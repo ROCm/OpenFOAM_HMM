@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,8 +32,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-#define defineSetWriterType(dataType)                                         \
-    defineNamedTemplateTypeNameAndDebug(writer<dataType >, 0);                \
+#define defineSetWriterType(dataType)                                          \
+    defineNamedTemplateTypeNameAndDebug(writer<dataType >, 0);                 \
     defineTemplatedRunTimeSelectionTable(writer, word, dataType);
 
 defineSetWriterType(scalar);

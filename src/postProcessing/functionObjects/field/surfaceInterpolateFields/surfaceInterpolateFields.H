@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -104,7 +104,7 @@ protected:
         bool active_;
 
         //- Fields to process
-        List<Tuple2<word, word> > fieldSet_;
+        List<Tuple2<word, word>> fieldSet_;
 
         //- Switch to send output to Info as well as to file
         Switch log_;
@@ -119,17 +119,22 @@ protected:
 
     // Protected Member Functions
 
+        template<class Type>
+        void interpolateFields
+        (
+            PtrList<GeometricField<Type, fvsPatchField, surfaceMesh>>&
+        ) const;
+
+
+private:
+
+    // Private member functions
+
         //- Disallow default bitwise copy construct
         surfaceInterpolateFields(const surfaceInterpolateFields&);
 
         //- Disallow default bitwise assignment
         void operator=(const surfaceInterpolateFields&);
-
-        template<class Type>
-        void interpolateFields
-        (
-            PtrList<GeometricField<Type, fvsPatchField, surfaceMesh> >&
-        ) const;
 
 
 public:
@@ -195,7 +200,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "surfaceInterpolateFieldsTemplates.C"
+    #include "surfaceInterpolateFieldsTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

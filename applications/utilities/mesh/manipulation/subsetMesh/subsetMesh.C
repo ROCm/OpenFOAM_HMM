@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -127,7 +127,7 @@ void subsetVolFields
 (
     const fvMeshSubset& subsetter,
     const wordList& fieldNames,
-    PtrList<GeometricField<Type, fvPatchField, volMesh> >& subFields
+    PtrList<GeometricField<Type, fvPatchField, volMesh>>& subFields
 )
 {
     const fvMesh& baseMesh = subsetter.baseMesh();
@@ -161,7 +161,7 @@ void subsetSurfaceFields
 (
     const fvMeshSubset& subsetter,
     const wordList& fieldNames,
-    PtrList<GeometricField<Type, fvsPatchField, surfaceMesh> >& subFields
+    PtrList<GeometricField<Type, fvsPatchField, surfaceMesh>>& subFields
 )
 {
     const fvMesh& baseMesh = subsetter.baseMesh();
@@ -196,7 +196,7 @@ void subsetPointFields
     const fvMeshSubset& subsetter,
     const pointMesh& pMesh,
     const wordList& fieldNames,
-    PtrList<GeometricField<Type, pointPatchField, pointMesh> >& subFields
+    PtrList<GeometricField<Type, pointPatchField, pointMesh>>& subFields
 )
 {
     const fvMesh& baseMesh = subsetter.baseMesh();
@@ -230,7 +230,7 @@ void subsetDimensionedFields
 (
     const fvMeshSubset& subsetter,
     const wordList& fieldNames,
-    PtrList<DimensionedField<Type, volMesh> >& subFields
+    PtrList<DimensionedField<Type, volMesh>>& subFields
 )
 {
     const fvMesh& baseMesh = subsetter.baseMesh();
@@ -681,7 +681,7 @@ int main(int argc, char *argv[])
     }
 
 
-    Info<< "\nEnd\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

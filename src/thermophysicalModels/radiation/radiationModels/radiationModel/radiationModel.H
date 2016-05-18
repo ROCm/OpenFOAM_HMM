@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -235,7 +235,7 @@ public:
             virtual tmp<volScalarField> Rp() const = 0;
 
             //- Source term component (constant)
-            virtual tmp<DimensionedField<scalar, volMesh> > Ru() const = 0;
+            virtual tmp<DimensionedField<scalar, volMesh>> Ru() const = 0;
 
             //- Energy source term
             virtual tmp<fvScalarMatrix> Sh(fluidThermo& thermo) const;
@@ -261,20 +261,20 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define addToRadiationRunTimeSelectionTables(model)                           \
-                                                                              \
-    addToRunTimeSelectionTable                                                \
-    (                                                                         \
-        radiationModel,                                                       \
-        model,                                                                \
-        dictionary                                                            \
-    );                                                                        \
-                                                                              \
-    addToRunTimeSelectionTable                                                \
-    (                                                                         \
-        radiationModel,                                                       \
-        model,                                                                \
-        T                                                                     \
+#define addToRadiationRunTimeSelectionTables(model)                            \
+                                                                               \
+    addToRunTimeSelectionTable                                                 \
+    (                                                                          \
+        radiationModel,                                                        \
+        model,                                                                 \
+        dictionary                                                             \
+    );                                                                         \
+                                                                               \
+    addToRunTimeSelectionTable                                                 \
+    (                                                                          \
+        radiationModel,                                                        \
+        model,                                                                 \
+        T                                                                      \
     );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

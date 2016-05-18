@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -253,7 +253,7 @@ Foam::MRFZone::MRFZone
     ),
     origin_(coeffs_.lookup("origin")),
     axis_(coeffs_.lookup("axis")),
-    omega_(DataEntry<scalar>::New("omega", coeffs_))
+    omega_(Function1<scalar>::New("omega", coeffs_))
 {
     if (cellZoneName_ == word::null)
     {
@@ -423,7 +423,7 @@ void Foam::MRFZone::makeRelative(volVectorField& U) const
         forAll(includedFaces_[patchi], i)
         {
             label patchFacei = includedFaces_[patchi][i];
-            U.boundaryField()[patchi][patchFacei] = vector::zero;
+            U.boundaryField()[patchi][patchFacei] = Zero;
         }
     }
 
@@ -450,6 +450,12 @@ void Foam::MRFZone::makeRelative(surfaceScalarField& phi) const
 void Foam::MRFZone::makeRelative(FieldField<fvsPatchField, scalar>& phi) const
 {
     makeRelativeRhoFlux(oneFieldField(), phi);
+}
+
+
+void Foam::MRFZone::makeRelative(Field<scalar>& phi, const label patchi) const
+{
+    makeRelativeRhoFlux(oneField(), phi, patchi);
 }
 
 

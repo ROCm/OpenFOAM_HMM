@@ -20,7 +20,7 @@ internalField   uniform 0;
 
 boundaryField
 {
-     ".*"
+    ".*"
     {
         type            boundaryRadiation;
         mode            lookup;
@@ -32,6 +32,11 @@ boundaryField
         type            boundaryRadiation;
         mode            solidRadiation;
         value           uniform 0;
+    }
+    "procBoundary.*"
+    {
+        type            processor;
+        value           $internalField;
     }
 }
 

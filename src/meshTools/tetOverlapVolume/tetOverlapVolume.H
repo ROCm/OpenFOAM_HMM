@@ -70,7 +70,7 @@ class tetOverlapVolume
 
             inline sumMomentOp()
             :
-                vol_(0.0, vector::zero)
+                vol_(0.0, Zero)
             {}
 
             inline void operator()(const tetPoints& tet)

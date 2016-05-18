@@ -22,11 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fv::boundaryRadiationProperties
+    Foam::radiation::boundaryRadiationProperties
 
 Description
     Boundary radiation properties holder
-
 
 SourceFiles
     boundaryRadiationProperties.C
@@ -70,12 +69,6 @@ class boundaryRadiationProperties
         autoPtr<volScalarField> radBoundaryProperties_;
 
 
-    // Private member functions
-
-        //- Create IO object if dictionary is present
-        IOobject createIOobject(const fvMesh& mesh, const word) const;
-
-
 public:
 
     // Declare name of the class and its debug switch
@@ -84,8 +77,8 @@ public:
 
     // Constructors
 
-        //- Construct given fvMesh and IOobject
-        boundaryRadiationProperties(const fvMesh&);
+        //- Construct given fvMesh
+        explicit boundaryRadiationProperties(const fvMesh&);
 
 
     // Member Functions
@@ -93,7 +86,7 @@ public:
         //- Access boundary emissivity on patch
         tmp<scalarField> emissivity
         (
-            const label patchId,
+            const label patchI,
             const label bandI = 0
         ) const;
 
@@ -101,7 +94,7 @@ public:
         //- Access boundary absorptivity on patch
         tmp<scalarField> absorptivity
         (
-            const label patchId,
+            const label patchI,
             const label bandI = 0
         ) const;
 
@@ -109,26 +102,22 @@ public:
         //- Access boundary transmissivity on patch
         tmp<scalarField> transmissivity
         (
-            const label patchId,
+            const label patchI,
             const label bandI = 0
         ) const;
 
         //- Access boundary reflectivity on patch
         tmp<scalarField> reflectivity
         (
-            const label patchId,
+            const label patchI,
             const label bandI = 0
         ) const;
 
 
-        //- Access to radBoundaryProperties
-        const volScalarField& radBoundaryProperties() const;
-
-
     //- Destructor
     virtual ~boundaryRadiationProperties();
-
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

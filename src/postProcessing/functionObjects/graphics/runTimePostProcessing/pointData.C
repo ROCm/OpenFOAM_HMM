@@ -87,7 +87,7 @@ Foam::pointData::pointData
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<DataEntry<vector>, word>& colours
+    const HashPtrTable<Function1<vector>, word>& colours
 )
 :
     geometryBase(parent, dict, colours),
@@ -100,7 +100,7 @@ Foam::pointData::pointData
 {
     if (dict.found("pointColour"))
     {
-        pointColour_.reset(DataEntry<vector>::New("pointColour", dict).ptr());
+        pointColour_.reset(Function1<vector>::New("pointColour", dict).ptr());
     }
     else
     {
@@ -128,7 +128,7 @@ Foam::autoPtr<Foam::pointData> Foam::pointData::New
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<DataEntry<vector>, word>& colours,
+    const HashPtrTable<Function1<vector>, word>& colours,
     const word& pointDataType
 )
 {

@@ -48,7 +48,7 @@ Foam::labelListList Foam::patchCorrectedInterpolation::getPatchGroups
     Istream& entry
 ) const
 {
-    List<List<word> > patchGroupNames(entry);
+    List<List<word>> patchGroupNames(entry);
 
     labelListList patchGroups(patchGroupNames.size());
 

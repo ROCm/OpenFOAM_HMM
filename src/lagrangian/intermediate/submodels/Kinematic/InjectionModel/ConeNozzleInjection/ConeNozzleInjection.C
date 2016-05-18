@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ConeNozzleInjection.H"
-#include "TimeDataEntry.H"
+#include "TimeFunction1.H"
 #include "mathematicalConstants.H"
 #include "distributionModel.H"
 
@@ -119,7 +119,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     ),
     flowRateProfile_
     (
-        TimeDataEntry<scalar>
+        TimeFunction1<scalar>
         (
             owner.db().time(),
             "flowRateProfile",
@@ -128,7 +128,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     ),
     thetaInner_
     (
-        TimeDataEntry<scalar>
+        TimeFunction1<scalar>
         (
             owner.db().time(),
             "thetaInner",
@@ -137,7 +137,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     ),
     thetaOuter_
     (
-        TimeDataEntry<scalar>
+        TimeFunction1<scalar>
         (
             owner.db().time(),
             "thetaOuter",
@@ -152,9 +152,9 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
             owner.rndGen()
         )
     ),
-    tanVec1_(vector::zero),
-    tanVec2_(vector::zero),
-    normal_(vector::zero),
+    tanVec1_(Zero),
+    tanVec2_(Zero),
+    normal_(Zero),
 
     UMag_(0.0),
     Cd_(owner.db().time(), "Cd"),
@@ -181,7 +181,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     direction_ /= mag(direction_);
 
     // Determine direction vectors tangential to direction
-    vector tangent = vector::zero;
+    vector tangent = Zero;
     scalar magTangent = 0.0;
 
     while(magTangent < SMALL)
@@ -225,7 +225,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     thetaOuter_(im.thetaOuter_),
     sizeDistribution_(im.sizeDistribution_, false),
     tanVec1_(im.tanVec1_),
-    tanVec2_(im.tanVec1_),
+    tanVec2_(im.tanVec2_),
     normal_(im.normal_),
     UMag_(im.UMag_),
     Cd_(im.Cd_),

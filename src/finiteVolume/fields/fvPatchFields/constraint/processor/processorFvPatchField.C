@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -67,7 +67,6 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
 {}
 
 
-// Construct by mapping given processorFvPatchField<Type>
 template<class Type>
 Foam::processorFvPatchField<Type>::processorFvPatchField
 (
@@ -196,7 +195,7 @@ Foam::processorFvPatchField<Type>::~processorFvPatchField()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> >
+Foam::tmp<Foam::Field<Type>>
 Foam::processorFvPatchField<Type>::patchNeighbourField() const
 {
     if (debug && !this->ready())
@@ -291,7 +290,7 @@ void Foam::processorFvPatchField<Type>::evaluate
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> >
+Foam::tmp<Foam::Field<Type>>
 Foam::processorFvPatchField<Type>::snGrad
 (
     const scalarField& deltaCoeffs

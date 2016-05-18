@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -52,6 +52,23 @@ Foam::fvPatchField<Type>::fvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
+    const Type& value
+)
+:
+    Field<Type>(p.size(), value),
+    patch_(p),
+    internalField_(iF),
+    updated_(false),
+    manipulatedMatrix_(false),
+    patchType_(word::null)
+{}
+
+
+template<class Type>
+Foam::fvPatchField<Type>::fvPatchField
+(
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
     const word& patchType
 )
 :
@@ -84,31 +101,6 @@ Foam::fvPatchField<Type>::fvPatchField
 template<class Type>
 Foam::fvPatchField<Type>::fvPatchField
 (
-    const fvPatchField<Type>& ptf,
-    const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF,
-    const fvPatchFieldMapper& mapper
-)
-:
-    Field<Type>(p.size()),
-    patch_(p),
-    internalField_(iF),
-    updated_(false),
-    manipulatedMatrix_(false),
-    patchType_(ptf.patchType_)
-{
-    // For unmapped faces set to internal field value (zero-gradient)
-    if (notNull(iF) && mapper.hasUnmapped())
-    {
-        fvPatchField<Type>::operator=(this->patchInternalField());
-    }
-    this->map(ptf, mapper);
-}
-
-
-template<class Type>
-Foam::fvPatchField<Type>::fvPatchField
-(
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const dictionary& dict,
@@ -124,14 +116,14 @@ Foam::fvPatchField<Type>::fvPatchField
 {
     if (dict.found("value"))
     {
-        fvPatchField<Type>::operator=
+        Field<Type>::operator=
         (
             Field<Type>("value", dict, p.size())
         );
     }
     else if (!valueRequired)
     {
-        fvPatchField<Type>::operator=(pTraits<Type>::zero);
+        Field<Type>::operator=(Zero);
     }
     else
     {
@@ -141,6 +133,31 @@ Foam::fvPatchField<Type>::fvPatchField
         )   << "Essential entry 'value' missing"
             << exit(FatalIOError);
     }
+}
+
+
+template<class Type>
+Foam::fvPatchField<Type>::fvPatchField
+(
+    const fvPatchField<Type>& ptf,
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
+    const fvPatchFieldMapper& mapper
+)
+:
+    Field<Type>(p.size()),
+    patch_(p),
+    internalField_(iF),
+    updated_(false),
+    manipulatedMatrix_(false),
+    patchType_(ptf.patchType_)
+{
+    // For unmapped faces set to internal field value (zero-gradient)
+    if (notNull(iF) && iF.size())
+    {
+        fvPatchField<Type>::operator=(this->patchInternalField());
+    }
+    this->map(ptf, mapper);
 }
 
 
@@ -197,14 +214,14 @@ void Foam::fvPatchField<Type>::check(const fvPatchField<Type>& ptf) const
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::fvPatchField<Type>::snGrad() const
+Foam::tmp<Foam::Field<Type>> Foam::fvPatchField<Type>::snGrad() const
 {
     return patch_.deltaCoeffs()*(*this - patchInternalField());
 }
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> >
+Foam::tmp<Foam::Field<Type>>
 Foam::fvPatchField<Type>::patchInternalField() const
 {
     return patch_.patchInternalField(internalField_);
@@ -543,7 +560,6 @@ void Foam::fvPatchField<Type>::operator/=
 }
 
 
-// Force an assignment, overriding fixedValue status
 template<class Type>
 void Foam::fvPatchField<Type>::operator==
 (
@@ -589,6 +605,6 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const fvPatchField<Type>& ptf)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#   include "fvPatchFieldNew.C"
+    #include "fvPatchFieldNew.C"
 
 // ************************************************************************* //

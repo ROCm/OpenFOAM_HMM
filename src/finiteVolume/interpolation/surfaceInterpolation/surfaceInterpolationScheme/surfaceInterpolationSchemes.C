@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,20 +32,20 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeBaseSurfaceInterpolationScheme(Type)                              \
-                                                                              \
-defineNamedTemplateTypeNameAndDebug(surfaceInterpolationScheme<Type>, 0);     \
-                                                                              \
-defineTemplateRunTimeSelectionTable                                           \
-(                                                                             \
-    surfaceInterpolationScheme<Type>,                                         \
-    Mesh                                                                      \
-);                                                                            \
-                                                                              \
-defineTemplateRunTimeSelectionTable                                           \
-(                                                                             \
-    surfaceInterpolationScheme<Type>,                                         \
-    MeshFlux                                                                  \
+#define makeBaseSurfaceInterpolationScheme(Type)                               \
+                                                                               \
+defineNamedTemplateTypeNameAndDebug(surfaceInterpolationScheme<Type>, 0);      \
+                                                                               \
+defineTemplateRunTimeSelectionTable                                            \
+(                                                                              \
+    surfaceInterpolationScheme<Type>,                                          \
+    Mesh                                                                       \
+);                                                                             \
+                                                                               \
+defineTemplateRunTimeSelectionTable                                            \
+(                                                                              \
+    surfaceInterpolationScheme<Type>,                                          \
+    MeshFlux                                                                   \
 );
 
 makeBaseSurfaceInterpolationScheme(scalar)
@@ -54,9 +54,49 @@ makeBaseSurfaceInterpolationScheme(sphericalTensor)
 makeBaseSurfaceInterpolationScheme(symmTensor)
 makeBaseSurfaceInterpolationScheme(tensor)
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<>
+Foam::tmp
+<
+    Foam::GeometricField
+    <
+        typename Foam::innerProduct<Foam::vector, Foam::scalar>::type,
+        Foam::fvsPatchField,
+        Foam::surfaceMesh
+    >
+>
+Foam::surfaceInterpolationScheme<Foam::scalar>::dotInterpolate
+(
+    const surfaceVectorField& Sf,
+    const GeometricField<scalar, fvPatchField, volMesh>&
+) const
+{
+    NotImplemented;
+
+    return
+        tmp
+        <
+            GeometricField
+            <
+                typename innerProduct<vector, scalar>::type,
+                fvsPatchField,
+                surfaceMesh
+            >
+        >
+        (
+            GeometricField
+            <
+                typename innerProduct<vector, scalar>::type,
+                fvsPatchField,
+                surfaceMesh
+            >::null()
+        );
+}
+
 
 // ************************************************************************* //

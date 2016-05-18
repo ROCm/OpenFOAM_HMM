@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -484,7 +484,7 @@ public:
 
             //- Interpolate from target to source with supplied op
             template<class Type, class CombineOp>
-            tmp<Field<Type> > interpolateToSource
+            tmp<Field<Type>> interpolateToSource
             (
                 const Field<Type>& fld,
                 const CombineOp& cop,
@@ -493,16 +493,16 @@ public:
 
             //- Interpolate from target tmp field to source with supplied op
             template<class Type, class CombineOp>
-            tmp<Field<Type> > interpolateToSource
+            tmp<Field<Type>> interpolateToSource
             (
-                const tmp<Field<Type> >& tFld,
+                const tmp<Field<Type>>& tFld,
                 const CombineOp& cop,
                 const UList<Type>& defaultValues = UList<Type>::null()
             ) const;
 
             //- Interpolate from source to target with supplied op
             template<class Type, class CombineOp>
-            tmp<Field<Type> > interpolateToTarget
+            tmp<Field<Type>> interpolateToTarget
             (
                 const Field<Type>& fld,
                 const CombineOp& cop,
@@ -511,16 +511,16 @@ public:
 
             //- Interpolate from source tmp field to target with supplied op
             template<class Type, class CombineOp>
-            tmp<Field<Type> > interpolateToTarget
+            tmp<Field<Type>> interpolateToTarget
             (
-                const tmp<Field<Type> >& tFld,
+                const tmp<Field<Type>>& tFld,
                 const CombineOp& cop,
                 const UList<Type>& defaultValues = UList<Type>::null()
             ) const;
 
             //- Interpolate from target to source
             template<class Type>
-            tmp<Field<Type> > interpolateToSource
+            tmp<Field<Type>> interpolateToSource
             (
                 const Field<Type>& fld,
                 const UList<Type>& defaultValues = UList<Type>::null()
@@ -528,15 +528,15 @@ public:
 
             //- Interpolate from target tmp field
             template<class Type>
-            tmp<Field<Type> > interpolateToSource
+            tmp<Field<Type>> interpolateToSource
             (
-                const tmp<Field<Type> >& tFld,
+                const tmp<Field<Type>>& tFld,
                 const UList<Type>& defaultValues = UList<Type>::null()
             ) const;
 
             //- Interpolate from source to target
             template<class Type>
-            tmp<Field<Type> > interpolateToTarget
+            tmp<Field<Type>> interpolateToTarget
             (
                 const Field<Type>& fld,
                 const UList<Type>& defaultValues = UList<Type>::null()
@@ -544,9 +544,9 @@ public:
 
             //- Interpolate from source tmp field
             template<class Type>
-            tmp<Field<Type> > interpolateToTarget
+            tmp<Field<Type>> interpolateToTarget
             (
-                const tmp<Field<Type> >& tFld,
+                const tmp<Field<Type>>& tFld,
                 const UList<Type>& defaultValues = UList<Type>::null()
             ) const;
 
@@ -599,8 +599,8 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "AMIInterpolation.C"
-#   include "AMIInterpolationParallelOps.C"
+    #include "AMIInterpolation.C"
+    #include "AMIInterpolationParallelOps.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

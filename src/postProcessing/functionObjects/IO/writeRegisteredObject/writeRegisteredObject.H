@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,12 +31,13 @@ Description
     This function object allows specification of different writing frequency
     of objects registered to the database. It has similar functionality
     as the main time database through the \c outputControl setting:
-    - timeStep
-    - outputTime
-    - adjustableTime
-    - runTime
-    - clockTime
-    - cpuTime
+
+    \li \c timeStep
+    \li \c outputTime
+    \li \c adjustableTime
+    \li \c runTime
+    \li \c clockTime
+    \li \c cpuTime
 
     Example of function object specification:
     \verbatim
@@ -59,7 +60,7 @@ Description
         log          | Log to standard output  | no          | yes
     \endtable
 
-    exclusiveWriting disables automatic writing (i.e through database) of the
+    \c exclusiveWriting disables automatic writing (i.e through database) of the
     objects to avoid duplicate writing.
 
 SeeAlso
@@ -96,8 +97,6 @@ class mapPolyMesh;
 
 class writeRegisteredObject
 {
-protected:
-
     // Private data
 
         //- Name of this set of writeRegisteredObject

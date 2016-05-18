@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
 #include "HasherInt.H"
 
 #if defined (__GLIBC__)
-#  include <endian.h>
+    #include <endian.h>
 #endif
 
 // Left-rotate a 32-bit value and carry by nBits
@@ -113,14 +113,14 @@ Description
 // rotates.
 // ----------------------------------------------------------------------------
 
-#define bitMixer(a, b, c)                                                     \
-    {                                                                         \
-        a -= c; a ^= bitRotateLeft(c, 4); c += b;                             \
-        b -= a; b ^= bitRotateLeft(a, 6); a += c;                             \
-        c -= b; c ^= bitRotateLeft(b, 8); b += a;                             \
-        a -= c; a ^= bitRotateLeft(c,16); c += b;                             \
-        b -= a; b ^= bitRotateLeft(a,19); a += c;                             \
-        c -= b; c ^= bitRotateLeft(b, 4); b += a;                             \
+#define bitMixer(a, b, c)                                                      \
+    {                                                                          \
+        a -= c; a ^= bitRotateLeft(c, 4); c += b;                              \
+        b -= a; b ^= bitRotateLeft(a, 6); a += c;                              \
+        c -= b; c ^= bitRotateLeft(b, 8); b += a;                              \
+        a -= c; a ^= bitRotateLeft(c,16); c += b;                              \
+        b -= a; b ^= bitRotateLeft(a,19); a += c;                              \
+        c -= b; c ^= bitRotateLeft(b, 4); b += a;                              \
     }
 
 
@@ -148,15 +148,15 @@ Description
 //  11  8 15 26 3 22 24
 // ----------------------------------------------------------------------------
 
-#define bitMixerFinal(a, b, c)                                                \
-    {                                                                         \
-        c ^= b; c -= bitRotateLeft(b, 14);                                    \
-        a ^= c; a -= bitRotateLeft(c, 11);                                    \
-        b ^= a; b -= bitRotateLeft(a, 25);                                    \
-        c ^= b; c -= bitRotateLeft(b, 16);                                    \
-        a ^= c; a -= bitRotateLeft(c, 4);                                     \
-        b ^= a; b -= bitRotateLeft(a, 14);                                    \
-        c ^= b; c -= bitRotateLeft(b, 24);                                    \
+#define bitMixerFinal(a, b, c)                                                 \
+    {                                                                          \
+        c ^= b; c -= bitRotateLeft(b, 14);                                     \
+        a ^= c; a -= bitRotateLeft(c, 11);                                     \
+        b ^= a; b -= bitRotateLeft(a, 25);                                     \
+        c ^= b; c -= bitRotateLeft(b, 16);                                     \
+        a ^= c; a -= bitRotateLeft(c, 4);                                      \
+        b ^= a; b -= bitRotateLeft(a, 14);                                     \
+        c ^= b; c -= bitRotateLeft(b, 24);                                     \
     }
 
 
@@ -187,7 +187,7 @@ Description
 // acceptable.  Do NOT use for cryptographic purposes.
 // ----------------------------------------------------------------------------
 
-//- Specialized little-endian code
+// Specialized little-endian code
 #if !defined (__BYTE_ORDER) || (__BYTE_ORDER == __LITTLE_ENDIAN)
 static unsigned jenkins_hashlittle
 (
@@ -480,11 +480,11 @@ unsigned Foam::Hasher
 )
 {
 #ifdef __BYTE_ORDER
-# if (__BYTE_ORDER == __BIG_ENDIAN)
-    return jenkins_hashbig(key, length, initval);
-# else
-    return jenkins_hashlittle(key, length, initval);
-# endif
+    #if (__BYTE_ORDER == __BIG_ENDIAN)
+        return jenkins_hashbig(key, length, initval);
+    #else
+        return jenkins_hashlittle(key, length, initval);
+    #endif
 #else
     // endian-ness not known at compile-time: runtime endian test
     const short endianTest = 0x0100;

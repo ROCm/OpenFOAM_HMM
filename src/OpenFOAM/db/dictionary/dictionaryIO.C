@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,7 +112,7 @@ bool Foam::dictionary::read(Istream& is, const bool keepHeader)
 
     if (is.bad())
     {
-        Info<< "dictionary::read(Istream&, bool) : "
+        InfoInFunction
             << "Istream not OK after reading dictionary " << name()
             << endl;
 
@@ -174,7 +174,8 @@ void Foam::dictionary::write(Ostream& os, bool subDict) const
 {
     if (subDict)
     {
-        os  << nl << indent << token::BEGIN_BLOCK << incrIndent << nl;
+        os  << nl;
+        os.beginBlock() << nl;
     }
 
     forAllConstIter(IDLList<entry>, *this, iter)
@@ -202,7 +203,7 @@ void Foam::dictionary::write(Ostream& os, bool subDict) const
 
     if (subDict)
     {
-        os  << decrIndent << indent << token::END_BLOCK << endl;
+        os.endBlock() << endl;
     }
 }
 

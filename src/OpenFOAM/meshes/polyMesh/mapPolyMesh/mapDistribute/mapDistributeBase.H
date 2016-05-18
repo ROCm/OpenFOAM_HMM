@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,7 +112,7 @@ protected:
 
 
         //- Schedule
-        mutable autoPtr<List<labelPair> > schedulePtr_;
+        mutable autoPtr<List<labelPair>> schedulePtr_;
 
 
     // Private Member Functions
@@ -128,13 +128,13 @@ protected:
         (
             const globalIndex& globalNumbering,
             const labelList& elements,
-            List<Map<label> >& compactMap
+            List<Map<label>>& compactMap
         ) const;
         void calcCompactAddressing
         (
             const globalIndex& globalNumbering,
             const labelListList& elements,
-            List<Map<label> >& compactMap
+            List<Map<label>>& compactMap
         ) const;
 
         void exchangeAddressing
@@ -142,7 +142,7 @@ protected:
             const int tag,
             const globalIndex& globalNumbering,
             labelList& elements,
-            List<Map<label> >& compactMap,
+            List<Map<label>>& compactMap,
             labelList& compactStart
         );
         void exchangeAddressing
@@ -150,7 +150,7 @@ protected:
             const int tag,
             const globalIndex& globalNumbering,
             labelListList& elements,
-            List<Map<label> >& compactMap,
+            List<Map<label>>& compactMap,
             labelList& compactStart
         );
 
@@ -212,7 +212,7 @@ public:
         (
             const globalIndex&,
             labelList& elements,
-            List<Map<label> >& compactMap,
+            List<Map<label>>& compactMap,
             const int tag = Pstream::msgType()
         );
 
@@ -223,7 +223,7 @@ public:
         (
             const globalIndex&,
             labelListList& cellCells,
-            List<Map<label> >& compactMap,
+            List<Map<label>>& compactMap,
             const int tag = Pstream::msgType()
         );
 
@@ -326,7 +326,7 @@ public:
             static label renumber
             (
                 const globalIndex&,
-                const List<Map<label> >& compactMap,
+                const List<Map<label>>& compactMap,
                 const label globalElement
             );
 

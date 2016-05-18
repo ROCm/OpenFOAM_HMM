@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,7 +102,7 @@ public:
 
 
     //- Selector
-    static autoPtr<WallInteractionModel<CloudType> > New
+    static autoPtr<WallInteractionModel<CloudType>> New
     (
         const dictionary& dict,
         CloudType& owner
@@ -141,30 +141,30 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeWallInteractionModel(CloudType)                                   \
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug(WallInteractionModel<CloudType>, 0);  \
-                                                                              \
-    defineTemplateRunTimeSelectionTable                                       \
-    (                                                                         \
-        WallInteractionModel<CloudType>,                                      \
-        dictionary                                                            \
+#define makeWallInteractionModel(CloudType)                                    \
+                                                                               \
+    defineNamedTemplateTypeNameAndDebug(WallInteractionModel<CloudType>, 0);   \
+                                                                               \
+    defineTemplateRunTimeSelectionTable                                        \
+    (                                                                          \
+        WallInteractionModel<CloudType>,                                       \
+        dictionary                                                             \
     );
 
 
-#define makeWallInteractionModelType(SS, CloudType)                           \
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
-                                                                              \
-    WallInteractionModel<CloudType>::                                         \
-        adddictionaryConstructorToTable<SS<CloudType> >                       \
+#define makeWallInteractionModelType(SS, CloudType)                            \
+                                                                               \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                     \
+                                                                               \
+    WallInteractionModel<CloudType>::                                          \
+        adddictionaryConstructorToTable<SS<CloudType>>                         \
             add##SS##CloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "WallInteractionModel.C"
+    #include "WallInteractionModel.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

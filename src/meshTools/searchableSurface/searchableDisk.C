@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,7 +58,7 @@ Foam::pointIndexHit Foam::searchableDisk::findNearest
 
     if (magV < ROOTVSMALL)
     {
-        v = vector::zero;
+        v = Zero;
     }
     else
     {
@@ -85,7 +85,7 @@ void Foam::searchableDisk::findLine
     pointIndexHit& info
 ) const
 {
-    info = pointIndexHit(false, vector::zero, -1);
+    info = pointIndexHit(false, Zero, -1);
 
     vector v(start - origin_);
 
@@ -103,7 +103,7 @@ void Foam::searchableDisk::findLine
 
     if (magV < ROOTVSMALL)
     {
-        v = vector::zero;
+        v = Zero;
     }
     else
     {
@@ -266,7 +266,7 @@ void Foam::searchableDisk::findLineAll
 (
     const pointField& start,
     const pointField& end,
-    List<List<pointIndexHit> >& info
+    List<List<pointIndexHit>>& info
 ) const
 {
     info.setSize(start.size());

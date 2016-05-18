@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #ifdef solarisGcc
-# define _SYS_VNODE_H
+    #define _SYS_VNODE_H
 #endif
 
 #include "OSspecific.H"
@@ -58,11 +58,11 @@ Description
 #include <netinet/in.h>
 
 #ifdef USE_RANDOM
-#   include <climits>
-#   if INT_MAX    != 2147483647
-#       error "INT_MAX    != 2147483647"
-#       error "The random number generator may not work!"
-#   endif
+    #include <climits>
+    #if INT_MAX    != 2147483647
+        #error "INT_MAX    != 2147483647"
+        #error "The random number generator may not work!"
+    #endif
 #endif
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -188,7 +188,6 @@ bool Foam::isAdministrator()
 }
 
 
-// use $HOME environment variable or passwd info
 Foam::fileName Foam::home()
 {
     char* env = ::getenv("HOME");
@@ -246,19 +245,44 @@ Foam::fileName Foam::home(const string& userName)
 
 Foam::fileName Foam::cwd()
 {
-    char buf[256];
-    if (::getcwd(buf, sizeof(buf)))
-    {
-        return buf;
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "Couldn't get the current working directory"
-            << exit(FatalError);
+    label pathLengthLimit = POSIX::pathLengthChunk;
+    List<char> path(pathLengthLimit);
 
-        return fileName::null;
+    // Resize path if getcwd fails with an ERANGE error
+    while(pathLengthLimit == path.size())
+    {
+        if (::getcwd(path.data(), path.size()))
+        {
+            return path.data();
+        }
+        else if(errno == ERANGE)
+        {
+            // Increment path length upto the pathLengthMax limit
+            if
+            (
+                (pathLengthLimit += POSIX::pathLengthChunk)
+             >= POSIX::pathLengthMax
+            )
+            {
+                FatalErrorInFunction
+                    << "Attempt to increase path length beyond limit of "
+                    << POSIX::pathLengthMax
+                    << exit(FatalError);
+            }
+
+            path.setSize(pathLengthLimit);
+        }
+        else
+        {
+            break;
+        }
     }
+
+    FatalErrorInFunction
+        << "Couldn't get the current working directory"
+        << exit(FatalError);
+
+    return fileName::null;
 }
 
 
@@ -563,14 +587,12 @@ bool Foam::mkDir(const fileName& pathName, mode_t mode)
 }
 
 
-// Set the file mode
 bool Foam::chMod(const fileName& name, const mode_t m)
 {
     return ::chmod(name.c_str(), m) == 0;
 }
 
 
-// Return the file mode
 mode_t Foam::mode(const fileName& name)
 {
     fileStat fileStatus(name);
@@ -585,7 +607,6 @@ mode_t Foam::mode(const fileName& name)
 }
 
 
-// Return the file type: FILE or DIRECTORY
 Foam::fileName::Type Foam::type(const fileName& name)
 {
     mode_t m = mode(name);
@@ -605,28 +626,24 @@ Foam::fileName::Type Foam::type(const fileName& name)
 }
 
 
-// Does the name exist in the filing system?
 bool Foam::exists(const fileName& name, const bool checkGzip)
 {
     return mode(name) || isFile(name, checkGzip);
 }
 
 
-// Does the directory exist?
 bool Foam::isDir(const fileName& name)
 {
     return S_ISDIR(mode(name));
 }
 
 
-// Does the file exist?
 bool Foam::isFile(const fileName& name, const bool checkGzip)
 {
     return S_ISREG(mode(name)) || (checkGzip && S_ISREG(mode(name + ".gz")));
 }
 
 
-// Return size of file
 off_t Foam::fileSize(const fileName& name)
 {
     fileStat fileStatus(name);
@@ -641,7 +658,6 @@ off_t Foam::fileSize(const fileName& name)
 }
 
 
-// Return time of last file modification
 time_t Foam::lastModified(const fileName& name)
 {
     fileStat fileStatus(name);
@@ -656,7 +672,6 @@ time_t Foam::lastModified(const fileName& name)
 }
 
 
-// Read a directory and return the entries as a string list
 Foam::fileNameList Foam::readDir
 (
     const fileName& directory,
@@ -670,8 +685,8 @@ Foam::fileNameList Foam::readDir
 
     if (POSIX::debug)
     {
-        Info<< "readDir(const fileName&, const fileType, const bool filtergz)"
-            << " : reading directory " << directory << endl;
+        InfoInFunction
+            << "reading directory " << directory << endl;
     }
 
     // Setup empty string list MAXTVALUES long
@@ -691,9 +706,8 @@ Foam::fileNameList Foam::readDir
 
         if (POSIX::debug)
         {
-            Info<< "readDir(const fileName&, const fileType, "
-                   "const bool filtergz) : cannot open directory "
-                << directory << endl;
+            InfoInFunction
+                << "cannot open directory " << directory << endl;
         }
     }
     else
@@ -752,7 +766,6 @@ Foam::fileNameList Foam::readDir
 }
 
 
-// Copy, recursively if necessary, the source to the destination
 bool Foam::cp(const fileName& src, const fileName& dest)
 {
     // Make sure source exists.
@@ -824,7 +837,8 @@ bool Foam::cp(const fileName& src, const fileName& dest)
         {
             if (POSIX::debug)
             {
-                Info<< "Copying : " << src/contents[i]
+                InfoInFunction
+                    << "Copying : " << src/contents[i]
                     << " to " << destFile/contents[i] << endl;
             }
 
@@ -838,7 +852,8 @@ bool Foam::cp(const fileName& src, const fileName& dest)
         {
             if (POSIX::debug)
             {
-                Info<< "Copying : " << src/subdirs[i]
+                InfoInFunction
+                    << "Copying : " << src/subdirs[i]
                     << " to " << destFile << endl;
             }
 
@@ -851,12 +866,12 @@ bool Foam::cp(const fileName& src, const fileName& dest)
 }
 
 
-// Create a softlink. dst should not exist. Returns true if successful.
 bool Foam::ln(const fileName& src, const fileName& dst)
 {
     if (POSIX::debug)
     {
-        Info<< "Create softlink from : " << src << " to " << dst
+        InfoInFunction
+            << "Create softlink from : " << src << " to " << dst
             << endl;
     }
 
@@ -888,12 +903,12 @@ bool Foam::ln(const fileName& src, const fileName& dst)
 }
 
 
-// Rename srcFile dstFile
 bool Foam::mv(const fileName& src, const fileName& dst)
 {
     if (POSIX::debug)
     {
-        Info<< "Move : " << src << " to " << dst << endl;
+        InfoInFunction
+            << "Move : " << src << " to " << dst << endl;
     }
 
     if
@@ -913,13 +928,12 @@ bool Foam::mv(const fileName& src, const fileName& dst)
 }
 
 
-//- Rename to a corresponding backup file
-//  If the backup file already exists, attempt with "01" .. "99" index
 bool Foam::mvBak(const fileName& src, const std::string& ext)
 {
     if (POSIX::debug)
     {
-        Info<< "mvBak : " << src << " to extension " << ext << endl;
+        InfoInFunction
+            << "mvBak : " << src << " to extension " << ext << endl;
     }
 
     if (exists(src, false))
@@ -951,12 +965,12 @@ bool Foam::mvBak(const fileName& src, const std::string& ext)
 }
 
 
-// Remove a file, returning true if successful otherwise false
 bool Foam::rm(const fileName& file)
 {
     if (POSIX::debug)
     {
-        Info<< "Removing : " << file << endl;
+        InfoInFunction
+            << "Removing : " << file << endl;
     }
 
     // Try returning plain file name; if not there, try with .gz
@@ -971,12 +985,11 @@ bool Foam::rm(const fileName& file)
 }
 
 
-// Remove a dirctory and its contents
 bool Foam::rmDir(const fileName& directory)
 {
     if (POSIX::debug)
     {
-        Info<< "rmDir(const fileName&) : "
+        InfoInFunction
             << "removing directory " << directory << endl;
     }
 
@@ -1284,31 +1297,31 @@ Foam::fileNameList Foam::dlLoaded()
 
 void Foam::osRandomSeed(const label seed)
 {
-#ifdef USE_RANDOM
+    #ifdef USE_RANDOM
     srandom((unsigned int)seed);
-#else
+    #else
     srand48(seed);
-#endif
+    #endif
 }
 
 
 Foam::label Foam::osRandomInteger()
 {
-#ifdef USE_RANDOM
+    #ifdef USE_RANDOM
     return random();
-#else
+    #else
     return lrand48();
-#endif
+    #endif
 }
 
 
 Foam::scalar Foam::osRandomDouble()
 {
-#ifdef USE_RANDOM
+    #ifdef USE_RANDOM
     return (scalar)random()/INT_MAX;
-#else
+    #else
     return drand48();
-#endif
+    #endif
 }
 
 

@@ -230,7 +230,7 @@ public:
             //  point and density specification
             inline tensor inertia
             (
-                PointRef refPt = vector::zero,
+                PointRef refPt = Zero,
                 scalar density = 1.0
             ) const;
 

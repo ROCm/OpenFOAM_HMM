@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -105,14 +105,17 @@ public:
         //- Construct with given size and value for all elements.
         List(const label, const T&);
 
+        //- Construct with given size initializing all elements to zero.
+        List(const label, const zero);
+
         //- Copy constructor.
         List(const List<T>&);
 
         //- Construct by transferring the parameter contents
-        List(const Xfer<List<T> >&);
+        List(const Xfer<List<T>>&);
 
         //- Construct as copy or re-use as specified.
-        List(List<T>&, bool reUse);
+        List(List<T>&, bool reuse);
 
         //- Construct as subset.
         List(const UList<T>&, const labelUList& mapAddressing);
@@ -141,7 +144,7 @@ public:
         List(Istream&);
 
         //- Clone
-        inline autoPtr<List<T> > clone() const;
+        inline autoPtr<List<T>> clone() const;
 
 
     //- Destructor
@@ -200,10 +203,15 @@ public:
             void transfer(SortableList<T>&);
 
             //- Transfer contents to the Xfer container
-            inline Xfer<List<T> > xfer();
+            inline Xfer<List<T>> xfer();
 
             //- Return subscript-checked element of UList.
             inline T& newElmt(const label);
+
+
+        //- Disallow implicit shallowCopy
+        void shallowCopy(const UList<T>&) = delete;
+
 
     // Member operators
 
@@ -224,6 +232,9 @@ public:
 
         //- Assignment of all entries to the given value
         inline void operator=(const T&);
+
+        //- Assignment of all entries to zero
+        inline void operator=(const zero);
 
 
     // Istream operator
@@ -251,12 +262,12 @@ List<T> readList(Istream&);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#   include "ListI.H"
+    #include "ListI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "List.C"
+    #include "List.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

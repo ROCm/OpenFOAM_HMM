@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,7 +50,7 @@ Description
             this->refValue() =
                 vector(1, 0, 0)
                *min(10, 0.1*this->db().time().value());
-            this->refGrad() = vector::zero;
+            this->refGrad() = Zero;
             this->valueFraction() = 1.0;
         #};
 
@@ -76,7 +76,7 @@ Description
         code
         #{
             this->refValue() = min(10, 0.1*this->db().time().value());
-            this->refGrad() = vector::zero;
+            this->refGrad() = Zero;
             this->valueFraction() = 1.0;
         #};
     }
@@ -124,7 +124,7 @@ class codedMixedFvPatchField
 
         const word redirectType_;
 
-        mutable autoPtr<mixedFvPatchField<Type> > redirectPatchFieldPtr_;
+        mutable autoPtr<mixedFvPatchField<Type>> redirectPatchFieldPtr_;
 
 
     // Private Member Functions
@@ -199,9 +199,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchField<Type> > clone() const
+        virtual tmp<fvPatchField<Type>> clone() const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchField<Type>>
             (
                 new codedMixedFvPatchField<Type>(*this)
             );
@@ -215,12 +215,12 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchField<Type> > clone
+        virtual tmp<fvPatchField<Type>> clone
         (
             const DimensionedField<Type, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchField<Type>>
             (
                 new codedMixedFvPatchField<Type>(*this, iF)
             );
@@ -255,7 +255,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "codedMixedFvPatchField.C"
+    #include "codedMixedFvPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

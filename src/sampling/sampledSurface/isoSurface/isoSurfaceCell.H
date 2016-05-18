@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -115,10 +115,10 @@ class isoSurfaceCell
         DynamicList<label> interpolatedPoints_;
 
         //- corresponding original, unmerged points
-        DynamicList<FixedList<label, 3> > interpolatedOldPoints_;
+        DynamicList<FixedList<label, 3>> interpolatedOldPoints_;
 
         //- corresponding weights
-        DynamicList<FixedList<scalar, 3> > interpolationWeights_;
+        DynamicList<FixedList<scalar, 3>> interpolationWeights_;
 
 
     // Private Member Functions
@@ -153,14 +153,18 @@ class isoSurfaceCell
             const scalarField& pointValues
         );
 
+        //- Return the two common points between two triangles
         static labelPair findCommonPoints
         (
             const labelledTri&,
             const labelledTri&
         );
 
+        //- Caculate centre of surface.
         static point calcCentre(const triSurface&);
 
+        //- Replace surface (localPoints, localTris) with single point.
+        //  Returns point.  Destroys arguments.
         pointIndexHit collapseSurface
         (
             const label cellI,
@@ -275,7 +279,7 @@ class isoSurfaceCell
         void calcAddressing
         (
             const triSurface& surf,
-            List<FixedList<label, 3> >& faceEdges,
+            List<FixedList<label, 3>>& faceEdges,
             labelList& edgeFace0,
             labelList& edgeFace1,
             Map<labelList>& edgeFacesRest
@@ -291,7 +295,7 @@ class isoSurfaceCell
         //- Mark all non-fully connected triangles
         static label markDanglingTriangles
         (
-            const List<FixedList<label, 3> >& faceEdges,
+            const List<FixedList<label, 3>>& faceEdges,
             const labelList& edgeFace0,
             const labelList& edgeFace1,
             const Map<labelList>& edgeFacesRest,
@@ -338,7 +342,7 @@ public:
 
         //- Interpolates cCoords,pCoords.
         template<class Type>
-        tmp<Field<Type> > interpolate
+        tmp<Field<Type>> interpolate
         (
             const Field<Type>& cCoords,
             const Field<Type>& pCoords
@@ -353,7 +357,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "isoSurfaceCellTemplates.C"
+    #include "isoSurfaceCellTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,15 +25,10 @@ License
 
 #include "symmetryPlanePointPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-symmetryPlanePointPatchField<Type>::symmetryPlanePointPatchField
+Foam::symmetryPlanePointPatchField<Type>::symmetryPlanePointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF
@@ -45,7 +40,7 @@ symmetryPlanePointPatchField<Type>::symmetryPlanePointPatchField
 
 
 template<class Type>
-symmetryPlanePointPatchField<Type>::symmetryPlanePointPatchField
+Foam::symmetryPlanePointPatchField<Type>::symmetryPlanePointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
@@ -68,7 +63,7 @@ symmetryPlanePointPatchField<Type>::symmetryPlanePointPatchField
 
 
 template<class Type>
-symmetryPlanePointPatchField<Type>::symmetryPlanePointPatchField
+Foam::symmetryPlanePointPatchField<Type>::symmetryPlanePointPatchField
 (
     const symmetryPlanePointPatchField<Type>& ptf,
     const pointPatch& p,
@@ -92,7 +87,7 @@ symmetryPlanePointPatchField<Type>::symmetryPlanePointPatchField
 
 
 template<class Type>
-symmetryPlanePointPatchField<Type>::symmetryPlanePointPatchField
+Foam::symmetryPlanePointPatchField<Type>::symmetryPlanePointPatchField
 (
     const symmetryPlanePointPatchField<Type>& ptf,
     const DimensionedField<Type, pointMesh>& iF
@@ -113,7 +108,7 @@ void Foam::symmetryPlanePointPatchField<Type>::evaluate
 {
     vector nHat = symmetryPlanePatch_.n();
 
-    tmp<Field<Type> > tvalues =
+    tmp<Field<Type>> tvalues =
     (
         (
             this->patchInternalField()
@@ -127,9 +122,5 @@ void Foam::symmetryPlanePointPatchField<Type>::evaluate
     this->setInInternalField(iF, tvalues());
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

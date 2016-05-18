@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,9 +29,9 @@ Description
     The reference scalar values must be monotonically increasing.
 
     The handling of out-of-bounds values depends on the current setting
-    of \a outOfBounds.
+    of \c outOfBounds.
 
-    If \a REPEAT is chosen for the out-of-bounds handling, the final time
+    If \c repeat is chosen for the out-of-bounds handling, the final time
     value is treated as being equivalent to time=0 for the following periods.
 
 
@@ -40,11 +40,13 @@ Description
     other format is csv (comma separated values):
 
     Read csv format:
+    \verbatim
         readerType      csv;
         fileName        "$FOAM_CASE/constant/p0vsTime.csv";
         hasHeaderLine   true;   // skip first line
         timeColumn      0;      // time is in column 0
         valueColumns    (1);    // value starts in column 1
+    \endverbatim
 
 
 Note
@@ -77,7 +79,7 @@ namespace Foam
 template<class Type>
 class interpolationTable
 :
-    public List<Tuple2<scalar, Type> >
+    public List<Tuple2<scalar, Type>>
 {
 public:
 
@@ -104,7 +106,7 @@ private:
         fileName fileName_;
 
         //- The actual reader
-        autoPtr<tableReader<Type> > reader_;
+        autoPtr<tableReader<Type>> reader_;
 
     // Private Member Functions
 
@@ -122,7 +124,7 @@ public:
         //- Construct from components
         interpolationTable
         (
-            const List<Tuple2<scalar, Type> >& values,
+            const List<Tuple2<scalar, Type>>& values,
             const boundsHandling bounds,
             const fileName& fName
         );
@@ -179,7 +181,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "interpolationTable.C"
+    #include "interpolationTable.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

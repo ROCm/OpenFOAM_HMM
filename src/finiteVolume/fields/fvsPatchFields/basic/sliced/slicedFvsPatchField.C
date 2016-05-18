@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,15 +25,10 @@ License
 
 #include "slicedFvsPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-slicedFvsPatchField<Type>::slicedFvsPatchField
+Foam::slicedFvsPatchField<Type>::slicedFvsPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, surfaceMesh>& iF,
@@ -43,12 +38,12 @@ slicedFvsPatchField<Type>::slicedFvsPatchField
     fvsPatchField<Type>(p, iF, Field<Type>())
 {
     // Set the fvsPatchField to a slice of the given complete field
-    UList<Type>::operator=(p.patchSlice(completeField));
+    UList<Type>::shallowCopy(p.patchSlice(completeField));
 }
 
 
 template<class Type>
-slicedFvsPatchField<Type>::slicedFvsPatchField
+Foam::slicedFvsPatchField<Type>::slicedFvsPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, surfaceMesh>& iF
@@ -59,7 +54,21 @@ slicedFvsPatchField<Type>::slicedFvsPatchField
 
 
 template<class Type>
-slicedFvsPatchField<Type>::slicedFvsPatchField
+Foam::slicedFvsPatchField<Type>::slicedFvsPatchField
+(
+    const fvPatch& p,
+    const DimensionedField<Type, surfaceMesh>& iF,
+    const dictionary& dict
+)
+:
+    fvsPatchField<Type>(p, iF, Field<Type>("value", dict, p.size()))
+{
+    NotImplemented;
+}
+
+
+template<class Type>
+Foam::slicedFvsPatchField<Type>::slicedFvsPatchField
 (
     const slicedFvsPatchField<Type>& ptf,
     const fvPatch& p,
@@ -74,21 +83,7 @@ slicedFvsPatchField<Type>::slicedFvsPatchField
 
 
 template<class Type>
-slicedFvsPatchField<Type>::slicedFvsPatchField
-(
-    const fvPatch& p,
-    const DimensionedField<Type, surfaceMesh>& iF,
-    const dictionary& dict
-)
-:
-    fvsPatchField<Type>(p, iF, Field<Type>("value", dict, p.size()))
-{
-    NotImplemented;
-}
-
-
-template<class Type>
-slicedFvsPatchField<Type>::slicedFvsPatchField
+Foam::slicedFvsPatchField<Type>::slicedFvsPatchField
 (
     const slicedFvsPatchField<Type>& ptf,
     const DimensionedField<Type, surfaceMesh>& iF
@@ -97,13 +92,15 @@ slicedFvsPatchField<Type>::slicedFvsPatchField
     fvsPatchField<Type>(ptf.patch(), iF, Field<Type>())
 {
     // Transfer the slice from the argument
-    UList<Type>::operator=(ptf);
+    UList<Type>::shallowCopy(ptf);
 }
 
+
 template<class Type>
-tmp<fvsPatchField<Type> > slicedFvsPatchField<Type>::clone() const
+Foam::tmp<Foam::fvsPatchField<Type>>
+Foam::slicedFvsPatchField<Type>::clone() const
 {
-    return tmp<fvsPatchField<Type> >
+    return tmp<fvsPatchField<Type>>
     (
         new slicedFvsPatchField<Type>(*this)
     );
@@ -111,7 +108,7 @@ tmp<fvsPatchField<Type> > slicedFvsPatchField<Type>::clone() const
 
 
 template<class Type>
-slicedFvsPatchField<Type>::slicedFvsPatchField
+Foam::slicedFvsPatchField<Type>::slicedFvsPatchField
 (
     const slicedFvsPatchField<Type>& ptf
 )
@@ -124,17 +121,18 @@ slicedFvsPatchField<Type>::slicedFvsPatchField
     )
 {
     // Transfer the slice from the argument
-    UList<Type>::operator=(ptf);
+    UList<Type>::shallowCopy(ptf);
 }
 
 
 template<class Type>
-tmp<fvsPatchField<Type> > slicedFvsPatchField<Type>::clone
+Foam::tmp<Foam::fvsPatchField<Type>>
+Foam::slicedFvsPatchField<Type>::clone
 (
     const DimensionedField<Type, surfaceMesh>& iF
 ) const
 {
-    return tmp<fvsPatchField<Type> >
+    return tmp<fvsPatchField<Type>>
     (
         new slicedFvsPatchField<Type>(*this, iF)
     );
@@ -142,16 +140,12 @@ tmp<fvsPatchField<Type> > slicedFvsPatchField<Type>::clone
 
 
 template<class Type>
-slicedFvsPatchField<Type>::~slicedFvsPatchField<Type>()
+Foam::slicedFvsPatchField<Type>::~slicedFvsPatchField()
 {
     // Set the fvsPatchField storage pointer to NULL before its destruction
     // to protect the field it a slice of.
-    UList<Type>::operator=(UList<Type>(NULL, 0));
+    UList<Type>::shallowCopy(UList<Type>(NULL, 0));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

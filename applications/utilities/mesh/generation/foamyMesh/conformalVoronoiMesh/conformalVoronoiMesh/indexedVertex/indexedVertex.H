@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,7 +61,7 @@ class Istream;
 template<class Gt, class Vb> Ostream& operator<<
 (
     Ostream&,
-    const Foam::InfoProxy<CGAL::indexedVertex<Gt, Vb> >&
+    const Foam::InfoProxy<CGAL::indexedVertex<Gt, Vb>>&
 );
 
 template<class Gt, class Vb> Ostream& operator<<
@@ -98,7 +98,7 @@ namespace CGAL
                        Class indexedVertex Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Gt, class Vb = CGAL::Triangulation_vertex_base_3<Gt> >
+template<class Gt, class Vb = CGAL::Triangulation_vertex_base_3<Gt>>
 class indexedVertex
 :
     public Foam::indexedVertexEnum,
@@ -134,7 +134,7 @@ public:
     typedef typename Tds::Vertex_handle                 Vertex_handle;
     typedef typename Tds::Cell_handle                   Cell_handle;
 
-    template<typename TDS2>
+    template<class TDS2>
     struct Rebind_TDS
     {
         typedef typename Vb::template Rebind_TDS<TDS2>::Other   Vb2;
@@ -258,7 +258,7 @@ public:
         //- Fix the vertex so that it can't be moved
         inline bool& fixed();
 
-        inline indexedVertex& operator=(const indexedVertex& rhs)
+        inline void operator=(const indexedVertex& rhs)
         {
             Vb::operator=(rhs);
 
@@ -268,8 +268,6 @@ public:
             this->alignment_ = rhs.alignment();
             this->targetCellSize_ = rhs.targetCellSize();
             this->vertexFixed_ = rhs.fixed();
-
-            return *this;
         }
 
         inline bool operator==(const indexedVertex& rhs) const
@@ -294,7 +292,7 @@ public:
 
         //- Return info proxy.
         //  Used to print indexedVertex information to a stream
-        Foam::InfoProxy<indexedVertex<Gt, Vb> > info() const
+        Foam::InfoProxy<indexedVertex<Gt, Vb>> info() const
         {
             return *this;
         }
@@ -302,7 +300,7 @@ public:
         friend Foam::Ostream& Foam::operator<< <Gt, Vb>
         (
             Foam::Ostream&,
-            const Foam::InfoProxy<indexedVertex<Gt, Vb> >&
+            const Foam::InfoProxy<indexedVertex<Gt, Vb>>&
         );
 
         friend Foam::Ostream& Foam::operator<< <Gt, Vb>

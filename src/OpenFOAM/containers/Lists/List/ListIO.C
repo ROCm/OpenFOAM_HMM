@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,6 @@ License
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-// Construct from Istream
 template<class T>
 Foam::List<T>::List(Istream& is)
 :
@@ -57,7 +56,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
     {
         L.transfer
         (
-            dynamicCast<token::Compound<List<T> > >
+            dynamicCast<token::Compound<List<T>>>
             (
                 firstToken.transferCompoundToken(is)
             )
@@ -173,12 +172,12 @@ Foam::List<T> Foam::readList(Istream& is)
                 << exit(FatalIOError);
         }
 
-        // read via a singly-linked list
+        // Read via a singly-linked list
         L = SLList<T>(is);
     }
     else
     {
-        // create list with a single item
+        // Create list with a single item
         L.setSize(1);
 
         is >> L[0];

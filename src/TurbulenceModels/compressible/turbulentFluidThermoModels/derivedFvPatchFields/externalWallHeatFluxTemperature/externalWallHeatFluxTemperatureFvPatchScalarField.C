@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -70,7 +70,7 @@ externalWallHeatFluxTemperatureFvPatchScalarField
     q_(p.size(), 0.0),
     h_(p.size(), 0.0),
     Ta_(p.size(), 0.0),
-    QrPrevious_(p.size()),
+    QrPrevious_(p.size(), 0.0),
     QrRelaxation_(1),
     QrName_("undefined-Qr"),
     thicknessLayers_(),
@@ -240,6 +240,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::autoMap
     q_.autoMap(m);
     h_.autoMap(m);
     Ta_.autoMap(m);
+    QrPrevious_.autoMap(m);
 }
 
 
@@ -257,6 +258,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::rmap
     q_.rmap(tiptf.q_, addr);
     h_.rmap(tiptf.h_, addr);
     Ta_.rmap(tiptf.Ta_, addr);
+    QrPrevious_.rmap(tiptf.QrPrevious_, addr);
 }
 
 
@@ -294,7 +296,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
             scalar totalSolidRes = 0.0;
             if (thicknessLayers_.size() > 0)
             {
-                forAll (thicknessLayers_, iLayer)
+                forAll(thicknessLayers_, iLayer)
                 {
                     const scalar l = thicknessLayers_[iLayer];
                     if (kappaLayers_[iLayer] > 0.0)

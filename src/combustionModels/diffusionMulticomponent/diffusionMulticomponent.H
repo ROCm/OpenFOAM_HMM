@@ -92,7 +92,7 @@ class diffusionMulticomponent
     // Private data
 
         //- Reactions
-        const PtrList<Reaction<ThermoType> >& reactions_;
+        const PtrList<Reaction<ThermoType>>& reactions_;
 
         //- Thermodynamic data of the species
         const PtrList<ThermoType>& specieThermo_;

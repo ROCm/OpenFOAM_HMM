@@ -6,21 +6,14 @@
     (
         "phiHbyA",
         (
-           (fvc::interpolate(HbyA) & mesh.Sf())
+           fvc::flux(HbyA)
          + alphacf*rAUcf*fvc::ddtCorr(Uc, phic)
          + phicForces
         )
     );
 
-    // Update the fixedFluxPressure BCs to ensure flux consistency
-    setSnGrad<fixedFluxPressureFvPatchScalarField>
-    (
-        p.boundaryField(),
-        (
-            phiHbyA.boundaryField()
-            - (mesh.Sf().boundaryField() & Uc.boundaryField())
-        )/(mesh.magSf().boundaryField()*rAUcf.boundaryField())
-    );
+    // Update the pressure BCs to ensure flux consistency
+    constrainPressure(p, Uc, phiHbyA, rAUcf);
 
     // Non-orthogonal pressure corrector loop
     while (pimple.correctNonOrthogonal())

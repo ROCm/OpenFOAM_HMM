@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,14 +62,6 @@ Foam::autoPtr<Foam::mapDistribute> Foam::backgroundMeshDecomposition::buildMap
         nSend[procI]++;
     }
 
-    // Send over how many I need to receive
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    labelListList sendSizes(Pstream::nProcs());
-
-    sendSizes[Pstream::myProcNo()] = nSend;
-
-    combineReduce(sendSizes, UPstream::listEq());
 
     // 2. Size sendMap
     labelListList sendMap(Pstream::nProcs());
@@ -89,6 +81,11 @@ Foam::autoPtr<Foam::mapDistribute> Foam::backgroundMeshDecomposition::buildMap
         sendMap[procI][nSend[procI]++] = i;
     }
 
+    // 4. Send over how many I need to receive
+    labelList recvSizes;
+    Pstream::exchangeSizes(sendMap, recvSizes);
+
+
     // Determine receive map
     // ~~~~~~~~~~~~~~~~~~~~~
 
@@ -106,7 +103,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::backgroundMeshDecomposition::buildMap
     {
         if (procI != Pstream::myProcNo())
         {
-            label nRecv = sendSizes[procI][Pstream::myProcNo()];
+            label nRecv = recvSizes[procI];
 
             constructMap[procI].setSize(nRecv);
 
@@ -538,7 +535,7 @@ bool Foam::backgroundMeshDecomposition::refineCell
 //        pointField samplePoints
 //        (
 //            volRes_*volRes_*volRes_,
-//            vector::zero
+//            Zero
 //        );
 //
 //        // scalar sampleVol = cellBb.volume()/samplePoints.size();
@@ -1216,7 +1213,7 @@ Foam::labelList Foam::backgroundMeshDecomposition::processorNearestPosition
 
 
 
-Foam::List<Foam::List<Foam::pointIndexHit> >
+Foam::List<Foam::List<Foam::pointIndexHit>>
 Foam::backgroundMeshDecomposition::intersectsProcessors
 (
     const List<point>& starts,
@@ -1238,7 +1235,7 @@ Foam::backgroundMeshDecomposition::intersectsProcessors
         const point& e = ends[sI];
 
         // Dummy point for treeBoundBox::intersects
-        point p(vector::zero);
+        point p(Zero);
 
         label nCandidates = 0;
 
@@ -1292,7 +1289,7 @@ Foam::backgroundMeshDecomposition::intersectsProcessors
         segmentIntersectsCandidate
     );
 
-    List<List<pointIndexHit> > segmentHitProcs(starts.size());
+    List<List<pointIndexHit>> segmentHitProcs(starts.size());
 
     // Working storage for assessing processors
     DynamicList<pointIndexHit> tmpProcHits;

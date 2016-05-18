@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -297,7 +297,7 @@ protected:
 
         //- Return field values by looking up field name
         template<class Type>
-        tmp<Field<Type> > setFieldValues
+        tmp<Field<Type>> setFieldValues
         (
             const word& fieldName,
             const bool mustGet = false,
@@ -384,7 +384,7 @@ public:
 
             //- Filter a surface field according to faceIds
             template<class Type>
-            tmp<Field<Type> > filterField
+            tmp<Field<Type>> filterField
             (
                 const GeometricField<Type, fvsPatchField, surfaceMesh>& field,
                 const bool applyOrientation
@@ -392,7 +392,7 @@ public:
 
             //- Filter a volume field according to faceIds
             template<class Type>
-            tmp<Field<Type> > filterField
+            tmp<Field<Type>> filterField
             (
                 const GeometricField<Type, fvPatchField, volMesh>& field,
                 const bool applyOrientation

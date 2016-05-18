@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,7 @@ namespace fv
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<divScheme<Type> > divScheme<Type>::New
+tmp<divScheme<Type>> divScheme<Type>::New
 (
     const fvMesh& mesh,
     Istream& schemeData
@@ -51,9 +51,7 @@ tmp<divScheme<Type> > divScheme<Type>::New
 {
     if (fv::debug)
     {
-        Info<< "divScheme<Type>::New(const fvMesh&, Istream&) : "
-               "constructing divScheme<Type>"
-            << endl;
+        InfoInFunction << "Constructing divScheme<Type>" << endl;
     }
 
     if (schemeData.eof())

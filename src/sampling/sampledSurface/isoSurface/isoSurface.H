@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -143,10 +143,10 @@ class isoSurface
         DynamicList<label> interpolatedPoints_;
 
         //- corresponding original, unmerged points
-        DynamicList<FixedList<label, 3> > interpolatedOldPoints_;
+        DynamicList<FixedList<label, 3>> interpolatedOldPoints_;
 
         //- corresponding weights
-        DynamicList<FixedList<scalar, 3> > interpolationWeights_;
+        DynamicList<FixedList<scalar, 3>> interpolationWeights_;
 
 
     // Private Member Functions
@@ -186,6 +186,7 @@ class isoSurface
             const bool neiLower
         ) const;
 
+        //- Get neighbour value and position.
         void getNeighbour
         (
             const labelList& boundaryRegion,
@@ -197,7 +198,8 @@ class isoSurface
             point& nbrPoint
         ) const;
 
-        //- Set faceCutType,cellCutType.
+        //- Determine for every face/cell whether it (possibly) generates
+        //  triangles.
         void calcCutTypes
         (
             const labelList& boundaryRegion,
@@ -237,7 +239,7 @@ class isoSurface
         //- Return input field with coupled (and empty) patch values rewritten
         template<class Type>
         tmp<SlicedGeometricField
-        <Type, fvPatchField, slicedFvPatchField, volMesh> >
+        <Type, fvPatchField, slicedFvPatchField, volMesh>>
         adaptPatchFields
         (
             const GeometricField<Type, fvPatchField, volMesh>& fld
@@ -258,6 +260,9 @@ class isoSurface
             const Type& snapP1
         ) const;
 
+
+        //- Note: cannot use simpler isoSurfaceCell::generateTriPoints since
+        //  the need here to sometimes pass in remote 'snappedPoints'
         template<class Type>
         void generateTriPoints
         (
@@ -325,13 +330,13 @@ class isoSurface
         ) const;
 
         template<class Type>
-        static tmp<Field<Type> > interpolate
+        static tmp<Field<Type>> interpolate
         (
             const label nPoints,
             const labelList& triPointMergeMap,
             const labelList& interpolatedPoints,
-            const List<FixedList<label, 3> >& interpolatedOldPoints,
-            const List<FixedList<scalar, 3> >& interpolationWeights,
+            const List<FixedList<label, 3>>& interpolatedOldPoints,
+            const List<FixedList<scalar, 3>>& interpolationWeights,
             const DynamicList<Type>& unmergedValues
         );
 
@@ -368,8 +373,8 @@ class isoSurface
             DynamicList<label>& triMap,
             labelList& triPointMap,
             labelList& interpolatedPoints,
-            List<FixedList<label, 3> >& interpolatedOldPoints,
-            List<FixedList<scalar, 3> >& interpolationWeights
+            List<FixedList<label, 3>>& interpolatedOldPoints,
+            List<FixedList<scalar, 3>>& interpolationWeights
         );
 
         //- Check single triangle for (topological) validity
@@ -420,7 +425,7 @@ public:
         //- Interpolates cCoords,pCoords. Uses the references to the original
         //  fields used to create the iso surface.
         template<class Type>
-        tmp<Field<Type> > interpolate
+        tmp<Field<Type>> interpolate
         (
             const GeometricField<Type, fvPatchField, volMesh>& cCoords,
             const Field<Type>& pCoords
@@ -436,7 +441,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "isoSurfaceTemplates.C"
+    #include "isoSurfaceTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

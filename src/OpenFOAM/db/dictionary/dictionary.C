@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ bool Foam::dictionary::findInPatterns
     const bool patternMatch,
     const word& Keyword,
     DLList<entry*>::const_iterator& wcLink,
-    DLList<autoPtr<regExp> >::const_iterator& reLink
+    DLList<autoPtr<regExp>>::const_iterator& reLink
 ) const
 {
     if (patternEntries_.size())
@@ -82,7 +82,7 @@ bool Foam::dictionary::findInPatterns
     const bool patternMatch,
     const word& Keyword,
     DLList<entry*>::iterator& wcLink,
-    DLList<autoPtr<regExp> >::iterator& reLink
+    DLList<autoPtr<regExp>>::iterator& reLink
 )
 {
     if (patternEntries_.size())
@@ -271,7 +271,7 @@ Foam::SHA1Digest Foam::dictionary::digest() const
 {
     OSHA1stream os;
 
-    // process entries
+    // Process entries
     forAllConstIter(IDLList<entry>, *this, iter)
     {
         os << *iter;
@@ -283,12 +283,12 @@ Foam::SHA1Digest Foam::dictionary::digest() const
 
 Foam::tokenList Foam::dictionary::tokens() const
 {
-    // linearise dictionary into a string
+    // Serialize dictionary into a string
     OStringStream os;
     write(os, false);
     IStringStream is(os.str());
 
-    // parse string as tokens
+    // Parse string as tokens
     DynamicList<token> tokens;
     token t;
     while (is.read(t))
@@ -317,7 +317,7 @@ bool Foam::dictionary::found
         {
             DLList<entry*>::const_iterator wcLink =
                 patternEntries_.begin();
-            DLList<autoPtr<regExp> >::const_iterator reLink =
+            DLList<autoPtr<regExp>>::const_iterator reLink =
                 patternRegexps_.begin();
 
             // Find in patterns using regular expressions only
@@ -354,7 +354,7 @@ const Foam::entry* Foam::dictionary::lookupEntryPtr
         {
             DLList<entry*>::const_iterator wcLink =
                 patternEntries_.begin();
-            DLList<autoPtr<regExp> >::const_iterator reLink =
+            DLList<autoPtr<regExp>>::const_iterator reLink =
                 patternRegexps_.begin();
 
             // Find in patterns using regular expressions only
@@ -393,7 +393,7 @@ Foam::entry* Foam::dictionary::lookupEntryPtr
         {
             DLList<entry*>::iterator wcLink =
                 patternEntries_.begin();
-            DLList<autoPtr<regExp> >::iterator reLink =
+            DLList<autoPtr<regExp>>::iterator reLink =
                 patternRegexps_.begin();
 
             // Find in patterns using regular expressions only
@@ -577,10 +577,10 @@ bool Foam::dictionary::substituteScopedKeyword(const word& keyword)
 {
     word varName = keyword(1, keyword.size()-1);
 
-    // lookup the variable name in the given dictionary
+    // Lookup the variable name in the given dictionary
     const entry* ePtr = lookupScopedEntryPtr(varName, true, true);
 
-    // if defined insert its entries into this dictionary
+    // If defined insert its entries into this dictionary
     if (ePtr != NULL)
     {
         const dictionary& addDict = ePtr->dict();
@@ -735,7 +735,7 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
     if (mergeEntry && iter != hashedEntries_.end())
     {
-        // merge dictionary with dictionary
+        // Merge dictionary with dictionary
         if (iter()->isDict() && entryPtr->isDict())
         {
             iter()->dict().merge(entryPtr->dict());
@@ -745,7 +745,7 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
         }
         else
         {
-            // replace existing dictionary with entry or vice versa
+            // Replace existing dictionary with entry or vice versa
             IDLList<entry>::replace(iter(), entryPtr);
             delete iter();
             hashedEntries_.erase(iter);
@@ -857,7 +857,7 @@ void Foam::dictionary::set(entry* entryPtr)
 {
     entry* existingPtr = lookupEntryPtr(entryPtr->keyword(), false, true);
 
-    // clear dictionary so merge acts like overwrite
+    // Clear dictionary so merge acts like overwrite
     if (existingPtr && existingPtr->isDict())
     {
         existingPtr->dict().clear();
@@ -887,7 +887,7 @@ bool Foam::dictionary::remove(const word& Keyword)
         // Delete from patterns first
         DLList<entry*>::iterator wcLink =
             patternEntries_.begin();
-        DLList<autoPtr<regExp> >::iterator reLink =
+        DLList<autoPtr<regExp>>::iterator reLink =
             patternRegexps_.begin();
 
         // Find in pattern using exact match only
@@ -917,7 +917,7 @@ bool Foam::dictionary::changeKeyword
     bool forceOverwrite
 )
 {
-    // no change
+    // No change
     if (oldKeyword == newKeyword)
     {
         return false;
@@ -955,7 +955,7 @@ bool Foam::dictionary::changeKeyword
                 // Delete from patterns first
                 DLList<entry*>::iterator wcLink =
                     patternEntries_.begin();
-                DLList<autoPtr<regExp> >::iterator reLink =
+                DLList<autoPtr<regExp>>::iterator reLink =
                     patternRegexps_.begin();
 
                 // Find in patterns using exact match only
@@ -983,7 +983,7 @@ bool Foam::dictionary::changeKeyword
         }
     }
 
-    // change name and HashTable, but leave DL-List untouched
+    // Change name and HashTable, but leave DL-List untouched
     iter()->keyword() = newKeyword;
     iter()->name() = name() + '.' + newKeyword;
     hashedEntries_.erase(oldKeyword);
@@ -1037,7 +1037,7 @@ bool Foam::dictionary::merge(const dictionary& dict)
         }
         else
         {
-            // not found - just add
+            // Not found - just add
             add(iter().clone(*this).ptr());
             changed = true;
         }
@@ -1058,7 +1058,7 @@ void Foam::dictionary::clear()
 
 void Foam::dictionary::transfer(dictionary& dict)
 {
-    // changing parents probably doesn't make much sense,
+    // Changing parents probably doesn't make much sense,
     // but what about the names?
     name() = dict.name();
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,15 +28,15 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> >
+Foam::tmp<Foam::Field<Type>>
 Foam::sampledTriSurfaceMesh::sampleField
 (
     const GeometricField<Type, fvPatchField, volMesh>& vField
 ) const
 {
     // One value per face
-    tmp<Field<Type> > tvalues(new Field<Type>(sampleElements_.size()));
-    Field<Type>& values = tvalues();
+    tmp<Field<Type>> tvalues(new Field<Type>(sampleElements_.size()));
+    Field<Type>& values = tvalues.ref();
 
     if (sampleSource_ == cells || sampleSource_ == insideCells)
     {
@@ -56,7 +56,7 @@ Foam::sampledTriSurfaceMesh::sampleField
 
         // Create flat boundary field
 
-        Field<Type> bVals(nBnd, pTraits<Type>::zero);
+        Field<Type> bVals(nBnd, Zero);
 
         forAll(vField.boundaryField(), patchI)
         {
@@ -67,7 +67,7 @@ Foam::sampledTriSurfaceMesh::sampleField
                 bVals,
                 vField.boundaryField()[patchI].size(),
                 bFaceI
-            ).assign(vField.boundaryField()[patchI]);
+            ) = vField.boundaryField()[patchI];
         }
 
         // Sample in flat boundary field
@@ -84,15 +84,15 @@ Foam::sampledTriSurfaceMesh::sampleField
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> >
+Foam::tmp<Foam::Field<Type>>
 Foam::sampledTriSurfaceMesh::interpolateField
 (
     const interpolation<Type>& interpolator
 ) const
 {
     // One value per vertex
-    tmp<Field<Type> > tvalues(new Field<Type>(sampleElements_.size()));
-    Field<Type>& values = tvalues();
+    tmp<Field<Type>> tvalues(new Field<Type>(sampleElements_.size()));
+    Field<Type>& values = tvalues.ref();
 
     if (sampleSource_ == cells || sampleSource_ == insideCells)
     {

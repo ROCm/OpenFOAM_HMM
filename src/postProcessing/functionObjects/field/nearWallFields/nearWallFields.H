@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -110,7 +110,7 @@ protected:
         // Read from dictionary
 
             //- Fields to process
-            List<Tuple2<word, word> > fieldSet_;
+            List<Tuple2<word, word>> fieldSet_;
 
             //- Switch to send output to Info as well as to file
             Switch log_;
@@ -134,7 +134,7 @@ protected:
             labelListList cellToWalls_;
 
             //- From cell to tracked end point
-            List<List<point> > cellToSamples_;
+            List<List<point>> cellToSamples_;
 
             //- Map from cell based data back to patch based data
             autoPtr<mapDistribute> getPatchDataMapPtr_;
@@ -157,7 +157,7 @@ protected:
         template<class Type>
         void createFields
         (
-            PtrList<GeometricField<Type, fvPatchField, volMesh> >&
+            PtrList<GeometricField<Type, fvPatchField, volMesh>>&
         ) const;
 
         //- Override boundary fields with sampled values
@@ -171,7 +171,7 @@ protected:
         template<class Type>
         void sampleFields
         (
-            PtrList<GeometricField<Type, fvPatchField, volMesh> >&
+            PtrList<GeometricField<Type, fvPatchField, volMesh>>&
         ) const;
 
 
@@ -246,7 +246,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "nearWallFieldsTemplates.C"
+    #include "nearWallFieldsTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

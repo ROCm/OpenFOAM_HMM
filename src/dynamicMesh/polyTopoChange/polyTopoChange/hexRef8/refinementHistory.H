@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -110,7 +110,7 @@ public:
         label parent_;
 
         //- Cells this cell was refined into
-        autoPtr<FixedList<label, 8> > addedCellsPtr_;
+        autoPtr<FixedList<label, 8>> addedCellsPtr_;
 
         //- Construct null (parent = -1)
         splitCell8();
@@ -161,6 +161,7 @@ private:
             const List<splitCell8>&,
             const splitCell8&
         );
+
         //- Debug write
         static void writeDebug
         (

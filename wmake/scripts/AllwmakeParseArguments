@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -55,6 +55,7 @@ options:
   -j                Compile using all local cores/hyperthreads
   -jN or -j N       Compile using N cores/hyperthreads
   -no-scheduler     Compile without wmakeScheduler
+  -update           Update lnInclude directories and dep files
 USAGE
 
     # Print options for building code documentation
@@ -122,6 +123,11 @@ do
         -no-scheduler)
             unset WM_SCHEDULER
             ;;
+        # Update lnInclude directories and dep files following a pull
+        -update)
+            wrmdep -update
+            wmakeLnIncludeAll
+            ;;
         # Generate documentation
         doc)
             test -n "$genDoc" || usage "invalid option '$1'"
@@ -161,4 +167,4 @@ fi
 unset Script usage setWM_NCOMPPROCS
 
 
-# ----------------------------------------------------------------- end-of-file
+#------------------------------------------------------------------------------

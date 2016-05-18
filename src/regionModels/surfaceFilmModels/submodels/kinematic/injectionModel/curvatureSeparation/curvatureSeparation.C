@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -78,7 +78,7 @@ tmp<volScalarField> curvatureSeparation::calcInvR1
     );
 
 
-    scalarField& invR1 = tinvR1().internalField();
+    scalarField& invR1 = tinvR1.ref().internalField();
 
     // apply defined patch radii
     const scalar rMin = 1e-6;
@@ -229,7 +229,7 @@ curvatureSeparation::curvatureSeparation
     deltaByR1Min_(coeffDict_.lookupOrDefault<scalar>("deltaByR1Min", 0.0)),
     definedPatchRadii_(),
     magG_(mag(owner.g().value())),
-    gHat_(vector::zero)
+    gHat_(Zero)
 {
     if (magG_ < ROOTVSMALL)
     {
@@ -240,10 +240,10 @@ curvatureSeparation::curvatureSeparation
 
     gHat_ = owner.g().value()/magG_;
 
-    List<Tuple2<word, scalar> > prIn(coeffDict_.lookup("definedPatchRadii"));
+    List<Tuple2<word, scalar>> prIn(coeffDict_.lookup("definedPatchRadii"));
     const wordList& allPatchNames = owner.regionMesh().boundaryMesh().names();
 
-    DynamicList<Tuple2<label, scalar> > prData(allPatchNames.size());
+    DynamicList<Tuple2<label, scalar>> prData(allPatchNames.size());
 
     labelHashSet uniquePatchIDs;
 

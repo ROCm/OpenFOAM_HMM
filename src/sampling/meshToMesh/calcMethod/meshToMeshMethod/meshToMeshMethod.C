@@ -146,7 +146,7 @@ Foam::meshToMeshMethod::interVolAndCentroid
     if (volAndInertia.first() <= ROOTVSMALL)
     {
         volAndInertia.first() = 0.0;
-        volAndInertia.second() = vector::zero;
+        volAndInertia.second() = Zero;
     }
     else
     {

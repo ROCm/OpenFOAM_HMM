@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -148,14 +148,12 @@ void Foam::mapDistribute::printLayout(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct null
 Foam::mapDistribute::mapDistribute()
 :
     mapDistributeBase()
 {}
 
 
-//- Construct from components
 Foam::mapDistribute::mapDistribute
 (
     const label constructSize,
@@ -176,7 +174,6 @@ Foam::mapDistribute::mapDistribute
 {}
 
 
-//- Construct from components
 Foam::mapDistribute::mapDistribute
 (
     const label constructSize,
@@ -215,7 +212,7 @@ Foam::mapDistribute::mapDistribute
 (
     const globalIndex& globalNumbering,
     labelList& elements,
-    List<Map<label> >& compactMap,
+    List<Map<label>>& compactMap,
     const int tag
 )
 :
@@ -233,7 +230,7 @@ Foam::mapDistribute::mapDistribute
 (
     const globalIndex& globalNumbering,
     labelListList& cellCells,
-    List<Map<label> >& compactMap,
+    List<Map<label>>& compactMap,
     const int tag
 )
 :
@@ -254,7 +251,7 @@ Foam::mapDistribute::mapDistribute
     const globalIndexAndTransform& globalTransforms,
     const labelPairList& transformedElements,
     labelList& transformedIndices,
-    List<Map<label> >& compactMap,
+    List<Map<label>>& compactMap,
     const int tag
 )
 :
@@ -359,7 +356,7 @@ Foam::mapDistribute::mapDistribute
     const globalIndexAndTransform& globalTransforms,
     const List<labelPairList>& transformedElements,
     labelListList& transformedIndices,
-    List<Map<label> >& compactMap,
+    List<Map<label>>& compactMap,
     const int tag
 )
 :
@@ -513,8 +510,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::mapDistribute::clone() const
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::label Foam::mapDistribute::whichTransform(const label index)
-const
+Foam::label Foam::mapDistribute::whichTransform(const label index) const
 {
     return findLower(transformStart_, index+1);
 }

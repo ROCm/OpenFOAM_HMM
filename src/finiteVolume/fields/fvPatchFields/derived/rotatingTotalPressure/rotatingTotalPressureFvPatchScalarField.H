@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,11 +59,12 @@ Description
     }
     \endverbatim
 
-    The \c omega entry is a DataEntry type, able to describe time varying
+    The \c omega entry is a Function1 type, able to describe time varying
     functions.
 
 SeeAlso
     Foam::totalPressureFvPatchScalarField
+    Foam::Function1Types
 
 SourceFiles
     rotatingTotalPressureFvPatchScalarField.C
@@ -74,7 +75,7 @@ SourceFiles
 #define rotatingTotalPressureFvPatchScalarField_H
 
 #include "totalPressureFvPatchScalarField.H"
-#include "DataEntry.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -92,7 +93,7 @@ class rotatingTotalPressureFvPatchScalarField
     // Private data
 
         //- Angular velocity of the frame
-        autoPtr<DataEntry<vector> > omega_;
+        autoPtr<Function1<vector>> omega_;
 
 
 public:

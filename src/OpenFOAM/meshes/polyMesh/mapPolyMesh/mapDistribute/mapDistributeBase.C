@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,7 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
     List<labelPair> allComms;
 
     {
-        HashSet<labelPair, labelPair::Hash<> > commsSet(Pstream::nProcs());
+        HashSet<labelPair, labelPair::Hash<>> commsSet(Pstream::nProcs());
 
         // Find what communication is required
         forAll(subMap, procI)
@@ -280,7 +280,7 @@ void Foam::mapDistributeBase::calcCompactAddressing
 (
     const globalIndex& globalNumbering,
     const labelList& elements,
-    List<Map<label> >& compactMap
+    List<Map<label>>& compactMap
 ) const
 {
     compactMap.setSize(Pstream::nProcs());
@@ -329,7 +329,7 @@ void Foam::mapDistributeBase::calcCompactAddressing
 (
     const globalIndex& globalNumbering,
     const labelListList& cellCells,
-    List<Map<label> >& compactMap
+    List<Map<label>>& compactMap
 ) const
 {
     compactMap.setSize(Pstream::nProcs());
@@ -389,7 +389,7 @@ void Foam::mapDistributeBase::exchangeAddressing
     const int tag,
     const globalIndex& globalNumbering,
     labelList& elements,
-    List<Map<label> >& compactMap,
+    List<Map<label>>& compactMap,
     labelList& compactStart
 )
 {
@@ -446,12 +446,10 @@ void Foam::mapDistributeBase::exchangeAddressing
     }
 
     subMap_.setSize(Pstream::nProcs());
-    labelListList sendSizes;
     Pstream::exchange<labelList, label>
     (
         wantedRemoteElements,
         subMap_,
-        sendSizes,
         tag,
         Pstream::worldComm  //TBD
     );
@@ -469,7 +467,7 @@ void Foam::mapDistributeBase::exchangeAddressing
     const int tag,
     const globalIndex& globalNumbering,
     labelListList& cellCells,
-    List<Map<label> >& compactMap,
+    List<Map<label>>& compactMap,
     labelList& compactStart
 )
 {
@@ -526,12 +524,10 @@ void Foam::mapDistributeBase::exchangeAddressing
     }
 
     subMap_.setSize(Pstream::nProcs());
-    labelListList sendSizes;
     Pstream::exchange<labelList, label>
     (
         wantedRemoteElements,
         subMap_,
-        sendSizes,
         tag,
         Pstream::worldComm      //TBD
     );
@@ -658,7 +654,7 @@ Foam::mapDistributeBase::mapDistributeBase
 (
     const globalIndex& globalNumbering,
     labelList& elements,
-    List<Map<label> >& compactMap,
+    List<Map<label>>& compactMap,
     const int tag
 )
 :
@@ -718,7 +714,7 @@ Foam::mapDistributeBase::mapDistributeBase
 (
     const globalIndex& globalNumbering,
     labelListList& cellCells,
-    List<Map<label> >& compactMap,
+    List<Map<label>>& compactMap,
     const int tag
 )
 :
@@ -824,7 +820,7 @@ Foam::Xfer<Foam::mapDistributeBase> Foam::mapDistributeBase::xfer()
 Foam::label Foam::mapDistributeBase::renumber
 (
     const globalIndex& globalNumbering,
-    const List<Map<label> >& compactMap,
+    const List<Map<label>>& compactMap,
     const label globalI
 )
 {

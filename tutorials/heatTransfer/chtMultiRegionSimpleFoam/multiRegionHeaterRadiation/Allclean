@@ -37,4 +37,4 @@ rm -f constant/topAir/subMap
 rm -f constant/topAir/visibleFaceFaces
 rm -f constant/topAir/mapDist
 
-# ----------------------------------------------------------------- end-of-file
+#------------------------------------------------------------------------------

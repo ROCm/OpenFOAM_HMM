@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,7 +89,7 @@ SourceFiles
 #define porousBafflePressureFvPatchField_H
 
 #include "fixedJumpFvPatchField.H"
-#include "DataEntry.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -113,10 +113,10 @@ class porousBafflePressureFvPatchField
         const word rhoName_;
 
         //- Darcy pressure loss coefficient
-        autoPtr<DataEntry<scalar> > D_;
+        autoPtr<Function1<scalar>> D_;
 
         //- Inertia pressure lost coefficient
-        autoPtr<DataEntry<scalar> > I_;
+        autoPtr<Function1<scalar>> I_;
 
         //- Porous media length
         scalar length_;
@@ -165,9 +165,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchField<scalar> > clone() const
+        virtual tmp<fvPatchField<scalar>> clone() const
         {
-            return tmp<fvPatchField<scalar> >
+            return tmp<fvPatchField<scalar>>
             (
                 new porousBafflePressureFvPatchField(*this)
             );
@@ -181,12 +181,12 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchField<scalar> > clone
+        virtual tmp<fvPatchField<scalar>> clone
         (
             const DimensionedField<scalar, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<scalar> >
+            return tmp<fvPatchField<scalar>>
             (
                 new porousBafflePressureFvPatchField(*this, iF)
             );

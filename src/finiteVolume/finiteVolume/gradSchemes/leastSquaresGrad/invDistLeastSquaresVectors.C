@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ Foam::leastSquaresVectors::leastSquaresVectors(const fvMesh& mesh)
             false
         ),
         mesh_,
-        dimensionedVector("zero", dimless/dimLength, vector::zero)
+        dimensionedVector("zero", dimless/dimLength, Zero)
     ),
     nVectors_
     (
@@ -65,7 +65,7 @@ Foam::leastSquaresVectors::leastSquaresVectors(const fvMesh& mesh)
             false
         ),
         mesh_,
-        dimensionedVector("zero", dimless/dimLength, vector::zero)
+        dimensionedVector("zero", dimless/dimLength, Zero)
     )
 {
     calcLeastSquaresVectors();
@@ -84,9 +84,7 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
 {
     if (debug)
     {
-        Info<< "leastSquaresVectors::calcLeastSquaresVectors() :"
-            << "Calculating least square gradient vectors"
-            << endl;
+        InfoInFunction << "Calculating least square gradient vectors" << endl;
     }
 
     const fvMesh& mesh = mesh_;
@@ -98,7 +96,7 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
     const volVectorField& C = mesh.C();
 
     // Set up temporary storage for the dd tensor (before inversion)
-    symmTensorField dd(mesh_.nCells(), symmTensor::zero);
+    symmTensorField dd(mesh_.nCells(), Zero);
 
     forAll(owner, facei)
     {
@@ -170,9 +168,8 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
 
     if (debug)
     {
-        Info<< "leastSquaresVectors::calcLeastSquaresVectors() :"
-            << "Finished calculating least square gradient vectors"
-            << endl;
+        InfoInFunction
+            <<"Finished calculating least square gradient vectors" << endl;
     }
 }
 

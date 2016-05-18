@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,9 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "mixtureKEpsilon.H"
+#include "fvOptions.H"
 #include "bound.H"
 #include "twoPhaseSystem.H"
-#include "dragModel.H"
 #include "virtualMassModel.H"
 #include "fixedValueFvPatchFields.H"
 #include "inletOutletFvPatchFields.H"
@@ -54,7 +54,7 @@ mixtureKEpsilon<BasicTurbulenceModel>::mixtureKEpsilon
     const word& type
 )
 :
-    eddyViscosity<RASModel<BasicTurbulenceModel> >
+    eddyViscosity<RASModel<BasicTurbulenceModel>>
     (
         type,
         alpha,
@@ -311,7 +311,7 @@ void mixtureKEpsilon<BasicTurbulenceModel>::initMixtureFields()
 template<class BasicTurbulenceModel>
 bool mixtureKEpsilon<BasicTurbulenceModel>::read()
 {
-    if (eddyViscosity<RASModel<BasicTurbulenceModel> >::read())
+    if (eddyViscosity<RASModel<BasicTurbulenceModel>>::read())
     {
         Cmu_.readIfPresent(this->coeffDict());
         C1_.readIfPresent(this->coeffDict());
@@ -335,6 +335,9 @@ void mixtureKEpsilon<BasicTurbulenceModel>::correctNut()
 {
     this->nut_ = Cmu_*sqr(k_)/epsilon_;
     this->nut_.correctBoundaryConditions();
+    fv::options::New(this->mesh_).correct(this->nut_);
+
+    BasicTurbulenceModel::correctNut();
 }
 
 
@@ -354,7 +357,7 @@ mixtureKEpsilon<BasicTurbulenceModel>::liquidTurbulence() const
         liquidTurbulencePtr_ =
            &const_cast<mixtureKEpsilon<BasicTurbulenceModel>&>
             (
-                U.db().lookupObject<mixtureKEpsilon<BasicTurbulenceModel> >
+                U.db().lookupObject<mixtureKEpsilon<BasicTurbulenceModel>>
                 (
                     IOobject::groupName
                     (
@@ -575,7 +578,9 @@ void mixtureKEpsilon<BasicTurbulenceModel>::correct()
     volScalarField& km = km_();
     volScalarField& epsilonm = epsilonm_();
 
-    eddyViscosity<RASModel<BasicTurbulenceModel> >::correct();
+    fv::options& fvOptions(fv::options::New(this->mesh_));
+
+    eddyViscosity<RASModel<BasicTurbulenceModel>>::correct();
 
     // Update the effective mixture density
     rhom = this->rhom();
@@ -610,7 +615,7 @@ void mixtureKEpsilon<BasicTurbulenceModel>::correct()
         kl.boundaryField().updateCoeffs();
         epsilonl.boundaryField().updateCoeffs();
 
-        Gc().checkOut();
+        Gc.ref().checkOut();
     }
 
     tmp<volScalarField> Gd;
@@ -630,7 +635,7 @@ void mixtureKEpsilon<BasicTurbulenceModel>::correct()
         kg.boundaryField().updateCoeffs();
         epsilong.boundaryField().updateCoeffs();
 
-        Gd().checkOut();
+        Gd.ref().checkOut();
     }
 
     // Mixture turbulence generation
@@ -657,13 +662,14 @@ void mixtureKEpsilon<BasicTurbulenceModel>::correct()
       - fvm::SuSp(((2.0/3.0)*C1_)*divUm, epsilonm)
       - fvm::Sp(C2_*epsilonm/km, epsilonm)
       + epsilonSource()
+      + fvOptions(epsilonm)
     );
 
-    epsEqn().relax();
-
-    epsEqn().boundaryManipulate(epsilonm.boundaryField());
-
+    epsEqn.ref().relax();
+    fvOptions.constrain(epsEqn.ref());
+    epsEqn.ref().boundaryManipulate(epsilonm.boundaryField());
     solve(epsEqn);
+    fvOptions.correct(epsilonm);
     bound(epsilonm, this->epsilonMin_);
 
 
@@ -679,10 +685,13 @@ void mixtureKEpsilon<BasicTurbulenceModel>::correct()
       - fvm::SuSp((2.0/3.0)*divUm, km)
       - fvm::Sp(epsilonm/km, km)
       + kSource()
+      + fvOptions(km)
     );
 
-    kmEqn().relax();
+    kmEqn.ref().relax();
+    fvOptions.constrain(kmEqn.ref());
     solve(kmEqn);
+    fvOptions.correct(km);
     bound(km, this->kMin_);
     km.correctBoundaryConditions();
 

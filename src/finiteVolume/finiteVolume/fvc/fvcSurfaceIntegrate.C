@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ License
 
 #include "fvcSurfaceIntegrate.H"
 #include "fvMesh.H"
-#include "zeroGradientFvPatchFields.H"
+#include "extrapolatedCalculatedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,7 +77,7 @@ void surfaceIntegrate
 
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
+tmp<GeometricField<Type, fvPatchField, volMesh>>
 surfaceIntegrate
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& ssf
@@ -85,7 +85,7 @@ surfaceIntegrate
 {
     const fvMesh& mesh = ssf.mesh();
 
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tvf
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tvf
     (
         new GeometricField<Type, fvPatchField, volMesh>
         (
@@ -102,12 +102,12 @@ surfaceIntegrate
             (
                 "0",
                 ssf.dimensions()/dimVol,
-                pTraits<Type>::zero
+                Zero
             ),
-            zeroGradientFvPatchField<Type>::typeName
+            extrapolatedCalculatedFvPatchField<Type>::typeName
         )
     );
-    GeometricField<Type, fvPatchField, volMesh>& vf = tvf();
+    GeometricField<Type, fvPatchField, volMesh>& vf = tvf.ref();
 
     surfaceIntegrate(vf.internalField(), ssf);
     vf.correctBoundaryConditions();
@@ -117,13 +117,13 @@ surfaceIntegrate
 
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
+tmp<GeometricField<Type, fvPatchField, volMesh>>
 surfaceIntegrate
 (
-    const tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >& tssf
+    const tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>& tssf
 )
 {
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tvf
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tvf
     (
         fvc::surfaceIntegrate(tssf())
     );
@@ -133,7 +133,7 @@ surfaceIntegrate
 
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
+tmp<GeometricField<Type, fvPatchField, volMesh>>
 surfaceSum
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& ssf
@@ -141,7 +141,7 @@ surfaceSum
 {
     const fvMesh& mesh = ssf.mesh();
 
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tvf
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tvf
     (
         new GeometricField<Type, fvPatchField, volMesh>
         (
@@ -154,11 +154,11 @@ surfaceSum
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensioned<Type>("0", ssf.dimensions(), pTraits<Type>::zero),
-            zeroGradientFvPatchField<Type>::typeName
+            dimensioned<Type>("0", ssf.dimensions(), Zero),
+            extrapolatedCalculatedFvPatchField<Type>::typeName
         )
     );
-    GeometricField<Type, fvPatchField, volMesh>& vf = tvf();
+    GeometricField<Type, fvPatchField, volMesh>& vf = tvf.ref();
 
     const labelUList& owner = mesh.owner();
     const labelUList& neighbour = mesh.neighbour();
@@ -189,12 +189,12 @@ surfaceSum
 
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> > surfaceSum
+tmp<GeometricField<Type, fvPatchField, volMesh>> surfaceSum
 (
-    const tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >& tssf
+    const tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>& tssf
 )
 {
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tvf = surfaceSum(tssf());
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tvf = surfaceSum(tssf());
     tssf.clear();
     return tvf;
 }

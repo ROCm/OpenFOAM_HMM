@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,13 +32,8 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 template<class Type>
-void volPointInterpolation::pushUntransformedData
+void Foam::volPointInterpolation::pushUntransformedData
 (
     List<Type>& pointData
 ) const
@@ -81,7 +76,7 @@ void volPointInterpolation::pushUntransformedData
 
 
 template<class Type>
-void volPointInterpolation::addSeparated
+void Foam::volPointInterpolation::addSeparated
 (
     GeometricField<Type, pointPatchField, pointMesh>& pf
 ) const
@@ -95,7 +90,7 @@ void volPointInterpolation::addSeparated
     {
         if (pf.boundaryField()[patchI].coupled())
         {
-            refCast<coupledPointPatchField<Type> >
+            refCast<coupledPointPatchField<Type>>
                 (pf.boundaryField()[patchI]).initSwapAddSeparated
                 (
                     Pstream::nonBlocking,
@@ -111,7 +106,7 @@ void volPointInterpolation::addSeparated
     {
         if (pf.boundaryField()[patchI].coupled())
         {
-            refCast<coupledPointPatchField<Type> >
+            refCast<coupledPointPatchField<Type>>
                 (pf.boundaryField()[patchI]).swapAddSeparated
                 (
                     Pstream::nonBlocking,
@@ -123,7 +118,7 @@ void volPointInterpolation::addSeparated
 
 
 template<class Type>
-void volPointInterpolation::interpolateInternalField
+void Foam::volPointInterpolation::interpolateInternalField
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     GeometricField<Type, pointPatchField, pointMesh>& pf
@@ -148,7 +143,7 @@ void volPointInterpolation::interpolateInternalField
             const scalarList& pw = pointWeights_[pointi];
             const labelList& ppc = pointCells[pointi];
 
-            pf[pointi] = pTraits<Type>::zero;
+            pf[pointi] = Zero;
 
             forAll(ppc, pointCelli)
             {
@@ -160,7 +155,7 @@ void volPointInterpolation::interpolateInternalField
 
 
 template<class Type>
-void volPointInterpolation::interpolateDimensionedInternalField
+void Foam::volPointInterpolation::interpolateDimensionedInternalField
 (
     const DimensionedField<Type, volMesh>& vf,
     DimensionedField<Type, pointMesh>& pf
@@ -191,7 +186,7 @@ void volPointInterpolation::interpolateDimensionedInternalField
     {
         const labelList& ppc = pointCells[pointi];
 
-        pf[pointi] = pTraits<Type>::zero;
+        pf[pointi] = Type(Zero);
 
         forAll(ppc, pointCelli)
         {
@@ -220,7 +215,7 @@ void volPointInterpolation::interpolateDimensionedInternalField
 
 
 template<class Type>
-tmp<Field<Type> > volPointInterpolation::flatBoundaryField
+Foam::tmp<Foam::Field<Type>> Foam::volPointInterpolation::flatBoundaryField
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf
 ) const
@@ -228,11 +223,11 @@ tmp<Field<Type> > volPointInterpolation::flatBoundaryField
     const fvMesh& mesh = vf.mesh();
     const fvBoundaryMesh& bm = mesh.boundary();
 
-    tmp<Field<Type> > tboundaryVals
+    tmp<Field<Type>> tboundaryVals
     (
         new Field<Type>(mesh.nFaces()-mesh.nInternalFaces())
     );
-    Field<Type>& boundaryVals = tboundaryVals();
+    Field<Type>& boundaryVals = tboundaryVals.ref();
 
     forAll(vf.boundaryField(), patchI)
     {
@@ -249,7 +244,7 @@ tmp<Field<Type> > volPointInterpolation::flatBoundaryField
                 boundaryVals,
                 vf.boundaryField()[patchI].size(),
                 bFaceI
-            ).assign(vf.boundaryField()[patchI]);
+            ) = vf.boundaryField()[patchI];
         }
         else
         {
@@ -257,7 +252,7 @@ tmp<Field<Type> > volPointInterpolation::flatBoundaryField
 
             forAll(pp, i)
             {
-                boundaryVals[bFaceI++] = pTraits<Type>::zero;
+                boundaryVals[bFaceI++] = Zero;
             }
         }
     }
@@ -267,7 +262,7 @@ tmp<Field<Type> > volPointInterpolation::flatBoundaryField
 
 
 template<class Type>
-void volPointInterpolation::interpolateBoundaryField
+void Foam::volPointInterpolation::interpolateBoundaryField
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     GeometricField<Type, pointPatchField, pointMesh>& pf
@@ -278,7 +273,7 @@ void volPointInterpolation::interpolateBoundaryField
     Field<Type>& pfi = pf.internalField();
 
     // Get face data in flat list
-    tmp<Field<Type> > tboundaryVals(flatBoundaryField(vf));
+    tmp<Field<Type>> tboundaryVals(flatBoundaryField(vf));
     const Field<Type>& boundaryVals = tboundaryVals();
 
 
@@ -296,7 +291,7 @@ void volPointInterpolation::interpolateBoundaryField
 
             Type& val = pfi[pointI];
 
-            val = pTraits<Type>::zero;
+            val = Zero;
             forAll(pFaces, j)
             {
                 if (boundaryIsPatchFace_[pFaces[j]])
@@ -321,7 +316,7 @@ void volPointInterpolation::interpolateBoundaryField
 
 
 template<class Type>
-void volPointInterpolation::interpolateBoundaryField
+void Foam::volPointInterpolation::interpolateBoundaryField
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     GeometricField<Type, pointPatchField, pointMesh>& pf,
@@ -338,7 +333,7 @@ void volPointInterpolation::interpolateBoundaryField
 
 
 template<class Type>
-void volPointInterpolation::interpolate
+void Foam::volPointInterpolation::interpolate
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     GeometricField<Type, pointPatchField, pointMesh>& pf
@@ -361,8 +356,8 @@ void volPointInterpolation::interpolate
 
 
 template<class Type>
-tmp<GeometricField<Type, pointPatchField, pointMesh> >
-volPointInterpolation::interpolate
+Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh>>
+Foam::volPointInterpolation::interpolate
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     const wordList& patchFieldTypes
@@ -371,7 +366,7 @@ volPointInterpolation::interpolate
     const pointMesh& pm = pointMesh::New(vf.mesh());
 
     // Construct tmp<pointField>
-    tmp<GeometricField<Type, pointPatchField, pointMesh> > tpf
+    tmp<GeometricField<Type, pointPatchField, pointMesh>> tpf
     (
         new GeometricField<Type, pointPatchField, pointMesh>
         (
@@ -387,25 +382,25 @@ volPointInterpolation::interpolate
         )
     );
 
-    interpolateInternalField(vf, tpf());
+    interpolateInternalField(vf, tpf.ref());
 
     // Interpolate to the patches overriding fixed value BCs
-    interpolateBoundaryField(vf, tpf(), true);
+    interpolateBoundaryField(vf, tpf.ref(), true);
 
     return tpf;
 }
 
 
 template<class Type>
-tmp<GeometricField<Type, pointPatchField, pointMesh> >
-volPointInterpolation::interpolate
+Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh>>
+Foam::volPointInterpolation::interpolate
 (
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf,
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tvf,
     const wordList& patchFieldTypes
 ) const
 {
     // Construct tmp<pointField>
-    tmp<GeometricField<Type, pointPatchField, pointMesh> > tpf =
+    tmp<GeometricField<Type, pointPatchField, pointMesh>> tpf =
         interpolate(tvf(), patchFieldTypes);
     tvf.clear();
     return tpf;
@@ -413,8 +408,8 @@ volPointInterpolation::interpolate
 
 
 template<class Type>
-tmp<GeometricField<Type, pointPatchField, pointMesh> >
-volPointInterpolation::interpolate
+Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh>>
+Foam::volPointInterpolation::interpolate
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name,
@@ -445,7 +440,7 @@ volPointInterpolation::interpolate
         }
 
 
-        tmp<GeometricField<Type, pointPatchField, pointMesh> > tpf
+        tmp<GeometricField<Type, pointPatchField, pointMesh>> tpf
         (
             new GeometricField<Type, pointPatchField, pointMesh>
             (
@@ -460,7 +455,7 @@ volPointInterpolation::interpolate
             )
         );
 
-        interpolate(vf, tpf());
+        interpolate(vf, tpf.ref());
 
         return tpf;
     }
@@ -497,8 +492,8 @@ volPointInterpolation::interpolate
 
 
 template<class Type>
-tmp<GeometricField<Type, pointPatchField, pointMesh> >
-volPointInterpolation::interpolate
+Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh>>
+Foam::volPointInterpolation::interpolate
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf
 ) const
@@ -508,14 +503,14 @@ volPointInterpolation::interpolate
 
 
 template<class Type>
-tmp<GeometricField<Type, pointPatchField, pointMesh> >
-volPointInterpolation::interpolate
+Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh>>
+Foam::volPointInterpolation::interpolate
 (
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tvf
 ) const
 {
     // Construct tmp<pointField>
-    tmp<GeometricField<Type, pointPatchField, pointMesh> > tpf =
+    tmp<GeometricField<Type, pointPatchField, pointMesh>> tpf =
         interpolate(tvf());
     tvf.clear();
     return tpf;
@@ -523,8 +518,8 @@ volPointInterpolation::interpolate
 
 
 template<class Type>
-tmp<DimensionedField<Type, pointMesh> >
-volPointInterpolation::interpolate
+Foam::tmp<Foam::DimensionedField<Type, Foam::pointMesh>>
+Foam::volPointInterpolation::interpolate
 (
     const DimensionedField<Type, volMesh>& vf,
     const word& name,
@@ -555,7 +550,7 @@ volPointInterpolation::interpolate
         }
 
 
-        tmp<DimensionedField<Type, pointMesh> > tpf
+        tmp<DimensionedField<Type, pointMesh>> tpf
         (
             new DimensionedField<Type, pointMesh>
             (
@@ -570,7 +565,7 @@ volPointInterpolation::interpolate
             )
         );
 
-        interpolateDimensionedInternalField(vf, tpf());
+        interpolateDimensionedInternalField(vf, tpf.ref());
 
         return tpf;
     }
@@ -608,8 +603,8 @@ volPointInterpolation::interpolate
 
 
 template<class Type>
-tmp<DimensionedField<Type, pointMesh> >
-volPointInterpolation::interpolate
+Foam::tmp<Foam::DimensionedField<Type, Foam::pointMesh>>
+Foam::volPointInterpolation::interpolate
 (
     const DimensionedField<Type, volMesh>& vf
 ) const
@@ -619,21 +614,17 @@ volPointInterpolation::interpolate
 
 
 template<class Type>
-tmp<DimensionedField<Type, pointMesh> >
-volPointInterpolation::interpolate
+Foam::tmp<Foam::DimensionedField<Type, Foam::pointMesh>>
+Foam::volPointInterpolation::interpolate
 (
-    const tmp<DimensionedField<Type, volMesh> >& tvf
+    const tmp<DimensionedField<Type, volMesh>>& tvf
 ) const
 {
     // Construct tmp<pointField>
-    tmp<DimensionedField<Type, pointMesh> > tpf = interpolate(tvf());
+    tmp<DimensionedField<Type, pointMesh>> tpf = interpolate(tvf.ref());
     tvf.clear();
     return tpf;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

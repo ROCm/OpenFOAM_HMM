@@ -39,8 +39,8 @@ externalCoupledMixedFvPatchField
 :
     mixedFvPatchField<Type>(p, iF)
 {
-    this->refValue() = pTraits<Type>::zero;
-    this->refGrad() = pTraits<Type>::zero;
+    this->refValue() = Type(Zero);
+    this->refGrad() = Type(Zero);
     this->valueFraction() = 0.0;
 }
 

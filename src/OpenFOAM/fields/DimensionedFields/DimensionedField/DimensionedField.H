@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -60,7 +60,7 @@ template<class Type, class GeoMesh> Ostream& operator<<
 template<class Type, class GeoMesh> Ostream& operator<<
 (
     Ostream&,
-    const tmp<DimensionedField<Type, GeoMesh> >&
+    const tmp<DimensionedField<Type, GeoMesh>>&
 );
 
 
@@ -168,20 +168,20 @@ public:
         DimensionedField
         (
             DimensionedField<Type, GeoMesh>&,
-            bool reUse
+            bool reuse
         );
 
         //- Construct by transferring the DimensionedField
         DimensionedField
         (
-            const Xfer<DimensionedField<Type, GeoMesh> >&
+            const Xfer<DimensionedField<Type, GeoMesh>>&
         );
 
         //- Construct as copy of tmp<DimensionedField> deleting argument
         #ifndef NoConstructFromTmp
         DimensionedField
         (
-            const tmp<DimensionedField<Type, GeoMesh> >&
+            const tmp<DimensionedField<Type, GeoMesh>>&
         );
         #endif
 
@@ -197,7 +197,7 @@ public:
         (
             const IOobject&,
             DimensionedField<Type, GeoMesh>&,
-            bool reUse
+            bool reuse
         );
 
         //- Construct as copy resetting name
@@ -212,14 +212,14 @@ public:
         (
             const word& newName,
             DimensionedField<Type, GeoMesh>&,
-            bool reUse
+            bool reuse
         );
 
         //- Construct by transferring the DimensionedField with a new name
         DimensionedField
         (
             const word& newName,
-            const Xfer<DimensionedField<Type, GeoMesh> >&
+            const Xfer<DimensionedField<Type, GeoMesh>>&
         );
 
         //- Construct as copy resetting name
@@ -227,12 +227,12 @@ public:
         DimensionedField
         (
             const word& newName,
-            const tmp<DimensionedField<Type, GeoMesh> >&
+            const tmp<DimensionedField<Type, GeoMesh>>&
         );
         #endif
 
         //- Clone
-        tmp<DimensionedField<Type, GeoMesh> > clone() const;
+        tmp<DimensionedField<Type, GeoMesh>> clone() const;
 
 
     //- Destructor
@@ -261,7 +261,7 @@ public:
         inline Field<Type>& field();
 
         //- Return a component field of the field
-        tmp<DimensionedField<cmptType, GeoMesh> > component
+        tmp<DimensionedField<cmptType, GeoMesh>> component
         (
             const direction
         ) const;
@@ -277,11 +277,11 @@ public:
         void replace
         (
             const direction,
-            const tmp<DimensionedField<cmptType, GeoMesh> >&
+            const tmp<DimensionedField<cmptType, GeoMesh>>&
         );
 
         //- Return the field transpose (only defined for second rank tensors)
-        tmp<DimensionedField<Type, GeoMesh> > T() const;
+        tmp<DimensionedField<Type, GeoMesh>> T() const;
 
         //- Calculate and return arithmetic average
         dimensioned<Type> average() const;
@@ -295,7 +295,7 @@ public:
         //- Calculate and return weighted average
         dimensioned<Type> weightedAverage
         (
-            const tmp<DimensionedField<scalar, GeoMesh> >&
+            const tmp<DimensionedField<scalar, GeoMesh>>&
         ) const;
 
 
@@ -309,20 +309,20 @@ public:
     // Member Operators
 
         void operator=(const DimensionedField<Type, GeoMesh>&);
-        void operator=(const tmp<DimensionedField<Type, GeoMesh> >&);
+        void operator=(const tmp<DimensionedField<Type, GeoMesh>>&);
         void operator=(const dimensioned<Type>&);
 
         void operator+=(const DimensionedField<Type, GeoMesh>&);
-        void operator+=(const tmp<DimensionedField<Type, GeoMesh> >&);
+        void operator+=(const tmp<DimensionedField<Type, GeoMesh>>&);
 
         void operator-=(const DimensionedField<Type, GeoMesh>&);
-        void operator-=(const tmp<DimensionedField<Type, GeoMesh> >&);
+        void operator-=(const tmp<DimensionedField<Type, GeoMesh>>&);
 
         void operator*=(const DimensionedField<scalar, GeoMesh>&);
-        void operator*=(const tmp<DimensionedField<scalar, GeoMesh> >&);
+        void operator*=(const tmp<DimensionedField<scalar, GeoMesh>>&);
 
         void operator/=(const DimensionedField<scalar, GeoMesh>&);
-        void operator/=(const tmp<DimensionedField<scalar, GeoMesh> >&);
+        void operator/=(const tmp<DimensionedField<scalar, GeoMesh>>&);
 
         void operator+=(const dimensioned<Type>&);
         void operator-=(const dimensioned<Type>&);
@@ -342,7 +342,7 @@ public:
         friend Ostream& operator<< <Type, GeoMesh>
         (
             Ostream&,
-            const tmp<DimensionedField<Type, GeoMesh> >&
+            const tmp<DimensionedField<Type, GeoMesh>>&
         );
 };
 
@@ -357,7 +357,7 @@ public:
 #include "DimensionedFieldFunctions.H"
 
 #ifdef NoRepository
-#   include "DimensionedField.C"
+    #include "DimensionedField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

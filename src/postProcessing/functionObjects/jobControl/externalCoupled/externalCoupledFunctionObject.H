@@ -275,7 +275,7 @@ class externalCoupledFunctionObject
 
         //- Helper: append data from all processors onto master
         template<class Type>
-        static tmp<Field<Type> > gatherAndCombine(const Field<Type>& fld);
+        static tmp<Field<Type>> gatherAndCombine(const Field<Type>& fld);
 
         static void checkOrder(const wordList&);
 

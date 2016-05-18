@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,12 +27,12 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template <class BinaryOp>
+template<class BinaryOp>
 void Foam::domainDecomposition::processInterCyclics
 (
     const polyBoundaryMesh& patches,
-    List<DynamicList<DynamicList<label> > >& interPatchFaces,
-    List<Map<label> >& procNbrToInterPatch,
+    List<DynamicList<DynamicList<label>>>& interPatchFaces,
+    List<Map<label>>& procNbrToInterPatch,
     List<labelListList>& subPatchIDs,
     List<labelListList>& subPatchStarts,
     bool owner,

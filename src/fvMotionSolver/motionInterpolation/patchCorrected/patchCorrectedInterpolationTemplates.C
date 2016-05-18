@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,7 +106,7 @@ void Foam::patchCorrectedInterpolation::interpolateDataFromPatchGroups
         dimensionedScalar("zero", dimless, 0),
         zeroGradientPointPatchField<scalar>::typeName
     );
-    data = dimensioned<Type>("zero", data.dimensions(), pTraits<Type>::zero);
+    data = dimensioned<Type>("zero", data.dimensions(), Type(Zero));
 
     forAll(patchGroups_, patchGroupI)
     {
@@ -168,7 +168,7 @@ void Foam::patchCorrectedInterpolation::propagateDataFromPatchGroup
 
     // Generate the seed labels and info
     labelList seedLabels(nSeedInfo);
-    List<PointData<Type> > seedInfo(nSeedInfo);
+    List<PointData<Type>> seedInfo(nSeedInfo);
     nSeedInfo = 0;
     forAll(patchGroup, patchGroupI)
     {
@@ -200,9 +200,9 @@ void Foam::patchCorrectedInterpolation::propagateDataFromPatchGroup
     }
 
     // Wave the data through the mesh
-    List<PointData<Type> > allPointInfo(mesh().nPoints());
-    List<PointData<Type> > allEdgeInfo(mesh().nEdges());
-    PointEdgeWave<PointData<Type> >
+    List<PointData<Type>> allPointInfo(mesh().nPoints());
+    List<PointData<Type>> allEdgeInfo(mesh().nEdges());
+    PointEdgeWave<PointData<Type>>
     (
         mesh(),
         seedLabels,

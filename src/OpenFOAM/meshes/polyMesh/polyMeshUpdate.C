@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,8 +40,8 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
 {
     if (debug)
     {
-        Info<< "void polyMesh::updateMesh(const mapPolyMesh&) : "
-            << "updating addressing and (optional) pointMesh/pointFields"
+        InfoInFunction
+            << "Updating addressing and (optional) pointMesh/pointFields"
             << endl;
     }
 
@@ -123,8 +123,8 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
     meshObject::updateMesh<pointMesh>(*this, mpm);
 
     // Reset valid directions (could change by faces put into empty patches)
-    geometricD_ = Vector<label>::zero;
-    solutionD_ = Vector<label>::zero;
+    geometricD_ = Zero;
+    solutionD_ = Zero;
 
     const_cast<Time&>(time()).functionObjects().updateMesh(mpm);
 }

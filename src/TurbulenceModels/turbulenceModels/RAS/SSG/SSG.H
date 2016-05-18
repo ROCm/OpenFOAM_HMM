@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -95,13 +95,13 @@ namespace RASModels
 template<class BasicTurbulenceModel>
 class SSG
 :
-    public ReynoldsStress<RASModel<BasicTurbulenceModel> >
+    public ReynoldsStress<RASModel<BasicTurbulenceModel>>
 {
     // Private Member Functions
 
         // Disallow default bitwise copy construct and assignment
         SSG(const SSG&);
-        SSG& operator=(const SSG&);
+        void operator=(const SSG&);
 
 
 protected:
@@ -206,7 +206,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "SSG.C"
+    #include "SSG.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

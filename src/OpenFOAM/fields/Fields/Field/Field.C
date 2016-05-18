@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,6 +60,13 @@ Foam::Field<Type>::Field(const label size, const Type& t)
 
 
 template<class Type>
+Foam::Field<Type>::Field(const label size, const zero)
+:
+    List<Type>(size, Zero)
+{}
+
+
+template<class Type>
 Foam::Field<Type>::Field
 (
     const UList<Type>& mapF,
@@ -75,7 +82,7 @@ Foam::Field<Type>::Field
 template<class Type>
 Foam::Field<Type>::Field
 (
-    const tmp<Field<Type> >& tmapF,
+    const tmp<Field<Type>>& tmapF,
     const labelUList& mapAddressing
 )
 :
@@ -102,7 +109,7 @@ Foam::Field<Type>::Field
 template<class Type>
 Foam::Field<Type>::Field
 (
-    const tmp<Field<Type> >& tmapF,
+    const tmp<Field<Type>>& tmapF,
     const labelListList& mapAddressing,
     const scalarListList& mapWeights
 )
@@ -160,7 +167,7 @@ Foam::Field<Type>::Field
 template<class Type>
 Foam::Field<Type>::Field
 (
-    const tmp<Field<Type> >& tmapF,
+    const tmp<Field<Type>>& tmapF,
     const FieldMapper& mapper,
     const bool applyFlip
 )
@@ -174,7 +181,7 @@ Foam::Field<Type>::Field
 template<class Type>
 Foam::Field<Type>::Field
 (
-    const tmp<Field<Type> >& tmapF,
+    const tmp<Field<Type>>& tmapF,
     const FieldMapper& mapper,
     const Type& defaultValue,
     const bool applyFlip
@@ -189,7 +196,7 @@ Foam::Field<Type>::Field
 template<class Type>
 Foam::Field<Type>::Field
 (
-    const tmp<Field<Type> >& tmapF,
+    const tmp<Field<Type>>& tmapF,
     const FieldMapper& mapper,
     const UList<Type>& defaultValues,
     const bool applyFlip
@@ -204,27 +211,27 @@ Foam::Field<Type>::Field
 template<class Type>
 Foam::Field<Type>::Field(const Field<Type>& f)
 :
-    refCount(),
+    tmp<Field<Type>>::refCount(),
     List<Type>(f)
 {}
 
 
 template<class Type>
-Foam::Field<Type>::Field(Field<Type>& f, bool reUse)
+Foam::Field<Type>::Field(Field<Type>& f, bool reuse)
 :
-    List<Type>(f, reUse)
+    List<Type>(f, reuse)
 {}
 
 
 template<class Type>
-Foam::Field<Type>::Field(const Xfer<List<Type> >& f)
+Foam::Field<Type>::Field(const Xfer<List<Type>>& f)
 :
     List<Type>(f)
 {}
 
 
 template<class Type>
-Foam::Field<Type>::Field(const Xfer<Field<Type> >& f)
+Foam::Field<Type>::Field(const Xfer<Field<Type>>& f)
 :
     List<Type>(f)
 {}
@@ -237,14 +244,13 @@ Foam::Field<Type>::Field(const UList<Type>& list)
 {}
 
 
-// Construct as copy of tmp<Field>
 #ifndef NoConstructFromTmp
 template<class Type>
-Foam::Field<Type>::Field(const tmp<Field<Type> >& tf)
+Foam::Field<Type>::Field(const tmp<Field<Type>>& tf)
 :
     List<Type>(const_cast<Field<Type>&>(tf()), tf.isTmp())
 {
-    const_cast<Field<Type>&>(tf()).resetRefCount();
+    tf.clear();
 }
 #endif
 
@@ -332,9 +338,9 @@ Foam::Field<Type>::Field
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::Field<Type>::clone() const
+Foam::tmp<Foam::Field<Type>> Foam::Field<Type>::clone() const
 {
-    return tmp<Field<Type> >(new Field<Type>(*this));
+    return tmp<Field<Type>>(new Field<Type>(*this));
 }
 
 
@@ -372,7 +378,7 @@ void Foam::Field<Type>::map
 template<class Type>
 void Foam::Field<Type>::map
 (
-    const tmp<Field<Type> >& tmapF,
+    const tmp<Field<Type>>& tmapF,
     const labelUList& mapAddressing
 )
 {
@@ -408,7 +414,7 @@ void Foam::Field<Type>::map
         const labelList&  localAddrs   = mapAddressing[i];
         const scalarList& localWeights = mapWeights[i];
 
-        f[i] = pTraits<Type>::zero;
+        f[i] = Zero;
 
         forAll(localAddrs, j)
         {
@@ -421,7 +427,7 @@ void Foam::Field<Type>::map
 template<class Type>
 void Foam::Field<Type>::map
 (
-    const tmp<Field<Type> >& tmapF,
+    const tmp<Field<Type>>& tmapF,
     const labelListList& mapAddressing,
     const scalarListList& mapWeights
 )
@@ -493,7 +499,7 @@ void Foam::Field<Type>::map
 template<class Type>
 void Foam::Field<Type>::map
 (
-    const tmp<Field<Type> >& tmapF,
+    const tmp<Field<Type>>& tmapF,
     const FieldMapper& mapper,
     const bool applyFlip
 )
@@ -590,7 +596,7 @@ void Foam::Field<Type>::rmap
 template<class Type>
 void Foam::Field<Type>::rmap
 (
-    const tmp<Field<Type> >& tmapF,
+    const tmp<Field<Type>>& tmapF,
     const labelUList& mapAddressing
 )
 {
@@ -609,7 +615,7 @@ void Foam::Field<Type>::rmap
 {
     Field<Type>& f = *this;
 
-    f = pTraits<Type>::zero;
+    f = Zero;
 
     forAll(mapF, i)
     {
@@ -621,7 +627,7 @@ void Foam::Field<Type>::rmap
 template<class Type>
 void Foam::Field<Type>::rmap
 (
-    const tmp<Field<Type> >& tmapF,
+    const tmp<Field<Type>>& tmapF,
     const labelUList& mapAddressing,
     const UList<scalar>& mapWeights
 )
@@ -639,14 +645,14 @@ void Foam::Field<Type>::negate()
 
 
 template<class Type>
-Foam::tmp<Foam::Field<typename Foam::Field<Type>::cmptType> >
+Foam::tmp<Foam::Field<typename Foam::Field<Type>::cmptType>>
 Foam::Field<Type>::component
 (
     const direction d
 ) const
 {
-    tmp<Field<cmptType> > Component(new Field<cmptType>(this->size()));
-    ::Foam::component(Component(), *this, d);
+    tmp<Field<cmptType>> Component(new Field<cmptType>(this->size()));
+    ::Foam::component(Component.ref(), *this, d);
     return Component;
 }
 
@@ -667,7 +673,7 @@ template<class Type>
 void Foam::Field<Type>::replace
 (
     const direction d,
-    const tmp<Field<cmptType> >& tsf
+    const tmp<Field<cmptType>>& tsf
 )
 {
     replace(d, tsf());
@@ -688,10 +694,23 @@ void Foam::Field<Type>::replace
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::Field<Type>::T() const
+template<class VSForm>
+VSForm Foam::Field<Type>::block(const label start) const
 {
-    tmp<Field<Type> > transpose(new Field<Type>(this->size()));
-    ::Foam::T(transpose(), *this);
+    VSForm vs;
+    for (direction i=0; i<VSForm::nComponents; i++)
+    {
+        vs[i] = this->operator[](start + i);
+    }
+    return vs;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>> Foam::Field<Type>::T() const
+{
+    tmp<Field<Type>> transpose(new Field<Type>(this->size()));
+    ::Foam::T(transpose.ref(), *this);
     return transpose;
 }
 
@@ -772,10 +791,7 @@ void Foam::Field<Type>::operator=(const tmp<Field>& rhs)
             << abort(FatalError);
     }
 
-    // This is dodgy stuff, don't try it at home.
-    Field* fieldPtr = rhs.ptr();
-    List<Type>::transfer(*fieldPtr);
-    delete fieldPtr;
+    List<Type>::operator=(rhs());
 }
 
 
@@ -787,32 +803,39 @@ void Foam::Field<Type>::operator=(const Type& t)
 
 
 template<class Type>
-template<class Form, class Cmpt, int nCmpt>
+void Foam::Field<Type>::operator=(const zero)
+{
+    List<Type>::operator=(Zero);
+}
+
+
+template<class Type>
+template<class Form, class Cmpt, Foam::direction nCmpt>
 void Foam::Field<Type>::operator=(const VectorSpace<Form,Cmpt,nCmpt>& vs)
 {
     TFOR_ALL_F_OP_S(Type, *this, =, VSType, vs)
 }
 
 
-#define COMPUTED_ASSIGNMENT(TYPE, op)                                         \
-                                                                              \
-template<class Type>                                                          \
-void Foam::Field<Type>::operator op(const UList<TYPE>& f)                     \
-{                                                                             \
-    TFOR_ALL_F_OP_F(Type, *this, op, TYPE, f)                                 \
-}                                                                             \
-                                                                              \
-template<class Type>                                                          \
-void Foam::Field<Type>::operator op(const tmp<Field<TYPE> >& tf)              \
-{                                                                             \
-    operator op(tf());                                                        \
-    tf.clear();                                                               \
-}                                                                             \
-                                                                              \
-template<class Type>                                                          \
-void Foam::Field<Type>::operator op(const TYPE& t)                            \
-{                                                                             \
-    TFOR_ALL_F_OP_S(Type, *this, op, TYPE, t)                                 \
+#define COMPUTED_ASSIGNMENT(TYPE, op)                                          \
+                                                                               \
+template<class Type>                                                           \
+void Foam::Field<Type>::operator op(const UList<TYPE>& f)                      \
+{                                                                              \
+    TFOR_ALL_F_OP_F(Type, *this, op, TYPE, f)                                  \
+}                                                                              \
+                                                                               \
+template<class Type>                                                           \
+void Foam::Field<Type>::operator op(const tmp<Field<TYPE>>& tf)                \
+{                                                                              \
+    operator op(tf());                                                         \
+    tf.clear();                                                                \
+}                                                                              \
+                                                                               \
+template<class Type>                                                           \
+void Foam::Field<Type>::operator op(const TYPE& t)                             \
+{                                                                              \
+    TFOR_ALL_F_OP_S(Type, *this, op, TYPE, t)                                  \
 }
 
 COMPUTED_ASSIGNMENT(Type, +=)
@@ -834,7 +857,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const Field<Type>& f)
 
 
 template<class Type>
-Foam::Ostream& Foam::operator<<(Ostream& os, const tmp<Field<Type> >& tf)
+Foam::Ostream& Foam::operator<<(Ostream& os, const tmp<Field<Type>>& tf)
 {
     os  << tf();
     tf.clear();

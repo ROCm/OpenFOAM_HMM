@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,6 +44,7 @@ SourceFiles
 #include "skewCorrectionVectors.H"
 #include "linear.H"
 #include "gaussGrad.H"
+#include "zeroGradientFvPatchField.H"
 #include "mixedFvPatchField.H"
 #include "directionMixedFvPatchField.H"
 
@@ -64,7 +65,7 @@ class outletStabilised
     // Private member data
 
         const surfaceScalarField& faceFlux_;
-        tmp<surfaceInterpolationScheme<Type> > tScheme_;
+        tmp<surfaceInterpolationScheme<Type>> tScheme_;
 
 
     // Private Member Functions
@@ -132,7 +133,7 @@ public:
         ) const
         {
             tmp<surfaceScalarField> tw = tScheme_().weights(vf);
-            surfaceScalarField& w = tw();
+            surfaceScalarField& w = tw.ref();
 
             const fvMesh& mesh_ = this->mesh();
             const cellList& cells = mesh_.cells();
@@ -141,10 +142,10 @@ public:
             {
                 if
                 (
-                    isA<zeroGradientFvPatchField<Type> >
+                    isA<zeroGradientFvPatchField<Type>>
                         (vf.boundaryField()[patchi])
-                 || isA<mixedFvPatchField<Type> >(vf.boundaryField()[patchi])
-                 || isA<directionMixedFvPatchField<Type> >
+                 || isA<mixedFvPatchField<Type>>(vf.boundaryField()[patchi])
+                 || isA<directionMixedFvPatchField<Type>>
                     (vf.boundaryField()[patchi])
                 )
                 {
@@ -180,7 +181,7 @@ public:
 
         //- Return the explicit correction to the face-interpolate
         //  set to zero on the near-boundary faces where upwinf is applied
-        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         correction
         (
             const GeometricField<Type, fvPatchField, volMesh>& vf
@@ -188,11 +189,11 @@ public:
         {
             if (tScheme_().corrected())
             {
-                tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tcorr =
+                tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> tcorr =
                     tScheme_().correction(vf);
 
                 GeometricField<Type, fvsPatchField, surfaceMesh>& corr =
-                    tcorr();
+                    tcorr.ref();
 
                 const fvMesh& mesh_ = this->mesh();
                 const cellList& cells = mesh_.cells();
@@ -201,9 +202,9 @@ public:
                 {
                     if
                     (
-                        isA<zeroGradientFvPatchField<Type> >
+                        isA<zeroGradientFvPatchField<Type>>
                             (vf.boundaryField()[patchi])
-                     || isA<mixedFvPatchField<Type> >
+                     || isA<mixedFvPatchField<Type>>
                             (vf.boundaryField()[patchi])
                     )
                     {
@@ -221,7 +222,7 @@ public:
                                 if (mesh_.isInternalFace(facei))
                                 {
                                     // Remove correction
-                                    corr[facei] = pTraits<Type>::zero;
+                                    corr[facei] = Zero;
                                 }
                             }
                         }
@@ -232,7 +233,7 @@ public:
             }
             else
             {
-                return tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+                return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
                 (
                     NULL
                 );

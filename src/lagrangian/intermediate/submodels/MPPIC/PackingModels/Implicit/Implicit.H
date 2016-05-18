@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,8 +58,6 @@ class Implicit
 :
     public PackingModel<CloudType>
 {
-private:
-
     //- Private data
 
         //- Volume fraction field
@@ -70,6 +68,9 @@ private:
 
         //- Correction cell-centred velocity
         tmp<volVectorField> uCorrect_;
+
+        //- Flag to indicate whether implicit limiting is applied
+        Switch applyLimiting_;
 
         //- Flag to indicate whether gravity is applied
         Switch applyGravity_;
@@ -95,9 +96,9 @@ public:
         Implicit(const Implicit<CloudType>& cm);
 
         //- Construct and return a clone
-        virtual autoPtr<PackingModel<CloudType> > clone() const
+        virtual autoPtr<PackingModel<CloudType>> clone() const
         {
-            return autoPtr<PackingModel<CloudType> >
+            return autoPtr<PackingModel<CloudType>>
             (
                 new Implicit<CloudType>(*this)
             );
@@ -130,7 +131,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "Implicit.C"
+    #include "Implicit.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

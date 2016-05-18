@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,10 +31,9 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Returns edgeI between two points.
 Foam::label Foam::primitiveMesh::getEdge
 (
-    List<DynamicList<label> >& pe,
+    List<DynamicList<label>>& pe,
     DynamicList<edge>& es,
 
     const label pointI,
@@ -104,7 +103,7 @@ void Foam::primitiveMesh::calcEdges(const bool doFaceEdges) const
         // ~~~~~~~~~~~~~
 
         // Estimate pointEdges storage
-        List<DynamicList<label> > pe(nPoints());
+        List<DynamicList<label>> pe(nPoints());
         forAll(pe, pointI)
         {
             pe[pointI].setCapacity(primitiveMesh::edgesPerPoint_);
@@ -669,7 +668,5 @@ const Foam::labelList& Foam::primitiveMesh::cellEdges(const label cellI) const
     return cellEdges(cellI, labels_);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

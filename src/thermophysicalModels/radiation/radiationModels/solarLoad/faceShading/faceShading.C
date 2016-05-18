@@ -334,7 +334,7 @@ void Foam::faceShading::calculate()
         // Collect the rays which has 'only one not wall' obstacle bettween
         // start and end.
         // If the ray hit itself get stored in dRayIs
-        forAll (hitInfo, rayI)
+        forAll(hitInfo, rayI)
         {
             if (!hitInfo[rayI].hit())
             {
@@ -379,10 +379,10 @@ void Foam::faceShading::calculate()
             )
         );
 
-        volScalarField& hitFaces = thitFaces();
+        volScalarField& hitFaces = thitFaces.ref();
 
         hitFaces.boundaryField() = 0.0;
-        forAll (rayStartFaces_, i)
+        forAll(rayStartFaces_, i)
         {
             const label faceI = rayStartFaces_[i];
             label patchID = patches.whichPatch(faceI);

@@ -22,10 +22,10 @@ done
 
 runApplication decomposePar -allRegions
 
-runParallel createZeroDirectory 4
+runParallel createZeroDirectory
 
 #-- Run in parallel
-runParallel $(getApplication) 4
+runParallel $(getApplication)
 
 # Reconstruct
 runApplication reconstructPar -allRegions

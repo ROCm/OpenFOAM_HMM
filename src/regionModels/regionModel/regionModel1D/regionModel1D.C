@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -134,7 +134,7 @@ void Foam::regionModels::regionModel1D::initialise()
         {
             const vector& n = pNormals[localFaceI];
             const labelList& faces = boundaryFaceFaces_[localPyrolysisFaceI++];
-            forAll (faces, faceI)
+            forAll(faces, faceI)
             {
                 const label faceID = faces[faceI];
                 nMagSf[faceID] = regionMesh().Sf()[faceID] & n;
@@ -183,7 +183,7 @@ Foam::tmp<Foam::labelField> Foam::regionModels::regionModel1D::moveMesh
 )
 {
     tmp<labelField> tcellMoveMap(new labelField(regionMesh().nCells(), 0));
-    labelField& cellMoveMap = tcellMoveMap();
+    labelField& cellMoveMap = tcellMoveMap.ref();
 
     if (!moveMesh_)
     {
@@ -217,7 +217,7 @@ Foam::tmp<Foam::labelField> Foam::regionModels::regionModel1D::moveMesh
                 oldCf[i + 1] = regionMesh().faceCentres()[faces[i]];
             }
 
-            vector newDelta = vector::zero;
+            vector newDelta = Zero;
             point nbrCf = oldCf[0];
 
             forAll(faces, i)
@@ -229,7 +229,7 @@ Foam::tmp<Foam::labelField> Foam::regionModels::regionModel1D::moveMesh
 
                 newDelta += (deltaV[cellI]/mag(sf))*n;
 
-                vector localDelta = vector::zero;
+                vector localDelta = Zero;
                 forAll(f, pti)
                 {
                     const label pointI = f[pti];

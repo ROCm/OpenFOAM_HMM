@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -137,9 +137,17 @@ public:
 
         //- Return the given absolute boundary flux relative within
         //  the MRF region
-        tmp<FieldField<fvsPatchField, scalar> > relative
+        tmp<FieldField<fvsPatchField, scalar>> relative
         (
-            const tmp<FieldField<fvsPatchField, scalar> >& tphi
+            const tmp<FieldField<fvsPatchField, scalar>>& tphi
+        ) const;
+
+        //- Return the given absolute patch flux relative within
+        //  the MRF region
+        tmp<Field<scalar>> relative
+        (
+            const tmp<Field<scalar>>& tphi,
+            const label patchi
         ) const;
 
         //- Make the given absolute mass-flux relative within the MRF region

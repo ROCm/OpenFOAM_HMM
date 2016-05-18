@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -119,10 +119,7 @@ void Foam::MeshedSurface<Face>::write
 {
     if (debug)
     {
-        Info<< "MeshedSurface::write"
-            "(const fileName&, const MeshedSurface&) : "
-            "writing to " << name
-            << endl;
+        InfoInFunction << "Writing to " << name << endl;
     }
 
     const word ext = name.ext();
@@ -168,7 +165,7 @@ template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
     const Xfer<pointField>& pointLst,
-    const Xfer<List<Face> >& faceLst,
+    const Xfer<List<Face>>& faceLst,
     const Xfer<surfZoneList>& zoneLst
 )
 :
@@ -183,7 +180,7 @@ template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
     const Xfer<pointField>& pointLst,
-    const Xfer<List<Face> >& faceLst,
+    const Xfer<List<Face>>& faceLst,
     const labelUList& zoneSizes,
     const UList<word>& zoneNames
 )
@@ -392,7 +389,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
-    const Xfer<UnsortedMeshedSurface<Face> >& surf
+    const Xfer<UnsortedMeshedSurface<Face>>& surf
 )
 :
     ParentType(List<Face>(), pointField())
@@ -404,7 +401,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
-    const Xfer<MeshedSurface<Face> >& surf
+    const Xfer<MeshedSurface<Face>>& surf
 )
 :
     ParentType(List<Face>(), pointField())
@@ -515,7 +512,7 @@ template<class Face>
 void Foam::MeshedSurface<Face>::reset
 (
     const Xfer<pointField>& pointLst,
-    const Xfer<List<Face> >& faceLst,
+    const Xfer<List<Face>>& faceLst,
     const Xfer<surfZoneList>& zoneLst
 )
 {
@@ -543,8 +540,8 @@ void Foam::MeshedSurface<Face>::reset
 template<class Face>
 void Foam::MeshedSurface<Face>::reset
 (
-    const Xfer<List<point> >& pointLst,
-    const Xfer<List<Face> >& faceLst,
+    const Xfer<List<point>>& pointLst,
+    const Xfer<List<Face>>& faceLst,
     const Xfer<surfZoneList>& zoneLst
 )
 {
@@ -603,8 +600,7 @@ bool Foam::MeshedSurface<Face>::stitchFaces
 
     if (verbose)
     {
-        Info<< "MeshedSurface::stitchFaces : Renumbering all faces"
-            << endl;
+        InfoInFunction<< "Renumbering all faces" << endl;
     }
 
     // Set the coordinates to the merged ones
@@ -1091,7 +1087,7 @@ void Foam::MeshedSurface<Face>::transfer
 
 
 template<class Face>
-Foam::Xfer<Foam::MeshedSurface<Face> > Foam::MeshedSurface<Face>::xfer()
+Foam::Xfer<Foam::MeshedSurface<Face>> Foam::MeshedSurface<Face>::xfer()
 {
     return xferMove(*this);
 }

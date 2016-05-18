@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -105,7 +105,7 @@ private:
         localIOdictionary dict_;
 
         //- Bounding boxes of all processors
-        List<List<treeBoundBox> > procBb_;
+        List<List<treeBoundBox>> procBb_;
 
         //- Global triangle numbering
         mutable autoPtr<globalIndex> globalTris_;
@@ -155,7 +155,7 @@ private:
 
                 DynamicList<segment>&,
                 DynamicList<label>&,
-                List<DynamicList<label> >&
+                List<DynamicList<label>>&
             ) const;
 
             //- Divide edges into local and remote segments. Construct map to
@@ -214,7 +214,7 @@ private:
         // Surface redistribution
 
             //- Finds new bounds based on an indepedent decomposition.
-            List<List<treeBoundBox> > independentlyDistributedBbs
+            List<List<treeBoundBox>> independentlyDistributedBbs
             (
                 const triSurface&
             );
@@ -381,7 +381,7 @@ public:
             (
                 const pointField& start,
                 const pointField& end,
-                List<List<pointIndexHit> >&
+                List<List<pointIndexHit>>&
             ) const;
 
             //- From a set of points and indices get the region
@@ -470,7 +470,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "distributedTriSurfaceMeshTemplates.C"
+    #include "distributedTriSurfaceMeshTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

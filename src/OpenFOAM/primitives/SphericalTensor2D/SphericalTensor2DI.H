@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,61 +25,64 @@ License
 
 #include "Vector2D.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct null
 template<class Cmpt>
-inline SphericalTensor2D<Cmpt>::SphericalTensor2D()
+inline Foam::SphericalTensor2D<Cmpt>::SphericalTensor2D()
 {}
 
 
-// Construct given VectorSpace
 template<class Cmpt>
-inline SphericalTensor2D<Cmpt>::SphericalTensor2D
+inline Foam::SphericalTensor2D<Cmpt>::SphericalTensor2D(const Foam::zero)
+:
+    SphericalTensor2D::vsType(Zero)
+{}
+
+
+template<class Cmpt>
+inline Foam::SphericalTensor2D<Cmpt>::SphericalTensor2D
 (
     const VectorSpace<SphericalTensor2D<Cmpt>, Cmpt, 1>& vs
 )
 :
-    VectorSpace<SphericalTensor2D<Cmpt>, Cmpt, 1>(vs)
+    SphericalTensor2D::vsType(vs)
 {}
 
 
-// Construct given three Cmpts
 template<class Cmpt>
-inline SphericalTensor2D<Cmpt>::SphericalTensor2D(const Cmpt& stii)
+inline Foam::SphericalTensor2D<Cmpt>::SphericalTensor2D(const Cmpt& stii)
 {
     this->v_[II] = stii;
 }
 
 
-// Construct from Istream
 template<class Cmpt>
-inline SphericalTensor2D<Cmpt>::SphericalTensor2D(Istream& is)
+inline Foam::SphericalTensor2D<Cmpt>::SphericalTensor2D(Istream& is)
 :
-    VectorSpace<SphericalTensor2D<Cmpt>, Cmpt, 1>(is)
+    SphericalTensor2D::vsType(is)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline const Cmpt&  SphericalTensor2D<Cmpt>::ii() const
+inline const Cmpt& Foam::SphericalTensor2D<Cmpt>::ii() const
 {
     return this->v_[II];
 }
 
 
 template<class Cmpt>
-inline Cmpt& SphericalTensor2D<Cmpt>::ii()
+inline Cmpt& Foam::SphericalTensor2D<Cmpt>::ii()
 {
     return this->v_[II];
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
@@ -172,7 +175,7 @@ public:
 };
 
 template<class Cmpt>
-class outerProduct<Cmpt, SphericalTensor2D<Cmpt> >
+class outerProduct<Cmpt, SphericalTensor2D<Cmpt>>
 {
 public:
 
@@ -181,7 +184,7 @@ public:
 
 
 template<class Cmpt>
-class innerProduct<SphericalTensor2D<Cmpt>, SphericalTensor2D<Cmpt> >
+class innerProduct<SphericalTensor2D<Cmpt>, SphericalTensor2D<Cmpt>>
 {
 public:
 
@@ -190,7 +193,7 @@ public:
 
 
 template<class Cmpt>
-class innerProduct<SphericalTensor2D<Cmpt>, Vector2D<Cmpt> >
+class innerProduct<SphericalTensor2D<Cmpt>, Vector2D<Cmpt>>
 {
 public:
 
@@ -198,7 +201,7 @@ public:
 };
 
 template<class Cmpt>
-class innerProduct<Vector2D<Cmpt>, SphericalTensor2D<Cmpt> >
+class innerProduct<Vector2D<Cmpt>, SphericalTensor2D<Cmpt>>
 {
 public:
 

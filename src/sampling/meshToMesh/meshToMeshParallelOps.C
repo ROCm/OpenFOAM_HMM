@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -64,7 +64,7 @@ Foam::label Foam::meshToMesh::calcDistribution
             procI = -1;
             if (debug)
             {
-                Info<< "meshToMesh::calcDistribution: "
+                InfoInFunction
                     << "Meshes split across multiple processors" << endl;
             }
         }
@@ -73,7 +73,7 @@ Foam::label Foam::meshToMesh::calcDistribution
             procI = findIndex(cellsPresentOnProc, 1);
             if (debug)
             {
-                Info<< "meshToMesh::calcDistribution: "
+                InfoInFunction
                     << "Meshes local to processor" << procI << endl;
             }
         }
@@ -143,7 +143,8 @@ Foam::autoPtr<Foam::mapDistribute> Foam::meshToMesh::calcProcMap
 
     if (debug)
     {
-        Info<< "Determining extent of src mesh per processor:" << nl
+        InfoInFunction
+            << "Determining extent of src mesh per processor:" << nl
             << "\tproc\tbb" << endl;
         forAll(procBb, procI)
         {
@@ -161,7 +162,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::meshToMesh::calcProcMap
 
     {
         // per processor indices into all segments to send
-        List<DynamicList<label> > dynSendMap(Pstream::nProcs());
+        List<DynamicList<label>> dynSendMap(Pstream::nProcs());
         label iniSize = floor(tgt.nCells()/Pstream::nProcs());
 
         forAll(dynSendMap, procI)
@@ -584,7 +585,7 @@ void Foam::meshToMesh::distributeAndMergeCells
 
     // Count any coupled faces
     typedef FixedList<label, 3> label3;
-    typedef HashTable<label, label3, label3::Hash<> > procCoupleInfo;
+    typedef HashTable<label, label3, label3::Hash<>> procCoupleInfo;
     procCoupleInfo procFaceToGlobalCell;
 
     forAll(allNbrProcIDs, procI)
@@ -648,17 +649,14 @@ void Foam::meshToMesh::distributeAndMergeCells
     forAll(allPoints, procI)
     {
         const pointField& pts = allPoints[procI];
-        SubList<point>(tgtPoints, pts.size(), pointOffset[procI]).assign(pts);
+        SubList<point>(tgtPoints, pts.size(), pointOffset[procI]) = pts;
     }
 
     // Insert cellIDs
     forAll(allTgtCellIDs, procI)
     {
         const labelList& cellIDs = allTgtCellIDs[procI];
-        SubList<label>(tgtCellIDs, cellIDs.size(), cellOffset[procI]).assign
-        (
-            cellIDs
-        );
+        SubList<label>(tgtCellIDs, cellIDs.size(), cellOffset[procI]) = cellIDs;
     }
 
 
@@ -675,7 +673,7 @@ void Foam::meshToMesh::distributeAndMergeCells
             allNInternalFaces[procI],
             internalFaceOffset[procI]
         );
-        slice.assign(SubList<face>(fcs, allNInternalFaces[procI]));
+        slice = SubList<face>(fcs, allNInternalFaces[procI]);
         forAll(slice, i)
         {
             add(slice[i], pointOffset[procI]);
@@ -687,7 +685,7 @@ void Foam::meshToMesh::distributeAndMergeCells
             allNInternalFaces[procI],
             internalFaceOffset[procI]
         );
-        ownSlice.assign(SubField<label>(faceOs, allNInternalFaces[procI]));
+        ownSlice = SubField<label>(faceOs, allNInternalFaces[procI]);
         add(ownSlice, cellOffset[procI]);
 
         SubField<label> nbrSlice
@@ -696,7 +694,7 @@ void Foam::meshToMesh::distributeAndMergeCells
             allNInternalFaces[procI],
             internalFaceOffset[procI]
         );
-        nbrSlice.assign(SubField<label>(faceNs, allNInternalFaces[procI]));
+        nbrSlice = SubField<label>(faceNs, allNInternalFaces[procI]);
         add(nbrSlice, cellOffset[procI]);
 
         internalFaceOffset[procI] += allNInternalFaces[procI];

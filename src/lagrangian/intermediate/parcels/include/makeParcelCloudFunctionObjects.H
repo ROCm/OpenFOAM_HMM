@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,17 +39,16 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelCloudFunctionObjects(CloudType)                             \
-                                                                              \
-    makeCloudFunctionObject(CloudType);                                       \
-                                                                              \
-    makeCloudFunctionObjectType(CloudToVTK, CloudType);                       \
-    makeCloudFunctionObjectType(FacePostProcessing, CloudType);               \
-    makeCloudFunctionObjectType(ParticleCollector, CloudType);                \
-    makeCloudFunctionObjectType(ParticleErosion, CloudType);                  \
-    makeCloudFunctionObjectType(ParticleTracks, CloudType);                   \
-    makeCloudFunctionObjectType(ParticleTrap, CloudType);                     \
-    makeCloudFunctionObjectType(PatchPostProcessing, CloudType);              \
+#define makeParcelCloudFunctionObjects(CloudType)                              \
+                                                                               \
+    makeCloudFunctionObject(CloudType);                                        \
+                                                                               \
+    makeCloudFunctionObjectType(FacePostProcessing, CloudType);                \
+    makeCloudFunctionObjectType(ParticleCollector, CloudType);                 \
+    makeCloudFunctionObjectType(ParticleErosion, CloudType);                   \
+    makeCloudFunctionObjectType(ParticleTracks, CloudType);                    \
+    makeCloudFunctionObjectType(ParticleTrap, CloudType);                      \
+    makeCloudFunctionObjectType(PatchPostProcessing, CloudType);               \
     makeCloudFunctionObjectType(VoidFraction, CloudType);
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,17 +25,18 @@ Class
     Foam::fixedMeanFvPatchField
 
 Group
-    grpGenericBoundaryConditions
+    grpInletBoundaryConditions
 
 Description
     This boundary condition extrapolates field to the patch using the near-cell
-    values and adjusts the distribution to match the specified mean value.
+    values and adjusts the distribution to match the specified, optionally
+    time-varying, mean value.
 
     \heading Patch usage
 
     \table
         Property     | Description             | Required    | Default value
-        meanValue    | mean value              | yes         |
+        meanValue    | mean value Function1    | yes         |
     \endtable
 
     Example of the boundary condition specification:
@@ -49,6 +50,7 @@ Description
 
 SeeAlso
     Foam::fixedValueFvPatchField
+    Foam::Function1Types
 
 SourceFiles
     fixedMeanFvPatchField.C
@@ -59,6 +61,7 @@ SourceFiles
 #define fixedMeanFvPatchField_H
 
 #include "fixedValueFvPatchFields.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -74,13 +77,10 @@ class fixedMeanFvPatchField
 :
     public fixedValueFvPatchField<Type>
 {
-
-protected:
-
-    // Protected data
+    // Private data
 
         //- MeanValue value the field is adjusted to maintain
-        Type meanValue_;
+        autoPtr<Function1<Type>> meanValue_;
 
 
 public:
@@ -123,9 +123,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchField<Type> > clone() const
+        virtual tmp<fvPatchField<Type>> clone() const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchField<Type>>
             (
                 new fixedMeanFvPatchField<Type>(*this)
             );
@@ -139,12 +139,12 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchField<Type> > clone
+        virtual tmp<fvPatchField<Type>> clone
         (
             const DimensionedField<Type, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchField<Type>>
             (
                 new fixedMeanFvPatchField<Type>(*this, iF)
             );
@@ -153,10 +153,8 @@ public:
 
     // Member functions
 
-        // Evaluation functions
-
-            //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs();
+        //- Update the coefficients associated with the patch field
+        virtual void updateCoeffs();
 
         //- Write
         virtual void write(Ostream&) const;
@@ -170,7 +168,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "fixedMeanFvPatchField.C"
+    #include "fixedMeanFvPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

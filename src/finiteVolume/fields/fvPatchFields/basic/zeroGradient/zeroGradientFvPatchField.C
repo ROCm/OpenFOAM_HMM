@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,15 +26,10 @@ License
 #include "zeroGradientFvPatchField.H"
 #include "fvPatchFieldMapper.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-zeroGradientFvPatchField<Type>::zeroGradientFvPatchField
+Foam::zeroGradientFvPatchField<Type>::zeroGradientFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -45,20 +40,7 @@ zeroGradientFvPatchField<Type>::zeroGradientFvPatchField
 
 
 template<class Type>
-zeroGradientFvPatchField<Type>::zeroGradientFvPatchField
-(
-    const zeroGradientFvPatchField<Type>& ptf,
-    const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF,
-    const fvPatchFieldMapper& mapper
-)
-:
-    fvPatchField<Type>(ptf, p, iF, mapper)
-{}
-
-
-template<class Type>
-zeroGradientFvPatchField<Type>::zeroGradientFvPatchField
+Foam::zeroGradientFvPatchField<Type>::zeroGradientFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -72,7 +54,20 @@ zeroGradientFvPatchField<Type>::zeroGradientFvPatchField
 
 
 template<class Type>
-zeroGradientFvPatchField<Type>::zeroGradientFvPatchField
+Foam::zeroGradientFvPatchField<Type>::zeroGradientFvPatchField
+(
+    const zeroGradientFvPatchField<Type>& ptf,
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
+    const fvPatchFieldMapper& mapper
+)
+:
+    fvPatchField<Type>(ptf, p, iF, mapper)
+{}
+
+
+template<class Type>
+Foam::zeroGradientFvPatchField<Type>::zeroGradientFvPatchField
 (
     const zeroGradientFvPatchField& zgpf
 )
@@ -82,7 +77,7 @@ zeroGradientFvPatchField<Type>::zeroGradientFvPatchField
 
 
 template<class Type>
-zeroGradientFvPatchField<Type>::zeroGradientFvPatchField
+Foam::zeroGradientFvPatchField<Type>::zeroGradientFvPatchField
 (
     const zeroGradientFvPatchField& zgpf,
     const DimensionedField<Type, volMesh>& iF
@@ -95,7 +90,7 @@ zeroGradientFvPatchField<Type>::zeroGradientFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void zeroGradientFvPatchField<Type>::evaluate(const Pstream::commsTypes)
+void Foam::zeroGradientFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {
@@ -108,12 +103,13 @@ void zeroGradientFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 
 
 template<class Type>
-tmp<Field<Type> > zeroGradientFvPatchField<Type>::valueInternalCoeffs
+Foam::tmp<Foam::Field<Type>>
+Foam::zeroGradientFvPatchField<Type>::valueInternalCoeffs
 (
     const tmp<scalarField>&
 ) const
 {
-    return tmp<Field<Type> >
+    return tmp<Field<Type>>
     (
         new Field<Type>(this->size(), pTraits<Type>::one)
     );
@@ -121,40 +117,39 @@ tmp<Field<Type> > zeroGradientFvPatchField<Type>::valueInternalCoeffs
 
 
 template<class Type>
-tmp<Field<Type> > zeroGradientFvPatchField<Type>::valueBoundaryCoeffs
+Foam::tmp<Foam::Field<Type>>
+Foam::zeroGradientFvPatchField<Type>::valueBoundaryCoeffs
 (
     const tmp<scalarField>&
 ) const
 {
-    return tmp<Field<Type> >
+    return tmp<Field<Type>>
     (
-        new Field<Type>(this->size(), pTraits<Type>::zero)
+        new Field<Type>(this->size(), Zero)
     );
 }
 
 
 template<class Type>
-tmp<Field<Type> > zeroGradientFvPatchField<Type>::gradientInternalCoeffs() const
+Foam::tmp<Foam::Field<Type>>
+Foam::zeroGradientFvPatchField<Type>::gradientInternalCoeffs() const
 {
-    return tmp<Field<Type> >
+    return tmp<Field<Type>>
     (
-        new Field<Type>(this->size(), pTraits<Type>::zero)
+        new Field<Type>(this->size(), Zero)
     );
 }
 
 
 template<class Type>
-tmp<Field<Type> > zeroGradientFvPatchField<Type>::gradientBoundaryCoeffs() const
+Foam::tmp<Foam::Field<Type>>
+Foam::zeroGradientFvPatchField<Type>::gradientBoundaryCoeffs() const
 {
-    return tmp<Field<Type> >
+    return tmp<Field<Type>>
     (
-        new Field<Type>(this->size(), pTraits<Type>::zero)
+        new Field<Type>(this->size(), Zero)
     );
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

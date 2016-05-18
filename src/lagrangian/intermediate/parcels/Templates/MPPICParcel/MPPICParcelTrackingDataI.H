@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -150,13 +150,13 @@ Foam::MPPICParcel<ParcelType>::TrackingData<CloudType>::updateAverages
     volumeAverage_() = 0;
     radiusAverage_() = 0;
     rhoAverage_() = 0;
-    uAverage_() = vector::zero;
+    uAverage_() = Zero;
     uSqrAverage_() = 0;
     frequencyAverage_() = 0;
     massAverage_() = 0;
 
     // temporary weights
-    autoPtr<AveragingMethod<scalar> > weightAveragePtr
+    autoPtr<AveragingMethod<scalar>> weightAveragePtr
     (
         AveragingMethod<scalar>::New
         (
