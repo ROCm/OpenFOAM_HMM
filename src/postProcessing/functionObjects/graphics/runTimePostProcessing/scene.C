@@ -111,6 +111,12 @@ void Foam::scene::readCamera(const dictionary& dict)
             );
             const vector up(coeffs.lookup("up"));
             cameraUp_.reset(new Constant<point>("up", up));
+            if (nFrameTotal_ > 1)
+            {
+                WarningInFunction
+                    << "Static mode with nFrames > 1 - please check your setup"
+                    << endl;
+            }
             break;
         }
         case mtFlightPath:
@@ -375,7 +381,12 @@ void Foam::scene::saveImage(vtkRenderWindow* renderWindow) const
         return;
     }
 
-    fileName prefix("postProcessing"/name_/obr_.time().timeName());
+    const Time& runTime = obr_.time();
+
+    fileName prefix(Pstream::parRun()
+              ? runTime.path()/".."/"postProcessing"/name_/obr_.time().timeName()
+              : runTime.path()/"postProcessing"/name_/obr_.time().timeName());
+
     mkDir(prefix);
 
     renderWindow->Render();
