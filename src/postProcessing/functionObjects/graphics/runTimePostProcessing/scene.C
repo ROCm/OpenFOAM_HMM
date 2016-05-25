@@ -237,6 +237,15 @@ void Foam::scene::initialise(vtkRenderer* renderer, const word& outputName)
 
         renderer->ResetCamera();
 
+        // Restore viewAngle (it might be reset by clipping)
+        vtkCamera* camera = renderer->GetActiveCamera();
+
+        if (!parallelProjection_)
+        {
+            camera->SetViewAngle(cameraViewAngle_->value(position()));
+        }
+        camera->Modified();
+
         clipActor->VisibilityOff();
     }
 }
