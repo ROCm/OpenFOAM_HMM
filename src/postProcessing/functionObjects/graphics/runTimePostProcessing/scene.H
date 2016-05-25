@@ -134,6 +134,9 @@ protected:
             //- Number of frames
             label nFrameTotal_;
 
+            //- startPosition [0-1]
+            scalar startPosition_;
+
             //- Position [0-1]
             scalar position_;
 

@@ -67,13 +67,17 @@ void Foam::scene::readCamera(const dictionary& dict)
         }
     }
 
-    if (dict.readIfPresent("startPosition", position_))
+    if (dict.readIfPresent("startPosition", startPosition_))
     {
-        if ((position_ < 0) || (position_ > 1))
+        if ((startPosition_ < 0) || (startPosition_ > 1))
         {
             FatalIOErrorInFunction(dict)
                 << "startPosition must be in the range 0-1"
                 << exit(FatalIOError);
+        }
+        else
+        {
+            position_ = startPosition_;
         }
     }
 
@@ -89,7 +93,7 @@ void Foam::scene::readCamera(const dictionary& dict)
                 << "endPosition must be in the range 0-1"
                 << exit(FatalIOError);
         }
-        dPosition_ = (endPosition - position_)/scalar(nFrameTotal_ - 1);
+        dPosition_ = (endPosition - startPosition_)/scalar(nFrameTotal_ - 1);
     }
 
     mode_ = modeTypeNames_.read(dict.lookup("mode"));
@@ -111,12 +115,6 @@ void Foam::scene::readCamera(const dictionary& dict)
             );
             const vector up(coeffs.lookup("up"));
             cameraUp_.reset(new Constant<point>("up", up));
-            if (nFrameTotal_ > 1)
-            {
-                WarningInFunction
-                    << "Static mode with nFrames > 1 - please check your setup"
-                    << endl;
-            }
             break;
         }
         case mtFlightPath:
@@ -296,6 +294,7 @@ Foam::scene::scene(const objectRegistry& obr, const word& name)
     clipBox_(),
     parallelProjection_(true),
     nFrameTotal_(1),
+    startPosition_(0),
     position_(0),
     dPosition_(0),
     currentFrameI_(0),
@@ -354,14 +353,15 @@ bool Foam::scene::loop(vtkRenderer* renderer)
 
     currentFrameI_++;
 
-    if (position_ > (1 + 0.5*dPosition_))
+    // Warning only if camera is in flight mode
+    if ((mode_ == mtFlightPath) && (position_ > (1 + 0.5*dPosition_)))
     {
         WarningInFunction
-            << "Current position exceeded 1 - please check your setup"
+            << "Current position "<< position_ <<" exceeded 1 - please check your setup"
             << endl;
     }
 
-    position_ += dPosition_;
+    position_ = startPosition_ + currentFrameI_*dPosition_;
 
     if (currentFrameI_ < nFrameTotal_)
     {
