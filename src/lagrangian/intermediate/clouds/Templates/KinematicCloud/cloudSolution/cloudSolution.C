@@ -63,6 +63,10 @@ Foam::cloudSolution::cloudSolution(const fvMesh& mesh, const dictionary& dict)
         {
             Info<< "Cloud source terms will be held constant" << endl;
         }
+
+        // transient default to false asks for extra massFlowRate
+        // in transient lagrangian
+        dict_.lookup("transient") >> transient_;
     }
 }
 
