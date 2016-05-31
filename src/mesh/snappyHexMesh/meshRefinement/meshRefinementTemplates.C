@@ -305,7 +305,7 @@ void Foam::meshRefinement::weightedSum
     }
 
     sum.setSize(meshPoints.size());
-    sum = Type(zero);
+    sum = Type(Zero);
 
     forAll(edges, edgeI)
     {

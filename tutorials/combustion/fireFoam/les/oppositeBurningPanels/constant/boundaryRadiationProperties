@@ -20,15 +20,13 @@ FoamFile
 {
     type            boundaryRadiation;
     mode            lookup;
-    emissivity      uniform 1.0;
-    value           uniform 0;
+    emissivity      1.0;
 }
 
 "(region0_to.*)"
 {
     type            boundaryRadiation;
     mode            solidRadiation;
-    value           uniform 0;
 }
 
 

@@ -194,7 +194,11 @@ Foam::radiation::boundaryRadiationPropertiesPatch::emissivity
         {
             tmp<scalarField> e
             (
-                 new scalarField("emissivity", dict_, patch_.size())
+                new scalarField
+                (
+                    patch_.size(),
+                    readScalar(dict_.lookup("emissivity"))
+                )
             );
 
             return e;
@@ -283,7 +287,11 @@ Foam::radiation::boundaryRadiationPropertiesPatch::absorptivity
         {
             tmp<scalarField> a
             (
-                 new scalarField("absorptivity", dict_, patch_.size())
+                new scalarField
+                (
+                    patch_.size(),
+                    readScalar(dict_.lookup("absorptivity"))
+                )
             );
 
             return a;
@@ -361,9 +369,11 @@ Foam::radiation::boundaryRadiationPropertiesPatch::transmissivity
             (
                 new scalarField
                 (
-                    "transmissivity", dict_, patch_.size()
+                    patch_.size(),
+                    readScalar(dict_.lookup("transmissivity"))
                 )
             );
+
             return tau;
         }
 
