@@ -1,0 +1,57 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus.master.MPPICInterFoam            |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       regIOobject;
+    location    "constant/polyMesh";
+    object      faceZones;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+1
+(
+inletZone
+{
+    type faceZone;
+faceLabels      List<label> 
+25
+(
+144917
+144918
+144919
+144920
+144921
+144922
+144923
+144924
+144925
+144926
+144927
+144928
+144929
+144930
+144931
+144932
+144933
+144934
+144935
+144936
+144937
+144938
+144939
+144940
+144941
+)
+;
+flipMap         List<bool> 25{0};
+}
+)
+
+// ************************************************************************* //

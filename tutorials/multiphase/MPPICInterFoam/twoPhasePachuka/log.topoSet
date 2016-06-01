@@ -1,0 +1,38 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus.master.MPPICInterFoam            |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : plus.master.MPPICInterFoam-ccac7d67dd44
+Exec   : topoSet
+Date   : May 31 2016
+Time   : 15:11:41
+Host   : "diego"
+PID    : 20977
+Case   : /home/sergio/OpenFOAM/OpenFOAM-plus.master.MPPICInterFoam/tutorials/multiphase/MPPICInterFoam/twoPhasePachuka
+nProcs : 1
+sigFpe : Enabling floating point exception trapping (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create polyMesh for time = 0
+
+Reading topoSetDict
+
+Time = 0
+    mesh not changed.
+Created faceSet inlet
+    Applying source boxToFace
+    Adding faces with centre within boxes 1((-0.01 -0.01 -0.03) (0.01 0.01 0.001))
+    faceSet inlet now size 25
+Created faceZoneSet inletZone
+    Applying source setToFaceZone
+    Adding all faces from faceSet inlet ...
+    faceZoneSet inletZone now size 25
+End
+

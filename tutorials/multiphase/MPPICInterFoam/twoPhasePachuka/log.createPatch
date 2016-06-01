@@ -1,0 +1,45 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus.master.MPPICInterFoam            |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : plus.master.MPPICInterFoam-ccac7d67dd44
+Exec   : createPatch -overwrite
+Date   : May 31 2016
+Time   : 15:11:41
+Host   : "diego"
+PID    : 20978
+Case   : /home/sergio/OpenFOAM/OpenFOAM-plus.master.MPPICInterFoam/tutorials/multiphase/MPPICInterFoam/twoPhasePachuka
+nProcs : 1
+sigFpe : Enabling floating point exception trapping (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create polyMesh for time = 0
+
+Reading "system/createPatchDict"
+
+Adding new patch inlet as patch 3 from 
+{
+    type            patch;
+}
+
+
+Read 25 faces from faceSet inlet
+
+Doing topology modification to order faces.
+
+Not synchronising points.
+
+Removing patches with no faces in them.
+
+No patches removed.
+Writing repatched mesh to 0
+
+End
+
