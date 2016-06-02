@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,14 +81,14 @@ void Foam::reduce(scalar&, const sumOp<scalar>&, const int, const label, label&)
 {}
 
 
-void Foam::UPstream::exchange
+void Foam::UPstream::allToAll
 (
-    int* sendBuf,
-    int* recvBuf,
+    const labelUList& sendData,
+    labelUList& recvData,
     const label communicator
 )
 {
-    recvBuf[0] = sendBuf[0];
+    recvData.deepCopy(sendData);
 }
 
 

@@ -14,7 +14,7 @@
             IOobject::MUST_READ
         );
 
-        if (Uheader.headerOk())
+        if (Uheader.typeHeaderOk<volVectorField>(true))
         {
             volVectorField U(Uheader, mesh);
 

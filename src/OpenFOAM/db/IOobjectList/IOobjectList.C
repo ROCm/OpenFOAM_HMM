@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ License
 #include "IOobjectList.H"
 #include "Time.H"
 #include "OSspecific.H"
-
+#include "IOList.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -77,7 +77,8 @@ Foam::IOobjectList::IOobjectList
             registerObject
         );
 
-        if (objectPtr->headerOk())
+        // Use object with local scope
+        if (objectPtr->typeHeaderOk<IOList<label>>(false))
         {
             insert(ObjectNames[i], objectPtr);
         }
@@ -133,8 +134,7 @@ Foam::IOobject* Foam::IOobjectList::lookup(const word& name) const
     {
         if (IOobject::debug)
         {
-            Info<< "IOobjectList::lookup : found "
-                << name << endl;
+            InfoInFunction << "Found " << name << endl;
         }
 
         return const_cast<IOobject*>(*iter);
@@ -143,8 +143,7 @@ Foam::IOobject* Foam::IOobjectList::lookup(const word& name) const
     {
         if (IOobject::debug)
         {
-            Info<< "IOobjectList::lookup : could not find "
-                << name << endl;
+            InfoInFunction << "Could not find " << name << endl;
         }
 
         return NULL;
@@ -162,7 +161,7 @@ Foam::IOobjectList Foam::IOobjectList::lookup(const wordRe& name) const
         {
             if (IOobject::debug)
             {
-                Info<< "IOobjectList::lookupRe : found " << iter.key() << endl;
+                InfoInFunction << "Found " << iter.key() << endl;
             }
 
             objectsOfName.insert(iter.key(), new IOobject(*iter()));
@@ -185,7 +184,7 @@ Foam::IOobjectList Foam::IOobjectList::lookup(const wordReList& patterns) const
         {
             if (IOobject::debug)
             {
-                Info<< "IOobjectList::lookupRe : found " << iter.key() << endl;
+                InfoInFunction << "Found " << iter.key() << endl;
             }
 
             objectsOfName.insert(iter.key(), new IOobject(*iter()));
@@ -206,8 +205,7 @@ Foam::IOobjectList Foam::IOobjectList::lookupClass(const word& ClassName) const
         {
             if (IOobject::debug)
             {
-                Info<< "IOobjectList::lookupClass : found "
-                    << iter.key() << endl;
+                InfoInFunction << "Found " << iter.key() << endl;
             }
 
             objectsOfClass.insert(iter.key(), new IOobject(*iter()));

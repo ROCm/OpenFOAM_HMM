@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,14 +36,14 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelPatchInteractionModels(CloudType)                           \
-                                                                              \
-    makePatchInteractionModel(CloudType);                                     \
-                                                                              \
-    makePatchInteractionModelType(LocalInteraction, CloudType);               \
-    makePatchInteractionModelType(NoInteraction, CloudType);                  \
-    makePatchInteractionModelType(Rebound, CloudType);                        \
-    makePatchInteractionModelType(StandardWallInteraction, CloudType);        \
+#define makeParcelPatchInteractionModels(CloudType)                            \
+                                                                               \
+    makePatchInteractionModel(CloudType);                                      \
+                                                                               \
+    makePatchInteractionModelType(LocalInteraction, CloudType);                \
+    makePatchInteractionModelType(NoInteraction, CloudType);                   \
+    makePatchInteractionModelType(Rebound, CloudType);                         \
+    makePatchInteractionModelType(StandardWallInteraction, CloudType);         \
     makePatchInteractionModelType(MultiInteraction, CloudType);
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,7 @@ namespace fvc
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
+tmp<GeometricField<Type, fvPatchField, volMesh>>
 ddt
 (
     const dimensioned<Type> dt,
@@ -51,12 +51,12 @@ ddt
     (
         mesh,
         mesh.ddtScheme("ddt(" + dt.name() + ')')
-    )().fvcDdt(dt);
+    ).ref().fvcDdt(dt);
 }
 
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
+tmp<GeometricField<Type, fvPatchField, volMesh>>
 ddt
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf
@@ -66,12 +66,12 @@ ddt
     (
         vf.mesh(),
         vf.mesh().ddtScheme("ddt(" + vf.name() + ')')
-    )().fvcDdt(vf);
+    ).ref().fvcDdt(vf);
 }
 
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
+tmp<GeometricField<Type, fvPatchField, volMesh>>
 ddt
 (
     const dimensionedScalar& rho,
@@ -82,12 +82,12 @@ ddt
     (
         vf.mesh(),
         vf.mesh().ddtScheme("ddt(" + rho.name() + ',' + vf.name() + ')')
-    )().fvcDdt(rho, vf);
+    ).ref().fvcDdt(rho, vf);
 }
 
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
+tmp<GeometricField<Type, fvPatchField, volMesh>>
 ddt
 (
     const volScalarField& rho,
@@ -98,12 +98,12 @@ ddt
     (
         vf.mesh(),
         vf.mesh().ddtScheme("ddt(" + rho.name() + ',' + vf.name() + ')')
-    )().fvcDdt(rho, vf);
+    ).ref().fvcDdt(rho, vf);
 }
 
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
+tmp<GeometricField<Type, fvPatchField, volMesh>>
 ddt
 (
     const volScalarField& alpha,
@@ -121,12 +121,12 @@ ddt
           + rho.name() + ','
           + vf.name() + ')'
         )
-    )().fvcDdt(alpha, rho, vf);
+    ).ref().fvcDdt(alpha, rho, vf);
 }
 
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
+tmp<GeometricField<Type, fvPatchField, volMesh>>
 ddt
 (
     const one&,
@@ -138,7 +138,7 @@ ddt
 
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
+tmp<GeometricField<Type, fvPatchField, volMesh>>
 ddt
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf,
@@ -150,7 +150,7 @@ ddt
 
 
 template<class Type>
-tmp<GeometricField<typename flux<Type>::type, fvsPatchField, surfaceMesh> >
+tmp<GeometricField<typename flux<Type>::type, fvsPatchField, surfaceMesh>>
 ddtCorr
 (
     const GeometricField<Type, fvPatchField, volMesh>& U,
@@ -161,12 +161,12 @@ ddtCorr
     (
         U.mesh(),
         U.mesh().ddtScheme("ddt(" + U.name() + ')')
-    )().fvcDdtUfCorr(U, Uf);
+    ).ref().fvcDdtUfCorr(U, Uf);
 }
 
 
 template<class Type>
-tmp<GeometricField<typename flux<Type>::type, fvsPatchField, surfaceMesh> >
+tmp<GeometricField<typename flux<Type>::type, fvsPatchField, surfaceMesh>>
 ddtCorr
 (
     const GeometricField<Type, fvPatchField, volMesh>& U,
@@ -182,12 +182,12 @@ ddtCorr
     (
         U.mesh(),
         U.mesh().ddtScheme("ddt(" + U.name() + ')')
-    )().fvcDdtPhiCorr(U, phi);
+    ).ref().fvcDdtPhiCorr(U, phi);
 }
 
 
 template<class Type>
-tmp<GeometricField<typename flux<Type>::type, fvsPatchField, surfaceMesh> >
+tmp<GeometricField<typename flux<Type>::type, fvsPatchField, surfaceMesh>>
 ddtCorr
 (
     const volScalarField& rho,
@@ -199,12 +199,12 @@ ddtCorr
     (
         U.mesh(),
         U.mesh().ddtScheme("ddt(" + U.name() + ')')
-    )().fvcDdtUfCorr(rho, U, Uf);
+    ).ref().fvcDdtUfCorr(rho, U, Uf);
 }
 
 
 template<class Type>
-tmp<GeometricField<typename flux<Type>::type, fvsPatchField, surfaceMesh> >
+tmp<GeometricField<typename flux<Type>::type, fvsPatchField, surfaceMesh>>
 ddtCorr
 (
     const volScalarField& rho,
@@ -221,7 +221,7 @@ ddtCorr
     (
         U.mesh(),
         U.mesh().ddtScheme("ddt(" + rho.name() + ',' + U.name() + ')')
-    )().fvcDdtPhiCorr(rho, U, phi);
+    ).ref().fvcDdtPhiCorr(rho, U, phi);
 }
 
 

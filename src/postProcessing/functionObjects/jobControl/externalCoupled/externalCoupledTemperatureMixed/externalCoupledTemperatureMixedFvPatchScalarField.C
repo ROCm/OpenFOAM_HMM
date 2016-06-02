@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -104,7 +104,7 @@ externalCoupledTemperatureMixedFvPatchScalarField
 
         // Initialise as a fixed value
         this->refValue() = *this;
-        this->refGrad() = pTraits<scalar>::zero;
+        this->refGrad() = Zero;
         this->valueFraction() = 1.0;
     }
 }

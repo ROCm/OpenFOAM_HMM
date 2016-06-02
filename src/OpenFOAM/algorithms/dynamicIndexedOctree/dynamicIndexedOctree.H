@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-typedef DynamicList<autoPtr<DynamicList<label > > > contentListList;
+typedef DynamicList<autoPtr<DynamicList<label >>> contentListList;
 
 // Forward declaration of classes
 template<class Type> class dynamicIndexedOctree;
@@ -181,7 +181,7 @@ private:
             //  according to where they are in relation to mid.
             void divide
             (
-                const autoPtr<DynamicList<label> >& indices,
+                const autoPtr<DynamicList<label>>& indices,
                 const treeBoundBox& bb,
                 contentListList& result
             ) const;
@@ -205,17 +205,6 @@ private:
                 const label octant,
                 label& nLevels
             );
-
-//            static label compactContents
-//            (
-//                DynamicList<node>& nodes,
-//                DynamicList<labelList>& contents,
-//                const label compactLevel,
-//                const label nodeI,
-//                const label level,
-//                List<labelList>& compactedContents,
-//                label& compactI
-//            );
 
             //- Determine inside/outside per node (mixed if cannot be
             //  determined). Only valid for closed shapes.
@@ -266,7 +255,7 @@ private:
             );
 
             //- Helper: take point on face(s) of bb and push it away from
-            //  edges of face.
+            //  edges of face.  If pt is not on a face does nothing.
             static point pushPointIntoFace
             (
                 const treeBoundBox& bb,
@@ -274,16 +263,8 @@ private:
                 const point& pt
             );
 
-            ////- Push point on multiple faces away from any corner/edge.
-            //static void checkMultipleFaces
-            //(
-            //    const treeBoundBox& bb,
-            //    const vector& dir,          // end-start
-            //    pointIndexHit& faceHitInfo,
-            //    direction& faceID
-            //);
-
             //- Walk to parent of node+octant.
+            //  Return false if top of tree reached.
             bool walkToParent
             (
                 const label nodeI,
@@ -435,9 +416,9 @@ public:
         );
 
         //- Clone
-        autoPtr<dynamicIndexedOctree<Type> > clone() const
+        autoPtr<dynamicIndexedOctree<Type>> clone() const
         {
-            return autoPtr<dynamicIndexedOctree<Type> >
+            return autoPtr<dynamicIndexedOctree<Type>>
             (
                 new dynamicIndexedOctree<Type>(*this)
             );
@@ -683,7 +664,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "dynamicIndexedOctree.C"
+    #include "dynamicIndexedOctree.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

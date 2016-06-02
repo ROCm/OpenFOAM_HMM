@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1581,7 +1581,7 @@ void Foam::conformalVoronoiMesh::limitDisplacement
     // Do not allow infinite recursion
     if (callCount > 7)
     {
-        displacement = vector::zero;
+        displacement = Zero;
         return;
     }
 
@@ -1630,7 +1630,7 @@ void Foam::conformalVoronoiMesh::limitDisplacement
             if (magSqr(pt - surfHit.hitPoint()) <= searchDistanceSqr)
             {
                 // Cannot limit displacement, point closer than tolerance
-                displacement = vector::zero;
+                displacement = Zero;
                 return;
             }
         }
@@ -2066,7 +2066,7 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
             keepSurfacePoint = false;
         }
 
-        List<List<pointIndexHit> > edHitsByFeature;
+        List<List<pointIndexHit>> edHitsByFeature;
 
         labelList featuresHit;
 
@@ -2295,7 +2295,7 @@ void Foam::conformalVoronoiMesh::reinsertSurfaceConformation()
         }
     }
 
-    inplaceSubset<PackedBoolList, List<Vb> >
+    inplaceSubset<PackedBoolList, List<Vb>>
     (
         selectedElems,
         surfaceConformationVertices_

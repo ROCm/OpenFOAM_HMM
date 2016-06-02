@@ -39,15 +39,8 @@ Foam::IOmapDistribute::IOmapDistribute(const IOobject& io)
 :
     regIOobject(io)
 {
-    // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-    {
-        WarningInFunction
-            << "IOmapDistribute " << name()
-            << " constructed with IOobject::MUST_READ_IF_MODIFIED"
-            " but IOmapDistribute does not support automatic rereading."
-            << endl;
-    }
+    // Warn for MUST_READ_IF_MODIFIED
+    warnNoRereading<IOmapDistribute>();
 
     if
     (
@@ -72,15 +65,8 @@ Foam::IOmapDistribute::IOmapDistribute
 :
     regIOobject(io)
 {
-    // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-    {
-        WarningInFunction
-            << "IOmapDistribute " << name()
-            << " constructed with IOobject::MUST_READ_IF_MODIFIED"
-            " but IOmapDistribute does not support automatic rereading."
-            << endl;
-    }
+    // Warn for MUST_READ_IF_MODIFIED
+    warnNoRereading<IOmapDistribute>();
 
     if
     (
@@ -109,15 +95,8 @@ Foam::IOmapDistribute::IOmapDistribute
 :
     regIOobject(io)
 {
-    // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-    {
-        WarningInFunction
-            << "IOmapDistribute " << name()
-            << " constructed with IOobject::MUST_READ_IF_MODIFIED"
-            " but IOmapDistribute does not support automatic rereading."
-            << endl;
-    }
+    // Warn for MUST_READ_IF_MODIFIED
+    warnNoRereading<IOmapDistribute>();
 
     mapDistribute::transfer(map());
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,7 @@ class fvMesh;
 template<class Type>
 class surfaceInterpolationScheme
 :
-    public refCount
+    public tmp<surfaceInterpolationScheme<Type>>::refCount
 {
     // Private data
 
@@ -118,14 +118,14 @@ public:
     // Selectors
 
         //- Return new tmp interpolation scheme
-        static tmp<surfaceInterpolationScheme<Type> > New
+        static tmp<surfaceInterpolationScheme<Type>> New
         (
             const fvMesh& mesh,
             Istream& schemeData
         );
 
         //- Return new tmp interpolation scheme
-        static tmp<surfaceInterpolationScheme<Type> > New
+        static tmp<surfaceInterpolationScheme<Type>> New
         (
             const fvMesh& mesh,
             const surfaceScalarField& faceFlux,
@@ -148,7 +148,7 @@ public:
 
         //- Return the face-interpolate of the given cell field
         //  with the given owner and neighbour weigting factors
-        static tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        static tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         interpolate
         (
             const GeometricField<Type, fvPatchField, volMesh>&,
@@ -157,14 +157,32 @@ public:
         );
 
         //- Return the face-interpolate of the given cell field
+        //  with the given weighting factors dotted with given field Sf
+        template<class SFType>
+        static tmp
+        <
+            GeometricField
+            <
+                typename innerProduct<typename SFType::value_type, Type>::type,
+                fvsPatchField,
+                surfaceMesh
+            >
+        >
+        dotInterpolate
+        (
+            const SFType& Sf,
+            const GeometricField<Type, fvPatchField, volMesh>& vf,
+            const tmp<surfaceScalarField>& tlambdas
+        );
+
+        //- Return the face-interpolate of the given cell field
         //  with the given weighting factors
-        static tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        static tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         interpolate
         (
             const GeometricField<Type, fvPatchField, volMesh>&,
             const tmp<surfaceScalarField>&
         );
-
 
         //- Return the interpolation weighting factors for the given field
         virtual tmp<surfaceScalarField> weights
@@ -180,25 +198,77 @@ public:
 
         //- Return the explicit correction to the face-interpolate
         //  for the given field
-        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         correction(const GeometricField<Type, fvPatchField, volMesh>&) const
         {
-            return tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >(NULL);
+            return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>(NULL);
         }
 
         //- Return the face-interpolate of the given cell field
+        //  with explicit correction dotted with given field Sf
+        virtual
+        tmp
+        <
+            GeometricField
+            <
+                typename innerProduct<vector, Type>::type,
+                fvsPatchField,
+                surfaceMesh
+            >
+        >
+        dotInterpolate
+        (
+            const surfaceVectorField& Sf,
+            const GeometricField<Type, fvPatchField, volMesh>& vf
+        ) const;
+
+        //- Return the face-interpolate of the given tmp cell field
+        //  with explicit correction dotted with given field Sf
+        tmp
+        <
+            GeometricField
+            <
+                typename innerProduct<vector, Type>::type,
+                fvsPatchField,
+                surfaceMesh
+            >
+        >
+        dotInterpolate
+        (
+            const surfaceVectorField& Sf,
+            const tmp<GeometricField<Type, fvPatchField, volMesh>>&
+        ) const;
+
+        //- Return the face-interpolate of the given cell field
         //  with explicit correction
-        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         interpolate(const GeometricField<Type, fvPatchField, volMesh>&) const;
 
         //- Return the face-interpolate of the given tmp cell field
         //  with explicit correction
-        tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         interpolate
         (
-            const tmp<GeometricField<Type, fvPatchField, volMesh> >&
+            const tmp<GeometricField<Type, fvPatchField, volMesh>>&
         ) const;
 };
+
+
+template<>
+tmp
+<
+    GeometricField
+    <
+        typename innerProduct<vector, scalar>::type,
+        fvsPatchField,
+        surfaceMesh
+    >
+>
+surfaceInterpolationScheme<scalar>::dotInterpolate
+(
+    const surfaceVectorField& Sf,
+    const GeometricField<scalar, fvPatchField, volMesh>&
+) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -213,10 +283,10 @@ public:
                                                                                \
 defineNamedTemplateTypeNameAndDebug(SS<Type>, 0);                              \
                                                                                \
-surfaceInterpolationScheme<Type>::addMeshConstructorToTable<SS<Type> >         \
+surfaceInterpolationScheme<Type>::addMeshConstructorToTable<SS<Type>>          \
     add##SS##Type##MeshConstructorToTable_;                                    \
                                                                                \
-surfaceInterpolationScheme<Type>::addMeshFluxConstructorToTable<SS<Type> >     \
+surfaceInterpolationScheme<Type>::addMeshFluxConstructorToTable<SS<Type>>      \
     add##SS##Type##MeshFluxConstructorToTable_;
 
 #define makeSurfaceInterpolationScheme(SS)                                     \
@@ -231,7 +301,7 @@ makeSurfaceInterpolationTypeScheme(SS, tensor)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "surfaceInterpolationScheme.C"
+    #include "surfaceInterpolationScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -247,7 +247,7 @@ public:
 
             //- Map volume field
             template<class Type>
-            static tmp<GeometricField<Type, fvPatchField, volMesh> >
+            static tmp<GeometricField<Type, fvPatchField, volMesh>>
             interpolate
             (
                 const GeometricField<Type, fvPatchField, volMesh>&,
@@ -258,7 +258,7 @@ public:
             );
 
             template<class Type>
-            tmp<GeometricField<Type, fvPatchField, volMesh> >
+            tmp<GeometricField<Type, fvPatchField, volMesh>>
             interpolate
             (
                 const GeometricField<Type, fvPatchField, volMesh>&
@@ -267,7 +267,7 @@ public:
             //- Map surface field. Optionally negates value if flipping
             //  a face (from exposing an internal face)
             template<class Type>
-            static tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+            static tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
             interpolate
             (
                 const GeometricField<Type, fvsPatchField, surfaceMesh>&,
@@ -279,7 +279,7 @@ public:
             );
 
             template<class Type>
-            tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+            tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
             interpolate
             (
                 const GeometricField<Type, fvsPatchField, surfaceMesh>&,
@@ -288,7 +288,7 @@ public:
 
             //- Map point field
             template<class Type>
-            static tmp<GeometricField<Type, pointPatchField, pointMesh> >
+            static tmp<GeometricField<Type, pointPatchField, pointMesh>>
             interpolate
             (
                 const GeometricField<Type, pointPatchField, pointMesh>&,
@@ -298,7 +298,7 @@ public:
             );
 
             template<class Type>
-            tmp<GeometricField<Type, pointPatchField, pointMesh> >
+            tmp<GeometricField<Type, pointPatchField, pointMesh>>
             interpolate
             (
                 const GeometricField<Type, pointPatchField, pointMesh>&
@@ -306,7 +306,7 @@ public:
 
             //- Map dimensioned fields
             template<class Type>
-            static tmp<DimensionedField<Type, volMesh> >
+            static tmp<DimensionedField<Type, volMesh>>
             interpolate
             (
                 const DimensionedField<Type, volMesh>&,
@@ -315,7 +315,7 @@ public:
             );
 
             template<class Type>
-            tmp<DimensionedField<Type, volMesh> >
+            tmp<DimensionedField<Type, volMesh>>
             interpolate
             (
                 const DimensionedField<Type, volMesh>&
@@ -331,7 +331,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "fvMeshSubsetInterpolate.C"
+    #include "fvMeshSubsetInterpolate.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

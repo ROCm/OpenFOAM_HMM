@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,21 +38,7 @@ Foam::UniformDimensionedField<Type>::UniformDimensionedField
     dimensioned<Type>(dt)
 {
     // Read value
-    if
-    (
-        (
-            io.readOpt() == IOobject::MUST_READ
-         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        dictionary dict(readStream(typeName));
-        scalar multiplier;
-        this->dimensions().read(dict.lookup("dimensions"), multiplier);
-        dict.lookup("value") >> this->value();
-        this->value() *= multiplier;
-    }
+    readHeaderOk(IOstream::BINARY, typeName);
 }
 
 
@@ -74,13 +60,13 @@ Foam::UniformDimensionedField<Type>::UniformDimensionedField
 )
 :
     regIOobject(io),
-    dimensioned<Type>(regIOobject::name(), dimless, pTraits<Type>::zero)
+    dimensioned<Type>(regIOobject::name(), dimless, Zero)
 {
-    dictionary dict(readStream(typeName));
-    scalar multiplier;
-    this->dimensions().read(dict.lookup("dimensions"), multiplier);
-    dict.lookup("value") >> this->value();
-    this->value() *= multiplier;
+    // For if MUST_READ_IF_MODIFIED
+    addWatch();
+
+    // Read unless NO_READ
+    readHeaderOk(IOstream::BINARY, typeName);
 }
 
 
@@ -92,6 +78,19 @@ Foam::UniformDimensionedField<Type>::~UniformDimensionedField()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+bool Foam::UniformDimensionedField<Type>::readData(Istream& is)
+{
+    dictionary dict(is);
+    scalar multiplier;
+    this->dimensions().read(dict.lookup("dimensions"), multiplier);
+    dict.lookup("value") >> this->value();
+    this->value() *= multiplier;
+
+    return is.good();
+}
+
 
 template<class Type>
 bool Foam::UniformDimensionedField<Type>::writeData(Ostream& os) const

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,7 @@ License
 namespace Foam
 {
     makeSurfaceWriterType(vtkSurfaceWriter);
+    addToRunTimeSelectionTable(surfaceWriter, vtkSurfaceWriter, wordDict);
 }
 
 
@@ -51,7 +52,7 @@ void Foam::vtkSurfaceWriter::writeGeometry
         << "DATASET POLYDATA" << nl;
 
     // Write vertex coords
-    os  << "POINTS " << points.size() << " float" << nl;
+    os  << "POINTS " << points.size() << " double" << nl;
     forAll(points, pointI)
     {
         const point& pt = points[pointI];
@@ -202,7 +203,22 @@ namespace Foam
 
 Foam::vtkSurfaceWriter::vtkSurfaceWriter()
 :
-    surfaceWriter()
+    surfaceWriter(),
+    writePrecision_(IOstream::defaultPrecision())
+{}
+
+
+Foam::vtkSurfaceWriter::vtkSurfaceWriter(const dictionary& dict)
+:
+    surfaceWriter(),
+    writePrecision_
+    (
+        dict.lookupOrDefault
+        (
+            "writePrecision",
+            IOstream::defaultPrecision()
+        )
+    )
 {}
 
 
@@ -229,6 +245,7 @@ Foam::fileName Foam::vtkSurfaceWriter::write
     }
 
     OFstream os(outputDir/surfaceName + ".vtk");
+    os.precision(writePrecision_);
 
     if (verbose)
     {

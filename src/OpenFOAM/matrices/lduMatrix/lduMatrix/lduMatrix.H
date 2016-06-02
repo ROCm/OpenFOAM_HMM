@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -521,7 +521,7 @@ public:
         lduMatrix(const lduMatrix&);
 
         //- Construct as copy or re-use as specified.
-        lduMatrix(lduMatrix&, bool reUse);
+        lduMatrix(lduMatrix&, bool reuse);
 
         //- Construct given an LDU addressed mesh and an Istream
         //  from which the coefficients are read
@@ -684,18 +684,18 @@ public:
 
 
             template<class Type>
-            tmp<Field<Type> > H(const Field<Type>&) const;
+            tmp<Field<Type>> H(const Field<Type>&) const;
 
             template<class Type>
-            tmp<Field<Type> > H(const tmp<Field<Type> >&) const;
+            tmp<Field<Type>> H(const tmp<Field<Type>>&) const;
 
             tmp<scalarField> H1() const;
 
             template<class Type>
-            tmp<Field<Type> > faceH(const Field<Type>&) const;
+            tmp<Field<Type>> faceH(const Field<Type>&) const;
 
             template<class Type>
-            tmp<Field<Type> > faceH(const tmp<Field<Type> >&) const;
+            tmp<Field<Type>> faceH(const tmp<Field<Type>>&) const;
 
 
         // Info
@@ -735,7 +735,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "lduMatrixTemplates.C"
+    #include "lduMatrixTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -47,14 +47,8 @@ void Foam::polyTopoChanger::readModifiers()
      || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
-        if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-        {
-            WarningInFunction
-                << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-                << " does not support automatic re-reading."
-                << endl;
-        }
-
+        // Warn for MUST_READ_IF_MODIFIED
+        warnNoRereading<polyTopoChanger>();
 
         PtrList<polyMeshModifier>& modifiers = *this;
 

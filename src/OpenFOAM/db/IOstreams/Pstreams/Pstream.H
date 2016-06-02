@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::Pstream
 
 Description
-    Inter-processor communications stream
+    Inter-processor communications stream.
 
 SourceFiles
     Pstream.C
@@ -123,7 +123,7 @@ public:
             );
 
             //- Like above but switches between linear/tree communication
-            template <class T>
+            template<class T>
             static void scatter
             (
                 T& Value,
@@ -303,30 +303,42 @@ public:
 
         // Exchange
 
-            //- Exchange data. Sends sendData, receives into recvData. Gets
-            //  passed sizes to receive. Continuous data only.
+            //- Helper: exchange contiguous data. Sends sendData, receives into
+            //  recvData. If block=true will wait for all transfers to finish.
+            template<class Container, class T>
+            static void exchange
+            (
+                const UList<Container>& sendData,
+                const labelUList& recvSizes,
+                List<Container>& recvData,
+                const int tag = UPstream::msgType(),
+                const label comm = UPstream::worldComm,
+                const bool block = true
+            );
+
+            //- Helper: exchange sizes of sendData. sendData is the data per
+            //  processor (in the communicator). Returns sizes of sendData
+            //  on the sending processor.
+            template<class Container>
+            static void exchangeSizes
+            (
+                const Container& sendData,
+                labelList& sizes,
+                const label comm = UPstream::worldComm
+            );
+
+            //- Exchange contiguous data. Sends sendData, receives into
+            //  recvData. Determines sizes to receive.
             //  If block=true will wait for all transfers to finish.
             template<class Container, class T>
             static void exchange
             (
-                const List<Container >& sendBufs,
-                const labelUList& recvSizes,
-                List<Container >& recvBufs,
+                const UList<Container>& sendData,
+                List<Container>& recvData,
                 const int tag = UPstream::msgType(),
                 const label comm = UPstream::worldComm,
                 const bool block = true
             );
-
-            template<class Container, class T>
-            static void exchange
-            (
-                const List<Container >&,
-                List<Container >&,
-                const int tag = UPstream::msgType(),
-                const label comm = UPstream::worldComm,
-                const bool block = true
-            );
-
 };
 
 
@@ -337,10 +349,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "gatherScatter.C"
-#   include "combineGatherScatter.C"
-#   include "gatherScatterList.C"
-#   include "exchange.C"
+    #include "gatherScatter.C"
+    #include "combineGatherScatter.C"
+    #include "gatherScatterList.C"
+    #include "exchange.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

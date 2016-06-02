@@ -77,7 +77,7 @@ protected:
         scalar size_;
 
         //- Colour
-        autoPtr<DataEntry<vector> > colour_;
+        autoPtr<Function1<vector>> colour_;
 
         //- Bold flag
         bool bold_;
@@ -92,7 +92,7 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<DataEntry<vector>, word>& colours
+            const HashPtrTable<Function1<vector>, word>& colours
         );
 
 

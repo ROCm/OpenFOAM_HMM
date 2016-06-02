@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -199,8 +199,8 @@ void Foam::momentOfInertia::massPropertiesShell
     // Reset properties for accumulation
 
     mass = 0.0;
-    cM = vector::zero;
-    J = tensor::zero;
+    cM = Zero;
+    J = Zero;
 
     // Find centre of mass
 
@@ -353,7 +353,7 @@ Foam::tmp<Foam::tensorField> Foam::momentOfInertia::meshInertia
 {
     tmp<tensorField> tTf = tmp<tensorField>(new tensorField(mesh.nCells()));
 
-    tensorField& tf = tTf();
+    tensorField& tf = tTf.ref();
 
     forAll(tf, cI)
     {
@@ -384,8 +384,8 @@ Foam::tensor Foam::momentOfInertia::meshInertia
     }
 
     scalar m = 0.0;
-    vector cM = vector::zero;
-    tensor J = tensor::zero;
+    vector cM = Zero;
+    tensor J = Zero;
 
     massPropertiesSolid(mesh.points(), faces, 1.0, m, cM, J);
 

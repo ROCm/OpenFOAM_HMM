@@ -69,7 +69,11 @@ int main(int argc, char *argv[])
 
 
         // Check p and U exist
-        if (pheader.headerOk() && Uheader.headerOk())
+        if
+        (
+            pheader.typeHeaderOk<volScalarField>(true)
+         && Uheader.typeHeaderOk<volVectorField>(true)
+        )
         {
             mesh.readUpdate();
 
@@ -106,7 +110,7 @@ int main(int argc, char *argv[])
                 );
 
                 // Check rho exists
-                if (rhoheader.headerOk())
+                if (rhoheader.typeHeaderOk<volScalarField>(true))
                 {
                     Info<< "    Reading rho" << endl;
                     volScalarField rho(rhoheader, mesh);

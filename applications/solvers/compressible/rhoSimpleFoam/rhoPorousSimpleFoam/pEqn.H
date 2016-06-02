@@ -1,27 +1,22 @@
 {
     const volScalarField& psi = thermo.psi();
 
-    volVectorField HbyA("HbyA", U);
-
+    tmp<volVectorField> tHbyA;
     if (pressureImplicitPorosity)
     {
-        HbyA = trTU() & UEqn().H();
+        tHbyA = constrainHbyA(trTU()&UEqn.H(), U, p);
     }
     else
     {
-        HbyA = trAU()*UEqn().H();
+        tHbyA = constrainHbyA(trAU()*UEqn.H(), U, p);
     }
+    volVectorField& HbyA = tHbyA.ref();
 
-    UEqn.clear();
+    tUEqn.clear();
 
     bool closedVolume = false;
 
-    surfaceScalarField phiHbyA
-    (
-        "phiHbyA",
-        fvc::interpolate(rho*HbyA) & mesh.Sf()
-    );
-
+    surfaceScalarField phiHbyA("phiHbyA", fvc::flux(rho*HbyA));
     MRF.makeRelative(fvc::interpolate(rho), phiHbyA);
 
     closedVolume = adjustPhi(phiHbyA, U, p);
@@ -51,13 +46,15 @@
             );
         }
 
-        tpEqn().setReference(pRefCell, pRefValue);
+        fvScalarMatrix& pEqn = tpEqn.ref();
 
-        tpEqn().solve();
+        pEqn.setReference(pRefCell, pRefValue);
+
+        pEqn.solve();
 
         if (simple.finalNonOrthogonalIter())
         {
-            phi = phiHbyA - tpEqn().flux();
+            phi = phiHbyA - pEqn.flux();
         }
     }
 

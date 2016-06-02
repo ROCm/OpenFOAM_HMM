@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,16 +25,16 @@ Class
     Foam::ManualInjection
 
 Description
-    Manual injection
+    Manual injection.
 
-    User specifies
-    - Total mass to inject
-    - Parcel positions in file \c positionsFile
-    - Initial parcel velocity
+    \li User specifies:
+        - Total mass to inject
+        - Parcel positions in file \c positionsFile
+        - Initial parcel velocity
 
-    Additional
-    - Parcel diameters obtained by distribution model
-    - All parcels introduced at SOI
+    \li Parcel diameters obtained by distribution model
+
+    \li All parcels introduced at SOI
 
 SourceFiles
     ManualInjection.C
@@ -47,6 +47,7 @@ SourceFiles
 #include "InjectionModel.H"
 #include "distributionModel.H"
 #include "Switch.H"
+#include "globalIOFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,7 +69,7 @@ class ManualInjection
         const word positionsFile_;
 
         //- Field of parcel positions
-        vectorIOField positions_;
+        vectorGlobalIOField positions_;
 
         //- Field of parcel diameters
         scalarList diameters_;
@@ -112,9 +113,9 @@ public:
         ManualInjection(const ManualInjection<CloudType>& im);
 
         //- Construct and return a clone
-        virtual autoPtr<InjectionModel<CloudType> > clone() const
+        virtual autoPtr<InjectionModel<CloudType>> clone() const
         {
-            return autoPtr<InjectionModel<CloudType> >
+            return autoPtr<InjectionModel<CloudType>>
             (
                 new ManualInjection<CloudType>(*this)
             );
@@ -179,7 +180,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ManualInjection.C"
+    #include "ManualInjection.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

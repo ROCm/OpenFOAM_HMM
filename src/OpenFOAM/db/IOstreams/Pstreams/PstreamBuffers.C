@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,13 +103,7 @@ void Foam::PstreamBuffers::finishedSends(labelList& recvSizes, const bool block)
 
     if (commsType_ == UPstream::nonBlocking)
     {
-        labelList sendSizes(sendBuf_.size());
-        forAll(sendBuf_, procI)
-        {
-            sendSizes[procI] = sendBuf_[procI].size();
-        }
-        recvSizes.setSize(sendBuf_.size());
-        UPstream::exchange(sendSizes.begin(), recvSizes.begin(), comm_);
+        Pstream::exchangeSizes(sendBuf_, recvSizes, comm_);
 
         Pstream::exchange<DynamicList<char>, char>
         (
@@ -129,22 +123,8 @@ void Foam::PstreamBuffers::finishedSends(labelList& recvSizes, const bool block)
             << " since transfers already in progress. Use non-blocking instead."
             << exit(FatalError);
 
-        // Note: possible only if using different tag from write started
+        // Note: maybe possible only if using different tag from write started
         // by ~UOPstream. Needs some work.
-        //sizes.setSize(UPstream::nProcs(comm));
-        //labelList& nsTransPs = sizes[UPstream::myProcNo(comm)];
-        //nsTransPs.setSize(UPstream::nProcs(comm));
-        //
-        //forAll(sendBuf_, procI)
-        //{
-        //    nsTransPs[procI] = sendBuf_[procI].size();
-        //}
-        //
-        //// Send sizes across.
-        //int oldTag = UPstream::msgType();
-        //UPstream::msgType() = tag_;
-        //combineReduce(sizes, UPstream::listEq());
-        //UPstream::msgType() = oldTag;
     }
 }
 

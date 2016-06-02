@@ -52,6 +52,7 @@ primitives/Tensor/lists/tensorList.C
 primitives/Vector/complexVector/complexVector.C
 #if !defined(WM_SP)
 primitives/Vector/floatVector/floatVector.C
+primitives/Tensor/floatTensor/floatTensor.C
 #endif
 primitives/Vector/labelVector/labelVector.C
 primitives/Vector/vector/vector.C
@@ -72,7 +73,7 @@ primitives/septernion/septernion.C
 primitives/triad/triad.C
 
 /* functions, data entries */
-primitives/functions/DataEntry/makeDataEntries.C
+primitives/functions/Function1/makeDataEntries.C
 primitives/functions/Polynomial/polynomialFunction.C
 
 primitives/subModelBase/subModelBase.C
@@ -108,6 +109,11 @@ $(ranges)/labelRange/labelRange.C
 $(ranges)/labelRange/labelRanges.C
 $(ranges)/scalarRange/scalarRange.C
 $(ranges)/scalarRange/scalarRanges.C
+
+spatialVectorAlgebra = primitives/spatialVectorAlgebra
+$(spatialVectorAlgebra)/SpatialVector/spatialVector/spatialVector.C
+$(spatialVectorAlgebra)/SpatialTensor/spatialTensor/spatialTensor.C
+$(spatialVectorAlgebra)/CompactSpatialTensor/compactSpatialTensor/compactSpatialTensor.C
 
 containers/HashTables/HashTable/HashTableCore.C
 containers/HashTables/StaticHashTable/StaticHashTableCore.C
@@ -183,10 +189,16 @@ $(functionEntries)/inputModeEntry/inputModeEntry.C
 $(functionEntries)/removeEntry/removeEntry.C
 
 IOdictionary = db/IOobjects/IOdictionary
+$(IOdictionary)/baseIOdictionary.C
+$(IOdictionary)/baseIOdictionaryIO.C
 $(IOdictionary)/IOdictionary.C
-$(IOdictionary)/IOdictionaryIO.C
+$(IOdictionary)/localIOdictionary.C
+$(IOdictionary)/unwatchedIOdictionary.C
 
 db/IOobjects/IOMap/IOMapName.C
+
+db/IOobjects/GlobalIOList/globalIOLists.C
+
 
 IOobject = db/IOobject
 $(IOobject)/IOobject.C
@@ -591,6 +603,9 @@ $(Fields)/tensorField/tensorFieldIOField.C
 $(Fields)/quaternionField/quaternionIOField.C
 $(Fields)/triadField/triadIOField.C
 $(Fields)/transformField/transformField.C
+
+$(Fields)/globalFields/globalIOFields.C
+
 
 pointPatchFields = fields/pointPatchFields
 $(pointPatchFields)/pointPatchField/pointPatchFields.C

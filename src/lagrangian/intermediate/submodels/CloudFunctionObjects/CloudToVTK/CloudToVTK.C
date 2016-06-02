@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,14 +39,14 @@ void Foam::CloudToVTK<CloudType>::writeData
 {
     const label procI = Pstream::myProcNo();
 
-    List<List<floatScalar> > allProcData(Pstream::nProcs());
+    List<List<floatScalar>> allProcData(Pstream::nProcs());
     allProcData[procI] = data;
     Pstream::gatherList(allProcData);
     List<floatScalar> allData =
-        ListListOps::combine<List<floatScalar> >
+        ListListOps::combine<List<floatScalar>>
         (
             allProcData,
-            accessOp<List<floatScalar> >()
+            accessOp<List<floatScalar>>()
         );
 
     vtkTools::write(vtkOs, binary, allData);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -99,7 +99,7 @@ public:
         DevolatilisationModel(const DevolatilisationModel<CloudType>& dm);
 
         //- Construct and return a clone
-        virtual autoPtr<DevolatilisationModel<CloudType> > clone() const = 0;
+        virtual autoPtr<DevolatilisationModel<CloudType>> clone() const = 0;
 
 
     //- Destructor
@@ -107,7 +107,7 @@ public:
 
 
     //- Selector
-    static autoPtr<DevolatilisationModel<CloudType> > New
+    static autoPtr<DevolatilisationModel<CloudType>> New
     (
         const dictionary& dict,
         CloudType& owner
@@ -148,42 +148,42 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeDevolatilisationModel(CloudType)                                  \
-                                                                              \
-    typedef Foam::CloudType::reactingMultiphaseCloudType                      \
-        reactingMultiphaseCloudType;                                          \
-    defineNamedTemplateTypeNameAndDebug                                       \
-    (                                                                         \
-        Foam::DevolatilisationModel<reactingMultiphaseCloudType>,             \
-        0                                                                     \
-    );                                                                        \
-    namespace Foam                                                            \
-    {                                                                         \
-        defineTemplateRunTimeSelectionTable                                   \
-        (                                                                     \
-            DevolatilisationModel<reactingMultiphaseCloudType>,               \
-            dictionary                                                        \
-        );                                                                    \
+#define makeDevolatilisationModel(CloudType)                                   \
+                                                                               \
+    typedef Foam::CloudType::reactingMultiphaseCloudType                       \
+        reactingMultiphaseCloudType;                                           \
+    defineNamedTemplateTypeNameAndDebug                                        \
+    (                                                                          \
+        Foam::DevolatilisationModel<reactingMultiphaseCloudType>,              \
+        0                                                                      \
+    );                                                                         \
+    namespace Foam                                                             \
+    {                                                                          \
+        defineTemplateRunTimeSelectionTable                                    \
+        (                                                                      \
+            DevolatilisationModel<reactingMultiphaseCloudType>,                \
+            dictionary                                                         \
+        );                                                                     \
     }
 
 
-#define makeDevolatilisationModelType(SS, CloudType)                          \
-                                                                              \
-    typedef Foam::CloudType::reactingMultiphaseCloudType                      \
-        reactingMultiphaseCloudType;                                          \
-    defineNamedTemplateTypeNameAndDebug                                       \
-        (Foam::SS<reactingMultiphaseCloudType>, 0);                           \
-                                                                              \
-    Foam::DevolatilisationModel<reactingMultiphaseCloudType>::                \
-        adddictionaryConstructorToTable                                       \
-        <Foam::SS<reactingMultiphaseCloudType> >                              \
+#define makeDevolatilisationModelType(SS, CloudType)                           \
+                                                                               \
+    typedef Foam::CloudType::reactingMultiphaseCloudType                       \
+        reactingMultiphaseCloudType;                                           \
+    defineNamedTemplateTypeNameAndDebug                                        \
+        (Foam::SS<reactingMultiphaseCloudType>, 0);                            \
+                                                                               \
+    Foam::DevolatilisationModel<reactingMultiphaseCloudType>::                 \
+        adddictionaryConstructorToTable                                        \
+        <Foam::SS<reactingMultiphaseCloudType>>                                \
         add##SS##CloudType##reactingMultiphaseCloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "DevolatilisationModel.C"
+    #include "DevolatilisationModel.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

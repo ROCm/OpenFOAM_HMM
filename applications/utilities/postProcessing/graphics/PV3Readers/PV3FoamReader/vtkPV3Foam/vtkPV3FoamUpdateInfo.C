@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -124,7 +124,7 @@ Foam::wordList Foam::vtkPV3Foam::getZoneNames(const word& zoneType) const
         false
     );
 
-    if (ioObj.headerOk())
+    if (ioObj.typeHeaderOk<cellZoneMesh>(false))
     {
         zonesEntries zones(ioObj);
 
@@ -333,7 +333,7 @@ void Foam::vtkPV3Foam::updateInfoPatches
         );
 
         // this should only ever fail if the mesh region doesn't exist
-        if (ioObj.headerOk())
+        if (ioObj.typeHeaderOk<polyBoundaryMesh>(true))
         {
             polyBoundaryMeshEntries patchEntries(ioObj);
 
@@ -678,33 +678,33 @@ void Foam::vtkPV3Foam::updateInfoLagrangianFields()
         lagrangianPrefix/cloudName
     );
 
-    addToSelection<IOField<label> >
+    addToSelection<IOField<label>>
     (
         fieldSelection,
         objects
     );
-    addToSelection<IOField<scalar> >
+    addToSelection<IOField<scalar>>
     (
         fieldSelection,
         objects
     );
-    addToSelection<IOField<vector> >
+    addToSelection<IOField<vector>>
     (
         fieldSelection,
         objects
     );
-    addToSelection<IOField<sphericalTensor> >
+    addToSelection<IOField<sphericalTensor>>
     (
         fieldSelection,
 
         objects
     );
-    addToSelection<IOField<symmTensor> >
+    addToSelection<IOField<symmTensor>>
     (
         fieldSelection,
         objects
     );
-    addToSelection<IOField<tensor> >
+    addToSelection<IOField<tensor>>
     (
         fieldSelection,
         objects

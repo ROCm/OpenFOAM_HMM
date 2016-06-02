@@ -136,7 +136,7 @@ Foam::geometrySurface::geometrySurface
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<DataEntry<vector>, word>& colours
+    const HashPtrTable<Function1<vector>, word>& colours
 )
 :
     surface(parent, dict, colours),
@@ -148,7 +148,7 @@ Foam::geometrySurface::geometrySurface
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<DataEntry<vector>, word>& colours,
+    const HashPtrTable<Function1<vector>, word>& colours,
     const List<fileName>& fileNames
 )
 :

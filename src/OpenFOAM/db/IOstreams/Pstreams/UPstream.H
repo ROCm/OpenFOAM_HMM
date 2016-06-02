@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -181,18 +181,31 @@ private:
 
     // Private data
 
+        //- By default this is not a parallel run
         static bool parRun_;
+
+        //- Standard transfer message type
         static int msgType_;
 
         // Communicator specific data
 
+        //- Free communicators
         static LIFOStack<label> freeComms_;
+
+        //- My processor number
         static DynamicList<int> myProcNo_;
-        static DynamicList<List<int> > procIDs_;
+
+        //- List of process IDs
+        static DynamicList<List<int>> procIDs_;
+
+        //- Parent communicator
         static DynamicList<label> parentCommunicator_;
 
-        static DynamicList<List<commsStruct> > linearCommunication_;
-        static DynamicList<List<commsStruct> > treeCommunication_;
+        //- Linear communication schedule
+        static DynamicList<List<commsStruct>> linearCommunication_;
+
+        //- Multi level communication schedule
+        static DynamicList<List<commsStruct>> treeCommunication_;
 
 
     // Private Member Functions
@@ -208,7 +221,7 @@ private:
         static void collectReceives
         (
             const label procID,
-            const List<DynamicList<label> >& receives,
+            const List<DynamicList<label>>& receives,
             DynamicList<label>& allReceives
         );
 
@@ -348,18 +361,6 @@ public:
         //  Spawns slave processes and initialises inter-communication
         static bool init(int& argc, char**& argv);
 
-        //- Exchange single integer to/from all processors in communicator
-        //  sendBuf, recvBuf need to be sized with number of processors in
-        //  communicstor. Sets recvBuf to whatever sendBuf on sending processor
-        //  is
-        static void exchange
-        (
-            int* sendBuf,
-            int* recvBuf,
-            const label comm = UPstream::worldComm
-        );
-
-
         // Non-blocking comms
 
             //- Get number of outstanding requests
@@ -489,7 +490,15 @@ public:
         //- Abort program
         static void abort();
 
-
+        //- Exchange label with all processors (in the communicator).
+        //  sendData[procI] is the label to send to procI.
+        //  After return recvData contains the data from the other processors.
+        static void allToAll
+        (
+            const labelUList& sendData,
+            labelUList& recvData,
+            const label communicator = 0
+        );
 };
 
 

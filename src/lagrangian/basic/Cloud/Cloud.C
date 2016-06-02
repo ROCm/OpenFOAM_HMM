@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -222,14 +222,14 @@ void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
 
     // List of lists of particles to be transfered for all of the
     // neighbour processors
-    List<IDLList<ParticleType> > particleTransferLists
+    List<IDLList<ParticleType>> particleTransferLists
     (
         neighbourProcs.size()
     );
 
     // List of destination processorPatches indices for all of the
     // neighbour processors
-    List<DynamicList<label> > patchIndexTransferLists
+    List<DynamicList<label>> patchIndexTransferLists
     (
         neighbourProcs.size()
     );
@@ -321,24 +321,22 @@ void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
         }
 
 
-        // Start sending. Sets number of bytes received
-        labelList nRecv(Pstream::nProcs());
-        pBufs.finishedSends(nRecv);
+        // Start sending. Sets number of bytes transferred
+        labelList allNTrans(Pstream::nProcs());
+        pBufs.finishedSends(allNTrans);
 
 
         bool transfered = false;
 
-        forAll(nRecv, i)
+        forAll(allNTrans, i)
         {
-            if (nRecv[i])
+            if (allNTrans[i])
             {
                 transfered = true;
                 break;
             }
         }
-
         reduce(transfered, orOp<bool>());
-
 
         if (!transfered)
         {
@@ -350,7 +348,7 @@ void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
         {
             label neighbProci = neighbourProcs[i];
 
-            label nRec = nRecv[neighbProci];
+            label nRec = allNTrans[neighbProci];
 
             if (nRec)
             {
@@ -402,15 +400,14 @@ void Foam::Cloud<ParticleType>::autoMap
 {
     if (cloud::debug)
     {
-        Info<< "Cloud<ParticleType>::autoMap(TrackData&, const mapPolyMesh&) "
-            << "for lagrangian cloud " << cloud::name() << endl;
+        InfoInFunction << "for lagrangian cloud " << cloud::name() << endl;
     }
 
     const labelList& reverseCellMap = mapper.reverseCellMap();
     const labelList& reverseFaceMap = mapper.reverseFaceMap();
 
     // Reset stored data that relies on the mesh
-//    polyMesh_.clearCellTree();
+    //    polyMesh_.clearCellTree();
     cellWallFacesPtr_.clear();
 
     // Ask for the tetBasePtIs to trigger all processors to build

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct null
 Foam::refinementHistory::splitCell8::splitCell8()
 :
     parent_(-1),
@@ -46,7 +45,6 @@ Foam::refinementHistory::splitCell8::splitCell8()
 {}
 
 
-//- Construct as child element of parent
 Foam::refinementHistory::splitCell8::splitCell8(const label parent)
 :
     parent_(parent),
@@ -54,14 +52,12 @@ Foam::refinementHistory::splitCell8::splitCell8(const label parent)
 {}
 
 
-//- Construct from Istream
 Foam::refinementHistory::splitCell8::splitCell8(Istream& is)
 {
     is >> *this;
 }
 
 
-//- Construct as (deep) copy.
 Foam::refinementHistory::splitCell8::splitCell8(const splitCell8& sc)
 :
     parent_(sc.parent_),
@@ -305,7 +301,7 @@ void Foam::refinementHistory::freeSplitCell(const label index)
     // Make sure parent does not point to me anymore.
     if (split.parent_ >= 0)
     {
-        autoPtr<FixedList<label, 8> >& subCellsPtr =
+        autoPtr<FixedList<label, 8>>& subCellsPtr =
             splitCells_[split.parent_].addedCellsPtr_;
 
         if (subCellsPtr.valid())
@@ -560,14 +556,8 @@ Foam::refinementHistory::refinementHistory(const IOobject& io)
     refCount(),
     active_(false)
 {
-    // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-    {
-        WarningInFunction
-            << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-            << " does not support automatic rereading."
-            << endl;
-    }
+    // Warn for MUST_READ_IF_MODIFIED
+    warnNoRereading<refinementHistory>();
 
     if
     (
@@ -596,7 +586,6 @@ Foam::refinementHistory::refinementHistory(const IOobject& io)
 }
 
 
-//- Read or construct
 Foam::refinementHistory::refinementHistory
 (
     const IOobject& io,
@@ -612,14 +601,8 @@ Foam::refinementHistory::refinementHistory
     freeSplitCells_(0),
     visibleCells_(visibleCells)
 {
-    // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-    {
-        WarningInFunction
-            << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-            << " does not support automatic rereading."
-            << endl;
-    }
+    // Warn for MUST_READ_IF_MODIFIED
+    warnNoRereading<refinementHistory>();
 
     if
     (
@@ -658,14 +641,8 @@ Foam::refinementHistory::refinementHistory
     active_(false),
     freeSplitCells_(0)
 {
-    // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-    {
-        WarningInFunction
-            << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-            << " does not support automatic rereading."
-            << endl;
-    }
+    // Warn for MUST_READ_IF_MODIFIED
+    warnNoRereading<refinementHistory>();
 
     if
     (
@@ -719,14 +696,8 @@ Foam::refinementHistory::refinementHistory
     active_(active),
     freeSplitCells_(0)
 {
-    // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-    {
-        WarningInFunction
-            << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-            << " does not support automatic rereading."
-            << endl;
-    }
+    // Warn for MUST_READ_IF_MODIFIED
+    warnNoRereading<refinementHistory>();
 
     if
     (

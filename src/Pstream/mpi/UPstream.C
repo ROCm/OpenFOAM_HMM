@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,9 +37,9 @@ License
 #include <csignal>
 
 #if defined(WM_SP)
-#   define MPI_SCALAR MPI_FLOAT
+    #define MPI_SCALAR MPI_FLOAT
 #elif defined(WM_DP)
-#   define MPI_SCALAR MPI_DOUBLE
+    #define MPI_SCALAR MPI_DOUBLE
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -86,7 +86,7 @@ bool Foam::UPstream::init(int& argc, char**& argv)
     // Initialise parallel structure
     setParRun(numprocs);
 
-#   ifndef SGIMPI
+    #ifndef SGIMPI
     string bufferSizeName = getEnv("MPI_BUFFER_SIZE");
 
     if (bufferSizeName.size())
@@ -105,7 +105,7 @@ bool Foam::UPstream::init(int& argc, char**& argv)
             << "environment variable MPI_BUFFER_SIZE not defined"
             << Foam::abort(FatalError);
     }
-#   endif
+    #endif
 
     //int processorNameLen;
     //char processorName[MPI_MAX_PROCESSOR_NAME];
@@ -125,12 +125,12 @@ void Foam::UPstream::exit(int errnum)
         Pout<< "UPstream::exit." << endl;
     }
 
-#   ifndef SGIMPI
+    #ifndef SGIMPI
     int size;
     char* buff;
     MPI_Buffer_detach(&buff, &size);
     delete[] buff;
-#   endif
+    #endif
 
     if (PstreamGlobals::outstandingRequests_.size())
     {
@@ -295,16 +295,28 @@ void Foam::reduce
 }
 
 
-void Foam::UPstream::exchange
+void Foam::UPstream::allToAll
 (
-    int* sendBuf,
-    int* recvBuf,
+    const labelUList& sendData,
+    labelUList& recvData,
     const label communicator
 )
 {
+    label np = nProcs(communicator);
+
+    if (sendData.size() != np || recvData.size() != np)
+    {
+        FatalErrorInFunction
+            << "Size of sendData " << sendData.size()
+            << " or size of recvData " << recvData.size()
+            << " is not equal to the number of processors in the domain "
+            << np
+            << Foam::abort(FatalError);
+    }
+
     if (!UPstream::parRun())
     {
-        recvBuf[0] = sendBuf[0];
+        recvData.deepCopy(sendData);
     }
     else
     {
@@ -312,18 +324,21 @@ void Foam::UPstream::exchange
         (
             MPI_Alltoall
             (
-                sendBuf,
-                1,
-                MPI_INT,
-                recvBuf,
-                1,
-                MPI_INT,
+                // NOTE: const_cast is a temporary hack for
+                // backward-compatibility with versions of OpenMPI < 1.7.4
+                const_cast<label*>(sendData.begin()),
+                sizeof(label),
+                MPI_BYTE,
+                recvData.begin(),
+                sizeof(label),
+                MPI_BYTE,
                 PstreamGlobals::MPICommunicators_[communicator]
             )
         )
         {
             FatalErrorInFunction
-                << "MPI_Alltoall failure"
+                << "MPI_Alltoall failed for " << sendData
+                << " on communicator " << communicator
                 << Foam::abort(FatalError);
         }
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,7 +74,7 @@ inline Foam::SubField<Type>::SubField
     const SubField<Type>& sfield
 )
 :
-    refCount(),
+    tmp<SubField<Type>>::refCount(),
     SubList<Type>(sfield)
 {}
 
@@ -84,12 +84,12 @@ inline Foam::SubField<Type>::SubField
 template<class Type>
 inline const Foam::SubField<Type>& Foam::SubField<Type>::null()
 {
-    return NullObjectRef<SubField<Type> >();
+    return NullObjectRef<SubField<Type>>();
 }
 
 
 template<class Type>
-inline Foam::tmp<Foam::Field<typename Foam::SubField<Type>::cmptType> >
+inline Foam::tmp<Foam::Field<typename Foam::SubField<Type>::cmptType>>
 Foam::SubField<Type>::component
 (
     const direction d
@@ -100,7 +100,7 @@ Foam::SubField<Type>::component
 
 
 template<class Type>
-inline Foam::tmp<Foam::Field<Type> > Foam::SubField<Type>::T() const
+inline Foam::tmp<Foam::Field<Type>> Foam::SubField<Type>::T() const
 {
     return (reinterpret_cast<const Field<Type>&>(*this)).T();
 }
@@ -111,14 +111,35 @@ inline Foam::tmp<Foam::Field<Type> > Foam::SubField<Type>::T() const
 template<class Type>
 inline void Foam::SubField<Type>::operator=(const SubField<Type>& rhs)
 {
-    UList<Type>::operator=(rhs);
+    SubList<Type>::operator=(rhs);
+}
+
+
+template<class Type>
+inline void Foam::SubField<Type>::operator=(const Field<Type>& rhs)
+{
+    SubList<Type>::operator=(rhs);
+}
+
+
+template<class Type>
+template<class Form, Foam::direction Ncmpts>
+inline void Foam::SubField<Type>::operator=
+(
+    const VectorSpace<Form, Type, Ncmpts>& rhs
+)
+{
+    forAll(rhs, i)
+    {
+        this->operator[](i) = rhs[i];
+    }
 }
 
 
 template<class Type>
 inline Foam::SubField<Type>::operator const Foam::Field<Type>&() const
 {
-    return *reinterpret_cast< const Field<Type>* >(this);
+    return *reinterpret_cast<const Field<Type>* >(this);
 }
 
 

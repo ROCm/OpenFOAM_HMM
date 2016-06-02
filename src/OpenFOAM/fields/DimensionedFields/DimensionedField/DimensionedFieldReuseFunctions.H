@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,21 +33,26 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class TypeR, class Type1, class GeoMesh>
-class reuseTmpDimensionedField
+template<class TypeR, class GeoMesh>
+tmp<DimensionedField<TypeR, GeoMesh>> New
+(
+    const tmp<DimensionedField<TypeR, GeoMesh>>& tdf1,
+    const word& name,
+    const dimensionSet& dimensions
+)
 {
-public:
+    DimensionedField<TypeR, GeoMesh>& df1 =
+        const_cast<DimensionedField<TypeR, GeoMesh>& >(tdf1());
 
-    static tmp<DimensionedField<TypeR, GeoMesh> > New
-    (
-        const tmp<DimensionedField<Type1, GeoMesh> >& tdf1,
-        const word& name,
-        const dimensionSet& dimensions
-    )
+    if (tdf1.isTmp())
     {
-        const DimensionedField<Type1, GeoMesh>& df1 = tdf1();
-
-        return tmp<DimensionedField<TypeR, GeoMesh> >
+        df1.rename(name);
+        df1.dimensions().reset(dimensions);
+        return tdf1;
+    }
+    else
+    {
+        return tmp<DimensionedField<TypeR, GeoMesh>>
         (
             new DimensionedField<TypeR, GeoMesh>
             (
@@ -62,10 +67,37 @@ public:
             )
         );
     }
+}
 
-    static void clear(const tmp<DimensionedField<Type1, GeoMesh> >& tdf1)
+
+template<class TypeR, class Type1, class GeoMesh>
+class reuseTmpDimensionedField
+{
+public:
+
+    static tmp<DimensionedField<TypeR, GeoMesh>> New
+    (
+        const tmp<DimensionedField<Type1, GeoMesh>>& tdf1,
+        const word& name,
+        const dimensionSet& dimensions
+    )
     {
-        tdf1.clear();
+        const DimensionedField<Type1, GeoMesh>& df1 = tdf1();
+
+        return tmp<DimensionedField<TypeR, GeoMesh>>
+        (
+            new DimensionedField<TypeR, GeoMesh>
+            (
+                IOobject
+                (
+                    name,
+                    df1.instance(),
+                    df1.db()
+                ),
+                df1.mesh(),
+                dimensions
+            )
+        );
     }
 };
 
@@ -75,9 +107,9 @@ class reuseTmpDimensionedField<TypeR, TypeR, GeoMesh>
 {
 public:
 
-    static tmp<DimensionedField<TypeR, GeoMesh> > New
+    static tmp<DimensionedField<TypeR, GeoMesh>> New
     (
-        const tmp<DimensionedField<TypeR, GeoMesh> >& tdf1,
+        const tmp<DimensionedField<TypeR, GeoMesh>>& tdf1,
         const word& name,
         const dimensionSet& dimensions
     )
@@ -93,7 +125,7 @@ public:
         }
         else
         {
-            return tmp<DimensionedField<TypeR, GeoMesh> >
+            return tmp<DimensionedField<TypeR, GeoMesh>>
             (
                 new DimensionedField<TypeR, GeoMesh>
                 (
@@ -107,14 +139,6 @@ public:
                     dimensions
                 )
             );
-        }
-    }
-
-    static void clear(const tmp<DimensionedField<TypeR, GeoMesh> >& tdf1)
-    {
-        if (tdf1.isTmp())
-        {
-            tdf1.ptr();
         }
     }
 };
@@ -125,17 +149,17 @@ class reuseTmpTmpDimensionedField
 {
 public:
 
-    static tmp<DimensionedField<TypeR, GeoMesh> > New
+    static tmp<DimensionedField<TypeR, GeoMesh>> New
     (
-        const tmp<DimensionedField<Type1, GeoMesh> >& tdf1,
-        const tmp<DimensionedField<Type2, GeoMesh> >& tdf2,
+        const tmp<DimensionedField<Type1, GeoMesh>>& tdf1,
+        const tmp<DimensionedField<Type2, GeoMesh>>& tdf2,
         const word& name,
         const dimensionSet& dimensions
     )
     {
         const DimensionedField<Type1, GeoMesh>& df1 = tdf1();
 
-        return tmp<DimensionedField<TypeR, GeoMesh> >
+        return tmp<DimensionedField<TypeR, GeoMesh>>
         (
             new DimensionedField<TypeR, GeoMesh>
             (
@@ -150,16 +174,6 @@ public:
             )
         );
     }
-
-    static void clear
-    (
-        const tmp<DimensionedField<Type1, GeoMesh> >& tdf1,
-        const tmp<DimensionedField<Type2, GeoMesh> >& tdf2
-    )
-    {
-        tdf1.clear();
-        tdf2.clear();
-    }
 };
 
 
@@ -168,10 +182,10 @@ class reuseTmpTmpDimensionedField<TypeR, Type1, Type12, TypeR, GeoMesh>
 {
 public:
 
-    static tmp<DimensionedField<TypeR, GeoMesh> > New
+    static tmp<DimensionedField<TypeR, GeoMesh>> New
     (
-        const tmp<DimensionedField<Type1, GeoMesh> >& tdf1,
-        const tmp<DimensionedField<TypeR, GeoMesh> >& tdf2,
+        const tmp<DimensionedField<Type1, GeoMesh>>& tdf1,
+        const tmp<DimensionedField<TypeR, GeoMesh>>& tdf2,
         const word& name,
         const dimensionSet& dimensions
     )
@@ -188,7 +202,7 @@ public:
         }
         else
         {
-            return tmp<DimensionedField<TypeR, GeoMesh> >
+            return tmp<DimensionedField<TypeR, GeoMesh>>
             (
                 new DimensionedField<TypeR, GeoMesh>
                 (
@@ -204,19 +218,6 @@ public:
             );
         }
     }
-
-    static void clear
-    (
-        const tmp<DimensionedField<Type1, GeoMesh> >& tdf1,
-        const tmp<DimensionedField<TypeR, GeoMesh> >& tdf2
-    )
-    {
-        tdf1.clear();
-        if (tdf2.isTmp())
-        {
-            tdf2.ptr();
-        }
-    }
 };
 
 
@@ -225,10 +226,10 @@ class reuseTmpTmpDimensionedField<TypeR, TypeR, TypeR, Type2, GeoMesh>
 {
 public:
 
-    static tmp<DimensionedField<TypeR, GeoMesh> > New
+    static tmp<DimensionedField<TypeR, GeoMesh>> New
     (
-        const tmp<DimensionedField<TypeR, GeoMesh> >& tdf1,
-        const tmp<DimensionedField<Type2, GeoMesh> >& tdf2,
+        const tmp<DimensionedField<TypeR, GeoMesh>>& tdf1,
+        const tmp<DimensionedField<Type2, GeoMesh>>& tdf2,
         const word& name,
         const dimensionSet& dimensions
     )
@@ -244,7 +245,7 @@ public:
         }
         else
         {
-            return tmp<DimensionedField<TypeR, GeoMesh> >
+            return tmp<DimensionedField<TypeR, GeoMesh>>
             (
                 new DimensionedField<TypeR, GeoMesh>
                 (
@@ -260,19 +261,6 @@ public:
             );
         }
     }
-
-    static void clear
-    (
-        const tmp<DimensionedField<TypeR, GeoMesh> >& tdf1,
-        const tmp<DimensionedField<Type2, GeoMesh> >& tdf2
-    )
-    {
-        if (tdf1.isTmp())
-        {
-            tdf1.ptr();
-        }
-        tdf2.clear();
-    }
 };
 
 
@@ -281,10 +269,10 @@ class reuseTmpTmpDimensionedField<TypeR, TypeR, TypeR, TypeR, GeoMesh>
 {
 public:
 
-    static tmp<DimensionedField<TypeR, GeoMesh> > New
+    static tmp<DimensionedField<TypeR, GeoMesh>> New
     (
-        const tmp<DimensionedField<TypeR, GeoMesh> >& tdf1,
-        const tmp<DimensionedField<TypeR, GeoMesh> >& tdf2,
+        const tmp<DimensionedField<TypeR, GeoMesh>>& tdf1,
+        const tmp<DimensionedField<TypeR, GeoMesh>>& tdf2,
         const word& name,
         const dimensionSet& dimensions
     )
@@ -308,7 +296,7 @@ public:
         }
         else
         {
-            return tmp<DimensionedField<TypeR, GeoMesh> >
+            return tmp<DimensionedField<TypeR, GeoMesh>>
             (
                 new DimensionedField<TypeR, GeoMesh>
                 (
@@ -322,24 +310,6 @@ public:
                     dimensions
                 )
             );
-        }
-    }
-
-    static void clear
-    (
-        const tmp<DimensionedField<TypeR, GeoMesh> >& tdf1,
-        const tmp<DimensionedField<TypeR, GeoMesh> >& tdf2
-    )
-    {
-        if (tdf1.isTmp())
-        {
-            tdf1.ptr();
-            tdf2.clear();
-        }
-        else if (tdf2.isTmp())
-        {
-            tdf1.clear();
-            tdf2.ptr();
         }
     }
 };

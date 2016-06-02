@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -365,7 +365,6 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
 
     // Send back (into recvNonLocal)
     recvNonLocal.clear();
-    recvNonLocal.setSize(sendWantedLocal.size());
     Pstream::exchange<labelList, label>(sendWantedLocal, recvNonLocal);
     sendWantedLocal.clear();
 

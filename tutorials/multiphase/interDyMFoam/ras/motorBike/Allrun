@@ -1,0 +1,20 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+./Allrun.pre
+
+runParallel $(getApplication)
+
+unset FOAM_SIGFPE
+runParallel -s reconstruct redistributePar -reconstruct
+
+# A bit more testing of decomposing
+\cp system/controlDict_nextWrite system/controlDict
+runParallel -s decompose redistributePar -decompose -latestTime
+runParallel -s restart $(getApplication)
+
+
+# ----------------------------------------------------------------- end-of-file

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -366,7 +366,7 @@ void createDummyFvMeshFiles(const polyMesh& mesh, const word& regionName)
 
         Info<< "Testing:" << io.objectPath() << endl;
 
-        if (!io.headerOk())
+        if (!io.typeHeaderOk<IOdictionary>(true))
         {
             Info<< "Writing dummy " << regionName/io.name() << endl;
             dictionary dummyDict;
@@ -392,7 +392,7 @@ void createDummyFvMeshFiles(const polyMesh& mesh, const word& regionName)
             false
         );
 
-        if (!io.headerOk())
+        if (!io.typeHeaderOk<IOdictionary>(true))
         {
             Info<< "Writing dummy " << regionName/io.name() << endl;
             dictionary dummyDict;
@@ -955,13 +955,11 @@ void addCoupledPatches
             }
             else
             {
-                // Rrocessor patch
-
-                word name =
-                    "procBoundary"
-                  + Foam::name(Pstream::myProcNo())
-                  + "to"
-                  + Foam::name(nbrProcI);
+                // Processor patch
+                word name
+                (
+                    processorPolyPatch::newName(Pstream::myProcNo(), nbrProcI)
+                );
 
                 sidePatchID[edgeI] = findPatchID(newPatches, name);
 
@@ -1152,7 +1150,7 @@ tmp<pointField> calcOffset
     vectorField::subField fc = pp.faceCentres();
 
     tmp<pointField> toffsets(new pointField(fc.size()));
-    pointField& offsets = toffsets();
+    pointField& offsets = toffsets.ref();
 
     forAll(fc, i)
     {
@@ -1927,7 +1925,7 @@ int main(int argc, char *argv[])
             extrudeMeshEdges
         )
     );
-    List<Map<label> > compactMap;
+    List<Map<label>> compactMap;
     const mapDistribute extrudeEdgeFacesMap
     (
         globalExtrudeFaces,
@@ -2298,7 +2296,7 @@ int main(int argc, char *argv[])
     // Calculate region normals by reducing local region normals
     pointField localRegionNormals(localToGlobalRegion.size());
     {
-        pointField localSum(localToGlobalRegion.size(), vector::zero);
+        pointField localSum(localToGlobalRegion.size(), Zero);
 
         forAll(pointLocalRegions, faceI)
         {
@@ -2655,7 +2653,7 @@ int main(int argc, char *argv[])
             mesh,
             IOobject::MUST_READ
         );
-        if (io.headerOk())
+        if (io.typeHeaderOk<pointIOField>(true))
         {
             // Read patchFaceCentres and patchEdgeCentres
             Info<< "Reading patch face,edge centres : "

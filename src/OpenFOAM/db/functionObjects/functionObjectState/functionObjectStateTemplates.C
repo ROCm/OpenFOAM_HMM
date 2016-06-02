@@ -100,9 +100,11 @@ void Foam::functionObjectState::getObjectProperty
     Type& value
 ) const
 {
-    if (stateDict_.found(objectName))
+    const IOdictionary& stateDict = this->stateDict();
+
+    if (stateDict.found(objectName))
     {
-        const dictionary& baseDict = stateDict_.subDict(objectName);
+        const dictionary& baseDict = stateDict.subDict(objectName);
         if (baseDict.found(entryName))
         {
             if (baseDict.isDict(entryName))
@@ -126,12 +128,14 @@ void Foam::functionObjectState::setObjectProperty
     const Type& value
 )
 {
-    if (!stateDict_.found(objectName))
+    IOdictionary& stateDict = this->stateDict();
+
+    if (!stateDict.found(objectName))
     {
-        stateDict_.add(objectName, dictionary());
+        stateDict.add(objectName, dictionary());
     }
 
-    dictionary& baseDict = stateDict_.subDict(objectName);
+    dictionary& baseDict = stateDict.subDict(objectName);
     baseDict.add(entryName, value, true);
 }
 
@@ -155,12 +159,14 @@ void Foam::functionObjectState::setObjectResult
     const Type& value
 )
 {
-    if (!stateDict_.found(resultsName_))
+    IOdictionary& stateDict = this->stateDict();
+
+    if (!stateDict.found(resultsName_))
     {
-        stateDict_.add(resultsName_, dictionary());
+        stateDict.add(resultsName_, dictionary());
     }
 
-    dictionary& resultsDict = stateDict_.subDict(resultsName_);
+    dictionary& resultsDict = stateDict.subDict(resultsName_);
 
     if (!resultsDict.found(objectName))
     {
@@ -215,9 +221,11 @@ void Foam::functionObjectState::getObjectResult
     Type& value
 ) const
 {
-    if (stateDict_.found(resultsName_))
+    const IOdictionary& stateDict = this->stateDict();
+
+    if (stateDict.found(resultsName_))
     {
-        const dictionary& resultsDict = stateDict_.subDict(resultsName_);
+        const dictionary& resultsDict = stateDict.subDict(resultsName_);
 
         if (resultsDict.found(objectName))
         {

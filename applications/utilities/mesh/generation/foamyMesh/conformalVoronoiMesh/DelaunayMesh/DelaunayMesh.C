@@ -70,7 +70,7 @@ Foam::DelaunayMesh<Triangulation>::DelaunayMesh
         )
     );
 
-    if (pts.headerOk())
+    if (pts.typeHeaderOk<pointIOField>(true))
     {
         labelIOField types
         (

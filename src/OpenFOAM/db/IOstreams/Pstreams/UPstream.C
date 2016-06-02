@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -147,9 +147,6 @@ Foam::label Foam::UPstream::allocateCommunicator
         }
     }
     parentCommunicator_[index] = parentIndex;
-
-    //linearCommunication_[index] = calcLinearComm(procIDs_[index].size());
-    //treeCommunication_[index] = calcTreeComm(procIDs_[index].size());
 
     // Size but do not fill structure - this is done on-the-fly
     linearCommunication_[index] = List<commsStruct>(procIDs_[index].size());
@@ -360,30 +357,23 @@ Foam::UList<Foam::UPstream::commsStruct>::operator[](const label procID) const
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// By default this is not a parallel run
 bool Foam::UPstream::parRun_(false);
 
-// Free communicators
 Foam::LIFOStack<Foam::label> Foam::UPstream::freeComms_;
 
-// My processor number
 Foam::DynamicList<int> Foam::UPstream::myProcNo_(10);
 
-// List of process IDs
-Foam::DynamicList<Foam::List<int> > Foam::UPstream::procIDs_(10);
+Foam::DynamicList<Foam::List<int>> Foam::UPstream::procIDs_(10);
 
-// Parent communicator
 Foam::DynamicList<Foam::label> Foam::UPstream::parentCommunicator_(10);
 
-// Standard transfer message type
 int Foam::UPstream::msgType_(1);
 
-// Linear communication schedule
-Foam::DynamicList<Foam::List<Foam::UPstream::commsStruct> >
+
+Foam::DynamicList<Foam::List<Foam::UPstream::commsStruct>>
 Foam::UPstream::linearCommunication_(10);
 
-// Multi level communication schedule
-Foam::DynamicList<Foam::List<Foam::UPstream::commsStruct> >
+Foam::DynamicList<Foam::List<Foam::UPstream::commsStruct>>
 Foam::UPstream::treeCommunication_(10);
 
 
@@ -397,10 +387,6 @@ Foam::UPstream::communicator serialComm
 );
 
 
-
-// Should compact transfer be used in which floats replace doubles
-// reducing the bandwidth requirement at the expense of some loss
-// in accuracy
 bool Foam::UPstream::floatTransfer
 (
     Foam::debug::optimisationSwitch("floatTransfer", 0)
@@ -412,8 +398,6 @@ registerOptSwitch
     Foam::UPstream::floatTransfer
 );
 
-// Number of processors at which the reduce algorithm changes from linear to
-// tree
 int Foam::UPstream::nProcsSimpleSum
 (
     Foam::debug::optimisationSwitch("nProcsSimpleSum", 16)
@@ -425,7 +409,6 @@ registerOptSwitch
     Foam::UPstream::nProcsSimpleSum
 );
 
-// Default commsType
 Foam::UPstream::commsTypes Foam::UPstream::defaultCommsType
 (
     commsTypeNames.read(Foam::debug::optimisationSwitches().lookup("commsType"))
@@ -465,15 +448,10 @@ namespace Foam
     addcommsTypeToOpt addcommsTypeToOpt_("commsType");
 }
 
-// Default communicator
 Foam::label Foam::UPstream::worldComm(0);
 
-
-// Warn for use of any communicator
 Foam::label Foam::UPstream::warnComm(-1);
 
-
-// Number of polling cycles in processor updates
 int Foam::UPstream::nPollProcInterfaces
 (
     Foam::debug::optimisationSwitch("nPollProcInterfaces", 0)

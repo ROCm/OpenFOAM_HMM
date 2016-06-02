@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,7 +41,7 @@ SourceFiles
 #include "solidBodyMotionFunction.H"
 #include "primitiveFields.H"
 #include "point.H"
-#include "DataEntry.H"
+#include "Function1.H"
 #include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -68,7 +68,7 @@ class rotatingMotion
         const vector axis_;
 
         //- Angular velocty (rad/sec)
-        autoPtr<DataEntry<scalar> > omega_;
+        autoPtr<Function1<scalar>> omega_;
 
 
     // Private Member Functions

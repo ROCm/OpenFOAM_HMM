@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,7 @@ Description
 
 #include "Time.H"
 #include "IOobject.H"
+#include "IOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,8 +43,9 @@ Foam::word Foam::Time::findInstance
     const word& stopInstance
 ) const
 {
-    // Note: if name is empty, just check the directory itself
-
+    // Note: - if name is empty, just check the directory itself
+    //       - check for an object with local file scope (so no looking up in
+    //         parent directory in case of parallel)
 
     const fileName tPath(path());
     const fileName dirPath(tPath/timeName()/dir);
@@ -56,16 +58,20 @@ Foam::word Foam::Time::findInstance
       :
         (
             isFile(dirPath/name)
-         && IOobject(name, timeName(), dir, *this).headerOk()
+         && IOobject
+            (
+                name,
+                timeName(),
+                dir,
+                *this
+            ).typeHeaderOk<IOList<label>>(false) // use object with local scope
         )
     )
     {
         if (debug)
         {
-            Info<< "Time::findInstance"
-                "(const fileName&, const word&"
-                ", const IOobject::readOption, const word&)"
-                << " : found \"" << name
+            InfoInFunction
+                << "Found \"" << name
                 << "\" in " << timeName()/dir
                 << endl;
         }
@@ -97,16 +103,20 @@ Foam::word Foam::Time::findInstance
           :
             (
                 isFile(tPath/ts[instanceI].name()/dir/name)
-             && IOobject(name, ts[instanceI].name(), dir, *this).headerOk()
+             && IOobject
+                (
+                    name,
+                    ts[instanceI].name(),
+                    dir,
+                    *this
+                ).typeHeaderOk<IOList<label>>(false)
             )
         )
         {
             if (debug)
             {
-                Info<< "Time::findInstance"
-                    "(const fileName&, const word&"
-                    ", const IOobject::readOption, const word&)"
-                    << " : found \"" << name
+                InfoInFunction
+                    << "Found \"" << name
                     << "\" in " << ts[instanceI].name()/dir
                     << endl;
             }
@@ -119,10 +129,8 @@ Foam::word Foam::Time::findInstance
         {
             if (debug)
             {
-                Info<< "Time::findInstance"
-                    "(const fileName&, const word&"
-                    ", const IOobject::readOption, const word&)"
-                    << " : hit stopInstance " << stopInstance
+                InfoInFunction
+                    << "Hit stopInstance " << stopInstance
                     << endl;
             }
 
@@ -168,16 +176,20 @@ Foam::word Foam::Time::findInstance
       :
         (
             isFile(tPath/constant()/dir/name)
-         && IOobject(name, constant(), dir, *this).headerOk()
+         && IOobject
+            (
+                name,
+                constant(),
+                dir,
+                *this
+            ).typeHeaderOk<IOList<label>>(false)
         )
     )
     {
         if (debug)
         {
-            Info<< "Time::findInstance"
-                "(const fileName&, const word&"
-                ", const IOobject::readOption, const word&)"
-                << " : found \"" << name
+            InfoInFunction
+                << "Found \"" << name
                 << "\" in " << constant()/dir
                 << endl;
         }

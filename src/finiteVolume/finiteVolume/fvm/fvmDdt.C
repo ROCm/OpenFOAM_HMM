@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,7 +41,7 @@ namespace fvm
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<fvMatrix<Type> >
+tmp<fvMatrix<Type>>
 ddt
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf
@@ -51,12 +51,12 @@ ddt
     (
         vf.mesh(),
         vf.mesh().ddtScheme("ddt(" + vf.name() + ')')
-    )().fvmDdt(vf);
+    ).ref().fvmDdt(vf);
 }
 
 
 template<class Type>
-tmp<fvMatrix<Type> >
+tmp<fvMatrix<Type>>
 ddt
 (
     const one&,
@@ -68,7 +68,7 @@ ddt
 
 
 template<class Type>
-tmp<fvMatrix<Type> >
+tmp<fvMatrix<Type>>
 ddt
 (
     const dimensionedScalar& rho,
@@ -79,12 +79,12 @@ ddt
     (
         vf.mesh(),
         vf.mesh().ddtScheme("ddt(" + rho.name() + ',' + vf.name() + ')')
-    )().fvmDdt(rho, vf);
+    ).ref().fvmDdt(rho, vf);
 }
 
 
 template<class Type>
-tmp<fvMatrix<Type> >
+tmp<fvMatrix<Type>>
 ddt
 (
     const volScalarField& rho,
@@ -95,12 +95,12 @@ ddt
     (
         vf.mesh(),
         vf.mesh().ddtScheme("ddt(" + rho.name() + ',' + vf.name() + ')')
-    )().fvmDdt(rho, vf);
+    ).ref().fvmDdt(rho, vf);
 }
 
 
 template<class Type>
-tmp<fvMatrix<Type> >
+tmp<fvMatrix<Type>>
 ddt
 (
     const volScalarField& alpha,
@@ -118,12 +118,12 @@ ddt
           + rho.name() + ','
           + vf.name() + ')'
         )
-    )().fvmDdt(alpha, rho, vf);
+    ).ref().fvmDdt(alpha, rho, vf);
 }
 
 
 template<class Type>
-tmp<fvMatrix<Type> >
+tmp<fvMatrix<Type>>
 ddt
 (
     const one&,
@@ -136,7 +136,7 @@ ddt
 
 
 template<class Type>
-tmp<fvMatrix<Type> >
+tmp<fvMatrix<Type>>
 ddt
 (
     const one&,
@@ -149,7 +149,7 @@ ddt
 
 
 template<class Type>
-tmp<fvMatrix<Type> >
+tmp<fvMatrix<Type>>
 ddt
 (
     const volScalarField& alpha,

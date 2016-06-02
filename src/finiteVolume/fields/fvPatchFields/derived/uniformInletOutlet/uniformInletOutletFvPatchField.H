@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,6 +59,7 @@ Note
 
 SeeAlso
     Foam::inletOutletFvPatchField
+    Foam::Function1Types
 
 SourceFiles
     uniformInletOutletFvPatchField.C
@@ -69,7 +70,7 @@ SourceFiles
 #define uniformInletOutletFvPatchField_H
 
 #include "mixedFvPatchField.H"
-#include "DataEntry.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -94,7 +95,7 @@ protected:
         word phiName_;
 
         //- Value
-        autoPtr<DataEntry<Type> > uniformInletValue_;
+        autoPtr<Function1<Type>> uniformInletValue_;
 
 
 public:
@@ -137,9 +138,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchField<Type> > clone() const
+        virtual tmp<fvPatchField<Type>> clone() const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchField<Type>>
             (
                 new uniformInletOutletFvPatchField<Type>(*this)
             );
@@ -153,35 +154,44 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchField<Type> > clone
+        virtual tmp<fvPatchField<Type>> clone
         (
             const DimensionedField<Type, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchField<Type>>
             (
                 new uniformInletOutletFvPatchField<Type>(*this, iF)
             );
         }
 
 
-    // Mapping functions
-
-        //- Map (and resize as needed) from self given a mapping object
-        virtual void autoMap
-        (
-            const fvPatchFieldMapper&
-        );
-
-        //- Reverse map the given fvPatchField onto this fvPatchField
-        virtual void rmap
-        (
-            const fvPatchField<Type>&,
-            const labelList&
-        );
-
-
     // Member functions
+
+        // Attributes
+
+            //- Return true: this patch field is altered by assignment
+            virtual bool assignable() const
+            {
+                return true;
+            }
+
+
+        // Mapping functions
+
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap
+            (
+                const fvPatchFieldMapper&
+            );
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const fvPatchField<Type>&,
+                const labelList&
+            );
+
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
@@ -203,7 +213,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "uniformInletOutletFvPatchField.C"
+    #include "uniformInletOutletFvPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

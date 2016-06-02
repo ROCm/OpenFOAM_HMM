@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,14 +91,14 @@ public:
         template<class Type, template<class> class PatchField, class GeoMesh>
         void write
         (
-            const PtrList<GeometricField<Type, PatchField, GeoMesh> >&
+            const PtrList<GeometricField<Type, PatchField, GeoMesh>>&
         );
 
         //- Write generic internal fields
         template<class Type, class GeoMesh>
         void write
         (
-            const PtrList<DimensionedField<Type, volMesh> >& flds
+            const PtrList<DimensionedField<Type, volMesh>>& flds
         );
 
         //- Interpolate and write volFields
@@ -106,7 +106,7 @@ public:
         void write
         (
             const volPointInterpolation&,
-            const PtrList<GeometricField<Type, fvPatchField, volMesh> >&
+            const PtrList<GeometricField<Type, fvPatchField, volMesh>>&
         );
 
         //- Interpolate and internal fields
@@ -114,7 +114,7 @@ public:
         void write
         (
             const volPointInterpolation&,
-            const PtrList<DimensionedField<Type, volMesh> >&
+            const PtrList<DimensionedField<Type, volMesh>>&
         );
 };
 

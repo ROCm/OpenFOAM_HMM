@@ -39,7 +39,7 @@ SourceFiles
 #include "NamedEnum.H"
 #include "vector.H"
 #include "HashPtrTable.H"
-#include "DataEntry.H"
+#include "Function1.H"
 
 #include "vtkSmartPointer.h"
 
@@ -121,7 +121,7 @@ protected:
         };
 
         //- Colours
-        const HashPtrTable<DataEntry<vector>, word>& colours_;
+        const HashPtrTable<Function1<vector>, word>& colours_;
 
         //- Field name
         word fieldName_;
@@ -183,7 +183,7 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<DataEntry<vector>, word>& colours
+            const HashPtrTable<Function1<vector>, word>& colours
         );
 
 
@@ -196,7 +196,7 @@ public:
         // Access
 
             //- Return the colours
-            const HashPtrTable<DataEntry<vector>, word>& colours() const;
+            const HashPtrTable<Function1<vector>, word>& colours() const;
 
             //- Return the field name
             const word& fieldName() const;

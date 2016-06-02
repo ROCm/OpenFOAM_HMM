@@ -151,7 +151,7 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField::Qro() const
         const radiationModel& radiation =
             db().lookupObject<radiationModel>("radiationProperties");
 
-        tQrt() += patch().lookupPatchField<volScalarField,scalar>
+        tQrt.ref() += patch().lookupPatchField<volScalarField,scalar>
         (
             radiation.externalRadHeatFieldName_
         );

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,40 +38,11 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-Foam::IOobject Foam::radiation::boundaryRadiationProperties::createIOobject
-(
-    const fvMesh& mesh, const word name
-) const
-{
-    IOobject io
-    (
-        name,
-        mesh.time().constant(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-    );
-
-    if (io.headerOk())
-    {
-        io.readOpt() = IOobject::MUST_READ_IF_MODIFIED;
-        return io;
-    }
-    else
-    {
-        io.readOpt() = IOobject::NO_READ;
-        return io;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
 Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
 (
-     const fvMesh& mesh
+    const fvMesh& mesh
 )
 :
     MeshObject
@@ -82,12 +53,16 @@ Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
     >(mesh),
     radBoundaryProperties_()
 {
-    const IOobject boundaryIO
+    IOobject boundaryIO
     (
-        createIOobject(mesh, boundaryRadiationProperties::typeName)
+        boundaryRadiationProperties::typeName,
+        mesh.time().constant(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
     );
 
-    if (boundaryIO.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
+    if (boundaryIO.typeHeaderOk<volScalarField>(true))
     {
         radBoundaryProperties_.set
         (
@@ -99,51 +74,52 @@ Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
 
 // * * * * * * * * * * * * * * * Member fucntions * * * * * * * * * * * * *  //
 
-const Foam::volScalarField& Foam::radiation::boundaryRadiationProperties::
-radBoundaryProperties() const
-{
-    return radBoundaryProperties_();
-}
-
-
-Foam::tmp<Foam::scalarField> Foam::radiation::boundaryRadiationProperties::
-emissivity(const label index, const label bandI) const
+Foam::tmp<Foam::scalarField>
+Foam::radiation::boundaryRadiationProperties::emissivity
+(
+    const label patchI,
+    const label bandI
+) const
 {
     if (!radBoundaryProperties_.empty())
     {
         return refCast<const boundaryRadiationPropertiesFvPatchField>
         (
-            radBoundaryProperties_->boundaryField()[index]
+            radBoundaryProperties_->boundaryField()[patchI]
         ).emissivity(bandI);
     }
     else
     {
         FatalErrorInFunction
             << "Field 'boundaryRadiationProperties'"
-            << "is not found in the constant directory."
-            << "Please add it "
+            << "is not found in the constant directory. "
+            << "Please add it"
             << exit(FatalError);
 
-         return tmp<scalarField>(new scalarField());
+        return tmp<scalarField>(new scalarField());
     }
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::radiation::boundaryRadiationProperties::
-absorptivity(const label index, const label bandI) const
+Foam::tmp<Foam::scalarField>
+Foam::radiation::boundaryRadiationProperties::absorptivity
+(
+    const label patchI,
+    const label bandI
+) const
 {
     if (!radBoundaryProperties_.empty())
     {
         return refCast<const boundaryRadiationPropertiesFvPatchField>
         (
-            radBoundaryProperties_->boundaryField()[index]
+            radBoundaryProperties_->boundaryField()[patchI]
         ).absorptivity(bandI);
     }
     else
     {
         FatalErrorInFunction
             << "Field 'boundaryRadiationProperties'"
-            << "is not found in the constant directory."
+            << "is not found in the constant directory. "
             << "Please add it "
             << exit(FatalError);
 
@@ -152,22 +128,26 @@ absorptivity(const label index, const label bandI) const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::radiation::boundaryRadiationProperties::
-transmissivity(const label index, const label bandI) const
+Foam::tmp<Foam::scalarField>
+Foam::radiation::boundaryRadiationProperties::transmissivity
+(
+    const label patchI,
+    const label bandI
+) const
 {
     if (!radBoundaryProperties_.empty())
     {
         return refCast<const boundaryRadiationPropertiesFvPatchField>
         (
-            radBoundaryProperties_->boundaryField()[index]
+            radBoundaryProperties_->boundaryField()[patchI]
         ).transmissivity(bandI);
     }
     else
     {
         FatalErrorInFunction
             << "Field 'boundaryRadiationProperties'"
-            << "is not found in the constant directory."
-            << "Please add it "
+            << "is not found in the constant directory. "
+            << "Please add it"
             << exit(FatalError);
 
         return tmp<scalarField>(new scalarField());
@@ -175,22 +155,26 @@ transmissivity(const label index, const label bandI) const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::radiation::boundaryRadiationProperties::
-reflectivity(const label index, const label bandI) const
+Foam::tmp<Foam::scalarField>
+Foam::radiation::boundaryRadiationProperties::reflectivity
+(
+    const label patchI,
+    const label bandI
+) const
 {
     if (!radBoundaryProperties_.empty())
     {
         return refCast<const boundaryRadiationPropertiesFvPatchField>
         (
-            radBoundaryProperties_->boundaryField()[index]
+            radBoundaryProperties_->boundaryField()[patchI]
         ).reflectivity(bandI);
     }
     else
     {
         FatalErrorInFunction
             << "Field 'boundaryRadiationProperties'"
-            << "is not found in the constant directory."
-            << "Please add it "
+            << "is not found in the constant directory. "
+            << "Please add it"
             << exit(FatalError);
 
         return tmp<scalarField>(new scalarField());

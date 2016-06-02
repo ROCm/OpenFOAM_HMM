@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -557,7 +557,7 @@ void Foam::boundaryMesh::read(const polyMesh& mesh)
         {
             const face& f = msh[faceI];
 
-            point ctr(vector::zero);
+            point ctr(Zero);
 
             forAll(f, fp)
             {
@@ -925,7 +925,7 @@ Foam::labelList Foam::boundaryMesh::getNearest
     bbMax.z() += 2*tol;
 
     const scalar planarTol =
-        indexedOctree<treeDataPrimitivePatch<uindirectPrimitivePatch> >::
+        indexedOctree<treeDataPrimitivePatch<uindirectPrimitivePatch>>::
         perturbTol();
 
 
@@ -1259,7 +1259,7 @@ void Foam::boundaryMesh::patchify
 
     if (newPatchPtrList.size())
     {
-        List<DynamicList<label> > patchFaces(nNewPatches);
+        List<DynamicList<label>> patchFaces(nNewPatches);
 
         // Give reasonable estimate for size of patches
         label nAvgFaces =

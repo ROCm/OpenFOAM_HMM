@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(commSchedule, 0);
+    defineTypeNameAndDebug(commSchedule, 0);
 }
 
 
@@ -62,7 +62,6 @@ Foam::label Foam::commSchedule::outstandingComms
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from separate addressing
 Foam::commSchedule::commSchedule
 (
     const label nProcs,
@@ -73,7 +72,7 @@ Foam::commSchedule::commSchedule
     procSchedule_(nProcs)
 {
     // Determine comms per processor.
-    List<DynamicList<label> > procToComms(nProcs);
+    List<DynamicList<label>> procToComms(nProcs);
 
     forAll(comms, commI)
     {

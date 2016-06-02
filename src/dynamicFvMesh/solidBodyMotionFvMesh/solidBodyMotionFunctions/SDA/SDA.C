@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,11 +90,10 @@ Foam::septernion Foam::solidBodyMotionFunctions::SDA::transformation() const
         swayA_*(sin(wr*time + phs) - sin(phs)),
         heaveA_*(sin(wr*time + phh) - sin(phh))
     );
-    quaternion R(rollA*sin(wr*time + phr), 0, 0);
-    septernion TR(septernion(CofG_ + T)*R*septernion(-CofG_));
+    quaternion R(quaternion::XYZ, vector(rollA*sin(wr*time + phr), 0, 0));
+    septernion TR(septernion(-CofG_ - T)*R*septernion(CofG_));
 
-    Info<< "solidBodyMotionFunctions::SDA::transformation(): "
-        << "Time = " << time << " transformation: " << TR << endl;
+    DebugInFunction << "Time = " << time << " transformation: " << TR << endl;
 
     return TR;
 }

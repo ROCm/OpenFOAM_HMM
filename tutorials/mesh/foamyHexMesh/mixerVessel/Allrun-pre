@@ -6,26 +6,18 @@ cd ${0%/*} || exit 1    # Run from this directory
 
 intersectSurfaces()
 {
-    runApplication              \
-        surfaceBooleanFeatures  \
-        intersection            \
-        "$@"
-
     outputName1=$(basename $1)
     outputName1=${outputName1%.*}
 
     outputName2=$(basename $2)
     outputName2=${outputName2%.*}
 
-    mv log.surfaceBooleanFeatures \
-       log.surfaceBooleanFeatures.$outputName1:$outputName2
+    runApplication -s $outputName1:$outputName2 \
+        surfaceBooleanFeatures intersection "$@"
 }
 
 # Set application name
 application=$(getApplication)
-
-# Get number of processors to run on
-nProcs=$(getNumberOfProcessors)
 
 \rm -rf 0
 
@@ -59,25 +51,28 @@ done
 
 # Meshing
 \cp system/controlDict.mesh system/controlDict
-\cp system/collapseDict.collapseFaces system/collapseDict
 
 runApplication blockMesh -region backgroundMeshDecomposition
 
-runApplication decomposePar -region backgroundMeshDecomposition
+runApplication -s backgroundMeshDecomposition \
+    decomposePar -region backgroundMeshDecomposition
 
 runApplication surfaceFeatureExtract
 
-runParallel foamyHexMesh $nProcs
+runParallel foamyHexMesh
 
-runParallel -log log.collapseFaces collapseEdges $nProcs -collapseFaces -latestTime
+runParallel -s faces \
+    collapseEdges -collapseFaces -latestTime \
+                  -dict system/collapseDict.collapseFaces
 
-#\cp system/collapseDict.indirectPatchFaces system/collapseDict
-#runParallel collapseEdges $nProcs -collapseFaceSet indirectPatchFaces -latestTime
-#mv log.collapseEdges log.collapseFaceSet
+#runParallel -s faceSet  \
+#    collapseEdges -collapseFaceSet indirectPatchFaces -latestTime \
+#                  -dict system/collapseDict.indirectPatchFaces
 
-runParallel checkMesh $nProcs -allTopology -allGeometry -latestTime
+runParallel checkMesh -allTopology -allGeometry -latestTime
 
-# Copy the mesh into polyMesh and delete the latest time directory
+# Copy the mesh from the latest time folder into polyMesh and delete that
+# latest time folder
 latestTime=$(foamInfoExec -case processor0 -latestTime)
 if [ "$latestTime" != "constant" ] && [ -d processor0/$latestTime/polyMesh ]
 then
@@ -88,4 +83,4 @@ then
 fi
 
 
-# ----------------------------------------------------------------- end-of-file
+#------------------------------------------------------------------------------

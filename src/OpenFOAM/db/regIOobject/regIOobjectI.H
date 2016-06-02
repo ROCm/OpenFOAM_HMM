@@ -88,15 +88,15 @@ inline Foam::label& Foam::regIOobject::eventNo()
 }
 
 
-inline Foam::label Foam::regIOobject::watchIndex() const
+inline const Foam::labelList& Foam::regIOobject::watchIndices() const
 {
-    return watchIndex_;
+    return watchIndices_;
 }
 
 
-inline Foam::label& Foam::regIOobject::watchIndex()
+inline Foam::labelList& Foam::regIOobject::watchIndices()
 {
-    return watchIndex_;
+    return watchIndices_;
 }
 
 

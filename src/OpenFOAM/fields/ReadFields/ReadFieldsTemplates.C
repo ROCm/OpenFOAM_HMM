@@ -36,7 +36,7 @@ Foam::wordList Foam::ReadFields
 (
     const typename GeoMesh::Mesh& mesh,
     const IOobjectList& objects,
-    PtrList<GeometricField<Type, PatchField, GeoMesh> >& fields,
+    PtrList<GeometricField<Type, PatchField, GeoMesh>>& fields,
     const bool syncPar,
     const bool readOldTime
 )

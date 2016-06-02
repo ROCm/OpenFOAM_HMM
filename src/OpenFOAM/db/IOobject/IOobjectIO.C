@@ -36,6 +36,9 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<IOobject>& ip)
     os  << "IOobject: "
         << io.type() << token::SPACE
         << io.name() << token::SPACE
+        << "readOpt:" << token::SPACE << io.readOpt() << token::SPACE
+        << "writeOpt:" << token::SPACE << io.writeOpt() << token::SPACE
+        << "globalObject:" << token::SPACE << io.globalObject() << token::SPACE
         << io.path() << endl;
 
     return os;

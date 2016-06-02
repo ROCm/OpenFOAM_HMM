@@ -25,6 +25,14 @@ addLayers       false;
 //          surface "_ "region. Default is true
 //singleRegionName false;
 
+// Optional: avoid patch-face merging. Allows mesh to be used for
+//           refinement/unrefinement
+//mergePatchFaces    false; // default true
+
+// Optional: keep zero-sized patches. By default snappyHexMesh filters
+//           these out.
+//keepPatches    true; // default false
+
 
 // Geometry. Definition of all surfaces. All surfaces are of class
 // searchableSurface.
@@ -71,10 +79,6 @@ geometry
     }
 };
 
-
-// Optional: avoid patch-face merging. Allows mesh to be used for
-//           refinement/unrefinement
-//mergePatchFaces    off; // default on
 
 // Settings for the castellatedMesh generation.
 castellatedMeshControls
@@ -281,14 +285,18 @@ castellatedMeshControls
     // after refinement.
     //
     // There are two different ways of specifying the regions to keep:
-    // 1. a single locationInMesh. All the 'zoned' surfaces are marked as such
+    // 1. a single locationInMesh. This is the unzoned part of the mesh.
+    //    All the 'zoned' surfaces are marked as such
     //    in the refinementSurfaces with the faceZone and cellZone keywords.
+    //    It is illegal to have the locationInMesh inside a surface for which
+    //    a cellZone is specified.
     //
     // or
     //
     // 2. multiple locationsInMesh, with per location the name of the cellZone.
     //    This uses walking to determine zones and automatically creates
-    //    faceZones on the outside of cellZones.
+    //    faceZones on the outside of cellZones. The special name 'none' is
+    //    used to indicate the unzoned/background part of the mesh.
 
 
         // Ad 1. Specify a single location and how to treat faces inbetween

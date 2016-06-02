@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,13 +29,8 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 template<class Type, class CombineOp>
-void pointConstraints::syncUntransformedData
+void Foam::pointConstraints::syncUntransformedData
 (
     const polyMesh& mesh,
     List<Type>& pointData,
@@ -91,7 +86,7 @@ void pointConstraints::syncUntransformedData
 
 
 template<class Type>
-void pointConstraints::setPatchFields
+void Foam::pointConstraints::setPatchFields
 (
     GeometricField<Type, pointPatchField, pointMesh>& pf
 )
@@ -100,9 +95,9 @@ void pointConstraints::setPatchFields
     {
         pointPatchField<Type>& ppf = pf.boundaryField()[patchI];
 
-        if (isA<valuePointPatchField<Type> >(ppf))
+        if (isA<valuePointPatchField<Type>>(ppf))
         {
-            refCast<valuePointPatchField<Type> >(ppf) =
+            refCast<valuePointPatchField<Type>>(ppf) =
                 ppf.patchInternalField();
         }
     }
@@ -110,7 +105,7 @@ void pointConstraints::setPatchFields
 
 
 template<class Type>
-void pointConstraints::constrainCorners
+void Foam::pointConstraints::constrainCorners
 (
     GeometricField<Type, pointPatchField, pointMesh>& pf
 ) const
@@ -127,7 +122,7 @@ void pointConstraints::constrainCorners
 
 
 template<class Type>
-void pointConstraints::constrain
+void Foam::pointConstraints::constrain
 (
     GeometricField<Type, pointPatchField, pointMesh>& pf,
     const bool overrideFixedValue
@@ -150,9 +145,5 @@ void pointConstraints::constrain
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

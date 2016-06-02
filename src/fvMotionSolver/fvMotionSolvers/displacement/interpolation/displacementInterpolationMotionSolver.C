@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ License
 #include "displacementInterpolationMotionSolver.H"
 #include "addToRunTimeSelectionTable.H"
 #include "SortableList.H"
-#include "IOList.H"
+#include "GlobalIOList.H"
 #include "Tuple2.H"
 #include "mapPolyMesh.H"
 #include "interpolateXY.H"
@@ -52,7 +52,10 @@ namespace Foam
     );
 
     template<>
-    const word IOList<Tuple2<scalar, vector> >::typeName("scalarVectorTable");
+    const word GlobalIOList<Tuple2<scalar, vector>>::typeName
+    (
+        "scalarVectorTable"
+    );
 }
 
 
@@ -63,7 +66,7 @@ void Foam::displacementInterpolationMotionSolver::calcInterpolation()
     // Get zones and their interpolation tables for displacement
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    List<Pair<word> > faceZoneToTable
+    List<Pair<word>> faceZoneToTable
     (
         coeffDict().lookup("interpolationTables")
     );
@@ -88,7 +91,7 @@ void Foam::displacementInterpolationMotionSolver::calcInterpolation()
 
         const word& tableName = faceZoneToTable[i][1];
 
-        IOList<Tuple2<scalar, vector> > table
+        GlobalIOList<Tuple2<scalar, vector>> table
         (
             IOobject
             (
@@ -341,10 +344,10 @@ Foam::displacementInterpolationMotionSolver::curPoints() const
     }
 
     tmp<pointField> tcurPoints(new pointField(points0()));
-    pointField& curPoints = tcurPoints();
+    pointField& curPoints = tcurPoints.ref();
 
     // Interpolate the displacement of the face zones.
-    vectorField zoneDisp(displacements_.size(), vector::zero);
+    vectorField zoneDisp(displacements_.size(), Zero);
     forAll(zoneDisp, zoneI)
     {
         if (times_[zoneI].size())

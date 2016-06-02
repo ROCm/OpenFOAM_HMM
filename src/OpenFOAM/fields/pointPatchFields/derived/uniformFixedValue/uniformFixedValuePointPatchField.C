@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,15 +25,10 @@ License
 
 #include "uniformFixedValuePointPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * * //
 
 template<class Type>
-uniformFixedValuePointPatchField<Type>::
+Foam::uniformFixedValuePointPatchField<Type>::
 uniformFixedValuePointPatchField
 (
     const pointPatch& p,
@@ -46,7 +41,7 @@ uniformFixedValuePointPatchField
 
 
 template<class Type>
-uniformFixedValuePointPatchField<Type>::
+Foam::uniformFixedValuePointPatchField<Type>::
 uniformFixedValuePointPatchField
 (
     const pointPatch& p,
@@ -55,7 +50,7 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(p, iF, dict, false),
-    uniformValue_(DataEntry<Type>::New("uniformValue", dict))
+    uniformValue_(Function1<Type>::New("uniformValue", dict))
 {
     if (dict.found("value"))
     {
@@ -73,7 +68,7 @@ uniformFixedValuePointPatchField
 
 
 template<class Type>
-uniformFixedValuePointPatchField<Type>::
+Foam::uniformFixedValuePointPatchField<Type>::
 uniformFixedValuePointPatchField
 (
     const uniformFixedValuePointPatchField<Type>& ptf,
@@ -83,7 +78,7 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(ptf, p, iF, mapper),
-    uniformValue_(ptf.uniformValue_().clone().ptr())
+    uniformValue_(ptf.uniformValue_, false)
 {
     // For safety re-evaluate
     const scalar t = this->db().time().timeOutputValue();
@@ -92,19 +87,19 @@ uniformFixedValuePointPatchField
 
 
 template<class Type>
-uniformFixedValuePointPatchField<Type>::
+Foam::uniformFixedValuePointPatchField<Type>::
 uniformFixedValuePointPatchField
 (
     const uniformFixedValuePointPatchField<Type>& ptf
 )
 :
     fixedValuePointPatchField<Type>(ptf),
-    uniformValue_(ptf.uniformValue_().clone().ptr())
+    uniformValue_(ptf.uniformValue_, false)
 {}
 
 
 template<class Type>
-uniformFixedValuePointPatchField<Type>::
+Foam::uniformFixedValuePointPatchField<Type>::
 uniformFixedValuePointPatchField
 (
     const uniformFixedValuePointPatchField<Type>& ptf,
@@ -112,7 +107,7 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(ptf, iF),
-    uniformValue_(ptf.uniformValue_().clone().ptr())
+    uniformValue_(ptf.uniformValue_, false)
 {
     // For safety re-evaluate
     const scalar t = this->db().time().timeOutputValue();
@@ -123,7 +118,7 @@ uniformFixedValuePointPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void uniformFixedValuePointPatchField<Type>::updateCoeffs()
+void Foam::uniformFixedValuePointPatchField<Type>::updateCoeffs()
 {
     if (this->updated())
     {
@@ -138,7 +133,7 @@ void uniformFixedValuePointPatchField<Type>::updateCoeffs()
 
 
 template<class Type>
-void uniformFixedValuePointPatchField<Type>::
+void Foam::uniformFixedValuePointPatchField<Type>::
 write(Ostream& os) const
 {
     // Note: write value
@@ -146,9 +141,5 @@ write(Ostream& os) const
     uniformValue_->writeData(os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

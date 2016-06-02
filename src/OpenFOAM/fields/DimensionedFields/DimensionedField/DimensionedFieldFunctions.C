@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,8 +35,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Global functions  * * * * * * * * * * * * * //
 
-template<class Type, class GeoMesh, int r>
-tmp<DimensionedField<typename powProduct<Type, r>::type, GeoMesh> >
+template<class Type, class GeoMesh, direction r>
+tmp<DimensionedField<typename powProduct<Type, r>::type, GeoMesh>>
 pow
 (
     const DimensionedField<Type, GeoMesh>& df,
@@ -45,7 +45,7 @@ pow
 {
     typedef typename powProduct<Type, r>::type powProductType;
 
-    tmp<DimensionedField<powProductType, GeoMesh> > tPow
+    tmp<DimensionedField<powProductType, GeoMesh>> tPow
     (
         new DimensionedField<powProductType, GeoMesh>
         (
@@ -60,17 +60,17 @@ pow
         )
     );
 
-    pow<Type, r, GeoMesh>(tPow().field(), df.field());
+    pow<Type, r, GeoMesh>(tPow.ref().field(), df.field());
 
     return tPow;
 }
 
 
-template<class Type, class GeoMesh, int r>
-tmp<DimensionedField<typename powProduct<Type, r>::type, GeoMesh> >
+template<class Type, class GeoMesh, direction r>
+tmp<DimensionedField<typename powProduct<Type, r>::type, GeoMesh>>
 pow
 (
-    const tmp<DimensionedField<Type, GeoMesh> >& tdf,
+    const tmp<DimensionedField<Type, GeoMesh>>& tdf,
     typename powProduct<Type, r>::type
 )
 {
@@ -78,7 +78,7 @@ pow
 
     const DimensionedField<Type, GeoMesh>& df = tdf();
 
-    tmp<DimensionedField<powProductType, GeoMesh> > tPow =
+    tmp<DimensionedField<powProductType, GeoMesh>> tPow =
         reuseTmpDimensionedField<powProductType, Type, GeoMesh>::New
         (
             tdf,
@@ -86,20 +86,20 @@ pow
             pow(df.dimensions(), r)
         );
 
-    pow<Type, r, GeoMesh>(tPow().field(), df.field());
+    pow<Type, r, GeoMesh>(tPow.ref().field(), df.field());
 
-    reuseTmpDimensionedField<powProductType, Type, GeoMesh>::clear(tdf);
+    tdf.clear();
 
     return tPow;
 }
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<typename outerProduct<Type, Type>::type, GeoMesh> >
+tmp<DimensionedField<typename outerProduct<Type, Type>::type, GeoMesh>>
 sqr(const DimensionedField<Type, GeoMesh>& df)
 {
     typedef typename outerProduct<Type, Type>::type outerProductType;
 
-    tmp<DimensionedField<outerProductType, GeoMesh> > tSqr
+    tmp<DimensionedField<outerProductType, GeoMesh>> tSqr
     (
         new DimensionedField<outerProductType, GeoMesh>
         (
@@ -114,20 +114,20 @@ sqr(const DimensionedField<Type, GeoMesh>& df)
         )
     );
 
-    sqr(tSqr().field(), df.field());
+    sqr(tSqr.ref().field(), df.field());
 
     return tSqr;
 }
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<typename outerProduct<Type, Type>::type, GeoMesh> >
-sqr(const tmp<DimensionedField<Type, GeoMesh> >& tdf)
+tmp<DimensionedField<typename outerProduct<Type, Type>::type, GeoMesh>>
+sqr(const tmp<DimensionedField<Type, GeoMesh>>& tdf)
 {
     typedef typename outerProduct<Type, Type>::type outerProductType;
 
     const DimensionedField<Type, GeoMesh>& df = tdf();
 
-    tmp<DimensionedField<outerProductType, GeoMesh> > tSqr =
+    tmp<DimensionedField<outerProductType, GeoMesh>> tSqr =
         reuseTmpDimensionedField<outerProductType, Type, GeoMesh>::New
         (
             tdf,
@@ -135,21 +135,21 @@ sqr(const tmp<DimensionedField<Type, GeoMesh> >& tdf)
             sqr(df.dimensions())
         );
 
-    sqr(tSqr().field(), df.field());
+    sqr(tSqr.ref().field(), df.field());
 
-    reuseTmpDimensionedField<outerProductType, Type, GeoMesh>::clear(tdf);
+    tdf.clear();
 
     return tSqr;
 }
 
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<scalar, GeoMesh> > magSqr
+tmp<DimensionedField<scalar, GeoMesh>> magSqr
 (
     const DimensionedField<Type, GeoMesh>& df
 )
 {
-    tmp<DimensionedField<scalar, GeoMesh> > tMagSqr
+    tmp<DimensionedField<scalar, GeoMesh>> tMagSqr
     (
         new DimensionedField<scalar, GeoMesh>
         (
@@ -164,20 +164,20 @@ tmp<DimensionedField<scalar, GeoMesh> > magSqr
         )
     );
 
-    magSqr(tMagSqr().field(), df.field());
+    magSqr(tMagSqr.ref().field(), df.field());
 
     return tMagSqr;
 }
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<scalar, GeoMesh> > magSqr
+tmp<DimensionedField<scalar, GeoMesh>> magSqr
 (
-    const tmp<DimensionedField<Type, GeoMesh> >& tdf
+    const tmp<DimensionedField<Type, GeoMesh>>& tdf
 )
 {
     const DimensionedField<Type, GeoMesh>& df = tdf();
 
-    tmp<DimensionedField<scalar, GeoMesh> > tMagSqr =
+    tmp<DimensionedField<scalar, GeoMesh>> tMagSqr =
         reuseTmpDimensionedField<scalar, Type, GeoMesh>::New
         (
             tdf,
@@ -185,21 +185,21 @@ tmp<DimensionedField<scalar, GeoMesh> > magSqr
             sqr(df.dimensions())
         );
 
-    magSqr(tMagSqr().field(), df.field());
+    magSqr(tMagSqr.ref().field(), df.field());
 
-    reuseTmpDimensionedField<scalar, Type, GeoMesh>::clear(tdf);
+    tdf.clear();
 
     return tMagSqr;
 }
 
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<scalar, GeoMesh> > mag
+tmp<DimensionedField<scalar, GeoMesh>> mag
 (
     const DimensionedField<Type, GeoMesh>& df
 )
 {
-    tmp<DimensionedField<scalar, GeoMesh> > tMag
+    tmp<DimensionedField<scalar, GeoMesh>> tMag
     (
         new DimensionedField<scalar, GeoMesh>
         (
@@ -214,20 +214,20 @@ tmp<DimensionedField<scalar, GeoMesh> > mag
         )
     );
 
-    mag(tMag().field(), df.field());
+    mag(tMag.ref().field(), df.field());
 
     return tMag;
 }
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<scalar, GeoMesh> > mag
+tmp<DimensionedField<scalar, GeoMesh>> mag
 (
-    const tmp<DimensionedField<Type, GeoMesh> >& tdf
+    const tmp<DimensionedField<Type, GeoMesh>>& tdf
 )
 {
     const DimensionedField<Type, GeoMesh>& df = tdf();
 
-    tmp<DimensionedField<scalar, GeoMesh> > tMag =
+    tmp<DimensionedField<scalar, GeoMesh>> tMag =
         reuseTmpDimensionedField<scalar, Type, GeoMesh>::New
         (
             tdf,
@@ -235,9 +235,9 @@ tmp<DimensionedField<scalar, GeoMesh> > mag
             df.dimensions()
         );
 
-    mag(tMag().field(), df.field());
+    mag(tMag.ref().field(), df.field());
 
-    reuseTmpDimensionedField<scalar, Type, GeoMesh>::clear(tdf);
+    tdf.clear();
 
     return tMag;
 }
@@ -253,7 +253,7 @@ cmptAv(const DimensionedField<Type, GeoMesh>& df)
 {
     typedef typename DimensionedField<Type, GeoMesh>::cmptType cmptType;
 
-    tmp<DimensionedField<cmptType, GeoMesh> > CmptAv
+    tmp<DimensionedField<cmptType, GeoMesh>> CmptAv
     (
         new DimensionedField<scalar, GeoMesh>
         (
@@ -268,7 +268,7 @@ cmptAv(const DimensionedField<Type, GeoMesh>& df)
         )
     );
 
-    cmptAv(CmptAv().field(), df.field());
+    cmptAv(CmptAv.ref().field(), df.field());
 
     return CmptAv;
 }
@@ -279,14 +279,14 @@ tmp
     DimensionedField
         <typename DimensionedField<Type, GeoMesh>::cmptType, GeoMesh>
 >
-cmptAv(const tmp<DimensionedField<Type, GeoMesh> >& tdf)
+cmptAv(const tmp<DimensionedField<Type, GeoMesh>>& tdf)
 {
     typedef typename DimensionedField<Type, GeoMesh>::cmptType
         cmptType;
 
     const DimensionedField<Type, GeoMesh>& df = tdf();
 
-    tmp<DimensionedField<cmptType, GeoMesh> > CmptAv =
+    tmp<DimensionedField<cmptType, GeoMesh>> CmptAv =
         reuseTmpDimensionedField<cmptType, Type, GeoMesh>::New
         (
             tdf,
@@ -294,38 +294,38 @@ cmptAv(const tmp<DimensionedField<Type, GeoMesh> >& tdf)
             df.dimensions()
         );
 
-    cmptAv(CmptAv().field(), df.field());
+    cmptAv(CmptAv.ref().field(), df.field());
 
-    reuseTmpDimensionedField<cmptType, Type, GeoMesh>::clear(tdf);
+    tdf.clear();
 
     return CmptAv;
 }
 
-#define UNARY_REDUCTION_FUNCTION(returnType, func, dfunc)                     \
-                                                                              \
-template<class Type, class GeoMesh>                                           \
-dimensioned<returnType> func                                                  \
-(                                                                             \
-    const DimensionedField<Type, GeoMesh>& df                                 \
-)                                                                             \
-{                                                                             \
-    return dimensioned<Type>                                                  \
-    (                                                                         \
-        #func "(" + df.name() + ')',                                          \
-        df.dimensions(),                                                      \
-        dfunc(df.field())                                                     \
-    );                                                                        \
-}                                                                             \
-                                                                              \
-template<class Type, class GeoMesh>                                           \
-dimensioned<returnType> func                                                  \
-(                                                                             \
-    const tmp<DimensionedField<Type, GeoMesh> >& tdf1                         \
-)                                                                             \
-{                                                                             \
-    dimensioned<returnType> res = func(tdf1());                               \
-    tdf1.clear();                                                             \
-    return res;                                                               \
+#define UNARY_REDUCTION_FUNCTION(returnType, func, dfunc)                      \
+                                                                               \
+template<class Type, class GeoMesh>                                            \
+dimensioned<returnType> func                                                   \
+(                                                                              \
+    const DimensionedField<Type, GeoMesh>& df                                  \
+)                                                                              \
+{                                                                              \
+    return dimensioned<Type>                                                   \
+    (                                                                          \
+        #func "(" + df.name() + ')',                                           \
+        df.dimensions(),                                                       \
+        dfunc(df.field())                                                      \
+    );                                                                         \
+}                                                                              \
+                                                                               \
+template<class Type, class GeoMesh>                                            \
+dimensioned<returnType> func                                                   \
+(                                                                              \
+    const tmp<DimensionedField<Type, GeoMesh>>& tdf1                           \
+)                                                                              \
+{                                                                              \
+    dimensioned<returnType> res = func(tdf1());                                \
+    tdf1.clear();                                                              \
+    return res;                                                                \
 }
 
 UNARY_REDUCTION_FUNCTION(Type, max, gMax)
@@ -364,279 +364,279 @@ BINARY_TYPE_OPERATOR_FS(Type, Type, scalar, /, '|', divide)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define PRODUCT_OPERATOR(product, op, opFunc)                                 \
-                                                                              \
-template<class Type1, class Type2, class GeoMesh>                             \
-tmp<DimensionedField<typename product<Type1, Type2>::type, GeoMesh> >         \
-operator op                                                                   \
-(                                                                             \
-    const DimensionedField<Type1, GeoMesh>& df1,                              \
-    const DimensionedField<Type2, GeoMesh>& df2                               \
-)                                                                             \
-{                                                                             \
-    typedef typename product<Type1, Type2>::type productType;                 \
-    tmp<DimensionedField<productType, GeoMesh> > tRes                         \
-    (                                                                         \
-        new DimensionedField<productType, GeoMesh>                            \
-        (                                                                     \
-            IOobject                                                          \
-            (                                                                 \
-                '(' + df1.name() + #op + df2.name() + ')',                    \
-                df1.instance(),                                               \
-                df1.db()                                                      \
-            ),                                                                \
-            df1.mesh(),                                                       \
-            df1.dimensions() op df2.dimensions()                              \
-        )                                                                     \
-    );                                                                        \
-                                                                              \
-    Foam::opFunc(tRes().field(), df1.field(), df2.field());                   \
-                                                                              \
-    return tRes;                                                              \
-}                                                                             \
-                                                                              \
-template<class Type1, class Type2, class GeoMesh>                             \
-tmp<DimensionedField<typename product<Type1, Type2>::type, GeoMesh> >         \
-operator op                                                                   \
-(                                                                             \
-    const DimensionedField<Type1, GeoMesh>& df1,                              \
-    const tmp<DimensionedField<Type2, GeoMesh> >& tdf2                        \
-)                                                                             \
-{                                                                             \
-    typedef typename product<Type1, Type2>::type productType;                 \
-                                                                              \
-    const DimensionedField<Type2, GeoMesh>& df2 = tdf2();                     \
-                                                                              \
-    tmp<DimensionedField<productType, GeoMesh> > tRes =                       \
-        reuseTmpDimensionedField<productType, Type2, GeoMesh>::New            \
-        (                                                                     \
-            tdf2,                                                             \
-            '(' + df1.name() + #op + df2.name() + ')',                        \
-            df1.dimensions() op df2.dimensions()                              \
-        );                                                                    \
-                                                                              \
-    Foam::opFunc(tRes().field(), df1.field(), df2.field());                   \
-                                                                              \
-    reuseTmpDimensionedField<productType, Type2, GeoMesh>::clear(tdf2);       \
-                                                                              \
-    return tRes;                                                              \
-}                                                                             \
-                                                                              \
-template<class Type1, class Type2, class GeoMesh>                             \
-tmp<DimensionedField<typename product<Type1, Type2>::type, GeoMesh> >         \
-operator op                                                                   \
-(                                                                             \
-    const tmp<DimensionedField<Type1, GeoMesh> >& tdf1,                       \
-    const DimensionedField<Type2, GeoMesh>& df2                               \
-)                                                                             \
-{                                                                             \
-    typedef typename product<Type1, Type2>::type productType;                 \
-                                                                              \
-    const DimensionedField<Type1, GeoMesh>& df1 = tdf1();                     \
-                                                                              \
-    tmp<DimensionedField<productType, GeoMesh> > tRes =                       \
-        reuseTmpDimensionedField<productType, Type1, GeoMesh>::New            \
-        (                                                                     \
-            tdf1,                                                             \
-            '(' + df1.name() + #op + df2.name() + ')',                        \
-            df1.dimensions() op df2.dimensions()                              \
-        );                                                                    \
-                                                                              \
-    Foam::opFunc(tRes().field(), df1.field(), df2.field());                   \
-                                                                              \
-    reuseTmpDimensionedField<productType, Type1, GeoMesh>::clear(tdf1);       \
-                                                                              \
-    return tRes;                                                              \
-}                                                                             \
-                                                                              \
-template<class Type1, class Type2, class GeoMesh>                             \
-tmp<DimensionedField<typename product<Type1, Type2>::type, GeoMesh> >         \
-operator op                                                                   \
-(                                                                             \
-    const tmp<DimensionedField<Type1, GeoMesh> >& tdf1,                       \
-    const tmp<DimensionedField<Type2, GeoMesh> >& tdf2                        \
-)                                                                             \
-{                                                                             \
-    typedef typename product<Type1, Type2>::type productType;                 \
-                                                                              \
-    const DimensionedField<Type1, GeoMesh>& df1 = tdf1();                     \
-    const DimensionedField<Type2, GeoMesh>& df2 = tdf2();                     \
-                                                                              \
-    tmp<DimensionedField<productType, GeoMesh> > tRes =                       \
-        reuseTmpTmpDimensionedField                                           \
-        <productType, Type1, Type1, Type2, GeoMesh>::New                      \
-        (                                                                     \
-            tdf1,                                                             \
-            tdf2,                                                             \
-            '(' + df1.name() + #op + df2.name() + ')',                        \
-            df1.dimensions() op df2.dimensions()                              \
-        );                                                                    \
-                                                                              \
-    Foam::opFunc(tRes().field(), df1.field(), df2.field());                   \
-                                                                              \
-    reuseTmpTmpDimensionedField                                               \
-        <productType, Type1, Type1, Type2, GeoMesh>::clear(tdf1, tdf2);       \
-                                                                              \
-    return tRes;                                                              \
-}                                                                             \
-                                                                              \
-template<class Form, class Type, class GeoMesh>                               \
-tmp<DimensionedField<typename product<Type, Form>::type, GeoMesh> >           \
-operator op                                                                   \
-(                                                                             \
-    const DimensionedField<Type, GeoMesh>& df1,                               \
-    const dimensioned<Form>& dvs                                              \
-)                                                                             \
-{                                                                             \
-    typedef typename product<Type, Form>::type productType;                   \
-                                                                              \
-    tmp<DimensionedField<productType, GeoMesh> > tRes                         \
-    (                                                                         \
-        new DimensionedField<productType, GeoMesh>                            \
-        (                                                                     \
-            IOobject                                                          \
-            (                                                                 \
-                '(' + df1.name() + #op + dvs.name() + ')',                    \
-                df1.instance(),                                               \
-                df1.db()                                                      \
-            ),                                                                \
-            df1.mesh(),                                                       \
-            df1.dimensions() op dvs.dimensions()                              \
-        )                                                                     \
-    );                                                                        \
-                                                                              \
-    Foam::opFunc(tRes().field(), df1.field(), dvs.value());                   \
-                                                                              \
-    return tRes;                                                              \
-}                                                                             \
-                                                                              \
-template<class Form, class Cmpt, int nCmpt, class Type, class GeoMesh>        \
-tmp<DimensionedField<typename product<Form, Type>::type, GeoMesh> >           \
-operator op                                                                   \
-(                                                                             \
-    const DimensionedField<Type, GeoMesh>& df1,                               \
-    const VectorSpace<Form,Cmpt,nCmpt>& vs                                    \
-)                                                                             \
-{                                                                             \
-    return df1 op dimensioned<Form>(static_cast<const Form&>(vs));            \
-}                                                                             \
-                                                                              \
-                                                                              \
-template<class Form, class Type, class GeoMesh>                               \
-tmp<DimensionedField<typename product<Type, Form>::type, GeoMesh> >           \
-operator op                                                                   \
-(                                                                             \
-    const tmp<DimensionedField<Type, GeoMesh> >& tdf1,                        \
-    const dimensioned<Form>& dvs                                              \
-)                                                                             \
-{                                                                             \
-    typedef typename product<Type, Form>::type productType;                   \
-                                                                              \
-    const DimensionedField<Type, GeoMesh>& df1 = tdf1();                      \
-                                                                              \
-    tmp<DimensionedField<productType, GeoMesh> > tRes =                       \
-        reuseTmpDimensionedField<productType, Type, GeoMesh>::New             \
-        (                                                                     \
-            tdf1,                                                             \
-            '(' + df1.name() + #op + dvs.name() + ')',                        \
-            df1.dimensions() op dvs.dimensions()                              \
-        );                                                                    \
-                                                                              \
-    Foam::opFunc(tRes().field(), df1.field(), dvs.value());                   \
-                                                                              \
-    reuseTmpDimensionedField<productType, Type, GeoMesh>::clear(tdf1);        \
-                                                                              \
-    return tRes;                                                              \
-}                                                                             \
-                                                                              \
-template<class Form, class Cmpt, int nCmpt, class Type, class GeoMesh>        \
-tmp<DimensionedField<typename product<Form, Type>::type, GeoMesh> >           \
-operator op                                                                   \
-(                                                                             \
-    const tmp<DimensionedField<Type, GeoMesh> >& tdf1,                        \
-    const VectorSpace<Form,Cmpt,nCmpt>& vs                                    \
-)                                                                             \
-{                                                                             \
-    return tdf1 op dimensioned<Form>(static_cast<const Form&>(vs));           \
-}                                                                             \
-                                                                              \
-                                                                              \
-template<class Form, class Type, class GeoMesh>                               \
-tmp<DimensionedField<typename product<Form, Type>::type, GeoMesh> >           \
-operator op                                                                   \
-(                                                                             \
-    const dimensioned<Form>& dvs,                                             \
-    const DimensionedField<Type, GeoMesh>& df1                                \
-)                                                                             \
-{                                                                             \
-    typedef typename product<Form, Type>::type productType;                   \
-    tmp<DimensionedField<productType, GeoMesh> > tRes                         \
-    (                                                                         \
-        new DimensionedField<productType, GeoMesh>                            \
-        (                                                                     \
-            IOobject                                                          \
-            (                                                                 \
-                '(' + dvs.name() + #op + df1.name() + ')',                    \
-                df1.instance(),                                               \
-                df1.db()                                                      \
-            ),                                                                \
-            df1.mesh(),                                                       \
-            dvs.dimensions() op df1.dimensions()                              \
-        )                                                                     \
-    );                                                                        \
-                                                                              \
-    Foam::opFunc(tRes().field(), dvs.value(), df1.field());                   \
-                                                                              \
-    return tRes;                                                              \
-}                                                                             \
-                                                                              \
-template<class Form, class Cmpt, int nCmpt, class Type, class GeoMesh>        \
-tmp<DimensionedField<typename product<Form, Type>::type, GeoMesh> >           \
-operator op                                                                   \
-(                                                                             \
-    const VectorSpace<Form,Cmpt,nCmpt>& vs,                                   \
-    const DimensionedField<Type, GeoMesh>& df1                                \
-)                                                                             \
-{                                                                             \
-    return dimensioned<Form>(static_cast<const Form&>(vs)) op df1;            \
-}                                                                             \
-                                                                              \
-template<class Form, class Type, class GeoMesh>                               \
-tmp<DimensionedField<typename product<Form, Type>::type, GeoMesh> >           \
-operator op                                                                   \
-(                                                                             \
-    const dimensioned<Form>& dvs,                                             \
-    const tmp<DimensionedField<Type, GeoMesh> >& tdf1                         \
-)                                                                             \
-{                                                                             \
-    typedef typename product<Form, Type>::type productType;                   \
-                                                                              \
-    const DimensionedField<Type, GeoMesh>& df1 = tdf1();                      \
-                                                                              \
-    tmp<DimensionedField<productType, GeoMesh> > tRes =                       \
-        reuseTmpDimensionedField<productType, Type, GeoMesh>::New             \
-        (                                                                     \
-            tdf1,                                                             \
-            '(' + dvs.name() + #op + df1.name() + ')',                        \
-            dvs.dimensions() op df1.dimensions()                              \
-        );                                                                    \
-                                                                              \
-    Foam::opFunc(tRes().field(), dvs.value(), df1.field());                   \
-                                                                              \
-    reuseTmpDimensionedField<productType, Type, GeoMesh>::clear(tdf1);        \
-                                                                              \
-    return tRes;                                                              \
-}                                                                             \
-                                                                              \
-template<class Form, class Cmpt, int nCmpt, class Type, class GeoMesh>        \
-tmp<DimensionedField<typename product<Form, Type>::type, GeoMesh> >           \
-operator op                                                                   \
-(                                                                             \
-    const VectorSpace<Form,Cmpt,nCmpt>& vs,                                   \
-    const tmp<DimensionedField<Type, GeoMesh> >& tdf1                         \
-)                                                                             \
-{                                                                             \
-    return dimensioned<Form>(static_cast<const Form&>(vs)) op tdf1;           \
+#define PRODUCT_OPERATOR(product, op, opFunc)                                  \
+                                                                               \
+template<class Type1, class Type2, class GeoMesh>                              \
+tmp<DimensionedField<typename product<Type1, Type2>::type, GeoMesh>>           \
+operator op                                                                    \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& df1,                               \
+    const DimensionedField<Type2, GeoMesh>& df2                                \
+)                                                                              \
+{                                                                              \
+    typedef typename product<Type1, Type2>::type productType;                  \
+    tmp<DimensionedField<productType, GeoMesh>> tRes                           \
+    (                                                                          \
+        new DimensionedField<productType, GeoMesh>                             \
+        (                                                                      \
+            IOobject                                                           \
+            (                                                                  \
+                '(' + df1.name() + #op + df2.name() + ')',                     \
+                df1.instance(),                                                \
+                df1.db()                                                       \
+            ),                                                                 \
+            df1.mesh(),                                                        \
+            df1.dimensions() op df2.dimensions()                               \
+        )                                                                      \
+    );                                                                         \
+                                                                               \
+    Foam::opFunc(tRes.ref().field(), df1.field(), df2.field());                \
+                                                                               \
+    return tRes;                                                               \
+}                                                                              \
+                                                                               \
+template<class Type1, class Type2, class GeoMesh>                              \
+tmp<DimensionedField<typename product<Type1, Type2>::type, GeoMesh>>           \
+operator op                                                                    \
+(                                                                              \
+    const DimensionedField<Type1, GeoMesh>& df1,                               \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tdf2                          \
+)                                                                              \
+{                                                                              \
+    typedef typename product<Type1, Type2>::type productType;                  \
+                                                                               \
+    const DimensionedField<Type2, GeoMesh>& df2 = tdf2();                      \
+                                                                               \
+    tmp<DimensionedField<productType, GeoMesh>> tRes =                         \
+        reuseTmpDimensionedField<productType, Type2, GeoMesh>::New             \
+        (                                                                      \
+            tdf2,                                                              \
+            '(' + df1.name() + #op + df2.name() + ')',                         \
+            df1.dimensions() op df2.dimensions()                               \
+        );                                                                     \
+                                                                               \
+    Foam::opFunc(tRes.ref().field(), df1.field(), df2.field());                \
+                                                                               \
+    tdf2.clear();                                                              \
+                                                                               \
+    return tRes;                                                               \
+}                                                                              \
+                                                                               \
+template<class Type1, class Type2, class GeoMesh>                              \
+tmp<DimensionedField<typename product<Type1, Type2>::type, GeoMesh>>           \
+operator op                                                                    \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tdf1,                         \
+    const DimensionedField<Type2, GeoMesh>& df2                                \
+)                                                                              \
+{                                                                              \
+    typedef typename product<Type1, Type2>::type productType;                  \
+                                                                               \
+    const DimensionedField<Type1, GeoMesh>& df1 = tdf1();                      \
+                                                                               \
+    tmp<DimensionedField<productType, GeoMesh>> tRes =                         \
+        reuseTmpDimensionedField<productType, Type1, GeoMesh>::New             \
+        (                                                                      \
+            tdf1,                                                              \
+            '(' + df1.name() + #op + df2.name() + ')',                         \
+            df1.dimensions() op df2.dimensions()                               \
+        );                                                                     \
+                                                                               \
+    Foam::opFunc(tRes.ref().field(), df1.field(), df2.field());                \
+                                                                               \
+    tdf1.clear();                                                              \
+                                                                               \
+    return tRes;                                                               \
+}                                                                              \
+                                                                               \
+template<class Type1, class Type2, class GeoMesh>                              \
+tmp<DimensionedField<typename product<Type1, Type2>::type, GeoMesh>>           \
+operator op                                                                    \
+(                                                                              \
+    const tmp<DimensionedField<Type1, GeoMesh>>& tdf1,                         \
+    const tmp<DimensionedField<Type2, GeoMesh>>& tdf2                          \
+)                                                                              \
+{                                                                              \
+    typedef typename product<Type1, Type2>::type productType;                  \
+                                                                               \
+    const DimensionedField<Type1, GeoMesh>& df1 = tdf1();                      \
+    const DimensionedField<Type2, GeoMesh>& df2 = tdf2();                      \
+                                                                               \
+    tmp<DimensionedField<productType, GeoMesh>> tRes =                         \
+        reuseTmpTmpDimensionedField                                            \
+        <productType, Type1, Type1, Type2, GeoMesh>::New                       \
+        (                                                                      \
+            tdf1,                                                              \
+            tdf2,                                                              \
+            '(' + df1.name() + #op + df2.name() + ')',                         \
+            df1.dimensions() op df2.dimensions()                               \
+        );                                                                     \
+                                                                               \
+    Foam::opFunc(tRes.ref().field(), df1.field(), df2.field());                \
+                                                                               \
+    tdf1.clear();                                                              \
+    tdf2.clear();                                                              \
+                                                                               \
+    return tRes;                                                               \
+}                                                                              \
+                                                                               \
+template<class Form, class Type, class GeoMesh>                                \
+tmp<DimensionedField<typename product<Type, Form>::type, GeoMesh>>             \
+operator op                                                                    \
+(                                                                              \
+    const DimensionedField<Type, GeoMesh>& df1,                                \
+    const dimensioned<Form>& dvs                                               \
+)                                                                              \
+{                                                                              \
+    typedef typename product<Type, Form>::type productType;                    \
+                                                                               \
+    tmp<DimensionedField<productType, GeoMesh>> tRes                           \
+    (                                                                          \
+        new DimensionedField<productType, GeoMesh>                             \
+        (                                                                      \
+            IOobject                                                           \
+            (                                                                  \
+                '(' + df1.name() + #op + dvs.name() + ')',                     \
+                df1.instance(),                                                \
+                df1.db()                                                       \
+            ),                                                                 \
+            df1.mesh(),                                                        \
+            df1.dimensions() op dvs.dimensions()                               \
+        )                                                                      \
+    );                                                                         \
+                                                                               \
+    Foam::opFunc(tRes.ref().field(), df1.field(), dvs.value());                \
+                                                                               \
+    return tRes;                                                               \
+}                                                                              \
+                                                                               \
+template<class Form, class Cmpt, direction nCmpt, class Type, class GeoMesh>   \
+tmp<DimensionedField<typename product<Form, Type>::type, GeoMesh>>             \
+operator op                                                                    \
+(                                                                              \
+    const DimensionedField<Type, GeoMesh>& df1,                                \
+    const VectorSpace<Form,Cmpt,nCmpt>& vs                                     \
+)                                                                              \
+{                                                                              \
+    return df1 op dimensioned<Form>(static_cast<const Form&>(vs));             \
+}                                                                              \
+                                                                               \
+                                                                               \
+template<class Form, class Type, class GeoMesh>                                \
+tmp<DimensionedField<typename product<Type, Form>::type, GeoMesh>>             \
+operator op                                                                    \
+(                                                                              \
+    const tmp<DimensionedField<Type, GeoMesh>>& tdf1,                          \
+    const dimensioned<Form>& dvs                                               \
+)                                                                              \
+{                                                                              \
+    typedef typename product<Type, Form>::type productType;                    \
+                                                                               \
+    const DimensionedField<Type, GeoMesh>& df1 = tdf1();                       \
+                                                                               \
+    tmp<DimensionedField<productType, GeoMesh>> tRes =                         \
+        reuseTmpDimensionedField<productType, Type, GeoMesh>::New              \
+        (                                                                      \
+            tdf1,                                                              \
+            '(' + df1.name() + #op + dvs.name() + ')',                         \
+            df1.dimensions() op dvs.dimensions()                               \
+        );                                                                     \
+                                                                               \
+    Foam::opFunc(tRes.ref().field(), df1.field(), dvs.value());                \
+                                                                               \
+    tdf1.clear();                                                              \
+                                                                               \
+    return tRes;                                                               \
+}                                                                              \
+                                                                               \
+template<class Form, class Cmpt, direction nCmpt, class Type, class GeoMesh>   \
+tmp<DimensionedField<typename product<Form, Type>::type, GeoMesh>>             \
+operator op                                                                    \
+(                                                                              \
+    const tmp<DimensionedField<Type, GeoMesh>>& tdf1,                          \
+    const VectorSpace<Form,Cmpt,nCmpt>& vs                                     \
+)                                                                              \
+{                                                                              \
+    return tdf1 op dimensioned<Form>(static_cast<const Form&>(vs));            \
+}                                                                              \
+                                                                               \
+                                                                               \
+template<class Form, class Type, class GeoMesh>                                \
+tmp<DimensionedField<typename product<Form, Type>::type, GeoMesh>>             \
+operator op                                                                    \
+(                                                                              \
+    const dimensioned<Form>& dvs,                                              \
+    const DimensionedField<Type, GeoMesh>& df1                                 \
+)                                                                              \
+{                                                                              \
+    typedef typename product<Form, Type>::type productType;                    \
+    tmp<DimensionedField<productType, GeoMesh>> tRes                           \
+    (                                                                          \
+        new DimensionedField<productType, GeoMesh>                             \
+        (                                                                      \
+            IOobject                                                           \
+            (                                                                  \
+                '(' + dvs.name() + #op + df1.name() + ')',                     \
+                df1.instance(),                                                \
+                df1.db()                                                       \
+            ),                                                                 \
+            df1.mesh(),                                                        \
+            dvs.dimensions() op df1.dimensions()                               \
+        )                                                                      \
+    );                                                                         \
+                                                                               \
+    Foam::opFunc(tRes.ref().field(), dvs.value(), df1.field());                \
+                                                                               \
+    return tRes;                                                               \
+}                                                                              \
+                                                                               \
+template<class Form, class Cmpt, direction nCmpt, class Type, class GeoMesh>   \
+tmp<DimensionedField<typename product<Form, Type>::type, GeoMesh>>             \
+operator op                                                                    \
+(                                                                              \
+    const VectorSpace<Form,Cmpt,nCmpt>& vs,                                    \
+    const DimensionedField<Type, GeoMesh>& df1                                 \
+)                                                                              \
+{                                                                              \
+    return dimensioned<Form>(static_cast<const Form&>(vs)) op df1;             \
+}                                                                              \
+                                                                               \
+template<class Form, class Type, class GeoMesh>                                \
+tmp<DimensionedField<typename product<Form, Type>::type, GeoMesh>>             \
+operator op                                                                    \
+(                                                                              \
+    const dimensioned<Form>& dvs,                                              \
+    const tmp<DimensionedField<Type, GeoMesh>>& tdf1                           \
+)                                                                              \
+{                                                                              \
+    typedef typename product<Form, Type>::type productType;                    \
+                                                                               \
+    const DimensionedField<Type, GeoMesh>& df1 = tdf1();                       \
+                                                                               \
+    tmp<DimensionedField<productType, GeoMesh>> tRes =                         \
+        reuseTmpDimensionedField<productType, Type, GeoMesh>::New              \
+        (                                                                      \
+            tdf1,                                                              \
+            '(' + dvs.name() + #op + df1.name() + ')',                         \
+            dvs.dimensions() op df1.dimensions()                               \
+        );                                                                     \
+                                                                               \
+    Foam::opFunc(tRes.ref().field(), dvs.value(), df1.field());                \
+                                                                               \
+    tdf1.clear();                                                              \
+                                                                               \
+    return tRes;                                                               \
+}                                                                              \
+                                                                               \
+template<class Form, class Cmpt, direction nCmpt, class Type, class GeoMesh>   \
+tmp<DimensionedField<typename product<Form, Type>::type, GeoMesh>>             \
+operator op                                                                    \
+(                                                                              \
+    const VectorSpace<Form,Cmpt,nCmpt>& vs,                                    \
+    const tmp<DimensionedField<Type, GeoMesh>>& tdf1                           \
+)                                                                              \
+{                                                                              \
+    return dimensioned<Form>(static_cast<const Form&>(vs)) op tdf1;            \
 }
 
 PRODUCT_OPERATOR(typeOfSum, +, add)

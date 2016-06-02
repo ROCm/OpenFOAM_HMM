@@ -57,7 +57,7 @@ Foam::searchableRotatedBox::searchableRotatedBox
             io.writeOpt(),
             false      //io.registerObject(),
         ),
-        treeBoundBox(point::zero, dict.lookup("span"))
+        treeBoundBox(Zero, dict.lookup("span"))
     ),
     transform_
     (
@@ -295,7 +295,7 @@ void Foam::searchableRotatedBox::findLineAll
 (
     const pointField& start,
     const pointField& end,
-    List<List<pointIndexHit> >& info
+    List<List<pointIndexHit>>& info
 ) const
 {
     info.setSize(start.size());

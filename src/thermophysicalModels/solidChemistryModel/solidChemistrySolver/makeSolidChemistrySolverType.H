@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,46 +43,46 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeSolidChemistrySolverType(SS, Schem, Comp, SThermo, GThermo)       \
-                                                                              \
-    typedef SS<Schem<Comp, SThermo, GThermo> >                                \
-        SS##Schem##Comp##SThermo##GThermo;                                    \
-                                                                              \
-    defineTemplateTypeNameAndDebugWithName                                    \
-    (                                                                         \
-        SS##Schem##Comp##SThermo##GThermo,                                    \
-        (#SS"<" + word(Schem<Comp, SThermo, GThermo>::typeName_())            \
-      + "<"#Comp"," + SThermo::typeName()                                     \
-      + ","  + GThermo::typeName() + ">>").c_str(),                           \
-        0                                                                     \
-    );                                                                        \
-                                                                              \
-    addToRunTimeSelectionTable                                                \
-    (                                                                         \
-        Comp,                                                                 \
-        SS##Schem##Comp##SThermo##GThermo,                                    \
-        fvMesh                                                                \
+#define makeSolidChemistrySolverType(SS, Schem, Comp, SThermo, GThermo)        \
+                                                                               \
+    typedef SS<Schem<Comp, SThermo, GThermo>>                                  \
+        SS##Schem##Comp##SThermo##GThermo;                                     \
+                                                                               \
+    defineTemplateTypeNameAndDebugWithName                                     \
+    (                                                                          \
+        SS##Schem##Comp##SThermo##GThermo,                                     \
+        (#SS"<" + word(Schem<Comp, SThermo, GThermo>::typeName_())             \
+      + "<"#Comp"," + SThermo::typeName()                                      \
+      + ","  + GThermo::typeName() + ">>").c_str(),                            \
+        0                                                                      \
+    );                                                                         \
+                                                                               \
+    addToRunTimeSelectionTable                                                 \
+    (                                                                          \
+        Comp,                                                                  \
+        SS##Schem##Comp##SThermo##GThermo,                                     \
+        fvMesh                                                                 \
     );
 
 
-#define makeSolidChemistrySolverTypes(SolidChem, Comp, SThermo, GThermo)      \
-                                                                              \
-    makeSolidChemistrySolverType                                              \
-    (                                                                         \
-        noChemistrySolver,                                                    \
-        SolidChem,                                                            \
-        Comp,                                                                 \
-        SThermo,                                                              \
-        GThermo                                                               \
-    );                                                                        \
-                                                                              \
-    makeSolidChemistrySolverType                                              \
-    (                                                                         \
-        ode,                                                                  \
-        SolidChem,                                                            \
-        Comp,                                                                 \
-        SThermo,                                                              \
-        GThermo                                                               \
+#define makeSolidChemistrySolverTypes(SolidChem, Comp, SThermo, GThermo)       \
+                                                                               \
+    makeSolidChemistrySolverType                                               \
+    (                                                                          \
+        noChemistrySolver,                                                     \
+        SolidChem,                                                             \
+        Comp,                                                                  \
+        SThermo,                                                               \
+        GThermo                                                                \
+    );                                                                         \
+                                                                               \
+    makeSolidChemistrySolverType                                               \
+    (                                                                          \
+        ode,                                                                   \
+        SolidChem,                                                             \
+        Comp,                                                                  \
+        SThermo,                                                               \
+        GThermo                                                                \
     );
 
 

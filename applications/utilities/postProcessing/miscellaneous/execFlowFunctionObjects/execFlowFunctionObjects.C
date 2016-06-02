@@ -306,7 +306,7 @@ void calc
                 false
             );
 
-            if (turbulencePropertiesHeader.headerOk())
+            if (turbulencePropertiesHeader.typeHeaderOk<IOdictionary>(true))
             {
                 singlePhaseTransportModel laminarTransport(U, phi);
 
@@ -364,7 +364,7 @@ void calc
                 false
             );
 
-            if (turbulencePropertiesHeader.headerOk())
+            if (turbulencePropertiesHeader.typeHeaderOk<IOdictionary>(true))
             {
                 autoPtr<compressible::turbulenceModel> turbulenceModel
                 (

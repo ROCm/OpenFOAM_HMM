@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,7 +50,6 @@ void Foam::mapDistribute::applyDummyTransforms(List<T>& field) const
 }
 
 
-// In case of no transform: copy elements
 template<class T>
 void Foam::mapDistribute::applyDummyInverseTransforms(List<T>& field) const
 {
@@ -67,7 +66,6 @@ void Foam::mapDistribute::applyDummyInverseTransforms(List<T>& field) const
 }
 
 
-// Calculate transformed elements.
 template<class T, class TransformOp>   //, class CombineOp>
 void Foam::mapDistribute::applyTransforms
 (
@@ -98,7 +96,6 @@ void Foam::mapDistribute::applyTransforms
 }
 
 
-// Calculate transformed elements.
 template<class T, class TransformOp>   //, class CombineOp>
 void Foam::mapDistribute::applyInverseTransforms
 (
@@ -129,7 +126,6 @@ void Foam::mapDistribute::applyInverseTransforms
 }
 
 
-//- Distribute data using default commsType.
 template<class T, class negateOp>
 void Foam::mapDistribute::distribute
 (
@@ -162,7 +158,6 @@ void Foam::mapDistribute::distribute
 }
 
 
-//- Distribute data using default commsType.
 template<class T>
 void Foam::mapDistribute::distribute
 (
@@ -181,7 +176,6 @@ void Foam::mapDistribute::distribute
 }
 
 
-//- Reverse distribute data using default commsType.
 template<class T>
 void Foam::mapDistribute::reverseDistribute
 (
@@ -200,9 +194,6 @@ void Foam::mapDistribute::reverseDistribute
 }
 
 
-//- Reverse distribute data using default commsType.
-//  Since constructSize might be larger than supplied size supply
-//  a nullValue
 template<class T>
 void Foam::mapDistribute::reverseDistribute
 (
@@ -222,7 +213,6 @@ void Foam::mapDistribute::reverseDistribute
 }
 
 
-//- Distribute data using default commsType.
 template<class T, class TransformOp>
 void Foam::mapDistribute::distribute
 (

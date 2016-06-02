@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,6 @@ namespace Foam
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-//- Calculate and return the laminar viscosity
 void Foam::incompressibleTwoPhaseMixture::calcNu()
 {
     nuModel1_->correct();
@@ -139,6 +138,14 @@ Foam::incompressibleTwoPhaseMixture::mu() const
           + (scalar(1) - limitedAlpha1)*rho2_*nuModel2_->nu()
         )
     );
+}
+
+
+Foam::tmp<Foam::scalarField>
+Foam::incompressibleTwoPhaseMixture::mu(const label patchI) const
+{
+
+    return mu()().boundaryField()[patchI];
 }
 
 

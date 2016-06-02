@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,7 @@ PDRkEpsilon::PDRkEpsilon
     const word& modelName
 )
 :
-    Foam::RASModels::kEpsilon<EddyDiffusivity<compressible::turbulenceModel> >
+    Foam::RASModels::kEpsilon<EddyDiffusivity<compressible::turbulenceModel>>
     (
         geometricOneField(),
         rho,
@@ -161,9 +161,9 @@ void PDRkEpsilon::correct()
       - fvm::Sp(C2_*betav*rho_*epsilon_/k_, epsilon_)
     );
 
-    epsEqn().relax();
+    epsEqn.ref().relax();
 
-    epsEqn().boundaryManipulate(epsilon_.boundaryField());
+    epsEqn.ref().boundaryManipulate(epsilon_.boundaryField());
 
     solve(epsEqn);
     bound(epsilon_, epsilonMin_);
@@ -182,7 +182,7 @@ void PDRkEpsilon::correct()
       - fvm::Sp(betav*rho_*epsilon_/k_, k_)
     );
 
-    kEqn().relax();
+    kEqn.ref().relax();
     solve(kEqn);
     bound(k_, kMin_);
 

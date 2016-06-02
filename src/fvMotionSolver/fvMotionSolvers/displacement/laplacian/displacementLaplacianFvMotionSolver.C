@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -79,7 +79,7 @@ Foam::displacementLaplacianFvMotionSolver::displacementLaplacianFvMotionSolver
         (
             "cellDisplacement",
             pointDisplacement_.dimensions(),
-            vector::zero
+            Zero
         ),
         cellMotionBoundaryTypes<vector>(pointDisplacement_.boundaryField())
     ),
@@ -118,7 +118,7 @@ Foam::displacementLaplacianFvMotionSolver::displacementLaplacianFvMotionSolver
     }
 
 
-    if (io.headerOk())
+    if (io.typeHeaderOk<pointVectorField>(true))
     {
         pointLocation_.reset
         (
@@ -169,7 +169,7 @@ displacementLaplacianFvMotionSolver
         (
             "cellDisplacement",
             pointDisplacement_.dimensions(),
-            vector::zero
+            Zero
         ),
         cellMotionBoundaryTypes<vector>(pointDisplacement_.boundaryField())
     ),
@@ -208,7 +208,7 @@ displacementLaplacianFvMotionSolver
     }
 
 
-    if (io.headerOk())
+    if (io.typeHeaderOk<pointVectorField>(true))
     {
         pointLocation_.reset
         (
@@ -303,6 +303,7 @@ Foam::displacementLaplacianFvMotionSolver::curPoints() const
         (
             points0() + pointDisplacement_.internalField()
         );
+        pointField& curPoints = tcurPoints.ref();
 
         // Implement frozen points
         if (frozenPointsZone_ != -1)
@@ -311,11 +312,11 @@ Foam::displacementLaplacianFvMotionSolver::curPoints() const
 
             forAll(pz, i)
             {
-                tcurPoints()[pz[i]] = points0()[pz[i]];
+                curPoints[pz[i]] = points0()[pz[i]];
             }
         }
 
-        twoDCorrectPoints(tcurPoints());
+        twoDCorrectPoints(curPoints);
 
         return tcurPoints;
     }

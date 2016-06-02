@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ namespace fv
 template<class Type>
 convectionScheme<Type>::convectionScheme(const convectionScheme& cs)
 :
-    refCount(),
+    tmp<convectionScheme<Type>>::refCount(),
     mesh_(cs.mesh_)
 {}
 
@@ -54,7 +54,7 @@ convectionScheme<Type>::convectionScheme(const convectionScheme& cs)
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<convectionScheme<Type> > convectionScheme<Type>::New
+tmp<convectionScheme<Type>> convectionScheme<Type>::New
 (
     const fvMesh& mesh,
     const surfaceScalarField& faceFlux,
@@ -63,10 +63,7 @@ tmp<convectionScheme<Type> > convectionScheme<Type>::New
 {
     if (fv::debug)
     {
-        Info<< "convectionScheme<Type>::New"
-               "(const fvMesh&, const surfaceScalarField&, Istream&) : "
-               "constructing convectionScheme<Type>"
-            << endl;
+        InfoInFunction << "Constructing convectionScheme<Type>" << endl;
     }
 
     if (schemeData.eof())
@@ -101,7 +98,7 @@ tmp<convectionScheme<Type> > convectionScheme<Type>::New
 
 
 template<class Type>
-tmp<convectionScheme<Type> > convectionScheme<Type>::New
+tmp<convectionScheme<Type>> convectionScheme<Type>::New
 (
     const fvMesh& mesh,
     const typename multivariateSurfaceInterpolationScheme<Type>::
@@ -112,12 +109,7 @@ tmp<convectionScheme<Type> > convectionScheme<Type>::New
 {
     if (fv::debug)
     {
-        Info<< "convectionScheme<Type>::New"
-               "(const fvMesh&, "
-               "const typename multivariateSurfaceInterpolationScheme<Type>"
-               "::fieldTable&, const surfaceScalarField&, Istream&) : "
-               "constructing convectionScheme<Type>"
-            << endl;
+        InfoInFunction << "Constructing convectionScheme<Type>" << endl;
     }
 
     if (schemeData.eof())

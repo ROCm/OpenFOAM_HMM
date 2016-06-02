@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -68,16 +68,16 @@ Foam::UPtrList<T>::UPtrList(PtrList<T>& lst)
 
 
 template<class T>
-Foam::UPtrList<T>::UPtrList(const Xfer<UPtrList<T> >& lst)
+Foam::UPtrList<T>::UPtrList(const Xfer<UPtrList<T>>& lst)
 {
     transfer(lst());
 }
 
 
 template<class T>
-Foam::UPtrList<T>::UPtrList(UPtrList<T>& a, bool reUse)
+Foam::UPtrList<T>::UPtrList(UPtrList<T>& a, bool reuse)
 :
-    ptrs_(a.ptrs_, reUse)
+    ptrs_(a.ptrs_, reuse)
 {}
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -72,9 +72,10 @@ void Foam::streamLine::track()
 
     // Read or lookup fields
     PtrList<volScalarField> vsFlds;
-    PtrList<interpolation<scalar> > vsInterp;
+    PtrList<interpolation<scalar>> vsInterp;
     PtrList<volVectorField> vvFlds;
-    PtrList<interpolation<vector> > vvInterp;
+    PtrList<interpolation<vector>> vvInterp;
+
     label UIndex = -1;
 
     initInterpolations

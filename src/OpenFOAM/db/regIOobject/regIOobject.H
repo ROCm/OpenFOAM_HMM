@@ -41,7 +41,6 @@ SourceFiles
 #include "IOobject.H"
 #include "typeInfo.H"
 #include "OSspecific.H"
-#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,21 +62,28 @@ class regIOobject
     public IOobject
 {
 
-public:
-
-    //- Types of communications
-    enum fileCheckTypes
-    {
-        timeStamp,
-        timeStampMaster,
-        inotify,
-        inotifyMaster
-    };
-
-    static const NamedEnum<fileCheckTypes, 4> fileCheckTypesNames;
-
-
 protected:
+
+        //- Read everywhere or only on master and scatter
+        bool read
+        (
+            const bool masterOnly,
+            const IOstream::streamFormat PstreamFormat,
+            const word& typeName
+        );
+
+public:
+        //- Check readOpt flags and read if necessary. Uses above read
+        bool readHeaderOk
+        (
+            const IOstream::streamFormat PstreamFormat,
+            const word& typeName
+        );
+protected:
+
+        //- Construct and return an IFstream for the object.
+        //  The results is NULL if the stream construction failed
+        Istream* objectStream();
 
         //- To flag master-only reading of objects
         static bool masterOnlyReading;
@@ -93,8 +99,8 @@ private:
         //- Is this object owned by the registry
         bool ownedByRegistry_;
 
-        //- Modification watch index
-        mutable label watchIndex_;
+        //- List of modification watch indices
+        mutable labelList watchIndices_;
 
         //- eventNo of last update
         label eventNo_;
@@ -125,8 +131,6 @@ public:
         TypeName("regIOobject");
 
         static int fileModificationSkew;
-
-        static fileCheckTypes fileModificationChecking;
 
 
     // Constructors
@@ -163,6 +167,9 @@ public:
 
             //- Remove object from registry
             bool checkOut();
+
+            //- Add file watch on object (if registered and READ_IF_MODIFIED)
+            virtual void addWatch();
 
             //- Is this object owned by the registry?
             inline bool ownedByRegistry() const;
@@ -235,6 +242,15 @@ public:
 
         // Reading
 
+            //- Return complete path + object name if the file exists
+            //  in the case directory otherwise null. Does not search
+            //  up if parallel. Can be overridden to provide this functionality
+            //  (e.g. IOdictionary)
+            virtual fileName filePath() const;
+
+            //- Read and check header info
+            bool headerOk();
+
             //- Return Istream and check object type against that given
             Istream& readStream(const word&);
 
@@ -249,11 +265,15 @@ public:
             //- Read object
             virtual bool read();
 
-            //- Return file-monitoring handle
-            inline label watchIndex() const;
+            //- Add file watch for fileName on object if not yet watched. Return
+            //  index of watch
+            virtual label addWatch(const fileName&);
 
-            //- Return file-monitoring handle
-            inline label& watchIndex();
+            //- Return file-monitoring handles
+            inline const labelList& watchIndices() const;
+
+            //- Return file-monitoring handles
+            inline labelList& watchIndices();
 
             //- Return true if the object's file (or files for objectRegistry)
             //  have been modified. (modified state is cached by Time)
@@ -279,6 +299,15 @@ public:
 
             //- Write using setting from DB
             virtual bool write() const;
+
+
+        // Other
+
+            //- Is object global
+            virtual bool global() const
+            {
+                return false;
+            }
 
 
     // Member operators

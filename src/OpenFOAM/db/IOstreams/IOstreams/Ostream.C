@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,6 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Decrement the indent level
 void Foam::Ostream::decrIndent()
 {
     if (indentLevel_ == 0)
@@ -41,21 +40,17 @@ void Foam::Ostream::decrIndent()
     }
     else
     {
-        indentLevel_--;
+        --indentLevel_;
     }
 }
 
 
-// Write keyType
-// write regular expression as quoted string
-// write plain word as word (unquoted)
 Foam::Ostream& Foam::Ostream::write(const keyType& kw)
 {
     return writeQuoted(kw, kw.isPattern());
 }
 
 
-// Write the keyword followed by appropriate indentation
 Foam::Ostream& Foam::Ostream::writeKeyword(const keyType& kw)
 {
     indent();
@@ -79,6 +74,37 @@ Foam::Ostream& Foam::Ostream::writeKeyword(const keyType& kw)
     {
         write(char(token::SPACE));
     }
+
+    return *this;
+}
+
+
+Foam::Ostream& Foam::Ostream::beginBlock(const word& keyword)
+{
+    indent();
+    write(keyword);
+    endl();
+    beginBlock();
+
+    return *this;
+}
+
+
+Foam::Ostream& Foam::Ostream::beginBlock()
+{
+    indent();
+    write(char(token::BEGIN_BLOCK));
+    incrIndent();
+
+    return *this;
+}
+
+
+Foam::Ostream& Foam::Ostream::endBlock()
+{
+    decrIndent();
+    indent();
+    write(char(token::END_BLOCK));
 
     return *this;
 }

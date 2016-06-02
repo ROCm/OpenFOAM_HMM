@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,7 +136,7 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
     {
         case ROTATIONAL:
         {
-            tensor revT = tensor::zero;
+            tensor revT = Zero;
 
             if (rotationAngleDefined_)
             {
@@ -221,8 +221,8 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
             }
             else
             {
-                point n0 = vector::zero;
-                point n1 = vector::zero;
+                point n0 = Zero;
+                point n1 = Zero;
                 if (half0Ctrs.size())
                 {
                     n0 = findFaceNormalMaxRadius(half0Ctrs);
@@ -489,12 +489,13 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     coupledPolyPatch(name, size, start, index, bm, patchType, transform),
     nbrPatchName_(word::null),
     nbrPatchID_(-1),
-    rotationAxis_(vector::zero),
-    rotationCentre_(point::zero),
+    rotationAxis_(Zero),
+    rotationCentre_(Zero),
     rotationAngleDefined_(false),
     rotationAngle_(0.0),
-    separationVector_(vector::zero),
+    separationVector_(Zero),
     AMIPtr_(NULL),
+    AMIMethod_(AMIPatchToPatchInterpolation::imFaceAreaWeight),
     AMIReverse_(false),
     AMIRequireMatch_(true),
     AMILowWeightCorrection_(-1.0),
@@ -519,12 +520,26 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     nbrPatchName_(dict.lookupOrDefault<word>("neighbourPatch", "")),
     coupleGroup_(dict),
     nbrPatchID_(-1),
-    rotationAxis_(vector::zero),
-    rotationCentre_(point::zero),
+    rotationAxis_(Zero),
+    rotationCentre_(Zero),
     rotationAngleDefined_(false),
     rotationAngle_(0.0),
-    separationVector_(vector::zero),
+    separationVector_(Zero),
     AMIPtr_(NULL),
+    AMIMethod_
+    (
+        AMIPatchToPatchInterpolation::wordTointerpolationMethod
+        (
+            dict.lookupOrDefault
+            (
+                "method",
+                AMIPatchToPatchInterpolation::interpolationMethodToWord
+                (
+                    AMIPatchToPatchInterpolation::imFaceAreaWeight
+                )
+            )
+        )
+    ),
     AMIReverse_(dict.lookupOrDefault<bool>("flipNormals", false)),
     AMIRequireMatch_(true),
     AMILowWeightCorrection_(dict.lookupOrDefault("lowWeightCorrection", -1.0)),
@@ -614,6 +629,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationAngle_(pp.rotationAngle_),
     separationVector_(pp.separationVector_),
     AMIPtr_(NULL),
+    AMIMethod_(pp.AMIMethod_),
     AMIReverse_(pp.AMIReverse_),
     AMIRequireMatch_(pp.AMIRequireMatch_),
     AMILowWeightCorrection_(pp.AMILowWeightCorrection_),
@@ -645,6 +661,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationAngle_(pp.rotationAngle_),
     separationVector_(pp.separationVector_),
     AMIPtr_(NULL),
+    AMIMethod_(pp.AMIMethod_),
     AMIReverse_(pp.AMIReverse_),
     AMIRequireMatch_(pp.AMIRequireMatch_),
     AMILowWeightCorrection_(pp.AMILowWeightCorrection_),
@@ -683,6 +700,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationAngle_(pp.rotationAngle_),
     separationVector_(pp.separationVector_),
     AMIPtr_(NULL),
+    AMIMethod_(pp.AMIMethod_),
     AMIReverse_(pp.AMIReverse_),
     AMIRequireMatch_(pp.AMIRequireMatch_),
     AMILowWeightCorrection_(pp.AMILowWeightCorrection_),
@@ -791,7 +809,7 @@ const Foam::AMIPatchToPatchInterpolation& Foam::cyclicAMIPolyPatch::AMI() const
 
     if (!AMIPtr_.valid())
     {
-        resetAMI();
+        resetAMI(AMIMethod_);
     }
 
     return AMIPtr_();
@@ -1078,6 +1096,16 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
         {
             // No additional info to write
         }
+    }
+
+    if (AMIMethod_ != AMIPatchToPatchInterpolation::imFaceAreaWeight)
+    {
+        os.writeKeyword("method")
+            <<  AMIPatchToPatchInterpolation::interpolationMethodToWord
+                (
+                    AMIMethod_
+                )
+            << token::END_STATEMENT << nl;
     }
 
     if (AMIReverse_)

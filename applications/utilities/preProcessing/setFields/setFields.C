@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,7 +64,7 @@ bool setCellFieldType
     );
 
     // Check the "constant" directory
-    if (!fieldHeader.headerOk())
+    if (!fieldHeader.typeHeaderOk<fieldType>(true))
     {
         fieldHeader = IOobject
         (
@@ -76,7 +76,7 @@ bool setCellFieldType
     }
 
     // Check field exists
-    if (fieldHeader.headerOk())
+    if (fieldHeader.typeHeaderOk<fieldType>(true))
     {
         Info<< "    Setting internal values of "
             << fieldHeader.headerClassName()
@@ -208,7 +208,7 @@ bool setFaceFieldType
     );
 
     // Check the "constant" directory
-    if (!fieldHeader.headerOk())
+    if (!fieldHeader.typeHeaderOk<fieldType>(true))
     {
         fieldHeader = IOobject
         (
@@ -220,7 +220,7 @@ bool setFaceFieldType
     }
 
     // Check field exists
-    if (fieldHeader.headerOk())
+    if (fieldHeader.typeHeaderOk<fieldType>(true))
     {
         Info<< "    Setting patchField values of "
             << fieldHeader.headerClassName()
@@ -240,7 +240,7 @@ bool setFaceFieldType
                 field.boundaryField()[patchi].size(),
                 field.boundaryField()[patchi].patch().start()
               - mesh.nInternalFaces()
-            ).assign(field.boundaryField()[patchi]);
+            ) = field.boundaryField()[patchi];
         }
 
         // Override

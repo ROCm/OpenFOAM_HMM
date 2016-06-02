@@ -425,10 +425,13 @@ void Foam::Time::readDict()
     controlDict_.readIfPresent("graphFormat", graphFormat_);
     controlDict_.readIfPresent("runTimeModifiable", runTimeModifiable_);
 
-    if (!runTimeModifiable_ && controlDict_.watchIndex() != -1)
+    if (!runTimeModifiable_ && controlDict_.watchIndices().size())
     {
-        removeWatch(controlDict_.watchIndex());
-        controlDict_.watchIndex() = -1;
+        forAllReverse(controlDict_.watchIndices(), i)
+        {
+            removeWatch(controlDict_.watchIndices()[i]);
+        }
+        controlDict_.watchIndices().clear();
     }
 }
 
@@ -437,7 +440,20 @@ bool Foam::Time::read()
 {
     if (controlDict_.regIOobject::read())
     {
+        // Read contents
         readDict();
+        functionObjects_.read();
+
+        if (runTimeModifiable_)
+        {
+            // For IOdictionary the call to regIOobject::read() would have
+            // already updated all the watchIndices via the addWatch but
+            // controlDict_ is an unwatchedIOdictionary so will only have
+            // stored the dependencies as files.
+             addWatches(controlDict_, controlDict_.files());
+        }
+        controlDict_.files().clear();
+
         return true;
     }
     else
@@ -463,7 +479,6 @@ void Foam::Time::readModifiedObjects()
             ),
             Pstream::parRun()
         );
-
         // Time handling is special since controlDict_ is the one dictionary
         // that is not registered to any database.
 
@@ -471,6 +486,17 @@ void Foam::Time::readModifiedObjects()
         {
             readDict();
             functionObjects_.read();
+
+            if (runTimeModifiable_)
+            {
+                // For IOdictionary the call to regIOobject::read() would have
+                // already updated all the watchIndices via the addWatch but
+                // controlDict_ is an unwatchedIOdictionary so will only have
+                // stored the dependencies as files.
+
+                addWatches(controlDict_, controlDict_.files());
+            }
+            controlDict_.files().clear();
         }
 
         bool registryModified = objectRegistry::modified();

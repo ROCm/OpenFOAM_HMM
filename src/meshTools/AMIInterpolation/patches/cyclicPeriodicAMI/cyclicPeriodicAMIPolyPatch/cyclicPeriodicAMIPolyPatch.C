@@ -284,7 +284,8 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
             ownStr.reset(new OBJstream(dir/name() + postfix));
             neiStr.reset(new OBJstream(dir/neighbPatch().name() + postfix));
 
-            Info<< "cyclicPeriodicAMIPolyPatch::resetAMI : patch:" << name()
+            InfoInFunction
+                << "patch:" << name()
                 << " writing accumulated AMI to " << ownStr().name()
                 << " and " << neiStr().name() << endl;
         }
@@ -368,7 +369,8 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
 
         if (debug)
         {
-            Info<< "cyclicPeriodicAMIPolyPatch::resetAMI : patch:" << name()
+            InfoInFunction
+                << "patch:" << name()
                 << " srcSum:" << srcSum
                 << " tgtSum:" << tgtSum
                 << " direction:" << direction
@@ -391,8 +393,8 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
 
                 if (debug)
                 {
-                    Info<< "cyclicPeriodicAMIPolyPatch::resetAMI : patch:"
-                        << name()
+                    InfoInFunction
+                        << "patch:" << name()
                         << " moving this side from:"
                         << gAverage(thisPatch.points())
                         << " to:" << gAverage(thisPoints) << endl;
@@ -402,8 +404,8 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
 
                 if (debug)
                 {
-                    Info<< "cyclicPeriodicAMIPolyPatch::resetAMI : patch:"
-                        << name()
+                    InfoInFunction
+                        << "patch:" << name()
                         << " appending weights with untransformed slave side"
                         << endl;
                 }
@@ -421,8 +423,8 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
 
                 if (debug)
                 {
-                    Info<< "cyclicPeriodicAMIPolyPatch::resetAMI : patch:"
-                        << name()
+                    InfoInFunction
+                        << "patch:" << name()
                         << " moving neighbour side from:"
                         << gAverage(nbrPatch.points())
                         << " to:" << gAverage(nbrPoints) << endl;
@@ -453,11 +455,12 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
 
             nTransforms_ += direction ? +1 : -1;
 
-            ++ iter;
+            ++iter;
 
             if (debug)
             {
-                Info<< "cyclicPeriodicAMIPolyPatch::resetAMI : patch:" << name()
+                InfoInFunction
+                    << "patch:" << name()
                     << " iteration:" << iter
                     << " srcSum:" << srcSum
                     << " tgtSum:" << tgtSum

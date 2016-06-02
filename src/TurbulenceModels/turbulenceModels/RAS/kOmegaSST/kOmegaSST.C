@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ template<class BasicTurbulenceModel>
 void kOmegaSST<BasicTurbulenceModel>::correctNut(const volScalarField& S2)
 {
     // Correct the turbulence viscosity
-    kOmegaSSTBase<eddyViscosity<RASModel<BasicTurbulenceModel> > >::correctNut
+    kOmegaSSTBase<eddyViscosity<RASModel<BasicTurbulenceModel>>>::correctNut
     (
         S2
     );
@@ -70,7 +70,7 @@ kOmegaSST<BasicTurbulenceModel>::kOmegaSST
     const word& type
 )
 :
-    kOmegaSSTBase<eddyViscosity<RASModel<BasicTurbulenceModel> > >
+    kOmegaSSTBase<eddyViscosity<RASModel<BasicTurbulenceModel>>>
     (
         type,
         alpha,

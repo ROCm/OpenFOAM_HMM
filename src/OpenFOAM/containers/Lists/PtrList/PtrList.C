@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,27 +70,18 @@ Foam::PtrList<T>::PtrList(const PtrList<T>& a, const CloneArg& cloneArg)
 
 
 template<class T>
-Foam::PtrList<T>::PtrList(const Xfer<PtrList<T> >& lst)
+Foam::PtrList<T>::PtrList(const Xfer<PtrList<T>>& lst)
 {
     transfer(lst());
 }
 
 
 template<class T>
-Foam::PtrList<T>::PtrList(PtrList<T>& a, bool reUse)
+Foam::PtrList<T>::PtrList(PtrList<T>& a, bool reuse)
 :
-    ptrs_(a.size())
+    ptrs_(a.ptrs_, reuse)
 {
-    if (reUse)
-    {
-        forAll(*this, i)
-        {
-            ptrs_[i] = a.ptrs_[i];
-            a.ptrs_[i] = NULL;
-        }
-        a.setSize(0);
-    }
-    else
+    if (!reuse)
     {
         forAll(*this, i)
         {
@@ -258,7 +249,7 @@ void Foam::PtrList<T>::reorder(const labelUList& oldToNew)
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-Foam::PtrList<T>& Foam::PtrList<T>::operator=(const PtrList<T>& a)
+void Foam::PtrList<T>::operator=(const PtrList<T>& a)
 {
     if (this == &a)
     {
@@ -290,9 +281,6 @@ Foam::PtrList<T>& Foam::PtrList<T>::operator=(const PtrList<T>& a)
             << " for type " << typeid(T).name()
             << abort(FatalError);
     }
-
-
-    return *this;
 }
 
 

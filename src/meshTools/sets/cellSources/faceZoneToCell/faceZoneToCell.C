@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,7 +90,7 @@ void Foam::faceZoneToCell::combine(topoSet& set, const bool add) const
             forAll(cellLabels, i)
             {
                 // Only do active cells
-                if (cellLabels[i] < mesh_.nCells())
+                if (cellLabels[i] >= 0 && cellLabels[i] < mesh_.nCells())
                 {
                     addOrDelete(set, cellLabels[i], add);
                 }

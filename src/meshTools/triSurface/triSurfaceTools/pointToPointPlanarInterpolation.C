@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(pointToPointPlanarInterpolation, 0);
+    defineTypeNameAndDebug(pointToPointPlanarInterpolation, 0);
 }
 
 
@@ -112,7 +112,7 @@ Foam::pointToPointPlanarInterpolation::calcCoordinateSystem
 
     if (debug)
     {
-        Info<< "pointToPointPlanarInterpolation::calcCoordinateSystem :"
+        InfoInFunction
             << " Used points " << p0 << ' ' << points[index1]
             << ' ' << points[index2]
             << " to define coordinate system with normal " << n << endl;
@@ -197,14 +197,14 @@ void Foam::pointToPointPlanarInterpolation::calcWeights
         (
             referenceCS_.localPosition(sourcePoints)
         );
-        vectorField& localVertices = tlocalVertices();
+        vectorField& localVertices = tlocalVertices.ref();
 
         const boundBox bb(localVertices, true);
         const point bbMid(bb.midpoint());
 
         if (debug)
         {
-            Info<< "pointToPointPlanarInterpolation::calcWeights :"
+            InfoInFunction
                 << " Perturbing points with " << perturb_
                 << " fraction of a random position inside " << bb
                 << " to break any ties on regular meshes."

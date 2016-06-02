@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,10 +24,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "thermoSingleLayer.H"
+#include "fvcDdt.H"
 #include "fvcDiv.H"
 #include "fvcLaplacian.H"
+#include "fvcFlux.H"
 #include "fvm.H"
-#include "fvcDdt.H"
 #include "addToRunTimeSelectionTable.H"
 #include "zeroGradientFvPatchFields.H"
 #include "mappedFieldFvPatchField.H"
@@ -90,7 +91,7 @@ void thermoSingleLayer::resetPrimaryRegionSourceTerms()
 {
     if (debug)
     {
-        Info<< "thermoSingleLayer::resetPrimaryRegionSourceTerms()" << endl;
+        InfoInFunction << endl;
     }
 
     kinematicSingleLayer::resetPrimaryRegionSourceTerms();
@@ -115,7 +116,7 @@ void thermoSingleLayer::correctHsForMappedT()
     forAll(T_.boundaryField(), patchI)
     {
         const fvPatchField<scalar>& Tp = T_.boundaryField()[patchI];
-        if (isA<mappedFieldFvPatchField<scalar> >(Tp))
+        if (isA<mappedFieldFvPatchField<scalar>>(Tp))
         {
             hs_.boundaryField()[patchI] == hs(Tp, patchI);
         }
@@ -147,7 +148,7 @@ void thermoSingleLayer::transferPrimaryRegionThermoFields()
 {
     if (debug)
     {
-        Info<< "thermoSingleLayer::transferPrimaryRegionThermoFields()" << endl;
+        InfoInFunction << endl;
     }
 
     kinematicSingleLayer::transferPrimaryRegionThermoFields();
@@ -166,7 +167,7 @@ void thermoSingleLayer::transferPrimaryRegionSourceFields()
 {
     if (debug)
     {
-        Info<< "thermoSingleLayer::transferPrimaryRegionSourceFields()" << endl;
+        InfoInFunction << endl;
     }
 
     kinematicSingleLayer::transferPrimaryRegionSourceFields();
@@ -233,7 +234,7 @@ void thermoSingleLayer::updateSubmodels()
 {
     if (debug)
     {
-        Info<< "thermoSingleLayer::updateSubmodels()" << endl;
+        InfoInFunction << endl;
     }
 
     // Update heat transfer coefficient sub-models
@@ -288,7 +289,7 @@ void thermoSingleLayer::solveEnergy()
 {
     if (debug)
     {
-        Info<< "thermoSingleLayer::solveEnergy()" << endl;
+        InfoInFunction << endl;
     }
 
 
@@ -584,7 +585,7 @@ thermoSingleLayer::thermoSingleLayer
                 IOobject::AUTO_WRITE,
                 false
             ),
-            fvc::interpolate(deltaRho_*U_) & regionMesh().Sf()
+            fvc::flux(deltaRho_*U_)
         );
 
         phi_ == phi0;
@@ -636,7 +637,7 @@ void thermoSingleLayer::preEvolveRegion()
 {
     if (debug)
     {
-        Info<< "thermoSingleLayer::preEvolveRegion()" << endl;
+        InfoInFunction << endl;
     }
 
     kinematicSingleLayer::preEvolveRegion();
@@ -653,7 +654,7 @@ void thermoSingleLayer::evolveRegion()
 {
     if (debug)
     {
-        Info<< "thermoSingleLayer::evolveRegion()" << endl;
+        InfoInFunction << endl;
     }
 
     // Update sub-models to provide updated source contributions
@@ -740,16 +741,18 @@ void thermoSingleLayer::info()
 
     const scalarField& Tinternal = T_.internalField();
 
-    Info<< indent << "min/max(T)         = " << gMin(Tinternal) << ", "
+    Info<< indent << "min/mean/max(T)    = "
+        << gMin(Tinternal) << ", "
+        << gAverage(Tinternal) << ", "
         << gMax(Tinternal) << nl;
 
     phaseChange_->info(Info);
 }
 
 
-tmp<DimensionedField<scalar, volMesh> > thermoSingleLayer::Srho() const
+tmp<DimensionedField<scalar, volMesh>> thermoSingleLayer::Srho() const
 {
-    tmp<DimensionedField<scalar, volMesh> > tSrho
+    tmp<DimensionedField<scalar, volMesh>> tSrho
     (
         new DimensionedField<scalar, volMesh>
         (
@@ -767,7 +770,7 @@ tmp<DimensionedField<scalar, volMesh> > thermoSingleLayer::Srho() const
         )
     );
 
-    scalarField& Srho = tSrho();
+    scalarField& Srho = tSrho.ref();
     const scalarField& V = primaryMesh().V();
     const scalar dt = time_.deltaTValue();
 
@@ -794,14 +797,14 @@ tmp<DimensionedField<scalar, volMesh> > thermoSingleLayer::Srho() const
 }
 
 
-tmp<DimensionedField<scalar, volMesh> > thermoSingleLayer::Srho
+tmp<DimensionedField<scalar, volMesh>> thermoSingleLayer::Srho
 (
     const label i
 ) const
 {
     const label vapId = thermo_.carrierId(filmThermo_->name());
 
-    tmp<DimensionedField<scalar, volMesh> > tSrho
+    tmp<DimensionedField<scalar, volMesh>> tSrho
     (
         new DimensionedField<scalar, volMesh>
         (
@@ -821,7 +824,7 @@ tmp<DimensionedField<scalar, volMesh> > thermoSingleLayer::Srho
 
     if (vapId == i)
     {
-        scalarField& Srho = tSrho();
+        scalarField& Srho = tSrho.ref();
         const scalarField& V = primaryMesh().V();
         const scalar dt = time().deltaTValue();
 
@@ -849,9 +852,9 @@ tmp<DimensionedField<scalar, volMesh> > thermoSingleLayer::Srho
 }
 
 
-tmp<DimensionedField<scalar, volMesh> > thermoSingleLayer::Sh() const
+tmp<DimensionedField<scalar, volMesh>> thermoSingleLayer::Sh() const
 {
-    tmp<DimensionedField<scalar, volMesh> > tSh
+    tmp<DimensionedField<scalar, volMesh>> tSh
     (
         new DimensionedField<scalar, volMesh>
         (
@@ -871,7 +874,7 @@ tmp<DimensionedField<scalar, volMesh> > thermoSingleLayer::Sh() const
 /*
     phase change energy fed back into the film...
 
-    scalarField& Sh = tSh();
+    scalarField& Sh = tSh.ref();
     const scalarField& V = primaryMesh().V();
     const scalar dt = time_.deltaTValue();
 

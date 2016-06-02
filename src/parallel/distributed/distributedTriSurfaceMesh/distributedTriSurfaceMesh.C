@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -181,7 +181,7 @@ void Foam::distributedTriSurfaceMesh::distributeSegment
 
     DynamicList<segment>& allSegments,
     DynamicList<label>& allSegmentMap,
-    List<DynamicList<label> >& sendMap
+    List<DynamicList<label>>& sendMap
 ) const
 {
     // 1. Fully local already handled outside. Note: retest is cheap.
@@ -278,7 +278,7 @@ Foam::distributedTriSurfaceMesh::distributeSegments
         // Original index of segment
         DynamicList<label> dynAllSegmentMap(start.size());
         // Per processor indices into allSegments to send
-        List<DynamicList<label> > dynSendMap(Pstream::nProcs());
+        List<DynamicList<label>> dynSendMap(Pstream::nProcs());
 
         forAll(start, segmentI)
         {
@@ -712,7 +712,7 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
         // Original index of segment
         DynamicList<label> dynAllSegmentMap(centres.size());
         // Per processor indices into allSegments to send
-        List<DynamicList<label> > dynSendMap(Pstream::nProcs());
+        List<DynamicList<label>> dynSendMap(Pstream::nProcs());
 
         // Work array - whether processor bb overlaps the bounding sphere.
         boolList procBbOverlaps(Pstream::nProcs());
@@ -808,7 +808,7 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
 // Returns a per processor a list of bounding boxes that most accurately
 // describe the shape. For now just a single bounding box per processor but
 // optimisation might be to determine a better fitting shape.
-Foam::List<Foam::List<Foam::treeBoundBox> >
+Foam::List<Foam::List<Foam::treeBoundBox>>
 Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
 (
     const triSurface& s
@@ -892,7 +892,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
     // Find bounding box for all triangles on new distribution.
 
     // Initialise to inverted box (VGREAT, -VGREAT)
-    List<List<treeBoundBox> > bbs(Pstream::nProcs());
+    List<List<treeBoundBox>> bbs(Pstream::nProcs());
     forAll(bbs, procI)
     {
         bbs[procI].setSize(1);
@@ -948,7 +948,7 @@ bool Foam::distributedTriSurfaceMesh::overlaps
         triBb.max() = max(triBb.max(), p1);
         triBb.max() = max(triBb.max(), p2);
 
-        //- Exact test of triangle intersecting bb
+        // Exact test of triangle intersecting bb
 
         // Quick rejection. If whole bounding box of tri is outside cubeBb then
         // there will be no intersection.
@@ -1339,7 +1339,7 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
 
     if (debug)
     {
-        Info<< "Constructed from triSurface:" << endl;
+        InfoInFunction << "Constructed from triSurface:" << endl;
         writeStats(Info);
 
         labelList nTris(Pstream::nProcs());
@@ -1388,27 +1388,6 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
         )
     )
 {
-    if
-    (
-        Pstream::parRun()
-     && (
-            dict_.readOpt() == IOobject::MUST_READ
-         || dict_.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     && (
-            regIOobject::fileModificationChecking == timeStampMaster
-         || regIOobject::fileModificationChecking == inotifyMaster
-        )
-    )
-    {
-        FatalErrorInFunction
-            << "    using 'timeStampMaster' or 'inotifyMaster.'\n"
-            << "    Modify the entry fileModificationChecking\n"
-            << "    in the etc/controlDict.\n"
-            << "    Use 'timeStamp' instead."
-            << exit(FatalError);
-    }
-
     read();
 
     reduce(bounds().min(), minOp<point>());
@@ -1416,7 +1395,7 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
 
     if (debug)
     {
-        Info<< "Read distributedTriSurface from " << io.objectPath()
+        InfoInFunction << "Read distributedTriSurface from " << io.objectPath()
             << ':' << endl;
         writeStats(Info);
 
@@ -1471,27 +1450,6 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
         )
     )
 {
-    if
-    (
-        Pstream::parRun()
-     && (
-            dict_.readOpt() == IOobject::MUST_READ
-         || dict_.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     && (
-            regIOobject::fileModificationChecking == timeStampMaster
-         || regIOobject::fileModificationChecking == inotifyMaster
-        )
-    )
-    {
-        FatalErrorInFunction
-            << "    using 'timeStampMaster' or 'inotifyMaster.'\n"
-            << "    Modify the entry fileModificationChecking\n"
-            << "    in the etc/controlDict.\n"
-            << "    Use 'timeStamp' instead."
-            << exit(FatalError);
-    }
-
     read();
 
     reduce(bounds().min(), minOp<point>());
@@ -1499,7 +1457,7 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
 
     if (debug)
     {
-        Info<< "Read distributedTriSurface from " << io.objectPath()
+        InfoInFunction << "Read distributedTriSurface from " << io.objectPath()
             << " and dictionary:" << endl;
         writeStats(Info);
 
@@ -1741,7 +1699,7 @@ void Foam::distributedTriSurfaceMesh::findLineAll
 (
     const pointField& start,
     const pointField& end,
-    List<List<pointIndexHit> >& info
+    List<List<pointIndexHit>>& info
 ) const
 {
     // Reuse fineLine. We could modify all of findLine to do multiple
@@ -2082,7 +2040,7 @@ void Foam::distributedTriSurfaceMesh::distribute
     // ~~~~~~~~~~~~~~~~~~~~~~
 
     {
-        List<List<treeBoundBox> > newProcBb(Pstream::nProcs());
+        List<List<treeBoundBox>> newProcBb(Pstream::nProcs());
 
         switch(distType_)
         {
@@ -2110,13 +2068,6 @@ void Foam::distributedTriSurfaceMesh::distribute
             break;
         }
 
-        //if (debug)
-        //{
-        //    Info<< "old bb:" << procBb_ << endl << endl;
-        //    Info<< "new bb:" << newProcBb << endl << endl;
-        //    Info<< "Same:" << (newProcBb == procBb_) << endl;
-        //}
-
         if (newProcBb == procBb_)
         {
             return;
@@ -2137,9 +2088,8 @@ void Foam::distributedTriSurfaceMesh::distribute
         Pstream::gatherList(nTris);
         Pstream::scatterList(nTris);
 
-        Info<< "distributedTriSurfaceMesh::distribute : before distribution:"
-            << endl
-            << "\tproc\ttris" << endl;
+        InfoInFunction
+            << "before distribution:" << endl << "\tproc\ttris" << endl;
 
         forAll(nTris, procI)
         {
@@ -2396,9 +2346,8 @@ void Foam::distributedTriSurfaceMesh::distribute
         Pstream::gatherList(nTris);
         Pstream::scatterList(nTris);
 
-        Info<< "distributedTriSurfaceMesh::distribute : after distribution:"
-            << endl
-            << "\tproc\ttris" << endl;
+        InfoInFunction
+            << "after distribution:" << endl << "\tproc\ttris" << endl;
 
         forAll(nTris, procI)
         {
@@ -2423,7 +2372,6 @@ void Foam::distributedTriSurfaceMesh::distribute
 }
 
 
-//- Write using given format, version and compression
 bool Foam::distributedTriSurfaceMesh::writeObject
 (
     IOstream::streamFormat fmt,

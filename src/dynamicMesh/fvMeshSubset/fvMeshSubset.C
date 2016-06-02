@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -90,14 +90,15 @@ void Foam::fvMeshSubset::markPoints
 }
 
 
-// Synchronize nCellsUsingFace on both sides of coupled patches. Marks
-// faces that become 'uncoupled' with 3.
 void Foam::fvMeshSubset::doCoupledPatches
 (
     const bool syncPar,
     labelList& nCellsUsingFace
 ) const
 {
+    // Synchronize nCellsUsingFace on both sides of coupled patches.
+    // Marks faces that become 'uncoupled' with 3.
+
     const polyBoundaryMesh& oldPatches = baseMesh().boundaryMesh();
 
     label nUncoupled = 0;
@@ -391,7 +392,6 @@ Foam::labelList Foam::fvMeshSubset::getCellsToRemove
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::fvMeshSubset::fvMeshSubset(const fvMesh& baseMesh)
 :
     baseMesh_(baseMesh),

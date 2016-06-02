@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,9 +54,7 @@ void Foam::fv::LeastSquaresVectors<Stencil>::calcLeastSquaresVectors()
 {
     if (debug)
     {
-        Info<< "LeastSquaresVectors::calcLeastSquaresVectors() :"
-            << "Calculating least square gradient vectors"
-            << endl;
+        InfoInFunction << "Calculating least square gradient vectors" << endl;
     }
 
     const fvMesh& mesh = this->mesh_;
@@ -68,7 +66,7 @@ void Foam::fv::LeastSquaresVectors<Stencil>::calcLeastSquaresVectors()
     // including components for the "empty" directions
     symmTensor dd0(sqr((Vector<label>::one - mesh.geometricD())/2));
 
-    forAll (vectors_, i)
+    forAll(vectors_, i)
     {
         List<vector>& lsvi = vectors_[i];
         symmTensor dd(dd0);
@@ -90,7 +88,7 @@ void Foam::fv::LeastSquaresVectors<Stencil>::calcLeastSquaresVectors()
         dd -= dd0;
 
         // Finalize the gradient weighting vectors
-        lsvi[0] = vector::zero;
+        lsvi[0] = Zero;
         for (label j=1; j<lsvi.size(); j++)
         {
             lsvi[j] = dd & lsvi[j];
@@ -100,9 +98,8 @@ void Foam::fv::LeastSquaresVectors<Stencil>::calcLeastSquaresVectors()
 
     if (debug)
     {
-        Info<< "LeastSquaresVectors::calcLeastSquaresVectors() :"
-            << "Finished calculating least square gradient vectors"
-            << endl;
+        InfoInFunction
+            << "Finished calculating least square gradient vectors" << endl;
     }
 }
 

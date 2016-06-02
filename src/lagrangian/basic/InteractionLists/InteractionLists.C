@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -287,7 +287,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
     rilInverse_.setSize(mesh_.nCells());
 
     // Temporary Dynamic lists for accumulation
-    List<DynamicList<label> > rilInverseTemp(rilInverse_.size());
+    List<DynamicList<label>> rilInverseTemp(rilInverse_.size());
 
     // Loop over all referred cells
     forAll(ril_, refCellI)
@@ -504,7 +504,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
     rwfilInverse_.setSize(mesh_.nCells());
 
     // Temporary Dynamic lists for accumulation
-    List<DynamicList<label> > rwfilInverseTemp(rwfilInverse_.size());
+    List<DynamicList<label>> rwfilInverseTemp(rwfilInverse_.size());
 
     // Loop over all referred wall faces
     forAll(rwfil_, refWallFaceI)
@@ -844,15 +844,6 @@ void Foam::InteractionLists<ParticleType>::buildMap
         nSend[procI]++;
     }
 
-    // Send over how many I need to receive
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    labelListList sendSizes(Pstream::nProcs());
-
-    sendSizes[Pstream::myProcNo()] = nSend;
-
-    combineReduce(sendSizes, UPstream::listEq());
-
     // 2. Size sendMap
     labelListList sendMap(Pstream::nProcs());
 
@@ -871,6 +862,11 @@ void Foam::InteractionLists<ParticleType>::buildMap
         sendMap[procI][nSend[procI]++] = i;
     }
 
+    // 4. Send over how many I need to receive
+    labelList recvSizes;
+    Pstream::exchangeSizes(sendMap, recvSizes);
+
+
     // Determine receive map
     // ~~~~~~~~~~~~~~~~~~~~~
 
@@ -888,7 +884,7 @@ void Foam::InteractionLists<ParticleType>::buildMap
     {
         if (procI != Pstream::myProcNo())
         {
-            label nRecv = sendSizes[procI][Pstream::myProcNo()];
+            label nRecv = recvSizes[procI];
 
             constructMap[procI].setSize(nRecv);
 
@@ -914,7 +910,7 @@ void Foam::InteractionLists<ParticleType>::buildMap
 template<class ParticleType>
 void Foam::InteractionLists<ParticleType>::prepareParticlesToRefer
 (
-    const List<DynamicList<ParticleType*> >& cellOccupancy
+    const List<DynamicList<ParticleType*>>& cellOccupancy
 )
 {
     const globalIndexAndTransform& globalTransforms =
@@ -1159,7 +1155,7 @@ Foam::InteractionLists<ParticleType>::~InteractionLists()
 template<class ParticleType>
 void Foam::InteractionLists<ParticleType>::sendReferredData
 (
-    const List<DynamicList<ParticleType*> >& cellOccupancy,
+    const List<DynamicList<ParticleType*>>& cellOccupancy,
     PstreamBuffers& pBufs
 )
 {
@@ -1184,7 +1180,7 @@ void Foam::InteractionLists<ParticleType>::sendReferredData
         {
             UOPstream toDomain(domain, pBufs);
 
-            UIndirectList<IDLList<ParticleType> > subMappedParticles
+            UIndirectList<IDLList<ParticleType>> subMappedParticles
             (
                 referredParticles_,
                 subMap

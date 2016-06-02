@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SSG.H"
+#include "fvOptions.H"
 #include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -40,6 +41,7 @@ void SSG<BasicTurbulenceModel>::correctNut()
 {
     this->nut_ = this->Cmu_*sqr(k_)/epsilon_;
     this->nut_.correctBoundaryConditions();
+    fv::options::New(this->mesh_).correct(this->nut_);
 
     BasicTurbulenceModel::correctNut();
 }
@@ -60,7 +62,7 @@ SSG<BasicTurbulenceModel>::SSG
     const word& type
 )
 :
-    ReynoldsStress<RASModel<BasicTurbulenceModel> >
+    ReynoldsStress<RASModel<BasicTurbulenceModel>>
     (
         type,
         alpha,
@@ -223,7 +225,7 @@ SSG<BasicTurbulenceModel>::SSG
 template<class BasicTurbulenceModel>
 bool SSG<BasicTurbulenceModel>::read()
 {
-    if (ReynoldsStress<RASModel<BasicTurbulenceModel> >::read())
+    if (ReynoldsStress<RASModel<BasicTurbulenceModel>>::read())
     {
         Cmu_.readIfPresent(this->coeffDict());
         C1_.readIfPresent(this->coeffDict());
@@ -290,8 +292,9 @@ void SSG<BasicTurbulenceModel>::correct()
     const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
     const volVectorField& U = this->U_;
     volSymmTensorField& R = this->R_;
+    fv::options& fvOptions(fv::options::New(this->mesh_));
 
-    ReynoldsStress<RASModel<BasicTurbulenceModel> >::correct();
+    ReynoldsStress<RASModel<BasicTurbulenceModel>>::correct();
 
     tmp<volTensorField> tgradU(fvc::grad(U));
     const volTensorField& gradU = tgradU();
@@ -311,13 +314,14 @@ void SSG<BasicTurbulenceModel>::correct()
      ==
         Ceps1_*alpha*rho*G*epsilon_/k_
       - fvm::Sp(Ceps2_*alpha*rho*epsilon_/k_, epsilon_)
+      + fvOptions(alpha, rho, epsilon_)
     );
 
-    epsEqn().relax();
-
-    epsEqn().boundaryManipulate(epsilon_.boundaryField());
-
+    epsEqn.ref().relax();
+    fvOptions.constrain(epsEqn.ref());
+    epsEqn.ref().boundaryManipulate(epsilon_.boundaryField());
     solve(epsEqn);
+    fvOptions.correct(epsilon_);
     bound(epsilon_, this->epsilonMin_);
 
 
@@ -364,10 +368,13 @@ void SSG<BasicTurbulenceModel>::correct()
           + C4_*dev(twoSymm(b&S))
           + C5_*twoSymm(b&Omega)
         )
+      + fvOptions(alpha, rho, R)
     );
 
-    REqn().relax();
+    REqn.ref().relax();
+    fvOptions.constrain(REqn.ref());
     solve(REqn);
+    fvOptions.correct(R);
 
     this->boundNormalStress(R);
 

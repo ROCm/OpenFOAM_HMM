@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,8 +42,8 @@ namespace Foam
 
 defineTypeNameAndDebug(removePoints, 0);
 
-//- Combine-reduce operator to combine data on faces. Takes care
-//  of reverse orientation on coupled face.
+// Combine-reduce operator to combine data on faces. Takes care
+// of reverse orientation on coupled face.
 template<class T, template<class> class CombineOp>
 class faceEqOp
 {
@@ -71,31 +71,11 @@ public:
     }
 };
 
-
-//// Dummy transform for List. Used in synchronisation.
-//template<class T>
-//class dummyTransformList
-//{
-//public:
-//    void operator()(const coupledPolyPatch&, Field<List<T> >&) const
-//    {}
-//};
-//// Dummy template specialisation. Used in synchronisation.
-//template<>
-//class pTraits<boolList>
-//{
-//public:
-//
-//    //- Component type
-//    typedef label cmptType;
-//};
-
-
 }
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Change the vertices of the face whilst keeping everything else the same.
 void Foam::removePoints::modifyFace
 (
     const label faceI,
@@ -148,7 +128,6 @@ void Foam::removePoints::modifyFace
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from mesh
 Foam::removePoints::removePoints
 (
     const polyMesh& mesh,

@@ -55,7 +55,7 @@
                     (
                         "zero",
                         tkappaByCp().dimensions(),
-                        symmTensor::zero
+                        Zero
                     ),
                     zeroGradientFvPatchSymmTensorField::typeName
                 )
@@ -76,7 +76,7 @@
             IOobject::AUTO_WRITE
         );
 
-        if (betavSolidIO.headerOk())
+        if (betavSolidIO.typeHeaderOk<volScalarField>(true))
         {
             betavSolid.set
             (

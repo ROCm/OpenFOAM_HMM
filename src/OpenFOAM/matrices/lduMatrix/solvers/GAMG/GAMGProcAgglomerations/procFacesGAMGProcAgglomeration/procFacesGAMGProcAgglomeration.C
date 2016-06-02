@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Create single cell mesh
 Foam::autoPtr<Foam::lduPrimitiveMesh>
 Foam::procFacesGAMGProcAgglomeration::singleCellMesh
 (
@@ -59,7 +58,7 @@ Foam::procFacesGAMGProcAgglomeration::singleCellMesh
 ) const
 {
     // Count number of faces per processor
-    List<Map<label> > procFaces(UPstream::nProcs(mesh.comm()));
+    List<Map<label>> procFaces(UPstream::nProcs(mesh.comm()));
     Map<label>& myNeighbours = procFaces[UPstream::myProcNo(mesh.comm())];
 
     {
@@ -166,7 +165,7 @@ Foam::procFacesGAMGProcAgglomeration::processorAgglomeration
     );
 
     tmp<labelField> tfineToCoarse(new labelField(0));
-    labelField& fineToCoarse = tfineToCoarse();
+    labelField& fineToCoarse = tfineToCoarse.ref();
 
     if (singleCellMeshPtr.valid())
     {

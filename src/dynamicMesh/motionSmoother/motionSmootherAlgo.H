@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -172,7 +172,7 @@ class motionSmootherAlgo
 
         //- Average of connected points.
         template<class Type>
-        tmp<GeometricField<Type, pointPatchField, pointMesh> > avg
+        tmp<GeometricField<Type, pointPatchField, pointMesh>> avg
         (
             const GeometricField<Type, pointPatchField, pointMesh>& fld,
             const scalarField& edgeWeight
@@ -180,7 +180,7 @@ class motionSmootherAlgo
 
         //- Average postion of connected points.
         template<class Type>
-        tmp<GeometricField<Type, pointPatchField, pointMesh> > avgPositions
+        tmp<GeometricField<Type, pointPatchField, pointMesh>> avgPositions
         (
             const GeometricField<Type, pointPatchField, pointMesh>& fld,
             const scalarField& edgeWeight
@@ -521,7 +521,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "motionSmootherAlgoTemplates.C"
+    #include "motionSmootherAlgoTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

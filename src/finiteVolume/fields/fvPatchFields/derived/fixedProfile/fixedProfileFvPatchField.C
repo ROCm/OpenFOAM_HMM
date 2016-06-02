@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,7 @@ Foam::fixedProfileFvPatchField<Type>::fixedProfileFvPatchField
 :
     fixedValueFvPatchField<Type>(p, iF),
     profile_(),
-    dir_(pTraits<vector>::zero),
+    dir_(Zero),
     origin_(0)
 {}
 
@@ -51,7 +51,7 @@ Foam::fixedProfileFvPatchField<Type>::fixedProfileFvPatchField
 :
     fixedValueFvPatchField<Type>(p, iF, fld),
     profile_(),
-    dir_(pTraits<vector>::zero),
+    dir_(Zero),
     origin_(0)
 {}
 
@@ -65,7 +65,7 @@ Foam::fixedProfileFvPatchField<Type>::fixedProfileFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF),
-    profile_(DataEntry<Type>::New("profile", dict)),
+    profile_(Function1<Type>::New("profile", dict)),
     dir_(dict.lookup("direction")),
     origin_(readScalar(dict.lookup("origin")))
 {

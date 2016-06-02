@@ -69,7 +69,7 @@ void MapVolFields
                 IOobject::MUST_READ
             );
 
-            if (targetIO.headerOk())
+            if (targetIO.typeHeaderOk<fieldType>(true))
             {
                 fieldType fieldTarget(targetIO, meshTarget);
 

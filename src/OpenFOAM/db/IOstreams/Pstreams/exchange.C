@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,7 @@ Description
 template<class Container, class T>
 void Foam::Pstream::exchange
 (
-    const List<Container>& sendBufs,
+    const UList<Container>& sendBufs,
     const labelUList& recvSizes,
     List<Container>& recvBufs,
     const int tag,
@@ -53,20 +53,11 @@ void Foam::Pstream::exchange
     if (sendBufs.size() != UPstream::nProcs(comm))
     {
         FatalErrorInFunction
-            << "Size of send buffer:" << sendBufs.size()
-            << " does not equal the number of processors:"
+            << "Size of list " << sendBufs.size()
+            << " does not equal the number of processors "
             << UPstream::nProcs(comm)
             << Foam::abort(FatalError);
     }
-    if (recvSizes.size() != UPstream::nProcs(comm))
-    {
-        FatalErrorInFunction
-            << "Size of receive sizes:" << recvSizes.size()
-            << " does not equal the number of processors:"
-            << UPstream::nProcs(comm)
-            << Foam::abort(FatalError);
-    }
-
 
     recvBufs.setSize(sendBufs.size());
 
@@ -141,33 +132,47 @@ void Foam::Pstream::exchange
 }
 
 
+template<class Container>
+void Foam::Pstream::exchangeSizes
+(
+    const Container& sendBufs,
+    labelList& recvSizes,
+    const label comm
+)
+{
+    if (sendBufs.size() != UPstream::nProcs(comm))
+    {
+        FatalErrorInFunction
+            << "Size of container " << sendBufs.size()
+            << " does not equal the number of processors "
+            << UPstream::nProcs(comm)
+            << Foam::abort(FatalError);
+    }
+
+    labelList sendSizes(sendBufs.size());
+    forAll(sendBufs, procI)
+    {
+        sendSizes[procI] = sendBufs[procI].size();
+    }
+    recvSizes.setSize(sendSizes.size());
+    allToAll(sendSizes, recvSizes, comm);
+}
+
+
 template<class Container, class T>
 void Foam::Pstream::exchange
 (
-    const List<Container>& sendBufs,
+    const UList<Container>& sendBufs,
     List<Container>& recvBufs,
     const int tag,
     const label comm,
     const bool block
 )
 {
-    labelList sendSizes(sendBufs.size());
-    forAll(sendBufs, procI)
-    {
-        sendSizes[procI] = sendBufs[procI].size();
-    }
-    labelList recvSizes(sendBufs.size());
-    UPstream::exchange(sendSizes.begin(), recvSizes.begin(), comm);
+    labelList recvSizes;
+    exchangeSizes(sendBufs, recvSizes, comm);
 
-    exchange<Container, T>
-    (
-        sendBufs,
-        recvSizes,
-        recvBufs,
-        tag,
-        comm,
-        block
-    );
+    exchange<Container, T>(sendBufs, recvSizes, recvBufs, tag, comm, block);
 }
 
 

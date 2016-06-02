@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,24 +32,24 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeBaseLimitedSurfaceInterpolationScheme(Type)                       \
-                                                                              \
-defineNamedTemplateTypeNameAndDebug                                           \
-(                                                                             \
-    limitedSurfaceInterpolationScheme<Type>,                                  \
-    0                                                                         \
-);                                                                            \
-                                                                              \
-defineTemplateRunTimeSelectionTable                                           \
-(                                                                             \
-    limitedSurfaceInterpolationScheme<Type>,                                  \
-    Mesh                                                                      \
-);                                                                            \
-                                                                              \
-defineTemplateRunTimeSelectionTable                                           \
-(                                                                             \
-    limitedSurfaceInterpolationScheme<Type>,                                  \
-    MeshFlux                                                                  \
+#define makeBaseLimitedSurfaceInterpolationScheme(Type)                        \
+                                                                               \
+defineNamedTemplateTypeNameAndDebug                                            \
+(                                                                              \
+    limitedSurfaceInterpolationScheme<Type>,                                   \
+    0                                                                          \
+);                                                                             \
+                                                                               \
+defineTemplateRunTimeSelectionTable                                            \
+(                                                                              \
+    limitedSurfaceInterpolationScheme<Type>,                                   \
+    Mesh                                                                       \
+);                                                                             \
+                                                                               \
+defineTemplateRunTimeSelectionTable                                            \
+(                                                                              \
+    limitedSurfaceInterpolationScheme<Type>,                                   \
+    MeshFlux                                                                   \
 );
 
 makeBaseLimitedSurfaceInterpolationScheme(scalar)

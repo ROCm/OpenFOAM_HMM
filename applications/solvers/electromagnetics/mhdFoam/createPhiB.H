@@ -9,7 +9,7 @@
 
     surfaceScalarField* phiBPtr;
 
-    if (phiBHeader.headerOk())
+    if (phiBHeader.typeHeaderOk<surfaceScalarField>(true))
     {
         Info<< "Reading field phiB\n" << endl;
 
@@ -40,7 +40,7 @@
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE
             ),
-            (fvc::interpolate(B) & mesh.Sf())
+            fvc::flux(B)
         );
     }
 

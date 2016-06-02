@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,8 +36,8 @@ bool Foam::IOobject::writeHeader(Ostream& os, const word& type) const
 {
     if (!os.good())
     {
-        Info<< "IOobject::writeHeader(Ostream&) : "
-            << "no stream open for write" << nl
+        InfoInFunction
+            << "No stream open for write" << nl
             << os.info() << endl;
 
         return false;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,7 +57,7 @@ Description
     }
     \endverbatim
 
-    The \c pressure entry is specified as a DataEntry type, able to describe
+    The \c pressure entry is specified as a Function1 type, able to describe
     time varying functions.
 
 Note
@@ -65,7 +65,7 @@ Note
 
 
 SeeAlso
-    Foam::DataEntry
+    Foam::Function1Types
     Foam::uniformFixedValueFvPatchField
     Foam::totalPressureFvPatchField
 
@@ -78,7 +78,7 @@ SourceFiles
 #define uniformTotalPressureFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
-#include "DataEntry.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -112,7 +112,7 @@ class uniformTotalPressureFvPatchScalarField
         scalar gamma_;
 
         //- Table of time vs total pressure, including the bounding treatment
-        autoPtr<DataEntry<scalar> > pressure_;
+        autoPtr<Function1<scalar>> pressure_;
 
 
 public:

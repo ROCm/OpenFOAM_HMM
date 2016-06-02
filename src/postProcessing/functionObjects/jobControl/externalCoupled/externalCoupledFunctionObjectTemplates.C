@@ -143,7 +143,7 @@ bool Foam::externalCoupledFunctionObject::readData
                 // additional processing by derived type.
                 pf.patchFieldType::evaluate();
             }
-            else if (isA<mixedFvPatchField<Type> >(bf[patchI]))
+            else if (isA<mixedFvPatchField<Type>>(bf[patchI]))
             {
                 // Read columns from file for
                 // value, snGrad, refValue, refGrad, valueFraction
@@ -159,7 +159,7 @@ bool Foam::externalCoupledFunctionObject::readData
                 mixedFvPatchField<Type>& pf =
                 const_cast<mixedFvPatchField<Type>&>
                 (
-                    refCast<const mixedFvPatchField<Type> >
+                    refCast<const mixedFvPatchField<Type>>
                     (
                         bf[patchI]
                     )
@@ -195,7 +195,7 @@ bool Foam::externalCoupledFunctionObject::readData
                 // additional processing by derived type.
                 pf.mixedFvPatchField<Type>::evaluate();
             }
-            else if (isA<fixedGradientFvPatchField<Type> >(bf[patchI]))
+            else if (isA<fixedGradientFvPatchField<Type>>(bf[patchI]))
             {
                 // Read columns for value and gradient
                 List<scalarField> data;
@@ -210,7 +210,7 @@ bool Foam::externalCoupledFunctionObject::readData
                 fixedGradientFvPatchField<Type>& pf =
                 const_cast<fixedGradientFvPatchField<Type>&>
                 (
-                    refCast<const fixedGradientFvPatchField<Type> >
+                    refCast<const fixedGradientFvPatchField<Type>>
                     (
                         bf[patchI]
                     )
@@ -236,7 +236,7 @@ bool Foam::externalCoupledFunctionObject::readData
                 // additional processing by derived type.
                 pf.fixedGradientFvPatchField<Type>::evaluate();
             }
-            else if (isA<fixedValueFvPatchField<Type> >(bf[patchI]))
+            else if (isA<fixedValueFvPatchField<Type>>(bf[patchI]))
             {
                 // Read columns for value only
                 List<scalarField> data;
@@ -263,7 +263,7 @@ bool Foam::externalCoupledFunctionObject::readData
                 fixedValueFvPatchField<Type>& pf =
                 const_cast<fixedValueFvPatchField<Type>&>
                 (
-                    refCast<const fixedValueFvPatchField<Type> >
+                    refCast<const fixedValueFvPatchField<Type>>
                     (
                         bf[patchI]
                     )
@@ -293,20 +293,20 @@ bool Foam::externalCoupledFunctionObject::readData
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> >
+Foam::tmp<Foam::Field<Type>>
 Foam::externalCoupledFunctionObject::gatherAndCombine
 (
     const Field<Type>& fld
 )
 {
     // Collect values from all processors
-    List<Field<Type> > gatheredValues(Pstream::nProcs());
+    List<Field<Type>> gatheredValues(Pstream::nProcs());
     gatheredValues[Pstream::myProcNo()] = fld;
     Pstream::gatherList(gatheredValues);
 
 
-    tmp<Field<Type> > tresult(new Field<Type>(0));
-    Field<Type>& result = tresult();
+    tmp<Field<Type>> tresult(new Field<Type>(0));
+    Field<Type>& result = tresult.ref();
 
     if (Pstream::master())
     {
@@ -456,10 +456,10 @@ bool Foam::externalCoupledFunctionObject::writeData
                     toMaster << os.str();
                 }
             }
-            else if (isA<mixedFvPatchField<Type> >(bf[patchI]))
+            else if (isA<mixedFvPatchField<Type>>(bf[patchI]))
             {
                 const mixedFvPatchField<Type>& pf =
-                    refCast<const mixedFvPatchField<Type> >(bf[patchI]);
+                    refCast<const mixedFvPatchField<Type>>(bf[patchI]);
 
                 Field<Type> value(gatherAndCombine(pf));
                 Field<Type> snGrad(gatherAndCombine(pf.snGrad()()));

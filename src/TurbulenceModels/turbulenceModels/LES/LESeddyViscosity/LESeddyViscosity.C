@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "LESeddyViscosity.H"
+#include "zeroGradientFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,7 +48,7 @@ LESeddyViscosity<BasicTurbulenceModel>::LESeddyViscosity
     const word& propertiesName
 )
 :
-    eddyViscosity<LESModel<BasicTurbulenceModel> >
+    eddyViscosity<LESModel<BasicTurbulenceModel>>
     (
         type,
         alpha,
@@ -76,7 +77,7 @@ LESeddyViscosity<BasicTurbulenceModel>::LESeddyViscosity
 template<class BasicTurbulenceModel>
 bool LESeddyViscosity<BasicTurbulenceModel>::read()
 {
-    if (eddyViscosity<LESModel<BasicTurbulenceModel> >::read())
+    if (eddyViscosity<LESModel<BasicTurbulenceModel>>::read())
     {
         Ce_.readIfPresent(this->coeffDict());
 
@@ -94,7 +95,7 @@ tmp<volScalarField> LESeddyViscosity<BasicTurbulenceModel>::epsilon() const
 {
     tmp<volScalarField> tk(this->k());
 
-    return tmp<volScalarField>
+    tmp<volScalarField> tepsilon
     (
         new volScalarField
         (
@@ -106,9 +107,14 @@ tmp<volScalarField> LESeddyViscosity<BasicTurbulenceModel>::epsilon() const
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            Ce_*tk()*sqrt(tk())/this->delta()
+            Ce_*tk()*sqrt(tk())/this->delta(),
+            zeroGradientFvPatchField<scalar>::typeName
         )
     );
+    volScalarField& epsilon = tepsilon.ref();
+    epsilon.correctBoundaryConditions();
+
+    return tepsilon;
 }
 
 

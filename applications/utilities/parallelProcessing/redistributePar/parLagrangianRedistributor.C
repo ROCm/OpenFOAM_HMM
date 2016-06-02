@@ -142,7 +142,7 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
     {
         // List of lists of particles to be transfered for all of the
         // neighbour processors
-        List<IDLList<passiveParticle> > particleTransferLists
+        List<IDLList<passiveParticle>> particleTransferLists
         (
             Pstream::nProcs()
         );
@@ -293,26 +293,8 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
     const word& cloudName
 ) const
 {
-    (void)srcMesh_.tetBasePtIs();
-    (void)tgtMesh_.tetBasePtIs();
-
-    // Temporarily: override master-only checking
-    regIOobject::fileCheckTypes oldCheckType =
-        regIOobject::fileModificationChecking;
-
-    if (oldCheckType == regIOobject::timeStampMaster)
-    {
-        regIOobject::fileModificationChecking = regIOobject::timeStamp;
-    }
-    else if (oldCheckType == regIOobject::inotifyMaster)
-    {
-        regIOobject::fileModificationChecking = regIOobject::inotify;
-    }
-
     // Load cloud and send particle
     passiveParticleCloud lpi(srcMesh_, cloudName, false);
-
-    regIOobject::fileModificationChecking = oldCheckType;
 
     return redistributeLagrangianPositions(lpi);
 }

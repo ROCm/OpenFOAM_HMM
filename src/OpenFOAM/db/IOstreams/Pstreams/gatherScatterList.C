@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -186,7 +186,7 @@ void Pstream::gatherList
 }
 
 
-template <class T>
+template<class T>
 void Pstream::gatherList(List<T>& Values, const int tag, const label comm)
 {
     if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
@@ -274,10 +274,6 @@ void Pstream::scatterList
         }
 
         // Send to my downstairs neighbours
-        // Note that the critical path is the one last in the 'below'
-        // processors which is why we receive from it last and send to it
-        // first (to give it maximum time to digest). Note that there will
-        // not be any conflict since it is a directed graph.
         forAllReverse(myComm.below(), belowI)
         {
             label belowID = myComm.below()[belowI];
@@ -325,7 +321,7 @@ void Pstream::scatterList
 }
 
 
-template <class T>
+template<class T>
 void Pstream::scatterList(List<T>& Values, const int tag, const label comm)
 {
     if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,14 +59,8 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
      || readOpt() == IOobject::MUST_READ_IF_MODIFIED
     )
     {
-        if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-        {
-            WarningInFunction
-                << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-                << " does not support automatic rereading."
-                << endl;
-        }
-
+        // Warn for MUST_READ_IF_MODIFIED
+        warnNoRereading<polyBoundaryMesh>();
 
         polyPatchList& patches = *this;
 
@@ -134,14 +128,8 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
      || this->readOpt() == IOobject::MUST_READ_IF_MODIFIED
     )
     {
-
-        if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-        {
-            WarningInFunction
-                << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-                << " does not support automatic rereading."
-                << endl;
-        }
+        // Warn for MUST_READ_IF_MODIFIED
+        warnNoRereading<polyBoundaryMesh>();
 
         polyPatchList& patches = *this;
 
@@ -179,7 +167,7 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
     {
         polyPatchList& patches = *this;
         patches.setSize(ppl.size());
-        forAll (patches, patchI)
+        forAll(patches, patchI)
         {
             patches.set(patchI, ppl[patchI].clone(*this).ptr());
         }
@@ -299,7 +287,7 @@ Foam::polyBoundaryMesh::neighbourEdges() const
 
         // From mesh edge (expressed as a point pair so as not to construct
         // point addressing) to patch + relative edge index.
-        HashTable<labelPair, edge, Hash<edge> > pointsToEdge(nEdgePairs);
+        HashTable<labelPair, edge, Hash<edge>> pointsToEdge(nEdgePairs);
 
         forAll(*this, patchI)
         {
@@ -320,7 +308,7 @@ Foam::polyBoundaryMesh::neighbourEdges() const
                 // Edge in mesh points.
                 edge meshEdge(pp.meshPoints()[e[0]], pp.meshPoints()[e[1]]);
 
-                HashTable<labelPair, edge, Hash<edge> >::iterator fnd =
+                HashTable<labelPair, edge, Hash<edge>>::iterator fnd =
                     pointsToEdge.find(meshEdge);
 
                 if (fnd == pointsToEdge.end())
@@ -1128,10 +1116,9 @@ bool Foam::polyBoundaryMesh::writeData(Ostream& os) const
 
     forAll(patches, patchI)
     {
-        os  << indent << patches[patchI].name() << nl
-            << indent << token::BEGIN_BLOCK << nl
-            << incrIndent << patches[patchI] << decrIndent
-            << indent << token::END_BLOCK << endl;
+        os.beginBlock(patches[patchI].name()) << nl;
+        os  << patches[patchI];
+        os.endBlock() << endl;
     }
 
     os  << decrIndent << token::END_LIST;
