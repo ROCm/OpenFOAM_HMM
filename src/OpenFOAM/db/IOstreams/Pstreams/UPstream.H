@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -503,6 +503,14 @@ public:
 
 
 Ostream& operator<<(Ostream&, const UPstream::commsStruct&);
+
+// Template specialisation for access of commsStruct
+template<>
+UPstream::commsStruct&
+UList<UPstream::commsStruct>::operator[](const label);
+template<>
+const UPstream::commsStruct&
+UList<UPstream::commsStruct>::operator[](const label) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
