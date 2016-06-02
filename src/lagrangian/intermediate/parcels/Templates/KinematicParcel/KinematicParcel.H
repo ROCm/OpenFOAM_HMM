@@ -325,7 +325,7 @@ public:
         AddToPropertyTypes
         (
             ParcelType,
-            " label"
+            "{label"
           + " label"
           + " scalar"
           + " scalar"
@@ -334,7 +334,7 @@ public:
           + " scalar"
           + " scalar"
           + " scalar"
-          + " vector"
+          + " vector}"
         );
 
 

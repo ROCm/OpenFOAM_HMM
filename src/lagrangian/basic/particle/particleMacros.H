@@ -66,6 +66,7 @@ namespace Foam
 
 
 //- Define a static 'propertyTypes' for the types of particle properties
+//  Brace brackets are used to delimit binary write groups
 // \sa AddToPropertyTypes
 #define DefinePropertyTypes(str)                                               \
                                                                                \
@@ -78,6 +79,7 @@ namespace Foam
 
 
 //- Add to existing static 'propertyTypes' for the types of particle properties
+//  Brace brackets are used to delimit binary write groups
 // \sa AddToPropertyTypes
 #define AddToPropertyTypes(ParcelType, str)                                    \
                                                                                \

@@ -184,7 +184,7 @@ public:
         AddToPropertyTypes
         (
             ParcelType,
-            " vector"
+            "{vector}"
         );
 
 
