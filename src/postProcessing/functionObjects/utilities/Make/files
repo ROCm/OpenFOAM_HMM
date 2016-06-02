@@ -50,4 +50,6 @@ yPlus/yPlusFunctionObject.C
 
 setTimeStep/setTimeStepFunctionObject.C
 
+reactionSensitivityAnalysis/reactionsSensitivityAnalysisFunctionObject.C
+
 LIB = $(FOAM_LIBBIN)/libutilityFunctionObjects

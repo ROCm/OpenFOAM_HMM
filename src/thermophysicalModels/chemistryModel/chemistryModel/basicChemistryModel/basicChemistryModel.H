@@ -175,6 +175,9 @@ public:
 
                 //- Return the heat release, i.e. enthalpy/sec [m2/s3]
                 virtual tmp<volScalarField> dQ() const = 0;
+
+                //- Return number of reactions
+                virtual label nReaction() const = 0;
 };
 
 
