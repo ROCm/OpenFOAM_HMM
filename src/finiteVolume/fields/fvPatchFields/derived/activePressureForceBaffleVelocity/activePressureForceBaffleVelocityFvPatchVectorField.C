@@ -266,31 +266,21 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
 
         scalar valueDiff = 0;
 
-        if (fBased_)
+        // Add this side (p*area)
+        forAll(cyclicFaceCells, facei)
         {
-             // Add this side
-            forAll(cyclicFaceCells, facei)
-            {
-                valueDiff +=p[cyclicFaceCells[facei]]*mag(initCyclicSf_[facei]);
-            }
-
-            // Remove other side
-            forAll(nbrFaceCells, facei)
-            {
-                valueDiff -=p[nbrFaceCells[facei]]*mag(initCyclicSf_[facei]);
-            }
+            valueDiff +=p[cyclicFaceCells[facei]]*mag(initCyclicSf_[facei]);
         }
-        else //pressure based
-        {
-            forAll(cyclicFaceCells, facei)
-            {
-                valueDiff += p[cyclicFaceCells[facei]];
-            }
 
-            forAll(nbrFaceCells, facei)
-            {
-                valueDiff -= p[nbrFaceCells[facei]];
-            }
+        // Remove other side
+        forAll(nbrFaceCells, facei)
+        {
+            valueDiff -=p[nbrFaceCells[facei]]*mag(initCyclicSf_[facei]);
+        }
+
+        if (!fBased_) //pressure based then weighted by area
+        {
+            valueDiff =/ patch().magSf();
         }
 
         reduce(valueDiff, sumOp<scalar>());
@@ -303,7 +293,7 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
             }
             else
             {
-                Info<< "Pressure difference = " << valueDiff << endl;
+                Info<< "Area-averaged pressure difference = " << valueDiff << endl;
             }
         }
 
