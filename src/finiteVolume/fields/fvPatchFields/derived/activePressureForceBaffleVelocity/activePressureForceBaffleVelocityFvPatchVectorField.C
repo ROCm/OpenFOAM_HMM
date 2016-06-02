@@ -279,8 +279,6 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
             {
                 valueDiff -=p[nbrFaceCells[facei]]*mag(initCyclicSf_[facei]);
             }
-
-            Info<< "Force difference = " << valueDiff << endl;
         }
         else //pressure based
         {
@@ -293,8 +291,20 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
             {
                 valueDiff -= p[nbrFaceCells[facei]];
             }
+        }
 
-            Info<< "Pressure difference = " << valueDiff << endl;
+        reduce(valueDiff, sumOp<scalar>());
+
+        if (Pstream::master())
+        {
+            if (fBased_)
+            {
+                Info<< "Force difference = " << valueDiff << endl;
+            }
+            else
+            {
+                Info<< "Pressure difference = " << valueDiff << endl;
+            }
         }
 
         if (mag(valueDiff) > mag(minThresholdValue_) || baffleActivated_)
@@ -322,7 +332,10 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
             openFraction_ = max(min(1 - 1e-6, openFraction_), 1e-6);
         }
 
-        Info<< "Open fraction = " << openFraction_ << endl;
+        if (Pstream::master())
+        {
+            Info<< "Open fraction = " << openFraction_ << endl;
+        }
 
         scalar areaFraction = 0.0;
 
