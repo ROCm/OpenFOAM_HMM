@@ -4,6 +4,10 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
+
+# Set application name
+application=`getApplication`
+
 # create the underlying block mesh
 m4 system/pachuka.m4 > system/blockMeshDict
 
@@ -24,9 +28,9 @@ runApplication setFields
 decomposePar > log.decomposePar 2>&1
 
 # Run
-runParallel `getApplication` 4
+runParallel `getApplication`
 
 # Reconstruct case
-runApplication reconstructPar -newTimes
+runApplication reconstructPar
 
 # ----------------------------------------------------------------- end-of-file
