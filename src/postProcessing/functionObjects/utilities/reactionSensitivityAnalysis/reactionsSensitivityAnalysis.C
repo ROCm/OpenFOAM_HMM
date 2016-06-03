@@ -60,7 +60,7 @@ void Foam::reactionsSensitivityAnalysis<chemistryType>::writeFileHeader
 {
     writeCommented(os, "Reaction");
 
-    forAll (speciesNames_, k)
+    forAll(speciesNames_, k)
     {
         os << tab << speciesNames_[k] << tab;
     }
@@ -99,9 +99,9 @@ void Foam::reactionsSensitivityAnalysis<chemistryType>::calculateSpeciesRR
 
     endTime_ += dt;
 
-    forAll (production_, specieI)
+    forAll(production_, specieI)
     {
-        forAll (production_[specieI], reactionI)
+        forAll(production_[specieI], reactionI)
         {
             RR = basicChemistry.calculateRR(reactionI, specieI);
 
@@ -150,7 +150,7 @@ void Foam::reactionsSensitivityAnalysis<chemistryType>::writeSpeciesRR()
         prodFilePtr_() << reactionI << tab;
         prodIntFilePtr_() << reactionI << tab;
 
-        forAll (speciesNames_, i)
+        forAll(speciesNames_, i)
         {
             prodFilePtr_() << production_[i][reactionI] << tab;
             consFilePtr_() << consumption_[i][reactionI] << tab;
@@ -202,12 +202,9 @@ Foam::reactionsSensitivityAnalysis<chemistryType>::reactionsSensitivityAnalysis
     read(dict);
     if (mesh_.nCells() != 1)
     {
-        FatalErrorIn
-            (
-                "Foam::reactionsSensitivityAnalysis::"
-                "reactionsSensitivityAnalysis()"
-            )   << "Function object only applicable to single cell cases "
-                << endl;
+        FatalErrorInFunction
+            << "Function object only applicable to single cell cases "
+            << abort(FatalError);
     }
 
     if (mesh_.foundObject<basicChemistryModel>("chemistryProperties"))
@@ -223,7 +220,7 @@ Foam::reactionsSensitivityAnalysis<chemistryType>::reactionsSensitivityAnalysis
             chemistry.thermo().composition().species().size()
         );
 
-        forAll (speciesNames_, i)
+        forAll(speciesNames_, i)
         {
             speciesNames_[i] = chemistry.thermo().composition().species()[i];
         }
@@ -237,7 +234,7 @@ Foam::reactionsSensitivityAnalysis<chemistryType>::reactionsSensitivityAnalysis
             productionInt_.setSize(production_.size());
             consumptionInt_.setSize(production_.size());
 
-            forAll (production_, i)
+            forAll(production_, i)
             {
                 production_[i].setSize(nReactions_, 0.0);
                 consumption_[i].setSize(nReactions_, 0.0);
@@ -248,12 +245,9 @@ Foam::reactionsSensitivityAnalysis<chemistryType>::reactionsSensitivityAnalysis
     }
     else
     {
-         FatalErrorIn
-            (
-                "void Foam::reactionsSensitivityAnalysis::"
-                "reactionsSensitivityAnalysis()"
-            )   << " Not chemistry model found "
-                << " The object available are : " << mesh_.names()
+         FatalErrorInFunction
+            << " Not chemistry model found. "
+            << " Object available are : " << mesh_.names()
             << exit(FatalError);
     }
 }
@@ -274,8 +268,7 @@ void Foam::reactionsSensitivityAnalysis<chemistryType>::read
 (
     const dictionary& dict
 )
-{
-}
+{}
 
 
 template<class chemistryType>
@@ -288,7 +281,6 @@ void Foam::reactionsSensitivityAnalysis<chemistryType>::execute()
         (
             "chemistryProperties"
         );
-
     calculateSpeciesRR(chemistry);
 }
 
@@ -322,7 +314,6 @@ void Foam::reactionsSensitivityAnalysis<chemistryType>::write()
         writeSpeciesRR();
 
         startTime_ = endTime_;
-
     }
 }
 
