@@ -28,7 +28,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const std::size_t Foam::solidParticle::sizeofFields_
+const std::size_t Foam::solidParticle::sizeofFields
 (
     sizeof(solidParticle) - sizeof(particle)
 );
@@ -54,7 +54,7 @@ Foam::solidParticle::solidParticle
         }
         else
         {
-            is.read(reinterpret_cast<char*>(&d_), sizeofFields_);
+            is.read(reinterpret_cast<char*>(&d_), sizeofFields);
         }
     }
 
@@ -130,7 +130,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const solidParticle& p)
         os.write
         (
             reinterpret_cast<const char*>(&p.d_),
-            solidParticle::sizeofFields_
+            solidParticle::sizeofFields
         );
     }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,17 +58,15 @@ class molecule
 :
     public particle
 {
-    // Private data
-
-        //- Size in bytes of the fields
-        static const std::size_t sizeofFields_;
-
-
 public:
 
+    //- Size in bytes of the fields
+    static const std::size_t sizeofFields;
+
+
     // Values of special that are less than zero are for built-in functionality.
-    // Values greater than zero are user specifiable/expandable (i.e. test
-    // special_ >= SPECIAL_USER)
+    // Values greater than zero are user specifiable/expandable
+    // (i.e. test special_ >= SPECIAL_USER)
 
     enum specialTypes
     {
@@ -77,6 +75,7 @@ public:
         NOT_SPECIAL      = 0,
         SPECIAL_USER     = 1
     };
+
 
     //- Class to hold molecule constant properties
     class constantProperties

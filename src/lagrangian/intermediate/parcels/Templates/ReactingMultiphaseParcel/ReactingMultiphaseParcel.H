@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,13 +66,11 @@ class ReactingMultiphaseParcel
 :
     public ParcelType
 {
-    // Private data
-
-        //- Size in bytes of the fields
-        static const std::size_t sizeofFields_;
-
-
 public:
+
+    //- Size in bytes of the fields
+    static const std::size_t sizeofFields;
+
 
     // IDs of phases in ReacingParcel phase list (Y)
 
@@ -265,6 +263,15 @@ public:
             " nGas(Y1..YN)"
           + " nLiquid(Y1..YN)"
           + " nSolid(Y1..YN)"
+        );
+
+        //- String representation of property types
+        AddToPropertyTypes
+        (
+            ParcelType,
+            " List<scalar>"
+          + " List<scalar>"
+          + " List<Scalar>"
         );
 
 
