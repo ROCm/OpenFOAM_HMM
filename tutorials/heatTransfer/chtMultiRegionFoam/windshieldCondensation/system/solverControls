@@ -6,11 +6,11 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-writeInterval   10;
+writeInterval   2.5;
 
-maxCo           2.5;
+maxCo           12;
 
-maxDeltaT       0.3;
+maxDeltaT       1;
 
 #inputMode           merge
 
