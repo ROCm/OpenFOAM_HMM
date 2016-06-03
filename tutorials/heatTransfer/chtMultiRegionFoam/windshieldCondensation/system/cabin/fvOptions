@@ -14,7 +14,7 @@ FoamFile
     object      fvOptions;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-/*
+
 airDeflection
 {
     type            directionalPressureGradientExplicitSource;
@@ -47,5 +47,5 @@ airDeflection
         fileName        "volFlowRateTable";
     }
 }
-*/
+
 // ************************************************************************* //
