@@ -36,7 +36,7 @@ Description
     "consumptionInt" :   integral between dumps of the consumption rate
 
     The function object indicates reaction rates of creation or destruction
-    of spcecies in each reaction.
+    of species in each reaction.
 
 
 SourceFiles
