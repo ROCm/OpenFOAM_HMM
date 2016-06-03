@@ -65,10 +65,8 @@ Foam::temperaturePhaseChangeTwoPhaseMixture::New
 
     if (cstrIter == componentsConstructorTablePtr_->end())
     {
-        FatalErrorIn
-        (
-            "temperaturePhaseChangeTwoPhaseMixture::New"
-        )   << "Unknown temperaturePhaseChangeTwoPhaseMixture type "
+        FatalErrorInFunction
+            << "Unknown temperaturePhaseChangeTwoPhaseMixture type "
             << temperaturePhaseChangeTwoPhaseMixtureTypeName << endl << endl
             << "Valid  temperaturePhaseChangeTwoPhaseMixtures are : " << endl
             << componentsConstructorTablePtr_->sortedToc()
