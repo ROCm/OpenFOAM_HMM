@@ -280,7 +280,7 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
 
         if (!fBased_) //pressure based then weighted by area
         {
-            valueDiff =/ patch().magSf();
+            valueDiff = valueDiff/gSum(patch().magSf());
         }
 
         reduce(valueDiff, sumOp<scalar>());
