@@ -175,7 +175,7 @@ void Foam::dictionary::write(Ostream& os, bool subDict) const
     if (subDict)
     {
         os  << nl;
-        os.beginBlock() << nl;
+        os.beginBlock();
     }
 
     forAllConstIter(IDLList<entry>, *this, iter)
@@ -203,7 +203,7 @@ void Foam::dictionary::write(Ostream& os, bool subDict) const
 
     if (subDict)
     {
-        os.endBlock() << endl;
+        os.endBlock() << flush;
     }
 }
 
