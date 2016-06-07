@@ -183,13 +183,14 @@ void Foam::ensightParts::renumber
 void Foam::ensightParts::writeGeometry(ensightGeoFile& os) const
 {
     // with some feedback
-    Info<< "write geometry part:" << nl << flush;
+    Info<< "write geometry part (" << flush;
 
     forAll(partsList_, partI)
     {
         Info<< " " << partI << flush;
         partsList_[partI].writeGeometry(os);
     }
+    Info<< " )" << endl;
 }
 
 

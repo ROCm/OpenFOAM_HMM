@@ -1,4 +1,5 @@
 // check for "points" in all of the result directories
+// - could restrict to the selected times
 
 bool hasMovingMesh = false;
 if (timeDirs.size() > 1)

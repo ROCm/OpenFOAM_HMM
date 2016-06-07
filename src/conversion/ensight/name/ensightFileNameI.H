@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,60 +23,60 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ensightGeoFile.H"
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::ensightGeoFile::initialize()
-{
-    writeBinaryHeader();
-    write("Ensight Geometry File");  newline(); // description line 1
-    write("=====================");  newline(); // description line 2
-    write("node id assign");         newline();
-    write("element id assign");      newline();
-}
-
+#include "error.H"
+#include <cctype>
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::ensightGeoFile::ensightGeoFile
-(
-    const fileName& pathname,
-    IOstream::streamFormat format
-)
+inline Foam::ensight::FileName::FileName(const FileName& fn)
 :
-    ensightFile(pathname, format)
-{
-    initialize();
-}
-
-
-Foam::ensightGeoFile::ensightGeoFile
-(
-    const fileName& path,
-    const fileName& name,
-    IOstream::streamFormat format
-)
-:
-    ensightFile(path, name, format)
-{
-    initialize();
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::ensightGeoFile::~ensightGeoFile()
+    fileName(fn, false)
 {}
+
+
+inline Foam::ensight::FileName::FileName(const char* s)
+:
+    fileName(s, false)
+{
+    stripInvalid();
+}
+
+
+inline Foam::ensight::FileName::FileName(const std::string& s)
+:
+    fileName(s, false)
+{
+    stripInvalid();
+}
+
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::ensightGeoFile::writeKeyword(const string& key)
+inline void Foam::ensight::FileName::stripInvalid()
 {
-    write(key); newline();
+    string::stripInvalid<FileName>(*this);
 
-    return *this;
+    removeRepeated('/');
+    removeTrailing('/');
+
+    if (empty())
+    {
+        FatalErrorInFunction
+            << "ensight::FileName empty after stripping" << nl
+            << exit(FatalError);
+    }
+}
+
+
+inline bool Foam::ensight::FileName::valid(char c)
+{
+    return
+    (
+        fileName::valid(c)  // includes space, quotes
+     && c != '*'   // wild-card
+     && c != '%'   // structured block continuation
+    );
 }
 
 

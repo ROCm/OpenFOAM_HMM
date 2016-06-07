@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,80 +22,84 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::ensightGeoFile
+    Foam::ensight::FileName
 
 Description
-    Specialized Ensight output with extra geometry file header
+    Specification of a valid Ensight file-name.
+
+    Spaces must be quoted,
+    no '*' wildcards, not '%' (structured block continuation).
+
+    Overall line length within case file is limited to 1024, but this is not
+    yet addresssed.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightGeoFile_H
-#define ensightGeoFile_H
+#ifndef ensightFileName_H
+#define ensightFileName_H
 
-#include "ensightFile.H"
+#include "fileName.H"
+#include "word.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace ensight
+{
 
 /*---------------------------------------------------------------------------*\
-                      Class ensightGeoFile Declaration
+                      Class ensight::FileName Declaration
 \*---------------------------------------------------------------------------*/
 
-class ensightGeoFile
+class FileName
 :
-    public ensightFile
+    public fileName
 {
     // Private Member Functions
 
-        //- Initialize by outputting header information
-        void initialize();
-
-        //- Disallow default bitwise assignment
-        void operator=(const ensightGeoFile&) = delete;
-
-        //- Disallow default copy constructor
-        ensightGeoFile(const ensightGeoFile&) = delete;
-
+        //- Strip invalid characters
+        inline void stripInvalid();
 
 public:
 
     // Constructors
 
-        //- Construct from pathname.
-        //  The entire pathname is checked for valid ensight naming.
-        ensightGeoFile
-        (
-            const fileName& pathname,
-            IOstream::streamFormat format=IOstream::BINARY
-        );
+        //- Construct as copy
+        inline explicit FileName(const FileName&);
 
-        //- Construct from path and name.
-        //  Only the name portion is checked for valid ensight naming.
-        ensightGeoFile
-        (
-            const fileName& path,
-            const fileName& name,
-            IOstream::streamFormat format=IOstream::BINARY
-        );
+        //- Construct as copy of character array
+        inline explicit FileName(const char*);
+
+        //- Construct as copy of std::string
+        inline explicit FileName(const std::string&);
 
 
-    //- Destructor
-    ~ensightGeoFile();
+    // Member functions
 
+        //- Is this character valid for an ensight file-name
+        inline static bool valid(char);
 
-    // Output
+    // Member operators
 
-        //- Write keyword with trailing newline
-        virtual Ostream& writeKeyword(const string& key);
+        // Assignment
+
+            void operator=(const fileName&) = delete;
+            void operator=(const word&) = delete;
+            void operator=(const string&) = delete;
+            void operator=(const std::string&) = delete;
+            void operator=(const char*) = delete;
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace ensight
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "ensightFileNameI.H"
 
 #endif
 

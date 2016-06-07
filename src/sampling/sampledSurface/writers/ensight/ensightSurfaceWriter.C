@@ -77,6 +77,8 @@ Foam::fileName Foam::ensightSurfaceWriter::write
     const bool verbose
 ) const
 {
+    const ensight::FileName surfName(surfaceName);
+
     if (!isDir(outputDir))
     {
         mkDir(outputDir);
@@ -85,10 +87,11 @@ Foam::fileName Foam::ensightSurfaceWriter::write
     // const scalar timeValue = Foam::name(this->mesh().time().timeValue());
     const scalar timeValue = 0.0;
 
-    OFstream osCase(outputDir/surfaceName + ".case");
+    OFstream osCase(outputDir/surfName + ".case");
     ensightGeoFile osGeom
     (
-        outputDir/surfaceName + ".0000.mesh",
+        outputDir,
+        surfName + ".0000.mesh",
         writeFormat_
     );
 

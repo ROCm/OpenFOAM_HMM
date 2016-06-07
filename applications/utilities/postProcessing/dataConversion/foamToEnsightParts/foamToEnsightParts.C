@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -166,9 +166,9 @@ int main(int argc, char *argv[])
         ensightDir = args.rootPath()/args.globalCaseName()/ensightDir;
     }
 
-    fileName dataDir = ensightDir/"data";
-    fileName caseFileName = "Ensight.case";
-    fileName dataMask = fileName("data")/ensightFile::mask();
+    const fileName caseFileName = "Ensight.case";
+    const fileName dataDir  = ensightDir/"data";
+    const fileName dataMask = dataDir.name()/ensightFile::mask();
 
     // Ensight and Ensight/data directories must exist
     // do not remove old data - we might wish to convert new results
@@ -178,6 +178,8 @@ int main(int argc, char *argv[])
         Info<<"Warning: re-using existing directory" << nl
             << "    " << ensightDir << endl;
     }
+
+    // as per mkdir -p "Ensight/data"
     mkDir(ensightDir);
     mkDir(dataDir);
 
@@ -216,6 +218,9 @@ int main(int argc, char *argv[])
     // map times used
     Map<scalar>  timeIndices;
 
+    // TODO: Track the time indices used by the geometry
+    DynamicList<label> geometryTimesUsed;
+
     // Track the time indices used by the volume fields
     DynamicList<label> fieldTimesUsed;
 
@@ -235,11 +240,12 @@ int main(int argc, char *argv[])
 
         #include "getTimeIndex.H"
 
-        // remember the time index
+        // remember the time index for the volume fields
         fieldTimesUsed.append(timeIndex);
 
         // the data/ITER subdirectory must exist
-        fileName subDir = ensightFile::subDir(timeIndex);
+        // Note that data/ITER is indeed a valid ensight::FileName
+        const fileName subDir = ensightFile::subDir(timeIndex);
         mkDir(dataDir/subDir);
 
         // place a timestamp in the directory for future reference
@@ -261,15 +267,19 @@ int main(int argc, char *argv[])
 
             if (!optNoMesh)
             {
-                fileName geomDir;
                 if (hasMovingMesh)
                 {
-                    geomDir = dataDir/subDir;
+                    // remember the time index for the geometry
+                    geometryTimesUsed.append(timeIndex);
                 }
 
-                ensightGeoFile geoFile(ensightDir/geomDir/geometryName, format);
+                ensightGeoFile geoFile
+                (
+                    (hasMovingMesh ? dataDir/subDir : ensightDir),
+                    geometryName,
+                    format
+                );
                 partsList.writeGeometry(geoFile);
-                Info<< nl;
             }
         }
 
