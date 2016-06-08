@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -333,6 +333,29 @@ void Foam::Time::setControls()
 }
 
 
+void Foam::Time::setMonitoring()
+{
+    // Time objects not registered so do like objectRegistry::checkIn ourselves.
+    if (runTimeModifiable_)
+    {
+        monitorPtr_.reset
+        (
+            new fileMonitor
+            (
+                regIOobject::fileModificationChecking == inotify
+             || regIOobject::fileModificationChecking == inotifyMaster
+            )
+        );
+
+        // Monitor all files that controlDict depends on
+        addWatches(controlDict_, controlDict_.files());
+    }
+
+    // Clear dependent files - not needed now
+    controlDict_.files().clear();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::Time::Time
@@ -401,25 +424,7 @@ Foam::Time::Time
     readOpt() = IOobject::MUST_READ_IF_MODIFIED;
 
     setControls();
-
-    // Time objects not registered so do like objectRegistry::checkIn ourselves.
-    if (runTimeModifiable_)
-    {
-        monitorPtr_.reset
-        (
-            new fileMonitor
-            (
-                regIOobject::fileModificationChecking == inotify
-             || regIOobject::fileModificationChecking == inotifyMaster
-            )
-        );
-
-        // Monitor all files that controlDict depends on
-        addWatches(controlDict_, controlDict_.files());
-    }
-
-    // Clear dependent files
-    controlDict_.files().clear();
+    setMonitoring();
 }
 
 
@@ -495,25 +500,7 @@ Foam::Time::Time
     readOpt() = IOobject::MUST_READ_IF_MODIFIED;
 
     setControls();
-
-    // Time objects not registered so do like objectRegistry::checkIn ourselves.
-    if (runTimeModifiable_)
-    {
-        monitorPtr_.reset
-        (
-            new fileMonitor
-            (
-                regIOobject::fileModificationChecking == inotify
-             || regIOobject::fileModificationChecking == inotifyMaster
-            )
-        );
-
-        // Monitor all files that controlDict depends on
-        addWatches(controlDict_, controlDict_.files());
-    }
-
-    // Clear dependent files since not needed
-    controlDict_.files().clear();
+    setMonitoring();
 }
 
 
@@ -588,25 +575,7 @@ Foam::Time::Time
     controlDict_.readOpt() = IOobject::MUST_READ_IF_MODIFIED;
 
     setControls();
-
-    // Time objects not registered so do like objectRegistry::checkIn ourselves.
-    if (runTimeModifiable_)
-    {
-        monitorPtr_.reset
-        (
-            new fileMonitor
-            (
-                regIOobject::fileModificationChecking == inotify
-             || regIOobject::fileModificationChecking == inotifyMaster
-            )
-        );
-
-        // Monitor all files that controlDict depends on
-        addWatches(controlDict_, controlDict_.files());
-    }
-
-    // Clear dependent files since not needed
-    controlDict_.files().clear();
+    setMonitoring();
 }
 
 
@@ -667,6 +636,7 @@ Foam::Time::Time
     functionObjects_(*this, enableFunctionObjects)
 {
     libs_.open(controlDict_, "libs");
+    setMonitoring(); // for profiling etc
 }
 
 
