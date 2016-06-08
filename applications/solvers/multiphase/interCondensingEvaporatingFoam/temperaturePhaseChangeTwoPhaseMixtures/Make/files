@@ -1,0 +1,7 @@
+temperaturePhaseChangeTwoPhaseMixtures/newtemperaturePhaseChangeTwoPhaseMixture.C
+temperaturePhaseChangeTwoPhaseMixtures/temperaturePhaseChangeTwoPhaseMixture.C
+thermoIncompressibleTwoPhaseMixture/thermoIncompressibleTwoPhaseMixture.C
+twoPhaseMixtureEThermo/twoPhaseMixtureEThermo.C
+constant/constant.C
+
+LIB = $(FOAM_LIBBIN)/libphaseTemperatureChangeTwoPhaseMixtures
