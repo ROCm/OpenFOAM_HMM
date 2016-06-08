@@ -1,0 +1,36 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+
+# Set application name
+application=`getApplication`
+
+# create the underlying block mesh
+m4 system/pachuka.m4 > system/blockMeshDict
+
+runApplication blockMesh
+
+cp 0/alpha.water.org 0/alpha.water
+
+# create faceSet for burner inlet and faceZone for coupled wall
+runApplication topoSet
+
+# create burner inlet
+runApplication createPatch -overwrite
+
+# Set alpha.water
+runApplication setFields
+
+# Decompose mesh
+decomposePar > log.decomposePar 2>&1
+
+# Run
+runParallel `getApplication`
+
+# Reconstruct case
+runApplication reconstructPar
+
+# ----------------------------------------------------------------- end-of-file
