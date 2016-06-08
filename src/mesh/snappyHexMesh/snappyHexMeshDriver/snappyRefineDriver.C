@@ -1025,7 +1025,7 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
                 //    const scalar rCVol = pow(cellVolumes[cellI], -5.0/3.0);
                 //
                 //    // Determine principal axes of cell
-                //    symmTensor R(symmTensor::zero);
+                //    symmTensor R(Zero);
                 //
                 //    forAll(cFaces, i)
                 //    {

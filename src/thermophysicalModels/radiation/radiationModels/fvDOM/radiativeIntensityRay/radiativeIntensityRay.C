@@ -137,7 +137,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
 
     if (mesh_.nSolutionD() == 2)
     {
-        vector meshDir(vector::zero);
+        vector meshDir(Zero);
         if (dom_.meshOrientation() != vector::zero)
         {
             meshDir = dom_.meshOrientation();
@@ -161,7 +161,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
     }
     else if (mesh_.nSolutionD() == 1)
     {
-        vector meshDir(vector::zero);
+        vector meshDir(Zero);
         if (dom_.meshOrientation() != vector::zero)
         {
             meshDir = dom_.meshOrientation();
@@ -195,7 +195,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
             IOobject::AUTO_WRITE
         );
 
-        // check if field exists and can be read
+        // Check if field exists and can be read
         if (IHeader.typeHeaderOk<volScalarField>(true))
         {
             ILambda_.set

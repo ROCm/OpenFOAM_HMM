@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -311,6 +311,7 @@ void Foam::meshRefinement::getBafflePatches
         zonify
         (
             true,               // allowFreeStandingZoneFaces
+            -2,                 // zone to put unreached cells into
             locationsInMesh,
             zonesInMesh,
 
@@ -1812,6 +1813,7 @@ void Foam::meshRefinement::findCellZoneInsideWalk
 
 bool Foam::meshRefinement::calcRegionToZone
 (
+    const label backgroundZoneID,
     const label surfZoneI,
     const label ownRegion,
     const label neiRegion,
@@ -1835,8 +1837,12 @@ bool Foam::meshRefinement::calcRegionToZone
             {
                 // Face between unset and my region. Put unset
                 // region into keepRegion
-                regionToCellZone[ownRegion] = -1;
-                changed = true;
+                //MEJ: see comment in findCellZoneTopo
+                if (backgroundZoneID != -2)
+                {
+                    regionToCellZone[ownRegion] = backgroundZoneID;
+                    changed = true;
+                }
             }
             else if (regionToCellZone[neiRegion] != -2)
             {
@@ -1852,8 +1858,11 @@ bool Foam::meshRefinement::calcRegionToZone
             {
                 // Face between unset and my region. Put unset
                 // region into keepRegion
-                regionToCellZone[neiRegion] = -1;
-                changed = true;
+                if (backgroundZoneID != -2)
+                {
+                    regionToCellZone[neiRegion] = backgroundZoneID;
+                    changed = true;
+                }
             }
             else if (regionToCellZone[ownRegion] != -2)
             {
@@ -1870,6 +1879,7 @@ bool Foam::meshRefinement::calcRegionToZone
 
 void Foam::meshRefinement::findCellZoneTopo
 (
+    const label backgroundZoneID,
     const pointField& locationsInMesh,
     const labelList& allSurfaceIndex,
     const labelList& namedSurfaceIndex,
@@ -1877,6 +1887,25 @@ void Foam::meshRefinement::findCellZoneTopo
     labelList& cellToZone
 ) const
 {
+    // This routine splits the mesh into regions, based on the intersection
+    // with a surface. The problem is that we know the surface which
+    // (intersected) face belongs to (in namedSurfaceIndex) but we don't
+    // know which side of the face it relates to. So all we are doing here
+    // is get the correspondence between surface/cellZone and regionSplit
+    // region.
+    // See the logic in calcRegionToZone. The problem is what to do
+    // with unreachable parts of the mesh (cellToZone = -2).
+    // In 23x this routine was only called for actually zoneing an existing
+    // mesh so we had to do something with these cells and they
+    // would get set to -1 (background). However in this version this routine
+    // also gets used much earlier on when after the surface refinement it
+    // removes unreachable cells ('Removing mesh beyond surface intersections')
+    // and this is when we keep -2 so it gets removed.
+    // So the zone to set these unmarked cells to is provided as argument:
+    // - backgroundZoneID = -2 : do not change so remove cells
+    // - backgroundZoneID = -1 : put into background
+
+
     // Assumes:
     // - region containing keepPoint does not go into a cellZone
     // - all other regions can be found by crossing faces marked in
@@ -1995,6 +2024,7 @@ void Foam::meshRefinement::findCellZoneTopo
                 // of internal face.
                 bool changedCell = calcRegionToZone
                 (
+                    backgroundZoneID,
                     surfaceToCellZone[surfI],
                     cellRegion[mesh_.faceOwner()[faceI]],
                     cellRegion[mesh_.faceNeighbour()[faceI]],
@@ -2032,6 +2062,7 @@ void Foam::meshRefinement::findCellZoneTopo
                     {
                         bool changedCell = calcRegionToZone
                         (
+                            backgroundZoneID,
                             surfaceToCellZone[surfI],
                             cellRegion[mesh_.faceOwner()[faceI]],
                             neiCellRegion[faceI-mesh_.nInternalFaces()],
@@ -2309,6 +2340,7 @@ void Foam::meshRefinement::getIntersections
 void Foam::meshRefinement::zonify
 (
     const bool allowFreeStandingZoneFaces,
+    const label backgroundZoneID,
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
 
@@ -2513,6 +2545,7 @@ void Foam::meshRefinement::zonify
 
         findCellZoneTopo
         (
+            backgroundZoneID,
             pointField(0),
             globalRegion1,      // To split up cells
             namedSurfaceIndex,  // Step across named surfaces to propagate
@@ -4271,7 +4304,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Zone per cell:
-    // -2 : unset
+    // -2 : unset : not allowed!
     // -1 : not in any zone (zone 'none')
     // >=0: zoneID
     // namedSurfaceIndex:
@@ -4283,6 +4316,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     zonify
     (
         allowFreeStandingZoneFaces,
+        -1,                 // Set all cells with cellToZone -2 to -1
         locationsInMesh,
         zonesInMesh,
 

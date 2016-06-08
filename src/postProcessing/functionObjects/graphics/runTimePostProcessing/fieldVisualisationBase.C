@@ -437,7 +437,7 @@ Foam::fieldVisualisationBase::fieldVisualisationBase
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<DataEntry<vector>, word>& colours
+    const HashPtrTable<Function1<vector>, word>& colours
 )
 :
     parent_(parent),
@@ -489,7 +489,7 @@ Foam::fieldVisualisationBase::~fieldVisualisationBase()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-const Foam::HashPtrTable<Foam::DataEntry<Foam::vector>, Foam::word>&
+const Foam::HashPtrTable<Foam::Function1<Foam::vector>, Foam::word>&
 Foam::fieldVisualisationBase::colours() const
 {
     return colours_;

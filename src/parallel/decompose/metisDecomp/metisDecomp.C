@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,7 +67,7 @@ Foam::label Foam::metisDecomp::decompose
 
     // processor weights initialised with no size, only used if specified in
     // a file
-    Field<scalar> processorWeights;
+    Field<floatScalar> processorWeights;
 
     // cell weights (so on the vertices of the dual)
     List<label> cellWeights;

@@ -92,7 +92,7 @@ protected:
         scalar tubeRadius_;
 
         //- Line colour
-        autoPtr<DataEntry<vector>> lineColour_;
+        autoPtr<Function1<vector>> lineColour_;
 
 
     // Protected Member Functions
@@ -122,7 +122,7 @@ public:
             (
                 const runTimePostProcessing& parent,
                 const dictionary& dict,
-                const HashPtrTable<DataEntry<vector>, word>& colours
+                const HashPtrTable<Function1<vector>, word>& colours
             ),
             (parent, dict, colours)
         );
@@ -135,7 +135,7 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<DataEntry<vector>, word>& colours
+            const HashPtrTable<Function1<vector>, word>& colours
         );
 
 
@@ -146,7 +146,7 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<DataEntry<vector>, word>& colours,
+            const HashPtrTable<Function1<vector>, word>& colours,
             const word& pathlineName
         );
 

@@ -13,6 +13,12 @@ $(generalSources)/semiImplicitSource/semiImplicitSource.C
 
 derivedSources=sources/derived
 $(derivedSources)/actuationDiskSource/actuationDiskSource.C
+$(derivedSources)/buoyancyForce/buoyancyForce.C
+$(derivedSources)/buoyancyForce/buoyancyForceIO.C
+$(derivedSources)/buoyancyEnergy/buoyancyEnergy.C
+$(derivedSources)/buoyancyEnergy/buoyancyEnergyIO.C
+$(derivedSources)/directionalPressureGradientExplicitSource/directionalPressureGradientExplicitSource.C
+$(derivedSources)/directionalPressureGradientExplicitSource/directionalPressureGradientExplicitSourceIO.C
 $(derivedSources)/effectivenessHeatExchangerSource/effectivenessHeatExchangerSource.C
 $(derivedSources)/explicitPorositySource/explicitPorositySource.C
 $(derivedSources)/meanVelocityForce/meanVelocityForce.C
@@ -33,14 +39,6 @@ $(derivedSources)/solidificationMeltingSource/solidificationMeltingSource.C
 $(derivedSources)/solidificationMeltingSource/solidificationMeltingSourceIO.C
 $(derivedSources)/tabulatedAccelerationSource/tabulatedAccelerationSource.C
 $(derivedSources)/tabulatedAccelerationSource/tabulated6DoFAcceleration/tabulated6DoFAcceleration.C
-/*
-$(derivedSources)/directionalPressureGradientExplicitSource/directionalPressureGradientExplicitSource.C
-$(derivedSources)/directionalPressureGradientExplicitSource/directionalPressureGradientExplicitSourceIO.C
-*/
-$(derivedSources)/buoyancyForce/buoyancyForce.C
-$(derivedSources)/buoyancyForce/buoyancyForceIO.C
-$(derivedSources)/buoyancyEnergy/buoyancyEnergy.C
-$(derivedSources)/buoyancyEnergy/buoyancyEnergyIO.C
 
 interRegion = sources/interRegion
 $(interRegion)/interRegionHeatTransfer/interRegionHeatTransferModel/interRegionHeatTransferModel.C

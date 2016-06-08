@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,6 +74,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::nbrRegion() const
      return (refCast<const fvMesh>(mpp.sampleMesh()));
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::radiation::boundaryRadiationPropertiesPatch::
@@ -138,19 +139,18 @@ Foam::radiation::boundaryRadiationPropertiesPatch::
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::radiation::absorptionEmissionModel&
-Foam::radiation::boundaryRadiationPropertiesPatch::
-absorptionEmission() const
+Foam::radiation::boundaryRadiationPropertiesPatch::absorptionEmission() const
 {
     return absorptionEmission_();
 }
 
 
 const Foam::radiation::transmissivityModel&
-Foam::radiation::boundaryRadiationPropertiesPatch::
-transmissiveModel() const
+Foam::radiation::boundaryRadiationPropertiesPatch::transmissiveModel() const
 {
     return transmissivity_();
 }
+
 
 Foam::tmp<Foam::scalarField>
 Foam::radiation::boundaryRadiationPropertiesPatch::emissivity
@@ -392,7 +392,6 @@ Foam::radiation::boundaryRadiationPropertiesPatch::transmissivity
 }
 
 
-
 Foam::tmp<Foam::scalarField>
 Foam::radiation::boundaryRadiationPropertiesPatch::reflectivity
 (
@@ -414,8 +413,8 @@ void Foam::radiation::boundaryRadiationPropertiesPatch::write
     os.writeKeyword("mode") << methodTypeNames_[method_]
         << token::END_STATEMENT << nl;
 
-     switch (method_)
-     {
+    switch (method_)
+    {
         case MODEL:
         {
             word modelType

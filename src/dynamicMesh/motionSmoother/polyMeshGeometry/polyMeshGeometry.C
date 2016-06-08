@@ -118,7 +118,7 @@ void Foam::polyMeshGeometry::updateCellCentresAndVols
         const labelList& cFaces(cells[cellI]);
 
         // Estimate the cell centre and bounding box using the face centres
-        vector cEst = vector::zero;
+        vector cEst(Zero);
         boundBox bb(boundBox::invertedBox);
 
         forAll(cFaces, cFaceI)

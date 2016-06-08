@@ -10,10 +10,8 @@ rm -rf 0 && cp -r 0.org 0
 
 runApplication decomposePar -force
 
-n=$(echo processor* | wc -w)
-
-runParallel potentialFoam $n -pName pPotential -initialiseUBCs
+runParallel potentialFoam -pName pPotential -initialiseUBCs
 
 rm -f processor*/0/phi
 
-runParallel XiDyMFoam $n
+runParallel XiDyMFoam

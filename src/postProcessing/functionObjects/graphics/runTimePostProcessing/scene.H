@@ -36,7 +36,7 @@ SourceFiles
 
 // OpenFOAM includes
 #include "dictionary.H"
-#include "DataEntry.H"
+#include "Function1.H"
 #include "vector.H"
 #include "point.H"
 #include "boundBox.H"
@@ -99,7 +99,7 @@ protected:
     // Protected data
 
         //- Colours
-        HashPtrTable<DataEntry<vector>, word> colours_;
+        HashPtrTable<Function1<vector>, word> colours_;
 
 
         // Camera settings
@@ -108,19 +108,19 @@ protected:
             modeType mode_;
 
             //- Position
-            autoPtr<DataEntry<point>> cameraPosition_;
+            autoPtr<Function1<point>> cameraPosition_;
 
             //- Focal point
-            autoPtr<DataEntry<point>> cameraFocalPoint_;
+            autoPtr<Function1<point>> cameraFocalPoint_;
 
             //- Up direction
-            autoPtr<DataEntry<vector>> cameraUp_;
+            autoPtr<Function1<vector>> cameraUp_;
 
             //- Zoom level
-            autoPtr<DataEntry<scalar>> cameraZoom_;
+            autoPtr<Function1<scalar>> cameraZoom_;
 
             //- View angle
-            autoPtr<DataEntry<scalar>> cameraViewAngle_;
+            autoPtr<Function1<scalar>> cameraViewAngle_;
 
 
         // Scene management
@@ -171,7 +171,7 @@ public:
         // Access
 
             //- Return the colours
-            const HashPtrTable<DataEntry<vector>, word>& colours() const;
+            const HashPtrTable<Function1<vector>, word>& colours() const;
 
             //- Return the current frame index
             label frameIndex() const;

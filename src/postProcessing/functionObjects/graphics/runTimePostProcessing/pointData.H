@@ -90,7 +90,7 @@ protected:
         scalar maxGlyphLength_;
 
         //- Point colour
-        autoPtr<DataEntry<vector>> pointColour_;
+        autoPtr<Function1<vector>> pointColour_;
 
 
     // Protected Member Functions
@@ -121,7 +121,7 @@ public:
             (
                 const runTimePostProcessing& parent,
                 const dictionary& dict,
-                const HashPtrTable<DataEntry<vector>, word>& colours
+                const HashPtrTable<Function1<vector>, word>& colours
             ),
             (parent, dict, colours)
         );
@@ -134,7 +134,7 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<DataEntry<vector>, word>& colours
+            const HashPtrTable<Function1<vector>, word>& colours
         );
 
 
@@ -145,7 +145,7 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<DataEntry<vector>, word>& colours,
+            const HashPtrTable<Function1<vector>, word>& colours,
             const word& pointDataName
         );
 

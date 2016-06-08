@@ -51,7 +51,7 @@ Foam::functionObjectSurface::functionObjectSurface
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<DataEntry<vector>, word>& colours
+    const HashPtrTable<Function1<vector>, word>& colours
 )
 :
     geometrySurface(parent, dict, colours, List<fileName>()),

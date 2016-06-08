@@ -81,7 +81,7 @@ Foam::geometryBase::geometryBase
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<DataEntry<vector>, word>& colours
+    const HashPtrTable<Function1<vector>, word>& colours
 )
 :
     parent_(parent),
@@ -98,11 +98,11 @@ Foam::geometryBase::geometryBase
 
     if (dict.found("opacity"))
     {
-        opacity_.reset(DataEntry<scalar>::New("opacity", dict).ptr());
+        opacity_.reset(Function1<scalar>::New("opacity", dict).ptr());
     }
     else
     {
-        opacity_.reset(new Constant<scalar>("opacity", 1.0));
+        opacity_.reset(new Function1Types::Constant<scalar>("opacity", 1.0));
     }
 }
 
@@ -139,7 +139,7 @@ Foam::scalar Foam::geometryBase::opacity(const scalar position) const
 }
 
 
-const Foam::HashPtrTable<Foam::DataEntry<Foam::vector>, Foam::word>&
+const Foam::HashPtrTable<Foam::Function1<Foam::vector>, Foam::word>&
 Foam::geometryBase::colours() const
 {
     return colours_;

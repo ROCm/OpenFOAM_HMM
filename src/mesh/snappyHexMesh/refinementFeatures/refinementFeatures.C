@@ -536,7 +536,7 @@ void Foam::refinementFeatures::findNearestEdge
     nearInfo.setSize(samples.size());
     nearInfo = pointIndexHit();
     nearNormal.setSize(samples.size());
-    nearNormal = vector::zero;
+    nearNormal = Zero;
 
     forAll(edgeTrees_, featI)
     {
@@ -595,7 +595,7 @@ void Foam::refinementFeatures::findNearestRegionEdge
     nearInfo.setSize(samples.size());
     nearInfo = pointIndexHit();
     nearNormal.setSize(samples.size());
-    nearNormal = vector::zero;
+    nearNormal = Zero;
 
 
     const PtrList<indexedOctree<treeDataEdge>>& regionTrees =

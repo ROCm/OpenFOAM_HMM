@@ -74,6 +74,11 @@ formatOptions
         //collateTimes true;  // write single file containing multiple timesteps
                               // (only for static surfaces)
     }
+    vtk
+    {
+        // Non-default write precision for floating point numbers
+        writePrecision 10;
+    }
     nastran
     {
         // From OpenFOAM field name to Nastran field name

@@ -74,7 +74,7 @@ surfaceAlignedSBRStressFvMotionSolver
             IOobject::NO_WRITE
         ),
         fvMesh_,
-        dimensionedVector("zero", dimless, vector::zero)
+        dimensionedVector("zero", dimless, Zero)
     ),
     maxAng_(coeffDict().lookupOrDefault<scalar>("maxAng", 80.0)),
     minAng_(coeffDict().lookupOrDefault<scalar>("minAng", 20.0)),
@@ -93,7 +93,7 @@ surfaceAlignedSBRStressFvMotionSolver
             IOobject::NO_WRITE
         ),
         fvMesh_,
-        dimensionedSymmTensor("zero", dimless, symmTensor::zero)
+        dimensionedSymmTensor("zero", dimless, Zero)
     ),
     minSigmaDiff_(coeffDict().lookupOrDefault<scalar>("minSigmaDiff", 1e-4))
 {
@@ -131,8 +131,8 @@ Foam::surfaceAlignedSBRStressFvMotionSolver::
 
 void Foam::surfaceAlignedSBRStressFvMotionSolver::calculateCellRot()
 {
-    cellRot_.internalField() = vector::zero;
-    pointDisplacement_.internalField() = vector::zero;
+    cellRot_.internalField() = Zero;
+    pointDisplacement_.internalField() = Zero;
 
     // Find intersections
     pointField start(fvMesh_.nInternalFaces());
@@ -316,7 +316,7 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::solve()
                 IOobject::NO_WRITE
             ),
             fvMesh_,
-            dimensionedVector("zero", dimLength, vector::zero),
+            dimensionedVector("zero", dimLength, Zero),
             cellMotionBoundaryTypes<vector>
             (
                 pointDisplacement().boundaryField()

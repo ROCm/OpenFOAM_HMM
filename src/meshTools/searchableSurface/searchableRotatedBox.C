@@ -57,7 +57,7 @@ Foam::searchableRotatedBox::searchableRotatedBox
             io.writeOpt(),
             false      //io.registerObject(),
         ),
-        treeBoundBox(point::zero, dict.lookup("span"))
+        treeBoundBox(Zero, dict.lookup("span"))
     ),
     transform_
     (

@@ -100,7 +100,7 @@ void Foam::searchableCone::findNearestAndNormal
     scalar magV = mag(v);
     if (magV < ROOTVSMALL)
     {
-       v = vector::zero;
+       v = Zero;
     }
     else
     {
@@ -1045,7 +1045,7 @@ void Foam::searchableCone::getNormal
 ) const
 {
     normal.setSize(info.size());
-    normal = vector::zero;
+    normal = Zero;
 
     forAll(info, i)
     {

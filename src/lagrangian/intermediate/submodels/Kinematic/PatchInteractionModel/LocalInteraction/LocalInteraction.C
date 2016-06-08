@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -181,7 +181,6 @@ bool Foam::LocalInteraction<CloudType>::correct
     if (patchI >= 0)
     {
         vector& U = p.U();
-        bool& active = p.active();
 
         typename PatchInteractionModel<CloudType>::interactionType it =
             this->wordToInteractionType
@@ -196,7 +195,7 @@ bool Foam::LocalInteraction<CloudType>::correct
                 scalar dm = p.mass()*p.nParticle();
 
                 keepParticle = false;
-                active = false;
+                p.active(false);
                 U = Zero;
                 nEscape_[patchI]++;
                 massEscape_[patchI] += dm;
@@ -213,7 +212,7 @@ bool Foam::LocalInteraction<CloudType>::correct
                 scalar dm = p.mass()*p.nParticle();
 
                 keepParticle = true;
-                active = false;
+                p.active(false);
                 U = Zero;
                 nStick_[patchI]++;
                 massStick_[patchI] += dm;
@@ -228,7 +227,7 @@ bool Foam::LocalInteraction<CloudType>::correct
             case PatchInteractionModel<CloudType>::itRebound:
             {
                 keepParticle = true;
-                active = true;
+                p.active(true);
 
                 vector nw;
                 vector Up;

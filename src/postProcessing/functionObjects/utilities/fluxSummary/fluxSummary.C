@@ -186,7 +186,7 @@ void Foam::fluxSummary::initialiseFaceZoneAndDirection
     const surfaceVectorField& Sf = mesh.Sf();
     const surfaceScalarField& magSf = mesh.magSf();
 
-    vector n = vector::zero;
+    vector n(Zero);
 
     forAll(fZone, i)
     {

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -264,16 +264,17 @@ void Foam::Function1Types::CSV<Type>::writeData(Ostream& os) const
 {
     Function1<Type>::writeData(os);
     os  << token::END_STATEMENT << nl;
-    os  << indent << word(this->name() + "Coeffs") << nl;
-    os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
+
+    os.beginBlock(word(this->name() + "Coeffs")) << nl;
 
     // Note: for TableBase write the dictionary entries it needs but not
     // the values themselves
     TableBase<Type>::writeEntries(os);
 
-    os.writeKeyword("nHeaderLine") << nHeaderLine_ << token::END_STATEMENT
-        << nl;
-    os.writeKeyword("refColumn") << refColumn_ << token::END_STATEMENT << nl;
+    os.writeKeyword("nHeaderLine") << nHeaderLine_
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("refColumn") << refColumn_
+        << token::END_STATEMENT << nl;
 
     // Force writing labelList in ascii
     os.writeKeyword("componentColumns");
@@ -293,8 +294,10 @@ void Foam::Function1Types::CSV<Type>::writeData(Ostream& os) const
         << token::END_STATEMENT << nl;
     os.writeKeyword("mergeSeparators") << mergeSeparators_
         << token::END_STATEMENT << nl;
-    os.writeKeyword("fileName") << fName_ << token::END_STATEMENT << nl;
-    os  << decrIndent << indent << token::END_BLOCK << endl;
+    os.writeKeyword("fileName") << fName_
+        << token::END_STATEMENT << nl;
+
+    os.endBlock() << endl;
 }
 
 

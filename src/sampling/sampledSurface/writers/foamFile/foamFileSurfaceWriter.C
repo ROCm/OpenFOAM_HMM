@@ -80,7 +80,7 @@ Foam::fileName Foam::foamFileSurfaceWriter::write
 
     // Face centers. Not really necessary but very handy when reusing as inputs
     // for e.g. timeVaryingMapped bc.
-    pointField faceCentres(faces.size(),point::zero);
+    pointField faceCentres(faces.size(), Zero);
 
     forAll(faces, faceI)
     {

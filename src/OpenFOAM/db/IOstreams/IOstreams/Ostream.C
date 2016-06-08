@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ void Foam::Ostream::decrIndent()
     }
     else
     {
-        indentLevel_--;
+        --indentLevel_;
     }
 }
 
@@ -74,6 +74,37 @@ Foam::Ostream& Foam::Ostream::writeKeyword(const keyType& kw)
     {
         write(char(token::SPACE));
     }
+
+    return *this;
+}
+
+
+Foam::Ostream& Foam::Ostream::beginBlock(const word& keyword)
+{
+    indent();
+    write(keyword);
+    endl();
+    beginBlock();
+
+    return *this;
+}
+
+
+Foam::Ostream& Foam::Ostream::beginBlock()
+{
+    indent();
+    write(char(token::BEGIN_BLOCK));
+    incrIndent();
+
+    return *this;
+}
+
+
+Foam::Ostream& Foam::Ostream::endBlock()
+{
+    decrIndent();
+    indent();
+    write(char(token::END_BLOCK));
 
     return *this;
 }

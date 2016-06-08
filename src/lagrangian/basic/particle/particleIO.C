@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,14 +28,15 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::string Foam::particle::propertyList_ = Foam::particle::propertyList();
+Foam::string Foam::particle::propertyList_  = Foam::particle::propertyList();
+Foam::string Foam::particle::propertyTypes_ = Foam::particle::propertyTypes();
 
 const std::size_t Foam::particle::sizeofPosition_
 (
     offsetof(particle, faceI_) - offsetof(particle, position_)
 );
 
-const std::size_t Foam::particle::sizeofFields_
+const std::size_t Foam::particle::sizeofFields
 (
     sizeof(particle) - offsetof(particle, position_)
 );
@@ -73,7 +74,7 @@ Foam::particle::particle(const polyMesh& mesh, Istream& is, bool readFields)
     {
         if (readFields)
         {
-            is.read(reinterpret_cast<char*>(&position_), sizeofFields_);
+            is.read(reinterpret_cast<char*>(&position_), sizeofFields);
         }
         else
         {
@@ -120,7 +121,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const particle& p)
         os.write
         (
             reinterpret_cast<const char*>(&p.position_),
-            particle::sizeofFields_
+            particle::sizeofFields
         );
     }
 

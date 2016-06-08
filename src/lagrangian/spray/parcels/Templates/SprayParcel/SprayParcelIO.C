@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,9 +32,13 @@ template<class ParcelType>
 Foam::string Foam::SprayParcel<ParcelType>::propertyList_ =
     Foam::SprayParcel<ParcelType>::propertyList();
 
+template<class ParcelType>
+Foam::string Foam::SprayParcel<ParcelType>::propertyTypes_ =
+    Foam::SprayParcel<ParcelType>::propertyTypes();
+
 
 template<class ParcelType>
-const std::size_t Foam::SprayParcel<ParcelType>::sizeofFields_
+const std::size_t Foam::SprayParcel<ParcelType>::sizeofFields
 (
     sizeof(SprayParcel<ParcelType>) - sizeof(ParcelType)
 );
@@ -85,7 +89,7 @@ Foam::SprayParcel<ParcelType>::SprayParcel
         }
         else
         {
-            is.read(reinterpret_cast<char*>(&d0_), sizeofFields_);
+            is.read(reinterpret_cast<char*>(&d0_), sizeofFields);
         }
     }
 
@@ -311,7 +315,7 @@ Foam::Ostream& Foam::operator<<
         os.write
         (
             reinterpret_cast<const char*>(&p.d0_),
-            SprayParcel<ParcelType>::sizeofFields_
+            SprayParcel<ParcelType>::sizeofFields
         );
     }
 

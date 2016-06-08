@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,14 +80,14 @@ class KinematicParcel
 {
     // Private data
 
-        //- Size in bytes of the fields
-        static const std::size_t sizeofFields_;
-
         //- Number of particle tracking attempts before we assume that it stalls
         static label maxTrackAttempts;
 
-
 public:
+
+    //- Size in bytes of the fields
+    static const std::size_t sizeofFields;
+
 
     //- Class to hold kinematic particle constant properties
     class constantProperties
@@ -234,7 +234,8 @@ protected:
         // Parcel properties
 
             //- Active flag - tracking inactive when active = false
-            bool active_;
+            //  Store as label for data alignment, but only has bool states
+            label active_;
 
             //- Parcel type id
             label typeId_;
@@ -309,12 +310,28 @@ public:
           + " typeId"
           + " nParticle"
           + " d"
-          + " dTarget "
+          + " dTarget"
           + " (Ux Uy Uz)"
           + " rho"
           + " age"
           + " tTurb"
           + " (UTurbx UTurby UTurbz)"
+        );
+
+        //- String representation of property types
+        AddToPropertyTypes
+        (
+            ParcelType,
+            " label"
+          + " label"
+          + " scalar"
+          + " scalar"
+          + " scalar"
+          + " vector"
+          + " scalar"
+          + " scalar"
+          + " scalar"
+          + " vector"
         );
 
 
@@ -442,8 +459,8 @@ public:
 
         // Edit
 
-            //- Return const access to active flag
-            inline bool& active();
+            //- Set active flag to the specified state
+            inline void active(const bool state);
 
             //- Return access to type id
             inline label& typeId();
