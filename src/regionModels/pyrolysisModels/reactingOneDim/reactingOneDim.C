@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -213,25 +213,17 @@ void reactingOneDim::updateFields()
 }
 
 
-void reactingOneDim::updateMesh(const scalarField& mass0)
+void reactingOneDim::updateMesh(const scalarField& deltaV)
 {
-    if (!moveMesh_)
-    {
-        return;
-    }
-
-    const scalarField newV(mass0/rho_);
-
-    Info<< "Initial/final volumes = " << gSum(regionMesh().V()) << ", "
-        << gSum(newV) << " [m3]" << endl;
+    Info<< "Initial/final volumes = " << gSum(deltaV) << endl;
 
     // move the mesh
-    const labelList moveMap = moveMesh(regionMesh().V() - newV, minimumDelta_);
+    const labelList moveMap = moveMesh(deltaV, minimumDelta_);
 
     // flag any cells that have not moved as non-reacting
     forAll(moveMap, i)
     {
-        if (moveMap[i] == 0)
+        if (moveMap[i] == 1)
         {
             solidChemistry_->setCellReacting(i, false);
         }
@@ -246,28 +238,26 @@ void reactingOneDim::solveContinuity()
         Info<< "reactingOneDim::solveContinuity()" << endl;
     }
 
-    const scalarField mass0 = rho_*regionMesh().V();
 
-    fvScalarMatrix rhoEqn
-    (
-        fvm::ddt(rho_)
-        ==
-      - solidChemistry_->RRg()
-    );
-
-    if (regionMesh().moving())
+    if (!moveMesh_)
     {
-        surfaceScalarField phiRhoMesh
+        fvScalarMatrix rhoEqn
         (
-            fvc::interpolate(rho_)*regionMesh().phi()
+            fvm::ddt(rho_)
+            ==
+          - solidChemistry_->RRg()
         );
 
-        rhoEqn += fvc::div(phiRhoMesh);
+        rhoEqn.solve();
     }
 
-    rhoEqn.solve();
+    if (moveMesh_)
+    {
+        const scalarField deltaV =
+            -solidChemistry_->RRg()*regionMesh().V()/rho_;
 
-    updateMesh(mass0);
+        updateMesh(deltaV);
+    }
 }
 
 
@@ -298,7 +288,7 @@ void reactingOneDim::solveSpeciesMass()
                 fvc::interpolate(Yi*rho_)*regionMesh().phi()
             );
 
-            YiEqn += fvc::div(phiYiRhoMesh);
+            YiEqn -= fvc::div(phiYiRhoMesh);
 
         }
 
@@ -329,7 +319,6 @@ void reactingOneDim::solveEnergy()
       - fvc::laplacian(kappa(), T())
      ==
         chemistrySh_
-      - fvm::Sp(solidChemistry_->RRg(), h_)
     );
 
     if (gasHSource_)
@@ -351,7 +340,7 @@ void reactingOneDim::solveEnergy()
             fvc::interpolate(rho_*h_)*regionMesh().phi()
         );
 
-        hEqn += fvc::div(phihMesh);
+        hEqn -= fvc::div(phihMesh);
     }
 
     hEqn.relax();
@@ -682,12 +671,6 @@ const surfaceScalarField& reactingOneDim::phiGas() const
 void reactingOneDim::preEvolveRegion()
 {
     pyrolysisModel::preEvolveRegion();
-
-    // Initialise all cells as able to react
-    forAll(h_, cellI)
-    {
-        solidChemistry_->setCellReacting(cellI, true);
-    }
 }
 
 
