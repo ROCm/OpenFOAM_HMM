@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "smoothSolver.H"
+#include "Profiling.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -87,6 +88,8 @@ Foam::solverPerformance Foam::smoothSolver::solve
     // If the nSweeps_ is negative do a fixed number of sweeps
     if (nSweeps_ < 0)
     {
+        addProfiling(solve, "lduMatrix::smoother." + fieldName_);
+
         autoPtr<lduMatrix::smoother> smootherPtr = lduMatrix::smoother::New
         (
             fieldName_,
@@ -144,6 +147,8 @@ Foam::solverPerformance Foam::smoothSolver::solve
          || !solverPerf.checkConvergence(tolerance_, relTol_)
         )
         {
+            addProfiling(solve, "lduMatrix::smoother." + fieldName_);
+
             autoPtr<lduMatrix::smoother> smootherPtr = lduMatrix::smoother::New
             (
                 fieldName_,

@@ -26,6 +26,7 @@ License
 #include "functionObjectList.H"
 #include "Time.H"
 #include "mapPolyMesh.H"
+#include "Profiling.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -220,6 +221,12 @@ bool Foam::functionObjectList::execute(const bool forceWrite)
 
         forAll(*this, objectI)
         {
+            addProfiling
+            (
+                fo,
+                "functionObject::" + operator[](objectI).name() + "::execute"
+            );
+
             ok = operator[](objectI).execute(forceWrite) && ok;
         }
     }
@@ -257,6 +264,12 @@ bool Foam::functionObjectList::end()
 
         forAll(*this, objectI)
         {
+            addProfiling
+            (
+                fo,
+                "functionObject::" + operator[](objectI).name() + "::end"
+            );
+
             ok = operator[](objectI).end() && ok;
         }
     }
@@ -339,6 +352,8 @@ bool Foam::functionObjectList::read()
 
         label nFunc = 0;
 
+        addProfiling(fo,"functionObjects::read");
+
         if (entryPtr->isDict())
         {
             // A dictionary of functionObjects
@@ -366,12 +381,24 @@ bool Foam::functionObjectList::read()
                     // An existing functionObject, and dictionary changed
                     if (newDigs[nFunc] != digests_[oldIndex])
                     {
+                        addProfiling
+                        (
+                            fo2,
+                            "functionObject::" + objPtr->name() + "::read"
+                        );
+
                         ok = objPtr->read(dict) && ok;
                     }
                 }
                 else
                 {
                     // New functionObject
+                    addProfiling
+                    (
+                        fo2,
+                        "functionObject::" + key + "::start"
+                    );
+
                     objPtr = functionObject::New(key, time_, dict).ptr();
                     ok = objPtr->start() && ok;
                 }

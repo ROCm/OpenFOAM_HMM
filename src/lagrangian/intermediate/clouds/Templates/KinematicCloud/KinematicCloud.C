@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +33,7 @@ License
 #include "PatchInteractionModel.H"
 #include "StochasticCollisionModel.H"
 #include "SurfaceFilmModel.H"
+#include "Profiling.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
@@ -90,6 +91,8 @@ template<class CloudType>
 template<class TrackData>
 void Foam::KinematicCloud<CloudType>::solve(TrackData& td)
 {
+    addProfiling(prof, "cloud::solve");
+
     if (solution_.steadyState())
     {
         td.cloud().storeState();

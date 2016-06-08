@@ -3,6 +3,7 @@ global/global.Cver
 /* global/constants/dimensionedConstants.C in global.Cver */
 global/argList/argList.C
 global/clock/clock.C
+global/profiling/Profiling.C
 
 bools = primitives/bools
 $(bools)/bool/bool.C

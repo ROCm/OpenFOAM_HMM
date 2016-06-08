@@ -27,6 +27,7 @@ License
 #include "PstreamReduceOps.H"
 #include "argList.H"
 #include "HashSet.H"
+#include "Profiling.H"
 
 #include <sstream>
 
@@ -335,6 +336,24 @@ void Foam::Time::setControls()
 
 void Foam::Time::setMonitoring()
 {
+    // initialize profiling on request
+    if (controlDict_.lookupOrDefault<Switch>("profiling", false))
+    {
+        Profiling::initialize
+        (
+            IOobject
+            (
+                "profiling",
+                timeName(),
+                "uniform",
+                *this,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            *this
+        );
+    }
+
     // Time objects not registered so do like objectRegistry::checkIn ourselves.
     if (runTimeModifiable_)
     {
@@ -651,6 +670,9 @@ Foam::Time::~Time()
 
     // destroy function objects first
     functionObjects_.clear();
+
+    // cleanup profiling
+    Profiling::stop(*this);
 }
 
 
@@ -892,9 +914,13 @@ bool Foam::Time::run() const
         {
             // Ensure functionObjects execute on last time step
             // (and hence write uptodate functionObjectProperties)
+            addProfiling(foExec, "functionObjects.execute()");
             functionObjects_.execute();
+            endProfiling(foExec);
 
+            addProfiling(foEnd, "functionObjects.end()");
             functionObjects_.end();
+            endProfiling(foEnd);
         }
     }
 
@@ -906,10 +932,12 @@ bool Foam::Time::run() const
 
             if (timeIndex_ == startTimeIndex_)
             {
+                addProfiling(functionObjects, "functionObjects.start()");
                 functionObjects_.start();
             }
             else
             {
+                addProfiling(functionObjects, "functionObjects.execute()");
                 functionObjects_.execute();
             }
         }
