@@ -33,8 +33,7 @@ runParallel -s 5 -np 5 icoFoam \
     -decomposeParDict system/decomposeParDict-5
 
 # Reconstruct mesh and results
-runParallel -s reconstruct redistributePar \
-    -reconstruct -decomposeParDict system/decomposeParDict
+runParallel -s reconstruct  -np 5 redistributePar -reconstruct
 
 
 # -----------------------------------------------------------------------------
