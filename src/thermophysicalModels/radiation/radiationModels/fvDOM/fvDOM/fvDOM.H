@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +46,7 @@ Description
             maxIter     4;          // maximum number of iterations
             cacheDiv    true;       // cache the div of the RTE equation.
             //NOTE: Caching div is "only" accurate if the upwind scheme is used
-            //in div(Ji,Ii_h)
+            //in div(Ji,Ii_h) and Ii_h is constant in time.
              meshOrientation    (1 1 1); //Mesh ortientation used for 2D and 1D
         }
 
