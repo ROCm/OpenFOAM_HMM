@@ -173,11 +173,7 @@ Foam::Ostream& Foam::ensightFile::write(const char* value)
 
     if (format() == IOstream::BINARY)
     {
-        write
-        (
-            reinterpret_cast<char const *>(buf),
-            sizeof(buf)
-        );
+        write(buf, sizeof(buf));
     }
     else
     {
@@ -204,7 +200,7 @@ Foam::Ostream& Foam::ensightFile::write(const label value)
 
         write
         (
-            reinterpret_cast<char const *>(&ivalue),
+            reinterpret_cast<const char *>(&ivalue),
             sizeof(ivalue)
         );
     }
@@ -230,7 +226,7 @@ Foam::Ostream& Foam::ensightFile::write
 
         write
         (
-            reinterpret_cast<char const *>(&ivalue),
+            reinterpret_cast<const char *>(&ivalue),
             sizeof(ivalue)
         );
     }
@@ -252,7 +248,7 @@ Foam::Ostream& Foam::ensightFile::write(const scalar value)
     {
         write
         (
-            reinterpret_cast<char const *>(&fvalue),
+            reinterpret_cast<const char *>(&fvalue),
             sizeof(fvalue)
         );
     }
