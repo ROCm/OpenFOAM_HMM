@@ -60,8 +60,10 @@ void reactingOneDim::readReactingOneDimControls()
 
     coeffs().lookup("minimumDelta") >> minimumDelta_;
 
-    coeffs().lookup("gasHSource") >> gasHSource_;
+    gasHSource_ = coeffs().lookupOrDefault<bool>("gasHSource", false);
+
     coeffs().lookup("QrHSource") >> QrHSource_;
+
     useChemistrySolvers_ =
         coeffs().lookupOrDefault<bool>("useChemistrySolvers", true);
 
@@ -209,7 +211,8 @@ void reactingOneDim::updateFields()
         updateQr();
     }
 
-    updatePhiGas();
+    //SAF: Commented out as the sensible gas enrgy is included in energy eq.
+    //updatePhiGas();
 }
 
 
@@ -250,11 +253,10 @@ void reactingOneDim::solveContinuity()
 
         rhoEqn.solve();
     }
-
-    if (moveMesh_)
+    else
     {
         const scalarField deltaV =
-            -solidChemistry_->RRg()*regionMesh().V()/rho_;
+            -solidChemistry_->RRg()*regionMesh().V()*time_.deltaT()/rho_;
 
         updateMesh(deltaV);
     }
@@ -319,13 +321,16 @@ void reactingOneDim::solveEnergy()
       - fvc::laplacian(kappa(), T())
      ==
         chemistrySh_
+      + solidChemistry_->RRsHs()
     );
 
+/* NOTE: gas Hs is included in hEqn
     if (gasHSource_)
     {
         const surfaceScalarField phiGas(fvc::interpolate(phiHsGas_));
         hEqn += fvc::div(phiGas);
     }
+*/
 
     if (QrHSource_)
     {
@@ -350,12 +355,14 @@ void reactingOneDim::solveEnergy()
 
 void reactingOneDim::calculateMassTransfer()
 {
+    /*
     totalGasMassFlux_ = 0;
     forAll(intCoupledPatchIDs_, i)
     {
         const label patchI = intCoupledPatchIDs_[i];
         totalGasMassFlux_ += gSum(phiGas_.boundaryField()[patchI]);
     }
+    */
 
     if (infoOutput_)
     {
@@ -453,8 +460,6 @@ reactingOneDim::reactingOneDim
             IOobject::AUTO_WRITE
         ),
         regionMesh()
-        //dimensionedScalar("zero", dimEnergy/dimArea/dimTime, 0.0),
-        //zeroGradientFvPatchVectorField::typeName
     ),
 
     lostSolidMass_(dimensionedScalar("zero", dimMass, 0.0)),
@@ -720,8 +725,8 @@ void reactingOneDim::info()
         << addedGasMass_.value() << nl
         << indent << "Total solid mass lost    [kg] = "
         << lostSolidMass_.value() << nl
-        << indent << "Total pyrolysis gases  [kg/s] = "
-        << totalGasMassFlux_ << nl
+        //<< indent << "Total pyrolysis gases  [kg/s] = "
+        //<< totalGasMassFlux_ << nl
         << indent << "Total heat release rate [J/s] = "
         << totalHeatRR_.value() << nl;
 }

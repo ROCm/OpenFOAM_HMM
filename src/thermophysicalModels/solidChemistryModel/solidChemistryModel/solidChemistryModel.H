@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -186,6 +186,9 @@ public:
 
             //- Return total solid source term
             inline tmp<DimensionedField<scalar, volMesh> > RRs() const;
+
+            //- Return net solid sensible enthalpy
+            inline tmp<DimensionedField<scalar, volMesh> > RRsHs() const;
 
             //- Solve the reaction system for the given time step
             //  and return the characteristic time
