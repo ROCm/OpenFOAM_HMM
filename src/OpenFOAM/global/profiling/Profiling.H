@@ -41,6 +41,8 @@ SourceFiles
 #include "Time.H"
 #include "clockTime.H"
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 namespace Foam
 {
 
@@ -130,6 +132,10 @@ protected:
         //- Add to stack and set timer lookup (based on Id)
         void push(Information*, clockTime& timer);
 
+        //- Remove from stack and remove timer lookup (based on Id).
+        //  Returns pointer to profiling information element
+        Information* pop();
+
 
     // Static control elements
 
@@ -139,7 +145,7 @@ protected:
         //- Stop profiling, cleanup pool if possible
         static void stop(const Time&);
 
-        //- Existing or new element on pool, add to stack
+        //- Existing or new element on pool, add to stack.
         //  Returns null if profiling has not been initialized
         static Information* New(const string& name, clockTime& timer);
 

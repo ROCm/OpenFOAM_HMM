@@ -72,7 +72,6 @@ void Foam::Profiling::initialize
         );
 
         pool_->push(info, pool_->clockTime_);
-        info->push();  // mark as on stack
     }
 }
 
@@ -107,7 +106,6 @@ Foam::Profiling::Information* Foam::Profiling::New
         }
 
         pool_->push(info, timer);
-        info->push();  // mark as on stack
     }
 
     return info;
@@ -118,8 +116,7 @@ void Foam::Profiling::unstack(const Information *info)
 {
     if (pool_ && info)
     {
-        Information *top = pool_->stack_.pop();
-        top->pop();  // mark as off stack
+        Information *top = pool_->pop();
 
         if (info->id() != top->id())
         {
@@ -300,7 +297,18 @@ Foam::Profiling::Information* Foam::Profiling::store(Information *info)
 void Foam::Profiling::push(Information *info, clockTime& timer)
 {
     stack_.push(info);
-    timers_.insert(info->id(), &timer);
+    timers_.set(info->id(), &timer);
+    info->push();                       // mark as on stack
+}
+
+
+Foam::Profiling::Information* Foam::Profiling::pop()
+{
+    Information *info = stack_.pop();
+    timers_.erase(info->id());
+    info->pop();                        // mark as off stack
+
+    return info;
 }
 
 
