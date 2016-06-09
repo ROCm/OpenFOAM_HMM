@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,7 @@ License
 #include "dlLibraryTable.H"
 #include "PstreamReduceOps.H"
 #include "OSspecific.H"
+#include "Ostream.H"
 #include "regIOobject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -41,6 +42,45 @@ namespace Foam
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+namespace Foam
+{
+//! \cond fileScope
+static inline void writeEntryIfPresent
+(
+    Ostream& os,
+    const dictionary& dict,
+    const word& key
+)
+{
+    // non-recursive like dictionary::found, but no pattern-match either
+    const entry* ptr = dict.lookupEntryPtr(key,false,false);
+
+    if (ptr)
+    {
+        os.writeKeyword(key)
+            << token::HASH << token::BEGIN_BLOCK;
+
+        os.writeQuoted(string(ptr->stream()), false)
+            << token::HASH << token::END_BLOCK
+            << token::END_STATEMENT << nl;
+    }
+}
+//! \endcond
+}
+
+
+void Foam::codedBase::writeCodeDict(Ostream& os, const dictionary& dict)
+{
+    writeEntryIfPresent(os, dict, "codeInclude");
+    writeEntryIfPresent(os, dict, "localCode");
+    writeEntryIfPresent(os, dict, "code");
+    writeEntryIfPresent(os, dict, "codeOptions");
+    writeEntryIfPresent(os, dict, "codeLibs");
+}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void* Foam::codedBase::loadLibrary
 (
@@ -164,8 +204,6 @@ void Foam::codedBase::unloadLibrary
     }
 }
 
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::codedBase::createLibrary
 (
