@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::camera
+    Foam::scene
 
 Description
 
@@ -116,9 +116,6 @@ protected:
             //- Up direction
             autoPtr<DataEntry<vector> > cameraUp_;
 
-            //- Zoom level
-            autoPtr<DataEntry<scalar> > cameraZoom_;
-
             //- View angle
             autoPtr<DataEntry<scalar> > cameraViewAngle_;
 
@@ -134,7 +131,7 @@ protected:
             //- Number of frames
             label nFrameTotal_;
 
-            //- startPosition [0-1]
+            //- Start position [0-1]
             scalar startPosition_;
 
             //- Position [0-1]
@@ -152,7 +149,7 @@ protected:
 
     // Protected Member Functions
 
-        void setCamera(vtkRenderer* renderer, const bool override) const;
+        void setCamera(vtkRenderer* renderer) const;
 
         string frameIndexStr() const;
 

@@ -138,15 +138,6 @@ void Foam::scene::readCamera(const dictionary& dict)
         }
     }
 
-    if (dict.found("zoom"))
-    {
-        cameraZoom_.reset(DataEntry<scalar>::New("zoom", dict).ptr());
-    }
-    else
-    {
-        cameraZoom_.reset(new Constant<scalar>("zoom", 1.0));
-    }
-
     if (dict.found("viewAngle"))
     {
         cameraViewAngle_.reset(DataEntry<scalar>::New("viewAngle", dict).ptr());
@@ -172,11 +163,12 @@ void Foam::scene::readColours(const dictionary& dict)
 void Foam::scene::initialise(vtkRenderer* renderer, const word& outputName)
 {
     currentFrameI_ = 0;
+    position_ = startPosition_;
 
     outputName_ = outputName;
 
     // Set the background
-    const vector backgroundColour = colours_["background"]->value(position());
+    const vector backgroundColour = colours_["background"]->value(position_);
     renderer->SetBackground
     (
         backgroundColour.x(),
@@ -188,7 +180,7 @@ void Foam::scene::initialise(vtkRenderer* renderer, const word& outputName)
     if (colours_.found("background2"))
     {
         renderer->GradientBackgroundOn();
-        vector backgroundColour2 = colours_["background2"]->value(position());
+        vector backgroundColour2 = colours_["background2"]->value(position_);
 
         renderer->SetBackground2
         (
@@ -208,9 +200,24 @@ void Foam::scene::initialise(vtkRenderer* renderer, const word& outputName)
     camera->SetParallelProjection(parallelProjection_);
     renderer->SetActiveCamera(camera);
 
-    setCamera(renderer, true);
 
-    // Initialise the extents
+    // Initialise the camera
+    const vector up = cameraUp_->value(position_);
+    const vector pos = cameraPosition_->value(position_);
+    const point focalPoint = cameraFocalPoint_->value(position_);
+
+    camera->SetViewUp(up.x(), up.y(), up.z());
+    camera->SetPosition(pos.x(), pos.y(), pos.z());
+    camera->SetFocalPoint(focalPoint.x(), focalPoint.y(), focalPoint.z());
+    camera->Modified();
+
+
+    // Add the lights
+    vtkSmartPointer<vtkLightKit> lightKit = vtkSmartPointer<vtkLightKit>::New();
+    lightKit->AddLightsToRenderer(renderer);
+
+
+    // For static mode initialise the clip box
     if (mode_ == mtStatic)
     {
         const point& min = clipBox_.min();
@@ -232,48 +239,38 @@ void Foam::scene::initialise(vtkRenderer* renderer, const word& outputName)
 
         vtkSmartPointer<vtkActor> clipActor = vtkSmartPointer<vtkActor>::New();
         clipActor->SetMapper(clipMapper);
-        clipActor->VisibilityOn();
+        clipActor->VisibilityOff();
         renderer->AddActor(clipActor);
 
+        // Call resetCamera to fit clip box in view
+        clipActor->VisibilityOn();
         renderer->ResetCamera();
-
-        // Restore viewAngle (it might be reset by clipping)
-        vtkCamera* camera = renderer->GetActiveCamera();
-
-        if (!parallelProjection_)
-        {
-            camera->SetViewAngle(cameraViewAngle_->value(position()));
-        }
-        camera->Modified();
-
         clipActor->VisibilityOff();
     }
 }
 
 
-void Foam::scene::setCamera(vtkRenderer* renderer, const bool override) const
+void Foam::scene::setCamera(vtkRenderer* renderer) const
 {
-    if (mode_ == mtFlightPath || override)
+    if (mode_ == mtFlightPath)
     {
+        const vector up = cameraUp_->value(position_);
+        const vector pos = cameraPosition_->value(position_);
+        const point focalPoint = cameraFocalPoint_->value(position_);
+
         vtkCamera* camera = renderer->GetActiveCamera();
-
-        if (!parallelProjection_)
-        {
-            camera->SetViewAngle(cameraViewAngle_->value(position()));
-        }
-
-        const vector up = cameraUp_->value(position());
-        const vector pos = cameraPosition_->value(position());
-        const point focalPoint = cameraFocalPoint_->value(position());
-
         camera->SetViewUp(up.x(), up.y(), up.z());
         camera->SetPosition(pos.x(), pos.y(), pos.z());
         camera->SetFocalPoint(focalPoint.x(), focalPoint.y(), focalPoint.z());
         camera->Modified();
+    }
 
-        vtkSmartPointer<vtkLightKit> lightKit =
-            vtkSmartPointer<vtkLightKit>::New();
-        lightKit->AddLightsToRenderer(renderer);
+    if (!parallelProjection_)
+    {
+        // Restore viewAngle (it might be reset by clipping)
+        vtkCamera* camera = renderer->GetActiveCamera();
+        camera->SetViewAngle(cameraViewAngle_->value(position_));
+        camera->Modified();
     }
 }
 
@@ -298,7 +295,6 @@ Foam::scene::scene(const objectRegistry& obr, const word& name)
     cameraPosition_(NULL),
     cameraFocalPoint_(NULL),
     cameraUp_(NULL),
-    cameraZoom_(NULL),
     cameraViewAngle_(NULL),
     clipBox_(),
     parallelProjection_(true),
@@ -348,8 +344,7 @@ void Foam::scene::read(const dictionary& dict)
 bool Foam::scene::loop(vtkRenderer* renderer)
 {
     static bool initialised = false;
-
-    setCamera(renderer, false);
+    setCamera(renderer);
 
     if (!initialised)
     {
@@ -357,18 +352,14 @@ bool Foam::scene::loop(vtkRenderer* renderer)
         return true;
     }
 
+    // Ensure that all objects can be seen without clipping
+    // Note: can only be done after all objects have been added!
+    renderer->ResetCameraClippingRange();
+
     // Save image from last iteration
     saveImage(renderer->GetRenderWindow());
 
     currentFrameI_++;
-
-    // Warning only if camera is in flight mode
-    if ((mode_ == mtFlightPath) && (position_ > (1 + 0.5*dPosition_)))
-    {
-        WarningInFunction
-            << "Current position "<< position_ <<" exceeded 1 - please check your setup"
-            << endl;
-    }
 
     position_ = startPosition_ + currentFrameI_*dPosition_;
 
@@ -378,6 +369,7 @@ bool Foam::scene::loop(vtkRenderer* renderer)
     }
     else
     {
+        initialised = false;
         return false;
     }
 }
@@ -392,9 +384,9 @@ void Foam::scene::saveImage(vtkRenderWindow* renderWindow) const
 
     const Time& runTime = obr_.time();
 
-    fileName prefix(Pstream::parRun()
-              ? runTime.path()/".."/"postProcessing"/name_/obr_.time().timeName()
-              : runTime.path()/"postProcessing"/name_/obr_.time().timeName());
+    fileName prefix(Pstream::parRun() ?
+        runTime.path()/".."/"postProcessing"/name_/obr_.time().timeName() :
+        runTime.path()/"postProcessing"/name_/obr_.time().timeName());
 
     mkDir(prefix);
 
