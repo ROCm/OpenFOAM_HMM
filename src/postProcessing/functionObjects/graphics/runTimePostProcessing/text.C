@@ -47,7 +47,8 @@ Foam::text::text
     position_(dict.lookup("position")),
     size_(readScalar(dict.lookup("size"))),
     colour_(NULL),
-    bold_(readBool(dict.lookup("bold")))
+    bold_(readBool(dict.lookup("bold"))),
+    timeStamp_(dict.lookupOrDefault<bool>("timeStamp", false))
 {
     if (dict.found("colour"))
     {
@@ -81,7 +82,13 @@ void Foam::text::addGeometryToScene
 
     vtkSmartPointer<vtkTextActor> actor = vtkSmartPointer<vtkTextActor>::New();
 
-    actor->SetInput(string_.c_str());
+    // Concatenate string with timeStamp if true
+    string textAndTime = string_;
+    if (timeStamp_)
+    {
+        textAndTime = textAndTime + " " + geometryBase::parent_.obr().time().timeName();
+    }
+    actor->SetInput(textAndTime.c_str());
     actor->GetTextProperty()->SetFontFamilyToArial();
     actor->GetTextProperty()->SetFontSize(size_);
     actor->GetTextProperty()->SetJustificationToLeft();

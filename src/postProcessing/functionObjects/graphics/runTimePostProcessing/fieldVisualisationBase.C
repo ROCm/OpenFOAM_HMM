@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -453,30 +453,31 @@ Foam::fieldVisualisationBase::fieldVisualisationBase
     {
         case cbColour:
         {
+            scalarBar_.visible_ = false;
             break;
         }
         case cbField:
         {
             dict.lookup("range") >> range_;
+
+            if (dict.found("colourMap"))
+            {
+                colourMap_ = colourMapTypeNames.read(dict.lookup("colourMap"));
+            }
+
+            const dictionary& sbarDict = dict.subDict("scalarBar");
+            sbarDict.lookup("visible") >> scalarBar_.visible_;
+            if (scalarBar_.visible_)
+            {
+                sbarDict.lookup("vertical") >> scalarBar_.vertical_;
+                sbarDict.lookup("position") >> scalarBar_.position_;
+                sbarDict.lookup("title") >> scalarBar_.title_;
+                sbarDict.lookup("fontSize") >> scalarBar_.fontSize_;
+                sbarDict.lookup("labelFormat") >> scalarBar_.labelFormat_;
+                sbarDict.lookup("numberOfLabels") >> scalarBar_.numberOfLabels_;
+            }
             break;
         }
-    }
-
-    if (dict.found("colourMap"))
-    {
-        colourMap_ = colourMapTypeNames.read(dict.lookup("colourMap"));
-    }
-
-    const dictionary& sbarDict = dict.subDict("scalarBar");
-    sbarDict.lookup("visible") >> scalarBar_.visible_;
-    if (scalarBar_.visible_)
-    {
-        sbarDict.lookup("vertical") >> scalarBar_.vertical_;
-        sbarDict.lookup("position") >> scalarBar_.position_;
-        sbarDict.lookup("title") >> scalarBar_.title_;
-        sbarDict.lookup("fontSize") >> scalarBar_.fontSize_;
-        sbarDict.lookup("labelFormat") >> scalarBar_.labelFormat_;
-        sbarDict.lookup("numberOfLabels") >> scalarBar_.numberOfLabels_;
     }
 }
 
