@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,7 @@ License
 #include "fvMesh.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "zeroGradientFvPatchFields.H"
+#include "extrapolatedCalculatedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,7 +42,7 @@ namespace fvc
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type, class CombineOp>
-tmp<GeometricField<Type, fvPatchField, volMesh> > cellReduce
+tmp<GeometricField<Type, fvPatchField, volMesh>> cellReduce
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& ssf,
     const CombineOp& cop,
@@ -67,11 +67,11 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > cellReduce
             ),
             mesh,
             dimensioned<Type>("initialValue", ssf.dimensions(), nullValue),
-            zeroGradientFvPatchField<Type>::typeName
+            extrapolatedCalculatedFvPatchField<Type>::typeName
         )
     );
 
-    volFieldType& result = tresult();
+    volFieldType& result = tresult.ref();
 
     const labelUList& own = mesh.owner();
     const labelUList& nbr = mesh.neighbour();
@@ -108,17 +108,18 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > cellReduce
 
 
 template<class Type, class CombineOp>
-tmp<GeometricField<Type, fvPatchField, volMesh> > cellReduce
+tmp<GeometricField<Type, fvPatchField, volMesh>> cellReduce
 (
     const tmp<GeometricField<Type, fvsPatchField, surfaceMesh>&> tssf,
     const CombineOp& cop,
     const Type& nullValue
 )
 {
-    tmp<GeometricField<Type, fvPatchField, volMesh> >
+    tmp<GeometricField<Type, fvPatchField, volMesh>>
         tvf(cellReduce(cop, tssf, nullValue));
 
     tssf.clear();
+
     return tvf;
 }
 

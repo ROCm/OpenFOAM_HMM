@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,6 @@ namespace Foam
 {
 defineTypeNameAndDebug(globalMeshData, 0);
 
-// Geometric matching tolerance. Factor of mesh bounding box.
 const scalar globalMeshData::matchTol_ = 1e-8;
 
 template<>
@@ -63,7 +62,6 @@ public:
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Collect processor patch addressing.
 void Foam::globalMeshData::initProcAddr()
 {
     processorPatchIndices_.setSize(mesh_.boundaryMesh().size());
@@ -251,7 +249,6 @@ void Foam::globalMeshData::calcSharedPoints() const
 }
 
 
-// Given information about locally used edges allocate global shared edges.
 void Foam::globalMeshData::countSharedEdges
 (
     const EdgeMap<labelList>& procSharedEdges,
@@ -294,12 +291,13 @@ void Foam::globalMeshData::countSharedEdges
 }
 
 
-// Shared edges are shared between multiple processors. By their nature both
-// of their endpoints are shared points. (but not all edges using two shared
-// points are shared edges! There might e.g. be an edge between two unrelated
-// clusters of shared points)
 void Foam::globalMeshData::calcSharedEdges() const
 {
+    // Shared edges are shared between multiple processors. By their nature both
+    // of their endpoints are shared points. (but not all edges using two shared
+    // points are shared edges! There might e.g. be an edge between two
+    // unrelated clusters of shared points)
+
     if
     (
         nGlobalEdges_ != -1
@@ -586,61 +584,84 @@ void Foam::globalMeshData::calcPointConnectivity
             transforms.nullTransformIndex()
         );
     }
-    // Send over.
+    // Send to master
     globalPointSlavesMap().distribute(myData);
 
 
     // String of connected points with their transform
     allPointConnectivity.setSize(globalPointSlavesMap().constructSize());
+    allPointConnectivity = labelPairList(0);
+
+    // Pass1: do the master points since these also update local slaves
+    //        (e.g. from local cyclics)
     forAll(slaves, pointI)
     {
         // Reconstruct string of connected points
         const labelList& pSlaves = slaves[pointI];
         const labelList& pTransformSlaves = transformedSlaves[pointI];
-        labelPairList& pConnectivity = allPointConnectivity[pointI];
-        pConnectivity.setSize(1+pSlaves.size()+pTransformSlaves.size());
-        label connI = 0;
 
-        // Add myself
-        pConnectivity[connI++] = myData[pointI];
-        // Add untransformed points
-        forAll(pSlaves, i)
+        if (pSlaves.size()+pTransformSlaves.size())
         {
-            pConnectivity[connI++] = myData[pSlaves[i]];
-        }
-        // Add transformed points.
-        forAll(pTransformSlaves, i)
-        {
-            // Get transform from index
-            label transformI = globalPointSlavesMap().whichTransform
-            (
-                pTransformSlaves[i]
-            );
-            // Add transform to connectivity
-            const labelPair& n = myData[pTransformSlaves[i]];
-            label procI = globalIndexAndTransform::processor(n);
-            label index = globalIndexAndTransform::index(n);
-            pConnectivity[connI++] = globalIndexAndTransform::encode
-            (
-                procI,
-                index,
-                transformI
-            );
-        }
+            labelPairList& pConnectivity = allPointConnectivity[pointI];
 
-        // Put back in slots
-        forAll(pSlaves, i)
-        {
-            allPointConnectivity[pSlaves[i]] = pConnectivity;
-        }
-        forAll(pTransformSlaves, i)
-        {
-            allPointConnectivity[pTransformSlaves[i]] = pConnectivity;
+            pConnectivity.setSize(1+pSlaves.size()+pTransformSlaves.size());
+            label connI = 0;
+
+            // Add myself
+            pConnectivity[connI++] = myData[pointI];
+            // Add untransformed points
+            forAll(pSlaves, i)
+            {
+                pConnectivity[connI++] = myData[pSlaves[i]];
+            }
+            // Add transformed points.
+            forAll(pTransformSlaves, i)
+            {
+                // Get transform from index
+                label transformI = globalPointSlavesMap().whichTransform
+                (
+                    pTransformSlaves[i]
+                );
+                // Add transform to connectivity
+                const labelPair& n = myData[pTransformSlaves[i]];
+                label proci = globalIndexAndTransform::processor(n);
+                label index = globalIndexAndTransform::index(n);
+                pConnectivity[connI++] = globalIndexAndTransform::encode
+                (
+                    proci,
+                    index,
+                    transformI
+                );
+            }
+
+            // Put back in slots
+            forAll(pSlaves, i)
+            {
+                allPointConnectivity[pSlaves[i]] = pConnectivity;
+            }
+            forAll(pTransformSlaves, i)
+            {
+                allPointConnectivity[pTransformSlaves[i]] = pConnectivity;
+            }
         }
     }
+
+
+    // Pass2: see if anything is still unset (should not be the case)
+    forAll(slaves, pointI)
+    {
+        labelPairList& pConnectivity = allPointConnectivity[pointI];
+
+        if (pConnectivity.size() == 0)
+        {
+            pConnectivity.setSize(1, myData[pointI]);
+        }
+    }
+
+
     globalPointSlavesMap().reverseDistribute
     (
-        allPointConnectivity.size(),
+        slaves.size(),
         allPointConnectivity
     );
 }
@@ -794,20 +815,18 @@ void Foam::globalMeshData::calcGlobalPointEdges
     // Push back
     globalPointSlavesMap().reverseDistribute
     (
-        globalPointEdges.size(),
+        slaves.size(),
         globalPointEdges
     );
     // Push back
     globalPointSlavesMap().reverseDistribute
     (
-        globalPointPoints.size(),
+        slaves.size(),
         globalPointPoints
     );
 }
 
 
-// Find transformation to take remotePoint to localPoint. Use info to find
-// the transforms.
 Foam::label Foam::globalMeshData::findTransform
 (
     const labelPairList& info,
@@ -884,7 +903,7 @@ void Foam::globalMeshData::calcGlobalEdgeSlaves() const
 
 
     // 1. collect point connectivity - basically recreating globalPoints output.
-    // All points will now have a string of points. The transforms are
+    // All points will now have a string of coupled points. The transforms are
     // in respect to the master.
     List<labelPairList> allPointConnectivity;
     calcPointConnectivity(allPointConnectivity);
@@ -1051,7 +1070,7 @@ void Foam::globalMeshData::calcGlobalEdgeSlaves() const
     // Construct map
     globalEdgeTransformedSlavesPtr_.reset(new labelListList());
 
-    List<Map<label> > compactMap(Pstream::nProcs());
+    List<Map<label>> compactMap(Pstream::nProcs());
     globalEdgeSlavesMapPtr_.reset
     (
         new mapDistribute
@@ -1199,8 +1218,6 @@ void Foam::globalMeshData::calcGlobalEdgeOrientation() const
 }
 
 
-// Calculate uncoupled boundary faces (without calculating
-// primitiveMesh::pointFaces())
 void Foam::globalMeshData::calcPointBoundaryFaces
 (
     labelListList& pointBoundaryFaces
@@ -1435,7 +1452,7 @@ void Foam::globalMeshData::calcGlobalPointBoundaryFaces() const
     }
 
     // Construct a map to get the face data directly
-    List<Map<label> > compactMap(Pstream::nProcs());
+    List<Map<label>> compactMap(Pstream::nProcs());
 
     globalPointTransformedBoundaryFacesPtr_.reset
     (
@@ -1662,7 +1679,7 @@ void Foam::globalMeshData::calcGlobalPointBoundaryCells() const
     }
 
     // Construct a map to get the cell data directly
-    List<Map<label> > compactMap(Pstream::nProcs());
+    List<Map<label>> compactMap(Pstream::nProcs());
 
     globalPointTransformedBoundaryCellsPtr_.reset
     (
@@ -1737,7 +1754,6 @@ void Foam::globalMeshData::calcGlobalCoPointSlaves() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from polyMesh
 Foam::globalMeshData::globalMeshData(const polyMesh& mesh)
 :
     processorTopology(mesh.boundaryMesh(), UPstream::worldComm),
@@ -1820,7 +1836,6 @@ void Foam::globalMeshData::clearOut()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Return shared point global labels.
 const Foam::labelList& Foam::globalMeshData::sharedPointGlobalLabels() const
 {
     if (!sharedPointGlobalLabelsPtr_.valid())
@@ -1871,7 +1886,6 @@ const Foam::labelList& Foam::globalMeshData::sharedPointGlobalLabels() const
 }
 
 
-// Collect coordinates of shared points. (does parallel communication!)
 Foam::pointField Foam::globalMeshData::sharedPoints() const
 {
     // Get all processors to send their shared points to master.
@@ -1926,7 +1940,7 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
             (
                 Pstream::blocking,
                 slave,
-                sharedPoints.size()*sizeof(vector::zero)
+                sharedPoints.size()*sizeof(Zero)
             );
             toSlave << sharedPoints;
         }
@@ -1954,7 +1968,6 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
 }
 
 
-// Collect coordinates of shared points. (does parallel communication!)
 Foam::pointField Foam::globalMeshData::geometricSharedPoints() const
 {
     // Get coords of my shared points
@@ -2728,7 +2741,6 @@ void Foam::globalMeshData::movePoints(const pointField& newPoints)
 }
 
 
-// Update all data after morph
 void Foam::globalMeshData::updateMesh()
 {
     // Clear out old data

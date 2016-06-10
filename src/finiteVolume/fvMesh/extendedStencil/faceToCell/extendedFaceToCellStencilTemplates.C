@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,11 +33,11 @@ void Foam::extendedFaceToCellStencil::collectData
     const mapDistribute& map,
     const labelListList& stencil,
     const GeometricField<Type, fvsPatchField, surfaceMesh>& fld,
-    List<List<Type> >& stencilFld
+    List<List<Type>>& stencilFld
 )
 {
     // 1. Construct face data in compact addressing
-    List<Type> flatFld(map.constructSize(), pTraits<Type>::zero);
+    List<Type> flatFld(map.constructSize(), Zero);
 
     // Insert my internal values
     forAll(fld, cellI)
@@ -78,22 +78,22 @@ void Foam::extendedFaceToCellStencil::collectData
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
 Foam::extendedFaceToCellStencil::weightedSum
 (
     const mapDistribute& map,
     const labelListList& stencil,
     const GeometricField<Type, fvsPatchField, surfaceMesh>& fld,
-    const List<List<scalar> >& stencilWeights
+    const List<List<scalar>>& stencilWeights
 )
 {
     const fvMesh& mesh = fld.mesh();
 
     // Collect internal and boundary values
-    List<List<Type> > stencilFld;
+    List<List<Type>> stencilFld;
     collectData(map, stencil, fld, stencilFld);
 
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tsfCorr
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tsfCorr
     (
         new GeometricField<Type, fvPatchField, volMesh>
         (
@@ -108,11 +108,11 @@ Foam::extendedFaceToCellStencil::weightedSum
             (
                 fld.name(),
                 fld.dimensions(),
-                pTraits<Type>::zero
+                Zero
             )
         )
     );
-    GeometricField<Type, fvPatchField, volMesh>& sf = tsfCorr();
+    GeometricField<Type, fvPatchField, volMesh>& sf = tsfCorr.ref();
 
     // cells
     forAll(sf, cellI)

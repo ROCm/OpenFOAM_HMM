@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,13 +67,11 @@ class ThermoParcel
 :
     public ParcelType
 {
-    // Private data
-
-        //- Size in bytes of the fields
-        static const std::size_t sizeofFields_;
-
-
 public:
+
+    //- Size in bytes of the fields
+    static const std::size_t sizeofFields;
+
 
     //- Class to hold thermo particle constant properties
     class constantProperties
@@ -167,16 +165,16 @@ public:
             // Interpolators for continuous phase fields
 
                 //- Temperature field interpolator
-                autoPtr<interpolation<scalar> > TInterp_;
+                autoPtr<interpolation<scalar>> TInterp_;
 
                 //- Specific heat capacity field interpolator
-                autoPtr<interpolation<scalar> > CpInterp_;
+                autoPtr<interpolation<scalar>> CpInterp_;
 
                 //- Thermal conductivity field interpolator
-                autoPtr<interpolation<scalar> > kappaInterp_;
+                autoPtr<interpolation<scalar>> kappaInterp_;
 
                 //- Radiation field interpolator
-                autoPtr<interpolation<scalar> > GInterp_;
+                autoPtr<interpolation<scalar>> GInterp_;
 
 
     public:
@@ -277,6 +275,14 @@ public:
           + " Cp"
         );
 
+        //- String representation of property types
+        AddToPropertyTypes
+        (
+            ParcelType,
+            " scalar"
+          + " scalar"
+        );
+
 
     // Constructors
 
@@ -349,9 +355,9 @@ public:
                 mesh_(mesh)
             {}
 
-            autoPtr<ThermoParcel<ParcelType> > operator()(Istream& is) const
+            autoPtr<ThermoParcel<ParcelType>> operator()(Istream& is) const
             {
-                return autoPtr<ThermoParcel<ParcelType> >
+                return autoPtr<ThermoParcel<ParcelType>>
                 (
                     new ThermoParcel<ParcelType>(mesh_, is, true)
                 );

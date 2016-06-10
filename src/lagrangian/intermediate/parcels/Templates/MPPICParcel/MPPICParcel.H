@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,14 +73,13 @@ class MPPICParcel
 :
     public ParcelType
 {
-    // Private data
-
-        //- Size in bytes of the fields
-        static const std::size_t sizeofFields_;
-
-
 public:
 
+    //- Size in bytes of the fields
+    static const std::size_t sizeofFields;
+
+
+    //- Tracking data
     template<class CloudType>
     class TrackingData
     :
@@ -105,25 +104,25 @@ public:
             // MPPIC Averages
 
                 //- Volume average
-                autoPtr<AveragingMethod<scalar> > volumeAverage_;
+                autoPtr<AveragingMethod<scalar>> volumeAverage_;
 
                 //- Radius average [ volume^(1/3) ]
-                autoPtr<AveragingMethod<scalar> > radiusAverage_;
+                autoPtr<AveragingMethod<scalar>> radiusAverage_;
 
                 //- Density average
-                autoPtr<AveragingMethod<scalar> > rhoAverage_;
+                autoPtr<AveragingMethod<scalar>> rhoAverage_;
 
                 //- Velocity average
-                autoPtr<AveragingMethod<vector> > uAverage_;
+                autoPtr<AveragingMethod<vector>> uAverage_;
 
                 //- Magnitude velocity sqyuared average
-                autoPtr<AveragingMethod<scalar> > uSqrAverage_;
+                autoPtr<AveragingMethod<scalar>> uSqrAverage_;
 
                 //- Frequency average
-                autoPtr<AveragingMethod<scalar> > frequencyAverage_;
+                autoPtr<AveragingMethod<scalar>> frequencyAverage_;
 
                 //- Mass average
-                autoPtr<AveragingMethod<scalar> > massAverage_;
+                autoPtr<AveragingMethod<scalar>> massAverage_;
 
 
             //- Label specifying the current part of the tracking process
@@ -175,7 +174,14 @@ public:
         AddToPropertyList
         (
             ParcelType,
-            "(UCorrectx UCorrecty UCorrectz)"
+            " (UCorrectx UCorrecty UCorrectz)"
+        );
+
+        //- String representation of property types
+        AddToPropertyTypes
+        (
+            ParcelType,
+            " vector"
         );
 
 
@@ -248,9 +254,9 @@ public:
                 mesh_(mesh)
             {}
 
-            autoPtr<MPPICParcel<ParcelType> > operator()(Istream& is) const
+            autoPtr<MPPICParcel<ParcelType>> operator()(Istream& is) const
             {
-                return autoPtr<MPPICParcel<ParcelType> >
+                return autoPtr<MPPICParcel<ParcelType>>
                 (
                     new MPPICParcel<ParcelType>(mesh_, is, true)
                 );

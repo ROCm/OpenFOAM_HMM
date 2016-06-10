@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -192,7 +192,7 @@ Foam::fileName Foam::nastranSurfaceWriter::writeTemplate
         << "$" << nl
         << "BEGIN BULK" << nl;
 
-    List<DynamicList<face> > decomposedFaces(faces.size());
+    List<DynamicList<face>> decomposedFaces(faces.size());
 
     writeGeometry(points, faces, decomposedFaces, os);
 
@@ -210,7 +210,7 @@ Foam::fileName Foam::nastranSurfaceWriter::writeTemplate
             const DynamicList<face>& dFaces = decomposedFaces[i];
             forAll(dFaces, faceI)
             {
-                Type v = pTraits<Type>::zero;
+                Type v = Zero;
                 const face& f = dFaces[faceI];
 
                 forAll(f, fptI)

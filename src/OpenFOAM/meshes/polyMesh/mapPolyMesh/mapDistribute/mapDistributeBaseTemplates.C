@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -461,7 +461,7 @@ void Foam::mapDistributeBase::distribute
         {
             // Set up sends to neighbours
 
-            List<List<T > > sendFields(Pstream::nProcs());
+            List<List<T>> sendFields(Pstream::nProcs());
 
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
             {
@@ -495,7 +495,7 @@ void Foam::mapDistributeBase::distribute
 
             // Set up receives from neighbours
 
-            List<List<T > > recvFields(Pstream::nProcs());
+            List<List<T>> recvFields(Pstream::nProcs());
 
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
             {
@@ -938,7 +938,7 @@ void Foam::mapDistributeBase::distribute
         {
             // Set up sends to neighbours
 
-            List<List<T > > sendFields(Pstream::nProcs());
+            List<List<T>> sendFields(Pstream::nProcs());
 
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
             {
@@ -972,7 +972,7 @@ void Foam::mapDistributeBase::distribute
 
             // Set up receives from neighbours
 
-            List<List<T > > recvFields(Pstream::nProcs());
+            List<List<T>> recvFields(Pstream::nProcs());
 
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
             {

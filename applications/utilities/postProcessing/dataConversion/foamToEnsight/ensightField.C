@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +41,7 @@ using namespace Foam;
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
+tmp<GeometricField<Type, fvPatchField, volMesh>>
 volField
 (
     const fvMeshSubset& meshSubsetter,
@@ -50,12 +50,12 @@ volField
 {
     if (meshSubsetter.hasSubMesh())
     {
-        tmp<GeometricField<Type, fvPatchField, volMesh> > tfld
+        tmp<GeometricField<Type, fvPatchField, volMesh>> tfld
         (
             meshSubsetter.interpolate(vf)
         );
-        tfld().checkOut();
-        tfld().rename(vf.name());
+        tfld.ref().checkOut();
+        tfld.ref().rename(vf.name());
         return tfld;
     }
     else
@@ -66,7 +66,7 @@ volField
 
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
+tmp<GeometricField<Type, fvPatchField, volMesh>>
 volField
 (
     const fvMeshSubset& meshSubsetter,
@@ -83,7 +83,7 @@ volField
     IOobject io(df);
     io.readOpt() = IOobject::NO_READ;
 
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tvf
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tvf
     (
         new GeometricField<Type, fvPatchField, volMesh>
         (
@@ -93,18 +93,18 @@ volField
             zeroGradientFvPatchField<scalar>::typeName
         )
     );
-    tvf().internalField() = df;
-    tvf().correctBoundaryConditions();
+    tvf.ref().internalField() = df;
+    tvf.ref().correctBoundaryConditions();
     const GeometricField<Type, fvPatchField, volMesh>& vf = tvf();
 
     if (meshSubsetter.hasSubMesh())
     {
-        tmp<GeometricField<Type, fvPatchField, volMesh> > tfld
+        tmp<GeometricField<Type, fvPatchField, volMesh>> tfld
         (
             meshSubsetter.interpolate(vf)
         );
-        tfld().checkOut();
-        tfld().rename(vf.name());
+        tfld.ref().checkOut();
+        tfld.ref().rename(vf.name());
         return tfld;
     }
     else
@@ -809,11 +809,11 @@ void ensightField
 {
     if (nodeValues)
     {
-        tmp<GeometricField<Type, pointPatchField, pointMesh> > pfld
+        tmp<GeometricField<Type, pointPatchField, pointMesh>> pfld
         (
             volPointInterpolation::New(vf.mesh()).interpolate(vf)
         );
-        pfld().rename(vf.name());
+        pfld.ref().rename(vf.name());
 
         ensightPointField<Type>
         (

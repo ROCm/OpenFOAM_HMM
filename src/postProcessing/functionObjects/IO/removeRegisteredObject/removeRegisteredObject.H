@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,8 +102,9 @@ protected:
             Switch log_;
 
 
-    // Private Member Functions
+private:
 
+    // Private member functions
 
         //- Disallow default bitwise copy construct
         removeRegisteredObject(const removeRegisteredObject&);

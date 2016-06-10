@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,9 +56,9 @@ inclinedFilmNusseltInletVelocityFvPatchVectorField
 :
     fixedValueFvPatchVectorField(ptf, p, iF, mapper),
     filmRegionName_(ptf.filmRegionName_),
-    GammaMean_(ptf.GammaMean_().clone().ptr()),
-    a_(ptf.a_().clone().ptr()),
-    omega_(ptf.omega_().clone().ptr())
+    GammaMean_(ptf.GammaMean_, false),
+    a_(ptf.a_, false),
+    omega_(ptf.omega_, false)
 {}
 
 
@@ -75,9 +75,9 @@ inclinedFilmNusseltInletVelocityFvPatchVectorField
     (
         dict.lookupOrDefault<word>("filmRegion", "surfaceFilmProperties")
     ),
-    GammaMean_(DataEntry<scalar>::New("GammaMean", dict)),
-    a_(DataEntry<scalar>::New("a", dict)),
-    omega_(DataEntry<scalar>::New("omega", dict))
+    GammaMean_(Function1<scalar>::New("GammaMean", dict)),
+    a_(Function1<scalar>::New("a", dict)),
+    omega_(Function1<scalar>::New("omega", dict))
 {
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
 }
@@ -91,9 +91,9 @@ inclinedFilmNusseltInletVelocityFvPatchVectorField
 :
     fixedValueFvPatchVectorField(fmfrpvf),
     filmRegionName_(fmfrpvf.filmRegionName_),
-    GammaMean_(fmfrpvf.GammaMean_().clone().ptr()),
-    a_(fmfrpvf.a_().clone().ptr()),
-    omega_(fmfrpvf.omega_().clone().ptr())
+    GammaMean_(fmfrpvf.GammaMean_, false),
+    a_(fmfrpvf.a_, false),
+    omega_(fmfrpvf.omega_, false)
 {}
 
 
@@ -106,9 +106,9 @@ inclinedFilmNusseltInletVelocityFvPatchVectorField
 :
     fixedValueFvPatchVectorField(fmfrpvf, iF),
     filmRegionName_(fmfrpvf.filmRegionName_),
-    GammaMean_(fmfrpvf.GammaMean_().clone().ptr()),
-    a_(fmfrpvf.a_().clone().ptr()),
-    omega_(fmfrpvf.omega_().clone().ptr())
+    GammaMean_(fmfrpvf.GammaMean_, false),
+    a_(fmfrpvf.a_, false),
+    omega_(fmfrpvf.omega_, false)
 {}
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -272,6 +272,8 @@ void writeDecomposition
     {
         procCells[cI] = decomp[cI];
     }
+
+    procCells.correctBoundaryConditions();
     procCells.write();
 }
 
@@ -575,7 +577,7 @@ void readField
     const IOobject& io,
     const fvMesh& mesh,
     const label i,
-    PtrList<GeometricField<Type, PatchField, GeoMesh> >& fields
+    PtrList<GeometricField<Type, PatchField, GeoMesh>>& fields
 )
 {
     fields.set
@@ -597,12 +599,12 @@ void readFields
     PtrList<GeoField>& fields
 )
 {
-    //typedef GeometricField<T, fvPatchField, Mesh> fldType;
-
     // Get my objects of type
     IOobjectList objects(allObjects.lookupClass(GeoField::typeName));
+
     // Check that we all have all objects
     wordList objectNames = objects.sortedNames();
+
     // Get master names
     wordList masterNames(objectNames);
     Pstream::scatter(masterNames);
@@ -827,11 +829,11 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     PtrList<surfaceSymmTensorField> surfSymmTensorFields;
     PtrList<surfaceTensorField> surfTensorFields;
 
-    PtrList<DimensionedField<scalar, volMesh> > dimScalarFields;
-    PtrList<DimensionedField<vector, volMesh> > dimVectorFields;
-    PtrList<DimensionedField<sphericalTensor, volMesh> > dimSphereTensorFields;
-    PtrList<DimensionedField<symmTensor, volMesh> > dimSymmTensorFields;
-    PtrList<DimensionedField<tensor, volMesh> > dimTensorFields;
+    PtrList<DimensionedField<scalar, volMesh>> dimScalarFields;
+    PtrList<DimensionedField<vector, volMesh>> dimVectorFields;
+    PtrList<DimensionedField<sphericalTensor, volMesh>> dimSphereTensorFields;
+    PtrList<DimensionedField<symmTensor, volMesh>> dimSymmTensorFields;
+    PtrList<DimensionedField<tensor, volMesh>> dimTensorFields;
 
 
     if (doReadFields)
@@ -1813,44 +1815,21 @@ void readLagrangian
         //Pout<< "Found clould objects:" << sprayObjs.names() << endl;
 
         parLagrangianRedistributor::readLagrangianFields
-        <IOField<label> >
+        <IOField<label>>
         (
             clouds[i],
             sprayObjs,
             selectedLagrangianFields
         );
         parLagrangianRedistributor::readLagrangianFields
-        <IOField<Field<label> > >
+        <IOField<Field<label>>>
         (
             clouds[i],
             sprayObjs,
             selectedLagrangianFields
         );
         parLagrangianRedistributor::readLagrangianFields
-        <CompactIOField<Field<label>, label> >
-        (
-            clouds[i],
-            sprayObjs,
-            selectedLagrangianFields
-        );
-
-
-        parLagrangianRedistributor::readLagrangianFields
-        <IOField<scalar> >
-        (
-            clouds[i],
-            sprayObjs,
-            selectedLagrangianFields
-        );
-        parLagrangianRedistributor::readLagrangianFields
-        <IOField<Field<scalar> > >
-        (
-            clouds[i],
-            sprayObjs,
-            selectedLagrangianFields
-        );
-        parLagrangianRedistributor::readLagrangianFields
-        <CompactIOField<Field<scalar>, scalar> >
+        <CompactIOField<Field<label>, label>>
         (
             clouds[i],
             sprayObjs,
@@ -1859,44 +1838,21 @@ void readLagrangian
 
 
         parLagrangianRedistributor::readLagrangianFields
-        <IOField<vector> >
+        <IOField<scalar>>
         (
             clouds[i],
             sprayObjs,
             selectedLagrangianFields
         );
         parLagrangianRedistributor::readLagrangianFields
-        <IOField<Field<vector> > >
+        <IOField<Field<scalar>>>
         (
             clouds[i],
             sprayObjs,
             selectedLagrangianFields
         );
         parLagrangianRedistributor::readLagrangianFields
-        <CompactIOField<Field<vector>, vector> >
-        (
-            clouds[i],
-            sprayObjs,
-            selectedLagrangianFields
-        );
-
-
-        parLagrangianRedistributor::readLagrangianFields
-        <IOField<sphericalTensor> >
-        (
-            clouds[i],
-            sprayObjs,
-            selectedLagrangianFields
-        );
-        parLagrangianRedistributor::readLagrangianFields
-        <IOField<Field<sphericalTensor> > >
-        (
-            clouds[i],
-            sprayObjs,
-            selectedLagrangianFields
-        );
-        parLagrangianRedistributor::readLagrangianFields
-        <CompactIOField<Field<sphericalTensor>, sphericalTensor> >
+        <CompactIOField<Field<scalar>, scalar>>
         (
             clouds[i],
             sprayObjs,
@@ -1905,21 +1861,21 @@ void readLagrangian
 
 
         parLagrangianRedistributor::readLagrangianFields
-        <IOField<symmTensor> >
+        <IOField<vector>>
         (
             clouds[i],
             sprayObjs,
             selectedLagrangianFields
         );
         parLagrangianRedistributor::readLagrangianFields
-        <IOField<Field<symmTensor> > >
+        <IOField<Field<vector>>>
         (
             clouds[i],
             sprayObjs,
             selectedLagrangianFields
         );
         parLagrangianRedistributor::readLagrangianFields
-        <CompactIOField<Field<symmTensor>, symmTensor> >
+        <CompactIOField<Field<vector>, vector>>
         (
             clouds[i],
             sprayObjs,
@@ -1928,21 +1884,67 @@ void readLagrangian
 
 
         parLagrangianRedistributor::readLagrangianFields
-        <IOField<tensor> >
+        <IOField<sphericalTensor>>
         (
             clouds[i],
             sprayObjs,
             selectedLagrangianFields
         );
         parLagrangianRedistributor::readLagrangianFields
-        <IOField<Field<tensor> > >
+        <IOField<Field<sphericalTensor>>>
         (
             clouds[i],
             sprayObjs,
             selectedLagrangianFields
         );
         parLagrangianRedistributor::readLagrangianFields
-        <CompactIOField<Field<tensor>, tensor> >
+        <CompactIOField<Field<sphericalTensor>, sphericalTensor>>
+        (
+            clouds[i],
+            sprayObjs,
+            selectedLagrangianFields
+        );
+
+
+        parLagrangianRedistributor::readLagrangianFields
+        <IOField<symmTensor>>
+        (
+            clouds[i],
+            sprayObjs,
+            selectedLagrangianFields
+        );
+        parLagrangianRedistributor::readLagrangianFields
+        <IOField<Field<symmTensor>>>
+        (
+            clouds[i],
+            sprayObjs,
+            selectedLagrangianFields
+        );
+        parLagrangianRedistributor::readLagrangianFields
+        <CompactIOField<Field<symmTensor>, symmTensor>>
+        (
+            clouds[i],
+            sprayObjs,
+            selectedLagrangianFields
+        );
+
+
+        parLagrangianRedistributor::readLagrangianFields
+        <IOField<tensor>>
+        (
+            clouds[i],
+            sprayObjs,
+            selectedLagrangianFields
+        );
+        parLagrangianRedistributor::readLagrangianFields
+        <IOField<Field<tensor>>>
+        (
+            clouds[i],
+            sprayObjs,
+            selectedLagrangianFields
+        );
+        parLagrangianRedistributor::readLagrangianFields
+        <CompactIOField<Field<tensor>, tensor>>
         (
             clouds[i],
             sprayObjs,
@@ -1985,39 +1987,19 @@ void redistributeLagrangian
             distributor.redistributeLagrangianPositions(clouds[i]);
 
             distributor.redistributeStoredLagrangianFields
-            <IOField<label> >
+            <IOField<label>>
             (
                 lagrangianMap,
                 clouds[i]
             );
             distributor.redistributeStoredLagrangianFields
-            <IOField<Field<label> > >
+            <IOField<Field<label>>>
             (
                 lagrangianMap,
                 clouds[i]
             );
             distributor.redistributeStoredLagrangianFields
-            <CompactIOField<Field<label>, label> >
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-
-
-            distributor.redistributeStoredLagrangianFields
-            <IOField<scalar> >
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-            distributor.redistributeStoredLagrangianFields
-            <IOField<Field<scalar> > >
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-            distributor.redistributeStoredLagrangianFields
-            <CompactIOField<Field<scalar>, scalar> >
+            <CompactIOField<Field<label>, label>>
             (
                 lagrangianMap,
                 clouds[i]
@@ -2025,39 +2007,19 @@ void redistributeLagrangian
 
 
             distributor.redistributeStoredLagrangianFields
-            <IOField<vector> >
+            <IOField<scalar>>
             (
                 lagrangianMap,
                 clouds[i]
             );
             distributor.redistributeStoredLagrangianFields
-            <IOField<Field<vector> > >
+            <IOField<Field<scalar>>>
             (
                 lagrangianMap,
                 clouds[i]
             );
             distributor.redistributeStoredLagrangianFields
-            <CompactIOField<Field<vector>, vector> >
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-
-
-            distributor.redistributeStoredLagrangianFields
-            <IOField<sphericalTensor> >
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-            distributor.redistributeStoredLagrangianFields
-            <IOField<Field<sphericalTensor> > >
-            (
-                lagrangianMap,
-                clouds[i]
-            );
-            distributor.redistributeStoredLagrangianFields
-            <CompactIOField<Field<sphericalTensor>, sphericalTensor> >
+            <CompactIOField<Field<scalar>, scalar>>
             (
                 lagrangianMap,
                 clouds[i]
@@ -2065,19 +2027,19 @@ void redistributeLagrangian
 
 
             distributor.redistributeStoredLagrangianFields
-            <IOField<symmTensor> >
+            <IOField<vector>>
             (
                 lagrangianMap,
                 clouds[i]
             );
             distributor.redistributeStoredLagrangianFields
-            <IOField<Field<symmTensor> > >
+            <IOField<Field<vector>>>
             (
                 lagrangianMap,
                 clouds[i]
             );
             distributor.redistributeStoredLagrangianFields
-            <CompactIOField<Field<symmTensor>, symmTensor> >
+            <CompactIOField<Field<vector>, vector>>
             (
                 lagrangianMap,
                 clouds[i]
@@ -2085,19 +2047,59 @@ void redistributeLagrangian
 
 
             distributor.redistributeStoredLagrangianFields
-            <IOField<tensor> >
+            <IOField<sphericalTensor>>
             (
                 lagrangianMap,
                 clouds[i]
             );
             distributor.redistributeStoredLagrangianFields
-            <IOField<Field<tensor> > >
+            <IOField<Field<sphericalTensor>>>
             (
                 lagrangianMap,
                 clouds[i]
             );
             distributor.redistributeStoredLagrangianFields
-            <CompactIOField<Field<tensor>, tensor> >
+            <CompactIOField<Field<sphericalTensor>, sphericalTensor>>
+            (
+                lagrangianMap,
+                clouds[i]
+            );
+
+
+            distributor.redistributeStoredLagrangianFields
+            <IOField<symmTensor>>
+            (
+                lagrangianMap,
+                clouds[i]
+            );
+            distributor.redistributeStoredLagrangianFields
+            <IOField<Field<symmTensor>>>
+            (
+                lagrangianMap,
+                clouds[i]
+            );
+            distributor.redistributeStoredLagrangianFields
+            <CompactIOField<Field<symmTensor>, symmTensor>>
+            (
+                lagrangianMap,
+                clouds[i]
+            );
+
+
+            distributor.redistributeStoredLagrangianFields
+            <IOField<tensor>>
+            (
+                lagrangianMap,
+                clouds[i]
+            );
+            distributor.redistributeStoredLagrangianFields
+            <IOField<Field<tensor>>>
+            (
+                lagrangianMap,
+                clouds[i]
+            );
+            distributor.redistributeStoredLagrangianFields
+            <CompactIOField<Field<tensor>, tensor>>
             (
                 lagrangianMap,
                 clouds[i]

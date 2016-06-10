@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,7 +66,7 @@ using namespace Foam;
 //    //    (note:without calculating pointNormals
 //    //     to avoid them being stored)
 //
-//    tmp<pointField> textrudeN(new pointField(p.nPoints(), vector::zero));
+//    tmp<pointField> textrudeN(new pointField(p.nPoints(), Zero));
 //    pointField& extrudeN = textrudeN();
 //    {
 //        const faceList& localFaces = p.localFaces();
@@ -85,7 +85,7 @@ using namespace Foam;
 //
 //
 //    // Collect local pointFaces
-//    List<List<point> > pointFaceNormals(map.constructSize());
+//    List<List<point>> pointFaceNormals(map.constructSize());
 //    {
 //        const vectorField& faceAreas = mesh.faceAreas();
 //
@@ -123,7 +123,7 @@ using namespace Foam;
 //        globalData.globalPointTransformedSlaves();
 //
 //
-//    pointField coupledPointNormals(map.constructSize(), vector::zero);
+//    pointField coupledPointNormals(map.constructSize(), Zero);
 //
 //    forAll(meshPoints, patchPointI)
 //    {

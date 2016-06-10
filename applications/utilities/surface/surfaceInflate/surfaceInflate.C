@@ -88,9 +88,9 @@ tmp<vectorField> calcVertexNormals(const triSurface& surf)
     // Weight = fA / (mag(e0)^2 * mag(e1)^2);
     tmp<vectorField> tpointNormals
     (
-        new pointField(surf.nPoints(), vector::zero)
+        new pointField(surf.nPoints(), Zero)
     );
-    vectorField& pointNormals = tpointNormals();
+    vectorField& pointNormals = tpointNormals.ref();
 
     const pointField& points = surf.points();
     const labelListList& pointFaces = surf.pointFaces();
@@ -134,7 +134,7 @@ tmp<vectorField> calcPointNormals
 {
     //const pointField pointNormals(s.pointNormals());
     tmp<vectorField> tpointNormals(calcVertexNormals(s));
-    vectorField& pointNormals = tpointNormals();
+    vectorField& pointNormals = tpointNormals.ref();
 
 
     // feature edges: create edge normals from edgeFaces only.
@@ -151,7 +151,7 @@ tmp<vectorField> calcPointNormals
                 {
                     if (!isFeaturePoint[e[i]])
                     {
-                        pointNormals[e[i]] = vector::zero;
+                        pointNormals[e[i]] = Zero;
                     }
                 }
             }
@@ -164,7 +164,7 @@ tmp<vectorField> calcPointNormals
                 const labelList& eFaces = edgeFaces[edgeI];
 
                 // Get average edge normal
-                vector n = vector::zero;
+                vector n = Zero;
                 forAll(eFaces, i)
                 {
                     n += s.faceNormals()[eFaces[i]];
@@ -356,7 +356,7 @@ tmp<scalarField> avg
 )
 {
     tmp<scalarField> tres(new scalarField(s.nPoints(), 0.0));
-    scalarField& res = tres();
+    scalarField& res = tres.ref();
 
     scalarField sumWeight(s.nPoints(), 0.0);
 
@@ -483,7 +483,7 @@ void lloydsSmoothing
             {
                 const labelList& pFaces = pointFaces[pointI];
 
-                point avg = point::zero;
+                point avg(Zero);
                 forAll(pFaces, pFaceI)
                 {
                     avg += faceCentres[pFaces[pFaceI]];
@@ -498,7 +498,7 @@ void lloydsSmoothing
 
         const pointField& points = s.points();
 
-        vectorField pointSum(s.nPoints(), vector::zero);
+        vectorField pointSum(s.nPoints(), Zero);
         labelList nPointSum(s.nPoints(), 0);
 
         forAll(edges, edgeI)

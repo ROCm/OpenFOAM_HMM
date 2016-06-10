@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::cyclicACMIPolyPatch::interpolate
+Foam::tmp<Foam::Field<Type>> Foam::cyclicACMIPolyPatch::interpolate
 (
     const Field<Type>& fldCouple,
     const Field<Type>& fldNonOverlap
@@ -39,7 +39,7 @@ Foam::tmp<Foam::Field<Type> > Foam::cyclicACMIPolyPatch::interpolate
     {
         const scalarField& w = AMI().srcWeightsSum();
 
-        tmp<Field<Type> > interpField(AMI().interpolateToSource(fldCouple));
+        tmp<Field<Type>> interpField(AMI().interpolateToSource(fldCouple));
 
         return interpField + (1.0 - w)*fldNonOverlap;
     }
@@ -47,7 +47,7 @@ Foam::tmp<Foam::Field<Type> > Foam::cyclicACMIPolyPatch::interpolate
     {
         const scalarField& w = neighbPatch().AMI().tgtWeightsSum();
 
-        tmp<Field<Type> > interpField
+        tmp<Field<Type>> interpField
         (
             neighbPatch().AMI().interpolateToTarget(fldCouple)
         );
@@ -58,10 +58,10 @@ Foam::tmp<Foam::Field<Type> > Foam::cyclicACMIPolyPatch::interpolate
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::cyclicACMIPolyPatch::interpolate
+Foam::tmp<Foam::Field<Type>> Foam::cyclicACMIPolyPatch::interpolate
 (
-    const tmp<Field<Type> >& tFldCouple,
-    const tmp<Field<Type> >& tFldNonOverlap
+    const tmp<Field<Type>>& tFldCouple,
+    const tmp<Field<Type>>& tFldNonOverlap
 ) const
 {
     return interpolate(tFldCouple(), tFldNonOverlap());

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,6 +47,8 @@ void Foam::ensightCaseEntry
     const label timeSet
 )
 {
+    const ensight::VarName varName(fieldName);
+
     caseFile.setf(ios_base::left);
 
     fileName dirName(dataMask);
@@ -68,9 +70,9 @@ void Foam::ensightCaseEntry
             << ensightType.c_str()
             << " per measured node: " << ts << " "
             << setw(15)
-            << ("c" + Foam::name(cloudNo) + fieldName).c_str()
+            << ("c" + Foam::name(cloudNo) + varName).c_str()
             << " "
-            << (dirName/fieldName).c_str()
+            << (dirName/varName).c_str()
             << nl;
     }
     else
@@ -78,9 +80,9 @@ void Foam::ensightCaseEntry
         caseFile
             << ensightType.c_str()
             << " per element: "
-            << setw(15) << fieldName
+            << setw(15) << varName
             << " "
-            << (dirName/fieldName).c_str()
+            << (dirName/varName).c_str()
             << nl;
     }
 }
@@ -97,16 +99,16 @@ void Foam::ensightParticlePositions
 {
     Cloud<passiveParticle> parcels(mesh, cloudName, false);
 
-    fileName cloudDir = subDir/cloud::prefix/cloudName;
-    fileName postFileName = cloudDir/"positions";
+    const fileName postFileName =
+        subDir/cloud::prefix/cloudName/"positions";
 
     // the ITER/lagrangian subdirectory must exist
-    mkDir(dataDir/cloudDir);
-    ensightFile os(dataDir/postFileName, format);
+    mkDir(dataDir/postFileName.path());
+    ensightFile os(dataDir, postFileName, format);
 
     // tag binary format (just like geometry files)
     os.writeBinaryHeader();
-    os.write(postFileName);
+    os.write(postFileName); // description
     os.newline();
     os.write("particle coordinates");
     os.newline();
@@ -161,14 +163,19 @@ void Foam::ensightLagrangianField
 {
     Info<< " " << fieldObject.name() << flush;
 
-    fileName cloudDir = subDir/cloud::prefix/cloudName;
-    fileName postFileName = cloudDir/fieldObject.name();
+    const fileName postFileName =
+        subDir/cloud::prefix/cloudName
+        /ensight::VarName(fieldObject.name());
 
-    string title =
-        postFileName + " with " + pTraits<Type>::typeName + " values";
+    // the ITER/lagrangian subdirectory was already created
+    // when writing positions
 
-    ensightFile os(dataDir/postFileName, format);
-    os.write(title);
+    ensightFile os(dataDir, postFileName, format);
+    os.write
+    (
+        // description
+        string(postFileName + " with " + pTraits<Type>::typeName + " values")
+    );
     os.newline();
 
     IOField<Type> field(fieldObject);
@@ -182,7 +189,7 @@ void Foam::ensightLagrangianField
 
         if (mag(val) < 1.0e-90)
         {
-            val = pTraits<Type>::zero;
+            val = Zero;
         }
 
         for (direction cmpt=0; cmpt < pTraits<Type>::nComponents; cmpt++)
@@ -206,7 +213,6 @@ void Foam::ensightLagrangianField
 }
 
 
-//- Write generalized field components
 template<class Type>
 void Foam::ensightVolField
 (
@@ -220,10 +226,10 @@ void Foam::ensightVolField
 {
     Info<< " " << fieldObject.name() << flush;
 
-    fileName postFileName = subDir/fieldObject.name();
+    const fileName postFileName = subDir/ensight::VarName(fieldObject.name());
 
-    ensightFile os(dataDir/postFileName, format);
-    os.write(postFileName);
+    ensightFile os(dataDir, postFileName, format);
+    os.write(postFileName); // description
     os.newline();
 
     // ie, volField<Type>

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,12 +47,12 @@ Description
     \endverbatim
 
 Note
-    The uniformValue entry is a DataEntry type, able to describe time
+    The uniformValue entry is a Function1 type, able to describe time
     varying functions.  The example above gives the usage for supplying a
     constant value.
 
 SeeAlso
-    Foam::DataEntry
+    Foam::Function1Types
     Foam::fixedValueFvPatchField
 
 SourceFiles
@@ -64,7 +64,7 @@ SourceFiles
 #define uniformFixedValueFvPatchField_H
 
 #include "fixedValueFvPatchFields.H"
-#include "DataEntry.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,7 +82,7 @@ class uniformFixedValueFvPatchField
 {
     // Private data
 
-        autoPtr<DataEntry<Type> > uniformValue_;
+        autoPtr<Function1<Type>> uniformValue_;
 
 
 public:
@@ -133,9 +133,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchField<Type> > clone() const
+        virtual tmp<fvPatchField<Type>> clone() const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchField<Type>>
             (
                 new uniformFixedValueFvPatchField<Type>(*this)
             );
@@ -149,12 +149,12 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchField<Type> > clone
+        virtual tmp<fvPatchField<Type>> clone
         (
             const DimensionedField<Type, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchField<Type>>
             (
                 new uniformFixedValueFvPatchField<Type>(*this, iF)
             );
@@ -178,7 +178,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "uniformFixedValueFvPatchField.C"
+    #include "uniformFixedValueFvPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

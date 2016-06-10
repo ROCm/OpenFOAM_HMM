@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,7 +41,7 @@ namespace fv
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
 template<class Type, class GType>
-tmp<laplacianScheme<Type, GType> > laplacianScheme<Type, GType>::New
+tmp<laplacianScheme<Type, GType>> laplacianScheme<Type, GType>::New
 (
     const fvMesh& mesh,
     Istream& schemeData
@@ -49,9 +49,7 @@ tmp<laplacianScheme<Type, GType> > laplacianScheme<Type, GType>::New
 {
     if (fv::debug)
     {
-        Info<< "laplacianScheme<Type, GType>::New(const fvMesh&, Istream&) : "
-               "constructing laplacianScheme<Type, GType>"
-            << endl;
+        InfoInFunction << "Constructing laplacianScheme<Type, GType>" << endl;
     }
 
     if (schemeData.eof())
@@ -95,7 +93,7 @@ laplacianScheme<Type, GType>::~laplacianScheme()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type, class GType>
-tmp<fvMatrix<Type> >
+tmp<fvMatrix<Type>>
 laplacianScheme<Type, GType>::fvmLaplacian
 (
     const GeometricField<GType, fvPatchField, volMesh>& gamma,
@@ -107,7 +105,7 @@ laplacianScheme<Type, GType>::fvmLaplacian
 
 
 template<class Type, class GType>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
+tmp<GeometricField<Type, fvPatchField, volMesh>>
 laplacianScheme<Type, GType>::fvcLaplacian
 (
     const GeometricField<GType, fvPatchField, volMesh>& gamma,

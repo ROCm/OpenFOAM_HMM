@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,23 +39,53 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define DefinePropertyList(str)                                               \
-                                                                              \
-    static string propertyList_;                                              \
-                                                                              \
-    static string propertyList()                                              \
-    {                                                                         \
-        return str;                                                           \
+//- Define a static 'propertyList' for particle properties
+//  The property list is space-delimited with brackets for vector groupings
+// \sa AddToPropertyList
+#define DefinePropertyList(str)                                                \
+                                                                               \
+    static string propertyList_;                                               \
+                                                                               \
+    static string propertyList()                                               \
+    {                                                                          \
+        return str;                                                            \
     }
 
 
-#define AddToPropertyList(ParcelType, str)                                    \
-                                                                              \
-    static string propertyList_;                                              \
-                                                                              \
-    static string propertyList()                                              \
-    {                                                                         \
-        return ParcelType::propertyList() + str;                              \
+//- Add to existing static 'propertyList' for particle properties
+//  The property list is space-delimited with brackets for vector groupings
+// \sa DefinePropertyList
+#define AddToPropertyList(ParcelType, str)                                     \
+                                                                               \
+    static string propertyList_;                                               \
+                                                                               \
+    static string propertyList()                                               \
+    {                                                                          \
+        return ParcelType::propertyList() + str;                               \
+    }
+
+
+//- Define a static 'propertyTypes' for the types of particle properties
+// \sa AddToPropertyTypes
+#define DefinePropertyTypes(str)                                               \
+                                                                               \
+    static string propertyTypes_;                                              \
+                                                                               \
+    static string propertyTypes()                                              \
+    {                                                                          \
+        return str;                                                            \
+    }
+
+
+//- Add to existing static 'propertyTypes' for the types of particle properties
+// \sa AddToPropertyTypes
+#define AddToPropertyTypes(ParcelType, str)                                    \
+                                                                               \
+    static string propertyTypes_;                                              \
+                                                                               \
+    static string propertyTypes()                                              \
+    {                                                                          \
+        return ParcelType::propertyTypes() + str;                              \
     }
 
 

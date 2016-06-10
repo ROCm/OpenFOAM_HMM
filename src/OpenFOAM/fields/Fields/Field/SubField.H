@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,6 +41,7 @@ SourceFiles
 
 #include "SubList.H"
 #include "Field.H"
+#include "VectorSpace.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +59,7 @@ template<class Type> class SubField;
 template<class Type>
 class SubField
 :
-    public refCount,
+    public tmp<SubField<Type>>::refCount,
     public SubList<Type>
 {
 
@@ -101,16 +102,23 @@ public:
         static inline const SubField<Type>& null();
 
         //- Return a component field of the field
-        inline tmp<Field<cmptType> > component(const direction) const;
+        inline tmp<Field<cmptType>> component(const direction) const;
 
         //- Return the field transpose (only defined for second rank tensors)
-        tmp<Field<Type> > T() const;
+        tmp<Field<Type>> T() const;
 
 
     // Member operators
 
         //- Assignment via UList operator. Takes linear time.
         inline void operator=(const SubField<Type>&);
+
+        //- Assignment via UList operator. Takes linear time.
+        inline void operator=(const Field<Type>&);
+
+        //- Assignment via UList operator. Takes linear time.
+        template<class Form, direction Ncmpts>
+        inline void operator=(const VectorSpace<Form, Type, Ncmpts>&);
 
         //- Allow cast to a const Field\<Type\>&
         inline operator const Field<Type>&() const;

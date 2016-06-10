@@ -1,10 +1,7 @@
-volScalarField rAU(1.0/UEqn().A());
-volScalarField rAtU(1.0/(1.0/rAU - UEqn().H1()));
-
-volVectorField HbyA("HbyA", U);
-HbyA = rAU*UEqn().H();
-
-UEqn.clear();
+volScalarField rAU(1.0/UEqn.A());
+volScalarField rAtU(1.0/(1.0/rAU - UEqn.H1()));
+volVectorField HbyA(constrainHbyA(rAU*UEqn.H(), U, p));
+tUEqn.clear();
 
 bool closedVolume = false;
 
@@ -14,7 +11,7 @@ if (simple.transonic())
     (
         "phid",
         fvc::interpolate(psi)
-       *(fvc::interpolate(HbyA) & mesh.Sf())
+       *fvc::flux(HbyA)
     );
 
     MRF.makeRelative(fvc::interpolate(psi), phid);
@@ -55,12 +52,7 @@ if (simple.transonic())
 }
 else
 {
-    surfaceScalarField phiHbyA
-    (
-        "phiHbyA",
-        fvc::interpolate(rho*HbyA) & mesh.Sf()
-    );
-
+    surfaceScalarField phiHbyA("phiHbyA", fvc::flux(rho*HbyA));
     MRF.makeRelative(fvc::interpolate(rho), phiHbyA);
 
     closedVolume = adjustPhi(phiHbyA, U, p);
@@ -69,6 +61,9 @@ else
     HbyA -= (rAU - rAtU)*fvc::grad(p);
 
     volScalarField rhorAtU("rhorAtU", rho*rAtU);
+
+    // Update the pressure BCs to ensure flux consistency
+    constrainPressure(p, rho, U, phiHbyA, rhorAtU, MRF);
 
     while (simple.correctNonOrthogonal())
     {

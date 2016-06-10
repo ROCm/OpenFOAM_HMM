@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ Description
     This boundary condition provides a jump condition, using the \c cyclic
     condition as a base.
 
-    The jump is specified as a \c DataEntry type, to enable the use of, e.g.
+    The jump is specified as a \c Function1 type, to enable the use of, e.g.
     contant, polynomial, table values.
 
     \heading Patch usage
@@ -70,7 +70,7 @@ Note
      The underlying \c patchType should be set to \c cyclic
 
 SeeAlso
-    Foam::DataEntry
+    Foam::Function1Types
 
 SourceFiles
     fanFvPatchField.C
@@ -84,7 +84,7 @@ SourceFiles
 #define fanFvPatchField_H
 
 #include "uniformJumpFvPatchField.H"
-#include "DataEntry.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -155,9 +155,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchField<Type> > clone() const
+        virtual tmp<fvPatchField<Type>> clone() const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchField<Type>>
             (
                 new fanFvPatchField<Type>(*this)
             );
@@ -171,12 +171,12 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchField<Type> > clone
+        virtual tmp<fvPatchField<Type>> clone
         (
             const DimensionedField<Type, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchField<Type>>
             (
                 new fanFvPatchField<Type>(*this, iF)
             );
@@ -187,6 +187,9 @@ public:
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
+
+        //- Write
+        virtual void write(Ostream&) const;
 };
 
 
@@ -210,7 +213,7 @@ fanFvPatchField<scalar>::fanFvPatchField
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "fanFvPatchField.C"
+    #include "fanFvPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

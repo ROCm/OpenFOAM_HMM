@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -238,7 +238,7 @@ public:
 
             //- Return the interface internal field of the given field
             template<class Type>
-            tmp<Field<Type> > interfaceInternalField
+            tmp<Field<Type>> interfaceInternalField
             (
                 const UList<Type>& internalData
             ) const;
@@ -287,7 +287,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "GAMGInterfaceTemplates.C"
+    #include "GAMGInterfaceTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,13 +69,11 @@ class DSMCParcel
 :
     public ParcelType
 {
-    // Private member data
-
-        //- Size in bytes of the fields
-        static const std::size_t sizeofFields_;
-
-
 public:
+
+    //- Size in bytes of the fields
+    static const std::size_t sizeofFields;
+
 
     //- Class to hold DSMC particle constant properties
     class constantProperties
@@ -130,16 +128,16 @@ public:
     //- Class used to pass kinematic tracking data to the trackToFace function
     class trackingData
     :
-        public particle::TrackingData<DSMCCloud<DSMCParcel<ParcelType> > >
+        public particle::TrackingData<DSMCCloud<DSMCParcel<ParcelType>>>
     {
     public:
 
         // Constructors
 
             //- Construct from components
-            trackingData(DSMCCloud<DSMCParcel<ParcelType> >& cloud)
+            trackingData(DSMCCloud<DSMCParcel<ParcelType>>& cloud)
             :
-                particle::TrackingData<DSMCCloud<DSMCParcel<ParcelType> > >
+                particle::TrackingData<DSMCCloud<DSMCParcel<ParcelType>>>
                 (
                     cloud
                 )
@@ -214,9 +212,9 @@ public:
                 mesh_(mesh)
             {}
 
-            autoPtr<DSMCParcel<ParcelType> > operator()(Istream& is) const
+            autoPtr<DSMCParcel<ParcelType>> operator()(Istream& is) const
             {
-                return autoPtr<DSMCParcel<ParcelType> >
+                return autoPtr<DSMCParcel<ParcelType>>
                 (
                     new DSMCParcel<ParcelType>(mesh_, is, true)
                 );
@@ -307,9 +305,9 @@ public:
 
         // I-O
 
-            static void readFields(Cloud<DSMCParcel<ParcelType> >& c);
+            static void readFields(Cloud<DSMCParcel<ParcelType>>& c);
 
-            static void writeFields(const Cloud<DSMCParcel<ParcelType> >& c);
+            static void writeFields(const Cloud<DSMCParcel<ParcelType>>& c);
 
 
     // Ostream Operator

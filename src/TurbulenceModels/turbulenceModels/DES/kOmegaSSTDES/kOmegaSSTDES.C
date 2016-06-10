@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,7 @@ template<class BasicTurbulenceModel>
 void kOmegaSSTDES<BasicTurbulenceModel>::correctNut(const volScalarField& S2)
 {
     // Correct the turbulence viscosity
-    kOmegaSSTBase<DESModel<BasicTurbulenceModel> >::correctNut(S2);
+    kOmegaSSTBase<DESModel<BasicTurbulenceModel>>::correctNut(S2);
 
     // Correct the turbulence thermal diffusivity
     BasicTurbulenceModel::correctNut();
@@ -81,7 +81,7 @@ kOmegaSSTDES<BasicTurbulenceModel>::kOmegaSSTDES
     const word& type
 )
 :
-    kOmegaSSTBase<DESModel<BasicTurbulenceModel> >
+    kOmegaSSTBase<DESModel<BasicTurbulenceModel>>
     (
         type,
         alpha,
@@ -135,7 +135,7 @@ kOmegaSSTDES<BasicTurbulenceModel>::kOmegaSSTDES
 template<class BasicTurbulenceModel>
 bool kOmegaSSTDES<BasicTurbulenceModel>::read()
 {
-    if (kOmegaSSTBase<DESModel<BasicTurbulenceModel> >::read())
+    if (kOmegaSSTBase<DESModel<BasicTurbulenceModel>>::read())
     {
         kappa_.readIfPresent(this->coeffDict());
         CDESkom_.readIfPresent(this->coeffDict());
@@ -206,9 +206,9 @@ void kOmegaSSTDES<BasicTurbulenceModel>::correct()
           + this->omegaSource()
         );
 
-        omegaEqn().relax();
+        omegaEqn.ref().relax();
 
-        omegaEqn().boundaryManipulate(omega.boundaryField());
+        omegaEqn.ref().boundaryManipulate(omega.boundaryField());
 
         solve(omegaEqn);
         bound(omega, this->omegaMin_);
@@ -231,7 +231,7 @@ void kOmegaSSTDES<BasicTurbulenceModel>::correct()
           + this->kSource()
         );
 
-        kEqn().relax();
+        kEqn.ref().relax();
         solve(kEqn);
         bound(k, this->kMin_);
     }

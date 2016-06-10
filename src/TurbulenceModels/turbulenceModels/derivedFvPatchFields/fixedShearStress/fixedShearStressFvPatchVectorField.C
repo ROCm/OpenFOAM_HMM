@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ Foam::fixedShearStressFvPatchVectorField::fixedShearStressFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    tau0_(vector::zero)
+    tau0_(Zero)
 {}
 
 
@@ -51,7 +51,7 @@ Foam::fixedShearStressFvPatchVectorField::fixedShearStressFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    tau0_(dict.lookupOrDefault<vector>("tau", vector::zero))
+    tau0_(dict.lookupOrDefault<vector>("tau", Zero))
 {
     fvPatchField<vector>::operator=(patchInternalField());
 }
@@ -117,7 +117,7 @@ void Foam::fixedShearStressFvPatchVectorField::updateCoeffs()
 
     const scalarField& ry = patch().deltaCoeffs();
 
-    operator==(tauHat*(tauHat & (tau0_*(1.0/(ry*nuEff())) + Uc)));
+    operator==(tauHat*(tauHat & (tau0_*(1.0/(ry*nuEff)) + Uc)));
 
     fixedValueFvPatchVectorField::updateCoeffs();
 }

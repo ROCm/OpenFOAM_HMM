@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,13 +67,11 @@ class ReactingParcel
 :
     public ParcelType
 {
-    // Private data
-
-        //- Size in bytes of the fields
-        static const std::size_t sizeofFields_;
-
-
 public:
+
+    //- Size in bytes of the fields
+    static const std::size_t sizeofFields;
+
 
     //- Class to hold reacting parcel constant properties
     class constantProperties
@@ -125,7 +123,7 @@ public:
             // Interpolators for continuous phase fields
 
                 //- Interpolator for continuous phase pressure field
-                autoPtr<interpolation<scalar> > pInterp_;
+                autoPtr<interpolation<scalar>> pInterp_;
 
 
     public:
@@ -221,6 +219,14 @@ public:
           + " nPhases(Y1..YN)"
         );
 
+        //- String representation of property types
+        AddToPropertyTypes
+        (
+            ParcelType,
+            " scalar"
+          + " List<scalar>"
+        );
+
 
     // Constructors
 
@@ -301,9 +307,9 @@ public:
                 mesh_(mesh)
             {}
 
-            autoPtr<ReactingParcel<ParcelType> > operator()(Istream& is) const
+            autoPtr<ReactingParcel<ParcelType>> operator()(Istream& is) const
             {
-                return autoPtr<ReactingParcel<ParcelType> >
+                return autoPtr<ReactingParcel<ParcelType>>
                 (
                     new ReactingParcel<ParcelType>(mesh_, is, true)
                 );

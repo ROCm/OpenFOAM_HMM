@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,11 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fv::boundaryRadiationProperties
+    Foam::radiation::boundaryRadiationProperties
 
 Description
     Boundary radiation properties holder
-
 
 SourceFiles
     boundaryRadiationProperties.C
@@ -37,8 +36,7 @@ SourceFiles
 #define boundaryRadiationProperties_H
 
 #include "MeshObject.H"
-#include "GeometricField.H"
-#include "volMesh.H"
+#include "boundaryRadiationPropertiesPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,7 +49,7 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class boundaryRadiationProperties Declaration
+                 Class boundaryRadiationProperties Declaration
 \*---------------------------------------------------------------------------*/
 
 class boundaryRadiationProperties
@@ -63,17 +61,11 @@ class boundaryRadiationProperties
         boundaryRadiationProperties
     >
 {
-
     // Private data
 
-        //- AutoPtr to volSacalarField properties
-        autoPtr<volScalarField> radBoundaryProperties_;
-
-
-    // Private member functions
-
-        //- Create IO object if dictionary is present
-        IOobject createIOobject(const fvMesh& mesh, const word) const;
+        //- Ptr list of boundaryRadiationProperties
+        List<autoPtr<boundaryRadiationPropertiesPatch> >
+            radBoundaryPropertiesPtrList_;
 
 
 public:
@@ -84,8 +76,8 @@ public:
 
     // Constructors
 
-        //- Construct given fvMesh and IOobject
-        boundaryRadiationProperties(const fvMesh&);
+        //- Construct given fvMesh
+        explicit boundaryRadiationProperties(const fvMesh&);
 
 
     // Member Functions
@@ -93,7 +85,7 @@ public:
         //- Access boundary emissivity on patch
         tmp<scalarField> emissivity
         (
-            const label patchId,
+            const label patchI,
             const label bandI = 0
         ) const;
 
@@ -101,7 +93,7 @@ public:
         //- Access boundary absorptivity on patch
         tmp<scalarField> absorptivity
         (
-            const label patchId,
+            const label patchI,
             const label bandI = 0
         ) const;
 
@@ -109,26 +101,22 @@ public:
         //- Access boundary transmissivity on patch
         tmp<scalarField> transmissivity
         (
-            const label patchId,
+            const label patchI,
             const label bandI = 0
         ) const;
 
         //- Access boundary reflectivity on patch
         tmp<scalarField> reflectivity
         (
-            const label patchId,
+            const label patchI,
             const label bandI = 0
         ) const;
 
 
-        //- Access to radBoundaryProperties
-        const volScalarField& radBoundaryProperties() const;
-
-
     //- Destructor
-    virtual ~boundaryRadiationProperties();
-
+    ~boundaryRadiationProperties();
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

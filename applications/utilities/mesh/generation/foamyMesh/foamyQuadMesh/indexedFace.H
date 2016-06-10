@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ namespace CGAL
                        Class indexedFace Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Gt, class Fb=CGAL::Triangulation_face_base_2<Gt> >
+template<class Gt, class Fb=CGAL::Triangulation_face_base_2<Gt>>
 class indexedFace
 :
     public Fb
@@ -70,7 +70,7 @@ public:
     typedef typename Fb::Vertex_handle                   Vertex_handle;
     typedef typename Fb::Face_handle                     Face_handle;
 
-    template<typename TDS2>
+    template<class TDS2>
     struct Rebind_TDS
     {
         typedef typename Fb::template Rebind_TDS<TDS2>::Other Fb2;

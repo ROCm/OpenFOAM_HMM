@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,15 +52,15 @@ inline void Foam::word::stripInvalid()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::word::word(const word& w)
-:
-    string(w)
-{}
-
-
 inline Foam::word::word()
 :
     string()
+{}
+
+
+inline Foam::word::word(const word& w)
+:
+    string(w)
 {}
 
 
@@ -95,6 +95,7 @@ inline Foam::word::word(const char* s, const bool doStripInvalid)
         stripInvalid();
     }
 }
+
 
 inline Foam::word::word
 (
@@ -131,34 +132,30 @@ inline bool Foam::word::valid(char c)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline const Foam::word& Foam::word::operator=(const word& q)
+inline void Foam::word::operator=(const word& q)
 {
     string::operator=(q);
-    return *this;
 }
 
 
-inline const Foam::word& Foam::word::operator=(const string& q)
+inline void Foam::word::operator=(const string& q)
 {
     string::operator=(q);
     stripInvalid();
-    return *this;
 }
 
 
-inline const Foam::word& Foam::word::operator=(const std::string& q)
+inline void Foam::word::operator=(const std::string& q)
 {
     string::operator=(q);
     stripInvalid();
-    return *this;
 }
 
 
-inline const Foam::word& Foam::word::operator=(const char* q)
+inline void Foam::word::operator=(const char* q)
 {
     string::operator=(q);
     stripInvalid();
-    return *this;
 }
 
 

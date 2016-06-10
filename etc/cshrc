@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -57,8 +57,8 @@ set foamInstall = $HOME/$WM_PROJECT
 if ( ! $?FOAM_INST_DIR ) setenv FOAM_INST_DIR $foamInstall
 
 #- Compiler location:
-#    foamCompiler = system | ThirdParty (OpenFOAM)
-setenv foamCompiler system
+#    WM_COMPILER_TYPE = system | ThirdParty (OpenFOAM)
+setenv WM_COMPILER_TYPE system
 
 #- Compiler:
 #    WM_COMPILER = Gcc | Gcc45 | Gcc46 | Gcc47 | Gcc48 | Gcc49 | Clang | Icc
@@ -202,14 +202,15 @@ if ( $status == 0 ) setenv MANPATH $cleaned
 
 # Source project setup files
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSource $WM_PROJECT_DIR/etc/config/settings.csh
-_foamSource $WM_PROJECT_DIR/etc/config/aliases.csh
+_foamSource $WM_PROJECT_DIR/etc/config.csh/settings
+_foamSource $WM_PROJECT_DIR/etc/config.csh/aliases
 
 # Source user setup files for optional packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/paraview.csh`
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/ensight.csh`
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/CGAL.csh`
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/mpi`
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/paraview`
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/ensight`
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/CGAL`
 
 
 # Clean environment paths again. Only remove duplicates
@@ -237,4 +238,4 @@ endif
 unset cleaned foamClean foamInstall foamOldDirs
 unalias _foamSource
 
-# ----------------------------------------------------------------- end-of-file
+#------------------------------------------------------------------------------

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -130,7 +130,7 @@ void subsetVolFields
     const label patchI,
     const Type& exposedValue,
     const word GeomVolType,
-    PtrList<GeometricField<Type, fvPatchField, volMesh> >& subFields
+    PtrList<GeometricField<Type, fvPatchField, volMesh>>& subFields
 )
 {
     const fvMesh& baseMesh = subsetter.baseMesh();
@@ -202,7 +202,7 @@ void subsetSurfaceFields
     const label patchI,
     const Type& exposedValue,
     const word GeomSurfType,
-    PtrList<GeometricField<Type, fvsPatchField, surfaceMesh> >& subFields
+    PtrList<GeometricField<Type, fvsPatchField, surfaceMesh>>& subFields
 )
 {
     const fvMesh& baseMesh = subsetter.baseMesh();
@@ -581,10 +581,10 @@ int main(int argc, char *argv[])
     );
 
     // Per faceSet the patch to put the baffles into
-    const List<Pair<word> > setsAndPatches(dict.lookup("blockedFaces"));
+    const List<Pair<word>> setsAndPatches(dict.lookup("blockedFaces"));
 
     // Per faceSet the patch to put the coupled baffles into
-    DynamicList<FixedList<word, 3> > coupledAndPatches(10);
+    DynamicList<FixedList<word, 3>> coupledAndPatches(10);
     const dictionary& functionDicts = dict.subDict("coupledFaces");
     forAllConstIter(dictionary, functionDicts, iter)
     {
@@ -782,7 +782,7 @@ int main(int argc, char *argv[])
         subsetter,
         objects,
         defaultPatchI,
-        pTraits<scalar>::zero,
+        scalar(Zero),
         volScalarField::typeName,
         scalarFlds
     );
@@ -794,7 +794,7 @@ int main(int argc, char *argv[])
         subsetter,
         objects,
         defaultPatchI,
-        pTraits<vector>::zero,
+        vector(Zero),
         volVectorField::typeName,
         vectorFlds
     );
@@ -812,7 +812,7 @@ int main(int argc, char *argv[])
         subsetter,
         objects,
         defaultPatchI,
-        pTraits<sphericalTensor>::zero,
+        sphericalTensor(Zero),
         volSphericalTensorField::typeName,
         sphericalTensorFlds
     );
@@ -824,7 +824,7 @@ int main(int argc, char *argv[])
         subsetter,
         objects,
         defaultPatchI,
-        pTraits<symmTensor>::zero,
+        symmTensor(Zero),
         volSymmTensorField::typeName,
         symmTensorFlds
     );
@@ -836,7 +836,7 @@ int main(int argc, char *argv[])
         subsetter,
         objects,
         defaultPatchI,
-        pTraits<tensor>::zero,
+        tensor(Zero),
         volTensorField::typeName,
         tensorFlds
     );
@@ -850,7 +850,7 @@ int main(int argc, char *argv[])
         subsetter,
         objects,
         defaultPatchI,
-        pTraits<scalar>::zero,
+        scalar(Zero),
         surfaceScalarField::typeName,
         surfScalarFlds
     );
@@ -862,7 +862,7 @@ int main(int argc, char *argv[])
         subsetter,
         objects,
         defaultPatchI,
-        pTraits<vector>::zero,
+        vector(Zero),
         surfaceVectorField::typeName,
         surfVectorFlds
     );
@@ -880,7 +880,7 @@ int main(int argc, char *argv[])
         subsetter,
         objects,
         defaultPatchI,
-        pTraits<sphericalTensor>::zero,
+        sphericalTensor(Zero),
         surfaceSphericalTensorField::typeName,
         surfSphericalTensorFlds
     );
@@ -900,7 +900,7 @@ int main(int argc, char *argv[])
         subsetter,
         objects,
         defaultPatchI,
-        pTraits<symmTensor>::zero,
+        symmTensor(Zero),
         surfaceSymmTensorField::typeName,
         surfSymmTensorFlds
     );
@@ -912,7 +912,7 @@ int main(int argc, char *argv[])
         subsetter,
         objects,
         defaultPatchI,
-        pTraits<tensor>::zero,
+        tensor(Zero),
         surfaceTensorField::typeName,
         surfTensorFlds
     );
@@ -1076,25 +1076,25 @@ int main(int argc, char *argv[])
     (
         subsetter.subMesh(),
         map,
-        vector::zero
+        Zero
     );
     initCreatedPatches<volSphericalTensorField>
     (
         subsetter.subMesh(),
         map,
-        sphericalTensor::zero
+        Zero
     );
     initCreatedPatches<volSymmTensorField>
     (
         subsetter.subMesh(),
         map,
-        symmTensor::zero
+        Zero
     );
     initCreatedPatches<volTensorField>
     (
         subsetter.subMesh(),
         map,
-        tensor::zero
+        Zero
     );
 
     initCreatedPatches<surfaceScalarField>
@@ -1107,25 +1107,25 @@ int main(int argc, char *argv[])
     (
         subsetter.subMesh(),
         map,
-        vector::zero
+        Zero
     );
     initCreatedPatches<surfaceSphericalTensorField>
     (
         subsetter.subMesh(),
         map,
-        sphericalTensor::zero
+        Zero
     );
     initCreatedPatches<surfaceSymmTensorField>
     (
         subsetter.subMesh(),
         map,
-        symmTensor::zero
+        Zero
     );
     initCreatedPatches<surfaceTensorField>
     (
         subsetter.subMesh(),
         map,
-        tensor::zero
+        Zero
     );
 
 

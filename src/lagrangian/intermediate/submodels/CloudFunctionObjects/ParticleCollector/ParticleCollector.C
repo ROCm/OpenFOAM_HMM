@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -108,7 +108,7 @@ void Foam::ParticleCollector<CloudType>::makeLogFile
 template<class CloudType>
 void Foam::ParticleCollector<CloudType>::initPolygons
 (
-    const List<Field<point> >& polygons
+    const List<Field<point>>& polygons
 )
 {
     mode_ = mtPolygon;
@@ -174,7 +174,7 @@ void Foam::ParticleCollector<CloudType>::initConcentricCircles()
         // set 4 quadrants for single sector cases
         nS = 4;
 
-        vector tangent = vector::zero;
+        vector tangent = Zero;
         scalar magTangent = 0.0;
 
         Random rnd(1234);
@@ -553,7 +553,7 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     word mode(this->coeffDict().lookup("mode"));
     if (mode == "polygon")
     {
-        List<Field<point> > polygons(this->coeffDict().lookup("polygons"));
+        List<Field<point>> polygons(this->coeffDict().lookup("polygons"));
 
         initPolygons(polygons);
 
@@ -562,12 +562,12 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     }
     else if (mode == "polygonWithNormal")
     {
-        List<Tuple2<Field<point>, vector> > polygonAndNormal
+        List<Tuple2<Field<point>, vector>> polygonAndNormal
         (
             this->coeffDict().lookup("polygons")
         );
 
-        List<Field<point> > polygons(polygonAndNormal.size());
+        List<Field<point>> polygons(polygonAndNormal.size());
         normal_.setSize(polygonAndNormal.size());
 
         forAll(polygons, polyI)

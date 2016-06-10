@@ -112,7 +112,7 @@ void Foam::pointMVCWeight::calcWeights
             u(j) = uVec[toLocal[f[j]]];
         }
 
-        vector v(point::zero);
+        vector v(Zero);
         forAll(f, j)
         {
             label jPlus1 = f.fcIndex(j);

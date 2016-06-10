@@ -74,13 +74,11 @@ Foam::point Foam::bezier::position(const scalar lambda) const
 
     forAll(working, workingI)
     {
-        -- nWorking;
+        --nWorking;
 
-        SubList<point>(working, nWorking).assign
-        (
+        SubList<point>(working, nWorking) =
             (1 - lambda)*SubList<point>(working, nWorking)
-          + lambda*SubList<point>(working, nWorking, 1)
-        );
+          + lambda*SubList<point>(working, nWorking, 1);
     }
 
     return working[0];

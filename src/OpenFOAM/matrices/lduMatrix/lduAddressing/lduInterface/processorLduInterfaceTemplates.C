@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -119,14 +119,14 @@ void Foam::processorLduInterface::receive
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::processorLduInterface::receive
+Foam::tmp<Foam::Field<Type>> Foam::processorLduInterface::receive
 (
     const Pstream::commsTypes commsType,
     const label size
 ) const
 {
-    tmp<Field<Type> > tf(new Field<Type>(size));
-    receive(commsType, tf());
+    tmp<Field<Type>> tf(new Field<Type>(size));
+    receive(commsType, tf.ref());
     return tf;
 }
 
@@ -261,14 +261,14 @@ void Foam::processorLduInterface::compressedReceive
 }
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::processorLduInterface::compressedReceive
+Foam::tmp<Foam::Field<Type>> Foam::processorLduInterface::compressedReceive
 (
     const Pstream::commsTypes commsType,
     const label size
 ) const
 {
-    tmp<Field<Type> > tf(new Field<Type>(size));
-    compressedReceive(commsType, tf());
+    tmp<Field<Type>> tf(new Field<Type>(size));
+    compressedReceive(commsType, tf.ref());
     return tf;
 }
 

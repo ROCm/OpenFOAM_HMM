@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -440,11 +440,11 @@ ostream& operator<<(ostream&, const InfoProxy<token>&);
 template<>
 Ostream& operator<<(Ostream& os, const InfoProxy<token>& ip);
 
-#define defineCompoundTypeName(Type, Name)                                    \
+#define defineCompoundTypeName(Type, Name)                                     \
     defineTemplateTypeNameAndDebugWithName(token::Compound<Type>, #Type, 0);
 
-#define addCompoundToRunTimeSelectionTable(Type, Name)                        \
-    token::compound::addIstreamConstructorToTable<token::Compound<Type> >     \
+#define addCompoundToRunTimeSelectionTable(Type, Name)                         \
+    token::compound::addIstreamConstructorToTable<token::Compound<Type>>       \
         add##Name##IstreamConstructorToTable_;
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -110,7 +110,7 @@ public:
         }
 
         //- Return the explicit correction to the face-interpolate
-        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         correction
         (
             const GeometricField<Type, fvPatchField, volMesh>& vf
@@ -148,37 +148,37 @@ public:
 // Add the patch constructor functions to the hash tables
 
 #define makeCentredFitSurfaceInterpolationTypeScheme\
-(                                                                             \
-    SS,                                                                       \
-    POLYNOMIAL,                                                               \
-    STENCIL,                                                                  \
-    TYPE                                                                      \
-)                                                                             \
-                                                                              \
-typedef CentredFitScheme<TYPE, POLYNOMIAL, STENCIL>                           \
-    CentredFitScheme##TYPE##POLYNOMIAL##STENCIL##_;                           \
-defineTemplateTypeNameAndDebugWithName                                        \
-    (CentredFitScheme##TYPE##POLYNOMIAL##STENCIL##_, #SS, 0);                 \
-                                                                              \
-surfaceInterpolationScheme<TYPE>::addMeshConstructorToTable                   \
-<CentredFitScheme<TYPE, POLYNOMIAL, STENCIL> >                                \
-    add##SS##STENCIL##TYPE##MeshConstructorToTable_;                          \
-                                                                              \
-surfaceInterpolationScheme<TYPE>::addMeshFluxConstructorToTable               \
-<CentredFitScheme<TYPE, POLYNOMIAL, STENCIL> >                                \
+(                                                                              \
+    SS,                                                                        \
+    POLYNOMIAL,                                                                \
+    STENCIL,                                                                   \
+    TYPE                                                                       \
+)                                                                              \
+                                                                               \
+typedef CentredFitScheme<TYPE, POLYNOMIAL, STENCIL>                            \
+    CentredFitScheme##TYPE##POLYNOMIAL##STENCIL##_;                            \
+defineTemplateTypeNameAndDebugWithName                                         \
+    (CentredFitScheme##TYPE##POLYNOMIAL##STENCIL##_, #SS, 0);                  \
+                                                                               \
+surfaceInterpolationScheme<TYPE>::addMeshConstructorToTable                    \
+<CentredFitScheme<TYPE, POLYNOMIAL, STENCIL>>                                  \
+    add##SS##STENCIL##TYPE##MeshConstructorToTable_;                           \
+                                                                               \
+surfaceInterpolationScheme<TYPE>::addMeshFluxConstructorToTable                \
+<CentredFitScheme<TYPE, POLYNOMIAL, STENCIL>>                                  \
     add##SS##STENCIL##TYPE##MeshFluxConstructorToTable_;
 
-#define makeCentredFitSurfaceInterpolationScheme(SS, POLYNOMIAL, STENCIL)     \
-                                                                              \
-makeCentredFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,scalar)    \
-makeCentredFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,vector)    \
-makeCentredFitSurfaceInterpolationTypeScheme                                  \
-(                                                                             \
-    SS,                                                                       \
-    POLYNOMIAL,                                                               \
-    STENCIL,                                                                  \
-    sphericalTensor                                                           \
-)                                                                             \
+#define makeCentredFitSurfaceInterpolationScheme(SS, POLYNOMIAL, STENCIL)      \
+                                                                               \
+makeCentredFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,scalar)     \
+makeCentredFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,vector)     \
+makeCentredFitSurfaceInterpolationTypeScheme                                   \
+(                                                                              \
+    SS,                                                                        \
+    POLYNOMIAL,                                                                \
+    STENCIL,                                                                   \
+    sphericalTensor                                                            \
+)                                                                              \
 makeCentredFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,symmTensor)\
 makeCentredFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,tensor)
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,18 @@ License
 
 #include "ensightGeoFile.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::ensightGeoFile::initialize()
+{
+    writeBinaryHeader();
+    write("Ensight Geometry File");  newline(); // description line 1
+    write("=====================");  newline(); // description line 2
+    write("node id assign");         newline();
+    write("element id assign");      newline();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::ensightGeoFile::ensightGeoFile
@@ -35,12 +47,22 @@ Foam::ensightGeoFile::ensightGeoFile
 :
     ensightFile(pathname, format)
 {
-    writeBinaryHeader();
-    write("Ensight Geometry File");  newline();
-    write("=====================");  newline();
-    write("node id assign");         newline();
-    write("element id assign");      newline();
+    initialize();
 }
+
+
+Foam::ensightGeoFile::ensightGeoFile
+(
+    const fileName& path,
+    const fileName& name,
+    IOstream::streamFormat format
+)
+:
+    ensightFile(path, name, format)
+{
+    initialize();
+}
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -52,8 +74,7 @@ Foam::ensightGeoFile::~ensightGeoFile()
 
 Foam::Ostream& Foam::ensightGeoFile::writeKeyword(const string& key)
 {
-    write(key);
-    newline();
+    write(key); newline();
 
     return *this;
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -470,7 +470,7 @@ public:
         LduMatrix(const LduMatrix<Type, DType, LUType>&);
 
         //- Construct as copy or re-use as specified.
-        LduMatrix(LduMatrix<Type, DType, LUType>&, bool reUse);
+        LduMatrix(LduMatrix<Type, DType, LUType>&, bool reuse);
 
         //- Construct given an LDU addressed mesh and an Istream
         //  from which the coefficients are read
@@ -595,10 +595,10 @@ public:
             void sumMagOffDiag(Field<LUType>& sumOff) const;
 
             //- Matrix multiplication
-            void Amul(Field<Type>&, const tmp<Field<Type> >&) const;
+            void Amul(Field<Type>&, const tmp<Field<Type>>&) const;
 
             //- Matrix transpose multiplication
-            void Tmul(Field<Type>&, const tmp<Field<Type> >&) const;
+            void Tmul(Field<Type>&, const tmp<Field<Type>>&) const;
 
 
             //- Sum the coefficients on each row of the matrix
@@ -607,7 +607,7 @@ public:
 
             void residual(Field<Type>& rA, const Field<Type>& psi) const;
 
-            tmp<Field<Type> > residual(const Field<Type>& psi) const;
+            tmp<Field<Type>> residual(const Field<Type>& psi) const;
 
 
             //- Initialise the update of interfaced interfaces
@@ -628,11 +628,11 @@ public:
             ) const;
 
 
-            tmp<Field<Type> > H(const Field<Type>&) const;
-            tmp<Field<Type> > H(const tmp<Field<Type> >&) const;
+            tmp<Field<Type>> H(const Field<Type>&) const;
+            tmp<Field<Type>> H(const tmp<Field<Type>>&) const;
 
-            tmp<Field<Type> > faceH(const Field<Type>&) const;
-            tmp<Field<Type> > faceH(const tmp<Field<Type> >&) const;
+            tmp<Field<Type>> faceH(const Field<Type>&) const;
+            tmp<Field<Type>> faceH(const tmp<Field<Type>>&) const;
 
 
     // Member operators
@@ -664,138 +664,138 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeLduMatrix(Type, DType, LUType)                                    \
-                                                                              \
-typedef Foam::LduMatrix<Type, DType, LUType>                                  \
-    ldu##Type##DType##LUType##Matrix;                                         \
-                                                                              \
-defineNamedTemplateTypeNameAndDebug(ldu##Type##DType##LUType##Matrix, 0);     \
-                                                                              \
-                                                                              \
-typedef LduMatrix<Type, DType, LUType>::smoother                              \
-    ldu##Type##DType##LUType##Smoother;                                       \
-                                                                              \
-defineTemplateRunTimeSelectionTable                                           \
-(                                                                             \
-    ldu##Type##DType##LUType##Smoother,                                       \
-    symMatrix                                                                 \
-);                                                                            \
-                                                                              \
-defineTemplateRunTimeSelectionTable                                           \
-(                                                                             \
-    ldu##Type##DType##LUType##Smoother,                                       \
-    asymMatrix                                                                \
-);                                                                            \
-                                                                              \
-                                                                              \
-typedef LduMatrix<Type, DType, LUType>::preconditioner                        \
-    ldu##Type##DType##LUType##Preconditioner;                                 \
-                                                                              \
-defineTemplateRunTimeSelectionTable                                           \
-(                                                                             \
-    ldu##Type##DType##LUType##Preconditioner,                                 \
-    symMatrix                                                                 \
-);                                                                            \
-                                                                              \
-defineTemplateRunTimeSelectionTable                                           \
-(                                                                             \
-    ldu##Type##DType##LUType##Preconditioner,                                 \
-    asymMatrix                                                                \
-);                                                                            \
-                                                                              \
-                                                                              \
-typedef LduMatrix<Type, DType, LUType>::solver                                \
-    ldu##Type##DType##LUType##Solver;                                         \
-                                                                              \
-defineTemplateRunTimeSelectionTable                                           \
-(                                                                             \
-    ldu##Type##DType##LUType##Solver,                                         \
-    symMatrix                                                                 \
-);                                                                            \
-                                                                              \
-defineTemplateRunTimeSelectionTable                                           \
-(                                                                             \
-    ldu##Type##DType##LUType##Solver,                                         \
-    asymMatrix                                                                \
+#define makeLduMatrix(Type, DType, LUType)                                     \
+                                                                               \
+typedef Foam::LduMatrix<Type, DType, LUType>                                   \
+    ldu##Type##DType##LUType##Matrix;                                          \
+                                                                               \
+defineNamedTemplateTypeNameAndDebug(ldu##Type##DType##LUType##Matrix, 0);      \
+                                                                               \
+                                                                               \
+typedef LduMatrix<Type, DType, LUType>::smoother                               \
+    ldu##Type##DType##LUType##Smoother;                                        \
+                                                                               \
+defineTemplateRunTimeSelectionTable                                            \
+(                                                                              \
+    ldu##Type##DType##LUType##Smoother,                                        \
+    symMatrix                                                                  \
+);                                                                             \
+                                                                               \
+defineTemplateRunTimeSelectionTable                                            \
+(                                                                              \
+    ldu##Type##DType##LUType##Smoother,                                        \
+    asymMatrix                                                                 \
+);                                                                             \
+                                                                               \
+                                                                               \
+typedef LduMatrix<Type, DType, LUType>::preconditioner                         \
+    ldu##Type##DType##LUType##Preconditioner;                                  \
+                                                                               \
+defineTemplateRunTimeSelectionTable                                            \
+(                                                                              \
+    ldu##Type##DType##LUType##Preconditioner,                                  \
+    symMatrix                                                                  \
+);                                                                             \
+                                                                               \
+defineTemplateRunTimeSelectionTable                                            \
+(                                                                              \
+    ldu##Type##DType##LUType##Preconditioner,                                  \
+    asymMatrix                                                                 \
+);                                                                             \
+                                                                               \
+                                                                               \
+typedef LduMatrix<Type, DType, LUType>::solver                                 \
+    ldu##Type##DType##LUType##Solver;                                          \
+                                                                               \
+defineTemplateRunTimeSelectionTable                                            \
+(                                                                              \
+    ldu##Type##DType##LUType##Solver,                                          \
+    symMatrix                                                                  \
+);                                                                             \
+                                                                               \
+defineTemplateRunTimeSelectionTable                                            \
+(                                                                              \
+    ldu##Type##DType##LUType##Solver,                                          \
+    asymMatrix                                                                 \
 );
 
 
-#define makeLduPreconditioner(Precon, Type, DType, LUType)                    \
-                                                                              \
-typedef Precon<Type, DType, LUType>                                           \
-    Precon##Type##DType##LUType##Preconditioner;                              \
-defineNamedTemplateTypeNameAndDebug                                           \
-(                                                                             \
-    Precon##Type##DType##LUType##Preconditioner,                              \
-    0                                                                         \
+#define makeLduPreconditioner(Precon, Type, DType, LUType)                     \
+                                                                               \
+typedef Precon<Type, DType, LUType>                                            \
+    Precon##Type##DType##LUType##Preconditioner;                               \
+defineNamedTemplateTypeNameAndDebug                                            \
+(                                                                              \
+    Precon##Type##DType##LUType##Preconditioner,                               \
+    0                                                                          \
 );
 
-#define makeLduSymPreconditioner(Precon, Type, DType, LUType)                 \
-                                                                              \
-LduMatrix<Type, DType, LUType>::preconditioner::                              \
-addsymMatrixConstructorToTable<Precon##Type##DType##LUType##Preconditioner>   \
+#define makeLduSymPreconditioner(Precon, Type, DType, LUType)                  \
+                                                                               \
+LduMatrix<Type, DType, LUType>::preconditioner::                               \
+addsymMatrixConstructorToTable<Precon##Type##DType##LUType##Preconditioner>    \
 add##Precon##Type##DType##LUType##PreconditionerSymMatrixConstructorToTable_;
 
-#define makeLduAsymPreconditioner(Precon, Type, DType, LUType)                \
-                                                                              \
-LduMatrix<Type, DType, LUType>::preconditioner::                              \
-addasymMatrixConstructorToTable<Precon##Type##DType##LUType##Preconditioner>  \
+#define makeLduAsymPreconditioner(Precon, Type, DType, LUType)                 \
+                                                                               \
+LduMatrix<Type, DType, LUType>::preconditioner::                               \
+addasymMatrixConstructorToTable<Precon##Type##DType##LUType##Preconditioner>   \
 add##Precon##Type##DType##LUType##PreconditionerAsymMatrixConstructorToTable_;
 
 
-#define makeLduSmoother(Smoother, Type, DType, LUType)                        \
-                                                                              \
-typedef Smoother<Type, DType, LUType>                                         \
-    Smoother##Type##DType##LUType##Smoother;                                  \
-                                                                              \
-defineNamedTemplateTypeNameAndDebug                                           \
-(                                                                             \
-    Smoother##Type##DType##LUType##Smoother,                                  \
-    0                                                                         \
+#define makeLduSmoother(Smoother, Type, DType, LUType)                         \
+                                                                               \
+typedef Smoother<Type, DType, LUType>                                          \
+    Smoother##Type##DType##LUType##Smoother;                                   \
+                                                                               \
+defineNamedTemplateTypeNameAndDebug                                            \
+(                                                                              \
+    Smoother##Type##DType##LUType##Smoother,                                   \
+    0                                                                          \
 );
 
-#define makeLduSymSmoother(Smoother, Type, DType, LUType)                     \
-                                                                              \
-LduMatrix<Type, DType, LUType>::smoother::                                    \
-    addsymMatrixConstructorToTable<Smoother##Type##DType##LUType##Smoother>   \
+#define makeLduSymSmoother(Smoother, Type, DType, LUType)                      \
+                                                                               \
+LduMatrix<Type, DType, LUType>::smoother::                                     \
+    addsymMatrixConstructorToTable<Smoother##Type##DType##LUType##Smoother>    \
     add##Smoother##Type##DType##LUType##SymMatrixConstructorToTable_;
 
-#define makeLduAsymSmoother(Smoother, Type, DType, LUType)                    \
-                                                                              \
-LduMatrix<Type, DType, LUType>::smoother::                                    \
-    addasymMatrixConstructorToTable<Smoother##Type##DType##LUType##Smoother>  \
+#define makeLduAsymSmoother(Smoother, Type, DType, LUType)                     \
+                                                                               \
+LduMatrix<Type, DType, LUType>::smoother::                                     \
+    addasymMatrixConstructorToTable<Smoother##Type##DType##LUType##Smoother>   \
     add##Smoother##Type##DType##LUType##AsymMatrixConstructorToTable_;
 
 
-#define makeLduSolver(Solver, Type, DType, LUType)                            \
-                                                                              \
-typedef Solver<Type, DType, LUType>                                           \
-    Solver##Type##DType##LUType##Solver;                                      \
-                                                                              \
-defineNamedTemplateTypeNameAndDebug                                           \
-(                                                                             \
-    Solver##Type##DType##LUType##Solver,                                      \
-    0                                                                         \
+#define makeLduSolver(Solver, Type, DType, LUType)                             \
+                                                                               \
+typedef Solver<Type, DType, LUType>                                            \
+    Solver##Type##DType##LUType##Solver;                                       \
+                                                                               \
+defineNamedTemplateTypeNameAndDebug                                            \
+(                                                                              \
+    Solver##Type##DType##LUType##Solver,                                       \
+    0                                                                          \
 );
 
-#define makeLduSymSolver(Solver, Type, DType, LUType)                         \
-                                                                              \
-LduMatrix<Type, DType, LUType>::solver::                                      \
-    addsymMatrixConstructorToTable<Solver##Type##DType##LUType##Solver>       \
+#define makeLduSymSolver(Solver, Type, DType, LUType)                          \
+                                                                               \
+LduMatrix<Type, DType, LUType>::solver::                                       \
+    addsymMatrixConstructorToTable<Solver##Type##DType##LUType##Solver>        \
     add##Solver##Type##DType##LUType##SymMatrixConstructorToTable_;
 
-#define makeLduAsymSolver(Solver, Type, DType, LUType)                        \
-                                                                              \
-LduMatrix<Type, DType, LUType>::solver::                                      \
-    addasymMatrixConstructorToTable<Solver##Type##DType##LUType##Solver>      \
+#define makeLduAsymSolver(Solver, Type, DType, LUType)                         \
+                                                                               \
+LduMatrix<Type, DType, LUType>::solver::                                       \
+    addasymMatrixConstructorToTable<Solver##Type##DType##LUType##Solver>       \
     add##Solver##Type##DType##LUType##AsymMatrixConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "LduMatrixI.H"
-#   include "LduMatrix.C"
+    #include "LduMatrixI.H"
+    #include "LduMatrix.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

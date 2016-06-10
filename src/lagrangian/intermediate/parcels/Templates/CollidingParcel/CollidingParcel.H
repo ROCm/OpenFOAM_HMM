@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,13 +72,11 @@ class CollidingParcel
 :
     public ParcelType
 {
-    // Private member data
-
-        //- Size in bytes of the fields
-        static const std::size_t sizeofFields_;
-
-
 public:
+
+    //- Size in bytes of the fields
+    static const std::size_t sizeofFields;
+
 
     //- Class to hold thermo particle constant properties
     class constantProperties
@@ -160,6 +158,14 @@ public:
           + " (collisionRecordsWallData)"
         );
 
+        //- String representation of property types
+        static string propertyTypes()
+        {
+            // TODO: collision information types
+            NotImplemented;
+            return string::null;
+        }
+
 
     // Constructors
 
@@ -232,9 +238,9 @@ public:
                 mesh_(mesh)
             {}
 
-            autoPtr<CollidingParcel<ParcelType> > operator()(Istream& is) const
+            autoPtr<CollidingParcel<ParcelType>> operator()(Istream& is) const
             {
-                return autoPtr<CollidingParcel<ParcelType> >
+                return autoPtr<CollidingParcel<ParcelType>>
                 (
                     new CollidingParcel<ParcelType>(mesh_, is, true)
                 );

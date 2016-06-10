@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,6 +50,11 @@ class vtkSurfaceWriter
 :
     public surfaceWriter
 {
+    // Private data
+
+        const unsigned int writePrecision_;
+
+
     // Private Member Functions
 
         static void writeGeometry(Ostream&, const pointField&, const faceList&);
@@ -83,6 +88,9 @@ public:
 
         //- Construct null
         vtkSurfaceWriter();
+
+        //- Construct with some output options
+        vtkSurfaceWriter(const dictionary& options);
 
 
     //- Destructor

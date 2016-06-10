@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -137,7 +137,7 @@ Foam::dimensioned<Type>::dimensioned
 :
     name_(name),
     dimensions_(dimSet),
-    value_(pTraits<Type>::zero)
+    value_(Zero)
 {
     initialize(is);
 }
@@ -153,7 +153,7 @@ Foam::dimensioned<Type>::dimensioned
 :
     name_(name),
     dimensions_(dimSet),
-    value_(pTraits<Type>::zero)
+    value_(Zero)
 {
     initialize(dict.lookup(name));
 }
@@ -165,7 +165,7 @@ Foam::dimensioned<Type>::dimensioned
 :
     name_("undefined"),
     dimensions_(dimless),
-    value_(pTraits<Type>::zero)
+    value_(Zero)
 {}
 
 
@@ -447,7 +447,7 @@ void Foam::dimensioned<Type>::operator/=
 
 // * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
 
-template<class Type, int r>
+template<class Type, Foam::direction r>
 Foam::dimensioned<typename Foam::powProduct<Type, r>::type>
 Foam::pow(const dimensioned<Type>& dt, typename powProduct<Type, r>::type)
 {
@@ -729,57 +729,54 @@ Foam::dimensioned<Type> Foam::operator/
 }
 
 
-// Products
-// ~~~~~~~~
-
-#define PRODUCT_OPERATOR(product, op, opFunc)                                 \
-                                                                              \
-template<class Type1, class Type2>                                            \
-Foam::dimensioned<typename Foam::product<Type1, Type2>::type>                 \
-Foam::operator op                                                             \
-(                                                                             \
-    const dimensioned<Type1>& dt1,                                            \
-    const dimensioned<Type2>& dt2                                             \
-)                                                                             \
-{                                                                             \
-    return dimensioned<typename product<Type1, Type2>::type>                  \
-    (                                                                         \
-        '(' + dt1.name() + #op + dt2.name() + ')',                            \
-        dt1.dimensions() op dt2.dimensions(),                                 \
-        dt1.value() op dt2.value()                                            \
-    );                                                                        \
-}                                                                             \
-                                                                              \
-template<class Type, class Form, class Cmpt, int nCmpt>                       \
-Foam::dimensioned<typename Foam::product<Type, Form>::type>                   \
-Foam::operator op                                                             \
-(                                                                             \
-    const dimensioned<Type>& dt1,                                             \
-    const VectorSpace<Form,Cmpt,nCmpt>& t2                                    \
-)                                                                             \
-{                                                                             \
-    return dimensioned<typename product<Type, Form>::type>                    \
-    (                                                                         \
-        '(' + dt1.name() + #op + name(t2) + ')',                              \
-        dt1.dimensions(),                                                     \
-        dt1.value() op static_cast<const Form&>(t2)                           \
-    );                                                                        \
-}                                                                             \
-                                                                              \
-template<class Type, class Form, class Cmpt, int nCmpt>                       \
-Foam::dimensioned<typename Foam::product<Form, Type>::type>                   \
-Foam::operator op                                                             \
-(                                                                             \
-    const VectorSpace<Form,Cmpt,nCmpt>& t1,                                   \
-    const dimensioned<Type>& dt2                                              \
-)                                                                             \
-{                                                                             \
-    return dimensioned<typename product<Form, Type>::type>                    \
-    (                                                                         \
-        '(' + name(t1) + #op + dt2.name() + ')',                              \
-        dt2.dimensions(),                                                     \
-        static_cast<const Form&>(t1) op dt2.value()                           \
-    );                                                                        \
+#define PRODUCT_OPERATOR(product, op, opFunc)                                  \
+                                                                               \
+template<class Type1, class Type2>                                             \
+Foam::dimensioned<typename Foam::product<Type1, Type2>::type>                  \
+Foam::operator op                                                              \
+(                                                                              \
+    const dimensioned<Type1>& dt1,                                             \
+    const dimensioned<Type2>& dt2                                              \
+)                                                                              \
+{                                                                              \
+    return dimensioned<typename product<Type1, Type2>::type>                   \
+    (                                                                          \
+        '(' + dt1.name() + #op + dt2.name() + ')',                             \
+        dt1.dimensions() op dt2.dimensions(),                                  \
+        dt1.value() op dt2.value()                                             \
+    );                                                                         \
+}                                                                              \
+                                                                               \
+template<class Type, class Form, class Cmpt, Foam::direction nCmpt>            \
+Foam::dimensioned<typename Foam::product<Type, Form>::type>                    \
+Foam::operator op                                                              \
+(                                                                              \
+    const dimensioned<Type>& dt1,                                              \
+    const VectorSpace<Form,Cmpt,nCmpt>& t2                                     \
+)                                                                              \
+{                                                                              \
+    return dimensioned<typename product<Type, Form>::type>                     \
+    (                                                                          \
+        '(' + dt1.name() + #op + name(t2) + ')',                               \
+        dt1.dimensions(),                                                      \
+        dt1.value() op static_cast<const Form&>(t2)                            \
+    );                                                                         \
+}                                                                              \
+                                                                               \
+template<class Type, class Form, class Cmpt, Foam::direction nCmpt>            \
+Foam::dimensioned<typename Foam::product<Form, Type>::type>                    \
+Foam::operator op                                                              \
+(                                                                              \
+    const VectorSpace<Form,Cmpt,nCmpt>& t1,                                    \
+    const dimensioned<Type>& dt2                                               \
+)                                                                              \
+{                                                                              \
+    return dimensioned<typename product<Form, Type>::type>                     \
+    (                                                                          \
+        '(' + name(t1) + #op + dt2.name() + ')',                               \
+        dt2.dimensions(),                                                      \
+        static_cast<const Form&>(t1) op dt2.value()                            \
+    );                                                                         \
 }
 
 

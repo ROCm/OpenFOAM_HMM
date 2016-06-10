@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::SprayParcel
 
 Description
-    Reacing spray parcel, with added functionality for atomization and breakup
+    Reacting spray parcel, with added functionality for atomization and breakup
 
 \*---------------------------------------------------------------------------*/
 
@@ -59,12 +59,6 @@ class SprayParcel
 :
     public ParcelType
 {
-    // Private data
-
-        //- Size in bytes of the fields
-        static const std::size_t sizeofFields_;
-
-
 public:
 
     //- Class to hold reacting particle constant properties
@@ -178,6 +172,9 @@ public:
 
     // Static data members
 
+        //- Size in bytes of the fields
+        static const std::size_t sizeofFields;
+
         //- Runtime type information
         TypeName("SprayParcel");
 
@@ -185,7 +182,7 @@ public:
         AddToPropertyList
         (
             ParcelType,
-          + " d0"
+            " d0"
           + " position0"
           + " sigma"
           + " mu"
@@ -198,6 +195,25 @@ public:
           + " injector"
           + " tMom"
           + " user"
+        );
+
+        //- String representation of property types
+        AddToPropertyTypes
+        (
+            ParcelType,
+            " scalar"
+          + " vector"
+          + " scalar"
+          + " scalar"
+          + " scalar"
+          + " scalar"
+          + " scalar"
+          + " scalar"
+          + " scalar"
+          + " scalar"
+          + " scalar"
+          + " scalar"
+          + " scalar"
         );
 
 
@@ -289,9 +305,9 @@ public:
                 mesh_(mesh)
             {}
 
-            autoPtr<SprayParcel<ParcelType> > operator()(Istream& is) const
+            autoPtr<SprayParcel<ParcelType>> operator()(Istream& is) const
             {
-                return autoPtr<SprayParcel<ParcelType> >
+                return autoPtr<SprayParcel<ParcelType>>
                 (
                     new SprayParcel<ParcelType>(mesh_, is, true)
                 );

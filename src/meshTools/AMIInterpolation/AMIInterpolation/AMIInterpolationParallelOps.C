@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,7 +61,7 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcDistribution
             procI = -1;
             if (debug)
             {
-                Info<< "AMIInterpolation::calcDistribution: "
+                InfoInFunction
                     << "AMI split across multiple processors" << endl;
             }
         }
@@ -70,7 +70,7 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcDistribution
             procI = findIndex(facesPresentOnProc, 1);
             if (debug)
             {
-                Info<< "AMIInterpolation::calcDistribution: "
+                InfoInFunction
                     << "AMI local to processor" << procI << endl;
             }
         }
@@ -248,7 +248,7 @@ distributeAndMergePatches
     // My own data first
     {
         const labelList& faceIDs = allTgtFaceIDs[Pstream::myProcNo()];
-        SubList<label>(tgtFaceIDs, faceIDs.size()).assign(faceIDs);
+        SubList<label>(tgtFaceIDs, faceIDs.size()) = faceIDs;
 
         const faceList& fcs = allFaces[Pstream::myProcNo()];
         forAll(fcs, i)
@@ -276,7 +276,7 @@ distributeAndMergePatches
         if (procI != Pstream::myProcNo())
         {
             const labelList& faceIDs = allTgtFaceIDs[procI];
-            SubList<label>(tgtFaceIDs, faceIDs.size(), nFaces).assign(faceIDs);
+            SubList<label>(tgtFaceIDs, faceIDs.size(), nFaces) = faceIDs;
 
             const faceList& fcs = allFaces[procI];
             forAll(fcs, i)
@@ -374,7 +374,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcProcMap
 
     {
         // Per processor indices into all segments to send
-        List<DynamicList<label> > dynSendMap(Pstream::nProcs());
+        List<DynamicList<label>> dynSendMap(Pstream::nProcs());
 
         // Work array - whether processor bb overlaps the face bounds
         boolList procBbOverlaps(Pstream::nProcs());

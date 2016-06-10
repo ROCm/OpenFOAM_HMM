@@ -94,7 +94,7 @@ private:
             List<wordList> fieldTypes_;
 
             //- Field dimensions
-            List<PtrList<dimensionSet> > fieldDimensions_;
+            List<PtrList<dimensionSet>> fieldDimensions_;
 
 
     // Public member functions

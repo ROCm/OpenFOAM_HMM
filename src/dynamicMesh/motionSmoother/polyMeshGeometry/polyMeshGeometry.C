@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -65,9 +65,9 @@ void Foam::polyMeshGeometry::updateFaceCentresAndAreas
         }
         else
         {
-            vector sumN = vector::zero;
+            vector sumN = Zero;
             scalar sumA = 0.0;
-            vector sumAc = vector::zero;
+            vector sumAc = Zero;
 
             point fCentre = p[f[0]];
             for (label pi = 1; pi < nPoints; pi++)
@@ -107,7 +107,7 @@ void Foam::polyMeshGeometry::updateCellCentresAndVols
     const cellList& cells = mesh().cells();
 
     // Clear the fields for accumulation
-    UIndirectList<vector>(cellCentres_, changedCells) = vector::zero;
+    UIndirectList<vector>(cellCentres_, changedCells) = Zero;
     UIndirectList<scalar>(cellVolumes_, changedCells) = 0.0;
 
 
@@ -115,12 +115,10 @@ void Foam::polyMeshGeometry::updateCellCentresAndVols
     forAll(changedCells, changedCellI)
     {
         const label cellI(changedCells[changedCellI]);
-
         const labelList& cFaces(cells[cellI]);
 
-
         // Estimate the cell centre and bounding box using the face centres
-        vector cEst = vector::zero;
+        vector cEst(Zero);
         boundBox bb(boundBox::invertedBox);
 
         forAll(cFaces, cFaceI)
@@ -343,7 +341,6 @@ Foam::polyMeshGeometry::polyMeshGeometry(const polyMesh& mesh)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Take over properties from mesh
 void Foam::polyMeshGeometry::correct()
 {
     faceAreas_ = mesh_.faceAreas();
@@ -353,7 +350,6 @@ void Foam::polyMeshGeometry::correct()
 }
 
 
-//- Recalculate on selected faces
 void Foam::polyMeshGeometry::correct
 (
     const pointField& p,
@@ -1693,7 +1689,7 @@ bool Foam::polyMeshGeometry::checkFaceTwist
 
         if (f.size() > 3)
         {
-            vector nf(vector::zero);
+            vector nf(Zero);
 
             if (mesh.isInternalFace(faceI))
             {
@@ -2118,7 +2114,7 @@ bool Foam::polyMeshGeometry::checkCellDeterminant
     {
         const cell& cFaces = cells[affectedCells[i]];
 
-        tensor areaSum(tensor::zero);
+        tensor areaSum(Zero);
         scalar magAreaSum = 0;
 
         forAll(cFaces, cFaceI)

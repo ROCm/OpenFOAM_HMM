@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,7 +77,7 @@ Foam::valuePointPatchField<Type>::valuePointPatchField
     }
     else if (!valueRequired)
     {
-        Field<Type>::operator=(pTraits<Type>::zero);
+        Field<Type>::operator=(Zero);
     }
     else
     {
@@ -137,7 +137,7 @@ void Foam::valuePointPatchField<Type>::rmap
 {
     Field<Type>::rmap
     (
-        refCast<const valuePointPatchField<Type> >
+        refCast<const valuePointPatchField<Type>>
         (
             ptf
         ),
@@ -201,7 +201,7 @@ void Foam::valuePointPatchField<Type>::operator=
     const pointPatchField<Type>& ptf
 )
 {
-    Field<Type>::operator=(ptf.patchInternalField());
+    Field<Type>::operator=(this->patchInternalField());
 }
 
 
@@ -225,7 +225,6 @@ void Foam::valuePointPatchField<Type>::operator=
 }
 
 
-// Force an assignment
 template<class Type>
 void Foam::valuePointPatchField<Type>::operator==
 (
@@ -242,7 +241,7 @@ void Foam::valuePointPatchField<Type>::operator==
     const pointPatchField<Type>& ptf
 )
 {
-    Field<Type>::operator=(ptf.patchInternalField());
+    Field<Type>::operator=(this->patchInternalField());
 }
 
 

@@ -21,7 +21,7 @@ wmakeCheckPwd "$WM_PROJECT_DIR/src" || {
 set -x
 
 # Update OpenFOAM version strings if required
-wmakePrintBuild -check || /bin/rm -f OpenFOAM/Make/*/global.? 2>/dev/null
+wmakePrintBuild -check || wrmo OpenFOAM/global/global.o
 
 wmakeLnInclude OpenFOAM
 wmakeLnInclude OSspecific/${WM_OSTYPE:-POSIX}
@@ -81,8 +81,10 @@ wmake $targetType regionCoupled
 postProcessing/Allwmake $targetType $*
 
 wmake $targetType sixDoFRigidBodyMotion
+wmake $targetType rigidBodyDynamics
+wmake $targetType rigidBodyMeshMotion
 
 # Needs access to Turbulence
 wmake $targetType thermophysicalModels/properties/liquidPropertiesFvPatchFields
 
-# ----------------------------------------------------------------- end-of-file
+#------------------------------------------------------------------------------

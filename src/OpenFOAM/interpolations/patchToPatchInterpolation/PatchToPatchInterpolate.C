@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,10 +33,9 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Interpolate point field
 template<class FromPatch, class ToPatch>
 template<class Type>
-tmp<Field<Type> >
+tmp<Field<Type>>
 PatchToPatchInterpolation<FromPatch, ToPatch>::pointInterpolate
 (
     const Field<Type>& pf
@@ -50,13 +49,9 @@ PatchToPatchInterpolation<FromPatch, ToPatch>::pointInterpolate
             << abort(FatalError);
     }
 
-    tmp<Field<Type> > tresult
+    tmp<Field<Type>> tresult
     (
-        new Field<Type>
-        (
-            toPatch_.nPoints(),
-            pTraits<Type>::zero
-        )
+        new Field<Type>(toPatch_.nPoints(), Zero)
     );
 
     Field<Type>& result = tresult();
@@ -90,22 +85,21 @@ PatchToPatchInterpolation<FromPatch, ToPatch>::pointInterpolate
 
 template<class FromPatch, class ToPatch>
 template<class Type>
-tmp<Field<Type> >
+tmp<Field<Type>>
 PatchToPatchInterpolation<FromPatch, ToPatch>::pointInterpolate
 (
-    const tmp<Field<Type> >& tpf
+    const tmp<Field<Type>>& tpf
 ) const
 {
-    tmp<Field<Type> > tint = pointInterpolate<Type>(tpf());
+    tmp<Field<Type>> tint = pointInterpolate<Type>(tpf());
     tpf.clear();
     return tint;
 }
 
 
-//- Interpolate face field
 template<class FromPatch, class ToPatch>
 template<class Type>
-tmp<Field<Type> >
+tmp<Field<Type>>
 PatchToPatchInterpolation<FromPatch, ToPatch>::faceInterpolate
 (
     const Field<Type>& ff
@@ -119,13 +113,9 @@ PatchToPatchInterpolation<FromPatch, ToPatch>::faceInterpolate
             << abort(FatalError);
     }
 
-    tmp<Field<Type> > tresult
+    tmp<Field<Type>> tresult
     (
-        new Field<Type>
-        (
-            toPatch_.size(),
-            pTraits<Type>::zero
-        )
+        new Field<Type>(toPatch_.size(), Zero)
     );
 
     Field<Type>& result = tresult();
@@ -161,13 +151,13 @@ PatchToPatchInterpolation<FromPatch, ToPatch>::faceInterpolate
 
 template<class FromPatch, class ToPatch>
 template<class Type>
-tmp<Field<Type> >
+tmp<Field<Type>>
 PatchToPatchInterpolation<FromPatch, ToPatch>::faceInterpolate
 (
-    const tmp<Field<Type> >& tff
+    const tmp<Field<Type>>& tff
 ) const
 {
-    tmp<Field<Type> > tint = faceInterpolate(tff());
+    tmp<Field<Type>> tint = faceInterpolate(tff());
     tff.clear();
     return tint;
 }

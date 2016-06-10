@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,7 +71,7 @@ public:
         GlobalIOField(const IOobject&, const Field<Type>&);
 
         //- Construct by transferring the Field contents
-        GlobalIOField(const IOobject&, const Xfer<Field<Type> >&);
+        GlobalIOField(const IOobject&, const Xfer<Field<Type>>&);
 
 
     //- Destructor

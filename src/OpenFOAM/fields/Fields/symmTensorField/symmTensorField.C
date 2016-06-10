@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,21 +108,21 @@ void inv(Field<symmTensor>& tf, const UList<symmTensor>& tf1)
 tmp<symmTensorField> inv(const UList<symmTensor>& tf)
 {
     tmp<symmTensorField> result(new symmTensorField(tf.size()));
-    inv(result(), tf);
+    inv(result.ref(), tf);
     return result;
 }
 
 tmp<symmTensorField> inv(const tmp<symmTensorField>& tf)
 {
-    tmp<symmTensorField> tRes = reuseTmp<symmTensor, symmTensor>::New(tf);
-    inv(tRes(), tf());
-    reuseTmp<symmTensor, symmTensor>::clear(tf);
+    tmp<symmTensorField> tRes = New(tf);
+    inv(tRes.ref(), tf());
+    tf.clear();
     return tRes;
 }
 
 
 template<>
-tmp<Field<symmTensor> > transformFieldMask<symmTensor>
+tmp<Field<symmTensor>> transformFieldMask<symmTensor>
 (
     const tensorField& tf
 )
@@ -131,19 +131,19 @@ tmp<Field<symmTensor> > transformFieldMask<symmTensor>
 }
 
 template<>
-tmp<Field<symmTensor> > transformFieldMask<symmTensor>
+tmp<Field<symmTensor>> transformFieldMask<symmTensor>
 (
     const tmp<tensorField>& ttf
 )
 {
-    tmp<Field<symmTensor> > ret = transformFieldMask<symmTensor>(ttf());
+    tmp<Field<symmTensor>> ret = transformFieldMask<symmTensor>(ttf());
     ttf.clear();
     return ret;
 }
 
 
 template<>
-tmp<Field<symmTensor> > transformFieldMask<symmTensor>
+tmp<Field<symmTensor>> transformFieldMask<symmTensor>
 (
     const symmTensorField& stf
 )
@@ -152,7 +152,7 @@ tmp<Field<symmTensor> > transformFieldMask<symmTensor>
 }
 
 template<>
-tmp<Field<symmTensor> > transformFieldMask<symmTensor>
+tmp<Field<symmTensor>> transformFieldMask<symmTensor>
 (
     const tmp<symmTensorField>& tstf
 )

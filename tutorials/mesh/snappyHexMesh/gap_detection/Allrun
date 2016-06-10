@@ -8,8 +8,8 @@ runApplication blockMesh
 
 runApplication decomposePar
 
-runParallel snappyHexMesh 8 -overwrite
+runParallel snappyHexMesh -overwrite
 
 runApplication reconstructParMesh -constant
 
-# ----------------------------------------------------------------- end-of-file
+#------------------------------------------------------------------------------

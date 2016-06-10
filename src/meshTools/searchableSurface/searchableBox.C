@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -223,7 +223,7 @@ const Foam::wordList& Foam::searchableBox::regions() const
 Foam::tmp<Foam::pointField> Foam::searchableBox::coordinates() const
 {
     tmp<pointField> tCtrs = tmp<pointField>(new pointField(6));
-    pointField& ctrs = tCtrs();
+    pointField& ctrs = tCtrs.ref();
 
     const pointField pts(treeBoundBox::points());
     const faceList& fcs = treeBoundBox::faces;
@@ -497,7 +497,7 @@ void Foam::searchableBox::findLineAll
 (
     const pointField& start,
     const pointField& end,
-    List<List<pointIndexHit> >& info
+    List<List<pointIndexHit>>& info
 ) const
 {
     info.setSize(start.size());
@@ -579,7 +579,7 @@ void Foam::searchableBox::getNormal
 ) const
 {
     normal.setSize(info.size());
-    normal = vector::zero;
+    normal = Zero;
 
     forAll(info, i)
     {

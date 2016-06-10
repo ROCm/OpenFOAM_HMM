@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,6 @@ namespace Foam
 
 class IOobjectList;
 
-
 //- Get sorted names of fields of type. If syncPar and running in parallel
 //  check for identical names
 wordList fieldNames(const IOobjectList& objects, const bool syncPar);
@@ -58,12 +57,14 @@ wordList ReadFields
 (
     const typename GeoMesh::Mesh& mesh,
     const IOobjectList& objects,
-    PtrList<GeometricField<Type, PatchField, GeoMesh> >& fields,
+    PtrList<GeometricField<Type, PatchField, GeoMesh>>& fields,
     const bool syncPar = true,
     const bool readOldTime = false
 );
 
-//- Helper routine to read other mesh fields
+//- Helper routine to read fields
+//  Reads all fields of type. Returns names of fields read. Guarantees all
+//  processors to read fields in same order.
 template<class GeoField, class Mesh>
 wordList ReadFields
 (
@@ -110,7 +111,7 @@ static void ReadFields
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ReadFieldsTemplates.C"
+    #include "ReadFieldsTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

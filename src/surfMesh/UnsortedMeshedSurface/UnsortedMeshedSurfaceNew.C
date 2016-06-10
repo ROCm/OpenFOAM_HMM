@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,14 +28,12 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Face>
-Foam::autoPtr< Foam::UnsortedMeshedSurface<Face> >
+Foam::autoPtr<Foam::UnsortedMeshedSurface<Face>>
 Foam::UnsortedMeshedSurface<Face>::New(const fileName& name, const word& ext)
 {
     if (debug)
     {
-        Info<< "UnsortedMeshedSurface::New(const fileName&, const word&) : "
-            "constructing UnsortedMeshedSurface"
-            << endl;
+        InfoInFunction << "Constructing UnsortedMeshedSurface" << endl;
     }
 
     typename fileExtensionConstructorTable::iterator cstrIter =
@@ -48,7 +46,7 @@ Foam::UnsortedMeshedSurface<Face>::New(const fileName& name, const word& ext)
         if (supported.found(ext))
         {
             // create indirectly
-            autoPtr<UnsortedMeshedSurface<Face> > surf
+            autoPtr<UnsortedMeshedSurface<Face>> surf
             (
                 new UnsortedMeshedSurface<Face>
             );
@@ -67,12 +65,12 @@ Foam::UnsortedMeshedSurface<Face>::New(const fileName& name, const word& ext)
             << exit(FatalError);
     }
 
-    return autoPtr<UnsortedMeshedSurface<Face> >(cstrIter()(name));
+    return autoPtr<UnsortedMeshedSurface<Face>>(cstrIter()(name));
 }
 
 
 template<class Face>
-Foam::autoPtr< Foam::UnsortedMeshedSurface<Face> >
+Foam::autoPtr<Foam::UnsortedMeshedSurface<Face>>
 Foam::UnsortedMeshedSurface<Face>::New(const fileName& name)
 {
     word ext = name.ext();

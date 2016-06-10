@@ -151,7 +151,7 @@ private:
         word rhoNbrName_;
 
         //- Pointer to 2-D look-up table of NTU f(mDot1, mDot2)
-        autoPtr<interpolation2DTable<scalar> > ntuTable_;
+        autoPtr<interpolation2DTable<scalar>> ntuTable_;
 
         //- Geometry input mode
         geometryModeType geometryMode_;

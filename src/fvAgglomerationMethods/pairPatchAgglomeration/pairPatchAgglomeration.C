@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -114,7 +114,7 @@ void Foam::pairPatchAgglomeration::setEdgeWeights
     const label nCoarseI =  max(fineToCoarse) + 1;
     labelListList coarseToFine(invertOneToMany(nCoarseI, fineToCoarse));
 
-    HashSet<edge, Hash<edge> > fineFeaturedFaces(coarsePatch.nEdges()/10);
+    HashSet<edge, Hash<edge>> fineFeaturedFaces(coarsePatch.nEdges()/10);
 
     // Map fine faces with featured edge into coarse faces
     forAllConstIter(EdgeMap<scalar>, facePairWeight_, iter)
@@ -254,7 +254,7 @@ void Foam::pairPatchAgglomeration::mapBaseToTopAgglom
 )
 {
     const labelList& fineToCoarse = restrictAddressing_[fineLevelIndex];
-    forAll (restrictTopBottomAddressing_, i)
+    forAll(restrictTopBottomAddressing_, i)
     {
         restrictTopBottomAddressing_[i] =
             fineToCoarse[restrictTopBottomAddressing_[i]];
@@ -440,7 +440,7 @@ Foam::tmp<Foam::labelField> Foam::pairPatchAgglomeration::agglomerateOneLevel
     const label nFineFaces = patch.size();
 
     tmp<labelField> tcoarseCellMap(new labelField(nFineFaces, -1));
-    labelField& coarseCellMap = tcoarseCellMap();
+    labelField& coarseCellMap = tcoarseCellMap.ref();
 
     const labelListList& faceFaces = patch.faceFaces();
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,8 +97,8 @@ public:
 
         virtual void write(const char* val)
         {
-            char buffer[80] = {0};
-            strcpy(buffer, val);
+            char buffer[80];
+            strncpy(buffer, val, 80);
             str_().write(buffer, 80*sizeof(char));
         }
 

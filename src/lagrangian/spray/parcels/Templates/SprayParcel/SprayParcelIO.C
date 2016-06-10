@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,9 +32,13 @@ template<class ParcelType>
 Foam::string Foam::SprayParcel<ParcelType>::propertyList_ =
     Foam::SprayParcel<ParcelType>::propertyList();
 
+template<class ParcelType>
+Foam::string Foam::SprayParcel<ParcelType>::propertyTypes_ =
+    Foam::SprayParcel<ParcelType>::propertyTypes();
+
 
 template<class ParcelType>
-const std::size_t Foam::SprayParcel<ParcelType>::sizeofFields_
+const std::size_t Foam::SprayParcel<ParcelType>::sizeofFields
 (
     sizeof(SprayParcel<ParcelType>) - sizeof(ParcelType)
 );
@@ -52,7 +56,7 @@ Foam::SprayParcel<ParcelType>::SprayParcel
 :
     ParcelType(mesh, is, readFields),
     d0_(0.0),
-    position0_(vector::zero),
+    position0_(Zero),
     sigma_(0.0),
     mu_(0.0),
     liquidCore_(0.0),
@@ -85,7 +89,7 @@ Foam::SprayParcel<ParcelType>::SprayParcel
         }
         else
         {
-            is.read(reinterpret_cast<char*>(&d0_), sizeofFields_);
+            is.read(reinterpret_cast<char*>(&d0_), sizeofFields);
         }
     }
 
@@ -176,7 +180,7 @@ void Foam::SprayParcel<ParcelType>::readFields
     c.checkFieldIOobject(c, user);
 
     label i = 0;
-    forAllIter(typename Cloud<SprayParcel<ParcelType> >, c, iter)
+    forAllIter(typename Cloud<SprayParcel<ParcelType>>, c, iter)
     {
         SprayParcel<ParcelType>& p = iter();
         p.d0_ = d0[i];
@@ -244,7 +248,7 @@ void Foam::SprayParcel<ParcelType>::writeFields
     IOField<scalar> user(c.fieldIOobject("user", IOobject::NO_READ), np);
 
     label i = 0;
-    forAllConstIter(typename Cloud<SprayParcel<ParcelType> >, c, iter)
+    forAllConstIter(typename Cloud<SprayParcel<ParcelType>>, c, iter)
     {
         const SprayParcel<ParcelType>& p = iter();
         d0[i] = p.d0_;
@@ -311,7 +315,7 @@ Foam::Ostream& Foam::operator<<
         os.write
         (
             reinterpret_cast<const char*>(&p.d0_),
-            SprayParcel<ParcelType>::sizeofFields_
+            SprayParcel<ParcelType>::sizeofFields
         );
     }
 

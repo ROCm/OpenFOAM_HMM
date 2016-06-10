@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -204,8 +204,7 @@ void Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::correct()
 {
     if (debug)
     {
-        Info<< "entering heheuPsiThermo<BasicPsiThermo, MixtureType>::correct()"
-            << endl;
+        InfoInFunction << endl;
     }
 
     // force the saving of the old-time values
@@ -215,8 +214,7 @@ void Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::correct()
 
     if (debug)
     {
-        Info<< "exiting heheuPsiThermo<BasicPsiThermo, MixtureType>::correct()"
-            << endl;
+        Info<< "    Finished" << endl;
     }
 }
 
@@ -231,7 +229,7 @@ Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::heu
 ) const
 {
     tmp<scalarField> theu(new scalarField(Tu.size()));
-    scalarField& heu = theu();
+    scalarField& heu = theu.ref();
 
     forAll(Tu, celli)
     {
@@ -252,7 +250,7 @@ Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::heu
 ) const
 {
     tmp<scalarField> theu(new scalarField(Tu.size()));
-    scalarField& heu = theu();
+    scalarField& heu = theu.ref();
 
     forAll(Tu, facei)
     {
@@ -285,7 +283,7 @@ Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::Tb() const
         )
     );
 
-    volScalarField& Tb_ = tTb();
+    volScalarField& Tb_ = tTb.ref();
     scalarField& TbCells = Tb_.internalField();
     const scalarField& pCells = this->p_.internalField();
     const scalarField& TCells = this->T_.internalField();
@@ -343,7 +341,7 @@ Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::psiu() const
         )
     );
 
-    volScalarField& psiu = tpsiu();
+    volScalarField& psiu = tpsiu.ref();
     scalarField& psiuCells = psiu.internalField();
     const scalarField& TuCells = this->Tu_.internalField();
     const scalarField& pCells = this->p_.internalField();
@@ -395,7 +393,7 @@ Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::psib() const
         )
     );
 
-    volScalarField& psib = tpsib();
+    volScalarField& psib = tpsib.ref();
     scalarField& psibCells = psib.internalField();
     const volScalarField Tb_(Tb());
     const scalarField& TbCells = Tb_.internalField();
@@ -448,7 +446,7 @@ Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::muu() const
         )
     );
 
-    volScalarField& muu_ = tmuu();
+    volScalarField& muu_ = tmuu.ref();
     scalarField& muuCells = muu_.internalField();
     const scalarField& pCells = this->p_.internalField();
     const scalarField& TuCells = this->Tu_.internalField();
@@ -504,7 +502,7 @@ Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::mub() const
         )
     );
 
-    volScalarField& mub_ = tmub();
+    volScalarField& mub_ = tmub.ref();
     scalarField& mubCells = mub_.internalField();
     const volScalarField Tb_(Tb());
     const scalarField& pCells = this->p_.internalField();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,7 @@ Description
     The above example shows the use of a fixed jump of '10'.
 
 Note
-    The uniformValue entry is a DataEntry type, able to describe time
+    The uniformValue entry is a Function1 type, able to describe time
     varying functions.  The example above gives the usage for supplying a
     constant value.
 
@@ -61,6 +61,7 @@ Note
 
 SeeAlso
     Foam::jumpCyclicAMIFvPatchField
+    Foam::Function1Types
 
 SourceFiles
     uniformJumpAMIFvPatchField.C
@@ -71,7 +72,7 @@ SourceFiles
 #define uniformJumpAMIFvPatchField_H
 
 #include "fixedJumpAMIFvPatchField.H"
-#include "DataEntry.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -93,7 +94,7 @@ protected:
     // Protected data
 
         //- "jump" table
-        autoPtr<DataEntry<Type> > jumpTable_;
+        autoPtr<Function1<Type>> jumpTable_;
 
 
 public:
@@ -135,9 +136,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchField<Type> > clone() const
+        virtual tmp<fvPatchField<Type>> clone() const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchField<Type>>
             (
                 new uniformJumpAMIFvPatchField<Type>(*this)
             );
@@ -151,12 +152,12 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchField<Type> > clone
+        virtual tmp<fvPatchField<Type>> clone
         (
             const DimensionedField<Type, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchField<Type>>
             (
                 new uniformJumpAMIFvPatchField<Type>(*this, iF)
             );
@@ -180,7 +181,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "uniformJumpAMIFvPatchField.C"
+    #include "uniformJumpAMIFvPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

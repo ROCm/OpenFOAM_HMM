@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,23 +62,23 @@ class StaticAssertionTest {};
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Internal use:
-// ~~~~~~~~~~~~~
-
 // Paste together strings, even if an argument is itself a macro
 #define StaticAssertMacro(X,Y)  StaticAssertMacro1(X,Y)
 #define StaticAssertMacro1(X,Y) StaticAssertMacro2(X,Y)
 #define StaticAssertMacro2(X,Y) X##Y
 
-// External use:
-// ~~~~~~~~~~~~~
+#ifdef __GNUC__
+    #define StaticAssertUnusedTypedef __attribute__((unused))
+#else
+    #define StaticAssertUnusedTypedef
+#endif
 
 //- Assert that some test is true at compile-time
-#define StaticAssert(Test)                                                   \
-    typedef ::Foam::StaticAssertionTest                                      \
-    <                                                                        \
-        sizeof( ::Foam::StaticAssertionFailed< ((Test) ? true : false) > )   \
-    > StaticAssertMacro(StaticAssertionTest, __LINE__)
+#define StaticAssert(Test)                                                     \
+    typedef ::Foam::StaticAssertionTest                                        \
+    <                                                                          \
+        sizeof( ::Foam::StaticAssertionFailed<((Test) ? true : false)>)        \
+    > StaticAssertMacro(StaticAssertionTest, __LINE__) StaticAssertUnusedTypedef
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

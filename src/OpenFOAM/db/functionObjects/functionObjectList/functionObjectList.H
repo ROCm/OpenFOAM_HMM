@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -117,12 +117,15 @@ public:
 
         //- Construct from Time, a dictionary with "functions" entry
         //  and the execution setting.
+        //  \param[in]  t - the other Time instance to construct from
         //  \param[in]  parentDict - the parent dictionary containing
         //    a "functions" entry, which can either be a list or a dictionary
         //    of functionObject specifications.
+        //  \param[in]  execution - whether the function objects should execute
+        //    or not. Default: true.
         functionObjectList
         (
-            const Time&,
+            const Time& t,
             const dictionary& parentDict,
             const bool execution=true
         );
@@ -143,11 +146,14 @@ public:
         //- Access to the functionObjects
         using PtrList<functionObject>::operator[];
 
+        //- Reset/read state dictionary for current time
+        virtual void resetState();
+
         //- Return the state dictionary
-        IOdictionary& stateDict();
+        virtual IOdictionary& stateDict();
 
         //- Return const access to the state dictionary
-        const IOdictionary& stateDict() const;
+        virtual const IOdictionary& stateDict() const;
 
         //- Clear the list of function objects
         virtual void clear();
@@ -163,7 +169,6 @@ public:
 
         //- Return the execution status (on/off) of the function objects
         virtual bool status() const;
-
 
         //- Called at the start of the time-loop
         virtual bool start();

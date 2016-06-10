@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -163,6 +163,7 @@ class mapDistribute
         //- Destination in constructMap for transformed elements
         labelList transformStart_;
 
+
     // Private Member Functions
 
         //- Helper function: copy transformElements without transformation
@@ -188,6 +189,7 @@ class mapDistribute
             List<T>& field,
             const TransformOp& top
         ) const;
+
 
 public:
 
@@ -215,7 +217,7 @@ public:
             (
                 const vectorTensorTransform& vt,
                 const bool forward,
-                List<List<Type> >& flds
+                List<List<Type>>& flds
             ) const
             {
                 forAll(flds, i)
@@ -272,7 +274,7 @@ public:
             (
                 const vectorTensorTransform& vt,
                 const bool forward,
-                List<List<point> >& flds
+                List<List<point>>& flds
             ) const
             {
                 forAll(flds, i)
@@ -353,7 +355,7 @@ public:
         (
             const globalIndex&,
             labelList& elements,
-            List<Map<label> >& compactMap,
+            List<Map<label>>& compactMap,
             const int tag = Pstream::msgType()
         );
 
@@ -364,7 +366,7 @@ public:
         (
             const globalIndex&,
             labelListList& cellCells,
-            List<Map<label> >& compactMap,
+            List<Map<label>>& compactMap,
             const int tag = Pstream::msgType()
         );
 
@@ -381,7 +383,7 @@ public:
             const globalIndexAndTransform&,
             const labelPairList& transformedElements,
             labelList& transformedIndices,
-            List<Map<label> >& compactMap,
+            List<Map<label>>& compactMap,
             const int tag = Pstream::msgType()
         );
 
@@ -393,7 +395,7 @@ public:
             const globalIndexAndTransform&,
             const List<labelPairList>& transformedElements,
             labelListList& transformedIndices,
-            List<Map<label> >& compactMap,
+            List<Map<label>>& compactMap,
             const int tag = Pstream::msgType()
         );
 
@@ -443,7 +445,6 @@ public:
 
             //- Transfer contents to the Xfer container
             Xfer<mapDistribute> xfer();
-
 
             //- Distribute data using default commsType.
             template<class T>
@@ -550,7 +551,6 @@ public:
 
         //- Write dictionary to Ostream
         friend Ostream& operator<<(Ostream&, const mapDistribute&);
-
 };
 
 
@@ -641,7 +641,7 @@ void mapDistribute::transform::operator()
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "mapDistributeTemplates.C"
+    #include "mapDistributeTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

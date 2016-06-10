@@ -99,9 +99,9 @@ void Foam::streamLineBase::initInterpolations
     const label nSeeds,
     label& UIndex,
     PtrList<volScalarField>& vsFlds,
-    PtrList<interpolation<scalar> >& vsInterp,
+    PtrList<interpolation<scalar>>& vsInterp,
     PtrList<volVectorField>& vvFlds,
-    PtrList<interpolation<vector> >& vvInterp
+    PtrList<interpolation<vector>>& vvInterp
 )
 {
     const Time& runTime = obr_.time();
@@ -316,9 +316,9 @@ void Foam::streamLineBase::trimToBox
 (
     const treeBoundBox& bb,
     const label trackI,
-    PtrList<DynamicList<point> >& newTracks,
-    PtrList<DynamicList<scalarList> >& newScalars,
-    PtrList<DynamicList<vectorList> >& newVectors
+    PtrList<DynamicList<point>>& newTracks,
+    PtrList<DynamicList<scalarList>>& newScalars,
+    PtrList<DynamicList<vectorList>>& newVectors
 ) const
 {
     const List<point>& track = allTracks_[trackI];
@@ -471,9 +471,9 @@ void Foam::streamLineBase::trimToBox(const treeBoundBox& bb)
 {
     // Storage for new tracks. Per track, per sample the coordinate (newTracks)
     // or values for all the sampled fields (newScalars, newVectors)
-    PtrList<DynamicList<point> > newTracks;
-    PtrList<DynamicList<scalarList> > newScalars;
-    PtrList<DynamicList<vectorList> > newVectors;
+    PtrList<DynamicList<point>> newTracks;
+    PtrList<DynamicList<scalarList>> newScalars;
+    PtrList<DynamicList<vectorList>> newVectors;
 
     forAll(allTracks_, trackI)
     {
@@ -854,7 +854,7 @@ void Foam::streamLineBase::write()
 
             if (allScalars_.size() > 0)
             {
-                List<List<scalarField> > scalarValues(allScalars_.size());
+                List<List<scalarField>> scalarValues(allScalars_.size());
 
                 forAll(allScalars_, scalarI)
                 {
@@ -908,7 +908,7 @@ void Foam::streamLineBase::write()
 
             if (allVectors_.size() > 0)
             {
-                List<List<vectorField> > vectorValues(allVectors_.size());
+                List<List<vectorField>> vectorValues(allVectors_.size());
 
                 forAll(allVectors_, vectorI)
                 {

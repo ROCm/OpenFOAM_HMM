@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,7 +107,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const fieldAverageItem& faItem)
 
     os  << faItem.fieldName_ << nl << token::BEGIN_BLOCK << nl;
     os.writeKeyword("mean") << faItem.mean_ << token::END_STATEMENT << nl;
-    os.writeKeyword("prime2Mean") << faItem.mean_
+    os.writeKeyword("prime2Mean") << faItem.prime2Mean_
         << token::END_STATEMENT << nl;
     os.writeKeyword("base") << faItem.baseTypeNames_[faItem.base_]
         << token::END_STATEMENT << nl;

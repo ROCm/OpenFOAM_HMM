@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,8 +62,8 @@ void Foam::polyMesh::calcDirections() const
     label nEmptyPatches = 0;
     label nWedgePatches = 0;
 
-    vector emptyDirVec = vector::zero;
-    vector wedgeDirVec = vector::zero;
+    vector emptyDirVec = Zero;
+    vector wedgeDirVec = Zero;
 
     forAll(boundaryMesh(), patchi)
     {
@@ -205,8 +205,8 @@ Foam::polyMesh::polyMesh(const IOobject& io)
     ),
     bounds_(points_),
     comm_(UPstream::worldComm),
-    geometricD_(Vector<label>::zero),
-    solutionD_(Vector<label>::zero),
+    geometricD_(Zero),
+    solutionD_(Zero),
     tetBasePtIsPtr_(NULL),
     cellTreePtr_(NULL),
     pointZones_
@@ -399,8 +399,8 @@ Foam::polyMesh::polyMesh
     ),
     bounds_(points_, syncPar),
     comm_(UPstream::worldComm),
-    geometricD_(Vector<label>::zero),
-    solutionD_(Vector<label>::zero),
+    geometricD_(Zero),
+    solutionD_(Zero),
     tetBasePtIsPtr_(NULL),
     cellTreePtr_(NULL),
     pointZones_
@@ -550,8 +550,8 @@ Foam::polyMesh::polyMesh
     ),
     bounds_(points_, syncPar),
     comm_(UPstream::worldComm),
-    geometricD_(Vector<label>::zero),
-    solutionD_(Vector<label>::zero),
+    geometricD_(Zero),
+    solutionD_(Zero),
     tetBasePtIsPtr_(NULL),
     cellTreePtr_(NULL),
     pointZones_
@@ -888,8 +888,8 @@ void Foam::polyMesh::addPatches
     }
 
     // Reset valid directions
-    geometricD_ = Vector<label>::zero;
-    solutionD_ = Vector<label>::zero;
+    geometricD_ = Zero;
+    solutionD_ = Zero;
 
     boundary_.setSize(p.size());
 
@@ -1051,8 +1051,8 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
 {
     if (debug)
     {
-        Info<< "tmp<scalarField> polyMesh::movePoints(const pointField&) : "
-            << " Moving points for time " << time().value()
+        InfoInFunction
+            << "Moving points for time " << time().value()
             << " index " << time().timeIndex() << endl;
     }
 
@@ -1094,8 +1094,7 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
         {
             moveError = true;
 
-            Info<< "tmp<scalarField> polyMesh::movePoints"
-                << "(const pointField&) : "
+            InfoInFunction
                 << "Moving the mesh with given points will "
                 << "invalidate the mesh." << nl
                 << "Mesh motion should not be executed." << endl;
@@ -1128,8 +1127,8 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     cellZones_.movePoints(points_);
 
     // Reset valid directions (could change with rotation)
-    geometricD_ = Vector<label>::zero;
-    solutionD_ = Vector<label>::zero;
+    geometricD_ = Zero;
+    solutionD_ = Zero;
 
     meshObject::movePoints<polyMesh>(*this);
     meshObject::movePoints<pointMesh>(*this);
@@ -1148,7 +1147,6 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
 }
 
 
-// Reset motion by deleting old points
 void Foam::polyMesh::resetMotion() const
 {
     curMotionTimeIndex_ = 0;
@@ -1156,7 +1154,6 @@ void Foam::polyMesh::resetMotion() const
 }
 
 
-// Return parallel info
 const Foam::globalMeshData& Foam::polyMesh::globalData() const
 {
     if (globalMeshDataPtr_.empty())

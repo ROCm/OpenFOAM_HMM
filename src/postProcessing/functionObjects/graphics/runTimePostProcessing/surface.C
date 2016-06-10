@@ -135,7 +135,7 @@ Foam::surface::surface
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<DataEntry<vector>, word>& colours
+    const HashPtrTable<Function1<vector>, word>& colours
 )
 :
     geometryBase(parent, dict, colours),
@@ -157,7 +157,7 @@ Foam::surface::surface
     {
         surfaceColour_.reset
         (
-            DataEntry<vector>::New("surfaceColour", dict).ptr()
+            Function1<vector>::New("surfaceColour", dict).ptr()
         );
     }
     else
@@ -167,7 +167,7 @@ Foam::surface::surface
 
     if (dict.found("edgeColour"))
     {
-        edgeColour_.reset(DataEntry<vector>::New("edgeColour", dict).ptr());
+        edgeColour_.reset(Function1<vector>::New("edgeColour", dict).ptr());
     }
     else
     {
@@ -191,7 +191,7 @@ Foam::autoPtr<Foam::surface> Foam::surface::New
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<DataEntry<vector>, word>& colours,
+    const HashPtrTable<Function1<vector>, word>& colours,
     const word& surfaceType
 )
 {

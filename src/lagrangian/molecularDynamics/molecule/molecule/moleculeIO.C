@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const std::size_t Foam::molecule::sizeofFields_
+const std::size_t Foam::molecule::sizeofFields
 (
     offsetof(molecule, siteForces_) - offsetof(molecule, Q_)
 );
@@ -45,14 +45,14 @@ Foam::molecule::molecule
 )
 :
     particle(mesh, is, readFields),
-    Q_(tensor::zero),
-    v_(vector::zero),
-    a_(vector::zero),
-    pi_(vector::zero),
-    tau_(vector::zero),
-    specialPosition_(vector::zero),
+    Q_(Zero),
+    v_(Zero),
+    a_(Zero),
+    pi_(Zero),
+    tau_(Zero),
+    specialPosition_(Zero),
     potentialEnergy_(0.0),
-    rf_(tensor::zero),
+    rf_(Zero),
     special_(0),
     id_(0),
     siteForces_(0),
@@ -77,7 +77,7 @@ Foam::molecule::molecule
         }
         else
         {
-            is.read(reinterpret_cast<char*>(&Q_), sizeofFields_);
+            is.read(reinterpret_cast<char*>(&Q_), sizeofFields);
             is  >> siteForces_ >> sitePositions_;
         }
     }
@@ -276,7 +276,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const molecule& mol)
         os.write
         (
             reinterpret_cast<const char*>(&mol.Q_),
-            molecule::sizeofFields_
+            molecule::sizeofFields
         );
         os  << mol.siteForces_ << mol.sitePositions_;
     }

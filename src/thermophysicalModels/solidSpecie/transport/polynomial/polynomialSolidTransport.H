@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -172,10 +172,7 @@ public:
 
     // Member operators
 
-        inline polynomialSolidTransport& operator=
-        (
-            const polynomialSolidTransport&
-        );
+        inline void operator=(const polynomialSolidTransport&);
         inline void operator+=(const polynomialSolidTransport&);
         inline void operator-=(const polynomialSolidTransport&);
         inline void operator*=(const scalar);
@@ -227,7 +224,7 @@ public:
 #include "polynomialSolidTransportI.H"
 
 #ifdef NoRepository
-#   include "polynomialSolidTransport.C"
+    #include "polynomialSolidTransport.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

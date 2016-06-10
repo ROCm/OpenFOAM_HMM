@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,15 +25,10 @@ License
 
 #include "turbulentInletFvPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
+Foam::turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -41,7 +36,7 @@ turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
 :
     fixedValueFvPatchField<Type>(p, iF),
     ranGen_(label(0)),
-    fluctuationScale_(pTraits<Type>::zero),
+    fluctuationScale_(Zero),
     referenceField_(p.size()),
     alpha_(0.1),
     curTimeIndex_(-1)
@@ -49,25 +44,7 @@ turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
 
 
 template<class Type>
-turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
-(
-    const turbulentInletFvPatchField<Type>& ptf,
-    const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF,
-    const fvPatchFieldMapper& mapper
-)
-:
-    fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
-    ranGen_(label(0)),
-    fluctuationScale_(ptf.fluctuationScale_),
-    referenceField_(ptf.referenceField_, mapper),
-    alpha_(ptf.alpha_),
-    curTimeIndex_(-1)
-{}
-
-
-template<class Type>
-turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
+Foam::turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -96,7 +73,25 @@ turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
 
 
 template<class Type>
-turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
+Foam::turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
+(
+    const turbulentInletFvPatchField<Type>& ptf,
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
+    const fvPatchFieldMapper& mapper
+)
+:
+    fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
+    ranGen_(label(0)),
+    fluctuationScale_(ptf.fluctuationScale_),
+    referenceField_(ptf.referenceField_, mapper),
+    alpha_(ptf.alpha_),
+    curTimeIndex_(-1)
+{}
+
+
+template<class Type>
+Foam::turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
 (
     const turbulentInletFvPatchField<Type>& ptf
 )
@@ -111,7 +106,7 @@ turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
 
 
 template<class Type>
-turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
+Foam::turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
 (
     const turbulentInletFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
@@ -129,7 +124,7 @@ turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void turbulentInletFvPatchField<Type>::autoMap
+void Foam::turbulentInletFvPatchField<Type>::autoMap
 (
     const fvPatchFieldMapper& m
 )
@@ -140,7 +135,7 @@ void turbulentInletFvPatchField<Type>::autoMap
 
 
 template<class Type>
-void turbulentInletFvPatchField<Type>::rmap
+void Foam::turbulentInletFvPatchField<Type>::rmap
 (
     const fvPatchField<Type>& ptf,
     const labelList& addr
@@ -149,14 +144,14 @@ void turbulentInletFvPatchField<Type>::rmap
     fixedValueFvPatchField<Type>::rmap(ptf, addr);
 
     const turbulentInletFvPatchField<Type>& tiptf =
-        refCast<const turbulentInletFvPatchField<Type> >(ptf);
+        refCast<const turbulentInletFvPatchField<Type>>(ptf);
 
     referenceField_.rmap(tiptf.referenceField_, addr);
 }
 
 
 template<class Type>
-void turbulentInletFvPatchField<Type>::updateCoeffs()
+void Foam::turbulentInletFvPatchField<Type>::updateCoeffs()
 {
     if (this->updated())
     {
@@ -198,7 +193,7 @@ void turbulentInletFvPatchField<Type>::updateCoeffs()
 
 
 template<class Type>
-void turbulentInletFvPatchField<Type>::write(Ostream& os) const
+void Foam::turbulentInletFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
     os.writeKeyword("fluctuationScale")
@@ -208,9 +203,5 @@ void turbulentInletFvPatchField<Type>::write(Ostream& os) const
     this->writeEntry("value", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

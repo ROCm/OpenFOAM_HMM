@@ -39,7 +39,7 @@ Foam::text::text
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<DataEntry<vector>, word>& colours
+    const HashPtrTable<Function1<vector>, word>& colours
 )
 :
     geometryBase(parent, dict, colours),
@@ -51,7 +51,7 @@ Foam::text::text
 {
     if (dict.found("colour"))
     {
-        colour_.reset(DataEntry<vector>::New("colour", dict).ptr());
+        colour_.reset(Function1<vector>::New("colour", dict).ptr());
     }
     else
     {

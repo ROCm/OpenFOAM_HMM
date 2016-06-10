@@ -63,6 +63,7 @@ Foam::fileName Foam::vtkSurfaceWriter::writeTemplate
     }
 
     OFstream os(outputDir/fieldName + '_' + surfaceName + ".vtk");
+    os.precision(writePrecision_);
 
     if (verbose)
     {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -118,7 +118,7 @@ class backgroundMeshDecomposition
         autoPtr<bPatch> boundaryFacesPtr_;
 
         //- Search tree for the boundaryFaces_ patch
-        autoPtr<indexedOctree<treeDataBPatch> > bFTreePtr_;
+        autoPtr<indexedOctree<treeDataBPatch>> bFTreePtr_;
 
         //- The bounds of all background meshes on all processors
         treeBoundBoxList allBackgroundMeshBounds_;
@@ -220,7 +220,7 @@ public:
         );
 
         //- Distribute supplied the points to the appropriate processor
-        template<typename PointType>
+        template<class PointType>
         autoPtr<mapDistribute> distributePoints(List<PointType>& points) const;
 
         //- Is the given position inside the domain of this decomposition
@@ -258,7 +258,7 @@ public:
         ) const;
 
         //- What processor is the given position on?
-        template<typename PointType>
+        template<class PointType>
         labelList processorPosition(const List<PointType>& pts) const;
 
         //- What is the nearest processor to the given position?
@@ -270,7 +270,7 @@ public:
         //  launched from, it is assumed that the point is on that processor.
         //  The index data member of the pointIndexHit is replaced with the
         //  processor index.
-        List<List<pointIndexHit> > intersectsProcessors
+        List<List<pointIndexHit>> intersectsProcessors
         (
             const List<point>& starts,
             const List<point>& ends,

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,7 @@ namespace Foam
 // + diameter = vectorPairScalarPair::second().first()
 // + target diameter = vectorPairScalarPair::second().second()
 // One structure to allow single operation parallel comms
-typedef Tuple2<Pair<vector>, Pair<scalar> > vectorPairScalarPair;
+typedef Tuple2<Pair<vector>, Pair<scalar>> vectorPairScalarPair;
 
 
 /*---------------------------------------------------------------------------*\
@@ -84,10 +84,10 @@ class InflationInjection
         scalar duration_;
 
         //- Flow rate profile relative to SOI [m3/s]
-        TimeDataEntry<scalar> flowRateProfile_;
+        TimeFunction1<scalar> flowRateProfile_;
 
         //- Growth rate of particle diameters towards target [m/s]
-        TimeDataEntry<scalar> growthRate_;
+        TimeFunction1<scalar> growthRate_;
 
         //- Positions, velocities, diameters and target diameters of
         //  new particles after splitting
@@ -131,9 +131,9 @@ public:
         InflationInjection(const InflationInjection<CloudType>& im);
 
         //- Construct and return a clone
-        virtual autoPtr<InjectionModel<CloudType> > clone() const
+        virtual autoPtr<InjectionModel<CloudType>> clone() const
         {
-            return autoPtr<InjectionModel<CloudType> >
+            return autoPtr<InjectionModel<CloudType>>
             (
                 new InflationInjection<CloudType>(*this)
             );
@@ -198,7 +198,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "InflationInjection.C"
+    #include "InflationInjection.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

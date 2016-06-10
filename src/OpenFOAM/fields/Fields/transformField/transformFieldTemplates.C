@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,56 +56,56 @@ void transform
 
 
 template<class Type>
-tmp<Field<Type> > transform
+tmp<Field<Type>> transform
 (
     const tensorField& trf,
     const Field<Type>& tf
 )
 {
-    tmp<Field<Type> > tranf(new Field<Type> (tf.size()));
-    transform(tranf(), trf, tf);
+    tmp<Field<Type>> tranf(new Field<Type> (tf.size()));
+    transform(tranf.ref(), trf, tf);
     return tranf;
 }
 
 
 template<class Type>
-tmp<Field<Type> > transform
+tmp<Field<Type>> transform
 (
     const tensorField& trf,
-    const tmp<Field<Type> >& ttf
+    const tmp<Field<Type>>& ttf
 )
 {
-    tmp<Field<Type> > tranf = reuseTmp<Type, Type>::New(ttf);
-    transform(tranf(), trf, ttf());
-    reuseTmp<Type, Type>::clear(ttf);
+    tmp<Field<Type>> tranf = New(ttf);
+    transform(tranf.ref(), trf, ttf());
+    ttf.clear();
     return tranf;
 }
 
 
 template<class Type>
-tmp<Field<Type> > transform
+tmp<Field<Type>> transform
 (
     const tmp<tensorField>& ttrf,
     const Field<Type>& tf
 )
 {
-    tmp<Field<Type> > tranf(new Field<Type> (tf.size()));
-    transform(tranf(), ttrf(), tf);
+    tmp<Field<Type>> tranf(new Field<Type> (tf.size()));
+    transform(tranf.ref(), ttrf(), tf);
     ttrf.clear();
     return tranf;
 }
 
 
 template<class Type>
-tmp<Field<Type> > transform
+tmp<Field<Type>> transform
 (
     const tmp<tensorField>& ttrf,
-    const tmp<Field<Type> >& ttf
+    const tmp<Field<Type>>& ttf
 )
 {
-    tmp<Field<Type> > tranf = reuseTmp<Type, Type>::New(ttf);
-    transform(tranf(), ttrf(), ttf());
-    reuseTmp<Type, Type>::clear(ttf);
+    tmp<Field<Type>> tranf = New(ttf);
+    transform(tranf.ref(), ttrf(), ttf());
+    ttf.clear();
     ttrf.clear();
     return tranf;
 }
@@ -124,42 +124,42 @@ void transform
 
 
 template<class Type>
-tmp<Field<Type> > transform
+tmp<Field<Type>> transform
 (
     const tensor& t,
     const Field<Type>& tf
 )
 {
-    tmp<Field<Type> > tranf(new Field<Type>(tf.size()));
-    transform(tranf(), t, tf);
+    tmp<Field<Type>> tranf(new Field<Type>(tf.size()));
+    transform(tranf.ref(), t, tf);
     return tranf;
 }
 
 
 template<class Type>
-tmp<Field<Type> > transform
+tmp<Field<Type>> transform
 (
     const tensor& t,
-    const tmp<Field<Type> >& ttf
+    const tmp<Field<Type>>& ttf
 )
 {
-    tmp<Field<Type> > tranf = reuseTmp<Type, Type>::New(ttf);
-    transform(tranf(), t, ttf());
-    reuseTmp<Type, Type>::clear(ttf);
+    tmp<Field<Type>> tranf = New(ttf);
+    transform(tranf.ref(), t, ttf());
+    ttf.clear();
     return tranf;
 }
 
 
 template<class Type1, class Type2>
-tmp<Field<Type1> > transformFieldMask(const Field<Type2>& f)
+tmp<Field<Type1>> transformFieldMask(const Field<Type2>& f)
 {
     return f;
 }
 
 template<class Type1, class Type2>
-tmp<Field<Type1> > transformFieldMask(const tmp<Field<Type2> >& tf)
+tmp<Field<Type1>> transformFieldMask(const tmp<Field<Type2>>& tf)
 {
-    return tmp<Field<Type1> >(tf.ptr());
+    return tmp<Field<Type1>>(tf.ptr());
 }
 
 

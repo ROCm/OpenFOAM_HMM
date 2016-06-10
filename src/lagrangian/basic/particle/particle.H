@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,11 +85,11 @@ class particle
         //- Size in bytes of the position data
         static const std::size_t sizeofPosition_;
 
-        //- Size in bytes of the fields
-        static const std::size_t sizeofFields_;
-
-
 public:
+
+    //- Size in bytes of the fields
+    static const std::size_t sizeofFields;
+
 
     template<class CloudType>
     class TrackingData
@@ -313,7 +313,17 @@ public:
         TypeName("particle");
 
         //- String representation of properties
-        DefinePropertyList("(Px Py Pz) cellI tetFaceI tetPtI origProc origId");
+        DefinePropertyList
+        (
+            "(Px Py Pz) cellI faceI stepFraction "
+            "tetFaceI tetPtI origProc origId"
+        );
+
+        //- String representation of property types
+        DefinePropertyTypes
+        (
+            "vector label label scalar label label label label"
+        );
 
         //- Cumulative particle counter - used to provode unique ID
         static label particleCount_;
@@ -589,7 +599,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "particleTemplates.C"
+    #include "particleTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

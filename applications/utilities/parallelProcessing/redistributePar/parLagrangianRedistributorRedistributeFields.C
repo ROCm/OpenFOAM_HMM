@@ -74,7 +74,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFields
 {
     const wordList objectNames
     (
-        filterObjects<IOField<Type> >
+        filterObjects<IOField<Type>>
         (
             objects,
             selectedFields
@@ -125,7 +125,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFields
                         IOobject::NO_WRITE,
                         false
                     ),
-                    xferMove<Field<Type> >(field)
+                    xferMove<Field<Type>>(field)
                 ).write();
             }
         }
@@ -146,7 +146,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
 {
     wordList objectNames
     (
-        filterObjects<CompactIOField<Field<Type>, Type> >
+        filterObjects<CompactIOField<Field<Type>, Type>>
         (
             objects,
             selectedFields
@@ -157,7 +157,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
     {
         const wordList ioFieldNames
         (
-            filterObjects<IOField<Field<Type> > >
+            filterObjects<IOField<Field<Type>>>
             (
                 objects,
                 selectedFields
@@ -212,7 +212,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
                         IOobject::NO_WRITE,
                         false
                     ),
-                    xferMove<Field<Field<Type> > >(field)
+                    xferMove<Field<Field<Type>>>(field)
                 ).write();
             }
         }
@@ -309,7 +309,7 @@ void Foam::parLagrangianRedistributor::redistributeStoredLagrangianFields
                         IOobject::NO_WRITE,
                         false
                     ),
-                    xferMove<Field<typename Container::value_type> >(field)
+                    xferMove<Field<typename Container::value_type>>(field)
                 ).write();
             }
         }

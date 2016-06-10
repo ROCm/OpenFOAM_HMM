@@ -179,9 +179,9 @@ directionalPressureGradientExplicitSource
 :
     cellSetOption(sourceName, modelType, dict, mesh),
     model_(PressureDropModelNames_.read(coeffs_.lookup("model"))),
-    gradP0_(cells_.size(), vector::zero),
-    dGradP_(cells_.size(), vector::zero),
-    gradPporous_(cells_.size(), vector::zero),
+    gradP0_(cells_.size(), Zero),
+    dGradP_(cells_.size(), Zero),
+    gradPporous_(cells_.size(), Zero),
     flowDir_(coeffs_.lookup("flowDir")),
     invAPtr_(NULL),
     D_(0),
@@ -386,7 +386,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
     }
 
     // Accumulate 'upstream' velocity into cells
-    vectorField UfCells(cells_.size(), vector::zero);
+    vectorField UfCells(cells_.size(), Zero);
     scalarField UfCellWeights(cells_.size(), 0.0);
 
     const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
@@ -486,7 +486,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::addSup
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedVector("zero", eqn.dimensions()/dimVolume, vector::zero)
+        dimensionedVector("zero", eqn.dimensions()/dimVolume, Zero)
     );
 
     UIndirectList<vector>(Su, cells_) = gradP0_ + dGradP_ + gradPporous_;
@@ -536,7 +536,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::constrain
     }
 
     gradP0_ += dGradP_;
-    dGradP_ = vector::zero;
+    dGradP_ = Zero;
 }
 
 

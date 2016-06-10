@@ -4,7 +4,7 @@
 HashTable<word> volumeFields;
 
 // 2. the fields for each cloud:
-HashTable< HashTable<word> > cloudFields;
+HashTable<HashTable<word>> cloudFields;
 
 if (timeDirs.size())
 {
@@ -48,7 +48,7 @@ if (timeDirs.size())
         cloudFields.insert(cloudName, HashTable<word>());
 
         // Identify the new cloud within the hash table
-        HashTable<HashTable<word> >::iterator cloudIter =
+        HashTable<HashTable<word>>::iterator cloudIter =
             cloudFields.find(cloudName);
 
         IOobjectList objs

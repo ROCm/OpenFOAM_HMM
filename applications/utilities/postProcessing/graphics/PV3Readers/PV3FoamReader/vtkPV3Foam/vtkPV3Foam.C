@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -665,7 +665,7 @@ void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
         labelList nZones(pbMesh.size(), 0);
 
         // Per global zone number the average face centre position
-        List<DynamicList<point> > zoneCentre(pbMesh.size());
+        List<DynamicList<point>> zoneCentre(pbMesh.size());
 
 
         // Loop through all patches to determine zones, and centre of each zone
@@ -710,7 +710,7 @@ void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
             // Create storage for additional zone centres
             forAll(zoneNFaces, zoneI)
             {
-                zoneCentre[patchI].append(vector::zero);
+                zoneCentre[patchI].append(Zero);
             }
 
             // Do averaging per individual zone

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,11 @@ Foam::string Foam::ReactingParcel<ParcelType>::propertyList_ =
     Foam::ReactingParcel<ParcelType>::propertyList();
 
 template<class ParcelType>
-const std::size_t Foam::ReactingParcel<ParcelType>::sizeofFields_
+Foam::string Foam::ReactingParcel<ParcelType>::propertyTypes_ =
+    Foam::ReactingParcel<ParcelType>::propertyTypes();
+
+template<class ParcelType>
+const std::size_t Foam::ReactingParcel<ParcelType>::sizeofFields
 (
     sizeof(scalar)
 );
@@ -64,7 +68,7 @@ Foam::ReactingParcel<ParcelType>::ReactingParcel
         }
         else
         {
-            is.read(reinterpret_cast<char*>(&mass0_), sizeofFields_);
+            is.read(reinterpret_cast<char*>(&mass0_), sizeofFields);
             is >> Ymix;
         }
 
@@ -116,7 +120,7 @@ void Foam::ReactingParcel<ParcelType>::readFields
     c.checkFieldIOobject(c, mass0);
 
     label i = 0;
-    forAllIter(typename Cloud<ReactingParcel<ParcelType> >, c, iter)
+    forAllIter(typename Cloud<ReactingParcel<ParcelType>>, c, iter)
     {
         ReactingParcel<ParcelType>& p = iter();
         p.mass0_ = mass0[i++];
@@ -133,7 +137,7 @@ void Foam::ReactingParcel<ParcelType>::readFields
 
 
     // Set storage for each Y... for each parcel
-    forAllIter(typename Cloud<ReactingParcel<ParcelType> >, c, iter)
+    forAllIter(typename Cloud<ReactingParcel<ParcelType>>, c, iter)
     {
         ReactingParcel<ParcelType>& p = iter();
         p.Y_.setSize(nPhases, 0.0);
@@ -152,7 +156,7 @@ void Foam::ReactingParcel<ParcelType>::readFields
         );
 
         label i = 0;
-        forAllIter(typename Cloud<ReactingParcel<ParcelType> >, c, iter)
+        forAllIter(typename Cloud<ReactingParcel<ParcelType>>, c, iter)
         {
             ReactingParcel<ParcelType>& p = iter();
             p.Y_[j] = Y[i++];
@@ -186,7 +190,7 @@ void Foam::ReactingParcel<ParcelType>::writeFields
         IOField<scalar> mass0(c.fieldIOobject("mass0", IOobject::NO_READ), np);
 
         label i = 0;
-        forAllConstIter(typename Cloud<ReactingParcel<ParcelType> >, c, iter)
+        forAllConstIter(typename Cloud<ReactingParcel<ParcelType>>, c, iter)
         {
             const ReactingParcel<ParcelType>& p = iter();
             mass0[i++] = p.mass0_;
@@ -215,7 +219,7 @@ void Foam::ReactingParcel<ParcelType>::writeFields
             label i = 0;
             forAllConstIter
             (
-                typename Cloud<ReactingParcel<ParcelType> >,
+                typename Cloud<ReactingParcel<ParcelType>>,
                 c,
                 iter
             )
@@ -251,7 +255,7 @@ Foam::Ostream& Foam::operator<<
         os.write
         (
             reinterpret_cast<const char*>(&p.mass0_),
-            ReactingParcel<ParcelType>::sizeofFields_
+            ReactingParcel<ParcelType>::sizeofFields
         );
         os  << p.Y();
     }

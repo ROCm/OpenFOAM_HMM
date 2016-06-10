@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,17 +29,6 @@ License
 #include "surfaceFields.H"
 #include "Tuple2.H"
 #include "PolynomialEntry.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    makeTemplatePatchTypeField
-    (
-        fvPatchScalarField,
-        fanFvPatchScalarField
-    );
-}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -78,7 +67,7 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
 :
     uniformJumpFvPatchField<scalar>(p, iF),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "none"))
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
 {
     if (this->cyclicPatch().owner())
     {
@@ -97,7 +86,7 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
                     nPows++;
                 }
             }
-            List<Tuple2<scalar, scalar> > coeffs(nPows);
+            List<Tuple2<scalar, scalar>> coeffs(nPows);
             nPows = 0;
             forAll(f, powI)
             {
@@ -109,13 +98,13 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
 
             this->jumpTable_.reset
             (
-                new PolynomialEntry<scalar>("jumpTable", coeffs)
+                new Function1Types::Polynomial<scalar>("jumpTable", coeffs)
             );
         }
         else
         {
             // Generic input constructed from dictionary
-            this->jumpTable_ = DataEntry<scalar>::New("jumpTable", dict);
+            this->jumpTable_ = Function1<scalar>::New("jumpTable", dict);
         }
     }
 
@@ -130,6 +119,18 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
     {
         this->evaluate(Pstream::blocking);
     }
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    makeTemplatePatchTypeField
+    (
+        fvPatchScalarField,
+        fanFvPatchScalarField
+    );
 }
 
 

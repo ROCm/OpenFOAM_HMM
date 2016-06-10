@@ -52,4 +52,14 @@ DebugSwitches
     SolverPerformance   0;
 }
 
+functions
+{
+    sensitivityAnalysis
+    {
+        functionObjectLibs  ( "libutilityFunctionObjects.so" );
+        type                psiReactionsSensitivityAnalysis;
+        outputControl       outputTime;
+        enabled             true;
+    }
+}
 // ************************************************************************* //

@@ -9,17 +9,14 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Set application name
 application=$(getApplication)
 
-# Get number of processors to run on
-nProcs=4 #$(getNumberOfProcessors)
-
 # decompose
-runApplication -log log.decomposePar.cabin decomposePar -region cabin
-runApplication -log log.decomposePar.ice decomposePar -region ice
-runApplication -log log.decomposePar.exterior decomposePar -region exterior
+runApplication -s cabin decomposePar -region cabin
+runApplication -s ice decomposePar -region ice
+runApplication -s exterior decomposePar -region exterior
 
-runParallel $application $nProcs
+runParallel $application
 
-runApplication -log log.reconstructPar.cabin reconstructPar -region cabin
-runApplication -log log.reconstructPar.ice reconstructPar -region ice
-runApplication -log log.reconstructPar.exterior reconstructPar -region exterior
+runApplication -s cabin reconstructPar -region cabin
+runApplication -s ice reconstructPar -region ice
+runApplication -s exterior reconstructPar -region exterior
 

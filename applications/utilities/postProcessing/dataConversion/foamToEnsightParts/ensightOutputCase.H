@@ -8,7 +8,7 @@ if (timeDirs[0].value() < 0)
 }
 
 // the case file is always ASCII
-Info << "write case: " << caseFileName.c_str() << endl;
+Info<< "write case: " << caseFileName.c_str() << endl;
 
 OFstream caseFile(ensightDir/caseFileName, IOstream::ASCII);
 caseFile.setf(ios_base::left);
@@ -20,7 +20,9 @@ caseFile
     << "FORMAT" << nl
     << setw(16) << "type:" << "ensight gold" << nl << nl;
 
-if (hasMovingMesh)
+// time-set for geometries
+// TODO: split off into separate time-set, but need to verify ensight spec
+if (geometryTimesUsed.size())
 {
     caseFile
         << "GEOMETRY" << nl
@@ -36,14 +38,14 @@ else
 
 // add information for clouds
 // multiple clouds currently require the same time index
-forAllConstIter(HashTable<HashTable<word> >, cloudFields, cloudIter)
+forAllConstIter(HashTable<HashTable<word>>, cloudFields, cloudIter)
 {
     const word& cloudName = cloudIter.key();
 
     caseFile
         << setw(16) << "measured: 2"
         << fileName(dataMask/cloud::prefix/cloudName/"positions").c_str()
-            << nl;
+        << nl;
 }
 caseFile
     << nl << "VARIABLE" << nl;
@@ -87,11 +89,10 @@ forAllConstIter(HashTable<word>, volumeFields, fieldIter)
     }
 }
 
+
 // TODO: allow similar/different time-steps for each cloud
-
-
 label cloudNo = 0;
-forAllConstIter(HashTable<HashTable<word> >, cloudFields, cloudIter)
+forAllConstIter(HashTable<HashTable<word>>, cloudFields, cloudIter)
 {
     const word& cloudName = cloudIter.key();
 
@@ -135,7 +136,7 @@ forAllConstIter(HashTable<HashTable<word> >, cloudFields, cloudIter)
 // add time values
 caseFile << nl << "TIME" << nl;
 
-// time set 1 - geometry and volume fields
+// time set 1 - volume fields
 if (fieldTimesUsed.size())
 {
     caseFile
@@ -161,9 +162,9 @@ if (fieldTimesUsed.size())
     count = 0;
     forAll(fieldTimesUsed, i)
     {
+        const label& index = fieldTimesUsed[i];
         caseFile
-            << " " << setw(12)
-                << timeIndices[fieldTimesUsed[i]] + timeCorrection;
+            << " " << setw(12) << timeIndices[index] + timeCorrection;
 
         if (++count % 6 == 0)
         {
@@ -173,9 +174,52 @@ if (fieldTimesUsed.size())
     caseFile << nl << nl;
 }
 
+
+// time set 2 - geometry
+// THIS NEEDS MORE CHECKING
+#if 0
+if (geometryTimesUsed.size())
+{
+    caseFile
+        << "time set:        " << 2 << nl
+        << "number of steps: " << geometryTimesUsed.size() << nl
+        << "filename numbers:" << nl;
+
+    label count = 0;
+    forAll(geometryTimesUsed, i)
+    {
+        caseFile
+            << " " << setw(12) << geometryTimesUsed[i];
+
+        if (++count % 6 == 0)
+        {
+            caseFile << nl;
+        }
+    }
+
+    caseFile
+        << nl << "time values:" << nl;
+
+    count = 0;
+    forAll(geometryTimesUsed, i)
+    {
+        const label& index = geometryTimesUsed[i];
+        caseFile
+            << " " << setw(12) << timeIndices[index] + timeCorrection;
+
+        if (++count % 6 == 0)
+        {
+            caseFile << nl;
+        }
+    }
+    caseFile << nl << nl;
+}
+#endif
+
+// time set - clouds
 // TODO: allow similar/different time-steps for each cloud
 cloudNo = 0;
-forAllConstIter(HashTable<DynamicList<label> >, cloudTimesUsed, cloudIter)
+forAllConstIter(HashTable<DynamicList<label>>, cloudTimesUsed, cloudIter)
 {
     // const word& cloudName = cloudIter.key();
     const DynamicList<label>& timesUsed = cloudIter();
@@ -205,9 +249,9 @@ forAllConstIter(HashTable<DynamicList<label> >, cloudTimesUsed, cloudIter)
         count = 0;
         forAll(timesUsed, i)
         {
+            const label& index = timesUsed[i];
             caseFile
-                << " " << setw(12)
-                    << timeIndices[timesUsed[i]] + timeCorrection;
+                << " " << setw(12) << timeIndices[index] + timeCorrection;
 
             if (++count % 6 == 0)
             {

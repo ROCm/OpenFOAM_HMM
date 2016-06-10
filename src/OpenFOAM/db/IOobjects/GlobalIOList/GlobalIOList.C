@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,7 @@ Foam::GlobalIOList<Type>::GlobalIOList(const IOobject& io)
     regIOobject(io)
 {
     // Check for MUST_READ_IF_MODIFIED
-    warnNoRereading<GlobalIOList<Type> >();
+    warnNoRereading<GlobalIOList<Type>>();
 
     readHeaderOk(IOstream::BINARY, typeName);
 }
@@ -45,7 +45,7 @@ Foam::GlobalIOList<Type>::GlobalIOList(const IOobject& io, const label size)
     regIOobject(io)
 {
     // Check for MUST_READ_IF_MODIFIED
-    warnNoRereading<GlobalIOList<Type> >();
+    warnNoRereading<GlobalIOList<Type>>();
 
     if (!readHeaderOk(IOstream::BINARY, typeName))
     {
@@ -60,7 +60,7 @@ Foam::GlobalIOList<Type>::GlobalIOList(const IOobject& io, const List<Type>& f)
     regIOobject(io)
 {
     // Check for MUST_READ_IF_MODIFIED
-    warnNoRereading<GlobalIOList<Type> >();
+    warnNoRereading<GlobalIOList<Type>>();
 
     if (!readHeaderOk(IOstream::BINARY, typeName))
     {
@@ -73,13 +73,13 @@ template<class Type>
 Foam::GlobalIOList<Type>::GlobalIOList
 (
     const IOobject& io,
-    const Xfer<List<Type> >& f
+    const Xfer<List<Type>>& f
 )
 :
     regIOobject(io)
 {
     // Check for MUST_READ_IF_MODIFIED
-    warnNoRereading<GlobalIOList<Type> >();
+    warnNoRereading<GlobalIOList<Type>>();
 
     List<Type>::transfer(f());
 

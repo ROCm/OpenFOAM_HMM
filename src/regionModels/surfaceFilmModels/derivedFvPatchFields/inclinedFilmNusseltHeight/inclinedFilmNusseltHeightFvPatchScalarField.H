@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ SourceFiles
 
 #include "fvPatchFields.H"
 #include "fixedValueFvPatchFields.H"
-#include "DataEntry.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,13 +60,13 @@ class inclinedFilmNusseltHeightFvPatchScalarField
         word filmRegionName_;
 
         //- Mean mass flow rate per unit length [kg/s/m]
-        autoPtr<DataEntry<scalar> > GammaMean_;
+        autoPtr<Function1<scalar>> GammaMean_;
 
         //- Perturbation amplitude [m]
-        autoPtr<DataEntry<scalar> > a_;
+        autoPtr<Function1<scalar>> a_;
 
         //- Perturbation frequency [rad/s/m]
-        autoPtr<DataEntry<scalar> > omega_;
+        autoPtr<Function1<scalar>> omega_;
 
 
 public:

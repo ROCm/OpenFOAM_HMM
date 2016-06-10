@@ -37,7 +37,7 @@ forAll(phases, phasei)
 // Lift, wall-lubrication and turbulent diffusion fluxes
 PtrList<surfaceScalarField> phiFs(phases.size());
 {
-    autoPtr<PtrList<volVectorField> > Fs = fluid.Fs();
+    autoPtr<PtrList<volVectorField>> Fs = fluid.Fs();
 
     forAll(phases, phasei)
     {
@@ -51,14 +51,14 @@ PtrList<surfaceScalarField> phiFs(phases.size());
                 new surfaceScalarField
                 (
                     IOobject::groupName("phiF", phase.name()),
-                    (fvc::interpolate(rAUs[phasei]*Fs()[phasei]) & mesh.Sf())
+                    fvc::flux(rAUs[phasei]*Fs()[phasei])
                 )
             );
         }
     }
 }
 {
-    autoPtr<PtrList<surfaceScalarField> > phiDs = fluid.phiDs(rAUs);
+    autoPtr<PtrList<surfaceScalarField>> phiDs = fluid.phiDs(rAUs);
 
     forAll(phases, phasei)
     {
@@ -201,7 +201,7 @@ while (pimple.correct())
             new surfaceScalarField
             (
                 IOobject::groupName("phiHbyA", phase.name()),
-                (fvc::interpolate(HbyAs[phasei]) & mesh.Sf())
+                fvc::flux(HbyAs[phasei])
               + phiCorrCoeff
                *fvc::interpolate
                 (
@@ -209,7 +209,7 @@ while (pimple.correct())
                 )
                *(
                    MRF.absolute(phase.phi().oldTime())
-                 - (fvc::interpolate(phase.U().oldTime()) & mesh.Sf())
+                 - fvc::flux(phase.U().oldTime())
                 )/runTime.deltaT()
               - phigFs[phasei]
             )
@@ -318,11 +318,14 @@ while (pimple.correct())
                                 rho
                             )
                         )/rho
-                      + (alpha/rho)*correction
+                      + correction
                         (
-                            phase.thermo().psi()*fvm::ddt(p_rgh)
-                          + fvm::div(phid, p_rgh)
-                          - fvm::Sp(fvc::div(phid), p_rgh)
+                            (alpha/rho)*
+                            (
+                                phase.thermo().psi()*fvm::ddt(p_rgh)
+                              + fvm::div(phid, p_rgh)
+                              - fvm::Sp(fvc::div(phid), p_rgh)
+                            )
                         )
                     ).ptr()
                 );
@@ -454,7 +457,7 @@ while (pimple.correct())
     forAll(phases, phasei)
     {
         phaseModel& phase = phases[phasei];
-        phase.rho()() += phase.thermo().psi()*(p_rgh - p_rgh_0);
+        phase.thermo().rho() += phase.thermo().psi()*(p_rgh - p_rgh_0);
     }
 
     // Correct p_rgh for consistency with p and the updated densities

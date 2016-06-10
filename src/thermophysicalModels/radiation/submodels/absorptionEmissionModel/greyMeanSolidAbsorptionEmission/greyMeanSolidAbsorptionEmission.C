@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 #include "greyMeanSolidAbsorptionEmission.H"
 #include "addToRunTimeSelectionTable.H"
 #include "unitConversion.H"
+#include "extrapolatedCalculatedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -53,16 +54,16 @@ greyMeanSolidAbsorptionEmission::X(const word specie) const
     const volScalarField& p = thermo_.p();
 
     tmp<scalarField> tXj(new scalarField(T.internalField().size(), 0.0));
-    scalarField& Xj = tXj();
+    scalarField& Xj = tXj.ref();
 
     tmp<scalarField> tRhoInv(new scalarField(T.internalField().size(), 0.0));
-    scalarField& rhoInv = tRhoInv();
+    scalarField& rhoInv = tRhoInv.ref();
 
     forAll(mixture_.Y(), specieI)
     {
         const scalarField& Yi = mixture_.Y()[specieI];
 
-        forAll (rhoInv, iCell)
+        forAll(rhoInv, iCell)
         {
             rhoInv[iCell] +=
                 Yi[iCell]/mixture_.rho(specieI, p[iCell], T[iCell]);
@@ -156,11 +157,11 @@ calc(const label propertyId) const
             ),
             mesh(),
             dimensionedScalar("a", dimless/dimLength, 0.0),
-            zeroGradientFvPatchVectorField::typeName
+            extrapolatedCalculatedFvPatchVectorField::typeName
         )
     );
 
-    scalarField& a = ta().internalField();
+    scalarField& a = ta.ref().internalField();
 
     forAllConstIter(HashTable<label>, speciesNames_, iter)
     {
@@ -170,7 +171,7 @@ calc(const label propertyId) const
         }
     }
 
-    ta().correctBoundaryConditions();
+    ta.ref().correctBoundaryConditions();
     return ta;
 }
 

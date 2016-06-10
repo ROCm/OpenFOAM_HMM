@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -122,7 +122,7 @@ void Foam::functionObjectFile::resetFile(const word& fileName)
 
 Foam::Omanip<int> Foam::functionObjectFile::valueWidth(const label offset) const
 {
-    return setw(IOstream::defaultPrecision() + addChars + offset);
+    return setw(writePrecision_ + addChars + offset);
 }
 
 
@@ -211,7 +211,7 @@ bool Foam::functionObjectFile::writeToFile() const
 
 Foam::label Foam::functionObjectFile::charWidth() const
 {
-    return IOstream::defaultPrecision() + addChars;
+    return writePrecision_ + addChars;
 }
 
 

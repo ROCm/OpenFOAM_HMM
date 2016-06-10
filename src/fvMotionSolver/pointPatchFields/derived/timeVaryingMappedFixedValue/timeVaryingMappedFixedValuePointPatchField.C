@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,10 +46,10 @@ timeVaryingMappedFixedValuePointPatchField
     sampleTimes_(0),
     startSampleTime_(-1),
     startSampledValues_(0),
-    startAverage_(pTraits<Type>::zero),
+    startAverage_(Zero),
     endSampleTime_(-1),
     endSampledValues_(0),
-    endAverage_(pTraits<Type>::zero),
+    endAverage_(Zero),
     offset_()
 {}
 
@@ -74,10 +74,10 @@ timeVaryingMappedFixedValuePointPatchField
     sampleTimes_(0),
     startSampleTime_(-1),
     startSampledValues_(0),
-    startAverage_(pTraits<Type>::zero),
+    startAverage_(Zero),
     endSampleTime_(-1),
     endSampledValues_(0),
-    endAverage_(pTraits<Type>::zero),
+    endAverage_(Zero),
     offset_
     (
         ptf.offset_.valid()
@@ -113,15 +113,15 @@ timeVaryingMappedFixedValuePointPatchField
     sampleTimes_(0),
     startSampleTime_(-1),
     startSampledValues_(0),
-    startAverage_(pTraits<Type>::zero),
+    startAverage_(Zero),
     endSampleTime_(-1),
     endSampledValues_(0),
-    endAverage_(pTraits<Type>::zero),
+    endAverage_(Zero),
     offset_()
 {
     if (dict.found("offset"))
     {
-        offset_ = DataEntry<Type>::New("offset", dict);
+        offset_ = Function1<Type>::New("offset", dict);
     }
 
     dict.readIfPresent("fieldTableName", fieldTableName_);
@@ -236,7 +236,7 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::rmap
     fixedValuePointPatchField<Type>::rmap(ptf, addr);
 
     const timeVaryingMappedFixedValuePointPatchField<Type>& tiptf =
-        refCast<const timeVaryingMappedFixedValuePointPatchField<Type> >(ptf);
+        refCast<const timeVaryingMappedFixedValuePointPatchField<Type>>(ptf);
 
     startSampledValues_.rmap(tiptf.startSampledValues_, addr);
     endSampledValues_.rmap(tiptf.endSampledValues_, addr);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ Foam::extendedCentredCellToCellStencil::extendedCentredCellToCellStencil
     stencil_(stencil)
 {
     // Calculate distribute map (also renumbers elements in stencil)
-    List<Map<label> > compactMap(Pstream::nProcs());
+    List<Map<label>> compactMap(Pstream::nProcs());
     mapPtr_.reset
     (
         new mapDistribute
@@ -53,7 +53,6 @@ Foam::extendedCentredCellToCellStencil::extendedCentredCellToCellStencil
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Per cell which elements of the stencil to keep.
 void Foam::extendedCentredCellToCellStencil::compact()
 {
     boolList isInStencil(map().constructSize(), false);

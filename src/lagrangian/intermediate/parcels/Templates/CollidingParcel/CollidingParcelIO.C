@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,7 @@ Foam::string Foam::CollidingParcel<ParcelType>::propertyList_ =
     Foam::CollidingParcel<ParcelType>::propertyList();
 
 template<class ParcelType>
-const std::size_t Foam::CollidingParcel<ParcelType>::sizeofFields_
+const std::size_t Foam::CollidingParcel<ParcelType>::sizeofFields
 (
     offsetof(CollidingParcel<ParcelType>, collisionRecords_)
   - offsetof(CollidingParcel<ParcelType>, f_)
@@ -52,9 +52,9 @@ Foam::CollidingParcel<ParcelType>::CollidingParcel
 )
 :
     ParcelType(mesh, is, readFields),
-    f_(vector::zero),
-    angularMomentum_(vector::zero),
-    torque_(vector::zero),
+    f_(Zero),
+    angularMomentum_(Zero),
+    torque_(Zero),
     collisionRecords_()
 {
     if (readFields)
@@ -67,7 +67,7 @@ Foam::CollidingParcel<ParcelType>::CollidingParcel
         }
         else
         {
-            is.read(reinterpret_cast<char*>(&f_), sizeofFields_);
+            is.read(reinterpret_cast<char*>(&f_), sizeofFields);
         }
 
         is >> collisionRecords_;
@@ -297,7 +297,7 @@ Foam::Ostream& Foam::operator<<
         os.write
         (
             reinterpret_cast<const char*>(&p.f_),
-            CollidingParcel<ParcelType>::sizeofFields_
+            CollidingParcel<ParcelType>::sizeofFields
         );
         os  << p.collisionRecords();
     }

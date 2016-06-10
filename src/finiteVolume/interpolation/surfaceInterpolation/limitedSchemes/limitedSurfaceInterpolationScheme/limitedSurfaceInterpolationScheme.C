@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,16 +28,11 @@ License
 #include "surfaceFields.H"
 #include "coupledFvPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<limitedSurfaceInterpolationScheme<Type> >
-limitedSurfaceInterpolationScheme<Type>::New
+Foam::tmp<Foam::limitedSurfaceInterpolationScheme<Type>>
+Foam::limitedSurfaceInterpolationScheme<Type>::New
 (
     const fvMesh& mesh,
     Istream& schemeData
@@ -45,10 +40,8 @@ limitedSurfaceInterpolationScheme<Type>::New
 {
     if (surfaceInterpolation::debug)
     {
-        Info<< "limitedSurfaceInterpolationScheme<Type>::"
-               "New(const fvMesh&, Istream&)"
-               " : constructing limitedSurfaceInterpolationScheme<Type>"
-            << endl;
+        InfoInFunction
+            << "Constructing limitedSurfaceInterpolationScheme<Type>" << endl;
     }
 
     if (schemeData.eof())
@@ -84,10 +77,9 @@ limitedSurfaceInterpolationScheme<Type>::New
 }
 
 
-// Return weighting factors for scheme given by name in dictionary
 template<class Type>
-tmp<limitedSurfaceInterpolationScheme<Type> >
-limitedSurfaceInterpolationScheme<Type>::New
+Foam::tmp<Foam::limitedSurfaceInterpolationScheme<Type>>
+Foam::limitedSurfaceInterpolationScheme<Type>::New
 (
     const fvMesh& mesh,
     const surfaceScalarField& faceFlux,
@@ -96,9 +88,8 @@ limitedSurfaceInterpolationScheme<Type>::New
 {
     if (surfaceInterpolation::debug)
     {
-        Info<< "limitedSurfaceInterpolationScheme<Type>::New"
-               "(const fvMesh&, const surfaceScalarField&, Istream&) : "
-               "constructing limitedSurfaceInterpolationScheme<Type>"
+        InfoInFunction
+            << "Constructing limitedSurfaceInterpolationScheme<Type>"
             << endl;
     }
 
@@ -138,14 +129,16 @@ limitedSurfaceInterpolationScheme<Type>::New
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
-limitedSurfaceInterpolationScheme<Type>::~limitedSurfaceInterpolationScheme()
+Foam::limitedSurfaceInterpolationScheme<Type>::
+~limitedSurfaceInterpolationScheme()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<surfaceScalarField> limitedSurfaceInterpolationScheme<Type>::weights
+Foam::tmp<Foam::surfaceScalarField>
+Foam::limitedSurfaceInterpolationScheme<Type>::weights
 (
     const GeometricField<Type, fvPatchField, volMesh>& phi,
     const surfaceScalarField& CDweights,
@@ -154,7 +147,7 @@ tmp<surfaceScalarField> limitedSurfaceInterpolationScheme<Type>::weights
 {
     // Note that here the weights field is initialised as the limiter
     // from which the weight is calculated using the limiter value
-    surfaceScalarField& Weights = tLimiter();
+    surfaceScalarField& Weights = tLimiter.ref();
 
     scalarField& pWeights = Weights.internalField();
 
@@ -187,7 +180,8 @@ tmp<surfaceScalarField> limitedSurfaceInterpolationScheme<Type>::weights
 }
 
 template<class Type>
-tmp<surfaceScalarField> limitedSurfaceInterpolationScheme<Type>::weights
+Foam::tmp<Foam::surfaceScalarField>
+Foam::limitedSurfaceInterpolationScheme<Type>::weights
 (
     const GeometricField<Type, fvPatchField, volMesh>& phi
 ) const
@@ -201,8 +195,8 @@ tmp<surfaceScalarField> limitedSurfaceInterpolationScheme<Type>::weights
 }
 
 template<class Type>
-tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
-limitedSurfaceInterpolationScheme<Type>::flux
+Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh>>
+Foam::limitedSurfaceInterpolationScheme<Type>::flux
 (
     const GeometricField<Type, fvPatchField, volMesh>& phi
 ) const
@@ -210,9 +204,5 @@ limitedSurfaceInterpolationScheme<Type>::flux
     return faceFlux_*this->interpolate(phi);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

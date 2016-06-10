@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,7 +135,7 @@ void Foam::particle::readFields(CloudType& c)
 
     IOobject procIO(c.fieldIOobject("origProcId", IOobject::MUST_READ));
 
-    if (procIO.typeHeaderOk<IOField<label> >(true))
+    if (procIO.typeHeaderOk<IOField<label>>(true))
     {
         IOField<label> origProcId(procIO);
         c.checkFieldIOobject(c, origProcId);
@@ -820,7 +820,7 @@ void Foam::particle::hitWallFaces
                     lambdaDistanceTolerance
                 );
 
-                pointHit hitInfo(vector::zero);
+                pointHit hitInfo(Zero);
 
                 if (mesh_.moving())
                 {

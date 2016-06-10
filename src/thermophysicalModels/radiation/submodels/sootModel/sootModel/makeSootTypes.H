@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,30 +31,30 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeSootTypesThermo(sootModelType, Thermo)                            \
-    typedef Foam::radiation::sootModelType<Foam::Thermo>                      \
-        sootModelType##Thermo;                                                \
-                                                                              \
-    defineTemplateTypeNameAndDebugWithName                                    \
-    (                                                                         \
-        sootModelType##Thermo,                                                \
-        #sootModelType"<"#Thermo">",                                          \
-        0                                                                     \
-    );                                                                        \
-                                                                              \
-    namespace Foam                                                            \
-    {                                                                         \
-        namespace radiation                                                   \
-        {                                                                     \
-            typedef sootModelType<Thermo> sootModelType##Thermo;              \
-                                                                              \
-            addToRunTimeSelectionTable                                        \
-            (                                                                 \
-                sootModel,                                                    \
-                sootModelType##Thermo,                                        \
-                dictionary                                                    \
-            );                                                                \
-        }                                                                     \
+#define makeSootTypesThermo(sootModelType, Thermo)                             \
+    typedef Foam::radiation::sootModelType<Foam::Thermo>                       \
+        sootModelType##Thermo;                                                 \
+                                                                               \
+    defineTemplateTypeNameAndDebugWithName                                     \
+    (                                                                          \
+        sootModelType##Thermo,                                                 \
+        #sootModelType"<"#Thermo">",                                           \
+        0                                                                      \
+    );                                                                         \
+                                                                               \
+    namespace Foam                                                             \
+    {                                                                          \
+        namespace radiation                                                    \
+        {                                                                      \
+            typedef sootModelType<Thermo> sootModelType##Thermo;               \
+                                                                               \
+            addToRunTimeSelectionTable                                         \
+            (                                                                  \
+                sootModel,                                                     \
+                sootModelType##Thermo,                                         \
+                dictionary                                                     \
+            );                                                                 \
+        }                                                                      \
     }
 
 

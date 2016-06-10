@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -112,8 +112,6 @@ bool Foam::StandardWallInteraction<CloudType>::correct
 {
     vector& U = p.U();
 
-    bool& active = p.active();
-
     if (isA<wallPolyPatch>(pp))
     {
         switch (interactionType_)
@@ -121,8 +119,8 @@ bool Foam::StandardWallInteraction<CloudType>::correct
             case PatchInteractionModel<CloudType>::itEscape:
             {
                 keepParticle = false;
-                active = false;
-                U = vector::zero;
+                p.active(false);
+                U = Zero;
                 nEscape_++;
                 massEscape_ += p.nParticle()*p.mass();
                 break;
@@ -130,8 +128,8 @@ bool Foam::StandardWallInteraction<CloudType>::correct
             case PatchInteractionModel<CloudType>::itStick:
             {
                 keepParticle = true;
-                active = false;
-                U = vector::zero;
+                p.active(false);
+                U = Zero;
                 nStick_++;
                 massStick_ += p.nParticle()*p.mass();
                 break;
@@ -139,7 +137,7 @@ bool Foam::StandardWallInteraction<CloudType>::correct
             case PatchInteractionModel<CloudType>::itRebound:
             {
                 keepParticle = true;
-                active = true;
+                p.active(true);
 
                 vector nw;
                 vector Up;
@@ -205,16 +203,9 @@ void Foam::StandardWallInteraction<CloudType>::info(Ostream& os)
     if (this->outputTime())
     {
         this->setModelProperty("nEscape", npe);
-        nEscape_ = 0;
-
         this->setModelProperty("massEscape", mpe);
-        massEscape_ = 0.0;
-
         this->setModelProperty("nStick", nps);
-        nStick_ = 0;
-
         this->setModelProperty("massStick", mps);
-        massStick_ = 0.0;
     }
 }
 

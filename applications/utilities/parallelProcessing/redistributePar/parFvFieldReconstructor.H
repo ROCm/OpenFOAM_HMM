@@ -105,7 +105,7 @@ public:
 
         //- Reconstruct volume internal field
         template<class Type>
-        tmp<DimensionedField<Type, volMesh> >
+        tmp<DimensionedField<Type, volMesh>>
         reconstructFvVolumeInternalField
         (
             const DimensionedField<Type, volMesh>&
@@ -113,14 +113,14 @@ public:
 
         //- Read and reconstruct volume internal field
         template<class Type>
-        tmp<DimensionedField<Type, volMesh> >
+        tmp<DimensionedField<Type, volMesh>>
         reconstructFvVolumeInternalField(const IOobject& fieldIoObject) const;
 
 
 
         //- Reconstruct volume field
         template<class Type>
-        tmp<GeometricField<Type, fvPatchField, volMesh> >
+        tmp<GeometricField<Type, fvPatchField, volMesh>>
         reconstructFvVolumeField
         (
             const GeometricField<Type, fvPatchField, volMesh>& fld
@@ -128,14 +128,14 @@ public:
 
         //- Read and reconstruct volume field
         template<class Type>
-        tmp<GeometricField<Type, fvPatchField, volMesh> >
+        tmp<GeometricField<Type, fvPatchField, volMesh>>
         reconstructFvVolumeField(const IOobject& fieldIoObject) const;
 
 
 
         //- Reconstruct surface field
         template<class Type>
-        tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         reconstructFvSurfaceField
         (
             const GeometricField<Type, fvsPatchField, surfaceMesh>&
@@ -143,7 +143,7 @@ public:
 
         //- Read and reconstruct surface field
         template<class Type>
-        tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         reconstructFvSurfaceField(const IOobject& fieldIoObject) const;
 
 

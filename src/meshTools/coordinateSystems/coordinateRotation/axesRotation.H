@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,16 +28,20 @@ Description
     A coordinate rotation specified using global axis
 
     The rotation is defined by a combination of vectors (e1/e2), (e2/e3)
-    or (e3/e1). Any nonorthogonality will be absorbed into the second vector.
+    or (e3/e1). Any nonorthogonality will be absorbed into the second
+    vector.
 
     \verbatim
-        axesRotation
-        {
-            type        axesRotation;
-            e1          (1 0 0);
-            e2          (0 1 0);
-        }
+    axesRotation
+    {
+        type        axesRotation;
+        e1          (1 0 0);
+        e2          (0 1 0);
+    }
     \endverbatim
+
+SourceFiles
+    axesRotation.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -153,22 +157,22 @@ public:
             return Rtr_;
         }
 
-        //- Return local Cartesian x-axis
+        //- Return local Cartesian x-axis in global coordinates
         virtual const vector e1() const
         {
-            return R_.x();
+            return Rtr_.x();
         }
 
-        //- Return local Cartesian y-axis
+        //- Return local Cartesian y-axis in global coordinates
         virtual const vector e2() const
         {
-            return R_.y();
+            return Rtr_.y();
         }
 
-        //- Return local Cartesian z-axis
+        //- Return local Cartesian z-axis in global coordinates
         virtual const vector e3() const
         {
-            return R_.z();
+            return Rtr_.z();
         }
 
         //- Return transformation tensor field

@@ -123,7 +123,7 @@ Foam::fileName Foam::boundaryDataSurfaceWriter::writeTemplate
                 IOobject::NO_WRITE,
                 false
             ),
-            pTraits<Type>::zero,
+            Type(Zero),
             values
         );
 
