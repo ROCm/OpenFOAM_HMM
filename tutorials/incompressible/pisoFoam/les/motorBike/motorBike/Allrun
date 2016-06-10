@@ -11,11 +11,11 @@ cp $FOAM_TUTORIALS/resources/geometry/motorBike.obj.gz constant/triSurface/
 mkdir 0
 
 runApplication blockMesh
-cp system/decomposeParDict.hierarchical system/decomposeParDict
-runApplication decomposePar
+# cp system/decomposeParDict.hierarchical system/decomposeParDict
+runApplication decomposePar -decomposeParDict system/decomposeParDict.hierarchical
 
-cp system/decomposeParDict.ptscotch system/decomposeParDict
-runParallel snappyHexMesh -overwrite -parallel
+# cp system/decomposeParDict.ptscotch system/decomposeParDict
+runParallel snappyHexMesh -decomposeParDict system/decomposeParDict.ptscotch -overwrite -parallel
 
 find . -type f -iname "*level*" -exec rm {} \;
 

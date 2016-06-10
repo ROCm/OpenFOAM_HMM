@@ -27,9 +27,13 @@ Class
 
 Description
     Hybrid convection scheme of Travin et al. for hybrid RAS/LES calculations.
-    The scheme blends between a low-dissipative convection scheme within the
-    LES region (e.g. linear) and a numerically more robust convection scheme in
-    the RAS region (e.g. upwind-biased schemes).
+
+    The scheme provides a blend between two convection schemes, based on local
+    properties including the wall distance, velocity gradient and eddy
+    viscosity.  The scheme was originally developed for DES calculations to
+    blend a low-dissipative scheme, e.g. linear, in the vorticity-dominated,
+    finely-resolved regions and a numerically more robust, e.g. upwind-biased,
+    convection scheme in irrotational or coarsely-resolved regions.
 
     The routine calculates the blending factor denoted as "sigma" in the
     literature reference, where 0 <= sigma <= sigmaMax, which is then employed

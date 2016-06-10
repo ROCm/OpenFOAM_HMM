@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | OpenCFD Ltd 2016
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,6 +38,11 @@ Description
     used in an extra wall beyond an existing cyclic patch pair. See PDRMesh
     for more details.
 
+    The baffle is activated when the pressure difference between master and
+    slave paches is positive and larger then minThresholdValue. The
+    orientation flag is used to to calculate the pressure difference bwetween
+    master-slave or slave-master.
+
     Once the threshold is crossed, this condition activated and continues to
     open or close at a fixed rate using
 
@@ -70,6 +75,7 @@ Description
         minThresholdValue | minimum absolute pressure or
                             force difference for activation | yes |
         forceBased   | force (true) or pressure-based (false) activation | yes |
+        opening      | Baffle is opening or closing (1 opening, 0 closing) | yes
     \endtable
 
     Example of the boundary condition specification:
@@ -85,6 +91,7 @@ Description
         maxOpenFractionDelta 0.1;
         minThresholdValue 0.01;
         forceBased      false;
+        opening         1;
     }
     \endverbatim
 
@@ -124,10 +131,6 @@ class activePressureForceBaffleVelocityFvPatchVectorField
         //- Index of the cyclic patch used when the active baffle is open
         label cyclicPatchLabel_;
 
-        //- Orientation (1 or -1) of the active baffle mode
-        //  Used to change the direction of opening or closing the baffle
-        label orientation_;
-
         //- Initial wall patch areas
         vectorField initWallSf_;
 
@@ -157,6 +160,9 @@ class activePressureForceBaffleVelocityFvPatchVectorField
 
         //- Baffle is activated
         bool baffleActivated_;
+
+        //- Baffle is opening or closing (1 opening, 0 closing)
+        bool opening_;
 
 
 public:

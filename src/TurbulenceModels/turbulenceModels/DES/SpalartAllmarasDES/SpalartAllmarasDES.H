@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,6 +47,11 @@ Description
         densities.
         Theor. Comput. Fluid Dyn., 20, 181-195.
     \endverbatim
+
+Note
+    The default value of the DES constant implemented was calibrated for
+    OpenFOAM using decaying isotropic turbulence and agrees with the value
+    suggested in the reference publication.
 
 SourceFiles
     SpalartAllmarasDES.C

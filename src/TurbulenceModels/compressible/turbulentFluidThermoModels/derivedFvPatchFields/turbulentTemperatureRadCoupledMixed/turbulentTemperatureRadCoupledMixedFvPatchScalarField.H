@@ -59,7 +59,7 @@ Description
         QrNbr           Qr; // or none. Name of Qr field on neighbour region
         Qr              Qr; // or none. Name of Qr field on local region
         thicknessLayers (0.1 0.2 0.3 0.4);
-        kappaLayers     (1 2 3 4)
+        kappaLayers     (1 2 3 4);
         value           uniform 300;
     }
     \endverbatim

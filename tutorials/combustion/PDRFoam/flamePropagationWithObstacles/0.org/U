@@ -40,7 +40,7 @@ boundaryField
         type            activePressureForceBaffleVelocity;
         value           uniform (0 0 0);
         cyclicPatch     baffleCyclic_half0;
-        orientation     1;
+        opening         1;
         openingTime     0.01;
         maxOpenFractionDelta 0.1;
         openFraction    0;

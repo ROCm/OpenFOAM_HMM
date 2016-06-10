@@ -37,8 +37,11 @@ Description
         39th AIAA Aerospace Sciences Meeting and Exhibit, Reno, NV
     \endverbatim
 
-    Note: DES constants CDES_kom and CDES_keps have been re-calibrated to 
-          OpenFOAM numerics via decaying isotropic turbulence test case
+Note
+    The default values of the DES constants implemented are code-specific
+    values calibrated for OpenFOAM using decaying isotropic turbulence, and
+    hence deviate slightly from the values suggested in the reference
+    publication.
 
 SourceFiles
     kOmegaSSTDES.C

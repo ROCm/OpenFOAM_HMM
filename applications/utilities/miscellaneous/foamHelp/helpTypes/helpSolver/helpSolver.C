@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,7 @@ License
 
 #include "helpSolver.H"
 #include "addToRunTimeSelectionTable.H"
+#include "fvMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -63,6 +64,11 @@ void Foam::helpTypes::helpSolver::init()
     helpType::init();
 
     argList::validArgs.append("solver");
+    argList::addBoolOption
+    (
+        "read",
+        "read solver type from the system/controlDict"
+    );
 }
 
 
@@ -76,6 +82,11 @@ void Foam::helpTypes::helpSolver::execute
 
     if (args.optionReadIfPresent("browse", solver))
     {
+        displayDoc(solver, ".*solvers/.*Foam/", true, "C");
+    }
+    else if (args.optionFound("read"))
+    {
+        mesh.time().controlDict().lookup("application") >> solver;
         displayDoc(solver, ".*solvers/.*Foam/", true, "C");
     }
     else

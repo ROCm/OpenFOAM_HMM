@@ -219,7 +219,7 @@ Foam::forceCoeffs::forceCoeffs
     CdBinFilePtr_(),
     ClBinFilePtr_()
 {
-    if (readFields)
+    if (active_ && readFields)
     {
         read(dict);
         if (log_) Info << endl;
@@ -309,6 +309,12 @@ void Foam::forceCoeffs::execute()
     }
 
     forces::calcForcesMoment();
+
+    // Need to re-check active_ flag - may have been reset in calcForcesMoment
+    if (!active_)
+    {
+        return;
+    }
 
     createFiles();
 
