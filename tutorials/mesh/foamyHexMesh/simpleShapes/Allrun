@@ -15,9 +15,7 @@ runApplication -s sphere \
                   constant/triSurface/sphere_orient.stl
 
 runApplication \
-    surfaceBooleanFeatures intersection \
-                           constant/triSurface/cone_orient.stl \
-                           constant/triSurface/sphere_orient.stl
+    surfaceBooleanFeatures intersection cone_orient.stl sphere_orient.stl
 
 runApplication foamyHexMesh
 
