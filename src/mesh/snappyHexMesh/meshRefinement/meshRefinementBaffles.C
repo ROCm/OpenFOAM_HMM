@@ -311,7 +311,6 @@ void Foam::meshRefinement::getBafflePatches
         zonify
         (
             true,               // allowFreeStandingZoneFaces
-            -2,                 // zone to put unreached cells into
             locationsInMesh,
             zonesInMesh,
 
@@ -1811,75 +1810,8 @@ void Foam::meshRefinement::findCellZoneInsideWalk
 }
 
 
-bool Foam::meshRefinement::calcRegionToZone
-(
-    const label backgroundZoneID,
-    const label surfZoneI,
-    const label ownRegion,
-    const label neiRegion,
-
-    labelList& regionToCellZone
-) const
-{
-    bool changed = false;
-
-    // Check whether inbetween different regions
-    if (ownRegion != neiRegion)
-    {
-        // Jump. Change one of the sides to my type.
-
-        // 1. Interface between my type and unset region.
-        // Set region to keepRegion
-
-        if (regionToCellZone[ownRegion] == -2)
-        {
-            if (regionToCellZone[neiRegion] == surfZoneI)
-            {
-                // Face between unset and my region. Put unset
-                // region into keepRegion
-                //MEJ: see comment in findCellZoneTopo
-                if (backgroundZoneID != -2)
-                {
-                    regionToCellZone[ownRegion] = backgroundZoneID;
-                    changed = true;
-                }
-            }
-            else if (regionToCellZone[neiRegion] != -2)
-            {
-                // Face between unset and other region.
-                // Put unset region into my region
-                regionToCellZone[ownRegion] = surfZoneI;
-                changed = true;
-            }
-        }
-        else if (regionToCellZone[neiRegion] == -2)
-        {
-            if (regionToCellZone[ownRegion] == surfZoneI)
-            {
-                // Face between unset and my region. Put unset
-                // region into keepRegion
-                if (backgroundZoneID != -2)
-                {
-                    regionToCellZone[neiRegion] = backgroundZoneID;
-                    changed = true;
-                }
-            }
-            else if (regionToCellZone[ownRegion] != -2)
-            {
-                // Face between unset and other region.
-                // Put unset region into my region
-                regionToCellZone[neiRegion] = surfZoneI;
-                changed = true;
-            }
-        }
-    }
-    return changed;
-}
-
-
 void Foam::meshRefinement::findCellZoneTopo
 (
-    const label backgroundZoneID,
     const pointField& locationsInMesh,
     const labelList& allSurfaceIndex,
     const labelList& namedSurfaceIndex,
@@ -1893,17 +1825,12 @@ void Foam::meshRefinement::findCellZoneTopo
     // know which side of the face it relates to. So all we are doing here
     // is get the correspondence between surface/cellZone and regionSplit
     // region.
-    // See the logic in calcRegionToZone. The problem is what to do
-    // with unreachable parts of the mesh (cellToZone = -2).
-    // In 23x this routine was only called for actually zoneing an existing
-    // mesh so we had to do something with these cells and they
-    // would get set to -1 (background). However in this version this routine
-    // also gets used much earlier on when after the surface refinement it
-    // removes unreachable cells ('Removing mesh beyond surface intersections')
-    // and this is when we keep -2 so it gets removed.
-    // So the zone to set these unmarked cells to is provided as argument:
-    // - backgroundZoneID = -2 : do not change so remove cells
-    // - backgroundZoneID = -1 : put into background
+    // This can occasionally go wrong when surfaces pass through a
+    // cell centre and a cell completely gets blocked off so becomes a
+    // separate region. The problem is to distinguish between a cell which
+    // properly should be deleted (so in the 'background' mesh)
+    // or just a single-cell region from incorrect baffling. Currently the
+    // logic is just to detect cells that are on different regions.
 
 
     // Assumes:
@@ -1993,94 +1920,106 @@ void Foam::meshRefinement::findCellZoneTopo
         }
     }
 
+    // Synchronise any changes due to locationInMesh 
+    Pstream::listCombineGather(regionToCellZone, maxEqOp<label>());
+    Pstream::listCombineScatter(regionToCellZone);
 
-    // Find correspondence between cell zone and surface
-    // by changing cell zone every time we cross a surface.
-    while (true)
+    // Get coupled neighbour cellRegion
+    labelList neiCellRegion;
+    syncTools::swapBoundaryCellList(mesh_, cellRegion, neiCellRegion);
+
+
+
+
+    // Detect unassigned cell (region) bordering two cellZones. Put these
+    // cells into either neighbouring cellZone.
+    labelList growCellToZone(mesh_.nCells(), -2);
+    for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
     {
-        // Synchronise regionToCellZone.
-        // Note:
-        // - region numbers are identical on all processors
-        // - keepRegion is identical ,,
-        // - cellZones are identical ,,
-        // This done at top of loop to account for geometric matching
-        // not being synchronised.
-        Pstream::listCombineGather(regionToCellZone, maxEqOp<label>());
-        Pstream::listCombineScatter(regionToCellZone);
+        label own = mesh_.faceOwner()[faceI];
+        label ownRegion = cellRegion[own];
+        label nei = mesh_.faceNeighbour()[faceI];
+        label neiRegion = cellRegion[nei];
 
-
-        bool changed = false;
-
-        // Internal faces
-
-        for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
+        // Check whether inbetween different regions
+        if (ownRegion != neiRegion)
         {
-            label surfI = namedSurfaceIndex[faceI];
-
-            // Connected even if no cellZone defined for surface
-            if (surfI != -1)
+            if (regionToCellZone[ownRegion] == -2)
             {
-                // Calculate region to zone from cellRegions on either side
-                // of internal face.
-                bool changedCell = calcRegionToZone
-                (
-                    backgroundZoneID,
-                    surfaceToCellZone[surfI],
-                    cellRegion[mesh_.faceOwner()[faceI]],
-                    cellRegion[mesh_.faceNeighbour()[faceI]],
-                    regionToCellZone
-                );
-
-                changed = changed | changedCell;
+                if (regionToCellZone[neiRegion] != -2)
+                {
+                    if (growCellToZone[own] == -2)
+                    {
+                        // First visit of cell
+                        growCellToZone[own] = regionToCellZone[neiRegion];
+                    }
+                    else if (regionToCellZone[neiRegion] != growCellToZone[own])
+                    {
+                        // Found a cell bordering multiple cellZones. Grow.
+                        cellToZone[own] = growCellToZone[own];
+                    }
+                }
+            }
+            else if (regionToCellZone[neiRegion] == -2)
+            {
+                if (growCellToZone[nei] == -2)
+                {
+                    // First visit of cell
+                    growCellToZone[nei] = regionToCellZone[ownRegion];
+                }
+                else if (regionToCellZone[ownRegion] != growCellToZone[nei])
+                {
+                    cellToZone[nei] = growCellToZone[nei];
+                }
             }
         }
+    }
 
-        // Boundary faces
 
-        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-        // Get coupled neighbour cellRegion
-        labelList neiCellRegion;
-        syncTools::swapBoundaryCellList(mesh_, cellRegion, neiCellRegion);
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
 
-        // Calculate region to zone from cellRegions on either side of coupled
-        // face.
-        forAll(patches, patchI)
+        if (pp.coupled())
         {
-            const polyPatch& pp = patches[patchI];
-
-            if (pp.coupled())
+            forAll(pp, i)
             {
-                forAll(pp, i)
+                label faceI = pp.start()+i;
+
+                label own = mesh_.faceOwner()[faceI];
+                label ownRegion = cellRegion[own];
+                label neiRegion = neiCellRegion[faceI-mesh_.nInternalFaces()];
+
+                // Check whether inbetween different regions
+                if (ownRegion != neiRegion)
                 {
-                    label faceI = pp.start()+i;
-
-                    label surfI = namedSurfaceIndex[faceI];
-
-                    // Connected even if no cellZone defined for surface
-                    if (surfI != -1)
+                    if (regionToCellZone[ownRegion] == -2)
                     {
-                        bool changedCell = calcRegionToZone
-                        (
-                            backgroundZoneID,
-                            surfaceToCellZone[surfI],
-                            cellRegion[mesh_.faceOwner()[faceI]],
-                            neiCellRegion[faceI-mesh_.nInternalFaces()],
-                            regionToCellZone
-                        );
-
-                        changed = changed | changedCell;
+                        if (regionToCellZone[neiRegion] != -2)
+                        {
+                            if (growCellToZone[own] == -2)
+                            {
+                                // First visit of cell
+                                growCellToZone[own] =
+                                    regionToCellZone[neiRegion];
+                            }
+                            else if
+                            (
+                                regionToCellZone[neiRegion]
+                             != growCellToZone[own]
+                            )
+                            {
+                                // Found a cell bordering multiple cellZones.
+                                cellToZone[own] = growCellToZone[own];
+                            }
+                        }
                     }
                 }
             }
         }
-
-        if (!returnReduce(changed, orOp<bool>()))
-        {
-            break;
-        }
     }
-
 
     if (debug)
     {
@@ -2200,10 +2139,6 @@ void Foam::meshRefinement::getIntersections
     PackedBoolList& posOrientation
 ) const
 {
-    const pointField& cellCentres = mesh_.cellCentres();
-    const labelList& faceOwner = mesh_.faceOwner();
-    const labelList& faceNeighbour = mesh_.faceNeighbour();
-
     namedSurfaceIndex.setSize(mesh_.nFaces());
     namedSurfaceIndex = -1;
 
@@ -2219,29 +2154,18 @@ void Foam::meshRefinement::getIntersections
     pointField start(testFaces.size());
     pointField end(testFaces.size());
 
-    forAll(testFaces, i)
     {
-        label faceI = testFaces[i];
-
-        if (mesh_.isInternalFace(faceI))
-        {
-            start[i] = cellCentres[faceOwner[faceI]];
-            end[i] = cellCentres[faceNeighbour[faceI]];
-        }
-        else
-        {
-            start[i] = cellCentres[faceOwner[faceI]];
-            end[i] = neiCc[faceI-mesh_.nInternalFaces()];
-        }
+        labelList minLevel;
+        calcCellCellRays
+        (
+            neiCc,
+            labelList(neiCc.size(), -1),
+            testFaces,
+            start,
+            end,
+            minLevel
+        );
     }
-
-    // Extend segments a bit
-    {
-        const vectorField smallVec(ROOTSMALL*(end-start));
-        start -= smallVec;
-        end += smallVec;
-    }
-
 
     // Do test for intersections
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2340,7 +2264,6 @@ void Foam::meshRefinement::getIntersections
 void Foam::meshRefinement::zonify
 (
     const bool allowFreeStandingZoneFaces,
-    const label backgroundZoneID,
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
 
@@ -2535,24 +2458,53 @@ void Foam::meshRefinement::zonify
         );
     }
 
+    if (debug&MESH)
+    {
+        Pout<< "Writing cell zone allocation on mesh to time "
+            << timeName() << endl;
+        volScalarField volCellToZone
+        (
+            IOobject
+            (
+                "cellToZoneBeforeTopo",
+                timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimless, 0),
+            zeroGradientFvPatchScalarField::typeName
+        );
 
-    // 5. Find any unassigned regions (from regionSplit)
+        forAll(cellToZone, cellI)
+        {
+            volCellToZone[cellI] = cellToZone[cellI];
+        }
+        volCellToZone.write();
+    }
+
+
+    // 5. Find any unassigned regions (from regionSplit). This will
+    //    just walk slightly out to cover those single cells that
+    //    are baffled off into a separate region.
+
+    Info<< "Growing from known cellZones to fix cells inbetween cellZones"
+        << nl << endl;
+
+    findCellZoneTopo
+    (
+        pointField(0),
+        globalRegion1,      // To split up cells
+        namedSurfaceIndex,  // Step across named surfaces to propagate
+        surfaceToCellZone,
+        cellToZone
+    );
+
 
     if (namedSurfaces.size())
     {
-        Info<< "Walking from known cellZones; crossing a faceZone "
-            << "face changes cellZone" << nl << endl;
-
-        findCellZoneTopo
-        (
-            backgroundZoneID,
-            pointField(0),
-            globalRegion1,      // To split up cells
-            namedSurfaceIndex,  // Step across named surfaces to propagate
-            surfaceToCellZone,
-            cellToZone
-        );
-
         // Make sure namedSurfaceIndex is unset inbetween same cell zones.
         if (!allowFreeStandingZoneFaces)
         {
@@ -3621,6 +3573,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     if (debug&MESH)
     {
+        runTime++;
         Pout<< "Writing subsetted mesh to time " << timeName()
             << endl;
         write
@@ -4316,7 +4269,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     zonify
     (
         allowFreeStandingZoneFaces,
-        -1,                 // Set all cells with cellToZone -2 to -1
         locationsInMesh,
         zonesInMesh,
 

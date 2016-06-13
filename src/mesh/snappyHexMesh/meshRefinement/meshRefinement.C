@@ -268,8 +268,6 @@ void Foam::meshRefinement::calcCellCellRays
 // Returns first intersection if there are more than one.
 void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
 {
-    const pointField& cellCentres = mesh_.cellCentres();
-
     // Stats on edges to test. Count proc faces only once.
     PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
 
@@ -309,28 +307,17 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
     // Collect segments we want to test for
     pointField start(changedFaces.size());
     pointField end(changedFaces.size());
-
-    forAll(changedFaces, i)
     {
-        label faceI = changedFaces[i];
-        label own = mesh_.faceOwner()[faceI];
-
-        start[i] = cellCentres[own];
-        if (mesh_.isInternalFace(faceI))
-        {
-            end[i] = cellCentres[mesh_.faceNeighbour()[faceI]];
-        }
-        else
-        {
-            end[i] = neiCc[faceI-mesh_.nInternalFaces()];
-        }
-    }
-
-    // Extend segments a bit
-    {
-        const vectorField smallVec(ROOTSMALL*(end-start));
-        start -= smallVec;
-        end += smallVec;
+        labelList minLevel;
+        calcCellCellRays
+        (
+            neiCc,
+            neiLevel,
+            changedFaces,
+            start,
+            end,
+            minLevel
+        );
     }
 
 
@@ -2964,8 +2951,6 @@ void Foam::meshRefinement::dumpRefinementLevel() const
 void Foam::meshRefinement::dumpIntersections(const fileName& prefix) const
 {
     {
-        const pointField& cellCentres = mesh_.cellCentres();
-
         OFstream str(prefix + "_edges.obj");
         label vertI = 0;
         Pout<< "meshRefinement::dumpIntersections :"
@@ -2986,27 +2971,17 @@ void Foam::meshRefinement::dumpIntersections(const fileName& prefix) const
         // Collect segments we want to test for
         pointField start(intersectionFaces.size());
         pointField end(intersectionFaces.size());
-
-        forAll(intersectionFaces, i)
         {
-            label faceI = intersectionFaces[i];
-            start[i] = cellCentres[mesh_.faceOwner()[faceI]];
-
-            if (mesh_.isInternalFace(faceI))
-            {
-                end[i] = cellCentres[mesh_.faceNeighbour()[faceI]];
-            }
-            else
-            {
-                end[i] = neiCc[faceI-mesh_.nInternalFaces()];
-            }
-        }
-
-        // Extend segments a bit
-        {
-            const vectorField smallVec(ROOTSMALL*(end-start));
-            start -= smallVec;
-            end += smallVec;
+            labelList minLevel;
+            calcCellCellRays
+            (
+                neiCc,
+                labelList(neiCc.size(), -1),
+                intersectionFaces,
+                start,
+                end,
+                minLevel
+            );
         }
 
 

@@ -1316,6 +1316,8 @@ void Foam::snappyRefineDriver::removeInsideCells
 
     if (debug&meshRefinement::MESH)
     {
+        const_cast<Time&>(mesh.time())++;
+
         Pout<< "Writing subsetted mesh to time "
             << meshRefiner_.timeName() << endl;
         meshRefiner_.write
