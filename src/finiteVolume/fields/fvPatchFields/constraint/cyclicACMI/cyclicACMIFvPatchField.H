@@ -218,6 +218,9 @@ public:
                 const Pstream::commsTypes commsType
             ) const;
 
+            //- Update the coefficients associated with the patch field
+            virtual void updateCoeffs();
+
             //- Manipulate matrix
             virtual void manipulateMatrix(fvMatrix<Type>& matrix);
 
