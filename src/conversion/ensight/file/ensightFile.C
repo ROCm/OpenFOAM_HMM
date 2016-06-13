@@ -278,7 +278,7 @@ Foam::Ostream& Foam::ensightFile::writeUndef()
 }
 
 
-Foam::Ostream& Foam::ensightFile::writeKeyword(const string& key)
+Foam::Ostream& Foam::ensightFile::writeKeyword(const keyType& key)
 {
     if (allowUndef_)
     {

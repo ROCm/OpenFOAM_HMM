@@ -72,7 +72,7 @@ Foam::ensightGeoFile::~ensightGeoFile()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::ensightGeoFile::writeKeyword(const string& key)
+Foam::Ostream& Foam::ensightGeoFile::writeKeyword(const keyType& key)
 {
     write(key); newline();
 

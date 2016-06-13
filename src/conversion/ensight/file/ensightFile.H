@@ -147,7 +147,7 @@ public:
         virtual Ostream& write(const char* buf, std::streamsize count);
 
         //- Write element keyword with trailing newline, optionally with undef
-        virtual Ostream& writeKeyword(const string& key);
+        virtual Ostream& writeKeyword(const keyType&);
 
         //- Write "C Binary" for binary files (eg, geometry/measured)
         Ostream& writeBinaryHeader();

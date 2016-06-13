@@ -88,7 +88,7 @@ public:
     // Output
 
         //- Write keyword with trailing newline
-        virtual Ostream& writeKeyword(const string& key);
+        virtual Ostream& writeKeyword(const keyType& key);
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
