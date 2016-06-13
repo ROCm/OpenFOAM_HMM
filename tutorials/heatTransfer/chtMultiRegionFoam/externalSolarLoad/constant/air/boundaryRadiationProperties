@@ -18,21 +18,19 @@ FoamFile
 ".*"
 {
     mode            lookup;
-    emissivity      uniform 1.0;
-    absorptivity    uniform 0.0;
-    transmissivity  uniform 1.0;
+    emissivity      1.0;
+    absorptivity    0.0;
+    transmissivity  1.0;
 }
 
 air_to_solid
 {
     mode            solidRadiation;
-    value           uniform 0;
 }
 
 air_to_floor
 {
     mode            solidRadiation;
-    value           uniform 0;
 }
 
 // ************************************************************************* //
