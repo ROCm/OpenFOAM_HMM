@@ -9,36 +9,25 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
+    class       dictionary;
+    location    "constant";
     object      boundaryRadiationProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 0 0 0 0];
 
-internalField   uniform 0;
-
-boundaryField
+region0_to_pyrolysisRegion_coupledWall
 {
-    region0_to_pyrolysisRegion_coupledWall
-    {
-        type            boundaryRadiation;
-        mode            solidRadiation;
-    }
-
-    ".*"
-    {
-        type            boundaryRadiation;
-        mode            lookup;
-        emissivity      uniform 1.0;
-        absorptivity    uniform 1.0;
-        transmissivity  uniform 0.0;
-    }
-    "procBoundary.*"
-    {
-        type            processor;
-        value           $internalField;
-    }
+    mode            solidRadiation;
 }
+
+".*"
+{
+    mode            lookup;
+    emissivity      1.0;
+    absorptivity    1.0;
+    transmissivity  0.0;
+}
+
 
 // ************************************************************************* //

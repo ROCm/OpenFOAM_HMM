@@ -279,8 +279,8 @@ void Foam::forces::initialiseBins()
         // Allocate storage for forces and moments
         forAll(force_, i)
         {
-            force_[i].setSize(nBin_);
-            moment_[i].setSize(nBin_);
+            force_[i].setSize(nBin_, vector::zero);
+            moment_[i].setSize(nBin_, vector::zero);
         }
     }
 }
@@ -841,8 +841,8 @@ Foam::forces::forces
 
     forAll(force_, i)
     {
-        force_[i].setSize(nBin_);
-        moment_[i].setSize(nBin_);
+        force_[i].setSize(nBin_, vector::zero);
+        moment_[i].setSize(nBin_, vector::zero);
     }
 }
 
@@ -944,8 +944,8 @@ void Foam::forces::read(const dictionary& dict)
         // Allocate storage for forces and moments
         forAll(force_, i)
         {
-            force_[i].setSize(1);
-            moment_[i].setSize(1);
+            force_[i].setSize(1, vector::zero);
+            moment_[i].setSize(1, vector::zero);
         }
     }
 

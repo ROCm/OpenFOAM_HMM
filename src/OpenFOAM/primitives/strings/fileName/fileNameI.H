@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,8 @@ License
 
 inline void Foam::fileName::stripInvalid()
 {
+    // skip stripping unless debug is active to avoid
+    // costly operations
     if (debug && string::stripInvalid<fileName>(*this))
     {
         std::cerr
@@ -54,10 +56,12 @@ inline Foam::fileName::fileName()
     string()
 {}
 
+
 inline Foam::fileName::fileName(const fileName& fn)
 :
     string(fn)
 {}
+
 
 inline Foam::fileName::fileName(const word& w)
 :
@@ -65,27 +69,36 @@ inline Foam::fileName::fileName(const word& w)
 {}
 
 
-inline Foam::fileName::fileName(const string& str)
+inline Foam::fileName::fileName(const string& s, const bool doStripInvalid)
 :
-    string(str)
+    string(s)
 {
-    stripInvalid();
+    if (doStripInvalid)
+    {
+        stripInvalid();
+    }
 }
 
 
-inline Foam::fileName::fileName(const std::string& str)
+inline Foam::fileName::fileName(const std::string& s, const bool doStripInvalid)
 :
-    string(str)
+    string(s)
 {
-    stripInvalid();
+    if (doStripInvalid)
+    {
+        stripInvalid();
+    }
 }
 
 
-inline Foam::fileName::fileName(const char* str)
+inline Foam::fileName::fileName(const char* s, const bool doStripInvalid)
 :
-    string(str)
+    string(s)
 {
-    stripInvalid();
+    if (doStripInvalid)
+    {
+        stripInvalid();
+    }
 }
 
 

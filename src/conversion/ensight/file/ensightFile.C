@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ensightFile.H"
+#include "error.H"
+
+#include <cstring>
 #include <sstream>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -33,8 +36,7 @@ bool Foam::ensightFile::allowUndef_ = false;
 Foam::scalar Foam::ensightFile::undefValue_ = Foam::floatScalarVGREAT;
 
 // default is width 8
-Foam::string Foam::ensightFile::mask_ = "********";
-
+Foam::string Foam::ensightFile::mask_   = "********";
 Foam::string Foam::ensightFile::dirFmt_ = "%08d";
 
 
@@ -79,15 +81,9 @@ Foam::label Foam::ensightFile::subDirWidth()
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::ensightFile::ensightFile
-(
-    const fileName& pathname,
-    IOstream::streamFormat format
-)
-:
-    OFstream(pathname, format)
+void Foam::ensightFile::initialize()
 {
     // ascii formatting specs
     setf
@@ -96,6 +92,33 @@ Foam::ensightFile::ensightFile
         ios_base::floatfield
     );
     precision(5);
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::ensightFile::ensightFile
+(
+    const fileName& pathname,
+    IOstream::streamFormat format
+)
+:
+    OFstream(ensight::FileName(pathname), format)
+{
+    initialize();
+}
+
+
+Foam::ensightFile::ensightFile
+(
+    const fileName& path,
+    const fileName& name,
+    IOstream::streamFormat format
+)
+:
+    OFstream(path/ensight::FileName(name), format)
+{
+    initialize();
 }
 
 
@@ -145,44 +168,27 @@ Foam::Ostream& Foam::ensightFile::write
 
 Foam::Ostream& Foam::ensightFile::write(const char* value)
 {
-    return write(string(value));
+    char buf[80];
+    strncpy(buf, value, 80); // max 80 chars or padded with nul if smaller
+
+    if (format() == IOstream::BINARY)
+    {
+        write(buf, sizeof(buf));
+    }
+    else
+    {
+        buf[79] = 0;  // max 79 in ASCII, ensure it is indeed nul-terminated
+        stdStream() << buf;
+    }
+
+    return *this;
+
 }
 
 
 Foam::Ostream& Foam::ensightFile::write(const string& value)
 {
-    char buf[80];
-
-    for (string::size_type i = 0; i < 80; ++i)
-    {
-        buf[i] = 0;
-    }
-
-    string::size_type n = value.size();
-    if (n >= 80)
-    {
-        n = 79;
-    }
-
-    for (string::size_type i = 0; i < n; ++i)
-    {
-        buf[i] = value[i];
-    }
-
-    if (format() == IOstream::BINARY)
-    {
-        write
-        (
-            reinterpret_cast<char const *>(buf),
-            sizeof(buf)
-        );
-    }
-    else
-    {
-        stdStream() << buf;
-    }
-
-    return *this;
+    return write(value.c_str());
 }
 
 
@@ -194,7 +200,7 @@ Foam::Ostream& Foam::ensightFile::write(const label value)
 
         write
         (
-            reinterpret_cast<char const *>(&ivalue),
+            reinterpret_cast<const char *>(&ivalue),
             sizeof(ivalue)
         );
     }
@@ -220,7 +226,7 @@ Foam::Ostream& Foam::ensightFile::write
 
         write
         (
-            reinterpret_cast<char const *>(&ivalue),
+            reinterpret_cast<const char *>(&ivalue),
             sizeof(ivalue)
         );
     }
@@ -242,7 +248,7 @@ Foam::Ostream& Foam::ensightFile::write(const scalar value)
     {
         write
         (
-            reinterpret_cast<char const *>(&fvalue),
+            reinterpret_cast<const char *>(&fvalue),
             sizeof(fvalue)
         );
     }

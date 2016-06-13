@@ -43,6 +43,7 @@ License
 #include "PressureGradientForce.H"
 #include "SRFForce.H"
 #include "VirtualMassForce.H"
+#include "InterfaceForce.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,8 +62,8 @@ License
     makeParticleForceModelType(ParamagneticForce, CloudType);                  \
     makeParticleForceModelType(PressureGradientForce, CloudType);              \
     makeParticleForceModelType(SRFForce, CloudType);                           \
-    makeParticleForceModelType(VirtualMassForce, CloudType);
-
+    makeParticleForceModelType(VirtualMassForce, CloudType);                   \
+    makeParticleForceModelType(InterfaceForce, CloudType);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

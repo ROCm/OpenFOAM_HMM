@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,21 +49,34 @@ class ensightGeoFile
 {
     // Private Member Functions
 
+        //- Initialize by outputting header information
+        void initialize();
+
         //- Disallow default bitwise assignment
-        void operator=(const ensightGeoFile&);
+        void operator=(const ensightGeoFile&) = delete;
 
         //- Disallow default copy constructor
-        ensightGeoFile(const ensightGeoFile&);
+        ensightGeoFile(const ensightGeoFile&) = delete;
 
 
 public:
 
     // Constructors
 
-        //- Construct from pathname
+        //- Construct from pathname.
+        //  The entire pathname is checked for valid ensight naming.
         ensightGeoFile
         (
             const fileName& pathname,
+            IOstream::streamFormat format=IOstream::BINARY
+        );
+
+        //- Construct from path and name.
+        //  Only the name portion is checked for valid ensight naming.
+        ensightGeoFile
+        (
+            const fileName& path,
+            const fileName& name,
             IOstream::streamFormat format=IOstream::BINARY
         );
 

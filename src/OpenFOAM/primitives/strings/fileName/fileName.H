@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,13 +110,13 @@ public:
         inline fileName(const word&);
 
         //- Construct as copy of string
-        inline fileName(const string&);
+        inline fileName(const string&, const bool doStripInvalid=true);
 
         //- Construct as copy of std::string
-        inline fileName(const std::string&);
+        inline fileName(const std::string&, const bool doStripInvalid=true);
 
         //- Construct as copy of character array
-        inline fileName(const char*);
+        inline fileName(const char*, const bool doStripInvalid=true);
 
         //- Construct by concatenating elements of wordList separated by '/'
         explicit fileName(const wordList&);

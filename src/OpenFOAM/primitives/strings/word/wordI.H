@@ -52,15 +52,15 @@ inline void Foam::word::stripInvalid()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::word::word(const word& w)
-:
-    string(w)
-{}
-
-
 inline Foam::word::word()
 :
     string()
+{}
+
+
+inline Foam::word::word(const word& w)
+:
+    string(w)
 {}
 
 
@@ -95,6 +95,7 @@ inline Foam::word::word(const char* s, const bool doStripInvalid)
         stripInvalid();
     }
 }
+
 
 inline Foam::word::word
 (

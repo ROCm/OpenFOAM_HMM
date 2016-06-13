@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "boundaryRadiationProperties.H"
-#include "boundaryRadiationPropertiesFvPatchField.H"
-#include "fvPatchField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -51,7 +49,7 @@ Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
         Foam::GeometricMeshObject,
         boundaryRadiationProperties
     >(mesh),
-    radBoundaryProperties_()
+    radBoundaryPropertiesPtrList_(mesh.boundary().size())
 {
     IOobject boundaryIO
     (
@@ -59,15 +57,28 @@ Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
         mesh.time().constant(),
         mesh,
         IOobject::MUST_READ,
-        IOobject::NO_WRITE
+        IOobject::NO_WRITE,
+        false
     );
 
-    if (boundaryIO.typeHeaderOk<volScalarField>(true))
+    if (boundaryIO.typeHeaderOk<IOdictionary>(true))
     {
-        radBoundaryProperties_.set
-        (
-            new volScalarField(boundaryIO, mesh)
-        );
+        const IOdictionary radiationDict(boundaryIO);
+
+        forAll (mesh.boundary(), patchi)
+        {
+            const polyPatch& pp = mesh.boundaryMesh()[patchi];
+
+            if (radiationDict.isDict(pp.name()))
+            {
+                const dictionary& dict = radiationDict.subDict(pp.name());
+
+                radBoundaryPropertiesPtrList_[patchi].set
+                (
+                    new boundaryRadiationPropertiesPatch(pp, dict)
+                );
+            }
+        }
     }
 }
 
@@ -81,18 +92,15 @@ Foam::radiation::boundaryRadiationProperties::emissivity
     const label bandI
 ) const
 {
-    if (!radBoundaryProperties_.empty())
+    if (!radBoundaryPropertiesPtrList_[patchI].empty())
     {
-        return refCast<const boundaryRadiationPropertiesFvPatchField>
-        (
-            radBoundaryProperties_->boundaryField()[patchI]
-        ).emissivity(bandI);
+        return radBoundaryPropertiesPtrList_[patchI]->emissivity(bandI);
     }
     else
     {
         FatalErrorInFunction
-            << "Field 'boundaryRadiationProperties'"
-            << "is not found in the constant directory. "
+            << "Patch : " << mesh().boundaryMesh()[patchI].name()
+            << " is not found in the boundaryRadiationProperties. "
             << "Please add it"
             << exit(FatalError);
 
@@ -108,19 +116,16 @@ Foam::radiation::boundaryRadiationProperties::absorptivity
     const label bandI
 ) const
 {
-    if (!radBoundaryProperties_.empty())
+    if (!radBoundaryPropertiesPtrList_[patchI].empty())
     {
-        return refCast<const boundaryRadiationPropertiesFvPatchField>
-        (
-            radBoundaryProperties_->boundaryField()[patchI]
-        ).absorptivity(bandI);
+        return radBoundaryPropertiesPtrList_[patchI]->absorptivity(bandI);
     }
     else
     {
         FatalErrorInFunction
-            << "Field 'boundaryRadiationProperties'"
-            << "is not found in the constant directory. "
-            << "Please add it "
+            << "Patch : " << mesh().boundaryMesh()[patchI].name()
+            << " is not found in the boundaryRadiationProperties. "
+            << "Please add it"
             << exit(FatalError);
 
         return tmp<scalarField>(new scalarField());
@@ -135,18 +140,15 @@ Foam::radiation::boundaryRadiationProperties::transmissivity
     const label bandI
 ) const
 {
-    if (!radBoundaryProperties_.empty())
+    if (!radBoundaryPropertiesPtrList_[patchI].empty())
     {
-        return refCast<const boundaryRadiationPropertiesFvPatchField>
-        (
-            radBoundaryProperties_->boundaryField()[patchI]
-        ).transmissivity(bandI);
+        return radBoundaryPropertiesPtrList_[patchI]->transmissivity(bandI);
     }
     else
     {
         FatalErrorInFunction
-            << "Field 'boundaryRadiationProperties'"
-            << "is not found in the constant directory. "
+            << "Patch : " << mesh().boundaryMesh()[patchI].name()
+            << " is not found in the boundaryRadiationProperties. "
             << "Please add it"
             << exit(FatalError);
 
@@ -162,18 +164,15 @@ Foam::radiation::boundaryRadiationProperties::reflectivity
     const label bandI
 ) const
 {
-    if (!radBoundaryProperties_.empty())
+    if (!radBoundaryPropertiesPtrList_[patchI].empty())
     {
-        return refCast<const boundaryRadiationPropertiesFvPatchField>
-        (
-            radBoundaryProperties_->boundaryField()[patchI]
-        ).reflectivity(bandI);
+        return radBoundaryPropertiesPtrList_[patchI]->reflectivity(bandI);
     }
     else
     {
         FatalErrorInFunction
-            << "Field 'boundaryRadiationProperties'"
-            << "is not found in the constant directory. "
+            << "Patch : " << mesh().boundaryMesh()[patchI].name()
+            << " is not found in the boundaryRadiationProperties. "
             << "Please add it"
             << exit(FatalError);
 
