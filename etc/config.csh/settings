@@ -217,9 +217,9 @@ switch ("$WM_COMPILER_TYPE")
 case OpenFOAM:
 case ThirdParty:
     # Default versions of GMP, MPFR and MPC, overide as necessary
-    set gmp_version=gmp-5.1.2
-    set mpfr_version=mpfr-3.1.2
-    set mpc_version=mpc-1.0.1
+    set gmp_version=gmp-6.0.1
+    set mpfr_version=mpfr-3.1.4
+    set mpc_version=mpc-1.0.3
     switch ("$WM_COMPILER")
     case Gcc:
     case Gcc48:
@@ -246,11 +246,18 @@ case ThirdParty:
     case Gcc53:
         set gcc_version=gcc-5.3.0
         breaksw
+    case Gcc54:
+        set gcc_version=gcc-5.4.0
+        breaksw
+    case Gcc61:
+        set gcc_version=gcc-6.1.0
+        breaksw
     case Clang:
         # Using clang - not gcc
         setenv WM_CC 'clang'
         setenv WM_CXX 'clang++'
         set clang_version=llvm-3.7.0
+        # set clang_version=llvm-3.8.0
         breaksw
     default:
         echo
