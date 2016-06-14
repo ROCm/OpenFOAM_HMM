@@ -38,9 +38,9 @@ divSchemes
 laplacianSchemes
 {
     default         none;
-    laplacian((rho*nuEff),U) Gauss linear corrected;
-    laplacian(rhorAUf,p_rgh) Gauss linear corrected;
-    laplacian(thermo:alpha,h) Gauss linear corrected;
+    laplacian((rho*nuEff),U) Gauss linear limited corrected 0.333;
+    laplacian(rhorAUf,p_rgh) Gauss linear limited corrected 0.333;
+    laplacian(thermo:alpha,h) Gauss linear limited corrected 0.333;
 }
 
 interpolationSchemes
@@ -50,7 +50,7 @@ interpolationSchemes
 
 snGradSchemes
 {
-    default         corrected;
+    default         limited corrected 0.333;
 }
 
 fluxRequired
