@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,110 +22,80 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::memInfo
+    Foam::cpuInfo
 
 Description
-    Memory usage information for the process running this object.
+    General CPU characteristics.
+
+    If the machine has multiple cpus/cores, only the characteristics
+    of the first core are used.
 
 Note
-    Uses the information from /proc/PID/status
+    Uses the information from /proc/cpuinfo
 
 SourceFiles
-    memInfo.C
+    cpuInfo.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef memInfo_H
-#define memInfo_H
+#ifndef cpuInfo_H
+#define cpuInfo_H
 
-#include "OSspecific.H"
-#include "POSIX.H"
-#include "IFstream.H"
+#include <string>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 // forward declarations
-class Istream;
 class Ostream;
 
 /*---------------------------------------------------------------------------*\
-                           Class memInfo Declaration
+                           Class cpuInfo Declaration
 \*---------------------------------------------------------------------------*/
 
-class memInfo
+class cpuInfo
 {
     // Private data
 
-        //- Peak memory used by the process (VmPeak in /proc/PID/status)
-        int peak_;
+        // Various bits from /proc/cpuinfo
 
-        //- Memory used by the process (VmSize in /proc/PID/status)
-        int size_;
+        std::string vendor_id;
+        std::string model_name;
+        int cpu_family;
+        int model;
+        float cpu_MHz;
+        int siblings;
+        int cpu_cores;
 
-        //- Resident set size of the process (VmRSS in /proc/PID/status)
-        int rss_;
+    // Private Member Functions
+
+        //- Parse /proc/cpuinfo
+        void parse();
 
         //- Disallow default bitwise assignment
-        void operator=(const memInfo&) = delete;
+        void operator=(const cpuInfo&) = delete;
 
         //- Disallow default copy constructor
-        memInfo(const memInfo&) = delete;
+        cpuInfo(const cpuInfo&) = delete;
 
 public:
 
     // Constructors
 
         //- Construct null
-        memInfo();
+        cpuInfo();
 
 
     //- Destructor
-    ~memInfo();
+    ~cpuInfo();
 
 
     // Member Functions
 
-        //- Parse /proc/PID/status and update accordingly
-        const memInfo& update();
-
-        // Access
-
-            //- Peak memory (VmPeak in /proc/PID/status) at last update()
-            int peak() const
-            {
-                return peak_;
-            }
-
-            //- Memory size (VmSize in /proc/PID/status) at last update()
-            int size() const
-            {
-                return size_;
-            }
-
-            //- Resident set size (VmRSS in /proc/PID/status) at last update()
-            int rss() const
-            {
-                return rss_;
-            }
-
-            //- True if the memory information appears valid
-            bool valid() const;
-
-
         //- Write content as dictionary entries
         void write(Ostream&) const;
 
-
-    // IOstream Operators
-
-        //- Read peak/size/rss from stream
-        friend Istream& operator>>(Istream&, memInfo&);
-
-        //- Write peak/size/rss to stream
-        friend Ostream& operator<<(Ostream&, const memInfo&);
 };
 
 
