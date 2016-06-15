@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,9 @@ void Foam::sampledSurfaces::writeSurface
         gatheredValues[Pstream::myProcNo()] = values;
         Pstream::gatherList(gatheredValues);
 
+
+        fileName sampleFile;
+
         if (Pstream::master())
         {
             // Combine values into single field
@@ -72,7 +75,7 @@ void Foam::sampledSurfaces::writeSurface
             // skip surface without faces (eg, a failed cut-plane)
             if (mergeList_[surfI].faces.size())
             {
-                fileName fName = formatter_->write
+                sampleFile = formatter_->write
                 (
                     outputDir,
                     s.name(),
@@ -82,11 +85,15 @@ void Foam::sampledSurfaces::writeSurface
                     allValues,
                     s.interpolate()
                 );
-
-                dictionary propsDict;
-                propsDict.add("file", fName);
-                setProperty(fieldName, propsDict);
             }
+        }
+
+        Pstream::scatter(sampleFile);
+        if (sampleFile.size())
+        {
+            dictionary propsDict;
+            propsDict.add("file", sampleFile);
+            setProperty(fieldName, propsDict);
         }
     }
     else
