@@ -323,9 +323,6 @@ void Foam::fvPatchField<Type>::updateCoeffs(const scalarField& weights)
     {
         updateCoeffs();
 
-        Field<Type>& fld = *this;
-        fld *= weights;
-
         updated_ = true;
     }
 }
