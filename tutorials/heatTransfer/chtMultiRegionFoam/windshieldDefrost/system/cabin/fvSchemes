@@ -23,15 +23,15 @@ ddtSchemes
 gradSchemes
 {
     default         Gauss linear;
-    grad(p_rgh)         Gauss linear;
+    grad(U)         cellLimited Gauss linear 1;
 }
 
 divSchemes
 {
     default         none;
-    div(phi,U)      Gauss linearUpwind grad(U);
+    div(phi,U)      Gauss upwind;
     div(phi,K)      Gauss linear;
-    div(phi,h)      Gauss limitedLinear 1;
+    div(phi,h)      Gauss upwind;
     div(phi,k)      Gauss limitedLinear 1;
     div(phi,omega)  Gauss limitedLinear 1;
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
