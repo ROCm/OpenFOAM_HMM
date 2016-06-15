@@ -27,6 +27,22 @@ Class
 Description
     Code profiling.
 
+    This is typically activated from within the system/controlDict as follows:
+    \code
+        profiling
+        {
+            active      true;  // default: true
+            cpuInfo     true;  // default: true
+            memInfo     true;  // default: true
+            sysInfo     true;  // default: true
+        }
+    \endcode
+    or simply using all defaults:
+    \code
+        profiling
+        {}
+    \endcode
+
 SourceFiles
     Profiling.C
 
@@ -48,6 +64,9 @@ namespace Foam
 
 // Forward declaration of classes
 class Ostream;
+class dictionary;
+class cpuInfo;
+class memInfo;
 
 /*---------------------------------------------------------------------------*\
                           Class Profiling Declaration
@@ -63,6 +82,7 @@ public:
 
         class Information;
         class Trigger;
+        class sysInfo;
 
 private:
 
@@ -93,6 +113,15 @@ private:
         //- Note the timers (by Id) for the correct stack-output
         Map<clockTime*> timers_;
 
+        //- General system information (optional)
+        sysInfo* sysInfo_;
+
+        //- CPU-Information (optional)
+        cpuInfo* cpuInfo_;
+
+        //- MEM-Information (optional)
+        memInfo* memInfo_;
+
 
     // Private Member Functions
 
@@ -112,8 +141,11 @@ protected:
 
     // Constructors
 
-        //- Construct IO object
+        //- Construct IO object, everything enabled
         Profiling(const IOobject&, const Time&);
+
+        //- Construct IO object with finer control over behaviour
+        Profiling(const dictionary&, const IOobject&, const Time&);
 
 
     //- Destructor
@@ -139,8 +171,11 @@ protected:
 
     // Static control elements
 
-        //- Singleton to initialize profiling pool
+        //- Singleton to initialize profiling pool, everything enabled
         static void initialize(const IOobject&, const Time&);
+
+        //- Singleton to initialize profiling pool with finer control
+        static void initialize(const dictionary&, const IOobject&, const Time&);
 
         //- Stop profiling, cleanup pool if possible
         static void stop(const Time&);
@@ -243,17 +278,10 @@ protected:
     // Member Functions
 
         //- Mark as being on the stack
-        void push() const
-        {
-            onStack_ = true;
-        }
-
+        void push() const;
 
         //- Mark as being off the stack
-        void pop() const
-        {
-            onStack_ = false;
-        }
+        void pop() const;
 
 
         //- Write the profiling times, optionally with additional values
@@ -382,10 +410,7 @@ public:
     // Access
 
         //- True if the triggered profiling is active
-        inline bool running() const
-        {
-            return ptr_;
-        }
+        bool running() const;
 
 
     // Edit

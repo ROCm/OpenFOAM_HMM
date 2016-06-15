@@ -24,8 +24,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Profiling.H"
+#include "ProfilingSysInfo.H"
+#include "cpuInfo.H"
+#include "memInfo.H"
+#include "OSspecific.H"
+#include "IOstreams.H"
 #include "dictionary.H"
-
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -35,6 +40,17 @@ Foam::label Foam::Profiling::Information::nextId_(0);
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+// file-scope function
+template<class T>
+inline static void writeEntry
+(
+    Foam::Ostream& os, const Foam::word& key, const T& value
+)
+{
+    os.writeKeyword(key) << value << Foam::token::END_STATEMENT << '\n';
+}
+
 
 Foam::label Foam::Profiling::Information::getNextId()
 {
@@ -72,6 +88,34 @@ void Foam::Profiling::initialize
         );
 
         pool_->push(info, pool_->clockTime_);
+        Info<< "Profiling initialized" << nl;
+    }
+}
+
+
+void Foam::Profiling::initialize
+(
+    const dictionary& dict,
+    const IOobject& ioObj,
+    const Time& owner
+)
+{
+    if (pool_)
+    {
+        WarningInFunction
+            << "Already initialized" << endl;
+    }
+    else
+    {
+        pool_ = new Profiling(dict, ioObj, owner);
+
+        Information *info = pool_->store
+        (
+            new Information()
+        );
+
+        pool_->push(info, pool_->clockTime_);
+        Info<< "Profiling initialized" << nl;
     }
 }
 
@@ -146,7 +190,41 @@ Foam::Profiling::Profiling
     clockTime_(),
     hash_(),
     stack_(),
-    timers_()
+    timers_(),
+    sysInfo_(new sysInfo()),
+    cpuInfo_(new cpuInfo()),
+    memInfo_(new memInfo())
+{}
+
+
+Foam::Profiling::Profiling
+(
+    const dictionary& dict,
+    const IOobject& io,
+    const Time& owner
+)
+:
+    regIOobject(io),
+    owner_(owner),
+    clockTime_(),
+    hash_(),
+    stack_(),
+    timers_(),
+    sysInfo_
+    (
+        dict.lookupOrDefault<Switch>("sysInfo", true)
+      ? new sysInfo() : 0
+    ),
+    cpuInfo_
+    (
+        dict.lookupOrDefault<Switch>("cpuInfo", true)
+      ? new cpuInfo() : 0
+    ),
+    memInfo_
+    (
+        dict.lookupOrDefault<Switch>("memInfo", true)
+      ? new memInfo() : 0
+    )
 {}
 
 
@@ -196,6 +274,10 @@ Foam::Profiling::Trigger::Trigger(const string& name)
 
 Foam::Profiling::~Profiling()
 {
+    deleteDemandDrivenData(sysInfo_);
+    deleteDemandDrivenData(cpuInfo_);
+    deleteDemandDrivenData(memInfo_);
+
     if (pool_ == this)
     {
         pool_ = 0;
@@ -281,6 +363,34 @@ bool Foam::Profiling::writeData(Ostream& os) const
     os  << decrIndent
         << indent << token::END_LIST << token::END_STATEMENT << nl;
 
+
+    if (sysInfo_)
+    {
+        os << nl;
+        os.beginBlock("sysInfo") << nl; // FUTURE: without nl
+        sysInfo_->write(os);
+        os.endBlock() << nl; // FUTURE: without nl
+    }
+
+    if (cpuInfo_)
+    {
+        os << nl;
+        os.beginBlock("cpuInfo") << nl; // FUTURE: without nl
+        cpuInfo_->write(os);
+        os.endBlock() << nl; // FUTURE: without nl
+    }
+
+    if (memInfo_)
+    {
+        memInfo_->update();
+
+        os << nl;
+        os.beginBlock("memInfo") << nl; // FUTURE: without nl
+        memInfo_->write(os);
+        writeEntry(os, "units", "kB");
+        os.endBlock() << nl; // FUTURE: without nl
+    }
+
     return os;
 }
 
@@ -312,6 +422,12 @@ Foam::Profiling::Information* Foam::Profiling::pop()
 }
 
 
+bool Foam::Profiling::Trigger::running() const
+{
+    return ptr_;
+}
+
+
 void Foam::Profiling::Trigger::stop()
 {
     if (ptr_)
@@ -324,14 +440,15 @@ void Foam::Profiling::Trigger::stop()
 }
 
 
-// file-scope function
-template<class T>
-inline static void writeEntry
-(
-    Foam::Ostream& os, const Foam::word& key, const T& value
-)
+void Foam::Profiling::Information::push() const
 {
-    os.writeKeyword(key) << value << Foam::token::END_STATEMENT << '\n';
+    onStack_ = true;
+}
+
+
+void Foam::Profiling::Information::pop() const
+{
+    onStack_ = false;
 }
 
 
@@ -365,6 +482,7 @@ Foam::Ostream& Foam::Profiling::Information::write
 
     return os;
 }
+
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 

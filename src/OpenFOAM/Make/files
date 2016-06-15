@@ -4,6 +4,7 @@ global/global.Cver
 global/argList/argList.C
 global/clock/clock.C
 global/profiling/Profiling.C
+global/profiling/ProfilingSysInfo.C
 
 bools = primitives/bools
 $(bools)/bool/bool.C
