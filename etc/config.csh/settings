@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -202,7 +202,7 @@ _foamAddLib  ${FOAM_USER_LIBBIN}:${FOAM_SITE_LIBBIN}:${FOAM_LIBBIN}:${FOAM_EXT_L
 # Compiler settings
 # ~~~~~~~~~~~~~~~~~
 unset gcc_version gmp_version mpfr_version mpc_version
-unsetenv MPFR_ARCH_PATH GMP_ARCH_PATH
+unsetenv GMP_ARCH_PATH MPFR_ARCH_PATH
 
 
 # Location of compiler installation
@@ -217,9 +217,9 @@ switch ("$WM_COMPILER_TYPE")
 case OpenFOAM:
 case ThirdParty:
     # Default versions of GMP, MPFR and MPC, overide as necessary
-    set gmp_version=gmp-6.0.1
-    set mpfr_version=mpfr-3.1.4
-    set mpc_version=mpc-1.0.3
+    set gmp_version=gmp-system
+    set mpfr_version=mpfr-system
+    set mpc_version=mpc-system
     switch ("$WM_COMPILER")
     case Gcc:
     case Gcc48:
@@ -291,17 +291,28 @@ case ThirdParty:
         _foamAddMan     $gccDir/man
         _foamAddPath    $gccDir/bin
 
-        # Add compiler libraries to run-time environment
+        # Add ThirdParty compiler libraries to run-time environment
         _foamAddLib     $gccDir/lib$WM_COMPILER_LIB_ARCH
 
-        # Add gmp/mpfr/mpc libraries to run-time environment
-        _foamAddLib     $gmpDir/lib$WM_COMPILER_LIB_ARCH
-        _foamAddLib     $mpfrDir/lib$WM_COMPILER_LIB_ARCH
-        _foamAddLib     $mpcDir/lib$WM_COMPILER_LIB_ARCH
+        # Add ThirdParty gmp/mpfr/mpc libraries to run-time environment
+        if ( "${gmpDir:t}" != "gmp-system" ) then
+            _foamAddLib $gmpDir/lib$WM_COMPILER_LIB_ARCH
+        endif
+        if ( "${mpfrDir:t}" != "mpfr-system" ) then
+            _foamAddLib $mpfrDir/lib$WM_COMPILER_LIB_ARCH
+        endif
+        if ( "${mpcDir:t}" != "mpc-system" ) then
+            _foamAddLib $mpcDir/lib$WM_COMPILER_LIB_ARCH
+        endif
 
         # Used by boost/CGAL:
-        setenv MPFR_ARCH_PATH $mpfrDir
         setenv GMP_ARCH_PATH $gmpDir
+        setenv MPFR_ARCH_PATH $mpfrDir
+
+        if ($?FOAM_VERBOSE && $?prompt) then
+            echo "Using ThirdParty compiler"
+            echo "    ${gccDir:t} (${gmpDir:t} ${mpfrDir:t} ${mpcDir:t})"
+        endif
     endif
     unset gcc_version gccDir
     unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
@@ -324,7 +335,6 @@ case ThirdParty:
         _foamAddPath    $clangDir/bin
     endif
     unset clang_version clangDir
-
     breaksw
 
 case system:

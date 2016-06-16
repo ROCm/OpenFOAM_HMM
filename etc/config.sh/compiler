@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -32,11 +32,10 @@
 
 case "$WM_COMPILER_TYPE" in
 OpenFOAM | ThirdParty)
-
     # Default versions of GMP, MPFR and MPC, override as necessary
-    gmp_version=gmp-6.0.1
-    mpfr_version=mpfr-3.1.4
-    mpc_version=mpc-1.0.3
+    gmp_version=gmp-system
+    mpfr_version=mpfr-system
+    mpc_version=mpc-system
 
     case "$WM_COMPILER" in
     Gcc | Gcc48)
