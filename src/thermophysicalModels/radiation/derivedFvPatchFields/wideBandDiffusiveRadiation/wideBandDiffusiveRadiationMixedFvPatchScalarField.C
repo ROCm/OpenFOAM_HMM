@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -182,11 +182,33 @@ updateCoeffs()
 
     // Use updated Ir while iterating over rays
     // avoids to used lagged Qin
+    /*
     scalarField Ir = dom.IRay(0).Qin().boundaryField()[patchI];
 
     for (label rayI=1; rayI < dom.nRay(); rayI++)
     {
         Ir += dom.IRay(rayI).Qin().boundaryField()[patchI];
+    }
+    */
+
+    // Calculate Ir into the wall on the same lambdaId
+    scalarField Ir(patch().size(), 0.0);
+    forAll(Iw, faceI)
+    {
+        for (label rayI=0; rayI < dom.nRay(); rayI++)
+        {
+            const vector& d = dom.IRay(rayI).d();
+
+            if ((-n[faceI] & d) < 0.0)
+            {
+                // q into the wall
+                const scalarField& IFace =
+                    dom.IRay(rayI).ILambda(lambdaId).boundaryField()[patchI];
+
+                const vector& rayDave = dom.IRay(rayI).dAve();
+                Ir[faceI] += IFace[faceI]*(n[faceI] & rayDave);
+            }
+        }
     }
 
     forAll(Iw, faceI)
@@ -204,8 +226,8 @@ updateCoeffs()
                   + emissivity[faceI]*Eb[faceI]
                 )/pi;
 
-            // Emmited heat flux from this ray direction
-            Qem[faceI] = refValue()[faceI]*nAve[faceI];
+            // Emmited heat flux from this ray direction (sum over lambdaId)
+            Qem[faceI] += refValue()[faceI]*nAve[faceI];
         }
         else
         {
@@ -214,8 +236,8 @@ updateCoeffs()
             refGrad()[faceI] = 0.0;
             refValue()[faceI] = 0.0; //not used
 
-            // Incident heat flux on this ray direction
-            Qin[faceI] = Iw[faceI]*nAve[faceI];
+            // Incident heat flux on this ray direction (sum over lambdaId)
+            Qin[faceI] += Iw[faceI]*nAve[faceI];
         }
     }
 
