@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -122,7 +122,7 @@ Foam::sampledSets::volFieldSampler<Type>::volFieldSampler
 
 
 template<class Type>
-void Foam::sampledSets::writeSampleFile
+Foam::fileName Foam::sampledSets::writeSampleFile
 (
     const coordSet& masterSampleSet,
     const PtrList<volFieldSampler<Type>>& masterFields,
@@ -155,20 +155,14 @@ void Foam::sampledSets::writeSampleFile
             valueSets,
             ofs
         );
-
-        forAll(masterFields, fieldi)
-        {
-            dictionary propsDict;
-            propsDict.add("file", fName);
-            const word& fieldName = masterFields[fieldi].name();
-            setProperty(fieldName, propsDict);
-        }
+        return fName;
     }
     else
     {
         WarningInFunction
             << "File " << ofs.name() << " could not be opened. "
             << "No data will be written" << endl;
+        return fileName::null;
     }
 }
 
@@ -326,11 +320,12 @@ void Foam::sampledSets::sampleAndWrite(fieldGroup<Type>& fields)
         PtrList<volFieldSampler<Type>> masterFields(sampledFields.size());
         combineSampledValues(sampledFields, indexSets_, masterFields);
 
-        if (Pstream::master())
+        forAll(masterSampledSets_, setI)
         {
-            forAll(masterSampledSets_, setI)
+            fileName sampleFile;
+            if (Pstream::master())
             {
-                writeSampleFile
+                sampleFile = writeSampleFile
                 (
                     masterSampledSets_[setI],
                     masterFields,
@@ -338,6 +333,18 @@ void Foam::sampledSets::sampleAndWrite(fieldGroup<Type>& fields)
                     outputPath_/mesh_.time().timeName(),
                     fields.formatter()
                 );
+            }
+
+            Pstream::scatter(sampleFile);
+            if (sampleFile.size())
+            {
+                forAll(masterFields, fieldi)
+                {
+                    dictionary propsDict;
+                    propsDict.add("file", sampleFile);
+                    const word& fieldName = masterFields[fieldi].name();
+                    setProperty(fieldName, propsDict);
+                }
             }
         }
     }

@@ -63,7 +63,7 @@ void Foam::constrainPressure
             refCast<fixedFluxPressureFvPatchScalarField>
             (
                 pBf[patchi]
-            ).updateCoeffs
+            ).updateSnGrad
             (
                 (
                     phiHbyABf[patchi]

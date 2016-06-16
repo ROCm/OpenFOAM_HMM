@@ -417,7 +417,7 @@ public:
             virtual void updateCoeffs();
 
             //- Update the coefficients associated with the patch field
-            //  and apply weight field
+            //  and optionally apply weight field.
             //  Sets Updated to true
             virtual void updateCoeffs(const scalarField& weights);
 

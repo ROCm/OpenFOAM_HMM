@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -227,8 +227,9 @@ class sampledSets
             PtrList<volFieldSampler<T>>& masterFields
         );
 
+        //- Write set on master, return fileName
         template<class Type>
-        void writeSampleFile
+        fileName writeSampleFile
         (
             const coordSet& masterSampleSet,
             const PtrList<volFieldSampler<Type>>& masterFields,

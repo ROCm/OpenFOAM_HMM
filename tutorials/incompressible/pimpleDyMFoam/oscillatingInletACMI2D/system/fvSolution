@@ -39,7 +39,7 @@ solvers
     pFinal
     {
         $p;
-        tolerance       1e-6;
+        tolerance       1e-10;
         relTol          0;
     }
 
