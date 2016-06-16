@@ -213,65 +213,21 @@ if ( ! $?WM_COMPILER_TYPE ) then
     echo "    WM_COMPILER_TYPE not set, using '$WM_COMPILER_TYPE'"
 endif
 
+# Load configured compiler versions, regardless of the compiler type
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/compiler`
+
 switch ("$WM_COMPILER_TYPE")
+case system:
+    # Use system compiler
+    breaksw
+
 case OpenFOAM:
 case ThirdParty:
-    # Default versions of GMP, MPFR and MPC, overide as necessary
-    set gmp_version=gmp-system
-    set mpfr_version=mpfr-system
-    set mpc_version=mpc-system
-    switch ("$WM_COMPILER")
-    case Gcc:
-    case Gcc48:
-        set gcc_version=gcc-4.8.5
-        breaksw
-    case Gcc45:
-        set gcc_version=gcc-4.5.4
-        breaksw
-    case Gcc46:
-        set gcc_version=gcc-4.6.4
-        breaksw
-    case Gcc47:
-        set gcc_version=gcc-4.7.4
-        breaksw
-    case Gcc49:
-        set gcc_version=gcc-4.9.3
-        breaksw
-    case Gcc51:
-        set gcc_version=gcc-5.1.0
-        breaksw
-    case Gcc52:
-        set gcc_version=gcc-5.2.0
-        breaksw
-    case Gcc53:
-        set gcc_version=gcc-5.3.0
-        breaksw
-    case Gcc54:
-        set gcc_version=gcc-5.4.0
-        breaksw
-    case Gcc61:
-        set gcc_version=gcc-6.1.0
-        breaksw
-    case Clang:
-        # Using clang - not gcc
-        setenv WM_CC 'clang'
-        setenv WM_CXX 'clang++'
-        set clang_version=llvm-3.7.0
-        # set clang_version=llvm-3.8.0
-        breaksw
-    default:
-        echo
-        echo "Warning in $WM_PROJECT_DIR/etc/config.csh/settings:"
-        echo "    Unknown OpenFOAM compiler type '$WM_COMPILER'"
-        echo "    Please check your settings"
-        echo
-        breaksw
-    endsw
-
-    # Optional configuration tweaks:
-    _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/compiler`
-
     if ( $?gcc_version ) then
+        if ( ! $?gmp_version  ) set gmp_version=gmp-system
+        if ( ! $?mpfr_version ) set mpfr_version=mpfr-system
+        if ( ! $?mpc_version  ) set mpc_version=mpc-system
         set gccDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$gcc_version
         set gmpDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$gmp_version
         set mpfrDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$mpfr_version
@@ -333,12 +289,13 @@ case ThirdParty:
 
         _foamAddMan     $clangDir/man
         _foamAddPath    $clangDir/bin
+
+        if ($?FOAM_VERBOSE && $?prompt) then
+            echo "Using ThirdParty compiler"
+            echo "    ${clangDir:t}"
+        endif
     endif
     unset clang_version clangDir
-    breaksw
-
-case system:
-    # Use system compiler
     breaksw
 
 default:

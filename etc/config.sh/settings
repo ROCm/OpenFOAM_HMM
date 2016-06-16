@@ -214,8 +214,10 @@ fi
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/compiler`
 
 case "$WM_COMPILER_TYPE" in
+system)
+    # Use system compiler
+    ;;
 OpenFOAM | ThirdParty)
-
     if [ -n "$gcc_version" ]
     then
         gccDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$gcc_version
@@ -284,11 +286,14 @@ OpenFOAM | ThirdParty)
 
         _foamAddMan     $clangDir/share/man
         _foamAddPath    $clangDir/bin
+
+        if [ "$FOAM_VERBOSE" -a "$PS1" ]
+        then
+            echo "Using ThirdParty compiler"
+            echo "    ${clangDir##*/}"
+        fi
     fi
     unset clang_version clangDir
-    ;;
-system)
-    # Use system compiler
     ;;
 *)
     echo "Warn: WM_COMPILER_TYPE='$WM_COMPILER_TYPE' is unsupported" 1>&2
