@@ -24,6 +24,9 @@ License
 Class
     Foam::hPolynomialThermo
 
+Group
+    grpSpecieThermo
+
 Description
     Thermodynamics package templated on the equation of state, using polynomial
     functions for cp, h and s

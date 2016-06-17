@@ -24,6 +24,9 @@ License
 Class
     Foam::linear
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     Central-differencing interpolation scheme class
 

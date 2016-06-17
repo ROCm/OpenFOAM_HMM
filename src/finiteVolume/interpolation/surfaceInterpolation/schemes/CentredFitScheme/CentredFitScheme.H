@@ -24,6 +24,9 @@ License
 Class
     Foam::CentredFitScheme
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     Centred fit surface interpolation scheme which applies an explicit
     correction to linear.

@@ -24,6 +24,9 @@ License
 Class
     Foam::PatchInjection
 
+Group
+    grpLagrangianIntermediateInjectionSubModels
+
 Description
     Patch injection
 

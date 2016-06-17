@@ -24,6 +24,9 @@ License
 Class
     Foam::InjectionModel
 
+Group
+    grpLagrangianIntermediateInjectionSubModels
+
 Description
     Templated injection model class.
 

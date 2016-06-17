@@ -24,6 +24,9 @@ License
 Class
     Foam::localMax
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     LocalMax-mean differencing scheme class.
 

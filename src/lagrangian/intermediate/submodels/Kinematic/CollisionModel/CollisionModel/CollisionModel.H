@@ -24,6 +24,9 @@ License
 Class
     Foam::CollisionModel
 
+Group
+    grpLagrangianIntermediateCollisionSubModels
+
 Description
     Templated collision model class.
 

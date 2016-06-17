@@ -24,6 +24,9 @@ License
 Class
     Foam::limitWith
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     limitWith differencing scheme limits the specified scheme with the
     specified limiter.

@@ -24,6 +24,9 @@ License
 Class
     Foam::COxidationMurphyShaddix
 
+Group
+    grpLagrangianIntermediateSurfaceReactionSubModels
+
 Description
     Limited to C(s) + O2 -> CO2
 

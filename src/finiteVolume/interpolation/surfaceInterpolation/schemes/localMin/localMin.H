@@ -24,6 +24,9 @@ License
 Class
     Foam::localMin
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     LocalMin-mean differencing scheme class.
 

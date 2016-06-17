@@ -24,6 +24,9 @@ License
 Class
     Foam::ETAB
 
+Group
+    grpLagrangianIntermediateBreakupSubModels
+
 Description
     The Enhanced TAB model.
 

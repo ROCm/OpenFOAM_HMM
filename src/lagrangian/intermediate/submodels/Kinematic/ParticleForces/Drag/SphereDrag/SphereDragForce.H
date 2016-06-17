@@ -24,6 +24,9 @@ License
 Class
     Foam::SphereDragForce
 
+Group
+    grpLagrangianIntermediateForceSubModels
+
 Description
     Drag model based on assumption of solid spheres
 

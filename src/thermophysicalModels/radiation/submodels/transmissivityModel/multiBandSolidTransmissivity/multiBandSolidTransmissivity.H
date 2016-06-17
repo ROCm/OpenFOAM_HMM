@@ -24,10 +24,11 @@ License
 Class
     Foam::radiation::multiBandSolidTransmissivity
 
+Group
+    grpRadiationTransmissivitySubModels
+
 Description
-
     multiBandSolidTransmissivity radiation transmissivity for solids.
-
 
 SourceFiles
     multiBandSolidTransmissivity.C

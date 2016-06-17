@@ -24,6 +24,9 @@ License
 Class
     Foam::ThermoParcel
 
+Group
+    grpLagrangianIntermediateParcels
+
 Description
     Thermodynamic parcel class with one/two-way coupling with the continuous
     phase. Includes Kinematic parcel sub-models, plus:

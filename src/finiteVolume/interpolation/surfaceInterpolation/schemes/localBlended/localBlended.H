@@ -24,6 +24,9 @@ License
 Class
     Foam::localBlended
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     Two-scheme localBlended differencing scheme.
 

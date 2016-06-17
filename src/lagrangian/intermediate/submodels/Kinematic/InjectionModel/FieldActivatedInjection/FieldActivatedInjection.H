@@ -24,6 +24,9 @@ License
 Class
     Foam::FieldActivatedInjection
 
+Group
+    grpLagrangianIntermediateInjectionSubModels
+
 Description
     Conditional injection at specified positions.
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::boundedDdtScheme
 
+Group
+    grpFvDdtSchemes
+
 Description
     Bounded form of the selected ddt scheme.
 

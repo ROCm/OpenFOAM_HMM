@@ -24,6 +24,9 @@ License
 Class
     Foam::KinematicCloud
 
+Group
+    grpLagrangianIntermediateClouds
+
 Description
     Templated base class for kinematic cloud
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::perfectFluid
 
+Group
+    grpSpecieEquationOfState
+
 Description
     Perfect gas equation of state.
 

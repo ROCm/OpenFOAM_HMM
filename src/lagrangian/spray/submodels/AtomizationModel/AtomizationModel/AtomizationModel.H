@@ -24,6 +24,9 @@ License
 Class
     Foam::AtomizationModel
 
+Group
+    grpLagrangianIntermediateAtomizationSubModels
+
 Description
     Templated atomization model class
 

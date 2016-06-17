@@ -24,6 +24,9 @@ License
 Class
     Foam::psiuReactionThermo
 
+Group
+    grpPsiThermo
+
 Description
     Foam::psiuReactionThermo
 
@@ -44,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class psiuReactionThermo Declaration
+                     Class psiuReactionThermo Declaration
 \*---------------------------------------------------------------------------*/
 
 class psiuReactionThermo

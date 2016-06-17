@@ -24,6 +24,9 @@ License
 Class
     Foam::LiftForce
 
+Group
+    grpLagrangianIntermediateForceSubModels
+
 Description
     Base class for particle lift force models
 

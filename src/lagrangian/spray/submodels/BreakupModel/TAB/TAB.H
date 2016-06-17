@@ -24,6 +24,9 @@ License
 Class
     Foam::TAB
 
+Group
+    grpLagrangianIntermediateBreakupSubModels
+
 Description
     The TAB Method for Numerical Calculation of Spray Droplet Breakup.
 

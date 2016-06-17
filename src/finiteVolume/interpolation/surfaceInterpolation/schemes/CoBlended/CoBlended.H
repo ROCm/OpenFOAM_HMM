@@ -24,6 +24,9 @@ License
 Class
     Foam::CoBlended
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     Two-scheme Courant number based blending differencing scheme.
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::NonSphereDragForce
 
+Group
+    grpLagrangianIntermediateForceSubModels
+
 Description
     Drag model for non-spherical particles.
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::CorrectionLimitingMethod
 
+Group
+    grpLagrangianIntermediateMPPICCorrectionLimitingMethods
+
 Description
     Base class for correction limiting methods.
 

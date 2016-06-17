@@ -24,6 +24,9 @@ License
 Class
     Foam::CorrectionLimitingMethods::absolute
 
+Group
+    grpLagrangianIntermediateMPPICCorrectionLimitingMethods
+
 Description
     Correction limiting method based on the absolute particle velocity.
 

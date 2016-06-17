@@ -24,6 +24,9 @@ License
 Class
     Foam::PatchPostProcessing
 
+Group
+    grpLagrangianIntermediateFunctionObjects
+
 Description
     Standard post-processing
 

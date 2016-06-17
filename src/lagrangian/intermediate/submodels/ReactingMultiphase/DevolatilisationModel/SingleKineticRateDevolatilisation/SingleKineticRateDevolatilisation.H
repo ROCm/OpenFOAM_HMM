@@ -24,6 +24,9 @@ License
 Class
     Foam::SingleKineticRateDevolatilisation
 
+Group
+    grpLagrangianIntermediateDevolatilisationSubModels
+
 Description
     Single kinetic rate devolatisation model.
     - acts on a per-specie basis

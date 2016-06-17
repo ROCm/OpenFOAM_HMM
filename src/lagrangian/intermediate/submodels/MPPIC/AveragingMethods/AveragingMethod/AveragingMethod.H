@@ -24,6 +24,9 @@ License
 Class
     Foam::AveragingMethod
 
+Group
+    grpLagrangianIntermediateMPPICAveragingMethods
+
 Description
     Base class for lagrangian averaging methods.
 

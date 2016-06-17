@@ -24,6 +24,9 @@ License
 Class
     Foam::limiterBlended
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     Blends two specified schemes using the limiter function provided by a
     limitedSurfaceInterpolationScheme.

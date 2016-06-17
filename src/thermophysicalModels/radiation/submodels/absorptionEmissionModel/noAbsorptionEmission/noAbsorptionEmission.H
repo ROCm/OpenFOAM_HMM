@@ -24,6 +24,9 @@ License
 Class
     Foam::radiation::noAbsorptionEmission
 
+Group
+    grpRadiationAbsorptionEmissionSubModels
+
 Description
     Dummy absorption-emission model for 'none'
 

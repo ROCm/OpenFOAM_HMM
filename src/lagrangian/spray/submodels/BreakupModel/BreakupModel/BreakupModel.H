@@ -24,6 +24,9 @@ License
 Class
     Foam::BreakupModel
 
+Group
+    grpLagrangianIntermediateBreakupSubModels
+
 Description
     Templated break-up model class
 

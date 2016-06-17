@@ -24,6 +24,9 @@ License
 Class
     Foam::NoBreakup
 
+Group
+    grpLagrangianIntermediateBreakupSubModels
+
 Description
     Dummy breakup model for 'none'
 

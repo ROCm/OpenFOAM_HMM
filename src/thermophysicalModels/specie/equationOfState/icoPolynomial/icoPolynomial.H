@@ -24,6 +24,9 @@ License
 Class
     Foam::icoPolynomial
 
+Group
+    grpSpecieEquationOfState
+
 Description
     Incompressible, polynomial form of equation of state, using a polynomial
     function for density.

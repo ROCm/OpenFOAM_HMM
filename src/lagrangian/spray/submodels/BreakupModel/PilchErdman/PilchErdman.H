@@ -24,6 +24,9 @@ License
 Class
     Foam::PilchErdman
 
+Group
+    grpLagrangianIntermediateBreakupSubModels
+
 Description
     Particle secondary breakup model, based on the reference:
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::RanzMarshall
 
+Group
+    grpLagrangianIntermediateHeatTransferSubModels
+
 Description
     The Ranz-Marshall correlation for heat transfer
 

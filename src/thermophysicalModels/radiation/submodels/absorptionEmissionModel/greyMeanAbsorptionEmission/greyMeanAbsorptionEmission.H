@@ -24,6 +24,9 @@ License
 Class
     Foam::radiation::greyMeanAbsorptionEmission
 
+Group
+    grpRadiationAbsorptionEmissionSubModels
+
 Description
     greyMeanAbsorptionEmission radiation absorption and emission coefficients
     for continuous phase

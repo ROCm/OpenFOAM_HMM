@@ -24,6 +24,9 @@ License
 Class
     Foam::SFCDLimiter
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     Class with limiter function which returns the limiter for the
     SFCD differencing scheme based on phict obtained from the LimiterFunc

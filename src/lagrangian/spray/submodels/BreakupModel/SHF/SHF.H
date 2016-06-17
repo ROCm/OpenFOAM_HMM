@@ -24,6 +24,9 @@ License
 Class
     Foam::SHF
 
+Group
+    grpLagrangianIntermediateBreakupSubModels
+
 Description
     Secondary Breakup Model to take account of the different breakup regimes,
     bag, molutimode, shear....

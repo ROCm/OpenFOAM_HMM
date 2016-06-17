@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::convectionScheme
 
+Group
+    grpFvConvectionSchemes
+
 Description
     Abstract base class for convection schemes.
 

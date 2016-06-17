@@ -24,6 +24,9 @@ License
 Class
     Foam::radiation::greyMeanSolidAbsorptionEmission
 
+Group
+    grpRadiationAbsorptionEmissionSubModels
+
 Description
     greyMeanSolidAbsorptionEmission radiation absorption and emission
     coefficients for solid mixture

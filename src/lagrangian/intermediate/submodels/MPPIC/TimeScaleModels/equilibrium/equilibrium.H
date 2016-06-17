@@ -24,6 +24,9 @@ License
 Class
     Foam::TimeScaleModels::equilibrium
 
+Group
+    grpLagrangianIntermediateMPPICTimeScaleSubModels
+
 Description
     Equlibrium model for the time scale over which properties of a dispersed
     phase tend towards the mean value.

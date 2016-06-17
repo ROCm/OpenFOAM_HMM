@@ -24,6 +24,9 @@ License
 Class
     Foam::NoInjection
 
+Group
+    grpLagrangianIntermediateInjectionSubModels
+
 Description
     Place holder for 'none' option
 

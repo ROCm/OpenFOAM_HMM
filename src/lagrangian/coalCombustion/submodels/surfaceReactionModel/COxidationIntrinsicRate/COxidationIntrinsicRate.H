@@ -24,6 +24,9 @@ License
 Class
     Foam::COxidationIntrinsicRate
 
+Group
+    grpLagrangianIntermediateSurfaceReactionSubModels
+
 Description
     Intrinsic char surface reaction mndel
 

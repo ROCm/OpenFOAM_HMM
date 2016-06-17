@@ -24,6 +24,9 @@ License
 Class
     Foam::sutherlandTransport
 
+Group
+    grpSpecieTransport
+
 Description
     Transport package using Sutherland's formula.
 

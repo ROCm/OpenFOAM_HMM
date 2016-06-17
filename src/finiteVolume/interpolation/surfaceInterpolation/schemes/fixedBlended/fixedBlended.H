@@ -24,6 +24,9 @@ License
 Class
     Foam::fixedBlended
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     Two-scheme fixed-blending differencing scheme.
 

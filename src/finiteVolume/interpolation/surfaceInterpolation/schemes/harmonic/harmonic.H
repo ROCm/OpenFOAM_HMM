@@ -24,6 +24,9 @@ License
 Class
     Foam::harmonic
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     Harmonic-mean differencing scheme class.
 

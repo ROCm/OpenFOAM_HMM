@@ -24,6 +24,9 @@ License
 Class
     Foam::reverseLinear
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     Inversed weight central-differencing interpolation scheme class.
 
@@ -46,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class reverseLinear Declaration
+                       Class reverseLinear Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

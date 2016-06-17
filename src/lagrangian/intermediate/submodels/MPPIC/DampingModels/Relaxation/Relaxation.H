@@ -24,6 +24,9 @@ License
 Class
     Foam::DampingModels::Relaxation
 
+Group
+    grpLagrangianIntermediateMPPICDampingSubModels
+
 Description
     Relaxation collisional damping model.
 

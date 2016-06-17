@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::limitedSnGrad
 
+Group
+    grpFvSnGradSchemes
+
 Description
     Run-time selected snGrad scheme with limited non-orthogonal correction.
 

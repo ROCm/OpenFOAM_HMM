@@ -24,6 +24,9 @@ License
 Class
     Foam::CellZoneInjection
 
+Group
+    grpLagrangianIntermediateInjectionSubModels
+
 Description
     Injection positions specified by a particle number density within a cell set
 

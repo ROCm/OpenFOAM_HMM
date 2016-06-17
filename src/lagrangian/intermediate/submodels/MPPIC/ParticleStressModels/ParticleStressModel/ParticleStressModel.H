@@ -24,6 +24,9 @@ License
 Class
     Foam::ParticleStressModel
 
+Group
+    grpLagrangianIntermediateMPPICParticleStressSubModels
+
 Description
     Base class for inter-particle stress models.
 

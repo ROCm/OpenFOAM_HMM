@@ -24,6 +24,9 @@ License
 Class
     Foam::NoComposition
 
+Group
+    grpLagrangianIntermediateCompositionSubModels
+
 Description
     Dummy class for 'none' option - will raise an error if any functions are
     called that require return values.

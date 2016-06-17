@@ -24,6 +24,9 @@ License
 Class
     Foam::ParticleCollector
 
+Group
+    grpLagrangianIntermediateFunctionObjects
+
 Description
     Function object to collect the parcel mass- and mass flow rate over a
     set of polygons.  The polygons can either be specified by sets of user-

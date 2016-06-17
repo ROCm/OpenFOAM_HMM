@@ -24,6 +24,9 @@ License
 Class
     Foam::VirtualMassForce
 
+Group
+    grpLagrangianIntermediateForceSubModels
+
 Description
     Calculates particle virtual mass force
 

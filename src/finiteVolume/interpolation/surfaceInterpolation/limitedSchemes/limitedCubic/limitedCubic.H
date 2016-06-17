@@ -24,6 +24,9 @@ License
 Class
     Foam::limitedCubicLimiter
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     Class with limiter function which returns the limiter for the
     TVD limited centred-cubic differencing scheme based on r obtained from

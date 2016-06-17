@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::gaussLaplacianScheme
 
+Group
+    grpFvLaplacianSchemes
+
 Description
     Basic second-order laplacian using face-gradients and Gauss' theorem.
 

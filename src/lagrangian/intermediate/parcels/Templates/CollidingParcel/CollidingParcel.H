@@ -24,6 +24,9 @@ License
 Class
     Foam::CollidingParcel
 
+Group
+    grpLagrangianIntermediateParcels
+
 Description
     Wrapper around kinematic parcel types to add collision modelling
 

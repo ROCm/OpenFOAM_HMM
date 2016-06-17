@@ -24,7 +24,11 @@ License
 Class
     Foam::DampingModels::NoDamping
 
+Group
+    grpLagrangianIntermediateMPPICDampingSubModels
+
 Description
+    Place holder for the 'none' option
 
 SourceFiles
     NoDamping.C

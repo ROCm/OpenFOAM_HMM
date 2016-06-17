@@ -24,6 +24,9 @@ License
 Class
     Foam::ParticleStressModels::exponential
 
+Group
+    grpLagrangianIntermediateMPPICParticleStressSubModels
+
 Description
     Exponential inter-particle stress model of the same form as used in
     twoPhaseEulerFoam

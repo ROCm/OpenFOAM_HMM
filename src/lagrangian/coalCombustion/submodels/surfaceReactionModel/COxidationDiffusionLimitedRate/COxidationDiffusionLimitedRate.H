@@ -24,6 +24,9 @@ License
 Class
     Foam::COxidationDiffusionLimitedRate
 
+Group
+    grpLagrangianIntermediateSurfaceReactionSubModels
+
 Description
     Diffusion limited rate surface reaction model for coal parcels. Limited to:
 

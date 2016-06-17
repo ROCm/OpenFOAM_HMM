@@ -24,6 +24,9 @@ License
 Class
     Foam::PhaseChangeModel
 
+Group
+    grpLagrangianIntermediatePhaseChangeSubModels
+
 Description
     Templated phase change model class
 

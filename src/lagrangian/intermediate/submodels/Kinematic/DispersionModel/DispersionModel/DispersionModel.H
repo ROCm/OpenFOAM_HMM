@@ -24,7 +24,11 @@ License
 Class
     Foam::DispersionModel
 
+Group
+    grpLagrangianIntermediateDispersionSubModels
+
 Description
+    Base class for dispersion modelling
 
 \*---------------------------------------------------------------------------*/
 

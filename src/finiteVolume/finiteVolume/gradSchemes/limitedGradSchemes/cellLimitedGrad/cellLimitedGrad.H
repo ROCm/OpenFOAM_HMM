@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::cellLimitedGrad
 
+Group
+    grpFvGradSchemes
+
 Description
     cellLimitedGrad gradient scheme applied to a runTime selected base gradient
     scheme.

@@ -24,7 +24,11 @@ License
 Class
     Foam::CorrectionLimitingMethods::noCorrectionLimiting
 
+Group
+    grpLagrangianIntermediateMPPICCorrectionLimitingMethods
+
 Description
+    Place holder for the 'none' option
 
 SourceFiles
     noCorrectionLimiting.C

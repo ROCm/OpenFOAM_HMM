@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::divScheme
 
+Group
+    grpFvDivSchemes
+
 Description
     Abstract base class for div schemes.
 

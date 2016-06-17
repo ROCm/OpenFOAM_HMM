@@ -24,6 +24,9 @@ License
 Class
     Foam::ParticleTracks
 
+Group
+    grpLagrangianIntermediateFunctionObjects
+
 Description
     Records particle state (all variables) on each call to postFace
 

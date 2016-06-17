@@ -24,6 +24,9 @@ License
 Class
     Foam::PatchFlowRateInjection
 
+Group
+    grpLagrangianIntermediateInjectionSubModels
+
 Description
     Patch injection
     - uses patch flow rate to determine concentration and velociy

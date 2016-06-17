@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::boundedConvectionScheme
 
+Group
+    grpFvConvectionSchemes
+
 Description
     Bounded form of the selected convection scheme.
 

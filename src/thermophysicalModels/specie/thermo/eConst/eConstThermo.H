@@ -24,6 +24,9 @@ License
 Class
     Foam::eConstThermo
 
+Group
+    grpSpecieThermo
+
 Description
     Constant properties thermodynamics package templated on an equation of
     state

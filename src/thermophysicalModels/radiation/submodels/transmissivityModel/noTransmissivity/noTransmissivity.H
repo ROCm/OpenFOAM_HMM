@@ -24,6 +24,9 @@ License
 Class
     Foam::radiation::noTransmissivity
 
+Group
+    grpRadiationTransmissivitySubModels
+
 Description
     Dummy transmissivity model for 'none'
 

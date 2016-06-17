@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::multivariateGaussConvectionScheme
 
+Group
+    grpFvConvectionSchemes
+
 Description
     Basic second-order convection using face-gradients and Gauss' theorem.
 

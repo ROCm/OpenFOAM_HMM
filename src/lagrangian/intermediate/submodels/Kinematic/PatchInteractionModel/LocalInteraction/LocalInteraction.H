@@ -24,6 +24,9 @@ License
 Class
     Foam::LocalInteraction
 
+Group
+    grpLagrangianIntermediatePatchInteractionSubModels
+
 Description
     Patch interaction specified on a patch-by-patch basis
 

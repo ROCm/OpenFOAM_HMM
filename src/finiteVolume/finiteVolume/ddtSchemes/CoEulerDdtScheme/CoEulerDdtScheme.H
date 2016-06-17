@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::CoEulerDdtScheme
 
+Group
+    grpFvDdtSchemes
+
 Description
     Courant number limited first-order Euler implicit/explicit ddt.
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::PackingModels::Implicit
 
+Group
+    grpLagrangianIntermediateMPPICPackingSubModels
+
 Description
     Implicit model for applying an inter-particle stress to the particles.
 

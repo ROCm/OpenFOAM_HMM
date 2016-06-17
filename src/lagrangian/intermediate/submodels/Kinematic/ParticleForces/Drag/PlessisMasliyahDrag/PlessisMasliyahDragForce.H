@@ -24,6 +24,9 @@ License
 Class
     Foam::PlessisMasliyahDragForce
 
+Group
+    grpLagrangianIntermediateForceSubModels
+
 Description
     PlessisMasliyahDragForce drag model for solid spheres.
 

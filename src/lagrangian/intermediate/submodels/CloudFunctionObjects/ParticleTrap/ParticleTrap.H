@@ -24,6 +24,9 @@ License
 Class
     Foam::ParticleTrap
 
+Group
+    grpLagrangianIntermediateFunctionObjects
+
 Description
     Traps particles within a given phase fraction for multi-phase cases
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::NoDevolatilisation
 
+Group
+    grpLagrangianIntermediateDevolatilisationSubModels
+
 Description
     Dummy devolatilisation model for 'none'
 

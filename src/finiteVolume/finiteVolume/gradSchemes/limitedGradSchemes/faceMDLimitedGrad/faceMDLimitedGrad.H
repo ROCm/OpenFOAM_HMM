@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::faceMDLimitedGrad
 
+Group
+    grpFvGradSchemes
+
 Description
     faceMDLimitedGrad gradient scheme applied to a runTime selected
     base gradient scheme.

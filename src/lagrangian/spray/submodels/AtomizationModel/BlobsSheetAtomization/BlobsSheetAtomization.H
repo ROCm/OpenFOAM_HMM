@@ -24,6 +24,9 @@ License
 Class
     Foam::BlobsSheetAtomization
 
+Group
+    grpLagrangianIntermediateAtomizationSubModels
+
 Description
     Primary Breakup Model for pressure swirl atomizers.
 

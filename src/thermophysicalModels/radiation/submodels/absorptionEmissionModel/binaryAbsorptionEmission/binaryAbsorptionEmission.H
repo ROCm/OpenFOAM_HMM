@@ -24,6 +24,9 @@ License
 Class
     Foam::radiation::binaryAbsorptionEmission
 
+Group
+    grpRadiationAbsorptionEmissionSubModels
+
 Description
     Radiation coefficient based on two absorption models
 

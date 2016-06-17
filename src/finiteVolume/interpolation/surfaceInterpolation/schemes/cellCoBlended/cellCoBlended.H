@@ -24,6 +24,9 @@ License
 Class
     Foam::cellCoBlended
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     Two-scheme cell-based Courant number based blending differencing scheme.
 

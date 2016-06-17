@@ -24,6 +24,9 @@ License
 Class
     Foam::ParticleStressModels::HarrisCrighton
 
+Group
+    grpLagrangianIntermediateMPPICParticleStressSubModels
+
 Description
     Inter-particle stress model of Harris and Crighton
 

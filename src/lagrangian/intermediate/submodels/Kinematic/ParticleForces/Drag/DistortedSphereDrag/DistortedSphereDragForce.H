@@ -24,6 +24,9 @@ License
 Class
     Foam::DistortedSphereDragForce
 
+Group
+    grpLagrangianIntermediateForceSubModels
+
 Description
     Drag model based on assumption of distorted spheres according to:
 

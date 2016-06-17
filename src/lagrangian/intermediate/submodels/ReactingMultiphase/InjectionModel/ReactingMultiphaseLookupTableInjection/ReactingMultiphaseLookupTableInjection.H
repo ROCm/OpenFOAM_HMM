@@ -24,6 +24,9 @@ License
 Class
     Foam::ReactingMultiphaseLookupTableInjection
 
+Group
+    grpLagrangianIntermediateInjectionSubModels
+
 Description
     Particle injection sources read from look-up table. Each row corresponds to
     an injection site.

@@ -24,6 +24,9 @@ License
 Class
     Foam::COxidationHurtMitchell
 
+Group
+    grpLagrangianIntermediateSurfaceReactionSubModels
+
 Description
     Char oxidation model given by Hurt and Mitchell:
 

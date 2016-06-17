@@ -24,7 +24,11 @@ License
 Class
     Foam::IsotropyModels::NoIsotropy
 
+Group
+    grpLagrangianIntermediateMPPICIsotropySubModels
+
 Description
+    Place holder for the 'none' option
 
 SourceFiles
     NoIsotropy.C

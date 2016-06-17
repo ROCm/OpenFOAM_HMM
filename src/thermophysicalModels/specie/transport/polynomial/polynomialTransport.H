@@ -24,6 +24,9 @@ License
 Class
     Foam::polynomialTransport
 
+Group
+    grpSpecieTransport
+
 Description
     Transport package using polynomial functions for mu and kappa
 

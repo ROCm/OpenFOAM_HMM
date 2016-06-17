@@ -24,6 +24,9 @@ License
 Class
     Foam::LiquidEvaporation
 
+Group
+    grpLagrangianIntermediatePhaseChangeSubModels
+
 Description
     Liquid evaporation model
     - uses ideal gas assumption

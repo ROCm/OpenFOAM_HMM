@@ -24,6 +24,9 @@ License
 Class
     Foam::ReactingCloud
 
+Group
+    grpLagrangianIntermediateClouds
+
 Description
     Templated base class for reacting cloud
 

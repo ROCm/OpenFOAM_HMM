@@ -24,6 +24,9 @@ License
 Class
     Foam::StandardWallInteraction
 
+Group
+    grpLagrangianIntermediatePatchInteractionSubModels
+
 Description
     Wall interaction model. Three choices:
     - rebound - optionally specify elasticity and resitution coefficients

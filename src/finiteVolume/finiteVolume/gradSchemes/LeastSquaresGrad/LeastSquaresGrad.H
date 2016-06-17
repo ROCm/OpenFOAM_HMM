@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::LeastSquaresGrad
 
+Group
+    grpFvGradSchemes
+
 Description
     Gradient calculated using weighted least-squares on an arbitrary stencil.
     The stencil type is provided via a template argument and any cell-based

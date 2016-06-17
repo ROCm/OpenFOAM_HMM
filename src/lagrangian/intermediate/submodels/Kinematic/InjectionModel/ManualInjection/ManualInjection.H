@@ -24,6 +24,9 @@ License
 Class
     Foam::ManualInjection
 
+Group
+    grpLagrangianIntermediateInjectionSubModels
+
 Description
     Manual injection
 

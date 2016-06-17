@@ -24,6 +24,9 @@ License
 Class
     Foam::psiThermo
 
+Group
+    grpPsiThermo
+
 Description
     Basic thermodynamic properties based on compressibility
 

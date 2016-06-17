@@ -24,6 +24,9 @@ License
 Class
     Foam::radiation::fvDOM
 
+Group
+    grpRadiationModels
+
 Description
 
     Finite Volume Discrete Ordinates Method. Solves the RTE equation for n

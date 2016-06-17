@@ -24,6 +24,9 @@ License
 Class
     Foam::MinmodLimiter
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     Class with limiter function which returns the limiter for the
     Minmod differencing scheme.

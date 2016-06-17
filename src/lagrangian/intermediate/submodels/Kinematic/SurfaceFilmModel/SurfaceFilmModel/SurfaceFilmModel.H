@@ -24,6 +24,9 @@ License
 Class
     Foam::SurfaceFilmModel
 
+Group
+    grpLagrangianIntermediateSurfaceFilmSubModels
+
 Description
     Templated wall surface film model class.
 

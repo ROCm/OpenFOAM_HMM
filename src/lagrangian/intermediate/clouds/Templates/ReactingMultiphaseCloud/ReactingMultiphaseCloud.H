@@ -24,6 +24,9 @@ License
 Class
     Foam::ReactingMultiphaseCloud
 
+Group
+    grpLagrangianIntermediateClouds
+
 Description
     Templated base class for multiphase reacting cloud
 

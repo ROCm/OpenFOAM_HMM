@@ -24,6 +24,9 @@ License
 Class
     Foam::NoSurfaceReaction
 
+Group
+    grpLagrangianIntermediateSurfaceReactionSubModels
+
 Description
     Dummy surface reaction model for 'none'
 

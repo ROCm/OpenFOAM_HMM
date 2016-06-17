@@ -24,6 +24,9 @@ License
 Class
     Foam::SuppressionCollision
 
+Group
+    grpLagrangianIntermediateCollisionSubModels
+
 Description
     Inter-cloud collision model, whereby the \c canReact flag can be used
     to inhibit devolatilisation and surface reactions

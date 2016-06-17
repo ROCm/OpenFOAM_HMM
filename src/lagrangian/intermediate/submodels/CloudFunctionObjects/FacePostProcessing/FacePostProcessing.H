@@ -24,6 +24,9 @@ License
 Class
     Foam::FacePostProcessing
 
+Group
+    grpLagrangianIntermediateFunctionObjects
+
 Description
     Records particle face quantities on used-specified face zone
 
