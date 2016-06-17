@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::fourthGrad
 
+Group
+    grpFvGradSchemes
+
 Description
     Second-order gradient scheme using least-squares.
 

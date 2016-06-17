@@ -24,6 +24,9 @@ License
 Class
     Foam::ConstantRateDevolatilisation
 
+Group
+    grpLagrangianIntermediateDevolatilisationSubModels
+
 Description
     Constant rate devolatisation model
     - need to set vapourisation temperature to 600 K

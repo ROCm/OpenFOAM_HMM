@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,8 @@ Class
 
 Description
     Reacting, 1-D pyrolysis model
+    NOTE: The moveMesh option can only be applied to solid reaction such as:
+          PMMA -> gas at the moment.
 
 SourceFiles
     reactingOneDim.C

@@ -24,6 +24,9 @@ License
 Class
     Foam::Boussinesq
 
+Group
+    grpSpecieEquationOfState
+
 Description
     Incompressible gas equation of state using the Boussinesq approximation for
     the density as a function of temperature only:

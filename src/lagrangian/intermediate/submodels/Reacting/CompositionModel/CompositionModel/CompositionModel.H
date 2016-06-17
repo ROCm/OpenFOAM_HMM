@@ -24,6 +24,9 @@ License
 Class
     Foam::CompositionModel
 
+Group
+    grpLagrangianIntermediateCompositionSubModels
+
 Description
     Templated reacting parcel composition model class
     Consists of carrier species (via thermo package), and additional liquids

@@ -24,6 +24,9 @@ License
 Class
     Foam::NoDispersion
 
+Group
+    grpLagrangianIntermediateDispersionSubModels
+
 Description
     Place holder for 'none' option
 

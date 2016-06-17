@@ -24,6 +24,9 @@ License
 Class
     Foam::AveragingMethods::Dual
 
+Group
+    grpLagrangianIntermediateMPPICAveragingMethods
+
 Description
     Dual-mesh lagrangian averaging procedure.
 

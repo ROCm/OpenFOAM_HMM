@@ -24,6 +24,9 @@ License
 Class
     Foam::CloudFunctionObject
 
+Group
+    grpLagrangianIntermediateFunctionObjects
+
 Description
     Templated cloud function object base class
 

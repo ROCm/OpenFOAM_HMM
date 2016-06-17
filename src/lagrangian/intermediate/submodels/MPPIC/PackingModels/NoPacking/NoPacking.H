@@ -24,7 +24,11 @@ License
 Class
     Foam::PackingModel::NoPacking
 
+Group
+    grpLagrangianIntermediateMPPICPackingSubModels
+
 Description
+    Place holder for the 'none' option
 
 SourceFiles
     NoPacking.C

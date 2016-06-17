@@ -24,6 +24,9 @@ License
 Class
     Foam::MUSCLLimiter
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     Class with limiter function which returns the limiter for the
     van Leer's MUSCL differencing scheme.

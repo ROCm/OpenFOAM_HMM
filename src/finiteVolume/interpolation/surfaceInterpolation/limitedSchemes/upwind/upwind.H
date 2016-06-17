@@ -24,6 +24,9 @@ License
 Class
     Foam::upwind
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     Upwind differencing scheme class.
 

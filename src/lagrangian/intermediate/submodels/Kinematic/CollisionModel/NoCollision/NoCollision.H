@@ -24,6 +24,9 @@ License
 Class
     Foam::NoCollision
 
+Group
+    grpLagrangianIntermediateCollisionSubModels
+
 Description
     Place holder for 'none' option
 

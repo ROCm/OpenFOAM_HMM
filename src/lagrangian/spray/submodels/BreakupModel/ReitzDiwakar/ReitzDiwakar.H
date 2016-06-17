@@ -24,6 +24,9 @@ License
 Class
     Foam::ReitzDiwakar
 
+Group
+    grpLagrangianIntermediateBreakupSubModels
+
 Description
     secondary breakup model
 

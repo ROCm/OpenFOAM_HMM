@@ -24,6 +24,9 @@ License
 Class
     Foam::hPowerThermo
 
+Group
+    grpSpecieThermo
+
 Description
     Power-function based thermodynamics package templated on EquationOfState.
 

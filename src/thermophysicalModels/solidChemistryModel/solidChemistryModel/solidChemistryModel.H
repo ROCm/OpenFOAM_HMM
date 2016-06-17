@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ Class
 Description
     Extends base solid chemistry model by adding a thermo package, and ODE
     functions.
+
     Introduces chemistry equation system and evaluation of chemical source
     terms.
 
@@ -54,7 +55,7 @@ namespace Foam
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
-                   Class solidChemistryModel Declaration
+                     Class solidChemistryModel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CompType, class SolidThermo>
@@ -187,6 +188,9 @@ public:
             //- Return total solid source term
             inline tmp<DimensionedField<scalar, volMesh>> RRs() const;
 
+            //- Return net solid sensible enthalpy
+            inline tmp<DimensionedField<scalar, volMesh> > RRsHs() const;
+
             //- Solve the reaction system for the given time step
             //  and return the characteristic time
             virtual scalar solve(const scalar deltaT) = 0;
@@ -242,7 +246,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    #include "solidChemistryModelI.H"
+#include "solidChemistryModelI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

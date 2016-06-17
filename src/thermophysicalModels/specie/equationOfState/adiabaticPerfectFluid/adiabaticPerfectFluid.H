@@ -24,6 +24,9 @@ License
 Class
     Foam::adiabaticPerfectFluid
 
+Group
+    grpSpecieEquationOfState
+
 Description
     AdiabaticPerfect gas equation of state.
 

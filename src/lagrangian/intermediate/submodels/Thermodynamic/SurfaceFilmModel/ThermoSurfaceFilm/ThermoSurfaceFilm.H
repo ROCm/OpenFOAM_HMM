@@ -24,6 +24,9 @@ License
 Class
     Foam::ThermoSurfaceFilm
 
+Group
+    grpLagrangianIntermediateSurfaceFilmSubModels
+
 Description
     Thermo parcel surface film model.
 

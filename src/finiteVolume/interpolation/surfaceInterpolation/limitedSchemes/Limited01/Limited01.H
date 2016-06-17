@@ -24,6 +24,9 @@ License
 Class
     Foam::Limited01Limiter
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     A LimitedLimiter with the range 0-1
 

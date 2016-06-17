@@ -24,6 +24,9 @@ License
 Class
     Foam::ParticleErosion
 
+Group
+    grpLagrangianIntermediateFunctionObjects
+
 Description
     Creates particle erosion field, Q
 

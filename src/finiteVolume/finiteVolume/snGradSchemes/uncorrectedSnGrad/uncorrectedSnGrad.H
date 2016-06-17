@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::uncorrectedSnGrad
 
+Group
+    grpFvSnGradSchemes
+
 Description
     Simple central-difference snGrad scheme without non-orthogonal correction.
 

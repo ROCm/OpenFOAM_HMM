@@ -24,6 +24,9 @@ License
 Class
     Foam::janafThermo
 
+Group
+    grpSpecieThermo
+
 Description
     JANAF tables based thermodynamics package templated
     into the equation of state.

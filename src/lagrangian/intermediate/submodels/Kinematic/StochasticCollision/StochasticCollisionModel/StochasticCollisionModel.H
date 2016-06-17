@@ -24,6 +24,9 @@ License
 Class
     Foam::StochasticCollisionModel
 
+Group
+    grpLagrangianIntermediateCollisionSubModels
+
 Description
     Templated stochastic collision model class
 

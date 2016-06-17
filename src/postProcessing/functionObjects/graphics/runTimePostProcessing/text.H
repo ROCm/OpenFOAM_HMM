@@ -25,6 +25,23 @@ Class
     Foam::text
 
 Description
+    Example of text object specification:
+    \verbatim
+    text1
+    {
+        string      "text to display";
+        position    (0.1 0.05);
+        size        18;
+        bold        yes;
+        visible     yes;
+
+        // Optionally override default colour
+        // colour    (0 1 1);
+
+        // Optional entry
+        timeStamp   yes; //Append solution time to string
+    }
+    \endverbatim
 
 SourceFiles
     text.C
@@ -81,6 +98,9 @@ protected:
 
         //- Bold flag
         bool bold_;
+
+        //- Time stamp flag
+        bool timeStamp_;
 
 
 public:

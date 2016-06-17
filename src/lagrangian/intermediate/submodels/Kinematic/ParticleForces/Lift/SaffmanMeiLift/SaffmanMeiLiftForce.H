@@ -24,6 +24,9 @@ License
 Class
     Foam::SaffmanMeiLiftForce
 
+Group
+    grpLagrangianIntermediateForceSubModels
+
 Description
     Saffman-Mei particle lift force model applicable to spherical particles.
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::radiation::multiBandSolidAbsorptionEmission
 
+Group
+    grpRadiationAbsorptionEmissionSubModels
+
 Description
 
     multiBandSolidAbsorptionEmission radiation absorption/emission for solids.

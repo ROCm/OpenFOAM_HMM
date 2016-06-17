@@ -24,6 +24,9 @@ License
 Class
     Foam::GravityForce
 
+Group
+    grpLagrangianIntermediateForceSubModels
+
 Description
     Calculates particle gravity force
 

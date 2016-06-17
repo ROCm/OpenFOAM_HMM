@@ -24,6 +24,9 @@ License
 Class
     Foam::SurfaceReactionModel
 
+Group
+    grpLagrangianIntermediateSurfaceReactionSubModels
+
 Description
     Templated surface reaction model class
 

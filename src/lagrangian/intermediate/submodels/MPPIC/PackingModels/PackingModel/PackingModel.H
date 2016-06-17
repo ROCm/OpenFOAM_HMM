@@ -24,6 +24,9 @@ License
 Class
     Foam::PackingModel
 
+Group
+    grpLagrangianIntermediateMPPICPackingSubModels
+
 Description
     Base class for packing models.
 

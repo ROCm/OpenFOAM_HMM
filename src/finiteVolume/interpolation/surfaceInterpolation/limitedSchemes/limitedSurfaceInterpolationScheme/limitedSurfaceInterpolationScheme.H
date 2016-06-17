@@ -24,6 +24,9 @@ License
 Class
     Foam::limitedSurfaceInterpolationScheme
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     Abstract base class for limited surface interpolation schemes.
 

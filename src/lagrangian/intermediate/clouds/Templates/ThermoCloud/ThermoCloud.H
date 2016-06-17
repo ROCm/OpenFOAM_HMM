@@ -24,6 +24,9 @@ License
 Class
     Foam::ThermoCloud
 
+Group
+    grpLagrangianIntermediateClouds
+
 Description
     Templated base class for thermodynamic cloud
 

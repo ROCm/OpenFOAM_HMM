@@ -24,6 +24,9 @@ License
 Class
     Foam::VoidFraction
 
+Group
+    grpLagrangianIntermediateFunctionObjects
+
 Description
     Creates particle void fraction field on carrier phase
 

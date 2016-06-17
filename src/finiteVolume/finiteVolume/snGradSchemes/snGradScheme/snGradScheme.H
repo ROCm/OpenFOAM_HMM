@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::snGradScheme
 
+Group
+    grpFvSnGradSchemes
+
 Description
     Abstract base class for snGrad schemes.
 

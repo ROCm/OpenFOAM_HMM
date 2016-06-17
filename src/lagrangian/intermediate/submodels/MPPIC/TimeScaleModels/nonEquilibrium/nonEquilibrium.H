@@ -24,6 +24,9 @@ License
 Class
     Foam::TimeScaleModels::nonEquilibrium
 
+Group
+    grpLagrangianIntermediateMPPICTimeScaleSubModels
+
 Description
     Non-Equlibrium model for the time scale over which properties of a
     dispersed phase tend towards the mean value.

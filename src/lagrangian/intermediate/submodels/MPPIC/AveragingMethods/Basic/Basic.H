@@ -24,6 +24,9 @@ License
 Class
     Foam::AveragingMethods::Basic
 
+Group
+    grpLagrangianIntermediateMPPICAveragingMethods
+
 Description
     Basic lagrangian averaging procedure.
 

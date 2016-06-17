@@ -24,6 +24,9 @@ License
 Class
     Foam::radiation::P1
 
+Group
+    grpRadiationModels
+
 Description
     Works well for combustion applications where optical thickness, tau is
     large, i.e. tau = a*L > 3 (L = distance between objects)

@@ -24,6 +24,9 @@ License
 Class
     Foam::PressureGradientForce
 
+Group
+    grpLagrangianIntermediateForceSubModels
+
 Description
     Calculates particle pressure gradient force
 

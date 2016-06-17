@@ -24,6 +24,9 @@ License
 Class
     Foam::PureUpwindFitScheme
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     Upwind biased fit surface interpolation scheme that applies an explicit
     correction to upwind.

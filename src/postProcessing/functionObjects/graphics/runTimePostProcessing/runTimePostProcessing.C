@@ -177,14 +177,20 @@ void Foam::runTimePostProcessing::write()
         surfaces_[i].addGeometryToScene(0, renderer);
     }
 
+    // Add the text
+    forAll(text_, i)
+    {
+        text_[i].addGeometryToScene(0, renderer);
+    }
+
     while (scene_.loop(renderer))
     {
         scalar position = scene_.position();
 
-        // Add the text
+        // Update the text
         forAll(text_, i)
         {
-            text_[i].addGeometryToScene(position, renderer);
+            text_[i].updateActors(position);
         }
 
         // Update the points

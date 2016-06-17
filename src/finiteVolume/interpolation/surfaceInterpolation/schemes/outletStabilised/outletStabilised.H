@@ -24,6 +24,9 @@ License
 Class
     Foam::outletStabilised
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     Outlet-stabilised interpolation scheme which applies upwind differencing
     to the faces of the cells adjacent to outlets.
@@ -54,7 +57,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class outletStabilised Declaration
+                      Class outletStabilised Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

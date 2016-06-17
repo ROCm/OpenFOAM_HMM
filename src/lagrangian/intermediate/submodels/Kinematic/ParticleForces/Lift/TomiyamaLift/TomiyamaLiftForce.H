@@ -24,6 +24,9 @@ License
 Class
     Foam::TomiyamaLiftForce
 
+Group
+    grpLagrangianIntermediateForceSubModels
+
 Description
     Tomiyama particle lift force model applicable to deformable bubbles.
 

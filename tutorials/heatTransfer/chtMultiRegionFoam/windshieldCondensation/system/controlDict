@@ -15,6 +15,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "solverControls"
+
 libs            ("libliquidPropertiesFvPatchFields.so");
 
 application     chtMultiRegionFoam;
@@ -30,8 +32,6 @@ endTime         90;
 deltaT          0.01;
 
 writeControl    adjustableRunTime;
-
-writeInterval   2.5;
 
 purgeWrite      0;
 
@@ -49,11 +49,7 @@ runTimeModifiable true;
 
 adjustTimeStep  yes;
 
-maxCo           12;
-
 maxDi           10;
-
-maxDeltaT       1;
 
 functions
 {
@@ -85,14 +81,14 @@ functions
         outputControl       timeStep;
         outputInterval      1;
         region              cabin;
-        fileToUpdate        "$FOAM_CASE/system/controlDict";
+        fileToUpdate        "$FOAM_CASE/system/solverControls";
 
         timeVsFile
         (
-            ( 1     "$FOAM_CASE/system/controlDict.0" )
-            ( 5     "$FOAM_CASE/system/controlDict.5")
-            ( 20    "$FOAM_CASE/system/controlDict.20")
-            ( 60    "$FOAM_CASE/system/controlDict.60")
+            ( 1     "$FOAM_CASE/system/solverControls.0" )
+            ( 5     "$FOAM_CASE/system/solverControls.5")
+            ( 20    "$FOAM_CASE/system/solverControls.20")
+            ( 60    "$FOAM_CASE/system/solverControls.60")
         );
     }
 }

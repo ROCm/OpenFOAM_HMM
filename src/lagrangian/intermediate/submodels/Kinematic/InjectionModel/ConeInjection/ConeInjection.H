@@ -24,6 +24,9 @@ License
 Class
     Foam::ConeInjection
 
+Group
+    grpLagrangianIntermediateInjectionSubModels
+
 Description
     Multi-point cone injection model.
 

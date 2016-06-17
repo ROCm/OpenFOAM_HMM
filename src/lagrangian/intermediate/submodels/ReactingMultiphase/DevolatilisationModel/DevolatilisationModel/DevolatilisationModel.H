@@ -24,6 +24,9 @@ License
 Class
     Foam::DevolatilisationModel
 
+Group
+    grpLagrangianIntermediateDevolatilisationSubModels
+
 Description
     Templated devolatilisation model class
 

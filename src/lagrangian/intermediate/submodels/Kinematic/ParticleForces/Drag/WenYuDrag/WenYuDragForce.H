@@ -24,6 +24,9 @@ License
 Class
     Foam::WenYuDragForce
 
+Group
+    grpLagrangianIntermediateForceSubModels
+
 Description
     Wen-Yu drag model for solid spheres.
 

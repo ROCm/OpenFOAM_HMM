@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::gaussDivScheme
 
+Group
+    grpFvDivSchemes
+
 Description
     Basic second-order div using face-gradients and Gauss' theorem.
 

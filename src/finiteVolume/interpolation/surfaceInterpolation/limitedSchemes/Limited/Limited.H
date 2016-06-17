@@ -24,6 +24,9 @@ License
 Class
     Foam::LimitedLimiter
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     Foam::LimitedLimiter
 

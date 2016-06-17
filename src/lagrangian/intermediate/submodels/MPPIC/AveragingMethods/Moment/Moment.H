@@ -24,6 +24,9 @@ License
 Class
     Foam::AveragingMethods::Moment
 
+Group
+    grpLagrangianIntermediateMPPICAveragingMethods
+
 Description
     Moment lagrangian averaging procedure.
 

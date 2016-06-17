@@ -24,9 +24,11 @@ License
 Class
     Foam::radiation::noSoot
 
+Group
+    grpRadiationSootSubModels
+
 Description
     noSoot
-
 
 SourceFiles
     noSoot.C

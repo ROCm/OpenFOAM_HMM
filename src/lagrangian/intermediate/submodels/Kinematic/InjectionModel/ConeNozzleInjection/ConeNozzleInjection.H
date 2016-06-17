@@ -24,6 +24,9 @@ License
 Class
     Foam::ConeNozzleInjection
 
+Group
+    grpLagrangianIntermediateInjectionSubModels
+
 Description
     Cone injection.
 

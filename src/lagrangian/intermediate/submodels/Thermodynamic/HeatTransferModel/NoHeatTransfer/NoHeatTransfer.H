@@ -24,6 +24,9 @@ License
 Class
     Foam::NoHeatTransfer
 
+Group
+    grpLagrangianIntermediateHeatTransferSubModels
+
 Description
     Dummy heat transfer model for 'none'
 

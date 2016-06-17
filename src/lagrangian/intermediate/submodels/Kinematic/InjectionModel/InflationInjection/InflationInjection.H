@@ -24,6 +24,9 @@ License
 Class
     Foam::InflationInjection
 
+Group
+    grpLagrangianIntermediateInjectionSubModels
+
 Description
     Inflation injection - creates new particles by splitting existing
     particles within in a set of generation cells, then inflating them

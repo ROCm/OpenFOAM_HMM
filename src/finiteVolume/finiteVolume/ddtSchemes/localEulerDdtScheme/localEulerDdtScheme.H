@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::localEulerDdtScheme
 
+Group
+    grpFvDdtSchemes
+
 Description
     Local time-step first-order Euler implicit/explicit ddt.
 

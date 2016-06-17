@@ -24,6 +24,9 @@ License
 Class
     Foam::MPPICCloud
 
+Group
+    grpLagrangianIntermediateClouds
+
 Description
     Adds MPPIC modelling to kinematic clouds
 

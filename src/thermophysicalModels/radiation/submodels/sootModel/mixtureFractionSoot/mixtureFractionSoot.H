@@ -24,6 +24,9 @@ License
 Class
     Foam::radiation::mixtureFractionSoot
 
+Group
+    grpRadiationSootSubModels
+
 Description
     This soot model is purely an state model. The ammount of soot produced is
     determined by a single step chemistry as :

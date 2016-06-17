@@ -24,6 +24,9 @@ License
 Class
     Foam::NoAtomization
 
+Group
+    grpLagrangianIntermediateAtomizationSubModels
+
 Description
     Dummy phase change model for 'none'
 

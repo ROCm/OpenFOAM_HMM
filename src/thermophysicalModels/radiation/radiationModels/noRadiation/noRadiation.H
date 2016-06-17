@@ -24,6 +24,9 @@ License
 Class
     Foam::radiation::noRadiation
 
+Group
+    grpRadiationModels
+
 Description
     No radiation - does nothing to energy equation source terms
     (returns zeros)

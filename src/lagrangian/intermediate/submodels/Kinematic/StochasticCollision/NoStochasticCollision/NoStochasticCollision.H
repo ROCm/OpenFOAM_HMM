@@ -24,6 +24,9 @@ License
 Class
     Foam::NoStochasticCollision
 
+Group
+    grpLagrangianIntermediateCollisionSubModels
+
 Description
     Dummy collision model for 'none'
 

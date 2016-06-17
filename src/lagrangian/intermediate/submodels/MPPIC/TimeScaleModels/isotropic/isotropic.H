@@ -24,6 +24,9 @@ License
 Class
     Foam::TimeScaleModels::isotropic
 
+Group
+    grpLagrangianIntermediateMPPICTimeScaleSubModels
+
 Description
     Model for the time scale over which the velocity field of a dispersed phase
     tends towards an isotropic distribution.

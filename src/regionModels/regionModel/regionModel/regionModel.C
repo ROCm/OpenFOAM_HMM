@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -201,7 +201,6 @@ bool Foam::regionModels::regionModel::read(const dictionary& dict)
         }
 
         infoOutput_.readIfPresent("infoOutput", dict);
-
         return true;
     }
     else
@@ -510,8 +509,6 @@ void Foam::regionModels::regionModel::evolve()
     {
         Info<< "\nEvolving " << modelName_ << " for region "
             << regionMesh().name() << endl;
-
-        //read();
 
         preEvolveRegion();
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::IsotropyModel
 
+Group
+    grpLagrangianIntermediateMPPICIsotropySubModels
+
 Description
     Base class for collisional return-to-isotropy models.
 

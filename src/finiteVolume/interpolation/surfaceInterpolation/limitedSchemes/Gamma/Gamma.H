@@ -24,6 +24,9 @@ License
 Class
     Foam::GammaLimiter
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     Class with limiter function which returns the limiter for the
     Gamma differencing scheme based on phict obtained from the LimiterFunc

@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::backwardDdtScheme
 
+Group
+    grpFvDdtSchemes
+
 Description
     Second-order backward-differencing ddt using the current and
     two previous time-step values.

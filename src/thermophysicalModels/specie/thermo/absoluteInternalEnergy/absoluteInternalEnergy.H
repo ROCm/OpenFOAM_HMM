@@ -24,6 +24,9 @@ License
 Class
     Foam::absoluteInternalEnergy
 
+Group
+    grpSpecieThermo
+
 Description
     Thermodynamics mapping class to expose the absolute internal energy function
     as the standard internal energy function e(T).

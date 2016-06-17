@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::laplacianScheme
 
+Group
+    grpFvLaplacianSchemes
+
 Description
     Abstract base class for laplacian schemes.
 

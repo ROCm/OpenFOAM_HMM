@@ -24,6 +24,9 @@ License
 Class
     Foam::CentredFitSnGradScheme
 
+Group
+    grpFvSnGradSchemes
+
 Description
     Centred fit snGrad scheme which applies an explicit correction to snGrad
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::skewCorrected
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     Skewness-corrected interpolation scheme that applies an explicit
     correction to given scheme.
@@ -47,7 +50,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class skewCorrected Declaration
+                       Class skewCorrected Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

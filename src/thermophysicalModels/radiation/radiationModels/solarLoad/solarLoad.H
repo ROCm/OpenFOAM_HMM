@@ -24,6 +24,9 @@ License
 Class
     Foam::radiation::solarLoad
 
+Group
+    grpRadiationModels
+
 Description
 
     The solar load radiation model includes Sun primary hits, their

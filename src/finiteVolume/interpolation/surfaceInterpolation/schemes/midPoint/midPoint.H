@@ -24,6 +24,9 @@ License
 Class
     Foam::midPoint
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     Mid-point interpolation (weighting factors = 0.5) scheme class.
 

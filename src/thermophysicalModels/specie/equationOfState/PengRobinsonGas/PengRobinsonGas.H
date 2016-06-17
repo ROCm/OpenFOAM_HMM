@@ -24,6 +24,9 @@ License
 Class
     Foam::PengRobinsonGas
 
+Group
+    grpSpecieEquationOfState
+
 Description
     PengRobinsonGas gas equation of state.
 

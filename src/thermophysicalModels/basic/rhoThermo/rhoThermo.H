@@ -24,6 +24,9 @@ License
 Class
     Foam::rhoThermo
 
+Group
+    grpRhoThermo
+
 Description
     Basic thermodynamic properties based on density
 

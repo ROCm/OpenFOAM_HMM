@@ -24,6 +24,9 @@ License
 Class
     Foam::radiation::constantAbsorptionEmission
 
+Group
+    grpRadiationAbsorptionEmissionSubModels
+
 Description
     Constant radiation absorption and emission coefficients for continuous
     phase

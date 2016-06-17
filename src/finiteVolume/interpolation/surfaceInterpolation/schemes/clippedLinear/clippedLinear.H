@@ -24,6 +24,9 @@ License
 Class
     Foam::clippedLinear
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     Central-differencing interpolation scheme using clipped-weights to
     improve stability on meshes with very rapid variations in cell size.

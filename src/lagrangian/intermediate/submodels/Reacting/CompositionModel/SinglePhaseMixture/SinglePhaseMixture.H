@@ -24,6 +24,9 @@ License
 Class
     Foam::SinglePhaseMixture
 
+Group
+    grpLagrangianIntermediateCompositionSubModels
+
 Description
     Templated parcel single phase, multi-component class
 

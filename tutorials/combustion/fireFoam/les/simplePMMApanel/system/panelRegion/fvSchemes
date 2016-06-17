@@ -1,0 +1,57 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system/pyrolysisRegion";
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    default Euler;
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+}
+
+divSchemes
+{
+    default        none;
+}
+
+laplacianSchemes
+{
+    default         none;
+    laplacian(kappa,T)  Gauss harmonic uncorrected;
+    laplacian(thermo:alpha,h)  Gauss harmonic uncorrected;
+    laplacian(kappa,T) Gauss harmonic uncorrected;
+}
+
+interpolationSchemes
+{
+    default         linear;
+    interpolate(K)  harmonic;
+}
+
+snGradSchemes
+{
+    default        uncorrected;
+}
+
+fluxRequired
+{
+    default         no;
+}
+
+// ************************************************************************* //

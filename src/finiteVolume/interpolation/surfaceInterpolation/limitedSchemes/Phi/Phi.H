@@ -24,6 +24,9 @@ License
 Class
     Foam::PhiLimiter
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     Class with limiter function which returns the limiter for the
     Phi differencing scheme.

@@ -24,6 +24,9 @@ License
 Class
     Foam::downwind
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     Downwind differencing scheme class.
 

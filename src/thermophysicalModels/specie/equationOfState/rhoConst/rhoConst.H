@@ -24,6 +24,9 @@ License
 Class
     Foam::rhoConst
 
+Group
+    grpSpecieEquationOfState
+
 Description
     RhoConst (rho = const) of state.
 

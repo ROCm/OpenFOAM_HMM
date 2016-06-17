@@ -24,6 +24,9 @@ License
 Class
     Foam::radiation::viewFactor
 
+Group
+    grpRadiationModels
+
 Description
     View factor radiation model. The system solved is: C q = b
     where:

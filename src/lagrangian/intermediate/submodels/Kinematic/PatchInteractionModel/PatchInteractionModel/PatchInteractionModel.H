@@ -24,6 +24,9 @@ License
 Class
     Foam::PatchInteractionModel
 
+Group
+    grpLagrangianIntermediatePatchInteractionSubModels
+
 Description
     Templated patch interaction model class
 

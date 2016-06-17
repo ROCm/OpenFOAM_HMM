@@ -24,6 +24,9 @@ License
 Class
     Foam::NoPhaseChange
 
+Group
+    grpLagrangianIntermediatePhaseChangeSubModels
+
 Description
     Dummy phase change model for 'none'
 

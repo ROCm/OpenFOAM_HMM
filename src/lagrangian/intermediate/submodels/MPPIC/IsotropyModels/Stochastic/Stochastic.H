@@ -24,6 +24,9 @@ License
 Class
     Foam::IsotropyModels::Stochastic
 
+Group
+    grpLagrangianIntermediateMPPICIsotropySubModels
+
 Description
     Stochastic return-to-isotropy model.
 

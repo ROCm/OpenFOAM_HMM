@@ -24,6 +24,9 @@ License
 Class
     Foam::SRFForce
 
+Group
+    grpLagrangianIntermediateForceSubModels
+
 Description
     Calculates particle SRF reference frame force
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::NonEquilibriumReversibleReaction
 
+Group
+    grpSpecieReactions
+
 Description
     Simple extension of Reaction to handle reversible reactions using
     equilibrium thermodynamics.

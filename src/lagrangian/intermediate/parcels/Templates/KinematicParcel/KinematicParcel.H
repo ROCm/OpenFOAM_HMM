@@ -24,6 +24,9 @@ License
 Class
     Foam::KinematicParcel
 
+Group
+    grpLagrangianIntermediateParcels
+
 Description
     Kinematic parcel class with rotational motion (as spherical
     particles only) and one/two-way coupling with the continuous

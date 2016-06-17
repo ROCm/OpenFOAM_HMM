@@ -24,6 +24,9 @@ License
 Class
     Foam::CollidingCloud
 
+Group
+    grpLagrangianIntermediateClouds
+
 Description
     Adds coolisions to kinematic clouds
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::SLTSDdtScheme
 
+Group
+    grpFvDdtSchemes
+
 Description
     Stabilised local time-step first-order Euler implicit/explicit ddt.
     The time-step is adjusted locally so that an advective equations remains

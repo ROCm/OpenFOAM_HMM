@@ -24,6 +24,9 @@ License
 Class
     Foam::CloudToVTK
 
+Group
+    grpLagrangianIntermediateFunctionObjects
+
 Description
     Write cloud data in VTK format
 

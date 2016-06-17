@@ -24,6 +24,9 @@ License
 Class
     Foam::MPPICParcel
 
+Group
+    grpLagrangianIntermediateParcels
+
 Description
     Wrapper around kinematic parcel types to add MPPIC modelling
 

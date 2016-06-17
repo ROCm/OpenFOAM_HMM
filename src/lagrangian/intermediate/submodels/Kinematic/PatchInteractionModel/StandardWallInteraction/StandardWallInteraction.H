@@ -24,6 +24,9 @@ License
 Class
     Foam::StandardWallInteraction
 
+Group
+    grpLagrangianIntermediatePatchInteractionSubModels
+
 Description
     Wall interaction model. Three choices:
 

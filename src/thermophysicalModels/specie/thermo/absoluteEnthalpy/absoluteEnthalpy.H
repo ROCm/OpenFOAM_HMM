@@ -24,6 +24,9 @@ License
 Class
     Foam::absoluteEnthalpy
 
+Group
+    grpSpecieThermo
+
 Description
     Thermodynamics mapping class to expose the absolute enthalpy function
     as the standard enthalpy function h(T).

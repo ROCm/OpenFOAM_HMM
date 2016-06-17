@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,11 +59,12 @@ void reactingOneDim::readReactingOneDimControls()
 
     coeffs().lookup("minimumDelta") >> minimumDelta_;
 
-    coeffs().lookup("gasHSource") >> gasHSource_;
+    gasHSource_ = coeffs().lookupOrDefault<bool>("gasHSource", false);
+
     coeffs().lookup("QrHSource") >> QrHSource_;
+
     useChemistrySolvers_ =
         coeffs().lookupOrDefault<bool>("useChemistrySolvers", true);
-
 }
 
 
@@ -207,29 +208,22 @@ void reactingOneDim::updateFields()
         updateQr();
     }
 
-    updatePhiGas();
+    //Note: Commented out as the sensible gas energy is included in energy eq.
+    //updatePhiGas();
 }
 
 
-void reactingOneDim::updateMesh(const scalarField& mass0)
+void reactingOneDim::updateMesh(const scalarField& deltaV)
 {
-    if (!moveMesh_)
-    {
-        return;
-    }
+    Info<< "Initial/final volumes = " << gSum(deltaV) << endl;
 
-    const scalarField newV(mass0/rho_);
+    // Move the mesh
+    const labelList moveMap = moveMesh(deltaV, minimumDelta_);
 
-    Info<< "Initial/final volumes = " << gSum(regionMesh().V()) << ", "
-        << gSum(newV) << " [m3]" << endl;
-
-    // move the mesh
-    const labelList moveMap = moveMesh(regionMesh().V() - newV, minimumDelta_);
-
-    // flag any cells that have not moved as non-reacting
+    // Flag any cells that have not moved as non-reacting
     forAll(moveMap, i)
     {
-        if (moveMap[i] == 0)
+        if (moveMap[i] == 1)
         {
             solidChemistry_->setCellReacting(i, false);
         }
@@ -244,28 +238,25 @@ void reactingOneDim::solveContinuity()
         InfoInFunction << endl;
     }
 
-    const scalarField mass0 = rho_*regionMesh().V();
 
-    fvScalarMatrix rhoEqn
-    (
-        fvm::ddt(rho_)
-        ==
-      - solidChemistry_->RRg()
-    );
-
-    if (regionMesh().moving())
+    if (!moveMesh_)
     {
-        surfaceScalarField phiRhoMesh
+        fvScalarMatrix rhoEqn
         (
-            fvc::interpolate(rho_)*regionMesh().phi()
+            fvm::ddt(rho_)
+            ==
+          - solidChemistry_->RRg()
         );
 
-        rhoEqn += fvc::div(phiRhoMesh);
+        rhoEqn.solve();
     }
+    else
+    {
+        const scalarField deltaV =
+            -solidChemistry_->RRg()*regionMesh().V()*time_.deltaT()/rho_;
 
-    rhoEqn.solve();
-
-    updateMesh(mass0);
+        updateMesh(deltaV);
+    }
 }
 
 
@@ -296,7 +287,7 @@ void reactingOneDim::solveSpeciesMass()
                 fvc::interpolate(Yi*rho_)*regionMesh().phi()
             );
 
-            YiEqn += fvc::div(phiYiRhoMesh);
+            YiEqn -= fvc::div(phiYiRhoMesh);
 
         }
 
@@ -327,14 +318,16 @@ void reactingOneDim::solveEnergy()
       - fvc::laplacian(kappa(), T())
      ==
         chemistrySh_
-      - fvm::Sp(solidChemistry_->RRg(), h_)
+      + solidChemistry_->RRsHs()
     );
 
+/* NOTE: gas Hs is included in hEqn
     if (gasHSource_)
     {
         const surfaceScalarField phiGas(fvc::interpolate(phiHsGas_));
         hEqn += fvc::div(phiGas);
     }
+*/
 
     if (QrHSource_)
     {
@@ -349,7 +342,7 @@ void reactingOneDim::solveEnergy()
             fvc::interpolate(rho_*h_)*regionMesh().phi()
         );
 
-        hEqn += fvc::div(phihMesh);
+        hEqn -= fvc::div(phihMesh);
     }
 
     hEqn.relax();
@@ -359,12 +352,14 @@ void reactingOneDim::solveEnergy()
 
 void reactingOneDim::calculateMassTransfer()
 {
+    /*
     totalGasMassFlux_ = 0;
     forAll(intCoupledPatchIDs_, i)
     {
         const label patchI = intCoupledPatchIDs_[i];
         totalGasMassFlux_ += gSum(phiGas_.boundaryField()[patchI]);
     }
+    */
 
     if (infoOutput_)
     {
@@ -678,12 +673,6 @@ const surfaceScalarField& reactingOneDim::phiGas() const
 void reactingOneDim::preEvolveRegion()
 {
     pyrolysisModel::preEvolveRegion();
-
-    // Initialise all cells as able to react
-    forAll(h_, cellI)
-    {
-        solidChemistry_->setCellReacting(cellI, true);
-    }
 }
 
 
@@ -733,8 +722,8 @@ void reactingOneDim::info()
         << addedGasMass_.value() << nl
         << indent << "Total solid mass lost    [kg] = "
         << lostSolidMass_.value() << nl
-        << indent << "Total pyrolysis gases  [kg/s] = "
-        << totalGasMassFlux_ << nl
+        //<< indent << "Total pyrolysis gases  [kg/s] = "
+        //<< totalGasMassFlux_ << nl
         << indent << "Total heat release rate [J/s] = "
         << totalHeatRR_.value() << nl;
 }

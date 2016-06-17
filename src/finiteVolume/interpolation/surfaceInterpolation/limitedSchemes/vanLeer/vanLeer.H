@@ -24,6 +24,9 @@ License
 Class
     Foam::vanLeerLimiter
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     Class with limiter function which returns the limiter for the
     vanLeer differencing scheme based on r obtained from the LimiterFunc

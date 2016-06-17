@@ -24,6 +24,9 @@ License
 Class
     Foam::NoSurfaceFilm
 
+Group
+    grpLagrangianIntermediateSurfaceFilmSubModels
+
 Description
     Place holder for 'none' option
 

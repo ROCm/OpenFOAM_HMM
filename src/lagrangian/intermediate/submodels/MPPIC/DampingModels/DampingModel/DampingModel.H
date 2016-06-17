@@ -24,6 +24,9 @@ License
 Class
     Foam::DampingModel
 
+Group
+    grpLagrangianIntermediateMPPICDampingSubModels
+
 Description
     Base class for collisional damping models.
 

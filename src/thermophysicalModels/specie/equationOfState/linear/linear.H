@@ -24,6 +24,9 @@ License
 Class
     Foam::linear
 
+Group
+    grpSpecieEquationOfState
+
 Description
     Linear equation of state with constant compressibility
 
@@ -37,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef linear_H
-#define linear_H
+#ifndef linearEOS_H
+#define linearEOS_H
 
 #include "autoPtr.H"
 

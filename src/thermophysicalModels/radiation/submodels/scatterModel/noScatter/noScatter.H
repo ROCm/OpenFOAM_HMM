@@ -24,6 +24,9 @@ License
 Class
     Foam::radiation::noScatter
 
+Group
+    grpRadiationScatterSubModels
+
 Description
     Dummy scatter model for 'none'
 

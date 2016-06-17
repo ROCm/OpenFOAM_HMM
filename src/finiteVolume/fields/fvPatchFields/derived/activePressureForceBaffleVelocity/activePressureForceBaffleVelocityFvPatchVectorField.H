@@ -29,21 +29,19 @@ Group
 
 Description
     This boundary condition is applied to the flow velocity, to simulate the
-    opening or closure of a baffle due to local pressure or force changes,
-    by merging the behaviours of wall and cyclic conditions.
+    opening or closure of a baffle due to area averaged pressure or force delta,
+    between both sides of the baffle. This is achieved by merging the
+    behaviours of wall and cyclic baffles
 
     The baffle joins two mesh regions, where the open fraction determines
     the interpolation weights applied to each cyclic- and neighbour-patch
     contribution. This means that this is boundary condition is meant to be
-    used in an extra wall beyond an existing cyclic patch pair. See PDRMesh
-    for more details.
+    used in an extra wall beyond an existing cyclic patch pair.
 
-    The baffle is activated when the pressure difference between master and
-    slave paches is positive and larger then minThresholdValue. The
-    orientation flag is used to to calculate the pressure difference bwetween
-    master-slave or slave-master.
+    The baffle is activated when the area weighted pressure difference between
+    master and slave paches is larger then minThresholdValue.
 
-    Once the threshold is crossed, this condition activated and continues to
+    Once the threshold is crossed, the baffle is activated and continues to
     open or close at a fixed rate using
 
         \f[
@@ -91,7 +89,7 @@ Description
         maxOpenFractionDelta 0.1;
         minThresholdValue 0.01;
         forceBased      false;
-        opening         1;
+        opening         true;
     }
     \endverbatim
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::PairCollision
 
+Group
+    grpLagrangianIntermediateCollisionSubModels
+
 Description
 
 SourceFiles

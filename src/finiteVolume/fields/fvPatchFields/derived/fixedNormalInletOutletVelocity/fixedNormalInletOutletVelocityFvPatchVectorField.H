@@ -28,10 +28,11 @@ Group
     grpInletletBoundaryConditions grpOutletBoundaryConditions
 
 Description
-
     This velocity inlet/outlet boundary condition combines a fixed normal
     component obtained from the "normalVelocity" patchField supplied with a
-    fixed or zero-gradiented tangential component depending on the direction
+    fixed or zero-gradiented tangential component.
+
+    The tangential component is set depending on the direction
     of the flow and the setting of "fixTangentialInflow":
     - Outflow: apply zero-gradient condition to tangential components
     - Inflow:

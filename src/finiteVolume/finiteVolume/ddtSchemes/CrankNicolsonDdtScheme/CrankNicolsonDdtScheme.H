@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::CrankNicolsonDdtScheme
 
+Group
+    grpFvDdtSchemes
+
 Description
     Second-oder Crank-Nicolson implicit ddt using the current and
     previous time-step fields as well as the previous time-step ddt.

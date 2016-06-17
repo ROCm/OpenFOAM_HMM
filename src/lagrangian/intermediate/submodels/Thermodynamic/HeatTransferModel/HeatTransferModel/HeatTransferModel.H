@@ -24,6 +24,9 @@ License
 Class
     Foam::HeatTransferModel
 
+Group
+    grpLagrangianIntermediateHeatTransferSubModels
+
 Description
     Templated heat transfer model class
 

@@ -260,35 +260,35 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
 
         scalar valueDiff = 0;
 
-        if (fBased_)
+        // Add this side (p*area)
+        forAll(cyclicFaceCells, facei)
         {
-             // Add this side
-            forAll(cyclicFaceCells, facei)
-            {
-                valueDiff +=p[cyclicFaceCells[facei]]*mag(initCyclicSf_[facei]);
-            }
-
-            // Remove other side
-            forAll(nbrFaceCells, facei)
-            {
-                valueDiff -=p[nbrFaceCells[facei]]*mag(initCyclicSf_[facei]);
-            }
-
-            Info<< "Force difference = " << valueDiff << endl;
+            valueDiff +=p[cyclicFaceCells[facei]]*mag(initCyclicSf_[facei]);
         }
-        else //pressure based
+
+        // Remove other side
+        forAll(nbrFaceCells, facei)
         {
-            forAll(cyclicFaceCells, facei)
-            {
-                valueDiff += p[cyclicFaceCells[facei]];
-            }
+            valueDiff -=p[nbrFaceCells[facei]]*mag(initCyclicSf_[facei]);
+        }
 
-            forAll(nbrFaceCells, facei)
-            {
-                valueDiff -= p[nbrFaceCells[facei]];
-            }
+        if (!fBased_) //pressure based then weighted by area
+        {
+            valueDiff = valueDiff/gSum(patch().magSf());
+        }
 
-            Info<< "Pressure difference = " << valueDiff << endl;
+        reduce(valueDiff, sumOp<scalar>());
+
+        if (Pstream::master())
+        {
+            if (fBased_)
+            {
+                Info<< "Force difference = " << valueDiff << endl;
+            }
+            else
+            {
+                Info<< "Area-averaged pressure difference = " << valueDiff << endl;
+            }
         }
 
         if (mag(valueDiff) > mag(minThresholdValue_) || baffleActivated_)
@@ -316,7 +316,10 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
             openFraction_ = max(min(1 - 1e-6, openFraction_), 1e-6);
         }
 
-        Info<< "Open fraction = " << openFraction_ << endl;
+        if (Pstream::master())
+        {
+            Info<< "Open fraction = " << openFraction_ << endl;
+        }
 
         scalar areaFraction = 0.0;
 

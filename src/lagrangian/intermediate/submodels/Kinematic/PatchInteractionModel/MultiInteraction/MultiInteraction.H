@@ -24,6 +24,9 @@ License
 Class
     Foam::MultiInteraction
 
+Group
+    grpLagrangianIntermediatePatchInteractionSubModels
+
 Description
     Runs multiple patch interaction models in turn. Takes dictionary
     where all the subdictionaries are the interaction models.

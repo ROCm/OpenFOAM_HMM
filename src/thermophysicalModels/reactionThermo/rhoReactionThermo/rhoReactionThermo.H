@@ -24,6 +24,9 @@ License
 Class
     Foam::rhoReactionThermo
 
+Group
+    grpRhoThermo
+
 Description
     Foam::rhoReactionThermo
 

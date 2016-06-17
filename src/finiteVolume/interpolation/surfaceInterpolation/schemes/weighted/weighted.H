@@ -24,6 +24,9 @@ License
 Class
     Foam::weighted
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     Interpolation scheme class using weights looked-up from the objectRegistry.
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::LISAAtomization
 
+Group
+    grpLagrangianIntermediateAtomizationSubModels
+
 Description
     Primary Breakup Model for pressure swirl atomizers.
 

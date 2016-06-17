@@ -24,6 +24,9 @@ License
 Class
     Foam::radiation::wideBandAbsorptionEmission
 
+Group
+    grpRadiationAbsorptionEmissionSubModels
+
 Description
 
     wideBandAbsorptionEmission radiation absorption and emission coefficients

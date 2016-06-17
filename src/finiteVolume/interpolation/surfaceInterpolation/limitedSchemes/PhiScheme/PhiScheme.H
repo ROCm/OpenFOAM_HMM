@@ -24,6 +24,9 @@ License
 Class
     Foam::PhiScheme
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     Class to create the weighting-factors based on the face-flux.
 

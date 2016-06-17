@@ -24,6 +24,9 @@ License
 Class
     Foam::filteredLinear2Limiter
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     Class to generate weighting factors for the filteredLinear2
     differencing scheme.

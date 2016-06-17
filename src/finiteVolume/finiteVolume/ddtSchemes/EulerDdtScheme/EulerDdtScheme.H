@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::EulerDdtScheme
 
+Group
+    grpFvDdtSchemes
+
 Description
     Basic first-order Euler implicit/explicit ddt using only the current and
     previous time-step values.

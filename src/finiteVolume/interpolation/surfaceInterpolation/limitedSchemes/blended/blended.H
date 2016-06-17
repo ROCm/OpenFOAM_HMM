@@ -24,6 +24,9 @@ License
 Class
     Foam::blended
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     linear/upwind blended differencing scheme.
 

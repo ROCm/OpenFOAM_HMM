@@ -24,6 +24,9 @@ License
 Class
     Foam::TimeScaleModel
 
+Group
+    grpLagrangianIntermediateMPPICTimeScaleSubModels
+
 Description
     Base class for time scale models.
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::ParticleStressModels::Lun
 
+Group
+    grpLagrangianIntermediateMPPICParticleStressSubModels
+
 Description
     Inter-particle stress model of Lun et al
 

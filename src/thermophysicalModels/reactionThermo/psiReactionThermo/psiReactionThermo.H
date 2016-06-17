@@ -24,6 +24,9 @@ License
 Class
     Foam::psiReactionThermo
 
+Group
+    grpPsiThermo
+
 Description
     Foam::psiReactionThermo
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::ddtScheme
 
+Group
+    grpFvDdtSchemes
+
 Description
     Abstract base class for ddt schemes.
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::radiation::constantScatter
 
+Group
+    grpRadiationScatterSubModels
+
 Description
     Constant radiation scatter coefficient
 

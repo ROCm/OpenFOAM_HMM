@@ -24,6 +24,9 @@ License
 Class
     Foam::LimitedScheme
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     Class to create NVD/TVD limited weighting-factors.
 

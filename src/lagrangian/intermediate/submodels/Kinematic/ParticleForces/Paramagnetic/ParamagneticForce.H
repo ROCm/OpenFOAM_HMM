@@ -24,6 +24,9 @@ License
 Class
     Foam::ParamagneticForce
 
+Group
+    grpLagrangianIntermediateForceSubModels
+
 Description
     Calculates particle paramagnetic (magnetic field) force
 

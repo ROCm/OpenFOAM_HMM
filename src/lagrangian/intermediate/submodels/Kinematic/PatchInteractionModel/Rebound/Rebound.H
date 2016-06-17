@@ -24,6 +24,9 @@ License
 Class
     Foam::Rebound
 
+Group
+    grpLagrangianIntermediatePatchInteractionSubModels
+
 Description
     Simple rebound patch interaction model
 

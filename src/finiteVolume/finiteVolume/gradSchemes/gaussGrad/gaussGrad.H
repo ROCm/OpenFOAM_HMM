@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::gaussGrad
 
+Group
+    grpFvGradSchemes
+
 Description
     Basic second-order gradient scheme using face-interpolation
     and Gauss' theorem.

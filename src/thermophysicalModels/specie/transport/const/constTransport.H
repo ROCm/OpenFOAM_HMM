@@ -24,6 +24,9 @@ License
 Class
     Foam::constTransport
 
+Group
+    grpSpecieTransport
+
 Description
     Constant properties Transport package.
     Templated into a given thermodynamics package (needed for thermal

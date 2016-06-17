@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::steadyStateDdtScheme
 
+Group
+    grpFvDdtSchemes
+
 Description
     SteadyState implicit/explicit ddt which returns 0.
 

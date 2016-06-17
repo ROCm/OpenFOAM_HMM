@@ -24,6 +24,9 @@ License
 Class
     Foam::UMISTLimiter
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     Class with limiter function which returns the limiter for the
     UMIST differencing scheme.

@@ -24,6 +24,9 @@ License
 Class
     Foam::QUICKLimiter
 
+Group
+    grpFvLimitedSurfaceInterpolationSchemes
+
 Description
     Class with limiter function which returns the limiter for the
     quadratic-upwind differencing scheme.

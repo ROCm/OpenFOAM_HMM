@@ -24,6 +24,9 @@ License
 Class
     Foam::LUST
 
+Group
+    grpFvSurfaceInterpolationSchemes
+
 Description
     LUST: Linear-upwind stabilised transport.
 
