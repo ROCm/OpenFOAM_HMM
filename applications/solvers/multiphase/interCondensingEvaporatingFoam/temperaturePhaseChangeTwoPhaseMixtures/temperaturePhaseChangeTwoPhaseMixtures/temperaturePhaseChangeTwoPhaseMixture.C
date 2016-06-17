@@ -64,7 +64,7 @@ temperaturePhaseChangeTwoPhaseMixture
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::Pair<Foam::tmp<Foam::volScalarField> >
+Foam::Pair<Foam::tmp<Foam::volScalarField>>
 Foam::temperaturePhaseChangeTwoPhaseMixture::vDotAlphal() const
 {
     volScalarField alphalCoeff
@@ -73,9 +73,9 @@ Foam::temperaturePhaseChangeTwoPhaseMixture::vDotAlphal() const
        *(1.0/mixture_.rho1() - 1.0/mixture_.rho2())
     );
 
-    Pair<tmp<volScalarField> > mDotAlphal = this->mDotAlphal();
+    Pair<tmp<volScalarField>> mDotAlphal = this->mDotAlphal();
 
-    return Pair<tmp<volScalarField> >
+    return Pair<tmp<volScalarField>>
     (
         alphalCoeff*mDotAlphal[0],
         alphalCoeff*mDotAlphal[1]
@@ -83,13 +83,13 @@ Foam::temperaturePhaseChangeTwoPhaseMixture::vDotAlphal() const
 }
 
 
-Foam::Pair<Foam::tmp<Foam::volScalarField> >
+Foam::Pair<Foam::tmp<Foam::volScalarField>>
 Foam::temperaturePhaseChangeTwoPhaseMixture::vDot() const
 {
     dimensionedScalar pCoeff(1.0/mixture_.rho1() - 1.0/mixture_.rho2());
-    Pair<tmp<volScalarField> > mDot = this->mDot();
+    Pair<tmp<volScalarField>> mDot = this->mDot();
 
-    return Pair<tmp<volScalarField> >(pCoeff*mDot[0], pCoeff*mDot[1]);
+    return Pair<tmp<volScalarField>>(pCoeff*mDot[0], pCoeff*mDot[1]);
 }
 
 

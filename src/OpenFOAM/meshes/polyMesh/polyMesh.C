@@ -1058,7 +1058,7 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
 
     if (newPoints.size() != points_.size())
     {
-        FatalErrorIn("polyMesh::movePoints(const pointField&)")
+        FatalErrorInFunction
             << "Size of newPoints " << newPoints.size()
             << " does not correspond to current mesh points size "
             << points_.size()

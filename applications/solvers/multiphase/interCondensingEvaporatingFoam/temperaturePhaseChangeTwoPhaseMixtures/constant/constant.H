@@ -46,7 +46,7 @@ namespace temperaturePhaseChangeTwoPhaseMixtures
 {
 
 /*--------------------------------------------------------------------*\
-                              Class constant
+                             Class constant
 \*--------------------------------------------------------------------*/
 
 class constant
@@ -88,15 +88,15 @@ public:
         //- Return the mass condensation and vaporisation rates as a
         //  coefficient to multiply (1 - alphal) for the condensation rate
         //  and a coefficient to multiply  alphal for the vaporisation rate
-        virtual Pair<tmp<volScalarField> > mDotAlphal() const;
+        virtual Pair<tmp<volScalarField>> mDotAlphal() const;
 
         //- Return the mass condensation and vaporisation rates as coefficients
-        virtual Pair<tmp<volScalarField> > mDot() const;
+        virtual Pair<tmp<volScalarField>> mDot() const;
 
         //- Return the mass condensation and vaporisation rates as a
         //  coefficient to multiply (Tsat - T) for the condensation rate
         //  and a coefficient to multiply  (T - Tsat) for the vaporisation rate
-        virtual Pair<tmp<volScalarField> > mDotDeltaT() const;
+        virtual Pair<tmp<volScalarField>> mDotDeltaT() const;
 
         //- Correct the constant phaseChange model
         virtual void correct();

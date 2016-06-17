@@ -269,7 +269,7 @@ void Foam::regIOobject::addWatch()
         label index = time().findWatch(watchIndices_, f);
         if (index != -1)
         {
-            FatalErrorIn("regIOobject::addWatch()")
+            FatalErrorInFunction
                 << "Object " << objectPath() << " of type " << type()
                 << " already watched with index " << watchIndices_[index]
                 << abort(FatalError);

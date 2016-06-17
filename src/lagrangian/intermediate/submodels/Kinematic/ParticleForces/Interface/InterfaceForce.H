@@ -64,7 +64,7 @@ class InterfaceForce
         const scalar C_;
 
         //- gradInterForce interpolator
-        autoPtr<interpolation<vector> > gradInterForceInterpPtr_;
+        autoPtr<interpolation<vector>> gradInterForceInterpPtr_;
 
 
 public:
@@ -87,9 +87,9 @@ public:
         InterfaceForce(const InterfaceForce& gf);
 
         //- Construct and return a clone
-        virtual autoPtr<ParticleForce<CloudType> > clone() const
+        virtual autoPtr<ParticleForce<CloudType>> clone() const
         {
-            return autoPtr<ParticleForce<CloudType> >
+            return autoPtr<ParticleForce<CloudType>>
             (
                 new InterfaceForce<CloudType>(*this)
             );

@@ -130,24 +130,24 @@ public:
         //- Return the mass condensation and vaporisation rates as a
         //  coefficient to multiply (1 - alphal) for the condensation rate
         //  and a coefficient to multiply  alphal for the vaporisation rate
-        virtual Pair<tmp<volScalarField> > mDotAlphal() const = 0;
+        virtual Pair<tmp<volScalarField>> mDotAlphal() const = 0;
 
         //- Return the mass condensation and vaporisation rates as coefficients
-        virtual Pair<tmp<volScalarField> > mDot() const = 0;
+        virtual Pair<tmp<volScalarField>> mDot() const = 0;
 
         //- Return the mass condensation and vaporisation rates as a
         //  coefficient to multiply (Tsat - T) for the condensation rate
         //  and a coefficient to multiply  (T - Tsat) for the vaporisation rate
-        virtual Pair<tmp<volScalarField> > mDotDeltaT() const = 0;
+        virtual Pair<tmp<volScalarField>> mDotDeltaT() const = 0;
 
         //- Return the volumetric condensation and vaporisation rates as a
         //  coefficient to multiply (1 - alphal) for the condensation rate
         //  and a coefficient to multiply  alphal for the vaporisation rate
-        Pair<tmp<volScalarField> > vDotAlphal() const;
+        Pair<tmp<volScalarField>> vDotAlphal() const;
 
         //- Return the volumetric condensation and vaporisation rates as
         //  coefficients
-        Pair<tmp<volScalarField> > vDot() const;
+        Pair<tmp<volScalarField>> vDot() const;
 
         //- Correct the phaseChange model
         virtual void correct() = 0;

@@ -97,7 +97,7 @@ List<Vb::Point> pointFile::initialPoints() const
 
             if (points.empty())
             {
-                FatalErrorIn("List<Vb::Point> pointFile::initialPoints() const")
+                FatalErrorInFunction
                     << "Point file contain no points"
                     << exit(FatalError) << endl;
             }
@@ -128,7 +128,7 @@ List<Vb::Point> pointFile::initialPoints() const
 
             if (points.empty())
             {
-                FatalErrorIn("List<Vb::Point> pointFile::initialPoints() const")
+                FatalErrorInFunction
                     << "Point file contain no points"
                     << exit(FatalError) << endl;
             }
@@ -170,7 +170,7 @@ List<Vb::Point> pointFile::initialPoints() const
         }
         else
         {
-            FatalErrorIn("List<Vb::Point> pointFile::initialPoints() const")
+            FatalErrorInFunction
                 << "Cannot find points file " << pointsIO.objectPath()
                 << exit(FatalError) << endl;
         }

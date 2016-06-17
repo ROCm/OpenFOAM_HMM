@@ -25,6 +25,7 @@ License
 
 \defgroup grpRegionBoundaryConditions Region boundary conditions
 @{
+    \ingroup grpBoundaryConditions
     This group contains region model boundary conditions
 @}
 

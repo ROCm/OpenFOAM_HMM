@@ -76,7 +76,7 @@ void Foam::reactionsSensitivityAnalysis<chemistryType>::calculateSpeciesRR
 )
 {
 
-    tmp<DimensionedField<scalar, volMesh> > RRt
+    tmp<DimensionedField<scalar, volMesh>> RRt
     (
         new DimensionedField<scalar, volMesh>
         (

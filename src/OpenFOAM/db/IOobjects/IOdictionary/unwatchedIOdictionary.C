@@ -119,7 +119,7 @@ void Foam::unwatchedIOdictionary::addWatch()
 
         if (findIndex(files_, f) != -1)
         {
-            FatalErrorIn("regIOobject::addWatch()")
+            FatalErrorInFunction
                 << "Object " << objectPath() << " of type " << type()
                 << " already watched" << abort(FatalError);
         }
