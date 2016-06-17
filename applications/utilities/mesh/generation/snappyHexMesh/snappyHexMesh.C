@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,6 +59,7 @@ Description
 #include "IOmanip.H"
 #include "decompositionModel.H"
 #include "fvMeshTools.H"
+#include "Profiling.H"
 
 using namespace Foam;
 
@@ -633,6 +634,7 @@ int main(int argc, char *argv[])
         "fileName",
         "name of the file to save the simplified surface to"
     );
+    #include "addProfilingOption.H"
     #include "addDictOption.H"
 
     #include "setRootCase.H"
@@ -816,7 +818,6 @@ int main(int argc, char *argv[])
 
     const Switch keepPatches(meshDict.lookupOrDefault("keepPatches", false));
 
-
     // Read decomposePar dictionary
     dictionary decomposeDict;
     {
@@ -927,6 +928,8 @@ int main(int argc, char *argv[])
         }
     }
 
+    // for the impatient who want to see some output files:
+    Profiling::writeNow();
 
     // Read geometry
     // ~~~~~~~~~~~~~
@@ -957,6 +960,7 @@ int main(int argc, char *argv[])
 
     if (surfaceSimplify)
     {
+        addProfiling(surfaceSimplify, "snappyHexMesh::surfaceSimplify");
         IOdictionary foamyHexMeshDict
         (
            IOobject
@@ -1001,6 +1005,8 @@ int main(int argc, char *argv[])
                 refineDict.lookupOrDefault("gapLevelIncrement", 0),
                 initialCellSize/defaultCellSize
             );
+
+        Profiling::writeNow();
     }
     else
     {
@@ -1535,6 +1541,8 @@ int main(int argc, char *argv[])
 
         Info<< "Mesh refined in = "
             << timer.cpuTimeIncrement() << " s." << endl;
+
+        Profiling::writeNow();
     }
 
     if (wantSnap)
@@ -1583,6 +1591,8 @@ int main(int argc, char *argv[])
 
         Info<< "Mesh snapped in = "
             << timer.cpuTimeIncrement() << " s." << endl;
+
+        Profiling::writeNow();
     }
 
     if (wantLayers)
@@ -1639,11 +1649,14 @@ int main(int argc, char *argv[])
 
         Info<< "Layers added in = "
             << timer.cpuTimeIncrement() << " s." << endl;
+
+        Profiling::writeNow();
     }
 
 
-
     {
+        addProfiling(checkMesh, "snappyHexMesh::checkMesh");
+
         // Check final mesh
         Info<< "Checking final mesh ..." << endl;
         faceSet wrongFaces(mesh, "wrongFaces", mesh.nFaces()/100);
@@ -1665,11 +1678,15 @@ int main(int argc, char *argv[])
         {
             Info<< "Finished meshing without any errors" << endl;
         }
+
+        Profiling::writeNow();
     }
 
 
     if (surfaceSimplify)
     {
+        addProfiling(surfaceSimplify, "snappyHexMesh::surfaceSimplify");
+
         const polyBoundaryMesh& bMesh = mesh.boundaryMesh();
 
         labelHashSet includePatches(bMesh.size());
@@ -1727,6 +1744,7 @@ int main(int argc, char *argv[])
         cellCentres.write();
     }
 
+    Profiling::writeNow();
 
     Info<< "Finished meshing in = "
         << runTime.elapsedCpuTime() << " s." << endl;

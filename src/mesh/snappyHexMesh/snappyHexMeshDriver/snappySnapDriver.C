@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,6 +45,7 @@ Description
 #include "localPointRegion.H"
 #include "PatchTools.H"
 #include "refinementFeatures.H"
+#include "Profiling.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -832,6 +833,7 @@ void Foam::snappySnapDriver::preSmoothPatch
     motionSmoother& meshMover
 )
 {
+    addProfiling(smooth, "snappyHexMesh::snap::smoothing");
     const fvMesh& mesh = meshRefiner.mesh();
 
     labelList checkFaces;
@@ -2168,6 +2170,7 @@ bool Foam::snappySnapDriver::scaleMesh
     motionSmoother& meshMover
 )
 {
+    addProfiling(scale, "snappyHexMesh::snap::scale");
     const fvMesh& mesh = meshRefiner_.mesh();
 
     // Relax displacement until correct mesh
@@ -2534,6 +2537,7 @@ void Foam::snappySnapDriver::doSnap
     const snapParameters& snapParams
 )
 {
+    addProfiling(snap, "snappyHexMesh::snap");
     fvMesh& mesh = meshRefiner_.mesh();
 
     Info<< nl
