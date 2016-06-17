@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -33,41 +33,55 @@
 #         boost_version=boost-system
 #         cgal_version=cgal-system
 #
-#     If using a central installation:
+#     If the system boost/cgal is unusable (eg, too old) and you don't
+#     have or want a ThirdParty installation:
+#
+#         boost_version=boost-none
+#         cgal_version=cgal-none
+#
+#     If using a central installation, but not located under ThirdParty:
 #         - specify boost-system / cgal-system
 #         - provide full paths for BOOST_ARCH_PATH / CGAL_ARCH_PATH
 #
+# Note
+#     When _foamAddLib is unset (eg, called from makeCGAL):
+#         - boost_version / cgal_version variables are retained.
+#         - the LD_LIBRARY_PATH is not adjusted.
 #------------------------------------------------------------------------------
 
 boost_version=boost-system
 cgal_version=CGAL-4.8
 
-if [ -z "$SOURCE_CGAL_VERSIONS_ONLY" ]
+export BOOST_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost_version
+export CGAL_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cgal_version
+
+#------------------------------------------------------------------------------
+if [ "$FOAM_VERBOSE" -a "$PS1" ]
+then
+    echo "Using boost ($boost_version)  ->  $BOOST_ARCH_PATH" 1>&2
+    echo "Using CGAL ($cgal_version)  ->  $CGAL_ARCH_PATH" 1>&2
+fi
+
+if type _foamAddLib > /dev/null 2>&1    # normal sourcing
 then
 
-    common_path=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER
+    # If BOOST_ARCH_PATH, CGAL_ARCH_PATH do not end with '-system' or '-none',
+    # they are either located within ThirdParty, or a central installation
+    # outside of ThirdParty and must be added to the lib-path.
 
-    export BOOST_ARCH_PATH=$common_path/$boost_version
-    export CGAL_ARCH_PATH=$common_path/$cgal_version
-
-    if [ "$FOAM_VERBOSE" -a "$PS1" ]
-    then
-        echo "Using CGAL and boost" 1>&2
-        echo "    $cgal_version at $CGAL_ARCH_PATH" 1>&2
-        echo "    $boost_version at $BOOST_ARCH_PATH" 1>&2
-    fi
-
-    if [ -d "$CGAL_ARCH_PATH" -a "$cgal_version" != "cgal-system" ]
-    then
-        _foamAddLib $CGAL_ARCH_PATH/lib
-    fi
-
-    if [ -d "$BOOST_ARCH_PATH" -a "$boost_version" != "boost-system" ]
+    ending="${BOOST_ARCH_PATH##*-}"
+    if [ "$ending" != none -a "$ending" != system ]
     then
         _foamAddLib $BOOST_ARCH_PATH/lib
     fi
 
-    unset boost_version cgal_version common_path
+    ending="${CGAL_ARCH_PATH##*-}"
+    if [ "$ending" != none -a "$ending" != system ]
+    then
+        _foamAddLib $CGAL_ARCH_PATH/lib
+    fi
+
+    unset boost_version cgal_version ending
 
 fi
 
