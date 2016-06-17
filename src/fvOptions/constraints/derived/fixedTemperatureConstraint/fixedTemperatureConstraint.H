@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::fixedTemperatureConstraint
 
+Group
+    grpFvOptionsConstraints
+
 Description
     Fixed temperature equation constraint
 

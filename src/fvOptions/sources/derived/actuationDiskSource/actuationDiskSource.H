@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::actuationDiskSource
 
+Group
+    grpFvOptionsSources
+
 Description
     Actuation disk source
 

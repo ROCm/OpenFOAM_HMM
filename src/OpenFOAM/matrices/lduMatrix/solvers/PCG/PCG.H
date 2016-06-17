@@ -24,6 +24,9 @@ License
 Class
     Foam::PCG
 
+Group
+    grpLduMatrixSolvers
+
 Description
     Preconditioned conjugate gradient solver for symmetric lduMatrices
     using a run-time selectable preconditioner.
@@ -44,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class PCG Declaration
+                             Class PCG Declaration
 \*---------------------------------------------------------------------------*/
 
 class PCG

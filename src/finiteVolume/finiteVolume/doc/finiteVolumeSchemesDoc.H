@@ -25,6 +25,7 @@ License
 
 \defgroup grpFvSchemes Finite volume numerical schemes
 @{
+    \ingroup grpNumerics
     This group contains finite volume numerical schemes
 @}
 

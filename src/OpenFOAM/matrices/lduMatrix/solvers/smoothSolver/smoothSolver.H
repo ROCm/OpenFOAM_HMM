@@ -24,6 +24,9 @@ License
 Class
     Foam::smoothSolver
 
+Group
+    grpLduMatrixSolvers
+
 Description
     Iterative solver for symmetric and asymetric matrices which uses a
     run-time selected smoother e.g. GaussSeidel to converge the solution to
@@ -64,6 +67,7 @@ protected:
 
         //- Read the control parameters from the controlDict_
         virtual void readControls();
+
 
 public:
 

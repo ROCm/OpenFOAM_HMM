@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::tabulatedHeatTransfer
 
+Group
+    grpFvOptionsSources
+
 Description
     Tabulated heat transfer model. The heat exchange area per unit volume
     must be provided.  The 2D table returns the heat transfer coefficient

@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::explicitPorositySource
 
+Group
+    grpFvOptionsSources
+
 Description
     Explicit porosity source
 

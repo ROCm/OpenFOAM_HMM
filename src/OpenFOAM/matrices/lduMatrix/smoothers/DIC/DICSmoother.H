@@ -24,6 +24,9 @@ License
 Class
     Foam::DICSmoother
 
+Group
+    grpLduMatrixSmoothers
+
 Description
     Simplified diagonal-based incomplete Cholesky smoother for symmetric
     matrices.

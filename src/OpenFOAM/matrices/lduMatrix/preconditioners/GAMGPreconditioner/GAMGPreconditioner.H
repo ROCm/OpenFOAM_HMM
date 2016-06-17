@@ -24,6 +24,9 @@ License
 Class
     Foam::GAMGPreconditioner
 
+Group
+    grpLduMatrixPreconditioners
+
 Description
     Geometric agglomerated algebraic multigrid preconditioner.
 

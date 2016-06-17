@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::meanVelocityForce
 
+Group
+    grpFvOptionsSources
+
 Description
     Calculates and applies the force necessary to maintain the specified mean
     velocity.

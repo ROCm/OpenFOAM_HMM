@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::solidificationMeltingSource
 
+Group
+    grpFvOptionsSources
+
 Description
     This source is designed to model the effect of solidification and melting
     processes, e.g. windhield defrosting.  The phase change occurs at the

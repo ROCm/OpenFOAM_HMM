@@ -24,6 +24,9 @@ License
 Class
     Foam::DILUSmoother
 
+Group
+    grpLduMatrixSmoothers
+
 Description
     Simplified diagonal-based incomplete LU smoother for asymmetric matrices.
 

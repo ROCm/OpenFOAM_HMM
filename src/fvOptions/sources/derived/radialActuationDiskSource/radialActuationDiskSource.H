@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::radialActuationDiskSource
 
+Group
+    grpFvOptionsSources
+
 Description
     Actuation disk source including radial thrust
 

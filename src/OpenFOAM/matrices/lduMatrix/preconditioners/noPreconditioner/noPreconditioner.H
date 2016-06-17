@@ -24,6 +24,9 @@ License
 Class
     Foam::noPreconditioner
 
+Group
+    grpLduMatrixPreconditioners
+
 Description
     Null preconditioner for both symmetric and asymmetric matrices.
 

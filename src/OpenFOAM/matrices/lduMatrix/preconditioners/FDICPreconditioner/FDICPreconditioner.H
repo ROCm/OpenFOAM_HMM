@@ -24,6 +24,9 @@ License
 Class
     Foam::FDICPreconditioner
 
+Group
+    grpLduMatrixPreconditioners
+
 Description
     Faster version of the DICPreconditioner diagonal-based incomplete
     Cholesky preconditioner for symmetric matrices

@@ -24,6 +24,9 @@ License
 Class
     Foam::nonBlockingGaussSeidelSmoother
 
+Group
+    grpLduMatrixSmoothers
+
 Description
     Variant of gaussSeidelSmoother that expects processor boundary
     cells to be sorted last and so can block later. Only when the

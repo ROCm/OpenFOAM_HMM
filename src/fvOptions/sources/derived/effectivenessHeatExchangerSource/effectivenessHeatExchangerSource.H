@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::effectivenessHeatExchangerSource
 
+Group
+    grpFvOptionsSources
+
 Description
     Heat exchanger source model, in which the heat exchanger is defined as a
     selection of cells.
