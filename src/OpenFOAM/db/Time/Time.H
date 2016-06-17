@@ -182,7 +182,8 @@ protected:
         void setControls();
 
         //- Set file monitoring, profiling, etc
-        void setMonitoring();
+        //  Optionally force profiling without inspecting the controlDict
+        void setMonitoring(const bool forceProfiling=false);
 
         //- Read the control dictionary and set the write controls etc.
         virtual void readDict();

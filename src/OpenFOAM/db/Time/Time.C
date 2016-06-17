@@ -334,11 +334,17 @@ void Foam::Time::setControls()
 }
 
 
-void Foam::Time::setMonitoring()
+void Foam::Time::setMonitoring(bool forceProfiling)
 {
     // initialize profiling on request
     // skip if 'active' keyword is explicitly set to false
-    const dictionary* profilingDict = controlDict_.subDictPtr("profiling");
+    const dictionary* profilingDict =
+    (
+        forceProfiling
+      ? &dictionary::null
+      : controlDict_.subDictPtr("profiling")
+    );
+
     if
     (
         profilingDict
@@ -526,7 +532,9 @@ Foam::Time::Time
     readOpt() = IOobject::MUST_READ_IF_MODIFIED;
 
     setControls();
-    setMonitoring();
+
+    // '-profiling' = force profiling, ignore controlDict entry
+    setMonitoring(args.optionFound("profiling"));
 }
 
 

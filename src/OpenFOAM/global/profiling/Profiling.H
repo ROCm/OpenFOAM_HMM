@@ -191,19 +191,17 @@ public:
 
     // Member Functions
 
-        //- The owner of the profiling
-        const Time& owner() const
-        {
-            return owner_;
-        }
+        //- True if profiling is active
+        static bool active();
 
+        //- Write profiling information now
+        static bool writeNow();
+
+        //- The owner of the profiling
+        const Time& owner() const;
 
         //- The size of the current stack
-        Foam::label size() const
-        {
-            return stack_.size();
-        }
-
+        Foam::label size() const;
 
         //- writeData member function required by regIOobject
         virtual bool writeData(Ostream&) const;
@@ -394,10 +392,14 @@ public:
 
     // Constructors
 
-        //- Construct profiling with given name
+        //- Construct profiling with given description.
+        //  Descriptions beginning with 'application::' are reserved for
+        //  internal use.
         Trigger(const char* name);
 
-        //- Construct profiling with given name
+        //- Construct profiling with given description.
+        //  Descriptions beginning with 'application::' are reserved for
+        //  internal use.
         Trigger(const string& name);
 
 
@@ -430,23 +432,23 @@ public:
 // Macros
 
 //- Define profiling with specified name and description correspond to the name
-// \sa addProfiling
-// \sa endProfiling
+//  \sa addProfiling
+//  \sa endProfiling
 #define addProfiling0(name)                                                    \
     Foam::Profiling::Trigger    profilingTriggerFor##name(#name)
 
 
 //- Define profiling with specified name and description string
 //  This is required if the description contains space, colons etc.
-// \sa addProfiling0
-// \sa endProfiling
+//  \sa addProfiling0
+//  \sa endProfiling
 #define addProfiling(name,descr)                                              \
     Foam::Profiling::Trigger    profilingTriggerFor##name(descr)
 
 
 //- Remove profiling with specified name
-// \sa addProfiling
-// \sa addProfiling0
+//  \sa addProfiling
+//  \sa addProfiling0
 #define endProfiling(name)      profilingTriggerFor##name.stop()
 
 

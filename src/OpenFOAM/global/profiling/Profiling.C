@@ -67,6 +67,27 @@ void Foam::Profiling::Information::raiseID(label maxVal)
 }
 
 
+bool Foam::Profiling::active()
+{
+    return pool_;
+}
+
+
+bool Foam::Profiling::writeNow()
+{
+    if (pool_)
+    {
+        Info<<"Profiling::writeNow() at time = "
+            << pool_->owner().timeName() << endl;
+        return pool_->write();
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 void Foam::Profiling::initialize
 (
     const IOobject& ioObj,
@@ -297,6 +318,17 @@ Foam::Profiling::Trigger::~Trigger()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+const Foam::Time& Foam::Profiling::owner() const
+{
+    return owner_;
+}
+
+Foam::label Foam::Profiling::size() const
+{
+    return stack_.size();
+}
+
 
 Foam::Profiling::Information* Foam::Profiling::find(const string& name)
 {
