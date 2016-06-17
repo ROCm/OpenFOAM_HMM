@@ -24,6 +24,9 @@ License
 Class
     Foam::BICCG
 
+Group
+    grpLduMatrixSolvers
+
 Description
     Diagonal incomplete LU preconditioned BiCG solver derived from the general
     preconditioned BiCG solver PBiCG but with the choice of preconditioner
@@ -49,7 +52,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class BICCG Declaration
+                            Class BICCG Declaration
 \*---------------------------------------------------------------------------*/
 
 class BICCG
@@ -63,6 +66,7 @@ class BICCG
 
         //- Disallow default bitwise assignment
         void operator=(const BICCG&);
+
 
 public:
 
@@ -112,7 +116,6 @@ public:
     //- Destructor
     virtual ~BICCG()
     {}
-
 };
 
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::interRegionExplicitPorositySource
 
+Group
+    grpFvOptionsSources
+
 Description
     Inter-region explicit porosity source.
 

@@ -23,16 +23,18 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpThermophysicalModels Thermophysical models
-@{
-    This group contains thermophysical models
-@}
+\page pageFiniteVolumeSchemes Numerical schemes
 
-\defgroup grpThermophysicalFunctionObjects Thermophysical function objects
-@{
-    \ingroup grpFunctionObjects
-    This group contains thermo-based function objects
-@}
+\section secSchemes Overview
+The available numerical schemes are grouped into the following categories:
+  - \ref grpFvGradSchemes
+  - \ref grpFvSnGradSchemes
+  - \ref grpFvDivSchemes
+  - \ref grpFvLaplacianSchemes
+  - \ref grpFvDdtSchemes
+  - \ref grpFvConvectionSchemes
+  - \ref grpFvSurfaceInterpolationSchemes
+  - \ref grpFvLimitedSurfaceInterpolationSchemes
 
 
 \*---------------------------------------------------------------------------*/

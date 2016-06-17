@@ -24,6 +24,9 @@ License
 Class
     Foam::diagonalPreconditioner
 
+Group
+    grpLduMatrixPreconditioners
+
 Description
     Diagonal preconditioner for both symmetric and asymmetric matrices.
 

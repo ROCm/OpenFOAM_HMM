@@ -23,15 +23,33 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpThermophysicalModels Thermophysical models
+\defgroup grpNumerics Numerics
 @{
-    This group contains thermophysical models
+    This group contains numerics
 @}
 
-\defgroup grpThermophysicalFunctionObjects Thermophysical function objects
+\defgroup grpLduMatrix Matrix manipulation and solvers
 @{
-    \ingroup grpFunctionObjects
-    This group contains thermo-based function objects
+    \ingroup grpNumerics
+    This group contains matrices
+@}
+
+\defgroup grpLduMatrixPreconditioners Preconditioners
+@{
+    \ingroup grpLduMatrix
+    This group contains matrix preconditioners
+@}
+
+\defgroup grpLduMatrixSmoothers Smoothers
+@{
+    \ingroup grpLduMatrix
+    This group contains matrix smoothers
+@}
+
+\defgroup grpLduMatrixSolvers Solvers
+@{
+    \ingroup grpLduMatrix
+    This group contains matrix solvers
 @}
 
 

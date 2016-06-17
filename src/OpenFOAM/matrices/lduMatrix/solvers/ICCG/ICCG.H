@@ -24,6 +24,9 @@ License
 Class
     Foam::ICCG
 
+Group
+    grpLduMatrixSolvers
+
 Description
     Incomplete Cholesky preconditioned CG solver derived from the general
     preconditioned CG solver PCG but with the choice of preconditioner
@@ -63,6 +66,7 @@ class ICCG
 
         //- Disallow default bitwise assignment
         void operator=(const ICCG&);
+
 
 public:
 
@@ -111,7 +115,6 @@ public:
     //- Destructor
     virtual ~ICCG()
     {}
-
 };
 
 

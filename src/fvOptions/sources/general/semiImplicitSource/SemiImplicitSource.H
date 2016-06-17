@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::SemiImplicitSource
 
+Group
+    grpFvOptionsSources
+
 Description
     Semi-implicit source, described using an input dictionary.  The injection
     rate coefficients are specified as pairs of Su-Sp coefficients, i.e.

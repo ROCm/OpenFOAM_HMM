@@ -23,16 +23,14 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpThermophysicalModels Thermophysical models
-@{
-    This group contains thermophysical models
-@}
+\page pageMatrixSolvers Matrix solvers
 
-\defgroup grpThermophysicalFunctionObjects Thermophysical function objects
-@{
-    \ingroup grpFunctionObjects
-    This group contains thermo-based function objects
-@}
+\section secSchemes Overview
+The available matrix solvers are grouped into the following categories:
+  - \ref grpLduMatrix
+  - \ref grpLduMatrixPreconditioners
+  - \ref grpLduMatrixSmoothers
+  - \ref grpLduMatrixSolvers
 
 
 \*---------------------------------------------------------------------------*/

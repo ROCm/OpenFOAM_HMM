@@ -24,6 +24,9 @@ License
 Class
     Foam::reactingMixture
 
+Group
+    grpReactionThermophysicalMixtures
+
 Description
     Foam::reactingMixture
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::singleStepReactingMixture
 
+Group
+    grpReactionThermophysicalMixtures
+
 Description
     Single step reacting mixture
 

@@ -23,16 +23,11 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpThermophysicalModels Thermophysical models
-@{
-    This group contains thermophysical models
-@}
+\page pageThermophsyicalModels Thermophsyical Models
 
-\defgroup grpThermophysicalFunctionObjects Thermophysical function objects
-@{
-    \ingroup grpFunctionObjects
-    This group contains thermo-based function objects
-@}
+\section secSchemes Overview
+The available thermophysical models are grouped into the following categories:
+  - \ref grpThermophysicalModels
 
 
 \*---------------------------------------------------------------------------*/

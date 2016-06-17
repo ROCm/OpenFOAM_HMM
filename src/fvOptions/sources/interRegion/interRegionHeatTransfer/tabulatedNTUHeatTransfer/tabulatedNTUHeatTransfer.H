@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::tabulatedNTUHeatTransfer
 
+Group
+    grpFvOptionsSources
+
 Description
     Tabulated heat transfer model.
 

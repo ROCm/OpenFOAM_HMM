@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::buoyancyForce
 
+Group
+    grpFvOptionsSources
+
 Description
     Calculates and applies the buoyancy force rho*g to the momentum equation
     corresponding to the specified velocity field.

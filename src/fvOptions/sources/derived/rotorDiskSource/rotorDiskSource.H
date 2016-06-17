@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::rotorDiskSource
 
+Group
+    grpFvOptionsSources
+
 Description
     Rotor disk source
 

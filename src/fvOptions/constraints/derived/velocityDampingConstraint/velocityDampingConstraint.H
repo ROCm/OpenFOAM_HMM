@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::velocityDampingConstraint
 
+Group
+    grpFvOptionsConstraints
+
 Description
     Constraint for velocity to dampen velocity fluctuations in
     steady simulations

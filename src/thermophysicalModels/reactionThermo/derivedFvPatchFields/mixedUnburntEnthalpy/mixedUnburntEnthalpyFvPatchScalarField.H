@@ -24,6 +24,9 @@ License
 Class
     Foam::mixedUnburntEnthalpyFvPatchScalarField
 
+Group
+    grpThermoBoundaryConditions
+
 Description
     Mixed boundary condition for unburnt
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,8 +56,22 @@ License
 
 \section usingTheCode Using the code
 
+    Solvers
     - \subpage pageSolvers
+
+    Modelling
+    - \subpage pageThermophsyicalModels
+    - \subpage pageTurbulenceModelling
+    - \subpage pageLagrangianIntermediate
+
+    Boundary conditions
     - \subpage pageBoundaryConditions
+
+    Numerics
+    - \subpage pageFiniteVolumeSchemes
+    - \subpage pageMatrixSolvers
+
+    Post-processing
     - \subpage pagePostProcessing
 
 

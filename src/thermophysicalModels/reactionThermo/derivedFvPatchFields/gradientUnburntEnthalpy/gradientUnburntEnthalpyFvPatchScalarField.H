@@ -24,6 +24,9 @@ License
 Class
     Foam::gradientUnburntEnthalpyFvPatchScalarField
 
+Group
+    grpThermoBoundaryConditions
+
 Description
     gradient boundary condition for unburnt
 

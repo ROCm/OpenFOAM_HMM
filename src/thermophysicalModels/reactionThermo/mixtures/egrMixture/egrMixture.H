@@ -24,6 +24,9 @@ License
 Class
     Foam::egrMixture
 
+Group
+    grpReactionThermophysicalMixtures
+
 Description
     Foam::egrMixture
 

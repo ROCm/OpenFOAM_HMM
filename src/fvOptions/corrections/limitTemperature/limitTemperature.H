@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::limitTemperature
 
+Group
+    grpFvOptionsCorrections
+
 Description
     Correction for temperature to apply limits between minimum and maximum
     values

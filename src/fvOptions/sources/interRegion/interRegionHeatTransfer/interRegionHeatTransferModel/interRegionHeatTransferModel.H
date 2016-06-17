@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::interRegionHeatTransferModel
 
+Group
+    grpFvOptionsSources
+
 Description
     Base class for inter region heat exchange. The derived classes must
     provide the heat transfer coeffisine (htc) which is used as follows

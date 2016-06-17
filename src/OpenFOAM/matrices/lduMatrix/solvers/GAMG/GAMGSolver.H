@@ -24,10 +24,13 @@ License
 Class
     Foam::GAMGSolver
 
+Group
+    grpLduMatrixSolvers
+
 Description
     Geometric agglomerated algebraic multigrid solver.
 
-  Characteristics:
+    Characteristics:
       - Requires positive definite, diagonally dominant matrix.
       - Agglomeration algorithm: selectable and optionally cached.
       - Restriction operator: summation.
@@ -65,7 +68,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class GAMGSolver Declaration
+                         Class GAMGSolver Declaration
 \*---------------------------------------------------------------------------*/
 
 class GAMGSolver

@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::directionalPressureGradientExplicitSource
 
+Group
+    grpFvOptionsSources
+
 Description
     Creates an explicit  pressure gradient source in such a way to deflect the
     flow towards an specific direction (flowDir). Alternatively add an extra

@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::explicitSetValue
 
+Group
+    grpFvOptionsConstraints
+
 Description
     Set values field values explicity.
 

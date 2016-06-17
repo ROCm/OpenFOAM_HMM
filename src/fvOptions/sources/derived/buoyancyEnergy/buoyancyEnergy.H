@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::buoyancyEnergy
 
+Group
+    grpFvOptionsSources
+
 Description
     Calculates and applies the buoyancy energy source rho*(U&g) to the energy
     equation.

@@ -24,6 +24,9 @@ License
 Class
     Foam::DICGaussSeidelSmoother
 
+Group
+    grpLduMatrixSmoothers
+
 Description
     Combined DIC/GaussSeidel smoother for symmetric matrices in which DIC
     smoothing is followed by GaussSeidel to ensure that any "spikes" created

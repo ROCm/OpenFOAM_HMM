@@ -24,6 +24,9 @@ License
 Class
     Foam::diagonalSolver
 
+Group
+    grpLduMatrixSolvers
+
 Description
     Foam::diagonalSolver
 
@@ -43,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class diagonalSolver Declaration
+                       Class diagonalSolver Declaration
 \*---------------------------------------------------------------------------*/
 
 class diagonalSolver

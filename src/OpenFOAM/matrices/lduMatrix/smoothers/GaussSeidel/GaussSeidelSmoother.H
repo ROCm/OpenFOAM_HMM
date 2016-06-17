@@ -24,6 +24,9 @@ License
 Class
     Foam::GaussSeidelSmoother
 
+Group
+    grpLduMatrixSmoothers
+
 Description
     A lduMatrix::smoother for Gauss-Seidel
 

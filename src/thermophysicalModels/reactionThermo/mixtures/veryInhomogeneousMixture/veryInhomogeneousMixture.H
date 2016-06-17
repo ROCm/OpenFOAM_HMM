@@ -24,6 +24,9 @@ License
 Class
     Foam::veryInhomogeneousMixture
 
+Group
+    grpReactionThermophysicalMixtures
+
 Description
     Foam::veryInhomogeneousMixture
 

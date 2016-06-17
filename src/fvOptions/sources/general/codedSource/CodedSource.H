@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::codedSource
 
+Group
+    grpFvOptionsSources
+
 Description
    Constructs on-the-fly fvOption source
 

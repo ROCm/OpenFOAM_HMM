@@ -23,16 +23,14 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpThermophysicalModels Thermophysical models
-@{
-    This group contains thermophysical models
-@}
+\page pageTurbulenceModelling Turbulence modelling
 
-\defgroup grpThermophysicalFunctionObjects Thermophysical function objects
-@{
-    \ingroup grpFunctionObjects
-    This group contains thermo-based function objects
-@}
+\section secSchemes Overview
+The available turbulence models are grouped into the following categories:
+  - \ref grpTurbulence
+  - \ref grpRASTurbulence
+  - \ref grpDESTurbulence
+  - \ref grpLESTurbulence
 
 
 \*---------------------------------------------------------------------------*/

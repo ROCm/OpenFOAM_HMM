@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +44,7 @@ The current range of features comprises of:
 - \ref grpIOFunctionObjects
 - \ref grpJobControlFunctionObjects
 - \ref grpUtilitiesFunctionObjects
+- \ref grpThermophysicalFunctionObjects
 
 \linebreak
 \subsection secFieldFunctionObjectUsage Using function objects

@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::tabulatedAccelerationSource
 
+Group
+    grpFvOptionsSources
+
 Description
     Solid-body 6-DoF acceleration source
 
@@ -64,7 +67,7 @@ namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class tabulatedAccelerationSource Declaration
+                 Class tabulatedAccelerationSource Declaration
 \*---------------------------------------------------------------------------*/
 
 class tabulatedAccelerationSource
@@ -83,6 +86,7 @@ protected:
         word UName_;
 
         dimensionedVector g0_;
+
 
 private:
 

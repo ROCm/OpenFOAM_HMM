@@ -24,6 +24,9 @@ License
 Class
     Foam::fv::variableHeatTransfer
 
+Group
+    grpFvOptionsSources
+
 Description
     Variable heat transfer model depending on local values. The area of contact
     between regions (area) must be provided. The Nu number is calculated as:
