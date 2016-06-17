@@ -261,7 +261,6 @@ if ( "$FOAM_MPI" != dummy ) then
 endif
 
 
-
 # Set the minimum MPI buffer size (used by all platforms except SGI MPI)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if ( ! $?minBufferSize ) set minBufferSize=20000000
@@ -273,5 +272,9 @@ if ( $?MPI_BUFFER_SIZE ) then
 else
     setenv MPI_BUFFER_SIZE $minBufferSize
 endif
+
+# Cleanup environment:
+# ~~~~~~~~~~~~~~~~~~~~
+unset minBufferSize
 
 #------------------------------------------------------------------------------

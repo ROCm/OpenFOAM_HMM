@@ -308,7 +308,6 @@ endsw
 # Cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
 #- keep _foamAddPath _foamAddLib _foamAddMan
-unset minBufferSize
 unsetenv WM_COMPILER_TYPE
 
 #------------------------------------------------------------------------------
