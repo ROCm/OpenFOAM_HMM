@@ -28,11 +28,15 @@
 #     Setup file for CGAL (& boost) include/libraries.
 #     Sourced from OpenFOAM-<VERSION>/etc/bashrc
 #
-#     If using system-wide installations for either one, use the following
-#     version settings:
+#     If using system-wide installations, use the following settings:
 #
 #         boost_version=boost-system
 #         cgal_version=cgal-system
+#
+#     If using a central installation:
+#         - specify boost-system / cgal-system
+#         - provide full paths for BOOST_ARCH_PATH / CGAL_ARCH_PATH
+#
 #------------------------------------------------------------------------------
 
 boost_version=boost-system

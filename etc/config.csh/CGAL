@@ -22,12 +22,27 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     config.csh/CGAL
+#     etc/config.csh/CGAL
 #
 # Description
 #     Setup file for CGAL (& boost) include/libraries.
 #     Sourced from OpenFOAM-<VERSION>/etc/cshrc
-##------------------------------------------------------------------------------
+#
+#     If using system-wide installations, use the following settings:
+#
+#         boost_version=boost-system
+#         cgal_version=cgal-system
+#
+#     If using a central installation:
+#         - specify boost-system / cgal-system
+#         - provide full paths for BOOST_ARCH_PATH / CGAL_ARCH_PATH
+#
+# Note
+#     When building OpenFOAM, any changes made here MUST be made in the
+#     equivalent config.sh version too, since that is the one which will
+#     be used during the build process.
+#
+#------------------------------------------------------------------------------
 
 set boost_version=boost-system
 set cgal_version=CGAL-4.8

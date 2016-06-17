@@ -5,11 +5,6 @@ cd ${0%/*} || exit 1    # Run from this directory
 targetType=libso
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
-# Get CGAL and scotch versions
-. $WM_PROJECT_DIR/etc/config.sh/functions
-_foamEval SOURCE_CGAL_VERSIONS_ONLY=yes \
-          $($WM_PROJECT_DIR/bin/foamEtcFile config.sh/CGAL)
-
 ## Get ZOLTAN_ARCH_PATH
 #if settings=`$WM_PROJECT_DIR/bin/foamEtcFile config.sh/zoltan`
 #then
@@ -21,22 +16,21 @@ _foamEval SOURCE_CGAL_VERSIONS_ONLY=yes \
 #    echo
 #fi
 
-
 set -x
 
 wmake $targetType renumberMethods
 
-if [ -n "$BOOST_ARCH_PATH" -o "$boost_version" = "boost-system" ]
+if [ -d "$BOOST_ARCH_PATH/include/boost" ] || \
+   [ "${BOOST_ARCH_PATH##*-}" = system -a -d /usr/include/boost ]
 then
     wmake $targetType SloanRenumber
 else
     echo
-    echo "Skipping SloanRenumber"
+    echo "Skipping SloanRenumber (no boost)"
     echo
 fi
 
-
-if [ -n "$ZOLTAN_ARCH_PATH" ]
+if [ -d "$ZOLTAN_ARCH_PATH" ]
 then
     wmake $targetType zoltanRenumber
 else
