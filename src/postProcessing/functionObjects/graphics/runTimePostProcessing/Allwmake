@@ -4,11 +4,11 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Source the wmake functions
 . $WM_DIR/scripts/wmakeFunctions
 
-# Store current directory
+# The source directory
 sourceDir=$PWD
 
 # Where are any generated files stored?
-findObjectDir dummy.C
+findObjectDir $sourceDir
 depDir="$objectsDir"
 
 echo

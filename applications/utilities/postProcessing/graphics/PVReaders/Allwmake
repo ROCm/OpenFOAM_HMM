@@ -53,6 +53,10 @@ case "$ParaView_VERSION" in
         wmake $targetType vtkPVReaders
         PVblockMeshReader/Allwmake $*
         PVFoamReader/Allwmake $*
+
+        # dummy directory to trigger proper 'wclean all' behaviour
+        # - the Allwclean will otherwise not be used
+        mkdir -p Make
     )
     fi
     ;;
