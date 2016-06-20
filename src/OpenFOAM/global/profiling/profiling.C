@@ -171,6 +171,15 @@ Foam::profiling::Information* Foam::profiling::New
         }
 
         pool_->push(info, timer);
+
+        if (pool_->memInfo_)
+        {
+            info->maxMem_ = Foam::max
+            (
+                info->maxMem_,
+                pool_->memInfo_->update().size()
+            );
+        }
     }
 
     return info;
@@ -243,7 +252,7 @@ Foam::profiling::profiling
     ),
     memInfo_
     (
-        dict.lookupOrDefault<Switch>("memInfo", true)
+        dict.lookupOrDefault<Switch>("memInfo", false)
       ? new memInfo() : 0
     )
 {}
@@ -274,6 +283,7 @@ Foam::profiling::Information::Information
     calls_(0),
     totalTime_(0),
     childTime_(0),
+    maxMem_(0),
     onStack_(false)
 {}
 
@@ -509,6 +519,10 @@ Foam::Ostream& Foam::profiling::Information::write
     writeEntry(os, "calls",         calls()     + (offset ? 1 : 0));
     writeEntry(os, "totalTime",     totalTime() + elapsedTime);
     writeEntry(os, "childTime",     childTime() + childTimes);
+    if (maxMem_)
+    {
+        writeEntry(os, "maxMem",    maxMem_);
+    }
     writeEntry(os, "onStack",       Switch(onStack()));
 
     os.endBlock() << nl; // FUTURE: without nl

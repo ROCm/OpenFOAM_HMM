@@ -27,14 +27,15 @@ Class
 Description
     Code profiling.
 
-    This is typically activated from within the system/controlDict as follows:
+    This is typically activated from within the system/controlDict as follows
+    (defaults shown):
     \code
         profiling
         {
-            active      true;  // default: true
-            cpuInfo     true;  // default: true
-            memInfo     true;  // default: true
-            sysInfo     true;  // default: true
+            active      true;
+            cpuInfo     true;
+            memInfo     false;
+            sysInfo     true;
         }
     \endcode
     or simply using all defaults:
@@ -247,6 +248,10 @@ class profiling::Information
         //- Time spent in children
         scalar childTime_;
 
+        //- Max memory usage on call.
+        //  Only valid when the calling profiling has memInfo active.
+        mutable int maxMem_;
+
         //- Is this information currently on the stack?
         mutable bool onStack_;
 
@@ -342,6 +347,12 @@ public:
         inline const scalar& childTime() const
         {
             return childTime_;
+        }
+
+
+        inline int maxMem() const
+        {
+            return maxMem_;
         }
 
 
@@ -444,6 +455,17 @@ public:
 #define addProfiling0(name)                                                    \
     ::Foam::Profiling::Trigger  profilingTriggerFor##name(#name)
 
+//- Define profiling with specified name and description correspond to the
+//  compiler-defined function name string:
+//  \sa addProfiling
+//  \sa endProfiling
+#ifdef __GNUC__
+    #define addProfilingInFunction(name)                                       \
+    ::Foam::profiling::Trigger  profilingTriggerFor##name(__PRETTY_FUNCTION__)
+#else
+    #define addProfilingInFunction(name)                                       \
+    ::Foam::profiling::Trigger  profilingTriggerFor##name(__func__)
+#endif
 
 //- Remove profiling with specified name
 //  \sa addProfiling

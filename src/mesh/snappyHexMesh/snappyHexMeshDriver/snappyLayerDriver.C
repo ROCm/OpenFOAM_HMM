@@ -3751,7 +3751,10 @@ void Foam::snappyLayerDriver::addLayers
             );
             fvMesh& newMesh = newMeshPtr();
 
-            //?neccesary? Update fields
+            // get timing, but more importantly get memory information
+            addProfiling(grow, "snappyHexMesh::layers::updateMesh");
+
+            //?necessary? Update fields
             newMesh.updateMesh(map);
 
             newMesh.setInstance(meshRefiner_.timeName());
