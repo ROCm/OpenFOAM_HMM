@@ -119,7 +119,7 @@ Foam::solidChemistryModel<CompType, SolidThermo>::RRsHs() const
 
     if (this->chemistry_)
     {
-        DimensionedField<scalar, volMesh>& RRs = tRRsHs();
+        DimensionedField<scalar, volMesh>& RRs = tRRsHs.ref();
 
         const volScalarField& T =  this->solidThermo().T();
         const volScalarField& p =  this->solidThermo().p();
