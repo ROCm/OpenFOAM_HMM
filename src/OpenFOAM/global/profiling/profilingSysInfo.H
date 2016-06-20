@@ -22,20 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Profiling::SysInfo
+    Foam::profiling::sysInfo
 
 Description
     General system information
 
 SourceFiles
-    ProfilingSysInfo.C
+    profilingSysInfo.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ProfilingSysInfo_H
-#define ProfilingSysInfo_H
+#ifndef profilingSysInfo_H
+#define profilingSysInfo_H
 
-#include "Profiling.H"
+#include "profiling.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,10 +46,10 @@ namespace Foam
 class Ostream;
 
 /*---------------------------------------------------------------------------*\
-                     Class Profiling::sysInfo Declaration
+                     Class profiling::sysInfo Declaration
 \*---------------------------------------------------------------------------*/
 
-class Profiling::sysInfo
+class profiling::sysInfo
 {
     // Private Static Data Members
 
@@ -70,7 +70,7 @@ protected:
 
     // Friendship
 
-        friend class Profiling;
+        friend class profiling;
 
 
     // Member Functions
@@ -98,8 +98,7 @@ public:
         //- Update it with a new timing information
         void update();
 
-        //- Write the profiling times, optionally with additional values
-        //  Use dictionary format.
+        //- Write the profiling sys-info, use dictionary format.
         Ostream& write(Ostream& os) const;
 };
 

@@ -39,7 +39,7 @@ License
 #include "localPointRegion.H"
 #include "IOmanip.H"
 #include "labelVector.H"
-#include "Profiling.H"
+#include "profiling.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

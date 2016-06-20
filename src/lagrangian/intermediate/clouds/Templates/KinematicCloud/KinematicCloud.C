@@ -33,7 +33,7 @@ License
 #include "PatchInteractionModel.H"
 #include "StochasticCollisionModel.H"
 #include "SurfaceFilmModel.H"
-#include "Profiling.H"
+#include "profiling.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 

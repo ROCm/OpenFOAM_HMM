@@ -29,7 +29,7 @@ License
 #include "fvmDdt.H"
 #include "fvmSup.H"
 #include "fvcDiv.H"
-#include "Profiling.H"
+#include "profiling.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

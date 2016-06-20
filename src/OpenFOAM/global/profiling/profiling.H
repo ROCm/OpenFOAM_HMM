@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Profiling
+    Foam::profiling
 
 Description
     Code profiling.
@@ -44,12 +44,12 @@ Description
     \endcode
 
 SourceFiles
-    Profiling.C
+    profiling.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Profiling_H
-#define Profiling_H
+#ifndef profiling_H
+#define profiling_H
 
 #include "HashPtrTable.H"
 #include "LIFOStack.H"
@@ -69,10 +69,10 @@ class cpuInfo;
 class memInfo;
 
 /*---------------------------------------------------------------------------*\
-                          Class Profiling Declaration
+                          Class profiling Declaration
 \*---------------------------------------------------------------------------*/
 
-class Profiling
+class profiling
 :
     public regIOobject
 {
@@ -89,7 +89,7 @@ private:
     // Private Static Data Members
 
         //- Only one global pool object is possible
-        static Profiling *pool_;
+        static profiling *pool_;
 
 
     // Private Data Members
@@ -126,10 +126,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        Profiling(const Profiling&) = delete;
+        profiling(const profiling&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const Profiling&) = delete;
+        void operator=(const profiling&) = delete;
 
 
 protected:
@@ -142,14 +142,14 @@ protected:
     // Constructors
 
         //- Construct IO object, everything enabled
-        Profiling(const IOobject&, const Time&);
+        profiling(const IOobject&, const Time&);
 
         //- Construct IO object with finer control over behaviour
-        Profiling(const dictionary&, const IOobject&, const Time&);
+        profiling(const dictionary&, const IOobject&, const Time&);
 
 
     //- Destructor
-    ~Profiling();
+    ~profiling();
 
 
     // Protected Member Functions
@@ -210,10 +210,10 @@ public:
 
 
 /*---------------------------------------------------------------------------*\
-                   Class Profiling::Information Declaration
+                   Class profiling::Information Declaration
 \*---------------------------------------------------------------------------*/
 
-class Profiling::Information
+class profiling::Information
 {
     // Private Static Data Members
 
@@ -264,7 +264,7 @@ protected:
 
     // Friendship
 
-        friend class Profiling;
+        friend class profiling;
 
 
     // Constructors
@@ -365,10 +365,10 @@ public:
 
 
 /*---------------------------------------------------------------------------*\
-                      Class Profiling::Trigger Declaration
+                      Class profiling::Trigger Declaration
 \*---------------------------------------------------------------------------*/
 
-class Profiling::Trigger
+class profiling::Trigger
 {
     // Private Data Members
 
@@ -431,19 +431,18 @@ public:
 
 // Macros
 
-//- Define profiling with specified name and description correspond to the name
-//  \sa addProfiling
-//  \sa endProfiling
-#define addProfiling0(name)                                                    \
-    Foam::Profiling::Trigger    profilingTriggerFor##name(#name)
-
-
 //- Define profiling with specified name and description string
 //  This is required if the description contains space, colons etc.
 //  \sa addProfiling0
 //  \sa endProfiling
 #define addProfiling(name,descr)                                              \
-    Foam::Profiling::Trigger    profilingTriggerFor##name(descr)
+    ::Foam::profiling::Trigger  profilingTriggerFor##name(descr)
+
+//- Define profiling with specified name and description correspond to the name
+//  \sa addProfiling
+//  \sa endProfiling
+#define addProfiling0(name)                                                    \
+    ::Foam::Profiling::Trigger  profilingTriggerFor##name(#name)
 
 
 //- Remove profiling with specified name

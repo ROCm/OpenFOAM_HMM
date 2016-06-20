@@ -25,7 +25,7 @@ License
 
 #include "fvScalarMatrix.H"
 #include "extrapolatedCalculatedFvPatchFields.H"
-#include "Profiling.H"
+#include "profiling.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

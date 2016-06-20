@@ -45,7 +45,7 @@ Description
 #include "localPointRegion.H"
 #include "PatchTools.H"
 #include "refinementFeatures.H"
-#include "Profiling.H"
+#include "profiling.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

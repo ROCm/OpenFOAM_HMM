@@ -27,7 +27,7 @@ License
 #include "Pstream.H"
 #include "simpleObjectRegistry.H"
 #include "dimensionedConstants.H"
-#include "Profiling.H"
+#include "profiling.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

@@ -25,7 +25,7 @@ License
 
 #include "LduMatrix.H"
 #include "diagTensorField.H"
-#include "Profiling.H"
+#include "profiling.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

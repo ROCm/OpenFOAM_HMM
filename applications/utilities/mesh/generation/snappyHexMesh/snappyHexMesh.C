@@ -59,7 +59,7 @@ Description
 #include "IOmanip.H"
 #include "decompositionModel.H"
 #include "fvMeshTools.H"
-#include "Profiling.H"
+#include "profiling.H"
 
 using namespace Foam;
 
@@ -929,7 +929,7 @@ int main(int argc, char *argv[])
     }
 
     // for the impatient who want to see some output files:
-    Profiling::writeNow();
+    profiling::writeNow();
 
     // Read geometry
     // ~~~~~~~~~~~~~
@@ -1006,7 +1006,7 @@ int main(int argc, char *argv[])
                 initialCellSize/defaultCellSize
             );
 
-        Profiling::writeNow();
+        profiling::writeNow();
     }
     else
     {
@@ -1542,7 +1542,7 @@ int main(int argc, char *argv[])
         Info<< "Mesh refined in = "
             << timer.cpuTimeIncrement() << " s." << endl;
 
-        Profiling::writeNow();
+        profiling::writeNow();
     }
 
     if (wantSnap)
@@ -1592,7 +1592,7 @@ int main(int argc, char *argv[])
         Info<< "Mesh snapped in = "
             << timer.cpuTimeIncrement() << " s." << endl;
 
-        Profiling::writeNow();
+        profiling::writeNow();
     }
 
     if (wantLayers)
@@ -1650,7 +1650,7 @@ int main(int argc, char *argv[])
         Info<< "Layers added in = "
             << timer.cpuTimeIncrement() << " s." << endl;
 
-        Profiling::writeNow();
+        profiling::writeNow();
     }
 
 
@@ -1679,7 +1679,7 @@ int main(int argc, char *argv[])
             Info<< "Finished meshing without any errors" << endl;
         }
 
-        Profiling::writeNow();
+        profiling::writeNow();
     }
 
 
@@ -1744,7 +1744,7 @@ int main(int argc, char *argv[])
         cellCentres.write();
     }
 
-    Profiling::writeNow();
+    profiling::writeNow();
 
     Info<< "Finished meshing in = "
         << runTime.elapsedCpuTime() << " s." << endl;

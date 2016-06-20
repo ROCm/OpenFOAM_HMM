@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ProfilingSysInfo.H"
+#include "profilingSysInfo.H"
 #include "demandDrivenData.H"
 #include "foamVersion.H"
 
@@ -56,20 +56,20 @@ inline static void printEnv
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::Profiling::sysInfo::sysInfo()
+Foam::profiling::sysInfo::sysInfo()
 {}
 
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::Profiling::sysInfo::~sysInfo()
+Foam::profiling::sysInfo::~sysInfo()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::Profiling::sysInfo::write
+Foam::Ostream& Foam::profiling::sysInfo::write
 (
     Ostream& os
 ) const

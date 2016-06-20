@@ -57,7 +57,7 @@ Description
 #include "localPointRegion.H"
 #include "externalDisplacementMeshMover.H"
 #include "scalarIOField.H"
-#include "Profiling.H"
+#include "profiling.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

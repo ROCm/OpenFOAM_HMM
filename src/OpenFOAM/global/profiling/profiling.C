@@ -23,8 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Profiling.H"
-#include "ProfilingSysInfo.H"
+#include "profiling.H"
+#include "profilingSysInfo.H"
 #include "cpuInfo.H"
 #include "memInfo.H"
 #include "OSspecific.H"
@@ -34,9 +34,9 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::Profiling* Foam::Profiling::pool_(0);
+Foam::profiling* Foam::profiling::pool_(0);
 
-Foam::label Foam::Profiling::Information::nextId_(0);
+Foam::label Foam::profiling::Information::nextId_(0);
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -52,13 +52,13 @@ inline static void writeEntry
 }
 
 
-Foam::label Foam::Profiling::Information::getNextId()
+Foam::label Foam::profiling::Information::getNextId()
 {
     return nextId_++;
 }
 
 
-void Foam::Profiling::Information::raiseID(label maxVal)
+void Foam::profiling::Information::raiseID(label maxVal)
 {
     if (nextId_ < maxVal)
     {
@@ -67,17 +67,17 @@ void Foam::Profiling::Information::raiseID(label maxVal)
 }
 
 
-bool Foam::Profiling::active()
+bool Foam::profiling::active()
 {
     return pool_;
 }
 
 
-bool Foam::Profiling::writeNow()
+bool Foam::profiling::writeNow()
 {
     if (pool_)
     {
-        Info<<"Profiling::writeNow() at time = "
+        Info<<"profiling::writeNow() at time = "
             << pool_->owner().timeName() << endl;
         return pool_->write();
     }
@@ -88,7 +88,7 @@ bool Foam::Profiling::writeNow()
 }
 
 
-void Foam::Profiling::initialize
+void Foam::profiling::initialize
 (
     const IOobject& ioObj,
     const Time& owner
@@ -101,7 +101,7 @@ void Foam::Profiling::initialize
     }
     else
     {
-        pool_ = new Profiling(ioObj, owner);
+        pool_ = new profiling(ioObj, owner);
 
         Information *info = pool_->store
         (
@@ -109,12 +109,12 @@ void Foam::Profiling::initialize
         );
 
         pool_->push(info, pool_->clockTime_);
-        Info<< "Profiling initialized" << nl;
+        Info<< "profiling initialized" << nl;
     }
 }
 
 
-void Foam::Profiling::initialize
+void Foam::profiling::initialize
 (
     const dictionary& dict,
     const IOobject& ioObj,
@@ -128,7 +128,7 @@ void Foam::Profiling::initialize
     }
     else
     {
-        pool_ = new Profiling(dict, ioObj, owner);
+        pool_ = new profiling(dict, ioObj, owner);
 
         Information *info = pool_->store
         (
@@ -136,12 +136,12 @@ void Foam::Profiling::initialize
         );
 
         pool_->push(info, pool_->clockTime_);
-        Info<< "Profiling initialized" << nl;
+        Info<< "profiling initialized" << nl;
     }
 }
 
 
-void Foam::Profiling::stop(const Time& owner)
+void Foam::profiling::stop(const Time& owner)
 {
     if (pool_ && &owner == &(pool_->owner_))
     {
@@ -151,7 +151,7 @@ void Foam::Profiling::stop(const Time& owner)
 }
 
 
-Foam::Profiling::Information* Foam::Profiling::New
+Foam::profiling::Information* Foam::profiling::New
 (
     const string& name,
     clockTime& timer
@@ -177,7 +177,7 @@ Foam::Profiling::Information* Foam::Profiling::New
 }
 
 
-void Foam::Profiling::unstack(const Information *info)
+void Foam::profiling::unstack(const Information *info)
 {
     if (pool_ && info)
     {
@@ -200,7 +200,7 @@ void Foam::Profiling::unstack(const Information *info)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::Profiling::Profiling
+Foam::profiling::profiling
 (
     const IOobject& io,
     const Time& owner
@@ -218,7 +218,7 @@ Foam::Profiling::Profiling
 {}
 
 
-Foam::Profiling::Profiling
+Foam::profiling::profiling
 (
     const dictionary& dict,
     const IOobject& io,
@@ -249,7 +249,7 @@ Foam::Profiling::Profiling
 {}
 
 
-Foam::Profiling::Information::Information()
+Foam::profiling::Information::Information()
 :
     id_(getNextId()),
     description_("application::main"),
@@ -257,11 +257,12 @@ Foam::Profiling::Information::Information()
     calls_(0),
     totalTime_(0),
     childTime_(0),
+    maxMem_(0),
     onStack_(false)
 {}
 
 
-Foam::Profiling::Information::Information
+Foam::profiling::Information::Information
 (
     Information *parent,
     const string& descr
@@ -277,23 +278,23 @@ Foam::Profiling::Information::Information
 {}
 
 
-Foam::Profiling::Trigger::Trigger(const char* name)
+Foam::profiling::Trigger::Trigger(const char* name)
 :
     clock_(),
-    ptr_(Profiling::New(name, clock_))
+    ptr_(profiling::New(name, clock_))
 {}
 
 
-Foam::Profiling::Trigger::Trigger(const string& name)
+Foam::profiling::Trigger::Trigger(const string& name)
 :
     clock_(),
-    ptr_(Profiling::New(name, clock_))
+    ptr_(profiling::New(name, clock_))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::Profiling::~Profiling()
+Foam::profiling::~profiling()
 {
     deleteDemandDrivenData(sysInfo_);
     deleteDemandDrivenData(cpuInfo_);
@@ -307,11 +308,11 @@ Foam::Profiling::~Profiling()
 }
 
 
-Foam::Profiling::Information::~Information()
+Foam::profiling::Information::~Information()
 {}
 
 
-Foam::Profiling::Trigger::~Trigger()
+Foam::profiling::Trigger::~Trigger()
 {
     stop();
 }
@@ -319,25 +320,25 @@ Foam::Profiling::Trigger::~Trigger()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::Time& Foam::Profiling::owner() const
+const Foam::Time& Foam::profiling::owner() const
 {
     return owner_;
 }
 
-Foam::label Foam::Profiling::size() const
+Foam::label Foam::profiling::size() const
 {
     return stack_.size();
 }
 
 
-Foam::Profiling::Information* Foam::Profiling::find(const string& name)
+Foam::profiling::Information* Foam::profiling::find(const string& name)
 {
     StorageContainer::iterator iter = hash_.find(name);
     return (iter != hash_.end() ? iter() : 0);
 }
 
 
-void Foam::Profiling::Information::update(const scalar& elapsed)
+void Foam::profiling::Information::update(const scalar& elapsed)
 {
     ++calls_;
     totalTime_ += elapsed;
@@ -349,7 +350,7 @@ void Foam::Profiling::Information::update(const scalar& elapsed)
 }
 
 
-bool Foam::Profiling::writeData(Ostream& os) const
+bool Foam::profiling::writeData(Ostream& os) const
 {
     os  << indent << "profiling" << nl
         << indent << token::BEGIN_LIST << incrIndent << nl;
@@ -429,14 +430,14 @@ bool Foam::Profiling::writeData(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::Profiling::Information* Foam::Profiling::store(Information *info)
+Foam::profiling::Information* Foam::profiling::store(Information *info)
 {
     hash_.insert(info->description(), info);
     return info;
 }
 
 
-void Foam::Profiling::push(Information *info, clockTime& timer)
+void Foam::profiling::push(Information *info, clockTime& timer)
 {
     stack_.push(info);
     timers_.set(info->id(), &timer);
@@ -444,7 +445,7 @@ void Foam::Profiling::push(Information *info, clockTime& timer)
 }
 
 
-Foam::Profiling::Information* Foam::Profiling::pop()
+Foam::profiling::Information* Foam::profiling::pop()
 {
     Information *info = stack_.pop();
     timers_.erase(info->id());
@@ -454,37 +455,37 @@ Foam::Profiling::Information* Foam::Profiling::pop()
 }
 
 
-bool Foam::Profiling::Trigger::running() const
+bool Foam::profiling::Trigger::running() const
 {
     return ptr_;
 }
 
 
-void Foam::Profiling::Trigger::stop()
+void Foam::profiling::Trigger::stop()
 {
     if (ptr_)
     {
         ptr_->update(clock_.elapsedTime());
-        Profiling::unstack(ptr_);
+        profiling::unstack(ptr_);
         // pointer is managed by pool storage -> thus no delete here
     }
     ptr_ = 0;
 }
 
 
-void Foam::Profiling::Information::push() const
+void Foam::profiling::Information::push() const
 {
     onStack_ = true;
 }
 
 
-void Foam::Profiling::Information::pop() const
+void Foam::profiling::Information::pop() const
 {
     onStack_ = false;
 }
 
 
-Foam::Ostream& Foam::Profiling::Information::write
+Foam::Ostream& Foam::profiling::Information::write
 (
     Ostream& os,
     const bool offset,
@@ -521,7 +522,7 @@ Foam::Ostream& Foam::Profiling::Information::write
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const Profiling::Information& info
+    const profiling::Information& info
 )
 {
     return info.write(os);

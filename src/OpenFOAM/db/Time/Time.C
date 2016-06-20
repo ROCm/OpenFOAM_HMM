@@ -27,7 +27,7 @@ License
 #include "PstreamReduceOps.H"
 #include "argList.H"
 #include "HashSet.H"
-#include "Profiling.H"
+#include "profiling.H"
 
 #include <sstream>
 
@@ -351,7 +351,7 @@ void Foam::Time::setMonitoring(bool forceProfiling)
      && profilingDict->lookupOrDefault<Switch>("active", true)
     )
     {
-        Profiling::initialize
+        profiling::initialize
         (
             *profilingDict,
             IOobject
@@ -687,7 +687,7 @@ Foam::Time::~Time()
     functionObjects_.clear();
 
     // cleanup profiling
-    Profiling::stop(*this);
+    profiling::stop(*this);
 }
 
 
