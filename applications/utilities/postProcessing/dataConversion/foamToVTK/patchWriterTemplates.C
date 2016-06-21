@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,8 @@ void Foam::patchWriter::write
     {
         const GeometricField<Type, fvPatchField, volMesh>& fld = flds[fieldI];
 
-        os_ << fld.name() << ' ' << pTraits<Type>::nComponents << ' '
+        os_ << fld.name() << ' '
+            << int(pTraits<Type>::nComponents) << ' '
             << nFaces_ << " float" << std::endl;
 
         DynamicList<floatScalar> fField(pTraits<Type>::nComponents*nFaces_);
@@ -74,7 +75,8 @@ void Foam::patchWriter::write
         const GeometricField<Type, pointPatchField, pointMesh>& fld =
             flds[fieldI];
 
-        os_ << fld.name() << ' ' << pTraits<Type>::nComponents << ' '
+        os_ << fld.name() << ' '
+            << int(pTraits<Type>::nComponents) << ' '
             << nPoints_ << " float" << std::endl;
 
         DynamicList<floatScalar> fField(pTraits<Type>::nComponents*nPoints_);
@@ -103,7 +105,8 @@ void Foam::patchWriter::write
     {
         const GeometricField<Type, fvPatchField, volMesh>& fld = flds[fieldI];
 
-        os_ << fld.name() << ' ' << pTraits<Type>::nComponents << ' '
+        os_ << fld.name() << ' '
+            << int(pTraits<Type>::nComponents) << ' '
             << nPoints_ << " float" << std::endl;
 
         DynamicList<floatScalar> fField(pTraits<Type>::nComponents*nPoints_);

@@ -65,7 +65,8 @@ void Foam::CloudToVTK<CloudType>::writeFieldData
 ) const
 {
     vtkOs
-        << title << ' ' << pTraits<Type>::nComponents << ' '
+        << title << ' '
+        << int(pTraits<Type>::nComponents) << ' '
         << nParcels << " float" << std::endl;
     writeData(vtkOs, binary, data);
 }
