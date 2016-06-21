@@ -66,7 +66,7 @@ Foam::cloudSolution::cloudSolution(const fvMesh& mesh, const dictionary& dict)
 
         // transient default to false asks for extra massFlowRate
         // in transient lagrangian
-        dict_.lookup("transient") >> transient_;
+        transient_ = true;
     }
 }
 
