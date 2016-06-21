@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,7 +71,8 @@ void Foam::surfaceMeshWriter::write
         const GeometricField<Type, fvsPatchField, surfaceMesh>& fld =
             sflds[fieldI];
 
-        os_ << fld.name() << ' ' << pTraits<Type>::nComponents << ' '
+        os_ << fld.name() << ' '
+            << int(pTraits<Type>::nComponents) << ' '
             << pp_.size() << " float" << std::endl;
 
         DynamicList<floatScalar> fField(pTraits<Type>::nComponents*pp_.size());
