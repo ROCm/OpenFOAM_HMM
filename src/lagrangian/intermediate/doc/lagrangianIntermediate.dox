@@ -23,16 +23,19 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpThermophysicalModels Thermophysical models
-@{
-    This group contains thermophysical models
-@}
+\page pageLagrangianIntermediate Lagrangian modelling
 
-\defgroup grpThermophysicalFunctionObjects Thermophysical function objects
-@{
-    \ingroup grpFunctionObjects
-    This group contains thermo-based function objects
-@}
+\section secSchemes Overview
+The available Lagrangian models are grouped into the following categories:
+  - \ref grpLagrangianIntermediateClouds
+  - \ref grpLagrangianIntermediateParcels
+  - \ref grpLagrangianIntermediateSubModels
+  - \ref grpLagrangianIntermediateKinematicSubModels
+  - \ref grpLagrangianIntermediateThermoSubModels
+  - \ref grpLagrangianIntermediateReactingSubModels
+  - \ref grpLagrangianIntermediateReactingMultiphaseSubModels
+  - \ref grpLagrangianIntermediateMPPICSubModels
+  - \ref grpLagrangianIntermediateFunctionObjects
 
 
 \*---------------------------------------------------------------------------*/

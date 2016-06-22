@@ -24,6 +24,9 @@ License
 Class
     Foam::SpecieMixture
 
+Group
+    grpReactionThermophysicalMixtures
+
 Description
     Foam::SpecieMixture
 

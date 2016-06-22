@@ -23,15 +23,28 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpThermophysicalModels Thermophysical models
+\defgroup grpFvOptions Finite volume Options
 @{
-    This group contains thermophysical models
+    \ingroup grpNumerics
+    This group contains finite volume options
 @}
 
-\defgroup grpThermophysicalFunctionObjects Thermophysical function objects
+\defgroup grpFvOptionsSources Sources
 @{
-    \ingroup grpFunctionObjects
-    This group contains thermo-based function objects
+    \ingroup grpFvOptions
+    This group contains finite volume sources
+@}
+
+\defgroup grpFvOptionsCorrections Corrections
+@{
+    \ingroup grpFvOptions
+    This group contains finite volume corrections
+@}
+
+\defgroup grpFvOptionsConstraints Constraints
+@{
+    \ingroup grpFvOptions
+    This group contains finite volume constraints
 @}
 
 

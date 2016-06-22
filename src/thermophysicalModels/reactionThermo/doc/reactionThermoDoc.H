@@ -21,17 +21,22 @@ License
     You should have received a copy of the GNU General Public License along with
     OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-\defgroup grpThermophysicalModels Thermophysical models
+\defgroup grpReactionThermophysicalModels Reaction thermophysical models
 @{
-    This group contains thermophysical models
+    \ingroup grpThermophysicalModels
+    This group contains reaction thermophysical models
 @}
 
-\defgroup grpThermophysicalFunctionObjects Thermophysical function objects
+\defgroup grpReactionThermophysicalMixtures Mixtures
 @{
-    \ingroup grpFunctionObjects
-    This group contains thermo-based function objects
+    \ingroup grpReactionThermophysicalModels
+    This group contains reaction mixtures
+@}
+
+\defgroup grpReactionThermophysicalChemistryReaders Chemistry readers
+@{
+    \ingroup grpReactionThermophysicalModels
+    This group contains chemistry readers
 @}
 
 

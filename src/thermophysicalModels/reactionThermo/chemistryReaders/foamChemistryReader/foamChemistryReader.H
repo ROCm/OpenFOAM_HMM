@@ -24,6 +24,9 @@ License
 Class
     Foam::foamChemistryReader
 
+Group
+    grpReactionThermophysicalChemistryReaders
+
 Description
     Chemistry reader for OpenFOAM format
 

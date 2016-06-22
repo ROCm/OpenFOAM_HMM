@@ -24,6 +24,9 @@ License
 Class
     Foam::basicCombustionMixture
 
+Group
+    grpReactionThermophysicalMixtures
+
 Description
     Specialization of the basicSpecieMixture for combustion.
 

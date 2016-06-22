@@ -24,6 +24,9 @@ License
 Class
     Foam::basicMultiComponentMixture
 
+Group
+    grpReactionThermophysicalMixtures
+
 Description
     Multi-component mixture.
 
