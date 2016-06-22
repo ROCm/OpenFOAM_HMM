@@ -101,8 +101,9 @@ castellatedMeshControls
         }
     }
 
-    locationInMesh (1e-5 1e-5 1e-5); // Offset from (0 0 0) to avoid
-                                     // coinciding with face or edge
+    locationInMesh (1e-5 -1e-2 1e-5);// Offset from (0 0 0) to avoid
+                                     // coinciding with face or edge and keep
+                                     // away from disk itself
 }
 
 snapControls
@@ -120,9 +121,6 @@ addLayersControls
     expansionRatio      1.2;
     finalLayerThickness 0.5;
     minThickness        1e-3;
-//  firstLayerThickness 0.01;
-
-//  maxThicknessToMedialRatio 0.6;
 }
 
 meshQualityControls
@@ -130,12 +128,6 @@ meshQualityControls
 //    minTetQuality -1e+30;
 }
 
-writeFlags
-(
-    scalarLevels
-    layerSets
-    layerFields
-);
 
 mergeTolerance 1e-6;
 
