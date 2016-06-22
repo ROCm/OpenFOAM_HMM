@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,7 @@ License
 
 #include "fvScalarMatrix.H"
 #include "extrapolatedCalculatedFvPatchFields.H"
+#include "profiling.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -59,6 +60,8 @@ Foam::fvMatrix<Foam::scalar>::solver
     const dictionary& solverControls
 )
 {
+    addProfiling(solve, "fvMatrix::solve." + psi_.name());
+
     if (debug)
     {
         Info.masterStream(this->mesh().comm())

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ Description
     Memory usage information for the process running this object.
 
 Note
-    Uses the information from /proc/\<pid\>/status
+    Uses the information from /proc/PID/status
 
 SourceFiles
     memInfo.C
@@ -47,6 +47,10 @@ SourceFiles
 namespace Foam
 {
 
+// forward declarations
+class Istream;
+class Ostream;
+
 /*---------------------------------------------------------------------------*\
                            Class memInfo Declaration
 \*---------------------------------------------------------------------------*/
@@ -55,15 +59,20 @@ class memInfo
 {
     // Private data
 
-        //- Peak memory used by the process (VmPeak in /proc/\<pid\>/status)
+        //- Peak memory used by the process (VmPeak in /proc/PID/status)
         int peak_;
 
-        //- Memory used by the process (VmSize in /proc/\<pid\>/status)
+        //- Memory used by the process (VmSize in /proc/PID/status)
         int size_;
 
-        //- Resident set size of the process (VmRSS in /proc/\<pid\>/status)
+        //- Resident set size of the process (VmRSS in /proc/PID/status)
         int rss_;
 
+        //- Disallow default bitwise assignment
+        void operator=(const memInfo&) = delete;
+
+        //- Disallow default copy constructor
+        memInfo(const memInfo&) = delete;
 
 public:
 
@@ -79,27 +88,24 @@ public:
 
     // Member Functions
 
-        //- Parse /proc/\<pid\>/status
+        //- Parse /proc/PID/status and update accordingly
         const memInfo& update();
 
         // Access
 
-            //- Access the stored peak memory (VmPeak in /proc/\<pid\>/status)
-            //  The value is stored from the previous update()
+            //- Peak memory (VmPeak in /proc/PID/status) at last update()
             int peak() const
             {
                 return peak_;
             }
 
-            //- Access the stored memory size (VmSize in /proc/\<pid\>/status)
-            //  The value is stored from the previous update()
+            //- Memory size (VmSize in /proc/PID/status) at last update()
             int size() const
             {
                 return size_;
             }
 
-            //- Access the stored rss value (VmRSS in /proc/\<pid\>/status)
-            //  The value is stored from the previous update()
+            //- Resident set size (VmRSS in /proc/PID/status) at last update()
             int rss() const
             {
                 return rss_;
@@ -107,6 +113,10 @@ public:
 
             //- True if the memory information appears valid
             bool valid() const;
+
+
+        //- Write content as dictionary entries
+        void write(Ostream&) const;
 
 
     // IOstream Operators

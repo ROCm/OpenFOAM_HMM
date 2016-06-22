@@ -24,6 +24,9 @@ License
 Class
     Foam::moleFractions
 
+Group
+    grpThermophysicalFunctionObjects
+
 Description
     This function object calculates mole-fraction fields from the mass-fraction
     fields of the psi/rhoReactionThermo and caches them for output and further

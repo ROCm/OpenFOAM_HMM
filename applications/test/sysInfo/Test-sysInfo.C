@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,49 +21,25 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+
+Description
+
 \*---------------------------------------------------------------------------*/
 
-#include "memInfo.H"
+#include "ProfilingSysInfo.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+using namespace Foam;
 
-Foam::memInfo::memInfo(Istream& is)
-:
-    base1(is),
-    base2(is),
-    member1(is),
-    member2(is)
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//  Main program:
+
+int main(int argc, char *argv[])
 {
-    // Check state of Istream
-    is.check("Foam::memInfo::memInfo(Foam::Istream&)");
-}
+    Profiling::sysInfo().write(Info);
 
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Foam::Istream& Foam::operator>>(Istream& is, memInfo&)
-{
-    // Check state of Istream
-    is.check
-    (
-        "Foam::Istream& Foam::operator>>(Foam::Istream&, Foam::memInfo&)"
-    );
-
-    return is;
-}
-
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const memInfo&)
-{
-    // Check state of Ostream
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
-        "const Foam::memInfo&)"
-    );
-
-    return os;
+    return 0;
 }
 
 

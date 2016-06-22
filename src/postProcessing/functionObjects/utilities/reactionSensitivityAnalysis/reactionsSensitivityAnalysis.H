@@ -25,7 +25,7 @@ Class
     Foam::reactionsSensitivityAnalysis
 
 Group
-    grpUtilitiesFunctionObjects
+    grpUtilitiesFunctionObjects grpThermophysicalFunctionObjects
 
 Description
     This function object creates four data files named:

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -138,6 +138,14 @@ public:
                 scalarListList& tgtWeights,
                 label srcFaceI = -1,
                 label tgtFaceI = -1
+            );
+
+            //- Normalise the weight. Can optionally subset addressing
+            //  (e.g. for mapNearest)
+            virtual void normaliseWeights
+            (
+                const bool verbose,
+                AMIInterpolation<SourcePatch, TargetPatch>& inter
             );
 };
 

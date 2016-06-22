@@ -24,6 +24,9 @@ License
 Class
     Foam::basicSpecieMixture
 
+Group
+    grpReactionThermophysicalMixtures
+
 Description
     Specialization of basicMultiComponentMixture for a mixture consisting
     of a number for molecular species.

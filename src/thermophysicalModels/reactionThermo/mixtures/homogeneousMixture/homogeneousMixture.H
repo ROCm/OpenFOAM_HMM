@@ -24,6 +24,9 @@ License
 Class
     Foam::homogeneousMixture
 
+Group
+    grpReactionThermophysicalMixtures
+
 Description
     Foam::homogeneousMixture
 

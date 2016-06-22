@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 #include "PstreamReduceOps.H"
 #include "argList.H"
 #include "HashSet.H"
+#include "profiling.H"
 
 #include <sstream>
 
@@ -333,6 +334,72 @@ void Foam::Time::setControls()
 }
 
 
+void Foam::Time::setMonitoring(bool forceProfiling)
+{
+    const dictionary* profilingDict = controlDict_.subDictPtr("profiling");
+
+    // initialize profiling on request
+    // otherwise rely on profiling entry within controlDict
+    // and skip if 'active' keyword is explicitly set to false
+    if (forceProfiling)
+    {
+        profiling::initialize
+        (
+            IOobject
+            (
+                "profiling",
+                timeName(),
+                "uniform",
+                *this,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            *this
+        );
+    }
+    else if
+    (
+        profilingDict
+     && profilingDict->lookupOrDefault<Switch>("active", true)
+    )
+    {
+        profiling::initialize
+        (
+            *profilingDict,
+            IOobject
+            (
+                "profiling",
+                timeName(),
+                "uniform",
+                *this,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            *this
+        );
+    }
+
+    // Time objects not registered so do like objectRegistry::checkIn ourselves.
+    if (runTimeModifiable_)
+    {
+        monitorPtr_.reset
+        (
+            new fileMonitor
+            (
+                regIOobject::fileModificationChecking == inotify
+             || regIOobject::fileModificationChecking == inotifyMaster
+            )
+        );
+
+        // Monitor all files that controlDict depends on
+        addWatches(controlDict_, controlDict_.files());
+    }
+
+    // Clear dependent files - not needed now
+    controlDict_.files().clear();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::Time::Time
@@ -401,25 +468,7 @@ Foam::Time::Time
     readOpt() = IOobject::MUST_READ_IF_MODIFIED;
 
     setControls();
-
-    // Time objects not registered so do like objectRegistry::checkIn ourselves.
-    if (runTimeModifiable_)
-    {
-        monitorPtr_.reset
-        (
-            new fileMonitor
-            (
-                regIOobject::fileModificationChecking == inotify
-             || regIOobject::fileModificationChecking == inotifyMaster
-            )
-        );
-
-        // Monitor all files that controlDict depends on
-        addWatches(controlDict_, controlDict_.files());
-    }
-
-    // Clear dependent files
-    controlDict_.files().clear();
+    setMonitoring();
 }
 
 
@@ -496,24 +545,8 @@ Foam::Time::Time
 
     setControls();
 
-    // Time objects not registered so do like objectRegistry::checkIn ourselves.
-    if (runTimeModifiable_)
-    {
-        monitorPtr_.reset
-        (
-            new fileMonitor
-            (
-                regIOobject::fileModificationChecking == inotify
-             || regIOobject::fileModificationChecking == inotifyMaster
-            )
-        );
-
-        // Monitor all files that controlDict depends on
-        addWatches(controlDict_, controlDict_.files());
-    }
-
-    // Clear dependent files since not needed
-    controlDict_.files().clear();
+    // '-profiling' = force profiling, ignore controlDict entry
+    setMonitoring(args.optionFound("profiling"));
 }
 
 
@@ -588,25 +621,7 @@ Foam::Time::Time
     controlDict_.readOpt() = IOobject::MUST_READ_IF_MODIFIED;
 
     setControls();
-
-    // Time objects not registered so do like objectRegistry::checkIn ourselves.
-    if (runTimeModifiable_)
-    {
-        monitorPtr_.reset
-        (
-            new fileMonitor
-            (
-                regIOobject::fileModificationChecking == inotify
-             || regIOobject::fileModificationChecking == inotifyMaster
-            )
-        );
-
-        // Monitor all files that controlDict depends on
-        addWatches(controlDict_, controlDict_.files());
-    }
-
-    // Clear dependent files since not needed
-    controlDict_.files().clear();
+    setMonitoring();
 }
 
 
@@ -667,6 +682,7 @@ Foam::Time::Time
     functionObjects_(*this, enableFunctionObjects)
 {
     libs_.open(controlDict_, "libs");
+    setMonitoring(); // for profiling etc
 }
 
 
@@ -681,6 +697,9 @@ Foam::Time::~Time()
 
     // destroy function objects first
     functionObjects_.clear();
+
+    // cleanup profiling
+    profiling::stop(*this);
 }
 
 
@@ -922,9 +941,13 @@ bool Foam::Time::run() const
         {
             // Ensure functionObjects execute on last time step
             // (and hence write uptodate functionObjectProperties)
+            addProfiling(foExec, "functionObjects.execute()");
             functionObjects_.execute();
+            endProfiling(foExec);
 
+            addProfiling(foEnd, "functionObjects.end()");
             functionObjects_.end();
+            endProfiling(foEnd);
         }
     }
 
@@ -936,10 +959,12 @@ bool Foam::Time::run() const
 
             if (timeIndex_ == startTimeIndex_)
             {
+                addProfiling(functionObjects, "functionObjects.start()");
                 functionObjects_.start();
             }
             else
             {
+                addProfiling(functionObjects, "functionObjects.execute()");
                 functionObjects_.execute();
             }
         }

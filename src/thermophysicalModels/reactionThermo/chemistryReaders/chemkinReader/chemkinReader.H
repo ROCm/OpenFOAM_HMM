@@ -24,6 +24,9 @@ License
 Class
     Foam::chemkinReader
 
+Group
+    grpReactionThermophysicalChemistryReaders
+
 Description
     Foam::chemkinReader
 

@@ -28,5 +28,11 @@ License
     This group contains thermophysical models
 @}
 
+\defgroup grpThermophysicalFunctionObjects Thermophysical function objects
+@{
+    \ingroup grpFunctionObjects
+    This group contains thermo-based function objects
+@}
+
 
 \*---------------------------------------------------------------------------*/

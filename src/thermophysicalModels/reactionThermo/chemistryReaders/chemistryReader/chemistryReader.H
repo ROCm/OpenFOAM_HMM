@@ -24,6 +24,9 @@ License
 Class
     Foam::chemistryReader
 
+Group
+    grpReactionThermophysicalChemistryReaders
+
 Description
     Abstract class for reading chemistry
 

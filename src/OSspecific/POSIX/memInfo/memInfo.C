@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,14 +24,29 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "memInfo.H"
+#include "IFstream.H"
+#include "IOstreams.H"
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+// file-scope function
+template<class T>
+inline static void writeEntry
+(
+    Foam::Ostream& os, const Foam::word& key, const T& value
+)
+{
+    os.writeKeyword(key) << value << Foam::token::END_STATEMENT << '\n';
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::memInfo::memInfo()
 :
-    peak_(-1),
-    size_(-1),
-    rss_(-1)
+    peak_(0),
+    size_(0),
+    rss_(0)
 {
     update();
 }
@@ -48,7 +63,7 @@ Foam::memInfo::~memInfo()
 const Foam::memInfo& Foam::memInfo::update()
 {
     // reset to invalid values first
-    peak_ = size_ = rss_ = -1;
+    peak_ = size_ = rss_ = 0;
     IFstream is("/proc/" + name(pid()) + "/status");
 
     while (is.good())
@@ -81,7 +96,15 @@ const Foam::memInfo& Foam::memInfo::update()
 
 bool Foam::memInfo::valid() const
 {
-    return peak_ != -1;
+    return peak_ > 0;
+}
+
+
+void Foam::memInfo::write(Ostream& os) const
+{
+    writeEntry(os, "size",  size_);
+    writeEntry(os, "peak",  peak_);
+    writeEntry(os, "rss",   rss_);
 }
 
 
@@ -108,14 +131,15 @@ Foam::Istream& Foam::operator>>(Istream& is, memInfo& m)
 Foam::Ostream& Foam::operator<<(Ostream& os, const memInfo& m)
 {
     os  << token::BEGIN_LIST
-        << m.peak_ << token::SPACE << m.size_ << token::SPACE << m.rss_
+        << m.peak_ << token::SPACE
+        << m.size_ << token::SPACE
+        << m.rss_
         << token::END_LIST;
 
     // Check state of Ostream
     os.check
     (
-        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
-        "const Foam::memInfo&)"
+        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, const Foam::memInfo&)"
     );
 
     return os;
