@@ -39,6 +39,7 @@ License
 #include "localPointRegion.H"
 #include "IOmanip.H"
 #include "labelVector.H"
+#include "profiling.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -79,6 +80,7 @@ Foam::label Foam::snappyRefineDriver::featureEdgeRefine
     const label minRefine
 )
 {
+    addProfiling(edge, "snappyHexMesh::refine::edge");
     const fvMesh& mesh = meshRefiner_.mesh();
 
     label iter = 0;
@@ -188,6 +190,7 @@ Foam::label Foam::snappyRefineDriver::smallFeatureRefine
     const label maxIter
 )
 {
+    addProfiling(feature, "snappyHexMesh::refine::smallFeature");
     const fvMesh& mesh = meshRefiner_.mesh();
 
 
@@ -310,6 +313,7 @@ Foam::label Foam::snappyRefineDriver::surfaceOnlyRefine
     const label maxIter
 )
 {
+    addProfiling(surface, "snappyHexMesh::refine::surface");
     const fvMesh& mesh = meshRefiner_.mesh();
 
     // Determine the maximum refinement level over all surfaces. This
@@ -807,6 +811,7 @@ Foam::label Foam::snappyRefineDriver::danglingCellRefine
     const label maxIter
 )
 {
+    addProfiling(dangling, "snappyHexMesh::refine::danglingCell");
     const fvMesh& mesh = meshRefiner_.mesh();
 
     label iter;
@@ -952,6 +957,7 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
     const label maxIter
 )
 {
+    addProfiling(interface, "snappyHexMesh::refine::transition");
     const fvMesh& mesh = meshRefiner_.mesh();
 
     label iter = 0;
@@ -1342,6 +1348,7 @@ Foam::label Foam::snappyRefineDriver::shellRefine
     const label maxIter
 )
 {
+    addProfiling(shell, "snappyHexMesh::refine::shell");
     const fvMesh& mesh = meshRefiner_.mesh();
 
     // Mark current boundary faces with 0. Have meshRefiner maintain them.
@@ -1517,6 +1524,7 @@ void Foam::snappyRefineDriver::baffleAndSplitMesh
     const dictionary& motionDict
 )
 {
+    addProfiling(split, "snappyHexMesh::refine::splitting");
     Info<< nl
         << "Splitting mesh at surface intersections" << nl
         << "---------------------------------------" << nl
@@ -1841,6 +1849,7 @@ void Foam::snappyRefineDriver::mergePatchFaces
     const dictionary& motionDict
 )
 {
+    addProfiling(merge, "snappyHexMesh::refine::merge");
     Info<< nl
         << "Merge refined boundary faces" << nl
         << "----------------------------" << nl
@@ -1895,6 +1904,7 @@ void Foam::snappyRefineDriver::doRefine
     const dictionary& motionDict
 )
 {
+    addProfiling(refine, "snappyHexMesh::refine");
     Info<< nl
         << "Refinement phase" << nl
         << "----------------" << nl

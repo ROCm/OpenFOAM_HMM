@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,33 +21,26 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+
+Description
+
 \*---------------------------------------------------------------------------*/
 
-#include "IMULES.H"
-#include "profiling.H"
+#include "cpuInfo.H"
+#include "IOstreams.H"
+
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//  Main program:
 
-void Foam::MULES::implicitSolve
-(
-    volScalarField& psi,
-    const surfaceScalarField& phi,
-    surfaceScalarField& phiPsi,
-    const scalar psiMax,
-    const scalar psiMin
-)
+int main(int argc, char *argv[])
 {
-    addProfiling(solve, "MULES::implicitSolve");
+    cpuInfo().write(Info);
+    Info<< endl;
 
-    implicitSolve
-    (
-        geometricOneField(),
-        psi,
-        phi,
-        phiPsi,
-        zeroField(), zeroField(),
-        psiMax, psiMin
-    );
+    return 0;
 }
 
 
