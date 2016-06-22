@@ -568,4 +568,15 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
 }
 
 
+template<class SourcePatch, class TargetPatch>
+void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::normaliseWeights
+(
+    const bool verbose,
+    AMIInterpolation<SourcePatch, TargetPatch>& inter
+)
+{
+    inter.normaliseWeights(this->conformal(), verbose);
+}
+
+
 // ************************************************************************* //
