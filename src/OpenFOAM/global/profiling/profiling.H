@@ -207,6 +207,14 @@ public:
         //- writeData member function required by regIOobject
         virtual bool writeData(Ostream&) const;
 
+        //- Write as uncompressed ASCII, using given format
+        virtual bool writeObject
+        (
+            IOstream::streamFormat ignoreAlwaysASCII,
+            IOstream::versionNumber ver,
+            IOstream::compressionType ignoreAlwaysUncompressed
+        ) const;
+
 };
 
 

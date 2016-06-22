@@ -438,6 +438,22 @@ bool Foam::profiling::writeData(Ostream& os) const
 }
 
 
+bool Foam::profiling::writeObject
+(
+    IOstream::streamFormat,
+    IOstream::versionNumber ver,
+    IOstream::compressionType
+) const
+{
+    return regIOobject::writeObject
+    (
+        IOstream::ASCII,
+        ver,
+        IOstream::UNCOMPRESSED
+    );
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::profiling::Information* Foam::profiling::store(Information *info)

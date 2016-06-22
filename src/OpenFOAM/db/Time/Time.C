@@ -336,16 +336,28 @@ void Foam::Time::setControls()
 
 void Foam::Time::setMonitoring(bool forceProfiling)
 {
-    // initialize profiling on request
-    // skip if 'active' keyword is explicitly set to false
-    const dictionary* profilingDict =
-    (
-        forceProfiling
-      ? &dictionary::null
-      : controlDict_.subDictPtr("profiling")
-    );
+    const dictionary* profilingDict = controlDict_.subDictPtr("profiling");
 
-    if
+    // initialize profiling on request
+    // otherwise rely on profiling entry within controlDict
+    // and skip if 'active' keyword is explicitly set to false
+    if (forceProfiling)
+    {
+        profiling::initialize
+        (
+            IOobject
+            (
+                "profiling",
+                timeName(),
+                "uniform",
+                *this,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            *this
+        );
+    }
+    else if
     (
         profilingDict
      && profilingDict->lookupOrDefault<Switch>("active", true)
