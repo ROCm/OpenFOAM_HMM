@@ -66,7 +66,6 @@ Description
         Property     | Description             | Required    | Default value
         p            | pressure field name     | no          | p
         cyclicPatch  | cyclic patch name       | yes         |
-        orientation  | 1 to open or -1 to close | yes|
         openFraction | current open fraction [0-1] | yes |
         openingTime  | time taken to open or close the baffle | yes |
         maxOpenFractionDelta | max fraction change per timestep | yes |
@@ -83,7 +82,6 @@ Description
         type            activePressureForceBaffleVelocity;
         p               p;
         cyclicPatch     cyclic1;
-        orientation     1;
         openFraction    0.2;
         openingTime     5.0;
         maxOpenFractionDelta 0.1;

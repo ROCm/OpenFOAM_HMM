@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,8 +119,9 @@ void writeVTKFields
     forAll(values, fieldI)
     {
         Info<< "        writing field " << fieldNames[fieldI] << endl;
-        os  << nl << fieldNames[fieldI] << ' ' << pTraits<Type>::nComponents
-            << ' ' << values[fieldI].size() << " float" << nl;
+        os  << nl << fieldNames[fieldI] << ' '
+            << int(pTraits<Type>::nComponents) << ' '
+            << values[fieldI].size() << " float" << nl;
         label offset = 0;
         forAll(addr, trackI)
         {
