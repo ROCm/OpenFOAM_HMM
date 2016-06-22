@@ -45,6 +45,10 @@ timePrecision   6;
 
 runTimeModifiable yes;
 
+profiling
+{
+    memInfo     true;
+}
 
 functions
 {

@@ -57,6 +57,7 @@ Description
 #include "localPointRegion.H"
 #include "externalDisplacementMeshMover.H"
 #include "scalarIOField.H"
+#include "profiling.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -3399,6 +3400,7 @@ void Foam::snappyLayerDriver::addLayers
         //    extrudeStatus
         //);
 
+        addProfiling(grow, "snappyHexMesh::layers::grow");
 
         // Grow out region of non-extrusion
         for (label i = 0; i < layerParams.nGrow(); i++)
@@ -3749,7 +3751,10 @@ void Foam::snappyLayerDriver::addLayers
             );
             fvMesh& newMesh = newMeshPtr();
 
-            //?neccesary? Update fields
+            // get timing, but more importantly get memory information
+            addProfiling(grow, "snappyHexMesh::layers::updateMesh");
+
+            //?necessary? Update fields
             newMesh.updateMesh(map);
 
             newMesh.setInstance(meshRefiner_.timeName());
@@ -4219,6 +4224,7 @@ void Foam::snappyLayerDriver::doLayers
     fvMeshDistribute& distributor
 )
 {
+    addProfiling(layers, "snappyHexMesh::layers");
     const fvMesh& mesh = meshRefiner_.mesh();
 
     Info<< nl

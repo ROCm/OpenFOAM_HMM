@@ -10,6 +10,7 @@ fileStat.C
 POSIX.C
 cpuTime/cpuTime.C
 clockTime/clockTime.C
+cpuInfo/cpuInfo.C
 memInfo/memInfo.C
 
 /*
