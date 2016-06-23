@@ -94,12 +94,7 @@ void Foam::profiling::initialize
     const Time& owner
 )
 {
-    if (pool_)
-    {
-        WarningInFunction
-            << "Already initialized" << endl;
-    }
-    else
+    if (!pool_)
     {
         pool_ = new profiling(ioObj, owner);
 
@@ -111,6 +106,9 @@ void Foam::profiling::initialize
         pool_->push(info, pool_->clockTime_);
         Info<< "profiling initialized" << nl;
     }
+
+    // silently ignore multiple initialization
+    // eg, decomposePar use multiple simultaneous Times
 }
 
 
@@ -121,12 +119,7 @@ void Foam::profiling::initialize
     const Time& owner
 )
 {
-    if (pool_)
-    {
-        WarningInFunction
-            << "Already initialized" << endl;
-    }
-    else
+    if (!pool_)
     {
         pool_ = new profiling(dict, ioObj, owner);
 
@@ -138,6 +131,9 @@ void Foam::profiling::initialize
         pool_->push(info, pool_->clockTime_);
         Info<< "profiling initialized" << nl;
     }
+
+    // silently ignore multiple initialization
+    // eg, decomposePar use multiple simultaneous Times
 }
 
 
