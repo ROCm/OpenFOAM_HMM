@@ -73,6 +73,19 @@ bool Foam::profiling::active()
 }
 
 
+bool Foam::profiling::print(Ostream& os)
+{
+    if (pool_)
+    {
+        return pool_->writeData(os);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 bool Foam::profiling::writeNow()
 {
     if (pool_)
