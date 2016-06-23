@@ -244,7 +244,8 @@ void Foam::fieldVisualisationBase::setField
     const scalar position,
     const word& colourFieldName,
     vtkPolyDataMapper* mapper,
-    vtkRenderer* renderer
+    vtkRenderer* renderer,
+    vtkPolyData* pData
 ) const
 {
     mapper->InterpolateScalarsBeforeMappingOn();
@@ -269,7 +270,6 @@ void Foam::fieldVisualisationBase::setField
             mapper->SetScalarRange(range_.first(), range_.second());
 
             // Set to use either cell or point data
-            vtkPolyData* pData = mapper->GetInput();
             const char* fieldName = colourFieldName.c_str();
             if (pData->GetCellData()->HasArray(fieldName) == 1)
             {
@@ -439,7 +439,7 @@ void Foam::fieldVisualisationBase::addGlyphs
     {
         glyph->Update();
 
-        setField(position, colourFieldName, glyphMapper, renderer);
+        setField(position, colourFieldName, glyphMapper, renderer, data);
 
         glyphMapper->Update();
 
