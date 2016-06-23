@@ -29,6 +29,7 @@ License
 
 // VTK includes
 #include "vtkArrowSource.h"
+#include "vtkCellData.h"
 #include "vtkColorTransferFunction.h"
 #include "vtkFloatArray.h"
 #include "vtkGlyph3D.h"
@@ -136,7 +137,7 @@ void Foam::fieldVisualisationBase::addScalarBar
     vtkLookupTable* lut
 ) const
 {
-    // add scalar bar legend
+    // Add scalar bar legend
     if (!scalarBar_.visible_)
     {
         return;
@@ -149,7 +150,7 @@ void Foam::fieldVisualisationBase::addScalarBar
 
     const vector textColour = colours_["text"]->value(position);
 
-    // workaround to supply our own scalarbar title
+    // Work-around to supply our own scalarbar title
     vtkSmartPointer<vtkTextActor> titleActor =
         vtkSmartPointer<vtkTextActor>::New();
     sbar->SetTitle(" ");
@@ -212,7 +213,7 @@ void Foam::fieldVisualisationBase::addScalarBar
     {
         sbar->SetOrientationToHorizontal();
 
-        // adjustments since not using scalarbar title property
+        // Adjustments since not using scalarbar title property
         sbar->SetWidth(0.75);
         sbar->SetHeight(0.07);
         sbar->SetBarRatio(0.5);
@@ -243,7 +244,8 @@ void Foam::fieldVisualisationBase::setField
     const scalar position,
     const word& colourFieldName,
     vtkPolyDataMapper* mapper,
-    vtkRenderer* renderer
+    vtkRenderer* renderer,
+    vtkPolyData* pData
 ) const
 {
     mapper->InterpolateScalarsBeforeMappingOn();
@@ -257,22 +259,39 @@ void Foam::fieldVisualisationBase::setField
         }
         case cbField:
         {
-            // create look-up table for colours
+            // Create look-up table for colours
             vtkSmartPointer<vtkLookupTable> lut =
                 vtkSmartPointer<vtkLookupTable>::New();
             setColourMap(lut);
             lut->SetVectorMode(vtkScalarsToColors::MAGNITUDE);
 
-            // configure the mapper
+            // Configure the mapper
             mapper->SelectColorArray(colourFieldName.c_str());
             mapper->SetScalarRange(range_.first(), range_.second());
-            mapper->SetScalarModeToUsePointFieldData();
+
+            // Set to use either cell or point data
+            const char* fieldName = colourFieldName.c_str();
+            if (pData->GetCellData()->HasArray(fieldName) == 1)
+            {
+                mapper->SetScalarModeToUseCellFieldData();
+            }
+            else if (pData->GetPointData()->HasArray(fieldName) == 1)
+            {
+                mapper->SetScalarModeToUsePointFieldData();
+            }
+            else
+            {
+                WarningInFunction
+                    << "Unable to determine cell or point data type "
+                    << "- assuming point data";
+                mapper->SetScalarModeToUsePointFieldData();
+            }
 
             mapper->SetColorModeToMapScalars();
             mapper->SetLookupTable(lut);
             mapper->ScalarVisibilityOn();
 
-            // add the bar
+            // Add the bar
             addScalarBar(position, renderer, lut);
             break;
         }
@@ -313,7 +332,7 @@ void Foam::fieldVisualisationBase::addGlyphs
             vtkSmartPointer<vtkSphereSource>::New();
         sphere->SetCenter(0, 0, 0);
         sphere->SetRadius(0.5);
-// setting higher resolution slows the rendering significantly
+// Setting higher resolution slows the rendering significantly
 //        sphere->SetPhiResolution(20);
 //        sphere->SetThetaResolution(20);
 
@@ -323,7 +342,7 @@ void Foam::fieldVisualisationBase::addGlyphs
         {
             double range[2];
 
-// can use values to find range
+// Can use values to find range
 //            vtkDataArray* values =
 //                data->GetPointData()->GetScalars(scaleFieldName.c_str());
 //            values->GetRange(range);
@@ -374,7 +393,7 @@ void Foam::fieldVisualisationBase::addGlyphs
             values->GetRange(range);
 
 /*
-            // attempt to set range for vectors...
+            // Attempt to set range for vectors...
             scalar x0 = sqrt(sqr(range_.first())/3.0);
             scalar x1 = sqrt(sqr(range_.second())/3.0);
             range[0] = x0;
@@ -420,7 +439,7 @@ void Foam::fieldVisualisationBase::addGlyphs
     {
         glyph->Update();
 
-        setField(position, colourFieldName, glyphMapper, renderer);
+        setField(position, colourFieldName, glyphMapper, renderer, data);
 
         glyphMapper->Update();
 

@@ -190,13 +190,20 @@ protected:
 
 public:
 
-    // Member Functions
+    // Static Member Functions
 
         //- True if profiling is active
         static bool active();
 
+        //- Print profiling information to specified output
+        //  Forwards to writeData member of top-level object
+        static bool print(Ostream&);
+
         //- Write profiling information now
         static bool writeNow();
+
+
+    // Member Functions
 
         //- The owner of the profiling
         const Time& owner() const;
@@ -248,7 +255,7 @@ class profiling::Information
         Information* parent_;
 
         //- Nr of times this was called
-        label calls_;
+        long calls_;
 
         //- Total time spent
         scalar totalTime_;
