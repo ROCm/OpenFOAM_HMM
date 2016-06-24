@@ -1,0 +1,90 @@
+#----------------------------------*-sh-*--------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software: you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#
+# File
+#     etc/config.csh/compiler
+#
+# Description
+#     Startup file for custom compiler versions for OpenFOAM
+#     Sourced from OpenFOAM-<VERSION>/etc/config.csh/settings
+#
+#------------------------------------------------------------------------------
+
+switch ("$WM_COMPILER_TYPE")
+case OpenFOAM:
+case ThirdParty:
+    # Default versions of GMP, MPFR and MPC, override as necessary
+    set gmp_version=gmp-system
+    set mpfr_version=mpfr-system
+    set mpc_version=mpc-system
+
+    switch ("$WM_COMPILER")
+    case Gcc:
+    case Gcc48:
+        set gcc_version=gcc-4.8.5
+        breaksw
+    case Gcc45:
+        set gcc_version=gcc-4.5.4
+        breaksw
+    case Gcc46:
+        set gcc_version=gcc-4.6.4
+        breaksw
+    case Gcc47:
+        set gcc_version=gcc-4.7.4
+        breaksw
+    case Gcc49:
+        set gcc_version=gcc-4.9.3
+        breaksw
+    case Gcc51:
+        set gcc_version=gcc-5.1.0
+        breaksw
+    case Gcc52:
+        set gcc_version=gcc-5.2.0
+        breaksw
+    case Gcc53:
+        set gcc_version=gcc-5.3.0
+        breaksw
+    case Gcc54:
+        set gcc_version=gcc-5.4.0
+        breaksw
+    case Gcc61:
+        set gcc_version=gcc-6.1.0
+        breaksw
+    case Clang:
+        # Using clang - not gcc
+        setenv WM_CC 'clang'
+        setenv WM_CXX 'clang++'
+        set clang_version=llvm-3.7.0
+        # set clang_version=llvm-3.8.0
+        breaksw
+    default:
+        echo
+        echo "Warning in $WM_PROJECT_DIR/etc/config.csh/compiler:"
+        echo "    Unknown OpenFOAM compiler type '$WM_COMPILER'"
+        echo "    Please check your settings"
+        echo
+        breaksw
+    endsw
+endsw
+
+#------------------------------------------------------------------------------

@@ -1,32 +1,70 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # Run from this directory
 
+# Optional unit: continue-on-error
+export WM_CONTINUE_ON_ERROR=true
+
 # Parse arguments for library compilation
 targetType=libso
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
-#set -x
 
+#
+# There are several prerequisites for building a plugin
+#
+#set -x
+canBuildPlugin()
+{
+    [ -d "$ParaView_DIR" -a -r "$ParaView_DIR" ] || {
+        echo
+        echo "WARNING: cannot build ParaView plugin(s) without paraview directory"
+        echo "    ParaView_DIR=$ParaView_DIR"
+        echo
+        return 1
+    }
+
+    [ -n "$PV_PLUGIN_PATH" ] || {
+        echo
+        echo "${PWD##*/} : invalid PV_PLUGIN_PATH for building ParaView plugin(s)"
+        echo "    PV_PLUGIN_PATH=${PV_PLUGIN_PATH:-unset}"
+        echo
+        return 1
+    }
+
+    type cmake > /dev/null 2>&1 || {
+        echo
+        echo "WARNING: cannot build ParaView plugin(s) without cmake"
+        echo
+        return 1
+    }
+
+    return 0 # success
+}
+
+
+# -----------------------------------------------------------------------------
 case "$ParaView_VERSION" in
 4* | 5*)
-    if [ -d "$ParaView_DIR" -a -r "$ParaView_DIR" ]
+    if canBuildPlugin
     then
-        [ -n "$PV_PLUGIN_PATH" ] || {
-            echo "$0 : PV_PLUGIN_PATH not valid - it is unset"
-            exit 1
-        }
-
-        # ensure CMake gets the correct C++ compiler
+    (
+        # C++ compiler for CMake
         [ -n "$WM_CXX" ] && export CXX="$WM_CXX"
 
         wmake $targetType vtkPVReaders
         PVblockMeshReader/Allwmake $*
         PVFoamReader/Allwmake $*
-    else
-        echo "ERROR: ParaView not found in $ParaView_DIR"
+
+        # dummy directory to trigger proper 'wclean all' behaviour
+        # - the Allwclean will otherwise not be used
+        mkdir -p Make
+    )
     fi
     ;;
 *)
-    echo "WARN: PV readers not building: ParaView_VERSION=$ParaView_VERSION"
+    echo
+    echo "NOTE: skipping build of ParaView plugin(s)"
+    echo "    different version: ParaView_VERSION=$ParaView_VERSION"
+    echo
     ;;
 esac
 

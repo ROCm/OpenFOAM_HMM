@@ -4,15 +4,21 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Parse arguments for library compilation
 targetType=libso
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
-set -x
 
-wmake $targetType conformalVoronoiMesh
-wmake $targetType conformalVoronoi2DMesh
-wmake foamyQuadMesh
-wmake foamyHexMesh
-#wmake foamyHexMeshBackgroundMesh
-#(cd foamyHexMeshSurfaceSimplify && ./Allwmake)
-#wmake cellSizeAndAlignmentGrid
+if [ -d "$CGAL_ARCH_PATH/include/CGAL" ] || \
+   [ "${CGAL_ARCH_PATH##*-}" = system -a -d /usr/include/CGAL ]
+then
+    set -x
 
+    wmake $targetType conformalVoronoiMesh
+    wmake $targetType conformalVoronoi2DMesh
+    wmake foamyQuadMesh
+    wmake foamyHexMesh
+    # wmake foamyHexMeshBackgroundMesh
+    # (cd foamyHexMeshSurfaceSimplify && ./Allwmake)
+    # wmake cellSizeAndAlignmentGrid
+else
+    echo "WARNING: cannot build ${PWD##*/} without CGAL"
+fi
 
 #------------------------------------------------------------------------------
