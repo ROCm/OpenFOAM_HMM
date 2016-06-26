@@ -71,6 +71,8 @@ Note
 #include "ensightParts.H"
 #include "ensightOutputFunctions.H"
 
+#include "memInfo.H"
+
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -132,6 +134,12 @@ int main(int argc, char *argv[])
     const char* geometryName = "geometry";
 
     #include "setRootCase.H"
+
+    cpuTime timer;
+    memInfo mem;
+    Info<< "Initial memory "
+        << mem.update().size() << " kB" << endl;
+
     #include "createTime.H"
 
     // get times list
@@ -468,11 +476,17 @@ int main(int argc, char *argv[])
             // remember the time index
             cloudTimesUsed[cloudName].append(timeIndex);
         }
+
+        Info<< "Wrote in "
+            << timer.cpuTimeIncrement() << " s, "
+            << mem.update().size() << " kB" << endl;
     }
 
     #include "ensightOutputCase.H"
 
-    Info<< "\nEnd\n"<< endl;
+    Info<< "\nEnd: "
+        << timer.elapsedCpuTime() << " s, "
+        << mem.update().peak() << " kB (peak)\n" << endl;
 
     return 0;
 }
