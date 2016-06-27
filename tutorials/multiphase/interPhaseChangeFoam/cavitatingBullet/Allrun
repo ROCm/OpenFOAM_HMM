@@ -19,6 +19,6 @@ restore0Dir
 runApplication potentialFoam -pName p_rgh
 
 # Run the solver
-runApplication `getApplication`
+runApplication $(getApplication)
 
 #------------------------------------------------------------------------------

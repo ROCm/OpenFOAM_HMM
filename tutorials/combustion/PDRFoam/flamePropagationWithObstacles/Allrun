@@ -13,6 +13,6 @@ runApplication topoSet
 runApplication PDRMesh -overwrite
 
 # Run
-runApplication `getApplication`
+runApplication $(getApplication)
 
 #------------------------------------------------------------------------------

@@ -11,7 +11,7 @@ runApplication topoSet
 runApplication extrudeToRegionMesh -overwrite
 
 # Run
-runApplication `getApplication`
+runApplication $(getApplication)
 
 paraFoam -touchAll
 
