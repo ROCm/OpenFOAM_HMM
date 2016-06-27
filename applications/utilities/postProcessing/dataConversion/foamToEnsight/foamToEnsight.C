@@ -78,6 +78,8 @@ Note
 #include "cellSet.H"
 #include "fvMeshSubset.H"
 
+#include "memInfo.H"
+
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -152,6 +154,11 @@ int main(int argc, char *argv[])
     // Check options
     const bool binary = !args.optionFound("ascii");
     const bool nodeValues = args.optionFound("nodeValues");
+
+    cpuTime timer;
+    memInfo mem;
+    Info<< "Initial memory "
+        << mem.update().size() << " kB" << endl;
 
     #include "createTime.H"
 
@@ -743,6 +750,10 @@ int main(int argc, char *argv[])
                 }
             }
         }
+
+        Info<< "Wrote in "
+            << timer.cpuTimeIncrement() << " s, "
+            << mem.update().size() << " kB" << endl;
     }
 
     #include "ensightCaseTail.H"
@@ -752,7 +763,9 @@ int main(int argc, char *argv[])
         delete ensightCaseFilePtr;
     }
 
-    Info<< "End\n" << endl;
+    Info<< "\nEnd: "
+        << timer.elapsedCpuTime() << " s, "
+        << mem.update().peak() << " kB (peak)\n" << endl;
 
     return 0;
 }

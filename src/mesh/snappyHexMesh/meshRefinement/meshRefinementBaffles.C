@@ -1833,7 +1833,15 @@ bool Foam::meshRefinement::calcRegionToZone
 
         if (regionToCellZone[ownRegion] == -2)
         {
-            if (regionToCellZone[neiRegion] == surfZoneI)
+            if (surfZoneI == -1)
+            {
+                // Special: face is -on faceZone  -not real boundary
+                //          -not on cellZone
+                // so make regions same on either side
+                regionToCellZone[ownRegion] = regionToCellZone[neiRegion];
+                changed = true;
+            }
+            else if (regionToCellZone[neiRegion] == surfZoneI)
             {
                 // Face between unset and my region. Put unset
                 // region into keepRegion
@@ -1854,7 +1862,15 @@ bool Foam::meshRefinement::calcRegionToZone
         }
         else if (regionToCellZone[neiRegion] == -2)
         {
-            if (regionToCellZone[ownRegion] == surfZoneI)
+            if (surfZoneI == -1)
+            {
+                // Special: face is -on faceZone  -not real boundary
+                //          -not on cellZone
+                // so make regions same on either side
+                regionToCellZone[neiRegion] = regionToCellZone[ownRegion];
+                changed = true;
+            }
+            else if (regionToCellZone[ownRegion] == surfZoneI)
             {
                 // Face between unset and my region. Put unset
                 // region into keepRegion
@@ -1881,7 +1897,7 @@ void Foam::meshRefinement::findCellZoneTopo
 (
     const label backgroundZoneID,
     const pointField& locationsInMesh,
-    const labelList& allSurfaceIndex,
+    const labelList& unnamedSurfaceRegion,
     const labelList& namedSurfaceIndex,
     const labelList& surfaceToCellZone,
     labelList& cellToZone
@@ -1914,9 +1930,9 @@ void Foam::meshRefinement::findCellZoneTopo
     // Analyse regions. Reuse regionsplit
     boolList blockedFace(mesh_.nFaces());
 
-    forAll(allSurfaceIndex, faceI)
+    forAll(unnamedSurfaceRegion, faceI)
     {
-        if (allSurfaceIndex[faceI] == -1)
+        if (unnamedSurfaceRegion[faceI] == -1 && namedSurfaceIndex[faceI] == -1)
         {
             blockedFace[faceI] = false;
         }
@@ -2018,7 +2034,7 @@ void Foam::meshRefinement::findCellZoneTopo
             label surfI = namedSurfaceIndex[faceI];
 
             // Connected even if no cellZone defined for surface
-            if (surfI != -1)
+            if (unnamedSurfaceRegion[faceI] == -1 && surfI != -1)
             {
                 // Calculate region to zone from cellRegions on either side
                 // of internal face.
@@ -2058,7 +2074,7 @@ void Foam::meshRefinement::findCellZoneTopo
                     label surfI = namedSurfaceIndex[faceI];
 
                     // Connected even if no cellZone defined for surface
-                    if (surfI != -1)
+                    if (unnamedSurfaceRegion[faceI] == -1 && surfI != -1)
                     {
                         bool changedCell = calcRegionToZone
                         (
@@ -2353,6 +2369,7 @@ void Foam::meshRefinement::zonify
 
 
     labelList namedSurfaces(surfaceZonesInfo::getNamedSurfaces(surfZones));
+    labelList unnamedSurfaces(surfaceZonesInfo::getUnnamedSurfaces(surfZones));
 
     // Get map from surface to cellZone (or -1)
     labelList surfaceToCellZone;
@@ -2379,15 +2396,17 @@ void Foam::meshRefinement::zonify
     // 1. Test all (unnamed & named) surfaces
 
     labelList globalRegion1;
-    labelList globalRegion2;
-    getIntersections
-    (
-        identity(surfaces_.surfaces().size()),  // surfacesToTest,
-        neiCc,
-        intersectedFaces(),     // testFaces
-        globalRegion1,
-        globalRegion2
-    );
+    {
+        labelList globalRegion2;
+        getIntersections
+        (
+            identity(surfaces_.surfaces().size()),  // surfacesToTest,
+            neiCc,
+            intersectedFaces(),     // testFaces
+            globalRegion1,
+            globalRegion2
+        );
+    }
 
     if (namedSurfaces.size())
     {
@@ -2555,12 +2574,25 @@ void Foam::meshRefinement::zonify
         Info<< "Walking from known cellZones; crossing a faceZone "
             << "face changes cellZone" << nl << endl;
 
+        labelList unnamedRegion1;
+        {
+            labelList unnamedRegion2;
+            getIntersections
+            (
+                unnamedSurfaces,
+                neiCc,
+                intersectedFaces(),
+                unnamedRegion1,
+                unnamedRegion2
+            );
+        }
+
         findCellZoneTopo
         (
             backgroundZoneID,
             pointField(0),
-            globalRegion1,      // To split up cells
-            namedSurfaceIndex,  // Step across named surfaces to propagate
+            unnamedRegion1,      // Intersections with unnamed surfaces
+            namedSurfaceIndex,   // Intersections with named surfaces
             surfaceToCellZone,
             cellToZone
         );

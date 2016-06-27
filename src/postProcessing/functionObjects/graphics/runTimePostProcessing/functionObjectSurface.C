@@ -137,7 +137,7 @@ void Foam::functionObjectSurface::addGeometryToScene
                 vtkSmartPointer<vtkPolyDataMapper>::New();
             mapper->SetInputConnection(surf->GetOutputPort());
 
-            setField(position, fieldName_, mapper, renderer);
+            setField(position, fieldName_, mapper, renderer, surf->GetOutput());
 
             surfaceActor_->SetMapper(mapper);
 

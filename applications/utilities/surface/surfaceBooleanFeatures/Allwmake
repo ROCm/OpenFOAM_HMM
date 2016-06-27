@@ -2,14 +2,18 @@
 cd ${0%/*} || exit 1    # Run from this directory
 set -x
 
-if [ -z "$CGAL_ARCH_PATH" ]
+unset COMPILE_FLAGS LINK_FLAGS
+
+if [ -d "$CGAL_ARCH_PATH/include/CGAL" ] || \
+   [ "${CGAL_ARCH_PATH##*-}" = system -a -d /usr/include/CGAL ]
 then
-    export COMPILE_FLAGS="-DNO_CGAL"
-else
     wmake PolyhedronReader
     export COMPILE_FLAGS='-IPolyhedronReader'
     export LINK_FLAGS='${CGAL_LIBS} -lPolyhedronReader'
+else
+    export COMPILE_FLAGS="-DNO_CGAL"
 fi
+
 wmake
 
 # ----------------------------------------------------------------- end-of-file
