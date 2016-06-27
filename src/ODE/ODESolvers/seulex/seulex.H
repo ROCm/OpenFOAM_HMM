@@ -24,6 +24,9 @@ License
 Class
     Foam::seulex
 
+Group
+    grpODESolvers
+
 Description
     An extrapolation-algorithm, based on the linearly implicit Euler method
     with step size control and order selection.

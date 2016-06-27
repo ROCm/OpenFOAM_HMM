@@ -24,6 +24,9 @@ License
 Application
     checkMesh
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Checks validity of a mesh.
 

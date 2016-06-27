@@ -24,6 +24,9 @@ License
 Application
     surfacePatch
 
+Group
+    grpSurfaceUtilities
+
 Description
     Patches (regionises) a surface using a user-selectable method.
 

@@ -24,6 +24,9 @@ License
 Application
     wallShearStress
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates and reports the turbulent wall shear stress for all patches,
     for the specified times.

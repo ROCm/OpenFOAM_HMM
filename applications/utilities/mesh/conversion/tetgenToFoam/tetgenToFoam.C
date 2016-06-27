@@ -24,6 +24,9 @@ License
 Application
     tetgenToFoam
 
+Group
+    grpMeshConversionUtilities
+
 Description
     Converts .ele and .node and .face files, written by tetgen.
 

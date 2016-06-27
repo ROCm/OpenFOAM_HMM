@@ -24,6 +24,9 @@ License
 Application
     pPrime2
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates and writes the scalar field of pPrime2 (sqr(p - pMean)) at
     each time

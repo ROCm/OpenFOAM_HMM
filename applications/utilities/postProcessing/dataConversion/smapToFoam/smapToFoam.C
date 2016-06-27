@@ -24,6 +24,9 @@ License
 Application
     smapToFoam
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Translates a STAR-CD SMAP data file into OpenFOAM field format.
 

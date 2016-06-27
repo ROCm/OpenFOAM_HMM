@@ -24,6 +24,9 @@ License
 Application
     surfaceClean
 
+Group
+    grpSurfaceUtilities
+
 Description
     Utility to clean surfaces.
 

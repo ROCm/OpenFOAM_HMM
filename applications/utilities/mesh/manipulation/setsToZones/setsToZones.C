@@ -24,6 +24,9 @@ License
 Application
     setsToZones
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Add pointZones/faceZones/cellZones to the mesh from similar named
     pointSets/faceSets/cellSets.

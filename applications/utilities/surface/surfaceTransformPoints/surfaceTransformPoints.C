@@ -24,6 +24,9 @@ License
 Application
     surfaceTransformPoints
 
+Group
+    grpSurfaceUtilities
+
 Description
     Transform (scale/rotate) a surface.
     Like transformPoints but for surfaces.

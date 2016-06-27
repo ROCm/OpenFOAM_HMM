@@ -24,6 +24,9 @@ License
 Application
     pdfPlot
 
+Group
+    grpPostProcessingUtilitie
+
 Description
     Generates a graph of a probability distribution function.
 

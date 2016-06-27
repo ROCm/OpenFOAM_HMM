@@ -24,6 +24,9 @@ License
 Application
     foamToVTK
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Legacy VTK file format writer.
 

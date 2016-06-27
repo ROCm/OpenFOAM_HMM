@@ -23,7 +23,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpTurbulence Turbulence
+\defgroup grpTurbulence Turbulence models
 @{
     This group contains turbulence models.
 @}

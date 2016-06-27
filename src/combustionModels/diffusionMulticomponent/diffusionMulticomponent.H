@@ -24,6 +24,9 @@ License
 Class
     Foam::combustionModels::diffusionMulticomponent
 
+Group
+    grpCombustionModels
+
 Description
 
     Diffusion based turbulent combustion model for multicomponent species.

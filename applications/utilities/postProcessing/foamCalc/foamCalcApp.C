@@ -24,6 +24,9 @@ License
 Application
     foamCalc
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Generic wrapper for calculating a quantity at each time.
 

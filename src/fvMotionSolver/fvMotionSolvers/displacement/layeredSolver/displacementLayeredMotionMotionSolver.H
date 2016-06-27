@@ -24,6 +24,9 @@ License
 Class
     Foam::displacementLayeredMotionMotionSolver
 
+Group
+    grpMeshMotionSolvers 
+
 Description
     Mesh motion solver for an (multi-block) extruded fvMesh. Gets given the
     structure of the mesh blocks and boundary conditions on these blocks.

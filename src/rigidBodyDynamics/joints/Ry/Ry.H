@@ -24,6 +24,9 @@ License
 Class
     Foam::RBD::joints::Ry
 
+Group
+    grpRigidBodyDynamicsJoints
+
 Description
     Revolute joint for rotation about the y-axis
 

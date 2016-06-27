@@ -24,6 +24,9 @@ License
 Application
     postChannel
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Post-processes data from channel flow calculations.
 

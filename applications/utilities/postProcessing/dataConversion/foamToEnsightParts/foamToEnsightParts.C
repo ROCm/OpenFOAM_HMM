@@ -24,6 +24,9 @@ License
 Application
     foamToEnsightParts
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Translates OpenFOAM data to Ensight format.
     An Ensight part is created for each cellZone and patch.

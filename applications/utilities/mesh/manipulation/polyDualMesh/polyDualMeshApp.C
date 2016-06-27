@@ -24,6 +24,9 @@ License
 Application
     polyDualMesh
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Calculates the dual of a polyMesh. Adheres to all the feature and patch
     edges.

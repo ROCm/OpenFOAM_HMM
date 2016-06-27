@@ -24,6 +24,9 @@ License
 Application
     writeMeshObj
 
+Group
+    grpMeshConversionUtilities
+
 Description
     For mesh debugging: writes mesh as three separate OBJ files which can
     be viewed with e.g. javaview.

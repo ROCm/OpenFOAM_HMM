@@ -24,6 +24,9 @@ License
 Application
     createTurbulenceFields
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Creates a full set of turbulence fields.
 

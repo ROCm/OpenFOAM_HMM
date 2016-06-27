@@ -24,6 +24,9 @@ License
 Application
     foamToTetDualMesh
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Converts polyMesh results to tetDualMesh.
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::RBD::joints::Py
 
+Group
+    grpRigidBodyDynamicsJoints
+
 Description
     Prismatic joint for translation along the y-axis.
 

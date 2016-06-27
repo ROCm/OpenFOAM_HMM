@@ -24,6 +24,9 @@ License
 Application
     plot3dToFoam
 
+Group
+    grpMeshConversionUtilities
+
 Description
     Plot3d mesh (ascii/formatted format) converter.
 

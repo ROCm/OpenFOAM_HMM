@@ -24,6 +24,9 @@ License
 Application
     snappyRefineMesh
 
+Group
+    grpMeshAdvancedUtilities
+
 Description
     Utility to refine cells near to a surface.
 

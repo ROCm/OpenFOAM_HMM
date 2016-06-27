@@ -24,6 +24,9 @@ License
 Application
     wallHeatFlux
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates and writes the heat flux for all patches as the boundary field
     of a volScalarField and also prints the integrated flux for all wall

@@ -24,6 +24,9 @@ License
 Application
     PDRMesh
 
+Group
+    grpMeshAdvancedUtilities
+
 Description
     Mesh and field preparation utility for PDR type simulations.
 

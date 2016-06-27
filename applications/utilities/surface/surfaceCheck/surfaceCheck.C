@@ -24,6 +24,9 @@ License
 Application
     surfaceCheck
 
+Group
+    grpSurfaceUtilities
+
 Description
     Checks geometric and topological quality of a surface.
 

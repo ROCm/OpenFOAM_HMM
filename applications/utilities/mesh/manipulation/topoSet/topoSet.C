@@ -24,6 +24,9 @@ License
 Application
     topoSet
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Operates on cellSets/faceSets/pointSets through a dictionary.
 

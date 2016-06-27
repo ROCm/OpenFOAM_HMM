@@ -24,6 +24,9 @@ License
 Application
     refineWallLayer
 
+Group
+    grpMeshAdvancedUtilities
+
 Description
     Utility to refine cells next to patches.
 

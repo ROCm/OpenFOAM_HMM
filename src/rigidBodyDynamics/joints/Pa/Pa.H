@@ -24,6 +24,9 @@ License
 Class
     Foam::RBD::joints::Pa
 
+Group
+    grpRigidBodyDynamicsJoints
+
 Description
     Prismatic joint for translation along the specified arbitrary axis.
 

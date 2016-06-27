@@ -24,6 +24,9 @@ License
 Application
     patchAverage
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates the average of the specified field over the specified patch.
 

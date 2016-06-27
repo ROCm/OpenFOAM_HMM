@@ -24,6 +24,9 @@ License
 Class
     Foam::combustionModels::laminar
 
+Group
+    grpCombustionModels
+
 Description
     Laminar combustion model.
 

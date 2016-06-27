@@ -24,6 +24,9 @@ License
 Application
     expandDictionary
 
+Group
+    grpMiscUtilities
+
 Description
     Read the dictionary provided as an argument, expand the macros etc. and
     write the resulting dictionary to standard output.

@@ -24,6 +24,9 @@ License
 Application
     gambitToFoam
 
+Group
+    grpMeshConversionUtilities
+
 Description
     Converts a GAMBIT mesh to OpenFOAM format.
 

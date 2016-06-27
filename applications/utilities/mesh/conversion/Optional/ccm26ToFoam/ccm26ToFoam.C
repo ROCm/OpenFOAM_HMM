@@ -21,6 +21,12 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+    ccm26ToFoam
+
+Group
+    grpMeshConversionUtilities
+
 Description
     Reads CCM files as written by Prostar/ccm using ccm 2.6 (not 2.4)
 

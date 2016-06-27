@@ -24,6 +24,9 @@ License
 Application
     applyBoundaryLayer
 
+Group
+    grpPreProcessingUtilities
+
 Description
     Apply a simplified boundary-layer model to the velocity and
     turbulence fields based on the 1/7th power-law.

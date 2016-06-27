@@ -24,6 +24,9 @@ License
 Application
     wallFunctionTable
 
+Group
+    grpPreProcessingUtilities
+
 Description
     Generates a table suitable for use by tabulated wall functions.
 

@@ -24,6 +24,9 @@ License
 Application
     selectCells
 
+Group
+    grpMeshAdvancedUtilities
+
 Description
     Select cells in relation to surface.
 

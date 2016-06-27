@@ -24,6 +24,9 @@ License
 Class
     Foam::RBD::joints::Ra
 
+Group
+    grpRigidBodyDynamicsJoints
+
 Description
     Revolute joint for rotation about the specified arbitrary axis.
 

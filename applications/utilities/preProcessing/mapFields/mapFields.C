@@ -24,6 +24,9 @@ License
 Application
     mapFields
 
+Group
+    grpPreProcessingUtilities
+
 Description
     Maps volume fields from one mesh to another, reading and
     interpolating all fields present in the time directory of both cases.

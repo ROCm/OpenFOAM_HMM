@@ -24,6 +24,9 @@ License
 Application
     deformedGeom
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Deforms a polyMesh using a displacement field U and a scaling factor
     supplied as an argument.

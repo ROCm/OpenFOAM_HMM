@@ -24,6 +24,9 @@ License
 Application
     surfaceInertia
 
+Group
+    grpSurfaceUtilities
+
 Description
     Calculates the inertia tensor, principal axes and moments of a
     command line specified triSurface.

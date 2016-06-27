@@ -24,6 +24,9 @@ License
 Application
     engineCompRatio
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculate the geometric compression ratio.
 
@@ -83,7 +86,7 @@ int main(int argc, char *argv[])
     Info<< "\nVmax = " << Vmax
         << ", Vmin = " << Vmin << nl
         << "Vmax/Vmin = " << Vmax/Vmin << endl;
-    
+
     Info<< "\nEnd\n" << endl;
 
     return 0;

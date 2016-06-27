@@ -24,6 +24,9 @@ License
 Application
     refinementLevel
 
+Group
+    grpMeshAdvancedUtilities
+
 Description
     Tries to figure out what the refinement level is on refined cartesian
     meshes. Run BEFORE snapping.

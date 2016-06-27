@@ -24,6 +24,9 @@ License
 Application
     setSet
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Manipulate a cell/face/point/ set or zone interactively.
 

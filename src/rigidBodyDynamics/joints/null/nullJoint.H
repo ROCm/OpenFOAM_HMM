@@ -24,6 +24,9 @@ License
 Class
     Foam::RBD::joints::null
 
+Group
+    grpRigidBodyDynamicsJoints
+
 Description
     Null joint for the root-body.
 

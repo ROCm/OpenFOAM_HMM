@@ -24,6 +24,9 @@ License
 Application
     foamUpgradeCyclics
 
+Group
+    grpPreProcessingUtilities
+
 Description
     Tool to upgrade mesh and fields for split cyclics.
 

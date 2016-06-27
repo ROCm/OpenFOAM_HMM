@@ -24,6 +24,9 @@ License
 Application
     boxTurb
 
+Group
+    grpPreProcessingUtilities
+
 Description
     Makes a box of turbulence which conforms to a given energy
     spectrum and is divergence free.

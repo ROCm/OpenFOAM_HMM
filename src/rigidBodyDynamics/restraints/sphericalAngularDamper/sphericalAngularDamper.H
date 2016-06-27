@@ -24,6 +24,9 @@ License
 Class
     Foam::RBD::restraints::sphericalAngularDamper
 
+Group
+    grpRigidBodyDynamicsRestraints
+
 Description
     Spherical angular damper restraint.
     Operates in the local frame of the body.

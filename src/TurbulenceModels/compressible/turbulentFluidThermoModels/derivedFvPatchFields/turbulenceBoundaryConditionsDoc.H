@@ -23,13 +23,13 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpCmpTurbulenceBoundaryConditions Compressible Turbulence BCs
+\defgroup grpCmpTurbulenceBoundaryConditions Boundary conditions
 @{
     \ingroup grpCmpTurbulence
     This group contains compressible turbulence model boundary conditions
 @}
 
-\defgroup grpCmpWallFunctions Compressible turbulence wall functions
+\defgroup grpCmpWallFunctions Wall functions
 @{
     \ingroup grpCmpTurbulenceBoundaryConditions
     This group contains compressible turbulence model wall functions

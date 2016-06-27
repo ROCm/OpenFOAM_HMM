@@ -24,6 +24,9 @@ License
 Class
     Foam::Rosenbrock34
 
+Group
+    grpODESolvers
+
 Description
     L-stable embedded Rosenbrock ODE solver of order (3)4.
 

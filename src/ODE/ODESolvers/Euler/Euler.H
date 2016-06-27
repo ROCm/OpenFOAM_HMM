@@ -24,6 +24,9 @@ License
 Class
     Foam::Euler
 
+Group
+    grpODESolvers
+
 Description
     Euler ODE solver of order (0)1.
 

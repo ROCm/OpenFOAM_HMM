@@ -23,7 +23,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpRASBoundaryConditions RAS boundary conditions
+\defgroup grpRASBoundaryConditions Boundary conditions
 @{
     \ingroup grpRASTurbulence
     This group contains RAS turbulence model boundary conditions

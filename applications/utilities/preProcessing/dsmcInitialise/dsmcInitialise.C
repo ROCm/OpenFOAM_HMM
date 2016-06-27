@@ -24,6 +24,9 @@ License
 Application
     dsmcInitialise
 
+Group
+    grpPreProcessingUtilities
+
 Description
     Initialise a case for dsmcFoam by reading the initialisation dictionary
     system/dsmcInitialise.

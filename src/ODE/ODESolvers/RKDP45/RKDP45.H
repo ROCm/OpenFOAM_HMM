@@ -24,6 +24,9 @@ License
 Class
     Foam::RKDP45
 
+Group
+    grpODESolvers
+
 Description
     4/5th Order Dormand–Prince Runge-Kutta ODE solver.
 

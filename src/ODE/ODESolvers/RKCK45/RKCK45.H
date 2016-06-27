@@ -24,6 +24,9 @@ License
 Class
     Foam::RKCK45
 
+Group
+    grpODESolvers
+
 Description
     4/5th Order Cash-Karp Runge-Kutta ODE solver.
 

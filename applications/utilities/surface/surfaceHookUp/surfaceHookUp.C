@@ -24,6 +24,9 @@ License
 Application
     surfaceHookUp
 
+Group
+    grpSurfaceUtilities
+
 Description
     Find close open edges and stitches the surface along them
 

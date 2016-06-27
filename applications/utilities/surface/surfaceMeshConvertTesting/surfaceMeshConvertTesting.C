@@ -24,6 +24,9 @@ License
 Application
     surfaceMeshConvertTesting
 
+Group
+    grpSurfaceUtilities
+
 Description
     Converts from one surface mesh format to another, but primarily
     used for testing functionality.

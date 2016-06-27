@@ -24,6 +24,9 @@ License
 Application
     foamToTecplot360
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Tecplot binary file format writer.
 

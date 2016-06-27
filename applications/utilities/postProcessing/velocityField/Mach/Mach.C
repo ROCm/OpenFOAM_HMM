@@ -24,6 +24,9 @@ License
 Application
     Mach
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates and optionally writes the local Mach number from the velocity
     field U at each time.

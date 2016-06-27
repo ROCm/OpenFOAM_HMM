@@ -24,6 +24,9 @@ License
 Application
     moveMesh
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Solver for moving meshes.
 

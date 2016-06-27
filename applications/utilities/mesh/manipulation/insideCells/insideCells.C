@@ -24,6 +24,9 @@ License
 Application
     insideCells
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Picks up cells with cell centre 'inside' of surface.
     Requires surface to be closed and singly connected.

@@ -24,6 +24,9 @@ License
 Application
     surfaceConvert
 
+Group
+    grpSurfaceUtilities
+
 Description
     Converts from one surface mesh format to another.
 

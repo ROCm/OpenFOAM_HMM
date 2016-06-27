@@ -24,6 +24,9 @@ License
 Application
     createPatch
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Utility to create patches out of selected boundary faces. Faces come either
     from existing patches or from a faceSet.

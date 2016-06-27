@@ -24,6 +24,9 @@ License
 Class
     Foam::masslessBody
 
+Group
+    grpRigidBodyDynamicsBodies
+
 Description
 
 SourceFiles

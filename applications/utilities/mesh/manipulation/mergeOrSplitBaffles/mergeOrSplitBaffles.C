@@ -24,6 +24,9 @@ License
 Application
     mergeOrSplitBaffles
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Detects faces that share points (baffles). Either merge them or
     duplicate the points.

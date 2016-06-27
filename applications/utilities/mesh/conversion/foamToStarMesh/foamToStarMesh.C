@@ -24,6 +24,9 @@ License
 Application
     foamToStarMesh
 
+Group
+    grpMeshConversionUtilities
+
 Description
     Reads an OpenFOAM mesh and writes a pro-STAR (v4) bnd/cel/vrt format.
 

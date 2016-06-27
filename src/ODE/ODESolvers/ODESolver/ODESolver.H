@@ -24,6 +24,9 @@ License
 Class
     Foam::ODESolver
 
+Group
+    grpODESolvers
+
 Description
     Abstract base-class for ODE system solvers
 
