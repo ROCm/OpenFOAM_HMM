@@ -55,7 +55,7 @@ alias wmSchedOFF='unset WM_SCHEDULER'
 unset foamPV
 foamPV()
 {
-    . $WM_PROJECT_DIR/etc/config.sh/paraview ParaView_VERSION=$1
+    . $WM_PROJECT_DIR/etc/config.sh/paraview ParaView_VERSION=${1:-none}
     echo "paraview-$ParaView_VERSION  (major: $ParaView_MAJOR)" 1>&2
 }
 

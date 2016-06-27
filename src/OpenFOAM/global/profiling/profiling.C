@@ -90,8 +90,6 @@ bool Foam::profiling::writeNow()
 {
     if (pool_)
     {
-        Info<<"profiling::writeNow() at time = "
-            << pool_->owner().timeName() << endl;
         return pool_->write();
     }
     else

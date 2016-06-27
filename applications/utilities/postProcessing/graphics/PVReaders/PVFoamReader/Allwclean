@@ -1,11 +1,19 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # Run from this directory
+
+# Source the wmake functions
+. $WM_DIR/scripts/wmakeFunctions
+
 set -x
 
 # deal with client/server vs combined plugins
 rm -f $FOAM_LIBBIN/libPVFoamReader* 2>/dev/null
 
-rm -rf PVFoamReader/Make
+rm -rf PVFoamReader/Make        # safety: old build location
 wclean libso vtkPVFoam
+
+# Where are the generated files stored?
+findObjectDir $PWD # remove entire top-level
+rm -rf "$objectsDir" > /dev/null 2>&1
 
 #------------------------------------------------------------------------------

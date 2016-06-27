@@ -1104,6 +1104,10 @@ int main(int argc, char *argv[])
                 {
                     const fileName timePath = processorDb.timePath();
 
+                    // If no fields have been decomposed the destination
+                    // directory will not have been created so make sure.
+                    mkDir(timePath);
+
                     if (copyUniform || mesh.distributed())
                     {
                         cp

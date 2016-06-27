@@ -163,6 +163,7 @@ Note
 #include "surfaceMeshWriter.H"
 #include "writeSurfFields.H"
 
+#include "memInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -322,6 +323,12 @@ int main(int argc, char *argv[])
     );
 
     #include "setRootCase.H"
+
+    cpuTime timer;
+    memInfo mem;
+    Info<< "Initial memory "
+        << mem.update().size() << " kB" << endl;
+
     #include "createTime.H"
 
     const bool doWriteInternal = !args.optionFound("noInternal");
@@ -432,9 +439,12 @@ int main(int argc, char *argv[])
 
     mkDir(fvPath);
 
-
     // Mesh wrapper; does subsetting and decomposition
     vtkMesh vMesh(mesh, cellSetName);
+
+    Info<< "VTK mesh topology: "
+        << timer.cpuTimeIncrement() << " s, "
+        << mem.update().size() << " kB" << endl;
 
 
     // Scan for all possible lagrangian clouds
@@ -1245,6 +1255,10 @@ int main(int argc, char *argv[])
                 writer.writeParcelHeader(0);
             }
         }
+
+        Info<< "Wrote in "
+            << timer.cpuTimeIncrement() << " s, "
+            << mem.update().size() << " kB" << endl;
     }
 
 
@@ -1305,7 +1319,9 @@ int main(int argc, char *argv[])
         }
     }
 
-    Info<< "End\n" << endl;
+    Info<< "\nEnd: "
+        << timer.elapsedCpuTime() << " s, "
+        << mem.update().peak() << " kB (peak)\n" << endl;
 
     return 0;
 }

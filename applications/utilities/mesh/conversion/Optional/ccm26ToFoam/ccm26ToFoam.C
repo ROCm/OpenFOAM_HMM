@@ -49,7 +49,7 @@ Description
 #include "SortableList.H"
 #include "cellSet.H"
 
-#include <ccmio.h>
+#include "libccmio/ccmio.h"
 #include <vector>
 
 using namespace Foam;

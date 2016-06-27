@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +39,7 @@ Description
 #include "triSurface.H"
 #include "triSurfaceSearch.H"
 #include "cellSet.H"
+#include "globalMeshData.H"
 
 using namespace Foam;
 
@@ -54,7 +55,6 @@ int main(int argc, char *argv[])
         "Surface must be closed and singly connected."
     );
 
-    argList::noParallel();
     argList::validArgs.append("surfaceFile");
     argList::validArgs.append("cellSet");
 
@@ -87,7 +87,8 @@ int main(int argc, char *argv[])
     }
 
 
-    Info<< "Selected " << insideCells.size() << " of " << mesh.nCells()
+    Info<< "Selected " << returnReduce(insideCells.size(), sumOp<label>())
+        << " of " << mesh.globalData().nTotalCells()
         << " cells" << nl << nl
         << "Writing selected cells to cellSet " << insideCells.name()
         << nl << nl

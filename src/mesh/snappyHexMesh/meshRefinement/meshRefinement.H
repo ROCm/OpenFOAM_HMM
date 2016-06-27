@@ -678,12 +678,14 @@ private:
             ) const;
 
             //- Finds zone per cell. Uses topological walk with all faces
-            //  marked in namedSurfaceIndex regarded as blocked.
+            //  marked in unnamedSurfaceRegion (intersections with unnamed
+            //  surfaces) and namedSurfaceIndex (intersections with named
+            //  surfaces) regarded as blocked.
             void findCellZoneTopo
             (
                 const label backgroundZoneID,
                 const pointField& locationsInMesh,
-                const labelList& allSurfaceIndex,
+                const labelList& unnamedSurfaceRegion,
                 const labelList& namedSurfaceIndex,
                 const labelList& surfaceToCellZone,
                 labelList& cellToZone

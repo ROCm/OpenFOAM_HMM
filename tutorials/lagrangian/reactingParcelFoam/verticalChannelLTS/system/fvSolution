@@ -59,6 +59,12 @@ solvers
         relTol          0.1;
         maxIter         20;
     }
+
+    Phi
+    {
+        $p;
+    }
+
 }
 
 PIMPLE
@@ -76,5 +82,9 @@ PIMPLE
     maxDeltaT       1;
 }
 
+potentialFlow
+{
+    nNonOrthogonalCorrectors 3;
+}
 
 // ************************************************************************* //
