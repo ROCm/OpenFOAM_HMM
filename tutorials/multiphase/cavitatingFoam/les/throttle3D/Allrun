@@ -25,7 +25,7 @@ refineMeshByCellSet()
    done
 }
 
-cp -r 0.org 0
+restore0Dir
 
 runApplication blockMesh
 refineMeshByCellSet 1 2 3

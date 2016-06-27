@@ -10,7 +10,7 @@ application=$(getApplication)
 runApplication blockMesh
 
 # Copy 0.org to 0
-cp -r 0.org 0
+restore0Dir
 
 # Create sets
 runApplication topoSet

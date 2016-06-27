@@ -16,8 +16,8 @@ runApplication snappyHexMesh -overwrite
 runApplication createBaffles -overwrite
 runApplication mergeOrSplitBaffles -split -overwrite
 
-# Copy fields after meshing to avoind the generation of unnecessary patch fields
-\cp -r 0.org 0
+# Copy fields after meshing to avoid the generation of unnecessary patch fields
+restore0Dir
 
 # Initialize alpha
 runApplication setFields
