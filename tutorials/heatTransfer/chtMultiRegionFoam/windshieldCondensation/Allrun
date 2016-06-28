@@ -21,7 +21,6 @@ rm log.topoSet
 runApplication topoSet -region cabin -dict system/topoSetDictRegister
 
 # set the initial fields
-rm -rf 0
-cp -rf 0.org 0
+restore0Dir
 
 runApplication $(getApplication)

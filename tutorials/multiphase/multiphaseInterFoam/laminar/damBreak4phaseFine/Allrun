@@ -5,9 +5,9 @@ cd ${0%/*} || exit 1    # Run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 # Set application name
-application=`getApplication`
+application=$(getApplication)
 
-cp -r 0.org 0
+restore0Dir
 
 runApplication blockMesh
 runApplication setFields

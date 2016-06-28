@@ -1,0 +1,71 @@
+#----------------------------------*-sh-*--------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software: you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#
+# File
+#     etc/config.sh/FFTW
+#
+# Description
+#     Setup file for FFTW include/libraries.
+#     Sourced from OpenFOAM-<VERSION>/etc/cshrc
+#
+#     If using system-wide installations, use the following settings:
+#
+#         fftw_version=fftw-system
+#
+#     If the system fftw is unusable (eg, too old) and you don't
+#     have or want a ThirdParty installation:
+#
+#         fftw_version=fftw-none
+#
+#     If using a central installation, but not located under ThirdParty:
+#         - specify fftw-system
+#         - provide full paths for FFTW_ARCH_PATH
+#
+# Note
+#     When building OpenFOAM, any changes made here MUST be made in the
+#     equivalent config.sh version too, since that is the one which will
+#     be used during the build process.
+#
+#------------------------------------------------------------------------------
+
+set fftw_version=fftw-system
+
+setenv FFTW_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$fftw_version
+
+#------------------------------------------------------------------------------
+if ($?FOAM_VERBOSE && $?prompt) then
+    echo "Using fftw ($fftw_version)  ->  $FFTW_ARCH_PATH"
+endif
+
+# If FFTW_ARCH_PATH does not end with '-system' or '-none',
+# it is either located within ThirdParty, or a central installation
+# outside of ThirdParty and must be added to the lib-path.
+
+set ending="${FFTW_ARCH_PATH:t}"
+if ( "$ending" != "fftw-none" && "$ending" != "fftw-system" ) then
+    _foamAddLib $FFTW_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
+endif
+
+unset fftw_version ending
+
+#------------------------------------------------------------------------------

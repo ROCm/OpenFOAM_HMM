@@ -10,6 +10,6 @@ runApplication topoSet
 runApplication createPatch -overwrite
 
 # Run
-runApplication `getApplication`
+runApplication $(getApplication)
 
 #------------------------------------------------------------------------------

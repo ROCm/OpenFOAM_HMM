@@ -5,10 +5,10 @@ cd ${0%/*} || exit 1    # Run from this directory
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
 # remove old time and post-processing directories
-rm -rf 0 *[1-9]* processor* postProcessing
+\rm -rf 0 *[1-9]* processor* postProcessing
 
-# copy 0.org to 0
-cp -r 0.org 0
+# restore 0/ directory from 0.org/
+\cp -r 0.org 0
 
 cleanCase
 

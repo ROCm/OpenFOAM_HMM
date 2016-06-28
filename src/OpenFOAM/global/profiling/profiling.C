@@ -369,8 +369,10 @@ void Foam::profiling::Information::update(const scalar& elapsed)
 
 bool Foam::profiling::writeData(Ostream& os) const
 {
-    os  << indent << "profiling" << nl
-        << indent << token::BEGIN_LIST << incrIndent << nl;
+    os.beginBlock("profiling") << nl; // FUTURE: without nl
+
+    // Add extra new line between entries
+    label nTrigger = 0;
 
     // write on-stack items
     // newest is first on the stack, top-level is at the end
@@ -382,6 +384,10 @@ bool Foam::profiling::writeData(Ostream& os) const
             const Information *info = *iter;
             scalar elapsed = timers_[info->id()]->elapsedTime();
 
+            if (nTrigger++)
+            {
+                os << nl;
+            }
             info->write(os, true, elapsed, oldElapsed);
             oldElapsed = elapsed;
         }
@@ -406,13 +412,15 @@ bool Foam::profiling::writeData(Ostream& os) const
 
         forAllConstIter(LookupContainer, lookup, iter)
         {
+            if (nTrigger++)
+            {
+                os << nl;
+            }
             iter()->write(os);
         }
     }
 
-    os  << decrIndent
-        << indent << token::END_LIST << token::END_STATEMENT << nl;
-
+    os.endBlock() << nl; // FUTURE: without nl
 
     if (sysInfo_)
     {
@@ -528,8 +536,7 @@ Foam::Ostream& Foam::profiling::Information::write
 {
     // write in dictionary format
 
-    // os.beginBlock("_" + Foam::name(id_)) << nl;
-    os.beginBlock() << nl; // FUTURE: without nl
+    os.beginBlock("trigger" + Foam::name(id_)) << nl; // FUTURE: without nl
 
     // FUTURE: os.writeEntry(key, value);
 
