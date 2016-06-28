@@ -211,6 +211,7 @@ _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/mpi`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/paraview`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/ensight`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/CGAL`
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/FFTW`
 
 
 # Clean environment paths again. Only remove duplicates
