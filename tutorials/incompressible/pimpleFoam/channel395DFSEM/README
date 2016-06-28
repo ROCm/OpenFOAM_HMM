@@ -1,0 +1,18 @@
+Channel test case for ReTau=395,based on the reference:
+
+    Poletto, R., Craft, T., and Revell, A.,
+    "A New Divergence Free Synthetic Eddy Method for the
+    Reproduction of Inlet Flow Conditions for LES",
+    Flow Turbulence Combust (2013) 91:519-539
+
+
+Inlet patch Reynolds stress, velocity and turbulence length scale data has been
+extracted from DNS data of:
+
+    Moser, Kim & Mansour
+    "DNS of Turbulent Channel Flow up to Re_tau=590",
+    Physics of Fluids (1999) vol 11, 943-945.
+
+Data available from (last checked 28 June 2016)
+
+    http://turbulence.ices.utexas.edu/MKM_1999.html
