@@ -76,6 +76,23 @@ void Foam::cachedRandom::randomise01(Type& value)
 
 
 template<class Type>
+void Foam::cachedRandom::shuffle(UList<Type>& values)
+{
+    const label nSample = values.size();
+    label posI = nSample - 1;
+
+    for (label i = 1; i < nSample; i++)
+    {
+        label j = position<label>(0, posI);
+        Type t = values[j];
+        values[j] = values[posI];
+        values[posI] = t;
+        posI--;
+    }
+}
+
+
+template<class Type>
 Type Foam::cachedRandom::globalSample01()
 {
     Type value = -GREAT*pTraits<Type>::one;
