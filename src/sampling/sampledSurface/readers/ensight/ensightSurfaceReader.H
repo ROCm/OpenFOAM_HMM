@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,8 @@ SourceFiles
 #define ensightSurfaceReader_H
 
 #include "surfaceReader.H"
+#include "ensightReadFile.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,6 +55,9 @@ class ensightSurfaceReader
 protected:
 
     // Protected Data
+
+        //- Format flag
+        IOstream::streamFormat streamFormat_;
 
         //- Base directory
         fileName baseDir_;
@@ -81,6 +86,8 @@ protected:
         //- Pointer to the surface
         autoPtr<meshedSurface> surfPtr_;
 
+        List<Tuple2<string, label> > schema_;
+
 
     // Protected Member Functions
 
@@ -92,6 +99,9 @@ protected:
 
         //- Helper function to skip forward n steps in stream
         void skip(const label n, IFstream& is) const;
+
+        //- Read (and throw away) geometry file header
+        void readGeometryHeader(ensightReadFile& is) const;
 
         //- Helper function to return Type after skipping n tokens
         template<class Type>

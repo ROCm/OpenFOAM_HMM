@@ -64,7 +64,8 @@ Foam::tmp<Foam::Field<Type> > Foam::ensightSurfaceReader::readField
     const word indexStr = oss.str();
     fieldFileName.replace("****", indexStr);
 
-    IFstream is(baseDir_/fieldFileName);
+    
+    ensightReadFile is(baseDir_/fieldFileName, streamFormat_);
 
     if (!is.good())
     {
@@ -75,7 +76,9 @@ Foam::tmp<Foam::Field<Type> > Foam::ensightSurfaceReader::readField
     }
 
     // Check that data type is as expected
-    word primitiveType(is);
+    string primitiveType;
+    is.read(primitiveType);
+    
 
     if (debug)
     {
@@ -90,52 +93,66 @@ Foam::tmp<Foam::Field<Type> > Foam::ensightSurfaceReader::readField
             << exit(FatalIOError);
     }
 
-    tmp<Field<Type> > tField(new Field<Type>());
-
-    label n;
-    if (surfPtr_.valid())
-    {
-        n = surfPtr_->size();
-    }
-    else
-    {
-        n = 1000;
-    }
-
-    Type value;
-    word wValue;
+    scalar value;
+    string strValue;
     label iValue;
 
     // Read header info: part index, e.g. part 1
-    is  >> wValue >> iValue;
+    is.read(strValue);
+    is.read(iValue);
 
-    // Read data file
-    // - Assume that file contains a mix of words and numbers, and that all
-    //   numbers relate to face values, e.g. header comprises of words and
-    //   element types are also words, e.g. tria3, quad4, nsided
-    DynamicList<Type> values(n);
-    while (is.good())
+    // Allocate storage for data as a list per component
+    List<DynamicList<scalar> > values(pTraits<Type>::nComponents);
+    label n = surfPtr_->size();
+    forAll(values, cmptI)
     {
-        token t(is);
+        values.setSize(n);
+    }
 
-        if (is.eof())
+    // Read data file using schema generated while reading the surface
+    forAll(schema_, i)
+    {
+        if (debug)
         {
-            break;
+            const string& faceType = schema_[i].first();
+            Info<< "Reading face type " << faceType << " data" << endl;
         }
 
-        if (t.isWord())
+        const label nFace = schema_[i].second();
+
+        if (nFace != 0)
         {
-            wValue = t.wordToken();
-        }
-        else
-        {
-            is.putBack(t);
-            is  >> value;
-            values.append(value);
+            is.read(strValue);
+
+            for
+            (
+                direction cmptI=0;
+                cmptI < pTraits<Type>::nComponents;
+                ++cmptI
+            )
+            {
+                for (label faceI = 0; faceI < nFace; ++faceI)
+                {
+                    is.read(value);
+                    values[cmptI].append(value);
+                }
+            }
         }
     }
 
-    tField().transfer(values);
+    tmp<Field<Type> > tField(new Field<Type>(n, pTraits<Type>::zero));
+    Field<Type>& field = tField.ref();
+
+    for
+    (
+        direction cmptI=0;
+        cmptI < pTraits<Type>::nComponents;
+        ++cmptI
+    )
+    {
+        field.replace(cmptI, values[cmptI]);
+        values[cmptI].clear();
+    }
 
     return tField;
 }
