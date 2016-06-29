@@ -297,13 +297,13 @@ Foam::scalar surfaceNoise::writeSurfaceData
             );
 
             // TODO: Move faceAreas to demand-driven function in MeshedSurface
-            scalarField faceAreas(surf.faces().size());
-            forAll(faceAreas, i)
-            {
-                faceAreas[i] = surf.faces()[i].mag(surf.points());
-            }
-
-//            areaAverage = sum(allData*faceAreas)/sum(faceAreas);
+            // scalarField faceAreas(surf.faces().size());
+            // forAll(faceAreas, i)
+            // {
+            //     faceAreas[i] = surf.faces()[i].mag(surf.points());
+            // }
+            //
+            // areaAverage = sum(allData*faceAreas)/sum(faceAreas);
             areaAverage = sum(allData)/allData.size();
         }
         Pstream::scatter(areaAverage);
@@ -326,13 +326,13 @@ Foam::scalar surfaceNoise::writeSurfaceData
         );
 
         // TODO: Move faceAreas to demand-driven function in MeshedSurface
-        scalarField faceAreas(surf.faces().size());
-        forAll(faceAreas, i)
-        {
-            faceAreas[i] = surf.faces()[i].mag(surf.points());
-        }
-
-//        return sum(data*faceAreas)/sum(faceAreas);
+        // scalarField faceAreas(surf.faces().size());
+        // forAll(faceAreas, i)
+        // {
+        //     faceAreas[i] = surf.faces()[i].mag(surf.points());
+        // }
+        //
+        // return sum(data*faceAreas)/sum(faceAreas);
         return sum(data)/data.size();
     }
 }
