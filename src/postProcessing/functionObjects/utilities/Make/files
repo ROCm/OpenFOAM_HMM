@@ -18,10 +18,8 @@ fluxSummary/fluxSummaryFunctionObject.C
 Lambda2/Lambda2.C
 Lambda2/Lambda2FunctionObject.C
 
-/*
 mapFields/mapFields.C
 mapFields/mapFieldsFunctionObject.C
-*/
 
 Peclet/Peclet.C
 Peclet/PecletFunctionObject.C
