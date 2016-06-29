@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,10 +25,25 @@ Class
     Foam::noiseFFT
 
 Description
-    FFT of the pressure field
+    Performs FFT of pressure field to generate noise data.
+
+    General functionality:
+    - Pf: fft of the pressure data
+    - meanPf: multi-window mean fft
+    - RMSmeanPf: multi-window RMS mean fft
+    - PSDf: multi-window power spectral density (PSD) in frequency domain
+    - PSD: power spectral density in dB/Hz
+    - SPL: sound pressure level in dB
+
+    Octave-based data:
+    - PSD spectrum
+    - SPL spectrum
 
 SourceFiles
     noiseFFT.C
+
+SeeAlso
+    windowModel.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -37,6 +52,7 @@ SourceFiles
 
 #include "scalarField.H"
 #include "graph.H"
+#include "windowModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,7 +60,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class noiseFFT Declaration
+                          Class noiseFFT Declaration
 \*---------------------------------------------------------------------------*/
 
 class noiseFFT
@@ -54,7 +70,18 @@ class noiseFFT
     // Private data
 
         //- Time spacing of the raw data
-        scalar deltat_;
+        scalar deltaT_;
+
+    struct octaveBandInfo
+    {
+        label octave;
+
+        // IDs of bin boundaries in pressure data
+        labelList binIDs;
+
+        // Centre frequencies for each bin
+        scalarField centreFreq;
+    };
 
 
 public:
@@ -81,37 +108,61 @@ public:
 
     // Member Functions
 
-        //- Return the graph of p(t)
+        //- Return the FFT frequencies
+        static tmp<scalarField> frequencies
+        (
+            const label N,
+            const scalar deltaT
+        );
+
+        //- Return the PSD [dB/Hz]
+        //  Input PSD in [Pa^2/Hz]
+        static tmp<scalarField> PSD(const scalarField& PSDf);
+
+        //- Return the SPL [dB]
+        //  Input P(rms)^2 in [Pa^2]
+        static tmp<scalarField> SPL(const scalarField& Prms2);
+
+        //- Return a list of the frequency indices wrt f field that
+        //  correspond to the bands limits for a given octave
+        static void octaveBandInfo
+        (
+            const scalarField& f,
+            const scalar fLower,
+            const scalar fUpper,
+            const scalar octave,
+            labelList& fBandIDs,
+            scalarField& fCentre
+        );
+
+        //- Return the graph of pressure as a function of time
         graph pt() const;
-
-        //- Return the nth window
-        tmp<scalarField> window(const label N, const label n) const;
-
-        //- Return the Hanning window function
-        tmp<scalarField> Hanning(const label N) const;
 
         //- Return the fft of the given pressure data
         tmp<scalarField> Pf(const tmp<scalarField>& pn) const;
 
-        //- Return the multi-window mean fft of the complete pressure data
-        graph meanPf(const label N, const label nw) const;
+        //- Return the multi-window mean fft of the complete pressure data [Pa]
+        graph meanPf(const windowModel& window) const;
 
-        //- Return the multi-window RMS mean fft of the complete pressure data
-        graph RMSmeanPf(const label N, const label nw) const;
+        //- Return the multi-window RMS mean fft of the complete pressure
+        //  data [Pa]
+        graph RMSmeanPf(const windowModel& window) const;
 
-        //- Return the narrow-band PFL (pressure-fluctuation level) spectrum
-        graph Lf(const graph& gPf) const;
+        //- Return the multi-window PSD (power spectral density) of the complete
+        //  pressure data [Pa^2/Hz]
+        graph PSDf(const windowModel& window) const;
 
-        //- Return the one-third-octave-band PFL spectrum
-        //  starting at octave with mean frequency f1
-        graph Ldelta(const graph& gLf, const scalar f1, const scalar fU) const;
+        //- Return the PSD [dB/Hz]
+        //  Takes PSD in [Pa^2/Hz]
+        graph PSD(const graph& gPSDf) const;
 
-        //- Return the one-third-octave-band pressure spectrum
-        //  starting at octave with mean frequency f1
-        graph Pdelta(const graph& gLf, const scalar f1, const scalar fU) const;
-
-        //- Return the total PFL as the sum of Lf over all frequencies
-        scalar Lsum(const graph& gLf) const;
+        //- Generate octave data
+        graph octaves
+        (
+            const graph& g,
+            const labelList& freqBandIDs,
+            bool integrate
+        ) const;
 
         //- Convert the db into Pa
         scalar dbToPa(const scalar db) const;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,61 +21,46 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Global
-    fftRenumber
-
-Description
-    Multi-dimensional renumbering used in the Numerical Recipes
-    fft routine.
-
-SourceFiles
-    fftRenumber.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef fftRenumber_H
-#define fftRenumber_H
-
-#include "complex.H"
-#include "List.H"
-#include "labelList.H"
+#include "uniform.H"
+#include "addToRunTimeSelectionTable.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace windowModels
+{
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(uniform, 0);
+addToRunTimeSelectionTable(windowModel, uniform, dictionary);
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+uniform::uniform(const dictionary& dict, const label nSamples)
+:
+    windowModel(dict, nSamples),
+    value_(readScalar(dict.lookup("value")))
+{
+    scalarField& wf = *this;
+    wf = value_;
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+uniform::~uniform()
+{}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Recursively evaluate the indexing necessary to do the folding of the fft
-// data. We recurse until we have the indexing ncessary for the folding in all
-// directions.
-void fftRenumberRecurse
-(
-    List<complex>& data,
-    List<complex>& renumData,
-    const labelList& nn,
-    label nnprod,
-    label ii,
-    label l1,
-    label l2
-);
-
-
-// Fold the n-d data array to get the fft components in the right places.
-void fftRenumber
-(
-    List<complex>& data,
-    const labelList& nn
-);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+} // End namespace windowModels
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //
