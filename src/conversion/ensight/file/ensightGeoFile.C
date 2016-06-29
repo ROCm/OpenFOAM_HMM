@@ -25,6 +25,8 @@ License
 
 #include "ensightGeoFile.H"
 
+#include "IOstreams.H"
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::ensightGeoFile::initialize()
@@ -74,7 +76,10 @@ Foam::ensightGeoFile::~ensightGeoFile()
 
 Foam::Ostream& Foam::ensightGeoFile::writeKeyword(const keyType& key)
 {
-    write(key); newline();
+    // Note: make sure to hit ensightFile::write(const string&)
+    write(string(key));
+
+    newline();
 
     return *this;
 }

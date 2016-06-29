@@ -144,7 +144,7 @@ public:
         using Ostream::write;
 
         //- Binary write
-        virtual Ostream& write(const char* buf, std::streamsize count);
+        virtual Ostream& write(const char*, std::streamsize count);
 
         //- Write element keyword with trailing newline, optionally with undef
         virtual Ostream& writeKeyword(const keyType&);
@@ -156,19 +156,19 @@ public:
         Ostream& writeUndef();
 
         //- Write C-string as "%79s" or as binary (max 80 chars)
-        Ostream& write(const char* value);
+        Ostream& write(const char*);
 
         //- Write string as "%79s" or as binary (max 80 chars)
-        Ostream& write(const string& value);
+        Ostream& write(const string&);
 
         //- Write integer as "%10d" or as binary
-        Ostream& write(const label value);
+        Ostream& write(const label);
 
         //- Write integer with specified width or as binary
-        Ostream& write(const label value, const label fieldWidth);
+        Ostream& write(const label, const label fieldWidth);
 
         //- Write float as "%12.5e" or as binary
-        Ostream& write(const scalar value);
+        Ostream& write(const scalar);
 
         //- Add carriage return to ascii stream
         void newline();
