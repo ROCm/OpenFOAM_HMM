@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,58 +21,30 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Global
-    fftRenumber
+Typedef
+    Foam::mapFieldsFunctionObject
 
 Description
-    Multi-dimensional renumbering used in the Numerical Recipes
-    fft routine.
+    FunctionObject wrapper around mapFields to allow it to be created
+    via the functions entry within controlDict.
 
 SourceFiles
-    fftRenumber.C
+    mapFieldsFunctionObject.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fftRenumber_H
-#define fftRenumber_H
+#ifndef mapFieldsFunctionObject_H
+#define mapFieldsFunctionObject_H
 
-#include "complex.H"
-#include "List.H"
-#include "labelList.H"
+#include "mapFields.H"
+#include "OutputFilterFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// Recursively evaluate the indexing necessary to do the folding of the fft
-// data. We recurse until we have the indexing ncessary for the folding in all
-// directions.
-void fftRenumberRecurse
-(
-    List<complex>& data,
-    List<complex>& renumData,
-    const labelList& nn,
-    label nnprod,
-    label ii,
-    label l1,
-    label l2
-);
-
-
-// Fold the n-d data array to get the fft components in the right places.
-void fftRenumber
-(
-    List<complex>& data,
-    const labelList& nn
-);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    typedef OutputFilterFunctionObject<mapFieldsFO> mapFieldsFunctionObject;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

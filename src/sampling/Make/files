@@ -51,6 +51,12 @@ $(surfWriters)/starcd/starcdSurfaceWriter.C
 $(surfWriters)/vtk/vtkSurfaceWriter.C
 $(surfWriters)/boundaryData/boundaryDataSurfaceWriter.C
 
+surfReaders = sampledSurface/readers
+
+$(surfReaders)/surfaceReader.C
+$(surfReaders)/surfaceReaderNew.C
+$(surfReaders)/ensight/ensightSurfaceReader.C
+
 graphField/writePatchGraph.C
 graphField/writeCellGraph.C
 graphField/makeGraph.C

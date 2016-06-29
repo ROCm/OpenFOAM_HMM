@@ -182,7 +182,6 @@ Foam::Ostream& Foam::ensightFile::write(const char* value)
     }
 
     return *this;
-
 }
 
 

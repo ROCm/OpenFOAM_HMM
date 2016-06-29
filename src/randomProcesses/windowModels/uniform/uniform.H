@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,83 +22,64 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fft
+    Foam::windowModels::uniform
 
 Description
-    Fast fourier transform using the fftw library.
-
-    The complex transform field is returned in the field supplied.  The
-    direction of transform is supplied as an argument (-1 = forward, 1 =
-    reverse).  The dimensionality and organisation of the array of values
-    in space is supplied in the nn indexing array.
+    A window that applies uniform scaling.
 
 SourceFiles
-    fft.C
+    uniform.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fft_H
-#define fft_H
+#ifndef uniform_H
+#define uniform_H
 
-#include "complexFields.H"
-#include "labelList.H"
+#include "autoPtr.H"
+#include "runTimeSelectionTables.H"
+#include "windowModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-class fft
+namespace windowModels
 {
+
+/*---------------------------------------------------------------------------*\
+                           Class uniform Declaration
+\*---------------------------------------------------------------------------*/
+
+class uniform
+:
+    public windowModel
+{
+
+protected:
+
+    // Protected data
+
+        //- Uniform value
+        scalar value_;
+
 
 public:
 
-    enum transformDirection
-    {
-        FORWARD_TRANSFORM = -1,
-        REVERSE_TRANSFORM = 1
-    };
+    //- Runtime type information
+    TypeName("uniform");
 
 
-    static void transform
-    (
-        complexField& field,
-        const labelList& nn,
-        transformDirection fftDirection
-    );
+    //- Construct from dictionary
+    uniform(const dictionary& dict, const label nSamples);
 
-
-    static tmp<complexField> forwardTransform
-    (
-        const tmp<complexField>& field,
-        const labelList& nn
-    );
-
-
-    static tmp<complexField> reverseTransform
-    (
-        const tmp<complexField>& field,
-        const labelList& nn
-    );
-
-
-    static tmp<complexVectorField> forwardTransform
-    (
-        const tmp<complexVectorField>& field,
-        const labelList& nn
-    );
-
-
-    static tmp<complexVectorField> reverseTransform
-    (
-        const tmp<complexVectorField>& field,
-        const labelList& nn
-    );
+    //- Destuctor
+    virtual ~uniform();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace windowModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

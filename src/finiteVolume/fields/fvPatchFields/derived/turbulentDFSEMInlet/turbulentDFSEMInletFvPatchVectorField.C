@@ -83,7 +83,11 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::writeEddyOBJ() const
     }   
 
     {
-        OFstream os(db().time().path()/"eddies.obj");
+        const Time& time = db().time();
+        OFstream os
+        (
+            time.path()/"eddies_" + Foam::name(time.timeIndex()) + ".obj"
+        );
 
         label pointOffset = 0;
         forAll(eddies_, eddyI)

@@ -1,0 +1,14 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
+if [ -f "$FFTW_ARCH_PATH/include/fftw3.h" ] || \
+   [ "${FFTW_ARCH_PATH##*-}" = system -a -f "/usr/include/fftw3.h" ]
+then
+    wmake
+else
+    echo
+    echo "Skipping boxTurb utility (no FFTW)"
+    echo
+fi
+
+#------------------------------------------------------------------------------
