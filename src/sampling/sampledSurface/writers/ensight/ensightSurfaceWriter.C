@@ -95,14 +95,13 @@ Foam::fileName Foam::ensightSurfaceWriter::write
         mkDir(outputDir);
     }
 
-    // const scalar timeValue = Foam::name(this->mesh().time().timeValue());
     const scalar timeValue = 0.0;
 
     OFstream osCase(outputDir/surfName + ".case");
     ensightGeoFile osGeom
     (
         outputDir,
-        surfName + ".0000.mesh",
+        surfName + ".000000.mesh",
         writeFormat_
     );
 
@@ -124,7 +123,7 @@ Foam::fileName Foam::ensightSurfaceWriter::write
         << "filename start number:         0" << nl
         << "filename increment:            1" << nl
         << "time values:" << nl
-        << timeValue << nl
+        << "    " << timeValue << nl
         << nl;
 
     ensightPartFaces ensPart(0, osGeom.name().name(), points, faces, true);

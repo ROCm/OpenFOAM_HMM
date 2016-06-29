@@ -64,6 +64,7 @@ Foam::fileName Foam::ensightSurfaceWriter::writeUncollated
     // - VAR2/SURF1.0001.VAR2
 
     const fileName baseDir = outputDir/varName;
+    const fileName timeDir = outputDir.name();
 
     if (!isDir(baseDir))
     {
@@ -71,19 +72,19 @@ Foam::fileName Foam::ensightSurfaceWriter::writeUncollated
     }
 
     // const scalar timeValue = Foam::name(this->mesh().time().timeValue());
-    const scalar timeValue = 0.0;
+    const scalar timeValue = readScalar(IStringStream(timeDir)());
 
     OFstream osCase(baseDir/surfName + ".case");
     ensightGeoFile osGeom
     (
         baseDir,
-        surfName + ".0000.mesh",
+        surfName + ".000000.mesh",
         writeFormat_
     );
     ensightFile osField
     (
         baseDir,
-        surfName + ".0000." + varName,
+        surfName + ".000000." + varName,
         writeFormat_
     );
 
@@ -97,22 +98,23 @@ Foam::fileName Foam::ensightSurfaceWriter::writeUncollated
         << "type: ensight gold" << nl
         << nl
         << "GEOMETRY" << nl
-        << "model:        1     " << osGeom.name().name() << nl
+        << "model:  1   " << osGeom.name().name() << nl
         << nl
         << "VARIABLE" << nl
         << ensightPTraits<Type>::typeName << " per "
-        << word(isNodeValues ? "node:" : "element:") << setw(10) << 1
-        << "       " << varName
-        << "       " << surfName.c_str() << ".****." << varName << nl
+        << word(isNodeValues ? "node:" : "element:")
+        << setw(3) << 1
+        << setw(15) << varName
+        << "   " << surfName.c_str() << ".********." << varName << nl
         << nl
         << "TIME" << nl
-        << "time set:                      1" << nl
-        << "number of steps:               1" << nl
-        << "filename start number:         0" << nl
-        << "filename increment:            1" << nl
+        << "time set:               1" << nl
+        << "number of steps:        1" << nl
+        << "filename start number:  0" << nl
+        << "filename increment:     1" << nl
         << "time values:" << nl
-        << timeValue << nl
-        << nl;
+        << "    " << timeValue
+        << nl << nl << "# end" << nl;
 
     ensightPartFaces ensPart(0, osGeom.name().name(), points, faces, true);
     osGeom << ensPart;
@@ -145,13 +147,13 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
     // eg, something like this:
     // - SURF1/SURF1.case
     // - SURF1/SURF1.0000.mesh
-    // - SURF1/SURF1.0001.VAR1
-    // - SURF1/SURF1.0001.VAR2
+    // - SURF1/SURF1/data/0000/VAR1
+    // - SURF1/SURF1/data/0000/VAR2
     // and
     // - SURF2/SURF2.case
     // - SURF2/SURF2.0000.mesh
-    // - SURF2/SURF2.0001.VAR1
-    // - SURF2/SURF2.0001.VAR2
+    // - SURF2/SURF2/data/0000/VAR1
+    // - SURF2/SURF2/data/0000/VAR2
 
     const fileName baseDir = outputDir.path()/surfName;
     const fileName timeDir = outputDir.name();
@@ -162,10 +164,9 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
     }
 
     // surfName already validated
-    const fileName meshFile(baseDir/surfName + ".0000.mesh");
+    const fileName meshFile(baseDir/surfName + ".000000.mesh");
     const scalar timeValue = readScalar(IStringStream(timeDir)());
     label timeIndex = 0;
-
 
     // Do case file
     {
@@ -235,9 +236,11 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
             {
                 Info<< "Writing state file to fieldsDict" << endl;
             }
-            OFstream os(baseDir/"fieldsDict");
-            os << dict;
-
+            {
+                OFstream os(baseDir/"fieldsDict");
+                os << "// summary of ensight times/fields" << nl << nl;
+                dict.write(os, false);
+            }
 
             OFstream osCase(baseDir/surfName + ".case");
 
@@ -251,7 +254,7 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
                 << "type: ensight gold" << nl
                 << nl
                 << "GEOMETRY" << nl
-                << "model:        1     " << meshFile.name() << nl
+                << "model:  1   " << meshFile.name() << nl
                 << nl
                 << "VARIABLE" << nl;
 
@@ -269,30 +272,32 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
                 osCase
                     << fieldType << " per "
                     << word(isNodeValues ? "node:" : "element:")
-                    << setw(10) << 1
+                    << setw(3)  << 1
                     << setw(15) << varName
-                    << "       " << surfName.c_str() << ".****." << varName
+                    << "   data/******/" << varName
                     << nl;
             }
             osCase << nl;
 
             osCase
                 << "TIME" << nl
-                << "time set:                      1" << nl
-                << "number of steps:               " << timeIndex+1 << nl
-                << "filename start number:         0" << nl
-                << "filename increment:            1" << nl
+                << "time set:               1" << nl
+                << "number of steps:        " << timeIndex+1 << nl
+                << "filename start number:  0" << nl
+                << "filename increment:     1" << nl
                 << "time values:" << nl;
+
+            label count = 0;
             forAll(times, timeI)
             {
-                osCase << setw(12) << times[timeI] << " ";
+                osCase << ' ' << setw(12) << times[timeI];
 
-                if (timeI != 0 && (timeI % 6) == 0)
+                if (++count % 6 == 0)
                 {
                     osCase << nl;
                 }
             }
-            osCase << nl;
+            osCase << nl << nl << "# end" << nl;
         }
     }
 
@@ -316,15 +321,20 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
     {
         OStringStream os;
         os.stdStream().fill('0');
-        os << setw(4) << timeIndex;
+        os << setw(6) << timeIndex;
         timeString = os.str();
     }
+
+    fileName dataDir = baseDir/"data"/timeString;
+
+    // as per mkdir -p "data/000000"
+    mkDir(dataDir);
 
     // Write field
     ensightFile osField
     (
-        baseDir,
-        surfName + "." + timeString + "." + varName,
+        dataDir,
+        varName,
         writeFormat_
     );
     if (verbose)
@@ -333,6 +343,14 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
     }
     osField.writeKeyword(ensightPTraits<Type>::typeName);
     ensPart.writeField(osField, values, isNodeValues);
+
+    // place a timestamp in the directory for future reference
+    {
+        OFstream timeStamp(dataDir/"time");
+        timeStamp
+            << "#   timestep time" << nl
+            << dataDir.name() << " " << timeValue << nl;
+    }
 
     return baseDir/surfName + ".case";
 }
