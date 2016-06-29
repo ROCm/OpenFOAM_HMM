@@ -2579,7 +2579,7 @@ int main(int argc, char *argv[])
              || procStat == fvMesh::TOPO_PATCH_CHANGE
             )
             {
-                Info<< "   Detected topology change; reconstructing addressing"
+                Info<< "    Detected topology change; reconstructing addressing"
                     << nl << endl;
 
                 if (baseMeshPtr.valid())
