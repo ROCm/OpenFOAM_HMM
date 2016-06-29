@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    word dictName("noiseDict");
+    fileName dictName(runTime.system()/"noiseDict");
     if (args.optionFound("dict"))
     {
         dictName = args["dict"];
@@ -118,7 +118,6 @@ int main(int argc, char *argv[])
         IOobject
         (
             dictName,
-            runTime.system(),
             runTime,
             IOobject::MUST_READ
         )

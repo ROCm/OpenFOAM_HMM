@@ -37,10 +37,10 @@ Description
     // Must be a power of 2, default = 2^16 (=65536)
     N               4096;
 
-    // Lower frequency bounds 
+    // Lower frequency bounds
     fl              25;
 
-    // Upper frequency bounds 
+    // Upper frequency bounds
     fu              25;
 
     // Start time
@@ -100,17 +100,11 @@ class pointNoise
 
 protected:
 
-    // Protected data
-
-        //- Graph format
-        word graphFormat_;
-
-
     // Protected Member Functions
 
         void filterTimeData
         (
-            const CSV<scalar>& pData,
+            const Function1Types::CSV<scalar>& pData,
             scalarField& t,
             scalarField& p
         );

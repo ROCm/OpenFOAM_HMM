@@ -3,7 +3,6 @@ $(Kmesh)/Kmesh.C
 
 fft = fft
 $(fft)/fft.C
-$(fft)/fftRenumber.C
 $(fft)/calcEk.C
 $(fft)/kShellIntegration.C
 
@@ -26,6 +25,7 @@ windowModels = windowModels
 $(windowModels)/windowModel/windowModel.C
 $(windowModels)/windowModel/windowModelNew.C
 $(windowModels)/Hanning/Hanning.C
+$(windowModels)/uniform/uniform.C
 
 
 LIB = $(FOAM_LIBBIN)/librandomProcesses

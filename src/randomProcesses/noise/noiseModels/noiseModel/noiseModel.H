@@ -30,7 +30,7 @@ Description
     Data is read from a dictionary, e.g.
 
     \verbatim
-    pRef            0;
+    rhoRef          0;
     N               4096;
     fl              25;
     fu              25;
@@ -40,10 +40,12 @@ Description
     where
     \table
         Property    | Description                   | Required  | Default value
-        pRef        | Reference pressure            | no        | 0
+        rhoRef      | Reference density             | no        | 1
         N           | Number of samples in sampling window | no | 65536 (2^16)
         fl          | Lower frequency bounds        | no        | 25
         fu          | Upper frequency bounds        | no        | 10000
+        startTime   | Start time                    | no        | 0
+        graphFormat | Graph format                  | no        | raw
     \endtable
 
 Note
@@ -94,8 +96,8 @@ protected:
         //- Copy of dictionary used for construction
         const dictionary dict_;
 
-        //- Reference pressure
-        scalar pRef_;
+        //- Reference density (to convert from kinematic to static pressure)
+        scalar rhoRef_;
 
         //- Number of samples in sampling window, default = 2^16
         label nSamples_;
@@ -111,7 +113,9 @@ protected:
 
         //- Window model
         autoPtr<windowModel> windowModelPtr_;
-        
+
+        //- Graph format
+        word graphFormat_;
 
 
     // Protected Member Functions

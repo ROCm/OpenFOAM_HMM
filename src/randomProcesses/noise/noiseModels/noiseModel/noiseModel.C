@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,12 +97,13 @@ Foam::label Foam::noiseModel::findStartTimeIndex
 Foam::noiseModel::noiseModel(const dictionary& dict)
 :
     dict_(dict),
-    pRef_(dict.lookupOrDefault("pRef", 0)),
-    nSamples_(dict.lookupOrDefault("N", 65536)),
-    fLower_(dict.lookupOrDefault("fl", 25)),
-    fUpper_(dict.lookupOrDefault("fu", 10000)),
-    startTime_(dict.lookupOrDefault("startTime", 0)),
-    windowModelPtr_(windowModel::New(dict, nSamples_))
+    rhoRef_(dict.lookupOrDefault<scalar>("rhoRef", 1)),
+    nSamples_(dict.lookupOrDefault<label>("N", 65536)),
+    fLower_(dict.lookupOrDefault<scalar>("fl", 25)),
+    fUpper_(dict.lookupOrDefault<scalar>("fu", 10000)),
+    startTime_(dict.lookupOrDefault<scalar>("startTime", 0)),
+    windowModelPtr_(windowModel::New(dict, nSamples_)),
+    graphFormat_(dict.lookupOrDefault<word>("graphFormat", "raw"))
 {
     // Check number of samples  - must be a power of 2 for our FFT
     bool powerOf2 = ((nSamples_ != 0) && !(nSamples_ & (nSamples_ - 1)));

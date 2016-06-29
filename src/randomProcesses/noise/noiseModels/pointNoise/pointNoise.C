@@ -43,7 +43,7 @@ addToRunTimeSelectionTable(noiseModel, pointNoise, dictionary);
 
 void pointNoise::filterTimeData
 (
-    const CSV<scalar>& pData,
+    const Function1Types::CSV<scalar>& pData,
     scalarField& t,
     scalarField& p
 )
@@ -80,12 +80,13 @@ void pointNoise::calculate()
 
     Info<< "Reading data file" << endl;
 
-    CSV<scalar> pData("pressure", dict_, "Data");
-    fileName baseFileName(pData.fName().lessExt());
+    Function1Types::CSV<scalar> pData("pressure", dict_, "Data");
 
     // Time and pressure history data
     scalarField t, p;
     filterTimeData(pData, t, p);
+    p *= rhoRef_;
+
     Info<< "    read " << t.size() << " values" << nl << endl;
 
     Info<< "Creating noise FFT" << endl;
@@ -93,38 +94,94 @@ void pointNoise::calculate()
 
     // Determine the windowing
     windowModelPtr_->validate(t.size());
+    const windowModel& win = windowModelPtr_();
+    const scalar deltaf = 1.0/(deltaT*win.nSamples());
+    fileName outDir(fileName("postProcessing")/"noise"/typeName);
 
     // Create the fft
     noiseFFT nfft(deltaT, p);
 
-    nfft -= pRef_;
 
-    graph Pf(nfft.RMSmeanPf(windowModelPtr_()));
-    Info<< "    Creating graph for " << Pf.title() << endl;
-    Pf.write(baseFileName + graph::wordify(Pf.title()), graphFormat_);
+    // Narrow band data
+    // ----------------
 
-    graph Lf(nfft.Lf(Pf));
-    Info<< "    Creating graph for " << Lf.title() << endl;
-    Lf.write(baseFileName + graph::wordify(Lf.title()), graphFormat_);
+    // RMS pressure [Pa]
+    graph Prmsf(nfft.RMSmeanPf(win));
+    Info<< "    Creating graph for " << Prmsf.title() << endl;
+    Prmsf.write(outDir, graph::wordify(Prmsf.title()), graphFormat_);
 
-    graph PSDf(nfft.PSDf(windowModelPtr_()));
+    // PSD [Pa^2/Hz]
+    graph PSDf(nfft.PSDf(win));
     Info<< "    Creating graph for " << PSDf.title() << endl;
-    PSDf.write(baseFileName + graph::wordify(PSDf.title()), graphFormat_);
+    PSDf.write(outDir, graph::wordify(PSDf.title()), graphFormat_);
 
-    graph PSD(nfft.PSD(PSDf));
-    Info<< "    Creating graph for " << PSD.title() << endl;
-    PSD.write(baseFileName + graph::wordify(PSD.title()), graphFormat_);
+    // PSD [dB/Hz]
+    graph PSDg
+    (
+        "PSD_dB_Hz(f)",
+        "f [Hz]",
+        "PSD(f) [dB_Hz]",
+        Prmsf.x(),
+        noiseFFT::PSD(PSDf.y())
+    );
+    Info<< "    Creating graph for " << PSDg.title() << endl;
+    PSDg.write(outDir, graph::wordify(PSDg.title()), graphFormat_);
+
+    // SPL [dB]
+    graph SPLg
+    (
+        "SPL_dB(f)",
+        "f [Hz]",
+        "SPL(f) [dB]",
+        Prmsf.x(),
+        noiseFFT::SPL(PSDf.y()*deltaf)
+    );
+    Info<< "    Creating graph for " << SPLg.title() << endl;
+    SPLg.write(outDir, graph::wordify(SPLg.title()), graphFormat_);
 
     labelList octave13BandIDs;
-    noiseFFT::octaveFrequenciesIDs(Pf.x(), fLower_, fUpper_, 3, octave13BandIDs);
+    scalarField octave13FreqCentre;
+    noiseFFT::octaveBandInfo
+    (
+        Prmsf.x(),
+        fLower_,
+        fUpper_,
+        3,
+        octave13BandIDs,
+        octave13FreqCentre
+    );
 
-    graph Ldelta(nfft.Ldelta(Lf, octave13BandIDs));
-    Info<< "    Creating graph for " << Ldelta.title() << endl;
-    Ldelta.write(baseFileName + graph::wordify(Ldelta.title()), graphFormat_);
 
-    graph Pdelta(nfft.Pdelta(Pf, octave13BandIDs));
-    Info<< "    Creating graph for " << Pdelta.title() << endl;
-    Pdelta.write(baseFileName + graph::wordify(Pdelta.title()), graphFormat_);
+    // 1/3 octave data
+    // ---------------
+
+    // PSD [Pa^2/Hz]
+    graph PSD13f(nfft.octaves(PSDf, octave13BandIDs, false));
+
+    // Integrated PSD = P(rms)^2 [Pa^2]
+    graph Prms13f2(nfft.octaves(PSDf, octave13BandIDs, true));
+
+    graph PSD13g
+    (
+        "PSD13_dB_Hz(fm)",
+        "fm [Hz]",
+        "PSD(fm) [dB_Hz]",
+        octave13FreqCentre,
+        noiseFFT::PSD(PSD13f.y())
+    );
+    Info<< "    Creating graph for " << PSD13g.title() << endl;
+    PSD13g.write(outDir, graph::wordify(PSD13g.title()), graphFormat_);
+
+    graph SPL13g
+    (
+        "SPL13_dB(fm)",
+        "fm [Hz]",
+        "SPL(fm) [dB]",
+        octave13FreqCentre,
+        noiseFFT::SPL(Prms13f2.y())
+    );
+    Info<< "    Creating graph for " << SPL13g.title() << endl;
+    SPL13g.write(outDir, graph::wordify(SPL13g.title()), graphFormat_);
 }
 
 
@@ -132,8 +189,7 @@ void pointNoise::calculate()
 
 pointNoise::pointNoise(const dictionary& dict)
 :
-    noiseModel(dict),
-    graphFormat_(dict.lookupOrDefault<word>("graphFormat", "raw"))
+    noiseModel(dict)
 {}
 
 

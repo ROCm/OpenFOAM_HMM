@@ -26,9 +26,10 @@ License
 #include "noiseFFT.H"
 #include "IFstream.H"
 #include "DynamicList.H"
-#include "fft.H"
 #include "SubField.H"
 #include "mathematicalConstants.H"
+#include "HashSet.H"
+#include "fft.H"
 
 using namespace Foam::constant;
 
@@ -44,7 +45,7 @@ Foam::tmp<Foam::scalarField> Foam::noiseFFT::frequencies
 )
 {
     tmp<scalarField> tf(new scalarField(N/2, 0));
-    scalarField& f = tf();
+    scalarField& f = tf.ref();
 
     scalar deltaf = 1.0/(N*deltaT);
     forAll(f, i)
@@ -56,70 +57,80 @@ Foam::tmp<Foam::scalarField> Foam::noiseFFT::frequencies
 }
 
 
-void Foam::noiseFFT::octaveFrequenciesIDs
+Foam::tmp<Foam::scalarField> Foam::noiseFFT::PSD(const scalarField& PSDf)
+{
+    return 10*log10(PSDf/sqr(p0));
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::noiseFFT::SPL(const scalarField& Prms2)
+{
+    return 10*log10(Prms2/sqr(p0));
+}
+
+
+void Foam::noiseFFT::octaveBandInfo
 (
     const scalarField& f,
     const scalar fLower,
     const scalar fUpper,
     const scalar octave,
-    labelList& freqBandIDs
+    labelList& fBandIDs,
+    scalarField& fCentre
 )
 {
     // Set the indices of to the lower frequency bands for the input frequency
     // range. Ensure that the centre frequency passes though 1000 Hz
 
     // Low frequency bound given by:
-    //     fLow = f0*(2^(bandI/octave/2))
-    // Centre frequency given by:
-    //     fCentre = f0*(2^(bandI/octave))
+    //     fLow = f0*(2^(0.5*bandI/octave))
 
-    scalar f0 = 1000;
-    scalar minFrequency = max(fLower, min(f));
+    // Initial (lowest centre frequency)
+    scalar fTest = 15.625;
 
-    // Lower frequency band limit
-    label band0Low = ceil(2*octave*log(minFrequency/f0)/log(2.0));
+    const scalar fRatio = pow(2, 1.0/octave);
+    const scalar fRatioL2C = pow(2, 0.5/octave);
 
-    // Centre frequency band limit
-    //label band0Centre = ceil(octave*log(fLower/f0)/log(2.0));
+    // IDs of band IDs
+    labelHashSet bandIDs(f.size());
 
-    scalar fLowerBand = f0*pow(2, band0Low/octave/2);
-    scalar fRatio = pow(2, 1.0/octave);
+    // Centre frequencies
+    DynamicList<scalar> fc;
 
-    bool complete = false;
-    DynamicList<label> bandIDs(f.size());
+    // Convert to lower band limit
+    fTest /= fRatioL2C;
+
     forAll(f, i)
     {
-        while (f[i] >= fLowerBand)
+        if (f[i] >= fTest)
         {
-            bandIDs.append(i);
-            fLowerBand *= fRatio;
-
-            if (fLowerBand > fUpper)
+            // Advance band if appropriate
+            while (f[i] > fTest)
             {
-                complete = true;
+                fTest *= fRatio;
+            }
+            fTest /= fRatio;
+
+            if (bandIDs.insert(i))
+            {
+                // Also store (next) centre frequency
+                fc.append(fTest*fRatioL2C);
+            }
+            fTest *= fRatio;
+
+            if (fTest > fUpper)
+            {
                 break;
             }
         }
-
-        if (complete) break;
     }
 
-    freqBandIDs.transfer(bandIDs);
-}
+    fBandIDs = bandIDs.toc();
 
+    // Remove the last centre frequency (beyond upper frequency limit)
+    fc.remove();
 
-Foam::tmp<Foam::scalarField> Foam::noiseFFT::octaveFrequencies
-(
-    const scalarField& f,
-    const scalar fLower,
-    const scalar fUpper,
-    const scalar octave
-)
-{
-    labelList freqBandIDs;
-    octaveFrequenciesIDs(f, fLower, fUpper, octave, freqBandIDs);
-    tmp<scalarField> tf(new scalarField(f, freqBandIDs));
-    return tf;
+    fCentre.transfer(fc);
 }
 
 
@@ -133,7 +144,10 @@ Foam::noiseFFT::noiseFFT
 :
     scalarField(pressure),
     deltaT_(deltaT)
-{}
+{
+    scalarField& p = *this;
+    p -= average(p);
+}
 
 
 Foam::noiseFFT::noiseFFT(const fileName& pFileName, const label skip)
@@ -191,6 +205,9 @@ Foam::noiseFFT::noiseFFT(const fileName& pFileName, const label skip)
     deltaT_ = (T1 - T0)/pData.size();
 
     this->transfer(pData);
+
+    scalarField& p = *this;
+    p -= average(p);
 }
 
 
@@ -220,6 +237,8 @@ Foam::tmp<Foam::scalarField> Foam::noiseFFT::Pf
     const tmp<scalarField>& tpn
 ) const
 {
+    // Calculate the 2-sided fft
+    // Note: result not scaled
     tmp<scalarField> tPn2
     (
         mag
@@ -234,17 +253,15 @@ Foam::tmp<Foam::scalarField> Foam::noiseFFT::Pf
 
     tpn.clear();
 
+    // Only storing the positive half
+    // Note: storing (N/2) values, DC component at position (0)
     tmp<scalarField> tPn
     (
         new scalarField
         (
-            scalarField::subField(tPn2(), tPn2().size()/2)
+            scalarField::subField(tPn2(), tPn2().size()/2 + 1)
         )
     );
-    scalarField& Pn = tPn();
-
-    Pn *= 2.0/sqrt(scalar(tPn2().size()));
-    Pn[0] /= 2.0;
 
     return tPn;
 }
@@ -255,7 +272,7 @@ Foam::graph Foam::noiseFFT::meanPf(const windowModel& window) const
     const label N = window.nSamples();
     const label nWindow = window.nWindow();
 
-    scalarField meanPf(N/2, 0.0);
+    scalarField meanPf(N/2 + 1, 0.0);
 
     for (label windowI = 0; windowI < nWindow; ++windowI)
     {
@@ -287,14 +304,13 @@ Foam::graph Foam::noiseFFT::RMSmeanPf(const windowModel& window) const
     const label N = window.nSamples();
     const label nWindow = window.nWindow();
 
-    scalarField RMSMeanPf(N/2, 0.0);
-
+    scalarField RMSMeanPf(N/2 + 1, 0.0);
     for (label windowI = 0; windowI < nWindow; ++windowI)
     {
         RMSMeanPf += sqr(Pf(window.apply<scalar>(*this, windowI)));
     }
 
-    RMSMeanPf = sqrt(RMSMeanPf/scalar(nWindow));
+    RMSMeanPf = sqrt(RMSMeanPf/scalar(nWindow))/scalar(N);
 
     scalar deltaf = 1.0/(N*deltaT_);
     scalarField f(RMSMeanPf.size());
@@ -305,9 +321,9 @@ Foam::graph Foam::noiseFFT::RMSmeanPf(const windowModel& window) const
 
     return graph
     (
-        "P(f)",
+        "Prms(f)",
         "f [Hz]",
-        "P(f) [Pa]",
+        "Prms(f) [Pa]",
         f,
         RMSMeanPf
     );
@@ -319,18 +335,29 @@ Foam::graph Foam::noiseFFT::PSDf(const windowModel& window) const
     const label N = window.nSamples();
     const label nWindow = window.nWindow();
 
-    scalarField psd(N/2, 0.0);
+    scalarField psd(N/2 + 1, 0.0);
 
     for (label windowI = 0; windowI < nWindow; ++windowI)
     {
-        psd += 0.5*sqr(Pf(window.apply<scalar>(*this, windowI)));
+        psd += sqr(Pf(window.apply<scalar>(*this, windowI)));
     }
 
     scalar deltaf = 1.0/(N*deltaT_);
+    scalar fs =  1.0/deltaT_;
+    psd /= scalar(nWindow)*fs*N;
 
-    psd /= nWindow*deltaf;
+    // Scaling due to use of 1-sided FFT
+    // Note: do not scale DC component
+    psd *= 2;
+    psd.first() /= 2;
+    psd.last() /= 2;
 
     scalarField f(psd.size());
+
+    if (0) // if (debug)
+    {
+        Pout<< "Average PSD: " << average(psd) << endl;
+    }
 
     forAll(f, i)
     {
@@ -348,156 +375,84 @@ Foam::graph Foam::noiseFFT::PSDf(const windowModel& window) const
 }
 
 
-Foam::graph Foam::noiseFFT::PSD(const graph& gPSD) const
+Foam::graph Foam::noiseFFT::PSD(const graph& gPSDf) const
 {
     return graph
     (
-        "PSD(dB)",
+        "PSD(f)",
         "f [Hz]",
-        "PSD_dB(f) [dB]",
-        gPSD.x(),
-        10*log10(gPSD.y()/sqr(p0))
+        "PSD_dB(f) [dB_Hz]",
+        gPSDf.x(),
+        10*log10(gPSDf.y()/sqr(p0))
     );
 }
 
 
-Foam::graph Foam::noiseFFT::Lf(const graph& gPf) const
-{
-    return graph
-    (
-        "L(f)",
-        "f [Hz]",
-        "L(f) [dB]",
-        gPf.x(),
-        20*log10(gPf.y()/p0)
-    );
-}
-
-
-Foam::graph Foam::noiseFFT::Ldelta
+Foam::graph Foam::noiseFFT::octaves
 (
-    const graph& gLf,
-    const labelList& freqBandIDs
+    const graph& g,
+    const labelList& freqBandIDs,
+    bool integrate
 ) const
 {
     if (freqBandIDs.size() < 2)
     {
         WarningInFunction
             << "Octave frequency bands are not defined "
-            << "- skipping Ldelta calculation"
+            << "- skipping octaves calculation"
             << endl;
 
         return graph
         (
-            "Ldelta",
-            "fm [Hz]",
-            "Ldelta [dB]",
+            "octave",
+            "x",
+            "y",
             scalarField(),
             scalarField()
         );
     }
 
-    const scalarField& f = gLf.x();
-    const scalarField& Lf = gLf.y();
+    const scalarField& f = g.x();
+    const scalarField& data = g.y();
 
-    scalarField ldelta(freqBandIDs.size() - 1, 0.0);
+    scalarField octData(freqBandIDs.size() - 1, 0.0);
     scalarField fm(freqBandIDs.size() -1, 0.0);
 
     for (label bandI = 0; bandI < freqBandIDs.size() - 1; bandI++)
     {
-        label f0 = freqBandIDs[bandI];
-        label f1 = freqBandIDs[bandI+1];
-        fm[bandI] = f[f0];
+        label fb0 = freqBandIDs[bandI];
+        label fb1 = freqBandIDs[bandI+1];
+        fm[bandI] = f[fb0];
 
-        if (f0 == f1) continue;
+        if (fb0 == fb1) continue;
 
-        for (label freqI = f0; freqI < f1; freqI++)
+        if (integrate)
         {
-            ldelta[bandI] += pow(10, Lf[freqI]/10.0);
+            for (label freqI = fb0; freqI < fb1; freqI++)
+            {
+                label f0 = f[freqI];
+                label f1 = f[freqI + 1];
+                scalar dataAve = 0.5*(data[freqI] + data[freqI + 1]);
+                octData[bandI] += dataAve*(f1 - f0);
+            }
         }
-        ldelta[bandI] = 10*log10(ldelta[bandI]);
+        else
+        {
+            for (label freqI = fb0; freqI < fb1; freqI++)
+            {
+                octData[bandI] += data[freqI];
+            }
+        }
     }
 
     return graph
     (
-        "Ldelta",
+        "octaves(f)",
         "fm [Hz]",
-        "Ldelta [dB]",
+        "octave data",
         fm,
-        ldelta
+        octData
     );
-}
-
-
-Foam::graph Foam::noiseFFT::Pdelta
-(
-    const graph& gPf,
-    const labelList& freqBandIDs
-) const
-{
-    if (freqBandIDs.size() < 2)
-    {
-        WarningInFunction
-            << "Octave frequency bands are not defined "
-            << "- skipping Pdelta calculation"
-            << endl;
-
-        return graph
-        (
-            "Pdelta",
-            "fm [Hz]",
-            "Pdelta [dB]",
-            scalarField(),
-            scalarField()
-        );
-    }
-
-    const scalarField& f = gPf.x();
-    const scalarField& Pf = gPf.y();
-
-    scalarField pdelta(freqBandIDs.size() - 1, 0.0);
-    scalarField fm(pdelta.size());
-
-    for (label bandI = 0; bandI < freqBandIDs.size() - 1; bandI++)
-    {
-        label f0 = freqBandIDs[bandI];
-        label f1 = freqBandIDs[bandI+1];
-        fm[bandI] = f[f0];
-
-        if (f0 == f1) continue;
-
-        for (label freqI = f0; freqI < f1; freqI++)
-        {
-            pdelta[bandI] += sqr(Pf[freqI]);
-        }
-        pdelta[bandI] = sqrt((2.0/3.0)*pdelta[bandI]);
-    }
-
-    return graph
-    (
-        "Pdelta",
-        "fm [Hz]",
-        "Pdelta [dB]",
-        fm,
-        pdelta
-    );
-}
-
-
-Foam::scalar Foam::noiseFFT::Lsum(const graph& gLf) const
-{
-    const scalarField& Lf = gLf.y();
-
-    scalar lsum = 0.0;
-
-    forAll(Lf, i)
-    {
-        lsum += pow(10, Lf[i]/10.0);
-    }
-
-    lsum = 10*log10(lsum);
-
-    return lsum;
 }
 
 

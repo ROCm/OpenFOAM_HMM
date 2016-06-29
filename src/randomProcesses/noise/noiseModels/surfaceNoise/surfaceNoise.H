@@ -158,7 +158,8 @@ protected:
         );
 
         //- Write surface data to file
-        void writeSurfaceData
+        //  Returns the area average value
+        scalar writeSurfaceData
         (
             const word& fName,
             const word& groupName,
@@ -168,6 +169,12 @@ protected:
             const labelList& procFaceOffset
         ) const;
 
+        //- Calculate the area average value
+        scalar surfaceAverage
+        (
+            const scalarField& data,
+            const labelList& procFaceOffset
+        ) const;
 
 
 public:
