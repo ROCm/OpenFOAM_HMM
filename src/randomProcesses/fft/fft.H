@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,11 +25,10 @@ Class
     Foam::fft
 
 Description
-    Fast fourier transform derived from the Numerical
-    Recipes in C routine.
+    Fast fourier transform using the fftw library.
 
     The complex transform field is returned in the field supplied.  The
-    direction of transform is supplied as an argument (1 = forward, -1 =
+    direction of transform is supplied as an argument (-1 = forward, 1 =
     reverse).  The dimensionality and organisation of the array of values
     in space is supplied in the nn indexing array.
 
@@ -56,8 +55,8 @@ public:
 
     enum transformDirection
     {
-        FORWARD_TRANSFORM = 1,
-        REVERSE_TRANSFORM = -1
+        FORWARD_TRANSFORM = -1,
+        REVERSE_TRANSFORM = 1
     };
 
 
