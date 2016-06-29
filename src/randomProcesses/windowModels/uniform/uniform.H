@@ -22,36 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::windowModels::Hanning
+    Foam::windowModels::uniform
 
 Description
-    Hanning window
-
-    The window is described by the function
-    \f[
-        wf = (1 - \alpha) - \alpha cos(2 \pi t/m);
-    \f]
-
-    Where:
-    \vartable
-        \alpha  | Coefficient with a default value of 0.5
-        t       | time
-        m       | window width
-    \endvartable
-
-    The window can be further manipulated by the controls:
-    - \c symmetric: force the window to be symmetric
-    - \c extended: extend the window by 1 element at start and end to produce
-      non-zero values at the start and end positions.  Note: window is
-      normalised to preserve energy content
+    A window that applies uniform scaling.
 
 SourceFiles
-    Hanning.C
+    uniform.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Hanning_H
-#define Hanning_H
+#ifndef uniform_H
+#define uniform_H
 
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
@@ -65,51 +47,33 @@ namespace windowModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class Hanning Declaration
+                           Class uniform Declaration
 \*---------------------------------------------------------------------------*/
 
-class Hanning
+class uniform
 :
     public windowModel
 {
 
 protected:
 
-    // Protected Member Data
+    // Protected data
 
-        //- Symmetric switch
-        bool symmetric_;
-
-        //- Extended switch
-        bool extended_;
-
-        //- Window coefficient, default = 0.5
-        scalar alpha_;
+        //- Uniform value
+        scalar value_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("Hanning");
+    TypeName("uniform");
 
 
     //- Construct from dictionary
-    Hanning(const dictionary& dict, const label nSamples);
+    uniform(const dictionary& dict, const label nSamples);
 
     //- Destuctor
-    virtual ~Hanning();
-
-
-    // Public Member Functions
-
-        //- Return the symmetric flag
-        bool symmetric() const;
-
-        //- Return the extended flag
-        bool extended() const;
-
-        //- Return the window coefficient
-        scalar alpha() const;
+    virtual ~uniform();
 };
 
 

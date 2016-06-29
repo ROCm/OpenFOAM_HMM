@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,15 +34,7 @@ Foam::tmp<Foam::Field<Type> > Foam::windowModel::apply
 
     if (nSamples > fld.size())
     {
-        FatalErrorIn
-        (
-            "template<class Type> "
-            "Foam::tmp<Foam::Field<Type> > Foam::windowModel::apply"
-            "("
-                "const Field<Type>&, "
-                "const label"
-            ") const"
-        )
+        FatalErrorInFunction
             << "Number of samples in sampling window is greater than the "
             << "size of the input field" << nl
             << "    input field size       = " << fld.size() << nl
@@ -53,20 +45,12 @@ Foam::tmp<Foam::Field<Type> > Foam::windowModel::apply
 
 
     tmp<Field<Type> > tresult(new Field<Type>(nSamples, pTraits<Type>::zero));
-    Field<Type>& result = tresult();
+    Field<Type>& result = tresult.ref();
 
     label nWindow = nWindowsTotal(fld.size());
     if (windowI >= nWindow)
     {
-        FatalErrorIn
-        (
-            "template<class Type> "
-            "Foam::tmp<Foam::Field<Type> > Foam::windowModel::apply"
-            "("
-                "const Field<Type>&, "
-                "const label"
-            ") const"
-        )
+        FatalErrorInFunction
             << "Requested window " << windowI << " outside of range. "
             << "Number of available windows is " << nWindow
             << abort(FatalError);

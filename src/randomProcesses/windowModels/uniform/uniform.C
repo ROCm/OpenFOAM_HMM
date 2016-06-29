@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Hanning.H"
+#include "uniform.H"
 #include "addToRunTimeSelectionTable.H"
 #include "mathematicalConstants.H"
 
@@ -36,82 +36,26 @@ namespace windowModels
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Hanning, 0);
-addToRunTimeSelectionTable(windowModel, Hanning, dictionary);
+defineTypeNameAndDebug(uniform, 0);
+addToRunTimeSelectionTable(windowModel, uniform, dictionary);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Hanning::Hanning(const dictionary& dict, const label nSamples)
+uniform::uniform(const dictionary& dict, const label nSamples)
 :
     windowModel(dict, nSamples),
-    symmetric_(readBool(dict.lookup("symmetric"))),
-    extended_(readBool(dict.lookup("extended"))),
-    alpha_(dict.lookupOrDefault("alpha", 0.5)) // Hamming = 0.54
+    value_(readScalar(dict.lookup("value")))
 {
-    // Extend range if required
-    label offset = extended_ ? 1 : 0;
-    scalar m = nSamples - 1 + 2*offset;
-    
-    scalarField t(nSamples);
-    forAll(t, i)
-    {
-        t[i] = i + offset;
-    }
-
     scalarField& wf = *this;
-    wf = alpha_ - (1 - alpha_)*cos(constant::mathematical::twoPi*t/m);
-
-    // Reset second half of window if symmetric
-    if (symmetric_)
-    {
-        label midPointI = 0;
-        if (nSamples % 2 == 0)
-        {
-            midPointI = nSamples/2;
-        }
-        else
-        {
-            midPointI = (nSamples + 1)/2;
-        }
-
-        for (label i = 0; i < midPointI; i++)
-        {
-            wf[nSamples - i - 1] = wf[i];
-        }
-    }
-
-    scalar sumSqr = sum(sqr(wf));
-
-    // Normalisation
-    wf *= sqrt(nSamples/sumSqr);
+    wf = value_;
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Hanning::~Hanning()
+uniform::~uniform()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Hanning::symmetric() const
-{
-    return symmetric_;
-}
-
-
-bool Hanning::extended() const
-{
-    return extended_;
-}
-
-
-Foam::scalar Hanning::alpha() const
-{
-    return alpha_;
-}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
