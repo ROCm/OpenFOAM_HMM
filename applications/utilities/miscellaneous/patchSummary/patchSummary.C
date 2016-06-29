@@ -24,6 +24,9 @@ License
 Application
     patchSummary
 
+Group
+    grpMiscUtilities
+
 Description
     Writes fields and boundary condition info for each patch at each requested
     time instance.

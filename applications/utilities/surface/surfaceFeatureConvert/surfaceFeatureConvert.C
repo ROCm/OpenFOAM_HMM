@@ -24,6 +24,9 @@ License
 Application
     surfaceFeatureConvert
 
+Group
+    grpSurfaceUtilities
+
 Description
     Convert between edgeMesh formats.
 

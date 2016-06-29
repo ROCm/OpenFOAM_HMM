@@ -24,6 +24,9 @@ License
 Application
     surfaceRedistributePar
 
+Group
+    grpSurfaceUtilities
+
 Description
     (Re)distribution of triSurface. Either takes an undecomposed surface
     or an already decomposed surface and redistributes it so that each

@@ -24,6 +24,9 @@ License
 Application
     modifyMesh
 
+Group
+    grpMeshAdvancedUtilities
+
 Description
     Manipulates mesh elements.
 

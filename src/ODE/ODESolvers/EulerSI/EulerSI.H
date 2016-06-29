@@ -24,6 +24,9 @@ License
 Class
     Foam::EulerSI
 
+Group
+    grpODESolvers
+
 Description
     Semi-implicit Euler ODE solver of order (0)1.
 

@@ -24,6 +24,9 @@ License
 Application
     execFlowFunctionObjects
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Execute the set of functionObjects specified in the selected dictionary
     (which defaults to system/controlDict) for the selected set of times.

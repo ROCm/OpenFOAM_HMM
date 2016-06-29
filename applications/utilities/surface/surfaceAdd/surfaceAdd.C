@@ -24,6 +24,9 @@ License
 Application
     surfaceAdd
 
+Group
+    grpSurfaceUtilities
+
 Description
     Add two surfaces. Does geometric merge on points. Does not check for
     overlapping/intersecting triangles.

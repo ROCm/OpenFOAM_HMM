@@ -24,6 +24,9 @@ License
 Application
     decomposePar
 
+Group
+    grpParallelUtilities
+
 Description
     Automatically decomposes a mesh and fields of a case for parallel
     execution of OpenFOAM.

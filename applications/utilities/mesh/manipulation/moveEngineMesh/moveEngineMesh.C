@@ -24,6 +24,9 @@ License
 Application
     moveEngineMesh
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Solver for moving meshes for engine calculations.
 

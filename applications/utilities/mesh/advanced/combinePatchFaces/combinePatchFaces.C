@@ -24,6 +24,9 @@ License
 Application
     combinePatchFaces
 
+Group
+    grpMeshAdvancedUtilities
+
 Description
     Checks for multiple patch faces on same cell and combines them.
     Multiple patch faces can result from e.g. removal of refined

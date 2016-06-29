@@ -24,6 +24,9 @@ License
 Application
     ideasUnvToFoam
 
+Group
+    grpMeshConversionUtilities
+
 Description
     I-Deas unv format mesh conversion.
 

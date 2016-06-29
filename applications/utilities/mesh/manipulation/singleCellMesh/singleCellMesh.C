@@ -24,6 +24,9 @@ License
 Application
     singleCellMesh
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Reads all fields and maps them to a mesh with all internal faces removed
     (singleCellFvMesh) which gets written to region "singleCell".

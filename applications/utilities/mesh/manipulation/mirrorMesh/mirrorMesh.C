@@ -24,6 +24,9 @@ License
 Application
     mirrorMesh
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Mirrors a mesh around a given plane.
 

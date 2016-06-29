@@ -24,6 +24,9 @@ License
 Application
     Pe
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates the Peclet number Pe from the flux phi and writes the maximum
     value, the surfaceScalarField Pef and volScalarField Pe.

@@ -24,6 +24,9 @@ License
 Application
     R
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates and writes the Reynolds stress R for the current time step.
 

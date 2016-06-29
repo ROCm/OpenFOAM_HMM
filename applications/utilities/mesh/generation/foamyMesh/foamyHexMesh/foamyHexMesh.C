@@ -24,6 +24,9 @@ License
 Application
     foamyHexMesh
 
+Group
+    grpMeshGenerationUtilities
+
 Description
     Conformal Voronoi automatic mesh generator
 

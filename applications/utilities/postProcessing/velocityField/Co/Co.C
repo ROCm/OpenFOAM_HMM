@@ -24,6 +24,9 @@ License
 Application
     Co
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates and writes the Co number as a volScalarField obtained
     from field phi.

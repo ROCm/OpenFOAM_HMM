@@ -24,6 +24,9 @@ License
 Application
     surfaceSubset
 
+Group
+    grpSurfaceUtilities
+
 Description
     A surface analysis tool which sub-sets the triSurface
     to choose only a part of interest. Based on subsetMesh.

@@ -24,6 +24,9 @@ License
 Application
     extrudeMesh
 
+Group
+    grpMeshGenerationUtilities
+
 Description
     Extrude mesh from existing patch (by default outwards facing normals;
     optional flips faces) or from patch read from file.

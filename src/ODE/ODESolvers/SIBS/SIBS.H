@@ -24,6 +24,9 @@ License
 Class
     Foam::SIBS
 
+Group
+    grpODESolvers
+
 Description
     Foam::SIBS
 

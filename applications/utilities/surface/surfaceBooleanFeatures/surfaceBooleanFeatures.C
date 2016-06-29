@@ -24,6 +24,9 @@ License
 Application
     surfaceBooleanFeatures
 
+Group
+    grpSurfaceUtilities
+
 Description
     Generates the extendedFeatureEdgeMesh for the interface between a boolean
     operation on two surfaces.

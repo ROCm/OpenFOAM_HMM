@@ -24,6 +24,9 @@ License
 Application
     wdot
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates and writes wdot for each time.
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -143,6 +143,10 @@ public:
                 template<class Type>
                 void randomise01(Type& value);
 
+                //- Shuffle the values in the list
+                template<class Type>
+                void shuffle(UList<Type>& values);
+
 
             // Global random numbers - consistent across all processors
 
@@ -224,7 +228,7 @@ label cachedRandom::globalPosition<label>(const label& start, const label& end);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "cachedRandomTemplates.C"
+#   include "cachedRandomTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

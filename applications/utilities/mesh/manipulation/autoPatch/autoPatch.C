@@ -24,6 +24,9 @@ License
 Application
     autoPatch
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Divides external faces into patches based on (user supplied) feature
     angle.

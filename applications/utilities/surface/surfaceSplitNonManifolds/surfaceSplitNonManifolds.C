@@ -24,6 +24,9 @@ License
 Application
     surfaceSplitNonManifolds
 
+Group
+    grpSurfaceUtilities
+
 Description
     Takes multiply connected surface and tries to split surface at
     multiply connected edges by duplicating points.

@@ -24,6 +24,9 @@ License
 Application
     foamToEnsight
 
+Group
+    grpPostProcessingUtilitie
+
 Description
     Translates OpenFOAM data to EnSight format.
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::RBD::joints::Px
 
+Group
+    grpRigidBodyDynamicsJoints
+
 Description
     Prismatic joint for translation along the x-axis.
 

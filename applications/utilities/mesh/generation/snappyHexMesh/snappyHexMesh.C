@@ -24,6 +24,9 @@ License
 Application
     snappyHexMesh
 
+Group
+    grpMeshGenerationUtilities
+
 Description
     Automatic split hex mesher. Refines and snaps to surface.
 

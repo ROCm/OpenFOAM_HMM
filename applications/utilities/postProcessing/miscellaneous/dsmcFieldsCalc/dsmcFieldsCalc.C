@@ -24,6 +24,9 @@ License
 Application
     dsmcFieldsCalc
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculate intensive fields (U and T) from averaged extensive fields from a
     DSMC calculation.

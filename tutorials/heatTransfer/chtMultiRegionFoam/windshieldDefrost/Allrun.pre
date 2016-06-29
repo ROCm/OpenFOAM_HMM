@@ -17,5 +17,4 @@ runApplication subsetMesh c0 -patch walls -overwrite
 runApplication splitMeshRegions -cellZones -overwrite
 
 # set the initial fields
-rm -rf 0
-cp -rf 0.org 0
+restore0Dir

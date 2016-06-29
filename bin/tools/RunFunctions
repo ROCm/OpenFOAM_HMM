@@ -41,7 +41,7 @@ isTest()
 
 getNumberOfProcessors()
 {
-    if [ -f $1 ]
+    if [ -f "$1" ]
     then
         expandDictionary $1 | sed -ne 's/^numberOfSubdomains\s*\(.*\);/\1/p'
     fi
@@ -166,7 +166,7 @@ compileApplication()
 
 cloneCase()
 {
-    if [ -d $2 ]
+    if [ -d "$2" ]
     then
         echo "Case already cloned: remove case directory $2 to clone"
     else
@@ -175,8 +175,21 @@ cloneCase()
         cpfiles="0 system constant"
         for f in $cpfiles
         do
-            cp -r $1/$f $2
+            \cp -r $1/$f $2
         done
+    fi
+}
+
+# Overwrite 0/ with the contents of 0.org/ if it exists
+restore0Dir()
+{
+    echo "Restore 0/ from 0.org/"
+    if [ -d 0.org ]
+    then
+        \rm -rf 0
+        \cp -r 0.org 0 > /dev/null 2>&1
+    else
+        echo "    Warning: no 0.org/ found"
     fi
 }
 

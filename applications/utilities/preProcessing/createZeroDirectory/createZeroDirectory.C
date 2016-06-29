@@ -24,6 +24,9 @@ License
 Application
     createZeroDirectory
 
+Group
+    grpPreProcessingUtilities
+
 Description
     Creates a zero directory with fields appropriate for the chosen solver and
     turbulence model. Operates on both single and multi-region cases.

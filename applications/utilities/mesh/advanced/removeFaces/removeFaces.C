@@ -24,6 +24,9 @@ License
 Application
     removeFaces
 
+Group
+    grpMeshAdvancedUtilities
+
 Description
     Utility to remove faces (combines cells on both sides).
 

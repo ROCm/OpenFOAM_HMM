@@ -24,6 +24,9 @@ License
 Application
     zipUpMesh
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Reads in a mesh with hanging vertices and zips up the cells to guarantee
     that all polyhedral cells of valid shape are closed.

@@ -24,6 +24,9 @@ License
 Application
     cfx4ToFoam
 
+Group
+    grpMeshConversionUtilities
+
 Description
     Converts a CFX 4 mesh to OpenFOAM format.
 

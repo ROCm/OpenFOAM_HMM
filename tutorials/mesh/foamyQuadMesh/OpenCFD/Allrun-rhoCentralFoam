@@ -4,8 +4,8 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
-cp system/controlDict.rhoCentralFoam system/controlDict
-cp -r 0.org 0
+\cp system/controlDict.rhoCentralFoam system/controlDict
+restore0Dir
 
 runApplication decomposePar
 runParallel rhoCentralFoam

@@ -24,6 +24,9 @@ License
 Application
     Lambda2
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates and writes the second largest eigenvalue of the sum of the
     square of the symmetrical and anti-symmetrical parts of the velocity

@@ -24,6 +24,9 @@ License
 Application
     redistributePar
 
+Group
+    grpParallelUtilities
+
 Description
     Redistributes existing decomposed mesh and fields according to the current
     settings in the decomposeParDict file.

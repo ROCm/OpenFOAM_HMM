@@ -24,6 +24,9 @@ License
 Application
     surfaceLambdaMuSmooth
 
+Group
+    grpSurfaceUtilities
+
 Description
     Smooths a surface using lambda/mu smoothing.
 

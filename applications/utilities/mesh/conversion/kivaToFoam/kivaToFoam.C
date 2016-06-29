@@ -24,6 +24,9 @@ License
 Application
     kivaToFoam
 
+Group
+    grpMeshConversionUtilities
+
 Description
     Converts a KIVA3v grid to OpenFOAM format.
 

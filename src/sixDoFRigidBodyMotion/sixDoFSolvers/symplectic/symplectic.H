@@ -24,6 +24,9 @@ License
 Class
     Foam::sixDoFSolvers::symplectic
 
+Group
+    grpSixDoFRigidBodySolvers
+
 Description
     Symplectic 2nd-order explicit time-integrator for 6DoF solid-body motion.
 

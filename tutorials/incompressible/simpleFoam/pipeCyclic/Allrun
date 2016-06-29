@@ -5,12 +5,13 @@ cd ${0%/*} || exit 1    # Run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 # Get application directory
-application=`getApplication`
+application=$(getApplication)
 
 runApplication blockMesh
 runApplication topoSet
 runApplication refineHexMesh c0 -overwrite
-cp -r 0.org 0
+
+restore0Dir
 
 #runApplication $application
 runApplication decomposePar -cellDist

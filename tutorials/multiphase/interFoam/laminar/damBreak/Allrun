@@ -34,12 +34,12 @@ cloneCase damBreak damBreakFine
 
     # Modify case
     setDamBreakFine
-    cp ../damBreak/0/alpha.water.org 0/alpha.water
+    \cp ../damBreak/0/alpha.water.org 0/alpha.water
     # And execute
     runApplication blockMesh
     runApplication setFields
     runApplication decomposePar
-    runParallel `getApplication`
+    runParallel $(getApplication)
     runApplication reconstructPar
 )
 

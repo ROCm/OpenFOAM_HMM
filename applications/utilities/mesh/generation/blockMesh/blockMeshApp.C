@@ -24,6 +24,9 @@ License
 Application
     blockMesh
 
+Group
+    grpMeshGenerationUtilities
+
 Description
     A multi-block mesh generator.
 

@@ -24,6 +24,9 @@ License
 Application
     refineHexMesh
 
+Group
+    grpMeshAdvancedUtilities
+
 Description
     Refines a hex mesh by 2x2x2 cell splitting.
 

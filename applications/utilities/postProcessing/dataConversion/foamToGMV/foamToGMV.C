@@ -24,6 +24,9 @@ License
 Application
     foamToGMV
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Translates foam output to GMV readable files.
 

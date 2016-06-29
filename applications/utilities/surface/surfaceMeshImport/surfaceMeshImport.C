@@ -24,6 +24,9 @@ License
 Application
     surfaceMeshImport
 
+Group
+    grpSurfaceUtilities
+
 Description
     Import from various third-party surface formats into surfMesh
     with optional scaling or transformations (rotate/translate)

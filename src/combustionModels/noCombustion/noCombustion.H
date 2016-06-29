@@ -24,6 +24,9 @@ License
 Class
     Foam::combustionModels::noCombustion
 
+Group
+    grpCombustionModels
+
 Description
     Dummy combustion model for 'no combustion'
 

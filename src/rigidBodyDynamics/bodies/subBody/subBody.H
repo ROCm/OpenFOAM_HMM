@@ -24,6 +24,9 @@ License
 Class
     Foam::subBody
 
+Group
+    grpRigidBodyDynamicsBodies
+
 Description
     This specialized rigidBody holds the original body after it has been merged
     into a master.

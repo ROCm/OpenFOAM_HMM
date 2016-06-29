@@ -24,6 +24,9 @@ License
 Application
     splitCells
 
+Group
+    grpMeshAdvancedUtilities
+
 Description
     Utility to split cells with flat faces.
 

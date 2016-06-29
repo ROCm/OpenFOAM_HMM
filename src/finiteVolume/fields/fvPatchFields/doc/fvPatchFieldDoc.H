@@ -23,7 +23,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpBoundaryConditions Boundary Conditions
+\defgroup grpBoundaryConditions Boundary conditions
 @{
     This group contains OpenFOAM boundary condition types.  All conditions
     are derived from the base Foam::fvPatchField class.  Patch values are
@@ -38,38 +38,38 @@ License
     of the matrix solve, via a call to \<field\>.correctBoundaryConditions().
 @}
 
-\defgroup grpConstraintBoundaryConditions Constraint boundary Conditions
+\defgroup grpConstraintBoundaryConditions Constraint
 @{
     \ingroup grpBoundaryConditions
     This group contains constraint boundary condition types.  These conditions
     are mainly employed to reduced dimensioned cases.
 @}
 
-\defgroup grpInletBoundaryConditions Inlet boundary Conditions
+\defgroup grpInletBoundaryConditions Inlet
 @{
     \ingroup grpBoundaryConditions
     This group contains inlet boundary condition types
 @}
 
-\defgroup grpOutletBoundaryConditions Outlet boundary Conditions
+\defgroup grpOutletBoundaryConditions Outlet
 @{
     \ingroup grpBoundaryConditions
     This group contains outlet boundary condition types
 @}
 
-\defgroup grpGenericBoundaryConditions Generic boundary Conditions
+\defgroup grpGenericBoundaryConditions Generic
 @{
     \ingroup grpBoundaryConditions
     This group contains generic boundary condition types
 @}
 
-\defgroup grpCoupledBoundaryConditions Coupled boundary Conditions
+\defgroup grpCoupledBoundaryConditions Coupled
 @{
     \ingroup grpBoundaryConditions
     This group contains coupled boundary condition types
 @}
 
-\defgroup grpWallBoundaryConditions Wall boundary Conditions
+\defgroup grpWallBoundaryConditions Wall
 @{
     \ingroup grpBoundaryConditions
     This group contains wall boundary condition types

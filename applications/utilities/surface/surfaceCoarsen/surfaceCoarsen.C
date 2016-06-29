@@ -24,6 +24,9 @@ License
 Application
     surfaceCoarsen
 
+Group
+    grpSurfaceUtilities
+
 Description
     Surface coarsening using `bunnylod'
 

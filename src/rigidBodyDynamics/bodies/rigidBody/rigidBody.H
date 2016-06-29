@@ -24,6 +24,9 @@ License
 Class
     Foam::RBD::rigidBody
 
+Group
+    grpRigidBodyDynamicsBodies
+
 Description
 
 SourceFiles

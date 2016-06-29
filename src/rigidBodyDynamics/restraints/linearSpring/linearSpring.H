@@ -24,6 +24,9 @@ License
 Class
     Foam::RBD::restraints::linearSpring
 
+Group
+    grpRigidBodyDynamicsRestraints
+
 Description
     Linear spring restraint.
 

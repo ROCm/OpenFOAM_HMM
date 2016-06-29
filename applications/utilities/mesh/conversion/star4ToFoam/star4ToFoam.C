@@ -24,6 +24,9 @@ License
 Application
     star4ToFoam
 
+Group
+    grpMeshConversionUtilities
+
 Description
     Converts a Star-CD (v4) pro-STAR mesh into OpenFOAM format.
 

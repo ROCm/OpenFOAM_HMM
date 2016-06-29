@@ -24,6 +24,9 @@ License
 Application
     surfaceRefineRedGreen
 
+Group
+    grpSurfaceUtilities
+
 Description
     Refine by splitting all three edges of triangle ('red' refinement).
 

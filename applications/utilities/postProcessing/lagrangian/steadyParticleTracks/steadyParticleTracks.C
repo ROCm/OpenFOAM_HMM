@@ -24,6 +24,10 @@ License
 Application
     steadyParticleTracks
 
+Group
+    grpPostProcessingUtilitie
+
+
 Description
     Generates a VTK file of particle tracks for cases that were computed using
     a steady-state cloud

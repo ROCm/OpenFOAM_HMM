@@ -24,6 +24,9 @@ License
 Application
     noise
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Utility to perform noise analysis of pressure data using the noiseFFT
     library.

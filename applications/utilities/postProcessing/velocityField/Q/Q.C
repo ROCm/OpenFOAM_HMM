@@ -24,6 +24,9 @@ License
 Application
     Q
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates and writes the second invariant of the velocity gradient tensor.
 

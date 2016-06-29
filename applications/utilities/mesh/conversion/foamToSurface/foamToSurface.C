@@ -24,6 +24,9 @@ License
 Application
     foamToSurface
 
+Group
+    grpMeshConversionUtilities
+
 Description
     Reads an OpenFOAM mesh and writes the boundaries in a surface format.
 

@@ -24,6 +24,9 @@ License
 Application
     attachMesh
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Attach topologically detached mesh using prescribed mesh modifiers.
 

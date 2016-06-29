@@ -24,6 +24,9 @@ License
 Application
     surfaceMeshConvert
 
+Group
+    grpSurfaceUtilities
+
 Description
     Converts between surface formats with optional scaling or
     transformations (rotate/translate) on a coordinateSystem.

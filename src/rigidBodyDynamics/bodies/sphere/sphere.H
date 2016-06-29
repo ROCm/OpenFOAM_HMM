@@ -24,6 +24,9 @@ License
 Class
     Foam::sphere
 
+Group
+    grpRigidBodyDynamicsBodies
+
 Description
     Specialization of rigidBody to construct a sphere given the mass and radius.
 

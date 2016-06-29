@@ -22,8 +22,7 @@ done
 
 runApplication snappyHexMesh -overwrite
 
-\rm -rf 0
-\cp -r 0.org 0
+restore0Dir
 
 runApplication setFields
 

@@ -24,6 +24,9 @@ License
 Application
     surfaceMeshInfo
 
+Group
+    grpSurfaceUtilities
+
 Description
     Miscellaneous information about surface meshes.
 

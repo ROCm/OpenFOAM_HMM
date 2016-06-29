@@ -24,6 +24,9 @@ License
 Application
     vorticity
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates and writes the vorticity of velocity field U.
 

@@ -73,6 +73,7 @@ class pointToPointPlanarInterpolation
         //  patch
         List<FixedList<scalar, 3>> nearestVertexWeight_;
 
+
     // Private Member Functions
 
         //- Calculate a local coordinate system from set of points
@@ -84,6 +85,7 @@ class pointToPointPlanarInterpolation
             const pointField& sourcePoints,
             const pointField& destPoints
         );
+
 
 public:
 
@@ -114,8 +116,34 @@ public:
             const scalar perturb
         );
 
+        //- Construct from components
+        pointToPointPlanarInterpolation
+        (
+            const scalar perturb,
+            const bool nearestOnly,
+            const coordinateSystem& referenceCS,
+            const label sourceSize,
+            const List<FixedList<label, 3> >& nearestVertex,
+            const List<FixedList<scalar, 3> >& nearestVertexWeight
+        );
+
+        //- Construct and return a clone
+        autoPtr<pointToPointPlanarInterpolation> clone() const;
+
 
     // Member Functions
+
+        //- Perturbation factor (for triangulation)
+        scalar perturb() const
+        {
+            return perturb_;
+        }
+
+        //- Whether to use nearest point only (avoids triangulation, projection)
+        bool nearestOnly() const
+        {
+            return nearestOnly_;
+        }
 
         //- Return the coordinateSystem
         const coordinateSystem& referenceCS() const
@@ -158,7 +186,6 @@ public:
         //- Interpolate from field on source points to dest points
         template<class Type>
         tmp<Field<Type>> interpolate(const Field<Type>& sourceFld) const;
-
 };
 
 

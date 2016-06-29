@@ -24,6 +24,9 @@ License
 Application
     star3ToFoam
 
+Group
+    grpMeshConversionUtilities
+
 Description
     Converts a Star-CD (v3) pro-STAR mesh into OpenFOAM format.
 

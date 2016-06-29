@@ -24,6 +24,9 @@ License
 Application
     engineSwirl
 
+Group
+    grpPreProcessingUtilities
+
 Description
     Generates a swirling flow for engine calulations.
 

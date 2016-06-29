@@ -24,6 +24,9 @@ License
 Class
     Foam::adaptiveSolver
 
+Group
+    grpODESolvers
+
 Description
 
 SourceFiles

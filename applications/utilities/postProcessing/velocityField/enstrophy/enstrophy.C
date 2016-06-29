@@ -24,6 +24,9 @@ License
 Application
     enstrophy
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates and writes the enstrophy of the velocity field U.
 

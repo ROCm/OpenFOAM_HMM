@@ -24,6 +24,9 @@ License
 Application
     adiabaticFlameT
 
+Group
+    grpThermophysicalUtilities
+
 Description
     Calculates the adiabatic flame temperature for a given fuel over a
     range of unburnt temperatures and equivalence ratios.

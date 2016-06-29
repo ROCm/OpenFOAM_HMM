@@ -24,6 +24,9 @@ License
 Application
     mergeMeshes
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Merges two meshes.
 

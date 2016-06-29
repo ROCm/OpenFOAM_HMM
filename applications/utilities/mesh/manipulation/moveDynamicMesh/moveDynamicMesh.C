@@ -24,6 +24,9 @@ License
 Application
     moveDynamicMesh
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Mesh motion and topological mesh changes utility.
 

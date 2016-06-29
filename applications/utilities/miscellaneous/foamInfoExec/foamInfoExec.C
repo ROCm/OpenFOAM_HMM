@@ -24,6 +24,9 @@ License
 Application
     foamInfoExec
 
+Group
+    grpMiscUtilities
+
 Description
     Interrogates a case and prints information to stdout.
 

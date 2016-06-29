@@ -24,6 +24,9 @@ License
 Application
     splitMeshRegions
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Splits mesh into multiple regions.
 

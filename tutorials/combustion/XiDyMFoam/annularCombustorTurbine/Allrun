@@ -6,12 +6,12 @@ cd ${0%/*} || exit 1
 
 ./Allrun.mesh
 
-rm -rf 0 && cp -r 0.org 0
+restore0Dir
 
 runApplication decomposePar -force
 
 runParallel potentialFoam -pName pPotential -initialiseUBCs
 
-rm -f processor*/0/phi
+\rm -f processor*/0/phi
 
 runParallel XiDyMFoam

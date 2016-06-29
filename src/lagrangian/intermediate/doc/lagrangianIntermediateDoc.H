@@ -23,7 +23,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpLagrangianIntermediate Lagrangian particle modelling
+\defgroup grpLagrangianIntermediate Lagrangian particle models
 @{
     This group contains Lagrangian modelling available in the 'intermediate' library
 @}

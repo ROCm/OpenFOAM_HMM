@@ -24,6 +24,9 @@ License
 Application
     surfaceInflate
 
+Group
+    grpSurfaceUtilities
+
 Description
     Inflates surface. WIP. Checks for overlaps and locally lowers
     inflation distance

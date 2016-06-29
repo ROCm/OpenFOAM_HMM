@@ -23,7 +23,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpTurbulenceBoundaryConditions Turbulence boundary conditions
+\defgroup grpTurbulenceBoundaryConditions Boundary conditions
 @{
     \ingroup grpTurbulence
     This group contains turbulence model boundary conditions

@@ -24,6 +24,9 @@ License
 Class
     Foam::RBD::restraints::linearDamper
 
+Group
+    grpRigidBodyDynamicsRestraints
+
 Description
     Linear damper restraint.  Operates in the local frame of the body.
 

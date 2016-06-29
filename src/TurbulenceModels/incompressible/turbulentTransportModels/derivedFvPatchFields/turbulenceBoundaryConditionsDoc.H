@@ -23,13 +23,13 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpIcoTurbulenceBoundaryConditions Incompressible Turbulence BCs
+\defgroup grpIcoTurbulenceBoundaryConditions Boundary conditions
 @{
     \ingroup grpIcoTurbulence
     This group contains incompressible turbulence model boundary conditions
 @}
 
-\defgroup grpIcoWallFunctions Incompressible turbulence wall functions
+\defgroup grpIcoWallFunctions Wall functions
 @{
     \ingroup grpIcoTurbulenceBoundaryConditions
     This group contains incompressible turbulence model wall functions

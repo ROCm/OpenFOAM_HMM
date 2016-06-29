@@ -24,6 +24,9 @@ License
 Application
     particleTracks
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Generates a VTK file of particle tracks for cases that were computed using
     a tracked-parcel-type cloud.

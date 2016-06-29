@@ -24,6 +24,9 @@ License
 Application
     foamListTimes
 
+Group
+    grpPostProcessingUtilities
+
 Description
     List times using timeSelector.
 

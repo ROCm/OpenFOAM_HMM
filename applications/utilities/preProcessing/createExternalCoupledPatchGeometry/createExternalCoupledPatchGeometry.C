@@ -24,6 +24,9 @@ License
 Application
     createExternalCoupledPatchGeometry.
 
+Group
+    grpPreProcessingUtilities
+
 Description
     Application to generate the patch geometry (points and faces) for use
     with the externalCoupled functionObject.

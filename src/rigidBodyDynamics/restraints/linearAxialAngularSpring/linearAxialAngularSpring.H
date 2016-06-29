@@ -24,6 +24,9 @@ License
 Class
     Foam::RBD::restraints::linearAxialAngularSpring
 
+Group
+    grpRigidBodyDynamicsRestraints
+
 Description
     Linear axial angular spring restraint.
 
