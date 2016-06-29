@@ -180,16 +180,29 @@ cloneCase()
     fi
 }
 
-# Overwrite 0/ with the contents of 0.org/ if it exists
+# Overwrite 0/ with the contents of 0.org/ if it exists.
+# The -processor option to do the processor directories instead
+#
 restore0Dir()
 {
-    echo "Restore 0/ from 0.org/"
-    if [ -d 0.org ]
+    if [ "$1" = "-processor" ]
     then
-        \rm -rf 0
-        \cp -r 0.org 0 > /dev/null 2>&1
+        echo "Restore 0/ from 0.org/ for processor directories"
+        [ -d 0.org ] || echo "    Warning: no 0.org/ found"
+
+        # do nonetheless
+        \ls -d processor* | xargs -I {} \rm -rf ./{}/0
+        \ls -d processor* | xargs -I {} \cp -r 0.org ./{}/0 > /dev/null 2>&1
+
     else
-        echo "    Warning: no 0.org/ found"
+        echo "Restore 0/ from 0.org/"
+        if [ -d 0.org ]
+        then
+            \rm -rf 0
+            \cp -r 0.org 0 > /dev/null 2>&1
+        else
+            echo "    Warning: no 0.org/ found"
+        fi
     fi
 }
 

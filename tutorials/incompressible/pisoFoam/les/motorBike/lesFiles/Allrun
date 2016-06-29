@@ -7,10 +7,10 @@
 \cp ../lesFiles/fvS* ../lesFiles/controlDict system/
 \cp ../lesFiles/turbulenceProperties constant/
 
-# $1 for special test cases?
-\ls -d processor* | xargs -I {} \rm -rf ./{}/0 $1
-\ls -d processor* | xargs -I {} \mv ./{}/500 ./{}/0 $1
-\ls -d processor* | xargs -I {} \rm -rf ./{}/0/uniform $1
+# restart from iteration 500
+\ls -d processor* | xargs -I {} \rm -rf ./{}/0
+\ls -d processor* | xargs -I {} \mv ./{}/500 ./{}/0
+\ls -d processor* | xargs -I {} \rm -rf ./{}/0/uniform
 
 runParallel pisoFoam
 
