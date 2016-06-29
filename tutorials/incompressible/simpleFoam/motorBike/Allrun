@@ -17,8 +17,7 @@ runParallel snappyHexMesh -overwrite
 # restore0Dir
 
 #- For parallel running: set the initial fields
-\ls -d processor* | xargs -I {} \rm -rf ./{}/0
-\ls -d processor* | xargs -I {} \cp -r 0.org ./{}/0
+restore0Dir -processor
 
 runParallel patchSummary
 runParallel potentialFoam

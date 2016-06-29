@@ -51,6 +51,7 @@ unset WM_ARCH_OPTION
 unset WM_CC
 unset WM_CFLAGS
 unset WM_COMPILER
+unset WM_COMPILER_ARCH
 unset WM_COMPILER_LIB_ARCH
 unset WM_COMPILE_OPTION
 unset WM_CXX
@@ -115,6 +116,16 @@ unset ParaView_DIR
 unset ParaView_INCLUDE_DIR
 unset PV_PLUGIN_PATH
 
+#------------------------------------------------------------------------------
+# unset other ThirdParty environment variables
+
+unset BOOST_ARCH_PATH
+unset CCMIO_ARCH_PATH
+unset CGAL_ARCH_PATH
+unset FFTW_ARCH_PATH
+unset GMP_ARCH_PATH
+unset MPFR_ARCH_PATH
+unset SCOTCH_ARCH_PATH
 
 #------------------------------------------------------------------------------
 # cleanup environment

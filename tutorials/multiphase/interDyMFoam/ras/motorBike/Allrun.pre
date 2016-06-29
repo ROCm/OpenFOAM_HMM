@@ -23,9 +23,9 @@ runApplication blockMesh
 # --------
 runApplication decomposePar -force
 runParallel snappyHexMesh -overwrite
-\ls -d processor* | xargs -I {} rm -f ./{}/constant/polyMesh/refinementHistory
+\ls -d processor* | xargs -I {} \rm -f ./{}/constant/polyMesh/refinementHistory
 
 # - set the initial fields
-\ls -d processor* | xargs -I {} \rm -rf ./{}/0
-\ls -d processor* | xargs -I {} \cp -r 0.org ./{}/0
+restore0Dir -processor
+
 runParallel setFields

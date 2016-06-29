@@ -9,58 +9,46 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "system";
-    object      controlDict;
+    class       volVectorField;
+    object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//DebugSwitches
-//{
-//    dynamicRefineFvMesh 1;
-//}
+dimensions      [0 1 -1 0 0 0 0];
 
-application     interDyMFoam;
+internalField   uniform (0 0 0);
 
-startFrom       startTime;
-
-startTime       0;
-
-stopAt          endTime;
-
-endTime         2;
-
-deltaT          0.001;
-
-writeControl    adjustableRunTime;
-writeInterval   0.02;
-
-purgeWrite      0;
-
-
-writeFormat     binary;
-
-writePrecision  6;
-
-writeCompression uncompressed;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable yes;
-
-adjustTimeStep  yes;
-
-maxCo           0.5;
-maxAlphaCo      0.5;
-maxDeltaT       1;
-
-functions
+boundaryField
 {
-    // Print stats
-    #include "minMax"
+    front
+    {
+        type            noSlip;
+    }
+    back
+    {
+        type            noSlip;
+    }
+    walls
+    {
+        type            noSlip;
+    }
+    porosityWall
+    {
+        type            slip;
+        value           $internalField;
+    }
+    inlet
+    {
+        type            flowRateInletVelocity;
+        massFlowRate    constant 0.1;
+        value           $internalField;
+    }
+    outlet
+    {
+        type            inletOutlet;
+        inletValue      $internalField;
+        value           $internalField;
+    }
 }
-
 
 // ************************************************************************* //

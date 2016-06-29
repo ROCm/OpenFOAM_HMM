@@ -69,9 +69,6 @@ OpenFOAM | ThirdParty)
         gcc_version=gcc-6.1.0
         ;;
     Clang)
-        # Using clang - not gcc
-        export WM_CC='clang'
-        export WM_CXX='clang++'
         clang_version=llvm-3.7.0
         # clang_version=llvm-3.8.0
         ;;
@@ -84,7 +81,15 @@ OpenFOAM | ThirdParty)
         ;;
     esac
     ;;
+esac
 
+# common settings (system or ThirdParty)
+case "$WM_COMPILER" in
+Clang)
+    # Using clang - not gcc
+    export WM_CC='clang'
+    export WM_CXX='clang++'
+    ;;
 esac
 
 #------------------------------------------------------------------------------

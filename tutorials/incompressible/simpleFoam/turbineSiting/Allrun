@@ -8,17 +8,16 @@ cd ${0%/*} || exit 1    # Run from this directory
 mkdir 0
 
 runApplication blockMesh
-cp system/decomposeParDict.hierarchical system/decomposeParDict
+\cp system/decomposeParDict.hierarchical system/decomposeParDict
 runApplication decomposePar
 
-cp system/decomposeParDict.ptscotch system/decomposeParDict
+\cp system/decomposeParDict.ptscotch system/decomposeParDict
 runParallel snappyHexMesh -overwrite
 
 find . -type f -iname "*level*" -exec rm {} \;
 
 # - set the initial fields
-\ls -d processor* | xargs -I {} \rm -rf ./{}/0
-\ls -d processor* | xargs -I {} \cp -r 0.org ./{}/0
+restore0Dir -processor
 
 runParallel topoSet
 runParallel $(getApplication)
