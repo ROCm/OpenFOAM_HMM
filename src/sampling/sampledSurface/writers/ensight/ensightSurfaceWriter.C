@@ -68,6 +68,17 @@ Foam::ensightSurfaceWriter::~ensightSurfaceWriter()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+// Note that ensight does supports geometry in a separate file,
+// but setting this true leaves mesh files in the wrong places
+// (when there are fields).
+//
+// Make this false to let the field writers take back control
+bool Foam::ensightSurfaceWriter::separateGeometry() const
+{
+    return false;
+}
+
+
 Foam::fileName Foam::ensightSurfaceWriter::write
 (
     const fileName& outputDir,

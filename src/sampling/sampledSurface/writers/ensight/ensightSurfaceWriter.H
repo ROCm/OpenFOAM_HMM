@@ -126,10 +126,7 @@ public:
 
         //- True if the surface format supports geometry in a separate file.
         //  False if geometry and field must be in a single file
-        virtual bool separateGeometry() const
-        {
-            return !collateTimes_;
-        }
+        virtual bool separateGeometry() const;
 
 
         //- Write single surface geometry to file.
