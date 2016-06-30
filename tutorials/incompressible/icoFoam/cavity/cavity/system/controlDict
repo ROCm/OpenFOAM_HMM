@@ -45,39 +45,5 @@ timePrecision   6;
 
 runTimeModifiable true;
 
-functions
-{
-  cuttingPlane
-  {
-      type            surfaces;
-      functionObjectLibs ("libsampling.so");
-      outputControl   timeStep;       //outputTime;
-      outputInterval  4;
-
-      surfaceFormat   ensight;
-      formatOptions
-      {
-//          ensight { format binary; collateTimes true;}
-      }
-      fields          (p U);
-
-      interpolationScheme cellPoint;
-
-      surfaces
-      (
-          zNormal_0.0
-          {
-              type            cuttingPlane;
-              planeType       pointAndNormal;
-              pointAndNormalDict
-              {
-                  basePoint       (0 0 0.005);
-                  normalVector    (0 0 1);
-              }
-              interpolate     true;
-          }
-      );
-  }
-}
 
 // ************************************************************************* //

@@ -78,13 +78,13 @@ Foam::fileName Foam::ensightSurfaceWriter::writeUncollated
     ensightGeoFile osGeom
     (
         baseDir,
-        surfName + ".000000.mesh",
+        surfName + ".00000000.mesh",
         writeFormat_
     );
     ensightFile osField
     (
         baseDir,
-        surfName + ".000000." + varName,
+        surfName + ".00000000." + varName,
         writeFormat_
     );
 
