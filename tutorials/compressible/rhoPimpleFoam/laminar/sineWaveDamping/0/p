@@ -41,7 +41,7 @@ boundaryField
         gamma           1.4;
         fieldInf        101325;
         lInf            2.25;
-        value           uniform 101325;
+        value           $internalField;
     }
 
     frontAndBack

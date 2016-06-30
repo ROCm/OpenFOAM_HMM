@@ -24,14 +24,14 @@ boundaryField
     inlet
     {
         type            fixedValue;
-        value           uniform 300;
+        value           $internalField;
     }
 
     outlet
     {
         type            inletOutlet;
-        inletValue      uniform 300;
-        value           uniform 300;
+        inletValue      $internalField;
+        value           $internalField;
     }
 
     frontAndBack

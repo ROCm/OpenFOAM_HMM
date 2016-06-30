@@ -24,13 +24,13 @@ boundaryField
     inlet
     {
         type            zeroGradient; // pressureInletVelocity;
-        value           uniform (0 0 0);
+        value           $internalField;
     }
 
     outlet
     {
         type            pressureInletOutletVelocity;
-        value           uniform (0 0 0);
+        value           $internalField;
     }
 
     frontAndBack
