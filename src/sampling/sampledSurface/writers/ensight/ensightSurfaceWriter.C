@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,14 +42,15 @@ Foam::ensightSurfaceWriter::ensightSurfaceWriter()
 :
     surfaceWriter(),
     writeFormat_(IOstream::ASCII),
-    collateTimes_(false)
+    collateTimes_(true)
 {}
 
 
 Foam::ensightSurfaceWriter::ensightSurfaceWriter(const dictionary& options)
 :
     surfaceWriter(),
-    writeFormat_(IOstream::ASCII)
+    writeFormat_(IOstream::ASCII),
+    collateTimes_(true)
 {
     // choose ascii or binary format
     if (options.found("format"))

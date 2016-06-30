@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,9 +52,10 @@ class ensightSurfaceWriter
 {
     // Private data
 
-        //- Write option (default is IOstream::ASCII
+        //- Write option (default: IOstream::ASCII)
         IOstream::streamFormat writeFormat_;
 
+        //- Collate times (default: ASCII)
         bool collateTimes_;
 
 

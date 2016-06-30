@@ -37,10 +37,10 @@ Description
     // Must be a power of 2, default = 2^16 (=65536)
     N               4096;
 
-    // Lower frequency bounds 
+    // Lower frequency bounds
     fl              25;
 
-    // Upper frequency bounds 
+    // Upper frequency bounds
     fu              25;
 
     // Start time
@@ -69,7 +69,7 @@ Description
     {
         ensight
         {
-            collateTimes 1;
+            collateTimes true;
         }
     }
     \endverbatim
@@ -134,10 +134,10 @@ protected:
         label nFace_;
 
         //- Frequency data output interval, default = 1
-        //  nSamples/2 data points are returned from the FFT, which can 
+        //  nSamples/2 data points are returned from the FFT, which can
         //  result in a very large number of output files (1 per frequency)
         label fftWriteInterval_;
-     
+
         //- Pointer to the surface reader
         mutable autoPtr<surfaceReader> readerPtr_;
 

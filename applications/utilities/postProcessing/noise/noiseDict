@@ -62,7 +62,7 @@ surfaceNoiseCoeffs
     {
         ensight
         {
-            collateTimes 1;
+            collateTimes true;
         }
     }
 

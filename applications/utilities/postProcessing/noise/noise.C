@@ -70,7 +70,7 @@ Description
         {
             ensight
             {
-                collateTimes 1;
+                collateTimes true;
             }
         }
 
