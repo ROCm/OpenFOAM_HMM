@@ -206,6 +206,8 @@ bool Foam::fv::acousticDampingSource::read(const dictionary& dict)
             Info<< name_ << ": Setting stencil width to " << w_ << endl;
         }
 
+        setBlendingFactor();
+
         return true;
     }
     else
