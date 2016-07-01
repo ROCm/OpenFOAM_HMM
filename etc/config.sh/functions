@@ -116,7 +116,7 @@ else
     # Cleanup environment:
     # ~~~~~~~~~~~~~~~~~~~~
     unset WM_BASH_FUNCTIONS
-    unset _foamAddPath _foamAddLib _foamAddMan
-    unset _foamSource _foamEval
+    unset -f _foamAddPath _foamAddLib _foamAddMan
+    unset -f _foamSource _foamEval
 
 fi
