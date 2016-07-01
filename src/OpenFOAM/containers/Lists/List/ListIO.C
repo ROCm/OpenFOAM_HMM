@@ -92,6 +92,8 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
                 }
                 else
                 {
+                    // uniform content (delimiter == token::BEGIN_BLOCK)
+
                     T element;
                     is >> element;
 
@@ -113,6 +115,8 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
         }
         else
         {
+            // contents are binary and contiguous
+
             if (s)
             {
                 is.read(reinterpret_cast<char*>(L.data()), s*sizeof(T));
