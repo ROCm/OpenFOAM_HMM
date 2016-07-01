@@ -34,16 +34,13 @@ License
 template<class T>
 void Foam::UList<T>::writeEntry(Ostream& os) const
 {
-    if
-    (
-        size()
-     && token::compound::isCompound
-        (
-            "List<" + word(pTraits<T>::typeName) + '>'
-        )
-    )
+    if (size())
     {
-        os  << word("List<" + word(pTraits<T>::typeName) + '>') << " ";
+        const word tag = "List<" + word(pTraits<T>::typeName) + '>';
+        if (token::compound::isCompound(tag))
+        {
+            os  << tag << ' ';
+        }
     }
 
     os << *this;

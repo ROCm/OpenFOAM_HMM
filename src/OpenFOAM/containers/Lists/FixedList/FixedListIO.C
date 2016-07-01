@@ -138,12 +138,10 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
 template<class T, unsigned Size>
 void Foam::FixedList<T, Size>::writeEntry(Ostream& os) const
 {
-    if
-    (
-        token::compound::isCompound("List<" + word(pTraits<T>::typeName) + '>')
-    )
+    const word tag = "List<" + word(pTraits<T>::typeName) + '>';
+    if (token::compound::isCompound(tag))
     {
-        os  << word("List<" + word(pTraits<T>::typeName) + '>') << " ";
+        os  << tag << " ";
     }
 
     os << *this;
