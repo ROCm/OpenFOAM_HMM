@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,8 +59,23 @@ class Ostream;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Return a word representation of an uint64
-word name(const uint64_t);
+//- Return a word representation of a uint64
+inline word name(const uint64_t val)
+{
+    // no stripping required
+    return word(std::to_string(val), false);
+}
+
+
+//- Return a word representation of a uint64_t, using printf-style formatter.
+//  The representation is not checked for valid word characters.
+word name(const char* fmt, const uint64_t);
+
+
+//- Return a word representation of a uint64_t, using printf-style formatter.
+//  The representation is not checked for valid word characters.
+word name(const std::string& fmt, const uint64_t);
+
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 

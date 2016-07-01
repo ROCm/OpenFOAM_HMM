@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "int32.H"
+#include "stringOps.H"
 #include "IOstreams.H"
 
 #include <inttypes.h>
@@ -32,11 +33,15 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::word Foam::name(const int32_t val)
+Foam::word Foam::name(const char* fmt, const int32_t val)
 {
-    std::ostringstream buf;
-    buf << val;
-    return buf.str();
+    return stringOps::name(fmt, val);
+}
+
+
+Foam::word Foam::name(const std::string& fmt, const int32_t val)
+{
+    return stringOps::name(fmt, val);
 }
 
 
