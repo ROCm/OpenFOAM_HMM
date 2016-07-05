@@ -58,10 +58,9 @@ wmake $targetType sampling
 
 # Compile scotchDecomp, metisDecomp etc.
 parallel/Allwmake $targetType $*
+randomProcesses/Allwmake $targetType $*
 
 wmake $targetType ODE
-wmake $targetType randomProcesses
-
 wmake $targetType fvMotionSolver
 
 transportModels/Allwmake $targetType $*
