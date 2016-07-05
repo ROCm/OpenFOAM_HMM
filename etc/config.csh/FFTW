@@ -48,7 +48,7 @@
 #
 #------------------------------------------------------------------------------
 
-set fftw_version=fftw-system
+set fftw_version=fftw-3.3.4
 
 setenv FFTW_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$fftw_version
 
