@@ -37,7 +37,7 @@ namespace Foam
 void fft::transform
 (
     complexField& field,
-    const labelList& nn,
+    const UList<int>& nn,
     transformDirection dir
 )
 {
@@ -112,7 +112,7 @@ void fft::transform
 tmp<complexField> fft::forwardTransform
 (
     const tmp<complexField>& tfield,
-    const labelList& nn
+    const UList<int>& nn
 )
 {
     tmp<complexField> tfftField(new complexField(tfield));
@@ -128,7 +128,7 @@ tmp<complexField> fft::forwardTransform
 tmp<complexField> fft::reverseTransform
 (
     const tmp<complexField>& tfield,
-    const labelList& nn
+    const UList<int>& nn
 )
 {
     tmp<complexField> tifftField(new complexField(tfield));
@@ -144,7 +144,7 @@ tmp<complexField> fft::reverseTransform
 tmp<complexVectorField> fft::forwardTransform
 (
     const tmp<complexVectorField>& tfield,
-    const labelList& nn
+    const UList<int>& nn
 )
 {
     tmp<complexVectorField> tfftVectorField
@@ -173,7 +173,7 @@ tmp<complexVectorField> fft::forwardTransform
 tmp<complexVectorField> fft::reverseTransform
 (
     const tmp<complexVectorField>& tfield,
-    const labelList& nn
+    const UList<int>& nn
 )
 {
     tmp<complexVectorField> tifftVectorField

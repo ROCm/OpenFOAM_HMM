@@ -246,7 +246,7 @@ Foam::tmp<Foam::scalarField> Foam::noiseFFT::Pf
             fft::reverseTransform
             (
                 ReComplexField(tpn),
-                labelList(1, tpn().size())
+                List<int>(1, tpn().size())
             )
         )
     );
