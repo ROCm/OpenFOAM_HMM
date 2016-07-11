@@ -32,6 +32,9 @@ Description
     reverse).  The dimensionality and organisation of the array of values
     in space is supplied in the nn indexing array.
 
+Note
+    The fftw library uses int only (no longs) for its dimensionality.
+
 SourceFiles
     fft.C
 
@@ -41,7 +44,7 @@ SourceFiles
 #define fft_H
 
 #include "complexFields.H"
-#include "labelList.H"
+#include "UList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,7 +66,7 @@ public:
     static void transform
     (
         complexField& field,
-        const labelList& nn,
+        const UList<int>& nn,
         transformDirection fftDirection
     );
 
@@ -71,28 +74,28 @@ public:
     static tmp<complexField> forwardTransform
     (
         const tmp<complexField>& field,
-        const labelList& nn
+        const UList<int>& nn
     );
 
 
     static tmp<complexField> reverseTransform
     (
         const tmp<complexField>& field,
-        const labelList& nn
+        const UList<int>& nn
     );
 
 
     static tmp<complexVectorField> forwardTransform
     (
         const tmp<complexVectorField>& field,
-        const labelList& nn
+        const UList<int>& nn
     );
 
 
     static tmp<complexVectorField> reverseTransform
     (
         const tmp<complexVectorField>& field,
-        const labelList& nn
+        const UList<int>& nn
     );
 };
 
