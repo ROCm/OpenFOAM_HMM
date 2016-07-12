@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -40,17 +40,18 @@ usage() {
 Usage: ${0##*/} [OPTION] [PARAVIEW_OPTION]
 options:
   -block            use blockMesh reader  (uses .blockMesh extension)
-  -builtin          use VTK builtin OpenFOAM reader  (uses .foam extension)
   -case <dir>       specify alternative case directory, default is the cwd
   -region <name>    specify alternative mesh region
   -touch            only create the file  (eg, .blockMesh, .OpenFOAM, etc)
   -touchAll         create .blockMesh, .OpenFOAM files (and for all regions)
+  -vtk | -builtin   use VTK builtin OpenFOAM reader  (uses .foam extension)
   -help             print the usage
 
+Paraview options start with a double dashes.
 
-paraview options start with a double dashes
+* start paraview with the OpenFOAM libraries
 
-* start paraview $ParaView_VERSION with the OpenFOAM libraries
+  paraview=$(command -v paraview)
 
 USAGE
     exit 1
@@ -67,10 +68,9 @@ unset regionName optTouch
 # already 2010-07)
 export LC_ALL=C
 
-# Reader extension
+# Reader extension and plugin
 extension=OpenFOAM
-
-requirePV=1
+plugin=PVFoamReader
 
 # Parse options
 while [ "$#" -gt 0 ]
@@ -81,11 +81,12 @@ do
         ;;
     -block | -blockMesh)
         extension=blockMesh
+        plugin=PVblockMeshReader
         shift
         ;;
-    -builtin)
+    -builtin | -vtk)
         extension=foam
-        requirePV=0
+        unset plugin
         shift
         ;;
     -case)
@@ -100,12 +101,12 @@ do
         ;;
     -touch)
         optTouch=true
-        requirePV=0
+        unset plugin
         shift
         ;;
     -touchAll)
         optTouch=all
-        requirePV=0
+        unset plugin
         shift
         ;;
     --)
@@ -116,26 +117,34 @@ do
         break    # Stop here, treat this and balance as paraview options
         ;;
     *)
-        usage "unknown option/argument: '$*'"
+        usage "unknown option/argument: '$1'"
         ;;
     esac
 done
 
-# Check that reader module has been built
-if [ $requirePV -eq 1 -a ! -f $PV_PLUGIN_PATH/libPVFoamReader_SM.so ]
-then
-    cat<< BUILDREADER
+# If a reader module is needed, check that it exists
+[ -z "$plugin" -o -f $PV_PLUGIN_PATH/lib${plugin}_SM.so ] || {
+    cat<< BUILDREADER 1>&2
 
-FATAL ERROR: ParaView reader module libraries do not exist
-
+ERROR: ParaView reader module library ($plugin) does not exist
 Please build the reader module before continuing:
-cd \$FOAM_UTILITIES/postProcessing/graphics/PVReaders
-./Allwclean
-./Allwmake
+
+    cd \$FOAM_UTILITIES/postProcessing/graphics/PVReaders
+    ./Allwclean
+    ./Allwmake
 
 BUILDREADER
-    exit 1
-fi
+
+    # Fallback to native reader, if possible
+    if [ "$extension" = OpenFOAM ]
+    then
+        extension=foam
+        echo "Using the native VTK/OpenFOAM reader instead" 1>&2
+    else
+        exit 1
+    fi
+}
+
 
 # Check for --data=... argument
 hasDataArg()
@@ -165,7 +174,7 @@ if [ -n "$regionName" ]
 then
     if [ ! -d constant/$regionName ]
     then
-        echo "FATAL ERROR: Region $regionName does not exist"
+        echo "FATAL ERROR: Region $regionName does not exist" 1>&2
         exit 1
     else
         caseFile="$caseName{$regionName}.$extension"
@@ -179,10 +188,10 @@ all)
     if [ -f system/blockMeshDict -o -f constant/polyMesh/blockMeshDict ]
     then
         touch "$caseName.blockMesh"
-        echo "Created '$caseName.blockMesh'"
+        echo "Created '$caseName.blockMesh'" 1>&2
     fi
     touch "$caseName.$extension"
-    echo "Created '$caseName.$extension'"
+    echo "Created '$caseName.$extension'" 1>&2
     # Discover probable regions
     for region in constant/*
     do
@@ -190,14 +199,14 @@ all)
         then
             regionName=${region##*/}
             touch "$caseName{$regionName}.$extension"
-            echo "Created '$caseName{$regionName}.$extension'"
+            echo "Created '$caseName{$regionName}.$extension'" 1>&2
         fi
     done
     exit 0
     ;;
 true)
     touch "$caseFile"
-    echo "Created '$caseFile'"
+    echo "Created '$caseFile'" 1>&2
     exit 0
     ;;
 esac
@@ -222,14 +231,14 @@ else
     warn="WARN file does not exist:"
     case $extension in
         blockMesh)
-            blockMeshDictDir=system/blockMeshDict
+            blockMeshDict=system/blockMeshDict
             if [ -f constant/polyMesh/blockMeshDict ]
             then
-                blockMeshDictDir=constant/polyMesh/blockMeshDict
+                blockMeshDict=constant/polyMesh/blockMeshDict
             fi
             for check in \
                 system/controlDict \
-                    $blockMeshDictDir \
+                    $blockMeshDict \
                 ;
             do
                 [ -s "$parentDir/$check" ] || {
@@ -240,7 +249,7 @@ else
             done
             ;;
 
-        builtin | OpenFOAM)
+        OpenFOAM)
             for check in \
                 system/controlDict \
                     $fvControls/fvSchemes \
@@ -268,7 +277,7 @@ else
     [ -e $caseFile ] || {
         trap "rm -f $caseFile 2>/dev/null; exit 0" EXIT TERM INT
         touch "$caseFile"
-        echo "Created temporary '$caseFile'"
+        echo "Created temporary '$caseFile'" 1>&2
     }
 
     # For now filter out any ld.so errors. Caused by non-system compiler?
