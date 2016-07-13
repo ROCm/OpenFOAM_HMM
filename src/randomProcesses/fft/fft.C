@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,7 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fft.H"
-#include "fftRenumber.H"
+
+#include <fftw3.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -33,16 +34,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define SWAP(a,b) tempr=(a); (a)=(b); (b)=tempr
-#define TWOPI 6.28318530717959
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 void fft::transform
 (
     complexField& field,
-    const labelList& nn,
-    transformDirection isign
+    const UList<int>& nn,
+    transformDirection dir
 )
 {
     forAll(nn, idim)
@@ -59,134 +55,64 @@ void fft::transform
         }
     }
 
-    const label ndim = nn.size();
-
-    label i1, i2, i3, i2rev, i3rev, ip1, ip2, ip3, ifp1, ifp2;
-    label ibit, k1, k2, n, nprev, nrem, idim;
-    scalar tempi, tempr;
-    scalar theta, wi, wpi, wpr, wr, wtemp;
-    scalar* data = reinterpret_cast<scalar*>(field.begin()) - 1;
-
-
-    // if inverse transform : renumber before transform
-
-    if (isign == REVERSE_TRANSFORM)
-    {
-        fftRenumber(field, nn);
-    }
-
-
-    label ntot = 1;
-    forAll(nn, idim)
-    {
-        ntot *= nn[idim];
-    }
-
-
-    nprev = 1;
-
-    for (idim=ndim; idim>=1; idim--)
-    {
-        n = nn[idim-1];
-        nrem = ntot/(n*nprev);
-        ip1 = nprev << 1;
-        ip2 = ip1*n;
-        ip3 = ip2*nrem;
-        i2rev = 1;
-
-        for (i2=1; i2<=ip2; i2+=ip1)
-        {
-            if (i2 < i2rev)
-            {
-                for (i1=i2; i1<=i2 + ip1 - 2; i1+=2)
-                {
-                    for (i3=i1; i3<=ip3; i3+=ip2)
-                    {
-                        i3rev = i2rev + i3 - i2;
-                        SWAP(data[i3], data[i3rev]);
-                        SWAP(data[i3 + 1], data[i3rev + 1]);
-                    }
-                }
-            }
-
-            ibit = ip2 >> 1;
-            while (ibit >= ip1 && i2rev > ibit)
-            {
-                i2rev -= ibit;
-                ibit >>= 1;
-            }
-
-            i2rev += ibit;
-        }
-
-        ifp1 = ip1;
-
-        while (ifp1 < ip2)
-        {
-            ifp2 = ifp1 << 1;
-            theta = isign*TWOPI/(ifp2/ip1);
-            wtemp = sin(0.5*theta);
-            wpr = -2.0*wtemp*wtemp;
-            wpi = sin(theta);
-            wr = 1.0;
-            wi = 0.0;
-
-            for (i3 = 1; i3 <= ifp1; i3 += ip1)
-            {
-                for (i1 = i3; i1 <= i3 + ip1 - 2; i1 += 2)
-                {
-                    for (i2 = i1; i2 <= ip3; i2 += ifp2)
-                    {
-                        k1 = i2;
-                        k2 = k1 + ifp1;
-                        tempr = scalar(wr*data[k2]) - scalar(wi*data[k2 + 1]);
-                        tempi = scalar(wr*data[k2 + 1]) + scalar(wi*data[k2]);
-                        data[k2] = data[k1] - tempr;
-                        data[k2 + 1] = data[k1 + 1] - tempi;
-                        data[k1] += tempr;
-                        data[k1 + 1] += tempi;
-                    }
-                }
-
-                wr = (wtemp = wr)*wpr - wi*wpi + wr;
-                wi = wi*wpr + wtemp*wpi + wi;
-            }
-            ifp1 = ifp2;
-        }
-        nprev *= n;
-    }
-
-
-    // if forward transform : renumber after transform
-
-    if (isign == FORWARD_TRANSFORM)
-    {
-        fftRenumber(field, nn);
-    }
-
-
-    // scale result (symmetric scale both forward and inverse transform)
-
-    scalar recRootN = 1.0/sqrt(scalar(ntot));
+    // Copy field into fftw containers
+    label N = field.size();
+    fftw_complex in[N], out[N];
 
     forAll(field, i)
     {
-        field[i] *= recRootN;
+        in[i][0] = field[i].Re();
+        in[i][1] = field[i].Im();
     }
+
+    // Create the plan
+    // FFTW_FORWARD = -1
+    // FFTW_BACKWARD = 1
+
+    // 1-D plan
+    // fftw_plan plan =
+    //    fftw_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+
+    // Generic 1..3-D plan
+    label rank = nn.size();
+    fftw_plan plan =
+        fftw_plan_dft(rank, nn.begin(), in, out, dir, FFTW_ESTIMATE);
+
+    // Compute the FFT
+    fftw_execute(plan);
+
+    forAll(field, i)
+    {
+        field[i].Re() = out[i][0];
+        field[i].Im() = out[i][1];
+    }
+
+    fftw_destroy_plan(plan);
+
+/*
+    fftw_real in[N], out[N];
+    // Create a plan for real data input
+    // - generates 1-sided FFT
+    // - direction given by FFTW_R2HC or FFTW_HC2R.
+    // - in[N] is the array of real input val ues
+    // - out[N] is the array of N/2 real valuea followed by N/2 complex values
+    // - 0 component = DC component
+    fftw_plan plan = fftw_plan_r2r_2d(N, in, out, FFTW_R2HC, FFTW_ESTIMATE)
+
+    // Compute the FFT
+    fftw_execute(plan);
+
+    fftw_destroy_plan(plan);
+*/
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#undef SWAP
-#undef TWOPI
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 tmp<complexField> fft::forwardTransform
 (
     const tmp<complexField>& tfield,
-    const labelList& nn
+    const UList<int>& nn
 )
 {
     tmp<complexField> tfftField(new complexField(tfield));
@@ -202,7 +128,7 @@ tmp<complexField> fft::forwardTransform
 tmp<complexField> fft::reverseTransform
 (
     const tmp<complexField>& tfield,
-    const labelList& nn
+    const UList<int>& nn
 )
 {
     tmp<complexField> tifftField(new complexField(tfield));
@@ -218,7 +144,7 @@ tmp<complexField> fft::reverseTransform
 tmp<complexVectorField> fft::forwardTransform
 (
     const tmp<complexVectorField>& tfield,
-    const labelList& nn
+    const UList<int>& nn
 )
 {
     tmp<complexVectorField> tfftVectorField
@@ -247,7 +173,7 @@ tmp<complexVectorField> fft::forwardTransform
 tmp<complexVectorField> fft::reverseTransform
 (
     const tmp<complexVectorField>& tfield,
-    const labelList& nn
+    const UList<int>& nn
 )
 {
     tmp<complexVectorField> tifftVectorField

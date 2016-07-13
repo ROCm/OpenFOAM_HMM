@@ -47,7 +47,7 @@
 #         - the LD_LIBRARY_PATH is not adjusted.
 #------------------------------------------------------------------------------
 
-fftw_version=fftw-system
+fftw_version=fftw-3.3.4
 
 export FFTW_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$fftw_version
 

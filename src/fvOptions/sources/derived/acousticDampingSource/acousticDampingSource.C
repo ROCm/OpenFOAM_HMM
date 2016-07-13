@@ -67,9 +67,9 @@ void Foam::fv::acousticDampingSource::setBlendingFactor()
         {
             blendFactor_[celli] = 0.0;
         }
-        else if ((d >= r1_) && (d <= (r1_ + r2_)))
+        else if ((d >= r1_) && (d <= r2_))
         {
-            blendFactor_[celli] = (1.0 - cos(pi*mag(d - r1_)/r2_))/2.0;
+            blendFactor_[celli] = (1.0 - cos(pi*mag(d - r1_)/(r2_ - r1_)))/2.0;
         }
     }
 
@@ -205,6 +205,8 @@ bool Foam::fv::acousticDampingSource::read(const dictionary& dict)
         {
             Info<< name_ << ": Setting stencil width to " << w_ << endl;
         }
+
+        setBlendingFactor();
 
         return true;
     }

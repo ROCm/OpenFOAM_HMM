@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,9 +52,10 @@ class ensightSurfaceWriter
 {
     // Private data
 
-        //- Write option (default is IOstream::ASCII
+        //- Write option (default: IOstream::ASCII)
         IOstream::streamFormat writeFormat_;
 
+        //- Collate times (default: ASCII)
         bool collateTimes_;
 
 
@@ -126,10 +127,7 @@ public:
 
         //- True if the surface format supports geometry in a separate file.
         //  False if geometry and field must be in a single file
-        virtual bool separateGeometry() const
-        {
-            return !collateTimes_;
-        }
+        virtual bool separateGeometry() const;
 
 
         //- Write single surface geometry to file.

@@ -46,13 +46,16 @@ QT4_WRAP_CPP(MOC_SRCS pqPVblockMeshReaderPanel.h)
 
 ADD_PARAVIEW_OBJECT_PANEL(IFACES IFACE_SRCS
   CLASS_NAME pqPVblockMeshReaderPanel
-  XML_NAME  PVblockMeshReader # name of SourceProxy in *SM.xml
+  XML_NAME  PVblockMeshReader           # name of SourceProxy in *SM.xml
   XML_GROUP sources
 )
 
-IF("${PARAVIEW_VERSION_MINOR}" EQUAL 0)
-        ADD_PARAVIEW_PLUGIN(
-            PVblockMeshReader_SM "1.0"
+# Separate GUI_RESOURCE_FILES deprecated with paraview 4.3
+# so check if version < 4.4
+
+IF(("${PARAVIEW_VERSION_MAJOR}" LESS 5) AND ("${PARAVIEW_VERSION_MINOR}" LESS 4))
+    ADD_PARAVIEW_PLUGIN(
+        PVblockMeshReader_SM "1.0"
         SERVER_MANAGER_XML PVblockMeshReader_SM.xml
         SERVER_MANAGER_SOURCES  vtkPVblockMeshReader.cxx
         GUI_INTERFACES ${IFACES}
@@ -60,16 +63,16 @@ IF("${PARAVIEW_VERSION_MINOR}" EQUAL 0)
             ${MOC_SRCS} ${UI_SRCS} ${IFACE_SRCS}
         GUI_RESOURCE_FILES PVblockMeshReader.xml
     )
-ELSE("${PARAVIEW_VERSION_MINOR}" EQUAL 0)
-        ADD_PARAVIEW_PLUGIN(
-            PVblockMeshReader_SM "1.0"
+ELSE()
+    ADD_PARAVIEW_PLUGIN(
+        PVblockMeshReader_SM "1.0"
         SERVER_MANAGER_XML PVblockMeshReader_SM.xml
         SERVER_MANAGER_SOURCES  vtkPVblockMeshReader.cxx
         GUI_INTERFACES ${IFACES}
         GUI_SOURCES pqPVblockMeshReaderPanel.cxx
             ${MOC_SRCS} ${UI_SRCS} ${IFACE_SRCS}
     )
-ENDIF("${PARAVIEW_VERSION_MINOR}" EQUAL 0)
+ENDIF()
 
 # Build the client-side plugin
 

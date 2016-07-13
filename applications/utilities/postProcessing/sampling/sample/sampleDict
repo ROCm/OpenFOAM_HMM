@@ -71,7 +71,7 @@ formatOptions
     {
         // ascii/binary format
         format  ascii;
-        //collateTimes true;  // write single file containing multiple timesteps
+        collateTimes true;    // write single file containing multiple timesteps
                               // (only for static surfaces)
     }
     vtk

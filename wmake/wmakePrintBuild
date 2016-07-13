@@ -3,8 +3,8 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -72,7 +72,6 @@ do
         ;;
     -c | -check)
         checkOnly=true
-        shift
         ;;
     -major)
         echo ${WM_PROJECT_VERSION:-unknown}
@@ -80,27 +79,26 @@ do
         ;;
     -u | -update)
         update=true
-        shift
         ;;
     -pkg | -package)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         # Mark empty as 'none', disallow '!' in string
         package=$(echo "${2:-none}" | sed -e 's/!//g')
-        shift 2
+        shift
         ;;
     -short)
         shortOpt=true
-        shift
         ;;
     -v | -version)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         version="$2"
-        shift 2
+        shift
         ;;
     *)
-        usage "unknown option/argument: '$*'"
+        usage "unknown option/argument: '$1'"
         ;;
     esac
+    shift
 done
 
 #------------------------------------------------------------------------------
@@ -146,12 +144,12 @@ then
     # Specified a version - no error possible
     rc=0
 else
-    # Get the head SHA1 when building under git
-    # if there are multiple values (eg, HEAD, origin/HEAD, ...)
+    # Get the head SHA1 (first 12 chars) when building under git.
+    # If there are multiple values (eg, HEAD, origin/HEAD, ...)
     # only take the first one, which is 'HEAD'
     version=$(
-        cd $WM_PROJECT_DIR 2>/dev/null && \
-        git show-ref --hash=12 --head HEAD 2>/dev/null | head -1
+        git --git-dir=$WM_PROJECT_DIR/.git show-ref --head HEAD 2>/dev/null |\
+        sed -ne '1s@^\(.\{12\}\).*$@\1@p'
     )
 
     if [ -n "$version" ]
@@ -205,10 +203,11 @@ then
         else
             echo "version changed from previous build" 1>&2
         fi
+        exit $rc
     else
         echo "no git description found" 1>&2
+        exit 0
     fi
-    exit $rc
 fi
 
 

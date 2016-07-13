@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,14 +42,15 @@ Foam::ensightSurfaceWriter::ensightSurfaceWriter()
 :
     surfaceWriter(),
     writeFormat_(IOstream::ASCII),
-    collateTimes_(false)
+    collateTimes_(true)
 {}
 
 
 Foam::ensightSurfaceWriter::ensightSurfaceWriter(const dictionary& options)
 :
     surfaceWriter(),
-    writeFormat_(IOstream::ASCII)
+    writeFormat_(IOstream::ASCII),
+    collateTimes_(true)
 {
     // choose ascii or binary format
     if (options.found("format"))
@@ -68,6 +69,17 @@ Foam::ensightSurfaceWriter::~ensightSurfaceWriter()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+// Note that ensight does supports geometry in a separate file,
+// but setting this true leaves mesh files in the wrong places
+// (when there are fields).
+//
+// Make this false to let the field writers take back control
+bool Foam::ensightSurfaceWriter::separateGeometry() const
+{
+    return false;
+}
+
+
 Foam::fileName Foam::ensightSurfaceWriter::write
 (
     const fileName& outputDir,
@@ -84,14 +96,13 @@ Foam::fileName Foam::ensightSurfaceWriter::write
         mkDir(outputDir);
     }
 
-    // const scalar timeValue = Foam::name(this->mesh().time().timeValue());
     const scalar timeValue = 0.0;
 
     OFstream osCase(outputDir/surfName + ".case");
     ensightGeoFile osGeom
     (
         outputDir,
-        surfName + ".0000.mesh",
+        surfName + ".00000000.mesh",
         writeFormat_
     );
 
@@ -113,7 +124,7 @@ Foam::fileName Foam::ensightSurfaceWriter::write
         << "filename start number:         0" << nl
         << "filename increment:            1" << nl
         << "time values:" << nl
-        << timeValue << nl
+        << "    " << timeValue << nl
         << nl;
 
     ensightPartFaces ensPart(0, osGeom.name().name(), points, faces, true);

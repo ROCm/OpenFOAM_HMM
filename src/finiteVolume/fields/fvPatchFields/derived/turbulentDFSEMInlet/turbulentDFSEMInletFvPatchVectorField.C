@@ -80,10 +80,14 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::writeEddyOBJ() const
         //    label i2 = ((i + 1) % nPoint) + nPoint;
         //    os  << "l " << i1 << " " << i2 << nl;
         //}
-    }   
+    }
 
     {
-        OFstream os(db().time().path()/"eddies.obj");
+        const Time& time = db().time();
+        OFstream os
+        (
+            time.path()/"eddies_" + Foam::name(time.timeIndex()) + ".obj"
+        );
 
         label pointOffset = 0;
         forAll(eddies_, eddyI)
@@ -91,7 +95,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::writeEddyOBJ() const
             const eddy& e = eddies_[eddyI];
             pointOffset += e.writeSurfaceOBJ(pointOffset, patchNormal_, os);
         }
-    }                 
+    }
 }
 
 
@@ -137,7 +141,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::writeLumleyCoeffs() const
             scalar eta = sqrt(-ii/3.0);
             os  << xi << token::TAB << eta << token::TAB
                 << ii << token::TAB << iii << endl;
-        }    
+        }
     }
 
     // After interpolation
@@ -1103,7 +1107,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::write(Ostream& os) const
     writeEntryIfDifferent(os, "d", 1.0, d_);
     writeEntryIfDifferent(os, "kappa", 0.41, kappa_);
     writeEntryIfDifferent(os, "perturb", 1e-5, perturb_);
-    writeEntryIfDifferent(os, "nCellPerEddy", 5, nCellPerEddy_);
+    writeEntryIfDifferent<label>(os, "nCellPerEddy", 5, nCellPerEddy_);
     writeEntryIfDifferent(os, "writeEddies", false, writeEddies_);
 
     if (!interpolateR_)
