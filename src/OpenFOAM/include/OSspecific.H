@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,7 @@ SourceFiles
 #define OSspecific_H
 
 #include "fileNameList.H"
+#include "stringList.H"
 
 #include <sys/types.h>
 
@@ -193,8 +194,14 @@ bool ping(const string&, const label port, const label timeOut);
 //- Check if machine is up by pinging port 22 (ssh) and 222 (rsh)
 bool ping(const string&, const label timeOut=10);
 
-//- Execute the specified command
+//- Execute the specified command via the shell.
+//  Uses vfork/execl internally.
+//  Where possible, use the list version instead.
 int system(const std::string& command);
+
+//- Execute the specified command with arguments.
+//  Uses vfork/execvp internally
+int system(const UList<string>& command);
 
 //- Open a shared library. Return handle to library. Print error message
 //  if library cannot be loaded (check = true)

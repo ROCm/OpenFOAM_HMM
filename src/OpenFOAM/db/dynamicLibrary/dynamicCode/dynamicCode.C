@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -493,10 +493,17 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
 
 bool Foam::dynamicCode::wmakeLibso() const
 {
-    const Foam::string wmakeCmd("wmake -s libso " + this->codePath());
-    Info<< "Invoking " << wmakeCmd << endl;
+    DynamicList<string> cmd(4);
+    cmd.append("wmake");
+    cmd.append("-s");
+    cmd.append("libso");
+    cmd.append(this->codePath());
 
-    if (Foam::system(wmakeCmd))
+    // NOTE: could also resolve wmake command explicitly
+    //   cmd[0] = stringOps::expand("$WM_PROJECT_DIR/wmake/wmake");
+
+    Info<< "Invoking wmake libso " << this->codePath().c_str() << endl;
+    if (Foam::system(cmd))
     {
         return false;
     }
