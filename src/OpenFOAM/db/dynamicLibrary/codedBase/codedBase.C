@@ -54,7 +54,7 @@ static inline void writeEntryIfPresent
 )
 {
     // non-recursive like dictionary::found, but no pattern-match either
-    const entry* ptr = dict.lookupEntryPtr(key,false,false);
+    const entry* ptr = dict.lookupEntryPtr(key, false, false);
 
     if (ptr)
     {
