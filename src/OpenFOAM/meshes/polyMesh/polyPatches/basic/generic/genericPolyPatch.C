@@ -118,6 +118,12 @@ Foam::genericPolyPatch::~genericPolyPatch()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+const Foam::word& Foam::genericPolyPatch::actualType() const
+{
+    return actualTypeName_;
+}
+
+
 void Foam::genericPolyPatch::write(Ostream& os) const
 {
     os.writeKeyword("type") << actualTypeName_ << token::END_STATEMENT << nl;
