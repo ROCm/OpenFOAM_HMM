@@ -22,7 +22,7 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     etc/config.sh/libccmio
+#     etc/config.sh/ccmio
 #
 # Description
 #     Setup file for libccmio include/libraries.
