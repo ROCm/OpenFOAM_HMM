@@ -848,7 +848,7 @@ turbulentDFSEMInletFvPatchVectorField
     eddy::debug = debug;
 
     // Set UMean as patch area average value
-    UMean_ = gSum(U_*patch().magSf())/gSum(patch().magSf());
+    UMean_ = gSum(U_*patch().magSf())/(gSum(patch().magSf()) + ROOTVSMALL);
 }
 
 
