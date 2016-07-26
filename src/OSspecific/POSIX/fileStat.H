@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::fileStat
 
 Description
-    Wrapper for stat() system call.
+    Wrapper for stat() and lstat() system calls.
 
 Warning
     on Linux (an maybe on others) a stat() of an nfs mounted (remote)
@@ -79,8 +79,21 @@ public:
         //- Empty constructor
         fileStat();
 
-        //- Construct from components
-        fileStat(const fileName& fName, const unsigned int maxTime=0);
+        //- Construct from components.
+        // \param fName \n
+        // The file name or directory name to stat.
+        //
+        // \param followLink \n
+        // If it is a link, get the status of the source file/directory.
+        //
+        // \param maxTime \n
+        // The timeout value.
+        fileStat
+        (
+            const fileName& fName,
+            const bool followLink = true,
+            const unsigned int maxTime = 0
+        );
 
         //- Construct from Istream
         fileStat(Istream&);
@@ -96,7 +109,7 @@ public:
                 return status_;
             }
 
-            //- Did constructor fail
+            //- Was file-stat successful?
             bool isValid() const
             {
                 return isValid_;
