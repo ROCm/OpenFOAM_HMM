@@ -151,7 +151,7 @@ void Foam::helpType::displayDoc
         Info<< "Source file: " << classDirectory.c_str() << classFile << nl
             << endl;
 
-        system(docBrowser);
+        Foam::system(docBrowser);
     }
     else
     {

@@ -1309,7 +1309,7 @@ int main(int argc, char *argv[])
                       + "_"
                       + procFile.name()
                     );
-                    if (system(cmd.c_str()) == -1)
+                    if (Foam::system(cmd.c_str()) == -1)
                     {
                         WarningInFunction
                             << "Could not execute command " << cmd << endl;
