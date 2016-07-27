@@ -53,10 +53,11 @@ Description
         jumpTable       csvFile;
         csvFileCoeffs
         {
-            hasHeaderLine   1;
+            nHeaderLine     1;
             refColumn       0;
             componentColumns 1(1);
             separator       ",";
+            mergeSeparators no;
             fileName        "$FOAM_CASE/constant/pressureVsU";
         }
         value           uniform 0;
@@ -67,7 +68,7 @@ Description
     the jump condition.
 
 Note
-     The underlying \c patchType should be set to \c cyclic
+    The underlying \c patchType should be set to \c cyclic
 
 SeeAlso
     Foam::Function1Types
