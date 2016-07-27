@@ -1,4 +1,5 @@
 #-------------------------------*- makefile -*---------------------------------
+WM_VERSION = OPENFOAM_PLUS=1606
 
 AR         = ar
 ARFLAGS    = cr
@@ -6,7 +7,7 @@ RANLIB     = ranlib
 CPP        = cpp
 LD         = ld
 
-GFLAGS     = -D$(WM_ARCH) -DWM_ARCH_OPTION=$(WM_ARCH_OPTION) \
+GFLAGS     = -D$(WM_VERSION) -D$(WM_ARCH) -DWM_ARCH_OPTION=$(WM_ARCH_OPTION) \
              -DWM_$(WM_PRECISION_OPTION) -DWM_LABEL_SIZE=$(WM_LABEL_SIZE)
 GINC       =
 GLIBS      = -lm

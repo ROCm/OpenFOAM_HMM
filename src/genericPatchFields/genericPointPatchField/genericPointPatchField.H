@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,7 @@ class genericPointPatchField
 {
     // Private data
 
-        word actualTypeName_;
+        const word actualTypeName_;
         dictionary dict_;
 
         HashPtrTable<scalarField> scalarFields_;
@@ -150,6 +150,9 @@ public:
                 const labelList&
             );
 
+
+        //- Return the actual type
+        const word& actualType() const;
 
         //- Write
         virtual void write(Ostream&) const;

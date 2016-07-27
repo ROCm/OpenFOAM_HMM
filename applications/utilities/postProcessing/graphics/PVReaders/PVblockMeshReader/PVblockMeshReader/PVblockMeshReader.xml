@@ -1,4 +1,5 @@
 <ParaViewReaders>
+  <!-- deprecated with paraview-4.3, use hints in *SM.xml -->
   <Reader name="PVblockMeshReader"
       extensions="blockMesh"
       file_description="OpenFOAM blockMesh reader">

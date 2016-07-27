@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -331,55 +331,7 @@ void Foam::codedFixedValuePointPatchField<Type>::write(Ostream& os) const
     os.writeKeyword("redirectType") << redirectType_
         << token::END_STATEMENT << nl;
 
-    if (dict_.found("codeInclude"))
-    {
-        os.writeKeyword("codeInclude")
-            << token::HASH << token::BEGIN_BLOCK;
-
-        os.writeQuoted(string(dict_["codeInclude"]), false)
-            << token::HASH << token::END_BLOCK
-            << token::END_STATEMENT << nl;
-    }
-
-    if (dict_.found("localCode"))
-    {
-        os.writeKeyword("localCode")
-            << token::HASH << token::BEGIN_BLOCK;
-
-        os.writeQuoted(string(dict_["localCode"]), false)
-            << token::HASH << token::END_BLOCK
-            << token::END_STATEMENT << nl;
-    }
-
-    if (dict_.found("code"))
-    {
-        os.writeKeyword("code")
-            << token::HASH << token::BEGIN_BLOCK;
-
-        os.writeQuoted(string(dict_["code"]), false)
-            << token::HASH << token::END_BLOCK
-            << token::END_STATEMENT << nl;
-    }
-
-    if (dict_.found("codeOptions"))
-    {
-        os.writeKeyword("codeOptions")
-            << token::HASH << token::BEGIN_BLOCK;
-
-        os.writeQuoted(string(dict_["codeOptions"]), false)
-            << token::HASH << token::END_BLOCK
-            << token::END_STATEMENT << nl;
-    }
-
-    if (dict_.found("codeLibs"))
-    {
-        os.writeKeyword("codeLibs")
-            << token::HASH << token::BEGIN_BLOCK;
-
-        os.writeQuoted(string(dict_["codeLibs"]), false)
-            << token::HASH << token::END_BLOCK
-            << token::END_STATEMENT << nl;
-    }
+    codedBase::writeCodeDict(os, dict_);
 }
 
 

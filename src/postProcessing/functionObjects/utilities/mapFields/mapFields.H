@@ -122,6 +122,13 @@ class mapFieldsFO
         //- Helper function to create the mesh-to-mesh interpolation
         void createInterpolation(const dictionary& dict);
 
+        //- Helper function to evaluate constraint patches after mapping
+        template<class Type>
+        void evaluateConstraintTypes
+        (
+            GeometricField<Type, fvPatchField, volMesh>& fld
+        ) const;
+
         //- Helper function to interpolate and write the fied
         template<class Type>
         bool writeFieldType() const;
