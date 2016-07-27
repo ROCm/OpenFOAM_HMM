@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,9 +48,9 @@ Foam::fileName::fileName(const wordList& lst)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::fileName::Type Foam::fileName::type() const
+Foam::fileName::Type Foam::fileName::type(const bool followLink) const
 {
-    return ::Foam::type(*this);
+    return ::Foam::type(*this, followLink);
 }
 
 
@@ -94,6 +94,7 @@ bool Foam::fileName::clean()
     (
         string::size_type src = nChar;
         src < maxLen;
+        /*nil*/
     )
     {
         char c = operator[](src++);

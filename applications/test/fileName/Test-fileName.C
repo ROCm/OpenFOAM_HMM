@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,7 @@ Description
 #include "IOobject.H"
 #include "IOstreams.H"
 #include "OSspecific.H"
+#include "POSIX.H"
 
 using namespace Foam;
 
@@ -98,6 +99,98 @@ int main()
             << "  name     = " << name << endl;
 
     }
+
+
+    // Test some copying and deletion
+    {
+        const fileName dirA("dirA");
+        const fileName lnA("lnA");
+        const fileName lnB("lnB");
+        const fileName dirB("dirB");
+
+        Foam::rmDir(dirA);
+        Foam::rm(lnA);
+        Foam::rm(lnB);
+        Foam::rmDir(dirB);
+
+
+        Info<< "Creating directory " << dirA << endl;
+        Foam::mkDir(dirA);
+
+
+        const int oldPosix = POSIX::debug;
+        POSIX::debug = 1;
+
+
+        // Create link and test it
+        Info<< "Creating softlink " << lnA << endl;
+        Foam::ln(dirA, lnA);
+
+        fileName::Type lnAType = lnA.type(false);
+
+        if (lnAType != fileName::LINK)
+        {
+            FatalErrorIn("Test-fileName") << "Type of softlink " << lnA
+                << " should be " << fileName::LINK
+                << " but is " << lnAType << exit(FatalError);
+        }
+
+        fileName::Type dirAType = lnA.type(true);
+
+        if (dirAType != fileName::DIRECTORY)
+        {
+            FatalErrorIn("Test-fileName") << "Type of what softlink " << lnA
+                << " points to should be " << fileName::DIRECTORY
+                << " but is " << dirAType << exit(FatalError);
+        }
+
+        // Copy link only
+        {
+            Info<< "Copying (non-follow) softlink " << lnA << " to " << lnB
+                << endl;
+
+            Foam::cp(lnA, lnB, false);
+            if (lnB.type(false) != fileName::LINK)
+            {
+                FatalErrorIn("Test-fileName") << "Type of softlink " << lnB
+                    << " should be " << fileName::LINK
+                    << " but is " << lnB.type(false) << exit(FatalError);
+            }
+            if (lnB.type(true) != fileName::DIRECTORY)
+            {
+                FatalErrorIn("Test-fileName") << "Type of softlink " << lnB
+                    << " should be " << fileName::DIRECTORY
+                    << " but is " << lnB.type(true) << exit(FatalError);
+            }
+
+            // Delete
+            Foam::rm(lnB);
+        }
+
+        // Copy contents of link
+        {
+            Info<< "Copying (contents of) softlink " << lnA << " to " << lnB
+                << endl;
+
+            Foam::cp(lnA, lnB, true);
+            if (lnB.type(false) != fileName::DIRECTORY)
+            {
+                FatalErrorIn("Test-fileName") << "Type of softlink " << lnB
+                    << " should be " << fileName::DIRECTORY
+                    << " but is " << lnB.type(false) << exit(FatalError);
+            }
+
+            // Delete
+            Foam::rm(lnB);
+        }
+
+        POSIX::debug = oldPosix;
+
+        Foam::rmDir(dirA);
+        Foam::rm(lnA);
+    }
+
+
 
     // test findEtcFile
     Info<< "\n\nfindEtcFile tests:" << nl

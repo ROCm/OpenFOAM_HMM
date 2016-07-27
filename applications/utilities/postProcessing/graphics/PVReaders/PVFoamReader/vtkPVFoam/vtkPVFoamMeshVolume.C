@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -275,7 +275,6 @@ vtkUnstructuredGrid* Foam::vtkPVFoam::volumeVTKMesh
             // Polyhedral cell - use VTK_POLYHEDRON
             const labelList& cFaces = mesh.cells()[cellI];
 
-#ifdef HAS_VTK_POLYHEDRON
             vtkIdType nFaces = cFaces.size();
             vtkIdType nLabels = nFaces;
 
@@ -320,33 +319,6 @@ vtkUnstructuredGrid* Foam::vtkPVFoam::volumeVTKMesh
             }
 
             vtkmesh->InsertNextCell(VTK_POLYHEDRON, nFaces, faceStream.data());
-#else
-            // this is a horrible substitute
-            // but avoids crashes when there is no vtkPolyhedron support
-
-            // establish unique node ids used
-            HashSet<vtkIdType, Hash<label>> hashUniqId(2*256);
-
-            forAll(cFaces, cFaceI)
-            {
-                const face& f = mesh.faces()[cFaces[cFaceI]];
-
-                forAll(f, fp)
-                {
-                    hashUniqId.insert(f[fp]);
-                }
-            }
-
-            // use face stream to store unique node ids:
-            faceStream = hashUniqId.sortedToc();
-
-            vtkmesh->InsertNextCell
-            (
-                VTK_CONVEX_POINT_SET,
-                vtkIdType(faceStream.size()),
-                faceStream.data()
-            );
-#endif
         }
         else
         {

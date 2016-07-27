@@ -208,7 +208,7 @@ unsetenv GMP_ARCH_PATH MPFR_ARCH_PATH
 # Location of compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if ( ! $?WM_COMPILER_TYPE ) then
-    set WM_COMPILER_TYPE=system
+    setenv WM_COMPILER_TYPE system
     echo "Warning in $WM_PROJECT_DIR/etc/config.csh/settings:"
     echo "    WM_COMPILER_TYPE not set, using '$WM_COMPILER_TYPE'"
 endif

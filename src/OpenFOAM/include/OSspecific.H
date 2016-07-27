@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,7 @@ SourceFiles
 #define OSspecific_H
 
 #include "fileNameList.H"
+#include "stringList.H"
 
 #include <sys/types.h>
 
@@ -132,44 +133,60 @@ bool mkDir(const fileName&, mode_t=0777);
 bool chMod(const fileName&, const mode_t);
 
 //- Return the file mode
-mode_t mode(const fileName&);
+mode_t mode(const fileName&, const bool followLink=true);
 
 //- Return the file type: DIRECTORY or FILE
-fileName::Type type(const fileName&);
+fileName::Type type(const fileName&, const bool followLink=true);
 
 //- Does the name exist (as DIRECTORY or FILE) in the file system?
 //  Optionally enable/disable check for gzip file.
-bool exists(const fileName&, const bool checkGzip=true);
+bool exists
+(
+    const fileName&,
+    const bool checkGzip=true,
+    const bool followLink=true
+);
 
 //- Does the name exist as a DIRECTORY in the file system?
-bool isDir(const fileName&);
+bool isDir(const fileName&, const bool followLink=true);
 
 //- Does the name exist as a FILE in the file system?
 //  Optionally enable/disable check for gzip file.
-bool isFile(const fileName&, const bool checkGzip=true);
+bool isFile
+(
+    const fileName&,
+    const bool checkGzip=true,
+    const bool followLink=true
+);
 
 //- Return size of file
-off_t fileSize(const fileName&);
+off_t fileSize(const fileName&, const bool followLink=true);
 
 //- Return time of last file modification
-time_t lastModified(const fileName&);
+time_t lastModified(const fileName&, const bool followLink=true);
 
 //- Read a directory and return the entries as a string list
 fileNameList readDir
 (
     const fileName&,
     const fileName::Type=fileName::FILE,
-    const bool filtergz=true
+    const bool filtergz=true,
+    const bool followLink=true
 );
 
 //- Copy, recursively if necessary, the source to the destination
-bool cp(const fileName& src, const fileName& dst);
+bool cp(const fileName& src, const fileName& dst, const bool followLink=true);
 
 //- Create a softlink. dst should not exist. Returns true if successful.
 bool ln(const fileName& src, const fileName& dst);
 
 //- Rename src to dst
-bool mv(const fileName& src, const fileName& dst);
+bool mv
+(
+    const fileName& src,
+    const fileName& dst,
+    const bool followLink=false
+);
 
 //- Rename to a corresponding backup file
 //  If the backup file already exists, attempt with "01" .. "99" suffix
@@ -193,8 +210,14 @@ bool ping(const string&, const label port, const label timeOut);
 //- Check if machine is up by pinging port 22 (ssh) and 222 (rsh)
 bool ping(const string&, const label timeOut=10);
 
-//- Execute the specified command
+//- Execute the specified command via the shell.
+//  Uses vfork/execl internally.
+//  Where possible, use the list version instead.
 int system(const std::string& command);
+
+//- Execute the specified command with arguments.
+//  Uses vfork/execvp internally
+int system(const UList<string>& command);
 
 //- Open a shared library. Return handle to library. Print error message
 //  if library cannot be loaded (check = true)

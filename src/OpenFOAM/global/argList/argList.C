@@ -1170,7 +1170,7 @@ void Foam::argList::displayDoc(bool source) const
 
         Info<< "Show documentation: " << docBrowser.c_str() << endl;
 
-        system(docBrowser);
+        Foam::system(docBrowser);
     }
     else
     {

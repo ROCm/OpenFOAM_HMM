@@ -59,7 +59,7 @@ class genericFvPatchField
 {
     // Private data
 
-        word actualTypeName_;
+        const word actualTypeName_;
         dictionary dict_;
 
         HashPtrTable<scalarField> scalarFields_;
@@ -178,6 +178,9 @@ public:
             //  evaluation of the gradient of this patchField
             tmp<Field<Type>> gradientBoundaryCoeffs() const;
 
+
+        //- Return the actual type
+        const word& actualType() const;
 
         //- Write
         virtual void write(Ostream&) const;

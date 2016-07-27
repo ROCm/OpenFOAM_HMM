@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 
 #include <signal.h>
 #include <unistd.h>
+#include <sys/sysmacros.h>
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -38,7 +39,12 @@ Foam::fileStat::fileStat()
 {}
 
 
-Foam::fileStat::fileStat(const fileName& fName, const unsigned int maxTime)
+Foam::fileStat::fileStat
+(
+    const fileName& fName,
+    const bool followLink,
+    const unsigned int maxTime
+)
 {
     // Work on volatile
     volatile bool locIsValid = false;
@@ -47,13 +53,13 @@ Foam::fileStat::fileStat(const fileName& fName, const unsigned int maxTime)
 
     if (!timedOut(myTimer))
     {
-        if (::stat(fName.c_str(), &status_) != 0)
+        if (followLink)
         {
-            locIsValid = false;
+            locIsValid = (::stat(fName.c_str(), &status_) == 0);
         }
         else
         {
-            locIsValid = true;
+            locIsValid = (::lstat(fName.c_str(), &status_) == 0);
         }
     }
 
