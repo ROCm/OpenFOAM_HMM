@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,6 +78,9 @@ public:
 
         //- A very large inverted boundBox: min/max == +/- VGREAT
         static const boundBox invertedBox;
+
+        //- Faces to point addressing, as per a 'hex' cell
+        static const faceList faces;
 
 
     // Constructors
@@ -158,11 +161,8 @@ public:
             //- Average length/height/width dimension
             inline scalar avgDim() const;
 
-            //- Return corner points in an order corresponding to a 'hex' cell
+            //- Corner points in an order corresponding to a 'hex' cell
             tmp<pointField> points() const;
-
-            //- Return faces with correct point order
-            static faceList faces();
 
 
         // Manipulate
