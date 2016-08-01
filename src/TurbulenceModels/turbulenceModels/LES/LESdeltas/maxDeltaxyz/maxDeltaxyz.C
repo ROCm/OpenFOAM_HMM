@@ -47,26 +47,31 @@ void Foam::LESModels::maxDeltaxyz::calcDelta()
     label nD = mesh.nGeometricD();
 
     const cellList& cells = mesh.cells();
+    const vectorField& cellC = mesh.cellCentres();
+    const vectorField& faceC = mesh.faceCentres();
+    const vectorField faceN(mesh.faceAreas()/mag(mesh.faceAreas()));
     scalarField hmax(cells.size());
 
-    forAll(cells,cellI)
+    forAll(cells, celli)
     {
         scalar deltaMaxTmp = 0.0;
-        const labelList& cFaces = mesh.cells()[cellI];
-        const point& centrevector = mesh.cellCentres()[cellI];
+        const labelList& cFaces = cells[celli];
+        const point& cc = cellC[celli];
 
-        forAll(cFaces, cFaceI)
+        forAll(cFaces, cFacei)
         {
-            label faceI = cFaces[cFaceI];
-            const point& facevector = mesh.faceCentres()[faceI];
-            scalar tmp = mag(facevector - centrevector);
+            label facei = cFaces[cFacei];
+            const point& fc = faceC[facei];
+            const vector& n = faceN[facei];
+
+            scalar tmp = magSqr(n*(n & (fc - cc)));
             if (tmp > deltaMaxTmp)
             {
                 deltaMaxTmp = tmp;
             }
         }
 
-        hmax[cellI] = deltaCoeff_*deltaMaxTmp;
+        hmax[celli] = deltaCoeff_*Foam::sqrt(deltaMaxTmp);
     }
 
     if (nD == 3)
@@ -76,7 +81,7 @@ void Foam::LESModels::maxDeltaxyz::calcDelta()
     else if (nD == 2)
     {
         WarningInFunction
-            << "Case is 2D, LES is not strictly applicable\n"
+            << "Case is 2D, LES is not strictly applicable" << nl
             << endl;
 
         delta_.internalField() = hmax;
