@@ -433,6 +433,12 @@ int main(int argc, char *argv[])
                    cellDist[celli] = procIds[celli];
                 }
 
+                // Propagate from internal to patch fields too
+                for (auto& pf : cellDist.boundaryField())
+                {
+                    pf = pf.patchInternalField();
+                }
+
                 cellDist.write();
 
                 Info<< nl << "Wrote decomposition as volScalarField to "
