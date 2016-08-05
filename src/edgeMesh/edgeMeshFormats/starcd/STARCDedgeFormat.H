@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,30 +62,18 @@ namespace fileFormats
 class STARCDedgeFormat
 :
     public edgeMesh,
-    public STARCDCore
+    protected STARCDCore
 {
-    // Private Data
-
-        //- STAR-CD identifier for line shapes (1d elements)
-        static const int starcdLineShape_ = 2;
-
-        //- STAR-CD identifier for line type
-        static const int starcdLineType_  = 5;
-
-
     // Private Member Functions
 
-        static inline void writeLines
-        (
-            Ostream&,
-            const edgeList&
-        );
+        static inline void writeLines(Ostream&, const edgeList&);
+
 
         //- Disallow default bitwise copy construct
-        STARCDedgeFormat(const STARCDedgeFormat&);
+        STARCDedgeFormat(const STARCDedgeFormat&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const STARCDedgeFormat&);
+        void operator=(const STARCDedgeFormat&) = delete;
 
 
 protected:

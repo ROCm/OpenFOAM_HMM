@@ -275,7 +275,7 @@ public:
     // Constructors
 
         //- Construct from fileName
-        meshReader(const fileName&, const scalar scaleFactor = 1.0);
+        meshReader(const fileName&, const scalar scaling = 1.0);
 
 
     //- Destructor

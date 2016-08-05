@@ -94,15 +94,9 @@ int main(int argc, char *argv[])
         exportName += '-' + args.globalCaseName();
     }
 
-    // default: rescale from [m] to [mm]
-    scalar scaleFactor = 1000;
-    if (args.optionReadIfPresent("scale", scaleFactor))
-    {
-        if (scaleFactor <= 0)
-        {
-            scaleFactor = 1;
-        }
-    }
+    // Default rescale from [m] to [mm]
+    const scalar scaleFactor = args.optionLookupOrDefault("scale", 1000.0);
+    const bool  writeBndFile = !args.optionFound("noBnd");
 
     #include "createPolyMesh.H"
 
@@ -116,12 +110,12 @@ int main(int argc, char *argv[])
 
         if (!timeI || state != polyMesh::UNCHANGED)
         {
-            fileFormats::STARCDMeshWriter writer(mesh, scaleFactor);
-
-            if (args.optionFound("noBnd"))
-            {
-                writer.noBoundary();
-            }
+            fileFormats::STARCDMeshWriter writer
+            (
+                mesh,
+                scaleFactor,
+                writeBndFile
+            );
 
             fileName meshName(exportName);
             if (state != polyMesh::UNCHANGED)
