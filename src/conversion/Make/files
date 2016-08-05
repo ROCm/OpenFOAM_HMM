@@ -15,6 +15,10 @@ ensight/part/ensightPartCells.C
 ensight/part/ensightPartFaces.C
 ensight/part/ensightParts.C
 
+fire/FIREMeshReader.C
+fire/FIREMeshWriter.C
+fire/checkFireEdges.C
+
 starcd/STARCDMeshReader.C
 starcd/STARCDMeshWriter.C
 

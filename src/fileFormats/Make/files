@@ -7,9 +7,11 @@ ensight/part/ensightFaces.C
 ensight/read/ensightReadFile.C
 ensight/type/ensightPTraits.C
 
-vtk/vtkUnstructuredReader.C
 nas/NASCore.C
+fire/FIRECore.C
 starcd/STARCDCore.C
+
+vtk/vtkUnstructuredReader.C
 
 coordSet/coordSet.C
 
