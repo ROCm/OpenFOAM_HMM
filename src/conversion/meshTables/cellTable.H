@@ -49,7 +49,7 @@ Description
     \endverbatim
 
     If the \a Label is missing, a value <tt>cellTable_{ID}</tt> will be
-    inferred. If the \a MaterialType is missing, the value @a fluid will
+    inferred. If the \a MaterialType is missing, the value \a fluid will
     be inferred.
 
 SourceFiles

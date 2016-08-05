@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,7 +90,12 @@ void Foam::meshReader::addPolyBoundaryFace
     const label nCreatedFaces
 )
 {
-    addPolyBoundaryFace(identifier.cell, identifier.face, nCreatedFaces);
+    addPolyBoundaryFace
+    (
+        identifier.cellId(),
+        identifier.faceId(),
+        nCreatedFaces
+    );
 }
 
 
@@ -153,7 +158,7 @@ void Foam::meshReader::createPolyBoundary()
 
                 forAll(idList, bndI)
                 {
-                    label baffleI = idList[bndI].cell - baffleOffset;
+                    label baffleI = idList[bndI].cellId() - baffleOffset;
 
                     if
                     (
@@ -189,13 +194,13 @@ void Foam::meshReader::createPolyBoundary()
         else if (patchPhysicalTypes_[patchi] == "monitoring")
         {
             // translate the "monitoring" pseudo-boundaries to face sets
-            List<label> monitoring(idList.size());
+            labelList monitoring(idList.size());
 
             label monitorI = 0;
             forAll(idList, bndI)
             {
-                label cellId = idList[bndI].cell;
-                label faceId = idList[bndI].face;
+                label cellId = idList[bndI].cellId();
+                label faceId = idList[bndI].faceId();
 
                 // standard case: volume cells
                 if (cellId < baffleOffset)
@@ -215,7 +220,7 @@ void Foam::meshReader::createPolyBoundary()
             forAll(idList, bndI)
             {
                 // standard case: volume cells
-                if (idList[bndI].cell < baffleOffset)
+                if (idList[bndI].cellId() < baffleOffset)
                 {
                     addPolyBoundaryFace
                     (
