@@ -6,4 +6,4 @@ EXE_INC = \
 EXE_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
-    -L$(FOAM_EXT_LIBBIN) -lccmio
+    -L$(CCMIO_ARCH_PATH)/lib -L$(FOAM_EXT_LIBBIN) -lccmio
