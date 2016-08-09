@@ -41,6 +41,13 @@ namespace fv
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
+const convectionScheme<Type>& boundedConvectionScheme<Type>::scheme() const
+{
+    return scheme_();
+}
+
+
+template<class Type>
 tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
 boundedConvectionScheme<Type>::interpolate
 (
