@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
             IOobject
             (
                 singleCellName,
-                mesh.polyMesh::instance(),
+                mesh.pointsInstance(),
                 runTime,
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE
@@ -108,6 +108,8 @@ int main(int argc, char *argv[])
             mesh
         )
     );
+    scMesh().setInstance(mesh.pointsInstance());
+
     // For convenience create any fv* files
     if (!exists(scMesh().fvSolution::objectPath()))
     {
@@ -140,7 +142,7 @@ int main(int argc, char *argv[])
                     IOobject
                     (
                         singleCellName,
-                        mesh.polyMesh::instance(),
+                        mesh.pointsInstance(),
                         runTime,
                         IOobject::NO_READ,
                         IOobject::AUTO_WRITE
