@@ -305,16 +305,21 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
     // Create faces and points for subsetted surface
     faceList& faces = this->storedFaces();
     faces.setSize(faceMap.size());
+
+    labelList& zoneIds = this->storedZoneIds();
+    zoneIds.setSize(faceMap.size());
+
     forAll(faceMap, i)
     {
-        const triFace& f = s[faceMap[i]];
+        const labelledTri& f = s[faceMap[i]];
         triFace newF
         (
             reversePointMap[f[0]],
             reversePointMap[f[1]],
             reversePointMap[f[2]]
         );
-        faces[i] = newF.triFaceFace();
+        faces[i]   = newF.triFaceFace();
+        zoneIds[i] = f.region(); // preserve zone information
 
         forAll(newF, fp)
         {
@@ -773,9 +778,10 @@ Foam::tmp<Foam::tensorField> Foam::sampledTriSurfaceMesh::interpolate
 void Foam::sampledTriSurfaceMesh::print(Ostream& os) const
 {
     os  << "sampledTriSurfaceMesh: " << name() << " :"
-        << "  surface:" << surface_.objectRegistry::name()
-        << "  faces:" << faces().size()
-        << "  points:" << points().size();
+        << " surface:" << surface_.objectRegistry::name()
+        << " faces:"   << faces().size()
+        << " points:"  << points().size()
+        << " zoneids:" << zoneIds().size();
 }
 
 

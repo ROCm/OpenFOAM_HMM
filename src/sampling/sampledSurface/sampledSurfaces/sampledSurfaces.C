@@ -72,20 +72,17 @@ void Foam::sampledSurfaces::writeGeometry() const
                 (
                     outputDir,
                     s.name(),
-                    mergeList_[surfI].points,
-                    mergeList_[surfI].faces
+                    meshedSurfRef
+                    (
+                        mergeList_[surfI].points,
+                        mergeList_[surfI].faces
+                    )
                 );
             }
         }
         else if (s.faces().size())
         {
-            formatter_->write
-            (
-                outputDir,
-                s.name(),
-                s.points(),
-                s.faces()
-            );
+            formatter_->write(outputDir, s.name(), s);
         }
     }
 }

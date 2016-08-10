@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,10 +39,12 @@ namespace Foam
 void Foam::dxSurfaceWriter::writeGeometry
 (
     Ostream& os,
-    const pointField& points,
-    const faceList& faces
+    const meshedSurf& surf
 )
 {
+    const pointField& points = surf.points();
+    const faceList&    faces = surf.faces();
+
     // Write vertex coordinates
 
     os  << "# The irregular positions" << nl

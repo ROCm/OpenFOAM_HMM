@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,14 +53,14 @@ Foam::fileName Foam::boundaryDataSurfaceWriter::write
 (
     const fileName& outputDir,
     const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
+    const meshedSurf& surf,
     const bool verbose
 ) const
 {
     const fileName baseDir(outputDir.path()/surfaceName);
     const fileName timeName(outputDir.name());
 
+    const pointField& points = surf.points();
 
     // Construct dummy time to use as an objectRegistry
     const fileName caseDir(getEnv("FOAM_CASE"));
@@ -109,6 +109,8 @@ Foam::fileName Foam::boundaryDataSurfaceWriter::write
     return baseDir;
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // create write methods
 defineSurfaceWriterWriteFields(Foam::boundaryDataSurfaceWriter);

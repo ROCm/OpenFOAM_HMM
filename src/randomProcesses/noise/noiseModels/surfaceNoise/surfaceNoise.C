@@ -290,12 +290,16 @@ Foam::scalar surfaceNoise::writeSurfaceData
                 }
             }
 
+            // could also have meshedSurface implement meshedSurf
             fileName outFileName = writerPtr_->write
             (
                 outDir,
                 fName,
-                surf.points(),
-                surf.surfFaces(),
+                meshedSurfRef
+                (
+                    surf.points(),
+                    surf.surfFaces()
+                ),
                 title,
                 allData,
                 false
@@ -313,12 +317,16 @@ Foam::scalar surfaceNoise::writeSurfaceData
     {
         const meshedSurface& surf = readerPtr_->geometry();
 
+        // could also have meshedSurface implement meshedSurf
         writerPtr_->write
         (
             outDir,
             fName,
-            surf.points(),
-            surf.surfFaces(),
+            meshedSurfRef
+            (
+                surf.points(),
+                surf.surfFaces()
+            ),
             title,
             data,
             false

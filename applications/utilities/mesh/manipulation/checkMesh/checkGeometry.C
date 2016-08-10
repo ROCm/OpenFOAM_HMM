@@ -1019,8 +1019,11 @@ Foam::label Foam::checkGeometry
                             (
                                 "postProcessing",
                                 "src_" + tmName,
-                                mergedPoints,
-                                mergedFaces,
+                                meshedSurfRef
+                                (
+                                    mergedPoints,
+                                    mergedFaces
+                                ),
                                 "weightsSum",
                                 mergedWeights,
                                 false
@@ -1066,8 +1069,11 @@ Foam::label Foam::checkGeometry
                             (
                                 "postProcessing",
                                 "tgt_" + tmName,
-                                mergedPoints,
-                                mergedFaces,
+                                meshedSurfRef
+                                (
+                                    mergedPoints,
+                                    mergedFaces
+                                ),
                                 "weightsSum",
                                 mergedWeights,
                                 false

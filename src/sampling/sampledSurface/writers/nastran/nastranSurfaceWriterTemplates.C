@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,9 +115,9 @@ void Foam::nastranSurfaceWriter::writeFaceValue
 
             os  << separator_;
             writeValue(EID, os);
-
             break;
         }
+
         case dfPLOAD4:
         {
             writeValue(EID, os);
@@ -129,6 +129,7 @@ void Foam::nastranSurfaceWriter::writeFaceValue
             }
             break;
         }
+
         default:
         {
             FatalErrorInFunction
@@ -148,8 +149,7 @@ Foam::fileName Foam::nastranSurfaceWriter::writeTemplate
 (
     const fileName& outputDir,
     const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
+    const meshedSurf& surf,
     const word& fieldName,
     const Field<Type>& values,
     const bool isNodeValues,
@@ -192,10 +192,8 @@ Foam::fileName Foam::nastranSurfaceWriter::writeTemplate
         << "$" << nl
         << "BEGIN BULK" << nl;
 
-    List<DynamicList<face>> decomposedFaces(faces.size());
-
-    writeGeometry(points, faces, decomposedFaces, os);
-
+    List<DynamicList<face>> decomposedFaces;
+    writeGeometry(surf, decomposedFaces, os);
 
     os  << "$" << nl
         << "$ Field data" << nl
@@ -238,7 +236,7 @@ Foam::fileName Foam::nastranSurfaceWriter::writeTemplate
         }
     }
 
-    writeFooter(os);
+    writeFooter(os, surf);
 
     os  << "ENDDATA" << endl;
 

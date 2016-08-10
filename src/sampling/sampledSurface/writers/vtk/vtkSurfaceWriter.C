@@ -40,10 +40,12 @@ namespace Foam
 void Foam::vtkSurfaceWriter::writeGeometry
 (
     Ostream& os,
-    const pointField& points,
-    const faceList& faces
+    const meshedSurf& surf
 )
 {
+    const pointField& points = surf.points();
+    const faceList&    faces = surf.faces();
+
     // header
     os
         << "# vtk DataFile Version 2.0" << nl
@@ -131,8 +133,9 @@ namespace Foam
         forAll(values, elemI)
         {
             const vector& v = values[elemI];
-            os  << float(v[0]) << ' ' << float(v[1]) << ' ' << float(v[2])
-                << nl;
+            os  << float(v[0]) << ' '
+                << float(v[1]) << ' '
+                << float(v[2]) << nl;
         }
     }
 
@@ -234,8 +237,7 @@ Foam::fileName Foam::vtkSurfaceWriter::write
 (
     const fileName& outputDir,
     const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
+    const meshedSurf& surf,
     const bool verbose
 ) const
 {
@@ -252,7 +254,7 @@ Foam::fileName Foam::vtkSurfaceWriter::write
         Info<< "Writing geometry to " << os.name() << endl;
     }
 
-    writeGeometry(os, points, faces);
+    writeGeometry(os, surf);
 
     return os.name();
 }

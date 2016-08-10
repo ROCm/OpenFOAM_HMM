@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 #include "IOmanip.H"
 #include "Tuple2.H"
 #include "makeSurfaceWriterMethods.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -204,6 +205,7 @@ void Foam::nastranSurfaceWriter::writeFace
     const word& faceType,
     const labelList& facePts,
     label& nFace,
+    const label PID,
     OFstream& os
 ) const
 {
@@ -221,16 +223,12 @@ void Foam::nastranSurfaceWriter::writeFace
 
     // For CTRIA3 elements, cols 7 onwards are not used
 
-    label PID = 1;
-
     writeKeyword(faceType, os);
-
     os  << separator_;
 
     os.setf(ios_base::right);
 
     writeValue(nFace++, os);
-
     os  << separator_;
 
     writeValue(PID, os);
@@ -286,12 +284,15 @@ void Foam::nastranSurfaceWriter::writeFace
 
 void Foam::nastranSurfaceWriter::writeGeometry
 (
-    const pointField& points,
-    const faceList& faces,
+    const meshedSurf& surf,
     List<DynamicList<face>>& decomposedFaces,
     OFstream& os
 ) const
 {
+    const pointField& points = surf.points();
+    const faceList&    faces = surf.faces();
+    const labelList&   zones = surf.zoneIds();
+
     // Write points
 
     os  << "$" << nl
@@ -303,28 +304,31 @@ void Foam::nastranSurfaceWriter::writeGeometry
         writeCoord(points[pointi], pointi, os);
     }
 
-
     // Write faces
+    decomposedFaces.clear();
+    decomposedFaces.setSize(faces.size());
 
     os  << "$" << nl
         << "$ Faces" << nl
         << "$" << nl;
 
-    label nFace = 1;
+    label nFace = 1; // the element-id
 
     forAll(faces, facei)
     {
         const face& f = faces[facei];
+        // 1-offset for PID
+        const label PID = 1 + (facei < zones.size() ? zones[facei] : 0);
 
         if (f.size() == 3)
         {
-            writeFace("CTRIA3", faces[facei], nFace, os);
-            decomposedFaces[facei].append(faces[facei]);
+            writeFace("CTRIA3", f, nFace, PID, os);
+            decomposedFaces[facei].append(f);
         }
         else if (f.size() == 4)
         {
-            writeFace("CQUAD4", faces[facei], nFace, os);
-            decomposedFaces[facei].append(faces[facei]);
+            writeFace("CQUAD4", f, nFace, PID, os);
+            decomposedFaces[facei].append(f);
         }
         else
         {
@@ -335,7 +339,7 @@ void Foam::nastranSurfaceWriter::writeGeometry
 
             forAll(triFaces, trii)
             {
-                writeFace("CTRIA3", triFaces[trii], nFace, os);
+                writeFace("CTRIA3", triFaces[trii], nFace, PID, os);
                 decomposedFaces[facei].append(triFaces[trii]);
             }
         }
@@ -343,29 +347,42 @@ void Foam::nastranSurfaceWriter::writeGeometry
 }
 
 
-void Foam::nastranSurfaceWriter::writeFooter(Ostream& os) const
+void Foam::nastranSurfaceWriter::writeFooter
+(
+    Ostream& os,
+    const meshedSurf& surf
+) const
 {
-    label PID = 1;
+    // zone id have been used for the PID. Find unique values.
 
-    writeKeyword("PSHELL", os);
-
-    os  << separator_;
-
-    writeValue(PID, os);
-
-    for (label i = 0; i < 7; i++)
+    labelList pidsUsed = labelHashSet(surf.zoneIds()).sortedToc();
+    if (pidsUsed.empty())
     {
-        // Dummy values
-        os  << separator_;
-        writeValue(1, os);
+        pidsUsed.setSize(1, Zero); // fallback
     }
 
-    os  << nl;
-    writeKeyword("MAT1", os);
-    os  << separator_;
+    for (auto pid : pidsUsed)
+    {
+        writeKeyword("PSHELL", os);
+        os  << separator_;
+        writeValue(pid+1, os);  // 1-offset for PID
+
+        for (label i = 0; i < 7; i++)
+        {
+            // Dummy values
+            os  << separator_;
+            writeValue(1, os);
+        }
+        os  << nl;
+    }
+
+
+    // use single material ID
 
     label MID = 1;
 
+    writeKeyword("MAT1", os);
+    os  << separator_;
     writeValue(MID, os);
 
     for (label i = 0; i < 7; i++)
@@ -374,7 +391,6 @@ void Foam::nastranSurfaceWriter::writeFooter(Ostream& os) const
         os  << separator_;
         writeValue("", os);
     }
-
     os << nl;
 }
 
@@ -431,8 +447,7 @@ Foam::fileName Foam::nastranSurfaceWriter::write
 (
     const fileName& outputDir,
     const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
+    const meshedSurf& surf,
     const bool verbose
 ) const
 {
@@ -453,16 +468,15 @@ Foam::fileName Foam::nastranSurfaceWriter::write
         << "$" << nl
         << "BEGIN BULK" << nl;
 
-    List<DynamicList<face>> decomposedFaces(faces.size());
-
-    writeGeometry(points, faces, decomposedFaces, os);
+    List<DynamicList<face>> decomposedFaces;
+    writeGeometry(surf, decomposedFaces, os);
 
     if (!isDir(outputDir))
     {
         mkDir(outputDir);
     }
 
-    writeFooter(os);
+    writeFooter(os, surf);
 
     os  << "ENDDATA" << endl;
 

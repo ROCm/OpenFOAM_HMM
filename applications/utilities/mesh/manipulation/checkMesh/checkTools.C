@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,7 @@ License
 #include "globalIndex.H"
 #include "PatchTools.H"
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
 {
@@ -238,7 +239,16 @@ void Foam::mergeAndWrite
         // Write
         if (Pstream::master())
         {
-            writer.write(outputDir, name, mergedPoints, mergedFaces);
+            writer.write
+            (
+                outputDir,
+                name,
+                meshedSurfRef
+                (
+                    mergedPoints,
+                    mergedFaces
+                )
+            );
         }
     }
     else
@@ -247,8 +257,11 @@ void Foam::mergeAndWrite
         (
             outputDir,
             name,
-            setPatch.localPoints(),
-            setPatch.localFaces()
+            meshedSurfRef
+            (
+                setPatch.localPoints(),
+                setPatch.localFaces()
+            )
         );
     }
 }

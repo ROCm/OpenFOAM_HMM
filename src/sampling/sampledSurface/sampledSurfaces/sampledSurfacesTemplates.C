@@ -79,8 +79,11 @@ void Foam::sampledSurfaces::writeSurface
                 (
                     outputDir,
                     s.name(),
-                    mergeList_[surfI].points,
-                    mergeList_[surfI].faces,
+                    meshedSurfRef
+                    (
+                        mergeList_[surfI].points,
+                        mergeList_[surfI].faces
+                    ),
                     fieldName,
                     allValues,
                     s.interpolate()
@@ -106,8 +109,7 @@ void Foam::sampledSurfaces::writeSurface
             (
                 outputDir,
                 s.name(),
-                s.points(),
-                s.faces(),
+                s,
                 fieldName,
                 values,
                 s.interpolate()

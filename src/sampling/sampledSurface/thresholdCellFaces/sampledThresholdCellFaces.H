@@ -148,6 +148,12 @@ public:
             return MeshStorage::surfFaces();
         }
 
+        //- Const access to per-face zone/region information
+        virtual const labelList& zoneIds() const
+        {
+            return Foam::emptyLabelList;
+        }
+
         //- Face area vectors (normals)
         virtual const vectorField& Sf() const
         {

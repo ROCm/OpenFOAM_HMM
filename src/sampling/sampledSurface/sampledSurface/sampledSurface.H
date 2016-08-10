@@ -52,7 +52,7 @@ SourceFiles
 #ifndef sampledSurface_H
 #define sampledSurface_H
 
-#include "pointField.H"
+#include "meshedSurf.H"
 #include "word.H"
 #include "labelList.H"
 #include "faceList.H"
@@ -83,6 +83,8 @@ Ostream& operator<<(Ostream&, const sampledSurface&);
 \*---------------------------------------------------------------------------*/
 
 class sampledSurface
+:
+    public meshedSurf
 {
     // Private data
 
