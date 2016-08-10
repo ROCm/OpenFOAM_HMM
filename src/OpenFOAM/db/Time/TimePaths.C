@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,38 @@ License
 #include "TimePaths.H"
 #include "IOstreams.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+bool Foam::TimePaths::detectProcessorCase()
+{
+    if (processorCase_)
+    {
+        return processorCase_;
+    }
+
+    // Look for "processor", but should really check for following digits too
+    const std::string::size_type sep = globalCaseName_.rfind('/');
+    const std::string::size_type pos = globalCaseName_.find
+    (
+        "processor",
+        (sep == string::npos ? 0 : sep)
+    );
+
+    if (pos == 0)
+    {
+        globalCaseName_ = ".";
+        processorCase_  = true;
+    }
+    else if (pos != string::npos && sep != string::npos && sep == pos-1)
+    {
+        globalCaseName_.resize(sep);
+        processorCase_  = true;
+    }
+
+    return processorCase_;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::TimePaths::TimePaths
@@ -38,29 +70,13 @@ Foam::TimePaths::TimePaths
 :
     processorCase_(false),
     rootPath_(rootPath),
+    globalCaseName_(caseName),
     case_(caseName),
     system_(systemName),
     constant_(constantName)
 {
     // Find out from case name whether a processor directory
-    std::string::size_type pos = caseName.find("processor");
-    if (pos != string::npos)
-    {
-        processorCase_ = true;
-
-        if (pos == 0)
-        {
-            globalCaseName_ = ".";
-        }
-        else
-        {
-            globalCaseName_ = caseName(pos-1);
-        }
-    }
-    else
-    {
-        globalCaseName_ = caseName;
-    }
+    detectProcessorCase();
 }
 
 
@@ -81,27 +97,10 @@ Foam::TimePaths::TimePaths
     system_(systemName),
     constant_(constantName)
 {
-    if (!processorCase)
-    {
-        // For convenience: find out from case name whether it is a
-        // processor directory and set processorCase flag so file searching
-        // goes up one level.
-        std::string::size_type pos = caseName.find("processor");
-
-        if (pos != string::npos)
-        {
-            processorCase_ = true;
-
-            if (pos == 0)
-            {
-                globalCaseName_ = ".";
-            }
-            else
-            {
-                globalCaseName_ = caseName(pos-1);
-            }
-        }
-    }
+    // For convenience: find out from case name whether it is a
+    // processor directory and set processorCase flag so file searching
+    // goes up one level.
+    detectProcessorCase();
 }
 
 

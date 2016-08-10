@@ -322,7 +322,7 @@ public:
         //- String representation of property types
         DefinePropertyTypes
         (
-            "vector label label scalar label label label label"
+            "{vector label label scalar label label label label}"
         );
 
         //- Cumulative particle counter - used to provode unique ID
