@@ -30,10 +30,10 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void Foam::nastranSurfaceWriter::writeValue
+Foam::Ostream& Foam::nastranSurfaceWriter::writeValue
 (
-    const Type& value,
-    Ostream& os
+    Ostream& os,
+    const Type& value
 ) const
 {
     switch (writeFormat_)
@@ -54,16 +54,18 @@ void Foam::nastranSurfaceWriter::writeValue
             break;
         }
     }
+
+    return os;
 }
 
 
 template<class Type>
-void Foam::nastranSurfaceWriter::writeFaceValue
+Foam::Ostream& Foam::nastranSurfaceWriter::writeFaceValue
 (
+    Ostream& os,
     const dataFormat& format,
     const Type& value,
-    const label EID,
-    Ostream& os
+    const label EID
 ) const
 {
     // Fixed short/long formats supporting PLOAD2 and PLOAD4:
@@ -84,16 +86,13 @@ void Foam::nastranSurfaceWriter::writeFaceValue
 
     Type scaledValue = scale_*value;
 
-    // Write Keyword
-    writeKeyword(dataFormatNames_[format], os);
-
-    os  << separator_;
+    // Write keyword
+    writeKeyword(os, dataFormatNames_[format])  << separator_;
 
     // Write load set ID
     os.setf(ios_base::right);
-    writeValue(SID, os);
 
-    os  << separator_;
+    writeValue(os, SID) << separator_;
 
     switch (format)
     {
@@ -101,7 +100,7 @@ void Foam::nastranSurfaceWriter::writeFaceValue
         {
             if (pTraits<Type>::nComponents == 1)
             {
-                writeValue(scaledValue, os);
+                writeValue(os, scaledValue) << separator_;
             }
             else
             {
@@ -110,22 +109,21 @@ void Foam::nastranSurfaceWriter::writeFaceValue
                     << "and cannot be used for higher rank values"
                     << endl;
 
-                writeValue(scalar(0), os);
+                writeValue(os, scalar(0)) << separator_;
             }
 
-            os  << separator_;
-            writeValue(EID, os);
+            writeValue(os, EID);
             break;
         }
 
         case dfPLOAD4:
         {
-            writeValue(EID, os);
+            writeValue(os, EID);
 
-            for (direction dirI = 0; dirI < pTraits<Type>::nComponents; dirI++)
+            for (direction dirI = 0; dirI < pTraits<Type>::nComponents; ++dirI)
             {
                 os  << separator_;
-                writeValue(component(scaledValue, dirI), os);
+                writeValue(os, component(scaledValue, dirI));
             }
             break;
         }
@@ -141,6 +139,8 @@ void Foam::nastranSurfaceWriter::writeFaceValue
     os.unsetf(ios_base::right);
 
     os << nl;
+
+    return os;
 }
 
 
@@ -185,15 +185,15 @@ Foam::fileName Foam::nastranSurfaceWriter::writeTemplate
         Info<< "Writing nastran file to " << os.name() << endl;
     }
 
-    os  << "TITLE=OpenFOAM " << surfaceName.c_str() << " " << fieldName
-        << " data" << nl
+    os  << "TITLE=OpenFOAM " << surfaceName.c_str()
+        << " " << fieldName << " data" << nl
         << "$" << nl
         << "TIME " << timeValue << nl
         << "$" << nl
         << "BEGIN BULK" << nl;
 
     List<DynamicList<face>> decomposedFaces;
-    writeGeometry(surf, decomposedFaces, os);
+    writeGeometry(os, surf, decomposedFaces);
 
     os  << "$" << nl
         << "$ Field data" << nl
@@ -201,7 +201,7 @@ Foam::fileName Foam::nastranSurfaceWriter::writeTemplate
 
     if (isNodeValues)
     {
-        label n = 0;
+        label elemId = 0;
 
         forAll(decomposedFaces, i)
         {
@@ -217,28 +217,26 @@ Foam::fileName Foam::nastranSurfaceWriter::writeTemplate
                 }
                 v /= f.size();
 
-                writeFaceValue(format, v, ++n, os);
+                writeFaceValue(os, format, v, ++elemId);
             }
         }
     }
     else
     {
-        label n = 0;
+        label elemId = 0;
 
         forAll(decomposedFaces, i)
         {
             const DynamicList<face>& dFaces = decomposedFaces[i];
-
             forAll(dFaces, facei)
             {
-                writeFaceValue(format, values[facei], ++n, os);
+                writeFaceValue(os, format, values[facei], ++elemId);
             }
         }
     }
 
-    writeFooter(os, surf);
-
-    os  << "ENDDATA" << endl;
+    writeFooter(os, surf)
+        << "ENDDATA" << endl;
 
     return os.name();
 }

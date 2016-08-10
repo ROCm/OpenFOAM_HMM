@@ -94,13 +94,13 @@ private:
     // Private data
 
         static const NamedEnum<writeFormat, 3> writeFormatNames_;
-        static const NamedEnum<dataFormat, 2> dataFormatNames_;
+        static const NamedEnum<dataFormat,  2> dataFormatNames_;
 
         //- Write option
         writeFormat writeFormat_;
 
         //- Mapping from field name to data format enumeration
-        HashTable<dataFormat, word> fieldMap_;
+        HashTable<dataFormat> fieldMap_;
 
         //- Scale to apply to values (default = 1.0)
         scalar scale_;
@@ -111,62 +111,59 @@ private:
 
     // Private Member Functions
 
-        //- Initialise the output stream format params
-        void formatOS(OFstream& os) const;
+        //- Initialise the output stream format parameters
+        void formatOS(Ostream& os) const;
 
-        //- Write a co-ordinate
+        //- Write a coordinate
         void writeCoord
         (
+            Ostream& os,
             const point& p,
-            const label pointi,
-            OFstream& os
+            const label pointI  //!< 0-based Point Id
         ) const;
 
         //- Write a face element (CTRIA3 or CQUAD4)
         void writeFace
         (
+            Ostream& os,
             const word& faceType,
-            const labelList& facePts,
-            label& nFace,
-            const label PID,
-            OFstream& os
+            const labelUList& facePts,
+            const label EID,    //!< 1-based Element Id
+            const label PID     //!< 1-based Property Id
         ) const;
 
         //- Main driver to write the surface mesh geometry
         void writeGeometry
         (
+            Ostream& os,
             const meshedSurf& surf,
-            List<DynamicList<face>>& decomposedFaces,
-            OFstream& os
+            List<DynamicList<face>>& decomposedFaces
         ) const;
 
         //- Write the formatted keyword to the output stream
-        void writeKeyword
+        Ostream& writeKeyword
         (
-            const word& keyword,
-            Ostream& os
+            Ostream& os,
+            const word& keyword
         ) const;
 
         //- Write the footer information
-        void writeFooter(Ostream& os, const meshedSurf& surf) const;
+        Ostream& writeFooter(Ostream& os, const meshedSurf& surf) const;
 
         //- Write a formatted value to the output stream
         template<class Type>
-        void writeValue
-        (
-            const Type& value,
-            Ostream& os
-        ) const;
+        Ostream& writeValue(Ostream& os, const Type& value) const;
 
         //- Write a face-based value
         template<class Type>
-        void writeFaceValue
+        Ostream& writeFaceValue
         (
+            Ostream& os,
             const dataFormat& format,
             const Type& value,
-            const label EID,
-            Ostream& os
+            const label EID     //!< 1-based Element Id
         ) const;
+
 
         //- Templated write operation
         template<class Type>
