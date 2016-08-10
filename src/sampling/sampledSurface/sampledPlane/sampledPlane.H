@@ -137,7 +137,7 @@ public:
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            return cuttingPlane::faces();
+            return cuttingPlane::surfFaces();
         }
 
         //- Face area magnitudes

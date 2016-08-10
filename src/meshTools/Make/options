@@ -5,5 +5,4 @@ EXE_INC = \
 
 LIB_LIBS = \
     -ltriSurface \
-    -lsurfMesh \
-    -lfileFormats
+    -lsurfMesh

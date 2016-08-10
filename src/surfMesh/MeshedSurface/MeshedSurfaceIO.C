@@ -47,7 +47,7 @@ Foam::Ostream& Foam::MeshedSurface<Face>::write(Ostream& os) const
 {
     os  << this->surfZones()
         << this->points()
-        << this->faces();
+        << this->surfFaces();
 
     os.check("MeshedSurface::write(Ostream&) const");
     return os;

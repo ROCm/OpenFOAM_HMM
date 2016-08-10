@@ -177,7 +177,7 @@ public:
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            return MeshStorage::faces();
+            return MeshStorage::surfFaces();
         }
 
         //- Face area vectors

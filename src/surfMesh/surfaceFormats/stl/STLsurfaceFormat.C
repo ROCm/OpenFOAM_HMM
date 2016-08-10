@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -203,7 +203,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeAscii
     }
 
     const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.faces();
+    const List<Face>&  faceLst = surf.surfFaces();
     const List<label>& faceMap = surf.faceMap();
 
     const List<surfZone>& zones =
@@ -258,9 +258,8 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBinary
             << exit(FatalError);
     }
 
-
     const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.faces();
+    const List<Face>&  faceLst = surf.surfFaces();
     const List<label>& faceMap = surf.faceMap();
 
     const List<surfZone>& zones =
@@ -340,12 +339,12 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeAscii
             << exit(FatalError);
     }
 
+    const pointField& pointLst = surf.points();
+    const List<Face>& faceLst  = surf.surfFaces();
+
     // a single zone - we can skip sorting
     if (surf.zoneToc().size() == 1)
     {
-        const pointField& pointLst = surf.points();
-        const List<Face>& faceLst  = surf.faces();
-
         os << "solid " << surf.zoneToc()[0].name() << endl;
         forAll(faceLst, facei)
         {
@@ -363,8 +362,8 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeAscii
            filename,
            MeshedSurfaceProxy<Face>
            (
-               surf.points(),
-               surf.faces(),
+               pointLst,
+               faceLst,
                zoneLst,
                faceMap
            )
@@ -389,7 +388,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBinary
     }
 
     const pointField&  pointLst = surf.points();
-    const List<Face>&  faceLst  = surf.faces();
+    const List<Face>&  faceLst  = surf.surfFaces();
     const List<label>& zoneIds  = surf.zoneIds();
 
     unsigned int nTris = 0;

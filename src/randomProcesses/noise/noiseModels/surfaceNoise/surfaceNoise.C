@@ -295,7 +295,7 @@ Foam::scalar surfaceNoise::writeSurfaceData
                 outDir,
                 fName,
                 surf.points(),
-                surf.faces(),
+                surf.surfFaces(),
                 title,
                 allData,
                 false
@@ -318,7 +318,7 @@ Foam::scalar surfaceNoise::writeSurfaceData
             outDir,
             fName,
             surf.points(),
-            surf.faces(),
+            surf.surfFaces(),
             title,
             data,
             false
