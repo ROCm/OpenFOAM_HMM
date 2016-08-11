@@ -10,6 +10,8 @@ UnsortedMeshedSurface/UnsortedMeshedSurfaces.C
 
 MeshedSurfaceProxy/MeshedSurfaceProxyCore.C
 
+mergedSurf/mergedSurf.C
+
 surfaceRegistry/surfaceRegistry.C
 surfMesh/surfMesh.C
 surfMesh/surfMeshClear.C

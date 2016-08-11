@@ -65,25 +65,21 @@ void Foam::sampledSurfaces::writeSurface
             );
 
             // Renumber (point data) to correspond to merged points
-            if (mergeList_[surfI].pointsMap.size() == allValues.size())
+            if (mergedList_[surfI].pointsMap().size() == allValues.size())
             {
-                inplaceReorder(mergeList_[surfI].pointsMap, allValues);
-                allValues.setSize(mergeList_[surfI].points.size());
+                inplaceReorder(mergedList_[surfI].pointsMap(), allValues);
+                allValues.setSize(mergedList_[surfI].points().size());
             }
 
             // Write to time directory under outputPath_
             // skip surface without faces (eg, a failed cut-plane)
-            if (mergeList_[surfI].faces.size())
+            if (mergedList_[surfI].size())
             {
                 sampleFile = formatter_->write
                 (
                     outputDir,
                     s.name(),
-                    meshedSurfRef
-                    (
-                        mergeList_[surfI].points,
-                        mergeList_[surfI].faces
-                    ),
+                    mergedList_[surfI],
                     fieldName,
                     allValues,
                     s.interpolate()
