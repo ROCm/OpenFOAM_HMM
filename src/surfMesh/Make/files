@@ -1,6 +1,5 @@
 surfZone/surfZone/surfZone.C
 surfZone/surfZone/surfZoneIOList.C
-surfZone/surfZoneIdentifier/surfZoneIdentifier.C
 
 MeshedSurfaceAllocator/MeshedSurfaceIOAllocator.C
 
