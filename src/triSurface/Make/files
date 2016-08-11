@@ -27,7 +27,6 @@ $(interfaces)/NAS/readNAS.C
 
 triSurface/geometricSurfacePatch/geometricSurfacePatch.C
 triSurface/surfacePatch/surfacePatch.C
-triSurface/surfacePatch/surfacePatchIOList.C
 
 triSurfaceFields/triSurfaceFields.C
 
