@@ -29,16 +29,30 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::ensightSurfaceReader::readSkip
+void Foam::ensightSurfaceReader::readFromLine
 (
-    IFstream& is,
     const label nSkip,
+    IStringStream& is,
     Type& value
 ) const
 {
     skip(nSkip, is);
 
     is  >> value;
+}
+
+
+template<class Type>
+void Foam::ensightSurfaceReader::readFromLine
+(
+    const label nSkip,
+    const string& buffer,
+    Type& value
+) const
+{
+    IStringStream is(buffer);
+
+    readFromLine(nSkip, is, value);
 }
 
 
@@ -60,9 +74,19 @@ Foam::tmp<Foam::Field<Type> > Foam::ensightSurfaceReader::readField
     fileName fieldFileName(fieldFileNames_[fieldIndex]);
 
     std::ostringstream oss;
-    oss << std::setfill('0') << std::setw(4) << fileIndex;
+    label nMask = 0;
+    for (size_t chari = 0; chari < fieldFileName.size(); chari++)
+    {
+        if (fieldFileName[chari] == '*')
+        {
+            nMask++;
+        }
+    }
+
+    const std::string maskStr(nMask, '*');
+    oss << std::setfill('0') << std::setw(nMask) << fileIndex;
     const word indexStr = oss.str();
-    fieldFileName.replace("****", indexStr);
+    fieldFileName.replace(maskStr, indexStr);
 
     
     ensightReadFile is(baseDir_/fieldFileName, streamFormat_);
