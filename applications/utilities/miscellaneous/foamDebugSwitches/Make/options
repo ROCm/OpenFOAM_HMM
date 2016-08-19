@@ -1,4 +1,5 @@
 EXE_LIBS = \
+    $(LINK_FLAGS) \
     -lsnappyHexMesh \
     -lbarotropicCompressibilityModel \
     -lsolidThermo \
@@ -41,7 +42,6 @@ EXE_LIBS = \
     -lOpenFOAM \
     -lpotential \
     -lradiationModels \
-    -lrandomProcesses \
     -lreactionThermophysicalModels \
     -lreconstruct \
     -lsampling \
