@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -261,6 +261,63 @@ void writeParts
             << " to " << subName << endl;
 
         subSurf.write(subName);
+    }
+}
+
+
+void syncEdges(const triSurface& p, labelHashSet& markedEdges)
+{
+    // See comment below about having duplicate edges
+
+    const edgeList& edges = p.edges();
+    HashSet<edge, Hash<edge>> edgeSet(2*markedEdges.size());
+
+    forAllConstIter(labelHashSet, markedEdges, iter)
+    {
+        edgeSet.insert(edges[iter.key()]);
+    }
+
+    forAll(edges, edgeI)
+    {
+        if (edgeSet.found(edges[edgeI]))
+        {
+            markedEdges.insert(edgeI);
+        }
+    }
+}
+
+
+void syncEdges(const triSurface& p, boolList& isMarkedEdge)
+{
+    // See comment below about having duplicate edges
+
+    const edgeList& edges = p.edges();
+
+    label n = 0;
+    forAll(isMarkedEdge, edgeI)
+    {
+        if (isMarkedEdge[edgeI])
+        {
+            n++;
+        }
+    }
+
+    HashSet<edge, Hash<edge>> edgeSet(2*n);
+
+    forAll(isMarkedEdge, edgeI)
+    {
+        if (isMarkedEdge[edgeI])
+        {
+            edgeSet.insert(edges[edgeI]);
+        }
+    }
+
+    forAll(edges, edgeI)
+    {
+        if (edgeSet.found(edges[edgeI]))
+        {
+            isMarkedEdge[edgeI] = true;
+        }
     }
 }
 
@@ -695,6 +752,7 @@ int main(int argc, char *argv[])
                     borderEdge[edgeI] = true;
                 }
             }
+            syncEdges(surf, borderEdge);
         }
 
         labelList faceZone;
@@ -725,6 +783,17 @@ int main(int argc, char *argv[])
 
     labelHashSet borderEdge(surf.size()/1000);
     PatchTools::checkOrientation(surf, false, &borderEdge);
+
+    // Bit strange: if a triangle has two same vertices (illegal!) it will
+    // still have three distinct edges (two of which have the same vertices).
+    // In this case the faceEdges addressing is not symmetric, i.e. a
+    // neighbouring, valid, triangle will have correct addressing so 3 distinct
+    // edges so it will miss one of those two identical edges.
+    // - we don't want to fix this in PrimitivePatch since it is too specific
+    // - instead just make sure we mark all identical edges consistently
+    //   when we use them for marking.
+
+    syncEdges(surf, borderEdge);
 
     //
     // Colour all faces into zones using borderEdge
