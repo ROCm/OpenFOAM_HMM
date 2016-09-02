@@ -41,7 +41,6 @@
         p_rghDDtEqn =
         (
             fvc::ddt(rho) + psi*correction(fvm::ddt(p_rgh))
-          + fvc::div(phiHbyA)
         ==
             fvOptions(psi, p_rgh, rho.name())
         );
@@ -52,6 +51,7 @@
         fvScalarMatrix p_rghEqn
         (
             p_rghDDtEqn()
+          + fvc::div(phiHbyA)
           - fvm::laplacian(rhorAUf, p_rgh)
         );
 
