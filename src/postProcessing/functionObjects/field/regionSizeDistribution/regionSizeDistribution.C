@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -335,7 +335,8 @@ Foam::regionSizeDistribution::regionSizeDistribution
     active_(true),
     alphaName_(dict.lookup("field")),
     patchNames_(dict.lookup("patches")),
-    log_(true)
+    log_(true),
+    isoPlanes_(dict.lookupOrDefault<bool>("isoPlanes", false))
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
     if (isA<fvMesh>(obr_))
@@ -387,6 +388,17 @@ void Foam::regionSizeDistribution::read(const dictionary& dict)
             if (log_) Info
                 << "Transforming all vectorFields with coordinate system "
                 << coordSysPtr_().name() << endl;
+        }
+
+        if (isoPlanes_)
+        {
+             dict.lookup("origin") >> origin_;
+             dict.lookup("direction") >> direction_;
+             dict.lookup("maxDiameter") >> maxDiameter_;
+             dict.lookup("nDownstreamBins") >> nDownstreamBins_;
+             dict.lookup("maxDownstream") >> maxDownstream_;
+
+             direction_ /= mag(direction_);
         }
     }
 }
@@ -691,6 +703,8 @@ void Foam::regionSizeDistribution::write()
         // (patchRegions) and background regions from maps.
         // Note that we have to use mesh volume (allRegionVolume) and not
         // allRegionAlphaVolume since background might not have alpha in it.
+        // Deleting regions where the volume-alpha-weighted is lower than
+        // threshold
         forAllIter(Map<scalar>, allRegionVolume, vIter)
         {
             label regionI = vIter.key();
@@ -698,6 +712,7 @@ void Foam::regionSizeDistribution::write()
             (
                 patchRegions.found(regionI)
              || vIter() >= maxDropletVol
+             || (allRegionAlphaVolume[regionI]/vIter() < threshold_)
             )
             {
                 allRegionVolume.erase(vIter);
@@ -734,6 +749,108 @@ void Foam::regionSizeDistribution::write()
                     allRegionAlphaVolume
                 )
             );
+
+            vectorField centroids(sortedVols.size(), vector::zero);
+
+            // Check if downstream bins are calculed
+            if (isoPlanes_)
+            {
+                vectorField alphaDistance
+                (
+                    (alpha.internalField()*mesh.V())
+                  * (mesh.C().internalField() - origin_)()
+                );
+
+                Map<vector> allRegionAlphaDistance
+                (
+                    regionSum
+                    (
+                        regions,
+                        alphaDistance
+                    )
+                );
+
+                // 2. centroid
+                vectorField sortedMoment
+                (
+                    extractData
+                    (
+                        sortedRegions,
+                        allRegionAlphaDistance
+                    )
+                );
+
+                centroids = sortedMoment/sortedVols + origin_;
+
+                // Bin according to centroid
+                scalarField distToPlane((centroids - origin_) & direction_);
+
+                vectorField radialDistToOrigin
+                (
+                    (centroids - origin_) - (distToPlane*direction_)
+                );
+
+                const scalar deltaX = maxDownstream_/nDownstreamBins_;
+                labelList downstreamIndices(distToPlane.size(), -1);
+                forAll(distToPlane, i)
+                {
+                    if
+                    (
+                        (mag(radialDistToOrigin[i]) < maxDiameter_)
+                     && (distToPlane[i] < maxDownstream_)
+                    )
+                    {
+                        downstreamIndices[i] = distToPlane[i]/deltaX;
+                    }
+                }
+
+                scalarField binDownCount(nDownstreamBins_, 0.0);
+                forAll(distToPlane, i)
+                {
+                    if (downstreamIndices[i] != -1)
+                    {
+                        binDownCount[downstreamIndices[i]] += 1.0;
+                    }
+                }
+
+                // Write
+                if (Pstream::master())
+                {
+                    // Construct mids of bins for plotting
+                    pointField xBin(nDownstreamBins_);
+
+                    scalar x = 0.5*deltaX;
+                    forAll(xBin, i)
+                    {
+                        xBin[i] = point(x, 0, 0);
+                        x += deltaX;
+                    }
+
+                    const coordSet coords("distance", "x", xBin, mag(xBin));
+                    writeGraph(coords, "isoPlanes", binDownCount);
+                }
+
+                // Write to screen
+                if (log_)
+                {
+                    Info<< "    Iso-planes Bins:" << endl;
+                    Info<< "    " << token::TAB << "Bin"
+                        << token::TAB << "Min distance"
+                        << token::TAB << "Count:"
+                        << endl;
+
+                    scalar delta = 0.0;
+                    forAll(binDownCount, binI)
+                    {
+                        Info<< "    " << token::TAB << binI
+                            << token::TAB << delta
+                            << token::TAB << binDownCount[binI] << endl;
+                        delta += deltaX;
+                    }
+                    Info<< endl;
+
+                }
+            }
 
             // Calculate the diameters
             scalarField sortedDiameters(sortedVols.size());
