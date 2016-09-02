@@ -46,7 +46,8 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
         scalarField Un(max(phip/patch().magSf(), scalar(0)));
         if (uniformJump_)
         {
-             Un = gAverage(Un);
+            scalar area = gSum(patch().magSf());
+            Un = gSum(Un*patch().magSf())/area;
         }
 
         if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
