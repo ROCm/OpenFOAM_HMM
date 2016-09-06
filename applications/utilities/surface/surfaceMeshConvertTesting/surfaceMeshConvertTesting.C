@@ -97,7 +97,11 @@ int main(int argc, char *argv[])
         "surfMesh",
         "test surfMesh output"
     );
-    argList::addBoolOption("triSurface");
+    argList::addBoolOption
+    (
+        "triSurface",
+        "use triSurface for read/write"
+    );
     argList::addBoolOption
     (
         "unsorted",
@@ -164,10 +168,14 @@ int main(int argc, char *argv[])
             os << surf;
             IStringStream is(os.str());
 
+            // both work:
             triSurface surf2(is);
 
+            // OR
             // is.rewind();
-            // is >> surf2;    // FAIL: uses List<labelledTri> base class
+            // triSurface surf2;
+            // is >> surf2;
+
             // surf2.read(is); // FAIL: private method
         }
 
