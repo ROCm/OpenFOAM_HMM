@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,10 +54,10 @@ class surfaceRegistry
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        surfaceRegistry(const surfaceRegistry&);
+        surfaceRegistry(const surfaceRegistry&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const surfaceRegistry&);
+        void operator=(const surfaceRegistry&) = delete;
 
 
 public:
@@ -75,7 +75,11 @@ public:
     // Constructors
 
         //- Construct for the given objectRegistry and named surface
-        surfaceRegistry(const objectRegistry&, const word& surfName = "");
+        surfaceRegistry
+        (
+            const objectRegistry&,
+            const word& surfName = word::null
+        );
 
 
     //- Destructor

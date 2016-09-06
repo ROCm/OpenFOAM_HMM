@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -263,11 +263,28 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 
 
 template<class Face>
-Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface(const fileName& name)
+Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
+(
+    const fileName& name
+)
 :
     ParentType()
 {
     read(name);
+}
+
+
+template<class Face>
+Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
+(
+    Istream& is
+)
+:
+    ParentType(),
+    zoneIds_(),
+    zoneToc_()
+{
+    read(is);
 }
 
 
@@ -421,6 +438,30 @@ void Foam::UnsortedMeshedSurface<Face>::remapFaces
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Face>
+Foam::Istream& Foam::UnsortedMeshedSurface<Face>::read(Istream& is)
+{
+    is  >> this->storedZoneIds()
+        >> this->storedPoints()
+        >> this->storedFaces();
+
+    is.check("UnsortedMeshedSurface::read(Istream&)");
+    return is;
+}
+
+
+template<class Face>
+Foam::Ostream& Foam::UnsortedMeshedSurface<Face>::write(Ostream& os) const
+{
+    os  << this->zoneIds()
+        << this->points()
+        << this->faces();
+
+    os.check("UnsortedMeshedSurface::write(Ostream&) const");
+    return os;
+}
+
 
 template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::setSize(const label s)
@@ -756,6 +797,30 @@ Foam::MeshedSurfaceProxy<Face>() const
         zoneLst,
         faceMap
     );
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+template<class Face>
+Foam::Istream& Foam::operator>>
+(
+    Foam::Istream& is,
+    Foam::UnsortedMeshedSurface<Face>& surf
+)
+{
+    return surf.read(is);
+}
+
+
+template<class Face>
+Foam::Ostream& Foam::operator<<
+(
+    Foam::Ostream& os,
+    const Foam::UnsortedMeshedSurface<Face>& surf
+)
+{
+    return surf.write(os);
 }
 
 
