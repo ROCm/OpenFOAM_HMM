@@ -269,9 +269,29 @@ void Foam::fieldVisualisationBase::setField
             lut->SetVectorMode(vtkScalarsToColors::MAGNITUDE);
 
             // Configure the mapper
-            mapper->SelectColorArray(colourFieldName.c_str());
+            const char* fieldName = colourFieldName.c_str();
+            mapper->SelectColorArray(fieldName);
+
+            // Set to use either point or cell data
+            // Note: if both point and cell data exists, preferentially
+            //       choosing point data.  This is often the case when using
+            //       glyphs
+            if (pData->GetPointData()->HasArray(fieldName) == 1)
+            {
+                mapper->SetScalarModeToUsePointFieldData();
+            }
+            else if (pData->GetCellData()->HasArray(fieldName) == 1)
+            {
+                mapper->SetScalarModeToUseCellFieldData();
+            }
+            else
+            {
+                WarningInFunction
+                    << "Unable to determine cell or point data type "
+                    << "- assuming point data";
+                mapper->SetScalarModeToUsePointFieldData();
+            }
             mapper->SetScalarRange(range_.first(), range_.second());
-            mapper->SetScalarModeToDefault(); // try points, then cells
             mapper->SetColorModeToMapScalars();
             mapper->SetLookupTable(lut);
             mapper->ScalarVisibilityOn();
