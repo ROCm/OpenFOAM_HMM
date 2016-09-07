@@ -669,6 +669,7 @@ private:
             //- Determines cell zone from cell region information.
             bool calcRegionToZone
             (
+                const label backgroundZoneID,
                 const label surfZoneI,
                 const label ownRegion,
                 const label neiRegion,
@@ -682,6 +683,7 @@ private:
             //  surfaces) regarded as blocked.
             void findCellZoneTopo
             (
+                const label backgroundZoneID,
                 const pointField& locationsInMesh,
                 const labelList& unnamedSurfaceRegion,
                 const labelList& namedSurfaceIndex,
@@ -702,10 +704,13 @@ private:
             void zonify
             (
                 const bool allowFreeStandingZoneFaces,
+                const label backgroundZoneID,
                 const pointField& locationsInMesh,
                 const wordList& zonesInMesh,
 
                 labelList& cellToZone,
+                labelList& unnamedRegion1,
+                labelList& unnamedRegion2,
                 labelList& namedSurfaceIndex,
                 PackedBoolList& posOrientation
             ) const;
