@@ -69,7 +69,7 @@ protected:
         List<word> fieldNames_;
 
         //- Field file names
-        List<word> fieldFileNames_;
+        List<string> fieldFileNames_;
 
         //- Number of time steps
         label nTimeSteps_;
@@ -91,21 +91,38 @@ protected:
 
     // Protected Member Functions
 
+        //- Helper function to skip forward n steps in stream
+        void skip(const label n, Istream& is) const;
+
+        //- Helper function to read an ascii line from file
+        void readLine(IFstream& is, string& buffer) const;
+
         //- Read and check a section header
         void debugSection(const word& expected, IFstream& is) const;
-
-        //- Read the case file
-        void readCase(IFstream& is);
-
-        //- Helper function to skip forward n steps in stream
-        void skip(const label n, IFstream& is) const;
 
         //- Read (and throw away) geometry file header
         void readGeometryHeader(ensightReadFile& is) const;
 
+        //- Read the case file
+        void readCase(IFstream& is);
+
         //- Helper function to return Type after skipping n tokens
         template<class Type>
-        void readSkip(IFstream& is, const label nSkip, Type& value) const;
+        void readFromLine
+        (
+            const label nSkip,
+            IStringStream& is,
+            Type& value
+        ) const;
+
+        //- Helper function to return Type after skipping n tokens
+        template<class Type>
+        void readFromLine
+        (
+            const label nSkip,
+            const string& buffer,
+            Type& value
+        ) const;
 
         //- Helper function to return a field
         template<class Type>

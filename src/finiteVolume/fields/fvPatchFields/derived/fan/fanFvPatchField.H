@@ -42,6 +42,8 @@ Description
         jumpTable    | jump data, e.g. \c csvFile | yes      |
         phi          | flux field name         | no          | phi
         rho          | density field name      | no          | none
+        uniformJump  | applies a uniform pressure based on the averaged
+                       velocity | no | false
     \endtable
 
     Example of the boundary condition specification:
@@ -53,10 +55,11 @@ Description
         jumpTable       csvFile;
         csvFileCoeffs
         {
-            hasHeaderLine   1;
+            nHeaderLine     1;
             refColumn       0;
             componentColumns 1(1);
             separator       ",";
+            mergeSeparators no;
             fileName        "$FOAM_CASE/constant/pressureVsU";
         }
         value           uniform 0;
@@ -67,7 +70,7 @@ Description
     the jump condition.
 
 Note
-     The underlying \c patchType should be set to \c cyclic
+    The underlying \c patchType should be set to \c cyclic
 
 SeeAlso
     Foam::Function1Types
@@ -108,6 +111,9 @@ class fanFvPatchField
         //- Name of the density field used to normalise the mass flux
         //  if neccessary
         word rhoName_;
+
+        //- Uniform pressure drop
+        bool uniformJump_;
 
 
     // Private Member Functions

@@ -118,6 +118,8 @@ tr.memlist
 .OFPlainTable tr td {
     height: 20px;
     padding-left: 5px;
+}
+
 div.line,
 span.comment,
 span.keyword,

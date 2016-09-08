@@ -494,8 +494,21 @@ void surfaceNoise::calculate()
         octave13FreqCentre
     );
 
-    List<scalarField> surfPSD13f(octave13BandIDs.size() - 1);
-    List<scalarField> surfPrms13f2(octave13BandIDs.size() - 1);
+    label bandSize = 0;
+    if (octave13BandIDs.empty())
+    {
+        WarningInFunction
+            << "Ocatve band calculation failed (zero sized). "
+            << "please check your input data"
+            << endl;
+    }
+    else
+    {
+        bandSize = octave13BandIDs.size() - 1;
+    }
+
+    List<scalarField> surfPSD13f(bandSize);
+    List<scalarField> surfPrms13f2(bandSize);
     forAll(surfPSD13f, freqI)
     {
         surfPSD13f[freqI].setSize(nLocalFace);

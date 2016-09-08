@@ -26,6 +26,91 @@ License
 #include "meshToMesh.H"
 
 template<class Type>
+void Foam::mapFieldsFO::evaluateConstraintTypes
+(
+    GeometricField<Type, fvPatchField, volMesh>& fld
+) const
+{
+    typename GeometricField<Type, fvPatchField, volMesh>::
+        GeometricBoundaryField& fldBf = fld.boundaryField();
+
+    if
+    (
+        Pstream::defaultCommsType == Pstream::blocking
+     || Pstream::defaultCommsType == Pstream::nonBlocking
+    )
+    {
+        label nReq = Pstream::nRequests();
+
+        forAll(fldBf, patchi)
+        {
+            fvPatchField<Type>& tgtField = fldBf[patchi];
+
+            if
+            (
+                tgtField.type() == tgtField.patch().patch().type()
+             && polyPatch::constraintType(tgtField.patch().patch().type())
+            )
+            {
+                tgtField.initEvaluate(Pstream::defaultCommsType);
+            }
+        }
+
+        // Block for any outstanding requests
+        if
+        (
+            Pstream::parRun()
+         && Pstream::defaultCommsType == Pstream::nonBlocking
+        )
+        {
+            Pstream::waitRequests(nReq);
+        }
+
+        forAll(fldBf, patchi)
+        {
+            fvPatchField<Type>& tgtField = fldBf[patchi];
+
+            if
+            (
+                tgtField.type() == tgtField.patch().patch().type()
+             && polyPatch::constraintType(tgtField.patch().patch().type())
+            )
+            {
+                tgtField.evaluate(Pstream::defaultCommsType);
+            }
+        }
+    }
+    else if (Pstream::defaultCommsType == Pstream::scheduled)
+    {
+        const lduSchedule& patchSchedule =
+            fld.mesh().globalData().patchSchedule();
+
+        forAll(patchSchedule, patchEvali)
+        {
+            label patchi = patchSchedule[patchEvali].patch;
+            fvPatchField<Type>& tgtField = fldBf[patchi];
+
+            if
+            (
+                tgtField.type() == tgtField.patch().patch().type()
+             && polyPatch::constraintType(tgtField.patch().patch().type())
+            )
+            {
+                if (patchSchedule[patchEvali].init)
+                {
+                    tgtField.initEvaluate(Pstream::scheduled);
+                }
+                else
+                {
+                    tgtField.evaluate(Pstream::scheduled);
+                }
+            }
+        }
+    }
+}
+
+
+template<class Type>
 bool Foam::mapFieldsFO::writeFieldType() const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> FieldType;
@@ -53,6 +138,9 @@ bool Foam::mapFieldsFO::writeFieldType() const
         if (log_) Info<< ": interpolated";
 
         FieldType fieldMapRegion(mapRegionIO, tfieldMapRegion);
+
+        evaluateConstraintTypes(fieldMapRegion);
+
         fieldMapRegion.write();
 
         if (log_) Info<< " and written" << nl;

@@ -34,7 +34,7 @@ namespace Foam
 }
 
 
-void Foam::ensightSurfaceReader::skip(const label n, IFstream& is) const
+void Foam::ensightSurfaceReader::skip(const label n, Istream& is) const
 {
     label i = 0;
     token t;
@@ -55,6 +55,40 @@ void Foam::ensightSurfaceReader::skip(const label n, IFstream& is) const
             << "Requested to skip " << n << "tokens, but stream exited after "
             << i << " tokens. Last token read: " << t
             << endl;
+    }
+}
+
+
+void Foam::ensightSurfaceReader::readLine(IFstream& is, string& buffer) const
+{
+    buffer = "";
+    while (is.good() && buffer == "")
+    {
+        is.getLine(buffer);
+    }
+}
+
+
+void Foam::ensightSurfaceReader::debugSection
+(
+    const word& expected,
+    IFstream& is
+) const
+{
+    string actual = "";
+    readLine(is, actual);
+
+    if (expected != actual)
+    {
+        FatalIOErrorInFunction(is)
+            << "Expected section header '" << expected
+            << "' but read the word '" << actual << "'"
+            << exit(FatalIOError);
+    }
+
+    if (debug)
+    {
+        Info<< "Read section header: " << expected << endl;
     }
 }
 
@@ -101,29 +135,6 @@ void Foam::ensightSurfaceReader::readGeometryHeader(ensightReadFile& is) const
 }
 
 
-void Foam::ensightSurfaceReader::debugSection
-(
-    const word& expected,
-    IFstream& is
-) const
-{
-    word actual(is);
-
-    if (expected != actual)
-    {
-        FatalIOErrorInFunction(is)
-            << "Expected section header '" << expected
-            << "' but read the word '" << actual << "'"
-            << exit(FatalIOError);
-    }
-
-    if (debug)
-    {
-        Info<< "Read section header: " << expected << endl;
-    }
-}
-
-
 void Foam::ensightSurfaceReader::readCase(IFstream& is)
 {
     if (debug)
@@ -141,31 +152,54 @@ void Foam::ensightSurfaceReader::readCase(IFstream& is)
     string buffer;
 
     // Read the file
+
     debugSection("FORMAT", is);
-    skip(3, is); // type: ensight gold
+    readLine(is, buffer);  // type: ensight gold
 
     debugSection("GEOMETRY", is);
-    readSkip(is, 2, meshFileName_);
+    readLine(is, buffer);
+    readFromLine(2, buffer, meshFileName_); // model: 1 xxx.0000.mesh
 
     debugSection("VARIABLE", is);
 
+    // Read the field description
     DynamicList<word> fieldNames(10);
-    DynamicList<word> fieldFileNames(10);
+    DynamicList<string> fieldFileNames(10);
     word fieldName;
-    word fieldFileName;
+    string fieldFileName;
     while (is.good())
     {
-        word primitiveType(is); // scalar, vector
+        readLine(is, buffer);
 
-        if (primitiveType == "TIME")
+        if (buffer == "TIME")
         {
             break;
         }
 
-        readSkip(is, 3, fieldName); // p, U etc
+        IStringStream iss(buffer);
+
+        // Read the field name, e.g. p U etc
+        readFromLine(4, iss, fieldName);
         fieldNames.append(fieldName);
 
-        is >> fieldFileName; // surfaceName.****.fieldName
+        // Field file name may contain /'s e.g.
+        //   surfaceName.****.fieldName
+        // This is not parser friendly - simply take remainder of buffer
+        label iPos = iss.stdStream().tellg();
+        fieldFileName = buffer(iPos, buffer.size() - iPos);
+        size_t p0  = fieldFileName.find_first_not_of(' ');
+        if (p0 == string::npos)
+        {
+            WarningInFunction
+                << "Error reading field file name. "
+                << "Current buffer: " << buffer
+                << endl;
+        }
+        else
+        {
+            size_t p1  = fieldFileName.find_last_not_of(' ');
+            fieldFileName = fieldFileName.substr(p0, p1 - p0 + 1);
+        }
         fieldFileNames.append(fieldFileName);
     }
     fieldNames_.transfer(fieldNames);
@@ -178,10 +212,14 @@ void Foam::ensightSurfaceReader::readCase(IFstream& is)
     }
 
     // Start reading time information
-    skip(3, is); // time set: 1
-    readSkip(is, 3, nTimeSteps_);
-    readSkip(is, 3, timeStartIndex_);
-    readSkip(is, 2, timeIncrement_);
+    readLine(is, buffer); // time set: 1
+
+    readLine(is, buffer);
+    readFromLine(3, buffer, nTimeSteps_);
+    readLine(is, buffer);
+    readFromLine(3, buffer, timeStartIndex_);
+    readLine(is, buffer);
+    readFromLine(2, buffer, timeIncrement_);
 
     if (debug)
     {
@@ -191,7 +229,7 @@ void Foam::ensightSurfaceReader::readCase(IFstream& is)
     }
 
     // Read the time values
-    skip(2, is);
+    readLine(is, buffer); // time values:
     timeValues_.setSize(nTimeSteps_);
     for (label i = 0; i < nTimeSteps_; i++)
     {

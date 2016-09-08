@@ -44,6 +44,11 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
             patch().patchField<surfaceScalarField, scalar>(phi);
 
         scalarField Un(max(phip/patch().magSf(), scalar(0)));
+        if (uniformJump_)
+        {
+            scalar area = gSum(patch().magSf());
+            Un = gSum(Un*patch().magSf())/area;
+        }
 
         if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
         {
@@ -67,7 +72,8 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
 :
     uniformJumpFvPatchField<scalar>(p, iF),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    uniformJump_(dict.lookupOrDefault<bool>("uniformJump", false))
 {
     if (this->cyclicPatch().owner())
     {

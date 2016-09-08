@@ -106,6 +106,8 @@ public:
 
     // Member Functions
 
+        const convectionScheme<Type>& scheme() const;
+
         tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> interpolate
         (
             const surfaceScalarField&,

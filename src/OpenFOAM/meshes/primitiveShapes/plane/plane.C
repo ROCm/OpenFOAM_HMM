@@ -129,22 +129,28 @@ Foam::plane::plane(const vector& normalVector)
 }
 
 
-Foam::plane::plane(const point& basePoint, const vector& normalVector)
+Foam::plane::plane
+(
+    const point& basePoint,
+    const vector& normalVector,
+    const bool normalise
+)
 :
     unitVector_(normalVector),
     basePoint_(basePoint)
 {
-    scalar magUnitVector(mag(unitVector_));
+    scalar magSqrUnitVector(magSqr(unitVector_));
 
-    if (magUnitVector > VSMALL)
-    {
-        unitVector_ /= magUnitVector;
-    }
-    else
+    if (magSqrUnitVector < VSMALL)
     {
         FatalErrorInFunction
             << "plane normal has zero length. basePoint:" << basePoint_
             << abort(FatalError);
+    }
+
+    if (normalise)
+    {
+        unitVector_ /= Foam::sqrt(magSqrUnitVector);
     }
 }
 

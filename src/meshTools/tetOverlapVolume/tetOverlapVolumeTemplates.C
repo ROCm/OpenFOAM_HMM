@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,51 +45,90 @@ void Foam::tetOverlapVolume::tetTetOverlap
     tetPointRef::storeOp cutInside(cutInsideTets, nCutInside);
     tetPointRef::dummyOp outside;
 
-    if (tetA.tet().mag() < minTetVolume_ || tetB.tet().mag() < minTetVolume_)
+    // Precompute the tet face areas and exit early if any face area is
+    // too small
+    static FixedList<vector, 4> tetAFaceAreas;
+    static FixedList<scalar, 4> tetAMag2FaceAreas;
+    tetPointRef tetATet = tetA.tet();
+    for (label facei = 0; facei < 4; ++facei)
     {
-        return;
+        tetAFaceAreas[facei] = -tetATet.tri(facei).normal();
+        tetAMag2FaceAreas[facei] = magSqr(tetAFaceAreas[facei]);
+        if (tetAMag2FaceAreas[facei] < ROOTVSMALL)
+        {
+            return;
+        }
     }
 
-    // face0
-    plane pl0(tetB[1], tetB[3], tetB[2]);
-    tetA.tet().sliceWithPlane(pl0, cutInside, outside);
-    if (nCutInside == 0)
+    static FixedList<vector, 4> tetBFaceAreas;
+    static FixedList<scalar, 4> tetBMag2FaceAreas;
+    tetPointRef tetBTet = tetB.tet();
+    for (label facei = 0; facei < 4; ++facei)
     {
-        return;
+        tetBFaceAreas[facei] = -tetBTet.tri(facei).normal();
+        tetBMag2FaceAreas[facei] = magSqr(tetBFaceAreas[facei]);
+        if (tetBMag2FaceAreas[facei] < ROOTVSMALL)
+        {
+            return;
+        }
     }
 
-    // face1
-    plane pl1(tetB[0], tetB[2], tetB[3]);
-    nInside = 0;
-    for (label i = 0; i < nCutInside; i++)
+
+    // Face 0
     {
-        const tetPointRef t = cutInsideTets[i].tet();
-        t.sliceWithPlane(pl1, inside, outside);
-    }
-    if (nInside == 0)
-    {
-        return;
+        vector n = tetBFaceAreas[0]/Foam::sqrt(tetBMag2FaceAreas[0]);
+        plane pl0(tetBTet.tri(0).a(), n, false);
+
+        tetA.tet().sliceWithPlane(pl0, cutInside, outside);
+        if (nCutInside == 0)
+        {
+            return;
+        }
     }
 
-    // face2
-    plane pl2(tetB[0], tetB[3], tetB[1]);
-    nCutInside = 0;
-    for (label i = 0; i < nInside; i++)
+    // Face 1
     {
-        const tetPointRef t = insideTets[i].tet();
-        t.sliceWithPlane(pl2, cutInside, outside);
-    }
-    if (nCutInside == 0)
-    {
-        return;
+        vector n = tetBFaceAreas[1]/Foam::sqrt(tetBMag2FaceAreas[1]);
+        plane pl1(tetBTet.tri(1).a(), n, false);
+
+        nInside = 0;
+        for (label i = 0; i < nCutInside; i++)
+        {
+            const tetPointRef t = cutInsideTets[i].tet();
+            t.sliceWithPlane(pl1, inside, outside);
+        }
+        if (nInside == 0)
+        {
+            return;
+        }
     }
 
-    // face3
-    plane pl3(tetB[0], tetB[1], tetB[2]);
-    for (label i = 0; i < nCutInside; i++)
+    // Face 2
     {
-        const tetPointRef t = cutInsideTets[i].tet();
-        t.sliceWithPlane(pl3, insideOp, outside);
+        vector n = tetBFaceAreas[2]/Foam::sqrt(tetBMag2FaceAreas[2]);
+        plane pl2(tetBTet.tri(2).a(), n, false);
+
+        nCutInside = 0;
+        for (label i = 0; i < nInside; i++)
+        {
+            const tetPointRef t = insideTets[i].tet();
+            t.sliceWithPlane(pl2, cutInside, outside);
+        }
+        if (nCutInside == 0)
+        {
+            return;
+        }
+    }
+
+    // Face 3
+    {
+        vector n = tetBFaceAreas[3]/Foam::sqrt(tetBMag2FaceAreas[3]);
+        plane pl3(tetBTet.tri(3).a(), n, false);
+        for (label i = 0; i < nCutInside; i++)
+        {
+            const tetPointRef t = cutInsideTets[i].tet();
+            t.sliceWithPlane(pl3, insideOp, outside);
+        }
     }
 }
 

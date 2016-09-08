@@ -131,7 +131,12 @@ public:
         plane(const vector& normalVector);
 
         //- Construct from normal vector and point in plane
-        plane(const point& basePoint, const vector& normalVector);
+        plane
+        (
+            const point& basePoint,
+            const vector& normalVector,
+            const bool normalise = true
+        );
 
         //- Construct from three points in plane
         plane(const point& point1, const point& point2, const point& point3);
