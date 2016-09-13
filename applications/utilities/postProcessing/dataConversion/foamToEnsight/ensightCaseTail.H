@@ -1,5 +1,8 @@
 if (Pstream::master())
 {
+    ensightCaseFile.setf(ios_base::scientific, ios_base::floatfield);
+    ensightCaseFile.precision(5);
+
     ensightCaseFile << nl << "TIME" << nl
         << "time set:                      " << 1 << nl
         << "number of steps:               " << nTimeSteps << nl
@@ -8,20 +11,17 @@ if (Pstream::master())
 
     ensightCaseFile << "time values:" << nl;
 
-    ensightCaseFile.setf(ios_base::scientific, ios_base::floatfield);
-    ensightCaseFile.precision(5);
-
     label count = 0;
     scalar Tcorr = 0.0;
-    if (Times[0].value() < 0)
+    if (timeDirs[0].value() < 0)
     {
-        Tcorr = - Times[0].value();
+        Tcorr = -timeDirs[0].value();
         Info<< "Correcting time values. Adding " << Tcorr << endl;
     }
 
-    forAll(Times, n)
+    forAll(timeDirs, n)
     {
-        ensightCaseFile << setw(12) << Times[n].value() + Tcorr << " ";
+        ensightCaseFile << setw(12) << timeDirs[n].value() + Tcorr << " ";
 
         if (++count % 6 == 0)
         {

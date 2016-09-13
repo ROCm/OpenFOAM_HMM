@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,10 +57,10 @@ class ensightStream
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        ensightStream(const ensightStream&);
+        ensightStream(const ensightStream&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const ensightStream&);
+        void operator=(const ensightStream&) = delete;
 
 
 public:
@@ -86,8 +86,6 @@ public:
             return name_;
         }
 
-        virtual bool ascii() const = 0;
-
         virtual void write(const char*) = 0;
 
         virtual void write(const int) = 0;
@@ -97,8 +95,6 @@ public:
         virtual void write(const List<int>&) = 0;
 
         virtual void writePartHeader(const label) = 0;
-
-
 
 };
 

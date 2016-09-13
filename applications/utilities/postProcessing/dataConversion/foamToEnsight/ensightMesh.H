@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,6 +63,11 @@ class ensightStream;
 class ensightMesh
 {
 public:
+
+    //- The name for geometry files
+    static const char* geometryName;
+
+        //- Helper class for managing face primitives
         class nFacePrimitives
         {
         public:
@@ -97,8 +102,8 @@ private:
         const bool faceZones_;
         const wordReList faceZonePatterns_;
 
-        //- Set binary file output
-        const bool binary_;
+        //- Ascii/Binary file output
+        const IOstream::streamFormat format_;
 
         //- The ensight part id for the first patch
         label patchPartOffset_;
@@ -140,10 +145,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        ensightMesh(const ensightMesh&);
+        ensightMesh(const ensightMesh&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const ensightMesh&);
+        void operator=(const ensightMesh&) = delete;
 
         void writePoints
         (
@@ -267,7 +272,7 @@ public:
             const wordReList& patchPatterns,
             const bool faceZones,
             const wordReList& faceZonePatterns,
-            const bool binary
+            const IOstream::streamFormat format = IOstream::BINARY
         );
 
 
@@ -282,6 +287,11 @@ public:
             const fvMesh& mesh() const
             {
                 return mesh_;
+            }
+
+            IOstream::streamFormat format() const
+            {
+                return format_;
             }
 
             const cellSets& meshCellSets() const
@@ -352,8 +362,6 @@ public:
             }
 
 
-
-
     // Other
 
         //- Update for new mesh
@@ -371,8 +379,7 @@ public:
 
         void write
         (
-            const fileName& postProcPath,
-            const word& prepend,
+            const fileName& ensightDir,
             const label timeIndex,
             const bool meshMoving,
             Ostream& ensightCaseFile

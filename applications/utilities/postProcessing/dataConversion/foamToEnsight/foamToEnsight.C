@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,10 +34,13 @@ Description
 
 Usage
     - foamToEnsight [OPTION] \n
-    Translates OpenFOAM data to Ensight format
+    Translates OpenFOAM data to EnSight format
 
     \param -ascii \n
     Write Ensight data in ASCII format instead of "C Binary"
+
+    \param -noZero \n
+    Exclude the often incomplete initial conditions.
 
     \param -patches patchList \n
     Specify particular patches to write.
@@ -51,6 +54,9 @@ Usage
 
     \param -cellZone zoneName \n
     Specify single cellZone to write (not lagrangian)
+
+    \param -width \<n\>\n
+    Width of EnSight data subdir (default: 8)
 
 Note
     Parallel support for cloud data is not supported
@@ -70,14 +76,12 @@ Note
 #include "scalarIOField.H"
 #include "tensorIOField.H"
 
+#include "ensightFile.H"
 #include "ensightMesh.H"
 #include "ensightField.H"
-
-#include "ensightParticlePositions.H"
-#include "ensightCloudField.H"
+#include "ensightCloud.H"
 
 #include "fvc.H"
-
 #include "cellSet.H"
 #include "fvMeshSubset.H"
 
@@ -151,32 +155,21 @@ int main(int argc, char *argv[])
         "word",
         "specify cellZone to write"
     );
+    argList::addOption
+    (
+        "name",
+        "subdir",
+        "define sub-directory name to use for ensight data "
+        "(default: 'EnSight')"
+    );
+    argList::addOption
+    (
+        "width",
+        "n",
+        "width of ensight data subdir"
+    );
 
-    #include "setRootCase.H"
-
-    // Check options
-    const bool binary = !args.optionFound("ascii");
-    const bool nodeValues = args.optionFound("nodeValues");
-
-    cpuTime timer;
-    memInfo mem;
-    Info<< "Initial memory "
-        << mem.update().size() << " kB" << endl;
-
-    #include "createTime.H"
-
-    instantList Times = timeSelector::select0(runTime, args);
-
-    #include "createNamedMesh.H"
-
-    // Mesh instance (region0 gets filtered out)
-    fileName regionPrefix = "";
-
-    if (regionName != polyMesh::defaultRegion)
-    {
-        regionPrefix = regionName;
-    }
-
+    // the volume field types that we handle
     const label nVolFieldTypes = 10;
     const word volFieldTypes[] =
     {
@@ -193,37 +186,87 @@ int main(int argc, char *argv[])
         volTensorField::DimensionedInternalField::typeName
     };
 
+    #include "setRootCase.H"
+
+    // default to binary output, unless otherwise specified
+    const enum IOstream::streamFormat format =
+    (
+        args.optionFound("ascii")
+      ? IOstream::ASCII
+      : IOstream::BINARY
+    );
+
+    const bool nodeValues = args.optionFound("nodeValues");
+
+    cpuTime timer;
+    memInfo mem;
+    Info<< "Initial memory "
+        << mem.update().size() << " kB" << endl;
+
+    #include "createTime.H"
+
+    instantList timeDirs = timeSelector::select0(runTime, args);
+
+    // adjust output width
+    if (args.optionFound("width"))
+    {
+        ensightFile::subDirWidth(args.optionRead<label>("width"));
+    }
+
+    // define sub-directory name to use for EnSight data
+    fileName ensightDir = "EnSight";
+    args.optionReadIfPresent("name", ensightDir);
+
     // Path to EnSight directory at case level only
     // - For parallel cases, data only written from master
-    fileName ensightDir = args.rootPath()/args.globalCaseName()/"EnSight";
+    if (!ensightDir.isAbsolute())
+    {
+        ensightDir = args.rootPath()/args.globalCaseName()/ensightDir;
+    }
+
+    const fileName dataDir  = ensightDir/"data";
+    const fileName dataMask = dataDir.name()/ensightFile::mask();
 
     if (Pstream::master())
     {
+        // EnSight and EnSight/data directories must exist
+        // - remove old data for a clean conversion of everything
         if (isDir(ensightDir))
         {
             rmDir(ensightDir);
         }
 
-        mkDir(ensightDir);
+        mkDir(dataDir);
+    }
+
+    #include "createNamedMesh.H"
+
+    // Mesh instance (region0 gets filtered out)
+    fileName regionPrefix;
+    if (regionName != polyMesh::defaultRegion)
+    {
+        regionPrefix = regionName;
     }
 
     // Start of case file header output
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    const word prepend = args.globalCaseName() + '.';
-
-    OFstream *ensightCaseFilePtr = NULL;
+    OFstream *ensightCaseFilePtr(nullptr);
     if (Pstream::master())
     {
-        fileName caseFileName = prepend + "case";
+        fileName caseFileName = args.globalCaseName() + ".case";
         Info<< nl << "write case: " << caseFileName.c_str() << endl;
 
-        // the case file is always ASCII
+        // The case file is always ASCII
         ensightCaseFilePtr = new OFstream
         (
             ensightDir/caseFileName,
             IOstream::ASCII
         );
+
+        ensightCaseFilePtr->setf(ios_base::left);
+        ensightCaseFilePtr->setf(ios_base::scientific, ios_base::floatfield);
+        ensightCaseFilePtr->precision(5);
 
         *ensightCaseFilePtr
             << "FORMAT" << nl
@@ -280,11 +323,11 @@ int main(int argc, char *argv[])
         patchPatterns,
         selectedZones,
         zonePatterns,
-        binary
+        format
     );
 
     // Set Time to the last time before looking for the lagrangian objects
-    runTime.setTime(Times.last(), Times.size()-1);
+    runTime.setTime(timeDirs.last(), timeDirs.size()-1);
 
     IOobjectList objects(mesh, runTime.timeName());
 
@@ -296,88 +339,99 @@ int main(int argc, char *argv[])
             << " Writing meshes for every timestep." << endl;
     }
 
-
-    wordHashSet allCloudNames;
     if (Pstream::master())
     {
-        word geomFileName = prepend + "0000";
+        // test the pre-check variable if there is a moving mesh
+        // time-set for geometries
+        // TODO: split off into separate time-set,
+        // but need to verify ensight spec
 
-        // test pre check variable if there is a moving mesh
         if (meshMoving)
         {
-            geomFileName = prepend + "****";
+            ensightCaseFile
+                << "GEOMETRY" << nl
+                << setw(16) << "model: 1"
+                << (dataMask/ensightMesh::geometryName).c_str() << nl;
         }
-
-        ensightCaseFile
-            << "GEOMETRY" << nl
-            << "model:        1     "
-            << (geomFileName + ".mesh").c_str() << nl;
+        else
+        {
+            ensightCaseFile
+                << "GEOMETRY" << nl
+                << setw(16) << "model:"
+                << ensightMesh::geometryName << nl;
+        }
     }
 
-    // Identify if lagrangian data exists at each time, and add clouds
-    // to the 'allCloudNames' hash set
-    forAll(Times, timeI)
+    // Identify if lagrangian data exists any time step, and add clouds
+    // to the 'cloudNames' (sorted list)
+    wordList cloudNames;
     {
-        runTime.setTime(Times[timeI], timeI);
+        wordHashSet allCloudNames;
 
-        fileNameList cloudDirs = readDir
-        (
-            runTime.timePath()/regionPrefix/cloud::prefix,
-            fileName::DIRECTORY
-        );
-
-        forAll(cloudDirs, cloudI)
+        forAll(timeDirs, timeI)
         {
-            IOobjectList cloudObjs
+            runTime.setTime(timeDirs[timeI], timeI);
+
+            fileNameList cloudDirs = readDir
             (
-                mesh,
-                runTime.timeName(),
-                cloud::prefix/cloudDirs[cloudI]
+                runTime.timePath()/regionPrefix/cloud::prefix,
+                fileName::DIRECTORY
             );
 
-            IOobject* positionsPtr = cloudObjs.lookup(word("positions"));
-
-            if (positionsPtr)
+            forAll(cloudDirs, cloudI)
             {
-                allCloudNames.insert(cloudDirs[cloudI]);
+                IOobjectList cloudObjs
+                (
+                    mesh,
+                    runTime.timeName(),
+                    cloud::prefix/cloudDirs[cloudI]
+                );
+
+                IOobject* positionsPtr = cloudObjs.lookup(word("positions"));
+
+                if (positionsPtr)
+                {
+                    allCloudNames.insert(cloudDirs[cloudI]);
+                }
             }
         }
+
+        // sorted for consistency
+        cloudNames = allCloudNames.sortedToc();
     }
 
     HashTable<HashTable<word>> allCloudFields;
-    forAllConstIter(wordHashSet, allCloudNames, cloudIter)
+    forAll(cloudNames, cloudNo)
     {
+        const word& cloudName = cloudNames[cloudNo];
+
         // Add the name of the cloud(s) to the case file header
         if (Pstream::master())
         {
             ensightCaseFile
-            <<  (
-                    "measured:     1     "
-                  + prepend
-                  + "****."
-                  + cloudIter.key()
-                ).c_str()
-            << nl;
+                << setw(16) << "measured: 1"
+                << fileName(dataMask/cloud::prefix/cloudName/"positions").c_str()
+                << nl;
         }
 
         // Create a new hash table for each cloud
-        allCloudFields.insert(cloudIter.key(), HashTable<word>());
+        allCloudFields.insert(cloudName, HashTable<word>());
 
         // Identify the new cloud in the hash table
         HashTable<HashTable<word>>::iterator newCloudIter =
-            allCloudFields.find(cloudIter.key());
+            allCloudFields.find(cloudName);
 
         // Loop over all times to build list of fields and field types
         // for each cloud
-        forAll(Times, timeI)
+        forAll(timeDirs, timeI)
         {
-            runTime.setTime(Times[timeI], timeI);
+            runTime.setTime(timeDirs[timeI], timeI);
 
             IOobjectList cloudObjs
             (
                 mesh,
                 runTime.timeName(),
-                cloud::prefix/cloudIter.key()
+                cloud::prefix/cloudName
             );
 
             forAllConstIter(IOobjectList, cloudObjs, fieldIter)
@@ -398,15 +452,26 @@ int main(int argc, char *argv[])
     }
 
     label nTimeSteps = 0;
-    forAll(Times, timeIndex)
+    forAll(timeDirs, timeIndex)
     {
-        nTimeSteps++;
-        runTime.setTime(Times[timeIndex], timeIndex);
+        ++nTimeSteps;
+        runTime.setTime(timeDirs[timeIndex], timeIndex);
 
-        word timeName = itoa(timeIndex);
-        word timeFile = prepend + timeName;
+        Info<< "Time [" << timeIndex << "] = " << runTime.timeName() << nl;
 
-        Info<< "Translating time = " << runTime.timeName() << nl;
+        if (Pstream::master())
+        {
+            // the data/ITER subdirectory must exist
+            // Note that data/ITER is indeed a valid ensight::FileName
+            const fileName subDir = ensightFile::subDir(timeIndex);
+            mkDir(dataDir/subDir);
+
+            // place a timestamp in the directory for future reference
+            OFstream timeStamp(dataDir/subDir/"time");
+            timeStamp
+                << "#   timestep time" << nl
+                << subDir.c_str() << " " << runTime.timeName() << nl;
+        }
 
         polyMesh::readUpdateState meshState = mesh.readUpdate();
         if (timeIndex != 0 && meshSubsetter.hasSubMesh())
@@ -420,7 +485,6 @@ int main(int argc, char *argv[])
             meshSubsetter.setLargeCellSubset(c0, 0);
         }
 
-
         if (meshState != polyMesh::UNCHANGED)
         {
             eMesh.correct();
@@ -430,8 +494,7 @@ int main(int argc, char *argv[])
         {
             eMesh.write
             (
-                ensightDir,
-                prepend,
+                dataDir,
                 timeIndex,
                 meshMoving,
                 ensightCaseFile
@@ -450,6 +513,7 @@ int main(int argc, char *argv[])
 
         // Cell field data output
         // ~~~~~~~~~~~~~~~~~~~~~~
+        Info<< "Write volume field (";
 
         for (label i=0; i<nVolFieldTypes; i++)
         {
@@ -491,10 +555,8 @@ int main(int argc, char *argv[])
                     (
                         volField(meshSubsetter, vf),
                         eMesh,
-                        ensightDir,
-                        prepend,
+                        dataDir,
                         timeIndex,
-                        binary,
                         nodeValues,
                         ensightCaseFile
                     );
@@ -506,10 +568,8 @@ int main(int argc, char *argv[])
                     (
                         volField(meshSubsetter, vf),
                         eMesh,
-                        ensightDir,
-                        prepend,
+                        dataDir,
                         timeIndex,
-                        binary,
                         nodeValues,
                         ensightCaseFile
                     );
@@ -521,10 +581,8 @@ int main(int argc, char *argv[])
                     (
                         volField(meshSubsetter, vf),
                         eMesh,
-                        ensightDir,
-                        prepend,
+                        dataDir,
                         timeIndex,
-                        binary,
                         nodeValues,
                         ensightCaseFile
                     );
@@ -536,10 +594,8 @@ int main(int argc, char *argv[])
                     (
                         volField(meshSubsetter, vf),
                         eMesh,
-                        ensightDir,
-                        prepend,
+                        dataDir,
                         timeIndex,
-                        binary,
                         nodeValues,
                         ensightCaseFile
                     );
@@ -551,10 +607,8 @@ int main(int argc, char *argv[])
                     (
                         volField(meshSubsetter, vf),
                         eMesh,
-                        ensightDir,
-                        prepend,
+                        dataDir,
                         timeIndex,
-                        binary,
                         nodeValues,
                         ensightCaseFile
                     );
@@ -575,10 +629,8 @@ int main(int argc, char *argv[])
                     (
                         volField<scalar>(meshSubsetter, df),
                         eMesh,
-                        ensightDir,
-                        prepend,
+                        dataDir,
                         timeIndex,
-                        binary,
                         nodeValues,
                         ensightCaseFile
                     );
@@ -598,10 +650,8 @@ int main(int argc, char *argv[])
                     (
                         volField<vector>(meshSubsetter, df),
                         eMesh,
-                        ensightDir,
-                        prepend,
+                        dataDir,
                         timeIndex,
-                        binary,
                         nodeValues,
                         ensightCaseFile
                     );
@@ -621,10 +671,8 @@ int main(int argc, char *argv[])
                     (
                         volField<sphericalTensor>(meshSubsetter, df),
                         eMesh,
-                        ensightDir,
-                        prepend,
+                        dataDir,
                         timeIndex,
-                        binary,
                         nodeValues,
                         ensightCaseFile
                     );
@@ -644,10 +692,8 @@ int main(int argc, char *argv[])
                     (
                         volField<symmTensor>(meshSubsetter, df),
                         eMesh,
-                        ensightDir,
-                        prepend,
+                        dataDir,
                         timeIndex,
-                        binary,
                         nodeValues,
                         ensightCaseFile
                     );
@@ -667,24 +713,30 @@ int main(int argc, char *argv[])
                     (
                         volField<tensor>(meshSubsetter, df),
                         eMesh,
-                        ensightDir,
-                        prepend,
+                        dataDir,
                         timeIndex,
-                        binary,
                         nodeValues,
                         ensightCaseFile
                     );
                 }
             }
         }
+        Info<< " )" << endl;
 
 
         // Cloud field data output
         // ~~~~~~~~~~~~~~~~~~~~~~~
 
-        forAllConstIter(HashTable<HashTable<word>>, allCloudFields, cloudIter)
+        forAll(cloudNames, cloudNo)
         {
-            const word& cloudName = cloudIter.key();
+            const word& cloudName = cloudNames[cloudNo];
+            if (!allCloudFields.found(cloudName))
+            {
+                // extra safety
+                continue;
+            }
+
+            const HashTable<word>& cloudFields = allCloudFields[cloudName];
 
             fileNameList currentCloudDirs = readDir
             (
@@ -692,17 +744,22 @@ int main(int argc, char *argv[])
                 fileName::DIRECTORY
             );
 
+            Info<< "Write " << cloudName << " (";
+
             bool cloudExists = inFileNameList(currentCloudDirs, cloudName);
+            reduce(cloudExists, orOp<bool>());
+
             ensightParticlePositions
             (
                 mesh,
-                ensightDir,
-                timeFile,
+                dataDir,
+                timeIndex,
                 cloudName,
-                cloudExists
+                cloudExists,
+                format
             );
 
-            forAllConstIter(HashTable<word>, cloudIter(), fieldIter)
+            forAllConstIter(HashTable<word>, cloudFields, fieldIter)
             {
                 const word& fieldName = fieldIter.key();
                 const word& fieldType = fieldIter();
@@ -720,17 +777,20 @@ int main(int argc, char *argv[])
                 (
                     false
                 );
+                reduce(fieldExists, orOp<bool>());
+
                 if (fieldType == scalarIOField::typeName)
                 {
                     ensightCloudField<scalar>
                     (
                         fieldObject,
-                        ensightDir,
-                        prepend,
+                        dataDir,
                         timeIndex,
                         cloudName,
+                        cloudNo,
                         ensightCaseFile,
-                        fieldExists
+                        fieldExists,
+                        format
                     );
                 }
                 else if (fieldType == vectorIOField::typeName)
@@ -738,37 +798,34 @@ int main(int argc, char *argv[])
                     ensightCloudField<vector>
                     (
                         fieldObject,
-                        ensightDir,
-                        prepend,
+                        dataDir,
                         timeIndex,
                         cloudName,
+                        cloudNo,
                         ensightCaseFile,
-                        fieldExists
+                        fieldExists,
+                        format
                     );
                 }
-                else
-                {
-                    Info<< "Unable to convert field type " << fieldType
-                        << " for field " << fieldName << endl;
-                }
             }
+            Info<< " )" << endl;
         }
 
         Info<< "Wrote in "
             << timer.cpuTimeIncrement() << " s, "
-            << mem.update().size() << " kB" << endl;
+            << mem.update().size() << " kB" << nl << endl;
     }
 
     #include "ensightCaseTail.H"
 
-    if (Pstream::master())
+    if (ensightCaseFilePtr) // on master only
     {
         delete ensightCaseFilePtr;
     }
 
-    Info<< "\nEnd: "
+    Info<< "End: "
         << timer.elapsedCpuTime() << " s, "
-        << mem.update().peak() << " kB (peak)\n" << endl;
+        << mem.update().peak() << " kB (peak)" << nl << endl;
 
     return 0;
 }

@@ -51,17 +51,17 @@ class ensightBinaryStream
 {
     // Private data
 
-        //- Description of data_
+        //- Output file stream
         autoPtr<std::ofstream> str_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        ensightBinaryStream(const ensightBinaryStream&);
+        ensightBinaryStream(const ensightBinaryStream&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const ensightBinaryStream&);
+        void operator=(const ensightBinaryStream&) = delete;
 
 
 public:
@@ -69,7 +69,7 @@ public:
     // Constructors
 
         //- Construct from components
-        ensightBinaryStream(const fileName& f, const Time&)
+        ensightBinaryStream(const fileName& f)
         :
             ensightStream(f),
             str_
@@ -89,11 +89,6 @@ public:
 
 
     // Member Functions
-
-        virtual bool ascii() const
-        {
-            return false;
-        }
 
         virtual void write(const char* val)
         {
@@ -140,14 +135,6 @@ public:
             write("part");
             write(partI);
         }
-
-    // Member Operators
-
-    // Friend Functions
-
-    // Friend Operators
-
-    // IOstream Operators
 
 };
 
