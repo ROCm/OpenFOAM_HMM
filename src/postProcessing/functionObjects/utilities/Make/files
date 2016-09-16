@@ -54,6 +54,9 @@ wallShearStress/wallShearStressFunctionObject.C
 yPlus/yPlus.C
 yPlus/yPlusFunctionObject.C
 
+zeroGradient/zeroGradient.C
+zeroGradient/zeroGradientFunctionObject.C
+
 setTimeStep/setTimeStepFunctionObject.C
 
 reactionSensitivityAnalysis/reactionsSensitivityAnalysisFunctionObject.C
