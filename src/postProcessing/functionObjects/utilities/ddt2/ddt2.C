@@ -29,6 +29,7 @@ License
 #include "dictionary.H"
 #include "FieldFunctions.H"
 #include "fvcDdt.H"
+#include "steadyStateDdtScheme.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -39,76 +40,198 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-
-template<class FieldType>
-bool Foam::ddt2::calculate
-(
-    const fvMesh& mesh,
-    bool& done
-)
+bool Foam::ddt2::checkFormatName(const word& str)
 {
-    if (done)
+    if (str.find("@@") == string::npos)
     {
-        return true; // already done - skip
-    }
+        WarningInFunction
+            << "Bad result naming "
+            << "(no '@@' token found), deactivating."
+            << nl << endl;
 
-    done = mesh.foundObject<FieldType>(fieldName_);
-    if (!done)
-    {
         return false;
     }
-
-    const FieldType& input =
-        mesh.lookupObject<FieldType>(fieldName_);
-
-    if (!mesh.foundObject<volScalarField>(resultName_))
+    else if (str == "@@")
     {
-        const dimensionSet dims
-        (
-            mag_
-          ? mag(input.dimensions()/dimTime)
-          : magSqr(input.dimensions()/dimTime)
-        );
+        WarningInFunction
+            << "Bad result naming "
+            << "(only a '@@' token found), deactivating."
+            << nl
+            << endl;
 
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+
+void Foam::ddt2::uniqWords(wordReList& lst)
+{
+    boolList retain(lst.size());
+    wordHashSet uniq;
+    forAll(lst, i)
+    {
+        const wordRe& select = lst[i];
+
+        retain[i] =
+        (
+            select.isPattern()
+         || uniq.insert(static_cast<const word&>(select))
+        );
+    }
+
+    inplaceSubset(retain, lst);
+}
+
+
+bool Foam::ddt2::accept(const word& fieldName) const
+{
+    // check input vs possible result names
+    // to avoid circular calculations
+    return !blacklist_.match(fieldName);
+}
+
+
+template<class FieldType>
+int Foam::ddt2::apply
+(
+    const fvMesh& mesh,
+    const word& inputName,
+    int& state
+)
+{
+    // state: return 0 (not-processed), -1 (skip), +1 ok
+
+    // already done, or not available
+    if (state || !mesh.foundObject<FieldType>(inputName))
+    {
+        return state;
+    }
+
+    const FieldType& input = mesh.lookupObject<FieldType>(inputName);
+
+    word outputName(resultName_);
+    outputName.replace("@@", inputName);
+
+    results_.set(outputName);
+
+    if (!mesh.foundObject<volScalarField>(outputName))
+    {
         mesh.objectRegistry::store
         (
             new volScalarField
             (
                 IOobject
                 (
-                    resultName_,
+                    outputName,
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
-                    IOobject::NO_WRITE // OR IOobject::AUTO_WRITE
+                    IOobject::NO_WRITE
                 ),
                 mesh,
                 dimensionedScalar
                 (
-                    "zero",
-                    dims,
+                    "0",
+                    (
+                        mag_
+                      ? mag(input.dimensions()/dimTime)
+                      : magSqr(input.dimensions()/dimTime)
+                    ),
                     Zero
-                ),
-                emptyPolyPatch::typeName
+                )
             )
         );
     }
 
-    volScalarField& field = const_cast<volScalarField&>
+    volScalarField& output = const_cast<volScalarField&>
     (
-        mesh.lookupObject<volScalarField>(resultName_)
+        mesh.lookupObject<volScalarField>(outputName)
     );
 
     if (mag_)
     {
-        field = mag(fvc::ddt(input));
+        output = mag(fvc::ddt(input));
     }
     else
     {
-        field = magSqr(fvc::ddt(input));
+        output = magSqr(fvc::ddt(input));
     }
 
-    return done;
+    if (log_)
+    {
+        // could add additional statistics here
+        Info<< type() << " " << name_
+            << " field " << output
+            << " average: " << gAverage(output) << endl;
+    }
+
+    state = +1;
+    return state;
+}
+
+
+int Foam::ddt2::process(const fvMesh& mesh, const word& fieldName)
+{
+    if (!accept(fieldName))
+    {
+        return -1;
+    }
+
+    int state = 0;
+
+    apply<volScalarField>(mesh, fieldName, state);
+    apply<volVectorField>(mesh, fieldName, state);
+
+    return state;
+}
+
+
+void Foam::ddt2::process(const fvMesh& mesh)
+{
+    results_.clear();
+
+    wordHashSet candidates = subsetStrings(selectFields_, mesh.names());
+    DynamicList<word> missing(selectFields_.size());
+    DynamicList<word> ignored(selectFields_.size());
+
+    // check exact matches first
+    forAll(selectFields_, i)
+    {
+        const wordRe& select = selectFields_[i];
+        if (!select.isPattern())
+        {
+            const word& fieldName = static_cast<const word&>(select);
+
+            if (!candidates.erase(fieldName))
+            {
+                missing.append(fieldName);
+            }
+            else if (process(mesh, fieldName) < 1)
+            {
+                ignored.append(fieldName);
+            }
+        }
+    }
+
+    forAllConstIter(wordHashSet, candidates, iter)
+    {
+        process(mesh, iter.key());
+    }
+
+    if (missing.size())
+    {
+        WarningInFunction
+            << "Missing field " << missing << endl;
+    }
+    if (ignored.size())
+    {
+        WarningInFunction
+            << "Unprocessed field " << ignored << endl;
+    }
 }
 
 
@@ -125,13 +248,28 @@ Foam::ddt2::ddt2
     name_(name),
     obr_(obr),
     active_(true),
-    fieldName_("undefined-fieldName"),
+    selectFields_(),
     resultName_(word::null),
+    blacklist_(),
+    results_(),
     log_(true),
     mag_(dict.lookupOrDefault<Switch>("mag", false))
 {
-    // Check if the available mesh is an fvMesh, otherwise deactivate
-    if (!isA<fvMesh>(obr_))
+    // Check if the available mesh is an fvMesh and transient,
+    // otherwise deactivate
+    if (isA<fvMesh>(obr_))
+    {
+        const fvMesh& mesh = refCast<const fvMesh>(obr_);
+
+        if (word(mesh.ddtScheme("default")) == "steadyState")
+        {
+            active_ = false;
+            WarningInFunction
+                << "Steady-state, deactivating." << nl
+                << endl;
+        }
+    }
+    else
     {
         active_ = false;
         WarningInFunction
@@ -157,16 +295,29 @@ void Foam::ddt2::read(const dictionary& dict)
     {
         log_.readIfPresent("log", dict);
 
-        dict.lookup("fieldName") >> fieldName_;
-        dict.readIfPresent("resultName", resultName_);
+        dict.lookup("fields") >> selectFields_;
+        uniqWords(selectFields_);
 
-        if (resultName_.empty())
+        resultName_ = dict.lookupOrDefault<word>
+        (
+            "result",
+            ( mag_ ? "mag(ddt(@@))" : "magSqr(ddt(@@))" )
+        );
+
+        active_ = checkFormatName(resultName_);
+        if (active_)
         {
-            resultName_ =
+            blacklist_.set
             (
-                word(mag_ ? "mag" : "magSqr")
-              + "(ddt(" + fieldName_ + "))"
+                string::quotemeta<regExp>
+                (
+                    resultName_
+                ).replace("@@", "(.+)")
             );
+        }
+        else
+        {
+            blacklist_.clear();
         }
     }
 }
@@ -174,32 +325,11 @@ void Foam::ddt2::read(const dictionary& dict)
 
 void Foam::ddt2::execute()
 {
+    results_.clear();
     if (active_)
     {
-        const fvMesh& mesh = refCast<const fvMesh>(obr_);
-        bool done = false;
-
-        calculate<volScalarField>(mesh, done);
-        calculate<volVectorField>(mesh, done);
-
-        if (!done)
-        {
-            WarningInFunction
-                << "Unprocessed field " << fieldName_ << endl;
-        }
+        process(refCast<const fvMesh>(obr_));
     }
-}
-
-
-void Foam::ddt2::end()
-{
-    // Do nothing
-}
-
-
-void Foam::ddt2::timeSet()
-{
-    // Do nothing
 }
 
 
@@ -207,26 +337,20 @@ void Foam::ddt2::write()
 {
     if (active_)
     {
-        if (obr_.foundObject<regIOobject>(resultName_))
+        // consistent output order
+        const wordList outputList = results_.sortedToc();
+
+        forAll(outputList, i)
         {
-            const regIOobject& io =
-                obr_.lookupObject<regIOobject>(resultName_);
+            const word& fieldName = outputList[i];
 
-            if (log_)
+            if (obr_.foundObject<regIOobject>(fieldName))
             {
-                const volScalarField& field = dynamicCast<const volScalarField&>
-                (
-                    io
-                );
+                const regIOobject& io =
+                    obr_.lookupObject<regIOobject>(fieldName);
 
-                // could add additional statistics here
-                Info<< type() << " " << name_
-                    << " output: writing field " << field.name()
-                    << " average: " << gAverage(field) << endl;
+                io.write();
             }
-
-            // could also add option to suppress writing?
-            io.write();
         }
     }
 }

@@ -40,8 +40,8 @@ Description
     {
         type        ddt2;
         functionObjectLibs ("libutilityFunctionObjects.so");
-        fieldName   p;
-        resultName  dpdt2;
+        fields      (p);
+        result      d@@dt2;
         ...
     }
     \endverbatim
@@ -50,14 +50,21 @@ Description
     \table
         Property | Description                | Required  | Default value
         type     | type name: ddt2            | yes       |
-        fieldName | Name of field to process  | yes       |
-        resultName | Name of magnitude field  | no        | magSqr(ddt(fieldName))
+        fields   | Name of fields to process  | yes       |
+        result   | Name of results            | no        | magSqr(ddt(@@))
         log      | Log to standard output     | no        | yes
         mag      | Use 'mag' instead of 'magSqr' | no     | false
     \endtable
 
     Note that the optional 'mag' entry cannot be changed during the simulation
     since it alters the dimensions of the output field.
+
+    A list of fields can contain exact names or regular expressions.
+    The token '\@\@' in the result name is replaced by the name of the source
+    field.
+
+    The function object will skip over fields that appear to have
+    already been processed (ie, their names are similar to the output names).
 
 SourceFiles
     ddt2.C
@@ -69,9 +76,10 @@ SourceFiles
 #define ddt2_H
 
 #include "volFieldsFwd.H"
-#include "surfaceFieldsFwd.H"
-#include "pointFieldFwd.H"
 #include "OFstream.H"
+#include "wordReList.H"
+#include "regExp.H"
+#include "HashSet.H"
 #include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -85,7 +93,6 @@ class dictionary;
 class fvMesh;
 class polyMesh;
 class mapPolyMesh;
-class dimensionSet;
 
 /*---------------------------------------------------------------------------*\
                             Class ddt2 Declaration
@@ -104,11 +111,17 @@ class ddt2
         //- On/off switch
         bool active_;
 
-        //- Name of field to process
-        word fieldName_;
+        //- Name of fields to process
+        wordReList selectFields_;
 
-        //- Name of result field
+        //- Formatting for the result fields.
         word resultName_;
+
+        //- Avoid processing the same field twice.
+        mutable regExp blacklist_;
+
+        //- Hashed names of result fields.
+        wordHashSet results_;
 
         //- Switch to send output to Info as well as to file
         Switch log_;
@@ -121,21 +134,25 @@ class ddt2
 
     // Private Member Functions
 
-        //- Create result field upon demand
-        volScalarField& getOrCreateResultField
-        (
-            const fvMesh&,
-            const dimensionSet& inputDims
-        );
+        //- Check that the word contains the appropriate substitution token(s).
+        static bool checkFormatName(const word&);
+
+        //- Eliminate duplicate 'word' entries
+        static void uniqWords(wordReList&);
 
 
-        //- Create result field upon demand
+        //- Accept unless field name appears to have already been processed
+        bool accept(const word& fieldName) const;
+
+        //- Apply for the volume field type
         template<class FieldType>
-        bool calculate(const FieldType& input);
+        int apply(const fvMesh& mesh, const word& inputName, int& state);
 
-        //- Create result field upon demand
-        template<class FieldType>
-        bool calculate(const fvMesh&, bool& done);
+        //- Process by trying to apply for various volume field types.
+        int process(const fvMesh& mesh, const word& inputName);
+
+        //- Calculate the ddt2 fields
+        void process(const fvMesh& mesh);
 
 
         //- Disallow default bitwise copy construct
@@ -179,16 +196,18 @@ public:
         //- Read the ddt2 specification
         virtual void read(const dictionary&);
 
-        //- Execute, currently does nothing
+        //- Calculate the ddt2 fields
         virtual void execute();
 
         //- Execute at the final time-loop, currently does nothing
-        virtual void end();
+        virtual void end()
+        {}
 
         //- Called when time was set at the end of the Time::operator++
-        virtual void timeSet();
+        virtual void timeSet()
+        {}
 
-        //- Calculate the ddt2 and write
+        //- Write the ddt fields
         virtual void write();
 
         //- Update for changes of mesh
