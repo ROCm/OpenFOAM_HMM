@@ -66,7 +66,7 @@ void Foam::vtkPVblockMesh::updateInfoBlocks
     if (debug)
     {
         Info<< "<beg> Foam::vtkPVblockMesh::updateInfoBlocks"
-            << " [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "]" << endl;
+            << " [meshPtr=" << (meshPtr_ ? "set" : "nullptr") << "]" << endl;
     }
 
     arrayRangeBlocks_.reset( arraySelection->GetNumberOfArrays() );
@@ -109,7 +109,7 @@ void Foam::vtkPVblockMesh::updateInfoEdges
     if (debug)
     {
         Info<< "<beg> Foam::vtkPVblockMesh::updateInfoEdges"
-            << " [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "]" << endl;
+            << " [meshPtr=" << (meshPtr_ ? "set" : "nullptr") << "]" << endl;
     }
 
     arrayRangeEdges_.reset( arraySelection->GetNumberOfArrays() );
@@ -150,8 +150,8 @@ Foam::vtkPVblockMesh::vtkPVblockMesh
 )
 :
     reader_(reader),
-    dbPtr_(NULL),
-    meshPtr_(NULL),
+    dbPtr_(nullptr),
+    meshPtr_(nullptr),
     meshRegion_(polyMesh::defaultRegion),
     meshDir_(polyMesh::meshSubDir),
     arrayRangeBlocks_("block"),
@@ -252,9 +252,9 @@ Foam::vtkPVblockMesh::~vtkPVblockMesh()
 
     // Hmm. pointNumberTextActors are not getting removed
     //
-    forAll(pointNumberTextActorsPtrs_, pointI)
+    forAll(pointNumberTextActorsPtrs_, pointi)
     {
-        pointNumberTextActorsPtrs_[pointI]->Delete();
+        pointNumberTextActorsPtrs_[pointi]->Delete();
     }
     pointNumberTextActorsPtrs_.clear();
 
@@ -269,7 +269,7 @@ void Foam::vtkPVblockMesh::updateInfo()
     if (debug)
     {
         Info<< "<beg> Foam::vtkPVblockMesh::updateInfo"
-            << " [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "] " << endl;
+            << " [meshPtr=" << (meshPtr_ ? "set" : "nullptr") << "] " << endl;
     }
 
     resetCounters();
@@ -420,10 +420,10 @@ void Foam::vtkPVblockMesh::renderPointNumbers
 {
     // always remove old actors first
 
-    forAll(pointNumberTextActorsPtrs_, pointI)
+    forAll(pointNumberTextActorsPtrs_, pointi)
     {
-        renderer->RemoveViewProp(pointNumberTextActorsPtrs_[pointI]);
-        pointNumberTextActorsPtrs_[pointI]->Delete();
+        renderer->RemoveViewProp(pointNumberTextActorsPtrs_[pointi]);
+        pointNumberTextActorsPtrs_[pointi]->Delete();
     }
     pointNumberTextActorsPtrs_.clear();
 
@@ -433,11 +433,11 @@ void Foam::vtkPVblockMesh::renderPointNumbers
         const scalar scaleFactor = meshPtr_->scaleFactor();
 
         pointNumberTextActorsPtrs_.setSize(cornerPts.size());
-        forAll(cornerPts, pointI)
+        forAll(cornerPts, pointi)
         {
             vtkTextActor* txt = vtkTextActor::New();
 
-            txt->SetInput(Foam::name(pointI).c_str());
+            txt->SetInput(Foam::name(pointi).c_str());
 
             // Set text properties
             vtkTextProperty* tprop = txt->GetTextProperty();
@@ -454,9 +454,9 @@ void Foam::vtkPVblockMesh::renderPointNumbers
 
             txt->GetPositionCoordinate()->SetValue
             (
-                cornerPts[pointI].x()*scaleFactor,
-                cornerPts[pointI].y()*scaleFactor,
-                cornerPts[pointI].z()*scaleFactor
+                cornerPts[pointi].x()*scaleFactor,
+                cornerPts[pointi].y()*scaleFactor,
+                cornerPts[pointi].z()*scaleFactor
             );
 
             // Add text to each renderer
@@ -464,7 +464,7 @@ void Foam::vtkPVblockMesh::renderPointNumbers
 
             // Maintain a list of text labels added so that they can be
             // removed later
-            pointNumberTextActorsPtrs_[pointI] = txt;
+            pointNumberTextActorsPtrs_[pointi] = txt;
         }
     }
 }

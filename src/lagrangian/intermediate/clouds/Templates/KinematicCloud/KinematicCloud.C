@@ -236,7 +236,7 @@ void Foam::KinematicCloud<CloudType>::postEvolve()
 
     solution_.nextIter();
 
-    if (this->db().time().outputTime())
+    if (this->db().time().writeTime())
     {
         outputProperties_.writeObject
         (
@@ -285,7 +285,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
 :
     CloudType(rho.mesh(), cloudName, false),
     kinematicCloud(),
-    cloudCopyPtr_(NULL),
+    cloudCopyPtr_(nullptr),
     mesh_(rho.mesh()),
     particleProperties_
     (
@@ -352,14 +352,14 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
         subModelProperties_.subOrEmptyDict("injectionModels"),
         *this
     ),
-    dispersionModel_(NULL),
-    patchInteractionModel_(NULL),
-    stochasticCollisionModel_(NULL),
-    surfaceFilmModel_(NULL),
-    UIntegrator_(NULL),
+    dispersionModel_(nullptr),
+    patchInteractionModel_(nullptr),
+    stochasticCollisionModel_(nullptr),
+    surfaceFilmModel_(nullptr),
+    UIntegrator_(nullptr),
     UTrans_
     (
-        new DimensionedField<vector, volMesh>
+        new volVectorField::Internal
         (
             IOobject
             (
@@ -375,7 +375,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     ),
     UCoeff_
     (
-        new DimensionedField<scalar, volMesh>
+        new volScalarField::Internal
         (
             IOobject
             (
@@ -397,6 +397,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
         if (readFields)
         {
             parcelType::readFields(*this);
+            this->deleteLostParticles();
         }
     }
 
@@ -416,7 +417,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
 :
     CloudType(c.mesh_, name, c),
     kinematicCloud(),
-    cloudCopyPtr_(NULL),
+    cloudCopyPtr_(nullptr),
     mesh_(c.mesh_),
     particleProperties_(c.particleProperties_),
     outputProperties_(c.outputProperties_),
@@ -424,7 +425,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     constProps_(c.constProps_),
     subModelProperties_(c.subModelProperties_),
     rndGen_(c.rndGen_, true),
-    cellOccupancyPtr_(NULL),
+    cellOccupancyPtr_(nullptr),
     cellLengthScale_(c.cellLengthScale_),
     rho_(c.rho_),
     U_(c.U_),
@@ -441,7 +442,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     UIntegrator_(c.UIntegrator_->clone()),
     UTrans_
     (
-        new DimensionedField<vector, volMesh>
+        new volVectorField::Internal
         (
             IOobject
             (
@@ -457,7 +458,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     ),
     UCoeff_
     (
-        new DimensionedField<scalar, volMesh>
+        new volScalarField::Internal
         (
             IOobject
             (
@@ -484,7 +485,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
 :
     CloudType(mesh, name, IDLList<parcelType>()),
     kinematicCloud(),
-    cloudCopyPtr_(NULL),
+    cloudCopyPtr_(nullptr),
     mesh_(mesh),
     particleProperties_
     (
@@ -515,7 +516,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     constProps_(),
     subModelProperties_(dictionary::null),
     rndGen_(0, 0),
-    cellOccupancyPtr_(NULL),
+    cellOccupancyPtr_(nullptr),
     cellLengthScale_(c.cellLengthScale_),
     rho_(c.rho_),
     U_(c.U_),
@@ -525,13 +526,13 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     forces_(*this, mesh),
     functions_(*this),
     injectors_(*this),
-    dispersionModel_(NULL),
-    patchInteractionModel_(NULL),
-    stochasticCollisionModel_(NULL),
-    surfaceFilmModel_(NULL),
-    UIntegrator_(NULL),
-    UTrans_(NULL),
-    UCoeff_(NULL)
+    dispersionModel_(nullptr),
+    patchInteractionModel_(nullptr),
+    stochasticCollisionModel_(nullptr),
+    surfaceFilmModel_(nullptr),
+    UIntegrator_(nullptr),
+    UTrans_(nullptr),
+    UCoeff_(nullptr)
 {}
 
 
@@ -710,13 +711,13 @@ void Foam::KinematicCloud<CloudType>::patchData
     vector& Up
 ) const
 {
-    label patchI = pp.index();
-    label patchFaceI = pp.whichFace(p.face());
+    label patchi = pp.index();
+    label patchFacei = pp.whichFace(p.face());
 
     vector n = tetIs.faceTri(mesh_).normal();
     n /= mag(n);
 
-    vector U = U_.boundaryField()[patchI][patchFaceI];
+    vector U = U_.boundaryField()[patchi][patchFacei];
 
     // Unless the face is rotating, the required normal is n;
     nw = n;
@@ -737,7 +738,7 @@ void Foam::KinematicCloud<CloudType>::patchData
     }
     else
     {
-        vector U00 = U_.oldTime().boundaryField()[patchI][patchFaceI];
+        vector U00 = U_.oldTime().boundaryField()[patchi][patchFacei];
 
         vector n00 = tetIs.oldFaceTri(mesh_).normal();
 

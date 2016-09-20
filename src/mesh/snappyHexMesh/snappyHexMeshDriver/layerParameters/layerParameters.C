@@ -280,11 +280,11 @@ Foam::layerParameters::layerParameters
             {
                 const dictionary& layerDict = iter().dict();
 
-                forAllConstIter(labelHashSet, patchIDs, patchIter)
+                forAllConstIter(labelHashSet, patchIDs, patchiter)
                 {
-                    label patchI = patchIter.key();
+                    label patchi = patchiter.key();
 
-                    numLayers_[patchI] =
+                    numLayers_[patchi] =
                         readLabel(layerDict.lookup("nSurfaceLayers"));
 
                     switch (layerSpec_)
@@ -293,12 +293,12 @@ Foam::layerParameters::layerParameters
                             layerDict.readIfPresent
                             (
                                 "firstLayerThickness",
-                                firstLayerThickness_[patchI]
+                                firstLayerThickness_[patchi]
                             );
                             layerDict.readIfPresent
                             (
                                 "thickness",
-                                thickness_[patchI]
+                                thickness_[patchi]
                             );
                         break;
 
@@ -306,12 +306,12 @@ Foam::layerParameters::layerParameters
                             layerDict.readIfPresent
                             (
                                 "firstLayerThickness",
-                                firstLayerThickness_[patchI]
+                                firstLayerThickness_[patchi]
                             );
                             layerDict.readIfPresent
                             (
                                 "expansionRatio",
-                                expansionRatio_[patchI]
+                                expansionRatio_[patchi]
                             );
                         break;
 
@@ -319,12 +319,12 @@ Foam::layerParameters::layerParameters
                             layerDict.readIfPresent
                             (
                                 "finalLayerThickness",
-                                finalLayerThickness_[patchI]
+                                finalLayerThickness_[patchi]
                             );
                             layerDict.readIfPresent
                             (
                                 "thickness",
-                                thickness_[patchI]
+                                thickness_[patchi]
                             );
                         break;
 
@@ -332,12 +332,12 @@ Foam::layerParameters::layerParameters
                             layerDict.readIfPresent
                             (
                                 "finalLayerThickness",
-                                finalLayerThickness_[patchI]
+                                finalLayerThickness_[patchi]
                             );
                             layerDict.readIfPresent
                             (
                                 "expansionRatio",
-                                expansionRatio_[patchI]
+                                expansionRatio_[patchi]
                             );
                         break;
 
@@ -345,12 +345,12 @@ Foam::layerParameters::layerParameters
                             layerDict.readIfPresent
                             (
                                 "thickness",
-                                thickness_[patchI]
+                                thickness_[patchi]
                             );
                             layerDict.readIfPresent
                             (
                                 "expansionRatio",
-                                expansionRatio_[patchI]
+                                expansionRatio_[patchi]
                             );
                         break;
 
@@ -365,7 +365,7 @@ Foam::layerParameters::layerParameters
                     layerDict.readIfPresent
                     (
                         "minThickness",
-                        minThickness_[patchI]
+                        minThickness_[patchi]
                     );
                 }
             }

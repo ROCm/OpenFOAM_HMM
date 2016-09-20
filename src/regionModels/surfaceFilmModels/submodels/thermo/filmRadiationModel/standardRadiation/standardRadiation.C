@@ -125,14 +125,14 @@ tmp<volScalarField> standardRadiation::Shs()
     );
 
     scalarField& Shs = tShs.ref();
-    const scalarField& QinP = QinPrimary_.internalField();
-    const scalarField& delta = owner_.delta().internalField();
-    const scalarField& alpha = owner_.alpha().internalField();
+    const scalarField& QinP = QinPrimary_;
+    const scalarField& delta = owner_.delta();
+    const scalarField& alpha = owner_.alpha();
 
     Shs = beta_*QinP*alpha*(1.0 - exp(-kappaBar_*delta));
 
     // Update net Qr on local region
-    QrNet_.internalField() = QinP - Shs;
+    QrNet_.primitiveFieldRef() = QinP - Shs;
     QrNet_.correctBoundaryConditions();
 
     return tShs;

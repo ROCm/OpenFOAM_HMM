@@ -27,22 +27,17 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 template<class Type>
-bool fieldOk(const IOobjectList& cloudObjs, const word& name)
+bool Foam::fieldOk(const IOobjectList& cloudObjs, const word& name)
 {
     IOobjectList objects(cloudObjs.lookupClass(IOField<Type>::typeName));
 
-    return (objects.lookup(name) != NULL);
+    return (objects.lookup(name) != nullptr);
 }
 
 
 template<class Type>
-tmp<Field<Type>> readParticleField
+Foam::tmp<Foam::Field<Type>> Foam::readParticleField
 (
     const word& name,
     const IOobjectList cloudObjs
@@ -51,7 +46,7 @@ tmp<Field<Type>> readParticleField
     IOobjectList objects(cloudObjs.lookupClass(IOField<Type>::typeName));
 
     const IOobject* obj = objects.lookup(name);
-    if (obj != NULL)
+    if (obj != nullptr)
     {
         IOField<Type> newField(*obj);
         return tmp<Field<Type>>(new Field<Type>(newField.xfer()));
@@ -66,7 +61,7 @@ tmp<Field<Type>> readParticleField
 
 
 template<class Type>
-void readFields
+void Foam::readFields
 (
     PtrList<List<Type>>& values,
     const List<word>& fieldNames,
@@ -78,7 +73,7 @@ void readFields
     forAll(fieldNames, j)
     {
         const IOobject* obj = objects.lookup(fieldNames[j]);
-        if (obj != NULL)
+        if (obj != nullptr)
         {
             Info<< "        reading field " << fieldNames[j] << endl;
             IOField<Type> newField(*obj);
@@ -95,7 +90,7 @@ void readFields
 
 
 template<class Type>
-void writeVTK(OFstream& os, const Type& value)
+void Foam::writeVTK(OFstream& os, const Type& value)
 {
     os  << value.component(0);
     for (label i=1; i<pTraits<Type>::nComponents; i++)
@@ -106,7 +101,7 @@ void writeVTK(OFstream& os, const Type& value)
 
 
 template<class Type>
-void writeVTKFields
+void Foam::writeVTKFields
 (
     OFstream& os,
     const PtrList<List<Type>>& values,
@@ -116,10 +111,10 @@ void writeVTKFields
 {
     label step = max(floor(8/pTraits<Type>::nComponents), 1);
 
-    forAll(values, fieldI)
+    forAll(values, fieldi)
     {
-        Info<< "        writing field " << fieldNames[fieldI] << endl;
-        os  << nl << fieldNames[fieldI] << ' '
+        Info<< "        writing field " << fieldNames[fieldi] << endl;
+        os  << nl << fieldNames[fieldi] << ' '
             << int(pTraits<Type>::nComponents) << ' '
             << values[fieldI].size() << " float" << nl;
         label offset = 0;
@@ -127,7 +122,7 @@ void writeVTKFields
         {
             const List<label> ids(addr[trackI]);
 
-            List<Type> data(UIndirectList<Type>(values[fieldI], ids));
+            List<Type> data(UIndirectList<Type>(values[fieldi], ids));
             label nData = data.size() - 1;
             forAll(data, i)
             {
@@ -148,7 +143,7 @@ void writeVTKFields
 
 
 template<class Type>
-void processFields
+void Foam::processFields
 (
     OFstream& os,
     const List<List<label>>& addr,
@@ -164,7 +159,7 @@ void processFields
         forAll(userFieldNames, i)
         {
             IOobject* obj = objects.lookup(userFieldNames[i]);
-            if (obj != NULL)
+            if (obj != nullptr)
             {
                 fieldNames.append(obj->name());
             }
@@ -184,8 +179,5 @@ void processFields
     }
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -50,6 +50,14 @@ namespace Foam
 {
 
 class solidParticleCloud;
+
+
+// Forward declaration of friend functions and operators
+
+class solidParticle;
+
+Ostream& operator<<(Ostream&, const solidParticle&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class solidParticle Declaration
@@ -126,9 +134,9 @@ public:
         (
             const polyMesh& mesh,
             const vector& position,
-            const label cellI,
-            const label tetFaceI,
-            const label tetPtI,
+            const label celli,
+            const label tetFacei,
+            const label tetPti,
             const scalar d,
             const vector& U
         );
@@ -195,7 +203,7 @@ public:
             (
                 const polyPatch&,
                 trackingData& td,
-                const label patchI,
+                const label patchi,
                 const scalar trackFraction,
                 const tetIndices& tetIs
             );

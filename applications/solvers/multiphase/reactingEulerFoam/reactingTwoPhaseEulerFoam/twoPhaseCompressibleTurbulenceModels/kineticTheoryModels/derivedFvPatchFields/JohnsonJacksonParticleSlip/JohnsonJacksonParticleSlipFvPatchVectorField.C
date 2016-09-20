@@ -160,7 +160,7 @@ void Foam::JohnsonJacksonParticleSlipFvPatchVectorField::updateCoeffs()
 
     const phaseModel& phased
     (
-        fluid.phase1().name() == dimensionedInternalField().group()
+        fluid.phase1().name() == internalField().group()
       ? fluid.phase1()
       : fluid.phase2()
     );
@@ -187,6 +187,14 @@ void Foam::JohnsonJacksonParticleSlipFvPatchVectorField::updateCoeffs()
         patch().lookupPatchField<volScalarField, scalar>
         (
             IOobject::groupName("nut", phased.name())
+        )
+    );
+
+    const scalarField nuFric
+    (
+        patch().lookupPatchField<volScalarField, scalar>
+        (
+            IOobject::groupName("nuFric", phased.name())
         )
     );
 
@@ -222,7 +230,7 @@ void Foam::JohnsonJacksonParticleSlipFvPatchVectorField::updateCoeffs()
        *gs0
        *specularityCoefficient_.value()
        *sqrt(3.0*Theta)
-       /max(6.0*nu*alphaMax.value(), SMALL)
+       /max(6.0*(nu - nuFric)*alphaMax.value(), SMALL)
     );
 
     this->valueFraction() = c/(c + patch().deltaCoeffs());

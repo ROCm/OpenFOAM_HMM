@@ -31,10 +31,6 @@ solvers
         tolerance           1e-6;
         relTol              0.01;
         smoother            GaussSeidel;
-        cacheAgglomeration  true;
-        nCellsInCoarsestLevel   10;
-        agglomerator        faceAreaPair;
-        mergeLevels         1;
     };
 
     p_rghFinal
@@ -43,9 +39,15 @@ solvers
         relTol              0;
     };
 
+    ph_rgh
+    {
+        $p_rgh;
+    }
+
+
     "(U|Yi|k|h|omega)"
     {
-        solver          PBiCG;
+        solver          PBiCGStab;
         preconditioner  DILU;
         tolerance       1e-6;
         relTol          0.1;
@@ -64,12 +66,7 @@ solvers
         tolerance               1e-4;
         relTol                  0;
         smoother                symGaussSeidel;
-        cacheAgglomeration      true;
-        nCellsInCoarsestLevel   10;
-        agglomerator            faceAreaPair;
-        mergeLevels             1;
         maxIter                 1;
-        nPreSweeps              0;
         nPostSweeps             1;
     }
 
@@ -88,6 +85,9 @@ PIMPLE
     nOuterCorrectors  1;
     nCorrectors       2;
     nNonOrthogonalCorrectors 0;
+
+    hydrostaticInitialization yes;
+    nHydrostaticCorrectors 5;
 }
 
 relaxationFactors

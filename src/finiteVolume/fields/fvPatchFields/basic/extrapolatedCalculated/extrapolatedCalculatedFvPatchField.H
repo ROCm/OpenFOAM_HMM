@@ -33,11 +33,10 @@ Description
     assigned.  \c snGrad returns the patch gradient evaluated from the current
     internal and patch field values rather than returning zero.
 
-    \heading Patch usage
-
+Usage
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            extrapolatedCalculated;
     }

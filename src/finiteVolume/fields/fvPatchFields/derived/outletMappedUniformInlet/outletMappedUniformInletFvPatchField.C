@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,7 +69,7 @@ outletMappedUniformInletFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF, dict),
-    outletPatchName_(dict.lookup("outletPatchName")),
+    outletPatchName_(dict.lookup("outletPatch")),
     phiName_(dict.lookupOrDefault<word>("phi", "phi"))
 {}
 
@@ -116,7 +116,7 @@ void Foam::outletMappedUniformInletFvPatchField<Type>::updateCoeffs()
     (
         dynamic_cast<const GeometricField<Type, fvPatchField, volMesh>&>
         (
-            this->dimensionedInternalField()
+            this->internalField()
         )
     );
 
@@ -168,7 +168,7 @@ template<class Type>
 void Foam::outletMappedUniformInletFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    os.writeKeyword("outletPatchName")
+    os.writeKeyword("outletPatch")
         << outletPatchName_ << token::END_STATEMENT << nl;
     if (phiName_ != "phi")
     {

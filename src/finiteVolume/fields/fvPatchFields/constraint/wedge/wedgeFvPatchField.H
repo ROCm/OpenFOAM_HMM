@@ -31,17 +31,16 @@ Description
     This boundary condition is similar to the cyclic condition, except that
     it is applied to 2-D geometries.
 
-    \heading Patch usage
-
+Usage
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            wedge;
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::cyclicFvPatchField
 
 SourceFiles

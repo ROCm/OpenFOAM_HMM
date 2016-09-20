@@ -415,10 +415,10 @@ void Foam::multiphaseMixture::correctContactAngle
 (
     const phase& alpha1,
     const phase& alpha2,
-    surfaceVectorField::GeometricBoundaryField& nHatb
+    surfaceVectorField::Boundary& nHatb
 ) const
 {
-    const volScalarField::GeometricBoundaryField& gbf
+    const volScalarField::Boundary& gbf
         = alpha1.boundaryField();
 
     const fvBoundaryMesh& boundary = mesh_.boundary();
@@ -523,7 +523,7 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseMixture::K
 {
     tmp<surfaceVectorField> tnHatfv = nHatfv(alpha1, alpha2);
 
-    correctContactAngle(alpha1, alpha2, tnHatfv.ref().boundaryField());
+    correctContactAngle(alpha1, alpha2, tnHatfv.ref().boundaryFieldRef());
 
     // Simple expression for curvature
     return -fvc::div(tnHatfv & mesh_.Sf());

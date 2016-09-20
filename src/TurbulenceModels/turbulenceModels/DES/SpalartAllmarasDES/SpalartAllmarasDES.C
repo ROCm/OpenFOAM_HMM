@@ -129,7 +129,7 @@ tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::r
             scalar(10)
         )
     );
-    tr.ref().boundaryField() == 0.0;
+    tr.ref().boundaryFieldRef() == 0.0;
 
     return tr;
 }
@@ -205,7 +205,7 @@ tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::dTilda
 ) const
 {
     tmp<volScalarField> tdTilda(psi(chi, fv1)*CDES_*this->delta());
-    min(tdTilda.ref().dimensionedInternalField(), tdTilda(), y_);
+    min(tdTilda.ref().ref(), tdTilda(), y_);
     return tdTilda;
 }
 

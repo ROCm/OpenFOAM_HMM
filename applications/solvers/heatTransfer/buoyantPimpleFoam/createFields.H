@@ -114,3 +114,6 @@ if (p_rgh.needReference())
 }
 
 dimensionedScalar initialMass("initialMass", fvc::domainIntegrate(rho));
+
+#include "createMRF.H"
+#include "createRadiationModel.H"

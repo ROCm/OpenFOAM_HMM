@@ -18,7 +18,6 @@ volScalarField rho
 );
 
 volScalarField& p = thermo.p();
-const volScalarField& psi = thermo.psi();
 
 Info<< "Reading field U\n" << endl;
 volVectorField U
@@ -86,3 +85,6 @@ mesh.setFluxRequired(p_rgh.name());
 
 dimensionedScalar initialMass = fvc::domainIntegrate(rho);
 dimensionedScalar totalVolume = sum(mesh.V());
+
+#include "createMRF.H"
+#include "createRadiationModel.H"

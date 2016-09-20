@@ -87,11 +87,11 @@ void dumpPoints(const triSurface& surf, const labelList& borderPoint)
 
     OFstream os(fName);
 
-    forAll(borderPoint, pointI)
+    forAll(borderPoint, pointi)
     {
-        if (borderPoint[pointI] != -1)
+        if (borderPoint[pointi] != -1)
         {
-            const point& pt = surf.localPoints()[pointI];
+            const point& pt = surf.localPoints()[pointi];
 
             os  << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
         }
@@ -216,9 +216,9 @@ label markBorderPoints
 
     const labelListList& pointEdges = surf.pointEdges();
 
-    forAll(pointEdges, pointI)
+    forAll(pointEdges, pointi)
     {
-        const labelList& pEdges = pointEdges[pointI];
+        const labelList& pEdges = pointEdges[pointi];
 
         label nBorderEdges = 0;
 
@@ -230,9 +230,9 @@ label markBorderPoints
             }
         }
 
-        if (nBorderEdges == 2 && borderPoint[pointI] == -1)
+        if (nBorderEdges == 2 && borderPoint[pointi] == -1)
         {
-            borderPoint[pointI] = nPoints++;
+            borderPoint[pointi] = nPoints++;
         }
     }
 
@@ -247,13 +247,13 @@ label markBorderPoints
 }
 
 
-// Get minumum length of edges connected to pointI
+// Get minumum length of edges connected to pointi
 // Serves to get some local length scale.
-scalar minEdgeLen(const triSurface& surf, const label pointI)
+scalar minEdgeLen(const triSurface& surf, const label pointi)
 {
     const pointField& points = surf.localPoints();
 
-    const labelList& pEdges = surf.pointEdges()[pointI];
+    const labelList& pEdges = surf.pointEdges()[pointi];
 
     scalar minLen = GREAT;
 
@@ -313,16 +313,16 @@ label findEdge
 }
 
 
-// Get the other edge connected to pointI on faceI.
+// Get the other edge connected to pointi on facei.
 label otherEdge
 (
     const triSurface& surf,
-    const label faceI,
+    const label facei,
     const label otherEdgeI,
-    const label pointI
+    const label pointi
 )
 {
-    const labelList& fEdges = surf.faceEdges()[faceI];
+    const labelList& fEdges = surf.faceEdges()[facei];
 
     forAll(fEdges, i)
     {
@@ -334,8 +334,8 @@ label otherEdge
         (
             edgeI != otherEdgeI
          && (
-                e.start() == pointI
-             || e.end() == pointI
+                e.start() == pointi
+             || e.end() == pointi
             )
         )
         {
@@ -344,8 +344,8 @@ label otherEdge
     }
 
     FatalErrorInFunction
-        << " verts:" << surf.localPoints()[faceI]
-        << " connected to point " << pointI
+        << " verts:" << surf.localPoints()[facei]
+        << " connected to point " << pointi
         << " faceEdges:" << UIndirectList<edge>(surf.edges(), fEdges)()
         << abort(FatalError);
 
@@ -362,32 +362,32 @@ void walkSplitLine
     const boolList& borderEdge,
     const labelList& borderPoint,
 
-    const label startFaceI,
+    const label startFacei,
     const label startEdgeI,     // is border edge
-    const label startPointI,    // is border point
+    const label startPointi,    // is border point
 
     Map<label>& faceToEdge,
     Map<label>& faceToPoint
 )
 {
-    label faceI = startFaceI;
+    label facei = startFacei;
     label edgeI = startEdgeI;
-    label pointI = startPointI;
+    label pointi = startPointi;
 
     do
     {
         //
-        // Stick to pointI and walk face-edge-face until back on border edge.
+        // Stick to pointi and walk face-edge-face until back on border edge.
         //
 
         do
         {
             // Cross face to next edge.
-            edgeI = otherEdge(surf, faceI, edgeI, pointI);
+            edgeI = otherEdge(surf, facei, edgeI, pointi);
 
             if (borderEdge[edgeI])
             {
-                if (!faceToEdge.insert(faceI, edgeI))
+                if (!faceToEdge.insert(facei, edgeI))
                 {
                     // Was already visited.
                     return;
@@ -398,7 +398,7 @@ void walkSplitLine
                     break;
                 }
             }
-            else if (!faceToPoint.insert(faceI, pointI))
+            else if (!faceToPoint.insert(facei, pointi))
             {
                 // Was already visited.
                 return;
@@ -414,13 +414,13 @@ void walkSplitLine
                     << abort(FatalError);
             }
 
-            if (eFaces[0] == faceI)
+            if (eFaces[0] == facei)
             {
-                faceI = eFaces[1];
+                facei = eFaces[1];
             }
-            else if (eFaces[1] == faceI)
+            else if (eFaces[1] == facei)
             {
-                faceI = eFaces[0];
+                facei = eFaces[0];
             }
             else
             {
@@ -434,9 +434,9 @@ void walkSplitLine
         // Back on border edge. Cross to other point on edge.
         //
 
-        pointI = surf.edges()[edgeI].otherVertex(pointI);
+        pointi = surf.edges()[edgeI].otherVertex(pointi);
 
-        if (borderPoint[pointI] == -1)
+        if (borderPoint[pointi] == -1)
         {
             return;
         }
@@ -451,7 +451,7 @@ void walkSplitLine
 label sharedFace
 (
     const triSurface& surf,
-    const label firstFaceI,
+    const label firstFacei,
     const label sharedEdgeI
 )
 {
@@ -459,7 +459,7 @@ label sharedFace
 
     const edge& e = surf.edges()[sharedEdgeI];
 
-    const triSurface::FaceType& f = surf.localFaces()[firstFaceI];
+    const triSurface::FaceType& f = surf.localFaces()[firstFacei];
 
     label startIndex = findIndex(f, e.start());
 
@@ -472,16 +472,16 @@ label sharedFace
     const labelList& eFaces = surf.sortedEdgeFaces()[sharedEdgeI];
 
     // Get position of face in sorted edge faces
-    label faceIndex = findIndex(eFaces, firstFaceI);
+    label faceIndex = findIndex(eFaces, firstFacei);
 
     if (edgeOrder)
     {
-        // Get face before firstFaceI
+        // Get face before firstFacei
         return eFaces[eFaces.rcIndex(faceIndex)];
     }
     else
     {
-        // Get face after firstFaceI
+        // Get face after firstFacei
         return eFaces[eFaces.fcIndex(faceIndex)];
     }
 }
@@ -521,17 +521,17 @@ void calcPointVecs
 
             forAll(eFaces, i)
             {
-                label faceI = eFaces[i];
+                label facei = eFaces[i];
 
-                if (faceToEdge.found(faceI))
+                if (faceToEdge.found(facei))
                 {
                     if (face0I == -1)
                     {
-                        face0I = faceI;
+                        face0I = facei;
                     }
                     else if (face1I == -1)
                     {
-                        face1I = faceI;
+                        face1I = facei;
 
                         break;
                     }
@@ -608,14 +608,14 @@ void renumberFaces
 {
     forAllConstIter(Map<label>, faceToEdge, iter)
     {
-        const label faceI = iter.key();
-        const triSurface::FaceType& f = surf.localFaces()[faceI];
+        const label facei = iter.key();
+        const triSurface::FaceType& f = surf.localFaces()[facei];
 
         forAll(f, fp)
         {
             if (pointMap[f[fp]] != -1)
             {
-                newTris[faceI][fp] = pointMap[f[fp]];
+                newTris[facei][fp] = pointMap[f[fp]];
             }
         }
     }
@@ -778,7 +778,7 @@ int main(int argc, char *argv[])
         //
 
         label startEdgeI = -1;
-        label startPointI = -1;
+        label startPointi = -1;
 
         forAll(borderEdge, edgeI)
         {
@@ -789,14 +789,14 @@ int main(int argc, char *argv[])
                 if ((borderPoint[e[0]] != -1) && (borderPoint[e[1]] == -1))
                 {
                     startEdgeI = edgeI;
-                    startPointI = e[0];
+                    startPointi = e[0];
 
                     break;
                 }
                 else if ((borderPoint[e[0]] == -1) && (borderPoint[e[1]] != -1))
                 {
                     startEdgeI = edgeI;
-                    startPointI = e[1];
+                    startPointi = e[1];
 
                     break;
                 }
@@ -813,17 +813,17 @@ int main(int argc, char *argv[])
         // Pick any face using edge to start from.
         const labelList& eFaces = surf.edgeFaces()[startEdgeI];
 
-        label firstFaceI = eFaces[0];
+        label firstFacei = eFaces[0];
 
         // Find second face which is from same surface i.e. has outwards
         // pointing normal as well (actually bit more complex than this)
-        label secondFaceI = sharedFace(surf, firstFaceI, startEdgeI);
+        label secondFacei = sharedFace(surf, firstFacei, startEdgeI);
 
         Info<< "Starting local walk from:" << endl
             << "    edge :" << startEdgeI << endl
-            << "    point:" << startPointI << endl
-            << "    face0:" << firstFaceI << endl
-            << "    face1:" << secondFaceI << endl
+            << "    point:" << startPointi << endl
+            << "    face0:" << firstFacei << endl
+            << "    face1:" << secondFacei << endl
             << endl;
 
         // From face on border edge to edge.
@@ -831,7 +831,7 @@ int main(int argc, char *argv[])
         // From face connected to border point (but not border edge) to point.
         Map<label> faceToPoint(2*nBorderPoints);
 
-        faceToEdge.insert(firstFaceI, startEdgeI);
+        faceToEdge.insert(firstFacei, startEdgeI);
 
         walkSplitLine
         (
@@ -839,15 +839,15 @@ int main(int argc, char *argv[])
             borderEdge,
             borderPoint,
 
-            firstFaceI,
+            firstFacei,
             startEdgeI,
-            startPointI,
+            startPointi,
 
             faceToEdge,
             faceToPoint
         );
 
-        faceToEdge.insert(secondFaceI, startEdgeI);
+        faceToEdge.insert(secondFacei, startEdgeI);
 
         walkSplitLine
         (
@@ -855,9 +855,9 @@ int main(int argc, char *argv[])
             borderEdge,
             borderPoint,
 
-            secondFaceI,
+            secondFacei,
             startEdgeI,
-            startPointI,
+            startPointi,
 
             faceToEdge,
             faceToPoint
@@ -890,18 +890,18 @@ int main(int argc, char *argv[])
         pointField newPoints(surf.localPoints());
         newPoints.setSize(newPoints.size() + nBorderPoints);
 
-        forAll(borderPoint, pointI)
+        forAll(borderPoint, pointi)
         {
-            label newPointI = borderPoint[pointI];
+            label newPointi = borderPoint[pointi];
 
-            if (newPointI != -1)
+            if (newPointi != -1)
             {
-                scalar minLen = minEdgeLen(surf, pointI);
+                scalar minLen = minEdgeLen(surf, pointi);
 
-                vector n = borderPointVec[pointI];
+                vector n = borderPointVec[pointi];
                 n /= mag(n);
 
-                newPoints[newPointI] = newPoints[pointI] + 0.1 * minLen * n;
+                newPoints[newPointi] = newPoints[pointi] + 0.1 * minLen * n;
             }
         }
 
@@ -913,10 +913,10 @@ int main(int argc, char *argv[])
         // Start off from copy of faces.
         List<labelledTri> newTris(surf.size());
 
-        forAll(surf, faceI)
+        forAll(surf, facei)
         {
-            newTris[faceI] = surf.localFaces()[faceI];
-            newTris[faceI].region() = surf[faceI].region();
+            newTris[facei] = surf.localFaces()[facei];
+            newTris[facei].region() = surf[facei].region();
         }
 
         // Renumber all faces in faceToEdge
@@ -926,9 +926,9 @@ int main(int argc, char *argv[])
 
 
         // Check if faces use unmoved points.
-        forAll(newTris, faceI)
+        forAll(newTris, facei)
         {
-            const triSurface::FaceType& f = newTris[faceI];
+            const triSurface::FaceType& f = newTris[facei];
 
             forAll(f, fp)
             {
@@ -936,7 +936,7 @@ int main(int argc, char *argv[])
 
                 if (mag(pt) >= GREAT/2)
                 {
-                    Info<< "newTri:" << faceI << " verts:" << f
+                    Info<< "newTri:" << facei << " verts:" << f
                         << " vert:" << f[fp] << " point:" << pt << endl;
                 }
             }

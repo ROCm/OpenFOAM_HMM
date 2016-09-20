@@ -52,46 +52,46 @@ Description
     \par points
 
     - unchanged:
-        - pointMap[pointI] contains old point label
-        - reversePointMap[oldPointI] contains new point label
+        - pointMap[pointi] contains old point label
+        - reversePointMap[oldPointi] contains new point label
     - removed:
-        - reversePointMap[oldPointI] contains -1
+        - reversePointMap[oldPointi] contains -1
     - merged into point:
-        - reversePointMap[oldPointI] contains <-1 : -newPointI-2
-        - pointMap[pointI] contains the old master point label
-        - pointsFromPoints gives for pointI all the old point labels
+        - reversePointMap[oldPointi] contains <-1 : -newPointi-2
+        - pointMap[pointi] contains the old master point label
+        - pointsFromPoints gives for pointi all the old point labels
           (including the old master point!)
     - added-from-same:
-        - pointMap[pointI] contains the old master point label
+        - pointMap[pointi] contains the old master point label
     - appended:
-        - pointMap[pointI] contains -1
+        - pointMap[pointi] contains -1
 
     \par faces
 
     - unchanged:
-        - faceMap[faceI] contains old face label
-        - reverseFaceMap[oldFaceI] contains new face label
+        - faceMap[facei] contains old face label
+        - reverseFaceMap[oldFacei] contains new face label
     - removed:
-        - reverseFaceMap[oldFaceI] contains -1
+        - reverseFaceMap[oldFacei] contains -1
     - merged into face:
-        - reverseFaceMap[oldFaceI] contains <-1 : -newFaceI-2
-        - faceMap[faceI] contains the old master face label
-        - facesFromFaces gives for faceI all the old face labels
+        - reverseFaceMap[oldFacei] contains <-1 : -newFacei-2
+        - faceMap[facei] contains the old master face label
+        - facesFromFaces gives for facei all the old face labels
           (including the old master face!)
     - added-from-same:
-        - faceMap[faceI] contains the old master face label
+        - faceMap[facei] contains the old master face label
     - inflated-from-edge:
-        - faceMap[faceI] contains -1
+        - faceMap[facei] contains -1
         - facesFromEdges contains an entry with
-            - faceI
+            - facei
             - list of faces(*) on old mesh that connected to the old edge
     - inflated-from-point:
-        - faceMap[faceI] contains -1
+        - faceMap[facei] contains -1
         - facesFromPoints contains an entry with
-            - faceI
+            - facei
             - list of faces(*) on old mesh that connected to the old point
     - appended:
-        - faceMap[faceI] contains -1
+        - faceMap[facei] contains -1
 
     Note (*) \n
        if the newly inflated face is a boundary face the list of faces will
@@ -101,34 +101,34 @@ Description
     \par cells
 
     - unchanged:
-        - cellMap[cellI] contains old cell label
-        - reverseCellMap[oldCellI] contains new cell label
+        - cellMap[celli] contains old cell label
+        - reverseCellMap[oldCelli] contains new cell label
     - removed:
-        - reverseCellMap[oldCellI] contains -1
+        - reverseCellMap[oldCelli] contains -1
     - merged into cell:
-        - reverseCellMap[oldCellI] contains <-1 : -newCellI-2
-        - cellMap[cellI] contains the old master cell label
-        - cellsFromCells gives for cellI all the old cell labels
+        - reverseCellMap[oldCelli] contains <-1 : -newCelli-2
+        - cellMap[celli] contains the old master cell label
+        - cellsFromCells gives for celli all the old cell labels
           (including the old master cell!)
     - added-from-same:
-        - cellMap[cellI] contains the old master cell label
+        - cellMap[celli] contains the old master cell label
     - inflated-from-face:
-        - cellMap[cellI] contains -1
+        - cellMap[celli] contains -1
         - cellsFromFaces contains an entry with
-            - cellI
+            - celli
             - list of cells on old mesh that connected to the old face
     - inflated-from-edge:
-        - cellMap[cellI] contains -1
+        - cellMap[celli] contains -1
         - cellsFromEdges contains an entry with
-            - cellI
+            - celli
             - list of cells on old mesh that connected to the old edge
     - inflated-from-point:
-        - cellMap[cellI] contains -1
+        - cellMap[celli] contains -1
         - cellsFromPoints contains an entry with
-            - cellI
+            - celli
             - list of cells on old mesh that connected to the old point
     - appended:
-        - cellMap[cellI] contains -1
+        - cellMap[celli] contains -1
 
 
 SourceFiles
@@ -468,9 +468,9 @@ public:
 
                 //- If point is removed return point (on new mesh) it merged
                 //  into
-                label mergedPoint(const label oldPointI) const
+                label mergedPoint(const label oldPointi) const
                 {
-                    label i = reversePointMap_[oldPointI];
+                    label i = reversePointMap_[oldPointi];
 
                     if (i == -1)
                     {
@@ -483,7 +483,7 @@ public:
                     else
                     {
                         FatalErrorInFunction
-                            << "old point label " << oldPointI
+                            << "old point label " << oldPointi
                             << " has reverseMap " << i << endl
                             << "Only call mergedPoint for removed points."
                             << abort(FatalError);
@@ -499,9 +499,9 @@ public:
                 }
 
                 //- If face is removed return face (on new mesh) it merged into
-                label mergedFace(const label oldFaceI) const
+                label mergedFace(const label oldFacei) const
                 {
-                    label i = reverseFaceMap_[oldFaceI];
+                    label i = reverseFaceMap_[oldFacei];
 
                     if (i == -1)
                     {
@@ -514,7 +514,7 @@ public:
                     else
                     {
                         FatalErrorInFunction
-                            << "old face label " << oldFaceI
+                            << "old face label " << oldFacei
                             << " has reverseMap " << i << endl
                             << "Only call mergedFace for removed faces."
                             << abort(FatalError);
@@ -530,9 +530,9 @@ public:
                 }
 
                 //- If cell is removed return cell (on new mesh) it merged into
-                label mergedCell(const label oldCellI) const
+                label mergedCell(const label oldCelli) const
                 {
-                    label i = reverseCellMap_[oldCellI];
+                    label i = reverseCellMap_[oldCelli];
 
                     if (i == -1)
                     {
@@ -545,7 +545,7 @@ public:
                     else
                     {
                         FatalErrorInFunction
-                            << "old cell label " << oldCellI
+                            << "old cell label " << oldCelli
                             << " has reverseMap " << i << endl
                             << "Only call mergedCell for removed cells."
                             << abort(FatalError);

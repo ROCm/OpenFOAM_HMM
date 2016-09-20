@@ -49,8 +49,7 @@ Description
     \endvartable
 
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         patchType    | underlying patch type should be \c cyclic| yes |
@@ -64,7 +63,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            porousBafflePressure;
         patchType       cyclic;

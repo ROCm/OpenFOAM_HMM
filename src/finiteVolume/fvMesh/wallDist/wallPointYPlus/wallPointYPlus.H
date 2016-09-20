@@ -102,26 +102,26 @@ public:
         // Needed by FaceCellWave
 
             //- Influence of neighbouring face.
-            //  Calls update(...) with cellCentre of cellI
+            //  Calls update(...) with cellCentre of celli
             template<class TrackingData>
             inline bool updateCell
             (
                 const polyMesh& mesh,
-                const label thisCellI,
-                const label neighbourFaceI,
+                const label thisCelli,
+                const label neighbourFacei,
                 const wallPointYPlus& neighbourWallInfo,
                 const scalar tol,
                 TrackingData& td
             );
 
             //- Influence of neighbouring cell.
-            //  Calls update(...) with faceCentre of faceI
+            //  Calls update(...) with faceCentre of facei
             template<class TrackingData>
             inline bool updateFace
             (
                 const polyMesh& mesh,
-                const label thisFaceI,
-                const label neighbourCellI,
+                const label thisFacei,
+                const label neighbourCelli,
                 const wallPointYPlus& neighbourWallInfo,
                 const scalar tol,
                 TrackingData& td
@@ -129,12 +129,12 @@ public:
 
             //- Influence of different value on same face.
             //  Merge new and old info.
-            //  Calls update(...) with faceCentre of faceI
+            //  Calls update(...) with faceCentre of facei
             template<class TrackingData>
             inline bool updateFace
             (
                 const polyMesh& mesh,
-                const label thisFaceI,
+                const label thisFacei,
                 const wallPointYPlus& neighbourWallInfo,
                 const scalar tol,
                 TrackingData& td

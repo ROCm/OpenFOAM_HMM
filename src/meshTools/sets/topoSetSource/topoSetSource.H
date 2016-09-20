@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -116,7 +116,7 @@ protected:
                 if (usageTablePtr_)
                 {
                     delete usageTablePtr_;
-                    usageTablePtr_ = NULL;
+                    usageTablePtr_ = nullptr;
                 }
             }
         };
@@ -126,8 +126,8 @@ protected:
 
         const polyMesh& mesh_;
 
-        //- Add (if bool) cellI to set or delete cellI from set.
-        void addOrDelete(topoSet& set, const label cellI, const bool) const;
+        //- Add (if bool) celli to set or delete celli from set.
+        void addOrDelete(topoSet& set, const label celli, const bool) const;
 
 
 private:
@@ -243,7 +243,7 @@ public:
         autoPtr<topoSetSource> clone() const
         {
             NotImplemented;
-            return autoPtr<topoSetSource>(NULL);
+            return autoPtr<topoSetSource>(nullptr);
         }
 
 

@@ -207,8 +207,8 @@ Foam::polyMesh::polyMesh(const IOobject& io)
     comm_(UPstream::worldComm),
     geometricD_(Zero),
     solutionD_(Zero),
-    tetBasePtIsPtr_(NULL),
-    cellTreePtr_(NULL),
+    tetBasePtIsPtr_(nullptr),
+    cellTreePtr_(nullptr),
     pointZones_
     (
         IOobject
@@ -263,11 +263,11 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         ),
         *this
     ),
-    globalMeshDataPtr_(NULL),
+    globalMeshDataPtr_(nullptr),
     moving_(false),
     topoChanging_(false),
     curMotionTimeIndex_(time().timeIndex()),
-    oldPointsPtr_(NULL)
+    oldPointsPtr_(nullptr)
 {
     if (exists(owner_.objectPath()))
     {
@@ -401,8 +401,8 @@ Foam::polyMesh::polyMesh
     comm_(UPstream::worldComm),
     geometricD_(Zero),
     solutionD_(Zero),
-    tetBasePtIsPtr_(NULL),
-    cellTreePtr_(NULL),
+    tetBasePtIsPtr_(nullptr),
+    cellTreePtr_(nullptr),
     pointZones_
     (
         IOobject
@@ -445,11 +445,11 @@ Foam::polyMesh::polyMesh
         *this,
         PtrList<cellZone>()
     ),
-    globalMeshDataPtr_(NULL),
+    globalMeshDataPtr_(nullptr),
     moving_(false),
     topoChanging_(false),
     curMotionTimeIndex_(time().timeIndex()),
-    oldPointsPtr_(NULL)
+    oldPointsPtr_(nullptr)
 {
     // Check if the faces and cells are valid
     forAll(faces_, facei)
@@ -552,8 +552,8 @@ Foam::polyMesh::polyMesh
     comm_(UPstream::worldComm),
     geometricD_(Zero),
     solutionD_(Zero),
-    tetBasePtIsPtr_(NULL),
-    cellTreePtr_(NULL),
+    tetBasePtIsPtr_(nullptr),
+    cellTreePtr_(nullptr),
     pointZones_
     (
         IOobject
@@ -596,11 +596,11 @@ Foam::polyMesh::polyMesh
         *this,
         0
     ),
-    globalMeshDataPtr_(NULL),
+    globalMeshDataPtr_(nullptr),
     moving_(false),
     topoChanging_(false),
     curMotionTimeIndex_(time().timeIndex()),
-    oldPointsPtr_(NULL)
+    oldPointsPtr_(nullptr)
 {
     // Check if faces are valid
     forAll(faces_, facei)
@@ -677,15 +677,15 @@ void Foam::polyMesh::resetPrimitives
 
 
     // Reset patch sizes and starts
-    forAll(boundary_, patchI)
+    forAll(boundary_, patchi)
     {
-        boundary_[patchI] = polyPatch
+        boundary_[patchi] = polyPatch
         (
-            boundary_[patchI],
+            boundary_[patchi],
             boundary_,
-            patchI,
-            patchSizes[patchI],
-            patchStarts[patchI]
+            patchi,
+            patchSizes[patchi],
+            patchStarts[patchi]
         );
     }
 
@@ -1126,6 +1126,9 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     faceZones_.movePoints(points_);
     cellZones_.movePoints(points_);
 
+    // Cell tree might become invalid
+    cellTreePtr_.clear();
+
     // Reset valid directions (could change with rotation)
     geometricD_ = Zero;
     solutionD_ = Zero;
@@ -1243,60 +1246,13 @@ void Foam::polyMesh::findCellFacePt
 
     const indexedOctree<treeDataCell>& tree = cellTree();
 
-    // Find nearest cell to the point
-    pointIndexHit info = tree.findNearest(p, sqr(GREAT));
+    // Find point inside cell
+    celli = tree.findInside(p);
 
-    if (info.hit())
+    if (celli != -1)
     {
-        label nearestCellI = tree.shapes().cellLabels()[info.index()];
-
         // Check the nearest cell to see if the point is inside.
-        findTetFacePt(nearestCellI, p, tetFacei, tetPti);
-
-        if (tetFacei != -1)
-        {
-            // Point was in the nearest cell
-
-            celli = nearestCellI;
-
-            return;
-        }
-        else
-        {
-            // Check the other possible cells that the point may be in
-
-            labelList testCells = tree.findIndices(p);
-
-            forAll(testCells, pCI)
-            {
-                label testCellI = tree.shapes().cellLabels()[testCells[pCI]];
-
-                if (testCellI == nearestCellI)
-                {
-                    // Don't retest the nearest cell
-
-                    continue;
-                }
-
-                // Check the test cell to see if the point is inside.
-                findTetFacePt(testCellI, p, tetFacei, tetPti);
-
-                if (tetFacei != -1)
-                {
-                    // Point was in the test cell
-
-                    celli = testCellI;
-
-                    return;
-                }
-            }
-        }
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "Did not find nearest cell in search tree."
-            << abort(FatalError);
+        findTetFacePt(celli, p, tetFacei, tetPti);
     }
 }
 
@@ -1347,24 +1303,24 @@ bool Foam::polyMesh::pointInCell
 
                 forAll(f, fp)
                 {
-                    label pointI;
-                    label nextPointI;
+                    label pointi;
+                    label nextPointi;
 
                     if (isOwn)
                     {
-                        pointI = f[fp];
-                        nextPointI = f.nextLabel(fp);
+                        pointi = f[fp];
+                        nextPointi = f.nextLabel(fp);
                     }
                     else
                     {
-                        pointI = f.nextLabel(fp);
-                        nextPointI = f[fp];
+                        pointi = f.nextLabel(fp);
+                        nextPointi = f[fp];
                     }
 
                     triPointRef faceTri
                     (
-                        points()[pointI],
-                        points()[nextPointI],
+                        points()[pointi],
+                        points()[nextPointi],
                         fc
                     );
 

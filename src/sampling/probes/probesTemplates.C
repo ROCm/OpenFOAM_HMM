@@ -78,9 +78,9 @@ void Foam::probes::sampleAndWrite
 
         os  << setw(w) << vField.time().timeToUserTime(vField.time().value());
 
-        forAll(values, probeI)
+        forAll(values, probei)
         {
-            os  << ' ' << setw(w) << values[probeI];
+            os  << ' ' << setw(w) << values[probei];
         }
         os  << endl;
     }
@@ -102,9 +102,9 @@ void Foam::probes::sampleAndWrite
 
         os  << setw(w) << sField.time().timeToUserTime(sField.time().value());
 
-        forAll(values, probeI)
+        forAll(values, probei)
         {
-            os  << ' ' << setw(w) << values[probeI];
+            os  << ' ' << setw(w) << values[probei];
         }
         os  << endl;
     }
@@ -114,7 +114,7 @@ void Foam::probes::sampleAndWrite
 template<class Type>
 void Foam::probes::sampleAndWrite(const fieldGroup<Type>& fields)
 {
-    forAll(fields, fieldI)
+    forAll(fields, fieldi)
     {
         if (loadFromFiles_)
         {
@@ -124,7 +124,7 @@ void Foam::probes::sampleAndWrite(const fieldGroup<Type>& fields)
                 (
                     IOobject
                     (
-                        fields[fieldI],
+                        fields[fieldi],
                         mesh_.time().timeName(),
                         mesh_,
                         IOobject::MUST_READ,
@@ -137,7 +137,7 @@ void Foam::probes::sampleAndWrite(const fieldGroup<Type>& fields)
         }
         else
         {
-            objectRegistry::const_iterator iter = mesh_.find(fields[fieldI]);
+            objectRegistry::const_iterator iter = mesh_.find(fields[fieldi]);
 
             if
             (
@@ -151,7 +151,7 @@ void Foam::probes::sampleAndWrite(const fieldGroup<Type>& fields)
                     mesh_.lookupObject
                     <GeometricField<Type, fvPatchField, volMesh>>
                     (
-                        fields[fieldI]
+                        fields[fieldi]
                     )
                 );
             }
@@ -163,7 +163,7 @@ void Foam::probes::sampleAndWrite(const fieldGroup<Type>& fields)
 template<class Type>
 void Foam::probes::sampleAndWriteSurfaceFields(const fieldGroup<Type>& fields)
 {
-    forAll(fields, fieldI)
+    forAll(fields, fieldi)
     {
         if (loadFromFiles_)
         {
@@ -173,7 +173,7 @@ void Foam::probes::sampleAndWriteSurfaceFields(const fieldGroup<Type>& fields)
                 (
                     IOobject
                     (
-                        fields[fieldI],
+                        fields[fieldi],
                         mesh_.time().timeName(),
                         mesh_,
                         IOobject::MUST_READ,
@@ -186,7 +186,7 @@ void Foam::probes::sampleAndWriteSurfaceFields(const fieldGroup<Type>& fields)
         }
         else
         {
-            objectRegistry::const_iterator iter = mesh_.find(fields[fieldI]);
+            objectRegistry::const_iterator iter = mesh_.find(fields[fieldi]);
 
             if
             (
@@ -200,7 +200,7 @@ void Foam::probes::sampleAndWriteSurfaceFields(const fieldGroup<Type>& fields)
                     mesh_.lookupObject
                     <GeometricField<Type, fvsPatchField, surfaceMesh>>
                     (
-                        fields[fieldI]
+                        fields[fieldi]
                     )
                 );
             }
@@ -233,16 +233,16 @@ Foam::probes::sample
             interpolation<Type>::New(interpolationScheme_, vField)
         );
 
-        forAll(*this, probeI)
+        forAll(*this, probei)
         {
-            if (elementList_[probeI] >= 0)
+            if (elementList_[probei] >= 0)
             {
-                const vector& position = operator[](probeI);
+                const vector& position = operator[](probei);
 
-                values[probeI] = interpolator().interpolate
+                values[probei] = interpolator().interpolate
                 (
                     position,
-                    elementList_[probeI],
+                    elementList_[probei],
                     -1
                 );
             }
@@ -250,11 +250,11 @@ Foam::probes::sample
     }
     else
     {
-        forAll(*this, probeI)
+        forAll(*this, probei)
         {
-            if (elementList_[probeI] >= 0)
+            if (elementList_[probei] >= 0)
             {
-                values[probeI] = vField[elementList_[probeI]];
+                values[probei] = vField[elementList_[probei]];
             }
         }
     }
@@ -296,11 +296,11 @@ Foam::probes::sample
 
     Field<Type>& values = tValues.ref();
 
-    forAll(*this, probeI)
+    forAll(*this, probei)
     {
-        if (faceList_[probeI] >= 0)
+        if (faceList_[probei] >= 0)
         {
-            values[probeI] = sField[faceList_[probeI]];
+            values[probei] = sField[faceList_[probei]];
         }
     }
 

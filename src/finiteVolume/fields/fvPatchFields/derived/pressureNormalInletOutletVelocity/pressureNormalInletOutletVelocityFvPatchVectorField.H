@@ -33,8 +33,7 @@ Description
     outflow (as defined by the flux); for inflow, the velocity is obtained from
     the flux with a direction normal to the patch faces.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
@@ -43,7 +42,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            pressureNormalInletOutletVelocity;
         phi             phi;
@@ -58,7 +57,7 @@ Note
     - negative flux (into of domain): derive from the flux and patch-normal
       direction
 
-SeeAlso
+See also
     Foam::mixedFvPatchVectorField
 
 SourceFiles

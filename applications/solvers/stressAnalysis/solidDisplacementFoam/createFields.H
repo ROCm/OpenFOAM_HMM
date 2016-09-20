@@ -1,3 +1,6 @@
+#include "readMechanicalProperties.H"
+#include "readThermalProperties.H"
+
 Info<< "Reading field D\n" << endl;
 volVectorField D
 (
@@ -13,7 +16,7 @@ volVectorField D
 );
 
 
-autoPtr<volScalarField> Tptr(NULL);
+autoPtr<volScalarField> Tptr(nullptr);
 
 if (thermalStress)
 {

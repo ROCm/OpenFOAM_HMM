@@ -175,12 +175,12 @@ Foam::globalIndexAndTransform::decodeTransformIndex
 Foam::label Foam::globalIndexAndTransform::addToTransformIndex
 (
     const label transformIndex,
-    const label patchI,
+    const label patchi,
     const bool isSendingSide,
     const scalar tol
 ) const
 {
-    const Pair<label>& transSign = patchTransformSign_[patchI];
+    const Pair<label>& transSign = patchTransformSign_[patchi];
 
     label matchTransI = transSign.first();
 
@@ -208,7 +208,7 @@ Foam::label Foam::globalIndexAndTransform::addToTransformIndex
             {
                 // sent from patch without a transformation. Do nothing.
                 FatalErrorInFunction
-                    << "patch:" << mesh_.boundaryMesh()[patchI].name()
+                    << "patch:" << mesh_.boundaryMesh()[patchi].name()
                     << " transform:" << matchTransI << " sign:" << sign
                     << "  current transforms:" << permutation
                     << exit(FatalError);
@@ -245,7 +245,7 @@ Foam::label Foam::globalIndexAndTransform::addToTransformIndex
                     FatalErrorInFunction
                         << "More than one patch accessing the same transform "
                         << "but not of the same sign." << endl
-                        << "patch:" << mesh_.boundaryMesh()[patchI].name()
+                        << "patch:" << mesh_.boundaryMesh()[patchi].name()
                         << " transform:" << matchTransI << " sign:" << sign
                         << "  current transforms:" << permutation
                         << exit(FatalError);
@@ -348,7 +348,7 @@ Foam::labelPair Foam::globalIndexAndTransform::encode
 
 Foam::labelPair Foam::globalIndexAndTransform::encode
 (
-    const label procI,
+    const label proci,
     const label index,
     const label transformIndex
 )
@@ -362,10 +362,10 @@ Foam::labelPair Foam::globalIndexAndTransform::encode
             << abort(FatalError);
     }
 
-    if (procI > labelMax/base_)
+    if (proci > labelMax/base_)
     {
         FatalErrorInFunction
-            << "Overflow : encoding processor " << procI << " in base " << base_
+            << "Overflow : encoding processor " << proci << " in base " << base_
             << " exceeds capability of label (" << labelMax
             << "). Please recompile with larger datatype for label."
             << exit(FatalError);
@@ -374,7 +374,7 @@ Foam::labelPair Foam::globalIndexAndTransform::encode
     return labelPair
     (
         index,
-        transformIndex + procI*base_
+        transformIndex + proci*base_
     );
 }
 
@@ -450,23 +450,23 @@ const Foam::vectorTensorTransform& Foam::globalIndexAndTransform::transform
 
 Foam::labelList Foam::globalIndexAndTransform::transformIndicesForPatches
 (
-    const labelHashSet& patchIs
+    const labelHashSet& patchis
 ) const
 {
     List<label> permutation(transforms_.size(), 0);
 
     labelList selectedTransformIs(0);
 
-    if (patchIs.empty() || transforms_.empty())
+    if (patchis.empty() || transforms_.empty())
     {
         return selectedTransformIs;
     }
 
-    forAllConstIter(labelHashSet, patchIs, iter)
+    forAllConstIter(labelHashSet, patchis, iter)
     {
-        label patchI = iter.key();
+        label patchi = iter.key();
 
-        const Pair<label>& transSign = patchTransformSign_[patchI];
+        const Pair<label>& transSign = patchTransformSign_[patchi];
 
         label matchTransI = transSign.first();
 
@@ -625,13 +625,13 @@ Foam::labelList Foam::globalIndexAndTransform::transformIndicesForPatches
 
 Foam::pointField Foam::globalIndexAndTransform::transformPatches
 (
-    const labelHashSet& patchIs,
+    const labelHashSet& patchis,
     const point& pt
 ) const
 {
-    labelList transIs = transformIndicesForPatches(patchIs);
+    labelList transIs = transformIndicesForPatches(patchis);
 
-    // Pout<< patchIs << nl << transIs << endl;
+    // Pout<< patchis << nl << transIs << endl;
 
     pointField transPts(transIs.size());
 

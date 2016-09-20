@@ -184,8 +184,6 @@ template<class GeoField>
 void Foam::sampledSurfaces::sampleAndWrite(const IOobjectList& objects)
 {
     wordList names;
-    const fvMesh& mesh = refCast<const fvMesh>(obr_);
-
     if (loadFromFiles_)
     {
         IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
@@ -193,7 +191,7 @@ void Foam::sampledSurfaces::sampleAndWrite(const IOobjectList& objects)
     }
     else
     {
-        names = mesh.thisDb().names<GeoField>();
+        names = mesh_.thisDb().names<GeoField>();
     }
 
     labelList nameIDs(findStrings(fieldSelection_, names));
@@ -216,11 +214,11 @@ void Foam::sampledSurfaces::sampleAndWrite(const IOobjectList& objects)
                 IOobject
                 (
                     fieldName,
-                    mesh.time().timeName(),
-                    mesh,
+                    time_.timeName(),
+                    mesh_,
                     IOobject::MUST_READ
                 ),
-                mesh
+                mesh_
             );
 
             sampleAndWrite(fld);
@@ -229,7 +227,7 @@ void Foam::sampledSurfaces::sampleAndWrite(const IOobjectList& objects)
         {
             sampleAndWrite
             (
-                mesh.thisDb().lookupObject<GeoField>(fieldName)
+                mesh_.thisDb().lookupObject<GeoField>(fieldName)
             );
         }
     }

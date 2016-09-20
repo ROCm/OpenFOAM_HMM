@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ Description
     Calculates and applies the buoyancy force rho*g to the momentum equation
     corresponding to the specified velocity field.
 
-    \heading Source usage
+Usage
     Example usage:
     \verbatim
     buoyancyForceCoeffs
@@ -107,7 +107,7 @@ public:
             (
                 const volScalarField& rho,
                 fvMatrix<vector>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
 

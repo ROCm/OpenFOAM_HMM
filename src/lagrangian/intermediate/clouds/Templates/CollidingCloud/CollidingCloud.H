@@ -196,7 +196,7 @@ public:
             //  then the wall impact distance should be zero.
             //  Otherwise, it should be allowed to be the value from
             //  the Parcel.
-            virtual bool hasWallImpactDistance() const;
+            bool hasWallImpactDistance() const;
 
 
             // Sub-models

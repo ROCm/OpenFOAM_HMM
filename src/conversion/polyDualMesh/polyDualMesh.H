@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -79,8 +79,8 @@ class polyDualMesh
         static void getPointEdges
         (
             const primitivePatch& patch,
-            const label faceI,
-            const label pointI,
+            const label facei,
+            const label pointi,
             label& e0,
             label& e1
         );
@@ -91,7 +91,7 @@ class polyDualMesh
             const label patchToDualOffset,
             const labelList& edgeToDualPoint,
             const labelList& pointToDualPoint,
-            const label pointI,
+            const label pointi,
 
             label& edgeI
         );
@@ -102,7 +102,7 @@ class polyDualMesh
             const label patchToDualOffset,
             const labelList& edgeToDualPoint,
 
-            const label pointI,
+            const label pointi,
             const label startEdgeI,
 
             labelList& dualFace2,
@@ -114,7 +114,7 @@ class polyDualMesh
             const polyPatch& patch,
             const labelList& pointToDualPoint,
 
-            const label pointI,
+            const label pointi,
             const labelList& dualFace,
             const labelList& featEdgeIndices,
 

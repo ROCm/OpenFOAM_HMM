@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,8 +32,7 @@ Description
     temperature for use with supersonic cases, where a user-specified
     value is applied in the case of reverse flow.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         U            | velocity field name     | no          | U
@@ -46,7 +45,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            inletOutletTotalTemperature;
         U               U;
@@ -59,7 +58,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::inletOutletFvPatchField
 
 SourceFiles

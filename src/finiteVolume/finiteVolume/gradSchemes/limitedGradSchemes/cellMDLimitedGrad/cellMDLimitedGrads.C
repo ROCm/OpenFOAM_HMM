@@ -62,8 +62,8 @@ Foam::fv::cellMDLimitedGrad<Foam::scalar>::calcGrad
     const volVectorField& C = mesh.C();
     const surfaceVectorField& Cf = mesh.Cf();
 
-    scalarField maxVsf(vsf.internalField());
-    scalarField minVsf(vsf.internalField());
+    scalarField maxVsf(vsf.primitiveField());
+    scalarField minVsf(vsf.primitiveField());
 
     forAll(owner, facei)
     {
@@ -81,7 +81,7 @@ Foam::fv::cellMDLimitedGrad<Foam::scalar>::calcGrad
     }
 
 
-    const volScalarField::GeometricBoundaryField& bsf = vsf.boundaryField();
+    const volScalarField::Boundary& bsf = vsf.boundaryField();
 
     forAll(bsf, patchi)
     {
@@ -205,8 +205,8 @@ Foam::fv::cellMDLimitedGrad<Foam::vector>::calcGrad
     const volVectorField& C = mesh.C();
     const surfaceVectorField& Cf = mesh.Cf();
 
-    vectorField maxVsf(vsf.internalField());
-    vectorField minVsf(vsf.internalField());
+    vectorField maxVsf(vsf.primitiveField());
+    vectorField minVsf(vsf.primitiveField());
 
     forAll(owner, facei)
     {
@@ -224,7 +224,7 @@ Foam::fv::cellMDLimitedGrad<Foam::vector>::calcGrad
     }
 
 
-    const volVectorField::GeometricBoundaryField& bsf = vsf.boundaryField();
+    const volVectorField::Boundary& bsf = vsf.boundaryField();
 
     forAll(bsf, patchi)
     {

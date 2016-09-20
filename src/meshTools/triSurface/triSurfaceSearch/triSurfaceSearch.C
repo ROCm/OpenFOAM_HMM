@@ -55,22 +55,22 @@ bool Foam::triSurfaceSearch::checkUniqueHit
     {
         // near point
 
-        const label nearPointI = f[nearLabel];
+        const label nearPointi = f[nearLabel];
 
         const labelList& pointFaces =
-            surface().pointFaces()[surface().meshPointMap()[nearPointI]];
+            surface().pointFaces()[surface().meshPointMap()[nearPointi]];
 
         forAll(pointFaces, pI)
         {
-            const label pointFaceI = pointFaces[pI];
+            const label pointFacei = pointFaces[pI];
 
-            if (pointFaceI != currHit.index())
+            if (pointFacei != currHit.index())
             {
                 forAll(hits, hI)
                 {
                     const pointIndexHit& hit = hits[hI];
 
-                    if (hit.index() == pointFaceI)
+                    if (hit.index() == pointFacei)
                     {
                         return false;
                     }
@@ -91,22 +91,22 @@ bool Foam::triSurfaceSearch::checkUniqueHit
 
         forAll(edgeFaces, fI)
         {
-            const label edgeFaceI = edgeFaces[fI];
+            const label edgeFacei = edgeFaces[fI];
 
-            if (edgeFaceI != currHit.index())
+            if (edgeFacei != currHit.index())
             {
                 forAll(hits, hI)
                 {
                     const pointIndexHit& hit = hits[hI];
 
-                    if (hit.index() == edgeFaceI)
+                    if (hit.index() == edgeFacei)
                     {
                         // Check normals
                         const vector currHitNormal =
                             surface().faceNormals()[currHit.index()];
 
                         const vector existingHitNormal =
-                            surface().faceNormals()[edgeFaceI];
+                            surface().faceNormals()[edgeFacei];
 
                         const label signCurrHit =
                             pos(currHitNormal & lineVec);
@@ -135,7 +135,7 @@ Foam::triSurfaceSearch::triSurfaceSearch(const triSurface& surface)
     surface_(surface),
     tolerance_(indexedOctree<treeDataTriSurface>::perturbTol()),
     maxTreeDepth_(10),
-    treePtr_(NULL)
+    treePtr_(nullptr)
 {}
 
 
@@ -148,7 +148,7 @@ Foam::triSurfaceSearch::triSurfaceSearch
     surface_(surface),
     tolerance_(indexedOctree<treeDataTriSurface>::perturbTol()),
     maxTreeDepth_(10),
-    treePtr_(NULL)
+    treePtr_(nullptr)
 {
     // Have optional non-standard search tolerance for gappy surfaces.
     if (dict.readIfPresent("tolerance", tolerance_) && tolerance_ > 0)
@@ -174,7 +174,7 @@ Foam::triSurfaceSearch::triSurfaceSearch
     surface_(surface),
     tolerance_(tolerance),
     maxTreeDepth_(maxTreeDepth),
-    treePtr_(NULL)
+    treePtr_(nullptr)
 {}
 
 
@@ -388,7 +388,7 @@ void Foam::triSurfaceSearch::findLineAll
 
     treeDataTriSurface::findAllIntersectOp allIntersectOp(octree, shapeMask);
 
-    forAll(start, pointI)
+    forAll(start, pointi)
     {
         hits.clear();
         shapeMask.clear();
@@ -398,14 +398,14 @@ void Foam::triSurfaceSearch::findLineAll
             // See if any intersection between pt and end
             pointIndexHit inter = octree.findLine
             (
-                start[pointI],
-                end[pointI],
+                start[pointi],
+                end[pointi],
                 allIntersectOp
             );
 
             if (inter.hit())
             {
-                vector lineVec = end[pointI] - start[pointI];
+                vector lineVec = end[pointi] - start[pointi];
                 lineVec /= mag(lineVec) + VSMALL;
 
                 if
@@ -429,7 +429,7 @@ void Foam::triSurfaceSearch::findLineAll
             }
         }
 
-        info[pointI].transfer(hits);
+        info[pointi].transfer(hits);
     }
 
     indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;

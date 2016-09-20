@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,8 +32,7 @@ Description
     when using wall functions, based on turbulence kinetic energy.
     - replicates OpenFOAM v1.5 (and earlier) behaviour
 
-    \heading Patch usage
-
+Usage
     \table
         Property  | Description         | Required   | Default value
         Cmu       | Cmu coefficient     | no         | 0.09
@@ -43,7 +42,7 @@ Description
 
     Examples of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            nutWallFunction;
         value           uniform 0.0;
@@ -57,7 +56,7 @@ Description
         Method, subsection "3.5.2 k-epsilon model"
     \endverbatim
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchField
 
 SourceFiles
@@ -164,6 +163,9 @@ public:
 
         //- Calculate the Y+ at the edge of the laminar sublayer
         static scalar yPlusLam(const scalar kappa, const scalar E);
+
+        //- Return the Y+ at the edge of the laminar sublayer
+        scalar yPlusLam() const;
 
         //- Calculate and return the yPlus at the boundary
         virtual tmp<scalarField> yPlus() const = 0;

@@ -67,11 +67,11 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::calcUTau
     const modelType& filmModel =
         db().time().lookupObject<modelType>(filmRegionName_);
 
-    const label filmPatchI = filmModel.regionPatchID(patchi);
+    const label filmPatchi = filmModel.regionPatchID(patchi);
 
     tmp<volScalarField> mDotFilm(filmModel.primaryMassTrans());
-    scalarField mDotFilmp = mDotFilm().boundaryField()[filmPatchI];
-    filmModel.toPrimary(filmPatchI, mDotFilmp);
+    scalarField mDotFilmp = mDotFilm().boundaryField()[filmPatchi];
+    filmModel.toPrimary(filmPatchi, mDotFilmp);
 
 
     // Retrieve RAS turbulence model
@@ -80,7 +80,7 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::calcUTau
         IOobject::groupName
         (
             turbulenceModel::propertiesName,
-            dimensionedInternalField().group()
+            internalField().group()
         )
     );
 
@@ -92,15 +92,15 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::calcUTau
 
     const scalar Cmu25 = pow(Cmu_, 0.25);
 
-    forAll(uTau, faceI)
+    forAll(uTau, facei)
     {
-        label faceCellI = patch().faceCells()[faceI];
+        label faceCelli = patch().faceCells()[facei];
 
-        scalar ut = Cmu25*sqrt(k[faceCellI]);
+        scalar ut = Cmu25*sqrt(k[faceCelli]);
 
-        scalar yPlus = y[faceI]*ut/nuw[faceI];
+        scalar yPlus = y[facei]*ut/nuw[facei];
 
-        scalar mStar = mDotFilmp[faceI]/(y[faceI]*ut);
+        scalar mStar = mDotFilmp[facei]/(y[facei]*ut);
 
         scalar factor = 0.0;
         if (yPlus > yPlusCrit_)
@@ -115,7 +115,7 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::calcUTau
             factor = mStar/(expTerm*yPlus - 1.0 + ROOTVSMALL);
         }
 
-        uTau[faceI] = sqrt(max(0, magGradU[faceI]*ut*factor));
+        uTau[facei] = sqrt(max(0, magGradU[facei]*ut*factor));
     }
 
     return tuTau;
@@ -131,7 +131,7 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::calcNut() const
         IOobject::groupName
         (
             turbulenceModel::propertiesName,
-            dimensionedInternalField().group()
+            internalField().group()
         )
     );
 
@@ -231,7 +231,7 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::yPlus() const
         IOobject::groupName
         (
             turbulenceModel::propertiesName,
-            dimensionedInternalField().group()
+            internalField().group()
         )
     );
 

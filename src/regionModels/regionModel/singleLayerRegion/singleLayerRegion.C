@@ -95,8 +95,8 @@ void Foam::regionModels::singleLayerRegion::initialise()
     volScalarField& magSf = magSfPtr_();
     forAll(intCoupledPatchIDs_, i)
     {
-        const label patchI = intCoupledPatchIDs_[i];
-        const polyPatch& pp = rbm[patchI];
+        const label patchi = intCoupledPatchIDs_[i];
+        const polyPatch& pp = rbm[patchi];
         const labelList& fCells = pp.faceCells();
 
         nBoundaryFaces += fCells.size();
@@ -121,19 +121,19 @@ void Foam::regionModels::singleLayerRegion::initialise()
     passivePatchIDs_.setSize(intCoupledPatchIDs_.size(), -1);
     forAll(intCoupledPatchIDs_, i)
     {
-        const label patchI = intCoupledPatchIDs_[i];
-        const polyPatch& ppIntCoupled = rbm[patchI];
+        const label patchi = intCoupledPatchIDs_[i];
+        const polyPatch& ppIntCoupled = rbm[patchi];
         if (ppIntCoupled.size() > 0)
         {
-            label cellId = rbm[patchI].faceCells()[0];
+            label cellId = rbm[patchi].faceCells()[0];
             const cell& cFaces = regionMesh().cells()[cellId];
 
-            label faceI = ppIntCoupled.start();
-            label faceO = cFaces.opposingFaceLabel(faceI, regionMesh().faces());
+            label facei = ppIntCoupled.start();
+            label faceO = cFaces.opposingFaceLabel(facei, regionMesh().faces());
 
-            label passivePatchI = rbm.whichPatch(faceO);
-            passivePatchIDs_[i] = passivePatchI;
-            const polyPatch& ppPassive = rbm[passivePatchI];
+            label passivePatchi = rbm.whichPatch(faceO);
+            passivePatchIDs_[i] = passivePatchi;
+            const polyPatch& ppPassive = rbm[passivePatchi];
             UIndirectList<scalar>(passiveMagSf, ppPassive.faceCells()) =
                 mag(ppPassive.faceAreas());
         }
@@ -164,8 +164,8 @@ Foam::regionModels::singleLayerRegion::singleLayerRegion
 )
 :
     regionModel(mesh, regionType),
-    nHatPtr_(NULL),
-    magSfPtr_(NULL),
+    nHatPtr_(nullptr),
+    magSfPtr_(nullptr),
     passivePatchIDs_()
 {}
 
@@ -179,8 +179,8 @@ Foam::regionModels::singleLayerRegion::singleLayerRegion
 )
 :
     regionModel(mesh, regionType, modelName, false),
-    nHatPtr_(NULL),
-    magSfPtr_(NULL),
+    nHatPtr_(nullptr),
+    magSfPtr_(nullptr),
     passivePatchIDs_()
 {
     if (active_)

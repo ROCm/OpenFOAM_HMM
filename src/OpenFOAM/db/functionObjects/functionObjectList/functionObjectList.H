@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,9 @@ Description
     List of function objects with start(), execute() and end() functions
     that is called for each object.
 
-See Also
-    Foam::functionObject and Foam::OutputFilterFunctionObject
+See also
+    Foam::functionObject
+    Foam::functionObjects::timeControl
 
 SourceFiles
     functionObjectList.C
@@ -44,6 +45,7 @@ SourceFiles
 #include "SHA1Digest.H"
 #include "HashTable.H"
 #include "IOdictionary.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,6 +53,7 @@ namespace Foam
 {
 
 class mapPolyMesh;
+class argList;
 
 /*---------------------------------------------------------------------------*\
                      Class functionObjectList Declaration
@@ -72,7 +75,7 @@ class functionObjectList
 
         //- The parent dictionary containing a "functions" entry
         //  This entry can either be a list or a dictionary of
-        //  functionObject specifications.
+        //  functionObject specifications
         const dictionary& parentDict_;
 
         //- Function object properties - stores state information
@@ -92,8 +95,12 @@ class functionObjectList
 
         //- Remove and return the function object pointer by name,
         //  and returns the old index via the parameter.
-        //  Returns a NULL pointer (and index -1) if it didn't exist.
+        //  Returns a nullptr (and index -1) if it didn't exist
         functionObject* remove(const word&, label& oldIndex);
+
+        //- Search the specified directory for functionObject
+        //  configuration files, add to the given map and recurse
+        static void listDir(const fileName& dir, HashSet<word>& foMap);
 
         //- Disallow default bitwise copy construct
         functionObjectList(const functionObjectList&);
@@ -104,16 +111,22 @@ class functionObjectList
 
 public:
 
+    // Static data members
+
+        //- Default relative path to the directory structure
+        //  containing the functionObject dictionary files
+        static fileName functionObjectDictPath;
+
+
     // Constructors
 
-        //- Construct from Time and the execution setting
+        //- Construct from Time and the execution setting.
         //  The functionObject specifications are read from the controlDict
         functionObjectList
         (
-            const Time&,
+            const Time& runTime,
             const bool execution=true
         );
-
 
         //- Construct from Time, a dictionary with "functions" entry
         //  and the execution setting.
@@ -125,14 +138,27 @@ public:
         //    or not. Default: true.
         functionObjectList
         (
-            const Time& t,
+            const Time& runTime,
             const dictionary& parentDict,
             const bool execution=true
         );
 
+        //- Construct and return a functionObjectList for an application.
+        //  If the "dict" argument is specified the functionObjectList is
+        //  constructed from that dictionary which is returned as
+        //  controlDict otherwise the functionObjectList is constructed
+        //  from the "functions" sub-dictionary of "system/controlDict"
+        static autoPtr<functionObjectList> New
+        (
+            const argList& args,
+            const Time& runTime,
+            dictionary& controlDict,
+            HashSet<word>& requiredFields
+        );
+
 
     //- Destructor
-    virtual ~functionObjectList();
+    ~functionObjectList();
 
 
     // Member Functions
@@ -147,54 +173,101 @@ public:
         using PtrList<functionObject>::operator[];
 
         //- Reset/read state dictionary for current time
-        virtual void resetState();
+        void resetState();
 
         //- Return the state dictionary
-        virtual IOdictionary& stateDict();
+        IOdictionary& stateDict();
 
         //- Return const access to the state dictionary
-        virtual const IOdictionary& stateDict() const;
+        const IOdictionary& stateDict() const;
 
         //- Clear the list of function objects
-        virtual void clear();
+        void clear();
 
         //- Find the ID of a given function object by name
-        virtual label findObjectID(const word& name) const;
+        label findObjectID(const word& name) const;
 
-        //- Switch the function objects on
-        virtual void on();
+        //- Print a list of functionObject configuration files in
+        //  user/group/shipped directories.
+        //  The search scheme allows for version-specific and
+        //  version-independent files using the following hierarchy:
+        //  - \b user settings:
+        //    - ~/.OpenFOAM/\<VERSION\>/caseDicts/postProcessing
+        //    - ~/.OpenFOAM/caseDicts/postProcessing
+        //  - \b group (site) settings (when $WM_PROJECT_SITE is set):
+        //    - $WM_PROJECT_SITE/\<VERSION\>/caseDicts/postProcessing
+        //    - $WM_PROJECT_SITE/caseDicts/postProcessing
+        //  - \b group (site) settings (when $WM_PROJECT_SITE is not set):
+        //    - $WM_PROJECT_INST_DIR/site/\<VERSION\>/caseDicts/postProcessing
+        //    - $WM_PROJECT_INST_DIR/site/caseDicts/postProcessing
+        //  - \b other (shipped) settings:
+        //    - $WM_PROJECT_DIR/etc/caseDicts/postProcessing
+        static void list();
 
-        //- Switch the function objects off
-        virtual void off();
+        //- Search for functionObject dictionary file in
+        //  user/group/shipped directories.
+        //  The search scheme allows for version-specific and
+        //  version-independent files using the following hierarchy:
+        //  - \b user settings:
+        //    - ~/.OpenFOAM/\<VERSION\>/caseDicts/postProcessing
+        //    - ~/.OpenFOAM/caseDicts/postProcessing
+        //  - \b group (site) settings (when $WM_PROJECT_SITE is set):
+        //    - $WM_PROJECT_SITE/\<VERSION\>/caseDicts/postProcessing
+        //    - $WM_PROJECT_SITE/caseDicts/postProcessing
+        //  - \b group (site) settings (when $WM_PROJECT_SITE is not set):
+        //    - $WM_PROJECT_INST_DIR/site/\<VERSION\>/caseDicts/postProcessing
+        //    - $WM_PROJECT_INST_DIR/site/caseDicts/postProcessing
+        //  - \b other (shipped) settings:
+        //    - $WM_PROJECT_DIR/etc/caseDicts/postProcessing
+        //
+        //  \return The path of the functionObject dictionary file if found
+        //  otherwise null
+        static fileName findDict(const word& funcName);
 
-        //- Return the execution status (on/off) of the function objects
-        virtual bool status() const;
-
-        //- Called at the start of the time-loop
-        virtual bool start();
-
-        //- Called at each ++ or += of the time-loop. forceWrite overrides
-        //  the usual outputControl behaviour and forces writing always
-        //  (used in postprocessing mode)
-        virtual bool execute(const bool forceWrite = false);
-
-        //- Called when Time::run() determines that the time-loop exits
-        virtual bool end();
-
-        //- Called when time was set at the end of the Time::operator++
-        virtual bool timeSet();
-
-        //- Called at the end of Time::adjustDeltaT() if adjustTime is true
-        virtual bool adjustTimeStep();
+        //- Read the specified functionObject configuration dictionary parsing
+        //  the optional arguments included in the name 'funcNameArgs0',
+        //  inserting 'field' or 'fields' entries as required and merging the
+        //  resulting functionObject dictionary into 'functionsDict'.  Any
+        //  fields required to execute the functionObject are added to
+        //  'requiredFields'
+        static bool readFunctionObject
+        (
+            const string& funcNameArgs0,
+            dictionary& functionsDict,
+            HashSet<word>& requiredFields
+        );
 
         //- Read and set the function objects if their data have changed
-        virtual bool read();
+        bool read();
+
+        //- Switch the function objects on
+        void on();
+
+        //- Switch the function objects off
+        void off();
+
+        //- Return the execution status (on/off) of the function objects
+        bool status() const;
+
+        //- Called at the start of the time-loop
+        bool start();
+
+        //- Called at each ++ or += of the time-loop.
+        //  postProcess overrides the usual executeControl behaviour and
+        //  forces execution (used in post-processing mode)
+        bool execute();
+
+        //- Called when Time::run() determines that the time-loop exits
+        bool end();
+
+        //- Called at the end of Time::adjustDeltaT() if adjustTime is true
+        bool adjustTimeStep();
 
         //- Update for changes of mesh
-        virtual void updateMesh(const mapPolyMesh& mpm);
+        void updateMesh(const mapPolyMesh& mpm);
 
         //- Update for changes of mesh
-        virtual void movePoints(const polyMesh& mesh);
+        void movePoints(const polyMesh& mesh);
 };
 
 

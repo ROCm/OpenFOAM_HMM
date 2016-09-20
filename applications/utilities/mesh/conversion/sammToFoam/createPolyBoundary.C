@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,17 +41,17 @@ void Foam::sammMesh::createPolyBoundary()
 
     const labelListList& PointCells = pointCells();
 
-    forAll(boundary_, patchI)
+    forAll(boundary_, patchi)
     {
-        const faceList& curShapePatch = boundary_[patchI];
+        const faceList& curShapePatch = boundary_[patchi];
 
-        polyBoundaryPatchStartIndices_[patchI] = nCreatedFaces;
+        polyBoundaryPatchStartIndices_[patchi] = nCreatedFaces;
 
-        forAll(curShapePatch, faceI)
+        forAll(curShapePatch, facei)
         {
             bool found = false;
 
-            const face& curFace = curShapePatch[faceI];
+            const face& curFace = curShapePatch[facei];
 
             meshFaces_[nCreatedFaces] = curFace;
 
@@ -59,19 +59,19 @@ void Foam::sammMesh::createPolyBoundary()
             // mark it in the cellPolys_
             const labelList& facePoints = curFace;
 
-            forAll(facePoints, pointI)
+            forAll(facePoints, pointi)
             {
                 const labelList& facePointCells =
-                    PointCells[facePoints[pointI]];
+                    PointCells[facePoints[pointi]];
 
-                forAll(facePointCells, cellI)
+                forAll(facePointCells, celli)
                 {
                     const faceList& curCellFaces =
-                        cellFaces_[facePointCells[cellI]];
+                        cellFaces_[facePointCells[celli]];
 
-                    forAll(curCellFaces, cellFaceI)
+                    forAll(curCellFaces, cellFacei)
                     {
-                        if (curCellFaces[cellFaceI] == curFace)
+                        if (curCellFaces[cellFacei] == curFace)
                         {
                             // Found the cell face corresponding to this face
                             found = true;
@@ -79,7 +79,7 @@ void Foam::sammMesh::createPolyBoundary()
                             // Debugging
                             if
                             (
-                                cellPolys_[facePointCells[cellI]][cellFaceI]
+                                cellPolys_[facePointCells[celli]][cellFacei]
                              != -1
                             )
                             {
@@ -89,7 +89,7 @@ void Foam::sammMesh::createPolyBoundary()
                                     << abort(FatalError);
                             }
 
-                            cellPolys_[facePointCells[cellI]][cellFaceI] =
+                            cellPolys_[facePointCells[celli]][cellFacei] =
                                 nCreatedFaces;
 
                             nBoundaryFacesFound++;
@@ -120,21 +120,21 @@ Foam::List<Foam::polyPatch* > Foam::sammMesh::polyBoundaryPatches
 {
     List<polyPatch* > p(boundary_.size());
 
-    forAll(boundary_, patchI)
+    forAll(boundary_, patchi)
     {
-        const faceList& curShapePatch = boundary_[patchI];
+        const faceList& curShapePatch = boundary_[patchi];
 
-        p[patchI] = polyPatch::New
+        p[patchi] = polyPatch::New
         (
-            patchTypes_[patchI],
-            patchNames_[patchI],
+            patchTypes_[patchi],
+            patchNames_[patchi],
             curShapePatch.size(),
-            polyBoundaryPatchStartIndices_[patchI],
-            patchI,
+            polyBoundaryPatchStartIndices_[patchi],
+            patchi,
             pMesh.boundaryMesh()
         ).ptr();
 
-        p[patchI]->physicalType() = patchPhysicalTypes_[patchI];
+        p[patchi]->physicalType() = patchPhysicalTypes_[patchi];
     }
 
     return p;

@@ -43,7 +43,7 @@ void Foam::KinematicParcel<ParcelType>::setCellValues
 (
     TrackData& td,
     const scalar dt,
-    const label cellI
+    const label celli
 )
 {
     tetIndices tetIs = this->currentTetIndices();
@@ -55,7 +55,7 @@ void Foam::KinematicParcel<ParcelType>::setCellValues
         if (debug)
         {
             WarningInFunction
-                << "Limiting observed density in cell " << cellI << " to "
+                << "Limiting observed density in cell " << celli << " to "
                 << td.cloud().constProps().rhoMin() <<  nl << endl;
         }
 
@@ -70,7 +70,7 @@ void Foam::KinematicParcel<ParcelType>::setCellValues
     Uc_ = td.cloud().dispersion().update
     (
         dt,
-        cellI,
+        celli,
         U_,
         Uc_,
         UTurb_,
@@ -85,10 +85,10 @@ void Foam::KinematicParcel<ParcelType>::cellValueSourceCorrection
 (
     TrackData& td,
     const scalar dt,
-    const label cellI
+    const label celli
 )
 {
-    Uc_ += td.cloud().UTrans()[cellI]/massCell(cellI);
+    Uc_ += td.cloud().UTrans()[celli]/massCell(celli);
 }
 
 
@@ -98,7 +98,7 @@ void Foam::KinematicParcel<ParcelType>::calc
 (
     TrackData& td,
     const scalar dt,
-    const label cellI
+    const label celli
 )
 {
     // Define local properties at beginning of time step
@@ -127,7 +127,7 @@ void Foam::KinematicParcel<ParcelType>::calc
     // ~~~~~~
 
     // Calculate new particle velocity
-    this->U_ = calcVelocity(td, dt, cellI, Re, muc_, mass0, Su, dUTrans, Spu);
+    this->U_ = calcVelocity(td, dt, celli, Re, muc_, mass0, Su, dUTrans, Spu);
 
 
     // Accumulate carrier phase source terms
@@ -135,10 +135,10 @@ void Foam::KinematicParcel<ParcelType>::calc
     if (td.cloud().solution().coupled())
     {
         // Update momentum transfer
-        td.cloud().UTrans()[cellI] += np0*dUTrans;
+        td.cloud().UTrans()[celli] += np0*dUTrans;
 
         // Update momentum transfer coefficient
-        td.cloud().UCoeff()[cellI] += np0*Spu;
+        td.cloud().UCoeff()[celli] += np0*Spu;
     }
 }
 
@@ -149,7 +149,7 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 (
     TrackData& td,
     const scalar dt,
-    const label cellI,
+    const label celli,
     const scalar Re,
     const scalar mu,
     const scalar mass,
@@ -285,7 +285,7 @@ bool Foam::KinematicParcel<ParcelType>::move
         scalar dt = min(dtMax, tEnd);
 
         // Cache the parcel current cell as this will change if a face is hit
-        const label cellI = p.cell();
+        const label celli = p.cell();
 
         const scalar magU = mag(U_);
         if (p.active() && tracking && (magU > ROOTVSMALL))
@@ -335,14 +335,14 @@ bool Foam::KinematicParcel<ParcelType>::move
         if ((dt > ROOTVSMALL) && calcParcel)
         {
             // Update cell based properties
-            p.setCellValues(td, dt, cellI);
+            p.setCellValues(td, dt, celli);
 
             if (solution.cellValueSourceCorrection())
             {
-                p.cellValueSourceCorrection(td, dt, cellI);
+                p.cellValueSourceCorrection(td, dt, celli);
             }
 
-            p.calc(td, dt, cellI);
+            p.calc(td, dt, celli);
         }
 
         if (p.onBoundary() && td.keepParticle)
@@ -355,7 +355,7 @@ bool Foam::KinematicParcel<ParcelType>::move
 
         p.age() += dt;
 
-        td.cloud().functions().postMove(p, cellI, dt, start, td.keepParticle);
+        td.cloud().functions().postMove(p, celli, dt, start, td.keepParticle);
     }
 
     return td.keepParticle;
@@ -384,7 +384,7 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
 (
     const polyPatch& pp,
     TrackData& td,
-    const label patchI,
+    const label patchi,
     const scalar trackFraction,
     const tetIndices& tetIs
 )

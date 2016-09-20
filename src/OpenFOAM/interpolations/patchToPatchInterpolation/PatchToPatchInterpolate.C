@@ -63,18 +63,18 @@ PatchToPatchInterpolation<FromPatch, ToPatch>::pointInterpolate
 
     const labelList& addr = pointAddr();
 
-    forAll(result, pointI)
+    forAll(result, pointi)
     {
-        const scalarField& curWeights = weights[pointI];
+        const scalarField& curWeights = weights[pointi];
 
-        if (addr[pointI] > -1)
+        if (addr[pointi] > -1)
         {
             const labelList& hitFacePoints =
-                fromPatchLocalFaces[addr[pointI]];
+                fromPatchLocalFaces[addr[pointi]];
 
             forAll(curWeights, wI)
             {
-                result[pointI] += curWeights[wI]*pf[hitFacePoints[wI]];
+                result[pointi] += curWeights[wI]*pf[hitFacePoints[wI]];
             }
         }
     }
@@ -126,21 +126,21 @@ PatchToPatchInterpolation<FromPatch, ToPatch>::faceInterpolate
 
     const labelList& addr = faceAddr();
 
-    forAll(result, faceI)
+    forAll(result, facei)
     {
-        const scalarField& curWeights = weights[faceI];
+        const scalarField& curWeights = weights[facei];
 
-        if (addr[faceI] > -1)
+        if (addr[facei] > -1)
         {
             const labelList& hitFaceFaces =
-                fromPatchFaceFaces[addr[faceI]];
+                fromPatchFaceFaces[addr[facei]];
 
             // first add the hit face
-            result[faceI] += ff[addr[faceI]]*curWeights[0];
+            result[facei] += ff[addr[facei]]*curWeights[0];
 
             for (label wI = 1; wI < curWeights.size(); wI++)
             {
-                result[faceI] += ff[hitFaceFaces[wI - 1]]*curWeights[wI];
+                result[facei] += ff[hitFaceFaces[wI - 1]]*curWeights[wI];
             }
         }
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,8 +22,6 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
-
-#include "error.H"
 
 #include "uint32.H"
 #include "IOstreams.H"
@@ -84,7 +82,7 @@ uint32_t Foam::readUint32(Istream& is)
 
 bool Foam::read(const char* buf, uint32_t& s)
 {
-    char *endptr = NULL;
+    char *endptr = nullptr;
     long l = strtol(buf, &endptr, 10);
     s = uint32_t(l);
     return (*endptr == 0);

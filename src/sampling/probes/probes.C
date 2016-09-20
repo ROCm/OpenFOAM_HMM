@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,12 +29,20 @@ License
 #include "Time.H"
 #include "IOmanip.H"
 #include "mapPolyMesh.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(probes, 0);
+
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        probes,
+        dictionary
+    );
 }
 
 
@@ -42,10 +50,7 @@ namespace Foam
 
 void Foam::probes::findElements(const fvMesh& mesh)
 {
-    if (debug)
-    {
-        Info<< "probes: resetting sample locations" << endl;
-    }
+    DebugInfo<< "probes: resetting sample locations" << endl;
 
     elementList_.clear();
     elementList_.setSize(size());
@@ -53,58 +58,58 @@ void Foam::probes::findElements(const fvMesh& mesh)
     faceList_.clear();
     faceList_.setSize(size());
 
-    forAll(*this, probeI)
+    forAll(*this, probei)
     {
-        const vector& location = operator[](probeI);
+        const vector& location = operator[](probei);
 
-        const label cellI = mesh.findCell(location);
+        const label celli = mesh.findCell(location);
 
-        elementList_[probeI] = cellI;
+        elementList_[probei] = celli;
 
-        if (cellI != -1)
+        if (celli != -1)
         {
-            const labelList& cellFaces = mesh.cells()[cellI];
-            const vector& cellCentre = mesh.cellCentres()[cellI];
+            const labelList& cellFaces = mesh.cells()[celli];
+            const vector& cellCentre = mesh.cellCentres()[celli];
             scalar minDistance = GREAT;
             label minFaceID = -1;
             forAll(cellFaces, i)
             {
-                label faceI = cellFaces[i];
-                vector dist = mesh.faceCentres()[faceI] - cellCentre;
+                label facei = cellFaces[i];
+                vector dist = mesh.faceCentres()[facei] - cellCentre;
                 if (mag(dist) < minDistance)
                 {
                     minDistance = mag(dist);
-                    minFaceID = faceI;
+                    minFaceID = facei;
                 }
             }
-            faceList_[probeI] = minFaceID;
+            faceList_[probei] = minFaceID;
         }
         else
         {
-            faceList_[probeI] = -1;
+            faceList_[probei] = -1;
         }
 
-        if (debug && (elementList_[probeI] != -1 || faceList_[probeI] != -1))
+        if (debug && (elementList_[probei] != -1 || faceList_[probei] != -1))
         {
             Pout<< "probes : found point " << location
-                << " in cell " << elementList_[probeI]
-                << " and face " << faceList_[probeI] << endl;
+                << " in cell " << elementList_[probei]
+                << " and face " << faceList_[probei] << endl;
         }
     }
 
 
     // Check if all probes have been found.
-    forAll(elementList_, probeI)
+    forAll(elementList_, probei)
     {
-        const vector& location = operator[](probeI);
-        label cellI = elementList_[probeI];
-        label faceI = faceList_[probeI];
+        const vector& location = operator[](probei);
+        label celli = elementList_[probei];
+        label facei = faceList_[probei];
 
         // Check at least one processor with cell.
-        reduce(cellI, maxOp<label>());
-        reduce(faceI, maxOp<label>());
+        reduce(celli, maxOp<label>());
+        reduce(facei, maxOp<label>());
 
-        if (cellI == -1)
+        if (celli == -1)
         {
             if (Pstream::master())
             {
@@ -113,7 +118,7 @@ void Foam::probes::findElements(const fvMesh& mesh)
                     << " in any cell. Skipping location." << endl;
             }
         }
-        else if (faceI == -1)
+        else if (facei == -1)
         {
             if (Pstream::master())
             {
@@ -125,27 +130,29 @@ void Foam::probes::findElements(const fvMesh& mesh)
         else
         {
             // Make sure location not on two domains.
-            if (elementList_[probeI] != -1 && elementList_[probeI] != cellI)
+            if (elementList_[probei] != -1 && elementList_[probei] != celli)
             {
                 WarningInFunction
                     << "Location " << location
                     << " seems to be on multiple domains:"
-                    << " cell " << elementList_[probeI]
+                    << " cell " << elementList_[probei]
                     << " on my domain " << Pstream::myProcNo()
-                    << " and cell " << cellI << " on some other domain." << endl
+                    << " and cell " << celli << " on some other domain."
+                    << nl
                     << "This might happen if the probe location is on"
                     << " a processor patch. Change the location slightly"
                     << " to prevent this." << endl;
             }
 
-            if (faceList_[probeI] != -1 && faceList_[probeI] != faceI)
+            if (faceList_[probei] != -1 && faceList_[probei] != facei)
             {
                 WarningInFunction
                     << "Location " << location
                     << " seems to be on multiple domains:"
-                    << " cell " << faceList_[probeI]
+                    << " cell " << faceList_[probei]
                     << " on my domain " << Pstream::myProcNo()
-                    << " and face " << faceI << " on some other domain." << endl
+                    << " and face " << facei << " on some other domain."
+                    << nl
                     << "This might happen if the probe location is on"
                     << " a processor patch. Change the location slightly"
                     << " to prevent this." << endl;
@@ -176,16 +183,14 @@ Foam::label Foam::probes::prepare()
         currentFields.insert(surfaceSymmTensorFields_);
         currentFields.insert(surfaceTensorFields_);
 
-        if (debug)
-        {
-            Info<< "Probing fields: " << currentFields << nl
-                << "Probing locations: " << *this << nl
-                << endl;
-        }
+        DebugInfo
+            << "Probing fields: " << currentFields << nl
+            << "Probing locations: " << *this << nl
+            << endl;
 
 
         fileName probeDir;
-        fileName probeSubDir = name_;
+        fileName probeSubDir = name();
 
         if (mesh_.name() != polyMesh::defaultRegion)
         {
@@ -209,10 +214,7 @@ Foam::label Foam::probes::prepare()
         {
             if (!currentFields.erase(iter.key()))
             {
-                if (debug)
-                {
-                    Info<< "close probe stream: " << iter()->name() << endl;
-                }
+                DdebugInfo<< "close probe stream: " << iter()->name() << endl;
 
                 delete probeFilePtrs_.remove(iter);
             }
@@ -230,27 +232,24 @@ Foam::label Foam::probes::prepare()
 
             OFstream& fout = *fPtr;
 
-            if (debug)
-            {
-                Info<< "open probe stream: " << fout.name() << endl;
-            }
+            DebugInfo<< "open probe stream: " << fout.name() << endl;
 
             probeFilePtrs_.insert(fieldName, fPtr);
 
             unsigned int w = IOstream::defaultPrecision() + 7;
 
-            forAll(*this, probeI)
+            forAll(*this, probei)
             {
-                fout<< "# Probe " << probeI << ' ' << operator[](probeI)
+                fout<< "# Probe " << probei << ' ' << operator[](probei)
                     << endl;
             }
 
             fout<< '#' << setw(IOstream::defaultPrecision() + 6)
                 << "Probe";
 
-            forAll(*this, probeI)
+            forAll(*this, probei)
             {
-                fout<< ' ' << setw(w) << probeI;
+                fout<< ' ' << setw(w) << probei;
             }
             fout<< endl;
 
@@ -263,26 +262,25 @@ Foam::label Foam::probes::prepare()
 }
 
 
-void Foam::probes::readDict(const dictionary& dict)
-{
-    dict.lookup("probeLocations") >> *this;
-    dict.lookup("fields") >> fieldSelection_;
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-    dict.readIfPresent("fixedLocations", fixedLocations_);
-    if (dict.readIfPresent("interpolationScheme", interpolationScheme_))
-    {
-        if (!fixedLocations_ && interpolationScheme_ != "cell")
-        {
-            WarningInFunction
-                << "Only cell interpolation can be applied when "
-                << "not using fixedLocations. InterpolationScheme "
-                << "entry will be ignored";
-        }
-    }
+Foam::probes::probes
+(
+    const word& name,
+    const Time& t,
+    const dictionary& dict
+)
+:
+    fvMeshFunctionObject(t, name),
+    pointField(0),
+    loadFromFiles_(false),
+    fieldSelection_(),
+    fixedLocations_(true),
+    interpolationScheme_("cell")
+{
+    read(dict);
 }
 
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::probes::probes
 (
@@ -290,28 +288,19 @@ Foam::probes::probes
     const objectRegistry& obr,
     const dictionary& dict,
     const bool loadFromFiles,
-    const bool doFindElements
+    const bool readFields
 )
 :
+    fvMeshFunctionObject(obr, name),
     pointField(0),
-    name_(name),
-    mesh_(refCast<const fvMesh>(obr)),
     loadFromFiles_(loadFromFiles),
     fieldSelection_(),
     fixedLocations_(true),
     interpolationScheme_("cell")
 {
-    // Read dictionary (but do not search for elements)
-    readDict(dict);
-
-    // Optionally find elements in constructor
-    if (doFindElements)
+    if (readFields)
     {
-        // Find the elements
-        findElements(mesh_);
-
-        // Open the probe streams
-        prepare();
+        read(dict);
     }
 }
 
@@ -324,48 +313,11 @@ Foam::probes::~probes()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::probes::execute()
+bool Foam::probes::read(const dictionary& dict)
 {
-    // Do nothing - only valid on write
-}
+    dict.lookup("probeLocations") >> *this;
+    dict.lookup("fields") >> fieldSelection_;
 
-
-void Foam::probes::end()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::probes::timeSet()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::probes::write()
-{
-    if (size() && prepare())
-    {
-        sampleAndWrite(scalarFields_);
-        sampleAndWrite(vectorFields_);
-        sampleAndWrite(sphericalTensorFields_);
-        sampleAndWrite(symmTensorFields_);
-        sampleAndWrite(tensorFields_);
-
-        sampleAndWriteSurfaceFields(surfaceScalarFields_);
-        sampleAndWriteSurfaceFields(surfaceVectorFields_);
-        sampleAndWriteSurfaceFields(surfaceSphericalTensorFields_);
-        sampleAndWriteSurfaceFields(surfaceSymmTensorFields_);
-        sampleAndWriteSurfaceFields(surfaceTensorFields_);
-    }
-}
-
-
-void Foam::probes::read(const dictionary& dict)
-{
-    readDict(dict);
-
-    // Find the elements
     dict.readIfPresent("fixedLocations", fixedLocations_);
     if (dict.readIfPresent("interpolationScheme", interpolationScheme_))
     {
@@ -381,16 +333,46 @@ void Foam::probes::read(const dictionary& dict)
     // Initialise cells to sample from supplied locations
     findElements(mesh_);
 
-    // Open the probe streams
     prepare();
+
+    return true;
+}
+
+
+bool Foam::probes::execute()
+{
+    return true;
+}
+
+
+bool Foam::probes::write()
+{
+    if (size() && prepare())
+    {
+        sampleAndWrite(scalarFields_);
+        sampleAndWrite(vectorFields_);
+        sampleAndWrite(sphericalTensorFields_);
+        sampleAndWrite(symmTensorFields_);
+        sampleAndWrite(tensorFields_);
+
+        sampleAndWriteSurfaceFields(surfaceScalarFields_);
+        sampleAndWriteSurfaceFields(surfaceVectorFields_);
+        sampleAndWriteSurfaceFields(surfaceSphericalTensorFields_);
+        sampleAndWriteSurfaceFields(surfaceSymmTensorFields_);
+        sampleAndWriteSurfaceFields(surfaceTensorFields_);
+    }
+
+    return true;
 }
 
 
 void Foam::probes::updateMesh(const mapPolyMesh& mpm)
 {
-    if (debug)
+    DebugInfo<< "probes: updateMesh" << endl;
+
+    if (&mpm.mesh() != &mesh_)
     {
-        Info<< "probes: updateMesh" << endl;
+        return;
     }
 
     if (fixedLocations_)
@@ -399,10 +381,7 @@ void Foam::probes::updateMesh(const mapPolyMesh& mpm)
     }
     else
     {
-        if (debug)
-        {
-            Info<< "probes: remapping sample locations" << endl;
-        }
+        DebugInfo<< "probes: remapping sample locations" << endl;
 
         // 1. Update cells
         {
@@ -411,23 +390,23 @@ void Foam::probes::updateMesh(const mapPolyMesh& mpm)
             const labelList& reverseMap = mpm.reverseCellMap();
             forAll(elementList_, i)
             {
-                label cellI = elementList_[i];
-                if (cellI != -1)
+                label celli = elementList_[i];
+                if (celli != -1)
                 {
-                    label newCellI = reverseMap[cellI];
-                    if (newCellI == -1)
+                    label newCelli = reverseMap[cellI];
+                    if (newCelli == -1)
                     {
                         // cell removed
                     }
-                    else if (newCellI < -1)
+                    else if (newCelli < -1)
                     {
                         // cell merged
-                        elems.append(-newCellI - 2);
+                        elems.append(-newCelli - 2);
                     }
                     else
                     {
                         // valid new cell
-                        elems.append(newCellI);
+                        elems.append(newCelli);
                     }
                 }
                 else
@@ -447,23 +426,23 @@ void Foam::probes::updateMesh(const mapPolyMesh& mpm)
             const labelList& reverseMap = mpm.reverseFaceMap();
             forAll(faceList_, i)
             {
-                label faceI = faceList_[i];
-                if (faceI != -1)
+                label facei = faceList_[i];
+                if (facei != -1)
                 {
-                    label newFaceI = reverseMap[faceI];
-                    if (newFaceI == -1)
+                    label newFacei = reverseMap[facei];
+                    if (newFacei == -1)
                     {
                         // face removed
                     }
-                    else if (newFaceI < -1)
+                    else if (newFacei < -1)
                     {
                         // face merged
-                        elems.append(-newFaceI - 2);
+                        elems.append(-newFacei - 2);
                     }
                     else
                     {
                         // valid new face
-                        elems.append(newFaceI);
+                        elems.append(newFacei);
                     }
                 }
                 else
@@ -479,14 +458,11 @@ void Foam::probes::updateMesh(const mapPolyMesh& mpm)
 }
 
 
-void Foam::probes::movePoints(const polyMesh&)
+void Foam::probes::movePoints(const polyMesh& mesh)
 {
-    if (debug)
-    {
-        Info<< "probes: movePoints" << endl;
-    }
+    DebugInfo<< "probes: movePoints" << endl;
 
-    if (fixedLocations_)
+    if (fixedLocations_ && &mesh == &mesh_)
     {
         findElements(mesh_);
     }

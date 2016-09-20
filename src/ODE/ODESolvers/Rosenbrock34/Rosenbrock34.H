@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,19 +31,17 @@ Description
     L-stable embedded Rosenbrock ODE solver of order (3)4.
 
     \verbatim
-        "Solving Ordinary Differential Equations II: Stiff
-         and Differential-Algebraic Problems, second edition",
-        Hairer, E.,
-        Nørsett, S.,
-        Wanner, G.,
-        Springer-Verlag, Berlin. 1996.
+        Hairer, E., Nørsett, S. P., & Wanner, G. (1996).
+        Solving Ordinary Differential Equations II:
+        Stiff and Differential-Algebraic Problems, second edition",
+        Springer-Verlag, Berlin.
     \endverbatim
 
     The default constants are from:
     \verbatim
-        "Implementation of Rosenbrock Methods"
-        Shampine, L. F.,
-        ACM Transactions on Mathematical Software, vol. 8, 1982, pp. 93–113.
+        Shampine, L. F. (1982).
+        Implementation of Rosenbrock Methods.
+        ACM Transactions on Mathematical Software, vol. 8, pp. 93–113.
     \endverbatim
     with which the scheme is more accurate than with the L-Stable coefficients
     for small step-size but less stable for large step-size.
@@ -107,8 +105,13 @@ public:
 
     // Constructors
 
-        //- Construct from ODE
+        //- Construct from ODESystem
         Rosenbrock34(const ODESystem& ode, const dictionary& dict);
+
+
+    //- Destructor
+    virtual ~Rosenbrock34()
+    {}
 
 
     // Member Functions
@@ -116,8 +119,11 @@ public:
         //- Inherit solve from ODESolver
         using ODESolver::solve;
 
+        //- Resize the ODE solver
+        virtual bool resize();
+
         //- Solve a single step dx and return the error
-        scalar solve
+        virtual scalar solve
         (
             const scalar x0,
             const scalarField& y0,
@@ -127,7 +133,7 @@ public:
         ) const;
 
         //- Solve the ODE system and the update the state
-        void solve
+        virtual void solve
         (
             scalar& x,
             scalarField& y,

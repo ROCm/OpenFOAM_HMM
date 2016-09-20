@@ -34,16 +34,15 @@ Description
 
     For a mass-based flux:
     - the flow rate should be provided in kg/s
-    - if \c rhoName is "none" the flow rate is in m3/s
-    - otherwise \c rhoName should correspond to the name of the density field
+    - if \c rho is "none" the flow rate is in m3/s
+    - otherwise \c rho should correspond to the name of the density field
     - if the density field cannot be found in the database, the user must
       specify the inlet density using the \c rhoInlet entry
 
     For a volumetric-based flux:
     - the flow rate is in m3/s
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         massFlowRate | mass flow rate [kg/s]   | no          |
@@ -54,7 +53,7 @@ Description
 
     Example of the boundary condition specification for a volumetric flow rate:
     \verbatim
-    myPatch
+    <patchName>
     {
         type                flowRateInletVelocity;
         volumetricFlowRate  0.2;
@@ -65,7 +64,7 @@ Description
 
     Example of the boundary condition specification for a mass flow rate:
     \verbatim
-    myPatch
+    <patchName>
     {
         type                flowRateInletVelocity;
         massFlowRate        0.2;
@@ -85,7 +84,7 @@ Note
     - May not work correctly for transonic inlets
     - Strange behaviour with potentialFoam since the U equation is not solved
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchField
     Foam::Function1Types
 

@@ -153,7 +153,7 @@ Foam::fvPatchField<Type>::fvPatchField
     patchType_(ptf.patchType_)
 {
     // For unmapped faces set to internal field value (zero-gradient)
-    if (notNull(iF) && iF.size())
+    if (notNull(iF) && mapper.hasUnmapped())
     {
         fvPatchField<Type>::operator=(this->patchInternalField());
     }
@@ -317,8 +317,9 @@ void Foam::fvPatchField<Type>::updateCoeffs()
 
 
 template<class Type>
-void Foam::fvPatchField<Type>::updateCoeffs(const scalarField& weights)
+void Foam::fvPatchField<Type>::updateWeightedCoeffs(const scalarField& weights)
 {
+    // Default behaviour ignores the weights
     if (!updated_)
     {
         updateCoeffs();

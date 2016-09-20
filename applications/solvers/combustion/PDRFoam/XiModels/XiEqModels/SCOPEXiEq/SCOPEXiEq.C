@@ -82,7 +82,7 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::SCOPEXiEq::XiEq() const
     volScalarField up(sqrt((2.0/3.0)*k));
     if (subGridSchelkin_)
     {
-        up.internalField() += calculateSchelkinEffect(uPrimeCoef_);
+        up.primitiveFieldRef() += calculateSchelkinEffect(uPrimeCoef_);
     }
 
     volScalarField l(lCoef_*sqrt(3.0/2.0)*up*k/epsilon);
@@ -119,9 +119,11 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::SCOPEXiEq::XiEq() const
         }
     }
 
+    volScalarField::Boundary& xieqBf = xieq.boundaryFieldRef();
+
     forAll(xieq.boundaryField(), patchi)
     {
-        scalarField& xieqp = xieq.boundaryField()[patchi];
+        scalarField& xieqp = xieqBf[patchi];
         const scalarField& Kp = K.boundaryField()[patchi];
         const scalarField& Map = Ma.boundaryField()[patchi];
         const scalarField& upBySup = upBySu.boundaryField()[patchi];

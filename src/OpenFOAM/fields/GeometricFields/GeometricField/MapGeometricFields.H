@@ -126,13 +126,13 @@ void MapGeometricFields
             // Map the internal field
             MapInternalField<Type, MeshMapper, GeoMesh>()
             (
-                field.internalField(),
+                field.primitiveFieldRef(),
                 mapper
             );
 
             // Map the patch fields
             typename GeometricField<Type, PatchField, GeoMesh>
-            ::GeometricBoundaryField& bfield = field.boundaryField();
+            ::Boundary& bfield = field.boundaryFieldRef();
             forAll(bfield, patchi)
             {
                 // Cannot check sizes for patch fields because of

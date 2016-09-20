@@ -48,12 +48,12 @@ correction
     tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> tsfCorr =
         linearInterpolate(vf);
 
-    Field<Type>& sfCorr = tsfCorr.ref().internalField();
+    Field<Type>& sfCorr = tsfCorr.ref().primitiveFieldRef();
 
     const pointField& points = mesh.points();
-    const pointField& C = mesh.C().internalField();
+    const pointField& C = mesh.C();
     const faceList& faces = mesh.faces();
-    const scalarField& w = mesh.weights().internalField();
+    const scalarField& w = mesh.weights();
     const labelList& owner = mesh.owner();
     const labelList& neighbour = mesh.neighbour();
 
@@ -104,7 +104,7 @@ correction
 
 
     typename GeometricField<Type, fvsPatchField, surfaceMesh>::
-        GeometricBoundaryField& bSfCorr = tsfCorr.ref().boundaryField();
+        Boundary& bSfCorr = tsfCorr.ref().boundaryFieldRef();
 
     forAll(bSfCorr, patchi)
     {

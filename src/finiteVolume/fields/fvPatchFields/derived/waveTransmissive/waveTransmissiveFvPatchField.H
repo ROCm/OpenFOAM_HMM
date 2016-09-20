@@ -47,8 +47,7 @@ Description
         \gamma  | ratio of specific heats
     \endvartable
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
@@ -59,7 +58,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            waveTransmissive;
         phi             phi;
@@ -68,7 +67,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::advectiveFvPatchField
 
 SourceFiles

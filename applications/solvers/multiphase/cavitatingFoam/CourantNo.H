@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,7 @@ if (mesh.nInternalFaces())
 {
     scalarField sumPhi
     (
-        fvc::surfaceSum(mag(phi))().internalField()
+        fvc::surfaceSum(mag(phi))().primitiveField()
     );
 
     CoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
@@ -50,7 +50,7 @@ if (mesh.nInternalFaces())
         fvc::surfaceSum
         (
             fvc::interpolate(scalar(1)/sqrt(psi))*mesh.magSf()
-        )().internalField()/mesh.V().field()
+        )().primitiveField()/mesh.V().field()
     )*runTime.deltaTValue();
 }
 

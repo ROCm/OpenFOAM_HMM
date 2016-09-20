@@ -72,8 +72,8 @@ void Foam::pointPatchDist::correct()
 
     forAllConstIter(labelHashSet, patchIDs_, iter)
     {
-        label patchI = iter.key();
-        nPoints += pbm[patchI].meshPoints().size();
+        label patchi = iter.key();
+        nPoints += pbm[patchi].meshPoints().size();
     }
 
     externalPointEdgePoint::trackingData td(points_);
@@ -85,18 +85,18 @@ void Foam::pointPatchDist::correct()
 
     forAllConstIter(labelHashSet, patchIDs_, iter)
     {
-        label patchI = iter.key();
+        label patchi = iter.key();
         // Retrieve the patch now we have its index in patches.
 
-        const labelList& mp = pbm[patchI].meshPoints();
+        const labelList& mp = pbm[patchi].meshPoints();
 
         forAll(mp, ppI)
         {
-            label meshPointI = mp[ppI];
-            wallPoints[nPoints] = meshPointI;
+            label meshPointi = mp[ppI];
+            wallPoints[nPoints] = meshPointi;
             wallInfo[nPoints] = externalPointEdgePoint
             (
-                td.points_[meshPointI],
+                td.points_[meshPointi],
                 0.0
             );
             nPoints++;
@@ -128,11 +128,11 @@ void Foam::pointPatchDist::correct()
     pointScalarField& psf = *this;
 
 
-    forAll(allPointInfo, pointI)
+    forAll(allPointInfo, pointi)
     {
-        if (allPointInfo[pointI].valid(td))
+        if (allPointInfo[pointi].valid(td))
         {
-            psf[pointI] = Foam::sqrt(allPointInfo[pointI].distSqr());
+            psf[pointi] = Foam::sqrt(allPointInfo[pointi].distSqr());
         }
         else
         {

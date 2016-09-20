@@ -30,8 +30,7 @@ Group
 Description
     Variant of inletOutlet boundary condition with uniform inletValue.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
@@ -40,7 +39,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type                uniformInletOutlet;
         phi                 phi;
@@ -57,7 +56,7 @@ Note
     - positive flux (out of domain): apply zero-gradient condition
     - negative flux (into of domain): apply the user-specified fixed value
 
-SeeAlso
+See also
     Foam::inletOutletFvPatchField
     Foam::Function1Types
 

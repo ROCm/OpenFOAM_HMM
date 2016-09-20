@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,41 +33,50 @@ License
 
 namespace Foam
 {
+
 // Signal number to catch
 int sigStopAtWriteNow::signal_
 (
     debug::optimisationSwitch("stopAtWriteNowSignal", -1)
 );
+
 // Register re-reader
 class addstopAtWriteNowSignalToOpt
 :
     public ::Foam::simpleRegIOobject
 {
+
 public:
+
     addstopAtWriteNowSignalToOpt(const char* name)
     :
         ::Foam::simpleRegIOobject(Foam::debug::addOptimisationObject, name)
     {}
+
     virtual ~addstopAtWriteNowSignalToOpt()
     {}
+
     virtual void readData(Foam::Istream& is)
     {
         sigStopAtWriteNow::signal_ = readLabel(is);
         sigStopAtWriteNow::set(true);
     }
+
     virtual void writeData(Foam::Ostream& os) const
     {
         os << sigStopAtWriteNow::signal_;
     }
 };
+
 addstopAtWriteNowSignalToOpt addstopAtWriteNowSignalToOpt_
 (
     "stopAtWriteNowSignal"
 );
+
 }
 
 
-static Foam::Time const* runTimePtr_ = NULL;
+Foam::Time const* Foam::sigStopAtWriteNow::runTimePtr_ = nullptr;
 
 
 struct sigaction Foam::sigStopAtWriteNow::oldAction_;
@@ -78,7 +87,7 @@ struct sigaction Foam::sigStopAtWriteNow::oldAction_;
 void Foam::sigStopAtWriteNow::sigHandler(int)
 {
     // Reset old handling
-    if (sigaction(signal_, &oldAction_, NULL) < 0)
+    if (sigaction(signal_, &oldAction_, nullptr) < 0)
     {
         FatalErrorInFunction
             << "Cannot reset " << signal_ << " trapping"
@@ -123,7 +132,7 @@ Foam::sigStopAtWriteNow::~sigStopAtWriteNow()
     // Reset old handling
     if (signal_ > 0)
     {
-        if (sigaction(signal_, &oldAction_, NULL) < 0)
+        if (sigaction(signal_, &oldAction_, nullptr) < 0)
         {
             FatalErrorInFunction
                 << "Cannot reset " << signal_ << " trapping"
@@ -145,8 +154,7 @@ void Foam::sigStopAtWriteNow::set(const bool verbose)
             FatalErrorInFunction
                 << "stopAtWriteNowSignal : " << signal_
                 << " cannot be the same as the writeNowSignal."
-                << " Please change this in the controlDict ("
-                << findEtcFile("controlDict", false) << ")."
+                << " Please change this in the etc/controlDict."
                 << exit(FatalError);
         }
 

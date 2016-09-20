@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,7 +92,7 @@ void* Foam::sigFpe::mallocNan(size_t size)
 void Foam::sigFpe::sigHandler(int)
 {
     // Reset old handling
-    if (sigaction(SIGFPE, &oldAction_, NULL) < 0)
+    if (sigaction(SIGFPE, &oldAction_, nullptr) < 0)
     {
         FatalErrorInFunction
             << "Cannot reset SIGFPE trapping"
@@ -176,7 +176,7 @@ void Foam::sigFpe::set(const bool verbose)
           | _EN_OVERFL,
             0,
             _ABORT_ON_ERROR,
-            NULL
+            nullptr
         );
 
         sigFpeActive_ = true;
@@ -235,7 +235,7 @@ void Foam::sigFpe::unset(const bool verbose)
                 << endl;
         }
 
-        if (sigaction(SIGFPE, &oldAction_, NULL) < 0)
+        if (sigaction(SIGFPE, &oldAction_, nullptr) < 0)
         {
             FatalErrorInFunction
                 << "Cannot reset SIGFPE trapping"

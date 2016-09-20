@@ -149,7 +149,7 @@ Foam::limitedSurfaceInterpolationScheme<Type>::weights
     // from which the weight is calculated using the limiter value
     surfaceScalarField& Weights = tLimiter.ref();
 
-    scalarField& pWeights = Weights.internalField();
+    scalarField& pWeights = Weights.primitiveFieldRef();
 
     forAll(pWeights, face)
     {
@@ -158,15 +158,15 @@ Foam::limitedSurfaceInterpolationScheme<Type>::weights
           + (1.0 - pWeights[face])*pos(faceFlux_[face]);
     }
 
-    surfaceScalarField::GeometricBoundaryField& bWeights =
-        Weights.boundaryField();
+    surfaceScalarField::Boundary& bWeights =
+        Weights.boundaryFieldRef();
 
-    forAll(bWeights, patchI)
+    forAll(bWeights, patchi)
     {
-        scalarField& pWeights = bWeights[patchI];
+        scalarField& pWeights = bWeights[patchi];
 
-        const scalarField& pCDweights = CDweights.boundaryField()[patchI];
-        const scalarField& pFaceFlux = faceFlux_.boundaryField()[patchI];
+        const scalarField& pCDweights = CDweights.boundaryField()[patchi];
+        const scalarField& pFaceFlux = faceFlux_.boundaryField()[patchi];
 
         forAll(pWeights, face)
         {

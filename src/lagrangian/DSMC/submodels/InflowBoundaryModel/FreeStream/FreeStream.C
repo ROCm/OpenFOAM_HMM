@@ -153,12 +153,12 @@ void Foam::FreeStream<CloudType>::inflow()
 
     label particlesInserted = 0;
 
-    const volScalarField::GeometricBoundaryField& boundaryT
+    const volScalarField::Boundary& boundaryT
     (
         cloud.boundaryT().boundaryField()
     );
 
-    const volVectorField::GeometricBoundaryField& boundaryU
+    const volVectorField::Boundary& boundaryU
     (
         cloud.boundaryU().boundaryField()
     );
@@ -230,7 +230,7 @@ void Foam::FreeStream<CloudType>::inflow()
 
             label globalFaceIndex = pFI + patch.start();
 
-            label cellI = mesh.faceOwner()[globalFaceIndex];
+            label celli = mesh.faceOwner()[globalFaceIndex];
 
             const vector& fC = patch.faceCentres()[pFI];
 
@@ -240,7 +240,7 @@ void Foam::FreeStream<CloudType>::inflow()
             (
                 mesh,
                 globalFaceIndex,
-                cellI
+                celli
             );
 
             // Cumulative triangle area fractions
@@ -408,7 +408,7 @@ void Foam::FreeStream<CloudType>::inflow()
                         p,
                         U,
                         Ei,
-                        cellI,
+                        celli,
                         globalFaceIndex,
                         faceTetIs.tetPt(),
                         typeId

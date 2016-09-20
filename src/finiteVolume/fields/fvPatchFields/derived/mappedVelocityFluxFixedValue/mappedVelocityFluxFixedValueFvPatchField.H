@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,8 +31,7 @@ Description
     This boundary condition maps the velocity and flux from a neighbour patch
     to this patch
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
@@ -40,7 +39,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            mappedVelocityFlux;
         phi             phi;
@@ -55,7 +54,7 @@ Note
     This boundary condition can only be applied to patches that are of
     the \c mappedPolyPatch type.
 
-SeeAlso
+See also
     Foam::mappedPatchBase
     Foam::mappedPolyPatch
     Foam::mappedFvPatch

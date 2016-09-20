@@ -153,15 +153,15 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
     // To prevent doing work twice per edge only look at edges to higher
     // point
     EdgeMap<label> facesPerEdge(100);
-    forAll(pointFaces, pointI)
+    forAll(pointFaces, pointi)
     {
-        const labelList& pFaces = pointFaces[pointI];
+        const labelList& pFaces = pointFaces[pointi];
 
         facesPerEdge.clear();
         forAll(pFaces, i)
         {
             const triSurface::FaceType& f = triSurface::operator[](pFaces[i]);
-            label fp = findIndex(f, pointI);
+            label fp = findIndex(f, pointi);
 
             // Something weird: if I expand the code of addFaceToEdge in both
             // below instances it gives a segmentation violation on some
@@ -169,13 +169,13 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
 
 
             // Forward edge
-            label nextPointI = f[f.fcIndex(fp)];
+            label nextPointi = f[f.fcIndex(fp)];
 
-            if (nextPointI > pointI)
+            if (nextPointi > pointi)
             {
                 bool okFace = addFaceToEdge
                 (
-                    edge(pointI, nextPointI),
+                    edge(pointi, nextPointi),
                     facesPerEdge
                 );
 
@@ -185,13 +185,13 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
                 }
             }
             // Reverse edge
-            label prevPointI = f[f.rcIndex(fp)];
+            label prevPointi = f[f.rcIndex(fp)];
 
-            if (prevPointI > pointI)
+            if (prevPointi > pointi)
             {
                 bool okFace = addFaceToEdge
                 (
-                    edge(pointI, prevPointI),
+                    edge(pointi, prevPointi),
                     facesPerEdge
                 );
 
@@ -419,14 +419,14 @@ void Foam::triSurfaceMesh::boundingSpheres
 
     const pointField& pts = triSurface::points();
 
-    forAll(*this, faceI)
+    forAll(*this, facei)
     {
-        const labelledTri& f = triSurface::operator[](faceI);
-        const point& fc = centres[faceI];
+        const labelledTri& f = triSurface::operator[](facei);
+        const point& fc = centres[facei];
         forAll(f, fp)
         {
             const point& pt = pts[f[fp]];
-            radiusSqr[faceI] = max(radiusSqr[faceI], Foam::magSqr(fc-pt));
+            radiusSqr[facei] = max(radiusSqr[facei], Foam::magSqr(fc-pt));
         }
     }
 
@@ -676,15 +676,15 @@ void Foam::triSurfaceMesh::getNormal
         {
             if (info[i].hit())
             {
-                label faceI = info[i].index();
-                normal[i] = s[faceI].normal(pts);
+                label facei = info[i].index();
+                normal[i] = s[facei].normal(pts);
 
-                scalar qual = s[faceI].tri(pts).quality();
+                scalar qual = s[facei].tri(pts).quality();
 
                 if (qual < minQuality_)
                 {
                     // Search neighbouring triangles
-                    const labelList& fFaces = faceFaces[faceI];
+                    const labelList& fFaces = faceFaces[facei];
 
                     forAll(fFaces, j)
                     {
@@ -713,12 +713,12 @@ void Foam::triSurfaceMesh::getNormal
         {
             if (info[i].hit())
             {
-                label faceI = info[i].index();
+                label facei = info[i].index();
                 // Cached:
-                //normal[i] = faceNormals()[faceI];
+                //normal[i] = faceNormals()[facei];
 
                 // Uncached
-                normal[i] = s[faceI].normal(pts);
+                normal[i] = s[facei].normal(pts);
                 normal[i] /= mag(normal[i]) + VSMALL;
             }
             else
@@ -808,9 +808,9 @@ void Foam::triSurfaceMesh::getVolumeType
     scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
     indexedOctree<treeDataTriSurface>::perturbTol() = tolerance();
 
-    forAll(points, pointI)
+    forAll(points, pointi)
     {
-        const point& pt = points[pointI];
+        const point& pt = points[pointi];
 
         if (!tree().bb().contains(pt))
         {
@@ -826,13 +826,13 @@ void Foam::triSurfaceMesh::getVolumeType
             else
             {
                 // Have to calculate directly as outside the octree
-                volType[pointI] = tree().shapes().getVolumeType(tree(), pt);
+                volType[pointi] = tree().shapes().getVolumeType(tree(), pt);
             }
         }
         else
         {
             // - use cached volume type per each tree node
-            volType[pointI] = tree().getVolumeType(pt);
+            volType[pointi] = tree().getVolumeType(pt);
         }
     }
 

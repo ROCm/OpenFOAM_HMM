@@ -1,5 +1,4 @@
 EXE_INC = \
-    /* -DFULLDEBUG -g -O0 */ \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
@@ -8,10 +7,8 @@ EXE_INC = \
     -I$(LIB_SRC)/lagrangian/basic/lnInclude
 
 EXE_LIBS = \
-    -lfiniteVolume \
-    -lmeshTools \
+    -ldynamicMesh \
     -lfileFormats \
     -lsampling \
     -lgenericPatchFields \
     -llagrangian
-

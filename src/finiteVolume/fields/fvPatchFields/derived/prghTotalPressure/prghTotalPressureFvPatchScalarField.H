@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ Description
     calculated as:
 
         \f[
-            p_rgh = p - \rho g (h - hRef)
+            p_rgh = p - \rho g.(h - hRef)
             p = p0 - 0.5 \rho |U|^2
         \f]
 
@@ -43,34 +43,29 @@ Description
         p0      | Total pressure [Pa]
         h       | Height in the opposite direction to gravity
         hRef    | Reference height in the opposite direction to gravity
-        \rho    | density
-        g       | acceleration due to gravity [m/s^2]
+        \rho    | Density
+        g       | Acceleration due to gravity [m/s^2]
     \endtable
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
-        U            | velocity field name     | no          | U
-        phi          | flux field name         | no          | phi
-        rho          | density field name      | no          | rho
-        p0           | total pressure          | yes         |
+        U            | Velocity field name     | no          | U
+        phi          | Flux field name         | no          | phi
+        rho          | Density field name      | no          | rho
+        p0           | Total pressure          | yes         |
     \endtable
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            prghTotalPressure;
-        U               U;
-        phi             phi;
-        rho             rho;
         p0              uniform 0;
-        value           uniform 0; // optional initial value
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchScalarField
 
 SourceFiles

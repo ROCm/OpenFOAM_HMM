@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,8 +59,8 @@ void Foam::patchPatchDist::correct()
     label nBnd = 0;
     forAllConstIter(labelHashSet, nbrPatchIDs_, iter)
     {
-        label nbrPatchI = iter.key();
-        const polyPatch& nbrPatch = patch_.boundaryMesh()[nbrPatchI];
+        label nbrPatchi = iter.key();
+        const polyPatch& nbrPatch = patch_.boundaryMesh()[nbrPatchi];
         nBnd += nbrPatch.nEdges()-nbrPatch.nInternalEdges();
     }
 
@@ -70,8 +70,8 @@ void Foam::patchPatchDist::correct()
 
     forAllConstIter(labelHashSet, nbrPatchIDs_, iter)
     {
-        label nbrPatchI = iter.key();
-        const polyPatch& nbrPatch = patch_.boundaryMesh()[nbrPatchI];
+        label nbrPatchi = iter.key();
+        const polyPatch& nbrPatch = patch_.boundaryMesh()[nbrPatchi];
         const labelList& nbrMp = nbrPatch.meshPoints();
 
         for
@@ -83,7 +83,7 @@ void Foam::patchPatchDist::correct()
         {
             const edge& e = nbrPatch.edges()[edgeI];
             const edge meshE = edge(nbrMp[e[0]], nbrMp[e[1]]);
-            nbrEdges.insert(meshE, nbrPatchI);
+            nbrEdges.insert(meshE, nbrPatchi);
         }
     }
 
@@ -156,11 +156,11 @@ void Foam::patchPatchDist::correct()
     // Extract into *this
     setSize(patch_.size());
     nUnset_ = 0;
-    forAll(allFaceInfo, faceI)
+    forAll(allFaceInfo, facei)
     {
-        if (allFaceInfo[faceI].valid(calc.data()))
+        if (allFaceInfo[facei].valid(calc.data()))
         {
-            operator[](faceI) =  Foam::sqrt(allFaceInfo[faceI].distSqr());
+            operator[](facei) =  Foam::sqrt(allFaceInfo[facei].distSqr());
         }
         else
         {

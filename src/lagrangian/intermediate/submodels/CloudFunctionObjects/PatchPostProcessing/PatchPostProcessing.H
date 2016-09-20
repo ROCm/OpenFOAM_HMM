@@ -73,8 +73,8 @@ class PatchPostProcessing
 
     // Private Member Functions
 
-        //- Returns local patchI if patch is in patchIds_ list
-        label applyToPatch(const label globalPatchI) const;
+        //- Returns local patchi if patch is in patchIds_ list
+        label applyToPatch(const label globalPatchi) const;
 
 
 protected:

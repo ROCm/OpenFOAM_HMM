@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,12 +29,21 @@ License
 #include "mappedPatchBase.H"
 #include "treeBoundBox.H"
 #include "treeDataFace.H"
+#include "addToRunTimeSelectionTable.H"
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(patchProbes, 0);
+
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        patchProbes,
+        dictionary
+    );
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -99,9 +108,9 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
         );
 
 
-        forAll(probeLocations(), probeI)
+        forAll(probeLocations(), probei)
         {
-            const point sample = probeLocations()[probeI];
+            const point sample = probeLocations()[probei];
 
             scalar span = boundaryTree.bb().mag();
 
@@ -116,9 +125,9 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
                 info = boundaryTree.findNearest(sample, Foam::sqr(GREAT));
             }
 
-            label faceI = boundaryTree.shapes().faceLabels()[info.index()];
+            label facei = boundaryTree.shapes().faceLabels()[info.index()];
 
-            const label patchi = bm.whichPatch(faceI);
+            const label patchi = bm.whichPatch(facei);
 
             if (isA<emptyPolyPatch>(bm[patchi]))
             {
@@ -151,7 +160,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
                 sampleInfo.second().first() = magSqr(facePt-sample);
                 sampleInfo.second().second() = Pstream::myProcNo();
 
-                nearest[probeI]= sampleInfo;
+                nearest[probei]= sampleInfo;
             }
         }
     }
@@ -174,7 +183,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
         InfoInFunction << endl;
         forAll(nearest, sampleI)
         {
-            label procI = nearest[sampleI].second().second();
+            label proci = nearest[sampleI].second().second();
             label localI = nearest[sampleI].first().index();
 
             Info<< "    " << sampleI << " coord:"<< operator[](sampleI)
@@ -205,11 +214,6 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
 
 void Foam::patchProbes::readDict(const dictionary& dict)
 {
-    if (!dict.readIfPresent("patches", patchNames_))
-    {
-        word patchName(dict.lookup("patchName"));
-        patchNames_ = wordReList(1, wordRe(patchName));
-    }
     probes::readDict(dict);
 }
 
@@ -219,23 +223,37 @@ void Foam::patchProbes::readDict(const dictionary& dict)
 Foam::patchProbes::patchProbes
 (
     const word& name,
+    const Time& t,
+    const dictionary& dict
+)
+:
+    probes(name, t, dict)
+{
+    // When constructing probes above it will have called the
+    // probes::findElements (since the virtual mechanism not yet operating).
+    // Not easy to workaround (apart from feeding through flag into constructor)
+    // so clear out any cells found for now.
+    elementList_.clear();
+    faceList_.clear();
+
+    read(dict);
+}
+
+
+Foam::patchProbes::patchProbes
+(
+    const word& name,
     const objectRegistry& obr,
     const dictionary& dict,
     const bool loadFromFiles,
-    const bool doFindElements
+)   const bool readFields
 )
 :
     probes(name, obr, dict, loadFromFiles, false)
 {
-    readDict(dict);
-
-    if (doFindElements)
+    if (readFields)
     {
-        // Find the elements
-        findElements(mesh_);
-
-        // Open the probe streams
-        prepare();
+        read(dict);
     }
 }
 
@@ -246,7 +264,7 @@ Foam::patchProbes::~patchProbes()
 {}
 
 
-void Foam::patchProbes::write()
+bool Foam::patchProbes::write()
 {
     if (this->size() && prepare())
     {
@@ -262,18 +280,19 @@ void Foam::patchProbes::write()
         sampleAndWriteSurfaceFields(surfaceSymmTensorFields_);
         sampleAndWriteSurfaceFields(surfaceTensorFields_);
     }
+
+    return true;
 }
 
 
-void Foam::patchProbes::read(const dictionary& dict)
+bool Foam::patchProbes::read(const dictionary& dict)
 {
-    readDict(dict);
-
-    // Find the elements
-    findElements(mesh_);
-
-    // Open the probe streams
-    prepare();
+    if (!dict.readIfPresent("patches", patchNames_))
+    {
+        word patchName(dict.lookup("patchName"));
+        patchNames_ = wordReList(1, wordRe(patchName));
+    }
+    return probes::read(dict);
 }
 
 

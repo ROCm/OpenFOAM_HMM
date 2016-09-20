@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,9 +33,18 @@ bool Foam::fv::CodedSource<Type>::read(const dictionary& dict)
 {
     if (cellSetOption::read(dict))
     {
-        coeffs_.lookup("fieldNames") >> fieldNames_;
+        coeffs_.lookup("fields") >> fieldNames_;
         applied_.setSize(fieldNames_.size(), false);
-        coeffs_.lookup("redirectType") >> redirectType_;
+
+        // Backward compatibility
+        if (dict.found("redirectType"))
+        {
+            dict.lookup("redirectType") >> name_;
+        }
+        else
+        {
+            dict.lookup("name") >> name_;
+        }
 
         // Code snippets
         {

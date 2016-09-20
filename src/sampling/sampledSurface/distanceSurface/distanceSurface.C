@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,7 +83,7 @@ void Foam::distanceSurface::createGeometry()
     // Internal field
     {
         const pointField& cc = fvm.C();
-        scalarField& fld = cellDistance.internalField();
+        scalarField& fld = cellDistance.primitiveFieldRef();
 
         List<pointIndexHit> nearest;
         surfPtr_().findNearest
@@ -128,12 +128,15 @@ void Foam::distanceSurface::createGeometry()
         }
     }
 
+    volScalarField::Boundary& cellDistanceBf =
+        cellDistance.boundaryFieldRef();
+
     // Patch fields
     {
-        forAll(fvm.C().boundaryField(), patchI)
+        forAll(fvm.C().boundaryField(), patchi)
         {
-            const pointField& cc = fvm.C().boundaryField()[patchI];
-            fvPatchScalarField& fld = cellDistance.boundaryField()[patchI];
+            const pointField& cc = fvm.C().boundaryField()[patchi];
+            fvPatchScalarField& fld = cellDistanceBf[patchi];
 
             List<pointIndexHit> nearest;
             surfPtr_().findNearest
@@ -254,7 +257,7 @@ void Foam::distanceSurface::createGeometry()
             pointMesh::New(fvm),
             dimensionedScalar("zero", dimLength, 0)
         );
-        pDist.internalField() = pointDistance_;
+        pDist.primitiveFieldRef() = pointDistance_;
 
         Pout<< "Writing point distance:" << pDist.objectPath() << endl;
         pDist.write();
@@ -335,9 +338,9 @@ Foam::distanceSurface::distanceSurface
     bounds_(dict.lookupOrDefault("bounds", boundBox::greatBox)),
     zoneKey_(keyType::null),
     needsUpdate_(true),
-    isoSurfCellPtr_(NULL),
-    isoSurfPtr_(NULL),
-    facesPtr_(NULL)
+    isoSurfCellPtr_(nullptr),
+    isoSurfPtr_(nullptr),
+    facesPtr_(nullptr)
 {
 //    dict.readIfPresent("zone", zoneKey_);
 //
@@ -391,9 +394,9 @@ Foam::distanceSurface::distanceSurface
     bounds_(bounds),
     zoneKey_(keyType::null),
     needsUpdate_(true),
-    isoSurfCellPtr_(NULL),
-    isoSurfPtr_(NULL),
-    facesPtr_(NULL)
+    isoSurfCellPtr_(nullptr),
+    isoSurfPtr_(nullptr),
+    facesPtr_(nullptr)
 {}
 
 

@@ -6,6 +6,5 @@ EXE_INC = \
 
 LIB_LIBS = \
     -ldecompositionMethods \
-    -lfiniteVolume \
+    -ldynamicMesh
     -ldynamicMesh \
-    -lmeshTools

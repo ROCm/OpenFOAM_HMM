@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,6 +76,9 @@ public:
 
 
     // Member Functions
+
+        //- Resize the ODE solver
+        bool resize(const label n);
 
         //- Solve a single step dx and return the error
         virtual scalar solve

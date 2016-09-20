@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,12 +70,12 @@ void Foam::cellToPoint::combine(topoSet& set, const bool add) const
     // Add all point from cells in loadedSet
     forAllConstIter(cellSet, loadedSet, iter)
     {
-        const label cellI = iter.key();
-        const labelList& cFaces = mesh_.cells()[cellI];
+        const label celli = iter.key();
+        const labelList& cFaces = mesh_.cells()[celli];
 
-        forAll(cFaces, cFaceI)
+        forAll(cFaces, cFacei)
         {
-            const face& f = mesh_.faces()[cFaces[cFaceI]];
+            const face& f = mesh_.faces()[cFaces[cFacei]];
 
             forAll(f, fp)
             {

@@ -417,10 +417,10 @@ void extractSurface
     labelList patchToCompactZone(bMesh.size(), -1);
     forAllConstIter(HashTable<label>, compactZoneID, iter)
     {
-        label patchI = bMesh.findPatchID(iter.key());
-        if (patchI != -1)
+        label patchi = bMesh.findPatchID(iter.key());
+        if (patchi != -1)
         {
-            patchToCompactZone[patchI] = iter();
+            patchToCompactZone[patchi] = iter();
         }
     }
 
@@ -574,6 +574,73 @@ scalar getMergeDistance(const polyMesh& mesh, const scalar mergeTol)
     }
 
     return mergeDist;
+}
+
+
+void removeZeroSizedPatches(fvMesh& mesh)
+{
+    // Remove any zero-sized ones. Assumes
+    // - processor patches are already only there if needed
+    // - all other patches are available on all processors
+    // - but coupled ones might still be needed, even if zero-size
+    //   (e.g. processorCyclic)
+    // See also logic in createPatch.
+    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
+    labelList oldToNew(pbm.size(), -1);
+    label newPatchi = 0;
+    forAll(pbm, patchi)
+    {
+        const polyPatch& pp = pbm[patchi];
+
+        if (!isA<processorPolyPatch>(pp))
+        {
+            if
+            (
+                isA<coupledPolyPatch>(pp)
+             || returnReduce(pp.size(), sumOp<label>())
+            )
+            {
+                // Coupled (and unknown size) or uncoupled and used
+                oldToNew[patchi] = newPatchi++;
+            }
+        }
+    }
+
+    forAll(pbm, patchi)
+    {
+        const polyPatch& pp = pbm[patchi];
+
+        if (isA<processorPolyPatch>(pp))
+        {
+            oldToNew[patchi] = newPatchi++;
+        }
+    }
+
+
+    const label nKeepPatches = newPatchi;
+
+    // Shuffle unused ones to end
+    if (nKeepPatches != pbm.size())
+    {
+        Info<< endl
+            << "Removing zero-sized patches:" << endl << incrIndent;
+
+        forAll(oldToNew, patchi)
+        {
+            if (oldToNew[patchi] == -1)
+            {
+                Info<< indent << pbm[patchi].name()
+                    << " type " << pbm[patchi].type()
+                    << " at position " << patchi << endl;
+                oldToNew[patchi] = newPatchi++;
+            }
+        }
+        Info<< decrIndent;
+
+        fvMeshTools::reorderPatches(mesh, oldToNew, nKeepPatches, true);
+        Info<< endl;
+    }
 }
 
 
@@ -830,6 +897,7 @@ int main(int argc, char *argv[])
     );
 
     const Switch keepPatches(meshDict.lookupOrDefault("keepPatches", false));
+
 
     // Read decomposePar dictionary
     dictionary decomposeDict;
@@ -1240,13 +1308,13 @@ int main(int argc, char *argv[])
         const PtrList<dictionary>& surfacePatchInfo = surfaces.patchInfo();
         const polyBoundaryMesh& pbm = mesh.boundaryMesh();
 
-        forAll(surfaceGeometry, surfI)
+        forAll(surfaceGeometry, surfi)
         {
-            label geomI = surfaceGeometry[surfI];
+            label geomi = surfaceGeometry[surfi];
 
-            const wordList& regNames = allGeometry.regionNames()[geomI];
+            const wordList& regNames = allGeometry.regionNames()[geomi];
 
-            Info<< surfaces.names()[surfI] << ':' << nl << nl;
+            Info<< surfaces.names()[surfi] << ':' << nl << nl;
 
             const word& fzName = surfaces.surfZones()[surfI].faceZoneName();
 
@@ -1255,16 +1323,16 @@ int main(int argc, char *argv[])
                 // 'Normal' surface
                 forAll(regNames, i)
                 {
-                    label globalRegionI = surfaces.globalRegion(surfI, i);
+                    label globalRegioni = surfaces.globalRegion(surfI, i);
 
-                    label patchI;
+                    label patchi;
 
-                    if (surfacePatchInfo.set(globalRegionI))
+                    if (surfacePatchInfo.set(globalRegioni))
                     {
-                        patchI = meshRefiner.addMeshedPatch
+                        patchi = meshRefiner.addMeshedPatch
                         (
                             regNames[i],
-                            surfacePatchInfo[globalRegionI]
+                            surfacePatchInfo[globalRegioni]
                         );
                     }
                     else
@@ -1272,7 +1340,7 @@ int main(int argc, char *argv[])
                         dictionary patchInfo;
                         patchInfo.set("type", wallPolyPatch::typeName);
 
-                        patchI = meshRefiner.addMeshedPatch
+                        patchi = meshRefiner.addMeshedPatch
                         (
                             regNames[i],
                             patchInfo
@@ -1280,12 +1348,12 @@ int main(int argc, char *argv[])
                     }
 
                     Info<< setf(ios_base::left)
-                        << setw(6) << patchI
-                        << setw(20) << pbm[patchI].type()
+                        << setw(6) << patchi
+                        << setw(20) << pbm[patchi].type()
                         << setw(30) << regNames[i] << nl;
 
-                    globalToMasterPatch[globalRegionI] = patchI;
-                    globalToSlavePatch[globalRegionI] = patchI;
+                    globalToMasterPatch[globalRegioni] = patchi;
+                    globalToSlavePatch[globalRegioni] = patchi;
                 }
             }
             else
@@ -1293,18 +1361,18 @@ int main(int argc, char *argv[])
                 // Zoned surface
                 forAll(regNames, i)
                 {
-                    label globalRegionI = surfaces.globalRegion(surfI, i);
+                    label globalRegioni = surfaces.globalRegion(surfi, i);
 
                     // Add master side patch
                     {
-                        label patchI;
+                        label patchi;
 
-                        if (surfacePatchInfo.set(globalRegionI))
+                        if (surfacePatchInfo.set(globalRegioni))
                         {
-                            patchI = meshRefiner.addMeshedPatch
+                            patchi = meshRefiner.addMeshedPatch
                             (
                                 regNames[i],
-                                surfacePatchInfo[globalRegionI]
+                                surfacePatchInfo[globalRegioni]
                             );
                         }
                         else
@@ -1312,7 +1380,7 @@ int main(int argc, char *argv[])
                             dictionary patchInfo;
                             patchInfo.set("type", wallPolyPatch::typeName);
 
-                            patchI = meshRefiner.addMeshedPatch
+                            patchi = meshRefiner.addMeshedPatch
                             (
                                 regNames[i],
                                 patchInfo
@@ -1320,23 +1388,23 @@ int main(int argc, char *argv[])
                         }
 
                         Info<< setf(ios_base::left)
-                            << setw(6) << patchI
-                            << setw(20) << pbm[patchI].type()
+                            << setw(6) << patchi
+                            << setw(20) << pbm[patchi].type()
                             << setw(30) << regNames[i] << nl;
 
-                        globalToMasterPatch[globalRegionI] = patchI;
+                        globalToMasterPatch[globalRegioni] = patchi;
                     }
                     // Add slave side patch
                     {
                         const word slaveName = regNames[i] + "_slave";
-                        label patchI;
+                        label patchi;
 
-                        if (surfacePatchInfo.set(globalRegionI))
+                        if (surfacePatchInfo.set(globalRegioni))
                         {
-                            patchI = meshRefiner.addMeshedPatch
+                            patchi = meshRefiner.addMeshedPatch
                             (
                                 slaveName,
-                                surfacePatchInfo[globalRegionI]
+                                surfacePatchInfo[globalRegioni]
                             );
                         }
                         else
@@ -1344,7 +1412,7 @@ int main(int argc, char *argv[])
                             dictionary patchInfo;
                             patchInfo.set("type", wallPolyPatch::typeName);
 
-                            patchI = meshRefiner.addMeshedPatch
+                            patchi = meshRefiner.addMeshedPatch
                             (
                                 slaveName,
                                 patchInfo
@@ -1352,11 +1420,11 @@ int main(int argc, char *argv[])
                         }
 
                         Info<< setf(ios_base::left)
-                            << setw(6) << patchI
-                            << setw(20) << pbm[patchI].type()
+                            << setw(6) << patchi
+                            << setw(20) << pbm[patchi].type()
                             << setw(30) << slaveName << nl;
 
-                        globalToSlavePatch[globalRegionI] = patchI;
+                        globalToSlavePatch[globalRegioni] = patchi;
                     }
                 }
 
@@ -1364,14 +1432,14 @@ int main(int argc, char *argv[])
                 // region in surface for patch for zoneing
                 if (regNames.size())
                 {
-                    label globalRegionI = surfaces.globalRegion(surfI, 0);
+                    label globalRegioni = surfaces.globalRegion(surfi, 0);
 
                     meshRefiner.addFaceZone
                     (
                         fzName,
-                        pbm[globalToMasterPatch[globalRegionI]].name(),
-                        pbm[globalToSlavePatch[globalRegionI]].name(),
-                        surfaces.surfZones()[surfI].faceType()
+                        pbm[globalToMasterPatch[globalRegioni]].name(),
+                        pbm[globalToSlavePatch[globalRegioni]].name(),
+                        surfaces.surfZones()[surfi].faceType()
                     );
                 }
             }
@@ -1388,9 +1456,9 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     HashTable<Pair<word>> faceZoneToPatches;
-    forAll(mesh.faceZones(), zoneI)
+    forAll(mesh.faceZones(), zonei)
     {
-        const word& fzName = mesh.faceZones()[zoneI].name();
+        const word& fzName = mesh.faceZones()[zonei].name();
 
         label mpI, spI;
         surfaceZonesInfo::faceZoneType fzType;
@@ -1713,13 +1781,13 @@ int main(int argc, char *argv[])
         }
         else
         {
-            forAll(bMesh, patchI)
+            forAll(bMesh, patchi)
             {
-                const polyPatch& patch = bMesh[patchI];
+                const polyPatch& patch = bMesh[patchi];
 
                 if (!isA<processorPolyPatch>(patch))
                 {
-                    includePatches.insert(patchI);
+                    includePatches.insert(patchi);
                 }
             }
         }

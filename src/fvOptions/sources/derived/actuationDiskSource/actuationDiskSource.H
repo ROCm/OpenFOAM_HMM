@@ -47,8 +47,7 @@ Description
         U_1 | velocity at the disk
     \endvartable
 
-    \heading Source usage
-
+Usage
     Example usage:
     \verbatim
     actuationDiskSourceCoeffs
@@ -196,7 +195,7 @@ public:
             virtual void addSup
             (
                 fvMatrix<vector>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
             //- Source term to compressible momentum equation
@@ -204,7 +203,7 @@ public:
             (
                 const volScalarField& rho,
                 fvMatrix<vector>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
 

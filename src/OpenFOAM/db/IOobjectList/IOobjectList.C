@@ -146,7 +146,7 @@ Foam::IOobject* Foam::IOobjectList::lookup(const word& name) const
             InfoInFunction << "Could not find " << name << endl;
         }
 
-        return NULL;
+        return nullptr;
     }
 }
 

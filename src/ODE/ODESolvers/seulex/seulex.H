@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,14 +31,12 @@ Description
     An extrapolation-algorithm, based on the linearly implicit Euler method
     with step size control and order selection.
 
-    The implementation is based on the SEULEX algorithm in
+    Reference:
     \verbatim
-        "Solving Ordinary Differential Equations II: Stiff
-         and Differential-Algebraic Problems, second edition",
-        Hairer, E.,
-        Nørsett, S.,
-        Wanner, G.,
-        Springer-Verlag, Berlin. 1996.
+        Hairer, E., Nørsett, S. P., & Wanner, G. (1996).
+        Solving Ordinary Differential Equations II:
+        Stiff and Differential-Algebraic Problems, second edition",
+        Springer-Verlag, Berlin.
     \endverbatim
 
 SourceFiles
@@ -136,14 +134,22 @@ public:
 
     // Constructors
 
-        //- Construct from ODE
+        //- Construct from ODESystem
         seulex(const ODESystem& ode, const dictionary& dict);
+
+
+    //- Destructor
+    virtual ~seulex()
+    {}
 
 
     // Member Functions
 
+        //- Resize the ODE solver
+        virtual bool resize();
+
         //- Solve the ODE system and the update the state
-        void solve
+        virtual void solve
         (
             scalar& x,
             scalarField& y,

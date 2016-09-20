@@ -515,10 +515,10 @@ Foam::label Foam::snappyRefineDriver::gapOnlyRefine
                 boolList newIsCandidateCell(isCandidateCell);
 
                 // Internal faces
-                for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
+                for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
                 {
-                    label own = mesh.faceOwner()[faceI];
-                    label nei = mesh.faceNeighbour()[faceI];
+                    label own = mesh.faceOwner()[facei];
+                    label nei = mesh.faceNeighbour()[facei];
 
                     if (isCandidateCell[own] != isCandidateCell[nei])
                     {
@@ -539,15 +539,15 @@ Foam::label Foam::snappyRefineDriver::gapOnlyRefine
                 // Boundary faces
                 for
                 (
-                    label faceI = mesh.nInternalFaces();
-                    faceI < mesh.nFaces();
-                    faceI++
+                    label facei = mesh.nInternalFaces();
+                    facei < mesh.nFaces();
+                    facei++
                 )
                 {
-                    label own = mesh.faceOwner()[faceI];
-                    label bFaceI = faceI-mesh.nInternalFaces();
+                    label own = mesh.faceOwner()[facei];
+                    label bFacei = facei-mesh.nInternalFaces();
 
-                    if (isCandidateCell[own] != neiIsCandidateCell[bFaceI])
+                    if (isCandidateCell[own] != neiIsCandidateCell[bFacei])
                     {
                         newIsCandidateCell[own] = true;
                     }
@@ -557,20 +557,20 @@ Foam::label Foam::snappyRefineDriver::gapOnlyRefine
             }
 
             label n = 0;
-            forAll(isCandidateCell, cellI)
+            forAll(isCandidateCell, celli)
             {
-                if (isCandidateCell[cellI])
+                if (isCandidateCell[celli])
                 {
                     n++;
                 }
             }
             candidateCells.setSize(n);
             n = 0;
-            forAll(isCandidateCell, cellI)
+            forAll(isCandidateCell, celli)
             {
-                if (isCandidateCell[cellI])
+                if (isCandidateCell[celli])
                 {
-                    candidateCells[n++] = cellI;
+                    candidateCells[n++] = celli;
                 }
             }
         }
@@ -833,22 +833,22 @@ Foam::label Foam::snappyRefineDriver::danglingCellRefine
         {
             cellSet candidateCellSet(mesh, "candidateCells", cells.size()/1000);
 
-            forAll(cells, cellI)
+            forAll(cells, celli)
             {
-                const cell& cFaces = cells[cellI];
+                const cell& cFaces = cells[celli];
 
                 label nIntFaces = 0;
                 forAll(cFaces, i)
                 {
-                    label bFaceI = cFaces[i]-mesh.nInternalFaces();
-                    if (bFaceI < 0)
+                    label bFacei = cFaces[i]-mesh.nInternalFaces();
+                    if (bFacei < 0)
                     {
                         nIntFaces++;
                     }
                     else
                     {
-                        label patchI = pbm.patchID()[bFaceI];
-                        if (pbm[patchI].coupled())
+                        label patchi = pbm.patchID()[bFacei];
+                        if (pbm[patchi].coupled())
                         {
                             nIntFaces++;
                         }
@@ -857,7 +857,7 @@ Foam::label Foam::snappyRefineDriver::danglingCellRefine
 
                 if (nIntFaces == nFaces)
                 {
-                    candidateCellSet.insert(cellI);
+                    candidateCellSet.insert(celli);
                 }
             }
 

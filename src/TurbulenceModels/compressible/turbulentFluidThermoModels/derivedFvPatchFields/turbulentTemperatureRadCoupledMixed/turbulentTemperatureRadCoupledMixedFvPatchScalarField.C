@@ -102,8 +102,8 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
         FatalErrorInFunction
             << "' not type '" << mappedPatchBase::typeName << "'"
             << "\n    for patch " << p.name()
-            << " of field " << dimensionedInternalField().name()
-            << " in file " << dimensionedInternalField().objectPath()
+            << " of field " << internalField().name()
+            << " in file " << internalField().objectPath()
             << exit(FatalError);
     }
 
@@ -178,9 +178,9 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
     const mappedPatchBase& mpp =
         refCast<const mappedPatchBase>(patch().patch());
     const polyMesh& nbrMesh = mpp.sampleMesh();
-    const label samplePatchI = mpp.samplePolyPatch().index();
+    const label samplePatchi = mpp.samplePolyPatch().index();
     const fvPatch& nbrPatch =
-        refCast<const fvMesh>(nbrMesh).boundary()[samplePatchI];
+        refCast<const fvMesh>(nbrMesh).boundary()[samplePatchi];
 
 
     scalarField Tc(patchInternalField());
@@ -237,10 +237,10 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
 
         Info<< patch().boundaryMesh().mesh().name() << ':'
             << patch().name() << ':'
-            << this->dimensionedInternalField().name() << " <- "
+            << this->internalField().name() << " <- "
             << nbrMesh.name() << ':'
             << nbrPatch.name() << ':'
-            << this->dimensionedInternalField().name() << " :"
+            << this->internalField().name() << " :"
             << " heat transfer rate:" << Q
             << " walltemperature "
             << " min:" << gMin(Tp)

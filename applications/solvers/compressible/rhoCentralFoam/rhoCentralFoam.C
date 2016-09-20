@@ -29,7 +29,7 @@ Group
 
 Description
     Density-based compressible flow solver based on central-upwind schemes of
-    Kurganov and Tadmor
+    Kurganov and Tadmor.
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,11 +45,14 @@ Description
 
 int main(int argc, char *argv[])
 {
-    #include "setRootCase.H"
+    #define NO_CONTROL
+    #include "postProcess.H"
 
+    #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFields.H"
+    #include "createFieldRefs.H"
     #include "createTimeControls.H"
     #include "createRDeltaT.H"
 
@@ -181,11 +184,11 @@ int main(int argc, char *argv[])
         // --- Solve momentum
         solve(fvm::ddt(rhoU) + fvc::div(phiUp));
 
-        U.dimensionedInternalField() =
-            rhoU.dimensionedInternalField()
-           /rho.dimensionedInternalField();
+        U.ref() =
+            rhoU()
+           /rho();
         U.correctBoundaryConditions();
-        rhoU.boundaryField() == rho.boundaryField()*U.boundaryField();
+        rhoU.boundaryFieldRef() == rho.boundaryField()*U.boundaryField();
 
         if (!inviscid)
         {
@@ -219,7 +222,7 @@ int main(int argc, char *argv[])
         e = rhoE/rho - 0.5*magSqr(U);
         e.correctBoundaryConditions();
         thermo.correct();
-        rhoE.boundaryField() ==
+        rhoE.boundaryFieldRef() ==
             rho.boundaryField()*
             (
                 e.boundaryField() + 0.5*magSqr(U.boundaryField())
@@ -236,11 +239,11 @@ int main(int argc, char *argv[])
             rhoE = rho*(e + 0.5*magSqr(U));
         }
 
-        p.dimensionedInternalField() =
-            rho.dimensionedInternalField()
-           /psi.dimensionedInternalField();
+        p.ref() =
+            rho()
+           /psi();
         p.correctBoundaryConditions();
-        rho.boundaryField() == psi.boundaryField()*p.boundaryField();
+        rho.boundaryFieldRef() == psi.boundaryField()*p.boundaryField();
 
         turbulence->correct();
 

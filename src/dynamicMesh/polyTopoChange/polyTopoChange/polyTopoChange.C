@@ -134,13 +134,13 @@ void Foam::polyTopoChange::countMap
     nMerge = 0;
     nRemove = 0;
 
-    forAll(map, newCellI)
+    forAll(map, newCelli)
     {
-        label oldCellI = map[newCellI];
+        label oldCelli = map[newCelli];
 
-        if (oldCellI >= 0)
+        if (oldCelli >= 0)
         {
-            if (reverseMap[oldCellI] == newCellI)
+            if (reverseMap[oldCelli] == newCelli)
             {
                 // unchanged
             }
@@ -150,7 +150,7 @@ void Foam::polyTopoChange::countMap
                 nAdd++;
             }
         }
-        else if (oldCellI == -1)
+        else if (oldCelli == -1)
         {
             // Created from nothing
             nInflate++;
@@ -158,26 +158,26 @@ void Foam::polyTopoChange::countMap
         else
         {
             FatalErrorInFunction
-                << " new:" << newCellI << abort(FatalError);
+                << " new:" << newCelli << abort(FatalError);
         }
     }
 
-    forAll(reverseMap, oldCellI)
+    forAll(reverseMap, oldCelli)
     {
-        label newCellI = reverseMap[oldCellI];
+        label newCelli = reverseMap[oldCelli];
 
-        if (newCellI >= 0)
+        if (newCelli >= 0)
         {
             // unchanged
         }
-        else if (newCellI == -1)
+        else if (newCelli == -1)
         {
             // removed
             nRemove++;
         }
         else
         {
-            // merged into -newCellI-2
+            // merged into -newCelli-2
             nMerge++;
         }
     }
@@ -207,10 +207,10 @@ void Foam::polyTopoChange::writeMeshStats(const polyMesh& mesh, Ostream& os)
 
     labelList patchSizes(patches.size());
     labelList patchStarts(patches.size());
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        patchSizes[patchI] = patches[patchI].size();
-        patchStarts[patchI] = patches[patchI].start();
+        patchSizes[patchi] = patches[patchi].size();
+        patchStarts[patchi] = patches[patchi].start();
     }
 
     os  << "    Points      : " << mesh.nPoints() << nl
@@ -232,15 +232,15 @@ void Foam::polyTopoChange::getMergeSets
     // Per new cell the number of old cells that have been merged into it
     labelList nMerged(cellMap.size(), 1);
 
-    forAll(reverseCellMap, oldCellI)
+    forAll(reverseCellMap, oldCelli)
     {
-        label newCellI = reverseCellMap[oldCellI];
+        label newCelli = reverseCellMap[oldCelli];
 
-        if (newCellI < -1)
+        if (newCelli < -1)
         {
-            label mergeCellI = -newCellI-2;
+            label mergeCelli = -newCelli-2;
 
-            nMerged[mergeCellI]++;
+            nMerged[mergeCelli]++;
         }
     }
 
@@ -249,11 +249,11 @@ void Foam::polyTopoChange::getMergeSets
 
     label nSets = 0;
 
-    forAll(nMerged, cellI)
+    forAll(nMerged, celli)
     {
-        if (nMerged[cellI] > 1)
+        if (nMerged[celli] > 1)
         {
-            cellToMergeSet[cellI] = nSets++;
+            cellToMergeSet[celli] = nSets++;
         }
     }
 
@@ -265,38 +265,38 @@ void Foam::polyTopoChange::getMergeSets
 
     cellsFromCells.setSize(nSets);
 
-    forAll(reverseCellMap, oldCellI)
+    forAll(reverseCellMap, oldCelli)
     {
-        label newCellI = reverseCellMap[oldCellI];
+        label newCelli = reverseCellMap[oldCelli];
 
-        if (newCellI < -1)
+        if (newCelli < -1)
         {
-            label mergeCellI = -newCellI-2;
+            label mergeCelli = -newCelli-2;
 
-            // oldCellI was merged into mergeCellI
+            // oldCelli was merged into mergeCelli
 
-            label setI = cellToMergeSet[mergeCellI];
+            label setI = cellToMergeSet[mergeCelli];
 
             objectMap& mergeSet = cellsFromCells[setI];
 
             if (mergeSet.masterObjects().empty())
             {
-                // First occurrence of master cell mergeCellI
+                // First occurrence of master cell mergeCelli
 
-                mergeSet.index() = mergeCellI;
-                mergeSet.masterObjects().setSize(nMerged[mergeCellI]);
+                mergeSet.index() = mergeCelli;
+                mergeSet.masterObjects().setSize(nMerged[mergeCelli]);
 
                 // old master label
-                mergeSet.masterObjects()[0] = cellMap[mergeCellI];
+                mergeSet.masterObjects()[0] = cellMap[mergeCelli];
 
                 // old slave label
-                mergeSet.masterObjects()[1] = oldCellI;
+                mergeSet.masterObjects()[1] = oldCelli;
 
-                nMerged[mergeCellI] = 2;
+                nMerged[mergeCelli] = 2;
             }
             else
             {
-                mergeSet.masterObjects()[nMerged[mergeCellI]++] = oldCellI;
+                mergeSet.masterObjects()[nMerged[mergeCelli]++] = oldCelli;
             }
         }
     }
@@ -335,10 +335,10 @@ Foam::pointField Foam::polyTopoChange::facePoints(const face& f) const
 void Foam::polyTopoChange::checkFace
 (
     const face& f,
-    const label faceI,
+    const label facei,
     const label own,
     const label nei,
-    const label patchI,
+    const label patchi,
     const label zoneI
 ) const
 {
@@ -348,15 +348,15 @@ void Foam::polyTopoChange::checkFace
         {
             // retired face
         }
-        else if (patchI == -1 || patchI >= nPatches_)
+        else if (patchi == -1 || patchi >= nPatches_)
         {
             FatalErrorInFunction
                 << "Face has no neighbour (so external) but does not have"
                 << " a valid patch" << nl
                 << "f:" << f
-                << " faceI(-1 if added face):" << faceI
+                << " facei(-1 if added face):" << facei
                 << " own:" << own << " nei:" << nei
-                << " patchI:" << patchI << nl;
+                << " patchi:" << patchi << nl;
             if (hasValidPoints(f))
             {
                 FatalError
@@ -368,14 +368,14 @@ void Foam::polyTopoChange::checkFace
     }
     else
     {
-        if (patchI != -1)
+        if (patchi != -1)
         {
             FatalErrorInFunction
-                << "Cannot both have valid patchI and neighbour" << nl
+                << "Cannot both have valid patchi and neighbour" << nl
                 << "f:" << f
-                << " faceI(-1 if added face):" << faceI
+                << " facei(-1 if added face):" << facei
                 << " own:" << own << " nei:" << nei
-                << " patchI:" << patchI << nl;
+                << " patchi:" << patchi << nl;
             if (hasValidPoints(f))
             {
                 FatalError
@@ -391,9 +391,9 @@ void Foam::polyTopoChange::checkFace
                 << "Owner cell label should be less than neighbour cell label"
                 << nl
                 << "f:" << f
-                << " faceI(-1 if added face):" << faceI
+                << " facei(-1 if added face):" << facei
                 << " own:" << own << " nei:" << nei
-                << " patchI:" << patchI << nl;
+                << " patchi:" << patchi << nl;
             if (hasValidPoints(f))
             {
                 FatalError
@@ -410,9 +410,9 @@ void Foam::polyTopoChange::checkFace
             << "Illegal vertices in face"
             << nl
             << "f:" << f
-            << " faceI(-1 if added face):" << faceI
+            << " facei(-1 if added face):" << facei
             << " own:" << own << " nei:" << nei
-            << " patchI:" << patchI << nl;
+            << " patchi:" << patchi << nl;
             if (hasValidPoints(f))
             {
                 FatalError
@@ -421,15 +421,15 @@ void Foam::polyTopoChange::checkFace
             }
             FatalError << abort(FatalError);
     }
-    if (faceI >= 0 && faceI < faces_.size() && faceRemoved(faceI))
+    if (facei >= 0 && facei < faces_.size() && faceRemoved(facei))
     {
         FatalErrorInFunction
             << "Face already marked for removal"
             << nl
             << "f:" << f
-            << " faceI(-1 if added face):" << faceI
+            << " facei(-1 if added face):" << facei
             << " own:" << own << " nei:" << nei
-            << " patchI:" << patchI << nl;
+            << " patchi:" << patchi << nl;
             if (hasValidPoints(f))
             {
                 FatalError
@@ -446,9 +446,9 @@ void Foam::polyTopoChange::checkFace
                 << "Face uses removed vertices"
                 << nl
                 << "f:" << f
-                << " faceI(-1 if added face):" << faceI
+                << " facei(-1 if added face):" << facei
                 << " own:" << own << " nei:" << nei
-                << " patchI:" << patchI << nl;
+                << " patchi:" << patchi << nl;
             if (hasValidPoints(f))
             {
                 FatalError
@@ -476,9 +476,9 @@ void Foam::polyTopoChange::makeCells
 
     // 1. Count faces per cell
 
-    for (label faceI = 0; faceI < nActiveFaces; faceI++)
+    for (label facei = 0; facei < nActiveFaces; facei++)
     {
-        if (faceOwner_[faceI] < 0)
+        if (faceOwner_[facei] < 0)
         {
             pointField newPoints;
             if (faceI < faces_.size())
@@ -496,27 +496,27 @@ void Foam::polyTopoChange::makeCells
 
 
             FatalErrorInFunction
-                << "Face " << faceI << " is active but its owner has"
+                << "Face " << facei << " is active but its owner has"
                 << " been deleted. This is usually due to deleting cells"
                 << " without modifying exposed faces to be boundary faces."
                 << exit(FatalError);
         }
-        nNbrs[faceOwner_[faceI]]++;
+        nNbrs[faceOwner_[facei]]++;
     }
-    for (label faceI = 0; faceI < nActiveFaces; faceI++)
+    for (label facei = 0; facei < nActiveFaces; facei++)
     {
-        if (faceNeighbour_[faceI] >= 0)
+        if (faceNeighbour_[facei] >= 0)
         {
-            nNbrs[faceNeighbour_[faceI]]++;
+            nNbrs[faceNeighbour_[facei]]++;
         }
     }
 
     // 2. Calculate offsets
 
     cellFaceOffsets[0] = 0;
-    forAll(nNbrs, cellI)
+    forAll(nNbrs, celli)
     {
-        cellFaceOffsets[cellI+1] = cellFaceOffsets[cellI] + nNbrs[cellI];
+        cellFaceOffsets[celli+1] = cellFaceOffsets[celli] + nNbrs[celli];
     }
 
     // 3. Fill faces per cell
@@ -524,20 +524,20 @@ void Foam::polyTopoChange::makeCells
     // reset the whole list to use as counter
     nNbrs = 0;
 
-    for (label faceI = 0; faceI < nActiveFaces; faceI++)
+    for (label facei = 0; facei < nActiveFaces; facei++)
     {
-        label cellI = faceOwner_[faceI];
+        label celli = faceOwner_[facei];
 
-        cellFaces[cellFaceOffsets[cellI] + nNbrs[cellI]++] = faceI;
+        cellFaces[cellFaceOffsets[celli] + nNbrs[celli]++] = facei;
     }
 
-    for (label faceI = 0; faceI < nActiveFaces; faceI++)
+    for (label facei = 0; facei < nActiveFaces; facei++)
     {
-        label cellI = faceNeighbour_[faceI];
+        label celli = faceNeighbour_[facei];
 
-        if (cellI >= 0)
+        if (celli >= 0)
         {
-            cellFaces[cellFaceOffsets[cellI] + nNbrs[cellI]++] = faceI;
+            cellFaces[cellFaceOffsets[celli] + nNbrs[celli]++] = facei;
         }
     }
 
@@ -559,12 +559,12 @@ void Foam::polyTopoChange::makeCellCells
 
     // 1. Count neighbours (through internal faces) per cell
 
-    for (label faceI = 0; faceI < nActiveFaces; faceI++)
+    for (label facei = 0; facei < nActiveFaces; facei++)
     {
-        if (faceNeighbour_[faceI] >= 0)
+        if (faceNeighbour_[facei] >= 0)
         {
-            nNbrs[faceOwner_[faceI]]++;
-            nNbrs[faceNeighbour_[faceI]]++;
+            nNbrs[faceOwner_[facei]]++;
+            nNbrs[faceNeighbour_[facei]]++;
         }
     }
 
@@ -577,13 +577,13 @@ void Foam::polyTopoChange::makeCellCells
     // reset the whole list to use as counter
     nNbrs = 0;
 
-    for (label faceI = 0; faceI < nActiveFaces; faceI++)
+    for (label facei = 0; facei < nActiveFaces; facei++)
     {
-        label nei = faceNeighbour_[faceI];
+        label nei = faceNeighbour_[facei];
 
         if (nei >= 0)
         {
-            label own = faceOwner_[faceI];
+            label own = faceOwner_[facei];
             cellCells.m()[cellCells.index(own, nNbrs[own]++)] = nei;
             cellCells.m()[cellCells.index(nei, nNbrs[nei]++)] = own;
         }
@@ -627,15 +627,15 @@ Foam::label Foam::polyTopoChange::getCellOrder
         label currentCell = -1;
         label minWeight = labelMax;
 
-        forAll(visited, cellI)
+        forAll(visited, celli)
         {
             // find the lowest connected cell that has not been visited yet
-            if (!cellRemoved(cellI) && !visited[cellI])
+            if (!cellRemoved(celli) && !visited[celli])
             {
-                if (cellCellAddressing[cellI].size() < minWeight)
+                if (cellCellAddressing[celli].size() < minWeight)
                 {
-                    minWeight = cellCellAddressing[cellI].size();
-                    currentCell = cellI;
+                    minWeight = cellCellAddressing[celli].size();
+                    currentCell = celli;
                 }
             }
         }
@@ -728,15 +728,15 @@ void Foam::polyTopoChange::getFaceOrder
     oldToNew = -1;
 
     // First unassigned face
-    label newFaceI = 0;
+    label newFacei = 0;
 
     labelList nbr;
     labelList order;
 
-    forAll(cellMap_, cellI)
+    forAll(cellMap_, celli)
     {
-        label startOfCell = cellFaceOffsets[cellI];
-        label nFaces = cellFaceOffsets[cellI+1] - startOfCell;
+        label startOfCell = cellFaceOffsets[celli];
+        label nFaces = cellFaceOffsets[celli+1] - startOfCell;
 
         // Neighbouring cells
         //SortableList<label> nbr(nFaces);
@@ -744,27 +744,27 @@ void Foam::polyTopoChange::getFaceOrder
 
         for (label i = 0; i < nFaces; i++)
         {
-            label faceI = cellFaces[startOfCell + i];
+            label facei = cellFaces[startOfCell + i];
 
-            label nbrCellI = faceNeighbour_[faceI];
+            label nbrCelli = faceNeighbour_[facei];
 
-            if (faceI >= nActiveFaces)
+            if (facei >= nActiveFaces)
             {
                 // Retired face.
                 nbr[i] = -1;
             }
-            else if (nbrCellI != -1)
+            else if (nbrCelli != -1)
             {
                 // Internal face. Get cell on other side.
-                if (nbrCellI == cellI)
+                if (nbrCelli == celli)
                 {
-                    nbrCellI = faceOwner_[faceI];
+                    nbrCelli = faceOwner_[facei];
                 }
 
-                if (cellI < nbrCellI)
+                if (celli < nbrCelli)
                 {
-                    // CellI is master
-                    nbr[i] = nbrCellI;
+                    // Celli is master
+                    nbr[i] = nbrCelli;
                 }
                 else
                 {
@@ -788,7 +788,7 @@ void Foam::polyTopoChange::getFaceOrder
         //    if (nbr[i] != -1)
         //    {
         //        oldToNew[cellFaces[startOfCell + nbr.indices()[i]]] =
-        //            newFaceI++;
+        //            newFacei++;
         //    }
         //}
         forAll(order, i)
@@ -796,7 +796,7 @@ void Foam::polyTopoChange::getFaceOrder
             label index = order[i];
             if (nbr[index] != -1)
             {
-                oldToNew[cellFaces[startOfCell + index]] = newFaceI++;
+                oldToNew[cellFaces[startOfCell + index]] = newFacei++;
             }
         }
     }
@@ -810,22 +810,22 @@ void Foam::polyTopoChange::getFaceOrder
 
     if (nPatches_ > 0)
     {
-        patchStarts[0] = newFaceI;
+        patchStarts[0] = newFacei;
 
-        for (label faceI = 0; faceI < nActiveFaces; faceI++)
+        for (label facei = 0; facei < nActiveFaces; facei++)
         {
-            if (region_[faceI] >= 0)
+            if (region_[facei] >= 0)
             {
-                patchSizes[region_[faceI]]++;
+                patchSizes[region_[facei]]++;
             }
         }
 
-        label faceI = patchStarts[0];
+        label facei = patchStarts[0];
 
-        forAll(patchStarts, patchI)
+        forAll(patchStarts, patchi)
         {
-            patchStarts[patchI] = faceI;
-            faceI += patchSizes[patchI];
+            patchStarts[patchi] = facei;
+            facei += patchSizes[patchi];
         }
     }
 
@@ -837,40 +837,40 @@ void Foam::polyTopoChange::getFaceOrder
 
     labelList workPatchStarts(patchStarts);
 
-    for (label faceI = 0; faceI < nActiveFaces; faceI++)
+    for (label facei = 0; facei < nActiveFaces; facei++)
     {
-        if (region_[faceI] >= 0)
+        if (region_[facei] >= 0)
         {
-            oldToNew[faceI] = workPatchStarts[region_[faceI]]++;
+            oldToNew[facei] = workPatchStarts[region_[facei]]++;
         }
     }
 
     // Retired faces.
-    for (label faceI = nActiveFaces; faceI < oldToNew.size(); faceI++)
+    for (label facei = nActiveFaces; facei < oldToNew.size(); facei++)
     {
-        oldToNew[faceI] = faceI;
+        oldToNew[facei] = facei;
     }
 
     // Check done all faces.
-    forAll(oldToNew, faceI)
+    forAll(oldToNew, facei)
     {
-        if (oldToNew[faceI] == -1)
+        if (oldToNew[facei] == -1)
         {
             FatalErrorInFunction
                 << "Did not determine new position"
-                << " for face " << faceI
-                << " owner " << faceOwner_[faceI]
-                << " neighbour " << faceNeighbour_[faceI]
-                << " region " << region_[faceI] << endl
+                << " for face " << facei
+                << " owner " << faceOwner_[facei]
+                << " neighbour " << faceNeighbour_[facei]
+                << " region " << region_[facei] << endl
                 << "This is usually caused by not specifying a patch for"
                 << " a boundary face." << nl
                 << "Switch on the polyTopoChange::debug flag to catch"
                 << " this error earlier." << nl;
-            if (hasValidPoints(faces_[faceI]))
+            if (hasValidPoints(faces_[facei]))
             {
                 FatalError
                         << "points (removed points marked with "
-                        << vector::max << ") " << facePoints(faces_[faceI]);
+                        << vector::max << ") " << facePoints(faces_[facei]);
             }
             FatalError << abort(FatalError);
         }
@@ -946,166 +946,166 @@ void Foam::polyTopoChange::compact
     label nActivePoints = 0;
     {
         labelList localPointMap(points_.size(), -1);
-        label newPointI = 0;
+        label newPointi = 0;
 
         if (!orderPoints)
         {
             nInternalPoints = -1;
 
-            forAll(points_, pointI)
+            forAll(points_, pointi)
             {
-                if (!pointRemoved(pointI) && !retiredPoints_.found(pointI))
+                if (!pointRemoved(pointi) && !retiredPoints_.found(pointi))
                 {
-                    localPointMap[pointI] = newPointI++;
+                    localPointMap[pointi] = newPointi++;
                 }
             }
-            nActivePoints = newPointI;
+            nActivePoints = newPointi;
         }
         else
         {
-            forAll(points_, pointI)
+            forAll(points_, pointi)
             {
-                if (!pointRemoved(pointI) && !retiredPoints_.found(pointI))
+                if (!pointRemoved(pointi) && !retiredPoints_.found(pointi))
                 {
                     nActivePoints++;
                 }
             }
 
             // Mark boundary points
-            forAll(faceOwner_, faceI)
+            forAll(faceOwner_, facei)
             {
                 if
                 (
-                   !faceRemoved(faceI)
-                 && faceOwner_[faceI] >= 0
-                 && faceNeighbour_[faceI] < 0
+                   !faceRemoved(facei)
+                 && faceOwner_[facei] >= 0
+                 && faceNeighbour_[facei] < 0
                 )
                 {
                     // Valid boundary face
-                    const face& f = faces_[faceI];
+                    const face& f = faces_[facei];
 
                     forAll(f, fp)
                     {
-                        label pointI = f[fp];
+                        label pointi = f[fp];
 
-                        if (localPointMap[pointI] == -1)
+                        if (localPointMap[pointi] == -1)
                         {
                             if
                             (
-                                pointRemoved(pointI)
-                             || retiredPoints_.found(pointI)
+                                pointRemoved(pointi)
+                             || retiredPoints_.found(pointi)
                             )
                             {
                                 FatalErrorInFunction
-                                    << "Removed or retired point " << pointI
+                                    << "Removed or retired point " << pointi
                                     << " in face " << f
-                                    << " at position " << faceI << endl
+                                    << " at position " << facei << endl
                                     << "Probably face has not been adapted for"
                                     << " removed points." << abort(FatalError);
                             }
-                            localPointMap[pointI] = newPointI++;
+                            localPointMap[pointi] = newPointi++;
                         }
                     }
                 }
             }
 
-            label nBoundaryPoints = newPointI;
+            label nBoundaryPoints = newPointi;
             nInternalPoints = nActivePoints - nBoundaryPoints;
 
             // Move the boundary addressing up
-            forAll(localPointMap, pointI)
+            forAll(localPointMap, pointi)
             {
-                if (localPointMap[pointI] != -1)
+                if (localPointMap[pointi] != -1)
                 {
-                    localPointMap[pointI] += nInternalPoints;
+                    localPointMap[pointi] += nInternalPoints;
                 }
             }
 
-            newPointI = 0;
+            newPointi = 0;
 
             // Mark internal points
-            forAll(faceOwner_, faceI)
+            forAll(faceOwner_, facei)
             {
                 if
                 (
-                   !faceRemoved(faceI)
-                 && faceOwner_[faceI] >= 0
-                 && faceNeighbour_[faceI] >= 0
+                   !faceRemoved(facei)
+                 && faceOwner_[facei] >= 0
+                 && faceNeighbour_[facei] >= 0
                 )
                 {
                     // Valid internal face
-                    const face& f = faces_[faceI];
+                    const face& f = faces_[facei];
 
                     forAll(f, fp)
                     {
-                        label pointI = f[fp];
+                        label pointi = f[fp];
 
-                        if (localPointMap[pointI] == -1)
+                        if (localPointMap[pointi] == -1)
                         {
                             if
                             (
-                                pointRemoved(pointI)
-                             || retiredPoints_.found(pointI)
+                                pointRemoved(pointi)
+                             || retiredPoints_.found(pointi)
                             )
                             {
                                 FatalErrorInFunction
-                                    << "Removed or retired point " << pointI
+                                    << "Removed or retired point " << pointi
                                     << " in face " << f
-                                    << " at position " << faceI << endl
+                                    << " at position " << facei << endl
                                     << "Probably face has not been adapted for"
                                     << " removed points." << abort(FatalError);
                             }
-                            localPointMap[pointI] = newPointI++;
+                            localPointMap[pointi] = newPointi++;
                         }
                     }
                 }
             }
 
-            if (newPointI != nInternalPoints)
+            if (newPointi != nInternalPoints)
             {
                 FatalErrorInFunction
                     << "Problem." << abort(FatalError);
             }
-            newPointI = nActivePoints;
+            newPointi = nActivePoints;
         }
 
         forAllConstIter(labelHashSet, retiredPoints_, iter)
         {
-            localPointMap[iter.key()] = newPointI++;
+            localPointMap[iter.key()] = newPointi++;
         }
 
 
         if (debug)
         {
             Pout<< "Points : active:" << nActivePoints
-                << "  removed:" << points_.size()-newPointI << endl;
+                << "  removed:" << points_.size()-newPointi << endl;
         }
 
         reorder(localPointMap, points_);
-        points_.setCapacity(newPointI);
+        points_.setCapacity(newPointi);
 
         // Update pointMaps
         reorder(localPointMap, pointMap_);
-        pointMap_.setCapacity(newPointI);
+        pointMap_.setCapacity(newPointi);
         renumberReverseMap(localPointMap, reversePointMap_);
 
         renumberKey(localPointMap, pointZone_);
         renumber(localPointMap, retiredPoints_);
 
         // Use map to relabel face vertices
-        forAll(faces_, faceI)
+        forAll(faces_, facei)
         {
-            face& f = faces_[faceI];
+            face& f = faces_[facei];
 
             //labelList oldF(f);
             renumberCompact(localPointMap, f);
 
-            if (!faceRemoved(faceI) && f.size() < 3)
+            if (!faceRemoved(facei) && f.size() < 3)
             {
                 FatalErrorInFunction
                     << "Created illegal face " << f
                     //<< " from face " << oldF
-                    << " at position:" << faceI
+                    << " at position:" << facei
                     << " when filtering removed points"
                     << abort(FatalError);
             }
@@ -1116,40 +1116,40 @@ void Foam::polyTopoChange::compact
     // Compact faces.
     {
         labelList localFaceMap(faces_.size(), -1);
-        label newFaceI = 0;
+        label newFacei = 0;
 
-        forAll(faces_, faceI)
+        forAll(faces_, facei)
         {
-            if (!faceRemoved(faceI) && faceOwner_[faceI] >= 0)
+            if (!faceRemoved(facei) && faceOwner_[facei] >= 0)
             {
-                localFaceMap[faceI] = newFaceI++;
+                localFaceMap[facei] = newFacei++;
             }
         }
-        nActiveFaces_ = newFaceI;
+        nActiveFaces_ = newFacei;
 
-        forAll(faces_, faceI)
+        forAll(faces_, facei)
         {
-            if (!faceRemoved(faceI) && faceOwner_[faceI] < 0)
+            if (!faceRemoved(facei) && faceOwner_[facei] < 0)
             {
                 // Retired face
-                localFaceMap[faceI] = newFaceI++;
+                localFaceMap[facei] = newFacei++;
             }
         }
 
         if (debug)
         {
             Pout<< "Faces : active:" << nActiveFaces_
-                << "  removed:" << faces_.size()-newFaceI << endl;
+                << "  removed:" << faces_.size()-newFacei << endl;
         }
 
         // Reorder faces.
-        reorderCompactFaces(newFaceI, localFaceMap);
+        reorderCompactFaces(newFacei, localFaceMap);
     }
 
     // Compact cells.
     {
         labelList localCellMap;
-        label newCellI;
+        label newCelli;
 
         if (orderCells)
         {
@@ -1158,7 +1158,7 @@ void Foam::polyTopoChange::compact
             makeCellCells(nActiveFaces_, cellCells);
 
             // Cell ordering (based on bandCompression). Handles removed cells.
-            newCellI = getCellOrder(cellCells, localCellMap);
+            newCelli = getCellOrder(cellCells, localCellMap);
         }
         else
         {
@@ -1166,31 +1166,31 @@ void Foam::polyTopoChange::compact
             localCellMap.setSize(cellMap_.size());
             localCellMap = -1;
 
-            newCellI = 0;
-            forAll(cellMap_, cellI)
+            newCelli = 0;
+            forAll(cellMap_, celli)
             {
-                if (!cellRemoved(cellI))
+                if (!cellRemoved(celli))
                 {
-                    localCellMap[cellI] = newCellI++;
+                    localCellMap[celli] = newCelli++;
                 }
             }
         }
 
         if (debug)
         {
-            Pout<< "Cells : active:" << newCellI
-                << "  removed:" << cellMap_.size()-newCellI << endl;
+            Pout<< "Cells : active:" << newCelli
+                << "  removed:" << cellMap_.size()-newCelli << endl;
         }
 
         // Renumber -if cells reordered or -if cells removed
-        if (orderCells || (newCellI != cellMap_.size()))
+        if (orderCells || (newCelli != cellMap_.size()))
         {
             reorder(localCellMap, cellMap_);
-            cellMap_.setCapacity(newCellI);
+            cellMap_.setCapacity(newCelli);
             renumberReverseMap(localCellMap, reverseCellMap_);
 
             reorder(localCellMap, cellZone_);
-            cellZone_.setCapacity(newCellI);
+            cellZone_.setCapacity(newCelli);
 
             renumberKey(localCellMap, cellFromPoint_);
             renumberKey(localCellMap, cellFromEdge_);
@@ -1198,39 +1198,39 @@ void Foam::polyTopoChange::compact
 
             // Renumber owner/neighbour. Take into account if neighbour suddenly
             // gets lower cell than owner.
-            forAll(faceOwner_, faceI)
+            forAll(faceOwner_, facei)
             {
-                label own = faceOwner_[faceI];
-                label nei = faceNeighbour_[faceI];
+                label own = faceOwner_[facei];
+                label nei = faceNeighbour_[facei];
 
                 if (own >= 0)
                 {
                     // Update owner
-                    faceOwner_[faceI] = localCellMap[own];
+                    faceOwner_[facei] = localCellMap[own];
 
                     if (nei >= 0)
                     {
                         // Update neighbour.
-                        faceNeighbour_[faceI] = localCellMap[nei];
+                        faceNeighbour_[facei] = localCellMap[nei];
 
                         // Check if face needs reversing.
                         if
                         (
-                            faceNeighbour_[faceI] >= 0
-                         && faceNeighbour_[faceI] < faceOwner_[faceI]
+                            faceNeighbour_[facei] >= 0
+                         && faceNeighbour_[facei] < faceOwner_[facei]
                         )
                         {
-                            faces_[faceI].flip();
-                            Swap(faceOwner_[faceI], faceNeighbour_[faceI]);
-                            flipFaceFlux_[faceI] =
+                            faces_[facei].flip();
+                            Swap(faceOwner_[facei], faceNeighbour_[facei]);
+                            flipFaceFlux_[facei] =
                             (
-                                flipFaceFlux_[faceI]
+                                flipFaceFlux_[facei]
                               ? 0
                               : 1
                             );
-                            faceZoneFlip_[faceI] =
+                            faceZoneFlip_[facei] =
                             (
-                                faceZoneFlip_[faceI]
+                                faceZoneFlip_[facei]
                               ? 0
                               : 1
                             );
@@ -1240,7 +1240,7 @@ void Foam::polyTopoChange::compact
                 else if (nei >= 0)
                 {
                     // Update neighbour.
-                    faceNeighbour_[faceI] = localCellMap[nei];
+                    faceNeighbour_[facei] = localCellMap[nei];
                 }
             }
         }
@@ -1290,9 +1290,9 @@ Foam::labelList Foam::polyTopoChange::selectFaces
 
     forAll(faceLabels, i)
     {
-        label faceI = faceLabels[i];
+        label facei = faceLabels[i];
 
-        if (internalFacesOnly == mesh.isInternalFace(faceI))
+        if (internalFacesOnly == mesh.isInternalFace(facei))
         {
             nFaces++;
         }
@@ -1314,11 +1314,11 @@ Foam::labelList Foam::polyTopoChange::selectFaces
 
         forAll(faceLabels, i)
         {
-            label faceI = faceLabels[i];
+            label facei = faceLabels[i];
 
-            if (internalFacesOnly == mesh.isInternalFace(faceI))
+            if (internalFacesOnly == mesh.isInternalFace(facei))
             {
-                collectedFaces[nFaces++] = faceI;
+                collectedFaces[nFaces++] = facei;
             }
         }
     }
@@ -1338,13 +1338,13 @@ void Foam::polyTopoChange::calcPatchPointMap
 {
     patchPointMap.setSize(boundary.size());
 
-    forAll(boundary, patchI)
+    forAll(boundary, patchi)
     {
-        const labelList& meshPoints = boundary[patchI].meshPoints();
+        const labelList& meshPoints = boundary[patchi].meshPoints();
 
-        const Map<label>& oldMeshPointMap = oldPatchMeshPointMaps[patchI];
+        const Map<label>& oldMeshPointMap = oldPatchMeshPointMaps[patchi];
 
-        labelList& curPatchPointRnb = patchPointMap[patchI];
+        labelList& curPatchPointRnb = patchPointMap[patchi];
 
         curPatchPointRnb.setSize(meshPoints.size());
 
@@ -1396,14 +1396,14 @@ void Foam::polyTopoChange::calcFaceInflationMaps
         // Collect all still existing faces connected to this point.
         forAllConstIter(Map<label>, faceFromPoint_, iter)
         {
-            label newFaceI = iter.key();
+            label newFacei = iter.key();
 
-            if (region_[newFaceI] == -1)
+            if (region_[newFacei] == -1)
             {
                 // Get internal faces using point on old mesh
                 facesFromPoints[nFacesFromPoints++] = objectMap
                 (
-                    newFaceI,
+                    newFacei,
                     selectFaces
                     (
                         mesh,
@@ -1417,7 +1417,7 @@ void Foam::polyTopoChange::calcFaceInflationMaps
                 // Get patch faces using point on old mesh
                 facesFromPoints[nFacesFromPoints++] = objectMap
                 (
-                    newFaceI,
+                    newFacei,
                     selectFaces
                     (
                         mesh,
@@ -1442,14 +1442,14 @@ void Foam::polyTopoChange::calcFaceInflationMaps
         // Collect all still existing faces connected to this edge.
         forAllConstIter(Map<label>, faceFromEdge_, iter)
         {
-            label newFaceI = iter.key();
+            label newFacei = iter.key();
 
-            if (region_[newFaceI] == -1)
+            if (region_[newFacei] == -1)
             {
                 // Get internal faces using edge on old mesh
                 facesFromEdges[nFacesFromEdges++] = objectMap
                 (
-                    newFaceI,
+                    newFacei,
                     selectFaces
                     (
                         mesh,
@@ -1463,7 +1463,7 @@ void Foam::polyTopoChange::calcFaceInflationMaps
                 // Get patch faces using edge on old mesh
                 facesFromEdges[nFacesFromEdges++] = objectMap
                 (
-                    newFaceI,
+                    newFacei,
                     selectFaces
                     (
                         mesh,
@@ -1544,12 +1544,12 @@ void Foam::polyTopoChange::calcCellInflationMaps
         // Collect all still existing faces connected to this point.
         forAllConstIter(Map<label>, cellFromFace_, iter)
         {
-            label oldFaceI = iter();
+            label oldFacei = iter();
 
-            if (mesh.isInternalFace(oldFaceI))
+            if (mesh.isInternalFace(oldFacei))
             {
-                twoCells[0] = mesh.faceOwner()[oldFaceI];
-                twoCells[1] = mesh.faceNeighbour()[oldFaceI];
+                twoCells[0] = mesh.faceOwner()[oldFacei];
+                twoCells[1] = mesh.faceNeighbour()[oldFacei];
                 cellsFromFaces[nCellsFromFaces++] = objectMap
                 (
                     iter.key(),
@@ -1561,7 +1561,7 @@ void Foam::polyTopoChange::calcCellInflationMaps
                 cellsFromFaces[nCellsFromFaces++] = objectMap
                 (
                     iter.key(),
-                    labelList(1, mesh.faceOwner()[oldFaceI])
+                    labelList(1, mesh.faceOwner()[oldFacei])
                 );
             }
         }
@@ -1711,12 +1711,12 @@ void Foam::polyTopoChange::resetZones
         forAllConstIter(Map<label>, faceZone_, iter)
         {
             label zoneI = iter();
-            label faceI = iter.key();
+            label facei = iter.key();
 
             label index = nFaces[zoneI]++;
 
-            addressing[zoneI][index] = faceI;
-            flipMode[zoneI][index] = faceZoneFlip_[faceI];
+            addressing[zoneI][index] = facei;
+            flipMode[zoneI][index] = faceZoneFlip_[facei];
         }
         // Sort the addressing
         forAll(addressing, zoneI)
@@ -1797,15 +1797,15 @@ void Foam::polyTopoChange::resetZones
 
         labelList nCells(cellZones.size(), 0);
 
-        forAll(cellZone_, cellI)
+        forAll(cellZone_, celli)
         {
-            label zoneI = cellZone_[cellI];
+            label zoneI = cellZone_[celli];
 
             if (zoneI >= cellZones.size())
             {
                 FatalErrorInFunction
                     << "Illegal zoneID " << zoneI << " for cell "
-                    << cellI << abort(FatalError);
+                    << celli << abort(FatalError);
             }
 
             if (zoneI >= 0)
@@ -1821,13 +1821,13 @@ void Foam::polyTopoChange::resetZones
         }
         nCells = 0;
 
-        forAll(cellZone_, cellI)
+        forAll(cellZone_, celli)
         {
-            label zoneI = cellZone_[cellI];
+            label zoneI = cellZone_[celli];
 
             if (zoneI >= 0)
             {
-                addressing[zoneI][nCells[zoneI]++] = cellI;
+                addressing[zoneI][nCells[zoneI]++] = celli;
             }
         }
         // Sort the addressing
@@ -1902,28 +1902,28 @@ void Foam::polyTopoChange::calcFaceZonePointMap
 
         curFzPointRnb.setSize(newZoneMeshPoints.size());
 
-        forAll(newZoneMeshPoints, pointI)
+        forAll(newZoneMeshPoints, pointi)
         {
-            if (newZoneMeshPoints[pointI] < pointMap_.size())
+            if (newZoneMeshPoints[pointi] < pointMap_.size())
             {
                 Map<label>::const_iterator ozmpmIter =
                     oldZoneMeshPointMap.find
                     (
-                        pointMap_[newZoneMeshPoints[pointI]]
+                        pointMap_[newZoneMeshPoints[pointi]]
                     );
 
                 if (ozmpmIter != oldZoneMeshPointMap.end())
                 {
-                    curFzPointRnb[pointI] = ozmpmIter();
+                    curFzPointRnb[pointi] = ozmpmIter();
                 }
                 else
                 {
-                    curFzPointRnb[pointI] = -1;
+                    curFzPointRnb[pointi] = -1;
                 }
             }
             else
             {
-                curFzPointRnb[pointI] = -1;
+                curFzPointRnb[pointi] = -1;
             }
         }
     }
@@ -1949,11 +1949,11 @@ void Foam::polyTopoChange::reorderCoupledFaces
     PstreamBuffers pBufs(Pstream::nonBlocking);
 
     // Send ordering
-    forAll(boundary, patchI)
+    forAll(boundary, patchi)
     {
-        if (syncParallel || !isA<processorPolyPatch>(boundary[patchI]))
+        if (syncParallel || !isA<processorPolyPatch>(boundary[patchi]))
         {
-            boundary[patchI].initOrder
+            boundary[patchi].initOrder
             (
                 pBufs,
                 primitivePatch
@@ -1961,8 +1961,8 @@ void Foam::polyTopoChange::reorderCoupledFaces
                     SubList<face>
                     (
                         faces_,
-                        patchSizes[patchI],
-                        patchStarts[patchI]
+                        patchSizes[patchi],
+                        patchStarts[patchi]
                     ),
                     points
                 )
@@ -1979,14 +1979,14 @@ void Foam::polyTopoChange::reorderCoupledFaces
 
     bool anyChanged = false;
 
-    forAll(boundary, patchI)
+    forAll(boundary, patchi)
     {
-        if (syncParallel || !isA<processorPolyPatch>(boundary[patchI]))
+        if (syncParallel || !isA<processorPolyPatch>(boundary[patchi]))
         {
-            labelList patchFaceMap(patchSizes[patchI], -1);
-            labelList patchFaceRotation(patchSizes[patchI], 0);
+            labelList patchFaceMap(patchSizes[patchi], -1);
+            labelList patchFaceRotation(patchSizes[patchi], 0);
 
-            bool changed = boundary[patchI].order
+            bool changed = boundary[patchi].order
             (
                 pBufs,
                 primitivePatch
@@ -1994,8 +1994,8 @@ void Foam::polyTopoChange::reorderCoupledFaces
                     SubList<face>
                     (
                         faces_,
-                        patchSizes[patchI],
-                        patchStarts[patchI]
+                        patchSizes[patchi],
+                        patchStarts[patchi]
                     ),
                     points
                 ),
@@ -2006,18 +2006,18 @@ void Foam::polyTopoChange::reorderCoupledFaces
             if (changed)
             {
                 // Merge patch face reordering into mesh face reordering table
-                label start = patchStarts[patchI];
+                label start = patchStarts[patchi];
 
-                forAll(patchFaceMap, patchFaceI)
+                forAll(patchFaceMap, patchFacei)
                 {
-                    oldToNew[patchFaceI + start] =
-                        start + patchFaceMap[patchFaceI];
+                    oldToNew[patchFacei + start] =
+                        start + patchFaceMap[patchFacei];
                 }
 
-                forAll(patchFaceRotation, patchFaceI)
+                forAll(patchFaceRotation, patchFacei)
                 {
-                    rotation[patchFaceI + start] =
-                        patchFaceRotation[patchFaceI];
+                    rotation[patchFacei + start] =
+                        patchFaceRotation[patchFacei];
                 }
 
                 anyChanged = true;
@@ -2036,11 +2036,11 @@ void Foam::polyTopoChange::reorderCoupledFaces
         reorderCompactFaces(oldToNew.size(), oldToNew);
 
         // Rotate faces (rotation is already in new face indices).
-        forAll(rotation, faceI)
+        forAll(rotation, facei)
         {
-            if (rotation[faceI] != 0)
+            if (rotation[facei] != 0)
             {
-                inplaceRotateList<List, label>(faces_[faceI], rotation[faceI]);
+                inplaceRotateList<List, label>(faces_[facei], rotation[facei]);
             }
         }
     }
@@ -2156,12 +2156,12 @@ void Foam::polyTopoChange::compactAndReorder
     oldPatchNMeshPoints.setSize(boundary.size());
     oldPatchStarts.setSize(boundary.size());
 
-    forAll(boundary, patchI)
+    forAll(boundary, patchi)
     {
         // Copy old face zone mesh point maps
-        oldPatchMeshPointMaps[patchI] = boundary[patchI].meshPointMap();
-        oldPatchNMeshPoints[patchI] = boundary[patchI].meshPoints().size();
-        oldPatchStarts[patchI] = boundary[patchI].start();
+        oldPatchMeshPointMaps[patchi] = boundary[patchi].meshPointMap();
+        oldPatchNMeshPoints[patchi] = boundary[patchi].meshPoints().size();
+        oldPatchStarts[patchi] = boundary[patchi].start();
     }
 
     // Grab old face zone mesh point maps.
@@ -2329,13 +2329,13 @@ void Foam::polyTopoChange::addMesh
         }
 
         // Add points in mesh order
-        for (label pointI = 0; pointI < mesh.nPoints(); pointI++)
+        for (label pointi = 0; pointi < mesh.nPoints(); pointi++)
         {
             addPoint
             (
-                points[pointI],
-                pointI,
-                newZoneID[pointI],
+                points[pointi],
+                pointi,
+                newZoneID[pointi],
                 true
             );
         }
@@ -2368,31 +2368,31 @@ void Foam::polyTopoChange::addMesh
 
             forAll(cellLabels, j)
             {
-                label cellI = cellLabels[j];
+                label celli = cellLabels[j];
 
-                if (newZoneID[cellI] != -1)
+                if (newZoneID[celli] != -1)
                 {
                     WarningInFunction
-                        << "Cell:" << cellI
-                        << " centre:" << mesh.cellCentres()[cellI]
+                        << "Cell:" << celli
+                        << " centre:" << mesh.cellCentres()[celli]
                         << " is in two zones:"
-                        << cellZones[newZoneID[cellI]].name()
+                        << cellZones[newZoneID[celli]].name()
                         << " and " << cellZones[zoneI].name() << endl
                         << "    This is not supported."
                         << " Continuing with first zone only." << endl;
                 }
                 else
                 {
-                    newZoneID[cellI] = cellZoneMap[zoneI];
+                    newZoneID[celli] = cellZoneMap[zoneI];
                 }
             }
         }
 
         // Add cells in mesh order
-        for (label cellI = 0; cellI < nAllCells; cellI++)
+        for (label celli = 0; celli < nAllCells; celli++)
         {
             // Add cell from cell
-            addCell(-1, -1, -1, cellI, newZoneID[cellI]);
+            addCell(-1, -1, -1, celli, newZoneID[celli]);
         }
     }
 
@@ -2439,27 +2439,27 @@ void Foam::polyTopoChange::addMesh
         // Add faces in mesh order
 
         // 1. Internal faces
-        for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
+        for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
         {
             addFace
             (
-                faces[faceI],
-                faceOwner[faceI],
-                faceNeighbour[faceI],
+                faces[facei],
+                faceOwner[facei],
+                faceNeighbour[facei],
                 -1,                         // masterPointID
                 -1,                         // masterEdgeID
-                faceI,                      // masterFaceID
+                facei,                      // masterFaceID
                 false,                      // flipFaceFlux
                 -1,                         // patchID
-                newZoneID[faceI],           // zoneID
-                zoneFlip[faceI]             // zoneFlip
+                newZoneID[facei],           // zoneID
+                zoneFlip[facei]             // zoneFlip
             );
         }
 
         // 2. Patch faces
-        forAll(patches, patchI)
+        forAll(patches, patchi)
         {
-            const polyPatch& pp = patches[patchI];
+            const polyPatch& pp = patches[patchi];
 
             if (pp.start() != faces_.size())
             {
@@ -2471,22 +2471,22 @@ void Foam::polyTopoChange::addMesh
                     << "Are patches in incremental order?"
                     << abort(FatalError);
             }
-            forAll(pp, patchFaceI)
+            forAll(pp, patchFacei)
             {
-                label faceI = pp.start() + patchFaceI;
+                label facei = pp.start() + patchFacei;
 
                 addFace
                 (
-                    faces[faceI],
-                    faceOwner[faceI],
+                    faces[facei],
+                    faceOwner[facei],
                     -1,                         // neighbour
                     -1,                         // masterPointID
                     -1,                         // masterEdgeID
-                    faceI,                      // masterFaceID
+                    facei,                      // masterFaceID
                     false,                      // flipFaceFlux
-                    patchMap[patchI],           // patchID
-                    newZoneID[faceI],           // zoneID
-                    zoneFlip[faceI]             // zoneFlip
+                    patchMap[patchi],           // patchID
+                    newZoneID[facei],           // zoneID
+                    zoneFlip[facei]             // zoneFlip
                 );
             }
         }
@@ -2663,50 +2663,50 @@ Foam::label Foam::polyTopoChange::addPoint
     const bool inCell
 )
 {
-    label pointI = points_.size();
+    label pointi = points_.size();
 
     points_.append(pt);
     pointMap_.append(masterPointID);
-    reversePointMap_.append(pointI);
+    reversePointMap_.append(pointi);
 
     if (zoneID >= 0)
     {
-        pointZone_.insert(pointI, zoneID);
+        pointZone_.insert(pointi, zoneID);
     }
 
     if (!inCell)
     {
-        retiredPoints_.insert(pointI);
+        retiredPoints_.insert(pointi);
     }
 
-    return pointI;
+    return pointi;
 }
 
 
 void Foam::polyTopoChange::modifyPoint
 (
-    const label pointI,
+    const label pointi,
     const point& pt,
     const label newZoneID,
     const bool inCell
 )
 {
-    if (pointI < 0 || pointI >= points_.size())
+    if (pointi < 0 || pointi >= points_.size())
     {
         FatalErrorInFunction
-            << "illegal point label " << pointI << endl
+            << "illegal point label " << pointi << endl
             << "Valid point labels are 0 .. " << points_.size()-1
             << abort(FatalError);
     }
-    if (pointRemoved(pointI) || pointMap_[pointI] == -1)
+    if (pointRemoved(pointi) || pointMap_[pointi] == -1)
     {
         FatalErrorInFunction
-            << "point " << pointI << " already marked for removal"
+            << "point " << pointi << " already marked for removal"
             << abort(FatalError);
     }
-    points_[pointI] = pt;
+    points_[pointi] = pt;
 
-    Map<label>::iterator pointFnd = pointZone_.find(pointI);
+    Map<label>::iterator pointFnd = pointZone_.find(pointi);
 
     if (pointFnd != pointZone_.end())
     {
@@ -2721,16 +2721,16 @@ void Foam::polyTopoChange::modifyPoint
     }
     else if (newZoneID >= 0)
     {
-        pointZone_.insert(pointI, newZoneID);
+        pointZone_.insert(pointi, newZoneID);
     }
 
     if (inCell)
     {
-        retiredPoints_.erase(pointI);
+        retiredPoints_.erase(pointi);
     }
     else
     {
-        retiredPoints_.insert(pointI);
+        retiredPoints_.insert(pointi);
     }
 }
 
@@ -2746,23 +2746,23 @@ void Foam::polyTopoChange::movePoints(const pointField& newPoints)
             << abort(FatalError);
     }
 
-    forAll(points_, pointI)
+    forAll(points_, pointi)
     {
-        points_[pointI] = newPoints[pointI];
+        points_[pointi] = newPoints[pointi];
     }
 }
 
 
 void Foam::polyTopoChange::removePoint
 (
-    const label pointI,
-    const label mergePointI
+    const label pointi,
+    const label mergePointi
 )
 {
-    if (pointI < 0 || pointI >= points_.size())
+    if (pointi < 0 || pointi >= points_.size())
     {
         FatalErrorInFunction
-            << "illegal point label " << pointI << endl
+            << "illegal point label " << pointi << endl
             << "Valid point labels are 0 .. " << points_.size()-1
             << abort(FatalError);
     }
@@ -2770,34 +2770,34 @@ void Foam::polyTopoChange::removePoint
     if
     (
         strict_
-     && (pointRemoved(pointI) || pointMap_[pointI] == -1)
+     && (pointRemoved(pointi) || pointMap_[pointi] == -1)
     )
     {
         FatalErrorInFunction
-            << "point " << pointI << " already marked for removal" << nl
-            << "Point:" << points_[pointI] << " pointMap:" << pointMap_[pointI]
+            << "point " << pointi << " already marked for removal" << nl
+            << "Point:" << points_[pointi] << " pointMap:" << pointMap_[pointi]
             << abort(FatalError);
     }
 
-    if (pointI == mergePointI)
+    if (pointi == mergePointi)
     {
         FatalErrorInFunction
-            << "Cannot remove/merge point " << pointI << " onto itself."
+            << "Cannot remove/merge point " << pointi << " onto itself."
             << abort(FatalError);
     }
 
-    points_[pointI] = point::max;
-    pointMap_[pointI] = -1;
-    if (mergePointI >= 0)
+    points_[pointi] = point::max;
+    pointMap_[pointi] = -1;
+    if (mergePointi >= 0)
     {
-        reversePointMap_[pointI] = -mergePointI-2;
+        reversePointMap_[pointi] = -mergePointi-2;
     }
     else
     {
-        reversePointMap_[pointI] = -1;
+        reversePointMap_[pointi] = -1;
     }
-    pointZone_.erase(pointI);
-    retiredPoints_.erase(pointI);
+    pointZone_.erase(pointi);
+    retiredPoints_.erase(pointi);
 }
 
 
@@ -2821,7 +2821,7 @@ Foam::label Foam::polyTopoChange::addFace
         checkFace(f, -1, own, nei, patchID, zoneID);
     }
 
-    label faceI = faces_.size();
+    label facei = faces_.size();
 
     faces_.append(f);
     region_.append(patchID);
@@ -2831,12 +2831,12 @@ Foam::label Foam::polyTopoChange::addFace
     if (masterPointID >= 0)
     {
         faceMap_.append(-1);
-        faceFromPoint_.insert(faceI, masterPointID);
+        faceFromPoint_.insert(facei, masterPointID);
     }
     else if (masterEdgeID >= 0)
     {
         faceMap_.append(-1);
-        faceFromEdge_.insert(faceI, masterEdgeID);
+        faceFromEdge_.insert(facei, masterEdgeID);
     }
     else if (masterFaceID >= 0)
     {
@@ -2851,24 +2851,24 @@ Foam::label Foam::polyTopoChange::addFace
         //    << abort(FatalError);
         faceMap_.append(-1);
     }
-    reverseFaceMap_.append(faceI);
+    reverseFaceMap_.append(facei);
 
-    flipFaceFlux_[faceI] = (flipFaceFlux ? 1 : 0);
+    flipFaceFlux_[facei] = (flipFaceFlux ? 1 : 0);
 
     if (zoneID >= 0)
     {
-        faceZone_.insert(faceI, zoneID);
+        faceZone_.insert(facei, zoneID);
     }
-    faceZoneFlip_[faceI] = (zoneFlip ? 1 : 0);
+    faceZoneFlip_[facei] = (zoneFlip ? 1 : 0);
 
-    return faceI;
+    return facei;
 }
 
 
 void Foam::polyTopoChange::modifyFace
 (
     const face& f,
-    const label faceI,
+    const label facei,
     const label own,
     const label nei,
     const bool flipFaceFlux,
@@ -2880,17 +2880,17 @@ void Foam::polyTopoChange::modifyFace
     // Check validity
     if (debug)
     {
-        checkFace(f, faceI, own, nei, patchID, zoneID);
+        checkFace(f, facei, own, nei, patchID, zoneID);
     }
 
-    faces_[faceI] = f;
-    faceOwner_[faceI] = own;
-    faceNeighbour_[faceI] = nei;
-    region_[faceI] = patchID;
+    faces_[facei] = f;
+    faceOwner_[facei] = own;
+    faceNeighbour_[facei] = nei;
+    region_[facei] = patchID;
 
-    flipFaceFlux_[faceI] = (flipFaceFlux ? 1 : 0);
+    flipFaceFlux_[facei] = (flipFaceFlux ? 1 : 0);
 
-    Map<label>::iterator faceFnd = faceZone_.find(faceI);
+    Map<label>::iterator faceFnd = faceZone_.find(facei);
 
     if (faceFnd != faceZone_.end())
     {
@@ -2905,18 +2905,18 @@ void Foam::polyTopoChange::modifyFace
     }
     else if (zoneID >= 0)
     {
-        faceZone_.insert(faceI, zoneID);
+        faceZone_.insert(facei, zoneID);
     }
-    faceZoneFlip_[faceI] = (zoneFlip ? 1 : 0);
+    faceZoneFlip_[facei] = (zoneFlip ? 1 : 0);
 }
 
 
-void Foam::polyTopoChange::removeFace(const label faceI, const label mergeFaceI)
+void Foam::polyTopoChange::removeFace(const label facei, const label mergeFacei)
 {
-    if (faceI < 0 || faceI >= faces_.size())
+    if (facei < 0 || facei >= faces_.size())
     {
         FatalErrorInFunction
-            << "illegal face label " << faceI << endl
+            << "illegal face label " << facei << endl
             << "Valid face labels are 0 .. " << faces_.size()-1
             << abort(FatalError);
     }
@@ -2924,33 +2924,33 @@ void Foam::polyTopoChange::removeFace(const label faceI, const label mergeFaceI)
     if
     (
         strict_
-     && (faceRemoved(faceI) || faceMap_[faceI] == -1)
+     && (faceRemoved(facei) || faceMap_[facei] == -1)
     )
     {
         FatalErrorInFunction
-            << "face " << faceI
+            << "face " << facei
             << " already marked for removal"
             << abort(FatalError);
     }
 
-    faces_[faceI].setSize(0);
-    region_[faceI] = -1;
-    faceOwner_[faceI] = -1;
-    faceNeighbour_[faceI] = -1;
-    faceMap_[faceI] = -1;
-    if (mergeFaceI >= 0)
+    faces_[facei].setSize(0);
+    region_[facei] = -1;
+    faceOwner_[facei] = -1;
+    faceNeighbour_[facei] = -1;
+    faceMap_[facei] = -1;
+    if (mergeFacei >= 0)
     {
-        reverseFaceMap_[faceI] = -mergeFaceI-2;
+        reverseFaceMap_[facei] = -mergeFacei-2;
     }
     else
     {
-        reverseFaceMap_[faceI] = -1;
+        reverseFaceMap_[facei] = -1;
     }
-    faceFromEdge_.erase(faceI);
-    faceFromPoint_.erase(faceI);
-    flipFaceFlux_[faceI] = 0;
-    faceZone_.erase(faceI);
-    faceZoneFlip_[faceI] = 0;
+    faceFromEdge_.erase(facei);
+    faceFromPoint_.erase(facei);
+    flipFaceFlux_[facei] = 0;
+    faceZone_.erase(facei);
+    faceZoneFlip_[facei] = 0;
 }
 
 
@@ -2963,75 +2963,75 @@ Foam::label Foam::polyTopoChange::addCell
     const label zoneID
 )
 {
-    label cellI = cellMap_.size();
+    label celli = cellMap_.size();
 
     if (masterPointID >= 0)
     {
         cellMap_.append(-1);
-        cellFromPoint_.insert(cellI, masterPointID);
+        cellFromPoint_.insert(celli, masterPointID);
     }
     else if (masterEdgeID >= 0)
     {
         cellMap_.append(-1);
-        cellFromEdge_.insert(cellI, masterEdgeID);
+        cellFromEdge_.insert(celli, masterEdgeID);
     }
     else if (masterFaceID >= 0)
     {
         cellMap_.append(-1);
-        cellFromFace_.insert(cellI, masterFaceID);
+        cellFromFace_.insert(celli, masterFaceID);
     }
     else
     {
         cellMap_.append(masterCellID);
     }
-    reverseCellMap_.append(cellI);
+    reverseCellMap_.append(celli);
     cellZone_.append(zoneID);
 
-    return cellI;
+    return celli;
 }
 
 
 void Foam::polyTopoChange::modifyCell
 (
-    const label cellI,
+    const label celli,
     const label zoneID
 )
 {
-    cellZone_[cellI] = zoneID;
+    cellZone_[celli] = zoneID;
 }
 
 
-void Foam::polyTopoChange::removeCell(const label cellI, const label mergeCellI)
+void Foam::polyTopoChange::removeCell(const label celli, const label mergeCelli)
 {
-    if (cellI < 0 || cellI >= cellMap_.size())
+    if (celli < 0 || celli >= cellMap_.size())
     {
         FatalErrorInFunction
-            << "illegal cell label " << cellI << endl
+            << "illegal cell label " << celli << endl
             << "Valid cell labels are 0 .. " << cellMap_.size()-1
             << abort(FatalError);
     }
 
-    if (strict_ && cellMap_[cellI] == -2)
+    if (strict_ && cellMap_[celli] == -2)
     {
         FatalErrorInFunction
-            << "cell " << cellI
+            << "cell " << celli
             << " already marked for removal"
             << abort(FatalError);
     }
 
-    cellMap_[cellI] = -2;
-    if (mergeCellI >= 0)
+    cellMap_[celli] = -2;
+    if (mergeCelli >= 0)
     {
-        reverseCellMap_[cellI] = -mergeCellI-2;
+        reverseCellMap_[celli] = -mergeCelli-2;
     }
     else
     {
-        reverseCellMap_[cellI] = -1;
+        reverseCellMap_[celli] = -1;
     }
-    cellFromPoint_.erase(cellI);
-    cellFromEdge_.erase(cellI);
-    cellFromFace_.erase(cellI);
-    cellZone_[cellI] = -1;
+    cellFromPoint_.erase(celli);
+    cellFromEdge_.erase(celli);
+    cellFromFace_.erase(celli);
+    cellZone_[celli] = -1;
 }
 
 
@@ -3122,17 +3122,17 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
         // (appended points (i.e. from nowhere) get value zero)
         pointField renumberedMeshPoints(newPoints.size());
 
-        forAll(pointMap_, newPointI)
+        forAll(pointMap_, newPointi)
         {
-            label oldPointI = pointMap_[newPointI];
+            label oldPointi = pointMap_[newPointi];
 
-            if (oldPointI >= 0)
+            if (oldPointi >= 0)
             {
-                renumberedMeshPoints[newPointI] = mesh.points()[oldPointI];
+                renumberedMeshPoints[newPointi] = mesh.points()[oldPointi];
             }
             else
             {
-                renumberedMeshPoints[newPointI] = Zero;
+                renumberedMeshPoints[newPointi] = Zero;
             }
         }
 
@@ -3441,14 +3441,14 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
 
         List<polyPatch*> newBoundary(oldPatches.size());
 
-        forAll(oldPatches, patchI)
+        forAll(oldPatches, patchi)
         {
-            newBoundary[patchI] = oldPatches[patchI].clone
+            newBoundary[patchi] = oldPatches[patchi].clone
             (
                 newMesh.boundaryMesh(),
-                patchI,
-                patchSizes[patchI],
-                patchStarts[patchI]
+                patchi,
+                patchSizes[patchi],
+                patchStarts[patchi]
             ).ptr();
         }
         newMesh.addFvPatches(newBoundary);

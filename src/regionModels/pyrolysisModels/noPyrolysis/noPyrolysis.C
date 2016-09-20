@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,8 +97,8 @@ noPyrolysis::noPyrolysis
 )
 :
     pyrolysisModel(mesh, regionType),
-    solidChemistry_(NULL),
-    radiation_(NULL)
+    solidChemistry_(nullptr),
+    radiation_(nullptr)
 {
     if (active())
     {
@@ -116,8 +116,8 @@ noPyrolysis::noPyrolysis
 )
 :
     pyrolysisModel(mesh, regionType),
-    solidChemistry_(NULL),
-    radiation_(NULL)
+    solidChemistry_(nullptr),
+    radiation_(nullptr)
 {
     if (active())
     {
@@ -135,15 +135,11 @@ noPyrolysis::~noPyrolysis()
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void noPyrolysis::preEvolveRegion()
-{
-    //Do nothing
-}
+{}
 
 
 void noPyrolysis::evolveRegion()
-{
-    //Do nothing
-}
+{}
 
 
 const volScalarField& noPyrolysis::rho() const

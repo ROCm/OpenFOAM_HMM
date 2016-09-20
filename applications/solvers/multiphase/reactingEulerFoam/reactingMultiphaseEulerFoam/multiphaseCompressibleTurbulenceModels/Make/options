@@ -13,3 +13,10 @@ EXE_INC = \
 
 LIB_LIBS = \
     -lcompressibleTurbulenceModels
+    -lreactingPhaseSystem \
+    -lreactingMultiphaseSystem \
+    -lreactingEulerianInterfacialModels \
+    -lreactingEulerianInterfacialCompositionModels \
+    -lfiniteVolume \
+    -lfvOptions \
+    -lmeshTools

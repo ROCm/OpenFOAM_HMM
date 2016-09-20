@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,11 +24,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "includeEtcEntry.H"
-#include "dictionary.H"
+#include "etcFiles.H"
 #include "IFstream.H"
-#include "addToMemberFunctionSelectionTable.H"
 #include "stringOps.H"
-#include "OSspecific.H"
+#include "addToMemberFunctionSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -41,7 +40,7 @@ const Foam::word Foam::functionEntries::includeEtcEntry::typeName
 // might include includeEtcEntry
 int Foam::functionEntries::includeEtcEntry::debug(0);
 
-bool Foam::functionEntries::includeEtcEntry::report(false);
+bool Foam::functionEntries::includeEtcEntry::log(false);
 
 
 namespace Foam
@@ -109,7 +108,7 @@ bool Foam::functionEntries::includeEtcEntry::execute
 
     if (ifs)
     {
-        if (Foam::functionEntries::includeEtcEntry::report)
+        if (Foam::functionEntries::includeEtcEntry::log)
         {
             Info<< fName << endl;
         }
@@ -147,7 +146,7 @@ bool Foam::functionEntries::includeEtcEntry::execute
 
     if (ifs)
     {
-        if (Foam::functionEntries::includeEtcEntry::report)
+        if (Foam::functionEntries::includeEtcEntry::log)
         {
             Info<< fName << endl;
         }

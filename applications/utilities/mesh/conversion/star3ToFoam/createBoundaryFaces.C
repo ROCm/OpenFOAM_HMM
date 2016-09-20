@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,48 +97,48 @@ void Foam::starMesh::markBoundaryFaces()
     boundaryCellIDs_.setSize(boundary_.size());
     boundaryCellFaceIDs_.setSize(boundary_.size());
 
-    forAll(boundary_, patchI)
+    forAll(boundary_, patchi)
     {
-        const faceList& patchFaces = boundary_[patchI];
+        const faceList& patchFaces = boundary_[patchi];
 
         // set size of patch lists
-        labelList& curBoundaryCellIDs = boundaryCellIDs_[patchI];
-        labelList& curBoundaryCellFaceIDs = boundaryCellFaceIDs_[patchI];
+        labelList& curBoundaryCellIDs = boundaryCellIDs_[patchi];
+        labelList& curBoundaryCellFaceIDs = boundaryCellFaceIDs_[patchi];
 
         curBoundaryCellIDs.setSize(patchFaces.size());
         curBoundaryCellFaceIDs.setSize(patchFaces.size());
 
         const labelListList& PointCells = pointCells();
 
-        forAll(patchFaces, faceI)
+        forAll(patchFaces, facei)
         {
             bool found = false;
 
-            const face& curFace = patchFaces[faceI];
+            const face& curFace = patchFaces[facei];
             const labelList& facePoints = curFace;
 
-            forAll(facePoints, pointI)
+            forAll(facePoints, pointi)
             {
                 const labelList& facePointCells =
-                    PointCells[facePoints[pointI]];
+                    PointCells[facePoints[pointi]];
 
-                forAll(facePointCells, cellI)
+                forAll(facePointCells, celli)
                 {
-                    const label curCellIndex = facePointCells[cellI];
+                    const label curCellIndex = facePointCells[celli];
 
                     const faceList& curCellFaces =
                         cellFaces_[curCellIndex];
 
-                    forAll(curCellFaces, cellFaceI)
+                    forAll(curCellFaces, cellFacei)
                     {
-                        if (starEqualFace(curFace, curCellFaces[cellFaceI]))
+                        if (starEqualFace(curFace, curCellFaces[cellFacei]))
                         {
                             // Found the cell face corresponding to this face
                             found = true;
 
                             // Set boundary face to the corresponding cell face
-                            curBoundaryCellIDs[faceI] = curCellIndex;
-                            curBoundaryCellFaceIDs[faceI] = cellFaceI;
+                            curBoundaryCellIDs[facei] = curCellIndex;
+                            curBoundaryCellFaceIDs[facei] = cellFacei;
                         }
                         if (found) break;
                     }
@@ -149,7 +149,7 @@ void Foam::starMesh::markBoundaryFaces()
             if (!found)
             {
                 FatalErrorInFunction
-                    << "Face " << faceI
+                    << "Face " << facei
                     << " does not have neighbour cell."
                     << " Face : " << endl << curFace << endl
                     << "PROSTAR Command: vset,news,vlis";
@@ -178,19 +178,19 @@ void Foam::starMesh::markBoundaryFaces()
 void Foam::starMesh::collectBoundaryFaces()
 {
     Info<< "Collecting boundary faces" << endl;
-    forAll(boundary_, patchI)
+    forAll(boundary_, patchi)
     {
-        faceList& patchFaces = boundary_[patchI];
+        faceList& patchFaces = boundary_[patchi];
 
         // set size of patch lists
-        const labelList& curBoundaryCellIDs = boundaryCellIDs_[patchI];
-        const labelList& curBoundaryCellFaceIDs = boundaryCellFaceIDs_[patchI];
+        const labelList& curBoundaryCellIDs = boundaryCellIDs_[patchi];
+        const labelList& curBoundaryCellFaceIDs = boundaryCellFaceIDs_[patchi];
 
-        forAll(curBoundaryCellIDs, faceI)
+        forAll(curBoundaryCellIDs, facei)
         {
-            patchFaces[faceI] =
-                cellFaces_[curBoundaryCellIDs[faceI]]
-                    [curBoundaryCellFaceIDs[faceI]];
+            patchFaces[facei] =
+                cellFaces_[curBoundaryCellIDs[facei]]
+                    [curBoundaryCellFaceIDs[facei]];
         }
     }
 

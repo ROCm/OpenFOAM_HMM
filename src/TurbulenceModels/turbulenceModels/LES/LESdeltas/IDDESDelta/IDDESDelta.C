@@ -66,7 +66,7 @@ void Foam::LESModels::IDDESDelta::calcDelta()
         )
     );
 
-    scalarField& faceToFacenMax = tfaceToFacenMax.ref().internalField();
+    scalarField& faceToFacenMax = tfaceToFacenMax.ref().primitiveFieldRef();
 
     const cellList& cells = mesh.cells();
     const vectorField& faceCentres = mesh.faceCentres();
@@ -113,7 +113,7 @@ void Foam::LESModels::IDDESDelta::calcDelta()
             << "Case must be either 2D or 3D" << exit(FatalError);
     }
 
-    delta_.internalField() =
+    delta_.primitiveFieldRef() =
         min
         (
             max

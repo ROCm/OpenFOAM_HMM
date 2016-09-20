@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,15 +82,15 @@ void Foam::blockMesh::createPoints() const
                 << endl;
         }
 
-        forAll(blockPoints, blockPointI)
+        forAll(blockPoints, blockPointi)
         {
             points_
             [
                 mergeList_
                 [
-                    blockOffsets_[blockI] + blockPointI
+                    blockOffsets_[blockI] + blockPointi
                 ]
-            ] = scaleFactor_ * blockPoints[blockPointI];
+            ] = scaleFactor_ * blockPoints[blockPointi];
         }
     }
 }
@@ -118,16 +118,16 @@ void Foam::blockMesh::createCells() const
     {
         const labelListList& blockCells = blocks[blockI].cells();
 
-        forAll(blockCells, blockCellI)
+        forAll(blockCells, blockCelli)
         {
-            labelList cellPoints(blockCells[blockCellI].size());
+            labelList cellPoints(blockCells[blockCelli].size());
 
-            forAll(cellPoints, cellPointI)
+            forAll(cellPoints, cellPointi)
             {
-                cellPoints[cellPointI] =
+                cellPoints[cellPointi] =
                     mergeList_
                     [
-                        blockCells[blockCellI][cellPointI]
+                        blockCells[blockCelli][cellPointi]
                       + blockOffsets_[blockI]
                     ];
             }
@@ -272,9 +272,9 @@ void Foam::blockMesh::createPatches() const
     patches_.clear();
     patches_.setSize(topoPatches.size());
 
-    forAll(topoPatches, patchI)
+    forAll(topoPatches, patchi)
     {
-        patches_[patchI] = createPatchFaces(topoPatches[patchI]);
+        patches_[patchi] = createPatchFaces(topoPatches[patchi]);
     }
 
 }

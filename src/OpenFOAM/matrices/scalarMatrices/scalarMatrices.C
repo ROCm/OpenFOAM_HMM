@@ -269,7 +269,7 @@ void Foam::multiply
 
     for (label i=0; i<A.m(); i++)
     {
-        for (label g = 0; g < C.n(); g++)
+        for (label g=0; g<C.n(); g++)
         {
             for (label l=0; l<C.m(); l++)
             {
@@ -280,7 +280,48 @@ void Foam::multiply
 }
 
 
-Foam::RectangularMatrix<Foam::scalar> Foam::SVDinv
+void Foam::multiply
+(
+    scalarSquareMatrix& ans,         // value changed in return
+    const scalarSquareMatrix& A,
+    const DiagonalMatrix<scalar>& B,
+    const scalarSquareMatrix& C
+)
+{
+    if (A.m() != B.size())
+    {
+        FatalErrorInFunction
+            << "A and B must have identical dimensions but A.m = "
+            << A.m() << " and B.m = " << B.size()
+            << abort(FatalError);
+    }
+
+    if (B.size() != C.m())
+    {
+        FatalErrorInFunction
+            << "B and C must have identical dimensions but B.m = "
+            << B.size() << " and C.m = " << C.m()
+            << abort(FatalError);
+    }
+
+    const label size = A.m();
+
+    ans = scalarSquareMatrix(size, Zero);
+
+    for (label i=0; i<size; i++)
+    {
+        for (label g=0; g<size; g++)
+        {
+            for (label l=0; l<size; l++)
+            {
+                ans(i, g) += C(l, g)*A(i, l)*B[l];
+            }
+        }
+    }
+}
+
+
+Foam::scalarRectangularMatrix Foam::SVDinv
 (
     const scalarRectangularMatrix& A,
     scalar minCondition

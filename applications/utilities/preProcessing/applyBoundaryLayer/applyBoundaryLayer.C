@@ -359,12 +359,12 @@ int main(int argc, char *argv[])
     // assumes U0 is the same as the current cell velocity
     Info<< "Setting boundary layer velocity" << nl << endl;
     scalar yblv = ybl.value();
-    forAll(Udash, cellI)
+    forAll(Udash, celli)
     {
-        if (y[cellI] <= yblv)
+        if (y[celli] <= yblv)
         {
-            mask[cellI] = 1;
-            Udash[cellI] *= ::pow(y[cellI]/yblv, (1.0/7.0));
+            mask[celli] = 1;
+            Udash[celli] *= ::pow(y[celli]/yblv, (1.0/7.0));
         }
     }
     mask.correctBoundaryConditions();

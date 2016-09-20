@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,9 +65,9 @@ void Foam::meshReader::calcPointCells() const
     faceListList& cFaces = cellFaces();
 
     // For each cell
-    forAll(cFaces, cellI)
+    forAll(cFaces, celli)
     {
-        const faceList& faces = cFaces[cellI];
+        const faceList& faces = cFaces[celli];
 
         forAll(faces, i)
         {
@@ -86,7 +86,7 @@ void Foam::meshReader::calcPointCells() const
 
                 for (label f = 0; f < curCount; f++)
                 {
-                    if (curPointCells[f] == cellI)
+                    if (curPointCells[f] == celli)
                     {
                         found = true;
                         break;
@@ -102,7 +102,7 @@ void Foam::meshReader::calcPointCells() const
                     }
 
                     // Enter the cell label in the point's cell list
-                    curPointCells[curCount] = cellI;
+                    curPointCells[curCount] = celli;
 
                     // Increment the cell count for the point addressed
                     cellCount[curPoint]++;
@@ -113,7 +113,7 @@ void Foam::meshReader::calcPointCells() const
 
     // report and remove unused points
     // - adjust points, pointCells, and cellFaces accordingly
-    label pointI = 0;
+    label pointi = 0;
     labelList oldToNew(nPoints, -1);
 
     forAll(ptCells, i)
@@ -121,16 +121,16 @@ void Foam::meshReader::calcPointCells() const
         ptCells[i].setSize(cellCount[i]);
         if (cellCount[i] > 0)
         {
-            oldToNew[i] = pointI++;
+            oldToNew[i] = pointi++;
         }
     }
 
     // report unused points
-    if (nPoints > pointI)
+    if (nPoints > pointi)
     {
-        Info<< "removing " << (nPoints - pointI) << " unused points" << endl;
+        Info<< "removing " << (nPoints - pointi) << " unused points" << endl;
 
-        nPoints = pointI;
+        nPoints = pointi;
 
         // adjust points and truncate - bend const-ness
         pointField& adjustedPoints = const_cast<pointField&>(points_);
@@ -144,9 +144,9 @@ void Foam::meshReader::calcPointCells() const
 
         // adjust cellFaces - this could be faster
         // For each cell
-        forAll(cFaces, cellI)
+        forAll(cFaces, celli)
         {
-            faceList& faces = cFaces[cellI];
+            faceList& faces = cFaces[celli];
 
             // For each face
             forAll(faces, i)

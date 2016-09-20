@@ -11,13 +11,10 @@ streamLines
     type            streamLine;
 
     // Output every
-    outputControl   outputTime;
-    // outputInterval 10;
+    writeControl    writeTime;
+    // writeInterval 10;
 
     setFormat       vtk; //gnuplot; //xmgr; //raw; //jplot; //csv; //ensight;
-
-    // Velocity field to use for tracking.
-    UName U;
 
     // Tracked forwards (+U) or backwards (-U)
     trackForward    true;
@@ -34,8 +31,8 @@ streamLines
     // Cloud name to use
     cloudName       particleTracks;
 
-    // Seeding method. See the sampleSets in sampleDict.
-    seedSampleSet   uniform;  //cloud;//triSurfaceMeshPointSet;
+    // Seeding method.
+    seedSampleSet   uniform;  //cloud; //triSurfaceMeshPointSet;
 
     uniformCoeffs
     {

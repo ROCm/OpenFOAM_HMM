@@ -34,13 +34,13 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            fixedFluxPressure;
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::fixedGradientFvPatchField
 
 SourceFiles
@@ -167,7 +167,7 @@ namespace Foam
     template<class GradBC>
     inline void setSnGrad
     (
-        volScalarField::GeometricBoundaryField& bf,
+        volScalarField::Boundary& bf,
         const FieldField<fvsPatchField, scalar>& snGrad
     )
     {
@@ -183,7 +183,7 @@ namespace Foam
     template<class GradBC>
     inline void setSnGrad
     (
-        volScalarField::GeometricBoundaryField& bf,
+        volScalarField::Boundary& bf,
         const tmp<FieldField<fvsPatchField, scalar>>& tsnGrad
     )
     {

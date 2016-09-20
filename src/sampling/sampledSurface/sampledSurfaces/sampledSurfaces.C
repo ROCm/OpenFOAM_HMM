@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,12 +30,21 @@ License
 #include "IOmanip.H"
 #include "volPointInterpolation.H"
 #include "PatchTools.H"
+#include "mapPolyMesh.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(sampledSurfaces, 0);
+
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        sampledSurfaces,
+        dictionary
+    );
 }
 
 bool Foam::sampledSurfaces::verbose_ = false;
@@ -49,7 +58,7 @@ void Foam::sampledSurfaces::writeGeometry() const
     // Write to time directory under outputPath_
     // Skip surface without faces (eg, a failed cut-plane)
 
-    const fileName outputDir = outputPath_/obr_.time().timeName();
+    const fileName outputDir = outputPath_/time_.timeName();
 
     forAll(*this, surfI)
     {
@@ -87,34 +96,58 @@ void Foam::sampledSurfaces::writeGeometry() const
 Foam::sampledSurfaces::sampledSurfaces
 (
     const word& name,
+    const Time& t,
+    const dictionary& dict
+)
+:
+    regionFunctionObject(t, name),
+    PtrList<sampledSurface>(),
+    loadFromFiles_(false),
+    outputPath_(fileName::null),
+    fieldSelection_(),
+    interpolationScheme_(word::null),
+    mergeList_(),
+    formatter_(nullptr)
+{
+    if (Pstream::parRun())
+    {
+        outputPath_ = mesh_.time().path()/".."/"postProcessing"/name;
+    }
+    else
+    {
+        outputPath_ = mesh_.time().path()/"postProcessing"/name;
+    }
+
+    read(dict);
+}
+
+
+Foam::sampledSurfaces::sampledSurfaces
+(
+    const word& name,
     const objectRegistry& obr,
     const dictionary& dict,
     const bool loadFromFiles
 )
 :
-    functionObjectState(obr, name),
+    regionFunctionObject(obr, name),
     PtrList<sampledSurface>(),
-    obr_(obr),
     loadFromFiles_(loadFromFiles),
     outputPath_(fileName::null),
     fieldSelection_(),
     interpolationScheme_(word::null),
     mergeList_(),
-    formatter_(NULL)
+    formatter_(nullptr)
 {
-    // Only active if a fvMesh is available
-    if (setActive<fvMesh>())
-    {
-        read(dict);
-    }
+    read(dict);
 
     if (Pstream::parRun())
     {
-        outputPath_ = obr_.time().path()/".."/"postProcessing"/name_;
+        outputPath_ = time_.path()/".."/"postProcessing"/name_;
     }
     else
     {
-        outputPath_ = obr_.time().path()/"postProcessing"/name_;
+        outputPath_ = time_.path()/"postProcessing"/name_;
     }
 
     read(dict);
@@ -135,25 +168,13 @@ void Foam::sampledSurfaces::verbose(const bool verbosity)
 }
 
 
-void Foam::sampledSurfaces::execute()
+bool Foam::sampledSurfaces::execute()
 {
-    // Do nothing - only valid on write
+    return true;
 }
 
 
-void Foam::sampledSurfaces::end()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::sampledSurfaces::timeSet()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::sampledSurfaces::write()
+bool Foam::sampledSurfaces::write()
 {
     if (size())
     {
@@ -183,10 +204,12 @@ void Foam::sampledSurfaces::write()
         sampleAndWrite<surfaceSymmTensorField>(objects);
         sampleAndWrite<surfaceTensorField>(objects);
     }
+
+    return true;
 }
 
 
-void Foam::sampledSurfaces::read(const dictionary& dict)
+bool Foam::sampledSurfaces::read(const dictionary& dict)
 {
     bool surfacesFound = dict.found("surfaces");
 
@@ -205,12 +228,10 @@ void Foam::sampledSurfaces::read(const dictionary& dict)
             dict.subOrEmptyDict("formatOptions").subOrEmptyDict(writeType)
         );
 
-        const fvMesh& mesh = refCast<const fvMesh>(obr_);
-
         PtrList<sampledSurface> newList
         (
             dict.lookup("surfaces"),
-            sampledSurface::iNew(mesh)
+            sampledSurface::iNew(mesh_)
         );
         transfer(newList);
 
@@ -244,20 +265,28 @@ void Foam::sampledSurfaces::read(const dictionary& dict)
         }
         Pout<< ")" << endl;
     }
+
+    return true;
 }
 
 
-void Foam::sampledSurfaces::updateMesh(const mapPolyMesh&)
+void Foam::sampledSurfaces::updateMesh(const mapPolyMesh& mpm)
 {
-    expire();
+    if (&mpm.mesh() == &mesh_)
+    {
+        expire();
+    }
 
     // pointMesh and interpolation will have been reset in mesh.update
 }
 
 
-void Foam::sampledSurfaces::movePoints(const polyMesh&)
+void Foam::sampledSurfaces::movePoints(const polyMesh& mesh)
 {
-    expire();
+    if (&mesh == &mesh_)
+    {
+        expire();
+    }
 }
 
 
@@ -330,10 +359,8 @@ bool Foam::sampledSurfaces::update()
         return updated;
     }
 
-    const fvMesh& mesh = refCast<const fvMesh>(obr_);
-
     // Dimension as fraction of mesh bounding box
-    scalar mergeDim = mergeTol_*mesh.bounds().mag();
+    scalar mergeDim = mergeTol_*mesh_.bounds().mag();
 
     if (Pstream::master() && debug)
     {

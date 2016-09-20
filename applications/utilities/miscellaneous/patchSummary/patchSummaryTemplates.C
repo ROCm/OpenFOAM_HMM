@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,7 +33,7 @@ void Foam::addToFieldList
 (
     PtrList<GeoField>& fieldList,
     const IOobject& obj,
-    const label fieldI,
+    const label fieldi,
     const typename GeoField::Mesh& mesh
 )
 {
@@ -41,7 +41,7 @@ void Foam::addToFieldList
     {
         fieldList.set
         (
-            fieldI,
+            fieldi,
             new GeoField(obj, mesh)
         );
         Info<< "    " << GeoField::typeName << tab << obj.name() << endl;
@@ -53,17 +53,17 @@ template<class GeoField>
 void Foam::outputFieldList
 (
     const PtrList<GeoField>& fieldList,
-    const label patchI
+    const label patchi
 )
 {
-    forAll(fieldList, fieldI)
+    forAll(fieldList, fieldi)
     {
-        if (fieldList.set(fieldI))
+        if (fieldList.set(fieldi))
         {
             Info<< "    " << pTraits<typename GeoField::value_type>::typeName
                 << tab << tab
-                << fieldList[fieldI].name() << tab << tab
-                << fieldList[fieldI].boundaryField()[patchI].type() << nl;
+                << fieldList[fieldi].name() << tab << tab
+                << fieldList[fieldi].boundaryField()[patchi].type() << nl;
         }
     }
 }
@@ -73,18 +73,18 @@ template<class GeoField>
 void Foam::collectFieldList
 (
     const PtrList<GeoField>& fieldList,
-    const label patchI,
+    const label patchi,
     HashTable<word>& fieldToType
 )
 {
-    forAll(fieldList, fieldI)
+    forAll(fieldList, fieldi)
     {
-        if (fieldList.set(fieldI))
+        if (fieldList.set(fieldi))
         {
             fieldToType.insert
             (
-                fieldList[fieldI].name(),
-                fieldList[fieldI].boundaryField()[patchI].type()
+                fieldList[fieldi].name(),
+                fieldList[fieldi].boundaryField()[patchi].type()
             );
         }
     }

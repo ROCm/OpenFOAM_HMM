@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,13 +28,12 @@ Group
     grpHeatTransferSolvers
 
 Description
-    Evolves the thermodynamics on a frozen flow field
+    Solver for energy transport and thermodynamics on a frozen flow field.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "rhoThermo.H"
-#include "turbulentFluidThermoModel.H"
 #include "turbulentFluidThermoModel.H"
 #include "LESModel.H"
 #include "radiationModel.H"
@@ -46,13 +45,16 @@ Description
 
 int main(int argc, char *argv[])
 {
-    #include "setRootCase.H"
+    #define NO_CONTROL
+    #include "postProcess.H"
 
+    #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFields.H"
     #include "createFvOptions.H"
-    #include "createRadiationModel.H"
+
+    const volScalarField& alphaEff = talphaEff();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

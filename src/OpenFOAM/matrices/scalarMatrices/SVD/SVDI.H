@@ -28,7 +28,8 @@ License
 template<class T>
 inline const T Foam::SVD::sign(const T& a, const T& b)
 {
-    return b >= 0 ? (a >= 0 ? a : -a) : (a >= 0 ? -a : a);
+    //return b >= 0 ? (a >= 0 ? a : -a) : (a >= 0 ? -a : a);
+    return b >= 0 ? a : -a;
 }
 
 
@@ -39,25 +40,30 @@ inline const Foam::scalarRectangularMatrix& Foam::SVD::U() const
     return U_;
 }
 
+
 inline const Foam::scalarRectangularMatrix& Foam::SVD::V() const
 {
     return V_;
 }
+
 
 inline const Foam::scalarDiagonalMatrix& Foam::SVD::S() const
 {
     return S_;
 }
 
-inline const Foam::scalarRectangularMatrix& Foam::SVD::VSinvUt() const
+
+inline bool Foam::SVD::converged() const
 {
-    return VSinvUt_;
+    return converged_;
 }
+
 
 inline Foam::label Foam::SVD::nZeros() const
 {
     return nZeros_;
 }
+
 
 inline Foam::scalar Foam::SVD::minNonZeroS() const
 {

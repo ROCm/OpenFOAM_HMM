@@ -588,12 +588,12 @@ Foam::Istream* Foam::IOobject::objectStream(const fileName& fName)
         else
         {
             delete isPtr;
-            return NULL;
+            return nullptr;
         }
     }
     else
     {
-        return NULL;
+        return nullptr;
     }
 }
 

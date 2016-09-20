@@ -114,7 +114,7 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
     ),
     test_(coeffDict().lookupOrDefault<Switch>("test", false)),
     rhoInf_(1.0),
-    rhoName_(coeffDict().lookupOrDefault<word>("rhoName", "rho")),
+    rhoName_(coeffDict().lookupOrDefault<word>("rho", "rho")),
     curTimeIndex_(-1)
 {
     if (rhoName_ == "rhoInf")
@@ -130,13 +130,24 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
 
         if (bodyDict.found("patches"))
         {
+            const label bodyID = model_.bodyID(iter().keyword());
+
+            if (bodyID == -1)
+            {
+                FatalErrorInFunction
+                    << "Body " << iter().keyword()
+                    << " has been merged with another body"
+                       " and cannot be assigned a set of patches"
+                    << exit(FatalError);
+            }
+
             bodyMeshes_.append
             (
                 new bodyMesh
                 (
                     mesh,
                     iter().keyword(),
-                    model_.bodyID(iter().keyword()),
+                    bodyID,
                     bodyDict
                 )
             );
@@ -153,12 +164,12 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
         pointScalarField& scale = bodyMeshes_[bi].weight_;
 
         // Scaling: 1 up to di then linear down to 0 at do away from patches
-        scale.internalField() =
+        scale.primitiveFieldRef() =
             min
             (
                 max
                 (
-                    (bodyMeshes_[bi].do_ - pDist.internalField())
+                    (bodyMeshes_[bi].do_ - pDist.primitiveField())
                    /(bodyMeshes_[bi].do_ - bodyMeshes_[bi].di_),
                     scalar(0)
                 ),
@@ -166,14 +177,14 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
             );
 
         // Convert the scale function to a cosine
-        scale.internalField() =
+        scale.primitiveFieldRef() =
             min
             (
                 max
                 (
                     0.5
                   - 0.5
-                   *cos(scale.internalField()
+                   *cos(scale.primitiveField()
                    *Foam::constant::mathematical::pi),
                     scalar(0)
                 ),
@@ -197,7 +208,7 @@ Foam::rigidBodyMeshMotion::~rigidBodyMeshMotion()
 Foam::tmp<Foam::pointField>
 Foam::rigidBodyMeshMotion::curPoints() const
 {
-    return points0() + pointDisplacement_.internalField();
+    return points0() + pointDisplacement_.primitiveField();
 }
 
 
@@ -250,13 +261,13 @@ void Foam::rigidBodyMeshMotion::solve()
             const label bodyID = bodyMeshes_[bi].bodyID_;
 
             dictionary forcesDict;
-            forcesDict.add("type", forces::typeName);
+            forcesDict.add("type", functionObjects::forces::typeName);
             forcesDict.add("patches", bodyMeshes_[bi].patches_);
             forcesDict.add("rhoInf", rhoInf_);
-            forcesDict.add("rhoName", rhoName_);
+            forcesDict.add("rho", rhoName_);
             forcesDict.add("CofR", vector::zero);
 
-            forces f("forces", db(), forcesDict);
+            functionObjects::forces f("forces", db(), forcesDict);
             f.calcForcesMoment();
 
             fx[bodyID] = spatialVector(f.momentEff(), f.forceEff());
@@ -281,7 +292,7 @@ void Foam::rigidBodyMeshMotion::solve()
     // Update the displacements
     if (bodyMeshes_.size() == 1)
     {
-        pointDisplacement_.internalField() = model_.transformPoints
+        pointDisplacement_.primitiveFieldRef() = model_.transformPoints
         (
             bodyMeshes_[0].bodyID_,
             bodyMeshes_[0].weight_,
@@ -298,7 +309,7 @@ void Foam::rigidBodyMeshMotion::solve()
             weights[bi] = &bodyMeshes_[bi].weight_;
         }
 
-        pointDisplacement_.internalField() =
+        pointDisplacement_.primitiveFieldRef() =
             model_.transformPoints(bodyIDs, weights, points0()) - points0();
     }
 

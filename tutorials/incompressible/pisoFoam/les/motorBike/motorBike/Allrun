@@ -19,7 +19,7 @@ runParallel snappyHexMesh -decomposeParDict system/decomposeParDict.ptscotch -pr
 
 find . -type f -iname "*level*" -exec rm {} \;
 
-#- set the initial fields
+#- Set the initial fields
 restore0Dir -processor
 
 runParallel renumberMesh -overwrite

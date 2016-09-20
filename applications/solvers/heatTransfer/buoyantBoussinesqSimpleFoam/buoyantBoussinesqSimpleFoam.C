@@ -28,7 +28,7 @@ Group
     grpHeatTransferSolvers
 
 Description
-    Steady-state solver for buoyant, turbulent flow of incompressible fluids
+    Steady-state solver for buoyant, turbulent flow of incompressible fluids.
 
     Uses the Boussinesq approximation:
     \f[
@@ -59,15 +59,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "postProcess.H"
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-
-    simpleControl simple(mesh);
-
+    #include "createControl.H"
     #include "createFields.H"
-    #include "createIncompressibleRadiationModel.H"
-    #include "createMRF.H"
     #include "createFvOptions.H"
     #include "initContinuityErrs.H"
 

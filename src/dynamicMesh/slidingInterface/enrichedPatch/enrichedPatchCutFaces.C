@@ -99,35 +99,35 @@ void Foam::enrichedPatch::calcCutFaces() const
         (pp.size()*primitiveMesh::edgesPerPoint_);
 
 
-    forAll(lf, faceI)
+    forAll(lf, facei)
     {
-        const face& curLocalFace = lf[faceI];
-        const face& curGlobalFace = enFaces[faceI];
+        const face& curLocalFace = lf[facei];
+        const face& curGlobalFace = enFaces[facei];
 
-        // Pout<< "Doing face " << faceI
+        // Pout<< "Doing face " << facei
         //     << " local: " << curLocalFace
         //     << " or " << curGlobalFace
         //     << endl;
 
-        // if (faceI < slavePatch_.size())
+        // if (facei < slavePatch_.size())
         // {
-        //     Pout<< "original slave: " << slavePatch_[faceI]
-        //         << " local: " << slavePatch_.localFaces()[faceI] << endl;
+        //     Pout<< "original slave: " << slavePatch_[facei]
+        //         << " local: " << slavePatch_.localFaces()[facei] << endl;
         // }
         // else
         // {
         //     Pout<< "original master: "
-        //         << masterPatch_[faceI - slavePatch_.size()] << " "
-        //         << masterPatch_.localFaces()[faceI - slavePatch_.size()]
+        //         << masterPatch_[facei - slavePatch_.size()] << " "
+        //         << masterPatch_.localFaces()[facei - slavePatch_.size()]
         //         << endl;
         // }
         // {
         //     pointField facePoints = curLocalFace.points(lp);
-        //     forAll(curLocalFace, pointI)
+        //     forAll(curLocalFace, pointi)
         //     {
-        //         Pout<< "v " << facePoints[pointI].x() << " "
-        //             << facePoints[pointI].y() << " "
-        //             << facePoints[pointI].z() << endl;
+        //         Pout<< "v " << facePoints[pointi].x() << " "
+        //             << facePoints[pointi].y() << " "
+        //             << facePoints[pointi].z() << endl;
         //     }
         // }
 
@@ -332,7 +332,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                     if (debug)
                     {
                         Pout<< " local: " << cutFaceLocalPoints
-                            << " one side: " << faceI;
+                            << " one side: " << facei;
                     }
 
                     // Append the face
@@ -433,7 +433,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                     // is the other side.  If this is not the case, there is no
                     // face on the other side.
 
-                    if (faceI < slavePatch_.size())
+                    if (facei < slavePatch_.size())
                     {
                         Map<labelList>::const_iterator mpfAddrIter =
                             masterPointFaceAddr.find(cutFaceGlobal[0]);
@@ -451,16 +451,16 @@ void Foam::enrichedPatch::calcCutFaces() const
 
                             for
                             (
-                                label pointI = 1;
-                                pointI < cutFaceGlobal.size();
-                                pointI++
+                                label pointi = 1;
+                                pointi < cutFaceGlobal.size();
+                                pointi++
                             )
                             {
                                 Map<labelList>::const_iterator
                                     mpfAddrPointIter =
                                         masterPointFaceAddr.find
                                         (
-                                            cutFaceGlobal[pointI]
+                                            cutFaceGlobal[pointi]
                                         );
 
                                 if
@@ -499,19 +499,19 @@ void Foam::enrichedPatch::calcCutFaces() const
                             // If all point are found attempt matching
                             if (!miss)
                             {
-                                forAll(hits, pointI)
+                                forAll(hits, pointi)
                                 {
-                                    if (hits[pointI] == cutFaceGlobal.size())
+                                    if (hits[pointi] == cutFaceGlobal.size())
                                     {
                                         // Found other side.
                                         otherSideFound = true;
 
                                         cfMaster.append
                                         (
-                                            masterFacesOfPZero[pointI]
+                                            masterFacesOfPZero[pointi]
                                         );
 
-                                        cfSlave.append(faceI);
+                                        cfSlave.append(facei);
 
                                         // Reverse the face such that it
                                         // points out of the master patch
@@ -520,7 +520,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                                         if (debug)
                                         {
                                             Pout<< " other side: "
-                                                << masterFacesOfPZero[pointI]
+                                                << masterFacesOfPZero[pointi]
                                                 << endl;
                                         }
                                     } // end of hits
@@ -536,7 +536,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                                 }
 
                                 cfMaster.append(-1);
-                                cfSlave.append(faceI);
+                                cfSlave.append(facei);
                             }
                         }
                         else
@@ -548,7 +548,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                             }
 
                             cfMaster.append(-1);
-                            cfSlave.append(faceI);
+                            cfSlave.append(facei);
                         }
                     }
                     else
@@ -558,7 +558,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                             Pout<< " master side" << endl;
                         }
 
-                        cfMaster.append(faceI - slavePatch_.size());
+                        cfMaster.append(facei - slavePatch_.size());
                         cfSlave.append(-1);
                     }
                 }
@@ -596,21 +596,21 @@ void Foam::enrichedPatch::calcCutFaces() const
 
                                     face origFace;
                                     face origFaceLocal;
-                                    if (faceI < slavePatch_.size())
+                                    if (facei < slavePatch_.size())
                                     {
-                                        origFace = slavePatch_[faceI];
+                                        origFace = slavePatch_[facei];
                                         origFaceLocal =
-                                            slavePatch_.localFaces()[faceI];
+                                            slavePatch_.localFaces()[facei];
                                     }
                                     else
                                     {
                                         origFace =
                                             masterPatch_
-                                            [faceI - slavePatch_.size()];
+                                            [facei - slavePatch_.size()];
 
                                         origFaceLocal =
                                             masterPatch_.localFaces()
-                                            [faceI - slavePatch_.size()];
+                                            [facei - slavePatch_.size()];
                                     }
 
                                     FatalErrorInFunction
@@ -622,7 +622,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                                         << "Slave size: " << slavePatch_.size()
                                         << " Master size: "
                                         << masterPatch_.size()
-                                        << " index: " << faceI << ".\n"
+                                        << " index: " << facei << ".\n"
                                         << "Face: " << curGlobalFace << nl
                                         << "Cut face: " << cutFaceGlobalPoints
                                         << " local: " << cutFaceLocalPoints
@@ -639,7 +639,7 @@ void Foam::enrichedPatch::calcCutFaces() const
 
         if (debug)
         {
-            Pout<< " Finished face " << faceI << endl;
+            Pout<< " Finished face " << facei << endl;
         }
 
     } // end of local faces

@@ -2,7 +2,6 @@
 cd ${0%/*} || exit 1    # Run from this directory
 
 # Parse arguments for library compilation
-targetType=libso
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
 wmakeCheckPwd "$WM_PROJECT_DIR/src" || {
@@ -21,13 +20,13 @@ wmakeCheckPwd "$WM_PROJECT_DIR/src" || {
 set -x
 
 # Update OpenFOAM version strings if required
-wmakePrintBuild -check || wrmo OpenFOAM/global/global.o
+wmakePrintBuild -check || wrmo OpenFOAM/global/global.o 2>/dev/null
 
 wmakeLnInclude OpenFOAM
 wmakeLnInclude OSspecific/${WM_OSTYPE:-POSIX}
 Pstream/Allwmake $targetType $*
 
-OSspecific/${WM_OSTYPE:-POSIX}/Allwmake $*
+OSspecific/${WM_OSTYPE:-POSIX}/Allwmake $targetType $*
 wmake $targetType OpenFOAM
 
 wmake $targetType fileFormats
@@ -48,9 +47,14 @@ wmake $targetType lagrangian/basic
 wmake $targetType lagrangian/distributionModels
 wmake $targetType genericPatchFields
 
+<<<<<<< HEAD
 conversion/Allwmake $targetType $*
+=======
+wmake $targetType conversion
+>>>>>>> foundation-github
 wmake $targetType mesh/extrudeModel
 wmake $targetType dynamicMesh
+wmake $targetType sampling
 wmake $targetType dynamicFvMesh
 wmake $targetType sampling
 wmake $targetType topoChangerFvMesh
@@ -77,7 +81,7 @@ wmake $targetType engine
 wmake $targetType fvOptions
 wmake $targetType regionCoupled
 
-postProcessing/Allwmake $targetType $*
+functionObjects/Allwmake $targetType $*
 
 wmake $targetType sixDoFRigidBodyMotion
 wmake $targetType rigidBodyDynamics

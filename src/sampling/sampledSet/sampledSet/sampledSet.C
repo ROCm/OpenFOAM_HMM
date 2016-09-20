@@ -41,21 +41,21 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::label Foam::sampledSet::getBoundaryCell(const label faceI) const
+Foam::label Foam::sampledSet::getBoundaryCell(const label facei) const
 {
-    return mesh().faceOwner()[faceI];
+    return mesh().faceOwner()[facei];
 }
 
 
-Foam::label Foam::sampledSet::getNeighbourCell(const label faceI) const
+Foam::label Foam::sampledSet::getNeighbourCell(const label facei) const
 {
-    if (faceI >= mesh().nInternalFaces())
+    if (facei >= mesh().nInternalFaces())
     {
-        return mesh().faceOwner()[faceI];
+        return mesh().faceOwner()[facei];
     }
     else
     {
-        return mesh().faceNeighbour()[faceI];
+        return mesh().faceNeighbour()[facei];
     }
 }
 
@@ -134,11 +134,11 @@ Foam::label Foam::sampledSet::pointInCell
 
 Foam::scalar Foam::sampledSet::calcSign
 (
-    const label faceI,
+    const label facei,
     const point& sample
 ) const
 {
-    vector vec = sample - mesh().faceCentres()[faceI];
+    vector vec = sample - mesh().faceCentres()[facei];
 
     scalar magVec = mag(vec);
 
@@ -150,7 +150,7 @@ Foam::scalar Foam::sampledSet::calcSign
 
     vec /= magVec;
 
-    vector n = mesh().faceAreas()[faceI];
+    vector n = mesh().faceAreas()[facei];
 
     n /= mag(n) + VSMALL;
 
@@ -160,16 +160,16 @@ Foam::scalar Foam::sampledSet::calcSign
 
 Foam::label Foam::sampledSet::findNearFace
 (
-    const label cellI,
+    const label celli,
     const point& sample,
     const scalar smallDist
 ) const
 {
-    const cell& myFaces = mesh().cells()[cellI];
+    const cell& myFaces = mesh().cells()[celli];
 
-    forAll(myFaces, myFaceI)
+    forAll(myFaces, myFacei)
     {
-        const face& f = mesh().faces()[myFaces[myFaceI]];
+        const face& f = mesh().faces()[myFaces[myFacei]];
 
         pointHit inter = f.nearestPoint(sample, mesh().points());
 
@@ -186,7 +186,7 @@ Foam::label Foam::sampledSet::findNearFace
 
         if (dist < smallDist)
         {
-            return myFaces[myFaceI];
+            return myFaces[myFacei];
         }
     }
     return -1;
@@ -196,20 +196,20 @@ Foam::label Foam::sampledSet::findNearFace
 Foam::point Foam::sampledSet::pushIn
 (
     const point& facePt,
-    const label faceI
+    const label facei
 ) const
 {
-    label cellI = mesh().faceOwner()[faceI];
-    const point& cC = mesh().cellCentres()[cellI];
+    label celli = mesh().faceOwner()[facei];
+    const point& cC = mesh().cellCentres()[celli];
 
     point newPosition = facePt;
 
     // Taken from particle::initCellFacePt()
-    label tetFaceI;
+    label tetFacei;
     label tetPtI;
-    mesh().findTetFacePt(cellI, facePt, tetFaceI, tetPtI);
+    mesh().findTetFacePt(celli, facePt, tetFacei, tetPtI);
 
-    if (tetFaceI == -1 || tetPtI == -1)
+    if (tetFacei == -1 || tetPtI == -1)
     {
         newPosition = facePt;
 
@@ -223,24 +223,24 @@ Foam::point Foam::sampledSet::pushIn
 
             mesh().findTetFacePt
             (
-                cellI,
+                celli,
                 newPosition,
-                tetFaceI,
+                tetFacei,
                 tetPtI
             );
 
             iterNo++;
 
-        } while (tetFaceI < 0  && iterNo <= trap);
+        } while (tetFacei < 0  && iterNo <= trap);
     }
 
-    if (tetFaceI == -1)
+    if (tetFacei == -1)
     {
         FatalErrorInFunction
             << "After pushing " << facePt << " to " << newPosition
-            << " it is still outside face " << faceI
-            << " at " << mesh().faceCentres()[faceI]
-            << " of cell " << cellI
+            << " it is still outside face " << facei
+            << " at " << mesh().faceCentres()[facei]
+            << " of cell " << celli
             << " at " << cC << endl
             << "Please change your starting point"
             << abort(FatalError);
@@ -254,28 +254,28 @@ bool Foam::sampledSet::getTrackingPoint
 (
     const point& samplePt,
     const point& bPoint,
-    const label bFaceI,
+    const label bFacei,
     const scalar smallDist,
 
     point& trackPt,
-    label& trackCellI,
-    label& trackFaceI
+    label& trackCelli,
+    label& trackFacei
 ) const
 {
     bool isGoodSample = false;
 
-    if (bFaceI == -1)
+    if (bFacei == -1)
     {
         // No boundary intersection. Try and find cell samplePt is in
-        trackCellI = mesh().findCell(samplePt, searchEngine_.decompMode());
+        trackCelli = mesh().findCell(samplePt, searchEngine_.decompMode());
 
         if
         (
-            (trackCellI == -1)
+            (trackCelli == -1)
         || !mesh().pointInCell
             (
                 samplePt,
-                trackCellI,
+                trackCelli,
                 searchEngine_.decompMode()
             )
         )
@@ -283,8 +283,8 @@ bool Foam::sampledSet::getTrackingPoint
             // Line samplePt - end_ does not intersect domain at all.
             // (or is along edge)
 
-            trackCellI = -1;
-            trackFaceI = -1;
+            trackCelli = -1;
+            trackFacei = -1;
 
             isGoodSample = false;
         }
@@ -293,7 +293,7 @@ bool Foam::sampledSet::getTrackingPoint
             // Start is inside. Use it as tracking point
 
             trackPt = samplePt;
-            trackFaceI = -1;
+            trackFacei = -1;
 
             isGoodSample = true;
         }
@@ -301,31 +301,31 @@ bool Foam::sampledSet::getTrackingPoint
     else if (mag(samplePt - bPoint) < smallDist)
     {
         // samplePt close to bPoint. Snap to it
-        trackPt = pushIn(bPoint, bFaceI);
-        trackFaceI = bFaceI;
-        trackCellI = getBoundaryCell(trackFaceI);
+        trackPt = pushIn(bPoint, bFacei);
+        trackFacei = bFacei;
+        trackCelli = getBoundaryCell(trackFacei);
 
         isGoodSample = true;
     }
     else
     {
-        scalar sign = calcSign(bFaceI, samplePt);
+        scalar sign = calcSign(bFacei, samplePt);
 
         if (sign < 0)
         {
             // samplePt inside or marginally outside.
             trackPt = samplePt;
-            trackFaceI = -1;
-            trackCellI = mesh().findCell(trackPt, searchEngine_.decompMode());
+            trackFacei = -1;
+            trackCelli = mesh().findCell(trackPt, searchEngine_.decompMode());
 
             isGoodSample = true;
         }
         else
         {
             // samplePt outside. use bPoint
-            trackPt = pushIn(bPoint, bFaceI);
-            trackFaceI = bFaceI;
-            trackCellI = getBoundaryCell(trackFaceI);
+            trackPt = pushIn(bPoint, bFacei);
+            trackFacei = bFacei;
+            trackCelli = getBoundaryCell(trackFacei);
 
             isGoodSample = false;
         }
@@ -336,11 +336,11 @@ bool Foam::sampledSet::getTrackingPoint
         InfoInFunction
             << " samplePt:" << samplePt
             << " bPoint:" << bPoint
-            << " bFaceI:" << bFaceI
+            << " bFacei:" << bFacei
             << endl << "   Calculated first tracking point :"
             << " trackPt:" << trackPt
-            << " trackCellI:" << trackCellI
-            << " trackFaceI:" << trackFaceI
+            << " trackCelli:" << trackCelli
+            << " trackFacei:" << trackFacei
             << " isGoodSample:" << isGoodSample
             << endl;
     }
@@ -478,7 +478,7 @@ Foam::Ostream& Foam::sampledSet::write(Ostream& os) const
 {
     coordSet::write(os);
 
-    os  << endl << "\t(cellI)\t(faceI)" << endl;
+    os  << endl << "\t(celli)\t(facei)" << endl;
 
     forAll(*this, sampleI)
     {

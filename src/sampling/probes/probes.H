@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::probes
 
 Group
-    grpFunctionObjects
+    grpUtilitiesFunctionObjects
 
 Description
     Set of locations to sample.
@@ -76,6 +76,7 @@ SourceFiles
 #ifndef probes_H
 #define probes_H
 
+#include "fvMeshFunctionObject.H"
 #include "HashPtrTable.H"
 #include "OFstream.H"
 #include "polyMesh.H"
@@ -91,6 +92,7 @@ namespace Foam
 {
 
 // Forward declaration of classes
+class Time;
 class objectRegistry;
 class dictionary;
 class fvMesh;
@@ -102,6 +104,7 @@ class mapPolyMesh;
 
 class probes
 :
+    public fvMeshFunctionObject,
     public pointField
 {
 protected:
@@ -123,18 +126,10 @@ protected:
         };
 
 
-    // Private data
-
-        //- Name of this set of probes,
-        //  Also used as the name of the probes directory.
-        const word name_;
-
-        //- Const reference to fvMesh
-        const fvMesh& mesh_;
+    // Protected data
 
         //- Load fields from files (not from objectRegistry)
-        const bool loadFromFiles_;
-
+        bool loadFromFiles_;
 
         // Read from dictonary
 
@@ -195,8 +190,6 @@ protected:
         //  returns number of fields to sample
         label prepare();
 
-        //- Read dictionary settings
-        void readDict(const dictionary& dict);
 
 private:
 
@@ -238,15 +231,23 @@ public:
 
     // Constructors
 
+        //- Construct from Time and dictionary
+        probes
+        (
+            const word& name,
+            const Time& runTime,
+            const dictionary& dict
+        );
+
         //- Construct for given objectRegistry and dictionary.
         //  Allow the possibility to load fields from files
         probes
         (
             const word& name,
-            const objectRegistry&,
-            const dictionary&,
-            const bool loadFromFiles = false,
-            const bool findElements = true
+            const objectRegistry& obr,
+            const dictionary& dict,
+            const bool loadFromFiles = false
+            const bool readFields = true
         );
 
 
@@ -255,12 +256,6 @@ public:
 
 
     // Member Functions
-
-        //- Return name of the set of probes
-        virtual const word& name() const
-        {
-            return name_;
-        }
 
         //- Return names of fields to probe
         virtual const wordReList& fieldNames() const
@@ -286,20 +281,14 @@ public:
             return elementList_;
         }
 
+        //- Read the probes
+        virtual bool read(const dictionary&);
+
         //- Execute, currently does nothing
-        virtual void execute();
-
-        //- Execute at the final time-loop, currently does nothing
-        virtual void end();
-
-        //- Called when time was set at the end of the Time::operator++
-        virtual void timeSet();
+        virtual bool execute();
 
         //- Sample and write
-        virtual void write();
-
-        //- Read the probes
-        virtual void read(const dictionary&);
+        virtual bool write();
 
         //- Update for changes of mesh
         virtual void updateMesh(const mapPolyMesh&);

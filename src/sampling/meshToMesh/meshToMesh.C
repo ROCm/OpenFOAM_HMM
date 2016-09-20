@@ -368,9 +368,9 @@ void Foam::meshToMesh::normaliseWeights
 
     if (nCell > 0)
     {
-        forAll(wght, cellI)
+        forAll(wght, celli)
         {
-            scalarList& w = wght[cellI];
+            scalarList& w = wght[celli];
             scalar s = sum(w);
 
             forAll(w, i)
@@ -663,11 +663,11 @@ void Foam::meshToMesh::calculatePatchAMIs(const word& AMIMethodName)
 
     forAll(srcPatchID_, i)
     {
-        label srcPatchI = srcPatchID_[i];
-        label tgtPatchI = tgtPatchID_[i];
+        label srcPatchi = srcPatchID_[i];
+        label tgtPatchi = tgtPatchID_[i];
 
-        const polyPatch& srcPP = srcRegion_.boundaryMesh()[srcPatchI];
-        const polyPatch& tgtPP = tgtRegion_.boundaryMesh()[tgtPatchI];
+        const polyPatch& srcPP = srcRegion_.boundaryMesh()[srcPatchi];
+        const polyPatch& tgtPP = tgtRegion_.boundaryMesh()[tgtPatchi];
 
         Info<< "Creating AMI between source patch " << srcPP.name()
             << " and target patch " << tgtPP.name()
@@ -710,9 +710,9 @@ void Foam::meshToMesh::constructNoCuttingPatches
 
         DynamicList<label> srcPatchID(srcBM.size());
         DynamicList<label> tgtPatchID(tgtBM.size());
-        forAll(srcBM, patchI)
+        forAll(srcBM, patchi)
         {
-            const polyPatch& pp = srcBM[patchI];
+            const polyPatch& pp = srcBM[patchi];
 
             // We want to map all the global patches, including constraint
             // patches (since they might have mappable properties, e.g.
@@ -721,11 +721,11 @@ void Foam::meshToMesh::constructNoCuttingPatches
             {
                 srcPatchID.append(pp.index());
 
-                label tgtPatchI = tgtBM.findPatchID(pp.name());
+                label tgtPatchi = tgtBM.findPatchID(pp.name());
 
-                if (tgtPatchI != -1)
+                if (tgtPatchi != -1)
                 {
-                    tgtPatchID.append(tgtPatchI);
+                    tgtPatchID.append(tgtPatchi);
                 }
                 else
                 {
@@ -823,8 +823,8 @@ Foam::meshToMesh::meshToMesh
     tgtToSrcCellVec_(),
     V_(0.0),
     singleMeshProc_(-1),
-    srcMapPtr_(NULL),
-    tgtMapPtr_(NULL)
+    srcMapPtr_(nullptr),
+    tgtMapPtr_(nullptr)
 {
     constructNoCuttingPatches
     (
@@ -861,8 +861,8 @@ Foam::meshToMesh::meshToMesh
     tgtToSrcCellVec_(),
     V_(0.0),
     singleMeshProc_(-1),
-    srcMapPtr_(NULL),
-    tgtMapPtr_(NULL)
+    srcMapPtr_(nullptr),
+    tgtMapPtr_(nullptr)
 {
     constructNoCuttingPatches(methodName, AMIMethodName, interpAllPatches);
 }
@@ -889,8 +889,8 @@ Foam::meshToMesh::meshToMesh
     tgtToSrcCellWght_(),
     V_(0.0),
     singleMeshProc_(-1),
-    srcMapPtr_(NULL),
-    tgtMapPtr_(NULL)
+    srcMapPtr_(nullptr),
+    tgtMapPtr_(nullptr)
 {
     constructFromCuttingPatches
     (
@@ -927,8 +927,8 @@ Foam::meshToMesh::meshToMesh
     tgtToSrcCellWght_(),
     V_(0.0),
     singleMeshProc_(-1),
-    srcMapPtr_(NULL),
-    tgtMapPtr_(NULL)
+    srcMapPtr_(nullptr),
+    tgtMapPtr_(nullptr)
 {
     constructFromCuttingPatches
     (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,14 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IncompressibleTurbulenceModel.H"
-#include "incompressible/transportModel/transportModel.H"
-#include "addToRunTimeSelectionTable.H"
-#include "makeTurbulenceModel.H"
-
-#include "laminar.H"
-#include "RASModel.H"
-#include "LESModel.H"
+#include "turbulentTransportModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,15 +35,6 @@ makeBaseTurbulenceModel
     IncompressibleTurbulenceModel,
     transportModel
 );
-
-#define makeRASModel(Type)                                                     \
-    makeTemplatedTurbulenceModel                                               \
-    (transportModelIncompressibleTurbulenceModel, RAS, Type)
-
-#define makeLESModel(Type)                                                     \
-    makeTemplatedTurbulenceModel                                               \
-    (transportModelIncompressibleTurbulenceModel, LES, Type)
-
 
 // -------------------------------------------------------------------------- //
 // RAS models
@@ -80,6 +64,9 @@ makeRASModel(kOmegaSST);
 #include "kOmegaSSTSAS.H"
 makeRASModel(kOmegaSSTSAS);
 
+#include "kOmegaSSTLM.H"
+makeRASModel(kOmegaSSTLM);
+
 #include "v2f.H"
 makeRASModel(v2f);
 
@@ -100,14 +87,17 @@ makeLESModel(Smagorinsky);
 #include "WALE.H"
 makeLESModel(WALE);
 
-#include "dynamicLagrangian.H"
-makeLESModel(dynamicLagrangian);
-
 #include "kEqn.H"
 makeLESModel(kEqn);
 
 #include "dynamicKEqn.H"
 makeLESModel(dynamicKEqn);
+
+#include "dynamicLagrangian.H"
+makeLESModel(dynamicLagrangian);
+
+#include "kOmegaSSTDES.H"
+makeLESModel(kOmegaSSTDES);
 
 #include "SpalartAllmarasDES.H"
 makeLESModel(SpalartAllmarasDES);

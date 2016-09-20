@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            fluxCorrectedVelocity;
         phi             phi;
@@ -68,7 +68,7 @@ Note
     If reverse flow is possible or expected use the
     pressureInletOutletVelocity condition instead.
 
-SeeAlso
+See also
     Foam::zeroGradientFvPatchField
     Foam::pressureInletOutletVelocityFvPatchVectorField
 

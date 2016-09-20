@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ Description
     The model generates a field \c \<name\>:alpha1 which can be visualised to
     to show the melt distribution as a fraction [0-1]
 
-    \heading Source usage
+Usage
     Example usage:
     \verbatim
     solidificationMeltingSource1
@@ -77,11 +77,11 @@ Description
         relax        | Relaxation coefficient [0-1] | no     | 0.9
         thermoMode   | Thermo mode [thermo|lookup] | yes     |
         rhoRef       | Reference (solid) density | yes       |
-        rhoName      | Name of density field   | no          | rho
-        TName        | Name of temperature field | no        | T
-        CpName       | Name of specific heat capacity field | no | Cp
-        UName        | Name of velocity field  | no          | U
-        phiName      | Name of flux field      | no          | phi
+        rho          | Name of density field   | no          | rho
+        T            | Name of temperature field | no        | T
+        Cp           | Name of specific heat capacity field | no | Cp
+        U            | Name of velocity field  | no          | U
+        phi          | Name of flux field      | no          | phi
         Cu           | Model coefficient       | no          | 100000
         q            | Model coefficient       | no          | 0.001
         beta         | Thermal expansion coefficient [1/K] | yes |
@@ -223,10 +223,10 @@ public:
         // Add explicit and implicit contributions
 
             //- Add explicit contribution to enthalpy equation
-            virtual void addSup(fvMatrix<scalar>& eqn, const label fieldI);
+            virtual void addSup(fvMatrix<scalar>& eqn, const label fieldi);
 
             //- Add implicit contribution to momentum equation
-            virtual void addSup(fvMatrix<vector>& eqn, const label fieldI);
+            virtual void addSup(fvMatrix<vector>& eqn, const label fieldi);
 
 
         // Add explicit and implicit contributions to compressible equation
@@ -236,7 +236,7 @@ public:
             (
                 const volScalarField& rho,
                 fvMatrix<scalar>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
             //- Add implicit contribution to compressible momentum equation
@@ -244,7 +244,7 @@ public:
             (
                 const volScalarField& rho,
                 fvMatrix<vector>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
 

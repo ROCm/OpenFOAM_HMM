@@ -88,7 +88,7 @@ public:
         //- Construct from number and list of names
         hashedWordList(const label nNames, const char** names);
 
-        //- Construct from a NULL-terminated list of names
+        //- Construct from a nullptr-terminated list of names
         hashedWordList(const char** names);
 
         //- Construct from Istream
@@ -102,6 +102,9 @@ public:
 
         //- Append an element at the end of the list
         void append(const word&);
+
+        //- Does the list contain the specified name
+        inline bool found(const word&) const;
 
         //- Does the list contain the specified name
         inline bool contains(const word&) const;

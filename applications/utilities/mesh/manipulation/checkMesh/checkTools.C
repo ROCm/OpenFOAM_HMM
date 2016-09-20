@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -33,13 +33,14 @@ License
 #include "tetWedgeMatcher.H"
 #include "tetMatcher.H"
 #include "IOmanip.H"
+#include "pointSet.H"
 #include "faceSet.H"
 #include "cellSet.H"
-#include "PatchTools.H"
 #include "Time.H"
 #include "surfaceWriter.H"
-#include "sampledSurfaces.H"
 #include "syncTools.H"
+#include "globalIndex.H"
+#include "PatchTools.H"
 
 
 void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
@@ -128,36 +129,36 @@ void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
 
     Map<label> polyhedralFaces;
 
-    for (label cellI = 0; cellI < mesh.nCells(); cellI++)
+    for (label celli = 0; celli < mesh.nCells(); celli++)
     {
-        if (hex.isA(mesh, cellI))
+        if (hex.isA(mesh, celli))
         {
             nHex++;
         }
-        else if (tet.isA(mesh, cellI))
+        else if (tet.isA(mesh, celli))
         {
             nTet++;
         }
-        else if (pyr.isA(mesh, cellI))
+        else if (pyr.isA(mesh, celli))
         {
             nPyr++;
         }
-        else if (prism.isA(mesh, cellI))
+        else if (prism.isA(mesh, celli))
         {
             nPrism++;
         }
-        else if (wedge.isA(mesh, cellI))
+        else if (wedge.isA(mesh, celli))
         {
             nWedge++;
         }
-        else if (tetWedge.isA(mesh, cellI))
+        else if (tetWedge.isA(mesh, celli))
         {
             nTetWedge++;
         }
         else
         {
             nUnknown++;
-            polyhedralFaces(mesh.cells()[cellI].size())++;
+            polyhedralFaces(mesh.cells()[celli].size())++;
         }
     }
 
@@ -188,9 +189,9 @@ void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
 
         const labelList sortedKeys = polyhedralFaces.sortedToc();
 
-        forAll(sortedKeys, keyI)
+        forAll(sortedKeys, keyi)
         {
-            const label nFaces = sortedKeys[keyI];
+            const label nFaces = sortedKeys[keyi];
 
             Info<< setf(std::ios::right) << setw(13)
                 << nFaces << "   " << polyhedralFaces[nFaces] << nl;
@@ -198,6 +199,58 @@ void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
     }
 
     Info<< endl;
+}
+
+
+void Foam::mergeAndWrite
+(
+    const polyMesh& mesh,
+    const surfaceWriter& writer,
+    const word& name,
+    const indirectPrimitivePatch setPatch,
+    const fileName& outputDir
+)
+{
+    if (Pstream::parRun())
+    {
+        labelList pointToGlobal;
+        labelList uniqueMeshPointLabels;
+        autoPtr<globalIndex> globalPoints;
+        autoPtr<globalIndex> globalFaces;
+        faceList mergedFaces;
+        pointField mergedPoints;
+        Foam::PatchTools::gatherAndMerge
+        (
+            mesh,
+            setPatch.localFaces(),
+            setPatch.meshPoints(),
+            setPatch.meshPointMap(),
+
+            pointToGlobal,
+            uniqueMeshPointLabels,
+            globalPoints,
+            globalFaces,
+
+            mergedFaces,
+            mergedPoints
+        );
+
+        // Write
+        if (Pstream::master())
+        {
+            writer.write(outputDir, name, mergedPoints, mergedFaces);
+        }
+    }
+    else
+    {
+        writer.write
+        (
+            outputDir,
+            name,
+            setPatch.localPoints(),
+            setPatch.localFaces()
+        );
+    }
 }
 
 
@@ -224,48 +277,7 @@ void Foam::mergeAndWrite
       / set.name()
     );
 
-
-    if (Pstream::parRun())
-    {
-        // Use tolerance from sampling (since we're doing exactly the same
-        // when parallel merging)
-        const scalar tol = sampledSurfaces::mergeTol();
-        // dimension as fraction of mesh bounding box
-        scalar mergeDim = tol * mesh.bounds().mag();
-
-        pointField mergedPoints;
-        faceList mergedFaces;
-        labelList pointMergeMap;
-
-        PatchTools::gatherAndMerge
-        (
-            mergeDim,
-            setPatch,
-            mergedPoints,
-            mergedFaces,
-            pointMergeMap
-        );
-        if (Pstream::master())
-        {
-            writer.write
-            (
-                outputDir,
-                set.name(),
-                mergedPoints,
-                mergedFaces
-            );
-        }
-    }
-    else
-    {
-        writer.write
-        (
-            outputDir,
-            set.name(),
-            setPatch.localPoints(),
-            setPatch.localFaces()
-        );
-    }
+    mergeAndWrite(mesh, writer, set.name(), setPatch, outputDir);
 }
 
 
@@ -288,9 +300,9 @@ void Foam::mergeAndWrite
 
 
     boolList bndInSet(mesh.nFaces()-mesh.nInternalFaces());
-    forAll(pbm, patchI)
+    forAll(pbm, patchi)
     {
-        const polyPatch& pp = pbm[patchI];
+        const polyPatch& pp = pbm[patchi];
         const labelList& fc = pp.faceCells();
         forAll(fc, i)
         {
@@ -301,32 +313,32 @@ void Foam::mergeAndWrite
 
 
     DynamicList<label> outsideFaces(3*set.size());
-    for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
+    for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
     {
-        bool ownVal = isInSet[mesh.faceOwner()[faceI]];
-        bool neiVal = isInSet[mesh.faceNeighbour()[faceI]];
+        bool ownVal = isInSet[mesh.faceOwner()[facei]];
+        bool neiVal = isInSet[mesh.faceNeighbour()[facei]];
 
         if (ownVal != neiVal)
         {
-            outsideFaces.append(faceI);
+            outsideFaces.append(facei);
         }
     }
 
 
-    forAll(pbm, patchI)
+    forAll(pbm, patchi)
     {
-        const polyPatch& pp = pbm[patchI];
+        const polyPatch& pp = pbm[patchi];
         const labelList& fc = pp.faceCells();
         if (pp.coupled())
         {
             forAll(fc, i)
             {
-                label faceI = pp.start()+i;
+                label facei = pp.start()+i;
 
-                bool neiVal = bndInSet[faceI-mesh.nInternalFaces()];
+                bool neiVal = bndInSet[facei-mesh.nInternalFaces()];
                 if (isInSet[fc[i]] && !neiVal)
                 {
-                    outsideFaces.append(faceI);
+                    outsideFaces.append(facei);
                 }
             }
         }
@@ -358,46 +370,118 @@ void Foam::mergeAndWrite
       / set.name()
     );
 
+    mergeAndWrite(mesh, writer, set.name(), setPatch, outputDir);
+}
+
+
+void Foam::mergeAndWrite
+(
+    const writer<scalar>& writer,
+    const pointSet& set
+)
+{
+    const polyMesh& mesh = refCast<const polyMesh>(set.db());
+
+    pointField mergedPts;
+    labelList mergedIDs;
 
     if (Pstream::parRun())
     {
-        // Use tolerance from sampling (since we're doing exactly the same
-        // when parallel merging)
-        const scalar tol = sampledSurfaces::mergeTol();
-        // dimension as fraction of mesh bounding box
-        scalar mergeDim = tol * mesh.bounds().mag();
+        // Note: we explicitly do not merge the points
+        // (mesh.globalData().mergePoints etc) since this might
+        // hide any synchronisation problem
 
-        pointField mergedPoints;
-        faceList mergedFaces;
-        labelList pointMergeMap;
+        globalIndex globalNumbering(mesh.nPoints());
 
-        PatchTools::gatherAndMerge
-        (
-            mergeDim,
-            setPatch,
-            mergedPoints,
-            mergedFaces,
-            pointMergeMap
-        );
+        mergedPts.setSize(returnReduce(set.size(), sumOp<label>()));
+        mergedIDs.setSize(mergedPts.size());
+
+        labelList setPointIDs(set.sortedToc());
+
+        // Get renumbered local data
+        pointField myPoints(mesh.points(), setPointIDs);
+        labelList myIDs(setPointIDs.size());
+        forAll(setPointIDs, i)
+        {
+            myIDs[i] = globalNumbering.toGlobal(setPointIDs[i]);
+        }
+
         if (Pstream::master())
         {
-            writer.write
+            // Insert master data first
+            label pOffset = 0;
+            SubList<point>(mergedPts, myPoints.size(), pOffset) = myPoints;
+            SubList<label>(mergedIDs, myIDs.size(), pOffset) = myIDs;
+            pOffset += myPoints.size();
+
+            // Receive slave ones
+            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            {
+                IPstream fromSlave(Pstream::scheduled, slave);
+
+                pointField slavePts(fromSlave);
+                labelList slaveIDs(fromSlave);
+
+                SubList<point>(mergedPts, slavePts.size(), pOffset) = slavePts;
+                SubList<label>(mergedIDs, slaveIDs.size(), pOffset) = slaveIDs;
+                pOffset += slaveIDs.size();
+            }
+        }
+        else
+        {
+            // Construct processor stream with estimate of size. Could
+            // be improved.
+            OPstream toMaster
             (
-                outputDir,
-                set.name(),
-                mergedPoints,
-                mergedFaces
+                Pstream::scheduled,
+                Pstream::masterNo(),
+                myPoints.byteSize() + myIDs.byteSize()
             );
+            toMaster << myPoints << myIDs;
         }
     }
     else
     {
-        writer.write
+        mergedIDs = set.sortedToc();
+        mergedPts = pointField(mesh.points(), mergedIDs);
+    }
+
+
+    // Write with scalar pointID
+    if (Pstream::master())
+    {
+        scalarField scalarPointIDs(mergedIDs.size());
+        forAll(mergedIDs, i)
+        {
+            scalarPointIDs[i] = 1.0*mergedIDs[i];
+        }
+
+        coordSet points(set.name(), "distance", mergedPts, mag(mergedPts));
+
+        List<const scalarField*> flds(1, &scalarPointIDs);
+
+        wordList fldNames(1, "pointID");
+
+        // Output e.g. pointSet p0 to
+        // postProcessing/<time>/p0.vtk
+        const fileName outputDir
         (
-            outputDir,
-            set.name(),
-            setPatch.localPoints(),
-            setPatch.localFaces()
+            set.time().path()
+          / (Pstream::parRun() ? ".." : "")
+          / "postProcessing"
+          / mesh.pointsInstance()
+          // set.name()
         );
+        mkDir(outputDir);
+
+        fileName outputFile(outputDir/writer.getFileName(points, wordList()));
+        //fileName outputFile(outputDir/set.name());
+
+        OFstream os(outputFile);
+
+        writer.write(points, fldNames, flds, os);
     }
 }
+
+
+// ************************************************************************* //

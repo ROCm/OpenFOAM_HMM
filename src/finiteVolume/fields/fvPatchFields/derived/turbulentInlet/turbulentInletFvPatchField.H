@@ -46,8 +46,7 @@ Description
         s       | fluctuation scale
     \endvartable
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         fluctuationScale | RMS fluctuation scale (fraction of mean) | yes |
@@ -57,7 +56,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            turbulentInlet;
         fluctuationScale 0.1;
@@ -66,7 +65,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchField
 
 SourceFiles

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ void Foam::jumpCyclicAMIFvPatchField<scalar>::updateInterfaceMatrix
     pnf = this->cyclicAMIPatch().interpolate(pnf);
 
     // only apply jump to original field
-    if (&psiInternal == &this->internalField())
+    if (&psiInternal == &this->primitiveField())
     {
         Field<scalar> jf(this->jump());
 

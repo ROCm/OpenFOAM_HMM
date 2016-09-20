@@ -344,13 +344,13 @@ public:
 
             //- Return dimensioned internal field reference
             const DimensionedField<Type, volMesh>&
-            dimensionedInternalField() const
+            internalField() const
             {
                 return internalField_;
             }
 
             //- Return internal field reference
-            const Field<Type>& internalField() const
+            const Field<Type>& primitiveField() const
             {
                 return internalField_;
             }
@@ -417,9 +417,10 @@ public:
             virtual void updateCoeffs();
 
             //- Update the coefficients associated with the patch field
-            //  and optionally apply weight field.
-            //  Sets Updated to true
-            virtual void updateCoeffs(const scalarField& weights);
+            //  with a weight field (0..1). This weight field is ususally
+            //  provided as the amount of geometric overlap for 'duplicate'
+            //  patches. Sets Updated to true
+            virtual void updateWeightedCoeffs(const scalarField& weights);
 
             //- Return internal field next to patch as patch field
             virtual tmp<Field<Type>> patchInternalField() const;
@@ -699,7 +700,7 @@ defineTemplateRunTimeSelectionTable(fvPatchTypeField, dictionary);
 #define makePatchFieldsTypeName(type)                                          \
     defineNamedTemplateTypeNameAndDebug(type##FvPatchScalarField, 0);          \
     defineNamedTemplateTypeNameAndDebug(type##FvPatchVectorField, 0);          \
-    defineNamedTemplateTypeNameAndDebug(type##FvPatchSphericalTensorField, 0);\
+    defineNamedTemplateTypeNameAndDebug(type##FvPatchSphericalTensorField, 0); \
     defineNamedTemplateTypeNameAndDebug(type##FvPatchSymmTensorField, 0);      \
     defineNamedTemplateTypeNameAndDebug(type##FvPatchTensorField, 0)
 

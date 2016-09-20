@@ -32,15 +32,11 @@ solvers
 
         smoother         GaussSeidel;
 
-        cacheAgglomeration true;
-        nCellsInCoarsestLevel 10;
-        agglomerator     faceAreaPair;
-        mergeLevels      1;
     }
 
     "(U|h|k|epsilon|G|Ii)"
     {
-        solver           PBiCG;
+        solver           PBiCGStab;
         preconditioner   DILU;
         tolerance        1e-7;
         relTol           0.1;
@@ -56,7 +52,7 @@ solvers
 
 SIMPLE
 {
-    momentumPredictor on;
+    momentumPredictor yes;
     nNonOrthogonalCorrectors 0;
     pRefCell        0;
     pRefValue       100000;

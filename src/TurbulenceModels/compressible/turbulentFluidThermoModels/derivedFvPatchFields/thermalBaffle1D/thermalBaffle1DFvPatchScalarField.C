@@ -53,7 +53,7 @@ thermalBaffle1DFvPatchScalarField
     thickness_(p.size()),
     Qs_(p.size()),
     solidDict_(),
-    solidPtr_(NULL),
+    solidPtr_(nullptr),
     QrPrevious_(p.size()),
     QrRelaxation_(1),
     QrName_("undefined-Qr")
@@ -403,9 +403,9 @@ void thermalBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
             scalar Q = gAverage(kappaw*snGrad());
             Info<< patch().boundaryMesh().mesh().name() << ':'
                 << patch().name() << ':'
-                << this->dimensionedInternalField().name() << " <- "
+                << this->internalField().name() << " <- "
                 << nbrPatch.name() << ':'
-                << this->dimensionedInternalField().name() << " :"
+                << this->internalField().name() << " :"
                 << " heat[W]:" << Q
                 << " walltemperature "
                 << " min:" << gMin(*this)

@@ -46,6 +46,14 @@ namespace Foam
 
 class trackedParticleCloud;
 
+
+// Forward declaration of friend functions and operators
+
+class trackedParticle;
+
+Ostream& operator<<(Ostream&, const trackedParticle&);
+
+
 /*---------------------------------------------------------------------------*\
                      Class trackedParticle Declaration
 \*---------------------------------------------------------------------------*/
@@ -113,8 +121,8 @@ public:
         (
             const polyMesh& mesh,
             const vector& position,
-            const label cellI,
-            const label tetFaceI,
+            const label celli,
+            const label tetFacei,
             const label tetPtI,
             const point& end,
             const label level,
@@ -218,7 +226,7 @@ public:
             (
                 const polyPatch&,
                 trackingData& td,
-                const label patchI,
+                const label patchi,
                 const scalar trackFraction,
                 const tetIndices& tetIs
             );
@@ -277,7 +285,7 @@ public:
             );
 
             //- Convert processor patch addressing to the global equivalents
-            //  and set the cellI to the face-neighbour
+            //  and set the celli to the face-neighbour
             void correctAfterParallelTransfer(const label, trackingData&);
 
 

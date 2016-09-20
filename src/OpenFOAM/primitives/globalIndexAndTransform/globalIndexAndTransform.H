@@ -194,7 +194,7 @@ public:
         inline label addToTransformIndex
         (
             const label transformIndex,
-            const label patchI,
+            const label patchi,
             const bool isSendingSide = true,
             const scalar tol = SMALL
         ) const;
@@ -230,7 +230,7 @@ public:
         //- Encode index and bare index as components on given processor
         inline static labelPair encode
         (
-            const label procI,
+            const label proci,
             const label index,
             const label transformIndex
         );

@@ -101,13 +101,13 @@ calcPointFaces() const
     // set up storage for pointFaces
     List<SLList<label>> pointFcs(meshPoints().size());
 
-    forAll(f, faceI)
+    forAll(f, facei)
     {
-        const Face& curPoints = f[faceI];
+        const Face& curPoints = f[facei];
 
-        forAll(curPoints, pointI)
+        forAll(curPoints, pointi)
         {
-            pointFcs[curPoints[pointI]].append(faceI);
+            pointFcs[curPoints[pointi]].append(facei);
         }
     }
 
@@ -116,14 +116,14 @@ calcPointFaces() const
 
     labelListList& pf = *pointFacesPtr_;
 
-    forAll(pointFcs, pointI)
+    forAll(pointFcs, pointi)
     {
-        pf[pointI].setSize(pointFcs[pointI].size());
+        pf[pointi].setSize(pointFcs[pointi].size());
 
         label i = 0;
-        forAllIter(SLList<label>, pointFcs[pointI], curFacesIter)
+        forAllIter(SLList<label>, pointFcs[pointi], curFacesIter)
         {
-            pf[pointI][i++] = curFacesIter();
+            pf[pointi][i++] = curFacesIter();
         }
     }
 

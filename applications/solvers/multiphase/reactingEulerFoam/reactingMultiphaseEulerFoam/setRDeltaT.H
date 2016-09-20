@@ -26,10 +26,10 @@
     }
 
     // Set the reciprocal time-step from the local Courant number
-    rDeltaT.dimensionedInternalField() = max
+    rDeltaT.ref() = max
     (
         1/dimensionedScalar("maxDeltaT", dimTime, maxDeltaT),
-        fvc::surfaceSum(maxPhi)().dimensionedInternalField()
+        fvc::surfaceSum(maxPhi)()()
        /((2*maxCo)*mesh.V())
     );
 
@@ -39,6 +39,6 @@
     fvc::smooth(rDeltaT, rDeltaTSmoothingCoeff);
 
     Info<< "Flow time scale min/max = "
-        << gMin(1/rDeltaT.internalField())
-        << ", " << gMax(1/rDeltaT.internalField()) << endl;
+        << gMin(1/rDeltaT.primitiveField())
+        << ", " << gMax(1/rDeltaT.primitiveField()) << endl;
 }

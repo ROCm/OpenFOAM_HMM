@@ -47,8 +47,7 @@ Description
         \delta | film height [m]
     \endvartable
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         phi          | Flux field name         | no          | phi
@@ -58,7 +57,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            filmHeightInletVelocity;
         phi             phi;
@@ -68,7 +67,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchField
 
 SourceFiles

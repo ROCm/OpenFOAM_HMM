@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,7 +62,7 @@ Foam::faceAreaPairGAMGAgglomeration::faceAreaPairGAMGAgglomeration
 {
     const fvMesh& fvmesh = refCast<const fvMesh>(mesh);
 
-    //agglomerate(mesh, sqrt(fvmesh.magSf().internalField()));
+    //agglomerate(mesh, sqrt(fvmesh.magSf().primitiveField()));
     agglomerate
     (
         mesh,
@@ -70,8 +70,8 @@ Foam::faceAreaPairGAMGAgglomeration::faceAreaPairGAMGAgglomeration
         (
             cmptMultiply
             (
-                fvmesh.Sf().internalField()
-               /sqrt(fvmesh.magSf().internalField()),
+                fvmesh.Sf().primitiveField()
+               /sqrt(fvmesh.magSf().primitiveField()),
                 vector(1, 1.01, 1.02)
                 //vector::one
             )

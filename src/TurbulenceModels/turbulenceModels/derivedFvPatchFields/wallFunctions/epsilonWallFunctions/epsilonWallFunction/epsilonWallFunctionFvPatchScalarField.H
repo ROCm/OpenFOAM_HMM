@@ -28,13 +28,12 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a turbulence dissipation wall function
-    condition for high Reynolds number, turbulent flow cases.
+    This boundary condition provides a turbulence dissipation wall constraint
+    for low- and high-Reynolds number turbulence models.
 
-    The condition can be applied to wall boundaries, whereby it
+    The condition can be applied to wall boundaries for which it
     - calculates \c epsilon and \c G
-    - inserts near wall epsilon values directly into the epsilon equation
-        to act as a constraint
+    - specifies the near-wall epsilon value
 
     where
 
@@ -43,8 +42,10 @@ Description
         G       | turblence generation field
     \endvartable
 
-    \heading Patch usage
+    The model switches between laminar and turbulent functions based on the
+    laminar-to-turbulent y+ value derived from kappa and E.
 
+Usage
     \table
         Property     | Description             | Required    | Default value
         Cmu          | model coefficient       | no          | 0.09
@@ -54,14 +55,15 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            epsilonWallFunction;
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::fixedInternalValueFvPatchField
+    Foam::omegaWallFunctionFvPatchScalarField
 
 SourceFiles
     epsilonWallFunctionFvPatchScalarField.C
@@ -103,6 +105,9 @@ protected:
 
         //- E coefficient
         scalar E_;
+
+        //- y+ at the edge of the laminar sublayer
+        scalar yPlusLam_;
 
         //- Local copy of turbulence G field
         scalarField G_;
@@ -257,7 +262,7 @@ public:
             virtual void updateCoeffs();
 
             //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs(const scalarField& weights);
+            virtual void updateWeightedCoeffs(const scalarField& weights);
 
             //- Manipulate matrix
             virtual void manipulateMatrix(fvMatrix<scalar>& matrix);

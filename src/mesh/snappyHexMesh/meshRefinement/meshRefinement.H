@@ -139,9 +139,9 @@ public:
         //- Enumeration for how the userdata is to be mapped upon refinement.
         enum mapType
         {
-            MASTERONLY = 1, /*!< maintain master only */
-            KEEPALL = 2,    /*!< have slaves (upon refinement) from master */
-            REMOVE = 4      /*!< set value to -1 any face that was refined */
+            MASTERONLY = 1, //!< maintain master only
+            KEEPALL = 2,    //!< have slaves (upon refinement) from master
+            REMOVE = 4      //!< set value to -1 any face that was refined
         };
 
 
@@ -264,7 +264,7 @@ private:
         autoPtr<mapPolyMesh> removeInsideCells
         (
             const string& msg,
-            const label exposedPatchI
+            const label exposedPatchi
         );
 
 
@@ -470,7 +470,7 @@ private:
                 const vector& surfaceLocation,
                 const vector& surfaceNormal,
 
-                const label cellI,
+                const label celli,
 
                 label& cellMaxLevel,
                 vector& cellMaxLocation,
@@ -544,7 +544,7 @@ private:
             //  Returns label of added face.
             label createBaffle
             (
-                const label faceI,
+                const label facei,
                 const label ownPatch,
                 const label neiPatch,
                 polyTopoChange& meshMod
@@ -556,7 +556,7 @@ private:
             //  markFacesOnProblemCells
             void markBoundaryFace
             (
-                const label faceI,
+                const label facei,
                 boolList& isBoundaryFace,
                 boolList& isBoundaryEdge,
                 boolList& isBoundaryPoint
@@ -583,14 +583,14 @@ private:
                 const pointField& neiCc,
                 const scalar minFaceArea,
                 const scalar maxNonOrtho,
-                const label faceI
+                const label facei
             ) const;
 
             bool isCollapsedCell
             (
                 const pointField&,
                 const scalar volFraction,
-                const label cellI
+                const label celli
             ) const;
 
             //- Returns list with for every internal face -1 or the patch
@@ -1178,7 +1178,7 @@ public:
             static label appendPatch
             (
                 fvMesh&,
-                const label insertPatchI,
+                const label insertPatchi,
                 const word&,
                 const dictionary&
             );

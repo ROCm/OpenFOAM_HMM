@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,8 +33,7 @@ Description
     thermal diffusivity (usually\c alphat) based on the Jayatilleke model for
     the Eulerian multiphase solvers.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         Prt          | Turbulent Prandtl number | no         | 0.85
@@ -45,7 +44,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            alphatPhaseChangeJayatillekeWallFunction;
         Prt             0.85;
@@ -55,7 +54,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::compressible::alphatPhaseChangeWallFunctionFvPatchScalarField
 
 SourceFiles

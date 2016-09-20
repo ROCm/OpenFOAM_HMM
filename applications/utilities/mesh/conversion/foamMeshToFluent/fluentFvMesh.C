@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -113,13 +113,13 @@ void Foam::fluentFvMesh::writeFluentMesh() const
 
     const pointField& p = points();
 
-    forAll(p, pointI)
+    forAll(p, pointi)
     {
         fluentMeshFile
             << "    "
-            << p[pointI].x() << " "
-            << p[pointI].y()
-            << " " << p[pointI].z() << std::endl;
+            << p[pointi].x() << " "
+            << p[pointi].y()
+            << " " << p[pointi].z() << std::endl;
     }
 
     fluentMeshFile
@@ -135,9 +135,9 @@ void Foam::fluentFvMesh::writeFluentMesh() const
         << "(13 (2 1 "
         << own.size() << " 2 0)" << std::endl << "(" << std::endl;
 
-    forAll(own, faceI)
+    forAll(own, facei)
     {
-        const labelList& l = fcs[faceI];
+        const labelList& l = fcs[facei];
 
         fluentMeshFile << "    ";
 
@@ -148,8 +148,8 @@ void Foam::fluentFvMesh::writeFluentMesh() const
             fluentMeshFile << l[lI] + 1 << " ";
         }
 
-        fluentMeshFile << nei[faceI] + 1 << " ";
-        fluentMeshFile << own[faceI] + 1 << std::endl;
+        fluentMeshFile << nei[facei] + 1 << " ";
+        fluentMeshFile << own[facei] + 1 << std::endl;
     }
 
     fluentMeshFile << "))" << std::endl;
@@ -157,31 +157,31 @@ void Foam::fluentFvMesh::writeFluentMesh() const
     label nWrittenFaces = own.size();
 
     // Writing boundary faces
-    forAll(boundary(), patchI)
+    forAll(boundary(), patchi)
     {
-        const faceUList& patchFaces = boundaryMesh()[patchI];
+        const faceUList& patchFaces = boundaryMesh()[patchi];
 
         const labelList& patchFaceCells =
-            boundaryMesh()[patchI].faceCells();
+            boundaryMesh()[patchi].faceCells();
 
         // The face group will be offset by 10 from the patch label
 
         // Write header
         fluentMeshFile
-            << "(13 (" << patchI + 10 << " " << nWrittenFaces + 1
+            << "(13 (" << patchi + 10 << " " << nWrittenFaces + 1
             << " " << nWrittenFaces + patchFaces.size() << " ";
 
         nWrittenFaces += patchFaces.size();
 
         // Write patch type
-        if (isA<wallFvPatch>(boundary()[patchI]))
+        if (isA<wallFvPatch>(boundary()[patchi]))
         {
             fluentMeshFile << 3;
         }
         else if
         (
-            isA<symmetryPlaneFvPatch>(boundary()[patchI])
-         || isA<symmetryFvPatch>(boundary()[patchI])
+            isA<symmetryPlaneFvPatch>(boundary()[patchi])
+         || isA<symmetryFvPatch>(boundary()[patchi])
         )
         {
             fluentMeshFile << 7;
@@ -194,9 +194,9 @@ void Foam::fluentFvMesh::writeFluentMesh() const
         fluentMeshFile
             <<" 0)" << std::endl << "(" << std::endl;
 
-        forAll(patchFaces, faceI)
+        forAll(patchFaces, facei)
         {
-            const labelList& l = patchFaces[faceI];
+            const labelList& l = patchFaces[facei];
 
             fluentMeshFile << "    ";
 
@@ -210,7 +210,7 @@ void Foam::fluentFvMesh::writeFluentMesh() const
                 fluentMeshFile << l[lI] + 1 << " ";
             }
 
-            fluentMeshFile << patchFaceCells[faceI] + 1 << " 0" << std::endl;
+            fluentMeshFile << patchFaceCells[facei] + 1 << " 0" << std::endl;
         }
 
         fluentMeshFile << "))" << std::endl;
@@ -230,21 +230,21 @@ void Foam::fluentFvMesh::writeFluentMesh() const
 
     bool hasWarned = false;
 
-    forAll(cells, cellI)
+    forAll(cells, celli)
     {
-        if (cells[cellI].model() == tet)
+        if (cells[celli].model() == tet)
         {
             fluentMeshFile << " " << 2;
         }
-        else if (cells[cellI].model() == hex)
+        else if (cells[celli].model() == hex)
         {
             fluentMeshFile << " " << 4;
         }
-        else if (cells[cellI].model() == pyr)
+        else if (cells[celli].model() == pyr)
         {
             fluentMeshFile << " " << 5;
         }
-        else if (cells[cellI].model() == prism)
+        else if (cells[celli].model() == prism)
         {
             fluentMeshFile << " " << 6;
         }
@@ -256,7 +256,7 @@ void Foam::fluentFvMesh::writeFluentMesh() const
 
                 WarningInFunction
                     << "foamMeshToFluent: cell shape for cell "
-                    << cellI << " only supported by Fluent polyhedral meshes."
+                    << celli << " only supported by Fluent polyhedral meshes."
                     << nl
                     << "    Suppressing any further messages for polyhedral"
                     << " cells." << endl;
@@ -275,20 +275,20 @@ void Foam::fluentFvMesh::writeFluentMesh() const
     fluentMeshFile << "(39 (2 interior interior-1)())" << std::endl;
 
     // Writing boundary patch types
-    forAll(boundary(), patchI)
+    forAll(boundary(), patchi)
     {
         fluentMeshFile
-            << "(39 (" << patchI + 10 << " ";
+            << "(39 (" << patchi + 10 << " ";
 
         // Write patch type
-        if (isA<wallFvPatch>(boundary()[patchI]))
+        if (isA<wallFvPatch>(boundary()[patchi]))
         {
             fluentMeshFile << "wall ";
         }
         else if
         (
-            isA<symmetryPlaneFvPatch>(boundary()[patchI])
-         || isA<symmetryFvPatch>(boundary()[patchI])
+            isA<symmetryPlaneFvPatch>(boundary()[patchi])
+         || isA<symmetryFvPatch>(boundary()[patchi])
         )
         {
             fluentMeshFile << "symmetry ";
@@ -299,7 +299,7 @@ void Foam::fluentFvMesh::writeFluentMesh() const
         }
 
         fluentMeshFile
-            << boundary()[patchI].name() << ")())" << std::endl;
+            << boundary()[patchi].name() << ")())" << std::endl;
     }
 }
 

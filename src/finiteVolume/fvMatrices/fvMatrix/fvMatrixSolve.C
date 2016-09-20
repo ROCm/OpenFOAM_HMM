@@ -146,7 +146,7 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregated
 
         // copy field and source
 
-        scalarField psiCmpt(psi.internalField().component(cmpt));
+        scalarField psiCmpt(psi.primitiveField().component(cmpt));
         addBoundaryDiag(diag(), cmpt);
 
         scalarField sourceCmpt(source.component(cmpt));
@@ -204,8 +204,9 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregated
         }
 
         solverPerfVec.replace(cmpt, solverPerf);
+        solverPerfVec.solverName() = solverPerf.solverName();
 
-        psi.internalField().replace(cmpt, psiCmpt);
+        psi.primitiveFieldRef().replace(cmpt, psiCmpt);
         diag() = saveDiag;
     }
 
@@ -244,7 +245,7 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveCoupled
     addBoundaryDiag(coupledMatrix.diag(), 0);
     addBoundarySource(coupledMatrix.source(), false);
 
-    coupledMatrix.interfaces() = psi.boundaryField().interfaces();
+    coupledMatrix.interfaces() = psi.boundaryFieldRef().interfaces();
     coupledMatrix.interfacesUpper() = boundaryCoeffs().component(0);
     coupledMatrix.interfacesLower() = internalCoeffs().component(0);
 
@@ -333,14 +334,14 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::fvMatrix<Type>::residual() const
 {
     tmp<Field<Type>> tres(new Field<Type>(source_));
-    Field<Type>& res = tres();
+    Field<Type>& res = tres.ref();
 
     addBoundarySource(res);
 
     // Loop over field components
     for (direction cmpt=0; cmpt<Type::nComponents; cmpt++)
     {
-        scalarField psiCmpt(psi_.internalField().component(cmpt));
+        scalarField psiCmpt(psi_.primitiveField().component(cmpt));
 
         scalarField boundaryDiagCmpt(psi_.size(), 0.0);
         addBoundaryDiag(boundaryDiagCmpt, cmpt);

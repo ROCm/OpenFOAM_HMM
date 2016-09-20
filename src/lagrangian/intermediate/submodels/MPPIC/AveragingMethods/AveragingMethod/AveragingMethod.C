@@ -198,18 +198,18 @@ bool Foam::AveragingMethod<Type>::write() const
     );
 
     // tet-volume weighted sums
-    forAll(mesh_.C(), cellI)
+    forAll(mesh_.C(), celli)
     {
         const List<tetIndices> cellTets =
-            polyMeshTetDecomposition::cellTetIndices(mesh_, cellI);
+            polyMeshTetDecomposition::cellTetIndices(mesh_, celli);
 
         forAll(cellTets, tetI)
         {
             const tetIndices& tetIs = cellTets[tetI];
             const scalar v = tetIs.tet(mesh_).mag();
 
-            cellValue[cellI] += v*interpolate(mesh_.C()[cellI], tetIs);
-            cellGrad[cellI] += v*interpolateGrad(mesh_.C()[cellI], tetIs);
+            cellValue[celli] += v*interpolate(mesh_.C()[celli], tetIs);
+            cellGrad[celli] += v*interpolateGrad(mesh_.C()[celli], tetIs);
 
             const face& f = mesh_.faces()[tetIs.face()];
             labelList vertices(3);
@@ -219,22 +219,22 @@ bool Foam::AveragingMethod<Type>::write() const
 
             forAll(vertices, vertexI)
             {
-                const label pointI = vertices[vertexI];
+                const label pointi = vertices[vertexI];
 
-                pointVolume[pointI] += v;
-                pointValue[pointI] +=
-                    v*interpolate(mesh_.points()[pointI], tetIs);
-                pointGrad[pointI] +=
-                    v*interpolateGrad(mesh_.points()[pointI], tetIs);
+                pointVolume[pointi] += v;
+                pointValue[pointi] +=
+                    v*interpolate(mesh_.points()[pointi], tetIs);
+                pointGrad[pointi] +=
+                    v*interpolateGrad(mesh_.points()[pointi], tetIs);
             }
         }
     }
 
     // average
-    cellValue.internalField() /= mesh_.V();
-    cellGrad.internalField() /= mesh_.V();
-    pointValue.internalField() /= pointVolume;
-    pointGrad.internalField() /= pointVolume;
+    cellValue.primitiveFieldRef() /= mesh_.V();
+    cellGrad.primitiveFieldRef() /= mesh_.V();
+    pointValue.primitiveFieldRef() /= pointVolume;
+    pointGrad.primitiveFieldRef() /= pointVolume;
 
     // write
     if (!cellValue.write()) return false;

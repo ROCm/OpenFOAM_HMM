@@ -5,6 +5,7 @@ global/argList/argList.C
 global/clock/clock.C
 global/profiling/profiling.C
 global/profiling/profilingSysInfo.C
+global/etcFiles/etcFiles.C
 
 bools = primitives/bools
 $(bools)/bool/bool.C
@@ -16,6 +17,8 @@ $(bools)/lists/boolList.C
 chars = primitives/chars
 $(chars)/char/charIO.C
 $(chars)/wchar/wcharIO.C
+
+primitives/direction/directionIO.C
 
 ints = primitives/ints
 $(ints)/uint32/uint32.C
@@ -186,6 +189,7 @@ $(functionEntries)/codeStream/codeStream.C
 $(functionEntries)/functionEntry/functionEntry.C
 $(functionEntries)/includeEntry/includeEntry.C
 $(functionEntries)/includeEtcEntry/includeEtcEntry.C
+$(functionEntries)/includeFuncEntry/includeFuncEntry.C
 $(functionEntries)/includeIfPresentEntry/includeIfPresentEntry.C
 $(functionEntries)/inputModeEntry/inputModeEntry.C
 $(functionEntries)/removeEntry/removeEntry.C
@@ -225,10 +229,12 @@ $(dll)/codedBase/codedBase.C
 
 db/functionObjects/functionObject/functionObject.C
 db/functionObjects/functionObjectList/functionObjectList.C
-db/functionObjects/functionObjectFile/functionObjectFile.C
-db/functionObjects/functionObjectState/functionObjectState.C
-db/functionObjects/outputFilterOutputControl/outputFilterOutputControl.C
-
+db/functionObjects/stateFunctionObject/stateFunctionObject.C
+db/functionObjects/writeFile/writeFile.C
+db/functionObjects/logFiles/logFiles.C
+db/functionObjects/timeControl/timeControl.C
+db/functionObjects/timeControl/timeControlFunctionObject.C
+db/functionObjects/regionFunctionObject/regionFunctionObject.C
 
 Time = db/Time
 $(Time)/TimePaths.C
@@ -274,8 +280,7 @@ $(lduMatrix)/solvers/diagonalSolver/diagonalSolver.C
 $(lduMatrix)/solvers/smoothSolver/smoothSolver.C
 $(lduMatrix)/solvers/PCG/PCG.C
 $(lduMatrix)/solvers/PBiCG/PBiCG.C
-$(lduMatrix)/solvers/ICCG/ICCG.C
-$(lduMatrix)/solvers/BICCG/BICCG.C
+$(lduMatrix)/solvers/PBiCGStab/PBiCGStab.C
 
 $(lduMatrix)/smoothers/GaussSeidel/GaussSeidelSmoother.C
 $(lduMatrix)/smoothers/symGaussSeidel/symGaussSeidelSmoother.C
