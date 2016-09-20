@@ -165,7 +165,7 @@ int Foam::ddt2::apply
     {
         // could add additional statistics here
         Info<< type() << " " << name_
-            << " field " << output
+            << " field " << outputName
             << " average: " << gAverage(output) << endl;
     }
 
