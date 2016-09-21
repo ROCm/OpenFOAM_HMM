@@ -149,11 +149,12 @@ int main(int argc, char *argv[])
     instantList timeDirs = timeSelector::select0(runTime, args);
 
     // default to binary output, unless otherwise specified
-    IOstream::streamFormat format = IOstream::BINARY;
-    if (args.optionFound("ascii"))
-    {
-        format = IOstream::ASCII;
-    }
+    const IOstream::streamFormat format =
+    (
+        args.optionFound("ascii")
+      ? IOstream::ASCII
+      : IOstream::BINARY
+    );
 
     // control for renumbering iterations
     label indexingNumber = 0;
@@ -204,6 +205,11 @@ int main(int argc, char *argv[])
         regionPrefix = regionName;
     }
 
+    if (Pstream::master())
+    {
+        Info<< "Converting " << timeDirs.size() << " time steps" << endl;
+    }
+
     // Construct the list of ensight parts for the entire mesh
     ensightParts partsList(mesh);
 
@@ -244,6 +250,9 @@ int main(int argc, char *argv[])
         cloudTimesUsed.insert(cloudIter.key(), DynamicList<label>());
     }
 
+    Info<< "Startup in "
+        << timer.cpuTimeIncrement() << " s, "
+        << mem.update().size() << " kB" << nl << endl;
 
     forAll(timeDirs, timeI)
     {

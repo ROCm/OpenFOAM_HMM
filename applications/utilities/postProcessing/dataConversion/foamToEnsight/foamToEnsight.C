@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
 
     // default to binary output, unless otherwise specified
-    const enum IOstream::streamFormat format =
+    const IOstream::streamFormat format =
     (
         args.optionFound("ascii")
       ? IOstream::ASCII
@@ -255,7 +255,9 @@ int main(int argc, char *argv[])
     if (Pstream::master())
     {
         fileName caseFileName = args.globalCaseName() + ".case";
-        Info<< nl << "write case: " << caseFileName.c_str() << endl;
+
+        Info<< "Converting " << timeDirs.size() << " time steps" << nl
+            << "Ensight case: " << caseFileName.c_str() << endl;
 
         // The case file is always ASCII
         ensightCaseFilePtr = new OFstream
@@ -333,12 +335,6 @@ int main(int argc, char *argv[])
 
     #include "checkMeshMoving.H"
 
-    if (meshMoving)
-    {
-        Info<< "Detected a moving mesh (multiple polyMesh/points files)."
-            << " Writing meshes for every timestep." << endl;
-    }
-
     if (Pstream::master())
     {
         // test the pre-check variable if there is a moving mesh
@@ -400,6 +396,11 @@ int main(int argc, char *argv[])
         cloudNames = allCloudNames.sortedToc();
     }
 
+    // ignore special fields (_0 fields),
+    // ignore fields we don't handle,
+    // ignore fields that are not available for all time-steps
+    HashTable<bool> fieldsToUse;
+
     HashTable<HashTable<word>> allCloudFields;
     forAll(cloudNames, cloudNo)
     {
@@ -450,6 +451,10 @@ int main(int argc, char *argv[])
             }
         }
     }
+
+    Info<< "Startup in "
+        << timer.cpuTimeIncrement() << " s, "
+        << mem.update().size() << " kB" << nl << endl;
 
     label nTimeSteps = 0;
     forAll(timeDirs, timeIndex)
@@ -515,7 +520,7 @@ int main(int argc, char *argv[])
         // ~~~~~~~~~~~~~~~~~~~~~~
         Info<< "Write volume field (";
 
-        for (label i=0; i<nVolFieldTypes; i++)
+        for (label i=0; i<nVolFieldTypes; ++i)
         {
             wordList fieldNames = objects.names(volFieldTypes[i]);
 
@@ -534,7 +539,7 @@ int main(int argc, char *argv[])
 
                 #include "checkData.H"
 
-                if (!variableGood)
+                if (!fieldsToUse[fieldName])
                 {
                     continue;
                 }
@@ -719,9 +724,14 @@ int main(int argc, char *argv[])
                         ensightCaseFile
                     );
                 }
+                else
+                {
+                    // Do not currently handle this type - blacklist for the future.
+                    fieldsToUse.set(fieldName, false);
+                }
             }
         }
-        Info<< " )" << endl;
+        Info<< " )" << nl;
 
 
         // Cloud field data output
@@ -808,12 +818,12 @@ int main(int argc, char *argv[])
                     );
                 }
             }
-            Info<< " )" << endl;
+            Info<< " )" << nl;
         }
 
         Info<< "Wrote in "
             << timer.cpuTimeIncrement() << " s, "
-            << mem.update().size() << " kB" << nl << endl;
+            << mem.update().size() << " kB" << nl << nl;
     }
 
     #include "ensightCaseTail.H"
