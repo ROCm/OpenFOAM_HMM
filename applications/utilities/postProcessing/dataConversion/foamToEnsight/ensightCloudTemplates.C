@@ -57,10 +57,10 @@ void Foam::writeCloudField
                     val = Zero;
                 }
 
-                for (direction i=0; i < pTraits<Type>::nComponents; ++i)
+                for (direction d=0; d < pTraits<Type>::nComponents; ++d)
                 {
-                    label cmpt = ensightPTraits<Type>::componentOrder[i];
-                    os.write( component(val, cmpt) );
+                    label cmpt = ensightPTraits<Type>::componentOrder[d];
+                    os.write(component(val, cmpt));
 
                     if (++count % 6 == 0)
                     {
@@ -84,10 +84,10 @@ void Foam::writeCloudField
                         val = Zero;
                     }
 
-                    for (direction i=0; i < pTraits<Type>::nComponents; ++i)
+                    for (direction d=0; d < pTraits<Type>::nComponents; ++d)
                     {
-                        label cmpt = ensightPTraits<Type>::componentOrder[i];
-                        os.write( component(val, cmpt) );
+                        label cmpt = ensightPTraits<Type>::componentOrder[d];
+                        os.write(component(val, cmpt));
 
                         if (++count % 6 == 0)
                         {
@@ -168,9 +168,9 @@ void Foam::ensightCloudField
         }
 
         filePtr = new ensightFile(dataDir, postFileName, format);
+        // description
         filePtr->write
         (
-            // description
             string(postFileName + " <" + pTraits<Type>::typeName + ">")
         );
         filePtr->newline();
