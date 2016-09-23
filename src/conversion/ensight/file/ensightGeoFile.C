@@ -24,14 +24,26 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ensightGeoFile.H"
+#include "foamVersion.H"
+
+// Macros to stringify macro contents.
+#define STRINGIFY(content)      #content
+#define STRING_QUOTE(input)     STRINGIFY(input)
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::ensightGeoFile::initialize()
 {
+    #ifdef OPENFOAM_PLUS
+    string desc2("Written by OpenFOAM+ " STRING_QUOTE(OPENFOAM_PLUS));
+    #else
+    string desc2("Written by OpenFOAM-" + string(Foam::FOAMversion));
+    #endif
+
     writeBinaryHeader();
     write("Ensight Geometry File");  newline(); // description line 1
-    write("=====================");  newline(); // description line 2
+    write(desc2);                    newline(); // description line 2
     write("node id assign");         newline();
     write("element id assign");      newline();
 }
