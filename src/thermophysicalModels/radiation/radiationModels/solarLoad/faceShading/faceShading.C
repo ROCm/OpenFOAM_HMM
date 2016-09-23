@@ -386,14 +386,15 @@ void Foam::faceShading::calculate()
         );
 
         volScalarField& hitFaces = thitFaces.ref();
+        volScalarField::Boundary& hitFacesBf = hitFaces.boundaryFieldRef();
 
-        hitFaces.boundaryField() = 0.0;
+        hitFacesBf = 0.0;
         forAll(rayStartFaces_, i)
         {
             const label faceI = rayStartFaces_[i];
             label patchID = patches.whichPatch(faceI);
             const polyPatch& pp = patches[patchID];
-            hitFaces.boundaryField()[patchID][faceI - pp.start()] = 1.0;
+            hitFacesBf[patchID][faceI - pp.start()] = 1.0;
         }
         hitFaces.write();
     }

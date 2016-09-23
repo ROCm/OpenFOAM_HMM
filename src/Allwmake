@@ -47,11 +47,7 @@ wmake $targetType lagrangian/basic
 wmake $targetType lagrangian/distributionModels
 wmake $targetType genericPatchFields
 
-<<<<<<< HEAD
 conversion/Allwmake $targetType $*
-=======
-wmake $targetType conversion
->>>>>>> foundation-github
 wmake $targetType mesh/extrudeModel
 wmake $targetType dynamicMesh
 wmake $targetType sampling

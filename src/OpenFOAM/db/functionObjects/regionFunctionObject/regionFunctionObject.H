@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,7 @@ Description
     reference to the region Foam::objectRegistry.
 
 See also
-    Foam::functionObject
+    Foam::functionObjects::stateFunctionObject
 
 SourceFiles
     regionFunctionObject.C
@@ -39,7 +39,7 @@ SourceFiles
 #ifndef functionObjects_regionFunctionObject_H
 #define functionObjects_regionFunctionObject_H
 
-#include "functionObject.H"
+#include "stateFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,20 +53,17 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class regionFunctionObject Declaration
+                    Class regionFunctionObject Declaration
 \*---------------------------------------------------------------------------*/
 
 class regionFunctionObject
 :
-    public functionObject
+    public stateFunctionObject
 {
 
 protected:
 
     // Protected member data
-
-        //- Reference to the Time
-        const Time& time_;
 
         //- Reference to the region objectRegistry
         const objectRegistry& obr_;
@@ -86,7 +83,7 @@ protected:
         template<class ObjectType>
         bool store
         (
-            word& fieldName,
+            const word& fieldName,
             const tmp<ObjectType>& tfield,
             bool cacheable = false
         );

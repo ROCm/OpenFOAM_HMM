@@ -40,14 +40,21 @@ License
 
 namespace Foam
 {
+namespace functionObjects
+{
+namespace runTimePostPro
+{
     defineTypeNameAndDebug(functionObjectSurface, 0);
     addToRunTimeSelectionTable(surface, functionObjectSurface, dictionary);
+}
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::functionObjectSurface::functionObjectSurface
+Foam::functionObjects::runTimePostPro::functionObjectSurface::
+functionObjectSurface
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
@@ -67,13 +74,15 @@ Foam::functionObjectSurface::functionObjectSurface
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::functionObjectSurface::~functionObjectSurface()
+Foam::functionObjects::runTimePostPro::functionObjectSurface::
+~functionObjectSurface()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::functionObjectSurface::addGeometryToScene
+void Foam::functionObjects::runTimePostPro::functionObjectSurface::
+addGeometryToScene
 (
     const scalar position,
     vtkRenderer* renderer
@@ -98,7 +107,7 @@ void Foam::functionObjectSurface::addGeometryToScene
         WarningInFunction
             << "Unable to find function object " << functionObject_
             << " output for field " << fieldName_
-            << ". Surface will not be processed"
+            << ". functionObjectSurface will not be processed"
             << endl;
         return;
     }

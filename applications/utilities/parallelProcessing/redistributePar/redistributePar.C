@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -716,8 +716,7 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
     {
         GeoField& fld = *iter();
 
-        typename GeoField::GeometricBoundaryField& bfld =
-            fld.boundaryField();
+        typename GeoField::Boundary& bfld = fld.boundaryFieldRef();
         if
         (
             Pstream::defaultCommsType == Pstream::blocking
@@ -728,7 +727,7 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
 
             forAll(bfld, patchi)
             {
-                typename GeoField::PatchFieldType& pfld = bfld[patchi];
+                typename GeoField::Patch& pfld = bfld[patchi];
 
                 //if (pfld.coupled())
                 //if (isA<CoupledPatchType>(pfld))
@@ -750,7 +749,7 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
 
             forAll(bfld, patchi)
             {
-                typename GeoField::PatchFieldType& pfld = bfld[patchi];
+                typename GeoField::Patch& pfld = bfld[patchi];
 
                 //if (pfld.coupled())
                 //if (isA<CoupledPatchType>(pfld))
@@ -768,7 +767,7 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
             forAll(patchSchedule, patchEvali)
             {
                 label patchi = patchSchedule[patchEvali].patch;
-                typename GeoField::PatchFieldType& pfld = bfld[patchi];
+                typename GeoField::Patch& pfld = bfld[patchi];
 
                 //if (pfld.coupled())
                 //if (isA<CoupledPatchType>(pfld))

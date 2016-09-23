@@ -93,7 +93,7 @@ void correctProcessorPatches(volScalarField& vf)
     // Not possible to use correctBoundaryConditions on fields as they may
     // use local info as opposed to the constraint values employed here,
     // but still need to update processor patches
-    volScalarField::GeometricBoundaryField& bf = vf.boundaryField();
+    volScalarField::Boundary& bf = vf.boundaryFieldRef();
 
     forAll(bf, patchI)
     {
@@ -134,8 +134,8 @@ void blendField
     if (fieldHeader.typeHeaderOk<volScalarField>(true))
     {
         volScalarField fld(fieldHeader, mesh);
-        scalarField& internalField = fld.internalField();
-        internalField = (1 - mask)*internalField + mask*boundaryLayerField;
+        scalarField& pf = fld.primitiveFieldRef();
+        pf = (1 - mask)*pf + mask*boundaryLayerField;
         fld.max(SMALL);
 
         // Do not correct BC
@@ -172,10 +172,9 @@ void calcOmegaField
     if (omegaHeader.typeHeaderOk<volScalarField>(true))
     {
         volScalarField omega(omegaHeader, mesh);
-        scalarField& internalField = omega.internalField();
+        scalarField& pf = omega.primitiveFieldRef();
 
-        internalField =
-            (1 - mask)*internalField + mask*epsilonBL/(Cmu*kBL + SMALL);
+        pf = (1 - mask)*pf + mask*epsilonBL/(Cmu*kBL + SMALL);
         omega.max(SMALL);
 
         // Do not correct BC

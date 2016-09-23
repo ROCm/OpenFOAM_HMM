@@ -70,12 +70,7 @@ tmp<GeometricField<Type, fvPatchField, volMesh>>
 volField
 (
     const fvMeshSubset& meshSubsetter,
-    const typename GeometricField
-    <
-        Type,
-        fvPatchField,
-        volMesh
-    >::DimensionedInternalField& df
+    const typename GeometricField<Type, fvPatchField, volMesh>::Internal& df
 )
 {
     // Construct volField (with zeroGradient) from dimensioned field
@@ -93,7 +88,7 @@ volField
             zeroGradientFvPatchField<scalar>::typeName
         )
     );
-    tvf.ref().internalField() = df;
+    tvf.ref().primitiveFieldRef() = df;
     tvf.ref().correctBoundaryConditions();
     const GeometricField<Type, fvPatchField, volMesh>& vf = tvf();
 

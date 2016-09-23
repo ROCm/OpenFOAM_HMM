@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,7 @@ License
 
 // OpenFOAM includes
 #include "functionObjectCloud.H"
+#include "fvMesh.H"
 #include "runTimePostProcessing.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -40,14 +41,20 @@ License
 
 namespace Foam
 {
+namespace functionObjects
+{
+namespace runTimePostPro
+{
     defineTypeNameAndDebug(functionObjectCloud, 0);
     addToRunTimeSelectionTable(pointData, functionObjectCloud, dictionary);
+}
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::functionObjectCloud::functionObjectCloud
+Foam::functionObjects::runTimePostPro::functionObjectCloud::functionObjectCloud
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
@@ -67,13 +74,15 @@ Foam::functionObjectCloud::functionObjectCloud
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::functionObjectCloud::~functionObjectCloud()
+Foam::functionObjects::runTimePostPro::functionObjectCloud::
+~functionObjectCloud()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::functionObjectCloud::addGeometryToScene
+void Foam::functionObjects::runTimePostPro::functionObjectCloud::
+addGeometryToScene
 (
     const scalar position,
     vtkRenderer* renderer
@@ -85,13 +94,13 @@ void Foam::functionObjectCloud::addGeometryToScene
     }
 
     const dictionary& cloudDict =
-        geometryBase::parent_.obr().lookupObject<IOdictionary>
+        geometryBase::parent_.mesh().lookupObject<IOdictionary>
         (
             cloudName_ + "OutputProperties"
         );
 
     fileName fName;
-    if (cloudDict.found("cloudFunctionObject"))
+    if (cloudDict.found("functionObjectCloud"))
     {
         const dictionary& foDict = cloudDict.subDict("cloudFunctionObject");
         if (foDict.found(functionObject_))
@@ -138,7 +147,10 @@ void Foam::functionObjectCloud::addGeometryToScene
 }
 
 
-void Foam::functionObjectCloud::updateActors(const scalar position)
+void Foam::functionObjects::runTimePostPro::functionObjectCloud::updateActors
+(
+    const scalar position
+)
 {
     actor_->GetProperty()->SetOpacity(opacity(position));
 

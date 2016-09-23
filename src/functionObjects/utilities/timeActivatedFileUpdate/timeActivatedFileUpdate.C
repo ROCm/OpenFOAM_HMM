@@ -109,7 +109,7 @@ bool Foam::functionObjects::timeActivatedFileUpdate::read
     lastIndex_ = -1;
     fileToUpdate_.expand();
 
-    Log << type() << " " << name_ << " output:" << nl
+    Log << type() << " " << name() << " output:" << nl
         << "    time vs file list:" << endl;
 
     forAll(timeVsFile_, i)

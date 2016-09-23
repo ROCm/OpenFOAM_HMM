@@ -365,7 +365,8 @@ public:
         (
             const word& name,
             const Time& runTime,
-            const dictionary& dict
+            const dictionary& dict,
+            const bool readFields = true
         );
 
         //- Construct from objectRegistry and dictionary
@@ -373,7 +374,8 @@ public:
         (
             const word& name,
             const objectRegistry& obr,
-            const dictionary&
+            const dictionary& dict,
+            const bool readFields = true
         );
 
 

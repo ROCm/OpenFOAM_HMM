@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "surfaceFieldValue.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -58,7 +59,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::faceSign() const
 inline Foam::fileName
 Foam::functionObjects::fieldValues::surfaceFieldValue::outputDir() const
 {
-    return baseFileDir()/name()/"surface"/obr_.time().timeName();
+    return baseFileDir()/name()/"surface"/time_.timeName();
 }
 
 

@@ -81,11 +81,11 @@ bool Foam::functionObjects::readFields::execute()
         const word& fieldName = fieldSet_[fieldi];
 
         // If necessary load field
-        loadField<scalar>(fieldName, vsf_, ssf_);
-        loadField<vector>(fieldName, vvf_, svf_);
-        loadField<sphericalTensor>(fieldName, vSpheretf_, sSpheretf_);
-        loadField<symmTensor>(fieldName, vSymmtf_, sSymmtf_);
-        loadField<tensor>(fieldName, vtf_, stf_);
+        loadField<scalar>(fieldName);
+        loadField<vector>(fieldName);
+        loadField<sphericalTensor>(fieldName);
+        loadField<symmTensor>(fieldName);
+        loadField<tensor>(fieldName);
     }
 
     return true;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,8 +55,7 @@ Usage
 See also
     Foam::functionObject
     Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::logFiles
-    Foam::functionObjects::pressureTools
+    Foam::functionObjects::writeFiles
     Foam::functionObjects::timeControl
 
 SourceFiles
@@ -70,9 +69,7 @@ SourceFiles
 #include "fvMeshFunctionObject.H"
 #include "logFiles.H"
 #include "volFieldsFwd.H"
-#include "surfaceFieldsFwd.H"
 #include "HashSet.H"
-#include "turbulentFluidThermoModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -88,7 +85,7 @@ namespace functionObjects
 class wallHeatFlux
 :
     public fvMeshFunctionObject,
-    public logFiles
+    public writeFile
 {
 
 protected:
@@ -102,12 +99,13 @@ protected:
     // Protected Member Functions
 
         //- File header information
-        virtual void writeFileHeader(const label i);
+        virtual void writeFileHeader(Ostream& os) const;
 
         //- Calculate the heat-flux
         void calcHeatFlux
         (
-            const compressible::turbulenceModel& turbModel,
+            const volScalarField& alpha,
+            const volScalarField& he,
             volScalarField& wallHeatFlux
         );
 

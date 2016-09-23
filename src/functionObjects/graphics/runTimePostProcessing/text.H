@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::text
+    Foam::functionObjects::runTimePostPro::text
 
 Description
     Example of text object specification:
@@ -48,8 +48,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef text_H
-#define text_H
+#ifndef functionObjects_runTimePostPro_text_H
+#define functionObjects_runTimePostPro_text_H
 
 #include "geometryBase.H"
 #include "Tuple2.H"
@@ -59,6 +59,10 @@ SourceFiles
 class vtkRenderer;
 
 namespace Foam
+{
+namespace functionObjects
+{
+namespace runTimePostPro
 {
 
 /*---------------------------------------------------------------------------*\
@@ -74,10 +78,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        text(const text&);
+        text(const text&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const text&);
+        void operator=(const text&) = delete;
 
 
 protected:
@@ -136,6 +140,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace runTimePostPro
+} // End namespace functionObjects
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

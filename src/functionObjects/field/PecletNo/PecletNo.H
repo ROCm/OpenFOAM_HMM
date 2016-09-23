@@ -33,10 +33,10 @@ Description
 Usage
     Example of function object specification to calculate the Peclet number:
     \verbatim
-    Peclet1
+    PecletNo1
     {
-        type        Peclet;
-        functionObjectLibs ("libutilityFunctionObjects.so");
+        type        PecletNo;
+        libs        ("libutilityFunctionObjects.so");
         ...
     }
     \endverbatim
@@ -46,6 +46,7 @@ Usage
         Property     | Description             | Required    | Default value
         type         | type name: Peclet       | yes         |
         phi          | Name of flux field      | no          | phi
+        rho          | Name of density field   | no          | rho
         result       | Name of Peclet field    | no          | <function name>
         log          | Log to standard output  | no          | yes
     \endtable
@@ -59,6 +60,7 @@ SourceFiles
 #define functionObjects_PecletNo_H
 
 #include "fieldExpression.H"
+#include "surfaceFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,7 +77,16 @@ class PecletNo
 :
     public fieldExpression
 {
+    // Private data
+
+        //- Name of density field, default is "rho"
+        word rhoName_;
+
+
     // Private Member Functions
+
+        //- Optionally scale the flux for compressible cases
+        tmp<surfaceScalarField> rhoScale(const surfaceScalarField& phi) const;
 
         //- Calculate the Peclet number field and return true if successful
         virtual bool calc();
@@ -89,8 +100,7 @@ public:
 
     // Constructors
 
-        //- Construct for given objectRegistry and dictionary.
-        //  Allow the possibility to load fields from files
+        //- Construct from Time and dictionary
         PecletNo
         (
             const word& name,
@@ -101,6 +111,12 @@ public:
 
     //- Destructor
     virtual ~PecletNo();
+
+
+    // Member Functions
+
+        //- Read the PecletNo data
+        virtual bool read(const dictionary&);
 };
 
 

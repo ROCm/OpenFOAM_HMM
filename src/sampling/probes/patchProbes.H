@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -147,9 +147,6 @@ protected:
         //- Find elements containing patchProbes
         virtual void findElements(const fvMesh&);
 
-        //- Read dictionary settings
-        void readDict(const dictionary& dict);
-
 
 private:
 
@@ -173,7 +170,9 @@ public:
         (
             const word& name,
             const Time& time,
-            const dictionary& dict
+            const dictionary& dict,
+            const bool loadFromFiles = false,
+            const bool readFields = true
         );
 
         //- Construct for given objectRegistry and dictionary.
@@ -184,7 +183,7 @@ public:
             const objectRegistry&,
             const dictionary&,
             const bool loadFromFiles = false,
-            const bool findElements = true
+            const bool readFields = true
         );
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,7 @@ SourceFiles
 #ifndef functionObjects_writeDictionary_H
 #define functionObjects_writeDictionary_H
 
-#include "functionObject.H"
+#include "regionFunctionObject.H"
 #include "wordList.H"
 #include "SHA1Digest.H"
 
@@ -59,12 +59,9 @@ namespace functionObjects
 
 class writeDictionary
 :
-    public functionObject
+    public regionFunctionObject
 {
     // Private data
-
-        //- Reference to the database
-        const objectRegistry& obr_;
 
         //- Names of dictionaries to monitor
         wordList dictNames_;

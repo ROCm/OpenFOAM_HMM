@@ -141,22 +141,13 @@ void Foam::sampledSets::combineSampledSets
 Foam::sampledSets::sampledSets
 (
     const word& name,
-    const Time& t,
+    const Time& runTime,
     const dictionary& dict
 )
 :
-    functionObject(name),
+    functionObjects::regionFunctionObject(name, runTime, dict),
     PtrList<sampledSet>(),
-    mesh_
-    (
-        refCast<const fvMesh>
-        (
-            t.lookupObject<objectRegistry>
-            (
-                dict.lookupOrDefault("region", polyMesh::defaultRegion)
-            )
-        )
-    ),
+    mesh_(refCast<const fvMesh>(obr_)),
     loadFromFiles_(false),
     outputPath_(fileName::null),
     searchEngine_(mesh_),
@@ -188,7 +179,7 @@ Foam::sampledSets::sampledSets
     const bool loadFromFiles
 )
 :
-    stateFunctionObject(obr, name),
+    functionObjects::regionFunctionObject(name, obr, dict),
     PtrList<sampledSet>(),
     mesh_(refCast<const fvMesh>(obr)),
     loadFromFiles_(loadFromFiles),

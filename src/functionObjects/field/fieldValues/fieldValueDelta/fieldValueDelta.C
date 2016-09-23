@@ -62,7 +62,10 @@ const Foam::NamedEnum
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void Foam::fieldValues::fieldValueDelta::writeFileHeader(Ostream& os) const
+void Foam::functionObjects::fieldValues::fieldValueDelta::writeFileHeader
+(
+    Ostream& os
+) const
 {
     const wordList& fields1 = region1Ptr_->fields();
     const wordList& fields2 = region2Ptr_->fields();
@@ -100,7 +103,7 @@ Foam::functionObjects::fieldValues::fieldValueDelta::fieldValueDelta
     const dictionary& dict
 )
 :
-    regionFunctionObject(name, runTime, dict),
+    fvMeshFunctionObject(name, runTime, dict),
     writeFile(obr_, name, typeName, dict),
     operation_(opSubtract),
     region1Ptr_(nullptr),
@@ -124,7 +127,7 @@ bool Foam::functionObjects::fieldValues::fieldValueDelta::read
     const dictionary& dict
 )
 {
-    regionFunctionObject::read(dict);
+    fvMeshFunctionObject::read(dict);
 
     writeFile::read(dict);
 
@@ -164,8 +167,8 @@ bool Foam::functionObjects::fieldValues::fieldValueDelta::write()
 
     Log << type() << " " << name() << " write:" << endl;
 
-    const word& name1 = source1Ptr_->name();
-    const word& name2 = source2Ptr_->name();
+    const word& name1 = region1Ptr_->name();
+    const word& name2 = region2Ptr_->name();
 
     const wordList entries1 = objectResultEntries(name1);
     const wordList entries2 = objectResultEntries(name2);
@@ -173,7 +176,7 @@ bool Foam::functionObjects::fieldValues::fieldValueDelta::write()
     if (entries1.size() != entries2.size())
     {
         FatalErrorInFunction
-            << name_ << ": objects must generate the same number of results"
+            << name() << ": objects must generate the same number of results"
             << nl
             << "    " << name1 << " objects: " << entries1 << nl
             << "    " << name2 << " objects: " << entries2 << nl
@@ -190,7 +193,7 @@ bool Foam::functionObjects::fieldValues::fieldValueDelta::write()
         if (type1 != type2)
         {
             FatalErrorInFunction
-                << name_
+                << name()
                 << ": input values for operation must be of the same type"
                 << nl
                 << "    " << entry1 << ": " << type1 << nl

@@ -30,10 +30,9 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::functionObjects::surfaceInterpolate::interpolateFields() const
+void Foam::functionObjects::surfaceInterpolate::interpolateFields()
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
-    typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
 
     // Convert field to map
     HashTable<word> fieldMap(2*fieldSet_.size());
@@ -61,14 +60,10 @@ void Foam::functionObjects::surfaceInterpolate::interpolateFields() const
             }
             else
             {
-                tmp<VolFieldType> tvf
-                (
-                    new SurfaceFieldType(sName, linearInterpolate(fld))
-                );
-                store(tvf, sName);
+                store(sName, linearInterpolate(fld));
 
                 Log << "        interpolated " << fld.name() << " to create "
-                    << sflds[sz].name() << endl;
+                    << sName << endl;
             }
         }
     }

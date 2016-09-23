@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -618,11 +618,11 @@ int main(int argc, char *argv[])
 
 
         // Construct dimensioned fields
-        PtrList<volScalarField::DimensionedInternalField> dsf;
-        PtrList<volVectorField::DimensionedInternalField> dvf;
-        PtrList<volSphericalTensorField::DimensionedInternalField> dSpheretf;
-        PtrList<volSymmTensorField::DimensionedInternalField> dSymmtf;
-        PtrList<volTensorField::DimensionedInternalField> dtf;
+        PtrList<const volScalarField::Internal> dsf;
+        PtrList<const volVectorField::Internal> dvf;
+        PtrList<const volSphericalTensorField::Internal> dSpheretf;
+        PtrList<const volSymmTensorField::Internal> dSymmtf;
+        PtrList<const volTensorField::Internal> dtf;
 
         if (!specifiedFields || selectedFields.size())
         {

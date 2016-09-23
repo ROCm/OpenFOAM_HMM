@@ -33,7 +33,7 @@ template<class Type>
 void Foam::functionObjects::residuals::writeFileHeader
 (
     Ostream& os,
-    const word& fieldName,
+    const word& fieldName
 ) const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;

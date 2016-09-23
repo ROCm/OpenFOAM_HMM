@@ -39,7 +39,7 @@ Usage
     yPlus1
     {
         type        yPlus;
-        functionObjectLibs ("libutilityFunctionObjects.so");
+        libs        ("libutilityFunctionObjects.so");
         ...
     }
     \endverbatim
@@ -55,8 +55,8 @@ Usage
 
 See also
     Foam::functionObject
-    Foam::functionObjects::fieldExpression
-    Foam::functionObjects::writeFiles
+    Foam::functionObjects::fvMeshFunctionObject
+    Foam::functionObjects::writeFile
     Foam::functionObjects::timeControl
 
 SourceFiles
@@ -70,7 +70,6 @@ SourceFiles
 #include "fvMeshFunctionObject.H"
 #include "writeFile.H"
 #include "volFieldsFwd.H"
-#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -93,15 +92,6 @@ class yPlus
 
         //- File header information
         virtual void writeFileHeader(Ostream& os) const;
-
-        //- Calculate y+
-        template<class TurbulenceModel>
-        void calcYPlus
-        (
-            const TurbulenceModel& turbulenceModel,
-            const fvMesh& mesh,
-            volScalarField& yPlus
-        );
 
         //- Disallow default bitwise copy construct
         yPlus(const yPlus&);
@@ -148,12 +138,6 @@ public:
 
 } // End namespace functionObjects
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "yPlusTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

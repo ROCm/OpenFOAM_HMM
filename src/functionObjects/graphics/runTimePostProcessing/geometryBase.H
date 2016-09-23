@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,17 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::geometryBase
+    Foam::functionObjects::runTimePostPro::geometryBase
 
 Description
+    Base class for surface handling
 
 SourceFiles
     geometryBase.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef geometryBase_H
-#define geometryBase_H
+#ifndef functionObjects_runTimePostPro_geometryBase_H
+#define functionObjects_runTimePostPro_geometryBase_H
 
 #include "dictionary.H"
 #include "vector.H"
@@ -47,8 +48,13 @@ class vtkActor;
 
 namespace Foam
 {
-
+namespace functionObjects
+{
 class runTimePostProcessing;
+
+namespace runTimePostPro
+{
+
 
 /*---------------------------------------------------------------------------*\
                         Class geometryBase Declaration
@@ -63,9 +69,9 @@ public:
 
         enum renderModeType
         {
-            rmFlat,
-            rmGouraud,
-            rmPhong
+            rmFlat,             //< Flat shading
+            rmGouraud,          //< Gouraud shading
+            rmPhong             //< Phong shading
         };
 
         static const NamedEnum<renderModeType, 3> renderModeTypeNames;
@@ -162,6 +168,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace runTimePostPro
+} // End namespace functionObjects
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

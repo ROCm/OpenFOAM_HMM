@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,17 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjectLine
+    Foam::functionObjects::runTimePostPro::functionObjectLine
 
 Description
+    Visualisation of line data from function object output
 
 SourceFiles
     functionObjectLine.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjectLine_H
-#define functionObjectLine_H
+#ifndef functionObjects_runTimePostPro_functionObjectLine_H
+#define functionObjects_runTimePostPro_functionObjectLine_H
 
 #include "pathline.H"
 #include "fieldVisualisationBase.H"
@@ -40,6 +41,10 @@ SourceFiles
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace functionObjects
+{
+namespace runTimePostPro
 {
 
 /*---------------------------------------------------------------------------*\
@@ -56,10 +61,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        functionObjectLine(const functionObjectLine&);
+        functionObjectLine(const functionObjectLine&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const functionObjectLine&);
+        void operator=(const functionObjectLine&) = delete;
 
 
 protected:
@@ -76,7 +81,7 @@ protected:
 public:
 
     //- Run-time type information
-    TypeName("line");
+    TypeName("functionObjectLine");
 
 
     // Constructors
@@ -110,6 +115,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace runTimePostPro
+} // End namespace functionObjects
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

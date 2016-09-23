@@ -230,7 +230,7 @@ void writeParts
     {
         boolList includeMap(surf.size(), false);
 
-        forAll(faceZone, faceI)
+        forAll(faceZone, facei)
         {
             if (faceZone[facei] == zone)
             {
@@ -651,7 +651,7 @@ int main(int argc, char *argv[])
                 {
                     Info<< "    close unconnected points "
                         << pti << ' ' << localPoints[pti]
-                        << " and " << prevPtI << ' '
+                        << " and " << prevPti << ' '
                         << localPoints[prevPti]
                         << " distance:"
                         << mag(localPoints[pti] - localPoints[prevPti])
@@ -660,8 +660,8 @@ int main(int argc, char *argv[])
                 else
                 {
                     Info<< "    small edge between points "
-                        << ptI << ' ' << localPoints[pti]
-                        << " and " << prevPtI << ' '
+                        << pti << ' ' << localPoints[pti]
+                        << " and " << prevPti << ' '
                         << localPoints[prevPti]
                         << " distance:"
                         << mag(localPoints[pti] - localPoints[prevPti])
@@ -837,7 +837,7 @@ int main(int argc, char *argv[])
 
         label nInt = 0;
 
-        forAll(surf.edges(), edgeI)
+        forAll(surf.edges(), edgei)
         {
             const edge& e = surf.edges()[edgei];
 

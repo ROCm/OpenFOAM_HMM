@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 #include "surfaceInterpolate.H"
 #include "fvcSnGrad.H"
 #include "wallPolyPatch.H"
+#include "turbulentFluidThermoModel.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -43,35 +44,31 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void Foam::functionObjects::wallHeatFlux::writeFileHeader(const label i)
+void Foam::functionObjects::wallHeatFlux::writeFileHeader(Ostream& os) const
 {
     // Add headers to output data
-    writeHeader(file(), "Wall heat-flux");
-    writeCommented(file(), "Time");
-    writeTabbed(file(), "patch");
-    writeTabbed(file(), "min");
-    writeTabbed(file(), "max");
-    writeTabbed(file(), "integral");
-    file() << endl;
+    writeHeader(os, "Wall heat-flux");
+    writeCommented(os, "Time");
+    writeTabbed(os, "patch");
+    writeTabbed(os, "min");
+    writeTabbed(os, "max");
+    writeTabbed(os, "integral");
+    os  << endl;
 }
 
 
 void Foam::functionObjects::wallHeatFlux::calcHeatFlux
 (
-    const compressible::turbulenceModel& model,
+    const volScalarField& alpha,
+    const volScalarField& he,
     volScalarField& wallHeatFlux
 )
 {
-    surfaceScalarField heatFlux
-    (
-        fvc::interpolate(model.alphaEff())*fvc::snGrad(model.transport().he())
-    );
+    surfaceScalarField heatFlux(fvc::interpolate(alpha)*fvc::snGrad(he));
 
-    volScalarField::Boundary& wallHeatFluxBf =
-        wallHeatFlux.boundaryFieldRef();
+    volScalarField::Boundary& wallHeatFluxBf = wallHeatFlux.boundaryFieldRef();
 
-    const surfaceScalarField::Boundary& heatFluxBf =
-        heatFlux.boundaryField();
+    const surfaceScalarField::Boundary& heatFluxBf = heatFlux.boundaryField();
 
     forAll(wallHeatFluxBf, patchi)
     {
@@ -82,8 +79,7 @@ void Foam::functionObjects::wallHeatFlux::calcHeatFlux
     {
         const volScalarField& Qr = lookupObject<volScalarField>("Qr");
 
-        const volScalarField::Boundary& radHeatFluxBf =
-            Qr.boundaryField();
+        const volScalarField::Boundary& radHeatFluxBf = Qr.boundaryField();
 
         forAll(wallHeatFluxBf, patchi)
         {
@@ -103,7 +99,7 @@ Foam::functionObjects::wallHeatFlux::wallHeatFlux
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    logFiles(obr_, name),
+    writeFile(obr_, name, typeName, dict),
     patchSet_()
 {
     volScalarField* wallHeatFluxPtr
@@ -126,7 +122,6 @@ Foam::functionObjects::wallHeatFlux::wallHeatFlux
     mesh_.objectRegistry::store(wallHeatFluxPtr);
 
     read(dict);
-    resetName(typeName);
 }
 
 
@@ -141,6 +136,7 @@ Foam::functionObjects::wallHeatFlux::~wallHeatFlux()
 bool Foam::functionObjects::wallHeatFlux::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
+    writeFile::read(dict);
 
     const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 
@@ -214,7 +210,24 @@ bool Foam::functionObjects::wallHeatFlux::execute()
                 turbulenceModel::propertiesName
             );
 
-        calcHeatFlux(turbModel, wallHeatFlux);
+        calcHeatFlux
+        (
+            turbModel.alphaEff()(),
+            turbModel.transport().he(),
+            wallHeatFlux
+        );
+    }
+    else if (foundObject<fluidThermo>(fluidThermo::dictName))
+    {
+        const fluidThermo& thermo =
+            lookupObject<fluidThermo>(fluidThermo::dictName);
+
+        calcHeatFlux
+        (
+            thermo.alpha(),
+            thermo.he(),
+            wallHeatFlux
+        );
     }
     else
     {
@@ -229,10 +242,7 @@ bool Foam::functionObjects::wallHeatFlux::execute()
 
 bool Foam::functionObjects::wallHeatFlux::write()
 {
-    logFiles::write();
-
-    const volScalarField& wallHeatFlux =
-        obr_.lookupObject<volScalarField>(type());
+    const volScalarField& wallHeatFlux = lookupObject<volScalarField>(type());
 
     Log << type() << " " << name() << " write:" << nl
         << "    writing field " << wallHeatFlux.name() << endl;
@@ -249,8 +259,7 @@ bool Foam::functionObjects::wallHeatFlux::write()
         label patchi = iter.key();
         const fvPatch& pp = patches[patchi];
 
-        const scalarField& hfp =
-            wallHeatFlux.boundaryField()[patchi];
+        const scalarField& hfp = wallHeatFlux.boundaryField()[patchi];
 
         const scalar minHfp = gMin(hfp);
         const scalar maxHfp = gMax(hfp);

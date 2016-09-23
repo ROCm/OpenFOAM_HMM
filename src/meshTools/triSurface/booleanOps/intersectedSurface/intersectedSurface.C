@@ -510,7 +510,7 @@ Foam::label Foam::intersectedSurface::nextEdge
     {
         // No unvisited edge found
         {
-            Pout<< "Writing face:" << faceI << " to face.obj" << endl;
+            Pout<< "Writing face:" << facei << " to face.obj" << endl;
             OFstream str("face.obj");
             writeOBJ(points, edges, fEdges, str);
 
@@ -714,7 +714,7 @@ Foam::faceList Foam::intersectedSurface::resplitFace
 
             label nVisits = iter();
 
-            Pout<< "point:" << pointI << "  nVisited:" << nVisits
+            Pout<< "point:" << pointi << "  nVisited:" << nVisits
                 << "  pointEdges:" << facePointEdges[pointi].size() << endl;
         }
     }
@@ -1097,11 +1097,11 @@ Foam::intersectedSurface::intersectedSurface
     DynamicList<labelledTri> newTris(eSurf.edges().size()/2);
 
     // Start in newTris for decomposed face.
-    labelList startTriI(surf.size(), 0);
+    labelList startTrii(surf.size(), 0);
 
     forAll(surf, facei)
     {
-        startTriI[facei] = newTris.size();
+        startTrii[facei] = newTris.size();
 
         if (eSurf.faceEdges()[facei].size() != surf.faceEdges()[facei].size())
         {
@@ -1176,7 +1176,7 @@ Foam::intersectedSurface::intersectedSurface
 
     for (label facei = 0; facei < surf.size()-1; facei++)
     {
-        for (label trii = startTrii[facei]; triI < startTrii[facei+1]; trii++)
+        for (label trii = startTrii[facei]; trii < startTrii[facei+1]; trii++)
         {
             faceMap_[trii] = facei;
         }
@@ -1202,7 +1202,7 @@ Foam::intersectedSurface::intersectedSurface
     )
     {
         // Get edge vertices in triSurface local numbering
-        const edge& e = eSurf.edges()[edgeI];
+        const edge& e = eSurf.edges()[edgei];
         label surfStarti = meshPointMap()[e.start()];
         label surfEndi = meshPointMap()[e.end()];
 

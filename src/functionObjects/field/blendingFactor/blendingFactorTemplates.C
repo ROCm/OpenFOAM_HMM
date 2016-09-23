@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,13 +24,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "gaussConvectionScheme.H"
+#include "boundedConvectionScheme.H"
 #include "blendedSchemeBase.H"
 #include "fvcCellReduce.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::blendingFactor::calcScheme
+void Foam::functionObjects::blendingFactor::calcBlendingFactor
 (
     const GeometricField<Type, fvPatchField, volMesh>& field,
     const typename fv::convectionScheme<Type>& cs
@@ -67,11 +68,13 @@ void Foam::blendingFactor::calcScheme
     const surfaceScalarField factorf(blendedScheme.blendingFactor(field));
 
     // Convert into vol field whose values represent the local face minima
-    // Note: factor applied to 1st scheme, and (1-factor) to 2nd scheme
+    // Note:
+    // - factor applied to 1st scheme, and (1-factor) to 2nd scheme
+    // - not using the store(...) mechanism due to need to correct BCs
     volScalarField& indicator =
         const_cast<volScalarField&>
         (
-            obr_.lookupObject<volScalarField>(resultName_)
+            lookupObject<volScalarField>(resultName_)
         );
     indicator = 1 - fvc::cellReduce(factorf, minEqOp<scalar>(), GREAT);
     indicator.correctBoundaryConditions();
@@ -79,7 +82,7 @@ void Foam::blendingFactor::calcScheme
 
 
 template<class Type>
-bool Foam::functionObjects::blendingFactor::calcBF()
+bool Foam::functionObjects::blendingFactor::calcScheme()
 {
     typedef GeometricField<Type, fvPatchField, volMesh> FieldType;
 
@@ -95,23 +98,25 @@ bool Foam::functionObjects::blendingFactor::calcBF()
 
     const surfaceScalarField& phi = lookupObject<surfaceScalarField>(phiName_);
 
-    tmp<fv::convectionScheme<Type>> cs =
+    tmp<fv::convectionScheme<Type>> tcs =
         fv::convectionScheme<Type>::New(mesh_, phi, its);
 
-    if (isA<fv::boundedConvectionScheme<Type>>(cs))
+    if (isA<fv::boundedConvectionScheme<Type>>(tcs()))
     {
         const fv::boundedConvectionScheme<Type>& bcs =
-            refCast<const fv::boundedConvectionScheme<Type>>(cs);
+            refCast<const fv::boundedConvectionScheme<Type>>(tcs());
 
-        calcScheme(field, bcs.scheme());
+        calcBlendingFactor(field, bcs.scheme());
     }
     else
     {
         const fv::gaussConvectionScheme<Type>& gcs =
-            refCast<const fv::gaussConvectionScheme<Type>>(cs);
+            refCast<const fv::gaussConvectionScheme<Type>>(tcs());
 
-        calcScheme(field, gcs);
+        calcBlendingFactor(field, gcs);
     }
+
+    return true;
 }
 
 

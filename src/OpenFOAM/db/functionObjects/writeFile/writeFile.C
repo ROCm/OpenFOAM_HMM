@@ -93,7 +93,7 @@ Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::createFile
     if (Pstream::master() && writeToFile_)
     {
         const word startTimeName =
-            obr_.time().timeName(obr_.time().startTime().value());
+            fileObr_.time().timeName(fileObr_.time().startTime().value());
 
         fileName outputDir(baseFileDir()/prefix_/startTimeName);
 
@@ -105,7 +105,7 @@ Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::createFile
         IFstream is(outputDir/(fName + ".dat"));
         if (is.good())
         {
-            fName = fName + "_" + obr_.time().timeName();
+            fName = fName + "_" + fileObr_.time().timeName();
         }
 
         osPtr.set(new OFstream(outputDir/(fName + ".dat")));

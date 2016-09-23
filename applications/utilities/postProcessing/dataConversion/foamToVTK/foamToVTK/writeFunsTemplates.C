@@ -64,7 +64,7 @@ void Foam::writeFuns::write
 (
     std::ostream& os,
     const bool binary,
-    const DimensionedField<Type, volMesh>& vvf,
+    const DimensionedField<Type, volMesh>& df,
     const vtkMesh& vMesh
 )
 {
@@ -74,19 +74,19 @@ void Foam::writeFuns::write
 
     label nValues = mesh.nCells() + superCells.size();
 
-    os  << vvf.name() << ' '
+    os  << df.name() << ' '
         << int(pTraits<Type>::nComponents) << ' '
         << nValues << " float" << std::endl;
 
     DynamicList<floatScalar> fField(pTraits<Type>::nComponents*nValues);
 
-    insert(vvf.primitiveField(), fField);
+    insert(df.field(), fField);
 
     forAll(superCells, superCelli)
     {
         label origCelli = superCells[superCelli];
 
-        insert(vvf[origCelli], fField);
+        insert(df[origCelli], fField);
     }
     write(os, binary, fField);
 }

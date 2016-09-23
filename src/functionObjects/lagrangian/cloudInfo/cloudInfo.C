@@ -49,7 +49,7 @@ namespace functionObjects
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::cloudInfo::writeFileHeader(Ostream& os) const
+void Foam::functionObjects::cloudInfo::writeFileHeader(Ostream& os) const
 {
     writeHeader(os, "Cloud information");
     writeCommented(os, "Time");
@@ -120,8 +120,6 @@ bool Foam::functionObjects::cloudInfo::execute()
 
 bool Foam::functionObjects::cloudInfo::write()
 {
-    logFiles::write();
-
     forAll(names(), i)
     {
         const word& cloudName = names()[i];
@@ -137,7 +135,7 @@ bool Foam::functionObjects::cloudInfo::write()
         scalar D10 = cloud.Dij(1, 0);
         scalar D32 = cloud.Dij(3, 2);
 
-        Log << type() << " " << name_ <<  " write:" << nl
+        Log << type() << " " << name() <<  " write:" << nl
             << "    number of parcels : " << nParcels << nl
             << "    mass in system    : " << massInSystem << nl
             << "    maximum diameter  : " << Dmax << nl

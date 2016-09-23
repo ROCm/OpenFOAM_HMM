@@ -199,7 +199,7 @@ bool Foam::functionObjects::fieldValues::volFieldValue::write()
         {
             WarningInFunction
                 << "Requested field " << fieldName
-                << " not found in database and not ok"
+                << " not found in database and not processed"
                 << endl;
         }
     }

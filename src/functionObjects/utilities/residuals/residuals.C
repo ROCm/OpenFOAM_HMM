@@ -46,7 +46,7 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void Foam::residuals::writeFileHeader(Ostream& os) const
+void Foam::functionObjects::residuals::writeFileHeader(Ostream& os) const
 {
     writeHeader(os, "Residuals");
     writeCommented(os, "Time");

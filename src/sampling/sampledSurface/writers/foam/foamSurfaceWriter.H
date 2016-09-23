@@ -25,7 +25,7 @@ Class
     Foam::foamSurfaceWriter
 
 Description
-    A surfaceWriter for foams
+    A surfaceWriter for OpenFOAM surfaces
 
 SourceFiles
     foamSurfaceWriter.C
@@ -182,7 +182,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "foamFileSurfaceWriterTemplates.C"
+    #include "foamSurfaceWriterTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

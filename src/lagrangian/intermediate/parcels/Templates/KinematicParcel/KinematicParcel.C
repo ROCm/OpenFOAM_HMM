@@ -291,7 +291,7 @@ bool Foam::KinematicParcel<ParcelType>::move
         if (p.active() && tracking && (magU > ROOTVSMALL))
         {
             const scalar d = dt*magU;
-            const scalar deltaLMax = solution.deltaLMax(cellLengthScale[cellI]);
+            const scalar deltaLMax = solution.deltaLMax(cellLengthScale[celli]);
             const scalar dCorr = min(d, deltaLMax);
             dt *=
                 dCorr/d

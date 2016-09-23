@@ -26,7 +26,7 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::runTimePostProcessing::readObjects
+void Foam::functionObjects::runTimePostProcessing::readObjects
 (
     const dictionary& dict,
     PtrList<Type>& objects

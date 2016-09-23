@@ -126,8 +126,8 @@ Foam::polyPatch::polyPatch
     ),
     start_(start),
     boundaryMesh_(bm),
-    faceCellsPtr_(NULL),
-    mePtr_(NULL)
+    faceCellsPtr_(nullptr),
+    mePtr_(nullptr)
 {}
 
 

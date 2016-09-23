@@ -1120,9 +1120,9 @@ bool Foam::polyBoundaryMesh::writeData(Ostream& os) const
 
     forAll(patches, patchi)
     {
-        os  << indent << patches[patchi].name() << nl
+        os.beginBlock(patches[patchi].name()) << nl;
         os  << patches[patchi];
-            << incrIndent << patches[patchi] << decrIndent
+        os.endBlock() << endl;
     }
 
     os  << decrIndent << token::END_LIST;

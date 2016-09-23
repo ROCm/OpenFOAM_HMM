@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,11 +22,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::streamLineBase
+    Foam::functionObjects::streamLineBase
 
 SeeAlso
-    Foam::streamLine
-    Foam::wallBoundedStreamLine
+    Foam::functionObjects::streamLine
+    Foam::functionObjects::wallBoundedStreamLine
 
 SourceFiles
     streamLineBase.C
@@ -36,7 +36,7 @@ SourceFiles
 #ifndef streamLineBase_H
 #define streamLineBase_H
 
-#include "functionObjectState.H"
+#include "fvMeshFunctionObject.H"
 #include "DynamicList.H"
 #include "scalarList.H"
 #include "vectorList.H"
@@ -49,34 +49,24 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-class objectRegistry;
-class dictionary;
-class mapPolyMesh;
 class meshSearch;
 class sampledSet;
 
+namespace functionObjects
+{
+
 /*---------------------------------------------------------------------------*\
-                         Class streamLineBase Declaration
+                       Class streamLineBase Declaration
 \*---------------------------------------------------------------------------*/
 
 class streamLineBase
 :
-    public functionObjectState
+    public fvMeshFunctionObject
 {
 protected:
 
         //- Input dictionary
         dictionary dict_;
-
-        //- Database this class is registered to
-        const objectRegistry& obr_;
-
-        //- Load fields from files (not from objectRegistry)
-        bool loadFromFiles_;
-
-        //- Switch to send output to Info as well as to file
-        Switch log_;
 
         //- List of fields to sample
         wordList fields_;
@@ -200,9 +190,8 @@ public:
         streamLineBase
         (
             const word& name,
-            const objectRegistry&,
-            const dictionary&,
-            const bool loadFromFiles = false
+            const Time& runTime,
+            const dictionary& dict
         );
 
 
@@ -213,19 +202,13 @@ public:
     // Member Functions
 
         //- Read the field average data
-        virtual void read(const dictionary&);
+        virtual bool read(const dictionary&);
 
         //- Execute the averaging
-        virtual void execute();
-
-        //- Execute the averaging at the final time-loop, currently does nothing
-        virtual void end();
-
-        //- Called when time was set at the end of the Time::operator++
-        virtual void timeSet();
+        virtual bool execute();
 
         //- Track and write
-        virtual void write();
+        virtual bool write();
 
         //- Update for changes of mesh
         virtual void updateMesh(const mapPolyMesh&);
@@ -237,6 +220,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace functionObjects
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

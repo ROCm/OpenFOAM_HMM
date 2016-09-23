@@ -62,7 +62,7 @@ class fvMesh;
 
 class sampledSets
 :
-    public regionFunctionObject,
+    public functionObjects::regionFunctionObject,
     public PtrList<sampledSet>
 {
     // Private classes

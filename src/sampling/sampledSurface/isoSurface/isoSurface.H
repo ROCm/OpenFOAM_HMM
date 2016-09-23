@@ -378,7 +378,7 @@ class isoSurface
         );
 
         //- Check single triangle for (topological) validity
-        static bool validTri(const triSurface&, const label);
+        static bool validTri(const triSurface&, const label facei);
 
         static triSurface subsetMesh
         (

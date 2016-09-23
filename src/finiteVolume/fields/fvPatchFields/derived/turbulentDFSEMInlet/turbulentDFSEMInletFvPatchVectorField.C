@@ -29,6 +29,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "momentOfInertia.H"
 #include "cartesianCS.H"
+#include "IFstream.H"
 #include "OFstream.H"
 #include "globalIndex.H"
 
@@ -106,19 +107,18 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::writeLumleyCoeffs() const
     // Before interpolation/raw data
     if (interpolateR_)
     {
-        AverageIOField<symmTensor> Rexp
+        fileName valsFile
         (
-            IOobject
-            (
-                "R",
-                this->db().time().caseConstant(),
-                "boundaryData"/patch().name()/"0",
-                this->db(),
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE,
-                false
-            )
+            this->db().time().caseConstant()
+           /"boundaryData"
+           /this->patch().name()
+           /"0"
+           /"R"
         );
+
+        IFstream is(valsFile);
+
+        Field<symmTensor> Rexp(is);
 
         OFstream os(db().time().path()/"lumley_input.out");
 
@@ -507,7 +507,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::initialiseEddies()
     {
         WarningInFunction
             << "Patch: " << patch().patch().name()
-            << " on field " << dimensionedInternalField().name()
+            << " on field " << internalField().name()
             << ": No eddies seeded - please check your set-up" << endl;
     }
 }

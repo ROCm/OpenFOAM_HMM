@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,7 @@ License
 
 // OpenFOAM includes
 #include "text.H"
+#include "fvMesh.H"
 #include "runTimePostProcessing.H"
 
 // VTK includes
@@ -35,7 +36,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::text::text
+Foam::functionObjects::runTimePostPro::text::text
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
@@ -63,13 +64,13 @@ Foam::text::text
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::text::~text()
+Foam::functionObjects::runTimePostPro::text::~text()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::text::addGeometryToScene
+void Foam::functionObjects::runTimePostPro::text::addGeometryToScene
 (
     const scalar position,
     vtkRenderer* renderer
@@ -86,7 +87,8 @@ void Foam::text::addGeometryToScene
     string textAndTime = string_;
     if (timeStamp_)
     {
-        textAndTime = textAndTime + " " + geometryBase::parent_.obr().time().timeName();
+        textAndTime =
+            textAndTime + " " + geometryBase::parent_.mesh().time().timeName();
     }
     actor->SetInput(textAndTime.c_str());
     actor->GetTextProperty()->SetFontFamilyToArial();
@@ -108,7 +110,10 @@ void Foam::text::addGeometryToScene
 }
 
 
-void Foam::text::updateActors(const scalar position)
+void Foam::functionObjects::runTimePostPro::text::updateActors
+(
+    const scalar position
+)
 {
     // do nothing - all handled by addGeometryToScene
 }

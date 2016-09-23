@@ -208,11 +208,7 @@ Foam::patchProbes::sample
 
     forAll(*this, probei)
     {
-<<<<<<< HEAD
-        label faceI = faceList_[probeI];
-=======
-        label facei = elementList_[probei];
->>>>>>> foundation-github
+        label facei = faceList_[probei];
 
         if (facei >= 0)
         {
@@ -263,11 +259,7 @@ Foam::patchProbes::sample
 
     forAll(*this, probei)
     {
-<<<<<<< HEAD
-        label faceI = faceList_[probeI];
-=======
-        label facei = elementList_[probei];
->>>>>>> foundation-github
+        label facei = faceList_[probei];
 
         if (facei >= 0)
         {

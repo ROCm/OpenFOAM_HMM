@@ -481,9 +481,9 @@ void Foam::polyTopoChange::makeCells
         if (faceOwner_[facei] < 0)
         {
             pointField newPoints;
-            if (faceI < faces_.size())
+            if (facei < faces_.size())
             {
-                const face& f = faces_[faceI];
+                const face& f = faces_[facei];
                 newPoints.setSize(f.size(), vector::max);
                 forAll(f, fp)
                 {

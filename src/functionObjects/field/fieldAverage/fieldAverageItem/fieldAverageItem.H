@@ -100,17 +100,20 @@ private:
 
     // Private data
 
+        //- Active flag
+        bool active_;
+
         //- Field name
         word fieldName_;
 
         //- Compute mean flag
-        Switch mean_;
+        bool mean_;
 
         //- Name of mean field
         word meanFieldName_;
 
         //- Compute prime-squared mean flag
-        Switch prime2Mean_;
+        bool prime2Mean_;
 
         //- Name of prime-squared mean field
         word prime2MeanFieldName_;
@@ -150,6 +153,18 @@ public:
 
         // Access
 
+            //- Return const access to the active flag
+            bool active() const
+            {
+                return active_;
+            }
+
+            //- Return non-const access to the active flag
+            bool& active()
+            {
+                return active_;
+            }
+
             //- Return const access to the field name
             const word& fieldName() const
             {
@@ -157,13 +172,13 @@ public:
             }
 
             //- Return const access to the mean flag
-            const Switch& mean() const
+            bool mean() const
             {
                 return mean_;
             }
 
             //- Return non-const access to the mean flag
-            Switch& mean()
+            bool& mean()
             {
                 return mean_;
             }
@@ -175,13 +190,13 @@ public:
             }
 
             //- Return const access to the prime-squared mean flag
-            const Switch& prime2Mean() const
+            bool prime2Mean() const
             {
                 return prime2Mean_;
             }
 
             //- Return non-const access to the prime-squared mean flag
-            Switch& prime2Mean()
+            bool& prime2Mean()
             {
                 return prime2Mean_;
             }
@@ -199,13 +214,13 @@ public:
             }
 
             //- Return true if base is ITER
-            Switch iterBase() const
+            bool iterBase() const
             {
                 return base_ == ITER;
             }
 
             //- Return true if base is time
-            Switch timeBase() const
+            bool timeBase() const
             {
                 return base_ == TIME;
             }
@@ -235,7 +250,8 @@ public:
         )
         {
             return
-                a.fieldName_ == b.fieldName_
+                a.active_ == b.active_
+             && a.fieldName_ == b.fieldName_
              && a.mean_ == b.mean_
              && a.meanFieldName_ == b.meanFieldName_
              && a.prime2Mean_ == b.prime2Mean_

@@ -63,12 +63,13 @@ XiReactionRate/XiReactionRate.C
 streamFunction/streamFunction.C
 
 valueAverage/valueAverage.C
-valueAverage/valueAverageFunctionObject.C
+fluxSummary/fluxSummary.C
+mapFields/mapFields.C
+reactionSensitivityAnalysis/reactionsSensitivityAnalysisObjects.C 
+DESModelRegions/DESModelRegions.C
 
-wallBoundedStreamLine/wallBoundedStreamLine.C
-wallBoundedStreamLine/wallBoundedStreamLineFunctionObject.C
-wallBoundedStreamLine/wallBoundedStreamLineParticle.C
-wallBoundedStreamLine/wallBoundedStreamLineParticleCloud.C
-wallBoundedStreamLine/wallBoundedParticle.C
+externalCoupled/externalCoupled.C
+externalCoupled/externalCoupledMixed/externalCoupledMixedFvPatchFields.C
+externalCoupled/externalCoupledTemperatureMixed/externalCoupledTemperatureMixedFvPatchScalarField.C
 
 LIB = $(FOAM_LIBBIN)/libfieldFunctionObjects

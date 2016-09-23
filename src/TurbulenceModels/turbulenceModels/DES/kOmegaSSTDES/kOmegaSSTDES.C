@@ -179,7 +179,7 @@ void kOmegaSSTDES<BasicTurbulenceModel>::correct()
     tgradU.clear();
 
     // Update omega and G at the wall
-    omega.boundaryField().updateCoeffs();
+    omega.boundaryFieldRef().updateCoeffs();
 
     volScalarField CDkOmega
     (
@@ -208,7 +208,7 @@ void kOmegaSSTDES<BasicTurbulenceModel>::correct()
 
         omegaEqn.ref().relax();
 
-        omegaEqn.ref().boundaryManipulate(omega.boundaryField());
+        omegaEqn.ref().boundaryManipulate(omega.boundaryFieldRef());
 
         solve(omegaEqn);
         bound(omega, this->omegaMin_);

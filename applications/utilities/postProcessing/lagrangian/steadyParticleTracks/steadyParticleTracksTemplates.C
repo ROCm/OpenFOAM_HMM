@@ -116,11 +116,11 @@ void Foam::writeVTKFields
         Info<< "        writing field " << fieldNames[fieldi] << endl;
         os  << nl << fieldNames[fieldi] << ' '
             << int(pTraits<Type>::nComponents) << ' '
-            << values[fieldI].size() << " float" << nl;
+            << values[fieldi].size() << " float" << nl;
         label offset = 0;
-        forAll(addr, trackI)
+        forAll(addr, tracki)
         {
-            const List<label> ids(addr[trackI]);
+            const List<label> ids(addr[tracki]);
 
             List<Type> data(UIndirectList<Type>(values[fieldi], ids));
             label nData = data.size() - 1;

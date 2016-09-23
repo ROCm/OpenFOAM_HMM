@@ -1257,7 +1257,7 @@ void Foam::isoSurface::trimToBox
 }
 
 
-bool Foam::isoSurface::validTri(const triSurface& surf, const label faceI)
+bool Foam::isoSurface::validTri(const triSurface& surf, const label facei)
 {
     // Simple check on indices ok.
 
@@ -1407,6 +1407,7 @@ Foam::isoSurface::isoSurface
     const scalarField& pVals,
     const scalar iso,
     const bool regularise,
+    const boundBox& bounds,
     const scalar mergeTol
 )
 :
@@ -1414,6 +1415,7 @@ Foam::isoSurface::isoSurface
     pVals_(pVals),
     iso_(iso),
     regularise_(regularise),
+    bounds_(bounds),
     mergeDistance_(mergeTol*mesh_.bounds().mag())
 {
     if (debug)

@@ -38,7 +38,7 @@ Usage
     CourantNo1
     {
         type        CourantNo;
-        functionObjectLibs ("libutilityFunctionObjects.so");
+        libs        ("libfieldFunctionObjects.so");
         ...
     }
     \endverbatim
@@ -113,8 +113,8 @@ public:
         CourantNo
         (
             const word& name,
-            const Time&,
-            const dictionary&
+            const Time& runTime,
+            const dictionary& dict
         );
 
 

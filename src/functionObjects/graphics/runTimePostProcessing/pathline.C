@@ -40,26 +40,40 @@ License
 
 namespace Foam
 {
-    template<>
-    const char* NamedEnum<pathline::representationType, 4>::names[] =
-    {
-        "none",
-        "line",
-        "tube",
-        "vector"
-    };
-
+namespace functionObjects
+{
+namespace runTimePostPro
+{
     defineTypeNameAndDebug(pathline, 0);
     defineRunTimeSelectionTable(pathline, dictionary);
 }
+}
 
-const Foam::NamedEnum<Foam::pathline::representationType, 4>
-    Foam::pathline::representationTypeNames;
+template<>
+const char* NamedEnum
+<
+    functionObjects::runTimePostPro::pathline::representationType,
+    4
+>::names[] =
+{
+    "none",
+    "line",
+    "tube",
+    "vector"
+};
+}
+
+const Foam::NamedEnum
+<
+    Foam::functionObjects::runTimePostPro::pathline::representationType,
+    4
+>
+    Foam::functionObjects::runTimePostPro::pathline::representationTypeNames;
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::pathline::addLines
+void Foam::functionObjects::runTimePostPro::pathline::addLines
 (
     const label frameI,
     vtkActor* actor,
@@ -114,7 +128,7 @@ void Foam::pathline::addLines
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pathline::pathline
+Foam::functionObjects::runTimePostPro::pathline::pathline
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
@@ -164,7 +178,8 @@ Foam::pathline::pathline
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::pathline> Foam::pathline::New
+Foam::autoPtr<Foam::functionObjects::runTimePostPro::pathline>
+Foam::functionObjects::runTimePostPro::pathline::New
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
@@ -196,7 +211,7 @@ Foam::autoPtr<Foam::pathline> Foam::pathline::New
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::pathline::~pathline()
+Foam::functionObjects::runTimePostPro::pathline::~pathline()
 {}
 
 

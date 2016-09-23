@@ -115,7 +115,7 @@ Foam::label Foam::probes::classifyFields()
 
     if (loadFromFiles_)
     {
-        // check files for a particular time
+        // Check files for a particular time
         IOobjectList objects(mesh_, mesh_.time().timeName());
         wordList allFields = objects.sortedNames();
 
@@ -134,7 +134,7 @@ Foam::label Foam::probes::classifyFields()
     }
     else
     {
-        // check currently available fields
+        // Check currently available fields
         wordList allFields = mesh_.sortedNames();
         labelList indices = findStrings(fieldSelection_, allFields);
 
@@ -152,5 +152,6 @@ Foam::label Foam::probes::classifyFields()
 
     return nFields;
 }
+
 
 // ************************************************************************* //

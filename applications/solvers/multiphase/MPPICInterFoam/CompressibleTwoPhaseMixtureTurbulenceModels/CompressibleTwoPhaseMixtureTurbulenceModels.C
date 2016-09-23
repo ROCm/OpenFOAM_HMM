@@ -32,6 +32,15 @@ License
 #include "turbulentTransportModel.H"
 #include "LESModel.H"
 
+makeTurbulenceModelTypes
+(
+    volScalarField,
+    geometricOneField,
+    incompressibleTurbulenceModel,
+    PhaseCompressibleTurbulenceModel,
+    immiscibleIncompressibleTwoPhaseMixture
+);
+
 makeBaseTurbulenceModel
 (
     volScalarField,

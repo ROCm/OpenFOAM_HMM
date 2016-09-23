@@ -520,11 +520,6 @@ bool Foam::functionObjectList::execute()
 
     if (execution_)
     {
-        if (forceWrite)
-        {
-            resetState();
-        }
-
         if (!updated_)
         {
             read();
@@ -532,21 +527,18 @@ bool Foam::functionObjectList::execute()
 
         forAll(*this, objectI)
         {
-            addProfiling
-            (
-                fo,
-                "functionObject::" + operator[](objectI).name() + "::execute"
-            );
+            const word& objName = operator[](objectI).name();
+            {
+                addProfiling(fo, "functionObject::" + objName + "::execute");
 
-            ok = operator[](objectI).execute() && ok;
+                ok = operator[](objectI).execute() && ok;
+            }
 
-            addProfiling
-            (
-                fo,
-                "functionObject::" + operator[](objectI).name() + "::write"
-            );
+            {
+                addProfiling(fo, "functionObject::" + objName + "::write");
 
-            ok = operator[](objectI).write() && ok;
+                ok = operator[](objectI).write() && ok;
+            }
         }
     }
 
@@ -583,11 +575,9 @@ bool Foam::functionObjectList::end()
 
         forAll(*this, objectI)
         {
-            addProfiling
-            (
-                fo,
-                "functionObject::" + operator[](objectI).name() + "::end"
-            );
+            const word& objName = operator[](objectI).name();
+
+            addProfiling(fo, "functionObject::" + objName + "::end");
 
             ok = operator[](objectI).end() && ok;
         }
@@ -610,12 +600,9 @@ bool Foam::functionObjectList::adjustTimeStep()
 
         forAll(*this, objectI)
         {
-            addProfiling
-            (
-                fo,
-                "functionObject::" + operator[](objectI).name()
-             + "::adjustTimeStep"
-            );
+            const word& objName = operator[](objectI).name();
+
+            addProfiling(fo, "functionObject::" + objName + "::adjustTimeStep");
 
             ok = operator[](objectI).adjustTimeStep() && ok;
         }

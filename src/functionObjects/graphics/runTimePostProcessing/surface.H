@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::surface
+    Foam::functionObjects::runTimePostPro::surface
 
 Description
 
@@ -31,8 +31,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surface_H
-#define surface_H
+#ifndef functionObjects_runTimePostPro_surface_H
+#define functionObjects_runTimePostPro_surface_H
 
 #include "geometryBase.H"
 #include "NamedEnum.H"
@@ -47,6 +47,10 @@ class vtkRenderer;
 class vtkPolyData;
 
 namespace Foam
+{
+namespace functionObjects
+{
+namespace runTimePostPro
 {
 
 /*---------------------------------------------------------------------------*\
@@ -78,10 +82,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        surface(const surface&);
+        surface(const surface&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const surface&);
+        void operator=(const surface&) = delete;
 
 
 protected:
@@ -181,6 +185,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace runTimePostPro
+} // End namespace functionObjects
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

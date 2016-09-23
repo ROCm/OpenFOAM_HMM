@@ -130,8 +130,7 @@ Foam::functionObjects::turbulenceFields::turbulenceFields
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    fieldSet_(),
-    log_(true)
+    fieldSet_()
 {
     read(dict);
 }
@@ -153,27 +152,25 @@ bool Foam::functionObjects::turbulenceFields::read(const dictionary& dict)
     }
     else
     {
-        log_.readIfPresent("log", dict);
         fieldSet_.insert(wordList(dict.lookup("fields")));
     }
 
-    Info<< type() << " " << name() << ": ";
+    Log << type() << " " << name() << ": ";
     if (fieldSet_.size())
     {
-        Info<< "storing fields:" << nl;
+        Log << "storing fields:" << nl;
         forAllConstIter(wordHashSet, fieldSet_, iter)
         {
-            Info<< "    " << modelName << ':' << iter.key() << nl;
+            Log << "    " << modelName << ':' << iter.key() << nl;
         }
-        Info<< endl;
+        Log << endl;
     }
     else
     {
-        Info<< "no fields requested to be stored" << nl << endl;
+        Log << "no fields requested to be stored" << nl << endl;
     }
 
     return true;
-    }
 }
 
 
@@ -303,7 +300,7 @@ bool Foam::functionObjects::turbulenceFields::execute()
 
 
 bool Foam::functionObjects::turbulenceFields::write()
-{}
+{
     forAllConstIter(wordHashSet, fieldSet_, iter)
     {
         const word fieldName = modelName + ':' + iter.key();

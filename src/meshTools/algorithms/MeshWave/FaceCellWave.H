@@ -370,7 +370,7 @@ public:
 
             //- Propagate from face to cell. Returns total number of cells
             //  (over all processors) changed.
-            virtual label faceToCell();
+           virtual label faceToCell();
 
             //- Propagate from cell to face. Returns total number of faces
             //  (over all processors) changed. (Faces on processorpatches are

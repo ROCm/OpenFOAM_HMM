@@ -53,43 +53,45 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::volScalarField& Foam::scalarTransport::transportedField()
+Foam::volScalarField& Foam::functionObjects::scalarTransport::transportedField()
 {
-    if (!mesh_.foundObject<volScalarField>(fieldName_))
+    if (!foundObject<volScalarField>(fieldName_))
     {
-        volScalarField* fldPtr = new volScalarField
+        tmp<volScalarField> tfldPtr
         (
-            IOobject
+            new volScalarField
             (
-                fieldName_,
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh_,
-            dimensionedScalar("zero", dimless, 0.0),
-            boundaryTypes()
+                IOobject
+                (
+                    fieldName_,
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::MUST_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                mesh_
+            )
         );
-        fldPtr->store();
+        store(fieldName_, tfldPtr);
     }
 
     return const_cast<volScalarField&>
     (
-        mesh_.lookupObject<volScalarField>(fieldName_)
+        lookupObject<volScalarField>(fieldName_)
     );
 }
 
 
 Foam::tmp<Foam::volScalarField> Foam::functionObjects::scalarTransport::D
 (
+    const volScalarField& s,
     const surfaceScalarField& phi
 ) const
 {
     typedef incompressible::turbulenceModel icoModel;
     typedef compressible::turbulenceModel cmpModel;
 
-    word Dname("D" + s_.name());
+    word Dname("D" + s.name());
 
     if (constantD_)
     {
@@ -110,18 +112,18 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::scalarTransport::D
             )
         );
     }
-    else if (mesh_.foundObject<icoModel>(turbulenceModel::propertiesName))
+    else if (foundObject<icoModel>(turbulenceModel::propertiesName))
     {
-        const icoModel& model = mesh_.lookupObject<icoModel>
+        const icoModel& model = lookupObject<icoModel>
         (
             turbulenceModel::propertiesName
         );
 
         return model.nuEff();
     }
-    else if (mesh_.foundObject<cmpModel>(turbulenceModel::propertiesName))
+    else if (foundObject<cmpModel>(turbulenceModel::propertiesName))
     {
-        const cmpModel& model = mesh_.lookupObject<cmpModel>
+        const cmpModel& model = lookupObject<cmpModel>
         (
             turbulenceModel::propertiesName
         );
@@ -221,13 +223,12 @@ bool Foam::functionObjects::scalarTransport::execute()
 {
     Log << type() << " write:" << endl;
 
-    const surfaceScalarField& phi =
-        mesh_.lookupObject<surfaceScalarField>(phiName_);
+    const surfaceScalarField& phi = lookupObject<surfaceScalarField>(phiName_);
 
     volScalarField& s = transportedField();
 
     // Calculate the diffusivity
-    volScalarField D(this->D(phi));
+    volScalarField D(this->D(s, phi));
 
     word divScheme("div(phi," + schemesField_ + ")");
     word laplacianScheme("laplacian(" + D.name() + "," + schemesField_ + ")");
@@ -241,8 +242,7 @@ bool Foam::functionObjects::scalarTransport::execute()
 
     if (phi.dimensions() == dimMass/dimTime)
     {
-        const volScalarField& rho =
-            mesh_.lookupObject<volScalarField>(rhoName_);
+        const volScalarField& rho = lookupObject<volScalarField>(rhoName_);
 
         for (label i = 0; i <= nCorr_; i++)
         {

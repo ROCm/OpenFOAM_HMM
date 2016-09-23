@@ -847,6 +847,8 @@ void Foam::snappySnapDriver::preSmoothPatch
         Info<< "Smoothing patch points ..." << endl;
     }
 
+    vectorField& pointDisp = meshMover.pointDisplacement().primitiveFieldRef();
+
     for
     (
         label smoothIter = 0;
@@ -865,8 +867,7 @@ void Foam::snappySnapDriver::preSmoothPatch
         if (snapParams.nSmoothInternal() > smoothIter)
         {
             // Override values on internal points on refinement interfaces
-            meshMover.pointDisplacement().internalField() =
-                smoothInternalDisplacement(meshRefiner, meshMover);
+            pointDisp = smoothInternalDisplacement(meshRefiner, meshMover);
         }
 
         // Smooth the patch points

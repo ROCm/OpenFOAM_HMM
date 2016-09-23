@@ -54,12 +54,12 @@ const Foam::NamedEnum
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void Foam::fieldMinMax::writeFileHeader(Ostream& os) const
+void Foam::functionObjects::fieldMinMax::writeFileHeader(Ostream& os) const
 {
     writeHeader(os, "Field minima and maxima");
     writeCommented(os, "Time");
 
-    if (writeLocation_)
+    if (location_)
     {
         writeTabbed(os, "field");
         writeTabbed(os, "min");
@@ -101,7 +101,7 @@ Foam::functionObjects::fieldMinMax::fieldMinMax
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    writeFile(obr_, name, typeName, dict),
+    writeFile(mesh_, name, typeName, dict),
     location_(true),
     mode_(mdMag),
     fieldSet_()
@@ -157,7 +157,6 @@ bool Foam::functionObjects::fieldMinMax::write()
 
     return true;
 }
-
 
 
 // ************************************************************************* //

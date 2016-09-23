@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,7 @@ bool Foam::functionObjects::writeDictionary::tryDirectory
         false
     );
 
-    if (dictIO.headerOk())
+    if (dictIO.typeHeaderOk<IOdictionary>(false))
     {
         IOdictionary dict(dictIO);
 
@@ -103,14 +103,7 @@ Foam::functionObjects::writeDictionary::writeDictionary
     const dictionary& dict
 )
 :
-    functionObject(name),
-    obr_
-    (
-        runTime.lookupObject<objectRegistry>
-        (
-            dict.lookupOrDefault("region", polyMesh::defaultRegion)
-        )
-    ),
+    regionFunctionObject(name, runTime, dict),
     dictNames_(),
     digests_()
 {

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,18 +55,15 @@ void Foam::functionObjects::fieldCoordinateSystemTransform::transform
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
 
-    if (mesh_.foundObject<VolFieldType>(fieldName))
+    if (foundObject<VolFieldType>(fieldName))
     {
         DebugInfo
             << type() << ": Field " << fieldName << " already in database"
             << endl;
 
-        transformField<VolFieldType>
-        (
-            mesh_.lookupObject<VolFieldType>(fieldName)
-        );
+        transformField<VolFieldType>(lookupObject<VolFieldType>(fieldName));
     }
-    else if (mesh_.foundObject<SurfaceFieldType>(fieldName))
+    else if (foundObject<SurfaceFieldType>(fieldName))
     {
         DebugInfo
             << type() << ": Field " << fieldName << " already in database"
@@ -74,7 +71,7 @@ void Foam::functionObjects::fieldCoordinateSystemTransform::transform
 
         transformField<SurfaceFieldType>
         (
-            mesh_.lookupObject<SurfaceFieldType>(fieldName)
+            lookupObject<SurfaceFieldType>(fieldName)
         );
     }
     else
@@ -88,11 +85,7 @@ void Foam::functionObjects::fieldCoordinateSystemTransform::transform
             IOobject::NO_WRITE
         );
 
-        if
-        (
-            fieldHeader.headerOk()
-         && fieldHeader.headerClassName() == VolFieldType::typeName
-        )
+        if (fieldHeader.typeHeaderOk<VolFieldType>(true))
         {
             DebugInfo
                 << type() << ": Field " << fieldName << " read from file"
@@ -100,14 +93,10 @@ void Foam::functionObjects::fieldCoordinateSystemTransform::transform
 
             transformField<VolFieldType>
             (
-                mesh_.lookupObject<VolFieldType>(fieldName)
+                lookupObject<VolFieldType>(fieldName)
             );
         }
-        else if
-        (
-            fieldHeader.headerOk()
-         && fieldHeader.headerClassName() == SurfaceFieldType::typeName
-        )
+        else if (fieldHeader.typeHeaderOk<SurfaceFieldType>(true))
         {
             DebugInfo
                 << type() << ": Field " << fieldName << " read from file"
@@ -115,7 +104,7 @@ void Foam::functionObjects::fieldCoordinateSystemTransform::transform
 
             transformField<SurfaceFieldType>
             (
-                mesh_.lookupObject<SurfaceFieldType>(fieldName)
+                lookupObject<SurfaceFieldType>(fieldName)
             );
         }
     }

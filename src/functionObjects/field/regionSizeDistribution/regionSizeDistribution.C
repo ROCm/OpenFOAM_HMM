@@ -334,13 +334,10 @@ Foam::functionObjects::regionSizeDistribution::regionSizeDistribution
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    file_(obr_, name),
+    writeFile(obr_, name),
     alphaName_(dict.lookup("field")),
     patchNames_(dict.lookup("patches")),
     isoPlanes_(dict.lookupOrDefault<bool>("isoPlanes", false))
-{
-    // Check if the available mesh is an fvMesh, otherwise deactivate
-    if (isA<fvMesh>(obr_))
 {
     read(dict);
 }
@@ -372,7 +369,7 @@ bool Foam::functionObjects::regionSizeDistribution::read(const dictionary& dict)
     {
         coordSysPtr_.reset(new coordinateSystem(obr_, dict));
 
-        Log < "Transforming all vectorFields with coordinate system "
+        Log << "Transforming all vectorFields with coordinate system "
             << coordSysPtr_().name() << endl;
     }
 
@@ -387,18 +384,6 @@ bool Foam::functionObjects::regionSizeDistribution::read(const dictionary& dict)
     }
 
     return true;
-}
-
-
-void Foam::regionSizeDistribution::execute()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::regionSizeDistribution::end()
-{
-    // Do nothing - only valid on write
 }
 
 
@@ -723,8 +708,8 @@ bool Foam::functionObjects::regionSizeDistribution::write()
         {
             vectorField alphaDistance
             (
-                (alpha.primitiveField()*mesh.V())
-              * (mesh.C().primitiveField() - origin_)()
+                (alpha.primitiveField()*mesh_.V())
+               *(mesh_.C().primitiveField() - origin_)()
             );
 
             Map<vector> allRegionAlphaDistance

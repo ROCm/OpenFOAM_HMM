@@ -22,13 +22,13 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::runTimePostProcessing
+    Foam::functionObjects::runTimePostProcessing
 
 Group
     grpGraphicsFunctionObjects
 
 Description
-    Function object to generate images during run-time.
+    Generate images during run-time.
 
     The functionality makes use of the VTK libraries (see http://www.vtk.org)
     which provide a broad set of functionality for scene composition and
@@ -54,10 +54,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef runTimePostProcessing_H
-#define runTimePostProcessing_H
+#ifndef functionObjects_runTimePostProcessing_H
+#define functionObjects_runTimePostProcessing_H
 
-#include "functionObjectState.H"
+#include "fvMeshFunctionObject.H"
 #include "objectRegistry.H"
 #include "mapPolyMesh.H"
 #include "PtrList.H"
@@ -70,12 +70,15 @@ class vtkRenderWindow;
 
 namespace Foam
 {
-
-class dictionary;
-class pointData;
-class pathline;
-class surface;
-class text;
+namespace functionObjects
+{
+namespace runTimePostPro
+{
+    class pointData;
+    class pathline;
+    class surface;
+    class text;
+}
 
 /*---------------------------------------------------------------------------*\
                    Class runTimePostProcessing Declaration
@@ -83,7 +86,7 @@ class text;
 
 class runTimePostProcessing
 :
-    public functionObjectState
+    public fvMeshFunctionObject
 {
 private:
 
@@ -101,19 +104,19 @@ private:
         outputType output_;
 
         //- Scene manager
-        scene scene_;
+        runTimePostPro::scene scene_;
 
         //- List of points
-        PtrList<pointData> points_;
+        PtrList<runTimePostPro::pointData> points_;
 
         //- List of lines
-        PtrList<pathline> lines_;
+        PtrList<runTimePostPro::pathline> lines_;
 
         //- List of surfaces
-        PtrList<surface> surfaces_;
+        PtrList<runTimePostPro::surface> surfaces_;
 
         //- List of text
-        PtrList<text> text_;
+        PtrList<runTimePostPro::text> text_;
 
 
         // Private Member Functions
@@ -125,17 +128,6 @@ private:
                 const dictionary& dict,
                 PtrList<Type>& objects
             ) const;
-
-
-protected:
-
-    // Protected data
-
-        //- Reference to the database
-        const objectRegistry& obr_;
-
-        //- on/off switch
-        bool active_;
 
 
 public:
@@ -150,10 +142,10 @@ public:
         runTimePostProcessing
         (
             const word& name,
-            const objectRegistry&,
-            const dictionary&,
-            const bool loadFromFiles = false
+            const Time& runTime,
+            const dictionary&dict
         );
+
 
     //- Desructor
     virtual ~runTimePostProcessing();
@@ -161,38 +153,25 @@ public:
 
     // Member Functions
 
-        virtual const objectRegistry& obr() const
+        const fvMesh& mesh() const
         {
-            return obr_;
+            return mesh_;
         }
 
         //- Read the field min/max data
-        virtual void read(const dictionary&);
+        virtual bool read(const dictionary&);
 
         //- Execute, currently does nothing
-        virtual void execute();
-
-        //- Execute at the final time-loop, currently does nothing
-        virtual void end();
-
-        //- Called when time was set at the end of the Time::operator++
-        virtual void timeSet();
+        virtual bool execute();
 
         //- Write
-        virtual void write();
-
-        //- Update for changes of mesh
-        virtual void updateMesh(const mapPolyMesh&)
-        {}
-
-        //- Update for changes of mesh
-        virtual void movePoints(const polyMesh&)
-        {}
+        virtual bool write();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace functionObjects
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

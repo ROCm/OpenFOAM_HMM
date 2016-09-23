@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,27 +40,43 @@ License
 
 namespace Foam
 {
-    template<>
-    const char* NamedEnum<surface::representationType, 5>::names[] =
-    {
-        "none",
-        "wireframe",
-        "surface",
-        "surfaceWithEdges",
-        "glyph"
-    };
-
+namespace functionObjects
+{
+namespace runTimePostPro
+{
     defineTypeNameAndDebug(surface, 0);
     defineRunTimeSelectionTable(surface, dictionary);
 }
+}
+template<>
+const char* NamedEnum
+<
+    functionObjects::runTimePostPro::surface::representationType,
+    5
+>::names[] =
+{
+    "none",
+    "wireframe",
+    "surface",
+    "surfaceWithEdges",
+    "glyph"
+};
+}
 
-const Foam::NamedEnum<Foam::surface::representationType, 5>
-    Foam::surface::representationTypeNames;
+const Foam::NamedEnum
+<
+    Foam::functionObjects::runTimePostPro::surface::representationType,
+    5
+>
+    Foam::functionObjects::runTimePostPro::surface::representationTypeNames;
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::surface::setRepresentation(vtkActor* actor) const
+void Foam::functionObjects::runTimePostPro::surface::setRepresentation
+(
+    vtkActor* actor
+) const
 {
     geometryBase::initialiseActor(actor);
 
@@ -93,7 +109,7 @@ void Foam::surface::setRepresentation(vtkActor* actor) const
 }
 
 
-void Foam::surface::addFeatureEdges
+void Foam::functionObjects::runTimePostPro::surface::addFeatureEdges
 (
     vtkRenderer* renderer,
     vtkPolyData* data
@@ -131,7 +147,7 @@ void Foam::surface::addFeatureEdges
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surface::surface
+Foam::functionObjects::runTimePostPro::surface::surface
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
@@ -187,7 +203,8 @@ Foam::surface::surface
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::surface> Foam::surface::New
+Foam::autoPtr<Foam::functionObjects::runTimePostPro::surface>
+Foam::functionObjects::runTimePostPro::surface::New
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
@@ -219,13 +236,16 @@ Foam::autoPtr<Foam::surface> Foam::surface::New
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::surface::~surface()
+Foam::functionObjects::runTimePostPro::surface::~surface()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::surface::updateActors(const scalar position)
+void Foam::functionObjects::runTimePostPro::surface::updateActors
+(
+    const scalar position
+)
 {
     if (!featureEdges_)
     {

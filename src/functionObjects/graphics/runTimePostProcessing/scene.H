@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::scene
+    Foam::functionObjects::runTimePostPro::scene
 
 Description
 
@@ -31,8 +31,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef scene_H
-#define scene_H
+#ifndef functionObjects_runTimePostPro_scene_H
+#define functionObjects_runTimePostPro_scene_H
 
 // OpenFOAM includes
 #include "dictionary.H"
@@ -53,6 +53,10 @@ class vtkRenderer;
 class vtkRenderWindow;
 
 namespace Foam
+{
+namespace functionObjects
+{
+namespace runTimePostPro
 {
 
 /*---------------------------------------------------------------------------*\
@@ -193,6 +197,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace runTimePostPro
+} // End namespace functionObjects
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

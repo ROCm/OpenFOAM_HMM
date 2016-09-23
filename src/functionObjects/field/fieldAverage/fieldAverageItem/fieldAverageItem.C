@@ -55,6 +55,7 @@ const Foam::NamedEnum
 
 Foam::functionObjects::fieldAverageItem::fieldAverageItem()
 :
+    active_(false),
     fieldName_("unknown"),
     mean_(0),
     meanFieldName_("unknown"),
@@ -71,6 +72,7 @@ Foam::functionObjects::fieldAverageItem::fieldAverageItem
     const fieldAverageItem& faItem
 )
 :
+    active_(faItem.active_),
     fieldName_(faItem.fieldName_),
     mean_(faItem.mean_),
     meanFieldName_(faItem.meanFieldName_),
@@ -104,6 +106,7 @@ void Foam::functionObjects::fieldAverageItem::operator=
     }
 
     // Set updated values
+    active_ = rhs.active_;
     fieldName_ = rhs.fieldName_;
     mean_ = rhs.mean_;
     meanFieldName_ = rhs.meanFieldName_;

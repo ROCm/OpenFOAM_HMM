@@ -189,13 +189,14 @@ Foam::labelList Foam::fvMeshDistribute::select
 }
 
 
-// Check all procs have same names and in exactly same order.
 void Foam::fvMeshDistribute::checkEqualWordList
 (
     const string& msg,
     const wordList& lst
 )
 {
+    // Check all procs have same names and in exactly same order.
+
     List<wordList> allNames(Pstream::nProcs());
     allNames[Pstream::myProcNo()] = lst;
     Pstream::gatherList(allNames);
@@ -235,7 +236,6 @@ Foam::wordList Foam::fvMeshDistribute::mergeWordList(const wordList& procNames)
 }
 
 
-// Print some info on mesh.
 void Foam::fvMeshDistribute::printMeshInfo(const fvMesh& mesh)
 {
     Pout<< "Primitives:" << nl
@@ -322,9 +322,10 @@ void Foam::fvMeshDistribute::printCoupleInfo
 }
 
 
-// Finds (non-empty) patch that exposed internal and proc faces can be put into.
 Foam::label Foam::fvMeshDistribute::findNonEmptyPatch() const
 {
+    // Finds (non-empty) patch that exposed internal and proc faces can be
+    // put into.
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
     label nonEmptyPatchi = -1;
@@ -412,18 +413,22 @@ Foam::tmp<Foam::surfaceScalarField> Foam::fvMeshDistribute::generateTestField
 
     const surfaceVectorField n(mesh.Sf()/mesh.magSf());
 
-    forAll(fld, faceI)
+    forAll(fld, facei)
     {
-        fld[faceI] = (n[faceI] & testNormal);
+        fld[facei] = (n[facei] & testNormal);
     }
-    forAll(fld.boundaryField(), patchI)
+
+    surfaceScalarField::Boundary& fluxBf = fld.boundaryFieldRef();
+    const surfaceVectorField::Boundary& nBf = n.boundaryField();
+
+    forAll(fluxBf, patchi)
     {
-        fvsPatchScalarField& fvp = fld.boundaryField()[patchI];
+        fvsPatchScalarField& fvp = fluxBf[patchi];
 
         scalarField newPfld(fvp.size());
         forAll(newPfld, i)
         {
-            newPfld[i] = (n.boundaryField()[patchI][i] & testNormal);
+            newPfld[i] = (nBf[patchi][i] & testNormal);
         }
         fvp == newPfld;
     }
@@ -441,41 +446,41 @@ void Foam::fvMeshDistribute::testField(const surfaceScalarField& fld)
 
     const surfaceVectorField n(mesh.Sf()/mesh.magSf());
 
-    forAll(fld, faceI)
+    forAll(fld, facei)
     {
-        scalar cos = (n[faceI] & testNormal);
+        scalar cos = (n[facei] & testNormal);
 
-        if (mag(cos-fld[faceI]) > 1e-6)
+        if (mag(cos - fld[facei]) > 1e-6)
         {
             //FatalErrorInFunction
             WarningInFunction
-                << "On internal face " << faceI << " at "
-                << mesh.faceCentres()[faceI]
-                << " the field value is " << fld[faceI]
+                << "On internal face " << facei << " at "
+                << mesh.faceCentres()[facei]
+                << " the field value is " << fld[facei]
                 << " whereas cos angle of " << testNormal
-                << " with mesh normal " << n[faceI]
+                << " with mesh normal " << n[facei]
                 << " is " << cos
                 //<< exit(FatalError);
                 << endl;
         }
     }
-    forAll(fld.boundaryField(), patchI)
+    forAll(fld.boundaryField(), patchi)
     {
-        const fvsPatchScalarField& fvp = fld.boundaryField()[patchI];
-        const fvsPatchVectorField& np = n.boundaryField()[patchI];
+        const fvsPatchScalarField& fvp = fld.boundaryField()[patchi];
+        const fvsPatchVectorField& np = n.boundaryField()[patchi];
 
         forAll(fvp, i)
         {
             scalar cos = (np[i] & testNormal);
 
-            if (mag(cos-fvp[i]) > 1e-6)
+            if (mag(cos - fvp[i]) > 1e-6)
             {
-                label faceI = fvp.patch().start()+i;
+                label facei = fvp.patch().start()+i;
                 //FatalErrorInFunction
                 WarningInFunction
-                    << "On face " << faceI
+                    << "On face " << facei
                     << " on patch " << fvp.patch().name()
-                    << " at " << mesh.faceCentres()[faceI]
+                    << " at " << mesh.faceCentres()[facei]
                     << " the field value is " << fvp[i]
                     << " whereas cos angle of " << testNormal
                     << " with mesh normal " << np[i]
@@ -488,13 +493,14 @@ void Foam::fvMeshDistribute::testField(const surfaceScalarField& fld)
 }
 
 
-// Delete all processor patches. Move any processor faces into the last
-// non-processor patch.
 Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::deleteProcPatches
 (
     const label destinationPatch
 )
 {
+    // Delete all processor patches. Move any processor faces into the last
+    // non-processor patch.
+
     // New patchID per boundary faces to be repatched. Is -1 (no change)
     // or new patchID
     labelList newPatchID(mesh_.nFaces() - mesh_.nInternalFaces(), -1);
@@ -535,23 +541,23 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::deleteProcPatches
     // Delete (now empty) processor patches.
     {
         labelList oldToNew(identity(mesh_.boundaryMesh().size()));
-        label newI = 0;
+        label newi = 0;
         // Non processor patches first
         forAll(mesh_.boundaryMesh(), patchi)
         {
             if (!isA<processorPolyPatch>(mesh_.boundaryMesh()[patchi]))
             {
-                oldToNew[patchi] = newI++;
+                oldToNew[patchi] = newi++;
             }
         }
-        label nNonProcPatches = newI;
+        label nNonProcPatches = newi;
 
         // Processor patches as last
         forAll(mesh_.boundaryMesh(), patchi)
         {
             if (isA<processorPolyPatch>(mesh_.boundaryMesh()[patchi]))
             {
-                oldToNew[patchi] = newI++;
+                oldToNew[patchi] = newi++;
             }
         }
         fvMeshTools::reorderPatches(mesh_, oldToNew, nNonProcPatches, false);
@@ -561,7 +567,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::deleteProcPatches
 }
 
 
-// Repatch the mesh.
 Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::repatch
 (
     const labelList& newPatchID,         // per boundary face -1 or new patchID
@@ -2521,7 +2526,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             const labelList& oldPatchMap = map().oldPatchMap();
 
             //Note: old mesh faces never flipped!
-            forAll(constructPatchMap, procI)
+            forAll(constructPatchMap, proci)
             {
                 if (proci != sendProc && constructPatchMap[proci].size())
                 {

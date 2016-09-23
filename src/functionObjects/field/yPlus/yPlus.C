@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "yPlus.H"
+#include "volFields.H"
 #include "turbulenceModel.H"
 #include "nutWallFunctionFvPatchScalarField.H"
 #include "wallFvPatch.H"
@@ -72,8 +73,10 @@ Foam::functionObjects::yPlus::yPlus
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    writeFile(obr_, name)
+    writeFile(obr_, name, typeName, dict)
 {
+    writeFileHeader(file());
+
     tmp<volScalarField> tyPlusPtr
     (
         new volScalarField
@@ -91,7 +94,7 @@ Foam::functionObjects::yPlus::yPlus
         )
     );
 
-    store(tyPlusPtr, typeName);
+    store(typeName, tyPlusPtr);
 }
 
 
@@ -106,7 +109,7 @@ Foam::functionObjects::yPlus::~yPlus()
 bool Foam::functionObjects::yPlus::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
-    dict.readIfPresent("phi", phiName_);
+    writeFile::read(dict);
 
     return true;
 }
@@ -114,34 +117,61 @@ bool Foam::functionObjects::yPlus::read(const dictionary& dict)
 
 bool Foam::functionObjects::yPlus::execute()
 {
-    typedef compressible::turbulenceModel cmpTurbModel;
-    typedef incompressible::turbulenceModel icoTurbModel;
-
     volScalarField& yPlus =
         const_cast<volScalarField&>
         (
-            mesh_.lookupObject<volScalarField>(resultName_)
+            lookupObject<volScalarField>(typeName)
         );
 
-    if (mesh.foundObject<cmpTurbModel>(turbulenceModel::propertiesName))
+    if (foundObject<turbulenceModel>(turbulenceModel::propertiesName))
     {
-        const cmpTurbModel& model =
-            mesh.lookupObject<cmpTurbModel>
+        volScalarField::Boundary& yPlusBf = yPlus.boundaryFieldRef();
+
+        const turbulenceModel& model =
+            lookupObject<turbulenceModel>
             (
                 turbulenceModel::propertiesName
             );
 
-        calcYPlus(model, yPlus);
-    }
-    else if (mesh.foundObject<icoTurbModel>(turbulenceModel::propertiesName))
-    {
-        const icoTurbModel& model =
-            mesh.lookupObject<icoTurbModel>
-            (
-                turbulenceModel::propertiesName
-            );
+        const nearWallDist nwd(mesh_);
+        const volScalarField::Boundary& d = nwd.y();
 
-        calcYPlus(model, yPlus);
+        // nut needed for wall function patches
+        const volScalarField::Boundary& nutBf = model.nut()().boundaryField();
+
+        // nuEff nu and U needed for plain wall patches
+        const volScalarField::Boundary& nuEffBf =
+            model.nuEff()().boundaryField();
+        const volScalarField::Boundary& nuBf = model.nu()().boundaryField();
+        const volVectorField::Boundary& UBf = model.U().boundaryField();
+
+        const fvPatchList& patches = mesh_.boundary();
+
+        forAll(patches, patchi)
+        {
+            const fvPatch& patch = patches[patchi];
+
+            if (isA<nutWallFunctionFvPatchScalarField>(nutBf[patchi]))
+            {
+                const nutWallFunctionFvPatchScalarField& nutPf =
+                    dynamic_cast<const nutWallFunctionFvPatchScalarField&>
+                    (
+                        nutBf[patchi]
+                    );
+
+                yPlusBf[patchi] = nutPf.yPlus();
+            }
+            else if (isA<wallFvPatch>(patch))
+            {
+                yPlusBf[patchi] =
+                    d[patchi]
+                   *sqrt
+                    (
+                        nuEffBf[patchi]
+                       *mag(UBf[patchi].snGrad())
+                    )/nuBf[patchi];
+            }
+        }
     }
     else
     {
@@ -164,8 +194,6 @@ bool Foam::functionObjects::yPlus::write()
         << "    writing field " << yPlus.name() << endl;
 
     yPlus.write();
-
-    writeFile::write();
 
     const volScalarField::Boundary& yPlusBf = yPlus.boundaryField();
     const fvPatchList& patches = mesh_.boundary();

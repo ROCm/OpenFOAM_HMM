@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ SourceFiles
 #ifndef functionObjects_removeRegisteredObject_H
 #define functionObjects_removeRegisteredObject_H
 
-#include "functionObject.H"
+#include "regionFunctionObject.H"
 #include "wordList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -79,12 +79,9 @@ namespace functionObjects
 
 class removeRegisteredObject
 :
-    public functionObject
+    public regionFunctionObject
 {
     // Private data
-
-        //- Reference to the objectRegistry
-        const objectRegistry& obr_;
 
         //- Names of objects to control
         wordList objectNames_;

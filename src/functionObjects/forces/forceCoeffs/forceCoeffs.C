@@ -31,18 +31,24 @@ License
 #include "fvMesh.H"
 #include "dimensionedTypes.H"
 #include "volFields.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace functionObjects
+{
     defineTypeNameAndDebug(forceCoeffs, 0);
+
+    addToRunTimeSelectionTable(functionObject, forceCoeffs, dictionary);
+}
 }
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::forceCoeffs::createFiles()
+void Foam::functionObjects::forceCoeffs::createFiles()
 {
     // Note: Only possible to create bin files after bins have been initialised
 
@@ -64,7 +70,7 @@ void Foam::forceCoeffs::createFiles()
 }
 
 
-void Foam::forceCoeffs::writeIntegratedHeader
+void Foam::functionObjects::forceCoeffs::writeIntegratedHeader
 (
     const word& header,
     Ostream& os
@@ -89,7 +95,7 @@ void Foam::forceCoeffs::writeIntegratedHeader
 }
 
 
-void Foam::forceCoeffs::writeBinHeader
+void Foam::functionObjects::forceCoeffs::writeBinHeader
 (
     const word& header,
     Ostream& os
@@ -144,7 +150,7 @@ void Foam::forceCoeffs::writeBinHeader
 }
 
 
-void Foam::forceCoeffs::writeIntegratedData
+void Foam::functionObjects::forceCoeffs::writeIntegratedData
 (
     const word& title,
     const List<Field<scalar>>& coeff
@@ -172,7 +178,7 @@ void Foam::forceCoeffs::writeIntegratedData
 }
 
 
-void Foam::forceCoeffs::writeBinData
+void Foam::functionObjects::forceCoeffs::writeBinData
 (
     const List<Field<scalar>> coeffs,
     Ostream& os
@@ -198,7 +204,7 @@ void Foam::forceCoeffs::writeBinData
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::forceCoeffs::forceCoeffs
+Foam::functionObjects::forceCoeffs::forceCoeffs
 (
     const word& name,
     const Time& runTime,
@@ -224,13 +230,13 @@ Foam::forceCoeffs::forceCoeffs
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::forceCoeffs::~forceCoeffs()
+Foam::functionObjects::forceCoeffs::~forceCoeffs()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::forceCoeffs::read(const dictionary& dict)
+bool Foam::functionObjects::forceCoeffs::read(const dictionary& dict)
 {
     forces::read(dict);
 
@@ -267,7 +273,7 @@ bool Foam::forceCoeffs::read(const dictionary& dict)
             )
         );
 
-        store(tforceCoeff.ptr());
+        store(tforceCoeff().name(), tforceCoeff);
 
         tmp<volVectorField> tmomentCoeff
         (
@@ -286,14 +292,14 @@ bool Foam::forceCoeffs::read(const dictionary& dict)
             )
         );
 
-        store(tmomentCoeff.ptr());
+        store(tmomentCoeff().name(), tmomentCoeff);
     }
 
     return true;
 }
 
 
-bool Foam::forceCoeffs::execute()
+bool Foam::functionObjects::forceCoeffs::execute()
 {
     forces::calcForcesMoment();
 
@@ -330,7 +336,7 @@ bool Foam::forceCoeffs::execute()
     scalar ClfTot = ClTot/2.0 + CmTot;
     scalar ClrTot = ClTot/2.0 - CmTot;
 
-    Log << type() << " " << name_ << " output:" << nl
+    Log << type() << " " << name() << " execute:" << nl
         << "    Coefficients" << nl;
 
     writeIntegratedData("Cm", momentCoeffs);
@@ -410,7 +416,7 @@ bool Foam::forceCoeffs::execute()
 }
 
 
-bool Foam::forceCoeffs::write()
+bool Foam::functionObjects::forceCoeffs::write()
 {
     if (writeFields_)
     {

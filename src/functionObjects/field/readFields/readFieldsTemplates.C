@@ -31,19 +31,19 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-bool Foam::readFields::loadField(const word& fieldName) const
+bool Foam::functionObjects::readFields::loadField(const word& fieldName)
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
 
-    if (obr_.foundObject<VolFieldType>(fieldName))
+    if (foundObject<VolFieldType>(fieldName))
     {
         DebugInfo
             << "readFields : " << VolFieldType::typeName
             << " " << fieldName << " already in database"
             << endl;
     }
-    else if (obr_.foundObject<SurfaceFieldType>(fieldName))
+    else if (foundObject<SurfaceFieldType>(fieldName))
     {
         DebugInfo<< "readFields: " << SurfaceFieldType::typeName
             << " " << fieldName << " already exists in database"
@@ -60,28 +60,20 @@ bool Foam::readFields::loadField(const word& fieldName) const
             IOobject::NO_WRITE
         );
 
-        if
-        (
-            fieldHeader.typeHeaderOk<vfType>(false)
-         && fieldHeader.headerClassName() == VolFieldType::typeName
-        )
+        if (fieldHeader.typeHeaderOk<VolFieldType>(false))
         {
             // Store field on mesh database
             Log << "    Reading " << fieldName << endl;
-            tmp<VolFieldType> tvf(new VolFieldType(fieldHeader, mesh));
-            store(tvf, fieldName);
+            tmp<VolFieldType> tvf(new VolFieldType(fieldHeader, mesh_));
+            regionFunctionObject::store(fieldName, tvf);
             return true;
         }
-        else if
-        (
-            fieldHeader.typeHeaderOk<sfType>(false)
-         && fieldHeader.headerClassName() == SurfaceFieldType::typeName
-        )
+        else if (fieldHeader.typeHeaderOk<SurfaceFieldType>(false))
         {
             // Store field on mesh database
             Log << "    Reading " << fieldName << endl;
-            tmp<SurfaceFieldType> tsf(new SurfaceFieldType(fieldHeader, mesh));
-            store(tsf, fieldName);
+            tmp<SurfaceFieldType> tsf(new SurfaceFieldType(fieldHeader, mesh_));
+            regionFunctionObject::store(fieldName, tsf);
             return true;
         }
     }

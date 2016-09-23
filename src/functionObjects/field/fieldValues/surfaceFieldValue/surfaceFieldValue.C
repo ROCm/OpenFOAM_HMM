@@ -25,7 +25,6 @@ License
 
 #include "surfaceFieldValue.H"
 #include "fvMesh.H"
-#include "cyclicPolyPatch.H"
 #include "emptyPolyPatch.H"
 #include "coupledPolyPatch.H"
 #include "sampledSurface.H"
@@ -489,7 +488,7 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::initialise
         if (weightFieldName_ == "none")
         {
             dict.lookup("orientedWeightField") >>  weightFieldName_;
-            if (log_) Info << "    weight field = " << weightFieldName_ << nl;
+            Log << "    weight field = " << weightFieldName_ << nl;
             orientWeightField_ = true;
         }
         else
@@ -527,7 +526,10 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::initialise
 }
 
 
-void Foam::fieldValues::faceSource::writeFileHeader(Ostream& os) const
+void Foam::functionObjects::fieldValues::surfaceFieldValue::writeFileHeader
+(
+    Ostream& os
+) const
 {
     if (operation_ != opNone)
     {
@@ -649,7 +651,6 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
     weightFieldName_("none"),
     orientWeightField_(false),
     orientedFieldsStart_(labelMax),
-    scaleFactor_(1.0),
     writeArea_(dict.lookupOrDefault("writeArea", false)),
     nFaces_(0),
     faceId_(),
@@ -675,7 +676,6 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
     weightFieldName_("none"),
     orientWeightField_(false),
     orientedFieldsStart_(labelMax),
-    scaleFactor_(1.0),
     writeArea_(dict.lookupOrDefault("writeArea", false)),
     nFaces_(0),
     faceId_(),

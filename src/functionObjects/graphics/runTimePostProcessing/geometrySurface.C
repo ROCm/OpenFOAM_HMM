@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,14 +48,19 @@ License
 
 namespace Foam
 {
+namespace functionObjects
+{
+namespace runTimePostPro
+{
     defineTypeNameAndDebug(geometrySurface, 0);
     addToRunTimeSelectionTable(surface, geometrySurface, dictionary);
 }
-
+}
+}
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::geometrySurface::addGeometryToScene
+void Foam::functionObjects::runTimePostPro::geometrySurface::addGeometryToScene
 (
     const scalar position,
     vtkRenderer* renderer,
@@ -132,7 +137,7 @@ void Foam::geometrySurface::addGeometryToScene
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::geometrySurface::geometrySurface
+Foam::functionObjects::runTimePostPro::geometrySurface::geometrySurface
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
@@ -144,7 +149,7 @@ Foam::geometrySurface::geometrySurface
 {}
 
 
-Foam::geometrySurface::geometrySurface
+Foam::functionObjects::runTimePostPro::geometrySurface::geometrySurface
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
@@ -159,13 +164,13 @@ Foam::geometrySurface::geometrySurface
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::geometrySurface::~geometrySurface()
+Foam::functionObjects::runTimePostPro::geometrySurface::~geometrySurface()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::geometrySurface::addGeometryToScene
+void Foam::functionObjects::runTimePostPro::geometrySurface::addGeometryToScene
 (
     const scalar position,
     vtkRenderer* renderer
@@ -184,7 +189,10 @@ void Foam::geometrySurface::addGeometryToScene
 }
 
 
-void Foam::geometrySurface::updateActors(const scalar position)
+void Foam::functionObjects::runTimePostPro::geometrySurface::updateActors
+(
+    const scalar position
+)
 {
     if (!visible_)
     {

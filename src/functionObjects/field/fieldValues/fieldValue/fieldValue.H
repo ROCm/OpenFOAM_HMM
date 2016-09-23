@@ -53,14 +53,11 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-class fvMesh;
-
 namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class fieldValue Declaration
+                         Class fieldValue Declaration
 \*---------------------------------------------------------------------------*/
 
 class fieldValue
@@ -72,6 +69,9 @@ class fieldValue
 protected:
 
     // Protected data
+
+        //- Optional scale value
+        scalar scaleFactor_;
 
         //- Construction dictionary
         dictionary dict_;

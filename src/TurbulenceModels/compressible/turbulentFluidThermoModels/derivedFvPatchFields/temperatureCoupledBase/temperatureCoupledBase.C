@@ -135,7 +135,7 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
                 const basicThermo& thermo =
                     mesh.lookupObject<basicThermo>(basicThermo::dictName);
 
-                return thermo.kappa(patchI);
+                return thermo.kappa(patchi);
             }
             else
             {

@@ -615,7 +615,7 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
 
                 label zonei = faceToZone[curF];
 
-                if (zoneI >= 0)
+                if (zonei >= 0)
                 {
                     // Single zone. Add the face
                     zoneFaces[zonei].append(facei);

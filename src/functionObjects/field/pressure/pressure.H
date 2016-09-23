@@ -143,9 +143,6 @@ class pressure
         //- Name of density field, default is "rho"
         word rhoName_;
 
-        //- Flag to show whether rhoInf has been initialised
-        bool rhoInfInitialised_;
-
 
         // Total pressure calculation
 
@@ -169,6 +166,9 @@ class pressure
 
             //- Freestream density
             scalar rhoInf_;
+
+            //- Flag to show whether rhoInf has been initialised
+            bool rhoInfInitialised_;
 
 
     // Private Member Functions

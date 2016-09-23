@@ -96,12 +96,13 @@ void Foam::sampledSurfaces::writeGeometry() const
 Foam::sampledSurfaces::sampledSurfaces
 (
     const word& name,
-    const Time& t,
+    const Time& runTime,
     const dictionary& dict
 )
 :
-    regionFunctionObject(t, name),
+    functionObjects::regionFunctionObject(name, runTime, dict),
     PtrList<sampledSurface>(),
+    mesh_(refCast<const fvMesh>(obr_)),
     loadFromFiles_(false),
     outputPath_(fileName::null),
     fieldSelection_(),
@@ -130,8 +131,9 @@ Foam::sampledSurfaces::sampledSurfaces
     const bool loadFromFiles
 )
 :
-    regionFunctionObject(obr, name),
+    functionObjects::regionFunctionObject(name, obr, dict),
     PtrList<sampledSurface>(),
+    mesh_(refCast<const fvMesh>(obr)),
     loadFromFiles_(loadFromFiles),
     outputPath_(fileName::null),
     fieldSelection_(),
@@ -143,11 +145,11 @@ Foam::sampledSurfaces::sampledSurfaces
 
     if (Pstream::parRun())
     {
-        outputPath_ = time_.path()/".."/"postProcessing"/name_;
+        outputPath_ = time_.path()/".."/"postProcessing"/name;
     }
     else
     {
-        outputPath_ = time_.path()/"postProcessing"/name_;
+        outputPath_ = time_.path()/"postProcessing"/name;
     }
 
     read(dict);

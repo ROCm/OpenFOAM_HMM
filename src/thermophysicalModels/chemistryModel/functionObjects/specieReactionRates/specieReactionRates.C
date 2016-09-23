@@ -33,26 +33,26 @@ template<class ChemistryModelType>
 void Foam::functionObjects::specieReactionRates<ChemistryModelType>::
 writeFileHeader
 (
-    const label i
-)
+    Ostream& os
+) const
 {
-    writeHeader(file(), "Specie reaction rates");
-    volRegion::writeFileHeader(*this, file());
-    writeHeaderValue(file(), "nSpecie", chemistryModel_.nSpecie());
-    writeHeaderValue(file(), "nReaction", chemistryModel_.nReaction());
+    writeHeader(os, "Specie reaction rates");
+    volRegion::writeFileHeader(*this, os);
+    writeHeaderValue(os, "nSpecie", chemistryModel_.nSpecie());
+    writeHeaderValue(os, "nReaction", chemistryModel_.nReaction());
 
-    writeCommented(file(), "Time");
-    writeTabbed(file(), "Reaction");
+    writeCommented(os, "Time");
+    writeTabbed(os, "Reaction");
 
     const wordList& speciesNames =
         chemistryModel_.thermo().composition().species();
 
     forAll (speciesNames, si)
     {
-        writeTabbed(file(), speciesNames[si]);
+        writeTabbed(os, speciesNames[si]);
     }
 
-    file() << endl;
+    os  << endl;
 }
 
 
@@ -69,7 +69,7 @@ specieReactionRates
 :
     fvMeshFunctionObject(name, runTime, dict),
     volRegion(fvMeshFunctionObject::mesh_, dict),
-    logFiles(obr_, name),
+    writeFile(obr_, name, typeName, dict),
     chemistryModel_
     (
         fvMeshFunctionObject::mesh_.lookupObject<ChemistryModelType>
@@ -78,7 +78,7 @@ specieReactionRates
         )
     )
 {
-    resetName("specieReactionRates");
+    writeFileHeader(file());
 }
 
 
@@ -114,8 +114,6 @@ bool Foam::functionObjects::specieReactionRates<ChemistryModelType>::execute()
 template<class ChemistryModelType>
 bool Foam::functionObjects::specieReactionRates<ChemistryModelType>::write()
 {
-    logFiles::write();
-
     const label nSpecie = chemistryModel_.nSpecie();
     const label nReaction = chemistryModel_.nReaction();
 
@@ -124,11 +122,8 @@ bool Foam::functionObjects::specieReactionRates<ChemistryModelType>::write()
 
     for (label ri=0; ri<nReaction; ri++)
     {
-        if (Pstream::master())
-        {
-            writeTime(file());
-            file() << token::TAB << ri;
-        }
+        writeTime(file());
+        file() << token::TAB << ri;
 
         for (label si=0; si<nSpecie; si++)
         {
@@ -151,23 +146,14 @@ bool Foam::functionObjects::specieReactionRates<ChemistryModelType>::write()
                 );
             }
 
-            if (Pstream::master())
-            {
-                file() << token::TAB << sumVRRi/V;
-            }
+            file() << token::TAB << sumVRRi/V;
         }
 
-        if (Pstream::master())
-        {
-            file() << nl;
-        }
+        file() << nl;
     }
 
-    if (Pstream::master())
-    {
-        file() << nl << endl;
-    }
-
+    file() << nl << endl;
+  
     return true;
 }
 

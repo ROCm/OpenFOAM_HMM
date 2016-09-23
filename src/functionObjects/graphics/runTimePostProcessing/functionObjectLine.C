@@ -40,14 +40,20 @@ License
 
 namespace Foam
 {
+namespace functionObjects
+{
+namespace runTimePostPro
+{
     defineTypeNameAndDebug(functionObjectLine, 0);
     addToRunTimeSelectionTable(pathline, functionObjectLine, dictionary);
+}
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::functionObjectLine::functionObjectLine
+Foam::functionObjects::runTimePostPro::functionObjectLine::functionObjectLine
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
@@ -65,13 +71,14 @@ Foam::functionObjectLine::functionObjectLine
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::functionObjectLine::~functionObjectLine()
+Foam::functionObjects::runTimePostPro::functionObjectLine::~functionObjectLine()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::functionObjectLine::addGeometryToScene
+void Foam::functionObjects::runTimePostPro::functionObjectLine::
+addGeometryToScene
 (
     const scalar position,
     vtkRenderer* renderer
@@ -121,7 +128,10 @@ void Foam::functionObjectLine::addGeometryToScene
 }
 
 
-void Foam::functionObjectLine::updateActors(const scalar position)
+void Foam::functionObjects::runTimePostPro::functionObjectLine::updateActors
+(
+    const scalar position
+)
 {
     actor_->GetProperty()->SetLineWidth(2);
     actor_->GetProperty()->SetOpacity(opacity(position));

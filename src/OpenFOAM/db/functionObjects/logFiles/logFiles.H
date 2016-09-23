@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +41,6 @@ SourceFiles
 #define functionObjects_logFiles_H
 
 #include "writeFile.H"
-#include "OFstream.H"
 #include "PtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -82,9 +81,6 @@ protected:
         //- Reset the list of names to a single name entry
         virtual void resetName(const word& name);
 
-        //- File header information
-        virtual void writeFileHeader(const label i = 0) = 0;
-
 
 private:
 
@@ -106,6 +102,16 @@ public:
         (
             const objectRegistry& obr,
             const word& prefix
+        );
+
+
+        //- Construct from objectRegistry and prefix, and read options
+        //  from dictionary
+        logFiles
+        (
+            const objectRegistry& obr,
+            const word& prefix,
+            const dictionary& dict
         );
 
 

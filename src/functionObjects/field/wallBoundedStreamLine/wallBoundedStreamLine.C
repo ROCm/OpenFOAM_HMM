@@ -259,63 +259,64 @@ bool Foam::functionObjects::wallBoundedStreamLine::read(const dictionary& dict)
         // Make sure that the mesh is trackable
         if (debug)
         {
-        // 1. Positive volume decomposition tets
-        faceSet faces(mesh_, "lowQualityTetFaces", mesh_.nFaces()/100+1);
-        if
-        (
-            polyMeshTetDecomposition::checkFaceTets
+            // 1. Positive volume decomposition tets
+            faceSet faces(mesh_, "lowQualityTetFaces", mesh_.nFaces()/100+1);
+            if
             (
-                mesh_,
-                polyMeshTetDecomposition::minTetQuality,
-                true,
-                &faces
+                polyMeshTetDecomposition::checkFaceTets
+                (
+                    mesh_,
+                    polyMeshTetDecomposition::minTetQuality,
+                    true,
+                    &faces
+                )
             )
-        )
-        {
-            label nFaces = returnReduce(faces.size(), sumOp<label>());
-
-            WarningInFunction
-                << "Found " << nFaces
-                <<" faces with low quality or negative volume "
-                << "decomposition tets. Writing to faceSet " << faces.name()
-                << endl;
-        }
-
-        // 2. All edges on a cell having two faces
-        EdgeMap<label> numFacesPerEdge;
-        forAll(mesh_.cells(), celli)
-        {
-            const cell& cFaces = mesh_.cells()[celli];
-
-            numFacesPerEdge.clear();
-
-            forAll(cFaces, cFacei)
             {
-                label facei = cFaces[cFacei];
-                const face& f = mesh_.faces()[facei];
-                forAll(f, fp)
-                {
-                    const edge e(f[fp], f.nextLabel(fp));
-                    EdgeMap<label>::iterator eFnd =
-                        numFacesPerEdge.find(e);
-                    if (eFnd != numFacesPerEdge.end())
-                    {
-                        eFnd()++;
-                    }
-                    else
-                    {
-                        numFacesPerEdge.insert(e, 1);
-                    }
-                }
+                label nFaces = returnReduce(faces.size(), sumOp<label>());
+
+                WarningInFunction
+                    << "Found " << nFaces
+                    <<" faces with low quality or negative volume "
+                    << "decomposition tets. Writing to faceSet " << faces.name()
+                    << endl;
             }
 
-            forAllConstIter(EdgeMap<label>, numFacesPerEdge, iter)
+            // 2. All edges on a cell having two faces
+            EdgeMap<label> numFacesPerEdge;
+            forAll(mesh_.cells(), celli)
             {
-                if (iter() != 2)
+                const cell& cFaces = mesh_.cells()[celli];
+
+                numFacesPerEdge.clear();
+
+                forAll(cFaces, cFacei)
                 {
-                    FatalErrorInFunction
-                        << "problem cell:" << celli
-                        << abort(FatalError);
+                    label facei = cFaces[cFacei];
+                    const face& f = mesh_.faces()[facei];
+                    forAll(f, fp)
+                    {
+                        const edge e(f[fp], f.nextLabel(fp));
+                        EdgeMap<label>::iterator eFnd =
+                            numFacesPerEdge.find(e);
+                        if (eFnd != numFacesPerEdge.end())
+                        {
+                            eFnd()++;
+                        }
+                        else
+                        {
+                            numFacesPerEdge.insert(e, 1);
+                        }
+                    }
+                }
+
+                forAllConstIter(EdgeMap<label>, numFacesPerEdge, iter)
+                {
+                    if (iter() != 2)
+                    {
+                        FatalErrorInFunction
+                            << "problem cell:" << celli
+                            << abort(FatalError);
+                    }
                 }
             }
         }

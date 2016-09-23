@@ -68,8 +68,8 @@ void Foam::patchCorrectedInterpolation::interpolateType
 
     // Set the point displacement to the uncorrected result everywhere except
     // for on the boundary
-    pointDisplacement.internalField() =
-        pointUncorrectedDisplacement.internalField();
+    pointDisplacement.primitiveFieldRef() =
+        pointUncorrectedDisplacement.primitiveField();
     pointDisplacement.correctBoundaryConditions();
 
     // Set the residual displacement as the difference between the boundary
@@ -136,10 +136,10 @@ void Foam::patchCorrectedInterpolation::interpolateDataFromPatchGroups
         // Calculate the weight and add to weighted sum
         const scalarField patchWeight
         (
-            1/max(sqr(patchDistance.internalField()), SMALL)
+            1/max(sqr(patchDistance.primitiveField()), SMALL)
         );
-        data.internalField() += patchWeight*patchData.internalField();
-        weight.internalField() += patchWeight;
+        data.primitiveFieldRef() += patchWeight*patchData.primitiveField();
+        weight.primitiveFieldRef() += patchWeight;
     }
 
     // Complete the average
@@ -150,52 +150,52 @@ void Foam::patchCorrectedInterpolation::interpolateDataFromPatchGroups
 template <class Type>
 void Foam::patchCorrectedInterpolation::propagateDataFromPatchGroup
 (
-    const label patchGroupI,
+    const label patchGroupi,
     pointScalarField& distance,
     GeometricField<Type, pointPatchField, pointMesh>& data
 ) const
 {
-    const labelList& patchGroup(patchGroups_[patchGroupI]);
+    const labelList& patchGroup(patchGroups_[patchGroupi]);
 
     // Get the size of the seed info
     label nSeedInfo(0);
-    forAll(patchGroup, patchGroupI)
+    forAll(patchGroup, patchGroupi)
     {
-        const label patchI(patchGroup[patchGroupI]);
+        const label patchi(patchGroup[patchGroupi]);
 
-        nSeedInfo += data.boundaryField()[patchI].size();
+        nSeedInfo += data.boundaryField()[patchi].size();
     }
 
     // Generate the seed labels and info
     labelList seedLabels(nSeedInfo);
     List<PointData<Type>> seedInfo(nSeedInfo);
     nSeedInfo = 0;
-    forAll(patchGroup, patchGroupI)
+    forAll(patchGroup, patchGroupi)
     {
-        const label patchI(patchGroup[patchGroupI]);
+        const label patchi(patchGroup[patchGroupi]);
 
-        pointPatchField<Type>& patchDataField(data.boundaryField()[patchI]);
+        pointPatchField<Type>& patchDataField(data.boundaryFieldRef()[patchi]);
 
         patchDataField.updateCoeffs();
 
         const pointPatch& patch(patchDataField.patch());
         const Field<Type> patchData(patchDataField.patchInternalField());
 
-        forAll(patch.meshPoints(), patchPointI)
+        forAll(patch.meshPoints(), patchPointi)
         {
-            const label pointI(patch.meshPoints()[patchPointI]);
+            const label pointi(patch.meshPoints()[patchPointi]);
 
-            seedLabels[nSeedInfo] = pointI;
+            seedLabels[nSeedInfo] = pointi;
 
             seedInfo[nSeedInfo] =
                 PointData<Type>
                 (
-                    mesh().points()[pointI],
+                    mesh().points()[pointi],
                     0,
-                    patchData[patchPointI]
+                    patchData[patchPointi]
                 );
 
-            nSeedInfo ++;
+            nSeedInfo++;
         }
     }
 
@@ -213,10 +213,10 @@ void Foam::patchCorrectedInterpolation::propagateDataFromPatchGroup
     );
 
     // Copy result into the fields
-    forAll(allPointInfo, pointI)
+    forAll(allPointInfo, pointi)
     {
-        distance[pointI] = sqrt(allPointInfo[pointI].distSqr());
-        data[pointI] = allPointInfo[pointI].data();
+        distance[pointi] = sqrt(allPointInfo[pointi].distSqr());
+        data[pointi] = allPointInfo[pointi].data();
     }
 }
 

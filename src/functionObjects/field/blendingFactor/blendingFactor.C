@@ -25,6 +25,7 @@ License
 
 #include "blendingFactor.H"
 #include "addToRunTimeSelectionTable.H"
+#include "zeroGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -55,8 +56,8 @@ bool Foam::functionObjects::blendingFactor::calc()
 {
     bool processed = false;
 
-    processed = processed || calcBF<scalar>();
-    processed = processed || calcBF<vector>();
+    processed = processed || calcScheme<scalar>();
+    processed = processed || calcScheme<vector>();
 
     return processed;
 }
@@ -72,10 +73,13 @@ Foam::functionObjects::blendingFactor::blendingFactor
 )
 :
     fieldExpression(name, runTime, dict),
-    writeFile(obr, name)
+    writeFile(obr_, name, typeName, dict),
+    phiName_("phi"),
+    tolerance_(0.001)
 {
     read(dict);
     writeFileHeader(file());
+    setResultName(typeName, fieldName_);
 
     tmp<volScalarField> indicatorPtr
     (
@@ -84,20 +88,18 @@ Foam::functionObjects::blendingFactor::blendingFactor
             IOobject
             (
                 resultName_,
-                mesh.time().timeName(),
-                mesh,
+                time_.timeName(),
+                mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            mesh,
+            mesh_,
             dimensionedScalar("0", dimless, 0.0),
             zeroGradientFvPatchScalarField::typeName
         )
     );
 
-    store(indicatorPtr, resultName_);
-
-    setResultName(typeName, fieldName_);
+    store(resultName_, indicatorPtr);
 }
 
 
@@ -114,16 +116,23 @@ bool Foam::functionObjects::blendingFactor::read(const dictionary& dict)
     fieldExpression::read(dict);
 
     phiName_ = dict.lookupOrDefault<word>("phi", "phi");
+    dict.readIfPresent("tolerance", tolerance_);
+    if ((tolerance_ < 0) || (tolerance_ > 1))
+    {
+        FatalErrorInFunction
+            << "tolerance must be in the range 0 to 1.  Supplied value: "
+            << tolerance_ << exit(FatalError);
+    }
 
     return true;
 }
 
 
-bool Foam::functionObjects::forces::write()
+bool Foam::functionObjects::blendingFactor::write()
 {
     if (fieldExpression::write())
     {
-        const volScalarField& indictator =
+        const volScalarField& indicator =
             lookupObject<volScalarField>(resultName_);
 
         // Generate scheme statistics
@@ -152,22 +161,22 @@ bool Foam::functionObjects::forces::write()
         reduce(nCellsScheme2, sumOp<label>());
         reduce(nCellsBlended, sumOp<label>());
 
-        Log << type() << " " << name_ << " write:" << nl
+        Log << type() << " " << name() << " write:" << nl
             << "    scheme 1 cells :  " << nCellsScheme1 << nl
             << "    scheme 2 cells :  " << nCellsScheme2 << nl
             << "    blended cells  :  " << nCellsBlended << nl
             << endl;
 
         file()
-            << mesh_.time().time().value()
+            << time_.time().value()
             << token::TAB << nCellsScheme1
             << token::TAB << nCellsScheme2
             << token::TAB << nCellsBlended
             << endl;
-        }
     }
 
     return true;
 }
+
 
 // ************************************************************************* //

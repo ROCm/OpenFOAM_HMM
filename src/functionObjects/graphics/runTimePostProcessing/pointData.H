@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::pointData
+    Foam::functionObjects::runTimePostPro::pointData
 
 Description
 
@@ -31,8 +31,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointData_H
-#define pointData_H
+#ifndef functionObjects_runTimePostPro_pointData_H
+#define functionObjects_runTimePostPro_pointData_H
 
 #include "geometryBase.H"
 #include "NamedEnum.H"
@@ -45,6 +45,10 @@ class vtkPolyData;
 class vtkPolyDataMapper;
 
 namespace Foam
+{
+namespace functionObjects
+{
+namespace runTimePostPro
 {
 
 /*---------------------------------------------------------------------------*\
@@ -61,8 +65,8 @@ public:
 
         enum representationType
         {
-            rtSphere,
-            rtVector
+            rtSphere,               //< Sphere
+            rtVector                //< Vector
         };
 
         static const NamedEnum<representationType, 2> representationTypeNames;
@@ -73,10 +77,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        pointData(const pointData&);
+        pointData(const pointData&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const pointData&);
+        void operator=(const pointData&) = delete;
 
 
 protected:
@@ -157,6 +161,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace runTimePostPro
+} // End namespace functionObjects
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

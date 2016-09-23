@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,17 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjectCloud
+    Foam::functionObjects::runTimePostPro::functionObjectCloud
 
 Description
+    Visualisation of cloud data from function object output
 
 SourceFiles
     functionObjectCloud.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjectCloud_H
-#define functionObjectCloud_H
+#ifndef functionObjects_runTimePostPro_functionObjectCloud_H
+#define functionObjects_runTimePostPro_functionObjectCloud_H
 
 #include "pointData.H"
 #include "fieldVisualisationBase.H"
@@ -40,6 +41,10 @@ SourceFiles
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace functionObjects
+{
+namespace runTimePostPro
 {
 
 /*---------------------------------------------------------------------------*\
@@ -56,20 +61,20 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        functionObjectCloud(const functionObjectCloud&);
+        functionObjectCloud(const functionObjectCloud&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const functionObjectCloud&);
+        void operator=(const functionObjectCloud&) = delete;
 
 
 protected:
 
     // Protected data
 
-        //- Name of cloud
+        //- Name of functionObjectCloud
         word cloudName_;
 
-        //- Name of cloud function object result to render
+        //- Name of functionObjectCloud function object result to render
         word functionObject_;
 
         //- Name of field to colour by
@@ -116,6 +121,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace runTimePostPro
+} // End namespace functionObjects
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

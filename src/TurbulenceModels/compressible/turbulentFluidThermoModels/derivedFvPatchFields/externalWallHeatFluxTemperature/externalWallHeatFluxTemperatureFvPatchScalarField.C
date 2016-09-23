@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -147,8 +147,8 @@ externalWallHeatFluxTemperatureFvPatchScalarField
                     << "\n number of layers for thicknessLayers and "
                     << "kappaLayers must be the same"
                     << "\n for patch " << p.name()
-                    << " of field " << dimensionedInternalField().name()
-                    << " in file " << dimensionedInternalField().objectPath()
+                    << " of field " << internalField().name()
+                    << " in file " << internalField().objectPath()
                     << exit(FatalIOError);
             }
         }
@@ -331,7 +331,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
 
         Info<< patch().boundaryMesh().mesh().name() << ':'
             << patch().name() << ':'
-            << this->internalField().name() << " :"
+            << internalField().name() << " :"
             << " heat transfer rate:" << Q
             << " wall temperature "
             << " min:" << gMin(*this)

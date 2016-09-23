@@ -61,7 +61,7 @@ class dictionary;
 
 class sampledSurfaces
 :
-    public regionFunctionObject,
+    public functionObjects::regionFunctionObject,
     public PtrList<sampledSurface>
 {
     // Private classes
@@ -94,6 +94,9 @@ class sampledSurfaces
 
 
     // Private data
+
+        //- Const reference to fvMesh
+        const fvMesh& mesh_;
 
         //- Load fields from files (not from objectRegistry)
         const bool loadFromFiles_;

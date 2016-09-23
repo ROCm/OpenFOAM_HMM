@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,14 +55,7 @@ Foam::functionObjects::removeRegisteredObject::removeRegisteredObject
     const dictionary& dict
 )
 :
-    functionObject(name),
-    obr_
-    (
-        runTime.lookupObject<objectRegistry>
-        (
-            dict.lookupOrDefault("region", polyMesh::defaultRegion)
-        )
-    ),
+    regionFunctionObject(name, runTime, dict),
     objectNames_()
 {
     read(dict);
@@ -89,14 +82,14 @@ bool Foam::functionObjects::removeRegisteredObject::execute()
 {
     forAll(objectNames_, i)
     {
-        if (obr_.foundObject<regIOobject>(objectNames_[i]))
+        if (foundObject<regIOobject>(objectNames_[i]))
         {
             const regIOobject& obj =
-                obr_.lookupObject<regIOobject>(objectNames_[i]);
+                lookupObject<regIOobject>(objectNames_[i]);
 
             if (obj.ownedByRegistry())
             {
-                Log << type() << " " << name_ << " output:" << nl
+                Log << type() << " " << name() << " output:" << nl
                     << "    removing object " << obj.name() << nl
                     << endl;
 

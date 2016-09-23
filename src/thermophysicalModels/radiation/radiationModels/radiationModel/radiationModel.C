@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -118,8 +118,8 @@ Foam::radiation::radiationModel::radiationModel(const volScalarField& T)
     firstIter_(true),
     absorptionEmission_(nullptr),
     scatter_(nullptr),
-    soot_(nullptr)
-    transmissivity_(nullPtr)
+    soot_(nullptr),
+    transmissivity_(nullptr)
 {}
 
 
@@ -139,8 +139,8 @@ Foam::radiation::radiationModel::radiationModel
     firstIter_(true),
     absorptionEmission_(nullptr),
     scatter_(nullptr),
-    soot_(nullptr)
-    transmissivity_(nullPtr)
+    soot_(nullptr),
+    transmissivity_(nullptr)
 {
     if (readOpt() == IOobject::NO_READ)
     {
@@ -179,8 +179,8 @@ Foam::radiation::radiationModel::radiationModel
     firstIter_(true),
     absorptionEmission_(nullptr),
     scatter_(nullptr),
-    soot_(nullPtr),
-    transmissivity_(nullPtr)
+    soot_(nullptr),
+    transmissivity_(nullptr)
 {
     initialise();
 }

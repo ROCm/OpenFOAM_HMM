@@ -52,13 +52,7 @@ Description
         name            movingWall;
 
         operation       areaAverage;
-
-        fields
-        (
-            p
-            phi
-            U
-        );
+        fields          (p phi U);
     }
 
     surfaceFieldValue1
@@ -75,15 +69,8 @@ Description
         name            f0;
 
         operation       sum;
-
         weightField     alpha1;
-
-        fields
-        (
-            p
-            phi
-            U
-        );
+        fields          (p phi U);
     }
     \endverbatim
 
@@ -165,6 +152,11 @@ SourceFiles
 
 #include "fieldValue.H"
 #include "NamedEnum.H"
+#include "faceList.H"
+#include "surfaceMesh.H"
+#include "fvsPatchField.H"
+#include "volFieldsFwd.H"
+#include "surfFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -180,7 +172,7 @@ namespace fieldValues
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class surfaceFieldValue Declaration
+                      Class surfaceFieldValue Declaration
 \*---------------------------------------------------------------------------*/
 
 class surfaceFieldValue
@@ -207,21 +199,21 @@ public:
         //- Operation type enumeration
         enum operationType
         {
-            opNone,
-            opSum,
-            opSumMag,
-            opSumDirection,
-            opSumDirectionBalance,
-            opAverage,
-            opWeightedAverage,
-            opAreaAverage,
-            opWeightedAreaAverage,
-            opAreaIntegrate,
-            opMin,
-            opMax,
-            opCoV,
-            opAreaNormalAverage,
-            opAreaNormalIntegrate
+            opNone,                 //< None
+            opSum,                  //< Sum
+            opSumMag,               //< Magnitude of sum
+            opSumDirection,         //< Sum in a given direction
+            opSumDirectionBalance,  //< Sum in a given direction for multiple
+            opAverage,              //< Average
+            opWeightedAverage,      //< Weighted average
+            opAreaAverage,          //< Area average
+            opWeightedAreaAverage,  //< Weighted area average
+            opAreaIntegrate,        //< Area integral
+            opMin,                  //< Minimum
+            opMax,                  //< Maximum
+            opCoV,                  //< Coefficient of variation
+            opAreaNormalAverage,    //< Area average in normal direction
+            opAreaNormalIntegrate   //< Area integral in normal direction
         };
 
         //- Operation type names
@@ -321,7 +313,7 @@ protected:
 
         //- Return field values by looking up field name
         template<class Type>
-        tmp<Field<Type>> setFieldValues
+        tmp<Field<Type>> getFieldValues
         (
             const word& fieldName,
             const bool mustGet = false,

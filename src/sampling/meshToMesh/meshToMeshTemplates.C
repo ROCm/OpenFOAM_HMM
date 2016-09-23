@@ -554,7 +554,7 @@ void Foam::meshToMesh::mapSrcToTgt
     const bool secondOrder
 ) const
 {
-    mapInternalSrcToTgt(field, cop, result.primitiveFieldRef(), secondOrder);
+    mapInternalSrcToTgt(field, cop, result, secondOrder);
 
     const PtrList<AMIPatchToPatchInterpolation>& AMIList = patchAMIs();
 
@@ -751,14 +751,14 @@ void Foam::meshToMesh::mapInternalTgtToSrc
         mapTgtToSrc
         (
             field,
-            fvc::grad(field)().internalField(),
+            fvc::grad(field)().primitiveField(),
             cop,
-            result.internalField()
+            result.primitiveFieldRef()
         );
     }
     else
     {
-        mapTgtToSrc(field, cop, result.internalField());
+        mapTgtToSrc(field, cop, result.primitiveFieldRef());
     }
 }
 
@@ -785,27 +785,6 @@ void Foam::meshToMesh::mapAndOpTgtToSrc
 
 
 template<class Type, class CombineOp>
-void Foam::meshToMesh::mapAndOpTgtToSrc
-(
-    const AMIPatchToPatchInterpolation& AMI,
-    Field<Type>& srcField,
-    const Field<Type>& tgtField,
-    const CombineOp& cop
-) const
-{
-    srcField = pTraits<Type>::zero;
-
-    AMI.interpolateToSource
-    (
-        tgtField,
-        multiplyWeightedOp<Type, CombineOp>(cop),
-        srcField,
-        UList<Type>::null()
-    );
-}
-
-
-template<class Type, class CombineOp>
 void Foam::meshToMesh::mapTgtToSrc
 (
     const GeometricField<Type, fvPatchField, volMesh>& field,
@@ -814,7 +793,7 @@ void Foam::meshToMesh::mapTgtToSrc
     const bool secondOrder
 ) const
 {
-    mapInternalTgtToSrc(field, cop, result.primitiveFieldRef(), secondOrder);
+    mapInternalTgtToSrc(field, cop, result, secondOrder);
 
     const PtrList<AMIPatchToPatchInterpolation>& AMIList = patchAMIs();
 

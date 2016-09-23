@@ -76,7 +76,7 @@ SourceFiles
 #ifndef probes_H
 #define probes_H
 
-#include "fvMeshFunctionObject.H"
+#include "functionObject.H"
 #include "HashPtrTable.H"
 #include "OFstream.H"
 #include "polyMesh.H"
@@ -104,7 +104,7 @@ class mapPolyMesh;
 
 class probes
 :
-    public fvMeshFunctionObject,
+    public functionObject,
     public pointField
 {
 protected:
@@ -127,6 +127,9 @@ protected:
 
 
     // Protected data
+
+        //- Const reference to fvMesh
+        const fvMesh& mesh_;
 
         //- Load fields from files (not from objectRegistry)
         bool loadFromFiles_;
@@ -236,7 +239,9 @@ public:
         (
             const word& name,
             const Time& runTime,
-            const dictionary& dict
+            const dictionary& dict,
+            const bool loadFromFiles = false,
+            const bool readFields = true
         );
 
         //- Construct for given objectRegistry and dictionary.
@@ -246,7 +251,7 @@ public:
             const word& name,
             const objectRegistry& obr,
             const dictionary& dict,
-            const bool loadFromFiles = false
+            const bool loadFromFiles = false,
             const bool readFields = true
         );
 

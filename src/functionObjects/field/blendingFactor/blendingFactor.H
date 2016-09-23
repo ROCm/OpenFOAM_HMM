@@ -54,7 +54,7 @@ Description
     blendingFactor1
     {
         type        blendingFactor;
-        functionObjectLibs ("libutilityFunctionObjects.so");
+        libs        ("libfieldFunctionObjects.so");
 
         ...
 
@@ -76,6 +76,7 @@ Description
 See also
     Foam::functionObjects::fieldExpression
     Foam::functionObjects::fvMeshFunctionObject
+    Foam::functionObjects::writeFile
 
 SourceFiles
     blendingFactor.C
@@ -86,6 +87,8 @@ SourceFiles
 #define functionObjects_blendingFactor_H
 
 #include "fieldExpression.H"
+#include "writeFile.H"
+#include "convectionScheme.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -100,22 +103,42 @@ namespace functionObjects
 
 class blendingFactor
 :
-    public fieldExpression
+    public fieldExpression,
+    public writeFile
 {
     // Private member data
 
         //- Name of flux field, default is "phi"
         word phiName_;
 
+        //- Tolerance used when calculating the number of blended cells
+        scalar tolerance_;
+
 
     // Private Member Functions
 
         //- Calculate the blending factor field
         template<class Type>
-        bool calcBF();
+        void calcBlendingFactor
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& field,
+            const typename fv::convectionScheme<Type>& cs
+        );
+
+        //- Calculate the blending factor field
+        template<class Type>
+        bool calcScheme();
 
         //- Calculate the blending factor field and return true if successful
         virtual bool calc();
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Write the file header
+        virtual void writeFileHeader(Ostream& os) const;
 
 
 public:

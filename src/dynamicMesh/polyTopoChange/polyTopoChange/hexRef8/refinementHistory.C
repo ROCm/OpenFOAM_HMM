@@ -557,7 +557,6 @@ void Foam::refinementHistory::apply
 Foam::refinementHistory::refinementHistory(const IOobject& io)
 :
     regIOobject(io),
-    refCount(),
     active_(false)
 {
     // Warn for MUST_READ_IF_MODIFIED
@@ -600,7 +599,6 @@ Foam::refinementHistory::refinementHistory
 )
 :
     regIOobject(io),
-    refCount(),
     active_(active),
     splitCells_(splitCells),
     freeSplitCells_(0),
@@ -642,7 +640,6 @@ Foam::refinementHistory::refinementHistory
 )
 :
     regIOobject(io),
-    refCount(),
     active_(false),
     freeSplitCells_(0)
 {
@@ -698,7 +695,6 @@ Foam::refinementHistory::refinementHistory
 )
 :
     regIOobject(io),
-    refCount(),
     active_(active),
     freeSplitCells_(0)
 {
@@ -750,7 +746,6 @@ Foam::refinementHistory::refinementHistory
 )
 :
     regIOobject(io),
-    refCount(),
     active_(rh.active_),
     splitCells_(rh.splitCells()),
     freeSplitCells_(rh.freeSplitCells()),
@@ -773,7 +768,6 @@ Foam::refinementHistory::refinementHistory
 )
 :
     regIOobject(io),
-    refCount(),
     active_(false)
 {
     if
@@ -886,7 +880,6 @@ Foam::refinementHistory::refinementHistory
 Foam::refinementHistory::refinementHistory(const IOobject& io, Istream& is)
 :
     regIOobject(io),
-    refCount(),
     splitCells_(is),
     freeSplitCells_(0),
     visibleCells_(is)

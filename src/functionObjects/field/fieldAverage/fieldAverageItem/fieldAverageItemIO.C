@@ -31,6 +31,7 @@ License
 
 Foam::functionObjects::fieldAverageItem::fieldAverageItem(Istream& is)
 :
+    active_(false),
     fieldName_("unknown"),
     mean_(0),
     meanFieldName_("unknown"),
@@ -48,8 +49,8 @@ Foam::functionObjects::fieldAverageItem::fieldAverageItem(Istream& is)
     const dictionaryEntry entry(dictionary::null, is);
 
     fieldName_ = entry.keyword();
-    entry.lookup("mean") >> mean_;
-    entry.lookup("prime2Mean") >> prime2Mean_;
+    mean_ = readBool(entry.lookup("mean"));
+    prime2Mean_ = readBool(entry.lookup("prime2Mean"));
     base_ = baseTypeNames_[entry.lookup("base")];
     window_ = entry.lookupOrDefault<scalar>("window", -1.0);
     windowName_ = entry.lookupOrDefault<word>("windowName", "");
@@ -80,9 +81,10 @@ Foam::Istream& Foam::functionObjects::operator>>
 
     const dictionaryEntry entry(dictionary::null, is);
 
+    faItem.active_ = false;
     faItem.fieldName_ = entry.keyword();
-    entry.lookup("mean") >> faItem.mean_;
-    entry.lookup("prime2Mean") >> faItem.prime2Mean_;
+    faItem.mean_ = readBool(entry.lookup("mean"));
+    faItem.prime2Mean_ = readBool(entry.lookup("prime2Mean"));
     faItem.base_ = faItem.baseTypeNames_[entry.lookup("base")];
     faItem.window_ = entry.lookupOrDefault<scalar>("window", -1.0);
     faItem.windowName_ = entry.lookupOrDefault<word>("windowName", "");

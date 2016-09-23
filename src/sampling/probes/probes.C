@@ -214,7 +214,7 @@ Foam::label Foam::probes::prepare()
         {
             if (!currentFields.erase(iter.key()))
             {
-                DdebugInfo<< "close probe stream: " << iter()->name() << endl;
+                DebugInfo<< "close probe stream: " << iter()->name() << endl;
 
                 delete probeFilePtrs_.remove(iter);
             }
@@ -267,18 +267,33 @@ Foam::label Foam::probes::prepare()
 Foam::probes::probes
 (
     const word& name,
-    const Time& t,
-    const dictionary& dict
+    const Time& runTime,
+    const dictionary& dict,
+    const bool loadFromFiles,
+    const bool readFields
 )
 :
-    fvMeshFunctionObject(t, name),
+    functionObject(name),
     pointField(0),
-    loadFromFiles_(false),
+    mesh_
+    (
+        refCast<const fvMesh>
+        (
+            runTime.lookupObject<objectRegistry>
+            (
+                dict.lookupOrDefault("region", polyMesh::defaultRegion)
+            )
+        )
+    ),
+    loadFromFiles_(loadFromFiles),
     fieldSelection_(),
     fixedLocations_(true),
     interpolationScheme_("cell")
 {
-    read(dict);
+    if (readFields)
+    {
+        read(dict);
+    }
 }
 
 
@@ -291,8 +306,9 @@ Foam::probes::probes
     const bool readFields
 )
 :
-    fvMeshFunctionObject(obr, name),
+    functionObject(name),
     pointField(0),
+    mesh_(refCast<const fvMesh>(obr)),
     loadFromFiles_(loadFromFiles),
     fieldSelection_(),
     fixedLocations_(true),
@@ -393,7 +409,7 @@ void Foam::probes::updateMesh(const mapPolyMesh& mpm)
                 label celli = elementList_[i];
                 if (celli != -1)
                 {
-                    label newCelli = reverseMap[cellI];
+                    label newCelli = reverseMap[celli];
                     if (newCelli == -1)
                     {
                         // cell removed

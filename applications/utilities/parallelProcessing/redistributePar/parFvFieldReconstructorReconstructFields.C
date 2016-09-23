@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,12 +125,8 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeField
 
     PtrList<fvPatchField<Type>> patchFields(fld.mesh().boundary().size());
 
-    const typename GeometricField
-    <
-        Type,
-        fvPatchField,
-        volMesh
-    >::GeometricBoundaryField& bfld = fld.boundaryField();
+    const typename GeometricField<Type, fvPatchField, volMesh>::Boundary&
+        bfld = fld.boundaryField();
 
     forAll(bfld, patchI)
     {
@@ -292,12 +288,8 @@ Foam::parFvFieldReconstructor::reconstructFvSurfaceField
 
     PtrList<fvsPatchField<Type>> patchFields(fld.mesh().boundary().size());
 
-    const typename GeometricField
-    <
-        Type,
-        fvsPatchField,
-        surfaceMesh
-    >::GeometricBoundaryField& bfld = fld.boundaryField();
+    const typename GeometricField<Type, fvsPatchField, surfaceMesh>::Boundary&
+        bfld = fld.boundaryField();
 
     forAll(bfld, patchI)
     {

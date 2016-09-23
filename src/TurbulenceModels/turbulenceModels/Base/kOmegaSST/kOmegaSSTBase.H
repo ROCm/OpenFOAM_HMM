@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,7 +52,7 @@ Description
     and the addition of the optional F3 term for rough walls from
     \verbatim
         Hellsten, A. (1998).
-        "Some Improvements in Menter’s k-omega-SST turbulence model"
+        "Some Improvements in Menter's k-omega-SST turbulence model"
         29th AIAA Fluid Dynamics Conference, AIAA-98-2554.
     \endverbatim
 
@@ -202,8 +202,24 @@ protected:
         virtual void correctNut(const volScalarField& S2);
 
         virtual void correctNut();
+
+        //- Return k production rate
+        virtual tmp<volScalarField::Internal> Pk
+        (
+            const volScalarField::Internal& G
+        ) const;
+
+        //- Return epsilon/k which for standard RAS is betaStar*omega
+        virtual tmp<volScalarField::Internal> epsilonByk
+        (
+            const volScalarField::Internal& F1,
+            const volScalarField::Internal& F2
+        ) const;
+
         virtual tmp<fvScalarMatrix> kSource() const;
+
         virtual tmp<fvScalarMatrix> omegaSource() const;
+
         virtual tmp<fvScalarMatrix> Qsas
         (
             const volScalarField& S2,

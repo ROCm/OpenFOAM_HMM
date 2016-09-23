@@ -173,7 +173,7 @@ protected:
 
         //- Insert field values into values list
         template<class Type>
-        tmp<Field<Type>> setFieldValues
+        tmp<Field<Type>> getFieldValues
         (
             const word& fieldName,
             const bool mustGet = false

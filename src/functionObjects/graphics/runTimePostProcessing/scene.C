@@ -43,19 +43,30 @@ License
 namespace Foam
 {
     template<>
-    const char* NamedEnum<scene::modeType, 2>::names[] =
+    const char* NamedEnum
+    <
+        functionObjects::runTimePostPro::scene::modeType,
+        2
+    >::names[] =
     {
         "static",
         "flightPath"
     };
 }
 
-const Foam::NamedEnum<Foam::scene::modeType, 2> modeTypeNames_;
+const Foam::NamedEnum
+<
+    Foam::functionObjects::runTimePostPro::scene::modeType,
+    2
+> modeTypeNames_;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::scene::readCamera(const dictionary& dict)
+void Foam::functionObjects::runTimePostPro::scene::readCamera
+(
+    const dictionary& dict
+)
 {
     if (dict.readIfPresent("nFrameTotal", nFrameTotal_))
     {
@@ -155,7 +166,10 @@ void Foam::scene::readCamera(const dictionary& dict)
 }
 
 
-void Foam::scene::readColours(const dictionary& dict)
+void Foam::functionObjects::runTimePostPro::scene::readColours
+(
+    const dictionary& dict
+)
 {
     const wordList colours = dict.toc();
     forAll(colours, i)
@@ -166,7 +180,11 @@ void Foam::scene::readColours(const dictionary& dict)
 }
 
 
-void Foam::scene::initialise(vtkRenderer* renderer, const word& outputName)
+void Foam::functionObjects::runTimePostPro::scene::initialise
+(
+    vtkRenderer* renderer,
+    const word& outputName
+)
 {
     currentFrameI_ = 0;
     position_ = startPosition_;
@@ -256,7 +274,10 @@ void Foam::scene::initialise(vtkRenderer* renderer, const word& outputName)
 }
 
 
-void Foam::scene::setCamera(vtkRenderer* renderer) const
+void Foam::functionObjects::runTimePostPro::scene::setCamera
+(
+    vtkRenderer* renderer
+) const
 {
     if (mode_ == mtFlightPath)
     {
@@ -281,7 +302,8 @@ void Foam::scene::setCamera(vtkRenderer* renderer) const
 }
 
 
-Foam::string Foam::scene::frameIndexStr() const
+Foam::string
+Foam::functionObjects::runTimePostPro::scene::frameIndexStr() const
 {
     string str = Foam::name(currentFrameI_);
     str.insert(0, 4 - str.length(), '0');
@@ -292,7 +314,11 @@ Foam::string Foam::scene::frameIndexStr() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::scene::scene(const objectRegistry& obr, const word& name)
+Foam::functionObjects::runTimePostPro::scene::scene
+(
+    const objectRegistry& obr,
+    const word& name
+)
 :
     obr_(obr),
     name_(name),
@@ -315,39 +341,39 @@ Foam::scene::scene(const objectRegistry& obr, const word& name)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::scene::~scene()
+Foam::functionObjects::runTimePostPro::scene::~scene()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::HashPtrTable<Foam::Function1<Foam::vector>, Foam::word>&
-Foam::scene::colours() const
+Foam::functionObjects::runTimePostPro::scene::colours() const
 {
     return colours_;
 }
 
 
-Foam::label Foam::scene::frameIndex() const
+Foam::label Foam::functionObjects::runTimePostPro::scene::frameIndex() const
 {
     return currentFrameI_;
 }
 
 
-Foam::scalar Foam::scene::position() const
+Foam::scalar Foam::functionObjects::runTimePostPro::scene::position() const
 {
     return position_;
 }
 
 
-void Foam::scene::read(const dictionary& dict)
+void Foam::functionObjects::runTimePostPro::scene::read(const dictionary& dict)
 {
     readCamera(dict.subDict("camera"));
     readColours(dict.subDict("colours"));
 }
 
 
-bool Foam::scene::loop(vtkRenderer* renderer)
+bool Foam::functionObjects::runTimePostPro::scene::loop(vtkRenderer* renderer)
 {
     static bool initialised = false;
     setCamera(renderer);
@@ -381,7 +407,10 @@ bool Foam::scene::loop(vtkRenderer* renderer)
 }
 
 
-void Foam::scene::saveImage(vtkRenderWindow* renderWindow) const
+void Foam::functionObjects::runTimePostPro::scene::saveImage
+(
+    vtkRenderWindow* renderWindow
+) const
 {
     if (!renderWindow)
     {

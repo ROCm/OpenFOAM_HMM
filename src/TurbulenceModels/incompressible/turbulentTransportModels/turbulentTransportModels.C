@@ -96,9 +96,6 @@ makeLESModel(dynamicKEqn);
 #include "dynamicLagrangian.H"
 makeLESModel(dynamicLagrangian);
 
-#include "kOmegaSSTDES.H"
-makeLESModel(kOmegaSSTDES);
-
 #include "SpalartAllmarasDES.H"
 makeLESModel(SpalartAllmarasDES);
 

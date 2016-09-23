@@ -78,10 +78,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        fvMeshFunctionObject(const fvMeshFunctionObject&);
+        fvMeshFunctionObject(const fvMeshFunctionObject&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const fvMeshFunctionObject&);
+        void operator=(const fvMeshFunctionObject&) = delete;
 
 
 public:

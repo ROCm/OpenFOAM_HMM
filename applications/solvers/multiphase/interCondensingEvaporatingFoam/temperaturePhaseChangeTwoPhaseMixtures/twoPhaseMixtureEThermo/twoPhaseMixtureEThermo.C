@@ -42,7 +42,7 @@ namespace Foam
 
 void Foam::twoPhaseMixtureEThermo::eBoundaryCorrection(volScalarField& h)
 {
-    volScalarField::GeometricBoundaryField& hbf = h.boundaryField();
+    volScalarField::Boundary& hbf = h.boundaryFieldRef();
 
     forAll(hbf, patchi)
     {
@@ -59,6 +59,7 @@ void Foam::twoPhaseMixtureEThermo::eBoundaryCorrection(volScalarField& h)
     }
 }
 
+
 void Foam::twoPhaseMixtureEThermo::init()
 {
     const volScalarField alpha1Rho1(alpha1()*rho1());
@@ -73,6 +74,7 @@ void Foam::twoPhaseMixtureEThermo::init()
 
     e_.correctBoundaryConditions();
 }
+
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
@@ -117,10 +119,12 @@ Foam::twoPhaseMixtureEThermo::twoPhaseMixtureEThermo
     init();
 }
 
+
 // * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
 
 Foam::twoPhaseMixtureEThermo::~twoPhaseMixtureEThermo()
 {}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -226,10 +230,8 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::he
 }
 
 
-Foam::tmp<Foam::volScalarField>
-Foam::twoPhaseMixtureEThermo::hc() const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::hc() const
 {
-
     const fvMesh& mesh = this->T_.mesh();
 
     return tmp<volScalarField>
@@ -277,8 +279,7 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::THE
 }
 
 
-Foam::tmp<Foam::volScalarField>
-Foam::twoPhaseMixtureEThermo::Cp() const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::Cp() const
 {
     const volScalarField limitedAlpha1
     (
@@ -317,8 +318,7 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::Cp
 }
 
 
-Foam::tmp<Foam::volScalarField>
-Foam::twoPhaseMixtureEThermo::rho() const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::rho() const
 {
     const volScalarField limitedAlpha1
     (
@@ -337,8 +337,7 @@ Foam::twoPhaseMixtureEThermo::rho() const
 }
 
 
-Foam::tmp<Foam::scalarField>
-Foam::twoPhaseMixtureEThermo::rho
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::rho
 (
     const label patchi
 ) const
@@ -357,8 +356,7 @@ Foam::twoPhaseMixtureEThermo::rho
 }
 
 
-Foam::tmp<Foam::volScalarField>
-Foam::twoPhaseMixtureEThermo::Cv() const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::Cv() const
 {
     const volScalarField limitedAlpha1
     (
@@ -376,8 +374,7 @@ Foam::twoPhaseMixtureEThermo::Cv() const
 }
 
 
-Foam::tmp<Foam::scalarField>
-Foam::twoPhaseMixtureEThermo::Cv
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::Cv
 (
     const scalarField& p,
     const scalarField& T,
@@ -398,8 +395,7 @@ Foam::twoPhaseMixtureEThermo::Cv
 }
 
 
-Foam::tmp<Foam::volScalarField>
-Foam::twoPhaseMixtureEThermo::gamma() const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::gamma() const
 {
     return tmp<volScalarField>
     (
@@ -422,8 +418,7 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::gamma
 }
 
 
-Foam::tmp<Foam::volScalarField>
-Foam::twoPhaseMixtureEThermo::Cpv() const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::Cpv() const
 {
      // This is an e thermo (Cpv = Cv)
      return Cv();
@@ -442,16 +437,14 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::Cpv
 }
 
 
-Foam::tmp<Foam::volScalarField>
-Foam::twoPhaseMixtureEThermo::CpByCpv() const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::CpByCpv() const
 {
      NotImplemented;
      return tmp<Foam::volScalarField>();
 }
 
 
-Foam::tmp<Foam::scalarField>
-Foam::twoPhaseMixtureEThermo::CpByCpv
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::CpByCpv
 (
     const scalarField& p,
     const scalarField& T,
@@ -463,8 +456,7 @@ Foam::twoPhaseMixtureEThermo::CpByCpv
 }
 
 
-Foam::tmp<Foam::volScalarField>
-Foam::twoPhaseMixtureEThermo::kappa() const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::kappa() const
 {
     const volScalarField limitedAlpha1
     (
@@ -482,8 +474,10 @@ Foam::twoPhaseMixtureEThermo::kappa() const
 }
 
 
-Foam::tmp<Foam::scalarField>
-Foam::twoPhaseMixtureEThermo::kappa(const label patchi) const
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::kappa
+(
+    const label patchi
+) const
 {
     const volScalarField limitedAlpha1
     (
@@ -496,8 +490,7 @@ Foam::twoPhaseMixtureEThermo::kappa(const label patchi) const
 }
 
 
-Foam::tmp<Foam::volScalarField>
-Foam::twoPhaseMixtureEThermo::kappaEff
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::kappaEff
 (
     const volScalarField& kappat
 ) const
@@ -508,8 +501,7 @@ Foam::twoPhaseMixtureEThermo::kappaEff
 }
 
 
-Foam::tmp<Foam::scalarField>
-Foam::twoPhaseMixtureEThermo::kappaEff
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::kappaEff
 (
     const scalarField& kappat,
     const label patchi
@@ -528,8 +520,7 @@ Foam::twoPhaseMixtureEThermo::kappaEff
 }
 
 
-Foam::tmp<Foam::volScalarField>
-Foam::twoPhaseMixtureEThermo::alphaEff
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::alphaEff
 (
     const volScalarField& alphat
 ) const
@@ -539,12 +530,11 @@ Foam::twoPhaseMixtureEThermo::alphaEff
         alpha1_*rho1() + (1.0 - alpha1_)*rho2()
     );
 
-
     return (kappa()/Cp()/rho + alphat);
 }
 
-Foam::tmp<Foam::scalarField>
-Foam::twoPhaseMixtureEThermo::alphaEff
+
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::alphaEff
 (
     const scalarField& alphat,
     const label patchi
@@ -575,6 +565,7 @@ Foam::twoPhaseMixtureEThermo::alphaEff
     return kappa/Cp/rho + alphat;
 }
 
+
 bool Foam::twoPhaseMixtureEThermo::read()
 {
     if (basicThermo::read() && thermoIncompressibleTwoPhaseMixture::read())
@@ -588,5 +579,6 @@ bool Foam::twoPhaseMixtureEThermo::read()
         return false;
     }
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

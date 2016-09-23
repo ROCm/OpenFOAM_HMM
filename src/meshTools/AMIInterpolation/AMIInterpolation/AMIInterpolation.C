@@ -352,7 +352,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
                 newSubMap.setSize(elems.size());
 
                 labelList oldToNew(targetCoarseSize, -1);
-                label newI = 0;
+                label newi = 0;
 
                 forAll(elems, i)
                 {
@@ -360,12 +360,12 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
                     label coarseElem = allRestrict[fineElem];
                     if (oldToNew[coarseElem] == -1)
                     {
-                        oldToNew[coarseElem] = newI;
+                        oldToNew[coarseElem] = newi;
                         newSubMap[newi] = coarseElem;
-                        newI++;
+                        newi++;
                     }
                 }
-                newSubMap.setSize(newI);
+                newSubMap.setSize(newi);
             }
         }
 
@@ -399,7 +399,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
             }
         }
 
-        label compactI = targetCoarseSize;
+        label compacti = targetCoarseSize;
 
         // Compact data from other processors
         forAll(map.constructMap(), proci)
@@ -431,7 +431,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
 
                     // Combine locally data coming from proci
                     labelList oldToNew(remoteTargetCoarseSize, -1);
-                    label newI = 0;
+                    label newi = 0;
 
                     forAll(elems, i)
                     {
@@ -452,7 +452,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
                             tgtCompactMap[fineElem] = newConstructMap[compacti];
                         }
                     }
-                    newConstructMap.setSize(newI);
+                    newConstructMap.setSize(newi);
                 }
             }
         }
@@ -495,7 +495,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
         (
             new mapDistribute
             (
-                compactI,
+                compacti,
                 tgtSubMap.xfer(),
                 tgtConstructMap.xfer()
             )
@@ -997,7 +997,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         forAll(srcAddress_, i)
         {
             labelList& addressing = srcAddress_[i];
-            forAll(addressing, addrI)
+            forAll(addressing, addri)
             {
                 addressing[addri] = tgtFaceIDs[addressing[addri]];
             }

@@ -326,7 +326,7 @@ int main(int argc, char *argv[])
     // Create mesh subsetting engine
     fvMeshSubset subsetter(mesh);
 
-    label patchi = -1;
+    labelList exposedPatchIDs;
 
     if (args.optionFound("patch"))
     {

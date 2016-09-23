@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +35,11 @@ License
 namespace Foam
 {
     template<>
-    const char* NamedEnum<geometryBase::renderModeType, 3>::names[] =
+    const char* NamedEnum
+    <
+        functionObjects::runTimePostPro::geometryBase::renderModeType,
+        3
+    >::names[] =
     {
         "flat",
         "gouraud",
@@ -43,13 +47,20 @@ namespace Foam
     };
 }
 
-const Foam::NamedEnum<Foam::geometryBase::renderModeType, 3>
-    Foam::geometryBase::renderModeTypeNames;
+const Foam::NamedEnum
+<
+    Foam::functionObjects::runTimePostPro::geometryBase::renderModeType,
+    3
+>
+    Foam::functionObjects::runTimePostPro::geometryBase::renderModeTypeNames;
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::geometryBase::initialiseActor(vtkActor* actor) const
+void Foam::functionObjects::runTimePostPro::geometryBase::initialiseActor
+(
+    vtkActor* actor
+) const
 {
     actor->GetProperty()->SetSpecular(0);
     actor->GetProperty()->SetSpecularPower(20);
@@ -77,7 +88,7 @@ void Foam::geometryBase::initialiseActor(vtkActor* actor) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::geometryBase::geometryBase
+Foam::functionObjects::runTimePostPro::geometryBase::geometryBase
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
@@ -109,38 +120,43 @@ Foam::geometryBase::geometryBase
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::geometryBase::~geometryBase()
+Foam::functionObjects::runTimePostPro::geometryBase::~geometryBase()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-const Foam::runTimePostProcessing& Foam::geometryBase::parent() const
+const Foam::functionObjects::runTimePostProcessing&
+Foam::functionObjects::runTimePostPro::geometryBase::parent() const
 {
     return parent_;
 }
 
 
-const Foam::word& Foam::geometryBase::name() const
+const Foam::word&
+Foam::functionObjects::runTimePostPro::geometryBase::name() const
 {
     return name_;
 }
 
 
-bool Foam::geometryBase::visible() const
+bool Foam::functionObjects::runTimePostPro::geometryBase::visible() const
 {
     return visible_;
 }
 
 
-Foam::scalar Foam::geometryBase::opacity(const scalar position) const
+Foam::scalar Foam::functionObjects::runTimePostPro::geometryBase::opacity
+(
+    const scalar position
+) const
 {
     return opacity_->value(position);
 }
 
 
 const Foam::HashPtrTable<Foam::Function1<Foam::vector>, Foam::word>&
-Foam::geometryBase::colours() const
+Foam::functionObjects::runTimePostPro::geometryBase::colours() const
 {
     return colours_;
 }

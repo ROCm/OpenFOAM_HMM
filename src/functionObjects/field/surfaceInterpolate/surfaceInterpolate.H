@@ -108,7 +108,7 @@ protected:
     // Protected Member Functions
 
         template<class Type>
-        void interpolateFields() const;
+        void interpolateFields();
 
 
 private:

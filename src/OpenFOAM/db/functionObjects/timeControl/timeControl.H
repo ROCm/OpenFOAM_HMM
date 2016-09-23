@@ -60,6 +60,7 @@ public:
         ocAdjustableRunTime,  //!< Adjust time step for execution
         ocRunTime,            //!< run time for execution
         ocClockTime,          //!< clock time for execution
+        ocCpuTime,            //!< CPU time for execution
         ocOnEnd,              //!< on end of run
         ocNone                //!< no execution
     };

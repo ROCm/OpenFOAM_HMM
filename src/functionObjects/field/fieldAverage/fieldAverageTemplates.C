@@ -33,6 +33,9 @@ License
 template<class Type>
 void Foam::functionObjects::fieldAverage::addMeanFieldType(const label fieldi)
 {
+    // Field has been found, so set active flag to true
+    faItems_[fieldi].active() = true;
+
     const word& fieldName = faItems_[fieldi].fieldName();
     const word& meanFieldName = faItems_[fieldi].meanFieldName();
 

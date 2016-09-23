@@ -44,7 +44,7 @@ Description
         ...
         writeToFile yes;
         log         yes;
-        writeLocation yes;
+        location    yes;
         mode        magnitude;
         fields      (U p);
     }
@@ -56,7 +56,7 @@ Usage
         type         | type name: fieldMinMax  | yes         |
         writeToFile  | write min/max data to file | no       | yes
         log          | write min/max data to standard output | no | yes
-        writeLocation | write location of the min/max value | no | yes
+        location     | write location of the min/max value | no | yes
         mode         | calculation mode: magnitude or component | no | magnitude
         fields       | list of fields to process | yes       |
     \endtable
@@ -117,7 +117,7 @@ protected:
         static const NamedEnum<modeType, 2> modeTypeNames_;
 
         //- Switch to write location of min/max values
-        Switch writeLocation_;
+        Switch location_;
 
         //- Mode for min/max - only applicable for ranks > 0
         modeType mode_;

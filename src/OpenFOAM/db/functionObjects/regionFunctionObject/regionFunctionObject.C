@@ -97,8 +97,7 @@ Foam::functionObjects::regionFunctionObject::regionFunctionObject
     const dictionary& dict
 )
 :
-    functionObject(name),
-    time_(runTime),
+    stateFunctionObject(name, runTime),
     obr_
     (
         runTime.lookupObject<objectRegistry>
@@ -116,8 +115,7 @@ Foam::functionObjects::regionFunctionObject::regionFunctionObject
     const dictionary& dict
 )
 :
-    functionObject(name),
-    time_(obr.time()),
+    stateFunctionObject(name, obr.time()),
     obr_(obr)
 {}
 

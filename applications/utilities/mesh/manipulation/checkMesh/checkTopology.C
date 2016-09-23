@@ -392,7 +392,7 @@ Foam::label Foam::checkTopology
                             // Already marked
                             regionDisconnected[regioni] = false;
                         }
-                        else if (pRegion != regionI)
+                        else if (pRegion != regioni)
                         {
                             // Multiple regions
                             regionDisconnected[regioni] = false;

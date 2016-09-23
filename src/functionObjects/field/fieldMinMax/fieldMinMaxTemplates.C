@@ -43,7 +43,7 @@ void Foam::functionObjects::fieldMinMax::output
 {
     OFstream& file = this->file();
 
-    if (writeLocation_)
+    if (location_)
     {
         writeTime(file());
 
@@ -97,10 +97,10 @@ void Foam::functionObjects::fieldMinMax::output
     word nameStr('(' + outputName + ')');
     this->setResult("min" + nameStr, minValue);
     this->setResult("min" + nameStr + "_position", minC);
-    this->setResult("min" + nameStr + "_processor", minProcI);
+    this->setResult("min" + nameStr + "_processor", minProci);
     this->setResult("max" + nameStr, maxValue);
     this->setResult("max" + nameStr + "_position", maxC);
-    this->setResult("max" + nameStr + "_processor", maxProcI);
+    this->setResult("max" + nameStr + "_processor", maxProci);
 }
 
 
@@ -117,7 +117,7 @@ void Foam::functionObjects::fieldMinMax::calcMinMaxFields
     {
         const label proci = Pstream::myProcNo();
 
-        const fieldType& field = obr_.lookupObject<fieldType>(fieldName);
+        const fieldType& field = lookupObject<fieldType>(fieldName);
 
         const volVectorField::Boundary& CfBoundary =
             mesh_.C().boundaryField();
@@ -177,13 +177,13 @@ void Foam::functionObjects::fieldMinMax::calcMinMaxFields
                 Pstream::gatherList(maxCs);
                 Pstream::scatterList(maxCs);
 
-                label minI = findMin(minVs);
-                scalar minValue = minVs[minI];
-                const vector& minC = minCs[minI];
+                label mini = findMin(minVs);
+                scalar minValue = minVs[mini];
+                const vector& minC = minCs[mini];
 
-                label maxI = findMax(maxVs);
-                scalar maxValue = maxVs[maxI];
-                const vector& maxC = maxCs[maxI];
+                label maxi = findMax(maxVs);
+                scalar maxValue = maxVs[maxi];
+                const vector& maxC = maxCs[maxi];
 
                 output
                 (
@@ -191,8 +191,8 @@ void Foam::functionObjects::fieldMinMax::calcMinMaxFields
                     word("mag(" + fieldName + ")"),
                     minC,
                     maxC,
-                    minI,
-                    maxI,
+                    mini,
+                    maxi,
                     minValue,
                     maxValue
                 );
@@ -225,18 +225,18 @@ void Foam::functionObjects::fieldMinMax::calcMinMaxFields
                     {
                         const vectorField& Cfp = CfBoundary[patchi];
 
-                        label minPI = findMin(fp);
-                        if (fp[minPI] < minVs[proci])
+                        label minPi = findMin(fp);
+                        if (fp[minPi] < minVs[proci])
                         {
-                            minVs[proci] = fp[minPI];
-                            minCs[proci] = Cfp[minPI];
+                            minVs[proci] = fp[minPi];
+                            minCs[proci] = Cfp[minPi];
                         }
 
-                        label maxPI = findMax(fp);
-                        if (fp[maxPI] > maxVs[proci])
+                        label maxPi = findMax(fp);
+                        if (fp[maxPi] > maxVs[proci])
                         {
-                            maxVs[proci] = fp[maxPI];
-                            maxCs[proci] = Cfp[maxPI];
+                            maxVs[proci] = fp[maxPi];
+                            maxCs[proci] = Cfp[maxPi];
                         }
                     }
                 }
@@ -251,13 +251,13 @@ void Foam::functionObjects::fieldMinMax::calcMinMaxFields
                 Pstream::gatherList(maxCs);
                 Pstream::scatterList(maxCs);
 
-                label minI = findMin(minVs);
-                Type minValue = minVs[minI];
-                const vector& minC = minCs[minI];
+                label mini = findMin(minVs);
+                Type minValue = minVs[mini];
+                const vector& minC = minCs[mini];
 
-                label maxI = findMax(maxVs);
-                Type maxValue = maxVs[maxI];
-                const vector& maxC = maxCs[maxI];
+                label maxi = findMax(maxVs);
+                Type maxValue = maxVs[maxi];
+                const vector& maxC = maxCs[maxi];
 
                 output
                 (
@@ -265,8 +265,8 @@ void Foam::functionObjects::fieldMinMax::calcMinMaxFields
                     fieldName,
                     minC,
                     maxC,
-                    minI,
-                    maxI,
+                    mini,
+                    maxi,
                     minValue,
                     maxValue
                 );

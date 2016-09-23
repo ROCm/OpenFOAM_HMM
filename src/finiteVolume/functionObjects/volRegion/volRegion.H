@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,7 +85,7 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class volRegion Declaration
+                          Class volRegion Declaration
 \*---------------------------------------------------------------------------*/
 
 class volRegion
@@ -106,8 +106,8 @@ public:
         //- Region type enumeration
         enum regionTypes
         {
-            vrtCellZone,
-            vrtAll
+            vrtCellZone,    //< cell zone
+            vrtAll          //< all cells
         };
 
         //- Region type names
@@ -131,7 +131,7 @@ protected:
     // Protected Member Functions
 
         //- Output file header information
-        void writeFileHeader(const writeFile& wf, Ostream& file);
+        void writeFileHeader(const writeFile& wf, Ostream& file) const;
 
 
 public:
@@ -143,11 +143,7 @@ public:
     // Constructors
 
         //- Construct from fvMesh and dictionary
-        volRegion
-        (
-            const fvMesh& mesh,
-            const dictionary& dict
-        );
+        volRegion(const fvMesh& mesh, const dictionary& dict);
 
 
     //- Destructor

@@ -1151,10 +1151,6 @@ int main(int argc, char *argv[])
                 // For the first region of a multi-region case additionally
                 // decompose the "uniform" directory in the time directory
                 if (regionNames.size() > 1 && regioni == 0)
-
-                    // If no fields have been decomposed the destination
-                    // directory will not have been created so make sure.
-                    mkDir(timePath);
                 {
                     decomposeUniform(copyUniform, mesh, processorDb);
                 }

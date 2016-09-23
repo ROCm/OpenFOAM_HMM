@@ -107,7 +107,7 @@ Foam::tmp<Foam::pointScalarField> Foam::functionObjects::streamFunction::calc
 
     bool finished = true;
 
-    // Find the boundary face with zero flux. set the stream function
+    // Find the boundary face with zero flux. Set the stream function
     // to zero on that face
     bool found = false;
 
@@ -123,10 +123,7 @@ Foam::tmp<Foam::pointScalarField> Foam::functionObjects::streamFunction::calc
             {
                 forAll(bouFaces, facei)
                 {
-                    if
-                    (
-                        magSqr(phi.boundaryField()[patchi][facei]) < SMALL
-                    )
+                    if (magSqr(phi.boundaryField()[patchi][facei]) < SMALL)
                     {
                         const labelList& zeroPoints = bouFaces[facei];
 
@@ -441,7 +438,7 @@ Foam::functionObjects::streamFunction::streamFunction
 :
     fieldExpression(name, runTime, dict, "phi")
 {
-    setResultName("streamFunction", "phi");
+    setResultName(typeName, "phi");
 
     label nD = mesh_.nGeometricD();
 

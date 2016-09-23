@@ -183,8 +183,8 @@ Foam::volumeType Foam::treeDataPrimitivePatch<PatchType>::getVolumeType
             << " nearest face:" << facei;
     }
 
-    const typename PatchType::FaceType& localF = patch_.localFaces()[faceI];
-    const typename PatchType::FaceType& f = patch_[faceI];
+    const typename PatchType::FaceType& localF = patch_.localFaces()[facei];
+    const typename PatchType::FaceType& f = patch_[facei];
     const pointField& points = patch_.points();
     const labelList& mp = patch_.meshPoints();
 

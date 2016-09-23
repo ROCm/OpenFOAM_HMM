@@ -219,8 +219,8 @@ void Foam::patchInjectionBase::setPositionAndCell
             (
                 position,
                 cellOwner,
-                tetFaceI,
-                tetPtI
+                tetFacei,
+                tetPti
             );
         }
         else

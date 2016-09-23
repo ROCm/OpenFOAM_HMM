@@ -26,7 +26,7 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Type Foam::functionObjects::fieldValues::fieldValueDelta::applyOperation
+void Foam::functionObjects::fieldValues::fieldValueDelta::applyOperation
 (
     const word& resultType,
     const word& name1,

@@ -2750,6 +2750,8 @@ bool Foam::snappyLayerDriver::writeLayerData
             {
                 fld[cellI] = cellNLayers[cellI];
             }
+            volScalarField::Boundary& fldBf = fld.boundaryFieldRef();
+
             const polyBoundaryMesh& pbm = mesh.boundaryMesh();
             forAll(patchIDs, i)
             {
@@ -2761,7 +2763,7 @@ bool Foam::snappyLayerDriver::writeLayerData
                 {
                     pfld[i] = cellNLayers[faceCells[i]];
                 }
-                fld.boundaryField()[patchI] == pfld;
+                fldBf[patchI] == pfld;
             }
             Info<< indent << fld.name() << "    : actual number of layers"
                 << endl;
@@ -2784,14 +2786,12 @@ bool Foam::snappyLayerDriver::writeLayerData
                 dimensionedScalar("zero", dimless, 0),
                 fixedValueFvPatchScalarField::typeName
             );
+            volScalarField::Boundary& fldBf = fld.boundaryFieldRef();
             const polyBoundaryMesh& pbm = mesh.boundaryMesh();
             forAll(patchIDs, i)
             {
                 label patchI = patchIDs[i];
-                fld.boundaryField()[patchI] == pbm[patchI].patchSlice
-                (
-                    faceRealThickness
-                );
+                fldBf[patchI] == pbm[patchI].patchSlice(faceRealThickness);
             }
             Info<< indent << fld.name() << "         : overall layer thickness"
                 << endl;

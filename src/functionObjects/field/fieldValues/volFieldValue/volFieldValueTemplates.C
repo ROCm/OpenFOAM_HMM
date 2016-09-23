@@ -47,7 +47,7 @@ bool Foam::functionObjects::fieldValues::volFieldValue::validField
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::functionObjects::fieldValues::volFieldValue::setFieldValues
+Foam::functionObjects::fieldValues::volFieldValue::getFieldValues
 (
     const word& fieldName,
     const bool mustGet
@@ -171,7 +171,7 @@ Type Foam::functionObjects::fieldValues::volFieldValue::processValues
 template<class Type>
 bool Foam::functionObjects::fieldValues::volFieldValue::writeValues
 (
-    const word& fieldName
+    const word& fieldName,
     const scalarField& weightField
 )
 {
@@ -179,7 +179,7 @@ bool Foam::functionObjects::fieldValues::volFieldValue::writeValues
 
     if (ok)
     {
-        Field<Type> values(setFieldValues<Type>(fieldName));
+        Field<Type> values(getFieldValues<Type>(fieldName));
         scalarField V(filterField(fieldValue::mesh_.V()));
 
         if (writeFields_)
@@ -218,7 +218,8 @@ bool Foam::functionObjects::fieldValues::volFieldValue::writeValues
 
         // Write state/results information
         const word& opName = operationTypeNames_[operation_];
-        word resultName = opName + '(' + sourceName_ + ',' + fieldName + ')';
+        word resultName =
+            opName + '(' + volRegion::regionName_ + ',' + fieldName + ')';
         this->setResult(resultName, result);
     }
 

@@ -45,7 +45,7 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void Foam::functionObjects::wallShearStress::writeFileHeader(Ostream& os)
+void Foam::functionObjects::wallShearStress::writeFileHeader(Ostream& os) const
 {
     // Add headers to output data
     writeHeader(os, "Wall shear stress");
@@ -89,10 +89,10 @@ Foam::functionObjects::wallShearStress::wallShearStress
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    writeFile(obr_, name),
+    writeFile(mesh_, name, typeName, dict),
     patchSet_()
 {
-    temp<volVectorField> wallShearStressPtr
+    tmp<volVectorField> wallShearStressPtr
     (
         new volVectorField
         (
@@ -114,7 +114,7 @@ Foam::functionObjects::wallShearStress::wallShearStress
         )
     );
 
-    store(wallShearStressPtr, typeName);
+    store(typeName, wallShearStressPtr);
 
     read(dict);
 }
@@ -131,6 +131,7 @@ Foam::functionObjects::wallShearStress::~wallShearStress()
 bool Foam::functionObjects::wallShearStress::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
+    writeFile::read(dict);
 
     const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 
@@ -224,8 +225,6 @@ bool Foam::functionObjects::wallShearStress::execute()
 
 bool Foam::functionObjects::wallShearStress::write()
 {
-    logFiles::write();
-
     const volVectorField& wallShearStress =
         obr_.lookupObject<volVectorField>(type());
 

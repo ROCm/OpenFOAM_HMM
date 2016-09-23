@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,8 +31,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pathline_H
-#define pathline_H
+#ifndef functionObjects_runTimePostPro_pathline_H
+#define functionObjects_runTimePostPro_pathline_H
 
 #include "geometryBase.H"
 #include "NamedEnum.H"
@@ -45,6 +45,10 @@ class vtkPolyData;
 class vtkPolyDataMapper;
 
 namespace Foam
+{
+namespace functionObjects
+{
+namespace runTimePostPro
 {
 
 /*---------------------------------------------------------------------------*\
@@ -75,10 +79,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        pathline(const pathline&);
+        pathline(const pathline&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const pathline&);
+        void operator=(const pathline&) = delete;
 
 
 protected:
@@ -158,6 +162,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace runTimePostPro
+} // End namespace functionObjects
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

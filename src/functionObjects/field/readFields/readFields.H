@@ -87,14 +87,11 @@ protected:
         //- Fields to load
         wordList fieldSet_;
 
-        //- Switch to send output to Info as well as to file
-        Switch log_;
-
 
     // Protected Member Functions
 
         template<class Type>
-        bool loadField(const word&) const;
+        bool loadField(const word&);
 
 
 private:

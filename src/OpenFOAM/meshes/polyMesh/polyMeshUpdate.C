@@ -91,6 +91,7 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
                     newMotionPoints[newPointi] = points_[newPointi];
                 }
             }
+        }
         else
         {
             const labelList& pointMap = mpm.pointMap();
@@ -103,7 +104,7 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
                 {
                     if (revPointMap[oldPointi] == newPointi) // master point
                     {
-                        newMotionPoints[newPoint] = oldMotionPoints[oldPointi];
+                        newMotionPoints[newPointi] = oldMotionPoints[oldPointi];
                     }
                     else
                     {

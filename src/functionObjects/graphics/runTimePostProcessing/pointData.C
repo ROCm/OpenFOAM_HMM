@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,24 +40,37 @@ License
 
 namespace Foam
 {
-    template<>
-    const char* NamedEnum<pointData::representationType, 2>::names[] =
-    {
-        "sphere",
-        "vector"
-    };
-
+namespace functionObjects
+{
+namespace runTimePostPro
+{
     defineTypeNameAndDebug(pointData, 0);
     defineRunTimeSelectionTable(pointData, dictionary);
 }
+}
+template<>
+const char* NamedEnum
+<
+    functionObjects::runTimePostPro::pointData::representationType,
+    2
+>::names[] =
+{
+    "sphere",
+    "vector"
+};
+}
 
-const Foam::NamedEnum<Foam::pointData::representationType, 2>
-    Foam::pointData::representationTypeNames;
+const Foam::NamedEnum
+<
+    Foam::functionObjects::runTimePostPro::pointData::representationType,
+    2
+>
+    Foam::functionObjects::runTimePostPro::pointData::representationTypeNames;
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::pointData::addPoints
+void Foam::functionObjects::runTimePostPro::pointData::addPoints
 (
     const label frameI,
     vtkActor* actor,
@@ -83,7 +96,7 @@ void Foam::pointData::addPoints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pointData::pointData
+Foam::functionObjects::runTimePostPro::pointData::pointData
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
@@ -124,7 +137,7 @@ Foam::pointData::pointData
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::pointData> Foam::pointData::New
+Foam::autoPtr<Foam::functionObjects::runTimePostPro::pointData> Foam::functionObjects::runTimePostPro::pointData::New
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
@@ -156,7 +169,7 @@ Foam::autoPtr<Foam::pointData> Foam::pointData::New
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::pointData::~pointData()
+Foam::functionObjects::runTimePostPro::pointData::~pointData()
 {}
 
 

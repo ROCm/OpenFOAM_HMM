@@ -93,6 +93,7 @@ bool Foam::functionObjects::fieldValue::read(const dictionary& dict)
     }
 
     fvMeshFunctionObject::read(dict);
+    writeFile::read(dict);
 
     dict.lookup("fields") >> fields_;
     dict.lookup("writeFields") >> writeFields_;

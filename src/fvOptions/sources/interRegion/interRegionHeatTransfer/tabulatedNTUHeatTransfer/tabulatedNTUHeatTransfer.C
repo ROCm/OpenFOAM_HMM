@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -254,7 +254,7 @@ void Foam::fv::tabulatedNTUHeatTransfer::calculateHtc()
     const scalarField mDotNbr(UMagNbrMapped*rhoNbrMapped*AinNbr_);
 
 
-    scalarField& htcc = htc_.internalField();
+    scalarField& htcc = htc_.primitiveFieldRef();
     const interpolation2DTable<Foam::scalar>& ntuTable = this->ntuTable();
 
     forAll(htcc, cellI)

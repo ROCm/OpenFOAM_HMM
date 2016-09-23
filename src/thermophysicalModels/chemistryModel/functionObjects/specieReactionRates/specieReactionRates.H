@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +46,7 @@ SourceFiles
 
 #include "fvMeshFunctionObject.H"
 #include "volRegion.H"
-#include "logFiles.H"
+#include "writeFile.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +56,7 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class specieReactionRates Declaration
+                     Class specieReactionRates Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ChemistryModelType>
@@ -64,7 +64,7 @@ class specieReactionRates
 :
     public fvMeshFunctionObject,
     public volRegion,
-    public logFiles
+    public writeFile
 {
     // Private Member Data
 
@@ -74,7 +74,7 @@ class specieReactionRates
     // Private Member Functions
 
         //- File header information
-        virtual void writeFileHeader(const label i);
+        virtual void writeFileHeader(Ostream& os) const;
 
         //- Disallow default bitwise copy construct
         specieReactionRates(const specieReactionRates&);

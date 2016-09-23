@@ -1316,14 +1316,14 @@ int main(int argc, char *argv[])
 
             Info<< surfaces.names()[surfi] << ':' << nl << nl;
 
-            const word& fzName = surfaces.surfZones()[surfI].faceZoneName();
+            const word& fzName = surfaces.surfZones()[surfi].faceZoneName();
 
             if (fzName.empty())
             {
                 // 'Normal' surface
                 forAll(regNames, i)
                 {
-                    label globalRegioni = surfaces.globalRegion(surfI, i);
+                    label globalRegioni = surfaces.globalRegion(surfi, i);
 
                     label patchi;
 

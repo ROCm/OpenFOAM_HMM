@@ -55,12 +55,8 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::validField
 
 
 template<class Type>
-<<<<<<< HEAD:src/postProcessing/functionObjects/field/fieldValues/faceSource/faceSourceTemplates.C
-Foam::tmp<Foam::Field<Type>> Foam::fieldValues::faceSource::setFieldValues
-=======
 Foam::tmp<Foam::Field<Type>>
 Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
->>>>>>> foundation-github:src/functionObjects/field/fieldValues/surfaceFieldValue/surfaceFieldValueTemplates.C
 (
     const word& fieldName,
     const bool mustGet,
@@ -294,7 +290,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
 
     if (ok)
     {
-        Field<Type> values(setFieldValues<Type>(fieldName, true, orient));
+        Field<Type> values(getFieldValues<Type>(fieldName, true, orient));
 
         vectorField Sf;
         if (surfacePtr_.valid())
@@ -357,7 +353,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
             // Write state/results information
             const word& opName = operationTypeNames_[operation_];
             word resultName =
-                opName + '(' + sourceName_ + ',' + fieldName + ')';
+                opName + '(' + regionName_ + ',' + fieldName + ')';
             this->setResult(resultName, result);
         }
     }

@@ -24,8 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PecletNo.H"
-#include "turbulentTransportModel.H"
-#include "turbulentFluidThermoModel.H"
+#include "turbulenceModel.H"
 #include "surfaceInterpolate.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -49,44 +48,43 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+Foam::tmp<Foam::surfaceScalarField> Foam::functionObjects::PecletNo::rhoScale
+(
+    const surfaceScalarField& phi
+) const
+{
+    if (phi.dimensions() == dimMass/dimTime)
+    {
+        return phi/fvc::interpolate(lookupObject<volScalarField>(rhoName_));
+    }
+    else
+    {
+        return phi;
+    }
+}
+
+
 bool Foam::functionObjects::PecletNo::calc()
 {
     if (foundObject<surfaceScalarField>(fieldName_))
     {
-        // Obtain nuEff of muEff.  Assumes that a compressible flux is present
-        // when using a compressible turbulence model, and an incompressible
-        // flux when using an incompressible turbulence model
-
-        tmp<volScalarField> nuOrMuEff;
-        if (mesh_.foundObject<cmpTurbModel>(turbulenceModel::propertiesName))
+        tmp<volScalarField> nuEff;
+        if (mesh_.foundObject<turbulenceModel>(turbulenceModel::propertiesName))
         {
-            const cmpTurbModel& model =
-                mesh_.lookupObject<cmpTurbModel>
+            const turbulenceModel& model =
+                lookupObject<turbulenceModel>
                 (
                     turbulenceModel::propertiesName
                 );
 
-            nuOrMuEff = model.muEff();
-        }
-        else if
-        (
-            mesh_.foundObject<icoTurbModel>(turbulenceModel::propertiesName)
-        )
-        {
-            const icoTurbModel& model =
-                mesh_.lookupObject<icoTurbModel>
-                (
-                    turbulenceModel::propertiesName
-                );
-
-            nuOrMuEff = model.nuEff();
+            nuEff = model.nuEff();
         }
         else if (mesh_.foundObject<dictionary>("transportProperties"))
         {
             const dictionary& model =
                 mesh_.lookupObject<dictionary>("transportProperties");
 
-            nuOrMuEff =
+            nuEff =
                 tmp<volScalarField>
                 (
                     new volScalarField
@@ -118,11 +116,11 @@ bool Foam::functionObjects::PecletNo::calc()
         return store
         (
             resultName_,
-            mag(phi)
+            mag(rhoScale(phi))
            /(
                 mesh_.magSf()
                *mesh_.surfaceInterpolation::deltaCoeffs()
-               *fvc::interpolate(nuOrMuEff)
+               *fvc::interpolate(nuEff)
             )
         );
     }
@@ -142,7 +140,8 @@ Foam::functionObjects::PecletNo::PecletNo
     const dictionary& dict
 )
 :
-    fieldExpression(name, runTime, dict, "phi")
+    fieldExpression(name, runTime, dict, "phi"),
+    rhoName_("rho")
 {
     setResultName("Pe", "phi");
 }
@@ -152,6 +151,15 @@ Foam::functionObjects::PecletNo::PecletNo
 
 Foam::functionObjects::PecletNo::~PecletNo()
 {}
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::functionObjects::PecletNo::read(const dictionary& dict)
+{
+    dict.readIfPresent("rho", rhoName_);
+
+    return true;
+}
 
 
 // ************************************************************************* //

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,7 @@ License
 #include "text.H"
 #include "Time.H"
 #include "sigFpe.H"
+#include "addToRunTimeSelectionTable.H"
 
 // VTK includes
 #include "vtkPolyDataMapper.h"
@@ -45,28 +46,35 @@ License
 
 namespace Foam
 {
+namespace functionObjects
+{
     defineTypeNameAndDebug(runTimePostProcessing, 0);
+
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        runTimePostProcessing,
+        dictionary
+    );
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::runTimePostProcessing::runTimePostProcessing
+Foam::functionObjects::runTimePostProcessing::runTimePostProcessing
 (
     const word& name,
-    const objectRegistry& obr,
-    const dictionary& dict,
-    const bool loadFromFiles
+    const Time& runTime,
+    const dictionary& dict
 )
 :
-    functionObjectState(obr, name),
-    scene_(obr, name),
+    fvMeshFunctionObject(name, runTime, dict),
+    scene_(runTime, name),
     points_(),
     lines_(),
     surfaces_(),
-    text_(),
-    obr_(obr),
-    active_(true)
+    text_()
 {
     read(dict);
 }
@@ -74,15 +82,15 @@ Foam::runTimePostProcessing::runTimePostProcessing
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::runTimePostProcessing::~runTimePostProcessing()
+Foam::functionObjects::runTimePostProcessing::~runTimePostProcessing()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::runTimePostProcessing::read(const dictionary& dict)
+bool Foam::functionObjects::runTimePostProcessing::read(const dictionary& dict)
 {
-    Info<< type() << " " << name_ << ": reading post-processing data" << endl;
+    Info<< type() << " " << name() << ": reading post-processing data" << endl;
 
     scene_.read(dict);
 
@@ -107,37 +115,32 @@ void Foam::runTimePostProcessing::read(const dictionary& dict)
                 << exit(FatalIOError);
         }
 
-        text_.append(new text(*this, iter().dict(), scene_.colours()));
+        text_.append(new runTimePostPro::text
+        (
+            *this,
+            iter().dict(),
+            scene_.colours())
+        );
     }
+
+    return true;
 }
 
 
-void Foam::runTimePostProcessing::execute()
+bool Foam::functionObjects::runTimePostProcessing::execute()
 {
-    // Do nothing
+    return true;
 }
 
 
-void Foam::runTimePostProcessing::end()
-{
-    // Do nothing
-}
-
-
-void Foam::runTimePostProcessing::timeSet()
-{
-    // Do nothing
-}
-
-
-void Foam::runTimePostProcessing::write()
+bool Foam::functionObjects::runTimePostProcessing::write()
 {
     if (!Pstream::master())
     {
-        return;
+        return true;
     }
 
-    Info<< type() << " " << name_ <<  " output:" << nl
+    Info<< type() << " " << name() <<  " output:" << nl
         << "    Constructing scene" << endl;
 
     // Unset any floating point trapping (some low-level rendering functionality
@@ -214,6 +217,8 @@ void Foam::runTimePostProcessing::write()
 
     // Reset any floating point trapping
     sigFpe::set(false);
+
+    return true;
 }
 
 

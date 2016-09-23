@@ -123,7 +123,7 @@ void Foam::inclinedFilmNusseltInletVelocityFvPatchVectorField::updateCoeffs()
 
     const label patchi = patch().index();
 
-    // retrieve the film region from the database
+    // Retrieve the film region from the database
 
     const regionModels::regionModel& region =
         db().time().lookupObject<regionModels::regionModel>(filmRegionName_);
@@ -134,11 +134,12 @@ void Foam::inclinedFilmNusseltInletVelocityFvPatchVectorField::updateCoeffs()
             const regionModels::surfaceFilmModels::kinematicSingleLayer&
         >(region);
 
-    // calculate the vector tangential to the patch
+
+    // Calculate the vector tangential to the patch
     // note: normal pointing into the domain
     const vectorField n(-patch().nf());
 
-    const scalarField gTan(film.gTan(patchI) & n);
+    const scalarField gTan(film.gTan(patchi) & n);
 
     if (patch().size() && (max(mag(gTan)) < SMALL))
     {
@@ -155,12 +156,14 @@ void Foam::inclinedFilmNusseltInletVelocityFvPatchVectorField::updateCoeffs()
     vectorField nTan(nHatp ^ n);
     nTan /= mag(nTan) + ROOTVSMALL;
 
-    // calculate distance in patch tangential direction
+
+    // Calculate distance in patch tangential direction
 
     const vectorField& Cf = patch().Cf();
     scalarField d(nTan & Cf);
 
-    // calculate the wavy film height
+
+    // Calculate the wavy film height
 
     const scalar t = db().time().timeOutputValue();
 

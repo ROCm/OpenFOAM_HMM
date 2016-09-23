@@ -821,7 +821,7 @@ void Foam::triSurfaceMesh::getVolumeType
                 {
                     outsideVolType_ = tree().shapes().getVolumeType(tree(), pt);
                 }
-                volType[pointI] = outsideVolType_;
+                volType[pointi] = outsideVolType_;
             }
             else
             {

@@ -154,10 +154,10 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
                 (
                     true,
                     facePt,
-                    faceI
+                    facei
                 );
 
-                sampleInfo.second().first() = magSqr(facePt-sample);
+                sampleInfo.second().first() = magSqr(facePt - sample);
                 sampleInfo.second().second() = Pstream::myProcNo();
 
                 nearest[probei]= sampleInfo;
@@ -172,24 +172,24 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
 
 
     // Update actual probe locations
-    forAll(nearest, sampleI)
+    forAll(nearest, samplei)
     {
-        operator[](sampleI) = nearest[sampleI].first().rawPoint();
+        operator[](samplei) = nearest[samplei].first().rawPoint();
     }
 
 
     if (debug)
     {
         InfoInFunction << endl;
-        forAll(nearest, sampleI)
+        forAll(nearest, samplei)
         {
-            label proci = nearest[sampleI].second().second();
-            label localI = nearest[sampleI].first().index();
+            label proci = nearest[samplei].second().second();
+            label locali = nearest[samplei].first().index();
 
-            Info<< "    " << sampleI << " coord:"<< operator[](sampleI)
-                << " found on processor:" << procI
-                << " in local face:" << localI
-                << " with location:" << nearest[sampleI].first().rawPoint()
+            Info<< "    " << samplei << " coord:"<< operator[](samplei)
+                << " found on processor:" << proci
+                << " in local face:" << locali
+                << " with location:" << nearest[samplei].first().rawPoint()
                 << endl;
         }
     }
@@ -212,31 +212,23 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
 }
 
 
-void Foam::patchProbes::readDict(const dictionary& dict)
-{
-    probes::readDict(dict);
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::patchProbes::patchProbes
 (
     const word& name,
     const Time& t,
-    const dictionary& dict
+    const dictionary& dict,
+    const bool loadFromFiles,
+    const bool readFields
 )
 :
-    probes(name, t, dict)
+    probes(name, t, dict, loadFromFiles, false)
 {
-    // When constructing probes above it will have called the
-    // probes::findElements (since the virtual mechanism not yet operating).
-    // Not easy to workaround (apart from feeding through flag into constructor)
-    // so clear out any cells found for now.
-    elementList_.clear();
-    faceList_.clear();
-
-    read(dict);
+    if (readFields)
+    {
+        read(dict);
+    }
 }
 
 
@@ -246,7 +238,7 @@ Foam::patchProbes::patchProbes
     const objectRegistry& obr,
     const dictionary& dict,
     const bool loadFromFiles,
-)   const bool readFields
+    const bool readFields
 )
 :
     probes(name, obr, dict, loadFromFiles, false)

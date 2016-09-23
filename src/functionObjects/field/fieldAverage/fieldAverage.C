@@ -69,7 +69,7 @@ void Foam::functionObjects::fieldAverage::initialize()
 {
     resetFields();
 
-    Log << type() << " " << name_ << ":" << nl;
+    Log << type() << " " << name() << ":" << nl;
 
     // Add mean fields to the field lists
     forAll(faItems_, fieldi)
@@ -187,7 +187,7 @@ void Foam::functionObjects::fieldAverage::writeAverages() const
 }
 
 
-void Foam::fieldAverage::writeAveragingProperties()
+void Foam::functionObjects::fieldAverage::writeAveragingProperties()
 {
     forAll(faItems_, fieldi)
     {

@@ -17,9 +17,10 @@
 
     // Do not compress interface at non-coupled boundary faces
     // (inlets, outlets etc.)
+    surfaceScalarField::Boundary& phicBf = phic.boundaryFieldRef();
     forAll(phic.boundaryField(), patchi)
     {
-        fvsPatchScalarField& phicp = phic.boundaryField()[patchi];
+        fvsPatchScalarField& phicp = phicBf[patchi];
 
         if (!phicp.coupled())
         {

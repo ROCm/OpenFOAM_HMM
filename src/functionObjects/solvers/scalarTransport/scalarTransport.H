@@ -45,7 +45,7 @@ Description
         scalar1
         {
             type            scalarTransport;
-            functionObjectLibs ("libutilityFunctionObjects.so");
+            libs            ("libutilityFunctionObjects.so");
 
             fvOptions
             {
@@ -137,7 +137,11 @@ class scalarTransport
         volScalarField& transportedField();
 
         //- Return the diffusivity field
-        tmp<volScalarField> D(const surfaceScalarField& phi) const;
+        tmp<volScalarField> D
+        (
+            const volScalarField& s,
+            const surfaceScalarField& phi
+        ) const;
 
         //- Disallow default bitwise copy construct
         scalarTransport(const scalarTransport&) = delete;

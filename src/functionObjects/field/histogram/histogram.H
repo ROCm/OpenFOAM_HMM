@@ -87,11 +87,10 @@ namespace functionObjects
 
 class histogram
 :
-    public fvMeshFunctionObject
+    public fvMeshFunctionObject,
+    public writeFile
 {
     // Private data
-
-        writeFile file_;
 
         //- Name of field
         word fieldName_;

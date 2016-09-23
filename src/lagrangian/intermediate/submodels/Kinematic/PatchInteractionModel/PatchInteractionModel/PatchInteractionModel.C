@@ -110,7 +110,7 @@ Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
 )
 :
     CloudSubModelBase<CloudType>(owner),
-    UName_("unknown_U")
+    UName_("unknown_U"),
     escapedParcels_(0),
     escapedMass_(0.0)
 {}
@@ -125,7 +125,7 @@ Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
 )
 :
     CloudSubModelBase<CloudType>(owner, dict, typeName, type),
-    UName_(this->coeffDict().lookupOrDefault("U", word("U")))
+    UName_(this->coeffDict().lookupOrDefault("U", word("U"))),
     escapedParcels_(0),
     escapedMass_(0.0)
 {}
@@ -188,7 +188,7 @@ void Foam::PatchInteractionModel<CloudType>::info(Ostream& os)
         << "      - escape                      = " << escapedParcelsTotal
         << ", " << escapedMassTotal << endl;
 
-    if (this->outputTime())
+    if (this->writeTime())
     {
         this->setBaseProperty("escapedParcels", escapedParcelsTotal);
         escapedParcels_ = 0;

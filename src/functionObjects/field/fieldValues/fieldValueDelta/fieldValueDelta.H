@@ -2,13 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-<<<<<<< HEAD:src/postProcessing/functionObjects/field/fieldValues/fieldValueDelta/fieldValueDelta.H
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
-=======
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
->>>>>>> foundation-github:src/functionObjects/field/fieldValues/fieldValueDelta/fieldValueDelta.H
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,15 +28,10 @@ Group
     grpFieldFunctionObjects
 
 Description
-<<<<<<< HEAD:src/postProcessing/functionObjects/field/fieldValues/fieldValueDelta/fieldValueDelta.H
-    This function object provides applies an operation to the output of two
-    fieldValue function objects.
+    Provides an operation between two 'field value' function objects.
 
     The operation is applied to all results of each fieldValue object.
     Accordingly, each object must generate the same number and type of results.
-=======
-    Provides a differencing option between two 'field value' function objects.
->>>>>>> foundation-github:src/functionObjects/field/fieldValues/fieldValueDelta/fieldValueDelta.H
 
     Example of function object specification:
     \verbatim
@@ -77,16 +67,11 @@ Usage
        average       | average
     \endplaintable
 
-<<<<<<< HEAD:src/postProcessing/functionObjects/field/fieldValues/fieldValueDelta/fieldValueDelta.H
-SeeAlso
-    Foam::fieldValue
-=======
 See also
     Foam::functionObject
-    Foam::functionObject::fieldValue
+    Foam::functionObjects::fieldValue
     Foam::functionObjects::regionFunctionObject
-    Foam::functionObjects::logFiles
->>>>>>> foundation-github:src/functionObjects/field/fieldValues/fieldValueDelta/fieldValueDelta.H
+    Foam::functionObjects::writeFile
 
 SourceFiles
     fieldValueDelta.C
@@ -96,13 +81,8 @@ SourceFiles
 #ifndef functionObjects_fieldValueDelta_H
 #define functionObjects_fieldValueDelta_H
 
-<<<<<<< HEAD:src/postProcessing/functionObjects/field/fieldValues/fieldValueDelta/fieldValueDelta.H
-#include "functionObjectState.H"
-#include "functionObjectFile.H"
-=======
-#include "regionFunctionObject.H"
-#include "logFiles.H"
->>>>>>> foundation-github:src/functionObjects/field/fieldValues/fieldValueDelta/fieldValueDelta.H
+#include "stateFunctionObject.H"
+#include "writeFile.H"
 #include "fieldValue.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -120,23 +100,18 @@ namespace fieldValues
 
 class fieldValueDelta
 :
-<<<<<<< HEAD:src/postProcessing/functionObjects/field/fieldValues/fieldValueDelta/fieldValueDelta.H
-    public functionObjectState,
-    public functionObjectFile
-=======
-    public regionFunctionObject,
-    public logFiles
->>>>>>> foundation-github:src/functionObjects/field/fieldValues/fieldValueDelta/fieldValueDelta.H
+    public fvMeshFunctionObject,
+    public writeFile
 {
 public:
         //- Operation type enumeration
         enum operationType
         {
-            opAdd,
-            opSubtract,
-            opMin,
-            opMax,
-            opAverage
+            opAdd,              //< Add
+            opSubtract,         //< Subtract
+            opMin,              //< Minimum
+            opMax,              //< Maximum
+            opAverage           //< Average
         };
 
         //- Operation type names
@@ -147,18 +122,6 @@ private:
 
     // Private data
 
-<<<<<<< HEAD:src/postProcessing/functionObjects/field/fieldValues/fieldValueDelta/fieldValueDelta.H
-        //- Database this class is registered to
-        const objectRegistry& obr_;
-
-        //- Flag to indicate to load from files
-        bool loadFromFiles_;
-
-        //- Switch to send output to Info as well as to file
-        Switch log_;
-
-=======
->>>>>>> foundation-github:src/functionObjects/field/fieldValues/fieldValueDelta/fieldValueDelta.H
         //- Operation to apply to values
         operationType operation_;
 
@@ -173,7 +136,7 @@ private:
 
         //- Templated function to apply the operation
         template<class Type>
-        void apply
+        void applyOperation
         (
             const word& resultType,
             const word& name1,

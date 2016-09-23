@@ -158,11 +158,10 @@ namespace functionObjects
 
 class regionSizeDistribution
 :
-    public fvMeshFunctionObject
+    public fvMeshFunctionObject,
+    public writeFile
 {
     // Private data
-
-        writeFile file_;
 
         //- Name of field
         word alphaName_;

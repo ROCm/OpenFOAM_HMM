@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ void Foam::functionObjects::logFiles::createFiles()
         {
             if (!filePtrs_.set(i))
             {
-                filePtrs_.set(i, createFile(names_[i]);
+                filePtrs_.set(i, createFile(names_[i]));
 
                 initStream(filePtrs_[i]);
             }
@@ -67,7 +67,7 @@ void Foam::functionObjects::logFiles::resetName(const word& name)
     names_.clear();
     names_.append(name);
 
-    resetFile(name);
+    writeFile::resetFile(name);
 }
 
 
@@ -83,6 +83,21 @@ Foam::functionObjects::logFiles::logFiles
     names_(),
     filePtrs_()
 {}
+
+
+Foam::functionObjects::logFiles::logFiles
+(
+    const objectRegistry& obr,
+    const word& prefix,
+    const dictionary& dict
+)
+:
+    writeFile(obr, prefix),
+    names_(),
+    filePtrs_()
+{
+    writeFile::read(dict);
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

@@ -71,7 +71,6 @@ SourceFiles
 #ifndef refinementHistory_H
 #define refinementHistory_H
 
-#include "UPtrList.H"
 #include "DynamicList.H"
 #include "labelList.H"
 #include "FixedList.H"
@@ -99,13 +98,12 @@ Ostream& operator<<(Ostream&, const refinementHistory&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class refinementHistory Declaration
+                      Class refinementHistory Declaration
 \*---------------------------------------------------------------------------*/
 
 class refinementHistory
 :
-    public regIOobject,
-    public refCount
+    public regIOobject
 {
 public:
 

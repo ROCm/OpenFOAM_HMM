@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,7 @@ void Foam::functionObjects::histogram::writeGraph
 {
     const wordList fieldNames(1, fieldName);
 
-    fileName outputPath = file_.baseTimeDir();
+    fileName outputPath = baseTimeDir();
     mkDir(outputPath);
     OFstream graphFile
     (
@@ -76,7 +76,7 @@ Foam::functionObjects::histogram::histogram
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    file_(obr_, name)
+    writeFile(obr_, name)
 {
     read(dict);
 }
@@ -157,7 +157,7 @@ bool Foam::functionObjects::histogram::write()
         x += delta;
     }
 
-    scalarField volFrac(nBins_, 0);
+    scalarField data(nBins_, 0);
     const scalarField& V = mesh_.V();
 
     forAll(field, celli)
@@ -165,29 +165,29 @@ bool Foam::functionObjects::histogram::write()
         const label bini = (field[celli] - min_)/delta;
         if (bini >= 0 && bini < nBins_)
         {
-            volFrac[bini] += V[celli];
+            data[bini] += V[celli];
         }
     }
 
-    Pstream::listCombineGather(volFrac, plusEqOp<scalar>());
+    Pstream::listCombineGather(data, plusEqOp<scalar>());
 
     if (Pstream::master())
     {
-        const scalar sumVol = sum(volFrac);
+        const scalar sumData = sum(data);
 
-        if (sumVol > SMALL)
+        if (sumData > SMALL)
         {
-            volFrac /= sumVol;
+            data /= sumData;
 
             const coordSet coords
             (
-                "Volume_Fraction",
+                fieldName_,
                 "x",
                 xBin,
                 mag(xBin)
             );
 
-            writeGraph(coords, field.name(), volFrac);
+            writeGraph(coords, fieldName_, data);
         }
     }
 

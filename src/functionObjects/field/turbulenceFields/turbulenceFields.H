@@ -146,9 +146,6 @@ protected:
         //- Fields to load
         wordHashSet fieldSet_;
 
-        //- Switch to send output to Info as well as to file
-        Switch log_;
-
 
     // Protected Member Functions
 
@@ -173,10 +170,10 @@ private:
     // Private member functions
 
         //- Disallow default bitwise copy construct
-        turbulenceFields(const turbulenceFields&);
+        turbulenceFields(const turbulenceFields&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const turbulenceFields&);
+        void operator=(const turbulenceFields&) = delete;
 
 
 public:

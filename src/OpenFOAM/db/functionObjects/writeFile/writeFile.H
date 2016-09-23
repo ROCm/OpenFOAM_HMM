@@ -40,6 +40,7 @@ SourceFiles
 #define functionObjects_writeFile_H
 
 #include "objectRegistry.H"
+#include "OFstream.H"
 #include "IOmanip.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -129,7 +130,8 @@ public:
             const word& prefix
         );
 
-        //- Construct from components and read options from dictionary
+        //- Construct from objectRegistry and prefix, and read options
+        //  from dictionary
         writeFile
         (
             const objectRegistry& obr,
@@ -151,6 +153,12 @@ public:
         //- Return access to the file (if only 1)
         OFstream& file();
 
+        //- Flag to allow writing to file
+        bool writeToFile() const;
+
+        //- Return width of character stream output
+        label charWidth() const;
+
         //- Write a commented string to stream
         void writeCommented(Ostream& os, const string& str) const;
 
@@ -171,9 +179,6 @@ public:
             const string& property,
             const Type& value
         ) const;
-
-        //- Return width of character stream output
-        label charWidth() const;
 };
 
 

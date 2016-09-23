@@ -129,6 +129,28 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correctNut()
 
 
 template<class BasicEddyViscosityModel>
+tmp<volScalarField::Internal> kOmegaSSTBase<BasicEddyViscosityModel>::Pk
+(
+    const volScalarField::Internal& G
+) const
+{
+    return min(G, (c1_*betaStar_)*this->k_()*this->omega_());
+}
+
+
+template<class BasicEddyViscosityModel>
+tmp<volScalarField::Internal>
+kOmegaSSTBase<BasicEddyViscosityModel>::epsilonByk
+(
+    const volScalarField::Internal& F1,
+    const volScalarField::Internal& F2
+) const
+{
+    return betaStar_*omega_();
+}
+
+
+template<class BasicEddyViscosityModel>
 tmp<fvScalarMatrix> kOmegaSSTBase<BasicEddyViscosityModel>::kSource() const
 {
     return tmp<fvScalarMatrix>
@@ -409,7 +431,7 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
     tgradU.clear();
 
     // Update omega and G at the wall
-    omega_.boundaryField().updateCoeffs();
+    omega_.boundaryFieldRef().updateCoeffs();
 
     volScalarField CDkOmega
     (
@@ -449,7 +471,7 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
 
         omegaEqn.ref().relax();
         fvOptions.constrain(omegaEqn.ref());
-        omegaEqn.ref().boundaryManipulate(omega_.boundaryField());
+        omegaEqn.ref().boundaryManipulate(omega_.boundaryFieldRef());
         solve(omegaEqn);
         fvOptions.correct(omega_);
         bound(omega_, this->omegaMin_);

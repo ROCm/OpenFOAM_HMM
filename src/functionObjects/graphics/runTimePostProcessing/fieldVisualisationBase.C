@@ -50,14 +50,22 @@ License
 namespace Foam
 {
     template<>
-    const char* NamedEnum<fieldVisualisationBase::colourByType, 2>::names[] =
+    const char* NamedEnum
+    <
+        functionObjects::fieldVisualisationBase::colourByType,
+        2
+    >::names[] =
     {
         "colour",
         "field"
     };
 
     template<>
-    const char* NamedEnum<fieldVisualisationBase::colourMapType, 4>::names[] =
+    const char* NamedEnum
+    <
+        functionObjects::fieldVisualisationBase::colourMapType,
+        4
+    >::names[] =
     {
         "rainbow",
         "blueWhiteRed",
@@ -66,16 +74,27 @@ namespace Foam
     };
 }
 
-const Foam::NamedEnum<Foam::fieldVisualisationBase::colourByType, 2>
-    Foam::fieldVisualisationBase::colourByTypeNames;
+const Foam::NamedEnum
+    <
+        Foam::functionObjects::fieldVisualisationBase::colourByType,
+        2
+    >
+    Foam::functionObjects::fieldVisualisationBase::colourByTypeNames;
 
-const Foam::NamedEnum<Foam::fieldVisualisationBase::colourMapType, 4>
-    Foam::fieldVisualisationBase::colourMapTypeNames;
+const Foam::NamedEnum
+    <
+        Foam::functionObjects::fieldVisualisationBase::colourMapType,
+        4
+    >
+    Foam::functionObjects::fieldVisualisationBase::colourMapTypeNames;
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::fieldVisualisationBase::setColourMap(vtkLookupTable* lut) const
+void Foam::functionObjects::fieldVisualisationBase::setColourMap
+(
+    vtkLookupTable* lut
+) const
 {
     label nColours = 256;
 
@@ -131,7 +150,7 @@ void Foam::fieldVisualisationBase::setColourMap(vtkLookupTable* lut) const
 }
 
 
-void Foam::fieldVisualisationBase::addScalarBar
+void Foam::functionObjects::fieldVisualisationBase::addScalarBar
 (
     const scalar position,
     vtkRenderer* renderer,
@@ -242,7 +261,7 @@ void Foam::fieldVisualisationBase::addScalarBar
 }
 
 
-void Foam::fieldVisualisationBase::setField
+void Foam::functionObjects::fieldVisualisationBase::setField
 (
     const scalar position,
     const word& colourFieldName,
@@ -307,7 +326,7 @@ void Foam::fieldVisualisationBase::setField
 
 
 
-void Foam::fieldVisualisationBase::addGlyphs
+void Foam::functionObjects::fieldVisualisationBase::addGlyphs
 (
     const scalar position,
     const word& scaleFieldName,
@@ -486,7 +505,7 @@ void Foam::fieldVisualisationBase::addGlyphs
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fieldVisualisationBase::fieldVisualisationBase
+Foam::functionObjects::fieldVisualisationBase::fieldVisualisationBase
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
@@ -537,20 +556,21 @@ Foam::fieldVisualisationBase::fieldVisualisationBase
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::fieldVisualisationBase::~fieldVisualisationBase()
+Foam::functionObjects::fieldVisualisationBase::~fieldVisualisationBase()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 const Foam::HashPtrTable<Foam::Function1<Foam::vector>, Foam::word>&
-Foam::fieldVisualisationBase::colours() const
+Foam::functionObjects::fieldVisualisationBase::colours() const
 {
     return colours_;
 }
 
 
-const Foam::word& Foam::fieldVisualisationBase::fieldName() const
+const Foam::word&
+Foam::functionObjects::fieldVisualisationBase::fieldName() const
 {
     return fieldName_;
 }

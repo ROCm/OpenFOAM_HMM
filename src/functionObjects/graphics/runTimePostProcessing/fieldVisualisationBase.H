@@ -22,17 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fieldVisualisationBase
+    Foam::functionObjects::fieldVisualisationBase
 
 Description
+    Base class for scene objects
 
 SourceFiles
     fieldVisualisationBase.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fieldVisualisationBase_H
-#define fieldVisualisationBase_H
+#ifndef functionObjects_fieldVisualisationBase_H
+#define functionObjects_fieldVisualisationBase_H
 
 #include "dictionary.H"
 #include "Tuple2.H"
@@ -55,6 +56,8 @@ class vtkRenderer;
 class vtkMapper;
 
 namespace Foam
+{
+namespace functionObjects
 {
 
 class runTimePostProcessing;
@@ -206,6 +209,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace functionObjects
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -52,7 +52,7 @@ volScalarField y
     dimensionedScalar("zero", dimLength, 0.0),
     zeroGradientFvPatchScalarField::typeName
 );
-y.internalField() = wallDist::New(mesh).y().internalField();
+y.primitiveFieldRef() = wallDist::New(mesh).y().primitiveField();
 y.correctBoundaryConditions();
 
 

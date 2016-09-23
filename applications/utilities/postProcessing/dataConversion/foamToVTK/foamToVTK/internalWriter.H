@@ -98,7 +98,7 @@ public:
         template<class Type, class GeoMesh>
         void write
         (
-            const PtrList<DimensionedField<Type, volMesh>>& flds
+            const PtrList<const DimensionedField<Type, volMesh>>& flds
         );
 
         //- Interpolate and write volFields
@@ -114,7 +114,7 @@ public:
         void write
         (
             const volPointInterpolation&,
-            const PtrList<DimensionedField<Type, volMesh>>&
+            const PtrList<const DimensionedField<Type, volMesh>>&
         );
 };
 

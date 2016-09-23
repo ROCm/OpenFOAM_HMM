@@ -139,7 +139,7 @@ void Foam::inclinedFilmNusseltHeightFvPatchScalarField::updateCoeffs()
     // Note: normal pointing into the domain
     const vectorField n(-patch().nf());
 
-    const scalarField gTan(film.gTan(patchI) & n);
+    const scalarField gTan(film.gTan(patchi) & n);
 
     if (patch().size() && (max(mag(gTan)) < SMALL))
     {
