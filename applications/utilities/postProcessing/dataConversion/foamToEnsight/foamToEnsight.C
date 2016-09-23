@@ -42,12 +42,15 @@ Usage
     \param -noZero \n
     Exclude the often incomplete initial conditions.
 
-    \param -patches patchList \n
-    Specify particular patches to write.
-    Specifying an empty list suppresses writing the internalMesh.
+    \param -noLagrangian \n
+    Suppress writing lagrangian positions and fields.
 
     \param -noPatches \n
     Suppress writing any patches.
+
+    \param -patches patchList \n
+    Specify particular patches to write.
+    Specifying an empty list suppresses writing the internalMesh.
 
     \param -faceZones zoneList \n
     Specify faceZones to write, with wildcards
@@ -124,6 +127,11 @@ int main(int argc, char *argv[])
     (
         "nodeValues",
         "write values in nodes"
+    );
+    argList::addBoolOption
+    (
+        "noLagrangian",
+        "suppress writing lagrangian positions and fields"
     );
     argList::addBoolOption
     (
@@ -298,6 +306,8 @@ int main(int argc, char *argv[])
         fieldPatterns = wordReList(args.optionLookup("fields")());
     }
 
+    const bool noLagrangian = args.optionFound("noLagrangian");
+
     word cellZoneName;
     const bool doCellZone = args.optionReadIfPresent("cellZone", cellZoneName);
 
@@ -334,6 +344,7 @@ int main(int argc, char *argv[])
     IOobjectList objects(mesh, runTime.timeName());
 
     #include "checkMeshMoving.H"
+    #include "findCloudFields.H"
 
     if (Pstream::master())
     {
@@ -356,105 +367,30 @@ int main(int argc, char *argv[])
                 << setw(16) << "model:"
                 << ensightMesh::geometryName << nl;
         }
-    }
 
-    // Identify if lagrangian data exists any time step, and add clouds
-    // to the 'cloudNames' (sorted list)
-    wordList cloudNames;
-    {
-        wordHashSet allCloudNames;
-
-        forAll(timeDirs, timeI)
-        {
-            runTime.setTime(timeDirs[timeI], timeI);
-
-            fileNameList cloudDirs = readDir
-            (
-                runTime.timePath()/regionPrefix/cloud::prefix,
-                fileName::DIRECTORY
-            );
-
-            forAll(cloudDirs, cloudI)
-            {
-                IOobjectList cloudObjs
-                (
-                    mesh,
-                    runTime.timeName(),
-                    cloud::prefix/cloudDirs[cloudI]
-                );
-
-                IOobject* positionsPtr = cloudObjs.lookup(word("positions"));
-
-                if (positionsPtr)
-                {
-                    allCloudNames.insert(cloudDirs[cloudI]);
-                }
-            }
-        }
-
-        // sorted for consistency
-        cloudNames = allCloudNames.sortedToc();
-    }
-
-    // ignore special fields (_0 fields),
-    // ignore fields we don't handle,
-    // ignore fields that are not available for all time-steps
-    HashTable<bool> fieldsToUse;
-
-    HashTable<HashTable<word>> allCloudFields;
-    forAll(cloudNames, cloudNo)
-    {
-        const word& cloudName = cloudNames[cloudNo];
 
         // Add the name of the cloud(s) to the case file header
-        if (Pstream::master())
+        forAll(cloudNames, cloudNo)
         {
+            const word& cloudName = cloudNames[cloudNo];
+
             ensightCaseFile
                 << setw(16) << "measured: 1"
-                << fileName(dataMask/cloud::prefix/cloudName/"positions").c_str()
-                << nl;
-        }
-
-        // Create a new hash table for each cloud
-        allCloudFields.insert(cloudName, HashTable<word>());
-
-        // Identify the new cloud in the hash table
-        HashTable<HashTable<word>>::iterator newCloudIter =
-            allCloudFields.find(cloudName);
-
-        // Loop over all times to build list of fields and field types
-        // for each cloud
-        forAll(timeDirs, timeI)
-        {
-            runTime.setTime(timeDirs[timeI], timeI);
-
-            IOobjectList cloudObjs
-            (
-                mesh,
-                runTime.timeName(),
-                cloud::prefix/cloudName
-            );
-
-            forAllConstIter(IOobjectList, cloudObjs, fieldIter)
-            {
-                const IOobject obj = *fieldIter();
-
-                if (obj.name() != "positions")
-                {
-                    // Add field and field type
-                    newCloudIter().insert
-                    (
-                        obj.name(),
-                        obj.headerClassName()
-                    );
-                }
-            }
+                << fileName
+                (
+                    dataMask/cloud::prefix/cloudName/"positions"
+                ).c_str() << nl;
         }
     }
 
     Info<< "Startup in "
         << timer.cpuTimeIncrement() << " s, "
         << mem.update().size() << " kB" << nl << endl;
+
+    // ignore special fields (_0 fields),
+    // ignore fields we don't handle,
+    // ignore fields that are not available for all time-steps
+    HashTable<bool> fieldsToUse;
 
     label nTimeSteps = 0;
     forAll(timeDirs, timeIndex)
@@ -740,13 +676,7 @@ int main(int argc, char *argv[])
         forAll(cloudNames, cloudNo)
         {
             const word& cloudName = cloudNames[cloudNo];
-            if (!allCloudFields.found(cloudName))
-            {
-                // extra safety
-                continue;
-            }
-
-            const HashTable<word>& cloudFields = allCloudFields[cloudName];
+            const HashTable<word>& theseCloudFields = cloudFields[cloudName];
 
             fileNameList currentCloudDirs = readDir
             (
@@ -769,7 +699,7 @@ int main(int argc, char *argv[])
                 format
             );
 
-            forAllConstIter(HashTable<word>, cloudFields, fieldIter)
+            forAllConstIter(HashTable<word>, theseCloudFields, fieldIter)
             {
                 const word& fieldName = fieldIter.key();
                 const word& fieldType = fieldIter();

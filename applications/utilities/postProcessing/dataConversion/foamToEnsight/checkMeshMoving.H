@@ -12,14 +12,16 @@ if (timeDirs.size() > 1 && Pstream::master())
     Info<< "Search for moving mesh ... " << flush;
     forAll(timeDirs, timeI)
     {
+        const word& timeName = timeDirs[timeI].name();
+
         meshMoving =
         (
-            timeDirs[timeI].name() != mesh.pointsInstance()
-         && isDir(baseDir/timeDirs[timeI].name()/polyMesh::meshSubDir)
+            timeName != mesh.pointsInstance()
+         && isDir(baseDir/timeName/polyMesh::meshSubDir)
          && IOobject
             (
                 "points",
-                timeDirs[timeI].name(),
+                timeName,
                 polyMesh::meshSubDir,
                 mesh,
                 IOobject::NO_READ,

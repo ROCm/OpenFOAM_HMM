@@ -11,7 +11,7 @@ if (!fieldsToUse.found(fieldName))
     {
         variableGood =
         (
-            fieldName.size() > 2 && fieldName(fieldName.size() - 2, 2) == "_0"
+            fieldName.size() > 2 && fieldName(fieldName.size()-2, 2) == "_0"
           ? false
           : IOobject
             (

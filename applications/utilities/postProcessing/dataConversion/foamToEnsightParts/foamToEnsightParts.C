@@ -44,6 +44,9 @@ Usage
     \param -noZero \n
     Exclude the often incomplete initial conditions.
 
+    \param -noLagrangian \n
+    Suppress writing lagrangian positions and fields.
+
     \param -index \<start\>\n
     Ignore the time index contained in the time file and use a
     simple indexing when creating the \c Ensight/data/######## files.
@@ -99,6 +102,11 @@ int main(int argc, char *argv[])
         "start",
         "ignore the time index contained in the uniform/time file "
         "and use simple indexing when creating the files"
+    );
+    argList::addBoolOption
+    (
+        "noLagrangian",
+        "suppress writing lagrangian positions and fields"
     );
     argList::addBoolOption
     (
@@ -158,7 +166,8 @@ int main(int argc, char *argv[])
 
     // control for renumbering iterations
     label indexingNumber = 0;
-    bool optIndex = args.optionReadIfPresent("index", indexingNumber);
+    const bool optIndex = args.optionReadIfPresent("index", indexingNumber);
+    const bool noLagrangian = args.optionFound("noLagrangian");
 
     // always write the geometry, unless the -noMesh option is specified
     bool optNoMesh = args.optionFound("noMesh");
@@ -389,15 +398,9 @@ int main(int argc, char *argv[])
         forAllConstIter(HashTable<HashTable<word>>, cloudFields, cloudIter)
         {
             const word& cloudName = cloudIter.key();
+            const fileName& cloudPrefix = regionPrefix/cloud::prefix;
 
-            if
-            (
-                !isDir
-                (
-                    runTime.timePath()/regionPrefix/
-                    cloud::prefix/cloudName
-                )
-            )
+            if (!isDir(runTime.timePath()/cloudPrefix/cloudName))
             {
                 continue;
             }
@@ -406,26 +409,23 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 runTime.timeName(),
-                cloud::prefix/cloudName
+                cloudPrefix/cloudName
             );
 
             // check that the positions field is present for this time
-            IOobject* positionPtr = cloudObjs.lookup(word("positions"));
-            if (positionPtr != NULL)
-            {
-                ensightParticlePositions
-                (
-                    mesh,
-                    dataDir,
-                    subDir,
-                    cloudName,
-                    format
-                );
-            }
-            else
+            if (!cloudObjs.found("positions"))
             {
                 continue;
             }
+
+            ensightParticlePositions
+            (
+                mesh,
+                dataDir,
+                subDir,
+                cloudName,
+                format
+            );
 
             Info<< "write " << cloudName << " (" << flush;
 
@@ -439,7 +439,7 @@ int main(int argc, char *argv[])
                 if (!fieldObject)
                 {
                     Info<< "missing "
-                        << runTime.timeName()/cloud::prefix/cloudName
+                        << runTime.timeName()/cloudPrefix/cloudName
                         / fieldName
                         << endl;
                     continue;
