@@ -204,13 +204,13 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::he
 (
     const scalarField& p,
     const scalarField& T,
-    const label patchI
+    const label patchi
 ) const
 {
-    const scalarField& alpha1p = alpha1().boundaryField()[patchI];
-    const scalarField& alpha2p = alpha2().boundaryField()[patchI];
+    const scalarField& alpha1p = alpha1().boundaryField()[patchi];
+    const scalarField& alpha2p = alpha2().boundaryField()[patchi];
 
-    const scalarField& Tp = T_.boundaryField()[patchI];
+    const scalarField& Tp = T_.boundaryField()[patchi];
 
     return
     (
@@ -429,11 +429,11 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::Cpv
 (
     const scalarField& p,
     const scalarField& T,
-    const label patchI
+    const label patchi
 ) const
 {
     // This is a e thermo (Cpv = Cv)
-    return Cv(p, T, patchI);
+    return Cv(p, T, patchi);
 }
 
 

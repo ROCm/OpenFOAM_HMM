@@ -726,7 +726,7 @@ turbulentDFSEMInletFvPatchVectorField
 
     perturb_(1e-5),
     mapMethod_("planarInterpolation"),
-    mapperPtr_(NULL),
+    mapperPtr_(nullptr),
     interpolateR_(false),
     R_(),
     interpolateL_(false),
@@ -772,7 +772,7 @@ turbulentDFSEMInletFvPatchVectorField
 
     perturb_(ptf.perturb_),
     mapMethod_(ptf.mapMethod_),
-    mapperPtr_(NULL),
+    mapperPtr_(nullptr),
     interpolateR_(ptf.interpolateR_),
     R_(ptf.R_, mapper),
     interpolateL_(ptf.interpolateL_),
@@ -817,7 +817,7 @@ turbulentDFSEMInletFvPatchVectorField
 
     perturb_(dict.lookupOrDefault<scalar>("perturb", 1e-5)),
     mapMethod_(dict.lookup("mapMethod")),
-    mapperPtr_(NULL),
+    mapperPtr_(nullptr),
     interpolateR_(false),
     R_(interpolateOrRead<symmTensor>("R", dict, interpolateR_)),
     interpolateL_(false),
@@ -865,7 +865,7 @@ turbulentDFSEMInletFvPatchVectorField
 
     perturb_(ptf.perturb_),
     mapMethod_(ptf.mapMethod_),
-    mapperPtr_(NULL),
+    mapperPtr_(nullptr),
     interpolateR_(ptf.interpolateR_),
     R_(ptf.R_),
     interpolateL_(ptf.interpolateL_),
@@ -909,7 +909,7 @@ turbulentDFSEMInletFvPatchVectorField
 
     perturb_(ptf.perturb_),
     mapMethod_(ptf.mapMethod_),
-    mapperPtr_(NULL),
+    mapperPtr_(nullptr),
     interpolateR_(ptf.interpolateR_),
     R_(ptf.R_),
     interpolateL_(ptf.interpolateL_),

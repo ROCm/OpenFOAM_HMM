@@ -142,7 +142,6 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
 }
 
 
-
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::radiation::wideBandAbsorptionEmission::~wideBandAbsorptionEmission()
@@ -152,7 +151,7 @@ Foam::radiation::wideBandAbsorptionEmission::~wideBandAbsorptionEmission()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::wideBandAbsorptionEmission::aCont(const label bandI) const
+Foam::radiation::wideBandAbsorptionEmission::aCont(const label bandi) const
 {
     const volScalarField& T = thermo_.T();
     const volScalarField& p = thermo_.p();
@@ -202,9 +201,9 @@ Foam::radiation::wideBandAbsorptionEmission::aCont(const label bandI) const
             scalar Ti = T[i];
 
             const absorptionCoeffs::coeffArray& b =
-                coeffs_[n][bandI].coeffs(T[i]);
+                coeffs_[n][bandi].coeffs(T[i]);
 
-            if (coeffs_[n][bandI].invTemp())
+            if (coeffs_[n][bandi].invTemp())
             {
                 Ti = 1.0/T[i];
             }
@@ -223,14 +222,14 @@ Foam::radiation::wideBandAbsorptionEmission::aCont(const label bandI) const
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::wideBandAbsorptionEmission::eCont(const label bandI) const
+Foam::radiation::wideBandAbsorptionEmission::eCont(const label bandi) const
 {
-    return aCont(bandI);
+    return aCont(bandi);
 }
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::wideBandAbsorptionEmission::ECont(const label bandI) const
+Foam::radiation::wideBandAbsorptionEmission::ECont(const label bandi) const
 {
     tmp<volScalarField> E
     (
@@ -256,18 +255,18 @@ Foam::radiation::wideBandAbsorptionEmission::ECont(const label bandI) const
         if (dQ.dimensions() == dimEnergy/dimTime)
         {
             E.ref().primitiveFieldRef() =
-                iEhrrCoeffs_[bandI]
+                iEhrrCoeffs_[bandi]
                *dQ.primitiveField()
-               *(iBands_[bandI][1] - iBands_[bandI][0])
+               *(iBands_[bandi][1] - iBands_[bandi][0])
                /totalWaveLength_
                /mesh_.V();
         }
         else if (dQ.dimensions() == dimEnergy/dimTime/dimVolume)
         {
             E.ref().primitiveFieldRef() =
-                iEhrrCoeffs_[bandI]
+                iEhrrCoeffs_[bandi]
                *dQ.primitiveField()
-               *(iBands_[bandI][1] - iBands_[bandI][0])
+               *(iBands_[bandi][1] - iBands_[bandi][0])
                /totalWaveLength_;
         }
         else

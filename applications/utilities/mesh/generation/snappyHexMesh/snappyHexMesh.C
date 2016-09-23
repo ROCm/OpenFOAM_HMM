@@ -91,39 +91,39 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
     autoPtr<refinementSurfaces> surfacePtr;
 
     // Count number of surfaces.
-    label surfI = 0;
-    forAll(allGeometry.names(), geomI)
+    label surfi = 0;
+    forAll(allGeometry.names(), geomi)
     {
-        const word& geomName = allGeometry.names()[geomI];
+        const word& geomName = allGeometry.names()[geomi];
 
         if (surfacesDict.found(geomName))
         {
-            surfI++;
+            surfi++;
         }
     }
 
-    labelList surfaces(surfI);
-    wordList names(surfI);
-    PtrList<surfaceZonesInfo> surfZones(surfI);
+    labelList surfaces(surfi);
+    wordList names(surfi);
+    PtrList<surfaceZonesInfo> surfZones(surfi);
 
-    labelList regionOffset(surfI);
+    labelList regionOffset(surfi);
 
-    labelList globalMinLevel(surfI, 0);
-    labelList globalMaxLevel(surfI, 0);
-    labelList globalLevelIncr(surfI, 0);
-    PtrList<dictionary> globalPatchInfo(surfI);
-    List<Map<label>> regionMinLevel(surfI);
-    List<Map<label>> regionMaxLevel(surfI);
-    List<Map<label>> regionLevelIncr(surfI);
-    List<Map<scalar>> regionAngle(surfI);
-    List<Map<autoPtr<dictionary>>> regionPatchInfo(surfI);
+    labelList globalMinLevel(surfi, 0);
+    labelList globalMaxLevel(surfi, 0);
+    labelList globalLevelIncr(surfi, 0);
+    PtrList<dictionary> globalPatchInfo(surfi);
+    List<Map<label>> regionMinLevel(surfi);
+    List<Map<label>> regionMaxLevel(surfi);
+    List<Map<label>> regionLevelIncr(surfi);
+    List<Map<scalar>> regionAngle(surfi);
+    List<Map<autoPtr<dictionary>>> regionPatchInfo(surfi);
 
     HashSet<word> unmatchedKeys(surfacesDict.toc());
 
-    surfI = 0;
-    forAll(allGeometry.names(), geomI)
+    surfi = 0;
+    forAll(allGeometry.names(), geomi)
     {
-        const word& geomName = allGeometry.names()[geomI];
+        const word& geomName = allGeometry.names()[geomi];
 
         const entry* ePtr = surfacesDict.lookupEntryPtr(geomName, false, true);
 
@@ -132,10 +132,10 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
             const dictionary& shapeDict = ePtr->dict();
             unmatchedKeys.erase(ePtr->keyword());
 
-            names[surfI] = geomName;
-            surfaces[surfI] = geomI;
+            names[surfi] = geomName;
+            surfaces[surfi] = geomi;
 
-            const searchableSurface& surface = allGeometry[geomI];
+            const searchableSurface& surface = allGeometry[geomi];
 
             // Find the index in shapeControlDict
             // Invert surfaceCellSize to get the refinementLevel
@@ -154,12 +154,12 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
                 surfaceCellSize
             );
 
-            globalMinLevel[surfI] = refLevel;
-            globalMaxLevel[surfI] = refLevel;
-            globalLevelIncr[surfI] = gapLevelIncrement;
+            globalMinLevel[surfi] = refLevel;
+            globalMaxLevel[surfi] = refLevel;
+            globalLevelIncr[surfi] = gapLevelIncrement;
 
             // Surface zones
-            surfZones.set(surfI, new surfaceZonesInfo(surface, shapeDict));
+            surfZones.set(surfi, new surfaceZonesInfo(surface, shapeDict));
 
 
             // Global perpendicular angle
@@ -167,7 +167,7 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
             {
                 globalPatchInfo.set
                 (
-                    surfI,
+                    surfi,
                     shapeDict.subDict("patchInfo").clone()
                 );
             }
@@ -179,23 +179,23 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
             {
                 const dictionary& regionsDict = shapeDict.subDict("regions");
                 const wordList& regionNames =
-                    allGeometry[surfaces[surfI]].regions();
+                    allGeometry[surfaces[surfi]].regions();
 
-                forAll(regionNames, regionI)
+                forAll(regionNames, regioni)
                 {
-                    if (regionsDict.found(regionNames[regionI]))
+                    if (regionsDict.found(regionNames[regioni]))
                     {
                         // Get the dictionary for region
                         const dictionary& regionDict = regionsDict.subDict
                         (
-                            regionNames[regionI]
+                            regionNames[regioni]
                         );
 
                         if (regionDict.found("patchInfo"))
                         {
-                            regionPatchInfo[surfI].insert
+                            regionPatchInfo[surfi].insert
                             (
-                                regionI,
+                                regioni,
                                 regionDict.subDict("patchInfo").clone()
                             );
                         }
@@ -209,16 +209,16 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
                 const dictionary& shapeControlRegionsDict =
                     shapeDict.subDict("regions");
                 const wordList& regionNames =
-                    allGeometry[surfaces[surfI]].regions();
+                    allGeometry[surfaces[surfi]].regions();
 
-                forAll(regionNames, regionI)
+                forAll(regionNames, regioni)
                 {
-                    if (shapeControlRegionsDict.found(regionNames[regionI]))
+                    if (shapeControlRegionsDict.found(regionNames[regioni]))
                     {
                         const dictionary& shapeControlRegionDict =
                             shapeControlRegionsDict.subDict
                             (
-                                regionNames[regionI]
+                                regionNames[regioni]
                             );
 
                         const word scsFuncName =
@@ -244,24 +244,24 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
                             surfaceCellSize
                         );
 
-                        regionMinLevel[surfI].insert(regionI, refLevel);
-                        regionMaxLevel[surfI].insert(regionI, refLevel);
-                        regionLevelIncr[surfI].insert(regionI, 0);
+                        regionMinLevel[surfi].insert(regioni, refLevel);
+                        regionMaxLevel[surfi].insert(regioni, refLevel);
+                        regionLevelIncr[surfi].insert(regioni, 0);
                     }
                 }
             }
 
-            surfI++;
+            surfi++;
         }
     }
 
     // Calculate local to global region offset
     label nRegions = 0;
 
-    forAll(surfaces, surfI)
+    forAll(surfaces, surfi)
     {
-        regionOffset[surfI] = nRegions;
-        nRegions += allGeometry[surfaces[surfI]].regions().size();
+        regionOffset[surfi] = nRegions;
+        nRegions += allGeometry[surfaces[surfi]].regions().size();
     }
 
     // Rework surface specific information into information per global region
@@ -270,47 +270,47 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
     labelList gapLevel(nRegions, -1);
     PtrList<dictionary> patchInfo(nRegions);
 
-    forAll(globalMinLevel, surfI)
+    forAll(globalMinLevel, surfi)
     {
-        label nRegions = allGeometry[surfaces[surfI]].regions().size();
+        label nRegions = allGeometry[surfaces[surfi]].regions().size();
 
         // Initialise to global (i.e. per surface)
         for (label i = 0; i < nRegions; i++)
         {
-            label globalRegionI = regionOffset[surfI] + i;
-            minLevel[globalRegionI] = globalMinLevel[surfI];
-            maxLevel[globalRegionI] = globalMaxLevel[surfI];
-            gapLevel[globalRegionI] =
-                maxLevel[globalRegionI]
-              + globalLevelIncr[surfI];
+            label globalRegioni = regionOffset[surfi] + i;
+            minLevel[globalRegioni] = globalMinLevel[surfi];
+            maxLevel[globalRegioni] = globalMaxLevel[surfi];
+            gapLevel[globalRegioni] =
+                maxLevel[globalRegioni]
+              + globalLevelIncr[surfi];
 
-            if (globalPatchInfo.set(surfI))
+            if (globalPatchInfo.set(surfi))
             {
                 patchInfo.set
                 (
-                    globalRegionI,
-                    globalPatchInfo[surfI].clone()
+                    globalRegioni,
+                    globalPatchInfo[surfi].clone()
                 );
             }
         }
 
         // Overwrite with region specific information
-        forAllConstIter(Map<label>, regionMinLevel[surfI], iter)
+        forAllConstIter(Map<label>, regionMinLevel[surfi], iter)
         {
-            label globalRegionI = regionOffset[surfI] + iter.key();
+            label globalRegioni = regionOffset[surfi] + iter.key();
 
-            minLevel[globalRegionI] = iter();
-            maxLevel[globalRegionI] = regionMaxLevel[surfI][iter.key()];
-            gapLevel[globalRegionI] =
-                maxLevel[globalRegionI]
-              + regionLevelIncr[surfI][iter.key()];
+            minLevel[globalRegioni] = iter();
+            maxLevel[globalRegioni] = regionMaxLevel[surfi][iter.key()];
+            gapLevel[globalRegioni] =
+                maxLevel[globalRegioni]
+              + regionLevelIncr[surfi][iter.key()];
         }
 
-        const Map<autoPtr<dictionary>>& localInfo = regionPatchInfo[surfI];
+        const Map<autoPtr<dictionary>>& localInfo = regionPatchInfo[surfi];
         forAllConstIter(Map<autoPtr<dictionary>>, localInfo, iter)
         {
-            label globalRegionI = regionOffset[surfI] + iter.key();
-            patchInfo.set(globalRegionI, iter()().clone());
+            label globalRegioni = regionOffset[surfi] + iter.key();
+            patchInfo.set(globalRegioni, iter()().clone());
         }
     }
 
@@ -336,13 +336,13 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
 
     // Determine maximum region name length
     label maxLen = 0;
-    forAll(rf.surfaces(), surfI)
+    forAll(rf.surfaces(), surfi)
     {
-        label geomI = rf.surfaces()[surfI];
-        const wordList& regionNames = allGeometry.regionNames()[geomI];
-        forAll(regionNames, regionI)
+        label geomi = rf.surfaces()[surfi];
+        const wordList& regionNames = allGeometry.regionNames()[geomi];
+        forAll(regionNames, regioni)
         {
-            maxLen = Foam::max(maxLen, label(regionNames[regionI].size()));
+            maxLen = Foam::max(maxLen, label(regionNames[regioni].size()));
         }
     }
 
@@ -356,22 +356,22 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
         << setw(10) << "---------"
         << setw(10) << "---------" << endl;
 
-    forAll(rf.surfaces(), surfI)
+    forAll(rf.surfaces(), surfi)
     {
-        label geomI = rf.surfaces()[surfI];
+        label geomi = rf.surfaces()[surfi];
 
-        Info<< rf.names()[surfI] << ':' << nl;
+        Info<< rf.names()[surfi] << ':' << nl;
 
-        const wordList& regionNames = allGeometry.regionNames()[geomI];
+        const wordList& regionNames = allGeometry.regionNames()[geomi];
 
-        forAll(regionNames, regionI)
+        forAll(regionNames, regioni)
         {
-            label globalI = rf.globalRegion(surfI, regionI);
+            label globali = rf.globalRegion(surfi, regioni);
 
-            Info<< setw(maxLen) << regionNames[regionI]
-                << setw(10) << rf.minLevel()[globalI]
-                << setw(10) << rf.maxLevel()[globalI]
-                << setw(10) << rf.gapLevel()[globalI] << endl;
+            Info<< setw(maxLen) << regionNames[regioni]
+                << setw(10) << rf.minLevel()[globali]
+                << setw(10) << rf.maxLevel()[globali]
+                << setw(10) << rf.gapLevel()[globali] << endl;
         }
     }
 
@@ -796,7 +796,7 @@ int main(int argc, char *argv[])
 //        {
 //            hexRef8 meshCutter(meshPtr(), false);
 //
-//            for (label refineI = 0; refineI < initialRefLevels; ++refineI)
+//            for (label refinei = 0; refinei < initialRefLevels; ++refinei)
 //            {
 //                // Mesh changing engine.
 //                polyTopoChange meshMod(meshPtr(), true);
@@ -818,7 +818,7 @@ int main(int argc, char *argv[])
 //                // Delete mesh volumes.
 //                meshPtr().clearOut();
 //
-//                Info<< "Refinement Iteration " << refineI + 1
+//                Info<< "Refinement Iteration " << refinei + 1
 //                    << ", Mesh size = " << meshPtr().nCells() << endl;
 //            }
 //        }
@@ -1117,24 +1117,24 @@ int main(int argc, char *argv[])
 
         const PtrList<dictionary>& patchInfo = surfaces.patchInfo();
         const labelList& surfaceGeometry = surfaces.surfaces();
-        forAll(surfaceGeometry, surfI)
+        forAll(surfaceGeometry, surfi)
         {
-            label geomI = surfaceGeometry[surfI];
-            const wordList& regNames = allGeometry.regionNames()[geomI];
+            label geomi = surfaceGeometry[surfi];
+            const wordList& regNames = allGeometry.regionNames()[geomi];
 
-            patchTypes[geomI].setSize(regNames.size());
-            forAll(regNames, regionI)
+            patchTypes[geomi].setSize(regNames.size());
+            forAll(regNames, regioni)
             {
-                label globalRegionI = surfaces.globalRegion(surfI, regionI);
+                label globalRegioni = surfaces.globalRegion(surfi, regioni);
 
-                if (patchInfo.set(globalRegionI))
+                if (patchInfo.set(globalRegioni))
                 {
-                    patchTypes[geomI][regionI] =
-                        word(patchInfo[globalRegionI].lookup("type"));
+                    patchTypes[geomi][regioni] =
+                        word(patchInfo[globalRegioni].lookup("type"));
                 }
                 else
                 {
-                    patchTypes[geomI][regionI] = wallPolyPatch::typeName;
+                    patchTypes[geomi][regioni] = wallPolyPatch::typeName;
                 }
             }
         }

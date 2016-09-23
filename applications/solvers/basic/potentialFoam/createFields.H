@@ -119,3 +119,5 @@ setRefCell
     PhiRefValue
 );
 mesh.setFluxRequired(Phi.name());
+
+#include "createMRF.H"

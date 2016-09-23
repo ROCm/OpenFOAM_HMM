@@ -141,7 +141,7 @@ Foam::functionObjects::runTimePostPro::pathline::pathline
         representationTypeNames.read(dict.lookup("representation"))
     ),
     tubeRadius_(0.0),
-    lineColour_(NULL)
+    lineColour_(nullptr)
 {
     if (dict.found("lineColour"))
     {

@@ -99,7 +99,7 @@ Foam::functionObjects::runTimePostPro::geometryBase::geometryBase
     name_(dict.dictName()),
     visible_(readBool(dict.lookup("visible"))),
     renderMode_(rmGouraud),
-    opacity_(NULL),
+    opacity_(nullptr),
     colours_(colours)
 {
     if (dict.found("renderMode"))

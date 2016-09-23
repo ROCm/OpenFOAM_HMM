@@ -160,8 +160,8 @@ Foam::functionObjects::runTimePostPro::surface::surface
         representationTypeNames.read(dict.lookup("representation"))
     ),
     featureEdges_(false),
-    surfaceColour_(NULL),
-    edgeColour_(NULL),
+    surfaceColour_(nullptr),
+    edgeColour_(nullptr),
     surfaceActor_(),
     edgeActor_(),
     maxGlyphLength_(0.0)

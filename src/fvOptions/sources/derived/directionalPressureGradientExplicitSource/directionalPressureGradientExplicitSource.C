@@ -183,7 +183,7 @@ directionalPressureGradientExplicitSource
     dGradP_(cells_.size(), Zero),
     gradPporous_(cells_.size(), Zero),
     flowDir_(coeffs_.lookup("flowDir")),
-    invAPtr_(NULL),
+    invAPtr_(nullptr),
     D_(0),
     I_(0),
     length_(0),

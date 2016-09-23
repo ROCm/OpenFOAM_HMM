@@ -173,7 +173,7 @@ displacementLaplacianFvMotionSolver
         ),
         cellMotionBoundaryTypes<vector>(pointDisplacement_.boundaryField())
     ),
-    pointLocation_(NULL),
+    pointLocation_(nullptr),
     interpolationPtr_
     (
         coeffDict().found("interpolation")

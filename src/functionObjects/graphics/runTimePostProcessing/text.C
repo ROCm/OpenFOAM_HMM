@@ -47,7 +47,7 @@ Foam::functionObjects::runTimePostPro::text::text
     string_(dict.lookup("string")),
     position_(dict.lookup("position")),
     size_(readScalar(dict.lookup("size"))),
-    colour_(NULL),
+    colour_(nullptr),
     bold_(readBool(dict.lookup("bold"))),
     timeStamp_(dict.lookupOrDefault<bool>("timeStamp", false))
 {
