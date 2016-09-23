@@ -81,7 +81,9 @@ volField
     // Construct volField (with zeroGradient) from dimensioned field
 
     IOobject io(df);
-    io.readOpt() = IOobject::NO_READ;
+    io.readOpt()  = IOobject::NO_READ;
+    io.writeOpt() = IOobject::NO_WRITE;
+    io.registerObject() = false;
 
     tmp<GeometricField<Type, fvPatchField, volMesh>> tvf
     (
@@ -89,16 +91,17 @@ volField
         (
             io,
             df.mesh(),
-            df.dimensions(),
-            zeroGradientFvPatchField<scalar>::typeName
+            dimensioned<Type>("0", df.dimensions(), Zero),
+            zeroGradientFvPatchField<Type>::typeName
         )
     );
     tvf.ref().internalField() = df;
     tvf.ref().correctBoundaryConditions();
-    const GeometricField<Type, fvPatchField, volMesh>& vf = tvf();
 
     if (meshSubsetter.hasSubMesh())
     {
+        const GeometricField<Type, fvPatchField, volMesh>& vf = tvf();
+
         tmp<GeometricField<Type, fvPatchField, volMesh>> tfld
         (
             meshSubsetter.interpolate(vf)
