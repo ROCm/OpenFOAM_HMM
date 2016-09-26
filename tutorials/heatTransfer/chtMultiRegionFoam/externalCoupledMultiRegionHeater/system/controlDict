@@ -59,7 +59,7 @@ functions
     externalCoupled
     {
         // Where to load it from (if not already in solver)
-        libs            ("libfieldControl.so");
+        libs            ("libfieldFunctionObjects.so");
 
         type            externalCoupled;
 

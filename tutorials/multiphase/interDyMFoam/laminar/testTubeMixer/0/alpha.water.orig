@@ -10,39 +10,20 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
-    object      T;
+    object      alpha.water;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 1 0 0 0];
+dimensions      [0 0 0 0 0 0 0];
 
-internalField   uniform 298.15;
+internalField   uniform 0;
 
 boundaryField
 {
-    panel_top
+    walls
     {
-        type            fixedValue;
-        value           uniform 298.15;
+        type            zeroGradient;
     }
-    panel_side
-    {
-        type            empty;
-    }
-
-    region0_to_panelRegion_panel
-    {
-
-
-        type                fixedIncidentRadiation;
-        kappaMethod         solidThermo;
-        kappa               none;
-        QrIncident          uniform 60000.0;   //W
-        value               uniform 298.15;
-    }
-
 }
-
 
 // ************************************************************************* //

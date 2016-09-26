@@ -49,8 +49,8 @@ boundaryField
     cabin_to_windshield
     {
         type            humidityTemperatureCoupledMixed;
-        kappa           fluidThermo;
-        kappaName       none;
+        kappaMethod     fluidThermo;
+        kappa           none;
 
         // Mode of operation: inert, condensation, vaporization,
         // condensationAndEvaporation
