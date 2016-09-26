@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,17 +52,17 @@ class ensightAsciiStream
 {
     // Private data
 
-        //- Description of data_
+        //- Output file stream
         OFstream str_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        ensightAsciiStream(const ensightAsciiStream&);
+        ensightAsciiStream(const ensightAsciiStream&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const ensightAsciiStream&);
+        void operator=(const ensightAsciiStream&) = delete;
 
 
 public:
@@ -70,14 +70,14 @@ public:
     // Constructors
 
         //- Construct from components
-        ensightAsciiStream(const fileName& f, const Time& runTime)
+        ensightAsciiStream(const fileName& f)
         :
             ensightStream(f),
             str_
             (
                 f,
-                runTime.writeFormat(),
-                runTime.writeVersion(),
+                IOstream::ASCII,
+                IOstream::currentVersion,
                 IOstream::UNCOMPRESSED
             )
         {
@@ -138,14 +138,6 @@ public:
             str_<< "part" << nl
                 << setw(10) << partI << nl;
         }
-
-    // Member Operators
-
-    // Friend Functions
-
-    // Friend Operators
-
-    // IOstream Operators
 
 };
 

@@ -69,10 +69,8 @@ void ensightField
 (
     const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>& vf,
     const Foam::ensightMesh& eMesh,
-    const Foam::fileName& postProcPath,
-    const Foam::word& prepend,
+    const Foam::fileName& dataDir,
     const Foam::label timeIndex,
-    const bool binary,
     const bool nodeValues,
     Foam::Ostream& ensightCaseFile
 );
@@ -85,8 +83,7 @@ void writePatchField
     const Foam::Field<Type>& pf,
     const Foam::word& patchName,
     const Foam::ensightMesh& eMesh,
-    const Foam::fileName& postProcPath,
-    const Foam::word& prepend,
+    const Foam::fileName& dataDir,
     const Foam::label timeIndex,
     Foam::Ostream& ensightCaseFile
 );

@@ -23,12 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "ensightFile.H"
 #include "ensightField.H"
 #include "fvMesh.H"
 #include "volFields.H"
 #include "OFstream.H"
 #include "IOmanip.H"
-#include "itoa.H"
 #include "volPointInterpolation.H"
 #include "ensightBinaryStream.H"
 #include "ensightAsciiStream.H"
@@ -76,7 +76,9 @@ volField
     // Construct volField (with zeroGradient) from dimensioned field
 
     IOobject io(df);
-    io.readOpt() = IOobject::NO_READ;
+    io.readOpt()  = IOobject::NO_READ;
+    io.writeOpt() = IOobject::NO_WRITE;
+    io.registerObject() = false;
 
     tmp<GeometricField<Type, fvPatchField, volMesh>> tvf
     (
@@ -84,16 +86,17 @@ volField
         (
             io,
             df.mesh(),
-            df.dimensions(),
-            zeroGradientFvPatchField<scalar>::typeName
+            dimensioned<Type>("0", df.dimensions(), Zero),
+            zeroGradientFvPatchField<Type>::typeName
         )
     );
     tvf.ref().primitiveFieldRef() = df;
     tvf.ref().correctBoundaryConditions();
-    const GeometricField<Type, fvPatchField, volMesh>& vf = tvf();
 
     if (meshSubsetter.hasSubMesh())
     {
+        const GeometricField<Type, fvPatchField, volMesh>& vf = tvf();
+
         tmp<GeometricField<Type, fvPatchField, volMesh>> tfld
         (
             meshSubsetter.interpolate(vf)
@@ -116,10 +119,8 @@ volField
 //    const IOobject& io,
 //    const fvMesh& mesh,
 //    const ensightMesh& eMesh,
-//    const fileName& postProcPath,
-//    const word& prepend,
+//    const fileName& dataDir,
 //    const label timeIndex,
-//    const bool binary,
 //    const bool nodeValues,
 //    Ostream& ensightCaseFile
 //)
@@ -129,10 +130,8 @@ volField
 //    (
 //        volField<typename Container::value_type>(meshSubsetter, fld),
 //        eMesh,
-//        postProcPath,
-//        prepend,
+//        dataDir,
 //        timeIndex,
-//        binary,
 //        nodeValues,
 //        ensightCaseFile
 //    );
@@ -170,26 +169,26 @@ void writeField
 (
     const char* key,
     const Field<Type>& vf,
-    ensightStream& ensightFile
+    ensightStream& os
 )
 {
     if (returnReduce(vf.size(), sumOp<label>()) > 0)
     {
         if (Pstream::master())
         {
-            ensightFile.write(key);
+            os.write(key);
 
             for (direction i=0; i < pTraits<Type>::nComponents; ++i)
             {
                 label cmpt = ensightPTraits<Type>::componentOrder[i];
 
-                ensightFile.write(vf.component(cmpt));
+                os.write(vf.component(cmpt));
 
                 for (int slave=1; slave<Pstream::nProcs(); slave++)
                 {
                     IPstream fromSlave(Pstream::scheduled, slave);
                     scalarField slaveData(fromSlave);
-                    ensightFile.write(slaveData);
+                    os.write(slaveData);
                 }
             }
         }
@@ -215,35 +214,35 @@ bool writePatchField
     const label ensightPatchi,
     const faceSets& boundaryFaceSet,
     const ensightMesh::nFacePrimitives& nfp,
-    ensightStream& ensightFile
+    ensightStream& os
 )
 {
     if (nfp.nTris || nfp.nQuads || nfp.nPolys)
     {
         if (Pstream::master())
         {
-            ensightFile.writePartHeader(ensightPatchi);
+            os.writePartHeader(ensightPatchi);
         }
 
         writeField
         (
             "tria3",
             Field<Type>(pf, boundaryFaceSet.tris),
-            ensightFile
+            os
         );
 
         writeField
         (
             "quad4",
             Field<Type>(pf, boundaryFaceSet.quads),
-            ensightFile
+            os
         );
 
         writeField
         (
             "nsided",
             Field<Type>(pf, boundaryFaceSet.polys),
-            ensightFile
+            os
         );
 
         return true;
@@ -262,15 +261,11 @@ void writePatchField
     const Field<Type>& pf,
     const word& patchName,
     const ensightMesh& eMesh,
-    const fileName& postProcPath,
-    const word& prepend,
+    const fileName& dataDir,
     const label timeIndex,
-    const bool binary,
     Ostream& ensightCaseFile
 )
 {
-    const Time& runTime = eMesh.mesh().time();
-
     const List<faceSets>& boundaryFaceSets = eMesh.boundaryFaceSets();
     const wordList& allPatchNames = eMesh.allPatchNames();
     const HashTable<ensightMesh::nFacePrimitives>&
@@ -290,53 +285,51 @@ void writePatchField
         ensightPatchi++;
     }
 
-
-    word pfName = patchName + '.' + fieldName;
-
-    word timeFile = prepend + itoa(timeIndex);
-
-    ensightStream* ensightFilePtr = nullptr;
+    ensightStream* filePtr(nullptr);
     if (Pstream::master())
     {
+        // TODO: verify that these are indeed valid ensight variable names
+        const word varName = patchName + '.' + fieldName;
+        const fileName postFileName = ensightFile::subDir(timeIndex)/varName;
+
+        // the data/ITER subdirectory must exist
+        mkDir(dataDir/postFileName.path());
+
         if (timeIndex == 0)
         {
-            ensightCaseFile.setf(ios_base::left);
+            const fileName dirName = dataDir.name()/ensightFile::mask();
 
+            ensightCaseFile.setf(ios_base::left);
             ensightCaseFile
-                << ensightPTraits<Type>::typeName
-                << " per element:            1       "
-                << setw(15) << pfName
-                << (' ' + prepend + "****." + pfName).c_str()
+                << ensightPTraits<Type>::typeName << " per "
+                << setw(20)
+                << "element:"
+                << " 1  "
+                << setw(15)
+                << varName.c_str() << ' '
+                << (dirName/varName).c_str()
                 << nl;
         }
 
-        // set the filename of the ensight file
-        fileName ensightFileName(timeFile + "." + pfName);
-
-        if (binary)
+        if (eMesh.format() == IOstream::BINARY)
         {
-            ensightFilePtr = new ensightBinaryStream
+            filePtr = new ensightBinaryStream
             (
-                postProcPath/ensightFileName,
-                runTime
+                dataDir/postFileName
             );
         }
         else
         {
-            ensightFilePtr = new ensightAsciiStream
+            filePtr = new ensightAsciiStream
             (
-                postProcPath/ensightFileName,
-                runTime
+                dataDir/postFileName
             );
         }
+
+        filePtr->write(ensightPTraits<Type>::typeName);
     }
 
-    ensightStream& ensightFile = *ensightFilePtr;
-
-    if (Pstream::master())
-    {
-        ensightFile.write(ensightPTraits<Type>::typeName);
-    }
+    ensightStream& os = *filePtr;
 
     if (patchi >= 0)
     {
@@ -347,7 +340,7 @@ void writePatchField
             ensightPatchi,
             boundaryFaceSets[patchi],
             nPatchPrims.find(patchName)(),
-            ensightFile
+            os
         );
     }
     else
@@ -361,13 +354,13 @@ void writePatchField
             ensightPatchi,
             nullFaceSets,
             nPatchPrims.find(patchName)(),
-            ensightFile
+            os
         );
     }
 
-    if (Pstream::master())
+    if (filePtr) // on master only
     {
-        delete ensightFilePtr;
+        delete filePtr;
     }
 }
 
@@ -377,19 +370,14 @@ void ensightField
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     const ensightMesh& eMesh,
-    const fileName& postProcPath,
-    const word& prepend,
+    const fileName& dataDir,
     const label timeIndex,
-    const bool binary,
     Ostream& ensightCaseFile
 )
 {
-    Info<< "Converting field " << vf.name() << endl;
-
-    word timeFile = prepend + itoa(timeIndex);
+    Info<< ' ' << vf.name();
 
     const fvMesh& mesh = eMesh.mesh();
-    const Time& runTime = mesh.time();
 
     const cellSets& meshCellSets = eMesh.meshCellSets();
     const List<faceSets>& boundaryFaceSets = eMesh.boundaryFaceSets();
@@ -409,48 +397,48 @@ void ensightField
     const labelList& hexes = meshCellSets.hexes;
     const labelList& polys = meshCellSets.polys;
 
-    ensightStream* ensightFilePtr = nullptr;
+    ensightStream* filePtr(nullptr);
     if (Pstream::master())
     {
-        // set the filename of the ensight file
-        fileName ensightFileName(timeFile + "." + vf.name());
+        const ensight::VarName varName(vf.name());
+        const fileName postFileName = ensightFile::subDir(timeIndex)/varName;
 
-        if (binary)
+        // the data/ITER subdirectory must exist
+        mkDir(dataDir/postFileName.path());
+
+        if (timeIndex == 0)
         {
-            ensightFilePtr = new ensightBinaryStream
+            const fileName dirName = dataDir.name()/ensightFile::mask();
+
+            ensightCaseFile.setf(ios_base::left);
+            ensightCaseFile
+                << ensightPTraits<Type>::typeName
+                << " per element:     1  "
+                << setw(15)
+                << varName.c_str() << ' '
+                << (dirName/varName).c_str()
+                << nl;
+        }
+
+        if (eMesh.format() == IOstream::BINARY)
+        {
+            filePtr = new ensightBinaryStream
             (
-                postProcPath/ensightFileName,
-                runTime
+                dataDir/postFileName
             );
         }
         else
         {
-            ensightFilePtr = new ensightAsciiStream
+            filePtr = new ensightAsciiStream
             (
-                postProcPath/ensightFileName,
-                runTime
+                dataDir/postFileName
             );
         }
+
+        filePtr->write(ensightPTraits<Type>::typeName);
     }
 
-    ensightStream& ensightFile = *ensightFilePtr;
-
-    if (Pstream::master())
-    {
-        if (timeIndex == 0)
-        {
-            ensightCaseFile.setf(ios_base::left);
-
-            ensightCaseFile
-                << ensightPTraits<Type>::typeName
-                << " per element:            1       "
-                << setw(15) << vf.name()
-                << (' ' + prepend + "****." + vf.name()).c_str()
-                << nl;
-        }
-
-        ensightFile.write(ensightPTraits<Type>::typeName);
-    }
+    ensightStream& os = *filePtr;
 
     if (patchNames.empty())
     {
@@ -458,42 +446,42 @@ void ensightField
 
         if (Pstream::master())
         {
-            ensightFile.writePartHeader(1);
+            os.writePartHeader(1);
         }
 
         writeField
         (
             "hexa8",
             map(vf, hexes, wedges),
-            ensightFile
+            os
         );
 
         writeField
         (
             "penta6",
             Field<Type>(vf, prisms),
-            ensightFile
+            os
         );
 
         writeField
         (
             "pyramid5",
             Field<Type>(vf, pyrs),
-            ensightFile
+            os
         );
 
         writeField
         (
             "tetra4",
             Field<Type>(vf, tets),
-            ensightFile
+            os
         );
 
         writeField
         (
             "nfaced",
             Field<Type>(vf, polys),
-            ensightFile
+            os
         );
     }
 
@@ -516,7 +504,7 @@ void ensightField
                     ensightPatchi,
                     boundaryFaceSets[patchi],
                     nPatchPrims.find(patchName)(),
-                    ensightFile
+                    os
                 )
             )
             {
@@ -541,8 +529,7 @@ void ensightField
 
             eMesh.barrier();
 
-            label zoneID = mesh.faceZones().findZoneID(faceZoneName);
-
+            const label zoneID = mesh.faceZones().findZoneID(faceZoneName);
             const faceZone& fz = mesh.faceZones()[zoneID];
 
             // Prepare data to write
@@ -590,7 +577,7 @@ void ensightField
                     ensightPatchi,
                     faceZoneFaceSets[zoneID],
                     nFaceZonePrims.find(faceZoneName)(),
-                    ensightFile
+                    os
                 )
             )
             {
@@ -598,9 +585,10 @@ void ensightField
             }
         }
     }
-    if (Pstream::master())
+
+    if (filePtr) // on master only
     {
-        delete ensightFilePtr;
+        delete filePtr;
     }
 }
 
@@ -610,65 +598,63 @@ void ensightPointField
 (
     const GeometricField<Type, pointPatchField, pointMesh>& pf,
     const ensightMesh& eMesh,
-    const fileName& postProcPath,
-    const word& prepend,
+    const fileName& dataDir,
     const label timeIndex,
-    const bool binary,
     Ostream& ensightCaseFile
 )
 {
-    Info<< "Converting field " << pf.name() << endl;
-
-    word timeFile = prepend + itoa(timeIndex);
+    Info<< ' ' << pf.name();
 
     const fvMesh& mesh = eMesh.mesh();
     const wordList& allPatchNames = eMesh.allPatchNames();
     const wordHashSet& patchNames = eMesh.patchNames();
     const wordHashSet& faceZoneNames = eMesh.faceZoneNames();
 
-
-    ensightStream* ensightFilePtr = nullptr;
+    ensightStream* filePtr(nullptr);
     if (Pstream::master())
     {
-        // set the filename of the ensight file
-        fileName ensightFileName(timeFile + "." + pf.name());
+        const ensight::VarName varName(pf.name());
+        const fileName postFileName = ensightFile::subDir(timeIndex)/varName;
 
-        if (binary)
+        // the data/ITER subdirectory must exist
+        mkDir(dataDir/postFileName.path());
+
+        if (timeIndex == 0)
         {
-            ensightFilePtr = new ensightBinaryStream
+            const fileName dirName = dataDir.name()/ensightFile::mask();
+
+            ensightCaseFile.setf(ios_base::left);
+            ensightCaseFile
+                << ensightPTraits<Type>::typeName
+                << " per "
+                << setw(20)
+                << " node:"
+                << " 1  "
+                << setw(15)
+                << varName.c_str() << ' '
+                << (dirName/varName).c_str()
+                << nl;
+        }
+
+        if (eMesh.format() == IOstream::BINARY)
+        {
+            filePtr = new ensightBinaryStream
             (
-                postProcPath/ensightFileName,
-                mesh.time()
+                dataDir/postFileName
             );
         }
         else
         {
-            ensightFilePtr = new ensightAsciiStream
+            filePtr = new ensightAsciiStream
             (
-                postProcPath/ensightFileName,
-                mesh.time()
+                dataDir/postFileName
             );
         }
+
+        filePtr->write(ensightPTraits<Type>::typeName);
     }
 
-    ensightStream& ensightFile = *ensightFilePtr;
-
-    if (Pstream::master())
-    {
-        if (timeIndex == 0)
-        {
-            ensightCaseFile.setf(ios_base::left);
-
-            ensightCaseFile
-                << ensightPTraits<Type>::typeName
-                << " per node:            1       "
-                << setw(15) << pf.name()
-                << (' ' + prepend + "****." + pf.name()).c_str()
-                << nl;
-        }
-
-        ensightFile.write(ensightPTraits<Type>::typeName);
-    }
+    ensightStream& os = *filePtr;
 
     if (eMesh.patchNames().empty())
     {
@@ -676,14 +662,14 @@ void ensightPointField
 
         if (Pstream::master())
         {
-            ensightFile.writePartHeader(1);
+            os.writePartHeader(1);
         }
 
         writeField
         (
             "coordinates",
             Field<Type>(pf.primitiveField(), eMesh.uniquePointMap()),
-            ensightFile
+            os
         );
     }
 
@@ -699,11 +685,8 @@ void ensightPointField
         if (patchNames.empty() || patchNames.found(patchName))
         {
             const fvPatch& p = mesh.boundary()[patchi];
-            if
-            (
-                returnReduce(p.size(), sumOp<label>())
-              > 0
-            )
+
+            if (returnReduce(p.size(), sumOp<label>()) > 0)
             {
                 // Renumber the patch points/faces into unique points
                 labelList pointToGlobal;
@@ -719,14 +702,14 @@ void ensightPointField
 
                 if (Pstream::master())
                 {
-                    ensightFile.writePartHeader(ensightPatchi);
+                    os.writePartHeader(ensightPatchi);
                 }
 
                 writeField
                 (
                     "coordinates",
                     Field<Type>(pf.primitiveField(), uniqueMeshPointLabels),
-                    ensightFile
+                    os
                 );
 
                 ensightPatchi++;
@@ -743,8 +726,7 @@ void ensightPointField
 
             eMesh.barrier();
 
-            label zoneID = mesh.faceZones().findZoneID(faceZoneName);
-
+            const label zoneID = mesh.faceZones().findZoneID(faceZoneName);
             const faceZone& fz = mesh.faceZones()[zoneID];
 
             if (returnReduce(fz().nPoints(), sumOp<label>()) > 0)
@@ -753,17 +735,17 @@ void ensightPointField
                 labelList pointToGlobal;
                 labelList uniqueMeshPointLabels;
                 autoPtr<globalIndex> globalPointsPtr =
-                mesh.globalData().mergePoints
-                (
-                    fz().meshPoints(),
-                    fz().meshPointMap(),
-                    pointToGlobal,
-                    uniqueMeshPointLabels
-                );
+                    mesh.globalData().mergePoints
+                    (
+                        fz().meshPoints(),
+                        fz().meshPointMap(),
+                        pointToGlobal,
+                        uniqueMeshPointLabels
+                    );
 
                 if (Pstream::master())
                 {
-                    ensightFile.writePartHeader(ensightPatchi);
+                    os.writePartHeader(ensightPatchi);
                 }
 
                 writeField
@@ -774,7 +756,7 @@ void ensightPointField
                         pf.primitiveField(),
                         uniqueMeshPointLabels
                     ),
-                    ensightFile
+                    os
                 );
 
                 ensightPatchi++;
@@ -782,9 +764,9 @@ void ensightPointField
         }
     }
 
-    if (Pstream::master())
+    if (filePtr) // on master only
     {
-        delete ensightFilePtr;
+        delete filePtr;
     }
 }
 
@@ -794,10 +776,8 @@ void ensightField
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     const ensightMesh& eMesh,
-    const fileName& postProcPath,
-    const word& prepend,
+    const fileName& dataDir,
     const label timeIndex,
-    const bool binary,
     const bool nodeValues,
     Ostream& ensightCaseFile
 )
@@ -814,10 +794,8 @@ void ensightField
         (
             pfld,
             eMesh,
-            postProcPath,
-            prepend,
+            dataDir,
             timeIndex,
-            binary,
             ensightCaseFile
         );
     }
@@ -827,10 +805,8 @@ void ensightField
         (
             vf,
             eMesh,
-            postProcPath,
-            prepend,
+            dataDir,
             timeIndex,
-            binary,
             ensightCaseFile
         );
     }

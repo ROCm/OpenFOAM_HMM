@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,22 +26,67 @@ InApplication
 
 Description
 
+SourceFiles
+    ensightCloud.C
+    ensightCloudTemplates.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "word.H"
-#include "label.H"
+#ifndef ensightCloud_H
+#define ensightCloud_H
+
+#include "ensightFile.H"
+#include "fvMesh.H"
+#include "Cloud.H"
+#include "IOobject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+void ensightParticlePositions
+(
+    const fvMesh& mesh,
+    const fileName& dataDir,
+    const label timeIndex,
+    const word& cloudName,
+    const bool dataExists,
+    const IOstream::streamFormat format
+);
+
+
+template<class Type>
+void ensightCloudField
+(
+    const IOobject& fieldObject,
+    const fileName& dataDir,
+    const label timeIndex,
+    const word& cloudName,
+    const label cloudNo,
+    Ostream& ensightCaseFile,
+    const bool dataExists,
+    const IOstream::streamFormat format
+);
+
+
+template<class Type>
+void writeCloudField
+(
+    const IOField<Type>& field,
+    ensightFile& os
+);
+
+}
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-word itoa(const label n);
+#ifdef NoRepository
+    #include "ensightCloudTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+#endif
 
 // ************************************************************************* //

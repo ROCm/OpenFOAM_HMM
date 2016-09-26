@@ -72,4 +72,7 @@ externalCoupled/externalCoupled.C
 externalCoupled/externalCoupledMixed/externalCoupledMixedFvPatchFields.C
 externalCoupled/externalCoupledTemperatureMixed/externalCoupledTemperatureMixedFvPatchScalarField.C
 
+ddt2/ddt2.C
+zeroGradient/zeroGradient.C
+
 LIB = $(FOAM_LIBBIN)/libfieldFunctionObjects
