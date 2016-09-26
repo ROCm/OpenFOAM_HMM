@@ -72,7 +72,8 @@ Foam::turbulentDFSEMInletFvPatchVectorField::interpolateBoundaryData
 
     fileName valsFile
     (
-        this->db().time().caseConstant()
+        this->db().time().path()
+       /this->db().time().caseConstant()
        /"boundaryData"
        /patchName
        /"0"

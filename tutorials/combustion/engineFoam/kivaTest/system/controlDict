@@ -55,9 +55,9 @@ functions
 {
     timeStep
     {
-        type coded;
+        type            coded;
         libs            ("libutilityFunctionObjects.so");
-        name setDeltaT;
+        name            setDeltaT;
 
         code
         #{

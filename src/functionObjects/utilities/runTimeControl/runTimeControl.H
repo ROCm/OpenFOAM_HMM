@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::functionObjects::runTimeControl
 
 Group
-    grpJobControlFunctionObjects
+    grpUtilitiesFunctionObjects
 
 Description
     Controls when the calculation is terminated based on satisfying
@@ -119,9 +119,6 @@ public:
 
         //- Execute, currently does nothing
         virtual bool execute();
-
-        //- Called when time was set at the end of the Time::operator++
-        virtual void timeSet();
 
         //- Calculate the runTimeControl and write
         virtual bool write();

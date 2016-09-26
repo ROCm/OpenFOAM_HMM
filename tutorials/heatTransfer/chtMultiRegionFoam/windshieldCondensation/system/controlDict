@@ -56,18 +56,9 @@ functions
     H2O
     {
         type            scalarTransport;
-
-        functionObjectLibs ("libutilityFunctionObjects.so");
-
+        libs            ("libsolverFunctionObjects.so");
         resetOnStartUp  no;
-
         region cabin;
-
-
-        // employ schemes used by U to the scalar transport equation
-        // note: field name is given by the name of the function, in this case
-        // 'scalar1'
-        autoSchemes     no;
 
         fvOptions
         {
@@ -77,9 +68,9 @@ functions
     fileUpdate
     {
         type                timeActivatedFileUpdate;
-        functionObjectLibs  ("libutilityFunctionObjects.so");
-        outputControl       timeStep;
-        outputInterval      1;
+        libs                ("libutilityFunctionObjects.so");
+        writeControl        timeStep;
+        writeInterval       1;
         region              cabin;
         fileToUpdate        "$FOAM_CASE/system/solverControls";
 

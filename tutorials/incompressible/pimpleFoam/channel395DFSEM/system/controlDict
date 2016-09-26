@@ -50,26 +50,26 @@ functions
     Q1
     {
         type            Q;
-        functionObjectLibs ("libutilityFunctionObjects.so");
-        outputControl   outputTime;
+        functionObjectLibs ("libfieldFunctionObjects.so");
+        writeControl    writeTime;
     }
     vorticity1
     {
         type            vorticity;
-        functionObjectLibs ("libutilityFunctionObjects.so");
-        outputControl   outputTime;
+        functionObjectLibs ("libfieldFunctionObjects.so");
+        writeControl    writeTime;
     }
     yPlus
     {
         type            yPlus;
-        functionObjectLibs ("libutilityFunctionObjects.so");
-        outputControl   outputTime;
+        functionObjectLibs ("libfieldFunctionObjects.so");
+        writeControl    writeTime;
     }
     fieldAverage1
     {
         type            fieldAverage;
         functionObjectLibs ( "libfieldFunctionObjects.so" );
-        outputControl   outputTime;
+        writeControl    writeTime;
         timeStart       8.5;
 
         fields

@@ -96,10 +96,8 @@ timeVaryingMappedFixedValueFvPatchField
      && mapMethod_ != "nearest"
     )
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "mapMethod should be one of 'planarInterpolation'"
+        FatalIOErrorInFunction(dict)
+            << "mapMethod should be one of 'planarInterpolation'"
             << ", 'nearest'" << exit(FatalIOError);
     }
 
@@ -248,7 +246,8 @@ void Foam::timeVaryingMappedFixedValueFvPatchField<Type>::checkTable()
         // Reread values and interpolate
         fileName samplePointsFile
         (
-            this->db().time().caseConstant()
+            this->db().time().path()
+           /this->db().time().caseConstant()
            /"boundaryData"
            /this->patch().name()
            /"points"
@@ -356,7 +355,8 @@ void Foam::timeVaryingMappedFixedValueFvPatchField<Type>::checkTable()
             // Reread values and interpolate
             fileName valsFile
             (
-                this->db().time().caseConstant()
+                this->db().time().path()
+               /this->db().time().caseConstant()
                /"boundaryData"
                /this->patch().name()
                /sampleTimes_[startSampleTime_].name()

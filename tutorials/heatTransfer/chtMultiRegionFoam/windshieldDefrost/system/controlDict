@@ -56,10 +56,10 @@ functions
     massFlux
     {
         type            faceSource;
-        functionObjectLibs ("libfieldFunctionObjects.so");
+        libs            ("libfieldFunctionObjects.so");
         enabled         yes;
-        outputControl   timeStep; //outputTime;
-        outputInterval  1;
+        writeControl    timeStep; //writeTime;
+        writeInterval   1;
         log             yes;
         valueOutput     no;
         source          patch;

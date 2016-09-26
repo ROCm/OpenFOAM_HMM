@@ -137,12 +137,10 @@ bool Foam::functionObjects::yPlus::execute()
         const volScalarField::Boundary& d = nwd.y();
 
         // nut needed for wall function patches
-        const volScalarField::Boundary& nutBf = model.nut()().boundaryField();
+        tmp<volScalarField> tnut = model.nut();
+        const volScalarField::Boundary& nutBf = tnut().boundaryField();
 
-        // nuEff nu and U needed for plain wall patches
-        const volScalarField::Boundary& nuEffBf =
-            model.nuEff()().boundaryField();
-        const volScalarField::Boundary& nuBf = model.nu()().boundaryField();
+        // U needed for plain wall patches
         const volVectorField::Boundary& UBf = model.U().boundaryField();
 
         const fvPatchList& patches = mesh_.boundary();
@@ -167,9 +165,9 @@ bool Foam::functionObjects::yPlus::execute()
                     d[patchi]
                    *sqrt
                     (
-                        nuEffBf[patchi]
+                        model.nuEff(patchi)
                        *mag(UBf[patchi].snGrad())
-                    )/nuBf[patchi];
+                    )/model.nu(patchi);
             }
         }
     }
