@@ -45,6 +45,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration
+template<class Enum, int> class NamedEnum;
+
 /*---------------------------------------------------------------------------*\
                           Class NamedEnum Declaration
 \*---------------------------------------------------------------------------*/
@@ -60,10 +63,10 @@ class NamedEnum
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        NamedEnum(const NamedEnum&);
+        NamedEnum(const NamedEnum&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const NamedEnum&);
+        void operator=(const NamedEnum&) = delete;
 
 
 public:
@@ -94,6 +97,9 @@ public:
 
         //- The set of names as a list of words
         static wordList words();
+
+        //- List of enumerations
+        static List<Enum> enums();
 
 
     // Member Operators
