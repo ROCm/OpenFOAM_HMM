@@ -267,10 +267,10 @@ bool Foam::functionObjects::nearWallFields::read(const dictionary& dict)
     // Convert field to map
     fieldMap_.resize(2*fieldSet_.size());
     reverseFieldMap_.resize(2*fieldSet_.size());
-    forAll(fieldSet_, setI)
+    forAll(fieldSet_, seti)
     {
-        const word& fldName = fieldSet_[setI].first();
-        const word& sampleFldName = fieldSet_[setI].second();
+        const word& fldName = fieldSet_[seti].first();
+        const word& sampleFldName = fieldSet_[seti].second();
 
         fieldMap_.insert(fldName, sampleFldName);
         reverseFieldMap_.insert(sampleFldName, fldName);

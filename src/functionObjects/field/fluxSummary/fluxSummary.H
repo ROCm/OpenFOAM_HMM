@@ -41,7 +41,7 @@ Usage
     fluxSummary1
     {
         type        fluxSummary;
-        functionObjectLibs ("libutilityFunctionObjects.so");
+        libs        ("libutilityFunctionObjects.so");
         ...
         write       yes;
         log         yes;

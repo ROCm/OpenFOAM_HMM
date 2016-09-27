@@ -89,21 +89,20 @@ void Foam::functionObjects::fieldValues::volFieldValue::initialise
 
 void Foam::functionObjects::fieldValues::volFieldValue::writeFileHeader
 (
-    const label i
-)
+    Ostream& os
+) const
 {
-    volRegion::writeFileHeader(*this, file());
+    volRegion::writeFileHeader(*this, os);
 
-    writeCommented(file(), "Time");
+    writeCommented(os, "Time");
 
     forAll(fields_, fieldi)
     {
-        file()
-            << tab << operationTypeNames_[operation_]
+        os  << tab << operationTypeNames_[operation_]
             << "(" << fields_[fieldi] << ")";
     }
 
-    file() << endl;
+    os  << endl;
 }
 
 
@@ -122,6 +121,7 @@ Foam::functionObjects::fieldValues::volFieldValue::volFieldValue
     weightFieldName_("none")
 {
     read(dict);
+    writeFileHeader(file());
 }
 
 

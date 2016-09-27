@@ -83,22 +83,22 @@ void Foam::snappyLayerDriver::dumpDisplacement
     OBJstream dispStr(prefix + "_disp.obj");
     Info<< "Writing all displacements to " << dispStr.name() << endl;
 
-    forAll(patchDisp, patchPointI)
+    forAll(patchDisp, patchPointi)
     {
-        const point& pt = pp.localPoints()[patchPointI];
-        dispStr.write(linePointRef(pt, pt + patchDisp[patchPointI]));
+        const point& pt = pp.localPoints()[patchPointi];
+        dispStr.write(linePointRef(pt, pt + patchDisp[patchPointi]));
     }
 
 
     OBJstream illStr(prefix + "_illegal.obj");
     Info<< "Writing invalid displacements to " << illStr.name() << endl;
 
-    forAll(patchDisp, patchPointI)
+    forAll(patchDisp, patchPointi)
     {
-        if (extrudeStatus[patchPointI] != EXTRUDE)
+        if (extrudeStatus[patchPointi] != EXTRUDE)
         {
-            const point& pt = pp.localPoints()[patchPointI];
-            illStr.write(linePointRef(pt, pt + patchDisp[patchPointI]));
+            const point& pt = pp.localPoints()[patchPointi];
+            illStr.write(linePointRef(pt, pt + patchDisp[patchPointi]));
         }
     }
 }
@@ -113,16 +113,16 @@ Foam::tmp<Foam::scalarField> Foam::snappyLayerDriver::avgPointData
     tmp<scalarField> tfaceFld(new scalarField(pp.size(), 0.0));
     scalarField& faceFld = tfaceFld.ref();
 
-    forAll(pp.localFaces(), faceI)
+    forAll(pp.localFaces(), facei)
     {
-        const face& f = pp.localFaces()[faceI];
+        const face& f = pp.localFaces()[facei];
         if (f.size())
         {
             forAll(f, fp)
             {
-                faceFld[faceI] += pointFld[f[fp]];
+                faceFld[facei] += pointFld[f[fp]];
             }
-            faceFld[faceI] /= f.size();
+            faceFld[facei] /= f.size();
         }
     }
     return tfaceFld;
@@ -143,13 +143,13 @@ void Foam::snappyLayerDriver::checkManifold
     // Check for edge-faces (surface pinched at edge)
     const labelListList& edgeFaces = fp.edgeFaces();
 
-    forAll(edgeFaces, edgeI)
+    forAll(edgeFaces, edgei)
     {
-        const labelList& eFaces = edgeFaces[edgeI];
+        const labelList& eFaces = edgeFaces[edgei];
 
         if (eFaces.size() > 2)
         {
-            const edge& e = fp.edges()[edgeI];
+            const edge& e = fp.edges()[edgei];
 
             nonManifoldPoints.insert(fp.meshPoints()[e[0]]);
             nonManifoldPoints.insert(fp.meshPoints()[e[1]]);
@@ -167,9 +167,9 @@ void Foam::snappyLayerDriver::checkMeshManifold() const
     // Get all outside faces
     labelList outsideFaces(mesh.nFaces() - mesh.nInternalFaces());
 
-    for (label faceI = mesh.nInternalFaces(); faceI < mesh.nFaces(); faceI++)
+    for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); facei++)
     {
-         outsideFaces[faceI - mesh.nInternalFaces()] = faceI;
+         outsideFaces[facei - mesh.nInternalFaces()] = facei;
     }
 
     pointSet nonManifoldPoints
@@ -214,24 +214,24 @@ void Foam::snappyLayerDriver::checkMeshManifold() const
 // Unset extrusion on point. Returns true if anything unset.
 bool Foam::snappyLayerDriver::unmarkExtrusion
 (
-    const label patchPointI,
+    const label patchPointi,
     pointField& patchDisp,
     labelList& patchNLayers,
     List<extrudeMode>& extrudeStatus
 )
 {
-    if (extrudeStatus[patchPointI] == EXTRUDE)
+    if (extrudeStatus[patchPointi] == EXTRUDE)
     {
-        extrudeStatus[patchPointI] = NOEXTRUDE;
-        patchNLayers[patchPointI] = 0;
-        patchDisp[patchPointI] = Zero;
+        extrudeStatus[patchPointi] = NOEXTRUDE;
+        patchNLayers[patchPointi] = 0;
+        patchDisp[patchPointi] = Zero;
         return true;
     }
-    else if (extrudeStatus[patchPointI] == EXTRUDEREMOVE)
+    else if (extrudeStatus[patchPointi] == EXTRUDEREMOVE)
     {
-        extrudeStatus[patchPointI] = NOEXTRUDE;
-        patchNLayers[patchPointI] = 0;
-        patchDisp[patchPointI] = Zero;
+        extrudeStatus[patchPointi] = NOEXTRUDE;
+        patchNLayers[patchPointi] = 0;
+        patchDisp[patchPointi] = Zero;
         return true;
     }
     else
@@ -296,18 +296,18 @@ void Foam::snappyLayerDriver::handleNonManifolds
     checkManifold(pp, nonManifoldPoints);
 
     // 2. Remote check for boundary edges on coupled boundaries
-    forAll(edgeGlobalFaces, edgeI)
+    forAll(edgeGlobalFaces, edgei)
     {
         if
         (
-            pp.edgeFaces()[edgeI].size() == 1
-         && edgeGlobalFaces[edgeI].size() > 2
+            pp.edgeFaces()[edgei].size() == 1
+         && edgeGlobalFaces[edgei].size() > 2
         )
         {
             // So boundary edges that are connected to more than 2 processors
             // i.e. a non-manifold edge which is exactly on a processor
             // boundary.
-            const edge& e = pp.edges()[edgeI];
+            const edge& e = pp.edges()[edgei];
             nonManifoldPoints.insert(pp.meshPoints()[e[0]]);
             nonManifoldPoints.insert(pp.meshPoints()[e[1]]);
         }
@@ -330,19 +330,19 @@ void Foam::snappyLayerDriver::handleNonManifolds
             0
         );
 
-        forAll(edgeGlobalFaces, edgeI)
+        forAll(edgeGlobalFaces, edgei)
         {
-            label meshEdgeI = meshEdges[edgeI];
+            label meshEdgei = meshEdges[edgei];
 
             if
             (
-                pp.edgeFaces()[edgeI].size() == 1
-             && edgeGlobalFaces[edgeI].size() == 1
-             && isCoupledEdge[meshEdgeI]
+                pp.edgeFaces()[edgei].size() == 1
+             && edgeGlobalFaces[edgei].size() == 1
+             && isCoupledEdge[meshEdgei]
             )
             {
                 // Edge of patch but no continuation across processor.
-                const edge& e = pp.edges()[edgeI];
+                const edge& e = pp.edges()[edgei];
                 //Pout<< "** Stopping extrusion on edge "
                 //    << pp.localPoints()[e[0]]
                 //    << pp.localPoints()[e[1]] << endl;
@@ -363,13 +363,13 @@ void Foam::snappyLayerDriver::handleNonManifolds
     {
         const labelList& meshPoints = pp.meshPoints();
 
-        forAll(meshPoints, patchPointI)
+        forAll(meshPoints, patchPointi)
         {
-            if (nonManifoldPoints.found(meshPoints[patchPointI]))
+            if (nonManifoldPoints.found(meshPoints[patchPointi]))
             {
                 unmarkExtrusion
                 (
-                    patchPointI,
+                    patchPointi,
                     patchDisp,
                     patchNLayers,
                     extrudeStatus
@@ -405,17 +405,17 @@ void Foam::snappyLayerDriver::handleFeatureAngle
 
         const labelListList& edgeFaces = pp.edgeFaces();
 
-        forAll(edgeFaces, edgeI)
+        forAll(edgeFaces, edgei)
         {
-            const labelList& eFaces = pp.edgeFaces()[edgeI];
+            const labelList& eFaces = pp.edgeFaces()[edgei];
 
-            label meshEdgeI = meshEdges[edgeI];
+            label meshEdgei = meshEdges[edgei];
 
             forAll(eFaces, i)
             {
                 nomalsCombine()
                 (
-                    edgeNormal[meshEdgeI],
+                    edgeNormal[meshEdgei],
                     pp.faceNormals()[eFaces[i]]
                 );
             }
@@ -449,13 +449,13 @@ void Foam::snappyLayerDriver::handleFeatureAngle
 
         // Now on coupled edges the edgeNormal will have been truncated and
         // only be still be the old value where two faces have the same normal
-        forAll(edgeFaces, edgeI)
+        forAll(edgeFaces, edgei)
         {
-            const labelList& eFaces = pp.edgeFaces()[edgeI];
+            const labelList& eFaces = pp.edgeFaces()[edgei];
 
-            label meshEdgeI = meshEdges[edgeI];
+            label meshEdgei = meshEdges[edgei];
 
-            const vector& n = edgeNormal[meshEdgeI];
+            const vector& n = edgeNormal[meshEdgei];
 
             if (n != point::max)
             {
@@ -463,7 +463,7 @@ void Foam::snappyLayerDriver::handleFeatureAngle
 
                 if (cos < minCos)
                 {
-                    const edge& e = pp.edges()[edgeI];
+                    const edge& e = pp.edges()[edgei];
 
                     unmarkExtrusion
                     (
@@ -528,13 +528,13 @@ void Foam::snappyLayerDriver::handleWarpedFaces
 
         if (f.size() > 3)
         {
-            label faceI = pp.addressing()[i];
+            label facei = pp.addressing()[i];
 
-            label ownLevel = cellLevel[mesh.faceOwner()[faceI]];
+            label ownLevel = cellLevel[mesh.faceOwner()[facei]];
             scalar edgeLen = edge0Len/(1<<ownLevel);
 
             // Normal distance to face centre plane
-            const point& fc = mesh.faceCentres()[faceI];
+            const point& fc = mesh.faceCentres()[facei];
             const vector& fn = pp.faceNormals()[i];
 
             scalarField vProj(f.size());
@@ -595,21 +595,21 @@ void Foam::snappyLayerDriver::handleWarpedFaces
 //    cellSet multiPatchCells(mesh, "multiPatchCells", pp.size());
 //
 //    // Detect points that use multiple faces on same cell.
-//    forAll(pointFaces, patchPointI)
+//    forAll(pointFaces, patchPointi)
 //    {
-//        const labelList& pFaces = pointFaces[patchPointI];
+//        const labelList& pFaces = pointFaces[patchPointi];
 //
 //        labelHashSet pointCells(pFaces.size());
 //
 //        forAll(pFaces, i)
 //        {
-//            label cellI = mesh.faceOwner()[pp.addressing()[pFaces[i]]];
+//            label celli = mesh.faceOwner()[pp.addressing()[pFaces[i]]];
 //
-//            if (!pointCells.insert(cellI))
+//            if (!pointCells.insert(celli))
 //            {
 //                // Second or more occurrence of cell so cell has two or more
 //                // pp faces connected to this point.
-//                multiPatchCells.insert(cellI);
+//                multiPatchCells.insert(celli);
 //            }
 //        }
 //    }
@@ -639,24 +639,24 @@ void Foam::snappyLayerDriver::handleWarpedFaces
 //        // (has to be done in separate loop since having one point on
 //        // multipatches has to reset extrusion on all points of cell)
 //
-//        forAll(pointFaces, patchPointI)
+//        forAll(pointFaces, patchPointi)
 //        {
-//            if (extrudeStatus[patchPointI] != NOEXTRUDE)
+//            if (extrudeStatus[patchPointi] != NOEXTRUDE)
 //            {
-//                const labelList& pFaces = pointFaces[patchPointI];
+//                const labelList& pFaces = pointFaces[patchPointi];
 //
 //                forAll(pFaces, i)
 //                {
-//                    label cellI =
+//                    label celli =
 //                        mesh.faceOwner()[pp.addressing()[pFaces[i]]];
 //
-//                    if (multiPatchCells.found(cellI))
+//                    if (multiPatchCells.found(celli))
 //                    {
 //                        if
 //                        (
 //                            unmarkExtrusion
 //                            (
-//                                patchPointI,
+//                                patchPointi,
 //                                patchDisp,
 //                                patchNLayers,
 //                                extrudeStatus
@@ -701,18 +701,18 @@ void Foam::snappyLayerDriver::setNumLayers
 
     forAll(patchIDs, i)
     {
-        label patchI = patchIDs[i];
+        label patchi = patchIDs[i];
 
-        const labelList& meshPoints = mesh.boundaryMesh()[patchI].meshPoints();
+        const labelList& meshPoints = mesh.boundaryMesh()[patchi].meshPoints();
 
-        label wantedLayers = patchToNLayers[patchI];
+        label wantedLayers = patchToNLayers[patchi];
 
-        forAll(meshPoints, patchPointI)
+        forAll(meshPoints, patchPointi)
         {
-            label ppPointI = pp.meshPointMap()[meshPoints[patchPointI]];
+            label ppPointi = pp.meshPointMap()[meshPoints[patchPointi]];
 
-            maxLayers[ppPointI] = max(wantedLayers, maxLayers[ppPointI]);
-            minLayers[ppPointI] = min(wantedLayers, minLayers[ppPointI]);
+            maxLayers[ppPointi] = max(wantedLayers, maxLayers[ppPointi]);
+            minLayers[ppPointi] = min(wantedLayers, minLayers[ppPointi]);
         }
     }
 
@@ -776,9 +776,9 @@ void Foam::snappyLayerDriver::setNumLayers
 
     // Calculate number of cells to create
     nAddedCells = 0;
-    forAll(pp.localFaces(), faceI)
+    forAll(pp.localFaces(), facei)
     {
-        const face& f = pp.localFaces()[faceI];
+        const face& f = pp.localFaces()[facei];
 
         // Get max of extrusion per point
         label nCells = 0;
@@ -817,35 +817,35 @@ Foam::snappyLayerDriver::makeLayerDisplacementField
         slipPointPatchVectorField::typeName
     );
     wordList actualPatchTypes(patchFieldTypes.size());
-    forAll(pointPatches, patchI)
+    forAll(pointPatches, patchi)
     {
-        actualPatchTypes[patchI] = pointPatches[patchI].type();
+        actualPatchTypes[patchi] = pointPatches[patchi].type();
     }
 
-    forAll(numLayers, patchI)
+    forAll(numLayers, patchi)
     {
         //  0 layers: do not allow slip so fixedValue 0
         // >0 layers: fixedValue which gets adapted
-        if (numLayers[patchI] == 0)
+        if (numLayers[patchi] == 0)
         {
-            patchFieldTypes[patchI] =
+            patchFieldTypes[patchi] =
                 zeroFixedValuePointPatchVectorField::typeName;
         }
-        else if (numLayers[patchI] > 0)
+        else if (numLayers[patchi] > 0)
         {
-            patchFieldTypes[patchI] = fixedValuePointPatchVectorField::typeName;
+            patchFieldTypes[patchi] = fixedValuePointPatchVectorField::typeName;
         }
     }
 
-    forAll(pointPatches, patchI)
+    forAll(pointPatches, patchi)
     {
-        if (isA<processorPointPatch>(pointPatches[patchI]))
+        if (isA<processorPointPatch>(pointPatches[patchi]))
         {
-            patchFieldTypes[patchI] = calculatedPointPatchVectorField::typeName;
+            patchFieldTypes[patchi] = calculatedPointPatchVectorField::typeName;
         }
-        else if (isA<cyclicPointPatch>(pointPatches[patchI]))
+        else if (isA<cyclicPointPatch>(pointPatches[patchi]))
         {
-            patchFieldTypes[patchI] = cyclicSlipPointPatchVectorField::typeName;
+            patchFieldTypes[patchi] = cyclicSlipPointPatchVectorField::typeName;
         }
     }
 
@@ -892,9 +892,9 @@ void Foam::snappyLayerDriver::growNoExtrusion
 
     label nGrown = 0;
 
-    forAll(localFaces, faceI)
+    forAll(localFaces, facei)
     {
-        const face& f = localFaces[faceI];
+        const face& f = localFaces[facei];
 
         bool hasSqueeze = false;
         forAll(f, fp)
@@ -950,12 +950,12 @@ void Foam::snappyLayerDriver::growNoExtrusion
     }
 
 
-    forAll(extrudeStatus, patchPointI)
+    forAll(extrudeStatus, patchPointi)
     {
-        if (extrudeStatus[patchPointI] == NOEXTRUDE)
+        if (extrudeStatus[patchPointi] == NOEXTRUDE)
         {
-            patchDisp[patchPointI] = Zero;
-            patchNLayers[patchPointI] = 0;
+            patchDisp[patchPointi] = Zero;
+            patchNLayers[patchPointi] = 0;
         }
     }
 
@@ -1022,42 +1022,41 @@ void Foam::snappyLayerDriver::determineSidePatches
         // so prepare to renumber edgePatchID
         Map<label> wantedToAddedPatch;
 
-        for (label patchI = nOldPatches; patchI < nPatches; patchI++)
+        for (label patchi = nOldPatches; patchi < nPatches; patchi++)
         {
-            label nbrProcI = patchToNbrProc[patchI];
-            word name =
-                    "procBoundary"
-                  + Foam::name(Pstream::myProcNo())
-                  + "to"
-                  + Foam::name(nbrProcI);
+            label nbrProci = patchToNbrProc[patchi];
+            word name
+            (
+                processorPolyPatch::newName(Pstream::myProcNo(), nbrProci)
+            );
 
             dictionary patchDict;
             patchDict.add("type", processorPolyPatch::typeName);
             patchDict.add("myProcNo", Pstream::myProcNo());
-            patchDict.add("neighbProcNo", nbrProcI);
+            patchDict.add("neighbProcNo", nbrProci);
             patchDict.add("nFaces", 0);
             patchDict.add("startFace", mesh.nFaces());
 
-            //Pout<< "Adding patch " << patchI
+            //Pout<< "Adding patch " << patchi
             //    << " name:" << name
             //    << " between " << Pstream::myProcNo()
-            //    << " and " << nbrProcI << endl;
+            //    << " and " << nbrProci << endl;
 
-            label procPatchI = meshRefiner_.appendPatch
+            label procPatchi = meshRefiner_.appendPatch
             (
                 mesh,
                 mesh.boundaryMesh().size(), // new patch index
                 name,
                 patchDict
             );
-            wantedToAddedPatch.insert(patchI, procPatchI);
+            wantedToAddedPatch.insert(patchi, procPatchi);
         }
 
         // Renumber edgePatchID
         forAll(edgePatchID, i)
         {
-            label patchI = edgePatchID[i];
-            Map<label>::const_iterator fnd = wantedToAddedPatch.find(patchI);
+            label patchi = edgePatchID[i];
+            Map<label>::const_iterator fnd = wantedToAddedPatch.find(patchi);
             if (fnd != wantedToAddedPatch.end())
             {
                 edgePatchID[i] = fnd();
@@ -1102,38 +1101,38 @@ void Foam::snappyLayerDriver::calculateLayerThickness
 
     forAll(patchIDs, i)
     {
-        label patchI = patchIDs[i];
+        label patchi = patchIDs[i];
 
-        const labelList& meshPoints = patches[patchI].meshPoints();
+        const labelList& meshPoints = patches[patchi].meshPoints();
 
-        forAll(meshPoints, patchPointI)
+        forAll(meshPoints, patchPointi)
         {
-            label ppPointI = pp.meshPointMap()[meshPoints[patchPointI]];
+            label ppPointi = pp.meshPointMap()[meshPoints[patchPointi]];
 
-            firstLayerThickness[ppPointI] = min
+            firstLayerThickness[ppPointi] = min
             (
-                firstLayerThickness[ppPointI],
-                layerParams.firstLayerThickness()[patchI]
+                firstLayerThickness[ppPointi],
+                layerParams.firstLayerThickness()[patchi]
             );
-            finalLayerThickness[ppPointI] = min
+            finalLayerThickness[ppPointi] = min
             (
-                finalLayerThickness[ppPointI],
-                layerParams.finalLayerThickness()[patchI]
+                finalLayerThickness[ppPointi],
+                layerParams.finalLayerThickness()[patchi]
             );
-            totalThickness[ppPointI] = min
+            totalThickness[ppPointi] = min
             (
-                totalThickness[ppPointI],
-                layerParams.thickness()[patchI]
+                totalThickness[ppPointi],
+                layerParams.thickness()[patchi]
             );
-            expRatio[ppPointI] = min
+            expRatio[ppPointi] = min
             (
-                expRatio[ppPointI],
-                layerParams.expansionRatio()[patchI]
+                expRatio[ppPointi],
+                layerParams.expansionRatio()[patchi]
             );
-            minThickness[ppPointI] = min
+            minThickness[ppPointi] = min
             (
-                minThickness[ppPointI],
-                layerParams.minThickness()[patchI]
+                minThickness[ppPointi],
+                layerParams.minThickness()[patchi]
             );
         }
     }
@@ -1231,14 +1230,14 @@ void Foam::snappyLayerDriver::calculateLayerThickness
         );
 
 
-        forAll(maxPointLevel, pointI)
+        forAll(maxPointLevel, pointi)
         {
             // Find undistorted edge size for this level.
-            scalar edgeLen = edge0Len/(1<<maxPointLevel[pointI]);
-            firstLayerThickness[pointI] *= edgeLen;
-            finalLayerThickness[pointI] *= edgeLen;
-            totalThickness[pointI] *= edgeLen;
-            minThickness[pointI] *= edgeLen;
+            scalar edgeLen = edge0Len/(1<<maxPointLevel[pointi]);
+            firstLayerThickness[pointi] *= edgeLen;
+            finalLayerThickness[pointi] *= edgeLen;
+            totalThickness[pointi] *= edgeLen;
+            minThickness[pointi] *= edgeLen;
         }
     }
 
@@ -1247,24 +1246,24 @@ void Foam::snappyLayerDriver::calculateLayerThickness
     // Rework thickness parameters into overall thickness
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    forAll(firstLayerThickness, pointI)
+    forAll(firstLayerThickness, pointi)
     {
-        thickness[pointI] = layerParams.layerThickness
+        thickness[pointi] = layerParams.layerThickness
         (
-            patchNLayers[pointI],
-            firstLayerThickness[pointI],
-            finalLayerThickness[pointI],
-            totalThickness[pointI],
-            expRatio[pointI]
+            patchNLayers[pointi],
+            firstLayerThickness[pointi],
+            finalLayerThickness[pointi],
+            totalThickness[pointi],
+            expRatio[pointi]
         );
 
-        expansionRatio[pointI] = layerParams.layerExpansionRatio
+        expansionRatio[pointi] = layerParams.layerExpansionRatio
         (
-            patchNLayers[pointI],
-            firstLayerThickness[pointI],
-            finalLayerThickness[pointI],
-            totalThickness[pointI],
-            expRatio[pointI]
+            patchNLayers[pointi],
+            firstLayerThickness[pointi],
+            finalLayerThickness[pointi],
+            totalThickness[pointi],
+            expRatio[pointi]
         );
     }
 
@@ -1281,8 +1280,8 @@ void Foam::snappyLayerDriver::calculateLayerThickness
         label maxPatchNameLen = 0;
         forAll(patchIDs, i)
         {
-            label patchI = patchIDs[i];
-            word patchName = patches[patchI].name();
+            label patchi = patchIDs[i];
+            word patchName = patches[patchi].name();
             maxPatchNameLen = max(maxPatchNameLen, label(patchName.size()));
         }
 
@@ -1299,29 +1298,29 @@ void Foam::snappyLayerDriver::calculateLayerThickness
 
         forAll(patchIDs, i)
         {
-            label patchI = patchIDs[i];
+            label patchi = patchIDs[i];
 
-            const labelList& meshPoints = patches[patchI].meshPoints();
+            const labelList& meshPoints = patches[patchi].meshPoints();
 
             scalar sumThickness = 0;
             scalar sumNearWallThickness = 0;
             label nMasterPoints = 0;
 
-            forAll(meshPoints, patchPointI)
+            forAll(meshPoints, patchPointi)
             {
-                label meshPointI = meshPoints[patchPointI];
-                if (isMasterPoint[meshPointI])
+                label meshPointi = meshPoints[patchPointi];
+                if (isMasterPoint[meshPointi])
                 {
-                    label ppPointI = pp.meshPointMap()[meshPointI];
+                    label ppPointi = pp.meshPointMap()[meshPointi];
 
-                    sumThickness += thickness[ppPointI];
+                    sumThickness += thickness[ppPointi];
                     sumNearWallThickness += layerParams.firstLayerThickness
                     (
-                        patchNLayers[ppPointI],
-                        firstLayerThickness[ppPointI],
-                        finalLayerThickness[ppPointI],
-                        thickness[ppPointI],
-                        expansionRatio[ppPointI]
+                        patchNLayers[ppPointi],
+                        firstLayerThickness[ppPointi],
+                        finalLayerThickness[ppPointi],
+                        thickness[ppPointi],
+                        expansionRatio[ppPointi]
                     );
                     nMasterPoints++;
                 }
@@ -1344,10 +1343,10 @@ void Foam::snappyLayerDriver::calculateLayerThickness
             }
 
             Info<< setf(ios_base::left) << setw(maxPatchNameLen)
-                << patches[patchI].name() << setprecision(3)
+                << patches[patchi].name() << setprecision(3)
                 << " " << setw(8)
-                << returnReduce(patches[patchI].size(), sumOp<scalar>())
-                << " " << setw(6) << layerParams.numLayers()[patchI]
+                << returnReduce(patches[patchi].size(), sumOp<scalar>())
+                << " " << setw(6) << layerParams.numLayers()[patchi]
                 << " " << setw(8) << avgNearWallThickness
                 << "  " << setw(8) << avgThickness
                 << endl;
@@ -1525,57 +1524,57 @@ void Foam::snappyLayerDriver::getPatchDisplacement
 
 
     // Check if no extrude possible.
-    forAll(pointNormals, patchPointI)
+    forAll(pointNormals, patchPointi)
     {
-        label meshPointI = pp.meshPoints()[patchPointI];
+        label meshPointi = pp.meshPoints()[patchPointi];
 
-        if (extrudeStatus[patchPointI] == NOEXTRUDE)
+        if (extrudeStatus[patchPointi] == NOEXTRUDE)
         {
             // Do not use unmarkExtrusion; forcibly set to zero extrusion.
-            patchNLayers[patchPointI] = 0;
-            patchDisp[patchPointI] = Zero;
+            patchNLayers[patchPointi] = 0;
+            patchDisp[patchPointi] = Zero;
         }
         else
         {
             // Get normal
-            const vector& n = pointNormals[patchPointI];
+            const vector& n = pointNormals[patchPointi];
 
-            if (!meshTools::visNormal(n, faceNormals, pointFaces[patchPointI]))
+            if (!meshTools::visNormal(n, faceNormals, pointFaces[patchPointi]))
             {
                 if (debug&meshRefinement::ATTRACTION)
                 {
-                    Pout<< "No valid normal for point " << meshPointI
-                        << ' ' << pp.points()[meshPointI]
+                    Pout<< "No valid normal for point " << meshPointi
+                        << ' ' << pp.points()[meshPointi]
                         << "; setting displacement to "
-                        << patchDisp[patchPointI]
+                        << patchDisp[patchPointi]
                         << endl;
                 }
 
-                extrudeStatus[patchPointI] = EXTRUDEREMOVE;
+                extrudeStatus[patchPointi] = EXTRUDEREMOVE;
                 nNoVisNormal++;
             }
         }
     }
 
     // At illegal points make displacement average of new neighbour positions
-    forAll(extrudeStatus, patchPointI)
+    forAll(extrudeStatus, patchPointi)
     {
-        if (extrudeStatus[patchPointI] == EXTRUDEREMOVE)
+        if (extrudeStatus[patchPointi] == EXTRUDEREMOVE)
         {
             point avg(Zero);
             label nPoints = 0;
 
-            const labelList& pEdges = pp.pointEdges()[patchPointI];
+            const labelList& pEdges = pp.pointEdges()[patchPointi];
 
             forAll(pEdges, i)
             {
-                label edgeI = pEdges[i];
+                label edgei = pEdges[i];
 
-                label otherPointI = pp.edges()[edgeI].otherVertex(patchPointI);
+                label otherPointi = pp.edges()[edgei].otherVertex(patchPointi);
 
-                if (extrudeStatus[otherPointI] != NOEXTRUDE)
+                if (extrudeStatus[otherPointi] != NOEXTRUDE)
                 {
-                    avg += localPoints[otherPointI] + patchDisp[otherPointI];
+                    avg += localPoints[otherPointi] + patchDisp[otherPointi];
                     nPoints++;
                 }
             }
@@ -1585,15 +1584,15 @@ void Foam::snappyLayerDriver::getPatchDisplacement
                 if (debug&meshRefinement::ATTRACTION)
                 {
                     Pout<< "Displacement at illegal point "
-                        << localPoints[patchPointI]
+                        << localPoints[patchPointi]
                         << " set to "
-                        << (avg / nPoints - localPoints[patchPointI])
+                        << (avg / nPoints - localPoints[patchPointi])
                         << endl;
                 }
 
-                patchDisp[patchPointI] =
+                patchDisp[patchPointi] =
                     avg / nPoints
-                  - localPoints[patchPointI];
+                  - localPoints[patchPointi];
 
                 nExtrudeRemove++;
             }
@@ -1628,15 +1627,15 @@ void Foam::snappyLayerDriver::getPatchDisplacement
 bool Foam::snappyLayerDriver::sameEdgeNeighbour
 (
     const labelListList& globalEdgeFaces,
-    const label myGlobalFaceI,
-    const label nbrGlobFaceI,
-    const label edgeI
+    const label myGlobalFacei,
+    const label nbrGlobFacei,
+    const label edgei
 ) const
 {
-    const labelList& eFaces = globalEdgeFaces[edgeI];
+    const labelList& eFaces = globalEdgeFaces[edgei];
     if (eFaces.size() == 2)
     {
-        return edge(myGlobalFaceI, nbrGlobFaceI) == edge(eFaces[0], eFaces[1]);
+        return edge(myGlobalFacei, nbrGlobFacei) == edge(eFaces[0], eFaces[1]);
     }
     else
     {
@@ -1649,15 +1648,15 @@ void Foam::snappyLayerDriver::getVertexString
 (
     const indirectPrimitivePatch& pp,
     const labelListList& globalEdgeFaces,
-    const label faceI,
-    const label edgeI,
-    const label myGlobFaceI,
-    const label nbrGlobFaceI,
+    const label facei,
+    const label edgei,
+    const label myGlobFacei,
+    const label nbrGlobFacei,
     DynamicList<label>& vertices
 ) const
 {
-    const labelList& fEdges = pp.faceEdges()[faceI];
-    label fp = findIndex(fEdges, edgeI);
+    const labelList& fEdges = pp.faceEdges()[facei];
+    label fp = findIndex(fEdges, edgei);
 
     if (fp == -1)
     {
@@ -1676,8 +1675,8 @@ void Foam::snappyLayerDriver::getVertexString
            !sameEdgeNeighbour
             (
                 globalEdgeFaces,
-                myGlobFaceI,
-                nbrGlobFaceI,
+                myGlobFacei,
+                nbrGlobFacei,
                 fEdges[prevFp]
             )
         )
@@ -1696,8 +1695,8 @@ void Foam::snappyLayerDriver::getVertexString
            !sameEdgeNeighbour
             (
                 globalEdgeFaces,
-                myGlobFaceI,
-                nbrGlobFaceI,
+                myGlobFacei,
+                nbrGlobFacei,
                 fEdges[nextFp]
             )
         )
@@ -1707,7 +1706,7 @@ void Foam::snappyLayerDriver::getVertexString
         endFp = nextFp;
     }
 
-    const face& f = pp.localFaces()[faceI];
+    const face& f = pp.localFaces()[facei];
     vertices.clear();
     fp = startFp;
     while (fp != endFp)
@@ -1744,30 +1743,30 @@ Foam::label Foam::snappyLayerDriver::truncateDisplacement
 
     forAllConstIter(faceSet, illegalPatchFaces, iter)
     {
-        label faceI = iter.key();
+        label facei = iter.key();
 
-        if (mesh.isInternalFace(faceI))
+        if (mesh.isInternalFace(facei))
         {
             FatalErrorInFunction
                 << "Faceset " << illegalPatchFaces.name()
-                << " contains internal face " << faceI << nl
+                << " contains internal face " << facei << nl
                 << "It should only contain patch faces" << abort(FatalError);
         }
 
-        const face& f = mesh.faces()[faceI];
+        const face& f = mesh.faces()[facei];
 
 
         forAll(f, fp)
         {
             if (meshPointMap.found(f[fp]))
             {
-                label patchPointI = meshPointMap[f[fp]];
+                label patchPointi = meshPointMap[f[fp]];
 
-                if (extrudeStatus[patchPointI] != NOEXTRUDE)
+                if (extrudeStatus[patchPointi] != NOEXTRUDE)
                 {
                     unmarkExtrusion
                     (
-                        patchPointI,
+                        patchPointi,
                         patchDisp,
                         patchNLayers,
                         extrudeStatus
@@ -1778,15 +1777,15 @@ Foam::label Foam::snappyLayerDriver::truncateDisplacement
         }
     }
 
-    forAll(patchDisp, patchPointI)
+    forAll(patchDisp, patchPointi)
     {
-        if (mag(patchDisp[patchPointI]) < minThickness[patchPointI])
+        if (mag(patchDisp[patchPointi]) < minThickness[patchPointi])
         {
             if
             (
                 unmarkExtrusion
                 (
-                    patchPointI,
+                    patchPointi,
                     patchDisp,
                     patchNLayers,
                     extrudeStatus
@@ -1796,11 +1795,11 @@ Foam::label Foam::snappyLayerDriver::truncateDisplacement
                 nChanged++;
             }
         }
-        else if (extrudeStatus[patchPointI] == NOEXTRUDE)
+        else if (extrudeStatus[patchPointi] == NOEXTRUDE)
         {
             // Make sure displacement is 0. Should already be so but ...
-            patchDisp[patchPointI] = Zero;
-            patchNLayers[patchPointI] = 0;
+            patchDisp[patchPointi] = Zero;
+            patchNLayers[patchPointi] = 0;
         }
     }
 
@@ -1897,20 +1896,20 @@ Foam::label Foam::snappyLayerDriver::truncateDisplacement
         label nButterFly = 0;
         {
             DynamicList<label> stringedVerts;
-            forAll(pp.edges(), edgeI)
+            forAll(pp.edges(), edgei)
             {
-                const labelList& globFaces = edgeGlobalFaces[edgeI];
+                const labelList& globFaces = edgeGlobalFaces[edgei];
 
                 if (globFaces.size() == 2)
                 {
-                    label myFaceI = pp.edgeFaces()[edgeI][0];
-                    label myGlobalFaceI = globalFaces.toGlobal
+                    label myFacei = pp.edgeFaces()[edgei][0];
+                    label myGlobalFacei = globalFaces.toGlobal
                     (
-                        pp.addressing()[myFaceI]
+                        pp.addressing()[myFacei]
                     );
-                    label nbrGlobalFaceI =
+                    label nbrGlobalFacei =
                     (
-                        globFaces[0] != myGlobalFaceI
+                        globFaces[0] != myGlobalFacei
                       ? globFaces[0]
                       : globFaces[1]
                     );
@@ -1918,10 +1917,10 @@ Foam::label Foam::snappyLayerDriver::truncateDisplacement
                     (
                         pp,
                         edgeGlobalFaces,
-                        myFaceI,
-                        edgeI,
-                        myGlobalFaceI,
-                        nbrGlobalFaceI,
+                        myFacei,
+                        edgei,
+                        myGlobalFacei,
+                        nbrGlobalFacei,
                         stringedVerts
                     );
 
@@ -1935,10 +1934,7 @@ Foam::label Foam::snappyLayerDriver::truncateDisplacement
                         bool pinch = false;
                         for (label i = 1; i < stringedVerts.size()-1; i++)
                         {
-                            if
-                            (
-                                extrudeStatus[stringedVerts[i]] == NOEXTRUDE
-                            )
+                            if (extrudeStatus[stringedVerts[i]] == NOEXTRUDE)
                             {
                                 pinch = true;
                                 break;
@@ -2059,15 +2055,15 @@ void Foam::snappyLayerDriver::setupLayerInfoTruncation
             << " nBufferCellsNoExtrude set to less than 0  ..." << endl;
 
         // Face layers if any point gets extruded
-        forAll(pp.localFaces(), patchFaceI)
+        forAll(pp.localFaces(), patchFacei)
         {
-            const face& f = pp.localFaces()[patchFaceI];
+            const face& f = pp.localFaces()[patchFacei];
 
             forAll(f, fp)
             {
                 if (patchNLayers[f[fp]] > 0)
                 {
-                    nPatchFaceLayers[patchFaceI] = patchNLayers[f[fp]];
+                    nPatchFaceLayers[patchFacei] = patchNLayers[f[fp]];
                     break;
                 }
             }
@@ -2075,11 +2071,11 @@ void Foam::snappyLayerDriver::setupLayerInfoTruncation
         nPatchPointLayers = patchNLayers;
 
         // Set any unset patch face layers
-        forAll(nPatchFaceLayers, patchFaceI)
+        forAll(nPatchFaceLayers, patchFacei)
         {
-            if (nPatchFaceLayers[patchFaceI] == -1)
+            if (nPatchFaceLayers[patchFacei] == -1)
             {
-                nPatchFaceLayers[patchFaceI] = 0;
+                nPatchFaceLayers[patchFacei] = 0;
             }
         }
     }
@@ -2088,9 +2084,9 @@ void Foam::snappyLayerDriver::setupLayerInfoTruncation
         // Determine max point layers per face.
         labelList maxLevel(pp.size(), 0);
 
-        forAll(pp.localFaces(), patchFaceI)
+        forAll(pp.localFaces(), patchFacei)
         {
-            const face& f = pp.localFaces()[patchFaceI];
+            const face& f = pp.localFaces()[patchFacei];
 
             // find patch faces where layer terminates (i.e contains extrude
             // and noextrude points).
@@ -2114,12 +2110,12 @@ void Foam::snappyLayerDriver::setupLayerInfoTruncation
 
                 if (noExtrude)
                 {
-                    nPatchFaceLayers[patchFaceI] = 1;
-                    maxLevel[patchFaceI] = mLevel;
+                    nPatchFaceLayers[patchFacei] = 1;
+                    maxLevel[patchFacei] = mLevel;
                 }
                 else
                 {
-                    maxLevel[patchFaceI] = mLevel;
+                    maxLevel[patchFacei] = mLevel;
                 }
             }
         }
@@ -2153,19 +2149,19 @@ void Foam::snappyLayerDriver::setupLayerInfoTruncation
 
                 boolList foundNeighbour(pp.nPoints(), false);
 
-                forAll(pp.meshPoints(), patchPointI)
+                forAll(pp.meshPoints(), patchPointi)
                 {
-                    forAll(pointFaces[patchPointI], pointFaceI)
+                    forAll(pointFaces[patchPointi], pointFacei)
                     {
-                        label faceI = pointFaces[patchPointI][pointFaceI];
+                        label facei = pointFaces[patchPointi][pointFacei];
 
                         if
                         (
-                            nPatchFaceLayers[faceI] != -1
-                         && maxLevel[faceI] > 0
+                            nPatchFaceLayers[facei] != -1
+                         && maxLevel[facei] > 0
                         )
                         {
-                            foundNeighbour[patchPointI] = true;
+                            foundNeighbour[patchPointi] = true;
                             break;
                         }
                     }
@@ -2180,21 +2176,21 @@ void Foam::snappyLayerDriver::setupLayerInfoTruncation
                     false               // null value
                 );
 
-                forAll(pp.meshPoints(), patchPointI)
+                forAll(pp.meshPoints(), patchPointi)
                 {
-                    if (foundNeighbour[patchPointI])
+                    if (foundNeighbour[patchPointi])
                     {
-                        forAll(pointFaces[patchPointI], pointFaceI)
+                        forAll(pointFaces[patchPointi], pointFacei)
                         {
-                            label faceI = pointFaces[patchPointI][pointFaceI];
+                            label facei = pointFaces[patchPointi][pointFacei];
                             if
                             (
-                                nPatchFaceLayers[faceI] == -1
-                             && maxLevel[faceI] > 0
-                             && ilevel < maxLevel[faceI]
+                                nPatchFaceLayers[facei] == -1
+                             && maxLevel[facei] > 0
+                             && ilevel < maxLevel[facei]
                             )
                             {
-                                tempCounter[faceI] = ilevel;
+                                tempCounter[facei] = ilevel;
                             }
                         }
                     }
@@ -2203,31 +2199,31 @@ void Foam::snappyLayerDriver::setupLayerInfoTruncation
             }
         }
 
-        forAll(pp.localFaces(), patchFaceI)
+        forAll(pp.localFaces(), patchFacei)
         {
-            if (nPatchFaceLayers[patchFaceI] == -1)
+            if (nPatchFaceLayers[patchFacei] == -1)
             {
-                nPatchFaceLayers[patchFaceI] = maxLevel[patchFaceI];
+                nPatchFaceLayers[patchFacei] = maxLevel[patchFacei];
             }
         }
 
-        forAll(pp.meshPoints(), patchPointI)
+        forAll(pp.meshPoints(), patchPointi)
         {
-            if (extrudeStatus[patchPointI] != NOEXTRUDE)
+            if (extrudeStatus[patchPointi] != NOEXTRUDE)
             {
-                forAll(pointFaces[patchPointI], pointFaceI)
+                forAll(pointFaces[patchPointi], pointFacei)
                 {
-                    label face = pointFaces[patchPointI][pointFaceI];
-                    nPatchPointLayers[patchPointI] = max
+                    label face = pointFaces[patchPointi][pointFacei];
+                    nPatchPointLayers[patchPointi] = max
                     (
-                        nPatchPointLayers[patchPointI],
+                        nPatchPointLayers[patchPointi],
                         nPatchFaceLayers[face]
                     );
                 }
             }
             else
             {
-                nPatchPointLayers[patchPointI] = 0;
+                nPatchPointLayers[patchPointi] = 0;
             }
         }
         syncTools::syncPointList
@@ -2254,9 +2250,9 @@ bool Foam::snappyLayerDriver::cellsUseFace
     {
         const cell& cFaces = mesh.cells()[cellLabels[i]];
 
-        forAll(cFaces, cFaceI)
+        forAll(cFaces, cFacei)
         {
-            if (faces.found(cFaces[cFaceI]))
+            if (faces.found(cFaces[cFacei]))
             {
                 return true;
             }
@@ -2322,11 +2318,11 @@ Foam::label Foam::snappyLayerDriver::checkAndUnmark
     const label nReportMax = 10;
     DynamicField<point> disabledFaceCentres(nReportMax);
 
-    forAll(addedCells, oldPatchFaceI)
+    forAll(addedCells, oldPatchFacei)
     {
         // Get the cells (in newMesh labels) per old patch face (in mesh
         // labels)
-        const labelList& fCells = addedCells[oldPatchFaceI];
+        const labelList& fCells = addedCells[oldPatchFacei];
 
         if (cellsUseFace(newMesh, fCells, wrongFaces))
         {
@@ -2335,7 +2331,7 @@ Foam::label Foam::snappyLayerDriver::checkAndUnmark
             (
                 unmarkExtrusion
                 (
-                    pp.localFaces()[oldPatchFaceI],
+                    pp.localFaces()[oldPatchFacei],
                     patchDisp,
                     patchNLayers,
                     extrudeStatus
@@ -2346,7 +2342,7 @@ Foam::label Foam::snappyLayerDriver::checkAndUnmark
                 {
                     disabledFaceCentres.append
                     (
-                        pp.faceCentres()[oldPatchFaceI]
+                        pp.faceCentres()[oldPatchFacei]
                     );
                 }
 
@@ -2448,41 +2444,41 @@ Foam::List<Foam::labelPair> Foam::snappyLayerDriver::getBafflesOnAddedMesh
     // - use the boundary face for the new baffles
 
     Map<label> baffleSet(4*baffles.size());
-    forAll(baffles, baffleI)
+    forAll(baffles, bafflei)
     {
-        baffleSet.insert(baffles[baffleI][0], baffleI);
-        baffleSet.insert(baffles[baffleI][1], baffleI);
+        baffleSet.insert(baffles[bafflei][0], bafflei);
+        baffleSet.insert(baffles[bafflei][1], bafflei);
     }
 
 
     List<labelPair> newBaffles(baffles.size(), labelPair(-1, -1));
     for
     (
-        label faceI = mesh.nInternalFaces();
-        faceI < mesh.nFaces();
-        faceI++
+        label facei = mesh.nInternalFaces();
+        facei < mesh.nFaces();
+        facei++
     )
     {
-        label oldFaceI = newToOldFaces[faceI];
+        label oldFacei = newToOldFaces[facei];
 
-        Map<label>::const_iterator faceFnd = baffleSet.find(oldFaceI);
+        Map<label>::const_iterator faceFnd = baffleSet.find(oldFacei);
         if (faceFnd != baffleSet.end())
         {
-            label baffleI = faceFnd();
-            labelPair& p = newBaffles[baffleI];
+            label bafflei = faceFnd();
+            labelPair& p = newBaffles[bafflei];
             if (p[0] == -1)
             {
-                p[0] = faceI;
+                p[0] = facei;
             }
             else if (p[1] == -1)
             {
-                p[1] = faceI;
+                p[1] = facei;
             }
             else
             {
                 FatalErrorInFunction
-                    << "Problem:" << faceI << " at:"
-                    << mesh.faceCentres()[faceI]
+                    << "Problem:" << facei << " at:"
+                    << mesh.faceCentres()[facei]
                     << " is on same baffle as " << p[0]
                     << " at:" << mesh.faceCentres()[p[0]]
                     << " and " << p[1]
@@ -2517,11 +2513,11 @@ void Foam::snappyLayerDriver::getLayerCellsFaces
     // Mark all cells in the layer.
     labelListList addedCells(addPatchCellLayer::addedCells(mesh, layerFaces));
 
-    forAll(addedCells, oldPatchFaceI)
+    forAll(addedCells, oldPatchFacei)
     {
-        const labelList& added = addedCells[oldPatchFaceI];
+        const labelList& added = addedCells[oldPatchFacei];
 
-        const labelList& layer = layerFaces[oldPatchFaceI];
+        const labelList& layer = layerFaces[oldPatchFacei];
 
         if (layer.size())
         {
@@ -2533,10 +2529,10 @@ void Foam::snappyLayerDriver::getLayerCellsFaces
         }
     }
 
-    forAll(layerFaces, oldPatchFaceI)
+    forAll(layerFaces, oldPatchFacei)
     {
-        const labelList& layer = layerFaces[oldPatchFaceI];
-        const scalar realThickness = oldRealThickness[oldPatchFaceI];
+        const labelList& layer = layerFaces[oldPatchFacei];
+        const scalar realThickness = oldRealThickness[oldPatchFacei];
 
         if (layer.size())
         {
@@ -2568,8 +2564,8 @@ void Foam::snappyLayerDriver::printLayerData
     label maxPatchNameLen = 0;
     forAll(patchIDs, i)
     {
-        label patchI = patchIDs[i];
-        word patchName = pbm[patchI].name();
+        label patchi = patchIDs[i];
+        word patchName = pbm[patchi].name();
         maxPatchNameLen = max(maxPatchNameLen, label(patchName.size()));
     }
 
@@ -2584,8 +2580,8 @@ void Foam::snappyLayerDriver::printLayerData
 
     forAll(patchIDs, i)
     {
-        label patchI = patchIDs[i];
-        const polyPatch& pp = pbm[patchI];
+        label patchi = patchIDs[i];
+        const polyPatch& pp = pbm[patchi];
 
         label sumSize = pp.size();
 
@@ -2598,11 +2594,11 @@ void Foam::snappyLayerDriver::printLayerData
         }
 
         // Thickness
-        scalarField::subField patchWanted = pbm[patchI].patchSlice
+        scalarField::subField patchWanted = pbm[patchi].patchSlice
         (
             faceWantedThickness
         );
-        scalarField::subField patchReal = pbm[patchI].patchSlice
+        scalarField::subField patchReal = pbm[patchi].patchSlice
         (
             faceRealThickness
         );
@@ -2635,7 +2631,7 @@ void Foam::snappyLayerDriver::printLayerData
         }
 
         Info<< setf(ios_base::left) << setw(maxPatchNameLen)
-            << pbm[patchI].name() << setprecision(3)
+            << pbm[patchi].name() << setprecision(3)
             << " " << setw(8) << sumSize
             << " " << setw(8) << avgLayers
             << " " << setw(8) << avgReal
@@ -2656,19 +2652,19 @@ bool Foam::snappyLayerDriver::writeLayerSets
     bool allOk = true;
     {
         label nAdded = 0;
-        forAll(cellNLayers, cellI)
+        forAll(cellNLayers, celli)
         {
-            if (cellNLayers[cellI] > 0)
+            if (cellNLayers[celli] > 0)
             {
                 nAdded++;
             }
         }
         cellSet addedCellSet(mesh, "addedCells", nAdded);
-        forAll(cellNLayers, cellI)
+        forAll(cellNLayers, celli)
         {
-            if (cellNLayers[cellI] > 0)
+            if (cellNLayers[celli] > 0)
             {
-                addedCellSet.insert(cellI);
+                addedCellSet.insert(celli);
             }
         }
         addedCellSet.instance() = meshRefiner_.timeName();
@@ -2681,20 +2677,20 @@ bool Foam::snappyLayerDriver::writeLayerSets
     }
     {
         label nAdded = 0;
-        for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
+        for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
         {
-            if (faceRealThickness[faceI] > 0)
+            if (faceRealThickness[facei] > 0)
             {
                 nAdded++;
             }
         }
 
         faceSet layerFacesSet(mesh, "layerFaces", nAdded);
-        for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
+        for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
         {
-            if (faceRealThickness[faceI] > 0)
+            if (faceRealThickness[facei] > 0)
             {
-                layerFacesSet.insert(faceI);
+                layerFacesSet.insert(facei);
             }
         }
         layerFacesSet.instance() = meshRefiner_.timeName();
@@ -2746,24 +2742,24 @@ bool Foam::snappyLayerDriver::writeLayerData
                 dimensionedScalar("zero", dimless, 0),
                 fixedValueFvPatchScalarField::typeName
             );
-            forAll(fld, cellI)
+            forAll(fld, celli)
             {
-                fld[cellI] = cellNLayers[cellI];
+                fld[celli] = cellNLayers[celli];
             }
             volScalarField::Boundary& fldBf = fld.boundaryFieldRef();
 
             const polyBoundaryMesh& pbm = mesh.boundaryMesh();
             forAll(patchIDs, i)
             {
-                label patchI = patchIDs[i];
-                const polyPatch& pp = pbm[patchI];
+                label patchi = patchIDs[i];
+                const polyPatch& pp = pbm[patchi];
                 const labelList& faceCells = pp.faceCells();
                 scalarField pfld(faceCells.size());
                 forAll(faceCells, i)
                 {
                     pfld[i] = cellNLayers[faceCells[i]];
                 }
-                fldBf[patchI] == pfld;
+                fldBf[patchi] == pfld;
             }
             Info<< indent << fld.name() << "    : actual number of layers"
                 << endl;
@@ -2790,8 +2786,8 @@ bool Foam::snappyLayerDriver::writeLayerData
             const polyBoundaryMesh& pbm = mesh.boundaryMesh();
             forAll(patchIDs, i)
             {
-                label patchI = patchIDs[i];
-                fldBf[patchI] == pbm[patchI].patchSlice(faceRealThickness);
+                label patchi = patchIDs[i];
+                fldBf[patchi] == pbm[patchi].patchSlice(faceRealThickness);
             }
             Info<< indent << fld.name() << "         : overall layer thickness"
                 << endl;
@@ -2817,13 +2813,13 @@ bool Foam::snappyLayerDriver::writeLayerData
             const polyBoundaryMesh& pbm = mesh.boundaryMesh();
             forAll(patchIDs, i)
             {
-                label patchI = patchIDs[i];
+                label patchi = patchIDs[i];
 
-                scalarField::subField patchWanted = pbm[patchI].patchSlice
+                scalarField::subField patchWanted = pbm[patchi].patchSlice
                 (
                     faceWantedThickness
                 );
-                scalarField::subField patchReal = pbm[patchI].patchSlice
+                scalarField::subField patchReal = pbm[patchi].patchSlice
                 (
                     faceRealThickness
                 );
@@ -2838,7 +2834,7 @@ bool Foam::snappyLayerDriver::writeLayerData
                     }
                 }
 
-                fld.boundaryField()[patchI] == pfld;
+                fld.boundaryField()[patchi] == pfld;
             }
             Info<< indent << fld.name()
                 << " : overall layer thickness (fraction"
@@ -3013,37 +3009,37 @@ void Foam::snappyLayerDriver::addLayers
     labelList numLayers(layerParams.numLayers());
     {
         labelHashSet layerIDs(patchIDs);
-        forAll(mesh.faceZones(), zoneI)
+        forAll(mesh.faceZones(), zonei)
         {
-            label mpI, spI;
+            label mpi, spi;
             surfaceZonesInfo::faceZoneType fzType;
             bool hasInfo = meshRefiner_.getFaceZoneInfo
             (
-                mesh.faceZones()[zoneI].name(),
-                mpI,
-                spI,
+                mesh.faceZones()[zonei].name(),
+                mpi,
+                spi,
                 fzType
             );
             if (hasInfo)
             {
                 const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-                if (layerIDs.found(mpI) && !layerIDs.found(spI))
+                if (layerIDs.found(mpi) && !layerIDs.found(spi))
                 {
                     // Only layers on master side. Fix points on slave side
-                    Info<< "On faceZone " << mesh.faceZones()[zoneI].name()
-                        << " adding layers to master patch " << pbm[mpI].name()
+                    Info<< "On faceZone " << mesh.faceZones()[zonei].name()
+                        << " adding layers to master patch " << pbm[mpi].name()
                         << " only. Freezing points on slave patch "
-                        << pbm[spI].name() << endl;
-                    numLayers[spI] = 0;
+                        << pbm[spi].name() << endl;
+                    numLayers[spi] = 0;
                 }
-                else if (!layerIDs.found(mpI) && layerIDs.found(spI))
+                else if (!layerIDs.found(mpi) && layerIDs.found(spi))
                 {
                     // Only layers on slave side. Fix points on master side
-                    Info<< "On faceZone " << mesh.faceZones()[zoneI].name()
-                        << " adding layers to slave patch " << pbm[spI].name()
+                    Info<< "On faceZone " << mesh.faceZones()[zonei].name()
+                        << " adding layers to slave patch " << pbm[spi].name()
                         << " only. Freezing points on master patch "
-                        << pbm[mpI].name() << endl;
-                    numLayers[mpI] = 0;
+                        << pbm[mpi].name() << endl;
+                    numLayers[mpi] = 0;
                 }
             }
         }
@@ -3100,11 +3096,11 @@ void Foam::snappyLayerDriver::addLayers
                 extrudeStatus
             );
 
-            forAll(extrudeStatus, patchPointI)
+            forAll(extrudeStatus, patchPointi)
             {
-                if (extrudeStatus[patchPointI] != NOEXTRUDE)
+                if (extrudeStatus[patchPointi] != NOEXTRUDE)
                 {
-                    duplicatePoint[pp().meshPoints()[patchPointI]] = 1;
+                    duplicatePoint[pp().meshPoints()[patchPointi]] = 1;
                 }
             }
         }
@@ -3121,11 +3117,11 @@ void Foam::snappyLayerDriver::addLayers
         label n = duplicatePoint.count();
         labelList candidatePoints(n);
         n = 0;
-        forAll(duplicatePoint, pointI)
+        forAll(duplicatePoint, pointi)
         {
-            if (duplicatePoint[pointI])
+            if (duplicatePoint[pointi])
             {
-                candidatePoints[n++] = pointI;
+                candidatePoints[n++] = pointi;
             }
         }
 
@@ -3138,20 +3134,20 @@ void Foam::snappyLayerDriver::addLayers
             DynamicList<label> nonDupZones(mesh.faceZones().size());
 
             labelHashSet layerIDs(patchIDs);
-            forAll(mesh.faceZones(), zoneI)
+            forAll(mesh.faceZones(), zonei)
             {
-                label mpI, spI;
+                label mpi, spi;
                 surfaceZonesInfo::faceZoneType fzType;
                 bool hasInfo = meshRefiner_.getFaceZoneInfo
                 (
-                    mesh.faceZones()[zoneI].name(),
-                    mpI,
-                    spI,
+                    mesh.faceZones()[zonei].name(),
+                    mpi,
+                    spi,
                     fzType
                 );
-                if (hasInfo && !layerIDs.found(mpI) && !layerIDs.found(spI))
+                if (hasInfo && !layerIDs.found(mpi) && !layerIDs.found(spi))
                 {
-                    nonDupZones.append(zoneI);
+                    nonDupZones.append(zonei);
                 }
             }
             nonDupBaffles = meshRefinement::subsetBaffles
@@ -3178,16 +3174,16 @@ void Foam::snappyLayerDriver::addLayers
             const labelList& pointMap = map().pointMap();
             const labelList& reversePointMap = map().reversePointMap();
 
-            forAll(pointMap, pointI)
+            forAll(pointMap, pointi)
             {
-                label oldPointI = pointMap[pointI];
-                label newMasterPointI = reversePointMap[oldPointI];
+                label oldPointi = pointMap[pointi];
+                label newMasterPointi = reversePointMap[oldPointi];
 
-                if (newMasterPointI != pointI)
+                if (newMasterPointi != pointi)
                 {
                     // Found slave. Mark both master and slave
-                    pointToMaster[pointI] = newMasterPointI;
-                    pointToMaster[newMasterPointI] = newMasterPointI;
+                    pointToMaster[pointi] = newMasterPointi;
+                    pointToMaster[newMasterPointi] = newMasterPointi;
                 }
             }
 
@@ -3229,13 +3225,13 @@ void Foam::snappyLayerDriver::addLayers
                 );
                 Info<< "Writing point-duplicates to " << str.name() << endl;
                 const pointField& p = mesh.points();
-                forAll(pointMap, pointI)
+                forAll(pointMap, pointi)
                 {
-                    label newMasterI = reversePointMap[pointMap[pointI]];
+                    label newMasteri = reversePointMap[pointMap[pointi]];
 
-                    if (newMasterI != pointI)
+                    if (newMasteri != pointi)
                     {
-                        str.write(linePointRef(p[pointI], p[newMasterI]));
+                        str.write(linePointRef(p[pointi], p[newMasteri]));
                     }
                 }
             }
@@ -3751,7 +3747,7 @@ void Foam::snappyLayerDriver::addLayers
             );
             fvMesh& newMesh = newMeshPtr();
 
-            // get timing, but more importantly get memory information
+            // Get timing, but more importantly get memory information
             addProfiling(grow, "snappyHexMesh::layers::updateMesh");
 
             //?necessary? Update fields
@@ -3783,9 +3779,9 @@ void Foam::snappyLayerDriver::addLayers
 
             // Count number of added cells
             label nAddedCells = 0;
-            forAll(cellNLayers, cellI)
+            forAll(cellNLayers, celli)
             {
-                if (cellNLayers[cellI] > 0)
+                if (cellNLayers[celli] > 0)
                 {
                     nAddedCells++;
                 }
@@ -3815,20 +3811,20 @@ void Foam::snappyLayerDriver::addLayers
                 labelList meshToNewMesh(mesh.nFaces(), -1);
                 for
                 (
-                    label faceI = newMesh.nInternalFaces();
-                    faceI < newMesh.nFaces();
-                    faceI++
+                    label facei = newMesh.nInternalFaces();
+                    facei < newMesh.nFaces();
+                    facei++
                 )
                 {
-                    label newMeshFaceI = map().faceMap()[faceI];
-                    if (newMeshFaceI != -1)
+                    label newMeshFacei = map().faceMap()[facei];
+                    if (newMeshFacei != -1)
                     {
-                        meshToNewMesh[newMeshFaceI] = faceI;
+                        meshToNewMesh[newMeshFacei] = facei;
                     }
                 }
 
                 List<labelPair> newMeshBaffles(baffles.size());
-                label newI = 0;
+                label newi = 0;
                 forAll(baffles, i)
                 {
                     const labelPair& p = baffles[i];
@@ -3839,10 +3835,10 @@ void Foam::snappyLayerDriver::addLayers
                     );
                     if (newMeshBaffle[0] != -1 && newMeshBaffle[1] != -1)
                     {
-                        newMeshBaffles[newI++] = newMeshBaffle;
+                        newMeshBaffles[newi++] = newMeshBaffle;
                     }
                 }
-                newMeshBaffles.setSize(newI);
+                newMeshBaffles.setSize(newi);
 
                 internalBaffles = meshRefinement::subsetBaffles
                 (
@@ -4003,23 +3999,23 @@ void Foam::snappyLayerDriver::addLayers
             //  - and point originating from duplicate
             for
             (
-                label faceI = mesh.nInternalFaces();
-                faceI < mesh.nFaces();
-                faceI++
+                label facei = mesh.nInternalFaces();
+                facei < mesh.nFaces();
+                facei++
             )
             {
-                label oldFaceI = map().faceMap()[faceI];
-                if (oldFaceI != -1 && oldBaffleFace[oldFaceI])
+                label oldFacei = map().faceMap()[facei];
+                if (oldFacei != -1 && oldBaffleFace[oldFacei])
                 {
-                    const face& f = mesh.faces()[faceI];
+                    const face& f = mesh.faces()[facei];
                     forAll(f, fp)
                     {
-                        label pointI = f[fp];
-                        label oldPointI = map().pointMap()[pointI];
+                        label pointi = f[fp];
+                        label oldPointi = map().pointMap()[pointi];
 
-                        if (pointToMaster[oldPointI] != -1)
+                        if (pointToMaster[oldPointi] != -1)
                         {
-                            candidates.append(pointI);
+                            candidates.append(pointi);
                         }
                     }
                 }
@@ -4050,19 +4046,19 @@ void Foam::snappyLayerDriver::addLayers
             pointToMaster.setSize(mesh.nPoints());
             pointToMaster = -1;
 
-            forAll(newToOld, newI)
+            forAll(newToOld, newi)
             {
-                const labelList& oldPoints = newToOld[newI];
+                const labelList& oldPoints = newToOld[newi];
                 if (oldPoints.size() > 1)
                 {
                     labelList meshPoints
                     (
                         UIndirectList<label>(candidates, oldPoints)
                     );
-                    label masterI = min(meshPoints);
+                    label masteri = min(meshPoints);
                     forAll(meshPoints, i)
                     {
-                        pointToMaster[meshPoints[i]] = masterI;
+                        pointToMaster[meshPoints[i]] = masteri;
                     }
                 }
             }
@@ -4075,10 +4071,10 @@ void Foam::snappyLayerDriver::addLayers
 
     // Count duplicate points
     label nPointPairs = 0;
-    forAll(pointToMaster, pointI)
+    forAll(pointToMaster, pointi)
     {
-        label otherPointI = pointToMaster[pointI];
-        if (otherPointI != -1)
+        label otherPointi = pointToMaster[pointi];
+        if (otherPointi != -1)
         {
             nPointPairs++;
         }
@@ -4099,13 +4095,13 @@ void Foam::snappyLayerDriver::addLayers
               + ".obj"
             );
             Info<< "Points to be merged to " << str.name() << endl;
-            forAll(pointToMaster, pointI)
+            forAll(pointToMaster, pointi)
             {
-                label otherPointI = pointToMaster[pointI];
-                if (otherPointI != -1)
+                label otherPointi = pointToMaster[pointi];
+                if (otherPointi != -1)
                 {
-                    const point& pt = mesh.points()[pointI];
-                    const point& otherPt = mesh.points()[otherPointI];
+                    const point& pt = mesh.points()[pointi];
+                    const point& otherPt = mesh.points()[otherPointi];
                     str.write(linePointRef(pt, otherPt));
                 }
             }
@@ -4147,15 +4143,15 @@ void Foam::snappyLayerDriver::addLayers
             // layers.
             scalarField newFaceRealThickness(mesh.nFaces(), 0.0);
             scalarField newFaceWantedThickness(mesh.nFaces(), 0.0);
-            forAll(newFaceRealThickness, faceI)
+            forAll(newFaceRealThickness, facei)
             {
-                label oldFaceI = faceMap[faceI];
-                if (oldFaceI >= 0)
+                label oldFacei = faceMap[facei];
+                if (oldFacei >= 0)
                 {
-                    scalar& realThick = newFaceRealThickness[faceI];
-                    realThick = max(realThick, faceRealThickness[oldFaceI]);
-                    scalar& wanted = newFaceWantedThickness[faceI];
-                    wanted = max(wanted, faceWantedThickness[oldFaceI]);
+                    scalar& realThick = newFaceRealThickness[facei];
+                    realThick = max(realThick, faceRealThickness[oldFacei]);
+                    scalar& wanted = newFaceWantedThickness[facei];
+                    wanted = max(wanted, faceWantedThickness[oldFacei]);
                 }
             }
             faceRealThickness.transfer(newFaceRealThickness);
@@ -4248,16 +4244,16 @@ void Foam::snappyLayerDriver::doLayers
     // Patches that need to get a layer
     DynamicList<label> patchIDs(numLayers.size());
     label nFacesWithLayers = 0;
-    forAll(numLayers, patchI)
+    forAll(numLayers, patchi)
     {
-        if (numLayers[patchI] > 0)
+        if (numLayers[patchi] > 0)
         {
-            const polyPatch& pp = mesh.boundaryMesh()[patchI];
+            const polyPatch& pp = mesh.boundaryMesh()[patchi];
 
             if (!pp.coupled())
             {
-                patchIDs.append(patchI);
-                nFacesWithLayers += mesh.boundaryMesh()[patchI].size();
+                patchIDs.append(patchi);
+                nFacesWithLayers += mesh.boundaryMesh()[patchi].size();
             }
             else
             {
@@ -4270,19 +4266,19 @@ void Foam::snappyLayerDriver::doLayers
 
     // Add contributions from faceZones that get layers
     const faceZoneMesh& fZones = mesh.faceZones();
-    forAll(fZones, zoneI)
+    forAll(fZones, zonei)
     {
-        label mpI, spI;
+        label mpi, spi;
         surfaceZonesInfo::faceZoneType fzType;
-        meshRefiner_.getFaceZoneInfo(fZones[zoneI].name(), mpI, spI, fzType);
+        meshRefiner_.getFaceZoneInfo(fZones[zonei].name(), mpi, spi, fzType);
 
-        if (numLayers[mpI] > 0)
+        if (numLayers[mpi] > 0)
         {
-            nFacesWithLayers += fZones[zoneI].size();
+            nFacesWithLayers += fZones[zonei].size();
         }
-        if (numLayers[spI] > 0)
+        if (numLayers[spi] > 0)
         {
-            nFacesWithLayers += fZones[zoneI].size();
+            nFacesWithLayers += fZones[zonei].size();
         }
     }
 
@@ -4325,16 +4321,16 @@ void Foam::snappyLayerDriver::doLayers
             {
                 // Add contributions from faceZones that get layers
                 const faceZoneMesh& fZones = mesh.faceZones();
-                forAll(fZones, zoneI)
+                forAll(fZones, zonei)
                 {
-                    const faceZone& fZone = fZones[zoneI];
+                    const faceZone& fZone = fZones[zonei];
                     const word& fzName = fZone.name();
 
-                    label mpI, spI;
+                    label mpi, spi;
                     surfaceZonesInfo::faceZoneType fzType;
-                    meshRefiner_.getFaceZoneInfo(fzName, mpI, spI, fzType);
+                    meshRefiner_.getFaceZoneInfo(fzName, mpi, spi, fzType);
 
-                    if (numLayers[mpI] > 0 || numLayers[spI])
+                    if (numLayers[mpi] > 0 || numLayers[spi])
                     {
                         forAll(fZone, i)
                         {
@@ -4351,12 +4347,12 @@ void Foam::snappyLayerDriver::doLayers
 
             for
             (
-                label faceI = mesh.nInternalFaces();
-                faceI < mesh.nFaces();
-                faceI++
+                label facei = mesh.nInternalFaces();
+                facei < mesh.nFaces();
+                facei++
             )
             {
-                if (intOrCoupled[faceI] && isExtrudedZoneFace[faceI])
+                if (intOrCoupled[facei] && isExtrudedZoneFace[facei])
                 {
                     faceZoneOnCoupledFace = true;
                     break;
@@ -4378,30 +4374,30 @@ void Foam::snappyLayerDriver::doLayers
                 << endl;
 
             scalarField cellWeights(mesh.nCells(), 1);
-            forAll(numLayers, patchI)
+            forAll(numLayers, patchi)
             {
-                if (numLayers[patchI] > 0)
+                if (numLayers[patchi] > 0)
                 {
-                    const polyPatch& pp = mesh.boundaryMesh()[patchI];
+                    const polyPatch& pp = mesh.boundaryMesh()[patchi];
                     forAll(pp.faceCells(), i)
                     {
-                        cellWeights[pp.faceCells()[i]] += numLayers[patchI];
+                        cellWeights[pp.faceCells()[i]] += numLayers[patchi];
                     }
                 }
             }
 
             // Add contributions from faceZones that get layers
             const faceZoneMesh& fZones = mesh.faceZones();
-            forAll(fZones, zoneI)
+            forAll(fZones, zonei)
             {
-                const faceZone& fZone = fZones[zoneI];
+                const faceZone& fZone = fZones[zonei];
                 const word& fzName = fZone.name();
 
-                label mpI, spI;
+                label mpi, spi;
                 surfaceZonesInfo::faceZoneType fzType;
-                meshRefiner_.getFaceZoneInfo(fzName, mpI, spI, fzType);
+                meshRefiner_.getFaceZoneInfo(fzName, mpi, spi, fzType);
 
-                if (numLayers[mpI] > 0)
+                if (numLayers[mpi] > 0)
                 {
                     // Get the owner side for unflipped faces, neighbour side
                     // for flipped ones
@@ -4410,18 +4406,18 @@ void Foam::snappyLayerDriver::doLayers
                     {
                         if (cellIDs[i] >= 0)
                         {
-                            cellWeights[cellIDs[i]] += numLayers[mpI];
+                            cellWeights[cellIDs[i]] += numLayers[mpi];
                         }
                     }
                 }
-                if (numLayers[spI] > 0)
+                if (numLayers[spi] > 0)
                 {
                     const labelList& cellIDs = fZone.masterCells();
                     forAll(cellIDs, i)
                     {
                         if (cellIDs[i] >= 0)
                         {
-                            cellWeights[cellIDs[i]] += numLayers[mpI];
+                            cellWeights[cellIDs[i]] += numLayers[mpi];
                         }
                     }
                 }

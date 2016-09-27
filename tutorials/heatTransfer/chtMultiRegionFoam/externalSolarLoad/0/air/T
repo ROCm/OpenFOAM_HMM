@@ -57,10 +57,10 @@ boundaryField
         value           uniform 300;
         inletValue      uniform 300;
         Tnbr            T;
-        kappa           fluidThermo;
+        kappaMethod     fluidThermo;
         QrNbr           none;
         Qr              Qr;
-        kappaName       none;
+        kappa           none;
     }
     air_to_solid
     {
@@ -68,10 +68,10 @@ boundaryField
         value           uniform 300;
         inletValue      uniform 300;
         Tnbr            T;
-        kappa           fluidThermo;
+        kappaMethod     fluidThermo;
         QrNbr           none;
         Qr              Qr;
-        kappaName       none;
+        kappa           none;
     }
 }
 

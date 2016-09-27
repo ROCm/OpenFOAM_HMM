@@ -110,9 +110,9 @@ bool Foam::functionObjects::runTimeControls::minMaxCondition::apply()
         return satisfied;
     }
 
-    forAll(fieldNames_, fieldI)
+    forAll(fieldNames_, fieldi)
     {
-        const word& fieldName = fieldNames_[fieldI];
+        const word& fieldName = fieldNames_[fieldi];
 
         const word valueType =
             state_.objectResultType(functionObjectName_, fieldName);

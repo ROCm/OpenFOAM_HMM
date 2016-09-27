@@ -33,12 +33,12 @@ Foam::findCellParticle::findCellParticle
     const vector& position,
     const label celli,
     const label tetFacei,
-    const label tetPtI,
+    const label tetPti,
     const point& end,
     const label data
 )
 :
-    particle(mesh, position, celli, tetFacei, tetPtI),
+    particle(mesh, position, celli, tetFacei, tetPti),
     end_(end),
     data_(data)
 {}

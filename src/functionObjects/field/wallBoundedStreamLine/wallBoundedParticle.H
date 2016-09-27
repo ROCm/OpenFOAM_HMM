@@ -112,9 +112,9 @@ protected:
 
         //- Particle is on diagonal edge:
         //      const face& f = mesh.faces()[tetFace()]
-        //      label faceBasePtI = mesh.tetBasePtIs()[facei];
-        //      label diagPtI = (faceBasePtI+diagEdge_)%f.size();
-        //      const edge e(f[faceBasePtI], f[diagPtI]);
+        //      label faceBasePti = mesh.tetBasePtIs()[facei];
+        //      label diagPti = (faceBasePti+diagEdge_)%f.size();
+        //      const edge e(f[faceBasePti], f[diagPti]);
         label diagEdge_;
 
 
@@ -130,7 +130,7 @@ protected:
         void crossDiagonalEdge();
 
         //- Track through single triangle
-        scalar trackFaceTri(const vector& endPosition, label& minEdgeI);
+        scalar trackFaceTri(const vector& endPosition, label& minEdgei);
 
         //- Is current triangle in the track direction
         bool isTriAlongTrack(const point& endPosition) const;
@@ -225,7 +225,7 @@ public:
             const vector& position,
             const label celli,
             const label tetFacei,
-            const label tetPtI,
+            const label tetPti,
             const label meshEdgeStart,
             const label diagEdge
         );

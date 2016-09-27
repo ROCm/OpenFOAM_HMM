@@ -135,19 +135,19 @@ void Foam::functionObjects::externalCoupled::removeReadFiles() const
 
     Log << type() << ": removing all read files" << endl;
 
-    forAll(regionGroupNames_, regionI)
+    forAll(regionGroupNames_, regioni)
     {
-        const word& compName = regionGroupNames_[regionI];
+        const word& compName = regionGroupNames_[regioni];
 
         const labelList& groups = regionToGroups_[compName];
         forAll(groups, i)
         {
-            label groupI = groups[i];
-            const wordRe& groupName = groupNames_[groupI];
+            label groupi = groups[i];
+            const wordRe& groupName = groupNames_[groupi];
 
-            forAll(groupReadFields_[groupI], fieldI)
+            forAll(groupReadFields_[groupi], fieldi)
             {
-                const word& fieldName = groupReadFields_[groupI][fieldI];
+                const word& fieldName = groupReadFields_[groupi][fieldi];
                 rm
                 (
                     groupDir(commsDir_, compName, groupName)
@@ -168,19 +168,19 @@ void Foam::functionObjects::externalCoupled::removeWriteFiles() const
 
     Log << type() << ": removing all write files" << endl;
 
-    forAll(regionGroupNames_, regionI)
+    forAll(regionGroupNames_, regioni)
     {
-        const word& compName = regionGroupNames_[regionI];
+        const word& compName = regionGroupNames_[regioni];
 
         const labelList& groups = regionToGroups_[compName];
         forAll(groups, i)
         {
-            label groupI = groups[i];
-            const wordRe& groupName = groupNames_[groupI];
+            label groupi = groups[i];
+            const wordRe& groupName = groupNames_[groupi];
 
-            forAll(groupReadFields_[groupI], fieldI)
+            forAll(groupReadFields_[groupi], fieldi)
             {
-                const word& fieldName = groupReadFields_[groupI][fieldI];
+                const word& fieldName = groupReadFields_[groupi][fieldi];
                 rm
                 (
                     groupDir(commsDir_, compName, groupName)
@@ -252,20 +252,20 @@ void Foam::functionObjects::externalCoupled::readColumns
 
         // Read data from file and send to destination processor
 
-        for (label procI = 0; procI < Pstream::nProcs(); procI++)
+        for (label proci = 0; proci < Pstream::nProcs(); proci++)
         {
             // Temporary storage
             List<scalarField> values(nColumns);
 
-            // Number of rows to read for processor procI
-            label procNRows = globalFaces.localSize(procI);
+            // Number of rows to read for processor proci
+            label procNRows = globalFaces.localSize(proci);
 
-            forAll(values, columnI)
+            forAll(values, columni)
             {
-                values[columnI].setSize(procNRows);
+                values[columni].setSize(procNRows);
             }
 
-            for (label rowI = 0; rowI < procNRows; rowI++)
+            for (label rowi = 0; rowi < procNRows; rowi++)
             {
                 // Get a line
                 do
@@ -273,8 +273,8 @@ void Foam::functionObjects::externalCoupled::readColumns
                     if (!masterFilePtr().good())
                     {
                         FatalIOErrorInFunction(masterFilePtr())
-                            << "Trying to read data for processor " << procI
-                            << " row " << rowI
+                            << "Trying to read data for processor " << proci
+                            << " row " << rowi
                             << ". Does your file have as many rows as there are"
                             << " patch faces (" << globalFaces.size()
                             << ") ?" << exit(FatalIOError);
@@ -285,14 +285,14 @@ void Foam::functionObjects::externalCoupled::readColumns
 
                 IStringStream lineStr(line);
 
-                for (label columnI = 0; columnI < nColumns; columnI++)
+                for (label columni = 0; columni < nColumns; columni++)
                 {
-                    lineStr >> values[columnI][rowI];
+                    lineStr >> values[columni][rowi];
                 }
             }
 
-            // Send to procI
-            UOPstream str(procI, pBufs);
+            // Send to proci
+            UOPstream str(proci, pBufs);
             str << values;
         }
     }
@@ -322,14 +322,14 @@ void Foam::functionObjects::externalCoupled::readLines
 
         // Read line from file and send to destination processor
 
-        for (label procI = 0; procI < Pstream::nProcs(); procI++)
+        for (label proci = 0; proci < Pstream::nProcs(); proci++)
         {
-            // Number of rows to read for processor procI
-            label procNRows = globalFaces.localSize(procI);
+            // Number of rows to read for processor proci
+            label procNRows = globalFaces.localSize(proci);
 
-            UOPstream toProc(procI, pBufs);
+            UOPstream toProc(proci, pBufs);
 
-            for (label rowI = 0; rowI < procNRows; rowI++)
+            for (label rowi = 0; rowi < procNRows; rowi++)
             {
                 // Get a line
                 do
@@ -337,8 +337,8 @@ void Foam::functionObjects::externalCoupled::readLines
                     if (!masterFilePtr().good())
                     {
                         FatalIOErrorInFunction(masterFilePtr())
-                            << "Trying to read data for processor " << procI
-                            << " row " << rowI
+                            << "Trying to read data for processor " << proci
+                            << " row " << rowi
                             << ". Does your file have as many rows as there are"
                             << " patch faces (" << globalFaces.size()
                             << ") ?" << exit(FatalIOError);
@@ -358,7 +358,7 @@ void Foam::functionObjects::externalCoupled::readLines
 
     // Read lines from PstreamBuffers
     UIPstream str(Pstream::masterNo(), pBufs);
-    for (label rowI = 0; rowI < nRows; rowI++)
+    for (label rowi = 0; rowi < nRows; rowi++)
     {
         string line(str);
         lines << line.c_str() << nl;
@@ -399,9 +399,9 @@ void Foam::functionObjects::externalCoupled::writeGeometry
     DynamicList<face> allMeshesFaces;
     DynamicField<point> allMeshesPoints;
 
-    forAll(meshes, meshI)
+    forAll(meshes, meshi)
     {
-        const fvMesh& mesh = meshes[meshI];
+        const fvMesh& mesh = meshes[meshi];
         const polyBoundaryMesh& pbm = mesh.boundaryMesh();
 
         const labelList patchIDs
@@ -422,9 +422,9 @@ void Foam::functionObjects::externalCoupled::writeGeometry
         {
             const polyPatch& p = pbm[patchIDs[i]];
 
-            forAll(p, pI)
+            forAll(p, pi)
             {
-                allFaceIDs.append(p.start()+pI);
+                allFaceIDs.append(p.start()+pi);
             }
         }
 
@@ -445,18 +445,18 @@ void Foam::functionObjects::externalCoupled::writeGeometry
             uniquePointIDs
         );
 
-        label procI = Pstream::myProcNo();
+        label proci = Pstream::myProcNo();
 
         List<pointField> collectedPoints(Pstream::nProcs());
-        collectedPoints[procI] = pointField(mesh.points(), uniquePointIDs);
+        collectedPoints[proci] = pointField(mesh.points(), uniquePointIDs);
         Pstream::gatherList(collectedPoints);
 
         List<faceList> collectedFaces(Pstream::nProcs());
-        faceList& patchFaces = collectedFaces[procI];
+        faceList& patchFaces = collectedFaces[proci];
         patchFaces = allPatch.localFaces();
-        forAll(patchFaces, faceI)
+        forAll(patchFaces, facei)
         {
-            inplaceRenumber(pointToGlobal, patchFaces[faceI]);
+            inplaceRenumber(pointToGlobal, patchFaces[facei]);
         }
         Pstream::gatherList(collectedFaces);
 
@@ -465,19 +465,19 @@ void Foam::functionObjects::externalCoupled::writeGeometry
             // Append and renumber
             label nPoints = allMeshesPoints.size();
 
-            forAll(collectedPoints, procI)
+            forAll(collectedPoints, proci)
             {
-                allMeshesPoints.append(collectedPoints[procI]);
+                allMeshesPoints.append(collectedPoints[proci]);
 
             }
             face newFace;
-            forAll(collectedFaces, procI)
+            forAll(collectedFaces, proci)
             {
-                const faceList& procFaces = collectedFaces[procI];
+                const faceList& procFaces = collectedFaces[proci];
 
-                forAll(procFaces, faceI)
+                forAll(procFaces, facei)
                 {
-                    const face& f = procFaces[faceI];
+                    const face& f = procFaces[facei];
 
                     newFace.setSize(f.size());
                     forAll(f, fp)
@@ -487,7 +487,7 @@ void Foam::functionObjects::externalCoupled::writeGeometry
                     allMeshesFaces.append(newFace);
                 }
 
-                nPoints += collectedPoints[procI].size();
+                nPoints += collectedPoints[proci].size();
             }
         }
 
@@ -573,10 +573,10 @@ void Foam::functionObjects::externalCoupled::checkOrder
 
 void Foam::functionObjects::externalCoupled::readData()
 {
-    forAll(regionGroupNames_, regionI)
+    forAll(regionGroupNames_, regioni)
     {
-        const word& compName = regionGroupNames_[regionI];
-        const wordList& regionNames = regionGroupRegions_[regionI];
+        const word& compName = regionGroupNames_[regioni];
+        const wordList& regionNames = regionGroupRegions_[regioni];
 
         // Get the meshes for the region-group
         UPtrList<const fvMesh> meshes(regionNames.size());
@@ -590,13 +590,13 @@ void Foam::functionObjects::externalCoupled::readData()
 
         forAll(groups, i)
         {
-            label groupI = groups[i];
-            const wordRe& groupName = groupNames_[groupI];
-            const wordList& fieldNames = groupReadFields_[groupI];
+            label groupi = groups[i];
+            const wordRe& groupName = groupNames_[groupi];
+            const wordList& fieldNames = groupReadFields_[groupi];
 
-            forAll(fieldNames, fieldI)
+            forAll(fieldNames, fieldi)
             {
-                const word& fieldName = fieldNames[fieldI];
+                const word& fieldName = fieldNames[fieldi];
 
                 bool ok = readData<scalar>
                 (
@@ -643,10 +643,10 @@ void Foam::functionObjects::externalCoupled::readData()
 
 void Foam::functionObjects::externalCoupled::writeData() const
 {
-    forAll(regionGroupNames_, regionI)
+    forAll(regionGroupNames_, regioni)
     {
-        const word& compName = regionGroupNames_[regionI];
-        const wordList& regionNames = regionGroupRegions_[regionI];
+        const word& compName = regionGroupNames_[regioni];
+        const wordList& regionNames = regionGroupRegions_[regioni];
 
         // Get the meshes for the region-group
         UPtrList<const fvMesh> meshes(regionNames.size());
@@ -660,13 +660,13 @@ void Foam::functionObjects::externalCoupled::writeData() const
 
         forAll(groups, i)
         {
-            label groupI = groups[i];
-            const wordRe& groupName = groupNames_[groupI];
-            const wordList& fieldNames = groupWriteFields_[groupI];
+            label groupi = groups[i];
+            const wordRe& groupName = groupNames_[groupi];
+            const wordList& fieldNames = groupWriteFields_[groupi];
 
-            forAll(fieldNames, fieldI)
+            forAll(fieldNames, fieldi)
             {
-                const word& fieldName = fieldNames[fieldI];
+                const word& fieldName = fieldNames[fieldi];
 
                 bool ok = writeData<scalar>
                 (
@@ -736,8 +736,8 @@ void Foam::functionObjects::externalCoupled::initialise()
 
         forAll(groups, i)
         {
-            label groupI = groups[i];
-            const wordRe& groupName = groupNames_[groupI];
+            label groupi = groups[i];
+            const wordRe& groupName = groupNames_[groupi];
 
             bool exists = false;
             if (Pstream::master())
@@ -938,26 +938,26 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
     if (log)
     {
         Info<< type() << ": Communicating with regions:" << endl;
-        forAll(regionGroupNames_, rgI)
+        forAll(regionGroupNames_, rgi)
         {
-            //const wordList& regionNames = regionGroupRegions_[rgI];
-            const word& compName = regionGroupNames_[rgI];
+            //const wordList& regionNames = regionGroupRegions_[rgi];
+            const word& compName = regionGroupNames_[rgi];
 
             Info<< "Region: " << compName << endl << incrIndent;
             const labelList& groups = regionToGroups_[compName];
             forAll(groups, i)
             {
-                label groupI = groups[i];
-                const wordRe& groupName = groupNames_[groupI];
+                label groupi = groups[i];
+                const wordRe& groupName = groupNames_[groupi];
 
                 Info<< indent << "patchGroup: " << groupName << "\t"
                     << endl
                     << incrIndent
                     << indent << "Reading fields: "
-                    << groupReadFields_[groupI]
+                    << groupReadFields_[groupi]
                     << endl
                     << indent << "Writing fields: "
-                    << groupWriteFields_[groupI]
+                    << groupWriteFields_[groupi]
                     << endl
                     << decrIndent;
             }
@@ -971,15 +971,15 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
     //       should already be written - but just make sure
     if (Pstream::master())
     {
-        forAll(regionGroupNames_, rgI)
+        forAll(regionGroupNames_, rgi)
         {
-            const word& compName = regionGroupNames_[rgI];
+            const word& compName = regionGroupNames_[rgi];
 
             const labelList& groups = regionToGroups_[compName];
             forAll(groups, i)
             {
-                label groupI = groups[i];
-                const wordRe& groupName = groupNames_[groupI];
+                label groupi = groups[i];
+                const wordRe& groupName = groupNames_[groupi];
 
                 fileName dir(groupDir(commsDir_, compName, groupName));
                 if (!isDir(dir))

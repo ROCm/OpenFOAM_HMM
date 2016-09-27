@@ -37,7 +37,7 @@ Description
     patchProbes
     {
         type            patchProbes;
-        functionObjectLibs ( "libsampling.so" );
+        libs            ( "libsampling.so" );
 
         // Name of the directory for probe data
         name            patchProbes;
@@ -46,14 +46,11 @@ Description
         patches         (".*inl.*");
 
         // Write at same frequency as fields
-        outputControl   outputTime;
-        outputInterval  1;
+        writeControl    writeTime;
+        writeInterval   1;
 
         // Fields to be probed
-        fields
-        (
-            p U
-        );
+        fields          (p U);
 
         // Locations to probe. These get snapped onto the nearest point
         // on the selected patches

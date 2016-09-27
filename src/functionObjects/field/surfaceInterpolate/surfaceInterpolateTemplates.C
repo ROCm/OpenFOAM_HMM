@@ -51,7 +51,7 @@ void Foam::functionObjects::surfaceInterpolate::interpolateFields()
         if (fieldMap.found(fld.name()))
         {
             //const word sName = "interpolate(" + fld.name() + ')';
-            const word& sName = fieldMap[fld.name()];
+            word& sName = fieldMap[fld.name()];
 
             if (obr_.found(sName))
             {

@@ -32,15 +32,15 @@ boundaryField
     windshield_to_cabin
     {
         type            humidityTemperatureCoupledMixed;
-        kappa           solidThermo;
-        kappaName       none;
+        kappaMethod     solidThermo;
+        kappa           none;
         value           uniform 260;
     }
     exterior
     {
         type            externalWallHeatFluxTemperature;
-        kappa           solidThermo;
-        kappaName       none;
+        kappaMethod     solidThermo;
+        kappa           none;
         h               uniform 10;
         Ta              uniform 260;
         value           uniform 260;

@@ -41,7 +41,7 @@ Description
     dsmcFields1
     {
         type        dsmcFields;
-        functionObjectLibs ("libutilityFunctionObjects.so");
+        libs        ("libutilityFunctionObjects.so");
         ...
     }
     \endverbatim

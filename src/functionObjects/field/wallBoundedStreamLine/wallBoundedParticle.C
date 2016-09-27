@@ -56,10 +56,10 @@ Foam::edge Foam::wallBoundedParticle::currentEdge() const
     }
     else
     {
-        label faceBasePtI = mesh_.tetBasePtIs()[tetFace()];
-        label diagPtI = (faceBasePtI+diagEdge_)%f.size();
+        label faceBasePti = mesh_.tetBasePtIs()[tetFace()];
+        label diagPti = (faceBasePti+diagEdge_)%f.size();
 
-        return edge(f[faceBasePtI], f[diagPtI]);
+        return edge(f[faceBasePti], f[diagPti]);
     }
 }
 
@@ -135,7 +135,7 @@ void Foam::wallBoundedParticle::crossDiagonalEdge()
 
     const Foam::face& f = mesh_.faces()[tetFace()];
 
-    // tetPtI starts from 1, goes up to f.size()-2
+    // tetPti starts from 1, goes up to f.size()-2
 
     if (tetPt() == diagEdge_)
     {
@@ -165,7 +165,7 @@ void Foam::wallBoundedParticle::crossDiagonalEdge()
 Foam::scalar Foam::wallBoundedParticle::trackFaceTri
 (
     const vector& endPosition,
-    label& minEdgeI
+    label& minEdgei
 )
 {
     // Track p from position to endPosition
@@ -175,7 +175,7 @@ Foam::scalar Foam::wallBoundedParticle::trackFaceTri
 
     // Check which edge intersects the trajectory.
     // Project trajectory onto triangle
-    minEdgeI = -1;
+    minEdgei = -1;
     scalar minS = 1;        // end position
 
     edge currentE(-1, -1);
@@ -217,13 +217,13 @@ Foam::scalar Foam::wallBoundedParticle::trackFaceTri
                 if (s >= 0 && s < minS)
                 {
                     minS = s;
-                    minEdgeI = i;
+                    minEdgei = i;
                 }
             }
         }
     }
 
-    if (minEdgeI != -1)
+    if (minEdgei != -1)
     {
         position() += minS*(endPosition-position());
     }
@@ -299,12 +299,12 @@ Foam::wallBoundedParticle::wallBoundedParticle
     const vector& position,
     const label celli,
     const label tetFacei,
-    const label tetPtI,
+    const label tetPti,
     const label meshEdgeStart,
     const label diagEdge
 )
 :
-    particle(mesh, position, celli, tetFacei, tetPtI),
+    particle(mesh, position, celli, tetFacei, tetPti),
     meshEdgeStart_(meshEdgeStart),
     diagEdge_(diagEdge)
 {}

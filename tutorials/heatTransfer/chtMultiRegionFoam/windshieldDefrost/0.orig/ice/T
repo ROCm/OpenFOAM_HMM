@@ -34,16 +34,16 @@ boundaryField
         type            compressible::turbulentTemperatureCoupledBaffleMixed;
         value           uniform 260;
         Tnbr            T;
-        kappa           fluidThermo;
-        kappaName       none;
+        kappaMethod     fluidThermo;
+        kappa           none;
     }
     ice_to_exterior
     {
         type            compressible::turbulentTemperatureCoupledBaffleMixed;
         value           uniform 260;
         Tnbr            T;
-        kappa           fluidThermo;
-        kappaName       none;
+        kappaMethod     fluidThermo;
+        kappa           none;
     }
 }
 

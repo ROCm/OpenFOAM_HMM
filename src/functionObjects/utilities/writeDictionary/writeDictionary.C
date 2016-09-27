@@ -50,14 +50,14 @@ namespace functionObjects
 
 bool Foam::functionObjects::writeDictionary::tryDirectory
 (
-    const label dictI,
+    const label dicti,
     const word& location,
     bool& firstDict
 )
 {
     IOobject dictIO
     (
-        dictNames_[dictI],
+        dictNames_[dicti],
         location,
         obr_,
         IOobject::MUST_READ,
@@ -69,7 +69,7 @@ bool Foam::functionObjects::writeDictionary::tryDirectory
     {
         IOdictionary dict(dictIO);
 
-        if (dict.digest() != digests_[dictI])
+        if (dict.digest() != digests_[dicti])
         {
             if (firstDict)
             {
@@ -84,7 +84,7 @@ bool Foam::functionObjects::writeDictionary::tryDirectory
 
             IOobject::writeDivider(Info);
 
-            digests_[dictI] = dict.digest();
+            digests_[dicti] = dict.digest();
         }
 
         return true;

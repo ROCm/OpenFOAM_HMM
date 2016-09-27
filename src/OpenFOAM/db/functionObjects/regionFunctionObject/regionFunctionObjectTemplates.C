@@ -51,7 +51,7 @@ const ObjectType& Foam::functionObjects::regionFunctionObject::lookupObject
 template<class ObjectType>
 bool Foam::functionObjects::regionFunctionObject::store
 (
-    const word& fieldName,
+    word& fieldName,
     const tmp<ObjectType>& tfield,
     bool cacheable
 )
@@ -89,6 +89,10 @@ bool Foam::functionObjects::regionFunctionObject::store
         if (fieldName.size() && fieldName != tfield().name())
         {
             tfield.ref().rename(fieldName);
+        }
+        else
+        {
+            fieldName = tfield().name();
         }
 
         obr_.objectRegistry::store(tfield.ptr());

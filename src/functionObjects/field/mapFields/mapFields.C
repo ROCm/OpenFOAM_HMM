@@ -87,7 +87,7 @@ void Foam::functionObjects::mapFields::createInterpolation
         meshToMesh::interpolationMethodNames_[mapMethodName]
     );
 
-    // Lookup corresponding AMI method
+    // Lookup corresponding AMi method
     word patchMapMethodName =
         AMIPatchToPatchInterpolation::interpolationMethodToWord
         (

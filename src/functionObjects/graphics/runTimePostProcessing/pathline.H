@@ -104,7 +104,7 @@ protected:
         //- Add the pathlines to the renderer
         void addLines
         (
-            const label frameI,
+            const label framei,
             vtkActor* actor,
             vtkPolyData* data
         ) const;

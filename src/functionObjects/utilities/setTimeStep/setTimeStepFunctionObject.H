@@ -40,7 +40,7 @@ Description
     setTimeStep1
     {
         type        setTimeStep;
-        functionObjectLibs ("libutilityFunctionObjects.so");
+        libs        ("libutilityFunctionObjects.so");
         ...
     }
     \endverbatim

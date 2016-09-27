@@ -64,16 +64,16 @@ bool Foam::functionObjects::readFields::loadField(const word& fieldName)
         {
             // Store field on mesh database
             Log << "    Reading " << fieldName << endl;
-            tmp<VolFieldType> tvf(new VolFieldType(fieldHeader, mesh_));
-            regionFunctionObject::store(fieldName, tvf);
+            VolFieldType* vfPtr(new VolFieldType(fieldHeader, mesh_));
+            mesh_.objectRegistry::store(vfPtr);
             return true;
         }
         else if (fieldHeader.typeHeaderOk<SurfaceFieldType>(false))
         {
             // Store field on mesh database
             Log << "    Reading " << fieldName << endl;
-            tmp<SurfaceFieldType> tsf(new SurfaceFieldType(fieldHeader, mesh_));
-            regionFunctionObject::store(fieldName, tsf);
+            SurfaceFieldType* sfPtr(new SurfaceFieldType(fieldHeader, mesh_));
+            mesh_.objectRegistry::store(sfPtr);
             return true;
         }
     }
