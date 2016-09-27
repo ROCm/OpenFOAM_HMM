@@ -1,5 +1,7 @@
 ensight/file/ensightFile.C
 ensight/file/ensightGeoFile.C
+ensight/part/ensightCells.C
+ensight/part/ensightFaces.C
 ensight/read/ensightReadFile.C
 ensight/type/ensightPTraits.C
 
