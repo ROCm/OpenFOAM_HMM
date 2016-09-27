@@ -28,56 +28,51 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<>
-const char* const Foam::ensightPTraits<Foam::scalar>::typeName =
-    Foam::pTraits<Foam::scalar>::typeName;
+const char* const
+Foam::ensightPTraits<Foam::scalar>::typeName = "scalar";
 
 template<>
 const Foam::direction
 Foam::ensightPTraits<Foam::scalar>::componentOrder[] = {0};
 
+
 template<>
-const char* const Foam::ensightPTraits<Foam::vector>::typeName =
-    Foam::pTraits<Foam::vector>::typeName;
+const char* const
+Foam::ensightPTraits<Foam::vector>::typeName = "vector";
 
 template<>
 const Foam::direction
 Foam::ensightPTraits<Foam::vector>::componentOrder[] = {0, 1, 2};
 
+
+// use mag(sphericalTensor) instead
 template<>
-const char* const Foam::ensightPTraits<Foam::sphericalTensor>::typeName =
-    Foam::pTraits<Foam::scalar>::typeName;
+const char* const
+Foam::ensightPTraits<Foam::sphericalTensor>::typeName = "scalar";
+
 
 template<>
 const Foam::direction
 Foam::ensightPTraits<Foam::sphericalTensor>::componentOrder[] = {0};
 
 template<>
-const char* const Foam::ensightPTraits<Foam::symmTensor>::typeName =
-    "tensor symm";
+const char* const
+Foam::ensightPTraits<Foam::symmTensor>::typeName = "tensor symm";
 
 
 template<>
 const Foam::direction
 Foam::ensightPTraits<Foam::symmTensor>::componentOrder[] = {0, 3, 5, 1, 2, 4};
 
+
 template<>
-const char* const Foam::ensightPTraits<Foam::tensor>::typeName =
-    "tensor asym";
+const char* const
+Foam::ensightPTraits<Foam::tensor>::typeName = "tensor asym";
 
 template<>
 const Foam::direction
 Foam::ensightPTraits<Foam::tensor>::componentOrder[] =
-{
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8
-};
+    { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
 
 
 // ************************************************************************* //

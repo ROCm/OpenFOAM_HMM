@@ -1,3 +1,8 @@
+ensight/file/ensightFile.C
+ensight/file/ensightGeoFile.C
+ensight/read/ensightReadFile.C
+ensight/type/ensightPTraits.C
+
 vtk/vtkUnstructuredReader.C
 nas/NASCore.C
 starcd/STARCDCore.C
@@ -8,7 +13,6 @@ setWriters = sampledSetWriters
 
 $(setWriters)/writers.C
 $(setWriters)/ensight/ensightSetWriterRunTime.C
-$(setWriters)/ensight/ensightPTraits.C
 $(setWriters)/gnuplot/gnuplotSetWriterRunTime.C
 $(setWriters)/jplot/jplotSetWriterRunTime.C
 $(setWriters)/raw/rawSetWriterRunTime.C
