@@ -25,6 +25,7 @@ License
 
 #include "ensightFile.H"
 #include "error.H"
+#include "UList.H"
 
 #include <cstring>
 #include <sstream>
@@ -306,5 +307,77 @@ Foam::Ostream& Foam::ensightFile::writeBinaryHeader()
     return *this;
 }
 
+
+//
+// Convenience Output Methods
+//
+
+void Foam::ensightFile::beginPart(const label index)
+{
+    write("part");
+    newline();
+    write(index+1); // Ensight starts with 1
+    newline();
+}
+
+
+void Foam::ensightFile::beginParticleCoordinates(const label nparticles)
+{
+    write("particle coordinates");
+    newline();
+    write(nparticles, 8); // unusual width
+    newline();
+}
+
+
+void Foam::ensightFile::writeList
+(
+    const UList<scalar>& field
+)
+{
+    forAll(field, i)
+    {
+        if (std::isnan(field[i]))
+        {
+            writeUndef();
+        }
+        else
+        {
+            write(field[i]);
+        }
+
+        newline();
+    }
+}
+
+
+void Foam::ensightFile::writeList
+(
+    const UList<scalar>& field,
+    const labelUList& idList
+)
+{
+    if (notNull(idList))
+    {
+        forAll(idList, i)
+        {
+            if (idList[i] >= field.size() || std::isnan(field[idList[i]]))
+            {
+                writeUndef();
+            }
+            else
+            {
+                write(field[idList[i]]);
+            }
+
+            newline();
+        }
+    }
+    else
+    {
+        // no idList => perNode
+        writeList(field);
+    }
+}
 
 // ************************************************************************* //

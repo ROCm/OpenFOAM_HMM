@@ -28,7 +28,7 @@ Description
     Specification of a valid Ensight file-name.
 
     Spaces must be quoted,
-    no '*' wildcards, not '%' (structured block continuation).
+    no '*' wildcards, no '%' (structured block continuation).
 
     Overall line length within case file is limited to 1024, but this is not
     yet addresssed.
@@ -80,15 +80,16 @@ public:
         //- Is this character valid for an ensight file-name
         inline static bool valid(char);
 
+
     // Member operators
 
-        // Assignment
+    // Assignment (disabled)
 
-            void operator=(const fileName&) = delete;
-            void operator=(const word&) = delete;
-            void operator=(const string&) = delete;
-            void operator=(const std::string&) = delete;
-            void operator=(const char*) = delete;
+        void operator=(const fileName&) = delete;
+        void operator=(const word&) = delete;
+        void operator=(const string&) = delete;
+        void operator=(const std::string&) = delete;
+        void operator=(const char*) = delete;
 
 };
 

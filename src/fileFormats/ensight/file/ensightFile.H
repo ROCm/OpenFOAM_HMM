@@ -38,6 +38,7 @@ Description
 
 #include "ensightFileName.H"
 #include "ensightVarName.H"
+#include "UList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,9 +81,13 @@ class ensightFile
 
 public:
 
-    // Forward declarations
-    class FileName;
-    class VarName;
+    // Static Member Functions
+
+        //- Return a null ensightFile
+        inline static const ensightFile& null()
+        {
+            return NullObjectRef<ensightFile>();
+        }
 
 
     // Constructors
@@ -172,6 +177,28 @@ public:
 
         //- Add carriage return to ascii stream
         void newline();
+
+
+    // Convenience Output Methods
+
+        //- Begin a part (0-based index).
+        void beginPart(const label index);
+
+        //- Begin a "particle coordinates" block (measured data)
+        void beginParticleCoordinates(const label nparticles);
+
+        //- Write a list of floats as "%12.5e" or as binary
+        //  With carriage return after each value (ascii stream)
+        void writeList(const UList<scalar>& field);
+
+        //- Write an indirect list of scalars as "%12.5e" or as binary
+        //  With carriage return after each value (ascii stream)
+        void writeList
+        (
+            const UList<scalar>& field,
+            const labelUList& idList
+        );
+
 };
 
 

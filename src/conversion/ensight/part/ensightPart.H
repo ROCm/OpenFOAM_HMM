@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -137,18 +137,6 @@ protected:
 
         //- Check for fully defined fields
         bool isFieldDefined(const List<scalar>&) const;
-
-        //- Write the part header
-        void writeHeader(ensightFile&, bool withDescription=false) const;
-
-        //- Write a scalar field for idList
-        //  A null reference for idList writes the perNode values
-        void writeFieldList
-        (
-            ensightFile& os,
-            const List<scalar>& field,
-            const labelUList& idList
-        ) const;
 
         //- Track points used
         virtual localPoints calcLocalPoints() const

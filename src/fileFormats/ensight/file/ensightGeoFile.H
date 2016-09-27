@@ -61,6 +61,15 @@ class ensightGeoFile
 
 public:
 
+    // Static Member Functions
+
+        //- Return a null ensightGeoFile
+        inline static const ensightGeoFile& null()
+        {
+            return NullObjectRef<ensightGeoFile>();
+        }
+
+
     // Constructors
 
         //- Construct from pathname.
@@ -89,6 +98,18 @@ public:
 
         //- Write keyword with trailing newline
         virtual Ostream& writeKeyword(const keyType& key);
+
+
+    // Convenience Output Methods
+
+        using ensightFile::beginPart;
+
+        //- Begin a "part" (0-based index), with a description.
+        void beginPart(const label index, const string& description);
+
+        //- Begin a "coordinates" block
+        void beginCoordinates(const label npoints);
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

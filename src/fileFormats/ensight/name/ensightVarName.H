@@ -63,9 +63,7 @@ class VarName
         //- Strip invalid characters
         inline void stripInvalid();
 
-
 public:
-
 
     // Constructors
 
@@ -87,12 +85,11 @@ public:
 
     // Member operators
 
-        // Assignment
-
-            void operator=(const word&) = delete;
-            void operator=(const string&) = delete;
-            void operator=(const std::string&) = delete;
-            void operator=(const char*) = delete;
+    // Assignment (disabled)
+        void operator=(const word&) = delete;
+        void operator=(const string&) = delete;
+        void operator=(const std::string&) = delete;
+        void operator=(const char*) = delete;
 
 };
 

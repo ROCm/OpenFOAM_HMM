@@ -35,17 +35,25 @@ License
 
 void Foam::ensightGeoFile::initialize()
 {
+    writeBinaryHeader();
+
+    // Description line 1
+    write("Ensight Geometry File");
+    newline();
+
+    // Description line 2
     #ifdef OPENFOAM_PLUS
-    string desc2("Written by OpenFOAM+ " STRING_QUOTE(OPENFOAM_PLUS));
+    write(string("Written by OpenFOAM+ " STRING_QUOTE(OPENFOAM_PLUS)));
     #else
-    string desc2("Written by OpenFOAM-" + string(Foam::FOAMversion));
+    write(string("Written by OpenFOAM-" + string(Foam::FOAMversion)));
     #endif
 
-    writeBinaryHeader();
-    write("Ensight Geometry File");  newline(); // description line 1
-    write(desc2);                    newline(); // description line 2
-    write("node id assign");         newline();
-    write("element id assign");      newline();
+    newline();
+    write("node id assign");
+    newline();
+
+    write("element id assign");
+    newline();
 }
 
 
@@ -87,9 +95,35 @@ Foam::ensightGeoFile::~ensightGeoFile()
 Foam::Ostream& Foam::ensightGeoFile::writeKeyword(const keyType& key)
 {
     // ensure we get ensightFile::write(const string&)
-    write(static_cast<const string&>(key)); newline();
+    write(static_cast<const string&>(key));
+    newline();
 
     return *this;
+}
+
+
+//
+// Convenience Output Methods
+//
+
+void Foam::ensightGeoFile::beginPart
+(
+    const label index,
+    const string& description
+)
+{
+    beginPart(index);
+    write(description);
+    newline();
+}
+
+
+void Foam::ensightGeoFile::beginCoordinates(const label npoints)
+{
+    write("coordinates");
+    newline();
+    write(npoints);
+    newline();
 }
 
 

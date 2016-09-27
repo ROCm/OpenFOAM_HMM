@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,72 +29,6 @@ Description
 #include "ensightPart.H"
 #include "dictionary.H"
 #include "IOstreams.H"
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::ensightPart::writeHeader
-(
-    ensightFile& os,
-    bool withDescription
-) const
-{
-    os.write("part");
-    os.newline();
-
-    os.write(number() + 1);   // Ensight starts with 1
-    os.newline();
-
-    if (withDescription)
-    {
-        os.write(name());
-        os.newline();
-    }
-}
-
-
-void Foam::ensightPart::writeFieldList
-(
-    ensightFile& os,
-    const List<scalar>& field,
-    const labelUList& idList
-) const
-{
-    if (notNull(idList))
-    {
-        forAll(idList, i)
-        {
-            if (idList[i] >= field.size() || std::isnan(field[idList[i]]))
-            {
-                os.writeUndef();
-            }
-            else
-            {
-                os.write(field[idList[i]]);
-            }
-
-            os.newline();
-        }
-    }
-    else
-    {
-        // no idList => perNode
-        forAll(field, i)
-        {
-            if (std::isnan(field[i]))
-            {
-                os.writeUndef();
-            }
-            else
-            {
-                os.write(field[i]);
-            }
-
-            os.newline();
-        }
-    }
-}
-
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -176,12 +110,8 @@ void Foam::ensightPart::writeGeometry
         const localPoints ptList = calcLocalPoints();
         const labelUList& pointMap = ptList.list;
 
-        writeHeader(os, true);
-
-        // write points
-        os.writeKeyword("coordinates");
-        os.write(ptList.nPoints);
-        os.newline();
+        os.beginPart(number(), name());
+        os.beginCoordinates(ptList.nPoints);
 
         for (direction cmpt=0; cmpt < point::nComponents; ++cmpt)
         {

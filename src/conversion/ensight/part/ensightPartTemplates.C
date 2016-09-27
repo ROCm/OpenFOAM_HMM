@@ -41,7 +41,7 @@ void Foam::ensightPart::writeField
 {
     if (this->size() && field.size())
     {
-        writeHeader(os);
+        os.beginPart(number());
 
         if (perNode)
         {
@@ -49,7 +49,8 @@ void Foam::ensightPart::writeField
             for (direction d=0; d < pTraits<Type>::nComponents; ++d)
             {
                 label cmpt = ensightPTraits<Type>::componentOrder[d];
-                writeFieldList(os, field.component(cmpt), labelUList::null());
+
+                os.writeList(field.component(cmpt));
             }
         }
         else
@@ -65,7 +66,8 @@ void Foam::ensightPart::writeField
                     for (direction d=0; d < pTraits<Type>::nComponents; ++d)
                     {
                         label cmpt = ensightPTraits<Type>::componentOrder[d];
-                        writeFieldList(os, field.component(cmpt), idList);
+
+                        os.writeList(field.component(cmpt), idList);
                     }
                 }
             }
