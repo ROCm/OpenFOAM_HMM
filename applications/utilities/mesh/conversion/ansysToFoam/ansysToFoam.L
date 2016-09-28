@@ -24,6 +24,9 @@ License
 Application
     ansysToFoam
 
+Group
+    grpMeshConversionUtilities
+
 Description
     Converts an ANSYS input mesh file, exported from I-DEAS,
     to OpenFOAM format.

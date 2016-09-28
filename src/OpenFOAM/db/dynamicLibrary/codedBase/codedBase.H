@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +43,7 @@ namespace Foam
 {
 
 // Forward declaration of classes
+class Ostream;
 class dynamicCode;
 class dynamicCodeContext;
 class dlLibraryTable;
@@ -83,13 +84,16 @@ class codedBase
         void createLibrary(dynamicCode&, const dynamicCodeContext&) const;
 
         //- Disallow default bitwise copy construct
-        codedBase(const codedBase&);
+        codedBase(const codedBase&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const codedBase&);
+        void operator=(const codedBase&) = delete;
 
 
 protected:
+
+        //- Write code-dictionary contents
+        static void writeCodeDict(Ostream&, const dictionary&);
 
         //- Update library as required
         void updateLibrary

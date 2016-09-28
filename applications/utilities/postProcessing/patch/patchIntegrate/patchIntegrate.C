@@ -24,6 +24,9 @@ License
 Application
     patchIntegrate
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates the integral of the specified field over the specified patch.
 

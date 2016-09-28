@@ -24,6 +24,9 @@ License
 Application
     datToFoam
 
+Group
+    grpMeshConversionUtilities
+
 Description
     Reads in a datToFoam mesh file and outputs a points file.  Used in
     conjunction with blockMesh.

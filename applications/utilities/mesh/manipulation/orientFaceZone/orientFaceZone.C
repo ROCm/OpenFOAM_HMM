@@ -24,6 +24,9 @@ License
 Application
     orientFaceZone
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Corrects orientation of faceZone.
 

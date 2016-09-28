@@ -24,6 +24,9 @@ License
 Application
     equilibriumFlameT
 
+Group
+    grpThermophysicalUtilities
+
 Description
     Calculates the equilibrium flame temperature for a given fuel and
     pressure for a range of unburnt gas temperatures and equivalence

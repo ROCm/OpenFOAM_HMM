@@ -8,15 +8,15 @@ cd ${0%/*} || exit 1    # Run from this directory
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 # Get version info and arch-path
 . $WM_PROJECT_DIR/etc/config.sh/functions
-_foamSource $($WM_PROJECT_DIR/bin/foamEtcFile config.sh/libccmio)
+_foamSource $($WM_PROJECT_DIR/bin/foamEtcFile config.sh/ccmio)
 
 set -x
 
-# Build libccmio (.so)
-$WM_THIRD_PARTY_DIR/makeCCMIO
+# Build libccmio (.a|.so)
+$WM_THIRD_PARTY_DIR/makeCCMIO lib # libso
 
 if [ -e $CCMIO_ARCH_PATH/include/libccmio/ccmio.h \
-  -a -e $FOAM_EXT_LIBBIN/libccmio.so ]
+  -a \( -e $CCMIO_ARCH_PATH/lib/libccmio.a -o $FOAM_EXT_LIBBIN/libccmio.so \) ]
 then
     wmake ccm26ToFoam
 fi

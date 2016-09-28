@@ -24,6 +24,9 @@ License
 Class
     Foam::RBD::joints::Rx
 
+Group
+    grpRigidBodyDynamicsJoints
+
 Description
     Revolute joint for rotation about the x-axis
 

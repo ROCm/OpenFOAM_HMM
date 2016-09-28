@@ -24,6 +24,9 @@ License
 Application
     gmshToFoam
 
+group
+    grpMeshConversionUtilities
+
 Description
     Reads .msh file as written by Gmsh.
 

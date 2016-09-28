@@ -12,6 +12,7 @@ $(generalSources)/codedSource/codedSource.C
 $(generalSources)/semiImplicitSource/semiImplicitSource.C
 
 derivedSources=sources/derived
+$(derivedSources)/acousticDampingSource/acousticDampingSource.C
 $(derivedSources)/actuationDiskSource/actuationDiskSource.C
 $(derivedSources)/buoyancyForce/buoyancyForce.C
 $(derivedSources)/buoyancyForce/buoyancyForceIO.C

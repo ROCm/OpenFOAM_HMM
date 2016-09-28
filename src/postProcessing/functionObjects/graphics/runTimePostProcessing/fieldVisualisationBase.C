@@ -43,6 +43,7 @@ License
 #include "vtkSphereSource.h"
 #include "vtkTextActor.h"
 #include "vtkTextProperty.h"
+#include "vtkCellDataToPointData.h"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -151,6 +152,9 @@ void Foam::fieldVisualisationBase::addScalarBar
     const vector textColour = colours_["text"]->value(position);
 
     // Work-around to supply our own scalarbar title
+    // - Default scalar bar title text is scales by the scalar bar box
+    //   dimensions so if the title is a long string, the text is shrunk to fit
+    //   Instead, suppress title and set the title using a vtkTextActor
     vtkSmartPointer<vtkTextActor> titleActor =
         vtkSmartPointer<vtkTextActor>::New();
     sbar->SetTitle(" ");
@@ -170,19 +174,18 @@ void Foam::fieldVisualisationBase::addScalarBar
     titleActor->GetPositionCoordinate()->
         SetCoordinateSystemToNormalizedViewport();
 
-/*
-    sbar->SetTitle(scalarBar_.title_.c_str());
-    sbar->GetTitleTextProperty()->SetColor
-    (
-        textColour[0],
-        textColour[1],
-        textColour[2]
-    );
-    sbar->GetTitleTextProperty()->SetFontSize(scalarBar_.fontSize_);
-    sbar->GetTitleTextProperty()->ShadowOff();
-    sbar->GetTitleTextProperty()->BoldOn();
-    sbar->GetTitleTextProperty()->ItalicOff();
-*/
+    // How to use the standard scalar bar text
+    // sbar->SetTitle(scalarBar_.title_.c_str());
+    // sbar->GetTitleTextProperty()->SetColor
+    // (
+    //     textColour[0],
+    //     textColour[1],
+    //     textColour[2]
+    // );
+    // sbar->GetTitleTextProperty()->SetFontSize(scalarBar_.fontSize_);
+    // sbar->GetTitleTextProperty()->ShadowOff();
+    // sbar->GetTitleTextProperty()->BoldOn();
+    // sbar->GetTitleTextProperty()->ItalicOff();
 
     sbar->GetLabelTextProperty()->SetColor
     (
@@ -217,8 +220,8 @@ void Foam::fieldVisualisationBase::addScalarBar
         sbar->SetWidth(0.75);
         sbar->SetHeight(0.07);
         sbar->SetBarRatio(0.5);
-//        sbar->SetHeight(0.1);
-//        sbar->SetTitleRatio(0.01);
+        // sbar->SetHeight(0.1);
+        // sbar->SetTitleRatio(0.01);
         sbar->SetTextPositionToPrecedeScalarBar();
     }
 
@@ -228,10 +231,10 @@ void Foam::fieldVisualisationBase::addScalarBar
         scalarBar_.position_.second() + sbar->GetHeight()
     );
 
-//    sbar->DrawFrameOn();
-//    sbar->DrawBackgroundOn();
-//    sbar->UseOpacityOff();
-//    sbar->VisibilityOff();
+    // sbar->DrawFrameOn();
+    // sbar->DrawBackgroundOn();
+    // sbar->UseOpacityOff();
+    // sbar->VisibilityOff();
     sbar->VisibilityOn();
 
     renderer->AddActor(sbar);
@@ -266,18 +269,20 @@ void Foam::fieldVisualisationBase::setField
             lut->SetVectorMode(vtkScalarsToColors::MAGNITUDE);
 
             // Configure the mapper
-            mapper->SelectColorArray(colourFieldName.c_str());
-            mapper->SetScalarRange(range_.first(), range_.second());
-
-            // Set to use either cell or point data
             const char* fieldName = colourFieldName.c_str();
-            if (pData->GetCellData()->HasArray(fieldName) == 1)
-            {
-                mapper->SetScalarModeToUseCellFieldData();
-            }
-            else if (pData->GetPointData()->HasArray(fieldName) == 1)
+            mapper->SelectColorArray(fieldName);
+
+            // Set to use either point or cell data
+            // Note: if both point and cell data exists, preferentially
+            //       choosing point data.  This is often the case when using
+            //       glyphs
+            if (pData->GetPointData()->HasArray(fieldName) == 1)
             {
                 mapper->SetScalarModeToUsePointFieldData();
+            }
+            else if (pData->GetCellData()->HasArray(fieldName) == 1)
+            {
+                mapper->SetScalarModeToUseCellFieldData();
             }
             else
             {
@@ -286,7 +291,7 @@ void Foam::fieldVisualisationBase::setField
                     << "- assuming point data";
                 mapper->SetScalarModeToUsePointFieldData();
             }
-
+            mapper->SetScalarRange(range_.first(), range_.second());
             mapper->SetColorModeToMapScalars();
             mapper->SetLookupTable(lut);
             mapper->ScalarVisibilityOn();
@@ -322,9 +327,37 @@ void Foam::fieldVisualisationBase::addGlyphs
     glyph->ScalingOn();
     bool ok = true;
 
-    label nComponents =
-        data->GetPointData()->GetArray(scaleFieldName.c_str())
-            ->GetNumberOfComponents();
+    // Determine whether we have scalar or vector data
+    label nComponents = -1;
+    const char* scaleFieldNameChar = scaleFieldName.c_str();
+    if (data->GetPointData()->HasArray(scaleFieldNameChar) == 1)
+    {
+        nComponents =
+            data->GetPointData()->GetArray(scaleFieldNameChar)
+                ->GetNumberOfComponents();
+    }
+    else if (data->GetCellData()->HasArray(scaleFieldNameChar) == 1)
+    {
+        // Need to convert cell data to point data
+        vtkSmartPointer<vtkCellDataToPointData> cellToPoint =
+            vtkSmartPointer<vtkCellDataToPointData>::New();
+        cellToPoint->SetInputData(data);
+        cellToPoint->Update();
+        vtkDataSet* pds = cellToPoint->GetOutput();
+        vtkDataArray* pData = pds->GetPointData()->GetArray(scaleFieldNameChar);
+
+        // Store in main vtkPolyData
+        data->GetPointData()->AddArray(pData);
+
+        nComponents = pData->GetNumberOfComponents();
+    }
+    else
+    {
+        WarningInFunction
+            << "Glyphs can only be added to scalar or vector data. "
+            << "Unable to process field " << scaleFieldName << endl;
+        return;
+    }
 
     if (nComponents == 1)
     {
@@ -332,9 +365,10 @@ void Foam::fieldVisualisationBase::addGlyphs
             vtkSmartPointer<vtkSphereSource>::New();
         sphere->SetCenter(0, 0, 0);
         sphere->SetRadius(0.5);
-// Setting higher resolution slows the rendering significantly
-//        sphere->SetPhiResolution(20);
-//        sphere->SetThetaResolution(20);
+
+        // Setting higher resolution slows the rendering significantly
+        // sphere->SetPhiResolution(20);
+        // sphere->SetThetaResolution(20);
 
         glyph->SetSourceConnection(sphere->GetOutputPort());
 
@@ -342,18 +376,18 @@ void Foam::fieldVisualisationBase::addGlyphs
         {
             double range[2];
 
-// Can use values to find range
-//            vtkDataArray* values =
-//                data->GetPointData()->GetScalars(scaleFieldName.c_str());
-//            values->GetRange(range);
+            // Can use values to find range
+            // vtkDataArray* values =
+            //     data->GetPointData()->GetScalars(scaleFieldNameChar);
+            // values->GetRange(range);
 
-            // set range accoding to user-supplied limits
+            // Set range accoding to user-supplied limits
             range[0] = range_.first();
             range[1] = range_.second();
             glyph->ClampingOn();
             glyph->SetRange(range);
 
-            // if range[0] != min(value), maxGlyphLength behaviour will not
+            // If range[0] != min(value), maxGlyphLength behaviour will not
             // be correct...
             glyph->SetScaleFactor(maxGlyphLength);
         }
@@ -370,7 +404,7 @@ void Foam::fieldVisualisationBase::addGlyphs
             0,
             0,
             vtkDataObject::FIELD_ASSOCIATION_POINTS,
-            scaleFieldName.c_str()
+            scaleFieldNameChar
         );
     }
     else if (nComponents == 3)
@@ -388,21 +422,21 @@ void Foam::fieldVisualisationBase::addGlyphs
         if (maxGlyphLength > 0)
         {
             vtkDataArray* values =
-                data->GetPointData()->GetVectors(scaleFieldName.c_str());
+                data->GetPointData()->GetVectors(scaleFieldNameChar);
+
             double range[6];
             values->GetRange(range);
 
-/*
             // Attempt to set range for vectors...
-            scalar x0 = sqrt(sqr(range_.first())/3.0);
-            scalar x1 = sqrt(sqr(range_.second())/3.0);
-            range[0] = x0;
-            range[1] = x0;
-            range[2] = x0;
-            range[3] = x1;
-            range[4] = x1;
-            range[5] = x1;
-*/
+            // scalar x0 = sqrt(sqr(range_.first())/3.0);
+            // scalar x1 = sqrt(sqr(range_.second())/3.0);
+            // range[0] = x0;
+            // range[1] = x0;
+            // range[2] = x0;
+            // range[3] = x1;
+            // range[4] = x1;
+            // range[5] = x1;
+
             glyph->ClampingOn();
             glyph->SetRange(range);
             glyph->SetScaleFactor(maxGlyphLength);
@@ -421,7 +455,7 @@ void Foam::fieldVisualisationBase::addGlyphs
             0,
             0,
             vtkDataObject::FIELD_ASSOCIATION_POINTS,
-            scaleFieldName.c_str()
+            scaleFieldNameChar
         );
     }
     else

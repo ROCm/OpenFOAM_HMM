@@ -24,6 +24,10 @@ License
 Application
     stitchMesh
 
+Group
+    grpMeshManipulationUtilities
+
+
 Description
     'Stitches' a mesh.
 

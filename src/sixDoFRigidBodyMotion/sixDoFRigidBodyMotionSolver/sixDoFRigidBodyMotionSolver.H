@@ -24,6 +24,9 @@ License
 Class
     Foam::sixDoFRigidBodyMotionSolver
 
+Group
+   grpMeshMotionSolvers 
+
 Description
     6-DoF solid-body mesh motion solver for an fvMesh.
 

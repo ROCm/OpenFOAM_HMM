@@ -29,7 +29,7 @@ License
     This group contains radiation models
 @}
 
-\defgroup grpRadiationSubModels Radiation sub-models
+\defgroup grpRadiationSubModels Sub-models
 @{
     \ingroup grpRadiationModels
     This group contains radiation sub-models

@@ -18,9 +18,9 @@ echo
 
 if [ -d "$VTK_DIR" -o -d "$ParaView_DIR" ]
 then
-    # ensure CMake gets the correct C++ compiler
+    # ensure CMake gets the correct C/C++ compilers
+    [ -n "$WM_CC" ]  && export CC="$WM_CC"
     [ -n "$WM_CXX" ] && export CXX="$WM_CXX"
-    [ -n "$WM_CC" ] && export CC="$WM_CC"
 
     if type cmake > /dev/null 2>&1
     then

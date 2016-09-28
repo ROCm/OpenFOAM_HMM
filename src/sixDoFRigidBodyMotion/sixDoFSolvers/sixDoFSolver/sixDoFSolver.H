@@ -24,6 +24,9 @@ License
 Class
     Foam::sixDoFSolver
 
+Group
+    grpSixDoFRigidBodySolvers
+
 Description
 
 SourceFiles

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,8 +24,13 @@ License
 Application
     surfaceMeshInfo
 
+Group
+    grpSurfaceUtilities
+
 Description
     Miscellaneous information about surface meshes.
+    To simplify parsing of the output, the normal banner information
+    is suppressed.
 
 Usage
     - surfaceMeshInfo surfaceFile [OPTION]

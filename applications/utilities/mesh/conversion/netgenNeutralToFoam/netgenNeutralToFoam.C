@@ -24,6 +24,9 @@ License
 Application
     netgenNeutralToFoam
 
+Group
+    grpMeshConversionUtilities
+
 Description
     Converts neutral file format as written by Netgen v4.4.
 

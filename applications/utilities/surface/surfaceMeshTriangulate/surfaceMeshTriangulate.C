@@ -24,6 +24,9 @@ License
 Application
     surfaceMeshTriangulate
 
+Group
+    grpSurfaceUtilities
+
 Description
     Extracts surface from a polyMesh. Depending on output surface format
     triangulates faces.

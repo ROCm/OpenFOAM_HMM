@@ -31,7 +31,7 @@ then
     cloneParallelCase motorBike motorBikeLES
 
     # Do the LES case
-    cp lesFiles/Allrun motorBikeLES/
+    \cp lesFiles/Allrun motorBikeLES/
     (cd motorBikeLES && foamRunTutorials)
 fi
 

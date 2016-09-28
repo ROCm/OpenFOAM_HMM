@@ -24,6 +24,9 @@ License
 Application
     surfaceFeatureExtract
 
+Group
+    grpSurfaceUtilities
+
 Description
     Extracts and writes surface features to file. All but the basic feature
     extraction is WIP.

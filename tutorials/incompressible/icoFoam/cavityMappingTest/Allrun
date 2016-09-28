@@ -1,0 +1,15 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+runApplication -s coarseMesh blockMesh -dict system/blockMeshDict.coarse
+
+mkdir constant/coarseMesh
+mv constant/polyMesh constant/coarseMesh
+
+runApplication -s fine blockMesh -dict system/blockMeshDict.fine
+
+runApplication $(getApplication)
+

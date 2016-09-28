@@ -24,6 +24,9 @@ License
 Application
     createBaffles
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Makes internal faces into boundary faces. Does not duplicate points, unlike
     mergeOrSplitBaffles.

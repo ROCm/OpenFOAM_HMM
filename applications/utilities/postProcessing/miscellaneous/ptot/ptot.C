@@ -24,6 +24,9 @@ License
 Application
     ptot
 
+Group
+    grpPostProcessingUtilities
+
 Description
     For each time: calculate the total pressure.
 

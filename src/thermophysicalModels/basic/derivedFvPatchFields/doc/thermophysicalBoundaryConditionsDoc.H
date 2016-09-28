@@ -23,7 +23,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpThermoBoundaryConditions Thermophysical boundary conditions
+\defgroup grpThermoBoundaryConditions Thermophysical
 @{
     \ingroup grpBoundaryConditions
     This group contains thermophysical model boundary conditions

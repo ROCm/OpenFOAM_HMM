@@ -24,6 +24,9 @@ License
 Class
     Foam::combustionModels::infinitelyFastChemistry
 
+Group
+    grpCombustionModels
+
 Description
     Simple infinitely fast chemistry combustion model based on the principle
     mixed is burnt. Additional parameter C is used to distribute the heat

@@ -24,6 +24,9 @@ License
 Application
     foamDataToFluent
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Translates OpenFOAM data to Fluent format.
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,10 +69,17 @@ namespace Foam
 class Time;
 class surfMesh;
 class polyBoundaryMesh;
+class Istream;
+class Ostream;
 
 template<class Face> class MeshedSurface;
 template<class Face> class MeshedSurfaceProxy;
 template<class Face> class UnsortedMeshedSurface;
+
+template<class Face>
+Istream& operator>>(Istream&, MeshedSurface<Face>&);
+template<class Face>
+Ostream& operator<<(Ostream&, const MeshedSurface<Face>&);
 
 /*---------------------------------------------------------------------------*\
                       Class MeshedSurface Declaration
@@ -84,7 +91,7 @@ class MeshedSurface
     public PrimitivePatch<Face, ::Foam::List, pointField, point>,
     public fileFormats::surfaceFormatsCore
 {
-    // friends - despite different face representationsx
+    // friends - despite different face representations
     template<class Face2> friend class MeshedSurface;
     template<class Face2> friend class UnsortedMeshedSurface;
     friend class surfMesh;
@@ -114,6 +121,15 @@ private:
         List<surfZone> zones_;
 
 
+    // Private Member functions
+
+        //- Read/construct from Istream
+        Istream& read(Istream&);
+
+        //- Write to Ostream
+        Ostream& write(Ostream&) const;
+
+
 protected:
 
     // Protected Member functions
@@ -133,7 +149,7 @@ protected:
         //- Non-const access to the faces
         List<Face>& storedFaces()
         {
-            return static_cast<List<Face> &>(*this);
+            return static_cast<List<Face>&>(*this);
         }
 
         //- Non-const access to the zones
@@ -234,8 +250,15 @@ public:
         //- Construct from file name (uses extension to determine type)
         MeshedSurface(const fileName&, const word& ext);
 
+        //- Construct from Istream
+        MeshedSurface(Istream&);
+
         //- Construct from database
-        MeshedSurface(const Time&, const word& surfName="");
+        MeshedSurface
+        (
+            const Time&,
+            const word& surfName = word::null
+        );
 
 
     // Declare run-time constructor selection table
@@ -285,7 +308,11 @@ public:
         );
 
         //- Write to file
-        static void write(const fileName&, const MeshedSurface<Face>&);
+        static void write
+        (
+            const fileName&,
+            const MeshedSurface<Face>&
+        );
 
 
     // Member Functions
@@ -301,7 +328,7 @@ public:
             //- Return const access to the faces
             inline const List<Face>& faces() const
             {
-                return static_cast<const List<Face> &>(*this);
+                return static_cast<const List<Face>&>(*this);
             }
 
             //- Const access to the surface zones.
@@ -353,7 +380,7 @@ public:
             //  Note, optimized to avoid overwriting data (with Xfer::null)
             virtual void reset
             (
-                const Xfer<pointField >& points,
+                const Xfer<pointField>& points,
                 const Xfer<List<Face>>& faces,
                 const Xfer<surfZoneList>& zones
             );
@@ -364,7 +391,7 @@ public:
             (
                 const Xfer<List<point>>& points,
                 const Xfer<List<Face>>& faces,
-                const Xfer<surfZoneList >& zones
+                const Xfer<surfZoneList>& zones
             );
 
             //- Remove invalid faces
@@ -435,7 +462,11 @@ public:
             }
 
             //- Write to database
-            void write(const Time&, const word& surfName="") const;
+            void write
+            (
+                const Time&,
+                const word& surfName = word::null
+            ) const;
 
 
     // Member operators
@@ -444,6 +475,25 @@ public:
 
         //- Conversion operator to MeshedSurfaceProxy
         operator MeshedSurfaceProxy<Face>() const;
+
+
+    // IOstream Operators
+
+        //- Read MeshedSurface from Istream.
+        friend Istream& operator>> <Face>
+        (
+            Istream&,
+            MeshedSurface<Face>&
+        );
+
+
+        //- Write MeshedSurface to Ostream.
+        friend Ostream& operator<< <Face>
+        (
+            Ostream&,
+            const MeshedSurface<Face>&
+        );
+
 };
 
 

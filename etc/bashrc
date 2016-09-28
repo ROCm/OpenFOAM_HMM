@@ -180,6 +180,7 @@ _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/ensight`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/gperftools`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/CGAL`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/scotch`
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/FFTW`
 
 
 # Clean environment paths again. Only remove duplicates

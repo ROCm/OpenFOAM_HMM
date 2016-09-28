@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(readFields, 0);
+    defineTypeNameAndDebug(readFields, 0);
 }
 
 
@@ -54,6 +54,9 @@ Foam::readFields::readFields
     if (isA<fvMesh>(obr_))
     {
         read(dict);
+
+        // Fields should all be present from start time so read on construction
+        execute();
     }
     else
     {
@@ -87,16 +90,28 @@ void Foam::readFields::execute()
 {
     if (active_)
     {
+        if (log_) Info << type() << " " << name_ << ":" << nl;
+
+        bool loaded = false;
         forAll(fieldSet_, fieldI)
         {
             const word& fieldName = fieldSet_[fieldI];
 
-            // If necessary load field
-            loadField<scalar>(fieldName);
-            loadField<vector>(fieldName);
-            loadField<sphericalTensor>(fieldName);
-            loadField<symmTensor>(fieldName);
-            loadField<tensor>(fieldName);
+            // Load field if necessary
+            loaded = loadField<scalar>(fieldName) || loaded;
+            loaded = loadField<vector>(fieldName) || loaded;
+            loaded = loadField<sphericalTensor>(fieldName) || loaded;
+            loaded = loadField<symmTensor>(fieldName) || loaded;
+            loaded = loadField<tensor>(fieldName) || loaded;
+        }
+
+        if (log_)
+        {
+            if (!loaded)
+            {
+                Info<< "    no fields loaded" << endl;
+            }
+            Info<< endl;
         }
     }
 }

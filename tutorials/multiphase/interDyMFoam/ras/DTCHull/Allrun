@@ -5,10 +5,9 @@ cd ${0%/*} || exit 1    # Run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 # copy DTC hull surface from resources folder
-cp $FOAM_TUTORIALS/resources/geometry/DTC-scaled.stl.gz constant/triSurface/
+\cp $FOAM_TUTORIALS/resources/geometry/DTC-scaled.stl.gz constant/triSurface/
 
 runApplication surfaceFeatureExtract
-
 runApplication blockMesh
 
 for i in 1 2 3 4 5 6
@@ -21,18 +20,11 @@ do
 done
 
 runApplication snappyHexMesh -overwrite
-
-\rm -rf 0
-\cp -r 0.org 0
-
+restore0Dir
 runApplication setFields
-
 runApplication decomposePar
-
 runParallel renumberMesh -overwrite
-
 runParallel $(getApplication)
-
 runApplication reconstructPar
 
 #------------------------------------------------------------------------------

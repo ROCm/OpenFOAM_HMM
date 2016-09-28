@@ -24,6 +24,9 @@ License
 Application
     foamMeshToFluent
 
+Group
+    grpMeshConversionUtilities
+
 Description
     Writes out the OpenFOAM mesh in Fluent mesh format.
 

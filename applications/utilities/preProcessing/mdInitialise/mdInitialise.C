@@ -21,6 +21,12 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+    mdInitialise
+
+Group
+    grpPreProcessingUtilities
+
 Description
     Initialises fields for a molecular dynamics (MD) simulation.
 

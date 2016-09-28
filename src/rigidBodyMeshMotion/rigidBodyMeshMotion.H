@@ -24,6 +24,9 @@ License
 Class
     Foam::rigidBodyMeshMotion
 
+Group
+    grpMeshMotionSolvers 
+
 Description
     Rigid-body mesh motion solver for fvMesh.
 

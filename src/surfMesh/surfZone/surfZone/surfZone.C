@@ -116,7 +116,7 @@ void Foam::surfZone::writeDict(Ostream& os) const
         << indent << token::BEGIN_BLOCK << incrIndent << nl;
 
     surfZoneIdentifier::write(os);
-    os.writeKeyword("nFaces") << size() << token::END_STATEMENT << nl;
+    os.writeKeyword("nFaces")    << size()  << token::END_STATEMENT << nl;
     os.writeKeyword("startFace") << start() << token::END_STATEMENT << nl;
 
     os  << decrIndent << indent << token::END_BLOCK << endl;
@@ -135,7 +135,7 @@ bool Foam::surfZone::operator==(const surfZone& rhs) const
 {
     return
     (
-        size() == rhs.size()
+        size()  == rhs.size()
      && start() == rhs.start()
      && geometricType() == rhs.geometricType()
     );

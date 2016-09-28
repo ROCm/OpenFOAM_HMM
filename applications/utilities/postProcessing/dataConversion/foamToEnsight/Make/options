@@ -5,7 +5,8 @@ EXE_INC = \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/fileFormats/lnInclude \
     -I$(LIB_SRC)/sampling/lnInclude \
-    -I$(LIB_SRC)/lagrangian/basic/lnInclude
+    -I$(LIB_SRC)/lagrangian/basic/lnInclude \
+    -I$(LIB_SRC)/conversion/lnInclude
 
 EXE_LIBS = \
     -lfiniteVolume \
@@ -13,5 +14,5 @@ EXE_LIBS = \
     -lfileFormats \
     -lsampling \
     -lgenericPatchFields \
-    -llagrangian
-
+    -llagrangian \
+    -lconversion

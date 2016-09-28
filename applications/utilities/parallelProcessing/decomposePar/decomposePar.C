@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,6 +23,9 @@ License
 
 Application
     decomposePar
+
+Group
+    grpParallelUtilities
 
 Description
     Automatically decomposes a mesh and fields of a case for parallel
@@ -422,7 +425,8 @@ int main(int argc, char *argv[])
                         IOobject::AUTO_WRITE
                     ),
                     mesh,
-                    dimensionedScalar("cellDist", dimless, 0)
+                    dimensionedScalar("cellDist", dimless, -1),
+                    zeroGradientFvPatchScalarField::typeName
                 );
 
                 forAll(procIds, celli)
@@ -430,6 +434,7 @@ int main(int argc, char *argv[])
                    cellDist[celli] = procIds[celli];
                 }
 
+                cellDist.correctBoundaryConditions();
                 cellDist.write();
 
                 Info<< nl << "Wrote decomposition as volScalarField to "

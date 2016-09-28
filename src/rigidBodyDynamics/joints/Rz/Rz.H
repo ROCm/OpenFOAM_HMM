@@ -24,6 +24,9 @@ License
 Class
     Foam::RBD::joints::Rz
 
+Group
+    grpRigidBodyDynamicsJoints
+    
 Description
     Revolute joint for rotation about the z-axis
 

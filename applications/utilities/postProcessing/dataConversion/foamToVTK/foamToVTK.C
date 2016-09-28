@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,6 +23,9 @@ License
 
 Application
     foamToVTK
+
+Group
+    grpPostProcessingUtilities
 
 Description
     Legacy VTK file format writer.
@@ -67,6 +70,9 @@ Usage
 
     \param -noInternal \n
     Do not generate file for mesh, only for patches
+
+    \param -noLagrangian \n
+    Suppress writing lagrangian positions and fields.
 
     \param -noPointValues \n
     No pointFields
@@ -289,6 +295,12 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
+        "noLagrangian",
+        "suppress writing lagrangian positions and fields"
+    );
+
+    argList::addBoolOption
+    (
         "noPointValues",
         "no pointFields"
     );
@@ -333,6 +345,7 @@ int main(int argc, char *argv[])
     const bool doLinks         = !args.optionFound("noLinks");
     bool binary                = !args.optionFound("ascii");
     const bool useTimeName     = args.optionFound("useTimeName");
+    const bool noLagrangian    = args.optionFound("noLagrangian");
 
     // Decomposition of polyhedral cells into tets/pyramids cells
     vtkTopo::decomposePoly     = !args.optionFound("poly");
@@ -403,9 +416,9 @@ int main(int argc, char *argv[])
 
     // VTK/ directory in the case
     fileName fvPath(runTime.path()/"VTK");
-    // Directory of mesh (region0 gets filtered out)
-    fileName regionPrefix = "";
 
+    // Directory of mesh (region0 gets filtered out)
+    fileName regionPrefix;
     if (regionName != polyMesh::defaultRegion)
     {
         fvPath = fvPath/regionName;
@@ -443,43 +456,7 @@ int main(int argc, char *argv[])
         << timer.cpuTimeIncrement() << " s, "
         << mem.update().size() << " kB" << endl;
 
-
-    // Scan for all possible lagrangian clouds
-    HashSet<fileName> allCloudDirs;
-    forAll(timeDirs, timeI)
-    {
-        runTime.setTime(timeDirs[timeI], timeI);
-        fileNameList cloudDirs
-        (
-            readDir
-            (
-                runTime.timePath()/regionPrefix/cloud::prefix,
-                fileName::DIRECTORY
-            )
-        );
-        forAll(cloudDirs, i)
-        {
-            IOobjectList sprayObjs
-            (
-                mesh,
-                runTime.timeName(),
-                cloud::prefix/cloudDirs[i]
-            );
-
-            IOobject* positionsPtr = sprayObjs.lookup(word("positions"));
-
-            if (positionsPtr)
-            {
-                if (allCloudDirs.insert(cloudDirs[i]))
-                {
-                    Info<< "At time: " << runTime.timeName()
-                        << " detected cloud directory : " << cloudDirs[i]
-                        << endl;
-                }
-            }
-        }
-    }
-
+    #include "findClouds.H"
 
     forAll(timeDirs, timeI)
     {
@@ -487,7 +464,7 @@ int main(int argc, char *argv[])
 
         Info<< "Time: " << runTime.timeName() << endl;
 
-        word timeDesc =
+        const word timeDesc =
             useTimeName ? runTime.timeName() : Foam::name(runTime.timeIndex());
 
         // Check for new polyMesh/ and update mesh, fvMeshSubset and cell
@@ -659,7 +636,7 @@ int main(int argc, char *argv[])
               + dtf.size();
 
 
-        // Construct pointMesh only if nessecary since constructs edge
+        // Construct pointMesh only if necessary since constructs edge
         // addressing (expensive on polyhedral meshes)
         if (noPointValues)
         {
@@ -1146,9 +1123,9 @@ int main(int argc, char *argv[])
         //
         //---------------------------------------------------------------------
 
-        forAllConstIter(HashSet<fileName>, allCloudDirs, iter)
+        forAll(cloudNames, cloudNo)
         {
-            const fileName& cloudName = iter.key();
+            const fileName& cloudName = cloudNames[cloudNo];
 
             // Always create the cloud directory.
             mkDir(fvPath/cloud::prefix/cloudName);
@@ -1169,9 +1146,7 @@ int main(int argc, char *argv[])
                 cloud::prefix/cloudName
             );
 
-            IOobject* positionsPtr = sprayObjs.lookup(word("positions"));
-
-            if (positionsPtr)
+            if (sprayObjs.found("positions"))
             {
                 wordList labelNames(sprayObjs.names(labelIOField::typeName));
                 Info<< "        labels            :";
@@ -1306,7 +1281,7 @@ int main(int argc, char *argv[])
                       + "_"
                       + procFile.name()
                     );
-                    if (system(cmd.c_str()) == -1)
+                    if (Foam::system(cmd.c_str()) == -1)
                     {
                         WarningInFunction
                             << "Could not execute command " << cmd << endl;

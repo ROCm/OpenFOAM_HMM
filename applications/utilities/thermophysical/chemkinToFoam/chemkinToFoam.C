@@ -24,6 +24,9 @@ License
 Application
     chemkinToFoam
 
+Group
+    grpSurfaceUtilities
+
 Description
     Converts CHEMKINIII thermodynamics and reaction data files into
     OpenFOAM format.

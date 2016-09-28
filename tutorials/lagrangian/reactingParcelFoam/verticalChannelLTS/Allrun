@@ -7,14 +7,14 @@ cd ${0%/*} || exit 1    # Run from this directory
 # create mesh
 runApplication blockMesh
 
-cp -r 0.org 0
+restore0Dir
 
 # initialise with potentialFoam solution
 runApplication potentialFoam
 
-rm -f 0/phi
+\rm -f 0/phi
 
 # run the solver
-runApplication `getApplication`
+runApplication $(getApplication)
 
 #------------------------------------------------------------------------------

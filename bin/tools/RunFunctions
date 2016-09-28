@@ -41,7 +41,7 @@ isTest()
 
 getNumberOfProcessors()
 {
-    if [ -f $1 ]
+    if [ -f "$1" ]
     then
         expandDictionary $1 | sed -ne 's/^numberOfSubdomains\s*\(.*\);/\1/p'
     fi
@@ -54,7 +54,6 @@ getApplication()
 
 runApplication()
 {
-    LOG_NAME=
     APP_RUN=
     LOG_IGNORE=false
     LOG_APPEND=false
@@ -100,18 +99,18 @@ runApplication()
 
 runParallel()
 {
-    LOG_NAME=
     APP_RUN=
-    # Store any parsed additional arguments e.g. decomposeParDict
-    APP_PARARGS=
     LOG_IGNORE=false
     LOG_APPEND=false
     LOG_SUFFIX=
+
+    # Store any parsed additional arguments e.g. decomposeParDict
+    APP_PARARGS=
     # Check the default decomposeParDict if available
-    nProcs=$(getNumberOfProcessors "system/decomposeParDict")
+    nProcs=$(getNumberOfProcessors system/decomposeParDict)
 
     # Parse options and executable
-    while [ $# -gt 0 ] && [ -z "$APP_RUN" ] ; do
+    while [ $# -gt 0 ] && [ -z "$APP_RUN" ]; do
         key="$1"
         case "$key" in
             -append|-a)
@@ -144,7 +143,7 @@ runParallel()
         shift
     done
 
-    if [ -f log.$SUFFIX ] && [ "$LOG_IGNORE" = "false" ]
+    if [ -f log.$LOG_SUFFIX ] && [ "$LOG_IGNORE" = "false" ]
     then
         echo "$APP_NAME already run on $PWD:" \
              "remove log file 'log.$LOG_SUFFIX' to re-run"
@@ -166,7 +165,7 @@ compileApplication()
 
 cloneCase()
 {
-    if [ -d $2 ]
+    if [ -d "$2" ]
     then
         echo "Case already cloned: remove case directory $2 to clone"
     else
@@ -175,8 +174,34 @@ cloneCase()
         cpfiles="0 system constant"
         for f in $cpfiles
         do
-            cp -r $1/$f $2
+            \cp -r $1/$f $2
         done
+    fi
+}
+
+# Overwrite 0/ with the contents of 0.org/ if it exists.
+# The -processor option to do the processor directories instead
+#
+restore0Dir()
+{
+    if [ "$1" = "-processor" ]
+    then
+        echo "Restore 0/ from 0.org/ for processor directories"
+        [ -d 0.org ] || echo "    Warning: no 0.org/ found"
+
+        # do nonetheless
+        \ls -d processor* | xargs -I {} \rm -rf ./{}/0
+        \ls -d processor* | xargs -I {} \cp -r 0.org ./{}/0 > /dev/null 2>&1
+
+    else
+        echo "Restore 0/ from 0.org/"
+        if [ -d 0.org ]
+        then
+            \rm -rf 0
+            \cp -r 0.org 0 > /dev/null 2>&1
+        else
+            echo "    Warning: no 0.org/ found"
+        fi
     fi
 }
 

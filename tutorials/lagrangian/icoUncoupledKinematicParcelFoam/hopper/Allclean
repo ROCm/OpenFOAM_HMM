@@ -4,11 +4,17 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
-cd hopperInitialState
-cleanCase
+(
+    cd hopperInitialState || exit 1
 
-cd ../hopperEmptying
-cleanCase
-rm -rf 0
+    cleanCase
+)
+
+(
+    cd hopperEmptying || exit 1
+
+    cleanCase
+    rm -rf 0
+)
 
 #------------------------------------------------------------------------------

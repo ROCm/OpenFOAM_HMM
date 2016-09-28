@@ -765,6 +765,13 @@ Foam::genericFvPatchField<Type>::gradientBoundaryCoeffs() const
 
 
 template<class Type>
+const Foam::word& Foam::genericFvPatchField<Type>::actualType() const
+{
+    return actualTypeName_;
+}
+
+
+template<class Type>
 void Foam::genericFvPatchField<Type>::write(Ostream& os) const
 {
     os.writeKeyword("type") << actualTypeName_ << token::END_STATEMENT << nl;

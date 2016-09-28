@@ -24,6 +24,9 @@ License
 Class
     Foam::Trapezoid
 
+Group
+    grpODESolvers
+
 Description
     Trapezoidal ODE solver of order (1)2.
 

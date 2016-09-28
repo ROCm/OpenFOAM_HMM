@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -343,11 +343,27 @@ Foam::MeshedSurface<Face>::MeshedSurface
 
 
 template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface(const fileName& name)
+Foam::MeshedSurface<Face>::MeshedSurface
+(
+    const fileName& name
+)
 :
     ParentType(List<Face>(), pointField())
 {
     read(name);
+}
+
+
+template<class Face>
+Foam::MeshedSurface<Face>::MeshedSurface
+(
+    Istream& is
+)
+:
+    ParentType(List<Face>(), pointField()),
+    zones_()
+{
+    read(is);
 }
 
 

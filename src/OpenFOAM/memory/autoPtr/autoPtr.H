@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -102,6 +102,15 @@ public:
 
             //- Delete object (if the pointer is valid) and set pointer to NULL.
             inline void clear();
+
+
+        // Access
+
+            //- Return reference, without checking pointer validity.
+            inline T& refOrNull();
+
+            //- Return const reference, without checking pointer validity.
+            inline const T& refOrNull() const;
 
 
         // Member operators

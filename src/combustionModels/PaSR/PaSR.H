@@ -24,6 +24,9 @@ License
 Class
     Foam::combustionModels::PaSR
 
+Group
+    grpCombustionModels
+
 Description
     Partially stirred reactor combustion model.  The model calculates a finite
     rate, based on both turbulence and chemistry time scales.  Depending on

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,6 +23,9 @@ License
 
 Application
     surfaceMeshConvertTesting
+
+Group
+    grpSurfaceUtilities
 
 Description
     Converts from one surface mesh format to another, but primarily
@@ -63,6 +66,9 @@ Note
 #include "MeshedSurfaces.H"
 #include "UnsortedMeshedSurfaces.H"
 
+#include "IStringStream.H"
+#include "OStringStream.H"
+
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -81,11 +87,37 @@ int main(int argc, char *argv[])
     argList::validArgs.append("outputFile");
 
     argList::addBoolOption("clean");
-    argList::addBoolOption("orient");
-    argList::addBoolOption("surfMesh");
-    argList::addBoolOption("triSurface");
-    argList::addBoolOption("unsorted");
-    argList::addBoolOption("triFace");
+    argList::addBoolOption
+    (
+        "orient",
+        "check surface orientation"
+    );
+    argList::addBoolOption
+    (
+        "surfMesh",
+        "test surfMesh output"
+    );
+    argList::addBoolOption
+    (
+        "triSurface",
+        "use triSurface for read/write"
+    );
+    argList::addBoolOption
+    (
+        "unsorted",
+        "use UnsortedMeshedSurface instead of MeshedSurface, "
+        "or unsorted output (with -triSurface option)"
+    );
+    argList::addBoolOption
+    (
+        "triFace",
+        "use triFace instead of face"
+    );
+    argList::addBoolOption
+    (
+        "stdout",
+        "ignore output filename and write to stdout"
+    );
 
     argList::addOption
     (
@@ -96,10 +128,11 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
+    const bool     optStdout = args.optionFound("stdout");
     const scalar scaleFactor = args.optionLookupOrDefault("scale", 0.0);
 
     const fileName importName = args[1];
-    const fileName exportName = args[2];
+    const fileName exportName = optStdout ? "-stdout" : args[2];
 
     if (importName == exportName)
     {
@@ -111,7 +144,11 @@ int main(int argc, char *argv[])
     if
     (
         !MeshedSurface<face>::canRead(importName, true)
-     || !MeshedSurface<face>::canWriteType(exportName.ext(), true)
+     ||
+        (
+            !optStdout
+         && !MeshedSurface<face>::canWriteType(exportName.ext(), true)
+        )
     )
     {
         return 1;
@@ -125,6 +162,23 @@ int main(int argc, char *argv[])
         surf.writeStats(Info);
         Info<< endl;
 
+        // check: output to ostream, construct from istream
+        {
+            OStringStream os;
+            os << surf;
+            IStringStream is(os.str());
+
+            // both work:
+            triSurface surf2(is);
+
+            // OR
+            // is.rewind();
+            // triSurface surf2;
+            // is >> surf2;
+
+            // surf2.read(is); // FAIL: private method
+        }
+
         if (args.optionFound("orient"))
         {
             Info<< "Checking surface orientation" << endl;
@@ -153,8 +207,15 @@ int main(int argc, char *argv[])
             Info<< endl;
         }
 
-        // write sorted by region
-        surf.write(exportName, true);
+        if (optStdout)
+        {
+            Info<< surf;
+        }
+        else
+        {
+            // normally write sorted (looks nicer)
+            surf.write(exportName, !args.optionFound("unsorted"));
+        }
     }
     else if (args.optionFound("unsorted"))
     {
@@ -164,6 +225,23 @@ int main(int argc, char *argv[])
         surf.writeStats(Info);
         Info<< endl;
 
+        // check: output to ostream, construct from istream
+        {
+            OStringStream os;
+            os << surf;
+            IStringStream is(os.str());
+
+            // both work:
+            UnsortedMeshedSurface<face> surf2(is);
+
+            // OR
+            // is.rewind();
+            // UnsortedMeshedSurface<face> surf2;
+            // is >> surf2;
+
+            // surf2.read(is);  // FAIL: private method
+        }
+
         if (args.optionFound("orient"))
         {
             Info<< "Checking surface orientation" << endl;
@@ -191,9 +269,16 @@ int main(int argc, char *argv[])
             surf.writeStats(Info);
             Info<< endl;
         }
-        surf.write(exportName);
+
+        if (optStdout)
+        {
+            Info<< surf;
+        }
+        else
+        {
+            surf.write(exportName);
+        }
     }
-#if 1
     else if (args.optionFound("triFace"))
     {
         MeshedSurface<triFace> surf(importName);
@@ -202,6 +287,23 @@ int main(int argc, char *argv[])
         surf.writeStats(Info);
         Info<< endl;
 
+        // check: output to ostream, construct from istream
+        {
+            OStringStream os;
+            os << surf;
+            IStringStream is(os.str());
+
+            // both work:
+            MeshedSurface<face> surf2(is);
+
+            // OR
+            // is.rewind();
+            // MeshedSurface<face> surf2;
+            // is >> surf2;
+
+            // surf2.read(is);  // FAIL: private method
+        }
+
         if (args.optionFound("orient"))
         {
             Info<< "Checking surface orientation" << endl;
@@ -229,9 +331,16 @@ int main(int argc, char *argv[])
             surf.writeStats(Info);
             Info<< endl;
         }
-        surf.write(exportName);
+
+        if (optStdout)
+        {
+            Info<< surf;
+        }
+        else
+        {
+            surf.write(exportName);
+        }
     }
-#endif
     else
     {
         MeshedSurface<face> surf(importName);
@@ -240,6 +349,23 @@ int main(int argc, char *argv[])
         surf.writeStats(Info);
         Info<< endl;
 
+        // check: output to ostream, construct from istream
+        {
+            OStringStream os;
+            os << surf;
+            IStringStream is(os.str());
+
+            // both work:
+            MeshedSurface<face> surf2(is);
+
+            // OR
+            // is.rewind();
+            // MeshedSurface<face> surf2;
+            // is >> surf2;
+
+            // surf2.read(is);  // FAIL: private method
+        }
+
         if (args.optionFound("orient"))
         {
             Info<< "Checking surface orientation" << endl;
@@ -255,7 +381,6 @@ int main(int argc, char *argv[])
             Info<< endl;
         }
 
-
         Info<< "writing " << exportName;
         if (scaleFactor <= 0)
         {
@@ -268,7 +393,15 @@ int main(int argc, char *argv[])
             surf.writeStats(Info);
             Info<< endl;
         }
-        surf.write(exportName);
+
+        if (optStdout)
+        {
+            Info<< surf;
+        }
+        else
+        {
+            surf.write(exportName);
+        }
 
         if (args.optionFound("surfMesh"))
         {
@@ -283,7 +416,6 @@ int main(int argc, char *argv[])
 
             Info<< "runTime.instance() = " << runTime.instance() << endl;
             Info<< "runTime.timeName() = " << runTime.timeName() << endl;
-
 
             Info<< "write MeshedSurface 'yetAnother' via proxy as surfMesh"
                 << endl;
@@ -309,13 +441,10 @@ int main(int argc, char *argv[])
             MeshedSurface<face> surfIn2(runTime, "foobar");
 
             Info<<"surfIn2 = " << surfIn2.size() << endl;
-
             Info<< "surfIn = " << surfIn.size() << endl;
-
 
             Info<< "writing surfMesh as obj = oldSurfIn.obj" << endl;
             surfIn.write("oldSurfIn.obj");
-
 
             Info<< "runTime.instance() = " << runTime.instance() << endl;
 

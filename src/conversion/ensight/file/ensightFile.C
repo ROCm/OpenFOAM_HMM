@@ -182,7 +182,6 @@ Foam::Ostream& Foam::ensightFile::write(const char* value)
     }
 
     return *this;
-
 }
 
 
@@ -282,14 +281,15 @@ Foam::Ostream& Foam::ensightFile::writeKeyword(const keyType& key)
 {
     if (allowUndef_)
     {
-        write(string(key + " undef"));
+        write(string(static_cast<const string&>(key) + " undef"));
         newline();
         write(undefValue_);
         newline();
     }
     else
     {
-        write(key);
+        // ensure we get ensightFile::write(const string&)
+        write(static_cast<const string&>(key));
         newline();
     }
     return *this;

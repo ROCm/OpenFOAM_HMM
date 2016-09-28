@@ -1,0 +1,18 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
+# Parse arguments for library compilation
+targetType=libso
+. $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
+
+if [ -f "$FFTW_ARCH_PATH/include/fftw3.h" ] || \
+   [ "${FFTW_ARCH_PATH##*-}" = system -a -f "/usr/include/fftw3.h" ]
+then
+    wmake $targetType
+else
+    echo
+    echo "Skipping randomProcesses library (no FFTW)"
+    echo
+fi
+
+#------------------------------------------------------------------------------

@@ -24,6 +24,9 @@ License
 Application
     surfaceToPatch
 
+Group
+    grpSurfaceUtilities
+
 Description
     Reads surface and applies surface regioning to a mesh. Uses boundaryMesh
     to do the hard work.

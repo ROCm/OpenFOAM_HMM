@@ -24,6 +24,9 @@ License
 Application
     surfaceSplitByPatch
 
+Group
+    grpSurfaceUtilities
+
 Description
     Writes regions of triSurface to separate files.
 

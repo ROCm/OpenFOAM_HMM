@@ -24,6 +24,9 @@ License
 Application
     fluentMeshToFoam
 
+Group
+    grpMeshConversionUtilities
+
 Description
     Converts a Fluent mesh to OpenFOAM format
     including multiple region and region boundary handling.

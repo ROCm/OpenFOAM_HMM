@@ -24,6 +24,9 @@ License
 Class
     Foam::combustionModels::singleStepCombustion
 
+Group
+    grpCombustionModels
+
 Description
     Base class for combustion models using singleStepReactingMixture.
 

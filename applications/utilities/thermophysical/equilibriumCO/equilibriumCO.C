@@ -24,6 +24,9 @@ License
 Application
     equilibriumCO
 
+Group
+    grpThermophysicalUtilities
+
 Description
     Calculates the equilibrium level of carbon monoxide.
 

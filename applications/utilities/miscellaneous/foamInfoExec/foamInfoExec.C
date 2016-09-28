@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,6 +23,11 @@ License
 
 Application
     foamInfoExec
+    To simplify parsing of the output, The normal banner information
+    is suppressed.
+
+Group
+    grpMiscUtilities
 
 Description
     Interrogates a case and prints information to stdout.

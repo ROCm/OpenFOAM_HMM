@@ -24,6 +24,9 @@ License
 Application
     extrudeToRegionMesh
 
+Group
+    grpMeshGenerationUtilities
+
 Description
     Extrude faceZones (internal or boundary faces) or faceSets (boundary faces
     only) into a separate mesh (as a different region).

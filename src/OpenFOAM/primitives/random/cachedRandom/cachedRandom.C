@@ -66,18 +66,19 @@ Foam::cachedRandom::cachedRandom(const label seed, const label count)
         seed_ = seed;
     }
 
+    // Initialise samples
+    osRandomSeed(seed_);
+
     // Samples will be cached if count > 0
     if (count > 0)
     {
         samples_.setSize(count);
-        sampleI_ = 0;
-    }
+        forAll(samples_, i)
+        {
+            samples_[i] = osRandomDouble();
+        }
 
-    // Initialise samples
-    osRandomSeed(seed_);
-    forAll(samples_, i)
-    {
-        samples_[i] = osRandomDouble();
+        sampleI_ = 0;
     }
 }
 
@@ -90,23 +91,28 @@ Foam::cachedRandom::cachedRandom(const cachedRandom& cr, const bool reset)
     hasGaussSample_(cr.hasGaussSample_),
     gaussSample_(cr.gaussSample_)
 {
+    //if (sampleI_ == -1)
+    //{
+    //    WarningInFunction
+    //        << "Copy constructor called, but samples not being cached. "
+    //        << "This may lead to non-repeatable behaviour" << endl;
+    //
+    //}
+
     if (reset)
     {
         hasGaussSample_ = false;
         gaussSample_ = 0;
-    }
-    if (sampleI_ == -1)
-    {
-        WarningInFunction
-            << "Copy constructor called, but samples not being cached. "
-            << "This may lead to non-repeatable behaviour" << endl;
 
-        osRandomSeed(seed_);
-    }
-
-    if (reset && samples_.size())
-    {
-        sampleI_ = 0;
+        if (samples_.size())
+        {
+            sampleI_ = 0;
+        }
+        else
+        {
+            // Re-initialise the samples
+            osRandomSeed(seed_);
+        }
     }
 }
 

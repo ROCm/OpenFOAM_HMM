@@ -1,27 +1,50 @@
 // check for "points" in any of the result directories
 
 bool meshMoving = false;
-if (Times.size() > 1)
+
+if (timeDirs.size() > 1 && Pstream::master())
 {
-    // We already loaded a mesh (usually from constant). See if any other
-    // points files
-    forAll(Times, timeI)
+    // We already loaded a mesh (usually from constant).
+    // See if any other "polyMesh/points" files exist too.
+
+    const fileName& baseDir = mesh.time().path();
+
+    Info<< "Search for moving mesh ... " << flush;
+    forAll(timeDirs, timeI)
     {
-        if (Times[timeI].name() != mesh.pointsInstance())
-        {
-            IOobject io
+        const word& timeName = timeDirs[timeI].name();
+
+        meshMoving =
+        (
+            timeName != mesh.pointsInstance()
+         && isDir(baseDir/timeName/polyMesh::meshSubDir)
+         && IOobject
             (
                 "points",
-                Times[timeI].name(),
+                timeName,
                 polyMesh::meshSubDir,
                 mesh,
-                IOobject::NO_READ
-            );
-            if (io.typeHeaderOk<pointIOField>(true))
-            {
-                meshMoving = true;
-                break;
-            }
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false  // no register
+            ).typeHeaderOk<pointIOField>(true)
+        );
+
+        if (meshMoving)
+        {
+            break;
         }
     }
+
+    if (meshMoving)
+    {
+        Info<< "found." << nl
+            << "    Writing meshes for every timestep." << endl;
+    }
+    else
+    {
+        Info<< "none detected." << endl;
+    }
 }
+
+reduce(meshMoving, orOp<bool>());

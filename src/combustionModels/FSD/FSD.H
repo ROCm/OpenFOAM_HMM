@@ -24,6 +24,9 @@ License
 Class
     Foam::combustionModels::FSD
 
+Group
+    grpCombustionModels
+
 Description
 
     Flame Surface Dennsity (FDS) combustion model.

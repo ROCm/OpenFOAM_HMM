@@ -62,14 +62,15 @@ functions
         // called at the end of the run
         endCalls
         (
-            "echo \*\*\* writing .bashrc \*\*\*"
-            "cat ~/.bashrc"
-            "echo \*\*\* done \*\*\*"
+            // Note: single quotes to avoid shell expansion
+            "echo '*** listing ~/.bashrc ***'"
+            "cat ~/.bashrc; echo '*** done ***'"
         );
 
-        // called every ouput time
+        // called every output time
         writeCalls
         (
+            // Note: can also backslash to escape shell meta-characters
             "echo \*\*\* writing data \*\*\*"
         );
     }

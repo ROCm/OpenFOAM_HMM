@@ -24,6 +24,9 @@ License
 Class
     Foam::rodas34
 
+Group
+    grpODESolvers
+
 Description
     L-stable, stiffly-accurate embedded Rosenbrock ODE solver of order (3)4.
 

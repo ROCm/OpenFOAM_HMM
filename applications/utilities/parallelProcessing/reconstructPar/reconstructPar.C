@@ -24,6 +24,9 @@ License
 Application
     reconstructPar
 
+Group
+    grpParallelUtilities
+
 Description
     Reconstructs fields of a case that is decomposed for parallel
     execution of OpenFOAM.

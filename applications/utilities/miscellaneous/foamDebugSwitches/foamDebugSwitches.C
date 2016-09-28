@@ -24,6 +24,9 @@ License
 Application
     foamDebugSwitches
 
+Group
+    grpMiscUtilities
+
 Description
     Write out all library debug switches.
 

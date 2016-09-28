@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1129,6 +1129,21 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     // Reset valid directions (could change with rotation)
     geometricD_ = Zero;
     solutionD_ = Zero;
+
+    // Reset cell tree - it gets built from mesh geometry so might have
+    // wrong boxes. It is correct as long as none of the cells leaves
+    // the boxes it is in which most likely is almost never the case except
+    // for tiny displacements. An alternative is to check the displacements
+    // to see if they are tiny - imagine a big windtunnel with a small rotating
+    // object. In this case the processors without the rotating object wouldn't
+    // have to clear any geometry. However your critical path still stays the
+    // same so no time would be gained (unless the decomposition gets weighted).
+    // Small benefit for lots of scope for problems so not done.
+    cellTreePtr_.clear();
+
+    // Note: tet-base decomposition does not get cleared. Ideally your face
+    // decomposition should not change during mesh motion ...
+
 
     meshObject::movePoints<polyMesh>(*this);
     meshObject::movePoints<pointMesh>(*this);

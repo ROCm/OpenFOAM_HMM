@@ -24,6 +24,9 @@ License
 Application
     transformPoints
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Transforms the mesh points in the polyMesh directory according to the
     translate, rotate and scale options.

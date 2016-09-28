@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +35,8 @@ Description
     based on where the field is below the threshold value.  These
     regions ("droplets") can now be analysed.
 
+
+
     Regions:
     - print the regions connected to a user-defined set of patches.
       (in spray calculation these form the liquid core)
@@ -53,6 +55,9 @@ Description
     - write graph of sum, average and deviation of droplet volume per bin
     - write graph of sum, average and deviation of user-defined fields.  For
       volVectorFields these are those of the 3 components and the magnitude.
+    - (optional) write graph of histogram of centroids on iso planes
+      downstream of the injector determined by origin, direction and maxDiameter
+      up to maxDownstream
 
     Example of function object specification:
     \verbatim
@@ -76,6 +81,24 @@ Description
             e3              (0 1 1);
             e1              (1 0 0);
         }
+
+        // Optional downstream iso-plane bins.
+        isoPlanes       true;
+
+            // Plane normal and point definition
+            direction       (1 0 1);
+            origin          (1e-4 0 5e-4);
+
+            // Maximum diameter of the cylinder formed by the origin point
+            // and direction
+            maxDiameter     3e-4;
+
+            // Maximum downstream distance
+            maxDownstream   6e-4;
+
+            // Number of iso-plane bins
+            nDownstreamBins 20;
+
     }
     \endverbatim
 
@@ -176,6 +199,27 @@ class regionSizeDistribution
 
         //- Optional coordinate system
         autoPtr<coordinateSystem> coordSysPtr_;
+
+        // Optional extra definition of bins on planes downstream to the origin
+        // point and maximum diameter
+
+            //- Switch to enable iso-planes sampling
+            bool isoPlanes_;
+
+            //- Optional origin point
+            vector origin_;
+
+            //- Optional plane normal direction
+            vector direction_;
+
+            //- Optional maximum diameter on plane
+            scalar maxDiameter_;
+
+            //- Optional number of bins for
+            scalar nDownstreamBins_;
+
+            //- Optional maximum downstream coordinate from origin
+            scalar maxDownstream_;
 
 
     // Private Member Functions

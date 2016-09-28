@@ -24,6 +24,9 @@ License
 Application
     flowType
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates and writes the flowType of velocity field U.
 

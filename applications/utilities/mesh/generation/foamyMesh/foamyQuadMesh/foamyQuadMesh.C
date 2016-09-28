@@ -24,6 +24,9 @@ License
 Application
     foamyQuadMesh
 
+Group
+    grpMeshGenerationUtilities
+
 Description
     Conformal-Voronoi 2D extruding automatic mesher with grid or read
     initial points and point position relaxation with optional

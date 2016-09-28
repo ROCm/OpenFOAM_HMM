@@ -24,6 +24,9 @@ License
 Application
     surfaceFind
 
+Group
+    grpSurfaceUtilities
+
 Description
     Finds nearest face and vertex.
 

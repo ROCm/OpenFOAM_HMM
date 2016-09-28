@@ -24,6 +24,9 @@ License
 Application
     renumberMesh
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Renumbers the cell list in order to reduce the bandwidth, reading and
     renumbering all fields from all the time directories.

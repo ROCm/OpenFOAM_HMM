@@ -24,6 +24,9 @@ License
 Application
     sammToFoam
 
+Group
+    grpMeshConversionUtilities
+
 Description
     Converts a Star-CD (v3) SAMM mesh to OpenFOAM format.
 

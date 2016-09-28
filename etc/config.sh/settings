@@ -246,19 +246,17 @@ OpenFOAM | ThirdParty)
         if [ "${gmpDir##*-}" != system ]
         then
             _foamAddLib $gmpDir/lib$WM_COMPILER_LIB_ARCH
+            export GMP_ARCH_PATH=$gmpDir        # For ThirdParty CGAL
         fi
         if [ "${mpfrDir##*-}" != system ]
         then
             _foamAddLib $mpfrDir/lib$WM_COMPILER_LIB_ARCH
+            export MPFR_ARCH_PATH=$mpfrDir      # For ThirdParty CGAL
         fi
         if [ "${mpcDir##*-}" != system ]
         then
             _foamAddLib $mpcDir/lib$WM_COMPILER_LIB_ARCH
         fi
-
-        # Used by boost/CGAL:
-        export GMP_ARCH_PATH=$gmpDir
-        export MPFR_ARCH_PATH=$mpfrDir
 
         if [ "$FOAM_VERBOSE" -a "$PS1" ]
         then
@@ -266,8 +264,6 @@ OpenFOAM | ThirdParty)
             echo "    ${gccDir##*/}  (${gmpDir##*/}  $${mpfrDir##*/}  ${mpcDir##*/})"
         fi
     fi
-    unset gcc_version gccDir
-    unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
 
     if [ -n "$clang_version" ]
     then
@@ -293,6 +289,9 @@ OpenFOAM | ThirdParty)
             echo "    ${clangDir##*/}"
         fi
     fi
+
+    unset gcc_version gccDir
+    unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
     unset clang_version clangDir
     ;;
 *)

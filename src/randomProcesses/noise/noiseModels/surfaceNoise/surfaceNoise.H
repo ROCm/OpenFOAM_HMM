@@ -1,0 +1,208 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Class
+    Foam::noiseModels::surfaceNoise
+
+Description
+    Perform noise analysis on surface-based pressure data.
+
+    Input data is read from a dictionary, e.g.
+
+    \verbatim
+    // Pressure reference
+    pRef            0;
+
+    // Number of samples in sampling window
+    // Must be a power of 2, default = 2^16 (=65536)
+    N               4096;
+
+    // Lower frequency bounds
+    fl              25;
+
+    // Upper frequency bounds
+    fu              25;
+
+    // Start time
+    startTime       0;
+
+    windowModel     <modelType>
+    <modelType>Coeffs
+    {
+        ...
+    }
+
+    // Input file
+    inputFile   "postProcessing/faceSource1/surface/patch/patch.case";
+
+    // Write interval for FFT data, default = 1
+    fftWriteInterval 100;
+
+    // Surface reader
+    reader      ensight;
+
+    // Surface writer
+    writer      ensight;
+
+    // Collate times for ensight output - ensures geometry is only written once
+    writeOptions
+    {
+        ensight
+        {
+            collateTimes true;
+        }
+    }
+    \endverbatim
+
+SourceFiles
+    surfaceNoise.C
+
+SeeAlso
+    noiseModel.H
+
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef surfaceNoise_H
+#define surfaceNoise_H
+
+#include "noiseModel.H"
+#include "labelList.H"
+#include "scalarField.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Forward declaration of classes
+class surfaceReader;
+class surfaceWriter;
+
+namespace noiseModels
+{
+
+/*---------------------------------------------------------------------------*\
+                        Class surfaceNoise Declaration
+\*---------------------------------------------------------------------------*/
+
+class surfaceNoise
+:
+    public noiseModel
+{
+
+protected:
+
+    // Protected Data
+
+        //- Input file name
+        const fileName inputFileName_;
+
+        //- Index of pressure field in reader field list
+        label pIndex_;
+
+        //- Sample times
+        scalarList times_;
+
+        //- Time step (constant)
+        scalar deltaT_;
+
+        //- Start time index
+        label startTimeIndex_;
+
+        //- Number of surface faces
+        label nFace_;
+
+        //- Frequency data output interval, default = 1
+        //  nSamples/2 data points are returned from the FFT, which can
+        //  result in a very large number of output files (1 per frequency)
+        label fftWriteInterval_;
+
+        //- Pointer to the surface reader
+        mutable autoPtr<surfaceReader> readerPtr_;
+
+        //- Pointer to the surface writer
+        autoPtr<surfaceWriter> writerPtr_;
+
+
+    // Protected Member Functions
+
+        //- Initialise
+        void initialise(const dictionary& dict);
+
+        //- Read surface data
+        void readSurfaceData
+        (
+            const labelList& procFaceOffset,
+            List<scalarField>& pData
+        );
+
+        //- Write surface data to file
+        //  Returns the area average value
+        scalar writeSurfaceData
+        (
+            const word& fName,
+            const word& groupName,
+            const word& title,
+            const scalar freq,
+            const scalarField& data,
+            const labelList& procFaceOffset
+        ) const;
+
+        //- Calculate the area average value
+        scalar surfaceAverage
+        (
+            const scalarField& data,
+            const labelList& procFaceOffset
+        ) const;
+
+
+public:
+
+    //- Runtime type information
+    TypeName("surfaceNoise");
+
+    //- Constructor
+    surfaceNoise(const dictionary& dict);
+
+    //- Destructor
+    virtual ~surfaceNoise();
+
+
+    // Public Member Functions
+
+        //- Calculate
+        virtual void calculate();
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace noiseModels
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

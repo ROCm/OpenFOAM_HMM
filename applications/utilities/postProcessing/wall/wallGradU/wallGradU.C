@@ -24,6 +24,9 @@ License
 Application
     wallGradU
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates and writes the gradient of U at the wall.
 

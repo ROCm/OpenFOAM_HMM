@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,10 +25,10 @@ Class
     Foam::surfZoneIdentifier
 
 Description
-    An identifier for a surface zone on a meshed surface.
+    Identifies a surface patch/zone by name, patch index and geometricType.
 
-    Similar in concept to a faceZone on the surface, but can also have a
-    "geometricType" as well.
+SeeAlso
+    patchIdentifier
 
 SourceFiles
     surfZoneIdentifier.C
@@ -52,6 +52,7 @@ class dictionary;
 // Forward declaration of friend functions and operators
 
 class surfZoneIdentifier;
+Istream& operator>>(Istream&, surfZoneIdentifier&);
 Ostream& operator<<(Ostream&, const surfZoneIdentifier&);
 
 /*---------------------------------------------------------------------------*\
@@ -74,10 +75,22 @@ class surfZoneIdentifier
 
 public:
 
+    // Public data
+
+        //- The name for an 'empty' type
+        static const word emptyType;
+
+
     // Constructors
 
         //- Construct null
         surfZoneIdentifier();
+
+        //- Construct null with specified index
+        explicit surfZoneIdentifier
+        (
+            const label index
+        );
 
         //- Construct from components
         surfZoneIdentifier
@@ -122,42 +135,57 @@ public:
             return name_;
         }
 
-        //- Return the geometric type of the zone
+        //- Return the geometric type of the patch/zone
         const word& geometricType() const
         {
             return geometricType_;
         }
 
-        //- Return the geometric type of the zone for modification
+        //- Return the geometric type of the patch/zone for modification
         word& geometricType()
         {
             return geometricType_;
         }
 
-        //- Return the index of this zone in the surface mesh
+        //- Return the index of this patch/zone in the surface mesh
         label index() const
         {
             return index_;
         }
 
-        //- Write surfZoneIdentifier as a dictionary
-        void write(Ostream&) const;
+        //- Return the index of this patch/zone for modification
+        label& index()
+        {
+            return index_;
+        }
+
 
         //- Write surfZoneIdentifier as a dictionary
-//        void writeDict(Ostream&) const;
+        void write(Ostream&) const;
 
 
     // Member Operators
 
-//        bool operator!=(const surfZoneIdentifier&) const;
-//
-//        //- compare.
-//        bool operator==(const surfZoneIdentifier&) const;
+        bool operator!=(const surfZoneIdentifier&) const;
+        bool operator==(const surfZoneIdentifier&) const;
+
 
     // Ostream Operator
 
-        friend Ostream& operator<<(Ostream&, const surfZoneIdentifier&);
-//        friend Istream& operator>>(Istream&, surfZoneIdentifier&);
+        //- Read name/type.
+        friend Istream& operator>>
+        (
+            Istream&,
+            surfZoneIdentifier&
+        );
+
+        //- Write name/type.
+        friend Ostream& operator<<
+        (
+            Ostream&,
+            const surfZoneIdentifier&
+        );
+
 };
 
 

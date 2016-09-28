@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,13 +26,26 @@ License
 #include "surfZoneIdentifier.H"
 #include "dictionary.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const Foam::word Foam::surfZoneIdentifier::emptyType = "empty";
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::surfZoneIdentifier::surfZoneIdentifier()
 :
-    name_(word::null),
+    name_(),
     index_(0),
-    geometricType_(word::null)
+    geometricType_()
+{}
+
+
+Foam::surfZoneIdentifier::surfZoneIdentifier(label index)
+:
+    name_(),
+    index_(index),
+    geometricType_()
 {}
 
 
@@ -57,7 +70,8 @@ Foam::surfZoneIdentifier::surfZoneIdentifier
 )
 :
     name_(name),
-    index_(index)
+    index_(index),
+    geometricType_()
 {
     dict.readIfPresent("geometricType", geometricType_);
 }
@@ -88,7 +102,8 @@ void Foam::surfZoneIdentifier::write(Ostream& os) const
 {
     if (geometricType_.size())
     {
-        os.writeKeyword("geometricType") << geometricType_
+        os.writeKeyword("geometricType")
+            << geometricType_
             << token::END_STATEMENT << nl;
     }
 }
@@ -96,41 +111,46 @@ void Foam::surfZoneIdentifier::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-// bool Foam::surfZoneIdentifier::operator!=
-// (
-//     const surfZoneIdentifier& p
-// ) const
-// {
-//     return !(*this == p);
-// }
-//
-//
-// bool Foam::surfZoneIdentifier::operator==
-// (
-//     const surfZoneIdentifier& p
-// ) const
-// {
-//     return geometricType() == p.geometricType() && name() == p.name();
-// }
+// needed for list output
+
+bool Foam::surfZoneIdentifier::operator!=
+(
+    const surfZoneIdentifier& rhs
+) const
+{
+    return !(*this == rhs);
+}
+
+
+bool Foam::surfZoneIdentifier::operator==
+(
+    const surfZoneIdentifier& rhs
+) const
+{
+    return
+    (
+        name() == rhs.name()
+     && geometricType() == rhs.geometricType()
+    );
+}
 
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-// Foam::Istream& Foam::operator>>(Istream& is, surfZoneIdentifier& p)
-// {
-//     is >> p.name_ >> p.geometricType_;
-//
-//     return is;
-// }
-
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const surfZoneIdentifier& p)
+Foam::Istream& Foam::operator>>(Istream& is, surfZoneIdentifier& obj)
 {
-    p.write(os);
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, const surfZoneIdentifier&)"
-    );
+    is  >> obj.name_
+        >> obj.geometricType_;
+
+    return is;
+}
+
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const surfZoneIdentifier& obj)
+{
+    os  << obj.name_ << ' ' << obj.geometricType_;
+
+    os.check("Ostream& operator<<(Ostream&, const surfZoneIdentifier&)");
     return os;
 }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +83,7 @@ Foam::label Foam::meshRefinement::mergePatchFaces
         label compactI = 0;
         forAll(mergeSets, setI)
         {
-            if (mergeSets[setI].size() == mergeSize)
+            if (mergeSets[setI].size() == mergeSize && compactI != setI)
             {
                 mergeSets[compactI++] = mergeSets[setI];
             }

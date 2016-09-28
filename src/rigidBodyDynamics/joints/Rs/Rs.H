@@ -24,6 +24,9 @@ License
 Class
     Foam::RBD::joints::Rs
 
+Group
+    grpRigidBodyDynamicsJoints
+
 Description
     Spherical joint for rotation about the x/y/z-axes using a quaternion
     (Euler parameters) to avoid gimble-lock.

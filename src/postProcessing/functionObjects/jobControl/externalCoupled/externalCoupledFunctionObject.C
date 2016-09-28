@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -770,7 +770,7 @@ void Foam::externalCoupledFunctionObject::initialise()
         // Wait for initial data to be made available
         wait();
 
-        // Eead data passed back from external source
+        // Read data passed back from external source
         readData();
     }
 

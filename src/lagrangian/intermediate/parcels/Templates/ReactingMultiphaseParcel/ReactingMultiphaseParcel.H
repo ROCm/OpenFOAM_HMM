@@ -272,9 +272,7 @@ public:
         AddToPropertyTypes
         (
             ParcelType,
-            " List<scalar>"
-          + " List<scalar>"
-          + " List<Scalar>"
+            " scalars scalars scalars"
         );
 
 

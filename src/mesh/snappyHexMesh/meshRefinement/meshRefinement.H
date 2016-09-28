@@ -709,6 +709,8 @@ private:
                 const wordList& zonesInMesh,
 
                 labelList& cellToZone,
+                labelList& unnamedRegion1,
+                labelList& unnamedRegion2,
                 labelList& namedSurfaceIndex,
                 PackedBoolList& posOrientation
             ) const;

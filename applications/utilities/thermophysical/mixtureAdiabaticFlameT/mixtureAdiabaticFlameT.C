@@ -24,6 +24,9 @@ License
 Application
     mixtureAdiabaticFlameT
 
+Group
+    grpThermophysicalUtilities
+
 Description
     Calculates the adiabatic flame temperature for a given mixture
     at a given temperature.

@@ -24,6 +24,9 @@ License
 Application
     uprime
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates and writes the scalar field of uprime (sqrt(2/3 k)).
 

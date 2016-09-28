@@ -48,7 +48,8 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 :
     uniformJumpFvPatchField<Type>(p, iF),
     phiName_("phi"),
-    rhoName_("rho")
+    rhoName_("rho"),
+    uniformJump_(false)
 {}
 
 
@@ -62,7 +63,8 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 :
     uniformJumpFvPatchField<Type>(p, iF, dict),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    uniformJump_(dict.lookupOrDefault<bool>("uniformJump", "false"))
 {}
 
 
@@ -77,7 +79,8 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 :
     uniformJumpFvPatchField<Type>(ptf, p, iF, mapper),
     phiName_(ptf.phiName_),
-    rhoName_(ptf.rhoName_)
+    rhoName_(ptf.rhoName_),
+    uniformJump_(ptf.uniformJump_)
 {}
 
 
@@ -89,7 +92,8 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 :
     uniformJumpFvPatchField<Type>(ptf),
     phiName_(ptf.phiName_),
-    rhoName_(ptf.rhoName_)
+    rhoName_(ptf.rhoName_),
+    uniformJump_(ptf.uniformJump_)
 {}
 
 
@@ -102,7 +106,8 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 :
     uniformJumpFvPatchField<Type>(ptf, iF),
     phiName_(ptf.phiName_),
-    rhoName_(ptf.rhoName_)
+    rhoName_(ptf.rhoName_),
+    uniformJump_(ptf.uniformJump_)
 {}
 
 
@@ -129,6 +134,10 @@ void Foam::fanFvPatchField<Type>::write(Ostream& os) const
     uniformJumpFvPatchField<Type>::write(os);
     this->template writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
     this->template writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
+    this->template writeEntryIfDifferent<bool>
+    (
+        os, "uniformJump", false, uniformJump_
+    );
 }
 
 

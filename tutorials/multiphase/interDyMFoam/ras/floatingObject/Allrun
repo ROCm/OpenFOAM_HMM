@@ -5,12 +5,12 @@ cd ${0%/*} || exit 1    # Run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 # Set application name
-application=`getApplication`
+application=$(getApplication)
 
 runApplication blockMesh
 runApplication topoSet
 runApplication subsetMesh -overwrite c0 -patch floatingObject
-cp -r 0.org 0 > /dev/null 2>&1
+restore0Dir
 runApplication setFields
 runApplication $application
 

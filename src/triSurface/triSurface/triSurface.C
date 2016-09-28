@@ -1108,6 +1108,15 @@ void Foam::triSurface::operator=(const triSurface& ts)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
+Foam::Istream& Foam::operator>>(Istream& is, triSurface& sm)
+{
+    sm.clearOut();
+    sm.read(is);
+    sm.setDefaultPatches();
+    return is;
+}
+
+
 Foam::Ostream& Foam::operator<<(Ostream& os, const triSurface& sm)
 {
     sm.write(os);

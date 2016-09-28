@@ -24,6 +24,9 @@ License
 Application
     splitMesh
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Splits mesh by making internal faces external. Uses attachDetach.
 

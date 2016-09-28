@@ -24,6 +24,9 @@ License
 Application
     streamFunction
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates and writes the stream function of velocity field U at each
     time.

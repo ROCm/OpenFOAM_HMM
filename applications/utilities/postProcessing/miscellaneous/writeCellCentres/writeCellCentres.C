@@ -21,6 +21,12 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+    writeCellCentres
+
+Group
+    grpPostProcessingUtilities
+
 Description
     Write the three components of the cell centres as volScalarFields so
     they can be used in postprocessing in thresholding.

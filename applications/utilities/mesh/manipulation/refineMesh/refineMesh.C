@@ -24,6 +24,9 @@ License
 Application
     refineMesh
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Utility to refine cells in multiple directions.
 

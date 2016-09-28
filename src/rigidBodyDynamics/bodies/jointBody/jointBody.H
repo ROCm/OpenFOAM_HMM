@@ -24,6 +24,9 @@ License
 Class
     Foam::jointBody
 
+Group
+    grpRigidBodyDynamicsBodies
+
 Description
 
 SourceFiles

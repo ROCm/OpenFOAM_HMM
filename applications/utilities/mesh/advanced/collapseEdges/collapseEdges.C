@@ -24,6 +24,9 @@ License
 Application
     collapseEdges
 
+Group
+    grpMeshAdvancedUtilities
+
 Description
     Collapses short edges and combines edges that are in line.
 

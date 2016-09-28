@@ -24,6 +24,9 @@ License
 Class
     Foam::sixDoFSolvers::Newmark
 
+Group
+    grpSixDoFRigidBodySolvers
+
 Description
     Newmark 2nd-order time-integrator for 6DoF solid-body motion.
 

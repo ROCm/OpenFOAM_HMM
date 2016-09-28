@@ -24,6 +24,9 @@ License
 Application
     changeDictionary
 
+Group
+    grpPreProcessingUtilities
+
 Description
     Utility to change dictionary entries, e.g. can be used to change the patch
     type in the field and polyMesh/boundary files.

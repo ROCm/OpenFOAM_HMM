@@ -24,6 +24,9 @@ License
 Class
     Foam::RBD::joints::Rzyx
 
+Group
+    grpRigidBodyDynamicsJoints
+
 Description
     Spherical joint for rotation about the x/y/z-axes using Euler-angles
     in the order z, y, x.

@@ -24,6 +24,9 @@ License
 Application
     objToVTK
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Read obj line (not surface!) file and convert into vtk.
 

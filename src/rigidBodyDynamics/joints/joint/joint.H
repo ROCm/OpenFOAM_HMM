@@ -24,6 +24,9 @@ License
 Namespace
     Foam::RBD::joints
 
+Group
+    grpRigidBodyDynamicsJoints
+
 Description
     Namespace for rigid-body joints
 

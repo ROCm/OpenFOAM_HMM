@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,6 +88,8 @@ SourceFiles
 #include "OFstream.H"
 #include "Switch.H"
 
+#include "convectionScheme.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -139,6 +141,14 @@ class blendingFactor
 
         //- Disallow default bitwise assignment
         void operator=(const blendingFactor&);
+
+        //- Helper function to calculate the blending factor for the scheme
+        template<class Type>
+        void calcScheme
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& field,
+            const typename fv::convectionScheme<Type>& cs
+        );
 
         //- Calculate the blending factor
         template<class Type>

@@ -24,6 +24,9 @@ License
 Application
     sample
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Sample field data with a choice of interpolation schemes, sampling options
     and write formats.

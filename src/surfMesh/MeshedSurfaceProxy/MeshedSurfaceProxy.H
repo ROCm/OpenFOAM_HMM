@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -128,7 +128,11 @@ public:
         );
 
         //- Write to file
-        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
+        static void write
+        (
+            const fileName&,
+            const MeshedSurfaceProxy<Face>&
+        );
 
 
     // Member Functions
@@ -176,7 +180,11 @@ public:
             }
 
             //- Write to database
-            virtual void write(const Time&, const word& surfName = "") const;
+            virtual void write
+            (
+                const Time&,
+                const word& surfName = word::null
+            ) const;
 };
 
 

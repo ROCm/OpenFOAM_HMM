@@ -24,6 +24,9 @@ License
 Application
     foamHelp
 
+Group
+    grpMiscUtilities
+
 Description
     Top level wrapper utility around foam help utilities
 

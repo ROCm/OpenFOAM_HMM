@@ -108,31 +108,6 @@ public:
         //- Write the lists
         void writeData(Ostream&) const;
 
-        //- Write (volume) scalar field
-        //  optionally write data for face parts
-        //  optionally write data per node
-        void writeScalarField
-        (
-            ensightFile&,
-            const List<scalar>& field,
-            const bool useFaceData = false,
-            const bool perNode = false
-        ) const;
-
-        //- Write (volume) vector field components
-        //  optionally write data for face parts
-        //  optionally write data per node
-        void writeVectorField
-        (
-            ensightFile&,
-            const List<scalar>& field0,
-            const List<scalar>& field1,
-            const List<scalar>& field2,
-            const bool useFaceData = false,
-            const bool perNode = false
-        ) const;
-
-
         //- Write generalized volume field components
         template<class Type>
         void writeField

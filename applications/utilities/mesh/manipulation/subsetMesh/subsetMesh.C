@@ -24,6 +24,9 @@ License
 Application
     subsetMesh
 
+Group
+    grpMeshManipulationUtilities
+
 Description
     Selects a section of mesh based on a cellSet.
 

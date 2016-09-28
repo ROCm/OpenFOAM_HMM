@@ -23,7 +23,7 @@ do
     viewFactorsGen -region $i > log.viewFactorsGen.$i 2>&1
 done
 
-runApplication `getApplication`
+runApplication $(getApplication)
 
 
 echo

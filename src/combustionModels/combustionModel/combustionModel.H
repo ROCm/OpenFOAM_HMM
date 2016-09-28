@@ -24,6 +24,9 @@ License
 Class
     Foam::combustionModel
 
+Group
+    grpCombustionModels
+
 Description
     Base class for combustion models
 

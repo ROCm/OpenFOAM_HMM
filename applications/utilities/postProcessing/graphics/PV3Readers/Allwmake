@@ -47,7 +47,8 @@ case "$ParaView_VERSION" in
     if canBuildPlugin
     then
     (
-        # C++ compiler for CMake
+        # ensure CMake gets the correct C/C++ compilers
+        [ -n "$WM_CC" ]  && export CC="$WM_CC"
         [ -n "$WM_CXX" ] && export CXX="$WM_CXX"
 
         wmake $targetType vtkPV3Readers

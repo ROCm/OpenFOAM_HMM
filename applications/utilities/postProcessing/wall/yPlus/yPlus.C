@@ -24,6 +24,9 @@ License
 Application
     yPlus
 
+Group
+    grpPostProcessingUtilities
+
 Description
     Calculates and reports yPlus for the near-wall cells of all wall patches,
     for the specified times for laminar, LES and RAS.

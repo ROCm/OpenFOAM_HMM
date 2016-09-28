@@ -24,6 +24,9 @@ License
 Class
     Foam::RKF45
 
+Group
+    grpODESolvers
+
 Description
     4/5th Order Runge-Kutta-Fehlberg ODE solver
 

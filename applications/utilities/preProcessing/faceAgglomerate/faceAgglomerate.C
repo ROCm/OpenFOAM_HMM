@@ -24,6 +24,9 @@ License
 Application
     faceAgglomerate
 
+Group
+    grpPreProcessingUtilities
+
 Description
     Agglomerate boundary faces using the pairPatchAgglomeration algorithm.
 

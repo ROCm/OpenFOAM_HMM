@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ensightOutputFunctions.H"
+#include "ensightPTraits.H"
 
 #include "passiveParticle.H"
 #include "IOField.H"
@@ -171,11 +172,8 @@ void Foam::ensightLagrangianField
     // when writing positions
 
     ensightFile os(dataDir, postFileName, format);
-    os.write
-    (
-        // description
-        string(postFileName + " with " + pTraits<Type>::typeName + " values")
-    );
+    // description
+    os.write(string(postFileName + " <" + pTraits<Type>::typeName + ">"));
     os.newline();
 
     IOField<Type> field(fieldObject);
@@ -187,21 +185,20 @@ void Foam::ensightLagrangianField
     {
         Type val = field[i];
 
-        if (mag(val) < 1.0e-90)
+        if (mag(val) < 1e-90)
         {
             val = Zero;
         }
 
-        for (direction cmpt=0; cmpt < pTraits<Type>::nComponents; cmpt++)
+        for (direction d=0; d < pTraits<Type>::nComponents; ++d)
         {
-            os.write( component(val, cmpt) );
-        }
+            label cmpt = ensightPTraits<Type>::componentOrder[d];
+            os.write(component(val, cmpt));
 
-        count += pTraits<Type>::nComponents;
-
-        if (count % 6 == 0)
-        {
-            os.newline();
+            if (++count % 6 == 0)
+            {
+                os.newline();
+            }
         }
     }
 

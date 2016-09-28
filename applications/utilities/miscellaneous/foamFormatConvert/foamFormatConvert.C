@@ -24,6 +24,9 @@ License
 Application
     foamFormatConvert
 
+Group
+    grpMiscUtilities
+
 Description
     Converts all IOobjects associated with a case into the format specified
     in the controlDict.
