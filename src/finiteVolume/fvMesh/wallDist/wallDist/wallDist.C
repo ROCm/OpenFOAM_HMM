@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,7 +98,13 @@ Foam::wallDist::wallDist(const fvMesh& mesh, const word& patchTypeName)
         static_cast<const fvSchemes&>(mesh).subDict(patchTypeName_ & "Dist")
        .lookupOrDefault<Switch>("nRequired", false)
     ),
-    n_(volVectorField::null())
+    n_(volVectorField::null()),
+    updateInterval_
+    (
+        static_cast<const fvSchemes&>(mesh).subDict(patchTypeName_ & "Dist")
+       .lookupOrDefault<label>("updateInterval", 1)
+    ),
+    requireUpdate_(true)
 {
     if (nRequired_)
     {
@@ -146,7 +152,13 @@ Foam::wallDist::wallDist
         static_cast<const fvSchemes&>(mesh).subDict(patchTypeName_ & "Dist")
        .lookupOrDefault<Switch>("nRequired", false)
     ),
-    n_(volVectorField::null())
+    n_(volVectorField::null()),
+    updateInterval_
+    (
+        static_cast<const fvSchemes&>(mesh).subDict(patchTypeName_ & "Dist")
+       .lookupOrDefault<label>("updateInterval", 1)
+    ),
+    requireUpdate_(true)
 {
     if (nRequired_)
     {
@@ -185,8 +197,17 @@ const Foam::volVectorField& Foam::wallDist::n() const
 
 bool Foam::wallDist::movePoints()
 {
-    if (pdm_->movePoints())
+    if ((mesh_.time().timeIndex() % updateInterval_) == 0)
     {
+        requireUpdate_ = true;
+    }
+
+    if (requireUpdate_ && pdm_->movePoints())
+    {
+        DebugInfo<< "Updating wall distance" << endl;
+
+        requireUpdate_ = false;
+
         if (nRequired_)
         {
             return pdm_->correct(y_, n_.ref());
@@ -206,6 +227,7 @@ bool Foam::wallDist::movePoints()
 void Foam::wallDist::updateMesh(const mapPolyMesh& mpm)
 {
     pdm_->updateMesh(mpm);
+    requireUpdate_ = true;
     movePoints();
 }
 
