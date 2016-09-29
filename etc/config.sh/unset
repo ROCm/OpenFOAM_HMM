@@ -183,9 +183,9 @@ unalias util
 unalias tut
 unalias run
 
-unset wmRefresh
-unset foamVersion
-unset foamPV
+unset -f wmRefresh
+unset -f foamVersion
+unset -f foamPV
 
 
 #------------------------------------------------------------------------------

@@ -70,7 +70,7 @@ alias run='cd $FOAM_RUN'
 # Refresh the environment
 # ~~~~~~~~~~~~~~~~~~~~~~~
 # For backward-compatibility unalias wmRefresh if it is defined as an alias
-[ "$(type -t wmRefresh)" = "alias" ] && unalias wmRefresh || unset wmRefresh
+[ "$(type -t wmRefresh)" = "alias" ] && unalias wmRefresh || unset -f wmRefresh
 wmRefresh()
 {
     wmProjectDir=$WM_PROJECT_DIR
@@ -82,7 +82,7 @@ wmRefresh()
 
 # Change OpenFOAM version
 # ~~~~~~~~~~~~~~~~~~~~~~~
-unset foamVersion
+unset -f foamVersion
 foamVersion()
 {
     if [ "$1" ]; then
@@ -99,7 +99,7 @@ foamVersion()
 
 # Change ParaView version
 # ~~~~~~~~~~~~~~~~~~~~~~~
-unset foamPV
+unset -f foamPV
 foamPV()
 {
     . $WM_PROJECT_DIR/etc/config.sh/paraview ParaView_VERSION=${1:-none}
