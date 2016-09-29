@@ -26,7 +26,7 @@ solarLoadCoeffs
 
     // Sun direction ray model. Give the sunDirection or calculated using the
     // (solar calculator)
-    sunDirectionModel   sunDirTraking;//sunDirConstant;
+    sunDirectionModel   sunDirTracking;//sunDirConstant;
 
         // Time interval to update Sun position (sec)
         sunTrackingUpdateInterval 800;

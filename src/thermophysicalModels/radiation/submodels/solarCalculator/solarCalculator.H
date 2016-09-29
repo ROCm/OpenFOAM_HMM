@@ -30,7 +30,7 @@ Description
 
     For the Sun direction:
     1) SunDirConstant : the direction is given in 'sunDirection'
-    2) SunDirTraking : the direction is calculated from the following
+    2) SunDirTracking : the direction is calculated from the following
        parameters:
             localStandardMeridian : GMT (Local Zone Meridian) in hours
             startDay :  day from 1 to 365)
@@ -109,7 +109,7 @@ public:
         enum sunDirModel
         {
             mSunDirConstant,
-            mSunDirTraking
+            mSunDirTracking
         };
 
         //- Direct sun load models
@@ -182,7 +182,7 @@ private:
         //- Up grid orientation
         vector gridUp_;
 
-        //- Interval in decimal hours to update Sun direction for SunDirTraking
+        //- Interval in decimal hours to update Sun direction for SunDirTracking
         scalar sunTrackingUpdateInterval_;
 
         //- Start time for the Sun position (decimal hours)
