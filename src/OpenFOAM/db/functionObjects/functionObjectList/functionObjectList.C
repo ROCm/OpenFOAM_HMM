@@ -701,12 +701,14 @@ bool Foam::functionObjectList::read()
                             "functionObject::" + objPtr->name() + "::read"
                         );
 
-                        ok = objPtr->read(dict) && ok;
+                        enabled = objPtr->read(dict);
+                        ok = enabled && ok;
                     }
                 }
-                else
+
+                if (!enabled)
                 {
-                    // Delete the disabled functionObject
+                    // Delete the disabled/invalid(read) functionObject
                     delete objPtr;
                     objPtr = nullptr;
                     continue;
