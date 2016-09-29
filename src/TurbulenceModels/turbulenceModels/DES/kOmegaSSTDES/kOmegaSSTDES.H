@@ -74,7 +74,7 @@ class kOmegaSSTDES
 
         // Disallow default bitwise copy construct and assignment
         kOmegaSSTDES(const kOmegaSSTDES&);
-        kOmegaSSTDES& operator=(const kOmegaSSTDES&);
+        void operator=(const kOmegaSSTDES&);
 
 
 protected:
@@ -104,6 +104,21 @@ protected:
         (
             const volScalarField& magGradU,
             const volScalarField& CDES
+        ) const;
+
+        //- Return epsilon/k
+        virtual tmp<volScalarField::Internal> epsilonByk
+        (
+            const volScalarField& F1,
+            const volTensorField& gradU
+        ) const;
+
+        //- Return G/nu
+        virtual tmp<volScalarField::Internal> GbyNu
+        (
+            const volScalarField::Internal& GbyNu0,
+            const volScalarField::Internal& F2,
+            const volScalarField::Internal& S2
         ) const;
 
 
@@ -144,9 +159,6 @@ public:
         //- Re-read model coefficients if they have changed
         virtual bool read();
 
-        //- Solve the turbulence equations and correct the turbulence viscosity
-        virtual void correct();
-
         //- Return the LES field indicator
         virtual tmp<volScalarField> LESRegion() const;
 };
@@ -159,7 +171,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #ifdef NoRepository
-#   include "kOmegaSSTDES.C"
+    #include "kOmegaSSTDES.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
