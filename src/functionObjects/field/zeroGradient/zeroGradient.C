@@ -108,51 +108,6 @@ int Foam::functionObjects::zeroGradient::process(const word& fieldName)
 }
 
 
-void Foam::functionObjects::zeroGradient::process()
-{
-    results_.clear();
-
-    wordHashSet candidates = subsetStrings(selectFields_, mesh_.names());
-    DynamicList<word> missing(selectFields_.size());
-    DynamicList<word> ignored(selectFields_.size());
-
-    // check exact matches first
-    forAll(selectFields_, i)
-    {
-        const wordRe& select = selectFields_[i];
-        if (!select.isPattern())
-        {
-            const word& fieldName = static_cast<const word&>(select);
-
-            if (!candidates.erase(fieldName))
-            {
-                missing.append(fieldName);
-            }
-            else if (process(fieldName) < 1)
-            {
-                ignored.append(fieldName);
-            }
-        }
-    }
-
-    forAllConstIter(wordHashSet, candidates, iter)
-    {
-        process(iter.key());
-    }
-
-    if (missing.size())
-    {
-        WarningInFunction
-            << "Missing field " << missing << endl;
-    }
-    if (ignored.size())
-    {
-        WarningInFunction
-            << "Unprocessed field " << ignored << endl;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::zeroGradient::zeroGradient
@@ -194,15 +149,59 @@ bool Foam::functionObjects::zeroGradient::read(const dictionary& dict)
 bool Foam::functionObjects::zeroGradient::execute()
 {
     results_.clear();
+
+    wordHashSet candidates = subsetStrings(selectFields_, mesh_.names());
+    DynamicList<word> missing(selectFields_.size());
+    DynamicList<word> ignored(selectFields_.size());
+
+    // check exact matches first
+    forAll(selectFields_, i)
+    {
+        const wordRe& select = selectFields_[i];
+        if (!select.isPattern())
+        {
+            const word& fieldName = static_cast<const word&>(select);
+
+            if (!candidates.erase(fieldName))
+            {
+                missing.append(fieldName);
+            }
+            else if (process(fieldName) < 1)
+            {
+                ignored.append(fieldName);
+            }
+        }
+    }
+
+    forAllConstIter(wordHashSet, candidates, iter)
+    {
+        process(iter.key());
+    }
+
+    if (missing.size())
+    {
+        WarningInFunction
+            << "Missing field " << missing << endl;
+    }
+    if (ignored.size())
+    {
+        WarningInFunction
+            << "Unprocessed field " << ignored << endl;
+    }
+
     return true;
 }
 
 
 bool Foam::functionObjects::zeroGradient::write()
 {
+    if (results_.size())
+    {
+        Log << type() << ' ' << name() << " write:" << endl;
+    }
+
     // Consistent output order
     const wordList outputList = results_.sortedToc();
-
     forAll(outputList, i)
     {
         const word& fieldName = outputList[i];
@@ -211,8 +210,7 @@ bool Foam::functionObjects::zeroGradient::write()
         {
             const regIOobject& io = lookupObject<regIOobject>(fieldName);
 
-            Log << type() << " " << name()
-                << " write: writing field " << fieldName << endl;
+            Log << "    " << fieldName << endl;
 
             io.write();
         }

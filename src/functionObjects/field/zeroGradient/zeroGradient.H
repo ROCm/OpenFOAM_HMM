@@ -65,8 +65,7 @@ Description
 
 SourceFiles
     zeroGradient.C
-    zeroGradientFunctionObject.C
-    IOzeroGradient.H
+    zeroGradientTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -114,7 +113,10 @@ class zeroGradient
         static void uniqWords(wordReList&);
 
 
-        //- Accept unless field only has empty/zero-gradient/processor patches
+        //- Accept unless field only has constraint patches
+        //  (ie, empty/zero-gradient/processor).
+        //  This should also avoid fields that were already processed by
+        //  zeroGradient.
         template<class Type>
         static bool accept(const GeometricField<Type, fvPatchField, volMesh>&);
 
@@ -124,9 +126,6 @@ class zeroGradient
 
         //- Process by trying to apply for various volume field types.
         int process(const word& inputName);
-
-        //- Calculate the zeroGradient fields
-        void process();
 
 
         //- Disallow default bitwise copy construct

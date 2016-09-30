@@ -31,7 +31,6 @@
 #------------------------------------------------------------------------------
 
 switch ("$WM_COMPILER_TYPE")
-case OpenFOAM:
 case ThirdParty:
     # Default versions of GMP, MPFR and MPC, override as necessary
     set gmp_version=gmp-system

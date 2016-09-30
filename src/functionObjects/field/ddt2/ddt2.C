@@ -121,7 +121,78 @@ int Foam::functionObjects::ddt2::process(const word& fieldName)
 }
 
 
-void Foam::functionObjects::ddt2::process()
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::functionObjects::ddt2::ddt2
+(
+    const word& name,
+    const Time& runTime,
+    const dictionary& dict
+)
+:
+    fvMeshFunctionObject(name, runTime, dict),
+    selectFields_(),
+    resultName_(word::null),
+    blacklist_(),
+    results_(),
+    mag_(dict.lookupOrDefault<Switch>("mag", false))
+{
+    read(dict);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::functionObjects::ddt2::~ddt2()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::functionObjects::ddt2::read(const dictionary& dict)
+{
+    fvMeshFunctionObject::read(dict);
+
+    if (word(mesh_.ddtScheme("default")) == "steadyState")
+    {
+        WarningInFunction
+            << typeName << " function object not appropriate for steady-state"
+            << endl;
+        return false;
+    }
+
+    fvMeshFunctionObject::read(dict);
+
+    dict.lookup("fields") >> selectFields_;
+    uniqWords(selectFields_);
+
+    resultName_ = dict.lookupOrDefault<word>
+    (
+        "result",
+        ( mag_ ? "mag(ddt(@@))" : "magSqr(ddt(@@))" )
+    );
+
+    if (checkFormatName(resultName_))
+    {
+        blacklist_.set
+        (
+            string::quotemeta<regExp>
+            (
+                resultName_
+            ).replace("@@", "(.+)")
+        );
+
+        return true;
+    }
+    else
+    {
+        blacklist_.clear();
+        return false;
+    }
+}
+
+
+bool Foam::functionObjects::ddt2::execute()
 {
     results_.clear();
 
@@ -163,82 +234,6 @@ void Foam::functionObjects::ddt2::process()
         WarningInFunction
             << "Unprocessed field " << ignored << endl;
     }
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::functionObjects::ddt2::ddt2
-(
-    const word& name,
-    const Time& runTime,
-    const dictionary& dict
-)
-:
-    fvMeshFunctionObject(name, runTime, dict),
-    selectFields_(),
-    resultName_(word::null),
-    blacklist_(),
-    results_(),
-    mag_(dict.lookupOrDefault<Switch>("mag", false))
-{
-    read(dict);
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::ddt2::~ddt2()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::functionObjects::ddt2::read(const dictionary& dict)
-{
-    fvMeshFunctionObject::read(dict);
-
-    if (word(mesh_.ddtScheme("default")) == "steadyState")
-    {
-        WarningInFunction
-            << typeName << " function object not appropriate for steady-state"
-            << endl;
-        return false;
-    }
-
-    dict.lookup("fields") >> selectFields_;
-    uniqWords(selectFields_);
-
-    resultName_ = dict.lookupOrDefault<word>
-    (
-        "result",
-        ( mag_ ? "mag(ddt(@@))" : "magSqr(ddt(@@))" )
-    );
-
-    if (checkFormatName(resultName_))
-    {
-        blacklist_.set
-        (
-            string::quotemeta<regExp>
-            (
-                resultName_
-            ).replace("@@", "(.+)")
-        );
-
-        return true;
-    }
-    else
-    {
-        blacklist_.clear();
-        return false;
-    }
-}
-
-
-bool Foam::functionObjects::ddt2::execute()
-{
-    results_.clear();
-    process();
 
     return true;
 }
@@ -246,9 +241,13 @@ bool Foam::functionObjects::ddt2::execute()
 
 bool Foam::functionObjects::ddt2::write()
 {
+    if (results_.size())
+    {
+        Log << type() << ' ' << name() << " write:" << endl;
+    }
+
     // Consistent output order
     const wordList outputList = results_.sortedToc();
-
     forAll(outputList, i)
     {
         const word& fieldName = outputList[i];
@@ -257,8 +256,7 @@ bool Foam::functionObjects::ddt2::write()
         {
             const regIOobject& io = lookupObject<regIOobject>(fieldName);
 
-            Log << type() << " " << name()
-                << " write: writing field " << fieldName << endl;
+            Log << "    " << fieldName << endl;
 
             io.write();
         }
