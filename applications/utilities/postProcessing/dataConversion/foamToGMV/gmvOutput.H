@@ -79,7 +79,7 @@ for (label i=0; i < nTypes; i++)
             )
         )
         {
-            Cloud<passiveParticle> particles(mesh);
+            Cloud<passiveParticle> particles(mesh, cloud::defaultName);
 
             IOobjectList objects(mesh, runTime.timeName(), cloud::prefix);
 

@@ -36,7 +36,7 @@ Usage
     \verbatim
     buoyancyForceCoeffs
     {
-        fieldNames      (U);                    // Name of velocity field
+        fields          (U);                    // Name of velocity field
     }
     \endverbatim
 
