@@ -28,7 +28,7 @@ Group
     grpWallFunctions
 
 Description
-    This boundary condition provides a wall constraint on turbulnce specific
+    This boundary condition provides a wall constraint on turbulence specific
     dissipation, omega for both low and high Reynolds number turbulence models.
 
     The near-wall omega may be either blended between the viscous region and

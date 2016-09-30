@@ -468,7 +468,7 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
           + fvm::div(alphaRhoPhi, omega_)
           - fvm::laplacian(alpha*rho*DomegaEff(F1), omega_)
          ==
-            alpha*rho*gamma*GbyNu(GbyNu0, F23(), S2())
+            alpha()*rho()*gamma*GbyNu(GbyNu0, F23(), S2())
           - fvm::SuSp((2.0/3.0)*alpha()*rho()*gamma*divU, omega_)
           - fvm::Sp(alpha()*rho()*beta*omega_(), omega_)
           - fvm::SuSp
