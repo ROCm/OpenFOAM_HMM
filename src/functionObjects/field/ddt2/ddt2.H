@@ -68,7 +68,7 @@ Description
 
 SourceFiles
     ddt2.C
-    IOddt2.H
+    ddt2Templates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -137,9 +137,6 @@ class ddt2
         //- Process by trying to apply for various volume field types.
         int process(const word& inputName);
 
-        //- Calculate the ddt2 fields
-        void process();
-
 
         //- Disallow default bitwise copy construct
         ddt2(const ddt2&) = delete;
@@ -171,7 +168,7 @@ public:
 
     // Member Functions
 
-        //- Return name of the ddt2 function object
+        //- Read the ddt2 specification
         virtual bool read(const dictionary&);
 
         //- Calculate the ddt2 fields

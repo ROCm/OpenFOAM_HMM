@@ -27,6 +27,8 @@ License
 #include "dimensionedType.H"
 #include "fvcDdt.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
 template<class FieldType>
 int Foam::functionObjects::ddt2::apply(const word& inputName, int& state)
 {
@@ -76,10 +78,8 @@ int Foam::functionObjects::ddt2::apply(const word& inputName, int& state)
         store(outputName, tddt2);
     }
 
-    volScalarField& output = const_cast<volScalarField&>
-    (
-        lookupObject<volScalarField>(outputName)
-    );
+    volScalarField& output =
+        const_cast<volScalarField&>(lookupObject<volScalarField>(outputName));
 
     if (mag_)
     {
@@ -91,7 +91,7 @@ int Foam::functionObjects::ddt2::apply(const word& inputName, int& state)
     }
 
     // Could add additional statistics here
-    Log << type() << " " << name()
+    Log << type() << ' ' << name()
         << " field " << outputName
         << " average: " << gAverage(output) << endl;
 

@@ -27,6 +27,8 @@ License
 #include "Time.H"
 #include "zeroGradientFvPatchField.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
 template<class Type>
 bool Foam::functionObjects::zeroGradient::accept
 (
@@ -38,10 +40,10 @@ bool Foam::functionObjects::zeroGradient::accept
 
     forAll(patches, patchi)
     {
-        const fvPatchField<Type>& p = patches[patchi];
-        const polyPatch& pp = p.patch().patch();
-
-        return !polyPatch::constraintType(pp.type());
+        if (!polyPatch::constraintType(patches[patchi].patch().patch().type()))
+        {
+            return true;
+        }
     }
 
     return false;
@@ -104,6 +106,7 @@ int Foam::functionObjects::zeroGradient::apply
 
     VolFieldType& output =
         const_cast<VolFieldType&>(lookupObject<VolFieldType>(outputName));
+
     output = input;
     output.correctBoundaryConditions();
 
