@@ -197,7 +197,11 @@ const Foam::volVectorField& Foam::wallDist::n() const
 
 bool Foam::wallDist::movePoints()
 {
-    if ((mesh_.time().timeIndex() % updateInterval_) == 0)
+    if
+    (
+        (updateInterval_ != 0)
+     && ((mesh_.time().timeIndex() % updateInterval_) == 0)
+    )
     {
         requireUpdate_ = true;
     }
@@ -227,6 +231,11 @@ bool Foam::wallDist::movePoints()
 void Foam::wallDist::updateMesh(const mapPolyMesh& mpm)
 {
     pdm_->updateMesh(mpm);
+
+    // Force update if performing topology change
+    // Note: needed?
+    // - field would have been mapped, so if using updateInterval option (!= 1)
+    //   live with error associated of not updating and use mapped values?
     requireUpdate_ = true;
     movePoints();
 }
