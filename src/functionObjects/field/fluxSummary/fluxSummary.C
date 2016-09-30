@@ -619,6 +619,7 @@ Foam::functionObjects::fluxSummary::~fluxSummary()
 
 bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
 {
+    fvMeshFunctionObject::read(dict);
     writeFile::read(dict);
 
     mode_ = modeTypeNames_.read(dict.lookup("mode"));

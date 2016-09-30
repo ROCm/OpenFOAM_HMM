@@ -507,6 +507,8 @@ Foam::functionObjects::streamLineBase::~streamLineBase()
 
 bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
 {
+    fvMeshFunctionObject::read(dict);
+
     Info<< type() << " " << name() << ":" << nl;
 
     dict.lookup("fields") >> fields_;

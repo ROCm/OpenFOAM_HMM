@@ -74,6 +74,8 @@ Foam::functionObjects::systemCall::~systemCall()
 
 bool Foam::functionObjects::systemCall::read(const dictionary& dict)
 {
+    functionObject::read(dict);
+
     dict.readIfPresent("executeCalls", executeCalls_);
     dict.readIfPresent("endCalls", endCalls_);
     dict.readIfPresent("writeCalls", writeCalls_);

@@ -77,6 +77,8 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
     const dictionary& dict
 )
 {
+    fvMeshFunctionObject::read(dict);
+
     const dictionary& conditionsDict = dict.subDict("conditions");
     const wordList conditionNames(conditionsDict.toc());
     conditions_.setSize(conditionNames.size());

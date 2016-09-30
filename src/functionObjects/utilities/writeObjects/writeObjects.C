@@ -98,6 +98,8 @@ Foam::functionObjects::writeObjects::~writeObjects()
 
 bool Foam::functionObjects::writeObjects::read(const dictionary& dict)
 {
+    functionObject::read(dict);
+
     if (dict.found("field"))
     {
         objectNames_.setSize(1);

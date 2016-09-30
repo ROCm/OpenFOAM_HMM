@@ -75,6 +75,7 @@ Foam::functionObjects::dsmcFields::~dsmcFields()
 
 bool Foam::functionObjects::dsmcFields::read(const dictionary& dict)
 {
+    fvMeshFunctionObject::read(dict);
     return true;
 }
 

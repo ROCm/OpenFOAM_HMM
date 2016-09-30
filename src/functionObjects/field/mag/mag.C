@@ -64,9 +64,7 @@ Foam::functionObjects::mag::mag
 )
 :
     fieldExpression(name, runTime, dict)
-{
-    read(dict);
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

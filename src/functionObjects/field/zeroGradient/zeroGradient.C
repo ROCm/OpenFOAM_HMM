@@ -181,6 +181,8 @@ Foam::functionObjects::zeroGradient::~zeroGradient()
 
 bool Foam::functionObjects::zeroGradient::read(const dictionary& dict)
 {
+    fvMeshFunctionObject::read(dict);
+
     dict.lookup("fields") >> selectFields_;
     uniqWords(selectFields_);
 

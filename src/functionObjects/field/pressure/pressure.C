@@ -230,6 +230,8 @@ Foam::functionObjects::pressure::~pressure()
 
 bool Foam::functionObjects::pressure::read(const dictionary& dict)
 {
+    fieldExpression::read(dict);
+
     dict.readIfPresent("U", UName_);
     dict.readIfPresent("rho", rhoName_);
 
