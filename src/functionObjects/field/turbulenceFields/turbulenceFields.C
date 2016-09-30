@@ -146,6 +146,8 @@ Foam::functionObjects::turbulenceFields::~turbulenceFields()
 
 bool Foam::functionObjects::turbulenceFields::read(const dictionary& dict)
 {
+    fvMeshFunctionObject::read(dict);
+
     if (dict.found("field"))
     {
         fieldSet_.insert(word(dict.lookup("field")));

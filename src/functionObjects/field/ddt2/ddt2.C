@@ -151,6 +151,8 @@ Foam::functionObjects::ddt2::~ddt2()
 
 bool Foam::functionObjects::ddt2::read(const dictionary& dict)
 {
+    fvMeshFunctionObject::read(dict);
+
     if (word(mesh_.ddtScheme("default")) == "steadyState")
     {
         WarningInFunction

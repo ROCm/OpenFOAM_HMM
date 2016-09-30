@@ -184,6 +184,8 @@ bool Foam::codedFunctionObject::end()
 
 bool Foam::codedFunctionObject::read(const dictionary& dict)
 {
+    functionObject::read(dict);
+
     // Backward compatibility
     if (dict.found("redirectType"))
     {

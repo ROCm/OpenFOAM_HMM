@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,6 +61,12 @@ Foam::functionObjects::writeCellVolumes::~writeCellVolumes()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::functionObjects::writeCellVolumes::read(const dictionary& dict)
+{
+    return fvMeshFunctionObject::read(dict);
+}
+
 
 bool Foam::functionObjects::writeCellVolumes::execute()
 {

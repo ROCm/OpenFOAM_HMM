@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,10 +106,13 @@ public:
 
     // Member Functions
 
+        //- Read the cell-volume data
+        virtual bool read(const dictionary&);
+
         //- Do nothing
         virtual bool execute();
 
-        //- Write the cell-centre fields
+        //- Write the cell-volume fields
         virtual bool write();
 };
 

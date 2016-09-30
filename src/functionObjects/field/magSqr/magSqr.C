@@ -64,9 +64,7 @@ Foam::functionObjects::magSqr::magSqr
 )
 :
     fieldExpression(name, runTime, dict)
-{
-    read(dict);
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

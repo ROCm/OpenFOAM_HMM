@@ -63,9 +63,7 @@ Foam::functionObjects::components::components
 )
 :
     fieldExpression(name, runTime, dict)
-{
-    read(dict);
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

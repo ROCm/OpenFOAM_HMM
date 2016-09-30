@@ -63,7 +63,6 @@ int main(int argc, char *argv[])
     #include "createControl.H"
     #include "createTimeControls.H"
     #include "createDyMControls.H"
-    #include "createRDeltaT.H"
     #include "createFields.H"
     #include "createFvOptions.H"
 

@@ -72,7 +72,7 @@ class kOmegaSSTDDES
 
         // Disallow default bitwise copy construct and assignment
         kOmegaSSTDDES(const kOmegaSSTDDES&);
-        kOmegaSSTDDES& operator=(const kOmegaSSTDDES&);
+        void operator=(const kOmegaSSTDDES&);
 
 
 protected:

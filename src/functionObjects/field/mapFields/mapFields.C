@@ -166,6 +166,8 @@ Foam::functionObjects::mapFields::~mapFields()
 
 bool Foam::functionObjects::mapFields::read(const dictionary& dict)
 {
+    fvMeshFunctionObject::read(dict);
+
     dict.lookup("fields") >> fieldNames_;
     createInterpolation(dict);
     return true;

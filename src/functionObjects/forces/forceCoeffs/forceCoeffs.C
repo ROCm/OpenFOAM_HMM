@@ -156,25 +156,27 @@ void Foam::functionObjects::forceCoeffs::writeIntegratedData
     const List<Field<scalar>>& coeff
 ) const
 {
+    if (!log)
+    {
+        return;
+    }
+
     scalar pressure = sum(coeff[0]);
     scalar viscous = sum(coeff[1]);
     scalar porous = sum(coeff[2]);
     scalar total = pressure + viscous + porous;
 
-    if (log)
+    Info<< "        " << title << "       : " << total << token::TAB
+        << "("
+        << "pressure: " << pressure << token::TAB
+        << "viscous: " << viscous;
+
+    if (porosity_)
     {
-        Info<< "        " << title << "       : " << total << token::TAB
-            << "("
-            << "pressure: " << pressure << token::TAB
-            << "viscous: " << viscous;
-
-        if (porosity_)
-        {
-            Info<< token::TAB << "porous: " << porous;
-        }
-
-        Info<< ")" << endl;
+        Info<< token::TAB << "porous: " << porous;
     }
+
+    Info<< ")" << endl;
 }
 
 
@@ -388,21 +390,21 @@ bool Foam::functionObjects::forceCoeffs::execute()
     if (writeFields_)
     {
         const volVectorField& force =
-            obr_.lookupObject<volVectorField>(fieldName("force"));
+            lookupObject<volVectorField>(fieldName("force"));
 
         const volVectorField& moment =
-            obr_.lookupObject<volVectorField>(fieldName("moment"));
+            lookupObject<volVectorField>(fieldName("moment"));
 
         volVectorField& forceCoeff =
             const_cast<volVectorField&>
             (
-                obr_.lookupObject<volVectorField>(fieldName("forceCoeff"))
+                lookupObject<volVectorField>(fieldName("forceCoeff"))
             );
 
         volVectorField& momentCoeff =
             const_cast<volVectorField&>
             (
-                obr_.lookupObject<volVectorField>(fieldName("momentCoeff"))
+                lookupObject<volVectorField>(fieldName("momentCoeff"))
             );
 
         dimensionedScalar f0("f0", dimForce, Aref_*pDyn);
@@ -421,10 +423,10 @@ bool Foam::functionObjects::forceCoeffs::write()
     if (writeFields_)
     {
         const volVectorField& forceCoeff =
-            obr_.lookupObject<volVectorField>(fieldName("forceCoeff"));
+            lookupObject<volVectorField>(fieldName("forceCoeff"));
 
         const volVectorField& momentCoeff =
-            obr_.lookupObject<volVectorField>(fieldName("momentCoeff"));
+            lookupObject<volVectorField>(fieldName("momentCoeff"));
 
         forceCoeff.write();
         momentCoeff.write();

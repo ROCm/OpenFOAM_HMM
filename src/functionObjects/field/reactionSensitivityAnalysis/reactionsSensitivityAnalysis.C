@@ -267,6 +267,7 @@ bool Foam::functionObjects::reactionsSensitivityAnalysis<chemistryType>::read
     const dictionary& dict
 )
 {
+    fvMeshFunctionObject::read(dict);
     writeFile::read(dict);
     return true;
 }
