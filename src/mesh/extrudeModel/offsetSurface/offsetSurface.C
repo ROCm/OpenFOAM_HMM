@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,7 +116,7 @@ point offsetSurface::operator()
         const triSurface& base = baseSurfPtr_();
         const triPointRef baseTri(base[triI].tri(base.points()));
 
-        List<scalar> bary;
+        FixedList<scalar, 3> bary;
         baseTri.barycentric(surfacePoint, bary);
 
         const triSurface& offset = offsetSurfPtr_();
@@ -135,8 +135,8 @@ point offsetSurface::operator()
         );
 
 
-        //- Either return interpolatedPoint or re-project onto surface (since
-        //  snapping might not have do so exactly)
+        // Either return interpolatedPoint or re-project onto surface (since
+        // snapping might not have do so exactly)
 
         if (project_)
         {
