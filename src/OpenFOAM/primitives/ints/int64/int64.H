@@ -45,9 +45,6 @@ SourceFiles
 #include "pTraits.H"
 #include "direction.H"
 
-#ifndef UINT64_MIN
-#define UINT64_MIN 0
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
