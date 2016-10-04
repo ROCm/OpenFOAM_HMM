@@ -48,10 +48,10 @@ Usage
         Ignore the time index contained in the time file and use a
         simple indexing when creating the \c Ensight/data/######## files.
 
-      - \par -noLagrangian \n
+      - \par -noLagrangian
         Suppress writing lagrangian positions and fields.
 
-      - \par -index \<start\>\n
+      - \par -index \<start\>
         Ignore the time index contained in the time file and use a
         simple indexing when creating the \c Ensight/data/######## files.
 
