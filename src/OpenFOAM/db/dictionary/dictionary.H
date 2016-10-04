@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -502,6 +502,14 @@ public:
 
 
         // Write
+
+            //- Write sub-dictionary with the keyword as its header
+            void writeEntry(const keyType& keyword, Ostream&) const;
+
+            //- Write dictionary entries.
+            //  Optionally with extra new line between entries for
+            //  "top-level" dictionaries
+            void writeEntries(Ostream&, const bool extraNewLine=false) const;
 
             //- Write dictionary, normally with sub-dictionary formatting
             void write(Ostream&, const bool subDict=true) const;

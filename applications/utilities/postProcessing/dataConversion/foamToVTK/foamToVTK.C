@@ -72,10 +72,10 @@ Usage
       - \par -noInternal
         Do not generate file for mesh, only for patches
 
-      - \par -noLagrangian \n
+      - \par -noLagrangian
         Suppress writing lagrangian positions and fields.
 
-      - \par -noPointValues \n
+      - \par -noPointValues
         No pointFields
 
       - \par -noFaceZones

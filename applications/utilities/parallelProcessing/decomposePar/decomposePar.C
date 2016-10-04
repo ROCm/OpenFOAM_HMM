@@ -39,34 +39,34 @@ Usage
         Write the cell distribution as a labelList, for use with 'manual'
         decomposition method or as a volScalarField for post-processing.
 
-      - \par -region \<regionName\> \n
+      - \par -region \<regionName\>
         Decompose named region. Does not check for existence of processor*.
 
-      - \par -allRegions \n
+      - \par -allRegions
         Decompose all regions in regionProperties. Does not check for
         existence of processor*.
 
-      - \par -copyUniform \n
+      - \par -copyUniform
         Copy any \a uniform directories too.
 
       - \par -constant
 
-      - \par -time xxx:yyy \n
+      - \par -time xxx:yyy
         Override controlDict settings and decompose selected times. Does not
         re-decompose the mesh i.e. does not handle moving mesh or changing
         mesh cases.
 
-      - \par -fields \n
+      - \par -fields
         Use existing geometry decomposition and convert fields only.
 
-      - \par -noSets \n
+      - \par -noSets
         Skip decomposing cellSets, faceSets, pointSets.
 
-      - \par -force \n
+      - \par -force
         Remove any existing \a processor subdirectories before decomposing the
         geometry.
 
-      - \par -ifRequired \n
+      - \par -ifRequired
         Only decompose the geometry if the number of domains has changed from a
         previous decomposition. No \a processor subdirectories will be removed
         unless the \a -force option is also specified. This option can be used

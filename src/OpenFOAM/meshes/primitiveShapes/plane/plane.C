@@ -449,15 +449,14 @@ Foam::point Foam::plane::mirror(const point& p) const
 
 void Foam::plane::writeDict(Ostream& os) const
 {
-    os.writeKeyword("planeType") << "pointAndNormal"
-        << token::END_STATEMENT << nl;
+    os.writeEntry("planeType", "pointAndNormal");
 
-    os.beginBlock("pointAndNormalDict") << nl;
+    os.beginBlock("pointAndNormalDict");
 
-    os.writeKeyword("point") << point_ << token::END_STATEMENT << nl;
-    os.writeKeyword("normal") << normal_ << token::END_STATEMENT << nl;
+    os.writeEntry("point",  point_);
+    os.writeEntry("normal", normal_);
 
-    os.endBlock() << endl;
+    os.endBlock() << flush;
 }
 
 

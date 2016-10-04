@@ -31,7 +31,7 @@ Description
     Converts a Star-CD (v4) pro-STAR mesh into OpenFOAM format.
 
 Usage
-    \b star4ToFoam [OPTION] ccmMesh
+    \b star4ToFoam [OPTION] prostarMesh
 
     Options:
       - \par -ascii

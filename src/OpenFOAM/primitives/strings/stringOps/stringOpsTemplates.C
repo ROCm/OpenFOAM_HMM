@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,46 +23,46 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "CompactListList.H"
-#include "Istream.H"
+#include <cstdio>
 
-// * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class T, class Container>
-Foam::CompactListList<T, Container>::CompactListList(Istream& is)
-{
-    operator>>(is, *this);
-}
+// NOTE: with C++11 could consider variadic templates for a more general
+// sprintf implementation
 
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-template<class T, class Container>
-Foam::Istream& Foam::operator>>(Istream& is, CompactListList<T, Container>& lst)
-{
-    is  >> lst.offsets_ >> lst.m_;
-    // Note: empty list gets output as two empty lists
-    if (lst.offsets_.size())
-    {
-        lst.size_ = lst.offsets_.size()-1;
-    }
-    else
-    {
-        lst.size_ = 0;
-    }
-    return is;
-}
-
-
-template<class T, class Container>
-Foam::Ostream& Foam::operator<<
+template<class PrimitiveType>
+Foam::word Foam::stringOps::name
 (
-    Ostream& os,
-    const CompactListList<T, Container>& lst
+    const char* fmt,
+    const PrimitiveType& val
 )
 {
-    os  << lst.offsets_ << lst.m_;
-    return os;
+    // same concept as GNU/BSD asprintf()
+    // use snprintf with zero to determine the number of characters required
+
+    int n = ::snprintf(0, 0, fmt, val);
+    if (n > 0)
+    {
+        char buf[n+1];
+        ::snprintf(buf, n+1, fmt, val);
+        buf[n] = 0;
+
+        // no stripping desired
+        return word(buf, false);
+    }
+
+    return word::null;
+}
+
+
+template<class PrimitiveType>
+Foam::word Foam::stringOps::name
+(
+    const std::string& fmt,
+    const PrimitiveType& val
+)
+{
+    return stringOps::name(fmt.c_str(), val);
 }
 
 
