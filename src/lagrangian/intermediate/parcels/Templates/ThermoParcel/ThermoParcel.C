@@ -72,8 +72,6 @@ void Foam::ThermoParcel<ParcelType>::cellValueSourceCorrection
 {
     this->Uc_ += td.cloud().UTrans()[celli]/this->massCell(celli);
 
-    const scalar CpMean = td.CpInterp().psi()[celli];
-
     tetIndices tetIs = this->currentTetIndices();
     Tc_ = td.TInterp().interpolate(this->position(), tetIs);
 

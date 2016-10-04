@@ -32,36 +32,35 @@ License
 
 namespace Foam
 {
+// Psi-based chemistry
+typedef functionObjects::reactionsSensitivityAnalysis<psiChemistryModel>
+    psiReactionsSensitivityAnalysisFunctionObject;
+
+defineTemplateTypeNameAndDebugWithName
+(
+    psiReactionsSensitivityAnalysisFunctionObject,
+    "psiReactionsSensitivityAnalysis",
+    0
+);
+
+// Rho-based chemistry
+typedef functionObjects::reactionsSensitivityAnalysis<rhoChemistryModel>
+    rhoReactionsSensitivityAnalysisFunctionObject;
+
+defineTemplateTypeNameAndDebugWithName
+(
+    rhoReactionsSensitivityAnalysisFunctionObject,
+    "rhoReactionsSensitivityAnalysis",
+    0
+);
+
 namespace functionObjects
 {
-    // Psi-based chemistry
-    typedef reactionsSensitivityAnalysis<psiChemistryModel>
-        psiReactionsSensitivityAnalysisFunctionObject;
-
-    defineTemplateTypeNameAndDebugWithName
-    (
-        psiReactionsSensitivityAnalysisFunctionObject,
-        "psiReactionsSensitivityAnalysis",
-        0
-    );
-
     addToRunTimeSelectionTable
     (
         functionObject,
         psiReactionsSensitivityAnalysisFunctionObject,
         dictionary
-    );
-
-
-    // Rho-based chemistry
-    typedef reactionsSensitivityAnalysis<rhoChemistryModel>
-        rhoReactionsSensitivityAnalysisFunctionObject;
-
-    defineTemplateTypeNameAndDebugWithName
-    (
-        rhoReactionsSensitivityAnalysisFunctionObject,
-        "rhoReactionsSensitivityAnalysis",
-        0
     );
 
     addToRunTimeSelectionTable
