@@ -41,31 +41,25 @@ canBuildPlugin()
 
 
 # -----------------------------------------------------------------------------
+# major version as per paraview include directory:
+# Eg, "PREFIX/include/paraview-3.4" -> "3.4"
+major="${ParaView_INCLUDE_DIR##*-}"
 
-case "$ParaView_VERSION" in
-3*)
+case "$major" in
+3.[0-9]*)
     if canBuildPlugin
     then
-        [ -n "$PV_PLUGIN_PATH" ] || {
-            echo "$0 : PV_PLUGIN_PATH not valid - it is unset"
-            exit 1
-        }
-
-        # Ensure CMake gets the correct C/C++ compilers
-        [ -n "$WM_CC" ] && export CC="$WM_CC"
-        [ -n "$WM_CXX" ] && export CXX="$WM_CXX"
-
+    (
         wmake $targetType vtkPV3Readers
-        PV3blockMeshReader/Allwmake $targetType $*
-        PV3FoamReader/Allwmake $targetType $*
-    else
-        echo "ERROR: ParaView not found in $ParaView_DIR"
+        PV3blockMeshReader/Allwmake $*
+        PV3FoamReader/Allwmake $*
+    )
     fi
     ;;
 *)
     echo
     echo "NOTE: skipping build of ParaView V3 plugin(s)"
-    echo "    different version: ParaView_VERSION=$ParaView_VERSION"
+    echo "    include directory was for paraview major version '${major:-none}'"
     echo
     ;;
 esac
