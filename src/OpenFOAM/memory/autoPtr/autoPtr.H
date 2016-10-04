@@ -106,11 +106,19 @@ public:
 
         // Access
 
-            //- Return reference, without checking pointer validity.
-            inline T& refOrNull();
+            //- Return the pointer, without nullptr checking.
+            //  Pointer remains under autoPtr management.
+            inline T* rawPtr();
 
-            //- Return const reference, without checking pointer validity.
-            inline const T& refOrNull() const;
+            //- Const access to the pointer, without nullptr checking.
+            //  Pointer remains under autoPtr management.
+            inline const T* rawPtr() const;
+
+            //- Return the reference, without nullptr checking.
+            inline T& rawRef();
+
+            //- Return the const reference, without nullptr checking.
+            inline const T& rawRef() const;
 
 
         // Member operators

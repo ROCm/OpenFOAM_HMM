@@ -30,6 +30,26 @@ Group
 Description
     Checks geometric and topological quality of a surface.
 
+Usage
+    - surfaceCheck surfaceFile [OPTION]
+
+    \param -checkSelfIntersection \n
+    Check for self-intersection.
+
+    \param -splitNonManifold \n
+    Split surface along non-manifold edges.
+
+    \param -verbose \n
+    Extra verbosity.
+
+    \param -blockMesh \n
+    Write vertices/blocks for tight-fitting 1 cell blockMeshDict.
+
+    \param -outputThreshold \<num files\> \n
+    Specifies upper limit for the number of files written. This is useful to
+    prevent surfaces with lots of disconnected parts to write lots of files.
+    Default is 10. A special case is 0 which prevents writing any files.
+
 \*---------------------------------------------------------------------------*/
 
 #include "triangle.H"
@@ -356,6 +376,8 @@ int main(int argc, char *argv[])
     const bool checkSelfIntersect = args.optionFound("checkSelfIntersection");
     const bool verbose = args.optionFound("verbose");
     const bool splitNonManifold = args.optionFound("splitNonManifold");
+    label outputThreshold = 10;
+    args.optionReadIfPresent("outputThreshold", outputThreshold);
 
     Info<< "Reading surface from " << surfFileName << " ..." << nl << endl;
 
@@ -465,10 +487,14 @@ int main(int argc, char *argv[])
             Info<< "Surface has " << illegalFaces.size()
                 << " illegal triangles." << endl;
 
-            OFstream str("illegalFaces");
-            Info<< "Dumping conflicting face labels to " << str.name() << endl
-                << "Paste this into the input for surfaceSubset" << endl;
-            str << illegalFaces;
+            if (outputThreshold > 0)
+            {
+                OFstream str("illegalFaces");
+                Info<< "Dumping conflicting face labels to " << str.name()
+                    << endl
+                    << "Paste this into the input for surfaceSubset" << endl;
+                str << illegalFaces;
+            }
         }
         else
         {
@@ -543,6 +569,7 @@ int main(int argc, char *argv[])
         }
 
         // Dump for subsetting
+        if (outputThreshold > 0)
         {
             DynamicList<label> problemFaces(surf.size()/100+1);
 
@@ -723,12 +750,15 @@ int main(int argc, char *argv[])
 
         Info<< "Conflicting face labels:" << problemFaces.size() << endl;
 
-        OFstream str("problemFaces");
+        if (outputThreshold > 0)
+        {
+            OFstream str("problemFaces");
 
-        Info<< "Dumping conflicting face labels to " << str.name() << endl
-            << "Paste this into the input for surfaceSubset" << endl;
+            Info<< "Dumping conflicting face labels to " << str.name() << endl
+                << "Paste this into the input for surfaceSubset" << endl;
 
-        str << problemFaces;
+            str << problemFaces;
+        }
     }
     else
     {
@@ -760,7 +790,7 @@ int main(int argc, char *argv[])
 
         Info<< "Number of unconnected parts : " << numZones << endl;
 
-        if (numZones > 1)
+        if (numZones > 1 && outputThreshold > 0)
         {
             Info<< "Splitting surface into parts ..." << endl << endl;
 
@@ -768,7 +798,7 @@ int main(int argc, char *argv[])
             writeParts
             (
                 surf,
-                numZones,
+                min(outputThreshold, numZones),
                 faceZone,
                 surfFilePath,
                 surfFileNameBase
@@ -808,15 +838,26 @@ int main(int argc, char *argv[])
     if (numNormalZones > 1)
     {
         Info<< "More than one normal orientation." << endl;
-        writeZoning(surf, normalZone, "normal", surfFilePath, surfFileNameBase);
-        writeParts
-        (
-            surf,
-            numNormalZones,
-            normalZone,
-            surfFilePath,
-            surfFileNameBase + "_normal"
-        );
+
+        if (outputThreshold > 0)
+        {
+            writeZoning
+            (
+                surf,
+                normalZone,
+                "normal",
+                surfFilePath,
+                surfFileNameBase
+            );
+            writeParts
+            (
+                surf,
+                min(outputThreshold, numNormalZones),
+                normalZone,
+                surfFilePath,
+                surfFileNameBase + "_normal"
+            );
+        }
     }
     Info<< endl;
 
@@ -833,7 +874,11 @@ int main(int argc, char *argv[])
 
         const indexedOctree<treeDataTriSurface>& tree = querySurf.tree();
 
-        OBJstream intStream("selfInterPoints.obj");
+        autoPtr<OBJstream> intStreamPtr;
+        if (outputThreshold > 0)
+        {
+            intStreamPtr.reset(new OBJstream("selfInterPoints.obj"));
+        }
 
         label nInt = 0;
 
@@ -855,9 +900,9 @@ int main(int argc, char *argv[])
                 )
             );
 
-            if (hitInfo.hit())
+            if (hitInfo.hit() && intStreamPtr.valid())
             {
-                intStream.write(hitInfo.hitPoint());
+                intStreamPtr().write(hitInfo.hitPoint());
                 nInt++;
             }
         }
@@ -870,36 +915,13 @@ int main(int argc, char *argv[])
         {
             Info<< "Surface is self-intersecting at " << nInt
                 << " locations." << endl;
-            Info<< "Writing intersection points to " << intStream.name()
-                << endl;
-        }
 
-        //surfaceIntersection inter(querySurf);
-        //
-        //if (inter.cutEdges().empty() && inter.cutPoints().empty())
-        //{
-        //    Info<< "Surface is not self-intersecting" << endl;
-        //}
-        //else
-        //{
-        //    Info<< "Surface is self-intersecting" << endl;
-        //    Info<< "Writing edges of intersection to selfInter.obj" << endl;
-        //
-        //    OFstream intStream("selfInter.obj");
-        //    forAll(inter.cutPoints(), cutPointI)
-        //    {
-        //        const point& pt = inter.cutPoints()[cutPointI];
-        //
-        //        intStream << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z()
-        //            << endl;
-        //    }
-        //    forAll(inter.cutEdges(), cutEdgeI)
-        //    {
-        //        const edge& e = inter.cutEdges()[cutEdgeI];
-        //
-        //        intStream << "l " << e.start()+1 << ' ' << e.end()+1 << endl;
-        //    }
-        //}
+            if (intStreamPtr.valid())
+            {
+                Info<< "Writing intersection points to "
+                    << intStreamPtr().name() << endl;
+            }
+        }
         Info<< endl;
     }
 
