@@ -41,9 +41,18 @@ void Foam::UList<T>::writeEntry(Ostream& os) const
         {
             os  << tag << ' ';
         }
+        os << *this;
     }
-
-    os << *this;
+    else if (os.format() == IOstream::ASCII)
+    {
+        // Zero-sized ASCII - Write size and delimiters
+        os  << 0 << token::BEGIN_LIST << token::END_LIST;
+    }
+    else
+    {
+        // Zero-sized binary - Write size only
+        os  << 0;
+    }
 }
 
 
