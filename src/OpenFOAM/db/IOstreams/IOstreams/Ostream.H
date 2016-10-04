@@ -154,32 +154,46 @@ public:
                 return indentLevel_;
             }
 
-            //- Incrememt the indent level
+            //- Increment the indent level
             void incrIndent()
             {
                 ++indentLevel_;
             }
 
-            //- Decrememt the indent level
+            //- Decrement the indent level
             void decrIndent();
 
             //- Write the keyword followed by an appropriate indentation
             virtual Ostream& writeKeyword(const keyType&);
 
             //- Write begin block group with the given name
-            //  Uses the appropriate indentation,
-            //  does not include a trailing newline.
-            virtual Ostream& beginBlock(const word&);
+            //  Increments indentation, adds newline.
+            virtual Ostream& beginBlock(const keyType&);
 
             //- Write begin block group without a name
-            //  Uses the appropriate indentation,
-            //  does not include a trailing newline.
+            //  Increments indentation, adds newline.
             virtual Ostream& beginBlock();
 
             //- Write end block group
-            //  Uses the appropriate indentation,
-            //  does not include a trailing newline.
+            //  Decrements indentation, adds newline.
             virtual Ostream& endBlock();
+
+            //- Write end entry (';') followed by newline.
+            virtual Ostream& endEntry();
+
+            //- Write a keyword/value entry.
+            //  The following two are functionally equivalent:
+            // \code
+            // os.writeEntry(key, value);
+            //
+            // os.writeKeyword(key) << value << endEntry;
+            // \endcode
+            template<class T>
+            Ostream& writeEntry(const keyType& key, const T& value)
+            {
+                writeKeyword(key) << value;
+                return endEntry();
+            }
 
 
         // Stream state functions
@@ -269,6 +283,32 @@ inline Ostream& flush(Ostream& os)
 inline Ostream& endl(Ostream& os)
 {
     os.endl();
+    return os;
+}
+
+
+//- Write begin block group without a name
+//  Increments indentation, adds newline.
+inline Ostream& beginBlock(Ostream& os)
+{
+    os.beginBlock();
+    return os;
+}
+
+
+//- Write end block group
+//  Decrements indentation, adds newline.
+inline Ostream& endBlock(Ostream& os)
+{
+    os.endBlock();
+    return os;
+}
+
+
+//- Write end entry (';') followed by newline.
+inline Ostream& endEntry(Ostream& os)
+{
+    os.endEntry();
     return os;
 }
 

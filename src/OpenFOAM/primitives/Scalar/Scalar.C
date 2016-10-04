@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,6 +22,8 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
+
+#include "stringOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,6 +61,18 @@ word name(const Scalar val)
     std::ostringstream buf;
     buf << val;
     return buf.str();
+}
+
+
+word name(const char* fmt, const Scalar val)
+{
+    return stringOps::name(fmt, val);
+}
+
+
+word name(const std::string& fmt, const Scalar val)
+{
+    return stringOps::name(fmt, val);
 }
 
 

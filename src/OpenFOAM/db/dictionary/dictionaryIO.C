@@ -170,14 +170,16 @@ Foam::Istream& Foam::operator>>(Istream& is, dictionary& dict)
 
 // * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * * //
 
-void Foam::dictionary::write(Ostream& os, bool subDict) const
+void Foam::dictionary::writeEntry(const keyType& kw, Ostream& os) const
 {
-    if (subDict)
-    {
-        os  << nl;
-        os.beginBlock() << nl;
-    }
+    os.beginBlock(kw);
+    writeEntries(os);
+    os.endBlock() << flush;
+}
 
+
+void Foam::dictionary::writeEntries(Ostream& os, const bool extraNewLine) const
+{
     forAllConstIter(IDLList<entry>, *this, iter)
     {
         const entry& e = *iter;
@@ -185,8 +187,9 @@ void Foam::dictionary::write(Ostream& os, bool subDict) const
         // Write entry
         os  << e;
 
-        // Add extra new line between entries for "top-level" dictionaries
-        if (!subDict && parent() == dictionary::null && e != *last())
+        // Add extra new line between entries for "top-level" dictionaries,
+        // but not after the last entry (looks ugly).
+        if (extraNewLine && parent() == dictionary::null && e != *last())
         {
             os  << nl;
         }
@@ -200,10 +203,22 @@ void Foam::dictionary::write(Ostream& os, bool subDict) const
                 << endl;
         }
     }
+}
+
+
+void Foam::dictionary::write(Ostream& os, const bool subDict) const
+{
+    if (subDict)
+    {
+        os  << nl;
+        os.beginBlock();
+    }
+
+    writeEntries(os, !subDict);
 
     if (subDict)
     {
-        os.endBlock() << endl;
+        os.endBlock() << flush;
     }
 }
 

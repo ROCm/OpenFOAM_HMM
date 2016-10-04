@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,10 +68,7 @@ Foam::dictionaryEntry::dictionaryEntry
 
 void Foam::dictionaryEntry::write(Ostream& os) const
 {
-    // write keyword with indent but without trailing spaces
-    os.indent();
-    os.write(keyword());
-    dictionary::write(os);
+    dictionary::writeEntry(keyword(), os);
 }
 
 
