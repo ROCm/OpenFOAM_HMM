@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,10 @@ Description
             // Optional entry enabling the calculation
             // of the normal-to-wall field
             nRequired false;
+
+            // Optional entry delaying wall distance update to every n steps
+            // Default is 1 (update every step)
+            updateInterval 5;
         }
     \endverbatim
 
@@ -89,6 +93,12 @@ class wallDist
 
         //- Normal-to-wall field
         mutable tmp<volVectorField> n_;
+
+        //- Update wall distance every updateInterval_ steps
+        const label updateInterval_;
+
+        //- Flag to indicate whether the wall distance requires updating
+        bool requireUpdate_;
 
 
     // Private Member Functions
