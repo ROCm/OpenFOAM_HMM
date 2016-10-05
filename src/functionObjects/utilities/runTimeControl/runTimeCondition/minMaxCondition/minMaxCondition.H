@@ -64,8 +64,8 @@ public:
         // Mode type
         enum modeType
         {
-            mdMin,          //< Minimum
-            mdMax           //< Maximum
+            mdMin,          //!< Minimum
+            mdMax           //!< Maximum
         };
 
         static const NamedEnum<modeType, 2> modeTypeNames_;

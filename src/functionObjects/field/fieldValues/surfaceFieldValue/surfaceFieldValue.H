@@ -199,21 +199,21 @@ public:
         //- Operation type enumeration
         enum operationType
         {
-            opNone,                 //< None
-            opSum,                  //< Sum
-            opSumMag,               //< Magnitude of sum
-            opSumDirection,         //< Sum in a given direction
-            opSumDirectionBalance,  //< Sum in a given direction for multiple
-            opAverage,              //< Average
-            opWeightedAverage,      //< Weighted average
-            opAreaAverage,          //< Area average
-            opWeightedAreaAverage,  //< Weighted area average
-            opAreaIntegrate,        //< Area integral
-            opMin,                  //< Minimum
-            opMax,                  //< Maximum
-            opCoV,                  //< Coefficient of variation
-            opAreaNormalAverage,    //< Area average in normal direction
-            opAreaNormalIntegrate   //< Area integral in normal direction
+            opNone,                 //!< None
+            opSum,                  //!< Sum
+            opSumMag,               //!< Magnitude of sum
+            opSumDirection,         //!< Sum in a given direction
+            opSumDirectionBalance,  //!< Sum in a given direction for multiple
+            opAverage,              //!< Average
+            opWeightedAverage,      //!< Weighted average
+            opAreaAverage,          //!< Area average
+            opWeightedAreaAverage,  //!< Weighted area average
+            opAreaIntegrate,        //!< Area integral
+            opMin,                  //!< Minimum
+            opMax,                  //!< Maximum
+            opCoV,                  //!< Coefficient of variation
+            opAreaNormalAverage,    //!< Area average in normal direction
+            opAreaNormalIntegrate   //!< Area integral in normal direction
         };
 
         //- Operation type names

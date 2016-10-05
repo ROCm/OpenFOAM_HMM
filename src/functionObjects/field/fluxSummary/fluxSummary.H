@@ -110,9 +110,9 @@ public:
         //- Face mode type
         enum modeType
         {
-            mdFaceZone,                 //< face zone
-            mdFaceZoneAndDirection,     //< face zone with prescribed direction
-            mdCellZoneAndDirection      //< cell zone with prescribed direction
+            mdFaceZone,                 //!< face zone
+            mdFaceZoneAndDirection,     //!< face zone with prescribed direction
+            mdCellZoneAndDirection      //!< cell zone with prescribed direction
         };
 
         //- Mode type names
