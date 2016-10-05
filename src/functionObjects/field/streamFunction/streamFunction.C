@@ -168,9 +168,9 @@ Foam::tmp<Foam::pointScalarField> Foam::functionObjects::streamFunction::calc
 
             const cellList& c = mesh_.cells();
 
-            forAll(c, cI)
+            forAll(c, ci)
             {
-                labelList zeroPoints = c[cI].labels(mesh_.faces());
+                labelList zeroPoints = c[ci].labels(mesh_.faces());
 
                 bool found = true;
 

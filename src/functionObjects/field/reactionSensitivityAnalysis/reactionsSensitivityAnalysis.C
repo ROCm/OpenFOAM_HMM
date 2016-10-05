@@ -101,26 +101,26 @@ calculateSpeciesRR
 
     endTime_ += dt;
 
-    forAll(production_, specieI)
+    forAll(production_, speciei)
     {
-        forAll(production_[specieI], reactionI)
+        forAll(production_[speciei], reactioni)
         {
-            RR = basicChemistry.calculateRR(reactionI, specieI);
+            RR = basicChemistry.calculateRR(reactioni, speciei);
 
             if (RR[0] > 0.0)
             {
-                production_[specieI][reactionI] = RR[0];
-                productionInt_[specieI][reactionI] =+ dt*RR[0];
+                production_[speciei][reactioni] = RR[0];
+                productionInt_[speciei][reactioni] =+ dt*RR[0];
             }
             else if (RR[0] < 0.0)
             {
-                consumption_[specieI][reactionI] = RR[0];
-                consumptionInt_[specieI][reactionI] =+ dt*RR[0];
+                consumption_[speciei][reactioni] = RR[0];
+                consumptionInt_[speciei][reactioni] =+ dt*RR[0];
             }
             else
             {
-                production_[specieI][reactionI] = 0.0;
-                consumption_[specieI][reactionI] = 0.0;
+                production_[speciei][reactioni] = 0.0;
+                consumption_[speciei][reactioni] = 0.0;
             }
         }
     }
@@ -143,21 +143,21 @@ writeSpeciesRR()
     prodIntFilePtr_() << "start time : " << startTime_ << tab
             << "end time :" <<  endTime_ << nl;
 
-    for (label reactionI = 0; reactionI < nReactions_; ++reactionI)
+    for (label reactioni = 0; reactioni < nReactions_; ++reactioni)
     {
-        consFilePtr_() << reactionI << tab;
-        consIntFilePtr_() << reactionI << tab;
-        prodFilePtr_() << reactionI << tab;
-        prodIntFilePtr_() << reactionI << tab;
+        consFilePtr_() << reactioni << tab;
+        consIntFilePtr_() << reactioni << tab;
+        prodFilePtr_() << reactioni << tab;
+        prodIntFilePtr_() << reactioni << tab;
 
         forAll(speciesNames_, i)
         {
-            prodFilePtr_() << production_[i][reactionI] << tab;
-            consFilePtr_() << consumption_[i][reactionI] << tab;
-            prodIntFilePtr_() << productionInt_[i][reactionI] << tab;
-            consIntFilePtr_() << consumptionInt_[i][reactionI] << tab;
-            consumptionInt_[i][reactionI] = 0.0;
-            productionInt_[i][reactionI] = 0.0;
+            prodFilePtr_() << production_[i][reactioni] << tab;
+            consFilePtr_() << consumption_[i][reactioni] << tab;
+            prodIntFilePtr_() << productionInt_[i][reactioni] << tab;
+            consIntFilePtr_() << consumptionInt_[i][reactioni] << tab;
+            consumptionInt_[i][reactioni] = 0.0;
+            productionInt_[i][reactioni] = 0.0;
         }
         consFilePtr_() << nl;
         consIntFilePtr_() << nl;
@@ -267,6 +267,7 @@ bool Foam::functionObjects::reactionsSensitivityAnalysis<chemistryType>::read
     const dictionary& dict
 )
 {
+    fvMeshFunctionObject::read(dict);
     writeFile::read(dict);
     return true;
 }

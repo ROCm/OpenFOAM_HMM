@@ -102,7 +102,7 @@ protected:
         //- Add the point data to the renderer
         void addPoints
         (
-            const label frameI,
+            const label framei,
             vtkActor* actor,
             vtkPolyDataMapper* mapper,
             vtkPolyData* data

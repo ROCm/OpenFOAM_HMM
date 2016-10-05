@@ -60,7 +60,6 @@ class linearUpwind
     // Private Data
 
         word gradSchemeName_;
-        tmp<fv::gradScheme<Type>> gradScheme_;
 
 
     // Private Member Functions
@@ -88,11 +87,7 @@ public:
         )
         :
             upwind<Type>(mesh, faceFlux),
-            gradSchemeName_("grad"),
-            gradScheme_
-            (
-                new fv::gaussGrad<Type>(mesh)
-            )
+            gradSchemeName_("grad")
         {}
 
         //- Construct from Istream.
@@ -105,15 +100,7 @@ public:
         )
         :
             upwind<Type>(mesh, schemeData),
-            gradSchemeName_(schemeData),
-            gradScheme_
-            (
-                fv::gradScheme<Type>::New
-                (
-                    mesh,
-                    mesh.gradScheme(gradSchemeName_)
-                )
-            )
+            gradSchemeName_(schemeData)
         {}
 
         //- Construct from faceFlux and Istream
@@ -125,15 +112,7 @@ public:
         )
         :
             upwind<Type>(mesh, faceFlux, schemeData),
-            gradSchemeName_(schemeData),
-            gradScheme_
-            (
-                fv::gradScheme<Type>::New
-                (
-                    mesh,
-                    mesh.gradScheme(gradSchemeName_)
-                )
-            )
+            gradSchemeName_(schemeData)
         {}
 
 
@@ -151,8 +130,15 @@ public:
         (
             const GeometricField<Type, fvPatchField, volMesh>&
         ) const;
-
 };
+
+
+// Specialize for volVectorField to support cached gradients
+template<>
+tmp<surfaceVectorField> linearUpwind<vector>::correction
+(
+    const volVectorField& vf
+) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -58,7 +58,8 @@ functions
         type            scalarTransport;
         libs            ("libsolverFunctionObjects.so");
         resetOnStartUp  no;
-        region cabin;
+        region          cabin;
+        field           H2O;
 
         fvOptions
         {

@@ -61,9 +61,7 @@ Foam::functionObjects::grad::grad
 )
 :
     fieldExpression(name, runTime, dict)
-{
-    read(dict);
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

@@ -64,14 +64,14 @@ Foam::functionObjects::runTimeControls::averageCondition::averageCondition
     {
         const dictionary& dict = conditionDict();
 
-        forAll(fieldNames_, fieldI)
+        forAll(fieldNames_, fieldi)
         {
-            const word& fieldName = fieldNames_[fieldI];
+            const word& fieldName = fieldNames_[fieldi];
 
             if (dict.found(fieldName))
             {
                 const dictionary& valueDict = dict.subDict(fieldName);
-                totalTime_[fieldI] = readScalar(valueDict.lookup("totalTime"));
+                totalTime_[fieldi] = readScalar(valueDict.lookup("totalTime"));
             }
         }
     }
@@ -101,11 +101,11 @@ bool Foam::functionObjects::runTimeControls::averageCondition::apply()
 
     DynamicList<label> unprocessedFields(fieldNames_.size());
 
-    forAll(fieldNames_, fieldI)
+    forAll(fieldNames_, fieldi)
     {
-        const word& fieldName(fieldNames_[fieldI]);
+        const word& fieldName(fieldNames_[fieldi]);
 
-        scalar Dt = totalTime_[fieldI];
+        scalar Dt = totalTime_[fieldi];
         scalar alpha = (Dt - dt)/Dt;
         scalar beta = dt/Dt;
 
@@ -133,10 +133,10 @@ bool Foam::functionObjects::runTimeControls::averageCondition::apply()
 
         if (!processed)
         {
-            unprocessedFields.append(fieldI);
+            unprocessedFields.append(fieldi);
         }
 
-        totalTime_[fieldI] += dt;
+        totalTime_[fieldi] += dt;
     }
 
     if (unprocessedFields.size())
@@ -147,8 +147,8 @@ bool Foam::functionObjects::runTimeControls::averageCondition::apply()
 
         forAll(unprocessedFields, i)
         {
-            label fieldI = unprocessedFields[i];
-            Info<< "        " << fieldNames_[fieldI] << nl;
+            label fieldi = unprocessedFields[i];
+            Info<< "        " << fieldNames_[fieldi] << nl;
         }
     }
 
@@ -162,20 +162,20 @@ void Foam::functionObjects::runTimeControls::averageCondition::write()
 {
     dictionary& conditionDict = this->conditionDict();
 
-    forAll(fieldNames_, fieldI)
+    forAll(fieldNames_, fieldi)
     {
-        const word& fieldName = fieldNames_[fieldI];
+        const word& fieldName = fieldNames_[fieldi];
 
         // value dictionary should be present - mean values are written there
         if (conditionDict.found(fieldName))
         {
             dictionary& valueDict = conditionDict.subDict(fieldName);
-            valueDict.add("totalTime", totalTime_[fieldI], true);
+            valueDict.add("totalTime", totalTime_[fieldi], true);
         }
         else
         {
             dictionary valueDict;
-            valueDict.add("totalTime", totalTime_[fieldI], true);
+            valueDict.add("totalTime", totalTime_[fieldi], true);
             conditionDict.add(fieldName, valueDict);
         }
     }

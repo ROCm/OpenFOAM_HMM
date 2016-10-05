@@ -132,15 +132,15 @@ apply()
 
     List<scalar> result(fieldNames_.size(), -VGREAT);
 
-    forAll(fieldNames_, fieldI)
+    forAll(fieldNames_, fieldi)
     {
-        const word& fieldName = fieldNames_[fieldI];
+        const word& fieldName = fieldNames_[fieldi];
 
         if (solverDict.found(fieldName))
         {
             const List<solverPerformance> sp(solverDict.lookup(fieldName));
             const scalar residual = sp.first().initialResidual();
-            result[fieldI] = residual;
+            result[fieldi] = residual;
 
             switch (mode_)
             {
@@ -203,14 +203,14 @@ apply()
                 << ": satisfied using threshold value: " << value_ << nl;
         }
 
-        forAll(result, resultI)
+        forAll(result, resulti)
         {
-            if (result[resultI] > 0)
+            if (result[resulti] > 0)
             {
                 if (log_)
                 {
-                    Info<< "    field: " << fieldNames_[resultI]
-                        << ", residual: " << result[resultI] << nl;
+                    Info<< "    field: " << fieldNames_[resulti]
+                        << ", residual: " << result[resulti] << nl;
                 }
             }
         }

@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "int64.H"
+#include "stringOps.H"
 #include "IOstreams.H"
 
 #include <inttypes.h>
@@ -32,11 +33,15 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::word Foam::name(const int64_t val)
+Foam::word Foam::name(const char* fmt, const int64_t val)
 {
-    std::ostringstream buf;
-    buf << val;
-    return buf.str();
+    return stringOps::name(fmt, val);
+}
+
+
+Foam::word Foam::name(const std::string& fmt, const int64_t val)
+{
+    return stringOps::name(fmt, val);
 }
 
 

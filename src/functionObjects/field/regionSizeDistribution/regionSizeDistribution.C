@@ -137,8 +137,8 @@ void Foam::functionObjects::regionSizeDistribution::writeAlphaFields
     // Knock out any cell not in patchRegions
     forAll(liquidCore, celli)
     {
-        label regionI = regions[celli];
-        if (patchRegions.found(regionI))
+        label regioni = regions[celli];
+        if (patchRegions.found(regioni))
         {
             backgroundAlpha[celli] = 0;
         }
@@ -146,7 +146,7 @@ void Foam::functionObjects::regionSizeDistribution::writeAlphaFields
         {
             liquidCore[celli] = 0;
 
-            scalar regionVol = regionVolume[regionI];
+            scalar regionVol = regionVolume[regioni];
             if (regionVol < maxDropletVol)
             {
                 backgroundAlpha[celli] = 0;
@@ -353,6 +353,8 @@ Foam::functionObjects::regionSizeDistribution::~regionSizeDistribution()
 
 bool Foam::functionObjects::regionSizeDistribution::read(const dictionary& dict)
 {
+    fvMeshFunctionObject::read(dict);
+
     dict.lookup("field") >> alphaName_;
     dict.lookup("patches") >> patchNames_;
     dict.lookup("threshold") >> threshold_;
@@ -598,10 +600,10 @@ bool Foam::functionObjects::regionSizeDistribution::write()
             << endl;
         forAllConstIter(Map<label>, patchRegions, iter)
         {
-            label regionI = iter.key();
+            label regioni = iter.key();
             Info<< "    " << token::TAB << iter.key()
-                << token::TAB << allRegionVolume[regionI]
-                << token::TAB << allRegionAlphaVolume[regionI] << endl;
+                << token::TAB << allRegionVolume[regioni]
+                << token::TAB << allRegionAlphaVolume[regioni] << endl;
 
         }
         Info<< endl;
@@ -658,17 +660,17 @@ bool Foam::functionObjects::regionSizeDistribution::write()
     // threshold
     forAllIter(Map<scalar>, allRegionVolume, vIter)
     {
-        label regionI = vIter.key();
+        label regioni = vIter.key();
         if
         (
-            patchRegions.found(regionI)
+            patchRegions.found(regioni)
          || vIter() >= maxDropletVol
-         || (allRegionAlphaVolume[regionI]/vIter() < threshold_)
+         || (allRegionAlphaVolume[regioni]/vIter() < threshold_)
         )
         {
             allRegionVolume.erase(vIter);
-            allRegionAlphaVolume.erase(regionI);
-            allRegionNumCells.erase(regionI);
+            allRegionAlphaVolume.erase(regioni);
+            allRegionNumCells.erase(regioni);
         }
     }
 
@@ -791,11 +793,11 @@ bool Foam::functionObjects::regionSizeDistribution::write()
                     << endl;
 
                 scalar delta = 0.0;
-                forAll(binDownCount, binI)
+                forAll(binDownCount, bini)
                 {
-                    Info<< "    " << token::TAB << binI
+                    Info<< "    " << token::TAB << bini
                         << token::TAB << delta
-                        << token::TAB << binDownCount[binI] << endl;
+                        << token::TAB << binDownCount[bini] << endl;
                     delta += deltaX;
                 }
                 Info<< endl;
@@ -844,11 +846,11 @@ bool Foam::functionObjects::regionSizeDistribution::write()
                 << endl;
 
             scalar diam = 0.0;
-            forAll(binCount, binI)
+            forAll(binCount, bini)
             {
-                Info<< "    " << token::TAB << binI
+                Info<< "    " << token::TAB << bini
                     << token::TAB << diam
-                    << token::TAB << binCount[binI] << endl;
+                    << token::TAB << binCount[bini] << endl;
 
                 diam += delta;
             }

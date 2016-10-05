@@ -24,17 +24,22 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "uint64.H"
+#include "stringOps.H"
 #include "IOstreams.H"
 
 #include <sstream>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::word Foam::name(const uint64_t val)
+Foam::word Foam::name(const char* fmt, const uint64_t val)
 {
-    std::ostringstream buf;
-    buf << val;
-    return buf.str();
+    return stringOps::name(fmt, val);
+}
+
+
+Foam::word Foam::name(const std::string& fmt, const uint64_t val)
+{
+    return stringOps::name(fmt, val);
 }
 
 

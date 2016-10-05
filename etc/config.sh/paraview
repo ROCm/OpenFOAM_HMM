@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -25,12 +25,37 @@
 #     etc/config.sh/paraview
 #
 # Description
-#     Setup file for paraview-[3-5].x
+#     Setup file for paraview (& cmake)
 #     Sourced from OpenFOAM-<VERSION>/etc/bashrc or from foamPV alias
 #
+#     If using system-wide installation for cmake, use the following settings:
+#
+#         cmake_version=cmake-system
+#
 # Note
-#     The env. variables 'ParaView_DIR' and 'ParaView_MAJOR'
-#     are required for building plugins
+#     The following env. variables are required for building plugins:
+#         ParaView_DIR
+#         ParaView_INCLUDE_DIR
+#         PV_PLUGIN_PATH
+#
+#     If using a central installation not located under ThirdParty, you will
+#     need to set some environment values directly. For example,
+#
+#         export ParaView_DIR=/opt/paraview/paraview-5.0.1
+#         export ParaView_INCLUDE_DIR=$ParaView_DIR/include/paraview-5.0
+#         export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview-5.0
+#
+#         export PATH=$ParaView_DIR/bin:$PATH
+#         export LD_LIBRARY_PATH=$ParaView_DIR/lib/paraview-5.0:$LD_LIBRARY_PATH
+#         unset ParaView_VERSION        # avoid using ThirdParty settings
+#
+#------------------------------------------------------------------------------
+
+ParaView_VERSION=5.0.1
+ParaView_MAJOR=detect                   # Automatically determine major version
+
+cmake_version=cmake-system
+
 #------------------------------------------------------------------------------
 
 # Clean the PATH
@@ -41,32 +66,15 @@ cleaned=$($WM_PROJECT_DIR/bin/foamCleanPath "$PATH" \
         ) \
         && PATH="$cleaned"
 
-# Determine the cmake to be used
+# Environment for ThirdParty cmake
 unset CMAKE_HOME
-for cmake in cmake-3.2.1 cmake-2.8.12.1 cmake-2.8.8 cmake-2.8.4 cmake-2.8.3 \
-             cmake-2.8.1
-do
-    cmake=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cmake
-    if [ -r $cmake ]
-    then
-        export CMAKE_HOME=$cmake
-        export CMAKE_ROOT=$cmake
-        export PATH=$CMAKE_HOME/bin:$PATH
-        break
-    fi
-done
-
-
-#- ParaView version, automatically determine major version
-#export ParaView_VERSION=3.12.0
-#export ParaView_VERSION=4.0.1
-#export ParaView_VERSION=4.1.0
-#export ParaView_VERSION=4.3.1
-#export ParaView_VERSION=4.4.0
-#export ParaView_VERSION=5.0.0
-export ParaView_VERSION=5.0.1
-export ParaView_MAJOR=detect
-
+cmake=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cmake_version
+if [ -r $cmake ]
+then
+    export CMAKE_HOME=$cmake
+    export CMAKE_ROOT=$cmake
+    export PATH=$CMAKE_HOME/bin:$PATH
+fi
 
 # Evaluate command-line parameters for ParaView
 _foamParaviewEval()
@@ -86,67 +94,69 @@ _foamParaviewEval()
 # Evaluate command-line parameters
 _foamParaviewEval $@
 
-
-# Set MAJOR version to correspond to VERSION
-# ParaView_MAJOR is "<digits>.<digits>" from ParaView_VERSION
-case "$ParaView_VERSION" in
-"$ParaView_MAJOR".* )
-    # Version and major appear to correspond
-    ;;
-
-[0-9]*)
-    # Extract major from the version
-    ParaView_MAJOR=$(echo $ParaView_VERSION | \
-                   sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/')
-    ;;
-esac
-export ParaView_VERSION ParaView_MAJOR
-
-paraviewInstDir=$WM_THIRD_PARTY_DIR/ParaView-$ParaView_VERSION
-paraviewArchName=ParaView-$ParaView_VERSION
-
-export ParaView_DIR=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$paraviewArchName
-
-# Set paths if binaries or source are present
-if [ -r $ParaView_DIR -o -r $paraviewInstDir ]
+# Require that ParaView_VERSION has not been unset.
+# Avoids conflict with an alternative (non-ThirdParty) installation.
+if [ -n "$ParaView_VERSION" ]
 then
-    export ParaView_INCLUDE_DIR=$ParaView_DIR/include/paraview-$ParaView_MAJOR
-    if [ ! -d $ParaView_INCLUDE_DIR -a -d $ParaView_DIR/include/paraview-3.0 ]
+
+    # Set MAJOR version to correspond to VERSION
+    # ParaView_MAJOR is "<digits>.<digits>" from ParaView_VERSION
+    case "$ParaView_VERSION" in
+    "$ParaView_MAJOR".* )
+        # Version and major appear to correspond
+        ;;
+
+    [0-9]*)
+        # Extract major from the version
+        ParaView_MAJOR=$(echo $ParaView_VERSION | \
+                       sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/')
+        ;;
+    esac
+
+    pvName=ParaView-$ParaView_VERSION
+    pvMajor=paraview-$ParaView_MAJOR
+    pvSrcDir=$WM_THIRD_PARTY_DIR/$pvName
+
+    export ParaView_DIR=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$pvName
+
+    # Set paths if binaries or source are present
+    if [ -r $ParaView_DIR -o -r $pvSrcDir ]
     then
-        export ParaView_INCLUDE_DIR=$ParaView_DIR/include/paraview-3.0
-    fi
+        pvLibDir=$ParaView_DIR/lib/$pvMajor
+        pvPython=$ParaView_DIR/Utilities/VTKPythonWrapping
 
-    ParaView_LIB_DIR=$ParaView_DIR/lib/paraview-$ParaView_MAJOR
+        export ParaView_INCLUDE_DIR=$ParaView_DIR/include/$pvMajor
+        export PV_PLUGIN_PATH=$FOAM_LIBBIN/$pvMajor
+        export PATH=$ParaView_DIR/bin:$PATH
+        export LD_LIBRARY_PATH=$pvLibDir:$LD_LIBRARY_PATH
 
-    export PATH=$ParaView_DIR/bin:$PATH
-    export LD_LIBRARY_PATH=$ParaView_LIB_DIR:$LD_LIBRARY_PATH
-    export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview-$ParaView_MAJOR
-
-    if [ "$FOAM_VERBOSE" -a "$PS1" ]
-    then
-        echo "Using paraview"
-        echo "    ParaView_DIR         : $ParaView_DIR"
-        echo "    ParaView_LIB_DIR     : $ParaView_LIB_DIR"
-        echo "    ParaView_INCLUDE_DIR : $ParaView_INCLUDE_DIR"
-        echo "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH"
-    fi
-
-    # Add in python libraries if required
-    paraviewPython=$ParaView_DIR/Utilities/VTKPythonWrapping
-    if [ -r $paraviewPython ]
-    then
-        if [ "$PYTHONPATH" ]
+        # Add in python libraries if required
+        if [ -r $pvPython ]
         then
-            export PYTHONPATH=$PYTHONPATH:$paraviewPython:$ParaView_LIB_DIR
-        else
-            export PYTHONPATH=$paraviewPython:$ParaView_LIB_DIR
+            if [ "$PYTHONPATH" ]
+            then
+                export PYTHONPATH=$PYTHONPATH:$pvPython:$pvLibDir
+            else
+                export PYTHONPATH=$pvPython:$pvLibDir
+            fi
         fi
+
+        if [ "$FOAM_VERBOSE" -a "$PS1" ]
+        then
+            echo "Using paraview"
+            echo "    ParaView_DIR         : $ParaView_DIR"
+            echo "    ParaView_INCLUDE_DIR : $ParaView_INCLUDE_DIR"
+            echo "    library dir          : $pvLibDir"
+            echo "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH"
+        fi
+    else
+        unset ParaView_DIR ParaView_INCLUDE_DIR PV_PLUGIN_PATH
     fi
-else
-    unset PV_PLUGIN_PATH
+
 fi
 
-unset _foamParaviewEval
-unset cleaned cmake paraviewInstDir paraviewPython
+unset -f _foamParaviewEval
+unset cleaned cmake cmake_version pvName pvMajor pvSrcDir pvLibDir pvPython
+unset ParaView_VERSION ParaView_MAJOR
 
 #------------------------------------------------------------------------------

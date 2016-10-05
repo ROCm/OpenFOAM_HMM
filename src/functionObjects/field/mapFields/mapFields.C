@@ -87,7 +87,7 @@ void Foam::functionObjects::mapFields::createInterpolation
         meshToMesh::interpolationMethodNames_[mapMethodName]
     );
 
-    // Lookup corresponding AMI method
+    // Lookup corresponding AMi method
     word patchMapMethodName =
         AMIPatchToPatchInterpolation::interpolationMethodToWord
         (
@@ -166,6 +166,8 @@ Foam::functionObjects::mapFields::~mapFields()
 
 bool Foam::functionObjects::mapFields::read(const dictionary& dict)
 {
+    fvMeshFunctionObject::read(dict);
+
     dict.lookup("fields") >> fieldNames_;
     createInterpolation(dict);
     return true;

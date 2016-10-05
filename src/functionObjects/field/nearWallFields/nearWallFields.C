@@ -60,7 +60,12 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
     DebugInFunction << "nPatchFaces: " << globalWalls.size() << endl;
 
     // Construct cloud
-    Cloud<findCellParticle> cloud(mesh_, IDLList<findCellParticle>());
+    Cloud<findCellParticle> cloud
+    (
+        mesh_,
+        cloud::defaultName,
+        IDLList<findCellParticle>()
+    );
 
     // Add particles to track to sample locations
     nPatchFaces = 0;
@@ -267,10 +272,10 @@ bool Foam::functionObjects::nearWallFields::read(const dictionary& dict)
     // Convert field to map
     fieldMap_.resize(2*fieldSet_.size());
     reverseFieldMap_.resize(2*fieldSet_.size());
-    forAll(fieldSet_, setI)
+    forAll(fieldSet_, seti)
     {
-        const word& fldName = fieldSet_[setI].first();
-        const word& sampleFldName = fieldSet_[setI].second();
+        const word& fldName = fieldSet_[seti].first();
+        const word& sampleFldName = fieldSet_[seti].second();
 
         fieldMap_.insert(fldName, sampleFldName);
         reverseFieldMap_.insert(sampleFldName, fldName);

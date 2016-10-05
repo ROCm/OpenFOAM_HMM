@@ -59,7 +59,7 @@ Foam::tetIndices Foam::functionObjects::wallBoundedStreamLine::findNearestTet
     const cell& cFaces = mesh_.cells()[celli];
 
     label minFacei = -1;
-    label minTetPtI = -1;
+    label minTetPti = -1;
     scalar minDistSqr = sqr(GREAT);
 
     forAll(cFaces, cFacei)
@@ -86,7 +86,7 @@ Foam::tetIndices Foam::functionObjects::wallBoundedStreamLine::findNearestTet
                 {
                     minDistSqr = d2;
                     minFacei = facei;
-                    minTetPtI = i-1;
+                    minTetPti = i-1;
                 }
                 fp = nextFp;
             }
@@ -98,7 +98,7 @@ Foam::tetIndices Foam::functionObjects::wallBoundedStreamLine::findNearestTet
     (
         celli,
         minFacei,
-        minTetPtI,
+        minTetPti,
         mesh_
     );
 }

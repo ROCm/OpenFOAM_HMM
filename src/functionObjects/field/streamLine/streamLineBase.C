@@ -54,12 +54,12 @@ Foam::functionObjects::streamLineBase::wallPatch() const
 
     label nFaces = 0;
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        //if (!polyPatch::constraintType(patches[patchI].type()))
-        if (isA<wallPolyPatch>(patches[patchI]))
+        //if (!polyPatch::constraintType(patches[patchi].type()))
+        if (isA<wallPolyPatch>(patches[patchi]))
         {
-            nFaces += patches[patchI].size();
+            nFaces += patches[patchi].size();
         }
     }
 
@@ -67,12 +67,12 @@ Foam::functionObjects::streamLineBase::wallPatch() const
 
     nFaces = 0;
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        //if (!polyPatch::constraintType(patches[patchI].type()))
-        if (isA<wallPolyPatch>(patches[patchI]))
+        //if (!polyPatch::constraintType(patches[patchi].type()))
+        if (isA<wallPolyPatch>(patches[patchi]))
         {
-            const polyPatch& pp = patches[patchI];
+            const polyPatch& pp = patches[patchi];
 
             forAll(pp, i)
             {
@@ -220,11 +220,11 @@ void Foam::functionObjects::streamLineBase::initInterpolations
 
 void Foam::functionObjects::streamLineBase::storePoint
 (
-    const label trackI,
+    const label tracki,
 
     const scalar w,
-    const label leftI,
-    const label rightI,
+    const label lefti,
+    const label righti,
 
     DynamicList<point>& newTrack,
     DynamicList<scalarList>& newScalars,
@@ -233,19 +233,19 @@ void Foam::functionObjects::streamLineBase::storePoint
 {
     label sz = newTrack.size();
 
-    const List<point>& track = allTracks_[trackI];
+    const List<point>& track = allTracks_[tracki];
 
-    newTrack.append((1.0-w)*track[leftI] + w*track[rightI]);
+    newTrack.append((1.0-w)*track[lefti] + w*track[righti]);
 
     // Scalars
     {
         newScalars.append(scalarList(allScalars_.size()));
         scalarList& newVals = newScalars[sz];
 
-        forAll(allScalars_, scalarI)
+        forAll(allScalars_, scalari)
         {
-            const scalarList& trackVals = allScalars_[scalarI][trackI];
-            newVals[scalarI] = (1.0-w)*trackVals[leftI] + w*trackVals[rightI];
+            const scalarList& trackVals = allScalars_[scalari][tracki];
+            newVals[scalari] = (1.0-w)*trackVals[lefti] + w*trackVals[righti];
         }
     }
 
@@ -254,10 +254,10 @@ void Foam::functionObjects::streamLineBase::storePoint
         newVectors.append(vectorList(allVectors_.size()));
         vectorList& newVals = newVectors[sz];
 
-        forAll(allVectors_, vectorI)
+        forAll(allVectors_, vectori)
         {
-            const vectorList& trackVals = allVectors_[vectorI][trackI];
-            newVals[vectorI] = (1.0-w)*trackVals[leftI] + w*trackVals[rightI];
+            const vectorList& trackVals = allVectors_[vectori][tracki];
+            newVals[vectori] = (1.0-w)*trackVals[lefti] + w*trackVals[righti];
         }
     }
 }
@@ -267,24 +267,24 @@ void Foam::functionObjects::streamLineBase::storePoint
 void Foam::functionObjects::streamLineBase::trimToBox
 (
     const treeBoundBox& bb,
-    const label trackI,
+    const label tracki,
     PtrList<DynamicList<point>>& newTracks,
     PtrList<DynamicList<scalarList>>& newScalars,
     PtrList<DynamicList<vectorList>>& newVectors
 ) const
 {
-    const List<point>& track = allTracks_[trackI];
+    const List<point>& track = allTracks_[tracki];
     if (track.size())
     {
         for
         (
-            label segmentI = 1;
-            segmentI < track.size();
-            segmentI++
+            label segmenti = 1;
+            segmenti < track.size();
+            segmenti++
         )
         {
-            const point& startPt = track[segmentI-1];
-            const point& endPt = track[segmentI];
+            const point& startPt = track[segmenti-1];
+            const point& endPt = track[segmenti];
 
             const vector d(endPt-startPt);
             scalar magD = mag(d);
@@ -292,14 +292,14 @@ void Foam::functionObjects::streamLineBase::trimToBox
             {
                 if (bb.contains(startPt))
                 {
-                    // Store 1.0*track[segmentI-1]+0*track[segmentI]
+                    // Store 1.0*track[segmenti-1]+0*track[segmenti]
                     storePoint
                     (
-                        trackI,
+                        tracki,
 
                         0.0,
-                        segmentI-1,
-                        segmentI,
+                        segmenti-1,
+                        segmenti,
 
                         newTracks.last(),
                         newScalars.last(),
@@ -315,11 +315,11 @@ void Foam::functionObjects::streamLineBase::trimToBox
                             // values
                             storePoint
                             (
-                                trackI,
+                                tracki,
 
                                 mag(clipPt-startPt)/magD,
-                                segmentI-1,
-                                segmentI,
+                                segmenti-1,
+                                segmenti,
 
                                 newTracks.last(),
                                 newScalars.last(),
@@ -356,11 +356,11 @@ void Foam::functionObjects::streamLineBase::trimToBox
                         // Store point and interpolated values
                         storePoint
                         (
-                            trackI,
+                            tracki,
 
                             mag(clipPt-startPt)/magD,
-                            segmentI-1,
-                            segmentI,
+                            segmenti-1,
+                            segmenti,
 
                             newTracks.last(),
                             newScalars.last(),
@@ -379,11 +379,11 @@ void Foam::functionObjects::streamLineBase::trimToBox
                             // Store point and interpolated values
                             storePoint
                             (
-                                trackI,
+                                tracki,
 
                                 mag(clipPt-startPt)/magD,
-                                segmentI-1,
-                                segmentI,
+                                segmenti-1,
+                                segmenti,
 
                                 newTracks.last(),
                                 newScalars.last(),
@@ -404,7 +404,7 @@ void Foam::functionObjects::streamLineBase::trimToBox
         {
             storePoint
             (
-                trackI,
+                tracki,
 
                 1.0,
                 track.size()-2,
@@ -427,9 +427,9 @@ void Foam::functionObjects::streamLineBase::trimToBox(const treeBoundBox& bb)
     PtrList<DynamicList<scalarList>> newScalars;
     PtrList<DynamicList<vectorList>> newVectors;
 
-    forAll(allTracks_, trackI)
+    forAll(allTracks_, tracki)
     {
-        const List<point>& track = allTracks_[trackI];
+        const List<point>& track = allTracks_[tracki];
 
         if (track.size())
         {
@@ -439,44 +439,44 @@ void Foam::functionObjects::streamLineBase::trimToBox(const treeBoundBox& bb)
             newVectors.append(new DynamicList<vectorList>(track.size()));
 
             // Trim, split and append to newTracks
-            trimToBox(bb, trackI, newTracks, newScalars, newVectors);
+            trimToBox(bb, tracki, newTracks, newScalars, newVectors);
         }
     }
 
     // Transfer newTracks to allTracks_
     allTracks_.setSize(newTracks.size());
-    forAll(allTracks_, trackI)
+    forAll(allTracks_, tracki)
     {
-        allTracks_[trackI].transfer(newTracks[trackI]);
+        allTracks_[tracki].transfer(newTracks[tracki]);
     }
     // Replace track scalars
-    forAll(allScalars_, scalarI)
+    forAll(allScalars_, scalari)
     {
-        DynamicList<scalarList>& fieldVals = allScalars_[scalarI];
+        DynamicList<scalarList>& fieldVals = allScalars_[scalari];
         fieldVals.setSize(newTracks.size());
 
-        forAll(fieldVals, trackI)
+        forAll(fieldVals, tracki)
         {
-            scalarList& trackVals = allScalars_[scalarI][trackI];
-            trackVals.setSize(newScalars[trackI].size());
-            forAll(trackVals, sampleI)
+            scalarList& trackVals = allScalars_[scalari][tracki];
+            trackVals.setSize(newScalars[tracki].size());
+            forAll(trackVals, samplei)
             {
-                trackVals[sampleI] = newScalars[trackI][sampleI][scalarI];
+                trackVals[samplei] = newScalars[tracki][samplei][scalari];
             }
         }
     }
     // Replace track vectors
-    forAll(allVectors_, vectorI)
+    forAll(allVectors_, vectori)
     {
-        DynamicList<vectorList>& fieldVals = allVectors_[vectorI];
+        DynamicList<vectorList>& fieldVals = allVectors_[vectori];
         fieldVals.setSize(newTracks.size());
-        forAll(fieldVals, trackI)
+        forAll(fieldVals, tracki)
         {
-            vectorList& trackVals = allVectors_[vectorI][trackI];
-            trackVals.setSize(newVectors[trackI].size());
-            forAll(trackVals, sampleI)
+            vectorList& trackVals = allVectors_[vectori][tracki];
+            trackVals.setSize(newVectors[tracki].size());
+            forAll(trackVals, samplei)
             {
-                trackVals[sampleI] = newVectors[trackI][sampleI][vectorI];
+                trackVals[samplei] = newVectors[tracki][samplei][vectori];
             }
         }
     }
@@ -507,6 +507,8 @@ Foam::functionObjects::streamLineBase::~streamLineBase()
 
 bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
 {
+    fvMeshFunctionObject::read(dict);
+
     Info<< type() << " " << name() << ":" << nl;
 
     dict.lookup("fields") >> fields_;

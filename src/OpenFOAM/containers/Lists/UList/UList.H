@@ -219,7 +219,7 @@ public:
         //- Copy elements of the given UList
         void deepCopy(const UList<T>&);
 
-        //- Write the UList as a dictionary entry
+        //- Write the UList with its compound type
         void writeEntry(Ostream&) const;
 
         //- Write the UList as a dictionary entry with keyword

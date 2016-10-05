@@ -63,11 +63,11 @@ Foam::vector Foam::wallBoundedStreamLineParticle::interpolateFields
 
         // Store the scalar fields
         sampledScalars_.setSize(td.vsInterp_.size());
-        forAll(td.vsInterp_, scalarI)
+        forAll(td.vsInterp_, scalari)
         {
-            sampledScalars_[scalarI].append
+            sampledScalars_[scalari].append
             (
-                td.vsInterp_[scalarI].interpolate
+                td.vsInterp_[scalari].interpolate
                 (
                     position,
                     ti,     //celli,
@@ -78,23 +78,23 @@ Foam::vector Foam::wallBoundedStreamLineParticle::interpolateFields
 
         // Store the vector fields
         sampledVectors_.setSize(td.vvInterp_.size());
-        forAll(td.vvInterp_, vectorI)
+        forAll(td.vvInterp_, vectori)
         {
             vector positionU;
-            if (vectorI == td.UIndex_)
+            if (vectori == td.UIndex_)
             {
                 positionU = U;
             }
             else
             {
-                positionU = td.vvInterp_[vectorI].interpolate
+                positionU = td.vvInterp_[vectori].interpolate
                 (
                     position,
                     ti,     //celli,
                     facei
                 );
             }
-            sampledVectors_[vectorI].append(positionU);
+            sampledVectors_[vectori].append(positionU);
         }
     }
 
@@ -136,7 +136,7 @@ Foam::wallBoundedStreamLineParticle::wallBoundedStreamLineParticle
     const vector& position,
     const label celli,
     const label tetFacei,
-    const label tetPtI,
+    const label tetPti,
     const label meshEdgeStart,
     const label diagEdge,
     const label lifeTime
@@ -148,7 +148,7 @@ Foam::wallBoundedStreamLineParticle::wallBoundedStreamLineParticle
         position,
         celli,
         tetFacei,
-        tetPtI,
+        tetPti,
         meshEdgeStart,
         diagEdge
     ),

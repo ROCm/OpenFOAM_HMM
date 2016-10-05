@@ -90,6 +90,8 @@ Foam::functionObjects::runTimePostProcessing::~runTimePostProcessing()
 
 bool Foam::functionObjects::runTimePostProcessing::read(const dictionary& dict)
 {
+    fvMeshFunctionObject::read(dict);
+
     Info<< type() << " " << name() << ": reading post-processing data" << endl;
 
     scene_.read(dict);

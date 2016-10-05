@@ -80,10 +80,11 @@ protected:
         const ObjectType& lookupObject(const word& fieldName) const;
 
         //- Store the given field in the objectRegistry under the given name
+        //  Note: sets the fieldName to tfield().name() if not already set
         template<class ObjectType>
         bool store
         (
-            const word& fieldName,
+            word& fieldName,
             const tmp<ObjectType>& tfield,
             bool cacheable = false
         );

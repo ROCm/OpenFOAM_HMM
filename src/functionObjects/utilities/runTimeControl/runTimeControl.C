@@ -77,27 +77,29 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
     const dictionary& dict
 )
 {
+    fvMeshFunctionObject::read(dict);
+
     const dictionary& conditionsDict = dict.subDict("conditions");
     const wordList conditionNames(conditionsDict.toc());
     conditions_.setSize(conditionNames.size());
 
-    label uniqueGroupI = 0;
-    forAll(conditionNames, conditionI)
+    label uniqueGroupi = 0;
+    forAll(conditionNames, conditioni)
     {
-        const word& conditionName = conditionNames[conditionI];
+        const word& conditionName = conditionNames[conditioni];
         const dictionary& dict = conditionsDict.subDict(conditionName);
 
         conditions_.set
         (
-            conditionI,
+            conditioni,
             runTimeCondition::New(conditionName, obr_, dict, *this)
         );
 
-        label groupI = conditions_[conditionI].groupID();
+        label groupi = conditions_[conditioni].groupID();
 
-        if (groupMap_.insert(groupI, uniqueGroupI))
+        if (groupMap_.insert(groupi, uniqueGroupi))
         {
-            uniqueGroupI++;
+            uniqueGroupi++;
         }
     }
 
@@ -114,9 +116,9 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
     {
         // Check that at least one condition is active
         bool active = false;
-        forAll(conditions_, conditionI)
+        forAll(conditions_, conditioni)
         {
-            if (conditions_[conditionI].active())
+            if (conditions_[conditioni].active())
             {
                 active = true;
                 break;
@@ -146,32 +148,32 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
     List<bool> groupSatisfied(groupMap_.size(), true);
     List<bool> groupActive(groupMap_.size(), false);
 
-    forAll(conditions_, conditionI)
+    forAll(conditions_, conditioni)
     {
-        runTimeCondition& condition = conditions_[conditionI];
+        runTimeCondition& condition = conditions_[conditioni];
 
         if (condition.active())
         {
             bool conditionSatisfied = condition.apply();
 
-            label groupI = condition.groupID();
+            label groupi = condition.groupID();
 
-            Map<label>::const_iterator conditionIter = groupMap_.find(groupI);
+            Map<label>::const_iterator conditionIter = groupMap_.find(groupi);
 
             if (conditionIter == groupMap_.end())
             {
                 FatalErrorInFunction
-                    << "group " << groupI << " not found in map"
+                    << "group " << groupi << " not found in map"
                     << abort(FatalError);
             }
 
             if (conditionSatisfied)
             {
-                IDs.append(conditionI);
+                IDs.append(conditioni);
 
                 groupActive[conditionIter()] = true;
 
-                if (groupI == -1)
+                if (groupi == -1)
                 {
                     // Condition not part of a group - only requires this to be
                     // satisfied for completion flag to be set
@@ -187,9 +189,9 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
     }
 
     bool done = false;
-    forAll(groupSatisfied, groupI)
+    forAll(groupSatisfied, groupi)
     {
-        if (groupSatisfied[groupI] && groupActive[groupI])
+        if (groupSatisfied[groupi] && groupActive[groupi])
         {
             done = true;
             break;
@@ -198,10 +200,10 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
 
     if (done)
     {
-        forAll(IDs, conditionI)
+        forAll(IDs, conditioni)
         {
-            Info<< "    " << conditions_[conditionI].type() << ": "
-                <<  conditions_[conditionI].name()
+            Info<< "    " << conditions_[conditioni].type() << ": "
+                <<  conditions_[conditioni].name()
                 << " condition satisfied" << nl;
         }
 
@@ -235,9 +237,9 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
 
 bool Foam::functionObjects::runTimeControls::runTimeControl::write()
 {
-    forAll(conditions_, conditionI)
+    forAll(conditions_, conditioni)
     {
-        conditions_[conditionI].write();
+        conditions_[conditioni].write();
     }
 
     return true;

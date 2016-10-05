@@ -35,8 +35,8 @@ boundaryField
         type            compressible::turbulentHeatFluxTemperature;
         heatSource      flux;
         q               uniform -40e3;
-        kappa           fluidThermo;
-        kappaName       none;
+        kappaMethod     fluidThermo;
+        kappa           none;
         value           $internalField;
     }
     right

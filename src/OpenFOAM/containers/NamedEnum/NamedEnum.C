@@ -120,4 +120,23 @@ Foam::wordList Foam::NamedEnum<Enum, nEnum>::words()
 }
 
 
+template<class Enum, int nEnum>
+Foam::List<Enum> Foam::NamedEnum<Enum, nEnum>::enums()
+{
+    List<Enum> lst(nEnum);
+
+    label nElem = 0;
+    for (int enumI = 0; enumI < nEnum; ++enumI)
+    {
+        if (names[enumI] && names[enumI][0])
+        {
+            lst[nElem++] = Enum(enumI);
+        }
+    }
+
+    lst.setSize(nElem);
+    return lst;
+}
+
+
 // ************************************************************************* //

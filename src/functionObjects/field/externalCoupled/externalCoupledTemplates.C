@@ -110,9 +110,9 @@ bool Foam::functionObjects::externalCoupled::readData
         // Handle column-wise reading of patch data. Supports most easy types
         forAll(patchIDs, i)
         {
-            label patchI = patchIDs[i];
+            label patchi = patchIDs[i];
 
-            if (isA<patchFieldType>(bf[patchI]))
+            if (isA<patchFieldType>(bf[patchi]))
             {
                 // Explicit handling of externalCoupledMixed bcs - they
                 // have specialised reading routines.
@@ -121,7 +121,7 @@ bool Foam::functionObjects::externalCoupled::readData
                 (
                     refCast<const patchFieldType>
                     (
-                        bf[patchI]
+                        bf[patchi]
                     )
                 );
 
@@ -129,7 +129,7 @@ bool Foam::functionObjects::externalCoupled::readData
                 OStringStream os;
                 readLines
                 (
-                    bf[patchI].size(),      // number of lines to read
+                    bf[patchi].size(),      // number of lines to read
                     masterFilePtr,
                     os
                 );
@@ -141,14 +141,14 @@ bool Foam::functionObjects::externalCoupled::readData
                 // additional processing by derived type.
                 pf.patchFieldType::evaluate();
             }
-            else if (isA<mixedFvPatchField<Type>>(bf[patchI]))
+            else if (isA<mixedFvPatchField<Type>>(bf[patchi]))
             {
                 // Read columns from file for
                 // value, snGrad, refValue, refGrad, valueFraction
                 List<scalarField> data;
                 readColumns
                 (
-                    bf[patchI].size(),              // number of lines to read
+                    bf[patchi].size(),              // number of lines to read
                     4*pTraits<Type>::nComponents+1, // nColumns: 4*Type+1*scalar
                     masterFilePtr,
                     data
@@ -159,13 +159,13 @@ bool Foam::functionObjects::externalCoupled::readData
                 (
                     refCast<const mixedFvPatchField<Type>>
                     (
-                        bf[patchI]
+                        bf[patchi]
                     )
                 );
 
                 // Transfer read data to bc.
                 // Skip value, snGrad
-                direction columnI = 2*pTraits<Type>::nComponents;
+                direction columni = 2*pTraits<Type>::nComponents;
 
                 Field<Type>& refValue = pf.refValue();
                 for
@@ -175,7 +175,7 @@ bool Foam::functionObjects::externalCoupled::readData
                     cmpt++
                 )
                 {
-                    refValue.replace(cmpt, data[columnI++]);
+                    refValue.replace(cmpt, data[columni++]);
                 }
                 Field<Type>& refGrad = pf.refGrad();
                 for
@@ -185,21 +185,21 @@ bool Foam::functionObjects::externalCoupled::readData
                     cmpt++
                 )
                 {
-                    refGrad.replace(cmpt, data[columnI++]);
+                    refGrad.replace(cmpt, data[columni++]);
                 }
-                pf.valueFraction() = data[columnI];
+                pf.valueFraction() = data[columni];
 
                 // Update the value from the read coefficicient. Bypass any
                 // additional processing by derived type.
                 pf.mixedFvPatchField<Type>::evaluate();
             }
-            else if (isA<fixedGradientFvPatchField<Type>>(bf[patchI]))
+            else if (isA<fixedGradientFvPatchField<Type>>(bf[patchi]))
             {
                 // Read columns for value and gradient
                 List<scalarField> data;
                 readColumns
                 (
-                    bf[patchI].size(),              // number of lines to read
+                    bf[patchi].size(),              // number of lines to read
                     2*pTraits<Type>::nComponents,   // nColumns: Type
                     masterFilePtr,
                     data
@@ -210,7 +210,7 @@ bool Foam::functionObjects::externalCoupled::readData
                 (
                     refCast<const fixedGradientFvPatchField<Type>>
                     (
-                        bf[patchI]
+                        bf[patchi]
                     )
                 );
 
@@ -234,20 +234,20 @@ bool Foam::functionObjects::externalCoupled::readData
                 // additional processing by derived type.
                 pf.fixedGradientFvPatchField<Type>::evaluate();
             }
-            else if (isA<fixedValueFvPatchField<Type>>(bf[patchI]))
+            else if (isA<fixedValueFvPatchField<Type>>(bf[patchi]))
             {
                 // Read columns for value only
                 List<scalarField> data;
                 readColumns
                 (
-                    bf[patchI].size(),              // number of lines to read
+                    bf[patchi].size(),              // number of lines to read
                     pTraits<Type>::nComponents,     // number of columns to read
                     masterFilePtr,
                     data
                 );
 
                 // Transfer read value to bc
-                Field<Type> value(bf[patchI].size());
+                Field<Type> value(bf[patchi].size());
                 for
                 (
                     direction cmpt = 0;
@@ -263,7 +263,7 @@ bool Foam::functionObjects::externalCoupled::readData
                 (
                     refCast<const fixedValueFvPatchField<Type>>
                     (
-                        bf[patchI]
+                        bf[patchi]
                     )
                 );
 
@@ -276,8 +276,8 @@ bool Foam::functionObjects::externalCoupled::readData
             else
             {
                 FatalErrorInFunction
-                    << "Unsupported boundary condition " << bf[patchI].type()
-                    << " for patch " << bf[patchI].patch().name()
+                    << "Unsupported boundary condition " << bf[patchi].type()
+                    << " for patch " << bf[patchi].patch().name()
                     << " in region " << mesh.name()
                     << exit(FatalError);
             }
@@ -309,24 +309,24 @@ Foam::functionObjects::externalCoupled::gatherAndCombine
     if (Pstream::master())
     {
         // Combine values into single field
-        label globalElemI = 0;
+        label globalElemi = 0;
 
-        forAll(gatheredValues, lstI)
+        forAll(gatheredValues, lsti)
         {
-            globalElemI += gatheredValues[lstI].size();
+            globalElemi += gatheredValues[lsti].size();
         }
 
-        result.setSize(globalElemI);
+        result.setSize(globalElemi);
 
-        globalElemI = 0;
+        globalElemi = 0;
 
-        forAll(gatheredValues, lstI)
+        forAll(gatheredValues, lsti)
         {
-            const Field<Type>& sub = gatheredValues[lstI];
+            const Field<Type>& sub = gatheredValues[lsti];
 
-            forAll(sub, elemI)
+            forAll(sub, elemi)
             {
-                result[globalElemI++] = sub[elemI];
+                result[globalElemi++] = sub[elemi];
             }
         }
     }
@@ -408,18 +408,18 @@ bool Foam::functionObjects::externalCoupled::writeData
         // Handle column-wise writing of patch data. Supports most easy types
         forAll(patchIDs, i)
         {
-            label patchI = patchIDs[i];
+            label patchi = patchIDs[i];
 
-            const globalIndex globalFaces(bf[patchI].size());
+            const globalIndex globalFaces(bf[patchi].size());
 
-            if (isA<patchFieldType>(bf[patchI]))
+            if (isA<patchFieldType>(bf[patchi]))
             {
                 // Explicit handling of externalCoupledMixed bcs - they
                 // have specialised writing routines
 
                 const patchFieldType& pf = refCast<const patchFieldType>
                 (
-                    bf[patchI]
+                    bf[patchi]
                 );
                 OStringStream os;
 
@@ -438,9 +438,9 @@ bool Foam::functionObjects::externalCoupled::writeData
                     }
                     masterFilePtr() << os.str().c_str();
 
-                    for (label procI = 1; procI < Pstream::nProcs(); procI++)
+                    for (label proci = 1; proci < Pstream::nProcs(); proci++)
                     {
-                        IPstream fromSlave(Pstream::scheduled, procI);
+                        IPstream fromSlave(Pstream::scheduled, proci);
                         string str(fromSlave);
                         masterFilePtr() << str.c_str();
                     }
@@ -451,10 +451,10 @@ bool Foam::functionObjects::externalCoupled::writeData
                     toMaster << os.str();
                 }
             }
-            else if (isA<mixedFvPatchField<Type>>(bf[patchI]))
+            else if (isA<mixedFvPatchField<Type>>(bf[patchi]))
             {
                 const mixedFvPatchField<Type>& pf =
-                    refCast<const mixedFvPatchField<Type>>(bf[patchI]);
+                    refCast<const mixedFvPatchField<Type>>(bf[patchi]);
 
                 Field<Type> value(gatherAndCombine(pf));
                 Field<Type> snGrad(gatherAndCombine(pf.snGrad()()));
@@ -464,29 +464,29 @@ bool Foam::functionObjects::externalCoupled::writeData
 
                 if (Pstream::master())
                 {
-                    forAll(refValue, faceI)
+                    forAll(refValue, facei)
                     {
                         masterFilePtr()
-                            << value[faceI] << token::SPACE
-                            << snGrad[faceI] << token::SPACE
-                            << refValue[faceI] << token::SPACE
-                            << refGrad[faceI] << token::SPACE
-                            << valueFraction[faceI] << nl;
+                            << value[facei] << token::SPACE
+                            << snGrad[facei] << token::SPACE
+                            << refValue[facei] << token::SPACE
+                            << refGrad[facei] << token::SPACE
+                            << valueFraction[facei] << nl;
                     }
                 }
             }
             else
             {
                 // Output the value and snGrad
-                Field<Type> value(gatherAndCombine(bf[patchI]));
-                Field<Type> snGrad(gatherAndCombine(bf[patchI].snGrad()()));
+                Field<Type> value(gatherAndCombine(bf[patchi]));
+                Field<Type> snGrad(gatherAndCombine(bf[patchi].snGrad()()));
                 if (Pstream::master())
                 {
-                    forAll(value, faceI)
+                    forAll(value, facei)
                     {
                         masterFilePtr()
-                            << value[faceI] << token::SPACE
-                            << snGrad[faceI] << nl;
+                            << value[facei] << token::SPACE
+                            << snGrad[facei] << nl;
                     }
                 }
             }

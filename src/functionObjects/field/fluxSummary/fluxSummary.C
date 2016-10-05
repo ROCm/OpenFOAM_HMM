@@ -81,9 +81,9 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZone
 {
     const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
-    label zoneI = mesh.faceZones().findZoneID(faceZoneName);
+    label zonei = mesh.faceZones().findZoneID(faceZoneName);
 
-    if (zoneI == -1)
+    if (zonei == -1)
     {
         FatalErrorInFunction
             << "Unable to find faceZone " << faceZoneName
@@ -93,7 +93,7 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZone
 
     faceZoneNames.append(faceZoneName);
 
-    const faceZone& fZone = mesh.faceZones()[zoneI];
+    const faceZone& fZone = mesh.faceZones()[zonei];
 
     DynamicList<label> faceIDs(fZone.size());
     DynamicList<label> facePatchIDs(fZone.size());
@@ -101,24 +101,24 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZone
 
     forAll(fZone, i)
     {
-        label faceI = fZone[i];
+        label facei = fZone[i];
 
         label faceID = -1;
         label facePatchID = -1;
-        if (mesh.isInternalFace(faceI))
+        if (mesh.isInternalFace(facei))
         {
-            faceID = faceI;
+            faceID = facei;
             facePatchID = -1;
         }
         else
         {
-            facePatchID = mesh.boundaryMesh().whichPatch(faceI);
+            facePatchID = mesh.boundaryMesh().whichPatch(facei);
             const polyPatch& pp = mesh.boundaryMesh()[facePatchID];
             if (isA<coupledPolyPatch>(pp))
             {
                 if (refCast<const coupledPolyPatch>(pp).owner())
                 {
-                    faceID = pp.whichFace(faceI);
+                    faceID = pp.whichFace(facei);
                 }
                 else
                 {
@@ -127,7 +127,7 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZone
             }
             else if (!isA<emptyPolyPatch>(pp))
             {
-                faceID = faceI - pp.start();
+                faceID = facei - pp.start();
             }
             else
             {
@@ -139,7 +139,7 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZone
         if (faceID >= 0)
         {
             // Orientation set by faceZone flip map
-            if (fZone.flipMap()[faceI])
+            if (fZone.flipMap()[facei])
             {
                 faceSigns.append(-1);
             }
@@ -174,9 +174,9 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZoneAndDirection
 
     vector refDir = dir/(mag(dir) + ROOTVSMALL);
 
-    label zoneI = mesh.faceZones().findZoneID(faceZoneName);
+    label zonei = mesh.faceZones().findZoneID(faceZoneName);
 
-    if (zoneI == -1)
+    if (zonei == -1)
     {
          FatalErrorInFunction
             << "Unable to find faceZone " << faceZoneName
@@ -187,7 +187,7 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZoneAndDirection
     faceZoneNames.append(faceZoneName);
     zoneRefDir.append(refDir);
 
-    const faceZone& fZone = mesh.faceZones()[zoneI];
+    const faceZone& fZone = mesh.faceZones()[zonei];
 
     DynamicList<label> faceIDs(fZone.size());
     DynamicList<label> facePatchIDs(fZone.size());
@@ -200,24 +200,24 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZoneAndDirection
 
     forAll(fZone, i)
     {
-        label faceI = fZone[i];
+        label facei = fZone[i];
 
         label faceID = -1;
         label facePatchID = -1;
-        if (mesh.isInternalFace(faceI))
+        if (mesh.isInternalFace(facei))
         {
-            faceID = faceI;
+            faceID = facei;
             facePatchID = -1;
         }
         else
         {
-            facePatchID = mesh.boundaryMesh().whichPatch(faceI);
+            facePatchID = mesh.boundaryMesh().whichPatch(facei);
             const polyPatch& pp = mesh.boundaryMesh()[facePatchID];
             if (isA<coupledPolyPatch>(pp))
             {
                 if (refCast<const coupledPolyPatch>(pp).owner())
                 {
-                    faceID = pp.whichFace(faceI);
+                    faceID = pp.whichFace(facei);
                 }
                 else
                 {
@@ -226,7 +226,7 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZoneAndDirection
             }
             else if (!isA<emptyPolyPatch>(pp))
             {
-                faceID = faceI - pp.start();
+                faceID = facei - pp.start();
             }
             else
             {
@@ -283,9 +283,9 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
 
     vector refDir = dir/(mag(dir) + ROOTVSMALL);
 
-    const label cellZoneI = mesh.cellZones().findZoneID(cellZoneName);
+    const label cellZonei = mesh.cellZones().findZoneID(cellZoneName);
 
-    if (cellZoneI == -1)
+    if (cellZonei == -1)
     {
         FatalErrorInFunction
             << "Unable to find cellZone " << cellZoneName
@@ -297,22 +297,22 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
     const polyBoundaryMesh& pbm = mesh.boundaryMesh();
 
     labelList cellAddr(mesh.nCells(), -1);
-    const labelList& cellIDs = mesh.cellZones()[cellZoneI];
+    const labelList& cellIDs = mesh.cellZones()[cellZonei];
     UIndirectList<label>(cellAddr, cellIDs) = identity(cellIDs.size());
     labelList nbrFaceCellAddr(mesh.nFaces() - nInternalFaces, -1);
 
-    forAll(pbm, patchI)
+    forAll(pbm, patchi)
     {
-        const polyPatch& pp = pbm[patchI];
+        const polyPatch& pp = pbm[patchi];
 
         if (pp.coupled())
         {
             forAll(pp, i)
             {
-                label faceI = pp.start() + i;
-                label nbrFaceI = faceI - nInternalFaces;
-                label own = mesh.faceOwner()[faceI];
-                nbrFaceCellAddr[nbrFaceI] = cellAddr[own];
+                label facei = pp.start() + i;
+                label nbrFacei = facei - nInternalFaces;
+                label own = mesh.faceOwner()[facei];
+                nbrFaceCellAddr[nbrFacei] = cellAddr[own];
             }
         }
     }
@@ -327,27 +327,27 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
     DynamicList<scalar> faceSigns(faceIDs.size());
 
     // Internal faces
-    for (label faceI = 0; faceI < nInternalFaces; faceI++)
+    for (label facei = 0; facei < nInternalFaces; facei++)
     {
-        const label own = cellAddr[mesh.faceOwner()[faceI]];
-        const label nbr = cellAddr[mesh.faceNeighbour()[faceI]];
+        const label own = cellAddr[mesh.faceOwner()[facei]];
+        const label nbr = cellAddr[mesh.faceNeighbour()[facei]];
 
         if (((own != -1) && (nbr == -1)) || ((own == -1) && (nbr != -1)))
         {
-            vector n = mesh.faces()[faceI].normal(mesh.points());
+            vector n = mesh.faces()[facei].normal(mesh.points());
             n /= mag(n) + ROOTVSMALL;
 
             if ((n & refDir) > tolerance_)
             {
-                faceIDs.append(faceI);
-                faceLocalPatchIDs.append(faceI);
+                faceIDs.append(facei);
+                faceLocalPatchIDs.append(facei);
                 facePatchIDs.append(-1);
                 faceSigns.append(1);
             }
             else if ((n & -refDir) > tolerance_)
             {
-                faceIDs.append(faceI);
-                faceLocalPatchIDs.append(faceI);
+                faceIDs.append(facei);
+                faceLocalPatchIDs.append(facei);
                 facePatchIDs.append(-1);
                 faceSigns.append(-1);
             }
@@ -355,33 +355,33 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
     }
 
     // Loop over boundary faces
-    forAll(pbm, patchI)
+    forAll(pbm, patchi)
     {
-        const polyPatch& pp = pbm[patchI];
+        const polyPatch& pp = pbm[patchi];
 
-        forAll(pp, localFaceI)
+        forAll(pp, localFacei)
         {
-            const label faceI = pp.start() + localFaceI;
-            const label own = cellAddr[mesh.faceOwner()[faceI]];
-            const label nbr = nbrFaceCellAddr[faceI - nInternalFaces];
+            const label facei = pp.start() + localFacei;
+            const label own = cellAddr[mesh.faceOwner()[facei]];
+            const label nbr = nbrFaceCellAddr[facei - nInternalFaces];
 
             if ((own != -1) && (nbr == -1))
             {
-                vector n = mesh.faces()[faceI].normal(mesh.points());
+                vector n = mesh.faces()[facei].normal(mesh.points());
                 n /= mag(n) + ROOTVSMALL;
 
                 if ((n & refDir) > tolerance_)
                 {
-                    faceIDs.append(faceI);
-                    faceLocalPatchIDs.append(localFaceI);
-                    facePatchIDs.append(patchI);
+                    faceIDs.append(facei);
+                    faceLocalPatchIDs.append(localFacei);
+                    facePatchIDs.append(patchi);
                     faceSigns.append(1);
                 }
                 else if ((n & -refDir) > tolerance_)
                 {
-                    faceIDs.append(faceI);
-                    faceLocalPatchIDs.append(localFaceI);
-                    facePatchIDs.append(patchI);
+                    faceIDs.append(facei);
+                    faceLocalPatchIDs.append(localFacei);
+                    facePatchIDs.append(patchi);
                     faceSigns.append(-1);
                 }
             }
@@ -423,26 +423,26 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
         DynamicList<label> changedEdges;
         DynamicList<patchEdgeFaceRegion> changedInfo;
 
-        label seedFaceI = labelMax;
+        label seedFacei = labelMax;
         for (; oldFaceID < patch.size(); oldFaceID++)
         {
             if (allFaceInfo[oldFaceID].region() == -1)
             {
-                seedFaceI = globalFaces.toGlobal(oldFaceID);
+                seedFacei = globalFaces.toGlobal(oldFaceID);
                 break;
             }
         }
-        reduce(seedFaceI, minOp<label>());
+        reduce(seedFacei, minOp<label>());
 
-        if (seedFaceI == labelMax)
+        if (seedFacei == labelMax)
         {
             break;
         }
 
-        if (globalFaces.isLocal(seedFaceI))
+        if (globalFaces.isLocal(seedFacei))
         {
-            label localFaceI = globalFaces.toLocal(seedFaceI);
-            const labelList& fEdges = patch.faceEdges()[localFaceI];
+            label localFacei = globalFaces.toLocal(seedFacei);
+            const labelList& fEdges = patch.faceEdges()[localFacei];
 
             forAll(fEdges, i)
             {
@@ -479,9 +479,9 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
         if (debug)
         {
             label nCells = 0;
-            forAll(allFaceInfo, faceI)
+            forAll(allFaceInfo, facei)
             {
-                if (allFaceInfo[faceI].region() == regioni)
+                if (allFaceInfo[facei].region() == regioni)
                 {
                     nCells++;
                 }
@@ -521,7 +521,7 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
         facePatchID.append(regionFacePatchIDs[regioni]);
         faceSign.append(regionFaceSigns[regioni]);
 
-        // Write OBJ of faces to file
+        // Write OBj of faces to file
         if (debug)
         {
             OBJstream os(mesh.time().path()/zoneName + ".obj");
@@ -619,6 +619,7 @@ Foam::functionObjects::fluxSummary::~fluxSummary()
 
 bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
 {
+    fvMeshFunctionObject::read(dict);
     writeFile::read(dict);
 
     mode_ = modeTypeNames_.read(dict.lookup("mode"));
@@ -712,16 +713,16 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
     {
         filePtrs_.setSize(faceZoneName_.size());
 
-        forAll(filePtrs_, fileI)
+        forAll(filePtrs_, filei)
         {
-            const word& fzName = faceZoneName_[fileI];
-            filePtrs_.set(fileI, createFile(fzName));
+            const word& fzName = faceZoneName_[filei];
+            filePtrs_.set(filei, createFile(fzName));
             writeFileHeader
             (
                 fzName,
-                faceArea_[fileI],
-                refDir_[fileI],
-                filePtrs_[fileI]
+                faceArea_[filei],
+                refDir_[filei],
+                filePtrs_[filei]
             );
         }
     }

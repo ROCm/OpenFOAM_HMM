@@ -36,25 +36,25 @@ Usage
     \b surfaceMeshImport inputFile [OPTION]
 
     Options:
-      - \par -clean \n
+      - \par -clean
         Perform some surface checking/cleanup on the input surface.
 
-      - \par -name \<name\> \n
+      - \par -name \<name\>
         Specify an alternative surface name when writing.
 
-      - \par -scaleIn \<scale\> \n
+      - \par -scaleIn \<scale\>
         Specify a scaling factor when reading files.
 
-      - \par -scaleOut \<scale\> \n
+      - \par -scaleOut \<scale\>
         Specify a scaling factor when writing files.
 
-      - \par -dict \<dictionary\> \n
+      - \par -dict \<dictionary\>
         Specify an alternative dictionary for constant/coordinateSystems.
 
-      - \par -from \<coordinateSystem\> \n
+      - \par -from \<coordinateSystem\>
         Specify a coordinate system when reading files.
 
-      - \par -to \<coordinateSystem\> \n
+      - \par -to \<coordinateSystem\>
         Specify a coordinate system when writing files.
 
 Note

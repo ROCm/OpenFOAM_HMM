@@ -75,9 +75,11 @@ Foam::functionObjects::yPlus::yPlus
     fvMeshFunctionObject(name, runTime, dict),
     writeFile(obr_, name, typeName, dict)
 {
+    read(dict);
+
     writeFileHeader(file());
 
-    tmp<volScalarField> tyPlusPtr
+    volScalarField* yPlusPtr
     (
         new volScalarField
         (
@@ -94,7 +96,7 @@ Foam::functionObjects::yPlus::yPlus
         )
     );
 
-    store(typeName, tyPlusPtr);
+    mesh_.objectRegistry::store(yPlusPtr);
 }
 
 

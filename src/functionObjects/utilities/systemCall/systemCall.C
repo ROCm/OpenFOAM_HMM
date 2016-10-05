@@ -74,6 +74,8 @@ Foam::functionObjects::systemCall::~systemCall()
 
 bool Foam::functionObjects::systemCall::read(const dictionary& dict)
 {
+    functionObject::read(dict);
+
     dict.readIfPresent("executeCalls", executeCalls_);
     dict.readIfPresent("endCalls", endCalls_);
     dict.readIfPresent("writeCalls", writeCalls_);
@@ -107,9 +109,9 @@ bool Foam::functionObjects::systemCall::read(const dictionary& dict)
 
 bool Foam::functionObjects::systemCall::execute()
 {
-    forAll(executeCalls_, callI)
+    forAll(executeCalls_, calli)
     {
-        Foam::system(executeCalls_[callI]);
+        Foam::system(executeCalls_[calli]);
     }
 
     return true;
@@ -118,9 +120,9 @@ bool Foam::functionObjects::systemCall::execute()
 
 bool Foam::functionObjects::systemCall::end()
 {
-    forAll(endCalls_, callI)
+    forAll(endCalls_, calli)
     {
-        Foam::system(endCalls_[callI]);
+        Foam::system(endCalls_[calli]);
     }
 
     return true;
@@ -129,9 +131,9 @@ bool Foam::functionObjects::systemCall::end()
 
 bool Foam::functionObjects::systemCall::write()
 {
-    forAll(writeCalls_, callI)
+    forAll(writeCalls_, calli)
     {
-        Foam::system(writeCalls_[callI]);
+        Foam::system(writeCalls_[calli]);
     }
 
     return true;

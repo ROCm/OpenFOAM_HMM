@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,6 +107,16 @@ public:
 
 //- Return a string representation of a Scalar
 word name(const Scalar);
+
+
+//- Return a word representation of a Scalar, using printf-style formatter.
+//  The representation is not checked for valid word characters.
+word name(const char* fmt, const Scalar);
+
+
+//- Return a word representation of a Scalar, using printf-style formatter.
+//  The representation is not checked for valid word characters.
+word name(const std::string& fmt, const Scalar);
 
 
 // Standard C++ transcendental functions

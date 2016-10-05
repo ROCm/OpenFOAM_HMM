@@ -172,7 +172,7 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
               : mesh_.faceOwner()[facei_]
             );
             // Check angle to nbrCell tet. Is it in the direction of the
-            // endposition? I.e. since volume of nbr tet is positive the
+            // endposition? i.e. since volume of nbr tet is positive the
             // tracking direction should be into the tet.
             tetIndices nbrTi(nbrCelli, tetFacei_, tetPti_, mesh_);
             if ((nbrTi.faceTri(mesh_).normal() & (endPosition-position())) < 0)
@@ -241,10 +241,10 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
         if (doTrack)
         {
             // Track across triangle. Return triangle edge crossed.
-            label triEdgeI = -1;
-            trackFraction = trackFaceTri(projectedEndPosition, triEdgeI);
+            label triEdgei = -1;
+            trackFraction = trackFaceTri(projectedEndPosition, triEdgei);
 
-            if (triEdgeI == -1)
+            if (triEdgei == -1)
             {
                 // Reached endpoint
                 //checkInside();
@@ -268,7 +268,7 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
             const Foam::face& f = mesh_.faces()[ti.face()];
             const label fp0 = ti.faceBasePt();
 
-            if (triEdgeI == 0)
+            if (triEdgei == 0)
             {
                 if (ti.facePtA() == f.fcIndex(fp0))
                 {
@@ -305,7 +305,7 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
                     crossDiagonalEdge();
                 }
             }
-            else if (triEdgeI == 1)
+            else if (triEdgei == 1)
             {
                 //Pout<< "Real edge." << endl;
                 diagEdge_ = -1;
@@ -314,7 +314,7 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
                 crossEdgeConnectedFace(currentEdge());
                 patchInteraction(td, trackFraction);
             }
-            else // if (triEdgeI == 2)
+            else // if (triEdgei == 2)
             {
                 if (ti.facePtB() == f.rcIndex(fp0))
                 {

@@ -39,5 +39,5 @@
     }
 
     timeIndices.insert(timeIndex, timeDirs[timeI].value());
-    Info<< "\nTime [" << timeIndex << "] = " << runTime.timeName() << nl;
+    Info<< nl << "Time [" << timeIndex << "] = " << runTime.timeName() << nl;
 

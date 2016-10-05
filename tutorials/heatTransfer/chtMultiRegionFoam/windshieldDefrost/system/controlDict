@@ -55,15 +55,15 @@ functions
 {
     massFlux
     {
-        type            faceSource;
+        type            surfaceFieldValue;
         libs            ("libfieldFunctionObjects.so");
         enabled         yes;
         writeControl    timeStep; //writeTime;
         writeInterval   1;
         log             yes;
-        valueOutput     no;
-        source          patch;
-        sourceName      inlet;
+        writeFields     no;
+        regionType      patch;
+        name            inlet;
         operation       sum;
         fields          (phi);
         region          cabin;

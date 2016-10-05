@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,15 +53,20 @@ namespace runTimeControls
     defineTypeNameAndDebug(minMaxCondition, 0);
     addToRunTimeSelectionTable(runTimeCondition, minMaxCondition, dictionary);
 
-    template<>
-    const char* NamedEnum<minMaxCondition::modeType, 2>::names[] =
-    {
-        "minimum",
-        "maximum"
-    };
 }
 }
 }
+
+template<>
+const char* Foam::NamedEnum
+<
+    Foam::functionObjects::runTimeControls::minMaxCondition::modeType,
+    2
+>::names[] =
+{
+    "minimum",
+    "maximum"
+};
 
 const Foam::NamedEnum
 <
@@ -86,7 +91,7 @@ Foam::functionObjects::runTimeControls::minMaxCondition::minMaxCondition
 )
 :
     runTimeCondition(name, obr, dict, state),
-    functionObjectName_(dict.lookup("functionObjectName")),
+    functionObjectName_(dict.lookup("functionObject")),
     mode_(modeTypeNames_.read(dict.lookup("mode"))),
     fieldNames_(dict.lookup("fields")),
     value_(readScalar(dict.lookup("value")))
@@ -110,9 +115,9 @@ bool Foam::functionObjects::runTimeControls::minMaxCondition::apply()
         return satisfied;
     }
 
-    forAll(fieldNames_, fieldI)
+    forAll(fieldNames_, fieldi)
     {
-        const word& fieldName = fieldNames_[fieldI];
+        const word& fieldName = fieldNames_[fieldi];
 
         const word valueType =
             state_.objectResultType(functionObjectName_, fieldName);

@@ -92,7 +92,11 @@ Foam::functionObjects::wallShearStress::wallShearStress
     writeFile(mesh_, name, typeName, dict),
     patchSet_()
 {
-    tmp<volVectorField> wallShearStressPtr
+    read(dict);
+
+    writeFileHeader(file());
+
+    volVectorField* wallShearStressPtr
     (
         new volVectorField
         (
@@ -114,9 +118,7 @@ Foam::functionObjects::wallShearStress::wallShearStress
         )
     );
 
-    store(typeName, wallShearStressPtr);
-
-    read(dict);
+    mesh_.objectRegistry::store(wallShearStressPtr);
 }
 
 

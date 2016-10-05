@@ -126,13 +126,13 @@ void Foam::externalCoupledMixedFvPatchField<Type>::writeData
     const Field<Type>& refGrad(this->refGrad());
     const scalarField& valueFraction(this->valueFraction());
 
-    forAll(refValue, faceI)
+    forAll(refValue, facei)
     {
-        os  << this->operator[](faceI) << token::SPACE
-            << snGrad[faceI] << token::SPACE
-            << refValue[faceI] << token::SPACE
-            << refGrad[faceI] << token::SPACE
-            << valueFraction[faceI] << nl;
+        os  << this->operator[](facei) << token::SPACE
+            << snGrad[facei] << token::SPACE
+            << refValue[facei] << token::SPACE
+            << refGrad[facei] << token::SPACE
+            << valueFraction[facei] << nl;
     }
 }
 
@@ -146,7 +146,7 @@ void Foam::externalCoupledMixedFvPatchField<Type>::readData(Istream& is)
 
     string line;
 
-    forAll(*this, faceI)
+    forAll(*this, facei)
     {
         iss.getLine(line);
         IStringStream lineStr(line);
@@ -158,9 +158,9 @@ void Foam::externalCoupledMixedFvPatchField<Type>::readData(Istream& is)
         lineStr
             >> value
             >> snGrad
-            >> this->refValue()[faceI]
-            >> this->refGrad()[faceI]
-            >> this->valueFraction()[faceI];
+            >> this->refValue()[facei]
+            >> this->refGrad()[facei]
+            >> this->valueFraction()[facei];
     }
 }
 

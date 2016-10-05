@@ -57,7 +57,7 @@ echo $FOAM_INST_DIR
 # $FOAM_INST_DIR/site/$WM_PROJECT_VERSION or $FOAM_INST_DIR/site
 
 #- Compiler location:
-#    WM_COMPILER_TYPE = system | ThirdParty (OpenFOAM)
+#    WM_COMPILER_TYPE = system | ThirdParty
 setenv WM_COMPILER_TYPE system
 
 #- Compiler:
@@ -218,9 +218,7 @@ _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/mpi`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/paraview`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/ensight`
 
-if ( ($?FOAMY_HEX_MESH) ) then
-    _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/CGAL`
-endif
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/CGAL`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/FFTW`
 
 

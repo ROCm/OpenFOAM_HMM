@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ void Foam::motionSmootherAlgo::checkConstraints
     }
 
 
-    typename FldType::Boundary& bFld = pf.boundaryField();
+    typename FldType::Boundary& bFld = pf.boundaryFieldRef();
 
 
     // Evaluate in reverse order

@@ -109,24 +109,24 @@ void Foam::functionObjects::forceCoeffs::writeBinHeader
 
     vectorField binPoints(nBin_);
     writeCommented(os, "x co-ords  :");
-    forAll(binPoints, pointI)
+    forAll(binPoints, pointi)
     {
-        binPoints[pointI] = (binMin_ + (pointI + 1)*binDx_)*binDir_;
-        os << tab << binPoints[pointI].x();
+        binPoints[pointi] = (binMin_ + (pointi + 1)*binDx_)*binDir_;
+        os << tab << binPoints[pointi].x();
     }
     os << nl;
 
     writeCommented(os, "y co-ords  :");
-    forAll(binPoints, pointI)
+    forAll(binPoints, pointi)
     {
-        os << tab << binPoints[pointI].y();
+        os << tab << binPoints[pointi].y();
     }
     os << nl;
 
     writeCommented(os, "z co-ords  :");
-    forAll(binPoints, pointI)
+    forAll(binPoints, pointi)
     {
-        os << tab << binPoints[pointI].z();
+        os << tab << binPoints[pointi].z();
     }
     os << nl;
 
@@ -156,25 +156,27 @@ void Foam::functionObjects::forceCoeffs::writeIntegratedData
     const List<Field<scalar>>& coeff
 ) const
 {
+    if (!log)
+    {
+        return;
+    }
+
     scalar pressure = sum(coeff[0]);
     scalar viscous = sum(coeff[1]);
     scalar porous = sum(coeff[2]);
     scalar total = pressure + viscous + porous;
 
-    if (log)
+    Info<< "        " << title << "       : " << total << token::TAB
+        << "("
+        << "pressure: " << pressure << token::TAB
+        << "viscous: " << viscous;
+
+    if (porosity_)
     {
-        Info<< "        " << title << "       : " << total << token::TAB
-            << "("
-            << "pressure: " << pressure << token::TAB
-            << "viscous: " << viscous;
-
-        if (porosity_)
-        {
-            Info<< token::TAB << "porous: " << porous;
-        }
-
-        Info<< ")" << endl;
+        Info<< token::TAB << "porous: " << porous;
     }
+
+    Info<< ")" << endl;
 }
 
 
@@ -186,15 +188,15 @@ void Foam::functionObjects::forceCoeffs::writeBinData
 {
     os  << obr_.time().value();
 
-    for (label binI = 0; binI < nBin_; binI++)
+    for (label bini = 0; bini < nBin_; bini++)
     {
-        scalar total = coeffs[0][binI] + coeffs[1][binI] + coeffs[2][binI];
+        scalar total = coeffs[0][bini] + coeffs[1][bini] + coeffs[2][bini];
 
-        os  << tab << total << tab << coeffs[0][binI] << tab << coeffs[1][binI];
+        os  << tab << total << tab << coeffs[0][bini] << tab << coeffs[1][bini];
 
         if (porosity_)
         {
-            os  << tab << coeffs[2][binI];
+            os  << tab << coeffs[2][bini];
         }
     }
 
@@ -256,7 +258,7 @@ bool Foam::functionObjects::forceCoeffs::read(const dictionary& dict)
     {
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
-        tmp<volVectorField> tforceCoeff
+        volVectorField* forceCoeffPtr
         (
             new volVectorField
             (
@@ -273,9 +275,9 @@ bool Foam::functionObjects::forceCoeffs::read(const dictionary& dict)
             )
         );
 
-        store(tforceCoeff().name(), tforceCoeff);
+        mesh_.objectRegistry::store(forceCoeffPtr);
 
-        tmp<volVectorField> tmomentCoeff
+        volVectorField* momentCoeffPtr
         (
             new volVectorField
             (
@@ -292,7 +294,7 @@ bool Foam::functionObjects::forceCoeffs::read(const dictionary& dict)
             )
         );
 
-        store(tmomentCoeff().name(), tmomentCoeff);
+        mesh_.objectRegistry::store(momentCoeffPtr);
     }
 
     return true;
@@ -361,11 +363,11 @@ bool Foam::functionObjects::forceCoeffs::execute()
             {
                 forAll(liftCoeffs, i)
                 {
-                    for (label binI = 1; binI < nBin_; binI++)
+                    for (label bini = 1; bini < nBin_; bini++)
                     {
-                        liftCoeffs[i][binI] += liftCoeffs[i][binI-1];
-                        dragCoeffs[i][binI] += dragCoeffs[i][binI-1];
-                        momentCoeffs[i][binI] += momentCoeffs[i][binI-1];
+                        liftCoeffs[i][bini] += liftCoeffs[i][bini-1];
+                        dragCoeffs[i][bini] += dragCoeffs[i][bini-1];
+                        momentCoeffs[i][bini] += momentCoeffs[i][bini-1];
                     }
                 }
             }
@@ -388,21 +390,21 @@ bool Foam::functionObjects::forceCoeffs::execute()
     if (writeFields_)
     {
         const volVectorField& force =
-            obr_.lookupObject<volVectorField>(fieldName("force"));
+            lookupObject<volVectorField>(fieldName("force"));
 
         const volVectorField& moment =
-            obr_.lookupObject<volVectorField>(fieldName("moment"));
+            lookupObject<volVectorField>(fieldName("moment"));
 
         volVectorField& forceCoeff =
             const_cast<volVectorField&>
             (
-                obr_.lookupObject<volVectorField>(fieldName("forceCoeff"))
+                lookupObject<volVectorField>(fieldName("forceCoeff"))
             );
 
         volVectorField& momentCoeff =
             const_cast<volVectorField&>
             (
-                obr_.lookupObject<volVectorField>(fieldName("momentCoeff"))
+                lookupObject<volVectorField>(fieldName("momentCoeff"))
             );
 
         dimensionedScalar f0("f0", dimForce, Aref_*pDyn);
@@ -421,10 +423,10 @@ bool Foam::functionObjects::forceCoeffs::write()
     if (writeFields_)
     {
         const volVectorField& forceCoeff =
-            obr_.lookupObject<volVectorField>(fieldName("forceCoeff"));
+            lookupObject<volVectorField>(fieldName("forceCoeff"));
 
         const volVectorField& momentCoeff =
-            obr_.lookupObject<volVectorField>(fieldName("momentCoeff"));
+            lookupObject<volVectorField>(fieldName("momentCoeff"));
 
         forceCoeff.write();
         momentCoeff.write();

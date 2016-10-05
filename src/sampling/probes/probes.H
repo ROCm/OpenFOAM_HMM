@@ -37,20 +37,17 @@ Description
     probes
     {
         type            probes;
-        functionObjectLibs ( "libsampling.so" );
+        libs            ("libsampling.so");
 
         // Name of the directory for probe data
         name            probes;
 
         // Write at same frequency as fields
-        outputControl   outputTime;
-        outputInterval  1;
+        writeControl    outputTime;
+        writeInterval   1;
 
         // Fields to be probed
-        fields
-        (
-            p U
-        );
+        fields          (p U);
 
         // Optional: do not recalculate cells if mesh moves
         fixedLocations  false;

@@ -46,7 +46,7 @@ Usage
     Q1
     {
         type        Q;
-        functionObjectLibs ("libutilityFunctionObjects.so");
+        libs        ("libutilityFunctionObjects.so");
         ...
     }
     \endverbatim

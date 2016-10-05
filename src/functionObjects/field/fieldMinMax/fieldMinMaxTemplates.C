@@ -151,18 +151,18 @@ void Foam::functionObjects::fieldMinMax::calcMinMaxFields
                     {
                         const vectorField& Cfp = CfBoundary[patchi];
 
-                        label minPI = findMin(mfp);
-                        if (mfp[minPI] < minVs[proci])
+                        label minPi = findMin(mfp);
+                        if (mfp[minPi] < minVs[proci])
                         {
-                            minVs[proci] = mfp[minPI];
-                            minCs[proci] = Cfp[minPI];
+                            minVs[proci] = mfp[minPi];
+                            minCs[proci] = Cfp[minPi];
                         }
 
-                        label maxPI = findMax(mfp);
-                        if (mfp[maxPI] > maxVs[proci])
+                        label maxPi = findMax(mfp);
+                        if (mfp[maxPi] > maxVs[proci])
                         {
-                            maxVs[proci] = mfp[maxPI];
-                            maxCs[proci] = Cfp[maxPI];
+                            maxVs[proci] = mfp[maxPi];
+                            maxCs[proci] = Cfp[maxPi];
                         }
                     }
                 }

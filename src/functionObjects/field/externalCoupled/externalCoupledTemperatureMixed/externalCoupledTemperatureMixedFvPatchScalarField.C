@@ -145,7 +145,7 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::writeData
     Ostream& os
 ) const
 {
-    const label patchI = patch().index();
+    const label patchi = patch().index();
 
     // Heat flux [W/m2]
     scalarField qDot(this->patch().size(), 0.0);
@@ -170,17 +170,17 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::writeData
 
         const basicThermo& thermo = turbModel.transport();
 
-        const fvPatchScalarField& hep = thermo.he().boundaryField()[patchI];
+        const fvPatchScalarField& hep = thermo.he().boundaryField()[patchi];
 
-        qDot = turbModel.alphaEff(patchI)*hep.snGrad();
+        qDot = turbModel.alphaEff(patchi)*hep.snGrad();
     }
     else if (db().foundObject<basicThermo>(thermoName))
     {
         const basicThermo& thermo = db().lookupObject<basicThermo>(thermoName);
 
-        const fvPatchScalarField& hep = thermo.he().boundaryField()[patchI];
+        const fvPatchScalarField& hep = thermo.he().boundaryField()[patchi];
 
-        qDot = thermo.alpha().boundaryField()[patchI]*hep.snGrad();
+        qDot = thermo.alpha().boundaryField()[patchi]*hep.snGrad();
     }
     else
     {
@@ -200,12 +200,12 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::writeData
 
     const Field<scalar>& magSf(this->patch().magSf());
 
-    forAll(patch(), faceI)
+    forAll(patch(), facei)
     {
-        os  << magSf[faceI] << token::SPACE
-            << Tp[faceI] << token::SPACE
-            << qDot[faceI] << token::SPACE
-            << htc[faceI] << token::SPACE
+        os  << magSf[facei] << token::SPACE
+            << Tp[facei] << token::SPACE
+            << qDot[facei] << token::SPACE
+            << htc[facei] << token::SPACE
             << nl;
     }
 }
@@ -222,15 +222,15 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::readData
 
     string line;
 
-    forAll(*this, faceI)
+    forAll(*this, facei)
     {
         iss.getLine(line);
         IStringStream lineStr(line);
 
         lineStr
-            >> this->refValue()[faceI]
-            >> this->refGrad()[faceI]
-            >> this->valueFraction()[faceI];
+            >> this->refValue()[facei]
+            >> this->refGrad()[facei]
+            >> this->valueFraction()[facei];
     }
 }
 

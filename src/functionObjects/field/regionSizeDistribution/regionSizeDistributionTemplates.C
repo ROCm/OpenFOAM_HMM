@@ -41,12 +41,12 @@ Foam::Map<Type> Foam::functionObjects::regionSizeDistribution::regionSum
 
     forAll(fld, celli)
     {
-        label regionI = regions[celli];
+        label regioni = regions[celli];
 
-        typename Map<Type>::iterator fnd = regionToSum.find(regionI);
+        typename Map<Type>::iterator fnd = regionToSum.find(regioni);
         if (fnd == regionToSum.end())
         {
-            regionToSum.insert(regionI, fld[celli]);
+            regionToSum.insert(regioni, fld[celli]);
         }
         else
         {

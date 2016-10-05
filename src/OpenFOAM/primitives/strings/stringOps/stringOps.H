@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,7 @@ SourceFiles
 #define stringOps_H
 
 #include "string.H"
+#include "word.H"
 #include "dictionary.H"
 #include "HashTable.H"
 
@@ -292,12 +293,34 @@ namespace stringOps
     string& inplaceTrim(string&);
 
 
+    //- Return a word representation of the primitive,
+    //  using printf-style formatter.
+    //  The representation is not checked for valid word characters -
+    //  it is assumed that the caller knows what they are doing
+    template<class PrimitiveType>
+    Foam::word name(const char* fmt, const PrimitiveType& val);
+
+    //- Return a word representation of the primitive,
+    //  using printf-style formatter.
+    //  The representation is not checked for valid word characters -
+    //  it is assumed that the caller knows what they are doing
+    template<class PrimitiveType>
+    Foam::word name(const std::string& fmt, const PrimitiveType& val);
+
+
 } // End namespace stringOps
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "stringOpsTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

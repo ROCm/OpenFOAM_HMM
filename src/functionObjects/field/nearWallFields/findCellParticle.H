@@ -122,7 +122,7 @@ public:
             const vector& position,
             const label celli,
             const label tetFacei,
-            const label tetPtI,
+            const label tetPti,
             const point& end,
             const label data
         );

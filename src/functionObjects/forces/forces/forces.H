@@ -305,7 +305,7 @@ protected:
         //- Add patch contributions to force and moment fields
         void addToFields
         (
-            const label patchI,
+            const label patchi,
             const vectorField& Md,
             const vectorField& fN,
             const vectorField& fT,

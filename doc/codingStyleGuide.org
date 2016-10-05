@@ -3,7 +3,7 @@
 #+TITLE:                 OpenFOAM C++ Style Guide
 #+AUTHOR:                  OpenFOAM Foundation
 #+DATE:                         2011-2016
-#+LINK:                    http://OpenFOAM.org
+#+LINK:                    http://OpenFOAM.com
 #+OPTIONS: author:nil ^:{}
 #+STARTUP: hidestars
 #+STARTUP: odd

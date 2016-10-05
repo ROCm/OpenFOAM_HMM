@@ -75,7 +75,7 @@ class writeDictionary
         //- Helper function to write the dictionary if found at location
         bool tryDirectory
         (
-            const label dictI,
+            const label dicti,
             const word& location,
             bool& firstDict
         );

@@ -50,8 +50,8 @@ boundaryField
         type            compressible::turbulentTemperatureCoupledBaffleMixed;
         value           uniform 260;
         Tnbr            T;
-        kappa           fluidThermo;
-        kappaName       none;
+        kappaMethod     fluidThermo;
+        kappa           none;
 
         // windshield 3 mm
         thicknessLayers (0.003);

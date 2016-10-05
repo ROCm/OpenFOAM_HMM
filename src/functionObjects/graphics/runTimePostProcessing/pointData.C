@@ -72,7 +72,7 @@ const Foam::NamedEnum
 
 void Foam::functionObjects::runTimePostPro::pointData::addPoints
 (
-    const label frameI,
+    const label framei,
     vtkActor* actor,
     vtkPolyDataMapper* mapper,
     vtkPolyData* data
@@ -80,7 +80,7 @@ void Foam::functionObjects::runTimePostPro::pointData::addPoints
 {
     geometryBase::initialiseActor(actor);
 
-    vector colour = pointColour_->value(frameI);
+    vector colour = pointColour_->value(framei);
     actor->GetProperty()->SetColor(colour[0], colour[1], colour[2]);
 
     switch (representation_)

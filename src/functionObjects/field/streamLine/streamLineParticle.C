@@ -70,11 +70,11 @@ Foam::vector Foam::streamLineParticle::interpolateFields
     }
 
     sampledScalars_.setSize(td.vsInterp_.size());
-    forAll(td.vsInterp_, scalarI)
+    forAll(td.vsInterp_, scalari)
     {
-        sampledScalars_[scalarI].append
+        sampledScalars_[scalari].append
         (
-            td.vsInterp_[scalarI].interpolate
+            td.vsInterp_[scalari].interpolate
             (
                 position,
                 celli,
@@ -84,11 +84,11 @@ Foam::vector Foam::streamLineParticle::interpolateFields
     }
 
     sampledVectors_.setSize(td.vvInterp_.size());
-    forAll(td.vvInterp_, vectorI)
+    forAll(td.vvInterp_, vectori)
     {
-        sampledVectors_[vectorI].append
+        sampledVectors_[vectori].append
         (
-            td.vvInterp_[vectorI].interpolate
+            td.vvInterp_[vectori].interpolate
             (
                 position,
                 celli,

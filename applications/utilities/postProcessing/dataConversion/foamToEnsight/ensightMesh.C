@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,15 +32,20 @@ License
 #include "processorPolyPatch.H"
 #include "cellModeller.H"
 #include "IOmanip.H"
-#include "itoa.H"
 #include "globalIndex.H"
 #include "mapDistribute.H"
 #include "stringListOps.H"
 
+#include "ensightFile.H"
 #include "ensightBinaryStream.H"
 #include "ensightAsciiStream.H"
 
 #include <fstream>
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const char* Foam::ensightMesh::geometryName = "geometry";
+
 
 // * * * * * * * * * * * * * Private Functions * * * * * * * * * * * * * * //
 
@@ -403,7 +408,7 @@ Foam::ensightMesh::ensightMesh
     const bool faceZones,
     const wordReList& faceZonePatterns,
 
-    const bool binary
+    const IOstream::streamFormat format
 )
 :
     mesh_(mesh),
@@ -412,7 +417,7 @@ Foam::ensightMesh::ensightMesh
     patchPatterns_(patchPatterns),
     faceZones_(faceZones),
     faceZonePatterns_(faceZonePatterns),
-    binary_(binary),
+    format_(format),
     meshCellSets_(mesh.nCells())
 {
     correct();
@@ -521,7 +526,7 @@ void Foam::ensightMesh::writePrims
     // Create a temp int array
     if (cellShapes.size())
     {
-        if (ensightGeometryFile.ascii())
+        if (format_ == IOstream::ASCII)
         {
             // Workaround for paraview issue : write one cell per line
 
@@ -1018,63 +1023,56 @@ void Foam::ensightMesh::writeAllPoints
 
 void Foam::ensightMesh::write
 (
-    const fileName& postProcPath,
-    const word& prepend,
+    const fileName& dataDir,
     const label timeIndex,
     const bool meshMoving,
     Ostream& ensightCaseFile
 ) const
 {
-    const Time& runTime = mesh_.time();
     const cellShapeList& cellShapes = mesh_.cellShapes();
 
-
-    word timeFile = prepend;
-
-    if (timeIndex == 0)
-    {
-        timeFile += "0000.";
-    }
-    else if (meshMoving)
-    {
-        timeFile += itoa(timeIndex) + '.';
-    }
-
-    // set the filename of the ensight file
-    fileName ensightGeometryFileName = timeFile + "mesh";
-
-    ensightStream* ensightGeometryFilePtr = nullptr;
+    ensightStream* filePtr(nullptr);
     if (Pstream::master())
     {
-        if (binary_)
+        // set the filename of the ensight file
+        fileName geoFileName = dataDir.path()/ensightMesh::geometryName;
+
+        if (meshMoving)
         {
-            ensightGeometryFilePtr = new ensightBinaryStream
+            geoFileName =
+                dataDir/ensightFile::subDir(timeIndex)
+               /ensightMesh::geometryName;
+
+            mkDir(geoFileName.path());
+        }
+
+        if (format_ == IOstream::BINARY)
+        {
+            filePtr = new ensightBinaryStream
             (
-                postProcPath/ensightGeometryFileName,
-                runTime
+                geoFileName
             );
-            ensightGeometryFilePtr->write("C binary");
+            filePtr->write("C binary");
         }
         else
         {
-            ensightGeometryFilePtr = new ensightAsciiStream
+            filePtr = new ensightAsciiStream
             (
-                postProcPath/ensightGeometryFileName,
-                runTime
+                geoFileName
             );
         }
     }
 
-    ensightStream& ensightGeometryFile = *ensightGeometryFilePtr;
+    ensightStream& os = *filePtr;
 
     if (Pstream::master())
     {
         string desc = string("written by OpenFOAM-") + Foam::FOAMversion;
 
-        ensightGeometryFile.write("EnSight Geometry File");
-        ensightGeometryFile.write(desc.c_str());
-        ensightGeometryFile.write("node id assign");
-        ensightGeometryFile.write("element id assign");
+        os.write("EnSight Geometry File");
+        os.write(desc.c_str());
+        os.write("node id assign");
+        os.write("element id assign");
     }
 
     if (patchNames_.empty())
@@ -1089,7 +1087,7 @@ void Foam::ensightMesh::write
             "internalMesh",
             uniquePoints,
             nPoints,
-            ensightGeometryFile
+            os
         );
 
         writeAllPrims
@@ -1103,7 +1101,7 @@ void Foam::ensightMesh::write
                 meshCellSets_.wedges,
                 pointToGlobal_
             ),
-            ensightGeometryFile
+            os
         );
 
         writeAllPrims
@@ -1111,7 +1109,7 @@ void Foam::ensightMesh::write
             "penta6",
             meshCellSets_.nPrisms,
             map(cellShapes, meshCellSets_.prisms, pointToGlobal_),
-            ensightGeometryFile
+            os
         );
 
         writeAllPrims
@@ -1119,7 +1117,7 @@ void Foam::ensightMesh::write
             "pyramid5",
             meshCellSets_.nPyrs,
             map(cellShapes, meshCellSets_.pyrs, pointToGlobal_),
-            ensightGeometryFile
+            os
         );
 
         writeAllPrims
@@ -1127,13 +1125,13 @@ void Foam::ensightMesh::write
             "tetra4",
             meshCellSets_.nTets,
             map(cellShapes, meshCellSets_.tets, pointToGlobal_),
-            ensightGeometryFile
+            os
         );
 
         writeAllPolys
         (
             pointToGlobal_,
-            ensightGeometryFile
+            os
         );
     }
 
@@ -1182,7 +1180,7 @@ void Foam::ensightMesh::write
                     patchName,
                     uniquePoints,
                     globalPointsPtr().size(),
-                    ensightGeometryFile
+                    os
                 );
 
                 writeAllFacePrims
@@ -1191,7 +1189,7 @@ void Foam::ensightMesh::write
                     tris,
                     nfp.nTris,
                     patchFaces,
-                    ensightGeometryFile
+                    os
                 );
 
                 writeAllFacePrims
@@ -1200,7 +1198,7 @@ void Foam::ensightMesh::write
                     quads,
                     nfp.nQuads,
                     patchFaces,
-                    ensightGeometryFile
+                    os
                 );
 
                 writeAllNSided
@@ -1208,7 +1206,7 @@ void Foam::ensightMesh::write
                     polys,
                     nfp.nPolys,
                     patchFaces,
-                    ensightGeometryFile
+                    os
                 );
             }
         }
@@ -1287,7 +1285,7 @@ void Foam::ensightMesh::write
                 faceZoneName,
                 uniquePoints,
                 globalPointsPtr().size(),
-                ensightGeometryFile
+                os
             );
 
             writeAllFacePrims
@@ -1296,7 +1294,7 @@ void Foam::ensightMesh::write
                 tris,
                 nfp.nTris,
                 faceZoneMasterFaces,
-                ensightGeometryFile
+                os
             );
 
             writeAllFacePrims
@@ -1305,7 +1303,7 @@ void Foam::ensightMesh::write
                 quads,
                 nfp.nQuads,
                 faceZoneMasterFaces,
-                ensightGeometryFile
+                os
             );
 
             writeAllNSided
@@ -1313,14 +1311,14 @@ void Foam::ensightMesh::write
                 polys,
                 nfp.nPolys,
                 faceZoneMasterFaces,
-                ensightGeometryFile
+                os
             );
         }
     }
 
-    if (Pstream::master())
+    if (filePtr) // only on master
     {
-        delete ensightGeometryFilePtr;
+        delete filePtr;
     }
 }
 

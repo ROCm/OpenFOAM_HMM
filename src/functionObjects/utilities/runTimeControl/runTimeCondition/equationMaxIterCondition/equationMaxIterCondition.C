@@ -105,15 +105,15 @@ bool Foam::functionObjects::runTimeControls::equationMaxIterCondition::apply()
 
     List<label> result(fieldNames_.size(), -1);
 
-    forAll(fieldNames_, fieldI)
+    forAll(fieldNames_, fieldi)
     {
-        const word& fieldName = fieldNames_[fieldI];
+        const word& fieldName = fieldNames_[fieldi];
 
         if (solverDict.found(fieldName))
         {
             const List<solverPerformance> sp(solverDict.lookup(fieldName));
             const label nIterations = sp.first().nIterations();
-            result[fieldI] = nIterations;
+            result[fieldi] = nIterations;
 
             if (nIterations > threshold_)
             {
@@ -154,14 +154,14 @@ bool Foam::functionObjects::runTimeControls::equationMaxIterCondition::apply()
                 << ": satisfied using threshold value: " << threshold_ << nl;
         }
 
-        forAll(result, resultI)
+        forAll(result, resulti)
         {
-            if (result[resultI] != -1)
+            if (result[resulti] != -1)
             {
                 if (log_)
                 {
-                    Info<< "    field: " << fieldNames_[resultI]
-                        << ", iterations: " << result[resultI] << nl;
+                    Info<< "    field: " << fieldNames_[resulti]
+                        << ", iterations: " << result[resulti] << nl;
                 }
             }
         }

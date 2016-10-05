@@ -65,7 +65,7 @@ bool Foam::radiation::solarLoad::updateHitFaces()
                 return false;
                 break;
             }
-            case solarCalculator::mSunDirTraking:
+            case solarCalculator::mSunDirTracking:
             {
                 label updateIndex = label
                 (

@@ -149,11 +149,11 @@ protected:
         //- Generate point and values by interpolating from existing values
         void storePoint
         (
-            const label trackI,
+            const label tracki,
 
             const scalar w,
-            const label leftI,
-            const label rightI,
+            const label lefti,
+            const label righti,
 
             DynamicList<point>& newTrack,
             DynamicList<List<scalar>>& newScalars,
@@ -164,7 +164,7 @@ protected:
         void trimToBox
         (
             const treeBoundBox& bb,
-            const label trackI,
+            const label tracki,
             PtrList<DynamicList<point>>& newTracks,
             PtrList<DynamicList<scalarList>>& newScalars,
             PtrList<DynamicList<vectorList>>& newVectors

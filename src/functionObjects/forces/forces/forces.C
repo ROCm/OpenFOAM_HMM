@@ -126,24 +126,24 @@ void Foam::functionObjects::forces::writeBinHeader
 
     vectorField binPoints(nBin_);
     writeCommented(os, "x co-ords  :");
-    forAll(binPoints, pointI)
+    forAll(binPoints, pointi)
     {
-        binPoints[pointI] = (binMin_ + (pointI + 1)*binDx_)*binDir_;
-        os  << tab << binPoints[pointI].x();
+        binPoints[pointi] = (binMin_ + (pointi + 1)*binDx_)*binDir_;
+        os  << tab << binPoints[pointi].x();
     }
     os  << nl;
 
     writeCommented(os, "y co-ords  :");
-    forAll(binPoints, pointI)
+    forAll(binPoints, pointi)
     {
-        os  << tab << binPoints[pointI].y();
+        os  << tab << binPoints[pointi].y();
     }
     os  << nl;
 
     writeCommented(os, "z co-ords  :");
-    forAll(binPoints, pointI)
+    forAll(binPoints, pointi)
     {
-        os  << tab << binPoints[pointI].z();
+        os  << tab << binPoints[pointi].z();
     }
     os  << nl;
 
@@ -223,8 +223,8 @@ void Foam::functionObjects::forces::initialiseBins()
         scalar binMax = -GREAT;
         forAllConstIter(labelHashSet, patchSet_, iter)
         {
-            label patchI = iter.key();
-            const polyPatch& pp = pbm[patchI];
+            label patchi = iter.key();
+            const polyPatch& pp = pbm[patchi];
             scalarField d(pp.faceCentres() & binDir_);
             binMin_ = min(min(d), binMin_);
             binMax = max(max(d), binMax);
@@ -245,8 +245,8 @@ void Foam::functionObjects::forces::initialiseBins()
 
                 forAll(cellZoneIDs, i)
                 {
-                    label zoneI = cellZoneIDs[i];
-                    const cellZone& cZone = mesh_.cellZones()[zoneI];
+                    label zonei = cellZoneIDs[i];
+                    const cellZone& cZone = mesh_.cellZones()[zonei];
                     const scalarField d(dd, cZone);
                     binMin_ = min(min(d), binMin_);
                     binMax = max(max(d), binMax);
@@ -497,7 +497,7 @@ void Foam::functionObjects::forces::applyBins
 
 void Foam::functionObjects::forces::addToFields
 (
-    const label patchI,
+    const label patchi,
     const vectorField& Md,
     const vectorField& fN,
     const vectorField& fT,
@@ -515,7 +515,7 @@ void Foam::functionObjects::forces::addToFields
             lookupObject<volVectorField>(fieldName("force"))
         );
 
-    vectorField& pf = force.boundaryFieldRef()[patchI];
+    vectorField& pf = force.boundaryFieldRef()[patchi];
     pf += fN + fT + fP;
 
     volVectorField& moment =
@@ -524,7 +524,7 @@ void Foam::functionObjects::forces::addToFields
             lookupObject<volVectorField>(fieldName("moment"))
         );
 
-    vectorField& pm = moment.boundaryFieldRef()[patchI];
+    vectorField& pm = moment.boundaryFieldRef()[patchi];
     pm += Md;
 }
 
@@ -557,9 +557,9 @@ void Foam::functionObjects::forces::addToFields
 
     forAll(cellIDs, i)
     {
-        label cellI = cellIDs[i];
-        force[cellI] += fN[i] + fT[i] + fP[i];
-        moment[cellI] += Md[i];
+        label celli = cellIDs[i];
+        force[celli] += fN[i] + fT[i] + fP[i];
+        moment[celli] += Md[i];
     }
 }
 
@@ -934,7 +934,7 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
     {
         Info << "    Fields will be written" << endl;
 
-        tmp<volVectorField> tforce
+        volVectorField* forcePtr
         (
             new volVectorField
             (
@@ -951,9 +951,9 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
             )
         );
 
-        store(tforce().name(), tforce);
+        mesh_.objectRegistry::store(forcePtr);
 
-        tmp<volVectorField> tmoment
+        volVectorField* momentPtr
         (
             new volVectorField
             (
@@ -970,7 +970,7 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
             )
         );
 
-        store(tmoment().name(), tmoment);
+        mesh_.objectRegistry::store(momentPtr);
     }
 
     return true;
@@ -991,33 +991,33 @@ void Foam::functionObjects::forces::calcForcesMoment()
 
         forAllConstIter(labelHashSet, patchSet_, iter)
         {
-            label patchI = iter.key();
+            label patchi = iter.key();
 
             vectorField Md
             (
-                mesh_.C().boundaryField()[patchI] - coordSys_.origin()
+                mesh_.C().boundaryField()[patchi] - coordSys_.origin()
             );
 
-            scalarField sA(mag(Sfb[patchI]));
+            scalarField sA(mag(Sfb[patchi]));
 
             // Normal force = surfaceUnitNormal*(surfaceNormal & forceDensity)
             vectorField fN
             (
-                Sfb[patchI]/sA
+                Sfb[patchi]/sA
                *(
-                    Sfb[patchI] & fD.boundaryField()[patchI]
+                    Sfb[patchi] & fD.boundaryField()[patchi]
                 )
             );
 
             // Tangential force (total force minus normal fN)
-            vectorField fT(sA*fD.boundaryField()[patchI] - fN);
+            vectorField fT(sA*fD.boundaryField()[patchi] - fN);
 
             // Porous force
             vectorField fP(Md.size(), Zero);
 
-            addToFields(patchI, Md, fN, fT, fP);
+            addToFields(patchi, Md, fN, fT, fP);
 
-            applyBins(Md, fN, fT, fP, mesh_.C().boundaryField()[patchI]);
+            applyBins(Md, fN, fT, fP, mesh_.C().boundaryField()[patchi]);
         }
     }
     else
@@ -1035,25 +1035,25 @@ void Foam::functionObjects::forces::calcForcesMoment()
 
         forAllConstIter(labelHashSet, patchSet_, iter)
         {
-            label patchI = iter.key();
+            label patchi = iter.key();
 
             vectorField Md
             (
-                mesh_.C().boundaryField()[patchI] - coordSys_.origin()
+                mesh_.C().boundaryField()[patchi] - coordSys_.origin()
             );
 
             vectorField fN
             (
-                rho(p)*Sfb[patchI]*(p.boundaryField()[patchI] - pRef)
+                rho(p)*Sfb[patchi]*(p.boundaryField()[patchi] - pRef)
             );
 
-            vectorField fT(Sfb[patchI] & devRhoReffb[patchI]);
+            vectorField fT(Sfb[patchi] & devRhoReffb[patchi]);
 
             vectorField fP(Md.size(), Zero);
 
-            addToFields(patchI, Md, fN, fT, fP);
+            addToFields(patchi, Md, fN, fT, fP);
 
-            applyBins(Md, fN, fT, fP, mesh_.C().boundaryField()[patchI]);
+            applyBins(Md, fN, fT, fP, mesh_.C().boundaryField()[patchi]);
         }
     }
 
@@ -1085,8 +1085,8 @@ void Foam::functionObjects::forces::calcForcesMoment()
 
             forAll(cellZoneIDs, i)
             {
-                label zoneI = cellZoneIDs[i];
-                const cellZone& cZone = mesh_.cellZones()[zoneI];
+                label zonei = cellZoneIDs[i];
+                const cellZone& cZone = mesh_.cellZones()[zonei];
 
                 const vectorField d(mesh_.C(), cZone);
                 const vectorField fP(fPTot, cZone);
