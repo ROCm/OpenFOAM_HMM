@@ -2814,6 +2814,7 @@ bool Foam::snappyLayerDriver::writeLayerData
                 dimensionedScalar("zero", dimless, 0),
                 fixedValueFvPatchScalarField::typeName
             );
+            volScalarField::Boundary& fldBf = fld.boundaryFieldRef();
             const polyBoundaryMesh& pbm = mesh.boundaryMesh();
             forAll(patchIDs, i)
             {
@@ -2838,7 +2839,7 @@ bool Foam::snappyLayerDriver::writeLayerData
                     }
                 }
 
-                fld.boundaryField()[patchI] == pfld;
+                fldBf[patchI] == pfld;
             }
             Info<< indent << fld.name()
                 << " : overall layer thickness (fraction"
