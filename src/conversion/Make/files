@@ -7,6 +7,9 @@ common/writer/meshWriter.C
 common/tables/boundaryRegion.C
 common/tables/cellTable.C
 
+ensight/mesh/ensightMesh.C
+ensight/mesh/ensightMeshIO.C
+ensight/mesh/ensightMeshOptions.C
 ensight/part/ensightPart.C
 ensight/part/ensightPartIO.C
 ensight/part/ensightPartCells.C
