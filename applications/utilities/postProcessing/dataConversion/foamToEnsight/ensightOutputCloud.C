@@ -23,8 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ensightCloud.H"
-#include "ensightFile.H"
+#include "ensightOutputCloud.H"
+
 #include "fvMesh.H"
 #include "passiveParticle.H"
 #include "Cloud.H"
@@ -32,30 +32,19 @@ License
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-void Foam::ensightParticlePositions
+void Foam::ensightCloud::writePositions
 (
     const fvMesh& mesh,
-    const fileName& dataDir,
-    const label timeIndex,
     const word& cloudName,
-    const bool dataExists,
-    IOstream::streamFormat format
+    const bool exists,
+    autoPtr<ensightFile>& output
 )
 {
-    if (dataExists)
-    {
-        Info<< " positions";
-    }
-    else
-    {
-        Info<< " positions{0}";
-    }
-
     // Total number of parcels on all processes
     label nTotParcels = 0;
     autoPtr<Cloud<passiveParticle>> cloudPtr;
 
-    if (dataExists)
+    if (exists)
     {
         cloudPtr.reset(new Cloud<passiveParticle>(mesh, cloudName, false));
         nTotParcels = cloudPtr().size();
@@ -64,29 +53,15 @@ void Foam::ensightParticlePositions
 
     if (Pstream::master())
     {
-        const fileName postFileName =
-            ensightFile::subDir(timeIndex)/cloud::prefix/cloudName/"positions";
+        ensightFile& os = output();
 
-        // the ITER/lagrangian subdirectory must exist
-        mkDir(dataDir/postFileName.path());
-
-        ensightFile os(dataDir, postFileName, format);
-
-        // tag binary format (just like geometry files)
-        os.writeBinaryHeader();
-        os.write(postFileName); // description
-        os.newline();
-        os.write("particle coordinates");
-        os.newline();
-        os.write(nTotParcels, 8);   // unusual width
-        os.newline();
-
+        os.beginParticleCoordinates(nTotParcels);
         if (!nTotParcels)
         {
             return;  // DONE
         }
 
-        if (format == IOstream::BINARY)
+        if (os.format() == IOstream::BINARY)
         {
             // binary write is Ensight6 - first ids, then positions
 
@@ -131,7 +106,7 @@ void Foam::ensightParticlePositions
             {
                 const point& p = elmnt().position();
 
-                os.write(++parcelId, 8);    // unusual width
+                os.write(++parcelId, 8); // unusual width
                 os.write(p.x());
                 os.write(p.y());
                 os.write(p.z());
@@ -148,7 +123,7 @@ void Foam::ensightParticlePositions
                 {
                     const point& p = points[pti];
 
-                    os.write(++parcelId, 8);    // unusual width
+                    os.write(++parcelId, 8); // unusual width
                     os.write(p.x());
                     os.write(p.y());
                     os.write(p.z());
@@ -171,10 +146,11 @@ void Foam::ensightParticlePositions
 
         {
             OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< points;
+            toMaster
+                << points;
         }
     }
-
 }
+
 
 // ************************************************************************* //

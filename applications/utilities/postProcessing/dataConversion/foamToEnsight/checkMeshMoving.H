@@ -38,8 +38,7 @@ if (timeDirs.size() > 1 && Pstream::master())
 
     if (meshMoving)
     {
-        Info<< "found." << nl
-            << "    Writing meshes for every timestep." << endl;
+        Info<< "found. Writing meshes for every timestep." << endl;
     }
     else
     {

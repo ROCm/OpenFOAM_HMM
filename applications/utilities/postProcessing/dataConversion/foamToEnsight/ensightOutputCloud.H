@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -21,68 +21,73 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InApplication
-    foamToEnsight
+Namespace
+    ensightOutput
 
 Description
+    A collection of global functions for writing ensight file content.
 
 SourceFiles
-    ensightCloud.C
-    ensightCloudTemplates.C
+    ensightOutputCloud.C
+    ensightOutputCloudTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightCloud_H
-#define ensightCloud_H
+#ifndef ensightOutputCloud_H
+#define ensightOutputCloud_H
 
 #include "ensightFile.H"
-#include "fvMesh.H"
-#include "Cloud.H"
-#include "IOobject.H"
+#include "ensightMesh.H"
+
+#include "autoPtr.H"
+#include "IOField.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+
 namespace Foam
 {
+namespace ensightCloud
+{
 
-void ensightParticlePositions
+//- Write cloud positions
+void writePositions
 (
     const fvMesh& mesh,
-    const fileName& dataDir,
-    const label timeIndex,
     const word& cloudName,
-    const bool dataExists,
-    const IOstream::streamFormat format
+    const bool exists,
+    autoPtr<ensightFile>& output
 );
 
 
+//- Write cloud field, returning true if the field is non-empty.
 template<class Type>
-void ensightCloudField
-(
-    const IOobject& fieldObject,
-    const fileName& dataDir,
-    const label timeIndex,
-    const word& cloudName,
-    const label cloudNo,
-    Ostream& ensightCaseFile,
-    const bool dataExists,
-    const IOstream::streamFormat format
-);
-
-
-template<class Type>
-void writeCloudField
+bool writeCloudField
 (
     const IOField<Type>& field,
     ensightFile& os
 );
 
-}
+
+//- Write cloud field from IOobject, always returning true.
+template<class Type>
+bool writeCloudField
+(
+    const IOobject& fieldObject,
+    const bool exists,
+    autoPtr<ensightFile>& output
+);
+
+
+} // namespace ensightCloud
+} // namespace Foam
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "ensightCloudTemplates.C"
+    #include "ensightOutputCloudTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

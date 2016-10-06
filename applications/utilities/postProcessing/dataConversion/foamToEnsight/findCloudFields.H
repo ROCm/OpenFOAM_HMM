@@ -50,7 +50,7 @@ if (timeDirs.size() && !noLagrangian)
 
                 forAllConstIter(IOobjectList, cloudObjs, fieldIter)
                 {
-                    const IOobject obj = *fieldIter();
+                    const IOobject& obj = *fieldIter();
 
                     // Add field and field type
                     cloudIter().insert
