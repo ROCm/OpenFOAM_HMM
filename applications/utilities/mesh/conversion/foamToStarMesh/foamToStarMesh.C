@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,7 @@ Note
     creating the cellTable information.
 
 See also
-    Foam::cellTable, Foam::meshWriter and Foam::meshWriters::STARCD
+    Foam::cellTable, Foam::meshWriter and Foam::fileFormats::STARCDMeshWriter
 
 \*---------------------------------------------------------------------------*/
 
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 
         if (!timeI || state != polyMesh::UNCHANGED)
         {
-            meshWriters::STARCD writer(mesh, scaleFactor);
+            fileFormats::STARCDMeshWriter writer(mesh, scaleFactor);
 
             if (args.optionFound("noBnd"))
             {

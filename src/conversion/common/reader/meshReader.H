@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -20,13 +20,6 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
-Namespace
-    Foam::meshReaders
-
-Description
-    A namespace for holding various types of mesh readers.
-
 
 Class
     Foam::meshReader
@@ -59,7 +52,6 @@ SourceFiles
 #include "polyMesh.H"
 #include "HashTable.H"
 #include "IOstream.H"
-
 #include "cellTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -76,66 +68,48 @@ class meshReader
 protected:
 
     //- Identify cell faces in terms of cell Id and face Id
-    class cellFaceIdentifier
+    class cellFaceIdentifier : public labelPair
     {
     public:
-        // Public data
-
-            //- Cell Id
-            label cell;
-
-            //- Face Id
-            label face;
-
 
         // Constructors
 
-            //- Construct null
-            cellFaceIdentifier() : cell(-1), face(-1) {}
+            //- Construct null, as invalid pair
+            cellFaceIdentifier() : labelPair(-1, -1) {}
 
             //- Construct from cell/face components
-            cellFaceIdentifier(label c, label f) : cell(c), face(f) {}
+            cellFaceIdentifier(label c, label f) : labelPair(c, f) {}
+
+
+        // Access
+
+            //- The cell id (readonly)
+            const label& cellId() const
+            {
+                return first();
+            }
+
+            //- The face id (readonly)
+            const label& faceId() const
+            {
+                return second();
+            }
 
 
         // Check
 
-            //- Used if cell or face are non-negative
+            //- Used if both cell or face are non-negative
             bool used() const
             {
-                return (cell >= 0 && face >= 0);
+                return (first() >= 0 && second() >= 0);
             }
 
-            //- Unused if cell or face are negative
-            bool unused() const
+            //- Unused if either cell or face are negative
+            bool notUsed() const
             {
-                return (cell < 0 || face < 0);
+                return (first() < 0 || second() < 0);
             }
-
-
-        // Member Operators
-
-            bool operator!=(const cellFaceIdentifier& cf) const
-            {
-                return (cell != cf.cell || face != cf.face);
-            }
-
-            bool operator==(const cellFaceIdentifier& cf) const
-            {
-                return (cell == cf.cell && face == cf.face);
-            }
-
-        // IOstream Operators
-
-            friend Ostream& operator<<
-            (
-                Ostream& os,
-                const cellFaceIdentifier& cf
-            )
-            {
-                os << "(" << cf.cell << "/" << cf.face << ")";
-                return os;
-            }
-        };
+    };
 
 
 private:
@@ -147,36 +121,26 @@ private:
         // duplicate cell entries. Use additional checking
         mutable labelListList* pointCellsPtr_;
 
-        //- Number of internal faces for polyMesh
-        label nInternalFaces_;
-
-        //- Polyhedral mesh boundary patch start indices and dimensions
-        labelList patchStarts_;
-        labelList patchSizes_;
-
         //- Association between two faces
         List<labelPair> interfaces_;
 
         //- List of cells/faces id pairs for each baffle
         List<List<cellFaceIdentifier>> baffleIds_;
 
-        //- Global face list for polyMesh
-        faceList meshFaces_;
-
         //- Cells as polyhedra for polyMesh
         cellList cellPolys_;
 
         //- Face sets for monitoring
-        HashTable<List<label>, word, string::hash> monitoringSets_;
+        HashTable<labelList> monitoringSets_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        meshReader(const meshReader&);
+        meshReader(const meshReader&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const meshReader&);
+        void operator=(const meshReader&) = delete;
 
         //- Calculate pointCells
         void calcPointCells() const;
@@ -220,7 +184,7 @@ private:
 
         void writeInterfaces(const objectRegistry&) const;
 
-        //- Write List<label> in constant/polyMesh
+        //- Write labelList in constant/polyMesh
         void writeMeshLabelList
         (
             const objectRegistry& registry,
@@ -271,6 +235,16 @@ protected:
 
         //- Boundary patch physical types
         wordList patchPhysicalTypes_;
+
+        //- Polyhedral mesh boundary patch start indices and dimensions
+        labelList patchStarts_;
+        labelList patchSizes_;
+
+        //- Number of internal faces for polyMesh
+        label nInternalFaces_;
+
+        //- Global face list for polyMesh
+        faceList meshFaces_;
 
         //- List of faces for every cell
         faceListList cellFaces_;

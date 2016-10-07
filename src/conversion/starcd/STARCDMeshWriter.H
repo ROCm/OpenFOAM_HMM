@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::meshWriters::STARCD
+    Foam::fileFormats::STARCDMeshWriter
 
 Description
     Writes polyMesh in pro-STAR (v4) bnd/cel/vrt format
@@ -46,14 +46,14 @@ SourceFiles
 namespace Foam
 {
 
-namespace meshWriters
+namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class meshWriters::STARCD Declaration
+                Class fileFormats::STARCDMeshWriter Declaration
 \*---------------------------------------------------------------------------*/
 
-class STARCD
+class STARCDMeshWriter
 :
     public meshWriter
 {
@@ -65,10 +65,10 @@ class STARCD
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        STARCD(const STARCD&);
+        STARCDMeshWriter(const STARCDMeshWriter&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const STARCD&);
+        void operator=(const STARCDMeshWriter&) = delete;
 
         //- Pro-STAR 4+ header format
         static void writeHeader(Ostream&, const char* filetype);
@@ -97,16 +97,12 @@ public:
 
     // Constructors
 
-        //- Open a file for writing
-        STARCD
-        (
-            const polyMesh&,
-            const scalar scaleFactor = 1.0
-        );
+        //- Write mesh files in PROSTAR format
+        STARCDMeshWriter(const polyMesh&, const scalar scaleFactor = 1.0);
 
 
     //- Destructor
-    virtual ~STARCD();
+    virtual ~STARCDMeshWriter();
 
 
     // Member Functions
@@ -130,7 +126,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace meshWriters
+} // End namespace fileFormats
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

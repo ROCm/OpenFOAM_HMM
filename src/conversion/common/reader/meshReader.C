@@ -84,13 +84,7 @@ void Foam::meshReader::addFaceZones(polyMesh& mesh) const
     }
 
     nZone = 0;
-    for
-    (
-        HashTable<List<label>, word, string::hash>::const_iterator
-        iter = monitoringSets_.begin();
-        iter != monitoringSets_.end();
-        ++iter
-    )
+    forAllConstIter(HashTable<labelList>, monitoringSets_, iter)
     {
         Info<< "faceZone " << nZone
             << " (size: " << iter().size() << ") name: "
@@ -103,7 +97,7 @@ void Foam::meshReader::addFaceZones(polyMesh& mesh) const
             (
                 iter.key(),
                 iter(),
-                List<bool>(iter().size(), false),
+                boolList(iter().size(), false),
                 nZone,
                 mesh.faceZones()
             )
@@ -196,15 +190,13 @@ Foam::meshReader::meshReader
     const fileName& fileOrPrefix,
     const scalar scaleFactor
 )
-    :
+:
     pointCellsPtr_(nullptr),
-    nInternalFaces_(0),
-    patchStarts_(0),
-    patchSizes_(0),
     interfaces_(0),
     baffleIds_(0),
-    meshFaces_(0),
     cellPolys_(0),
+    monitoringSets_(),
+    // protected
     geometryFile_(fileOrPrefix),
     scaleFactor_(scaleFactor),
     points_(0),
@@ -213,6 +205,10 @@ Foam::meshReader::meshReader
     patchTypes_(0),
     patchNames_(0),
     patchPhysicalTypes_(0),
+    patchStarts_(0),
+    patchSizes_(0),
+    nInternalFaces_(0),
+    meshFaces_(0),
     cellFaces_(0),
     baffleFaces_(0),
     cellTableId_(0),

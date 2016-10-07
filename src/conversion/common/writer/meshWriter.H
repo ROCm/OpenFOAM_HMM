@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,19 +21,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    Foam::meshWriters
-
-Description
-    A namespace for holding various types of mesh writers.
-
-
 Class
     Foam::meshWriter
 
 Description
-    write OpenFOAM meshes and/or results to another CFD format
-    - currently just STAR-CD
+    Write OpenFOAM meshes and/or results to another CFD format.
 
 \par Files
 
@@ -65,9 +57,7 @@ Description
 
 
 SourceFiles
-    meshWriterI.H
     meshWriter.C
-    meshWriterIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -92,10 +82,10 @@ class meshWriter
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        meshWriter(const meshWriter&);
+        meshWriter(const meshWriter&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const meshWriter&);
+        void operator=(const meshWriter&) = delete;
 
 
 protected:
@@ -137,7 +127,7 @@ public:
 
     // Constructors
 
-        //- Create a writer obejct
+        //- Create a writer object
         meshWriter
         (
             const polyMesh&,
@@ -159,11 +149,12 @@ public:
                 scaleFactor_ = scaling;
             }
 
-            //- Suppress writing bnd file
+            //- Suppress writing boundary (bnd) file
             void noBoundary()
             {
                 writeBoundary_ = false;
             }
+
 
         // Write
 
