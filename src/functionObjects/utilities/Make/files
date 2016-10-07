@@ -25,4 +25,6 @@ writeDictionary/writeDictionary.C
 
 writeObjects/writeObjects.C
 
+thermoCoupleProbes/thermoCoupleProbes.C
+
 LIB = $(FOAM_LIBBIN)/libutilityFunctionObjects

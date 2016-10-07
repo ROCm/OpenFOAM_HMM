@@ -273,7 +273,7 @@ Foam::probes::probes
     const bool readFields
 )
 :
-    functionObject(name),
+    stateFunctionObject(name, runTime),
     pointField(0),
     mesh_
     (
@@ -295,31 +295,6 @@ Foam::probes::probes
         read(dict);
     }
 }
-
-
-Foam::probes::probes
-(
-    const word& name,
-    const objectRegistry& obr,
-    const dictionary& dict,
-    const bool loadFromFiles,
-    const bool readFields
-)
-:
-    functionObject(name),
-    pointField(0),
-    mesh_(refCast<const fvMesh>(obr)),
-    loadFromFiles_(loadFromFiles),
-    fieldSelection_(),
-    fixedLocations_(true),
-    interpolationScheme_("cell")
-{
-    if (readFields)
-    {
-        read(dict);
-    }
-}
-
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
