@@ -2810,6 +2810,7 @@ bool Foam::snappyLayerDriver::writeLayerData
                 dimensionedScalar("zero", dimless, 0),
                 fixedValueFvPatchScalarField::typeName
             );
+            volScalarField::Boundary& fldBf = fld.boundaryFieldRef();
             const polyBoundaryMesh& pbm = mesh.boundaryMesh();
             forAll(patchIDs, i)
             {
@@ -2824,7 +2825,7 @@ bool Foam::snappyLayerDriver::writeLayerData
                     faceRealThickness
                 );
 
-                // Convert patchReal to relavtive thickness
+                // Convert patchReal to relative thickness
                 scalarField pfld(patchReal.size(), 0.0);
                 forAll(patchReal, i)
                 {
@@ -2834,7 +2835,7 @@ bool Foam::snappyLayerDriver::writeLayerData
                     }
                 }
 
-                fld.boundaryField()[patchi] == pfld;
+                fldBf[patchi] == pfld;
             }
             Info<< indent << fld.name()
                 << " : overall layer thickness (fraction"

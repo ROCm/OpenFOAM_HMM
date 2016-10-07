@@ -60,8 +60,8 @@ public:
 
     enum operatingMode
     {
-        omMin,          //< Minimum
-        omMax           //< Maximum
+        omMin,          //!< Minimum
+        omMax           //!< Maximum
     };
 
     static const NamedEnum<operatingMode, 2> operatingModeNames;

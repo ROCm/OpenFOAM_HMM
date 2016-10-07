@@ -137,12 +137,6 @@ unsetenv MPFR_ARCH_PATH
 unsetenv SCOTCH_ARCH_PATH
 
 #------------------------------------------------------------------------------
-# Unset foamyHexMesh-related environment variables
-
-unsetenv FOAMY_HEX_MESH
-
-
-#------------------------------------------------------------------------------
 # Cleanup environment
 # PATH, LD_LIBRARY_PATH, MANPATH
 

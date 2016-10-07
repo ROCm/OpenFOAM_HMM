@@ -106,6 +106,7 @@ Foam::functionObjects::valueAverage::~valueAverage()
 
 bool Foam::functionObjects::valueAverage::read(const dictionary& dict)
 {
+    regionFunctionObject::read(dict);
     writeFile::read(dict);
 
     dict.lookup("functionObjectName") >> functionObjectName_;

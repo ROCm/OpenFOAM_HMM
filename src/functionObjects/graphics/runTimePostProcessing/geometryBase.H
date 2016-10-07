@@ -69,9 +69,9 @@ public:
 
         enum renderModeType
         {
-            rmFlat,             //< Flat shading
-            rmGouraud,          //< Gouraud shading
-            rmPhong             //< Phong shading
+            rmFlat,             //!< Flat shading
+            rmGouraud,          //!< Gouraud shading
+            rmPhong             //!< Phong shading
         };
 
         static const NamedEnum<renderModeType, 3> renderModeTypeNames;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,6 +103,8 @@ bool Foam::functionObjects::timeActivatedFileUpdate::read
     const dictionary& dict
 )
 {
+    functionObject::read(dict);
+
     dict.lookup("fileToUpdate") >> fileToUpdate_;
     dict.lookup("timeVsFile") >> timeVsFile_;
 

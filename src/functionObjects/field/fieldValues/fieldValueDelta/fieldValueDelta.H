@@ -107,11 +107,11 @@ public:
         //- Operation type enumeration
         enum operationType
         {
-            opAdd,              //< Add
-            opSubtract,         //< Subtract
-            opMin,              //< Minimum
-            opMax,              //< Maximum
-            opAverage           //< Average
+            opAdd,              //!< Add
+            opSubtract,         //!< Subtract
+            opMin,              //!< Minimum
+            opMax,              //!< Maximum
+            opAverage           //!< Average
         };
 
         //- Operation type names

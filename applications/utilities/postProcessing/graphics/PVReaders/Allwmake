@@ -42,37 +42,31 @@ canBuildPlugin()
 
 # -----------------------------------------------------------------------------
 
-case "$ParaView_VERSION" in
-4* | 5*)
+# major version as per paraview include directory:
+# Eg, "PREFIX/include/paraview-5.0" -> "5.0"
+major="${ParaView_INCLUDE_DIR##*-}"
+
+case "$major" in
+[45].[0-9]*)
     if canBuildPlugin
     then
-        [ -n "$PV_PLUGIN_PATH" ] || {
-            echo "$0 : PV_PLUGIN_PATH not valid - it is unset"
-            exit 1
-        }
-
-        # ensure CMake gets the correct C/C++ compilers
-        [ -n "$WM_CC" ] && export CC="$WM_CC"
-        [ -n "$WM_CXX" ] && export CXX="$WM_CXX"
-
+    (
         wmake $targetType vtkPVReaders
         PVblockMeshReader/Allwmake $targetType $*
-        PVFoamReader/Allwmake $targetType $*
+        PVFoamReader/Allwmake $targetType  $*
 
         # Dummy directory to trigger proper 'wclean all' behaviour
         # - the Allwclean will otherwise not be used
         mkdir -p Make
-    else
-        echo "ERROR: ParaView not found in $ParaView_DIR"
+    )
     fi
     ;;
 *)
     echo
     echo "NOTE: skipping build of ParaView plugin(s)"
-    echo "    different version: ParaView_VERSION=$ParaView_VERSION"
+    echo "    include directory was for paraview major version '${major:-none}'"
     echo
     ;;
 esac
-
 
 #------------------------------------------------------------------------------

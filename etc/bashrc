@@ -57,7 +57,7 @@ export FOAM_INST_DIR=$HOME/$WM_PROJECT
 # $FOAM_INST_DIR/site/$WM_PROJECT_VERSION or $FOAM_INST_DIR/site
 
 #- Compiler location:
-#    WM_COMPILER_TYPE= system | ThirdParty (OpenFOAM)
+#    WM_COMPILER_TYPE= system | ThirdParty
 export WM_COMPILER_TYPE=system
 
 #- Compiler:
@@ -173,10 +173,7 @@ _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/paraview`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/ensight`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/gperftools`
 
-if [ ! -z "$FOAMY_HEX_MESH" ]
-then
-    _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/CGAL`
-fi
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/CGAL`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/scotch`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/FFTW`
 

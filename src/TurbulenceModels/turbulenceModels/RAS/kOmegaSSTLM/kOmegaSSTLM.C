@@ -60,13 +60,13 @@ tmp<volScalarField::Internal> kOmegaSSTLM<BasicTurbulenceModel>::Pk
 template<class BasicTurbulenceModel>
 tmp<volScalarField::Internal> kOmegaSSTLM<BasicTurbulenceModel>::epsilonByk
 (
-    const volScalarField::Internal& F1,
-    const volScalarField::Internal& F2
+    const volScalarField& F1,
+    const volTensorField& gradU
 ) const
 {
     return
         min(max(gammaIntEff_, scalar(0.1)), scalar(1))
-       *kOmegaSST<BasicTurbulenceModel>::epsilonByk(F1, F2);
+       *kOmegaSST<BasicTurbulenceModel>::epsilonByk(F1, gradU);
 }
 
 

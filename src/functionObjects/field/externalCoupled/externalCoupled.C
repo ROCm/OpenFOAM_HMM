@@ -854,6 +854,8 @@ bool Foam::functionObjects::externalCoupled::end()
 
 bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
 {
+    functionObject::read(dict);
+
     dict.readIfPresent("enabled", enabled_);
 
     if (!enabled_)

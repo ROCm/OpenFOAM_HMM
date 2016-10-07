@@ -164,8 +164,8 @@ protected:
         //- Modified form of the k-omega SST epsilon/k
         virtual tmp<volScalarField::Internal> epsilonByk
         (
-            const volScalarField::Internal& F1,
-            const volScalarField::Internal& F2
+            const volScalarField& F1,
+            const volTensorField& gradU
         ) const;
 
         //- Freestream blending-function

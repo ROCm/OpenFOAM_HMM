@@ -106,8 +106,8 @@ public:
         //- Region type enumeration
         enum regionTypes
         {
-            vrtCellZone,    //< cell zone
-            vrtAll          //< all cells
+            vrtCellZone,    //!< cell zone
+            vrtAll          //!< all cells
         };
 
         //- Region type names

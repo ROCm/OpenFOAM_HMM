@@ -103,9 +103,6 @@ class scalarTransport
         //- Name of field to process
         word fieldName_;
 
-        //- On/off switch
-        bool active_;
-
         //- Name of flux field (optional)
         word phiName_;
 

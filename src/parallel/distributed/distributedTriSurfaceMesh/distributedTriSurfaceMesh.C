@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1766,6 +1766,8 @@ void Foam::distributedTriSurfaceMesh::findLineAll
     e1.setSize(compactI);
     pointMap.setSize(compactI);
 
+
+    label iter = 0;
     while (returnReduce(e0.size(), sumOp<label>()) > 0)
     {
         findLine
@@ -1791,7 +1793,12 @@ void Foam::distributedTriSurfaceMesh::findLineAll
 
                 point pt = hitInfo[i].hitPoint() + smallVec[pointI];
 
-                if (((pt-start[pointI])&dirVec[pointI]) <= magSqrDirVec[pointI])
+                // Check current coordinate along ray
+                scalar d = ((pt-start[pointI])&dirVec[pointI]);
+
+                // Note check for d>0. Very occasionally the octree will find
+                // an intersection to the left of the ray due to tolerances.
+                if (d > 0 && d <= magSqrDirVec[pointI])
                 {
                     e0[compactI] = pt;
                     e1[compactI] = end[pointI];
@@ -1805,6 +1812,21 @@ void Foam::distributedTriSurfaceMesh::findLineAll
         e0.setSize(compactI);
         e1.setSize(compactI);
         pointMap.setSize(compactI);
+
+        iter++;
+
+        if (iter == 1000)
+        {
+            Pout<< "distributedTriSurfaceMesh::findLineAll :"
+                << " Exiting loop due to excessive number of"
+                << " intersections along ray"
+                << " start:" << UIndirectList<point>(start, pointMap)
+                << " end:" << UIndirectList<point>(end, pointMap)
+                << " e0:" << UIndirectList<point>(e0, pointMap)
+                << " e1:" << UIndirectList<point>(e1, pointMap)
+                << endl;
+            break;
+        }
     }
 }
 

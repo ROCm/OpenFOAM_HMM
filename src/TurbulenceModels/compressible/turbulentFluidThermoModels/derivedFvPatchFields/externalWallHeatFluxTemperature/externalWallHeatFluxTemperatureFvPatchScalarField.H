@@ -117,8 +117,8 @@ public:
         //- Operation mode enumeration
         enum operationMode
         {
-            fixedHeatFlux,              //< Fixed heat flux
-            fixedHeatTransferCoeff,     //< Fixed heat transfer coefficient
+            fixedHeatFlux,              //!< Fixed heat flux
+            fixedHeatTransferCoeff,     //!< Fixed heat transfer coefficient
             unknown
         };
 

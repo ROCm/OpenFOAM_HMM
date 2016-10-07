@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ Description
     Converts a Star-CD (v4) pro-STAR mesh into OpenFOAM format.
 
 Usage
-    \b star4ToFoam [OPTION] ccmMesh
+    \b star4ToFoam [OPTION] prostarMesh
 
     Options:
       - \par -ascii
@@ -47,6 +47,9 @@ Usage
 
 Note
     Baffles are written as interfaces for later use
+
+See Also
+    Foam::cellTable, Foam::meshReader and Foam::fileFormats::STARCDMeshReader
 
 \*---------------------------------------------------------------------------*/
 
@@ -95,7 +98,7 @@ int main(int argc, char *argv[])
         scaleFactor = 1;
     }
 
-    meshReaders::STARCD::keepSolids = args.optionFound("solids");
+    fileFormats::STARCDMeshReader::keepSolids = args.optionFound("solids");
 
     // default to binary output, unless otherwise specified
     IOstream::streamFormat format = IOstream::BINARY;
@@ -110,7 +113,7 @@ int main(int argc, char *argv[])
     // remove extensions and/or trailing '.'
     const fileName prefix = fileName(args[1]).lessExt();
 
-    meshReaders::STARCD reader(prefix, runTime, scaleFactor);
+    fileFormats::STARCDMeshReader reader(prefix, runTime, scaleFactor);
 
     autoPtr<polyMesh> mesh = reader.mesh(runTime);
     reader.writeMesh(mesh, format);

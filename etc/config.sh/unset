@@ -133,12 +133,6 @@ unset MPFR_ARCH_PATH
 unset SCOTCH_ARCH_PATH
 
 #------------------------------------------------------------------------------
-# Unset foamyHexMesh-related environment variables
-
-unset FOAMY_HEX_MESH
-
-
-#------------------------------------------------------------------------------
 # Cleanup environment
 # PATH, LD_LIBRARY_PATH, MANPATH
 
@@ -183,9 +177,9 @@ unalias util
 unalias tut
 unalias run
 
-unset wmRefresh
-unset foamVersion
-unset foamPV
+unset -f wmRefresh
+unset -f foamVersion
+unset -f foamPV
 
 
 #------------------------------------------------------------------------------

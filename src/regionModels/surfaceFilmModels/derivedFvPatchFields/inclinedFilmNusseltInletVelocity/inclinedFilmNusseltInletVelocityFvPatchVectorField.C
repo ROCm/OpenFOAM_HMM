@@ -70,7 +70,7 @@ inclinedFilmNusseltInletVelocityFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchVectorField(p, iF),
+    fixedValueFvPatchVectorField(p, iF, dict),
     filmRegionName_
     (
         dict.lookupOrDefault<word>("filmRegion", "surfaceFilmProperties")
@@ -78,9 +78,7 @@ inclinedFilmNusseltInletVelocityFvPatchVectorField
     GammaMean_(Function1<scalar>::New("GammaMean", dict)),
     a_(Function1<scalar>::New("a", dict)),
     omega_(Function1<scalar>::New("omega", dict))
-{
-    fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
-}
+{}
 
 
 Foam::inclinedFilmNusseltInletVelocityFvPatchVectorField::

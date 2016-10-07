@@ -353,6 +353,8 @@ Foam::functionObjects::regionSizeDistribution::~regionSizeDistribution()
 
 bool Foam::functionObjects::regionSizeDistribution::read(const dictionary& dict)
 {
+    fvMeshFunctionObject::read(dict);
+
     dict.lookup("field") >> alphaName_;
     dict.lookup("patches") >> patchNames_;
     dict.lookup("threshold") >> threshold_;

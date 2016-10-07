@@ -65,8 +65,8 @@ public:
 
         enum representationType
         {
-            rtSphere,               //< Sphere
-            rtVector                //< Vector
+            rtSphere,               //!< Sphere
+            rtVector                //!< Vector
         };
 
         static const NamedEnum<representationType, 2> representationTypeNames;

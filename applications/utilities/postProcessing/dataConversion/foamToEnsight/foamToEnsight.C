@@ -34,7 +34,6 @@ Description
 
 Usage
     \b foamToEnsight [OPTION]
-    Translates OpenFOAM data to EnSight format
 
     Options:
       - \par -ascii
@@ -43,29 +42,28 @@ Usage
       - \par -noZero
         Exclude the often incomplete initial conditions.
 
-      - \par -noLagrangian \n
+      - \par -noLagrangian
         Suppress writing lagrangian positions and fields.
 
       - \par -noPatches
         Suppress writing any patches.
 
-      - \par -patches patchList \n
+      - \par -patches patchList
         Specify particular patches to write.
         Specifying an empty list suppresses writing the internalMesh.
 
-      - \par -faceZones zoneList \n
+      - \par -faceZones zoneList
         Specify faceZones to write, with wildcards
 
       - \par -cellZone zoneName
         Specify single cellZone to write (not lagrangian)
 
-      - \par -width \<n\>\n
+      - \par -width \<n\>
         Width of EnSight data subdir (default: 8)
 
 Note
-    Parallel support for cloud data is not supported
-    - writes to \a EnSight directory to avoid collisions with
-      foamToEnsightParts
+    Writes to \a EnSight directory to avoid collisions with
+    foamToEnsightParts
 
 \*---------------------------------------------------------------------------*/
 

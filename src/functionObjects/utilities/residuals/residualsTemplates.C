@@ -87,7 +87,13 @@ void Foam::functionObjects::residuals::writeResidual(const word& fieldName)
             {
                 if (component(validComponents, cmpt) != -1)
                 {
-                    file() << token::TAB << component(residual, cmpt);
+                    const scalar r = component(residual, cmpt);
+
+                    file() << token::TAB << r;
+
+                    const word resultName =
+                        fieldName + word(pTraits<Type>::componentNames[cmpt]);
+                    setResult(resultName, r);
                 }
             }
         }

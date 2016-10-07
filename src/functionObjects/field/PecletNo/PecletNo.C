@@ -144,6 +144,7 @@ Foam::functionObjects::PecletNo::PecletNo
     rhoName_("rho")
 {
     setResultName("Pe", "phi");
+    read(dict);
 }
 
 

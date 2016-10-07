@@ -108,7 +108,45 @@ int Foam::functionObjects::zeroGradient::process(const word& fieldName)
 }
 
 
-void Foam::functionObjects::zeroGradient::process()
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::functionObjects::zeroGradient::zeroGradient
+(
+    const word& name,
+    const Time& runTime,
+    const dictionary& dict
+)
+:
+    fvMeshFunctionObject(name, runTime, dict),
+    selectFields_(),
+    resultName_(string::null),
+    results_()
+{
+    read(dict);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::functionObjects::zeroGradient::~zeroGradient()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::functionObjects::zeroGradient::read(const dictionary& dict)
+{
+    fvMeshFunctionObject::read(dict);
+
+    dict.lookup("fields") >> selectFields_;
+    uniqWords(selectFields_);
+
+    resultName_ = dict.lookupOrDefault<word>("result", type() + "(@@)");
+    return checkFormatName(resultName_);
+}
+
+
+bool Foam::functionObjects::zeroGradient::execute()
 {
     results_.clear();
 
@@ -150,57 +188,20 @@ void Foam::functionObjects::zeroGradient::process()
         WarningInFunction
             << "Unprocessed field " << ignored << endl;
     }
-}
 
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::functionObjects::zeroGradient::zeroGradient
-(
-    const word& name,
-    const Time& runTime,
-    const dictionary& dict
-)
-:
-    fvMeshFunctionObject(name, runTime, dict),
-    selectFields_(),
-    resultName_(string::null),
-    results_()
-{
-    read(dict);
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::zeroGradient::~zeroGradient()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::functionObjects::zeroGradient::read(const dictionary& dict)
-{
-    dict.lookup("fields") >> selectFields_;
-    uniqWords(selectFields_);
-
-    resultName_ = dict.lookupOrDefault<word>("result", type() + "(@@)");
-    return checkFormatName(resultName_);
-}
-
-
-bool Foam::functionObjects::zeroGradient::execute()
-{
-    results_.clear();
     return true;
 }
 
 
 bool Foam::functionObjects::zeroGradient::write()
 {
+    if (results_.size())
+    {
+        Log << type() << ' ' << name() << " write:" << endl;
+    }
+
     // Consistent output order
     const wordList outputList = results_.sortedToc();
-
     forAll(outputList, i)
     {
         const word& fieldName = outputList[i];
@@ -209,8 +210,7 @@ bool Foam::functionObjects::zeroGradient::write()
         {
             const regIOobject& io = lookupObject<regIOobject>(fieldName);
 
-            Log << type() << " " << name()
-                << " write: writing field " << fieldName << endl;
+            Log << "    " << fieldName << endl;
 
             io.write();
         }

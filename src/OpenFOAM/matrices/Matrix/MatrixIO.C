@@ -160,15 +160,13 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const Matrix<Form, Type>& M)
     {
         if (mn)
         {
-            bool uniform = false;
-
             const Type* v = M.v_;
 
-            if (mn > 1 && contiguous<Type>())
+            // can the contents be considered 'uniform' (ie, identical)
+            bool uniform = (mn > 1 && contiguous<Type>());
+            if (uniform)
             {
-                uniform = true;
-
-                for (label i=0; i<mn; i++)
+                for (label i=0; i<mn; ++i)
                 {
                     if (v[i] != v[0])
                     {
@@ -180,18 +178,18 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const Matrix<Form, Type>& M)
 
             if (uniform)
             {
-                // Write size of list and start contents delimiter
+                // Write start delimiter
                 os  << token::BEGIN_BLOCK;
 
-                // Write list contents
+                // Write contents
                 os << v[0];
 
-                // Write end of contents delimiter
+                // Write end delimiter
                 os << token::END_BLOCK;
             }
             else if (mn < 10 && contiguous<Type>())
             {
-                // Write size of list and start contents delimiter
+                // Write start contents delimiter
                 os  << token::BEGIN_LIST;
 
                 label k = 0;
@@ -204,7 +202,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const Matrix<Form, Type>& M)
                     // Write row
                     for (label j=0; j< M.n(); j++)
                     {
-                        if (j > 0) os << token::SPACE;
+                        if (j) os << token::SPACE;
                         os << v[k++];
                     }
 
@@ -216,7 +214,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const Matrix<Form, Type>& M)
             }
             else
             {
-                // Write size of list and start contents delimiter
+                // Write start contents delimiter
                 os  << nl << token::BEGIN_LIST;
 
                 label k = 0;

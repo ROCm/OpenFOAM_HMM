@@ -204,14 +204,9 @@ _foamAddLib  ${FOAM_USER_LIBBIN}:${FOAM_SITE_LIBBIN}:${FOAM_LIBBIN}:${FOAM_EXT_L
 unset gcc_version gmp_version mpfr_version mpc_version
 unsetenv GMP_ARCH_PATH MPFR_ARCH_PATH
 
-
-# Location of compiler installation
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if ( ! $?WM_COMPILER_TYPE ) then
-    setenv WM_COMPILER_TYPE system
-    echo "Warning in $WM_PROJECT_DIR/etc/config.csh/settings:"
-    echo "    WM_COMPILER_TYPE not set, using '$WM_COMPILER_TYPE'"
-endif
+# Compiler installation - default to system
+# ~~~~~~~~~~~~~~~~~~~~~
+if ( ! $?WM_COMPILER_TYPE ) setenv WM_COMPILER_TYPE system
 
 # Load configured compiler versions, regardless of the compiler type
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -235,13 +230,16 @@ case ThirdParty:
 
         # Check that the compiler directory can be found
         if ( ! -d "$gccDir" ) then
-            echo
-            echo "Warning in $WM_PROJECT_DIR/etc/config.csh/settings:"
-            echo "    Cannot find $gccDir installation."
-            echo "    Please install this compiler version or if you wish to" \
-                 " use the system compiler,"
-            echo "    change the 'WM_COMPILER_TYPE' setting to 'system'"
-            echo
+            cat << GCC_NOT_FOUND
+===============================================================================
+Warning in $WM_PROJECT_DIR/etc/config.csh/settings:
+Cannot find '$WM_COMPILER' compiler installation
+    $gccDir
+
+    Either install this compiler version, or use the system compiler by setting
+    WM_COMPILER_TYPE to 'system' in \$WM_PROJECT_DIR/etc/cshrc.
+===============================================================================
+GCC_NOT_FOUND
         endif
 
         _foamAddMan     $gccDir/man
@@ -268,18 +266,22 @@ case ThirdParty:
             echo "    ${gccDir:t} (${gmpDir:t} ${mpfrDir:t} ${mpcDir:t})"
         endif
     endif
+
     if ( $?clang_version ) then
         set clangDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$clang_version
 
         # Check that the compiler directory can be found
         if ( ! -d "$clangDir" ) then
-            echo
-            echo "Warning in $WM_PROJECT_DIR/etc/config.csh/settings:"
-            echo "    Cannot find $clangDir installation."
-            echo "    Please install this compiler version or if you wish to" \
-                 " use the system compiler,"
-            echo "    change the 'WM_COMPILER_TYPE' setting to 'system'"
-            echo
+            cat << CLANG_NOT_FOUND
+===============================================================================
+Warning in $WM_PROJECT_DIR/etc/config.csh/settings:
+Cannot find '$WM_COMPILER' compiler installation
+    $clangDir
+
+    Either install this compiler version, or use the system compiler by setting
+    WM_COMPILER_TYPE to 'system' in \$WM_PROJECT_DIR/etc/cshrc.
+===============================================================================
+CLANG_NOT_FOUND
         endif
 
         _foamAddMan     $clangDir/man

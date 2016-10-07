@@ -1,0 +1,80 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      combustionProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+combustionModel  infinitelyFastChemistry<psiThermoCombustion,gasHThermoPhysics>;
+
+//combustionModel  FSD<psiThermoCombustion,gasHThermoPhysics>;
+//combustionModel  diffusionMulticomponent<psiChemistryCombustion,gasHThermoPhysics>;
+//NOTE: To use diffusionMulticomponent combustion model you need to rename files:
+// reactions.twoSteps -> reactions
+// thermophysicalProperties.twoSteps -> thermophysicalProperties
+
+active  true;
+
+infinitelyFastChemistryCoeffs
+{
+    semiImplicit no;
+    C           5.0;
+}
+
+diffusionMulticomponentCoeffs
+{
+    Ci          (1.0 1.5);
+    fuels       (CH4 CO);
+    oxidants    (O2 O2);
+    YoxStream   (0.23 0.23);
+    YfStream    (1.0 1.0);
+    sigma       (0.02 0.02);
+    oxidantRes  (0.015 0.005);
+    ftCorr      (0  0);
+    laminarIgn  false;
+}
+
+FSDCoeffs
+{
+    semiImplicit no;
+    Cv          0.1;
+    ftVarMin    1e-2;
+
+    reactionRateFlameArea relaxation;
+
+    fuel                Methane;
+
+    semiImplicit        no;
+
+    relaxationCoeffs
+    {
+        C                     2.0;
+        alpha                 1.0;
+        Methane
+        {
+            omega0            0.5;
+            eta               -0.013;
+            omegaMin          0.01;
+            sigmaExt          470;
+        }
+        Propane
+        {
+            omega0            0.4;
+            eta               -0.00656;
+            omegaMin          0.01;
+            sigmaExt          450;
+        }
+    }
+}
+
+// ************************************************************************* //
