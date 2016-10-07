@@ -28,6 +28,18 @@
 #     Miscellaneous functions for running tutorial cases
 #------------------------------------------------------------------------------
 
+#
+# Look for '-parallel' in the argument list.
+#
+isParallel()
+{
+    for i; do [ "$i" = "-parallel" ] && return 0; done
+    return 1
+}
+
+#
+# Look for '-test' in the argument list.
+#
 isTest()
 {
     for i in "$@"; do
