@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::meshReaders::STARCD
+    Foam::fileFormats::STARCDMeshReader
 
 Description
     Read pro-STAR vrt/cel/bnd files.
@@ -52,14 +52,14 @@ SourceFiles
 namespace Foam
 {
 
-namespace meshReaders
+namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class meshReaders::STARCD Declaration
+                Class fileFormats::STARCDMeshReader Declaration
 \*---------------------------------------------------------------------------*/
 
-class STARCD
+class STARCDMeshReader
 :
     public meshReader
 {
@@ -119,10 +119,10 @@ private:
     // Private member functions
 
         //- Disallow default bitwise copy construct
-        STARCD(const STARCD&);
+        STARCDMeshReader(const STARCDMeshReader&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const STARCD&);
+        void operator=(const STARCDMeshReader&) = delete;
 
 
 protected:
@@ -161,7 +161,7 @@ public:
     // Constructors
 
         //- Construct from case name
-        STARCD
+        STARCDMeshReader
         (
             const fileName& prefix,
             const objectRegistry&,
@@ -170,13 +170,13 @@ public:
 
 
     //- Destructor
-    virtual ~STARCD();
+    virtual ~STARCDMeshReader();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace meshReaders
+} // End namespace fileFormats
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

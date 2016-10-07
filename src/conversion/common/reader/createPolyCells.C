@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -138,7 +138,7 @@ void Foam::meshReader::createPolyCells()
                         << endl;
 #endif
 
-                    if (baffleIds_[baffleI][side].unused())
+                    if (baffleIds_[baffleI][side].notUsed())
                     {
                         baffleIds_[baffleI][side] = cellFaceIdentifier
                         (
@@ -166,8 +166,8 @@ void Foam::meshReader::createPolyCells()
         {
             for (label side = 0; side < nNeighbours; ++side)
             {
-                label neiCell = baffleIds_[baffleI][side].cell;
-                label neiFace = baffleIds_[baffleI][side].face;
+                label neiCell = baffleIds_[baffleI][side].cellId();
+                label neiFace = baffleIds_[baffleI][side].faceId();
 
                 if (baffleIds_[baffleI][side].used())
                 {

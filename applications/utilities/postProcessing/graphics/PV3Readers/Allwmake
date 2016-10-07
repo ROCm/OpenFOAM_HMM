@@ -51,8 +51,8 @@ case "$major" in
     then
     (
         wmake $targetType vtkPV3Readers
-        PV3blockMeshReader/Allwmake $*
-        PV3FoamReader/Allwmake $*
+        PV3blockMeshReader/Allwmake $targetType $*
+        PV3FoamReader/Allwmake $targetType $*
     )
     fi
     ;;

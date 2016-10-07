@@ -52,8 +52,8 @@ case "$major" in
     then
     (
         wmake $targetType vtkPVReaders
-        PVblockMeshReader/Allwmake $*
-        PVFoamReader/Allwmake $*
+        PVblockMeshReader/Allwmake $targetType $*
+        PVFoamReader/Allwmake $targetType  $*
 
         # Dummy directory to trigger proper 'wclean all' behaviour
         # - the Allwclean will otherwise not be used

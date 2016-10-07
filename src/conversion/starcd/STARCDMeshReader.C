@@ -35,15 +35,15 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* const Foam::meshReaders::STARCD::defaultBoundaryName =
+const char* const Foam::fileFormats::STARCDMeshReader::defaultBoundaryName =
     "Default_Boundary_Region";
 
-const char* const Foam::meshReaders::STARCD::defaultSolidBoundaryName =
+const char* const Foam::fileFormats::STARCDMeshReader::defaultSolidBoundaryName =
     "Default_Boundary_Solid";
 
-bool Foam::meshReaders::STARCD::keepSolids = false;
+bool Foam::fileFormats::STARCDMeshReader::keepSolids = false;
 
-const int Foam::meshReaders::STARCD::starToFoamFaceAddr[4][6] =
+const int Foam::fileFormats::STARCDMeshReader::starToFoamFaceAddr[4][6] =
 {
     { 4, 5, 2, 3, 0, 1 },     // 11 = pro-STAR hex
     { 0, 1, 4, -1, 2, 3 },    // 12 = pro-STAR prism
@@ -54,7 +54,7 @@ const int Foam::meshReaders::STARCD::starToFoamFaceAddr[4][6] =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::meshReaders::STARCD::readToNewline(IFstream& is)
+void Foam::fileFormats::STARCDMeshReader::readToNewline(IFstream& is)
 {
     char ch = '\n';
     do
@@ -65,7 +65,7 @@ void Foam::meshReaders::STARCD::readToNewline(IFstream& is)
 }
 
 
-bool Foam::meshReaders::STARCD::readHeader(IFstream& is, word fileSignature)
+bool Foam::fileFormats::STARCDMeshReader::readHeader(IFstream& is, word fileSignature)
 {
     if (!is.good())
     {
@@ -95,7 +95,10 @@ bool Foam::meshReaders::STARCD::readHeader(IFstream& is, word fileSignature)
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::meshReaders::STARCD::readAux(const objectRegistry& registry)
+void Foam::fileFormats::STARCDMeshReader::readAux
+(
+    const objectRegistry& registry
+)
 {
     boundaryRegion_.readDict(registry);
     cellTable_.readDict(registry);
@@ -115,7 +118,7 @@ Body:
   <vertexId>  <x>  <y>  <z> [newline]
 
 \*---------------------------------------------------------------------------*/
-void Foam::meshReaders::STARCD::readPoints
+void Foam::fileFormats::STARCDMeshReader::readPoints
 (
     const fileName& inputName,
     const scalar scaleFactor
@@ -197,7 +200,6 @@ void Foam::meshReaders::STARCD::readPoints
             << "no points in file " << inputName
             << abort(FatalError);
     }
-
 }
 
 
@@ -241,7 +243,7 @@ for each cell face.
 Strictly speaking, we only need the cellModeller for adding boundaries.
 \*---------------------------------------------------------------------------*/
 
-void Foam::meshReaders::STARCD::readCells(const fileName& inputName)
+void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
 {
     const word fileSignature = "PROSTAR_CELL";
     label nFluids = 0, nSolids = 0, nBaffles = 0, nShells = 0;
@@ -632,7 +634,10 @@ BAFFLE
 etc,
 \*---------------------------------------------------------------------------*/
 
-void Foam::meshReaders::STARCD::readBoundary(const fileName& inputName)
+void Foam::fileFormats::STARCDMeshReader::readBoundary
+(
+    const fileName& inputName
+)
 {
     const word fileSignature = "PROSTAR_BOUNDARY";
     label nPatches = 0, nFaces = 0, nBafflePatches = 0, maxId = 0;
@@ -979,7 +984,7 @@ void Foam::meshReaders::STARCD::readBoundary(const fileName& inputName)
 //
 // remove unused points
 //
-void Foam::meshReaders::STARCD::cullPoints()
+void Foam::fileFormats::STARCDMeshReader::cullPoints()
 {
     label nPoints = points_.size();
     labelList oldToNew(nPoints, -1);
@@ -1039,7 +1044,7 @@ void Foam::meshReaders::STARCD::cullPoints()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-bool Foam::meshReaders::STARCD::readGeometry(const scalar scaleFactor)
+bool Foam::fileFormats::STARCDMeshReader::readGeometry(const scalar scaleFactor)
 {
     readPoints(geometryFile_ + ".vrt", scaleFactor);
     readCells(geometryFile_ + ".cel");
@@ -1052,7 +1057,7 @@ bool Foam::meshReaders::STARCD::readGeometry(const scalar scaleFactor)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::meshReaders::STARCD::STARCD
+Foam::fileFormats::STARCDMeshReader::STARCDMeshReader
 (
     const fileName& prefix,
     const objectRegistry& registry,
@@ -1070,7 +1075,7 @@ Foam::meshReaders::STARCD::STARCD
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::meshReaders::STARCD::~STARCD()
+Foam::fileFormats::STARCDMeshReader::~STARCDMeshReader()
 {}
 
 

@@ -31,10 +31,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* Foam::meshWriters::STARCD::defaultBoundaryName =
+const char* Foam::fileFormats::STARCDMeshWriter::defaultBoundaryName =
     "Default_Boundary_Region";
 
-const Foam::label Foam::meshWriters::STARCD::foamToStarFaceAddr[4][6] =
+const Foam::label Foam::fileFormats::STARCDMeshWriter::foamToStarFaceAddr[4][6] =
 {
     { 4, 5, 2, 3, 0, 1 },     // 11 = pro-STAR hex
     { 0, 1, 4, 5, 2, -1 },    // 12 = pro-STAR prism
@@ -45,7 +45,7 @@ const Foam::label Foam::meshWriters::STARCD::foamToStarFaceAddr[4][6] =
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::label Foam::meshWriters::STARCD::findDefaultBoundary() const
+Foam::label Foam::fileFormats::STARCDMeshWriter::findDefaultBoundary() const
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
@@ -64,7 +64,7 @@ Foam::label Foam::meshWriters::STARCD::findDefaultBoundary() const
 }
 
 
-void Foam::meshWriters::STARCD::getCellTable()
+void Foam::fileFormats::STARCDMeshWriter::getCellTable()
 {
     // read constant/polyMesh/propertyName
     IOList<label> ioList
@@ -171,7 +171,7 @@ void Foam::meshWriters::STARCD::getCellTable()
 }
 
 
-void Foam::meshWriters::STARCD::writeHeader(Ostream& os, const char* filetype)
+void Foam::fileFormats::STARCDMeshWriter::writeHeader(Ostream& os, const char* filetype)
 {
     os  << "PROSTAR_" << filetype << nl
         << 4000
@@ -186,7 +186,7 @@ void Foam::meshWriters::STARCD::writeHeader(Ostream& os, const char* filetype)
 }
 
 
-void Foam::meshWriters::STARCD::writePoints(const fileName& prefix) const
+void Foam::fileFormats::STARCDMeshWriter::writePoints(const fileName& prefix) const
 {
     OFstream os(prefix + ".vrt");
     writeHeader(os, "VERTEX");
@@ -216,7 +216,10 @@ void Foam::meshWriters::STARCD::writePoints(const fileName& prefix) const
 }
 
 
-void Foam::meshWriters::STARCD::writeCells(const fileName& prefix) const
+void Foam::fileFormats::STARCDMeshWriter::writeCells
+(
+    const fileName& prefix
+) const
 {
     OFstream os(prefix + ".cel");
     writeHeader(os, "CELL");
@@ -358,7 +361,10 @@ void Foam::meshWriters::STARCD::writeCells(const fileName& prefix) const
 }
 
 
-void Foam::meshWriters::STARCD::writeBoundary(const fileName& prefix) const
+void Foam::fileFormats::STARCDMeshWriter::writeBoundary
+(
+    const fileName& prefix
+) const
 {
     OFstream os(prefix + ".bnd");
     writeHeader(os, "BOUNDARY");
@@ -464,7 +470,7 @@ void Foam::meshWriters::STARCD::writeBoundary(const fileName& prefix) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::meshWriters::STARCD::STARCD
+Foam::fileFormats::STARCDMeshWriter::STARCDMeshWriter
 (
     const polyMesh& mesh,
     const scalar scaleFactor
@@ -480,13 +486,13 @@ Foam::meshWriters::STARCD::STARCD
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::meshWriters::STARCD::~STARCD()
+Foam::fileFormats::STARCDMeshWriter::~STARCDMeshWriter()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::meshWriters::STARCD::rmFiles(const fileName& baseName) const
+void Foam::fileFormats::STARCDMeshWriter::rmFiles(const fileName& baseName) const
 {
     rm(baseName + ".vrt");
     rm(baseName + ".cel");
@@ -495,7 +501,7 @@ void Foam::meshWriters::STARCD::rmFiles(const fileName& baseName) const
 }
 
 
-bool Foam::meshWriters::STARCD::write(const fileName& meshName) const
+bool Foam::fileFormats::STARCDMeshWriter::write(const fileName& meshName) const
 {
     fileName baseName(meshName);
 
