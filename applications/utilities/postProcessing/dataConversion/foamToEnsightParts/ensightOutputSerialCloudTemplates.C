@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -21,58 +21,69 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Template to write generalized field components
-
 \*---------------------------------------------------------------------------*/
 
-#include "ensightPart.H"
+#include "ensightOutputSerialCloud.H"
+#include "ensightSerialOutput.H"
 #include "ensightPTraits.H"
+
+#include "passiveParticle.H"
+#include "IOField.H"
+#include "volFields.H"
+#include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::ensightPart::writeField
+bool Foam::ensightSerialCloud::writeCloudField
 (
-    ensightFile& os,
-    const Field<Type>& field,
-    const bool perNode
-) const
+    const IOField<Type>& field,
+    ensightFile& os
+)
 {
-    if (this->size() && field.size())
+    // 6 values per line
+    label count = 0;
+
+    forAll(field, i)
     {
-        os.beginPart(number());
+        Type val = field[i];
 
-        if (perNode)
+        if (mag(val) < 1e-90)
         {
-            os.writeKeyword("coordinates");
-            for (direction d=0; d < pTraits<Type>::nComponents; ++d)
-            {
-                label cmpt = ensightPTraits<Type>::componentOrder[d];
-
-                os.writeList(field.component(cmpt));
-            }
+            val = Zero;
         }
-        else
+
+        for (direction d=0; d < pTraits<Type>::nComponents; ++d)
         {
-            forAll(elementTypes(), elemI)
+            label cmpt = ensightPTraits<Type>::componentOrder[d];
+            os.write(component(val, cmpt));
+
+            if (++count % 6 == 0)
             {
-                const labelUList& idList = elemLists_[elemI];
-
-                if (idList.size())
-                {
-                    os.writeKeyword(elementTypes()[elemI]);
-
-                    for (direction d=0; d < pTraits<Type>::nComponents; ++d)
-                    {
-                        label cmpt = ensightPTraits<Type>::componentOrder[d];
-
-                        os.writeList(field.component(cmpt), idList);
-                    }
-                }
+                os.newline();
             }
         }
     }
+
+    // add final newline if required
+    if (count % 6)
+    {
+        os.newline();
+    }
+
+    return true;
+}
+
+
+template<class Type>
+bool Foam::ensightSerialCloud::writeCloudField
+(
+    const IOobject& fieldObject,
+    autoPtr<ensightFile> output
+)
+{
+    IOField<Type> field(fieldObject);
+    return writeCloudField(field, output.rawRef());
 }
 
 

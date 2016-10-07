@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,130 +24,45 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ensightPart.H"
-#include "dictionary.H"
-#include "ListOps.H"
-#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
 namespace Foam
 {
     defineTypeNameAndDebug(ensightPart, 0);
-    defineTemplateTypeNameAndDebug(IOPtrList<ensightPart>, 0);
-    defineRunTimeSelectionTable(ensightPart, istream);
 }
-
-const Foam::List<Foam::word> Foam::ensightPart::elemTypes_(0);
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-bool Foam::ensightPart::isFieldDefined(const List<scalar>& field) const
+// TODO - move elsewhere
+#if 0
+bool Foam::ensightPart::isFieldDefined
+(
+    const List<scalar>& field
+    // const labelUList& addr = cellIds() or faceIds()
+) const
 {
-    forAll(elemLists_, elemI)
+    forAll(addr, elemI)
     {
-        const labelUList& idList = elemLists_[elemI];
+        const label id = addr[i];
 
-        forAll(idList, i)
+        if (id >= field.size() || std::isnan(field[id]))
         {
-            const label id = idList[i];
-
-            if (id >= field.size() || std::isnan(field[id]))
-            {
-                return false;
-            }
+            return false;
         }
     }
     return true;
 }
+#endif
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::ensightPart::ensightPart
-()
+Foam::ensightPart::ensightPart(const string& description)
 :
-    number_(0),
-    name_(""),
-    elemLists_(0),
-    offset_(0),
-    size_(0),
-    isCellData_(true),
-    matId_(0),
-    points_(pointField::null())
+    name_(description)
 {}
-
-
-Foam::ensightPart::ensightPart
-(
-    label partNumber,
-    const string& partDescription
-)
-:
-    number_(partNumber),
-    name_(partDescription),
-    elemLists_(0),
-    offset_(0),
-    size_(0),
-    isCellData_(true),
-    matId_(0),
-    points_(pointField::null())
-{}
-
-
-Foam::ensightPart::ensightPart
-(
-    label partNumber,
-    const string& partDescription,
-    const pointField& points
-)
-:
-    number_(partNumber),
-    name_(partDescription),
-    elemLists_(0),
-    offset_(0),
-    size_(0),
-    isCellData_(true),
-    matId_(0),
-    points_(points)
-{}
-
-
-Foam::ensightPart::ensightPart(const ensightPart& part)
-:
-    number_(part.number_),
-    name_(part.name_),
-    elemLists_(part.elemLists_),
-    offset_(part.offset_),
-    size_(part.size_),
-    isCellData_(part.isCellData_),
-    matId_(part.matId_),
-    points_(part.points_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-
-Foam::autoPtr<Foam::ensightPart> Foam::ensightPart::New(Istream& is)
-{
-    const word partType(is);
-
-    istreamConstructorTable::iterator cstrIter =
-        istreamConstructorTablePtr_->find(partType);
-
-    if (cstrIter == istreamConstructorTablePtr_->end())
-    {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "unknown ensightPart type "
-            << partType << nl << nl
-            << "Valid ensightPart types are :" << endl
-            << istreamConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
-    }
-
-    return autoPtr<ensightPart>(cstrIter()(is));
-}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -156,32 +71,16 @@ Foam::ensightPart::~ensightPart()
 {}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-void Foam::ensightPart::renumber(const labelUList& origId)
+Foam::ensightGeoFile& Foam::operator<<
+(
+    ensightGeoFile& os,
+    const ensightPart& part
+)
 {
-    // transform to global values first
-    if (offset_)
-    {
-        forAll(elemLists_, elemI)
-        {
-            labelList& idList = elemLists_[elemI];
-            forAll(idList, i)
-            {
-                idList[i] += offset_;
-            }
-        }
-
-        offset_ = 0;
-    }
-
-    if (origId.size())
-    {
-        forAll(elemLists_, elemI)
-        {
-            inplaceRenumber(origId, elemLists_[elemI]);
-        }
-    }
+    part.write(os);
+    return os;
 }
 
 

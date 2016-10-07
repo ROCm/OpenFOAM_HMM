@@ -28,6 +28,7 @@ License
 #include "OFstream.H"
 #include "OSspecific.H"
 #include "ensightPartFaces.H"
+#include "ensightSerialOutput.H"
 #include "ensightPTraits.H"
 #include "OStringStream.H"
 #include "regExp.H"
@@ -121,7 +122,13 @@ Foam::fileName Foam::ensightSurfaceWriter::writeUncollated
 
     // Write field
     osField.writeKeyword(ensightPTraits<Type>::typeName);
-    ensPart.writeField(osField, values, isNodeValues);
+    ensightSerialOutput::writeField
+    (
+        values,
+        ensPart,
+        osField,
+        isNodeValues
+    );
 
     return osCase.name();
 }
@@ -337,12 +344,21 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
         varName,
         writeFormat_
     );
+
     if (verbose)
     {
         Info<< "Writing field file to " << osField.name() << endl;
     }
+
+    // Write field
     osField.writeKeyword(ensightPTraits<Type>::typeName);
-    ensPart.writeField(osField, values, isNodeValues);
+    ensightSerialOutput::writeField
+    (
+        values,
+        ensPart,
+        osField,
+        isNodeValues
+    );
 
     // place a timestamp in the directory for future reference
     {

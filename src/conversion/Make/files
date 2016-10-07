@@ -11,7 +11,6 @@ ensight/mesh/ensightMesh.C
 ensight/mesh/ensightMeshIO.C
 ensight/mesh/ensightMeshOptions.C
 ensight/part/ensightPart.C
-ensight/part/ensightPartIO.C
 ensight/part/ensightPartCells.C
 ensight/part/ensightPartFaces.C
 ensight/part/ensightParts.C

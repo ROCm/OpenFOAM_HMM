@@ -78,8 +78,14 @@ Note
 #include "scalarIOField.H"
 #include "tensorIOField.H"
 
+// file-format/conversion
+#include "ensightCase.H"
+#include "ensightGeoFile.H"
 #include "ensightParts.H"
-#include "ensightOutputFunctions.H"
+#include "ensightSerialOutput.H"
+
+// local files
+#include "ensightOutputSerialCloud.H"
 
 #include "memInfo.H"
 
@@ -146,19 +152,7 @@ int main(int argc, char *argv[])
     cloudFieldTypes.insert(vectorIOField::typeName);
     cloudFieldTypes.insert(tensorIOField::typeName);
 
-    const char* geometryName = "geometry";
-
     #include "setRootCase.H"
-
-    cpuTime timer;
-    memInfo mem;
-    Info<< "Initial memory "
-        << mem.update().size() << " kB" << endl;
-
-    #include "createTime.H"
-
-    // Get times list
-    instantList timeDirs = timeSelector::select0(runTime, args);
 
     // Default to binary output, unless otherwise specified
     const IOstream::streamFormat format =
@@ -168,6 +162,57 @@ int main(int argc, char *argv[])
       : IOstream::BINARY
     );
 
+    cpuTime timer;
+    memInfo mem;
+    Info<< "Initial memory " << mem.update().size() << " kB" << endl;
+
+    #include "createTime.H"
+
+    instantList timeDirs = timeSelector::select0(runTime, args);
+
+    #include "createNamedMesh.H"
+
+    fileName regionPrefix; // Mesh instance (region0 gets filtered out)
+    if (regionName != polyMesh::defaultRegion)
+    {
+        regionPrefix = regionName;
+    }
+
+    //
+    // general (case) output options
+    //
+    ensightCase::options caseOpts(format);
+
+    caseOpts.width(args.optionLookupOrDefault<label>("width", 8));
+    caseOpts.overwrite(false); // leave existing output directory
+
+    // Can also have separate directory for lagrangian
+    // caseOpts.separateCloud(true);
+
+    // Define sub-directory name to use for EnSight data.
+    // The path to the ensight directory is at case level only
+    // - For parallel cases, data only written from master
+    fileName ensightDir = args.optionLookupOrDefault<word>("name", "Ensight");
+    if (!ensightDir.isAbsolute())
+    {
+        ensightDir = args.rootPath()/args.globalCaseName()/ensightDir;
+    }
+
+    //
+    // Open new ensight case file, initialize header etc.
+    //
+    ensightCase ensCase
+    (
+        ensightDir,
+        "Ensight",  // args.globalCaseName(),
+        caseOpts
+    );
+
+
+    //
+    // Miscellaneous output configuration
+    //
+
     // Control for renumbering iterations
     label indexingNumber = 0;
     const bool optIndex = args.optionReadIfPresent("index", indexingNumber);
@@ -176,92 +221,31 @@ int main(int argc, char *argv[])
     // Always write the geometry, unless the -noMesh option is specified
     bool optNoMesh = args.optionFound("noMesh");
 
-    // Adjust output width
-    if (args.optionFound("width"))
-    {
-        ensightFile::subDirWidth(args.optionRead<label>("width"));
-    }
-
-    // Define sub-directory name to use for Ensight data
-    fileName ensightDir = "Ensight";
-    args.optionReadIfPresent("name", ensightDir);
-
-    if (!ensightDir.isAbsolute())
-    {
-        ensightDir = args.rootPath()/args.globalCaseName()/ensightDir;
-    }
-
-    const fileName caseFileName = "Ensight.case";
-    const fileName dataDir  = ensightDir/"data";
-    const fileName dataMask = dataDir.name()/ensightFile::mask();
-
-    // Ensight and Ensight/data directories must exist
-    // do not remove old data - we might wish to convert new results
-    // or a particular time interval
-    if (isDir(ensightDir))
-    {
-        Info<<"Warning: re-using existing directory" << nl
-            << "    " << ensightDir << endl;
-    }
-
-    // As per mkdir -p "Ensight/data"
-    mkDir(ensightDir);
-    mkDir(dataDir);
-
-    #include "createNamedMesh.H"
-
-    // Mesh instance (region0 gets filtered out)
-    fileName regionPrefix;
-
-    if (regionName != polyMesh::defaultRegion)
-    {
-        regionPrefix = regionName;
-    }
-
-    if (Pstream::master())
-    {
-        Info<< "Converting " << timeDirs.size() << " time steps" << endl;
-    }
 
     // Construct the list of ensight parts for the entire mesh
     ensightParts partsList(mesh);
 
     // Write summary information
+    if (Pstream::master())
     {
-        OFstream partsInfoFile(ensightDir/"partsInfo");
+        Info<< "Converting " << timeDirs.size() << " time steps" << endl;
 
-        partsInfoFile
+        OFstream info(ensCase.path()/"partsInfo");
+
+        info
             << "// summary of ensight parts" << nl << nl;
-        partsList.writeSummary(partsInfoFile);
+        partsList.writeSummary(info);
     }
 
-    #include "checkHasMovingMesh.H"
+    #include "checkMeshMoving.H"
     #include "findFields.H"
 
-    if (hasMovingMesh && optNoMesh)
+    if (meshMoving && optNoMesh)
     {
         Info<< "mesh is moving: ignoring '-noMesh' option" << endl;
         optNoMesh = false;
     }
 
-
-    // Map times used
-    Map<scalar>  timeIndices;
-
-    // TODO: Track the time indices used by the geometry
-    DynamicList<label> geometryTimesUsed;
-
-    // Track the time indices used by the volume fields
-    DynamicList<label> fieldTimesUsed;
-
-    // Track the time indices used by each cloud
-    HashTable<DynamicList<label>> cloudTimesUsed;
-
-    // Create a new DynamicList for each cloud
-    forAllConstIter(HashTable<HashTable<word>>, cloudFields, cloudIter)
-    {
-        cloudTimesUsed.insert(cloudIter.key(), DynamicList<label>());
-    }
 
     Info<< "Startup in "
         << timer.cpuTimeIncrement() << " s, "
@@ -272,24 +256,9 @@ int main(int argc, char *argv[])
         runTime.setTime(timeDirs[timeI], timeI);
 
         #include "getTimeIndex.H"
-
-        // Remember the time index for the volume fields
-        fieldTimesUsed.append(timeIndex);
-
-        // The data/ITER subdirectory must exist
-        // Note that data/ITER is indeed a valid ensight::FileName
-        const fileName subDir = ensightFile::subDir(timeIndex);
-        mkDir(dataDir/subDir);
-
-        // Place a timestamp in the directory for future reference
-        {
-            OFstream timeStamp(dataDir/subDir/"time");
-            timeStamp
-                << "#   timestep time" << nl
-                << subDir.c_str() << " " << runTime.timeName() << nl;
-        }
-
         #include "moveMesh.H"
+
+        ensCase.setTime(timeDirs[timeI], timeIndex);
 
         if (timeI == 0 || mesh.moving())
         {
@@ -300,19 +269,8 @@ int main(int argc, char *argv[])
 
             if (!optNoMesh)
             {
-                if (hasMovingMesh)
-                {
-                    // Remember the time index for the geometry
-                    geometryTimesUsed.append(timeIndex);
-                }
-
-                ensightGeoFile geoFile
-                (
-                    (hasMovingMesh ? dataDir/subDir : ensightDir),
-                    geometryName,
-                    format
-                );
-                partsList.writeGeometry(geoFile);
+                autoPtr<ensightGeoFile> os = ensCase.newGeometry(meshMoving);
+                partsList.write(os.rawRef());
             }
         }
 
@@ -332,68 +290,76 @@ int main(int argc, char *argv[])
                 IOobject::NO_WRITE
             );
 
+            bool wrote = false;
             if (fieldType == volScalarField::typeName)
             {
-                ensightVolField<scalar>
+                autoPtr<ensightFile> os = ensCase.newData<scalar>
                 (
-                    partsList,
-                    fieldObject,
-                    mesh,
-                    dataDir,
-                    subDir,
-                    format
+                    fieldName
                 );
 
+                volScalarField vf(fieldObject, mesh);
+                wrote = ensightSerialOutput::writeField<scalar>
+                (
+                    vf, partsList, os
+                );
             }
             else if (fieldType == volVectorField::typeName)
             {
-                ensightVolField<vector>
+                autoPtr<ensightFile> os = ensCase.newData<vector>
                 (
-                    partsList,
-                    fieldObject,
-                    mesh,
-                    dataDir,
-                    subDir,
-                    format
+                    fieldName
                 );
 
+                volVectorField vf(fieldObject, mesh);
+                wrote = ensightSerialOutput::writeField<vector>
+                (
+                    vf, partsList, os
+                );
             }
             else if (fieldType == volSphericalTensorField::typeName)
             {
-                ensightVolField<sphericalTensor>
+                autoPtr<ensightFile> os = ensCase.newData<sphericalTensor>
                 (
-                    partsList,
-                    fieldObject,
-                    mesh,
-                    dataDir,
-                    subDir,
-                    format
+                    fieldName
                 );
 
+                volSphericalTensorField vf(fieldObject, mesh);
+                wrote = ensightSerialOutput::writeField<sphericalTensor>
+                (
+                    vf, partsList, os
+                );
             }
             else if (fieldType == volSymmTensorField::typeName)
             {
-                ensightVolField<symmTensor>
+                autoPtr<ensightFile> os = ensCase.newData<symmTensor>
                 (
-                    partsList,
-                    fieldObject,
-                    mesh,
-                    dataDir,
-                    subDir,
-                    format
+                    fieldName
+                );
+
+                volSymmTensorField vf(fieldObject, mesh);
+                wrote = ensightSerialOutput::writeField<symmTensor>
+                (
+                    vf, partsList, os
                 );
             }
             else if (fieldType == volTensorField::typeName)
             {
-                ensightVolField<tensor>
+                autoPtr<ensightFile> os = ensCase.newData<tensor>
                 (
-                    partsList,
-                    fieldObject,
-                    mesh,
-                    dataDir,
-                    subDir,
-                    format
+                    fieldName
                 );
+
+                volTensorField vf(fieldObject, mesh);
+                wrote = ensightSerialOutput::writeField<tensor>
+                (
+                    vf, partsList, os
+                );
+            }
+
+            if (wrote)
+            {
+                Info<< " " << fieldObject.name() << flush;
             }
         }
         Info<< " )" << endl;
@@ -422,16 +388,16 @@ int main(int argc, char *argv[])
                 continue;
             }
 
-            Info<< "Write " << cloudName << " ( positions" << flush;
+            Info<< "Write " << cloudName << " (" << flush;
 
-            ensightParticlePositions
+            ensightSerialCloud::writePositions
             (
                 mesh,
-                dataDir,
-                subDir,
                 cloudName,
-                format
+                ensCase.newCloud(cloudName)
             );
+            Info<< " positions";
+
 
             forAllConstIter(HashTable<word>, cloudIter(), fieldIter)
             {
@@ -449,48 +415,39 @@ int main(int argc, char *argv[])
                     continue;
                 }
 
+                bool wrote = false;
                 if (fieldType == scalarIOField::typeName)
                 {
-                    ensightLagrangianField<scalar>
+                    wrote = ensightSerialCloud::writeCloudField<scalar>
                     (
                         *fieldObject,
-                        dataDir,
-                        subDir,
-                        cloudName,
-                        format
+                        ensCase.newCloudData<scalar>(cloudName, fieldName)
                     );
-
                 }
                 else if (fieldType == vectorIOField::typeName)
                 {
-                    ensightLagrangianField<vector>
+                    wrote = ensightSerialCloud::writeCloudField<vector>
                     (
                         *fieldObject,
-                        dataDir,
-                        subDir,
-                        cloudName,
-                        format
+                        ensCase.newCloudData<vector>(cloudName, fieldName)
                     );
-
                 }
                 else if (fieldType == tensorIOField::typeName)
                 {
-                    ensightLagrangianField<tensor>
+                    wrote = ensightSerialCloud::writeCloudField<tensor>
                     (
                         *fieldObject,
-                        dataDir,
-                        subDir,
-                        cloudName,
-                        format
+                        ensCase.newCloudData<tensor>(cloudName, fieldName)
                     );
+                }
 
+                if (wrote)
+                {
+                    Info<< " " << fieldObject->name();
                 }
             }
 
             Info<< " )" << endl;
-
-            // Remember the time index
-            cloudTimesUsed[cloudName].append(timeIndex);
         }
 
         Info<< "Wrote in "
@@ -498,7 +455,7 @@ int main(int argc, char *argv[])
             << mem.update().size() << " kB" << endl;
     }
 
-    #include "ensightOutputCase.H"
+    ensCase.write();
 
     Info<< "\nEnd: "
         << timer.elapsedCpuTime() << " s, "

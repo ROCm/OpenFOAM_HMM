@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,70 +29,57 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightOutputFunctions_H
-#define ensightOutputFunctions_H
+#ifndef ensightOutputSerialCloud_H
+#define ensightOutputSerialCloud_H
 
 #include "ensightFile.H"
 #include "Cloud.H"
 #include "polyMesh.H"
 #include "IOobject.H"
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
 namespace Foam
 {
+namespace ensightSerialCloud
+{
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-void ensightCaseEntry
-(
-    OFstream& caseFile,
-    const string& ensightType,
-    const word& fieldName,
-    const fileName& dataMask,
-    const fileName& local=fileName::null,
-    const label cloudNo=-1,
-    const label timeSet=1
-);
-
-
-void ensightParticlePositions
+//- Write cloud positions
+void writePositions
 (
     const polyMesh& mesh,
-    const fileName& dataDir,
-    const fileName& subDir,
     const word& cloudName,
-    IOstream::streamFormat format
+    autoPtr<ensightFile> output
 );
 
 
-//- Write lagrangian parcels
+//- Write cloud field
 template<class Type>
-void ensightLagrangianField
+bool writeCloudField
+(
+    const IOField<Type>& field,
+    ensightFile& os
+);
+
+
+//- Write cloud field
+template<class Type>
+bool writeCloudField
 (
     const IOobject& fieldObject,
-    const fileName& dataDir,
-    const fileName& subDir,
-    const word& cloudName,
-    IOstream::streamFormat format
+    autoPtr<ensightFile> output
 );
 
-//- Write generalized field components
-template<class Type>
-void ensightVolField
-(
-    const ensightParts& partsList,
-    const IOobject& fieldObject,
-    const fvMesh& mesh,
-    const fileName& dataDir,
-    const fileName& subDir,
-    IOstream::streamFormat format
-);
+
+} // namespace ensightSerialCloud
+} // namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // namespace Foam
 
 #ifdef NoRepository
-    #include "ensightOutputFunctions.C"
+    #include "ensightOutputSerialCloudTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

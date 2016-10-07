@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,259 +24,40 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ensightPartCells.H"
-#include "IOstream.H"
-#include "IStringStream.H"
-#include "dictionary.H"
-#include "cellModeller.H"
-#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(ensightPartCells, 0);
-    addToRunTimeSelectionTable(ensightPart, ensightPartCells, istream);
 }
-
-const Foam::List<Foam::word> Foam::ensightPartCells::elemTypes_
-(
-    IStringStream
-    (
-        "(tetra4 pyramid5 penta6 hexa8 nfaced)"
-    )()
-);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::ensightPartCells::classify
-(
-    const polyMesh& mesh,
-    const labelUList& idList
-)
-{
-    // References to cell shape models
-    const cellModel& tet   = *(cellModeller::lookup("tet"));
-    const cellModel& pyr   = *(cellModeller::lookup("pyr"));
-    const cellModel& prism = *(cellModeller::lookup("prism"));
-    const cellModel& hex   = *(cellModeller::lookup("hex"));
-
-    const cellShapeList& cellShapes = mesh.cellShapes();
-
-    offset_ = 0;
-    size_ = mesh.nCells();
-
-    bool limited = false;
-    if (notNull(idList))
-    {
-        limited = true;
-        size_ = idList.size();
-    }
-
-    // count the shapes
-    label nTet   = 0;
-    label nPyr   = 0;
-    label nPrism = 0;
-    label nHex   = 0;
-    label nPoly  = 0;
-
-    for (label listI = 0; listI < size_; ++listI)
-    {
-        label cellId = listI;
-        if (limited)
-        {
-            cellId = idList[listI];
-        }
-
-        const cellShape& cellShape = cellShapes[cellId];
-        const cellModel& cellModel = cellShape.model();
-
-        if (cellModel == tet)
-        {
-            nTet++;
-        }
-        else if (cellModel == pyr)
-        {
-            nPyr++;
-        }
-        else if (cellModel == prism)
-        {
-            nPrism++;
-        }
-        else if (cellModel == hex)
-        {
-            nHex++;
-        }
-        else
-        {
-            nPoly++;
-        }
-    }
-
-
-    // we can avoid double looping, but at the cost of allocation
-    labelList tetCells(nTet);
-    labelList pyramidCells(nPyr);
-    labelList prismCells(nPrism);
-    labelList hexCells(nHex);
-    labelList polyCells(nPoly);
-
-    nTet   = 0,
-    nPyr   = 0;
-    nPrism = 0;
-    nHex   = 0;
-    nPoly  = 0;
-
-    // classify the shapes
-    for (label listI = 0; listI < size_; ++listI)
-    {
-        label cellId = listI;
-        if (limited)
-        {
-            cellId = idList[listI];
-        }
-
-        const cellShape& cellShape = cellShapes[cellId];
-        const cellModel& cellModel = cellShape.model();
-
-        if (cellModel == tet)
-        {
-            tetCells[nTet++] = cellId;
-        }
-        else if (cellModel == pyr)
-        {
-            pyramidCells[nPyr++] = cellId;
-        }
-        else if (cellModel == prism)
-        {
-            prismCells[nPrism++] = cellId;
-        }
-        else if (cellModel == hex)
-        {
-            hexCells[nHex++] = cellId;
-        }
-        else
-        {
-            polyCells[nPoly++] = cellId;
-        }
-    }
-
-
-    // MUST match with elementTypes
-    elemLists_.setSize(elementTypes().size());
-
-    elemLists_[tetra4Elements].transfer(tetCells);
-    elemLists_[pyramid5Elements].transfer(pyramidCells);
-    elemLists_[penta6Elements].transfer(prismCells);
-    elemLists_[hexa8Elements].transfer(hexCells);
-    elemLists_[nfacedElements].transfer(polyCells);
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::ensightPartCells::ensightPartCells
-(
-    label partNumber,
-    const string& partDescription
-)
-:
-    ensightPart(partNumber, partDescription),
-    mesh_(*reinterpret_cast<polyMesh*>(0))
-{}
-
-
-Foam::ensightPartCells::ensightPartCells
-(
-    label partNumber,
-    const polyMesh& mesh
-)
-:
-    ensightPart(partNumber, "cells", mesh.points()),
-    mesh_(mesh)
-{
-    classify(mesh);
-}
-
-
-Foam::ensightPartCells::ensightPartCells
-(
-    label partNumber,
-    const polyMesh& mesh,
-    const labelUList& idList
-)
-:
-    ensightPart(partNumber, "cells", mesh.points()),
-    mesh_(mesh)
-{
-    classify(mesh, idList);
-}
-
-
-Foam::ensightPartCells::ensightPartCells
-(
-    label partNumber,
-    const polyMesh& mesh,
-    const cellZone& cZone
-)
-:
-    ensightPart(partNumber, cZone.name(), mesh.points()),
-    mesh_(mesh)
-{
-    classify(mesh, cZone);
-}
-
-
-Foam::ensightPartCells::ensightPartCells(const ensightPartCells& part)
-:
-    ensightPart(part),
-    mesh_(part.mesh_)
-{}
-
-
-Foam::ensightPartCells::ensightPartCells(Istream& is)
-:
-    ensightPart(),
-    mesh_(*reinterpret_cast<polyMesh*>(0))
-{
-    reconstruct(is);
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::ensightPartCells::~ensightPartCells()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 Foam::ensightPart::localPoints Foam::ensightPartCells::calcLocalPoints() const
 {
-    localPoints ptList(points_);
+    localPoints ptList(mesh_.points());
     labelList& usedPoints = ptList.list;
     label nPoints = 0;
 
-    forAll(elemLists_, typeI)
+    // add all points from cells
+    const labelUList& idList = this->cellIds();
+
+    forAll(idList, i)
     {
-        const labelUList& idList = elemLists_[typeI];
+        const label id = idList[i];
+        const labelUList& cFaces = mesh_.cells()[id];
 
-        // add all points from cells
-        forAll(idList, i)
+        forAll(cFaces, cFacei)
         {
-            const label id = idList[i] + offset_;
-            const labelUList& cFaces = mesh_.cells()[id];
+            const face& f = mesh_.faces()[cFaces[cFacei]];
 
-            forAll(cFaces, cFacei)
+            forAll(f, fp)
             {
-                const face& f = mesh_.faces()[cFaces[cFacei]];
-
-                forAll(f, fp)
+                if (usedPoints[f[fp]] == -1)
                 {
-                    if (usedPoints[f[fp]] == -1)
-                    {
-                        usedPoints[f[fp]] = nPoints++;
-                    }
+                    usedPoints[f[fp]] = nPoints++;
                 }
             }
         }
@@ -297,6 +78,60 @@ Foam::ensightPart::localPoints Foam::ensightPartCells::calcLocalPoints() const
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::ensightPartCells::ensightPartCells
+(
+    label partIndex,
+    const polyMesh& mesh
+)
+:
+    ensightCells(partIndex),
+    ensightPart("cells"),
+    mesh_(mesh)
+{
+    classify(mesh);
+}
+
+
+Foam::ensightPartCells::ensightPartCells
+(
+    label partIndex,
+    const polyMesh& mesh,
+    const labelUList& idList
+)
+:
+    ensightCells(partIndex),
+    ensightPart("cells"),
+    mesh_(mesh)
+{
+    classify(mesh, idList);
+}
+
+
+Foam::ensightPartCells::ensightPartCells
+(
+    label partIndex,
+    const polyMesh& mesh,
+    const cellZone& cZone
+)
+:
+    ensightCells(partIndex),
+    ensightPart(cZone.name()),
+    mesh_(mesh)
+{
+    classify(mesh, cZone);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::ensightPartCells::~ensightPartCells()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 void Foam::ensightPartCells::writeConnectivity
 (
     ensightGeoFile& os,
@@ -305,6 +140,8 @@ void Foam::ensightPartCells::writeConnectivity
     const labelUList& pointMap
 ) const
 {
+    if (idList.empty()) return;
+
     os.writeKeyword(key);
     os.write(idList.size());
     os.newline();
@@ -318,7 +155,7 @@ void Foam::ensightPartCells::writeConnectivity
         // write the number of faces per element
         forAll(idList, i)
         {
-            const label id = idList[i] + offset_;
+            const label id = idList[i];
             const labelUList& cFace = mesh_.cells()[id];
 
             os.write(cFace.size());
@@ -328,7 +165,7 @@ void Foam::ensightPartCells::writeConnectivity
         // write the number of points per element face
         forAll(idList, i)
         {
-            const label id = idList[i] + offset_;
+            const label id = idList[i];
             const labelUList& cFace = mesh_.cells()[id];
 
             forAll(cFace, facei)
@@ -343,7 +180,7 @@ void Foam::ensightPartCells::writeConnectivity
         // write the points describing each element face
         forAll(idList, i)
         {
-            const label id = idList[i] + offset_;
+            const label id = idList[i];
             const labelUList& cFace = mesh_.cells()[id];
 
             forAll(cFace, cFacei)
@@ -380,12 +217,12 @@ void Foam::ensightPartCells::writeConnectivity
     else
     {
         // write primitive
-        const cellShapeList& cellShapes = mesh_.cellShapes();
+        const cellShapeList& shapes = mesh_.cellShapes();
 
         forAll(idList, i)
         {
-            const label id = idList[i] + offset_;
-            const cellShape& cellPoints = cellShapes[id];
+            const label id = idList[i];
+            const cellShape& cellPoints = shapes[id];
 
             // convert global -> local index
             // (note: Ensight indices start with 1)
@@ -399,9 +236,97 @@ void Foam::ensightPartCells::writeConnectivity
 }
 
 
-void Foam::ensightPartCells::writeGeometry(ensightGeoFile& os) const
+void Foam::ensightPartCells::write
+(
+    ensightGeoFile& os,
+    const pointField& points
+) const
 {
-    ensightPart::writeGeometry(os, points_);
+    if (size())
+    {
+        const localPoints ptList = calcLocalPoints();
+        const labelUList& pointMap = ptList.list;
+
+        os.beginPart(index(), name());
+        os.beginCoordinates(ptList.nPoints);
+
+        for (direction cmpt=0; cmpt < point::nComponents; ++cmpt)
+        {
+            forAll(pointMap, ptI)
+            {
+                if (pointMap[ptI] > -1)
+                {
+                    os.write(points[ptI].component(cmpt));
+                    os.newline();
+                }
+            }
+        }
+
+        // write each element type
+        const List<ensightCells::elemType> enums =
+            ensightCells::elemEnum.enums();
+
+        forAllConstIter(List<ensightCells::elemType>, enums, iter)
+        {
+            const ensightCells::elemType what = *iter;
+
+            writeConnectivity
+            (
+                os,
+                ensightCells::key(what),
+                cellIds(what),
+                pointMap
+            );
+        }
+    }
+}
+
+
+void Foam::ensightPartCells::write(ensightGeoFile& os) const
+{
+    this->write(os, mesh_.points());
+}
+
+
+void Foam::ensightPartCells::writeSummary(Ostream& os) const
+{
+    os.beginBlock(type());
+
+    os.writeEntry("id",     index()+1); // Ensight starts with 1
+    os.writeEntry("name",   name());
+    os.writeEntry("size",   size());
+
+    os.endBlock() << flush;
+}
+
+
+void Foam::ensightPartCells::dumpInfo(Ostream& os) const
+{
+    os.beginBlock(type());
+
+    os.writeEntry("id",     index()+1); // Ensight starts with 1
+    os.writeEntry("name",   name());
+    os.writeEntry("size",   size());
+
+    const List<ensightCells::elemType> enums = ensightCells::elemEnum.enums();
+    forAllConstIter(List<ensightCells::elemType>, enums, iter)
+    {
+        const ensightCells::elemType what = *iter;
+        const labelUList& addr = this->cellIds(what);
+
+        os.writeKeyword(ensightCells::key(what));
+
+        // DIY flat output
+        os << addr.size() << '(';
+        forAll(addr, i)
+        {
+            if (i) os << ' ';
+            os << addr[i];
+        }
+        os << ')' << endEntry;
+    }
+
+    os.endBlock() << flush;
 }
 
 

@@ -1,7 +1,7 @@
 // check for "points" in all of the result directories
 // - could restrict to the selected times
 
-bool hasMovingMesh = false;
+bool meshMoving = false;
 
 if (timeDirs.size() > 1 && Pstream::master())
 {
@@ -13,7 +13,7 @@ if (timeDirs.size() > 1 && Pstream::master())
     Info<< "Search for moving mesh ... " << flush;
     forAll(timeDirs, timeI)
     {
-        hasMovingMesh =
+        meshMoving =
         (
             isDir(baseDir/timeDirs[timeI].name()/polyMesh::meshSubDir)
          && IOobject
@@ -28,13 +28,13 @@ if (timeDirs.size() > 1 && Pstream::master())
             ).typeHeaderOk<pointIOField>(true)
         );
 
-        if (hasMovingMesh)
+        if (meshMoving)
         {
             break;
         }
     }
 
-    if (hasMovingMesh)
+    if (meshMoving)
     {
         Info<< "found." << nl
             << "    Writing meshes for every timestep." << endl;
@@ -45,4 +45,4 @@ if (timeDirs.size() > 1 && Pstream::master())
     }
 }
 
-reduce(hasMovingMesh, orOp<bool>());
+reduce(meshMoving, orOp<bool>());
