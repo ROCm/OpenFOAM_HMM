@@ -142,7 +142,7 @@ void Foam::interfaceProperties::calculateK()
     volVectorField nHat(gradAlpha/(mag(gradAlpha) + deltaN_));
     forAll(nHat.boundaryField(), patchi)
     {
-        nHat.boundaryField()[patchi] = nHatfv.boundaryField()[patchi];
+        nHat.boundaryFieldRef()[patchi] = nHatfv.boundaryField()[patchi];
     }
 
     K_ = -fvc::div(nHatf_) + (nHat & fvc::grad(nHatfv) & nHat);

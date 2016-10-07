@@ -145,7 +145,7 @@ void Foam::threePhaseInterfaceProperties::calculateK()
     // Complex expression for curvature.
     // Correction is formally zero but numerically non-zero.
     // volVectorField nHat = gradAlpha/(mag(gradAlpha) + deltaN_);
-    // nHat.boundaryField() = nHatfv.boundaryField();
+    // nHat.boundaryFieldRef() = nHatfv.boundaryField();
     // K_ = -fvc::div(nHatf_) + (nHat & fvc::grad(nHatfv) & nHat);
 }
 
