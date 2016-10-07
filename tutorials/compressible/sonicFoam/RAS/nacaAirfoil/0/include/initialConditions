@@ -5,40 +5,11 @@
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-FoamFile
-{
-    version     2.0;
-    format      ascii;
-    class       volScalarField;
-    location    "0";
-    object      alphat;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 -1 -1 0 0 0 0];
-
-internalField   uniform 0;
-
-boundaryField
-{
-    "(inlet|outlet).*"
-    {
-        type            calculated;
-        value           uniform 0;
-    }
-
-    "sym.*"
-    {
-        type            empty;
-    }
-
-    "wall.*"
-    {
-        type            compressible::alphatWallFunction;
-        Prt             0.85;
-        value           uniform 0;
-    }
-}
-
+flowVelocity        (600 148.16 0);
+pressure            100000;
+temperature         300;
+turbulentKE         1000;
+turbulentEpsilon    25000;
 
 // ************************************************************************* //

@@ -9,40 +9,27 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    location    "0";
-    object      epsilon;
+    class       dictionary;
+    location    "system";
+    object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include        "include/initialConditions"
+numberOfSubdomains   6;
 
-dimensions      [0 2 -3 0 0 0 0];
+method               simple;
 
-internalField   uniform $turbulentEpsilon;
-
-boundaryField
+simpleCoeffs
 {
-    "(inlet|outlet).*"
-    {
-        type            inletOutlet;
-        inletValue      uniform $turbulentEpsilon;
-        value           $internalField;
-    }
+    n                (3 2 1);
+    delta            0.001;
+}
 
-    "sym.*"
-    {
-        type            empty;
-    }
-
-    "wall.*"
-    {
-        type            epsilonWallFunction;
-        Cmu             0.09;
-        kappa           0.41;
-        E               9.8;
-        value           uniform $turbulentEpsilon;
-    }
+hierarchicalCoeffs
+{
+    n                (3 2 1);
+    delta            0.001;
+    order            xyz;
 }
 
 
