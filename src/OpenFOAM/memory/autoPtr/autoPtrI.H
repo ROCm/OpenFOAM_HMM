@@ -130,14 +130,28 @@ inline void Foam::autoPtr<T>::clear()
 
 
 template<class T>
-inline T& Foam::autoPtr<T>::refOrNull()
+inline T* Foam::autoPtr<T>::rawPtr()
+{
+    return ptr_;
+}
+
+
+template<class T>
+inline const T* Foam::autoPtr<T>::rawPtr() const
+{
+    return ptr_;
+}
+
+
+template<class T>
+inline T& Foam::autoPtr<T>::rawRef()
 {
     return *ptr_;
 }
 
 
 template<class T>
-inline const T& Foam::autoPtr<T>::refOrNull() const
+inline const T& Foam::autoPtr<T>::rawRef() const
 {
     return *ptr_;
 }
