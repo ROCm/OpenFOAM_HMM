@@ -1779,8 +1779,11 @@ bool Foam::meshRefinement::calcRegionToZone
                 // Special: face is -on faceZone  -not real boundary
                 //          -not on cellZone
                 // so make regions same on either side
-                regionToCellZone[ownRegion] = regionToCellZone[neiRegion];
-                changed = true;
+                if (regionToCellZone[neiRegion] != -2)
+                {
+                    regionToCellZone[ownRegion] = regionToCellZone[neiRegion];
+                    changed = true;
+                }
             }
             else if (regionToCellZone[neiRegion] == surfZoneI)
             {
