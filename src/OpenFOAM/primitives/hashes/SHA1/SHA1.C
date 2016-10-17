@@ -35,13 +35,9 @@ Description
 
 #include "SHA1.H"
 #include "IOstreams.H"
+#include "endian.H"
 
 #include <cstring>
-
-#if defined (__GLIBC__)
-    #include <endian.h>
-#endif
-
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -54,46 +50,25 @@ static const unsigned char fillbuf[64] = { 0x80, 0 /* , 0, 0, ...  */ };
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
-inline uint32_t Foam::SHA1::swapBytes(uint32_t n)
+//! \cond fileScope
+//- Swap bytes from internal to network (big-endian) order
+static inline uint32_t swapBytes(uint32_t n)
 {
-    #ifdef __BYTE_ORDER
-        #if (__BYTE_ORDER == __BIG_ENDIAN)
-        return n;
-        #else
-        return
-        (
-            ((n) << 24)
-          | (((n) & 0xff00) << 8)
-          | (((n) >> 8) & 0xff00)
-          | ((n) >> 24)
-        );
-        #endif
-    #else
-        const short x = 0x0100;
-
-        // yields 0x01 for big endian
-        if (*(reinterpret_cast<const char*>(&x)))
-        {
-            return n;
-        }
-        else
-        {
-            return
-            (
-                ((n) << 24)
-              | (((n) & 0xff00) << 8)
-              | (((n) >> 8) & 0xff00)
-              | ((n) >> 24)
-            );
-        }
-    #endif
+#ifdef WM_LITTLE_ENDIAN
+    return Foam::endian::swap32(n);
+#else
+    return n;
+#endif
 }
 
-
-inline void Foam::SHA1::set_uint32(unsigned char *cp, uint32_t v)
+//- Copy the 4-byte value into the memory location pointed to by *dst.
+//  If the architecture allows unaligned access this is equivalent to
+//  *(uint32_t *) cp = val
+static inline void set_uint32(unsigned char *dst, uint32_t v)
 {
-    memcpy(cp, &v, sizeof(uint32_t));
+    memcpy(dst, &v, sizeof(uint32_t));
 }
+//! \endcond
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -150,7 +125,7 @@ void Foam::SHA1::processBytes(const void *data, size_t len)
         unsigned char* bufp = reinterpret_cast<unsigned char*>(buffer_);
         size_t remaining = bufLen_;
 
-        memcpy (&bufp[remaining], data, len);
+        memcpy(&bufp[remaining], data, len);
         remaining += len;
         if (remaining >= 64)
         {
