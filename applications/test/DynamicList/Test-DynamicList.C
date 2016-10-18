@@ -111,13 +111,15 @@ int main(int argc, char *argv[])
 
 
     // test the transfer between DynamicLists
-    DynamicList<label, 1, 0> dlA;
+    DynamicList<label, 1, 0> dlA
+    {
+        0, 1, 2, 3, 4
+    };
+    dlA.append({ 5, 6 });
+    dlA = { 1, 2, 4 };
+
     DynamicList<label, 1, 0> dlB;
 
-    for (label i = 0; i < 5; i++)
-    {
-        dlA.append(i);
-    }
     dlA.setCapacity(10);
 
     Info<< "<dlA>" << dlA << "</dlA>" << nl << "sizes: "
