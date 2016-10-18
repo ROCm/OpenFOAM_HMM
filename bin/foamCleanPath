@@ -99,7 +99,7 @@ IFS=': '
 # or may contain ':' separators
 set -- $*
 
-# strip out wildcards via sed
+# Strip out wildcards via sed. Path and wildcard cannot contain '?'.
 while [ "$#" -ge 1 ]
 do
     wildcard=$1
@@ -107,7 +107,7 @@ do
     ##DEBUG echo "remove>$wildcard<" 1>&2
     if [ -n "$wildcard" ]
     then
-        dirList=$(echo "$dirList:" | sed -e "s@${wildcard}[^:]*:@@g")
+        dirList=$(echo "$dirList:" | sed -e "s?${wildcard}[^:]*:??g")
     fi
 done
 
