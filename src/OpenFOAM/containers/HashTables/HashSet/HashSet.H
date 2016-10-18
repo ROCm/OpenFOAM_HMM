@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,6 +85,9 @@ public:
         //- Construct from UList of Key
         HashSet(const UList<Key>&);
 
+        //- Construct from an initializer list of Key
+        HashSet(std::initializer_list<Key>);
+
         //- Construct as copy
         HashSet(const HashSet<Key, Hash>& hs)
         :
@@ -121,7 +124,11 @@ public:
 
         //- Insert keys from a UList of Key
         //  Return the number of new elements inserted
-        label insert(const UList<Key>&);
+        label insert(const UList<Key>& lst);
+
+        //- Insert keys from a initializer list of Key
+        //  Return the number of new elements inserted
+        label insert(std::initializer_list<Key> lst);
 
         //- Same as insert (cannot overwrite nil content)
         bool set(const Key& key)
@@ -131,6 +138,12 @@ public:
 
         //- Same as insert (cannot overwrite nil content)
         label set(const UList<Key>& lst)
+        {
+            return insert(lst);
+        }
+
+        //- Same as insert (cannot overwrite nil content)
+        label set(std::initializer_list<Key> lst)
         {
             return insert(lst);
         }
