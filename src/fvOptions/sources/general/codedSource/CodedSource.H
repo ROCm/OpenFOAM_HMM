@@ -28,7 +28,7 @@ Group
     grpFvOptionsSources
 
 Description
-   Constructs on-the-fly fvOption source
+    Constructs on-the-fly fvOption source
 
     The hook functions take the following arguments:
 
@@ -50,7 +50,7 @@ Description
     )
 
     where :
-        field is the field in fieldNames
+        field is the name of the field in the fields list
         eqn is the fvMatrix
 
 Usage
@@ -98,11 +98,6 @@ Usage
                 $codeAddSup
                 $codeSetValue
             #};
-        }
-
-        sourceTimeCoeffs
-        {
-            // Dummy entry
         }
     }
     \endverbatim
