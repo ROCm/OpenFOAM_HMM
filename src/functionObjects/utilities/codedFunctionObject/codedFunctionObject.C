@@ -37,6 +37,8 @@ License
 
 namespace Foam
 {
+namespace functionObjects
+{
     defineTypeNameAndDebug(codedFunctionObject, 0);
 
     addToRunTimeSelectionTable
@@ -46,10 +48,11 @@ namespace Foam
         dictionary
     );
 }
+}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::codedFunctionObject::prepare
+void Foam::functionObjects::codedFunctionObject::prepare
 (
     dynamicCode& dynCode,
     const dynamicCodeContext& context
@@ -90,25 +93,26 @@ void Foam::codedFunctionObject::prepare
 }
 
 
-Foam::dlLibraryTable& Foam::codedFunctionObject::libs() const
+Foam::dlLibraryTable& Foam::functionObjects::codedFunctionObject::libs() const
 {
     return const_cast<Time&>(time_).libs();
 }
 
 
-Foam::string Foam::codedFunctionObject::description() const
+Foam::string Foam::functionObjects::codedFunctionObject::description() const
 {
     return "functionObject " + name();
 }
 
 
-void Foam::codedFunctionObject::clearRedirect() const
+void Foam::functionObjects::codedFunctionObject::clearRedirect() const
 {
     redirectFunctionObjectPtr_.clear();
 }
 
 
-const Foam::dictionary& Foam::codedFunctionObject::codeDict() const
+const Foam::dictionary&
+Foam::functionObjects::codedFunctionObject::codeDict() const
 {
     return dict_;
 }
@@ -116,7 +120,7 @@ const Foam::dictionary& Foam::codedFunctionObject::codeDict() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::codedFunctionObject::codedFunctionObject
+Foam::functionObjects::codedFunctionObject::codedFunctionObject
 (
     const word& name,
     const Time& time,
@@ -137,13 +141,14 @@ Foam::codedFunctionObject::codedFunctionObject
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::codedFunctionObject::~codedFunctionObject()
+Foam::functionObjects::codedFunctionObject::~codedFunctionObject()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::functionObject& Foam::codedFunctionObject::redirectFunctionObject() const
+Foam::functionObject&
+Foam::functionObjects::codedFunctionObject::redirectFunctionObject() const
 {
     if (!redirectFunctionObjectPtr_.valid())
     {
@@ -161,28 +166,28 @@ Foam::functionObject& Foam::codedFunctionObject::redirectFunctionObject() const
 }
 
 
-bool Foam::codedFunctionObject::execute()
+bool Foam::functionObjects::codedFunctionObject::execute()
 {
     updateLibrary(name_);
     return redirectFunctionObject().execute();
 }
 
 
-bool Foam::codedFunctionObject::write()
+bool Foam::functionObjects::codedFunctionObject::write()
 {
     updateLibrary(name_);
     return redirectFunctionObject().write();
 }
 
 
-bool Foam::codedFunctionObject::end()
+bool Foam::functionObjects::codedFunctionObject::end()
 {
     updateLibrary(name_);
     return redirectFunctionObject().end();
 }
 
 
-bool Foam::codedFunctionObject::read(const dictionary& dict)
+bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
 {
     functionObject::read(dict);
 

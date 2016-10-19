@@ -25,6 +25,9 @@ License
 @{
     \ingroup grpFunctionObjects
     This group contains utility-based function objects
+
+    Function objects in this group are packaged into the
+    libutilityFunctionObjects.so library.
 @}
 
 \*---------------------------------------------------------------------------*/

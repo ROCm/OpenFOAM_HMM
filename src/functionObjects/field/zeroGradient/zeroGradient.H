@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::zeroGradient
+    Foam::functionObjects::zeroGradient
 
 Group
-    grpFVFunctionObjects
+    grpFieldFunctionObjects
 
 Description
     This function object creates a volume field with zero-gradient

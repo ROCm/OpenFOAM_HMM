@@ -25,7 +25,7 @@ Class
     Foam::functionObjects::turbulenceFields
 
 Group
-    grpUtilitiesFunctionObjects
+    grpFieldFunctionObjects
 
 Description
     Stores turbulence fields on the mesh database for further manipulation.

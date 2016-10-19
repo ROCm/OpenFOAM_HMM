@@ -28,6 +28,7 @@ Group
     grpFieldFunctionObjects
 
 Description
+    Base class for field expression function objects
 
 See also
     Foam::functionObjects::fvMeshFunctionObject

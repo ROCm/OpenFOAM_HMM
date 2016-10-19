@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,13 +21,13 @@ License
     You should have received a copy of the GNU General Public License along with
     OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\defgroup grpCloudFunctionObjects Cloud function objects
+\defgroup grpSolversFunctionObjects Solver function objects
 @{
     \ingroup grpFunctionObjects
-    This group contains cloud-based function objects.
+    This group contains solver-based function objects
 
     Function objects in this group are packaged into the
-    libcloudFunctionObjects.so library.
+    libsolverFunctionObjects.so library.
 @}
 
 \*---------------------------------------------------------------------------*/

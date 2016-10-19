@@ -29,7 +29,7 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void Foam::thermoCoupleProbes::sampleAndWrite
+void Foam::functionObjects::thermoCoupleProbes::sampleAndWrite
 (
     const GeometricField<Type, fvPatchField, volMesh>& vField
 )
@@ -50,4 +50,6 @@ void Foam::thermoCoupleProbes::sampleAndWrite
         probeStream << endl;
     }
 }
+
+
 // ************************************************************************* //

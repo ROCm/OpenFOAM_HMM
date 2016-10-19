@@ -25,7 +25,7 @@ Class
     Foam::functionObjects::externalCoupled
 
 Group
-    grpUtilitiesFunctionObjects
+    grpFieldFunctionObjects
 
 Description
     This functionObject provides a simple interface for explicit coupling with

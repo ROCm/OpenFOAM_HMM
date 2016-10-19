@@ -24,10 +24,17 @@ License
 Class
     Foam::functionObjects::thermoCoupleProbes
 
-Description
-    Sample probe for temperature using a thermocouple. Uses the correlation:
+Group
+    grpUtilitiesFunctionObjects
 
-    Nu = 2.0 + (0.4*sqrt(Re) + 0.06*pow(Re, 2/3))*pow(Pr, 0.4)
+Description
+    Sample probe for temperature using a thermocouple.
+
+    Uses the correlation:
+
+    \f[
+        Nu = 2.0 + \left(0.4 Re^{0.5} + 0.06 Re^{2/3}\right)*Pr^{0.4}
+    \f]
 
     Example of function object specification:
     \verbatim
@@ -47,14 +54,14 @@ Description
         d               1e-3;
         epsilon         0.85;
 
-        radName         G;
+        radiationField  G;
 
-        functionObjectLibs ("libsampling.so");
-        outputControl   timeStep;
-        outputInterval  1;
+        libs            ("libutilityFunctionObjects.so");
+        writeControl    timeStep;
+        writeInterval   1;
         probeLocations
         (
-            ( 0.5 0.5 0.5 )
+            (0.5 0.5 0.5)
         );
         fields
         (
@@ -69,8 +76,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef thermoCoupleProbes_H
-#define thermoCoupleProbes_H
+#ifndef functionObjects_hermoCoupleProbes_H
+#define functionObjects_hermoCoupleProbes_H
 
 #include "probes.H"
 #include "ODESystem.H"
@@ -82,9 +89,11 @@ SourceFiles
 
 namespace Foam
 {
+namespace functionObjects
+{
 
 /*---------------------------------------------------------------------------*\
-                        Class thermoCoupleProbes Declaration
+                     Class thermoCoupleProbes Declaration
 \*---------------------------------------------------------------------------*/
 
 class thermoCoupleProbes
@@ -108,8 +117,11 @@ protected:
         //- Thermocouple emissivity
         scalar epsilon_;
 
-        //- Name for the incident radiation field
-        word radName_;
+        //- Name of the velocity field
+        word UName_;
+
+        //- Name of the incident radiation field
+        word radiationFieldName_;
 
          //- Fluid thermo reference
         const fluidThermo& thermo_;
@@ -129,10 +141,6 @@ protected:
         (
             const GeometricField<Type, fvPatchField, volMesh>&
         );
-
-
-        //- Read dictionary settings
-        void readDict(const dictionary& dict);
 
 
 private:
@@ -160,7 +168,7 @@ public:
             const Time& runTime,
             const dictionary& dict,
             const bool loadFromFiles = false,
-            const bool findElements = true
+            const bool readFields = true
         );
 
 
@@ -202,6 +210,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace functionObjects
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

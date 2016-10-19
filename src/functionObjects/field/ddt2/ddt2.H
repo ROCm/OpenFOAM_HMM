@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::ddt2
+    Foam::functionObjects::ddt2
 
 Group
-    grpFVFunctionObjects
+    grpFieldFunctionObjects
 
 Description
     This function object calculates the magnitude squared

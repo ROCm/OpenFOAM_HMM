@@ -34,36 +34,29 @@ using namespace Foam::constant;
 
 namespace Foam
 {
+namespace functionObjects
+{
     defineTypeNameAndDebug(thermoCoupleProbes, 0);
     addToRunTimeSelectionTable(functionObject, thermoCoupleProbes, dictionary);
 }
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
-void Foam::thermoCoupleProbes::readDict(const dictionary& dict)
-{
-    rho_ = readScalar(dict.lookup("rho"));
-    Cp_ = readScalar(dict.lookup("Cp"));
-    d_ = readScalar(dict.lookup("d"));
-    epsilon_ = readScalar(dict.lookup("epsilon"));
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::thermoCoupleProbes::thermoCoupleProbes
+Foam::functionObjects::thermoCoupleProbes::thermoCoupleProbes
 (
     const word& name,
     const Time& runTime,
     const dictionary& dict,
     const bool loadFromFiles,
-    const bool doFindElements
+    const bool readFields
 )
 :
-    probes(name, runTime, dict, loadFromFiles, doFindElements),
+    probes(name, runTime, dict, loadFromFiles, false),
     ODESystem(),
-    radName_(dict.lookup("radName")),
+    UName_(dict.lookup("U")),
+    radiationFieldName_(dict.lookup("radiationField")),
     thermo_
     (
         mesh_.lookupObject<fluidThermo>(basicThermo::dictName)
@@ -71,8 +64,10 @@ Foam::thermoCoupleProbes::thermoCoupleProbes
     odeSolver_(ODESolver::New(*this, dict)),
     Ttc_(this->size(), 0.0)
 {
-
-    readDict(dict);
+    if (readFields)
+    {
+        read(dict);
+    }
 
     // Check if the property exist (resume old calculation)
     // or of it is new.
@@ -85,35 +80,24 @@ Foam::thermoCoupleProbes::thermoCoupleProbes
     }
     else
     {
-       Ttc_ = probes::sample(thermo_.T());
-    }
-
-    // Initialize thermocouple at initial T (room temperature)
-
-    if (doFindElements)
-    {
-        // Find the elements
-        findElements(mesh_);
-
-        // Open the probe streams
-        prepare();
+        Ttc_ = probes::sample(thermo_.T());
     }
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::thermoCoupleProbes::~thermoCoupleProbes()
+Foam::functionObjects::thermoCoupleProbes::~thermoCoupleProbes()
 {}
 
 
-Foam::label Foam::thermoCoupleProbes::nEqns() const
+Foam::label Foam::functionObjects::thermoCoupleProbes::nEqns() const
 {
     return this->size();
 }
 
 
-void Foam::thermoCoupleProbes::derivatives
+void Foam::functionObjects::thermoCoupleProbes::derivatives
 (
     const scalar x,
     const scalarField& y,
@@ -128,14 +112,14 @@ void Foam::thermoCoupleProbes::derivatives
     scalarField Cpc(y.size(), 0.0);
     scalarField kappac(y.size(), 0.0);
 
-    if (radName_ != "none")
+    if (radiationFieldName_ != "none")
     {
-        G = sample(mesh_.lookupObject<volScalarField>(radName_));
+        G = sample(mesh_.lookupObject<volScalarField>(radiationFieldName_));
     }
 
     Tc = probes::sample(thermo_.T());
 
-    Uc = mag(this->sample(mesh_.lookupObject<volVectorField>("U")));
+    Uc = mag(this->sample(mesh_.lookupObject<volVectorField>(UName_)));
 
     rhoc = this->sample(thermo_.rho()());
     kappac = this->sample(thermo_.kappa()());
@@ -150,8 +134,8 @@ void Foam::thermoCoupleProbes::derivatives
 
     const scalar sigma = physicoChemical::sigma.value();
 
-    scalar area = 4*constant::mathematical::pi*sqr(d_/2);
-    scalar volume = (4/3)*constant::mathematical::pi*pow(d_/2, 3);
+    scalar area = 4*constant::mathematical::pi*sqr(0.5*d_);
+    scalar volume = (4/3)*constant::mathematical::pi*pow3(0.5*d_);
 
     dydx =
         (epsilon_*(G/4 - sigma*pow(y, 4.0))*area + htc*(Tc - y)*area)
@@ -159,7 +143,7 @@ void Foam::thermoCoupleProbes::derivatives
 }
 
 
-void Foam::thermoCoupleProbes::jacobian
+void Foam::functionObjects::thermoCoupleProbes::jacobian
 (
     const scalar x,
     const scalarField& y,
@@ -168,18 +152,20 @@ void Foam::thermoCoupleProbes::jacobian
 ) const
 {
     derivatives(x, y, dfdt);
-    for (label i=0; i<nEqns(); i++)
+
+    const label n = nEqns();
+
+    for (label i=0; i<n; i++)
     {
-        for (label j=0; j<nEqns(); j++)
+        for (label j=0; j<n; j++)
         {
             dfdy(i, j) = 0.0;
         }
     }
-
 }
 
 
-bool Foam::thermoCoupleProbes::write()
+bool Foam::functionObjects::thermoCoupleProbes::write()
 {
     if (this->size())
     {
@@ -190,11 +176,12 @@ bool Foam::thermoCoupleProbes::write()
         setProperty(typeName, probeDict);
         return true;
     }
-     return false;
+
+    return false;
 }
 
 
-bool Foam::thermoCoupleProbes::execute()
+bool Foam::functionObjects::thermoCoupleProbes::execute()
 {
     if (this->size())
     {
@@ -208,11 +195,18 @@ bool Foam::thermoCoupleProbes::execute()
 }
 
 
-bool Foam::thermoCoupleProbes::read(const dictionary& dict)
+bool Foam::functionObjects::thermoCoupleProbes::read(const dictionary& dict)
 {
-    readDict(dict);
-    probes::read(dict);
-    return true;
+    if (probes::read(dict))
+    {
+        rho_ = readScalar(dict.lookup("rho"));
+        Cp_ = readScalar(dict.lookup("Cp"));
+        d_ = readScalar(dict.lookup("d"));
+        epsilon_ = readScalar(dict.lookup("epsilon"));
+        return true;
+    }
+
+    return false;
 }
 
 

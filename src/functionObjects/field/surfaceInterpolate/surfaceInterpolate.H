@@ -22,9 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::surfaceInterpolate
+    Foam::functionObjects::surfaceInterpolate
 
-Group grpFieldFunctionObjects
+Group
+    grpFieldFunctionObjects
 
 Description
     Linearly interpolates volume fields to generate surface fields.
