@@ -63,12 +63,17 @@ using namespace Foam;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Element type numbers
+
+static label MSHLINE   = 1;
+
 static label MSHTRI   = 2;
 static label MSHQUAD  = 3;
 static label MSHTET   = 4;
-static label MSHPYR   = 7;
-static label MSHPRISM = 6;
+
+
 static label MSHHEX   = 5;
+static label MSHPRISM = 6;
+static label MSHPYR   = 7;
 
 
 // Skips till end of section. Returns false if end of file.
@@ -424,6 +429,11 @@ void readCells
     List<DynamicList<label>>& zoneCells
 )
 {
+    //$Elements
+    //number-of-elements
+    //elm-number elm-type number-of-tags < tag > \u2026 node-number-list
+
+
     Info<< "Starting to read cells at line " << inFile.lineNumber() << endl;
 
     const cellModel& hex = *(cellModeller::lookup("hex"));
@@ -473,13 +483,12 @@ void readCells
         IStringStream lineStr(line);
 
         label elmNumber, elmType, regPhys;
-
         if (versionFormat >= 2)
         {
             lineStr >> elmNumber >> elmType;
 
             label nTags;
-            lineStr>> nTags;
+            lineStr >> nTags;
 
             if (nTags > 0)
             {
@@ -488,7 +497,7 @@ void readCells
                 for (label i = 1; i < nTags; i++)
                 {
                     label dummy;
-                    lineStr>> dummy;
+                    lineStr >> dummy;
                 }
             }
         }
@@ -499,8 +508,12 @@ void readCells
         }
 
         // regPhys on surface elements is region number.
-
-        if (elmType == MSHTRI)
+        if (elmType == MSHLINE)
+        {
+            label meshPti;
+            lineStr >> meshPti >> meshPti;
+	    }
+        else if (elmType == MSHTRI)
         {
             lineStr >> triPoints[0] >> triPoints[1] >> triPoints[2];
 
