@@ -125,7 +125,8 @@ public:
 
     // Friend Operators
 
-        friend word operator&(const word&, const word&);
+        //- Join word a and bm capitalising first letter of b
+        friend word operator&(const word& a, const word& b);
 
 
     // IOstream operators

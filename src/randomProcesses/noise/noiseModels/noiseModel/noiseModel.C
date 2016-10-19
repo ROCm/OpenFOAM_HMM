@@ -53,7 +53,7 @@ Foam::scalar Foam::noiseModel::checkUniformTimeStep
                 deltaT = dT;
             }
 
-            if (mag(deltaT - dT) > SMALL)
+            if (mag(dT/deltaT - 1) > 1e-8)
             {
                 FatalErrorInFunction
                     << "Unable to process data with a variable time step"
