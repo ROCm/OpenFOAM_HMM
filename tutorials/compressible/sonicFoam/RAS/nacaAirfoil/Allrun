@@ -4,13 +4,33 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
-# Get application name
-application=$(getApplication)
+# Convert mesh from resources directory
+runApplication star4ToFoam -scale 1 \
+    $FOAM_TUTORIALS/resources/geometry/nacaAirfoil/nacaAirfoil
 
-runApplication star3ToFoam prostar/nacaAirfoil
-
+# Symmetry plane -> empy
 sed -i -e 's/symmetry\([)]*;\)/empty\1/' constant/polyMesh/boundary
 
-runApplication $application
+# Don't need these extra files (from star4ToFoam conversion)
+rm -f \
+   constant/cellTable \
+   constant/polyMesh/cellTableId \
+   constant/polyMesh/interfaces  \
+   constant/polyMesh/origCellId  > /dev/null 2>&1
+
+
+if isParallel "$@"
+then
+
+    # Parallel
+    runApplication decomposePar
+    runParallel $(getApplication)
+
+else
+
+    # Serial
+    runApplication $(getApplication)
+
+fi
 
 #------------------------------------------------------------------------------

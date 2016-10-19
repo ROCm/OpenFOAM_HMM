@@ -172,18 +172,6 @@ public:
             const bool readFields = true
         );
 
-        //- Construct for given objectRegistry and dictionary.
-        //  Allow the possibility to load fields from files
-        patchProbes
-        (
-            const word& name,
-            const objectRegistry&,
-            const dictionary&,
-            const bool loadFromFiles = false,
-            const bool readFields = true
-        );
-
-
     //- Destructor
     virtual ~patchProbes();
 

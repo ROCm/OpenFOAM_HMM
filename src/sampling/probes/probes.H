@@ -73,7 +73,7 @@ SourceFiles
 #ifndef probes_H
 #define probes_H
 
-#include "functionObject.H"
+#include "stateFunctionObject.H"
 #include "HashPtrTable.H"
 #include "OFstream.H"
 #include "polyMesh.H"
@@ -82,6 +82,8 @@ SourceFiles
 #include "surfaceFieldsFwd.H"
 #include "surfaceMesh.H"
 #include "wordReList.H"
+
+using namespace Foam::functionObjects;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -101,7 +103,7 @@ class mapPolyMesh;
 
 class probes
 :
-    public functionObject,
+    public stateFunctionObject,
     public pointField
 {
 protected:
@@ -236,17 +238,6 @@ public:
         (
             const word& name,
             const Time& runTime,
-            const dictionary& dict,
-            const bool loadFromFiles = false,
-            const bool readFields = true
-        );
-
-        //- Construct for given objectRegistry and dictionary.
-        //  Allow the possibility to load fields from files
-        probes
-        (
-            const word& name,
-            const objectRegistry& obr,
             const dictionary& dict,
             const bool loadFromFiles = false,
             const bool readFields = true

@@ -232,24 +232,6 @@ Foam::patchProbes::patchProbes
 }
 
 
-Foam::patchProbes::patchProbes
-(
-    const word& name,
-    const objectRegistry& obr,
-    const dictionary& dict,
-    const bool loadFromFiles,
-    const bool readFields
-)
-:
-    probes(name, obr, dict, loadFromFiles, false)
-{
-    if (readFields)
-    {
-        read(dict);
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::patchProbes::~patchProbes()

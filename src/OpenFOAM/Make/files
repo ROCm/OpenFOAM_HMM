@@ -144,6 +144,9 @@ $(Sstreams)/SstreamsPrint.C
 $(Sstreams)/readHexLabel.C
 $(Sstreams)/prefixOSstream.C
 
+hashes = $(Streams)/hashes
+$(hashes)/base64Layer.C
+
 gzstream = $(Streams)/gzstream
 $(gzstream)/gzstream.C
 

@@ -14,35 +14,37 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include        "include/initialConditions"
+
 dimensions      [0 1 -1 0 0 0 0];
 
-internalField   uniform (600 148.16 0);
+internalField   uniform $flowVelocity;
 
 boundaryField
 {
-    INLE1
+    "inlet.*"
     {
         type            supersonicFreestream;
-        pInf            100000;
-        TInf            300;
-        UInf            (600 148.16 0);
+        pInf            $pressure;
+        TInf            $temperature;
+        UInf            $flowVelocity;
         gamma           1.4;
-        value           uniform (600 148.16 0);
+        value           $internalField;
     }
 
-    OUTL2
+    "outlet.*"
     {
         type            inletOutlet;
-        inletValue      uniform (600 148.16 0);
-        value           uniform (600 148.16 0);
+        inletValue      uniform $flowVelocity;
+        value           $internalField;
     }
 
-    SYMP3
+    "sym.*"
     {
         type            empty;
     }
 
-    WALL10
+    "wall.*"
     {
         type            noSlip;
     }

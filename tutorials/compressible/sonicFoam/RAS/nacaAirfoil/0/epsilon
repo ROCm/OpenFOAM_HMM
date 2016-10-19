@@ -15,35 +15,33 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include        "include/initialConditions"
+
 dimensions      [0 2 -3 0 0 0 0];
 
-internalField   uniform 25000;
+internalField   uniform $turbulentEpsilon;
 
 boundaryField
 {
-    INLE1
+    "(inlet|outlet).*"
     {
         type            inletOutlet;
-        inletValue      uniform 25000;
-        value           uniform 25000;
+        inletValue      uniform $turbulentEpsilon;
+        value           $internalField;
     }
-    OUTL2
-    {
-        type            inletOutlet;
-        inletValue      uniform 25000;
-        value           uniform 25000;
-    }
-    SYMP3
+
+    "sym.*"
     {
         type            empty;
     }
-    WALL10
+
+    "wall.*"
     {
         type            epsilonWallFunction;
         Cmu             0.09;
         kappa           0.41;
         E               9.8;
-        value           uniform 25000;
+        value           uniform $turbulentEpsilon;
     }
 }
 

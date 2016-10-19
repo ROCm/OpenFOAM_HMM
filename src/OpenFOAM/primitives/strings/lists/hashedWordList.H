@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +61,8 @@ class hashedWordList
 {
     // Private data
 
-        HashTable<label, word> indices_;
+        //- Hash of words/indices
+        HashTable<label,word> indices_;
 
 
     // Private Member Functions
@@ -79,11 +80,14 @@ public:
         //- Copy constructor.
         hashedWordList(const hashedWordList&);
 
-        //- Construct from list of names
-        hashedWordList(const UList<word>& names);
+        //- Construct from list of words
+        hashedWordList(const UList<word>&);
+
+        //- Construct from an initializer list
+        hashedWordList(std::initializer_list<word>);
 
         //- Construct by transferring the parameter contents
-        hashedWordList(const Xfer<List<word>>& names);
+        hashedWordList(const Xfer<List<word>>&);
 
         //- Construct from number and list of names
         hashedWordList(const label nNames, const char** names);
@@ -109,15 +113,27 @@ public:
         //- Does the list contain the specified name
         inline bool contains(const word&) const;
 
+        //- Return the hash of words/indices for inspection
+        inline const HashTable<label,word>& lookup() const;
+
         //- Transfer the contents of the argument List into this list
         //  and annul the argument list.
         void transfer(List<word>&);
 
+        //- Sort the list and rehash the indices
+        void sort();
+
+        //- Adjust the list if necessary to eliminate duplicate entries
+        void uniq();
+
 
     // Member Operators
 
-        //- Assignment operator from list of names
-        inline void operator=(const UList<word>& names);
+        //- Assignment operator from list of words
+        inline void operator=(const UList<word>&);
+
+        //- Assignment operator from initializer list
+        inline void operator=(std::initializer_list<word>);
 
         //- Assignment operator.
         inline void operator=(const hashedWordList&);

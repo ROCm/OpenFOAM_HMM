@@ -15,32 +15,30 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include        "include/initialConditions"
+
 dimensions      [0 2 -2 0 0 0 0];
 
-internalField   uniform 1000;
+internalField   uniform $turbulentKE;
 
 boundaryField
 {
-    INLE1
+    "(inlet|outlet).*"
     {
         type            inletOutlet;
-        inletValue      uniform 1000;
-        value           uniform 1000;
+        inletValue      uniform $turbulentKE;
+        value           $internalField;
     }
-    OUTL2
-    {
-        type            inletOutlet;
-        inletValue      uniform 1000;
-        value           uniform 1000;
-    }
-    SYMP3
+
+    "sym.*"
     {
         type            empty;
     }
-    WALL10
+
+    "wall.*"
     {
         type            kqRWallFunction;
-        value           uniform 1000;
+        value           $internalField;
     }
 }
 

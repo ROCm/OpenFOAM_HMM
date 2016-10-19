@@ -21,21 +21,18 @@ internalField   uniform 0;
 
 boundaryField
 {
-    INLE1
+    "(inlet|outlet).*"
     {
         type            calculated;
         value           uniform 0;
     }
-    OUTL2
-    {
-        type            calculated;
-        value           uniform 0;
-    }
-    SYMP3
+
+    "sym.*"
     {
         type            empty;
     }
-    WALL10
+
+    "wall.*"
     {
         type            nutkWallFunction;
         Cmu             0.09;

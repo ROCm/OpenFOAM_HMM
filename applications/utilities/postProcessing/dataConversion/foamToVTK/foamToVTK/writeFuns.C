@@ -25,31 +25,7 @@ License
 
 #include "writeFuns.H"
 #include "vtkTopo.H"
-
-#if defined(__mips)
-    #include <standards.h>
-    #include <sys/endian.h>
-#endif
-
-// MacOSX
-#ifdef __DARWIN_BYTE_ORDER
-    #if __DARWIN_BYTE_ORDER==__DARWIN_BIG_ENDIAN
-        #undef LITTLE_ENDIAN
-    #else
-        #undef BIG_ENDIAN
-    #endif
-#endif
-
-#if defined(LITTLE_ENDIAN) \
- || defined(_LITTLE_ENDIAN) \
- || defined(__LITTLE_ENDIAN)
-    #define LITTLEENDIAN 1
-#elif defined(BIG_ENDIAN) || defined(_BIG_ENDIAN) || defined(__BIG_ENDIAN)
-    #undef LITTLEENDIAN
-#else
-    #error "Cannot find LITTLE_ENDIAN or BIG_ENDIAN symbol defined."
-    #error "Please add to compilation options"
-#endif
+#include "endian.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,7 +61,7 @@ void Foam::writeFuns::write
 {
     if (binary)
     {
-        #ifdef LITTLEENDIAN
+        #ifdef WM_LITTLE_ENDIAN
         swapWords(fField.size(), reinterpret_cast<label*>(fField.begin()));
         #endif
         os.write
@@ -138,7 +114,7 @@ void Foam::writeFuns::write
 {
     if (binary)
     {
-        #ifdef LITTLEENDIAN
+        #ifdef WM_LITTLE_ENDIAN
         swapWords(elems.size(), reinterpret_cast<label*>(elems.begin()));
         #endif
         os.write
