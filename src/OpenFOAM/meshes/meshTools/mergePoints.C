@@ -39,23 +39,22 @@ Foam::label Foam::mergePoints
     const Type& origin
 )
 {
-    Type compareOrigin = origin;
-
-    if (origin == Type::max)
-    {
-        if (points.size())
-        {
-            compareOrigin = sum(points)/points.size();
-        }
-    }
-
     // Create a old to new point mapping array
     pointMap.setSize(points.size());
     pointMap = -1;
 
     if (points.empty())
     {
-        return points.size();
+        return 0;
+    }
+
+    // Explicitly convert to Field to support various list types
+    tmp<Field<Type>> tPoints(new Field<Type>(points));
+
+    Type compareOrigin = origin;
+    if (origin == Type::max)
+    {
+        compareOrigin = sum(tPoints())/points.size();
     }
 
     // We're comparing distance squared to origin first.
@@ -70,7 +69,7 @@ Foam::label Foam::mergePoints
     const scalar mergeTolSqr = Foam::sqr(scalar(mergeTol));
 
     // Sort points by magSqr
-    const Field<Type> d(points - compareOrigin);
+    const Field<Type> d(tPoints - compareOrigin);
 
     List<scalar> magSqrD(d.size());
     forAll(d, pointI)
@@ -98,11 +97,9 @@ Foam::label Foam::mergePoints
 
     label newPointI = 0;
 
-
     // Handle 0th point separately (is always unique)
     label pointI = order[0];
     pointMap[pointI] = newPointI++;
-
 
     for (label sortI = 1; sortI < order.size(); sortI++)
     {

@@ -27,7 +27,6 @@ License
 
 #include "volFields.H"
 #include "dictionary.H"
-#include "FieldFunctions.H"
 #include "fvcDdt.H"
 #include "steadyStateDdtScheme.H"
 
