@@ -41,6 +41,7 @@ Description
         codeWrite   : c++; upon functionObject::write()
         codeEnd     : c++; upon functionObject::end();
 
+Usage
     Example of function object specification:
     \verbatim
     difference

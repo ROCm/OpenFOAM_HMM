@@ -34,12 +34,13 @@ Description
     - total current number of parcels
     - total current mass of parcels
 
+Usage
     Example of function object specification:
     \verbatim
     cloudInfo1
     {
         type        cloudInfo;
-        libs        ("libcloudFunctionObjects.so");
+        libs        ("liblagrangianFunctionObjects.so");
         ...
         clouds
         (
@@ -49,8 +50,7 @@ Description
     }
     \endverbatim
 
-
-Usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | type name: cloudInfo    | yes         |

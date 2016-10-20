@@ -32,6 +32,7 @@ Description
     co-ordinates to a local co-ordinate system.  The fields are run-time
     modifiable.
 
+Usage
     Example of function object specification:
     \verbatim
     fieldCoordinateSystemTransform1
@@ -56,7 +57,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | type name: fieldCoordinateSystemTransform | yes |

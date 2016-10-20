@@ -31,6 +31,7 @@ Description
     Writes the turbulent flame-speed and reaction-rate volScalarFields for the
     Xi-based combustion models.
 
+Usage
     Example of function object specification:
     \verbatim
     XiReactionRate
@@ -41,7 +42,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property  | Description                 | Required  | Default value
         type      | type name: XiReactionRate   | yes       |

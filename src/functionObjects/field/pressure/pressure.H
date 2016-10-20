@@ -76,6 +76,7 @@ Description
         Total pressure coefficient  | yes       | yes
     \endtable
 
+Usage
     Example of function object specification to calculate pressure coefficient:
     \verbatim
     pressure1
@@ -88,7 +89,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property     | Description                 | Required   | Default value
         type         | type name: pressure    | yes        |

@@ -32,7 +32,7 @@ Description
     volScalarField.  The field is stored on the mesh database so that it can
     be retrieved and used for other applications.
 
-Usage    
+Usage
     Example of function object specification to calculate the Courant number:
     \verbatim
     CourantNo1
@@ -43,7 +43,7 @@ Usage
     }
     \endverbatim
 
-    \heading Function object usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | Type name: CourantNo    | yes         |

@@ -43,6 +43,7 @@ Usage
     }
     \endverbatim
 
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | Type name: vorticity    | yes         |

@@ -35,18 +35,18 @@ Description
     - overallT
     from averaged extensive fields from a DSMC calculation.
 
-
+Usage
     Example of function object specification to calculate DSMC fields:
     \verbatim
     dsmcFields1
     {
         type        dsmcFields;
-        libs        ("libutilityFunctionObjects.so");
+        libs        ("liblagrangianFunctionObjects.so");
         ...
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | Type name: dsmcFields   | yes         |

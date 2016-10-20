@@ -48,6 +48,7 @@ Description
     - localForceBin.dat  : force bins in local co-ordinate system
     - localMomentBin.dat : moment bins in local co-ordinate system
 
+Usage
     Example of function object specification:
     \verbatim
     forces1
@@ -68,7 +69,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | Type name: forces       | yes         |

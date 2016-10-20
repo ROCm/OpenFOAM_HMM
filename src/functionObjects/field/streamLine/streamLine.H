@@ -31,6 +31,7 @@ Description
     Generates streamline data by sampling a set of user-specified fields along a
     particle track, transported by a user-specified velocity field.
 
+Usage
     Example of function object specification:
     \verbatim
     streamLine1
@@ -64,7 +65,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | Type name: streamLine   | yes         |

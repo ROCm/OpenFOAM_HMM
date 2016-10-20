@@ -30,6 +30,7 @@ Group
 Description
     Write the volume-weighted histogram of a volScalarField.
 
+Usage
     Example:
     \verbatim
     histogram1
@@ -46,7 +47,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | type name: histogram    | yes         |

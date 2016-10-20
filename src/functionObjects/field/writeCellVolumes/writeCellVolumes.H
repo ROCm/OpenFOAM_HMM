@@ -30,6 +30,7 @@ Group
 Description
     Writes the cell-volumes volScalarField.
 
+Usage
     Example of function object specification:
     \verbatim
     writeCellVolumes
@@ -40,7 +41,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property  | Description                 | Required    | Default value
         type      | type name: writeCellVolumes | yes       |

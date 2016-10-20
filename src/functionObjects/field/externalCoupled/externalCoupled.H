@@ -98,7 +98,9 @@ Usage
     \endverbatim
 
     This reads/writes (on the master processor) the directory:
+
         comms/region0_region1/TPatchGroup/
+
     with contents:
         patchPoints     (collected points)
         patchFaces      (collected faces)

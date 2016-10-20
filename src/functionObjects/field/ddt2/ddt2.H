@@ -34,6 +34,7 @@ Description
     The result can be used further for determining variance or RMS values
     (for example).
 
+Usage
     Example of function object specification:
     \verbatim
     dpdt2
@@ -46,7 +47,7 @@ Description
     }
     \endverbatim
 
-    \heading Function object usage
+    Where the entries comprise:
     \table
         Property | Description                | Required  | Default value
         type     | type name: ddt2            | yes       |

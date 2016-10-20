@@ -45,6 +45,7 @@ Description
     model.  All wall patches are included by default; to restrict the
     calculation to certain patches, use the optional 'patches' entry.
 
+Usage
     Example of function object specification:
     \verbatim
     wallShearStress1
@@ -56,7 +57,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property | Description                | Required   | Default value
         type     | type name: wallShearStress | yes        |

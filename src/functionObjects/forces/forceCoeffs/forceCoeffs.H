@@ -45,6 +45,7 @@ Description
     - CdBin.dat         : drag coefficient bins
     - ClBin.dat         : lift coefficient bins
 
+Usage
     Example of function object specification:
     \verbatim
     forceCoeffs1
@@ -71,7 +72,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | Type name: forces       | yes         |

@@ -36,11 +36,15 @@ Description
         Nu = 2.0 + \left(0.4 Re^{0.5} + 0.06 Re^{2/3}\right)*Pr^{0.4}
     \f]
 
+Usage
     Example of function object specification:
     \verbatim
     probes
     {
         type            thermoCoupleProbes;
+        libs            ("libutilityFunctionObjects.so");
+        writeControl    timeStep;
+        writeInterval   1;
 
         solver          rodas23;
         absTol          1e-12;
@@ -56,9 +60,6 @@ Description
 
         radiationField  G;
 
-        libs            ("libutilityFunctionObjects.so");
-        writeControl    timeStep;
-        writeInterval   1;
         probeLocations
         (
             (0.5 0.5 0.5)

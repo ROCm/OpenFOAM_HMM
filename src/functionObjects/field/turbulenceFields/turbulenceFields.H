@@ -37,6 +37,7 @@ Description
     turbulenceModel:R
     \endverbatim
 
+Usage
     Example of function object specification:
     \verbatim
     turbulenceFields1
@@ -52,7 +53,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property     | Description                 | Required | Default value
         type         | type name: turbulenceFields | yes      |

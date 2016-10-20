@@ -35,6 +35,7 @@ Description
     component value or the magnitude is reported.  When operating in parallel,
     the processor owning the value is also given.
 
+Usage
     Example of function object specification:
     \verbatim
     fieldMinMax1
@@ -50,7 +51,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | type name: fieldMinMax  | yes         |

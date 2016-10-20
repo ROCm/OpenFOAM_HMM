@@ -31,6 +31,7 @@ Description
     Writes the cell-centres volVectorField and the three component fields as
     volScalarFields.
 
+Usage
     Example of function object specification:
     \verbatim
     writeCellCentres
@@ -41,7 +42,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property  | Description                 | Required    | Default value
         type      | type name: writeCellCentres | yes       |

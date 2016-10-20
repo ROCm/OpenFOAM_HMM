@@ -38,6 +38,7 @@ Description
     - to calculate a new field as a  post-processing step or
     - since the fields are registered, used in another functionObject
 
+Usage
     Example of function object specification:
     \verbatim
     surfaceInterpolate1
@@ -49,7 +50,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property | Description               | Required    | Default value
         type     | type name: nearWallFields | yes         |

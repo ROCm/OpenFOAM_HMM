@@ -31,6 +31,7 @@ Description
     Reads fields from the time directories and adds them to the mesh database
     for further post-processing.
 
+Usage
     Example of function object specification:
     \verbatim
     readFields1
@@ -42,7 +43,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | type name: readFields   | yes         |

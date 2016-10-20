@@ -43,6 +43,7 @@ Description
     The kinematicCloud properties are read from the
     constant/kinematicCloudProperties dictionary in the usual manner.
 
+Usage
     Example of function object specification:
     \verbatim
         tracks
@@ -52,7 +53,7 @@ Description
         }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property | Description                     | Required   | Default value
         type     | Type name: icoUncoupledKinematicCloud | yes  |

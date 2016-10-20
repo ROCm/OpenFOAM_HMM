@@ -36,7 +36,7 @@ Description
     - The diffusivity can be set manually using the 'D' entry, or retrieved
       from the turbulence model (if applicable).
 
-
+Usage
     Example of function object specification to solve a scalar transport
     equation:
     \verbatim
@@ -55,7 +55,7 @@ Description
     }
     \endverbatim
 
-    \heading Function object usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | Type name: scalarTransport | yes      |

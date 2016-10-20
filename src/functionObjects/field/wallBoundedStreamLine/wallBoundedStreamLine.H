@@ -32,6 +32,7 @@ Description
     particle track, transported by a user-specified velocity field, constrained
     to a patch.
 
+Usage
     Example of function object specification:
     \verbatim
     wallBoundedStreamLine1
@@ -67,7 +68,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | Type name: wallBoundedStreamLine| yes |

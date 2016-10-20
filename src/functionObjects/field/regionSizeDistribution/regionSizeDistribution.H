@@ -35,8 +35,6 @@ Description
     based on where the field is below the threshold value.  These
     regions ("droplets") can now be analysed.
 
-
-
     Regions:
     - print the regions connected to a user-defined set of patches.
       (in spray calculation these form the liquid core)
@@ -59,6 +57,7 @@ Description
       downstream of the injector determined by origin, direction and maxDiameter
       up to maxDownstream
 
+Usage
     Example of function object specification:
     \verbatim
     regionSizeDistribution1
@@ -102,7 +101,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | type name: regionSizeDistribution |yes|

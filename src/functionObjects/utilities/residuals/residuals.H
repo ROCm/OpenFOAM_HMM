@@ -30,18 +30,15 @@ Group
 Description
     Writes out the initial residual for specified fields.
 
+Usage
     Example of function object specification:
     \verbatim
     residuals
     {
         type            residuals;
-        writeControl   timeStep;
-        writeInterval  1;
-        fields
-        (
-            U
-            p
-        );
+        libs            ("libutilityFunctionObjects.so");
+        ...
+        fields          (U p);
     }
     \endverbatim
 

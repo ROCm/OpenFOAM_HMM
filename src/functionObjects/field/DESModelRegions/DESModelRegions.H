@@ -47,6 +47,7 @@ Usage
     }
     \endverbatim
 
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | type name: DESModelRegions| yes       |

@@ -64,7 +64,7 @@ Description
     periodicRestart option and setting \c restartPeriod to the required
     averaging period.
 
-    Example of function object specification:
+Usage
     \verbatim
     fieldAverage1
     {
@@ -98,7 +98,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property          | Description           | Required    | Default value
         type              | type name: fieldAverage | yes |

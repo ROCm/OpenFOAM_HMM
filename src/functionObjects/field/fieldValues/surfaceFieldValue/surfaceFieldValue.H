@@ -37,6 +37,7 @@ Description
     For example, to calculate the volumetric or mass flux across a patch,
     apply the 'sum' operator to the flux field (typically \c phi)
 
+Usage
     Examples of function object specification:
     \verbatim
     movingWallPatch
@@ -74,7 +75,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | type name: surfaceFieldValue   | yes         |

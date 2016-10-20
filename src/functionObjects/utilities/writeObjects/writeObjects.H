@@ -48,6 +48,7 @@ Description
         anyWrite  | any option of the previous two
     \endvartable
 
+Usage
     Example of function object specification:
     \verbatim
     writeObjects1
@@ -60,7 +61,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required     | Default value
         type         | type name: writeObjects | yes          |

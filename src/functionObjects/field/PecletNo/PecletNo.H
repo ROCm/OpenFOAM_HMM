@@ -41,7 +41,7 @@ Usage
     }
     \endverbatim
 
-    \heading Function object usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | type name: Peclet       | yes         |

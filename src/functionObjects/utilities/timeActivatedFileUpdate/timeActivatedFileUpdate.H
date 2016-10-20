@@ -30,6 +30,7 @@ Group
 Description
     Performs a file copy/replacement once a specified time has been reached.
 
+Usage
     Example usage to update the fvSolution dictionary at various times
     throughout the calculation:
     \verbatim
@@ -51,7 +52,7 @@ Description
     }
     \endverbatim
 
-    \heading Function object usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | Type name: timeActivatedFileUpdate | yes |

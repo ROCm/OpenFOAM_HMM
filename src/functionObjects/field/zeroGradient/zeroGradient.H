@@ -34,6 +34,7 @@ Description
     The result can be used, for example, to post-process near-wall
     field values.
 
+Usage
     Example of function object specification:
     \verbatim
     zeroGrad
@@ -46,7 +47,7 @@ Description
     }
     \endverbatim
 
-    \heading Function object usage
+    Where the entries comprise:
     \table
         Property | Description                | Required  | Default value
         type     | type name: zeroGradient    | yes       |

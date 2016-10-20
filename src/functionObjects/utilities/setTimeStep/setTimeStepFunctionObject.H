@@ -34,7 +34,7 @@ Description
     functionObjects. Supports 'enabled' flag but none of the other options
     'timeStart', 'timeEnd', 'writeControl' etc.
 
-
+Usage
     Example of function object specification to manipulate the time step:
     \verbatim
     setTimeStep1
@@ -45,7 +45,7 @@ Description
     }
     \endverbatim
 
-    \heading Function object usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | Type name: setTimeStep  | yes         |

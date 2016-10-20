@@ -49,6 +49,7 @@ Description
     Additional reporting is written to the standard output, providing
     statistics as to the number of cells used by each scheme.
 
+Usage
     Example of function object specification to calculate the blending factor:
     \verbatim
     blendingFactor1
@@ -63,7 +64,7 @@ Description
     }
     \endverbatim
 
-    \heading Function object usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | Type name: blendingFactor | yes       |

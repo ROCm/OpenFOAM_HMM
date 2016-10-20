@@ -33,6 +33,7 @@ Description
     Given a list of user-specified fields and a 'volRegion', a number of
     operations can be performed, such as sums, averages and integrations.
 
+Usage
     Example of function object specification:
     \verbatim
     volFieldValue1
@@ -58,7 +59,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property     | Description              | Required    | Default value
         type         | Type name: volFieldValue            | yes   |

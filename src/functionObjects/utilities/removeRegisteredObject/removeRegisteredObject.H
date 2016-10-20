@@ -30,6 +30,7 @@ Group
 Description
     Removes registered objects if present in the database.
 
+Usage
     Example of function object specification:
     \verbatim
     removeRegisteredObject1
@@ -41,7 +42,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | type name: removeRegisteredObject | yes |

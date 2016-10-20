@@ -31,6 +31,7 @@ Description
     Writes a scalar field whose value is the local processor ID.  The output
     field name is 'processorID'.
 
+Usage
     Example of function object specification:
     \verbatim
     processorField1
@@ -41,7 +42,7 @@ Description
     }
     \endverbatim
 
-Usage
+    Where the entries comprise:
     \table
         Property     | Description             | Required    | Default value
         type         | type name: processorField | yes       |
