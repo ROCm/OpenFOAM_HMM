@@ -233,6 +233,25 @@ public:
             //- Check the surface zone definitions
             void checkZones();
 
+
+            //- Return face area vectors (normals)
+            inline const vectorField& Sf() const
+            {
+                return MeshReference::faceAreas();
+            }
+
+            //- Return face area magnitudes
+            inline const scalarField& magSf() const
+            {
+                return MeshReference::magFaceAreas();
+            }
+
+            //- Face centres
+            inline const vectorField& Cf() const
+            {
+                return MeshReference::faceCentres();
+            }
+
             //- Add surface zones
             void addZones
             (

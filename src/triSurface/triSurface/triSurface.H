@@ -335,6 +335,25 @@ public:
             const labelList& edgeOwner() const;
 
 
+            //- Face area vectors (normals)
+            inline const vectorField& Sf() const
+            {
+                return ParentType::faceAreas();
+            }
+
+            //- Face area magnitudes
+            inline const scalarField& magSf() const
+            {
+                return ParentType::magFaceAreas();
+            }
+
+            //- Face centres
+            inline const vectorField& Cf() const
+            {
+                return ParentType::faceCentres();
+            }
+
+
         // Edit
 
             //- Move points
