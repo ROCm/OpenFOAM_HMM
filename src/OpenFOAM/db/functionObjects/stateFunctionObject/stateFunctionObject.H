@@ -125,6 +125,21 @@ public:
             //- Return true if the property exists
             bool foundProperty(const word& entryName) const;
 
+            //- Set dictionary, return true if set
+            bool getDict
+            (
+                const word& entryName,
+                dictionary& dict
+            ) const;
+
+            //- Set dictionary from named object, return true if set
+            bool getObjectDict
+            (
+                const word& objectName,
+                const word& entryName,
+                dictionary& dict
+            ) const;
+
             //- Retrieve generic property
             template<class Type>
             Type getProperty
@@ -133,9 +148,9 @@ public:
                 const Type& defaultValue = Type(Zero)
             ) const;
 
-            //- Retrieve generic property
+            //- Set generic property, return true if set
             template<class Type>
-            void getProperty(const word& entryName, Type& value) const;
+            bool getProperty(const word& entryName, Type& value) const;
 
             //- Add generic property
             template<class Type>
@@ -150,9 +165,9 @@ public:
                 const Type& defaultValue = Type(Zero)
             ) const;
 
-            //- Retrieve generic property from named object
+            //- Set generic property from named object, return true if set
             template<class Type>
-            void getObjectProperty
+            bool getObjectProperty
             (
                 const word& objectName,
                 const word& entryName,
@@ -205,9 +220,9 @@ public:
                 const Type& defaultValue = Type(Zero)
             ) const;
 
-            //- Retrieve result from named object
+            //- Set result from named object, return true if set
             template<class Type>
-            void getObjectResult
+            bool getObjectResult
             (
                 const word& objectName,
                 const word& entryName,

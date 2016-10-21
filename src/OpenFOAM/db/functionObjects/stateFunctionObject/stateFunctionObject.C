@@ -95,6 +95,39 @@ bool Foam::functionObjects::stateFunctionObject::foundProperty
 }
 
 
+bool Foam::functionObjects::stateFunctionObject::getDict
+(
+    const word& entryName,
+    dictionary& dict
+) const
+{
+    return getObjectDict(name(), entryName, dict);
+}
+
+
+bool Foam::functionObjects::stateFunctionObject::getObjectDict
+(
+    const word& objectName,
+    const word& entryName,
+    dictionary& dict
+) const
+{
+    const IOdictionary& stateDict = this->stateDict();
+
+    if (stateDict.found(objectName))
+    {
+        const dictionary& baseDict = stateDict.subDict(objectName);
+        if (baseDict.found(entryName) && baseDict.isDict(entryName))
+        {
+            dict = baseDict.subDict(entryName);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 Foam::word Foam::functionObjects::stateFunctionObject::resultType
 (
     const word& entryName

@@ -41,13 +41,13 @@ Type Foam::functionObjects::stateFunctionObject::getProperty
 
 
 template<class Type>
-void Foam::functionObjects::stateFunctionObject::getProperty
+bool Foam::functionObjects::stateFunctionObject::getProperty
 (
     const word& entryName,
     Type& value
 ) const
 {
-    getObjectProperty(name(), entryName, value);
+    return getObjectProperty(name(), entryName, value);
 }
 
 
@@ -77,7 +77,7 @@ Type Foam::functionObjects::stateFunctionObject::getObjectProperty
 
 
 template<class Type>
-void Foam::functionObjects::stateFunctionObject::getObjectProperty
+bool Foam::functionObjects::stateFunctionObject::getObjectProperty
 (
     const word& objectName,
     const word& entryName,
@@ -89,18 +89,10 @@ void Foam::functionObjects::stateFunctionObject::getObjectProperty
     if (stateDict.found(objectName))
     {
         const dictionary& baseDict = stateDict.subDict(objectName);
-        if (baseDict.found(entryName))
-        {
-            if (baseDict.isDict(entryName))
-            {
-                value = baseDict.subDict(entryName);
-            }
-            else
-            {
-                baseDict.lookup(entryName) >> value;
-            }
-        }
+        return baseDict.readIfPresent(entryName, value);
     }
+
+    return false;
 }
 
 
@@ -192,13 +184,13 @@ Type Foam::functionObjects::stateFunctionObject::getObjectResult
 ) const
 {
     Type result = defaultValue;
-    getObjectResult(objectName, entryName, result);
+    (void)getObjectResult(objectName, entryName, result);
     return result;
 }
 
 
 template<class Type>
-void Foam::functionObjects::stateFunctionObject::getObjectResult
+bool Foam::functionObjects::stateFunctionObject::getObjectResult
 (
     const word& objectName,
     const word& entryName,
@@ -222,10 +214,12 @@ void Foam::functionObjects::stateFunctionObject::getObjectResult
                 const dictionary& resultTypeDict =
                     objectDict.subDict(dictTypeName);
 
-                resultTypeDict.readIfPresent<Type>(entryName, value);
+                return resultTypeDict.readIfPresent<Type>(entryName, value);
             }
         }
     }
+
+    return false;
 }
 
 
