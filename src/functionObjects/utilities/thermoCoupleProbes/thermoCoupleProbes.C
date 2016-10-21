@@ -71,14 +71,7 @@ Foam::functionObjects::thermoCoupleProbes::thermoCoupleProbes
 
     // Check if the property exist (resume old calculation)
     // or of it is new.
-    if (foundProperty(typeName))
-    {
-        const dictionary& dict =
-            this->stateDict().subDict(this->name()).subDict(typeName);
-
-        dict.lookup("Tc") >> Ttc_;
-    }
-    else
+    if (!getProperty("Tc", Ttc_))
     {
         Ttc_ = probes::sample(thermo_.T());
     }
