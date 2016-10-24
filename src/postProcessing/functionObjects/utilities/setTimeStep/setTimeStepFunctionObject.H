@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,10 @@ Description
     functionObjects. Supports 'enabled' flag but none of the other options
     'timeStart', 'timeEnd', 'outputControl' etc.
 
+    Note that any 'writeControl adjustableRunTime' will still be in
+    operation and will limit the wanted time step to account for the
+    - write interval and - timestep adjustment speed (time step cannot
+    change too quickly).
 
     Example of function object specification to manipulate the time step:
     \verbatim

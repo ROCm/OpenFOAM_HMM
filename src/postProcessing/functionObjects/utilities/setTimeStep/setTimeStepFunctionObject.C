@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,7 +103,16 @@ bool Foam::setTimeStepFunctionObject::adjustTimeStep()
         // Wanted timestep
         scalar newDeltaT = timeStepPtr_().value(time_.timeOutputValue());
 
-        const_cast<Time&>(time()).setDeltaT(newDeltaT, false);
+        static label index = -1;
+
+        if (time().timeIndex() != index)
+        {
+            // Store current time so we don't get infinite recursion (since
+            // setDeltaT calls adjustTimeStep() again)
+            index = time().timeIndex();
+            // Set time, allow deltaT to be adjusted for writeInterval purposes
+            const_cast<Time&>(time()).setDeltaT(newDeltaT, true);
+        }
 
         return true;
     }
