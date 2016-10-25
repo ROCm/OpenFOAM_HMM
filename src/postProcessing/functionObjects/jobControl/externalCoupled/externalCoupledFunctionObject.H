@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -319,10 +319,10 @@ public:
     //- Runtime type information
     TypeName("externalCoupled");
 
-    //- Name of lock file
+    //- Name of lock file (normally 'OpenFOAM.lock')
     static word lockName;
 
-    //- Name of patch key, e.g. '# Patch:' when looking for start of patch data
+    //- Name of patch key, e.g. '// Patch:' when looking for start of patch data
     static string patchKey;
 
 
@@ -391,7 +391,7 @@ public:
             //  separated by '_'
             static word compositeName(const wordList&);
 
-            //- Write geometry for the group/patch
+            //- Write geometry for the group as region/patch
             static void writeGeometry
             (
                 const UPtrList<const fvMesh>& meshes,

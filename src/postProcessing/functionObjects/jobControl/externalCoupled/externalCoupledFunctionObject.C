@@ -49,7 +49,7 @@ namespace Foam
 
 Foam::word Foam::externalCoupledFunctionObject::lockName = "OpenFOAM";
 
-Foam::string Foam::externalCoupledFunctionObject::patchKey = "# Patch: ";
+Foam::string Foam::externalCoupledFunctionObject::patchKey = "// Patch:";
 
 template<>
 const char* Foam::NamedEnum
@@ -431,11 +431,6 @@ void Foam::externalCoupledFunctionObject::writeGeometry
 
     fileName dir(groupDir(commsDir, compositeName(regionNames), groupName));
 
-    //if (log_)
-    {
-        Info<< typeName << ": writing geometry to " << dir << endl;
-    }
-
     autoPtr<OFstream> osPointsPtr;
     autoPtr<OFstream> osFacesPtr;
     if (Pstream::master())
@@ -443,12 +438,20 @@ void Foam::externalCoupledFunctionObject::writeGeometry
         mkDir(dir);
         osPointsPtr.reset(new OFstream(dir/"patchPoints"));
         osFacesPtr.reset(new OFstream(dir/"patchFaces"));
+
+        osPointsPtr() << "// Group: " << groupName << endl;
+        osFacesPtr()  << "// Group: " << groupName << endl;
+
+        Info<< typeName << ": writing geometry to " << dir << endl;
     }
 
+    // Individual region/patch entries
 
-    DynamicList<face> allMeshesFaces;
-    DynamicField<point> allMeshesPoints;
+    DynamicList<face> allFaces;
+    DynamicField<point> allPoints;
 
+    labelList pointToGlobal;
+    labelList uniquePointIDs;
     forAll(meshes, meshI)
     {
         const fvMesh& mesh = meshes[meshI];
@@ -461,109 +464,66 @@ void Foam::externalCoupledFunctionObject::writeGeometry
             ).sortedToc()
         );
 
-        // Count faces
-        label nFaces = 0;
-        forAll(patchIDs, i)
-        {
-            nFaces += mesh.boundaryMesh()[patchIDs[i]].size();
-        }
-
-        // Collect faces
-        DynamicList<label> allFaceIDs(nFaces);
         forAll(patchIDs, i)
         {
             const polyPatch& p = mesh.boundaryMesh()[patchIDs[i]];
 
-            forAll(p, pI)
+            mesh.globalData().mergePoints
+            (
+                p.meshPoints(),
+                p.meshPointMap(),
+                pointToGlobal,
+                uniquePointIDs
+            );
+
+            label procI = Pstream::myProcNo();
+
+            List<pointField> collectedPoints(Pstream::nProcs());
+            collectedPoints[procI] = pointField(mesh.points(), uniquePointIDs);
+            Pstream::gatherList(collectedPoints);
+
+            List<faceList> collectedFaces(Pstream::nProcs());
+            faceList& patchFaces = collectedFaces[procI];
+            patchFaces = p.localFaces();
+            forAll(patchFaces, faceI)
             {
-                allFaceIDs.append(p.start()+pI);
+                inplaceRenumber(pointToGlobal, patchFaces[faceI]);
             }
-        }
+            Pstream::gatherList(collectedFaces);
 
-        // Construct overall patch
-        indirectPrimitivePatch allPatch
-        (
-            IndirectList<face>(mesh.faces(), allFaceIDs),
-            mesh.points()
-        );
-
-        labelList pointToGlobal;
-        labelList uniquePointIDs;
-        mesh.globalData().mergePoints
-        (
-            allPatch.meshPoints(),
-            allPatch.meshPointMap(),
-            pointToGlobal,
-            uniquePointIDs
-        );
-
-        label procI = Pstream::myProcNo();
-
-        List<pointField> collectedPoints(Pstream::nProcs());
-        collectedPoints[procI] = pointField(mesh.points(), uniquePointIDs);
-        Pstream::gatherList(collectedPoints);
-
-        List<faceList> collectedFaces(Pstream::nProcs());
-        faceList& patchFaces = collectedFaces[procI];
-        patchFaces = allPatch.localFaces();
-        forAll(patchFaces, faceI)
-        {
-            inplaceRenumber(pointToGlobal, patchFaces[faceI]);
-        }
-        Pstream::gatherList(collectedFaces);
-
-        if (Pstream::master())
-        {
-            // Append and renumber
-            label nPoints = allMeshesPoints.size();
-
-            forAll(collectedPoints, procI)
+            if (Pstream::master())
             {
-                allMeshesPoints.append(collectedPoints[procI]);
+                allPoints.clear();
+                allFaces.clear();
 
-            }
-            face newFace;
-            forAll(collectedFaces, procI)
-            {
-                const faceList& procFaces = collectedFaces[procI];
-
-                forAll(procFaces, faceI)
+                for (label procI=0; procI < Pstream::nProcs(); ++procI)
                 {
-                    const face& f = procFaces[faceI];
-
-                    newFace.setSize(f.size());
-                    forAll(f, fp)
-                    {
-                        newFace[fp] = f[fp]+nPoints;
-                    }
-                    allMeshesFaces.append(newFace);
+                    allPoints.append(collectedPoints[procI]);
+                    allFaces.append(collectedFaces[procI]);
                 }
 
-                nPoints += collectedPoints[procI].size();
+                Info<< typeName << ": mesh " << mesh.name()
+                    << ", patch " << p.name()
+                    << ": writing " << allPoints.size() << " points to "
+                    << osPointsPtr().name() << nl
+                    << typeName << ": mesh " << mesh.name()
+                    << ", patch " << p.name()
+                    << ": writing " << allFaces.size() << " faces to "
+                    << osFacesPtr().name() << endl;
+
+                // The entry name (region / patch)
+                const string entryHeader =
+                    patchKey + ' ' + mesh.name() + ' ' + p.name();
+
+                // Write points
+                osPointsPtr()
+                    << entryHeader.c_str() << nl << allPoints << nl << endl;
+
+                // Write faces
+                osFacesPtr()
+                    << entryHeader.c_str() << nl << allFaces << nl << endl;
             }
         }
-
-        //if (log_)
-        {
-            Info<< typeName << ": for mesh " << mesh.name()
-                << " writing " << allMeshesPoints.size() << " points to "
-                << osPointsPtr().name() << endl;
-            Info<< typeName << ": for mesh " << mesh.name()
-                << " writing " << allMeshesFaces.size() << " faces to "
-                << osFacesPtr().name() << endl;
-        }
-    }
-
-    // Write points
-    if (osPointsPtr.valid())
-    {
-        osPointsPtr() << allMeshesPoints << endl;
-    }
-
-    // Write faces
-    if (osFacesPtr.valid())
-    {
-        osFacesPtr() << allMeshesFaces << endl;
     }
 }
 
