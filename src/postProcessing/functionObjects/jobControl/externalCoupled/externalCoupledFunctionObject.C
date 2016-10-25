@@ -51,6 +51,23 @@ Foam::word Foam::externalCoupledFunctionObject::lockName = "OpenFOAM";
 
 Foam::string Foam::externalCoupledFunctionObject::patchKey = "# Patch: ";
 
+template<>
+const char* Foam::NamedEnum
+<
+    Foam::externalCoupledFunctionObject::stateEnd,
+    2
+>::names[] =
+{
+    "remove",
+    "done"
+};
+
+const Foam::NamedEnum
+<
+    Foam::externalCoupledFunctionObject::stateEnd,
+    2
+> Foam::externalCoupledFunctionObject::stateEndNames_;
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -88,7 +105,7 @@ Foam::fileName Foam::externalCoupledFunctionObject::lockFile() const
 }
 
 
-void Foam::externalCoupledFunctionObject::createLockFile() const
+void Foam::externalCoupledFunctionObject::useMaster() const
 {
     if (!Pstream::master())
     {
@@ -104,13 +121,13 @@ void Foam::externalCoupledFunctionObject::createLockFile() const
         if (log_) Info<< type() << ": creating lock file" << endl;
 
         OFstream os(fName);
-        os  << "lock file";
+        os  << "status=openfoam\n";
         os.flush();
     }
 }
 
 
-void Foam::externalCoupledFunctionObject::removeLockFile() const
+void Foam::externalCoupledFunctionObject::useSlave() const
 {
     if (!Pstream::master())
     {
@@ -119,7 +136,35 @@ void Foam::externalCoupledFunctionObject::removeLockFile() const
 
     if (log_) Info<< type() << ": removing lock file" << endl;
 
-    rm(lockFile());
+    Foam::rm(lockFile());
+}
+
+
+void Foam::externalCoupledFunctionObject::cleanup() const
+{
+    if (!Pstream::master())
+    {
+        return;
+    }
+
+    const fileName lck(lockFile());
+    switch (stateEnd_)
+    {
+        case REMOVE:
+            {
+                if (log_) Info<< type() << ": removing lock file" << endl;
+                Foam::rm(lck);
+            }
+            break;
+        case DONE:
+            {
+                if (log_) Info<< type() << ": lock file status=done" << endl;
+                OFstream os(lck);
+                os  << "status=done\n";
+                os.flush();
+            }
+            break;
+    }
 }
 
 
@@ -189,30 +234,29 @@ void Foam::externalCoupledFunctionObject::removeWriteFiles() const
 }
 
 
-void Foam::externalCoupledFunctionObject::wait() const
+void Foam::externalCoupledFunctionObject::waitForSlave() const
 {
     const fileName fName(lockFile());
-    label found = 0;
     label totalTime = 0;
+    bool found = false;
 
     if (log_) Info<< type() << ": beginning wait for lock file " << fName << nl;
 
-    while (found == 0)
+    while (!found)
     {
         if (Pstream::master())
         {
             if (totalTime > timeOut_)
             {
                 FatalErrorInFunction
-                    << "Wait time exceeded time out time of " << timeOut_
+                    << "Wait time exceeded timeout of " << timeOut_
                     << " s" << abort(FatalError);
             }
 
             IFstream is(fName);
-
             if (is.good())
             {
-                found++;
+                found = true;
 
                 if (log_)
                 {
@@ -232,7 +276,7 @@ void Foam::externalCoupledFunctionObject::wait() const
         }
 
         // prevent other procs from racing ahead
-        reduce(found, sumOp<label>());
+        reduce(found, orOp<bool>());
     }
 }
 
@@ -768,7 +812,7 @@ void Foam::externalCoupledFunctionObject::initialise()
     if (initByExternal_)
     {
         // Wait for initial data to be made available
-        wait();
+        waitForSlave();
 
         // Read data passed back from external source
         readData();
@@ -790,6 +834,7 @@ Foam::externalCoupledFunctionObject::externalCoupledFunctionObject
     functionObject(name),
     time_(runTime),
     enabled_(true),
+    stateEnd_(REMOVE),
     initialised_(false)
 {
     read(dict);
@@ -801,7 +846,7 @@ Foam::externalCoupledFunctionObject::externalCoupledFunctionObject
 
     if (!initByExternal_)
     {
-        createLockFile();
+        useMaster();
     }
 }
 
@@ -809,7 +854,12 @@ Foam::externalCoupledFunctionObject::externalCoupledFunctionObject
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::externalCoupledFunctionObject::~externalCoupledFunctionObject()
-{}
+{
+    if (enabled())
+    {
+        cleanup();
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -846,11 +896,12 @@ bool Foam::externalCoupledFunctionObject::execute(const bool forceWrite)
         // Write data for external source
         writeData();
 
-        // remove lock file, signalling external source to execute
-        removeLockFile();
+        // Signal external source to execute (by removing lock file)
+        // - Wait for slave to provide data
+        useSlave();
 
         // Wait for response
-        wait();
+        waitForSlave();
 
         // Remove old data files from OpenFOAM
         removeWriteFiles();
@@ -858,8 +909,8 @@ bool Foam::externalCoupledFunctionObject::execute(const bool forceWrite)
         // Read data passed back from external source
         readData();
 
-        // create lock file for external source
-        createLockFile();
+        // Signal external source to wait (by creating the lock file)
+        useMaster();
 
         return true;
     }
@@ -877,7 +928,7 @@ bool Foam::externalCoupledFunctionObject::end()
         // Remove old data files
         removeReadFiles();
         removeWriteFiles();
-        removeLockFile();
+        cleanup();
     }
 
     return true;
@@ -906,19 +957,24 @@ bool Foam::externalCoupledFunctionObject::read(const dictionary& dict)
         return true;
     }
 
+    calcFrequency_  = dict.lookupOrDefault("calcFrequency", 1);
+
     dict.lookup("commsDir") >> commsDir_;
     commsDir_.expand();
+    commsDir_.clean();
 
-    waitInterval_ = dict.lookupOrDefault("waitInterval", 1);
-    timeOut_ = dict.lookupOrDefault("timeOut", 100*waitInterval_);
-    calcFrequency_ = dict.lookupOrDefault("calcFrequency", 1);
+    waitInterval_   = dict.lookupOrDefault("waitInterval", 1);
+    timeOut_        = dict.lookupOrDefault("timeOut", 100*waitInterval_);
     initByExternal_ = readBool(dict.lookup("initByExternal"));
+    // initByExternal_ = dict.lookupOrDefault<Switch>("initByExternal", false);
+    stateEnd_       =
+        stateEndNames_[dict.lookupOrDefault<word>("stateEnd", "remove")];
+
     log_ = dict.lookupOrDefault("log", false);
 
 
     // Get names of all fvMeshes (and derived types)
     wordList allRegionNames(time_.lookupClass<fvMesh>().sortedToc());
-
 
 
     const dictionary& allRegionsDict = dict.subDict("regions");

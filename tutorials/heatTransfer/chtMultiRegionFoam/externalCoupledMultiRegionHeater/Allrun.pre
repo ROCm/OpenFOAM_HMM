@@ -28,6 +28,6 @@ runApplication createExternalCoupledPatchGeometry \
 echo
 echo "creating files for paraview post-processing"
 echo
-paraFoam -touchAll
+paraFoam -touchAll 2>/dev/null
 
 # ----------------------------------------------------------------- end-of-file
