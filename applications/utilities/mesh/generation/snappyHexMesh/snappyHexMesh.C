@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -837,13 +837,7 @@ int main(int argc, char *argv[])
         if (Pstream::parRun())
         {
             fileName decompDictFile;
-            if (args.optionReadIfPresent("decomposeParDict", decompDictFile))
-            {
-                if (isDir(decompDictFile))
-                {
-                    decompDictFile = decompDictFile/"decomposeParDict";
-                }
-            }
+            args.optionReadIfPresent("decomposeParDict", decompDictFile);
 
             decomposeDict = IOdictionary
             (

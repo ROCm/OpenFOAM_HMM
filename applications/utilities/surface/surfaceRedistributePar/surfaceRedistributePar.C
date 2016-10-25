@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,6 +46,7 @@ Note
 #include "distributedTriSurfaceMesh.H"
 #include "mapDistribute.H"
 #include "localIOdictionary.H"
+#include "decompositionModel.H"
 
 using namespace Foam;
 
@@ -103,7 +104,8 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "redistribute a triSurface"
+        "Redistribute a triSurface. "
+        "The specified surface must be located in the constant/triSurface directory"
     );
 
     argList::validArgs.append("triSurfaceMesh");
@@ -127,7 +129,7 @@ int main(int argc, char *argv[])
         << "Using distribution method "
         << distTypeName << nl << endl;
 
-    const bool keepNonMapped = args.options().found("keepNonMapped");
+    const bool keepNonMapped = args.optionFound("keepNonMapped");
 
     if (keepNonMapped)
     {
@@ -150,6 +152,37 @@ int main(int argc, char *argv[])
 
 
     Random rndGen(653213);
+
+    // For independent decomposition, ensure that distributedTriSurfaceMesh
+    // can find the alternative decomposeParDict specified via the
+    // -decomposeParDict option.
+    if (distType == distributedTriSurfaceMesh::INDEPENDENT)
+    {
+        fileName decompDictFile;
+        args.optionReadIfPresent("decomposeParDict", decompDictFile);
+
+        IOdictionary* dict = new IOdictionary
+        (
+            decompositionModel::selectIO
+            (
+                IOobject
+                (
+                    "decomposeParDict",
+                    runTime.system(),
+                    runTime,
+                    IOobject::MUST_READ_IF_MODIFIED,
+                    IOobject::NO_WRITE
+                ),
+                decompDictFile
+            )
+        );
+
+        // The object must have the expected "decomposeParDict" name.
+        // This also implies that it cannot be changed during the run.
+        dict->rename("decomposeParDict");
+
+        runTime.store(dict);
+    }
 
     // Determine mesh bounding boxes:
     List<List<treeBoundBox>> meshBb(Pstream::nProcs());

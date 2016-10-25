@@ -107,16 +107,12 @@ int main(int argc, char *argv[])
     fileName dictPath;
 
     // Check if the dictionary is specified on the command-line
-    if (args.optionFound("dict"))
+    if (args.optionReadIfPresent("dict", dictPath))
     {
-        dictPath = args["dict"];
-
-        dictPath =
-        (
-            isDir(dictPath)
-          ? dictPath/dictName
-          : dictPath
-        );
+        if (isDir(dictPath))
+        {
+            dictPath = dictPath / dictName;
+        }
     }
     // Check if dictionary is present in the constant directory
     else if
