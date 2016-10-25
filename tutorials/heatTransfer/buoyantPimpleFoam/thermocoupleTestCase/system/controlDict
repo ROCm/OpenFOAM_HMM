@@ -51,10 +51,12 @@ maxCo           0.5;
 
 functions
 {
-
     probes
     {
         type            thermoCoupleProbes;
+        libs            ("libutilityFunctionObjects.so");
+        writeControl    timeStep;
+        writeInterval   1;
 
         solver          rodas23;
         absTol          1e-12;
@@ -67,23 +69,9 @@ functions
         Cp              440;
         d               1e-3;
         epsilon         0.85;
-
-        radName         G;
-
-        functionObjectLibs
-        (
-            "libutilityFunctionObjects.so"
-        );
-        writeControl   timeStep;
-        writeInterval  1;
-        probeLocations
-        (
-            ( 0.5 0.5 0.5 )
-        );
-        fields
-        (
-            T
-        );
+        radiationField  G;
+        probeLocations  ((0.5 0.5 0.5));
+        fields          (T);
     }
 }
 
