@@ -55,14 +55,11 @@ Foam::functionObjects::thermoCoupleProbes::thermoCoupleProbes
 :
     probes(name, runTime, dict, loadFromFiles, false),
     ODESystem(),
-    UName_(dict.lookup("U")),
+    UName_(dict.lookupOrDefault<word>("U", "U")),
     radiationFieldName_(dict.lookup("radiationField")),
-    thermo_
-    (
-        mesh_.lookupObject<fluidThermo>(basicThermo::dictName)
-    ),
-    odeSolver_(ODESolver::New(*this, dict)),
-    Ttc_(this->size(), 0.0)
+    thermo_(mesh_.lookupObject<fluidThermo>(basicThermo::dictName)),
+    odeSolver_(nullptr),
+    Ttc_()
 {
     if (readFields)
     {
@@ -75,6 +72,10 @@ Foam::functionObjects::thermoCoupleProbes::thermoCoupleProbes
     {
         Ttc_ = probes::sample(thermo_.T());
     }
+
+    // Note: can only create the solver once all samples have been found
+    // - the number of samples is used to set the size of the ODE system
+    odeSolver_ = ODESolver::New(*this, dict);
 }
 
 
@@ -131,7 +132,7 @@ void Foam::functionObjects::thermoCoupleProbes::derivatives
     scalar volume = (4/3)*constant::mathematical::pi*pow3(0.5*d_);
 
     dydx =
-        (epsilon_*(G/4 - sigma*pow(y, 4.0))*area + htc*(Tc - y)*area)
+        (epsilon_*(G/4 - sigma*pow4(y))*area + htc*(Tc - y)*area)
       / (rho_*Cp_*volume);
 }
 

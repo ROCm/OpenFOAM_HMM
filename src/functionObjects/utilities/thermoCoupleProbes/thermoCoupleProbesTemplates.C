@@ -23,9 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "thermoCoupleProbes.H"
-#include "volFields.H"
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>

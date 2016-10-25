@@ -77,8 +77,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_hermoCoupleProbes_H
-#define functionObjects_hermoCoupleProbes_H
+#ifndef functionObjects_thermoCoupleProbes_H
+#define functionObjects_thermoCoupleProbes_H
 
 #include "probes.H"
 #include "ODESystem.H"
@@ -184,20 +184,21 @@ public:
 
     virtual void derivatives
     (
-        const scalar t,
-        const scalarField& c,
-        scalarField& dcdt
+        const scalar x,
+        const scalarField& y,
+        scalarField& dydx
     ) const;
 
     virtual void jacobian
     (
         const scalar t,
-        const scalarField& c,
-        scalarField& dcdt,
-        scalarSquareMatrix& dfdc
+        const scalarField& y,
+        scalarField& dfdt,
+        scalarSquareMatrix& dfdy
     ) const;
 
-    //- Public members
+
+    // Public Member Functions
 
         //- Sample and write
         virtual bool write();
@@ -208,6 +209,7 @@ public:
         //- Read
         virtual bool read(const dictionary&);
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
