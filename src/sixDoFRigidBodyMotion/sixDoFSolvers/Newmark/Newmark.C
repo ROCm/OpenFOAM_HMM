@@ -46,7 +46,7 @@ Foam::sixDoFSolvers::Newmark::Newmark
     sixDoFRigidBodyMotion& body
 )
 :
-    sixDoFSolver(body),
+    sixDoFSolver(dict, body),
     gamma_(dict.lookupOrDefault<scalar>("gamma", 0.5)),
     beta_
     (

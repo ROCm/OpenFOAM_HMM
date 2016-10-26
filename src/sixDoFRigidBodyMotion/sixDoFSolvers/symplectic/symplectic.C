@@ -46,7 +46,7 @@ Foam::sixDoFSolvers::symplectic::symplectic
     sixDoFRigidBodyMotion& body
 )
 :
-    sixDoFSolver(body)
+    sixDoFSolver(dict, body)
 {}
 
 

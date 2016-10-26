@@ -98,6 +98,15 @@ public:
             sixDoFRigidBodyMotion& body
         );
 
+        //- Construct and return a clone
+        virtual autoPtr<sixDoFSolver> clone() const
+        {
+            return autoPtr<sixDoFSolver>
+            (
+                new CrankNicolson(dict_, body_)
+            );
+        }
+
 
     //- Destructor
     virtual ~CrankNicolson();

@@ -36,9 +36,14 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDoFSolver::sixDoFSolver(sixDoFRigidBodyMotion& body)
+Foam::sixDoFSolver::sixDoFSolver
+(
+    const dictionary& dict,
+    sixDoFRigidBodyMotion& body
+)
 :
-    body_(body)
+    body_(body),
+    dict_(dict)
 {}
 
 

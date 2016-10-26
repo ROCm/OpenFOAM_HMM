@@ -59,6 +59,9 @@ protected:
         //- The rigid body
         sixDoFRigidBodyMotion& body_;
 
+        //- Model dictionary
+        dictionary dict_;
+
 
     // Protected member functions
 
@@ -148,7 +151,10 @@ public:
     // Constructors
 
         // Construct for given body
-        sixDoFSolver(sixDoFRigidBodyMotion& body);
+        sixDoFSolver(const dictionary& dict, sixDoFRigidBodyMotion& body);
+
+        //- Construct and return a clone
+        virtual autoPtr<sixDoFSolver> clone() const = 0;
 
 
     //- Destructor

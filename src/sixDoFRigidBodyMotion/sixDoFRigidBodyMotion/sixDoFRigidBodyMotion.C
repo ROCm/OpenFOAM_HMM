@@ -170,7 +170,8 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     momentOfInertia_(sDoFRBM.momentOfInertia_),
     aRelax_(sDoFRBM.aRelax_),
     aDamp_(sDoFRBM.aDamp_),
-    report_(sDoFRBM.report_)
+    report_(sDoFRBM.report_),
+    solver_(sDoFRBM.solver_, false)
 {}
 
 
