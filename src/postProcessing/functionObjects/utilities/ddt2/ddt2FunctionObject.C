@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,34 +21,22 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InApplication
-    foamToEnsight
-
-Description
-
-SourceFiles
-    ensightParticlePositions.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightParticlePositions_H
-#define ensightParticlePositions_H
+#include "ddt2FunctionObject.H"
 
-#include "fvMesh.H"
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+namespace Foam
+{
+    defineNamedTemplateTypeNameAndDebug(ddt2FunctionObject, 0);
 
-void ensightParticlePositions
-(
-    const Foam::fvMesh& mesh,
-    const Foam::fileName& postProcPath,
-    const Foam::word& timeFile,
-    const Foam::word& CloudName,
-    const bool dataExists
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        ddt2FunctionObject,
+        dictionary
+    );
+}
 
 // ************************************************************************* //

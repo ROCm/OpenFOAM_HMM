@@ -34,26 +34,28 @@ class namedEnumTest
 {
 public:
 
-    enum options
+    enum option
     {
         a,
         b,
-        c
+        c,
+        d
     };
 
-    static const Foam::NamedEnum<options, 3> namedEnum;
+    static const Foam::NamedEnum<option, 4> namedEnum;
 };
 
 
 template<>
-const char* Foam::NamedEnum<namedEnumTest::options, 3>::names[] =
+const char* Foam::NamedEnum<namedEnumTest::option, 4>::names[] =
 {
     "a",
     "b",
-    "c"
+    "c",
+    "d"
 };
 
-const Foam::NamedEnum<namedEnumTest::options, 3> namedEnumTest::namedEnum;
+const Foam::NamedEnum<namedEnumTest::option, 4> namedEnumTest::namedEnum;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -61,11 +63,47 @@ const Foam::NamedEnum<namedEnumTest::options, 3> namedEnumTest::namedEnum;
 
 int main(int argc, char *argv[])
 {
-    Info<< namedEnumTest::namedEnum["a"] << endl;
-    Info<< namedEnumTest::namedEnum[namedEnumTest::a] << endl;
+    const List<namedEnumTest::option> options
+        = namedEnumTest::namedEnum.enums();
 
-    namedEnumTest::options hmm(namedEnumTest::namedEnum.read(Sin));
-    Info<< namedEnumTest::namedEnum[hmm] << endl;
+    Info<< "enums: " << options << nl;
+
+    Info<< "loop over enums (as list):" << nl;
+    forAll(options, i)
+    {
+        const namedEnumTest::option& opt = options[i];
+
+        Info<< "option[" << opt
+            << "] = '" << namedEnumTest::namedEnum[opt] << "'" << nl;
+    }
+
+#if __cplusplus > 201100L
+    // C++11
+    Info<< "loop over enums (C++11 for range):" << nl;
+    for (auto const& opt : options)
+    {
+        Info<< "option[" << opt
+            << "] = '" << namedEnumTest::namedEnum[opt] << "'" << nl;
+    }
+#else
+    Info<< "loop over enums (via iterator):" << nl;
+    forAllConstIter(List<namedEnumTest::option>, options, iter)
+    {
+        const namedEnumTest::option& opt = *iter;
+
+        Info<< "option[" << opt
+            << "] = '" << namedEnumTest::namedEnum[opt] << "'" << nl;
+    }
+#endif
+
+    Info<< nl
+        << namedEnumTest::namedEnum["a"] << nl
+        << namedEnumTest::namedEnum[namedEnumTest::a] << nl;
+
+    Info<< "--- test read construction ---" << endl;
+
+    namedEnumTest::option dummy(namedEnumTest::namedEnum.read(Sin));
+    Info<< namedEnumTest::namedEnum[dummy] << endl;
 
     Info<< "End\n" << endl;
 

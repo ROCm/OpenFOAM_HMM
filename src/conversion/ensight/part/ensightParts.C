@@ -225,59 +225,6 @@ void Foam::ensightParts::writeData(Ostream& os) const
 }
 
 
-void Foam::ensightParts::writeScalarField
-(
-    ensightFile& os,
-    const List<scalar>& field,
-    const bool useFaceData,
-    const bool perNode
-) const
-{
-    forAll(partsList_, partI)
-    {
-        if
-        (
-            useFaceData
-          ? partsList_[partI].isFaceData()
-          : partsList_[partI].isCellData()
-        )
-        {
-            partsList_[partI].writeScalarField(os, field, perNode);
-        }
-    }
-}
-
-
-void Foam::ensightParts::writeVectorField
-(
-    ensightFile& os,
-    const List<scalar>& field0,
-    const List<scalar>& field1,
-    const List<scalar>& field2,
-    const bool useFaceData,
-    const bool perNode
-) const
-{
-    forAll(partsList_, partI)
-    {
-        if
-        (
-            useFaceData
-          ? partsList_[partI].isFaceData()
-          : partsList_[partI].isCellData()
-        )
-        {
-            partsList_[partI].writeVectorField
-            (
-                os,
-                field0, field1, field2,
-                perNode
-            );
-        }
-    }
-}
-
-
 // * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
 
 Foam::ensightGeoFile& Foam::operator<<

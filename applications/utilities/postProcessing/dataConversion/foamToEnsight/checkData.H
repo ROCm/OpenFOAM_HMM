@@ -1,21 +1,33 @@
-// ignore special fields or fields that we don't handle
-//
-bool variableGood = true;
-for (label n1=0; n1<Times.size() && variableGood; ++n1)
+// ignore special fields (_0 fields),
+// ignore fields we don't handle,
+// ignore fields that are not available for all time-steps
+
+// hash by field-name in fieldsToUse
+if (!fieldsToUse.found(fieldName))
 {
-    // ignore _0 fields
-    if (fieldName.size() > 2 && fieldName(fieldName.size() - 2, 2) == "_0")
+    bool variableGood = false;
+
+    forAll(timeDirs, n1)
     {
-        variableGood = false;
-    }
-    else
-    {
-        variableGood = IOobject
+        variableGood =
         (
-            fieldName,
-            Times[n1].name(),
-            mesh,
-            IOobject::NO_READ
-        ).typeHeaderOk<volScalarField>(false);
+            fieldName.size() > 2 && fieldName(fieldName.size()-2, 2) == "_0"
+          ? false
+          : IOobject
+            (
+                fieldName,
+                timeDirs[n1].name(),
+                mesh,
+                IOobject::NO_READ
+            ).typeHeaderOk<volScalarField>(false)
+        );
+
+        if (variableGood)
+        {
+            break;
+        }
     }
+
+    reduce(variableGood, andOp<bool>());
+    fieldsToUse.set(fieldName, variableGood);
 }

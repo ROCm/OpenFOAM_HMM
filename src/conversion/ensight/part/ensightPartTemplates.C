@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "ensightPart.H"
+#include "ensightPTraits.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
@@ -45,13 +46,9 @@ void Foam::ensightPart::writeField
         if (perNode)
         {
             os.writeKeyword("coordinates");
-            for
-            (
-                direction cmpt=0;
-                cmpt < pTraits<Type>::nComponents;
-                ++cmpt
-            )
+            for (direction d=0; d < pTraits<Type>::nComponents; ++d)
             {
+                label cmpt = ensightPTraits<Type>::componentOrder[d];
                 writeFieldList(os, field.component(cmpt), labelUList::null());
             }
         }
@@ -65,13 +62,9 @@ void Foam::ensightPart::writeField
                 {
                     os.writeKeyword(elementTypes()[elemI]);
 
-                    for
-                    (
-                        direction cmpt=0;
-                        cmpt < pTraits<Type>::nComponents;
-                        ++cmpt
-                    )
+                    for (direction d=0; d < pTraits<Type>::nComponents; ++d)
                     {
+                        label cmpt = ensightPTraits<Type>::componentOrder[d];
                         writeFieldList(os, field.component(cmpt), idList);
                     }
                 }

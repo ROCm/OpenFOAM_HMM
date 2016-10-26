@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,45 +21,22 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InApplication
-    foamToEnsight
-
-Description
-
-SourceFiles
-    ensightCloudField.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightCloudField_H
-#define ensightCloudField_H
+#include "zeroGradientFunctionObject.H"
 
-#include "Cloud.H"
-#include "IOobject.H"
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+namespace Foam
+{
+    defineNamedTemplateTypeNameAndDebug(zeroGradientFunctionObject, 0);
 
-template<class Type>
-void ensightCloudField
-(
-    const IOobject& fieldObject,
-    const fileName& postProcPath,
-    const word& prepend,
-    const label timeIndex,
-    const word& timeFile,
-    const word& cloudName,
-    Ostream& ensightCaseFile,
-    const bool dataExists
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "ensightCloudField.C"
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        zeroGradientFunctionObject,
+        dictionary
+    );
+}
 
 // ************************************************************************* //

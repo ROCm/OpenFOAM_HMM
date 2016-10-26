@@ -613,6 +613,7 @@ void writeMesh
 
 int main(int argc, char *argv[])
 {
+    #include "addRegionOption.H"
     #include "addOverwriteOption.H"
     Foam::argList::addBoolOption
     (
@@ -762,20 +763,29 @@ int main(int argc, char *argv[])
 //    }
 //    else
     {
-        Foam::Info
-            << "Create mesh for time = "
-            << runTime.timeName() << Foam::nl << Foam::endl;
+        word regionName;
+        if (args.optionReadIfPresent("region", regionName))
+        {
+            Info<< "Create mesh " << regionName << " for time = "
+                << runTime.timeName() << nl << endl;
+        }
+        else
+        {
+            regionName = fvMesh::defaultRegion;
+            Info<< "Create mesh for time = "
+                << runTime.timeName() << nl << endl;
+        }
 
         meshPtr.set
         (
             new fvMesh
             (
-                Foam::IOobject
+                IOobject
                 (
-                    Foam::fvMesh::defaultRegion,
+                    regionName,
                     runTime.timeName(),
                     runTime,
-                    Foam::IOobject::MUST_READ
+                    IOobject::MUST_READ
                 )
             )
         );

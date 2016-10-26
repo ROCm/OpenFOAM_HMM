@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,10 +98,10 @@ private:
     // Private Member Functions
 
         //- Disallow construct as copy
-        surfMesh(const surfMesh&);
+        surfMesh(const surfMesh&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const surfMesh&);
+        void operator=(const surfMesh&) = delete;
 
 
 protected:
@@ -155,7 +155,11 @@ public:
     // Constructors
 
         //- Construct from IOobject, with alternative surface name
-        explicit surfMesh(const IOobject&, const word& surfName="");
+        explicit surfMesh
+        (
+            const IOobject&,
+            const word& surfName = word::null
+        );
 
         //- Construct by transferring components (points, faces) without zones.
         //  surfZones are added using addZones() member function
@@ -164,7 +168,7 @@ public:
             const IOobject&,
             const Xfer<pointField>&,
             const Xfer<faceList>&,
-            const word& surfName=""
+            const word& surfName = word::null
         );
 
         //- Construct copy/move from MeshedSurface
@@ -172,7 +176,7 @@ public:
         (
             const IOobject&,
             const Xfer<MeshedSurface<face>>& surf,
-            const word& surfName=""
+            const word& surfName = word::null
         );
 
 

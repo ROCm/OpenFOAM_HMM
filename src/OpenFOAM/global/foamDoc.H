@@ -60,7 +60,7 @@ License
     - \subpage pageSolvers
 
     Modelling
-    - \subpage pageThermophsyicalModels
+    - \subpage pageThermophysicalModels
     - \subpage pageTurbulenceModelling
     - \subpage pageLagrangianIntermediate
 

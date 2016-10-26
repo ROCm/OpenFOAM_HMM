@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -102,6 +102,23 @@ public:
 
             //- Delete object (if the pointer is valid) and set pointer to NULL.
             inline void clear();
+
+
+        // Access
+
+            //- Return the pointer, without nullptr checking.
+            //  Pointer remains under autoPtr management.
+            inline T* rawPtr();
+
+            //- Const access to the pointer, without nullptr checking.
+            //  Pointer remains under autoPtr management.
+            inline const T* rawPtr() const;
+
+            //- Return the reference, without nullptr checking.
+            inline T& rawRef();
+
+            //- Return the const reference, without nullptr checking.
+            inline const T& rawRef() const;
 
 
         // Member operators

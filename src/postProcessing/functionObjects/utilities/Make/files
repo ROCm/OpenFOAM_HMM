@@ -6,6 +6,9 @@ codedFunctionObject/codedFunctionObject.C
 CourantNo/CourantNo.C
 CourantNo/CourantNoFunctionObject.C
 
+ddt2/ddt2.C
+ddt2/ddt2FunctionObject.C
+
 DESModelRegions/DESModelRegions.C
 DESModelRegions/DESModelRegionsFunctionObject.C
 
@@ -50,6 +53,9 @@ wallShearStress/wallShearStressFunctionObject.C
 
 yPlus/yPlus.C
 yPlus/yPlusFunctionObject.C
+
+zeroGradient/zeroGradient.C
+zeroGradient/zeroGradientFunctionObject.C
 
 setTimeStep/setTimeStepFunctionObject.C
 

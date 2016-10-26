@@ -303,27 +303,6 @@ public:
         //- Helper: write geometry given the pointField
         void writeGeometry(ensightGeoFile&, const pointField&) const;
 
-        //- Write scalar field
-        //  optionally write data per node
-        void writeScalarField
-        (
-            ensightFile&,
-            const List<scalar>& field,
-            const bool perNode = false
-        ) const;
-
-        //- Write vector field components
-        //  optionally write data per node
-        void writeVectorField
-        (
-            ensightFile&,
-            const List<scalar>& field0,
-            const List<scalar>& field1,
-            const List<scalar>& field2,
-            const bool perNode = false
-        ) const;
-
-
         //- Write generalized field components
         //  optionally write data per node
         template<class Type>

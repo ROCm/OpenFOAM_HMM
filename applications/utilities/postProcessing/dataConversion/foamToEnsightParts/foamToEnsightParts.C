@@ -44,6 +44,9 @@ Usage
     \param -noZero \n
     Exclude the often incomplete initial conditions.
 
+    \param -noLagrangian \n
+    Suppress writing lagrangian positions and fields.
+
     \param -index \<start\>\n
     Ignore the time index contained in the time file and use a
     simple indexing when creating the \c Ensight/data/######## files.
@@ -102,6 +105,11 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
+        "noLagrangian",
+        "suppress writing lagrangian positions and fields"
+    );
+    argList::addBoolOption
+    (
         "noMesh",
         "suppress writing the geometry. "
         "Can be useful for converting partial results for a static geometry"
@@ -149,15 +157,17 @@ int main(int argc, char *argv[])
     instantList timeDirs = timeSelector::select0(runTime, args);
 
     // default to binary output, unless otherwise specified
-    IOstream::streamFormat format = IOstream::BINARY;
-    if (args.optionFound("ascii"))
-    {
-        format = IOstream::ASCII;
-    }
+    const IOstream::streamFormat format =
+    (
+        args.optionFound("ascii")
+      ? IOstream::ASCII
+      : IOstream::BINARY
+    );
 
     // control for renumbering iterations
     label indexingNumber = 0;
-    bool optIndex = args.optionReadIfPresent("index", indexingNumber);
+    const bool optIndex = args.optionReadIfPresent("index", indexingNumber);
+    const bool noLagrangian = args.optionFound("noLagrangian");
 
     // always write the geometry, unless the -noMesh option is specified
     bool optNoMesh = args.optionFound("noMesh");
@@ -204,6 +214,11 @@ int main(int argc, char *argv[])
         regionPrefix = regionName;
     }
 
+    if (Pstream::master())
+    {
+        Info<< "Converting " << timeDirs.size() << " time steps" << endl;
+    }
+
     // Construct the list of ensight parts for the entire mesh
     ensightParts partsList(mesh);
 
@@ -244,6 +259,9 @@ int main(int argc, char *argv[])
         cloudTimesUsed.insert(cloudIter.key(), DynamicList<label>());
     }
 
+    Info<< "Startup in "
+        << timer.cpuTimeIncrement() << " s, "
+        << mem.update().size() << " kB" << nl << endl;
 
     forAll(timeDirs, timeI)
     {
@@ -294,7 +312,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        Info<< "write volume field (" << flush;
+        Info<< "Write volume field (" << flush;
 
         forAllConstIter(HashTable<word>, volumeFields, fieldIter)
         {
@@ -380,15 +398,9 @@ int main(int argc, char *argv[])
         forAllConstIter(HashTable<HashTable<word>>, cloudFields, cloudIter)
         {
             const word& cloudName = cloudIter.key();
+            const fileName& cloudPrefix = regionPrefix/cloud::prefix;
 
-            if
-            (
-                !isDir
-                (
-                    runTime.timePath()/regionPrefix/
-                    cloud::prefix/cloudName
-                )
-            )
+            if (!isDir(runTime.timePath()/cloudPrefix/cloudName))
             {
                 continue;
             }
@@ -397,28 +409,25 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 runTime.timeName(),
-                cloud::prefix/cloudName
+                cloudPrefix/cloudName
             );
 
             // check that the positions field is present for this time
-            IOobject* positionPtr = cloudObjs.lookup(word("positions"));
-            if (positionPtr != NULL)
-            {
-                ensightParticlePositions
-                (
-                    mesh,
-                    dataDir,
-                    subDir,
-                    cloudName,
-                    format
-                );
-            }
-            else
+            if (!cloudObjs.found("positions"))
             {
                 continue;
             }
 
-            Info<< "write " << cloudName << " (" << flush;
+            Info<< "Write " << cloudName << " ( positions" << flush;
+
+            ensightParticlePositions
+            (
+                mesh,
+                dataDir,
+                subDir,
+                cloudName,
+                format
+            );
 
             forAllConstIter(HashTable<word>, cloudIter(), fieldIter)
             {
@@ -430,7 +439,7 @@ int main(int argc, char *argv[])
                 if (!fieldObject)
                 {
                     Info<< "missing "
-                        << runTime.timeName()/cloud::prefix/cloudName
+                        << runTime.timeName()/cloudPrefix/cloudName
                         / fieldName
                         << endl;
                     continue;

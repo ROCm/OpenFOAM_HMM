@@ -409,8 +409,9 @@ public:
         void operator=(const triSurface&);
 
 
-    // Ostream Operator
+    // IOstream Operators
 
+        friend Istream& operator>>(Istream&, triSurface&);
         friend Ostream& operator<<(Ostream&, const triSurface&);
 };
 

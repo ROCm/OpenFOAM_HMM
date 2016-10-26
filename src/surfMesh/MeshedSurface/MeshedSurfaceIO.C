@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,9 +25,34 @@ License
 
 #include "MeshedSurface.H"
 #include "boundBox.H"
+#include "Istream.H"
 #include "Ostream.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Face>
+Foam::Istream& Foam::MeshedSurface<Face>::read(Istream& is)
+{
+    is  >> this->storedZones()
+        >> this->storedPoints()
+        >> this->storedFaces();
+
+    is.check("MeshedSurface::read(Istream&)");
+    return is;
+}
+
+
+template<class Face>
+Foam::Ostream& Foam::MeshedSurface<Face>::write(Ostream& os) const
+{
+    os  << this->surfZones()
+        << this->points()
+        << this->faces();
+
+    os.check("MeshedSurface::write(Ostream&) const");
+    return os;
+}
+
 
 template<class Face>
 void Foam::MeshedSurface<Face>::writeStats(Ostream& os) const
@@ -61,6 +86,30 @@ void Foam::MeshedSurface<Face>::writeStats(Ostream& os) const
     }
 
     os  << "boundingBox : " << boundBox(this->points()) << endl;
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+template<class Face>
+Foam::Istream& Foam::operator>>
+(
+    Foam::Istream& is,
+    Foam::MeshedSurface<Face>& surf
+)
+{
+    return surf.read(is);
+}
+
+
+template<class Face>
+Foam::Ostream& Foam::operator<<
+(
+    Foam::Ostream& os,
+    const Foam::MeshedSurface<Face>& surf
+)
+{
+    return surf.write(os);
 }
 
 

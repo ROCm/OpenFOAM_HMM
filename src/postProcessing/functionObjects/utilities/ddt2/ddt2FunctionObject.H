@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,41 +21,33 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::ddt2FunctionObject
+
+Description
+    FunctionObject wrapper around ddt2 to allow it to be created
+    via the functions entry within controlDict.
+
+SourceFiles
+    ddt2FunctionObject.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "itoa.H"
+#ifndef ddt2FunctionObject_H
+#define ddt2FunctionObject_H
+
+#include "ddt2.H"
+#include "OutputFilterFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-word itoa(const label n)
-{
-    const label offset = '0';
-    const label length = 4;
-
-    char val[length + 1];
-
-    label leftOfN = n;
-
-    for (label i=0; i<length; i++)
-    {
-        label j = label(leftOfN/pow(10, length - i - 1));
-        leftOfN -= j*pow(10, length - i - 1);
-        val[i] = offset + j;
-    }
-
-    val[length] = 0;
-
-    return val;
+    typedef OutputFilterFunctionObject<ddt2> ddt2FunctionObject;
 }
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+#endif
 
 // ************************************************************************* //

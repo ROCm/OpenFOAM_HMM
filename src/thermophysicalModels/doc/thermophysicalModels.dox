@@ -23,7 +23,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\page pageThermophsyicalModels Thermophysical Models
+\page pageThermophysicalModels Thermophysical Models
 
 \section secSchemes Overview
 The available thermophysical models are grouped into the following categories:

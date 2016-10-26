@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,26 @@ Group
 
 Description
     Checks geometric and topological quality of a surface.
+
+Usage
+    - surfaceCheck surfaceFile [OPTION]
+
+    \param -checkSelfIntersection \n
+    Check for self-intersection.
+
+    \param -splitNonManifold \n
+    Split surface along non-manifold edges.
+
+    \param -verbose \n
+    Extra verbosity.
+
+    \param -blockMesh \n
+    Write vertices/blocks for tight-fitting 1 cell blockMeshDict.
+
+    \param -outputThreshold \<num files\> \n
+    Specifies upper limit for the number of files written. This is useful to
+    prevent surfaces with lots of disconnected parts to write lots of files.
+    Default is 10. A special case is 0 which prevents writing any files.
 
 \*---------------------------------------------------------------------------*/
 
@@ -265,6 +285,63 @@ void writeParts
 }
 
 
+void syncEdges(const triSurface& p, labelHashSet& markedEdges)
+{
+    // See comment below about having duplicate edges
+
+    const edgeList& edges = p.edges();
+    HashSet<edge, Hash<edge>> edgeSet(2*markedEdges.size());
+
+    forAllConstIter(labelHashSet, markedEdges, iter)
+    {
+        edgeSet.insert(edges[iter.key()]);
+    }
+
+    forAll(edges, edgeI)
+    {
+        if (edgeSet.found(edges[edgeI]))
+        {
+            markedEdges.insert(edgeI);
+        }
+    }
+}
+
+
+void syncEdges(const triSurface& p, boolList& isMarkedEdge)
+{
+    // See comment below about having duplicate edges
+
+    const edgeList& edges = p.edges();
+
+    label n = 0;
+    forAll(isMarkedEdge, edgeI)
+    {
+        if (isMarkedEdge[edgeI])
+        {
+            n++;
+        }
+    }
+
+    HashSet<edge, Hash<edge>> edgeSet(2*n);
+
+    forAll(isMarkedEdge, edgeI)
+    {
+        if (isMarkedEdge[edgeI])
+        {
+            edgeSet.insert(edges[edgeI]);
+        }
+    }
+
+    forAll(edges, edgeI)
+    {
+        if (edgeSet.found(edges[edgeI]))
+        {
+            isMarkedEdge[edgeI] = true;
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
@@ -299,6 +376,8 @@ int main(int argc, char *argv[])
     const bool checkSelfIntersect = args.optionFound("checkSelfIntersection");
     const bool verbose = args.optionFound("verbose");
     const bool splitNonManifold = args.optionFound("splitNonManifold");
+    label outputThreshold = 10;
+    args.optionReadIfPresent("outputThreshold", outputThreshold);
 
     Info<< "Reading surface from " << surfFileName << " ..." << nl << endl;
 
@@ -408,10 +487,14 @@ int main(int argc, char *argv[])
             Info<< "Surface has " << illegalFaces.size()
                 << " illegal triangles." << endl;
 
-            OFstream str("illegalFaces");
-            Info<< "Dumping conflicting face labels to " << str.name() << endl
-                << "Paste this into the input for surfaceSubset" << endl;
-            str << illegalFaces;
+            if (outputThreshold > 0)
+            {
+                OFstream str("illegalFaces");
+                Info<< "Dumping conflicting face labels to " << str.name()
+                    << endl
+                    << "Paste this into the input for surfaceSubset" << endl;
+                str << illegalFaces;
+            }
         }
         else
         {
@@ -486,6 +569,7 @@ int main(int argc, char *argv[])
         }
 
         // Dump for subsetting
+        if (outputThreshold > 0)
         {
             DynamicList<label> problemFaces(surf.size()/100+1);
 
@@ -666,12 +750,15 @@ int main(int argc, char *argv[])
 
         Info<< "Conflicting face labels:" << problemFaces.size() << endl;
 
-        OFstream str("problemFaces");
+        if (outputThreshold > 0)
+        {
+            OFstream str("problemFaces");
 
-        Info<< "Dumping conflicting face labels to " << str.name() << endl
-            << "Paste this into the input for surfaceSubset" << endl;
+            Info<< "Dumping conflicting face labels to " << str.name() << endl
+                << "Paste this into the input for surfaceSubset" << endl;
 
-        str << problemFaces;
+            str << problemFaces;
+        }
     }
     else
     {
@@ -695,6 +782,7 @@ int main(int argc, char *argv[])
                     borderEdge[edgeI] = true;
                 }
             }
+            syncEdges(surf, borderEdge);
         }
 
         labelList faceZone;
@@ -702,7 +790,7 @@ int main(int argc, char *argv[])
 
         Info<< "Number of unconnected parts : " << numZones << endl;
 
-        if (numZones > 1)
+        if (numZones > 1 && outputThreshold > 0)
         {
             Info<< "Splitting surface into parts ..." << endl << endl;
 
@@ -710,7 +798,7 @@ int main(int argc, char *argv[])
             writeParts
             (
                 surf,
-                numZones,
+                min(outputThreshold, numZones),
                 faceZone,
                 surfFilePath,
                 surfFileNameBase
@@ -726,6 +814,17 @@ int main(int argc, char *argv[])
     labelHashSet borderEdge(surf.size()/1000);
     PatchTools::checkOrientation(surf, false, &borderEdge);
 
+    // Bit strange: if a triangle has two same vertices (illegal!) it will
+    // still have three distinct edges (two of which have the same vertices).
+    // In this case the faceEdges addressing is not symmetric, i.e. a
+    // neighbouring, valid, triangle will have correct addressing so 3 distinct
+    // edges so it will miss one of those two identical edges.
+    // - we don't want to fix this in PrimitivePatch since it is too specific
+    // - instead just make sure we mark all identical edges consistently
+    //   when we use them for marking.
+
+    syncEdges(surf, borderEdge);
+
     //
     // Colour all faces into zones using borderEdge
     //
@@ -739,15 +838,26 @@ int main(int argc, char *argv[])
     if (numNormalZones > 1)
     {
         Info<< "More than one normal orientation." << endl;
-        writeZoning(surf, normalZone, "normal", surfFilePath, surfFileNameBase);
-        writeParts
-        (
-            surf,
-            numNormalZones,
-            normalZone,
-            surfFilePath,
-            surfFileNameBase + "_normal"
-        );
+
+        if (outputThreshold > 0)
+        {
+            writeZoning
+            (
+                surf,
+                normalZone,
+                "normal",
+                surfFilePath,
+                surfFileNameBase
+            );
+            writeParts
+            (
+                surf,
+                min(outputThreshold, numNormalZones),
+                normalZone,
+                surfFilePath,
+                surfFileNameBase + "_normal"
+            );
+        }
     }
     Info<< endl;
 
@@ -764,7 +874,11 @@ int main(int argc, char *argv[])
 
         const indexedOctree<treeDataTriSurface>& tree = querySurf.tree();
 
-        OBJstream intStream("selfInterPoints.obj");
+        autoPtr<OBJstream> intStreamPtr;
+        if (outputThreshold > 0)
+        {
+            intStreamPtr.reset(new OBJstream("selfInterPoints.obj"));
+        }
 
         label nInt = 0;
 
@@ -786,9 +900,9 @@ int main(int argc, char *argv[])
                 )
             );
 
-            if (hitInfo.hit())
+            if (hitInfo.hit() && intStreamPtr.valid())
             {
-                intStream.write(hitInfo.hitPoint());
+                intStreamPtr().write(hitInfo.hitPoint());
                 nInt++;
             }
         }
@@ -801,36 +915,13 @@ int main(int argc, char *argv[])
         {
             Info<< "Surface is self-intersecting at " << nInt
                 << " locations." << endl;
-            Info<< "Writing intersection points to " << intStream.name()
-                << endl;
-        }
 
-        //surfaceIntersection inter(querySurf);
-        //
-        //if (inter.cutEdges().empty() && inter.cutPoints().empty())
-        //{
-        //    Info<< "Surface is not self-intersecting" << endl;
-        //}
-        //else
-        //{
-        //    Info<< "Surface is self-intersecting" << endl;
-        //    Info<< "Writing edges of intersection to selfInter.obj" << endl;
-        //
-        //    OFstream intStream("selfInter.obj");
-        //    forAll(inter.cutPoints(), cutPointI)
-        //    {
-        //        const point& pt = inter.cutPoints()[cutPointI];
-        //
-        //        intStream << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z()
-        //            << endl;
-        //    }
-        //    forAll(inter.cutEdges(), cutEdgeI)
-        //    {
-        //        const edge& e = inter.cutEdges()[cutEdgeI];
-        //
-        //        intStream << "l " << e.start()+1 << ' ' << e.end()+1 << endl;
-        //    }
-        //}
+            if (intStreamPtr.valid())
+            {
+                Info<< "Writing intersection points to "
+                    << intStreamPtr().name() << endl;
+            }
+        }
         Info<< endl;
     }
 

@@ -162,12 +162,11 @@ public:
         );
 
         //- String representation of property types
-        static string propertyTypes()
-        {
-            // TODO: collision information types
-            NotImplemented;
-            return string::null;
-        }
+        AddToPropertyTypes
+        (
+            ParcelType,
+            "{vector vector vector} *"
+        );
 
 
     // Constructors
