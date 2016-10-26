@@ -86,7 +86,7 @@ void Foam::vtkPV3Foam::reduceMemory()
     if (!reader_->GetCacheMesh())
     {
         delete meshPtr_;
-        meshPtr_ = NULL;
+        meshPtr_ = nullptr;
     }
 }
 
@@ -226,8 +226,8 @@ Foam::vtkPV3Foam::vtkPV3Foam
 )
 :
     reader_(reader),
-    dbPtr_(NULL),
-    meshPtr_(NULL),
+    dbPtr_(nullptr),
+    meshPtr_(nullptr),
     meshRegion_(polyMesh::defaultRegion),
     meshDir_(polyMesh::meshSubDir),
     timeIndex_(-1),
@@ -347,7 +347,7 @@ void Foam::vtkPV3Foam::updateInfo()
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::updateInfo"
-            << " [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "] timeIndex="
+            << " [meshPtr=" << (meshPtr_ ? "set" : "nullptr") << "] timeIndex="
             << timeIndex_ << endl;
     }
 
@@ -426,7 +426,7 @@ void Foam::vtkPV3Foam::updateFoamMesh()
     if (!reader_->GetCacheMesh())
     {
         delete meshPtr_;
-        meshPtr_ = NULL;
+        meshPtr_ = nullptr;
     }
 
     // Check to see if the OpenFOAM mesh has been created
@@ -551,7 +551,7 @@ void Foam::vtkPV3Foam::CleanUp()
 double* Foam::vtkPV3Foam::findTimes(int& nTimeSteps)
 {
     int nTimes = 0;
-    double* tsteps = NULL;
+    double* tsteps = nullptr;
 
     if (dbPtr_.valid())
     {
@@ -636,10 +636,10 @@ void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
 
     // always remove old actors first
 
-    forAll(patchTextActorsPtrs_, patchI)
+    forAll(patchTextActorsPtrs_, patchi)
     {
-        renderer->RemoveViewProp(patchTextActorsPtrs_[patchI]);
-        patchTextActorsPtrs_[patchI]->Delete();
+        renderer->RemoveViewProp(patchTextActorsPtrs_[patchi]);
+        patchTextActorsPtrs_[patchi]->Delete();
     }
     patchTextActorsPtrs_.clear();
 
@@ -669,9 +669,9 @@ void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
 
 
         // Loop through all patches to determine zones, and centre of each zone
-        forAll(pbMesh, patchI)
+        forAll(pbMesh, patchi)
         {
-            const polyPatch& pp = pbMesh[patchI];
+            const polyPatch& pp = pbMesh[patchi];
 
             // Only include the patch if it is selected
             if (!selectedPatches.found(pp.name()))
@@ -703,27 +703,27 @@ void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
             // Do topological analysis of patch, find disconnected regions
             patchZones pZones(pp, featEdge);
 
-            nZones[patchI] = pZones.nZones();
+            nZones[patchi] = pZones.nZones();
 
             labelList zoneNFaces(pZones.nZones(), 0);
 
             // Create storage for additional zone centres
             forAll(zoneNFaces, zoneI)
             {
-                zoneCentre[patchI].append(Zero);
+                zoneCentre[patchi].append(Zero);
             }
 
             // Do averaging per individual zone
-            forAll(pp, faceI)
+            forAll(pp, facei)
             {
-                label zoneI = pZones[faceI];
-                zoneCentre[patchI][zoneI] += pp[faceI].centre(pp.points());
+                label zoneI = pZones[facei];
+                zoneCentre[patchi][zoneI] += pp[facei].centre(pp.points());
                 zoneNFaces[zoneI]++;
             }
 
-            forAll(zoneCentre[patchI], zoneI)
+            forAll(zoneCentre[patchi], zoneI)
             {
-                zoneCentre[patchI][zoneI] /= zoneNFaces[zoneI];
+                zoneCentre[patchi][zoneI] /= zoneNFaces[zoneI];
             }
         }
 
@@ -734,9 +734,9 @@ void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
 
         label displayZoneI = 0;
 
-        forAll(pbMesh, patchI)
+        forAll(pbMesh, patchi)
         {
-            displayZoneI += min(MAXPATCHZONES, nZones[patchI]);
+            displayZoneI += min(MAXPATCHZONES, nZones[patchi]);
         }
 
         if (debug)
@@ -756,18 +756,18 @@ void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
         // Actor index
         displayZoneI = 0;
 
-        forAll(pbMesh, patchI)
+        forAll(pbMesh, patchi)
         {
-            const polyPatch& pp = pbMesh[patchI];
+            const polyPatch& pp = pbMesh[patchi];
 
             label globalZoneI = 0;
 
             // Only selected patches will have a non-zero number of zones
-            label nDisplayZones = min(MAXPATCHZONES, nZones[patchI]);
+            label nDisplayZones = min(MAXPATCHZONES, nZones[patchi]);
             label increment = 1;
-            if (nZones[patchI] >= MAXPATCHZONES)
+            if (nZones[patchi] >= MAXPATCHZONES)
             {
-                increment = nZones[patchI]/MAXPATCHZONES;
+                increment = nZones[patchi]/MAXPATCHZONES;
             }
 
             for (label i = 0; i < nDisplayZones; i++)
@@ -775,7 +775,7 @@ void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
                 if (debug)
                 {
                     Info<< "patch name = " << pp.name() << nl
-                        << "anchor = " << zoneCentre[patchI][globalZoneI] << nl
+                        << "anchor = " << zoneCentre[patchi][globalZoneI] << nl
                         << "globalZoneI = " << globalZoneI << endl;
                 }
 
@@ -798,9 +798,9 @@ void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
 
                 txt->GetPositionCoordinate()->SetValue
                 (
-                    zoneCentre[patchI][globalZoneI].x(),
-                    zoneCentre[patchI][globalZoneI].y(),
-                    zoneCentre[patchI][globalZoneI].z()
+                    zoneCentre[patchi][globalZoneI].x(),
+                    zoneCentre[patchi][globalZoneI].y(),
+                    zoneCentre[patchi][globalZoneI].z()
                 );
 
                 // Add text to each renderer

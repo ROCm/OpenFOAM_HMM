@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,8 +46,7 @@ Description
         z   | vertical co-ordinate
     \endvartable
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         z0           | surface roughness length| yes         |
@@ -55,14 +54,14 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            nutkAtmRoughWallFunction;
         z0              uniform 0;
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::nutkWallFunctionFvPatchField
 
 SourceFiles

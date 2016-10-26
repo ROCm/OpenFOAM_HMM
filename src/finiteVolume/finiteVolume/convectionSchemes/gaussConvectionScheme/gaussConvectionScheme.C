@@ -92,18 +92,18 @@ gaussConvectionScheme<Type>::fvmDiv
     );
     fvMatrix<Type>& fvm = tfvm.ref();
 
-    fvm.lower() = -weights.internalField()*faceFlux.internalField();
-    fvm.upper() = fvm.lower() + faceFlux.internalField();
+    fvm.lower() = -weights.primitiveField()*faceFlux.primitiveField();
+    fvm.upper() = fvm.lower() + faceFlux.primitiveField();
     fvm.negSumDiag();
 
-    forAll(vf.boundaryField(), patchI)
+    forAll(vf.boundaryField(), patchi)
     {
-        const fvPatchField<Type>& psf = vf.boundaryField()[patchI];
-        const fvsPatchScalarField& patchFlux = faceFlux.boundaryField()[patchI];
-        const fvsPatchScalarField& pw = weights.boundaryField()[patchI];
+        const fvPatchField<Type>& psf = vf.boundaryField()[patchi];
+        const fvsPatchScalarField& patchFlux = faceFlux.boundaryField()[patchi];
+        const fvsPatchScalarField& pw = weights.boundaryField()[patchi];
 
-        fvm.internalCoeffs()[patchI] = patchFlux*psf.valueInternalCoeffs(pw);
-        fvm.boundaryCoeffs()[patchI] = -patchFlux*psf.valueBoundaryCoeffs(pw);
+        fvm.internalCoeffs()[patchi] = patchFlux*psf.valueInternalCoeffs(pw);
+        fvm.boundaryCoeffs()[patchi] = -patchFlux*psf.valueBoundaryCoeffs(pw);
     }
 
     if (tinterpScheme_().corrected())

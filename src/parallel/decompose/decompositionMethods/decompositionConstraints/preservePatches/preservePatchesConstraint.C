@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,13 +33,14 @@ namespace Foam
 {
 namespace decompositionConstraints
 {
-defineTypeName(preservePatchesConstraint);
-addToRunTimeSelectionTable
-(
-    decompositionConstraint,
-    preservePatchesConstraint,
-    dictionary
-);
+    defineTypeName(preservePatchesConstraint);
+
+    addToRunTimeSelectionTable
+    (
+        decompositionConstraint,
+        preservePatchesConstraint,
+        dictionary
+    );
 }
 }
 
@@ -146,9 +147,9 @@ void Foam::decompositionConstraints::preservePatchesConstraint::apply
 
     labelList destProc(mesh.nFaces()-mesh.nInternalFaces(), labelMax);
 
-    forAll(pbm, patchI)
+    forAll(pbm, patchi)
     {
-        const polyPatch& pp = pbm[patchI];
+        const polyPatch& pp = pbm[patchi];
 
         const labelUList& faceCells = pp.faceCells();
 

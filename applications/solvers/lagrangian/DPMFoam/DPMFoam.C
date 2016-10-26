@@ -56,14 +56,13 @@ int main(int argc, char *argv[])
         "specify alternative cloud name. default is 'kinematicCloud'"
     );
 
+    #include "postProcess.H"
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-
-    pimpleControl pimple(mesh);
-
+    #include "createControl.H"
     #include "createTimeControls.H"
-    #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "initContinuityErrs.H"
 
@@ -110,7 +109,7 @@ int main(int argc, char *argv[])
             zeroGradientFvPatchVectorField::typeName
         );
 
-        cloudVolSUSu.internalField() = -cloudSU.source()/mesh.V();
+        cloudVolSUSu.primitiveFieldRef() = -cloudSU.source()/mesh.V();
         cloudVolSUSu.correctBoundaryConditions();
         cloudSU.source() = Zero;
 

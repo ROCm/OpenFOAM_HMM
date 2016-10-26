@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,20 +51,20 @@ void Foam::conformalVoronoiMesh::calcNeighbourCellCentres
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        const polyPatch& pp = patches[patchI];
+        const polyPatch& pp = patches[patchi];
 
         const labelUList& faceCells = pp.faceCells();
 
-        label bFaceI = pp.start() - mesh.nInternalFaces();
+        label bFacei = pp.start() - mesh.nInternalFaces();
 
         if (pp.coupled())
         {
             forAll(faceCells, i)
             {
-                neiCc[bFaceI] = cellCentres[faceCells[i]];
-                bFaceI++;
+                neiCc[bFacei] = cellCentres[faceCells[i]];
+                bFacei++;
             }
         }
     }
@@ -82,14 +82,14 @@ void Foam::conformalVoronoiMesh::selectSeparatedCoupledFaces
 {
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
         // Check all coupled. Avoid using .coupled() so we also pick up AMI.
-        if (isA<coupledPolyPatch>(patches[patchI]))
+        if (isA<coupledPolyPatch>(patches[patchi]))
         {
             const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
             (
-                patches[patchI]
+                patches[patchi]
             );
 
             if (cpp.separated() || !cpp.parallel())
@@ -116,15 +116,15 @@ void Foam::conformalVoronoiMesh::findCellZoneInsideWalk
     boolList blockedFace(mesh.nFaces());
     selectSeparatedCoupledFaces(mesh, blockedFace);
 
-    forAll(faceToSurface, faceI)
+    forAll(faceToSurface, facei)
     {
-        if (faceToSurface[faceI] == -1)
+        if (faceToSurface[facei] == -1)
         {
-            blockedFace[faceI] = false;
+            blockedFace[facei] = false;
         }
         else
         {
-            blockedFace[faceI] = true;
+            blockedFace[facei] = true;
         }
     }
     // No need to sync since namedSurfaceIndex already is synced
@@ -156,16 +156,16 @@ void Foam::conformalVoronoiMesh::findCellZoneInsideWalk
         // Find the region containing the insidePoint
         label keepRegionI = -1;
 
-        label cellI = mesh.findCell(insidePoint);
+        label celli = mesh.findCell(insidePoint);
 
-        if (cellI != -1)
+        if (celli != -1)
         {
-            keepRegionI = cellRegion[cellI];
+            keepRegionI = cellRegion[celli];
         }
         reduce(keepRegionI, maxOp<label>());
 
         Info<< "    For surface " << surfName
-            << " found point " << insidePoint << " in cell " << cellI
+            << " found point " << insidePoint << " in cell " << celli
             << " in global region " << keepRegionI
             << " out of " << cellRegion.nRegions() << " regions." << endl;
 
@@ -179,22 +179,22 @@ void Foam::conformalVoronoiMesh::findCellZoneInsideWalk
         }
 
         // Set all cells with this region
-        forAll(cellRegion, cellI)
+        forAll(cellRegion, celli)
         {
-            if (cellRegion[cellI] == keepRegionI)
+            if (cellRegion[celli] == keepRegionI)
             {
-                if (cellToSurface[cellI] == -2)
+                if (cellToSurface[celli] == -2)
                 {
-                    cellToSurface[cellI] = surfI;
+                    cellToSurface[celli] = surfI;
                 }
-                else if (cellToSurface[cellI] != surfI)
+                else if (cellToSurface[celli] != surfI)
                 {
                     WarningInFunction
-                        << "Cell " << cellI
-                        << " at " << mesh.cellCentres()[cellI]
+                        << "Cell " << celli
+                        << " at " << mesh.cellCentres()[celli]
                         << " is inside surface " << surfName
                         << " but already marked as being in zone "
-                        << cellToSurface[cellI] << endl
+                        << cellToSurface[celli] << endl
                         << "This can happen if your surfaces are not"
                         << " (sufficiently) closed."
                         << endl;
@@ -276,23 +276,23 @@ Foam::labelList Foam::conformalVoronoiMesh::calcCellZones
                 selectInside = false;
             }
 
-            forAll(volType, pointI)
+            forAll(volType, pointi)
             {
-                if (cellToSurface[pointI] == -1)
+                if (cellToSurface[pointi] == -1)
                 {
                     if
                     (
                         (
-                            volType[pointI] == volumeType::INSIDE
+                            volType[pointi] == volumeType::INSIDE
                          && selectInside
                         )
                      || (
-                            volType[pointI] == volumeType::OUTSIDE
+                            volType[pointi] == volumeType::OUTSIDE
                          && !selectInside
                         )
                     )
                     {
-                        cellToSurface[pointI] = surfI;
+                        cellToSurface[pointi] = surfI;
                     }
                 }
             }
@@ -323,85 +323,85 @@ void Foam::conformalVoronoiMesh::calcFaceZones
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        const polyPatch& pp = patches[patchI];
+        const polyPatch& pp = patches[patchi];
 
         const labelUList& faceCells = pp.faceCells();
 
-        label bFaceI = pp.start() - mesh.nInternalFaces();
+        label bFacei = pp.start() - mesh.nInternalFaces();
 
         if (pp.coupled())
         {
             forAll(faceCells, i)
             {
-                neiFaceOwner[bFaceI] = cellToSurface[faceCells[i]];
-                bFaceI++;
+                neiFaceOwner[bFacei] = cellToSurface[faceCells[i]];
+                bFacei++;
             }
         }
     }
 
     syncTools::swapBoundaryFaceList(mesh, neiFaceOwner);
 
-    forAll(faces, faceI)
+    forAll(faces, facei)
     {
-        const label ownerSurfaceI = cellToSurface[faceOwner[faceI]];
+        const label ownerSurfacei = cellToSurface[faceOwner[facei]];
 
-        if (faceToSurface[faceI] >= 0)
+        if (faceToSurface[facei] >= 0)
         {
             continue;
         }
 
-        if (mesh.isInternalFace(faceI))
+        if (mesh.isInternalFace(facei))
         {
-            const label neiSurfaceI = cellToSurface[faceNeighbour[faceI]];
+            const label neiSurfacei = cellToSurface[faceNeighbour[facei]];
 
             if
             (
-                (ownerSurfaceI >= 0 || neiSurfaceI >= 0)
-             && ownerSurfaceI != neiSurfaceI
+                (ownerSurfacei >= 0 || neiSurfacei >= 0)
+             && ownerSurfacei != neiSurfacei
             )
             {
-                flipMap[faceI] =
+                flipMap[facei] =
                     (
-                        ownerSurfaceI == max(ownerSurfaceI, neiSurfaceI)
+                        ownerSurfacei == max(ownerSurfacei, neiSurfacei)
                       ? false
                       : true
                     );
 
-                faceToSurface[faceI] = max(ownerSurfaceI, neiSurfaceI);
+                faceToSurface[facei] = max(ownerSurfacei, neiSurfacei);
             }
         }
         else
         {
-            label patchID = mesh.boundaryMesh().whichPatch(faceI);
+            label patchID = mesh.boundaryMesh().whichPatch(facei);
 
             if (mesh.boundaryMesh()[patchID].coupled())
             {
-                const label neiSurfaceI =
-                    neiFaceOwner[faceI - mesh.nInternalFaces()];
+                const label neiSurfacei =
+                    neiFaceOwner[facei - mesh.nInternalFaces()];
 
                 if
                 (
-                    (ownerSurfaceI >= 0 || neiSurfaceI >= 0)
-                 && ownerSurfaceI != neiSurfaceI
+                    (ownerSurfacei >= 0 || neiSurfacei >= 0)
+                 && ownerSurfacei != neiSurfacei
                 )
                 {
-                    flipMap[faceI] =
+                    flipMap[facei] =
                         (
-                            ownerSurfaceI == max(ownerSurfaceI, neiSurfaceI)
+                            ownerSurfacei == max(ownerSurfacei, neiSurfacei)
                           ? false
                           : true
                         );
 
-                    faceToSurface[faceI] = max(ownerSurfaceI, neiSurfaceI);
+                    faceToSurface[facei] = max(ownerSurfacei, neiSurfacei);
                 }
             }
             else
             {
-                if (ownerSurfaceI >= 0)
+                if (ownerSurfacei >= 0)
                 {
-                    faceToSurface[faceI] = ownerSurfaceI;
+                    faceToSurface[facei] = ownerSurfacei;
                 }
             }
         }
@@ -430,23 +430,23 @@ void Foam::conformalVoronoiMesh::calcFaceZones
     );
 
     // Use intersection of cellCentre connections
-    forAll(faces, faceI)
+    forAll(faces, facei)
     {
-        if (faceToSurface[faceI] >= 0)
+        if (faceToSurface[facei] >= 0)
         {
             continue;
         }
 
-        label patchID = mesh.boundaryMesh().whichPatch(faceI);
+        label patchID = mesh.boundaryMesh().whichPatch(facei);
 
-        const label own = faceOwner[faceI];
+        const label own = faceOwner[facei];
 
         List<pointIndexHit> surfHit;
         labelList hitSurface;
 
-        if (mesh.isInternalFace(faceI))
+        if (mesh.isInternalFace(facei))
         {
-            const label nei = faceNeighbour[faceI];
+            const label nei = faceNeighbour[facei];
 
             geometryToConformTo().findSurfaceAllIntersections
             (
@@ -461,7 +461,7 @@ void Foam::conformalVoronoiMesh::calcFaceZones
             geometryToConformTo().findSurfaceAllIntersections
             (
                 cellCentres[own],
-                neiCc[faceI - mesh.nInternalFaces()],
+                neiCc[facei - mesh.nInternalFaces()],
                 surfHit,
                 hitSurface
             );
@@ -481,19 +481,19 @@ void Foam::conformalVoronoiMesh::calcFaceZones
                     norm
                 );
 
-                vector fN = faces[faceI].normal(mesh.points());
+                vector fN = faces[facei].normal(mesh.points());
                 fN /= mag(fN) + SMALL;
 
                 if ((norm[0] & fN) < 0)
                 {
-                    flipMap[faceI] = true;
+                    flipMap[facei] = true;
                 }
                 else
                 {
-                    flipMap[faceI] = false;
+                    flipMap[facei] = false;
                 }
 
-                faceToSurface[faceI] = hitSurface[0];
+                faceToSurface[facei] = hitSurface[0];
             }
         }
     }
@@ -501,39 +501,39 @@ void Foam::conformalVoronoiMesh::calcFaceZones
 
 //    labelList neiCellSurface(mesh.nFaces()-mesh.nInternalFaces());
 //
-//    forAll(patches, patchI)
+//    forAll(patches, patchi)
 //    {
-//        const polyPatch& pp = patches[patchI];
+//        const polyPatch& pp = patches[patchi];
 //
 //        if (pp.coupled())
 //        {
 //            forAll(pp, i)
 //            {
-//                label faceI = pp.start()+i;
-//                label ownSurface = cellToSurface[faceOwner[faceI]];
-//                neiCellSurface[faceI - mesh.nInternalFaces()] = ownSurface;
+//                label facei = pp.start()+i;
+//                label ownSurface = cellToSurface[faceOwner[facei]];
+//                neiCellSurface[facei - mesh.nInternalFaces()] = ownSurface;
 //            }
 //        }
 //    }
 //    syncTools::swapBoundaryFaceList(mesh, neiCellSurface);
 //
-//    forAll(patches, patchI)
+//    forAll(patches, patchi)
 //    {
-//        const polyPatch& pp = patches[patchI];
+//        const polyPatch& pp = patches[patchi];
 //
 //        if (pp.coupled())
 //        {
 //            forAll(pp, i)
 //            {
-//                label faceI = pp.start()+i;
-//                label ownSurface = cellToSurface[faceOwner[faceI]];
+//                label facei = pp.start()+i;
+//                label ownSurface = cellToSurface[faceOwner[facei]];
 //                label neiSurface =
-//                    neiCellSurface[faceI-mesh.nInternalFaces()];
+//                    neiCellSurface[facei-mesh.nInternalFaces()];
 //
-//                if (faceToSurface[faceI] == -1 && (ownSurface != neiSurface))
+//                if (faceToSurface[facei] == -1 && (ownSurface != neiSurface))
 //                {
 //                    // Give face the max cell zone
-//                    faceToSurface[faceI] =  max(ownSurface, neiSurface);
+//                    faceToSurface[facei] =  max(ownSurface, neiSurface);
 //                }
 //            }
 //        }
@@ -617,13 +617,13 @@ void Foam::conformalVoronoiMesh::addZones
     // Topochange container
     polyTopoChange meshMod(mesh);
 
-    forAll(cellToSurface, cellI)
+    forAll(cellToSurface, celli)
     {
-        label surfaceI = cellToSurface[cellI];
+        label surfacei = cellToSurface[celli];
 
-        if (surfaceI >= 0)
+        if (surfacei >= 0)
         {
-            label zoneI = surfaceToCellZone[surfaceI];
+            label zoneI = surfaceToCellZone[surfacei];
 
             if (zoneI >= 0)
             {
@@ -631,7 +631,7 @@ void Foam::conformalVoronoiMesh::addZones
                 (
                     polyModifyCell
                     (
-                        cellI,
+                        celli,
                         false,          // removeFromZone
                         zoneI
                     )
@@ -643,55 +643,55 @@ void Foam::conformalVoronoiMesh::addZones
     const labelList& faceOwner = mesh.faceOwner();
     const labelList& faceNeighbour = mesh.faceNeighbour();
 
-    forAll(faceToSurface, faceI)
+    forAll(faceToSurface, facei)
     {
-        label surfaceI = faceToSurface[faceI];
+        label surfacei = faceToSurface[facei];
 
-        if (surfaceI < 0)
+        if (surfacei < 0)
         {
             continue;
         }
 
-        label patchID = mesh.boundaryMesh().whichPatch(faceI);
+        label patchID = mesh.boundaryMesh().whichPatch(facei);
 
-        if (mesh.isInternalFace(faceI))
+        if (mesh.isInternalFace(facei))
         {
-            label own = faceOwner[faceI];
-            label nei = faceNeighbour[faceI];
+            label own = faceOwner[facei];
+            label nei = faceNeighbour[facei];
 
             meshMod.setAction
             (
                 polyModifyFace
                 (
-                    mesh.faces()[faceI],            // modified face
-                    faceI,                          // label of face
+                    mesh.faces()[facei],            // modified face
+                    facei,                          // label of face
                     own,                            // owner
                     nei,                            // neighbour
                     false,                          // face flip
                     -1,                             // patch for face
                     false,                          // remove from zone
-                    surfaceToFaceZone[surfaceI],    // zone for face
-                    flipMap[faceI]                  // face flip in zone
+                    surfaceToFaceZone[surfacei],    // zone for face
+                    flipMap[facei]                  // face flip in zone
                 )
             );
         }
         else if (patchID != -1 && mesh.boundaryMesh()[patchID].coupled())
         {
-            label own = faceOwner[faceI];
+            label own = faceOwner[facei];
 
             meshMod.setAction
             (
                 polyModifyFace
                 (
-                    mesh.faces()[faceI],            // modified face
-                    faceI,                          // label of face
+                    mesh.faces()[facei],            // modified face
+                    facei,                          // label of face
                     own,                            // owner
                     -1,                             // neighbour
                     false,                          // face flip
                     patchID,                        // patch for face
                     false,                          // remove from zone
-                    surfaceToFaceZone[surfaceI],    // zone for face
-                    flipMap[faceI]                  // face flip in zone
+                    surfaceToFaceZone[surfacei],    // zone for face
+                    flipMap[facei]                  // face flip in zone
                 )
             );
         }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,7 +98,7 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::rd
             scalar(10)
         )
     );
-    tr.ref().boundaryField() == 0.0;
+    tr.ref().boundaryFieldRef() == 0.0;
 
     return tr;
 }

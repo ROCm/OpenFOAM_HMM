@@ -356,7 +356,7 @@ inline Foam::scalar Foam::KinematicCloud<CloudType>::Dmax() const
 
 
 template<class CloudType>
-inline Foam::cachedRandom& Foam::KinematicCloud<CloudType>::rndGen()
+inline Foam::cachedRandom& Foam::KinematicCloud<CloudType>::rndGen() const
 {
     return rndGen_;
 }
@@ -431,7 +431,7 @@ Foam::KinematicCloud<CloudType>::SU(volVectorField& U) const
     {
         if (solution_.semiImplicit("U"))
         {
-            const DimensionedField<scalar, volMesh>
+            const volScalarField::Internal
                 Vdt(mesh_.V()*this->db().time().deltaT());
 
             return UTrans()/Vdt - fvm::Sp(UCoeff()/Vdt, U) + UCoeff()/Vdt*U;
@@ -478,12 +478,12 @@ Foam::KinematicCloud<CloudType>::vDotSweep() const
     forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
     {
         const parcelType& p = iter();
-        const label cellI = p.cell();
+        const label celli = p.cell();
 
-        vDotSweep[cellI] += p.nParticle()*p.areaP()*mag(p.U() - U_[cellI]);
+        vDotSweep[celli] += p.nParticle()*p.areaP()*mag(p.U() - U_[celli]);
     }
 
-    vDotSweep.internalField() /= mesh_.V();
+    vDotSweep.primitiveFieldRef() /= mesh_.V();
     vDotSweep.correctBoundaryConditions();
 
     return tvDotSweep;
@@ -517,12 +517,12 @@ Foam::KinematicCloud<CloudType>::theta() const
     forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
     {
         const parcelType& p = iter();
-        const label cellI = p.cell();
+        const label celli = p.cell();
 
-        theta[cellI] += p.nParticle()*p.volume();
+        theta[celli] += p.nParticle()*p.volume();
     }
 
-    theta.internalField() /= mesh_.V();
+    theta.primitiveFieldRef() /= mesh_.V();
     theta.correctBoundaryConditions();
 
     return ttheta;
@@ -551,13 +551,13 @@ Foam::KinematicCloud<CloudType>::alpha() const
         )
     );
 
-    scalarField& alpha = talpha.ref().internalField();
+    scalarField& alpha = talpha.ref().primitiveFieldRef();
     forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
     {
         const parcelType& p = iter();
-        const label cellI = p.cell();
+        const label celli = p.cell();
 
-        alpha[cellI] += p.nParticle()*p.mass();
+        alpha[celli] += p.nParticle()*p.mass();
     }
 
     alpha /= (mesh_.V()*rho_);
@@ -588,13 +588,13 @@ Foam::KinematicCloud<CloudType>::rhoEff() const
         )
     );
 
-    scalarField& rhoEff = trhoEff.ref().internalField();
+    scalarField& rhoEff = trhoEff.ref().primitiveFieldRef();
     forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
     {
         const parcelType& p = iter();
-        const label cellI = p.cell();
+        const label celli = p.cell();
 
-        rhoEff[cellI] += p.nParticle()*p.mass();
+        rhoEff[celli] += p.nParticle()*p.mass();
     }
 
     rhoEff /= mesh_.V();

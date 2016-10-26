@@ -1,8 +1,8 @@
 postPro1
 {
     type            runTimePostProcessing;
-    functionObjectLibs ("librunTimePostProcessing.so");
-    outputControl   outputTime;
+    libs            ("librunTimePostProcessing.so");
+    writeControl    writeTime;
     output
     {
         name            image;

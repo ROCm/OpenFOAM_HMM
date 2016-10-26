@@ -74,6 +74,7 @@ class snappySnapDriver
         // Snapping
 
             //- Calculates (geometric) shared points
+            //  Requires PackedList to be sized and initalised
             static label getCollocatedPoints
             (
                 const scalar tol,
@@ -196,7 +197,7 @@ class snappySnapDriver
                     const scalar featureCos,
                     const indirectPrimitivePatch& pp,
                     const PackedBoolList& isFeatureEdge,
-                    const label pointI
+                    const label pointi
                 ) const;
 
                 void smoothAndConstrain
@@ -302,7 +303,7 @@ class snappySnapDriver
                     const indirectPrimitivePatch& pp,
                     const vectorField& patchAttraction,
                     const List<pointConstraint>& patchConstraints,
-                    const label faceI
+                    const label facei
                 ) const;
 
                 scalar pyrVol
@@ -440,7 +441,7 @@ class snappySnapDriver
                     const indirectPrimitivePatch& pp,
                     const scalarField& snapDist,
                     const vectorField& nearestDisp,
-                    const label pointI,
+                    const label pointi,
 
                     const List<List<point>>& pointFaceSurfNormals,
                     const List<List<point>>& pointFaceDisp,
@@ -552,7 +553,7 @@ class snappySnapDriver
 
                     const indirectPrimitivePatch& pp,
                     const scalarField& snapDist,
-                    const label pointI,
+                    const label pointi,
                     const point& estimatedPt,
 
                     List<List<DynamicList<point>>>&,
@@ -573,7 +574,7 @@ class snappySnapDriver
 
                     const indirectPrimitivePatch& pp,
                     const scalarField& snapDist,
-                    const label pointI,
+                    const label pointi,
                     const point& estimatedPt,
 
                     // Feature-point to pp point
@@ -760,6 +761,9 @@ public:
             );
 
             //- Repatch faces according to surface nearest the face centre
+            //  - calculate face-wise snap distance as max of point-wise
+            //  - calculate face-wise nearest surface point
+            //  - repatch face according to patch for surface point.
             autoPtr<mapPolyMesh> repatchToSurface
             (
                 const snapParameters& snapParams,

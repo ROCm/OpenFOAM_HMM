@@ -32,8 +32,7 @@ Description
     by name "outletPatchName" and applies this as the uniform value of the
     field over this patch.
 
-    \heading Patch usage
-
+Usage
     \table
         Property        | Description             | Required    | Default value
         outletPatchName | name of outlet patch    | yes         |
@@ -42,7 +41,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            outletMappedUniformInlet;
         outletPatchName aPatch;
@@ -51,7 +50,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchField
 
 SourceFiles

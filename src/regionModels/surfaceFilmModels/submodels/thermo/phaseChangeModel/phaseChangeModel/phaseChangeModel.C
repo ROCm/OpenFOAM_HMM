@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,13 +94,13 @@ void phaseChangeModel::correct
         dEnergy
     );
 
-    latestMassPC_ = sum(dMass.internalField());
+    latestMassPC_ = sum(dMass.primitiveField());
     totalMassPC_ += latestMassPC_;
 
     availableMass -= dMass;
     dMass.correctBoundaryConditions();
 
-    if (outputTime())
+    if (writeTime())
     {
         scalar phaseChangeMass = getModelProperty<scalar>("phaseChangeMass");
         phaseChangeMass += returnReduce(totalMassPC_, sumOp<scalar>());

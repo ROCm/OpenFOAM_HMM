@@ -31,8 +31,7 @@ Description
     This boundary condition supplies a fixed value constraint, and is the base
     class for a number of other boundary conditions.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         value        | Patch face values       | yes         |
@@ -40,10 +39,10 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            fixedValue;
-        value           uniform 0;  // example for scalar field usage
+        value           uniform 0;  // Example for scalar field usage
     }
     \endverbatim
 
@@ -100,7 +99,8 @@ public:
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
-            const dictionary&
+            const dictionary&,
+            const bool valueRequired=true
         );
 
         //- Construct by mapping the given fixedValueFvPatchField<Type>

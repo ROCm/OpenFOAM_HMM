@@ -42,7 +42,7 @@ singleStepCombustion<CombThermoType, ThermoType>::singleStepCombustion
 )
 :
     CombThermoType(modelType, mesh, phaseName),
-    singleMixturePtr_(NULL),
+    singleMixturePtr_(nullptr),
     wFuel_
     (
         IOobject
@@ -161,7 +161,7 @@ singleStepCombustion<CombThermoType, ThermoType>::dQ() const
     if (this->active())
     {
         volScalarField& dQ = tdQ.ref();
-        dQ.dimensionedInternalField() = this->mesh().V()*Sh()();
+        dQ.ref() = this->mesh().V()*Sh()();
     }
     return tdQ;
 }

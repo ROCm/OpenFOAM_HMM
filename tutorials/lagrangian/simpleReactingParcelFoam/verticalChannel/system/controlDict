@@ -48,16 +48,16 @@ runTimeModifiable yes;
 
 functions
 {
-    faceSource1
+    surfaceFieldValue1
     {
-        type            faceSource;
-        functionObjectLibs ("libfieldFunctionObjects.so");
+        type            surfaceFieldValue;
+        libs            ("libfieldFunctionObjects.so");
         enabled         yes;
-        outputControl   outputTime;
+        writeControl    writeTime;
         log             yes;
-        valueOutput     no;
-        source          patch;
-        sourceName      outlet;
+        writeFields     no;
+        regionType      patch;
+        name            outlet;
         operation       weightedAverage;
         weightField     phi;
         fields

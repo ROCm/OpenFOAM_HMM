@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,7 @@ Description
         hexMatcher hex(mesh);
         cellShape shape;
         ..
-        bool isHex = hex.match(cellI, shape);
+        bool isHex = hex.match(celli, shape);
     \endverbatim
     Now shape is set to the correct Hex cellShape (if \a isHex is true)
 
@@ -134,7 +134,7 @@ protected:
         //- Map from 'edge' to neighbouring faces
         labelList edgeFaces_;
 
-        //- pointFaceIndex[localVertI][localFaceI] is index in localFace
+        //- pointFaceIndex[localVertI][localFacei] is index in localFace
         //  where localVertI is.
         labelListList pointFaceIndex_;
 
@@ -163,13 +163,13 @@ protected:
         void calcPointFaceIndex();
 
         //- Given start,end of edge lookup both faces sharing it and return
-        //  face != localFaceI
+        //  face != localFacei
         label otherFace
         (
             const label numVert,
             const label v0,
             const label v1,
-            const label localFaceI
+            const label localFacei
         ) const;
 
 
@@ -242,20 +242,20 @@ public:
             //  matching. Returns true and sets vertLabels_.
             //  Needs faces, faceOwner of all faces in 'mesh' and cell number
             //  and labels of faces for this cell.
-            //  cellI only used in combination with faceOwner to detect owner
+            //  celli only used in combination with faceOwner to detect owner
             //  status.
             virtual bool matchShape
             (
                 const bool checkOnly,
                 const faceList& faces,
                 const labelList& faceOwner,
-                const label cellI,
+                const label celli,
                 const labelList& myFaces
             ) = 0;
 
             //- Exact match. Uses faceSizeMatch.
             //  Returns true if cell matches shape exactly.
-            virtual bool isA(const primitiveMesh& mesh, const label cellI) = 0;
+            virtual bool isA(const primitiveMesh& mesh, const label celli) = 0;
 
             //- Exact match given all the faces forming a cell. No checks
             //  on whether faces match up and form a closed shape.
@@ -265,7 +265,7 @@ public:
             virtual bool matches
             (
                 const primitiveMesh& mesh,
-                const label cellI,
+                const label celli,
                 cellShape& shape
             ) = 0;
 

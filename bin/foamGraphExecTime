@@ -1,9 +1,9 @@
-#!/bin/csh -f
+#!/bin/sh
 #------------------------------------------------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -26,38 +26,27 @@
 #     foamGraphExecTime
 #
 # Description
+#     Deprecated script extract the 'ExecutionTime' for each time-step from a
+#     log file for graphing.
 #
+#     Superceded by the more general foamLog script.
 #------------------------------------------------------------------------------
-if (! -f "$1" ) then
-    echo "No file: '$1'"
+Script=${0##*/}
+
+if [ ! -f "$1" ]; then
+    echo "$Script: $1 is not a valid filename"
     exit 1
-endif
+fi
 
-set tmpTime = newTime$$.dat
-cat $1 | grep "ExecutionTime = " | awk 'BEGIN { NENTRIES = 0 ; TPREV = 0.0 }{NENTRIES++; printf("%f %e\n", NENTRIES, $3 - TPREV); TPREV = $3}' - > $tmpTime
+tmpTime=newTime$$.dat
+cat $1 | \
+    grep "ExecutionTime = " | \
+    awk 'BEGIN { NENTRIES = 0 ; TPREV = 0.0 }{NENTRIES++; printf("%f %e\n", NENTRIES, $3 - TPREV); TPREV = $3}' - > $tmpTime
 
-set linesExec = `cat $tmpTime | wc -l`
+if [ "$(cat $tmpTime | wc -l)" -gt 1 ]; then
+    mv $tmpTime executionTime.dat
+fi
 
-set ngraphs = 0
-
-cat << EOF > executionTime.dat
-Solver Performance
-iterations
-time/iteration
-0 0
-0 0
-1
-EOF
-
-if ($linesExec > 1) then
-cat << EOF >> executionTime.dat
-time
-0
-$linesExec
-EOF
-cat $tmpTime >> executionTime.dat
-endif
-
-rm $tmpTime
+rm -f $tmpTime
 
 #------------------------------------------------------------------------------

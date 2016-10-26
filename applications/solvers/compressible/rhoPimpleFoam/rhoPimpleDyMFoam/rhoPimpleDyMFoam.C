@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,8 +28,8 @@ Group
     grpCompressibleSolvers grpMovingMeshSolvers
 
 Description
-    Transient solver for laminar or turbulent flow of compressible fluids
-    for HVAC and similar applications.
+    Transient solver for turbulent flow of compressible fluids for HVAC and
+    similar applications, with optional mesh motion and mesh topology changes.
 
     Uses the flexible PIMPLE (PISO-SIMPLE) solution for time-resolved and
     pseudo-transient simulations.
@@ -51,16 +51,15 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "postProcess.H"
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
-
-    pimpleControl pimple(mesh);
-
-    #include "createRDeltaT.H"
+    #include "createControl.H"
     #include "initContinuityErrs.H"
     #include "createFields.H"
-    #include "createMRF.H"
+    #include "createFieldRefs.H"
     #include "createFvOptions.H"
     #include "createRhoUf.H"
     #include "createControls.H"

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,6 +23,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#define makeTurbulenceModelTypes(Alpha, Rho, baseModel, BaseModel, Transport)  \
+                                                                               \
+    namespace Foam                                                             \
+    {                                                                          \
+        typedef BaseModel<Transport> Transport##BaseModel;                     \
+        typedef laminarModel<Transport##BaseModel>                             \
+            laminar##Transport##BaseModel;                                     \
+        typedef RASModel<Transport##BaseModel> RAS##Transport##BaseModel;      \
+        typedef LESModel<Transport##BaseModel> LES##Transport##BaseModel;      \
+    }
+
+
 #define makeBaseTurbulenceModel(Alpha, Rho, baseModel, BaseModel, Transport)   \
                                                                                \
     namespace Foam                                                             \
@@ -41,22 +53,19 @@ License
             dictionary                                                         \
         );                                                                     \
                                                                                \
-        typedef BaseModel<Transport> Transport##BaseModel;                     \
                                                                                \
+        defineNamedTemplateTypeNameAndDebug(laminar##Transport##BaseModel, 0); \
                                                                                \
-        typedef laminar<Transport##BaseModel> Laminar##Transport##BaseModel;   \
-                                                                               \
-        defineNamedTemplateTypeNameAndDebug(Laminar##Transport##BaseModel, 0); \
+        defineTemplateRunTimeSelectionTable                                    \
+        (laminar##Transport##BaseModel, dictionary);                           \
                                                                                \
         addToRunTimeSelectionTable                                             \
         (                                                                      \
             Transport##baseModel,                                              \
-            Laminar##Transport##BaseModel,                                     \
+            laminar##Transport##BaseModel,                                     \
             dictionary                                                         \
         );                                                                     \
                                                                                \
-                                                                               \
-        typedef RASModel<Transport##BaseModel> RAS##Transport##BaseModel;      \
                                                                                \
         defineNamedTemplateTypeNameAndDebug(RAS##Transport##BaseModel, 0);     \
                                                                                \
@@ -70,8 +79,6 @@ License
             dictionary                                                         \
         );                                                                     \
                                                                                \
-                                                                               \
-        typedef LESModel<Transport##BaseModel> LES##Transport##BaseModel;      \
                                                                                \
         defineNamedTemplateTypeNameAndDebug(LES##Transport##BaseModel, 0);     \
                                                                                \

@@ -31,20 +31,20 @@ boundaryField
         type            compressible::turbulentTemperatureRadCoupledMixed;
         value           uniform 300;
         Tnbr            T;
-        kappa           solidThermo;
+        kappaMethod     solidThermo;
         QrNbr           Qr;
         Qr              none;
-        kappaName       none;
+        kappa           none;
     }
     solid_to_floor
     {
         type            compressible::turbulentTemperatureRadCoupledMixed;
         value           uniform 300;
         Tnbr            T;
-        kappa           solidThermo;
+        kappaMethod     solidThermo;
         QrNbr           none;
         Qr              none;
-        kappaName       none;
+        kappa           none;
     }
 }
 

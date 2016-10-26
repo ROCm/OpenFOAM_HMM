@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +43,18 @@ Foam::HashSet<Key, Hash>::HashSet(const UList<Key>& lst)
 
 
 template<class Key, class Hash>
+Foam::HashSet<Key, Hash>::HashSet(std::initializer_list<Key> lst)
+:
+    HashTable<nil, Key, Hash>(2*lst.size())
+{
+    for (const Key& k : lst)
+    {
+        this->insert(k);
+    }
+}
+
+
+template<class Key, class Hash>
 template<class AnyType, class AnyHash>
 Foam::HashSet<Key, Hash>::HashSet
 (
@@ -73,6 +85,21 @@ Foam::label Foam::HashSet<Key, Hash>::insert(const UList<Key>& lst)
     forAll(lst, elemI)
     {
         if (this->insert(lst[elemI]))
+        {
+            ++count;
+        }
+    }
+
+    return count;
+}
+
+template<class Key, class Hash>
+Foam::label Foam::HashSet<Key, Hash>::insert(std::initializer_list<Key> lst)
+{
+    label count = 0;
+    for (const Key& k : lst)
+    {
+        if (this->insert(k))
         {
             ++count;
         }

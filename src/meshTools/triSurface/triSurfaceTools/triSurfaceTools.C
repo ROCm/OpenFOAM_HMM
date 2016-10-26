@@ -49,54 +49,54 @@ const Foam::label Foam::triSurfaceTools::COLLAPSED = -3;
     Wiley-Teubner, 1996)
 */
 
-// FaceI gets refined ('red'). Propagate edge refinement.
+// Facei gets refined ('red'). Propagate edge refinement.
 void Foam::triSurfaceTools::calcRefineStatus
 (
     const triSurface& surf,
-    const label faceI,
+    const label facei,
     List<refineType>& refine
 )
 {
-    if (refine[faceI] == RED)
+    if (refine[facei] == RED)
     {
         // Already marked for refinement. Do nothing.
     }
     else
     {
         // Not marked or marked for 'green' refinement. Refine.
-        refine[faceI] = RED;
+        refine[facei] = RED;
 
-        const labelList& myNeighbours = surf.faceFaces()[faceI];
+        const labelList& myNeighbours = surf.faceFaces()[facei];
 
         forAll(myNeighbours, myNeighbourI)
         {
-            label neighbourFaceI = myNeighbours[myNeighbourI];
+            label neighbourFacei = myNeighbours[myNeighbourI];
 
-            if (refine[neighbourFaceI] == GREEN)
+            if (refine[neighbourFacei] == GREEN)
             {
                 // Change to red refinement and propagate
-                calcRefineStatus(surf, neighbourFaceI, refine);
+                calcRefineStatus(surf, neighbourFacei, refine);
             }
-            else if (refine[neighbourFaceI] == NONE)
+            else if (refine[neighbourFacei] == NONE)
             {
-                refine[neighbourFaceI] = GREEN;
+                refine[neighbourFacei] = GREEN;
             }
         }
     }
 }
 
 
-// Split faceI along edgeI at position newPointI
+// Split facei along edgeI at position newPointi
 void Foam::triSurfaceTools::greenRefine
 (
     const triSurface& surf,
-    const label faceI,
+    const label facei,
     const label edgeI,
-    const label newPointI,
+    const label newPointi,
     DynamicList<labelledTri>& newFaces
 )
 {
-    const labelledTri& f = surf.localFaces()[faceI];
+    const labelledTri& f = surf.localFaces()[facei];
     const edge& e = surf.edges()[edgeI];
 
     // Find index of edge in face.
@@ -113,7 +113,7 @@ void Foam::triSurfaceTools::greenRefine
             labelledTri
             (
                 f[fp0],
-                newPointI,
+                newPointi,
                 f[fp2],
                 f.region()
             )
@@ -122,7 +122,7 @@ void Foam::triSurfaceTools::greenRefine
         (
             labelledTri
             (
-                newPointI,
+                newPointi,
                 f[fp1],
                 f[fp2],
                 f.region()
@@ -136,7 +136,7 @@ void Foam::triSurfaceTools::greenRefine
             labelledTri
             (
                 f[fp2],
-                newPointI,
+                newPointi,
                 f[fp1],
                 f.region()
             )
@@ -145,7 +145,7 @@ void Foam::triSurfaceTools::greenRefine
         (
             labelledTri
             (
-                newPointI,
+                newPointi,
                 f[fp0],
                 f[fp1],
                 f.region()
@@ -164,9 +164,9 @@ Foam::triSurface Foam::triSurfaceTools::doRefine
 {
     // Storage for new points. (start after old points)
     DynamicList<point> newPoints(surf.nPoints());
-    forAll(surf.localPoints(), pointI)
+    forAll(surf.localPoints(), pointi)
     {
-        newPoints.append(surf.localPoints()[pointI]);
+        newPoints.append(surf.localPoints()[pointi]);
     }
     label newVertI = surf.nPoints();
 
@@ -177,12 +177,12 @@ Foam::triSurface Foam::triSurfaceTools::doRefine
     // Point index for midpoint on edge
     labelList edgeMid(surf.nEdges(), -1);
 
-    forAll(refineStatus, faceI)
+    forAll(refineStatus, facei)
     {
-        if (refineStatus[faceI] == RED)
+        if (refineStatus[facei] == RED)
         {
             // Create new vertices on all edges to be refined.
-            const labelList& fEdges = surf.faceEdges()[faceI];
+            const labelList& fEdges = surf.faceEdges()[facei];
 
             forAll(fEdges, i)
             {
@@ -218,7 +218,7 @@ Foam::triSurface Foam::triSurfaceTools::doRefine
                     edgeMid[fEdges[0]],
                     edges[fEdges[0]].commonVertex(edges[fEdges[1]]),
                     edgeMid[fEdges[1]],
-                    surf[faceI].region()
+                    surf[facei].region()
                 )
             );
 
@@ -229,7 +229,7 @@ Foam::triSurface Foam::triSurfaceTools::doRefine
                     edgeMid[fEdges[1]],
                     edges[fEdges[1]].commonVertex(edges[fEdges[2]]),
                     edgeMid[fEdges[2]],
-                    surf[faceI].region()
+                    surf[facei].region()
                 )
             );
 
@@ -240,7 +240,7 @@ Foam::triSurface Foam::triSurfaceTools::doRefine
                     edgeMid[fEdges[2]],
                     edges[fEdges[2]].commonVertex(edges[fEdges[0]]),
                     edgeMid[fEdges[0]],
-                    surf[faceI].region()
+                    surf[facei].region()
                 )
             );
 
@@ -252,7 +252,7 @@ Foam::triSurface Foam::triSurfaceTools::doRefine
                     edgeMid[fEdges[0]],
                     edgeMid[fEdges[1]],
                     edgeMid[fEdges[2]],
-                    surf[faceI].region()
+                    surf[facei].region()
                 )
             );
 
@@ -262,14 +262,14 @@ Foam::triSurface Foam::triSurfaceTools::doRefine
             {
                 const label edgeI = fEdges[i];
 
-                label otherFaceI = otherFace(surf, faceI, edgeI);
+                label otherFacei = otherFace(surf, facei, edgeI);
 
-                if ((otherFaceI != -1) && (refineStatus[otherFaceI] == GREEN))
+                if ((otherFacei != -1) && (refineStatus[otherFacei] == GREEN))
                 {
                     greenRefine
                     (
                         surf,
-                        otherFaceI,
+                        otherFacei,
                         edgeI,
                         edgeMid[edgeI],
                         newFaces
@@ -280,11 +280,11 @@ Foam::triSurface Foam::triSurfaceTools::doRefine
     }
 
     // Copy unmarked triangles since keep original vertex numbering.
-    forAll(refineStatus, faceI)
+    forAll(refineStatus, facei)
     {
-        if (refineStatus[faceI] == NONE)
+        if (refineStatus[facei] == NONE)
         {
-            newFaces.append(surf.localFaces()[faceI]);
+            newFaces.append(surf.localFaces()[facei]);
         }
     }
 
@@ -339,11 +339,11 @@ void Foam::triSurfaceTools::protectNeighbours
 //    const labelList& myFaces = surf.pointFaces()[vertI];
 //    forAll(myFaces, i)
 //    {
-//        label faceI = myFaces[i];
+//        label facei = myFaces[i];
 //
-//        if ((faceStatus[faceI] == ANYEDGE) || (faceStatus[faceI] >= 0))
+//        if ((faceStatus[facei] == ANYEDGE) || (faceStatus[facei] >= 0))
 //        {
-//            faceStatus[faceI] = NOEDGE;
+//            faceStatus[facei] = NOEDGE;
 //        }
 //    }
 
@@ -352,13 +352,13 @@ void Foam::triSurfaceTools::protectNeighbours
     {
         const labelList& myFaces = surf.edgeFaces()[myEdges[i]];
 
-        forAll(myFaces, myFaceI)
+        forAll(myFaces, myFacei)
         {
-            label faceI = myFaces[myFaceI];
+            label facei = myFaces[myFacei];
 
-            if ((faceStatus[faceI] == ANYEDGE) || (faceStatus[faceI] >= 0))
+            if ((faceStatus[facei] == ANYEDGE) || (faceStatus[facei] >= 0))
             {
-                faceStatus[faceI] = NOEDGE;
+                faceStatus[facei] = NOEDGE;
             }
        }
     }
@@ -385,9 +385,9 @@ Foam::labelHashSet Foam::triSurfaceTools::getCollapsedFaces
 
     labelHashSet facesToBeCollapsed(2*myFaces.size());
 
-    forAll(myFaces, myFaceI)
+    forAll(myFaces, myFacei)
     {
-        facesToBeCollapsed.insert(myFaces[myFaceI]);
+        facesToBeCollapsed.insert(myFaces[myFacei]);
     }
 
     // From faces using v1 check if they share an edge with faces
@@ -396,9 +396,9 @@ Foam::labelHashSet Foam::triSurfaceTools::getCollapsedFaces
     //    collapses
     const labelList& v1Faces = surf.pointFaces()[v1];
 
-    forAll(v1Faces, v1FaceI)
+    forAll(v1Faces, v1Facei)
     {
-        label face1I = v1Faces[v1FaceI];
+        label face1I = v1Faces[v1Facei];
 
         label otherEdgeI = oppositeEdge(surf, face1I, v1);
 
@@ -432,9 +432,9 @@ Foam::label Foam::triSurfaceTools::vertexUsesFace
 {
     const labelList& myFaces = surf.pointFaces()[vertI];
 
-    forAll(myFaces, myFaceI)
+    forAll(myFaces, myFacei)
     {
-        label face1I = myFaces[myFaceI];
+        label face1I = myFaces[myFacei];
 
         if (faceUsed.found(face1I))
         {
@@ -465,18 +465,18 @@ void Foam::triSurfaceTools::getMergedEdges
     // Mark all (non collapsed) faces using v2
     labelHashSet v2FacesHash(v2Faces.size());
 
-    forAll(v2Faces, v2FaceI)
+    forAll(v2Faces, v2Facei)
     {
-        if (!collapsedFaces.found(v2Faces[v2FaceI]))
+        if (!collapsedFaces.found(v2Faces[v2Facei]))
         {
-            v2FacesHash.insert(v2Faces[v2FaceI]);
+            v2FacesHash.insert(v2Faces[v2Facei]);
         }
     }
 
 
-    forAll(v1Faces, v1FaceI)
+    forAll(v1Faces, v1Facei)
     {
-        label face1I = v1Faces[v1FaceI];
+        label face1I = v1Faces[v1Facei];
 
         if (collapsedFaces.found(face1I))
         {
@@ -526,7 +526,7 @@ void Foam::triSurfaceTools::getMergedEdges
 }
 
 
-// Calculates (cos of) angle across edgeI of faceI,
+// Calculates (cos of) angle across edgeI of facei,
 // taking into account updated addressing (resulting from edge collapse)
 Foam::scalar Foam::triSurfaceTools::edgeCosAngle
 (
@@ -536,7 +536,7 @@ Foam::scalar Foam::triSurfaceTools::edgeCosAngle
     const labelHashSet& collapsedFaces,
     const HashTable<label, label, Hash<label>>& edgeToEdge,
     const HashTable<label, label, Hash<label>>& edgeToFace,
-    const label faceI,
+    const label facei,
     const label edgeI
 )
 {
@@ -544,7 +544,7 @@ Foam::scalar Foam::triSurfaceTools::edgeCosAngle
 
     label A = surf.edges()[edgeI].start();
     label B = surf.edges()[edgeI].end();
-    label C = oppositeVertex(surf, faceI, edgeI);
+    label C = oppositeVertex(surf, facei, edgeI);
 
     label D = -1;
 
@@ -561,7 +561,7 @@ Foam::scalar Foam::triSurfaceTools::edgeCosAngle
     else
     {
         // Use normal edge-face addressing
-        face2I = otherFace(surf, faceI, edgeI);
+        face2I = otherFace(surf, facei, edgeI);
 
         if ((face2I != -1) && !collapsedFaces.found(face2I))
         {
@@ -616,7 +616,7 @@ Foam::scalar Foam::triSurfaceTools::edgeCosAngle
         else
         {
             FatalErrorInFunction
-                << "face " << faceI << " does not use vertex "
+                << "face " << facei << " does not use vertex "
                 << v1 << " of collapsed edge" << abort(FatalError);
         }
     }
@@ -638,16 +638,16 @@ Foam::scalar Foam::triSurfaceTools::collapseMinCosAngle
 
     scalar minCos = 1;
 
-    forAll(v1Faces, v1FaceI)
+    forAll(v1Faces, v1Facei)
     {
-        label faceI = v1Faces[v1FaceI];
+        label facei = v1Faces[v1Facei];
 
-        if (collapsedFaces.found(faceI))
+        if (collapsedFaces.found(facei))
         {
             continue;
         }
 
-        const labelList& myEdges = surf.faceEdges()[faceI];
+        const labelList& myEdges = surf.faceEdges()[facei];
 
         forAll(myEdges, myEdgeI)
         {
@@ -665,7 +665,7 @@ Foam::scalar Foam::triSurfaceTools::collapseMinCosAngle
                         collapsedFaces,
                         edgeToEdge,
                         edgeToFace,
-                        faceI,
+                        facei,
                         edgeI
                     )
                 );
@@ -691,16 +691,16 @@ bool Foam::triSurfaceTools::collapseCreatesFold
 {
     const labelList& v1Faces = surf.pointFaces()[v1];
 
-    forAll(v1Faces, v1FaceI)
+    forAll(v1Faces, v1Facei)
     {
-        label faceI = v1Faces[v1FaceI];
+        label facei = v1Faces[v1Facei];
 
-        if (collapsedFaces.found(faceI))
+        if (collapsedFaces.found(facei))
         {
             continue;
         }
 
-        const labelList& myEdges = surf.faceEdges()[faceI];
+        const labelList& myEdges = surf.faceEdges()[facei];
 
         forAll(myEdges, myEdgeI)
         {
@@ -716,7 +716,7 @@ bool Foam::triSurfaceTools::collapseCreatesFold
                     collapsedFaces,
                     edgeToEdge,
                     edgeToFace,
-                    faceI,
+                    facei,
                     edgeI
                 )
               < minCos
@@ -755,11 +755,11 @@ bool Foam::triSurfaceTools::collapseCreatesFold
 //
 //    forAll(collapsed, collapseI)
 //    {
-//        const label faceI = collapsed[collapseI];
+//        const label facei = collapsed[collapseI];
 //
-//        const labelList& myEdges = surf.faceEdges()[faceI];
+//        const labelList& myEdges = surf.faceEdges()[facei];
 //
-//        Pout<< "collapsing faceI:" << faceI << " uses edges:" << myEdges
+//        Pout<< "collapsing facei:" << facei << " uses edges:" << myEdges
 //            << endl;
 //
 //        forAll(myEdges, myEdgeI)
@@ -772,17 +772,17 @@ bool Foam::triSurfaceTools::collapseCreatesFold
 //            if ((myEdges[myEdgeI] != edgeI) && (myFaces.size() == 2))
 //            {
 //                // Get the other face
-//                label neighbourFaceI = myFaces[0];
+//                label neighbourFacei = myFaces[0];
 //
-//                if (neighbourFaceI == faceI)
+//                if (neighbourFacei == facei)
 //                {
-//                    neighbourFaceI = myFaces[1];
+//                    neighbourFacei = myFaces[1];
 //                }
 //
 //                // Is 'outside' face if not in collapsedFaces itself
-//                if (!collapsedFaces.found(neighbourFaceI))
+//                if (!collapsedFaces.found(neighbourFacei))
 //                {
-//                    neighbours.insert(neighbourFaceI, myEdges[myEdgeI]);
+//                    neighbours.insert(neighbourFacei, myEdges[myEdgeI]);
 //                }
 //            }
 //        }
@@ -812,7 +812,7 @@ bool Foam::triSurfaceTools::collapseCreatesFold
 //        {
 //            const labelList& faceJEdges = surf.faceEdges()[neighbourList[j]];
 //
-//            // Check if faceI and faceJ share an edge
+//            // Check if facei and faceJ share an edge
 //            forAll(faceIEdges, fI)
 //            {
 //                forAll(faceJEdges, fJ)
@@ -842,7 +842,7 @@ Foam::surfaceLocation Foam::triSurfaceTools::cutEdge
     const triSurface& s,
     const label triI,
     const label excludeEdgeI,
-    const label excludePointI,
+    const label excludePointi,
 
     const point& triPoint,
     const plane& cutPlane,
@@ -877,11 +877,11 @@ Foam::surfaceLocation Foam::triSurfaceTools::cutEdge
     // Return information
     surfaceLocation cut;
 
-    if (excludePointI != -1)
+    if (excludePointi != -1)
     {
         // Excluded point. Test only opposite edge.
 
-        label fp0 = findIndex(s.localFaces()[triI], excludePointI);
+        label fp0 = findIndex(s.localFaces()[triI], excludePointi);
 
         if (fp0 == -1)
         {
@@ -1166,7 +1166,7 @@ Foam::surfaceLocation Foam::triSurfaceTools::visitFaces
     const labelList& eFaces,
     const surfaceLocation& start,
     const label excludeEdgeI,
-    const label excludePointI,
+    const label excludePointi,
     const surfaceLocation& end,
     const plane& cutPlane
 )
@@ -1199,7 +1199,7 @@ Foam::surfaceLocation Foam::triSurfaceTools::visitFaces
                     s,
                     triI,
                     excludeEdgeI,       // excludeEdgeI
-                    excludePointI,      // excludePointI
+                    excludePointi,      // excludePointi
                     start.rawPoint(),
                     cutPlane,
                     end.rawPoint()
@@ -1255,9 +1255,9 @@ void Foam::triSurfaceTools::writeOBJ
 {
     OFstream outFile(fName);
 
-    forAll(pts, pointI)
+    forAll(pts, pointi)
     {
-        const point& pt = pts[pointI];
+        const point& pt = pts[pointi];
 
         outFile<< "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
     }
@@ -1321,18 +1321,18 @@ void Foam::triSurfaceTools::getVertexTriangles
     edgeTris.setSize(startFaces.size() + endFaces.size() - myFaces.size());
 
     label nTris = 0;
-    forAll(startFaces, startFaceI)
+    forAll(startFaces, startFacei)
     {
-        edgeTris[nTris++] = startFaces[startFaceI];
+        edgeTris[nTris++] = startFaces[startFacei];
     }
 
-    forAll(endFaces, endFaceI)
+    forAll(endFaces, endFacei)
     {
-        label faceI = endFaces[endFaceI];
+        label facei = endFaces[endFacei];
 
-        if ((faceI != face1I) && (faceI != face2I))
+        if ((facei != face1I) && (facei != face2I))
         {
-            edgeTris[nTris++] = faceI;
+            edgeTris[nTris++] = facei;
         }
     }
 }
@@ -1427,7 +1427,7 @@ Foam::labelList Foam::triSurfaceTools::getVertexVertices
 Foam::label Foam::triSurfaceTools::otherFace
 (
     const triSurface& surf,
-    const label faceI,
+    const label facei,
     const label edgeI
 )
 {
@@ -1439,7 +1439,7 @@ Foam::label Foam::triSurfaceTools::otherFace
     }
     else
     {
-        if (faceI == myFaces[0])
+        if (facei == myFaces[0])
         {
             return myFaces[1];
         }
@@ -1451,17 +1451,17 @@ Foam::label Foam::triSurfaceTools::otherFace
 }
 
 
-// Get the two edges on faceI counterclockwise after edgeI
+// Get the two edges on facei counterclockwise after edgeI
 void Foam::triSurfaceTools::otherEdges
 (
     const triSurface& surf,
-    const label faceI,
+    const label facei,
     const label edgeI,
     label& e1,
     label& e2
 )
 {
-    const labelList& eFaces = surf.faceEdges()[faceI];
+    const labelList& eFaces = surf.faceEdges()[facei];
 
     label i0 = findIndex(eFaces, edgeI);
 
@@ -1469,7 +1469,7 @@ void Foam::triSurfaceTools::otherEdges
     {
         FatalErrorInFunction
             << "Edge " << surf.edges()[edgeI] << " not in face "
-            << surf.localFaces()[faceI] << abort(FatalError);
+            << surf.localFaces()[facei] << abort(FatalError);
     }
 
     label i1 = eFaces.fcIndex(i0);
@@ -1480,17 +1480,17 @@ void Foam::triSurfaceTools::otherEdges
 }
 
 
-// Get the two vertices on faceI counterclockwise vertI
+// Get the two vertices on facei counterclockwise vertI
 void Foam::triSurfaceTools::otherVertices
 (
     const triSurface& surf,
-    const label faceI,
+    const label facei,
     const label vertI,
     label& vert1I,
     label& vert2I
 )
 {
-    const labelledTri& f = surf.localFaces()[faceI];
+    const labelledTri& f = surf.localFaces()[facei];
 
     if (vertI == f[0])
     {
@@ -1519,11 +1519,11 @@ void Foam::triSurfaceTools::otherVertices
 Foam::label Foam::triSurfaceTools::oppositeEdge
 (
     const triSurface& surf,
-    const label faceI,
+    const label facei,
     const label vertI
 )
 {
-    const labelList& myEdges = surf.faceEdges()[faceI];
+    const labelList& myEdges = surf.faceEdges()[facei];
 
     forAll(myEdges, myEdgeI)
     {
@@ -1538,7 +1538,7 @@ Foam::label Foam::triSurfaceTools::oppositeEdge
     }
 
     FatalErrorInFunction
-        << "Cannot find vertex " << vertI << " in edges of face " << faceI
+        << "Cannot find vertex " << vertI << " in edges of face " << facei
         << abort(FatalError);
 
     return -1;
@@ -1549,11 +1549,11 @@ Foam::label Foam::triSurfaceTools::oppositeEdge
 Foam::label Foam::triSurfaceTools::oppositeVertex
 (
     const triSurface& surf,
-    const label faceI,
+    const label facei,
     const label edgeI
 )
 {
-    const triSurface::FaceType& f = surf.localFaces()[faceI];
+    const triSurface::FaceType& f = surf.localFaces()[facei];
     const edge& e = surf.edges()[edgeI];
 
     forAll(f, fp)
@@ -1568,7 +1568,7 @@ Foam::label Foam::triSurfaceTools::oppositeVertex
 
     FatalErrorInFunction
         << "Cannot find vertex opposite edge " << edgeI << " vertices " << e
-        << " in face " << faceI << " vertices " << f << abort(FatalError);
+        << " in face " << facei << " vertices " << f << abort(FatalError);
 
     return -1;
 }
@@ -1617,11 +1617,11 @@ Foam::label Foam::triSurfaceTools::getTriangle
 
     const labelList& eFaces = surf.edgeFaces()[e0I];
 
-    forAll(eFaces, eFaceI)
+    forAll(eFaces, eFacei)
     {
-        label faceI = eFaces[eFaceI];
+        label facei = eFaces[eFacei];
 
-        const labelList& myEdges = surf.faceEdges()[faceI];
+        const labelList& myEdges = surf.faceEdges()[facei];
 
         if
         (
@@ -1637,7 +1637,7 @@ Foam::label Foam::triSurfaceTools::getTriangle
              || (myEdges[2] == e2I)
             )
             {
-                return faceI;
+                return facei;
             }
         }
     }
@@ -1716,9 +1716,9 @@ Foam::triSurface Foam::triSurfaceTools::collapseEdges
 
     // Map for old to new points
     labelList pointMap(localPoints.size());
-    forAll(localPoints, pointI)
+    forAll(localPoints, pointi)
     {
-        pointMap[pointI] = pointI;
+        pointMap[pointi] = pointi;
     }
 
 
@@ -1818,9 +1818,9 @@ Foam::triSurface Foam::triSurfaceTools::collapseEdges
 
 
     // Get only non-collapsed triangles and renumber vertex labels.
-    forAll(localFaces, faceI)
+    forAll(localFaces, facei)
     {
-        const labelledTri& f = localFaces[faceI];
+        const labelledTri& f = localFaces[facei];
 
         const label a = pointMap[f[0]];
         const label b = pointMap[f[1]];
@@ -1829,7 +1829,7 @@ Foam::triSurface Foam::triSurfaceTools::collapseEdges
         if
         (
             (a != b) && (a != c) && (b != c)
-         && (faceStatus[faceI] != COLLAPSED)
+         && (faceStatus[facei] != COLLAPSED)
         )
         {
             // uncollapsed triangle
@@ -1837,7 +1837,7 @@ Foam::triSurface Foam::triSurfaceTools::collapseEdges
         }
         else
         {
-            //Pout<< "Collapsed triangle " << faceI
+            //Pout<< "Collapsed triangle " << facei
             //    << " vertices:" << f << endl;
         }
     }
@@ -1870,9 +1870,9 @@ Foam::triSurface Foam::triSurfaceTools::redGreenRefine
     List<refineType> refineStatus(surf.size(), NONE);
 
     // Mark & propagate refinement
-    forAll(refineFaces, refineFaceI)
+    forAll(refineFaces, refineFacei)
     {
-        calcRefineStatus(surf, refineFaces[refineFaceI], refineStatus);
+        calcRefineStatus(surf, refineFaces[refineFacei], refineStatus);
     }
 
     // Do actual refinement
@@ -1894,7 +1894,7 @@ Foam::triSurface Foam::triSurfaceTools::greenRefine
 
     pointField newPoints(surf.localPoints());
     newPoints.setSize(surf.nPoints() + surf.nEdges());
-    label newPointI = surf.nPoints();
+    label newPointi = surf.nPoints();
 
 
     // Refine edges
@@ -1906,9 +1906,9 @@ Foam::triSurface Foam::triSurfaceTools::greenRefine
 
         bool neighbourIsRefined= false;
 
-        forAll(myFaces, myFaceI)
+        forAll(myFaces, myFacei)
         {
-            if (refineStatus[myFaces[myFaceI]] != NONE)
+            if (refineStatus[myFaces[myFacei]] != NONE)
             {
                 neighbourIsRefined =  true;
             }
@@ -1927,40 +1927,40 @@ Foam::triSurface Foam::triSurfaceTools::greenRefine
                   + surf.localPoints()[e.end()]
                 );
 
-            newPoints[newPointI] = mid;
+            newPoints[newPointi] = mid;
 
             // Refine faces using edge
-            forAll(myFaces, myFaceI)
+            forAll(myFaces, myFacei)
             {
                 // Add faces to newFaces
                 greenRefine
                 (
                     surf,
-                    myFaces[myFaceI],
+                    myFaces[myFacei],
                     edgeI,
-                    newPointI,
+                    newPointi,
                     newFaces
                 );
 
                 // Mark as refined
-                refineStatus[myFaces[myFaceI]] = GREEN;
+                refineStatus[myFaces[myFacei]] = GREEN;
             }
 
-            newPointI++;
+            newPointi++;
         }
     }
 
     // Add unrefined faces
-    forAll(surf.localFaces(), faceI)
+    forAll(surf.localFaces(), facei)
     {
-        if (refineStatus[faceI] == NONE)
+        if (refineStatus[facei] == NONE)
         {
-            newFaces.append(surf.localFaces()[faceI]);
+            newFaces.append(surf.localFaces()[facei]);
         }
     }
 
     newFaces.shrink();
-    newPoints.setSize(newPointI);
+    newPoints.setSize(newPointi);
 
     return triSurface(newFaces, surf.patches(), newPoints, true);
 }
@@ -2059,9 +2059,9 @@ Foam::triSurface Foam::triSurfaceTools::mergePoints
         List<labelledTri> newTriangles(surf.size());
         label newTriangleI = 0;
 
-        forAll(surf, faceI)
+        forAll(surf, facei)
         {
-            const labelledTri& f = surf.localFaces()[faceI];
+            const labelledTri& f = surf.localFaces()[facei];
 
             label newA = pointMap[f[0]];
             label newB = pointMap[f[1]];
@@ -2094,11 +2094,11 @@ Foam::triSurface Foam::triSurfaceTools::mergePoints
 Foam::vector Foam::triSurfaceTools::surfaceNormal
 (
     const triSurface& surf,
-    const label nearestFaceI,
+    const label nearestFacei,
     const point& nearestPt
 )
 {
-    const triSurface::FaceType& f = surf[nearestFaceI];
+    const triSurface::FaceType& f = surf[nearestFacei];
     const pointField& points = surf.points();
 
     label nearType, nearLabel;
@@ -2108,12 +2108,12 @@ Foam::vector Foam::triSurfaceTools::surfaceNormal
     if (nearType == triPointRef::NONE)
     {
         // Nearest to face
-        return surf.faceNormals()[nearestFaceI];
+        return surf.faceNormals()[nearestFacei];
     }
     else if (nearType == triPointRef::EDGE)
     {
         // Nearest to edge. Assume order of faceEdges same as face vertices.
-        label edgeI = surf.faceEdges()[nearestFaceI][nearLabel];
+        label edgeI = surf.faceEdges()[nearestFacei][nearLabel];
 
         // Calculate edge normal by averaging face normals
         const labelList& eFaces = surf.edgeFaces()[edgeI];
@@ -2129,7 +2129,7 @@ Foam::vector Foam::triSurfaceTools::surfaceNormal
     else
     {
         // Nearest to point
-        const triSurface::FaceType& localF = surf.localFaces()[nearestFaceI];
+        const triSurface::FaceType& localF = surf.localFaces()[nearestFacei];
         return surf.pointNormals()[localF[nearLabel]];
     }
 }
@@ -2176,10 +2176,10 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
 (
     const triSurface& surf,
     const point& sample,
-    const label nearestFaceI
+    const label nearestFacei
 )
 {
-    const triSurface::FaceType& f = surf[nearestFaceI];
+    const triSurface::FaceType& f = surf[nearestFacei];
     const pointField& points = surf.points();
 
     // Find where point is on face
@@ -2194,7 +2194,7 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
         vector sampleNearestVec = (sample - nearestPoint);
 
         // Nearest to face interior. Use faceNormal to determine side
-        scalar c = sampleNearestVec & surf.faceNormals()[nearestFaceI];
+        scalar c = sampleNearestVec & surf.faceNormals()[nearestFacei];
 
         // // If the sample is essentially on the face, do not check for
         // // it being perpendicular.
@@ -2203,7 +2203,7 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
 
         // if (magSampleNearestVec > SMALL)
         // {
-        //     c /= magSampleNearestVec*mag(surf.faceNormals()[nearestFaceI]);
+        //     c /= magSampleNearestVec*mag(surf.faceNormals()[nearestFacei]);
 
         //     if (mag(c) < 0.99)
         //     {
@@ -2215,7 +2215,7 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
         //             << "nearestPoint: " << nearestPoint << nl
         //             << "sample - nearestPoint: "
         //             << sample - nearestPoint << nl
-        //             << "normal: " << surf.faceNormals()[nearestFaceI] << nl
+        //             << "normal: " << surf.faceNormals()[nearestFacei] << nl
         //             << "mag(sample - nearestPoint): "
         //             << mag(sample - nearestPoint) << nl
         //             << "normalised dot product: " << c << nl
@@ -2242,7 +2242,7 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
         // situation since otherwise the nearest point could never be the edge.
 
         // Get the edge. Assume order of faceEdges same as face vertices.
-        label edgeI = surf.faceEdges()[nearestFaceI][nearLabel];
+        label edgeI = surf.faceEdges()[nearestFacei][nearLabel];
 
         // if (debug)
         // {
@@ -2275,14 +2275,14 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
         // above (nearType == triPointRef::EDGE).
 
 
-        const triSurface::FaceType& localF = surf.localFaces()[nearestFaceI];
-        label nearPointI = localF[nearLabel];
+        const triSurface::FaceType& localF = surf.localFaces()[nearestFacei];
+        label nearPointi = localF[nearLabel];
 
         const edgeList& edges = surf.edges();
         const pointField& localPoints = surf.localPoints();
-        const point& base = localPoints[nearPointI];
+        const point& base = localPoints[nearPointi];
 
-        const labelList& pEdges = surf.pointEdges()[nearPointI];
+        const labelList& pEdges = surf.pointEdges()[nearPointi];
 
         scalar minDistSqr = Foam::sqr(GREAT);
         label minEdgeI = -1;
@@ -2293,10 +2293,10 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
 
             const edge& e = edges[edgeI];
 
-            label otherPointI = e.otherVertex(nearPointI);
+            label otherPointi = e.otherVertex(nearPointi);
 
             // Get edge normal.
-            vector eVec(localPoints[otherPointI] - base);
+            vector eVec(localPoints[otherPointi] - base);
             scalar magEVec = mag(eVec);
 
             if (magEVec > VSMALL)
@@ -2344,19 +2344,19 @@ Foam::triSurface Foam::triSurfaceTools::triangulate
         mesh.nFaces() - mesh.nInternalFaces()
     );
 
-    label newPatchI = 0;
+    label newPatchi = 0;
 
     forAllConstIter(labelHashSet, includePatches, iter)
     {
-        const label patchI = iter.key();
-        const polyPatch& patch = bMesh[patchI];
+        const label patchi = iter.key();
+        const polyPatch& patch = bMesh[patchi];
         const pointField& points = patch.points();
 
         label nTriTotal = 0;
 
-        forAll(patch, patchFaceI)
+        forAll(patch, patchFacei)
         {
-            const face& f = patch[patchFaceI];
+            const face& f = patch[patchFacei];
 
             faceList triFaces(f.nTriangles(points));
 
@@ -2364,11 +2364,11 @@ Foam::triSurface Foam::triSurfaceTools::triangulate
 
             f.triangles(points, nTri, triFaces);
 
-            forAll(triFaces, triFaceI)
+            forAll(triFaces, triFacei)
             {
-                const face& f = triFaces[triFaceI];
+                const face& f = triFaces[triFacei];
 
-                triangles.append(labelledTri(f[0], f[1], f[2], newPatchI));
+                triangles.append(labelledTri(f[0], f[1], f[2], newPatchi));
 
                 nTriTotal++;
             }
@@ -2378,10 +2378,10 @@ Foam::triSurface Foam::triSurfaceTools::triangulate
         {
             Pout<< patch.name() << " : generated " << nTriTotal
                 << " triangles from " << patch.size() << " faces with"
-                << " new patchid " << newPatchI << endl;
+                << " new patchid " << newPatchi << endl;
         }
 
-        newPatchI++;
+        newPatchi++;
     }
     triangles.shrink();
 
@@ -2396,19 +2396,19 @@ Foam::triSurface Foam::triSurfaceTools::triangulate
     );
 
     // Add patch names to surface
-    surface.patches().setSize(newPatchI);
+    surface.patches().setSize(newPatchi);
 
-    newPatchI = 0;
+    newPatchi = 0;
 
     forAllConstIter(labelHashSet, includePatches, iter)
     {
-        const label patchI = iter.key();
-        const polyPatch& patch = bMesh[patchI];
+        const label patchi = iter.key();
+        const polyPatch& patch = bMesh[patchi];
 
-        surface.patches()[newPatchI].name() = patch.name();
-        surface.patches()[newPatchI].geometricType() = patch.type();
+        surface.patches()[newPatchi].name() = patch.name();
+        surface.patches()[newPatchi].geometricType() = patch.type();
 
-        newPatchI++;
+        newPatchi++;
     }
 
     return surface;
@@ -2431,15 +2431,15 @@ Foam::triSurface Foam::triSurfaceTools::triangulateFaceCentre
 
     pointField newPoints(points.size() + faceCentres.size());
 
-    label newPointI = 0;
+    label newPointi = 0;
 
-    forAll(points, pointI)
+    forAll(points, pointi)
     {
-        newPoints[newPointI++] = points[pointI];
+        newPoints[newPointi++] = points[pointi];
     }
-    forAll(faceCentres, faceI)
+    forAll(faceCentres, facei)
     {
-        newPoints[newPointI++] = faceCentres[faceI];
+        newPoints[newPointi++] = faceCentres[facei];
     }
 
 
@@ -2449,28 +2449,28 @@ Foam::triSurface Foam::triSurfaceTools::triangulateFaceCentre
         mesh.nFaces() - mesh.nInternalFaces()
     );
 
-    label newPatchI = 0;
+    label newPatchi = 0;
 
     forAllConstIter(labelHashSet, includePatches, iter)
     {
-        const label patchI = iter.key();
-        const polyPatch& patch = bMesh[patchI];
+        const label patchi = iter.key();
+        const polyPatch& patch = bMesh[patchi];
 
         label nTriTotal = 0;
 
-        forAll(patch, patchFaceI)
+        forAll(patch, patchFacei)
         {
             // Face in global coords.
-            const face& f = patch[patchFaceI];
+            const face& f = patch[patchFacei];
 
-            // Index in newPointI of face centre.
-            label fc = points.size() + patchFaceI + patch.start();
+            // Index in newPointi of face centre.
+            label fc = points.size() + patchFacei + patch.start();
 
             forAll(f, fp)
             {
                 label fp1 = f.fcIndex(fp);
 
-                triangles.append(labelledTri(f[fp], f[fp1], fc, newPatchI));
+                triangles.append(labelledTri(f[fp], f[fp1], fc, newPatchi));
 
                 nTriTotal++;
             }
@@ -2480,10 +2480,10 @@ Foam::triSurface Foam::triSurfaceTools::triangulateFaceCentre
         {
             Pout<< patch.name() << " : generated " << nTriTotal
                 << " triangles from " << patch.size() << " faces with"
-                << " new patchid " << newPatchI << endl;
+                << " new patchid " << newPatchi << endl;
         }
 
-        newPatchI++;
+        newPatchi++;
     }
     triangles.shrink();
 
@@ -2499,19 +2499,19 @@ Foam::triSurface Foam::triSurfaceTools::triangulateFaceCentre
     );
 
     // Add patch names to surface
-    surface.patches().setSize(newPatchI);
+    surface.patches().setSize(newPatchi);
 
-    newPatchI = 0;
+    newPatchi = 0;
 
     forAllConstIter(labelHashSet, includePatches, iter)
     {
-        const label patchI = iter.key();
-        const polyPatch& patch = bMesh[patchI];
+        const label patchi = iter.key();
+        const polyPatch& patch = bMesh[patchi];
 
-        surface.patches()[newPatchI].name() = patch.name();
-        surface.patches()[newPatchI].geometricType() = patch.type();
+        surface.patches()[newPatchi].name() = patch.name();
+        surface.patches()[newPatchi].geometricType() = patch.type();
 
-        newPatchI++;
+        newPatchi++;
     }
 
     return surface;
@@ -2638,9 +2638,9 @@ void Foam::triSurfaceTools::calcInterpolationWeights
 
         scalar minDistance = GREAT;
 
-        forAll(s, faceI)
+        forAll(s, facei)
         {
-            const labelledTri& f = s[faceI];
+            const labelledTri& f = s[facei];
 
             triPointRef tri(f.tri(points));
 
@@ -2663,7 +2663,7 @@ void Foam::triSurfaceTools::calcInterpolationWeights
                 calcInterpolationWeights(tri, nearest.rawPoint(), weights);
 
                 //Pout<< "calcScalingFactors : samplePt:" << samplePt
-                //    << " inside triangle:" << faceI
+                //    << " inside triangle:" << facei
                 //    << " verts:" << verts
                 //    << " weights:" << weights
                 //    << endl;
@@ -2843,7 +2843,7 @@ Foam::surfaceLocation Foam::triSurfaceTools::trackToEdge
                 eFaces,
                 start,
                 start.index(),      // excludeEdgeI
-                -1,                 // excludePointI
+                -1,                 // excludePointi
                 end,
                 cutPlane
             );
@@ -2858,7 +2858,7 @@ Foam::surfaceLocation Foam::triSurfaceTools::trackToEdge
                 pFaces,
                 start,
                 -1,                 // excludeEdgeI
-                start.index(),      // excludePointI
+                start.index(),      // excludePointi
                 end,
                 cutPlane
             );

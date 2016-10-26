@@ -41,6 +41,38 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
 template<class Type>
 Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
 (
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
+    const dictionary& dict
+)
+:
+    cyclicAMILduInterfaceField(),
+    coupledFvPatchField<Type>(p, iF, dict, dict.found("value")),
+    cyclicAMIPatch_(refCast<const cyclicAMIFvPatch>(p))
+{
+    if (!isA<cyclicAMIFvPatch>(p))
+    {
+        FatalIOErrorInFunction
+        (
+            dict
+        )   << "    patch type '" << p.type()
+            << "' not constraint type '" << typeName << "'"
+            << "\n    for patch " << p.name()
+            << " of field " << this->internalField().name()
+            << " in file " << this->internalField().objectPath()
+            << exit(FatalIOError);
+    }
+
+    if (!dict.found("value") && this->coupled())
+    {
+        this->evaluate(Pstream::blocking);
+    }
+}
+
+
+template<class Type>
+Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
+(
     const cyclicAMIFvPatchField<Type>& ptf,
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -56,41 +88,9 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
         FatalErrorInFunction
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
-            << " of field " << this->dimensionedInternalField().name()
-            << " in file " << this->dimensionedInternalField().objectPath()
+            << " of field " << this->internalField().name()
+            << " in file " << this->internalField().objectPath()
             << exit(FatalIOError);
-    }
-}
-
-
-template<class Type>
-Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
-(
-    const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF,
-    const dictionary& dict
-)
-:
-    cyclicAMILduInterfaceField(),
-    coupledFvPatchField<Type>(p, iF, dict),
-    cyclicAMIPatch_(refCast<const cyclicAMIFvPatch>(p))
-{
-    if (!isA<cyclicAMIFvPatch>(p))
-    {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "    patch type '" << p.type()
-            << "' not constraint type '" << typeName << "'"
-            << "\n    for patch " << p.name()
-            << " of field " << this->dimensionedInternalField().name()
-            << " in file " << this->dimensionedInternalField().objectPath()
-            << exit(FatalIOError);
-    }
-
-    if (!dict.found("value") && this->coupled())
-    {
-        this->evaluate(Pstream::blocking);
     }
 }
 
@@ -133,7 +133,7 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::cyclicAMIFvPatchField<Type>::patchNeighbourField() const
 {
-    const Field<Type>& iField = this->internalField();
+    const Field<Type>& iField = this->primitiveField();
     const labelUList& nbrFaceCells =
         cyclicAMIPatch_.cyclicAMIPatch().neighbPatch().faceCells();
 
@@ -165,7 +165,7 @@ Foam::cyclicAMIFvPatchField<Type>::neighbourPatchField() const
     const GeometricField<Type, fvPatchField, volMesh>& fld =
         static_cast<const GeometricField<Type, fvPatchField, volMesh>&>
         (
-            this->internalField()
+            this->primitiveField()
         );
 
     return refCast<const cyclicAMIFvPatchField<Type>>

@@ -159,7 +159,7 @@ public:
         virtual void calculate
         (
             const scalar dt,
-            const label cellI,
+            const label celli,
             const scalar Re,
             const scalar Pr,
             const scalar d,

@@ -134,7 +134,7 @@ protected:
         void insertMatrixElements
         (
             const globalIndex& index,
-            const label fromProcI,
+            const label fromProci,
             const labelListList& globalFaceFaces,
             const scalarListList& viewFactors,
             scalarSquareMatrix& matrix
@@ -180,7 +180,7 @@ public:
             virtual tmp<volScalarField> Rp() const;
 
             //- Source term component (constant)
-            virtual tmp<DimensionedField<scalar, volMesh>> Ru() const;
+            virtual tmp<volScalarField::Internal> Ru() const;
 
 
     // Access

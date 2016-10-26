@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -152,8 +152,8 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     QrNbrName_("none"),
     QrName_("none"),
     specieName_("none"),
-    liquid_(NULL),
-    liquidDict_(NULL),
+    liquid_(nullptr),
+    liquidDict_(nullptr),
     mass_(patch().size(), 0.0),
     Tvap_(0.0),
     myKDelta_(patch().size(), 0.0),
@@ -227,7 +227,7 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     QrNbrName_(dict.lookupOrDefault<word>("QrNbr", "none")),
     QrName_(dict.lookupOrDefault<word>("Qr", "none")),
     specieName_(dict.lookupOrDefault<word>("specieName", "none")),
-    liquid_(NULL),
+    liquid_(nullptr),
     liquidDict_(),
     mass_(patch().size(), 0.0),
     Tvap_(0.0),
@@ -247,8 +247,8 @@ humidityTemperatureCoupledMixedFvPatchScalarField
             << "\n    patch type '" << p.type()
             << "' not type '" << mappedPatchBase::typeName << "'"
             << "\n    for patch " << p.name()
-            << " of field " << dimensionedInternalField().name()
-            << " in file " << dimensionedInternalField().objectPath()
+            << " of field " << internalField().name()
+            << " in file " << internalField().objectPath()
             << exit(FatalIOError);
     }
 
@@ -635,7 +635,7 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
                 (
                     fieldName,
                     refCast<const fvMesh>(mesh)
-                ).boundaryField()[patch().index()];
+                ).boundaryFieldRef()[patch().index()];
 
 
             pDelta = mass_/liquidRho/magSf;
@@ -710,10 +710,10 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
 
             Info<< mesh.name() << ':'
                 << patch().name() << ':'
-                << dimensionedInternalField().name() << " <- "
+                << internalField().name() << " <- "
                 << nbrMesh.name() << ':'
                 << nbrPatch.name() << ':'
-                << dimensionedInternalField().name() << " :" << nl
+                << internalField().name() << " :" << nl
                 << "    Total mass flux   [Kg/s] : " << Qdm << nl
                 << "    Total mass on the wall [Kg] : " << QMass << nl
                 << "    Total heat (>0 leaving the wall to the fluid) [W] : "

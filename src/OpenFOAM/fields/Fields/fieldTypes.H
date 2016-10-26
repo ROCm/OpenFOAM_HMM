@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,22 @@ Description
 #include "symmTensor.H"
 #include "tensor.H"
 #include "triad.H"
+#include "macros.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#define CAPITALIZE_scalar Scalar
+#define CAPITALIZE_vector Vector
+#define CAPITALIZE_sphericalTensor SphericalTensor
+#define CAPITALIZE_symmTensor SymmTensor
+#define CAPITALIZE_tensor Tensor
+
+#define FOR_ALL_FIELD_TYPES(Macro, ...)                                        \
+    Macro(scalar, __VA_ARGS__)                                                 \
+    Macro(vector, __VA_ARGS__)                                                 \
+    Macro(sphericalTensor, __VA_ARGS__)                                        \
+    Macro(symmTensor, __VA_ARGS__)                                             \
+    Macro(tensor, __VA_ARGS__)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

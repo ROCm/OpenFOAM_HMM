@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,6 +44,13 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward declaration of friend functions and operators
+
+class cv2DControls;
+
+Ostream& operator<<(Ostream&, const cv2DControls&);
+
 
 /*---------------------------------------------------------------------------*\
                         Class cv2DControls Declaration

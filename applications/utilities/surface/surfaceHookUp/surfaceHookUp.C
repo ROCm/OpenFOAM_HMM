@@ -47,17 +47,17 @@ Usage
 
 using namespace Foam;
 
-// Split faceI along edgeI at position newPointI
+// Split facei along edgeI at position newPointi
 void greenRefine
 (
     const triSurface& surf,
-    const label faceI,
+    const label facei,
     const label edgeI,
-    const label newPointI,
+    const label newPointi,
     DynamicList<labelledTri>& newFaces
 )
 {
-    const labelledTri& f = surf.localFaces()[faceI];
+    const labelledTri& f = surf.localFaces()[facei];
     const edge& e = surf.edges()[edgeI];
 
     // Find index of edge in face.
@@ -74,7 +74,7 @@ void greenRefine
             labelledTri
             (
                 f[fp0],
-                newPointI,
+                newPointi,
                 f[fp2],
                 f.region()
             )
@@ -83,7 +83,7 @@ void greenRefine
         (
             labelledTri
             (
-                newPointI,
+                newPointi,
                 f[fp1],
                 f[fp2],
                 f.region()
@@ -97,7 +97,7 @@ void greenRefine
             labelledTri
             (
                 f[fp2],
-                newPointI,
+                newPointi,
                 f[fp1],
                 f.region()
             )
@@ -106,7 +106,7 @@ void greenRefine
         (
             labelledTri
             (
-                newPointI,
+                newPointi,
                 f[fp0],
                 f[fp1],
                 f.region()
@@ -386,14 +386,14 @@ int main(int argc, char *argv[])
 
             const labelListList& pointEdges = surf.pointEdges();
 
-            forAll(bPointsTobEdges, bPointI)
+            forAll(bPointsTobEdges, bPointi)
             {
-                pointIndexHit& nearestHit = bPointsTobEdges[bPointI];
+                pointIndexHit& nearestHit = bPointsTobEdges[bPointi];
 
-                const label pointI = surf.boundaryPoints()[bPointI];
-                const point& samplePt = surf.localPoints()[pointI];
+                const label pointi = surf.boundaryPoints()[bPointi];
+                const point& samplePt = surf.localPoints()[pointi];
 
-                const labelList& pEdges = pointEdges[pointI];
+                const labelList& pEdges = pointEdges[pointi];
 
                 // Add edges connected to the edge to the shapeMask
                 DynamicList<label> shapeMask;
@@ -431,7 +431,7 @@ int main(int argc, char *argv[])
                     )
                     {
                         nearestHit = currentHit;
-                        bPointsHitTree[bPointI] = treeI;
+                        bPointsHitTree[bPointi] = treeI;
                     }
                 }
 
@@ -444,7 +444,7 @@ int main(int argc, char *argv[])
     //                    (
     //                        surf,
     //                        nearestHit.index(),
-    //                        pointI,
+    //                        pointi,
     //                        30
     //                    );
 
@@ -455,20 +455,20 @@ int main(int argc, char *argv[])
                 }
             }
 
-            forAll(bPointsTobEdges, bPointI)
+            forAll(bPointsTobEdges, bPointi)
             {
-                const pointIndexHit& eHit = bPointsTobEdges[bPointI];
+                const pointIndexHit& eHit = bPointsTobEdges[bPointi];
 
                 if (eHit.hit())
                 {
-                    const label hitSurfI = bPointsHitTree[bPointI];
+                    const label hitSurfI = bPointsHitTree[bPointi];
                     const triSurface& hitSurf = newSurfaces[hitSurfI];
 
                     const label eIndex =
                         treeBoundaryEdges[hitSurfI][eHit.index()];
                     const edge& e = hitSurf.edges()[eIndex];
 
-                    const label pointI = surf.boundaryPoints()[bPointI];
+                    const label pointi = surf.boundaryPoints()[bPointi];
 
                     const labelList& eFaces = hitSurf.edgeFaces()[eIndex];
 
@@ -481,16 +481,16 @@ int main(int argc, char *argv[])
                         continue;
                     }
 
-                    const label faceI = eFaces[0];
+                    const label facei = eFaces[0];
 
-                    if (visitedFace[hitSurfI][faceI])
+                    if (visitedFace[hitSurfI][facei])
                     {
                         continue;
                     }
 
                     DynamicList<labelledTri> newFacesFromSplit(2);
 
-                    const point& pt = surf.localPoints()[pointI];
+                    const point& pt = surf.localPoints()[pointi];
 
                     if
                     (
@@ -509,38 +509,38 @@ int main(int argc, char *argv[])
 
                     nChanged++;
 
-                    label newPointI = -1;
+                    label newPointi = -1;
 
                     // Keep the points in the same place and move the edge
                     if (hitSurfI == surfI)
                     {
-                        newPointI = pointI;
+                        newPointi = pointi;
                     }
                     else
                     {
-                        newPoints[hitSurfI].append(newPoints[surfI][pointI]);
-                        newPointI = newPoints[hitSurfI].size() - 1;
+                        newPoints[hitSurfI].append(newPoints[surfI][pointi]);
+                        newPointi = newPoints[hitSurfI].size() - 1;
                     }
 
                     // Split the other face.
                     greenRefine
                     (
                         hitSurf,
-                        faceI,
+                        facei,
                         eIndex,
-                        newPointI,
+                        newPointi,
                         newFacesFromSplit
                     );
 
-                    visitedFace[hitSurfI][faceI] = true;
+                    visitedFace[hitSurfI][facei] = true;
 
-                    forAll(newFacesFromSplit, newFaceI)
+                    forAll(newFacesFromSplit, newFacei)
                     {
-                        const labelledTri& fN = newFacesFromSplit[newFaceI];
+                        const labelledTri& fN = newFacesFromSplit[newFacei];
 
-                        if (newFaceI == 0)
+                        if (newFacei == 0)
                         {
-                            newFaces[hitSurfI][faceI] = fN;
+                            newFaces[hitSurfI][facei] = fN;
                         }
                         else
                         {

@@ -48,10 +48,7 @@ namespace Foam
 Foam::wordList
 Foam::velocityDisplacementMotionSolver::pointDisplacementBoundaryTypes() const
 {
-    const pointVectorField::GeometricBoundaryField& pmUbf
-    (
-        pointMotionU().boundaryField()
-    );
+    const pointVectorField::Boundary& pmUbf(pointMotionU().boundaryField());
 
     wordList cmUbf = pmUbf.types();
 
@@ -93,7 +90,7 @@ Foam::velocityDisplacementMotionSolver::velocityDisplacementMotionSolver
         pointDisplacementBoundaryTypes()
     );
 
-    pointDisplacement.internalField() = mesh.points() - points0;
+    pointDisplacement.primitiveFieldRef() = mesh.points() - points0;
 
     displacementMotionSolverPtr_.set
     (
@@ -155,6 +152,8 @@ void Foam::velocityDisplacementMotionSolver::solve()
     // Update the velocity boundary conditions
     pointMotionU().correctBoundaryConditions();
 
+    pointVectorField::Boundary& dispBf = displacement.boundaryFieldRef();
+
     // Update the displacement boundary conditions
     forAll(pointMotionU().boundaryField(), patchI)
     {
@@ -163,7 +162,7 @@ void Foam::velocityDisplacementMotionSolver::solve()
             pointMotionU().boundaryField()[patchI]
         );
 
-        displacement.boundaryField()[patchI] ==
+        dispBf[patchI] ==
             patchField.patchInternalField()*deltaT
           + patchField.patchInternalField(displacementOld);
     }
@@ -172,8 +171,8 @@ void Foam::velocityDisplacementMotionSolver::solve()
     displacementMotionSolverPtr_->solve();
 
     // Update the velocity
-    pointMotionU().internalField() =
-        (displacement.internalField() - displacementOld)/deltaT;
+    pointMotionU().primitiveFieldRef() =
+        (displacement.primitiveField() - displacementOld)/deltaT;
 }
 
 

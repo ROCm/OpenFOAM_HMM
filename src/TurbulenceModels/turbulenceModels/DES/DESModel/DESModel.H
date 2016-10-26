@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::DESModel
+    Foam::LESModels::DESModel
 
 Description
     Templated abstract base class for DES models
@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DESModel_H
-#define DESModel_H
+#ifndef LESModels_DESModel_H
+#define LESModels_DESModel_H
 
 #include "DESModelBase.H"
 
@@ -63,7 +63,7 @@ private:
         DESModel(const DESModel&);
 
         //- Disallow default bitwise assignment
-        DESModel& operator=(const DESModel&);
+        void operator=(const DESModel&);
 
 
 public:

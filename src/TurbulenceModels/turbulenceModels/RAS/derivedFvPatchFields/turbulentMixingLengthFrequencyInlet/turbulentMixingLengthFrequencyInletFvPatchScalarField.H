@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,8 +45,7 @@ Description
         L       | length scale
     \endvartable
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         mixingLength | Length scale [m]        | yes         |
@@ -56,7 +55,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            turbulentMixingLengthFrequencyInlet;
         mixingLength    0.005;
@@ -67,7 +66,7 @@ Description
 Note
     In the event of reverse flow, a zero-gradient condition is applied
 
-SeeAlso
+See also
     Foam::inletOutletFvPatchField
 
 

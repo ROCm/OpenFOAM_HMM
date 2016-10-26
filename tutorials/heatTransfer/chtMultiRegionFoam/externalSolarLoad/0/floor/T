@@ -45,12 +45,12 @@ boundaryField
     {
         type            externalWallHeatFluxTemperature;
         value           uniform 300;
-        kappa           solidThermo;
+        kappaMethod     solidThermo;
         Ta              uniform 313;
         h               uniform 1000000;
         thicknessLayers ( 1 2 );
         kappaLayers     ( 100 200 );
-        kappaName       none;
+        kappa           none;
     }
     floor_to_domain3
     {
@@ -62,20 +62,20 @@ boundaryField
         type            compressible::turbulentTemperatureRadCoupledMixed;
         value           uniform 300;
         Tnbr            T;
-        kappa           solidThermo;
+        kappaMethod     solidThermo;
         QrNbr           Qr;
         Qr              none;
-        kappaName       none;
+        kappa           none;
     }
     floor_to_solid
     {
         type            compressible::turbulentTemperatureRadCoupledMixed;
         value           uniform 300;
         Tnbr            T;
-        kappa           solidThermo;
+        kappaMethod     solidThermo;
         QrNbr           none;
         Qr              none;
-        kappaName       none;
+        kappa           none;
     }
 }
 

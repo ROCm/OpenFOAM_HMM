@@ -81,7 +81,11 @@ bool Foam::dlLibraryTable::open
 {
     if (functionLibName.size())
     {
-        void* functionLibPtr = dlOpen(functionLibName, verbose);
+        void* functionLibPtr = dlOpen
+        (
+            fileName(functionLibName).expand(),
+            verbose
+        );
 
         if (debug)
         {
@@ -142,7 +146,7 @@ bool Foam::dlLibraryTable::close
 
         bool ok = dlClose(libPtrs_[index]);
 
-        libPtrs_[index] = NULL;
+        libPtrs_[index] = nullptr;
         libNames_[index] = fileName::null;
 
         if (!ok)
@@ -179,7 +183,7 @@ void* Foam::dlLibraryTable::findLibrary(const fileName& functionLibName)
     {
         return libPtrs_[index];
     }
-    return NULL;
+    return nullptr;
 }
 
 

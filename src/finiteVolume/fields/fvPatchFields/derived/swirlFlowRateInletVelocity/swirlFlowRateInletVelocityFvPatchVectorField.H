@@ -37,8 +37,7 @@ Description
     dimensions of the flux, phi. The current density is used to correct the
     velocity when applying the mass basis.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
@@ -49,7 +48,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            swirlFlowRateInletVelocity;
         flowRate        constant 0.2;
@@ -63,7 +62,7 @@ Note
       constant values.
     - the value is positive into the domain
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchField
     Foam::Function1Types
 

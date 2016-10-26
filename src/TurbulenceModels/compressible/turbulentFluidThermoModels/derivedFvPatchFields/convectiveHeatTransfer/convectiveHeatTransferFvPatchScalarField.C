@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -116,7 +116,7 @@ void convectiveHeatTransferFvPatchScalarField::updateCoeffs()
             IOobject::groupName
             (
                 compressible::turbulenceModel::propertiesName,
-                dimensionedInternalField().group()
+                internalField().group()
             )
         );
 
@@ -136,19 +136,19 @@ void convectiveHeatTransferFvPatchScalarField::updateCoeffs()
     const scalarField Pr(muw*Cpw/kappaw);
 
     scalarField& htc = *this;
-    forAll(htc, faceI)
+    forAll(htc, facei)
     {
-        label faceCellI = patch().faceCells()[faceI];
+        label celli = patch().faceCells()[facei];
 
-        scalar Re = rhow[faceI]*mag(Uc[faceCellI] - Uw[faceI])*L_/muw[faceI];
+        scalar Re = rhow[facei]*mag(Uc[celli] - Uw[facei])*L_/muw[facei];
 
         if (Re < 5.0E+05)
         {
-            htc[faceI] = 0.664*sqrt(Re)*cbrt(Pr[faceI])*kappaw[faceI]/L_;
+            htc[facei] = 0.664*sqrt(Re)*cbrt(Pr[facei])*kappaw[facei]/L_;
         }
         else
         {
-            htc[faceI] = 0.037*pow(Re, 0.8)*cbrt(Pr[faceI])*kappaw[faceI]/L_;
+            htc[facei] = 0.037*pow(Re, 0.8)*cbrt(Pr[facei])*kappaw[facei]/L_;
         }
     }
 

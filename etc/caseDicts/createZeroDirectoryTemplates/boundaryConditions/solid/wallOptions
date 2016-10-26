@@ -39,8 +39,8 @@ heatTransfer
             type        compressible::turbulentTemperatureCoupledBaffleMixed;
             value       ${:VALUE.T};
             Tnbr        T;
-            kappa       solidThermo;
-            kappaName   none;
+            kappaMethod solidThermo;
+            kappa       none;
         }
     }
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,18 +30,17 @@ Group
 Description
     This boundary condition provides a fixed condition for internal energy
 
-    \heading Patch usage
-
+Usage
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            fixedEnergy;
         value           uniform 100;
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchField
 
 SourceFiles

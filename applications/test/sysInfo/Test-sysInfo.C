@@ -27,8 +27,9 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "ProfilingSysInfo.H"
+#include "profilingSysInfo.H"
 #include "IOstreams.H"
+#include "endian.H"
 
 using namespace Foam;
 
@@ -37,7 +38,22 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    Profiling::sysInfo().write(Info);
+    profiling::sysInfo().write(Info);
+
+#ifdef WM_BIG_ENDIAN
+    Info
+        << "WM_BIG_ENDIAN is defined"
+        << nl;
+#endif
+#ifdef WM_LITTLE_ENDIAN
+    Info
+        << "WM_LITTLE_ENDIAN is defined"
+        << nl;
+#endif
+
+    Info<< "Runtime endian check: big=" << endian::isBig()
+        << " little=" << endian::isLittle()
+        << nl;
 
     return 0;
 }

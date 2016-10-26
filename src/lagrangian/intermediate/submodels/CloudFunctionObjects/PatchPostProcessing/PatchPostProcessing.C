@@ -34,12 +34,12 @@ License
 template<class CloudType>
 Foam::label Foam::PatchPostProcessing<CloudType>::applyToPatch
 (
-    const label globalPatchI
+    const label globalPatchi
 ) const
 {
     forAll(patchIDs_, i)
     {
-        if (patchIDs_[i] == globalPatchI)
+        if (patchIDs_[i] == globalPatchi)
         {
             return i;
         }
@@ -69,13 +69,13 @@ void Foam::PatchPostProcessing<CloudType>::write()
             const fvMesh& mesh = this->owner().mesh();
 
             // Create directory if it doesn't exist
-            mkDir(this->outputTimeDir());
+            mkDir(this->writeTimeDir());
 
             const word& patchName = mesh.boundaryMesh()[patchIDs_[i]].name();
 
             OFstream patchOutFile
             (
-                this->outputTimeDir()/patchName + ".post",
+                this->writeTimeDir()/patchName + ".post",
                 IOstream::ASCII,
                 IOstream::currentVersion,
                 mesh.time().writeCompression()
@@ -158,8 +158,8 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
     {
         forAll(patchIDs_, i)
         {
-            const label patchI = patchIDs_[i];
-            const word& patchName = owner.mesh().boundaryMesh()[patchI].name();
+            const label patchi = patchIDs_[i];
+            const word& patchName = owner.mesh().boundaryMesh()[patchi].name();
             Info<< "Post-process patch " << patchName << endl;
         }
     }
@@ -202,17 +202,17 @@ void Foam::PatchPostProcessing<CloudType>::postPatch
     bool&
 )
 {
-    const label patchI = pp.index();
-    const label localPatchI = applyToPatch(patchI);
+    const label patchi = pp.index();
+    const label localPatchi = applyToPatch(patchi);
 
-    if (localPatchI != -1 && patchData_[localPatchI].size() < maxStoredParcels_)
+    if (localPatchi != -1 && patchData_[localPatchi].size() < maxStoredParcels_)
     {
-        times_[localPatchI].append(this->owner().time().value());
+        times_[localPatchi].append(this->owner().time().value());
 
         OStringStream data;
         data<< Pstream::myProcNo() << ' ' << p;
 
-        patchData_[localPatchI].append(data.str());
+        patchData_[localPatchi].append(data.str());
     }
 }
 

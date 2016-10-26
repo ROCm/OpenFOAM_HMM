@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Global
     Foam::ReadFields
 
 Description
-    Helper routine to read fields
+    Field reading functions for post-processing utilities
 
 SourceFiles
     ReadFields.C
@@ -39,19 +39,23 @@ SourceFiles
 #include "PtrList.H"
 #include "wordList.H"
 #include "GeometricField.H"
+#include "HashSet.H"
+#include "LIFOStack.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+class regIOobject;
 class IOobjectList;
+class objectRegistry;
 
 //- Get sorted names of fields of type. If syncPar and running in parallel
 //  check for identical names
 wordList fieldNames(const IOobjectList& objects, const bool syncPar);
 
-//- Helper routine to read Geometric fields
+//- Read Geometric fields
 template<class Type, template<class> class PatchField, class GeoMesh>
 wordList ReadFields
 (
@@ -62,9 +66,9 @@ wordList ReadFields
     const bool readOldTime = false
 );
 
-//- Helper routine to read fields
-//  Reads all fields of type. Returns names of fields read. Guarantees all
-//  processors to read fields in same order.
+//- Read all fields of the specified type.
+//  Returns names of fields read.
+//  Guarantees all processors read fields in same order.
 template<class GeoField, class Mesh>
 wordList ReadFields
 (
@@ -74,8 +78,7 @@ wordList ReadFields
     const bool syncPar = true
 );
 
-//- Helper routine to read non-mesh fields (e.g. uniformDimensionedField like
-//  'g')
+//- Read non-mesh fields, e.g. uniformDimensionedField like 'g'
 template<class GeoField>
 wordList ReadFields
 (
@@ -84,8 +87,8 @@ wordList ReadFields
     const bool syncPar = true
 );
 
-//- Helper routine to read GeometricFields. The fieldsCache is per time
-//  an objectRegistry of all stored fields
+//- Read all GeometricFields of the specified type.
+//  The fieldsCache is an objectRegistry of all stored fields
 template<class GeoField>
 static void ReadFields
 (
@@ -95,8 +98,8 @@ static void ReadFields
     objectRegistry& fieldsCache
 );
 
-//- Helper routine to read GeometricFields. The fieldsCache is per time
-//  an objectRegistry of all stored fields
+//- Read all GeometricFields of the specified type.
+//  The fieldsCache is an objectRegistry of all stored fields
 template<class GeoField>
 static void ReadFields
 (
@@ -105,6 +108,34 @@ static void ReadFields
     const wordList& timeNames,
     const word& registryName = "fieldsCache"
 );
+
+//- Read the selected GeometricFields of the specified type.
+//  The fields are transferred to the objectRegistry and a list of them is
+//  returned as a stack for later clean-up
+template<class GeoFieldType>
+void readFields
+(
+    const typename GeoFieldType::Mesh& mesh,
+    const IOobjectList& objects,
+    const HashSet<word>& selectedFields,
+    LIFOStack<regIOobject*>& storedObjects
+);
+
+
+//- Read the selected UniformDimensionedFields of the specified type.
+//  The fields are transferred to the objectRegistry and a list of them is
+//  returned as a stack for later clean-up
+template<class GeoFieldType>
+void readUniformFields
+(
+    const IOobjectList& objects,
+    const HashSet<word>& selectedFields,
+    LIFOStack<regIOobject*>& storedObjects,
+    const bool syncPar = true
+);
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 

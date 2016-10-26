@@ -40,12 +40,12 @@ void Foam::Cloud<ParticleType>::checkPatches() const
 {
     const polyBoundaryMesh& pbm = polyMesh_.boundaryMesh();
     bool ok = true;
-    forAll(pbm, patchI)
+    forAll(pbm, patchi)
     {
-        if (isA<cyclicAMIPolyPatch>(pbm[patchI]))
+        if (isA<cyclicAMIPolyPatch>(pbm[patchi]))
         {
             const cyclicAMIPolyPatch& cami =
-                refCast<const cyclicAMIPolyPatch>(pbm[patchI]);
+                refCast<const cyclicAMIPolyPatch>(pbm[patchi]);
 
             if (cami.owner())
             {
@@ -73,11 +73,11 @@ void Foam::Cloud<ParticleType>::calcCellWallFaces() const
 
     const polyBoundaryMesh& patches = polyMesh_.boundaryMesh();
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        if (isA<wallPolyPatch>(patches[patchI]))
+        if (isA<wallPolyPatch>(patches[patchi]))
         {
-            const polyPatch& patch = patches[patchI];
+            const polyPatch& patch = patches[patchi];
 
             const labelList& pFaceCells = patch.faceCells();
 
@@ -91,31 +91,6 @@ void Foam::Cloud<ParticleType>::calcCellWallFaces() const
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class ParticleType>
-Foam::Cloud<ParticleType>::Cloud
-(
-    const polyMesh& pMesh,
-    const IDLList<ParticleType>& particles
-)
-:
-    cloud(pMesh),
-    IDLList<ParticleType>(),
-    polyMesh_(pMesh),
-    labels_(),
-    nTrackingRescues_(),
-    cellWallFacesPtr_()
-{
-    checkPatches();
-
-    // Ask for the tetBasePtIs to trigger all processors to build
-    // them, otherwise, if some processors have no particles then
-    // there is a comms mismatch.
-    polyMesh_.tetBasePtIs();
-
-    IDLList<ParticleType>::operator=(particles);
-}
-
 
 template<class ParticleType>
 Foam::Cloud<ParticleType>::Cloud
@@ -139,7 +114,10 @@ Foam::Cloud<ParticleType>::Cloud
     // there is a comms mismatch.
     polyMesh_.tetBasePtIs();
 
-    IDLList<ParticleType>::operator=(particles);
+    if (particles.size())
+    {
+        IDLList<ParticleType>::operator=(particles);
+    }
 }
 
 
@@ -169,6 +147,25 @@ template<class ParticleType>
 void Foam::Cloud<ParticleType>::deleteParticle(ParticleType& p)
 {
     delete(this->remove(&p));
+}
+
+
+template<class ParticleType>
+void Foam::Cloud<ParticleType>::deleteLostParticles()
+{
+    forAllIter(typename Cloud<ParticleType>, *this, pIter)
+    {
+        ParticleType& p = pIter();
+
+        if (p.cell() == -1)
+        {
+            WarningInFunction
+                << "deleting lost particle at position " << p.position()
+                << endl;
+
+            deleteParticle(p);
+        }
+    }
 }
 
 
@@ -263,27 +260,27 @@ void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
                 // boundary face
                 if (Pstream::parRun() && p.face() >= pMesh().nInternalFaces())
                 {
-                    label patchI = pbm.whichPatch(p.face());
+                    label patchi = pbm.whichPatch(p.face());
 
                     // ... and the face is on a processor patch
                     // prepare it for transfer
-                    if (procPatchIndices[patchI] != -1)
+                    if (procPatchIndices[patchi] != -1)
                     {
                         label n = neighbourProcIndices
                         [
                             refCast<const processorPolyPatch>
                             (
-                                pbm[patchI]
+                                pbm[patchi]
                             ).neighbProcNo()
                         ];
 
-                        p.prepareForParallelTransfer(patchI, td);
+                        p.prepareForParallelTransfer(patchi, td);
 
                         particleTransferLists[n].append(this->remove(&p));
 
                         patchIndexTransferLists[n].append
                         (
-                            procPatchNeighbours[patchI]
+                            procPatchNeighbours[patchi]
                         );
                     }
                 }
@@ -368,9 +365,9 @@ void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
                 {
                     ParticleType& newp = newpIter();
 
-                    label patchI = procPatches[receivePatchIndex[pI++]];
+                    label patchi = procPatches[receivePatchIndex[pI++]];
 
-                    newp.correctAfterParallelTransfer(patchI, td);
+                    newp.correctAfterParallelTransfer(patchi, td);
 
                     addParticle(newParticles.remove(&newp));
                 }

@@ -28,6 +28,18 @@
 #     Miscellaneous functions for running tutorial cases
 #------------------------------------------------------------------------------
 
+#
+# Look for '-parallel' in the argument list.
+#
+isParallel()
+{
+    for i; do [ "$i" = "-parallel" ] && return 0; done
+    return 1
+}
+
+#
+# Look for '-test' in the argument list.
+#
 isTest()
 {
     for i in "$@"; do
@@ -41,10 +53,7 @@ isTest()
 
 getNumberOfProcessors()
 {
-    if [ -f "$1" ]
-    then
-        expandDictionary $1 | sed -ne 's/^numberOfSubdomains\s*\(.*\);/\1/p'
-    fi
+    foamDictionary -entry numberOfSubdomains -value system/decomposeParDict
 }
 
 getApplication()
@@ -179,28 +188,28 @@ cloneCase()
     fi
 }
 
-# Overwrite 0/ with the contents of 0.org/ if it exists.
+# Overwrite 0/ with the contents of 0.orig/ if it exists.
 # The -processor option to do the processor directories instead
 #
 restore0Dir()
 {
     if [ "$1" = "-processor" ]
     then
-        echo "Restore 0/ from 0.org/ for processor directories"
-        [ -d 0.org ] || echo "    Warning: no 0.org/ found"
+        echo "Restore 0/ from 0.orig/ for processor directories"
+        [ -d 0.orig ] || echo "    Warning: no 0.orig/ found"
 
         # do nonetheless
         \ls -d processor* | xargs -I {} \rm -rf ./{}/0
-        \ls -d processor* | xargs -I {} \cp -r 0.org ./{}/0 > /dev/null 2>&1
+        \ls -d processor* | xargs -I {} \cp -r 0.orig ./{}/0 > /dev/null 2>&1
 
     else
-        echo "Restore 0/ from 0.org/"
-        if [ -d 0.org ]
+        echo "Restore 0/ from 0.orig/"
+        if [ -d 0.orig ]
         then
             \rm -rf 0
-            \cp -r 0.org 0 > /dev/null 2>&1
+            \cp -r 0.orig 0 > /dev/null 2>&1
         else
-            echo "    Warning: no 0.org/ found"
+            echo "    Warning: no 0.orig/ found"
         fi
     fi
 }

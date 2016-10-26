@@ -113,16 +113,28 @@ void kinematicSingleLayer::transferPrimaryRegionSourceFields()
         InfoInFunction << endl;
     }
 
+    volScalarField::Boundary& rhoSpPrimaryBf =
+        rhoSpPrimary_.boundaryFieldRef();
+
+    volVectorField::Boundary& USpPrimaryBf =
+        USpPrimary_.boundaryFieldRef();
+
+    volScalarField::Boundary& pSpPrimaryBf =
+        pSpPrimary_.boundaryFieldRef();
+
     // Convert accummulated source terms into per unit area per unit time
     const scalar deltaT = time_.deltaTValue();
-    forAll(rhoSpPrimary_.boundaryField(), patchI)
+    forAll(rhoSpPrimary_.boundaryField(), patchi)
     {
-        const scalarField& priMagSf =
-            primaryMesh().magSf().boundaryField()[patchI];
+        scalarField rpriMagSfdeltaT
+        (
+            (1.0/deltaT)
+           /primaryMesh().magSf().boundaryField()[patchi]
+        );
 
-        rhoSpPrimary_.boundaryField()[patchI] /= priMagSf*deltaT;
-        USpPrimary_.boundaryField()[patchI] /= priMagSf*deltaT;
-        pSpPrimary_.boundaryField()[patchI] /= priMagSf*deltaT;
+        rhoSpPrimaryBf[patchi] *= rpriMagSfdeltaT;
+        USpPrimaryBf[patchi] *= rpriMagSfdeltaT;
+        pSpPrimaryBf[patchi] *= rpriMagSfdeltaT;
     }
 
     // Retrieve the source fields from the primary region via direct mapped
@@ -134,7 +146,7 @@ void kinematicSingleLayer::transferPrimaryRegionSourceFields()
     pSp_.correctBoundaryConditions();
 
     // update addedMassTotal counter
-    if (time().outputTime())
+    if (time().writeTime())
     {
         if (debug)
         {
@@ -274,10 +286,10 @@ void kinematicSingleLayer::updateSurfaceVelocities()
     // Push boundary film velocity values into internal field
     for (label i=0; i<intCoupledPatchIDs_.size(); i++)
     {
-        label patchI = intCoupledPatchIDs_[i];
-        const polyPatch& pp = regionMesh().boundaryMesh()[patchI];
+        label patchi = intCoupledPatchIDs_[i];
+        const polyPatch& pp = regionMesh().boundaryMesh()[patchi];
         UIndirectList<vector>(Uw_, pp.faceCells()) =
-            U_.boundaryField()[patchI];
+            U_.boundaryField()[patchi];
     }
     Uw_ -= nHat()*(Uw_ & nHat());
     Uw_.correctBoundaryConditions();
@@ -832,8 +844,8 @@ kinematicSingleLayer::~kinematicSingleLayer()
 
 void kinematicSingleLayer::addSources
 (
-    const label patchI,
-    const label faceI,
+    const label patchi,
+    const label facei,
     const scalar massSource,
     const vector& momentumSource,
     const scalar pressureSource,
@@ -849,9 +861,9 @@ void kinematicSingleLayer::addSources
             << "    pressure = " << pressureSource << endl;
     }
 
-    rhoSpPrimary_.boundaryField()[patchI][faceI] -= massSource;
-    USpPrimary_.boundaryField()[patchI][faceI] -= momentumSource;
-    pSpPrimary_.boundaryField()[patchI][faceI] -= pressureSource;
+    rhoSpPrimary_.boundaryFieldRef()[patchi][facei] -= massSource;
+    USpPrimary_.boundaryFieldRef()[patchi][facei] -= momentumSource;
+    pSpPrimary_.boundaryFieldRef()[patchi][facei] -= pressureSource;
 
     addedMassTotal_ += massSource;
 }
@@ -877,7 +889,7 @@ void kinematicSingleLayer::preEvolveRegion()
     correctAlpha();
 
     // Reset transfer fields
-//    availableMass_ = mass();
+    //availableMass_ = mass();
     availableMass_ = netMass();
     cloudMassTrans_ == dimensionedScalar("zero", dimMass, 0.0);
     cloudDiameterTrans_ == dimensionedScalar("zero", dimLength, 0.0);
@@ -941,8 +953,8 @@ scalar kinematicSingleLayer::CourantNumber() const
     {
         const scalarField sumPhi
         (
-            fvc::surfaceSum(mag(phi_))().internalField()
-          / (deltaRho_.internalField() + ROOTVSMALL)
+            fvc::surfaceSum(mag(phi_))().primitiveField()
+          / (deltaRho_.primitiveField() + ROOTVSMALL)
         );
 
         forAll(delta_, i)
@@ -1083,8 +1095,8 @@ void kinematicSingleLayer::info()
 {
     Info<< "\nSurface film: " << type() << endl;
 
-    const scalarField& deltaInternal = delta_.internalField();
-    const vectorField& Uinternal = U_.internalField();
+    const scalarField& deltaInternal = delta_;
+    const vectorField& Uinternal = U_;
     scalar addedMassTotal = 0.0;
     outputProperties().readIfPresent("addedMassTotal", addedMassTotal);
     addedMassTotal += returnReduce(addedMassTotal_, sumOp<scalar>());
@@ -1097,17 +1109,17 @@ void kinematicSingleLayer::info()
         << indent << "min/max(delta)     = " << gMin(deltaInternal) << ", "
         << gMax(deltaInternal) << nl
         << indent << "coverage           = "
-        << gSum(alpha_.internalField()*magSf())/gSum(magSf()) <<  nl;
+        << gSum(alpha_.primitiveField()*magSf())/gSum(magSf()) <<  nl;
 
     injection_.info(Info);
 }
 
 
-tmp<DimensionedField<scalar, volMesh>> kinematicSingleLayer::Srho() const
+tmp<volScalarField::Internal> kinematicSingleLayer::Srho() const
 {
-    return tmp<DimensionedField<scalar, volMesh>>
+    return tmp<volScalarField::Internal>
     (
-        new DimensionedField<scalar, volMesh>
+        new volScalarField::Internal
         (
             IOobject
             (
@@ -1125,14 +1137,14 @@ tmp<DimensionedField<scalar, volMesh>> kinematicSingleLayer::Srho() const
 }
 
 
-tmp<DimensionedField<scalar, volMesh>> kinematicSingleLayer::Srho
+tmp<volScalarField::Internal> kinematicSingleLayer::Srho
 (
     const label i
 ) const
 {
-    return tmp<DimensionedField<scalar, volMesh>>
+    return tmp<volScalarField::Internal>
     (
-        new DimensionedField<scalar, volMesh>
+        new volScalarField::Internal
         (
             IOobject
             (
@@ -1150,11 +1162,11 @@ tmp<DimensionedField<scalar, volMesh>> kinematicSingleLayer::Srho
 }
 
 
-tmp<DimensionedField<scalar, volMesh>> kinematicSingleLayer::Sh() const
+tmp<volScalarField::Internal> kinematicSingleLayer::Sh() const
 {
-    return tmp<DimensionedField<scalar, volMesh>>
+    return tmp<volScalarField::Internal>
     (
-        new DimensionedField<scalar, volMesh>
+        new volScalarField::Internal
         (
             IOobject
             (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,13 +24,12 @@ License
 Application
     simpleReactingParcelFoam
 
-Description
-    Steady state SIMPLE solver for laminar or turbulent flow with coal
-    Lagrangian parcels.
+Group
+    grpLagrangianSolvers
 
-    Note:
-    - including run-time selectable finite volume options,e.g. sources,
-      constraints
+Description
+    Steady state solver for compressible, turbulent flow with coal particle
+    clouds and optional sources/constraints.
 
 \*---------------------------------------------------------------------------*/
 
@@ -49,20 +48,18 @@ Description
 
 int main(int argc, char *argv[])
 {
-    #include "setRootCase.H"
+    #include "postProcess.H"
 
+    #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-    #include "readGravitationalAcceleration.H"
-
-    simpleControl simple(mesh);
-
+    #include "createControl.H"
     #include "createFields.H"
-    #include "createRadiationModel.H"
-    #include "createClouds.H"
-    #include "createMRF.H"
+    #include "createFieldRefs.H"
     #include "createFvOptions.H"
     #include "initContinuityErrs.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

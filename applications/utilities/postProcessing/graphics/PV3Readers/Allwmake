@@ -5,7 +5,6 @@ cd ${0%/*} || exit 1    # Run from this directory
 export WM_CONTINUE_ON_ERROR=true
 
 # Parse arguments for library compilation
-targetType=libso
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
 #
@@ -42,27 +41,28 @@ canBuildPlugin()
 
 
 # -----------------------------------------------------------------------------
-case "$ParaView_VERSION" in
-3*)
+# major version as per paraview include directory:
+# Eg, "PREFIX/include/paraview-3.4" -> "3.4"
+major="${ParaView_INCLUDE_DIR##*-}"
+
+case "$major" in
+3.[0-9]*)
     if canBuildPlugin
     then
     (
-        # ensure CMake gets the correct C/C++ compilers
-        [ -n "$WM_CC" ]  && export CC="$WM_CC"
-        [ -n "$WM_CXX" ] && export CXX="$WM_CXX"
-
         wmake $targetType vtkPV3Readers
-        PV3blockMeshReader/Allwmake $*
-        PV3FoamReader/Allwmake $*
+        PV3blockMeshReader/Allwmake $targetType $*
+        PV3FoamReader/Allwmake $targetType $*
     )
     fi
     ;;
 *)
     echo
     echo "NOTE: skipping build of ParaView V3 plugin(s)"
-    echo "    different version: ParaView_VERSION=$ParaView_VERSION"
+    echo "    include directory was for paraview major version '${major:-none}'"
     echo
     ;;
 esac
+
 
 #------------------------------------------------------------------------------

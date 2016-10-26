@@ -129,7 +129,7 @@ void Foam::nastranSurfaceWriter::writeKeyword
 void Foam::nastranSurfaceWriter::writeCoord
 (
     const point& p,
-    const label pointI,
+    const label pointi,
     OFstream& os
 ) const
 {
@@ -151,7 +151,7 @@ void Foam::nastranSurfaceWriter::writeCoord
 
     os.setf(ios_base::right);
 
-    writeValue(pointI + 1, os);
+    writeValue(pointi + 1, os);
     os  << separator_;
     writeValue("", os);
     os  << separator_;
@@ -298,9 +298,9 @@ void Foam::nastranSurfaceWriter::writeGeometry
         << "$ Points" << nl
         << "$" << nl;
 
-    forAll(points, pointI)
+    forAll(points, pointi)
     {
-        writeCoord(points[pointI], pointI, os);
+        writeCoord(points[pointi], pointi, os);
     }
 
 
@@ -312,19 +312,19 @@ void Foam::nastranSurfaceWriter::writeGeometry
 
     label nFace = 1;
 
-    forAll(faces, faceI)
+    forAll(faces, facei)
     {
-        const face& f = faces[faceI];
+        const face& f = faces[facei];
 
         if (f.size() == 3)
         {
-            writeFace("CTRIA3", faces[faceI], nFace, os);
-            decomposedFaces[faceI].append(faces[faceI]);
+            writeFace("CTRIA3", faces[facei], nFace, os);
+            decomposedFaces[facei].append(faces[facei]);
         }
         else if (f.size() == 4)
         {
-            writeFace("CQUAD4", faces[faceI], nFace, os);
-            decomposedFaces[faceI].append(faces[faceI]);
+            writeFace("CQUAD4", faces[facei], nFace, os);
+            decomposedFaces[facei].append(faces[facei]);
         }
         else
         {
@@ -333,10 +333,10 @@ void Foam::nastranSurfaceWriter::writeGeometry
             faceList triFaces;
             f.triangles(points, nTri, triFaces);
 
-            forAll(triFaces, triI)
+            forAll(triFaces, trii)
             {
-                writeFace("CTRIA3", triFaces[triI], nFace, os);
-                decomposedFaces[faceI].append(triFaces[triI]);
+                writeFace("CTRIA3", triFaces[trii], nFace, os);
+                decomposedFaces[facei].append(triFaces[trii]);
             }
         }
     }

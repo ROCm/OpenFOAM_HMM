@@ -43,8 +43,7 @@ Description
         \Delta   | inverse distance from patch face centre to cell centre
     \endvartable
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         gradient     | gradient                | yes         |
@@ -52,7 +51,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            fixedGradient;
         gradient        uniform 0;

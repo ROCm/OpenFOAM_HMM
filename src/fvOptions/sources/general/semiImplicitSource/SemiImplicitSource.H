@@ -60,7 +60,7 @@ Description
     - absolute: values are given as \<quantity\>
     - specific: values are given as \<quantity\>/m3
 
-SeeAlso
+See also
     Foam::fvOption
 
 SourceFiles
@@ -191,7 +191,7 @@ public:
             virtual void addSup
             (
                 fvMatrix<Type>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
             //- Add explicit contribution to compressible equation
@@ -199,7 +199,7 @@ public:
             (
                 const volScalarField& rho,
                 fvMatrix<Type>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
 

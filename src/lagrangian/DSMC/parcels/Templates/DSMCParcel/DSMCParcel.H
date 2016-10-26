@@ -179,9 +179,9 @@ public:
             const vector& position,
             const vector& U,
             const scalar Ei,
-            const label cellI,
-            const label tetFaceI,
-            const label tetPtI,
+            const label celli,
+            const label tetFacei,
+            const label tetPti,
             const label typeId
         );
 
@@ -263,7 +263,7 @@ public:
             (
                 const polyPatch&,
                 TrackData& td,
-                const label patchI,
+                const label patchi,
                 const scalar trackFraction,
                 const tetIndices& tetIs
             );

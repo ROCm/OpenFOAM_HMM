@@ -148,7 +148,7 @@ public:
         ) const;
 
         //- Return an internal field of the average
-        tmp<Field<Type>> internalField() const;
+        tmp<Field<Type>> primitiveField() const;
 
         //- Return an internal field of the gradient
         tmp<Field<TypeGrad>> internalFieldGrad() const;

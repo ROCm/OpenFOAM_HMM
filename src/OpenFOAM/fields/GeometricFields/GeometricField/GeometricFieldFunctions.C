@@ -49,8 +49,8 @@ void component
     const direction d
 )
 {
-    component(gcf.internalField(), gf.internalField(), d);
-    component(gcf.boundaryField(), gf.boundaryField(), d);
+    component(gcf.primitiveFieldRef(), gf.primitiveField(), d);
+    component(gcf.boundaryFieldRef(), gf.boundaryField(), d);
 }
 
 
@@ -61,8 +61,8 @@ void T
      const GeometricField<Type, PatchField, GeoMesh>& gf1
 )
 {
-    T(gf.internalField(), gf1.internalField());
-    T(gf.boundaryField(), gf1.boundaryField());
+    T(gf.primitiveFieldRef(), gf1.primitiveField());
+    T(gf.boundaryFieldRef(), gf1.boundaryField());
 }
 
 
@@ -79,8 +79,8 @@ void pow
     const GeometricField<Type, PatchField, GeoMesh>& gf1
 )
 {
-    pow(gf.internalField(), gf1.internalField(), r);
-    pow(gf.boundaryField(), gf1.boundaryField(), r);
+    pow(gf.primitiveFieldRef(), gf1.primitiveField(), r);
+    pow(gf.boundaryFieldRef(), gf1.boundaryField(), r);
 }
 
 template
@@ -173,8 +173,8 @@ void sqr
     const GeometricField<Type, PatchField, GeoMesh>& gf1
 )
 {
-    sqr(gf.internalField(), gf1.internalField());
-    sqr(gf.boundaryField(), gf1.boundaryField());
+    sqr(gf.primitiveFieldRef(), gf1.primitiveField());
+    sqr(gf.boundaryFieldRef(), gf1.boundaryField());
 }
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -261,8 +261,8 @@ void magSqr
     const GeometricField<Type, PatchField, GeoMesh>& gf
 )
 {
-    magSqr(gsf.internalField(), gf.internalField());
-    magSqr(gsf.boundaryField(), gf.boundaryField());
+    magSqr(gsf.primitiveFieldRef(), gf.primitiveField());
+    magSqr(gsf.boundaryFieldRef(), gf.boundaryField());
 }
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -333,8 +333,8 @@ void mag
     const GeometricField<Type, PatchField, GeoMesh>& gf
 )
 {
-    mag(gsf.internalField(), gf.internalField());
-    mag(gsf.boundaryField(), gf.boundaryField());
+    mag(gsf.primitiveFieldRef(), gf.primitiveField());
+    mag(gsf.boundaryFieldRef(), gf.boundaryField());
 }
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -410,8 +410,8 @@ void cmptAv
     const GeometricField<Type, PatchField, GeoMesh>& gf
 )
 {
-    cmptAv(gcf.internalField(), gf.internalField());
-    cmptAv(gcf.boundaryField(), gf.boundaryField());
+    cmptAv(gcf.primitiveFieldRef(), gf.primitiveField());
+    cmptAv(gcf.boundaryFieldRef(), gf.boundaryField());
 }
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -505,7 +505,7 @@ dimensioned<returnType> func                                                   \
     (                                                                          \
         #func "(" + gf.name() + ')',                                           \
         gf.dimensions(),                                                       \
-        Foam::func(gFunc(gf.internalField()), gFunc(gf.boundaryField()))       \
+        Foam::func(gFunc(gf.primitiveField()), gFunc(gf.boundaryField()))      \
     );                                                                         \
 }                                                                              \
                                                                                \
@@ -538,7 +538,7 @@ dimensioned<returnType> func                                                   \
     (                                                                          \
         #func "(" + gf.name() + ')',                                           \
         gf.dimensions(),                                                       \
-        gFunc(gf.internalField())                                              \
+        gFunc(gf.primitiveField())                                             \
     );                                                                         \
 }                                                                              \
                                                                                \
@@ -599,8 +599,18 @@ void opFunc                                                                    \
     const GeometricField<Type2, PatchField, GeoMesh>& gf2                      \
 )                                                                              \
 {                                                                              \
-    Foam::opFunc(gf.internalField(), gf1.internalField(), gf2.internalField());\
-    Foam::opFunc(gf.boundaryField(), gf1.boundaryField(), gf2.boundaryField());\
+    Foam::opFunc                                                               \
+    (                                                                          \
+        gf.primitiveFieldRef(),                                                \
+        gf1.primitiveField(),                                                  \
+        gf2.primitiveField()                                                   \
+    );                                                                         \
+    Foam::opFunc                                                               \
+    (                                                                          \
+        gf.boundaryFieldRef(),                                                 \
+        gf1.boundaryField(),                                                   \
+        gf2.boundaryField()                                                    \
+    );                                                                         \
 }                                                                              \
                                                                                \
 template                                                                       \
@@ -745,8 +755,8 @@ void opFunc                                                                    \
     const dimensioned<Form>& dvs                                               \
 )                                                                              \
 {                                                                              \
-    Foam::opFunc(gf.internalField(), gf1.internalField(), dvs.value());        \
-    Foam::opFunc(gf.boundaryField(), gf1.boundaryField(), dvs.value());        \
+    Foam::opFunc(gf.primitiveFieldRef(), gf1.primitiveField(), dvs.value());   \
+    Foam::opFunc(gf.boundaryFieldRef(), gf1.boundaryField(), dvs.value());     \
 }                                                                              \
                                                                                \
 template                                                                       \
@@ -858,8 +868,8 @@ void opFunc                                                                    \
     const GeometricField<Type, PatchField, GeoMesh>& gf1                       \
 )                                                                              \
 {                                                                              \
-    Foam::opFunc(gf.internalField(), dvs.value(), gf1.internalField());        \
-    Foam::opFunc(gf.boundaryField(), dvs.value(), gf1.boundaryField());        \
+    Foam::opFunc(gf.primitiveFieldRef(), dvs.value(), gf1.primitiveField());   \
+    Foam::opFunc(gf.boundaryFieldRef(), dvs.value(), gf1.boundaryField());     \
 }                                                                              \
                                                                                \
 template                                                                       \

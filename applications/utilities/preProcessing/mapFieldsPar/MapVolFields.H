@@ -39,7 +39,7 @@ template<class Type>
 void evaluateConstraintTypes(GeometricField<Type, fvPatchField, volMesh>& fld)
 {
     typename GeometricField<Type, fvPatchField, volMesh>::
-        GeometricBoundaryField& fldBf = fld.boundaryField();
+        Boundary& fldBf = fld.boundaryFieldRef();
 
     if
     (

@@ -76,22 +76,22 @@ Foam::labelList Foam::meshToMeshMethod::maskCells() const
 
 bool Foam::meshToMeshMethod::intersect
 (
-    const label srcCellI,
-    const label tgtCellI
+    const label srcCelli,
+    const label tgtCelli
 ) const
 {
-    scalar threshold = tolerance_*src_.cellVolumes()[srcCellI];
+    scalar threshold = tolerance_*src_.cellVolumes()[srcCelli];
 
     tetOverlapVolume overlapEngine;
 
-    treeBoundBox bbTgtCell(tgt_.points(), tgt_.cellPoints()[tgtCellI]);
+    treeBoundBox bbTgtCell(tgt_.points(), tgt_.cellPoints()[tgtCelli]);
 
     return overlapEngine.cellCellOverlapMinDecomp
     (
         src_,
-        srcCellI,
+        srcCelli,
         tgt_,
-        tgtCellI,
+        tgtCelli,
         bbTgtCell,
         threshold
     );
@@ -100,20 +100,20 @@ bool Foam::meshToMeshMethod::intersect
 
 Foam::scalar Foam::meshToMeshMethod::interVol
 (
-    const label srcCellI,
-    const label tgtCellI
+    const label srcCelli,
+    const label tgtCelli
 ) const
 {
     tetOverlapVolume overlapEngine;
 
-    treeBoundBox bbTgtCell(tgt_.points(), tgt_.cellPoints()[tgtCellI]);
+    treeBoundBox bbTgtCell(tgt_.points(), tgt_.cellPoints()[tgtCelli]);
 
     scalar vol = overlapEngine.cellCellOverlapVolumeMinDecomp
     (
         src_,
-        srcCellI,
+        srcCelli,
         tgt_,
-        tgtCellI,
+        tgtCelli,
         bbTgtCell
     );
 
@@ -159,26 +159,26 @@ Foam::meshToMeshMethod::interVolAndCentroid
 
 void Foam::meshToMeshMethod::appendNbrCells
 (
-    const label cellI,
+    const label celli,
     const polyMesh& mesh,
     const DynamicList<label>& visitedCells,
     DynamicList<label>& nbrCellIDs
 ) const
 {
-    const labelList& nbrCells = mesh.cellCells()[cellI];
+    const labelList& nbrCells = mesh.cellCells()[celli];
 
     // filter out cells already visited from cell neighbours
     forAll(nbrCells, i)
     {
-        label nbrCellI = nbrCells[i];
+        label nbrCelli = nbrCells[i];
 
         if
         (
-            (findIndex(visitedCells, nbrCellI) == -1)
-         && (findIndex(nbrCellIDs, nbrCellI) == -1)
+            (findIndex(visitedCells, nbrCelli) == -1)
+         && (findIndex(nbrCellIDs, nbrCelli) == -1)
         )
         {
-            nbrCellIDs.append(nbrCellI);
+            nbrCellIDs.append(nbrCelli);
         }
     }
 }
@@ -273,10 +273,10 @@ void Foam::meshToMeshMethod::writeConnectivity
         const labelList& addr = mesh1ToMesh2Addr[i];
         forAll(addr, j)
         {
-            label cellI = addr[j];
+            label celli = addr[j];
             const vector& c0 = mesh1.cellCentres()[i];
 
-            const cell& c = mesh2.cells()[cellI];
+            const cell& c = mesh2.cells()[celli];
             const pointField pts(c.points(mesh2.faces(), mesh2.points()));
             forAll(pts, j)
             {

@@ -62,9 +62,9 @@ void Foam::sampledSurface::makeSf() const
     SfPtr_ = new vectorField(theFaces.size());
 
     vectorField& values = *SfPtr_;
-    forAll(theFaces, faceI)
+    forAll(theFaces, facei)
     {
-        values[faceI] = theFaces[faceI].normal(points());
+        values[facei] = theFaces[facei].normal(points());
     }
 }
 
@@ -83,9 +83,9 @@ void Foam::sampledSurface::makeMagSf() const
     magSfPtr_ = new scalarField(theFaces.size());
 
     scalarField& values = *magSfPtr_;
-    forAll(theFaces, faceI)
+    forAll(theFaces, facei)
     {
-        values[faceI] = theFaces[faceI].mag(points());
+        values[facei] = theFaces[facei].mag(points());
     }
 }
 
@@ -104,9 +104,9 @@ void Foam::sampledSurface::makeCf() const
     CfPtr_ = new vectorField(theFaces.size());
 
     vectorField& values = *CfPtr_;
-    forAll(theFaces, faceI)
+    forAll(theFaces, facei)
     {
-        values[faceI] = theFaces[faceI].centre(points());
+        values[facei] = theFaces[facei].centre(points());
     }
 }
 
@@ -156,9 +156,9 @@ Foam::sampledSurface::sampledSurface
     name_(name),
     mesh_(mesh),
     interpolate_(interpolate),
-    SfPtr_(NULL),
-    magSfPtr_(NULL),
-    CfPtr_(NULL),
+    SfPtr_(nullptr),
+    magSfPtr_(nullptr),
+    CfPtr_(nullptr),
     area_(-1)
 {}
 
@@ -173,9 +173,9 @@ Foam::sampledSurface::sampledSurface
     name_(name),
     mesh_(mesh),
     interpolate_(dict.lookupOrDefault("interpolate", false)),
-    SfPtr_(NULL),
-    magSfPtr_(NULL),
-    CfPtr_(NULL),
+    SfPtr_(nullptr),
+    magSfPtr_(nullptr),
+    CfPtr_(nullptr),
     area_(-1)
 {
     dict.readIfPresent("name", name_);
@@ -243,7 +243,7 @@ Foam::tmp<Foam::scalarField> Foam::sampledSurface::sample
 ) const
 {
     NotImplemented;
-    return tmp<scalarField>(NULL);
+    return tmp<scalarField>(nullptr);
 }
 
 
@@ -253,7 +253,7 @@ Foam::tmp<Foam::vectorField> Foam::sampledSurface::sample
 ) const
 {
     NotImplemented;
-    return tmp<vectorField>(NULL);
+    return tmp<vectorField>(nullptr);
 }
 
 
@@ -263,7 +263,7 @@ Foam::tmp<Foam::sphericalTensorField> Foam::sampledSurface::sample
 ) const
 {
     NotImplemented;
-    return tmp<sphericalTensorField>(NULL);
+    return tmp<sphericalTensorField>(nullptr);
 }
 
 
@@ -273,7 +273,7 @@ Foam::tmp<Foam::symmTensorField> Foam::sampledSurface::sample
 ) const
 {
     NotImplemented;
-    return tmp<symmTensorField>(NULL);
+    return tmp<symmTensorField>(nullptr);
 }
 
 
@@ -283,7 +283,7 @@ Foam::tmp<Foam::tensorField> Foam::sampledSurface::sample
 ) const
 {
     NotImplemented;
-    return tmp<tensorField>(NULL);
+    return tmp<tensorField>(nullptr);
 }
 
 
@@ -293,9 +293,9 @@ Foam::sampledSurface::project(const Field<scalar>& field) const
     tmp<Field<scalar>> tRes(new Field<scalar>(faces().size()));
     Field<scalar>& res = tRes.ref();
 
-    forAll(faces(), faceI)
+    forAll(faces(), facei)
     {
-        res[faceI] = field[faceI];
+        res[facei] = field[facei];
     }
 
     return tRes;

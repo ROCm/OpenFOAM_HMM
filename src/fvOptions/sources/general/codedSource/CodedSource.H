@@ -28,7 +28,7 @@ Group
     grpFvOptionsSources
 
 Description
-   Constructs on-the-fly fvOption source
+    Constructs on-the-fly fvOption source
 
     The hook functions take the following arguments:
 
@@ -40,35 +40,32 @@ Description
     codeAddSup
     (
         fvMatrix<Type}>& eqn,
-        const label fieldI
+        const label fieldi
     )
 
     constrain
     (
         fvMatrix<Type}>& eqn,
-        const label fieldI
+        const label fieldi
     )
 
     where :
-        field is the field in fieldNames
+        field is the name of the field in the fields list
         eqn is the fvMatrix
 
-    \heading Source usage
-
+Usage
     Example usage in controlDict:
     \verbatim
     energySource
     {
         type            scalarCodedSource;
 
-        active          yes;
-
         scalarCodedSourceCoeffs
         {
             selectionMode   all;
 
-            fieldNames      (h);
-            redirectType    sourceTime;
+            fields          (h);
+            name            sourceTime;
 
             codeInclude
             #{
@@ -101,11 +98,6 @@ Description
                 $codeAddSup
                 $codeSetValue
             #};
-        }
-
-        sourceTimeCoeffs
-        {
-            // Dummy entry
         }
     }
     \endverbatim
@@ -144,7 +136,7 @@ protected:
 
     // Protected data
 
-        word redirectType_;
+        word name_;
 
         string codeCorrect_;
         string codeAddSup_;
@@ -207,7 +199,7 @@ public:
             virtual void addSup
             (
                 fvMatrix<Type>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
             //- Explicit and implicit matrix contributions
@@ -216,14 +208,14 @@ public:
             (
                 const volScalarField& rho,
                 fvMatrix<Type>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
             //- Set value
             virtual void constrain
             (
                 fvMatrix<Type>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
 

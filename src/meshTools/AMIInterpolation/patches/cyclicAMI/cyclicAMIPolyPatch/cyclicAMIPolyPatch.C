@@ -56,18 +56,18 @@ Foam::vector Foam::cyclicAMIPolyPatch::findFaceNormalMaxRadius
 
     const scalarField magRadSqr(magSqr(n));
 
-    label faceI = findMax(magRadSqr);
+    label facei = findMax(magRadSqr);
 
     if (debug)
     {
         Info<< "findFaceMaxRadius(const pointField&) : patch: " << name() << nl
-            << "    rotFace  = " << faceI << nl
-            << "    point    = " << faceCentres[faceI] << nl
-            << "    distance = " << Foam::sqrt(magRadSqr[faceI])
+            << "    rotFace  = " << facei << nl
+            << "    point    = " << faceCentres[facei] << nl
+            << "    distance = " << Foam::sqrt(magRadSqr[facei])
             << endl;
     }
 
-    return n[faceI];
+    return n[facei];
 }
 
 
@@ -494,12 +494,12 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationAngleDefined_(false),
     rotationAngle_(0.0),
     separationVector_(Zero),
-    AMIPtr_(NULL),
+    AMIPtr_(nullptr),
     AMIMethod_(AMIPatchToPatchInterpolation::imFaceAreaWeight),
     AMIReverse_(false),
     AMIRequireMatch_(true),
     AMILowWeightCorrection_(-1.0),
-    surfPtr_(NULL),
+    surfPtr_(nullptr),
     surfDict_(fileName("surface"))
 {
     // Neighbour patch might not be valid yet so no transformation
@@ -525,7 +525,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationAngleDefined_(false),
     rotationAngle_(0.0),
     separationVector_(Zero),
-    AMIPtr_(NULL),
+    AMIPtr_(nullptr),
     AMIMethod_
     (
         AMIPatchToPatchInterpolation::wordTointerpolationMethod
@@ -543,7 +543,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     AMIReverse_(dict.lookupOrDefault<bool>("flipNormals", false)),
     AMIRequireMatch_(true),
     AMILowWeightCorrection_(dict.lookupOrDefault("lowWeightCorrection", -1.0)),
-    surfPtr_(NULL),
+    surfPtr_(nullptr),
     surfDict_(dict.subOrEmptyDict("surface"))
 {
     if (nbrPatchName_ == word::null && !coupleGroup_.valid())
@@ -628,12 +628,12 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationAngleDefined_(pp.rotationAngleDefined_),
     rotationAngle_(pp.rotationAngle_),
     separationVector_(pp.separationVector_),
-    AMIPtr_(NULL),
+    AMIPtr_(nullptr),
     AMIMethod_(pp.AMIMethod_),
     AMIReverse_(pp.AMIReverse_),
     AMIRequireMatch_(pp.AMIRequireMatch_),
     AMILowWeightCorrection_(pp.AMILowWeightCorrection_),
-    surfPtr_(NULL),
+    surfPtr_(nullptr),
     surfDict_(pp.surfDict_)
 {
     // Neighbour patch might not be valid yet so no transformation
@@ -660,12 +660,12 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationAngleDefined_(pp.rotationAngleDefined_),
     rotationAngle_(pp.rotationAngle_),
     separationVector_(pp.separationVector_),
-    AMIPtr_(NULL),
+    AMIPtr_(nullptr),
     AMIMethod_(pp.AMIMethod_),
     AMIReverse_(pp.AMIReverse_),
     AMIRequireMatch_(pp.AMIRequireMatch_),
     AMILowWeightCorrection_(pp.AMILowWeightCorrection_),
-    surfPtr_(NULL),
+    surfPtr_(nullptr),
     surfDict_(pp.surfDict_)
 {
     if (nbrPatchName_ == name())
@@ -699,12 +699,12 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationAngleDefined_(pp.rotationAngleDefined_),
     rotationAngle_(pp.rotationAngle_),
     separationVector_(pp.separationVector_),
-    AMIPtr_(NULL),
+    AMIPtr_(nullptr),
     AMIMethod_(pp.AMIMethod_),
     AMIReverse_(pp.AMIReverse_),
     AMIRequireMatch_(pp.AMIRequireMatch_),
     AMILowWeightCorrection_(pp.AMILowWeightCorrection_),
-    surfPtr_(NULL),
+    surfPtr_(nullptr),
     surfDict_(pp.surfDict_)
 {}
 
@@ -867,7 +867,7 @@ void Foam::cyclicAMIPolyPatch::transformPosition(pointField& l) const
 void Foam::cyclicAMIPolyPatch::transformPosition
 (
     point& l,
-    const label faceI
+    const label facei
 ) const
 {
     if (!parallel())
@@ -876,7 +876,7 @@ void Foam::cyclicAMIPolyPatch::transformPosition
         (
             forwardT().size() == 1
           ? forwardT()[0]
-          : forwardT()[faceI]
+          : forwardT()[facei]
         );
 
         if (transform() == ROTATIONAL)
@@ -894,7 +894,7 @@ void Foam::cyclicAMIPolyPatch::transformPosition
         (
             separation().size() == 1
           ? separation()[0]
-          : separation()[faceI]
+          : separation()[facei]
         );
 
         l -= s;
@@ -905,7 +905,7 @@ void Foam::cyclicAMIPolyPatch::transformPosition
 void Foam::cyclicAMIPolyPatch::reverseTransformPosition
 (
     point& l,
-    const label faceI
+    const label facei
 ) const
 {
     if (!parallel())
@@ -914,7 +914,7 @@ void Foam::cyclicAMIPolyPatch::reverseTransformPosition
         (
             reverseT().size() == 1
           ? reverseT()[0]
-          : reverseT()[faceI]
+          : reverseT()[facei]
         );
 
         if (transform() == ROTATIONAL)
@@ -932,7 +932,7 @@ void Foam::cyclicAMIPolyPatch::reverseTransformPosition
         (
             separation().size() == 1
           ? separation()[0]
-          : separation()[faceI]
+          : separation()[facei]
         );
 
         l += s;
@@ -943,7 +943,7 @@ void Foam::cyclicAMIPolyPatch::reverseTransformPosition
 void Foam::cyclicAMIPolyPatch::reverseTransformDirection
 (
     vector& d,
-    const label faceI
+    const label facei
 ) const
 {
     if (!parallel())
@@ -952,7 +952,7 @@ void Foam::cyclicAMIPolyPatch::reverseTransformDirection
         (
             reverseT().size() == 1
           ? reverseT()[0]
-          : reverseT()[faceI]
+          : reverseT()[facei]
         );
 
         d = Foam::transform(T, d);
@@ -1010,48 +1010,48 @@ bool Foam::cyclicAMIPolyPatch::order
 
 Foam::label Foam::cyclicAMIPolyPatch::pointFace
 (
-    const label faceI,
+    const label facei,
     const vector& n,
     point& p
 ) const
 {
     point prt(p);
-    reverseTransformPosition(prt, faceI);
+    reverseTransformPosition(prt, facei);
 
     vector nrt(n);
-    reverseTransformDirection(nrt, faceI);
+    reverseTransformDirection(nrt, facei);
 
-    label nbrFaceI = -1;
+    label nbrFacei = -1;
 
     if (owner())
     {
-        nbrFaceI = AMI().tgtPointFace
+        nbrFacei = AMI().tgtPointFace
         (
             *this,
             neighbPatch(),
             nrt,
-            faceI,
+            facei,
             prt
         );
     }
     else
     {
-        nbrFaceI = neighbPatch().AMI().srcPointFace
+        nbrFacei = neighbPatch().AMI().srcPointFace
         (
             neighbPatch(),
             *this,
             nrt,
-            faceI,
+            facei,
             prt
         );
     }
 
-    if (nbrFaceI >= 0)
+    if (nbrFacei >= 0)
     {
         p = prt;
     }
 
-    return nbrFaceI;
+    return nbrFacei;
 }
 
 

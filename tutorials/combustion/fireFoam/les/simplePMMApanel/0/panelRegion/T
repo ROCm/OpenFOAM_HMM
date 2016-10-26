@@ -36,8 +36,8 @@ boundaryField
 
 
         type                fixedIncidentRadiation;
-        kappa               solidThermo;
-        kappaName           none;
+        kappaMethod         solidThermo;
+        kappa               none;
         QrIncident          uniform 60000.0;   //W
         value               uniform 298.15;
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,14 +44,14 @@ void triSurface::writeDXGeometry
 ) const
 {
     labelList faceMap;
-    surfacePatchList myPatches(calcPatches(faceMap));
+    surfacePatchList patches(calcPatches(faceMap));
 
     // Print patch names as comment
     os  << "# Patches:" << endl;
-    forAll(myPatches, patchI)
+    forAll(patches, patchi)
     {
-        os  << "#     " << patchI << "    "
-            << myPatches[patchI].name() << endl;
+        os  << "#     " << patchi << "    "
+            << patches[patchi].name() << endl;
     }
     os  << nl << endl;
 
@@ -60,9 +60,9 @@ void triSurface::writeDXGeometry
     os  << "# The irregular positions" << endl
         << "object 1 class array type float rank 1 shape 3 items "
         << nPoints() << " data follows" << endl;
-    forAll(localPoints(), pointI)
+    forAll(localPoints(), pointi)
     {
-        const point& pt = localPoints()[pointI];
+        const point& pt = localPoints()[pointi];
         os  << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
     }
     os  << endl;
@@ -75,19 +75,19 @@ void triSurface::writeDXGeometry
     {
         label faceIndex = 0;
 
-        forAll(myPatches, patchI)
+        forAll(patches, patchi)
         {
             // Print all faces belonging to this patch
 
             for
             (
-                label patchFaceI = 0;
-                patchFaceI < myPatches[patchI].size();
-                patchFaceI++
+                label patchFacei = 0;
+                patchFacei < patches[patchi].size();
+                patchFacei++
             )
             {
-                const label faceI = faceMap[faceIndex++];
-                const labelledTri& f = localFaces()[faceI];
+                const label facei = faceMap[faceIndex++];
+                const labelledTri& f = localFaces()[facei];
 
                 os  << f[0] << ' ' << f[1] << ' ' << f[2] << endl;
             }
@@ -95,9 +95,9 @@ void triSurface::writeDXGeometry
     }
     else
     {
-        forAll(*this, faceI)
+        forAll(*this, facei)
         {
-            const labelledTri& f = localFaces()[faceI];
+            const labelledTri& f = localFaces()[facei];
 
             os  << f[0] << ' ' << f[1] << ' ' << f[2] << endl;
         }
@@ -132,13 +132,13 @@ void triSurface::writeDX(const bool writeSorted, Ostream& os) const
         // Write patch number as data
 
         labelList faceMap;
-        surfacePatchList myPatches(calcPatches(faceMap));
+        surfacePatchList patches(calcPatches(faceMap));
 
-        forAll(myPatches, patchI)
+        forAll(patches, patchi)
         {
-            forAll(myPatches[patchI], patchFaceI)
+            forAll(patches[patchi], patchFacei)
             {
-                os  << patchI << endl;
+                os  << patchi << endl;
             }
         }
     }
@@ -146,9 +146,9 @@ void triSurface::writeDX(const bool writeSorted, Ostream& os) const
     {
         // Write face number as data
 
-        forAll(*this, faceI)
+        forAll(*this, facei)
         {
-            os  << faceI << endl;
+            os  << facei << endl;
         }
     }
 
@@ -170,9 +170,9 @@ void triSurface::writeDX(const scalarField& field, Ostream& os) const
         // Connections dependent data
         os  << "object 3 class array type float rank 0 items " << field.size()
             << " data follows" << endl;
-        forAll(field, faceI)
+        forAll(field, facei)
         {
-            os  << field[faceI] << endl;
+            os  << field[facei] << endl;
         }
         os  << endl
             << "attribute \"dep\" string \"connections\"" << endl << endl;
@@ -182,9 +182,9 @@ void triSurface::writeDX(const scalarField& field, Ostream& os) const
         // Positions dependent data
         os  << "object 3 class array type float rank 0 items " << field.size()
             << " data follows" << endl;
-        forAll(field, pointI)
+        forAll(field, pointi)
         {
-            os  << field[pointI] << endl;
+            os  << field[pointi] << endl;
         }
         os  << endl
             << "attribute \"dep\" string \"positions\"" << endl << endl;
@@ -213,11 +213,11 @@ void triSurface::writeDX(const vectorField& field, Ostream& os) const
         // Connections dependent data
         os  << "object 3 class array type float rank 1 shape 3 items "
             << field.size() << " data follows" << endl;
-        forAll(field, faceI)
+        forAll(field, facei)
         {
-            os  << field[faceI].x() << ' '
-                << field[faceI].y() << ' '
-                << field[faceI].z() << endl;
+            os  << field[facei].x() << ' '
+                << field[facei].y() << ' '
+                << field[facei].z() << endl;
         }
         os  << endl
             << "attribute \"dep\" string \"connections\"" << endl << endl;
@@ -227,11 +227,11 @@ void triSurface::writeDX(const vectorField& field, Ostream& os) const
         // Positions dependent data
         os  << "object 3 class array type float rank 1 shape 3 items "
             << field.size() << " data follows" << endl;
-        forAll(field, pointI)
+        forAll(field, pointi)
         {
-            os  << field[pointI].x() << ' '
-                << field[pointI].y() << ' '
-                << field[pointI].z() << endl;
+            os  << field[pointi].x() << ' '
+                << field[pointi].y() << ' '
+                << field[pointi].z() << endl;
         }
         os  << endl
             << "attribute \"dep\" string \"positions\"" << endl << endl;

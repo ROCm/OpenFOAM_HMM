@@ -74,16 +74,16 @@ void Foam::motionSmootherAlgo::testSyncPositions
 
 void Foam::motionSmootherAlgo::checkFld(const pointScalarField& fld)
 {
-    forAll(fld, pointI)
+    forAll(fld, pointi)
     {
-        const scalar val = fld[pointI];
+        const scalar val = fld[pointi];
 
         if ((val > -GREAT) && (val < GREAT))
         {}
         else
         {
             FatalErrorInFunction
-                << "Problem : point:" << pointI << " value:" << val
+                << "Problem : point:" << pointi << " value:" << val
                 << abort(FatalError);
         }
     }
@@ -148,13 +148,13 @@ void Foam::motionSmootherAlgo::minSmooth
 
     forAll(meshPoints, i)
     {
-        label pointI = meshPoints[i];
-        if (isAffectedPoint.get(pointI) == 1)
+        label pointi = meshPoints[i];
+        if (isAffectedPoint.get(pointi) == 1)
         {
-            newFld[pointI] = min
+            newFld[pointi] = min
             (
-                fld[pointI],
-                0.5*fld[pointI] + 0.5*avgFld[pointI]
+                fld[pointi],
+                0.5*fld[pointi] + 0.5*avgFld[pointi]
             );
         }
     }
@@ -180,14 +180,14 @@ void Foam::motionSmootherAlgo::minSmooth
     );
     const pointScalarField& avgFld = tavgFld();
 
-    forAll(fld, pointI)
+    forAll(fld, pointi)
     {
-        if (isAffectedPoint.get(pointI) == 1 && isInternalPoint(pointI))
+        if (isAffectedPoint.get(pointi) == 1 && isInternalPoint(pointi))
         {
-            newFld[pointI] = min
+            newFld[pointi] = min
             (
-                fld[pointI],
-                0.5*fld[pointI] + 0.5*avgFld[pointI]
+                fld[pointi],
+                0.5*fld[pointi] + 0.5*avgFld[pointi]
             );
         }
     }
@@ -230,11 +230,11 @@ void Foam::motionSmootherAlgo::scaleField
 {
     forAll(meshPoints, i)
     {
-        label pointI = meshPoints[i];
+        label pointi = meshPoints[i];
 
-        if (pointLabels.found(pointI))
+        if (pointLabels.found(pointi))
         {
-            fld[pointI] *= scale;
+            fld[pointi] *= scale;
         }
     }
 }
@@ -272,19 +272,19 @@ void Foam::motionSmootherAlgo::subtractField
 {
     forAll(meshPoints, i)
     {
-        label pointI = meshPoints[i];
+        label pointi = meshPoints[i];
 
-        if (pointLabels.found(pointI))
+        if (pointLabels.found(pointi))
         {
-            fld[pointI] = max(0.0, fld[pointI]-f);
+            fld[pointi] = max(0.0, fld[pointi]-f);
         }
     }
 }
 
 
-bool Foam::motionSmootherAlgo::isInternalPoint(const label pointI) const
+bool Foam::motionSmootherAlgo::isInternalPoint(const label pointi) const
 {
-    return isInternalPoint_.get(pointI) == 1;
+    return isInternalPoint_.get(pointi) == 1;
 }
 
 
@@ -315,13 +315,13 @@ void Foam::motionSmootherAlgo::getAffectedFacesAndPoints
         {
             const labelList& pCells = mesh_.pointCells(iter.key());
 
-            forAll(pCells, pCellI)
+            forAll(pCells, pCelli)
             {
-                const cell& cFaces = mesh_.cells()[pCells[pCellI]];
+                const cell& cFaces = mesh_.cells()[pCells[pCelli]];
 
-                forAll(cFaces, cFaceI)
+                forAll(cFaces, cFacei)
                 {
-                    nbrFaces.insert(cFaces[cFaceI]);
+                    nbrFaces.insert(cFaces[cFacei]);
                 }
             }
         }
@@ -428,14 +428,17 @@ void Foam::motionSmootherAlgo::setDisplacementPatchFields
     pointVectorField& displacement
 )
 {
+    pointVectorField::Boundary& displacementBf =
+        displacement.boundaryFieldRef();
+
     // Adapt the fixedValue bc's (i.e. copy internal point data to
     // boundaryField for all affected patches)
     forAll(patchIDs, i)
     {
-        label patchI = patchIDs[i];
+        label patchi = patchIDs[i];
 
-        displacement.boundaryField()[patchI] ==
-            displacement.boundaryField()[patchI].patchInternalField();
+        displacementBf[patchi] ==
+            displacementBf[patchi].patchInternalField();
     }
 
     // Make consistent with non-adapted bc's by evaluating those now and
@@ -449,18 +452,18 @@ void Foam::motionSmootherAlgo::setDisplacementPatchFields
 
     forAll(patchSchedule, patchEvalI)
     {
-        label patchI = patchSchedule[patchEvalI].patch;
+        label patchi = patchSchedule[patchEvalI].patch;
 
-        if (!adaptPatchSet.found(patchI))
+        if (!adaptPatchSet.found(patchi))
         {
             if (patchSchedule[patchEvalI].init)
             {
-                displacement.boundaryField()[patchI]
+                displacementBf[patchi]
                     .initEvaluate(Pstream::scheduled);
             }
             else
             {
-                displacement.boundaryField()[patchI]
+                displacementBf[patchi]
                     .evaluate(Pstream::scheduled);
             }
         }
@@ -474,10 +477,10 @@ void Foam::motionSmootherAlgo::setDisplacementPatchFields
     // by multi-corner constraints into account.
     forAll(patchIDs, i)
     {
-        label patchI = patchIDs[i];
+        label patchi = patchIDs[i];
 
-        displacement.boundaryField()[patchI] ==
-            displacement.boundaryField()[patchI].patchInternalField();
+        displacementBf[patchi] ==
+            displacementBf[patchi].patchInternalField();
     }
 }
 
@@ -532,9 +535,9 @@ void Foam::motionSmootherAlgo::setDisplacement
 
 
     // Set internal point data from displacement on combined patch points.
-    forAll(ppMeshPoints, patchPointI)
+    forAll(ppMeshPoints, patchPointi)
     {
-        displacement[ppMeshPoints[patchPointI]] = patchDisp[patchPointI];
+        displacement[ppMeshPoints[patchPointi]] = patchDisp[patchPointi];
     }
 
 
@@ -557,18 +560,18 @@ void Foam::motionSmootherAlgo::setDisplacement
     {
         OFstream str(mesh.db().path()/"changedPoints.obj");
         label nVerts = 0;
-        forAll(ppMeshPoints, patchPointI)
+        forAll(ppMeshPoints, patchPointi)
         {
-            const vector& newDisp = displacement[ppMeshPoints[patchPointI]];
+            const vector& newDisp = displacement[ppMeshPoints[patchPointi]];
 
-            if (mag(newDisp-patchDisp[patchPointI]) > SMALL)
+            if (mag(newDisp-patchDisp[patchPointi]) > SMALL)
             {
-                const point& pt = mesh.points()[ppMeshPoints[patchPointI]];
+                const point& pt = mesh.points()[ppMeshPoints[patchPointi]];
 
                 meshTools::writeOBJ(str, pt);
                 nVerts++;
                 //Pout<< "Point:" << pt
-                //    << " oldDisp:" << patchDisp[patchPointI]
+                //    << " oldDisp:" << patchDisp[patchPointi]
                 //    << " newDisp:" << newDisp << endl;
             }
         }
@@ -577,9 +580,9 @@ void Foam::motionSmootherAlgo::setDisplacement
     }
 
     // Now reset input displacement
-    forAll(ppMeshPoints, patchPointI)
+    forAll(ppMeshPoints, patchPointi)
     {
-        patchDisp[patchPointI] = displacement[ppMeshPoints[patchPointI]];
+        patchDisp[patchPointi] = displacement[ppMeshPoints[patchPointi]];
     }
 }
 
@@ -600,21 +603,24 @@ void Foam::motionSmootherAlgo::correctBoundaryConditions
 
     const lduSchedule& patchSchedule = mesh_.globalData().patchSchedule();
 
+    pointVectorField::Boundary& displacementBf =
+        displacement.boundaryFieldRef();
+
     // 1. evaluate on adaptPatches
     forAll(patchSchedule, patchEvalI)
     {
-        label patchI = patchSchedule[patchEvalI].patch;
+        label patchi = patchSchedule[patchEvalI].patch;
 
-        if (adaptPatchSet.found(patchI))
+        if (adaptPatchSet.found(patchi))
         {
             if (patchSchedule[patchEvalI].init)
             {
-                displacement.boundaryField()[patchI]
+                displacementBf[patchi]
                     .initEvaluate(Pstream::blocking);
             }
             else
             {
-                displacement.boundaryField()[patchI]
+                displacementBf[patchi]
                     .evaluate(Pstream::blocking);
             }
         }
@@ -624,18 +630,18 @@ void Foam::motionSmootherAlgo::correctBoundaryConditions
     // 2. evaluate on non-AdaptPatches
     forAll(patchSchedule, patchEvalI)
     {
-        label patchI = patchSchedule[patchEvalI].patch;
+        label patchi = patchSchedule[patchEvalI].patch;
 
-        if (!adaptPatchSet.found(patchI))
+        if (!adaptPatchSet.found(patchi))
         {
             if (patchSchedule[patchEvalI].init)
             {
-                displacement.boundaryField()[patchI]
+                displacementBf[patchi]
                     .initEvaluate(Pstream::blocking);
             }
             else
             {
-                displacement.boundaryField()[patchI]
+                displacementBf[patchi]
                     .evaluate(Pstream::blocking);
             }
         }
@@ -776,28 +782,28 @@ Foam::tmp<Foam::pointField> Foam::motionSmootherAlgo::curPoints() const
     {
         const pointBoundaryMesh& pbm = displacement_.mesh().boundary();
         actualPatchTypes.setSize(pbm.size());
-        forAll(pbm, patchI)
+        forAll(pbm, patchi)
         {
-            actualPatchTypes[patchI] = pbm[patchI].type();
+            actualPatchTypes[patchi] = pbm[patchi].type();
         }
     }
 
     wordList actualPatchFieldTypes;
     {
-        const pointVectorField::GeometricBoundaryField& pfld =
+        const pointVectorField::Boundary& pfld =
             displacement_.boundaryField();
         actualPatchFieldTypes.setSize(pfld.size());
-        forAll(pfld, patchI)
+        forAll(pfld, patchi)
         {
-            if (isA<fixedValuePointPatchField<vector>>(pfld[patchI]))
+            if (isA<fixedValuePointPatchField<vector>>(pfld[patchi]))
             {
                 // Get rid of funny
-                actualPatchFieldTypes[patchI] =
+                actualPatchFieldTypes[patchi] =
                     fixedValuePointPatchField<vector>::typeName;
             }
             else
             {
-                actualPatchFieldTypes[patchI] = pfld[patchI].type();
+                actualPatchFieldTypes[patchi] = pfld[patchi].type();
             }
         }
     }
@@ -831,7 +837,7 @@ Foam::tmp<Foam::pointField> Foam::motionSmootherAlgo::curPoints() const
         );
     }
 
-    tmp<pointField> tnewPoints(oldPoints_ + totalDisplacement.internalField());
+    tmp<pointField> tnewPoints(oldPoints_ + totalDisplacement.primitiveField());
 
     // Correct for 2-D motion
     modifyMotionPoints(tnewPoints.ref());
@@ -866,14 +872,14 @@ bool Foam::motionSmootherAlgo::scaleMesh
         const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
         Pout<< "Entering scaleMesh : coupled patches:" << endl;
-        forAll(patches, patchI)
+        forAll(patches, patchi)
         {
-            if (patches[patchI].coupled())
+            if (patches[patchi].coupled())
             {
                 const coupledPolyPatch& pp =
-                    refCast<const coupledPolyPatch>(patches[patchI]);
+                    refCast<const coupledPolyPatch>(patches[patchi]);
 
-                Pout<< '\t' << patchI << '\t' << pp.name()
+                Pout<< '\t' << patchi << '\t' << pp.name()
                     << " parallel:" << pp.parallel()
                     << " separated:" << pp.separated()
                     << " forwardT:" << pp.forwardT().size()
@@ -899,8 +905,8 @@ bool Foam::motionSmootherAlgo::scaleMesh
     );
 
     Info<< "Moving mesh using displacement scaling :"
-        << " min:" << gMin(scale_.internalField())
-        << "  max:" << gMax(scale_.internalField())
+        << " min:" << gMin(scale_.primitiveField())
+        << "  max:" << gMax(scale_.primitiveField())
         << endl;
 
     // Get points using current displacement and scale. Optionally 2D corrected.
@@ -1053,20 +1059,20 @@ void Foam::motionSmootherAlgo::updateMesh()
     // Check whether displacement has fixed value b.c. on adaptPatchID
     forAll(adaptPatchIDs_, i)
     {
-        label patchI = adaptPatchIDs_[i];
+        label patchi = adaptPatchIDs_[i];
 
         if
         (
            !isA<fixedValuePointPatchVectorField>
             (
-                displacement_.boundaryField()[patchI]
+                displacement_.boundaryField()[patchi]
             )
         )
         {
             FatalErrorInFunction
-                << "Patch " << patches[patchI].name()
+                << "Patch " << patches[patchi].name()
                 << " has wrong boundary condition "
-                << displacement_.boundaryField()[patchI].type()
+                << displacement_.boundaryField()[patchi].type()
                 << " on field " << displacement_.name() << nl
                 << "Only type allowed is "
                 << fixedValuePointPatchVectorField::typeName

@@ -29,7 +29,8 @@ Group
 
 Description
     Solver for n incompressible fluids which captures the interfaces and
-    includes surface-tension and contact-angle effects for each phase.
+    includes surface-tension and contact-angle effects for each phase, with
+    optional mesh motion and mesh topology changes.
 
     Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
 
@@ -47,16 +48,16 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "postProcess.H"
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
     #include "initContinuityErrs.H"
-
-    pimpleControl pimple(mesh);
-
-    #include "createControls.H"
+    #include "createControl.H"
+    #include "createTimeControls.H"
+    #include "createDyMControls.H"
     #include "createFields.H"
-    #include "createMRF.H"
     #include "createFvOptions.H"
 
     volScalarField rAU
@@ -77,6 +78,8 @@ int main(int argc, char *argv[])
     #include "createUf.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
+
+    const surfaceScalarField& rhoPhi(mixture.rhoPhi());
 
     turbulence->validate();
 

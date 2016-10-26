@@ -55,14 +55,12 @@ Foam::AveragingMethods::Dual<Type>::Dual
     volumeCell_(mesh.V()),
     volumeDual_(mesh.nPoints(), 0.0),
     dataCell_(FieldField<Field, Type>::operator[](0)),
-    dataDual_(FieldField<Field, Type>::operator[](1)),
-    tetVertices_(3),
-    tetCoordinates_(4)
+    dataDual_(FieldField<Field, Type>::operator[](1))
 {
-    forAll(this->mesh_.C(), cellI)
+    forAll(this->mesh_.C(), celli)
     {
         List<tetIndices> cellTets =
-            polyMeshTetDecomposition::cellTetIndices(this->mesh_, cellI);
+            polyMeshTetDecomposition::cellTetIndices(this->mesh_, celli);
         forAll(cellTets, tetI)
         {
             const tetIndices& tetIs = cellTets[tetI];
@@ -123,7 +121,10 @@ void Foam::AveragingMethods::Dual<Type>::tetGeometry
 
     tetIs.tet(this->mesh_).barycentric(position, tetCoordinates_);
 
-    tetCoordinates_ = max(tetCoordinates_, scalar(0));
+    forAll(tetCoordinates_, i)
+    {
+        tetCoordinates_[i] = max(tetCoordinates_[i], scalar(0));
+    }
 }
 
 
@@ -191,7 +192,7 @@ Foam::AveragingMethods::Dual<Type>::interpolateGrad
 {
     tetGeometry(position, tetIs);
 
-    const label cellI(tetIs.cell());
+    const label celli(tetIs.cell());
 
     const tensor T
     (
@@ -199,9 +200,9 @@ Foam::AveragingMethods::Dual<Type>::interpolateGrad
         (
             tensor
             (
-                this->mesh_.points()[tetVertices_[0]] - this->mesh_.C()[cellI],
-                this->mesh_.points()[tetVertices_[1]] - this->mesh_.C()[cellI],
-                this->mesh_.points()[tetVertices_[2]] - this->mesh_.C()[cellI]
+                this->mesh_.points()[tetVertices_[0]] - this->mesh_.C()[celli],
+                this->mesh_.points()[tetVertices_[1]] - this->mesh_.C()[celli],
+                this->mesh_.points()[tetVertices_[2]] - this->mesh_.C()[celli]
             )
         )
     );
@@ -215,7 +216,7 @@ Foam::AveragingMethods::Dual<Type>::interpolateGrad
         dataDual_[tetVertices_[2]]
     );
 
-    const Type s(dataCell_[cellI]);
+    const Type s(dataCell_[celli]);
 
     return (T & S) + (t*s);
 }
@@ -244,7 +245,7 @@ void Foam::AveragingMethods::Dual<Type>::average
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::AveragingMethods::Dual<Type>::internalField() const
+Foam::AveragingMethods::Dual<Type>::primitiveField() const
 {
     return tmp<Field<Type>>(dataCell_);
 }

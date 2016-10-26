@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,8 +44,7 @@ Description
         g       | acceleration due to gravity [m/s2]
     \endtable
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         rho          | uniform density [kg/m3] | yes         |
@@ -55,7 +54,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            uniformDensityHydrostaticPressure;
         rho             rho;

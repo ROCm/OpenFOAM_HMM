@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -57,7 +57,7 @@ class globalIndex;
 class ensightStream;
 
 /*---------------------------------------------------------------------------*\
-                           Class ensightMesh Declaration
+                         Class ensightMesh Declaration
 \*---------------------------------------------------------------------------*/
 
 class ensightMesh
@@ -369,7 +369,7 @@ public:
 
         //- When exporting faceZones, check if a given face has to be included
         //  or not (i.e. faces on processor boundaries)
-        bool faceToBeIncluded(const label faceI) const;
+        bool faceToBeIncluded(const label facei) const;
 
         //- Helper to cause barrier. Necessary on Quadrics.
         static void barrier();
@@ -384,7 +384,6 @@ public:
             const bool meshMoving,
             Ostream& ensightCaseFile
         ) const;
-
 };
 
 

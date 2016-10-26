@@ -152,7 +152,7 @@ public:
             virtual void addSup
             (
                 fvMatrix<vector>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
 
@@ -163,7 +163,7 @@ public:
             (
                 const volScalarField& rho,
                 fvMatrix<vector>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
 

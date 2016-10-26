@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -318,7 +318,7 @@ void Foam::codedBase::createLibrary
 
 void Foam::codedBase::updateLibrary
 (
-    const word& redirectType
+    const word& name
 ) const
 {
     const dictionary& dict = this->codeDict();
@@ -331,12 +331,12 @@ void Foam::codedBase::updateLibrary
 
     dynamicCodeContext context(dict);
 
-    // codeName: redirectType + _<sha1>
-    // codeDir : redirectType
+    // codeName: name + _<sha1>
+    // codeDir : name
     dynamicCode dynCode
     (
-        redirectType + context.sha1().str(true),
-        redirectType
+        name + context.sha1().str(true),
+        name
     );
     const fileName libPath = dynCode.libPath();
 

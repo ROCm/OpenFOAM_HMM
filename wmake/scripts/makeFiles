@@ -62,8 +62,8 @@ echo >> Make/files
 
 for file in `find . -name "*.[cCylLfF]" -type f -print`
 do
-    fileName=`echo ${file##*/}`
-    pathName=`echo ${file%/*} | sed 's%^\.%%' | sed 's%^/%%' | $dirToString`
+    fileName=${file##*/}
+    pathName=`echo ${file%/*} | sed -e 's%^\.%%' -e 's%^/%%' | $dirToString`
 
     if [ -n "$pathName" ]
     then

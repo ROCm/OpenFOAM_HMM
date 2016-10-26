@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -101,14 +101,14 @@ void Foam::fv::cellSetOption::setCellSet()
 
             forAll(points_, i)
             {
-                label cellI = mesh_.findCell(points_[i]);
-                if (cellI >= 0)
+                label celli = mesh_.findCell(points_[i]);
+                if (celli >= 0)
                 {
-                    selectedCells.insert(cellI);
+                    selectedCells.insert(celli);
                 }
 
-                label globalCellI = returnReduce(cellI, maxOp<label>());
-                if (globalCellI < 0)
+                label globalCelli = returnReduce(celli, maxOp<label>());
+                if (globalCelli < 0)
                 {
                     WarningInFunction
                         << "Unable to find owner cell for point " << points_[i]

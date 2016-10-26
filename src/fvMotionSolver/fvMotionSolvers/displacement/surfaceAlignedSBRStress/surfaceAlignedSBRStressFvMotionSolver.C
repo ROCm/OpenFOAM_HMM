@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,29 +131,32 @@ Foam::surfaceAlignedSBRStressFvMotionSolver::
 
 void Foam::surfaceAlignedSBRStressFvMotionSolver::calculateCellRot()
 {
-    cellRot_.internalField() = Zero;
-    pointDisplacement_.internalField() = Zero;
+    cellRot_.primitiveFieldRef() = Zero;
+    pointDisplacement_.primitiveFieldRef() = Zero;
 
     // Find intersections
     pointField start(fvMesh_.nInternalFaces());
     pointField end(start.size());
 
+    const vectorField& Cc = fvMesh_.cellCentres();
+    const polyBoundaryMesh& pbm = fvMesh_.boundaryMesh();
+
     for (label faceI = 0; faceI < fvMesh_.nInternalFaces(); faceI++)
     {
-        start[faceI] = fvMesh_.cellCentres()[fvMesh_.faceOwner()[faceI]];
-        end[faceI] = fvMesh_.cellCentres()[fvMesh_.faceNeighbour()[faceI]];
+        start[faceI] = Cc[fvMesh_.faceOwner()[faceI]];
+        end[faceI] = Cc[fvMesh_.faceNeighbour()[faceI]];
     }
 
     DynamicList<label> hitCells;
 
-    forAll(surfaceMesh_, surfI)
+    forAll(surfaceMesh_, surfi)
     {
         List<pointIndexHit> hit(start.size());
-        surfaceMesh_[surfI].findLineAny(start, end, hit);
+        surfaceMesh_[surfi].findLineAny(start, end, hit);
 
         labelField pointsCount(fvMesh_.nPoints(), 1);
 
-        const vectorField& nf = surfaceMesh_[surfI].faceNormals();
+        const vectorField& nf = surfaceMesh_[surfi].faceNormals();
 
         const vectorField& SfMesh = fvMesh_.faceAreas();
 
@@ -161,54 +164,45 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::calculateCellRot()
 
         DynamicList<label> cellsHit;
 
-        forAll(hit, faceI)
+        forAll(hit, facei)
         {
-            if (hit[faceI].hit())
+            if (hit[facei].hit())
             {
                 label rotCellId(-1);
-                const vector hitPoint = hit[faceI].hitPoint();
+                const vector hitPoint = hit[facei].hitPoint();
 
-                if (fvMesh_.isInternalFace(faceI))
+                if (fvMesh_.isInternalFace(facei))
                 {
-                    const vector cCOne =
-                        fvMesh_.cellCentres()[fvMesh_.faceOwner()[faceI]];
-
-                    const vector cCTwo =
-                        fvMesh_.cellCentres()[fvMesh_.faceNeighbour()[faceI]];
+                    const vector cCOne = Cc[fvMesh_.faceOwner()[facei]];
+                    const vector cCTwo = Cc[fvMesh_.faceNeighbour()[facei]];
 
                     if (mag(cCOne - hitPoint) < mag(cCTwo - hitPoint))
                     {
-                        rotCellId = fvMesh_.faceOwner()[faceI];
+                        rotCellId = fvMesh_.faceOwner()[facei];
                     }
                     else
                     {
-                        rotCellId = fvMesh_.faceNeighbour()[faceI];
+                        rotCellId = fvMesh_.faceNeighbour()[facei];
                     }
                 }
                 else
                 {
-                    label patchI = fvMesh_.boundaryMesh().whichPatch(faceI);
-                    if
-                    (
-                        isA<processorPolyPatch>(fvMesh_.boundaryMesh()[patchI])
-                    )
+                    label patchi = pbm.whichPatch(facei);
+                    if (isA<processorPolyPatch>(pbm[patchi]))
                     {
-                        const point& ownCc =
-                            fvMesh_.cellCentres()[fvMesh_.faceOwner()[faceI]];
+                        const point& ownCc = Cc[fvMesh_.faceOwner()[facei]];
 
                         const vector cCentreOne = ownCc - hitPoint;
 
                         const vector nbrCc =
-                            refCast<const processorPolyPatch>
-                            (
-                                fvMesh_.boundaryMesh()[patchI]
-                            ).neighbFaceCellCentres()[faceI];
+                            refCast<const processorPolyPatch>(pbm[patchi])
+                                .neighbFaceCellCentres()[facei];
 
                         const vector cCentreTwo = nbrCc - hitPoint;
 
                         if (cCentreOne < cCentreTwo)
                         {
-                            rotCellId = fvMesh_.faceOwner()[faceI];
+                            rotCellId = fvMesh_.faceOwner()[facei];
                         }
                     }
                 }
@@ -228,7 +222,7 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::calculateCellRot()
                     forAll(cFaces, k)
                     {
                         scalar tmp =
-                            mag(nf[hit[faceI].index()] & nSfMesh[cFaces[k]]);
+                            mag(nf[hit[facei].index()] & nSfMesh[cFaces[k]]);
 
                         if (tmp > cosMax)
                         {
@@ -248,7 +242,7 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::calculateCellRot()
                     )
                     {
                         cellRot_[rotCellId] =
-                            nSfMesh[faceId] ^ nf[hit[faceI].index()];
+                            nSfMesh[faceId]^nf[hit[facei].index()];
 
                         const scalar magRot = mag(cellRot_[rotCellId]);
 
@@ -279,13 +273,12 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::calculateCellRot()
             }
         }
 
-        forAll(pointDisplacement_.internalField(), iPoint)
+        vectorField& pd = pointDisplacement_.primitiveFieldRef();
+        forAll(pd, pointi)
         {
-            vector& point = pointDisplacement_.internalField()[iPoint];
-            point /= pointsCount[iPoint];
+            vector& point = pd[pointi];
+            point /= pointsCount[pointi];
         }
-
-
     }
 }
 
@@ -367,7 +360,7 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::solve()
     volScalarField& mu =  tmu.ref();
 
     const scalarList& V = fvMesh_.V();
-    mu.internalField() = (1.0/V);
+    mu.primitiveFieldRef() = (1.0/V);
 
     const volScalarField lambda(-mu);
 
@@ -379,8 +372,8 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::solve()
     const volSymmTensorField magNewSigmaD(sigmaD_ + accFactor_*newSigmaD);
 
     const scalar diffSigmaD =
-        gSum(mag(sigmaD_.oldTime().internalField()))
-     -  gSum(mag(magNewSigmaD.internalField()));
+        gSum(mag(sigmaD_.oldTime().primitiveField()))
+     -  gSum(mag(magNewSigmaD.primitiveField()));
 
     if (mag(diffSigmaD) > minSigmaDiff_)
     {
@@ -388,7 +381,7 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::solve()
     }
 
     const surfaceScalarField Df(diffusivity().operator()());
-    pointDisplacement_.boundaryField().updateCoeffs();
+    pointDisplacement_.boundaryFieldRef().updateCoeffs();
 
     const volTensorField gradCd(fvc::grad(cellDisp));
 
@@ -419,5 +412,6 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::solve()
         DEqn.solve();
     }
 }
+
 
 // ************************************************************************* //

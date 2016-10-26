@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,11 +28,8 @@ License
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList()
 :
-    List<T>(0),
     capacity_(0)
-{
-    List<T>::size(0);
-}
+{}
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
@@ -76,6 +73,17 @@ template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
 (
     const UList<T>& lst
+)
+:
+    List<T>(lst),
+    capacity_(lst.size())
+{}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
+(
+    std::initializer_list<T> lst
 )
 :
     List<T>(lst),
@@ -144,28 +152,14 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::reserve
     const label nElem
 )
 {
-    // Allocate more capacity?
+    // Allocate more capacity if necessary
     if (nElem > capacity_)
     {
-        // TODO: convince the compiler that division by zero does not occur
-        //        if (SizeInc && (!SizeMult || !SizeDiv))
-        //        {
-        //            // resize with SizeInc as the granularity
-        //            capacity_ = nElem;
-        //            unsigned pad = SizeInc - (capacity_ % SizeInc);
-        //            if (pad != SizeInc)
-        //            {
-        //                capacity_ += pad;
-        //            }
-        //        }
-        //        else
-        {
-            capacity_ = max
-            (
-                nElem,
-                label(SizeInc + capacity_ * SizeMult / SizeDiv)
-            );
-        }
+        capacity_ = max
+        (
+            nElem,
+            label(SizeInc + capacity_ * SizeMult / SizeDiv)
+        );
 
         // Adjust allocated size, leave addressed size untouched
         label nextFree = List<T>::size();
@@ -181,28 +175,14 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
     const label nElem
 )
 {
-    // Allocate more capacity?
+    // Allocate more capacity if necessary
     if (nElem > capacity_)
     {
-        // TODO: convince the compiler that division by zero does not occur
-        //        if (SizeInc && (!SizeMult || !SizeDiv))
-        //        {
-        //            // resize with SizeInc as the granularity
-        //            capacity_ = nElem;
-        //            unsigned pad = SizeInc - (capacity_ % SizeInc);
-        //            if (pad != SizeInc)
-        //            {
-        //                capacity_ += pad;
-        //            }
-        //        }
-        //        else
-        {
-            capacity_ = max
-            (
-                nElem,
-                label(SizeInc + capacity_ * SizeMult / SizeDiv)
-            );
-        }
+        capacity_ = max
+        (
+            nElem,
+            label(SizeInc + capacity_ * SizeMult / SizeDiv)
+        );
 
         List<T>::setSize(capacity_);
     }
@@ -289,8 +269,9 @@ template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void
 Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::transfer(List<T>& lst)
 {
+    // Take over storage, clear addressing for lst.
     capacity_ = lst.size();
-    List<T>::transfer(lst);   // Take over storage, clear addressing for lst.
+    List<T>::transfer(lst);
 }
 
 
@@ -304,7 +285,6 @@ Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::transfer
     // Take over storage as-is (without shrink), clear addressing for lst.
     capacity_ = lst.capacity_;
     lst.capacity_ = 0;
-
     List<T>::transfer(static_cast<List<T>&>(lst));
 }
 
@@ -342,7 +322,7 @@ Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
     if (this == &lst)
     {
         FatalErrorInFunction
-            << "attempted appending to self" << abort(FatalError);
+            << "Attempted appending to self" << abort(FatalError);
     }
 
     label nextFree = List<T>::size();
@@ -351,6 +331,24 @@ Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
     forAll(lst, elemI)
     {
         this->operator[](nextFree++) = lst[elemI];
+    }
+    return *this;
+}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>&
+Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
+(
+    std::initializer_list<T> lst
+)
+{
+    label nextFree = List<T>::size();
+    setSize(nextFree + lst.size());
+
+    for (const T& val : lst)
+    {
+        this->operator[](nextFree++) = val;
     }
     return *this;
 }
@@ -429,7 +427,7 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
     if (this == &lst)
     {
         FatalErrorInFunction
-            << "attempted assignment to self" << abort(FatalError);
+            << "Attempted assignment to self" << abort(FatalError);
     }
 
     if (capacity_ >= lst.size())
@@ -453,6 +451,29 @@ template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
 (
     const UList<T>& lst
+)
+{
+    if (capacity_ >= lst.size())
+    {
+        // Can copy w/o reallocating, match initial size to avoid reallocation
+        List<T>::size(lst.size());
+        List<T>::operator=(lst);
+    }
+    else
+    {
+        // Make everything available for the copy operation
+        List<T>::size(capacity_);
+
+        List<T>::operator=(lst);
+        capacity_ = List<T>::size();
+    }
+}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
+(
+    std::initializer_list<T> lst
 )
 {
     if (capacity_ >= lst.size())

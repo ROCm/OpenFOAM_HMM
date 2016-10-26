@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -106,14 +106,14 @@ int main(int argc, char *argv[])
     {
         label no, blkNo, patchLabel;
 
-        forAll(cfxPatchTypes, patchI)
+        forAll(cfxPatchTypes, patchi)
         {
             // Grab patch type and name
-            cfxFile >> cfxPatchTypes[patchI] >> cfxPatchNames[patchI] >> no;
+            cfxFile >> cfxPatchTypes[patchi] >> cfxPatchNames[patchi] >> no;
 
             // Grab patch range
-            patchRanges[patchI].setSize(6);
-            labelList& curRange = patchRanges[patchI];
+            patchRanges[patchi].setSize(6);
+            labelList& curRange = patchRanges[patchi];
 
             forAll(curRange, rI)
             {
@@ -125,9 +125,9 @@ int main(int argc, char *argv[])
             // 0 = solid (3-D patch),
             // 1 = high i, 2 = high j, 3 = high k
             // 4 = low i, 5 = low j, 6 = low k
-            cfxFile >> patchDirections[patchI] >> blkNo >> patchLabel;
+            cfxFile >> patchDirections[patchi] >> blkNo >> patchLabel;
 
-            patchMasterBlocks[patchI] = blkNo - 1;
+            patchMasterBlocks[patchi] = blkNo - 1;
         }
     }
 
@@ -181,9 +181,9 @@ int main(int argc, char *argv[])
 
     faceListList rawPatches(npatch);
 
-    forAll(rawPatches, patchI)
+    forAll(rawPatches, patchi)
     {
-        const word& patchType = cfxPatchTypes[patchI];
+        const word& patchType = cfxPatchTypes[patchi];
 
         // reject volume patches
         if
@@ -192,17 +192,17 @@ int main(int argc, char *argv[])
          || patchType == "SOLCON" || patchType == "USER3D"
         )
         {
-            patchMasterBlocks[patchI] = -1;
-            rawPatches[patchI].setSize(0);
+            patchMasterBlocks[patchi] = -1;
+            rawPatches[patchi].setSize(0);
         }
         else
         {
             // read and create a 2-D patch
-            rawPatches[patchI] =
-                blocks[patchMasterBlocks[patchI]].patchFaces
+            rawPatches[patchi] =
+                blocks[patchMasterBlocks[patchi]].patchFaces
                 (
-                    patchDirections[patchI],
-                    patchRanges[patchI]
+                    patchDirections[patchi],
+                    patchRanges[patchi]
                 );
 
         }
@@ -257,11 +257,11 @@ int main(int argc, char *argv[])
             const labelList& blockPFacePoints =
                 blockPFaces[blockPFaceLabel];
 
-            forAll(blockPFacePoints, blockPFacePointI)
+            forAll(blockPFacePoints, blockPFacePointi)
             {
-                forAll(blockPFacePoints, blockPFacePointI2)
+                forAll(blockPFacePoints, blockPFacePointi2)
                 {
-                    if (blockPFacePointI != blockPFacePointI2)
+                    if (blockPFacePointi != blockPFacePointi2)
                     {
                         sqrMergeTol =
                             min
@@ -270,9 +270,9 @@ int main(int argc, char *argv[])
                                 magSqr
                                 (
                                     blockPpoints
-                                        [blockPFacePoints[blockPFacePointI]]
+                                        [blockPFacePoints[blockPFacePointi]]
                                   - blockPpoints
-                                        [blockPFacePoints[blockPFacePointI2]]
+                                        [blockPFacePoints[blockPFacePointi2]]
                                 )
                             );
                     }
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
             labelList& cp = curPairs[blockPFaceLabel];
             cp.setSize(blockPFacePoints.size());
 
-        forAll(blockPFacePoints, blockPFacePointI)
+        forAll(blockPFacePoints, blockPFacePointi)
         {
             found = false;
 
@@ -303,16 +303,16 @@ int main(int argc, char *argv[])
                 const labelList& blockNFacePoints =
                     blockNFaces[blockNFaceLabel];
 
-            forAll(blockNFacePoints, blockNFacePointI)
+            forAll(blockNFacePoints, blockNFacePointi)
             {
                 if
                 (
                     magSqr
                     (
                         blockPpoints
-                            [blockPFacePoints[blockPFacePointI]]
+                            [blockPFacePoints[blockPFacePointi]]
                       - blockNpoints
-                            [blockNFacePoints[blockNFacePointI]]
+                            [blockNFacePoints[blockNFacePointi]]
                     )
                   < sqrMergeTol
                 )
@@ -320,15 +320,15 @@ int main(int argc, char *argv[])
                     // Found a new pair
                     found = true;
 
-                    cp[blockPFacePointI] =
-                        blockNFacePoints[blockNFacePointI];
+                    cp[blockPFacePointi] =
+                        blockNFacePoints[blockNFacePointi];
 
                     label PpointLabel =
-                        blockPFacePoints[blockPFacePointI]
+                        blockPFacePoints[blockPFacePointi]
                       + blockOffsets[blockPlabel];
 
                     label NpointLabel =
-                        blockNFacePoints[blockNFacePointI]
+                        blockNFacePoints[blockNFacePointi]
                       + blockOffsets[blockNlabel];
 
                     label minPN = min(PpointLabel, NpointLabel);
@@ -384,14 +384,14 @@ int main(int argc, char *argv[])
 
                 const labelList& cp = curPairs[blockPFaceLabel];
 
-                forAll(cp, blockPFacePointI)
+                forAll(cp, blockPFacePointi)
                 {
                     label PpointLabel =
-                        blockPFacePoints[blockPFacePointI]
+                        blockPFacePoints[blockPFacePointi]
                       + blockOffsets[blockPlabel];
 
                     label NpointLabel =
-                        cp[blockPFacePointI]
+                        cp[blockPFacePointi]
                       + blockOffsets[blockNlabel];
 
                     if
@@ -443,16 +443,16 @@ int main(int argc, char *argv[])
             const labelList& blockPFacePoints
                 = blockPFaces[blockPFaceLabel];
 
-            forAll(blockPFacePoints, blockPFacePointI)
+            forAll(blockPFacePoints, blockPFacePointi)
             {
                 label PpointLabel =
-                    blockPFacePoints[blockPFacePointI]
+                    blockPFacePoints[blockPFacePointi]
                   + blockOffsets[blockPlabel];
 
                 if (pointMergeList[PpointLabel] == -1)
                 {
                     FatalErrorInFunction
-                        << "Unable to merge point " << blockPFacePointI
+                        << "Unable to merge point " << blockPFacePointi
                         << " of face " << blockPFaceLabel
                         << " of block " << blockPlabel
                         << abort(FatalError);
@@ -465,16 +465,16 @@ int main(int argc, char *argv[])
             const labelList& blockNFacePoints
                 = blockNFaces[blockNFaceLabel];
 
-            forAll(blockNFacePoints, blockNFacePointI)
+            forAll(blockNFacePoints, blockNFacePointi)
             {
                 label NpointLabel =
-                    blockNFacePoints[blockNFacePointI]
+                    blockNFacePoints[blockNFacePointi]
                   + blockOffsets[blockNlabel];
 
                 if (pointMergeList[NpointLabel] == -1)
                 {
                     FatalErrorInFunction
-                        << "Unable to merge point " << blockNFacePointI
+                        << "Unable to merge point " << blockNFacePointi
                         << " of face " << blockNFaceLabel
                         << " of block " << blockNlabel
                         << abort(FatalError);
@@ -553,16 +553,16 @@ int main(int argc, char *argv[])
     {
         labelListList curBlockCells = blocks[blockI].blockCells();
 
-        forAll(curBlockCells, blockCellI)
+        forAll(curBlockCells, blockCelli)
         {
-            labelList cellPoints(curBlockCells[blockCellI].size());
+            labelList cellPoints(curBlockCells[blockCelli].size());
 
-            forAll(cellPoints, pointI)
+            forAll(cellPoints, pointi)
             {
-                cellPoints[pointI] =
+                cellPoints[pointi] =
                     pointMergeList
                     [
-                        curBlockCells[blockCellI][pointI]
+                        curBlockCells[blockCelli][pointi]
                       + blockOffsets[blockI]
                     ];
             }
@@ -583,30 +583,30 @@ int main(int argc, char *argv[])
 
     label nCreatedPatches = 0;
 
-    forAll(rawPatches, patchI)
+    forAll(rawPatches, patchi)
     {
-        if (rawPatches[patchI].size() && cfxPatchTypes[patchI] != "BLKBDY")
+        if (rawPatches[patchi].size() && cfxPatchTypes[patchi] != "BLKBDY")
         {
             // Check if this name has been already created
             label existingPatch = -1;
 
-            for (label oldPatchI = 0; oldPatchI < nCreatedPatches; oldPatchI++)
+            for (label oldPatchi = 0; oldPatchi < nCreatedPatches; oldPatchi++)
             {
-                if (patchNames[oldPatchI] == cfxPatchNames[patchI])
+                if (patchNames[oldPatchi] == cfxPatchNames[patchi])
                 {
-                    existingPatch = oldPatchI;
+                    existingPatch = oldPatchi;
                     break;
                 }
             }
 
-            const faceList& curRawPatch = rawPatches[patchI];
-            label curBlock = patchMasterBlocks[patchI];
+            const faceList& curRawPatch = rawPatches[patchi];
+            label curBlock = patchMasterBlocks[patchi];
 
             if (existingPatch >= 0)
             {
-                Info<< "CFX patch " << patchI
-                    << ", of type " << cfxPatchTypes[patchI]
-                    << ", name " << cfxPatchNames[patchI]
+                Info<< "CFX patch " << patchi
+                    << ", of type " << cfxPatchTypes[patchi]
+                    << ", name " << cfxPatchNames[patchi]
                     << " already exists as OpenFOAM patch " << existingPatch
                     << ".  Adding faces." << endl;
 
@@ -614,19 +614,19 @@ int main(int argc, char *argv[])
                 label oldSize = renumberedPatch.size();
                 renumberedPatch.setSize(oldSize + curRawPatch.size());
 
-                forAll(curRawPatch, faceI)
+                forAll(curRawPatch, facei)
                 {
-                    const face& oldFace = curRawPatch[faceI];
+                    const face& oldFace = curRawPatch[facei];
 
-                    face& newFace = renumberedPatch[oldSize + faceI];
+                    face& newFace = renumberedPatch[oldSize + facei];
                     newFace.setSize(oldFace.size());
 
-                    forAll(oldFace, pointI)
+                    forAll(oldFace, pointi)
                     {
-                        newFace[pointI] =
+                        newFace[pointi] =
                             pointMergeList
                             [
-                                oldFace[pointI]
+                                oldFace[pointi]
                               + blockOffsets[curBlock]
                             ];
                     }
@@ -638,66 +638,66 @@ int main(int argc, char *argv[])
                 faceList& renumberedPatch = boundary[nCreatedPatches];
                 renumberedPatch.setSize(curRawPatch.size());
 
-                forAll(curRawPatch, faceI)
+                forAll(curRawPatch, facei)
                 {
-                    const face& oldFace = curRawPatch[faceI];
+                    const face& oldFace = curRawPatch[facei];
 
-                    face& newFace = renumberedPatch[faceI];
+                    face& newFace = renumberedPatch[facei];
                     newFace.setSize(oldFace.size());
 
-                    forAll(oldFace, pointI)
+                    forAll(oldFace, pointi)
                     {
-                        newFace[pointI] =
+                        newFace[pointi] =
                             pointMergeList
                             [
-                                oldFace[pointI]
+                                oldFace[pointi]
                               + blockOffsets[curBlock]
                             ];
                     }
                 }
 
-                Info<< "CFX patch " << patchI
-                    << ", of type " << cfxPatchTypes[patchI]
-                    << ", name " << cfxPatchNames[patchI]
+                Info<< "CFX patch " << patchi
+                    << ", of type " << cfxPatchTypes[patchi]
+                    << ", name " << cfxPatchNames[patchi]
                     << " converted into OpenFOAM patch " << nCreatedPatches
                     << " type ";
 
-                if (cfxPatchTypes[patchI] == "WALL")
+                if (cfxPatchTypes[patchi] == "WALL")
                 {
                     Info<< "wall." << endl;
 
                     patchTypes[nCreatedPatches] = wallPolyPatch::typeName;
-                    patchNames[nCreatedPatches] = cfxPatchNames[patchI];
+                    patchNames[nCreatedPatches] = cfxPatchNames[patchi];
                     nCreatedPatches++;
                 }
-                else if (cfxPatchTypes[patchI] == "SYMMET")
+                else if (cfxPatchTypes[patchi] == "SYMMET")
                 {
                     Info<< "symmetryPlane." << endl;
 
                     patchTypes[nCreatedPatches] = symmetryPolyPatch::typeName;
-                    patchNames[nCreatedPatches] = cfxPatchNames[patchI];
+                    patchNames[nCreatedPatches] = cfxPatchNames[patchi];
                     nCreatedPatches++;
                 }
                 else if
                 (
-                    cfxPatchTypes[patchI] == "INLET"
-                 || cfxPatchTypes[patchI] == "OUTLET"
-                 || cfxPatchTypes[patchI] == "PRESS"
-                 || cfxPatchTypes[patchI] == "CNDBDY"
-                 || cfxPatchTypes[patchI] == "USER2D"
+                    cfxPatchTypes[patchi] == "INLET"
+                 || cfxPatchTypes[patchi] == "OUTLET"
+                 || cfxPatchTypes[patchi] == "PRESS"
+                 || cfxPatchTypes[patchi] == "CNDBDY"
+                 || cfxPatchTypes[patchi] == "USER2D"
                 )
                 {
                     Info<< "generic." << endl;
 
                     patchTypes[nCreatedPatches] = polyPatch::typeName;
-                    patchNames[nCreatedPatches] = cfxPatchNames[patchI];
+                    patchNames[nCreatedPatches] = cfxPatchNames[patchi];
                     nCreatedPatches++;
                 }
                 else
                 {
                     FatalErrorInFunction
                         << "Unrecognised CFX patch type "
-                        << cfxPatchTypes[patchI]
+                        << cfxPatchTypes[patchi]
                         << abort(FatalError);
                 }
             }
@@ -722,14 +722,14 @@ int main(int argc, char *argv[])
     );
 
     // Add information to dictionary
-    forAll(patchNames, patchI)
+    forAll(patchNames, patchi)
     {
-        if (!patchDicts.set(patchI))
+        if (!patchDicts.set(patchi))
         {
-            patchDicts.set(patchI, new dictionary());
+            patchDicts.set(patchi, new dictionary());
         }
         // Add but not overwrite
-        patchDicts[patchI].add("type", patchTypes[patchI], false);
+        patchDicts[patchi].add("type", patchTypes[patchi], false);
     }
 
     polyMesh pShapeMesh

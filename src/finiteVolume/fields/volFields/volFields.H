@@ -62,10 +62,13 @@ void GeometricField<scalar, fvPatchField, volMesh>::replace
     const GeometricField<scalar, fvPatchField, volMesh>& sf
 );
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "volFieldsI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -52,7 +52,7 @@ namespace fv
 
 void Foam::fv::acousticDampingSource::setBlendingFactor()
 {
-    blendFactor_.internalField() = 1;
+    blendFactor_.primitiveFieldRef() = 1;
 
     const vectorField& Cf = mesh_.C();
 

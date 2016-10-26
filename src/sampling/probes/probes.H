@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::probes
 
 Group
-    grpFunctionObjects
+    grpUtilitiesFunctionObjects
 
 Description
     Set of locations to sample.
@@ -37,20 +37,17 @@ Description
     probes
     {
         type            probes;
-        functionObjectLibs ( "libsampling.so" );
+        libs            ("libsampling.so");
 
         // Name of the directory for probe data
         name            probes;
 
         // Write at same frequency as fields
-        outputControl   outputTime;
-        outputInterval  1;
+        writeControl    outputTime;
+        writeInterval   1;
 
         // Fields to be probed
-        fields
-        (
-            p U
-        );
+        fields          (p U);
 
         // Optional: do not recalculate cells if mesh moves
         fixedLocations  false;
@@ -76,6 +73,7 @@ SourceFiles
 #ifndef probes_H
 #define probes_H
 
+#include "stateFunctionObject.H"
 #include "HashPtrTable.H"
 #include "OFstream.H"
 #include "polyMesh.H"
@@ -85,12 +83,15 @@ SourceFiles
 #include "surfaceMesh.H"
 #include "wordReList.H"
 
+using namespace Foam::functionObjects;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
 // Forward declaration of classes
+class Time;
 class objectRegistry;
 class dictionary;
 class fvMesh;
@@ -102,6 +103,7 @@ class mapPolyMesh;
 
 class probes
 :
+    public stateFunctionObject,
     public pointField
 {
 protected:
@@ -123,18 +125,13 @@ protected:
         };
 
 
-    // Private data
-
-        //- Name of this set of probes,
-        //  Also used as the name of the probes directory.
-        const word name_;
+    // Protected data
 
         //- Const reference to fvMesh
         const fvMesh& mesh_;
 
         //- Load fields from files (not from objectRegistry)
-        const bool loadFromFiles_;
-
+        bool loadFromFiles_;
 
         // Read from dictonary
 
@@ -195,8 +192,6 @@ protected:
         //  returns number of fields to sample
         label prepare();
 
-        //- Read dictionary settings
-        void readDict(const dictionary& dict);
 
 private:
 
@@ -238,15 +233,14 @@ public:
 
     // Constructors
 
-        //- Construct for given objectRegistry and dictionary.
-        //  Allow the possibility to load fields from files
+        //- Construct from Time and dictionary
         probes
         (
             const word& name,
-            const objectRegistry&,
-            const dictionary&,
+            const Time& runTime,
+            const dictionary& dict,
             const bool loadFromFiles = false,
-            const bool findElements = true
+            const bool readFields = true
         );
 
 
@@ -255,12 +249,6 @@ public:
 
 
     // Member Functions
-
-        //- Return name of the set of probes
-        virtual const word& name() const
-        {
-            return name_;
-        }
 
         //- Return names of fields to probe
         virtual const wordReList& fieldNames() const
@@ -286,20 +274,14 @@ public:
             return elementList_;
         }
 
+        //- Read the probes
+        virtual bool read(const dictionary&);
+
         //- Execute, currently does nothing
-        virtual void execute();
-
-        //- Execute at the final time-loop, currently does nothing
-        virtual void end();
-
-        //- Called when time was set at the end of the Time::operator++
-        virtual void timeSet();
+        virtual bool execute();
 
         //- Sample and write
-        virtual void write();
-
-        //- Read the probes
-        virtual void read(const dictionary&);
+        virtual bool write();
 
         //- Update for changes of mesh
         virtual void updateMesh(const mapPolyMesh&);

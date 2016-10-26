@@ -39,6 +39,7 @@ SourceFiles
 #define gaussConvectionScheme_H
 
 #include "convectionScheme.H"
+#include "etcFiles.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

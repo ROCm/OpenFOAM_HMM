@@ -9,7 +9,7 @@ application=$(getApplication)
 # Create mesh
 runApplication blockMesh
 
-# Restore 0/ from 0.org/
+# Restore 0/ from 0.orig/
 restore0Dir
 
 # Create sets

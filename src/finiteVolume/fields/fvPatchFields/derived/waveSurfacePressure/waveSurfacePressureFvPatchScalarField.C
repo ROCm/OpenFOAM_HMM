@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,16 +82,11 @@ waveSurfacePressureFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF),
+    fixedValueFvPatchScalarField(p, iF, dict),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     zetaName_(dict.lookupOrDefault<word>("zeta", "zeta")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
-{
-    fvPatchField<scalar>::operator=
-    (
-        scalarField("value", dict, p.size())
-    );
-}
+{}
 
 
 Foam::waveSurfacePressureFvPatchScalarField::
@@ -146,7 +141,7 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const label patchI = patch().index();
+    const label patchi = patch().index();
 
     const scalar dt = db().time().deltaTValue();
 
@@ -156,7 +151,7 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
         (
             db().lookupObject<volVectorField>(zetaName_)
         );
-    vectorField& zetap = zeta.boundaryField()[patchI];
+    vectorField& zetap = zeta.boundaryFieldRef()[patchi];
 
     // lookup d/dt scheme from database for zeta
     const word ddtSchemeName(zeta.mesh().ddtScheme(zeta.name()));
@@ -170,7 +165,7 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
     tmp<vectorField> nf(patch().nf());
 
     // change in zeta due to flux
-    vectorField dZetap(dt*nf()*phi.boundaryField()[patchI]/patch().magSf());
+    vectorField dZetap(dt*nf()*phi.boundaryField()[patchi]/patch().magSf());
 
     if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
     {
@@ -180,12 +175,14 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
         dZetap /= rhop;
     }
 
+    const volVectorField& zeta0 = zeta.oldTime();
+
     switch (ddtScheme)
     {
         case tsEuler:
         case tsCrankNicolson:
         {
-            zetap = zeta.oldTime().boundaryField()[patchI] + dZetap;
+            zetap = zeta0.boundaryField()[patchi] + dZetap;
 
             break;
         }
@@ -199,8 +196,8 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
 
             zetap =
                 (
-                    c0*zeta.oldTime().boundaryField()[patchI]
-                  - c00*zeta.oldTime().oldTime().boundaryField()[patchI]
+                    c0*zeta0.boundaryField()[patchi]
+                  - c00*zeta0.oldTime().boundaryField()[patchi]
                   + dZetap
                 )/c;
 
@@ -211,8 +208,8 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
             FatalErrorInFunction
                 << ddtSchemeName << nl
                 << "    on patch " << this->patch().name()
-                << " of field " << this->dimensionedInternalField().name()
-                << " in file " << this->dimensionedInternalField().objectPath()
+                << " of field " << this->internalField().name()
+                << " in file " << this->internalField().objectPath()
                 << abort(FatalError);
         }
     }

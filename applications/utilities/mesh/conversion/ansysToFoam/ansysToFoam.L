@@ -280,11 +280,11 @@ label findFace(const polyMesh& mesh, const face& f)
 
     forAll(pFaces, i)
     {
-        label faceI = pFaces[i];
+        label facei = pFaces[i];
 
-        if (mesh.faces()[faceI] == f)
+        if (mesh.faces()[facei] == f)
         {
-            return faceI;
+            return facei;
         }
     }
 
@@ -318,7 +318,7 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
 
-    fileName ansysFile(args.additionalArgs()[0]);
+    fileName ansysFile(args[1]);
     ifstream ansysStream(ansysFile.c_str());
 
     if (!ansysStream)
@@ -488,18 +488,18 @@ int main(int argc, char *argv[])
     faceListList boundary(slPatchCells.size());
     wordList patchNames(slPatchCells.size());
 
-    forAll(slPatchCells, patchI)
+    forAll(slPatchCells, patchi)
     {
         SLList<face> patchFaces;
 
-        SLList<label>::iterator cellIter(slPatchCells[patchI].begin());
-        SLList<label>::iterator faceIter(slPatchCellFaces[patchI].begin());
+        SLList<label>::iterator cellIter(slPatchCells[patchi].begin());
+        SLList<label>::iterator faceIter(slPatchCellFaces[patchi].begin());
 
         for
         (
             ;
-            cellIter != slPatchCells[patchI].end()
-         && faceIter != slPatchCellFaces[patchI].end();
+            cellIter != slPatchCells[patchi].end()
+         && faceIter != slPatchCellFaces[patchi].end();
             ++cellIter, ++faceIter
         )
         {
@@ -516,8 +516,8 @@ int main(int argc, char *argv[])
             );
         }
 
-        boundary[patchI] = patchFaces;
-        patchNames[patchI] = word("patch") + name(patchI + 1);
+        boundary[patchi] = patchFaces;
+        patchNames[patchi] = word("patch") + name(patchi + 1);
     }
 
 
@@ -525,10 +525,10 @@ int main(int argc, char *argv[])
     // Lookup the face labels for all the boundary faces
     //
     labelListList boundaryFaceLabels(boundary.size());
-    forAll(boundary, patchI)
+    forAll(boundary, patchi)
     {
-        const faceList& bFaces = boundary[patchI];
-        labelList& bFaceLabels = boundaryFaceLabels[patchI];
+        const faceList& bFaces = boundary[patchi];
+        labelList& bFaceLabels = boundaryFaceLabels[patchi];
         bFaceLabels.setSize(bFaces.size());
         forAll(bFaces, i)
         {
@@ -541,24 +541,24 @@ int main(int argc, char *argv[])
     // faces go into faceZones and external faces go into patches.
     List<faceList> patchFaces(slPatchCells.size());
     labelList patchNFaces(slPatchCells.size(), 0);
-    forAll(boundary, patchI)
+    forAll(boundary, patchi)
     {
-        const faceList& bFaces = boundary[patchI];
-        const labelList& bFaceLabels = boundaryFaceLabels[patchI];
+        const faceList& bFaces = boundary[patchi];
+        const labelList& bFaceLabels = boundaryFaceLabels[patchi];
 
-        patchFaces[patchI].setSize(bFaces.size());
+        patchFaces[patchi].setSize(bFaces.size());
 
         forAll(bFaces, i)
         {
             if (!dummyMesh().isInternalFace(bFaceLabels[i]))
             {
-                patchFaces[patchI][patchNFaces[patchI]++] = bFaces[i];
+                patchFaces[patchi][patchNFaces[patchi]++] = bFaces[i];
             }
         }
-        patchFaces[patchI].setSize(patchNFaces[patchI]);
+        patchFaces[patchi].setSize(patchNFaces[patchi]);
 
-        Info<< "Patch " << patchI << " named " << patchNames[patchI]
-            << ": " << boundary[patchI].size() << " faces" << endl;
+        Info<< "Patch " << patchi << " named " << patchNames[patchi]
+            << ": " << boundary[patchi].size() << " faces" << endl;
     }
 
     // We no longer need the dummyMesh
@@ -586,14 +586,14 @@ int main(int argc, char *argv[])
     );
 
     // Add information to dictionary
-    forAll(patchNames, patchI)
+    forAll(patchNames, patchi)
     {
-        if (!patchDicts.set(patchI))
+        if (!patchDicts.set(patchi))
         {
-            patchDicts.set(patchI, new dictionary());
+            patchDicts.set(patchi, new dictionary());
         }
         // Add but not overwrite
-        patchDicts[patchI].add("type", polyPatch::typeName, false);
+        patchDicts[patchi].add("type", polyPatch::typeName, false);
     }
 
 
@@ -622,27 +622,27 @@ int main(int argc, char *argv[])
         DynamicList<cellZone*> cz;
 
         // FaceZones
-        forAll(boundaryFaceLabels, patchI)
+        forAll(boundaryFaceLabels, patchi)
         {
-            if (boundaryFaceLabels[patchI].size())
+            if (boundaryFaceLabels[patchi].size())
             {
                 // Re-do the boundaryFaceLabels since the boundary face
                 // labels will be different on the pShapeMesh.
-                const faceList& bFaces = boundary[patchI];
-                labelList& bFaceLabels = boundaryFaceLabels[patchI];
+                const faceList& bFaces = boundary[patchi];
+                labelList& bFaceLabels = boundaryFaceLabels[patchi];
                 forAll(bFaceLabels, i)
                 {
                     bFaceLabels[i] = findFace(pShapeMesh, bFaces[i]);
                 }
 
-                Info<< "Creating faceZone " <<  patchNames[patchI]
+                Info<< "Creating faceZone " <<  patchNames[patchi]
                     << " with " << bFaceLabels.size() << " faces" << endl;
 
                 fz.append
                 (
                     new faceZone
                     (
-                        patchNames[patchI],
+                        patchNames[patchi],
                         bFaceLabels,
                         boolList(bFaceLabels.size(), false),
                         fz.size(),

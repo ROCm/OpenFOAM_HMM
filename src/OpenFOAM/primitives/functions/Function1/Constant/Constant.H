@@ -79,11 +79,7 @@ public:
     // Constructors
 
         //- Construct from components
-        Constant
-        (
-            const word& entryName,
-            const Type& value
-        );
+        Constant(const word& entryName, const Type& value);
 
         //- Construct from entry name and dictionary
         Constant(const word& entryName, const dictionary& dict);

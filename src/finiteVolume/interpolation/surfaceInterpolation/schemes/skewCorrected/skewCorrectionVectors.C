@@ -90,11 +90,12 @@ void Foam::skewCorrectionVectors::calcSkewCorrectionVectors()
             Cpf - ((Sf[facei] & Cpf)/(Sf[facei] & d))*d;
     }
 
+    surfaceVectorField::Boundary& skewCorrVecsBf =
+        skewCorrectionVectors_.boundaryFieldRef();
 
-    forAll(skewCorrectionVectors_.boundaryField(), patchI)
+    forAll(skewCorrVecsBf, patchi)
     {
-        fvsPatchVectorField& patchSkewCorrVecs =
-            skewCorrectionVectors_.boundaryField()[patchI];
+        fvsPatchVectorField& patchSkewCorrVecs = skewCorrVecsBf[patchi];
 
         if (!patchSkewCorrVecs.coupled())
         {
@@ -104,28 +105,28 @@ void Foam::skewCorrectionVectors::calcSkewCorrectionVectors()
         {
             const fvPatch& p = patchSkewCorrVecs.patch();
             const labelUList& faceCells = p.faceCells();
-            const vectorField& patchFaceCentres = Cf.boundaryField()[patchI];
-            const vectorField& patchSf = Sf.boundaryField()[patchI];
+            const vectorField& patchFaceCentres = Cf.boundaryField()[patchi];
+            const vectorField& patchSf = Sf.boundaryField()[patchi];
             const vectorField patchD(p.delta());
 
-            forAll(p, patchFaceI)
+            forAll(p, patchFacei)
             {
                 vector Cpf =
-                    patchFaceCentres[patchFaceI] - C[faceCells[patchFaceI]];
+                    patchFaceCentres[patchFacei] - C[faceCells[patchFacei]];
 
-                patchSkewCorrVecs[patchFaceI] =
+                patchSkewCorrVecs[patchFacei] =
                     Cpf
                   - (
-                        (patchSf[patchFaceI] & Cpf)/
-                        (patchSf[patchFaceI] & patchD[patchFaceI])
-                    )*patchD[patchFaceI];
+                        (patchSf[patchFacei] & Cpf)/
+                        (patchSf[patchFacei] & patchD[patchFacei])
+                    )*patchD[patchFacei];
             }
         }
     }
 
     scalar skewCoeff = 0.0;
 
-    if (Sf.internalField().size())
+    if (Sf.primitiveField().size())
     {
         skewCoeff =
             max(mag(skewCorrectionVectors_)*mesh_.deltaCoeffs()).value();

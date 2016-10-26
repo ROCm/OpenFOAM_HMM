@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,9 +32,21 @@ License
 #include "ThermalDiffusivity.H"
 #include "EddyDiffusivity.H"
 
-#include "laminar.H"
+#include "laminarModel.H"
 #include "RASModel.H"
 #include "LESModel.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+makeTurbulenceModelTypes
+(
+    volScalarField,
+    volScalarField,
+    compressibleTurbulenceModel,
+    PhaseCompressibleTurbulenceModel,
+    ThermalDiffusivity,
+    phaseModel
+);
 
 makeBaseTurbulenceModel
 (
@@ -46,6 +58,10 @@ makeBaseTurbulenceModel
     phaseModel
 );
 
+#define makeLaminarModel(Type)                                                 \
+    makeTemplatedLaminarModel                                                  \
+    (phaseModelPhaseCompressibleTurbulenceModel, laminar, Type)
+
 #define makeRASModel(Type)                                                     \
     makeTemplatedTurbulenceModel                                               \
     (phaseModelPhaseCompressibleTurbulenceModel, RAS, Type)
@@ -53,6 +69,9 @@ makeBaseTurbulenceModel
 #define makeLESModel(Type)                                                     \
     makeTemplatedTurbulenceModel                                               \
     (phaseModelPhaseCompressibleTurbulenceModel, LES, Type)
+
+#include "Stokes.H"
+makeLaminarModel(Stokes);
 
 #include "kEpsilon.H"
 makeRASModel(kEpsilon);

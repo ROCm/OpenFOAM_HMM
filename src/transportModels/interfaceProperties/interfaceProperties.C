@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,12 +47,12 @@ const Foam::scalar Foam::interfaceProperties::convertToRad =
 
 void Foam::interfaceProperties::correctContactAngle
 (
-    surfaceVectorField::GeometricBoundaryField& nHatb,
-    surfaceVectorField::GeometricBoundaryField& gradAlphaf
+    surfaceVectorField::Boundary& nHatb,
+    const surfaceVectorField::Boundary& gradAlphaf
 ) const
 {
     const fvMesh& mesh = alpha1_.mesh();
-    const volScalarField::GeometricBoundaryField& abf = alpha1_.boundaryField();
+    const volScalarField::Boundary& abf = alpha1_.boundaryField();
 
     const fvBoundaryMesh& boundary = mesh.boundary();
 
@@ -128,7 +128,7 @@ void Foam::interfaceProperties::calculateK()
     //     (gradAlphaf + deltaN_*vector(0, 0, 1)
     //    *sign(gradAlphaf.component(vector::Z)))/(mag(gradAlphaf) + deltaN_)
     // );
-    correctContactAngle(nHatfv.boundaryField(), gradAlphaf.boundaryField());
+    correctContactAngle(nHatfv.boundaryFieldRef(), gradAlphaf.boundaryField());
 
     // Face unit interface normal flux
     nHatf_ = nHatfv & Sf;
@@ -142,7 +142,7 @@ void Foam::interfaceProperties::calculateK()
     volVectorField nHat(gradAlpha/(mag(gradAlpha) + deltaN_));
     forAll(nHat.boundaryField(), patchi)
     {
-        nHat.boundaryField()[patchi] = nHatfv.boundaryField()[patchi];
+        nHat.boundaryFieldRef()[patchi] = nHatfv.boundaryField()[patchi];
     }
 
     K_ = -fvc::div(nHatf_) + (nHat & fvc::grad(nHatfv) & nHat);

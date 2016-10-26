@@ -1,0 +1,124 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Class
+    Foam::combustionModels::eddyDissipationDiffusionModel
+
+Description
+    Eddy dissipation model based on the principle of mixed is burnt.
+
+SourceFiles
+    eddyDissipationDiffusionModel.C
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef eddyDissipationDiffusionModel_H
+#define eddyDissipationDiffusionModel_H
+
+#include "eddyDissipationModelBase.H"
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace combustionModels
+{
+
+/*---------------------------------------------------------------------------*\
+                  Class eddyDissipationDiffusionModel Declaration
+\*---------------------------------------------------------------------------*/
+
+template<class CombThermoType, class ThermoType>
+class eddyDissipationDiffusionModel
+:
+    public eddyDissipationModelBase<CombThermoType, ThermoType>
+{
+    // Private data
+
+        //- Diffussivity constant
+        scalar Cd_;
+
+
+    // Private memeber functions
+
+        //- Disallow copy construct
+        eddyDissipationDiffusionModel(const eddyDissipationDiffusionModel&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const eddyDissipationDiffusionModel&);
+
+
+public:
+
+    //- Runtime type information
+    TypeName("EDC");
+
+
+    // Constructors
+
+        //- Construct from components
+        eddyDissipationDiffusionModel
+        (
+            const word& modelType,
+            const fvMesh& mesh,
+            const word& phaseName
+        );
+
+
+    //- Destructor
+    virtual ~eddyDissipationDiffusionModel();
+
+
+    // Member Functions
+
+        //- Calculate time scale
+        virtual tmp<volScalarField> timeScale();
+
+         //- Return the reciprocal of the diffusion time scale
+        tmp<volScalarField> rtDiff() const;
+
+
+        // I-O
+
+            //- Update properties
+            virtual bool read();
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace combustionModels
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "eddyDissipationDiffusionModel.C"
+#endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

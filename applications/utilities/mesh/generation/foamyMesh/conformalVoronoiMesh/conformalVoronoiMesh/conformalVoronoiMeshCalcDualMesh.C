@@ -133,7 +133,7 @@ void Foam::conformalVoronoiMesh::calcTetMesh
     points.setSize(vertI);
     pointToDelaunayVertex.setSize(vertI);
 
-    label cellI = 0;
+    label celli = 0;
 
     for
     (
@@ -144,7 +144,7 @@ void Foam::conformalVoronoiMesh::calcTetMesh
     {
         if (cit->internalOrBoundaryDualVertex())
         {
-             cit->cellIndex() = cellI++;
+             cit->cellIndex() = celli++;
         }
         else
         {
@@ -170,7 +170,7 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 
     neighbour.setSize(number_of_finite_facets());
 
-    label faceI = 0;
+    label facei = 0;
 
     labelList verticesOnTriFace(3, label(-1));
 
@@ -262,14 +262,14 @@ void Foam::conformalVoronoiMesh::calcTetMesh
                 neighbourCell = c1I;
             }
 
-            faces[faceI] = newFace;
-            owner[faceI] = ownerCell;
-            neighbour[faceI] = neighbourCell;
-            faceI++;
+            faces[facei] = newFace;
+            owner[facei] = ownerCell;
+            neighbour[facei] = neighbourCell;
+            facei++;
         }
     }
 
-    label nInternalFaces = faceI;
+    label nInternalFaces = facei;
 
     faces.setSize(nInternalFaces);
     owner.setSize(nInternalFaces);
@@ -910,11 +910,11 @@ void Foam::conformalVoronoiMesh::checkCellSizing()
         pointField cellsToResize(cellsToResizeMap.size());
 
         label count = 0;
-        for (label cellI = 0; cellI < pMesh.nCells(); ++cellI)
+        for (label celli = 0; celli < pMesh.nCells(); ++celli)
         {
-            if (cellsToResizeMap.found(cellI))
+            if (cellsToResizeMap.found(celli))
             {
-                cellsToResize[count++] = pMesh.cellCentres()[cellI];
+                cellsToResize[count++] = pMesh.cellCentres()[celli];
             }
         }
 
@@ -947,9 +947,9 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::findOffsetPatchFaces
         mesh.nCells()/1000
     );
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        const polyPatch& patch = patches[patchI];
+        const polyPatch& patch = patches[patchi];
 
         const faceList& localFaces = patch.localFaces();
         const pointField& localPoints = patch.localPoints();
@@ -1079,11 +1079,11 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
         const polyBoundaryMesh& patches = pMesh.boundaryMesh();
 
-        forAll(patches, patchI)
+        forAll(patches, patchi)
         {
-            if (patches[patchI].coupled())
+            if (patches[patchi].coupled())
             {
-                const labelUList& owners = patches[patchI].faceCells();
+                const labelUList& owners = patches[patchi].faceCells();
 
                 forAll(owners, i)
                 {
@@ -1152,9 +1152,9 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     // forAllConstIter(labelHashSet, limitCells, iter)
     // {
-    //     label cellI = iter.key();
+    //     label celli = iter.key();
 
-    //     const labelList& cP = cellPts[cellI];
+    //     const labelList& cP = cellPts[celli];
 
     //     forAll(cP, cPI)
     //     {
@@ -1535,16 +1535,16 @@ Foam::label Foam::conformalVoronoiMesh::createPatchInfo
 
     const PtrList<dictionary>& patchInfo = geometryToConformTo_.patchInfo();
 
-    forAll(patchNames, patchI)
+    forAll(patchNames, patchi)
     {
-        if (patchInfo.set(patchI))
+        if (patchInfo.set(patchi))
         {
-            patchDicts.set(patchI, new dictionary(patchInfo[patchI]));
+            patchDicts.set(patchi, new dictionary(patchInfo[patchi]));
         }
         else
         {
-            patchDicts.set(patchI, new dictionary());
-            patchDicts[patchI].set
+            patchDicts.set(patchi, new dictionary());
+            patchDicts[patchi].set
             (
                 "type",
                 wallPolyPatch::typeName
@@ -1595,13 +1595,13 @@ Foam::label Foam::conformalVoronoiMesh::createPatchInfo
         Pstream::gatherList(procUsedList);
         Pstream::scatterList(procUsedList);
 
-        forAll(procUsedList, procI)
+        forAll(procUsedList, proci)
         {
-            if (procI != Pstream::myProcNo())
+            if (proci != Pstream::myProcNo())
             {
-                if (procUsedList[procI][Pstream::myProcNo()])
+                if (procUsedList[proci][Pstream::myProcNo()])
                 {
-                    procUsed[procI] = true;
+                    procUsed[proci] = true;
                 }
             }
         }
@@ -1734,14 +1734,14 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     const label nPatches = patchNames.size();
 
     labelList procNeighbours(nPatches, label(-1));
-    forAll(procNeighbours, patchI)
+    forAll(procNeighbours, patchi)
     {
-        if (patchDicts[patchI].found("neighbProcNo"))
+        if (patchDicts[patchi].found("neighbProcNo"))
         {
-            procNeighbours[patchI] =
+            procNeighbours[patchi] =
             (
-                patchDicts[patchI].found("neighbProcNo")
-              ? readLabel(patchDicts[patchI].lookup("neighbProcNo"))
+                patchDicts[patchi].found("neighbProcNo")
+              ? readLabel(patchDicts[patchi].lookup("neighbProcNo"))
               : -1
             );
         }
@@ -1762,7 +1762,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
     labelPairPairDynListList procPatchSortingIndex(nPatches);
 
-    label dualFaceI = 0;
+    label dualFacei = 0;
 
     if (foamyHexMeshControls().guardFeaturePoints())
     {
@@ -1810,7 +1810,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                 }
 
                 // Error if startCell is null
-                if (startCell == NULL)
+                if (startCell == nullptr)
                 {
                     Pout<< "Start cell is null!" << endl;
                 }
@@ -2029,11 +2029,11 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
             }
 
             // internal face
-            faces[dualFaceI] = newDualFace;
-            owner[dualFaceI] = own;
-            neighbour[dualFaceI] = nei;
+            faces[dualFacei] = newDualFace;
+            owner[dualFacei] = own;
+            neighbour[dualFacei] = nei;
 
-            dualFaceI++;
+            dualFacei++;
         }
         else if
         (
@@ -2293,11 +2293,11 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 //                    else
                     {
                         // internal face
-                        faces[dualFaceI] = newDualFace;
-                        owner[dualFaceI] = own;
-                        neighbour[dualFaceI] = nei;
+                        faces[dualFacei] = newDualFace;
+                        owner[dualFacei] = own;
+                        neighbour[dualFacei] = nei;
 
-                        dualFaceI++;
+                        dualFacei++;
                     }
                 }
             }
@@ -2313,7 +2313,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
             << endl;
     }
 
-    label nInternalFaces = dualFaceI;
+    label nInternalFaces = dualFacei;
 
     faces.setSize(nInternalFaces);
     owner.setSize(nInternalFaces);
@@ -2347,9 +2347,9 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
     // Return     patchPointPairSlaves.setSize(nPatches);
     patchPointPairSlaves.setSize(nPatches);
-    forAll(patchPPSlaves, patchI)
+    forAll(patchPPSlaves, patchi)
     {
-        patchPointPairSlaves[patchI].transfer(patchPPSlaves[patchI]);
+        patchPointPairSlaves[patchi].transfer(patchPPSlaves[patchi]);
     }
 
     if (foamyHexMeshControls().objOutput())
@@ -2458,13 +2458,13 @@ void Foam::conformalVoronoiMesh::sortProcPatches
         return;
     }
 
-    forAll(patchSortingIndices, patchI)
+    forAll(patchSortingIndices, patchi)
     {
-        faceList& faces = patchFaces[patchI];
-        labelList& owner = patchOwners[patchI];
-        DynamicList<label>& slaves = patchPointPairSlaves[patchI];
+        faceList& faces = patchFaces[patchi];
+        labelList& owner = patchOwners[patchi];
+        DynamicList<label>& slaves = patchPointPairSlaves[patchi];
         DynamicList<Pair<labelPair>>& sortingIndices
-            = patchSortingIndices[patchI];
+            = patchSortingIndices[patchi];
 
         if (!sortingIndices.empty())
         {
@@ -2477,7 +2477,7 @@ void Foam::conformalVoronoiMesh::sortProcPatches
             {
                 FatalErrorInFunction
                     << "patch size and size of sorting indices is inconsistent "
-                    << " for patch " << patchI << nl
+                    << " for patch " << patchi << nl
                     << " faces.size() " << faces.size() << nl
                     << " owner.size() " << owner.size() << nl
                     << " slaves.size() " << slaves.size() << nl
@@ -2527,17 +2527,17 @@ void Foam::conformalVoronoiMesh::addPatches
     owner.setSize(nInternalFaces + nBoundaryFaces);
     boundaryFacesToRemove.setSize(nInternalFaces + nBoundaryFaces);
 
-    label faceI = nInternalFaces;
+    label facei = nInternalFaces;
 
     forAll(patchFaces, p)
     {
         forAll(patchFaces[p], f)
         {
-            faces[faceI] = patchFaces[p][f];
-            owner[faceI] = patchOwners[p][f];
-            boundaryFacesToRemove[faceI] = indirectPatchFace[p][f];
+            faces[facei] = patchFaces[p][f];
+            owner[facei] = patchOwners[p][f];
+            boundaryFacesToRemove[facei] = indirectPatchFace[p][f];
 
-            faceI++;
+            facei++;
         }
     }
 }
@@ -2566,7 +2566,7 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
         }
     }
 
-    label pointI = 0;
+    label pointi = 0;
 
     labelList oldToNew(pts.size(), label(-1));
 
@@ -2577,7 +2577,7 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
     {
         if (ptUsed[ptUI] == true)
         {
-            oldToNew[ptUI] = pointI++;
+            oldToNew[ptUI] = pointi++;
         }
     }
 
@@ -2585,12 +2585,12 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
     inplaceReorder(oldToNew, boundaryPts);
 
     Info<< "    Removing "
-        << returnReduce(pts.size() - pointI, sumOp<label>())
+        << returnReduce(pts.size() - pointi, sumOp<label>())
         << " unused points"
         << endl;
 
-    pts.setSize(pointI);
-    boundaryPts.setSize(pointI);
+    pts.setSize(pointi);
+    boundaryPts.setSize(pointi);
 
     // Renumber the faces to use the new point numbers
 
@@ -2623,7 +2623,7 @@ Foam::labelList Foam::conformalVoronoiMesh::removeUnusedCells
         cellUsed[neighbour[nI]] = true;
     }
 
-    label cellI = 0;
+    label celli = 0;
 
     labelList oldToNew(cellUsed.size(), label(-1));
 
@@ -2634,11 +2634,11 @@ Foam::labelList Foam::conformalVoronoiMesh::removeUnusedCells
     {
         if (cellUsed[cellUI] == true)
         {
-            oldToNew[cellUI] = cellI++;
+            oldToNew[cellUI] = celli++;
         }
     }
 
-    labelList newToOld(invert(cellI, oldToNew));
+    labelList newToOld(invert(celli, oldToNew));
 
     // Find all of the unused cells, create a list of them, then
     // subtract one from each owner and neighbour entry for each of

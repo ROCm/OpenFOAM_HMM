@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -74,8 +74,7 @@ Description
         layer", Journal of Wind Engineering and Industrial Aerodynamics
         95(2007), pp 355-369.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description                      | Required  | Default
         flowDir      | Flow direction                   | yes       |

@@ -40,9 +40,8 @@ SourceFiles
 
 #include "Reaction.H"
 #include "ODESystem.H"
-#include "volFieldsFwd.H"
+#include "volFields.H"
 #include "simpleMatrix.H"
-#include "DimensionedField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,23 +63,23 @@ class chemistryModel
 {
     // Private Member Functions
 
+        //- Solve the reaction system for the given time step
+        //  of given type and return the characteristic time
+        template<class DeltaTType>
+        scalar solve(const DeltaTType& deltaT);
+
         //- Disallow copy constructor
         chemistryModel(const chemistryModel&);
 
         //- Disallow default bitwise assignment
         void operator=(const chemistryModel&);
 
-        //- Solve the reaction system for the given time step
-        //  of given type and return the characteristic time
-        template<class DeltaTType>
-        scalar solve(const DeltaTType& deltaT);
-
 
 protected:
 
     typedef ThermoType thermoType;
 
-    // Private data
+    // Protected data
 
         //- Reference to the field of specie mass fractions
         PtrList<volScalarField>& Y_;
@@ -101,14 +100,20 @@ protected:
         scalar Treact_;
 
         //- List of reaction rate per specie [kg/m3/s]
-        PtrList<DimensionedField<scalar, volMesh>> RR_;
+        PtrList<volScalarField::Internal> RR_;
+
+        //- Temporary concentration field
+        mutable scalarField c_;
+
+        //- Temporary rate-of-change of concentration field
+        mutable scalarField dcdt_;
 
 
     // Protected Member Functions
 
         //- Write access to chemical source terms
         //  (e.g. for multi-chemistry model)
-        inline PtrList<DimensionedField<scalar, volMesh>>& RR();
+        inline PtrList<volScalarField::Internal>& RR();
 
 
 public:
@@ -136,10 +141,10 @@ public:
         inline const PtrList<ThermoType>& specieThermo() const;
 
         //- The number of species
-        inline label nSpecie() const;
+        virtual inline label nSpecie() const;
 
         //- The number of reactions
-        inline label nReaction() const;
+        virtual inline label nReaction() const;
 
         //- Temperature below which the reaction rates are assumed 0
         inline scalar Treact() const;
@@ -148,11 +153,12 @@ public:
         inline scalar& Treact();
 
         //- dc/dt = omega, rate of change in concentration, for each species
-        virtual tmp<scalarField> omega
+        virtual void omega
         (
             const scalarField& c,
             const scalar T,
-            const scalar p
+            const scalar p,
+            scalarField& dcdt
         ) const;
 
         //- Return the reaction rate for reaction r and the reference
@@ -196,19 +202,19 @@ public:
         // basicChemistryModel.H)
 
             //- Return const access to the chemical source terms for specie, i
-            inline const DimensionedField<scalar, volMesh>& RR
+            inline const volScalarField::Internal& RR
             (
                 const label i
             ) const;
 
             //- Return non const access to chemical source terms [kg/m3/s]
-            virtual DimensionedField<scalar, volMesh>& RR
+            virtual volScalarField::Internal& RR
             (
                 const label i
             );
 
             //- Return reaction rate of the speciei in reactionI
-            virtual tmp<DimensionedField<scalar, volMesh>> calculateRR
+            virtual tmp<volScalarField::Internal> calculateRR
             (
                 const label reactionI,
                 const label speciei
@@ -259,7 +265,7 @@ public:
                 scalar& p,
                 scalar& deltaT,
                 scalar& subDeltaT
-            ) const;
+            ) const = 0;
 };
 
 

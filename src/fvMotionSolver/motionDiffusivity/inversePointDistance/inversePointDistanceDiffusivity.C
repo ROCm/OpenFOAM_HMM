@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,18 +102,18 @@ void Foam::inversePointDistanceDiffusivity::correct()
 
             forAll(meshPoints, i)
             {
-                label pointI = meshPoints[i];
+                label pointi = meshPoints[i];
 
-                if (!pointWallDist[pointI].valid(dummyTrackData))
+                if (!pointWallDist[pointi].valid(dummyTrackData))
                 {
                     // Not yet seeded
                     seedInfo[nPatchEdges] = pointEdgePoint
                     (
-                        mesh().points()[pointI],
+                        mesh().points()[pointi],
                         0.0
                     );
-                    seedPoints[nPatchEdges] = pointI;
-                    pointWallDist[pointI] = seedInfo[nPatchEdges];
+                    seedPoints[nPatchEdges] = pointi;
+                    pointWallDist[pointi] = seedInfo[nPatchEdges];
 
                     nPatchEdges++;
                 }
@@ -137,9 +137,9 @@ void Foam::inversePointDistanceDiffusivity::correct()
     }
 
 
-    for (label faceI=0; faceI<mesh().nInternalFaces(); faceI++)
+    for (label facei=0; facei<mesh().nInternalFaces(); facei++)
     {
-        const face& f = mesh().faces()[faceI];
+        const face& f = mesh().faces()[facei];
 
         scalar dist = 0;
 
@@ -149,14 +149,18 @@ void Foam::inversePointDistanceDiffusivity::correct()
         }
         dist /= f.size();
 
-        faceDiffusivity_[faceI] = 1.0/dist;
+        faceDiffusivity_[facei] = 1.0/dist;
     }
 
-    forAll(faceDiffusivity_.boundaryField(), patchI)
-    {
-        fvsPatchScalarField& bfld = faceDiffusivity_.boundaryField()[patchI];
 
-        if (patchSet.found(patchI))
+    surfaceScalarField::Boundary& faceDiffusivityBf =
+        faceDiffusivity_.boundaryFieldRef();
+
+    forAll(faceDiffusivityBf, patchi)
+    {
+        fvsPatchScalarField& bfld = faceDiffusivityBf[patchi];
+
+        if (patchSet.found(patchi))
         {
             const labelUList& faceCells = bfld.patch().faceCells();
 
@@ -168,9 +172,9 @@ void Foam::inversePointDistanceDiffusivity::correct()
 
                 scalar dist = 0;
 
-                forAll(ownFaces, ownFaceI)
+                forAll(ownFaces, ownFacei)
                 {
-                    const face& f = mesh().faces()[ownFaces[ownFaceI]];
+                    const face& f = mesh().faces()[ownFaces[ownFacei]];
 
                     forAll(f, fp)
                     {

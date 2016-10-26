@@ -61,8 +61,8 @@ Foam::topoSetSource::addToUsageTable Foam::regionToFace::usage_
 void Foam::regionToFace::markZone
 (
     const indirectPrimitivePatch& patch,
-    const label procI,
-    const label faceI,
+    const label proci,
+    const label facei,
     const label zoneI,
     labelList& faceZone
 ) const
@@ -74,9 +74,9 @@ void Foam::regionToFace::markZone
     DynamicList<label> changedEdges;
     DynamicList<patchEdgeFaceRegion> changedInfo;
 
-    if (Pstream::myProcNo() == procI)
+    if (Pstream::myProcNo() == proci)
     {
-        const labelList& fEdges = patch.faceEdges()[faceI];
+        const labelList& fEdges = patch.faceEdges()[facei];
         forAll(fEdges, i)
         {
             changedEdges.append(fEdges[i]);
@@ -100,11 +100,11 @@ void Foam::regionToFace::markZone
         returnReduce(patch.nEdges(), sumOp<label>())
     );
 
-    forAll(allFaceInfo, faceI)
+    forAll(allFaceInfo, facei)
     {
-        if (allFaceInfo[faceI].region() == zoneI)
+        if (allFaceInfo[facei].region() == zoneI)
         {
-            faceZone[faceI] = zoneI;
+            faceZone[facei] = zoneI;
         }
     }
 }
@@ -158,17 +158,17 @@ void Foam::regionToFace::combine(topoSet& set, const bool add) const
     markZone
     (
         patch,
-        ni.second().second(),   // procI
+        ni.second().second(),   // proci
         ni.first().index(),     // start face
         0,                      // currentZone
         faceRegion
     );
 
-    forAll(faceRegion, faceI)
+    forAll(faceRegion, facei)
     {
-        if (faceRegion[faceI] == 0)
+        if (faceRegion[facei] == 0)
         {
-            addOrDelete(set, patch.addressing()[faceI], add);
+            addOrDelete(set, patch.addressing()[facei], add);
         }
     }
 }

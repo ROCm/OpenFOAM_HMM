@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,8 +31,7 @@ Description
     This boundary condition provides a thermal wall function for turbulent
     thermal diffusivity (usually\c alphat) based on the Jayatilleke model.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         Prt          | turbulent Prandtl number | no         | 0.85
@@ -43,7 +42,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            alphatJayatillekeWallFunction;
         Prt             0.85;
@@ -53,7 +52,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchField
 
 SourceFiles

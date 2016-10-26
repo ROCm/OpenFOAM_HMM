@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,19 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+inline const Foam::HashTable<Foam::label,Foam::word>&
+Foam::hashedWordList::lookup() const
+{
+    return indices_;
+}
+
+
+inline bool Foam::hashedWordList::found(const word& name) const
+{
+    return indices_.found(name);
+}
+
+
 inline bool Foam::hashedWordList::contains(const word& name) const
 {
     return indices_.found(name);
@@ -34,6 +47,13 @@ inline bool Foam::hashedWordList::contains(const word& name) const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 inline void Foam::hashedWordList::operator=(const UList<word>& lst)
+{
+    List<word>::operator=(lst);
+    rehash();
+}
+
+
+inline void Foam::hashedWordList::operator=(std::initializer_list<word> lst)
 {
     List<word>::operator=(lst);
     rehash();

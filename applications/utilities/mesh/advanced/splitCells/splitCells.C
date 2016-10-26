@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -103,14 +103,14 @@ scalarField pack(const boolList& lst, const scalarField& elems)
 
 
 // Given sin and cos of max angle between normals calculate whether f0 and f1
-// on cellI make larger angle. Uses sinAngle only for quadrant detection.
+// on celli make larger angle. Uses sinAngle only for quadrant detection.
 bool largerAngle
 (
     const primitiveMesh& mesh,
     const scalar cosAngle,
     const scalar sinAngle,
 
-    const label cellI,
+    const label celli,
     const label f0,             // face label
     const label f1,
 
@@ -120,7 +120,7 @@ bool largerAngle
 {
     const labelList& own = mesh.faceOwner();
 
-    bool sameFaceOrder = !((own[f0] == cellI) ^ (own[f1] == cellI));
+    bool sameFaceOrder = !((own[f0] == celli) ^ (own[f1] == celli));
 
     // Get cos between faceArea vectors. Correct so flat angle (180 degrees)
     // gives -1.
@@ -140,7 +140,7 @@ bool largerAngle
 
     scalar fcCosAngle = n0 & c1c0;
 
-    if (own[f0] != cellI)
+    if (own[f0] != celli)
     {
         fcCosAngle = -fcCosAngle;
     }
@@ -193,7 +193,7 @@ bool largerAngle
 bool splitHex
 (
     const polyMesh& mesh,
-    const label cellI,
+    const label celli,
     const label edgeI,
 
     DynamicList<label>& cutCells,
@@ -217,13 +217,13 @@ bool splitHex
     label leftFp = -1;
     label rightFp = -1;
 
-    const cell& cFaces = mesh.cells()[cellI];
+    const cell& cFaces = mesh.cells()[celli];
 
     forAll(cFaces, i)
     {
-        label faceI = cFaces[i];
+        label facei = cFaces[i];
 
-        const face& f = faces[faceI];
+        const face& f = faces[facei];
 
         label fp0 = findIndex(f, e[0]);
         label fp1 = findIndex(f, e[1]);
@@ -233,7 +233,7 @@ bool splitHex
             if (fp1 != -1)
             {
                 // Face uses e[1] but not e[0]
-                rightI = faceI;
+                rightI = facei;
                 rightFp = fp1;
 
                 if (leftI != -1)
@@ -251,7 +251,7 @@ bool splitHex
             }
             else
             {
-                leftI = faceI;
+                leftI = facei;
                 leftFp = fp0;
 
                 if (rightI != -1)
@@ -290,7 +290,7 @@ bool splitHex
     loopWeights[2] = -GREAT;
     loopWeights[3] = -GREAT;
 
-    cutCells.append(cellI);
+    cutCells.append(celli);
     cellLoops.append(loop);
     cellEdgeWeights.append(loopWeights);
 
@@ -298,13 +298,13 @@ bool splitHex
 }
 
 
-// Split cellI along edgeI with a plane along halfNorm direction.
+// Split celli along edgeI with a plane along halfNorm direction.
 bool splitCell
 (
     const polyMesh& mesh,
     const geomCellLooper& cellCutter,
 
-    const label cellI,
+    const label celli,
     const label edgeI,
     const vector& halfNorm,
 
@@ -342,7 +342,7 @@ bool splitCell
         cellCutter.cut
         (
             cutPlane,
-            cellI,
+            celli,
             vertIsCut,
             edgeIsCut,
             edgeWeight,
@@ -352,7 +352,7 @@ bool splitCell
     )
     {
         // Did manage to cut cell. Copy into overall list.
-        cutCells.append(cellI);
+        cutCells.append(celli);
         cellLoops.append(loop);
         cellEdgeWeights.append(loopWeights);
 
@@ -400,15 +400,15 @@ void collectCuts
 
     forAllConstIter(cellSet, cellsToCut, iter)
     {
-        const label cellI = iter.key();
-        const labelList& cEdges = cellEdges[cellI];
+        const label celli = iter.key();
+        const labelList& cEdges = cellEdges[celli];
 
         forAll(cEdges, i)
         {
             label edgeI = cEdges[i];
 
             label f0, f1;
-            meshTools::getEdgeFaces(mesh, cellI, edgeI, f0, f1);
+            meshTools::getEdgeFaces(mesh, celli, edgeI, f0, f1);
 
             vector n0 = faceAreas[f0];
             n0 /= mag(n0);
@@ -424,7 +424,7 @@ void collectCuts
                     minCos,
                     minSin,
 
-                    cellI,
+                    celli,
                     f0,
                     f1,
                     n0,
@@ -434,13 +434,13 @@ void collectCuts
             {
                 bool splitOk = false;
 
-                if (!geometry && cellShapes[cellI].model() == hex)
+                if (!geometry && cellShapes[celli].model() == hex)
                 {
                     splitOk =
                         splitHex
                         (
                             mesh,
-                            cellI,
+                            celli,
                             edgeI,
 
                             cutCells,
@@ -452,7 +452,7 @@ void collectCuts
                 {
                     vector halfNorm;
 
-                    if ((own[f0] == cellI) ^ (own[f1] == cellI))
+                    if ((own[f0] == celli) ^ (own[f1] == celli))
                     {
                         // Opposite owner orientation
                         halfNorm = 0.5*(n0 - n1);
@@ -469,7 +469,7 @@ void collectCuts
                         (
                             mesh,
                             cellCutter,
-                            cellI,
+                            celli,
                             edgeI,
                             halfNorm,
 
@@ -606,9 +606,9 @@ int main(int argc, char *argv[])
         if (!readSet)
         {
             // Try all cells for cutting
-            for (label cellI = 0; cellI < mesh.nCells(); cellI++)
+            for (label celli = 0; celli < mesh.nCells(); celli++)
             {
-                cellsToCut.insert(cellI);
+                cellsToCut.insert(celli);
             }
         }
 
@@ -661,13 +661,13 @@ int main(int argc, char *argv[])
         }
 
         // Remove cut cells from cellsToCut  (Note:only relevant if -readSet)
-        forAll(cuts.cellLoops(), cellI)
+        forAll(cuts.cellLoops(), celli)
         {
-            if (cuts.cellLoops()[cellI].size())
+            if (cuts.cellLoops()[celli].size())
             {
-                //Info<< "Removing cut cell " << cellI << " from wishlist"
+                //Info<< "Removing cut cell " << celli << " from wishlist"
                 //    << endl;
-                cellsToCut.erase(cellI);
+                cellsToCut.erase(celli);
             }
         }
 

@@ -74,12 +74,12 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
 (
     const polyMesh& owner,
     const vector& position,
-    const label cellI,
-    const label tetFaceI,
-    const label tetPtI
+    const label celli,
+    const label tetFacei,
+    const label tetPti
 )
 :
-    ParcelType(owner, position, cellI, tetFaceI, tetPtI),
+    ParcelType(owner, position, celli, tetFacei, tetPti),
     active_(true),
     typeId_(-1),
     nParticle_(0),
@@ -101,9 +101,9 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
 (
     const polyMesh& owner,
     const vector& position,
-    const label cellI,
-    const label tetFaceI,
-    const label tetPtI,
+    const label celli,
+    const label tetFacei,
+    const label tetPti,
     const label typeId,
     const scalar nParticle0,
     const scalar d0,
@@ -112,7 +112,7 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     const constantProperties& constProps
 )
 :
-    ParcelType(owner, position, cellI, tetFaceI, tetPtI),
+    ParcelType(owner, position, celli, tetFacei, tetPti),
     active_(true),
     typeId_(typeId),
     nParticle_(nParticle0),
@@ -352,10 +352,10 @@ inline Foam::label Foam::KinematicParcel<ParcelType>::faceInterpolation() const
 template<class ParcelType>
 inline Foam::scalar Foam::KinematicParcel<ParcelType>::massCell
 (
-    const label cellI
+    const label celli
 ) const
 {
-    return rhoc_*this->mesh().cellVolumes()[cellI];
+    return rhoc_*this->mesh().cellVolumes()[celli];
 }
 
 

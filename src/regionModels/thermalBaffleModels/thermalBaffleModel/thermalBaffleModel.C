@@ -104,8 +104,8 @@ void thermalBaffleModel::init()
 
         forAll(intCoupledPatchIDs_, i)
         {
-            const label patchI = intCoupledPatchIDs_[i];
-            const polyPatch& pp = rbm[patchI];
+            const label patchi = intCoupledPatchIDs_[i];
+            const polyPatch& pp = rbm[patchi];
 
             if
             (
@@ -135,8 +135,8 @@ void thermalBaffleModel::init()
 
         if (oneD_ && !constantThickness_)
         {
-            const label patchI = intCoupledPatchIDs_[0];
-            const polyPatch& pp = rbm[patchI];
+            const label patchi = intCoupledPatchIDs_[0];
+            const polyPatch& pp = rbm[patchi];
             const mappedVariableThicknessWallPolyPatch& ppCoupled =
                 refCast
                 <
@@ -157,16 +157,16 @@ void thermalBaffleModel::init()
             // Calculate thickness of the baffle on the first face only.
             if (delta_.value() == 0.0)
             {
-                forAll(ppCoupled, localFaceI)
+                forAll(ppCoupled, localFacei)
                 {
-                    label faceI = ppCoupled.start() + localFaceI;
+                    label facei = ppCoupled.start() + localFacei;
 
                     label faceO =
-                        boundaryFaceOppositeFace_[localFaceI];
+                        boundaryFaceOppositeFace_[localFacei];
 
                     delta_.value() = mag
                     (
-                        regionMesh().faceCentres()[faceI]
+                        regionMesh().faceCentres()[facei]
                       - regionMesh().faceCentres()[faceO]
                     );
                     break;

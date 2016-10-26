@@ -83,7 +83,7 @@ Foam::PhiScheme<Type, PhiLimiter>::limiter
 
     const surfaceScalarField& Uflux = tUflux();
 
-    scalarField& pLimiter = Limiter.internalField();
+    scalarField& pLimiter = Limiter.primitiveFieldRef();
 
     forAll(pLimiter, face)
     {
@@ -99,27 +99,27 @@ Foam::PhiScheme<Type, PhiLimiter>::limiter
     }
 
 
-    surfaceScalarField::GeometricBoundaryField& bLimiter =
-        Limiter.boundaryField();
+    surfaceScalarField::Boundary& bLimiter =
+        Limiter.boundaryFieldRef();
 
-    forAll(bLimiter, patchI)
+    forAll(bLimiter, patchi)
     {
-        scalarField& pLimiter = bLimiter[patchI];
+        scalarField& pLimiter = bLimiter[patchi];
 
-        if (bLimiter[patchI].coupled())
+        if (bLimiter[patchi].coupled())
         {
-            const scalarField& pCDweights = CDweights.boundaryField()[patchI];
-            const vectorField& pSf = Sf.boundaryField()[patchI];
-            const scalarField& pmagSf = magSf.boundaryField()[patchI];
-            const scalarField& pFaceFlux = Uflux.boundaryField()[patchI];
+            const scalarField& pCDweights = CDweights.boundaryField()[patchi];
+            const vectorField& pSf = Sf.boundaryField()[patchi];
+            const scalarField& pmagSf = magSf.boundaryField()[patchi];
+            const scalarField& pFaceFlux = Uflux.boundaryField()[patchi];
 
             const Field<Type> pphiP
             (
-                phi.boundaryField()[patchI].patchInternalField()
+                phi.boundaryField()[patchi].patchInternalField()
             );
             const Field<Type> pphiN
             (
-                phi.boundaryField()[patchI].patchNeighbourField()
+                phi.boundaryField()[patchi].patchNeighbourField()
             );
 
             forAll(pLimiter, face)

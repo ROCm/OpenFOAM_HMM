@@ -83,9 +83,9 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
             Info<< "... scanning for polyhedra" << endl;
         }
 
-        forAll(cellShapes, cellI)
+        forAll(cellShapes, celli)
         {
-            const cellModel& model = cellShapes[cellI].model();
+            const cellModel& model = cellShapes[celli].model();
 
             if
             (
@@ -97,11 +97,11 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
              && model != tetWedge
             )
             {
-                const cell& cFaces = mesh.cells()[cellI];
+                const cell& cFaces = mesh.cells()[celli];
 
-                forAll(cFaces, cFaceI)
+                forAll(cFaces, cFacei)
                 {
-                    const face& f = mesh.faces()[cFaces[cFaceI]];
+                    const face& f = mesh.faces()[cFaces[cFacei]];
 
                     label nQuads = 0;
                     label nTris = 0;
@@ -158,7 +158,7 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
     vtkmesh->Allocate(mesh.nCells() + nAddCells);
 
     // Set counters for additional points and additional cells
-    label addPointI = 0, addCellI = 0;
+    label addPointi = 0, addCelli = 0;
 
     // Create storage for points - needed for mapping from OpenFOAM to VTK
     // data types - max 'order' = hex = 8 points
@@ -168,12 +168,12 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
     // [numFace0Pts, id1, id2, id3, numFace1Pts, id1, id2, id3, ...]
     DynamicList<vtkIdType> faceStream(256);
 
-    forAll(cellShapes, cellI)
+    forAll(cellShapes, celli)
     {
-        const cellShape& cellShape = cellShapes[cellI];
+        const cellShape& cellShape = cellShapes[celli];
         const cellModel& cellModel = cellShape.model();
 
-        superCells[addCellI++] = cellI;
+        superCells[addCelli++] = celli;
 
         if (cellModel == tet)
         {
@@ -219,7 +219,7 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
                 nodeIds
             );
         }
-        else if (cellModel == tetWedge)
+        else if (cellModel == tetWedge && !reader_->GetUseVTKPolyhedron())
         {
             // Treat as squeezed prism (VTK_WEDGE)
 
@@ -273,16 +273,16 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
         else if (reader_->GetUseVTKPolyhedron())
         {
             // Polyhedral cell - use VTK_POLYHEDRON
-            const labelList& cFaces = mesh.cells()[cellI];
+            const labelList& cFaces = mesh.cells()[celli];
 
 #ifdef HAS_VTK_POLYHEDRON
             vtkIdType nFaces = cFaces.size();
             vtkIdType nLabels = nFaces;
 
             // count size for face stream
-            forAll(cFaces, cFaceI)
+            forAll(cFaces, cFacei)
             {
-                const face& f = mesh.faces()[cFaces[cFaceI]];
+                const face& f = mesh.faces()[cFaces[cFacei]];
                 nLabels += f.size();
             }
 
@@ -292,10 +292,10 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
             faceStream.clear();
             faceStream.reserve(nLabels + nFaces);
 
-            forAll(cFaces, cFaceI)
+            forAll(cFaces, cFacei)
             {
-                const face& f = mesh.faces()[cFaces[cFaceI]];
-                const bool isOwner = (owner[cFaces[cFaceI]] == cellI);
+                const face& f = mesh.faces()[cFaces[cFacei]];
+                const bool isOwner = (owner[cFaces[cFacei]] == celli);
                 const label nFacePoints = f.size();
 
                 // number of labels for this face
@@ -327,9 +327,9 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
             // establish unique node ids used
             HashSet<vtkIdType, Hash<label>> hashUniqId(2*256);
 
-            forAll(cFaces, cFaceI)
+            forAll(cFaces, cFacei)
             {
-                const face& f = mesh.faces()[cFaces[cFaceI]];
+                const face& f = mesh.faces()[cFaces[cFacei]];
 
                 forAll(f, fp)
                 {
@@ -353,20 +353,20 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
             // Polyhedral cell. Decompose into tets + prisms.
 
             // Mapping from additional point to cell
-            addPointCellLabels[addPointI] = cellI;
+            addPointCellLabels[addPointi] = celli;
 
             // The new vertex from the cell-centre
-            const label newVertexLabel = mesh.nPoints() + addPointI;
-            vtkInsertNextOpenFOAMPoint(vtkpoints, mesh.C()[cellI]);
+            const label newVertexLabel = mesh.nPoints() + addPointi;
+            vtkInsertNextOpenFOAMPoint(vtkpoints, mesh.C()[celli]);
 
             // Whether to insert cell in place of original or not.
             bool substituteCell = true;
 
-            const labelList& cFaces = mesh.cells()[cellI];
-            forAll(cFaces, cFaceI)
+            const labelList& cFaces = mesh.cells()[celli];
+            forAll(cFaces, cFacei)
             {
-                const face& f = mesh.faces()[cFaces[cFaceI]];
-                const bool isOwner = (owner[cFaces[cFaceI]] == cellI);
+                const face& f = mesh.faces()[cFaces[cFacei]];
+                const bool isOwner = (owner[cFaces[cFacei]] == celli);
 
                 // Number of triangles and quads in decomposition
                 label nTris = 0;
@@ -388,7 +388,7 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
                     }
                     else
                     {
-                        superCells[addCellI++] = cellI;
+                        superCells[addCelli++] = celli;
                     }
 
                     const face& quad = quadFcs[quadI];
@@ -431,7 +431,7 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
                     }
                     else
                     {
-                        superCells[addCellI++] = cellI;
+                        superCells[addCelli++] = celli;
                     }
 
                     const face& tri = triFcs[triI];
@@ -460,7 +460,7 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
                 }
             }
 
-            addPointI++;
+            addPointi++;
         }
     }
 

@@ -32,8 +32,8 @@ Foam::trackedParticle::trackedParticle
 (
     const polyMesh& mesh,
     const vector& position,
-    const label cellI,
-    const label tetFaceI,
+    const label celli,
+    const label tetFacei,
     const label tetPtI,
     const point& end,
     const label level,
@@ -42,7 +42,7 @@ Foam::trackedParticle::trackedParticle
     const label k
 )
 :
-    particle(mesh, position, cellI, tetFaceI, tetPtI),
+    particle(mesh, position, celli, tetFacei, tetPtI),
     end_(end),
     level_(level),
     i_(i),
@@ -139,7 +139,7 @@ bool Foam::trackedParticle::hitPatch
 (
     const polyPatch&,
     trackingData& td,
-    const label patchI,
+    const label patchi,
     const scalar trackFraction,
     const tetIndices& tetIs
 )
@@ -228,11 +228,11 @@ void Foam::trackedParticle::hitPatch
 
 void Foam::trackedParticle::correctAfterParallelTransfer
 (
-    const label patchI,
+    const label patchi,
     trackingData& td
 )
 {
-    particle::correctAfterParallelTransfer(patchI, td);
+    particle::correctAfterParallelTransfer(patchi, td);
 
     label edgeI = k();
     if (edgeI != -1)

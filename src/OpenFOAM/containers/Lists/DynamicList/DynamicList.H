@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,7 @@ SourceFiles
 #define DynamicList_H
 
 #include "List.H"
-#include "StaticAssert.H"
+#include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -79,8 +79,11 @@ class DynamicList
 :
     public List<T>
 {
-    //- Avoid invalid sizing parameters
-    StaticAssert((SizeInc || SizeMult) && SizeDiv);
+    static_assert
+    (
+        (SizeInc || SizeMult) && SizeDiv,
+        "Invalid sizing parameters"
+    );
 
     // Private data
 
@@ -113,6 +116,9 @@ public:
         //- Construct from UList. Size set to UList size.
         //  Also constructs from DynamicList with different sizing parameters.
         explicit inline DynamicList(const UList<T>&);
+
+        //- Construct from an initializer list. Size set to list size.
+        explicit inline DynamicList(std::initializer_list<T>);
 
         //- Construct from UIndirectList. Size set to UIndirectList size.
         explicit inline DynamicList(const UIndirectList<T>&);
@@ -198,6 +204,12 @@ public:
                 const UList<T>&
             );
 
+            //- Append an initializer list at the end of this list.
+            inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& append
+            (
+                std::initializer_list<T>
+            );
+
             //- Append a UIndirectList at the end of this list
             inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& append
             (
@@ -214,16 +226,19 @@ public:
             //- Assignment of all addressed entries to the given value
             inline void operator=(const T&);
 
-            //- Assignment from DynamicList
+            //- Assignment to DynamicList
             inline void operator=
             (
                 const DynamicList<T, SizeInc, SizeMult, SizeDiv>&
             );
 
-            //- Assignment from UList
+            //- Assignment to UList
             inline void operator=(const UList<T>&);
 
-            //- Assignment from UIndirectList
+            //- Assignment from initializer list
+            inline void operator=(std::initializer_list<T>);
+
+            //- Assignment to UIndirectList
             inline void operator=(const UIndirectList<T>&);
 
 

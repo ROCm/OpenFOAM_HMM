@@ -206,32 +206,32 @@ void Foam::twoPhaseSystem::solve()
     const surfaceScalarField& phi2 = phase2_.phi();
 
     // Construct the dilatation rate source term
-    tmp<volScalarField::DimensionedInternalField> tdgdt;
+    tmp<volScalarField::Internal> tdgdt;
 
     if (phase1_.divU().valid() && phase2_.divU().valid())
     {
         tdgdt =
         (
-            alpha2.dimensionedInternalField()
-           *phase1_.divU()().dimensionedInternalField()
-          - alpha1.dimensionedInternalField()
-           *phase2_.divU()().dimensionedInternalField()
+            alpha2()
+           *phase1_.divU()()()
+          - alpha1()
+           *phase2_.divU()()()
         );
     }
     else if (phase1_.divU().valid())
     {
         tdgdt =
         (
-            alpha2.dimensionedInternalField()
-           *phase1_.divU()().dimensionedInternalField()
+            alpha2()
+           *phase1_.divU()()()
         );
     }
     else if (phase2_.divU().valid())
     {
         tdgdt =
         (
-          - alpha1.dimensionedInternalField()
-           *phase2_.divU()().dimensionedInternalField()
+          - alpha1()
+           *phase2_.divU()()()
         );
     }
 
@@ -257,7 +257,7 @@ void Foam::twoPhaseSystem::solve()
 
     for (int acorr=0; acorr<nAlphaCorr; acorr++)
     {
-        volScalarField::DimensionedInternalField Sp
+        volScalarField::Internal Sp
         (
             IOobject
             (
@@ -269,7 +269,7 @@ void Foam::twoPhaseSystem::solve()
             dimensionedScalar("Sp", dimless/dimTime, 0.0)
         );
 
-        volScalarField::DimensionedInternalField Su
+        volScalarField::Internal Su
         (
             IOobject
             (
@@ -316,11 +316,13 @@ void Foam::twoPhaseSystem::solve()
             )
         );
 
+        surfaceScalarField::Boundary& alphaPhic1Bf =
+            alphaPhic1.boundaryFieldRef();
+
         // Ensure that the flux at inflow BCs is preserved
-        forAll(alphaPhic1.boundaryField(), patchi)
+        forAll(alphaPhic1Bf, patchi)
         {
-            fvsPatchScalarField& alphaPhic1p =
-                alphaPhic1.boundaryField()[patchi];
+            fvsPatchScalarField& alphaPhic1p = alphaPhic1Bf[patchi];
 
             if (!alphaPhic1p.coupled())
             {
@@ -401,7 +403,7 @@ void Foam::twoPhaseSystem::solve()
             fvScalarMatrix alpha1Eqn
             (
                 fvm::ddt(alpha1) - fvc::ddt(alpha1)
-              - fvm::laplacian(alphaDbyA, alpha1, "bounded")
+              - fvm::laplacian(alphaDbyA(), alpha1, "bounded")
             );
 
             alpha1Eqn.relax();

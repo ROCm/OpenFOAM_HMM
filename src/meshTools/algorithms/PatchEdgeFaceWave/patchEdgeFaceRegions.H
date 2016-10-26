@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,6 +50,15 @@ namespace Foam
 
 // Forward declaration of classes
 class polyMesh;
+
+
+// Forward declaration of friend functions and operators
+
+class patchEdgeFaceRegions;
+
+Istream& operator>>(Istream&, patchEdgeFaceRegions&);
+Ostream& operator<<(Ostream&, const patchEdgeFaceRegions&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class patchEdgeFaceRegions Declaration
@@ -108,7 +117,7 @@ public:
                 const polyMesh& mesh,
                 const Patch& patch,
                 const label edgeI,
-                const label faceI,
+                const label facei,
                 const patchEdgeFaceRegions& faceInfo,
                 const scalar tol,
                 TrackingData& td
@@ -132,7 +141,7 @@ public:
             (
                 const polyMesh& mesh,
                 const Patch& patch,
-                const label faceI,
+                const label facei,
                 const label edgeI,
                 const patchEdgeFaceRegions& edgeInfo,
                 const scalar tol,

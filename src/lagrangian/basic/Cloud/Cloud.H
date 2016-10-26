@@ -133,25 +133,9 @@ public:
         Cloud
         (
             const polyMesh& mesh,
-            const IDLList<ParticleType>& particles
-        );
-
-        //- Construct from mesh, cloud name, and a list of particles
-        Cloud
-        (
-            const polyMesh& mesh,
             const word& cloudName,
             const IDLList<ParticleType>& particles
         );
-
-        //- Construct from mesh by reading from file
-        //  Optionally disable checking of class name for post-processing
-        Cloud
-        (
-            const polyMesh& mesh,
-            const bool checkClass = true
-        );
-
 
         //- Construct from mesh by reading from file with given cloud instance
         //  Optionally disable checking of class name for post-processing
@@ -207,7 +191,7 @@ public:
             //  non-zero wall distance values.  By default, assume
             //  that they can't (default for wallImpactDistance in
             //  particle is 0.0).
-            virtual bool hasWallImpactDistance() const
+            bool hasWallImpactDistance() const
             {
                 return false;
             }
@@ -259,6 +243,9 @@ public:
             //- Remove particle from cloud and delete
             void deleteParticle(ParticleType&);
 
+            //- Remove lost particles from cloud and delete
+            void deleteLostParticles();
+
             //- Reset the particles
             void cloudReset(const Cloud<ParticleType>& c);
 
@@ -297,10 +284,6 @@ public:
                 const Cloud<ParticleType>& c,
                 const CompactIOField<Field<DataType>, DataType>& data
             ) const;
-
-            //- Read the field data for the cloud of particles. Dummy at
-            //  this level.
-            virtual void readFields();
 
 
         // Write

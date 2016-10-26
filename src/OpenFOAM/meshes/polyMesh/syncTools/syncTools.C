@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,14 +48,14 @@ void Foam::syncTools::swapBoundaryCellPositions
 
     neighbourCellData.setSize(nBnd);
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        const polyPatch& pp = patches[patchI];
+        const polyPatch& pp = patches[patchi];
         const labelUList& faceCells = pp.faceCells();
         forAll(faceCells, i)
         {
-            label bFaceI = pp.start()+i-mesh.nInternalFaces();
-            neighbourCellData[bFaceI] = cellData[faceCells[i]];
+            label bFacei = pp.start()+i-mesh.nInternalFaces();
+            neighbourCellData[bFacei] = cellData[faceCells[i]];
         }
     }
     syncTools::swapBoundaryFacePositions(mesh, neighbourCellData);
@@ -73,32 +73,32 @@ Foam::PackedBoolList Foam::syncTools::getMasterPoints(const polyMesh& mesh)
     const labelListList& transformedSlaves =
             globalData.globalPointTransformedSlaves();
 
-    forAll(meshPoints, coupledPointI)
+    forAll(meshPoints, coupledPointi)
     {
-        label meshPointI = meshPoints[coupledPointI];
+        label meshPointi = meshPoints[coupledPointi];
         if
         (
             (
-                slaves[coupledPointI].size()
-              + transformedSlaves[coupledPointI].size()
+                slaves[coupledPointi].size()
+              + transformedSlaves[coupledPointi].size()
             )
           > 0
         )
         {
-            isMasterPoint[meshPointI] = true;
+            isMasterPoint[meshPointi] = true;
         }
-        donePoint[meshPointI] = true;
+        donePoint[meshPointi] = true;
     }
 
 
     // Do all other points
     // ~~~~~~~~~~~~~~~~~~~
 
-    forAll(donePoint, pointI)
+    forAll(donePoint, pointi)
     {
-        if (!donePoint[pointI])
+        if (!donePoint[pointi])
         {
-            isMasterPoint[pointI] = true;
+            isMasterPoint[pointi] = true;
         }
     }
 
@@ -156,12 +156,12 @@ Foam::PackedBoolList Foam::syncTools::getMasterFaces(const polyMesh& mesh)
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        if (patches[patchI].coupled())
+        if (patches[patchi].coupled())
         {
             const coupledPolyPatch& pp =
-                refCast<const coupledPolyPatch>(patches[patchI]);
+                refCast<const coupledPolyPatch>(patches[patchi]);
 
             if (!pp.owner())
             {
@@ -186,9 +186,9 @@ Foam::PackedBoolList Foam::syncTools::getInternalOrMasterFaces
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        const polyPatch& pp = patches[patchI];
+        const polyPatch& pp = patches[patchi];
 
         if (pp.coupled())
         {
@@ -222,9 +222,9 @@ Foam::PackedBoolList Foam::syncTools::getInternalOrCoupledFaces
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        const polyPatch& pp = patches[patchI];
+        const polyPatch& pp = patches[patchi];
 
         if (!pp.coupled())
         {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,21 +32,17 @@ Description
 
     References:
     \verbatim
-        "A family of embedded Runge-Kutta formulae"
-        Dormand, J. R.,
-        Prince, P. J.,
-        Journal of Computational and Applied Mathematics,
-        6 (1), 1980: pp. 19-26.
+        Dormand, J. R., & Prince, P. J. (1980).
+        A family of embedded Runge-Kutta formulae.
+        Journal of computational and applied mathematics, 6(1), 19-26.
 
-        "Solving Ordinary Differential Equations I: Nonstiff Problems,
-         second edition",
-        Hairer, E.,
-        Nørsett, S.,
-        Wanner, G.,
-        Springer-Verlag, Berlin. 1993, ISBN 3-540-56670-8.
+        Hairer, E., Nørsett, S. P., & Wanner, G. (1993).
+        Solving Ordinary Differential Equations I: Nonstiff Problems,
+        second edition.
+        Springer-Verlag, Berlin.
     \endverbatim
 
-SeeAlso
+See also
     Foam::RKF45
     Foam::RKCK45
 
@@ -105,8 +101,13 @@ public:
 
     // Constructors
 
-        //- Construct from ODE
+        //- Construct from ODESystem
         RKDP45(const ODESystem& ode, const dictionary& dict);
+
+
+    //- Destructor
+    virtual ~RKDP45()
+    {}
 
 
     // Member Functions
@@ -114,8 +115,11 @@ public:
         //- Inherit solve from ODESolver
         using ODESolver::solve;
 
+        //- Resize the ODE solver
+        virtual bool resize();
+
         //- Solve a single step dx and return the error
-        scalar solve
+        virtual scalar solve
         (
             const scalar x0,
             const scalarField& y0,
@@ -125,7 +129,7 @@ public:
         ) const;
 
         //- Solve the ODE system and the update the state
-        void solve
+        virtual void solve
         (
             scalar& x,
             scalarField& y,

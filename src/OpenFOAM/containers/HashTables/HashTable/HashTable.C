@@ -28,6 +28,7 @@ License
 
 #include "HashTable.H"
 #include "List.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -37,7 +38,7 @@ Foam::HashTable<T, Key, Hash>::HashTable(const label size)
     HashTableCore(),
     nElmts_(0),
     tableSize_(HashTableCore::canonicalSize(size)),
-    table_(NULL)
+    table_(nullptr)
 {
     if (tableSize_)
     {
@@ -54,26 +55,14 @@ Foam::HashTable<T, Key, Hash>::HashTable(const label size)
 template<class T, class Key, class Hash>
 Foam::HashTable<T, Key, Hash>::HashTable(const HashTable<T, Key, Hash>& ht)
 :
-    HashTableCore(),
-    nElmts_(0),
-    tableSize_(ht.tableSize_),
-    table_(NULL)
+    HashTable<T, Key, Hash>(ht.tableSize_)
 {
-    if (tableSize_)
+    for (const_iterator iter = ht.cbegin(); iter != ht.cend(); ++iter)
     {
-        table_ = new hashedEntry*[tableSize_];
-
-        for (label hashIdx = 0; hashIdx < tableSize_; hashIdx++)
-        {
-            table_[hashIdx] = 0;
-        }
-
-        for (const_iterator iter = ht.cbegin(); iter != ht.cend(); ++iter)
-        {
-            insert(iter.key(), *iter);
-        }
+        insert(iter.key(), *iter);
     }
 }
+
 
 template<class T, class Key, class Hash>
 Foam::HashTable<T, Key, Hash>::HashTable
@@ -84,9 +73,24 @@ Foam::HashTable<T, Key, Hash>::HashTable
     HashTableCore(),
     nElmts_(0),
     tableSize_(0),
-    table_(NULL)
+    table_(nullptr)
 {
     transfer(ht());
+}
+
+
+template<class T, class Key, class Hash>
+Foam::HashTable<T, Key, Hash>::HashTable
+(
+    std::initializer_list<Tuple2<Key, T>> lst
+)
+:
+    HashTable<T, Key, Hash>(lst.size())
+{
+    for (const Tuple2<Key, T>& pair : lst)
+    {
+        insert(pair.first(), pair.second());
+    }
 }
 
 
@@ -304,7 +308,7 @@ bool Foam::HashTable<T, Key, Hash>::set
 template<class T, class Key, class Hash>
 bool Foam::HashTable<T, Key, Hash>::iteratorBase::erase()
 {
-    // Note: entryPtr_ is NULL for end(), so this catches that too
+    // Note: entryPtr_ is nullptr for end(), so this catches that too
     if (entryPtr_)
     {
         // Search element before entryPtr_
@@ -337,7 +341,7 @@ bool Foam::HashTable<T, Key, Hash>::iteratorBase::erase()
             hashTable_->table_[hashIndex_] = entryPtr_->next_;
             delete entryPtr_;
 
-            // Assign any non-NULL pointer value so it doesn't look
+            // Assign any non-nullptr value so it doesn't look
             // like end()/cend()
             entryPtr_ = reinterpret_cast<hashedEntry*>(this);
 
@@ -519,7 +523,7 @@ void Foam::HashTable<T, Key, Hash>::transfer(HashTable<T, Key, Hash>& ht)
     ht.tableSize_ = 0;
 
     table_ = ht.table_;
-    ht.table_ = NULL;
+    ht.table_ = nullptr;
 
     nElmts_ = ht.nElmts_;
     ht.nElmts_ = 0;
@@ -555,6 +559,29 @@ void Foam::HashTable<T, Key, Hash>::operator=
     for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
         insert(iter.key(), *iter);
+    }
+}
+
+
+template<class T, class Key, class Hash>
+void Foam::HashTable<T, Key, Hash>::operator=
+(
+    std::initializer_list<Tuple2<Key, T>> lst
+)
+{
+    // Could be zero-sized from a previous transfer()
+    if (!tableSize_)
+    {
+        resize(lst.size());
+    }
+    else
+    {
+        clear();
+    }
+
+    for (const Tuple2<Key, T>& pair : lst)
+    {
+        insert(pair.first(), pair.second());
     }
 }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +46,7 @@ namespace searchableSurfaceModifiers
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class autoPatch Declaration
+                          Class autoPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class autoPatch
@@ -76,7 +76,7 @@ public:
         autoPtr<searchableSurfaceModifier> clone() const
         {
             NotImplemented;
-            return autoPtr<searchableSurfaceModifier>(NULL);
+            return autoPtr<searchableSurfaceModifier>(nullptr);
         }
 
 

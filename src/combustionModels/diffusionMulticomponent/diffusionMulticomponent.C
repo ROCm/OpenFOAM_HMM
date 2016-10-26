@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,40 +36,13 @@ void Foam::combustionModels::
 diffusionMulticomponent<CombThermoType, ThermoType>::init()
 {
     // Load default values
-    if (this->coeffs().found("Ci"))
-    {
-        this->coeffs().lookup("Ci") >> Ci_;
-    }
-
-    if (this->coeffs().found("YoxStream"))
-    {
-        this->coeffs().lookup("YoxStream") >> YoxStream_;
-    }
-
-    if (this->coeffs().found("YfStream"))
-    {
-        this->coeffs().lookup("YfStream") >> YfStream_;
-    }
-
-    if (this->coeffs().found("sigma"))
-    {
-        this->coeffs().lookup("sigma") >> sigma_;
-    }
-
-    if (this->coeffs().found("ftCorr"))
-    {
-        this->coeffs().lookup("ftCorr") >> ftCorr_;
-    }
-
-    if (this->coeffs().found("alpha"))
-    {
-        alpha_ = readScalar(this->coeffs().lookup("alpha"));
-    }
-
-    if (this->coeffs().found("laminarIgn"))
-    {
-        this->coeffs().lookup("laminarIgn") >> laminarIgn_;
-    }
+    this->coeffs().readIfPresent("Ci", Ci_);
+    this->coeffs().readIfPresent("YoxStream", YoxStream_);
+    this->coeffs().readIfPresent("YfStream", YfStream_);
+    this->coeffs().readIfPresent("sigma", sigma_);
+    this->coeffs().readIfPresent("ftCorr", ftCorr_);
+    this->coeffs().readIfPresent("alpha", alpha_);
+    this->coeffs().readIfPresent("laminarIgn", laminarIgn_);
 
     typedef typename Reaction<ThermoType>::specieCoeffs specieCoeffs;
 
@@ -142,7 +115,6 @@ diffusionMulticomponent<CombThermoType, ThermoType>::init()
         const scalar fStoich = 1.0/(1.0 + stoicRatio_[k]);
 
         Info << "stoichiometric mixture fraction : " << fStoich << endl;
-
     }
 }
 
@@ -164,7 +136,7 @@ diffusionMulticomponent
     specieThermo_
     (
         dynamic_cast<const reactingMixture<ThermoType>&>
-            (this->thermo()).speciesData()
+           (this->thermo()).speciesData()
     ),
     RijPtr_(reactions_.size()),
     Ci_(reactions_.size(), 1.0),
@@ -218,7 +190,6 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
 
         for (label k=0; k < nReactions; k++)
         {
-
             RijlPtr.set
             (
                 k,
@@ -246,8 +217,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
 
             if (laminarIgn_)
             {
-                Rijl.dimensionedInternalField() =
-                    -this->chemistryPtr_->calculateRR(k, fuelIndex);
+                Rijl.ref() = -this->chemistryPtr_->calculateRR(k, fuelIndex);
             }
 
 
@@ -287,11 +257,9 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
             (
                 "ft" + name(k),
                 (
-                    s_[k]*Yfuel
-                  - (Yox - YoxStream_[k])
+                    s_[k]*Yfuel - (Yox - YoxStream_[k])
                 )
-                /
-                (
+               /(
                     s_[k]*YfStream_[k] + YoxStream_[k]
                 )
             );
@@ -318,15 +286,9 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
               * exp(-sqr(ft - fStoich)/(2*sqr(sigma)))
             );
 
-            const volScalarField topHatFilter
-            (
-                pos(filter - 1e-3)
-            );
+            const volScalarField topHatFilter(pos(filter - 1e-3));
 
-            const volScalarField prob
-            (
-                "prob" + name(k), preExp*filter
-            );
+            const volScalarField prob("prob" + name(k), preExp*filter);
 
             const volScalarField RijkDiff
             (
@@ -383,8 +345,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
                 const scalar stoichCoeff = lhs[l].stoichCoeff;
 
                 this->chemistryPtr_->RR(lIndex) +=
-                    -Rijk*stoichCoeff*specieThermo_[lIndex].W()
-                   /fuelStoic/MwFuel;
+                   -Rijk*stoichCoeff*specieThermo_[lIndex].W()/fuelStoic/MwFuel;
 
             }
 
@@ -396,8 +357,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
                 const scalar stoichCoeff = rhs[r].stoichCoeff;
 
                 this->chemistryPtr_->RR(rIndex) +=
-                    Rijk*stoichCoeff*specieThermo_[rIndex].W()
-                   /fuelStoic/MwFuel;
+                    Rijk*stoichCoeff*specieThermo_[rIndex].W()/fuelStoic/MwFuel;
             }
         }
     }

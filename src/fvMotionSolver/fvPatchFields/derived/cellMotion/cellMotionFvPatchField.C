@@ -63,10 +63,8 @@ Foam::cellMotionFvPatchField<Type>::cellMotionFvPatchField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<Type>(p, iF)
-{
-    fvPatchField<Type>::operator=(Field<Type>("value", dict, p.size()));
-}
+    fixedValueFvPatchField<Type>(p, iF, dict)
+{}
 
 
 template<class Type>
@@ -102,10 +100,10 @@ void Foam::cellMotionFvPatchField<Type>::updateCoeffs()
 
     const fvPatch& p = this->patch();
     const polyPatch& pp = p.patch();
-    const fvMesh& mesh = this->dimensionedInternalField().mesh();
+    const fvMesh& mesh = this->internalField().mesh();
     const pointField& points = mesh.points();
 
-    word pfName = this->dimensionedInternalField().name();
+    word pfName = this->internalField().name();
     pfName.replace("cell", "point");
 
     const GeometricField<Type, pointPatchField, pointMesh>& pointMotion =

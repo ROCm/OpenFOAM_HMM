@@ -41,17 +41,6 @@ Foam::label Foam::profiling::Information::nextId_(0);
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-// file-scope function
-template<class T>
-inline static void writeEntry
-(
-    Foam::Ostream& os, const Foam::word& key, const T& value
-)
-{
-    os.writeKeyword(key) << value << Foam::token::END_STATEMENT << '\n';
-}
-
-
 Foam::label Foam::profiling::Information::getNextId()
 {
     return nextId_++;
@@ -369,7 +358,7 @@ void Foam::profiling::Information::update(const scalar& elapsed)
 
 bool Foam::profiling::writeData(Ostream& os) const
 {
-    os.beginBlock("profiling") << nl; // FUTURE: without nl
+    os.beginBlock("profiling");
 
     // Add extra new line between entries
     label nTrigger = 0;
@@ -420,22 +409,22 @@ bool Foam::profiling::writeData(Ostream& os) const
         }
     }
 
-    os.endBlock() << nl; // FUTURE: without nl
+    os.endBlock();
 
     if (sysInfo_)
     {
         os << nl;
-        os.beginBlock("sysInfo") << nl; // FUTURE: without nl
+        os.beginBlock("sysInfo");
         sysInfo_->write(os);
-        os.endBlock() << nl; // FUTURE: without nl
+        os.endBlock();
     }
 
     if (cpuInfo_)
     {
         os << nl;
-        os.beginBlock("cpuInfo") << nl; // FUTURE: without nl
+        os.beginBlock("cpuInfo");
         cpuInfo_->write(os);
-        os.endBlock() << nl; // FUTURE: without nl
+        os.endBlock();
     }
 
     if (memInfo_)
@@ -443,10 +432,10 @@ bool Foam::profiling::writeData(Ostream& os) const
         memInfo_->update();
 
         os << nl;
-        os.beginBlock("memInfo") << nl; // FUTURE: without nl
+        os.beginBlock("memInfo");
         memInfo_->write(os);
-        writeEntry(os, "units", "kB");
-        os.endBlock() << nl; // FUTURE: without nl
+        os.writeEntry("units", "kB");
+        os.endBlock();
     }
 
     return os;
@@ -536,26 +525,24 @@ Foam::Ostream& Foam::profiling::Information::write
 {
     // write in dictionary format
 
-    os.beginBlock("trigger" + Foam::name(id_)) << nl; // FUTURE: without nl
+    os.beginBlock(word("trigger" + Foam::name(id_)));
 
-    // FUTURE: os.writeEntry(key, value);
-
-    writeEntry(os, "id",            id_);
+    os.writeEntry("id",             id_);
     if (id_ != parent().id())
     {
-        writeEntry(os, "parentId",  parent().id());
+        os.writeEntry("parentId",   parent().id());
     }
-    writeEntry(os, "description",   description());
-    writeEntry(os, "calls",         calls()     + (offset ? 1 : 0));
-    writeEntry(os, "totalTime",     totalTime() + elapsedTime);
-    writeEntry(os, "childTime",     childTime() + childTimes);
+    os.writeEntry("description",    description());
+    os.writeEntry("calls",          calls()     + (offset ? 1 : 0));
+    os.writeEntry("totalTime",      totalTime() + elapsedTime);
+    os.writeEntry("childTime",      childTime() + childTimes);
     if (maxMem_)
     {
-        writeEntry(os, "maxMem",    maxMem_);
+        os.writeEntry("maxMem",     maxMem_);
     }
-    writeEntry(os, "onStack",       Switch(onStack()));
+    os.writeEntry("onStack",        Switch(onStack()));
 
-    os.endBlock() << nl; // FUTURE: without nl
+    os.endBlock();
 
     return os;
 }

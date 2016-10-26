@@ -96,6 +96,7 @@ private:
         //- Patch mapping array
         labelList patchMap_;
 
+        //- Optional face mapping array with flip encoded
         mutable autoPtr<labelList> faceFlipMapPtr_;
 
 
@@ -304,7 +305,7 @@ public:
                 const GeometricField<Type, pointPatchField, pointMesh>&
             ) const;
 
-            //- Map dimensioned fields
+            //- Map dimensioned field
             template<class Type>
             static tmp<DimensionedField<Type, volMesh>>
             interpolate
@@ -316,11 +317,7 @@ public:
 
             template<class Type>
             tmp<DimensionedField<Type, volMesh>>
-            interpolate
-            (
-                const DimensionedField<Type, volMesh>&
-            ) const;
-
+            interpolate(const DimensionedField<Type, volMesh>&) const;
 };
 
 

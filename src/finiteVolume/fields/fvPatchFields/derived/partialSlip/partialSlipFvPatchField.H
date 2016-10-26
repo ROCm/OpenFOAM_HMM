@@ -31,8 +31,7 @@ Description
     This boundary condition provides a partial slip condition.  The amount of
     slip is controlled by a user-supplied field.
 
-    \heading Patch usage
-
+Usage
     \table
         Property      | Description             | Required    | Default value
         valueFraction | fraction od value used for boundary [0-1] | yes |
@@ -40,7 +39,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            partialSlip;
         valueFraction   uniform 0.1;
@@ -48,7 +47,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::transformFvPatchField
 
 SourceFiles

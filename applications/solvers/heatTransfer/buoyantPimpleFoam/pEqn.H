@@ -41,8 +41,6 @@
         p_rghDDtEqn =
         (
             fvc::ddt(rho) + psi*correction(fvm::ddt(p_rgh))
-        ==
-            fvOptions(psi, p_rgh, rho.name())
         );
     }
 
@@ -53,6 +51,8 @@
             p_rghDDtEqn()
           + fvc::div(phiHbyA)
           - fvm::laplacian(rhorAUf, p_rgh)
+        ==
+            fvOptions(psi, p_rgh, rho.name())
         );
 
         p_rghEqn.solve(mesh.solver(p_rgh.select(pimple.finalInnerIter())));

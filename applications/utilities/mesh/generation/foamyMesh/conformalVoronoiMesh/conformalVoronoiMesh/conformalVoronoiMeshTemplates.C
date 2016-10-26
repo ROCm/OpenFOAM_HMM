@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -98,35 +98,33 @@ bool Foam::conformalVoronoiMesh::distributeBackground(const Triangulation& mesh)
             {
                 pointFromPoint v = topoint(vit->point());
 
-                label cellI = cellSearch.findCell(v);
+                label celli = cellSearch.findCell(v);
 
-                if (cellI == -1)
+                if (celli == -1)
                 {
 //                     Pout<< "findCell conformalVoronoiMesh::distribute "
 //                         << "findCell "
 //                         << vit->type() << " "
 //                         << vit->index() << " "
 //                         << v << " "
-//                         << cellI
-//                         << " find nearest cellI ";
+//                         << celli
+//                         << " find nearest celli ";
 
-                    cellI = cellSearch.findNearestCell(v);
+                    celli = cellSearch.findNearestCell(v);
                 }
 
-                cellVertices[cellI]++;
+                cellVertices[celli]++;
             }
         }
+
+        scalarField& cwi = cellWeights.primitiveFieldRef();
 
         forAll(cellVertices, cI)
         {
             // Give a small but finite weight for empty cells.  Some
             // decomposition methods have difficulty with integer overflows in
             // the sum of the normalised weight field.
-            cellWeights.internalField()[cI] = max
-            (
-                cellVertices[cI],
-                1e-2
-            );
+            cwi[cI] = max(cellVertices[cI], 1e-2);
         }
 
         autoPtr<mapDistributePolyMesh> mapDist = decomposition_().distribute

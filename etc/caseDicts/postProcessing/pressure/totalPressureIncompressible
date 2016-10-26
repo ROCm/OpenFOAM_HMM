@@ -1,26 +1,19 @@
 /*--------------------------------*- C++ -*----------------------------------*\
-| =========                 |                                                 |
-| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 |  \\    /   O peration     | Version:  plus                                  |  
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
-|    \\/     M anipulation  |                                                 |
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+Description
+    Calculates the total pressure field for a case where the solver is
+    incompressible (pressure is kinematic, e.g. m^2/s^2).
+
 \*---------------------------------------------------------------------------*/
-FoamFile
-{
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    object      totalPressureIncompressible;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-totalPressure
-{
-    pRef  0.0;
-    rho   1.2;
+#includeEtc "caseDicts/postProcessing/pressure/totalPressureIncompressible.cfg"
 
-    #includeEtc
-    "caseDicts/postProcessing/pressure/totalPressureIncompressible.cfg"
-}
+pRef    0.0;
+rhoInf  1.2;
 
 // ************************************************************************* //

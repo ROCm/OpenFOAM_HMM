@@ -30,11 +30,10 @@ Group
 Description
     This boundary condition provides a slip constraint.
 
-    \heading Patch usage
-
+Usage
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            slip;
     }

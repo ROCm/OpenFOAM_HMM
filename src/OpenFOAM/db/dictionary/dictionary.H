@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -283,7 +283,7 @@ public:
             ) const;
 
             //- Find and return an entry data stream pointer if present
-            //  otherwise return NULL.
+            //  otherwise return nullptr.
             //  If recursive, search parent dictionaries.
             //  If patternMatch, use regular expressions
             const entry* lookupEntryPtr
@@ -294,7 +294,7 @@ public:
             ) const;
 
             //- Find and return an entry data stream pointer for manipulation
-            //  if present otherwise return NULL.
+            //  if present otherwise return nullptr.
             //  If recursive, search parent dictionaries.
             //  If patternMatch, use regular expressions.
             entry* lookupEntryPtr
@@ -364,7 +364,7 @@ public:
             ) const;
 
             //- Find and return an entry data stream pointer if present
-            //  otherwise return NULL. Allows scoping using '.'
+            //  otherwise return nullptr. Allows scoping using '.'
             const entry* lookupScopedEntryPtr
             (
                 const word&,
@@ -376,7 +376,7 @@ public:
             bool isDict(const word&) const;
 
             //- Find and return a sub-dictionary pointer if present
-            //  otherwise return NULL.
+            //  otherwise return nullptr.
             const dictionary* subDictPtr(const word&) const;
 
             //- Find and return a sub-dictionary
@@ -395,6 +395,9 @@ public:
 
             //- Return the table of contents
             wordList toc() const;
+
+            //- Return the sorted table of contents
+            wordList sortedToc() const;
 
             //- Return the list of available keys or patterns
             List<keyType> keys(bool patterns=false) const;
@@ -499,6 +502,14 @@ public:
 
 
         // Write
+
+            //- Write sub-dictionary with the keyword as its header
+            void writeEntry(const keyType& keyword, Ostream&) const;
+
+            //- Write dictionary entries.
+            //  Optionally with extra new line between entries for
+            //  "top-level" dictionaries
+            void writeEntries(Ostream&, const bool extraNewLine=false) const;
 
             //- Write dictionary, normally with sub-dictionary formatting
             void write(Ostream&, const bool subDict=true) const;

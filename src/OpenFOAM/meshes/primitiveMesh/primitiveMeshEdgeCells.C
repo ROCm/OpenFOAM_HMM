@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -78,43 +78,43 @@ const Foam::labelList& Foam::primitiveMesh::edgeCells
         // Do quadratic insertion.
         forAll(eFaces, i)
         {
-            label faceI = eFaces[i];
+            label facei = eFaces[i];
 
             {
-                label ownCellI = own[faceI];
+                label ownCelli = own[facei];
 
                 // Check if not already in storage
                 forAll(storage, j)
                 {
-                    if (storage[j] == ownCellI)
+                    if (storage[j] == ownCelli)
                     {
-                        ownCellI = -1;
+                        ownCelli = -1;
                         break;
                     }
                 }
 
-                if (ownCellI != -1)
+                if (ownCelli != -1)
                 {
-                    storage.append(ownCellI);
+                    storage.append(ownCelli);
                 }
             }
 
-            if (isInternalFace(faceI))
+            if (isInternalFace(facei))
             {
-                label neiCellI = nei[faceI];
+                label neiCelli = nei[facei];
 
                 forAll(storage, j)
                 {
-                    if (storage[j] == neiCellI)
+                    if (storage[j] == neiCelli)
                     {
-                        neiCellI = -1;
+                        neiCelli = -1;
                         break;
                     }
                 }
 
-                if (neiCellI != -1)
+                if (neiCelli != -1)
                 {
-                    storage.append(neiCellI);
+                    storage.append(neiCelli);
                 }
             }
         }

@@ -225,9 +225,9 @@ public:
         (
             const polyMesh& mesh,
             const vector& position,
-            const label cellI,
-            const label tetFaceI,
-            const label tetPtI
+            const label celli,
+            const label tetFacei,
+            const label tetPti
         );
 
         //- Construct from components
@@ -235,9 +235,9 @@ public:
         (
             const polyMesh& mesh,
             const vector& position,
-            const label cellI,
-            const label tetFaceI,
-            const label tetPtI,
+            const label celli,
+            const label tetFacei,
+            const label tetPti,
             const label typeId,
             const scalar nParticle0,
             const scalar d0,
@@ -409,7 +409,7 @@ public:
             (
                 TrackData& td,
                 const scalar dt,
-                const label cellI
+                const label celli
             );
 
             //- Correct parcel properties according to atomization model
@@ -418,7 +418,7 @@ public:
             (
                 TrackData& td,
                 const scalar dt,
-                const label cellI
+                const label celli
             );
 
             //- Correct parcel properties according to breakup model
@@ -427,7 +427,7 @@ public:
             (
                 TrackData& td,
                 const scalar dt,
-                const label cellI
+                const label celli
             );
 
             //- Correct cell values using latest transfer information
@@ -436,7 +436,7 @@ public:
             (
                 TrackData& td,
                 const scalar dt,
-                const label cellI
+                const label celli
             );
 
             //- Correct surface values due to emitted species
@@ -444,7 +444,7 @@ public:
             void correctSurfaceValues
             (
                 TrackData& td,
-                const label cellI,
+                const label celli,
                 const scalar T,
                 const scalarField& Cs,
                 scalar& rhos,
@@ -459,7 +459,7 @@ public:
             (
                 TrackData& td,
                 const scalar dt,
-                const label cellI
+                const label celli
             );
 
             //- Calculate the chi-factor for flash-boiling for the

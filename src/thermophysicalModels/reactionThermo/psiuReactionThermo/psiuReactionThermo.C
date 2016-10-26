@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,7 @@ defineRunTimeSelectionTable(psiuReactionThermo, fvMesh);
 
 wordList psiuReactionThermo::heuBoundaryTypes()
 {
-    const volScalarField::GeometricBoundaryField& tbf =
+    const volScalarField::Boundary& tbf =
         this->Tu().boundaryField();
 
     wordList hbt = tbf.types();
@@ -74,7 +74,7 @@ wordList psiuReactionThermo::heuBoundaryTypes()
 
 void psiuReactionThermo::heuBoundaryCorrection(volScalarField& heu)
 {
-    volScalarField::GeometricBoundaryField& hbf = heu.boundaryField();
+    volScalarField::Boundary& hbf = heu.boundaryFieldRef();
 
     forAll(hbf, patchi)
     {

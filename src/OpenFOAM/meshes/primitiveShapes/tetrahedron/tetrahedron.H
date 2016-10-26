@@ -205,7 +205,7 @@ public:
             inline const Point& d() const;
 
             //- Return i-th face
-            inline triPointRef tri(const label faceI) const;
+            inline triPointRef tri(const label facei) const;
 
         // Properties
 
@@ -249,7 +249,7 @@ public:
             inline scalar barycentric
             (
                 const point& pt,
-                List<scalar>& bary
+                FixedList<scalar, 4>& bary
             ) const;
 
             //- Return nearest point to p on tetrahedron. Is p itself

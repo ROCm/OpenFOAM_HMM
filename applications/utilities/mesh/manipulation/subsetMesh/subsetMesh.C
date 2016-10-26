@@ -523,17 +523,17 @@ int main(int argc, char *argv[])
     // Read dimensioned fields and subset
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    typedef volScalarField::DimensionedInternalField dimScalType;
+    typedef volScalarField::Internal dimScalType;
     wordList scalarDimNames(objects.names(dimScalType::typeName));
     PtrList<dimScalType> scalarDimFlds(scalarDimNames.size());
     subsetDimensionedFields(subsetter, scalarDimNames, scalarDimFlds);
 
-    typedef volVectorField::DimensionedInternalField dimVecType;
+    typedef volVectorField::Internal dimVecType;
     wordList vectorDimNames(objects.names(dimVecType::typeName));
     PtrList<dimVecType> vectorDimFlds(vectorDimNames.size());
     subsetDimensionedFields(subsetter, vectorDimNames, vectorDimFlds);
 
-    typedef volSphericalTensorField::DimensionedInternalField dimSphereType;
+    typedef volSphericalTensorField::Internal dimSphereType;
     wordList sphericalTensorDimNames(objects.names(dimSphereType::typeName));
     PtrList<dimSphereType> sphericalTensorDimFlds
     (
@@ -546,12 +546,12 @@ int main(int argc, char *argv[])
         sphericalTensorDimFlds
     );
 
-    typedef volSymmTensorField::DimensionedInternalField dimSymmTensorType;
+    typedef volSymmTensorField::Internal dimSymmTensorType;
     wordList symmTensorDimNames(objects.names(dimSymmTensorType::typeName));
     PtrList<dimSymmTensorType> symmTensorDimFlds(symmTensorDimNames.size());
     subsetDimensionedFields(subsetter, symmTensorDimNames, symmTensorDimFlds);
 
-    typedef volTensorField::DimensionedInternalField dimTensorType;
+    typedef volTensorField::Internal dimTensorType;
     wordList tensorDimNames(objects.names(dimTensorType::typeName));
     PtrList<dimTensorType> tensorDimFlds(tensorDimNames.size());
     subsetDimensionedFields(subsetter, tensorDimNames, tensorDimFlds);

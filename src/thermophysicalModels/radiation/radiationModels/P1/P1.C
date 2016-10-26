@@ -242,12 +242,14 @@ void Foam::radiation::P1::calculate()
       - 4.0*(e_*physicoChemical::sigma*pow4(T_) ) - E_
     );
 
+    volScalarField::Boundary& QrBf = Qr_.boundaryFieldRef();
+
     // Calculate radiative heat flux on boundaries.
     forAll(mesh_.boundaryMesh(), patchi)
     {
         if (!G_.boundaryField()[patchi].coupled())
         {
-            Qr_.boundaryField()[patchi] =
+            QrBf[patchi] =
                 -gamma.boundaryField()[patchi]
                 *G_.boundaryField()[patchi].snGrad();
         }
@@ -279,12 +281,12 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::P1::Rp() const
 Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh>>
 Foam::radiation::P1::Ru() const
 {
-    const DimensionedField<scalar, volMesh>& G =
-        G_.dimensionedInternalField();
-    const DimensionedField<scalar, volMesh> E =
-        absorptionEmission_->ECont()().dimensionedInternalField();
-    const DimensionedField<scalar, volMesh> a =
-        absorptionEmission_->aCont()().dimensionedInternalField();
+    const volScalarField::Internal& G =
+        G_();
+    const volScalarField::Internal E =
+        absorptionEmission_->ECont()()();
+    const volScalarField::Internal a =
+        absorptionEmission_->aCont()()();
 
     return a*G - E;
 }

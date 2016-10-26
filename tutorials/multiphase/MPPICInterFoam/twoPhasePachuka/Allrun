@@ -13,7 +13,7 @@ m4 system/pachuka.m4 > system/blockMeshDict
 
 runApplication blockMesh
 
-\cp 0/alpha.water.org 0/alpha.water
+\cp 0/alpha.water.orig 0/alpha.water
 
 # create faceSet for burner inlet and faceZone for coupled wall
 runApplication topoSet

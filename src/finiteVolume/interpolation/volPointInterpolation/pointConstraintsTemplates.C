@@ -91,9 +91,12 @@ void Foam::pointConstraints::setPatchFields
     GeometricField<Type, pointPatchField, pointMesh>& pf
 )
 {
-    forAll(pf.boundaryField(), patchI)
+    typename GeometricField<Type, pointPatchField, pointMesh>::
+        Boundary& pfbf = pf.boundaryFieldRef();
+
+    forAll(pfbf, patchi)
     {
-        pointPatchField<Type>& ppf = pf.boundaryField()[patchI];
+        pointPatchField<Type>& ppf = pfbf[patchi];
 
         if (isA<valuePointPatchField<Type>>(ppf))
         {
@@ -134,7 +137,12 @@ void Foam::pointConstraints::constrain
     pf.correctBoundaryConditions();
 
     // Sync any dangling points
-    syncUntransformedData(mesh()(), pf.internalField(), maxMagSqrEqOp<Type>());
+    syncUntransformedData
+    (
+        mesh()(),
+        pf.primitiveFieldRef(),
+        maxMagSqrEqOp<Type>()
+    );
 
     // Apply multiple constraints on edge/corner points
     constrainCorners(pf);

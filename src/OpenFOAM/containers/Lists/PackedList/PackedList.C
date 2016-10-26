@@ -407,12 +407,10 @@ Foam::Ostream& Foam::PackedList<nBits>::write
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII)
     {
-        bool uniform = false;
-
-        if (sz > 1 && !indexedOutput)
+        // Can the contents be considered 'uniform' (ie, identical)?
+        bool uniform = (sz > 1 && !indexedOutput);
+        if (uniform)
         {
-            uniform = true;
-
             forAll(lst, i)
             {
                 if (lst[i] != lst[0])
@@ -475,9 +473,12 @@ Foam::Ostream& Foam::PackedList<nBits>::write
     }
     else
     {
+        // Contents are binary and contiguous
+
         os  << nl << sz << nl;
         if (sz)
         {
+            // write(...) includes surrounding start/end delimiters
             os.write
             (
                 reinterpret_cast<const char*>(lst.storage().cdata()),

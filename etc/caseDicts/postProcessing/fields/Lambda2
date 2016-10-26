@@ -1,22 +1,23 @@
 /*--------------------------------*- C++ -*----------------------------------*\
-| =========                 |                                                 |
-| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 |  \\    /   O peration     | Version:  plus                                  |  
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
-|    \\/     M anipulation  |                                                 |
-\*---------------------------------------------------------------------------*/
-FoamFile
-{
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    object      Lambda2.cfg;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+Description
+    Calculates and writes the second largest eigenvalue of the sum of the
+    square of the symmetrical and anti-symmetrical parts of the velocity
+    gradient tensor.
 
-Lambda2
-{
-    #includeEtc "caseDicts/postProcessing/fields/Lambda2.cfg"
-}
+\*---------------------------------------------------------------------------*/
+
+type            Lambda2;
+libs            ("libfieldFunctionObjects.so");
+
+field           U;
+
+executeControl  writeTime;
+writeControl    writeTime;
 
 // ************************************************************************* //

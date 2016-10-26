@@ -17,8 +17,8 @@ FoamFile
 graph
 {
     type            sets;
-    functionObjectLibs ("libsampling.so");
-    outputControl   outputTime;
+    libs ("libsampling.so");
+    writeControl   writeTime;
 
     interpolationScheme cellPointFace;
 

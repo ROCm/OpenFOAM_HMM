@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,16 +43,16 @@ defineTypeNameAndDebug(regionSide, 0);
 Foam::label Foam::regionSide::otherFace
 (
     const primitiveMesh& mesh,
-    const label cellI,
-    const label faceI,
+    const label celli,
+    const label facei,
     const label edgeI
 )
 {
     label f0I, f1I;
 
-    meshTools::getEdgeFaces(mesh, cellI, edgeI, f0I, f1I);
+    meshTools::getEdgeFaces(mesh, celli, edgeI, f0I, f1I);
 
-    if (f0I == faceI)
+    if (f0I == facei)
     {
         return f1I;
     }
@@ -67,17 +67,17 @@ Foam::label Foam::regionSide::otherFace
 Foam::label Foam::regionSide::otherEdge
 (
     const primitiveMesh& mesh,
-    const label faceI,
+    const label facei,
     const label edgeI,
-    const label pointI
+    const label pointi
 )
 {
     const edge& e = mesh.edges()[edgeI];
 
     // Get other point on edge.
-    label freePointI = e.otherVertex(pointI);
+    label freePointi = e.otherVertex(pointi);
 
-    const labelList& fEdges = mesh.faceEdges()[faceI];
+    const labelList& fEdges = mesh.faceEdges()[facei];
 
     forAll(fEdges, fEdgeI)
     {
@@ -87,12 +87,12 @@ Foam::label Foam::regionSide::otherEdge
         if
         (
             (
-                otherE.start() == pointI
-             && otherE.end() != freePointI
+                otherE.start() == pointi
+             && otherE.end() != freePointi
             )
          || (
-                otherE.end() == pointI
-             && otherE.start() != freePointI
+                otherE.end() == pointi
+             && otherE.start() != freePointi
             )
         )
         {
@@ -102,52 +102,52 @@ Foam::label Foam::regionSide::otherEdge
     }
 
     FatalErrorInFunction
-        << "Cannot find other edge on face " << faceI << " that uses point "
-        << pointI << " but not point " << freePointI << endl
+        << "Cannot find other edge on face " << facei << " that uses point "
+        << pointi << " but not point " << freePointi << endl
         << "Edges on face:" << fEdges
         << " verts:" << UIndirectList<edge>(mesh.edges(), fEdges)()
         << " Vertices on face:"
-        << mesh.faces()[faceI]
+        << mesh.faces()[facei]
         << " Vertices on original edge:" << e << abort(FatalError);
 
     return -1;
 }
 
 
-// Step from faceI (on side cellI) to connected face & cell without crossing
+// Step from facei (on side celli) to connected face & cell without crossing
 // fenceEdges.
 void Foam::regionSide::visitConnectedFaces
 (
     const primitiveMesh& mesh,
     const labelHashSet& region,
     const labelHashSet& fenceEdges,
-    const label cellI,
-    const label faceI,
+    const label celli,
+    const label facei,
     labelHashSet& visitedFace
 )
 {
-    if (!visitedFace.found(faceI))
+    if (!visitedFace.found(facei))
     {
         if (debug)
         {
-            Info<< "visitConnectedFaces : cellI:" << cellI << " faceI:"
-                << faceI << "  isOwner:" << (cellI == mesh.faceOwner()[faceI])
+            Info<< "visitConnectedFaces : celli:" << celli << " facei:"
+                << facei << "  isOwner:" << (celli == mesh.faceOwner()[facei])
                 << endl;
         }
 
         // Mark as visited
-        visitedFace.insert(faceI);
+        visitedFace.insert(facei);
 
         // Mark which side of face was visited.
-        if (cellI == mesh.faceOwner()[faceI])
+        if (celli == mesh.faceOwner()[facei])
         {
-            sideOwner_.insert(faceI);
+            sideOwner_.insert(facei);
         }
 
 
         // Visit all neighbouring faces on faceSet. Stay on this 'side' of
         // face by doing edge-face-cell walk.
-        const labelList& fEdges = mesh.faceEdges()[faceI];
+        const labelList& fEdges = mesh.faceEdges()[facei];
 
         forAll(fEdges, fEdgeI)
         {
@@ -159,41 +159,41 @@ void Foam::regionSide::visitConnectedFaces
                 // we hit face on faceSet.
 
                 // Find face reachable from edge
-                label otherFaceI = otherFace(mesh, cellI, faceI, edgeI);
+                label otherFacei = otherFace(mesh, celli, facei, edgeI);
 
-                if (mesh.isInternalFace(otherFaceI))
+                if (mesh.isInternalFace(otherFacei))
                 {
-                    label otherCellI = cellI;
+                    label otherCelli = celli;
 
                     // Keep on crossing faces/cells until back on face on
                     // surface
-                    while (!region.found(otherFaceI))
+                    while (!region.found(otherFacei))
                     {
-                        visitedFace.insert(otherFaceI);
+                        visitedFace.insert(otherFacei);
 
                         if (debug)
                         {
-                            Info<< "visitConnectedFaces : cellI:" << cellI
-                                << " found insideEdgeFace:" << otherFaceI
+                            Info<< "visitConnectedFaces : celli:" << celli
+                                << " found insideEdgeFace:" << otherFacei
                                 << endl;
                         }
 
 
-                        // Cross otherFaceI into neighbouring cell
-                        otherCellI =
+                        // Cross otherFacei into neighbouring cell
+                        otherCelli =
                             meshTools::otherCell
                             (
                                 mesh,
-                                otherCellI,
-                                otherFaceI
+                                otherCelli,
+                                otherFacei
                             );
 
-                        otherFaceI =
+                        otherFacei =
                                 otherFace
                                 (
                                     mesh,
-                                    otherCellI,
-                                    otherFaceI,
+                                    otherCelli,
+                                    otherFacei,
                                     edgeI
                                 );
                     }
@@ -203,8 +203,8 @@ void Foam::regionSide::visitConnectedFaces
                         mesh,
                         region,
                         fenceEdges,
-                        otherCellI,
-                        otherFaceI,
+                        otherCelli,
+                        otherFacei,
                         visitedFace
                     );
                 }
@@ -214,7 +214,7 @@ void Foam::regionSide::visitConnectedFaces
 }
 
 
-// From edge on face connected to point on region (regionPointI) cross
+// From edge on face connected to point on region (regionPointi) cross
 // to all other edges using this point by walking across faces
 // Does not cross regionEdges so stays on one side
 // of region
@@ -222,26 +222,26 @@ void Foam::regionSide::walkPointConnectedFaces
 (
     const primitiveMesh& mesh,
     const labelHashSet& regionEdges,
-    const label regionPointI,
-    const label startFaceI,
+    const label regionPointi,
+    const label startFacei,
     const label startEdgeI,
     labelHashSet& visitedEdges
 )
 {
     // Mark as visited
-    insidePointFaces_.insert(startFaceI);
+    insidePointFaces_.insert(startFacei);
 
     if (debug)
     {
-        Info<< "walkPointConnectedFaces : regionPointI:" << regionPointI
-            << " faceI:" << startFaceI
+        Info<< "walkPointConnectedFaces : regionPointi:" << regionPointi
+            << " facei:" << startFacei
             << " edgeI:" << startEdgeI << " verts:"
             << mesh.edges()[startEdgeI]
             << endl;
     }
 
-    // Cross faceI i.e. get edge not startEdgeI which uses regionPointI
-    label edgeI = otherEdge(mesh, startFaceI, startEdgeI, regionPointI);
+    // Cross facei i.e. get edge not startEdgeI which uses regionPointi
+    label edgeI = otherEdge(mesh, startFacei, startEdgeI, regionPointi);
 
     if (!regionEdges.found(edgeI))
     {
@@ -263,16 +263,16 @@ void Foam::regionSide::walkPointConnectedFaces
 
             const labelList& eFaces = mesh.edgeFaces()[edgeI];
 
-            forAll(eFaces, eFaceI)
+            forAll(eFaces, eFacei)
             {
-                label faceI = eFaces[eFaceI];
+                label facei = eFaces[eFacei];
 
                 walkPointConnectedFaces
                 (
                     mesh,
                     regionEdges,
-                    regionPointI,
-                    faceI,
+                    regionPointi,
+                    facei,
                     edgeI,
                     visitedEdges
                 );
@@ -298,8 +298,8 @@ void Foam::regionSide::walkAllPointConnectedFaces
 
     forAllConstIter(labelHashSet, regionFaces, iter)
     {
-        const label faceI = iter.key();
-        const labelList& fEdges = mesh.faceEdges()[faceI];
+        const label facei = iter.key();
+        const labelList& fEdges = mesh.faceEdges()[facei];
 
         forAll(fEdges, fEdgeI)
         {
@@ -331,29 +331,29 @@ void Foam::regionSide::walkAllPointConnectedFaces
 
     forAllConstIter(labelHashSet, regionFaces, iter)
     {
-        const label faceI = iter.key();
+        const label facei = iter.key();
 
         // Get side of face.
-        label cellI;
+        label celli;
 
-        if (sideOwner_.found(faceI))
+        if (sideOwner_.found(facei))
         {
-            cellI = mesh.faceOwner()[faceI];
+            celli = mesh.faceOwner()[facei];
         }
         else
         {
-            cellI = mesh.faceNeighbour()[faceI];
+            celli = mesh.faceNeighbour()[facei];
         }
 
         // Find starting point and edge on face.
-        const labelList& fEdges = mesh.faceEdges()[faceI];
+        const labelList& fEdges = mesh.faceEdges()[facei];
 
         forAll(fEdges, fEdgeI)
         {
             label edgeI = fEdges[fEdgeI];
 
-            // Get the face 'perpendicular' to faceI on region.
-            label otherFaceI = otherFace(mesh, cellI, faceI, edgeI);
+            // Get the face 'perpendicular' to facei on region.
+            label otherFacei = otherFace(mesh, celli, facei, edgeI);
 
             // Edge
             const edge& e = mesh.edges()[edgeI];
@@ -365,14 +365,14 @@ void Foam::regionSide::walkAllPointConnectedFaces
 
                 visitedPoint.insert(e.start());
 
-                //edgeI = otherEdge(mesh, otherFaceI, edgeI, e.start());
+                //edgeI = otherEdge(mesh, otherFacei, edgeI, e.start());
 
                 walkPointConnectedFaces
                 (
                     mesh,
                     regionEdges,
                     e.start(),
-                    otherFaceI,
+                    otherFacei,
                     edgeI,
                     visitedEdges
                 );
@@ -384,14 +384,14 @@ void Foam::regionSide::walkAllPointConnectedFaces
 
                 visitedPoint.insert(e.end());
 
-                //edgeI = otherEdge(mesh, otherFaceI, edgeI, e.end());
+                //edgeI = otherEdge(mesh, otherFacei, edgeI, e.end());
 
                 walkPointConnectedFaces
                 (
                     mesh,
                     regionEdges,
                     e.end(),
-                    otherFaceI,
+                    otherFacei,
                     edgeI,
                     visitedEdges
                 );
@@ -409,8 +409,8 @@ Foam::regionSide::regionSide
     const primitiveMesh& mesh,
     const labelHashSet& region,         // faces of region
     const labelHashSet& fenceEdges,     // outside edges
-    const label startCellI,
-    const label startFaceI
+    const label startCelli,
+    const label startFacei
 )
 :
     sideOwner_(region.size()),
@@ -427,8 +427,8 @@ Foam::regionSide::regionSide
         mesh,
         region,
         fenceEdges,
-        startCellI,
-        startFaceI,
+        startCelli,
+        startFacei,
         visitedFace
     );
 

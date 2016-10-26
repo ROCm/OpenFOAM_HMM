@@ -27,7 +27,7 @@ Class
 Description
     A time-varying form of a mapped fixed value boundary condition.
 
-See Also
+See also
     Foam::timeVaryingMappedFixedValueFvPatchField
 
 SourceFiles
@@ -63,7 +63,7 @@ class timeVaryingMappedFixedValuePointPatchField
         word fieldTableName_;
 
         //- If true adjust the mapped field to maintain average value
-        bool setAverage_;
+        Switch setAverage_;
 
         //- Fraction of perturbation (fraction of bounding box) to add
         scalar perturb_;

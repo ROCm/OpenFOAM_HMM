@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -52,7 +52,7 @@ void Foam::codedFixedValuePointPatchField<Type>::setFieldTemplates
 {
     word fieldType(pTraits<Type>::typeName);
 
-    // template type for pointPatchField
+    // Template type for pointPatchField
     dynCode.setFilterVariable("TemplateType", fieldType);
 
     // Name for pointPatchField - eg, ScalarField, VectorField, ...
@@ -107,26 +107,26 @@ void Foam::codedFixedValuePointPatchField<Type>::prepare
     const dynamicCodeContext& context
 ) const
 {
-    // take no chances - typeName must be identical to redirectType_
-    dynCode.setFilterVariable("typeName", redirectType_);
+    // Take no chances - typeName must be identical to name_
+    dynCode.setFilterVariable("typeName", name_);
 
-    // set TemplateType and FieldType filter variables
+    // Set TemplateType and FieldType filter variables
     // (for pointPatchField)
     setFieldTemplates(dynCode);
 
-    // compile filtered C template
+    // Compile filtered C template
     dynCode.addCompileFile(codeTemplateC);
 
-    // copy filtered H template
+    // Copy filtered H template
     dynCode.addCopyFile(codeTemplateH);
 
 
-    // debugging: make BC verbose
-    //  dynCode.setFilterVariable("verbose", "true");
-    //  Info<<"compile " << redirectType_ << " sha1: "
-    //      << context.sha1() << endl;
+    // Debugging: make BC verbose
+    //   dynCode.setFilterVariable("verbose", "true");
+    //   Info<<"compile " << name_ << " sha1: "
+    //       << context.sha1() << endl;
 
-    // define Make/options
+    // Define Make/options
     dynCode.setMakeOptions
         (
             "EXE_INC = -g \\\n"
@@ -144,12 +144,12 @@ template<class Type>
 const Foam::dictionary& Foam::codedFixedValuePointPatchField<Type>::codeDict()
 const
 {
-    // use system/codeDict or in-line
+    // Use system/codeDict or in-line
     return
     (
         dict_.found("code")
       ? dict_
-      : this->dict().subDict(redirectType_)
+      : this->dict().subDict(name_)
     );
 }
 
@@ -161,14 +161,14 @@ Foam::string Foam::codedFixedValuePointPatchField<Type>::description() const
         "patch "
       + this->patch().name()
       + " on field "
-      + this->dimensionedInternalField().name();
+      + this->internalField().name();
 }
 
 
 template<class Type>
 void Foam::codedFixedValuePointPatchField<Type>::clearRedirect() const
 {
-    // remove instantiation of pointPatchField provided by library
+    // Remove instantiation of pointPatchField provided by library
     redirectPatchFieldPtr_.clear();
 }
 
@@ -200,7 +200,7 @@ Foam::codedFixedValuePointPatchField<Type>::codedFixedValuePointPatchField
     fixedValuePointPatchField<Type>(ptf, p, iF, mapper),
     codedBase(),
     dict_(ptf.dict_),
-    redirectType_(ptf.redirectType_),
+    name_(ptf.name_),
     redirectPatchFieldPtr_()
 {}
 
@@ -217,10 +217,15 @@ Foam::codedFixedValuePointPatchField<Type>::codedFixedValuePointPatchField
     fixedValuePointPatchField<Type>(p, iF, dict, valueRequired),
     codedBase(),
     dict_(dict),
-    redirectType_(dict.lookup("redirectType")),
+    name_
+    (
+        dict.found("redirectType")
+      ? dict.lookup("redirectType")
+      : dict.lookup("name")
+    ),
     redirectPatchFieldPtr_()
 {
-    updateLibrary(redirectType_);
+    updateLibrary(name_);
 }
 
 
@@ -233,7 +238,7 @@ Foam::codedFixedValuePointPatchField<Type>::codedFixedValuePointPatchField
     fixedValuePointPatchField<Type>(ptf),
     codedBase(),
     dict_(ptf.dict_),
-    redirectType_(ptf.redirectType_),
+    name_(ptf.name_),
     redirectPatchFieldPtr_()
 {}
 
@@ -248,7 +253,7 @@ Foam::codedFixedValuePointPatchField<Type>::codedFixedValuePointPatchField
     fixedValuePointPatchField<Type>(ptf, iF),
     codedBase(),
     dict_(ptf.dict_),
-    redirectType_(ptf.redirectType_),
+    name_(ptf.name_),
     redirectPatchFieldPtr_()
 {}
 
@@ -265,7 +270,7 @@ Foam::codedFixedValuePointPatchField<Type>::redirectPatchField() const
         // Make sure to construct the patchfield with up-to-date value
 
         OStringStream os;
-        os.writeKeyword("type") << redirectType_ << token::END_STATEMENT
+        os.writeKeyword("type") << name_ << token::END_STATEMENT
             << nl;
         static_cast<const Field<Type>&>(*this).writeEntry("value", os);
         IStringStream is(os.str());
@@ -276,7 +281,7 @@ Foam::codedFixedValuePointPatchField<Type>::redirectPatchField() const
             pointPatchField<Type>::New
             (
                 this->patch(),
-                this->dimensionedInternalField(),
+                this->internalField(),
                 dict
             ).ptr()
         );
@@ -294,7 +299,7 @@ void Foam::codedFixedValuePointPatchField<Type>::updateCoeffs()
     }
 
     // Make sure library containing user-defined pointPatchField is up-to-date
-    updateLibrary(redirectType_);
+    updateLibrary(name_);
 
     const pointPatchField<Type>& fvp = redirectPatchField();
 
@@ -314,7 +319,7 @@ void Foam::codedFixedValuePointPatchField<Type>::evaluate
 )
 {
     // Make sure library containing user-defined pointPatchField is up-to-date
-    updateLibrary(redirectType_);
+    updateLibrary(name_);
 
     const pointPatchField<Type>& fvp = redirectPatchField();
 
@@ -328,7 +333,7 @@ template<class Type>
 void Foam::codedFixedValuePointPatchField<Type>::write(Ostream& os) const
 {
     fixedValuePointPatchField<Type>::write(os);
-    os.writeKeyword("redirectType") << redirectType_
+    os.writeKeyword("name") << name_
         << token::END_STATEMENT << nl;
 
     codedBase::writeCodeDict(os, dict_);

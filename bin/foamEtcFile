@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -39,8 +39,8 @@
 #     \endcode
 #
 # Note
-#     This script must exist in <foamInstall>/OpenFOAM-<VERSION>/bin/
-#     or <foamInstall>/openfoam<VERSION>/bin/ (for the debian version)
+#     This script must exist in $FOAM_INST_DIR/OpenFOAM-<VERSION>/bin/
+#     or $FOAM_INST_DIR/openfoam<VERSION>/bin/ (for the debian version)
 #
 #-------------------------------------------------------------------------------
 usage() {
@@ -86,7 +86,7 @@ binDir="${0%/*}"
 # the project dir:
 projectDir="${binDir%/bin}"
 
-# the prefix dir (same as foamInstall):
+# the prefix dir (same as $FOAM_INST_DIR):
 prefixDir="${projectDir%/*}"
 
 # the name used for the project directory
@@ -103,7 +103,7 @@ OpenFOAM-*)         # standard naming convention OpenFOAM-<VERSION>
     version="${projectDirName##OpenFOAM-}"
     ;;
 
-openfoam[0-9]* | openfoamdev)     # debian naming convention 'openfoam<VERSION>'
+openfoam[0-9]* | openfoam-dev)     # debian naming convention 'openfoam<VERSION>'
     versionNum="${projectDirName##openfoam}"
     case "$versionNum" in
     ??)         # convert 2 digit version number to decimal delineated

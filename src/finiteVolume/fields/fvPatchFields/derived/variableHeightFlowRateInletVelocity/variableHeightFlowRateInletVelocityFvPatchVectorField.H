@@ -34,8 +34,7 @@ Description
     The flow rate is made proportional to the phase fraction alpha at each
     face of the patch and alpha is ensured to be bound between 0 and 1.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         flowRate     | volumetric flow rate [m3/s] | yes |
@@ -44,7 +43,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            variableHeightFlowRateInletVelocity;
         flowRate        0.2;
@@ -61,7 +60,7 @@ Note
     - strange behaviour with potentialFoam since the momentum equation is
       not solved
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchField
     Foam::Function1Types
 

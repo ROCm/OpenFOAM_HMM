@@ -34,8 +34,7 @@ Description
     The sample mode is set by the underlying mapping engine, provided by the
     mappedPatchBase class.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         fieldName    | name of field to be mapped | no       | this field name
@@ -46,7 +45,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            mapped;
         fieldName       T;
@@ -69,7 +68,7 @@ Note
     It is not possible to sample internal faces since volume fields are not
     defined on faces.
 
-SeeAlso
+See also
     Foam::mappedPatchBase
     Foam::interpolation
     Foam::fixedValueFvPatchField

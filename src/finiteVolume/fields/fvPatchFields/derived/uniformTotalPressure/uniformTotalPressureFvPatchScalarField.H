@@ -29,42 +29,32 @@ Group
 
 Description
     This boundary condition provides a time-varying form of the uniform total
-    pressure boundary condition.
+    pressure boundary condition Foam::totalPressureFvPatchField.
 
-    \heading Patch usage
-
+Usage
     \table
-        Property     | Description             | Required    | Default value
-        U            | velocity field name     | no          | U
-        phi          | flux field name         | no          | phi
-        rho          | density field name      | no          | none
-        psi          | compressibility field name | no       | none
-        gamma        | ratio of specific heats (Cp/Cv) | yes |
-        pressure     | total pressure as a function of time | yes |
+        Property     | Description                | Required    | Default value
+        U            | Velocity field name        | no          | U
+        phi          | Flux field name            | no          | phi
+        rho          | Density field name         | no          | rho
+        psi          | Compressibility field name | no          | none
+        gamma        | (Cp/Cv)                    | no          | 1
+        p0           | Total pressure as a function of time | yes |
     \endtable
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            uniformTotalPressure;
-        U               U;
-        phi             phi;
-        rho             rho;
-        psi             psi;
-        gamma           1.4;
-        pressure        uniform 1e5;
+        p0              uniform 1e5;
     }
     \endverbatim
 
-    The \c pressure entry is specified as a Function1 type, able to describe
+    The \c p0 entry is specified as a Function1 type, able to describe
     time varying functions.
 
-Note
-    The default boundary behaviour is for subsonic, incompressible flow.
-
-
-SeeAlso
+See also
     Foam::Function1Types
     Foam::uniformFixedValueFvPatchField
     Foam::totalPressureFvPatchField
@@ -112,7 +102,7 @@ class uniformTotalPressureFvPatchScalarField
         scalar gamma_;
 
         //- Table of time vs total pressure, including the bounding treatment
-        autoPtr<Function1<scalar>> pressure_;
+        autoPtr<Function1<scalar>> p0_;
 
 
 public:

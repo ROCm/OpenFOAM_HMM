@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,13 +32,14 @@ License
 
 namespace Foam
 {
-defineTypeName(refinementHistoryConstraint);
-addToRunTimeSelectionTable
-(
-    decompositionConstraint,
-    refinementHistoryConstraint,
-    dictionary
-);
+    defineTypeName(refinementHistoryConstraint);
+
+    addToRunTimeSelectionTable
+    (
+        decompositionConstraint,
+        refinementHistoryConstraint,
+        dictionary
+    );
 }
 
 
@@ -84,7 +85,7 @@ void Foam::refinementHistoryConstraint::add
 ) const
 {
     autoPtr<const refinementHistory> storagePtr;
-    refinementHistory const* refPtr = NULL;
+    refinementHistory const* refPtr = nullptr;
 
     if (mesh.foundObject<refinementHistory>("refinementHistory"))
     {
@@ -151,7 +152,7 @@ void Foam::refinementHistoryConstraint::apply
 ) const
 {
     autoPtr<const refinementHistory> storagePtr;
-    refinementHistory const* refPtr = NULL;
+    refinementHistory const* refPtr = nullptr;
 
     if (mesh.foundObject<refinementHistory>("refinementHistory"))
     {

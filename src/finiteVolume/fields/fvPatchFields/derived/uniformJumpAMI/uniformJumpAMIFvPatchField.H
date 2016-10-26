@@ -32,8 +32,7 @@ Description
     condition as a base.  The jump is specified as a time-varying uniform
     value across the patch.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         patchType    | underlying patch type should be \c cyclicAMI| yes |
@@ -42,7 +41,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            uniformJumpAMI;
         patchType       cyclicAMI;
@@ -59,7 +58,7 @@ Note
 
     The underlying \c patchType should be set to \c cyclic
 
-SeeAlso
+See also
     Foam::jumpCyclicAMIFvPatchField
     Foam::Function1Types
 

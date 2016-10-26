@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -151,7 +151,7 @@ void Foam::porousBafflePressureFvPatchField::updateCoeffs()
         IOobject::groupName
         (
             turbulenceModel::propertiesName,
-            dimensionedInternalField().group()
+            internalField().group()
         )
     );
 
@@ -166,7 +166,7 @@ void Foam::porousBafflePressureFvPatchField::updateCoeffs()
           + I*0.5*magUn
          )*magUn*length_;
 
-    if (dimensionedInternalField().dimensions() == dimPressure)
+    if (internalField().dimensions() == dimPressure)
     {
         jump_ *= patch().lookupPatchField<volScalarField, scalar>(rhoName_);
     }

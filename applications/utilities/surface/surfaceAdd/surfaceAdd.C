@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -136,12 +136,12 @@ int main(int argc, char *argv[])
         Info<< "Additional Points:" << extraPoints.size() << endl;
 
         vectorField pointsAll(points1);
-        label pointI = pointsAll.size();
+        label pointi = pointsAll.size();
         pointsAll.setSize(pointsAll.size() + extraPoints.size());
 
         forAll(extraPoints, i)
         {
-            pointsAll[pointI++] = extraPoints[i];
+            pointsAll[pointi++] = extraPoints[i];
         }
 
         combinedSurf = triSurface(surface1, surface1.patches(), pointsAll);
@@ -179,9 +179,9 @@ int main(int argc, char *argv[])
         label trianglei = 0;
 
         // Copy triangles1 into trianglesAll
-        forAll(surface1, faceI)
+        forAll(surface1, facei)
         {
-            facesAll[trianglei++] = surface1[faceI];
+            facesAll[trianglei++] = surface1[facei];
         }
         label nRegions1 = surface1.patches().size();
 
@@ -196,9 +196,9 @@ int main(int argc, char *argv[])
         }
 
         // Add (renumbered) surface2 triangles
-        forAll(surface2, faceI)
+        forAll(surface2, facei)
         {
-            const labelledTri& tri = surface2[faceI];
+            const labelledTri& tri = surface2[facei];
 
             labelledTri& destTri = facesAll[trianglei++];
             destTri[0] = tri[0] + points1.size();
@@ -223,13 +223,13 @@ int main(int argc, char *argv[])
             // Overwrite
             newPatches.setSize(max(nRegions1, nRegions2));
 
-            forAll(surface1.patches(), patchI)
+            forAll(surface1.patches(), patchi)
             {
-                newPatches[patchI] = surface1.patches()[patchI];
+                newPatches[patchi] = surface1.patches()[patchi];
             }
-            forAll(surface2.patches(), patchI)
+            forAll(surface2.patches(), patchi)
             {
-                newPatches[patchI] = surface2.patches()[patchI];
+                newPatches[patchi] = surface2.patches()[patchi];
             }
         }
         else
@@ -247,24 +247,24 @@ int main(int argc, char *argv[])
 
             newPatches.setSize(nRegions1 + nRegions2);
 
-            label newPatchI = 0;
+            label newPatchi = 0;
 
-            forAll(surface1.patches(), patchI)
+            forAll(surface1.patches(), patchi)
             {
-                newPatches[newPatchI++] = surface1.patches()[patchI];
+                newPatches[newPatchi++] = surface1.patches()[patchi];
             }
 
-            forAll(surface2.patches(), patchI)
+            forAll(surface2.patches(), patchi)
             {
-                newPatches[newPatchI++] = surface2.patches()[patchI];
+                newPatches[newPatchi++] = surface2.patches()[patchi];
             }
         }
 
 
         Info<< "New patches:" << nl;
-        forAll(newPatches, patchI)
+        forAll(newPatches, patchi)
         {
-            Info<< "    " << patchI << '\t' << newPatches[patchI].name() << nl;
+            Info<< "    " << patchi << '\t' << newPatches[patchi].name() << nl;
         }
         Info<< endl;
 

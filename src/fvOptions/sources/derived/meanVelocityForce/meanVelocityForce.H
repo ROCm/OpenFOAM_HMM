@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,13 +33,13 @@ Description
 
     Note: Currently only handles kinematic pressure (incompressible solvers).
 
-    \heading Source usage
+Usage
     Example usage:
     \verbatim
     meanVelocityForceCoeffs
     {
         selectionMode   all;                    // Apply force to all cells
-        fieldNames      (U);                    // Name of velocity field
+        fields          (U);                    // Name of velocity field
         Ubar            (10.0 0 0);             // Desired mean velocity
         relaxation      0.2;                    // Optional relaxation factor
     }
@@ -151,7 +151,7 @@ public:
             virtual void addSup
             (
                 fvMatrix<vector>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
             //- Add explicit contribution to compressible momentum equation
@@ -159,14 +159,14 @@ public:
             (
                 const volScalarField& rho,
                 fvMatrix<vector>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
             //- Set 1/A coefficient
             virtual void constrain
             (
                 fvMatrix<vector>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
 

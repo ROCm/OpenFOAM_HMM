@@ -30,11 +30,10 @@ Group
 Description
     This boundary condition enables processor communication across patches.
 
-    \heading Patch usage
-
+Usage
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            processor;
     }

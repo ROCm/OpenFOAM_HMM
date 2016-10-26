@@ -66,6 +66,30 @@ tmp<volScalarField> kOmegaSSTDES<BasicTurbulenceModel>::dTilda
 }
 
 
+template<class BasicTurbulenceModel>
+tmp<volScalarField::Internal> kOmegaSSTDES<BasicTurbulenceModel>::epsilonByk
+(
+    const volScalarField& F1,
+    const volTensorField& gradU
+) const
+{
+    volScalarField CDES(this->CDES(F1));
+    return sqrt(this->k_())/dTilda(mag(gradU), CDES)()();
+}
+
+
+template<class BasicTurbulenceModel>
+tmp<volScalarField::Internal> kOmegaSSTDES<BasicTurbulenceModel>::GbyNu
+(
+    const volScalarField::Internal& GbyNu0,
+    const volScalarField::Internal& F2,
+    const volScalarField::Internal& S2
+) const
+{
+    return GbyNu0; // Unlimited
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
@@ -147,96 +171,6 @@ bool kOmegaSSTDES<BasicTurbulenceModel>::read()
     {
         return false;
     }
-}
-
-
-template<class BasicTurbulenceModel>
-void kOmegaSSTDES<BasicTurbulenceModel>::correct()
-{
-    if (!this->turbulence_)
-    {
-        return;
-    }
-
-    // Local references
-    const alphaField& alpha = this->alpha_;
-    const rhoField& rho = this->rho_;
-    const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
-    const volVectorField& U = this->U_;
-    volScalarField& k = this->k_;
-    volScalarField& omega = this->omega_;
-    volScalarField& nut = this->nut_;
-
-    DESModel<BasicTurbulenceModel>::correct();
-
-    volScalarField divU(fvc::div(fvc::absolute(this->phi(), U)));
-
-    tmp<volTensorField> tgradU = fvc::grad(U);
-    volScalarField magGradU(mag(tgradU()));
-    volScalarField S2(2*magSqr(symm(tgradU())));
-    volScalarField GbyNu((tgradU() && dev(twoSymm(tgradU()))));
-    volScalarField G(this->GName(), nut*GbyNu);
-    tgradU.clear();
-
-    // Update omega and G at the wall
-    omega.boundaryField().updateCoeffs();
-
-    volScalarField CDkOmega
-    (
-        (2*this->alphaOmega2_)*(fvc::grad(k) & fvc::grad(omega))/omega
-    );
-
-    volScalarField F1(this->F1(CDkOmega));
-
-    {
-        volScalarField gamma(this->gamma(F1));
-        volScalarField beta(this->beta(F1));
-
-        // Turbulent frequency equation
-        tmp<fvScalarMatrix> omegaEqn
-        (
-            fvm::ddt(alpha, rho, omega)
-          + fvm::div(alphaRhoPhi, omega)
-          - fvm::laplacian(alpha*rho*this->DomegaEff(F1), omega)
-         ==
-            alpha*rho*gamma*GbyNu // Using unlimited GybNu
-          - fvm::SuSp((2.0/3.0)*alpha*rho*gamma*divU, omega)
-          - fvm::Sp(alpha*rho*beta*omega, omega)
-          - fvm::SuSp(alpha*rho*(F1 - scalar(1))*CDkOmega/omega, omega)
-          + this->omegaSource()
-        );
-
-        omegaEqn.ref().relax();
-
-        omegaEqn.ref().boundaryManipulate(omega.boundaryField());
-
-        solve(omegaEqn);
-        bound(omega, this->omegaMin_);
-    }
-
-    {
-        volScalarField CDES(this->CDES(F1));
-        volScalarField dTilda(this->dTilda(magGradU, CDES));
-
-        // Turbulent kinetic energy equation
-        tmp<fvScalarMatrix> kEqn
-        (
-            fvm::ddt(alpha, rho, k)
-          + fvm::div(alphaRhoPhi, k)
-          - fvm::laplacian(alpha*rho*this->DkEff(F1), k)
-         ==
-            min(alpha*rho*G, (this->c1_*this->betaStar_)*alpha*rho*k*omega)
-          - fvm::SuSp((2.0/3.0)*alpha*rho*divU, k)
-          - fvm::Sp(alpha*rho*sqrt(k)/dTilda, k)  // modified for DES
-          + this->kSource()
-        );
-
-        kEqn.ref().relax();
-        solve(kEqn);
-        bound(k, this->kMin_);
-    }
-
-    this->correctNut(S2);
 }
 
 

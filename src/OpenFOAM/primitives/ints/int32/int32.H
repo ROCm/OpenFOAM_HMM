@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,18 +36,13 @@ SourceFiles
 #ifndef int32_H
 #define int32_H
 
-#define __STDC_LIMIT_MACROS
-#include <stdint.h>
+#include <cstdint>
 #include <climits>
 #include <cstdlib>
 
 #include "word.H"
 #include "pTraits.H"
 #include "direction.H"
-
-#ifndef UINT32_MIN
-#define UINT32_MIN 0
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,7 +55,22 @@ class Ostream;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Return a word representation of an int32
-word name(const int32_t);
+inline word name(const int32_t val)
+{
+    // no stripping required
+    return word(std::to_string(val), false);
+}
+
+
+//- Return a word representation of an int32, using printf-style formatter.
+//  The representation is not checked for valid word characters.
+word name(const char* fmt, const int32_t);
+
+
+//- Return a word representation of an int32, using printf-style formatter.
+//  The representation is not checked for valid word characters.
+word name(const std::string&, const int32_t);
+
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
