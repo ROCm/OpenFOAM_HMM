@@ -48,13 +48,12 @@ int main(int argc, char *argv[])
 
     {
         dictionary dict;
-        dict.add("aaOPENMPIcc", 1);
+        dict.add(word("aa" + getEnv("WM_MPLIB") + "cc"), 16);
 
         string s("DDD${aa${WM_MPLIB}cc}EEE");
         stringOps::inplaceExpand(s, dict, true, false);
         Info<< "variable expansion:" << s << endl;
     }
-
 
     Info<< nl
         << "FOAM_CASE=" << getEnv("FOAM_CASE") << nl
@@ -65,7 +64,9 @@ int main(int argc, char *argv[])
     {
         {
             dictionary dict1(IFstream("testDict")());
-            Info<< "dict1: " << dict1 << nl
+            dict1.writeEntry("dict1", Info);
+
+            Info<< nl
                 << "toc: " << dict1.toc() << nl
                 << "keys: " << dict1.keys() << nl
                 << "patterns: " << dict1.keys(true) << endl;
@@ -89,14 +90,14 @@ int main(int argc, char *argv[])
                 << "no = " << dict4.name() << " " << dict4.toc() << endl;
         }
 
-
         IOobject::writeDivider(Info);
 
         {
             dictionary dict(IFstream("testDictRegex")());
             dict.add(keyType("fooba[rz]", true), "anything");
 
-            Info<< "dict:" << dict << nl
+            dict.writeEntry("testDictRegex", Info);
+            Info<< nl
                 << "toc: " << dict.toc() << nl
                 << "keys: " << dict.keys() << nl
                 << "patterns: " << dict.keys(true) << endl;

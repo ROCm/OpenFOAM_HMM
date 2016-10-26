@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,41 +49,41 @@ using namespace Foam;
 // Adds empty patch if not yet there. Returns patchID.
 label addPatch(polyMesh& mesh, const word& patchName)
 {
-    label patchI = mesh.boundaryMesh().findPatchID(patchName);
+    label patchi = mesh.boundaryMesh().findPatchID(patchName);
 
-    if (patchI == -1)
+    if (patchi == -1)
     {
         const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
         List<polyPatch*> newPatches(patches.size() + 1);
 
-        patchI = 0;
+        patchi = 0;
 
         // Copy all old patches
         forAll(patches, i)
         {
             const polyPatch& pp = patches[i];
 
-            newPatches[patchI] =
+            newPatches[patchi] =
                 pp.clone
                 (
                     patches,
-                    patchI,
+                    patchi,
                     pp.size(),
                     pp.start()
                 ).ptr();
 
-            patchI++;
+            patchi++;
         }
 
         // Add zero-sized patch
-        newPatches[patchI] =
+        newPatches[patchi] =
             new polyPatch
             (
                 patchName,
                 0,
                 mesh.nFaces(),
-                patchI,
+                patchi,
                 patches,
                 polyPatch::typeName
             );
@@ -91,14 +91,14 @@ label addPatch(polyMesh& mesh, const word& patchName)
         mesh.removeBoundary();
         mesh.addPatches(newPatches);
 
-        Pout<< "Created patch " << patchName << " at " << patchI << endl;
+        Pout<< "Created patch " << patchName << " at " << patchi << endl;
     }
     else
     {
-        Pout<< "Reusing patch " << patchName << " at " << patchI << endl;
+        Pout<< "Reusing patch " << patchName << " at " << patchi << endl;
     }
 
-    return patchI;
+    return patchi;
 }
 
 
@@ -109,26 +109,26 @@ bool repatchFace
     const boundaryMesh& bMesh,
     const labelList& nearest,
     const labelList& surfToMeshPatch,
-    const label faceI,
+    const label facei,
     polyTopoChange& meshMod
 )
 {
     bool changed = false;
 
-    label bFaceI = faceI - mesh.nInternalFaces();
+    label bFacei = facei - mesh.nInternalFaces();
 
-    if (nearest[bFaceI] != -1)
+    if (nearest[bFacei] != -1)
     {
         // Use boundary mesh one.
-        label bMeshPatchID = bMesh.whichPatch(nearest[bFaceI]);
+        label bMeshPatchID = bMesh.whichPatch(nearest[bFacei]);
 
         label patchID = surfToMeshPatch[bMeshPatchID];
 
-        if (patchID != mesh.boundaryMesh().whichPatch(faceI))
+        if (patchID != mesh.boundaryMesh().whichPatch(facei))
         {
-            label own = mesh.faceOwner()[faceI];
+            label own = mesh.faceOwner()[facei];
 
-            label zoneID = mesh.faceZones().whichZone(faceI);
+            label zoneID = mesh.faceZones().whichZone(facei);
 
             bool zoneFlip = false;
 
@@ -136,15 +136,15 @@ bool repatchFace
             {
                 const faceZone& fZone = mesh.faceZones()[zoneID];
 
-                zoneFlip = fZone.flipMap()[fZone.whichFace(faceI)];
+                zoneFlip = fZone.flipMap()[fZone.whichFace(facei)];
             }
 
             meshMod.setAction
             (
                 polyModifyFace
                 (
-                    mesh.faces()[faceI],// modified face
-                    faceI,              // label of face being modified
+                    mesh.faces()[facei],// modified face
+                    facei,              // label of face being modified
                     own,                // owner
                     -1,                 // neighbour
                     false,              // face flip
@@ -225,10 +225,10 @@ int main(int argc, char *argv[])
     Info<< "Before patching:" << nl
         << "    patch\tsize" << endl;
 
-    forAll(mesh.boundaryMesh(), patchI)
+    forAll(mesh.boundaryMesh(), patchi)
     {
-        Info<< "    " << mesh.boundaryMesh()[patchI].name() << '\t'
-            << mesh.boundaryMesh()[patchI].size() << nl;
+        Info<< "    " << mesh.boundaryMesh()[patchi].name() << '\t'
+            << mesh.boundaryMesh()[patchi].size() << nl;
     }
     Info<< endl;
 
@@ -258,11 +258,11 @@ int main(int argc, char *argv[])
         // Dump unmatched faces to faceSet for debugging.
         faceSet unmatchedFaces(mesh, "unmatchedFaces", nearest.size()/100);
 
-        forAll(nearest, bFaceI)
+        forAll(nearest, bFacei)
         {
-            if (nearest[bFaceI] == -1)
+            if (nearest[bFacei] == -1)
             {
-                unmatchedFaces.insert(mesh.nInternalFaces() + bFaceI);
+                unmatchedFaces.insert(mesh.nInternalFaces() + bFacei);
             }
         }
 
@@ -286,9 +286,9 @@ int main(int argc, char *argv[])
 
         forAllConstIter(faceSet, faceLabels, iter)
         {
-            label faceI = iter.key();
+            label facei = iter.key();
 
-            if (repatchFace(mesh, bMesh, nearest, patchMap, faceI, meshMod))
+            if (repatchFace(mesh, bMesh, nearest, patchMap, facei, meshMod))
             {
                 nChanged++;
             }
@@ -296,11 +296,11 @@ int main(int argc, char *argv[])
     }
     else
     {
-        forAll(nearest, bFaceI)
+        forAll(nearest, bFacei)
         {
-            label faceI = mesh.nInternalFaces() + bFaceI;
+            label facei = mesh.nInternalFaces() + bFacei;
 
-            if (repatchFace(mesh, bMesh, nearest, patchMap, faceI, meshMod))
+            if (repatchFace(mesh, bMesh, nearest, patchMap, facei, meshMod))
             {
                 nChanged++;
             }
@@ -316,10 +316,10 @@ int main(int argc, char *argv[])
         Info<< "After patching:" << nl
             << "    patch\tsize" << endl;
 
-        forAll(mesh.boundaryMesh(), patchI)
+        forAll(mesh.boundaryMesh(), patchi)
         {
-            Info<< "    " << mesh.boundaryMesh()[patchI].name() << '\t'
-                << mesh.boundaryMesh()[patchI].size() << endl;
+            Info<< "    " << mesh.boundaryMesh()[patchi].name() << '\t'
+                << mesh.boundaryMesh()[patchi].size() << endl;
         }
         Info<< endl;
 

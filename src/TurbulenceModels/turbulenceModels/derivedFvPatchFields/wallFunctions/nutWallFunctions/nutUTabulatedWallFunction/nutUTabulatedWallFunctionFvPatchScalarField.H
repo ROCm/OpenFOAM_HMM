@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,8 +33,7 @@ Description
     of U+ as a function of near-wall Reynolds number.  The table should be
     located in the $FOAM_CASE/constant directory.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         uPlusTable   | U+ as a function of Re table name | yes |
@@ -42,7 +41,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            nutTabulatedWallFunction;
         uPlusTable      myUPlusTable;
@@ -53,7 +52,7 @@ Note
     The tables are not registered since the same table object may be used for
     more than one patch.
 
-SeeAlso
+See also
     Foam::nutWallFunctionFvPatchScalarField
 
 SourceFiles

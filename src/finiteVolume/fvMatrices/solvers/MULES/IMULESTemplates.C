@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -41,7 +41,7 @@ namespace MULES
     inline tmp<surfaceScalarField> interpolate(const RhoType& rho)
     {
         NotImplemented;
-        return tmp<surfaceScalarField>(NULL);
+        return tmp<surfaceScalarField>(nullptr);
     }
 
     template<>
@@ -191,8 +191,8 @@ void Foam::MULES::implicitSolve
             MULEScontrols
         );
 
-        scalar maxPsiM1 = gMax(psi.internalField()) - 1.0;
-        scalar minPsi = gMin(psi.internalField());
+        scalar maxPsiM1 = gMax(psi.primitiveField()) - 1.0;
+        scalar minPsi = gMin(psi.primitiveField());
 
         scalar unboundedness = max(max(maxPsiM1, 0.0), -min(minPsi, 0.0));
 

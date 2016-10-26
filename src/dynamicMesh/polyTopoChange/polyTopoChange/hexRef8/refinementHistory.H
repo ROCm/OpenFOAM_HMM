@@ -71,7 +71,6 @@ SourceFiles
 #ifndef refinementHistory_H
 #define refinementHistory_H
 
-#include "UPtrList.H"
 #include "DynamicList.H"
 #include "labelList.H"
 #include "FixedList.H"
@@ -89,14 +88,22 @@ namespace Foam
 class mapPolyMesh;
 class mapDistributePolyMesh;
 
+
+// Forward declaration of friend functions and operators
+
+class refinementHistory;
+
+Istream& operator>>(Istream&, refinementHistory&);
+Ostream& operator<<(Ostream&, const refinementHistory&);
+
+
 /*---------------------------------------------------------------------------*\
-                           Class refinementHistory Declaration
+                      Class refinementHistory Declaration
 \*---------------------------------------------------------------------------*/
 
 class refinementHistory
 :
-    public regIOobject,
-    public refCount
+    public regIOobject
 {
 public:
 
@@ -290,14 +297,14 @@ public:
         }
 
         //- Get parent of cell
-        label parentIndex(const label cellI) const
+        label parentIndex(const label celli) const
         {
-            label index = visibleCells_[cellI];
+            label index = visibleCells_[celli];
 
             if (index < 0)
             {
                 FatalErrorInFunction
-                    << "Cell " << cellI << " is not visible"
+                    << "Cell " << celli << " is not visible"
                     << abort(FatalError);
             }
             return splitCells_[index].parent_;
@@ -306,14 +313,14 @@ public:
         //- Store splitting of cell into 8
         void storeSplit
         (
-            const label cellI,
+            const label celli,
             const labelList& addedCells
         );
 
         //- Store combining 8 cells into master
         void combineCells
         (
-            const label masterCellI,
+            const label masterCelli,
             const labelList& combinedCells
         );
 
@@ -402,6 +409,10 @@ public:
 
         friend Ostream& operator<<(Ostream&, const refinementHistory&);
 };
+
+
+Istream& operator>>(Istream&, refinementHistory::splitCell8&);
+Ostream& operator<<(Ostream&, const refinementHistory::splitCell8&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

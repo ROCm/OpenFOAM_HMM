@@ -79,11 +79,9 @@ Foam::Ostream& Foam::Ostream::writeKeyword(const keyType& kw)
 }
 
 
-Foam::Ostream& Foam::Ostream::beginBlock(const word& keyword)
+Foam::Ostream& Foam::Ostream::beginBlock(const keyType& keyword)
 {
-    indent();
-    write(keyword);
-    endl();
+    indent(); write(keyword); write('\n');
     beginBlock();
 
     return *this;
@@ -92,8 +90,7 @@ Foam::Ostream& Foam::Ostream::beginBlock(const word& keyword)
 
 Foam::Ostream& Foam::Ostream::beginBlock()
 {
-    indent();
-    write(char(token::BEGIN_BLOCK));
+    indent(); write(char(token::BEGIN_BLOCK)); write('\n');
     incrIndent();
 
     return *this;
@@ -103,8 +100,15 @@ Foam::Ostream& Foam::Ostream::beginBlock()
 Foam::Ostream& Foam::Ostream::endBlock()
 {
     decrIndent();
-    indent();
-    write(char(token::END_BLOCK));
+    indent(); write(char(token::END_BLOCK)); write('\n');
+
+    return *this;
+}
+
+
+Foam::Ostream& Foam::Ostream::endEntry()
+{
+    write(char(token::END_STATEMENT)); write('\n');
 
     return *this;
 }

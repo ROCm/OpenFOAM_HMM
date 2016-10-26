@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,13 +34,14 @@ namespace Foam
 {
 namespace decompositionConstraints
 {
-defineTypeName(singleProcessorFaceSetsConstraint);
-addToRunTimeSelectionTable
-(
-    decompositionConstraint,
-    singleProcessorFaceSetsConstraint,
-    dictionary
-);
+    defineTypeName(singleProcessorFaceSetsConstraint);
+
+    addToRunTimeSelectionTable
+    (
+        decompositionConstraint,
+        singleProcessorFaceSetsConstraint,
+        dictionary
+    );
 }
 }
 
@@ -196,11 +197,11 @@ void Foam::decompositionConstraints::singleProcessorFaceSetsConstraint::add
 
     label nUnblocked = 0;
 
-    forAll(procFacePoint, pointI)
+    forAll(procFacePoint, pointi)
     {
-        if (procFacePoint[pointI])
+        if (procFacePoint[pointi])
         {
-            const labelList& pFaces = mesh.pointFaces()[pointI];
+            const labelList& pFaces = mesh.pointFaces()[pointi];
             forAll(pFaces, i)
             {
                 if (blockedFace[pFaces[i]])
@@ -277,11 +278,11 @@ void Foam::decompositionConstraints::singleProcessorFaceSetsConstraint::apply
         syncTools::syncPointList(mesh, procFacePoint, orEqOp<bool>(), false);
 
         // 2. Unblock all faces on procFacePoint
-        forAll(procFacePoint, pointI)
+        forAll(procFacePoint, pointi)
         {
-            if (procFacePoint[pointI])
+            if (procFacePoint[pointi])
             {
-                const labelList& pFaces = mesh.pointFaces()[pointI];
+                const labelList& pFaces = mesh.pointFaces()[pointi];
                 forAll(pFaces, i)
                 {
                     label faceI = pFaces[i];

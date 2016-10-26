@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,12 +39,12 @@ namespace Foam
 void Foam::extrude2DMesh::check2D() const
 {
     const faceList& faces = mesh_.faces();
-    forAll(faces, faceI)
+    forAll(faces, facei)
     {
-        if (faces[faceI].size() != 2)
+        if (faces[facei].size() != 2)
         {
             FatalErrorInFunction
-                << "Face " << faceI << " size " << faces[faceI].size()
+                << "Face " << facei << " size " << faces[facei].size()
                 << " is not of size 2: mesh is not a valid two-dimensional "
                 << "mesh" << exit(FatalError);
         }
@@ -92,8 +92,8 @@ Foam::extrude2DMesh::extrude2DMesh
     model_(model),
     modelType_(dict.lookup("extrudeModel")),
     patchType_(dict.lookup("patchType")),
-    frontPatchI_(-1),
-    backPatchI_(-1)
+    frontPatchi_(-1),
+    backPatchi_(-1)
 {
     check2D();
 }
@@ -111,17 +111,17 @@ void Foam::extrude2DMesh::addFrontBackPatches()
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    frontPatchI_ = patches.findPatchID("front");
-    backPatchI_ = patches.findPatchID("back");
+    frontPatchi_ = patches.findPatchID("front");
+    backPatchi_ = patches.findPatchID("back");
 
     // Add patch.
     List<polyPatch*> newPatches(patches.size() + 2);
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        const polyPatch& pp = patches[patchI];
+        const polyPatch& pp = patches[patchi];
 
-        newPatches[patchI] =
+        newPatches[patchi] =
             pp.clone
             (
                 patches,
@@ -131,59 +131,59 @@ void Foam::extrude2DMesh::addFrontBackPatches()
             ).ptr();
     }
 
-    if (frontPatchI_ == -1)
+    if (frontPatchi_ == -1)
     {
-        frontPatchI_ = patches.size();
+        frontPatchi_ = patches.size();
 
-        newPatches[frontPatchI_] =
+        newPatches[frontPatchi_] =
             polyPatch::New
             (
                 patchType_,
                 "front",
                 0,
                 mesh_.nFaces(),
-                frontPatchI_,
+                frontPatchi_,
                 patches
             ).ptr();
 
-//        newPatches[frontPatchI_] = polyPatch::New
+//        newPatches[frontPatchi_] = polyPatch::New
 //        (
 //            "front",
 //            patchDict_,
-//            frontPatchI_,
+//            frontPatchi_,
 //            patches
 //        ).ptr();
 
-        Info<< "Adding patch " << newPatches[frontPatchI_]->name()
-            << " at index " << frontPatchI_
+        Info<< "Adding patch " << newPatches[frontPatchi_]->name()
+            << " at index " << frontPatchi_
             << " for front faces." << nl << endl;
     }
 
-    if (backPatchI_ == -1)
+    if (backPatchi_ == -1)
     {
-        backPatchI_ = patches.size() + 1;
+        backPatchi_ = patches.size() + 1;
 
-        newPatches[backPatchI_] =
+        newPatches[backPatchi_] =
             polyPatch::New
             (
                 patchType_,
                 "back",
                 0,
                 mesh_.nFaces(),
-                backPatchI_,
+                backPatchi_,
                 patches
             ).ptr();
 
-//        newPatches[frontPatchI_] = polyPatch::New
+//        newPatches[frontPatchi_] = polyPatch::New
 //        (
 //            "back",
 //            patchDict_,
-//            backPatchI_,
+//            backPatchi_,
 //            patches
 //        ).ptr();
 
-        Info<< "Adding patch " << newPatches[backPatchI_]->name()
-            << " at index " << backPatchI_
+        Info<< "Adding patch " << newPatches[backPatchi_]->name()
+            << " at index " << backPatchi_
             << " for back faces." << nl << endl;
     }
 
@@ -205,15 +205,15 @@ void Foam::extrude2DMesh::setRefinement
     {
         label offset = layer * mesh_.nCells();
 
-        forAll(mesh_.cells(), cellI)
+        forAll(mesh_.cells(), celli)
         {
             meshMod.addCell
             (
                 -1,     //masterPointID,
                 -1,     //masterEdgeID,
                 -1,     //masterFaceID,
-                cellI + offset,  //masterCellID,
-                mesh_.cellZones().whichZone(cellI)  //zoneID
+                celli + offset,  //masterCellID,
+                mesh_.cellZones().whichZone(celli)  //zoneID
             );
         }
     }
@@ -226,13 +226,13 @@ void Foam::extrude2DMesh::setRefinement
     {
         label offset = layer * points.size();
 
-        forAll(points, pointI)
+        forAll(points, pointi)
         {
             // Don't need the surface normal for either linearDirection or
             // wedge. Will need to add to be able to use others.
             point newPoint = model_
             (
-                points[pointI],
+                points[pointi],
                 vector(),
                 layer
             );
@@ -240,7 +240,7 @@ void Foam::extrude2DMesh::setRefinement
             meshMod.addPoint
             (
                 newPoint,
-                pointI + offset,
+                pointi + offset,
                 -1,             // zoneID
                 true            // inCell
             );
@@ -262,18 +262,18 @@ void Foam::extrude2DMesh::setRefinement
         label currentLayerOffset = layer * mesh_.nPoints();
         label nextLayerOffset = currentLayerOffset + mesh_.nPoints();
 
-        for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
+        for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
         {
-            label zoneID = mesh_.faceZones().whichZone(faceI);
+            label zoneID = mesh_.faceZones().whichZone(facei);
             bool zoneFlip = false;
             if (zoneID != -1)
             {
                 const faceZone& fZone = mesh_.faceZones()[zoneID];
-                zoneFlip = fZone.flipMap()[fZone.whichFace(faceI)];
+                zoneFlip = fZone.flipMap()[fZone.whichFace(facei)];
             }
 
             face newFace(4);
-            const face& f = faces[faceI];
+            const face& f = faces[facei];
             newFace[0] = f[0] + currentLayerOffset;
             newFace[1] = f[1] + currentLayerOffset;
             newFace[2] = f[1] + nextLayerOffset;
@@ -281,15 +281,15 @@ void Foam::extrude2DMesh::setRefinement
 
 //{
 //    vector n = newFace.normal(pointField(meshMod.points()));
-//    label own = mesh_.faceOwner()[faceI];
+//    label own = mesh_.faceOwner()[facei];
 //    const labelList& ownPoints = mesh_.cellPoints()[own];
 //    point ownCc = sum(pointField(mesh_.points(), ownPoints))/ownPoints.size();
-//    label nei = mesh_.faceNeighbour()[faceI];
+//    label nei = mesh_.faceNeighbour()[facei];
 //    const labelList& neiPoints = mesh_.cellPoints()[nei];
 //    point neiCc = sum(pointField(mesh_.points(), neiPoints))/neiPoints.size();
 //    vector d = neiCc - ownCc;
 
-//    Pout<< "face:" << faceI << " at:" << f.centre(mesh_.points()) << endl
+//    Pout<< "face:" << facei << " at:" << f.centre(mesh_.points()) << endl
 //        << "    own:" << own << " at:" << ownCc << endl
 //        << "    nei:" << nei << " at:" << neiCc << endl
 //        << "    sign:" << (n & d) << endl
@@ -301,8 +301,8 @@ void Foam::extrude2DMesh::setRefinement
             meshMod.addFace
             (
                 newFace,
-                mesh_.faceOwner()[faceI] + offset,       // own
-                mesh_.faceNeighbour()[faceI] + offset,   // nei
+                mesh_.faceOwner()[facei] + offset,       // own
+                mesh_.faceNeighbour()[facei] + offset,   // nei
                 -1,                             // masterPointID
                 -1,                             // masterEdgeID
                 nFaces++,    // masterFaceID
@@ -315,36 +315,36 @@ void Foam::extrude2DMesh::setRefinement
             if (debug)
             {
                 Info<< newFace << " "
-                    << mesh_.faceOwner()[faceI] + offset << " "
-                    << mesh_.faceNeighbour()[faceI] + offset << " "
+                    << mesh_.faceOwner()[facei] + offset << " "
+                    << mesh_.faceNeighbour()[facei] + offset << " "
                     << nFaces - 1
                     << endl;
             }
         }
     }
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
         for (label layer=0; layer < nLayers; layer++)
         {
             label currentLayerOffset = layer*mesh_.nPoints();
             label nextLayerOffset = currentLayerOffset + mesh_.nPoints();
 
-            label startFaceI = patches[patchI].start();
-            label endFaceI = startFaceI + patches[patchI].size();
+            label startFacei = patches[patchi].start();
+            label endFacei = startFacei + patches[patchi].size();
 
-            for (label faceI = startFaceI; faceI < endFaceI; faceI++)
+            for (label facei = startFacei; facei < endFacei; facei++)
             {
-                label zoneID = mesh_.faceZones().whichZone(faceI);
+                label zoneID = mesh_.faceZones().whichZone(facei);
                 bool zoneFlip = false;
                 if (zoneID != -1)
                 {
                     const faceZone& fZone = mesh_.faceZones()[zoneID];
-                    zoneFlip = fZone.flipMap()[fZone.whichFace(faceI)];
+                    zoneFlip = fZone.flipMap()[fZone.whichFace(facei)];
                 }
 
                 face newFace(4);
-                const face& f = faces[faceI];
+                const face& f = faces[facei];
                 newFace[0] = f[0] + currentLayerOffset;
                 newFace[1] = f[1] + currentLayerOffset;
                 newFace[2] = f[1] + nextLayerOffset;
@@ -355,13 +355,13 @@ void Foam::extrude2DMesh::setRefinement
                 meshMod.addFace
                 (
                     newFace,
-                    mesh_.faceOwner()[faceI] + offset,       // own
+                    mesh_.faceOwner()[facei] + offset,       // own
                     -1,                                      // nei
                     -1,                                      // masterPointID
                     -1,                                      // masterEdgeID
                     nFaces++,                                // masterFaceID
                     false,                                   // flipFaceFlux
-                    patchI,                                  // patchID
+                    patchi,                                  // patchID
                     zoneID,                                  // zoneID
                     zoneFlip                                 // zoneFlip
                 );
@@ -369,7 +369,7 @@ void Foam::extrude2DMesh::setRefinement
                 if (debug)
                 {
                     Info<< newFace << " "
-                        << mesh_.faceOwner()[faceI] + offset << " "
+                        << mesh_.faceOwner()[facei] + offset << " "
                         << nFaces - 1
                         << endl;
                 }
@@ -379,52 +379,52 @@ void Foam::extrude2DMesh::setRefinement
 
     // Add extra internal faces that need special treatment for owners and
     // neighbours.
-    forAll(mesh_.cells(), cellI)
+    forAll(mesh_.cells(), celli)
     {
-        const cell& cFaces = mesh_.cells()[cellI];
+        const cell& cFaces = mesh_.cells()[celli];
 
         face frontFace(cFaces.size());
 
         // Make a loop out of faces.
-        label nextFaceI = cFaces[0];
+        label nextFacei = cFaces[0];
 
-        const face& f = faces[nextFaceI];
+        const face& f = faces[nextFacei];
 
-        label nextPointI;
-        if (mesh_.faceOwner()[nextFaceI] == cellI)
+        label nextPointi;
+        if (mesh_.faceOwner()[nextFacei] == celli)
         {
             frontFace[0] = f[0];
-            nextPointI = f[1];
+            nextPointi = f[1];
         }
         else
         {
             frontFace[0] = f[1];
-            nextPointI = f[0];
+            nextPointi = f[0];
         }
 
 
         for (label i = 1; i < frontFace.size(); i++)
         {
-            frontFace[i] = nextPointI;
+            frontFace[i] = nextPointi;
 
-            // Find face containing pointI
-            forAll(cFaces, cFaceI)
+            // Find face containing pointi
+            forAll(cFaces, cFacei)
             {
-                label faceI = cFaces[cFaceI];
-                if (faceI != nextFaceI)
+                label facei = cFaces[cFacei];
+                if (facei != nextFacei)
                 {
-                    const face& f = faces[faceI];
+                    const face& f = faces[facei];
 
-                    if (f[0] == nextPointI)
+                    if (f[0] == nextPointi)
                     {
-                        nextPointI = f[1];
-                        nextFaceI = faceI;
+                        nextPointi = f[1];
+                        nextFacei = facei;
                         break;
                     }
-                    else if (f[1] == nextPointI)
+                    else if (f[1] == nextPointi)
                     {
-                        nextPointI = f[0];
-                        nextFaceI = faceI;
+                        nextPointi = f[0];
+                        nextFacei = facei;
                         break;
                     }
                 }
@@ -444,13 +444,13 @@ void Foam::extrude2DMesh::setRefinement
             label nei = -1;
             if (layer != nLayers - 1)
             {
-                nei = cellI + offset + mesh_.nCells();
+                nei = celli + offset + mesh_.nCells();
             }
 
             meshMod.addFace
             (
                 frontFace,
-                cellI + offset,                 // own
+                celli + offset,                 // own
                 nei,                            // nei
                 -1,                             // masterPointID
                 -1,                             // masterEdgeID
@@ -464,7 +464,7 @@ void Foam::extrude2DMesh::setRefinement
             if (debug)
             {
                 Info<< frontFace << " "
-                    << cellI + offset << " "
+                    << celli + offset << " "
                     << nei << " "
                     << nFaces - 1
                     << endl;
@@ -475,52 +475,52 @@ void Foam::extrude2DMesh::setRefinement
     // Generate front and back faces
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    forAll(mesh_.cells(), cellI)
+    forAll(mesh_.cells(), celli)
     {
-        const cell& cFaces = mesh_.cells()[cellI];
+        const cell& cFaces = mesh_.cells()[celli];
 
         face frontFace(cFaces.size());
 
         // Make a loop out of faces.
-        label nextFaceI = cFaces[0];
+        label nextFacei = cFaces[0];
 
-        const face& f = faces[nextFaceI];
+        const face& f = faces[nextFacei];
 
-        label nextPointI;
-        if (mesh_.faceOwner()[nextFaceI] == cellI)
+        label nextPointi;
+        if (mesh_.faceOwner()[nextFacei] == celli)
         {
             frontFace[0] = f[0];
-            nextPointI = f[1];
+            nextPointi = f[1];
         }
         else
         {
             frontFace[0] = f[1];
-            nextPointI = f[0];
+            nextPointi = f[0];
         }
 
 
         for (label i = 1; i < frontFace.size(); i++)
         {
-            frontFace[i] = nextPointI;
+            frontFace[i] = nextPointi;
 
-            // Find face containing pointI
-            forAll(cFaces, cFaceI)
+            // Find face containing pointi
+            forAll(cFaces, cFacei)
             {
-                label faceI = cFaces[cFaceI];
-                if (faceI != nextFaceI)
+                label facei = cFaces[cFacei];
+                if (facei != nextFacei)
                 {
-                    const face& f = faces[faceI];
+                    const face& f = faces[facei];
 
-                    if (f[0] == nextPointI)
+                    if (f[0] == nextPointi)
                     {
-                        nextPointI = f[1];
-                        nextFaceI = faceI;
+                        nextPointi = f[1];
+                        nextFacei = facei;
                         break;
                     }
-                    else if (f[1] == nextPointI)
+                    else if (f[1] == nextPointi)
                     {
-                        nextPointI = f[0];
-                        nextFaceI = faceI;
+                        nextPointi = f[0];
+                        nextFacei = facei;
                         break;
                     }
                 }
@@ -531,13 +531,13 @@ void Foam::extrude2DMesh::setRefinement
         meshMod.addFace
         (
             frontFace.reverseFace(),
-            cellI,                          // own
+            celli,                          // own
             -1,                             // nei
             -1,                             // masterPointID
             -1,                             // masterEdgeID
             nFaces++,                       // masterFaceID
             false,                          // flipFaceFlux
-            backPatchI_,                    // patchID
+            backPatchi_,                    // patchID
             -1,                             // zoneID
             false                           // zoneFlip
         );
@@ -545,7 +545,7 @@ void Foam::extrude2DMesh::setRefinement
         if (debug)
         {
             Info<< nl<<frontFace.reverseFace() << " "
-                << cellI << " "
+                << celli << " "
                 << nFaces - 1
                 << endl;
         }
@@ -561,13 +561,13 @@ void Foam::extrude2DMesh::setRefinement
         meshMod.addFace
         (
             frontFace,
-            cellI + offset,                 // own
+            celli + offset,                 // own
             -1,                             // nei
             -1,                             // masterPointID
             -1,                             // masterEdgeID
             nFaces++,                       // masterFaceID
             false,                          // flipFaceFlux
-            frontPatchI_,                   // patchID
+            frontPatchi_,                   // patchID
             -1,                             // zoneID
             false                           // zoneFlip
         );
@@ -575,7 +575,7 @@ void Foam::extrude2DMesh::setRefinement
         if (debug)
         {
             Info<< frontFace << " "
-                << cellI + offset << " "
+                << celli + offset << " "
                 << nFaces - 1
                 << endl;
         }

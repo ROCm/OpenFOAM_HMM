@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,8 +33,7 @@ Description
     condition varies from the standard wall function by taking into account any
     mass released from the film model.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         B            | model coefficient       | no          | 5.5
@@ -46,7 +45,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            alphatFilmWallFunction;
         B               5.5;
@@ -58,7 +57,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchField
 
 SourceFiles

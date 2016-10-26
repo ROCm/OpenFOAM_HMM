@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -281,6 +281,19 @@ extern messageStream Info;
 //  for FUNCTION_NAME in file __FILE__ at line __LINE__
 #define InfoInFunction InfoIn(FUNCTION_NAME)
 
+//- Report an information message using Foam::Pout
+//  for functionName in file __FILE__ at line __LINE__
+#define PoutIn(functionName)                                                   \
+    ::Foam::Pout((functionName), __FILE__, __LINE__)
+
+//- Report an information message using Foam::Pout
+//  for FUNCTION_NAME in file __FILE__ at line __LINE__
+#define PoutInFunction PoutIn(FUNCTION_NAME)
+
+//- Report write to Foam::Info if the local log switch is true
+#define Log                                                                    \
+    if (log) Info
+
 
 //- Report an IO information message using Foam::Info
 //  for functionName in file __FILE__ at line __LINE__
@@ -305,12 +318,27 @@ extern messageStream Info;
 #define DebugInFunction                                                        \
     if (debug) InfoInFunction
 
+//- Report an information message using Foam::Pout
+//  if the local debug switch is true
+#define DebugPout                                                              \
+    if (debug) Pout
+
+//- Report an information message using Foam::Pout
+//  for FUNCTION_NAME in file __FILE__ at line __LINE__
+//  if the local debug switch is true
+#define DebugPoutInFunction                                                        \
+    if (debug) PoutInFunction
 
 //- Report a variable name and value
 //  using Foam::Pout in file __FILE__ at line __LINE__
 #define DebugVar(var)                                                          \
-    ::Foam::Pout<< "["<< __FILE__ << ":" << __LINE__ << "] "                   \
-    << #var " " << var << ::Foam::endl
+{                                                                              \
+    ::Foam::string oldPrefix(::Foam::Pout.prefix());                           \
+    ::Foam::Pout<< "["<< __FILE__ << ":" << __LINE__ << "] ";                  \
+    ::Foam::Pout.prefix() = oldPrefix + #var " ";                              \
+    ::Foam::Pout<< var << ::Foam::endl;                                        \
+    ::Foam::Pout.prefix() = oldPrefix;                                         \
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,13 +70,11 @@ pressureDirectedInletVelocityFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchVectorField(p, iF),
+    fixedValueFvPatchVectorField(p, iF, dict),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     inletDir_("inletDirection", dict, p.size())
-{
-    fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
-}
+{}
 
 
 Foam::pressureDirectedInletVelocityFvPatchVectorField::
@@ -165,8 +163,8 @@ void Foam::pressureDirectedInletVelocityFvPatchVectorField::updateCoeffs()
         FatalErrorInFunction
             << "dimensions of phi are not correct"
             << "\n    on patch " << this->patch().name()
-            << " of field " << this->dimensionedInternalField().name()
-            << " in file " << this->dimensionedInternalField().objectPath()
+            << " of field " << this->internalField().name()
+            << " in file " << this->internalField().objectPath()
             << exit(FatalError);
     }
 

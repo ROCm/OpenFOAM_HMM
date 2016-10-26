@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,8 +45,7 @@ Description
         g       | acceleration due to gravity [m/s^2]
     \endtable
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         rho          | rho field name          | no          | rho
@@ -55,7 +54,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            prghPressure;
         rho             rho;
@@ -64,7 +63,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchScalarField
 
 SourceFiles

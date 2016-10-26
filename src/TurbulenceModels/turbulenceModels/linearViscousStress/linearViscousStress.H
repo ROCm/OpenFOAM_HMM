@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class linearViscousStress Declaration
+                     Class linearViscousStress Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>

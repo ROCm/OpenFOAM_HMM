@@ -29,15 +29,14 @@ Description
 
     Motion specified as pointVectorFields.
 
-    \heading Patch usage
-
+Usage
     Example:
     \verbatim
     walls
     {
         type                uniformInterpolatedDisplacement;
         value               uniform (0 0 0);
-        fieldName           wantedDisplacement;
+        field               wantedDisplacement;
         interpolationScheme linear;
     }
     \endverbatim

@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -25,34 +25,50 @@
 #     config.csh/paraview
 #
 # Description
-#     Setup file for paraview
+#     Setup file for paraview (and cmake)
 #     Sourced from OpenFOAM-<VERSION>/etc/cshrc or from foamPV alias
 #
+#     If using system-wide installation for cmake, use the following settings:
+#
+#         cmake_version=cmake-system
+#
 # Note
-#     The env. variables 'ParaView_DIR' and 'ParaView_MAJOR'
-#     are required for building plugins
+#     The following env. variables are required for building plugins:
+#         ParaView_DIR
+#         ParaView_INCLUDE_DIR
+#         PV_PLUGIN_PATH
+#
+#     If using a central installation not located under ThirdParty, you will
+#     need to set some environment values directly. For example,
+#
+#         setenv ParaView_DIR /opt/paraview/paraview-5.0.1
+#         setenv ParaView_INCLUDE_DIR $ParaView_DIR/include/paraview-5.0
+#         setenv PV_PLUGIN_PATH $FOAM_LIBBIN/paraview-5.0
+#
+#         setenv PATH ${ParaView_DIR}/bin:${PATH}
+#         setenv LD_LIBRARY_PATH ${ParaView_DIR}/lib/paraview-5.0:${LD_LIBRARY_PATH}
+#         unsetenv ParaView_VERSION     # avoid using ThirdParty settings
+#
 #------------------------------------------------------------------------------
 
-# clean the PATH
-set cleaned=`$WM_PROJECT_DIR/bin/foamCleanPath "$PATH" "$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/cmake- $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-"`
+setenv ParaView_VERSION 5.0.1
+setenv ParaView_MAJOR   detect          # Automatically determine major version
+
+set cmake_version=cmake-system
+
+#------------------------------------------------------------------------------
+
+# Clean the PATH
+set cleaned=`$WM_PROJECT_DIR/bin/foamCleanPath "$PATH" "$ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/cmake- $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-"`
 if ( $status == 0 ) setenv PATH $cleaned
 
-# determine the cmake to be used
+# Environment for ThirdParty cmake
 unsetenv CMAKE_HOME
-foreach cmake ( cmake-3.2.1 cmake-2.8.12.1 cmake-2.8.8 cmake-2.8.4 cmake-2.8.3 cmake-2.8.1 )
-    set cmake=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cmake
-    if ( -r $cmake ) then
-        setenv CMAKE_HOME $cmake
-        setenv PATH ${CMAKE_HOME}/bin:${PATH}
-        break
-    endif
-end
-
-#- ParaView version, automatically determine major version:
-#setenv ParaView_VERSION 4.4.0
-setenv ParaView_VERSION 5.0.1
-setenv ParaView_MAJOR detect
-
+set cmake=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cmake_version
+if ( -r $cmake ) then
+    setenv CMAKE_HOME $cmake
+    setenv PATH ${CMAKE_HOME}/bin:${PATH}
+endif
 
 # Evaluate command-line parameters for ParaView
 while ( $#argv > 0 )
@@ -66,62 +82,64 @@ while ( $#argv > 0 )
 end
 
 
-# set MAJOR version to correspond to VERSION
-# ParaView_MAJOR is "<digits>.<digits>" from ParaView_VERSION
-switch ("$ParaView_VERSION")
-case "$ParaView_MAJOR".*:
-    # version and major appear to correspond
-    breaksw
+# Require that ParaView_VERSION has not been unset.
+# Avoids conflict with an alternative (non-ThirdParty) installation.
+if ( $?ParaView_VERSION ) then
 
-case [0-9]*:
-    # extract major from the version
-    setenv ParaView_MAJOR `echo ${ParaView_VERSION} | \
-        sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/'`
-    breaksw
-endsw
+    # Set MAJOR version to correspond to VERSION
+    # ParaView_MAJOR is "<digits>.<digits>" from ParaView_VERSION
+    switch ("$ParaView_VERSION")
+    case "$ParaView_MAJOR".*:
+        # Version and major appear to correspond
+        breaksw
 
+    case [0-9]*:
+        # Extract major from the version
+        setenv ParaView_MAJOR `echo ${ParaView_VERSION} | \
+            sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/'`
+        breaksw
+    endsw
 
-set paraviewInstDir=$WM_THIRD_PARTY_DIR/ParaView-${ParaView_VERSION}
-set paraviewArchName=ParaView-$ParaView_VERSION
+    set pvName=ParaView-$ParaView_VERSION
+    set pvMajor=paraview-$ParaView_MAJOR
+    set pvSrcDir=$WM_THIRD_PARTY_DIR/$pvName
 
-setenv ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$paraviewArchName
+    setenv ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$pvName
 
-# set paths if binaries or source are present
-if ( -r $ParaView_DIR || -r $paraviewInstDir ) then
-    setenv ParaView_INCLUDE_DIR $ParaView_DIR/include/paraview-${ParaView_MAJOR}
-    if (! -r $ParaView_INCLUDE_DIR && -r $ParaView_DIR/include/paraview-3.0) then
-        setenv ParaView_INCLUDE_DIR $ParaView_DIR/include/paraview-3.0
-    endif
+    # Set paths if binaries or source are present
+    if ( -r $ParaView_DIR || -r $pvSrcDir ) then
+        set pvLibDir=${ParaView_DIR}/lib/$pvMajor
+        set pvPython=$ParaView_DIR/Utilities/VTKPythonWrapping
 
-    set ParaView_LIB_DIR=${ParaView_DIR}/lib/paraview-${ParaView_MAJOR}
+        setenv ParaView_INCLUDE_DIR $ParaView_DIR/include/$pvMajor
+        setenv PV_PLUGIN_PATH $FOAM_LIBBIN/$pvMajor
+        setenv PATH ${ParaView_DIR}/bin:${PATH}
+        setenv LD_LIBRARY_PATH "${pvLibDir}:${LD_LIBRARY_PATH}"
 
-    setenv PATH ${ParaView_DIR}/bin:${PATH}
-    setenv LD_LIBRARY_PATH "${ParaView_LIB_DIR}:${LD_LIBRARY_PATH}"
-    setenv PV_PLUGIN_PATH $FOAM_LIBBIN/paraview-${ParaView_MAJOR}
-
-    if ($?FOAM_VERBOSE && $?prompt) then
-        echo "Using paraview"
-        echo "    ParaView_DIR         : $ParaView_DIR"
-        echo "    ParaView_LIB_DIR     : $ParaView_LIB_DIR"
-        echo "    ParaView_INCLUDE_DIR : $ParaView_INCLUDE_DIR"
-        echo "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH"
-    endif
-
-
-    # add in python libraries if required
-    set paraviewPython=$ParaView_DIR/Utilities/VTKPythonWrapping
-    if ( -r $paraviewPython ) then
-        if ($?PYTHONPATH) then
-            setenv PYTHONPATH ${PYTHONPATH}:${paraviewPython}:$ParaView_LIB_DIR
-        else
-            setenv PYTHONPATH ${paraviewPython}:$ParaView_LIB_DIR
+        # Add in python libraries if required
+        if ( -r $pvPython ) then
+            if ($?PYTHONPATH) then
+                setenv PYTHONPATH ${PYTHONPATH}:${pvPython}:$pvLibDir
+            else
+                setenv PYTHONPATH ${pvPython}:$pvLibDir
+            endif
         endif
+
+        if ($?FOAM_VERBOSE && $?prompt) then
+            echo "Using paraview"
+            echo "    ParaView_DIR         : $ParaView_DIR"
+            echo "    ParaView_INCLUDE_DIR : $ParaView_INCLUDE_DIR"
+            echo "    library dir          : $pvLibDir"
+            echo "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH"
+        endif
+    else
+        unsetenv ParaView_INCLUDE_DIR PV_PLUGIN_PATH
+        setenv ParaView_DIR   # Defined but empty (used by foamPV alias)
     endif
-else
-    unsetenv PV_PLUGIN_PATH
+
 endif
 
-
-unset cleaned cmake paraviewInstDir paraviewPython
+unset cleaned cmake cmake_version pvName pvMajor pvSrcDir pvLibDir pvPython
+unsetenv ParaView_VERSION ParaView_MAJOR
 
 #------------------------------------------------------------------------------

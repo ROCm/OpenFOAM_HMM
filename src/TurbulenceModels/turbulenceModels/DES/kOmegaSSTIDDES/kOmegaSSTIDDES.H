@@ -85,7 +85,7 @@ class kOmegaSSTIDDES
 
         // Disallow default bitwise copy construct and assignment
         kOmegaSSTIDDES(const kOmegaSSTIDDES&);
-        kOmegaSSTIDDES& operator=(const kOmegaSSTIDDES&);
+        void operator=(const kOmegaSSTIDDES&);
 
 
 protected:
@@ -160,7 +160,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "kOmegaSSTIDDES.C"
+    #include "kOmegaSSTIDDES.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

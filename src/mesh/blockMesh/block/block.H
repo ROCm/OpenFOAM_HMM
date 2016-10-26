@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -67,32 +67,27 @@ class block
 {
     // Private data
 
-        //- List of vertices
-        mutable pointField vertices_;
-
-        //- List of cells
-        mutable labelListList cells_;
+        //- List of points
+        pointField points_;
 
         //- Boundary patches
-        mutable labelListListList boundaryPatches_;
+        FixedList<List<FixedList<label, 4>>, 6> boundaryPatches_;
 
 
     // Private Member Functions
 
         //- Creates vertices for cells filling the block
-        void createPoints() const;
-
-        //- Creates cells for filling the block
-        void createCells() const;
+        void createPoints();
 
         //- Creates boundary patch faces for the block
-        void createBoundary() const;
+        void createBoundary();
 
         //- Disallow default bitwise copy construct
         block(const block&);
 
         //- Disallow default bitwise assignment
         void operator=(const block&);
+
 
 public:
 
@@ -101,9 +96,10 @@ public:
         //- Construct from components with Istream
         block
         (
-            const pointField& blockPointField,
-            const curvedEdgeList&,
-            Istream&
+            const pointField& vertices,
+            const blockEdgeList& edges,
+            const blockFaceList& faces,
+            Istream& is
         );
 
         //- Construct from a block definition
@@ -113,38 +109,51 @@ public:
         autoPtr<block> clone() const
         {
             NotImplemented;
-            return autoPtr<block>(NULL);
+            return autoPtr<block>(nullptr);
         }
 
+        //- Class used for the read-construction of
+        //  PtrLists of blocks
+        class iNew
+        {
+            const pointField& points_;
+            const blockEdgeList& edges_;
+            const blockFaceList& faces_;
 
-    //- Destructor
-    ~block();
+        public:
+
+            iNew
+            (
+                const pointField& points,
+                const blockEdgeList& edges,
+                const blockFaceList& faces
+            )
+            :
+                points_(points),
+                edges_(edges),
+                faces_(faces)
+            {}
+
+            autoPtr<block> operator()(Istream& is) const
+            {
+                return autoPtr<block>(new block(points_, edges_, faces_, is));
+            }
+        };
 
 
     // Member Functions
 
         // Access
 
-            //- Return the block definition
-            inline const blockDescriptor& blockDef() const;
-
-            //- Vertex label offset for a particular i,j,k position
-            inline label vtxLabel(label i, label j, label k) const;
-
             //- Return the points for filling the block
-            const pointField& points() const;
+            inline const pointField& points() const;
 
             //- Return the cells for filling the block
-            const labelListList& cells() const;
+            List<FixedList<label, 8>> cells() const;
 
             //- Return the boundary patch faces for the block
-            const labelListListList& boundaryPatches() const;
-
-
-        // Edit
-
-            //- Clear geometry (internal points, cells, boundaryPatches)
-            void clearGeom();
+            inline const FixedList<List<FixedList<label, 4>>, 6>&
+                boundaryPatches() const;
 
 
     // Ostream Operator

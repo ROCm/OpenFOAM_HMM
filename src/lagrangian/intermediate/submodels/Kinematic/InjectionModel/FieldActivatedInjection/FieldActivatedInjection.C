@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -200,14 +200,14 @@ void Foam::FieldActivatedInjection<CloudType>::setPositionAndCell
     const scalar,
     vector& position,
     label& cellOwner,
-    label& tetFaceI,
-    label& tetPtI
+    label& tetFacei,
+    label& tetPti
 )
 {
     position = positions_[parcelI];
     cellOwner = injectorCells_[parcelI];
-    tetFaceI = injectorTetFaces_[parcelI];
-    tetPtI = injectorTetPts_[parcelI];
+    tetFacei = injectorTetFaces_[parcelI];
+    tetPti = injectorTetPts_[parcelI];
 }
 
 
@@ -241,12 +241,12 @@ bool Foam::FieldActivatedInjection<CloudType>::validInjection
     const label parcelI
 )
 {
-    const label cellI = injectorCells_[parcelI];
+    const label celli = injectorCells_[parcelI];
 
     if
     (
         nParcelsInjected_[parcelI] < nParcelsPerInjector_
-     && factor_*referenceField_[cellI] > thresholdField_[cellI]
+     && factor_*referenceField_[celli] > thresholdField_[celli]
     )
     {
         nParcelsInjected_[parcelI]++;

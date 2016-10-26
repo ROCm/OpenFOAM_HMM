@@ -68,10 +68,9 @@ Note
       of shared edges.  Doing full analysis of how many patches use the edge
       would be too complicated
 
-SeeAlso
+See also
     mapDistribute
     globalIndexAndTransform
-
 
 SourceFiles
     globalMeshData.C

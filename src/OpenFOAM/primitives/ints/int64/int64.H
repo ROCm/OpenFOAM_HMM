@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,7 @@ SourceFiles
 #ifndef int64_H
 #define int64_H
 
-#define __STDC_LIMIT_MACROS
-#include <stdint.h>
+#include <cstdint>
 #include <climits>
 #include <cstdlib>
 
@@ -45,9 +44,6 @@ SourceFiles
 #include "pTraits.H"
 #include "direction.H"
 
-#ifndef UINT64_MIN
-#define UINT64_MIN 0
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,7 +56,22 @@ class Ostream;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Return a word representation of an int64
-word name(const int64_t);
+inline word name(const int64_t val)
+{
+    // no stripping required
+    return word(std::to_string(val), false);
+}
+
+
+//- Return a word representation of an int64, using printf-style formatter.
+//  The representation is not checked for valid word characters.
+word name(const char* fmt, const int64_t);
+
+
+//- Return a word representation of an int64, using printf-style formatter.
+//  The representation is not checked for valid word characters.
+word name(const std::string& fmt, const int64_t);
+
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 

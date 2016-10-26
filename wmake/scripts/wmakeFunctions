@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -23,7 +23,7 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     wdepFunctions
+#     wmakeFunctions
 #
 # Description
 #     Functions to check wmake environment and find .dep and .o files
@@ -35,7 +35,7 @@
 
 checkEnv()
 {
-    for envar in WM_OPTIONS WM_DIR WM_PROJECT_DIR
+    for envar in WM_OPTIONS WM_LINK_LANGUAGE WM_DIR WM_PROJECT_DIR
     do
         eval test "\$$envar" || {
             echo "$Script error: environment variable \$$envar not set" 1>&2
@@ -61,9 +61,11 @@ expandPath()
 
 findTarget()
 {
+    expandPath $WM_PROJECT_DIR
+    wmpdir=$exPath
     expandPath $1
 
-    if [ "$exPath" = "$WM_PROJECT_DIR" \
+    if [ "$exPath" = "$wmpdir" \
                    -o "$exPath" = "$HOME" \
                    -o "$exPath" = "/" \
        ]
@@ -77,14 +79,42 @@ findTarget()
     fi
 }
 
+cdSource()
+{
+    if [ ! -d $MakeDir ]
+    then
+        echo "$Script: '$MakeDir' directory does not exist in $PWD" 1>&2
+        echo "    Searching up directories tree for Make directory"
+
+        findTarget .
+        targetType=
+
+        if [ "$dir" ]
+        then
+            cd $dir 2>/dev/null || {
+                echo "$Script error: could not change to directory '$dir'" 1>&2
+                exit 1
+            }
+        fi
+    fi
+
+
+    [ -r $MakeDir/files ] || {
+        echo "$Script error: file '$MakeDir/files' does not exist in $PWD" 1>&2
+        exit 1
+    }
+}
+
 findObjectDir()
 {
+    expandPath $WM_PROJECT_DIR
+    wmpdir=$exPath
     expandPath $1
 
-    if echo $exPath | grep "$WM_PROJECT_DIR" > /dev/null
+    if echo $exPath | grep "$wmpdir" > /dev/null
     then
         platformPath=$WM_PROJECT_DIR/platforms/${WM_OPTIONS}
-        objectsDir=$platformPath$(echo $exPath | sed s%$WM_PROJECT_DIR%% )
+        objectsDir=$platformPath$(echo $exPath | sed s%$wmpdir%% )
     else
         path=$exPath
         dir=.
@@ -98,10 +128,25 @@ findObjectDir()
     fi
 }
 
-depToSource()
-{
-    sourceFile=$(echo ${depFile%.dep} | \
-        sed -e s%platforms/${WM_OPTIONS}/%% -e s%Make/${WM_OPTIONS}/%% )
-}
+if [ -n "$BASH_VERSION" ]; then
+    depToSource()
+    {
+        sourceFile=${depFile%.dep}
+        sourceFile="${sourceFile/platforms\/${WM_OPTIONS}\//}"
+        sourceFile="${sourceFile/Make\/${WM_OPTIONS}\//}"
+        sourceFile="${sourceFile/platforms\/${WM_OPTIONS}${WM_MPLIB}\//}"
+        sourceFile="${sourceFile/Make\/${WM_OPTIONS}${WM_MPLIB}\//}"
+    }
+else
+    depToSource()
+    {
+        sourceFile=$(echo ${depFile%.dep} |                 \
+            sed -e s%platforms/${WM_OPTIONS}/%%             \
+                -e s%Make/${WM_OPTIONS}/%%                  \
+                -e s%platforms/${WM_OPTIONS}${WM_MPLIB}/%%  \
+                -e s%Make/${WM_OPTIONS}${WM_MPLIB}/%% )
+    }
+fi
+
 
 #------------------------------------------------------------------------------

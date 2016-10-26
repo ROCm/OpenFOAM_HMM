@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,7 @@ Application
 Description
     Simple tests and examples of use of List
 
-See Also
+See also
     Foam::List
 
 \*---------------------------------------------------------------------------*/
@@ -64,7 +64,12 @@ int main(int argc, char *argv[])
     List<vector> list1(IStringStream("1 ((0 1 2))")());
     Info<< "list1: " << list1 << endl;
 
-    List<vector> list2(IStringStream("((0 1 2) (3 4 5) (6 7 8))")());
+    List<vector> list2
+    {
+        vector(0, 1, 2),
+        vector(3, 4, 5),
+        vector(6, 7, 8)
+    };
     Info<< "list2: " << list2 << endl;
 
     list1.append(list2);
@@ -80,17 +85,40 @@ int main(int argc, char *argv[])
     Info<< "list2: " << list2 << nl
         << "list3: " << list3 << endl;
 
-    List<vector> list4(IStringStream("((0 1 2) (3 4 5) (6 7 8))")());
-    List<vector> list5(IStringStream("((5 3 1) (10 2 2) (8 1 0))")());
-    Info<< "list4: " << list4 << nl
-        << "list5: " << list5 << endl;
+    List<vector> list4
+    {
+        vector(0, 1, 2),
+        vector(3, 4, 5),
+        vector(6, 7, 8)
+    };
+    Info<< "list4: " << list4 << endl;
+
+    List<vector> list5
+    {
+        {5, 3, 1},
+        {10, 2, 2},
+        {8, 1, 0}
+    };
+    Info<< "list5: " << list5 << endl;
+    list5 =
+    {
+        {8, 1, 0},
+        {5, 3, 1},
+        {10, 2, 2}
+
+    };
+    Info<< "list5: " << list5 << endl;
+
     list4.swap(list5);
     Info<< "Swapped via the swap() method" << endl;
     Info<< "list4: " << list4 << nl
         << "list5: " << list5 << endl;
 
+    List<vector> list6(list4.begin(), list4.end());
+    Info<< "list6: " << list6 << endl;
+
     // Subset
-    const labelList map(IStringStream("2 (0 2)")());
+    const labelList map{0, 2};
     List<vector> subList3(list3, map);
     Info<< "Elements " << map << " out of " << list3
         << " => " << subList3 << endl;
@@ -131,35 +159,6 @@ int main(int argc, char *argv[])
         << "-reList: " << reLst << nl
         << "-wordList: " << wLst << nl
         << "-stringList: " << sLst << endl;
-
-
-    Info<< nl
-        << "Test List Iterator Constuctor" << endl;
-
-    List<vector> initialList(IStringStream("((0 1 2) (3 4 5) (6 7 8))")());
-
-    Info<< "    Initial List: " << initialList << endl;
-
-    List<vector> iteratorList(initialList.begin(), initialList.end());
-
-    Info<< "    Foam::List constructed from Foam::List: "
-        << iteratorList << endl;
-
-    std::list<vector> stlList(initialList.begin(), initialList.end());
-
-    Info<< "    std::list constructed from Foam::List: ";
-
-    std::list<vector>::iterator it;
-    for (it=stlList.begin(); it != stlList.end(); ++it)
-    {
-        Info<< *it << " ";
-    }
-    Info<< endl;
-
-    List<vector> iteratorSTLList(stlList.begin(), stlList.end());
-
-    Info<< "    Foam::List constructed from std::list: "
-        << iteratorList << endl;
 
     return 0;
 }

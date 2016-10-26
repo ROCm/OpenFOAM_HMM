@@ -17,7 +17,7 @@ FoamFile
 
 application     reactingTwoPhaseEulerFoam;
 
-startFrom       startTime;
+startFrom       latestTime;
 
 startTime       0;
 
@@ -25,11 +25,11 @@ stopAt          endTime;
 
 endTime         2;
 
-deltaT          1e-5;
+deltaT          1e-4;
 
 writeControl    adjustableRunTime;
 
-writeInterval   0.1;
+writeInterval   0.5;
 
 purgeWrite      0;
 
@@ -37,7 +37,7 @@ writeFormat     ascii;
 
 writePrecision  9;
 
-writeCompression compressed;
+writeCompression uncompressed;
 
 timeFormat      general;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,8 +30,7 @@ Group
 Description
     Explicit porosity source
 
-    \heading Source usage
-
+Usage
     Example usage, here employing the Darcy-Forchheimer model:
     \verbatim
     explicitPorositySourceCoeffs
@@ -141,7 +140,7 @@ public:
             virtual void addSup
             (
                 fvMatrix<vector>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
             //- Add implicit contribution to compressible momentum equation
@@ -149,7 +148,7 @@ public:
             (
                 const volScalarField& rho,
                 fvMatrix<vector>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
             //- Add implicit contribution to phase momentum equation
@@ -158,7 +157,7 @@ public:
                 const volScalarField& alpha,
                 const volScalarField& rho,
                 fvMatrix<vector>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
 

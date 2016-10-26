@@ -10,12 +10,15 @@
 near
 {
     // Where to load it from
-    functionObjectLibs ("libfieldFunctionObjects.so");
+    libs            ("libfieldFunctionObjects.so");
 
     type nearWallFields;
 
     // Output every
-    outputControl   outputTime;
+    writeControl    writeTime;
+
+    // Calculate every
+    executeControl   writeTime;
 
     // Fields to be sampled. Per field original name and mapped field to
     // create.
@@ -36,19 +39,19 @@ near
 wallBoundedStreamLines
 {
     // Where to load it from (if not already in solver)
-    functionObjectLibs ("libfieldFunctionObjects.so");
+    libs            ("libfieldFunctionObjects.so");
     type            wallBoundedStreamLine;
 
     // Output every
-    outputControl   outputTime;
+    writeControl    writeTime;
 
     setFormat       vtk; //gnuplot; //xmgr; //raw; //jplot;
 
     // Velocity field to use for tracking.
-    UName UNear;
+    U     UNear;
 
-    // Interpolation method. Default is cellPoint. See sampleDict.
-    //interpolationScheme pointMVC;
+    // Interpolation method. Default is cellPoint.
+    // interpolationScheme pointMVC;
 
     // Tracked forwards (+U) or backwards (-U)
     trackForward    true;
@@ -64,8 +67,8 @@ wallBoundedStreamLines
     // Cloud name to use
     cloudName       wallBoundedParticleTracks;
 
-    // Seeding method. See the sampleSets in sampleDict.
-    seedSampleSet   patchSeed;    //cloud;//triSurfaceMeshPointSet;
+    // Seeding method.
+    seedSampleSet   patchSeed;    //cloud; //triSurfaceMeshPointSet;
 
     uniformCoeffs
     {

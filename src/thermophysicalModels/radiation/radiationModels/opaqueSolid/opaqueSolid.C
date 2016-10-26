@@ -76,9 +76,7 @@ bool Foam::radiation::opaqueSolid::read()
 
 
 void Foam::radiation::opaqueSolid::calculate()
-{
-    // Do nothing
-}
+{}
 
 
 Foam::tmp<Foam::volScalarField> Foam::radiation::opaqueSolid::Rp() const
@@ -110,9 +108,9 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::opaqueSolid::Rp() const
 Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh>>
 Foam::radiation::opaqueSolid::Ru() const
 {
-    return tmp<DimensionedField<scalar, volMesh>>
+    return tmp<volScalarField::Internal>
     (
-        new DimensionedField<scalar, volMesh>
+        new volScalarField::Internal
         (
             IOobject
             (

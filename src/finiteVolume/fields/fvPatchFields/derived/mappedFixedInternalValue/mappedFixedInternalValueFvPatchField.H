@@ -31,8 +31,7 @@ Description
     This boundary condition maps the boundary and internal values of a
     neighbour patch field to the boundary and internal values of *this.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         fieldName    | name of field to be mapped | no       | this field name
@@ -41,7 +40,7 @@ Description
     \endtable
 
     \verbatim
-    myPatch
+    <patchName>
     {
         type            mappedFixedInternalValue;
         fieldName       T;
@@ -55,7 +54,7 @@ Note
     This boundary condition can only be applied to patches that are of
     the \c mappedPolyPatch type.
 
-SeeAlso
+See also
     Foam::mappedPatchBase
     Foam::mappedPolyPatch
     Foam::mappedFvPatch

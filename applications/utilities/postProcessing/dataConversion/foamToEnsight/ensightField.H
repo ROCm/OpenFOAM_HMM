@@ -60,7 +60,7 @@ volField
         Type,
         Foam::fvPatchField,
         Foam::volMesh
-    >::DimensionedInternalField& df
+    >::Internal& df
 );
 
 

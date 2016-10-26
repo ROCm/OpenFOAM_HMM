@@ -31,8 +31,7 @@ Description
     This boundary condition provides a generic outflow condition, with
     specified inflow for the case of return flow.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         phi          | Flux field name         | no          | phi
@@ -41,7 +40,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            inletOutlet;
         phi             phi;
@@ -58,7 +57,7 @@ Note
     - Positive flux (out of domain): apply zero-gradient condition
     - Negative flux (into of domain): apply the "inletValue" fixed-value
 
-SeeAlso
+See also
     Foam::mixedFvPatchField
     Foam::zeroGradientFvPatchField
     Foam::outletInletFvPatchField

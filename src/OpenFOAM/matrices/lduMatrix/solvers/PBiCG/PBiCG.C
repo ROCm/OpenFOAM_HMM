@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,37 +76,25 @@ Foam::solverPerformance Foam::PBiCG::solve
         fieldName_
     );
 
-    label nCells = psi.size();
+    const label nCells = psi.size();
 
     scalar* __restrict__ psiPtr = psi.begin();
 
     scalarField pA(nCells);
     scalar* __restrict__ pAPtr = pA.begin();
 
-    scalarField pT(nCells, 0.0);
-    scalar* __restrict__ pTPtr = pT.begin();
-
     scalarField wA(nCells);
     scalar* __restrict__ wAPtr = wA.begin();
 
-    scalarField wT(nCells);
-    scalar* __restrict__ wTPtr = wT.begin();
-
-    scalar wArT = solverPerf.great_;
-    scalar wArTold = wArT;
-
-    // --- Calculate A.psi and T.psi
+    // --- Calculate A.psi
     matrix_.Amul(wA, psi, interfaceBouCoeffs_, interfaces_, cmpt);
-    matrix_.Tmul(wT, psi, interfaceIntCoeffs_, interfaces_, cmpt);
 
-    // --- Calculate initial residual and transpose residual fields
+    // --- Calculate initial residual field
     scalarField rA(source - wA);
-    scalarField rT(source - wT);
     scalar* __restrict__ rAPtr = rA.begin();
-    scalar* __restrict__ rTPtr = rT.begin();
 
     // --- Calculate normalisation factor
-    scalar normFactor = this->normFactor(psi, source, wA, pA);
+    const scalar normFactor = this->normFactor(psi, source, wA, pA);
 
     if (lduMatrix::debug >= 2)
     {
@@ -126,6 +114,22 @@ Foam::solverPerformance Foam::PBiCG::solve
      || !solverPerf.checkConvergence(tolerance_, relTol_)
     )
     {
+        scalarField pT(nCells, 0);
+        scalar* __restrict__ pTPtr = pT.begin();
+
+        scalarField wT(nCells);
+        scalar* __restrict__ wTPtr = wT.begin();
+
+        // --- Calculate T.psi
+        matrix_.Tmul(wT, psi, interfaceIntCoeffs_, interfaces_, cmpt);
+
+        // --- Calculate initial transpose residual field
+        scalarField rT(source - wT);
+        scalar* __restrict__ rTPtr = rT.begin();
+
+        // --- Initial value not used
+        scalar wArT = 0;
+
         // --- Select and construct the preconditioner
         autoPtr<lduMatrix::preconditioner> preconPtr =
         lduMatrix::preconditioner::New
@@ -138,7 +142,7 @@ Foam::solverPerformance Foam::PBiCG::solve
         do
         {
             // --- Store previous wArT
-            wArTold = wArT;
+            const scalar wArTold = wArT;
 
             // --- Precondition residuals
             preconPtr->precondition(wA, rA, cmpt);
@@ -157,7 +161,7 @@ Foam::solverPerformance Foam::PBiCG::solve
             }
             else
             {
-                scalar beta = wArT/wArTold;
+                const scalar beta = wArT/wArTold;
 
                 for (label cell=0; cell<nCells; cell++)
                 {
@@ -171,7 +175,7 @@ Foam::solverPerformance Foam::PBiCG::solve
             matrix_.Amul(wA, pA, interfaceBouCoeffs_, interfaces_, cmpt);
             matrix_.Tmul(wT, pT, interfaceIntCoeffs_, interfaces_, cmpt);
 
-            scalar wApT = gSumProd(wA, pT, matrix().mesh().comm());
+            const scalar wApT = gSumProd(wA, pT, matrix().mesh().comm());
 
             // --- Test for singularity
             if (solverPerf.checkSingularity(mag(wApT)/normFactor))
@@ -182,7 +186,7 @@ Foam::solverPerformance Foam::PBiCG::solve
 
             // --- Update solution and residual:
 
-            scalar alpha = wArT/wApT;
+            const scalar alpha = wArT/wApT;
 
             for (label cell=0; cell<nCells; cell++)
             {

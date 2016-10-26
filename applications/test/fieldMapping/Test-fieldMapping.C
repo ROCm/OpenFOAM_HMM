@@ -163,11 +163,11 @@ int main(int argc, char *argv[])
         }
 
         // Remove face
-        label candidateFaceI = rndGen.integer(0, mesh.nInternalFaces()-1);
-        Info<< "Wanting to delete face " << mesh.faceCentres()[candidateFaceI]
+        label candidateFacei = rndGen.integer(0, mesh.nInternalFaces()-1);
+        Info<< "Wanting to delete face " << mesh.faceCentres()[candidateFacei]
             << nl << endl;
 
-        labelList candidates(1, candidateFaceI);
+        labelList candidates(1, candidateFacei);
 
 
         // Get compatible set of faces and connected sets of cells.
@@ -300,8 +300,8 @@ int main(int argc, char *argv[])
         // Check face field mapping
         if (surfaceOne.size())
         {
-            const scalar max = gMax(surfaceOne.internalField());
-            const scalar min = gMin(surfaceOne.internalField());
+            const scalar max = gMax(surfaceOne.primitiveField());
+            const scalar min = gMin(surfaceOne.primitiveField());
 
             Info<< "Uniform surface field min = " << min
                 << "  max = " << max << endl;

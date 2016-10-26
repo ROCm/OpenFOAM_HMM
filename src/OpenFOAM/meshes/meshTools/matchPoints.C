@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,7 +76,7 @@ bool Foam::matchPoints
 
         // Go through range of equal mag and find nearest vector.
         scalar minDistSqr = VGREAT;
-        label minFaceI = -1;
+        label minFacei = -1;
 
         for
         (
@@ -88,18 +88,18 @@ bool Foam::matchPoints
             j++
         )
         {
-            label faceI = pts1MagSqr.indices()[j];
+            label facei = pts1MagSqr.indices()[j];
             // Compare actual vectors
-            scalar distSqr = magSqr(pts0[face0I] - pts1[faceI]);
+            scalar distSqr = magSqr(pts0[face0I] - pts1[facei]);
 
             if (distSqr <= sqr(matchDist) && distSqr < minDistSqr)
             {
                 minDistSqr = distSqr;
-                minFaceI = faceI;
+                minFacei = facei;
             }
         }
 
-        if (minFaceI == -1)
+        if (minFacei == -1)
         {
             fullMatch = false;
 
@@ -122,17 +122,17 @@ bool Foam::matchPoints
                     j++
                 )
                 {
-                    label faceI = pts1MagSqr.indices()[j];
+                    label facei = pts1MagSqr.indices()[j];
 
-                    Pout<< "    Compared coord: " << pts1[faceI]
+                    Pout<< "    Compared coord: " << pts1[facei]
                         << " at index " << j
                         << " with difference to point "
-                        << mag(pts1[faceI] - pts0[face0I]) << endl;
+                        << mag(pts1[facei] - pts0[face0I]) << endl;
                 }
             }
         }
 
-        from0To1[face0I] = minFaceI;
+        from0To1[face0I] = minFacei;
     }
 
     return fullMatch;
@@ -187,7 +187,7 @@ bool Foam::matchPoints
 
         // Go through range of equal mag and find nearest vector.
         scalar minDistSqr = VGREAT;
-        label minFaceI = -1;
+        label minFacei = -1;
 
         // Valid candidate points should have opposite normal
         const scalar minDistNorm = 0;
@@ -202,16 +202,16 @@ bool Foam::matchPoints
             j++
         )
         {
-            label faceI = pts1MagSqr.indices()[j];
+            label facei = pts1MagSqr.indices()[j];
             // Compare actual vectors
-            scalar distSqr = magSqr(pts0[face0I] - pts1[faceI]);
+            scalar distSqr = magSqr(pts0[face0I] - pts1[facei]);
 
-            scalar distNorm = (pts0Dir[face0I] & pts1Dir[faceI]);
+            scalar distNorm = (pts0Dir[face0I] & pts1Dir[facei]);
 
             if
             (
                 magSqr(pts0Dir[face0I]) < sqr(SMALL)
-             && magSqr(pts1Dir[faceI]) < sqr(SMALL)
+             && magSqr(pts1Dir[facei]) < sqr(SMALL)
             )
             {
                 distNorm = -1;
@@ -223,12 +223,12 @@ bool Foam::matchPoints
                 if (distNorm < minDistNorm)
                 {
                     minDistSqr = distSqr;
-                    minFaceI = faceI;
+                    minFacei = facei;
                 }
             }
         }
 
-        if (minFaceI == -1)
+        if (minFacei == -1)
         {
             fullMatch = false;
 
@@ -251,17 +251,17 @@ bool Foam::matchPoints
                     j++
                 )
                 {
-                    label faceI = pts1MagSqr.indices()[j];
+                    label facei = pts1MagSqr.indices()[j];
 
-                    Pout<< "    Compared coord: " << pts1[faceI]
+                    Pout<< "    Compared coord: " << pts1[facei]
                         << " at index " << j
                         << " with difference to point "
-                        << mag(pts1[faceI] - pts0[face0I]) << endl;
+                        << mag(pts1[facei] - pts0[face0I]) << endl;
                 }
             }
         }
 
-        from0To1[face0I] = minFaceI;
+        from0To1[face0I] = minFacei;
     }
 
     return fullMatch;

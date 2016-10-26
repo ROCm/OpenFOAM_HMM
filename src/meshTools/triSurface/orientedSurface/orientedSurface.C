@@ -156,12 +156,12 @@ Foam::labelList Foam::orientedSurface::edgeToFace
 void Foam::orientedSurface::walkSurface
 (
     const triSurface& s,
-    const label startFaceI,
+    const label startFacei,
     labelList& flipState
 )
 {
     // List of faces that were changed in the last iteration.
-    labelList changedFaces(1, startFaceI);
+    labelList changedFaces(1, startFacei);
     // List of edges that were changed in the last iteration.
     labelList changedEdges;
 
@@ -189,7 +189,7 @@ void Foam::orientedSurface::propagateOrientation
     const triSurface& s,
     const point& samplePoint,
     const bool orientOutside,
-    const label nearestFaceI,
+    const label nearestFacei,
     const point& nearestPt,
     labelList& flipState
 )
@@ -201,43 +201,43 @@ void Foam::orientedSurface::propagateOrientation
     (
         s,
         samplePoint,
-        nearestFaceI
+        nearestFacei
     );
 
     if (side == triSurfaceTools::UNKNOWN)
     {
         // Non-closed surface. Do what? For now behave as if no flipping
         // necessary
-        flipState[nearestFaceI] = NOFLIP;
+        flipState[nearestFacei] = NOFLIP;
     }
     else if ((side == triSurfaceTools::OUTSIDE) == orientOutside)
     {
         // outside & orientOutside or inside & !orientOutside
         // Normals on surface pointing correctly. No need to flip normals
-        flipState[nearestFaceI] = NOFLIP;
+        flipState[nearestFacei] = NOFLIP;
     }
     else
     {
         // Need to flip normals.
-        flipState[nearestFaceI] = FLIP;
+        flipState[nearestFacei] = FLIP;
     }
 
     if (debug)
     {
-        vector n = triSurfaceTools::surfaceNormal(s, nearestFaceI, nearestPt);
+        vector n = triSurfaceTools::surfaceNormal(s, nearestFacei, nearestPt);
 
         Pout<< "orientedSurface::propagateOrientation : starting face"
             << " orientation:" << nl
             << "     for samplePoint:" << samplePoint << nl
             << "     starting from point:" << nearestPt << nl
-            << "     on face:" << nearestFaceI << nl
+            << "     on face:" << nearestFacei << nl
             << "     with normal:" << n << nl
             << "     decided side:" << label(side)
             << endl;
     }
 
-    // Walk the surface from nearestFaceI, changing the flipstate.
-    walkSurface(s, nearestFaceI, flipState);
+    // Walk the surface from nearestFacei, changing the flipstate.
+    walkSurface(s, nearestFacei, flipState);
 }
 
 
@@ -249,24 +249,24 @@ void Foam::orientedSurface::findZoneSide
     const labelList& faceZone,
     const label zoneI,
     const point& outsidePoint,
-    label& zoneFaceI,
+    label& zoneFacei,
     bool& isOutside
 )
 {
     const triSurface& s = surfSearches.surface();
 
-    zoneFaceI = -1;
+    zoneFacei = -1;
     isOutside = false;
 
     pointField start(1, outsidePoint);
     List<List<pointIndexHit>> hits(1, List<pointIndexHit>());
 
-    forAll(faceZone, faceI)
+    forAll(faceZone, facei)
     {
-        if (faceZone[faceI] == zoneI)
+        if (faceZone[facei] == zoneI)
         {
-            const point& fc = s.faceCentres()[faceI];
-            const vector& n = s.faceNormals()[faceI];
+            const point& fc = s.faceCentres()[facei];
+            const vector& n = s.faceNormals()[facei];
 
             const vector d = fc - outsidePoint;
             const scalar magD = mag(d);
@@ -279,7 +279,7 @@ void Foam::orientedSurface::findZoneSide
                 //Info<< "Zone " << zoneI << " : Shooting ray"
                 //    << " from " << outsidePoint
                 //    << " to " << end
-                //    << " to pierce triangle " << faceI
+                //    << " to pierce triangle " << facei
                 //    << " with centre " << fc << endl;
 
 
@@ -288,7 +288,7 @@ void Foam::orientedSurface::findZoneSide
                 label zoneIndex = -1;
                 forAll(hits[0], i)
                 {
-                    if (hits[0][i].index() == faceI)
+                    if (hits[0][i].index() == facei)
                     {
                         zoneIndex = i;
                         break;
@@ -297,7 +297,7 @@ void Foam::orientedSurface::findZoneSide
 
                 if (zoneIndex != -1)
                 {
-                    zoneFaceI = faceI;
+                    zoneFacei = facei;
 
                     if ((zoneIndex%2) == 0)
                     {
@@ -326,17 +326,17 @@ bool Foam::orientedSurface::flipSurface
     bool hasFlipped = false;
 
     // Flip tris in s
-    forAll(flipState, faceI)
+    forAll(flipState, facei)
     {
-        if (flipState[faceI] == UNVISITED)
+        if (flipState[facei] == UNVISITED)
         {
             FatalErrorInFunction
-                << "unvisited face " << faceI
+                << "unvisited face " << facei
                 << abort(FatalError);
         }
-        else if (flipState[faceI] == FLIP)
+        else if (flipState[facei] == FLIP)
         {
-            labelledTri& tri = s[faceI];
+            labelledTri& tri = s[facei];
 
             label tmp = tri[0];
 
@@ -370,27 +370,27 @@ bool Foam::orientedSurface::orientConsistent(triSurface& s)
         //      FLIP: need to flip
         labelList flipState(s.size(), UNVISITED);
 
-        label faceI = 0;
+        label facei = 0;
         while (true)
         {
-            label startFaceI = -1;
-            while (faceI < s.size())
+            label startFacei = -1;
+            while (facei < s.size())
             {
-                if (flipState[faceI] == UNVISITED)
+                if (flipState[facei] == UNVISITED)
                 {
-                    startFaceI = faceI;
+                    startFacei = facei;
                     break;
                 }
-                faceI++;
+                facei++;
             }
 
-            if (startFaceI == -1)
+            if (startFacei == -1)
             {
                 break;
             }
 
-            flipState[startFaceI] = NOFLIP;
-            walkSurface(s, startFaceI, flipState);
+            flipState[startFacei] = NOFLIP;
+            walkSurface(s, startFacei, flipState);
         }
 
         anyFlipped = flipSurface(s, flipState);
@@ -468,26 +468,26 @@ bool Foam::orientedSurface::orient
 
         scalar minDist = GREAT;
         point minPoint;
-        label minFaceI = -1;
+        label minFacei = -1;
 
-        forAll(s, faceI)
+        forAll(s, facei)
         {
-            if (flipState[faceI] == UNVISITED)
+            if (flipState[facei] == UNVISITED)
             {
                 pointHit curHit =
-                    s[faceI].nearestPoint(samplePoint, s.points());
+                    s[facei].nearestPoint(samplePoint, s.points());
 
                 if (curHit.distance() < minDist)
                 {
                     minDist = curHit.distance();
                     minPoint = curHit.rawPoint();
-                    minFaceI = faceI;
+                    minFacei = facei;
                 }
             }
         }
 
         // Did we find anything?
-        if (minFaceI == -1)
+        if (minFacei == -1)
         {
             break;
         }
@@ -499,7 +499,7 @@ bool Foam::orientedSurface::orient
             s,
             samplePoint,
             orientOutside,
-            minFaceI,
+            minFacei,
             minPoint,
             flipState
         );
@@ -542,7 +542,7 @@ bool Foam::orientedSurface::orient
     labelList flipState(s.size(), UNVISITED);
     for (label zoneI = 0; zoneI < nZones; zoneI++)
     {
-        label zoneFaceI = -1;
+        label zoneFacei = -1;
         bool isOutside;
         findZoneSide
         (
@@ -551,19 +551,19 @@ bool Foam::orientedSurface::orient
             zoneI,
             samplePoint,
 
-            zoneFaceI,
+            zoneFacei,
             isOutside
         );
 
         if (isOutside == orientOutside)
         {
-            flipState[zoneFaceI] = NOFLIP;
+            flipState[zoneFacei] = NOFLIP;
         }
         else
         {
-            flipState[zoneFaceI] = FLIP;
+            flipState[zoneFacei] = FLIP;
         }
-        walkSurface(s, zoneFaceI, flipState);
+        walkSurface(s, zoneFacei, flipState);
     }
 
     // Now finally flip triangles according to flipState.

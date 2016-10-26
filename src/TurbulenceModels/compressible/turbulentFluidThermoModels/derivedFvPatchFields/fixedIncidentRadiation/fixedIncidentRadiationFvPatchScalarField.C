@@ -114,8 +114,8 @@ fixedIncidentRadiationFvPatchScalarField
     QrIncident_(ptf.QrIncident_)
 {}
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::radiation::fixedIncidentRadiationFvPatchScalarField::autoMap
 (
@@ -159,15 +159,12 @@ void Foam::radiation::fixedIncidentRadiationFvPatchScalarField::updateCoeffs()
 
     scalarField emissivity
     (
-        radiation.absorptionEmission().e()().boundaryField()
-        [
-            patch().index()
-        ]
+        radiation.absorptionEmission().e()().boundaryField()[patch().index()]
     );
 
     gradient() =
-        emissivity*
-        (
+        emissivity
+       *(
             QrIncident_
           - physicoChemical::sigma.value()*pow4(*this)
         )/kappa(*this);
@@ -179,7 +176,7 @@ void Foam::radiation::fixedIncidentRadiationFvPatchScalarField::updateCoeffs()
         scalar Qr = gSum(kappa(*this)*gradient()*patch().magSf());
         Info<< patch().boundaryMesh().mesh().name() << ':'
             << patch().name() << ':'
-            << this->dimensionedInternalField().name() << " -> "
+            << this->internalField().name() << " -> "
             << " radiativeFlux:" << Qr
             << " walltemperature "
             << " min:" << gMin(*this)

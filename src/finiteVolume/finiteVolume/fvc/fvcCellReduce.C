@@ -31,18 +31,9 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace fvc
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 template<class Type, class CombineOp>
-tmp<GeometricField<Type, fvPatchField, volMesh>> cellReduce
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::fvc::cellReduce
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& ssf,
     const CombineOp& cop,
@@ -76,29 +67,15 @@ tmp<GeometricField<Type, fvPatchField, volMesh>> cellReduce
     const labelUList& own = mesh.owner();
     const labelUList& nbr = mesh.neighbour();
 
-    // Internal field
-    const Field<Type>& iField = ssf.internalField();
-    forAll(iField, faceI)
+    forAll(own, i)
     {
-        label cellOwn = own[faceI];
-        cop(result[cellOwn], iField[faceI]);
-
-        label cellNbr = nbr[faceI];
-        cop(result[cellNbr], iField[faceI]);
+        label celli = own[i];
+        cop(result[celli], ssf[i]);
     }
-
-    // Boundary field
-    forAll(ssf.boundaryField(), patchI)
+    forAll(nbr, i)
     {
-        const fvsPatchField<Type>& pf = ssf.boundaryField()[patchI];
-        const label start = pf.patch().start();
-
-        forAll(pf, i)
-        {
-            label faceI = start + i;
-            label cellI = own[faceI];
-            cop(result[cellI], pf[i]);
-        }
+        label celli = nbr[i];
+        cop(result[celli], ssf[i]);
     }
 
     result.correctBoundaryConditions();
@@ -108,28 +85,28 @@ tmp<GeometricField<Type, fvPatchField, volMesh>> cellReduce
 
 
 template<class Type, class CombineOp>
-tmp<GeometricField<Type, fvPatchField, volMesh>> cellReduce
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::fvc::cellReduce
 (
-    const tmp<GeometricField<Type, fvsPatchField, surfaceMesh>&> tssf,
+    const tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>& tssf,
     const CombineOp& cop,
     const Type& nullValue
 )
 {
-    tmp<GeometricField<Type, fvPatchField, volMesh>>
-        tvf(cellReduce(cop, tssf, nullValue));
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tvf
+    (
+        cellReduce
+        (
+            tssf,
+            cop,
+            nullValue
+        )
+    );
 
     tssf.clear();
 
     return tvf;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace fvc
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

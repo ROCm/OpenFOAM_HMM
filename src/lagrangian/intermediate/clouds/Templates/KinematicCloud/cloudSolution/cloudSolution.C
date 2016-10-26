@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -215,7 +215,7 @@ bool Foam::cloudSolution::solveThisStep() const
     return
         active_
      && (
-            mesh_.time().outputTime()
+            mesh_.time().writeTime()
          || (mesh_.time().timeIndex() % calcFrequency_ == 0)
         );
 }
@@ -238,7 +238,7 @@ bool Foam::cloudSolution::canEvolve()
 
 bool Foam::cloudSolution::output() const
 {
-    return active_ && mesh_.time().outputTime();
+    return active_ && mesh_.time().writeTime();
 }
 
 

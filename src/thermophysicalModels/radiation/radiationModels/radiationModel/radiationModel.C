@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,10 +116,10 @@ Foam::radiation::radiationModel::radiationModel(const volScalarField& T)
     coeffs_(dictionary::null),
     solverFreq_(0),
     firstIter_(true),
-    absorptionEmission_(NULL),
-    scatter_(NULL),
-    soot_(NULL),
-    transmissivity_(NULL)
+    absorptionEmission_(nullptr),
+    scatter_(nullptr),
+    soot_(nullptr),
+    transmissivity_(nullptr)
 {}
 
 
@@ -137,10 +137,10 @@ Foam::radiation::radiationModel::radiationModel
     coeffs_(subOrEmptyDict(type + "Coeffs")),
     solverFreq_(1),
     firstIter_(true),
-    absorptionEmission_(NULL),
-    scatter_(NULL),
-    soot_(NULL),
-    transmissivity_(NULL)
+    absorptionEmission_(nullptr),
+    scatter_(nullptr),
+    soot_(nullptr),
+    transmissivity_(nullptr)
 {
     if (readOpt() == IOobject::NO_READ)
     {
@@ -177,10 +177,10 @@ Foam::radiation::radiationModel::radiationModel
     coeffs_(subOrEmptyDict(type + "Coeffs")),
     solverFreq_(1),
     firstIter_(true),
-    absorptionEmission_(NULL),
-    scatter_(NULL),
-    soot_(NULL),
-    transmissivity_(NULL)
+    absorptionEmission_(nullptr),
+    scatter_(nullptr),
+    soot_(nullptr),
+    transmissivity_(nullptr)
 {
     initialise();
 }

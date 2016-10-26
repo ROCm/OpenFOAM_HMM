@@ -68,13 +68,13 @@ Foam::fv::faceCorrectedSnGrad<Type>::fullGradCorrection
         )
     );
 
-    Field<Type>& sfCorr = tsfCorr.ref().internalField();
+    Field<Type>& sfCorr = tsfCorr.ref().primitiveFieldRef();
 
     const pointField& points = mesh.points();
     const faceList& faces = mesh.faces();
-    const vectorField& Sf = mesh.Sf().internalField();
-    const vectorField& C = mesh.C().internalField();
-    const scalarField& magSf = mesh.magSf().internalField();
+    const vectorField& Sf = mesh.Sf();
+    const vectorField& C = mesh.C();
+    const scalarField& magSf = mesh.magSf();
     const labelList& owner = mesh.owner();
     const labelList& neighbour = mesh.neighbour();
 
@@ -116,7 +116,7 @@ Foam::fv::faceCorrectedSnGrad<Type>::fullGradCorrection
         sfCorr[facei] = dCorr&fgrad;
     }
 
-    tsfCorr.ref().boundaryField() = Zero;
+    tsfCorr.ref().boundaryFieldRef() = Zero;
 
     return tsfCorr;
 }

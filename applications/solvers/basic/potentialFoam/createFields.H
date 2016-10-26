@@ -43,7 +43,7 @@ word pName("p");
 // Update name of the pressure field from the command-line option
 args.optionReadIfPresent("pName", pName);
 
-// Infer the pressure BCs from the velocity BCs
+// Infer the pressure BCs from the velocity
 wordList pBCTypes
 (
     U.boundaryField().size(),
@@ -78,62 +78,36 @@ volScalarField p
     pBCTypes
 );
 
-label pRefCell = 0;
-scalar pRefValue = 0.0;
-if (args.optionFound("writep"))
-{
-    setRefCell
-    (
-        p,
-        potentialFlow.dict(),
-        pRefCell,
-        pRefValue
-    );
-}
-
-
-Info<< "Constructing velocity potential field Phi\n" << endl;
-autoPtr<volScalarField> PhiPtr;
-
-IOobject io
+// Infer the velocity potential BCs from the pressure
+wordList PhiBCTypes
 (
-    "Phi",
-    runTime.timeName(),
-    mesh,
-    IOobject::MUST_READ,
-    IOobject::NO_WRITE
+    p.boundaryField().size(),
+    zeroGradientFvPatchScalarField::typeName
 );
 
-if (io.typeHeaderOk<volScalarField>())
+forAll(p.boundaryField(), patchi)
 {
-    PhiPtr.reset(new volScalarField(io, mesh));
-}
-else
-{
-    // Cannot just use p.boundaryField().types() since does not initialise
-    // complex boundary types. Instead re-clone them from p.
-
-    io.readOpt() = IOobject::NO_READ;
-    PhiPtr.reset
-    (
-        new volScalarField
-        (
-            io,
-            mesh,
-            dimensionedScalar("Phi", dimLength*dimVelocity, 0),
-            p.boundaryField().types()
-        )
-    );
-
-    const volScalarField::GeometricBoundaryField& bp = p.boundaryField();
-    volScalarField::GeometricBoundaryField& bPhi = PhiPtr().boundaryField();
-
-    forAll(bp, patchI)
+    if (p.boundaryField()[patchi].fixesValue())
     {
-        bPhi.set(patchI, bp[patchI].clone(PhiPtr().dimensionedInternalField()));
+        PhiBCTypes[patchi] = fixedValueFvPatchScalarField::typeName;
     }
 }
-volScalarField& Phi = PhiPtr();
+
+Info<< "Constructing velocity potential field Phi\n" << endl;
+volScalarField Phi
+(
+    IOobject
+    (
+        "Phi",
+        runTime.timeName(),
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedScalar("Phi", dimLength*dimVelocity, 0),
+    PhiBCTypes
+);
 
 label PhiRefCell = 0;
 scalar PhiRefValue = 0;
@@ -145,3 +119,5 @@ setRefCell
     PhiRefValue
 );
 mesh.setFluxRequired(Phi.name());
+
+#include "createMRF.H"

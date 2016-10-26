@@ -42,28 +42,28 @@ int main(int argc, char * argv[])
     SHA1 sha;
     SHA1Digest shaDig;
 
-    std::string str("The quick brown fox jumps over the lazy dog");
-    Info<< shaDig << nl;
-    Info<< SHA1("The quick brown fox jumps over the lazy dog") << nl;
+    const std::string str("The quick brown fox jumps over the lazy dog");
+    Info<< shaDig << " : empty" << nl;
+    Info<< SHA1(str) << " : " << str << nl;
 
-    sha.append("The quick brown fox jumps over the lazy dog");
-    Info<< sha << nl;
+    sha.append(str);
+    Info<< sha << " : appended to empty" << nl;
 
     sha.clear();
-    sha.append("The quick brown fox jumps over the lazy dog");
+    sha.append(str);
     shaDig = sha;
 
     sha.append("\n");
-    Info<< sha << nl;
+    Info<< sha << " : with trailing newline" << nl;
     Info<< shaDig << nl;
 
     if (sha == shaDig)
     {
-        Info<<"SHA1 digests are identical\n";
+        Info<<"SHA1 digests are identical (unexpected)\n";
     }
     else
     {
-        Info<<"SHA1 digests are different\n";
+        Info<<"SHA1 digests are different (expected)\n";
     }
     Info<<"lhs:" << sha << " rhs:" << shaDig << endl;
 
@@ -99,7 +99,6 @@ int main(int argc, char * argv[])
         os.rewind();
         os  << "The quick brown fox jumps over the lazy dog";
         Info<< os.digest() << endl;
-
     }
 
     {

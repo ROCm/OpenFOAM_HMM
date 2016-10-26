@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,31 +32,32 @@ Description
     edges.
 
 Usage
-
-    - polyDualMesh featureAngle
+    \b polyDualMesh featureAngle
 
     Detects any boundary edge > angle and creates multiple boundary faces
     for it. Normal behaviour is to have each point become a cell
     (1.5 behaviour)
 
-    \param -concaveMultiCells
-    Creates multiple cells for each point on a concave edge. Might limit
-    the amount of distortion on some meshes.
+    Options:
+      - \par -concaveMultiCells
+        Creates multiple cells for each point on a concave edge. Might limit
+        the amount of distortion on some meshes.
 
-    \param -splitAllFaces
-    Normally only constructs a single face between two cells. This single face
-    might be too distorted. splitAllFaces will create a single face for every
-    original cell the face passes through. The mesh will thus have
-    multiple faces inbetween two cells! (so is not strictly upper-triangular
-    anymore - checkMesh will complain)
+      - \par -splitAllFaces
+        Normally only constructs a single face between two cells. This single
+        face might be too distorted. splitAllFaces will create a single face for
+        every original cell the face passes through. The mesh will thus have
+        multiple faces inbetween two cells! (so is not strictly upper-triangular
+        anymore - checkMesh will complain)
 
-    \param -doNotPreserveFaceZones:
-    By default all faceZones are preserved by marking all faces, edges and
-    points on them as features. The -doNotPreserveFaceZones disables this
-    behaviour.
+      - \par -doNotPreserveFaceZones:
+        By default all faceZones are preserved by marking all faces, edges and
+        points on them as features. The -doNotPreserveFaceZones disables this
+        behaviour.
 
-    Note: is just a driver for meshDualiser. Substitute your own
-    simpleMarkFeatures to have different behaviour.
+Note
+    It is just a driver for meshDualiser. Substitute your own simpleMarkFeatures
+    to have different behaviour.
 
 \*---------------------------------------------------------------------------*/
 
@@ -108,9 +109,9 @@ void simpleMarkFeatures
     // 1. Mark all edges between patches
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        const polyPatch& pp = patches[patchI];
+        const polyPatch& pp = patches[patchi];
         const labelList& meshEdges = pp.meshEdges();
 
         // All patch corner edges. These need to be feature points & edges!
@@ -237,9 +238,9 @@ void simpleMarkFeatures
     // Face centres that need inclusion in the dual mesh
     labelHashSet featureFaceSet(mesh.nFaces()-mesh.nInternalFaces());
     // A. boundary faces.
-    for (label faceI = mesh.nInternalFaces(); faceI < mesh.nFaces(); faceI++)
+    for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); facei++)
     {
-        featureFaceSet.insert(faceI);
+        featureFaceSet.insert(facei);
     }
 
     // B. face zones.
@@ -273,11 +274,11 @@ void simpleMarkFeatures
 
             forAll(fz, i)
             {
-                label faceI = fz[i];
-                const face& f = mesh.faces()[faceI];
-                const labelList& fEdges = mesh.faceEdges()[faceI];
+                label facei = fz[i];
+                const face& f = mesh.faces()[facei];
+                const labelList& fEdges = mesh.faceEdges()[facei];
 
-                featureFaceSet.insert(faceI);
+                featureFaceSet.insert(facei);
                 forAll(f, fp)
                 {
                     // Mark point as multi cell point (since both sides of
@@ -388,9 +389,9 @@ int main(int argc, char *argv[])
     // (Note: in 1.4.2 we can use the built-in mesh point ordering
     //  facility instead)
     PackedBoolList isBoundaryEdge(mesh.nEdges());
-    for (label faceI = mesh.nInternalFaces(); faceI < mesh.nFaces(); faceI++)
+    for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); facei++)
     {
-        const labelList& fEdges = mesh.faceEdges()[faceI];
+        const labelList& fEdges = mesh.faceEdges()[facei];
 
         forAll(fEdges, i)
         {

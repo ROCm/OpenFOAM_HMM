@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ License
 
 namespace Foam
 {
-    makePatchFieldsTypeName(jumpCyclic);
+    makePatchFieldTypeNames(jumpCyclic);
 }
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -52,7 +52,7 @@ void Foam::jumpCyclicFvPatchField<Foam::scalar>::updateInterfaceMatrix
         this->cyclicPatch().neighbFvPatch().faceCells();
 
     // only apply jump to original field
-    if (&psiInternal == &this->internalField())
+    if (&psiInternal == &this->primitiveField())
     {
         Field<scalar> jf(this->jump());
 

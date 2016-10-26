@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,8 +46,7 @@ Description
         Pr_t    | turblent Prandtl number
     \endvartable
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         nut          | turbulence viscosity field name | no  | nut
@@ -56,7 +55,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            alphatWallFunction;
         nut             nut;
@@ -65,7 +64,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchField
 
 SourceFiles

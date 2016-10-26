@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,14 +30,12 @@ Group
 Description
     L-stable, stiffly-accurate embedded Rosenbrock ODE solver of order (3)4.
 
-    References:
+    Reference:
     \verbatim
-        "Solving Ordinary Differential Equations II: Stiff
-         and Differential-Algebraic Problems, second edition",
-        Hairer, E.,
-        Nørsett, S.,
-        Wanner, G.,
-        Springer-Verlag, Berlin. 1996.
+        Hairer, E., Nørsett, S. P., & Wanner, G. (1996).
+        Solving Ordinary Differential Equations II:
+        Stiff and Differential-Algebraic Problems, second edition",
+        Springer-Verlag, Berlin.
     \endverbatim
 
 SourceFiles
@@ -100,8 +98,13 @@ public:
 
     // Constructors
 
-        //- Construct from ODE
+        //- Construct from ODESystem
         rodas34(const ODESystem& ode, const dictionary& dict);
+
+
+    //- Destructor
+    virtual ~rodas34()
+    {}
 
 
     // Member Functions
@@ -109,8 +112,11 @@ public:
         //- Inherit solve from ODESolver
         using ODESolver::solve;
 
+        //- Resize the ODE solver
+        virtual bool resize();
+
         //- Solve a single step dx and return the error
-        scalar solve
+        virtual scalar solve
         (
             const scalar x0,
             const scalarField& y0,
@@ -120,7 +126,7 @@ public:
         ) const;
 
         //- Solve the ODE system and the update the state
-        void solve
+        virtual void solve
         (
             scalar& x,
             scalarField& y,

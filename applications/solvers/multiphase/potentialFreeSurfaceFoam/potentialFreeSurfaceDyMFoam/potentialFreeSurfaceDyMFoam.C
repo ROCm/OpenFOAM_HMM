@@ -29,7 +29,8 @@ Group
 
 Description
     Incompressible Navier-Stokes solver with inclusion of a wave height field
-    to enable single-phase free-surface approximations.
+    to enable single-phase free-surface approximations, with optional mesh
+    motion and mesh topology changes.
 
     Wave height field, zeta, used by pressure boundary conditions.
 
@@ -52,16 +53,16 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "postProcess.H"
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
     #include "initContinuityErrs.H"
-
-    pimpleControl pimple(mesh);
-
-    #include "createControls.H"
+    #include "createControl.H"
+    #include "createTimeControls.H"
+    #include "createDyMControls.H"
     #include "createFields.H"
-    #include "createMRF.H"
     #include "createFvOptions.H"
 
     volScalarField rAU

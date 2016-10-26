@@ -1,0 +1,51 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      binary;
+    class       volScalarField;
+    location    "0/windshield";
+    object      T;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 1 0 0 0];
+
+internalField   uniform 260;
+
+boundaryField
+{
+    symmetry
+    {
+        type            symmetryPlane;
+    }
+    walls
+    {
+        type            zeroGradient;
+    }
+    windshield_to_cabin
+    {
+        type            humidityTemperatureCoupledMixed;
+        kappaMethod     solidThermo;
+        kappa           none;
+        value           uniform 260;
+    }
+    exterior
+    {
+        type            externalWallHeatFluxTemperature;
+        kappaMethod     solidThermo;
+        kappa           none;
+        h               uniform 10;
+        Ta              uniform 260;
+        value           uniform 260;
+    }
+}
+
+
+// ************************************************************************* //

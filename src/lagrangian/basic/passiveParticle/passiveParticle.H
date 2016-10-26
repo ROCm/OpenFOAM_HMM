@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,12 +62,12 @@ public:
         (
             const polyMesh& mesh,
             const vector& position,
-            const label cellI,
-            const label tetFaceI,
-            const label tetPtI
+            const label celli,
+            const label tetFacei,
+            const label tetPti
         )
         :
-            particle(mesh, position, cellI, tetFaceI, tetPtI)
+            particle(mesh, position, celli, tetFacei, tetPti)
         {}
 
         //- Construct from components, with searching for tetFace and
@@ -76,11 +76,11 @@ public:
         (
             const polyMesh& mesh,
             const vector& position,
-            const label cellI,
+            const label celli,
             bool doCellFacePt = true
         )
         :
-            particle(mesh, position, cellI, doCellFacePt)
+            particle(mesh, position, celli, doCellFacePt)
         {}
 
         //- Construct from Istream

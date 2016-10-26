@@ -31,11 +31,10 @@ Description
     Constructs on-the-fly a new boundary condition (derived from
     mixedFvPatchField) which is then used to evaluate.
 
-    \heading Patch usage
-
+Usage
     Example:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            codedMixed;
 
@@ -43,7 +42,7 @@ Description
         refGradient     uniform (0 0 0);
         valueFraction   uniform 1;
 
-        redirectType    rampedMixed;   // name of generated BC
+        name    rampedMixed;   // name of generated BC
 
         code
         #{
@@ -71,7 +70,7 @@ Description
     which would have a corresponding entry
 
     \verbatim
-    myPatch
+    <patchName>
     {
         code
         #{
@@ -82,7 +81,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::dynamicCode
     Foam::functionEntries::codeStream
 
@@ -122,7 +121,7 @@ class codedMixedFvPatchField
         //- Dictionary contents for the boundary condition
         mutable dictionary dict_;
 
-        const word redirectType_;
+        const word name_;
 
         mutable autoPtr<mixedFvPatchField<Type>> redirectPatchFieldPtr_;
 
@@ -236,7 +235,7 @@ public:
         virtual void updateCoeffs();
 
         //- Evaluate the patch field
-        //  This is only needed to set the updated() flag of the redirectType
+        //  This is only needed to set the updated() flag of the name
         //  to false.
         virtual void evaluate
         (

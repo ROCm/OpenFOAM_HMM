@@ -27,13 +27,6 @@ solvers
     {
         solver          GAMG;
         smoother        DIC;
-        nPreSweeps      0;
-        nPostSweeps     2;
-        nFinestSweeps   2;
-        cacheAgglomeration true;
-        nCellsInCoarsestLevel 10;
-        agglomerator    faceAreaPair;
-        mergeLevels     1;
         tolerance       1e-8;
         relTol          0.01;
         maxIter         100;
@@ -87,11 +80,11 @@ solvers
 
 PIMPLE
 {
-    nOuterCorrectors    3;
+    nOuterCorrectors    6;
     nCorrectors         1;
     nNonOrthogonalCorrectors 0;
-    nEnergyCorrectors   3;
-    faceMomentum        on;
+    nEnergyCorrectors   2;
+    faceMomentum        yes;
 }
 
 relaxationFactors
@@ -104,7 +97,7 @@ relaxationFactors
     equations
     {
         ".*"            1;
-        "h.*"           0.4;
+        "h.*"           0.3;
     }
 }
 

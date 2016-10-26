@@ -6,7 +6,7 @@ cd ${0%/*} || exit 1    # Run from this directory
 
 echo "Use common files for 0/, constant/ and blockMeshDict"
 \rm -rf 0 constant
-\cp -r ../common/0.org 0
+\cp -r ../common/0.orig 0
 \cp -r ../common/constant constant
 
 m4 system/blockMeshDict.m4 > system/blockMeshDict

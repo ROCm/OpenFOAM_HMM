@@ -39,10 +39,10 @@ dictionaryReplacement
             {
                 type            compressible::turbulentTemperatureRadCoupledMixed;
                 Tnbr            T;
-                kappa           solidThermo;
+                kappaMethod     solidThermo;
                 QrNbr           none;
                 Qr              none;
-                kappaName       none;
+                kappa           none;
                 value           uniform 300;
             }
 
@@ -50,10 +50,10 @@ dictionaryReplacement
             {
                 type            compressible::turbulentTemperatureRadCoupledMixed;
                 Tnbr            T;
-                kappa           solidThermo;
+                kappaMethod     solidThermo;
                 QrNbr           Qr;
                 Qr              none;
-                kappaName       none;
+                kappa           none;
                 value           uniform 300;
             }
 
@@ -66,13 +66,13 @@ dictionaryReplacement
             minZ
             {
                 type            externalWallHeatFluxTemperature;
-                kappa           solidThermo;
+                kappaMethod     solidThermo;
                 Ta              uniform 313.0;
                 h               uniform 10e5;
                 thicknessLayers (1 2);
                 kappaLayers     (100 200);
                 value           uniform 300.0;
-                kappaName       none;
+                kappa           none;
             }
         }
     }

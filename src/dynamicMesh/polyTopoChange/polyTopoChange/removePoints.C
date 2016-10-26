@@ -78,26 +78,26 @@ public:
 
 void Foam::removePoints::modifyFace
 (
-    const label faceI,
+    const label facei,
     const face& newFace,
     polyTopoChange& meshMod
 ) const
 {
     // Get other face data.
-    label patchI = -1;
-    label owner = mesh_.faceOwner()[faceI];
+    label patchi = -1;
+    label owner = mesh_.faceOwner()[facei];
     label neighbour = -1;
 
-    if (mesh_.isInternalFace(faceI))
+    if (mesh_.isInternalFace(facei))
     {
-        neighbour = mesh_.faceNeighbour()[faceI];
+        neighbour = mesh_.faceNeighbour()[facei];
     }
     else
     {
-        patchI = mesh_.boundaryMesh().whichPatch(faceI);
+        patchi = mesh_.boundaryMesh().whichPatch(facei);
     }
 
-    label zoneID = mesh_.faceZones().whichZone(faceI);
+    label zoneID = mesh_.faceZones().whichZone(facei);
 
     bool zoneFlip = false;
 
@@ -105,7 +105,7 @@ void Foam::removePoints::modifyFace
     {
         const faceZone& fZone = mesh_.faceZones()[zoneID];
 
-        zoneFlip = fZone.flipMap()[fZone.whichFace(faceI)];
+        zoneFlip = fZone.flipMap()[fZone.whichFace(facei)];
     }
 
     meshMod.setAction
@@ -113,11 +113,11 @@ void Foam::removePoints::modifyFace
         polyModifyFace
         (
             newFace,        // modified face
-            faceI,          // label of face being modified
+            facei,          // label of face being modified
             owner,          // owner
             neighbour,      // neighbour
             false,          // face flip
-            patchI,         // patch for face
+            patchi,         // patch for face
             false,          // remove from zone
             zoneID,         // zone for face
             zoneFlip        // face flip in zone
@@ -162,31 +162,31 @@ Foam::label Foam::removePoints::countPointUsage
 
         forAll(e, eI)
         {
-            label pointI = e[eI];
+            label pointi = e[eI];
 
-            if (edge0[pointI] == -2)
+            if (edge0[pointi] == -2)
             {
                 // Already too many edges
             }
-            else if (edge0[pointI] == -1)
+            else if (edge0[pointi] == -1)
             {
                 // Store first edge using point
-                edge0[pointI] = edgeI;
+                edge0[pointi] = edgeI;
             }
             else
             {
                 // Already one edge using point. Check second container.
 
-                if (edge1[pointI] == -1)
+                if (edge1[pointi] == -1)
                 {
                     // Store second edge using point
-                    edge1[pointI] = edgeI;
+                    edge1[pointi] = edgeI;
                 }
                 else
                 {
                     // Third edge using point. Mark.
-                    edge0[pointI] = -2;
-                    edge1[pointI] = -2;
+                    edge0[pointi] = -2;
+                    edge1[pointi] = -2;
                 }
             }
         }
@@ -200,14 +200,14 @@ Foam::label Foam::removePoints::countPointUsage
     pointCanBeDeleted = false;
     //label nDeleted = 0;
 
-    forAll(edge0, pointI)
+    forAll(edge0, pointi)
     {
-        if (edge0[pointI] >= 0 && edge1[pointI] >= 0)
+        if (edge0[pointi] >= 0 && edge1[pointi] >= 0)
         {
             // Point used by two edges exactly
 
-            const edge& e0 = edges[edge0[pointI]];
-            const edge& e1 = edges[edge1[pointI]];
+            const edge& e0 = edges[edge0[pointi]];
+            const edge& e1 = edges[edge1[pointi]];
 
             label common = e0.commonVertex(e1);
             label vLeft = e0.otherVertex(common);
@@ -221,14 +221,14 @@ Foam::label Foam::removePoints::countPointUsage
 
             if ((e0Vec & e1Vec) > minCos)
             {
-                pointCanBeDeleted[pointI] = true;
+                pointCanBeDeleted[pointi] = true;
                 //nDeleted++;
             }
         }
-        else if (edge0[pointI] == -1)
+        else if (edge0[pointi] == -1)
         {
             // point not used at all
-            pointCanBeDeleted[pointI] = true;
+            pointCanBeDeleted[pointi] = true;
             //nDeleted++;
         }
     }
@@ -238,9 +238,9 @@ Foam::label Foam::removePoints::countPointUsage
 
     // Protect any points on faces that would collapse down to nothing
     // No particular intelligence so might protect too many points
-    forAll(mesh_.faces(), faceI)
+    forAll(mesh_.faces(), facei)
     {
-        const face& f = mesh_.faces()[faceI];
+        const face& f = mesh_.faces()[facei];
 
         label nCollapse = 0;
         forAll(f, fp)
@@ -280,9 +280,9 @@ Foam::label Foam::removePoints::countPointUsage
     );
 
     label nDeleted = 0;
-    forAll(pointCanBeDeleted, pointI)
+    forAll(pointCanBeDeleted, pointi)
     {
-        if (pointCanBeDeleted[pointI])
+        if (pointCanBeDeleted[pointi])
         {
             nDeleted++;
         }
@@ -300,9 +300,9 @@ void Foam::removePoints::setRefinement
 {
     // Count deleted points
     label nDeleted = 0;
-    forAll(pointCanBeDeleted, pointI)
+    forAll(pointCanBeDeleted, pointi)
     {
-        if (pointCanBeDeleted[pointI])
+        if (pointCanBeDeleted[pointi])
         {
             nDeleted++;
         }
@@ -329,19 +329,19 @@ void Foam::removePoints::setRefinement
 
     nDeleted = 0;
 
-    forAll(pointCanBeDeleted, pointI)
+    forAll(pointCanBeDeleted, pointi)
     {
-        if (pointCanBeDeleted[pointI])
+        if (pointCanBeDeleted[pointi])
         {
             if (undoable_)
             {
-                pointToSaved.insert(pointI, nDeleted);
-                savedPoints_[nDeleted++] = mesh_.points()[pointI];
+                pointToSaved.insert(pointi, nDeleted);
+                savedPoints_[nDeleted++] = mesh_.points()[pointi];
             }
-            meshMod.setAction(polyRemovePoint(pointI));
+            meshMod.setAction(polyRemovePoint(pointi));
 
             // Store faces affected
-            const labelList& pFaces = mesh_.pointFaces()[pointI];
+            const labelList& pFaces = mesh_.pointFaces()[pointi];
 
             forAll(pFaces, i)
             {
@@ -365,9 +365,9 @@ void Foam::removePoints::setRefinement
 
     forAllConstIter(labelHashSet, facesAffected, iter)
     {
-        label faceI = iter.key();
+        label facei = iter.key();
 
-        const face& f = mesh_.faces()[faceI];
+        const face& f = mesh_.faces()[facei];
 
         face newFace(f.size());
 
@@ -375,37 +375,37 @@ void Foam::removePoints::setRefinement
 
         forAll(f, fp)
         {
-            label pointI = f[fp];
+            label pointi = f[fp];
 
-            if (!pointCanBeDeleted[pointI])
+            if (!pointCanBeDeleted[pointi])
             {
-                newFace[newI++] = pointI;
+                newFace[newI++] = pointi;
             }
         }
         newFace.setSize(newI);
 
         // Actually change the face to the new vertices
-        modifyFace(faceI, newFace, meshMod);
+        modifyFace(facei, newFace, meshMod);
 
         // Save the face. Negative indices are into savedPoints_
         if (undoable_)
         {
-            savedFaceLabels_[nSaved] = faceI;
+            savedFaceLabels_[nSaved] = facei;
 
             face& savedFace = savedFaces_[nSaved++];
             savedFace.setSize(f.size());
 
             forAll(f, fp)
             {
-                label pointI = f[fp];
+                label pointi = f[fp];
 
-                if (pointCanBeDeleted[pointI])
+                if (pointCanBeDeleted[pointi])
                 {
-                    savedFace[fp] = -pointToSaved[pointI]-1;
+                    savedFace[fp] = -pointToSaved[pointi]-1;
                 }
                 else
                 {
-                    savedFace[fp] = pointI;
+                    savedFace[fp] = pointi;
                 }
             }
         }
@@ -442,7 +442,7 @@ void Foam::removePoints::setRefinement
                 if (meshPoints != keptPoints)
                 {
                     FatalErrorInFunction
-                        << "faceI:" << savedFaceLabels_[saveI] << nl
+                        << "facei:" << savedFaceLabels_[saveI] << nl
                         << "meshPoints:" << meshPoints << nl
                         << "keptPoints:" << keptPoints << nl
                         << abort(FatalError);
@@ -461,16 +461,16 @@ void Foam::removePoints::updateMesh(const mapPolyMesh& map)
         {
             if (savedFaceLabels_[localI] >= 0)
             {
-                label newFaceI = map.reverseFaceMap()[savedFaceLabels_[localI]];
+                label newFacei = map.reverseFaceMap()[savedFaceLabels_[localI]];
 
-                if (newFaceI == -1)
+                if (newFacei == -1)
                 {
                     FatalErrorInFunction
                         << "Old face " << savedFaceLabels_[localI]
                         << " seems to have dissapeared."
                         << abort(FatalError);
                 }
-                savedFaceLabels_[localI] = newFaceI;
+                savedFaceLabels_[localI] = newFacei;
             }
         }
 
@@ -483,16 +483,16 @@ void Foam::removePoints::updateMesh(const mapPolyMesh& map)
 
             forAll(f, fp)
             {
-                label pointI = f[fp];
+                label pointi = f[fp];
 
-                if (pointI >= 0)
+                if (pointi >= 0)
                 {
-                    f[fp] = map.reversePointMap()[pointI];
+                    f[fp] = map.reversePointMap()[pointi];
 
                     if (f[fp] == -1)
                     {
                         FatalErrorInFunction
-                            << "Old point " << pointI
+                            << "Old point " << pointi
                             << " seems to have dissapeared."
                             << abort(FatalError);
                     }
@@ -518,11 +518,11 @@ void Foam::removePoints::updateMesh(const mapPolyMesh& map)
 
                     forAll(savedFace, fp)
                     {
-                        label pointI = savedFace[fp];
+                        label pointi = savedFace[fp];
 
-                        if (pointI >= 0)
+                        if (pointi >= 0)
                         {
-                            keptFace[keptFp++] = pointI;
+                            keptFace[keptFp++] = pointi;
                         }
                     }
                     keptFace.setSize(keptFp);
@@ -532,7 +532,7 @@ void Foam::removePoints::updateMesh(const mapPolyMesh& map)
                     if (keptFace != f)
                     {
                         FatalErrorInFunction
-                            << "faceI:" << savedFaceLabels_[saveI] << nl
+                            << "facei:" << savedFaceLabels_[saveI] << nl
                             << "face:" << f << nl
                             << "keptFace:" << keptFace << nl
                             << "saved points:"
@@ -623,19 +623,19 @@ void Foam::removePoints::getUnrefimentSet
                 {
                     if (savedFace[fp] < 0)
                     {
-                        label savedPointI = -savedFace[fp]-1;
+                        label savedPointi = -savedFace[fp]-1;
 
-                        if (savedPoints_[savedPointI] == vector::max)
+                        if (savedPoints_[savedPointi] == vector::max)
                         {
                             FatalErrorInFunction
-                                << "Trying to restore point " << savedPointI
+                                << "Trying to restore point " << savedPointi
                                 << " from mesh face " << savedFaceLabels_[saveI]
                                 << " saved face:" << savedFace
                                 << " which has already been undone."
                                 << abort(FatalError);
                         }
 
-                        localPointsSet.insert(savedPointI);
+                        localPointsSet.insert(savedPointi);
                     }
                 }
             }
@@ -651,13 +651,13 @@ void Foam::removePoints::getUnrefimentSet
         // Populate with my local points-to-restore.
         forAll(savedFaces_, saveI)
         {
-            label bFaceI = savedFaceLabels_[saveI] - mesh_.nInternalFaces();
+            label bFacei = savedFaceLabels_[saveI] - mesh_.nInternalFaces();
 
-            if (bFaceI >= 0)
+            if (bFacei >= 0)
             {
                 const face& savedFace = savedFaces_[saveI];
 
-                boolList& fRestore = faceVertexRestore[bFaceI];
+                boolList& fRestore = faceVertexRestore[bFacei];
 
                 fRestore.setSize(savedFace.size());
                 fRestore = false;
@@ -666,9 +666,9 @@ void Foam::removePoints::getUnrefimentSet
                 {
                     if (savedFace[fp] < 0)
                     {
-                        label savedPointI = -savedFace[fp]-1;
+                        label savedPointi = -savedFace[fp]-1;
 
-                        if (localPointsSet.found(savedPointI))
+                        if (localPointsSet.found(savedPointi))
                         {
                             fRestore[fp] = true;
                         }
@@ -693,11 +693,11 @@ void Foam::removePoints::getUnrefimentSet
 
         forAll(savedFaces_, saveI)
         {
-            label bFaceI = savedFaceLabels_[saveI] - mesh_.nInternalFaces();
+            label bFacei = savedFaceLabels_[saveI] - mesh_.nInternalFaces();
 
-            if (bFaceI >= 0)
+            if (bFacei >= 0)
             {
-                const boolList& fRestore = faceVertexRestore[bFaceI];
+                const boolList& fRestore = faceVertexRestore[bFacei];
 
                 const face& savedFace = savedFaces_[saveI];
 
@@ -722,9 +722,9 @@ void Foam::removePoints::getUnrefimentSet
                                 << abort(FatalError);
                         }
 
-                        label savedPointI = -savedFace[fp]-1;
+                        label savedPointi = -savedFace[fp]-1;
 
-                        localPointsSet.insert(savedPointI);
+                        localPointsSet.insert(savedPointi);
                     }
                 }
             }
@@ -747,9 +747,9 @@ void Foam::removePoints::getUnrefimentSet
         {
             if (savedFace[fp] < 0)
             {
-                label savedPointI = -savedFace[fp]-1;
+                label savedPointi = -savedFace[fp]-1;
 
-                if (localPointsSet.found(savedPointI))
+                if (localPointsSet.found(savedPointi))
                 {
                     localFacesSet.insert(saveI);
                 }
@@ -828,12 +828,12 @@ void Foam::removePoints::setUnrefinement
         {
             if (savedFace[fp] < 0)
             {
-                label addedPointI = addedPoints[-savedFace[fp]-1];
+                label addedPointi = addedPoints[-savedFace[fp]-1];
 
-                if (addedPointI != -1)
+                if (addedPointi != -1)
                 {
-                    savedFace[fp] = addedPointI;
-                    newFace[newFp++] = addedPointI;
+                    savedFace[fp] = addedPointi;
+                    newFace[newFp++] = addedPointi;
                 }
                 else
                 {
@@ -889,15 +889,15 @@ void Foam::removePoints::setUnrefinement
             {
                 if (savedFace[fp] < 0)
                 {
-                    label addedPointI = addedPoints[-savedFace[fp]-1];
+                    label addedPointi = addedPoints[-savedFace[fp]-1];
 
-                    if (addedPointI != -1)
+                    if (addedPointi != -1)
                     {
                         FatalErrorInFunction
                             << "Face:" << savedFaceLabels_[saveI]
                             << " savedVerts:" << savedFace
                             << " uses restored point:" << -savedFace[fp]-1
-                            << " with new pointlabel:" << addedPointI
+                            << " with new pointlabel:" << addedPointi
                             << abort(FatalError);
                     }
                 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,7 +58,6 @@ namespace Foam
 
 typedef UINT_SIZE(uint, _t) uLabel;
 
-static const uLabel uLabelMin = UINT_SIZE(UINT, _MIN);
 static const uLabel uLabelMax = UINT_SIZE(UINT, _MAX);
 
 inline uLabel readULabel(Istream& is)
@@ -91,8 +90,6 @@ inline uLabel component(const uLabel l, const direction)
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "uLabelSpecific.H"
 
 #undef UINT_ADD_SIZE
 #undef UINT_ADD_DEF_SIZE

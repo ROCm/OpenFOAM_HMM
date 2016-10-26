@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,7 +52,7 @@ Foam::Kmesh::Kmesh(const fvMesh& mesh)
     boundBox box = mesh.bounds();
     l_ = box.span();
 
-    vector cornerCellCentre = ::Foam::max(mesh.C().internalField());
+    vector cornerCellCentre = ::Foam::max(mesh.C().primitiveField());
     vector cellL = 2*(box.max() - cornerCellCentre);
 
     vector rdeltaByL;

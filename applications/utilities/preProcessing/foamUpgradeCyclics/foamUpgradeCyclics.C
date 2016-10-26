@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,14 +31,14 @@ Description
     Tool to upgrade mesh and fields for split cyclics.
 
 Usage
+    \b foamUpgradeCyclics [OPTION]
 
-    - foamUpgradeCyclics [OPTION]
+    Options:
+      - \par -test
+        Suppress writing the updated files with split cyclics
 
-    \param -test \n
-    Suppress writing the updated files with split cyclics
-
-    \param -enableFunctionEntries \n
-    By default all dictionary preprocessing of fields is disabled
+      - \par -enableFunctionEntries
+        By default all dictionary preprocessing of fields is disabled
 
 \*---------------------------------------------------------------------------*/
 
@@ -91,15 +91,15 @@ void rewriteBoundary
 
     // Replace any 'cyclic'
     label nOldCyclics = 0;
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        const dictionary& patchDict = patches[patchI].dict();
+        const dictionary& patchDict = patches[patchi].dict();
 
         if (word(patchDict["type"]) == cyclicPolyPatch::typeName)
         {
             if (!patchDict.found("neighbourPatch"))
             {
-                Info<< "Patch " << patches[patchI].keyword()
+                Info<< "Patch " << patches[patchi].keyword()
                     << " does not have 'neighbourPatch' entry; assuming it"
                     << " is of the old type." << endl;
                 nOldCyclics++;
@@ -122,23 +122,23 @@ void rewriteBoundary
 
 
     // Add new entries
-    label addedPatchI = nOldPatches;
-    label newPatchI = 0;
-    forAll(oldPatches, patchI)
+    label addedPatchi = nOldPatches;
+    label newPatchi = 0;
+    forAll(oldPatches, patchi)
     {
-        const dictionary& patchDict = oldPatches[patchI].dict();
+        const dictionary& patchDict = oldPatches[patchi].dict();
 
         if
         (
             word(patchDict["type"]) == cyclicPolyPatch::typeName
         )
         {
-            const word& name = oldPatches[patchI].keyword();
+            const word& name = oldPatches[patchi].keyword();
 
             if (patchDict.found("neighbourPatch"))
             {
-                patches.set(patchI, oldPatches.set(patchI, NULL));
-                oldToNew[patchI] = newPatchI++;
+                patches.set(patchi, oldPatches.set(patchi, nullptr));
+                oldToNew[patchi] = newPatchi++;
 
                 // Check if patches come from automatic conversion
                 word oldName;
@@ -182,20 +182,20 @@ void rewriteBoundary
                 nbrNames.insert(name, nbrName);
 
                 // Save current dictionary
-                const dictionary patchDict(patches[patchI].dict());
+                const dictionary patchDict(patches[patchi].dict());
 
                 // Change entry on this side
-                patches.set(patchI, oldPatches.set(patchI, NULL));
-                oldToNew[patchI] = newPatchI++;
-                dictionary& thisPatchDict = patches[patchI].dict();
+                patches.set(patchi, oldPatches.set(patchi, nullptr));
+                oldToNew[patchi] = newPatchi++;
+                dictionary& thisPatchDict = patches[patchi].dict();
                 thisPatchDict.add("neighbourPatch", nbrName);
                 thisPatchDict.set("nFaces", nFaces/2);
-                patches[patchI].keyword() = thisName;
+                patches[patchi].keyword() = thisName;
 
                 // Add entry on other side
                 patches.set
                 (
-                    addedPatchI,
+                    addedPatchi,
                     new dictionaryEntry
                     (
                         nbrName,
@@ -203,21 +203,21 @@ void rewriteBoundary
                         patchDict
                     )
                 );
-                oldToNew[addedPatchI] = newPatchI++;
-                dictionary& nbrPatchDict = patches[addedPatchI].dict();
+                oldToNew[addedPatchi] = newPatchi++;
+                dictionary& nbrPatchDict = patches[addedPatchi].dict();
                 nbrPatchDict.set("neighbourPatch", thisName);
                 nbrPatchDict.set("nFaces", nFaces/2);
                 nbrPatchDict.set("startFace", startFace+nFaces/2);
-                patches[addedPatchI].keyword() = nbrName;
+                patches[addedPatchi].keyword() = nbrName;
 
                 Info<< "Replaced with patches" << nl
-                    << patches[patchI].keyword() << " with" << nl
+                    << patches[patchi].keyword() << " with" << nl
                     << "    nFaces    : "
                     << readLabel(thisPatchDict.lookup("nFaces"))
                     << nl
                     << "    startFace : "
                     << readLabel(thisPatchDict.lookup("startFace")) << nl
-                    << patches[addedPatchI].keyword() << " with" << nl
+                    << patches[addedPatchi].keyword() << " with" << nl
                     << "    nFaces    : "
                     << readLabel(nbrPatchDict.lookup("nFaces"))
                     << nl
@@ -225,13 +225,13 @@ void rewriteBoundary
                     << readLabel(nbrPatchDict.lookup("startFace"))
                     << nl << endl;
 
-                addedPatchI++;
+                addedPatchi++;
             }
         }
         else
         {
-            patches.set(patchI, oldPatches.set(patchI, NULL));
-            oldToNew[patchI] = newPatchI++;
+            patches.set(patchi, oldPatches.set(patchi, nullptr));
+            oldToNew[patchi] = newPatchi++;
         }
     }
 

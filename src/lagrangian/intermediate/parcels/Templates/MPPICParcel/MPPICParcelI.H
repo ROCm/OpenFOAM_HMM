@@ -30,12 +30,12 @@ inline Foam::MPPICParcel<ParcelType>::MPPICParcel
 (
     const polyMesh& owner,
     const vector& position,
-    const label cellI,
-    const label tetFaceI,
-    const label tetPtI
+    const label celli,
+    const label tetFacei,
+    const label tetPti
 )
 :
-    ParcelType(owner, position, cellI, tetFaceI, tetPtI),
+    ParcelType(owner, position, celli, tetFacei, tetPti),
     UCorrect_(Zero)
 {}
 
@@ -45,9 +45,9 @@ inline Foam::MPPICParcel<ParcelType>::MPPICParcel
 (
     const polyMesh& owner,
     const vector& position,
-    const label cellI,
-    const label tetFaceI,
-    const label tetPtI,
+    const label celli,
+    const label tetFacei,
+    const label tetPti,
     const label typeId,
     const scalar nParticle0,
     const scalar d0,
@@ -61,9 +61,9 @@ inline Foam::MPPICParcel<ParcelType>::MPPICParcel
     (
         owner,
         position,
-        cellI,
-        tetFaceI,
-        tetPtI,
+        celli,
+        tetFacei,
+        tetPti,
         typeId,
         nParticle0,
         d0,

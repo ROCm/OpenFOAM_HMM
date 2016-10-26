@@ -55,11 +55,15 @@ functions
 {
     timeStep
     {
-        type coded;
-        functionObjectLibs ("libutilityFunctionObjects.so");
-        redirectType setDeltaT;
+        type            coded;
+        libs            ("libutilityFunctionObjects.so");
+        name            setDeltaT;
 
         code
+        #{
+        #};
+
+        codeExecute
         #{
             const Time& runTime = mesh().time();
             if (runTime.timeToUserTime(runTime.value()) >= -15.0)

@@ -20,8 +20,8 @@ runAnsysToFoam()
 
 runAnsysToFoam flange.ans 0.001
 runApplication $application
-runApplication foamToEnsight
-runApplication foamToEnsightParts
+runApplication foamToEnsight -noZero
+runApplication foamToEnsightParts -noZero
 runApplication foamToVTK
 
 #------------------------------------------------------------------------------

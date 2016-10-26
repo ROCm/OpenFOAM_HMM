@@ -40,7 +40,7 @@ bool Foam::sigInt::sigActive_ = false;
 void Foam::sigInt::sigHandler(int)
 {
     // Reset old handling
-    if (sigaction(SIGINT, &oldAction_, NULL) < 0)
+    if (sigaction(SIGINT, &oldAction_, nullptr) < 0)
     {
         FatalErrorInFunction
             << "Cannot reset SIGINT trapping"
@@ -96,7 +96,7 @@ void Foam::sigInt::unset(const bool)
 {
     if (sigActive_)
     {
-        if (sigaction(SIGINT, &oldAction_, NULL) < 0)
+        if (sigaction(SIGINT, &oldAction_, nullptr) < 0)
         {
             FatalErrorInFunction
                 << "Cannot set SIGINT trapping"

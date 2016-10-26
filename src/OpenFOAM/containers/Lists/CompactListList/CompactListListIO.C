@@ -42,13 +42,13 @@ Foam::Istream& Foam::operator>>(Istream& is, CompactListList<T, Container>& lst)
 {
     is  >> lst.offsets_ >> lst.m_;
     // Note: empty list gets output as two empty lists
-    if (lst.offsets_.size() == 0)
+    if (lst.offsets_.size())
     {
-        lst.size_ = 0;
+        lst.size_ = lst.offsets_.size()-1;
     }
     else
     {
-        lst.size_ = lst.offsets_.size()-1;
+        lst.size_ = 0;
     }
     return is;
 }

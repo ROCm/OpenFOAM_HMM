@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,18 +53,18 @@ void Foam::MULES::correct
 
     if (mesh.moving())
     {
-        psi.internalField() =
+        psi.primitiveFieldRef() =
         (
-            rho.field()*psi.internalField()*rDeltaT
+            rho.field()*psi.primitiveField()*rDeltaT
           + Su.field()
           - psiIf
         )/(rho.field()*rDeltaT - Sp.field());
     }
     else
     {
-        psi.internalField() =
+        psi.primitiveFieldRef() =
         (
-            rho.field()*psi.internalField()*rDeltaT
+            rho.field()*psi.primitiveField()*rDeltaT
           + Su.field()
           - psiIf
         )/(rho.field()*rDeltaT - Sp.field());
@@ -145,7 +145,7 @@ void Foam::MULES::limiterCorr
 )
 {
     const scalarField& psiIf = psi;
-    const volScalarField::GeometricBoundaryField& psiBf = psi.boundaryField();
+    const volScalarField::Boundary& psiBf = psi.boundaryField();
 
     const fvMesh& mesh = psi.mesh();
 
@@ -168,14 +168,14 @@ void Foam::MULES::limiterCorr
 
     const labelUList& owner = mesh.owner();
     const labelUList& neighb = mesh.neighbour();
-    tmp<volScalarField::DimensionedInternalField> tVsc = mesh.Vsc();
+    tmp<volScalarField::Internal> tVsc = mesh.Vsc();
     const scalarField& V = tVsc();
 
-    const surfaceScalarField::GeometricBoundaryField& phiBf =
+    const surfaceScalarField::Boundary& phiBf =
         phi.boundaryField();
 
     const scalarField& phiCorrIf = phiCorr;
-    const surfaceScalarField::GeometricBoundaryField& phiCorrBf =
+    const surfaceScalarField::Boundary& phiCorrBf =
         phiCorr.boundaryField();
 
     slicedSurfaceScalarField lambda
@@ -196,8 +196,8 @@ void Foam::MULES::limiterCorr
     );
 
     scalarField& lambdaIf = lambda;
-    surfaceScalarField::GeometricBoundaryField& lambdaBf =
-        lambda.boundaryField();
+    surfaceScalarField::Boundary& lambdaBf =
+        lambda.boundaryFieldRef();
 
     scalarField psiMaxn(psiIf.size(), psiMin);
     scalarField psiMinn(psiIf.size(), psiMax);
@@ -293,7 +293,7 @@ void Foam::MULES::limiterCorr
        *(
            (rho.field()*rDeltaT - Sp.field())*psiMaxn
          - Su.field()
-         - rho.field()*psi.internalField()*rDeltaT
+         - rho.field()*psi.primitiveField()*rDeltaT
         );
 
     psiMinn =
@@ -301,7 +301,7 @@ void Foam::MULES::limiterCorr
        *(
            Su.field()
          - (rho.field()*rDeltaT - Sp.field())*psiMinn
-         + rho.field()*psi.internalField()*rDeltaT
+         + rho.field()*psi.primitiveField()*rDeltaT
         );
 
     scalarField sumlPhip(psiIf.size());

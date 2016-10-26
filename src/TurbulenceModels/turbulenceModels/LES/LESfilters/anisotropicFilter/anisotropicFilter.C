@@ -63,14 +63,14 @@ Foam::anisotropicFilter::anisotropicFilter
 {
     for (direction d=0; d<vector::nComponents; d++)
     {
-        coeff_.internalField().replace
+        coeff_.primitiveFieldRef().replace
         (
             d,
             (1/widthCoeff_)*
             sqr
             (
                 2.0*mesh.V()
-               /fvc::surfaceSum(mag(mesh.Sf().component(d)))().internalField()
+               /fvc::surfaceSum(mag(mesh.Sf().component(d)))().primitiveField()
             )
         );
     }
@@ -100,14 +100,14 @@ Foam::anisotropicFilter::anisotropicFilter
 {
     for (direction d=0; d<vector::nComponents; d++)
     {
-        coeff_.internalField().replace
+        coeff_.primitiveFieldRef().replace
         (
             d,
             (1/widthCoeff_)*
             sqr
             (
                 2.0*mesh.V()
-               /fvc::surfaceSum(mag(mesh.Sf().component(d)))().internalField()
+               /fvc::surfaceSum(mag(mesh.Sf().component(d)))().primitiveField()
             )
         );
     }
@@ -129,6 +129,8 @@ Foam::tmp<Foam::volScalarField> Foam::anisotropicFilter::operator()
     const tmp<volScalarField>& unFilteredField
 ) const
 {
+    correctBoundaryConditions(unFilteredField);
+
     tmp<volScalarField> tmpFilteredField =
         unFilteredField
       + (
@@ -151,6 +153,8 @@ Foam::tmp<Foam::volVectorField> Foam::anisotropicFilter::operator()
     const tmp<volVectorField>& unFilteredField
 ) const
 {
+    correctBoundaryConditions(unFilteredField);
+
     tmp<volVectorField> tmpFilteredField =
         unFilteredField
       + (
@@ -173,6 +177,8 @@ Foam::tmp<Foam::volSymmTensorField> Foam::anisotropicFilter::operator()
     const tmp<volSymmTensorField>& unFilteredField
 ) const
 {
+    correctBoundaryConditions(unFilteredField);
+
     tmp<volSymmTensorField> tmpFilteredField
     (
         new volSymmTensorField
@@ -207,6 +213,8 @@ Foam::tmp<Foam::volTensorField> Foam::anisotropicFilter::operator()
     const tmp<volTensorField>& unFilteredField
 ) const
 {
+    correctBoundaryConditions(unFilteredField);
+
     tmp<volTensorField> tmpFilteredField
     (
         new volTensorField

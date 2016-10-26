@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,12 +108,12 @@ inline Foam::SprayParcel<ParcelType>::SprayParcel
 (
     const polyMesh& mesh,
     const vector& position,
-    const label cellI,
-    const label tetFaceI,
-    const label tetPtI
+    const label celli,
+    const label tetFacei,
+    const label tetPti
 )
 :
-    ParcelType(mesh, position, cellI, tetFaceI, tetPtI),
+    ParcelType(mesh, position, celli, tetFacei, tetPti),
     d0_(this->d()),
     position0_(position),
     sigma_(0.0),
@@ -135,9 +135,9 @@ inline Foam::SprayParcel<ParcelType>::SprayParcel
 (
     const polyMesh& mesh,
     const vector& position,
-    const label cellI,
-    const label tetFaceI,
-    const label tetPtI,
+    const label celli,
+    const label tetFacei,
+    const label tetPti,
     const label typeId,
     const scalar nParticle0,
     const scalar d0,
@@ -163,9 +163,9 @@ inline Foam::SprayParcel<ParcelType>::SprayParcel
     (
         mesh,
         position,
-        cellI,
-        tetFaceI,
-        tetPtI,
+        celli,
+        tetFacei,
+        tetPti,
         typeId,
         nParticle0,
         d0,

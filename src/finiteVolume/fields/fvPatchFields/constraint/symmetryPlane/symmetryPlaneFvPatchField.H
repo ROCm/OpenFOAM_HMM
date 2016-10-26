@@ -30,11 +30,10 @@ Group
 Description
     This boundary condition enforces a symmetryPlane constraint
 
-    \heading Patch usage
-
+Usage
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            symmetryPlane;
     }

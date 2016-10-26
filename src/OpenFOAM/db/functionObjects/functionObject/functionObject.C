@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,16 +32,19 @@ License
 
 namespace Foam
 {
-defineDebugSwitchWithName(functionObject, "functionObject", 0);
-defineRunTimeSelectionTable(functionObject, dictionary);
+    defineDebugSwitchWithName(functionObject, "functionObject", 0);
+    defineRunTimeSelectionTable(functionObject, dictionary);
 }
+
+bool Foam::functionObject::postProcess(false);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObject::functionObject(const word& name)
 :
-    name_(name)
+    name_(name),
+    log(postProcess)
 {}
 
 
@@ -50,23 +53,35 @@ Foam::functionObject::functionObject(const word& name)
 Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
 (
     const word& name,
-    const Time& t,
-    const dictionary& functionDict
+    const Time& runTime,
+    const dictionary& dict
 )
 {
-    const word functionType(functionDict.lookup("type"));
+    const word functionType(dict.lookup("type"));
 
     if (debug)
     {
         Info<< "Selecting function " << functionType << endl;
     }
 
-    const_cast<Time&>(t).libs().open
-    (
-        functionDict,
-        "functionObjectLibs",
-        dictionaryConstructorTablePtr_
-    );
+    if (dict.found("functionObjectLibs"))
+    {
+        const_cast<Time&>(runTime).libs().open
+        (
+            dict,
+            "functionObjectLibs",
+            dictionaryConstructorTablePtr_
+        );
+    }
+    else
+    {
+        const_cast<Time&>(runTime).libs().open
+        (
+            dict,
+            "libs",
+            dictionaryConstructorTablePtr_
+        );
+    }
 
     if (!dictionaryConstructorTablePtr_)
     {
@@ -90,7 +105,7 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
             << exit(FatalError);
     }
 
-    return autoPtr<functionObject>(cstrIter()(name, t, functionDict));
+    return autoPtr<functionObject>(cstrIter()(name, runTime, dict));
 }
 
 
@@ -108,15 +123,20 @@ const Foam::word& Foam::functionObject::name() const
 }
 
 
-bool Foam::functionObject::end()
+bool Foam::functionObject::read(const dictionary& dict)
 {
-    return execute(false);
+    if (!postProcess)
+    {
+        log = dict.lookupOrDefault<Switch>("log", true);
+    }
+
+    return true;
 }
 
 
-bool Foam::functionObject::timeSet()
+bool Foam::functionObject::end()
 {
-    return false;
+    return true;
 }
 
 
@@ -126,15 +146,12 @@ bool Foam::functionObject::adjustTimeStep()
 }
 
 
-Foam::autoPtr<Foam::functionObject> Foam::functionObject::iNew::operator()
-(
-    const word& name,
-    Istream& is
-) const
-{
-    dictionary dict(is);
-    return functionObject::New(name, time_, dict);
-}
+void Foam::functionObject::updateMesh(const mapPolyMesh&)
+{}
+
+
+void Foam::functionObject::movePoints(const polyMesh&)
+{}
 
 
 // ************************************************************************* //

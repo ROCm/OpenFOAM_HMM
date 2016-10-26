@@ -32,8 +32,7 @@ Description
     condition.  It does not use information on the patch; instead it holds
     thr data locally.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         fieldName    | name of field to be mapped | no       | this field name
@@ -43,7 +42,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            mappedField;
         fieldName       T;              // optional field name
@@ -60,7 +59,7 @@ Note
     employ this condition if it is not possible to change the underlying
     geometric (poly) patch type to \c mapped.
 
-SeeAlso
+See also
     Foam::mappedPatchBase
     Foam::mappedPolyPatch
     Foam::mappedFvPatch

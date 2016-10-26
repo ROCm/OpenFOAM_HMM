@@ -30,14 +30,14 @@ License
 template<class BasicPsiThermo, class MixtureType>
 void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::calculate()
 {
-    const scalarField& hCells = this->he().internalField();
-    const scalarField& pCells = this->p_.internalField();
+    const scalarField& hCells = this->he();
+    const scalarField& pCells = this->p_;
 
-    scalarField& TCells = this->T_.internalField();
-    scalarField& psiCells = this->psi_.internalField();
-    scalarField& rhoCells = this->rho_.internalField();
-    scalarField& muCells = this->mu_.internalField();
-    scalarField& alphaCells = this->alpha_.internalField();
+    scalarField& TCells = this->T_.primitiveFieldRef();
+    scalarField& psiCells = this->psi_.primitiveFieldRef();
+    scalarField& rhoCells = this->rho_.primitiveFieldRef();
+    scalarField& muCells = this->mu_.primitiveFieldRef();
+    scalarField& alphaCells = this->alpha_.primitiveFieldRef();
 
     forAll(TCells, celli)
     {
@@ -58,17 +58,36 @@ void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::calculate()
         alphaCells[celli] = mixture_.alphah(pCells[celli], TCells[celli]);
     }
 
+    volScalarField::Boundary& pBf =
+        this->p_.boundaryFieldRef();
+
+    volScalarField::Boundary& TBf =
+        this->T_.boundaryFieldRef();
+
+    volScalarField::Boundary& psiBf =
+        this->psi_.boundaryFieldRef();
+
+    volScalarField::Boundary& rhoBf =
+        this->rho_.boundaryFieldRef();
+
+    volScalarField::Boundary& heBf =
+        this->he().boundaryFieldRef();
+
+    volScalarField::Boundary& muBf =
+        this->mu_.boundaryFieldRef();
+
+    volScalarField::Boundary& alphaBf =
+        this->alpha_.boundaryFieldRef();
+
     forAll(this->T_.boundaryField(), patchi)
     {
-        fvPatchScalarField& pp = this->p_.boundaryField()[patchi];
-        fvPatchScalarField& pT = this->T_.boundaryField()[patchi];
-        fvPatchScalarField& ppsi = this->psi_.boundaryField()[patchi];
-        fvPatchScalarField& prho = this->rho_.boundaryField()[patchi];
-
-        fvPatchScalarField& ph = this->he().boundaryField()[patchi];
-
-        fvPatchScalarField& pmu = this->mu_.boundaryField()[patchi];
-        fvPatchScalarField& palpha = this->alpha_.boundaryField()[patchi];
+        fvPatchScalarField& pp = pBf[patchi];
+        fvPatchScalarField& pT = TBf[patchi];
+        fvPatchScalarField& ppsi = psiBf[patchi];
+        fvPatchScalarField& prho = rhoBf[patchi];
+        fvPatchScalarField& phe = heBf[patchi];
+        fvPatchScalarField& pmu = muBf[patchi];
+        fvPatchScalarField& palpha = alphaBf[patchi];
 
         if (pT.fixesValue())
         {
@@ -77,7 +96,7 @@ void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::calculate()
                 const typename MixtureType::thermoType& mixture_ =
                     this->patchFaceMixture(patchi, facei);
 
-                ph[facei] = mixture_.HE(pp[facei], pT[facei]);
+                phe[facei] = mixture_.HE(pp[facei], pT[facei]);
 
                 ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
                 prho[facei] = mixture_.rho(pp[facei], pT[facei]);
@@ -92,7 +111,7 @@ void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::calculate()
                 const typename MixtureType::thermoType& mixture_ =
                     this->patchFaceMixture(patchi, facei);
 
-                pT[facei] = mixture_.THE(ph[facei], pp[facei], pT[facei]);
+                pT[facei] = mixture_.THE(phe[facei], pp[facei], pT[facei]);
 
                 ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
                 prho[facei] = mixture_.rho(pp[facei], pT[facei]);

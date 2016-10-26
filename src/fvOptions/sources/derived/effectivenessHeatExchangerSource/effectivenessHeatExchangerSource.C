@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,23 +61,23 @@ void Foam::fv::effectivenessHeatExchangerSource::initialise()
     label count = 0;
     forAll(fZone, i)
     {
-        label faceI = fZone[i];
+        label facei = fZone[i];
         label faceId = -1;
         label facePatchId = -1;
-        if (mesh_.isInternalFace(faceI))
+        if (mesh_.isInternalFace(facei))
         {
-            faceId = faceI;
+            faceId = facei;
             facePatchId = -1;
         }
         else
         {
-            facePatchId = mesh_.boundaryMesh().whichPatch(faceI);
+            facePatchId = mesh_.boundaryMesh().whichPatch(facei);
             const polyPatch& pp = mesh_.boundaryMesh()[facePatchId];
             if (isA<coupledPolyPatch>(pp))
             {
                 if (refCast<const coupledPolyPatch>(pp).owner())
                 {
-                    faceId = pp.whichFace(faceI);
+                    faceId = pp.whichFace(facei);
                 }
                 else
                 {
@@ -86,7 +86,7 @@ void Foam::fv::effectivenessHeatExchangerSource::initialise()
             }
             else if (!isA<emptyPolyPatch>(pp))
             {
-                faceId = faceI - pp.start();
+                faceId = facei - pp.start();
             }
             else
             {
@@ -126,15 +126,15 @@ void Foam::fv::effectivenessHeatExchangerSource::calculateTotalArea
     area = 0;
     forAll(faceId_, i)
     {
-        label faceI = faceId_[i];
+        label facei = faceId_[i];
         if (facePatchId_[i] != -1)
         {
-            label patchI = facePatchId_[i];
-            area += mesh_.magSf().boundaryField()[patchI][faceI];
+            label patchi = facePatchId_[i];
+            area += mesh_.magSf().boundaryField()[patchi][facei];
         }
         else
         {
-            area += mesh_.magSf()[faceI];
+            area += mesh_.magSf()[facei];
         }
     }
     reduce(area, sumOp<scalar>());
@@ -156,9 +156,9 @@ Foam::fv::effectivenessHeatExchangerSource::effectivenessHeatExchangerSource
     secondaryInletT_(readScalar(coeffs_.lookup("secondaryInletT"))),
     primaryInletT_(readScalar(coeffs_.lookup("primaryInletT"))),
     eTable_(),
-    UName_(coeffs_.lookupOrDefault<word>("UName", "U")),
-    TName_(coeffs_.lookupOrDefault<word>("TName", "T")),
-    phiName_(coeffs_.lookupOrDefault<word>("phiName", "phi")),
+    UName_(coeffs_.lookupOrDefault<word>("U", "U")),
+    TName_(coeffs_.lookupOrDefault<word>("T", "T")),
+    phiName_(coeffs_.lookupOrDefault<word>("phi", "phi")),
     faceZoneName_(coeffs_.lookup("faceZone")),
     zoneID_(mesh_.faceZones().findZoneID(faceZoneName_)),
     faceId_(),
@@ -212,20 +212,20 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
     scalar CpfMean = 0;
     forAll(faceId_, i)
     {
-        label faceI = faceId_[i];
+        label facei = faceId_[i];
         if (facePatchId_[i] != -1)
         {
-            label patchI = facePatchId_[i];
-            totalphi += phi.boundaryField()[patchI][faceI]*faceSign_[i];
+            label patchi = facePatchId_[i];
+            totalphi += phi.boundaryField()[patchi][facei]*faceSign_[i];
 
             CpfMean +=
-                Cpf.boundaryField()[patchI][faceI]
-               *mesh_.magSf().boundaryField()[patchI][faceI];
+                Cpf.boundaryField()[patchi][facei]
+               *mesh_.magSf().boundaryField()[patchi][facei];
         }
         else
         {
-            totalphi += phi[faceI]*faceSign_[i];
-            CpfMean += Cpf[faceI]*mesh_.magSf()[faceI];
+            totalphi += phi[facei]*faceSign_[i];
+            CpfMean += Cpf[facei]*mesh_.magSf()[facei];
         }
     }
     reduce(CpfMean, sumOp<scalar>());

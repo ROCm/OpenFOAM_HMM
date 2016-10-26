@@ -45,7 +45,7 @@ tmp<scalarField> nutUTabulatedWallFunctionFvPatchScalarField::calcNut() const
         IOobject::groupName
         (
             turbulenceModel::propertiesName,
-            dimensionedInternalField().group()
+            internalField().group()
         )
     );
     const scalarField& y = turbModel.y()[patchi];
@@ -74,9 +74,9 @@ tmp<scalarField> nutUTabulatedWallFunctionFvPatchScalarField::calcUPlus
     tmp<scalarField> tuPlus(new scalarField(patch().size(), 0.0));
     scalarField& uPlus = tuPlus.ref();
 
-    forAll(uPlus, faceI)
+    forAll(uPlus, facei)
     {
-        uPlus[faceI] = uPlusTable_.interpolateLog10(Rey[faceI]);
+        uPlus[facei] = uPlusTable_.interpolateLog10(Rey[facei]);
     }
 
     return tuPlus;
@@ -187,7 +187,7 @@ tmp<scalarField> nutUTabulatedWallFunctionFvPatchScalarField::yPlus() const
         IOobject::groupName
         (
             turbulenceModel::propertiesName,
-            dimensionedInternalField().group()
+            internalField().group()
         )
     );
     const scalarField& y = turbModel.y()[patchi];

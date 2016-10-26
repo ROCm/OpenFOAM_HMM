@@ -140,9 +140,9 @@ updateCoeffs()
 
     label rayId = -1;
     label lambdaId = -1;
-    dom.setRayIdLambdaId(dimensionedInternalField().name(), rayId, lambdaId);
+    dom.setRayIdLambdaId(internalField().name(), rayId, lambdaId);
 
-    const label patchI = patch().index();
+    const label patchi = patch().index();
 
     if (dom.nLambda() == 0)
     {
@@ -159,15 +159,15 @@ updateCoeffs()
 
     const scalarField nAve(n & ray.dAve());
 
-    ray.Qr().boundaryField()[patchI] += Iw*nAve;
+    ray.Qr().boundaryFieldRef()[patchi] += Iw*nAve;
 
     const scalarField Eb
     (
-        dom.blackBody().bLambda(lambdaId).boundaryField()[patchI]
+        dom.blackBody().bLambda(lambdaId).boundaryField()[patchi]
     );
 
     const boundaryRadiationProperties& boundaryRadiation =
-        boundaryRadiationProperties::New(dimensionedInternalField().mesh());
+        boundaryRadiationProperties::New(internalField().mesh());
 
 
     const tmp<scalarField> temissivity
@@ -177,67 +177,67 @@ updateCoeffs()
 
     const scalarField& emissivity = temissivity();
 
-    scalarField& Qem = ray.Qem().boundaryField()[patchI];
-    scalarField& Qin = ray.Qin().boundaryField()[patchI];
+    scalarField& Qem = ray.Qem().boundaryFieldRef()[patchi];
+    scalarField& Qin = ray.Qin().boundaryFieldRef()[patchi];
 
     // Use updated Ir while iterating over rays
     // avoids to used lagged Qin
     /*
-    scalarField Ir = dom.IRay(0).Qin().boundaryField()[patchI];
+    scalarField Ir = dom.IRay(0).Qin().boundaryField()[patchi];
 
     for (label rayI=1; rayI < dom.nRay(); rayI++)
     {
-        Ir += dom.IRay(rayI).Qin().boundaryField()[patchI];
+        Ir += dom.IRay(rayI).Qin().boundaryField()[patchi];
     }
     */
 
     // Calculate Ir into the wall on the same lambdaId
     scalarField Ir(patch().size(), 0.0);
-    forAll(Iw, faceI)
+    forAll(Iw, facei)
     {
-        for (label rayI=0; rayI < dom.nRay(); rayI++)
+        for (label rayi=0; rayi < dom.nRay(); rayi++)
         {
-            const vector& d = dom.IRay(rayI).d();
+            const vector& d = dom.IRay(rayi).d();
 
-            if ((-n[faceI] & d) < 0.0)
+            if ((-n[facei] & d) < 0.0)
             {
                 // q into the wall
                 const scalarField& IFace =
-                    dom.IRay(rayI).ILambda(lambdaId).boundaryField()[patchI];
+                    dom.IRay(rayi).ILambda(lambdaId).boundaryField()[patchi];
 
-                const vector& rayDave = dom.IRay(rayI).dAve();
-                Ir[faceI] += IFace[faceI]*(n[faceI] & rayDave);
+                const vector& rayDave = dom.IRay(rayi).dAve();
+                Ir[facei] += IFace[facei]*(n[facei] & rayDave);
             }
         }
     }
 
-    forAll(Iw, faceI)
+    forAll(Iw, facei)
     {
         const vector& d = dom.IRay(rayId).d();
 
-        if ((-n[faceI] & d) > 0.0)
+        if ((-n[facei] & d) > 0.0)
         {
             // direction out of the wall
-            refGrad()[faceI] = 0.0;
-            valueFraction()[faceI] = 1.0;
-            refValue()[faceI] =
+            refGrad()[facei] = 0.0;
+            valueFraction()[facei] = 1.0;
+            refValue()[facei] =
                 (
-                    Ir[faceI]*(1.0 - emissivity[faceI])
-                  + emissivity[faceI]*Eb[faceI]
+                    Ir[facei]*(1.0 - emissivity[facei])
+                  + emissivity[facei]*Eb[facei]
                 )/pi;
 
             // Emmited heat flux from this ray direction (sum over lambdaId)
-            Qem[faceI] += refValue()[faceI]*nAve[faceI];
+            Qem[facei] += refValue()[facei]*nAve[facei];
         }
         else
         {
             // direction into the wall
-            valueFraction()[faceI] = 0.0;
-            refGrad()[faceI] = 0.0;
-            refValue()[faceI] = 0.0; //not used
+            valueFraction()[facei] = 0.0;
+            refGrad()[facei] = 0.0;
+            refValue()[facei] = 0.0; //not used
 
             // Incident heat flux on this ray direction (sum over lambdaId)
-            Qin[faceI] += Iw[faceI]*nAve[faceI];
+            Qin[facei] += Iw[facei]*nAve[facei];
         }
     }
 

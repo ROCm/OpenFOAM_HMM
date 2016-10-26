@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -110,9 +110,9 @@ void filterPatches(polyMesh& mesh, const HashSet<word>& addedPatchNames)
     label nOldPatches = returnReduce(patches.size(), sumOp<label>());
 
     // Copy old patches.
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        const polyPatch& pp = patches[patchI];
+        const polyPatch& pp = patches[patchi];
 
         // Note: reduce possible since non-proc patches guaranteed in same order
         if (!isA<processorPolyPatch>(pp))
@@ -146,14 +146,14 @@ void filterPatches(polyMesh& mesh, const HashSet<word>& addedPatchNames)
             {
                 Info<< "Removing zero-sized patch " << pp.name()
                     << " type " << pp.type()
-                    << " at position " << patchI << endl;
+                    << " at position " << patchi << endl;
             }
         }
     }
     // Copy non-empty processor patches
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        const polyPatch& pp = patches[patchI];
+        const polyPatch& pp = patches[patchi];
 
         if (isA<processorPolyPatch>(pp))
         {
@@ -173,7 +173,7 @@ void filterPatches(polyMesh& mesh, const HashSet<word>& addedPatchNames)
             else
             {
                 Info<< "Removing empty processor patch " << pp.name()
-                    << " at position " << patchI << endl;
+                    << " at position " << patchi << endl;
             }
         }
     }
@@ -202,16 +202,16 @@ void dumpCyclicMatch(const fileName& prefix, const polyMesh& mesh)
 {
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
         if
         (
-            isA<cyclicPolyPatch>(patches[patchI])
-         && refCast<const cyclicPolyPatch>(patches[patchI]).owner()
+            isA<cyclicPolyPatch>(patches[patchi])
+         && refCast<const cyclicPolyPatch>(patches[patchi]).owner()
         )
         {
             const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(patches[patchI]);
+                refCast<const cyclicPolyPatch>(patches[patchi]);
 
             // Dump patches
             {
@@ -247,12 +247,12 @@ void dumpCyclicMatch(const fileName& prefix, const polyMesh& mesh)
             Pout<< "Dumping cyclic match as lines between face centres to "
                 << str.name() << endl;
 
-            forAll(cycPatch, faceI)
+            forAll(cycPatch, facei)
             {
-                const point& fc0 = mesh.faceCentres()[cycPatch.start()+faceI];
+                const point& fc0 = mesh.faceCentres()[cycPatch.start()+facei];
                 meshTools::writeOBJ(str, fc0);
                 vertI++;
-                const point& fc1 = mesh.faceCentres()[nbrPatch.start()+faceI];
+                const point& fc1 = mesh.faceCentres()[nbrPatch.start()+facei];
                 meshTools::writeOBJ(str, fc1);
                 vertI++;
 
@@ -322,9 +322,9 @@ void syncPoints
     {
         // Send
 
-        forAll(patches, patchI)
+        forAll(patches, patchi)
         {
-            const polyPatch& pp = patches[patchI];
+            const polyPatch& pp = patches[patchi];
 
             if
             (
@@ -342,12 +342,12 @@ void syncPoints
                 const labelList& meshPts = procPatch.meshPoints();
                 const labelList& nbrPts = procPatch.neighbPoints();
 
-                forAll(nbrPts, pointI)
+                forAll(nbrPts, pointi)
                 {
-                    label nbrPointI = nbrPts[pointI];
-                    if (nbrPointI >= 0 && nbrPointI < patchInfo.size())
+                    label nbrPointi = nbrPts[pointi];
+                    if (nbrPointi >= 0 && nbrPointi < patchInfo.size())
                     {
-                        patchInfo[nbrPointI] = points[meshPts[pointI]];
+                        patchInfo[nbrPointi] = points[meshPts[pointi]];
                     }
                 }
 
@@ -359,9 +359,9 @@ void syncPoints
 
         // Receive and set.
 
-        forAll(patches, patchI)
+        forAll(patches, patchi)
         {
-            const polyPatch& pp = patches[patchI];
+            const polyPatch& pp = patches[patchi];
 
             if
             (
@@ -400,19 +400,19 @@ void syncPoints
 
                 const labelList& meshPts = procPatch.meshPoints();
 
-                forAll(meshPts, pointI)
+                forAll(meshPts, pointi)
                 {
-                    label meshPointI = meshPts[pointI];
-                    points[meshPointI] = nbrPatchInfo[pointI];
+                    label meshPointi = meshPts[pointi];
+                    points[meshPointi] = nbrPatchInfo[pointi];
                 }
             }
         }
     }
 
     // Do the cyclics.
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        const polyPatch& pp = patches[patchI];
+        const polyPatch& pp = patches[patchi];
 
         if
         (
@@ -481,9 +481,9 @@ void syncPoints
 
         forAll(pd.sharedPointLabels(), i)
         {
-            label meshPointI = pd.sharedPointLabels()[i];
+            label meshPointi = pd.sharedPointLabels()[i];
             // Fill my entries in the shared points
-            sharedPts[pd.sharedPointAddr()[i]] = points[meshPointI];
+            sharedPts[pd.sharedPointAddr()[i]] = points[meshPointi];
         }
 
         // Combine on master.
@@ -494,8 +494,8 @@ void syncPoints
         // my local information.
         forAll(pd.sharedPointLabels(), i)
         {
-            label meshPointI = pd.sharedPointLabels()[i];
-            points[meshPointI] = sharedPts[pd.sharedPointAddr()[i]];
+            label meshPointi = pd.sharedPointLabels()[i];
+            points[meshPointi] = sharedPts[pd.sharedPointAddr()[i]];
         }
     }
 }
@@ -567,12 +567,12 @@ int main(int argc, char *argv[])
         // Old and new patches.
         DynamicList<polyPatch*> allPatches(patches.size()+patchSources.size());
 
-        label startFaceI = mesh.nInternalFaces();
+        label startFacei = mesh.nInternalFaces();
 
         // Copy old patches.
-        forAll(patches, patchI)
+        forAll(patches, patchi)
         {
-            const polyPatch& pp = patches[patchI];
+            const polyPatch& pp = patches[patchi];
 
             if (!isA<processorPolyPatch>(pp))
             {
@@ -581,12 +581,12 @@ int main(int argc, char *argv[])
                     pp.clone
                     (
                         patches,
-                        patchI,
+                        patchi,
                         pp.size(),
-                        startFaceI
+                        startFacei
                     ).ptr()
                 );
-                startFaceI += pp.size();
+                startFacei += pp.size();
             }
         }
 
@@ -596,20 +596,20 @@ int main(int argc, char *argv[])
 
             word patchName(dict.lookup("name"));
 
-            label destPatchI = patches.findPatchID(patchName);
+            label destPatchi = patches.findPatchID(patchName);
 
-            if (destPatchI == -1)
+            if (destPatchi == -1)
             {
                 dictionary patchDict(dict.subDict("patchInfo"));
 
-                destPatchI = allPatches.size();
+                destPatchi = allPatches.size();
 
                 Info<< "Adding new patch " << patchName
-                    << " as patch " << destPatchI
+                    << " as patch " << destPatchi
                     << " from " << patchDict << endl;
 
                 patchDict.set("nFaces", 0);
-                patchDict.set("startFace", startFaceI);
+                patchDict.set("startFace", startFacei);
 
                 // Add an empty patch.
                 allPatches.append
@@ -618,7 +618,7 @@ int main(int argc, char *argv[])
                     (
                         patchName,
                         patchDict,
-                        destPatchI,
+                        destPatchi,
                         patches
                     ).ptr()
                 );
@@ -631,9 +631,9 @@ int main(int argc, char *argv[])
         }
 
         // Copy old patches.
-        forAll(patches, patchI)
+        forAll(patches, patchi)
         {
-            const polyPatch& pp = patches[patchI];
+            const polyPatch& pp = patches[patchi];
 
             if (isA<processorPolyPatch>(pp))
             {
@@ -642,12 +642,12 @@ int main(int argc, char *argv[])
                     pp.clone
                     (
                         patches,
-                        patchI,
+                        patchi,
                         pp.size(),
-                        startFaceI
+                        startFacei
                     ).ptr()
                 );
-                startFaceI += pp.size();
+                startFacei += pp.size();
             }
         }
 
@@ -671,9 +671,9 @@ int main(int argc, char *argv[])
         const dictionary& dict = patchSources[addedI];
 
         const word patchName(dict.lookup("name"));
-        label destPatchI = patches.findPatchID(patchName);
+        label destPatchi = patches.findPatchID(patchName);
 
-        if (destPatchI == -1)
+        if (destPatchi == -1)
         {
             FatalErrorInFunction
                 << "patch " << patchName << " not added. Problem."
@@ -698,7 +698,7 @@ int main(int argc, char *argv[])
                 const polyPatch& pp = patches[iter.key()];
 
                 Info<< "Moving faces from patch " << pp.name()
-                    << " to patch " << destPatchI << endl;
+                    << " to patch " << destPatchi << endl;
 
                 forAll(pp, i)
                 {
@@ -706,7 +706,7 @@ int main(int argc, char *argv[])
                     (
                         mesh,
                         pp.start() + i,
-                        destPatchI,
+                        destPatchi,
                         meshMod
                     );
                 }
@@ -728,12 +728,12 @@ int main(int argc, char *argv[])
 
             forAll(patchFaces, i)
             {
-                label faceI = patchFaces[i];
+                label facei = patchFaces[i];
 
-                if (mesh.isInternalFace(faceI))
+                if (mesh.isInternalFace(facei))
                 {
                     FatalErrorInFunction
-                        << "Face " << faceI << " specified in set "
+                        << "Face " << facei << " specified in set "
                         << faces.name()
                         << " is not an external face of the mesh." << endl
                         << "This application can only repatch existing boundary"
@@ -743,8 +743,8 @@ int main(int argc, char *argv[])
                 changePatchID
                 (
                     mesh,
-                    faceI,
-                    destPatchI,
+                    facei,
+                    destPatchi,
                     meshMod
                 );
             }
@@ -786,9 +786,9 @@ int main(int argc, char *argv[])
         // For cyclic patches:
         // - for separated ones use user specified offset vector
 
-        forAll(mesh.boundaryMesh(), patchI)
+        forAll(mesh.boundaryMesh(), patchi)
         {
-            const polyPatch& pp = mesh.boundaryMesh()[patchI];
+            const polyPatch& pp = mesh.boundaryMesh()[patchi];
 
             if (pp.size() && isA<coupledPolyPatch>(pp))
             {

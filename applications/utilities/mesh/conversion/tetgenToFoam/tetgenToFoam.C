@@ -83,11 +83,11 @@ label findFace(const primitiveMesh& mesh, const face& f)
 
     forAll(pFaces, i)
     {
-        label faceI = pFaces[i];
+        label facei = pFaces[i];
 
-        if (mesh.faces()[faceI] == f)
+        if (mesh.faces()[facei] == f)
         {
-            return faceI;
+            return facei;
         }
     }
 
@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
     {
         labelList pointIndex(nNodes);
 
-        label pointI = 0;
+        label pointi = 0;
 
         while (nodeStream.good())
         {
@@ -221,15 +221,15 @@ int main(int argc, char *argv[])
                 }
 
                 // Store point and node number.
-                points[pointI] = point(x, y, z);
-                nodeToPoint.insert(nodeI, pointI);
-                pointI++;
+                points[pointi] = point(x, y, z);
+                nodeToPoint.insert(nodeI, pointi);
+                pointi++;
             }
         }
-        if (pointI != nNodes)
+        if (pointi != nNodes)
         {
             FatalIOErrorInFunction(nodeStream)
-                << "Only " << pointI << " nodes present instead of " << nNodes
+                << "Only " << pointi << " nodes present instead of " << nNodes
                 << " from header." << exit(FatalIOError);
         }
     }
@@ -282,7 +282,7 @@ int main(int argc, char *argv[])
     labelList tetPoints(4);
 
     cellShapeList cells(nTets);
-    label cellI = 0;
+    label celli = 0;
 
     while (eleStream.good())
     {
@@ -302,7 +302,7 @@ int main(int argc, char *argv[])
                 tetPoints[i] = nodeToPoint[nodeI];
             }
 
-            cells[cellI++] = cellShape(tet, tetPoints);
+            cells[celli++] = cellShape(tet, tetPoints);
 
             // Skip attributes
             for (label i = 0; i < nElemAttr; i++)
@@ -394,7 +394,7 @@ int main(int argc, char *argv[])
         boundaryPatch.setSize(nFaces);
         boundaryPatch = -1;
 
-        label faceI = 0;
+        label facei = 0;
 
         // Region to patch conversion
         Map<label> regionToPatch;
@@ -409,9 +409,9 @@ int main(int argc, char *argv[])
             {
                 IStringStream faceLine(line);
 
-                label tetGenFaceI, dummy, region;
+                label tetGenFacei, dummy, region;
 
-                faceLine >> tetGenFaceI;
+                faceLine >> tetGenFacei;
 
                 // Read face and reverse orientation (Foam needs outwards
                 // pointing)
@@ -425,7 +425,7 @@ int main(int argc, char *argv[])
 
                 if (findFace(mesh, f) >= mesh.nInternalFaces())
                 {
-                    boundaryFaces[faceI] = f;
+                    boundaryFaces[facei] = f;
 
                     if (nFaceAttr > 0)
                     {
@@ -434,27 +434,27 @@ int main(int argc, char *argv[])
 
 
                         // Get Foam patchID and update region->patch table.
-                        label patchI = 0;
+                        label patchi = 0;
 
                         Map<label>::iterator patchFind =
                             regionToPatch.find(region);
 
                         if (patchFind == regionToPatch.end())
                         {
-                            patchI = nPatches;
+                            patchi = nPatches;
 
                             Info<< "Mapping tetgen region " << region
                                 << " to Foam patch "
-                                << patchI << endl;
+                                << patchi << endl;
 
                             regionToPatch.insert(region, nPatches++);
                         }
                         else
                         {
-                            patchI = patchFind();
+                            patchi = patchFind();
                         }
 
-                        boundaryPatch[faceI] = patchI;
+                        boundaryPatch[facei] = patchi;
 
                         // Skip remaining attributes
                         for (label i = 1; i < nFaceAttr; i++)
@@ -463,15 +463,15 @@ int main(int argc, char *argv[])
                         }
                     }
 
-                    faceI++;
+                    facei++;
                 }
             }
         }
 
 
         // Trim
-        boundaryFaces.setSize(faceI);
-        boundaryPatch.setSize(faceI);
+        boundaryFaces.setSize(facei);
+        boundaryPatch.setSize(facei);
 
 
          // Print region to patch mapping
@@ -489,9 +489,9 @@ int main(int argc, char *argv[])
         faceListList patchFaces(nPatches);
         wordList patchNames(nPatches);
 
-        forAll(patchNames, patchI)
+        forAll(patchNames, patchi)
         {
-            patchNames[patchI] = word("patch") + name(patchI);
+            patchNames[patchi] = word("patch") + name(patchi);
         }
 
         wordList patchTypes(nPatches, polyPatch::typeName);
@@ -503,21 +503,21 @@ int main(int argc, char *argv[])
         // Sort boundaryFaces by patch using boundaryPatch.
         List<DynamicList<face>> allPatchFaces(nPatches);
 
-        forAll(boundaryPatch, faceI)
+        forAll(boundaryPatch, facei)
         {
-            label patchI = boundaryPatch[faceI];
+            label patchi = boundaryPatch[facei];
 
-            allPatchFaces[patchI].append(boundaryFaces[faceI]);
+            allPatchFaces[patchi].append(boundaryFaces[facei]);
         }
 
         Info<< "Patch sizes:" << endl;
 
-        forAll(allPatchFaces, patchI)
+        forAll(allPatchFaces, patchi)
         {
-            Info<< "    " << patchNames[patchI] << " : "
-                << allPatchFaces[patchI].size() << endl;
+            Info<< "    " << patchNames[patchi] << " : "
+                << allPatchFaces[patchi].size() << endl;
 
-            patchFaces[patchI].transfer(allPatchFaces[patchI]);
+            patchFaces[patchi].transfer(allPatchFaces[patchi]);
         }
 
         Info<< endl;

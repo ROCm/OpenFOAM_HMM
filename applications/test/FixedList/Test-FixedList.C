@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,7 @@ Application
 Description
     Simple tests and examples of use of FixedList
 
-See Also
+See also
     Foam::FixedList
 
 \*---------------------------------------------------------------------------*/
@@ -70,6 +70,20 @@ int main(int argc, char *argv[])
     Info<< "Swapped via the swap() method" << endl;
     Info<< "list: " << list << nl
         << "list2: " << list2 << endl;
+
+    List<label> list3{0, 1, 2, 3};
+    FixedList<label, 4> list4(list3.begin(), list3.end());
+    Info<< "list3: " << list3 << nl
+        << "list4: " << list4 << endl;
+
+    list4 = {1, 2, 3, 5};
+    Info<< "list4: " << list4 << nl;
+
+    FixedList<label, 5> list5{0, 1, 2, 3, 4};
+    Info<< "list5: " << list5 << endl;
+
+    List<FixedList<label, 2>> list6{{0, 1}, {2, 3}};
+    Info<< "list6: " << list6 << endl;
 
     if (Pstream::parRun())
     {

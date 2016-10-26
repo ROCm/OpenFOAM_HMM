@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,8 +36,8 @@ Description
     {
        scalarField sumPhi
         (
-            fvc::surfaceSum(mag(phiSt))().internalField()
-          / rho.internalField()
+            fvc::surfaceSum(mag(phiSt))().primitiveField()
+          / rho.primitiveField()
         );
 
         StCoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();

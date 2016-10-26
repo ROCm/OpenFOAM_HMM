@@ -68,8 +68,8 @@ mappedPatchFieldBase<Type>::mappedPatchFieldBase
     (
         dict.template lookupOrDefault<word>
         (
-            "fieldName",
-            patchField_.dimensionedInternalField().name()
+            "field",
+            patchField_.internalField().name()
         )
     ),
     setAverage_(readBool(dict.lookup("setAverage"))),
@@ -92,7 +92,7 @@ mappedPatchFieldBase<Type>::mappedPatchFieldBase
 :
     mapper_(mapper),
     patchField_(patchField),
-    fieldName_(patchField_.dimensionedInternalField().name()),
+    fieldName_(patchField_.internalField().name()),
     setAverage_(false),
     average_(Zero),
     interpolationScheme_(interpolationCell<Type>::typeName)
@@ -143,13 +143,13 @@ mappedPatchFieldBase<Type>::sampleField() const
 
     if (mapper_.sameRegion())
     {
-        if (fieldName_ == patchField_.dimensionedInternalField().name())
+        if (fieldName_ == patchField_.internalField().name())
         {
             // Optimisation: bypass field lookup
             return
                 dynamic_cast<const fieldType&>
                 (
-                    patchField_.dimensionedInternalField()
+                    patchField_.internalField()
                 );
         }
         else
@@ -214,14 +214,14 @@ tmp<Field<Type>> mappedPatchFieldBase<Type>::mappedField() const
                 const interpolation<Type>& interp = interpolator();
 
                 newValues.setSize(samples.size(), pTraits<Type>::max);
-                forAll(samples, cellI)
+                forAll(samples, celli)
                 {
-                    if (samples[cellI] != point::max)
+                    if (samples[celli] != point::max)
                     {
-                        newValues[cellI] = interp.interpolate
+                        newValues[celli] = interp.interpolate
                         (
-                            samples[cellI],
-                            cellI
+                            samples[celli],
+                            celli
                         );
                     }
                 }
@@ -263,15 +263,15 @@ tmp<Field<Type>> mappedPatchFieldBase<Type>::mappedField() const
 
             const fieldType& nbrField = sampleField();
 
-            forAll(nbrField.boundaryField(), patchI)
+            forAll(nbrField.boundaryField(), patchi)
             {
                 const fvPatchField<Type>& pf =
-                    nbrField.boundaryField()[patchI];
+                    nbrField.boundaryField()[patchi];
                 label faceStart = pf.patch().start();
 
-                forAll(pf, faceI)
+                forAll(pf, facei)
                 {
-                    allValues[faceStart++] = pf[faceI];
+                    allValues[faceStart++] = pf[facei];
                 }
             }
 
@@ -314,7 +314,7 @@ tmp<Field<Type>> mappedPatchFieldBase<Type>::mappedField() const
 template<class Type>
 void mappedPatchFieldBase<Type>::write(Ostream& os) const
 {
-    os.writeKeyword("fieldName") << fieldName_ << token::END_STATEMENT << nl;
+    os.writeKeyword("field") << fieldName_ << token::END_STATEMENT << nl;
     os.writeKeyword("setAverage") << setAverage_ << token::END_STATEMENT << nl;
     os.writeKeyword("average") << average_ << token::END_STATEMENT << nl;
     os.writeKeyword("interpolationScheme") << interpolationScheme_

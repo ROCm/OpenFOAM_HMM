@@ -34,8 +34,7 @@ Description
     The jump is specified as a fixed value field, applied as an offset to the
     'owner' patch.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         patchType    | underlying patch type should be \c cyclic| yes |
@@ -44,7 +43,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            fixedJumpAMI;
         patchType       cyclic;
@@ -57,7 +56,7 @@ Description
 Note
      The underlying \c patchType should be set to \c cyclicAMI
 
-SeeAlso
+See also
     Foam::jumpCyclicAMIFvPatchField
 
 SourceFiles

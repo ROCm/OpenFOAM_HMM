@@ -293,7 +293,7 @@ void LRR<BasicTurbulenceModel>::correct()
     volScalarField G(this->GName(), 0.5*mag(tr(P)));
 
     // Update epsilon and G at the wall
-    epsilon_.boundaryField().updateCoeffs();
+    epsilon_.boundaryFieldRef().updateCoeffs();
 
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn
@@ -309,7 +309,7 @@ void LRR<BasicTurbulenceModel>::correct()
 
     epsEqn.ref().relax();
     fvOptions.constrain(epsEqn.ref());
-    epsEqn.ref().boundaryManipulate(epsilon_.boundaryField());
+    epsEqn.ref().boundaryManipulate(epsilon_.boundaryFieldRef());
     solve(epsEqn);
     fvOptions.correct(epsilon_);
     bound(epsilon_, this->epsilonMin_);
@@ -327,10 +327,10 @@ void LRR<BasicTurbulenceModel>::correct()
         {
             forAll(curPatch, facei)
             {
-                label faceCelli = curPatch.faceCells()[facei];
-                P[faceCelli] *= min
+                label celli = curPatch.faceCells()[facei];
+                P[celli] *= min
                 (
-                    G[faceCelli]/(0.5*mag(tr(P[faceCelli])) + SMALL),
+                    G[celli]/(0.5*mag(tr(P[celli])) + SMALL),
                     1.0
                 );
             }

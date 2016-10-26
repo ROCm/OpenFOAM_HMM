@@ -41,8 +41,8 @@ void Func                                                                      \
     const GeometricField<Type1, PatchField, GeoMesh>& gf1                      \
 )                                                                              \
 {                                                                              \
-    Foam::Func(res.internalField(), gf1.internalField());                      \
-    Foam::Func(res.boundaryField(), gf1.boundaryField());                      \
+    Foam::Func(res.primitiveFieldRef(), gf1.primitiveField());                 \
+    Foam::Func(res.boundaryFieldRef(), gf1.boundaryField());                   \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -110,8 +110,8 @@ void OpFunc                                                                    \
     const GeometricField<Type1, PatchField, GeoMesh>& gf1                      \
 )                                                                              \
 {                                                                              \
-    Foam::OpFunc(res.internalField(), gf1.internalField());                    \
-    Foam::OpFunc(res.boundaryField(), gf1.boundaryField());                    \
+    Foam::OpFunc(res.primitiveFieldRef(), gf1.primitiveField());               \
+    Foam::OpFunc(res.boundaryFieldRef(), gf1.boundaryField());                 \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -180,8 +180,18 @@ void Func                                                                      \
     const GeometricField<Type2, PatchField, GeoMesh>& gf2                      \
 )                                                                              \
 {                                                                              \
-    Foam::Func(res.internalField(), gf1.internalField(), gf2.internalField());\
-    Foam::Func(res.boundaryField(), gf1.boundaryField(), gf2.boundaryField());\
+    Foam::Func                                                                 \
+    (                                                                          \
+        res.primitiveFieldRef(),                                               \
+        gf1.primitiveField(),                                                  \
+        gf2.primitiveField()                                                   \
+    );                                                                         \
+    Foam::Func                                                                 \
+    (                                                                          \
+        res.boundaryFieldRef(),                                                \
+        gf1.boundaryField(),                                                   \
+        gf2.boundaryField()                                                    \
+    );                                                                         \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -308,8 +318,8 @@ void Func                                                                      \
     const GeometricField<Type2, PatchField, GeoMesh>& gf2                      \
 )                                                                              \
 {                                                                              \
-    Foam::Func(res.internalField(), dt1.value(), gf2.internalField());         \
-    Foam::Func(res.boundaryField(), dt1.value(), gf2.boundaryField());         \
+    Foam::Func(res.primitiveFieldRef(), dt1.value(), gf2.primitiveField());    \
+    Foam::Func(res.boundaryFieldRef(), dt1.value(), gf2.boundaryField());      \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -399,8 +409,8 @@ void Func                                                                      \
     const dimensioned<Type2>& dt2                                              \
 )                                                                              \
 {                                                                              \
-    Foam::Func(res.internalField(), gf1.internalField(), dt2.value());         \
-    Foam::Func(res.boundaryField(), gf1.boundaryField(), dt2.value());         \
+    Foam::Func(res.primitiveFieldRef(), gf1.primitiveField(), dt2.value());    \
+    Foam::Func(res.boundaryFieldRef(), gf1.boundaryField(), dt2.value());      \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -498,9 +508,9 @@ void OpFunc                                                                    \
 )                                                                              \
 {                                                                              \
     Foam::OpFunc                                                               \
-        (res.internalField(), gf1.internalField(), gf2.internalField());       \
+    (res.primitiveFieldRef(), gf1.primitiveField(), gf2.primitiveField());     \
     Foam::OpFunc                                                               \
-        (res.boundaryField(), gf1.boundaryField(), gf2.boundaryField());       \
+    (res.boundaryFieldRef(), gf1.boundaryField(), gf2.boundaryField());        \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -627,8 +637,8 @@ void OpFunc                                                                    \
     const GeometricField<Type2, PatchField, GeoMesh>& gf2                      \
 )                                                                              \
 {                                                                              \
-    Foam::OpFunc(res.internalField(), dt1.value(), gf2.internalField());       \
-    Foam::OpFunc(res.boundaryField(), dt1.value(), gf2.boundaryField());       \
+    Foam::OpFunc(res.primitiveFieldRef(), dt1.value(), gf2.primitiveField());  \
+    Foam::OpFunc(res.boundaryFieldRef(), dt1.value(), gf2.boundaryField());    \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -718,8 +728,8 @@ void OpFunc                                                                    \
     const dimensioned<Type2>& dt2                                              \
 )                                                                              \
 {                                                                              \
-    Foam::OpFunc(res.internalField(), gf1.internalField(), dt2.value());       \
-    Foam::OpFunc(res.boundaryField(), gf1.boundaryField(), dt2.value());       \
+    Foam::OpFunc(res.primitiveFieldRef(), gf1.primitiveField(), dt2.value());  \
+    Foam::OpFunc(res.boundaryFieldRef(), gf1.boundaryField(), dt2.value());    \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \

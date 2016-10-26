@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,24 +39,24 @@ void Foam::cellPointWeight::findTetrahedron
 (
     const polyMesh& mesh,
     const vector& position,
-    const label cellI
+    const label celli
 )
 {
     if (debug)
     {
         Pout<< nl << "Foam::cellPointWeight::findTetrahedron" << nl
             << "position = " << position << nl
-            << "cellI = " << cellI << endl;
+            << "celli = " << celli << endl;
     }
 
     List<tetIndices> cellTets = polyMeshTetDecomposition::cellTetIndices
     (
         mesh,
-        cellI
+        celli
     );
 
     const faceList& pFaces = mesh.faces();
-    const scalar cellVolume = mesh.cellVolumes()[cellI];
+    const scalar cellVolume = mesh.cellVolumes()[celli];
 
     forAll(cellTets, tetI)
     {
@@ -117,7 +117,7 @@ void Foam::cellPointWeight::findTetrahedron
             << "    Tetrahedron search failed; using closest tet to point "
             << position << nl
             << "    cell: "
-            << cellI << nl
+            << celli << nl
             << endl;
     }
 
@@ -141,32 +141,32 @@ void Foam::cellPointWeight::findTriangle
 (
     const polyMesh& mesh,
     const vector& position,
-    const label faceI
+    const label facei
 )
 {
     if (debug)
     {
         Pout<< "\nbool Foam::cellPointWeight::findTriangle" << nl
             << "position = " << position << nl
-            << "faceI = " << faceI << endl;
+            << "facei = " << facei << endl;
     }
 
     List<tetIndices> faceTets = polyMeshTetDecomposition::faceTetIndices
     (
         mesh,
-        faceI,
-        mesh.faceOwner()[faceI]
+        facei,
+        mesh.faceOwner()[facei]
     );
 
-    const scalar faceAreaSqr = magSqr(mesh.faceAreas()[faceI]);
+    const scalar faceAreaSqr = magSqr(mesh.faceAreas()[facei]);
 
-    const face& f =  mesh.faces()[faceI];
+    const face& f =  mesh.faces()[facei];
 
     forAll(faceTets, tetI)
     {
         const tetIndices& tetIs = faceTets[tetI];
 
-        List<scalar> triWeights(3);
+        FixedList<scalar, 3> triWeights;
 
         // Barycentric coordinates of the position
         scalar det = tetIs.faceTri(mesh).barycentric(position, triWeights);
@@ -224,7 +224,7 @@ void Foam::cellPointWeight::findTriangle
             << "    Triangle search failed; using closest tri to point "
             << position << nl
             << "    face: "
-            << faceI << nl
+            << facei << nl
             << endl;
     }
 
@@ -234,7 +234,7 @@ void Foam::cellPointWeight::findTriangle
     // determinant is suitable.  If not, the return from barycentric
     // to triWeights is safe.
 
-    List<scalar> triWeights(3);
+    FixedList<scalar, 3> triWeights;
 
     tetIs.faceTri(mesh).barycentric(position, triWeights);
 
@@ -256,23 +256,21 @@ Foam::cellPointWeight::cellPointWeight
 (
     const polyMesh& mesh,
     const vector& position,
-    const label cellI,
-    const label faceI
+    const label celli,
+    const label facei
 )
 :
-    cellI_(cellI),
-    weights_(4),
-    faceVertices_(3)
+    celli_(celli)
 {
-    if (faceI < 0)
+    if (facei < 0)
     {
         // Face data not supplied
-        findTetrahedron(mesh, position, cellI);
+        findTetrahedron(mesh, position, celli);
     }
     else
     {
         // Face data supplied
-        findTriangle(mesh, position, faceI);
+        findTriangle(mesh, position, facei);
     }
 }
 

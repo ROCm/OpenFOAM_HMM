@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -159,7 +159,7 @@ updateCoeffs()
 
     //const scalarField temissivity = emissivity();
     const boundaryRadiationProperties& boundaryRadiation =
-        boundaryRadiationProperties::New(dimensionedInternalField().mesh());
+        boundaryRadiationProperties::New(internalField().mesh());
 
     const tmp<scalarField> temissivity
     (

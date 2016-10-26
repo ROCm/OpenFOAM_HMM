@@ -87,7 +87,7 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
     do_(readScalar(coeffDict().lookup("outerDistance"))),
     test_(coeffDict().lookupOrDefault<Switch>("test", false)),
     rhoInf_(1.0),
-    rhoName_(coeffDict().lookupOrDefault<word>("rhoName", "rho")),
+    rhoName_(coeffDict().lookupOrDefault<word>("rho", "rho")),
     scale_
     (
         IOobject
@@ -118,26 +118,26 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
         pointPatchDist pDist(pMesh, patchSet_, points0());
 
         // Scaling: 1 up to di then linear down to 0 at do away from patches
-        scale_.internalField() =
+        scale_.primitiveFieldRef() =
             min
             (
                 max
                 (
-                    (do_ - pDist.internalField())/(do_ - di_),
+                    (do_ - pDist.primitiveField())/(do_ - di_),
                     scalar(0)
                 ),
                 scalar(1)
             );
 
         // Convert the scale function to a cosine
-        scale_.internalField() =
+        scale_.primitiveFieldRef() =
             min
             (
                 max
                 (
                     0.5
                   - 0.5
-                   *cos(scale_.internalField()
+                   *cos(scale_.primitiveField()
                    *Foam::constant::mathematical::pi),
                     scalar(0)
                 ),
@@ -161,7 +161,7 @@ Foam::sixDoFRigidBodyMotionSolver::~sixDoFRigidBodyMotionSolver()
 Foam::tmp<Foam::pointField>
 Foam::sixDoFRigidBodyMotionSolver::curPoints() const
 {
-    return points0() + pointDisplacement_.internalField();
+    return points0() + pointDisplacement_.primitiveField();
 }
 
 
@@ -216,13 +216,13 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
     {
         dictionary forcesDict;
 
-        forcesDict.add("type", forces::typeName);
+        forcesDict.add("type", functionObjects::forces::typeName);
         forcesDict.add("patches", patches_);
         forcesDict.add("rhoInf", rhoInf_);
-        forcesDict.add("rhoName", rhoName_);
+        forcesDict.add("rho", rhoName_);
         forcesDict.add("CofR", motion_.centreOfRotation());
 
-        forces f("forces", db(), forcesDict);
+        functionObjects::forces f("forces", db(), forcesDict);
 
         f.calcForcesMoment();
 
@@ -241,7 +241,7 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
     }
 
     // Update the displacements
-    pointDisplacement_.internalField() =
+    pointDisplacement_.primitiveFieldRef() =
         motion_.transform(points0(), scale_) - points0();
 
     // Displacement has changed. Update boundary conditions

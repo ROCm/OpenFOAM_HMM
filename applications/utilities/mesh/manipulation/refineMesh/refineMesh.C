@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -243,9 +243,9 @@ int main(int argc, char *argv[])
         // Select all cells
         refCells.setSize(mesh.nCells());
 
-        forAll(mesh.cells(), cellI)
+        forAll(mesh.cells(), celli)
         {
-            refCells[cellI] = cellI;
+            refCells[celli] = celli;
         }
 
         if (mesh.nGeometricD() == 3)
@@ -332,9 +332,9 @@ int main(int argc, char *argv[])
     // Create cellSet with added cells for easy inspection
     cellSet newCells(mesh, "refinedCells", refCells.size());
 
-    forAll(oldToNew, oldCellI)
+    forAll(oldToNew, oldCelli)
     {
-        const labelList& added = oldToNew[oldCellI];
+        const labelList& added = oldToNew[oldCelli];
 
         forAll(added, i)
         {
@@ -375,21 +375,21 @@ int main(int argc, char *argv[])
       + oldTimeName;
 
 
-    forAll(oldToNew, oldCellI)
+    forAll(oldToNew, oldCelli)
     {
-        const labelList& added = oldToNew[oldCellI];
+        const labelList& added = oldToNew[oldCelli];
 
         if (added.size())
         {
             forAll(added, i)
             {
-                newToOld[added[i]] = oldCellI;
+                newToOld[added[i]] = oldCelli;
             }
         }
         else
         {
             // Unrefined cell
-            newToOld[oldCellI] = oldCellI;
+            newToOld[oldCelli] = oldCelli;
         }
     }
 

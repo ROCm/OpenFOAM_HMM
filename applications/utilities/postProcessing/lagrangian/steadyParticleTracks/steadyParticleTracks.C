@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
 
         PtrList<passiveParticle> particles(0);
 
-        // transfer particles to (more convenient) list
+        // Transfer particles to (more convenient) list
         {
             passiveParticleCloud ppc(mesh, cloudName);
             Info<< "\n    Read " << returnReduce(ppc.size(), sumOp<label>())
@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
         {
             Info<< "\n    Generating " << nTracks << " tracks" << endl;
 
-            // determine length of each track
+            // Determine length of each track
             labelList trackLengths(nTracks, 0);
             forAll(particleToTrack, i)
             {
@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
                 trackLengths[trackI]++;
             }
 
-            // particle "age" property used to sort the tracks
+            // Particle "age" property used to sort the tracks
             List<SortableList<scalar>> agePerTrack(nTracks);
             List<List<label>> particleMap(nTracks);
 
@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
                 particleMap[i].setSize(length);
             }
 
-            // store the particle age per track
+            // Store the particle age per track
             IOobjectList cloudObjs
             (
                 mesh,
@@ -230,8 +230,11 @@ int main(int argc, char *argv[])
             {
                 tmp<scalarField> tage =
                     readParticleField<scalar>("age", cloudObjs);
+
                 const scalarField& age = tage();
+
                 List<label> trackSamples(nTracks, 0);
+
                 forAll(particleToTrack, i)
                 {
                     const label trackI = particleToTrack[i];
@@ -269,7 +272,7 @@ int main(int argc, char *argv[])
                         labelList& particleIds = particleMap[i];
 
                         {
-                            // update addressing
+                            // Update addressing
                             List<label> sortedIds(ids);
                             forAll(sortedIds, j)
                             {
@@ -289,7 +292,7 @@ int main(int argc, char *argv[])
                 }
 
 
-                // write track (line) connectivity to file
+                // Write track (line) connectivity to file
 
                 Info<< "\n    Writing track lines" << endl;
                 os  << "\nLINES " << nTracks << ' ' << nPoints + nTracks << nl;

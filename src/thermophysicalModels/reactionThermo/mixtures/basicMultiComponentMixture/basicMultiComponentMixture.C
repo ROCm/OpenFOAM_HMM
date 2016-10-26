@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,6 @@ namespace Foam
     defineTypeNameAndDebug(basicMultiComponentMixture, 0);
 }
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::basicMultiComponentMixture::basicMultiComponentMixture
@@ -44,8 +43,11 @@ Foam::basicMultiComponentMixture::basicMultiComponentMixture
 )
 :
     species_(specieNames),
+    active_(species_.size(), true),
     Y_(species_.size())
 {
+    tmp<volScalarField> tYdefault;
+
     forAll(species_, i)
     {
         IOobject header
@@ -56,14 +58,12 @@ Foam::basicMultiComponentMixture::basicMultiComponentMixture
             IOobject::NO_READ
         );
 
-        // check if field exists and can be read
+        // Check if field exists and can be read
         if (header.typeHeaderOk<volScalarField>(true))
         {
-            if (debug)
-            {
-                Info<< "basicMultiComponentMixture: reading " << species_[i]
-                    << endl;
-            }
+            DebugInfo
+                << "basicMultiComponentMixture: reading " << species_[i]
+                << endl;
 
             Y_.set
             (
@@ -84,24 +84,38 @@ Foam::basicMultiComponentMixture::basicMultiComponentMixture
         }
         else
         {
-            if (debug)
+            // Read Ydefault if not already read
+            if (!tYdefault.valid())
             {
-                Info<< "basicMultiComponentMixture: specie " << species_[i]
-                    << " not found - looking for Ydefault" << endl;
-            }
+                word YdefaultName(IOobject::groupName("Ydefault", phaseName));
 
-            volScalarField Ydefault
-            (
-                IOobject
+                tYdefault = new volScalarField
                 (
-                    "Ydefault",
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                ),
-                mesh
-            );
+                    IOobject
+                    (
+                        YdefaultName,
+                        exists
+                        (
+                            mesh.time().path()/mesh.time().timeName()
+                           /YdefaultName
+                        )
+                      ? mesh.time().timeName()
+                      : (
+                            exists
+                            (
+                                mesh.time().path()/mesh.time().constant()
+                               /YdefaultName
+                            )
+                          ? mesh.time().constant()
+                          : Time::timeName(0)
+                        ),
+                        mesh,
+                        IOobject::MUST_READ,
+                        IOobject::NO_WRITE
+                    ),
+                    mesh
+                );
+            }
 
             Y_.set
             (
@@ -116,7 +130,7 @@ Foam::basicMultiComponentMixture::basicMultiComponentMixture
                         IOobject::NO_READ,
                         IOobject::AUTO_WRITE
                     ),
-                    Ydefault
+                    tYdefault()
                 )
             );
         }

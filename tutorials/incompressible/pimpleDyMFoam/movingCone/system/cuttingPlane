@@ -9,9 +9,9 @@
 cuttingPlane
 {
     type            surfaces;
-    functionObjectLibs ("libsampling.so");
+    libs            ("libsampling.so");
 
-    outputControl   outputTime;
+    writeControl    writeTime;
 
     surfaceFormat   vtk;
     fields          ( p U );
@@ -26,8 +26,8 @@ cuttingPlane
             planeType       pointAndNormal;
             pointAndNormalDict
             {
-                basePoint       (0 0 0);
-                normalVector    (0 0 1);
+                point   (0 0 0);
+                normal  (0 0 1);
             }
             interpolate     true;
         }

@@ -18,8 +18,6 @@ volScalarField rho
 );
 
 volScalarField& p = thermo.p();
-const volScalarField& psi = thermo.psi();
-
 
 Info<< "Reading field U\n" << endl;
 volVectorField U
@@ -114,3 +112,6 @@ if (p_rgh.needReference())
 }
 
 dimensionedScalar initialMass("initialMass", fvc::domainIntegrate(rho));
+
+#include "createMRF.H"
+#include "createRadiationModel.H"

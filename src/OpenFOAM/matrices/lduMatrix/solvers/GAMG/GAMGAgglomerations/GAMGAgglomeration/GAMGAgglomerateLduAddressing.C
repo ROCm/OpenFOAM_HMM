@@ -506,17 +506,17 @@ void Foam::GAMGAgglomeration::procAgglomerateRestrictAddressing
         nCells_[levelIndex] = coarseCellOffsets.last();
 
         // Renumber consecutively
-        for (label procI = 1; procI < procIDs.size(); procI++)
+        for (label proci = 1; proci < procIDs.size(); proci++)
         {
             SubList<label> procSlot
             (
                 procRestrictAddressing,
-                offsets[procI+1]-offsets[procI],
-                offsets[procI]
+                offsets[proci+1]-offsets[proci],
+                offsets[proci]
             );
             forAll(procSlot, i)
             {
-                procSlot[i] += coarseCellOffsets[procI];
+                procSlot[i] += coarseCellOffsets[proci];
             }
         }
 
@@ -548,21 +548,21 @@ void Foam::GAMGAgglomeration::combineLevels(const label curLevel)
     {
         if (prevFaceResAddr[i] >= 0)
         {
-            label fineFaceI = prevFaceResAddr[i];
-            prevFaceResAddr[i] = curFaceResAddr[fineFaceI];
-            prevFaceFlipMap[i] = curFaceFlipMap[fineFaceI];
+            label fineFacei = prevFaceResAddr[i];
+            prevFaceResAddr[i] = curFaceResAddr[fineFacei];
+            prevFaceFlipMap[i] = curFaceFlipMap[fineFacei];
         }
         else
         {
-            label fineFaceI = -prevFaceResAddr[i] - 1;
-            prevFaceResAddr[i] = -curResAddr[fineFaceI] - 1;
-            prevFaceFlipMap[i] = curFaceFlipMap[fineFaceI];
+            label fineFacei = -prevFaceResAddr[i] - 1;
+            prevFaceResAddr[i] = -curResAddr[fineFacei] - 1;
+            prevFaceFlipMap[i] = curFaceFlipMap[fineFacei];
         }
     }
 
     // Delete the restrictAddressing for the coarser level
-    faceRestrictAddressing_.set(curLevel, NULL);
-    faceFlipMap_.set(curLevel, NULL);
+    faceRestrictAddressing_.set(curLevel, nullptr);
+    faceFlipMap_.set(curLevel, nullptr);
 
     forAll(prevResAddr, i)
     {
@@ -580,13 +580,13 @@ void Foam::GAMGAgglomeration::combineLevels(const label curLevel)
         labelList& prevResAddr = prevPatchFaceResAddr[inti];
         forAll(prevResAddr, i)
         {
-            label fineFaceI = prevResAddr[i];
-            prevResAddr[i] = curResAddr[fineFaceI];
+            label fineFacei = prevResAddr[i];
+            prevResAddr[i] = curResAddr[fineFacei];
         }
     }
 
     // Delete the restrictAddressing for the coarser level
-    restrictAddressing_.set(curLevel, NULL);
+    restrictAddressing_.set(curLevel, nullptr);
 
     // Patch faces
     nPatchFaces_[prevLevel] = nPatchFaces_[curLevel];
@@ -620,7 +620,7 @@ void Foam::GAMGAgglomeration::combineLevels(const label curLevel)
 
     // Delete the matrix addressing and coefficients from the previous level
     // and replace with the corresponding entry from the coarser level
-    meshLevels_.set(prevLevel, meshLevels_.set(curLevel, NULL));
+    meshLevels_.set(prevLevel, meshLevels_.set(curLevel, nullptr));
 }
 
 
@@ -680,18 +680,18 @@ void Foam::GAMGAgglomeration::calculateRegionMaster
     // Determine the master processors
     Map<label> agglomToMaster(procAgglomMap.size());
 
-    forAll(procAgglomMap, procI)
+    forAll(procAgglomMap, proci)
     {
-        label coarseI = procAgglomMap[procI];
+        label coarseI = procAgglomMap[proci];
 
         Map<label>::iterator fnd = agglomToMaster.find(coarseI);
         if (fnd == agglomToMaster.end())
         {
-            agglomToMaster.insert(coarseI, procI);
+            agglomToMaster.insert(coarseI, proci);
         }
         else
         {
-            fnd() = min(fnd(), procI);
+            fnd() = min(fnd(), proci);
         }
     }
 

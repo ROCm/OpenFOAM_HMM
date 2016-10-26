@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,12 +71,12 @@ Foam::sampledPlane::sampledPlane
 )
 :
     sampledSurface(name, mesh, dict),
-    cuttingPlane(plane(dict.lookup("basePoint"), dict.lookup("normalVector"))),
+    cuttingPlane(plane(dict)),
     zoneKey_(keyType::null),
     triangulate_(dict.lookupOrDefault("triangulate", true)),
     needsUpdate_(true)
 {
-    // make plane relative to the coordinateSystem (Cartesian)
+    // Make plane relative to the coordinateSystem (Cartesian)
     // allow lookup from global coordinate systems
     if (dict.found("coordinateSystem"))
     {
@@ -85,7 +85,7 @@ Foam::sampledPlane::sampledPlane
         point  base = cs.globalPosition(planeDesc().refPoint());
         vector norm = cs.globalVector(planeDesc().normal());
 
-        // assign the plane description
+        // Assign the plane description
         static_cast<plane&>(*this) = plane(base, norm);
     }
 
@@ -115,7 +115,7 @@ bool Foam::sampledPlane::needsUpdate() const
 
 bool Foam::sampledPlane::expire()
 {
-    // already marked as expired
+    // Already marked as expired
     if (needsUpdate_)
     {
         return false;

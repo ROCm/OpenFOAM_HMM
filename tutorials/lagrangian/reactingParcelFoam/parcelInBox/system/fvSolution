@@ -53,12 +53,6 @@ solvers
         tolerance       0;
         relTol          0.1;
         smoother        GaussSeidel;
-        nPreSweeps      0;
-        nPostSweeps     2;
-        cacheAgglomeration true;
-        nCellsInCoarsestLevel 10;
-        agglomerator    faceAreaPair;
-        mergeLevels     1;
         maxIter         20;
     }
 
@@ -71,7 +65,7 @@ solvers
 
     "(Yi|O2|N2|H2O)"
     {
-        solver          PBiCG;
+        solver          PBiCGStab;
         preconditioner  DILU;
         tolerance       1e-6;
         relTol          0;

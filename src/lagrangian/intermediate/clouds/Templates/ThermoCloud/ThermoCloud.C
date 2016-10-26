@@ -57,7 +57,7 @@ void Foam::ThermoCloud<CloudType>::setModels()
     {
         radAreaP_.reset
         (
-            new DimensionedField<scalar, volMesh>
+            new volScalarField::Internal
             (
                 IOobject
                 (
@@ -74,7 +74,7 @@ void Foam::ThermoCloud<CloudType>::setModels()
 
         radT4_.reset
         (
-            new DimensionedField<scalar, volMesh>
+            new volScalarField::Internal
             (
                 IOobject
                 (
@@ -91,7 +91,7 @@ void Foam::ThermoCloud<CloudType>::setModels()
 
         radAreaPT4_.reset
         (
-            new DimensionedField<scalar, volMesh>
+            new volScalarField::Internal
             (
                 IOobject
                 (
@@ -149,20 +149,20 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
         false
     ),
     thermoCloud(),
-    cloudCopyPtr_(NULL),
+    cloudCopyPtr_(nullptr),
     constProps_(this->particleProperties()),
     thermo_(thermo),
     T_(thermo.thermo().T()),
     p_(thermo.thermo().p()),
-    heatTransferModel_(NULL),
-    TIntegrator_(NULL),
+    heatTransferModel_(nullptr),
+    TIntegrator_(nullptr),
     radiation_(false),
-    radAreaP_(NULL),
-    radT4_(NULL),
-    radAreaPT4_(NULL),
+    radAreaP_(nullptr),
+    radT4_(nullptr),
+    radAreaPT4_(nullptr),
     hsTrans_
     (
-        new DimensionedField<scalar, volMesh>
+        new volScalarField::Internal
         (
             IOobject
             (
@@ -178,7 +178,7 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
     ),
     hsCoeff_
     (
-        new DimensionedField<scalar, volMesh>
+        new volScalarField::Internal
         (
             IOobject
             (
@@ -200,6 +200,7 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
         if (readFields)
         {
             parcelType::readFields(*this);
+            this->deleteLostParticles();
         }
     }
 
@@ -219,7 +220,7 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
 :
     CloudType(c, name),
     thermoCloud(),
-    cloudCopyPtr_(NULL),
+    cloudCopyPtr_(nullptr),
     constProps_(c.constProps_),
     thermo_(c.thermo_),
     T_(c.T()),
@@ -227,12 +228,12 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
     heatTransferModel_(c.heatTransferModel_->clone()),
     TIntegrator_(c.TIntegrator_->clone()),
     radiation_(c.radiation_),
-    radAreaP_(NULL),
-    radT4_(NULL),
-    radAreaPT4_(NULL),
+    radAreaP_(nullptr),
+    radT4_(nullptr),
+    radAreaPT4_(nullptr),
     hsTrans_
     (
-        new DimensionedField<scalar, volMesh>
+        new volScalarField::Internal
         (
             IOobject
             (
@@ -248,7 +249,7 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
     ),
     hsCoeff_
     (
-        new DimensionedField<scalar, volMesh>
+        new volScalarField::Internal
         (
             IOobject
             (
@@ -267,7 +268,7 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
     {
         radAreaP_.reset
         (
-            new DimensionedField<scalar, volMesh>
+            new volScalarField::Internal
             (
                 IOobject
                 (
@@ -284,7 +285,7 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
 
         radT4_.reset
         (
-            new DimensionedField<scalar, volMesh>
+            new volScalarField::Internal
             (
                 IOobject
                 (
@@ -301,7 +302,7 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
 
         radAreaPT4_.reset
         (
-            new DimensionedField<scalar, volMesh>
+            new volScalarField::Internal
             (
                 IOobject
                 (
@@ -329,19 +330,19 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
 :
     CloudType(mesh, name, c),
     thermoCloud(),
-    cloudCopyPtr_(NULL),
+    cloudCopyPtr_(nullptr),
     constProps_(),
     thermo_(c.thermo()),
     T_(c.T()),
     p_(c.p()),
-    heatTransferModel_(NULL),
-    TIntegrator_(NULL),
+    heatTransferModel_(nullptr),
+    TIntegrator_(nullptr),
     radiation_(false),
-    radAreaP_(NULL),
-    radT4_(NULL),
-    radAreaPT4_(NULL),
-    hsTrans_(NULL),
-    hsCoeff_(NULL)
+    radAreaP_(nullptr),
+    radT4_(nullptr),
+    radAreaPT4_(nullptr),
+    hsTrans_(nullptr),
+    hsCoeff_(nullptr)
 {}
 
 

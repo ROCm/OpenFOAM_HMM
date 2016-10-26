@@ -8,34 +8,31 @@
 
 forceCoeffs1
 {
-    type        forceCoeffs;
+    type            forceCoeffs;
+    libs            ("libforces.so");
+    writeControl    writeTime;
+    writeFields     true;
 
-    functionObjectLibs ( "libforces.so" );
-
-    outputControl   outputTime;
-
-    writeFields true;
-
-    patches     (body);
-    pName       p;
-    UName       U;
-    rhoName     rhoInf;      // Indicates incompressible
-    log         true;
-    rhoInf      1;           // Redundant for incompressible
-    liftDir     (0 1 0);
-    dragDir     (1 0 0);
-    CofR        (3.5 0 0);  // Axle midpoint on ground
-    pitchAxis   (0 0 1);
-    magUInf     10;
-    lRef        4;        // Wheelbase length
-    Aref        1;        // Estimated
-    porosity    on;
+    patches         (body);
+    p               p;
+    U               U;
+    rho             rhoInf;      // Indicates incompressible
+    log             true;
+    rhoInf          1;           // Redundant for incompressible
+    liftDir         (0 1 0);
+    dragDir         (1 0 0);
+    CofR            (3.5 0 0);  // Axle midpoint on ground
+    pitchAxis       (0 0 1);
+    magUInf         10;
+    lRef            4;        // Wheelbase length
+    Aref            1;        // Estimated
+    porosity        on;
 
     binData
     {
-        nBin        20;          // output data into 20 bins
-        direction   (1 0 0);     // bin direction
-        cumulative  yes;
+        nBin            20;          // output data into 20 bins
+        direction       (1 0 0);     // bin direction
+        cumulative      yes;
     }
 }
 

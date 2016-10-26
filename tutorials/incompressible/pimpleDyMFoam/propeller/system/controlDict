@@ -54,8 +54,7 @@ maxCo           2;
 
 functions
 {
-    #include "readFields"
-    #include "Q"
+    #includeFunc Q
     #include "surfaces"
     #include "forces"
 }

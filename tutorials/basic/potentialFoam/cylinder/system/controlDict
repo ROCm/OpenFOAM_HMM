@@ -17,19 +17,19 @@ FoamFile
 
 application     potentialFoam;
 
-startFrom       startTime;
+startFrom        latestTime;
 
 startTime       0;
 
-stopAt          endTime;
+stopAt           nextWrite;
 
 endTime         1;
 
 deltaT          1;
 
-writeControl    timeStep;
+writeControl     timeStep;
 
-writeInterval   1;
+writeInterval    1;
 
 purgeWrite      0;
 
@@ -47,20 +47,23 @@ runTimeModifiable true;
 
 functions
 {
-    difference
+    error
     {
         // Load the library containing the 'coded' functionObject
-        functionObjectLibs ("libutilityFunctionObjects.so");
+        libs            ("libutilityFunctionObjects.so");
+
         type coded;
+
         // Name of on-the-fly generated functionObject
-        redirectType error;
-        code
+        name error;
+
+        codeEnd
         #{
             // Lookup U
             Info<< "Looking up field U\n" << endl;
             const volVectorField& U = mesh().lookupObject<volVectorField>("U");
 
-            Info<< "Reading inlet velocity  uInfX\n" << endl;
+            Info<< "Reading inlet velocity uInfX\n" << endl;
 
             scalar ULeft = 0.0;
             label leftI = mesh().boundaryMesh().findPatchID("left");

@@ -33,11 +33,10 @@ Description
     averaging the flux over the patch, and then applying it in the direction
     normal to the patch faces.
 
-    \heading Patch usage
-
+Usage
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            pressureInletUniformVelocity;
         value           uniform 0;

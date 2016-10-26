@@ -2,7 +2,7 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 2011 OpenFOAM Foundation
+   \\  /     A nd            | Copyright (C) 2011-2016 OpenFOAM Foundation
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ Group
     grpDiscreteMethodsSolvers
 
 Description
-    Equilibrates and/or preconditions molecular dynamics systems
+    Solver to equilibrate and/or precondition molecular dynamics systems.
 
 \*---------------------------------------------------------------------------*/
 
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 
         runTime.write();
 
-        if (runTime.outputTime())
+        if (runTime.writeTime())
         {
             nAveragingSteps = 0;
         }

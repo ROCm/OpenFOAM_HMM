@@ -786,6 +786,8 @@ int main(int argc, char *argv[])
         );
 
         label compactI = 0;
+
+        volScalarField::Boundary& vfbf = viewFactorField.boundaryFieldRef();
         forAll(viewFactorsPatches, i)
         {
             label patchID = viewFactorsPatches[i];
@@ -805,7 +807,7 @@ int main(int argc, char *argv[])
                     forAll(fineFaces, fineId)
                     {
                         const label faceID = fineFaces[fineId];
-                        viewFactorField.boundaryField()[patchID][faceID] = Fij;
+                        vfbf[patchID][faceID] = Fij;
                     }
                     compactI++;
                 }

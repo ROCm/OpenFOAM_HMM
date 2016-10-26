@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,30 +94,30 @@ class meshDualiser
         static void dumpPolyTopoChange(const polyTopoChange&, const fileName&);
 
         //- Find dual cell given point and cell
-        label findDualCell(const label cellI, const label pointI) const;
+        label findDualCell(const label celli, const label pointi) const;
 
         //- Helper function to generate dualpoints on all boundary edges
         //  emanating from (boundary & feature) point
         void generateDualBoundaryEdges
         (
             const PackedBoolList&,
-            const label pointI,
+            const label pointi,
             polyTopoChange&
         );
 
         //- Check that owner and neighbour of face have same dual cell
         bool sameDualCell
         (
-            const label faceI,
-            const label pointI
+            const label facei,
+            const label pointi
         ) const;
 
         //- Add internal face
         label addInternalFace
         (
-            const label masterPointI,
+            const label masterPointi,
             const label masterEdgeI,
-            const label masterFaceI,
+            const label masterFacei,
 
             const bool edgeOrder,
             const label dualCell0,
@@ -129,12 +129,12 @@ class meshDualiser
         //- Add boundary face
         label addBoundaryFace
         (
-            const label masterPointI,
+            const label masterPointi,
             const label masterEdgeI,
-            const label masterFaceI,
+            const label masterFacei,
 
-            const label dualCellI,
-            const label patchI,
+            const label dualCelli,
+            const label patchi,
             const DynamicList<label>& verts,
             polyTopoChange& meshMod
         ) const;
@@ -145,7 +145,7 @@ class meshDualiser
             const bool splitFace,
             const PackedBoolList&,
             const label edgeI,
-            const label startFaceI,
+            const label startFacei,
             polyTopoChange&,
             boolList& doneEFaces
         ) const;
@@ -153,17 +153,17 @@ class meshDualiser
         //- Create single internal face from internal face
         void createFaceFromInternalFace
         (
-            const label faceI,
+            const label facei,
             label& fp,
             polyTopoChange&
         ) const;
 
-        //- Creates boundary faces walking around point on patchI.
+        //- Creates boundary faces walking around point on patchi.
         void createFacesAroundBoundaryPoint
         (
-            const label patchI,
-            const label patchPointI,
-            const label startFaceI,
+            const label patchi,
+            const label patchPointi,
+            const label startFacei,
             polyTopoChange&,
             boolList& donePFaces            // pFaces visited
         ) const;

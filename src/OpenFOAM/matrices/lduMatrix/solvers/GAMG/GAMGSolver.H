@@ -42,7 +42,7 @@ Description
       - Coarse matrix scaling: performed by correction scaling, using steepest
         descent optimisation.
       - Type of cycle: V-cycle with optional pre-smoothing.
-      - Coarsest-level matrix solved using ICCG or BICCG.
+      - Coarsest-level matrix solved using PCG or PBiCGStab.
 
 SourceFiles
     GAMGSolver.C
@@ -237,7 +237,7 @@ class GAMGSolver
         ) const;
 
         //- Interpolate the correction after injected prolongation and
-        /// re-normalise
+        //  re-normalise
         void interpolate
         (
             scalarField& psi,
@@ -295,6 +295,21 @@ class GAMGSolver
             const direction cmpt=0
         ) const;
 
+        //- Create and return the dictionary to specify the PCG solver
+        //  to solve the coarsest level
+        dictionary PCGsolverDict
+        (
+            const scalar tol,
+            const scalar relTol
+        ) const;
+
+        //- Create and return the dictionary to specify the PBiCGStab solver
+        //  to solve the coarsest level
+        dictionary PBiCGStabSolverDict
+        (
+            const scalar tol,
+            const scalar relTol
+        ) const;
 
         //- Solve the coarsest level with either an iterative or direct solver
         void solveCoarsestLevel

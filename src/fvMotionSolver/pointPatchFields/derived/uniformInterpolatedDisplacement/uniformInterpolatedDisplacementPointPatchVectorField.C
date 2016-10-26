@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,10 +59,10 @@ uniformInterpolatedDisplacementPointPatchVectorField
 )
 :
     fixedValuePointPatchField<vector>(p, iF, dict),
-    fieldName_(dict.lookup("fieldName")),
+    fieldName_(dict.lookup("field")),
     interpolationScheme_(dict.lookup("interpolationScheme"))
 {
-    const pointMesh& pMesh = this->dimensionedInternalField().mesh();
+    const pointMesh& pMesh = this->internalField().mesh();
 
     // Read time values
     instantList allTimes = Time::findTimes(pMesh().time().path());
@@ -161,7 +161,7 @@ void uniformInterpolatedDisplacementPointPatchVectorField::updateCoeffs()
         );
     }
 
-    const pointMesh& pMesh = this->dimensionedInternalField().mesh();
+    const pointMesh& pMesh = this->internalField().mesh();
     const Time& t = pMesh().time();
 
     // Update indices of times and weights
@@ -232,7 +232,7 @@ void uniformInterpolatedDisplacementPointPatchVectorField::updateCoeffs()
             IOobject
             (
                 word("uniformInterpolate(")
-              + this->dimensionedInternalField().name()
+              + this->internalField().name()
               + ')',
                 pMesh.time().timeName(),
                 pMesh.thisDb(),
@@ -249,7 +249,7 @@ void uniformInterpolatedDisplacementPointPatchVectorField::updateCoeffs()
     // Extract back from the internal field
     this->operator==
     (
-        this->patchInternalField(result.dimensionedInternalField())
+        this->patchInternalField(result())
     );
 
     fixedValuePointPatchField<vector>::updateCoeffs();
@@ -260,7 +260,7 @@ void uniformInterpolatedDisplacementPointPatchVectorField::write(Ostream& os)
 const
 {
     pointPatchField<vector>::write(os);
-    os.writeKeyword("fieldName")
+    os.writeKeyword("field")
         << fieldName_ << token::END_STATEMENT << nl;
     os.writeKeyword("interpolationScheme")
         << interpolationScheme_ << token::END_STATEMENT << nl;

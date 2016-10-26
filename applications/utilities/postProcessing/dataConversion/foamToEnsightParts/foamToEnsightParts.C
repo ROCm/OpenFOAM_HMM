@@ -32,31 +32,35 @@ Description
     An Ensight part is created for each cellZone and patch.
 
 Usage
-    - foamToEnsightParts [OPTION] \n
-    Translates OpenFOAM data to Ensight format
+    \b foamToEnsightParts [OPTION]
 
-    \param -ascii \n
-    Write Ensight data in ASCII format instead of "C Binary"
+    Options:
+      - \par -ascii
+        Write Ensight data in ASCII format instead of "C Binary"
 
-    \param -name \<subdir\>\n
-    define sub-directory name to use for Ensight data (default: "Ensight")
+      - \par -name \<subdir\>
+        Define sub-directory name to use for Ensight data (default: "Ensight")
 
-    \param -noZero \n
-    Exclude the often incomplete initial conditions.
+      - \par -noZero
+        Exclude the often incomplete initial conditions.
 
-    \param -noLagrangian \n
-    Suppress writing lagrangian positions and fields.
+      - \par -index \<start\>
+        Ignore the time index contained in the time file and use a
+        simple indexing when creating the \c Ensight/data/######## files.
 
-    \param -index \<start\>\n
-    Ignore the time index contained in the time file and use a
-    simple indexing when creating the \c Ensight/data/######## files.
+      - \par -noLagrangian
+        Suppress writing lagrangian positions and fields.
 
-    \param -noMesh \n
-    Suppress writing the geometry. Can be useful for converting partial
-    results for a static geometry.
+      - \par -index \<start\>
+        Ignore the time index contained in the time file and use a
+        simple indexing when creating the \c Ensight/data/######## files.
 
-    \param -width \<n\>\n
-    width of Ensight data subdir
+      - \par -noMesh
+        Suppress writing the geometry. Can be useful for converting partial
+        results for a static geometry.
+
+      - \par -width \<n\>
+        Width of Ensight data subdir
 
 Note
     - no parallel data.
@@ -86,8 +90,8 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    // enable -constant
-    // probably don't need -withZero though, since the fields are vetted
+    // Enable -constant
+    // Probably don't need -withZero though, since the fields are vetted
     // afterwards anyhow
     timeSelector::addOptions(true, false);
     argList::noParallel();
@@ -128,7 +132,7 @@ int main(int argc, char *argv[])
         "width of Ensight data subdir"
     );
 
-    // the volume field types that we handle
+    // The volume field types that we handle
     wordHashSet volFieldTypes;
     volFieldTypes.insert(volScalarField::typeName);
     volFieldTypes.insert(volVectorField::typeName);
@@ -136,7 +140,7 @@ int main(int argc, char *argv[])
     volFieldTypes.insert(volSymmTensorField::typeName);
     volFieldTypes.insert(volTensorField::typeName);
 
-    // the lagrangian field types that we handle
+    // The lagrangian field types that we handle
     wordHashSet cloudFieldTypes;
     cloudFieldTypes.insert(scalarIOField::typeName);
     cloudFieldTypes.insert(vectorIOField::typeName);
@@ -153,10 +157,10 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
 
-    // get times list
+    // Get times list
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-    // default to binary output, unless otherwise specified
+    // Default to binary output, unless otherwise specified
     const IOstream::streamFormat format =
     (
         args.optionFound("ascii")
@@ -164,21 +168,21 @@ int main(int argc, char *argv[])
       : IOstream::BINARY
     );
 
-    // control for renumbering iterations
+    // Control for renumbering iterations
     label indexingNumber = 0;
     const bool optIndex = args.optionReadIfPresent("index", indexingNumber);
     const bool noLagrangian = args.optionFound("noLagrangian");
 
-    // always write the geometry, unless the -noMesh option is specified
+    // Always write the geometry, unless the -noMesh option is specified
     bool optNoMesh = args.optionFound("noMesh");
 
-    // adjust output width
+    // Adjust output width
     if (args.optionFound("width"))
     {
         ensightFile::subDirWidth(args.optionRead<label>("width"));
     }
 
-    // define sub-directory name to use for Ensight data
+    // Define sub-directory name to use for Ensight data
     fileName ensightDir = "Ensight";
     args.optionReadIfPresent("name", ensightDir);
 
@@ -200,7 +204,7 @@ int main(int argc, char *argv[])
             << "    " << ensightDir << endl;
     }
 
-    // as per mkdir -p "Ensight/data"
+    // As per mkdir -p "Ensight/data"
     mkDir(ensightDir);
     mkDir(dataDir);
 
@@ -222,7 +226,7 @@ int main(int argc, char *argv[])
     // Construct the list of ensight parts for the entire mesh
     ensightParts partsList(mesh);
 
-    // write summary information
+    // Write summary information
     {
         OFstream partsInfoFile(ensightDir/"partsInfo");
 
@@ -241,7 +245,7 @@ int main(int argc, char *argv[])
     }
 
 
-    // map times used
+    // Map times used
     Map<scalar>  timeIndices;
 
     // TODO: Track the time indices used by the geometry
@@ -269,15 +273,15 @@ int main(int argc, char *argv[])
 
         #include "getTimeIndex.H"
 
-        // remember the time index for the volume fields
+        // Remember the time index for the volume fields
         fieldTimesUsed.append(timeIndex);
 
-        // the data/ITER subdirectory must exist
+        // The data/ITER subdirectory must exist
         // Note that data/ITER is indeed a valid ensight::FileName
         const fileName subDir = ensightFile::subDir(timeIndex);
         mkDir(dataDir/subDir);
 
-        // place a timestamp in the directory for future reference
+        // Place a timestamp in the directory for future reference
         {
             OFstream timeStamp(dataDir/subDir/"time");
             timeStamp
@@ -298,7 +302,7 @@ int main(int argc, char *argv[])
             {
                 if (hasMovingMesh)
                 {
-                    // remember the time index for the geometry
+                    // Remember the time index for the geometry
                     geometryTimesUsed.append(timeIndex);
                 }
 
@@ -394,7 +398,7 @@ int main(int argc, char *argv[])
         }
         Info<< " )" << endl;
 
-        // check for clouds
+        // Check for clouds
         forAllConstIter(HashTable<HashTable<word>>, cloudFields, cloudIter)
         {
             const word& cloudName = cloudIter.key();
@@ -412,7 +416,7 @@ int main(int argc, char *argv[])
                 cloudPrefix/cloudName
             );
 
-            // check that the positions field is present for this time
+            // Check that the positions field is present for this time
             if (!cloudObjs.found("positions"))
             {
                 continue;
@@ -485,7 +489,7 @@ int main(int argc, char *argv[])
 
             Info<< " )" << endl;
 
-            // remember the time index
+            // Remember the time index
             cloudTimesUsed[cloudName].append(timeIndex);
         }
 

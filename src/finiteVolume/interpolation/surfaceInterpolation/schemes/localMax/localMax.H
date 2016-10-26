@@ -113,7 +113,7 @@ public:
         {
             NotImplemented;
 
-            return tmp<surfaceScalarField>(NULL);
+            return tmp<surfaceScalarField>(nullptr);
         }
 
         //- Return the face-interpolate of the given cell field
@@ -141,17 +141,39 @@ public:
             );
             GeometricField<Type, fvsPatchField, surfaceMesh>& vff = tvff.ref();
 
-            forAll(vff.boundaryField(), patchi)
-            {
-                vff.boundaryField()[patchi] = vf.boundaryField()[patchi];
-            }
-
             const labelUList& own = mesh.owner();
             const labelUList& nei = mesh.neighbour();
 
             forAll(vff, facei)
             {
                 vff[facei] = max(vf[own[facei]], vf[nei[facei]]);
+            }
+
+            typename GeometricField<Type, fvsPatchField, surfaceMesh>::
+                Boundary& bff = vff.boundaryFieldRef();
+
+            forAll(bff, patchi)
+            {
+                const fvPatchField<Type>& pf = vf.boundaryField()[patchi];
+                Field<Type>& pff = bff[patchi];
+
+                if (pf.coupled())
+                {
+                    tmp<Field<Type>> tpif(pf.patchInternalField());
+                    const Field<Type>& pif = tpif();
+
+                    tmp<Field<Type>> tpnf(pf.patchNeighbourField());
+                    const Field<Type>& pnf = tpnf();
+
+                    forAll(pff, i)
+                    {
+                        pff[i] = max(pif[i], pnf[i]);
+                    }
+                }
+                else
+                {
+                    pff = pf;
+                }
             }
 
             return tvff;

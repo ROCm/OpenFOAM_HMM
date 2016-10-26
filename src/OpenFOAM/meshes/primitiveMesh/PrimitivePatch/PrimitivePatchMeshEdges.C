@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,10 +77,10 @@ meshEdges
         // get the patch faces sharing the edge
         const labelList& curFaces = EdgeFaces[edgeI];
 
-        forAll(curFaces, faceI)
+        forAll(curFaces, facei)
         {
             // get the cell next to the face
-            label curCell = faceCells[curFaces[faceI]];
+            label curCell = faceCells[curFaces[facei]];
 
             // get reference to edges on the cell
             const labelList& ce = cellEdges[curCell];
@@ -141,10 +141,10 @@ meshEdges
     // local-to-global point label translation is necessary
     forAll(PatchEdges, edgeI)
     {
-        const label globalPointI = pp[PatchEdges[edgeI].start()];
-        const edge curEdge(globalPointI, pp[PatchEdges[edgeI].end()]);
+        const label globalPointi = pp[PatchEdges[edgeI].start()];
+        const edge curEdge(globalPointi, pp[PatchEdges[edgeI].end()]);
 
-        const labelList& pe = pointEdges[globalPointI];
+        const labelList& pe = pointEdges[globalPointi];
 
         forAll(pe, i)
         {

@@ -63,10 +63,10 @@ void Foam::fvMesh::clearGeomNotOldVol()
         MoveableMeshObject
     >(*this);
 
-    slicedVolScalarField::DimensionedInternalField* VPtr =
-        static_cast<slicedVolScalarField::DimensionedInternalField*>(VPtr_);
+    slicedVolScalarField::Internal* VPtr =
+        static_cast<slicedVolScalarField::Internal*>(VPtr_);
     deleteDemandDrivenData(VPtr);
-    VPtr_ = NULL;
+    VPtr_ = nullptr;
 
     deleteDemandDrivenData(SfPtr_);
     deleteDemandDrivenData(magSfPtr_);
@@ -77,11 +77,11 @@ void Foam::fvMesh::clearGeomNotOldVol()
 
 void Foam::fvMesh::updateGeomNotOldVol()
 {
-    bool haveV = (VPtr_ != NULL);
-    bool haveSf = (SfPtr_ != NULL);
-    bool haveMagSf = (magSfPtr_ != NULL);
-    bool haveCP = (CPtr_ != NULL);
-    bool haveCf = (CfPtr_ != NULL);
+    bool haveV = (VPtr_ != nullptr);
+    bool haveSf = (SfPtr_ != nullptr);
+    bool haveMagSf = (magSfPtr_ != nullptr);
+    bool haveCP = (CPtr_ != nullptr);
+    bool haveCf = (CfPtr_ != nullptr);
 
     clearGeomNotOldVol();
 
@@ -251,16 +251,16 @@ Foam::fvMesh::fvMesh(const IOobject& io)
     fvSolution(static_cast<const objectRegistry&>(*this)),
     data(static_cast<const objectRegistry&>(*this)),
     boundary_(*this, boundaryMesh()),
-    lduPtr_(NULL),
+    lduPtr_(nullptr),
     curTimeIndex_(time().timeIndex()),
-    VPtr_(NULL),
-    V0Ptr_(NULL),
-    V00Ptr_(NULL),
-    SfPtr_(NULL),
-    magSfPtr_(NULL),
-    CPtr_(NULL),
-    CfPtr_(NULL),
-    phiPtr_(NULL)
+    VPtr_(nullptr),
+    V0Ptr_(nullptr),
+    V00Ptr_(nullptr),
+    SfPtr_(nullptr),
+    magSfPtr_(nullptr),
+    CPtr_(nullptr),
+    CfPtr_(nullptr),
+    phiPtr_(nullptr)
 {
     if (debug)
     {
@@ -361,16 +361,16 @@ Foam::fvMesh::fvMesh
     fvSolution(static_cast<const objectRegistry&>(*this)),
     data(static_cast<const objectRegistry&>(*this)),
     boundary_(*this, boundaryMesh()),
-    lduPtr_(NULL),
+    lduPtr_(nullptr),
     curTimeIndex_(time().timeIndex()),
-    VPtr_(NULL),
-    V0Ptr_(NULL),
-    V00Ptr_(NULL),
-    SfPtr_(NULL),
-    magSfPtr_(NULL),
-    CPtr_(NULL),
-    CfPtr_(NULL),
-    phiPtr_(NULL)
+    VPtr_(nullptr),
+    V0Ptr_(nullptr),
+    V00Ptr_(nullptr),
+    SfPtr_(nullptr),
+    magSfPtr_(nullptr),
+    CPtr_(nullptr),
+    CfPtr_(nullptr),
+    phiPtr_(nullptr)
 {
     if (debug)
     {
@@ -395,16 +395,16 @@ Foam::fvMesh::fvMesh
     fvSolution(static_cast<const objectRegistry&>(*this)),
     data(static_cast<const objectRegistry&>(*this)),
     boundary_(*this, boundaryMesh()),
-    lduPtr_(NULL),
+    lduPtr_(nullptr),
     curTimeIndex_(time().timeIndex()),
-    VPtr_(NULL),
-    V0Ptr_(NULL),
-    V00Ptr_(NULL),
-    SfPtr_(NULL),
-    magSfPtr_(NULL),
-    CPtr_(NULL),
-    CfPtr_(NULL),
-    phiPtr_(NULL)
+    VPtr_(nullptr),
+    V0Ptr_(nullptr),
+    V00Ptr_(nullptr),
+    SfPtr_(nullptr),
+    magSfPtr_(nullptr),
+    CPtr_(nullptr),
+    CfPtr_(nullptr),
+    phiPtr_(nullptr)
 {
     if (debug)
     {
@@ -428,16 +428,16 @@ Foam::fvMesh::fvMesh
     fvSolution(static_cast<const objectRegistry&>(*this)),
     data(static_cast<const objectRegistry&>(*this)),
     boundary_(*this),
-    lduPtr_(NULL),
+    lduPtr_(nullptr),
     curTimeIndex_(time().timeIndex()),
-    VPtr_(NULL),
-    V0Ptr_(NULL),
-    V00Ptr_(NULL),
-    SfPtr_(NULL),
-    magSfPtr_(NULL),
-    CPtr_(NULL),
-    CfPtr_(NULL),
-    phiPtr_(NULL)
+    VPtr_(nullptr),
+    V0Ptr_(nullptr),
+    V00Ptr_(nullptr),
+    SfPtr_(nullptr),
+    magSfPtr_(nullptr),
+    CPtr_(nullptr),
+    CfPtr_(nullptr),
+    phiPtr_(nullptr)
 {
     if (debug)
     {
@@ -652,15 +652,15 @@ void Foam::fvMesh::mapFields(const mapPolyMesh& meshMap)
 
         // Inject volume of merged cells
         label nMerged = 0;
-        forAll(meshMap.reverseCellMap(), oldCellI)
+        forAll(meshMap.reverseCellMap(), oldCelli)
         {
-            label index = meshMap.reverseCellMap()[oldCellI];
+            label index = meshMap.reverseCellMap()[oldCelli];
 
             if (index < -1)
             {
-                label cellI = -index-2;
+                label celli = -index-2;
 
-                V0[cellI] += savedV0[oldCellI];
+                V0[celli] += savedV0[oldCelli];
 
                 nMerged++;
             }
@@ -696,15 +696,15 @@ void Foam::fvMesh::mapFields(const mapPolyMesh& meshMap)
 
         // Inject volume of merged cells
         label nMerged = 0;
-        forAll(meshMap.reverseCellMap(), oldCellI)
+        forAll(meshMap.reverseCellMap(), oldCelli)
         {
-            label index = meshMap.reverseCellMap()[oldCellI];
+            label index = meshMap.reverseCellMap()[oldCelli];
 
             if (index < -1)
             {
-                label cellI = -index-2;
+                label celli = -index-2;
 
-                V00[cellI] += savedV00[oldCellI];
+                V00[celli] += savedV00[oldCelli];
                 nMerged++;
             }
         }
@@ -763,15 +763,18 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
     tmp<scalarField> tsweptVols = polyMesh::movePoints(p);
     scalarField& sweptVols = tsweptVols.ref();
 
-    phi.internalField() = scalarField::subField(sweptVols, nInternalFaces());
-    phi.internalField() *= rDeltaT;
+    phi.primitiveFieldRef() =
+        scalarField::subField(sweptVols, nInternalFaces());
+    phi.primitiveFieldRef() *= rDeltaT;
 
     const fvPatchList& patches = boundary();
 
-    forAll(patches, patchI)
+    surfaceScalarField::Boundary& phibf = phi.boundaryFieldRef();
+
+    forAll(patches, patchi)
     {
-        phi.boundaryField()[patchI] = patches[patchI].patchSlice(sweptVols);
-        phi.boundaryField()[patchI] *= rDeltaT;
+        phibf[patchi] = patches[patchi].patchSlice(sweptVols);
+        phibf[patchi] *= rDeltaT;
     }
 
     // Update or delete the local geometric properties as early as possible so
@@ -853,18 +856,12 @@ void Foam::fvMesh::updateMesh(const mapPolyMesh& mpm)
 }
 
 
-bool Foam::fvMesh::writeObjects
+bool Foam::fvMesh::writeObject
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
     IOstream::compressionType cmp
 ) const
-{
-    return polyMesh::writeObject(fmt, ver, cmp);
-}
-
-
-bool Foam::fvMesh::write() const
 {
     bool ok = true;
     if (phiPtr_)
@@ -872,7 +869,13 @@ bool Foam::fvMesh::write() const
         ok = phiPtr_->write();
     }
 
-    return ok && polyMesh::write();
+    return ok && polyMesh::writeObject(fmt, ver, cmp);
+}
+
+
+bool Foam::fvMesh::write() const
+{
+    return polyMesh::write();
 }
 
 

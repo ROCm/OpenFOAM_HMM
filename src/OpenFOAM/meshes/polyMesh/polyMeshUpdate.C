@@ -84,11 +84,11 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
 
             // Any points created out-of-nothing get set to the current
             // coordinate for lack of anything better.
-            forAll(mpm.pointMap(), newPointI)
+            forAll(mpm.pointMap(), newPointi)
             {
-                if (mpm.pointMap()[newPointI] == -1)
+                if (mpm.pointMap()[newPointi] == -1)
                 {
-                    newMotionPoints[newPointI] = points_[newPointI];
+                    newMotionPoints[newPointi] = points_[newPointi];
                 }
             }
         }
@@ -97,23 +97,23 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
             const labelList& pointMap = mpm.pointMap();
             const labelList& revPointMap = mpm.reversePointMap();
 
-            forAll(pointMap, newPointI)
+            forAll(pointMap, newPointi)
             {
-                label oldPointI = pointMap[newPointI];
-                if (oldPointI >= 0)
+                label oldPointi = pointMap[newPointi];
+                if (oldPointi >= 0)
                 {
-                    if (revPointMap[oldPointI] == newPointI) // master point
+                    if (revPointMap[oldPointi] == newPointi) // master point
                     {
-                        newMotionPoints[newPointI] = oldMotionPoints[oldPointI];
+                        newMotionPoints[newPointi] = oldMotionPoints[oldPointi];
                     }
                     else
                     {
-                        newMotionPoints[newPointI] = points_[newPointI];
+                        newMotionPoints[newPointi] = points_[newPointi];
                     }
                 }
                 else
                 {
-                    newMotionPoints[newPointI] = points_[newPointI];
+                    newMotionPoints[newPointi] = points_[newPointi];
                 }
             }
         }

@@ -92,6 +92,7 @@ public:
 
     ClassName("searchableSurfaces");
 
+
     // Constructors
 
         //- Construct with length specified. Fill later.
@@ -119,6 +120,7 @@ public:
         {
             return names_;
         }
+
         wordList& names()
         {
             return names_;
@@ -128,6 +130,7 @@ public:
         {
             return regionNames_;
         }
+
         List<wordList>& regionNames()
         {
             return regionNames_;
@@ -209,18 +212,6 @@ public:
 
             //- Calculate bounding box
             boundBox bounds() const;
-
-
-        // Single point queries
-
-            //- Calculate point which is on a set of surfaces.
-            pointIndexHit facesIntersection
-            (
-                const scalar initialDistSqr,
-                const scalar convergenceDistSqr,
-                const point& start
-            ) const;
-
 
         // Checking
 

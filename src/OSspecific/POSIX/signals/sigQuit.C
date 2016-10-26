@@ -40,7 +40,7 @@ bool Foam::sigQuit::sigActive_ = false;
 void Foam::sigQuit::sigHandler(int)
 {
     // Reset old handling
-    if (sigaction(SIGQUIT, &oldAction_, NULL) < 0)
+    if (sigaction(SIGQUIT, &oldAction_, nullptr) < 0)
     {
         FatalErrorInFunction
             << "Cannot reset SIGQUIT trapping"
@@ -98,7 +98,7 @@ void Foam::sigQuit::unset(const bool)
 {
     if (sigActive_)
     {
-        if (sigaction(SIGQUIT, &oldAction_, NULL) < 0)
+        if (sigaction(SIGQUIT, &oldAction_, nullptr) < 0)
         {
         FatalErrorInFunction
             << "Cannot set SIGQUIT trapping"

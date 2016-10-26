@@ -109,7 +109,7 @@ const T* Foam::DictionaryBase<IDLListType, T>::lookupPtr
     }
     else
     {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -125,7 +125,7 @@ T* Foam::DictionaryBase<IDLListType, T>::lookupPtr(const word& keyword)
     }
     else
     {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -183,6 +183,13 @@ Foam::wordList Foam::DictionaryBase<IDLListType, T>::toc() const
 
 
 template<class IDLListType, class T>
+Foam::wordList Foam::DictionaryBase<IDLListType, T>::sortedToc() const
+{
+    return hashedTs_.sortedToc();
+}
+
+
+template<class IDLListType, class T>
 void Foam::DictionaryBase<IDLListType, T>::insert(const word& keyword, T* tPtr)
 {
     // NOTE: we should probably check that HashTable::insert actually worked
@@ -213,7 +220,7 @@ T* Foam::DictionaryBase<IDLListType, T>::remove(const word& keyword)
     }
     else
     {
-        return NULL;
+        return nullptr;
     }
 }
 

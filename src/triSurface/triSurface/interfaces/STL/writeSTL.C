@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,34 +35,34 @@ void Foam::triSurface::writeSTLASCII(const bool writeSorted, Ostream& os) const
 {
     labelList faceMap;
 
-    surfacePatchList myPatches(calcPatches(faceMap));
+    surfacePatchList patches(calcPatches(faceMap));
 
     if (writeSorted)
     {
         label faceIndex = 0;
-        forAll(myPatches, patchI)
+        forAll(patches, patchi)
         {
             // Print all faces belonging to this region
-            const surfacePatch& patch = myPatches[patchI];
+            const surfacePatch& patch = patches[patchi];
 
             os  << "solid " << patch.name() << endl;
 
             for
             (
-                label patchFaceI = 0;
-                patchFaceI < patch.size();
-                patchFaceI++
+                label patchFacei = 0;
+                patchFacei < patch.size();
+                patchFacei++
             )
             {
-                const label faceI = faceMap[faceIndex++];
+                const label facei = faceMap[faceIndex++];
 
-                const vector& n = faceNormals()[faceI];
+                const vector& n = faceNormals()[facei];
 
                 os  << "  facet normal "
                     << n.x() << ' ' << n.y() << ' ' << n.z() << nl
                     << "    outer loop" << endl;
 
-                const labelledTri& f = (*this)[faceI];
+                const labelledTri& f = (*this)[facei];
                 const point& pa = points()[f[0]];
                 const point& pb = points()[f[1]];
                 const point& pc = points()[f[2]];
@@ -84,39 +84,39 @@ void Foam::triSurface::writeSTLASCII(const bool writeSorted, Ostream& os) const
     {
         // Get patch (=compact region) per face
         labelList patchIDs(size());
-        forAll(myPatches, patchI)
+        forAll(patches, patchi)
         {
-            label faceI = myPatches[patchI].start();
+            label facei = patches[patchi].start();
 
-            forAll(myPatches[patchI], i)
+            forAll(patches[patchi], i)
             {
-                patchIDs[faceMap[faceI++]] = patchI;
+                patchIDs[faceMap[facei++]] = patchi;
             }
         }
 
-        label currentPatchI = -1;
+        label currentPatchi = -1;
 
-        forAll(*this, faceI)
+        forAll(*this, facei)
         {
-            if (currentPatchI != patchIDs[faceI])
+            if (currentPatchi != patchIDs[facei])
             {
-                if (currentPatchI != -1)
+                if (currentPatchi != -1)
                 {
                     // Have already valid patch. Close it.
-                    os  << "endsolid " << myPatches[currentPatchI].name()
+                    os  << "endsolid " << patches[currentPatchi].name()
                         << nl;
                 }
-                currentPatchI = patchIDs[faceI];
-                os  << "solid " << myPatches[currentPatchI].name() << nl;
+                currentPatchi = patchIDs[facei];
+                os  << "solid " << patches[currentPatchi].name() << nl;
             }
 
-            const vector& n = faceNormals()[faceI];
+            const vector& n = faceNormals()[facei];
 
             os  << "  facet normal "
                 << n.x() << ' ' << n.y() << ' ' << n.z() << nl
                 << "    outer loop" << endl;
 
-            const labelledTri& f = (*this)[faceI];
+            const labelledTri& f = (*this)[facei];
             const point& pa = points()[f[0]];
             const point& pb = points()[f[1]];
             const point& pc = points()[f[2]];
@@ -131,9 +131,9 @@ void Foam::triSurface::writeSTLASCII(const bool writeSorted, Ostream& os) const
                 << "  endfacet" << endl;
         }
 
-        if (currentPatchI != -1)
+        if (currentPatchi != -1)
         {
-            os  << "endsolid " << myPatches[currentPatchI].name()
+            os  << "endsolid " << patches[currentPatchi].name()
                 << nl;
         }
     }
@@ -151,12 +151,12 @@ void Foam::triSurface::writeSTLBINARY(std::ostream& os) const
 
     const vectorField& normals = faceNormals();
 
-    forAll(*this, faceI)
+    forAll(*this, facei)
     {
-        const labelledTri& f = (*this)[faceI];
+        const labelledTri& f = (*this)[facei];
 
         // Convert vector into STL single precision
-        STLpoint n(normals[faceI]);
+        STLpoint n(normals[facei]);
         STLpoint pa(points()[f[0]]);
         STLpoint pb(points()[f[1]]);
         STLpoint pc(points()[f[2]]);

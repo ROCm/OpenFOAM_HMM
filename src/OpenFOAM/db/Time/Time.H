@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -101,10 +101,10 @@ public:
         //- Stop-run control options
         enum stopAtControls
         {
-            saEndTime,    /*!< stop when Time reaches the prescribed endTime */
-            saNoWriteNow, /*!< set endTime to stop immediately w/o writing */
-            saWriteNow,   /*!< set endTime to stop immediately w/ writing */
-            saNextWrite   /*!< stop the next time data are written */
+            saEndTime,    //!< stop when Time reaches the prescribed endTime
+            saNoWriteNow, //!< set endTime to stop immediately w/o writing
+            saWriteNow,   //!< set endTime to stop immediately w/ writing
+            saNextWrite   //!< stop the next time data are written
         };
 
         //- Supported time directory name formats
@@ -132,20 +132,8 @@ protected:
 
         scalar writeInterval_;
 
-        // Additional writing
-
-            writeControls secondaryWriteControl_;
-
-            scalar secondaryWriteInterval_;
-
         label  purgeWrite_;
-        mutable FIFOStack<word> previousOutputTimes_;
-
-        // Additional purging
-
-            label  secondaryPurgeWrite_;
-            mutable FIFOStack<word> previousSecondaryOutputTimes_;
-
+        mutable FIFOStack<word> previousWriteTimes_;
 
         // One-shot writing
         bool writeOnce_;
@@ -157,7 +145,7 @@ protected:
         autoPtr<TimeState> prevTimeState_;
 
 
-        // Signal handlers for secondary writing
+        // Signal handlers for writing
 
             //- Enable one-shot writing upon signal
             sigWriteNow sigWriteNow_;
@@ -401,6 +389,9 @@ public:
                 const scalar,
                 const word& constantName = "constant"
             );
+
+            //- Write time dictionary to the \<time\>/uniform directory
+            virtual bool writeTimeDict() const;
 
             //- Write using given format, version and compression
             virtual bool writeObject

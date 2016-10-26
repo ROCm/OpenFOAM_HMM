@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "wakeEntrainmentCoalescence.H"
+#include "fvmSup.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -62,10 +63,14 @@ wakeEntrainmentCoalescence
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField>
-Foam::diameterModels::IATEsources::wakeEntrainmentCoalescence::R() const
+Foam::tmp<Foam::fvScalarMatrix>
+Foam::diameterModels::IATEsources::wakeEntrainmentCoalescence::R
+(
+    const volScalarField& alphai,
+    volScalarField& kappai
+) const
 {
-    return (-12)*phi()*Cwe_*cbrt(CD())*iate_.a()*Ur();
+    return -fvm::SuSp(12*phi()*Cwe_*cbrt(CD())*iate_.a()*Ur(), kappai);
 }
 
 

@@ -8,10 +8,7 @@ runApplication blockMesh
 
 runApplication topoSet -constant
 
-# split the mesh to generate the ACMI coupled patches
+# Split the mesh to generate the ACMI coupled patches
 runApplication createBaffles -overwrite
-
-# remove zero-sized patches
-runApplication createPatch -overwrite
 
 restore0Dir

@@ -30,8 +30,7 @@ Group
 Description
     This boundary condition provides a uniform fixed value condition.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         uniformValue | uniform value           |         yes |
@@ -39,7 +38,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            uniformFixedValue;
         uniformValue    constant 0.2;
@@ -51,7 +50,7 @@ Note
     varying functions.  The example above gives the usage for supplying a
     constant value.
 
-SeeAlso
+See also
     Foam::Function1Types
     Foam::fixedValueFvPatchField
 

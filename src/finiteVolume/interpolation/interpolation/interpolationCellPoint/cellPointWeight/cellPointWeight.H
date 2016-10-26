@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,13 +55,13 @@ protected:
     // Protected data
 
        //- Cell index
-       const label cellI_;
+       const label celli_;
 
        //- Weights applied to tet vertices
-       List<scalar> weights_;
+       FixedList<scalar, 4> weights_;
 
        //- Face vertex indices
-       List<label> faceVertices_;
+       FixedList<label, 3> faceVertices_;
 
 
     // Protected Member Functions
@@ -70,14 +70,14 @@ protected:
         (
             const polyMesh& mesh,
             const vector& position,
-            const label cellI
+            const label celli
         );
 
         void findTriangle
         (
             const polyMesh& mesh,
             const vector& position,
-            const label faceI
+            const label facei
         );
 
 
@@ -98,8 +98,8 @@ public:
         (
             const polyMesh& mesh,
             const vector& position,
-            const label cellI,
-            const label faceI = -1
+            const label celli,
+            const label facei = -1
         );
 
 
@@ -108,17 +108,17 @@ public:
         //- Cell index
         inline label cell() const
         {
-            return cellI_;
+            return celli_;
         }
 
         //- Interpolation weights
-        inline const List<scalar>& weights() const
+        inline const FixedList<scalar, 4>& weights() const
         {
             return weights_;
         }
 
         //- Interpolation addressing for points on face
-        inline const List<label>& faceVertices() const
+        inline const FixedList<label, 3>& faceVertices() const
         {
             return faceVertices_;
         }
