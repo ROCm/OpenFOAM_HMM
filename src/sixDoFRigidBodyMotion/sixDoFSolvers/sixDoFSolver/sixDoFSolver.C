@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "sixDoFSolver.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -46,6 +47,11 @@ Foam::sixDoFSolver::sixDoFSolver
     dict_(dict)
 {}
 
+
+void Foam::sixDoFSolver::write(Ostream& os) const
+{
+    os << dict_;
+}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 

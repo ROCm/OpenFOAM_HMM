@@ -181,6 +181,10 @@ public:
             scalar deltaT,
             scalar deltaT0
         ) = 0;
+
+
+    //- Write
+    void write(Ostream&) const;
 };
 
 

@@ -90,5 +90,4 @@ void Foam::sixDoFSolvers::CrankNicolson::solve
     Q() = Qpi.first();
 }
 
-
 // ************************************************************************* //

@@ -96,7 +96,7 @@ public:
             sixDoFRigidBodyMotion& body
         );
 
-         //- Construct and return a clone
+        //- Construct and return a clone
         virtual autoPtr<sixDoFSolver> clone() const
         {
             return autoPtr<sixDoFSolver>

@@ -98,5 +98,4 @@ void Foam::sixDoFSolvers::symplectic::solve
     pi() += rConstraints() & aDamp()*0.5*deltaT*tau();
 }
 
-
 // ************************************************************************* //
