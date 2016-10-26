@@ -255,8 +255,11 @@ castellatedMeshControls
         //    //  that in small gaps we're getting more cells.
         //    //  The specification is
         //    //  - numGapCells : minimum number of cells in the gap
+        //    //                  (usually >3; lower than this might not
+        //    //                   resolve correctly)
         //    //  - minLevel    : min refinement level at which to kick in
-        //    //  - maxLevel    : upper refinement level
+        //    //  - maxLevel    : upper refinement level (to avoid refinement
+        //    //                  continuing on a single extraneous feature)
         //    // All three settings can be overridden on a surface by
         //    // surface basis in the refinementSurfaces section.
         //    gapLevel (<numGapCells> <minLevel> <maxlevel>);
