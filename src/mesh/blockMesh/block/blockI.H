@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,24 +23,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::label Foam::block::vtxLabel(label i, label j, label k) const
+inline const Foam::pointField& Foam::block::points() const
 {
-    return
-    (
-        i
-      + j * (meshDensity().x() + 1)
-      + k * (meshDensity().x() + 1) * (meshDensity().y() + 1)
-    );
+    return points_;
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline const Foam::blockDescriptor& Foam::block::blockDef() const
+inline const Foam::FixedList<Foam::List<Foam::FixedList<Foam::label, 4>>, 6>&
+Foam::block::boundaryPatches() const
 {
-    return *this;
+    return boundaryPatches_;
 }
 
 

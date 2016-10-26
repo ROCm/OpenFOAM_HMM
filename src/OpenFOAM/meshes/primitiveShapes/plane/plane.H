@@ -129,7 +129,7 @@ public:
         explicit plane(const vector& normalVector);
 
         //- Construct from normal vector and point in plane
-        plane
+        explicit plane
         (
             const point& basePoint,
             const vector& normalVector,
@@ -137,7 +137,12 @@ public:
         );
 
         //- Construct from three points in plane
-        plane(const point&, const point&, const point&);
+        explicit plane
+        (
+            const point& point1,
+            const point& point2,
+            const point& point3
+        );
 
         //- Construct from coefficients for the
         //  plane equation: ax + by + cz + d = 0

@@ -177,7 +177,11 @@ public:
         //- Return the bubble Webber number
         tmp<volScalarField> We() const;
 
-        virtual tmp<volScalarField> R() const = 0;
+        virtual tmp<fvScalarMatrix> R
+        (
+            const volScalarField& alphai,
+            volScalarField& kappai
+        ) const = 0;
 };
 
 

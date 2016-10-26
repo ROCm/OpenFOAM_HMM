@@ -43,9 +43,12 @@ SourceFiles
 #define blockMesh_H
 
 #include "blockList.H"
+#include "searchableSurfaces.H"
 #include "polyMesh.H"
 #include "IOdictionary.H"
-#include "curvedEdgeList.H"
+#include "blockVertexList.H"
+#include "blockEdgeList.H"
+#include "blockFaceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,16 +66,25 @@ class blockMesh
     // Private data
 
         //- Switch for verbose output
-        static bool verboseOutput;
+        bool verboseOutput;
 
-        //- Point field defining the block mesh (corners)
-        pointField blockPointField_;
-
-        //- The list of curved edges
-        curvedEdgeList edges_;
+        //- Optional searchable geometry to project face-points to
+        searchableSurfaces geometry_;
 
         //- The scaling factor to convert to metres
         scalar scaleFactor_;
+
+        //- The list of block vertices
+        blockVertexList blockVertices_;
+
+        //- The list of block vertex positions
+        pointField vertices_;
+
+        //- The list of curved edges
+        blockEdgeList edges_;
+
+        //- The list of curved faces
+        blockFaceList faces_;
 
         //- The blocks themselves (the topology) as a polyMesh
         polyMesh* topologyPtr_;
@@ -166,17 +178,29 @@ public:
 
         // Access
 
-            //- Reference to point field defining the block mesh
+            //- Optional searchable geometry to project face-points to
+            const searchableSurfaces& geometry() const
+            {
+                return geometry_;
+            }
+
+            //- Reference to point field defining the blockMesh
             //  these points have not been scaled by scaleFactor
-            const pointField& blockPointField() const;
+            const pointField& vertices() const;
 
             //- Return the blockMesh topology as a polyMesh
             const polyMesh& topology() const;
 
             //- Return the curved edges
-            const curvedEdgeList& edges() const
+            const blockEdgeList& edges() const
             {
                 return edges_;
+            }
+
+            //- Return the curved faces
+            const blockFaceList& faces() const
+            {
+                return faces_;
             }
 
             //- The scaling factor used to convert to metres
@@ -204,11 +228,8 @@ public:
 
         // Edit
 
-            //- Clear geometry (internal points, cells, boundaryPatches)
-            void clearGeom();
-
             //- Enable/disable verbose information about the progress
-            static void verbose(const bool on=true);
+            void verbose(const bool on=true);
 
 
         // Write

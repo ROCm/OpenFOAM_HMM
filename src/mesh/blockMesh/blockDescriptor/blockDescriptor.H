@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*---------------------------------------------------------------------------* \
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -31,14 +31,14 @@ Description
     For a given block, the correspondence between the ordering of vertex labels
     and face labels is shown below.  For vertex numbering in the sequence 0 to 7
     (block, centre): faces 0 (f0) and 1 are left and right, respectively; faces
-    2 and 3 are bottom and top; and faces 4 and 5 are front the back:
+    2 and 3 are front the back; and faces 4 and 5 are bottom and top:
     \verbatim
-             4 ---- 5
-        f3   |\     |\   f5
-         |   | 7 ---- 6    \
-         |   0 |--- 1 |     \
-         |    \|     \|      f4
-        f2     3 ---- 2
+             7 ---- 6
+        f5   |\     |\   f3
+         |   | 4 ---- 5    \
+         |   3 |--- 2 |     \
+         |    \|     \|      f2
+        f4     0 ---- 1
 
              f0 ----- f1
      \endverbatim
@@ -55,7 +55,8 @@ SourceFiles
 #include "cellShape.H"
 #include "pointField.H"
 #include "scalarList.H"
-#include "curvedEdgeList.H"
+#include "blockEdgeList.H"
+#include "blockFaceList.H"
 #include "gradingDescriptors.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -79,28 +80,31 @@ class blockDescriptor
     // Private data
 
         //- Reference to point field defining the block mesh
-        const pointField& blockPointField_;
+        const pointField& vertices_;
 
-        //- Reference to a list of curved edges
-        const curvedEdgeList& curvedEdges_;
+        //- Reference to a list of block edges
+        const blockEdgeList& edges_;
+
+        //- Reference to the list of curved faces
+        const blockFaceList& faces_;
 
         //- Block shape
         cellShape blockShape_;
 
         //- The number of cells in the i,j,k directions
-        Vector<label> meshDensity_;
-
-        //- Block edge points
-        List<List<point>> edgePoints_;
-
-        //- Block edge weighting factors
-        scalarListList edgeWeights_;
+        Vector<label> density_;
 
         //- Expansion ratios in all directions
         List<gradingDescriptors> expand_;
 
-        //- Name of the zone (empty string if none)
+        //- Name of the zone (empty word if none)
         word zoneName_;
+
+        //- Curved-face labels for each block-face (-1 for flat faces)
+        FixedList<label, 6> curvedFaces_;
+
+        //- Number of curved faces in this block
+        label nCurvedFaces_;
 
 
     // Private Member Functions
@@ -108,11 +112,19 @@ class blockDescriptor
         //- Check block has outward-pointing faces
         void check(const Istream& is);
 
-        //- Set the points/weights for all edges
-        void makeBlockEdges();
+        //- Calculate the points and weights for the specified edge.
+        //  Return the number of curved edges
+        label edgePointsWeights
+        (
+            pointField (&edgePoints)[12],
+            scalarList (&edgeWeights)[12],
+            const label edgei,
+            const label start,
+            const label end,
+            const label dim
+        ) const;
 
-        //- Set the edge points/weights
-        void setEdge(label edgeI, label start, label end, label dim);
+        void findCurvedFaces();
 
 
     // Private Member Functions
@@ -129,9 +141,10 @@ public:
         blockDescriptor
         (
             const cellShape&,
-            const pointField& blockPointField,
-            const curvedEdgeList&,
-            const Vector<label>& meshDensity,
+            const pointField& vertices,
+            const blockEdgeList&,
+            const blockFaceList&,
+            const Vector<label>& density,
             const UList<gradingDescriptors>& expand,
             const word& zoneName = ""
         );
@@ -139,59 +152,86 @@ public:
         //- Construct from Istream
         blockDescriptor
         (
-            const pointField& blockPointField,
-            const curvedEdgeList&,
+            const pointField& vertices,
+            const blockEdgeList&,
+            const blockFaceList&,
             Istream&
         );
-
-        //- Clone
-        autoPtr<blockDescriptor> clone() const
-        {
-            NotImplemented;
-            return autoPtr<blockDescriptor>(nullptr);
-        }
-
-
-    //- Destructor
-    ~blockDescriptor();
 
 
     // Member Functions
 
-        // Access
-
-        //- Return the number of cells in the i,j,k directions
-        const Vector<label>& density() const
-        {
-            return meshDensity_;
-        }
-
-        //- Reference to point field defining the block mesh
-        const pointField& blockPointField() const;
+        //- Return reference to the list of curved faces
+        inline const blockFaceList& faces() const;
 
         //- Return the block shape
-        const cellShape& blockShape() const;
-
-        //- Return the block points along each edge
-        const List<List<point>>& blockEdgePoints() const;
-
-        //- Return the weightings along each edge
-        const scalarListList& blockEdgeWeights() const;
+        inline const cellShape& blockShape() const;
 
         //- Return the mesh density (number of cells) in the i,j,k directions
-        const Vector<label>& meshDensity() const;
+        inline const Vector<label>& density() const;
 
         //- Return the (optional) zone name
-        const word& zoneName() const;
+        inline const word& zoneName() const;
 
         //- Return the number of points
-        label nPoints() const;
+        inline label nPoints() const;
 
         //- Return the number of cells
-        label nCells() const;
+        inline label nCells() const;
 
-        //- Return block point at local label i
-        const point& blockPoint(const label i) const;
+        //- Curved-face labels for each block-face (-1 for flat faces)
+        inline const FixedList<label, 6>& curvedFaces() const;
+
+        //- Number of curved faces in this block
+        inline label nCurvedFaces() const;
+
+        //- Return block point for local label i
+        inline const point& blockPoint(const label i) const;
+
+        //- Vertex label offset for a particular i,j,k position
+        inline label pointLabel
+        (
+            const label i,
+            const label j,
+            const label k
+        ) const;
+
+        //- Face vertex label offset for a particular i,j,k position
+        inline label facePointLabel
+        (
+            const label facei,
+            const label i,
+            const label j
+        ) const;
+
+        //- Return true if point i,j,k addresses a block vertex
+        inline bool vertex(const label i, const label j, const label k) const;
+
+        //- Return true if point i,j,k addresses a block edge
+        inline bool edge(const label i, const label j, const label k) const;
+
+        //- Calculate the points and weights for all edges.
+        //  Return the number of curved edges
+        label edgesPointsWeights
+        (
+            pointField (&edgePoints)[12],
+            scalarList (&edgeWeights)[12]
+        ) const;
+
+        //- Return true if point i,j,k addresses a block flat face or edge
+        inline bool flatFaceOrEdge
+        (
+            const label i,
+            const label j,
+            const label k
+        ) const;
+
+        //- Return the list of face-points for all of the faces of the block
+        FixedList<pointField, 6> facePoints(const pointField& points) const;
+
+        //- Correct the location of the given face-points
+        //  to lie on the faces of the block
+        void correctFacePoints(FixedList<pointField, 6>&) const;
 
 
     // IOstream Operators
@@ -203,6 +243,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "blockDescriptorI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

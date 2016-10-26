@@ -561,7 +561,7 @@ void SpalartAllmarasDES<BasicTurbulenceModel>::correct()
     bound(nuTilda_, dimensionedScalar("0", nuTilda_.dimensions(), 0.0));
     nuTilda_.correctBoundaryConditions();
 
-    correctNut(fv1);
+    correctNut();
 }
 
 

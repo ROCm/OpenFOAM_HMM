@@ -179,8 +179,6 @@ int main(int argc, char *argv[])
     Info<< "Creating block mesh from\n    "
         << meshDictIO.objectPath() << endl;
 
-    blockMesh::verbose(true);
-
     IOdictionary meshDict(meshDictIO);
     blockMesh blocks(meshDict, regionName);
 
@@ -289,8 +287,8 @@ int main(int argc, char *argv[])
         forAll(blocks, blockI)
         {
             const block& b = blocks[blockI];
-            const labelListList& blockCells = b.cells();
-            const word& zoneName = b.blockDef().zoneName();
+            const List<FixedList<label, 8>> blockCells = b.cells();
+            const word& zoneName = b.zoneName();
 
             if (zoneName.size())
             {
