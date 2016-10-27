@@ -512,7 +512,7 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
     Info<< type() << " " << name() << ":" << nl;
 
     dict.lookup("fields") >> fields_;
-    dict.lookup("U") >> UName_;
+    UName_ = dict.lookupOrDefault<word>("U", "U");
 
     if (findIndex(fields_, UName_) == -1)
     {
