@@ -28,8 +28,12 @@ boundaryField
 
     ceiling
     {
-        type            fixedValue;
-        value           uniform 300;
+        type            lumpedMassWallTemperature;
+        kappaMethod     fluidThermo;
+        kappaName       none;
+        mass            1000;
+        Cp              4100;
+        value           uniform 300.0;
     }
 
     fixedWalls
