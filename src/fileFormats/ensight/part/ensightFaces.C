@@ -101,7 +101,7 @@ inline Foam::label Foam::ensightFaces::offset
 }
 
 
-void Foam::ensightFaces::allocate()
+void Foam::ensightFaces::resize()
 {
     // overall required size
     label n = 0;
@@ -137,13 +137,40 @@ Foam::ensightFaces::ensightFaces(label partIndex)
     sizes_(0),
     lists_()
 {
-    // ensure sub-lists are properly initialized to nullptr
+    // Ensure sub-lists are properly initialized to nullptr
     forAll(lists_, typeI)
     {
         lists_[typeI] = nullptr;
     }
 
-    clear();
+    resize();   // adjust allocation
+}
+
+
+Foam::ensightFaces::ensightFaces(const ensightFaces& obj)
+:
+    index_(obj.index_),
+    address_(obj.address_),
+    flipMap_(obj.flipMap_),
+    sizes_(0),
+    lists_()
+{
+    // Ensure sub-lists are properly initialized to nullptr
+    forAll(lists_, typeI)
+    {
+        lists_[typeI] = nullptr;
+    }
+
+    // Total (reduced) sizes
+    FixedList<label, 3> totSizes = obj.sizes_;
+
+    // Local sizes
+    this->sizes_ = obj.sizes();
+
+    resize();   // adjust allocation
+
+    // Restore total (reduced) sizes
+    this->sizes_ = totSizes;
 }
 
 
@@ -151,7 +178,13 @@ Foam::ensightFaces::ensightFaces(label partIndex)
 
 Foam::ensightFaces::~ensightFaces()
 {
-    clear();
+    sizes_ = 0;
+    forAll(lists_, typeI)
+    {
+        deleteDemandDrivenData(lists_[typeI]);
+    }
+    address_.clear();
+    flipMap_.clear();
 }
 
 
@@ -162,7 +195,7 @@ Foam::FixedList<Foam::label, 3> Foam::ensightFaces::sizes() const
     FixedList<label, 3> count;
     forAll(lists_, typeI)
     {
-        count[typeI] = lists_[typeI] ? lists_[typeI]->size() : 0;
+        count[typeI] = lists_[typeI]->size();
     }
 
     return count;
@@ -183,13 +216,7 @@ Foam::label Foam::ensightFaces::total() const
 void Foam::ensightFaces::clear()
 {
     sizes_ = 0;
-
-    forAll(lists_, typeI)
-    {
-        deleteDemandDrivenData(lists_[typeI]);
-    }
-    address_.clear();
-    flipMap_.clear();
+    resize();
 }
 
 
@@ -197,7 +224,7 @@ void Foam::ensightFaces::reduce()
 {
     forAll(sizes_, typeI)
     {
-        sizes_[typeI] = lists_[typeI] ? lists_[typeI]->size() : 0;
+        sizes_[typeI] = lists_[typeI]->size();
         Foam::reduce(sizes_[typeI], sumOp<label>());
     }
 }
@@ -265,7 +292,7 @@ void Foam::ensightFaces::classify(const faceList& faces)
         sizes_[what]++;
     }
 
-    allocate(); // adjust allocation
+    resize();   // adjust allocation
     sizes_ = 0; // reset sizes
 
     // Assign face-id per shape type
@@ -305,7 +332,7 @@ void Foam::ensightFaces::classify
         }
     }
 
-    allocate(); // adjust allocation
+    resize();   // adjust allocation
     sizes_ = 0; // reset sizes
 
     if (useFlip)

@@ -74,11 +74,13 @@ public:
         //- Return the ensight element name for the specified type
         static inline const char* key(const enum elemType);
 
+
 private:
 
     // Private data
 
-        //- Location in list
+        //- Location within a list.
+        //  The ensight part number is typically this value +1.
         label index_;
 
         //- Linear list of ids, sub-sectioned per element type via SubLists
@@ -90,7 +92,8 @@ private:
         //- List of global sizes for each element type
         FixedList<label, 3> sizes_;
 
-        //- SubLists of ids for each element type
+        //- SubLists of ids for each element type.
+        //  Managed via pointers, since a SubList cannot be relocated/resized.
         FixedList<SubList<label>*, 3> lists_;
 
 
@@ -106,12 +109,11 @@ private:
         inline label offset(const enum elemType what, const label i) const;
 
         //- Use current sizes to redimension the element lists
-        void allocate();
+        void resize();
 
         //- Disallow default bitwise assignment
         void operator=(const ensightFaces&) = delete;
 
-        // Retain default copy constructor. Needed for lists etc.
 
 public:
 
@@ -119,6 +121,9 @@ public:
 
         //- Construct null, optionally with index
         ensightFaces(label partIndex = 0);
+
+        //- Copy constructor. Needed for lists etc.
+        ensightFaces(const ensightFaces&);
 
 
     //- Destructor
@@ -189,7 +194,7 @@ public:
         );
 
 
-        //- Set sizes to zero, free up memory
+        //- Set addressable sizes to zero, free up addressing memory.
         void clear();
 
         //- Sum element counts across all processes.

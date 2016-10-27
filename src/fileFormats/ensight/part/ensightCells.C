@@ -65,7 +65,7 @@ inline Foam::label Foam::ensightCells::offset
 }
 
 
-void Foam::ensightCells::allocate()
+void Foam::ensightCells::resize()
 {
     // overall required size
     label n = 0;
@@ -97,13 +97,39 @@ Foam::ensightCells::ensightCells(const label partIndex)
     sizes_(0),
     lists_()
 {
-    // ensure sub-lists are properly initialized to nullptr
+    // Ensure sub-lists are properly initialized to nullptr
     forAll(lists_, typeI)
     {
         lists_[typeI] = nullptr;
     }
 
-    clear();
+    resize();   // adjust allocation
+}
+
+
+Foam::ensightCells::ensightCells(const ensightCells& obj)
+:
+    index_(obj.index_),
+    address_(obj.address_),
+    sizes_(0),
+    lists_()
+{
+    // Ensure sub-lists are properly initialized to nullptr
+    forAll(lists_, typeI)
+    {
+        lists_[typeI] = nullptr;
+    }
+
+    // Total (reduced) sizes
+    FixedList<label, 5> totSizes = obj.sizes_;
+
+    // Local sizes
+    this->sizes_ = obj.sizes();
+
+    resize();   // adjust allocation
+
+    // Restore total (reduced) sizes
+    this->sizes_ = totSizes;
 }
 
 
@@ -111,7 +137,12 @@ Foam::ensightCells::ensightCells(const label partIndex)
 
 Foam::ensightCells::~ensightCells()
 {
-    clear();
+    sizes_ = 0;
+    forAll(lists_, typeI)
+    {
+        deleteDemandDrivenData(lists_[typeI]);
+    }
+    address_.clear();
 }
 
 
@@ -143,12 +174,7 @@ Foam::label Foam::ensightCells::total() const
 void Foam::ensightCells::clear()
 {
     sizes_ = 0;
-
-    forAll(lists_, typeI)
-    {
-        deleteDemandDrivenData(lists_[typeI]);
-    }
-    address_.clear();
+    resize();
 }
 
 
@@ -156,7 +182,7 @@ void Foam::ensightCells::reduce()
 {
     forAll(sizes_, typeI)
     {
-        sizes_[typeI] = lists_[typeI] ? lists_[typeI]->size() : 0;
+        sizes_[typeI] = lists_[typeI]->size();
         Foam::reduce(sizes_[typeI], sumOp<label>());
     }
 }
@@ -221,8 +247,8 @@ void Foam::ensightCells::classify
         sizes_[what]++;
     }
 
-    allocate();
-    sizes_ = 0;   // reset sizes
+    resize();   // adjust allocation
+    sizes_ = 0; // reset sizes
 
     // Assign cell-id per shape type
     for (label listI = 0; listI < sz; ++listI)

@@ -23,6 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "error.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 inline const char* Foam::ensightCells::key(const enum elemType what)
@@ -66,6 +68,14 @@ inline const Foam::labelUList& Foam::ensightCells::cellIds
     const enum elemType what
 ) const
 {
+    if (!lists_[what])
+    {
+        FatalErrorInFunction
+            << "Accessing unallocated sublist for elem-type: "
+            << elemEnum[what]
+            << exit(FatalError);
+    }
+
     return *(lists_[what]);
 }
 

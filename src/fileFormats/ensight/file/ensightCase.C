@@ -58,14 +58,17 @@ void Foam::ensightCase::initialize()
         // eg, convert new results or a particular time interva
         // OR remove everything
 
-        if (options_->overwrite())
+        if (isDir(ensightDir_))
         {
-            rmDir(ensightDir_);
-        }
-        else if (isDir(ensightDir_))
-        {
-            Info<<"Warning: re-using existing directory" << nl
-                << "    " << ensightDir_ << endl;
+            if (options_->overwrite())
+            {
+                Foam::rmDir(ensightDir_);
+            }
+            else
+            {
+                Info<<"Warning: re-using existing directory" << nl
+                    << "    " << ensightDir_ << endl;
+            }
         }
 
         // Create ensight and data directories

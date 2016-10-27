@@ -82,7 +82,8 @@ private:
 
     // Private data
 
-        //- Location within a list
+        //- Location within a list.
+        //  The ensight part number is typically this value +1.
         label index_;
 
         //- Linear list of ids, sub-sectioned per element type via SubLists
@@ -92,6 +93,7 @@ private:
         FixedList<label, 5> sizes_;
 
         //- List of ids for each element type
+        //  Managed via pointers, since a SubList cannot be relocated/resized.
         FixedList<SubList<label>*, 5> lists_;
 
 
@@ -101,12 +103,11 @@ private:
         inline label offset(const enum elemType what, const label i) const;
 
         //- Use current sizes to redimension the element lists
-        void allocate();
+        void resize();
 
         //- Disallow default bitwise assignment
         void operator=(const ensightCells&) = delete;
 
-        // Retain default copy constructor (needed for lists etc).
 
 public:
 
@@ -114,6 +115,9 @@ public:
 
         //- Construct null, optionally with index
         ensightCells(label partIndex = 0);
+
+        //- Copy constructor. Needed for lists etc.
+        ensightCells(const ensightCells&);
 
 
     //- Destructor
@@ -171,7 +175,7 @@ public:
         );
 
 
-        //- Set sizes to zero, free up memory
+        //- Set addressable sizes to zero, free up addressing memory.
         void clear();
 
         //- Sum element counts across all processes.

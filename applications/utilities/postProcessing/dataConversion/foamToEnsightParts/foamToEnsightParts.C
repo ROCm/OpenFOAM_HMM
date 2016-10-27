@@ -139,18 +139,22 @@ int main(int argc, char *argv[])
     );
 
     // The volume field types that we handle
-    wordHashSet volFieldTypes;
-    volFieldTypes.insert(volScalarField::typeName);
-    volFieldTypes.insert(volVectorField::typeName);
-    volFieldTypes.insert(volSphericalTensorField::typeName);
-    volFieldTypes.insert(volSymmTensorField::typeName);
-    volFieldTypes.insert(volTensorField::typeName);
+    const wordHashSet volFieldTypes
+    {
+        volScalarField::typeName,
+        volVectorField::typeName,
+        volSphericalTensorField::typeName,
+        volSymmTensorField::typeName,
+        volTensorField::typeName
+    };
 
     // The lagrangian field types that we handle
-    wordHashSet cloudFieldTypes;
-    cloudFieldTypes.insert(scalarIOField::typeName);
-    cloudFieldTypes.insert(vectorIOField::typeName);
-    cloudFieldTypes.insert(tensorIOField::typeName);
+    const wordHashSet cloudFieldTypes
+    {
+        scalarIOField::typeName,
+        vectorIOField::typeName,
+        tensorIOField::typeName
+    };
 
     #include "setRootCase.H"
 

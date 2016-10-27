@@ -189,9 +189,8 @@ int main(int argc, char *argv[])
         "(tet pyr prism hex poly)."
     );
 
-    // the volume field types that we handle
-    const label nVolFieldTypes = 10;
-    const word volFieldTypes[] =
+    // The volume field types that we handle
+    const wordList volFieldTypes
     {
         volScalarField::typeName,
         volVectorField::typeName,
@@ -363,7 +362,7 @@ int main(int argc, char *argv[])
         // ~~~~~~~~~~~~~~~~~~~~~~
         Info<< "Write volume field (";
 
-        for (label typei=0; typei < nVolFieldTypes; ++typei)
+        forAll(volFieldTypes, typei)
         {
             const word& fieldType = volFieldTypes[typei];
             wordList fieldNames = objects.names(fieldType);
