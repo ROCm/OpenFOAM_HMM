@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -79,16 +79,16 @@ void insertDuplicateMerge
     const labelList& faceOwner = mesh.faceOwner();
     const faceZoneMesh& faceZones = mesh.faceZones();
 
-    forAll(duplicates, bFaceI)
+    forAll(duplicates, bFacei)
     {
-        label otherFaceI = duplicates[bFaceI];
+        label otherFacei = duplicates[bFacei];
 
-        if (otherFaceI != -1 && otherFaceI > bFaceI)
+        if (otherFacei != -1 && otherFacei > bFacei)
         {
             // Two duplicate faces. Merge.
 
-            label face0 = mesh.nInternalFaces() + bFaceI;
-            label face1 = mesh.nInternalFaces() + otherFaceI;
+            label face0 = mesh.nInternalFaces() + bFacei;
+            label face1 = mesh.nInternalFaces() + otherFacei;
 
             label own0 = faceOwner[face0];
             label own1 = faceOwner[face1];
@@ -169,21 +169,21 @@ labelList findBaffles(const polyMesh& mesh, const labelList& boundaryFaces)
     // Check that none are on processor patches
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    forAll(duplicates, bFaceI)
+    forAll(duplicates, bFacei)
     {
-        if (duplicates[bFaceI] != -1)
+        if (duplicates[bFacei] != -1)
         {
-            label faceI = mesh.nInternalFaces() + bFaceI;
-            label patchI = patches.whichPatch(faceI);
+            label facei = mesh.nInternalFaces() + bFacei;
+            label patchi = patches.whichPatch(facei);
 
-            if (isA<processorPolyPatch>(patches[patchI]))
+            if (isA<processorPolyPatch>(patches[patchi]))
             {
                 FatalErrorInFunction
-                    << "Duplicate face " << faceI
+                    << "Duplicate face " << facei
                     << " is on a processorPolyPatch."
                     << "This is not allowed." << nl
-                    << "Face:" << faceI
-                    << " is on patch:" << patches[patchI].name()
+                    << "Face:" << facei
+                    << " is on patch:" << patches[patchi].name()
                     << abort(FatalError);
             }
         }
@@ -199,14 +199,14 @@ labelList findBaffles(const polyMesh& mesh, const labelList& boundaryFaces)
             (mesh.nFaces() - mesh.nInternalFaces())/256
         );
 
-        forAll(duplicates, bFaceI)
+        forAll(duplicates, bFacei)
         {
-            label otherFaceI = duplicates[bFaceI];
+            label otherFacei = duplicates[bFacei];
 
-            if (otherFaceI != -1 && otherFaceI > bFaceI)
+            if (otherFacei != -1 && otherFacei > bFacei)
             {
-                duplicateSet.insert(mesh.nInternalFaces() + bFaceI);
-                duplicateSet.insert(mesh.nInternalFaces() + otherFaceI);
+                duplicateSet.insert(mesh.nInternalFaces() + bFacei);
+                duplicateSet.insert(mesh.nInternalFaces() + otherFacei);
             }
         }
 
@@ -372,16 +372,16 @@ int main(int argc, char *argv[])
 
         pointSet dupPoints(mesh, "duplicatedPoints", 100);
 
-        forAll(pointMap, pointI)
+        forAll(pointMap, pointi)
         {
-            label oldPointI = pointMap[pointI];
+            label oldPointi = pointMap[pointi];
 
-            nDupPerPoint[oldPointI]++;
+            nDupPerPoint[oldPointi]++;
 
-            if (nDupPerPoint[oldPointI] > 1)
+            if (nDupPerPoint[oldPointi] > 1)
             {
-                dupPoints.insert(map().reversePointMap()[oldPointI]);
-                dupPoints.insert(pointI);
+                dupPoints.insert(map().reversePointMap()[oldPointi]);
+                dupPoints.insert(pointi);
             }
         }
 

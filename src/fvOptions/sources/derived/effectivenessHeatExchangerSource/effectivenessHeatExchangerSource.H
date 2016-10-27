@@ -62,8 +62,7 @@ Description
         T_{ref} | min or max(T) in cell zone depending on the sign of Q_t [K]
     \endvartable
 
-    \heading Source usage
-
+Usage
     Example usage:
     \verbatim
     effectivenessHeatExchangerSource1
@@ -254,7 +253,7 @@ public:
             virtual void addSup
             (
                 fvMatrix<scalar>& eqn,
-                const label fieldI
+                const label fieldi
             )
             {
                 NotImplemented;
@@ -268,7 +267,7 @@ public:
             (
                 const volScalarField& rho,
                 fvMatrix<scalar>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
 

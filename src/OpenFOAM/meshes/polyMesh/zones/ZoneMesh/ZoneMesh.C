@@ -137,7 +137,7 @@ Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
     PtrList<ZoneType>(),
     regIOobject(io),
     mesh_(mesh),
-    zoneMapPtr_(NULL)
+    zoneMapPtr_(nullptr)
 {
     read();
 }
@@ -154,7 +154,7 @@ Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
     PtrList<ZoneType>(size),
     regIOobject(io),
     mesh_(mesh),
-    zoneMapPtr_(NULL)
+    zoneMapPtr_(nullptr)
 {
     // Optionally read contents, otherwise keep size
     read();
@@ -172,7 +172,7 @@ Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
     PtrList<ZoneType>(),
     regIOobject(io),
     mesh_(mesh),
-    zoneMapPtr_(NULL)
+    zoneMapPtr_(nullptr)
 {
     if (!read())
     {
@@ -447,12 +447,12 @@ bool Foam::ZoneMesh<ZoneType, MeshType>::checkParallelSync
 
     // Have every processor check but only master print error.
 
-    for (label procI = 1; procI < allNames.size(); procI++)
+    for (label proci = 1; proci < allNames.size(); proci++)
     {
         if
         (
-            (allNames[procI] != allNames[0])
-         || (allTypes[procI] != allTypes[0])
+            (allNames[proci] != allNames[0])
+         || (allTypes[proci] != allTypes[0])
         )
         {
             hasError = true;
@@ -462,9 +462,9 @@ bool Foam::ZoneMesh<ZoneType, MeshType>::checkParallelSync
                 Info<< " ***Inconsistent zones across processors, "
                        "processor 0 has zone names:" << allNames[0]
                     << " zone types:" << allTypes[0]
-                    << " processor " << procI << " has zone names:"
-                    << allNames[procI]
-                    << " zone types:" << allTypes[procI]
+                    << " processor " << proci << " has zone names:"
+                    << allNames[proci]
+                    << " zone types:" << allTypes[proci]
                     << endl;
             }
         }

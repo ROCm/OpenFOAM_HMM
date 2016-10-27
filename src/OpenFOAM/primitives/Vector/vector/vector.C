@@ -37,7 +37,7 @@ template<>
 const char* const Foam::vector::vsType::componentNames[] = {"x", "y", "z"};
 
 template<>
-const Foam::vector Foam::vector::vsType::vsType::zero(vector::uniform(0));
+const Foam::vector Foam::vector::vsType::zero(vector::uniform(0));
 
 template<>
 const Foam::vector Foam::vector::vsType::one(vector::uniform(1));

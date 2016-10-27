@@ -97,7 +97,7 @@ class cuttingPlane
         (
             const primitiveMesh&,
             const labelUList& edgePoint,
-            const label cellI,
+            const label celli,
             const label startEdgeI,
             DynamicList<label>& faceVerts
         );
@@ -117,6 +117,7 @@ protected:
 
         //- Construct plane description without cutting
         cuttingPlane(const plane&);
+
 
     // Protected Member Functions
 

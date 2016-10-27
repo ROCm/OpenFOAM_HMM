@@ -257,7 +257,7 @@ Foam::ensightSurfaceReader::ensightSurfaceReader(const fileName& fName)
     timeStartIndex_(0),
     timeIncrement_(1),
     timeValues_(),
-    surfPtr_(NULL)
+    surfPtr_(nullptr)
 {
     IFstream is(fName);
     readCase(is);

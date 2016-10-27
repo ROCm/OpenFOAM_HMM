@@ -57,7 +57,7 @@ void Foam::LimitedScheme<Type, Limiter, LimitFunc>::calcLimiter
 
     const vectorField& C = mesh.C();
 
-    scalarField& pLim = limiterField.internalField();
+    scalarField& pLim = limiterField.primitiveFieldRef();
 
     forAll(pLim, face)
     {
@@ -76,8 +76,8 @@ void Foam::LimitedScheme<Type, Limiter, LimitFunc>::calcLimiter
         );
     }
 
-    surfaceScalarField::GeometricBoundaryField& bLim =
-        limiterField.boundaryField();
+    surfaceScalarField::Boundary& bLim =
+        limiterField.boundaryFieldRef();
 
     forAll(bLim, patchi)
     {

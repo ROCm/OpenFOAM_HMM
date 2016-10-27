@@ -51,12 +51,12 @@ const scalar boundaryMesh::distanceTol_ = 1e-2;
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Returns number of feature edges connected to pointI
-Foam::label Foam::boundaryMesh::nFeatureEdges(label pointI) const
+// Returns number of feature edges connected to pointi
+Foam::label Foam::boundaryMesh::nFeatureEdges(label pointi) const
 {
     label nFeats = 0;
 
-    const labelList& pEdges = mesh().pointEdges()[pointI];
+    const labelList& pEdges = mesh().pointEdges()[pointi];
 
     forAll(pEdges, pEdgeI)
     {
@@ -71,7 +71,7 @@ Foam::label Foam::boundaryMesh::nFeatureEdges(label pointI) const
 }
 
 
-// Returns next feature edge connected to pointI
+// Returns next feature edge connected to pointi
 Foam::label Foam::boundaryMesh::nextFeatureEdge
 (
     const label edgeI,
@@ -99,7 +99,7 @@ Foam::label Foam::boundaryMesh::nextFeatureEdge
 }
 
 
-// Finds connected feature edges, starting from startPointI and returns
+// Finds connected feature edges, starting from startPointi and returns
 // feature labels (not edge labels). Marks feature edges handled in
 // featVisited.
 Foam::labelList Foam::boundaryMesh::collectSegment
@@ -256,11 +256,11 @@ Foam::label Foam::boundaryMesh::findPatchID
     const word& patchName
 ) const
 {
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        if (patches[patchI].name() == patchName)
+        if (patches[patchi].name() == patchName)
         {
-            return patchI;
+            return patchi;
         }
     }
 
@@ -272,9 +272,9 @@ Foam::wordList Foam::boundaryMesh::patchNames() const
 {
     wordList names(patches_.size());
 
-    forAll(patches_, patchI)
+    forAll(patches_, patchi)
     {
-        names[patchI] = patches_[patchI].name();
+        names[patchi] = patches_[patchi].name();
     }
     return names;
 }
@@ -283,16 +283,16 @@ Foam::wordList Foam::boundaryMesh::patchNames() const
 Foam::label Foam::boundaryMesh::whichPatch
 (
     const polyPatchList& patches,
-    const label faceI
+    const label facei
 ) const
 {
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        const polyPatch& pp = patches[patchI];
+        const polyPatch& pp = patches[patchi];
 
-        if ((faceI >= pp.start()) && (faceI < (pp.start() + pp.size())))
+        if ((facei >= pp.start()) && (facei < (pp.start() + pp.size())))
         {
-            return patchI;
+            return patchi;
         }
     }
     return -1;
@@ -314,9 +314,9 @@ Foam::labelList Foam::boundaryMesh::faceToEdge
 
     forAll(changedFaces, i)
     {
-        label faceI = changedFaces[i];
+        label facei = changedFaces[i];
 
-        const labelList& fEdges = mesh().faceEdges()[faceI];
+        const labelList& fEdges = mesh().faceEdges()[facei];
 
         forAll(fEdges, fEdgeI)
         {
@@ -354,15 +354,15 @@ Foam::labelList Foam::boundaryMesh::edgeToFace
 
         const labelList& eFaces = mesh().edgeFaces()[edgeI];
 
-        forAll(eFaces, eFaceI)
+        forAll(eFaces, eFacei)
         {
-            label faceI = eFaces[eFaceI];
+            label facei = eFaces[eFacei];
 
-            if (faceRegion[faceI] == -1)
+            if (faceRegion[facei] == -1)
             {
-                faceRegion[faceI] = region;
+                faceRegion[facei] = region;
 
-                changedFaces[changedI++] = faceI;
+                changedFaces[changedI++] = facei;
             }
         }
     }
@@ -373,19 +373,19 @@ Foam::labelList Foam::boundaryMesh::edgeToFace
 }
 
 
-// Finds area, starting at faceI, delimited by borderEdge
+// Finds area, starting at facei, delimited by borderEdge
 void Foam::boundaryMesh::markZone
 (
     const boolList& borderEdge,
-    label faceI,
+    label facei,
     label currentZone,
     labelList& faceZone
 ) const
 {
-    faceZone[faceI] = currentZone;
+    faceZone[facei] = currentZone;
 
     // List of faces whose faceZone has been set.
-    labelList changedFaces(1, faceI);
+    labelList changedFaces(1, facei);
     // List of edges whose faceZone has been set.
     labelList changedEdges;
 
@@ -436,7 +436,7 @@ void Foam::boundaryMesh::markZone
 // Null constructor
 Foam::boundaryMesh::boundaryMesh()
 :
-    meshPtr_(NULL),
+    meshPtr_(nullptr),
     patches_(),
     meshFace_(),
     featurePoints_(),
@@ -462,7 +462,7 @@ void Foam::boundaryMesh::clearOut()
     {
         delete meshPtr_;
 
-        meshPtr_ = NULL;
+        meshPtr_ = nullptr;
     }
 }
 
@@ -482,34 +482,34 @@ void Foam::boundaryMesh::read(const polyMesh& mesh)
 
     meshFace_.setSize(nBFaces);
 
-    label bFaceI = 0;
+    label bFacei = 0;
 
     // Collect all boundary faces.
-    forAll(mesh.boundaryMesh(), patchI)
+    forAll(mesh.boundaryMesh(), patchi)
     {
-        const polyPatch& pp = mesh.boundaryMesh()[patchI];
+        const polyPatch& pp = mesh.boundaryMesh()[patchi];
 
         patches_.set
         (
-            patchI,
+            patchi,
             new boundaryPatch
             (
                 pp.name(),
-                patchI,
+                patchi,
                 pp.size(),
-                bFaceI,
+                bFacei,
                 pp.type()
             )
         );
 
         // Collect all faces in global numbering.
-        forAll(pp, patchFaceI)
+        forAll(pp, patchFacei)
         {
-            meshFace_[bFaceI] = pp.start() + patchFaceI;
+            meshFace_[bFacei] = pp.start() + patchFacei;
 
-            bFaces[bFaceI] = pp[patchFaceI];
+            bFaces[bFacei] = pp[patchFacei];
 
-            bFaceI++;
+            bFacei++;
         }
     }
 
@@ -518,9 +518,9 @@ void Foam::boundaryMesh::read(const polyMesh& mesh)
     {
         Pout<< "read : patches now:" << endl;
 
-        forAll(patches_, patchI)
+        forAll(patches_, patchi)
         {
-            const boundaryPatch& bp = patches_[patchI];
+            const boundaryPatch& bp = patches_[patchi];
 
             Pout<< "    name  : " << bp.name() << endl
                 << "    size  : " << bp.size() << endl
@@ -553,9 +553,9 @@ void Foam::boundaryMesh::read(const polyMesh& mesh)
 
         Pout<< "** Start of Faces **" << endl;
 
-        forAll(msh, faceI)
+        forAll(msh, facei)
         {
-            const face& f = msh[faceI];
+            const face& f = msh[facei];
 
             point ctr(Zero);
 
@@ -565,7 +565,7 @@ void Foam::boundaryMesh::read(const polyMesh& mesh)
             }
             ctr /= f.size();
 
-            Pout<< "    " << faceI
+            Pout<< "    " << facei
                 << " ctr:" << ctr
                 << " verts:" << f
                 << endl;
@@ -575,10 +575,10 @@ void Foam::boundaryMesh::read(const polyMesh& mesh)
 
         Pout<< "** Start of Points **" << endl;
 
-        forAll(msh.points(), pointI)
+        forAll(msh.points(), pointi)
         {
-            Pout<< "    " << pointI
-                << " coord:" << msh.points()[pointI]
+            Pout<< "    " << pointi
+                << " coord:" << msh.points()[pointi]
                 << endl;
         }
 
@@ -646,17 +646,17 @@ void Foam::boundaryMesh::readTriSurface(const fileName& fName)
         patches_.setSize(surfPatches.size());
 
         // Take over patches, setting size to 0 for now.
-        forAll(surfPatches, patchI)
+        forAll(surfPatches, patchi)
         {
-            const geometricSurfacePatch& surfPatch = surfPatches[patchI];
+            const geometricSurfacePatch& surfPatch = surfPatches[patchi];
 
             patches_.set
             (
-                patchI,
+                patchi,
                 new boundaryPatch
                 (
                     surfPatch.name(),
-                    patchI,
+                    patchi,
                     0,
                     0,
                     surfPatch.geometricType()
@@ -670,15 +670,15 @@ void Foam::boundaryMesh::readTriSurface(const fileName& fName)
 
         patches_.setSize(regionToBoundaryPatch.size());
 
-        forAll(patches_, patchI)
+        forAll(patches_, patchi)
         {
             patches_.set
             (
-                patchI,
+                patchi,
                 new boundaryPatch
                 (
-                    "patch" + name(patchI),
-                    patchI,
+                    "patch" + name(patchi),
+                    patchi,
                     0,
                     0,
                     "empty"
@@ -697,7 +697,7 @@ void Foam::boundaryMesh::readTriSurface(const fileName& fName)
 
     meshFace_.setSize(surf.size());
 
-    label bFaceI = 0;
+    label bFacei = 0;
 
     // Current region number
     label surfRegion = regions[0];
@@ -708,7 +708,7 @@ void Foam::boundaryMesh::readTriSurface(const fileName& fName)
 
 
     // Index in bFaces of start of current patch
-    label startFaceI = 0;
+    label startFacei = 0;
 
     forAll(indices, indexI)
     {
@@ -721,8 +721,8 @@ void Foam::boundaryMesh::readTriSurface(const fileName& fName)
             // Change of region. We now know the size of the previous one.
             boundaryPatch& bp = patches_[foamRegion];
 
-            bp.size() = bFaceI - startFaceI;
-            bp.start() = startFaceI;
+            bp.size() = bFacei - startFacei;
+            bp.start() = startFacei;
 
             surfRegion = tri.region();
             foamRegion = regionToBoundaryPatch[surfRegion];
@@ -731,19 +731,19 @@ void Foam::boundaryMesh::readTriSurface(const fileName& fName)
                 << foamRegion << " with name " << patches_[foamRegion].name()
                 << endl;
 
-            startFaceI = bFaceI;
+            startFacei = bFacei;
         }
 
-        meshFace_[bFaceI] = triI;
+        meshFace_[bFacei] = triI;
 
-        bFaces[bFaceI++] = face(tri);
+        bFaces[bFacei++] = face(tri);
     }
 
     // Final region
     boundaryPatch& bp = patches_[foamRegion];
 
-    bp.size() = bFaceI - startFaceI;
-    bp.start() = startFaceI;
+    bp.size() = bFacei - startFacei;
+    bp.start() = startFacei;
 
     //
     // Construct single primitivePatch for all of boundary
@@ -772,16 +772,16 @@ void Foam::boundaryMesh::writeTriSurface(const fileName& fName) const
 {
     geometricSurfacePatchList surfPatches(patches_.size());
 
-    forAll(patches_, patchI)
+    forAll(patches_, patchi)
     {
-        const boundaryPatch& bp = patches_[patchI];
+        const boundaryPatch& bp = patches_[patchi];
 
-        surfPatches[patchI] =
+        surfPatches[patchi] =
             geometricSurfacePatch
             (
                 bp.physicalType(),
                 bp.name(),
-                patchI
+                patchi
             );
     }
 
@@ -799,11 +799,11 @@ void Foam::boundaryMesh::writeTriSurface(const fileName& fName) const
 
     label triI = 0;
 
-    forAll(mesh(), faceI)
+    forAll(mesh(), facei)
     {
-        startTri[faceI] = triI;
+        startTri[facei] = triI;
 
-        triI += nTris[faceI];
+        triI += nTris[facei];
     }
 
     // Triangulate
@@ -817,23 +817,23 @@ void Foam::boundaryMesh::writeTriSurface(const fileName& fName) const
 
     triI = 0;
 
-    forAll(patches_, patchI)
+    forAll(patches_, patchi)
     {
-        const boundaryPatch& bp = patches_[patchI];
+        const boundaryPatch& bp = patches_[patchi];
 
-        forAll(bp, patchFaceI)
+        forAll(bp, patchFacei)
         {
-            label faceI = bp.start() + patchFaceI;
+            label facei = bp.start() + patchFacei;
 
-            label triVertI = 3*startTri[faceI];
+            label triVertI = 3*startTri[facei];
 
-            for (label faceTriI = 0; faceTriI < nTris[faceI]; faceTriI++)
+            for (label faceTriI = 0; faceTriI < nTris[facei]; faceTriI++)
             {
                 label v0 = triVerts[triVertI++];
                 label v1 = triVerts[triVertI++];
                 label v2 = triVerts[triVertI++];
 
-                tris[triI++] = labelledTri(v0, v1, v2, patchI);
+                tris[triI++] = labelledTri(v0, v1, v2, patchi);
             }
         }
     }
@@ -870,17 +870,17 @@ Foam::labelList Foam::boundaryMesh::getNearest
     DynamicList<label> leftFaces(mesh().size()/2);
     DynamicList<label> rightFaces(mesh().size()/2);
 
-    forAll(mesh(), bFaceI)
+    forAll(mesh(), bFacei)
     {
-        scalar sign = mesh().faceNormals()[bFaceI] & splitNormal_;
+        scalar sign = mesh().faceNormals()[bFacei] & splitNormal_;
 
         if (sign > -1e-5)
         {
-            rightFaces.append(bFaceI);
+            rightFaces.append(bFacei);
         }
         if (sign < 1e-5)
         {
-            leftFaces.append(bFaceI);
+            leftFaces.append(bFacei);
         }
     }
 
@@ -976,32 +976,32 @@ Foam::labelList Foam::boundaryMesh::getNearest
     // Search nearest triangle centre for every polyMesh boundary face
     //
 
-    labelList nearestBFaceI(pMesh.nFaces() - pMesh.nInternalFaces());
+    labelList nearestBFacei(pMesh.nFaces() - pMesh.nInternalFaces());
 
     treeBoundBox tightest;
 
     const scalar searchDimSqr = magSqr(searchSpan);
 
-    forAll(nearestBFaceI, patchFaceI)
+    forAll(nearestBFacei, patchFacei)
     {
-        label meshFaceI = pMesh.nInternalFaces() + patchFaceI;
+        label meshFacei = pMesh.nInternalFaces() + patchFacei;
 
-        const point& ctr = pMesh.faceCentres()[meshFaceI];
+        const point& ctr = pMesh.faceCentres()[meshFacei];
 
-        if (debug && (patchFaceI % 1000) == 0)
+        if (debug && (patchFacei % 1000) == 0)
         {
-            Pout<< "getNearest : patchFace:" << patchFaceI
-                << " meshFaceI:" << meshFaceI << " ctr:" << ctr << endl;
+            Pout<< "getNearest : patchFace:" << patchFacei
+                << " meshFacei:" << meshFacei << " ctr:" << ctr << endl;
         }
 
 
         // Get normal from area vector
-        vector n = pMesh.faceAreas()[meshFaceI];
+        vector n = pMesh.faceAreas()[meshFacei];
         scalar area = mag(n);
         n /= area;
 
         scalar typDim = -GREAT;
-        const face& f = pMesh.faces()[meshFaceI];
+        const face& f = pMesh.faces()[meshFacei];
 
         forAll(f, fp)
         {
@@ -1020,14 +1020,14 @@ Foam::labelList Foam::boundaryMesh::getNearest
             if (leftInfo.hit())
             {
                 // Found in both trees. Compare normals.
-                label rightFaceI = rightFaces[rightInfo.index()];
-                label leftFaceI = leftFaces[leftInfo.index()];
+                label rightFacei = rightFaces[rightInfo.index()];
+                label leftFacei = leftFaces[leftInfo.index()];
 
                 label rightDist = mag(rightInfo.hitPoint()-ctr);
                 label leftDist = mag(leftInfo.hitPoint()-ctr);
 
-                scalar rightSign = n & ns[rightFaceI];
-                scalar leftSign = n & ns[leftFaceI];
+                scalar rightSign = n & ns[rightFacei];
+                scalar leftSign = n & ns[leftFacei];
 
                 if
                 (
@@ -1038,11 +1038,11 @@ Foam::labelList Foam::boundaryMesh::getNearest
                     // Both same sign. Choose nearest.
                     if (rightDist < leftDist)
                     {
-                        nearestBFaceI[patchFaceI] = rightFaceI;
+                        nearestBFacei[patchFacei] = rightFacei;
                     }
                     else
                     {
-                        nearestBFaceI[patchFaceI] = leftFaceI;
+                        nearestBFacei[patchFacei] = leftFacei;
                     }
                 }
                 else
@@ -1061,11 +1061,11 @@ Foam::labelList Foam::boundaryMesh::getNearest
                         // Different sign and nearby. Choosing matching normal
                         if (rightSign > 0)
                         {
-                            nearestBFaceI[patchFaceI] = rightFaceI;
+                            nearestBFacei[patchFacei] = rightFacei;
                         }
                         else
                         {
-                            nearestBFaceI[patchFaceI] = leftFaceI;
+                            nearestBFacei[patchFacei] = leftFacei;
                         }
                     }
                     else
@@ -1073,11 +1073,11 @@ Foam::labelList Foam::boundaryMesh::getNearest
                         // Different sign but faraway. Choosing nearest.
                         if (rightDist < leftDist)
                         {
-                            nearestBFaceI[patchFaceI] = rightFaceI;
+                            nearestBFacei[patchFacei] = rightFacei;
                         }
                         else
                         {
-                            nearestBFaceI[patchFaceI] = leftFaceI;
+                            nearestBFacei[patchFacei] = leftFacei;
                         }
                     }
                 }
@@ -1086,8 +1086,8 @@ Foam::labelList Foam::boundaryMesh::getNearest
             {
                 // Found in right but not in left. Choose right regardless if
                 // correct sign. Note: do we want this?
-                label rightFaceI = rightFaces[rightInfo.index()];
-                nearestBFaceI[patchFaceI] = rightFaceI;
+                label rightFacei = rightFaces[rightInfo.index()];
+                nearestBFacei[patchFacei] = rightFacei;
             }
         }
         else
@@ -1098,17 +1098,17 @@ Foam::labelList Foam::boundaryMesh::getNearest
             {
                 // Found in left but not in right. Choose left regardless if
                 // correct sign. Note: do we want this?
-                nearestBFaceI[patchFaceI] = leftFaces[leftInfo.index()];
+                nearestBFacei[patchFacei] = leftFaces[leftInfo.index()];
             }
             else
             {
                 // No face found in left tree.
-                nearestBFaceI[patchFaceI] = -1;
+                nearestBFacei[patchFacei] = -1;
             }
         }
     }
 
-    return nearestBFaceI;
+    return nearestBFacei;
 }
 
 
@@ -1132,28 +1132,28 @@ void Foam::boundaryMesh::patchify
 
     label nNewPatches = patches_.size();
 
-    forAll(oldPatches, oldPatchI)
+    forAll(oldPatches, oldPatchi)
     {
-        const polyPatch& patch = oldPatches[oldPatchI];
-        const label newPatchI = findPatchID(patch.name());
+        const polyPatch& patch = oldPatches[oldPatchi];
+        const label newPatchi = findPatchID(patch.name());
 
-        if (newPatchI != -1)
+        if (newPatchi != -1)
         {
-            nameToIndex.insert(patch.name(), newPatchI);
-            indexToName.insert(newPatchI, patch.name());
+            nameToIndex.insert(patch.name(), newPatchi);
+            indexToName.insert(newPatchi, patch.name());
         }
     }
 
     // Include all boundaryPatches not yet in nameToIndex (i.e. not in old
     // patches)
-    forAll(patches_, bPatchI)
+    forAll(patches_, bPatchi)
     {
-        const boundaryPatch& bp = patches_[bPatchI];
+        const boundaryPatch& bp = patches_[bPatchi];
 
         if (!nameToIndex.found(bp.name()))
         {
-            nameToIndex.insert(bp.name(), bPatchI);
-            indexToName.insert(bPatchI, bp.name());
+            nameToIndex.insert(bp.name(), bPatchi);
+            indexToName.insert(bPatchi, bp.name());
         }
     }
 
@@ -1165,21 +1165,21 @@ void Foam::boundaryMesh::patchify
 
     List<polyPatch*> newPatchPtrList(nNewPatches);
 
-    label meshFaceI = newMesh.nInternalFaces();
+    label meshFacei = newMesh.nInternalFaces();
 
     // First patch gets all non-coupled faces
     label facesToBeDone = newMesh.nFaces() - newMesh.nInternalFaces();
 
-    forAll(patches_, bPatchI)
+    forAll(patches_, bPatchi)
     {
-        const boundaryPatch& bp = patches_[bPatchI];
+        const boundaryPatch& bp = patches_[bPatchi];
 
-        const label newPatchI = nameToIndex[bp.name()];
+        const label newPatchi = nameToIndex[bp.name()];
 
         // Find corresponding patch in polyMesh
-        const label oldPatchI = findPatchID(oldPatches, bp.name());
+        const label oldPatchi = findPatchID(oldPatches, bp.name());
 
-        if (oldPatchI == -1)
+        if (oldPatchi == -1)
         {
             // Newly created patch. Gets all or zero faces.
             if (debug)
@@ -1188,17 +1188,17 @@ void Foam::boundaryMesh::patchify
                     << " type:" << bp.physicalType() << endl;
             }
 
-            newPatchPtrList[newPatchI] = polyPatch::New
+            newPatchPtrList[newPatchi] = polyPatch::New
             (
                 bp.physicalType(),
                 bp.name(),
                 facesToBeDone,
-                meshFaceI,
-                newPatchI,
+                meshFacei,
+                newPatchi,
                 newMesh.boundaryMesh()
             ).ptr();
 
-            meshFaceI += facesToBeDone;
+            meshFacei += facesToBeDone;
 
             // first patch gets all boundary faces; all others get 0.
             facesToBeDone = 0;
@@ -1206,7 +1206,7 @@ void Foam::boundaryMesh::patchify
         else
         {
             // Existing patch. Gets all or zero faces.
-            const polyPatch& oldPatch = oldPatches[oldPatchI];
+            const polyPatch& oldPatch = oldPatches[oldPatchi];
 
             if (debug)
             {
@@ -1214,15 +1214,15 @@ void Foam::boundaryMesh::patchify
                     << oldPatch.name() << endl;
             }
 
-            newPatchPtrList[newPatchI] = oldPatch.clone
+            newPatchPtrList[newPatchi] = oldPatch.clone
             (
                 newMesh.boundaryMesh(),
-                newPatchI,
+                newPatchi,
                 facesToBeDone,
-                meshFaceI
+                meshFacei
             ).ptr();
 
-            meshFaceI += facesToBeDone;
+            meshFacei += facesToBeDone;
 
             // first patch gets all boundary faces; all others get 0.
             facesToBeDone = 0;
@@ -1234,9 +1234,9 @@ void Foam::boundaryMesh::patchify
     {
         Pout<< "Patchify : new polyPatch list:" << endl;
 
-        forAll(newPatchPtrList, patchI)
+        forAll(newPatchPtrList, patchi)
         {
-            const polyPatch& newPatch = *newPatchPtrList[patchI];
+            const polyPatch& newPatch = *newPatchPtrList[patchi];
 
             if (debug)
             {
@@ -1244,7 +1244,7 @@ void Foam::boundaryMesh::patchify
                     << "    type :" << newPatch.typeName << endl
                     << "    size :" << newPatch.size() << endl
                     << "    start:" << newPatch.start() << endl
-                    << "    index:" << patchI << endl;
+                    << "    index:" << patchi << endl;
             }
         }
     }
@@ -1266,9 +1266,9 @@ void Foam::boundaryMesh::patchify
             (newMesh.nFaces() - newMesh.nInternalFaces())
           / nNewPatches;
 
-        forAll(patchFaces, newPatchI)
+        forAll(patchFaces, newPatchi)
         {
-            patchFaces[newPatchI].setCapacity(nAvgFaces);
+            patchFaces[newPatchi].setCapacity(nAvgFaces);
         }
 
         //
@@ -1276,38 +1276,38 @@ void Foam::boundaryMesh::patchify
         // since will contain all faces.
         //
 
-        forAll(oldPatches, oldPatchI)
+        forAll(oldPatches, oldPatchi)
         {
-            const polyPatch& patch = oldPatches[oldPatchI];
+            const polyPatch& patch = oldPatches[oldPatchi];
 
-            forAll(patch, patchFaceI)
+            forAll(patch, patchFacei)
             {
                 // Put face into region given by nearest boundary face
 
-                label meshFaceI = patch.start() + patchFaceI;
+                label meshFacei = patch.start() + patchFacei;
 
-                label bFaceI = meshFaceI - newMesh.nInternalFaces();
+                label bFacei = meshFacei - newMesh.nInternalFaces();
 
-                patchFaces[whichPatch(nearest[bFaceI])].append(meshFaceI);
+                patchFaces[whichPatch(nearest[bFacei])].append(meshFacei);
             }
         }
 
-        forAll(patchFaces, newPatchI)
+        forAll(patchFaces, newPatchi)
         {
-            patchFaces[newPatchI].shrink();
+            patchFaces[newPatchi].shrink();
         }
 
 
         // Change patch > 0. (since above we put all faces into the zeroth
         // patch)
 
-        for (label newPatchI = 1; newPatchI < patchFaces.size(); newPatchI++)
+        for (label newPatchi = 1; newPatchi < patchFaces.size(); newPatchi++)
         {
-            const labelList& pFaces = patchFaces[newPatchI];
+            const labelList& pFaces = patchFaces[newPatchi];
 
-            forAll(pFaces, pFaceI)
+            forAll(pFaces, pFacei)
             {
-                polyMeshRepatcher.changePatchID(pFaces[pFaceI], newPatchI);
+                polyMeshRepatcher.changePatchID(pFaces[pFacei], newPatchi);
             }
         }
 
@@ -1532,20 +1532,20 @@ void Foam::boundaryMesh::setExtraEdges(const label edgeI)
 }
 
 
-Foam::label Foam::boundaryMesh::whichPatch(const label faceI) const
+Foam::label Foam::boundaryMesh::whichPatch(const label facei) const
 {
-    forAll(patches_, patchI)
+    forAll(patches_, patchi)
     {
-        const boundaryPatch& bp = patches_[patchI];
+        const boundaryPatch& bp = patches_[patchi];
 
-        if ((faceI >= bp.start()) && (faceI < (bp.start() + bp.size())))
+        if ((facei >= bp.start()) && (facei < (bp.start() + bp.size())))
         {
-            return patchI;
+            return patchi;
         }
     }
 
     FatalErrorInFunction
-        << "Cannot find face " << faceI << " in list of boundaryPatches "
+        << "Cannot find face " << facei << " in list of boundaryPatches "
         << patches_
         << abort(FatalError);
 
@@ -1555,11 +1555,11 @@ Foam::label Foam::boundaryMesh::whichPatch(const label faceI) const
 
 Foam::label Foam::boundaryMesh::findPatchID(const word& patchName) const
 {
-    forAll(patches_, patchI)
+    forAll(patches_, patchi)
     {
-        if (patches_[patchI].name() == patchName)
+        if (patches_[patchi].name() == patchName)
         {
-            return patchI;
+            return patchi;
         }
     }
 
@@ -1573,26 +1573,26 @@ void Foam::boundaryMesh::addPatch(const word& patchName)
 
     // Add empty patch at end of patch list.
 
-    label patchI = patches_.size()-1;
+    label patchi = patches_.size()-1;
 
     boundaryPatch* bpPtr = new boundaryPatch
     (
         patchName,
-        patchI,
+        patchi,
         0,
         mesh().size(),
         "empty"
     );
 
-    patches_.set(patchI, bpPtr);
+    patches_.set(patchi, bpPtr);
 
     if (debug)
     {
         Pout<< "addPatch : patches now:" << endl;
 
-        forAll(patches_, patchI)
+        forAll(patches_, patchi)
         {
-            const boundaryPatch& bp = patches_[patchI];
+            const boundaryPatch& bp = patches_[patchi];
 
             Pout<< "    name  : " << bp.name() << endl
                 << "    size  : " << bp.size() << endl
@@ -1606,35 +1606,35 @@ void Foam::boundaryMesh::addPatch(const word& patchName)
 
 void Foam::boundaryMesh::deletePatch(const word& patchName)
 {
-    const label delPatchI = findPatchID(patchName);
+    const label delPatchi = findPatchID(patchName);
 
-    if (delPatchI == -1)
+    if (delPatchi == -1)
     {
         FatalErrorInFunction
             << "Can't find patch named " << patchName
             << abort(FatalError);
     }
 
-    if (patches_[delPatchI].size())
+    if (patches_[delPatchi].size())
     {
         FatalErrorInFunction
             << "Trying to delete non-empty patch " << patchName
-            << endl << "Current size:" << patches_[delPatchI].size()
+            << endl << "Current size:" << patches_[delPatchi].size()
             << abort(FatalError);
     }
 
     PtrList<boundaryPatch> newPatches(patches_.size() - 1);
 
-    for (label patchI = 0; patchI < delPatchI; patchI++)
+    for (label patchi = 0; patchi < delPatchi; patchi++)
     {
-        newPatches.set(patchI, patches_[patchI].clone());
+        newPatches.set(patchi, patches_[patchi].clone());
     }
 
-    // Move patches down, starting from delPatchI.
+    // Move patches down, starting from delPatchi.
 
-    for (label patchI = delPatchI + 1; patchI < patches_.size(); patchI++)
+    for (label patchi = delPatchi + 1; patchi < patches_.size(); patchi++)
     {
-        newPatches.set(patchI - 1, patches_[patchI].clone());
+        newPatches.set(patchi - 1, patches_[patchi].clone());
     }
 
     patches_.clear();
@@ -1645,9 +1645,9 @@ void Foam::boundaryMesh::deletePatch(const word& patchName)
     {
         Pout<< "deletePatch : patches now:" << endl;
 
-        forAll(patches_, patchI)
+        forAll(patches_, patchi)
         {
-            const boundaryPatch& bp = patches_[patchI];
+            const boundaryPatch& bp = patches_[patchi];
 
             Pout<< "    name  : " << bp.name() << endl
                 << "    size  : " << bp.size() << endl
@@ -1681,12 +1681,12 @@ void Foam::boundaryMesh::changePatchType
 
     PtrList<boundaryPatch> newPatches(patches_.size());
 
-    forAll(patches_, patchI)
+    forAll(patches_, patchi)
     {
-        if (patchI == changeI)
+        if (patchi == changeI)
         {
             // Create copy but for type
-            const boundaryPatch& oldBp = patches_[patchI];
+            const boundaryPatch& oldBp = patches_[patchi];
 
             boundaryPatch* bpPtr = new boundaryPatch
             (
@@ -1697,12 +1697,12 @@ void Foam::boundaryMesh::changePatchType
                 patchType
             );
 
-            newPatches.set(patchI, bpPtr);
+            newPatches.set(patchi, bpPtr);
         }
         else
         {
             // Create copy
-            newPatches.set(patchI, patches_[patchI].clone());
+            newPatches.set(patchi, patches_[patchi].clone());
         }
     }
 
@@ -1729,9 +1729,9 @@ void Foam::boundaryMesh::changeFaces
 
     labelList nFaces(patches_.size(), 0);
 
-    forAll(patchIDs, faceI)
+    forAll(patchIDs, facei)
     {
-        label patchID = patchIDs[faceI];
+        label patchID = patchIDs[facei];
 
         if (patchID < 0 || patchID >= patches_.size())
         {
@@ -1749,27 +1749,27 @@ void Foam::boundaryMesh::changeFaces
 
     startFace[0] = 0;
 
-    for (label patchI = 1; patchI < patches_.size(); patchI++)
+    for (label patchi = 1; patchi < patches_.size(); patchi++)
     {
-        startFace[patchI] = startFace[patchI-1] + nFaces[patchI-1];
+        startFace[patchi] = startFace[patchi-1] + nFaces[patchi-1];
     }
 
     // Update patch info
     PtrList<boundaryPatch> newPatches(patches_.size());
 
-    forAll(patches_, patchI)
+    forAll(patches_, patchi)
     {
-        const boundaryPatch& bp = patches_[patchI];
+        const boundaryPatch& bp = patches_[patchi];
 
         newPatches.set
         (
-            patchI,
+            patchi,
             new boundaryPatch
             (
                 bp.name(),
-                patchI,
-                nFaces[patchI],
-                startFace[patchI],
+                patchi,
+                nFaces[patchi],
+                startFace[patchi],
                 bp.physicalType()
             )
         );
@@ -1780,9 +1780,9 @@ void Foam::boundaryMesh::changeFaces
     {
         Pout<< "changeFaces : patches now:" << endl;
 
-        forAll(patches_, patchI)
+        forAll(patches_, patchi)
         {
-            const boundaryPatch& bp = patches_[patchI];
+            const boundaryPatch& bp = patches_[patchi];
 
             Pout<< "    name  : " << bp.name() << endl
                 << "    size  : " << bp.size() << endl
@@ -1796,11 +1796,11 @@ void Foam::boundaryMesh::changeFaces
     // Construct face mapping array
     oldToNew.setSize(patchIDs.size());
 
-    forAll(patchIDs, faceI)
+    forAll(patchIDs, facei)
     {
-        int patchID = patchIDs[faceI];
+        int patchID = patchIDs[facei];
 
-        oldToNew[faceI] = startFace[patchID]++;
+        oldToNew[facei] = startFace[patchID]++;
     }
 
     // Copy faces into correct position and maintain label of original face
@@ -1808,10 +1808,10 @@ void Foam::boundaryMesh::changeFaces
 
     labelList newMeshFace(mesh().size());
 
-    forAll(oldToNew, faceI)
+    forAll(oldToNew, facei)
     {
-        newFaces[oldToNew[faceI]] = mesh()[faceI];
-        newMeshFace[oldToNew[faceI]] = meshFace_[faceI];
+        newFaces[oldToNew[facei]] = mesh()[facei];
+        newMeshFace[oldToNew[facei]] = meshFace_[facei];
     }
 
     // Reconstruct 'mesh' from new faces and (copy of) existing points.
@@ -1829,9 +1829,9 @@ void Foam::boundaryMesh::changeFaces
 }
 
 
-Foam::label Foam::boundaryMesh::getNTris(const label faceI) const
+Foam::label Foam::boundaryMesh::getNTris(const label facei) const
 {
-    const face& f = mesh()[faceI];
+    const face& f = mesh()[facei];
 
     return f.nTriangles(mesh().points());
 }
@@ -1839,7 +1839,7 @@ Foam::label Foam::boundaryMesh::getNTris(const label faceI) const
 
 Foam::label Foam::boundaryMesh::getNTris
 (
-    const label startFaceI,
+    const label startFacei,
     const label nFaces,
     labelList& nTris
 ) const
@@ -1850,7 +1850,7 @@ Foam::label Foam::boundaryMesh::getNTris
 
     for (label i = 0; i < nFaces; i++)
     {
-        label faceNTris = getNTris(startFaceI + i);
+        label faceNTris = getNTris(startFacei + i);
 
         nTris[i] = faceNTris;
 
@@ -1864,7 +1864,7 @@ Foam::label Foam::boundaryMesh::getNTris
 // consecutive vertices per triangle.
 void Foam::boundaryMesh::triangulate
 (
-    const label startFaceI,
+    const label startFacei,
     const label nFaces,
     const label totalNTris,
     labelList& triVerts
@@ -1877,9 +1877,9 @@ void Foam::boundaryMesh::triangulate
 
     for (label i = 0; i < nFaces; i++)
     {
-        label faceI = startFaceI + i;
+        label facei = startFacei + i;
 
-        const face& f = mesh()[faceI];
+        const face& f = mesh()[facei];
 
         // Have face triangulate itself (results in faceList)
         faceList triFaces(f.nTriangles(mesh().points()));
@@ -1890,9 +1890,9 @@ void Foam::boundaryMesh::triangulate
 
         // Copy into triVerts
 
-        forAll(triFaces, triFaceI)
+        forAll(triFaces, triFacei)
         {
-            const face& triF = triFaces[triFaceI];
+            const face& triF = triFaces[triFacei];
 
             triVerts[vertI++] = triF[0];
             triVerts[vertI++] = triF[1];
@@ -1905,11 +1905,11 @@ void Foam::boundaryMesh::triangulate
 // Number of local points in subset.
 Foam::label Foam::boundaryMesh::getNPoints
 (
-    const label startFaceI,
+    const label startFacei,
     const label nFaces
 ) const
 {
-    SubList<face> patchFaces(mesh(), nFaces, startFaceI);
+    SubList<face> patchFaces(mesh(), nFaces, startFacei);
 
     primitivePatch patch(patchFaces, mesh().points());
 
@@ -1920,14 +1920,14 @@ Foam::label Foam::boundaryMesh::getNPoints
 // Triangulation of face subset in local coords.
 void Foam::boundaryMesh::triangulateLocal
 (
-    const label startFaceI,
+    const label startFacei,
     const label nFaces,
     const label totalNTris,
     labelList& triVerts,
     labelList& localToGlobal
 ) const
 {
-    SubList<face> patchFaces(mesh(), nFaces, startFaceI);
+    SubList<face> patchFaces(mesh(), nFaces, startFacei);
 
     primitivePatch patch(patchFaces, mesh().points());
 
@@ -1953,9 +1953,9 @@ void Foam::boundaryMesh::triangulateLocal
 
         // Copy into triVerts
 
-        forAll(triFaces, triFaceI)
+        forAll(triFaces, triFacei)
         {
-            const face& triF = triFaces[triFaceI];
+            const face& triF = triFaces[triFacei];
 
             triVerts[vertI++] = triF[0];
             triVerts[vertI++] = triF[1];
@@ -1968,7 +1968,7 @@ void Foam::boundaryMesh::triangulateLocal
 void Foam::boundaryMesh::markFaces
 (
     const labelList& protectedEdges,
-    const label seedFaceI,
+    const label seedFacei,
     boolList& visited
 ) const
 {
@@ -1983,21 +1983,21 @@ void Foam::boundaryMesh::markFaces
     // Initialize zone for all faces to -1
     labelList currentZone(mesh().size(), -1);
 
-    // Mark with 0 all faces reachable from seedFaceI
-    markZone(protectedEdge, seedFaceI, 0, currentZone);
+    // Mark with 0 all faces reachable from seedFacei
+    markZone(protectedEdge, seedFacei, 0, currentZone);
 
     // Set in visited all reached ones.
     visited.setSize(mesh().size());
 
-    forAll(currentZone, faceI)
+    forAll(currentZone, facei)
     {
-        if (currentZone[faceI] == 0)
+        if (currentZone[facei] == 0)
         {
-            visited[faceI] = true;
+            visited[facei] = true;
         }
         else
         {
-            visited[faceI] = false;
+            visited[facei] = false;
         }
     }
 }

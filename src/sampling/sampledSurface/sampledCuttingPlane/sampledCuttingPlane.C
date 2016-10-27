@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,15 +69,13 @@ void Foam::sampledCuttingPlane::createGeometry()
         const polyBoundaryMesh& patches = mesh().boundaryMesh();
 
         // Patch to put exposed internal faces into
-        const label exposedPatchI = patches.findPatchID(exposedPatchName_);
+        const label exposedPatchi = patches.findPatchID(exposedPatchName_);
 
-        if (debug)
-        {
-            Info<< "Allocating subset of size "
-                << mesh().cellZones()[zoneID_.index()].size()
-                << " with exposed faces into patch "
-                << patches[exposedPatchI].name() << endl;
-        }
+        DebugInfo
+            << "Allocating subset of size "
+            << mesh().cellZones()[zoneID_.index()].size()
+            << " with exposed faces into patch "
+            << patches[exposedPatchi].name() << endl;
 
         subMeshPtr_.reset
         (
@@ -86,17 +84,17 @@ void Foam::sampledCuttingPlane::createGeometry()
         subMeshPtr_().setLargeCellSubset
         (
             labelHashSet(mesh().cellZones()[zoneID_.index()]),
-            exposedPatchI
+            exposedPatchi
         );
     }
 
 
     // Select either the submesh or the underlying mesh
-    const fvMesh& fvm =
+    const fvMesh& mesh =
     (
         subMeshPtr_.valid()
       ? subMeshPtr_().subMesh()
-      : static_cast<const fvMesh&>(mesh())
+      : static_cast<const fvMesh&>(this->mesh())
     );
 
 
@@ -110,13 +108,13 @@ void Foam::sampledCuttingPlane::createGeometry()
             IOobject
             (
                 "cellDistance",
-                fvm.time().timeName(),
-                fvm.time(),
+                mesh.time().timeName(),
+                mesh.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            fvm,
+            mesh,
             dimensionedScalar("zero", dimLength, 0)
         )
     );
@@ -124,8 +122,8 @@ void Foam::sampledCuttingPlane::createGeometry()
 
     // Internal field
     {
-        const pointField& cc = fvm.cellCentres();
-        scalarField& fld = cellDistance.internalField();
+        const pointField& cc = mesh.cellCentres();
+        scalarField& fld = cellDistance.primitiveFieldRef();
 
         forAll(cc, i)
         {
@@ -134,32 +132,35 @@ void Foam::sampledCuttingPlane::createGeometry()
         }
     }
 
+    volScalarField::Boundary& cellDistanceBf =
+        cellDistance.boundaryFieldRef();
+
     // Patch fields
     {
-        forAll(cellDistance.boundaryField(), patchI)
+        forAll(cellDistanceBf, patchi)
         {
             if
             (
                 isA<emptyFvPatchScalarField>
                 (
-                    cellDistance.boundaryField()[patchI]
+                    cellDistanceBf[patchi]
                 )
             )
             {
-                cellDistance.boundaryField().set
+                cellDistanceBf.set
                 (
-                    patchI,
+                    patchi,
                     new calculatedFvPatchScalarField
                     (
-                        fvm.boundary()[patchI],
+                        mesh.boundary()[patchi],
                         cellDistance
                     )
                 );
 
-                const polyPatch& pp = fvm.boundary()[patchI].patch();
-                pointField::subField cc = pp.patchSlice(fvm.faceCentres());
+                const polyPatch& pp = mesh.boundary()[patchi].patch();
+                pointField::subField cc = pp.patchSlice(mesh.faceCentres());
 
-                fvPatchScalarField& fld = cellDistance.boundaryField()[patchI];
+                fvPatchScalarField& fld = cellDistanceBf[patchi];
                 fld.setSize(pp.size());
                 forAll(fld, i)
                 {
@@ -168,8 +169,8 @@ void Foam::sampledCuttingPlane::createGeometry()
             }
             else
             {
-                const pointField& cc = fvm.C().boundaryField()[patchI];
-                fvPatchScalarField& fld = cellDistance.boundaryField()[patchI];
+                const pointField& cc = mesh.C().boundaryField()[patchi];
+                fvPatchScalarField& fld = cellDistanceBf[patchi];
 
                 forAll(fld, i)
                 {
@@ -185,9 +186,9 @@ void Foam::sampledCuttingPlane::createGeometry()
 
 
     // Distance to points
-    pointDistance_.setSize(fvm.nPoints());
+    pointDistance_.setSize(mesh.nPoints());
     {
-        const pointField& pts = fvm.points();
+        const pointField& pts = mesh.points();
 
         forAll(pointDistance_, i)
         {
@@ -205,16 +206,16 @@ void Foam::sampledCuttingPlane::createGeometry()
             IOobject
             (
                 "pointDistance",
-                fvm.time().timeName(),
-                fvm.time(),
+                mesh.time().timeName(),
+                mesh.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            pointMesh::New(fvm),
+            pointMesh::New(mesh),
             dimensionedScalar("zero", dimLength, 0)
         );
-        pDist.internalField() = pointDistance_;
+        pDist.primitiveFieldRef() = pointDistance_;
 
         Pout<< "Writing point distance:" << pDist.objectPath() << endl;
         pDist.write();
@@ -235,7 +236,7 @@ void Foam::sampledCuttingPlane::createGeometry()
         )
         //new isoSurfaceCell
         //(
-        //    fvm,
+        //    mesh,
         //    cellDistance,
         //    pointDistance_,
         //    0.0,
@@ -270,10 +271,10 @@ Foam::sampledCuttingPlane::sampledCuttingPlane
     zoneID_(dict.lookupOrDefault("zone", word::null), mesh.cellZones()),
     exposedPatchName_(word::null),
     needsUpdate_(true),
-    subMeshPtr_(NULL),
-    cellDistancePtr_(NULL),
-    isoSurfPtr_(NULL),
-    facesPtr_(NULL)
+    subMeshPtr_(nullptr),
+    cellDistancePtr_(nullptr),
+    isoSurfPtr_(nullptr),
+    facesPtr_(nullptr)
 {
     if (zoneID_.index() != -1)
     {
@@ -327,7 +328,7 @@ bool Foam::sampledCuttingPlane::expire()
     // Clear derived data
     clearGeom();
 
-    // already marked as expired
+    // Already marked as expired
     if (needsUpdate_)
     {
         return false;

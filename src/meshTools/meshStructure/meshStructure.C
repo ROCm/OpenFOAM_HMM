@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,10 +43,10 @@ bool Foam::meshStructure::isStructuredCell
 (
     const polyMesh& mesh,
     const label layerI,
-    const label cellI
+    const label celli
 ) const
 {
-    const cell& cFaces = mesh.cells()[cellI];
+    const cell& cFaces = mesh.cells()[celli];
 
     // Count number of side faces
     label nSide = 0;
@@ -74,12 +74,12 @@ bool Foam::meshStructure::isStructuredCell
             label nLayerPlus1 = 0;
             forAll(f, fp)
             {
-                label pointI = f[fp];
-                if (pointLayer_[pointI] == layerI)
+                label pointi = f[fp];
+                if (pointLayer_[pointi] == layerI)
                 {
                     nLayer++;
                 }
-                else if (pointLayer_[pointI] == layerI+1)
+                else if (pointLayer_[pointi] == layerI+1)
                 {
                     nLayerPlus1++;
                 }
@@ -118,10 +118,10 @@ void Foam::meshStructure::correct
         // Start of changes
         labelList patchFaces(pp.size());
         List<topoDistanceData> patchData(pp.size());
-        forAll(pp, patchFaceI)
+        forAll(pp, patchFacei)
         {
-            patchFaces[patchFaceI] = pp.addressing()[patchFaceI];
-            patchData[patchFaceI] = topoDistanceData(patchFaceI, 0);
+            patchFaces[patchFacei] = pp.addressing()[patchFacei];
+            patchData[patchFacei] = topoDistanceData(patchFacei, 0);
         }
 
 
@@ -142,10 +142,10 @@ void Foam::meshStructure::correct
 
         cellToPatchFaceAddressing_.setSize(mesh.nCells());
         cellLayer_.setSize(mesh.nCells());
-        forAll(cellToPatchFaceAddressing_, cellI)
+        forAll(cellToPatchFaceAddressing_, celli)
         {
-            cellToPatchFaceAddressing_[cellI] = cellData[cellI].data();
-            cellLayer_[cellI] = cellData[cellI].distance();
+            cellToPatchFaceAddressing_[celli] = cellData[celli].data();
+            cellLayer_[celli] = cellData[celli].distance();
         }
 
 
@@ -158,43 +158,43 @@ void Foam::meshStructure::correct
         faceToPatchEdgeAddressing_ = labelMin;
         faceLayer_.setSize(mesh.nFaces());
 
-        forAll(faceToPatchFaceAddressing_, faceI)
+        forAll(faceToPatchFaceAddressing_, facei)
         {
-            label own = mesh.faceOwner()[faceI];
-            label patchFaceI = faceData[faceI].data();
-            label patchDist = faceData[faceI].distance();
+            label own = mesh.faceOwner()[facei];
+            label patchFacei = faceData[facei].data();
+            label patchDist = faceData[facei].distance();
 
-            if (mesh.isInternalFace(faceI))
+            if (mesh.isInternalFace(facei))
             {
-                label nei = mesh.faceNeighbour()[faceI];
+                label nei = mesh.faceNeighbour()[facei];
 
                 if (cellData[own].distance() == cellData[nei].distance())
                 {
                     // side face
-                    faceToPatchFaceAddressing_[faceI] = 0;
-                    faceLayer_[faceI] = cellData[own].distance();
+                    faceToPatchFaceAddressing_[facei] = 0;
+                    faceLayer_[facei] = cellData[own].distance();
                 }
                 else if (cellData[own].distance() < cellData[nei].distance())
                 {
                     // unturned face
-                    faceToPatchFaceAddressing_[faceI] = patchFaceI+1;
-                    faceToPatchEdgeAddressing_[faceI] = -1;
-                    faceLayer_[faceI] = patchDist;
+                    faceToPatchFaceAddressing_[facei] = patchFacei+1;
+                    faceToPatchEdgeAddressing_[facei] = -1;
+                    faceLayer_[facei] = patchDist;
                 }
                 else
                 {
                     // turned face
-                    faceToPatchFaceAddressing_[faceI] = -(patchFaceI+1);
-                    faceToPatchEdgeAddressing_[faceI] = -1;
-                    faceLayer_[faceI] = patchDist;
+                    faceToPatchFaceAddressing_[facei] = -(patchFacei+1);
+                    faceToPatchEdgeAddressing_[facei] = -1;
+                    faceLayer_[facei] = patchDist;
                 }
             }
             else if (patchDist == cellData[own].distance())
             {
                 // starting face
-                faceToPatchFaceAddressing_[faceI] = -(patchFaceI+1);
-                faceToPatchEdgeAddressing_[faceI] = -1;
-                faceLayer_[faceI] = patchDist;
+                faceToPatchFaceAddressing_[facei] = -(patchFacei+1);
+                faceToPatchEdgeAddressing_[facei] = -1;
+                faceLayer_[facei] = patchDist;
             }
             else
             {
@@ -227,10 +227,10 @@ void Foam::meshStructure::correct
         // Start of changes
         labelList patchPoints(pp.nPoints());
         List<pointTopoDistanceData> patchData(pp.nPoints());
-        forAll(pp.meshPoints(), patchPointI)
+        forAll(pp.meshPoints(), patchPointi)
         {
-            patchPoints[patchPointI] = pp.meshPoints()[patchPointI];
-            patchData[patchPointI] = pointTopoDistanceData(patchPointI, 0);
+            patchPoints[patchPointi] = pp.meshPoints()[patchPointi];
+            patchData[patchPointi] = pointTopoDistanceData(patchPointi, 0);
         }
 
 
@@ -246,10 +246,10 @@ void Foam::meshStructure::correct
             mesh.globalData().nTotalPoints()  // max iterations
         );
 
-        forAll(pointData, pointI)
+        forAll(pointData, pointi)
         {
-            pointToPatchPointAddressing_[pointI] = pointData[pointI].data();
-            pointLayer_[pointI] = pointData[pointI].distance();
+            pointToPatchPointAddressing_[pointi] = pointData[pointi].data();
+            pointLayer_[pointi] = pointData[pointi].distance();
         }
 
 
@@ -261,14 +261,14 @@ void Foam::meshStructure::correct
         }
 
         // Look up on faces
-        forAll(faceToPatchEdgeAddressing_, faceI)
+        forAll(faceToPatchEdgeAddressing_, facei)
         {
-            if (faceToPatchEdgeAddressing_[faceI] == labelMin)
+            if (faceToPatchEdgeAddressing_[facei] == labelMin)
             {
                 // Face not yet done. Check if all points on same level
                 // or if not see what edge it originates from
 
-                const face& f = mesh.faces()[faceI];
+                const face& f = mesh.faces()[facei];
 
                 label levelI = pointLayer_[f[0]];
                 for (label fp = 1; fp < f.size(); fp++)
@@ -283,19 +283,19 @@ void Foam::meshStructure::correct
                 if (levelI != -1)
                 {
                     // All same level
-                    //Pout<< "Horizontal boundary face " << faceI
-                    //    << " at:" << mesh.faceCentres()[faceI]
-                    //    << " data:" << faceData[faceI]
+                    //Pout<< "Horizontal boundary face " << facei
+                    //    << " at:" << mesh.faceCentres()[facei]
+                    //    << " data:" << faceData[facei]
                     //    << " pointDatas:"
                     //    << UIndirectList<pointTopoDistanceData>(pointData, f)
                     //    << endl;
 
-                    label patchFaceI = faceData[faceI].data();
-                    label patchDist = faceData[faceI].distance();
+                    label patchFacei = faceData[facei].data();
+                    label patchDist = faceData[facei].distance();
 
-                    faceToPatchEdgeAddressing_[faceI] = -1;
-                    faceToPatchFaceAddressing_[faceI] = patchFaceI+1;
-                    faceLayer_[faceI] = patchDist;
+                    faceToPatchEdgeAddressing_[facei] = -1;
+                    faceToPatchFaceAddressing_[facei] = patchFacei+1;
+                    faceLayer_[facei] = patchDist;
                 }
                 else
                 {
@@ -304,23 +304,23 @@ void Foam::meshStructure::correct
                     // See if there is any edge
                     forAll(f, fp)
                     {
-                        label pointI = f[fp];
-                        label nextPointI = f.nextLabel(fp);
+                        label pointi = f[fp];
+                        label nextPointi = f.nextLabel(fp);
 
                         EdgeMap<label>::const_iterator fnd = pointsToEdge.find
                         (
                             edge
                             (
-                                pointData[pointI].data(),
-                                pointData[nextPointI].data()
+                                pointData[pointi].data(),
+                                pointData[nextPointi].data()
                             )
                         );
                         if (fnd != pointsToEdge.end())
                         {
-                            faceToPatchEdgeAddressing_[faceI] = fnd();
-                            faceToPatchFaceAddressing_[faceI] = 0;
-                            label own = mesh.faceOwner()[faceI];
-                            faceLayer_[faceI] = cellData[own].distance();
+                            faceToPatchEdgeAddressing_[facei] = fnd();
+                            faceToPatchFaceAddressing_[facei] = 0;
+                            label own = mesh.faceOwner()[facei];
+                            faceLayer_[facei] = cellData[own].distance();
 
                             // Note: could test whether the other edges on the
                             // face are consistent
@@ -344,15 +344,15 @@ void Foam::meshStructure::correct
         {
             const labelList& lCells = layerToCells[layerI];
 
-            forAll(lCells, lCellI)
+            forAll(lCells, lCelli)
             {
-                label cellI = lCells[lCellI];
+                label celli = lCells[lCelli];
 
                 structured_ = isStructuredCell
                 (
                     mesh,
                     layerI,
-                    cellI
+                    celli
                 );
 
                 if (!structured_)

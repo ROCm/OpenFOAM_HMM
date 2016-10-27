@@ -55,7 +55,7 @@ void Foam::vtkPVblockMesh::convertMeshBlocks
     label datasetNo = 0;       // restart at dataset 0
 
     const blockMesh& blkMesh = *meshPtr_;
-    const Foam::pointField& blockPoints = blkMesh.blockPointField();
+    const Foam::pointField& blockPoints = blkMesh.vertices();
 
     if (debug)
     {
@@ -77,7 +77,7 @@ void Foam::vtkPVblockMesh::convertMeshBlocks
             continue;
         }
 
-        const blockDescriptor& blockDef = blkMesh[blockI].blockDef();
+        const blockDescriptor& blockDef = blkMesh[blockI];
 
         vtkUnstructuredGrid* vtkmesh = vtkUnstructuredGrid::New();
 
@@ -148,7 +148,7 @@ void Foam::vtkPVblockMesh::convertMeshEdges
     label datasetNo = 0;       // restart at dataset 0
 
     const blockMesh& blkMesh = *meshPtr_;
-    const curvedEdgeList& edges = blkMesh.edges();
+    const blockEdgeList& edges = blkMesh.edges();
 
     int edgeI = 0;
     const scalar scaleFactor = blkMesh.scaleFactor();
@@ -168,9 +168,14 @@ void Foam::vtkPVblockMesh::convertMeshEdges
         // search each block
         forAll(blkMesh, blockI)
         {
-            const blockDescriptor& blockDef = blkMesh[blockI].blockDef();
+            const blockDescriptor& blockDef = blkMesh[blockI];
 
             edgeList blkEdges = blockDef.blockShape().edges();
+
+            // List of edge point and weighting factors
+            pointField edgesPoints[12];
+            scalarList edgesWeights[12];
+            blockDef.edgesPointsWeights(edgesPoints, edgesWeights);
 
             // find the corresponding edge within the block
             label foundEdgeI = -1;
@@ -185,9 +190,7 @@ void Foam::vtkPVblockMesh::convertMeshEdges
 
             if (foundEdgeI != -1)
             {
-                const List<point>& edgePoints =
-                    blockDef.blockEdgePoints()[foundEdgeI];
-
+                const List<point>& edgePoints = edgesPoints[foundEdgeI];
 
                 vtkPolyData* vtkmesh = vtkPolyData::New();
                 vtkPoints* vtkpoints = vtkPoints::New();
@@ -256,7 +259,7 @@ void Foam::vtkPVblockMesh::convertMeshCorners
     range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
 
-    const pointField& blockPoints = meshPtr_->blockPointField();
+    const pointField& blockPoints = meshPtr_->vertices();
     const scalar& scaleFactor = meshPtr_->scaleFactor();
 
     if (debug)

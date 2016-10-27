@@ -177,9 +177,9 @@ label addCellZone(const polyMesh& mesh, const word& name)
 // Checks whether patch present
 void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
 {
-    const label patchI = bMesh.findPatchID(name);
+    const label patchi = bMesh.findPatchID(name);
 
-    if (patchI == -1)
+    if (patchi == -1)
     {
         FatalErrorInFunction
             << "Cannot find patch " << name << endl
@@ -188,7 +188,7 @@ void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
             << exit(FatalError);
     }
 
-    if (bMesh[patchI].empty())
+    if (bMesh[patchi].empty())
     {
         FatalErrorInFunction
             << "Patch " << name << " is present but zero size"
@@ -480,7 +480,7 @@ int main(int argc, char *argv[])
 
     IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
 
-    // Bypass runTime write (since only writes at outputTime)
+    // Bypass runTime write (since only writes at writeTime)
     if
     (
        !runTime.objectRegistry::writeObject

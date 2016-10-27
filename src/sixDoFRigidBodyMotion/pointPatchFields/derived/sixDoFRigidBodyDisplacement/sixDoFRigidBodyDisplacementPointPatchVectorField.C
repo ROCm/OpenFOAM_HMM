@@ -68,7 +68,7 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
     fixedValuePointPatchField<vector>(p, iF, dict),
     motion_(dict, dict),
     rhoInf_(1.0),
-    rhoName_(dict.lookupOrDefault<word>("rhoName", "rho")),
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     lookupGravity_(-1),
     g_(Zero),
     curTimeIndex_(-1)
@@ -195,7 +195,7 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
         }
     }
 
-    const polyMesh& mesh = this->dimensionedInternalField().mesh()();
+    const polyMesh& mesh = this->internalField().mesh()();
     const Time& t = mesh.time();
     const pointPatch& ptPatch = this->patch();
 
@@ -210,13 +210,13 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
 
     dictionary forcesDict;
 
-    forcesDict.add("type", forces::typeName);
+    forcesDict.add("type", functionObjects::forces::typeName);
     forcesDict.add("patches", wordList(1, ptPatch.name()));
     forcesDict.add("rhoInf", rhoInf_);
-    forcesDict.add("rhoName", rhoName_);
+    forcesDict.add("rho", rhoName_);
     forcesDict.add("CofR", motion_.centreOfRotation());
 
-    forces f("forces", db(), forcesDict);
+    functionObjects::forces f("forces", db(), forcesDict);
 
     f.calcForcesMoment();
 
@@ -255,7 +255,7 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::write(Ostream& os) const
 {
     pointPatchField<vector>::write(os);
 
-    os.writeKeyword("rhoName") << rhoName_ << token::END_STATEMENT << nl;
+    os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
 
     if (rhoName_ == "rhoInf")
     {

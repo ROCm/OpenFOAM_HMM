@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,6 +47,15 @@ namespace Foam
 
 class polyPatch;
 class polyMesh;
+
+
+// Forward declaration of friend functions and operators
+
+class pointTopoDistanceData;
+
+Istream& operator>>(Istream&, pointTopoDistanceData&);
+Ostream& operator<<(Ostream&, const pointTopoDistanceData&);
+
 
 /*---------------------------------------------------------------------------*\
                        Class pointTopoDistanceData Declaration
@@ -116,7 +125,7 @@ public:
             inline void leaveDomain
             (
                 const polyPatch& patch,
-                const label patchPointI,
+                const label patchPointi,
                 const point& pos,
                 TrackingData& td
             );
@@ -126,7 +135,7 @@ public:
             inline void enterDomain
             (
                 const polyPatch& patch,
-                const label patchPointI,
+                const label patchPointi,
                 const point& pos,
                 TrackingData& td
             );
@@ -144,7 +153,7 @@ public:
             inline bool updatePoint
             (
                 const polyMesh& mesh,
-                const label pointI,
+                const label pointi,
                 const label edgeI,
                 const pointTopoDistanceData& edgeInfo,
                 const scalar tol,
@@ -157,7 +166,7 @@ public:
             inline bool updatePoint
             (
                 const polyMesh& mesh,
-                const label pointI,
+                const label pointi,
                 const pointTopoDistanceData& newPointInfo,
                 const scalar tol,
                 TrackingData& td
@@ -179,7 +188,7 @@ public:
             (
                 const polyMesh& mesh,
                 const label edgeI,
-                const label pointI,
+                const label pointi,
                 const pointTopoDistanceData& pointInfo,
                 const scalar tol,
                 TrackingData& td

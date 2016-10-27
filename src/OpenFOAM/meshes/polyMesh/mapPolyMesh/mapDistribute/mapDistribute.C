@@ -271,12 +271,12 @@ Foam::mapDistribute::mapDistribute
     forAll(transformedElements, i)
     {
         labelPair elem = transformedElements[i];
-        label procI = globalIndexAndTransform::processor(elem);
-        if (procI != Pstream::myProcNo())
+        label proci = globalTransforms.processor(elem);
+        if (proci != Pstream::myProcNo())
         {
-            label index = globalIndexAndTransform::index(elem);
-            label nCompact = compactMap[procI].size();
-            compactMap[procI].insert(index, nCompact);
+            label index = globalTransforms.index(elem);
+            label nCompact = compactMap[proci].size();
+            compactMap[proci].insert(index, nCompact);
         }
     }
 
@@ -302,7 +302,7 @@ Foam::mapDistribute::mapDistribute
     forAll(transformedElements, i)
     {
         labelPair elem = transformedElements[i];
-        label trafoI = globalIndexAndTransform::transformIndex(elem);
+        label trafoI = globalTransforms.transformIndex(elem);
         nPerTransform[trafoI]++;
     }
     // Offset per transformIndex
@@ -322,16 +322,16 @@ Foam::mapDistribute::mapDistribute
     forAll(transformedElements, i)
     {
         labelPair elem = transformedElements[i];
-        label procI = globalIndexAndTransform::processor(elem);
-        label index = globalIndexAndTransform::index(elem);
-        label trafoI = globalIndexAndTransform::transformIndex(elem);
+        label proci = globalTransforms.processor(elem);
+        label index = globalTransforms.index(elem);
+        label trafoI = globalTransforms.transformIndex(elem);
 
         // Get compact index for untransformed element
         label rawElemI =
         (
-            procI == Pstream::myProcNo()
+            proci == Pstream::myProcNo()
           ? index
-          : compactMap[procI][index]
+          : compactMap[proci][index]
         );
 
         label& n = nPerTransform[trafoI];
@@ -373,18 +373,18 @@ Foam::mapDistribute::mapDistribute
     );
 
     // Add all (non-local) transformed elements needed.
-    forAll(transformedElements, cellI)
+    forAll(transformedElements, celli)
     {
-        const labelPairList& elems = transformedElements[cellI];
+        const labelPairList& elems = transformedElements[celli];
 
         forAll(elems, i)
         {
-            label procI = globalIndexAndTransform::processor(elems[i]);
-            if (procI != Pstream::myProcNo())
+            label proci = globalTransforms.processor(elems[i]);
+            if (proci != Pstream::myProcNo())
             {
-                label index = globalIndexAndTransform::index(elems[i]);
-                label nCompact = compactMap[procI].size();
-                compactMap[procI].insert(index, nCompact);
+                label index = globalTransforms.index(elems[i]);
+                label nCompact = compactMap[proci].size();
+                compactMap[proci].insert(index, nCompact);
             }
         }
     }
@@ -408,13 +408,13 @@ Foam::mapDistribute::mapDistribute
     // Count per transformIndex
     label nTrafo = globalTransforms.transformPermutations().size();
     labelList nPerTransform(nTrafo, 0);
-    forAll(transformedElements, cellI)
+    forAll(transformedElements, celli)
     {
-        const labelPairList& elems = transformedElements[cellI];
+        const labelPairList& elems = transformedElements[celli];
 
         forAll(elems, i)
         {
-            label trafoI = globalIndexAndTransform::transformIndex(elems[i]);
+            label trafoI = globalTransforms.transformIndex(elems[i]);
             nPerTransform[trafoI]++;
         }
     }
@@ -432,30 +432,30 @@ Foam::mapDistribute::mapDistribute
     nPerTransform = 0;
 
     transformedIndices.setSize(transformedElements.size());
-    forAll(transformedElements, cellI)
+    forAll(transformedElements, celli)
     {
-        const labelPairList& elems = transformedElements[cellI];
-        transformedIndices[cellI].setSize(elems.size());
+        const labelPairList& elems = transformedElements[celli];
+        transformedIndices[celli].setSize(elems.size());
 
         forAll(elems, i)
         {
-            label procI = globalIndexAndTransform::processor(elems[i]);
-            label index = globalIndexAndTransform::index(elems[i]);
-            label trafoI = globalIndexAndTransform::transformIndex(elems[i]);
+            label proci = globalTransforms.processor(elems[i]);
+            label index = globalTransforms.index(elems[i]);
+            label trafoI = globalTransforms.transformIndex(elems[i]);
 
             // Get compact index for untransformed element
             label rawElemI =
             (
-                procI == Pstream::myProcNo()
+                proci == Pstream::myProcNo()
               ? index
-              : compactMap[procI][index]
+              : compactMap[proci][index]
             );
 
             label& n = nPerTransform[trafoI];
             // index of element to transform
             transformElements_[trafoI][n] = rawElemI;
             // destination of transformed element
-            transformedIndices[cellI][i] = transformStart_[trafoI]+n;
+            transformedIndices[celli][i] = transformStart_[trafoI]+n;
             n++;
         }
     }
@@ -467,10 +467,7 @@ Foam::mapDistribute::mapDistribute
 }
 
 
-Foam::mapDistribute::mapDistribute
-(
-    const mapDistribute& map
-)
+Foam::mapDistribute::mapDistribute(const mapDistribute& map)
 :
     mapDistributeBase(map),
     transformElements_(map.transformElements_),
@@ -478,10 +475,7 @@ Foam::mapDistribute::mapDistribute
 {}
 
 
-Foam::mapDistribute::mapDistribute
-(
-    const Xfer<mapDistribute>& map
-)
+Foam::mapDistribute::mapDistribute(const Xfer<mapDistribute>& map)
 :
     mapDistributeBase
     (

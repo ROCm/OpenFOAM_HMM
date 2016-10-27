@@ -108,8 +108,8 @@ public:
                 const scalar time,
                 vector& position,
                 label& cellOwner,
-                label& tetFaceI,
-                label& tetPtI
+                label& tetFacei,
+                label& tetPti
             );
 
             virtual void setProperties

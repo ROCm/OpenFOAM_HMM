@@ -80,7 +80,7 @@ void surfaceSlipDisplacementPointPatchVectorField::calcProjection
 
 
     // Get fixed points (bit of a hack)
-    const pointZone* zonePtr = NULL;
+    const pointZone* zonePtr = nullptr;
 
     if (frozenPointsZone_.size() > 0)
     {
@@ -419,7 +419,7 @@ void surfaceSlipDisplacementPointPatchVectorField::evaluate
     calcProjection(displacement);
 
     // Get internal field to insert values into
-    Field<vector>& iF = const_cast<Field<vector>&>(this->internalField());
+    Field<vector>& iF = const_cast<Field<vector>&>(this->primitiveField());
 
     //setInInternalField(iF, motionU);
     setInInternalField(iF, displacement);

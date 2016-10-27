@@ -45,15 +45,15 @@ Foam::labelList Foam::snappySnapDriver::getFacePoints
 
         forAll(f, fp)
         {
-            label meshPointI = f[fp];
+            label meshPointi = f[fp];
 
             Map<label>::const_iterator iter =
-                pp.meshPointMap().find(meshPointI);
+                pp.meshPointMap().find(meshPointi);
 
             if (iter != pp.meshPointMap().end())
             {
-                label pointI = iter();
-                pointOnZone[pointI] = true;
+                label pointi = iter();
+                pointOnZone[pointi] = true;
             }
         }
     }

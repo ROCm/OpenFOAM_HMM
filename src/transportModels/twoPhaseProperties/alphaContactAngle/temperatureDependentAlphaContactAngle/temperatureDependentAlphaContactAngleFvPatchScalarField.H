@@ -27,24 +27,23 @@ Class
 Description
     Temperature-dependent constant alphaContactAngle scalar boundary condition.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
-        TName        | Temperature field name  | no          | T
+        T            | Temperature field name  | no          | T
         theta0       | Contact angle data      | yes         |
     \endtable
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            temperatureDependentAlphaContactAngle;
         theta0          constant 60;
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::alphaContactAngleFvPatchScalarField
     Foam::constantAlphaContactAngleFvPatchScalarField
 

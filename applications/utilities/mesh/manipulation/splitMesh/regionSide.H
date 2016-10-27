@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,32 +77,32 @@ class regionSide
         static label otherEdge
         (
             const primitiveMesh& mesh,
-            const label faceI,
+            const label facei,
             const label edgeI,
-            const label pointI
+            const label pointi
         );
 
-        //- From faceI, side cellI, cross to other faces/cells by
+        //- From facei, side celli, cross to other faces/cells by
         //  face-cell walking and store visited faces and update sideOwner_.
         void visitConnectedFaces
         (
             const primitiveMesh& mesh,
             const labelHashSet& region,
             const labelHashSet& fenceEdges,
-            const label cellI,
-            const label faceI,
+            const label celli,
+            const label facei,
             labelHashSet& visitedFace
         );
 
-        //- From edge on face connected to point on region (regionPointI) cross
+        //- From edge on face connected to point on region (regionPointi) cross
         //  to all other edges using this point by walking across faces
         //  Does not cross regionEdges so stays on one side of region
         void walkPointConnectedFaces
         (
             const primitiveMesh& mesh,
             const labelHashSet& regionEdges,
-            const label regionPointI,
-            const label startFaceI,
+            const label regionPointi,
+            const label startFacei,
             const label startEdgeI,
             labelHashSet& visitedEdges
         );
@@ -127,8 +127,8 @@ public:
         static label otherFace
         (
             const primitiveMesh& mesh,
-            const label cellI,
-            const label excludeFaceI,
+            const label celli,
+            const label excludeFacei,
             const label edgeI
         );
 

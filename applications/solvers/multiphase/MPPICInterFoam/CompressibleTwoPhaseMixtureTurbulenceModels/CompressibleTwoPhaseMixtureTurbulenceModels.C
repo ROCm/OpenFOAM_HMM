@@ -28,9 +28,17 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "makeTurbulenceModel.H"
 
-#include "laminar.H"
 #include "turbulentTransportModel.H"
 #include "LESModel.H"
+
+makeTurbulenceModelTypes
+(
+    volScalarField,
+    geometricOneField,
+    incompressibleTurbulenceModel,
+    PhaseCompressibleTurbulenceModel,
+    immiscibleIncompressibleTwoPhaseMixture
+);
 
 makeBaseTurbulenceModel
 (
@@ -41,13 +49,32 @@ makeBaseTurbulenceModel
     immiscibleIncompressibleTwoPhaseMixture
 );
 
+#define makeLaminarModel(Type)                                                 \
+    makeTemplatedTurbulenceModel                                               \
+    (                                                                          \
+       immiscibleIncompressibleTwoPhaseMixturePhaseCompressibleTurbulenceModel,\
+        laminar,                                                               \
+        Type                                                                   \
+    )
+
 #define makeRASModel(Type)                                                     \
     makeTemplatedTurbulenceModel                                               \
-    (immiscibleIncompressibleTwoPhaseMixturePhaseCompressibleTurbulenceModel, RAS, Type)
+    (                                                                          \
+       immiscibleIncompressibleTwoPhaseMixturePhaseCompressibleTurbulenceModel,\
+        RAS,                                                                   \
+        Type                                                                   \
+    )
 
 #define makeLESModel(Type)                                                     \
     makeTemplatedTurbulenceModel                                               \
-    (immiscibleIncompressibleTwoPhaseMixturePhaseCompressibleTurbulenceModel, LES, Type)
+    (                                                                          \
+       immiscibleIncompressibleTwoPhaseMixturePhaseCompressibleTurbulenceModel,\
+        LES,                                                                   \
+        Type                                                                   \
+    )
+
+#include "Stokes.H"
+makeLaminarModel(Stokes);
 
 #include "kEpsilon.H"
 makeRASModel(kEpsilon);
@@ -60,5 +87,6 @@ makeLESModel(kEqn);
 
 #include "kOmega.H"
 makeRASModel(kOmega);
+
 
 // ************************************************************************* //

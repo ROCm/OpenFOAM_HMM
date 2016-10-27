@@ -251,7 +251,7 @@ Foam::radiation::radiativeIntensityRay::~radiativeIntensityRay()
 Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
 {
     // Reset boundary heat flux to zero
-    Qr_.boundaryField() = 0.0;
+    Qr_.boundaryFieldRef() = 0.0;
 
     scalar maxResidual = -GREAT;
 
@@ -259,47 +259,27 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
     {
         const volScalarField& k = dom_.aLambda(lambdaI);
 
-        tmp<fvScalarMatrix> IiEq;
+        const surfaceScalarField Ji(dAve_ & mesh_.Sf());
 
-        if (!dom_.cacheDiv())
-        {
-            const surfaceScalarField Ji(dAve_ & mesh_.Sf());
+        fvScalarMatrix IiEq
+        (
+            fvm::div(Ji, ILambda_[lambdaI], "div(Ji,Ii_h)")
+          + fvm::Sp(k*omega_, ILambda_[lambdaI])
+        ==
+            1.0/constant::mathematical::pi*omega_
+           *(
+                (k - absorptionEmission_.aDisp(lambdaI))
+               *blackBody_.bLambda(lambdaI)
 
-            IiEq =
-            (
-                fvm::div(Ji, ILambda_[lambdaI], "div(Ji,Ii_h)")
-              + fvm::Sp(k*omega_, ILambda_[lambdaI])
-            ==
-                1.0/constant::mathematical::pi*omega_
-              * (
-                    (k - absorptionEmission_.aDisp(lambdaI))
-                    *blackBody_.bLambda(lambdaI)
-                  + absorptionEmission_.ECont(lambdaI)
-                  + absorptionEmission_.EDisp(lambdaI)
-                )
-            );
-        }
-        else
-        {
-            IiEq =
-            (
-               dom_.fvRayDiv(myRayId_, lambdaI)
-             + fvm::Sp(k*omega_, ILambda_[lambdaI])
-           ==
-               1.0/constant::mathematical::pi*omega_
-             * (
-                    (k - absorptionEmission_.aDisp(lambdaI))
-                   *blackBody_.bLambda(lambdaI)
-                 + absorptionEmission_.E(lambdaI)/4
-               )
-            );
-        }
+              + absorptionEmission_.E(lambdaI)/4
+            )
+        );
 
-        IiEq.ref().relax();
+        IiEq.relax();
 
         const solverPerformance ILambdaSol = solve
         (
-            IiEq.ref(),
+            IiEq,
             mesh_.solver("Ii")
         );
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,8 +28,8 @@ Group
     grpLagrangianSolvers grpMovingMeshSolvers
 
 Description
-    Transient PIMPLE solver for compressible, laminar or turbulent flow with
-    spray parcels and support for moving meshes.
+    Transient solver for compressible, turbulent flow with a spray particle
+    cloud, with optional mesh motion and mesh topology changes.
 
 \*---------------------------------------------------------------------------*/
 
@@ -48,23 +48,20 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "postProcess.H"
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
-    #include "initContinuityErrs.H"
-
-    pimpleControl pimple(mesh);
-
+    #include "createControl.H"
     #include "createControls.H"
-    #include "readGravitationalAcceleration.H"
     #include "createFields.H"
+    #include "createFieldRefs.H"
     #include "createRhoUf.H"
-    #include "createMRF.H"
     #include "createFvOptions.H"
-    #include "createClouds.H"
-    #include "createRadiationModel.H"
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
+    #include "initContinuityErrs.H"
 
     turbulence->validate();
 

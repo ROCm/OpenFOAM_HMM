@@ -35,8 +35,7 @@ Description
     - point, and
     - surface noise.
 
-    \heading Example usage
-
+Usage
     \verbatim
     noiseModel      surfaceNoise; // pointNoise
 
@@ -84,7 +83,7 @@ Description
     \endverbatim
 
 
-SeeAlso
+See also
     noiseFFT.H
     noiseModel.H
     windowModel.H

@@ -8,15 +8,15 @@
 
     PtrList<labelIOList>& faceProcAddressing = procMeshes.faceProcAddressing();
 
-    forAll(faceProcAddressing, procI)
+    forAll(faceProcAddressing, proci)
     {
-        const labelList& curFaceAddr = faceProcAddressing[procI];
+        const labelList& curFaceAddr = faceProcAddressing[proci];
 
-        forAll(curFaceAddr, faceI)
+        forAll(curFaceAddr, facei)
         {
-            if (mag(curFaceAddr[faceI]) < minFaceIndex)
+            if (mag(curFaceAddr[facei]) < minFaceIndex)
             {
-                minFaceIndex = mag(curFaceAddr[faceI]);
+                minFaceIndex = mag(curFaceAddr[facei]);
             }
         }
     }
@@ -33,16 +33,16 @@
             << "the current version fo decomposePar"
             << endl;
 
-        forAll(faceProcAddressing, procI)
+        forAll(faceProcAddressing, proci)
         {
-            labelList& curFaceAddr = faceProcAddressing[procI];
+            labelList& curFaceAddr = faceProcAddressing[proci];
 
-            forAll(curFaceAddr, faceI)
+            forAll(curFaceAddr, facei)
             {
-                curFaceAddr[faceI] += sign(curFaceAddr[faceI]);
+                curFaceAddr[facei] += sign(curFaceAddr[facei]);
             }
 
-            faceProcAddressing[procI].write();
+            faceProcAddressing[proci].write();
         }
     }
 }

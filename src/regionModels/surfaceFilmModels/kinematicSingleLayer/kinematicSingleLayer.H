@@ -340,7 +340,7 @@ public:
             //- Return const access to the dynamic viscosity / [Pa.s]
             inline const volScalarField& mu() const;
 
-            //- Return const access to the surface tension / [m/s2]
+            //- Return const access to the surface tension / [kg/s2]
             inline const volScalarField& sigma() const;
 
 
@@ -403,8 +403,8 @@ public:
             //- External hook to add sources to the film
             virtual void addSources
             (
-                const label patchI,            // patchI on primary region
-                const label faceI,             // faceI of patchI
+                const label patchi,            // patchi on primary region
+                const label facei,             // facei of patchi
                 const scalar massSource,       // [kg]
                 const vector& momentumSource,  // [kg.m/s] (tang'l momentum)
                 const scalar pressureSource,   // [kg.m/s] (normal momentum)
@@ -516,16 +516,16 @@ public:
             // Mapped into primary region
 
                 //- Return total mass source - Eulerian phase only
-                virtual tmp<DimensionedField<scalar, volMesh>> Srho() const;
+                virtual tmp<volScalarField::Internal> Srho() const;
 
                 //- Return mass source for specie i - Eulerian phase only
-                virtual tmp<DimensionedField<scalar, volMesh>> Srho
+                virtual tmp<volScalarField::Internal> Srho
                 (
                     const label i
                 ) const;
 
                 //- Return enthalpy source - Eulerian phase only
-                virtual tmp<DimensionedField<scalar, volMesh>> Sh() const;
+                virtual tmp<volScalarField::Internal> Sh() const;
 
 
         // I-O

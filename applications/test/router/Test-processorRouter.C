@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,9 +52,9 @@ labelList procNeighbours(const polyMesh& mesh)
 
     label nNeighbours = 0;
 
-    forAll(mesh.boundaryMesh(), patchI)
+    forAll(mesh.boundaryMesh(), patchi)
     {
-        if (isA<processorPolyPatch>(mesh.boundaryMesh()[patchI]))
+        if (isA<processorPolyPatch>(mesh.boundaryMesh()[patchi]))
         {
             nNeighbours++;
         }
@@ -64,11 +64,11 @@ labelList procNeighbours(const polyMesh& mesh)
 
     nNeighbours = 0;
 
-    forAll(mesh.boundaryMesh(), patchI)
+    forAll(mesh.boundaryMesh(), patchi)
     {
-        if (isA<processorPolyPatch>(mesh.boundaryMesh()[patchI]))
+        if (isA<processorPolyPatch>(mesh.boundaryMesh()[patchi]))
         {
-            const polyPatch& patch = mesh.boundaryMesh()[patchI];
+            const polyPatch& patch = mesh.boundaryMesh()[patchi];
 
             const processorPolyPatch& procPatch =
                 refCast<const processorPolyPatch>(patch);
@@ -142,20 +142,20 @@ int main(int argc, char *argv[])
     OFstream objFile(fName);
 
     // Write processors as single vertex in centre of mesh
-    forAll(meshCentres, procI)
+    forAll(meshCentres, proci)
     {
-        const point& pt = meshCentres[procI];
+        const point& pt = meshCentres[proci];
 
         objFile << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
     }
     // Write connections as lines between processors (duplicated)
-    forAll(connections, procI)
+    forAll(connections, proci)
     {
-        const labelList& nbs = connections[procI];
+        const labelList& nbs = connections[proci];
 
         forAll(nbs, nbI)
         {
-            objFile << "l " << procI + 1 << ' ' << nbs[nbI] + 1 << endl;
+            objFile << "l " << proci + 1 << ' ' << nbs[nbI] + 1 << endl;
         }
     }
 
@@ -196,9 +196,9 @@ int main(int argc, char *argv[])
 
         OFstream objFile(fName);
 
-        forAll(meshCentres, procI)
+        forAll(meshCentres, proci)
         {
-            const point& pt = meshCentres[procI];
+            const point& pt = meshCentres[proci];
 
             objFile << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z()
                     << endl;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,16 +41,16 @@ const Foam::scalar Foam::threePhaseInterfaceProperties::convertToRad =
 
 void Foam::threePhaseInterfaceProperties::correctContactAngle
 (
-    surfaceVectorField::GeometricBoundaryField& nHatb
+    surfaceVectorField::Boundary& nHatb
 ) const
 {
-    const volScalarField::GeometricBoundaryField& alpha1 =
+    const volScalarField::Boundary& alpha1 =
         mixture_.alpha1().boundaryField();
-    const volScalarField::GeometricBoundaryField& alpha2 =
+    const volScalarField::Boundary& alpha2 =
         mixture_.alpha2().boundaryField();
-    const volScalarField::GeometricBoundaryField& alpha3 =
+    const volScalarField::Boundary& alpha3 =
         mixture_.alpha3().boundaryField();
-    const volVectorField::GeometricBoundaryField& U =
+    const volVectorField::Boundary& U =
         mixture_.U().boundaryField();
 
     const fvMesh& mesh = mixture_.U().mesh();
@@ -134,7 +134,7 @@ void Foam::threePhaseInterfaceProperties::calculateK()
     // Face unit interface normal
     surfaceVectorField nHatfv(gradAlphaf/(mag(gradAlphaf) + deltaN_));
 
-    correctContactAngle(nHatfv.boundaryField());
+    correctContactAngle(nHatfv.boundaryFieldRef());
 
     // Face unit interface normal flux
     nHatf_ = nHatfv & Sf;
@@ -145,7 +145,7 @@ void Foam::threePhaseInterfaceProperties::calculateK()
     // Complex expression for curvature.
     // Correction is formally zero but numerically non-zero.
     // volVectorField nHat = gradAlpha/(mag(gradAlpha) + deltaN_);
-    // nHat.boundaryField() = nHatfv.boundaryField();
+    // nHat.boundaryFieldRef() = nHatfv.boundaryField();
     // K_ = -fvc::div(nHatf_) + (nHat & fvc::grad(nHatfv) & nHat);
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -46,8 +46,7 @@ Description
     \endvartable
 
 
-    \heading Patch usage
-
+Usage
     \table
         Property        | Description               | Required | Default value
         UInf            | freestream velocity       | yes      |
@@ -56,7 +55,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            SRFFreestreamVelocity;
         UInf            uniform (0 0 0);
@@ -65,7 +64,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::freestreamFvPatchField
     Foam::SRFVelocityFvPatchVectorField
 

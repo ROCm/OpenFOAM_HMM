@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,7 +57,7 @@ Foam::laplaceFilter::laplaceFilter(const fvMesh& mesh, scalar widthCoeff)
         calculatedFvPatchScalarField::typeName
     )
 {
-    coeff_.dimensionedInternalField() = pow(mesh.V(), 2.0/3.0)/widthCoeff_;
+    coeff_.ref() = pow(mesh.V(), 2.0/3.0)/widthCoeff_;
 }
 
 
@@ -78,7 +78,7 @@ Foam::laplaceFilter::laplaceFilter(const fvMesh& mesh, const dictionary& bd)
         calculatedFvPatchScalarField::typeName
     )
 {
-    coeff_.dimensionedInternalField() = pow(mesh.V(), 2.0/3.0)/widthCoeff_;
+    coeff_.ref() = pow(mesh.V(), 2.0/3.0)/widthCoeff_;
 }
 
 
@@ -97,6 +97,8 @@ Foam::tmp<Foam::volScalarField> Foam::laplaceFilter::operator()
     const tmp<volScalarField>& unFilteredField
 ) const
 {
+    correctBoundaryConditions(unFilteredField);
+
     tmp<volScalarField> filteredField =
         unFilteredField() + fvc::laplacian(coeff_, unFilteredField());
 
@@ -111,6 +113,8 @@ Foam::tmp<Foam::volVectorField> Foam::laplaceFilter::operator()
     const tmp<volVectorField>& unFilteredField
 ) const
 {
+    correctBoundaryConditions(unFilteredField);
+
     tmp<volVectorField> filteredField =
         unFilteredField() + fvc::laplacian(coeff_, unFilteredField());
 
@@ -125,6 +129,8 @@ Foam::tmp<Foam::volSymmTensorField> Foam::laplaceFilter::operator()
     const tmp<volSymmTensorField>& unFilteredField
 ) const
 {
+    correctBoundaryConditions(unFilteredField);
+
     tmp<volSymmTensorField> filteredField =
         unFilteredField() + fvc::laplacian(coeff_, unFilteredField());
 
@@ -139,6 +145,8 @@ Foam::tmp<Foam::volTensorField> Foam::laplaceFilter::operator()
     const tmp<volTensorField>& unFilteredField
 ) const
 {
+    correctBoundaryConditions(unFilteredField);
+
     tmp<volTensorField> filteredField =
         unFilteredField() + fvc::laplacian(coeff_, unFilteredField());
 

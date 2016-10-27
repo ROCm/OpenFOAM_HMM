@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
 
         Info<< "    Reading particle positions" << endl;
         passiveParticleCloud myCloud(mesh, cloudName);
+
         Info<< "    Read " << returnReduce(myCloud.size(), sumOp<label>())
             << " particles" << endl;
 
@@ -85,7 +86,6 @@ int main(int argc, char *argv[])
 
             if (origProc >= maxIds.size())
             {
-                // Expand size
                 maxIds.setSize(origProc+1, -1);
             }
 
@@ -106,15 +106,15 @@ int main(int argc, char *argv[])
     labelList numIds = maxIds + 1;
 
     Info<< nl << "Particle statistics:" << endl;
-    forAll(maxIds, procI)
+    forAll(maxIds, proci)
     {
-        Info<< "    Found " << numIds[procI] << " particles originating"
-            << " from processor " << procI << endl;
+        Info<< "    Found " << numIds[proci] << " particles originating"
+            << " from processor " << proci << endl;
     }
     Info<< nl << endl;
 
 
-    // calc starting ids for particles on each processor
+    // Calculate starting ids for particles on each processor
     List<label> startIds(numIds.size(), 0);
     for (label i = 0; i < numIds.size()-1; i++)
     {
@@ -123,11 +123,10 @@ int main(int argc, char *argv[])
     label nParticle = startIds.last() + numIds[startIds.size()-1];
 
 
-
-    // number of tracks to generate
+    // Number of tracks to generate
     label nTracks = nParticle/sampleFrequency;
 
-    // storage for all particle tracks
+    // Storage for all particle tracks
     List<DynamicList<vector>> allTracks(nTracks);
 
     Info<< "\nGenerating " << nTracks << " particle tracks for cloud "
@@ -146,7 +145,7 @@ int main(int argc, char *argv[])
         Info<< "    Reading particle positions" << endl;
         passiveParticleCloud myCloud(mesh, cloudName);
 
-        // collect the track data on all processors that have positions
+        // Collect the track data on all processors that have positions
         allPositions[Pstream::myProcNo()].setSize
         (
             myCloud.size(),
@@ -164,7 +163,7 @@ int main(int argc, char *argv[])
             i++;
         }
 
-        // collect the track data on the master processor
+        // Collect the track data on the master processor
         Pstream::gatherList(allPositions);
         Pstream::gatherList(allOrigIds);
         Pstream::gatherList(allOrigProcs);
@@ -172,13 +171,13 @@ int main(int argc, char *argv[])
         Info<< "    Constructing tracks" << nl << endl;
         if (Pstream::master())
         {
-            forAll(allPositions, procI)
+            forAll(allPositions, proci)
             {
-                forAll(allPositions[procI], i)
+                forAll(allPositions[proci], i)
                 {
                     label globalId =
-                        startIds[allOrigProcs[procI][i]]
-                      + allOrigIds[procI][i];
+                        startIds[allOrigProcs[proci][i]]
+                      + allOrigIds[proci][i];
 
                     if (globalId % sampleFrequency == 0)
                     {
@@ -187,7 +186,7 @@ int main(int argc, char *argv[])
                         {
                             allTracks[trackId].append
                             (
-                                allPositions[procI][i]
+                                allPositions[proci][i]
                             );
                         }
                     }
@@ -231,18 +230,16 @@ int main(int argc, char *argv[])
 
         OFstream vtkTracks
         (
-            vtkPath
-          / "particleTracks." + vtkFile.ext()
+            vtkPath/("particleTracks." + vtkFile.ext())
         );
 
         Info<< "\nWriting particle tracks in " << setFormat
             << " format to " << vtkTracks.name()
             << nl << endl;
 
-
         scalarFormatterPtr().write
         (
-            true,           // writeTracks
+            true,
             tracks,
             wordList(0),
             List<List<scalarField>>(0),

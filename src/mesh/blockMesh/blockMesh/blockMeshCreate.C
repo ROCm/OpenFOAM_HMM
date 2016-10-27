@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
 #include "blockMesh.H"
 #include "cellModeller.H"
 
@@ -38,41 +37,37 @@ void Foam::blockMesh::createPoints() const
         Info<< "Creating points with scale " << scaleFactor_ << endl;
     }
 
-    //
-    // generate points
-    //
-    points_.clear();
     points_.setSize(nPoints_);
 
-    forAll(blocks, blockI)
+    forAll(blocks, blocki)
     {
-        const pointField& blockPoints = blocks[blockI].points();
+        const pointField& blockPoints = blocks[blocki].points();
 
         if (verboseOutput)
         {
-            const Vector<label>& density = blocks[blockI].meshDensity();
+            const Vector<label>& density = blocks[blocki].density();
 
-            label v0 = blocks[blockI].vtxLabel(0, 0, 0);
-            label vi1 = blocks[blockI].vtxLabel(1, 0, 0);
-            scalar diStart = mag(blockPoints[vi1]-blockPoints[v0]);
+            label v0 = blocks[blocki].pointLabel(0, 0, 0);
+            label vi1 = blocks[blocki].pointLabel(1, 0, 0);
+            scalar diStart = mag(blockPoints[vi1] - blockPoints[v0]);
 
-            label vinM1 = blocks[blockI].vtxLabel(density.x()-1, 0, 0);
-            label vin = blocks[blockI].vtxLabel(density.x(), 0, 0);
-            scalar diFinal = mag(blockPoints[vin]-blockPoints[vinM1]);
+            label vinM1 = blocks[blocki].pointLabel(density.x()-1, 0, 0);
+            label vin = blocks[blocki].pointLabel(density.x(), 0, 0);
+            scalar diFinal = mag(blockPoints[vin] - blockPoints[vinM1]);
 
-            label vj1 = blocks[blockI].vtxLabel(0, 1, 0);
-            scalar djStart = mag(blockPoints[vj1]-blockPoints[v0]);
-            label vjnM1 = blocks[blockI].vtxLabel(0, density.y()-1, 0);
-            label vjn = blocks[blockI].vtxLabel(0, density.y(), 0);
-            scalar djFinal = mag(blockPoints[vjn]-blockPoints[vjnM1]);
+            label vj1 = blocks[blocki].pointLabel(0, 1, 0);
+            scalar djStart = mag(blockPoints[vj1] - blockPoints[v0]);
+            label vjnM1 = blocks[blocki].pointLabel(0, density.y()-1, 0);
+            label vjn = blocks[blocki].pointLabel(0, density.y(), 0);
+            scalar djFinal = mag(blockPoints[vjn] - blockPoints[vjnM1]);
 
-            label vk1 = blocks[blockI].vtxLabel(0, 0, 1);
-            scalar dkStart = mag(blockPoints[vk1]-blockPoints[v0]);
-            label vknM1 = blocks[blockI].vtxLabel(0, 0, density.z()-1);
-            label vkn = blocks[blockI].vtxLabel(0, 0, density.z());
-            scalar dkFinal = mag(blockPoints[vkn]-blockPoints[vknM1]);
+            label vk1 = blocks[blocki].pointLabel(0, 0, 1);
+            scalar dkStart = mag(blockPoints[vk1] - blockPoints[v0]);
+            label vknM1 = blocks[blocki].pointLabel(0, 0, density.z()-1);
+            label vkn = blocks[blocki].pointLabel(0, 0, density.z());
+            scalar dkFinal = mag(blockPoints[vkn] - blockPoints[vknM1]);
 
-            Info<< "    Block " << blockI << " cell size :" << nl
+            Info<< "    Block " << blocki << " cell size :" << nl
                 << "        i : " << scaleFactor_*diStart << " .. "
                 << scaleFactor_*diFinal << nl
                 << "        j : " << scaleFactor_*djStart << " .. "
@@ -82,15 +77,15 @@ void Foam::blockMesh::createPoints() const
                 << endl;
         }
 
-        forAll(blockPoints, blockPointI)
+        forAll(blockPoints, blockPointi)
         {
             points_
             [
                 mergeList_
                 [
-                    blockOffsets_[blockI] + blockPointI
+                    blockOffsets_[blocki] + blockPointi
                 ]
-            ] = scaleFactor_ * blockPoints[blockPointI];
+            ] = scaleFactor_ * blockPoints[blockPointi];
         }
     }
 }
@@ -106,29 +101,25 @@ void Foam::blockMesh::createCells() const
         Info<< "Creating cells" << endl;
     }
 
-    //
-    // generate cells
-    //
-    cells_.clear();
     cells_.setSize(nCells_);
 
     label cellLabel = 0;
 
-    forAll(blocks, blockI)
+    forAll(blocks, blocki)
     {
-        const labelListList& blockCells = blocks[blockI].cells();
+        const List<FixedList<label, 8>> blockCells(blocks[blocki].cells());
 
-        forAll(blockCells, blockCellI)
+        forAll(blockCells, blockCelli)
         {
-            labelList cellPoints(blockCells[blockCellI].size());
+            labelList cellPoints(blockCells[blockCelli].size());
 
-            forAll(cellPoints, cellPointI)
+            forAll(cellPoints, cellPointi)
             {
-                cellPoints[cellPointI] =
+                cellPoints[cellPointi] =
                     mergeList_
                     [
-                        blockCells[blockCellI][cellPointI]
-                      + blockOffsets_[blockI]
+                        blockCells[blockCelli][cellPointi]
+                      + blockOffsets_[blocki]
                     ];
             }
 
@@ -154,9 +145,9 @@ Foam::faceList Foam::blockMesh::createPatchFaces
 
     forAll(patchTopologyFaces, patchTopologyFaceLabel)
     {
-        const label blockI = blockLabels[patchTopologyFaceLabel];
+        const label blocki = blockLabels[patchTopologyFaceLabel];
 
-        faceList blockFaces = blocks[blockI].blockShape().faces();
+        faceList blockFaces = blocks[blocki].blockShape().faces();
 
         forAll(blockFaces, blockFaceLabel)
         {
@@ -167,7 +158,7 @@ Foam::faceList Foam::blockMesh::createPatchFaces
             )
             {
                 nFaces +=
-                    blocks[blockI].boundaryPatches()[blockFaceLabel].size();
+                    blocks[blocki].boundaryPatches()[blockFaceLabel].size();
             }
         }
     }
@@ -179,20 +170,20 @@ Foam::faceList Foam::blockMesh::createPatchFaces
 
     forAll(patchTopologyFaces, patchTopologyFaceLabel)
     {
-        const label blockI = blockLabels[patchTopologyFaceLabel];
+        const label blocki = blockLabels[patchTopologyFaceLabel];
 
-        faceList blockFaces = blocks[blockI].blockShape().faces();
+        faceList blockFaces = blocks[blocki].blockShape().faces();
 
         forAll(blockFaces, blockFaceLabel)
         {
             if
             (
                 blockFaces[blockFaceLabel]
-                == patchTopologyFaces[patchTopologyFaceLabel]
+             == patchTopologyFaces[patchTopologyFaceLabel]
             )
             {
-                const labelListList& blockPatchFaces =
-                    blocks[blockI].boundaryPatches()[blockFaceLabel];
+                const List<FixedList<label, 4>>& blockPatchFaces =
+                    blocks[blocki].boundaryPatches()[blockFaceLabel];
 
                 forAll(blockPatchFaces, blockFaceLabel)
                 {
@@ -203,7 +194,7 @@ Foam::faceList Foam::blockMesh::createPatchFaces
                         mergeList_
                         [
                             blockPatchFaces[blockFaceLabel][0]
-                          + blockOffsets_[blockI]
+                          + blockOffsets_[blocki]
                         ];
 
                     label nUnique = 1;
@@ -219,7 +210,7 @@ Foam::faceList Foam::blockMesh::createPatchFaces
                             mergeList_
                             [
                                 blockPatchFaces[blockFaceLabel][facePointLabel]
-                              + blockOffsets_[blockI]
+                              + blockOffsets_[blocki]
                             ];
 
                         if (quadFace[nUnique] != quadFace[nUnique-1])
@@ -265,29 +256,13 @@ void Foam::blockMesh::createPatches() const
         Info<< "Creating patches" << endl;
     }
 
-    //
-    // generate points
-    //
-
-    patches_.clear();
     patches_.setSize(topoPatches.size());
 
-    forAll(topoPatches, patchI)
+    forAll(topoPatches, patchi)
     {
-        patches_[patchI] = createPatchFaces(topoPatches[patchI]);
-    }
-
-}
-
-
-void Foam::blockMesh::clearGeom()
-{
-    blockList& blocks = *this;
-
-    forAll(blocks, blockI)
-    {
-        blocks[blockI].clearGeom();
+        patches_[patchi] = createPatchFaces(topoPatches[patchi]);
     }
 }
+
 
 // ************************************************************************* //

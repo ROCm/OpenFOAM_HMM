@@ -125,66 +125,66 @@ inline Foam::Random& Foam::DSMCCloud<ParcelType>::rndGen()
 
 
 template<class ParcelType>
-inline Foam::volScalarField::GeometricBoundaryField&
+inline Foam::volScalarField::Boundary&
 Foam::DSMCCloud<ParcelType>::qBF()
 {
-    return q_.boundaryField();
+    return q_.boundaryFieldRef();
 }
 
 
 template<class ParcelType>
-inline Foam::volVectorField::GeometricBoundaryField&
+inline Foam::volVectorField::Boundary&
 Foam::DSMCCloud<ParcelType>::fDBF()
 {
-    return fD_.boundaryField();
+    return fD_.boundaryFieldRef();
 }
 
 
 template<class ParcelType>
-inline Foam::volScalarField::GeometricBoundaryField&
+inline Foam::volScalarField::Boundary&
 Foam::DSMCCloud<ParcelType>::rhoNBF()
 {
-    return rhoN_.boundaryField();
+    return rhoN_.boundaryFieldRef();
 }
 
 
 template<class ParcelType>
-inline Foam::volScalarField::GeometricBoundaryField&
+inline Foam::volScalarField::Boundary&
 Foam::DSMCCloud<ParcelType>::rhoMBF()
 {
-    return rhoM_.boundaryField();
+    return rhoM_.boundaryFieldRef();
 }
 
 
 template<class ParcelType>
-inline Foam::volScalarField::GeometricBoundaryField&
+inline Foam::volScalarField::Boundary&
 Foam::DSMCCloud<ParcelType>::linearKEBF()
 {
-    return linearKE_.boundaryField();
+    return linearKE_.boundaryFieldRef();
 }
 
 
 template<class ParcelType>
-inline Foam::volScalarField::GeometricBoundaryField&
+inline Foam::volScalarField::Boundary&
 Foam::DSMCCloud<ParcelType>::internalEBF()
 {
-    return internalE_.boundaryField();
+    return internalE_.boundaryFieldRef();
 }
 
 
 template<class ParcelType>
-inline Foam::volScalarField::GeometricBoundaryField&
+inline Foam::volScalarField::Boundary&
 Foam::DSMCCloud<ParcelType>::iDofBF()
 {
-    return iDof_.boundaryField();
+    return iDof_.boundaryFieldRef();
 }
 
 
 template<class ParcelType>
-inline Foam::volVectorField::GeometricBoundaryField&
+inline Foam::volVectorField::Boundary&
 Foam::DSMCCloud<ParcelType>::momentumBF()
 {
-    return momentum_.boundaryField();
+    return momentum_.boundaryFieldRef();
 }
 
 

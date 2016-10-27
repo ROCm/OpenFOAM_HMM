@@ -110,7 +110,7 @@ public:
             virtual void setParcelProperties
             (
                 parcelType& p,
-                const label filmCellI
+                const label filmCelli
             ) const;
 
 

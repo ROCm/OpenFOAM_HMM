@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,8 +33,7 @@ SourceFiles
 #ifndef functionObjectTemplate_H
 #define functionObjectTemplate_H
 
-#include "stringList.H"
-#include "pointField.H"
+#include "regionFunctionObject.H"
 
 //{{{ begin codeInclude
 ${codeInclude}
@@ -46,10 +45,6 @@ namespace Foam
 {
 
 // Forward declaration of classes
-class objectRegistry;
-class dictionary;
-class polyMesh;
-class mapPolyMesh;
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -57,14 +52,10 @@ class fvMesh;
 \*---------------------------------------------------------------------------*/
 
 class ${typeName}FunctionObject
+:
+    public functionObjects::regionFunctionObject
 {
     // Private data
-
-        //- Name of this set of system calls
-        word name_;
-
-        //- Registry
-        const objectRegistry& obr_;
 
 //{{{ begin codeData
         ${codeData}
@@ -72,8 +63,6 @@ class ${typeName}FunctionObject
 
 
     // Private Member Functions
-
-        const objectRegistry& obr() const;
 
         const fvMesh& mesh() const;
 
@@ -92,14 +81,12 @@ public:
 
     // Constructors
 
-        //- Construct for given objectRegistry and dictionary.
-        //  Allow the possibility to load fields from files
+        //- Construct from Time and dictionary
         ${typeName}FunctionObject
         (
             const word& name,
-            const objectRegistry& unused,
-            const dictionary&,
-            const bool loadFromFilesUnused = false
+            const Time& runTime,
+            const dictionary&
         );
 
 
@@ -109,34 +96,17 @@ public:
 
     // Member Functions
 
-        //- Return name of the system call set
-        virtual const word& name() const
-        {
-            return name_;
-        }
-
         //- Read the system calls
-        virtual void read(const dictionary&);
+        virtual bool read(const dictionary&);
 
         //- Execute the "executeCalls" at each time-step
-        virtual void execute();
+        virtual bool execute();
 
         //- Execute the "endCalls" at the final time-loop
-        virtual void end();
+        virtual bool end();
 
         //- Write, execute the "writeCalls"
-        virtual void write();
-
-        //- Called when time was set at the end of the Time::operator++
-        virtual void timeSet();
-
-        //- Update for changes of mesh
-        virtual void updateMesh(const mapPolyMesh&)
-        {}
-
-        //- Update for changes of mesh
-        virtual void movePoints(const polyMesh&)
-        {}
+        virtual bool write();
 };
 
 

@@ -50,10 +50,8 @@ movingWallVelocityFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchVectorField(p, iF)
-{
-    fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
-}
+    fixedValueFvPatchVectorField(p, iF, dict)
+{}
 
 
 Foam::movingWallVelocityFvPatchVectorField::
@@ -99,7 +97,7 @@ void Foam::movingWallVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    const fvMesh& mesh = dimensionedInternalField().mesh();
+    const fvMesh& mesh = internalField().mesh();
 
     if (mesh.moving())
     {
@@ -119,7 +117,7 @@ void Foam::movingWallVelocityFvPatchVectorField::updateCoeffs()
         const vectorField Up((pp.faceCentres() - oldFc)/deltaT);
 
         const volVectorField& U =
-            static_cast<const volVectorField&>(dimensionedInternalField());
+            static_cast<const volVectorField&>(internalField());
 
         scalarField phip
         (

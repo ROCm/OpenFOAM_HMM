@@ -35,8 +35,7 @@ Description
 
     A slip condition is applied tangential to the patch.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
@@ -45,7 +44,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            pressureInletOutletParSlipVelocity;
         value           uniform 0;
@@ -58,7 +57,7 @@ Note
     - negative flux (into of domain): derive from the flux with specified
       direction
 
-SeeAlso
+See also
     Foam::mixedFvPatchVectorField
     Foam::pressureDirectedInletOutletVelocityFvPatchVectorField
 

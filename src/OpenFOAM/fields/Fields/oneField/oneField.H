@@ -55,6 +55,11 @@ class oneField
 
 public:
 
+    // Public typedefs
+
+        typedef oneField FieldType;
+
+
     // Constructors
 
         //- Construct null
@@ -70,13 +75,18 @@ public:
 };
 
 
+inline const oneField& operator*(const oneField&, const oneField&);
+
+inline const oneField& operator/(const oneField&, const oneField&);
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    #include "oneFieldI.H"
+#include "oneFieldI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

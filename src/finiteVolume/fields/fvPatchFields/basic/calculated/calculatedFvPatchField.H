@@ -32,11 +32,10 @@ Description
     that the value is assigned via field assignment, and not via a call to
     e.g. \c updateCoeffs or \c evaluate.
 
-    \heading Patch usage
-
+Usage
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            calculated;
         value           uniform (0 0 0);    // Required value entry

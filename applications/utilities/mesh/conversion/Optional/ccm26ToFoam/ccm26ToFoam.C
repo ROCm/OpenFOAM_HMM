@@ -71,32 +71,32 @@ labelList getInternalFaceOrder
     labelList oldToNew(owner.size(), -1);
 
     // First unassigned face
-    label newFaceI = 0;
+    label newFacei = 0;
 
-    forAll(cells, cellI)
+    forAll(cells, celli)
     {
-        const labelList& cFaces = cells[cellI];
+        const labelList& cFaces = cells[celli];
 
         SortableList<label> nbr(cFaces.size());
 
         forAll(cFaces, i)
         {
-            label faceI = cFaces[i];
+            label facei = cFaces[i];
 
-            label nbrCellI = neighbour[faceI];
+            label nbrCelli = neighbour[facei];
 
-            if (nbrCellI != -1)
+            if (nbrCelli != -1)
             {
                 // Internal face. Get cell on other side.
-                if (nbrCellI == cellI)
+                if (nbrCelli == celli)
                 {
-                    nbrCellI = owner[faceI];
+                    nbrCelli = owner[facei];
                 }
 
-                if (cellI < nbrCellI)
+                if (celli < nbrCelli)
                 {
-                    // CellI is master
-                    nbr[i] = nbrCellI;
+                    // Celli is master
+                    nbr[i] = nbrCelli;
                 }
                 else
                 {
@@ -117,15 +117,15 @@ labelList getInternalFaceOrder
         {
             if (nbr[i] != -1)
             {
-                oldToNew[cFaces[nbr.indices()[i]]] = newFaceI++;
+                oldToNew[cFaces[nbr.indices()[i]]] = newFacei++;
             }
         }
     }
 
     // Keep boundary faces in same order.
-    for (label faceI = newFaceI; faceI < owner.size(); faceI++)
+    for (label facei = newFacei; facei < owner.size(); facei++)
     {
-        oldToNew[faceI] = faceI;
+        oldToNew[facei] = facei;
     }
 
     return oldToNew;
@@ -134,7 +134,7 @@ labelList getInternalFaceOrder
 
 void storeCellInZone
 (
-    const label cellI,
+    const label celli,
     const label cellType,
     Map<label>& typeToZone,
     List<DynamicList<label>>& zoneCells
@@ -155,12 +155,12 @@ void storeCellInZone
                 << zoneI << endl;
             typeToZone.insert(cellType, zoneI);
 
-            zoneCells[zoneI].append(cellI);
+            zoneCells[zoneI].append(celli);
         }
         else
         {
             // Existing zone for type
-            zoneCells[zoneFnd()].append(cellI);
+            zoneCells[zoneFnd()].append(celli);
         }
     }
 }
@@ -192,7 +192,7 @@ void ReadVertices
     // any chunk.  Normally this would be in a for loop.
 
     CCMIOSize nVertices;
-    CCMIOEntitySize(&err, vertices, &nVertices, NULL);
+    CCMIOEntitySize(&err, vertices, &nVertices, nullptr);
 
     List<int> mapData(nVertices, 0);
     List<float> verts(3*nVertices, 0);
@@ -211,9 +211,9 @@ void ReadVertices
     CCMIOReadMap(&err, mapID, mapData.begin(), offset, offsetPlusSize);
 
     //CCMIOSize size;
-    //CCMIOEntityDescription(&err, vertices, &size, NULL);
+    //CCMIOEntityDescription(&err, vertices, &size, nullptr);
     //char *desc = new char[size + 1];
-    //CCMIOEntityDescription(&err, vertices, NULL, desc);
+    //CCMIOEntityDescription(&err, vertices, nullptr, desc);
     //Pout<< "label: '" << desc << "'" << endl;
     //delete [] desc;
 
@@ -249,7 +249,7 @@ void ReadProblem
     int i = 0;
     while
     (
-        CCMIONextEntity(NULL, problem, kCCMIOCellType, &i, &next)
+        CCMIONextEntity(nullptr, problem, kCCMIOCellType, &i, &next)
      == kCCMIONoErr
     )
     {
@@ -261,10 +261,10 @@ void ReadProblem
         // an array to get the name because we do not know how long the
         // string is yet.  Many parameters to CCMIO functions that
         // return
-        // data can be NULL if that data is not needed.)
+        // data can be nullptr if that data is not needed.)
         if
         (
-            CCMIOReadOptstr(NULL, next, "MaterialType", &size, NULL)
+            CCMIOReadOptstr(nullptr, next, "MaterialType", &size, nullptr)
          == kCCMIONoErr
         )
         {
@@ -286,19 +286,19 @@ void ReadProblem
     int k = 0;
     while
     (
-        CCMIONextEntity(NULL, problem, kCCMIOBoundaryRegion, &k, &boundary)
+        CCMIONextEntity(nullptr, problem, kCCMIOBoundaryRegion, &k, &boundary)
      == kCCMIONoErr
     )
     {
         // Index of foam patch
-        label foamPatchI = -1;
+        label foamPatchi = -1;
 
         // Read prostar id
 
         int prostarI = -1;
         if
         (
-            CCMIOReadOpti(NULL, boundary, "ProstarRegionNumber", &prostarI)
+            CCMIOReadOpti(nullptr, boundary, "ProstarRegionNumber", &prostarI)
          == kCCMIONoErr
         )
         {
@@ -317,21 +317,27 @@ void ReadProblem
 
         if (prostarToFoamPatch.found(prostarI))
         {
-            foamPatchI = prostarToFoamPatch[prostarI];
+            foamPatchi = prostarToFoamPatch[prostarI];
 
             // Read boundary type
 
             int size;
             if
             (
-                CCMIOReadOptstr(NULL, boundary, "BoundaryType", &size, NULL)
-             == kCCMIONoErr
+                CCMIOReadOptstr
+                (
+                    nullptr,
+                    boundary,
+                    "BoundaryType",
+                    &size,
+                    nullptr
+                ) == kCCMIONoErr
             )
             {
                 char* s = new char[size + 1];
-                CCMIOReadOptstr(NULL, boundary, "BoundaryType", &size, s);
+                CCMIOReadOptstr(nullptr, boundary, "BoundaryType", &size, s);
                 s[size] = '\0';
-                foamPatchTypes[foamPatchI] = string::validate<word>(string(s));
+                foamPatchTypes[foamPatchi] = string::validate<word>(string(s));
                 delete [] s;
             }
 
@@ -346,42 +352,48 @@ void ReadProblem
 
             if
             (
-                CCMIOReadOptstr(NULL, boundary, "BoundaryName", &size, NULL)
-             == kCCMIONoErr
+                CCMIOReadOptstr
+                (
+                    nullptr,
+                    boundary,
+                    "BoundaryName",
+                    &size,
+                    nullptr
+                ) == kCCMIONoErr
             )
             {
                 char* name = new char[size + 1];
-                CCMIOReadOptstr(NULL, boundary, "BoundaryName", &size, name);
+                CCMIOReadOptstr(nullptr, boundary, "BoundaryName", &size, name);
                 name[size] = '\0';
-                foamPatchNames[foamPatchI] =
+                foamPatchNames[foamPatchi] =
                     string::validate<word>(string(name));
                 delete [] name;
             }
             else if
             (
-                CCMIOReadOptstr(NULL, boundary, "Label", &size, NULL)
+                CCMIOReadOptstr(nullptr, boundary, "Label", &size, nullptr)
              == kCCMIONoErr
             )
             {
                 char* name = new char[size + 1];
-                CCMIOReadOptstr(NULL, boundary, "Label", &size, name);
+                CCMIOReadOptstr(nullptr, boundary, "Label", &size, name);
                 name[size] = '\0';
-                foamPatchNames[foamPatchI] =
+                foamPatchNames[foamPatchi] =
                     string::validate<word>(string(name));
                 delete [] name;
             }
             else
             {
-                foamPatchNames[foamPatchI] =
-                    foamPatchTypes[foamPatchI]
-                  + Foam::name(foamPatchI);
-                Pout<< "Made up name:" << foamPatchNames[foamPatchI]
+                foamPatchNames[foamPatchi] =
+                    foamPatchTypes[foamPatchi]
+                  + Foam::name(foamPatchi);
+                Pout<< "Made up name:" << foamPatchNames[foamPatchi]
                     << endl;
             }
 
-            Pout<< "Read patch:" << foamPatchI
-                << " name:" << foamPatchNames[foamPatchI]
-                << " foamPatchTypes:" << foamPatchTypes[foamPatchI]
+            Pout<< "Read patch:" << foamPatchi
+                << " name:" << foamPatchNames[foamPatchi]
+                << " foamPatchTypes:" << foamPatchTypes[foamPatchi]
                 << endl;
         }
 
@@ -413,7 +425,7 @@ void ReadCells
     CCMIOID id;
     CCMIOGetEntity(&err, topology, kCCMIOCells, 0, &id);
     CCMIOSize nCells;
-    CCMIOEntitySize(&err, id, &nCells, NULL);
+    CCMIOEntitySize(&err, id, &nCells, nullptr);
 
     std::vector<int> mapData(nCells);
     std::vector<int> cellType(nCells);
@@ -437,7 +449,7 @@ void ReadCells
 
     CCMIOGetEntity(&err, topology, kCCMIOInternalFaces, 0, &id);
     CCMIOSize nInternalFaces;
-    CCMIOEntitySize(&err, id, &nInternalFaces, NULL);
+    CCMIOEntitySize(&err, id, &nInternalFaces, nullptr);
     Pout<< "nInternalFaces:" << nInternalFaces << endl;
 
     // Determine patch sizes before reading internal faces
@@ -445,12 +457,12 @@ void ReadCells
     int index = 0;
     while
     (
-        CCMIONextEntity(NULL, topology, kCCMIOBoundaryFaces, &index, &id)
+        CCMIONextEntity(nullptr, topology, kCCMIOBoundaryFaces, &index, &id)
      == kCCMIONoErr
     )
     {
         CCMIOSize size;
-        CCMIOEntitySize(&err, id, &size, NULL);
+        CCMIOEntitySize(&err, id, &size, nullptr);
 
         Pout<< "Read kCCMIOBoundaryFaces entry with " << size
             << " faces." << endl;
@@ -469,10 +481,10 @@ void ReadCells
     mapData.resize(nInternalFaces);
     CCMIOGetEntity(&err, topology, kCCMIOInternalFaces, 0, &id);
     CCMIOSize size;
-    CCMIOReadFaces(&err, id, kCCMIOInternalFaces, NULL, &size, NULL,
+    CCMIOReadFaces(&err, id, kCCMIOInternalFaces, nullptr, &size, nullptr,
                    kCCMIOStart, kCCMIOEnd);
     std::vector<int> faces(size);
-    CCMIOReadFaces(&err, id, kCCMIOInternalFaces, &mapID, NULL, &faces[0],
+    CCMIOReadFaces(&err, id, kCCMIOInternalFaces, &mapID, nullptr, &faces[0],
                    kCCMIOStart, kCCMIOEnd);
     std::vector<int> faceCells(2*nInternalFaces);
     CCMIOReadFaceCells(&err, id, kCCMIOInternalFaces, &faceCells[0],
@@ -488,12 +500,12 @@ void ReadCells
 
     unsigned int pos = 0;
 
-    for (unsigned int faceI = 0; faceI < nInternalFaces; faceI++)
+    for (unsigned int facei = 0; facei < nInternalFaces; facei++)
     {
-        foamFaceMap[faceI] = mapData[faceI];
-        foamOwner[faceI] = faceCells[2*faceI];
-        foamNeighbour[faceI] = faceCells[2*faceI+1];
-        face& f = foamFaces[faceI];
+        foamFaceMap[facei] = mapData[facei];
+        foamOwner[facei] = faceCells[2*facei];
+        foamNeighbour[facei] = faceCells[2*facei+1];
+        face& f = foamFaces[facei];
 
         f.setSize(faces[pos++]);
         forAll(f, fp)
@@ -509,22 +521,38 @@ void ReadCells
     label regionI = 0;
     while
     (
-        CCMIONextEntity(NULL, topology, kCCMIOBoundaryFaces, &index, &id)
+        CCMIONextEntity(nullptr, topology, kCCMIOBoundaryFaces, &index, &id)
      == kCCMIONoErr
     )
     {
         CCMIOSize nFaces;
-        CCMIOEntitySize(&err, id, &nFaces, NULL);
+        CCMIOEntitySize(&err, id, &nFaces, nullptr);
 
         mapData.resize(nFaces);
         faceCells.resize(nFaces);
-        CCMIOReadFaces(&err, id, kCCMIOBoundaryFaces, NULL, &size, NULL,
+        CCMIOReadFaces(&err, id, kCCMIOBoundaryFaces, nullptr, &size, nullptr,
                        kCCMIOStart, kCCMIOEnd);
         faces.resize(size);
-        CCMIOReadFaces(&err, id, kCCMIOBoundaryFaces, &mapID, NULL, &faces[0],
-                       kCCMIOStart, kCCMIOEnd);
-        CCMIOReadFaceCells(&err, id, kCCMIOBoundaryFaces, &faceCells[0],
-                           kCCMIOStart, kCCMIOEnd);
+        CCMIOReadFaces
+        (
+            &err,
+            id,
+            kCCMIOBoundaryFaces,
+            &mapID,
+            nullptr,
+            &faces[0],
+            kCCMIOStart,
+            kCCMIOEnd
+        );
+        CCMIOReadFaceCells
+        (
+            &err,
+            id,
+            kCCMIOBoundaryFaces,
+            &faceCells[0],
+            kCCMIOStart,
+            kCCMIOEnd
+        );
         CCMIOReadMap(&err, mapID, &mapData[0], kCCMIOStart, kCCMIOEnd);
         CheckError(err, "Error reading boundary faces");
 
@@ -532,7 +560,7 @@ void ReadCells
         int prostarI;
         if
         (
-            CCMIOReadOpti(NULL, id, "ProstarRegionNumber", &prostarI)
+            CCMIOReadOpti(nullptr, id, "ProstarRegionNumber", &prostarI)
          == kCCMIONoErr
         )
         {
@@ -563,12 +591,12 @@ void ReadCells
 
         for (unsigned int i = 0; i < nFaces; i++)
         {
-            label foamFaceI = foamPatchStarts[regionI] + i;
+            label foamFacei = foamPatchStarts[regionI] + i;
 
-            foamFaceMap[foamFaceI] = mapData[i];
-            foamOwner[foamFaceI] = faceCells[i];
-            foamNeighbour[foamFaceI] = -1;
-            face& f = foamFaces[foamFaceI];
+            foamFaceMap[foamFacei] = mapData[i];
+            foamOwner[foamFacei] = faceCells[i];
+            foamNeighbour[foamFacei] = -1;
+            face& f = foamFaces[foamFacei];
 
             f.setSize(faces[pos++]);
             forAll(f, fp)
@@ -645,12 +673,12 @@ int main(int argc, char *argv[])
         }
 
         // Open the file.  Because we did not initialize 'err' we need to pass
-        // in NULL (which always means kCCMIONoErr) and then assign the return
-        // value to 'err'.).
+        // in nullptr (which always means kCCMIONoErr) and then assign the
+        // return value to 'err'.).
         CCMIOID root;
         CCMIOError err = CCMIOOpenFile
         (
-            NULL,
+            nullptr,
             ccmFile.c_str(),
             kCCMIORead,
             &root
@@ -665,9 +693,9 @@ int main(int argc, char *argv[])
         CheckError(err, "Error opening state");
 
         unsigned int size;
-        CCMIOEntityDescription(&err, state, &size, NULL);
+        CCMIOEntityDescription(&err, state, &size, nullptr);
         char *desc = new char[size + 1];
-        CCMIOEntityDescription(&err, state, NULL, desc);
+        CCMIOEntityDescription(&err, state, nullptr, desc);
         Pout<< "Reading state '" << kDefaultState << "' (" << desc << ")"
             << endl;
         delete [] desc;
@@ -684,7 +712,7 @@ int main(int argc, char *argv[])
             processor,
             &vertices,
             &topology,
-            NULL,
+            nullptr,
             &solution
         );
 
@@ -698,8 +726,8 @@ int main(int argc, char *argv[])
                 processor,
                 &vertices,
                 &topology,
-                NULL,
-                NULL
+                nullptr,
+                nullptr
             );
             if (err != kCCMIONoErr)
             {
@@ -807,19 +835,19 @@ int main(int argc, char *argv[])
 
     // Renumber vertex labels to Foam point labels
     {
-        label maxCCMPointI = max(foamPointMap);
-        labelList toFoamPoints(invert(maxCCMPointI+1, foamPointMap));
+        label maxCCMPointi = max(foamPointMap);
+        labelList toFoamPoints(invert(maxCCMPointi+1, foamPointMap));
 
-        forAll(foamFaces, faceI)
+        forAll(foamFaces, facei)
         {
-            inplaceRenumber(toFoamPoints, foamFaces[faceI]);
+            inplaceRenumber(toFoamPoints, foamFaces[facei]);
         }
     }
 
     // Renumber cell labels
     {
-        label maxCCMCellI = max(foamCellMap);
-        labelList toFoamCells(invert(maxCCMCellI+1, foamCellMap));
+        label maxCCMCelli = max(foamCellMap);
+        labelList toFoamCells(invert(maxCCMCelli+1, foamCellMap));
 
         inplaceRenumber(toFoamCells, foamOwner);
         inplaceRenumber(toFoamCells, foamNeighbour);
@@ -837,15 +865,15 @@ int main(int argc, char *argv[])
     // Set owner/neighbour so owner < neighbour
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    forAll(foamNeighbour, faceI)
+    forAll(foamNeighbour, facei)
     {
-        label nbr = foamNeighbour[faceI];
-        label own = foamOwner[faceI];
+        label nbr = foamNeighbour[facei];
+        label own = foamOwner[facei];
 
         if (nbr >= foamCellType.size() || own >= foamCellType.size())
         {
             FatalErrorInFunction
-                << "face:" << faceI
+                << "face:" << facei
                 << " nbr:" << nbr
                 << " own:" << own
                 << " nCells:" << foamCellType.size()
@@ -856,15 +884,15 @@ int main(int argc, char *argv[])
         {
             if (nbr < own)
             {
-                foamOwner[faceI] = foamNeighbour[faceI];
-                foamNeighbour[faceI] = own;
-                foamFaces[faceI].flip();
+                foamOwner[facei] = foamNeighbour[facei];
+                foamNeighbour[facei] = own;
+                foamFaces[facei].flip();
             }
         }
 
 
         // And check the face
-        const face& f = foamFaces[faceI];
+        const face& f = foamFaces[facei];
 
         forAll(f, fp)
         {
@@ -903,9 +931,9 @@ int main(int argc, char *argv[])
         );
 
         // Reorder faces accordingly
-        forAll(foamCells, cellI)
+        forAll(foamCells, celli)
         {
-            inplaceRenumber(oldToNew, foamCells[cellI]);
+            inplaceRenumber(oldToNew, foamCells[celli]);
         }
 
         // Reorder faces.
@@ -935,40 +963,40 @@ int main(int argc, char *argv[])
     // Create patches. Use patch types to determine what Foam types to generate.
     List<polyPatch*> newPatches(foamPatchNames.size());
 
-    label meshFaceI = foamPatchStarts[0];
+    label meshFacei = foamPatchStarts[0];
 
-    forAll(newPatches, patchI)
+    forAll(newPatches, patchi)
     {
-        const word& patchName = foamPatchNames[patchI];
-        const word& patchType = foamPatchTypes[patchI];
+        const word& patchName = foamPatchNames[patchi];
+        const word& patchType = foamPatchTypes[patchi];
 
-        Pout<< "Patch:" << patchName << " start at:" << meshFaceI
-            << " size:" << foamPatchSizes[patchI]
-            << " end at:" << meshFaceI+foamPatchSizes[patchI]
+        Pout<< "Patch:" << patchName << " start at:" << meshFacei
+            << " size:" << foamPatchSizes[patchi]
+            << " end at:" << meshFacei+foamPatchSizes[patchi]
             << endl;
 
         if (patchType == "wall")
         {
-            newPatches[patchI] =
+            newPatches[patchi] =
                 new wallPolyPatch
                 (
                     patchName,
-                    foamPatchSizes[patchI],
-                    meshFaceI,
-                    patchI,
+                    foamPatchSizes[patchi],
+                    meshFacei,
+                    patchi,
                     mesh.boundaryMesh(),
                     patchType
                 );
         }
         else if (patchType == "symmetryplane")
         {
-            newPatches[patchI] =
+            newPatches[patchi] =
                 new symmetryPolyPatch
                 (
                     patchName,
-                    foamPatchSizes[patchI],
-                    meshFaceI,
-                    patchI,
+                    foamPatchSizes[patchi],
+                    meshFacei,
+                    patchi,
                     mesh.boundaryMesh(),
                     patchType
                 );
@@ -976,13 +1004,13 @@ int main(int argc, char *argv[])
         else if (patchType == "empty")
         {
             // Note: not ccm name, introduced by us above.
-            newPatches[patchI] =
+            newPatches[patchi] =
                 new emptyPolyPatch
                 (
                     patchName,
-                    foamPatchSizes[patchI],
-                    meshFaceI,
-                    patchI,
+                    foamPatchSizes[patchi],
+                    meshFacei,
+                    patchi,
                     mesh.boundaryMesh(),
                     patchType
                 );
@@ -991,25 +1019,25 @@ int main(int argc, char *argv[])
         {
             // All other ccm types become straight polyPatch:
             // 'inlet', 'outlet', ...
-            newPatches[patchI] =
+            newPatches[patchi] =
                 new polyPatch
                 (
                     patchName,
-                    foamPatchSizes[patchI],
-                    meshFaceI,
-                    patchI,
+                    foamPatchSizes[patchi],
+                    meshFacei,
+                    patchi,
                     mesh.boundaryMesh(),
                     word::null
                 );
         }
 
-        meshFaceI += foamPatchSizes[patchI];
+        meshFacei += foamPatchSizes[patchi];
     }
 
-    if (meshFaceI != foamOwner.size())
+    if (meshFacei != foamOwner.size())
     {
         FatalErrorInFunction
-            << "meshFaceI:" << meshFaceI
+            << "meshFacei:" << meshFacei
             << " nFaces:" << foamOwner.size()
             << abort(FatalError);
     }
@@ -1030,12 +1058,12 @@ int main(int argc, char *argv[])
         // Storage for cell zones.
         List<DynamicList<label>> zoneCells(0);
 
-        forAll(foamCellType, cellI)
+        forAll(foamCellType, celli)
         {
             storeCellInZone
             (
-                cellI,
-                foamCellType[cellI],
+                celli,
+                foamCellType[celli],
                 typeToZone,
                 zoneCells
             );
@@ -1100,9 +1128,9 @@ int main(int argc, char *argv[])
         dimensionedScalar("cellId", dimless, 0.0)
     );
 
-    forAll(foamCellMap, cellI)
+    forAll(foamCellMap, celli)
     {
-        cellIdField[cellI] = foamCellMap[cellI];
+        cellIdField[celli] = foamCellMap[celli];
     }
 
     // Construct field with calculated bc to hold cell type.
@@ -1120,9 +1148,9 @@ int main(int argc, char *argv[])
         dimensionedScalar("cellType", dimless, 0.0)
     );
 
-    forAll(foamCellType, cellI)
+    forAll(foamCellType, celli)
     {
-        cellTypeField[cellI] = foamCellType[cellI];
+        cellTypeField[celli] = foamCellType[celli];
     }
 
     Info<< "Writing cellIds as volScalarField to " << cellIdField.objectPath()

@@ -32,7 +32,6 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// In case of no transform: copy elements
 template<class T>
 void Foam::mapDistribute::applyDummyTransforms(List<T>& field) const
 {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,38 +25,34 @@ Class
     Foam::temperatureCoupledBase
 
 Description
-    Common functions for use in temperature coupled boundaries.
+    Common functions used in temperature coupled boundaries.
 
-    For now only provides the following methods:
+    The thermal conductivity \c kappa may be obtained by the following methods:
+      - 'lookup' : lookup volScalarField (or volSymmTensorField) with name
+        defined by 'kappa'
+      - 'fluidThermo' : use fluidThermo and default
+        compressible::turbulenceModel to calculate kappa
+      - 'solidThermo' : use solidThermo kappa()
+      - 'directionalSolidThermo': uses look up for volSymmTensorField for
+        transformed kappa vector. Field name definable in 'alphaAni',
+        named 'Anialpha' in solid solver by default
 
-    - kappa() : heat conduction at patch. Gets supplied how to lookup/calculate
-      'kappa':
-        - 'lookup' : lookup volScalarField (or volSymmTensorField) with name
-           defined in 'kappaName'
-        - 'fluidThermo' : use fluidThermo and default
-          compressible::turbulenceModel to calculate kappa
-        - 'solidThermo' : use solidThermo kappa()
-        - 'directionalSolidThermo': uses look up for volSymmTensorField for
-          transformed kappa vector. Field name definable in 'alphaAniName',
-          named 'Anialpha' in solid solver by default
+    \par Keywords provided by this class:
+      \table
+        Property     | Description                | Required    | Default value
+        kappaMethod  | Thermal conductivity method        | yes |
+        kappa        | Name of thermal conductivity field | no  | none
+        alphaAni     | Name of the non-isotropic alpha    | no  | Anialpha
+      \endtable
 
-    \heading Keywords provided by this class
-
-    \table
-        Property     | Description             | Required    | Default value
-        kappa        | heat conduction type at patch, as listed above | yes |
-        kappaName    | Name of thermal conductivity field | yes |
-        alphaAniName | name of the non-isotropic alpha | no | 'Anialpha'
-    \endtable
-
-    Usage examples:
+Usage
     \verbatim
     nonIsotropicWall
     {
         ...
-        kappa           directionalSolidThermo;
-        kappaName       none;
-        alphaAniName    Anialpha;
+        kappaMethod     directionalSolidThermo;
+        kappa           none;
+        alphaAni        Anialpha;
         ...
     }
     \endverbatim

@@ -166,8 +166,8 @@ int main(int argc, char *argv[])
             // No flip map.
             forAll(faceLabels, i)
             {
-                label faceI = faceLabels[i];
-                addressing.append(faceI);
+                label facei = faceLabels[i];
+                addressing.append(facei);
                 flipMap.append(false);
             }
         }
@@ -190,24 +190,24 @@ int main(int argc, char *argv[])
 
             forAll(faceLabels, i)
             {
-                label faceI = faceLabels[i];
+                label facei = faceLabels[i];
 
                 bool flip = false;
 
-                if (mesh.isInternalFace(faceI))
+                if (mesh.isInternalFace(facei))
                 {
                     if
                     (
-                        cells.found(mesh.faceOwner()[faceI])
-                    && !cells.found(mesh.faceNeighbour()[faceI])
+                        cells.found(mesh.faceOwner()[facei])
+                    && !cells.found(mesh.faceNeighbour()[facei])
                     )
                     {
                         flip = false;
                     }
                     else if
                     (
-                       !cells.found(mesh.faceOwner()[faceI])
-                     && cells.found(mesh.faceNeighbour()[faceI])
+                       !cells.found(mesh.faceOwner()[facei])
+                     && cells.found(mesh.faceNeighbour()[facei])
                     )
                     {
                         flip = true;
@@ -216,21 +216,21 @@ int main(int argc, char *argv[])
                     {
                         FatalErrorInFunction
                             << "One of owner or neighbour of internal face "
-                            << faceI << " should be in cellSet " << cells.name()
+                            << facei << " should be in cellSet " << cells.name()
                             << " to be able to determine orientation." << endl
-                            << "Face:" << faceI
-                            << " own:" << mesh.faceOwner()[faceI]
+                            << "Face:" << facei
+                            << " own:" << mesh.faceOwner()[facei]
                             << " OwnInCellSet:"
-                            << cells.found(mesh.faceOwner()[faceI])
-                            << " nei:" << mesh.faceNeighbour()[faceI]
+                            << cells.found(mesh.faceOwner()[facei])
+                            << " nei:" << mesh.faceNeighbour()[facei]
                             << " NeiInCellSet:"
-                            << cells.found(mesh.faceNeighbour()[faceI])
+                            << cells.found(mesh.faceNeighbour()[facei])
                             << abort(FatalError);
                     }
                 }
                 else
                 {
-                    if (cells.found(mesh.faceOwner()[faceI]))
+                    if (cells.found(mesh.faceOwner()[facei]))
                     {
                         flip = false;
                     }
@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
                     }
                 }
 
-                addressing.append(faceI);
+                addressing.append(facei);
                 flipMap.append(flip);
             }
         }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -156,7 +156,7 @@ public:
         autoPtr<pyrolysisModel> clone() const
         {
             NotImplemented;
-            return autoPtr<pyrolysisModel>(NULL);
+            return autoPtr<pyrolysisModel>(nullptr);
         }
 
 
@@ -212,8 +212,8 @@ public:
                 //- External hook to add mass to the primary region
                 virtual scalar addMassSources
                 (
-                    const label patchI,
-                    const label faceI
+                    const label patchi,
+                    const label facei
                 );
 
 

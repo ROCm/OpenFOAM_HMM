@@ -21,7 +21,7 @@ minMax
     type            fieldMinMax;
 
     // Where to load it from (if not already in solver)
-    functionObjectLibs ("libfieldFunctionObjects.so");
+    libs               ("libfieldFunctionObjects.so");
 
     // Log to output (default: false)
     log             true;

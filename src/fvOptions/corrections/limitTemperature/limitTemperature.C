@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,8 +56,8 @@ Foam::fv::limitTemperature::limitTemperature
 )
 :
     cellSetOption(name, modelType, dict, mesh),
-    Tmin_(readScalar(coeffs_.lookup("Tmin"))),
-    Tmax_(readScalar(coeffs_.lookup("Tmax")))
+    Tmin_(readScalar(coeffs_.lookup("min"))),
+    Tmax_(readScalar(coeffs_.lookup("max")))
 {
     // Set the field name to that of the energy field from which the temperature
     // is obtained
@@ -73,6 +73,22 @@ Foam::fv::limitTemperature::limitTemperature
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+bool Foam::fv::limitTemperature::read(const dictionary& dict)
+{
+    if (cellSetOption::read(dict))
+    {
+        coeffs_.lookup("min") >> Tmin_;
+        coeffs_.lookup("max") >> Tmax_;
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 void Foam::fv::limitTemperature::correct(volScalarField& he)
 {
     const basicThermo& thermo =
@@ -84,18 +100,18 @@ void Foam::fv::limitTemperature::correct(volScalarField& he)
     scalarField heMin(thermo.he(thermo.p(), Tmin, cells_));
     scalarField heMax(thermo.he(thermo.p(), Tmax, cells_));
 
-    scalarField& hec = he.internalField();
+    scalarField& hec = he.primitiveFieldRef();
 
     forAll(cells_, i)
     {
-        label cellI = cells_[i];
-        hec[cellI]= max(min(hec[cellI], heMax[i]), heMin[i]);
+        label celli = cells_[i];
+        hec[celli]= max(min(hec[celli], heMax[i]), heMin[i]);
     }
 
     // handle boundaries in the case of 'all'
     if (selectionMode_ == smAll)
     {
-        volScalarField::GeometricBoundaryField& bf = he.boundaryField();
+        volScalarField::Boundary& bf = he.boundaryFieldRef();
 
         forAll(bf, patchi)
         {
@@ -118,22 +134,6 @@ void Foam::fv::limitTemperature::correct(volScalarField& he)
                 }
             }
         }
-    }
-}
-
-
-bool Foam::fv::limitTemperature::read(const dictionary& dict)
-{
-    if (cellSetOption::read(dict))
-    {
-        coeffs_.readIfPresent("Tmin", Tmin_);
-        coeffs_.readIfPresent("Tmax", Tmax_);
-
-        return true;
-    }
-    else
-    {
-        return false;
     }
 }
 

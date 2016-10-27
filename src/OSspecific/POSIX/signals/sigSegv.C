@@ -40,7 +40,7 @@ bool Foam::sigSegv::sigActive_ = false;
 void Foam::sigSegv::sigHandler(int)
 {
     // Reset old handling
-    if (sigaction(SIGSEGV, &oldAction_, NULL) < 0)
+    if (sigaction(SIGSEGV, &oldAction_, nullptr) < 0)
     {
         FatalErrorInFunction
             << "Cannot reset SIGSEGV trapping"
@@ -98,7 +98,7 @@ void Foam::sigSegv::unset(const bool)
 {
     if (sigActive_)
     {
-        if (sigaction(SIGSEGV, &oldAction_, NULL) < 0)
+        if (sigaction(SIGSEGV, &oldAction_, nullptr) < 0)
         {
             FatalErrorInFunction
                 << "Cannot set SIGSEGV trapping"

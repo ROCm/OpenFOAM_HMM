@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ void Foam::motionSmootherAlgo::checkConstraints
     }
 
 
-    typename FldType::GeometricBoundaryField& bFld = pf.boundaryField();
+    typename FldType::Boundary& bFld = pf.boundaryFieldRef();
 
 
     // Evaluate in reverse order
@@ -211,16 +211,16 @@ Foam::motionSmootherAlgo::avg
     // Average
     // ~~~~~~~
 
-    forAll(res, pointI)
+    forAll(res, pointi)
     {
-        if (mag(sumWeight[pointI]) < VSMALL)
+        if (mag(sumWeight[pointi]) < VSMALL)
         {
             // Unconnected point. Take over original value
-            res[pointI] = fld[pointI];
+            res[pointi] = fld[pointi];
         }
         else
         {
-            res[pointI] /= sumWeight[pointI];
+            res[pointi] /= sumWeight[pointi];
         }
     }
 
@@ -242,11 +242,11 @@ void Foam::motionSmootherAlgo::smooth
     tmp<pointVectorField> tavgFld = avg(fld, edgeWeight);
     const pointVectorField& avgFld = tavgFld();
 
-    forAll(fld, pointI)
+    forAll(fld, pointi)
     {
-        if (isInternalPoint(pointI))
+        if (isInternalPoint(pointi))
         {
-            newFld[pointI] = 0.5*fld[pointI] + 0.5*avgFld[pointI];
+            newFld[pointi] = 0.5*fld[pointi] + 0.5*avgFld[pointi];
         }
     }
 

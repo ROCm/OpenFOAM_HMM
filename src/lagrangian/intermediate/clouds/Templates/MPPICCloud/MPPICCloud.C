@@ -76,9 +76,9 @@ Foam::MPPICCloud<CloudType>::MPPICCloud
 )
 :
     CloudType(cloudName, rho, U, mu, g, false),
-    packingModel_(NULL),
-    dampingModel_(NULL),
-    isotropyModel_(NULL)
+    packingModel_(nullptr),
+    dampingModel_(nullptr),
+    isotropyModel_(nullptr)
 {
     if (this->solution().active())
     {
@@ -94,6 +94,7 @@ Foam::MPPICCloud<CloudType>::MPPICCloud
         if (readFields)
         {
             parcelType::readFields(*this);
+            this->deleteLostParticles();
         }
     }
 }
@@ -122,9 +123,9 @@ Foam::MPPICCloud<CloudType>::MPPICCloud
 )
 :
     CloudType(mesh, name, c),
-    packingModel_(NULL),
-    dampingModel_(NULL),
-    isotropyModel_(NULL)
+    packingModel_(nullptr),
+    dampingModel_(nullptr),
+    isotropyModel_(nullptr)
 {}
 
 
@@ -263,8 +264,8 @@ void Foam::MPPICCloud<CloudType>::info()
 
     tmp<volScalarField> alpha = this->theta();
 
-    const scalar alphaMin = gMin(alpha().internalField());
-    const scalar alphaMax = gMax(alpha().internalField());
+    const scalar alphaMin = gMin(alpha().primitiveField());
+    const scalar alphaMax = gMax(alpha().primitiveField());
 
     Info<< "    Min cell volume fraction        = " << alphaMin << endl;
     Info<< "    Max cell volume fraction        = " << alphaMax << endl;
@@ -276,13 +277,13 @@ void Foam::MPPICCloud<CloudType>::info()
 
     scalar nMin = GREAT;
 
-    forAll(this->mesh().cells(), cellI)
+    forAll(this->mesh().cells(), celli)
     {
-        const label n = this->cellOccupancy()[cellI].size();
+        const label n = this->cellOccupancy()[celli].size();
 
         if (n > 0)
         {
-            const scalar nPack = n*alphaMax/alpha()[cellI];
+            const scalar nPack = n*alphaMax/alpha()[celli];
 
             if (nPack < nMin)
             {

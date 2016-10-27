@@ -35,8 +35,7 @@ Description
 
     The tangential patch velocity can be optionally specified.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
@@ -45,7 +44,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            pressureInletOutletVelocity;
         phi             phi;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,8 +32,7 @@ Description
     It is a zero-gradient condition that constrains the flux across the patch
     based on the free-stream velocity.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         U            | velocity field name     | no          | U
@@ -43,7 +42,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            freestreamPressure;
     }
@@ -52,7 +51,7 @@ Description
 Note
     This condition is designed to operate with a freestream velocity condition
 
-SeeAlso
+See also
     Foam::zeroGradientFvPatchField
     Foam::freestreamFvPatchField
 

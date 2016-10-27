@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,8 +61,11 @@ protected:
         //- Reference to ODESystem
         const ODESystem& odes_;
 
-        //- Size of the ODESystem
-        label n_;
+        //- Maximum size of the ODESystem
+        const label maxN_;
+
+        //- Size of the ODESystem (adjustable)
+        mutable label n_;
 
         //- Absolute convergence tolerance per step
         scalarField absTol_;
@@ -92,6 +95,8 @@ protected:
 
 
 public:
+
+    friend class ODESystem;
 
     //- Runtime type information
     TypeName("ODESolver");
@@ -164,15 +169,25 @@ public:
 
     // Member Functions
 
-        scalarField& absTol()
-        {
-            return absTol_;
-        }
+        //- Return the number of equations to solve
+        inline label nEqns() const;
 
-        scalarField& relTol()
-        {
-            return relTol_;
-        }
+        //- Return access to the absolute tolerance field
+        inline scalarField& absTol();
+
+        //- Return access to the relative tolerance field
+        inline scalarField& relTol();
+
+        //- Resize the ODE solver
+        virtual bool resize() = 0;
+
+        template<class Type>
+        static inline void resizeField(UList<Type>& f, const label n);
+
+        template<class Type>
+        inline void resizeField(UList<Type>& f) const;
+
+        inline void resizeMatrix(scalarSquareMatrix& m) const;
 
         //- Solve the ODE system as far as possible upto dxTry
         //  adjusting the step as necessary to provide a solution within
@@ -183,12 +198,7 @@ public:
             scalar& x,
             scalarField& y,
             scalar& dxTry
-        ) const //= 0;
-        {
-            stepState step(dxTry);
-            solve(x, y, step);
-            dxTry = step.dxTry;
-        }
+        ) const;
 
         //- Solve the ODE system as far as possible upto dxTry
         //  adjusting the step as necessary to provide a solution within
@@ -216,6 +226,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "ODESolverI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

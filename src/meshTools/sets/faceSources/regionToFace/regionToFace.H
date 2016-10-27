@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,8 +70,8 @@ class regionToFace
         void markZone
         (
             const indirectPrimitivePatch& patch,
-            const label procI,
-            const label faceI,
+            const label proci,
+            const label facei,
             const label zoneI,
             labelList& faceZone
         ) const;

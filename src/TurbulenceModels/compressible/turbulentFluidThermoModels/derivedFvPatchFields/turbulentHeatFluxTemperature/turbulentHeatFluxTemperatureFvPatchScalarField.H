@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,24 +22,26 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::turbulentHeatFluxTemperatureFvPatchScalarField
+    Foam::compressible::turbulentHeatFluxTemperatureFvPatchScalarField
 
 Description
     Fixed heat boundary condition to specify temperature gradient. Input
     heat source either specified in terms of an absolute power [W], or as a
     flux [W/m^2].
 
-    \heading Patch usage
+    The thermal conductivity \c kappa can either be retrieved from various
+    possible sources, as detailed in the class temperatureCoupledBase.
 
+Usage
     \table
         Property     | Description             | Required    | Default value
         heatSource   | 'power' [W] or 'flux' [W/m^2] | yes |
         q            | heat power or flux field      | yes |
-        kappa        | inherited from temperatureCoupledBase | yes |
-        kappaName    | inherited from temperatureCoupledBase | yes |
         Qr           | name of the radiative flux field | yes |
         value        | initial temperature value | no | calculated
         gradient     | initial gradient value | no | 0.0
+        kappaMethod  | inherited from temperatureCoupledBase | inherited |
+        kappa        | inherited from temperatureCoupledBase | inherited |
     \endtable
 
     Note: If needed, both 'value' and 'gradient' must be defined to be used.
@@ -51,14 +53,13 @@ Description
         type            compressible::turbulentHeatFluxTemperature;
         heatSource      flux;
         q               uniform 10;
-        kappa           fluidThermo;
-        kappaName       none;
+        kappaMethod     fluidThermo;
+        kappa           none;
         Qr              none;
     }
     \endverbatim
 
-
-SeeAlso
+See also
     Foam::temperatureCoupledBase
 
 SourceFiles

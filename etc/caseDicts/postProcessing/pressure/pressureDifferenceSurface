@@ -1,26 +1,19 @@
 /*--------------------------------*- C++ -*----------------------------------*\
-| =========                 |                                                 |
-| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 |  \\    /   O peration     | Version:  plus                                  |  
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
-|    \\/     M anipulation  |                                                 |
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+Description
+    Interpolates pressures onto 2 specified triangulated surfaces and
+    calculates the difference between the average pressures.
+
 \*---------------------------------------------------------------------------*/
-FoamFile
-{
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    object      pressureDifferenceSurface;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-pressureDifferenceSurface
-{
-    triSurface1 <triSurface1>;
-    triSurface2 <triSurface2>;
+triSurface1 <triSurface1>;
+triSurface2 <triSurface2>;
 
-    #includeEtc
-    "caseDicts/postProcessing/pressure/pressureDifferenceSurface.cfg"
-}
+#includeEtc "caseDicts/postProcessing/pressure/pressureDifferenceSurface.cfg"
 
 // ************************************************************************* //

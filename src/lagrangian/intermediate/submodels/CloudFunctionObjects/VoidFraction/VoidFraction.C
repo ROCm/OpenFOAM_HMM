@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,7 @@ Foam::VoidFraction<CloudType>::VoidFraction
 )
 :
     CloudFunctionObject<CloudType>(dict, owner, modelName, typeName),
-    thetaPtr_(NULL)
+    thetaPtr_(nullptr)
 {}
 
 
@@ -64,7 +64,7 @@ Foam::VoidFraction<CloudType>::VoidFraction
 )
 :
     CloudFunctionObject<CloudType>(vf),
-    thetaPtr_(NULL)
+    thetaPtr_(nullptr)
 {}
 
 
@@ -82,7 +82,7 @@ void Foam::VoidFraction<CloudType>::preEvolve()
 {
     if (thetaPtr_.valid())
     {
-        thetaPtr_->internalField() = 0.0;
+        thetaPtr_->primitiveFieldRef() = 0.0;
     }
     else
     {
@@ -115,7 +115,7 @@ void Foam::VoidFraction<CloudType>::postEvolve()
 
     const fvMesh& mesh = this->owner().mesh();
 
-    theta.internalField() /= mesh.time().deltaTValue()*mesh.V();
+    theta.primitiveFieldRef() /= mesh.time().deltaTValue()*mesh.V();
 
     CloudFunctionObject<CloudType>::postEvolve();
 }
@@ -125,7 +125,7 @@ template<class CloudType>
 void Foam::VoidFraction<CloudType>::postMove
 (
     parcelType& p,
-    const label cellI,
+    const label celli,
     const scalar dt,
     const point&,
     bool&
@@ -133,7 +133,7 @@ void Foam::VoidFraction<CloudType>::postMove
 {
     volScalarField& theta = thetaPtr_();
 
-    theta[cellI] += dt*p.nParticle()*p.volume();
+    theta[celli] += dt*p.nParticle()*p.volume();
 }
 
 

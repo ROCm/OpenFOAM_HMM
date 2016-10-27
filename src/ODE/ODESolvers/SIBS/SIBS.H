@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,12 +28,16 @@ Group
     grpODESolvers
 
 Description
-    Foam::SIBS
+    A semi-implicit mid-point solver for stiff systems of ordinary differential
+    equations.
 
-    Bader, G. and Deuflhard, P.
-    "A Semi-Implicit Mid-Point Rule for
-     Stiff Systems of Ordinary Differential Equations."
-     Numer. Math. 41, 373-398, 1983.
+    Reference:
+    \verbatim
+        Bader, G., & Deuflhard, P. (1983).
+        A semi-implicit mid-point rule for stiff systems
+        of ordinary differential equations.
+        Numerische Mathematik, 41(3), 373-398.
+    \endverbatim
 
 SourceFiles
     SIMPR.C
@@ -117,13 +121,21 @@ public:
 
     // Constructors
 
-        //- Construct from ODE
+        //- Construct from ODE system
         SIBS(const ODESystem& ode, const dictionary& dict);
+
+
+    //- Destructor
+    virtual ~SIBS()
+    {}
 
 
     // Member Functions
 
-        void solve
+        //- Resize the ODE solver
+        virtual bool resize();
+
+        virtual void solve
         (
             scalar& x,
             scalarField& y,

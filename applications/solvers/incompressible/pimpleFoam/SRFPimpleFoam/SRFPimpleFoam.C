@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,8 +28,8 @@ Group
     grpIncompressibleSolvers
 
 Description
-    Large time-step transient solver for incompressible, flow in a single
-    rotating frame using the PIMPLE (merged PISO-SIMPLE) algorithm.
+    Large time-step transient solver for incompressible, turbulent flow in a
+    single rotating frame.
 
     Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
 
@@ -46,12 +46,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "postProcess.H"
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-
-    pimpleControl pimple(mesh);
-
+    #include "createControl.H"
     #include "createTimeControls.H"
     #include "createFields.H"
     #include "createFvOptions.H"

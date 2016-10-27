@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,19 +34,25 @@ License
 template<class T>
 void Foam::UList<T>::writeEntry(Ostream& os) const
 {
-    if
-    (
-        size()
-     && token::compound::isCompound
-        (
-            "List<" + word(pTraits<T>::typeName) + '>'
-        )
-    )
+    if (size())
     {
-        os  << word("List<" + word(pTraits<T>::typeName) + '>') << " ";
+        const word tag = "List<" + word(pTraits<T>::typeName) + '>';
+        if (token::compound::isCompound(tag))
+        {
+            os  << tag << ' ';
+        }
+        os << *this;
     }
-
-    os << *this;
+    else if (os.format() == IOstream::ASCII)
+    {
+        // Zero-sized ASCII - Write size and delimiters
+        os  << 0 << token::BEGIN_LIST << token::END_LIST;
+    }
+    else
+    {
+        // Zero-sized binary - Write size only
+        os  << 0;
+    }
 }
 
 
@@ -65,12 +71,10 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII || !contiguous<T>())
     {
-        bool uniform = false;
-
-        if (L.size() > 1 && contiguous<T>())
+        // Can the contents be considered 'uniform' (ie, identical)?
+        bool uniform = (L.size() > 1 && contiguous<T>());
+        if (uniform)
         {
-            uniform = true;
-
             forAll(L, i)
             {
                 if (L[i] != L[0])
@@ -100,7 +104,7 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
             // Write contents
             forAll(L, i)
             {
-                if (i > 0) os << token::SPACE;
+                if (i) os << token::SPACE;
                 os << L[i];
             }
 
@@ -124,10 +128,13 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
     }
     else
     {
+        // Contents are binary and contiguous
         os << nl << L.size() << nl;
+
         if (L.size())
         {
-            os.write(reinterpret_cast<const char*>(L.v_), L.byteSize());
+            // write(...) includes surrounding start/end delimiters
+            os.write(reinterpret_cast<const char*>(L.cdata()), L.byteSize());
         }
     }
 
@@ -208,6 +215,8 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& L)
                 }
                 else
                 {
+                    // uniform content (delimiter == token::BEGIN_BLOCK)
+
                     T element;
                     is >> element;
 
@@ -229,6 +238,8 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& L)
         }
         else
         {
+            // contents are binary and contiguous
+
             if (s)
             {
                 is.read(reinterpret_cast<char*>(L.data()), s*sizeof(T));

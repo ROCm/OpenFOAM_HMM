@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,22 +45,22 @@ void writeFluentField
     Ostream& stream
 )
 {
-    const scalarField& phiInternal = phi.internalField();
+    const scalarField& phiInternal = phi;
 
     // Writing cells
     stream
         << "(300 ("
         << fluentFieldIdentifier << " "  // Field identifier
         << "1 "                  // Zone ID: (cells=1, internal faces=2,
-                                 // patch faces=patchI+10)
+                                 // patch faces=patchi+10)
         << "1 "                  // Number of components (scalar=1, vector=3)
         << "0 0 "                // Unused
         << "1 " << phiInternal.size() // Start and end of list
         << ")(" << endl;
 
-    forAll(phiInternal, cellI)
+    forAll(phiInternal, celli)
     {
-        stream << phiInternal[cellI] << endl;
+        stream << phiInternal[celli] << endl;
     }
 
     stream
@@ -69,23 +69,23 @@ void writeFluentField
     label nWrittenFaces = phiInternal.size();
 
     // Writing boundary faces
-    forAll(phi.boundaryField(), patchI)
+    forAll(phi.boundaryField(), patchi)
     {
-        if (isType<emptyFvPatchScalarField>(phi.boundaryField()[patchI]))
+        if (isType<emptyFvPatchScalarField>(phi.boundaryField()[patchi]))
         {
             // Form empty patch field repeat the internal field to
             // allow for the node interpolation in Fluent
-            const scalarField& phiInternal = phi.internalField();
+            const scalarField& phiInternal = phi;
 
             // Get reference to internal cells
             const labelList emptyFaceCells =
-                phi.boundaryField()[patchI].patch().patch().faceCells();
+                phi.boundaryField()[patchi].patch().patch().faceCells();
 
             // Writing cells for empty patch
             stream
                 << "(300 ("
                 << fluentFieldIdentifier << " "  // Field identifier
-                << patchI + 10 << " "            // Zone ID: patchI+10
+                << patchi + 10 << " "            // Zone ID: patchi+10
                 << "1 "             // Number of components (scalar=1, vector=3)
                 << "0 0 "                // Unused
                 << nWrittenFaces + 1 << " "
@@ -94,9 +94,9 @@ void writeFluentField
 
             nWrittenFaces += emptyFaceCells.size();
 
-            forAll(emptyFaceCells, faceI)
+            forAll(emptyFaceCells, facei)
             {
-                stream << phiInternal[emptyFaceCells[faceI]] << endl;
+                stream << phiInternal[emptyFaceCells[facei]] << endl;
             }
 
             stream
@@ -107,13 +107,13 @@ void writeFluentField
             // Regular patch
             label nWrittenFaces = phiInternal.size();
 
-            const scalarField& patchPhi = phi.boundaryField()[patchI];
+            const scalarField& patchPhi = phi.boundaryField()[patchi];
 
             // Write header
             stream
                 << "(300 ("
                 << fluentFieldIdentifier << " "  // Field identifier
-                << patchI + 10 << " "            // Zone ID: patchI+10
+                << patchi + 10 << " "            // Zone ID: patchi+10
                 << "1 "          // Number of components (scalar=1, vector=3)
                 << "0 0 "            // Unused
                 << nWrittenFaces + 1 << " " << nWrittenFaces + patchPhi.size()
@@ -122,9 +122,9 @@ void writeFluentField
 
             nWrittenFaces += patchPhi.size();
 
-            forAll(patchPhi, faceI)
+            forAll(patchPhi, facei)
             {
-                stream << patchPhi[faceI] << endl;
+                stream << patchPhi[facei] << endl;
             }
 
             stream

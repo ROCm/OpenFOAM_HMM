@@ -44,6 +44,38 @@ Foam::cyclicACMIFvPatchField<Type>::cyclicACMIFvPatchField
 template<class Type>
 Foam::cyclicACMIFvPatchField<Type>::cyclicACMIFvPatchField
 (
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
+    const dictionary& dict
+)
+:
+    cyclicACMILduInterfaceField(),
+    coupledFvPatchField<Type>(p, iF, dict, dict.found("value")),
+    cyclicACMIPatch_(refCast<const cyclicACMIFvPatch>(p))
+{
+    if (!isA<cyclicACMIFvPatch>(p))
+    {
+        FatalIOErrorInFunction
+        (
+            dict
+        )   << "    patch type '" << p.type()
+            << "' not constraint type '" << typeName << "'"
+            << "\n    for patch " << p.name()
+            << " of field " << this->internalField().name()
+            << " in file " << this->internalField().objectPath()
+            << exit(FatalIOError);
+    }
+
+    if (!dict.found("value") && this->coupled())
+    {
+        this->evaluate(Pstream::blocking);
+    }
+}
+
+
+template<class Type>
+Foam::cyclicACMIFvPatchField<Type>::cyclicACMIFvPatchField
+(
     const cyclicACMIFvPatchField<Type>& ptf,
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -59,43 +91,12 @@ Foam::cyclicACMIFvPatchField<Type>::cyclicACMIFvPatchField
         FatalErrorInFunction
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
-            << " of field " << this->dimensionedInternalField().name()
-            << " in file " << this->dimensionedInternalField().objectPath()
+            << " of field " << this->internalField().name()
+            << " in file " << this->internalField().objectPath()
             << exit(FatalIOError);
     }
 }
 
-
-template<class Type>
-Foam::cyclicACMIFvPatchField<Type>::cyclicACMIFvPatchField
-(
-    const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF,
-    const dictionary& dict
-)
-:
-    cyclicACMILduInterfaceField(),
-    coupledFvPatchField<Type>(p, iF, dict),
-    cyclicACMIPatch_(refCast<const cyclicACMIFvPatch>(p))
-{
-    if (!isA<cyclicACMIFvPatch>(p))
-    {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "    patch type '" << p.type()
-            << "' not constraint type '" << typeName << "'"
-            << "\n    for patch " << p.name()
-            << " of field " << this->dimensionedInternalField().name()
-            << " in file " << this->dimensionedInternalField().objectPath()
-            << exit(FatalIOError);
-    }
-
-    if (!dict.found("value") && this->coupled())
-    {
-        this->evaluate(Pstream::blocking);
-    }
-}
 
 
 template<class Type>
@@ -136,7 +137,7 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::cyclicACMIFvPatchField<Type>::patchNeighbourField() const
 {
-    const Field<Type>& iField = this->internalField();
+    const Field<Type>& iField = this->primitiveField();
     const cyclicACMIPolyPatch& cpp = cyclicACMIPatch_.cyclicACMIPatch();
     tmp<Field<Type>> tpnf
     (
@@ -166,7 +167,7 @@ Foam::cyclicACMIFvPatchField<Type>::neighbourPatchField() const
     const GeometricField<Type, fvPatchField, volMesh>& fld =
         static_cast<const GeometricField<Type, fvPatchField, volMesh>&>
         (
-            this->internalField()
+            this->primitiveField()
         );
 
     return refCast<const cyclicACMIFvPatchField<Type>>
@@ -183,7 +184,7 @@ Foam::cyclicACMIFvPatchField<Type>::nonOverlapPatchField() const
     const GeometricField<Type, fvPatchField, volMesh>& fld =
         static_cast<const GeometricField<Type, fvPatchField, volMesh>&>
         (
-            this->internalField()
+            this->primitiveField()
         );
 
     return fld.boundaryField()[cyclicACMIPatch_.nonOverlapPatchID()];
@@ -281,7 +282,7 @@ void Foam::cyclicACMIFvPatchField<Type>::updateCoeffs()
 
     const scalarField& mask = cyclicACMIPatch_.cyclicACMIPatch().mask();
     const fvPatchField<Type>& npf = nonOverlapPatchField();
-    const_cast<fvPatchField<Type>&>(npf).updateCoeffs(1.0 - mask);
+    const_cast<fvPatchField<Type>&>(npf).updateWeightedCoeffs(1.0 - mask);
 }
 
 

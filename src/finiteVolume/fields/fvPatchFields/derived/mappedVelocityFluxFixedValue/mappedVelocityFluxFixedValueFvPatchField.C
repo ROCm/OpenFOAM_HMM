@@ -63,8 +63,8 @@ mappedVelocityFluxFixedValueFvPatchField
             << "Patch type '" << p.type()
             << "' not type '" << mappedPatchBase::typeName << "'"
             << " for patch " << p.name()
-            << " of field " << dimensionedInternalField().name()
-            << " in file " << dimensionedInternalField().objectPath()
+            << " of field " << internalField().name()
+            << " in file " << internalField().objectPath()
             << exit(FatalError);
     }
 }
@@ -87,8 +87,8 @@ mappedVelocityFluxFixedValueFvPatchField
             << "Patch type '" << p.type()
             << "' not type '" << mappedPatchBase::typeName << "'"
             << " for patch " << p.name()
-            << " of field " << dimensionedInternalField().name()
-            << " in file " << dimensionedInternalField().objectPath()
+            << " of field " << internalField().name()
+            << " in file " << internalField().objectPath()
             << exit(FatalError);
     }
 
@@ -102,8 +102,8 @@ mappedVelocityFluxFixedValueFvPatchField
             << "Patch " << p.name()
             << " of type '" << p.type()
             << "' can not be used in 'nearestCell' mode"
-            << " of field " << dimensionedInternalField().name()
-            << " in file " << dimensionedInternalField().objectPath()
+            << " of field " << internalField().name()
+            << " in file " << internalField().objectPath()
             << exit(FatalError);
     }
 }
@@ -152,14 +152,12 @@ void Foam::mappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
         mappedVelocityFluxFixedValueFvPatchField::patch().patch()
     );
     const fvMesh& nbrMesh = refCast<const fvMesh>(mpp.sampleMesh());
-    const word& fieldName = dimensionedInternalField().name();
+    const word& fieldName = internalField().name();
     const volVectorField& UField =
         nbrMesh.lookupObject<volVectorField>(fieldName);
 
-    surfaceScalarField& phiField = const_cast<surfaceScalarField&>
-    (
-        nbrMesh.lookupObject<surfaceScalarField>(phiName_)
-    );
+    const surfaceScalarField& phiField =
+        nbrMesh.lookupObject<surfaceScalarField>(phiName_);
 
     vectorField newUValues;
     scalarField newPhiValues;
@@ -171,17 +169,17 @@ void Foam::mappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
             vectorField allUValues(nbrMesh.nFaces(), Zero);
             scalarField allPhiValues(nbrMesh.nFaces(), 0.0);
 
-            forAll(UField.boundaryField(), patchI)
+            forAll(UField.boundaryField(), patchi)
             {
-                const fvPatchVectorField& Upf = UField.boundaryField()[patchI];
-                const scalarField& phipf = phiField.boundaryField()[patchI];
+                const fvPatchVectorField& Upf = UField.boundaryField()[patchi];
+                const scalarField& phipf = phiField.boundaryField()[patchi];
 
                 label faceStart = Upf.patch().start();
 
-                forAll(Upf, faceI)
+                forAll(Upf, facei)
                 {
-                    allUValues[faceStart + faceI] = Upf[faceI];
-                    allPhiValues[faceStart + faceI] = phipf[faceI];
+                    allUValues[faceStart + facei] = Upf[facei];
+                    allPhiValues[faceStart + facei] = phipf[facei];
                 }
             }
 
@@ -217,7 +215,10 @@ void Foam::mappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
     }
 
     operator==(newUValues);
-    phiField.boundaryField()[patch().index()] == newPhiValues;
+    const_cast<surfaceScalarField&>
+    (
+        phiField
+    ).boundaryFieldRef()[patch().index()] == newPhiValues;
 
     // Restore tag
     UPstream::msgType() = oldTag;

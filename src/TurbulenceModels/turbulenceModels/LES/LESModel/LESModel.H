@@ -78,7 +78,10 @@ protected:
         //- Lower limit of k
         dimensionedScalar kMin_;
 
-        //- Lower limit of omega
+        //- Lower limit of epsilon
+        dimensionedScalar epsilonMin_;
+
+        //- Lower limit for omega
         dimensionedScalar omegaMin_;
 
         //- Run-time selectable delta model

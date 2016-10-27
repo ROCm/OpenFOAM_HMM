@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,8 +69,8 @@ void Foam::channelIndex::walkOppositeFaces
     DynamicList<label> frontFaces(startFaces);
     forAll(frontFaces, i)
     {
-        label faceI = frontFaces[i];
-        blockedFace[faceI] = true;
+        label facei = frontFaces[i];
+        blockedFace[facei] = true;
     }
 
     while (returnReduce(frontFaces.size(), sumOp<label>()) > 0)
@@ -79,11 +79,11 @@ void Foam::channelIndex::walkOppositeFaces
         boolList isFrontBndFace(nBnd, false);
         forAll(frontFaces, i)
         {
-            label faceI = frontFaces[i];
+            label facei = frontFaces[i];
 
-            if (!mesh.isInternalFace(faceI))
+            if (!mesh.isInternalFace(facei))
             {
-                isFrontBndFace[faceI-mesh.nInternalFaces()] = true;
+                isFrontBndFace[facei-mesh.nInternalFaces()] = true;
             }
         }
         syncTools::swapBoundaryFaceList(mesh, isFrontBndFace);
@@ -91,11 +91,11 @@ void Foam::channelIndex::walkOppositeFaces
         // Add
         forAll(isFrontBndFace, i)
         {
-            label faceI = mesh.nInternalFaces()+i;
-            if (isFrontBndFace[i] && !blockedFace[faceI])
+            label facei = mesh.nInternalFaces()+i;
+            if (isFrontBndFace[i] && !blockedFace[facei])
             {
-                blockedFace[faceI] = true;
-                frontFaces.append(faceI);
+                blockedFace[facei] = true;
+                frontFaces.append(facei);
             }
         }
 
@@ -104,47 +104,47 @@ void Foam::channelIndex::walkOppositeFaces
 
         forAll(frontFaces, i)
         {
-            label faceI = frontFaces[i];
+            label facei = frontFaces[i];
 
             {
-                const cell& ownCell = cells[mesh.faceOwner()[faceI]];
+                const cell& ownCell = cells[mesh.faceOwner()[facei]];
 
-                label oppositeFaceI = ownCell.opposingFaceLabel(faceI, faces);
+                label oppositeFacei = ownCell.opposingFaceLabel(facei, faces);
 
-                if (oppositeFaceI == -1)
+                if (oppositeFacei == -1)
                 {
                     FatalErrorInFunction
-                        << "Face:" << faceI << " owner cell:" << ownCell
+                        << "Face:" << facei << " owner cell:" << ownCell
                         << " is not a hex?" << abort(FatalError);
                 }
                 else
                 {
-                    if (!blockedFace[oppositeFaceI])
+                    if (!blockedFace[oppositeFacei])
                     {
-                        blockedFace[oppositeFaceI] = true;
-                        newFrontFaces.append(oppositeFaceI);
+                        blockedFace[oppositeFacei] = true;
+                        newFrontFaces.append(oppositeFacei);
                     }
                 }
             }
 
-            if (mesh.isInternalFace(faceI))
+            if (mesh.isInternalFace(facei))
             {
-                const cell& neiCell = mesh.cells()[mesh.faceNeighbour()[faceI]];
+                const cell& neiCell = mesh.cells()[mesh.faceNeighbour()[facei]];
 
-                label oppositeFaceI = neiCell.opposingFaceLabel(faceI, faces);
+                label oppositeFacei = neiCell.opposingFaceLabel(facei, faces);
 
-                if (oppositeFaceI == -1)
+                if (oppositeFacei == -1)
                 {
                     FatalErrorInFunction
-                        << "Face:" << faceI << " neighbour cell:" << neiCell
+                        << "Face:" << facei << " neighbour cell:" << neiCell
                         << " is not a hex?" << abort(FatalError);
                 }
                 else
                 {
-                    if (!blockedFace[oppositeFaceI])
+                    if (!blockedFace[oppositeFacei])
                     {
-                        blockedFace[oppositeFaceI] = true;
-                        newFrontFaces.append(oppositeFaceI);
+                        blockedFace[oppositeFacei] = true;
+                        newFrontFaces.append(oppositeFacei);
                     }
                 }
             }
@@ -175,11 +175,11 @@ void Foam::channelIndex::calcLayeredRegions
     {
         OFstream str(mesh.time().path()/"blockedFaces.obj");
         label vertI = 0;
-        forAll(blockedFace, faceI)
+        forAll(blockedFace, facei)
         {
-            if (blockedFace[faceI])
+            if (blockedFace[facei])
             {
-                const face& f = mesh.faces()[faceI];
+                const face& f = mesh.faces()[facei];
                 forAll(f, fp)
                 {
                     meshTools::writeOBJ(str, mesh.points()[f[fp]]);
@@ -243,9 +243,9 @@ Foam::channelIndex::channelIndex
 
     forAll(patchNames, i)
     {
-        const label patchI = patches.findPatchID(patchNames[i]);
+        const label patchi = patches.findPatchID(patchNames[i]);
 
-        if (patchI == -1)
+        if (patchi == -1)
         {
             FatalErrorInFunction
                 << "Illegal patch " << patchNames[i]
@@ -253,7 +253,7 @@ Foam::channelIndex::channelIndex
                 << exit(FatalError);
         }
 
-        nFaces += patches[patchI].size();
+        nFaces += patches[patchi].size();
     }
 
     labelList startFaces(nFaces);

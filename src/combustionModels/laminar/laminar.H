@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef laminar_H
-#define laminar_H
+#ifndef combustionModels_laminar_H
+#define combustionModels_laminar_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

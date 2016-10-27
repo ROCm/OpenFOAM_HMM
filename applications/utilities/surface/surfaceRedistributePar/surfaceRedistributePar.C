@@ -76,11 +76,11 @@ void writeProcStats
     Pstream::gatherList(nFaces);
     Pstream::scatterList(nFaces);
 
-    forAll(surfBb, procI)
+    forAll(surfBb, proci)
     {
-        Info<< "processor" << procI << nl;
+        Info<< "processor" << proci << nl;
 
-        const List<treeBoundBox>& bbs = meshBb[procI];
+        const List<treeBoundBox>& bbs = meshBb[proci];
         if (bbs.size())
         {
             Info<< "\tMesh bounds          : " << bbs[0] << nl;
@@ -89,9 +89,9 @@ void writeProcStats
                 Info<< "\t                       " << bbs[i]<< nl;
             }
         }
-        Info<< "\tSurface bounding box : " << surfBb[procI] << nl
-            << "\tTriangles            : " << nFaces[procI] << nl
-            << "\tVertices             : " << nPoints[procI]
+        Info<< "\tSurface bounding box : " << surfBb[proci] << nl
+            << "\tTriangles            : " << nFaces[proci] << nl
+            << "\tVertices             : " << nPoints[proci]
             << endl;
     }
     Info<< endl;

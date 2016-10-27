@@ -28,7 +28,9 @@ Group
     grpBasicSolvers
 
 Description
-    Potential flow solver.
+    Potential flow solver which solves for the velocity potential, to
+    calculate the flux-field, from which the velocity field is obtained by
+    reconstructing the flux.
 
     \heading Solver details
     The potential flow solution is typically employed to generate initial fields
@@ -130,7 +132,6 @@ int main(int argc, char *argv[])
     pisoControl potentialFlow(mesh, "potentialFlow");
 
     #include "createFields.H"
-    #include "createMRF.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

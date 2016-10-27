@@ -51,6 +51,14 @@ namespace Foam
 class Time;
 class IFstream;
 
+
+// Forward declaration of friend functions and operators
+
+class triSurface;
+
+Ostream& operator<<(Ostream&, const triSurface&);
+
+
 /*---------------------------------------------------------------------------*\
                            Class triSurface Declaration
 \*---------------------------------------------------------------------------*/
@@ -345,12 +353,12 @@ public:
             void cleanup(const bool verbose);
 
             //- Fill faceZone with currentZone for every face reachable
-            //  from faceI without crossing edge marked in borderEdge.
+            //  from facei without crossing edge marked in borderEdge.
             //  Note: faceZone has to be sized nFaces before calling this fun.
             void markZone
             (
                 const boolList& borderEdge,
-                const label faceI,
+                const label facei,
                 const label currentZone,
                 labelList& faceZone
             ) const;

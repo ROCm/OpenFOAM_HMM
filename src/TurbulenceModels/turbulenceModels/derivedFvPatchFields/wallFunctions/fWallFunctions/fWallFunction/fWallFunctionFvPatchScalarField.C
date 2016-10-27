@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -178,7 +178,7 @@ void fWallFunctionFvPatchScalarField::updateCoeffs()
         IOobject::groupName
         (
             turbulenceModel::propertiesName,
-            dimensionedInternalField().group()
+            internalField().group()
         )
     );
     const v2fBase& v2fModel = refCast<const v2fBase>(turbModel);
@@ -202,27 +202,27 @@ void fWallFunctionFvPatchScalarField::updateCoeffs()
     scalarField& f = *this;
 
     // Set f wall values
-    forAll(f, faceI)
+    forAll(f, facei)
     {
-        label faceCellI = patch().faceCells()[faceI];
+        label celli = patch().faceCells()[facei];
 
-        scalar uTau = Cmu25*sqrt(k[faceCellI]);
+        scalar uTau = Cmu25*sqrt(k[celli]);
 
-        scalar yPlus = uTau*y[faceI]/nuw[faceI];
+        scalar yPlus = uTau*y[facei]/nuw[facei];
 
         if (yPlus > yPlusLam_)
         {
             scalar N = 6.0;
-            scalar v2c = v2[faceCellI];
-            scalar epsc = epsilon[faceCellI];
-            scalar kc = k[faceCellI];
+            scalar v2c = v2[celli];
+            scalar epsc = epsilon[celli];
+            scalar kc = k[celli];
 
-            f[faceI] = N*v2c*epsc/(sqr(kc) + ROOTVSMALL);
-            f[faceI] /= sqr(uTau) + ROOTVSMALL;
+            f[facei] = N*v2c*epsc/(sqr(kc) + ROOTVSMALL);
+            f[facei] /= sqr(uTau) + ROOTVSMALL;
         }
         else
         {
-            f[faceI] = 0.0;
+            f[facei] = 0.0;
         }
     }
 

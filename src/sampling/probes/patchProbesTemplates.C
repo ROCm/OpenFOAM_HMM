@@ -47,9 +47,9 @@ void Foam::patchProbes::sampleAndWrite
             << setw(w)
             << vField.time().timeToUserTime(vField.time().value());
 
-        forAll(values, probeI)
+        forAll(values, probei)
         {
-            probeStream << ' ' << setw(w) << values[probeI];
+            probeStream << ' ' << setw(w) << values[probei];
         }
         probeStream << endl;
     }
@@ -73,9 +73,9 @@ void Foam::patchProbes::sampleAndWrite
             << setw(w)
             << sField.time().timeToUserTime(sField.time().value());
 
-        forAll(values, probeI)
+        forAll(values, probei)
         {
-            probeStream << ' ' << setw(w) << values[probeI];
+            probeStream << ' ' << setw(w) << values[probei];
         }
         probeStream << endl;
     }
@@ -88,7 +88,7 @@ void Foam::patchProbes::sampleAndWrite
     const fieldGroup<Type>& fields
 )
 {
-    forAll(fields, fieldI)
+    forAll(fields, fieldi)
     {
         if (loadFromFiles_)
         {
@@ -98,7 +98,7 @@ void Foam::patchProbes::sampleAndWrite
                 (
                     IOobject
                     (
-                        fields[fieldI],
+                        fields[fieldi],
                         mesh_.time().timeName(),
                         mesh_,
                         IOobject::MUST_READ,
@@ -111,7 +111,7 @@ void Foam::patchProbes::sampleAndWrite
         }
         else
         {
-            objectRegistry::const_iterator iter = mesh_.find(fields[fieldI]);
+            objectRegistry::const_iterator iter = mesh_.find(fields[fieldi]);
 
             if
             (
@@ -125,7 +125,7 @@ void Foam::patchProbes::sampleAndWrite
                     mesh_.lookupObject
                     <GeometricField<Type, fvPatchField, volMesh>>
                     (
-                        fields[fieldI]
+                        fields[fieldi]
                     )
                 );
             }
@@ -140,7 +140,7 @@ void Foam::patchProbes::sampleAndWriteSurfaceFields
     const fieldGroup<Type>& fields
 )
 {
-    forAll(fields, fieldI)
+    forAll(fields, fieldi)
     {
         if (loadFromFiles_)
         {
@@ -150,7 +150,7 @@ void Foam::patchProbes::sampleAndWriteSurfaceFields
                 (
                     IOobject
                     (
-                        fields[fieldI],
+                        fields[fieldi],
                         mesh_.time().timeName(),
                         mesh_,
                         IOobject::MUST_READ,
@@ -163,7 +163,7 @@ void Foam::patchProbes::sampleAndWriteSurfaceFields
         }
         else
         {
-            objectRegistry::const_iterator iter = mesh_.find(fields[fieldI]);
+            objectRegistry::const_iterator iter = mesh_.find(fields[fieldi]);
 
             if
             (
@@ -177,7 +177,7 @@ void Foam::patchProbes::sampleAndWriteSurfaceFields
                     mesh_.lookupObject
                     <GeometricField<Type, fvsPatchField, surfaceMesh>>
                     (
-                        fields[fieldI]
+                        fields[fieldi]
                     )
                 );
             }
@@ -206,15 +206,15 @@ Foam::patchProbes::sample
 
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    forAll(*this, probeI)
+    forAll(*this, probei)
     {
-        label faceI = faceList_[probeI];
+        label facei = faceList_[probei];
 
-        if (faceI >= 0)
+        if (facei >= 0)
         {
-            label patchI = patches.whichPatch(faceI);
-            label localFaceI = patches[patchI].whichFace(faceI);
-            values[probeI] = vField.boundaryField()[patchI][localFaceI];
+            label patchi = patches.whichPatch(facei);
+            label localFacei = patches[patchi].whichFace(facei);
+            values[probei] = vField.boundaryField()[patchi][localFacei];
         }
     }
 
@@ -257,15 +257,15 @@ Foam::patchProbes::sample
 
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    forAll(*this, probeI)
+    forAll(*this, probei)
     {
-        label faceI = faceList_[probeI];
+        label facei = faceList_[probei];
 
-        if (faceI >= 0)
+        if (facei >= 0)
         {
-            label patchI = patches.whichPatch(faceI);
-            label localFaceI = patches[patchI].whichFace(faceI);
-            values[probeI] = sField.boundaryField()[patchI][localFaceI];
+            label patchi = patches.whichPatch(facei);
+            label localFacei = patches[patchi].whichFace(facei);
+            values[probei] = sField.boundaryField()[patchi][localFacei];
         }
     }
 

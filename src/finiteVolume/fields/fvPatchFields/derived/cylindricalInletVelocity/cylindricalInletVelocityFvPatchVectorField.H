@@ -32,8 +32,7 @@ Description
     cylindrical co-ordinates given a central axis, central point, rpm, axial
     and radial velocity.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         axis         | axis of rotation        | yes         |
@@ -45,7 +44,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            cylindricalInletVelocity;
         axis            (0 0 1);
@@ -61,7 +60,7 @@ Note
     types, able to describe time varying functions.  The example above gives
     the usage for supplying constant values.
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchField
     Foam::Function1Types
 

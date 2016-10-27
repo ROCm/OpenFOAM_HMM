@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,10 +43,8 @@ License
 #include "fvmDdt.H"
 #include "fvmLaplacian.H"
 #include "fixedValueFvsPatchFields.H"
-
 #include "blendingMethod.H"
 #include "HashPtrTable.H"
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -392,7 +390,7 @@ void Foam::twoPhaseSystem::solve()
 
     for (int acorr=0; acorr<nAlphaCorr; acorr++)
     {
-        volScalarField::DimensionedInternalField Sp
+        volScalarField::Internal Sp
         (
             IOobject
             (
@@ -404,7 +402,7 @@ void Foam::twoPhaseSystem::solve()
             dimensionedScalar("Sp", dgdt_.dimensions(), 0.0)
         );
 
-        volScalarField::DimensionedInternalField Su
+        volScalarField::Internal Su
         (
             IOobject
             (
@@ -446,11 +444,13 @@ void Foam::twoPhaseSystem::solve()
             )
         );
 
+        surfaceScalarField::Boundary& alphaPhic1Bf =
+            alphaPhic1.boundaryFieldRef();
+
         // Ensure that the flux at inflow BCs is preserved
-        forAll(alphaPhic1.boundaryField(), patchi)
+        forAll(alphaPhic1Bf, patchi)
         {
-            fvsPatchScalarField& alphaPhic1p =
-                alphaPhic1.boundaryField()[patchi];
+            fvsPatchScalarField& alphaPhic1p = alphaPhic1Bf[patchi];
 
             if (!alphaPhic1p.coupled())
             {
@@ -523,7 +523,7 @@ void Foam::twoPhaseSystem::solve()
             fvScalarMatrix alpha1Eqn
             (
                 fvm::ddt(alpha1) - fvc::ddt(alpha1)
-              - fvm::laplacian(alpha1alpha2f*pPrimeByA_(), alpha1, "bounded")
+              - fvm::laplacian(alpha1alpha2f()*pPrimeByA_(), alpha1, "bounded")
             );
 
             alpha1Eqn.relax();

@@ -24,22 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "writeFuns.H"
-
-#if defined(__mips)
-    #include <standards.h>
-    #include <sys/endian.h>
-#endif
-
-#if defined(LITTLE_ENDIAN) \
- || defined(_LITTLE_ENDIAN) \
- || defined(__LITTLE_ENDIAN)
-    #define LITTLEENDIAN 1
-#elif defined(BIG_ENDIAN) || defined(_BIG_ENDIAN) || defined(__BIG_ENDIAN)
-    #undef LITTLEENDIAN
-#else
-    #error "Cannot find LITTLE_ENDIAN or BIG_ENDIAN symbol defined."
-    #error "Please add to compilation options"
-#endif
+#include "endian.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,7 +60,7 @@ void Foam::writeFuns::write
 {
     if (binary)
     {
-        #ifdef LITTLEENDIAN
+        #ifdef WM_LITTLE_ENDIAN
         swapWords(fField.size(), reinterpret_cast<int32_t*>(fField.begin()));
         #endif
 
@@ -124,7 +109,7 @@ void Foam::writeFuns::write
 {
     if (binary)
     {
-        #ifdef LITTLEENDIAN
+        #ifdef WM_LITTLE_ENDIAN
         swapWords
         (
             (sizeof(label)/4)*elems.size(),

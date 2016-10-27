@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,72 +23,31 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
 #include "block.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::block::block
 (
-    const pointField& blockPointField,
-    const curvedEdgeList& edges,
+    const pointField& vertices,
+    const blockEdgeList& edges,
+    const blockFaceList& faces,
     Istream& is
 )
 :
-    blockDescriptor(blockPointField, edges, is),
-    vertices_(0),
-    cells_(0),
-    boundaryPatches_(0)
-{}
+    blockDescriptor(vertices, edges, faces, is)
+{
+    createPoints();
+    createBoundary();
+}
 
 
 Foam::block::block(const blockDescriptor& blockDesc)
 :
-    blockDescriptor(blockDesc),
-    vertices_(0),
-    cells_(0),
-    boundaryPatches_(0)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::block::~block()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-const Foam::pointField& Foam::block::points() const
+    blockDescriptor(blockDesc)
 {
-    if (vertices_.empty())
-    {
-        createPoints();
-    }
-
-    return vertices_;
-}
-
-
-const Foam::labelListList& Foam::block::cells() const
-{
-    if (cells_.empty())
-    {
-        createCells();
-    }
-
-    return cells_;
-}
-
-
-const Foam::labelListListList& Foam::block::boundaryPatches() const
-{
-    if (boundaryPatches_.empty())
-    {
-        createBoundary();
-    }
-
-    return boundaryPatches_;
+    createPoints();
+    createBoundary();
 }
 
 

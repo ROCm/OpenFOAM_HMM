@@ -285,7 +285,7 @@ void realizableKE<BasicTurbulenceModel>::correct()
     volScalarField G(this->GName(), nut*(tgradU() && dev(twoSymm(tgradU()))));
 
     // Update epsilon and G at the wall
-    epsilon_.boundaryField().updateCoeffs();
+    epsilon_.boundaryFieldRef().updateCoeffs();
 
     // SAF: limiting thermo->nu(). If psiThermo is used rho might be < 0
     // temporarily when p < 0 then nu < 0 which needs limiting
@@ -317,7 +317,7 @@ void realizableKE<BasicTurbulenceModel>::correct()
 
     epsEqn.ref().relax();
     fvOptions.constrain(epsEqn.ref());
-    epsEqn.ref().boundaryManipulate(epsilon_.boundaryField());
+    epsEqn.ref().boundaryManipulate(epsilon_.boundaryFieldRef());
     solve(epsEqn);
     fvOptions.correct(epsilon_);
     bound(epsilon_, this->epsilonMin_);

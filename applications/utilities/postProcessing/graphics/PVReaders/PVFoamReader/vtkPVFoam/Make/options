@@ -9,8 +9,7 @@ EXE_INC = \
     -I../PVFoamReader
 
 LIB_LIBS = \
-    -lmeshTools \
-    -lfiniteVolume \
+    -ldynamicMesh \
     -ldynamicMesh \
     -lgenericPatchFields \
     -llagrangian \

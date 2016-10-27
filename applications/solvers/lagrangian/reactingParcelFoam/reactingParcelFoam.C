@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,12 +28,8 @@ Group
     grpLagrangianSolvers
 
 Description
-    Transient PIMPLE solver for compressible, laminar or turbulent flow with
-    reacting multiphase Lagrangian parcels.
-
-    Note:
-    - includes run-time selectable finite volume options, e.g. sources,
-      constraints
+    Transient solver for compressible, turbulent flow with a reacting,
+    multiphase particle cloud, and optional sources/constraints.
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,22 +48,17 @@ Description
 
 int main(int argc, char *argv[])
 {
-    #include "setRootCase.H"
+    #include "postProcess.H"
 
+    #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-    #include "readGravitationalAcceleration.H"
-
-    pimpleControl pimple(mesh);
-
+    #include "createControl.H"
     #include "createTimeControls.H"
-    #include "createRDeltaT.H"
-    #include "initContinuityErrs.H"
     #include "createFields.H"
-    #include "createRadiationModel.H"
-    #include "createClouds.H"
-    #include "createMRF.H"
+    #include "createFieldRefs.H"
     #include "createFvOptions.H"
+    #include "initContinuityErrs.H"
 
     turbulence->validate();
 

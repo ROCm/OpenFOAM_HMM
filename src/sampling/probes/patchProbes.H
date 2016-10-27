@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,7 @@ Description
     patchProbes
     {
         type            patchProbes;
-        functionObjectLibs ( "libsampling.so" );
+        libs            ( "libsampling.so" );
 
         // Name of the directory for probe data
         name            patchProbes;
@@ -46,14 +46,11 @@ Description
         patches         (".*inl.*");
 
         // Write at same frequency as fields
-        outputControl   outputTime;
-        outputInterval  1;
+        writeControl    writeTime;
+        writeInterval   1;
 
         // Fields to be probed
-        fields
-        (
-            p U
-        );
+        fields          (p U);
 
         // Locations to probe. These get snapped onto the nearest point
         // on the selected patches
@@ -147,9 +144,6 @@ protected:
         //- Find elements containing patchProbes
         virtual void findElements(const fvMesh&);
 
-        //- Read dictionary settings
-        void readDict(const dictionary& dict);
-
 
 private:
 
@@ -168,29 +162,29 @@ public:
 
     // Constructors
 
-        //- Construct for given objectRegistry and dictionary.
-        //  Allow the possibility to load fields from files
+        //- Construct from Time and dictionary
         patchProbes
         (
             const word& name,
-            const objectRegistry&,
-            const dictionary&,
+            const Time& time,
+            const dictionary& dict,
             const bool loadFromFiles = false,
-            const bool findElements = true
+            const bool readFields = true
         );
-
 
     //- Destructor
     virtual ~patchProbes();
 
+
     //- Public members
 
         //- Sample and write
-        virtual void write();
+        virtual bool write();
 
         //- Read
-        virtual void read(const dictionary&);
+        virtual bool read(const dictionary&);
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

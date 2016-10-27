@@ -33,37 +33,37 @@ Description
     An Ensight part is created for the internalMesh and for each patch.
 
 Usage
-    - foamToEnsight [OPTION] \n
-    Translates OpenFOAM data to EnSight format
+    \b foamToEnsight [OPTION]
 
-    \param -ascii \n
-    Write Ensight data in ASCII format instead of "C Binary"
+    Options:
+      - \par -ascii
+        Write Ensight data in ASCII format instead of "C Binary"
 
-    \param -noZero \n
-    Exclude the often incomplete initial conditions.
+      - \par -noZero
+        Exclude the often incomplete initial conditions.
 
-    \param -noLagrangian \n
-    Suppress writing lagrangian positions and fields.
+      - \par -noLagrangian
+        Suppress writing lagrangian positions and fields.
 
-    \param -noPatches \n
-    Suppress writing any patches.
+      - \par -noPatches
+        Suppress writing any patches.
 
-    \param -patches patchList \n
-    Specify particular patches to write.
-    Specifying an empty list suppresses writing the internalMesh.
+      - \par -patches patchList
+        Specify particular patches to write.
+        Specifying an empty list suppresses writing the internalMesh.
 
-    \param -faceZones zoneList \n
-    Specify faceZones to write, with wildcards
+      - \par -faceZones zoneList
+        Specify faceZones to write, with wildcards
 
-    \param -cellZone zoneName \n
-    Specify single cellZone to write (not lagrangian)
+      - \par -cellZone zoneName
+        Specify single cellZone to write (not lagrangian)
 
-    \param -width \<n\>\n
-    Width of EnSight data subdir (default: 8)
+      - \par -width \<n\>
+        Width of EnSight data subdir (default: 8)
 
 Note
-    Parallel support for cloud data is not supported
-    - writes to \a EnSight directory to avoid collisions with foamToEnsightParts
+    Writes to \a EnSight directory to avoid collisions with
+    foamToEnsightParts
 
 \*---------------------------------------------------------------------------*/
 
@@ -94,11 +94,7 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-bool inFileNameList
-(
-    const fileNameList& nameList,
-    const word& name
-)
+bool inFileNameList(const fileNameList& nameList, const word& name)
 {
     forAll(nameList, i)
     {
@@ -110,7 +106,6 @@ bool inFileNameList
 
     return false;
 }
-
 
 
 int main(int argc, char *argv[])
@@ -187,11 +182,11 @@ int main(int argc, char *argv[])
         volSymmTensorField::typeName,
         volTensorField::typeName,
 
-        volScalarField::DimensionedInternalField::typeName,
-        volVectorField::DimensionedInternalField::typeName,
-        volSphericalTensorField::DimensionedInternalField::typeName,
-        volSymmTensorField::DimensionedInternalField::typeName,
-        volTensorField::DimensionedInternalField::typeName
+        volScalarField::Internal::typeName,
+        volVectorField::Internal::typeName,
+        volSphericalTensorField::Internal::typeName,
+        volSymmTensorField::Internal::typeName,
+        volTensorField::Internal::typeName
     };
 
     #include "setRootCase.H"
@@ -557,15 +552,10 @@ int main(int argc, char *argv[])
                 // DimensionedFields
                 else if
                 (
-                    volFieldTypes[i]
-                 == volScalarField::DimensionedInternalField::typeName
+                    volFieldTypes[i] == volScalarField::Internal::typeName
                 )
                 {
-                    volScalarField::DimensionedInternalField df
-                    (
-                        fieldObject,
-                        mesh
-                    );
+                    volScalarField::Internal df(fieldObject, mesh);
                     ensightField<scalar>
                     (
                         volField<scalar>(meshSubsetter, df),
@@ -578,15 +568,10 @@ int main(int argc, char *argv[])
                 }
                 else if
                 (
-                    volFieldTypes[i]
-                 == volVectorField::DimensionedInternalField::typeName
+                    volFieldTypes[i] == volVectorField::Internal::typeName
                 )
                 {
-                    volVectorField::DimensionedInternalField df
-                    (
-                        fieldObject,
-                        mesh
-                    );
+                    volVectorField::Internal df(fieldObject, mesh);
                     ensightField<vector>
                     (
                         volField<vector>(meshSubsetter, df),
@@ -600,14 +585,10 @@ int main(int argc, char *argv[])
                 else if
                 (
                     volFieldTypes[i]
-                 == volSphericalTensorField::DimensionedInternalField::typeName
+                 == volSphericalTensorField::Internal::typeName
                 )
                 {
-                    volSphericalTensorField::DimensionedInternalField df
-                    (
-                        fieldObject,
-                        mesh
-                    );
+                    volSphericalTensorField::Internal df(fieldObject, mesh);
                     ensightField<sphericalTensor>
                     (
                         volField<sphericalTensor>(meshSubsetter, df),
@@ -620,15 +601,10 @@ int main(int argc, char *argv[])
                 }
                 else if
                 (
-                    volFieldTypes[i]
-                 == volSymmTensorField::DimensionedInternalField::typeName
+                    volFieldTypes[i] == volSymmTensorField::Internal::typeName
                 )
                 {
-                    volSymmTensorField::DimensionedInternalField df
-                    (
-                        fieldObject,
-                        mesh
-                    );
+                    volSymmTensorField::Internal df(fieldObject, mesh);
                     ensightField<symmTensor>
                     (
                         volField<symmTensor>(meshSubsetter, df),
@@ -641,15 +617,10 @@ int main(int argc, char *argv[])
                 }
                 else if
                 (
-                    volFieldTypes[i]
-                 == volTensorField::DimensionedInternalField::typeName
+                    volFieldTypes[i] == volTensorField::Internal::typeName
                 )
                 {
-                    volTensorField::DimensionedInternalField df
-                    (
-                        fieldObject,
-                        mesh
-                    );
+                    volTensorField::Internal df(fieldObject, mesh);
                     ensightField<tensor>
                     (
                         volField<tensor>(meshSubsetter, df),

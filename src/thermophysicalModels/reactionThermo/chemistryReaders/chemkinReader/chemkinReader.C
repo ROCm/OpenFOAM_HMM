@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -119,8 +119,8 @@ Foam::scalar Foam::chemkinReader::molecularWeight
 
     forAll(specieComposition, i)
     {
-        label nAtoms = specieComposition[i].nAtoms;
-        const word& elementName = specieComposition[i].elementName;
+        label nAtoms = specieComposition[i].nAtoms();
+        const word& elementName = specieComposition[i].name();
 
         if (isotopeAtomicWts_.found(elementName))
         {
@@ -428,24 +428,26 @@ void Foam::chemkinReader::addReaction
     forAll(lhs, i)
     {
         const List<specieElement>& specieComposition =
-            specieComposition_[speciesTable_[lhs[i].index]];
+            speciesComposition_[speciesTable_[lhs[i].index]];
 
         forAll(specieComposition, j)
         {
-            label elementi = elementIndices_[specieComposition[j].elementName];
-            nAtoms[elementi] += lhs[i].stoichCoeff*specieComposition[j].nAtoms;
+            label elementi = elementIndices_[specieComposition[j].name()];
+            nAtoms[elementi] +=
+                lhs[i].stoichCoeff*specieComposition[j].nAtoms();
         }
     }
 
     forAll(rhs, i)
     {
         const List<specieElement>& specieComposition =
-            specieComposition_[speciesTable_[rhs[i].index]];
+            speciesComposition_[speciesTable_[rhs[i].index]];
 
         forAll(specieComposition, j)
         {
-            label elementi = elementIndices_[specieComposition[j].elementName];
-            nAtoms[elementi] -= rhs[i].stoichCoeff*specieComposition[j].nAtoms;
+            label elementi = elementIndices_[specieComposition[j].name()];
+            nAtoms[elementi] -=
+                rhs[i].stoichCoeff*specieComposition[j].nAtoms();
         }
     }
 

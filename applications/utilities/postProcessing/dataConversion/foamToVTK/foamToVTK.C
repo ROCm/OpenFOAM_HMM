@@ -30,76 +30,77 @@ Group
 Description
     Legacy VTK file format writer.
 
-    - handles volScalar, volVector, pointScalar, pointVector, surfaceScalar
+    - Handles volFields, pointFields, surfaceScalarField, surfaceVectorField
       fields.
-    - mesh topo changes.
-    - both ascii and binary.
-    - single time step writing.
-    - write subset only.
-    - automatic decomposition of cells; polygons on boundary undecomposed since
+    - Mesh topo changes.
+    - Both ascii and binary.
+    - Single time step writing.
+    - Write subset only.
+    - Automatic decomposition of cells; polygons on boundary undecomposed since
       handled by vtk.
 
 Usage
+    \b foamToVTK [OPTION]
 
-    - foamToVTK [OPTION]
+    Options:
+      - \par -ascii
+        Write VTK data in ASCII format instead of binary.
 
-    \param -ascii \n
-    Write VTK data in ASCII format instead of binary.
+      - \par -mesh \<name\>
+        Use a different mesh name (instead of -region)
 
-    \param -mesh \<name\>\n
-    Use a different mesh name (instead of -region)
+      - \par -fields \<fields\>
+        Convert selected fields only. For example,
+        \verbatim
+          -fields "( p T U )"
+        \endverbatim
+        The quoting is required to avoid shell expansions and to pass the
+        information as a single argument.
 
-    \param -fields \<fields\>\n
-    Convert selected fields only. For example,
-    \verbatim
-         -fields "( p T U )"
-    \endverbatim
-    The quoting is required to avoid shell expansions and to pass the
-    information as a single argument.
+      - \par -surfaceFields
+        Write surfaceScalarFields (e.g., phi)
 
-    \param -surfaceFields \n
-    Write surfaceScalarFields (e.g., phi)
+      - \par -cellSet \<name\>
+      - \par -faceSet \<name\>
 
-    \param -cellSet \<name\>\n
-    \param -faceSet \<name\>\n
-    \param -pointSet \<name\>\n
-    Restrict conversion to the cellSet, faceSet or pointSet.
+      - \par -pointSet \<name\>
+        Restrict conversion to the cellSet, faceSet or pointSet.
 
-    \param -nearCellValue \n
-    Output cell value on patches instead of patch value itself
+      - \par -nearCellValue
+        Output cell value on patches instead of patch value itself
 
-    \param -noInternal \n
-    Do not generate file for mesh, only for patches
+      - \par -noInternal
+        Do not generate file for mesh, only for patches
 
-    \param -noLagrangian \n
-    Suppress writing lagrangian positions and fields.
+      - \par -noLagrangian
+        Suppress writing lagrangian positions and fields.
 
-    \param -noPointValues \n
-    No pointFields
+      - \par -noPointValues
+        No pointFields
 
-    \param -noFaceZones \n
-    No faceZones
+      - \par -noFaceZones
+        No faceZones
 
-    \param -noLinks \n
-    (in parallel) do not link processor files to master
+      - \par -noLinks
+        (in parallel) do not link processor files to master
 
-    \param poly \n
-    write polyhedral cells without tet/pyramid decomposition
+      - \par poly
+        write polyhedral cells without tet/pyramid decomposition
 
-    \param -allPatches \n
-    Combine all patches into a single file
+      - \par -allPatches
+        Combine all patches into a single file
 
-    \param -excludePatches \<patchNames\>\n
-    Specify patches (wildcards) to exclude. For example,
-    \verbatim
-         -excludePatches '( inlet_1 inlet_2 "proc.*")'
-    \endverbatim
-    The quoting is required to avoid shell expansions and to pass the
-    information as a single argument. The double quotes denote a regular
-    expression.
+      - \par -excludePatches \<patchNames\>
+        Specify patches (wildcards) to exclude. For example,
+        \verbatim
+          -excludePatches '( inlet_1 inlet_2 "proc.*")'
+        \endverbatim
+        The quoting is required to avoid shell expansions and to pass the
+        information as a single argument. The double quotes denote a regular
+        expression.
 
-    \param -useTimeName \n
-    use the time index in the VTK file name instead of the time index
+      - \par -useTimeName
+        use the time index in the VTK file name instead of the time index
 
 Note
     mesh subset is handled by vtkMesh. Slight inconsistency in
@@ -111,7 +112,7 @@ Note
     whole-mesh values onto the subset patch.
 
 Note
-    new file format: \n
+    \par new file format:
     no automatic timestep recognition.
     However can have .pvd file format which refers to time simulation
     if XML *.vtu files are available:
@@ -171,7 +172,7 @@ Note
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class GeoField>
-void print(const char* msg, Ostream& os, const PtrList<GeoField>& flds)
+void print(const char* msg, Ostream& os, const PtrList<const GeoField>& flds)
 {
     if (flds.size())
     {
@@ -198,35 +199,35 @@ void print(Ostream& os, const wordList& flds)
 labelList getSelectedPatches
 (
     const polyBoundaryMesh& patches,
-    const List<wordRe>& excludePatches  //HashSet<word>& excludePatches
+    const List<wordRe>& excludePatches
 )
 {
     DynamicList<label> patchIDs(patches.size());
 
     Info<< "Combining patches:" << endl;
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        const polyPatch& pp = patches[patchI];
+        const polyPatch& pp = patches[patchi];
 
         if
         (
             isType<emptyPolyPatch>(pp)
-            || (Pstream::parRun() && isType<processorPolyPatch>(pp))
+         || (Pstream::parRun() && isType<processorPolyPatch>(pp))
         )
         {
-            Info<< "    discarding empty/processor patch " << patchI
+            Info<< "    discarding empty/processor patch " << patchi
                 << " " << pp.name() << endl;
         }
         else if (findStrings(excludePatches, pp.name()))
         {
-            Info<< "    excluding patch " << patchI
+            Info<< "    excluding patch " << patchi
                 << " " << pp.name() << endl;
         }
         else
         {
-            patchIDs.append(patchI);
-            Info<< "    patch " << patchI << " " << pp.name() << endl;
+            patchIDs.append(patchi);
+            Info<< "    patch " << patchi << " " << pp.name() << endl;
         }
     }
     return patchIDs.shrink();
@@ -543,11 +544,11 @@ int main(int argc, char *argv[])
 
         // Construct the vol fields (on the original mesh if subsetted)
 
-        PtrList<volScalarField> vsf;
-        PtrList<volVectorField> vvf;
-        PtrList<volSphericalTensorField> vSpheretf;
-        PtrList<volSymmTensorField> vSymmtf;
-        PtrList<volTensorField> vtf;
+        PtrList<const volScalarField> vsf;
+        PtrList<const volVectorField> vvf;
+        PtrList<const volSphericalTensorField> vSpheretf;
+        PtrList<const volSymmTensorField> vSymmtf;
+        PtrList<const volTensorField> vtf;
 
         if (!specifiedFields || selectedFields.size())
         {
@@ -590,11 +591,11 @@ int main(int argc, char *argv[])
 
 
         // Construct dimensioned fields
-        PtrList<volScalarField::DimensionedInternalField> dsf;
-        PtrList<volVectorField::DimensionedInternalField> dvf;
-        PtrList<volSphericalTensorField::DimensionedInternalField> dSpheretf;
-        PtrList<volSymmTensorField::DimensionedInternalField> dSymmtf;
-        PtrList<volTensorField::DimensionedInternalField> dtf;
+        PtrList<const volScalarField::Internal> dsf;
+        PtrList<const volVectorField::Internal> dvf;
+        PtrList<const volSphericalTensorField::Internal> dSpheretf;
+        PtrList<const volSymmTensorField::Internal> dSymmtf;
+        PtrList<const volTensorField::Internal> dtf;
 
         if (!specifiedFields || selectedFields.size())
         {
@@ -646,11 +647,11 @@ int main(int argc, char *argv[])
                 << " (\"-noPointValues\" (at your option)\n";
         }
 
-        PtrList<pointScalarField> psf;
-        PtrList<pointVectorField> pvf;
-        PtrList<pointSphericalTensorField> pSpheretf;
-        PtrList<pointSymmTensorField> pSymmtf;
-        PtrList<pointTensorField> ptf;
+        PtrList<const pointScalarField> psf;
+        PtrList<const pointVectorField> pvf;
+        PtrList<const pointSphericalTensorField> pSpheretf;
+        PtrList<const pointSymmTensorField> pSymmtf;
+        PtrList<const pointTensorField> ptf;
 
         if (!noPointValues && !(specifiedFields && selectedFields.empty()))
         {
@@ -794,7 +795,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("surfaceFields"))
         {
-            PtrList<surfaceScalarField> ssf;
+            PtrList<const surfaceScalarField> ssf;
             readFields
             (
                 vMesh,
@@ -805,7 +806,7 @@ int main(int argc, char *argv[])
             );
             print("    surfScalarFields  :", Info, ssf);
 
-            PtrList<surfaceVectorField> svf;
+            PtrList<const surfaceVectorField> svf;
             readFields
             (
                 vMesh,
@@ -827,8 +828,9 @@ int main(int argc, char *argv[])
 
                 forAll(ssf, i)
                 {
-                    svf.set(sz+i, ssf[i]*n);
-                    svf[sz+i].rename(ssf[i].name());
+                    surfaceVectorField* ssfiPtr = (ssf[i]*n).ptr();
+                    ssfiPtr->rename(ssf[i].name());
+                    svf.set(sz+i, ssfiPtr);
                 }
                 ssf.clear();
 
@@ -937,9 +939,9 @@ int main(int argc, char *argv[])
         }
         else
         {
-            forAll(patches, patchI)
+            forAll(patches, patchi)
             {
-                const polyPatch& pp = patches[patchI];
+                const polyPatch& pp = patches[patchi];
 
                 if (!findStrings(excludePatches, pp.name()))
                 {
@@ -972,7 +974,7 @@ int main(int argc, char *argv[])
                         binary,
                         nearCellValue,
                         patchFileName,
-                        labelList(1, patchI)
+                        labelList(1, patchi)
                     );
 
                     if (!isA<emptyPolyPatch>(pp))
@@ -1037,7 +1039,7 @@ int main(int argc, char *argv[])
 
         if (doFaceZones)
         {
-            PtrList<surfaceScalarField> ssf;
+            PtrList<const surfaceScalarField> ssf;
             readFields
             (
                 vMesh,
@@ -1048,7 +1050,7 @@ int main(int argc, char *argv[])
             );
             print("    surfScalarFields  :", Info, ssf);
 
-            PtrList<surfaceVectorField> svf;
+            PtrList<const surfaceVectorField> svf;
             readFields
             (
                 vMesh,

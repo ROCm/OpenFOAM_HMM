@@ -25,6 +25,7 @@ License
 
 #include "BrownianMotionForce.H"
 #include "mathematicalConstants.H"
+#include "fundamentalConstants.H"
 #include "demandDrivenData.H"
 #include "turbulenceModel.H"
 
@@ -76,7 +77,7 @@ Foam::BrownianMotionForce<CloudType>::kModel() const
             << "Database objects include: " << obr.sortedToc()
             << abort(FatalError);
 
-        return tmp<volScalarField>(NULL);
+        return tmp<volScalarField>(nullptr);
     }
 }
 
@@ -95,7 +96,7 @@ Foam::BrownianMotionForce<CloudType>::BrownianMotionForce
     rndGen_(owner.rndGen()),
     lambda_(readScalar(this->coeffs().lookup("lambda"))),
     turbulence_(readBool(this->coeffs().lookup("turbulence"))),
-    kPtr_(NULL),
+    kPtr_(nullptr),
     ownK_(false)
 {}
 
@@ -110,7 +111,7 @@ Foam::BrownianMotionForce<CloudType>::BrownianMotionForce
     rndGen_(bmf.rndGen_),
     lambda_(bmf.lambda_),
     turbulence_(bmf.turbulence_),
-    kPtr_(NULL),
+    kPtr_(nullptr),
     ownK_(false)
 {}
 
@@ -170,35 +171,50 @@ Foam::forceSuSp Foam::BrownianMotionForce<CloudType>::calcCoupled
     const scalar dp = p.d();
     const scalar Tc = p.Tc();
 
-    const scalar eta = rndGen_.sample01<scalar>();
     const scalar alpha = 2.0*lambda_/dp;
     const scalar cc = 1.0 + alpha*(1.257 + 0.4*exp(-1.1/alpha));
 
-    const scalar sigma = physicoChemical::sigma.value();
+    // Boltzmann constant
+    const scalar kb = physicoChemical::k.value();
 
-    scalar f = 0.0;
+    scalar f = 0;
     if (turbulence_)
     {
-        const label cellI = p.cell();
+        const label celli = p.cell();
         const volScalarField& k = *kPtr_;
-        const scalar kc = k[cellI];
-        const scalar Dp = sigma*Tc*cc/(3*mathematical::pi*muc*dp);
-        f = eta/mass*sqrt(2.0*sqr(kc)*sqr(Tc)/(Dp*dt));
+        const scalar kc = k[celli];
+        const scalar Dp = kb*Tc*cc/(3*mathematical::pi*muc*dp);
+        f = sqrt(2.0*sqr(kc)*sqr(Tc)/(Dp*dt));
     }
     else
     {
         const scalar s0 =
-            216*muc*sigma*Tc/(sqr(mathematical::pi)*pow5(dp)*sqr(p.rho())*cc);
-        f = eta*sqrt(mathematical::pi*s0/dt);
+            216*muc*kb*Tc/(sqr(mathematical::pi)*pow5(dp)*sqr(p.rho())*cc);
+        f = mass*sqrt(mathematical::pi*s0/dt);
     }
 
-    const scalar sqrt2 = sqrt(2.0);
-    for (label i = 0; i < 3; i++)
-    {
-        const scalar x = rndGen_.sample01<scalar>();
-        const scalar eta = sqrt2*erfInv(2*x - 1.0);
-        value.Su()[i] = mass*f*eta;
-    }
+
+    // To generate a cubic distribution (3 independent directions) :
+    // const scalar sqrt2 = sqrt(2.0);
+    // for (direction dir = 0; dir < vector::nComponents; dir++)
+    // {
+    //     const scalar x = rndGen_.sample01<scalar>();
+    //     const scalar eta = sqrt2*erfInv(2*x - 1.0);
+    //     value.Su()[dir] = f*eta;
+    // }
+
+
+    // To generate a spherical distribution:
+
+    cachedRandom& rnd = this->owner().rndGen();
+
+    const scalar theta = rnd.sample01<scalar>()*twoPi;
+    const scalar u = 2*rnd.sample01<scalar>() - 1;
+
+    const scalar a = sqrt(1 - sqr(u));
+    const vector dir(a*cos(theta), a*sin(theta), u);
+
+    value.Su() = f*mag(rnd.GaussNormal<scalar>())*dir;
 
     return value;
 }

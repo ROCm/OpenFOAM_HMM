@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,8 +31,7 @@ Description
     This boundary condition provides an enthalpy condition for wall heat
     transfer
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         Tinf         | wall temperature        | yes         |
@@ -41,7 +40,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            wallHeatTransfer;
         Tinf            uniform 500;

@@ -28,8 +28,8 @@ Group
     grpLagrangianSolvers
 
 Description
-    Transient PIMPLE solver for compressible, laminar or turbulent flow with
-    reacting Lagrangian parcels, and surface film modelling.
+    Transient solver for compressible, turbulent flow with a reacting,
+    multiphase particle cloud, and surface film modelling.
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,23 +47,19 @@ Description
 
 int main(int argc, char *argv[])
 {
-    #include "setRootCase.H"
+    #include "postProcess.H"
 
+    #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-
-    pimpleControl pimple(mesh);
-
-    #include "createFields.H"
-    #include "createMRF.H"
-    #include "createFvOptions.H"
-    #include "createClouds.H"
-    #include "createRadiationModel.H"
-    #include "createSurfaceFilmModel.H"
-    #include "initContinuityErrs.H"
+    #include "createControl.H"
     #include "createTimeControls.H"
+    #include "createFields.H"
+    #include "createFieldRefs.H"
+    #include "createFvOptions.H"
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
+    #include "initContinuityErrs.H"
 
     turbulence->validate();
 
@@ -73,7 +69,7 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "createTimeControls.H"
+        #include "readTimeControls.H"
         #include "compressibleCourantNo.H"
         #include "setMultiRegionDeltaT.H"
         #include "setDeltaT.H"

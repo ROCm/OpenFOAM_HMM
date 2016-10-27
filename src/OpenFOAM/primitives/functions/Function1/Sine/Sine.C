@@ -89,17 +89,17 @@ template<class Type>
 void Foam::Function1Types::Sine<Type>::writeData(Ostream& os) const
 {
     Function1<Type>::writeData(os);
-    os  << token::END_STATEMENT << nl;
+    os.endEntry();
 
-    os.beginBlock(word(this->name() + "Coeffs")) << nl;
+    os.beginBlock(word(this->name() + "Coeffs"));
 
-    os.writeKeyword("t0") << t0_ << token::END_STATEMENT << nl;
+    os.writeEntry("t0", t0_);
     amplitude_->writeData(os);
     frequency_->writeData(os);
     scale_->writeData(os);
     level_->writeData(os);
 
-    os.endBlock() << endl;
+    os.endBlock() << flush;
 }
 
 

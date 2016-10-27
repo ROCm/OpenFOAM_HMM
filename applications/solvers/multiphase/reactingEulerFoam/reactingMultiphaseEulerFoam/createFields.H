@@ -1,3 +1,4 @@
+#include "createRDeltaT.H"
 #include "readGravitationalAcceleration.H"
 #include "readhRef.H"
 
@@ -9,8 +10,6 @@ autoPtr<multiphaseSystem> fluidPtr
 );
 multiphaseSystem& fluid = fluidPtr();
 multiphaseSystem::phaseModelList& phases = fluid.phases();
-
-surfaceScalarField& phi = fluid.phi();
 
 dimensionedScalar pMin
 (
@@ -48,6 +47,3 @@ setRefCell
     pRefValue
 );
 mesh.setFluxRequired(p_rgh.name());
-
-const IOMRFZoneList& MRF = fluid.MRF();
-fv::options& fvOptions = fluid.fvOptions();

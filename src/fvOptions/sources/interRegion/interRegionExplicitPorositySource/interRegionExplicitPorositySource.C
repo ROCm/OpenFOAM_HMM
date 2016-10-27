@@ -116,10 +116,10 @@ Foam::fv::interRegionExplicitPorositySource::interRegionExplicitPorositySource
 )
 :
     interRegionOption(name, modelType, dict, mesh),
-    porosityPtr_(NULL),
+    porosityPtr_(nullptr),
     firstIter_(true),
-    UName_(coeffs_.lookupOrDefault<word>("UName", "U")),
-    muName_(coeffs_.lookupOrDefault<word>("muName", "thermo:mu"))
+    UName_(coeffs_.lookupOrDefault<word>("U", "U")),
+    muName_(coeffs_.lookupOrDefault<word>("mu", "thermo:mu"))
 {
     if (active_)
     {
@@ -134,7 +134,7 @@ Foam::fv::interRegionExplicitPorositySource::interRegionExplicitPorositySource
 void Foam::fv::interRegionExplicitPorositySource::addSup
 (
     fvMatrix<vector>& eqn,
-    const label fieldI
+    const label fieldi
 )
 {
     initialise();
@@ -160,9 +160,9 @@ void Foam::fv::interRegionExplicitPorositySource::addSup
     // Map local velocity onto neighbour region
     meshInterp().mapSrcToTgt
     (
-        U.internalField(),
+        U.primitiveField(),
         plusEqOp<vector>(),
-        UNbr.internalField()
+        UNbr.primitiveFieldRef()
     );
 
     fvMatrix<vector> nbrEqn(UNbr, eqn.dimensions());
@@ -188,7 +188,7 @@ void Foam::fv::interRegionExplicitPorositySource::addSup
 (
     const volScalarField& rho,
     fvMatrix<vector>& eqn,
-    const label fieldI
+    const label fieldi
 )
 {
     initialise();
@@ -214,9 +214,9 @@ void Foam::fv::interRegionExplicitPorositySource::addSup
     // Map local velocity onto neighbour region
     meshInterp().mapSrcToTgt
     (
-        U.internalField(),
+        U.primitiveField(),
         plusEqOp<vector>(),
-        UNbr.internalField()
+        UNbr.primitiveFieldRef()
     );
 
     fvMatrix<vector> nbrEqn(UNbr, eqn.dimensions());
@@ -255,17 +255,17 @@ void Foam::fv::interRegionExplicitPorositySource::addSup
     // Map local rho onto neighbour region
     meshInterp().mapSrcToTgt
     (
-        rho.internalField(),
+        rho.primitiveField(),
         plusEqOp<scalar>(),
-        rhoNbr.internalField()
+        rhoNbr.primitiveFieldRef()
     );
 
     // Map local mu onto neighbour region
     meshInterp().mapSrcToTgt
     (
-        mu.internalField(),
+        mu.primitiveField(),
         plusEqOp<scalar>(),
-        muNbr.internalField()
+        muNbr.primitiveFieldRef()
     );
 
     porosityPtr_->addResistance(nbrEqn, rhoNbr, muNbr);
@@ -289,8 +289,8 @@ bool Foam::fv::interRegionExplicitPorositySource::read(const dictionary& dict)
 {
     if (interRegionOption::read(dict))
     {
-        coeffs_.readIfPresent("UName", UName_);
-        coeffs_.readIfPresent("muName", muName_);
+        coeffs_.readIfPresent("U", UName_);
+        coeffs_.readIfPresent("mu", muName_);
 
         // Reset the porosity model?
 

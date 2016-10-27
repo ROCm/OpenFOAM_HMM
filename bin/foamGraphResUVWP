@@ -1,9 +1,9 @@
-#!/bin/csh -f
+#!/bin/sh
 #------------------------------------------------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -26,105 +26,39 @@
 #     foamGraphResUVWP
 #
 # Description
+#     Deprecated script extract initial velocity and pressure residuals for each
+#     time-step from a log file for graphing.
 #
+#     Superceded by the more general foamLog script.
 #------------------------------------------------------------------------------
-if (! -f "$1" ) then
-    echo "No file: '$1'"
+Script=${0##*/}
+
+if [ ! -f "$1" ]; then
+    echo "$Script: $1 is not a valid filename"
     exit 1
-endif
+fi
 
-set tmpU = newU$$.dat
-cat $1 | grep "Solving for Ux" | grep -v "solution singularity" | sed s/,//g | awk 'BEGIN { NENTRIES = 0 }{NENTRIES++; printf("%d %e\n", NENTRIES, $8)}' - > $tmpU
+scan()
+{
+    tmpFile=new$1$$.dat
+    cat $2 | \
+        grep "Solving for $1" | \
+        grep -v "solution singularity" | \
+        sed s/,//g | \
+        awk 'BEGIN { NENTRIES = 0 }{NENTRIES++; printf("%d %e\n", NENTRIES, $8)}' - > $tmpFile
 
-set tmpV = newV$$.dat
-cat $1 | grep "Solving for Uy" | grep -v "solution singularity" | sed s/,//g | awk 'BEGIN { NENTRIES = 0 }{NENTRIES++; printf("%d %e\n", NENTRIES, $8)}' - > $tmpV
+    if [ "$(cat $tmpFile | wc -l)" -gt 1 ]; then
+        echo >> residualUVWP.dat
+        cat $tmpFile >> residualUVWP.dat
+    fi
 
-set tmpW = newW$$.dat
-cat $1 | grep "Solving for Uz" | grep -v "solution singularity" | sed s/,//g | awk 'BEGIN { NENTRIES = 0 }{NENTRIES++; printf("%d %e\n", NENTRIES, $8)}' - > $tmpW
+    rm $tmpFile
+}
 
-set tmpP = newP$$.dat
-cat $1 | grep "Solving for p" | grep -v "solution singularity" | sed s/,//g | awk 'BEGIN { NENTRIES = 0 }{NENTRIES++; printf("%d %e\n", NENTRIES, $8)}' - > $tmpP
-
-set linesU = `cat $tmpU | wc -l`
-set linesV = `cat $tmpV | wc -l`
-set linesW = `cat $tmpW | wc -l`
-set linesP = `cat $tmpP | wc -l`
-
-set ngraphs = 0
-
-if ($linesU > 1) then
-@ ngraphs = $ngraphs + 1
-endif
-
-if ($linesV > 1) then
-@ ngraphs = $ngraphs + 1
-endif
-
-if ($linesW > 1) then
-@ ngraphs = $ngraphs + 1
-endif
-
-if ($linesP > 1) then
-@ ngraphs = $ngraphs + 1
-endif
-
-cat << EOF > residualUVWP.dat
-EOF
-#Solver Performance
-#number of iterations
-#residual
-#0 0
-#0 0
-#$ngraphs
-#EOF
-
-if ($linesU > 1) then
-cat << EOF >> residualUVWP.dat
-
-EOF
-#U
-#0
-#$linesU
-#EOF
-cat $tmpU >> residualUVWP.dat
-endif
-
-if ($linesV > 1) then
-cat << EOF >> residualUVWP.dat
-
-EOF
-#V
-#0
-#$linesV
-#EOF
-cat $tmpV >> residualUVWP.dat
-endif
-
-if ($linesW > 1) then
-cat << EOF >> residualUVWP.dat
-
-EOF
-#W
-#0
-#$linesW
-#EOF
-cat $tmpW >> residualUVWP.dat
-endif
-
-if ($linesP > 1) then
-cat << EOF >> residualUVWP.dat
-
-EOF
-#P
-#0
-#$linesP
-#EOF
-cat $tmpP >> residualUVWP.dat
-endif
-
-rm $tmpU
-rm $tmpV
-rm $tmpW
-rm $tmpP
+rm -f residualUVWP.dat
+scan "Ux" $1
+scan "Uy" $1
+scan "Uz" $1
+scan "p" $1
 
 #------------------------------------------------------------------------------

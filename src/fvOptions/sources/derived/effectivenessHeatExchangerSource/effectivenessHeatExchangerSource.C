@@ -72,23 +72,23 @@ void Foam::fv::effectivenessHeatExchangerSource::initialise()
     label count = 0;
     forAll(fZone, i)
     {
-        label faceI = fZone[i];
+        label facei = fZone[i];
         label faceId = -1;
         label facePatchId = -1;
-        if (mesh_.isInternalFace(faceI))
+        if (mesh_.isInternalFace(facei))
         {
-            faceId = faceI;
+            faceId = facei;
             facePatchId = -1;
         }
         else
         {
-            facePatchId = mesh_.boundaryMesh().whichPatch(faceI);
+            facePatchId = mesh_.boundaryMesh().whichPatch(facei);
             const polyPatch& pp = mesh_.boundaryMesh()[facePatchId];
             if (isA<coupledPolyPatch>(pp))
             {
                 if (refCast<const coupledPolyPatch>(pp).owner())
                 {
-                    faceId = pp.whichFace(faceI);
+                    faceId = pp.whichFace(facei);
                 }
                 else
                 {
@@ -97,7 +97,7 @@ void Foam::fv::effectivenessHeatExchangerSource::initialise()
             }
             else if (!isA<emptyPolyPatch>(pp))
             {
-                faceId = faceI - pp.start();
+                faceId = facei - pp.start();
             }
             else
             {

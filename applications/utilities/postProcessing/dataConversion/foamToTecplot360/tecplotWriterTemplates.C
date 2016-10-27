@@ -69,16 +69,16 @@ Foam::tmp<Field<Type>> Foam::tecplotWriter::getPatchField
 (
     const bool nearCellValue,
     const GeometricField<Type, fvPatchField, volMesh>& vfld,
-    const label patchI
+    const label patchi
 ) const
 {
     if (nearCellValue)
     {
-        return vfld.boundaryField()[patchI].patchInternalField();
+        return vfld.boundaryField()[patchi].patchInternalField();
     }
     else
     {
-        return vfld.boundaryField()[patchI];
+        return vfld.boundaryField()[patchi];
     }
 }
 
@@ -93,22 +93,22 @@ Foam::tmp<Field<Type>> Foam::tecplotWriter::getFaceField
     const polyBoundaryMesh& patches = sfld.mesh().boundaryMesh();
 
     tmp<Field<Type>> tfld(new Field<Type>(faceLabels.size()));
-    Field<Type>& fld = tfld();
+    Field<Type>& fld = tfld.ref();
 
     forAll(faceLabels, i)
     {
-        label faceI = faceLabels[i];
+        label facei = faceLabels[i];
 
-        label patchI = patches.whichPatch(faceI);
+        label patchi = patches.whichPatch(facei);
 
-        if (patchI == -1)
+        if (patchi == -1)
         {
-            fld[i] = sfld[faceI];
+            fld[i] = sfld[facei];
         }
         else
         {
-            label localFaceI = faceI - patches[patchI].start();
-            fld[i] = sfld.boundaryField()[patchI][localFaceI];
+            label localFacei = facei - patches[patchi].start();
+            fld[i] = sfld.boundaryField()[patchi][localFacei];
         }
     }
 

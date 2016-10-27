@@ -114,9 +114,9 @@ void Foam::sampledSurface::project
     {
         const vectorField& norm = Sf();
 
-        forAll(norm, faceI)
+        forAll(norm, facei)
         {
-            res[faceI] = field[faceI] & (norm[faceI]/mag(norm[faceI]));
+            res[facei] = field[facei] & (norm[facei]/mag(norm[facei]));
         }
     }
     else
@@ -181,22 +181,22 @@ Foam::sampledSurface::pointAverage
 
     labelField nPointCells(mesh.nCells(), 0);
     {
-        for (label pointI = 0; pointI < mesh.nPoints(); pointI++)
+        for (label pointi = 0; pointi < mesh.nPoints(); pointi++)
         {
-            const labelList& pCells = mesh.pointCells(pointI);
+            const labelList& pCells = mesh.pointCells(pointi);
 
             forAll(pCells, i)
             {
-                label cellI = pCells[i];
+                label celli = pCells[i];
 
-                cellAvg[cellI] += pfld[pointI];
-                nPointCells[cellI]++;
+                cellAvg[celli] += pfld[pointi];
+                nPointCells[celli]++;
             }
         }
     }
-    forAll(cellAvg, cellI)
+    forAll(cellAvg, celli)
     {
-        cellAvg[cellI] /= nPointCells[cellI];
+        cellAvg[celli] /= nPointCells[celli];
     }
     // Give value to calculatedFvPatchFields
     cellAvg.correctBoundaryConditions();

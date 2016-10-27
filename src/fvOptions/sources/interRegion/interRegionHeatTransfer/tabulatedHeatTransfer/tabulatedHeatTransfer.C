@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,8 +93,8 @@ Foam::fv::tabulatedHeatTransfer::tabulatedHeatTransfer
 )
 :
     interRegionHeatTransferModel(name, modelType, dict, mesh),
-    UName_(coeffs_.lookupOrDefault<word>("UName", "U")),
-    UNbrName_(coeffs_.lookupOrDefault<word>("UNbrName", "U")),
+    UName_(coeffs_.lookupOrDefault<word>("U", "U")),
+    UNbrName_(coeffs_.lookupOrDefault<word>("UNbr", "U")),
     hTable_(),
     AoV_(),
     startTimeName_(mesh.time().timeName())
@@ -122,7 +122,7 @@ void Foam::fv::tabulatedHeatTransfer::calculateHtc()
 
     const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
 
-    scalarField& htcc = htc_.internalField();
+    scalarField& htcc = htc_.primitiveFieldRef();
 
     forAll(htcc, i)
     {

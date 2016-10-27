@@ -117,11 +117,6 @@ void Foam::Cloud<ParticleType>::initCloud(const bool checkClass)
     {
         ioP.readData(*this, checkClass);
         ioP.close();
-
-        if (this->size())
-        {
-            readFields();
-        }
     }
     else
     {
@@ -148,25 +143,6 @@ void Foam::Cloud<ParticleType>::initCloud(const bool checkClass)
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class ParticleType>
-Foam::Cloud<ParticleType>::Cloud
-(
-    const polyMesh& pMesh,
-    const bool checkClass
-)
-:
-    cloud(pMesh),
-    polyMesh_(pMesh),
-    labels_(),
-    nTrackingRescues_(),
-    cellWallFacesPtr_()
-{
-    checkPatches();
-
-    initCloud(checkClass);
-}
-
 
 template<class ParticleType>
 Foam::Cloud<ParticleType>::Cloud
@@ -245,11 +221,6 @@ void Foam::Cloud<ParticleType>::checkFieldFieldIOobject
             << abort(FatalError);
     }
 }
-
-
-template<class ParticleType>
-void Foam::Cloud<ParticleType>::readFields()
-{}
 
 
 template<class ParticleType>

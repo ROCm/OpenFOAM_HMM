@@ -36,9 +36,9 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::null()
 template<class Type, template<class> class PatchField, class GeoMesh>
 inline
 const typename
-Foam::GeometricField<Type, PatchField, GeoMesh>::DimensionedInternalField&
+Foam::GeometricField<Type, PatchField, GeoMesh>::Internal&
 Foam::GeometricField<Type, PatchField, GeoMesh>::
-dimensionedInternalField() const
+internalField() const
 {
     return *this;
 }
@@ -47,8 +47,8 @@ dimensionedInternalField() const
 template<class Type, template<class> class PatchField, class GeoMesh>
 inline
 const typename
-Foam::GeometricField<Type, PatchField, GeoMesh>::InternalField&
-Foam::GeometricField<Type, PatchField, GeoMesh>::internalField() const
+Foam::GeometricField<Type, PatchField, GeoMesh>::Internal::FieldType&
+Foam::GeometricField<Type, PatchField, GeoMesh>::primitiveField() const
 {
     return *this;
 }
@@ -56,7 +56,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::internalField() const
 
 template<class Type, template<class> class PatchField, class GeoMesh>
 inline const typename Foam::GeometricField<Type, PatchField, GeoMesh>::
-GeometricBoundaryField&
+Boundary&
 Foam::GeometricField<Type, PatchField, GeoMesh>::boundaryField() const
 {
     return boundaryField_;
@@ -76,6 +76,19 @@ inline Foam::label&
 Foam::GeometricField<Type, PatchField, GeoMesh>::timeIndex()
 {
     return timeIndex_;
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+inline
+const typename
+Foam::GeometricField<Type, PatchField, GeoMesh>::Internal&
+Foam::GeometricField<Type, PatchField, GeoMesh>::
+operator()() const
+{
+    return *this;
 }
 
 

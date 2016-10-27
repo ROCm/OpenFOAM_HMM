@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,39 +33,47 @@ License
 
 namespace Foam
 {
+
 // Signal number to catch
 int sigWriteNow::signal_
 (
     debug::optimisationSwitch("writeNowSignal", -1)
 );
+
 // Register re-reader
 class addwriteNowSignalToOpt
 :
     public ::Foam::simpleRegIOobject
 {
+
 public:
+
     addwriteNowSignalToOpt(const char* name)
     :
         ::Foam::simpleRegIOobject(Foam::debug::addOptimisationObject, name)
     {}
+
     virtual ~addwriteNowSignalToOpt()
     {}
+
     virtual void readData(Foam::Istream& is)
     {
         sigWriteNow::signal_ = readLabel(is);
         sigWriteNow::set(true);
     }
+
     virtual void writeData(Foam::Ostream& os) const
     {
         os << sigWriteNow::signal_;
     }
 };
+
 addwriteNowSignalToOpt addwriteNowSignalToOpt_("writeNowSignal");
 
 }
 
 
-static Foam::Time* runTimePtr_ = NULL;
+Foam::Time* Foam::sigWriteNow::runTimePtr_ = nullptr;
 
 
 struct sigaction Foam::sigWriteNow::oldAction_;
@@ -106,7 +114,7 @@ Foam::sigWriteNow::~sigWriteNow()
     // Reset old handling
     if (signal_ > 0)
     {
-        if (sigaction(signal_, &oldAction_, NULL) < 0)
+        if (sigaction(signal_, &oldAction_, nullptr) < 0)
         {
             FatalErrorInFunction
                 << "Cannot reset " << signal_ << " trapping"

@@ -32,8 +32,7 @@ Description
     values and adjusts the distribution to match the specified, optionally
     time-varying, mean value.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         meanValue    | mean value Function1    | yes         |
@@ -41,14 +40,14 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            fixedMean;
         meanValue       1.0;
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchField
     Foam::Function1Types
 

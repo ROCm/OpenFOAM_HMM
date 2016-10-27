@@ -124,11 +124,13 @@ void Foam::multiphaseSystem::solveAlphas()
             );
         }
 
+        surfaceScalarField::Boundary& alphaPhiCorrBf =
+            alphaPhiCorr.boundaryFieldRef();
+
         // Ensure that the flux at inflow BCs is preserved
-        forAll(alphaPhiCorr.boundaryField(), patchi)
+        forAll(alphaPhiCorrBf, patchi)
         {
-            fvsPatchScalarField& alphaPhiCorrp =
-                alphaPhiCorr.boundaryField()[patchi];
+            fvsPatchScalarField& alphaPhiCorrp = alphaPhiCorrBf[patchi];
 
             if (!alphaPhiCorrp.coupled())
             {
@@ -264,10 +266,10 @@ void Foam::multiphaseSystem::correctContactAngle
 (
     const phaseModel& phase1,
     const phaseModel& phase2,
-    surfaceVectorField::GeometricBoundaryField& nHatb
+    surfaceVectorField::Boundary& nHatb
 ) const
 {
-    const volScalarField::GeometricBoundaryField& gbf
+    const volScalarField::Boundary& gbf
         = phase1.boundaryField();
 
     const fvBoundaryMesh& boundary = mesh_.boundary();
@@ -372,7 +374,7 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseSystem::K
 {
     tmp<surfaceVectorField> tnHatfv = nHatfv(phase1, phase2);
 
-    correctContactAngle(phase1, phase2, tnHatfv.ref().boundaryField());
+    correctContactAngle(phase1, phase2, tnHatfv.ref().boundaryFieldRef());
 
     // Simple expression for curvature
     return -fvc::div(tnHatfv & mesh_.Sf());
@@ -666,6 +668,9 @@ Foam::tmp<Foam::volVectorField> Foam::multiphaseSystem::Svm
         }
     }
 
+    volVectorField::Boundary& SvmBf =
+        tSvm.ref().boundaryFieldRef();
+
     // Remove virtual mass at fixed-flux boundaries
     forAll(phase.phi().boundaryField(), patchi)
     {
@@ -677,7 +682,7 @@ Foam::tmp<Foam::volVectorField> Foam::multiphaseSystem::Svm
             )
         )
         {
-            tSvm.ref().boundaryField()[patchi] = Zero;
+            SvmBf[patchi] = Zero;
         }
     }
 
@@ -713,6 +718,8 @@ Foam::multiphaseSystem::dragCoeffs() const
                 )
             ).ptr();
 
+        volScalarField::Boundary& Kbf = Kptr->boundaryFieldRef();
+
         // Remove drag at fixed-flux boundaries
         forAll(dm.phase1().phi().boundaryField(), patchi)
         {
@@ -724,7 +731,7 @@ Foam::multiphaseSystem::dragCoeffs() const
                 )
             )
             {
-                Kptr->boundaryField()[patchi] = 0.0;
+                Kbf[patchi] = 0.0;
             }
         }
 

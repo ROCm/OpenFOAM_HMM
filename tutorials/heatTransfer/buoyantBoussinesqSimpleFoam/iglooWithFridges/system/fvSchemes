@@ -40,7 +40,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default         Gauss linear limited corrected 0.333;
+    default         Gauss linear limited corrected 0.33;
     laplacian(diffusivity,cellDisplacement) Gauss linear corrected;
 }
 
@@ -51,7 +51,7 @@ interpolationSchemes
 
 snGradSchemes
 {
-    default         limited corrected 0.333;
+    default         limited corrected 0.33;
 }
 
 

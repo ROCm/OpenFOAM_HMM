@@ -56,10 +56,11 @@ functions
 {
     sensitivityAnalysis
     {
-        functionObjectLibs  ( "libutilityFunctionObjects.so" );
+        libs                ("libfieldFunctionObjects.so");
         type                psiReactionsSensitivityAnalysis;
-        outputControl       outputTime;
-        enabled             true;
+        writeControl        writeTime;
     }
 }
+
+
 // ************************************************************************* //

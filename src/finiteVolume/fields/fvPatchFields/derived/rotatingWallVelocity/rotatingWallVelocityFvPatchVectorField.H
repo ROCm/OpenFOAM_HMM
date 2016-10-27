@@ -30,8 +30,7 @@ Group
 Description
     This boundary condition provides a rotational velocity condition.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         origin       | origin of rotation in Cartesian co-ordinates | yes|
@@ -41,7 +40,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            rotatingWallVelocity;
         origin          (0 0 0);
@@ -52,7 +51,7 @@ Description
 
     The \c omega entry is a Function1 of time, see Foam::Function1Types.
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchField
     Foam::Function1Types
 

@@ -30,7 +30,7 @@ Description
     The momentum and other fluid properties are of the "mixture" and a single
     momentum equation is solved.
 
-    It includes MRF and MPPIC clouds
+    It includes MRF and an MPPIC cloud.
 
     Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
 
@@ -53,25 +53,21 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "postProcess.H"
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-
-    pimpleControl pimple(mesh);
-
-    #include "createTimeControls.H"
+    #include "createControl.H"
     #include "initContinuityErrs.H"
     #include "createFields.H"
-    #include "createMRF.H"
     #include "createFvOptions.H"
+    #include "createTimeControls.H"
     #include "correctPhi.H"
-
-    turbulence->validate();
-
-
-    #include "readTimeControls.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -126,7 +122,7 @@ int main(int argc, char *argv[])
             zeroGradientFvPatchVectorField::typeName
         );
 
-        cloudVolSUSu.internalField() = -cloudSU.source()/mesh.V();
+        cloudVolSUSu.primitiveFieldRef() = -cloudSU.source()/mesh.V();
         cloudVolSUSu.correctBoundaryConditions();
 
         cloudSU.source() = vector::zero;

@@ -98,7 +98,7 @@ pid_t Foam::pgid()
 
 bool Foam::env(const word& envName)
 {
-    return ::getenv(envName.c_str()) != NULL;
+    return ::getenv(envName.c_str()) != nullptr;
 }
 
 
@@ -174,7 +174,7 @@ Foam::string Foam::userName()
 {
     struct passwd* pw = ::getpwuid(::getuid());
 
-    if (pw != NULL)
+    if (pw != nullptr)
     {
         return pw->pw_name;
     }
@@ -195,7 +195,7 @@ Foam::fileName Foam::home()
 {
     char* env = ::getenv("HOME");
 
-    if (env != NULL)
+    if (env != nullptr)
     {
         return fileName(env);
     }
@@ -203,7 +203,7 @@ Foam::fileName Foam::home()
     {
         struct passwd* pw = ::getpwuid(getuid());
 
-        if (pw != NULL)
+        if (pw != nullptr)
         {
             return pw->pw_dir;
         }
@@ -227,7 +227,7 @@ Foam::fileName Foam::home(const string& userName)
     {
         char* env = ::getenv("HOME");
 
-        if (env != NULL)
+        if (env != nullptr)
         {
             return fileName(env);
         }
@@ -235,7 +235,7 @@ Foam::fileName Foam::home(const string& userName)
         pw = ::getpwuid(::getuid());
     }
 
-    if (pw != NULL)
+    if (pw != nullptr)
     {
         return pw->pw_dir;
     }
@@ -292,155 +292,6 @@ Foam::fileName Foam::cwd()
 bool Foam::chDir(const fileName& dir)
 {
     return ::chdir(dir.c_str()) == 0;
-}
-
-
-Foam::fileNameList Foam::findEtcFiles
-(
-    const fileName& name,
-    bool mandatory,
-    bool findFirst
-)
-{
-    fileNameList results;
-
-    // Search for user files in
-    // * ~/.OpenFOAM/VERSION
-    // * ~/.OpenFOAM
-    //
-    fileName searchDir = home()/".OpenFOAM";
-    if (isDir(searchDir))
-    {
-        fileName fullName = searchDir/FOAMversion/name;
-        if (isFile(fullName))
-        {
-            results.append(fullName);
-            if (findFirst)
-            {
-                return results;
-            }
-        }
-
-        fullName = searchDir/name;
-        if (isFile(fullName))
-        {
-            results.append(fullName);
-            if (findFirst)
-            {
-                return results;
-            }
-        }
-    }
-
-    // Search for group (site) files in
-    // * $WM_PROJECT_SITE/VERSION
-    // * $WM_PROJECT_SITE
-    //
-    searchDir = getEnv("WM_PROJECT_SITE");
-    if (searchDir.size())
-    {
-        if (isDir(searchDir))
-        {
-            fileName fullName = searchDir/FOAMversion/name;
-            if (isFile(fullName))
-            {
-                results.append(fullName);
-                if (findFirst)
-                {
-                    return results;
-                }
-            }
-
-            fullName = searchDir/name;
-            if (isFile(fullName))
-            {
-                results.append(fullName);
-                if (findFirst)
-                {
-                    return results;
-                }
-            }
-        }
-    }
-    else
-    {
-        // OR search for group (site) files in
-        // * $WM_PROJECT_INST_DIR/site/VERSION
-        // * $WM_PROJECT_INST_DIR/site
-        //
-        searchDir = getEnv("WM_PROJECT_INST_DIR");
-        if (isDir(searchDir))
-        {
-            fileName fullName = searchDir/"site"/FOAMversion/name;
-            if (isFile(fullName))
-            {
-                results.append(fullName);
-                if (findFirst)
-                {
-                    return results;
-                }
-            }
-
-            fullName = searchDir/"site"/name;
-            if (isFile(fullName))
-            {
-                results.append(fullName);
-                if (findFirst)
-                {
-                    return results;
-                }
-            }
-        }
-    }
-
-    // Search for other (shipped) files in
-    // * $WM_PROJECT_DIR/etc
-    //
-    searchDir = getEnv("WM_PROJECT_DIR");
-    if (isDir(searchDir))
-    {
-        fileName fullName = searchDir/"etc"/name;
-        if (isFile(fullName))
-        {
-            results.append(fullName);
-            if (findFirst)
-            {
-                return results;
-            }
-        }
-    }
-
-    // Not found
-    if (results.empty())
-    {
-        // Abort if the file is mandatory, otherwise return null
-        if (mandatory)
-        {
-            std::cerr
-                << "--> FOAM FATAL ERROR in Foam::findEtcFiles() :"
-                   " could not find mandatory file\n    '"
-                << name.c_str() << "'\n\n" << std::endl;
-            ::exit(1);
-        }
-    }
-
-    // Return list of matching paths or empty list if none found
-    return results;
-}
-
-
-Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
-{
-    fileNameList results(findEtcFiles(name, mandatory, true));
-
-    if (results.size())
-    {
-        return results[0];
-    }
-    else
-    {
-        return fileName();
-    }
 }
 
 
@@ -720,7 +571,7 @@ Foam::fileNameList Foam::readDir
     label nEntries = 0;
 
     // Attempt to open directory and set the structure pointer
-    if ((source = ::opendir(directory.c_str())) == NULL)
+    if ((source = ::opendir(directory.c_str())) == nullptr)
     {
         dirEntries.setSize(0);
 
@@ -733,7 +584,7 @@ Foam::fileNameList Foam::readDir
     else
     {
         // Read and parse all the entries in the directory
-        while ((list = ::readdir(source)) != NULL)
+        while ((list = ::readdir(source)) != nullptr)
         {
             fileName fName(list->d_name);
 
@@ -1045,7 +896,7 @@ bool Foam::rmDir(const fileName& directory)
     struct dirent *list;
 
     // Attempt to open directory and set the structure pointer
-    if ((source = ::opendir(directory.c_str())) == NULL)
+    if ((source = ::opendir(directory.c_str())) == nullptr)
     {
         WarningInFunction
             << "cannot open directory " << directory << endl;
@@ -1055,7 +906,7 @@ bool Foam::rmDir(const fileName& directory)
     else
     {
         // Read and parse all the entries in the directory
-        while ((list = ::readdir(source)) != NULL)
+        while ((list = ::readdir(source)) != nullptr)
         {
             fileName fName(list->d_name);
 
@@ -1141,7 +992,7 @@ bool Foam::ping
     struct sockaddr_in destAddr;      // will hold the destination addr
     u_int addr;
 
-    if ((hostPtr = ::gethostbyname(destName.c_str())) == NULL)
+    if ((hostPtr = ::gethostbyname(destName.c_str())) == nullptr)
     {
         FatalErrorInFunction
             << "gethostbyname error " << h_errno << " for host " << destName

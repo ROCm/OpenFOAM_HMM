@@ -41,8 +41,7 @@ Description
     if alpha < lowerBound:
     - apply a fixed value condition, with a uniform level of the lower bound
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
@@ -52,7 +51,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            variableHeightFlowRate;
         lowerBound      0.0;

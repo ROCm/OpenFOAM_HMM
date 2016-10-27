@@ -34,6 +34,11 @@ addLayers       false;
 //keepPatches    true; // default false
 
 
+//Optional: preserve all generated patches. Default is to remove
+//          zero-sized patches.
+//keepPatches true;
+
+
 // Geometry. Definition of all surfaces. All surfaces are of class
 // searchableSurface.
 // Surfaces are used

@@ -8,8 +8,8 @@
 
 inletMassFlowRate
 {
-    type            faceSource;
-    functionObjectLibs ("libfieldFunctionObjects.so");
+    type            surfaceFieldValue;
+    libs            ("libfieldFunctionObjects.so");
 
     fields
     (
@@ -17,22 +17,22 @@ inletMassFlowRate
         alphaRhoPhi.liquid
     );
 
-    valueOutput     false;
+    writeFields     false;
     log             true;
     surfaceFormat   null;
 
-    source          patch;
-    sourceName      inlet;
+    regionType      patch;
+    name            inlet;
 
     operation       sum;
 
-    outputControl   timeStep;
+    writeControl   timeStep;
 }
 
 outletMassFlowRate
 {
-    type            faceSource;
-    functionObjectLibs ("libfieldFunctionObjects.so");
+    type            surfaceFieldValue;
+    libs            ("libfieldFunctionObjects.so");
 
     fields
     (
@@ -40,23 +40,23 @@ outletMassFlowRate
         alphaRhoPhi.liquid
     );
 
-    valueOutput     false;
+    writeFields     false;
     log             true;
     surfaceFormat   null;
 
-    source          patch;
-    sourceName      outlet;
+    regionType      patch;
+    name            outlet;
 
     operation       sum;
 
-    outputControl   timeStep;
+    writeControl   timeStep;
 }
 
 totalMass
 {
     type            coded;
-    functionObjectLibs ("libutilityFunctionObjects.so");
-    redirectType    error;
+    libs            ("libutilityFunctionObjects.so");
+    name    error;
 
     code
     #{

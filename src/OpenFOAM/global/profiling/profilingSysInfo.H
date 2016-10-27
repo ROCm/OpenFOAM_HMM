@@ -51,12 +51,6 @@ class Ostream;
 
 class profiling::sysInfo
 {
-    // Private Static Data Members
-
-
-    // Private Data Members
-
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -72,9 +66,6 @@ protected:
 
         friend class profiling;
 
-
-    // Member Functions
-
 public:
 
 
@@ -89,11 +80,6 @@ public:
 
 
     // Member Functions
-
-    // Access
-
-
-    // Edit
 
         //- Update it with a new timing information
         void update();

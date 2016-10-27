@@ -1,0 +1,28 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+# create the blockMesh file with the parametric one
+m4 system/blockMeshDict.m4 > system/blockMeshDict
+
+runApplication blockMesh
+runApplication topoSet
+
+runApplication  snappyHexMesh -overwrite
+
+runApplication extrudeToRegionMesh -overwrite
+
+runApplication decomposePar
+rm log.decomposePar
+runApplication decomposePar -region panelRegion
+
+runParallel $(getApplication)
+
+paraFoam -touch
+paraFoam -touch -region panelRegion
+
+(cd validation && ./crateGraphs)
+
+# -----------------------------------------------------------------------------

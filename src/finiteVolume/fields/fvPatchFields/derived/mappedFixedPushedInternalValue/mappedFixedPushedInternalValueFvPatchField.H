@@ -31,8 +31,7 @@ Description
     This boundary condition maps the boundary values of a neighbour patch
     field to the boundary and internal cell values of *this.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         fieldName    | name of field to be mapped | no       | this field name
@@ -42,7 +41,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            mappedFixedPushedInternalValue;
         fieldName       T;
@@ -56,7 +55,7 @@ Note
     This boundary condition can only be applied to patches that are of
     the \c mappedPolyPatch type.
 
-SeeAlso
+See also
     Foam::mappedPatchBase
     Foam::mappedPolyPatch
     Foam::mappedFvPatch

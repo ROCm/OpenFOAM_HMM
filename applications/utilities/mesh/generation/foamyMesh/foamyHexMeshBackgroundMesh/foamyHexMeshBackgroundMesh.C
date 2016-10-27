@@ -3,7 +3,7 @@
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
    \\  /     A nd            | Copyright (C) 2012-2016 OpenFOAM Foundation
-    \\/      M anipulation   |
+    \\/      M anipulation   | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -128,32 +128,32 @@ void printMeshData(const polyMesh& mesh)
     label totProcPatches = 0;
     label maxProcFaces = 0;
 
-    for (label procI = 0; procI < Pstream::nProcs(); procI++)
+    for (label proci = 0; proci < Pstream::nProcs(); proci++)
     {
         Info<< endl
-            << "Processor " << procI << nl
-            << "    Number of cells = " << globalCells.localSize(procI)
+            << "Processor " << proci << nl
+            << "    Number of cells = " << globalCells.localSize(proci)
             << endl;
 
         label nProcFaces = 0;
 
-        const labelList& nei = patchNeiProcNo[procI];
+        const labelList& nei = patchNeiProcNo[proci];
 
-        forAll(patchNeiProcNo[procI], i)
+        forAll(patchNeiProcNo[proci], i)
         {
             Info<< "    Number of faces shared with processor "
-                << patchNeiProcNo[procI][i] << " = " << patchSize[procI][i]
+                << patchNeiProcNo[proci][i] << " = " << patchSize[proci][i]
                 << endl;
 
-            nProcFaces += patchSize[procI][i];
+            nProcFaces += patchSize[proci][i];
         }
 
         Info<< "    Number of processor patches = " << nei.size() << nl
             << "    Number of processor faces = " << nProcFaces << nl
             << "    Number of boundary faces = "
-            << globalBoundaryFaces.localSize(procI) << endl;
+            << globalBoundaryFaces.localSize(proci) << endl;
 
-        maxProcCells = max(maxProcCells, globalCells.localSize(procI));
+        maxProcCells = max(maxProcCells, globalCells.localSize(proci));
         totProcFaces += nProcFaces;
         totProcPatches += nei.size();
         maxProcPatches = max(maxProcPatches, nei.size());
@@ -256,7 +256,7 @@ autoPtr<polyMesh> generateHexMesh
     cellShapeList cellShapes(nCells[0]*nCells[1]*nCells[2]);
 
     labelList hexPoints(8);
-    label cellI = 0;
+    label celli = 0;
     for (label i = 0; i < nCells[0]; i++)
     {
         for (label j = 0; j < nCells[1]; j++)
@@ -271,7 +271,7 @@ autoPtr<polyMesh> generateHexMesh
                 hexPoints[5] = vtxLabel(nCells, i+1, j,   k+1);
                 hexPoints[6] = vtxLabel(nCells, i+1, j+1, k+1);
                 hexPoints[7] = vtxLabel(nCells, i,   j+1, k+1);
-                cellShapes[cellI++] = cellShape(hex, hexPoints);
+                cellShapes[celli++] = cellShape(hex, hexPoints);
             }
         }
     }
@@ -353,14 +353,14 @@ tmp<scalarField> signedDistance
         // Push back to original
         forAll(volType, i)
         {
-            label pointI = surfIndices[i];
-            scalar dist = mag(points[pointI] - nearest[pointI].hitPoint());
+            label pointi = surfIndices[i];
+            scalar dist = mag(points[pointi] - nearest[pointi].hitPoint());
 
             volumeType vT = volType[i];
 
             if (vT == volumeType::OUTSIDE)
             {
-                fld[pointI] = dist;
+                fld[pointi] = dist;
             }
             else if (vT == volumeType::INSIDE)
             {
@@ -624,27 +624,30 @@ int main(int argc, char *argv[])
         scalarField distSqr(cellDistance.size());
 
         const labelList& cellLevel = backgroundMesh.cellLevel();
-        forAll(cellLevel, cellI)
+        forAll(cellLevel, celli)
         {
             // The largest edge of the cell will always be less than the
             // span of the bounding box of the cell.
-            distSqr[cellI] = magSqr(cellSize)/pow(2, cellLevel[cellI]);
+            distSqr[celli] = magSqr(cellSize)/pow(2, cellLevel[celli]);
         }
 
         {
             // Internal field
-            cellDistance.internalField() = signedDistance
+            cellDistance.primitiveFieldRef() = signedDistance
             (
                 distSqr,
                 fvm.C(),
                 geometry,
                 surfaces
             );
+
             // Patch fields
-            forAll(fvm.C().boundaryField(), patchI)
+            volScalarField::Boundary& cellDistanceBf =
+                cellDistance.boundaryFieldRef();
+            forAll(fvm.C().boundaryField(), patchi)
             {
-                const pointField& cc = fvm.C().boundaryField()[patchI];
-                fvPatchScalarField& fld = cellDistance.boundaryField()[patchI];
+                const pointField& cc = fvm.C().boundaryField()[patchi];
+                fvPatchScalarField& fld = cellDistanceBf[patchi];
                 scalarField patchDistSqr
                 (
                     fld.patch().patchInternalField(distSqr)
@@ -679,12 +682,12 @@ int main(int argc, char *argv[])
         );
         {
             scalarField pointDistSqr(fvm.nPoints(), -sqr(GREAT));
-            for (label faceI = 0; faceI < fvm.nInternalFaces(); faceI++)
+            for (label facei = 0; facei < fvm.nInternalFaces(); facei++)
             {
-                label own = fvm.faceOwner()[faceI];
+                label own = fvm.faceOwner()[facei];
                 label ownDistSqr = distSqr[own];
 
-                const face& f = fvm.faces()[faceI];
+                const face& f = fvm.faces()[facei];
                 forAll(f, fp)
                 {
                     pointDistSqr[f[fp]] = max(pointDistSqr[f[fp]], ownDistSqr);
@@ -698,7 +701,7 @@ int main(int argc, char *argv[])
                 -sqr(GREAT)             // null value
             );
 
-            pointDistance.internalField() = signedDistance
+            pointDistance.primitiveFieldRef() = signedDistance
             (
                 pointDistSqr,
                 fvm.points(),

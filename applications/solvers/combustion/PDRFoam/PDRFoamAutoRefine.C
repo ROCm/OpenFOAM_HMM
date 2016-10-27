@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "createTimeControls.H"
+        #include "readTimeControls.H"
         #include "compressibleCourantNo.H"
         #include "setDeltaT.H"
 
@@ -131,11 +131,11 @@ int main(int argc, char *argv[])
                 protectedCell = 0;
             }
 
-            forAll(betav, cellI)
+            forAll(betav, celli)
             {
-                if (betav[cellI] < 0.99)
+                if (betav[celli] < 0.99)
                 {
-                    protectedCell[cellI] = 1;
+                    protectedCell[celli] = 1;
                 }
             }
 

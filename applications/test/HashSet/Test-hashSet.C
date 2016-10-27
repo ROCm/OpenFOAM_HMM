@@ -25,6 +25,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "hashedWordList.H"
 #include "HashSet.H"
 #include "Map.H"
 
@@ -35,31 +36,57 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    wordHashSet setA(0);
-    HashTable<label, word> tableA;
+    hashedWordList words
+    {
+        "abc",
+        "def",
+        "ghi"
+    };
+    words = { "def", "ghi", "xy", "all", "begin", "all" };
+
+    wordHashSet setA
+    {
+        "xx",
+        "yy",
+        "zz"
+    };
+
+    setA = { "kjhk", "kjhk2", "abced" };
+
+    HashTable<label, word> tableA
+    {
+        { "value1", 1 },
+        { "value2", 2 },
+        { "value3", 3 }
+    };
 
     HashTable<nil> tableB;
-    Map<label> mapA;
-
-    setA.insert("kjhk");
-    setA.insert("kjhk2");
-
-    tableA.insert("value1", 1);
-    tableA.insert("value2", 2);
-    tableA.insert("value3", 3);
-
     tableB.insert("value4", nil());
     tableB.insert("value5", nil());
     tableB.insert("value6", nil());
 
-    mapA.set(1, 1);
-    mapA.set(2, 2);
-    mapA.set(3, 3);
+    Map<label> mapA
+    {
+        { 1, 1 },
+        { 2, 2 },
+        { 3, 3 }
+    };
     mapA.set(4, 4);
 
-    Info<< setA << endl;
-    Info<< tableA << endl;
-    Info<< mapA << endl;
+    Info<< "hashedWordList: " << words << nl
+        << "with lookup: "  << words.lookup() << endl;
+
+    words.sort();
+    Info<< "hashedWordList: " << words << nl
+        << "with lookup: "  << words.lookup() << endl;
+
+    words.uniq();
+    Info<< "hashedWordList: " << words << nl
+        << "with lookup: "  << words.lookup() << endl;
+
+    Info<< "wordHashSet: "    << setA << endl;
+    Info<< "Table-HashSet: "  << tableA << endl;
+    Info<< "Map<label>: "     << mapA << endl;
 
     Info<< "create from HashSet: ";
     Info<< wordHashSet(setA) << endl;
@@ -76,9 +103,10 @@ int main(int argc, char *argv[])
         << nl;
 
 
-    labelHashSet setB(1);
-    setB.insert(11);
-    setB.insert(42);
+    labelHashSet setB
+    {
+        1, 11, 42
+    };
 
     Info<< "setB : " << setB << endl;
 
@@ -89,11 +117,7 @@ int main(int argc, char *argv[])
     Info<< "setC : " << setC << endl;
 
     labelHashSet setD(1);
-    setD.insert(11);
-    setD.insert(100);
-    setD.insert(49);
-    setD.insert(36);
-    setD.insert(2008);
+    setD.insert({11, 100, 49, 36, 2008});
 
     Info<< "setD : " << setD << endl;
 
@@ -131,7 +155,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        Info<< "setD has no 0" << endl;
+        Info<< "setD has no 11" << endl;
     }
 
     Info<< "setD : " << setD << endl;
