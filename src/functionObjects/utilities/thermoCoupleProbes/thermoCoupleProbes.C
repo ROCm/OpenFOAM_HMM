@@ -68,9 +68,14 @@ Foam::functionObjects::thermoCoupleProbes::thermoCoupleProbes
 
     // Check if the property exist (resume old calculation)
     // or of it is new.
-    if (!getProperty("Tc", Ttc_))
+    dictionary probeDict;
+    if (getDict(typeName, probeDict))
     {
-        Ttc_ = probes::sample(thermo_.T());
+        probeDict.lookup("Tc") >> Ttc_;
+    }
+    else
+    {
+       Ttc_ = probes::sample(thermo_.T());
     }
 
     // Note: can only create the solver once all samples have been found

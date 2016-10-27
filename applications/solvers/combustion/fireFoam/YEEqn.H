@@ -9,7 +9,6 @@ tmp<fv::convectionScheme<scalar>> mvConvection
     )
 );
 {
-    radiation->correct();
     combustion->correct();
     dQ = combustion->dQ();
     volScalarField Yt(0.0*Y[0]);
@@ -47,6 +46,8 @@ tmp<fv::convectionScheme<scalar>> mvConvection
 
     Y[inertIndex] = scalar(1) - Yt;
     Y[inertIndex].max(0.0);
+
+    radiation->correct();
 
     volScalarField& he = thermo.he();
 
