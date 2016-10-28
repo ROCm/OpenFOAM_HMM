@@ -42,23 +42,54 @@ isParallel()
 #
 isTest()
 {
-    for i in "$@"; do
-        if [ "$i" = "-test" ]
-        then
-            return 0
-        fi
-    done
+    for i; do [ "$i" = "-test" ] && return 0; done
     return 1
 }
 
+#
+# Extract 'numberOfSubdomains' from system/decomposeParDict
+# (or alternative location).
+#
+# On failure:
+#    return '1'
+#    exit status 1
+#
 getNumberOfProcessors()
 {
-    foamDictionary -entry numberOfSubdomains -value system/decomposeParDict
+    # Re-use positional parameters for automatic whitespace elimination
+    set -- $(foamDictionary -entry numberOfSubdomains -value "${1:-system/decomposeParDict}")
+
+    if [ "$#" -eq 1 ]
+    then
+        echo "$1"
+    else
+        echo "Error retrieving 'numberOfSubdomains' from decomposeParDict" 1>&2
+        echo 1
+        return 1
+    fi
 }
 
+
+#
+# Extract 'application' from system/controlDict
+#
+# On failure:
+#    return 'false' which is also a command (ie, shell builtin or /bin/false)
+#    exit status 1
+#
 getApplication()
 {
-    sed -ne 's/^ *application\s*\([a-zA-Z]*\)\s*;.*$/\1/p' system/controlDict
+    # Re-use positional parameters for automatic whitespace elimination
+    set -- $(foamDictionary -entry application -value system/controlDict)
+
+    if [ "$#" -eq 1 ]
+    then
+        echo "$1"
+    else
+        echo "Error retrieving 'application' from controlDict" 1>&2
+        echo false
+        return 1
+    fi
 }
 
 runApplication()
