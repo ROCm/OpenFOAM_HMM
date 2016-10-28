@@ -97,28 +97,23 @@ cleanCase()
     rm -rf surfaceSampling > /dev/null 2>&1
     rm -rf cuttingPlane > /dev/null 2>&1
     rm -rf system/machines > /dev/null 2>&1
+    rm -rf Ensight EnSight ensightWrite VTK > /dev/null 2>&1
 
     # From mpirunDebug
     rm -f gdbCommands  mpirun.schema
 
     cleanSnappyFiles
-    if [ -d constant/polyMesh ]
-    then
-        rm -rf constant/polyMesh > /dev/null 2>&1
-    fi
+    rm -f 0/cellDist > /dev/null 2>&1
+
     if [ -d constant ]
     then
         (cd constant && \
             rm -rf \
-            cellToRegion cellLevel* pointLevel* \
+            cellDecomposition cellToRegion cellLevel* pointLevel* \
+            polyMesh tetDualMesh \
             > /dev/null 2>&1 \
         )
     fi
-
-    rm -rf constant/tetDualMesh > /dev/null 2>&1
-
-    rm -rf VTK > /dev/null 2>&1
-    rm -f 0/cellLevel 0/pointLevel 0/cellDist constant/cellDecomposition
 
     if [ -e system/blockMeshDict.m4 ]
     then
@@ -130,7 +125,7 @@ cleanCase()
 removeCase()
 {
     echo "Removing ${1:-unknown} case"
-    rm -rf $1
+    [ "$#" -ge 1 ] && rm -rf "$1"
 }
 
 
