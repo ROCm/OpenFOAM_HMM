@@ -43,7 +43,7 @@ namespace Foam
     >::names[] = { "tria3", "quad4", "nsided" };
 }
 
-const Foam::NamedEnum<Foam::ensightFaces::elemType,3>
+const Foam::NamedEnum<Foam::ensightFaces::elemType, 3>
     Foam::ensightFaces::elemEnum;
 
 
@@ -109,7 +109,7 @@ void Foam::ensightFaces::resize()
     {
         n += sizes_[typeI];
     }
-    address_.setSize(n, 0);
+    address_.setSize(n, Zero);
 
     // assign corresponding sub-lists
     n = 0;
@@ -134,7 +134,7 @@ Foam::ensightFaces::ensightFaces(label partIndex)
     index_(partIndex),
     address_(),
     flipMap_(),
-    sizes_(0),
+    sizes_(Zero),
     lists_()
 {
     // Ensure sub-lists are properly initialized to nullptr
@@ -152,7 +152,7 @@ Foam::ensightFaces::ensightFaces(const ensightFaces& obj)
     index_(obj.index_),
     address_(obj.address_),
     flipMap_(obj.flipMap_),
-    sizes_(0),
+    sizes_(),
     lists_()
 {
     // Ensure sub-lists are properly initialized to nullptr
@@ -178,7 +178,6 @@ Foam::ensightFaces::ensightFaces(const ensightFaces& obj)
 
 Foam::ensightFaces::~ensightFaces()
 {
-    sizes_ = 0;
     forAll(lists_, typeI)
     {
         deleteDemandDrivenData(lists_[typeI]);
@@ -215,7 +214,7 @@ Foam::label Foam::ensightFaces::total() const
 
 void Foam::ensightFaces::clear()
 {
-    sizes_ = 0;
+    sizes_ = Zero;  // reset sizes
     resize();
 }
 
@@ -285,15 +284,15 @@ void Foam::ensightFaces::classify(const faceList& faces)
     // Count the shapes
     // Can avoid double looping, but only at the expense of allocation
 
-    sizes_ = 0; // reset sizes
+    sizes_ = Zero;  // reset sizes
     for (label listI = 0; listI < sz; ++listI)
     {
         const enum elemType what = whatType(faces[listI]);
         sizes_[what]++;
     }
 
-    resize();   // adjust allocation
-    sizes_ = 0; // reset sizes
+    resize();       // adjust allocation
+    sizes_ = Zero;  // reset sizes
 
     // Assign face-id per shape type
     for (label listI = 0; listI < sz; ++listI)
@@ -320,7 +319,7 @@ void Foam::ensightFaces::classify
     // Count the shapes
     // Can avoid double looping, but only at the expense of allocation
 
-    sizes_ = 0; // reset sizes
+    sizes_ = Zero;  // reset sizes
     for (label listI = 0; listI < sz; ++listI)
     {
         const label faceId = addressing[listI];
@@ -332,8 +331,8 @@ void Foam::ensightFaces::classify
         }
     }
 
-    resize();   // adjust allocation
-    sizes_ = 0; // reset sizes
+    resize();       // adjust allocation
+    sizes_ = Zero;  // reset sizes
 
     if (useFlip)
     {
