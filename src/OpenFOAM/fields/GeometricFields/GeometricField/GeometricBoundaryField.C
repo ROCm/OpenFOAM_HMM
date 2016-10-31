@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +83,7 @@ readField
     // 2. Patch-groups. (using non-wild card entries of dictionaries)
     // (patchnames already matched above)
     // Note: in reverse order of entries in the dictionary (last
-    // patchGroups wins). This is so is consistent with dictionary wildcard
+    // patchGroups wins). This is so it is consistent with dictionary wildcard
     // behaviour
     if (dict.size())
     {
@@ -570,14 +570,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::Boundary::
 writeEntry(const word& keyword, Ostream& os) const
 {
     os.beginBlock(keyword);
-
-    forAll(*this, patchi)
-    {
-        os.beginBlock(this->operator[](patchi).patch().name());
-        os  << this->operator[](patchi);
-        os.endBlock();
-    }
-
+    this->writeEntries(os);
     os.endBlock() << flush;
 
     // Check state of IOstream
@@ -586,6 +579,19 @@ writeEntry(const word& keyword, Ostream& os) const
         "GeometricField<Type, PatchField, GeoMesh>::Boundary::"
         "writeEntry(const word& keyword, Ostream& os) const"
     );
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::Boundary::
+writeEntries(Ostream& os) const
+{
+    forAll(*this, patchi)
+    {
+        os.beginBlock(this->operator[](patchi).patch().name());
+        os  << this->operator[](patchi);
+        os.endBlock();
+    }
 }
 
 
