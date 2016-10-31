@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,6 +106,7 @@ Usage
         restartOnOutput | Restart the averaging on output | no | no
         periodicRestart   | Periodically restart the averaging | no | no
         restartPeriod     | Periodic restart period | conditional |
+        restartTime       | One-shot reset of the averaging | no | great
         fields            | list of fields and averaging options | yes |
     \endtable
 
@@ -165,6 +166,9 @@ protected:
 
         //- Restart period
         scalar restartPeriod_;
+
+        //- Specific restart time
+        scalar restartTime_;
 
         //- Initialised flag
         bool initialised_;
