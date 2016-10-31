@@ -141,10 +141,22 @@ void Foam::functionObjects::fieldAverage::calcAverages()
         prevTimeIndex_ = currentTimeIndex;
     }
 
+    bool doRestart = false;
     if (periodicRestart_ && currentTime > restartPeriod_*periodIndex_)
     {
-        restart();
+        doRestart = true;
         periodIndex_++;
+    }
+
+    if (currentTime >= restartTime_)
+    {
+        doRestart = true;      // Restart is overdue.
+        restartTime_ = GREAT;  // Avoid triggering again
+    }
+
+    if (doRestart)
+    {
+        restart();
     }
 
     Log
@@ -262,6 +274,7 @@ Foam::functionObjects::fieldAverage::fieldAverage
     restartOnOutput_(false),
     periodicRestart_(false),
     restartPeriod_(GREAT),
+    restartTime_(GREAT),
     initialised_(false),
     faItems_(),
     totalIter_(),
@@ -296,6 +309,25 @@ bool Foam::functionObjects::fieldAverage::read(const dictionary& dict)
     if (periodicRestart_)
     {
         dict.lookup("restartPeriod") >> restartPeriod_;
+        Log
+            << "    Restart period " << restartPeriod_
+            << nl << endl;
+    }
+
+    restartTime_ = GREAT;
+    if (dict.readIfPresent("restartTime", restartTime_))
+    {
+        if (restartTime_ < obr_.time().value())
+        {
+            // The restart time is already in the past - ignore
+            restartTime_ = GREAT;
+        }
+        else
+        {
+            Log
+                << "    Restart scheduled at time " << restartTime_
+                << nl << endl;
+        }
     }
 
     readAveragingProperties();

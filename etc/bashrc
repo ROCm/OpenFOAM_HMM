@@ -32,7 +32,7 @@
 #------------------------------------------------------------------------------
 
 export WM_PROJECT=OpenFOAM
-export WM_PROJECT_VERSION=plus.master.develop
+export WM_PROJECT_VERSION=plus
 
 ################################################################################
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
@@ -42,15 +42,15 @@ export WM_PROJECT_VERSION=plus.master.develop
 #
 # Please set to the appropriate path if the default is not correct.
 #
-[ $BASH_SOURCE ] && \
-export FOAM_INST_DIR=$(cd ${BASH_SOURCE%/*/*/*} && pwd -P) || \
-export FOAM_INST_DIR=$HOME/$WM_PROJECT
-# export FOAM_INST_DIR=~$WM_PROJECT
-# export FOAM_INST_DIR=/opt/$WM_PROJECT
-# export FOAM_INST_DIR=/usr/local/$WM_PROJECT
+[ $BASH_SOURCE ] && FOAM_INST_DIR=$(\cd ${BASH_SOURCE%/*/*/*} && \pwd -P) || \
+FOAM_INST_DIR=$HOME/$WM_PROJECT
+# FOAM_INST_DIR=~$WM_PROJECT
+# FOAM_INST_DIR=/opt/$WM_PROJECT
+# FOAM_INST_DIR=/usr/local/$WM_PROJECT
 #
 # END OF (NORMAL) USER EDITABLE PART
 ################################################################################
+export FOAM_INST_DIR
 
 # The default environment variables below can be overridden in a prefs.sh file
 # located in ~/.OpenFOAM/$WM_PROJECT_VERSION, ~/.OpenFOAM,
