@@ -239,11 +239,11 @@ inline const Cmpt&
 VectorSpace<Form, Cmpt, Ncmpts>::
 ConstBlock<SubVector, BStart>::operator[]
 (
-    const direction i
+    const direction d
 ) const
 {
     #ifdef FULLDEBUG
-    if (i >= Ncmpts)
+    if (d >= Ncmpts)
     {
         FatalErrorInFunction
             << "index " << d << " out of range"
@@ -251,7 +251,7 @@ ConstBlock<SubVector, BStart>::operator[]
     }
     #endif
 
-    return vs_[BStart + i];
+    return vs_[BStart + d];
 }
 
 
@@ -269,7 +269,7 @@ ConstBlock<SubVector, BStart>::operator()
     if (i >= Ncmpts)
     {
         FatalErrorInFunction
-            << "index " << d << " out of range"
+            << "index " << i << " out of range"
             << abort(FatalError);
     }
 
