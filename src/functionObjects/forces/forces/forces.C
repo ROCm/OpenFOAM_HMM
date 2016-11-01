@@ -180,7 +180,7 @@ void Foam::functionObjects::forces::initialise()
         if (!foundObject<volVectorField>(fDName_))
         {
             FatalErrorInFunction
-                << "Could not find " << fDName_ << " in database."
+                << "Could not find " << fDName_ << " in database"
                 << exit(FatalError);
         }
     }
@@ -194,14 +194,15 @@ void Foam::functionObjects::forces::initialise()
         )
         {
             FatalErrorInFunction
-                << "Could not find " << UName_ << ", " << pName_
+                << "Could not find U: " << UName_ << " or p:" << pName_
+                << " in database"
                 << exit(FatalError);
         }
 
         if (rhoName_ != "rhoInf" && !foundObject<volScalarField>(rhoName_))
         {
             FatalErrorInFunction
-                << "Could not find " << rhoName_
+                << "Could not find rho:" << rhoName_
                 << exit(FatalError);
         }
     }
@@ -269,13 +270,13 @@ void Foam::functionObjects::forces::initialiseBins()
         {
             binPoints_[i] = (i + 0.5)*binDir_*binDx_;
         }
+    }
 
-        // Allocate storage for forces and moments
-        forAll(force_, i)
-        {
-            force_[i].setSize(nBin_, vector::zero);
-            moment_[i].setSize(nBin_, vector::zero);
-        }
+    // Allocate storage for forces and moments
+    forAll(force_, i)
+    {
+        force_[i].setSize(nBin_, vector::zero);
+        moment_[i].setSize(nBin_, vector::zero);
     }
 }
 
@@ -908,23 +909,14 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
         }
         else if (nBin_ == 0)
         {
+            // Case of no bins equates to a single bin to collect all data
             nBin_ = 1;
         }
-        else if ((nBin_ == 0) || (nBin_ == 1))
+        else
         {
             binDict.lookup("cumulative") >> binCumulative_;
             binDict.lookup("direction") >> binDir_;
             binDir_ /= mag(binDir_);
-        }
-    }
-
-    if (nBin_ == 1)
-    {
-        // Allocate storage for forces and moments
-        forAll(force_, i)
-        {
-            force_[i].setSize(1, vector::zero);
-            moment_[i].setSize(1, vector::zero);
         }
     }
 
