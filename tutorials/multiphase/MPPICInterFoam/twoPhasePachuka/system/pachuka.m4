@@ -851,36 +851,34 @@ edges
     arc 73 75 (0.0 Rd3 Hl3)
     arc 69 71 (0.0 qRt Hl3)
 
-    arc 68 69 (qRt 0.0 Hl3)
     arc 76 77 (Rt 0.0 Hl3)
-
     arc 78 79 (-Rt 0.0 Hl3)
+
     arc 76 78 (0.0 -Rt Hl3)
-
     arc 77 79 (0.0 Rt Hl3)
+
     arc 84 85 (Rd 0.0 Ht)
-
     arc 86 87 (-Rd 0.0 Ht)
+
     arc 84 86 (0.0 -Rd Ht)
-
     arc 85 87 (0.0 Rd Ht)
+
     arc 92 93 (Rd3 0.0 Ht)
-
     arc 94 95 (-Rd3 0.0 Ht)
+
     arc 94 92 (0.0 -Rd3 Ht)
-
     arc 93 95 (0.0 Rd3 Ht)
+
     arc 88 89 (qRt 0.0 Ht)
-
     arc 90 91 (-qRt 0.0 Ht)
+
     arc 88 90 (0.0 -qRt Ht)
-
     arc 89 91 (0.0 qRt Ht)
+
     arc 96 97 (Rt 0.0 Ht)
-
     arc 98 99 (-Rt 0.0 Ht)
-    arc 98 96 (0.0 -Rt Ht)
 
+    arc 98 96 (0.0 -Rt Ht)
     arc 97 99 (0.0 Rt Ht)
 );
 
