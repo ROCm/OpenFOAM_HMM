@@ -59,6 +59,7 @@ set cmake_version=cmake-system
 #------------------------------------------------------------------------------
 
 # Clean the PATH
+if ( ! $?ParaView_DIR ) setenv ParaView_DIR
 set cleaned=`$WM_PROJECT_DIR/bin/foamCleanPath "$PATH" "$ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/cmake- $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-"`
 if ( $status == 0 ) setenv PATH $cleaned
 
