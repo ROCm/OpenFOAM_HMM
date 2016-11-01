@@ -733,7 +733,7 @@ Foam::functionObjects::forces::forces
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    writeFile(mesh_, name, name, dict),
+    writeFile(mesh_, name),
     force_(3),
     moment_(3),
     forceFilePtr_(),
@@ -781,7 +781,7 @@ Foam::functionObjects::forces::forces
 )
 :
     fvMeshFunctionObject(name, obr, dict),
-    writeFile(mesh_, name, name, dict),
+    writeFile(mesh_, name),
     force_(3),
     moment_(3),
     forceFilePtr_(),
