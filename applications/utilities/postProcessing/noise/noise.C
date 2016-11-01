@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
     (
         IOobject
         (
-            dictName,
+            dictName.expand(),
             runTime,
             IOobject::MUST_READ
         )

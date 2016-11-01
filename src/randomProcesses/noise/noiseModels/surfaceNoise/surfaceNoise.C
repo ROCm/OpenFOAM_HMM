@@ -46,6 +46,11 @@ addToRunTimeSelectionTable(noiseModel, surfaceNoise, dictionary);
 
 void surfaceNoise::initialise(const dictionary& dict)
 {
+    dict.lookup("inputFile") >> inputFileName_;
+    inputFileName_.expand();
+
+    dict.readIfPresent("fftWriteInterval", fftWriteInterval_);
+
     label nAvailableTimes = 0;
 
     // All reading performed on the master processor only
@@ -418,13 +423,13 @@ Foam::scalar surfaceNoise::surfaceAverage
 surfaceNoise::surfaceNoise(const dictionary& dict)
 :
     noiseModel(dict),
-    inputFileName_(dict.lookup("inputFile")),
+    inputFileName_("unknown-inputFile"),
     pIndex_(0),
     times_(),
     deltaT_(0),
     startTimeIndex_(0),
     nFace_(0),
-    fftWriteInterval_(dict.lookupOrDefault("fftWriteInterval", 1))
+    fftWriteInterval_(1)
 {
     initialise(dict);
 }
