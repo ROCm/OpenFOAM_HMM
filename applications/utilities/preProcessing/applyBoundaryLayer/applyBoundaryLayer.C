@@ -57,57 +57,37 @@ static const scalar Cmu(0.09);
 static const scalar kappa(0.41);
 
 
-Foam::tmp<Foam::volVectorField> createSimplifiedU(const volVectorField& U)
-{
-    tmp<volVectorField> tU
-    (
-        new volVectorField
-        (
-            IOobject
-            (
-                "Udash",
-                U.mesh().time().timeName(),
-                U.mesh(),
-                IOobject::NO_READ
-            ),
-            U.mesh(),
-            dimensionedVector("0", dimVelocity, vector::zero),
-            zeroGradientFvPatchField<vector>::typeName
-        )
-    );
-
-    // Assign the internal value to the original field
-    tU.ref() = U;
-
-    return tU;
-}
-
-
-void correctProcessorPatches(volScalarField& vf)
+template<class Type>
+void correctProcessorPatches
+(
+    GeometricField<Type, fvPatchField, volMesh>& vf
+)
 {
     if (!Pstream::parRun())
     {
         return;
     }
 
+    typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
+
     // Not possible to use correctBoundaryConditions on fields as they may
     // use local info as opposed to the constraint values employed here,
     // but still need to update processor patches
-    volScalarField::Boundary& bf = vf.boundaryFieldRef();
+    typename volFieldType::Boundary& bf = vf.boundaryFieldRef();
 
-    forAll(bf, patchI)
+    forAll(bf, patchi)
     {
-        if (isA<processorFvPatchField<scalar>>(bf[patchI]))
+        if (isA<processorFvPatchField<Type>>(bf[patchi]))
         {
-            bf[patchI].initEvaluate();
+            bf[patchi].initEvaluate();
         }
     }
 
-    forAll(bf, patchI)
+    forAll(bf, patchi)
     {
-        if (isA<processorFvPatchField<scalar>>(bf[patchI]))
+        if (isA<processorFvPatchField<Type>>(bf[patchi]))
         {
-            bf[patchI].evaluate();
+            bf[patchi].evaluate();
         }
     }
 }
@@ -142,7 +122,7 @@ void blendField
         // - operation may use inconsistent fields wrt these local
         //   manipulations
         //fld.correctBoundaryConditions();
-        correctProcessorPatches(fld);
+        correctProcessorPatches<scalar>(fld);
 
         Info<< "Writing " << fieldName << nl << endl;
         fld.write();
@@ -181,7 +161,7 @@ void calcOmegaField
         // - operation may use inconsistent fields wrt these local
         //   manipulations
         // omega.correctBoundaryConditions();
-        correctProcessorPatches(omega);
+        correctProcessorPatches<scalar>(omega);
 
         Info<< "Writing omega\n" << endl;
         omega.write();
@@ -215,7 +195,7 @@ void setField
         // - operation may use inconsistent fields wrt these local
         //   manipulations
         // fld.correctBoundaryConditions();
-        correctProcessorPatches(fld);
+        correctProcessorPatches<scalar>(fld);
 
         Info<< "Writing " << fieldName << nl << endl;
         fld.write();
@@ -267,7 +247,8 @@ tmp<volScalarField> calcNut
         //       case for the Templated Turbulence models.  The call to correct
         //       below will evolve the turbulence model equations and update nut,
         //       whereas only nut update is required.  Need to revisit.
-        turbulence->correct();
+//        turbulence->correct();
+        turbulence->correctEnergyTransport();
 
         return tmp<volScalarField>(new volScalarField(turbulence->nut()));
     }
@@ -290,8 +271,8 @@ tmp<volScalarField> calcNut
         // Note: in previous versions of the code, nut was initialised on
         //       construction of the turbulence model.  This is no longer the
         //       case for the Templated Turbulence models.  The call to correct
-        //       below will evolve the turbulence model equations and update nut,
-        //       whereas only nut update is required.  Need to revisit.
+        //       below will evolve the turbulence model equations and update
+        //       nut, whereas only nut update is required.  Need to revisit.
         turbulence->correct();
 
         return tmp<volScalarField>(new volScalarField(turbulence->nut()));
@@ -347,38 +328,32 @@ int main(int argc, char *argv[])
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    // Create a copy of the U field where BCs are simplified to  zeroGradient
-    // to enable boundary condition update without requiring other fields,
-    // e.g. phi.  We can then call correctBoundaryConditions on this field to
-    // enable appropriate behaviour for processor patches.
-    volVectorField Udash(createSimplifiedU(U));
-
     // Modify velocity by applying a 1/7th power law boundary-layer
     // u/U0 = (y/ybl)^(1/7)
     // assumes U0 is the same as the current cell velocity
     Info<< "Setting boundary layer velocity" << nl << endl;
     scalar yblv = ybl.value();
-    forAll(Udash, celli)
+    forAll(U, celli)
     {
         if (y[celli] <= yblv)
         {
             mask[celli] = 1;
-            Udash[celli] *= ::pow(y[celli]/yblv, (1.0/7.0));
+            U[celli] *= ::pow(y[celli]/yblv, (1.0/7.0));
         }
     }
     mask.correctBoundaryConditions();
-    Udash.correctBoundaryConditions();
+    correctProcessorPatches<vector>(U);
 
     // Retrieve nut from turbulence model
-    volScalarField nut(calcNut(mesh, Udash));
+    volScalarField nut(calcNut(mesh, U));
 
     // Blend nut using boundary layer profile
-    volScalarField S("S", mag(dev(symm(fvc::grad(Udash)))));
+    volScalarField S("S", mag(dev(symm(fvc::grad(U)))));
     nut = (1 - mask)*nut + mask*sqr(kappa*min(y, ybl))*::sqrt(2)*S;
 
     // Do not correct BC - wall functions will 'undo' manipulation above
     // by using nut from turbulence model
-    correctProcessorPatches(nut);
+    correctProcessorPatches<scalar>(nut);
     nut.write();
 
     // Boundary layer turbulence kinetic energy
@@ -395,10 +370,8 @@ int main(int argc, char *argv[])
     calcOmegaField(mesh, mask, kBL, epsilonBL);
     setField(mesh, "nuTilda", nut);
 
-
-    // Copy internal field Udash into U before writing
+    // Write the updated U field
     Info<< "Writing U\n" << endl;
-    U = Udash;
     U.write();
 
     Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
