@@ -896,12 +896,12 @@ int main(int argc, char *argv[])
 
         forAll(surf.edges(), edgei)
         {
-            const edge& e = surf.edges()[edgeI];
+            const edge& e = surf.edges()[edgei];
             const point& start = surf.points()[surf.meshPoints()[e[0]]];
             const point& end = surf.points()[surf.meshPoints()[e[1]]];
 
             // Exclude hits of connected triangles
-            treeDataTriSurface::findSelfIntersectOp exclOp(tree, edgeI);
+            treeDataTriSurface::findSelfIntersectOp exclOp(tree, edgei);
 
             pointIndexHit hitInfo(tree.findLineAny(start, end, exclOp));
 
