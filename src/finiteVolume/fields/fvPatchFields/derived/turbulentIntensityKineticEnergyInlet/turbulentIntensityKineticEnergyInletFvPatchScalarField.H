@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,8 +46,7 @@ Description
 
     In the event of reverse flow, a zero-gradient condition is applied.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         intensity    | fraction of mean field [0-1] | yes    |
@@ -57,7 +56,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type        turbulentIntensityKineticEnergyInlet;
         intensity   0.05;           // 5% turbulence
@@ -65,7 +64,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::inletOutletFvPatchField
 
 SourceFiles

@@ -34,7 +34,7 @@ Description
     {
         type            codedFixedValue;
         value           uniform 0;
-        redirectType    rampedFixedValue;   // name of generated bc
+        name    rampedFixedValue;   // name of generated bc
 
         code
         #{
@@ -71,7 +71,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     codedFixedValueFvPatchField
 
 SourceFiles
@@ -110,9 +110,10 @@ class codedFixedValuePointPatchField
         //- Dictionary contents for the boundary condition
         mutable dictionary dict_;
 
-        const word redirectType_;
+        const word name_;
 
         mutable autoPtr<pointPatchField<Type>> redirectPatchFieldPtr_;
+
 
     // Private Member Functions
 
@@ -135,6 +136,7 @@ class codedFixedValuePointPatchField
 
         // Get the dictionary to initialize the codeContext
         virtual const dictionary& codeDict() const;
+
 
 public:
 
@@ -216,7 +218,6 @@ public:
                 )
             );
         }
-
 
 
     // Member functions

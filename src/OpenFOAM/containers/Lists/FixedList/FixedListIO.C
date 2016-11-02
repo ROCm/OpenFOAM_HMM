@@ -118,6 +118,8 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
     }
     else
     {
+        // contents are binary and contiguous
+
         is.read(reinterpret_cast<char*>(L.data()), Size*sizeof(T));
 
         is.fatalCheck
@@ -136,16 +138,10 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
 template<class T, unsigned Size>
 void Foam::FixedList<T, Size>::writeEntry(Ostream& os) const
 {
-    if
-    (
-        size()
-     && token::compound::isCompound
-        (
-            "List<" + word(pTraits<T>::typeName) + '>'
-        )
-    )
+    const word tag = "List<" + word(pTraits<T>::typeName) + '>';
+    if (token::compound::isCompound(tag))
     {
-        os  << word("List<" + word(pTraits<T>::typeName) + '>') << " ";
+        os  << tag << " ";
     }
 
     os << *this;
@@ -171,12 +167,10 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const FixedList<T, Size>& L)
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII || !contiguous<T>())
     {
-        bool uniform = false;
-
-        if (Size > 1 && contiguous<T>())
+        // Can the contents be considered 'uniform' (ie, identical)?
+        bool uniform = (Size > 1 && contiguous<T>());
+        if (uniform)
         {
-            uniform = true;
-
             forAll(L, i)
             {
                 if (L[i] != L[0])
@@ -198,7 +192,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const FixedList<T, Size>& L)
             // Write end delimiter
             os << token::END_BLOCK;
         }
-        else if (Size <= 1 ||(Size < 11 && contiguous<T>()))
+        else if (Size <= 1 || (Size < 11 && contiguous<T>()))
         {
             // Write start delimiter
             os << token::BEGIN_LIST;
@@ -206,7 +200,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const FixedList<T, Size>& L)
             // Write contents
             forAll(L, i)
             {
-                if (i > 0) os << token::SPACE;
+                if (i) os << token::SPACE;
                 os << L[i];
             }
 
@@ -230,6 +224,9 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const FixedList<T, Size>& L)
     }
     else
     {
+        // Contents are binary and contiguous
+
+        // write(...) includes surrounding start/end delimiters
         os.write(reinterpret_cast<const char*>(L.cdata()), Size*sizeof(T));
     }
 

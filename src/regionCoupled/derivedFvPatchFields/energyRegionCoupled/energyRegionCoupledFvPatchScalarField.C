@@ -192,12 +192,12 @@ weights() const
     tmp<scalarField> tw(new scalarField(deltas.size()));
     scalarField& w = tw.ref();
 
-    forAll(alphaDelta, faceI)
+    forAll(alphaDelta, facei)
     {
-        scalar di = alphaDelta[faceI];
-        scalar dni = nbrAlphaDelta[faceI];
+        scalar di = alphaDelta[facei];
+        scalar dni = nbrAlphaDelta[facei];
 
-        w[faceI] = di/(di + dni);
+        w[facei] = di/(di + dni);
     }
 
     return tw;
@@ -216,8 +216,8 @@ energyRegionCoupledFvPatchScalarField
     coupledFvPatchField<scalar>(p, iF),
     regionCoupledPatch_(refCast<const regionCoupledBaseFvPatch>(p)),
     method_(UNDEFINED),
-    nbrThermoPtr_(NULL),
-    thermoPtr_(NULL)
+    nbrThermoPtr_(nullptr),
+    thermoPtr_(nullptr)
 {}
 
 
@@ -233,8 +233,8 @@ energyRegionCoupledFvPatchScalarField
     coupledFvPatchField<scalar>(ptf, p, iF, mapper),
     regionCoupledPatch_(refCast<const regionCoupledBaseFvPatch>(p)),
     method_(ptf.method_),
-    nbrThermoPtr_(NULL),
-    thermoPtr_(NULL)
+    nbrThermoPtr_(nullptr),
+    thermoPtr_(nullptr)
 {}
 
 
@@ -249,8 +249,8 @@ energyRegionCoupledFvPatchScalarField
     coupledFvPatchField<scalar>(p, iF, dict),
     regionCoupledPatch_(refCast<const regionCoupledBaseFvPatch>(p)),
     method_(UNDEFINED),
-    nbrThermoPtr_(NULL),
-    thermoPtr_(NULL)
+    nbrThermoPtr_(nullptr),
+    thermoPtr_(nullptr)
 {
 
     if (!isA<regionCoupledBase>(this->patch().patch()))
@@ -258,8 +258,8 @@ energyRegionCoupledFvPatchScalarField
         FatalErrorInFunction
             << "' not type '" << regionCoupledBase::typeName << "'"
             << "\n    for patch " << p.name()
-            << " of field " << dimensionedInternalField().name()
-            << " in file " << dimensionedInternalField().objectPath()
+            << " of field " << internalField().name()
+            << " in file " << internalField().objectPath()
             << exit(FatalError);
     }
 }
@@ -274,8 +274,8 @@ energyRegionCoupledFvPatchScalarField
     coupledFvPatchField<scalar>(ptf),
     regionCoupledPatch_(ptf.regionCoupledPatch_),
     method_(ptf.method_),
-    nbrThermoPtr_(NULL),
-    thermoPtr_(NULL)
+    nbrThermoPtr_(nullptr),
+    thermoPtr_(nullptr)
 {}
 
 
@@ -289,8 +289,8 @@ energyRegionCoupledFvPatchScalarField
     coupledFvPatchField<scalar>(ptf, iF),
     regionCoupledPatch_(ptf.regionCoupledPatch_),
     method_(ptf.method_),
-    nbrThermoPtr_(NULL),
-    thermoPtr_(NULL)
+    nbrThermoPtr_(nullptr),
+    thermoPtr_(nullptr)
 {}
 
 
@@ -354,7 +354,7 @@ patchNeighbourField() const
 
     const scalarField nbrIntT
     (
-        nbrThermoPtr_->T().internalField(), nbrFaceCells
+        nbrThermoPtr_->T().primitiveField(), nbrFaceCells
     );
 
     scalarField intNbrT
@@ -379,7 +379,7 @@ patchNeighbourTemperatureField() const
 
     const scalarField nbrIntT
     (
-        nbrThermoPtr_->T().internalField(), nbrFaceCells
+        nbrThermoPtr_->T().primitiveField(), nbrFaceCells
     );
 
      tmp<scalarField> tintNbrT =
@@ -396,7 +396,7 @@ patchInternalTemperatureField() const
 
     tmp<scalarField> tintT
     (
-        new scalarField(thermoPtr_->T().internalField(), faceCells)
+        new scalarField(thermoPtr_->T().primitiveField(), faceCells)
     );
 
     return tintT;
@@ -416,7 +416,7 @@ void Foam::energyRegionCoupledFvPatchScalarField::updateInterfaceMatrix
 
     scalarField myHE(this->size());
 
-    if (&psiInternal == &internalField())
+    if (&psiInternal == &primitiveField())
     {
         label patchi = this->patch().index();
         const scalarField& pp =  thermoPtr_->p().boundaryField()[patchi];

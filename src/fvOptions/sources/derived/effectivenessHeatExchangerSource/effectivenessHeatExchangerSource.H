@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,8 +62,7 @@ Description
         T_{ref} | min or max(T) in cell zone depending on the sign of Q_t [K]
     \endvartable
 
-    \heading Source usage
-
+Usage
     Example usage:
     \verbatim
     effectivenessHeatExchangerSource1
@@ -78,7 +77,7 @@ Description
 
             secondaryMassFlowRate   1.0;
             secondaryInletT         336;
-            primaryInletT           293;
+            // primaryInletT           293;  // Constrain to this T if present
             faceZone                facesZoneInletOriented;
             outOfBounds             clamp;
             fileName                "effTable";
@@ -89,16 +88,19 @@ Description
     The effectiveness table is described in terms of the primary and secondary
     mass flow rates.  For example, the table:
 
+    \verbatim
                            secondary MFR
                        |  0.1   0.2   0.3
                   -----+-----------------
                   0.02 |   A     B     C
      primary MFR  0.04 |   D     E     F
                   0.06 |   G     H     I
+    \endverbatim
 
 
     Is specified by the following:
 
+    \verbatim
         (
             0.02
             (
@@ -119,7 +121,7 @@ Description
                 (0.3    I)
             )
         );
-
+    \endverbatim
 
 Note
 - the table with name "fileName" should have the same units as the
@@ -170,6 +172,9 @@ protected:
         //- Primary air temperature at the heat exchanger inlet [K]
         scalar primaryInletT_;
 
+        //- Flag to use a user-specified primary inlet temperature
+        bool userPrimaryInletT_;
+
         //- 2D look up table efficiency = function of primary and secondary
         // mass flow rates [kg/s]
         autoPtr<interpolation2DTable<scalar>> eTable_;
@@ -186,9 +191,6 @@ protected:
         //- Name of the faceZone at the heat exchange inlet
         word faceZoneName_;
 
-        //- Id for the face zone
-        label zoneID_;
-
          //- Local list of face IDs
         labelList faceId_;
 
@@ -197,9 +199,6 @@ protected:
 
         //- List of +1/-1 representing face flip map (1 use as is, -1 negate)
         labelList faceSign_;
-
-        //- Area of the face zone
-        scalar faceZoneArea_;
 
 
 private:
@@ -254,7 +253,7 @@ public:
             virtual void addSup
             (
                 fvMatrix<scalar>& eqn,
-                const label fieldI
+                const label fieldi
             )
             {
                 NotImplemented;
@@ -268,7 +267,7 @@ public:
             (
                 const volScalarField& rho,
                 fvMatrix<scalar>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
 

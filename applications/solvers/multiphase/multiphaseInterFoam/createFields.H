@@ -44,8 +44,6 @@ volScalarField rho
 );
 rho.oldTime();
 
-const surfaceScalarField& rhoPhi(mixture.rhoPhi());
-
 // Construct incompressible turbulence model
 autoPtr<incompressible::turbulenceModel> turbulence
 (
@@ -93,3 +91,5 @@ if (p_rgh.needReference())
 }
 
 mesh.setFluxRequired(p_rgh.name());
+
+#include "createMRF.H"

@@ -31,18 +31,13 @@ solvers
         tolerance           1e-4;
         relTol              0;
         smoother            symGaussSeidel;
-        cacheAgglomeration  true;
-        nCellsInCoarsestLevel   10;
-        agglomerator        faceAreaPair;
-        mergeLevels         1;
         maxIter             5;
-        nPreSweeps          0;
         nPostSweeps         1;
     }
 
     "(U|h|k|epsilon)"
     {
-        solver          PBiCG;
+        solver          PBiCGStab;
         preconditioner  DILU;
         tolerance       1e-05;
         relTol          0.1;

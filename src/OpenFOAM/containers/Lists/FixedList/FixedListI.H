@@ -35,6 +35,16 @@ inline Foam::FixedList<T, Size>::FixedList()
 
 
 template<class T, unsigned Size>
+inline Foam::FixedList<T, Size>::FixedList(const T& t)
+{
+    for (unsigned i=0; i<Size; i++)
+    {
+        v_[i] = t;
+    }
+}
+
+
+template<class T, unsigned Size>
 inline Foam::FixedList<T, Size>::FixedList(const T v[Size])
 {
     for (unsigned i=0; i<Size; i++)
@@ -45,13 +55,28 @@ inline Foam::FixedList<T, Size>::FixedList(const T v[Size])
 
 
 template<class T, unsigned Size>
-inline Foam::FixedList<T, Size>::FixedList(const T& t)
+template<class InputIterator>
+Foam::FixedList<T, Size>::FixedList
+(
+    InputIterator first,
+    InputIterator last
+)
 {
+    checkSize(std::distance(first, last));
+
+    InputIterator iter = first;
     for (unsigned i=0; i<Size; i++)
     {
-        v_[i] = t;
+        v_[i] = *iter++;
     }
 }
+
+
+template<class T, unsigned Size>
+inline Foam::FixedList<T, Size>::FixedList(std::initializer_list<T> lst)
+:
+    FixedList<T, Size>(lst.begin(), lst.end())
+{}
 
 
 template<class T, unsigned Size>
@@ -71,15 +96,10 @@ inline Foam::FixedList<T, Size>::FixedList(const SLList<T>& lst)
 {
     checkSize(lst.size());
 
-    label i = 0;
-    for
-    (
-        typename SLList<T>::const_iterator iter = lst.begin();
-        iter != lst.end();
-        ++iter
-    )
+    typename SLList<T>::const_iterator iter = lst.begin();
+    for (unsigned i=0; i<Size; i++)
     {
-        operator[](i++) = iter();
+        v_[i] = *iter++;
     }
 }
 
@@ -140,10 +160,10 @@ inline void Foam::FixedList<T, Size>::checkStart(const label start) const
 template<class T, unsigned Size>
 inline void Foam::FixedList<T, Size>::checkSize(const label size) const
 {
-    if (size < 0 || unsigned(size) > Size)
+    if (unsigned(size) != Size)
     {
         FatalErrorInFunction
-            << "size " << size << " out of range 0 ... " << (Size)
+            << "size " << size << " != " << Size
             << abort(FatalError);
     }
 }
@@ -278,15 +298,22 @@ inline void Foam::FixedList<T, Size>::operator=(const SLList<T>& lst)
 {
     checkSize(lst.size());
 
-    label i = 0;
-    for
-    (
-        typename SLList<T>::const_iterator iter = lst.begin();
-        iter != lst.end();
-        ++iter
-    )
+    typename SLList<T>::const_iterator iter = lst.begin();
+    for (unsigned i=0; i<Size; i++)
     {
-        operator[](i++) = iter();
+        v_[i] = *iter++;
+    }
+}
+
+template<class T, unsigned Size>
+inline void Foam::FixedList<T, Size>::operator=(std::initializer_list<T> lst)
+{
+    checkSize(lst.size());
+
+    typename std::initializer_list<T>::iterator iter = lst.begin();
+    for (unsigned i=0; i<Size; i++)
+    {
+        v_[i] = *iter++;
     }
 }
 

@@ -141,22 +141,22 @@ protected:
         vector position_;
 
         //- Index of the cell it is in
-        label cellI_;
+        label celli_;
 
         //- Face index if the particle is on a face otherwise -1
-        label faceI_;
+        label facei_;
 
         //- Fraction of time-step completed
         scalar stepFraction_;
 
         //- Index of the face that owns the decomposed tet that the
         //  particle is in
-        label tetFaceI_;
+        label tetFacei_;
 
         //- Index of the point on the face that defines the decomposed
         //  tet that the particle is in.  Relative to the face base
         //  point.
-        label tetPtI_;
+        label tetPti_;
 
         //- Originating processor id
         label origProc_;
@@ -187,9 +187,9 @@ protected:
             const label triI,
             const vector& tetArea,
             const label tetPlaneBasePtI,
-            const label cellI,
-            const label tetFaceI,
-            const label tetPtI,
+            const label celli,
+            const label tetFacei,
+            const label tetPti,
             const scalar tol
         ) const;
 
@@ -201,9 +201,9 @@ protected:
             const label triI,
             const vector& tetArea,
             const label tetPlaneBasePtI,
-            const label cellI,
-            const label tetFaceI,
-            const label tetPtI,
+            const label celli,
+            const label tetFacei,
+            const label tetPti,
             const scalar tol
         ) const;
 
@@ -211,12 +211,12 @@ protected:
         inline void tetNeighbour(label triI);
 
         //- Cross the from the given face across the given edge of the
-        //  given cell to find the resulting face and tetPtI
+        //  given cell to find the resulting face and tetPti
         inline void crossEdgeConnectedFace
         (
-            const label& cellI,
-            label& tetFaceI,
-            label& tetPtI,
+            const label& celli,
+            label& tetFacei,
+            label& tetPti,
             const edge& e
         );
 
@@ -249,7 +249,7 @@ protected:
         (
             const polyPatch&,
             TrackData& td,
-            const label patchI,
+            const label patchi,
             const scalar trackFraction,
             const tetIndices& tetIs
         );
@@ -315,8 +315,8 @@ public:
         //- String representation of properties
         DefinePropertyList
         (
-            "(Px Py Pz) cellI faceI stepFraction "
-            "tetFaceI tetPtI origProc origId"
+            "(Px Py Pz) celli facei stepFraction "
+            "tetFacei tetPti origProc origId"
         );
 
         //- String representation of property types
@@ -347,18 +347,18 @@ public:
         (
             const polyMesh& mesh,
             const vector& position,
-            const label cellI,
-            const label tetFaceI,
-            const label tetPtI
+            const label celli,
+            const label tetFacei,
+            const label tetPti
         );
 
-        //- Construct from components, tetFaceI_ and tetPtI_ are not
+        //- Construct from components, tetFacei_ and tetPti_ are not
         //  supplied so they will be deduced by a search
         particle
         (
             const polyMesh& mesh,
             const vector& position,
-            const label cellI,
+            const label celli,
             bool doCellFacePt = true
         );
 
@@ -444,11 +444,11 @@ public:
             //  particle occupies.
             inline tetPointRef currentTet() const;
 
-            //- Return the normal of the tri on tetFaceI_ for the
+            //- Return the normal of the tri on tetFacei_ for the
             //  current tet.
             inline vector normal() const;
 
-            //- Return the normal of the tri on tetFaceI_ for the
+            //- Return the normal of the tri on tetFacei_ for the
             //  current tet at the start of the timestep, i.e. based
             //  on oldPoints
             inline vector oldNormal() const;
@@ -476,19 +476,19 @@ public:
             inline bool onBoundary() const;
 
             //- Is this global face an internal face?
-            inline bool internalFace(const label faceI) const;
+            inline bool internalFace(const label facei) const;
 
             //- Is this global face a boundary face?
-            inline bool boundaryFace(const label faceI) const;
+            inline bool boundaryFace(const label facei) const;
 
             //- Which patch is particle on
-            inline label patch(const label faceI) const;
+            inline label patch(const label facei) const;
 
             //- Which face of this patch is this particle on
             inline label patchFace
             (
-                const label patchI,
-                const label faceI
+                const label patchi,
+                const label facei
             ) const;
 
             //- Return the fraction of time-step completed
@@ -556,12 +556,12 @@ public:
         //- Convert global addressing to the processor patch
         //  local equivalents
         template<class TrackData>
-        void prepareForParallelTransfer(const label patchI, TrackData& td);
+        void prepareForParallelTransfer(const label patchi, TrackData& td);
 
         //- Convert processor patch addressing to the global equivalents
-        //  and set the cellI to the face-neighbour
+        //  and set the celli to the face-neighbour
         template<class TrackData>
-        void correctAfterParallelTransfer(const label patchI, TrackData& td);
+        void correctAfterParallelTransfer(const label patchi, TrackData& td);
 
 
     // I-O

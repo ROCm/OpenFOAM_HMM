@@ -1,9 +1,9 @@
-#!/bin/csh -f
+#!/bin/sh
 #------------------------------------------------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -26,60 +26,39 @@
 #     foamGraphResKE
 #
 # Description
+#     Deprecated script extract initial turbulence residuals for each time-step
+#     from a log file for graphing.
 #
+#     Superceded by the more general foamLog script.
 #------------------------------------------------------------------------------
-if (! -f "$1" ) then
-    echo "No file: '$1'"
+Script=${0##*/}
+
+if [ ! -f "$1" ]; then
+    echo "$Script: $1 is not a valid filename"
     exit 1
-endif
+fi
 
-set tmpK = newK$$.dat
-cat $1 | grep "Solving for k" | grep -v "solution singularity" | sed s/,//g | awk 'BEGIN { NENTRIES = 0 }{NENTRIES++; printf("%f %e\n", NENTRIES, $8)}' - > $tmpK
+scan()
+{
+    tmpFile=new$1$$.dat
+    cat $2 | \
+        grep "Solving for $1" | \
+        grep -v "solution singularity" | \
+        sed s/,//g | \
+        awk 'BEGIN { NENTRIES = 0 }{NENTRIES++; printf("%d %e\n", NENTRIES, $8)}' - > $tmpFile
 
-set tmpEpsilon = newEpsilon$$.dat
-cat $1 | grep "Solving for epsilon" | grep -v "solution singularity" | sed s/,//g | awk 'BEGIN { NENTRIES = 0 }{NENTRIES++; printf("%f %e\n", NENTRIES, $8)}' - > $tmpEpsilon
+    if [ "$(cat $tmpFile | wc -l)" -gt 1 ]; then
+        echo >> residualKE.dat
+        cat $tmpFile >> residualKE.dat
+    fi
 
-set linesK = `cat $tmpK | wc -l`
-set linesEpsilon = `cat $tmpEpsilon | wc -l`
+    rm $tmpFile
+}
 
-set ngraphs = 0
-
-if ($linesK > 1) then
-@ ngraphs = $ngraphs + 1
-endif
-
-if ($linesEpsilon > 1) then
-@ ngraphs = $ngraphs + 1
-endif
-
-cat << EOF > residualKE.dat
-Solver Performance
-number of iterations
-residual
-0 0
-0 0
-$ngraphs
-EOF
-
-if ($linesK > 1) then
-cat << EOF >> residualKE.dat
-k
-0
-$linesK
-EOF
-cat $tmpK >> residualKE.dat
-endif
-
-if ($linesEpsilon > 1) then
-cat << EOF >> residualKE.dat
-epsilon
-0
-$linesEpsilon
-EOF
-cat $tmpEpsilon >> residualKE.dat
-endif
-
-rm $tmpK
-rm $tmpEpsilon
+rm -f residualKE.dat
+scan "k" $1
+scan "epsilon" $1
+scan "omega" $1
+scan "nuTilda" $1
 
 #------------------------------------------------------------------------------

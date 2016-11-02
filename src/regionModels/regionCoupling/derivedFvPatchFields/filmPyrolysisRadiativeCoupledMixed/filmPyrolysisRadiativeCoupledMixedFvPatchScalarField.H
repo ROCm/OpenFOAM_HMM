@@ -66,11 +66,11 @@ Description
 
     Notes:
 
-    \li \c kappa and \c kappaName are inherited from temperatureCoupledBase.
-    \li \c Qr is the radiative flux defined in the radiation model.
+    - kappa and \c kappaName are inherited from temperatureCoupledBase.
+    - Qr is the radiative flux defined in the radiation model.
 
 
-SeeAlso
+See also
     Foam::temperatureCoupledBase
 
 SourceFiles

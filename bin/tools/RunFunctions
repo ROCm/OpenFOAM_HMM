@@ -28,28 +28,68 @@
 #     Miscellaneous functions for running tutorial cases
 #------------------------------------------------------------------------------
 
-isTest()
+#
+# Look for '-parallel' in the argument list.
+#
+isParallel()
 {
-    for i in "$@"; do
-        if [ "$i" = "-test" ]
-        then
-            return 0
-        fi
-    done
+    for i; do [ "$i" = "-parallel" ] && return 0; done
     return 1
 }
 
+#
+# Look for '-test' in the argument list.
+#
+isTest()
+{
+    for i; do [ "$i" = "-test" ] && return 0; done
+    return 1
+}
+
+#
+# Extract 'numberOfSubdomains' from system/decomposeParDict
+# (or alternative location).
+#
+# On failure:
+#    return '1'
+#    exit status 1
+#
 getNumberOfProcessors()
 {
-    if [ -f "$1" ]
+    # Re-use positional parameters for automatic whitespace elimination
+    set -- $(foamDictionary -entry numberOfSubdomains -value "${1:-system/decomposeParDict}")
+
+    if [ "$#" -eq 1 ]
     then
-        expandDictionary $1 | sed -ne 's/^numberOfSubdomains\s*\(.*\);/\1/p'
+        echo "$1"
+    else
+        echo "Error retrieving 'numberOfSubdomains' from decomposeParDict" 1>&2
+        echo 1
+        return 1
     fi
 }
 
+
+#
+# Extract 'application' from system/controlDict
+#
+# On failure:
+#    return 'false' which is also a command (ie, shell builtin or /bin/false)
+#    exit status 1
+#
 getApplication()
 {
-    sed -ne 's/^ *application\s*\([a-zA-Z]*\)\s*;.*$/\1/p' system/controlDict
+    # Re-use positional parameters for automatic whitespace elimination
+    set -- $(foamDictionary -entry application -value system/controlDict)
+
+    if [ "$#" -eq 1 ]
+    then
+        echo "$1"
+    else
+        echo "Error retrieving 'application' from controlDict" 1>&2
+        echo false
+        return 1
+    fi
 }
 
 runApplication()
@@ -179,28 +219,28 @@ cloneCase()
     fi
 }
 
-# Overwrite 0/ with the contents of 0.org/ if it exists.
+# Overwrite 0/ with the contents of 0.orig/ if it exists.
 # The -processor option to do the processor directories instead
 #
 restore0Dir()
 {
     if [ "$1" = "-processor" ]
     then
-        echo "Restore 0/ from 0.org/ for processor directories"
-        [ -d 0.org ] || echo "    Warning: no 0.org/ found"
+        echo "Restore 0/ from 0.orig/ for processor directories"
+        [ -d 0.orig ] || echo "    Warning: no 0.orig/ found"
 
         # do nonetheless
         \ls -d processor* | xargs -I {} \rm -rf ./{}/0
-        \ls -d processor* | xargs -I {} \cp -r 0.org ./{}/0 > /dev/null 2>&1
+        \ls -d processor* | xargs -I {} \cp -r 0.orig ./{}/0 > /dev/null 2>&1
 
     else
-        echo "Restore 0/ from 0.org/"
-        if [ -d 0.org ]
+        echo "Restore 0/ from 0.orig/"
+        if [ -d 0.orig ]
         then
             \rm -rf 0
-            \cp -r 0.org 0 > /dev/null 2>&1
+            \cp -r 0.orig 0 > /dev/null 2>&1
         else
-            echo "    Warning: no 0.org/ found"
+            echo "    Warning: no 0.orig/ found"
         fi
     fi
 }

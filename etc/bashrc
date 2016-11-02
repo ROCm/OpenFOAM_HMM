@@ -37,28 +37,27 @@ export WM_PROJECT_VERSION=plus
 ################################################################################
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 #
-# either set $FOAM_INST_DIR before sourcing this file or set
-# 'foamInstall' below to where OpenFOAM is installed
+# FOAM_INST_DIR is the location of the OpenFOAM installation which defaults to
+# the directory containing this file if sourced by a bash shell.
 #
-# Location of the OpenFOAM installation
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-foamInstall=$HOME/$WM_PROJECT
-# foamInstall=~$WM_PROJECT
-# foamInstall=/opt/$WM_PROJECT
-# foamInstall=/usr/local/$WM_PROJECT
+# Please set to the appropriate path if the default is not correct.
+#
+[ $BASH_SOURCE ] && FOAM_INST_DIR=$(\cd ${BASH_SOURCE%/*/*/*} && \pwd -P) || \
+FOAM_INST_DIR=$HOME/$WM_PROJECT
+# FOAM_INST_DIR=~$WM_PROJECT
+# FOAM_INST_DIR=/opt/$WM_PROJECT
+# FOAM_INST_DIR=/usr/local/$WM_PROJECT
 #
 # END OF (NORMAL) USER EDITABLE PART
 ################################################################################
+export FOAM_INST_DIR
 
-#
-# These are the defaults for this version which should generally be
-# overridden from the prefs.sh file or from command-line specification
-#
-#- note the location for later use (eg, in job scripts)
-: ${FOAM_INST_DIR:=$foamInstall}; export FOAM_INST_DIR
+# The default environment variables below can be overridden in a prefs.sh file
+# located in ~/.OpenFOAM/$WM_PROJECT_VERSION, ~/.OpenFOAM,
+# $FOAM_INST_DIR/site/$WM_PROJECT_VERSION or $FOAM_INST_DIR/site
 
 #- Compiler location:
-#    WM_COMPILER_TYPE= system | ThirdParty (OpenFOAM)
+#    WM_COMPILER_TYPE= system | ThirdParty
 export WM_COMPILER_TYPE=system
 
 #- Compiler:
@@ -87,7 +86,7 @@ export WM_COMPILE_OPTION=Opt
 #- MPI implementation:
 #    WM_MPLIB = SYSTEMOPENMPI | OPENMPI | SYSTEMMPI | MPICH | MPICH-GM | HPMPI
 #               | MPI | QSMPI | SGIMPI
-export WM_MPLIB=SYSTEMOPENMPI
+export WM_MPLIB=OPENMPI
 
 #- Operating System:
 #    WM_OSTYPE = POSIX | ???
@@ -104,15 +103,10 @@ export FOAM_SIGFPE=
 
 ################################################################################
 
-# The old dirs to be cleaned from the various environment variables
-# - remove anything under top-level directory.
-# NB: the WM_PROJECT_INST_DIR might not be identical between versions
-foamOldDirs="$FOAM_INST_DIR $WM_PROJECT_SITE $HOME/$WM_PROJECT/$USER"
-if [ "$WM_PROJECT_INST_DIR" != "$FOAM_INST_DIR" ]
-then
-    foamOldDirs="$WM_PROJECT_INST_DIR $foamOldDirs"
-fi
-
+# The old dirs to be cleaned from the environment variables
+foamOldDirs="$WM_PROJECT_DIR $WM_THIRD_PARTY_DIR \
+    $HOME/$WM_PROJECT/$USER $FOAM_USER_APPBIN $FOAM_USER_LIBBIN \
+    $WM_PROJECT_SITE $FOAM_SITE_APPBIN $FOAM_SITE_LIBBIN"
 
 # Location of installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -178,6 +172,7 @@ _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/mpi`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/paraview`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/ensight`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/gperftools`
+
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/CGAL`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/scotch`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/FFTW`
@@ -206,7 +201,7 @@ fi
 
 # Cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
-unset cleaned foamClean foamInstall foamOldDirs
+unset cleaned foamClean foamOldDirs
 
 
 # Unload initialization functions:

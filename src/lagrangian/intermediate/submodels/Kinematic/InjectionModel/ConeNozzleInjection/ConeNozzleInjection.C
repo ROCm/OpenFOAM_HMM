@@ -48,8 +48,8 @@ void Foam::ConeNozzleInjection<CloudType>::setInjectionMethod()
         this->findCellAtPosition
         (
             injectorCell_,
-            tetFaceI_,
-            tetPtI_,
+            tetFacei_,
+            tetPti_,
             position_,
             false
         );
@@ -110,8 +110,8 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     duration_(readScalar(this->coeffDict().lookup("duration"))),
     position_(this->coeffDict().lookup("position")),
     injectorCell_(-1),
-    tetFaceI_(-1),
-    tetPtI_(-1),
+    tetFacei_(-1),
+    tetPti_(-1),
     direction_(this->coeffDict().lookup("direction")),
     parcelsPerSecond_
     (
@@ -216,8 +216,8 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     duration_(im.duration_),
     position_(im.position_),
     injectorCell_(im.injectorCell_),
-    tetFaceI_(im.tetFaceI_),
-    tetPtI_(im.tetPtI_),
+    tetFacei_(im.tetFacei_),
+    tetPti_(im.tetPti_),
     direction_(im.direction_),
     parcelsPerSecond_(im.parcelsPerSecond_),
     flowRateProfile_(im.flowRateProfile_),
@@ -253,8 +253,8 @@ void Foam::ConeNozzleInjection<CloudType>::updateMesh()
             this->findCellAtPosition
             (
                 injectorCell_,
-                tetFaceI_,
-                tetPtI_,
+                tetFacei_,
+                tetPti_,
                 position_
             );
         }
@@ -317,8 +317,8 @@ void Foam::ConeNozzleInjection<CloudType>::setPositionAndCell
     const scalar,
     vector& position,
     label& cellOwner,
-    label& tetFaceI,
-    label& tetPtI
+    label& tetFacei,
+    label& tetPti
 )
 {
     cachedRandom& rndGen = this->owner().rndGen();
@@ -332,8 +332,8 @@ void Foam::ConeNozzleInjection<CloudType>::setPositionAndCell
         {
             position = position_;
             cellOwner = injectorCell_;
-            tetFaceI = tetFaceI_;
-            tetPtI = tetPtI_;
+            tetFacei = tetFacei_;
+            tetPti = tetPti_;
 
             break;
         }
@@ -348,8 +348,8 @@ void Foam::ConeNozzleInjection<CloudType>::setPositionAndCell
             this->findCellAtPosition
             (
                 cellOwner,
-                tetFaceI,
-                tetPtI,
+                tetFacei,
+                tetPti,
                 position
             );
             break;

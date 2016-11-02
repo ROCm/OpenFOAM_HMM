@@ -1,0 +1,122 @@
+postPro1
+{
+    type            runTimePostProcessing;
+    libs            ("librunTimePostProcessing.so");
+    writeControl    writeTime;
+    output
+    {
+        name            image;
+        width           2000;
+        height          1200;
+    }
+    camera
+    {
+        // If camera is moving, optionally provide start and end times
+        // startPosition    0.2;
+        // endPosition      0.75;
+
+        // Total number of frames to generate
+        nFrameTotal         1;
+
+        // Parallel projection flag
+        parallelProjection  no;
+
+        // Camera mode:
+        // - flightPath: define flight path
+        // - static: fixed position
+        mode                static;
+        staticCoeffs
+        {
+            clipBox         (-0.2 -0.2 0)(1.65 0.2 1.25); // optional
+            focalPoint      (1.2 1.1 0.2);
+            up              (0 0 1);
+            lookDir         (2.4 4.0 -1.5);
+        }
+    }
+
+    // Default colours
+    // - If select to colourBy colour, these values are used unless
+    // they are locally overriden
+    colours
+    {
+        background      (1 1 1);
+        background2     (0 0 1);
+        text            (0 0 0);
+        edge            (1 0 0);
+        surface         (0.5 0.5 0.5);
+        line            (1 0 0);
+    }
+    // Line data
+    lines
+    {
+        streamline
+        {
+            type            functionObjectLine;
+            functionObject  streamLines;
+            representation  tube;
+            visible         yes;
+            tubeRadius      0.01;
+            colourBy        field;
+            fieldName       U;
+            range           (0 20);
+            opacity         1;
+            scalarBar
+            {
+                visible         yes;
+                position        (0.8 0.1);
+                vertical        yes;
+                fontSize        16;
+                title           "velocity / [m/s]";
+                labelFormat     "%6.2f";
+                numberOfLabels  5;
+            }
+        }
+    }
+
+    // Surface data
+    surfaces
+    {
+        surface1
+        {
+            type            geometry;
+            files           ("$FOAM_CASE/constant/triSurface/motorBike.obj.gz");
+            renderMode      phong;
+            representation  surface;
+            edgeColour      (0 0 0);
+            visible         yes;
+            featureEdges    yes;
+            opacity         1;
+        }
+        cuttingPlane1
+        {
+            type            functionObjectSurface;
+            functionObject  cuttingPlane;
+            colourMap       blueWhiteRed;
+            representation  glyph;
+            maxGlyphLength  0.1;
+            visible         yes;
+            featureEdges    no;
+            colourBy        field;
+            fieldName       U;
+            range           (0 30);
+            opacity         1;
+            scalarBar
+            {
+                visible         no;
+            }
+        }
+    }
+
+    // Text data
+    text
+    {
+        text1
+        {
+            string          "Motorbike";
+            position        (0.1 0.05);
+            size            72;
+            bold            yes;
+            visible         yes;
+        }
+    }
+}

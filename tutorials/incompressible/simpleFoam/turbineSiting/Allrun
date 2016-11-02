@@ -16,7 +16,7 @@ runParallel snappyHexMesh -overwrite
 
 find . -type f -iname "*level*" -exec rm {} \;
 
-# - set the initial fields
+# - Set the initial fields
 restore0Dir -processor
 
 runParallel topoSet

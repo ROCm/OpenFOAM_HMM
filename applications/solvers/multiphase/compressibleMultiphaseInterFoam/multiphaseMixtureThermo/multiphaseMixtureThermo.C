@@ -815,10 +815,10 @@ void Foam::multiphaseMixtureThermo::correctContactAngle
 (
     const phaseModel& alpha1,
     const phaseModel& alpha2,
-    surfaceVectorField::GeometricBoundaryField& nHatb
+    surfaceVectorField::Boundary& nHatb
 ) const
 {
-    const volScalarField::GeometricBoundaryField& gbf
+    const volScalarField::Boundary& gbf
         = alpha1.boundaryField();
 
     const fvBoundaryMesh& boundary = mesh_.boundary();
@@ -923,7 +923,7 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::K
 {
     tmp<surfaceVectorField> tnHatfv = nHatfv(alpha1, alpha2);
 
-    correctContactAngle(alpha1, alpha2, tnHatfv.ref().boundaryField());
+    correctContactAngle(alpha1, alpha2, tnHatfv.ref().boundaryFieldRef());
 
     // Simple expression for curvature
     return -fvc::div(tnHatfv & mesh_.Sf());
@@ -1058,7 +1058,7 @@ void Foam::multiphaseMixtureThermo::solveAlphas
         surfaceScalarField& alphaPhi = alphaPhiCorrs[phasei];
         alphaPhi += upwind<scalar>(mesh_, phi_).flux(alpha);
 
-        volScalarField::DimensionedInternalField Sp
+        volScalarField::Internal Sp
         (
             IOobject
             (
@@ -1070,7 +1070,7 @@ void Foam::multiphaseMixtureThermo::solveAlphas
             dimensionedScalar("Sp", alpha.dgdt().dimensions(), 0.0)
         );
 
-        volScalarField::DimensionedInternalField Su
+        volScalarField::Internal Su
         (
             IOobject
             (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,7 +71,7 @@ filmPyrolysisTemperatureCoupledFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF),
+    fixedValueFvPatchScalarField(p, iF, dict),
     filmRegionName_
     (
         dict.lookupOrDefault<word>("filmRegion", "surfaceFilmProperties")
@@ -82,9 +82,7 @@ filmPyrolysisTemperatureCoupledFvPatchScalarField
     ),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
-{
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
-}
+{}
 
 
 Foam::filmPyrolysisTemperatureCoupledFvPatchScalarField::
@@ -146,28 +144,28 @@ void Foam::filmPyrolysisTemperatureCoupledFvPatchScalarField::updateCoeffs()
 
     scalarField& Tp = *this;
 
-    const label patchI = patch().index();
+    const label patchi = patch().index();
 
     // Retrieve film model
     const filmModelType& filmModel =
         db().time().lookupObject<filmModelType>(filmRegionName_);
 
-    const label filmPatchI = filmModel.regionPatchID(patchI);
+    const label filmPatchi = filmModel.regionPatchID(patchi);
 
-    scalarField alphaFilm = filmModel.alpha().boundaryField()[filmPatchI];
-    filmModel.toPrimary(filmPatchI, alphaFilm);
+    scalarField alphaFilm = filmModel.alpha().boundaryField()[filmPatchi];
+    filmModel.toPrimary(filmPatchi, alphaFilm);
 
-    scalarField TFilm = filmModel.Ts().boundaryField()[filmPatchI];
-    filmModel.toPrimary(filmPatchI, TFilm);
+    scalarField TFilm = filmModel.Ts().boundaryField()[filmPatchi];
+    filmModel.toPrimary(filmPatchi, TFilm);
 
     // Retrieve pyrolysis model
     const pyrModelType& pyrModel =
         db().time().lookupObject<pyrModelType>(pyrolysisRegionName_);
 
-    const label pyrPatchI = pyrModel.regionPatchID(patchI);
+    const label pyrPatchi = pyrModel.regionPatchID(patchi);
 
-    scalarField TPyr = pyrModel.T().boundaryField()[pyrPatchI];
-    pyrModel.toPrimary(pyrPatchI, TPyr);
+    scalarField TPyr = pyrModel.T().boundaryField()[pyrPatchi];
+    pyrModel.toPrimary(pyrPatchi, TPyr);
 
 
     // Evaluate temperature

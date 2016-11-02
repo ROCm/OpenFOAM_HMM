@@ -74,11 +74,11 @@ void Foam::MRFZone::setMRFFaces()
 
     label nZoneFaces = 0;
 
-    for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
+    for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
     {
-        if (zoneCell[own[faceI]] || zoneCell[nei[faceI]])
+        if (zoneCell[own[facei]] || zoneCell[nei[facei]])
         {
-            faceType[faceI] = 1;
+            faceType[facei] = 1;
             nZoneFaces++;
         }
     }
@@ -86,19 +86,19 @@ void Foam::MRFZone::setMRFFaces()
 
     labelHashSet excludedPatches(excludedPatchLabels_);
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        const polyPatch& pp = patches[patchI];
+        const polyPatch& pp = patches[patchi];
 
-        if (pp.coupled() || excludedPatches.found(patchI))
+        if (pp.coupled() || excludedPatches.found(patchi))
         {
             forAll(pp, i)
             {
-                label faceI = pp.start()+i;
+                label facei = pp.start()+i;
 
-                if (zoneCell[own[faceI]])
+                if (zoneCell[own[facei]])
                 {
-                    faceType[faceI] = 2;
+                    faceType[facei] = 2;
                     nZoneFaces++;
                 }
             }
@@ -107,11 +107,11 @@ void Foam::MRFZone::setMRFFaces()
         {
             forAll(pp, i)
             {
-                label faceI = pp.start()+i;
+                label facei = pp.start()+i;
 
-                if (zoneCell[own[faceI]])
+                if (zoneCell[own[facei]])
                 {
-                    faceType[faceI] = 1;
+                    faceType[facei] = 1;
                     nZoneFaces++;
                 }
             }
@@ -131,11 +131,11 @@ void Foam::MRFZone::setMRFFaces()
     internalFaces_.setSize(mesh_.nFaces());
     label nInternal = 0;
 
-    for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
+    for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
     {
-        if (faceType[faceI] == 1)
+        if (faceType[facei] == 1)
         {
-            internalFaces_[nInternal++] = faceI;
+            internalFaces_[nInternal++] = facei;
         }
     }
     internalFaces_.setSize(nInternal);
@@ -149,13 +149,13 @@ void Foam::MRFZone::setMRFFaces()
 
         forAll(pp, patchFacei)
         {
-            label faceI = pp.start() + patchFacei;
+            label facei = pp.start() + patchFacei;
 
-            if (faceType[faceI] == 1)
+            if (faceType[facei] == 1)
             {
                 nIncludedFaces[patchi]++;
             }
-            else if (faceType[faceI] == 2)
+            else if (faceType[facei] == 2)
             {
                 nExcludedFaces[patchi]++;
             }
@@ -178,13 +178,13 @@ void Foam::MRFZone::setMRFFaces()
 
         forAll(pp, patchFacei)
         {
-            label faceI = pp.start() + patchFacei;
+            label facei = pp.start() + patchFacei;
 
-            if (faceType[faceI] == 1)
+            if (faceType[facei] == 1)
             {
                 includedFaces_[patchi][nIncludedFaces[patchi]++] = patchFacei;
             }
-            else if (faceType[faceI] == 2)
+            else if (faceType[facei] == 2)
             {
                 excludedFaces_[patchi][nExcludedFaces[patchi]++] = patchFacei;
             }
@@ -319,8 +319,8 @@ void Foam::MRFZone::addCoriolis
     }
 
     const labelList& cells = mesh_.cellZones()[cellZoneID_];
-    vectorField& ddtUc = ddtU.internalField();
-    const vectorField& Uc = U.internalField();
+    vectorField& ddtUc = ddtU.primitiveFieldRef();
+    const vectorField& Uc = U;
 
     const vector Omega = this->Omega();
 
@@ -418,12 +418,15 @@ void Foam::MRFZone::makeRelative(volVectorField& U) const
     }
 
     // Included patches
+
+    volVectorField::Boundary& Ubf = U.boundaryFieldRef();
+
     forAll(includedFaces_, patchi)
     {
         forAll(includedFaces_[patchi], i)
         {
             label patchFacei = includedFaces_[patchi][i];
-            U.boundaryField()[patchi][patchFacei] = Zero;
+            Ubf[patchi][patchFacei] = Zero;
         }
     }
 
@@ -433,7 +436,7 @@ void Foam::MRFZone::makeRelative(volVectorField& U) const
         forAll(excludedFaces_[patchi], i)
         {
             label patchFacei = excludedFaces_[patchi][i];
-            U.boundaryField()[patchi][patchFacei] -=
+            Ubf[patchi][patchFacei] -=
                 (Omega
               ^ (C.boundaryField()[patchi][patchFacei] - origin_));
         }
@@ -484,12 +487,14 @@ void Foam::MRFZone::makeAbsolute(volVectorField& U) const
     }
 
     // Included patches
+    volVectorField::Boundary& Ubf = U.boundaryFieldRef();
+
     forAll(includedFaces_, patchi)
     {
         forAll(includedFaces_[patchi], i)
         {
             label patchFacei = includedFaces_[patchi][i];
-            U.boundaryField()[patchi][patchFacei] =
+            Ubf[patchi][patchFacei] =
                 (Omega ^ (C.boundaryField()[patchi][patchFacei] - origin_));
         }
     }
@@ -500,7 +505,7 @@ void Foam::MRFZone::makeAbsolute(volVectorField& U) const
         forAll(excludedFaces_[patchi], i)
         {
             label patchFacei = excludedFaces_[patchi][i];
-            U.boundaryField()[patchi][patchFacei] +=
+            Ubf[patchi][patchFacei] +=
                 (Omega ^ (C.boundaryField()[patchi][patchFacei] - origin_));
         }
     }
@@ -528,11 +533,13 @@ void Foam::MRFZone::correctBoundaryVelocity(volVectorField& U) const
     const vector Omega = this->Omega();
 
     // Included patches
+    volVectorField::Boundary& Ubf = U.boundaryFieldRef();
+
     forAll(includedFaces_, patchi)
     {
         const vectorField& patchC = mesh_.Cf().boundaryField()[patchi];
 
-        vectorField pfld(U.boundaryField()[patchi]);
+        vectorField pfld(Ubf[patchi]);
 
         forAll(includedFaces_[patchi], i)
         {
@@ -541,7 +548,7 @@ void Foam::MRFZone::correctBoundaryVelocity(volVectorField& U) const
             pfld[patchFacei] = (Omega ^ (patchC[patchFacei] - origin_));
         }
 
-        U.boundaryField()[patchi] == pfld;
+        Ubf[patchi] == pfld;
     }
 }
 

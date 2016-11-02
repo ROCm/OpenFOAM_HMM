@@ -49,7 +49,6 @@ SourceFiles
 #include "labelList.H"
 #include "speciesTable.H"
 #include "atomicWeights.H"
-
 #include "reactionTypes.H"
 
 #include <FlexLexer.h>
@@ -78,33 +77,6 @@ public:
             solid,
             liquid,
             gas
-        };
-
-        //- species element
-        struct specieElement
-        {
-            word elementName;
-            label nAtoms;
-
-            bool operator==(const specieElement& se) const
-            {
-                return
-                (
-                    nAtoms == se.nAtoms
-                 && elementName == se.elementName
-                );
-            }
-
-            bool operator!=(const specieElement& se) const
-            {
-                return !operator==(se);
-            }
-
-            friend Ostream& operator<<(Ostream& os, const specieElement& se)
-            {
-                os  << se.nAtoms << token::SPACE << se.elementName;
-                return os;
-            }
         };
 
 
@@ -206,7 +178,7 @@ private:
         HashPtrTable<gasHThermoPhysics> speciesThermo_;
 
         //- Table of species composition
-        HashTable<List<specieElement>> specieComposition_;
+        speciesCompositionTable speciesComposition_;
 
         //- List of the reactions
         ReactionList<gasHThermoPhysics> reactions_;
@@ -372,6 +344,12 @@ public:
             return speciesTable_;
         }
 
+        //- Table of species composition
+        const speciesCompositionTable& specieComposition() const
+        {
+            return speciesComposition_;
+        }
+
         //- Specie phase
         const HashTable<phase>& speciePhase() const
         {
@@ -382,12 +360,6 @@ public:
         const HashPtrTable<gasHThermoPhysics>& speciesThermo() const
         {
             return speciesThermo_;
-        }
-
-        //- Table of species composition
-        const HashTable<List<specieElement>>& specieComposition() const
-        {
-            return specieComposition_;
         }
 
         //- List of the reactions

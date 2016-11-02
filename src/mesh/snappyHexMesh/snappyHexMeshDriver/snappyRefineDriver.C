@@ -515,10 +515,10 @@ Foam::label Foam::snappyRefineDriver::gapOnlyRefine
                 boolList newIsCandidateCell(isCandidateCell);
 
                 // Internal faces
-                for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
+                for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
                 {
-                    label own = mesh.faceOwner()[faceI];
-                    label nei = mesh.faceNeighbour()[faceI];
+                    label own = mesh.faceOwner()[facei];
+                    label nei = mesh.faceNeighbour()[facei];
 
                     if (isCandidateCell[own] != isCandidateCell[nei])
                     {
@@ -539,15 +539,15 @@ Foam::label Foam::snappyRefineDriver::gapOnlyRefine
                 // Boundary faces
                 for
                 (
-                    label faceI = mesh.nInternalFaces();
-                    faceI < mesh.nFaces();
-                    faceI++
+                    label facei = mesh.nInternalFaces();
+                    facei < mesh.nFaces();
+                    facei++
                 )
                 {
-                    label own = mesh.faceOwner()[faceI];
-                    label bFaceI = faceI-mesh.nInternalFaces();
+                    label own = mesh.faceOwner()[facei];
+                    label bFacei = facei-mesh.nInternalFaces();
 
-                    if (isCandidateCell[own] != neiIsCandidateCell[bFaceI])
+                    if (isCandidateCell[own] != neiIsCandidateCell[bFacei])
                     {
                         newIsCandidateCell[own] = true;
                     }
@@ -557,20 +557,20 @@ Foam::label Foam::snappyRefineDriver::gapOnlyRefine
             }
 
             label n = 0;
-            forAll(isCandidateCell, cellI)
+            forAll(isCandidateCell, celli)
             {
-                if (isCandidateCell[cellI])
+                if (isCandidateCell[celli])
                 {
                     n++;
                 }
             }
             candidateCells.setSize(n);
             n = 0;
-            forAll(isCandidateCell, cellI)
+            forAll(isCandidateCell, celli)
             {
-                if (isCandidateCell[cellI])
+                if (isCandidateCell[celli])
                 {
-                    candidateCells[n++] = cellI;
+                    candidateCells[n++] = celli;
                 }
             }
         }
@@ -833,22 +833,22 @@ Foam::label Foam::snappyRefineDriver::danglingCellRefine
         {
             cellSet candidateCellSet(mesh, "candidateCells", cells.size()/1000);
 
-            forAll(cells, cellI)
+            forAll(cells, celli)
             {
-                const cell& cFaces = cells[cellI];
+                const cell& cFaces = cells[celli];
 
                 label nIntFaces = 0;
                 forAll(cFaces, i)
                 {
-                    label bFaceI = cFaces[i]-mesh.nInternalFaces();
-                    if (bFaceI < 0)
+                    label bFacei = cFaces[i]-mesh.nInternalFaces();
+                    if (bFacei < 0)
                     {
                         nIntFaces++;
                     }
                     else
                     {
-                        label patchI = pbm.patchID()[bFaceI];
-                        if (pbm[patchI].coupled())
+                        label patchi = pbm.patchID()[bFacei];
+                        if (pbm[patchi].coupled())
                         {
                             nIntFaces++;
                         }
@@ -857,7 +857,7 @@ Foam::label Foam::snappyRefineDriver::danglingCellRefine
 
                 if (nIntFaces == nFaces)
                 {
-                    candidateCellSet.insert(cellI);
+                    candidateCellSet.insert(celli);
                 }
             }
 
@@ -993,21 +993,21 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
                     cells.size()/100
                 );
 
-                forAll(cells, cellI)
+                forAll(cells, celli)
                 {
-                    const cell& cFaces = cells[cellI];
-                    label cLevel = cutter.cellLevel()[cellI];
+                    const cell& cFaces = cells[celli];
+                    label cLevel = cutter.cellLevel()[celli];
 
-                    forAll(cFaces, cFaceI)
+                    forAll(cFaces, cFacei)
                     {
-                        label faceI = cFaces[cFaceI];
+                        label facei = cFaces[cFacei];
 
-                        if (surfaceIndex[faceI] != -1)
+                        if (surfaceIndex[facei] != -1)
                         {
-                            label fLevel = cutter.faceLevel(faceI);
+                            label fLevel = cutter.faceLevel(facei);
                             if (fLevel != cLevel)
                             {
-                                transitionCells.insert(cellI);
+                                transitionCells.insert(celli);
                             }
                         }
                     }
@@ -1025,24 +1025,24 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
 
                 //forAllConstIter(cellSet, transitionCells, iter)
                 //{
-                //    label cellI = iter.key();
-                //    const cell& cFaces = cells[cellI];
-                //    const point& cc = cellCentres[cellI];
-                //    const scalar rCVol = pow(cellVolumes[cellI], -5.0/3.0);
+                //    label celli = iter.key();
+                //    const cell& cFaces = cells[celli];
+                //    const point& cc = cellCentres[celli];
+                //    const scalar rCVol = pow(cellVolumes[celli], -5.0/3.0);
                 //
                 //    // Determine principal axes of cell
                 //    symmTensor R(Zero);
                 //
                 //    forAll(cFaces, i)
                 //    {
-                //        label faceI = cFaces[i];
+                //        label facei = cFaces[i];
                 //
-                //        const point& fc = faceCentres[faceI];
+                //        const point& fc = faceCentres[facei];
                 //
                 //        // Calculate face-pyramid volume
-                //        scalar pyrVol = 1.0/3.0 * fA[faceI] & (fc-cc);
+                //        scalar pyrVol = 1.0/3.0 * fA[facei] & (fc-cc);
                 //
-                //        if (faceOwner[faceI] != cellI)
+                //        if (faceOwner[facei] != celli)
                 //        {
                 //            pyrVol = -pyrVol;
                 //        }
@@ -1066,17 +1066,17 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
                 //    labelVector plusFaceLevel(labelVector(-1, -1, -1));
                 //    labelVector minFaceLevel(labelVector(-1, -1, -1));
                 //
-                //    forAll(cFaces, cFaceI)
+                //    forAll(cFaces, cFacei)
                 //    {
-                //        label faceI = cFaces[cFaceI];
+                //        label facei = cFaces[cFacei];
                 //
-                //        if (surfaceIndex[faceI] != -1)
+                //        if (surfaceIndex[facei] != -1)
                 //        {
-                //            label fLevel = cutter.faceLevel(faceI);
+                //            label fLevel = cutter.faceLevel(facei);
                 //
                 //            // Get outwards pointing normal
-                //            vector n = fA[faceI]/mag(fA[faceI]);
-                //            if (faceOwner[faceI] != cellI)
+                //            vector n = fA[facei]/mag(fA[facei]);
+                //            if (faceOwner[facei] != celli)
                 //            {
                 //                n = -n;
                 //            }
@@ -1129,7 +1129,7 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
                 //         && plusFaceLevel[dir] != minFaceLevel[dir]
                 //        )
                 //        {
-                //            candidateCellSet.insert(cellI);
+                //            candidateCellSet.insert(celli);
                 //        }
                 //    }
                 //}
@@ -1138,26 +1138,26 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
 
                 forAllConstIter(cellSet, transitionCells, iter)
                 {
-                    label cellI = iter.key();
-                    const cell& cFaces = cells[cellI];
-                    label cLevel = cutter.cellLevel()[cellI];
+                    label celli = iter.key();
+                    const cell& cFaces = cells[celli];
+                    label cLevel = cutter.cellLevel()[celli];
 
                     // Detect opposite intersection
                     bool foundOpposite = false;
 
-                    forAll(cFaces, cFaceI)
+                    forAll(cFaces, cFacei)
                     {
-                        label faceI = cFaces[cFaceI];
+                        label facei = cFaces[cFacei];
 
                         if
                         (
-                            surfaceIndex[faceI] != -1
-                         && cutter.faceLevel(faceI) > cLevel
+                            surfaceIndex[facei] != -1
+                         && cutter.faceLevel(facei) > cLevel
                         )
                         {
                             // Get outwards pointing normal
-                            vector n = fA[faceI]/mag(fA[faceI]);
-                            if (faceOwner[faceI] != cellI)
+                            vector n = fA[facei]/mag(fA[facei]);
+                            if (faceOwner[facei] != celli)
                             {
                                 n = -n;
                             }
@@ -1165,17 +1165,17 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
                             // Check for any opposite intersection
                             forAll(cFaces, cFaceI2)
                             {
-                                label face2I = cFaces[cFaceI2];
+                                label face2i = cFaces[cFaceI2];
 
                                 if
                                 (
-                                    face2I != faceI
-                                 && surfaceIndex[face2I] != -1
+                                    face2i != facei
+                                 && surfaceIndex[face2i] != -1
                                 )
                                 {
                                     // Get outwards pointing normal
-                                    vector n2 = fA[face2I]/mag(fA[face2I]);
-                                    if (faceOwner[face2I] != cellI)
+                                    vector n2 = fA[face2i]/mag(fA[face2i]);
+                                    if (faceOwner[face2i] != celli)
                                     {
                                         n2 = -n2;
                                     }
@@ -1199,7 +1199,7 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
 
                     if (foundOpposite)
                     {
-                        candidateCellSet.insert(cellI);
+                        candidateCellSet.insert(celli);
                     }
                 }
 
@@ -1813,22 +1813,22 @@ void Foam::snappyRefineDriver::addFaceZones
             //const word slaveName = czNames.second()+"_to_"+czNames.first();
             const word& slaveName = patchNames.second();
 
-            label mpI = meshRefiner.addMeshedPatch(masterName, patchInfo);
+            label mpi = meshRefiner.addMeshedPatch(masterName, patchInfo);
 
             Info<< setf(ios_base::left)
-                << setw(6) << mpI
-                << setw(20) << mesh.boundaryMesh()[mpI].type()
+                << setw(6) << mpi
+                << setw(20) << mesh.boundaryMesh()[mpi].type()
                 << setw(30) << masterName
                 << setw(30) << fzName
                 << setw(10) << surfaceZonesInfo::faceZoneTypeNames[fzType]
                 << nl;
 
 
-            label slI = meshRefiner.addMeshedPatch(slaveName, patchInfo);
+            label sli = meshRefiner.addMeshedPatch(slaveName, patchInfo);
 
             Info<< setf(ios_base::left)
-                << setw(6) << slI
-                << setw(20) << mesh.boundaryMesh()[slI].type()
+                << setw(6) << sli
+                << setw(20) << mesh.boundaryMesh()[sli].type()
                 << setw(30) << slaveName
                 << setw(30) << fzName
                 << setw(10) << surfaceZonesInfo::faceZoneTypeNames[fzType]

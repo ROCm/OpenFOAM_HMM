@@ -128,20 +128,22 @@ public:
             surfaceScalarField& reverseLinearWeights =
                 treverseLinearWeights.ref();
 
-            reverseLinearWeights.internalField() =
-                1.0 - cdWeights.internalField();
+            reverseLinearWeights.primitiveFieldRef() =
+                1.0 - cdWeights.primitiveField();
 
-            forAll(mesh.boundary(), patchI)
+            surfaceScalarField::Boundary& rlwbf =
+                reverseLinearWeights.boundaryFieldRef();
+
+
+            forAll(mesh.boundary(), patchi)
             {
-                if (reverseLinearWeights.boundaryField()[patchI].coupled())
+                if (rlwbf[patchi].coupled())
                 {
-                    reverseLinearWeights.boundaryField()[patchI] =
-                        1.0 - cdWeights.boundaryField()[patchI];
+                    rlwbf[patchi] = 1.0 - cdWeights.boundaryField()[patchi];
                 }
                 else
                 {
-                    reverseLinearWeights.boundaryField()[patchI] =
-                        cdWeights.boundaryField()[patchI];
+                    rlwbf[patchi] = cdWeights.boundaryField()[patchi];
                 }
             }
 

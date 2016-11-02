@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -106,8 +106,8 @@ void Foam::codedMixedFvPatchField<Type>::prepare
     const dynamicCodeContext& context
 ) const
 {
-    // take no chances - typeName must be identical to redirectType_
-    dynCode.setFilterVariable("typeName", redirectType_);
+    // take no chances - typeName must be identical to name_
+    dynCode.setFilterVariable("typeName", name_);
 
     // set TemplateType and FieldType filter variables
     // (for fvPatchField)
@@ -122,7 +122,7 @@ void Foam::codedMixedFvPatchField<Type>::prepare
 
     // debugging: make BC verbose
     //  dynCode.setFilterVariable("verbose", "true");
-    //  Info<<"compile " << redirectType_ << " sha1: "
+    //  Info<<"compile " << name_ << " sha1: "
     //      << context.sha1() << endl;
 
     // define Make/options
@@ -148,7 +148,7 @@ const
     (
         dict_.found("code")
       ? dict_
-      : this->dict().subDict(redirectType_)
+      : this->dict().subDict(name_)
     );
 }
 
@@ -160,7 +160,7 @@ Foam::string Foam::codedMixedFvPatchField<Type>::description() const
         "patch "
       + this->patch().name()
       + " on field "
-      + this->dimensionedInternalField().name();
+      + this->internalField().name();
 }
 
 
@@ -199,7 +199,7 @@ Foam::codedMixedFvPatchField<Type>::codedMixedFvPatchField
     mixedFvPatchField<Type>(ptf, p, iF, mapper),
     codedBase(),
     dict_(ptf.dict_),
-    redirectType_(ptf.redirectType_),
+    name_(ptf.name_),
     redirectPatchFieldPtr_()
 {}
 
@@ -215,10 +215,15 @@ Foam::codedMixedFvPatchField<Type>::codedMixedFvPatchField
     mixedFvPatchField<Type>(p, iF, dict),
     codedBase(),
     dict_(dict),
-    redirectType_(dict.lookup("redirectType")),
+    name_
+    (
+        dict.found("redirectType")
+      ? dict.lookup("redirectType")
+      : dict.lookup("name")
+    ),
     redirectPatchFieldPtr_()
 {
-    updateLibrary(redirectType_);
+    updateLibrary(name_);
 }
 
 
@@ -231,7 +236,7 @@ Foam::codedMixedFvPatchField<Type>::codedMixedFvPatchField
     mixedFvPatchField<Type>(ptf),
     codedBase(),
     dict_(ptf.dict_),
-    redirectType_(ptf.redirectType_),
+    name_(ptf.name_),
     redirectPatchFieldPtr_()
 {}
 
@@ -246,7 +251,7 @@ Foam::codedMixedFvPatchField<Type>::codedMixedFvPatchField
     mixedFvPatchField<Type>(ptf, iF),
     codedBase(),
     dict_(ptf.dict_),
-    redirectType_(ptf.redirectType_),
+    name_(ptf.name_),
     redirectPatchFieldPtr_()
 {}
 
@@ -271,7 +276,7 @@ Foam::codedMixedFvPatchField<Type>::redirectPatchField() const
 
         // Override the type to enforce the fvPatchField::New constructor
         // to choose our type
-        dict.set("type", redirectType_);
+        dict.set("type", name_);
 
         redirectPatchFieldPtr_.set
         (
@@ -280,7 +285,7 @@ Foam::codedMixedFvPatchField<Type>::redirectPatchField() const
                 fvPatchField<Type>::New
                 (
                     this->patch(),
-                    this->dimensionedInternalField(),
+                    this->internalField(),
                     dict
                 ).ptr()
             )
@@ -299,7 +304,7 @@ void Foam::codedMixedFvPatchField<Type>::updateCoeffs()
     }
 
     // Make sure library containing user-defined fvPatchField is up-to-date
-    updateLibrary(redirectType_);
+    updateLibrary(name_);
 
     const mixedFvPatchField<Type>& fvp = redirectPatchField();
 
@@ -321,7 +326,7 @@ void Foam::codedMixedFvPatchField<Type>::evaluate
 )
 {
     // Make sure library containing user-defined fvPatchField is up-to-date
-    updateLibrary(redirectType_);
+    updateLibrary(name_);
 
     const mixedFvPatchField<Type>& fvp = redirectPatchField();
 
@@ -338,7 +343,7 @@ template<class Type>
 void Foam::codedMixedFvPatchField<Type>::write(Ostream& os) const
 {
     mixedFvPatchField<Type>::write(os);
-    os.writeKeyword("redirectType") << redirectType_
+    os.writeKeyword("name") << name_
         << token::END_STATEMENT << nl;
 
     codedBase::writeCodeDict(os, dict_);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Description
 
     Adapted from the gnulib implementation.
 
-SeeAlso
+See also
     Foam::SHA1Digest
 
 SourceFiles
@@ -90,14 +90,6 @@ class SHA1
         uint32_t buffer_[32];
 
     // Private Member Functions
-
-        //- Swap bytes from internal to network (big-endian) order
-        static inline uint32_t swapBytes(uint32_t);
-
-        //- Copy the 4-byte value into the memory location pointed to by *dst.
-        //  If the architecture allows unaligned access this is equivalent to
-        //  *(uint32_t *) cp = val
-        static inline void set_uint32(unsigned char *cp, uint32_t);
 
         //- Process data block-wise, LEN must be a multiple of 64!
         void processBlock(const void *data, size_t len);

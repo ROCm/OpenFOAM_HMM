@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -115,7 +115,7 @@ public:
         autoPtr<IATEsource> clone() const
         {
             NotImplemented;
-            return autoPtr<IATEsource>(NULL);
+            return autoPtr<IATEsource>(nullptr);
         }
 
 
@@ -177,7 +177,11 @@ public:
         //- Return the bubble Webber number
         tmp<volScalarField> We() const;
 
-        virtual tmp<volScalarField> R() const = 0;
+        virtual tmp<fvScalarMatrix> R
+        (
+            const volScalarField& alphai,
+            volScalarField& kappai
+        ) const = 0;
 };
 
 

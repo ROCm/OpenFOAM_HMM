@@ -244,6 +244,13 @@ Foam::Field<Type>::Field(const UList<Type>& list)
 {}
 
 
+template<class Type>
+Foam::Field<Type>::Field(const UIndirectList<Type>& list)
+:
+    List<Type>(list)
+{}
+
+
 #ifndef NoConstructFromTmp
 template<class Type>
 Foam::Field<Type>::Field(const tmp<Field<Type>>& tf)
@@ -720,12 +727,10 @@ void Foam::Field<Type>::writeEntry(const word& keyword, Ostream& os) const
 {
     os.writeKeyword(keyword);
 
-    bool uniform = false;
-
-    if (this->size() && contiguous<Type>())
+    // Can the contents be considered 'uniform' (ie, identical)?
+    bool uniform = (this->size() && contiguous<Type>());
+    if (uniform)
     {
-        uniform = true;
-
         forAll(*this, i)
         {
             if (this->operator[](i) != this->operator[](0))

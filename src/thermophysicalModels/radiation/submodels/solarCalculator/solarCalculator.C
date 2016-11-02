@@ -41,7 +41,7 @@ namespace Foam
     >::names[] =
     {
         "sunDirConstant",
-        "sunDirTraking"
+        "sunDirTracking"
     };
 
     template<>
@@ -70,7 +70,7 @@ void Foam::solarCalculator::calculateBetaTetha()
     scalar runTime = 0.0;
     switch (sunDirectionModel_)
     {
-        case mSunDirTraking:
+        case mSunDirTracking:
         {
             runTime = mesh_.time().value();
             break;
@@ -165,7 +165,7 @@ void Foam::solarCalculator::init()
 
             break;
         }
-        case mSunDirTraking:
+        case mSunDirTracking:
         {
             if (word(mesh_.ddtScheme("default")) == "steadyState")
             {
@@ -278,7 +278,7 @@ void Foam::solarCalculator::correctSunDirection()
         {
             break;
         }
-        case mSunDirTraking:
+        case mSunDirTracking:
         {
             calculateBetaTetha();
             calculateSunDirection();

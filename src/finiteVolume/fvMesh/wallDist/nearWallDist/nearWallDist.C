@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,11 +47,11 @@ void Foam::nearWallDist::calculate()
 
     const volVectorField& cellCentres = mesh_.C();
 
-    forAll(mesh_.boundary(), patchI)
+    forAll(mesh_.boundary(), patchi)
     {
-        fvPatchScalarField& ypatch = operator[](patchI);
+        fvPatchScalarField& ypatch = operator[](patchi);
 
-        const fvPatch& patch = mesh_.boundary()[patchI];
+        const fvPatch& patch = mesh_.boundary()[patchi];
 
         if (isA<wallFvPatch>(patch))
         {
@@ -60,24 +60,24 @@ void Foam::nearWallDist::calculate()
             const labelUList& faceCells = patch.faceCells();
 
             // Check cells with face on wall
-            forAll(patch, patchFaceI)
+            forAll(patch, patchFacei)
             {
                 label nNeighbours = wallUtils.getPointNeighbours
                 (
                     pPatch,
-                    patchFaceI,
+                    patchFacei,
                     neighbours
                 );
 
-                label minFaceI = -1;
+                label minFacei = -1;
 
-                ypatch[patchFaceI] = wallUtils.smallestDist
+                ypatch[patchFacei] = wallUtils.smallestDist
                 (
-                    cellCentres[faceCells[patchFaceI]],
+                    cellCentres[faceCells[patchFacei]],
                     pPatch,
                     nNeighbours,
                     neighbours,
-                    minFaceI
+                    minFacei
                 );
             }
         }
@@ -93,7 +93,7 @@ void Foam::nearWallDist::calculate()
 
 Foam::nearWallDist::nearWallDist(const Foam::fvMesh& mesh)
 :
-    volScalarField::GeometricBoundaryField
+    volScalarField::Boundary
     (
         mesh.boundary(),
         mesh.V(),           // Dummy internal field,
@@ -121,15 +121,15 @@ void Foam::nearWallDist::correct()
         const fvBoundaryMesh& bnd = mesh_.boundary();
 
         this->setSize(bnd.size());
-        forAll(*this, patchI)
+        forAll(*this, patchi)
         {
             this->set
             (
-                patchI,
+                patchi,
                 fvPatchField<scalar>::New
                 (
                     calculatedFvPatchScalarField::typeName,
-                    bnd[patchI],
+                    bnd[patchi],
                     V
                 )
             );

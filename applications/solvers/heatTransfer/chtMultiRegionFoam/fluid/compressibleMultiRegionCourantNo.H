@@ -1,30 +1,30 @@
     scalar CoNum = -GREAT;
 
-    forAll(fluidRegions, regionI)
+    forAll(fluidRegions, regioni)
     {
         CoNum = max
         (
             compressibleCourantNo
             (
-                fluidRegions[regionI],
+                fluidRegions[regioni],
                 runTime,
-                rhoFluid[regionI],
-                phiFluid[regionI]
+                rhoFluid[regioni],
+                phiFluid[regioni]
             ),
             CoNum
         );
     }
 /*
-    forAll(porousFluidRegions, porousI)
+    forAll(porousFluidRegions, porousi)
     {
         CoNum = max
         (
             compressibleCourantNo
             (
-                porousFluidRegions[porousI],
+                porousFluidRegions[porousi],
                 runTime,
-                rhoPorous[porousI],
-                phiPorous[porousI]
+                rhoPorous[porousi],
+                phiPorous[porousi]
             ),
             CoNum
         );

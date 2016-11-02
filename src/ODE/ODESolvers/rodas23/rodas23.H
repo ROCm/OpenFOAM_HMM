@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,16 +32,11 @@ Description
 
     References:
     \verbatim
-        Sandu et al,
-        "Benchmarking stiff ODE solvers for atmospheric chemistry problems II
-         Rosenbrock solvers",
-         A. Sandu,
-         J.G. Verwer,
-         J.G. Blom,
-         E.J. Spee,
-         G.R. Carmichael,
-         F.A. Potra,
-         Atmospheric Environment, Volume 31, 1997, Issue 20, Pages 3459-3472
+        Sandu, A., Verwer, J. G., Blom, J. G., Spee, E. J., Carmichael, G. R.,
+        & Potra, F. A. (1997).
+        Benchmarking stiff ODE solvers for atmospheric chemistry problems II:
+        Rosenbrock solvers.
+        Atmospheric environment, 31(20), 3459-3472.
     \endverbatim
 
 SourceFiles
@@ -99,8 +94,13 @@ public:
 
     // Constructors
 
-        //- Construct from ODE
+        //- Construct from ODESystem
         rodas23(const ODESystem& ode, const dictionary& dict);
+
+
+    //- Destructor
+    virtual ~rodas23()
+    {}
 
 
     // Member Functions
@@ -108,8 +108,11 @@ public:
         //- Inherit solve from ODESolver
         using ODESolver::solve;
 
+        //- Resize the ODE solver
+        virtual bool resize();
+
         //- Solve a single step dx and return the error
-        scalar solve
+        virtual scalar solve
         (
             const scalar x0,
             const scalarField& y0,
@@ -119,7 +122,7 @@ public:
         ) const;
 
         //- Solve the ODE system and the update the state
-        void solve
+        virtual void solve
         (
             scalar& x,
             scalarField& y,

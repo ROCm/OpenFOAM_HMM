@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -152,9 +152,9 @@ updateCoeffs()
 
     label rayId = -1;
     label lambdaId = -1;
-    dom.setRayIdLambdaId(dimensionedInternalField().name(), rayId, lambdaId);
+    dom.setRayIdLambdaId(internalField().name(), rayId, lambdaId);
 
-    const label patchI = patch().index();
+    const label patchi = patch().index();
 
     if (dom.nLambda() != 1)
     {
@@ -172,10 +172,10 @@ updateCoeffs()
 
     const scalarField nAve(n & ray.dAve());
 
-    ray.Qr().boundaryField()[patchI] += Iw*nAve;
+    ray.Qr().boundaryFieldRef()[patchi] += Iw*nAve;
 
     const boundaryRadiationProperties& boundaryRadiation =
-        boundaryRadiationProperties::New(dimensionedInternalField().mesh());
+        boundaryRadiationProperties::New(internalField().mesh());
 
     const tmp<scalarField> temissivity
     (
@@ -184,18 +184,18 @@ updateCoeffs()
 
     const scalarField& emissivity = temissivity();
 
-    scalarField& Qem = ray.Qem().boundaryField()[patchI];
-    scalarField& Qin = ray.Qin().boundaryField()[patchI];
+    scalarField& Qem = ray.Qem().boundaryFieldRef()[patchi];
+    scalarField& Qin = ray.Qin().boundaryFieldRef()[patchi];
 
     const vector& myRayId = dom.IRay(rayId).d();
 
     // Use updated Ir while iterating over rays
     // avoids to used lagged Qin
-    scalarField Ir = dom.IRay(0).Qin().boundaryField()[patchI];
+    scalarField Ir = dom.IRay(0).Qin().boundaryField()[patchi];
 
     for (label rayI=1; rayI < dom.nRay(); rayI++)
     {
-        Ir += dom.IRay(rayI).Qin().boundaryField()[patchI];
+        Ir += dom.IRay(rayI).Qin().boundaryField()[patchi];
     }
 
     if (solarLoad_)

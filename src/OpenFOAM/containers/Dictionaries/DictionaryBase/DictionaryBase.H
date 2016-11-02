@@ -36,7 +36,7 @@ Note
     gcc 2.95.2 so it has to be instantiated for T when an instantiation of
     DictionaryBase is requested
 
-See Also
+See also
     Dictionary and UDictionary
 
 SourceFiles
@@ -113,10 +113,10 @@ public:
             //- Search DictionaryBase for given keyword
             bool found(const word&) const;
 
-            //- Find and return an entry if present, otherwise return NULL
+            //- Find and return an entry if present, otherwise return nullptr
             const T* lookupPtr(const word&) const;
 
-            //- Find and return an entry if present, otherwise return NULL
+            //- Find and return an entry if present, otherwise return nullptr
             T* lookupPtr(const word&);
 
             //- Find and return entry
@@ -128,6 +128,9 @@ public:
             //- Return the table of contents
             wordList toc() const;
 
+            //- Return the table of contents as a sorted list
+            wordList sortedToc() const;
+
 
         // Editing
 
@@ -138,7 +141,7 @@ public:
             void append(const word&, T*);
 
             //- Remove and return entry specified by keyword.
-            //  Return NULL if the keyword was not found.
+            //  Return nullptr if the keyword was not found.
             T* remove(const word&);
 
             //- Clear the dictionary

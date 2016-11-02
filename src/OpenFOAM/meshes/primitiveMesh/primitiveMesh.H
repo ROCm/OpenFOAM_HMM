@@ -606,35 +606,35 @@ public:
                 virtual bool checkUpperTriangular
                 (
                     const bool report = false,
-                    labelHashSet* setPtr = NULL
+                    labelHashSet* setPtr = nullptr
                 ) const;
 
                 //- Check cell zip-up
                 virtual bool checkCellsZipUp
                 (
                     const bool report = false,
-                    labelHashSet* setPtr = NULL
+                    labelHashSet* setPtr = nullptr
                 ) const;
 
                 //- Check uniqueness of face vertices
                 virtual bool checkFaceVertices
                 (
                     const bool report = false,
-                    labelHashSet* setPtr = NULL
+                    labelHashSet* setPtr = nullptr
                 ) const;
 
                 //- Check for unused points
                 virtual bool checkPoints
                 (
                     const bool report = false,
-                    labelHashSet* setPtr = NULL
+                    labelHashSet* setPtr = nullptr
                 ) const;
 
                 //- Check face-face connectivity
                 virtual bool checkFaceFaces
                 (
                     const bool report = false,
-                    labelHashSet* setPtr = NULL
+                    labelHashSet* setPtr = nullptr
                 ) const;
 
 
@@ -648,8 +648,8 @@ public:
                 virtual bool checkClosedCells
                 (
                     const bool report = false,
-                    labelHashSet* setPtr = NULL,
-                    labelHashSet* highAspectSetPtr = NULL,
+                    labelHashSet* setPtr = nullptr,
+                    labelHashSet* highAspectSetPtr = nullptr,
                     const Vector<label>& solutionD = Vector<label>::one
                 ) const;
 
@@ -657,21 +657,21 @@ public:
                 virtual bool checkFaceAreas
                 (
                     const bool report = false,
-                    labelHashSet* setPtr = NULL
+                    labelHashSet* setPtr = nullptr
                 ) const;
 
                 //- Check for negative cell volumes
                 virtual bool checkCellVolumes
                 (
                     const bool report = false,
-                    labelHashSet* setPtr = NULL
+                    labelHashSet* setPtr = nullptr
                 ) const;
 
                 //- Check for non-orthogonality
                 virtual bool checkFaceOrthogonality
                 (
                     const bool report = false,
-                    labelHashSet* setPtr = NULL
+                    labelHashSet* setPtr = nullptr
                 ) const;
 
                 //- Check face pyramid volume
@@ -679,14 +679,14 @@ public:
                 (
                     const bool report = false,
                     const scalar minPyrVol = -SMALL,
-                    labelHashSet* setPtr = NULL
+                    labelHashSet* setPtr = nullptr
                 ) const;
 
                 //- Check face skewness
                 virtual bool checkFaceSkewness
                 (
                     const bool report = false,
-                    labelHashSet* setPtr = NULL
+                    labelHashSet* setPtr = nullptr
                 ) const;
 
                 //- Check face angles
@@ -694,7 +694,7 @@ public:
                 (
                     const bool report = false,
                     const scalar maxSin = 10,    // In degrees
-                    labelHashSet* setPtr = NULL
+                    labelHashSet* setPtr = nullptr
                 ) const;
 
                 //- Check face warpage: decompose face and check ratio between
@@ -713,7 +713,7 @@ public:
                 (
                     const bool report,
                     const scalar reportDistSqr,
-                    labelHashSet* setPtr = NULL
+                    labelHashSet* setPtr = nullptr
                 ) const;
 
                 //- Check edge length
@@ -721,14 +721,14 @@ public:
                 (
                     const bool report,
                     const scalar minLenSqr,
-                    labelHashSet* setPtr = NULL
+                    labelHashSet* setPtr = nullptr
                 ) const;
 
                 //- Check for concave cells by the planes of faces
                 virtual bool checkConcaveCells
                 (
                     const bool report = false,
-                    labelHashSet* setPtr = NULL
+                    labelHashSet* setPtr = nullptr
                 ) const;
 
 
@@ -812,47 +812,47 @@ public:
             //- cellCells using cells.
             const labelList& cellCells
             (
-                const label cellI,
+                const label celli,
                 DynamicList<label>&
             ) const;
 
-            const labelList& cellCells(const label cellI) const;
+            const labelList& cellCells(const label celli) const;
 
             //- cellPoints using cells
             const labelList& cellPoints
             (
-                const label cellI,
+                const label celli,
                 DynamicList<label>&
             ) const;
 
-            const labelList& cellPoints(const label cellI) const;
+            const labelList& cellPoints(const label celli) const;
 
             //- pointCells using pointFaces
             const labelList& pointCells
             (
-                const label pointI,
+                const label pointi,
                 DynamicList<label>&
             ) const;
 
-            const labelList& pointCells(const label pointI) const;
+            const labelList& pointCells(const label pointi) const;
 
             //- pointPoints using edges, pointEdges
             const labelList& pointPoints
             (
-                const label pointI,
+                const label pointi,
                 DynamicList<label>&
             ) const;
 
-            const labelList& pointPoints(const label pointI) const;
+            const labelList& pointPoints(const label pointi) const;
 
             //- faceEdges using pointFaces, edges, pointEdges
             const labelList& faceEdges
             (
-                const label faceI,
+                const label facei,
                 DynamicList<label>&
             ) const;
 
-            const labelList& faceEdges(const label faceI) const;
+            const labelList& faceEdges(const label facei) const;
 
             //- edgeFaces using pointFaces, edges, pointEdges
             const labelList& edgeFaces
@@ -875,11 +875,11 @@ public:
             //- cellEdges using cells, pointFaces, edges, pointEdges
             const labelList& cellEdges
             (
-                const label cellI,
+                const label celli,
                 DynamicList<label>&
             ) const;
 
-            const labelList& cellEdges(const label cellI) const;
+            const labelList& cellEdges(const label celli) const;
 
 
             //- Clear geometry

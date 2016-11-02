@@ -27,10 +27,7 @@ Description
 
 #include "Hasher.H"
 #include "HasherInt.H"
-
-#if defined (__GLIBC__)
-    #include <endian.h>
-#endif
+#include "endian.H"
 
 // Left-rotate a 32-bit value and carry by nBits
 #define bitRotateLeft(x, nBits)  (((x) << (nBits)) | ((x) >> (32 - (nBits))))
@@ -188,7 +185,7 @@ Description
 // ----------------------------------------------------------------------------
 
 // Specialized little-endian code
-#if !defined (__BYTE_ORDER) || (__BYTE_ORDER == __LITTLE_ENDIAN)
+#ifdef WM_LITTLE_ENDIAN
 static unsigned jenkins_hashlittle
 (
     const void *key,
@@ -357,8 +354,6 @@ static unsigned jenkins_hashlittle
 #endif
 
 
-
-
 // ----------------------------------------------------------------------------
 // hashbig():
 // This is the same as hashword() on big-endian machines.  It is different
@@ -366,7 +361,7 @@ static unsigned jenkins_hashlittle
 // big-endian byte ordering.
 // ----------------------------------------------------------------------------
 // specialized big-endian code
-#if !defined (__BYTE_ORDER) || (__BYTE_ORDER == __BIG_ENDIAN)
+#ifdef WM_BIG_ENDIAN
 static unsigned jenkins_hashbig
 (
     const void *key,
@@ -479,25 +474,12 @@ unsigned Foam::Hasher
     unsigned initval
 )
 {
-#ifdef __BYTE_ORDER
-    #if (__BYTE_ORDER == __BIG_ENDIAN)
-        return jenkins_hashbig(key, length, initval);
-    #else
-        return jenkins_hashlittle(key, length, initval);
-    #endif
+#if defined (WM_BIG_ENDIAN)
+    return jenkins_hashbig(key, length, initval);
+#elif defined (WM_LITTLE_ENDIAN)
+    return jenkins_hashlittle(key, length, initval);
 #else
-    // endian-ness not known at compile-time: runtime endian test
-    const short endianTest = 0x0100;
-
-    // yields 0x01 for big endian
-    if (*(reinterpret_cast<const char*>(&endianTest)))
-    {
-        return jenkins_hashbig(key, length, initval);
-    }
-    else
-    {
-        return jenkins_hashlittle(key, length, initval);
-    }
+    #error "Cannot determine WM_BIG_ENDIAN or WM_LITTLE_ENDIAN."
 #endif
 }
 

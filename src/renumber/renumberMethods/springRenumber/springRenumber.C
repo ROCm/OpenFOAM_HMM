@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -86,9 +86,9 @@ Foam::labelList Foam::springRenumber::renumber
     // Move cells to the average 'position' of their neighbour.
 
     scalarField position(cellCells.size());
-    forAll(position, cellI)
+    forAll(position, celli)
     {
-        position[cellI] = cellI;
+        position[celli] = celli;
     }
 
     labelList oldToNew(identity(cellCells.size()));
@@ -109,16 +109,16 @@ Foam::labelList Foam::springRenumber::renumber
 
         // Sum force per cell.
         scalarField sumForce(cellCells.size(), 0.0);
-        forAll(cellCells, oldCellI)
+        forAll(cellCells, oldCelli)
         {
-            const labelList& cCells = cellCells[oldCellI];
-            label cellI = oldToNew[oldCellI];
+            const labelList& cCells = cellCells[oldCelli];
+            label celli = oldToNew[oldCelli];
 
             forAll(cCells, i)
             {
-                label nbrCellI = oldToNew[cCells[i]];
+                label nbrCelli = oldToNew[cCells[i]];
 
-                sumForce[cellI] += (position[nbrCellI]-position[cellI]);
+                sumForce[celli] += (position[nbrCelli]-position[celli]);
             }
         }
 

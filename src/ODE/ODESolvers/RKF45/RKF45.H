@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,17 +32,15 @@ Description
 
     References:
     \verbatim
-        "Low-order classical Runge-Kutta formulas with step size control
-         and their application to some heat transfer problems."
-        Fehlberg, E.,
-        NASA Technical Report 315, 1969.
+        Fehlberg, E. (1969).
+        Low-order classical Runge-Kutta formulas with stepsize control
+        and their application to some heat transfer problems.
+        NASA Technical Report 315.
 
-        "Solving Ordinary Differential Equations I: Nonstiff Problems,
-         second edition",
-        Hairer, E.,
-        Nørsett, S.,
-        Wanner, G.,
-        Springer-Verlag, Berlin. 1993, ISBN 3-540-56670-8.
+        Hairer, E., Nørsett, S. P., & Wanner, G. (1993).
+        Solving Ordinary Differential Equations I: Nonstiff Problems,
+        second edition.
+        Springer-Verlag, Berlin.
     \endverbatim
 
     This method embedds the 4-th order integration step into the 5-th order step
@@ -105,8 +103,13 @@ public:
 
     // Constructors
 
-        //- Construct from ODE
+        //- Construct from ODESystem
         RKF45(const ODESystem& ode, const dictionary& dict);
+
+
+    //- Destructor
+    virtual ~RKF45()
+    {}
 
 
     // Member Functions
@@ -114,8 +117,11 @@ public:
         //- Inherit solve from ODESolver
         using ODESolver::solve;
 
+        //- Resize the ODE solver
+        virtual bool resize();
+
         //- Solve a single step dx and return the error
-        scalar solve
+        virtual scalar solve
         (
             const scalar x0,
             const scalarField& y0,
@@ -125,7 +131,7 @@ public:
         ) const;
 
         //- Solve the ODE system and the update the state
-        void solve
+        virtual void solve
         (
             scalar& x,
             scalarField& y,

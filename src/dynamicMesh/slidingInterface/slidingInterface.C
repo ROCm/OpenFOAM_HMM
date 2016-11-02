@@ -178,19 +178,19 @@ Foam::slidingInterface::slidingInterface
     edgeMasterCatchFraction_(edgeMasterCatchFractionDefault_),
     edgeCoPlanarTol_(edgeCoPlanarTolDefault_),
     edgeEndCutoffTol_(edgeEndCutoffTolDefault_),
-    cutFaceMasterPtr_(NULL),
-    cutFaceSlavePtr_(NULL),
-    masterFaceCellsPtr_(NULL),
-    slaveFaceCellsPtr_(NULL),
-    masterStickOutFacesPtr_(NULL),
-    slaveStickOutFacesPtr_(NULL),
-    retiredPointMapPtr_(NULL),
-    cutPointEdgePairMapPtr_(NULL),
-    slavePointPointHitsPtr_(NULL),
-    slavePointEdgeHitsPtr_(NULL),
-    slavePointFaceHitsPtr_(NULL),
-    masterPointEdgeHitsPtr_(NULL),
-    projectedSlavePointsPtr_(NULL)
+    cutFaceMasterPtr_(nullptr),
+    cutFaceSlavePtr_(nullptr),
+    masterFaceCellsPtr_(nullptr),
+    slaveFaceCellsPtr_(nullptr),
+    masterStickOutFacesPtr_(nullptr),
+    slaveStickOutFacesPtr_(nullptr),
+    retiredPointMapPtr_(nullptr),
+    cutPointEdgePairMapPtr_(nullptr),
+    slavePointPointHitsPtr_(nullptr),
+    slavePointEdgeHitsPtr_(nullptr),
+    slavePointFaceHitsPtr_(nullptr),
+    masterPointEdgeHitsPtr_(nullptr),
+    projectedSlavePointsPtr_(nullptr)
 {
     checkDefinition();
 
@@ -256,19 +256,19 @@ Foam::slidingInterface::slidingInterface
         intersection::algorithmNames_.read(dict.lookup("projection"))
     ),
     trigger_(false),
-    cutFaceMasterPtr_(NULL),
-    cutFaceSlavePtr_(NULL),
-    masterFaceCellsPtr_(NULL),
-    slaveFaceCellsPtr_(NULL),
-    masterStickOutFacesPtr_(NULL),
-    slaveStickOutFacesPtr_(NULL),
-    retiredPointMapPtr_(NULL),
-    cutPointEdgePairMapPtr_(NULL),
-    slavePointPointHitsPtr_(NULL),
-    slavePointEdgeHitsPtr_(NULL),
-    slavePointFaceHitsPtr_(NULL),
-    masterPointEdgeHitsPtr_(NULL),
-    projectedSlavePointsPtr_(NULL)
+    cutFaceMasterPtr_(nullptr),
+    cutFaceSlavePtr_(nullptr),
+    masterFaceCellsPtr_(nullptr),
+    slaveFaceCellsPtr_(nullptr),
+    masterStickOutFacesPtr_(nullptr),
+    slaveStickOutFacesPtr_(nullptr),
+    retiredPointMapPtr_(nullptr),
+    cutPointEdgePairMapPtr_(nullptr),
+    slavePointPointHitsPtr_(nullptr),
+    slavePointEdgeHitsPtr_(nullptr),
+    slavePointFaceHitsPtr_(nullptr),
+    masterPointEdgeHitsPtr_(nullptr),
+    projectedSlavePointsPtr_(nullptr)
 {
     // Optionally default tolerances from dictionary
     setTolerances(dict);
@@ -450,10 +450,10 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
         const pointField& slaveLocalPoints = slavePatch.localPoints();
         const vectorField& slavePointNormals = slavePatch.pointNormals();
 
-        forAll(cutPoints, pointI)
+        forAll(cutPoints, pointi)
         {
             // Try to find the cut point in retired points
-            Map<label>::const_iterator rpmIter = rpm.find(cutPoints[pointI]);
+            Map<label>::const_iterator rpmIter = rpm.find(cutPoints[pointi]);
 
             if (rpmIter != rpm.end())
             {
@@ -463,7 +463,7 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
                 }
 
                 // Cut point is a retired point
-                motionPoints[cutPoints[pointI]] =
+                motionPoints[cutPoints[pointi]] =
                     projectedSlavePoints[slaveZonePointMap.find(rpmIter())()];
             }
             else
@@ -472,12 +472,12 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
                 // must be an edge-to-edge intersection.
 
                 Map<Pair<edge>>::const_iterator cpepmIter =
-                    cpepm.find(cutPoints[pointI]);
+                    cpepm.find(cutPoints[pointi]);
 
                 if (cpepmIter != cpepm.end())
                 {
                     // Pout<< "Need to re-create hit for point "
-                    //     << cutPoints[pointI]
+                    //     << cutPoints[pointi]
                     //     << " lookup: " << cpepmIter()
                     //     << endl;
 
@@ -597,7 +597,7 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
                             )
                             {
                                 // Cut both master and slave.
-                                motionPoints[cutPoints[pointI]] =
+                                motionPoints[cutPoints[pointi]] =
                                     masterCutPoint;
                             }
                         }
@@ -627,7 +627,7 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
                 else
                 {
                     FatalErrorInFunction
-                        << "Cut point " << cutPoints[pointI]
+                        << "Cut point " << cutPoints[pointi]
                         << " not recognised as either the projected "
                         << "or as intersection point.  Error in point "
                         << "projection or data mapping"

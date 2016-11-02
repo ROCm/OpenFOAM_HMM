@@ -45,8 +45,18 @@ void transform
     const GeometricField<Type, PatchField, GeoMesh>& tf
 )
 {
-    transform(rtf.internalField(), trf.internalField(), tf.internalField());
-    transform(rtf.boundaryField(), trf.boundaryField(), tf.boundaryField());
+    transform
+    (
+        rtf.primitiveFieldRef(),
+        trf.primitiveField(),
+        tf.primitiveField()
+    );
+    transform
+    (
+        rtf.boundaryFieldRef(),
+        trf.boundaryField(),
+        tf.boundaryField()
+    );
 }
 
 
@@ -74,7 +84,7 @@ tmp<GeometricField<Type, PatchField, GeoMesh>> transform
         )
     );
 
-    transform(tranf(), trf, tf);
+    transform(tranf.ref(), trf, tf);
 
     return tranf;
 }
@@ -131,8 +141,8 @@ void transform
     const GeometricField<Type, PatchField, GeoMesh>& tf
 )
 {
-    transform(rtf.internalField(), t.value(), tf.internalField());
-    transform(rtf.boundaryField(), t.value(), tf.boundaryField());
+    transform(rtf.primitiveFieldRef(), t.value(), tf.primitiveField());
+    transform(rtf.boundaryFieldRef(), t.value(), tf.boundaryField());
 }
 
 
@@ -145,7 +155,7 @@ tmp<GeometricField<Type, PatchField, GeoMesh>> transform
 {
     tmp<GeometricField<Type, PatchField, GeoMesh>> tranf
     (
-        new GeometricField<vector, PatchField, GeoMesh>
+        new GeometricField<Type, PatchField, GeoMesh>
         (
             IOobject
             (
@@ -160,7 +170,7 @@ tmp<GeometricField<Type, PatchField, GeoMesh>> transform
         )
     );
 
-    transform(tranf(), t, tf);
+    transform(tranf.ref(), t, tf);
 
     return tranf;
 }

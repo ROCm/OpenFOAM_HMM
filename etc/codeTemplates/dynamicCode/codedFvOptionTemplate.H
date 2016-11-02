@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,13 +33,13 @@ Description
     codeAddSup
     (
         fvMatrix<Type}>& eqn,
-        const label fieldI
+        const label fieldi
     )
 
     setValue
     (
          fvMatrix<Type}>& eqn,
-        const label fieldI
+        const label fieldi
     )
 
     where :
@@ -56,7 +56,7 @@ Description
         scalarCodedSourceCoeffs
         {
             fieldNames      (h);
-            redirectType    sourceTime;
+            name    sourceTime;
 
             codeInclude
             #{
@@ -105,7 +105,7 @@ SourceFiles
 #ifndef codedFvOptionTemplate_H
 #define codedFvOptionTemplate_H
 
-#include "fvOption.H"
+#include "cellSetOption.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -121,7 +121,7 @@ namespace fv
 
 class ${typeName}FvOption${SourceType}
 :
-    public option
+    public cellSetOption
 {
 public:
 
@@ -159,7 +159,7 @@ public:
             virtual void addSup
             (
                 fvMatrix<${TemplateType}>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
             //- Explicit and implicit matrix contributions for compressible
@@ -168,14 +168,14 @@ public:
             (
                 const volScalarField& rho,
                 fvMatrix<${TemplateType}>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
             //- Set value
             virtual void setValue
             (
                 fvMatrix<${TemplateType}>& eqn,
-                const label fieldI
+                const label fieldi
             );
 };
 

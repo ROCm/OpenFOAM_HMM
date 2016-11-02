@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -31,19 +31,27 @@ Description
     Checks validity of a mesh.
 
 Usage
-    - checkMesh [OPTION]
+    \b checkMesh [OPTION]
 
-    \param -allGeometry \n
-    Checks all (including non finite-volume specific) geometry
+    Options:
+      - \par -allGeometry
+        Checks all (including non finite-volume specific) geometry
 
-    \param -allTopology \n
-    Checks all (including non finite-volume specific) addressing
+      - \par -allTopology
+        Checks all (including non finite-volume specific) addressing
 
-    \param -meshQuality \n
-    Checks against user defined (in \a system/meshQualityDict) quality settings
+      - \par -meshQuality
+        Checks against user defined (in \a system/meshQualityDict) quality
+        settings
 
-    \param -region \<name\> \n
-    Specify an alternative mesh region.
+      - \par -region \<name\>
+        Specify an alternative mesh region.
+
+      - \par -writeSets \<surfaceFormat\>
+        Reconstruct all cellSets and faceSets geometry and write to
+        postProcessing directory according to surfaceFormat
+        (e.g. vtk or ensight). Additionally reconstructs all pointSets and
+        writes as vtk format.
 
     \param -writeSets \<surfaceFormat\> \n
     Reconstruct all cellSets and faceSets geometry and write to postProcessing/
@@ -56,7 +64,8 @@ Usage
 #include "Time.H"
 #include "polyMesh.H"
 #include "globalMeshData.H"
-#include "vtkSurfaceWriter.H"
+#include "surfaceWriter.H"
+#include "vtkSetWriter.H"
 
 #include "checkTools.H"
 #include "checkTopology.H"
@@ -94,7 +103,7 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "writeSets",
-        "surfaceFormat"
+        "surfaceFormat",
         "reconstruct and write all faceSets and cellSets in selected format"
     );
 
@@ -156,10 +165,12 @@ int main(int argc, char *argv[])
     }
 
 
-    autoPtr<surfaceWriter> writer;
+    autoPtr<surfaceWriter> surfWriter;
+    autoPtr<writer<scalar>> setWriter;
     if (writeSets)
     {
-        writer = surfaceWriter::New(surfaceFormat);
+        surfWriter = surfaceWriter::New(surfaceFormat);
+        setWriter = writer<scalar>::New(vtkSetWriter<scalar>::typeName);
     }
 
 
@@ -192,15 +203,22 @@ int main(int argc, char *argv[])
                     mesh,
                     allTopology,
                     allGeometry,
-                    writer
+                    surfWriter,
+                    setWriter
                 );
             }
 
-            nFailedChecks += checkGeometry(mesh, allGeometry, writer);
+            nFailedChecks += checkGeometry
+            (
+                mesh,
+                allGeometry,
+                surfWriter,
+                setWriter
+            );
 
             if (meshQuality)
             {
-                nFailedChecks += checkMeshQuality(mesh, qualDict(), writer);
+                nFailedChecks += checkMeshQuality(mesh, qualDict(), surfWriter);
             }
 
 
@@ -221,11 +239,17 @@ int main(int argc, char *argv[])
         {
             Info<< "Time = " << runTime.timeName() << nl << endl;
 
-            label nFailedChecks = checkGeometry(mesh, allGeometry, writer);
+            label nFailedChecks = checkGeometry
+            (
+                mesh,
+                allGeometry,
+                surfWriter,
+                setWriter
+            );
 
             if (meshQuality)
             {
-                nFailedChecks += checkMeshQuality(mesh, qualDict(), writer);
+                nFailedChecks += checkMeshQuality(mesh, qualDict(), surfWriter);
             }
 
 

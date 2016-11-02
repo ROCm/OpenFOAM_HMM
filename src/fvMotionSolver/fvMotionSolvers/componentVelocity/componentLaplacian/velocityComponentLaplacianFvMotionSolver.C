@@ -111,7 +111,7 @@ Foam::velocityComponentLaplacianFvMotionSolver::curPoints() const
     (
         cmpt_,
         tcurPoints().component(cmpt_)
-      + fvMesh_.time().deltaTValue()*pointMotionU_.internalField()
+      + fvMesh_.time().deltaTValue()*pointMotionU_.primitiveField()
     );
 
     twoDCorrectPoints(tcurPoints.ref());
@@ -127,7 +127,7 @@ void Foam::velocityComponentLaplacianFvMotionSolver::solve()
     movePoints(fvMesh_.points());
 
     diffusivityPtr_->correct();
-    pointMotionU_.boundaryField().updateCoeffs();
+    pointMotionU_.boundaryFieldRef().updateCoeffs();
 
     Foam::solve
     (
@@ -150,7 +150,7 @@ void Foam::velocityComponentLaplacianFvMotionSolver::updateMesh
 
     // Update diffusivity. Note two stage to make sure old one is de-registered
     // before creating/registering new one.
-    diffusivityPtr_.reset(NULL);
+    diffusivityPtr_.reset(nullptr);
     diffusivityPtr_ = motionDiffusivity::New
     (
         fvMesh_,

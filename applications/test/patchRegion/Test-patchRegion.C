@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,8 +59,8 @@ int main(int argc, char *argv[])
 
 
     const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-    label patchI = pbm.findPatchID(patchName);
-    const polyPatch& patch = pbm[patchI];
+    label patchi = pbm.findPatchID(patchName);
+    const polyPatch& patch = pbm[patchi];
 
     Info<< "Patch:" << patch.name() << endl;
 
@@ -76,18 +76,18 @@ int main(int argc, char *argv[])
     DynamicList<label> changedEdges(4*patch.size());
     DynamicList<patchEdgeFaceRegions> changedInfo(changedEdges.size());
 
-    forAll(patch, faceI)
+    forAll(patch, facei)
     {
-        const labelList& fEdges = patch.faceEdges()[faceI];
+        const labelList& fEdges = patch.faceEdges()[facei];
 
-        label globalFaceI = globalNumbering.toGlobal(faceI);
+        label globalFacei = globalNumbering.toGlobal(facei);
 
         forAll(fEdges, i)
         {
             changedEdges.append(fEdges[i]);
             changedInfo.append
             (
-                patchEdgeFaceRegions(labelPair(globalFaceI, globalFaceI))
+                patchEdgeFaceRegions(labelPair(globalFacei, globalFacei))
             );
         }
     }
@@ -117,30 +117,30 @@ int main(int argc, char *argv[])
     {
         labelList currentRegion(patch.nPoints(), -1);
 
-        forAll(patch.localFaces(), faceI)
+        forAll(patch.localFaces(), facei)
         {
-            const face& f = patch.localFaces()[faceI];
+            const face& f = patch.localFaces()[facei];
 
             forAll(f, fp)
             {
-                label faceRegion = allFaceInfo[faceI].regions()[fp];
+                label faceRegion = allFaceInfo[facei].regions()[fp];
 
-                label pointI = f[fp];
+                label pointi = f[fp];
 
-                if (currentRegion[pointI] == -1)
+                if (currentRegion[pointi] == -1)
                 {
-                    currentRegion[pointI] = faceRegion;
+                    currentRegion[pointi] = faceRegion;
                 }
-                else if (currentRegion[pointI] != faceRegion)
+                else if (currentRegion[pointi] != faceRegion)
                 {
-                    if (duplicateRegion[pointI] == -1)
+                    if (duplicateRegion[pointi] == -1)
                     {
                         Pout<< "Multi region point:"
-                            << patch.localPoints()[pointI]
-                            << " with region:" << currentRegion[pointI]
+                            << patch.localPoints()[pointi]
+                            << " with region:" << currentRegion[pointi]
                             << " and region:" << faceRegion
                             << endl;
-                        duplicateRegion[pointI] = currentRegion[pointI];
+                        duplicateRegion[pointi] = currentRegion[pointi];
                     }
                 }
             }

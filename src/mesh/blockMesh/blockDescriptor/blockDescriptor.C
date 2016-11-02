@@ -23,29 +23,133 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
 #include "blockDescriptor.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::blockDescriptor::check(const Istream& is)
+{
+    forAll(blockShape_, pi)
+    {
+        if (blockShape_[pi] < 0)
+        {
+            FatalIOErrorInFunction(is)
+                << "Negative point label " << blockShape_[pi]
+                << " in block " << *this
+                << exit(FatalIOError);
+        }
+        else if (blockShape_[pi] >= vertices_.size())
+        {
+            FatalIOErrorInFunction(is)
+                << "Point label " << blockShape_[pi]
+                << " out of range 0.." << vertices_.size() - 1
+                << " in block " << *this
+                << exit(FatalIOError);
+        }
+    }
+
+    const point blockCentre(blockShape_.centre(vertices_));
+    const faceList faces(blockShape_.faces());
+
+    // Check each face is outward-pointing with respect to the block centre
+    label outwardFaceCount = 0;
+    boolList correctFaces(faces.size(), true);
+
+    forAll(faces, i)
+    {
+        point faceCentre(faces[i].centre(vertices_));
+        vector faceNormal(faces[i].normal(vertices_));
+        if (mag(faceNormal) > SMALL)
+        {
+            if (((faceCentre - blockCentre) & faceNormal) > 0)
+            {
+                outwardFaceCount++;
+            }
+            else
+            {
+                correctFaces[i] = false;
+            }
+        }
+        else
+        {
+            outwardFaceCount++;
+        }
+    }
+
+    // If all faces are inward-pointing the block is inside-out
+    if (outwardFaceCount == 0)
+    {
+        FatalIOErrorInFunction(is)
+            << "Block " << *this << " is inside-out"
+            << exit(FatalIOError);
+    }
+    else if (outwardFaceCount != faces.size())
+    {
+        FatalIOErrorInFunction(is)
+            << "Block " << *this << " has inward-pointing faces"
+            << nl << "    ";
+
+        forAll(correctFaces, i)
+        {
+            if (!correctFaces[i])
+            {
+                FatalIOError<< faces[i] << token::SPACE;
+            }
+        }
+
+        FatalIOError << exit(FatalIOError);
+    }
+}
+
+
+void Foam::blockDescriptor::findCurvedFaces()
+{
+    const faceList blockFaces(blockShape().faces());
+
+    forAll(blockFaces, blockFacei)
+    {
+        forAll(faces_, facei)
+        {
+            if
+            (
+                face::sameVertices
+                (
+                    faces_[facei].vertices(),
+                    blockFaces[blockFacei]
+                )
+            )
+            {
+                curvedFaces_[blockFacei] = facei;
+                nCurvedFaces_++;
+                break;
+            }
+        }
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::blockDescriptor::blockDescriptor
 (
     const cellShape& bshape,
-    const pointField& blockPointField,
-    const curvedEdgeList& edges,
-    const Vector<label>& meshDensity,
+    const pointField& vertices,
+    const blockEdgeList& edges,
+    const blockFaceList& faces,
+    const Vector<label>& density,
     const UList<gradingDescriptors>& expand,
     const word& zoneName
 )
 :
-    blockPointField_(blockPointField),
-    curvedEdges_(edges),
+    vertices_(vertices),
+    edges_(edges),
+    faces_(faces),
     blockShape_(bshape),
-    meshDensity_(meshDensity),
-    edgePoints_(12),
-    edgeWeights_(12),
+    density_(density),
     expand_(expand),
-    zoneName_(zoneName)
+    zoneName_(zoneName),
+    curvedFaces_(-1),
+    nCurvedFaces_(0)
 {
     if (expand_.size() != 12)
     {
@@ -54,30 +158,27 @@ Foam::blockDescriptor::blockDescriptor
             << exit(FatalError);
     }
 
-    // Create a list of edges
-    makeBlockEdges();
+    findCurvedFaces();
 }
 
 
 Foam::blockDescriptor::blockDescriptor
 (
-    const pointField& blockPointField,
-    const curvedEdgeList& edges,
+    const pointField& vertices,
+    const blockEdgeList& edges,
+    const blockFaceList& faces,
     Istream& is
 )
 :
-    blockPointField_(blockPointField),
-    curvedEdges_(edges),
+    vertices_(vertices),
+    edges_(edges),
+    faces_(faces),
     blockShape_(is),
-    meshDensity_(),
-    edgePoints_(12),
-    edgeWeights_(12),
-    expand_
-    (
-        12,
-        gradingDescriptors()
-    ),
-    zoneName_()
+    density_(),
+    expand_(12, gradingDescriptors()),
+    zoneName_(),
+    curvedFaces_(-1),
+    nCurvedFaces_(0)
 {
     // Examine next token
     token t(is);
@@ -97,7 +198,7 @@ Foam::blockDescriptor::blockDescriptor
         // New-style: read a list of 3 values
         if (t.pToken() == token::BEGIN_LIST)
         {
-            is >> meshDensity_;
+            is >> density_;
         }
         else
         {
@@ -112,9 +213,9 @@ Foam::blockDescriptor::blockDescriptor
     else
     {
         // Old-style: read three labels
-        is  >> meshDensity_.x()
-            >> meshDensity_.y()
-            >> meshDensity_.z();
+        is  >> density_.x()
+            >> density_.y()
+            >> density_.z();
     }
 
     is >> t;
@@ -156,86 +257,93 @@ Foam::blockDescriptor::blockDescriptor
     }
     else
     {
-        FatalErrorInFunction
+        FatalIOErrorInFunction(is)
             << "Unknown definition of expansion ratios: " << expRatios
-            << exit(FatalError);
+            << exit(FatalIOError);
     }
 
-    // Create a list of edges
-    makeBlockEdges();
+    check(is);
+
+    findCurvedFaces();
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::blockDescriptor::~blockDescriptor()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::pointField& Foam::blockDescriptor::blockPointField() const
+Foam::FixedList<Foam::pointField, 6>
+Foam::blockDescriptor::facePoints(const pointField& points) const
 {
-    return blockPointField_;
+    // Caches points for curvature correction
+    FixedList<pointField, 6> facePoints;
+
+    // Set local variables for mesh specification
+    const label ni = density_.x();
+    const label nj = density_.y();
+    const label nk = density_.z();
+
+    facePoints[0].setSize((nj + 1)*(nk + 1));
+    facePoints[1].setSize((nj + 1)*(nk + 1));
+
+    for (label j=0; j<=nj; j++)
+    {
+        for (label k=0; k<=nk; k++)
+        {
+            facePoints[0][facePointLabel(0, j, k)] =
+                points[pointLabel(0, j, k)];
+            facePoints[1][facePointLabel(1, j, k)] =
+                points[pointLabel(ni, j, k)];
+        }
+    }
+
+    facePoints[2].setSize((ni + 1)*(nk + 1));
+    facePoints[3].setSize((ni + 1)*(nk + 1));
+
+    for (label i=0; i<=ni; i++)
+    {
+        for (label k=0; k<=nk; k++)
+        {
+            facePoints[2][facePointLabel(2, i, k)] =
+                points[pointLabel(i, 0, k)];
+            facePoints[3][facePointLabel(3, i, k)] =
+                points[pointLabel(i, nj, k)];
+        }
+    }
+
+    facePoints[4].setSize((ni + 1)*(nj + 1));
+    facePoints[5].setSize((ni + 1)*(nj + 1));
+
+    for (label i=0; i<=ni; i++)
+    {
+        for (label j=0; j<=nj; j++)
+        {
+            facePoints[4][facePointLabel(4, i, j)] =
+                points[pointLabel(i, j, 0)];
+            facePoints[5][facePointLabel(5, i, j)] =
+                points[pointLabel(i, j, nk)];
+        }
+    }
+
+    return facePoints;
 }
 
 
-const Foam::cellShape& Foam::blockDescriptor::blockShape() const
+void Foam::blockDescriptor::correctFacePoints
+(
+    FixedList<pointField, 6>& facePoints
+) const
 {
-    return blockShape_;
-}
-
-
-const Foam::List<Foam::List<Foam::point>>&
-Foam::blockDescriptor::blockEdgePoints() const
-{
-    return edgePoints_;
-}
-
-
-const Foam::scalarListList& Foam::blockDescriptor::blockEdgeWeights() const
-{
-    return edgeWeights_;
-}
-
-
-const Foam::Vector<Foam::label>& Foam::blockDescriptor::meshDensity() const
-{
-    return meshDensity_;
-}
-
-
-const Foam::word& Foam::blockDescriptor::zoneName() const
-{
-    return zoneName_;
-}
-
-
-Foam::label Foam::blockDescriptor::nPoints() const
-{
-    return
-    (
-        (meshDensity_.x() + 1)
-      * (meshDensity_.y() + 1)
-      * (meshDensity_.z() + 1)
-    );
-}
-
-
-Foam::label Foam::blockDescriptor::nCells() const
-{
-    return
-    (
-        meshDensity_.x()
-      * meshDensity_.y()
-      * meshDensity_.z()
-    );
-}
-
-
-const Foam::point& Foam::blockDescriptor::blockPoint(const label i) const
-{
-    return blockPointField_[blockShape_[i]];
+    forAll(curvedFaces_, blockFacei)
+    {
+        if (curvedFaces_[blockFacei] != -1)
+        {
+            faces_[curvedFaces_[blockFacei]].project
+            (
+                *this,
+                blockFacei,
+                facePoints[blockFacei]
+            );
+        }
+    }
 }
 
 
@@ -263,7 +371,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const blockDescriptor& bd)
         os  << ' ' << bd.zoneName();
     }
 
-    os  << ' '  << bd.meshDensity()
+    os  << ' '  << bd.density()
         << " simpleGrading (";
 
 
@@ -296,13 +404,13 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const blockDescriptor& bd)
     }
     else
     {
-        forAll(expand, edgeI)
+        forAll(expand, edgei)
         {
-            if (edgeI)
+            if (edgei)
             {
                 os  << ' ';
             }
-            os  << expand[edgeI];
+            os  << expand[edgei];
         }
     }
 

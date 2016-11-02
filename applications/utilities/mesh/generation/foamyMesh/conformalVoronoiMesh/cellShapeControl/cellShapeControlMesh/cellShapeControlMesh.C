@@ -450,7 +450,7 @@ Foam::cellShapeControlMesh::~cellShapeControlMesh()
 void Foam::cellShapeControlMesh::barycentricCoords
 (
     const Foam::point& pt,
-    scalarList& bary,
+    FixedList<scalar, 4>& bary,
     Cell_handle& ch
 ) const
 {
@@ -744,7 +744,7 @@ Foam::label Foam::cellShapeControlMesh::estimateCellCount
     {
         if (!cit->hasFarPoint() && !is_infinite(cit))
         {
-            // @todo Check if tet centre is on the processor..
+            // TODO: Check if tet centre is on the processor..
             CGAL::Tetrahedron_3<baseK> tet
             (
                 cit->vertex(0)->point(),

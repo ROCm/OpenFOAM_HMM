@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,17 +27,99 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::blockMesh::checkBlockMesh(const polyMesh& bm) const
+void Foam::blockMesh::check(const polyMesh& bm) const
 {
-    if (verboseOutput)
-    {
-        Info<< nl << "Check topology" << endl;
-    }
+    Info<< nl << "Check topology" << endl;
 
     bool ok = true;
 
-    const pointField& points = bm.points();
+    // Check for duplicate curved edge definitions
+    forAll(edges_, cei)
+    {
+        for (label cej=cei+1; cej<edges_.size(); cej++)
+        {
+            if (edges_[cei].compare(edges_[cej]) != 0)
+            {
+                Info<< "    Curved edge " << edges_[cej]
+                    << "    is a duplicate of curved edge " << edges_[cei]
+                    << endl;
+                ok = false;
+                break;
+            }
+        }
+    }
+
+    // Check curved-edge/block-edge correspondence
+    //
+    // Loop over the edges of each block rather than the edgeList of the
+    // topological mesh due to problems with calcEdges for blocks with
+    // repeated point labels
+    const blockList& blocks = *this;
+
+    forAll(edges_, cei)
+    {
+        bool found = false;
+
+        forAll(blocks, blocki)
+        {
+            edgeList edges = blocks[blocki].blockShape().edges();
+
+            forAll(edges, ei)
+            {
+                found = edges_[cei].compare(edges[ei][0], edges[ei][1]) != 0;
+                if (found) break;
+            }
+            if (found) break;
+        }
+
+        if (!found)
+        {
+            Info<< "    Curved edge " << edges_[cei]
+                << "    does not correspond to a block edge."
+                << endl;
+            ok = false;
+        }
+    }
+
     const faceList& faces = bm.faces();
+
+    // Check for duplicate curved face definitions
+    forAll(faces_, cfi)
+    {
+        for (label cfj=cfi+1; cfj<faces_.size(); cfj++)
+        {
+            if (faces_[cfi].compare(faces_[cfj]) != 0)
+            {
+                Info<< "    Curved face " << faces_[cfj]
+                    << "    is a duplicate of curved face " << faces_[cfi]
+                    << endl;
+                ok = false;
+                break;
+            }
+        }
+    }
+
+    // Check curved-face/block-face correspondence
+    forAll(faces_, cfi)
+    {
+        bool found = false;
+
+        forAll(faces, fi)
+        {
+            found = faces_[cfi].compare(faces[fi]) != 0;
+            if (found) break;
+        }
+
+        if (!found)
+        {
+            Info<< "    Curved face " << faces_[cfi]
+                << "    does not correspond to a block face."
+                << endl;
+            ok = false;
+        }
+    }
+
+    const pointField& points = bm.points();
     const cellList& cells = bm.cells();
     const polyPatchList& patches = bm.boundaryMesh();
 
@@ -143,84 +225,6 @@ void Foam::blockMesh::checkBlockMesh(const polyMesh& bm) const
             << "Block mesh topology incorrect, stopping mesh generation!"
             << exit(FatalError);
     }
-}
-
-
-bool Foam::blockMesh::blockLabelsOK
-(
-    const label blockLabel,
-    const pointField& points,
-    const cellShape& blockShape
-) const
-{
-    bool ok = true;
-
-    forAll(blockShape, blockI)
-    {
-        if (blockShape[blockI] < 0)
-        {
-            ok = false;
-
-            WarningInFunction
-                << "out-of-range point label " << blockShape[blockI]
-                << " (min = 0"
-                << ") in block " << blockLabel << endl;
-        }
-        else if (blockShape[blockI] >= points.size())
-        {
-            ok = false;
-
-            WarningInFunction
-                << "out-of-range point label " << blockShape[blockI]
-                << " (max = " << points.size() - 1
-                << ") in block " << blockLabel << endl;
-        }
-    }
-
-    return ok;
-}
-
-
-bool Foam::blockMesh::patchLabelsOK
-(
-    const label patchLabel,
-    const pointField& points,
-    const faceList& patchFaces
-) const
-{
-    bool ok = true;
-
-    forAll(patchFaces, faceI)
-    {
-        const labelList& f = patchFaces[faceI];
-
-        forAll(f, fp)
-        {
-            if (f[fp] < 0)
-            {
-                ok = false;
-
-                WarningInFunction
-                    << "out-of-range point label " << f[fp]
-                    << " (min = 0"
-                    << ") on patch " << patchLabel
-                    << ", face " << faceI << endl;
-            }
-            else if (f[fp] >= points.size())
-            {
-                ok = false;
-
-                WarningInFunction
-                    << "out-of-range point label " << f[fp]
-                    << " (max = " << points.size() - 1
-                    << ") on patch " << patchLabel
-                    << ", face " << faceI << endl;
-
-            }
-        }
-    }
-
-    return ok;
 }
 
 

@@ -47,9 +47,9 @@ void Foam::edgeSurface::writeOBJ
     Ostream& os
 )
 {
-    forAll(points, pointI)
+    forAll(points, pointi)
     {
-        const point& pt = points[pointI];
+        const point& pt = points[pointi];
 
         os << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
     }
@@ -71,9 +71,9 @@ void Foam::edgeSurface::writeOBJ
     Ostream& os
 )
 {
-    forAll(points, pointI)
+    forAll(points, pointi)
     {
-        const point& pt = points[pointI];
+        const point& pt = points[pointi];
 
         os << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
     }
@@ -101,9 +101,9 @@ void Foam::edgeSurface::calcPointEdges()
         pointNEdges[e[1]]++;
     }
 
-    forAll(pointEdges_, pointI)
+    forAll(pointEdges_, pointi)
     {
-        pointEdges_[pointI].setSize(pointNEdges[pointI]);
+        pointEdges_[pointi].setSize(pointNEdges[pointi]);
     }
 
     pointNEdges = 0;
@@ -142,20 +142,20 @@ Foam::edgeSurface::edgeSurface
     // Copy points (surface ones first)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    label pointI = 0;
+    label pointi = 0;
 
     const pointField& surfPoints = surf.localPoints();
 
     forAll(surfPoints, i)
     {
-        points_[pointI++] = surfPoints[i];
+        points_[pointi++] = surfPoints[i];
     }
 
     const pointField& cutPoints = inter.cutPoints();
 
     forAll(cutPoints, i)
     {
-        points_[pointI++] = cutPoints[i];
+        points_[pointi++] = cutPoints[i];
     }
 
 
@@ -230,9 +230,9 @@ Foam::edgeSurface::edgeSurface
         {
             allParentEdges.append(edgeI);
 
-            forAll(myFaces, myFaceI)
+            forAll(myFaces, myFacei)
             {
-                allFaceEdges[myFaces[myFaceI]].append(eI);
+                allFaceEdges[myFaces[myFacei]].append(eI);
             }
         }
     }
@@ -266,28 +266,28 @@ Foam::edgeSurface::edgeSurface
         // Get the face from the correct surface
         const FixedList<label, 2>& twoFaces = iter.key();
 
-        label faceI;
+        label facei;
 
         if (isFirstSurface)
         {
-            faceI = twoFaces[0];
+            facei = twoFaces[0];
         }
         else
         {
-            faceI = twoFaces[1];
+            facei = twoFaces[1];
         }
 
         // Store on face-edge addressing. (note: offset edge)
-        allFaceEdges[faceI].append(edgeI + nSurfaceEdges_);
+        allFaceEdges[facei].append(edgeI + nSurfaceEdges_);
     }
 
     // Transfer.
     edges_.transfer(allEdges);
     parentEdges_.transfer(allParentEdges);
 
-    forAll(allFaceEdges, faceI)
+    forAll(allFaceEdges, facei)
     {
-        faceEdges_[faceI].transfer(allFaceEdges[faceI]);
+        faceEdges_[facei].transfer(allFaceEdges[facei]);
     }
 
 
@@ -301,14 +301,14 @@ Foam::edgeSurface::edgeSurface
     {
         Pout<< "edgeSurface : Dumping faceEdges to files" << endl;
 
-        forAll(faceEdges_, faceI)
+        forAll(faceEdges_, facei)
         {
-            const labelList& fEdges = faceEdges_[faceI];
+            const labelList& fEdges = faceEdges_[facei];
 
             if (fEdges.size() != 3)
             {
-                fileName faceFName("face_" + name(faceI) + ".obj");
-                Pout<< "edgeSurface : Dumping faceEdges for face " << faceI
+                fileName faceFName("face_" + name(facei) + ".obj");
+                Pout<< "edgeSurface : Dumping faceEdges for face " << facei
                     << " to " << faceFName << endl;
 
                 OFstream fStream(faceFName);
@@ -341,7 +341,7 @@ Foam::edgeSurface::edgeSurface
 
 void Foam::edgeSurface::addIntersectionEdges
 (
-    const label faceI,
+    const label facei,
     const edgeList& additionalEdges
 )
 {
@@ -349,7 +349,7 @@ void Foam::edgeSurface::addIntersectionEdges
     {
         Pout<< "Old face consisted of edges:" << endl;
 
-        const labelList& fEdges = faceEdges_[faceI];
+        const labelList& fEdges = faceEdges_[facei];
         forAll(fEdges, i)
         {
             const edge& e = edges_[fEdges[i]];
@@ -375,7 +375,7 @@ void Foam::edgeSurface::addIntersectionEdges
     }
 
     // Append to faceEdges.
-    labelList& fEdges = faceEdges_[faceI];
+    labelList& fEdges = faceEdges_[facei];
 
     label nFEdges = fEdges.size();
 
@@ -393,7 +393,7 @@ void Foam::edgeSurface::addIntersectionEdges
 
     if (debug & 2)
     {
-        const labelList& fEdges = faceEdges_[faceI];
+        const labelList& fEdges = faceEdges_[facei];
 
         Pout<< "New face consists of edges:" << endl;
         forAll(fEdges, i)

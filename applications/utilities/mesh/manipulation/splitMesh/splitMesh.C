@@ -89,9 +89,9 @@ label findEdge(const primitiveMesh& mesh, const label v0, const label v1)
 // Checks whether patch present
 void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
 {
-    const label patchI = bMesh.findPatchID(name);
+    const label patchi = bMesh.findPatchID(name);
 
-    if (patchI == -1)
+    if (patchi == -1)
     {
         FatalErrorInFunction
             << "Cannot find patch " << name << nl
@@ -100,7 +100,7 @@ void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
             << exit(FatalError);
     }
 
-    if (bMesh[patchI].size())
+    if (bMesh[patchi].size())
     {
         FatalErrorInFunction
             << "Patch " << name << " is present but non-zero size"
@@ -203,15 +203,15 @@ int main(int argc, char *argv[])
     }
 
     // Find sides reachable from 0th face of faceSet
-    label startFaceI = faces[0];
+    label startFacei = faces[0];
 
     regionSide regionInfo
     (
         mesh,
         facesSet,
         fenceEdges,
-        mesh.faceOwner()[startFaceI],
-        startFaceI
+        mesh.faceOwner()[startFacei],
+        startFacei
     );
 
     // Determine flip state for all faces in faceSet

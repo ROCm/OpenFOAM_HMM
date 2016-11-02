@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,12 +29,12 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from cell number and parent
-Foam::splitCell::splitCell(const label cellI, splitCell* parent)
+Foam::splitCell::splitCell(const label celli, splitCell* parent)
 :
-    cellI_(cellI),
+    celli_(celli),
     parent_(parent),
-    master_(NULL),
-    slave_(NULL)
+    master_(nullptr),
+    slave_(nullptr)
 {}
 
 
@@ -49,11 +49,11 @@ Foam::splitCell::~splitCell()
         // Make sure parent does not refer to me anymore.
         if (myParent->master() == this)
         {
-            myParent->master() = NULL;
+            myParent->master() = nullptr;
         }
         else if (myParent->slave() == this)
         {
-            myParent->slave() = NULL;
+            myParent->slave() = nullptr;
         }
         else
         {
@@ -112,7 +112,7 @@ Foam::splitCell* Foam::splitCell::getOther() const
         FatalErrorInFunction
             << "Cell:" << cellLabel() << abort(FatalError);
 
-        return NULL;
+        return nullptr;
     }
     else if (myParent->master() == this)
     {
@@ -128,7 +128,7 @@ Foam::splitCell* Foam::splitCell::getOther() const
             << " parent's master or slave pointer" << endl
             << "Cell:" << cellLabel() << abort(FatalError);
 
-        return NULL;
+        return nullptr;
     }
 }
 

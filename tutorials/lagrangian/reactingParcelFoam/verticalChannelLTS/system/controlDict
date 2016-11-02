@@ -52,16 +52,15 @@ profiling
 
 functions
 {
-    faceSource1
+    surfaceFieldValue1
     {
-        type            faceSource;
-        functionObjectLibs ("libfieldFunctionObjects.so");
-        enabled         yes;
-        outputControl   outputTime;
+        type            surfaceFieldValue;
+        libs            ("libfieldFunctionObjects.so");
+        writeControl    writeTime;
         log             yes;
-        valueOutput     no;
-        source          patch;
-        sourceName      outlet;
+        writeFields     no;
+        regionType      patch;
+        name            outlet;
         operation       weightedAverage;
         weightField     phi;
         fields

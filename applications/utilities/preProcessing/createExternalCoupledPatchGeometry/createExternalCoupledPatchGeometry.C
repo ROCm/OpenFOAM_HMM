@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,9 @@ Description
     with the externalCoupled functionObject.
 
 Usage
-    - createExternalCoupledPatchGeometry \<patchGroup\> [OPTION]
+    \verbatim
+    createExternalCoupledPatchGeometry \<patchGroup\> [OPTION]
+    \endverbatim
 
     \param -commsDir \<commsDir\> \n
     Specify an alternative communications directory (default is comms
@@ -53,13 +55,13 @@ Note:
     The addressing is patch-local, i.e. point indices for each patch point
     used for face addressing starts at index 0.
 
-SeeAlso
-    externalCoupledFunctionObject
+See also
+    functionObjects::externalCoupled
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "externalCoupledFunctionObject.H"
+#include "externalCoupled.H"
 #include "IOobjectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -117,7 +119,7 @@ int main(int argc, char *argv[])
     }
 
 
-    externalCoupledFunctionObject::writeGeometry
+    functionObjects::externalCoupled::writeGeometry
     (
         UPtrList<const fvMesh>(meshes),
         commsDir,

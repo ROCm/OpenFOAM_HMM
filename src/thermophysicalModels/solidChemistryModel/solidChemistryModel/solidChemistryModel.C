@@ -59,16 +59,16 @@ solidChemistryModel
     reactingCells_(mesh.nCells(), true)
 {
     // create the fields for the chemistry sources
-    forAll(RRs_, fieldI)
+    forAll(RRs_, fieldi)
     {
         RRs_.set
         (
-            fieldI,
-            new DimensionedField<scalar, volMesh>
+            fieldi,
+            new volScalarField::Internal
             (
                 IOobject
                 (
-                    "RRs." + Ys_[fieldI].name(),
+                    "RRs." + Ys_[fieldi].name(),
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
@@ -140,10 +140,10 @@ Foam::solidChemistryModel<CompType, SolidThermo>::Sh() const
 
         forAll(Ys_, i)
         {
-            forAll(Sh, cellI)
+            forAll(Sh, celli)
             {
                 scalar hf = solidThermo_[i].Hc();
-                Sh[cellI] -= hf*RRs_[i][cellI];
+                Sh[celli] -= hf*RRs_[i][celli];
             }
         }
     }
@@ -177,7 +177,7 @@ Foam::solidChemistryModel<CompType, SolidThermo>::dQ() const
     if (this->chemistry_)
     {
         volScalarField& dQ = tdQ.ref();
-        dQ.dimensionedInternalField() = this->mesh_.V()*Sh()();
+        dQ.ref() = this->mesh_.V()*Sh()();
     }
 
     return tdQ;
@@ -187,11 +187,11 @@ Foam::solidChemistryModel<CompType, SolidThermo>::dQ() const
 template<class CompType, class SolidThermo>
 void Foam::solidChemistryModel<CompType, SolidThermo>::setCellReacting
 (
-    const label cellI,
+    const label celli,
     const bool active
 )
 {
-    reactingCells_[cellI] = active;
+    reactingCells_[celli] = active;
 }
 
 // ************************************************************************* //

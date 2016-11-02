@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -179,7 +179,7 @@ void Foam::MULES::limiter
 )
 {
     const scalarField& psiIf = psi;
-    const volScalarField::GeometricBoundaryField& psiBf = psi.boundaryField();
+    const volScalarField::Boundary& psiBf = psi.boundaryField();
 
     const fvMesh& mesh = psi.mesh();
 
@@ -199,15 +199,15 @@ void Foam::MULES::limiter
 
     const labelUList& owner = mesh.owner();
     const labelUList& neighb = mesh.neighbour();
-    tmp<volScalarField::DimensionedInternalField> tVsc = mesh.Vsc();
+    tmp<volScalarField::Internal> tVsc = mesh.Vsc();
     const scalarField& V = tVsc();
 
     const scalarField& phiBDIf = phiBD;
-    const surfaceScalarField::GeometricBoundaryField& phiBDBf =
+    const surfaceScalarField::Boundary& phiBDBf =
         phiBD.boundaryField();
 
     const scalarField& phiCorrIf = phiCorr;
-    const surfaceScalarField::GeometricBoundaryField& phiCorrBf =
+    const surfaceScalarField::Boundary& phiCorrBf =
         phiCorr.boundaryField();
 
     slicedSurfaceScalarField lambda
@@ -228,8 +228,8 @@ void Foam::MULES::limiter
     );
 
     scalarField& lambdaIf = lambda;
-    surfaceScalarField::GeometricBoundaryField& lambdaBf =
-        lambda.boundaryField();
+    surfaceScalarField::Boundary& lambdaBf =
+        lambda.boundaryFieldRef();
 
     scalarField psiMaxn(psiIf.size(), psiMin);
     scalarField psiMinn(psiIf.size(), psiMax);
@@ -330,7 +330,7 @@ void Foam::MULES::limiter
 
     if (mesh.moving())
     {
-        tmp<volScalarField::DimensionedInternalField> V0 = mesh.Vsc0();
+        tmp<volScalarField::Internal> V0 = mesh.Vsc0();
 
         psiMaxn =
             V
@@ -609,7 +609,7 @@ void Foam::MULES::limitSum(SurfaceScalarFieldList& phiPsiCorrs)
         limitSum(phiPsiCorrsInternal);
     }
 
-    surfaceScalarField::GeometricBoundaryField& bfld =
+    const surfaceScalarField::Boundary& bfld =
         phiPsiCorrs[0].boundaryField();
 
     forAll(bfld, patchi)
@@ -622,7 +622,7 @@ void Foam::MULES::limitSum(SurfaceScalarFieldList& phiPsiCorrs)
                 phiPsiCorrsPatch.set
                 (
                     phasei,
-                    &phiPsiCorrs[phasei].boundaryField()[patchi]
+                    &phiPsiCorrs[phasei].boundaryFieldRef()[patchi]
                 );
             }
 

@@ -6,7 +6,7 @@ cd ${0%/*} || exit 1    # Run from this directory
 
 cleanCase
 
-rm system/blockMeshDict
-rm 0/alpha.water
+rm -f system/blockMeshDict
+rm -f 0/alpha.water
 
 # ----------------------------------------------------------------- end-of-file

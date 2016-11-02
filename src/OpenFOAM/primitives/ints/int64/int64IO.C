@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,9 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "int64.H"
+#include "stringOps.H"
 #include "IOstreams.H"
 
 #include <inttypes.h>
@@ -34,11 +33,15 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::word Foam::name(const int64_t val)
+Foam::word Foam::name(const char* fmt, const int64_t val)
 {
-    std::ostringstream buf;
-    buf << val;
-    return buf.str();
+    return stringOps::name(fmt, val);
+}
+
+
+Foam::word Foam::name(const std::string& fmt, const int64_t val)
+{
+    return stringOps::name(fmt, val);
 }
 
 
@@ -86,7 +89,7 @@ int64_t Foam::readInt64(Istream& is)
 
 bool Foam::read(const char* buf, int64_t& s)
 {
-    char *endptr = NULL;
+    char *endptr = nullptr;
     errno = 0;
     intmax_t l = strtoimax(buf, &endptr, 10);
     s = int64_t(l);

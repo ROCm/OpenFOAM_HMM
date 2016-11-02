@@ -33,11 +33,11 @@ Description
     directions in a participating media, not including scatter.
 
     Available absorption models:
-        constantAbsorptionEmission
-        greyMeanAbsoprtionEmission
-        wideBandAbsorptionEmission
+    - constantAbsorptionEmission
+    - greyMeanAbsoprtionEmission
+    - wideBandAbsorptionEmission
 
-    i.e. dictionary
+Usage
     \verbatim
         fvDOMCoeffs
         {
@@ -47,9 +47,6 @@ Description
             convergence 1e-3;       // convergence criteria for radiation
                                     //iteration
             maxIter     4;          // maximum number of iterations
-            cacheDiv    true;       // cache the div of the RTE equation.
-            //NOTE: Caching div is "only" accurate if the upwind scheme is used
-            //in div(Ji,Ii_h) and Ii_h is constant in time.
              meshOrientation    (1 1 1); //Mesh ortientation used for 2D and 1D
         }
 
@@ -58,15 +55,19 @@ Description
 
     The total number of solid angles is  4*nPhi*nTheta in 3-D.
 
-    In 1-D the ray directions are on X, Y or Z (nPhi and nTheta are ignored).
-    'meshOrientation' vector can be used for any other 1D direction.
-
-    In 2-D the ray directions are on X-Y, X-Z or Y-Z planes.
-    (only nPhi is considered). 'meshOrientation' vector can be used for
-    not-aligned planes specifying the plane normal vector.
-
-    In 3D (nPhi and nTheta are considered). 'meshOrientation' vector is not
-    considered.
+    Operating modes:
+    - 1-D:
+      - ray directions are on X, Y or Z
+      - \c nPhi and \c nTheta entries are ignored
+      - \c meshOrientation vector can be used for any other 1-D direction.
+    - 2-D:
+      - ray directions are on X-Y, X-Z or Y-Z planes
+      - only the \c nPhi entry is considered
+      - \c meshOrientation vector can be used for non-aligned planes
+        specifying the plane normal vector.
+    - 3-D:
+      - rays geberated in 3-D using the \c nPhi and \c nTheta entries
+      - \c meshOrientation vector is not applicable.
 
 SourceFiles
     fvDOM.C
@@ -139,13 +140,7 @@ class fvDOM
         scalar convergence_;
 
         //- Maximum number of iterations
-        scalar maxIter_;
-
-        //- List of cached fvMatrices for rays
-        List<PtrList<fvScalarMatrix>>fvRayDiv_;
-
-        //- Cache convection div matrix
-        bool cacheDiv_;
+        label maxIter_;
 
         //- Maximum omega weight
         scalar omegaMax_;
@@ -220,7 +215,7 @@ public:
             virtual tmp<volScalarField> Rp() const;
 
             //- Source term component (constant)
-            virtual tmp<DimensionedField<scalar, volMesh>> Ru() const;
+            virtual tmp<volScalarField::Internal> Ru() const;
 
 
         // Access
@@ -267,16 +262,6 @@ public:
 
             //- Const access to black body
             inline const blackBodyEmission& blackBody() const;
-
-            //- Const access to cached fvMatrix
-            inline const fvScalarMatrix& fvRayDiv
-            (
-                const label lambdaI,
-                const label rayId
-            ) const;
-
-            //- Caching div(Ji, Ilamda)
-            inline bool cacheDiv() const;
 
             //- Return omegaMax
             inline scalar omegaMax() const;

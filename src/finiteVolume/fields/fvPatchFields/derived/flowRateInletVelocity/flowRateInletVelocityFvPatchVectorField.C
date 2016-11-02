@@ -54,7 +54,7 @@ flowRateInletVelocityFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<vector>(p, iF),
+    fixedValueFvPatchField<vector>(p, iF, dict, false),
     rhoInlet_(dict.lookupOrDefault<scalar>("rhoInlet", -VGREAT)),
     extrapolateProfile_
     (
@@ -234,6 +234,8 @@ void Foam::flowRateInletVelocityFvPatchVectorField::write(Ostream& os) const
         writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
         writeEntryIfDifferent<scalar>(os, "rhoInlet", -VGREAT, rhoInlet_);
     }
+    os.writeKeyword("extrapolateProfile")
+        << extrapolateProfile_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 

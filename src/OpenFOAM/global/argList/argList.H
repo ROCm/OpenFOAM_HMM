@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,17 +39,17 @@ Description
     \endverbatim
     The backslash-escaping is required to avoid interpretation by the shell.
 
-    \par Default command-line options
-    \param -case \<dir\> \n
-        select a case directory instead of the current working directory
-    \param -parallel \n
-        specify case as a parallel job
-    \param -doc \n
-        display the documentation in browser
-    \param -srcDoc \n
-        display the source documentation in browser
-    \param -help \n
-       print the usage
+    Default command-line options:
+      - \par -case \<dir\>
+        Select a case directory instead of the current working directory
+      - \par -parallel
+        Specify case as a parallel job
+      - \par -doc
+        Display the documentation in browser
+      - \par -srcDoc
+        Display the source documentation in browser
+      - \par -help
+        Print the usage
 
     The environment variable \b FOAM_CASE is set to the path of the
     global case (same for serial and parallel jobs).
@@ -161,6 +161,9 @@ public:
         //- Max screen width for displaying usage (default: 80)
         static string::size_type usageMax;
 
+        //- Standard name for the post-processing option
+        static word postProcessOptionName;
+
         //! \cond internalClass
         class initValidTables
         {
@@ -247,14 +250,6 @@ public:
             //  Index 1 corresponds to the first argument.
             template<class T>
             inline T argRead(const label index) const;
-
-            //- Return arguments that are additional to the executable
-            //  \deprecated use operator[] directly (deprecated Feb 2010)
-            stringList::subList additionalArgs() const
-            {
-                return stringList::subList(args_, args_.size()-1, 1);
-            }
-
 
             //- Return options
             inline const Foam::HashTable<string>& options() const;
@@ -356,6 +351,8 @@ public:
             //- Remove the parallel options
             static void noParallel();
 
+            //- Return true if the post-processing option is specified
+            static bool postProcess(int argc, char *argv[]);
 
             //- Set option directly (use with caution)
             //  An option with an empty param is a bool option.

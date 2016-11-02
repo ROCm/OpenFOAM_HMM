@@ -82,7 +82,8 @@ Description
             30                            // Reference velocity scale
             2                             // Reference length scale
             0                             // Minimum sigma limit (0-1)
-            1;                            // Maximum sigma limit (0-1)
+            1                             // Maximum sigma limit (0-1)
+            1.0e-03;                      // Limiter of B function, typically 1.0e-03
         .
         .
     }
@@ -153,6 +154,9 @@ class DEShybrid
         //- Maximum bound for sigma (0 <= sigmaMax <= 1)
         scalar sigmaMax_;
 
+        //- Limiter of B function
+        scalar OmegaLim_;
+
         //- Scheme constants
         scalar CH1_;
         scalar CH2_;
@@ -184,7 +188,7 @@ class DEShybrid
             const volScalarField B
             (
                 CH3_*Omega*max(S, Omega)
-               /max(0.5*(sqr(S) + sqr(Omega)), sqr(1.0e-3/tau0_))
+               /max(0.5*(sqr(S) + sqr(Omega)), sqr(OmegaLim_/tau0_))
             );
             const volScalarField K
             (
@@ -254,6 +258,7 @@ public:
             L0_("L0", dimLength, readScalar(is)),
             sigmaMin_(readScalar(is)),
             sigmaMax_(readScalar(is)),
+            OmegaLim_(readScalar(is)),
             CH1_(3.0),
             CH2_(1.0),
             CH3_(2.0)
@@ -318,6 +323,7 @@ public:
             L0_("L0", dimLength, readScalar(is)),
             sigmaMin_(readScalar(is)),
             sigmaMax_(readScalar(is)),
+            OmegaLim_(readScalar(is)),
             CH1_(3.0),
             CH2_(1.0),
             CH3_(2.0)
@@ -407,7 +413,7 @@ public:
                     << "Unable to retrieve turbulence model from the mesh "
                     << "database" << exit(FatalError);
 
-                return tmp<surfaceScalarField>(NULL);
+                return tmp<surfaceScalarField>(nullptr);
             }
         }
 
@@ -488,7 +494,7 @@ public:
             {
                 return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
                 (
-                    NULL
+                    nullptr
                 );
             }
         }

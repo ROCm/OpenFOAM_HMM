@@ -23,9 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "AverageIOField.H"
 #include "pointToPointPlanarInterpolation.H"
 #include "Time.H"
+#include "IFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,25 +70,24 @@ Foam::turbulentDFSEMInletFvPatchVectorField::interpolateBoundaryData
 {
     const word& patchName = this->patch().name();
 
-    // Note: reading from the '0' directory only
-    IOobject io
+    fileName valsFile
     (
-        fieldName,
-        this->db().time().caseConstant(),
-        "boundaryData"/patchName/"0",
-        this->db(),
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE,
-        false
+        this->db().time().path()
+       /this->db().time().caseConstant()
+       /"boundaryData"
+       /patchName
+       /"0"
+       /fieldName
     );
 
-    Info<< "Turbulent DFSEM patch " << this->patch().name()
+    IFstream is(valsFile);
+    Field<Type> vals(is);
+
+    Info<< "Turbulent DFSEM patch " << patchName
         << ": interpolating field " << fieldName
-        << " from " << io.path() << endl;
+        << " from " << valsFile << endl;
 
-    AverageIOField<Type> aFld(io);
-
-    return patchMapper().interpolate(aFld);
+    return patchMapper().interpolate(vals);
 }
 
 

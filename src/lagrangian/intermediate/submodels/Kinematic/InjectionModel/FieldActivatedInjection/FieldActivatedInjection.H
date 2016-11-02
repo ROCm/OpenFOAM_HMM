@@ -30,16 +30,16 @@ Group
 Description
     Conditional injection at specified positions.
 
-    \li for injection to be allowed
-        \verbatim
-        factor*referenceField[cellI] >= thresholdField[cellI]
-        \endverbatim
-        where:
+    For injection to be allowed
+      \verbatim
+      factor*referenceField[celli] >= thresholdField[celli]
+      \endverbatim
+      where:
         - \c referenceField is the field used to supply the look-up values
         - \c thresholdField supplies the values beyond which the injection is
             permitted.
 
-    \li limited to a user-supllied number of injections per injector location
+    Limited to a user-supplied number of injections per injector location
 
 SourceFiles
     FieldActivatedInjection.C
@@ -177,8 +177,8 @@ public:
                 const scalar time,
                 vector& position,
                 label& cellOwner,
-                label& tetFaceI,
-                label& tetPtI
+                label& tetFacei,
+                label& tetPti
             );
 
             //- Set the parcel properties

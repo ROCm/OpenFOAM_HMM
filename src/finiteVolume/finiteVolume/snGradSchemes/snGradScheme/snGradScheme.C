@@ -126,7 +126,7 @@ snGradScheme<Type>::snGrad
     GeometricField<Type, fvsPatchField, surfaceMesh>& ssf = tsf.ref();
 
     // set reference to difference factors array
-    const scalarField& deltaCoeffs = tdeltaCoeffs().internalField();
+    const scalarField& deltaCoeffs = tdeltaCoeffs();
 
     // owner/neighbour addressing
     const labelUList& owner = mesh.owner();
@@ -138,18 +138,20 @@ snGradScheme<Type>::snGrad
             deltaCoeffs[facei]*(vf[neighbour[facei]] - vf[owner[facei]]);
     }
 
+    typename GeometricField<Type, fvsPatchField, surfaceMesh>::
+        Boundary& ssfbf = ssf.boundaryFieldRef();
+
     forAll(vf.boundaryField(), patchi)
     {
         const fvPatchField<Type>& pvf = vf.boundaryField()[patchi];
 
         if (pvf.coupled())
         {
-            ssf.boundaryField()[patchi] =
-                pvf.snGrad(tdeltaCoeffs().boundaryField()[patchi]);
+            ssfbf[patchi] = pvf.snGrad(tdeltaCoeffs().boundaryField()[patchi]);
         }
         else
         {
-            ssf.boundaryField()[patchi] = pvf.snGrad();
+            ssfbf[patchi] = pvf.snGrad();
         }
     }
 

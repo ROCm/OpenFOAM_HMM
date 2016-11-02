@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,6 +64,14 @@ Foam::hashedWordList::hashedWordList(const hashedWordList& names)
 Foam::hashedWordList::hashedWordList(const Xfer<List<word>>& names)
 :
     List<word>(names)
+{
+    rehash();
+}
+
+
+Foam::hashedWordList::hashedWordList(std::initializer_list<word> lst)
+:
+    List<word>(lst)
 {
     rehash();
 }
@@ -135,6 +143,40 @@ void Foam::hashedWordList::transfer(List<word>& lst)
 {
     List<word>::transfer(lst);
     rehash();
+}
+
+
+void Foam::hashedWordList::sort()
+{
+    Foam::sort(*this);
+    rehash();
+}
+
+
+void Foam::hashedWordList::uniq()
+{
+    if (size() != indices_.size())
+    {
+        // sizes don't match, which means there appear to be duplicates
+
+        indices_.clear();
+        label nElem = 0;
+        forAll(*this, i)
+        {
+            const word& item = List<word>::operator[](i);
+
+            if (indices_.insert(item, nElem))
+            {
+                if (nElem != i)
+                {
+                    List<word>::operator[](nElem) = item;
+                }
+                ++nElem;
+            }
+        }
+
+        List<word>::setSize(nElem);
+    }
 }
 
 

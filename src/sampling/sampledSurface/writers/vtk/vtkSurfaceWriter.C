@@ -53,9 +53,9 @@ void Foam::vtkSurfaceWriter::writeGeometry
 
     // Write vertex coords
     os  << "POINTS " << points.size() << " double" << nl;
-    forAll(points, pointI)
+    forAll(points, pointi)
     {
-        const point& pt = points[pointI];
+        const point& pt = points[pointi];
         os  << float(pt.x()) << ' '
             << float(pt.y()) << ' '
             << float(pt.z()) << nl;
@@ -65,17 +65,17 @@ void Foam::vtkSurfaceWriter::writeGeometry
 
     // Write faces
     label nNodes = 0;
-    forAll(faces, faceI)
+    forAll(faces, facei)
     {
-        nNodes += faces[faceI].size();
+        nNodes += faces[facei].size();
     }
 
     os  << "POLYGONS " << faces.size() << ' '
         << faces.size() + nNodes << nl;
 
-    forAll(faces, faceI)
+    forAll(faces, facei)
     {
-        const face& f = faces[faceI];
+        const face& f = faces[facei];
 
         os  << f.size();
         forAll(f, fp)

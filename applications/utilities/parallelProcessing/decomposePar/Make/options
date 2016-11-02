@@ -8,11 +8,10 @@ EXE_INC = \
     -I$(LIB_SRC)/regionModels/regionModel/lnInclude
 
 EXE_LIBS = \
-    -lfiniteVolume \
+    -ldynamicMesh \
     -ldecompose \
     -lgenericPatchFields \
     -ldecompositionMethods -L$(FOAM_LIBBIN)/dummy -lmetisDecomp -lscotchDecomp \
     -llagrangian \
     -ldynamicMesh \
-    -lmeshTools \
     -lregionModels

@@ -32,11 +32,10 @@ Description
     directly into a matrix, i.e. to set a constraint condition.  Default
     behaviour is to act as a zero gradient condition.
 
-    \heading Patch usage
-
+Usage
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            fixedInternalValue;
         value           uniform 0;              // place holder
@@ -48,7 +47,7 @@ Note
     wall function, which applies a near-wall constraint for high Reynolds
     number flows.
 
-SeeAlso
+See also
     Foam::epsilonWallFunctionFvPatchScalarField
 
 SourceFiles

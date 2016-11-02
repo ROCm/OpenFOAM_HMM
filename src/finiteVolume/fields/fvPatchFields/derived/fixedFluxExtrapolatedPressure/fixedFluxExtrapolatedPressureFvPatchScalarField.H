@@ -34,13 +34,13 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            fixedFluxExtrapolatedPressure;
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::fixedGradientFvPatchField
 
 SourceFiles

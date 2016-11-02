@@ -123,7 +123,7 @@
             ++dmIter, ++dcIter
         )
         {
-            const phaseModel *phase2Ptr = NULL;
+            const phaseModel *phase2Ptr = nullptr;
 
             if (&phase == &dmIter()->phase1())
             {
@@ -187,7 +187,7 @@
 
     // Update the fixedFluxPressure BCs to ensure flux consistency
     {
-        surfaceScalarField::GeometricBoundaryField phib(phi.boundaryField());
+        surfaceScalarField::Boundary phib(phi.boundaryField());
         phib = 0;
         phasei = 0;
         forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
@@ -203,7 +203,7 @@
 
         setSnGrad<fixedFluxPressureFvPatchScalarField>
         (
-            p_rgh.boundaryField(),
+            p_rgh.boundaryFieldRef(),
             (
                 phiHbyA.boundaryField() - MRF.relative(phib)
             )/(mesh.magSf().boundaryField()*rAUf.boundaryField())

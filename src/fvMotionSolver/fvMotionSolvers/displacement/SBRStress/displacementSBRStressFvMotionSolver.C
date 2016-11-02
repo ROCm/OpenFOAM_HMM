@@ -164,7 +164,7 @@ Foam::displacementSBRStressFvMotionSolver::curPoints() const
 
     tmp<pointField> tcurPoints
     (
-        points0() + pointDisplacement().internalField()
+        points0() + pointDisplacement().primitiveField()
     );
 
     twoDCorrectPoints(tcurPoints.ref());
@@ -180,7 +180,7 @@ void Foam::displacementSBRStressFvMotionSolver::solve()
     movePoints(fvMesh_.points());
 
     diffusivityPtr_->correct();
-    pointDisplacement_.boundaryField().updateCoeffs();
+    pointDisplacement_.boundaryFieldRef().updateCoeffs();
 
     surfaceScalarField Df(diffusivityPtr_->operator()());
 
@@ -246,7 +246,7 @@ void Foam::displacementSBRStressFvMotionSolver::updateMesh
 
     // Update diffusivity. Note two stage to make sure old one is de-registered
     // before creating/registering new one.
-    diffusivityPtr_.reset(NULL);
+    diffusivityPtr_.reset(nullptr);
     diffusivityPtr_ = motionDiffusivity::New
     (
         fvMesh_,

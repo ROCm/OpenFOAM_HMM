@@ -114,24 +114,23 @@ Foam::fvPatchField<Type>::fvPatchField
     manipulatedMatrix_(false),
     patchType_(dict.lookupOrDefault<word>("patchType", word::null))
 {
-    if (dict.found("value"))
+    if (valueRequired)
     {
-        Field<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else if (!valueRequired)
-    {
-        Field<Type>::operator=(Zero);
-    }
-    else
-    {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Essential entry 'value' missing"
-            << exit(FatalIOError);
+        if (dict.found("value"))
+        {
+            Field<Type>::operator=
+            (
+                Field<Type>("value", dict, p.size())
+            );
+        }
+        else
+        {
+            FatalIOErrorInFunction
+            (
+                dict
+            )   << "Essential entry 'value' missing"
+                << exit(FatalIOError);
+        }
     }
 }
 
@@ -153,7 +152,7 @@ Foam::fvPatchField<Type>::fvPatchField
     patchType_(ptf.patchType_)
 {
     // For unmapped faces set to internal field value (zero-gradient)
-    if (notNull(iF) && iF.size())
+    if (notNull(iF) && mapper.hasUnmapped())
     {
         fvPatchField<Type>::operator=(this->patchInternalField());
     }
@@ -317,8 +316,9 @@ void Foam::fvPatchField<Type>::updateCoeffs()
 
 
 template<class Type>
-void Foam::fvPatchField<Type>::updateCoeffs(const scalarField& weights)
+void Foam::fvPatchField<Type>::updateWeightedCoeffs(const scalarField& weights)
 {
+    // Default behaviour ignores the weights
     if (!updated_)
     {
         updateCoeffs();

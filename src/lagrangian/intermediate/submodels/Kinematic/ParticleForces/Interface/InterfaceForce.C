@@ -45,7 +45,7 @@ Foam::InterfaceForce<CloudType>::InterfaceForce
     (
         readScalar(this->coeffs().lookup("C"))
     ),
-    gradInterForceInterpPtr_(NULL)
+    gradInterForceInterpPtr_(nullptr)
 {}
 
 

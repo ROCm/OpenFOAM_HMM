@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,9 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "functionObjectTemplate.H"
-#include "Time.H"
 #include "fvCFD.H"
 #include "unitConversion.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -37,6 +37,36 @@ namespace Foam
 
 defineTypeNameAndDebug(${typeName}FunctionObject, 0);
 
+addRemovableToRunTimeSelectionTable
+(
+    functionObject,
+    ${typeName}FunctionObject,
+    dictionary
+);
+
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+extern "C"
+{
+    // dynamicCode:
+    // SHA1 = ${SHA1sum}
+    //
+    // unique function name that can be checked if the correct library version
+    // has been loaded
+    void ${typeName}_${SHA1sum}(bool load)
+    {
+        if (load)
+        {
+            // code that can be explicitly executed after loading
+        }
+        else
+        {
+            // code that can be explicitly executed before unloading
+        }
+    }
+}
+
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
@@ -46,12 +76,6 @@ ${localCode}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-const objectRegistry& ${typeName}FunctionObject::obr() const
-{
-    return obr_;
-}
-
 
 const fvMesh& ${typeName}FunctionObject::mesh() const
 {
@@ -64,13 +88,11 @@ const fvMesh& ${typeName}FunctionObject::mesh() const
 ${typeName}FunctionObject::${typeName}FunctionObject
 (
     const word& name,
-    const objectRegistry& obr,
-    const dictionary& dict,
-    const bool
+    const Time& runTime,
+    const dictionary& dict
 )
 :
-    name_(name),
-    obr_(obr)
+    functionObjects::regionFunctionObject(name, runTime, dict)
 {
     read(dict);
 }
@@ -84,7 +106,7 @@ ${typeName}FunctionObject::~${typeName}FunctionObject()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void ${typeName}FunctionObject::read(const dictionary& dict)
+bool ${typeName}FunctionObject::read(const dictionary& dict)
 {
     if (${verbose:-false})
     {
@@ -94,10 +116,12 @@ void ${typeName}FunctionObject::read(const dictionary& dict)
 //{{{ begin code
     ${codeRead}
 //}}} end code
+
+    return true;
 }
 
 
-void ${typeName}FunctionObject::execute()
+bool ${typeName}FunctionObject::execute()
 {
     if (${verbose:-false})
     {
@@ -107,10 +131,27 @@ void ${typeName}FunctionObject::execute()
 //{{{ begin code
     ${codeExecute}
 //}}} end code
+
+    return true;
 }
 
 
-void ${typeName}FunctionObject::end()
+bool ${typeName}FunctionObject::write()
+{
+    if (${verbose:-false})
+    {
+        Info<<"write ${typeName} sha1: ${SHA1sum}\n";
+    }
+
+//{{{ begin code
+    ${codeWrite}
+//}}} end code
+
+    return true;
+}
+
+
+bool ${typeName}FunctionObject::end()
 {
     if (${verbose:-false})
     {
@@ -120,37 +161,13 @@ void ${typeName}FunctionObject::end()
 //{{{ begin code
     ${codeEnd}
 //}}} end code
+
+    return true;
 }
 
-
-void ${typeName}FunctionObject::timeSet()
-{
-    if (${verbose:-false})
-    {
-        Info<<"timeSet ${typeName} sha1: ${SHA1sum}\n";
-    }
-
-//{{{ begin codeTime
-    ${codeTimeSet}
-//}}} end code
-}
-
-
-void ${typeName}FunctionObject::write()
-{
-    if (${verbose:-false})
-    {
-        Info<<"write ${typeName} sha1: ${SHA1sum}\n";
-    }
-
-//{{{ begin code
-    ${code}
-//}}} end code
-}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
 
 // ************************************************************************* //

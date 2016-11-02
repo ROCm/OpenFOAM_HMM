@@ -421,24 +421,6 @@ Foam::boundBox Foam::searchableSurfaces::bounds() const
 }
 
 
-Foam::pointIndexHit Foam::searchableSurfaces::facesIntersection
-(
-    const scalar initDistSqr,
-    const scalar convergenceDistSqr,
-    const point& start
-) const
-{
-    return searchableSurfacesQueries::facesIntersection
-    (
-        *this,
-        allSurfaces_,
-        initDistSqr,
-        convergenceDistSqr,
-        start
-    );
-}
-
-
 bool Foam::searchableSurfaces::checkClosed(const bool report) const
 {
     if (report)
@@ -765,9 +747,9 @@ bool Foam::searchableSurfaces::checkQuality
             );
 
             label nBadTris = 0;
-            forAll(s, faceI)
+            forAll(s, facei)
             {
-                const labelledTri& f = s[faceI];
+                const labelledTri& f = s[facei];
 
                 scalar q = triPointRef
                 (

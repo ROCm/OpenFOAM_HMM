@@ -26,7 +26,6 @@ License
 #include "SemiImplicitSource.H"
 #include "fvMesh.H"
 #include "fvMatrices.H"
-#include "DimensionedField.H"
 #include "fvmSup.H"
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
@@ -131,7 +130,7 @@ template<class Type>
 void Foam::fv::SemiImplicitSource<Type>::addSup
 (
     fvMatrix<Type>& eqn,
-    const label fieldI
+    const label fieldi
 )
 {
     if (debug)
@@ -142,11 +141,11 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
 
     const GeometricField<Type, fvPatchField, volMesh>& psi = eqn.psi();
 
-    DimensionedField<Type, volMesh> Su
+    typename GeometricField<Type, fvPatchField, volMesh>::Internal Su
     (
         IOobject
         (
-            name_ + fieldNames_[fieldI] + "Su",
+            name_ + fieldNames_[fieldi] + "Su",
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
@@ -162,13 +161,13 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
         false
     );
 
-    UIndirectList<Type>(Su, cells_) = injectionRate_[fieldI].first()/VDash_;
+    UIndirectList<Type>(Su, cells_) = injectionRate_[fieldi].first()/VDash_;
 
-    DimensionedField<scalar, volMesh> Sp
+    volScalarField::Internal Sp
     (
         IOobject
         (
-            name_ + fieldNames_[fieldI] + "Sp",
+            name_ + fieldNames_[fieldi] + "Sp",
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
@@ -184,7 +183,7 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
         false
     );
 
-    UIndirectList<scalar>(Sp, cells_) = injectionRate_[fieldI].second()/VDash_;
+    UIndirectList<scalar>(Sp, cells_) = injectionRate_[fieldi].second()/VDash_;
 
     eqn += Su + fvm::SuSp(Sp, psi);
 }
@@ -195,7 +194,7 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
 (
     const volScalarField& rho,
     fvMatrix<Type>& eqn,
-    const label fieldI
+    const label fieldi
 )
 {
     if (debug)
@@ -204,7 +203,7 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
             << ">::addSup for source " << name_ << endl;
     }
 
-    return this->addSup(eqn, fieldI);
+    return this->addSup(eqn, fieldi);
 }
 
 

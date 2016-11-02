@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #------------------------------------------------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
@@ -30,7 +30,7 @@
 #
 # Description
 #     Find directories with a 'Make/files' that contains a 'LIB =' directive
-#     and execute 'wmakeLnInclude -update' for each one
+#     and execute 'wmakeLnInclude' for each one
 #
 #------------------------------------------------------------------------------
 Script=${0##*/}
@@ -39,10 +39,15 @@ usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-Usage: $Script [dir1 .. dirN]
+Usage: $Script [OPTION] [dir1 .. dirN]
 
-    Find directories with a 'Make/files' that contains a 'LIB =' directive
-    and execute 'wmakeLnInclude -update' for each one
+options:
+  -j                Compile using all local cores/hyperthreads
+  -jN or -j N       Compile using N cores/hyperthreads
+  -h | -help        Print the usage
+
+Find directories with a 'Make/files' that contains a 'LIB =' directive
+and execute 'wmakeLnInclude -update' for each one
 
 USAGE
     exit 1
@@ -54,35 +59,61 @@ USAGE
 #------------------------------------------------------------------------------
 
 findName=lnInclude
+nCores=0
+
+# Default 'wmakeLnInclude' option
+wmLnOpt=
 
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | -help)   # Provide immediate help
-        usage
-        ;;
-    -*)
-        usage "unknown option: '$*'"
-        ;;
-    *)
-        break
-        ;;
+        -h | -help)   # Provide immediate help
+            usage
+            ;;
+        -u | -update)
+            wmLnOpt="-update"
+            ;;
+        # Parallel execution on WM_NCOMPPROCS cores
+        -j)
+            nCores=$WM_NCOMPPROCS
+            test $# -ge 2 && expr $2 + 1 > /dev/null 2>&1 \
+                && shift && nCores=$1
+            ;;
+        # Parallel compilation on specified number of cores
+        -j*)
+            nCores=${1#-j}
+            ;;
+        -*)
+            usage "unknown option: '$*'"
+            ;;
+        *)
+            break
+            ;;
     esac
+    shift
 done
 
 
-# Default to searching from CWD
+FAIL=0
+
+if [ "$nCores" -gt 0 ]
+then
+    echo "$Script: starting wmakeLnInclude processes on $nCores cores"
+else
+    echo "$Script: running wmakeLnInclude"
+fi
+
+
+# Defaults to searching from CWD
 [ "$#" -gt 0 ] || set -- .
 
 for checkDir
 do
     if [ -d $checkDir ]
     then
-        echo "Searching: $checkDir for 'Make' directories"
-        echo "---------"
+        echo "    searching $checkDir for 'Make' directories"
     else
-        echo "Skipping non-dir: $checkDir"
-        echo "----------------"
+        echo "    skipping non-dir $checkDir"
         continue
     fi
 
@@ -93,15 +124,40 @@ do
         then
             if grep -e '^ *LIB *=' "$MakeDir/files" >/dev/null 2>&1
             then
-                wmakeLnInclude -update $topDir
+                # If running in parallel start wmakeLnInclude on nCores
+                # and more as the cores become free
+                if [ "$nCores" -gt 0 ]
+                then
+                    joblist=($(jobs -p))
+                    while (( ${#joblist[*]} > $nCores ))
+                    do
+                        # When the job limit is reached wait for a job to finish
+                        wait -n
+                        joblist=($(jobs -p))
+                    done
+                    wmakeLnInclude $wmLnOpt $topDir &
+                else
+                    wmakeLnInclude $wmLnOpt $topDir
+                fi
             elif [ -d "$topDir/lnInclude" ]
             then
-                echo "removing spurious $topDir/lnInclude"
+                echo "    removing spurious $topDir/lnInclude"
                 rm -rf "$topDir/lnInclude"
             fi
         fi
     done
 done
+
+if [ "$nCores" -gt 0 ]
+then
+    # Wait for all of the wmakeLnInclude jobs to finish
+    wait
+
+    # Synchronize the file system to ensure that all of the links exist
+    # before compilation
+    # sync
+    sleep 2
+fi
 
 
 #------------------------------------------------------------------------------

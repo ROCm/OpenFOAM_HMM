@@ -1,28 +1,21 @@
 /*--------------------------------*- C++ -*----------------------------------*\
-| =========                 |                                                 |
-| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 |  \\    /   O peration     | Version:  plus                                  |  
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
-|    \\/     M anipulation  |                                                 |
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+Description
+    Writes out values of fields from cells nearest to specified locations.
+
 \*---------------------------------------------------------------------------*/
-FoamFile
-{
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    object      probes;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-probes
-{
-    fields ( p U );
-    probeLocations
-    (
-        (0 0 0)
-    );
+#includeEtc "caseDicts/postProcessing/probes/probes.cfg"
 
-    #includeEtc "caseDicts/postProcessing/probes/probes.cfg"
-}
+fields (p U);
+probeLocations
+(
+    (0 0 0)
+);
 
 // ************************************************************************* //

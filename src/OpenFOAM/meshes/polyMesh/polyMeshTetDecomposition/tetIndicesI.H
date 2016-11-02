@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,19 +23,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::label Foam::tetIndices::cell() const
 {
-    return cellI_;
+    return celli_;
 }
 
 
 Foam::label Foam::tetIndices::face() const
 {
-    return faceI_;
+    return facei_;
 }
 
 
@@ -59,7 +57,7 @@ Foam::label Foam::tetIndices::facePtB() const
 
 Foam::label Foam::tetIndices::tetPt() const
 {
-    return tetPtI_;
+    return tetPti_;
 }
 
 
@@ -69,11 +67,11 @@ Foam::tetPointRef Foam::tetIndices::tet(const polyMesh& mesh) const
     const faceList& pFaces = mesh.faces();
     const vectorField& pC = mesh.cellCentres();
 
-    const Foam::face& f = pFaces[faceI_];
+    const Foam::face& f = pFaces[facei_];
 
     return tetPointRef
     (
-        pC[cellI_],
+        pC[celli_],
         pPts[f[faceBasePtI_]],
         pPts[f[facePtAI_]],
         pPts[f[facePtBI_]]
@@ -88,13 +86,13 @@ Foam::tetPointRef Foam::tetIndices::oldTet(const polyMesh& mesh) const
 
     // We need to reconstruct the old Cc from oldPoints (it isn't
     // stored)
-    point oldC = mesh.cells()[cellI_].centre
+    point oldC = mesh.cells()[celli_].centre
     (
         oldPPts,
         pFaces
     );
 
-    const Foam::face& f = pFaces[faceI_];
+    const Foam::face& f = pFaces[facei_];
 
     return tetPointRef
     (
@@ -111,7 +109,7 @@ Foam::triPointRef Foam::tetIndices::faceTri(const polyMesh& mesh) const
     const pointField& pPts = mesh.points();
     const faceList& pFaces = mesh.faces();
 
-    const Foam::face& f = pFaces[faceI_];
+    const Foam::face& f = pFaces[facei_];
 
     return triPointRef
     (
@@ -126,7 +124,7 @@ Foam::triFace Foam::tetIndices::faceTriIs(const polyMesh& mesh) const
 {
     const faceList& pFaces = mesh.faces();
 
-    const Foam::face& f = pFaces[faceI_];
+    const Foam::face& f = pFaces[facei_];
 
     return triFace
     (
@@ -142,7 +140,7 @@ Foam::triPointRef Foam::tetIndices::oldFaceTri(const polyMesh& mesh) const
     const pointField& oldPPts = mesh.oldPoints();
     const faceList& pFaces = mesh.faces();
 
-    const Foam::face& f = pFaces[faceI_];
+    const Foam::face& f = pFaces[facei_];
 
     return triPointRef
     (
@@ -155,13 +153,13 @@ Foam::triPointRef Foam::tetIndices::oldFaceTri(const polyMesh& mesh) const
 
 Foam::label& Foam::tetIndices::cell()
 {
-    return cellI_;
+    return celli_;
 }
 
 
 Foam::label& Foam::tetIndices::face()
 {
-    return faceI_;
+    return facei_;
 }
 
 
@@ -185,7 +183,7 @@ Foam::label& Foam::tetIndices::facePtB()
 
 Foam::label& Foam::tetIndices::tetPt()
 {
-    return tetPtI_;
+    return tetPti_;
 }
 
 

@@ -31,8 +31,7 @@ Description
     This boundary condition provides a surface-normal vector boundary condition
     by its magnitude.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         refValue     | reference value         | yes         |
@@ -40,7 +39,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            surfaceNormalFixedValue;
         refValue        uniform -10;           // 10 INTO the domain
@@ -51,7 +50,7 @@ Note
     Sign conventions:
     - the value is positive for outward-pointing vectors
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchField
 
 SourceFiles

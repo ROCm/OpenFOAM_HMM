@@ -31,8 +31,7 @@ Description
     This boundary condition provides a total pressure condition for patches
     in a rotating frame.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         U            | velocity field name     | no          | U
@@ -46,7 +45,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            rotatingTotalPressure;
         U               U;
@@ -62,7 +61,7 @@ Description
     The \c omega entry is a Function1 type, able to describe time varying
     functions.
 
-SeeAlso
+See also
     Foam::totalPressureFvPatchScalarField
     Foam::Function1Types
 

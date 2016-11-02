@@ -84,13 +84,15 @@ bool Foam::patchDistMethods::meshWave::correct(volScalarField& y)
     y.transfer(wave.distance());
 
     // Transfer values on patches into boundaryField of y
-    forAll(y.boundaryField(), patchI)
-    {
-        if (!isA<emptyFvPatchScalarField>(y.boundaryField()[patchI]))
-        {
-            scalarField& waveFld = wave.patchDistance()[patchI];
+    volScalarField::Boundary& ybf = y.boundaryFieldRef();
 
-            y.boundaryField()[patchI].transfer(waveFld);
+    forAll(ybf, patchi)
+    {
+        if (!isA<emptyFvPatchScalarField>(ybf[patchi]))
+        {
+            scalarField& waveFld = wave.patchDistance()[patchi];
+
+            ybf[patchi].transfer(waveFld);
         }
     }
 
@@ -112,9 +114,11 @@ bool Foam::patchDistMethods::meshWave::correct
     // Collect pointers to data on patches
     UPtrList<vectorField> patchData(mesh_.boundaryMesh().size());
 
-    forAll(n.boundaryField(), patchI)
+    volVectorField::Boundary& nbf = n.boundaryFieldRef();
+
+    forAll(nbf, patchi)
     {
-        patchData.set(patchI, &n.boundaryField()[patchI]);
+        patchData.set(patchi, &nbf[patchi]);
     }
 
     // Do mesh wave
@@ -132,17 +136,19 @@ bool Foam::patchDistMethods::meshWave::correct
     n.transfer(wave.cellData());
 
     // Transfer values on patches into boundaryField of y and n
-    forAll(y.boundaryField(), patchI)
+    volScalarField::Boundary& ybf = y.boundaryFieldRef();
+
+    forAll(ybf, patchi)
     {
-        scalarField& waveFld = wave.patchDistance()[patchI];
+        scalarField& waveFld = wave.patchDistance()[patchi];
 
-        if (!isA<emptyFvPatchScalarField>(y.boundaryField()[patchI]))
+        if (!isA<emptyFvPatchScalarField>(ybf[patchi]))
         {
-            y.boundaryField()[patchI].transfer(waveFld);
+            ybf[patchi].transfer(waveFld);
 
-            vectorField& wavePatchData = wave.patchData()[patchI];
+            vectorField& wavePatchData = wave.patchData()[patchi];
 
-            n.boundaryField()[patchI].transfer(wavePatchData);
+            nbf[patchi].transfer(wavePatchData);
         }
     }
 

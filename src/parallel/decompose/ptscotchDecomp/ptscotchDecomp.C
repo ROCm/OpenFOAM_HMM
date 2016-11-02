@@ -261,9 +261,9 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 //    globalIndex globalCells(initxadj.size()-1);
 //
 //    bool hasZeroDomain = false;
-//    for (label procI = 0; procI < Pstream::nProcs(); procI++)
+//    for (label proci = 0; proci < Pstream::nProcs(); proci++)
 //    {
-//        if (globalCells.localSize(procI) == 0)
+//        if (globalCells.localSize(proci) == 0)
 //        {
 //            hasZeroDomain = true;
 //            break;
@@ -300,12 +300,12 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 //    // (is same as number of cells next processor has to receive)
 //    List<label> nSendCells(Pstream::nProcs(), 0);
 //
-//    for (label procI = nSendCells.size()-1; procI >=1; procI--)
+//    for (label proci = nSendCells.size()-1; proci >=1; proci--)
 //    {
-//        label nLocalCells = globalCells.localSize(procI);
-//        if (nLocalCells-nSendCells[procI] < 1)
+//        label nLocalCells = globalCells.localSize(proci);
+//        if (nLocalCells-nSendCells[proci] < 1)
 //        {
-//            nSendCells[procI-1] = nSendCells[procI]-nLocalCells+1;
+//            nSendCells[proci-1] = nSendCells[proci]-nLocalCells+1;
 //        }
 //    }
 //
@@ -519,10 +519,10 @@ Foam::label Foam::ptscotchDecomp::decompose
             label baseval = 0;
             // 100*hasVertlabels+10*hasEdgeWeights+1*hasVertWeighs
             str << baseval << ' ' << "000" << nl;
-            for (label cellI = 0; cellI < xadjSize-1; cellI++)
+            for (label celli = 0; celli < xadjSize-1; celli++)
             {
-                label start = xadj[cellI];
-                label end = xadj[cellI+1];
+                label start = xadj[celli];
+                label end = xadj[celli+1];
                 str << end-start;
 
                 for (label i = start; i < end; i++)
@@ -669,13 +669,13 @@ Foam::label Foam::ptscotchDecomp::decompose
             const_cast<SCOTCH_Num*>(xadj+1),// vendloctab, end index  ,,
 
             const_cast<SCOTCH_Num*>(velotab.begin()),// veloloctab, vtx weights
-            NULL,                   // vlblloctab
+            nullptr,                   // vlblloctab
 
             adjncySize,             // edgelocnbr, number of arcs
             adjncySize,             // edgelocsiz
             const_cast<SCOTCH_Num*>(adjncy),         // edgeloctab
-            NULL,                   // edgegsttab
-            NULL                    // edlotab, edge weights
+            nullptr,                   // edgegsttab
+            nullptr                    // edlotab, edge weights
         ),
         "SCOTCH_dgraphBuild"
     );

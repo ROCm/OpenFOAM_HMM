@@ -124,13 +124,13 @@ class surfaceIntersection
         static void transfer(List<DynamicList<T>>&,  List<List<T>>&);
 
         //- Get minimum length of all edges connected to point
-        static scalar minEdgeLen(const triSurface& surf, const label pointI);
+        static scalar minEdgeLen(const triSurface& surf, const label pointi);
 
         //- Get edge label of edge between face vertices fp and fp+1
         static label getEdge
         (
             const triSurface& surf,
-            const label faceI,
+            const label facei,
             const label fp
         );
 
@@ -154,7 +154,7 @@ class surfaceIntersection
         (
             const triSurface& surf,
             const label edgeI,
-            const label faceI,
+            const label facei,
             const scalar tol
         );
 
@@ -164,7 +164,7 @@ class surfaceIntersection
         //static pointIndexHit faceEdgeIntersection
         //(
         //    const triSurface&,
-        //    const label hitFaceI,
+        //    const label hitFacei,
         //
         //    const vector& n,
         //    const point& eStart,

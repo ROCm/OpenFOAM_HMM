@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -129,38 +129,38 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
 
     forAll(filmPatches, i)
     {
-        const label filmPatchI = filmPatches[i];
-        const label primaryPatchI = primaryPatches[i];
+        const label filmPatchi = filmPatches[i];
+        const label primaryPatchi = primaryPatches[i];
 
-        const labelList& injectorCellsPatch = pbm[primaryPatchI].faceCells();
+        const labelList& injectorCellsPatch = pbm[primaryPatchi].faceCells();
 
-        cacheFilmFields(filmPatchI, primaryPatchI, filmModel);
+        cacheFilmFields(filmPatchi, primaryPatchi, filmModel);
 
-        const vectorField& Cf = mesh.C().boundaryField()[primaryPatchI];
-        const vectorField& Sf = mesh.Sf().boundaryField()[primaryPatchI];
-        const scalarField& magSf = mesh.magSf().boundaryField()[primaryPatchI];
+        const vectorField& Cf = mesh.C().boundaryField()[primaryPatchi];
+        const vectorField& Sf = mesh.Sf().boundaryField()[primaryPatchi];
+        const scalarField& magSf = mesh.magSf().boundaryField()[primaryPatchi];
 
         forAll(injectorCellsPatch, j)
         {
             if (diameterParcelPatch_[j] > 0)
             {
-                const label cellI = injectorCellsPatch[j];
+                const label celli = injectorCellsPatch[j];
 
                 // The position could bein any tet of the decomposed cell,
                 // so arbitrarily choose the first face of the cell as the
                 // tetFace and the first point on the face after the base
                 // point as the tetPt.  The tracking will pick the cell
                 // consistent with the motion in the first tracking step.
-                const label tetFaceI = this->owner().mesh().cells()[cellI][0];
-                const label tetPtI = 1;
+                const label tetFacei = this->owner().mesh().cells()[celli][0];
+                const label tetPti = 1;
 
-//                const point& pos = this->owner().mesh().C()[cellI];
+//                const point& pos = this->owner().mesh().C()[celli];
 
                 const scalar offset =
                     max
                     (
                         diameterParcelPatch_[j],
-                        deltaFilmPatch_[primaryPatchI][j]
+                        deltaFilmPatch_[primaryPatchi][j]
                     );
                 const point pos = Cf[j] - 1.1*offset*Sf[j]/magSf[j];
 
@@ -170,9 +170,9 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
                     (
                         this->owner().pMesh(),
                         pos,
-                        cellI,
-                        tetFaceI,
-                        tetPtI
+                        celli,
+                        tetFacei,
+                        tetPti
                     );
 
                 // Check/set new parcel thermo properties
@@ -205,27 +205,27 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
 template<class CloudType>
 void Foam::SurfaceFilmModel<CloudType>::cacheFilmFields
 (
-    const label filmPatchI,
-    const label primaryPatchI,
+    const label filmPatchi,
+    const label primaryPatchi,
     const regionModels::surfaceFilmModels::surfaceFilmModel& filmModel
 )
 {
-    massParcelPatch_ = filmModel.cloudMassTrans().boundaryField()[filmPatchI];
-    filmModel.toPrimary(filmPatchI, massParcelPatch_);
+    massParcelPatch_ = filmModel.cloudMassTrans().boundaryField()[filmPatchi];
+    filmModel.toPrimary(filmPatchi, massParcelPatch_);
 
     diameterParcelPatch_ =
-        filmModel.cloudDiameterTrans().boundaryField()[filmPatchI];
-    filmModel.toPrimary(filmPatchI, diameterParcelPatch_, maxEqOp<scalar>());
+        filmModel.cloudDiameterTrans().boundaryField()[filmPatchi];
+    filmModel.toPrimary(filmPatchi, diameterParcelPatch_, maxEqOp<scalar>());
 
-    UFilmPatch_ = filmModel.Us().boundaryField()[filmPatchI];
-    filmModel.toPrimary(filmPatchI, UFilmPatch_);
+    UFilmPatch_ = filmModel.Us().boundaryField()[filmPatchi];
+    filmModel.toPrimary(filmPatchi, UFilmPatch_);
 
-    rhoFilmPatch_ = filmModel.rho().boundaryField()[filmPatchI];
-    filmModel.toPrimary(filmPatchI, rhoFilmPatch_);
+    rhoFilmPatch_ = filmModel.rho().boundaryField()[filmPatchi];
+    filmModel.toPrimary(filmPatchi, rhoFilmPatch_);
 
-    deltaFilmPatch_[primaryPatchI] =
-        filmModel.delta().boundaryField()[filmPatchI];
-    filmModel.toPrimary(filmPatchI, deltaFilmPatch_[primaryPatchI]);
+    deltaFilmPatch_[primaryPatchi] =
+        filmModel.delta().boundaryField()[filmPatchi];
+    filmModel.toPrimary(filmPatchi, deltaFilmPatch_[primaryPatchi]);
 }
 
 
@@ -233,16 +233,16 @@ template<class CloudType>
 void Foam::SurfaceFilmModel<CloudType>::setParcelProperties
 (
     parcelType& p,
-    const label filmFaceI
+    const label filmFacei
 ) const
 {
     // Set parcel properties
-    scalar vol = mathematical::pi/6.0*pow3(diameterParcelPatch_[filmFaceI]);
-    p.d() = diameterParcelPatch_[filmFaceI];
-    p.U() = UFilmPatch_[filmFaceI];
-    p.rho() = rhoFilmPatch_[filmFaceI];
+    scalar vol = mathematical::pi/6.0*pow3(diameterParcelPatch_[filmFacei]);
+    p.d() = diameterParcelPatch_[filmFacei];
+    p.U() = UFilmPatch_[filmFacei];
+    p.rho() = rhoFilmPatch_[filmFacei];
 
-    p.nParticle() = massParcelPatch_[filmFaceI]/p.rho()/vol;
+    p.nParticle() = massParcelPatch_[filmFacei]/p.rho()/vol;
 
     if (ejectedParcelType_ >= 0)
     {
@@ -270,7 +270,7 @@ void Foam::SurfaceFilmModel<CloudType>::info(Ostream& os)
         << "      - parcels absorbed            = " << nTransTotal << nl
         << "      - parcels ejected             = " << nInjectTotal << endl;
 
-    if (this->outputTime())
+    if (this->writeTime())
     {
         this->setModelProperty("nParcelsTransferred", nTransTotal);
         this->setModelProperty("nParcelsInjected", nInjectTotal);

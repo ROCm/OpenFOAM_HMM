@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,43 +69,41 @@ public:
         FLIP
     };
 
+    //- A direction and a reference point
+    class ray
+    {
+        point refPoint_;
+        vector dir_;
 
-        //- A direction and a reference point
-        class ray
+    public:
+
+        ray(const point& refPoint, const vector& dir)
+        :
+            refPoint_(refPoint),
+            dir_(dir)
+        {}
+
+        const point& refPoint() const
         {
-            point refPoint_;
+            return refPoint_;
+        }
 
-            vector dir_;
-
-        public:
-
-            ray(const point& refPoint, const vector& dir)
-            :
-                refPoint_(refPoint),
-                dir_(dir)
-            {}
-
-            const point& refPoint() const
-            {
-                return refPoint_;
-            }
-
-            const vector& dir() const
-            {
-                return dir_;
-            }
-        };
+        const vector& dir() const
+        {
+            return dir_;
+        }
+    };
 
 
 private:
 
     // Private data
 
-        //- Plane normal
-        vector unitVector_;
+        //- Normal
+        vector normal_;
 
-        //- Base point
-        point basePoint_;
+        //- Reference point
+        point point_;
 
 
     // Private Member Functions
@@ -128,10 +126,10 @@ public:
     // Constructors
 
         //- Construct from normal vector through the origin
-        plane(const vector& normalVector);
+        explicit plane(const vector& normalVector);
 
         //- Construct from normal vector and point in plane
-        plane
+        explicit plane
         (
             const point& basePoint,
             const vector& normalVector,
@@ -139,17 +137,22 @@ public:
         );
 
         //- Construct from three points in plane
-        plane(const point& point1, const point& point2, const point& point3);
+        explicit plane
+        (
+            const point& point1,
+            const point& point2,
+            const point& point3
+        );
 
         //- Construct from coefficients for the
         //  plane equation: ax + by + cz + d = 0
-        plane(const scalarList& C);
+        explicit plane(const scalarList& C);
 
         //- Construct from dictionary
-        plane(const dictionary& planeDict);
+        explicit plane(const dictionary& planeDict);
 
         //- Construct from Istream. Assumes the base + normal notation.
-        plane(Istream& is);
+        explicit plane(Istream& is);
 
 
     // Member Functions

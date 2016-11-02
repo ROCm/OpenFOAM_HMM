@@ -63,10 +63,10 @@ public:
         //- Extrusion controls
         enum extrudeMode
         {
-            NOEXTRUDE,      /*!< Do not extrude. No layers added. */
-            EXTRUDE,        /*!< Extrude */
-            EXTRUDEREMOVE   /*!< Extrude but afterwards remove added */
-                            /*!< faces locally */
+            NOEXTRUDE,      //!< Do not extrude. No layers added.
+            EXTRUDE,        //!< Extrude
+            EXTRUDEREMOVE   //!< Extrude but afterwards remove added
+                            //!< faces locally
         };
 
 private:
@@ -144,7 +144,7 @@ private:
                 //- Unset extrusion on point. Returns true if anything unset.
                 static bool unmarkExtrusion
                 (
-                    const label patchPointI,
+                    const label patchPointi,
                     pointField& patchDisp,
                     labelList& patchNLayers,
                     List<extrudeMode>& extrudeStatus
@@ -289,8 +289,8 @@ private:
                 bool sameEdgeNeighbour
                 (
                     const labelListList& globalEdgeFaces,
-                    const label myGlobalFaceI,
-                    const label nbrGlobFaceI,
+                    const label myGlobalFacei,
+                    const label nbrGlobFacei,
                     const label edgeI
                 ) const;
 
@@ -299,10 +299,10 @@ private:
                 (
                     const indirectPrimitivePatch& pp,
                     const labelListList& globalEdgeFaces,
-                    const label faceI,
+                    const label facei,
                     const label edgeI,
-                    const label myGlobFaceI,
-                    const label nbrGlobFaceI,
+                    const label myGlobFacei,
+                    const label nbrGlobFacei,
                     DynamicList<label>& vertices
                 ) const;
 

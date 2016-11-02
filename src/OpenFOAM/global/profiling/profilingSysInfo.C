@@ -30,17 +30,6 @@ License
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 // file-scope function
-template<class T>
-inline static void writeEntry
-(
-    Foam::Ostream& os, const Foam::word& key, const T& value
-)
-{
-    os.writeKeyword(key) << value << Foam::token::END_STATEMENT << '\n';
-}
-
-
-// file-scope function
 inline static void printEnv
 (
     Foam::Ostream& os, const Foam::word& key, const Foam::word& envName
@@ -49,7 +38,7 @@ inline static void printEnv
     const std::string value = getEnv(envName);
     if (!value.empty())
     {
-        writeEntry(os, key, value);
+        os.writeEntry(key, value);
     }
 }
 
@@ -74,12 +63,12 @@ Foam::Ostream& Foam::profiling::sysInfo::write
     Ostream& os
 ) const
 {
-    writeEntry(os, "host", hostName(false)); // short name
-    writeEntry(os, "date", clock::dateTime());
+    os.writeEntry("host",       hostName(false)); // short name
+    os.writeEntry("date",       clock::dateTime());
 
     // compile-time information
-    writeEntry(os, "version",     std::string(FOAMversion));
-    writeEntry(os, "build",       std::string(FOAMbuild));
+    os.writeEntry("version",    std::string(FOAMversion));
+    os.writeEntry("build",      std::string(FOAMbuild));
 
     printEnv(os, "arch",         "WM_ARCH");
     printEnv(os, "compilerType", "WM_COMPILER_TYPE");

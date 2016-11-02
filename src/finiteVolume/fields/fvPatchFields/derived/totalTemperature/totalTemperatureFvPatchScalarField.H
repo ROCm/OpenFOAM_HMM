@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,8 +30,7 @@ Group
 Description
     This boundary condition provides a total temperature condition.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         U            | Velocity field name     | no          | U
@@ -43,7 +42,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            totalTemperature;
         T0              uniform 300;
@@ -53,7 +52,7 @@ Description
 SourceFiles
     totalTemperatureFvPatchScalarField.C
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchField
 
 \*---------------------------------------------------------------------------*/

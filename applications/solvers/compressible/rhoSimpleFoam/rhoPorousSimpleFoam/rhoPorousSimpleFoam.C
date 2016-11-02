@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,9 +28,8 @@ Group
     grpCompressibleSolvers
 
 Description
-    Steady-state solver for turbulent flow of compressible fluids with
-    RANS turbulence modelling, implicit or explicit porosity treatment
-    and run-time selectable finite volume sources.
+    Steady-state solver for turbulent flow of compressible fluids, with
+    implicit or explicit porosity treatment and optional sources.
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,14 +44,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "postProcess.H"
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-
-    simpleControl simple(mesh);
-
+    #include "createControl.H"
     #include "createFields.H"
-    #include "createMRF.H"
     #include "createFvOptions.H"
     #include "createZones.H"
     #include "initContinuityErrs.H"

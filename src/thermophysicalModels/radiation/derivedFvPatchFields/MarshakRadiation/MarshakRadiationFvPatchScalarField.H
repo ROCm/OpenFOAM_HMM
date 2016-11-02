@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,8 +34,7 @@ Description
     The radiation temperature is retrieved from the mesh database, using a
     user specified temperature field name.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         T            | temperature field name  | no          | T
@@ -43,7 +42,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            MarshakRadiation;
         T               T;
@@ -51,7 +50,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::radiationCoupledBase
     Foam::mixedFvPatchField
 

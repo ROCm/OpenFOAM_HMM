@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,8 +31,7 @@ Description
     This boundary condition provides a wide-band, diffusive radiation
     condition, where the patch temperature is specified.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         T            | temperature field name  | no          | T
@@ -40,14 +39,14 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            wideBandDiffusiveRadiation;
         value           uniform 0;
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::mixedFvPatchScalarField
     Foam::radiationCoupledBase
 

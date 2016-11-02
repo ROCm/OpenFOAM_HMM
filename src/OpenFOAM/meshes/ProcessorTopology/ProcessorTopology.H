@@ -28,7 +28,7 @@ Description
     Determines processor-processor connection. After instantiation contains
     on all processors the processor-processor connection table.
 
-    *this[procI] gives the list of neighbouring processors.
+    *this[proci] gives the list of neighbouring processors.
 
     TODO: This does not currently correctly support multiple processor
     patches connecting two processors.
@@ -63,8 +63,8 @@ private:
 
     // Private data
 
-        //- Local map from neighbour proc to patchI. Different per processor!
-        //  -1 or patchI for connection to procID
+        //- Local map from neighbour proc to patchi. Different per processor!
+        //  -1 or patchi for connection to procID
         labelList procPatchMap_;
 
         //- Order in which the patches should be initialised/evaluated

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,9 +56,9 @@ Foam::fv::buoyancyEnergy::buoyancyEnergy
 )
 :
     option(sourceName, modelType, dict, mesh),
-    UName_(coeffs_.lookupOrDefault<word>("UName", "U"))
+    UName_(coeffs_.lookupOrDefault<word>("U", "U"))
 {
-    coeffs_.lookup("fieldNames") >> fieldNames_;
+    coeffs_.lookup("fields") >> fieldNames_;
 
     if (fieldNames_.size() != 1)
     {
@@ -76,7 +76,7 @@ void Foam::fv::buoyancyEnergy::addSup
 (
     const volScalarField& rho,
     fvMatrix<scalar>& eqn,
-    const label fieldI
+    const label fieldi
 )
 {
     const uniformDimensionedVectorField& g =

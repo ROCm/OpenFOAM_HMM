@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,8 +31,7 @@ Description
     This boundary condition provides a kinematic turbulent thermal conductivity
     for using wall functions, using the Jayatilleke 'P' function.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         Prt          | turbulent Prandtl number | no         | 0.85
@@ -43,7 +42,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            alphatJayatillekeWallFunction;
     }
@@ -52,7 +51,7 @@ Description
 Note
     The units of kinematic turbulent thermal conductivity are [m2/s]
 
-SeeAlso
+See also
     Foam::fixedValueFvPatchField
 
 SourceFiles

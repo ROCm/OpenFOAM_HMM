@@ -24,9 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ReadFields.H"
-#include "HashSet.H"
-#include "Pstream.H"
 #include "IOobjectList.H"
+#include "objectRegistry.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 

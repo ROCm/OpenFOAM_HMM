@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,9 +28,20 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "makeTurbulenceModel.H"
 
-#include "laminar.H"
-#include "turbulentTransportModel.H"
+#include "laminarModel.H"
+#include "RASModel.H"
 #include "LESModel.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+makeTurbulenceModelTypes
+(
+    volScalarField,
+    geometricOneField,
+    incompressibleTurbulenceModel,
+    PhaseIncompressibleTurbulenceModel,
+    singlePhaseTransportModel
+);
 
 makeBaseTurbulenceModel
 (
@@ -41,6 +52,10 @@ makeBaseTurbulenceModel
     singlePhaseTransportModel
 );
 
+#define makeLaminarModel(Type)                                                 \
+    makeTemplatedTurbulenceModel                                               \
+    (singlePhaseTransportModelPhaseIncompressibleTurbulenceModel, laminar, Type)
+
 #define makeRASModel(Type)                                                     \
     makeTemplatedTurbulenceModel                                               \
     (singlePhaseTransportModelPhaseIncompressibleTurbulenceModel, RAS, Type)
@@ -48,6 +63,9 @@ makeBaseTurbulenceModel
 #define makeLESModel(Type)                                                     \
     makeTemplatedTurbulenceModel                                               \
     (singlePhaseTransportModelPhaseIncompressibleTurbulenceModel, LES, Type)
+
+#include "Stokes.H"
+makeLaminarModel(Stokes);
 
 #include "kEpsilon.H"
 makeRASModel(kEpsilon);

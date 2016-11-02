@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -96,7 +96,7 @@ static void get_vertex_list(void *data, int sizeGID, int sizeLID,
    */
 
     wgt_dim = 0;
-    obj_wgts = NULL;
+    obj_wgts = nullptr;
 
     for (Foam::label i=0; i<mesh.nCells(); i++)
     {
@@ -121,12 +121,12 @@ static void get_num_edges_list(void *data, int sizeGID, int sizeLID,
 
     for (Foam::label i=0; i < num_obj ;i++)
     {
-        Foam::label cellI = localID[i];
-        const Foam::cell& cFaces = mesh.cells()[cellI];
-        forAll(cFaces, cFaceI)
+        Foam::label celli = localID[i];
+        const Foam::cell& cFaces = mesh.cells()[celli];
+        forAll(cFaces, cFacei)
         {
             Foam::label n = 0;
-            if (mesh.isInternalFace(cFaces[cFaceI]))
+            if (mesh.isInternalFace(cFaces[cFacei]))
             {
                 n++;
             }
@@ -164,20 +164,20 @@ static void get_edge_list(void *data, int sizeGID, int sizeLID,
 
     for (Foam::label i=0; i < num_obj; i++)
     {
-        Foam::label cellI = localID[i];
+        Foam::label celli = localID[i];
 
-        const Foam::cell& cFaces = mesh.cells()[cellI];
-        forAll(cFaces, cFaceI)
+        const Foam::cell& cFaces = mesh.cells()[celli];
+        forAll(cFaces, cFacei)
         {
             Foam::label n = 0;
 
-            Foam::label faceI = cFaces[cFaceI];
-            if (mesh.isInternalFace(faceI))
+            Foam::label facei = cFaces[cFacei];
+            if (mesh.isInternalFace(facei))
             {
-                Foam::label nbr = mesh.faceOwner()[faceI];
-                if (nbr == cellI)
+                Foam::label nbr = mesh.faceOwner()[facei];
+                if (nbr == celli)
                 {
-                    nbr = mesh.faceNeighbour()[faceI];
+                    nbr = mesh.faceNeighbour()[facei];
                 }
 
                 // Note: global index
@@ -240,9 +240,9 @@ static void get_geom_list
 
     const Foam::pointField& cc = mesh.cellCentres();
 
-    for (Foam::label cellI = 0; cellI < num_obj; cellI++)
+    for (Foam::label celli = 0; celli < num_obj; celli++)
     {
-        const Foam::point& pt = cc[cellI];
+        const Foam::point& pt = cc[celli];
 
         for (Foam::direction cmpt = 0; cmpt < Foam::vector::nComponents; cmpt++)
         {

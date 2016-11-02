@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "regionSplit.H"
+#include "FaceCellWave.H"
 #include "cyclicPolyPatch.H"
 #include "processorPolyPatch.H"
 #include "globalIndex.H"
@@ -58,11 +59,11 @@ void Foam::regionSplit::calcNonCompactRegionSplit
     // Take over blockedFaces by seeding a negative number
     // (so is always less than the decomposition)
     label nUnblocked = 0;
-    forAll(faceData, faceI)
+    forAll(faceData, facei)
     {
-        if (blockedFace.size() && blockedFace[faceI])
+        if (blockedFace.size() && blockedFace[facei])
         {
-            faceData[faceI] = minData(-2);
+            faceData[facei] = minData(-2);
         }
         else
         {
@@ -76,13 +77,13 @@ void Foam::regionSplit::calcNonCompactRegionSplit
     nUnblocked = 0;
 
 
-    forAll(faceData, faceI)
+    forAll(faceData, facei)
     {
-        if (blockedFace.empty() || !blockedFace[faceI])
+        if (blockedFace.empty() || !blockedFace[facei])
         {
-            seedFaces[nUnblocked] = faceI;
+            seedFaces[nUnblocked] = facei;
             // Seed face with globally unique number
-            seedData[nUnblocked] = minData(globalFaces.toGlobal(faceI));
+            seedData[nUnblocked] = minData(globalFaces.toGlobal(facei));
             nUnblocked++;
         }
     }
@@ -104,29 +105,29 @@ void Foam::regionSplit::calcNonCompactRegionSplit
 
     // And extract
     cellRegion.setSize(mesh().nCells());
-    forAll(cellRegion, cellI)
+    forAll(cellRegion, celli)
     {
-        if (cellData[cellI].valid(deltaCalc.data()))
+        if (cellData[celli].valid(deltaCalc.data()))
         {
-            cellRegion[cellI] = cellData[cellI].data();
+            cellRegion[celli] = cellData[celli].data();
         }
         else
         {
             // Unvisited cell -> only possible if surrounded by blocked faces.
             // If so make up region from any of the faces
-            const cell& cFaces = mesh().cells()[cellI];
-            label faceI = cFaces[0];
+            const cell& cFaces = mesh().cells()[celli];
+            label facei = cFaces[0];
 
-            if (blockedFace.size() && !blockedFace[faceI])
+            if (blockedFace.size() && !blockedFace[facei])
             {
                 FatalErrorInFunction
-                    << "Problem: unblocked face " << faceI
-                    << " at " << mesh().faceCentres()[faceI]
-                    << " on unassigned cell " << cellI
-                    << mesh().cellCentres()[faceI]
+                    << "Problem: unblocked face " << facei
+                    << " at " << mesh().faceCentres()[facei]
+                    << " on unassigned cell " << celli
+                    << mesh().cellCentres()[celli]
                     << exit(FatalError);
             }
-            cellRegion[cellI] = globalFaces.toGlobal(faceI);
+            cellRegion[celli] = globalFaces.toGlobal(facei);
         }
     }
 }
@@ -152,15 +153,15 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
 
         if (coupledOrBlockedFace.size())
         {
-            forAll(pbm, patchI)
+            forAll(pbm, patchi)
             {
-                const polyPatch& pp = pbm[patchI];
+                const polyPatch& pp = pbm[patchi];
                 if (isA<processorPolyPatch>(pp))
                 {
-                    label faceI = pp.start();
+                    label facei = pp.start();
                     forAll(pp, i)
                     {
-                        coupledOrBlockedFace[faceI++] = true;
+                        coupledOrBlockedFace[facei++] = true;
                     }
                 }
             }
@@ -188,9 +189,9 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
 
         // Compact
         Map<label> globalToCompact(mesh().nCells()/8);
-        forAll(cellRegion, cellI)
+        forAll(cellRegion, celli)
         {
-            label region = cellRegion[cellI];
+            label region = cellRegion[celli];
 
             label globalRegion;
 
@@ -204,7 +205,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
             {
                 globalRegion = fnd();
             }
-            cellRegion[cellI] = globalRegion;
+            cellRegion[celli] = globalRegion;
         }
 
 
@@ -243,9 +244,9 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
     {
         labelHashSet haveRegion(mesh().nCells()/8);
 
-        forAll(cellRegion, cellI)
+        forAll(cellRegion, celli)
         {
-            label region = cellRegion[cellI];
+            label region = cellRegion[celli];
 
             // Count originating processor. Use isLocal as efficiency since
             // most cells are locally originating.
@@ -258,10 +259,10 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
             }
             else
             {
-                label procI = globalRegions.whichProcID(region);
+                label proci = globalRegions.whichProcID(region);
                 if (haveRegion.insert(region))
                 {
-                    nOriginating[procI]++;
+                    nOriginating[proci]++;
                 }
             }
         }
@@ -292,17 +293,17 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
     Map<label> globalToCompact(2*nOriginating[Pstream::myProcNo()]);
     // Remote regions we want the compact number for
     List<labelHashSet> nonLocal(Pstream::nProcs());
-    forAll(nonLocal, procI)
+    forAll(nonLocal, proci)
     {
-        if (procI != Pstream::myProcNo())
+        if (proci != Pstream::myProcNo())
         {
-            nonLocal[procI].resize(2*nOriginating[procI]);
+            nonLocal[proci].resize(2*nOriginating[proci]);
         }
     }
 
-    forAll(cellRegion, cellI)
+    forAll(cellRegion, celli)
     {
-        label region = cellRegion[cellI];
+        label region = cellRegion[celli];
         if (globalRegions.isLocal(region))
         {
             // Insert new compact region (if not yet present)
@@ -324,17 +325,17 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
     // Convert the nonLocal (labelHashSets) to labelLists.
 
     labelListList sendNonLocal(Pstream::nProcs());
-    forAll(sendNonLocal, procI)
+    forAll(sendNonLocal, proci)
     {
-        sendNonLocal[procI] = nonLocal[procI].toc();
+        sendNonLocal[proci] = nonLocal[proci].toc();
     }
 
     if (debug)
     {
-        forAll(sendNonLocal, procI)
+        forAll(sendNonLocal, proci)
         {
-            Pout<< "    from processor " << procI
-                << " want " << sendNonLocal[procI].size()
+            Pout<< "    from processor " << proci
+                << " want " << sendNonLocal[proci].size()
                 << " region numbers."
                 << endl;
         }
@@ -346,19 +347,19 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
     labelListList recvNonLocal(Pstream::nProcs());
     Pstream::exchange<labelList, label>(sendNonLocal, recvNonLocal);
 
-    // Now we have the wanted compact region labels that procI wants in
-    // recvNonLocal[procI]. Construct corresponding list of compact
+    // Now we have the wanted compact region labels that proci wants in
+    // recvNonLocal[proci]. Construct corresponding list of compact
     // region labels to send back.
 
     labelListList sendWantedLocal(Pstream::nProcs());
-    forAll(recvNonLocal, procI)
+    forAll(recvNonLocal, proci)
     {
-        const labelList& nonLocal = recvNonLocal[procI];
-        sendWantedLocal[procI].setSize(nonLocal.size());
+        const labelList& nonLocal = recvNonLocal[proci];
+        sendWantedLocal[proci].setSize(nonLocal.size());
 
         forAll(nonLocal, i)
         {
-            sendWantedLocal[procI][i] = globalToCompact[nonLocal[i]];
+            sendWantedLocal[proci][i] = globalToCompact[nonLocal[i]];
         }
     }
 
@@ -372,10 +373,10 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
     // corresponding compact number. Insert these into the local compaction
     // map.
 
-    forAll(recvNonLocal, procI)
+    forAll(recvNonLocal, proci)
     {
-        const labelList& wantedRegions = sendNonLocal[procI];
-        const labelList& compactRegions = recvNonLocal[procI];
+        const labelList& wantedRegions = sendNonLocal[proci];
+        const labelList& compactRegions = recvNonLocal[proci];
 
         forAll(wantedRegions, i)
         {
@@ -384,9 +385,9 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
     }
 
     // Finally renumber the regions
-    forAll(cellRegion, cellI)
+    forAll(cellRegion, celli)
     {
-        cellRegion[cellI] = globalToCompact[cellRegion[cellI]];
+        cellRegion[celli] = globalToCompact[cellRegion[celli]];
     }
 
     return globalCompactPtr;

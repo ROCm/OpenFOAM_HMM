@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ Description
 
 if (mesh.nInternalFaces())
 {
-    scalarField sumAmaxSf(fvc::surfaceSum(amaxSf)().internalField());
+    scalarField sumAmaxSf(fvc::surfaceSum(amaxSf)().primitiveField());
 
     CoNum = 0.5*gMax(sumAmaxSf/mesh.V().field())*runTime.deltaTValue();
 

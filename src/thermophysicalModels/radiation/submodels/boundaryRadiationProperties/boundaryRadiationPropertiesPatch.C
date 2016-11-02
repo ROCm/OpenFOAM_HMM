@@ -86,8 +86,8 @@ boundaryRadiationPropertiesPatch
 :
     method_(methodTypeNames_.read(dict.lookup("mode"))),
     dict_(dict),
-    absorptionEmission_(NULL),
-    transmissivity_(NULL),
+    absorptionEmission_(nullptr),
+    transmissivity_(nullptr),
     patch_(p)
 {
     switch (method_)

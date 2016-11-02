@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ namespace Foam
     (
         PtrList<GeoField>& fieldList,
         const IOobject& obj,
-        const label fieldI,
+        const label fieldi,
         const typename GeoField::Mesh& mesh
     );
 
@@ -46,14 +46,14 @@ namespace Foam
     void outputFieldList
     (
         const PtrList<GeoField>& fieldList,
-        const label patchI
+        const label patchi
     );
 
     template<class GeoField>
     void collectFieldList
     (
         const PtrList<GeoField>& fieldList,
-        const label patchI,
+        const label patchi,
         HashTable<word>& fieldToType
     );
 } // End namespace Foam

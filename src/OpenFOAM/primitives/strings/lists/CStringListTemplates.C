@@ -58,7 +58,7 @@ void Foam::CStringList::reset
     }
 
     argv_ = new char*[argc_+1];
-    argv_[argc_] = NULL; // extra terminator
+    argv_[argc_] = nullptr; // extra terminator
 
     if (argc_ > 0)
     {

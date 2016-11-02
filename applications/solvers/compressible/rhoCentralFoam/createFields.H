@@ -1,3 +1,5 @@
+#include "createRDeltaT.H"
+
 Info<< "Reading thermophysical properties\n" << endl;
 
 autoPtr<psiThermo> pThermo
@@ -6,17 +8,7 @@ autoPtr<psiThermo> pThermo
 );
 psiThermo& thermo = pThermo();
 
-volScalarField& p = thermo.p();
 volScalarField& e = thermo.he();
-const volScalarField& T = thermo.T();
-const volScalarField& psi = thermo.psi();
-const volScalarField& mu = thermo.mu();
-
-bool inviscid(true);
-if (max(mu.internalField()) > 0.0)
-{
-    inviscid = false;
-}
 
 Info<< "Reading field U\n" << endl;
 volVectorField U

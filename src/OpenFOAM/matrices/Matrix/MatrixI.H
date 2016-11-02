@@ -32,7 +32,7 @@ inline Foam::Matrix<Form, Type>::Matrix()
 :
     mRows_(0),
     nCols_(0),
-    v_(NULL)
+    v_(nullptr)
 {}
 
 
@@ -277,6 +277,14 @@ Foam::Matrix<Form, Type>::col
         mStart,
         nStart
     );
+}
+
+
+template<class Form, class Type>
+void Foam::Matrix<Form, Type>::shallowResize(const label m, const label n)
+{
+    mRows_ = m;
+    nCols_ = n;
 }
 
 

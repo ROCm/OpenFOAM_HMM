@@ -127,10 +127,7 @@ class fvMeshDistribute
 
             //- Save internal fields of surfaceFields
             template<class T>
-            void saveInternalFields
-            (
-                PtrList<Field<T>>& iflds
-            ) const;
+            void saveInternalFields(PtrList<Field<T>>& iflds) const;
 
             //- Set value of patch faces resulting from internal faces
             template<class T>
@@ -152,8 +149,8 @@ class fvMeshDistribute
             void correctBoundaryConditions();
 
             //- Delete all processor patches. Move any processor faces into
-            //  patchI.
-            autoPtr<mapPolyMesh> deleteProcPatches(const label patchI);
+            //  patchi.
+            autoPtr<mapPolyMesh> deleteProcPatches(const label patchi);
 
             //- Repatch the mesh. This is only necessary for the proc
             //  boundary faces. newPatchID is over all boundary faces: -1 or
@@ -173,6 +170,7 @@ class fvMeshDistribute
             (
                 labelListList& constructPointMap
             );
+
 
         // Coupling information
 
@@ -242,11 +240,11 @@ class fvMeshDistribute
 
         // Other
 
-            //- Remove cells. Add all exposed faces to patch oldInternalPatchI
+            //- Remove cells. Add all exposed faces to patch oldInternalPatchi
             autoPtr<mapPolyMesh> doRemoveCells
             (
                 const labelList& cellsToRemove,
-                const label oldInternalPatchI
+                const label oldInternalPatchi
             );
 
             //- Add processor patches. Changes mesh and returns per neighbour
@@ -263,7 +261,7 @@ class fvMeshDistribute
             (
                 const labelList& neighbourNewProc,  // new processor per b. face
                 const labelList& referPatchID,      // -1 or original patch
-                const List<Map<label>>& procPatchID// patchID
+                const List<Map<label>>& procPatchID // patchID
             );
 
             //- Send mesh and coupling data.

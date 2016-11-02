@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -69,19 +69,19 @@ bool validTri
 (
     const bool verbose,
     const triSurface& surf,
-    const label faceI
+    const label facei
 )
 {
     // Simple check on indices ok.
 
-    const labelledTri& f = surf[faceI];
+    const labelledTri& f = surf[facei];
 
     forAll(f, fp)
     {
         if (f[fp] < 0 || f[fp] >= surf.points().size())
         {
             WarningInFunction
-                << "triangle " << faceI << " vertices " << f
+                << "triangle " << facei << " vertices " << f
                 << " uses point indices outside point range 0.."
                 << surf.points().size()-1 << endl;
             return false;
@@ -91,7 +91,7 @@ bool validTri
     if ((f[0] == f[1]) || (f[0] == f[2]) || (f[1] == f[2]))
     {
         WarningInFunction
-            << "triangle " << faceI
+            << "triangle " << facei
             << " uses non-unique vertices " << f
             << " coords:" << f.points(surf.points())
             << endl;
@@ -100,21 +100,21 @@ bool validTri
 
     // duplicate triangle check
 
-    const labelList& fFaces = surf.faceFaces()[faceI];
+    const labelList& fFaces = surf.faceFaces()[facei];
 
     // Check if faceNeighbours use same points as this face.
     // Note: discards normal information - sides of baffle are merged.
     forAll(fFaces, i)
     {
-        label nbrFaceI = fFaces[i];
+        label nbrFacei = fFaces[i];
 
-        if (nbrFaceI <= faceI)
+        if (nbrFacei <= facei)
         {
             // lower numbered faces already checked
             continue;
         }
 
-        const labelledTri& nbrF = surf[nbrFaceI];
+        const labelledTri& nbrF = surf[nbrFacei];
 
         if
         (
@@ -124,8 +124,8 @@ bool validTri
         )
         {
             WarningInFunction
-                << "triangle " << faceI << " vertices " << f
-                << " has the same vertices as triangle " << nbrFaceI
+                << "triangle " << facei << " vertices " << f
+                << " has the same vertices as triangle " << nbrFacei
                 << " vertices " << nbrF
                 << " coords:" << f.points(surf.points())
                 << endl;
@@ -250,11 +250,11 @@ void writeParts
     {
         boolList includeMap(surf.size(), false);
 
-        forAll(faceZone, faceI)
+        forAll(faceZone, facei)
         {
-            if (faceZone[faceI] == zone)
+            if (faceZone[facei] == zone)
             {
-                includeMap[faceI] = true;
+                includeMap[facei] = true;
             }
         }
 
@@ -297,11 +297,11 @@ void syncEdges(const triSurface& p, labelHashSet& markedEdges)
         edgeSet.insert(edges[iter.key()]);
     }
 
-    forAll(edges, edgeI)
+    forAll(edges, edgei)
     {
-        if (edgeSet.found(edges[edgeI]))
+        if (edgeSet.found(edges[edgei]))
         {
-            markedEdges.insert(edgeI);
+            markedEdges.insert(edgei);
         }
     }
 }
@@ -314,9 +314,9 @@ void syncEdges(const triSurface& p, boolList& isMarkedEdge)
     const edgeList& edges = p.edges();
 
     label n = 0;
-    forAll(isMarkedEdge, edgeI)
+    forAll(isMarkedEdge, edgei)
     {
-        if (isMarkedEdge[edgeI])
+        if (isMarkedEdge[edgei])
         {
             n++;
         }
@@ -324,19 +324,19 @@ void syncEdges(const triSurface& p, boolList& isMarkedEdge)
 
     HashSet<edge, Hash<edge>> edgeSet(2*n);
 
-    forAll(isMarkedEdge, edgeI)
+    forAll(isMarkedEdge, edgei)
     {
-        if (isMarkedEdge[edgeI])
+        if (isMarkedEdge[edgei])
         {
-            edgeSet.insert(edges[edgeI]);
+            edgeSet.insert(edges[edgei]);
         }
     }
 
-    forAll(edges, edgeI)
+    forAll(edges, edgei)
     {
-        if (edgeSet.found(edges[edgeI]))
+        if (edgeSet.found(edges[edgei]))
         {
-            isMarkedEdge[edgeI] = true;
+            isMarkedEdge[edgei] = true;
         }
     }
 }
@@ -414,9 +414,9 @@ int main(int argc, char *argv[])
         Info<< "// blockMeshDict info" << nl << nl;
 
         Info<< "vertices\n(" << nl;
-        forAll(cornerPts, ptI)
+        forAll(cornerPts, pti)
         {
-            Info<< "    " << cornerPts[ptI] << nl;
+            Info<< "    " << cornerPts[pti] << nl;
         }
 
         // number of divisions needs adjustment later
@@ -439,14 +439,14 @@ int main(int argc, char *argv[])
     {
         labelList regionSize(surf.patches().size(), 0);
 
-        forAll(surf, faceI)
+        forAll(surf, facei)
         {
-            label region = surf[faceI].region();
+            label region = surf[facei].region();
 
             if (region < 0 || region >= regionSize.size())
             {
                 WarningInFunction
-                    << "Triangle " << faceI << " vertices " << surf[faceI]
+                    << "Triangle " << facei << " vertices " << surf[facei]
                     << " has region " << region << " which is outside the range"
                     << " of regions 0.." << surf.patches().size()-1
                     << endl;
@@ -459,10 +459,10 @@ int main(int argc, char *argv[])
 
         Info<< "Region\tSize" << nl
             << "------\t----" << nl;
-        forAll(surf.patches(), patchI)
+        forAll(surf.patches(), patchi)
         {
-            Info<< surf.patches()[patchI].name() << '\t'
-                << regionSize[patchI] << nl;
+            Info<< surf.patches()[patchi].name() << '\t'
+                << regionSize[patchi] << nl;
         }
         Info<< nl << endl;
     }
@@ -474,11 +474,11 @@ int main(int argc, char *argv[])
     {
         DynamicList<label> illegalFaces(surf.size()/100 + 1);
 
-        forAll(surf, faceI)
+        forAll(surf, facei)
         {
-            if (!validTri(verbose, surf, faceI))
+            if (!validTri(verbose, surf, facei))
             {
-                illegalFaces.append(faceI);
+                illegalFaces.append(facei);
             }
         }
 
@@ -510,19 +510,19 @@ int main(int argc, char *argv[])
 
     {
         scalarField triQ(surf.size(), 0);
-        forAll(surf, faceI)
+        forAll(surf, facei)
         {
-            const labelledTri& f = surf[faceI];
+            const labelledTri& f = surf[facei];
 
             if (f[0] == f[1] || f[0] == f[2] || f[1] == f[2])
             {
                 //WarningInFunction
-                //    << "Illegal triangle " << faceI << " vertices " << f
+                //    << "Illegal triangle " << facei << " vertices " << f
                 //    << " coords " << f.points(surf.points()) << endl;
             }
             else
             {
-                triQ[faceI] = triPointRef
+                triQ[facei] = triPointRef
                 (
                     surf.points()[f[0]],
                     surf.points()[f[1]],
@@ -542,10 +542,10 @@ int main(int argc, char *argv[])
 
         scalar dist = (1.0 - 0.0)/20.0;
         scalar min = 0;
-        forAll(binCount, binI)
+        forAll(binCount, bini)
         {
             Info<< "    " << min << " .. " << min+dist << "  : "
-                << 1.0/surf.size() * binCount[binI]
+                << 1.0/surf.size() * binCount[bini]
                 << endl;
             min += dist;
         }
@@ -573,11 +573,11 @@ int main(int argc, char *argv[])
         {
             DynamicList<label> problemFaces(surf.size()/100+1);
 
-            forAll(triQ, faceI)
+            forAll(triQ, facei)
             {
-                if (triQ[faceI] < 1e-11)
+                if (triQ[facei] < 1e-11)
                 {
-                    problemFaces.append(faceI);
+                    problemFaces.append(facei);
                 }
             }
 
@@ -604,23 +604,23 @@ int main(int argc, char *argv[])
 
         scalarField edgeMag(edges.size());
 
-        forAll(edges, edgeI)
+        forAll(edges, edgei)
         {
-            edgeMag[edgeI] = edges[edgeI].mag(localPoints);
+            edgeMag[edgei] = edges[edgei].mag(localPoints);
         }
 
-        label minEdgeI = findMin(edgeMag);
-        label maxEdgeI = findMax(edgeMag);
+        label minEdgei = findMin(edgeMag);
+        label maxEdgei = findMax(edgeMag);
 
-        const edge& minE = edges[minEdgeI];
-        const edge& maxE = edges[maxEdgeI];
+        const edge& minE = edges[minEdgei];
+        const edge& maxE = edges[maxEdgei];
 
 
         Info<< "Edges:" << nl
-            << "    min " << edgeMag[minEdgeI] << " for edge " << minEdgeI
+            << "    min " << edgeMag[minEdgei] << " for edge " << minEdgei
             << " points " << localPoints[minE[0]] << localPoints[minE[1]]
             << nl
-            << "    max " << edgeMag[maxEdgeI] << " for edge " << maxEdgeI
+            << "    max " << edgeMag[maxEdgei] << " for edge " << maxEdgei
             << " points " << localPoints[maxE[0]] << localPoints[maxE[1]]
             << nl
             << endl;
@@ -648,25 +648,25 @@ int main(int argc, char *argv[])
 
         for (label i = 1; i < sortedMag.size(); i++)
         {
-            label ptI = sortedMag.indices()[i];
+            label pti = sortedMag.indices()[i];
 
-            label prevPtI = sortedMag.indices()[i-1];
+            label prevPti = sortedMag.indices()[i-1];
 
-            if (mag(localPoints[ptI] - localPoints[prevPtI]) < smallDim)
+            if (mag(localPoints[pti] - localPoints[prevPti]) < smallDim)
             {
                 // Check if neighbours.
-                const labelList& pEdges = surf.pointEdges()[ptI];
+                const labelList& pEdges = surf.pointEdges()[pti];
 
-                label edgeI = -1;
+                label edgei = -1;
 
                 forAll(pEdges, i)
                 {
                     const edge& e = edges[pEdges[i]];
 
-                    if (e[0] == prevPtI || e[1] == prevPtI)
+                    if (e[0] == prevPti || e[1] == prevPti)
                     {
                         // point1 and point0 are connected through edge.
-                        edgeI = pEdges[i];
+                        edgei = pEdges[i];
 
                         break;
                     }
@@ -674,24 +674,24 @@ int main(int argc, char *argv[])
 
                 nClose++;
 
-                if (edgeI == -1)
+                if (edgei == -1)
                 {
                     Info<< "    close unconnected points "
-                        << ptI << ' ' << localPoints[ptI]
-                        << " and " << prevPtI << ' '
-                        << localPoints[prevPtI]
+                        << pti << ' ' << localPoints[pti]
+                        << " and " << prevPti << ' '
+                        << localPoints[prevPti]
                         << " distance:"
-                        << mag(localPoints[ptI] - localPoints[prevPtI])
+                        << mag(localPoints[pti] - localPoints[prevPti])
                         << endl;
                 }
                 else
                 {
                     Info<< "    small edge between points "
-                        << ptI << ' ' << localPoints[ptI]
-                        << " and " << prevPtI << ' '
-                        << localPoints[prevPtI]
+                        << pti << ' ' << localPoints[pti]
+                        << " and " << prevPti << ' '
+                        << localPoints[prevPti]
                         << " distance:"
-                        << mag(localPoints[ptI] - localPoints[prevPtI])
+                        << mag(localPoints[pti] - localPoints[prevPti])
                         << endl;
                 }
             }
@@ -711,9 +711,9 @@ int main(int argc, char *argv[])
     const labelListList& edgeFaces = surf.edgeFaces();
 
     label nSingleEdges = 0;
-    forAll(edgeFaces, edgeI)
+    forAll(edgeFaces, edgei)
     {
-        const labelList& myFaces = edgeFaces[edgeI];
+        const labelList& myFaces = edgeFaces[edgei];
 
         if (myFaces.size() == 1)
         {
@@ -724,15 +724,15 @@ int main(int argc, char *argv[])
     }
 
     label nMultEdges = 0;
-    forAll(edgeFaces, edgeI)
+    forAll(edgeFaces, edgei)
     {
-        const labelList& myFaces = edgeFaces[edgeI];
+        const labelList& myFaces = edgeFaces[edgei];
 
         if (myFaces.size() > 2)
         {
-            forAll(myFaces, myFaceI)
+            forAll(myFaces, myFacei)
             {
-                problemFaces.append(myFaces[myFaceI]);
+                problemFaces.append(myFaces[myFacei]);
             }
 
             nMultEdges++;
@@ -775,11 +775,11 @@ int main(int argc, char *argv[])
         boolList borderEdge(surf.nEdges(), false);
         if (splitNonManifold)
         {
-            forAll(edgeFaces, edgeI)
+            forAll(edgeFaces, edgei)
             {
-                if (edgeFaces[edgeI].size() > 2)
+                if (edgeFaces[edgei].size() > 2)
                 {
-                    borderEdge[edgeI] = true;
+                    borderEdge[edgei] = true;
                 }
             }
             syncEdges(surf, borderEdge);
@@ -894,7 +894,7 @@ int main(int argc, char *argv[])
 
         label nInt = 0;
 
-        forAll(surf.edges(), edgeI)
+        forAll(surf.edges(), edgei)
         {
             const edge& e = surf.edges()[edgeI];
             const point& start = surf.points()[surf.meshPoints()[e[0]]];
@@ -926,7 +926,6 @@ int main(int argc, char *argv[])
                         intStreamPtr().write(hitInfo2.hitPoint());
                     }
                 }
-
             }
         }
 

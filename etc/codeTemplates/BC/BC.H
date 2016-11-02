@@ -43,8 +43,7 @@ Description
         Q_{t}  | TYPE function of time [units]
     \endtable
 
-    \heading Patch usage
-
+Usage
     \table
         Property   | Description                  | Req'd? | Default
         scalarData | single scalar value          | yes    |
@@ -56,7 +55,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type       NAME;
         scalarData -1;

@@ -210,7 +210,7 @@ Foam::tmp<Foam::tensorField> Foam::axesRotation::transformTensor
 ) const
 {
     NotImplemented;
-    return tmp<tensorField>(NULL);
+    return tmp<tensorField>(nullptr);
 }
 
 
@@ -230,7 +230,7 @@ Foam::tmp<Foam::tensorField> Foam::axesRotation::transformTensor
 ) const
 {
     NotImplemented;
-    return tmp<tensorField>(NULL);
+    return tmp<tensorField>(nullptr);
 }
 
 

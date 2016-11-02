@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,8 +33,7 @@ Description
     (fvDOM), in which the radiation temperature is retrieved from the
     temperature field boundary condition.
 
-    \heading Patch usage
-
+Usage
     \table
         Property     | Description             | Required    | Default value
         T            | temperature field name  | no          | T
@@ -42,7 +41,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            greyDiffusiveRadiation;
         T               T;
@@ -50,7 +49,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::radiation::radiationModel
     Foam::radiation::fvDOM
     Foam::radiationCoupledBase

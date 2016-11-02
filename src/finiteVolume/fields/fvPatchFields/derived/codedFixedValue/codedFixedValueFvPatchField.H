@@ -31,15 +31,14 @@ Description
     Constructs on-the-fly a new boundary condition (derived from
     fixedValueFvPatchField) which is then used to evaluate.
 
-    \heading Patch usage
-
+Usage
     Example:
     \verbatim
-    myPatch
+    <patchName>
     {
         type            codedFixedValue;
         value           uniform 0;
-        redirectType    rampedFixedValue;   // name of generated BC
+        name    rampedFixedValue;   // name of generated BC
 
         code
         #{
@@ -63,7 +62,7 @@ Description
     which would have a corresponding entry:
 
     \verbatim
-    myPatch
+    <patchName>
     {
         code
         #{
@@ -72,7 +71,7 @@ Description
     }
     \endverbatim
 
-SeeAlso
+See also
     Foam::dynamicCode
     Foam::functionEntries::codeStream
 
@@ -112,7 +111,7 @@ class codedFixedValueFvPatchField
         //- Dictionary contents for the boundary condition
         const dictionary dict_;
 
-        const word redirectType_;
+        const word name_;
 
         mutable autoPtr<fvPatchField<Type>> redirectPatchFieldPtr_;
 

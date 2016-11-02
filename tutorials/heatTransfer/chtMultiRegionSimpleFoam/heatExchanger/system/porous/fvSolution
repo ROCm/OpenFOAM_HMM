@@ -24,17 +24,13 @@ solvers
 
         smoother         DIC;
 
-        cacheAgglomeration true;
-        nCellsInCoarsestLevel 10;
-        agglomerator     faceAreaPair;
-        mergeLevels      1;
 
         maxIter          10;
     }
 
     "(U|h|e|k|epsilon)"
     {
-        solver           PBiCG;
+        solver           PBiCGStab;
         preconditioner   DILU;
         tolerance        1e-7;
         relTol           0.1;

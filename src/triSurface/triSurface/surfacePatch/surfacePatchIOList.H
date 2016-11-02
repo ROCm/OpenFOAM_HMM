@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,12 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declaration of friend functions and operators
+
+class surfacePatchIOList;
+
+Ostream& operator<<(Ostream&, const surfacePatchIOList&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class surfacePatchIOList Declaration
@@ -100,7 +105,6 @@ public:
         {
             return true;
         }
-
         //- Return complete path + object name if the file exists
         //  either in the case/processor or case otherwise null
         virtual fileName filePath() const

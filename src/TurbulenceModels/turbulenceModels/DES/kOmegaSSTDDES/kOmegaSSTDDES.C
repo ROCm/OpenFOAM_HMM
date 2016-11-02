@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +56,7 @@ tmp<volScalarField> kOmegaSSTDDES<BasicTurbulenceModel>::rd
             scalar(10)
         )
     );
-    tr.ref().boundaryField() == 0.0;
+    tr.ref().boundaryFieldRef() == 0.0;
 
     return tr;
 }

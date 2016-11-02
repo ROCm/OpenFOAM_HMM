@@ -36,7 +36,7 @@ Foam::pointFieldDecomposer::decomposeField
 ) const
 {
     // Create and map the internal field values
-    Field<Type> internalField(field.internalField(), pointAddressing_);
+    Field<Type> internalField(field.primitiveField(), pointAddressing_);
 
     // Create a list of pointers for the patchFields
     PtrList<pointPatchField<Type>> patchFields(boundaryAddressing_.size());
@@ -101,9 +101,9 @@ void Foam::pointFieldDecomposer::decomposeFields
     const PtrList<GeoField>& fields
 ) const
 {
-    forAll(fields, fieldI)
+    forAll(fields, fieldi)
     {
-        decomposeField(fields[fieldI])().write();
+        decomposeField(fields[fieldi])().write();
     }
 }
 

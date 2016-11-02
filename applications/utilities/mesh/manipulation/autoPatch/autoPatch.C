@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -123,16 +123,16 @@ int main(int argc, char *argv[])
     //
 
     // Current patch number.
-    label newPatchI = bMesh.patches().size();
+    label newPatchi = bMesh.patches().size();
 
     label suffix = 0;
 
     while (true)
     {
         // Find first unset face.
-        label unsetFaceI = findIndex(patchIDs, -1);
+        label unsetFacei = findIndex(patchIDs, -1);
 
-        if (unsetFaceI == -1)
+        if (unsetFacei == -1)
         {
             // All faces have patchID set. Exit.
             break;
@@ -151,29 +151,29 @@ int main(int argc, char *argv[])
         bMesh.changePatchType(patchName, "patch");
 
 
-        // Fill visited with all faces reachable from unsetFaceI.
+        // Fill visited with all faces reachable from unsetFacei.
         boolList visited(bMesh.mesh().size());
 
-        bMesh.markFaces(markedEdges, unsetFaceI, visited);
+        bMesh.markFaces(markedEdges, unsetFacei, visited);
 
 
         // Assign all visited faces to current patch
         label nVisited = 0;
 
-        forAll(visited, faceI)
+        forAll(visited, facei)
         {
-            if (visited[faceI])
+            if (visited[facei])
             {
                 nVisited++;
 
-                patchIDs[faceI] = newPatchI;
+                patchIDs[facei] = newPatchi;
             }
         }
 
         Info<< "Assigned " << nVisited << " faces to patch " << patchName
             << endl << endl;
 
-        newPatchI++;
+        newPatchi++;
     }
 
 
@@ -183,41 +183,41 @@ int main(int argc, char *argv[])
     // Create new list of patches with old ones first
     List<polyPatch*> newPatchPtrList(patches.size());
 
-    newPatchI = 0;
+    newPatchi = 0;
 
     // Copy old patches
-    forAll(mesh.boundaryMesh(), patchI)
+    forAll(mesh.boundaryMesh(), patchi)
     {
-        const polyPatch& patch = mesh.boundaryMesh()[patchI];
+        const polyPatch& patch = mesh.boundaryMesh()[patchi];
 
-        newPatchPtrList[newPatchI] =
+        newPatchPtrList[newPatchi] =
             patch.clone
             (
                 mesh.boundaryMesh(),
-                newPatchI,
+                newPatchi,
                 patch.size(),
                 patch.start()
             ).ptr();
 
-        newPatchI++;
+        newPatchi++;
     }
 
     // Add new ones with empty size.
-    for (label patchI = newPatchI; patchI < patches.size(); patchI++)
+    for (label patchi = newPatchi; patchi < patches.size(); patchi++)
     {
-        const boundaryPatch& bp = patches[patchI];
+        const boundaryPatch& bp = patches[patchi];
 
-        newPatchPtrList[newPatchI] = polyPatch::New
+        newPatchPtrList[newPatchi] = polyPatch::New
         (
             polyPatch::typeName,
             bp.name(),
             0,
             mesh.nFaces(),
-            newPatchI,
+            newPatchi,
             mesh.boundaryMesh()
         ).ptr();
 
-        newPatchI++;
+        newPatchi++;
     }
 
     if (!overwrite)
@@ -237,11 +237,11 @@ int main(int argc, char *argv[])
     // have to do the geometric stuff.
     const labelList& meshFace = bMesh.meshFace();
 
-    forAll(patchIDs, faceI)
+    forAll(patchIDs, facei)
     {
-        label meshFaceI = meshFace[faceI];
+        label meshFacei = meshFace[facei];
 
-        polyMeshRepatcher.changePatchID(meshFaceI, patchIDs[faceI]);
+        polyMeshRepatcher.changePatchID(meshFacei, patchIDs[facei]);
     }
 
     polyMeshRepatcher.repatch();

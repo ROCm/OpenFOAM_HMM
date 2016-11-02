@@ -164,9 +164,9 @@ protected:
         //  ensure that it lies in a cell and not edge/face
         virtual bool findCellAtPosition
         (
-            label& cellI,
-            label& tetFaceI,
-            label& tetPtI,
+            label& celli,
+            label& tetFacei,
+            label& tetPti,
             vector& position,
             bool errorOnNotFound = true
         );
@@ -325,8 +325,8 @@ public:
                 const scalar time,
                 vector& position,
                 label& cellOwner,
-                label& tetFaceI,
-                label& tetPtI
+                label& tetFacei,
+                label& tetPti
             ) = 0;
 
             //- Set the parcel properties

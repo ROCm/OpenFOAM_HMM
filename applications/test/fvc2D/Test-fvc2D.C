@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Application
     test
 
 Description
-    Finite volume method test code.
+    Finite volume method test code for 2-D space.
 
 \*---------------------------------------------------------------------------*/
 
@@ -37,16 +37,13 @@ namespace Foam
 {
     typedef GeometricField<vector2D, fvPatchField, volMesh> volVector2DField;
 
-    defineTemplate2TypeNameAndDebug
-    (
-        volVector2DField::DimensionedInternalField,
-        0
-    );
+    defineTemplate2TypeNameAndDebug(volVector2DField::Internal, 0);
     defineTemplateTypeNameAndDebug(volVector2DField, 0);
 
     typedef fvPatchField<vector2D> fvPatchVector2DField;
     makeFvPatchField(fvPatchVector2DField)
 }
+
 
 int main(int argc, char *argv[])
 {

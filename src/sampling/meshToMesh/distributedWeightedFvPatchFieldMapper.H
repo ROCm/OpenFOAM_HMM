@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -85,13 +85,13 @@ public:
                 }
             }
 
-            if ((singlePatchProc_ == -1) != (distMapPtr_ != NULL))
+            if ((singlePatchProc_ == -1) != (distMapPtr_ != nullptr))
             {
                 FatalErrorInFunction
                     << "Supply a mapDistributeBase if and only if "
                     << "singlePatchProc is -1"
                     << " singlePatchProc_:" << singlePatchProc_
-                    << " distMapPtr_:" << (distMapPtr_ != NULL)
+                    << " distMapPtr_:" << (distMapPtr_ != nullptr)
                     << exit(FatalError);
             }
         }

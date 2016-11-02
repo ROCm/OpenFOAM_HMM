@@ -27,7 +27,7 @@ License
 #include "products.H"
 #include "VectorSpaceOps.H"
 #include "ops.H"
-#include "StaticAssert.H"
+#include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -79,7 +79,11 @@ VectorSpace<Form, Cmpt, Ncmpts>::ConstBlock<SubVector, BStart>::ConstBlock
 :
     vs_(vs)
 {
-    StaticAssert(vsType::nComponents >= BStart + nComponents);
+    static_assert
+    (
+        vsType::nComponents >= BStart + nComponents,
+        "Requested block size > VectorSpace size"
+    );
 }
 
 
@@ -102,7 +106,7 @@ inline const Cmpt& VectorSpace<Form, Cmpt, Ncmpts>::component
     if (d >= Ncmpts)
     {
         FatalErrorInFunction
-            << "index out of range"
+            << "index " << d << " out of range"
             << abort(FatalError);
     }
     #endif
@@ -121,7 +125,7 @@ inline Cmpt& VectorSpace<Form, Cmpt, Ncmpts>::component
     if (d >= Ncmpts)
     {
         FatalErrorInFunction
-            << "index out of range"
+            << "index " << d << "out of range"
             << abort(FatalError);
     }
     #endif
@@ -141,7 +145,7 @@ inline void VectorSpace<Form, Cmpt, Ncmpts>::component
     if (d >= Ncmpts)
     {
         FatalErrorInFunction
-            << "index out of range"
+            << "index " << d << " out of range"
             << abort(FatalError);
     }
     #endif
@@ -161,7 +165,7 @@ inline void VectorSpace<Form, Cmpt, Ncmpts>::replace
     if (d >= Ncmpts)
     {
         FatalErrorInFunction
-            << "index out of range"
+            << "index " << d << " out of range"
             << abort(FatalError);
     }
     #endif
@@ -201,7 +205,7 @@ inline const Cmpt& VectorSpace<Form, Cmpt, Ncmpts>::operator[]
     if (d >= Ncmpts)
     {
         FatalErrorInFunction
-            << "index out of range"
+            << "index " << d << " out of range"
             << abort(FatalError);
     }
     #endif
@@ -220,7 +224,7 @@ inline Cmpt& VectorSpace<Form, Cmpt, Ncmpts>::operator[]
     if (d >= Ncmpts)
     {
         FatalErrorInFunction
-            << "index out of range"
+            << "index " << d << " out of range"
             << abort(FatalError);
     }
     #endif
@@ -235,19 +239,19 @@ inline const Cmpt&
 VectorSpace<Form, Cmpt, Ncmpts>::
 ConstBlock<SubVector, BStart>::operator[]
 (
-    const direction i
+    const direction d
 ) const
 {
     #ifdef FULLDEBUG
-    if (i >= Ncmpts)
+    if (d >= Ncmpts)
     {
         FatalErrorInFunction
-            << "index out of range"
+            << "index " << d << " out of range"
             << abort(FatalError);
     }
     #endif
 
-    return vs_[BStart + i];
+    return vs_[BStart + d];
 }
 
 
@@ -265,7 +269,7 @@ ConstBlock<SubVector, BStart>::operator()
     if (i >= Ncmpts)
     {
         FatalErrorInFunction
-            << "index out of range"
+            << "index " << i << " out of range"
             << abort(FatalError);
     }
 

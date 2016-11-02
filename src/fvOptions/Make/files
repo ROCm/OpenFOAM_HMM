@@ -52,17 +52,16 @@ $(interRegion)/interRegionExplicitPorositySource/interRegionExplicitPorositySour
 
 
 /* Constraints */
-
 generalConstraints=constraints/general
-$(generalConstraints)/explicitSetValue/explicitSetValue.C
+$(generalConstraints)/fixedValueConstraint/fixedValueConstraints.C
 
 derivedConstraints=constraints/derived
 $(derivedConstraints)/fixedTemperatureConstraint/fixedTemperatureConstraint.C
 $(derivedConstraints)/velocityDampingConstraint/velocityDampingConstraint.C
 
-
 /* Corrections */
 
 corrections/limitTemperature/limitTemperature.C
+corrections/limitVelocity/limitVelocity.C
 
 LIB = $(FOAM_LIBBIN)/libfvOptions

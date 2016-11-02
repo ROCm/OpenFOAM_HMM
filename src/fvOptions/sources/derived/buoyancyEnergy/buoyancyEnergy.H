@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,12 +31,12 @@ Description
     Calculates and applies the buoyancy energy source rho*(U&g) to the energy
     equation.
 
-    \heading Source usage
+Usage
     Example usage:
     \verbatim
     buoyancyEnergyCoeffs
     {
-        fieldNames      (h);                    // Name of energy field
+        fields          (h);                    // Name of energy field
     }
     \endverbatim
 
@@ -108,7 +108,7 @@ public:
             (
                 const volScalarField& rho,
                 fvMatrix<scalar>& eqn,
-                const label fieldI
+                const label fieldi
             );
 
 

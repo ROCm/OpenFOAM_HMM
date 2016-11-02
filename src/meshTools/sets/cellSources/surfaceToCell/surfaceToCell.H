@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -110,11 +110,11 @@ class surfaceToCell
 
         //- Find index of nearest triangle to point. Returns triangle or -1 if
         //  not found within search span.
-        //  Cache result under pointI.
+        //  Cache result under pointi.
         static label getNearest
         (
             const triSurfaceSearch& querySurf,
-            const label pointI,
+            const label pointi,
             const point& pt,
             const vector& searchSpan,
             Map<label>& cache
@@ -127,7 +127,7 @@ class surfaceToCell
         (
             const triSurfaceSearch& querySurf,
             const vector& span,
-            const label cellI,
+            const label celli,
             const label cellTriI,
             Map<label>& pointToNearest
         ) const;

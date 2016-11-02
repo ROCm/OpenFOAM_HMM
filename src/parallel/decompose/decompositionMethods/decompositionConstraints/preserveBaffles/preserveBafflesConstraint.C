@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,13 +34,14 @@ namespace Foam
 {
 namespace decompositionConstraints
 {
-defineTypeName(preserveBafflesConstraint);
-addToRunTimeSelectionTable
-(
-    decompositionConstraint,
-    preserveBafflesConstraint,
-    dictionary
-);
+    defineTypeName(preserveBafflesConstraint);
+
+    addToRunTimeSelectionTable
+    (
+        decompositionConstraint,
+        preserveBafflesConstraint,
+        dictionary
+    );
 }
 }
 

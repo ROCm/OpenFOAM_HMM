@@ -65,7 +65,8 @@ JohnsonJacksonParticleThetaFvPatchScalarField
     mixedFvPatchScalarField(ptf, p, iF, mapper),
     restitutionCoefficient_(ptf.restitutionCoefficient_),
     specularityCoefficient_(ptf.specularityCoefficient_)
-{}
+{
+}
 
 
 Foam::JohnsonJacksonParticleThetaFvPatchScalarField::
@@ -180,7 +181,7 @@ void Foam::JohnsonJacksonParticleThetaFvPatchScalarField::updateCoeffs()
 
     const phaseModel& phased
     (
-        fluid.phase1().name() == dimensionedInternalField().group()
+        fluid.phase1().name() == internalField().group()
       ? fluid.phase1()
       : fluid.phase2()
     );

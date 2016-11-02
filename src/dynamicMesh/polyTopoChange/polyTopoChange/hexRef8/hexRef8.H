@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,17 +108,17 @@ class hexRef8
         //- Get patch and zone info
         void getFaceInfo
         (
-            const label faceI,
+            const label facei,
             label& patchID,
             label& zoneID,
             label& zoneFlip
         ) const;
 
-        //- Adds a face on top of existing faceI. Reverses if necessary.
+        //- Adds a face on top of existing facei. Reverses if necessary.
         label addFace
         (
             polyTopoChange& meshMod,
-            const label faceI,
+            const label facei,
             const face& newFace,
             const label own,
             const label nei
@@ -128,19 +128,19 @@ class hexRef8
         label addInternalFace
         (
             polyTopoChange& meshMod,
-            const label meshFaceI,
-            const label meshPointI,
+            const label meshFacei,
+            const label meshPointi,
             const face& newFace,
             const label own,
             const label nei
         ) const;
 
-        //- Modifies existing faceI for either new owner/neighbour or new face
+        //- Modifies existing facei for either new owner/neighbour or new face
         //  points. Reverses if necessary.
         void modFace
         (
             polyTopoChange& meshMod,
-            const label faceI,
+            const label facei,
             const face& newFace,
             const label own,
             const label nei
@@ -148,24 +148,24 @@ class hexRef8
 
         scalar getLevel0EdgeLength() const;
 
-        //- Get cell added to point of cellI (if any)
+        //- Get cell added to point of celli (if any)
         label getAnchorCell
         (
             const labelListList& cellAnchorPoints,
             const labelListList& cellAddedCells,
-            const label cellI,
-            const label faceI,
-            const label pointI
+            const label celli,
+            const label facei,
+            const label pointi
         ) const;
 
-        //- Get new owner and neighbour (in unspecified order) of pointI
-        //  on faceI.
+        //- Get new owner and neighbour (in unspecified order) of pointi
+        //  on facei.
         void getFaceNeighbours
         (
             const labelListList& cellAnchorPoints,
             const labelListList& cellAddedCells,
-            const label faceI,
-            const label pointI,
+            const label facei,
+            const label pointi,
 
             label& own,
             label& nei
@@ -179,11 +179,11 @@ class hexRef8
         //- Count number of vertices <= anchorLevel
         label countAnchors(const labelList&, const label) const;
         //- Debugging: dump cell as .obj file
-        void dumpCell(const label cellI) const;
+        void dumpCell(const label celli) const;
         //- Find index of point with wantedLevel, starting from fp.
         label findLevel
         (
-            const label faceI,
+            const label facei,
             const face& f,
             const label startFp,
             const bool searchForward,
@@ -197,8 +197,8 @@ class hexRef8
         static void checkInternalOrientation
         (
             polyTopoChange& meshMod,
-            const label cellI,
-            const label faceI,
+            const label celli,
+            const label facei,
             const point& ownPt,
             const point& neiPt,
             const face& newFace
@@ -208,8 +208,8 @@ class hexRef8
         static void checkBoundaryOrientation
         (
             polyTopoChange& meshMod,
-            const label cellI,
-            const label faceI,
+            const label celli,
+            const label facei,
             const point& ownPt,
             const point& boundaryPt,
             const face& newFace
@@ -232,12 +232,12 @@ class hexRef8
             const labelListList& cellAddedCells,
             const labelList& cellMidPoint,
             const labelList& edgeMidPoint,
-            const label cellI,
-            const label faceI,
+            const label celli,
+            const label facei,
             const bool faceOrder,
-            const label midPointI,
-            const label anchorPointI,
-            const label faceMidPointI,
+            const label midPointi,
+            const label anchorPointi,
+            const label faceMidPointi,
 
             Map<edge>& midPointToAnchors,
             Map<edge>& midPointToFaceMids,
@@ -252,8 +252,8 @@ class hexRef8
             const labelList& cellMidPoint,
             const labelList& faceMidPoint,
             const labelList& edgeMidPoint,
-            const label cellI,
-            const label faceI,
+            const label celli,
+            const label facei,
 
             Map<edge>& midPointToAnchors,
             Map<edge>& midPointToFaceMids,
@@ -261,7 +261,7 @@ class hexRef8
             label& nFacesAdded
         ) const;
 
-        //- Create all internal faces to split cellI into 8.
+        //- Create all internal faces to split celli into 8.
         void createInternalFaces
         (
             const labelListList& cellAnchorPoints,
@@ -270,7 +270,7 @@ class hexRef8
             const labelList& faceMidPoint,
             const labelList& faceAnchorLevel,
             const labelList& edgeMidPoint,
-            const label cellI,
+            const label celli,
             polyTopoChange& meshMod
         ) const;
 
@@ -280,7 +280,7 @@ class hexRef8
         (
             const labelList& edgeMidPoint,
             const label cLevel,
-            const label faceI,
+            const label facei,
             const label startFp,
             DynamicList<label>& faceVerts
         ) const;
@@ -290,7 +290,7 @@ class hexRef8
         (
             const labelList& edgeMidPoint,
             const label cLevel,
-            const label faceI,
+            const label facei,
             const label startFp,
             DynamicList<label>& faceVerts
         ) const;
@@ -330,7 +330,7 @@ class hexRef8
             //  hex was matched (6 faces of each four corner points)
             bool matchHexShape
             (
-                const label cellI,
+                const label celli,
                 const label cellLevel,
                 DynamicList<face>& quads
             ) const;
@@ -411,7 +411,7 @@ public:
         // Refinement
 
             //- Gets level such that the face has four points <= level.
-            label faceLevel(const label faceI) const;
+            label faceLevel(const label facei) const;
 
             //- Given valid mesh and current cell level and proposed
             //  cells to refine calculate any clashes (due to 2:1) and return

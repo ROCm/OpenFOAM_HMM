@@ -70,7 +70,7 @@ inclinedFilmNusseltHeightFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF),
+    fixedValueFvPatchScalarField(p, iF, dict),
     filmRegionName_
     (
         dict.lookupOrDefault<word>("filmRegion", "surfaceFilmProperties")
@@ -78,9 +78,7 @@ inclinedFilmNusseltHeightFvPatchScalarField
     GammaMean_(Function1<scalar>::New("GammaMean", dict)),
     a_(Function1<scalar>::New("a", dict)),
     omega_(Function1<scalar>::New("omega", dict))
-{
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
-}
+{}
 
 
 Foam::inclinedFilmNusseltHeightFvPatchScalarField::
@@ -121,7 +119,7 @@ void Foam::inclinedFilmNusseltHeightFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const label patchI = patch().index();
+    const label patchi = patch().index();
 
     // Retrieve the film region from the database
 
@@ -139,7 +137,7 @@ void Foam::inclinedFilmNusseltHeightFvPatchScalarField::updateCoeffs()
     // Note: normal pointing into the domain
     const vectorField n(-patch().nf());
 
-    const scalarField gTan(film.gTan(patchI) & n);
+    const scalarField gTan(film.gTan(patchi) & n);
 
     if (patch().size() && (max(mag(gTan)) < SMALL))
     {
@@ -151,7 +149,7 @@ void Foam::inclinedFilmNusseltHeightFvPatchScalarField::updateCoeffs()
 
     const volVectorField& nHat = film.nHat();
 
-    const vectorField nHatp(nHat.boundaryField()[patchI].patchInternalField());
+    const vectorField nHatp(nHat.boundaryField()[patchi].patchInternalField());
 
     vectorField nTan(nHatp ^ n);
     nTan /= mag(nTan) + ROOTVSMALL;
@@ -172,10 +170,10 @@ void Foam::inclinedFilmNusseltHeightFvPatchScalarField::updateCoeffs()
     const scalarField G(GMean + a*sin(omega*constant::mathematical::twoPi*d));
 
     const volScalarField& mu = film.mu();
-    const scalarField mup(mu.boundaryField()[patchI].patchInternalField());
+    const scalarField mup(mu.boundaryField()[patchi].patchInternalField());
 
     const volScalarField& rho = film.rho();
-    const scalarField rhop(rho.boundaryField()[patchI].patchInternalField());
+    const scalarField rhop(rho.boundaryField()[patchi].patchInternalField());
 
     const scalarField Re(max(G, scalar(0.0))/mup);
 

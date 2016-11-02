@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,8 +36,8 @@ Foam::scalar Foam::compressibleCourantNo
 {
     scalarField sumPhi
     (
-        fvc::surfaceSum(mag(phi))().internalField()
-      / rho.internalField()
+        fvc::surfaceSum(mag(phi))().primitiveField()
+      / rho.primitiveField()
     );
 
     scalar CoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();

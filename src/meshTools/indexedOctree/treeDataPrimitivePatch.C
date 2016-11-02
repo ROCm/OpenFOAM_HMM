@@ -175,16 +175,16 @@ Foam::volumeType Foam::treeDataPrimitivePatch<PatchType>::getVolumeType
     }
 
     // Get actual intersection point on face
-    label faceI = info.index();
+    label facei = info.index();
 
     if (debug & 2)
     {
         Pout<< "getSampleType : sample:" << sample
-            << " nearest face:" << faceI;
+            << " nearest face:" << facei;
     }
 
-    const typename PatchType::FaceType& localF = patch_.localFaces()[faceI];
-    const typename PatchType::FaceType& f = patch_[faceI];
+    const typename PatchType::FaceType& localF = patch_.localFaces()[facei];
+    const typename PatchType::FaceType& f = patch_[facei];
     const pointField& points = patch_.points();
     const labelList& mp = patch_.meshPoints();
 
@@ -271,7 +271,7 @@ Foam::volumeType Foam::treeDataPrimitivePatch<PatchType>::getVolumeType
     // 3] Get the 'real' edge the face intersection is on
     //
 
-    const labelList& fEdges = patch_.faceEdges()[faceI];
+    const labelList& fEdges = patch_.faceEdges()[facei];
 
     forAll(fEdges, fEdgeI)
     {
@@ -357,7 +357,7 @@ Foam::volumeType Foam::treeDataPrimitivePatch<PatchType>::getVolumeType
     if (debug & 2)
     {
         Pout<< "Did not find sample " << sample
-            << " anywhere related to nearest face " << faceI << endl
+            << " anywhere related to nearest face " << facei << endl
             << "Face:";
 
         forAll(f, fp)
