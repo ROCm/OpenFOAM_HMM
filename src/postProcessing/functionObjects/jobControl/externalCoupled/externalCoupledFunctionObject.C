@@ -69,6 +69,36 @@ const Foam::NamedEnum
 > Foam::externalCoupledFunctionObject::stateEndNames_;
 
 
+namespace Foam
+{
+//! \cond fileScope
+//- Write list content with size, bracket, content, bracket one-per-line.
+//  This makes for consistent for parsing, regardless of the list length.
+template <class T>
+static void writeList(Ostream& os, const string& header, const UList<T>& L)
+{
+    // Header string
+    os  << header.c_str() << nl;
+
+    // Write size and start delimiter
+    os  << L.size() << nl
+        << token::BEGIN_LIST;
+
+    // Write contents
+    forAll(L, i)
+    {
+        os << nl << L[i];
+    }
+
+    // Write end delimiter
+    os << nl << token::END_LIST << nl << endl;
+}
+//! \endcond
+
+}
+// namespace Foam
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::fileName Foam::externalCoupledFunctionObject::baseDir() const
@@ -515,13 +545,8 @@ void Foam::externalCoupledFunctionObject::writeGeometry
                 const string entryHeader =
                     patchKey + ' ' + mesh.name() + ' ' + p.name();
 
-                // Write points
-                osPointsPtr()
-                    << entryHeader.c_str() << nl << allPoints << nl << endl;
-
-                // Write faces
-                osFacesPtr()
-                    << entryHeader.c_str() << nl << allFaces << nl << endl;
+                writeList(osPointsPtr(), entryHeader, allPoints);
+                writeList(osFacesPtr(),  entryHeader, allFaces);
             }
         }
     }
@@ -545,7 +570,7 @@ Foam::word Foam::externalCoupledFunctionObject::compositeName
         {
             // For compatibility with single region cases suppress single
             // region name
-            return word("");
+            return word::null;
         }
         else
         {

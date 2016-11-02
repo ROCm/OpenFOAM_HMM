@@ -15,11 +15,11 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Decompose
 runApplication decomposePar -allRegions
 
-# Verify parallel operation of createExternalCoupledPatchGeometry
-\rm -f log.createExternalCoupledPatchGeometry
-runParallel createExternalCoupledPatchGeometry \
-    -regions '(topAir heater)' coupleGroup \
-    -commsDir $PWD/comms
+## Can verify parallel operation of createExternalCoupledPatchGeometry
+# \rm -f log.createExternalCoupledPatchGeometry
+# runParallel createExternalCoupledPatchGeometry \
+#     -regions '(topAir heater)' coupleGroup \
+#     -commsDir $PWD/comms
 
 # Run OpenFOAM
 runParallel $(getApplication) &
