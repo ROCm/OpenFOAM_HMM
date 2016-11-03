@@ -162,7 +162,7 @@ bool Foam::functionObjects::streamLine::read(const dictionary& dict)
             nSubCycle_ = max(nSubCycle_, 1);
 
 
-            Log << "    automatic track length specified through"
+            Info<< "    automatic track length specified through"
                 << " number of sub cycles : " << nSubCycle_ << nl
                 << endl;
         }

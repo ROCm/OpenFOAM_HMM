@@ -93,6 +93,7 @@ Foam::functionObjects::histogram::~histogram()
 bool Foam::functionObjects::histogram::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
+    writeFile::read(dict);
 
     dict.lookup("field") >> fieldName_;
     dict.lookup("max") >> max_;

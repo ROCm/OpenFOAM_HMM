@@ -281,7 +281,7 @@ bool Foam::functionObjects::nearWallFields::read(const dictionary& dict)
         reverseFieldMap_.insert(sampleFldName, fldName);
     }
 
-    Log  << type() << " " << name()
+    Info<< type() << " " << name()
         << ": Sampling " << fieldMap_.size() << " fields" << endl;
 
     // Do analysis

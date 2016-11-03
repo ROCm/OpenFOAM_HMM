@@ -114,6 +114,7 @@ Foam::functionObjects::blendingFactor::~blendingFactor()
 bool Foam::functionObjects::blendingFactor::read(const dictionary& dict)
 {
     fieldExpression::read(dict);
+    writeFile::read(dict);
 
     phiName_ = dict.lookupOrDefault<word>("phi", "phi");
     dict.readIfPresent("tolerance", tolerance_);

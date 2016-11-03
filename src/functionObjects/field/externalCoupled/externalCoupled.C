@@ -936,37 +936,33 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
     }
 
 
-    // Print a bit
-    if (log)
+    Info<< type() << ": Communicating with regions:" << endl;
+    forAll(regionGroupNames_, rgi)
     {
-        Info<< type() << ": Communicating with regions:" << endl;
-        forAll(regionGroupNames_, rgi)
+        //const wordList& regionNames = regionGroupRegions_[rgi];
+        const word& compName = regionGroupNames_[rgi];
+
+        Info<< "Region: " << compName << endl << incrIndent;
+        const labelList& groups = regionToGroups_[compName];
+        forAll(groups, i)
         {
-            //const wordList& regionNames = regionGroupRegions_[rgi];
-            const word& compName = regionGroupNames_[rgi];
+            label groupi = groups[i];
+            const wordRe& groupName = groupNames_[groupi];
 
-            Info<< "Region: " << compName << endl << incrIndent;
-            const labelList& groups = regionToGroups_[compName];
-            forAll(groups, i)
-            {
-                label groupi = groups[i];
-                const wordRe& groupName = groupNames_[groupi];
-
-                Info<< indent << "patchGroup: " << groupName << "\t"
-                    << endl
-                    << incrIndent
-                    << indent << "Reading fields: "
-                    << groupReadFields_[groupi]
-                    << endl
-                    << indent << "Writing fields: "
-                    << groupWriteFields_[groupi]
-                    << endl
-                    << decrIndent;
-            }
-            Info<< decrIndent;
+            Info<< indent << "patchGroup: " << groupName << "\t"
+                << endl
+                << incrIndent
+                << indent << "Reading fields: "
+                << groupReadFields_[groupi]
+                << endl
+                << indent << "Writing fields: "
+                << groupWriteFields_[groupi]
+                << endl
+                << decrIndent;
         }
-        Info<< endl;
+        Info<< decrIndent;
     }
+    Info<< endl;
 
 
     // Note: we should not have to make directories since the geometry

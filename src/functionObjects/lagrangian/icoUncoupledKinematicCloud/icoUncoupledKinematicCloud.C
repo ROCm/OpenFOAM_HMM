@@ -120,9 +120,7 @@ bool Foam::functionObjects::icoUncoupledKinematicCloud::read
     const dictionary& dict
 )
 {
-    fvMeshFunctionObject::read(dict);
-
-    return true;
+    return fvMeshFunctionObject::read(dict);
 }
 
 

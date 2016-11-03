@@ -488,7 +488,7 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::initialise
         if (weightFieldName_ == "none")
         {
             dict.lookup("orientedWeightField") >>  weightFieldName_;
-            Log << "    weight field = " << weightFieldName_ << nl;
+            Info<< "    weight field = " << weightFieldName_ << nl;
             orientWeightField_ = true;
         }
         else
