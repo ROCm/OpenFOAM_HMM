@@ -41,73 +41,7 @@ namespace Foam
 
 void Foam::sampledSurface::clearGeom() const
 {
-    deleteDemandDrivenData(SfPtr_);
-    deleteDemandDrivenData(magSfPtr_);
-    deleteDemandDrivenData(CfPtr_);
     area_ = -1;
-}
-
-
-void Foam::sampledSurface::makeSf() const
-{
-    // It is an error to recalculate if the pointer is already set
-    if (SfPtr_)
-    {
-        FatalErrorInFunction
-            << "face area vectors already exist"
-            << abort(FatalError);
-    }
-
-    const faceList& theFaces = faces();
-    SfPtr_ = new vectorField(theFaces.size());
-
-    vectorField& values = *SfPtr_;
-    forAll(theFaces, facei)
-    {
-        values[facei] = theFaces[facei].normal(points());
-    }
-}
-
-
-void Foam::sampledSurface::makeMagSf() const
-{
-    // It is an error to recalculate if the pointer is already set
-    if (magSfPtr_)
-    {
-        FatalErrorInFunction
-            << "mag face areas already exist"
-            << abort(FatalError);
-    }
-
-    const faceList& theFaces = faces();
-    magSfPtr_ = new scalarField(theFaces.size());
-
-    scalarField& values = *magSfPtr_;
-    forAll(theFaces, facei)
-    {
-        values[facei] = theFaces[facei].mag(points());
-    }
-}
-
-
-void Foam::sampledSurface::makeCf() const
-{
-    // It is an error to recalculate if the pointer is already set
-    if (CfPtr_)
-    {
-        FatalErrorInFunction
-            << "face centres already exist"
-            << abort(FatalError);
-    }
-
-    const faceList& theFaces = faces();
-    CfPtr_ = new vectorField(theFaces.size());
-
-    vectorField& values = *CfPtr_;
-    forAll(theFaces, facei)
-    {
-        values[facei] = theFaces[facei].centre(points());
-    }
 }
 
 
@@ -156,9 +90,6 @@ Foam::sampledSurface::sampledSurface
     name_(name),
     mesh_(mesh),
     interpolate_(interpolate),
-    SfPtr_(nullptr),
-    magSfPtr_(nullptr),
-    CfPtr_(nullptr),
     area_(-1)
 {}
 
@@ -173,9 +104,6 @@ Foam::sampledSurface::sampledSurface
     name_(name),
     mesh_(mesh),
     interpolate_(dict.lookupOrDefault("interpolate", false)),
-    SfPtr_(nullptr),
-    magSfPtr_(nullptr),
-    CfPtr_(nullptr),
     area_(-1)
 {
     dict.readIfPresent("name", name_);
@@ -191,39 +119,6 @@ Foam::sampledSurface::~sampledSurface()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-const Foam::vectorField& Foam::sampledSurface::Sf() const
-{
-    if (!SfPtr_)
-    {
-        makeSf();
-    }
-
-    return *SfPtr_;
-}
-
-
-const Foam::scalarField& Foam::sampledSurface::magSf() const
-{
-    if (!magSfPtr_)
-    {
-        makeMagSf();
-    }
-
-    return *magSfPtr_;
-}
-
-
-const Foam::vectorField& Foam::sampledSurface::Cf() const
-{
-    if (!CfPtr_)
-    {
-        makeCf();
-    }
-
-    return *CfPtr_;
-}
-
 
 Foam::scalar Foam::sampledSurface::area() const
 {

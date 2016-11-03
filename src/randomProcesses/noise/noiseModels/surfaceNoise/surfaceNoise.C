@@ -301,14 +301,8 @@ Foam::scalar surfaceNoise::writeSurfaceData
                 false
             );
 
-            // TODO: Move faceAreas to demand-driven function in MeshedSurface
-            // scalarField faceAreas(surf.faces().size());
-            // forAll(faceAreas, i)
-            // {
-            //     faceAreas[i] = surf.faces()[i].mag(surf.points());
-            // }
-            //
-            // areaAverage = sum(allData*faceAreas)/sum(faceAreas);
+            // TO BE VERIFIED: area-averaged values
+            // areaAverage = sum(allData*surf.magSf())/sum(surf.magSf());
             areaAverage = sum(allData)/allData.size();
         }
         Pstream::scatter(areaAverage);
@@ -330,14 +324,8 @@ Foam::scalar surfaceNoise::writeSurfaceData
             false
         );
 
-        // TODO: Move faceAreas to demand-driven function in MeshedSurface
-        // scalarField faceAreas(surf.faces().size());
-        // forAll(faceAreas, i)
-        // {
-        //     faceAreas[i] = surf.faces()[i].mag(surf.points());
-        // }
-        //
-        // return sum(data*faceAreas)/sum(faceAreas);
+        // TO BE VERIFIED: area-averaged values
+        // return sum(data*surf.magSf())/sum(surf.magSf());
         return sum(data)/data.size();
     }
 }
@@ -387,14 +375,8 @@ Foam::scalar surfaceNoise::surfaceAverage
                 }
             }
 
-            // TODO: Move faceAreas to demand-driven function in MeshedSurface
-            scalarField faceAreas(surf.faces().size());
-            forAll(faceAreas, i)
-            {
-                faceAreas[i] = surf.faces()[i].mag(surf.points());
-            }
-
-//            areaAverage = sum(allData*faceAreas)/sum(faceAreas);
+            // TO BE VERIFIED: area-averaged values
+            // areaAverage = sum(allData*surf.magSf())/sum(surf.magSf());
             areaAverage = sum(allData)/allData.size();
         }
         Pstream::scatter(areaAverage);
@@ -405,14 +387,8 @@ Foam::scalar surfaceNoise::surfaceAverage
     {
         const meshedSurface& surf = readerPtr_->geometry();
 
-        // TODO: Move faceAreas to demand-driven function in MeshedSurface
-        scalarField faceAreas(surf.faces().size());
-        forAll(faceAreas, i)
-        {
-            faceAreas[i] = surf.faces()[i].mag(surf.points());
-        }
-
-//        return sum(data*faceAreas)/sum(faceAreas);
+        // TO BE VERIFIED: area-averaged values
+        // return sum(data*surf.magSf())/sum(surf.magSf());
         return sum(data)/data.size();
     }
 }
@@ -550,9 +526,6 @@ void surfaceNoise::calculate()
             surfPSD13f[freqI][faceI] = PSD13f.y()[freqI];
             surfPrms13f2[freqI][faceI] = Prms13f2.y()[freqI];
         }
-
-        // Free the storage for p
-//        p.clear();
     }
 
     // Output directory for graphs

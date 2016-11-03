@@ -50,6 +50,7 @@ functions
     #include "wallBoundedStreamLines"
     #include "cuttingPlane"
     #include "forceCoeffs"
+    #include "ensightWrite"
 }
 
 

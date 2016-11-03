@@ -158,6 +158,11 @@ public:
 
     // Member Functions
 
+        const isoSurface& surface() const
+        {
+            return surfPtr_();
+        }
+
         //- Does the surface need an update?
         virtual bool needsUpdate() const;
 
@@ -194,15 +199,31 @@ public:
             return facesPtr_;
         }
 
-
-        const isoSurface& surface() const
+        //- Face area magnitudes
+        virtual const vectorField& Sf() const
         {
-            return surfPtr_();
+            return surface().Sf();
         }
 
-        //- Lookup or read isoField. Sets volFieldPtr_ and pointFieldPtr_.
+        //- Face area magnitudes
+        virtual const scalarField& magSf() const
+        {
+            return surface().magSf();
+        }
+
+        //- Face centres
+        virtual const vectorField& Cf() const
+        {
+            return surface().Cf();
+        }
+
+
+        //- Lookup or read isoField.
+        //  Sets volFieldPtr_ and pointFieldPtr_.
         void getIsoField();
 
+
+    // Sample
 
         //- Sample field on surface
         virtual tmp<scalarField> sample
@@ -235,6 +256,8 @@ public:
         ) const;
 
 
+    // Interpolate
+
         //- Interpolate field on surface
         virtual tmp<scalarField> interpolate
         (
@@ -264,6 +287,9 @@ public:
         (
             const interpolation<tensor>&
         ) const;
+
+
+    // Output
 
         //- Write
         virtual void print(Ostream&) const;

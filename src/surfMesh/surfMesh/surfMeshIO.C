@@ -168,7 +168,7 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
             Info<< "Point motion" << endl;
         }
 
-        clearGeom();
+        clearOut();
         storedIOPoints().instance() = pointsInst;
 
         storedIOPoints() = pointIOField
