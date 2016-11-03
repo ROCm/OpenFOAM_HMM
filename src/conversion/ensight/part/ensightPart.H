@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,21 +29,17 @@ Description
 
 SourceFiles
     ensightPart.C
-    ensightPartIO.C
-    ensightPartTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef ensightPart_H
 #define ensightPart_H
 
-#include "ensightFile.H"
 #include "ensightGeoFile.H"
 #include "typeInfo.H"
 #include "labelList.H"
 #include "polyMesh.H"
 #include "Field.H"
-#include "IOPtrList.H"
 #include "IOstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -54,8 +50,6 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class ensightPart;
-
-Ostream& operator<<(Ostream&, const ensightPart&);
 ensightGeoFile& operator<<(ensightGeoFile&, const ensightPart&);
 
 
@@ -65,40 +59,22 @@ ensightGeoFile& operator<<(ensightGeoFile&, const ensightPart&);
 
 class ensightPart
 {
-    // Private data
-
-        // Static data members
-        static const List<word> elemTypes_;
-
-
-protected:
-
-    // Protected data
-
-        //- Part number
-        label number_;
+    // Private Data
 
         //- Part name (or description)
         string name_;
 
-        //- Simple labelList with a name
-        labelListList elemLists_;
 
-        //- Start offset for elemLists_
-        label offset_;
+    // Private Member Functions
 
-        //- Number of elements in this part
-        label size_;
+        //- Disallow default bitwise copy construct
+        ensightPart(const ensightPart&) = delete;
 
-        //- Cell or face data
-        bool isCellData_;
+        //- Disallow default bitwise assignment
+        void operator=(const ensightPart&) = delete;
 
-        //- Material id (numeric)
-        label matId_;
 
-        //- pointField referenced
-        const pointField& points_;
-
+protected:
 
     // Protected Classes
 
@@ -127,46 +103,6 @@ protected:
             {}
         };
 
-
-    // Protected Member Functions
-
-        //- Reconstruct part characteristics (eg, element types) from Istream
-        //  A part reconstructed in this manner can be used when writing fields,
-        //  but cannot be used to write a new geometry
-        void reconstruct(Istream&);
-
-        //- Check for fully defined fields
-        bool isFieldDefined(const List<scalar>&) const;
-
-        //- Write the part header
-        void writeHeader(ensightFile&, bool withDescription=false) const;
-
-        //- Write a scalar field for idList
-        //  A null reference for idList writes the perNode values
-        void writeFieldList
-        (
-            ensightFile& os,
-            const List<scalar>& field,
-            const labelUList& idList
-        ) const;
-
-        //- Track points used
-        virtual localPoints calcLocalPoints() const
-        {
-            return localPoints();
-        }
-
-        //- Write connectivities
-        virtual void writeConnectivity
-        (
-            ensightGeoFile&,
-            const word& key,
-            const labelUList& idList,
-            const labelUList& pointMap
-        ) const
-        {}
-
-
 public:
 
     //- Runtime type information
@@ -175,85 +111,23 @@ public:
 
     // Constructors
 
-        //- Construct null
-        ensightPart();
-
-        //- Construct empty part with number and description
-        ensightPart(label partNumber, const string& partDescription);
-
-        //- Construct part with number, description and points reference
-        ensightPart
-        (
-            label partNumber,
-            const string& partDescription,
-            const pointField& points
-        );
-
-        //- Construct as copy
-        ensightPart(const ensightPart&);
-
-
-    // Selectors
-
-        // Declare run-time constructor selection table
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            ensightPart,
-            istream,
-            (
-                Istream& is
-            ),
-            (is)
-        );
-
-        //- Construct and return clone
-        autoPtr<ensightPart> clone() const
-        {
-            return autoPtr<ensightPart>(new ensightPart(*this));
-        };
-
-        //- Reconstruct part characteristics on freestore from Istream
-        //  \sa reconstruct
-        static autoPtr<ensightPart> New(Istream&);
+        //- Construct with description
+        ensightPart(const string& description);
 
 
     //- Destructor
     virtual ~ensightPart();
 
 
-    // Static members
-
-        virtual const List<word>& elementTypes() const
-        {
-            return elemTypes_;
-        }
-
-
     // Access
 
+        //- Part index (0-based)
+        virtual label index() const = 0;
+
         //- Number of elements in this part
-        label size() const
+        virtual label size() const
         {
-            return size_;
-        }
-
-        //- Represents cell data
-        bool isCellData() const
-        {
-            return isCellData_;
-        }
-
-        //- Represents face data
-        bool isFaceData() const
-        {
-            return !isCellData_;
-        }
-
-        //- Part number
-        label number() const
-        {
-            return number_;
+            return 0;
         }
 
         //- Part name or description
@@ -262,79 +136,34 @@ public:
             return name_;
         }
 
-        //- Material id
-        label materialId() const
-        {
-            return matId_;
-        }
-
         //- non-const access to part name or description
         void name(const string& value)
         {
             name_ = value;
         }
 
-        //- non-const access to material id
-        void materialId(const label value)
-        {
-            matId_ = value;
-        }
 
-        //- Simple labelList with a name
-        const labelListList& elemLists() const
-        {
-            return elemLists_;
-        }
-
-        //- Offset for element ids
-        label offset() const
-        {
-            return offset_;
-        }
-
-
-    // Edit
-
-        //- Renumber elements
-        void renumber(const labelUList&);
-
-        //- Write summary information about the object
-        bool writeSummary(Ostream&) const;
-
-        //- Write reconstruction information for the object
-        bool writeData(Ostream&) const;
+    // Output
 
         //- Write geometry
-        virtual void writeGeometry(ensightGeoFile&) const
-        {}
+        virtual void write(ensightGeoFile&) const = 0;
 
-        //- Helper: write geometry given the pointField
-        void writeGeometry(ensightGeoFile&, const pointField&) const;
-
-        //- Write generalized field components
-        //  optionally write data per node
-        template<class Type>
-        void writeField
+        //- Helper: write geometry with given pointField
+        virtual void write
         (
-            ensightFile&,
-            const Field<Type>&,
-            const bool perNode = false
-        ) const;
+            ensightGeoFile&,
+            const pointField&
+        ) const = 0;
 
 
-    // Member Operators
+        //- Write summary information about the object
+        virtual void writeSummary(Ostream&) const = 0;
 
-        //- Disallow default bitwise assignment
-        void operator=(const ensightPart&)
-        {
-            NotImplemented;
-        }
+        //- Print various types of debugging information
+        virtual void dumpInfo(Ostream&) const = 0;
 
 
     // IOstream Operators
-
-        //- Write data (reconstruction information)
-        friend Ostream& operator<<(Ostream&, const ensightPart&);
 
         //- Write geometry
         friend ensightGeoFile& operator<<(ensightGeoFile&, const ensightPart&);
@@ -345,12 +174,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "ensightPartTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

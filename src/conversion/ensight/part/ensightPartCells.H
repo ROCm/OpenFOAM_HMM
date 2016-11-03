@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,7 @@ SourceFiles
 #define ensightPartCells_H
 
 #include "ensightPart.H"
+#include "ensightCells.H"
 #include "typeInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,28 +50,22 @@ namespace Foam
 
 class ensightPartCells
 :
+    public ensightCells,
     public ensightPart
 {
+    // Private data
+
+        //- Mesh referenced
+        const polyMesh& mesh_;
+
+
     // Private Member Functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const ensightPartCells&);
-
-        //- Classify the cell types, set elemLists.
-        void classify
-        (
-            const polyMesh&,
-            const labelUList& idLabels = labelUList::null()
-        );
-
         //- Track points used
-        virtual localPoints calcLocalPoints() const;
-
-        //- Track the points used
-        // virtual void makeLocalPointMap();
+        localPoints calcLocalPoints() const;
 
         //- Element connectivity
-        virtual void writeConnectivity
+        void writeConnectivity
         (
             ensightGeoFile&,
             const word& key,
@@ -79,28 +74,11 @@ class ensightPartCells
         ) const;
 
 
-protected:
+        //- Disallow default bitwise copy construct
+        ensightPartCells(const ensightPartCells&) = delete;
 
-        //- Addressable ensight element types
-        enum elemType
-        {
-            tetra4Elements,
-            pyramid5Elements,
-            penta6Elements,
-            hexa8Elements,
-            nfacedElements
-        };
-
-
-    // Static data members
-
-        static const List<word> elemTypes_;
-
-
-    // Protected data
-
-        //- Mesh referenced
-        const polyMesh& mesh_;
+        //- Disallow default bitwise assignment
+        void operator=(const ensightPartCells&) = delete;
 
 
 public:
@@ -110,16 +88,17 @@ public:
 
     // Constructors
 
-        //- Construct empty part with number and description
-        ensightPartCells(label partNumber, const string& partDescription);
-
         //- Construct from polyMesh without zones
-        ensightPartCells(label partNumber, const polyMesh&);
+        ensightPartCells
+        (
+            label partIndex,
+            const polyMesh&
+        );
 
         //- Construct from polyMesh and list of (non-zoned) cells
         ensightPartCells
         (
-            label partNumber,
+            label partIndex,
             const polyMesh&,
             const labelUList&
         );
@@ -127,25 +106,10 @@ public:
         //- Construct from polyMesh and cellZone
         ensightPartCells
         (
-            label partNumber,
+            label partIndex,
             const polyMesh&,
             const cellZone&
         );
-
-        //- Construct as copy
-        ensightPartCells(const ensightPartCells&);
-
-        //- Reconstruct part characteristics (eg, element types) from Istream
-        //  A part reconstructed in this manner can be used when writing fields,
-        //  but cannot be used to write a new geometry
-        //  \sa Foam::ensightPart::reconstruct
-        ensightPartCells(Istream&);
-
-        //- Reconstruct part characteristics on freestore from Istream
-        static autoPtr<ensightPartCells> New(Istream& is)
-        {
-            return autoPtr<ensightPartCells>(new ensightPartCells(is));
-        }
 
 
     //- Destructor
@@ -154,14 +118,36 @@ public:
 
     // Member Functions
 
-        //- Write geometry
-        virtual void writeGeometry(ensightGeoFile&) const;
+    // Access
 
-        //- Static listing of the element types
-        virtual const List<word>& elementTypes() const
+        //- Part index (0-based)
+        virtual label index() const
         {
-            return elemTypes_;
+            return ensightCells::index();
         }
+
+        //- Number of elements in this part
+        virtual label size() const
+        {
+            return ensightCells::size();
+        }
+
+
+    // Output
+
+        //- Write geometry
+        virtual void write(ensightGeoFile&) const;
+
+        //- Helper: write geometry given the pointField
+        virtual void write(ensightGeoFile&, const pointField&) const;
+
+
+        //- Write summary information about the object
+        virtual void writeSummary(Ostream&) const;
+
+        //- Print various types of debugging information
+        virtual void dumpInfo(Ostream&) const;
+
 };
 
 
