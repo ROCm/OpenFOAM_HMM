@@ -439,14 +439,26 @@ Foam::meshReader::polyBoundaryPatches(const polyMesh& mesh)
         }
         dictionary& patchDict = patchDicts[patchi];
 
-        // add but not overwrite type
-        patchDict.add("type", patchTypes_[patchi], false);
-        if (patchPhysicalTypes_.size() && patchPhysicalTypes_[patchi].size())
+        // Add but not override 'type'
+        if (!patchDict.found("type"))
         {
-            patchDict.add("startFace", patchPhysicalTypes_[patchi], false);
+            patchDict.add("type", patchTypes_[patchi], false);
         }
 
-        // overwrite sizes and start
+        // Add but not override 'physicalType' but only if it differs
+        // from 'type'
+        if
+        (
+            patchi < patchPhysicalTypes_.size()
+         && patchPhysicalTypes_[patchi].size()
+         && patchPhysicalTypes_[patchi] != patchTypes_[patchi]
+         && !patchDict.found("physicalType")
+        )
+        {
+            patchDict.add("physicalType", patchPhysicalTypes_[patchi], false);
+        }
+
+        // Overwrite sizes and start
         patchDict.add("nFaces", patchSizes_[patchi], true);
         patchDict.add("startFace", patchStarts_[patchi], true);
     }
