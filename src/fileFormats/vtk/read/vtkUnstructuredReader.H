@@ -25,8 +25,8 @@ Class
     Foam::vtkUnstructuredReader
 
 Description
-    Reader for vtk unstructured_grid legacy files. Supports single CELLS, POINTS
-    etc. entry only.
+    Reader for vtk UNSTRUCTURED_GRID legacy files.
+    Supports single CELLS, POINTS etc. entry only.
 
     - all integer types (int, unsigned_int, long etc.) become Foam::label
     - all real types (float, double) become Foam::scalar
@@ -47,6 +47,7 @@ SourceFiles
 #ifndef vtkUnstructuredReader_H
 #define vtkUnstructuredReader_H
 
+#include "foamVtkCore.H"
 #include "objectRegistry.H"
 #include "cellShapeList.H"
 #include "HashSet.H"
@@ -62,6 +63,8 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class vtkUnstructuredReader
+:
+    public fileFormats::foamVtkCore
 {
 public:
 
@@ -106,29 +109,6 @@ public:
         };
 
         static const NamedEnum<parseMode, 5> parseModeNames;
-
-
-        //- Enumeration defining the cell types
-        enum vtkTypes
-        {
-            VTK_EMPTY_CELL       = 0,
-            VTK_VERTEX           = 1,
-            VTK_POLY_VERTEX      = 2,
-            VTK_LINE             = 3,
-            VTK_POLY_LINE        = 4,
-            VTK_TRIANGLE         = 5,
-            VTK_TRIANGLE_STRIP   = 6,
-            VTK_POLYGON          = 7,
-            VTK_PIXEL            = 8,
-            VTK_QUAD             = 9,
-            VTK_TETRA            = 10,
-            VTK_VOXEL            = 11,
-            VTK_HEXAHEDRON       = 12,
-            VTK_WEDGE            = 13,
-            VTK_PYRAMID          = 14,
-            VTK_PENTAGONAL_PRISM = 15,
-            VTK_HEXAGONAL_PRISM  = 16,
-        };
 
 
 private:
