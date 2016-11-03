@@ -47,6 +47,8 @@ clearGeom()
 
     deleteDemandDrivenData(localPointsPtr_);
     deleteDemandDrivenData(faceCentresPtr_);
+    deleteDemandDrivenData(faceAreasPtr_);
+    deleteDemandDrivenData(magFaceAreasPtr_);
     deleteDemandDrivenData(faceNormalsPtr_);
     deleteDemandDrivenData(pointNormalsPtr_);
 }

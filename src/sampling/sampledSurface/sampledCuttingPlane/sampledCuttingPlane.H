@@ -141,6 +141,12 @@ public:
 
     // Member Functions
 
+        //const isoSurfaceCell& surface() const
+        const isoSurface& surface() const
+        {
+            return isoSurfPtr_();
+        }
+
         //- Does the surface need an update?
         virtual bool needsUpdate() const;
 
@@ -176,12 +182,26 @@ public:
             return facesPtr_;
         }
 
-
-        //const isoSurfaceCell& surface() const
-        const isoSurface& surface() const
+        //- Face area magnitudes
+        virtual const vectorField& Sf() const
         {
-            return isoSurfPtr_();
+            return surface().Sf();
         }
+
+        //- Face area magnitudes
+        virtual const scalarField& magSf() const
+        {
+            return surface().magSf();
+        }
+
+        //- Face centres
+        virtual const vectorField& Cf() const
+        {
+            return surface().Cf();
+        }
+
+
+    // Sample
 
         //- Sample field on surface
         virtual tmp<scalarField> sample
@@ -214,6 +234,8 @@ public:
         ) const;
 
 
+    // Interpolate
+
         //- Interpolate field on surface
         virtual tmp<scalarField> interpolate
         (
@@ -243,6 +265,9 @@ public:
         (
             const interpolation<tensor>&
         ) const;
+
+
+    // Output
 
         //- Write
         virtual void print(Ostream&) const;

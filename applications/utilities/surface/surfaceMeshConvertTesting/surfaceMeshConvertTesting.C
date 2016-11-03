@@ -161,7 +161,8 @@ int main(int argc, char *argv[])
 
         Info<< "Read surface:" << endl;
         surf.writeStats(Info);
-        Info<< endl;
+        Info<< "Area         : " << sum(surf.magSf()) << nl
+            << endl;
 
         // check: output to ostream, construct from istream
         {
@@ -205,7 +206,8 @@ int main(int argc, char *argv[])
             Info<< " with scaling " << scaleFactor << endl;
             surf.scalePoints(scaleFactor);
             surf.writeStats(Info);
-            Info<< endl;
+            Info<< "Area         : " << sum(surf.magSf()) << nl
+                << endl;
         }
 
         if (optStdout)
@@ -224,7 +226,8 @@ int main(int argc, char *argv[])
 
         Info<< "Read surface:" << endl;
         surf.writeStats(Info);
-        Info<< endl;
+        Info<< "Area         : " << sum(surf.magSf()) << nl
+            << endl;
 
         // check: output to ostream, construct from istream
         {
@@ -268,7 +271,8 @@ int main(int argc, char *argv[])
             Info<< " with scaling " << scaleFactor << endl;
             surf.scalePoints(scaleFactor);
             surf.writeStats(Info);
-            Info<< endl;
+            Info<< "Area         : " << sum(surf.magSf()) << nl
+                << endl;
         }
 
         if (optStdout)
@@ -286,7 +290,8 @@ int main(int argc, char *argv[])
 
         Info<< "Read surface:" << endl;
         surf.writeStats(Info);
-        Info<< endl;
+        Info<< "Area         : " << sum(surf.magSf()) << nl
+            << endl;
 
         // check: output to ostream, construct from istream
         {
@@ -330,7 +335,8 @@ int main(int argc, char *argv[])
             Info<< " with scaling " << scaleFactor << endl;
             surf.scalePoints(scaleFactor);
             surf.writeStats(Info);
-            Info<< endl;
+            Info<< "Area         : " << sum(surf.magSf()) << nl
+                << endl;
         }
 
         if (optStdout)
@@ -348,7 +354,8 @@ int main(int argc, char *argv[])
 
         Info<< "Read surface:" << endl;
         surf.writeStats(Info);
-        Info<< endl;
+        Info<< "Area         : " << sum(surf.magSf()) << nl
+            << endl;
 
         // check: output to ostream, construct from istream
         {
@@ -392,7 +399,8 @@ int main(int argc, char *argv[])
             Info<< " with scaling " << scaleFactor << endl;
             surf.scalePoints(scaleFactor);
             surf.writeStats(Info);
-            Info<< endl;
+            Info<< "Area         : " << sum(surf.magSf()) << nl
+                << endl;
         }
 
         if (optStdout)

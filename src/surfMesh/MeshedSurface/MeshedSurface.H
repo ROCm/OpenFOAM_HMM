@@ -339,6 +339,31 @@ public:
                 return zones_;
             }
 
+            //- Face area vectors (normals)
+            inline const vectorField& Sf() const
+            {
+                return ParentType::faceAreas();
+            }
+
+            //- Face area magnitudes
+            inline const scalarField& magSf() const
+            {
+                return ParentType::magFaceAreas();
+            }
+
+            //- Face centres
+            inline const vectorField& Cf() const
+            {
+                return ParentType::faceCentres();
+            }
+
+
+        // Edit
+
+            //- Clear all storage
+            virtual void clear();
+
+
             //- Add surface zones
             virtual void addZones
             (
@@ -364,11 +389,6 @@ public:
             //- Remove surface zones
             virtual void removeZones();
 
-
-        // Edit
-
-            //- Clear all storage
-            virtual void clear();
 
             //- Move points
             virtual void movePoints(const pointField&);
