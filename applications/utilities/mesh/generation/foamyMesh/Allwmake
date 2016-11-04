@@ -4,8 +4,8 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Parse arguments for library compilation
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
-if [ -d "$CGAL_ARCH_PATH/include/CGAL" ] || \
-   [ "${CGAL_ARCH_PATH##*-}" = system -a -d /usr/include/CGAL ]
+if [ -f "$CGAL_ARCH_PATH/include/CGAL/version.h" ] || \
+   [ "${CGAL_ARCH_PATH##*-}" = system -a -f /usr/include/CGAL/version.h ]
 then
     set -x
 
