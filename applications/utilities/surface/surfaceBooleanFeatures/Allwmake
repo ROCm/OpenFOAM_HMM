@@ -4,8 +4,8 @@ set -x
 
 unset COMPILE_FLAGS LINK_FLAGS
 
-if [ -d "$CGAL_ARCH_PATH/include/CGAL" ] || \
-   [ "${CGAL_ARCH_PATH##*-}" = system -a -d /usr/include/CGAL ]
+if [ -f "$CGAL_ARCH_PATH/include/CGAL/version.h" ] || \
+   [ "${CGAL_ARCH_PATH##*-}" = system -a -f /usr/include/CGAL/version.h ]
 then
     wmake PolyhedronReader
     export COMPILE_FLAGS='-IPolyhedronReader'
