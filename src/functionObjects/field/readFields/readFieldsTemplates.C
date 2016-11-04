@@ -60,7 +60,7 @@ bool Foam::functionObjects::readFields::loadField(const word& fieldName)
             IOobject::NO_WRITE
         );
 
-        if (fieldHeader.typeHeaderOk<VolFieldType>(false))
+        if (fieldHeader.typeHeaderOk<VolFieldType>(true))
         {
             // Store field on mesh database
             Log << "    Reading " << fieldName << endl;
@@ -68,7 +68,7 @@ bool Foam::functionObjects::readFields::loadField(const word& fieldName)
             mesh_.objectRegistry::store(vfPtr);
             return true;
         }
-        else if (fieldHeader.typeHeaderOk<SurfaceFieldType>(false))
+        else if (fieldHeader.typeHeaderOk<SurfaceFieldType>(true))
         {
             // Store field on mesh database
             Log << "    Reading " << fieldName << endl;
