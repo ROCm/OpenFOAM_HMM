@@ -72,13 +72,13 @@ then
     ending="${BOOST_ARCH_PATH##*-}"
     if [ "$ending" != none -a "$ending" != system ]
     then
-        _foamAddLib $BOOST_ARCH_PATH/lib
+        _foamAddLib $BOOST_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
     fi
 
     ending="${CGAL_ARCH_PATH##*-}"
     if [ "$ending" != none -a "$ending" != system ]
     then
-        _foamAddLib $CGAL_ARCH_PATH/lib
+        _foamAddLib $CGAL_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
     fi
 
     unset boost_version cgal_version ending

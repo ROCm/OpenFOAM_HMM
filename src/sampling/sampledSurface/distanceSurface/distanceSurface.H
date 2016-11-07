@@ -193,6 +193,25 @@ public:
             return facesPtr_;
         }
 
+        //- Face area vectors
+        virtual const vectorField& Sf() const
+        {
+            return surface().Sf();
+        }
+
+        //- Face area magnitudes
+        virtual const scalarField& magSf() const
+        {
+            return surface().magSf();
+        }
+
+        //- Face centres
+        virtual const vectorField& Cf() const
+        {
+            return surface().Cf();
+        }
+
+
         const triSurface& surface() const
         {
             if (cell_)

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,18 +29,9 @@ License
 
 Foam::ensightParts::ensightParts(const polyMesh& mesh)
 :
-    partsList_()
+    StorageType()
 {
     recalculate(mesh);
-}
-
-
-Foam::ensightParts::ensightParts(const IOobject& ioObj)
-:
-    partsList_()
-{
-    IOPtrList<ensightPart> ioList(ioObj);
-    partsList_.transfer(ioList);
 }
 
 
@@ -54,19 +45,9 @@ Foam::ensightParts::~ensightParts()
 
 void Foam::ensightParts::recalculate(const polyMesh& mesh)
 {
-    partsList_.clear();
+    StorageType::clear();
 
-    // extra space for unzoned cells
-    label nPart =
-    (
-        mesh.cellZones().size()
-      + mesh.boundaryMesh().size()
-      + 1
-    );
-
-    partsList_.setSize(nPart);
-    nPart = 0;
-
+    label nPart = 0;
     label nZoneCells = 0;
 
     // do cell zones
@@ -77,13 +58,7 @@ void Foam::ensightParts::recalculate(const polyMesh& mesh)
 
         if (cZone.size())
         {
-            partsList_.set
-            (
-                nPart,
-                new ensightPartCells(nPart, mesh, cZone)
-            );
-
-            nPart++;
+            this->append(new ensightPartCells(nPart++, mesh, cZone));
         }
     }
 
@@ -92,13 +67,7 @@ void Foam::ensightParts::recalculate(const polyMesh& mesh)
     // special case: no zones at all - do entire mesh
     if (nZoneCells == 0)
     {
-        partsList_.set
-        (
-            nPart,
-            new ensightPartCells(nPart, mesh)
-        );
-
-        nPart++;
+        this->append(new ensightPartCells(nPart++, mesh));
     }
     else if (mesh.nCells() > nZoneCells)
     {
@@ -128,13 +97,7 @@ void Foam::ensightParts::recalculate(const polyMesh& mesh)
 
         if (unzoned.size())
         {
-            partsList_.set
-            (
-                nPart,
-                new ensightPartCells(nPart, mesh, unzoned)
-            );
-
-            nPart++;
+            this->append(new ensightPartCells(nPart++, mesh, unzoned));
         }
     }
 
@@ -145,96 +108,41 @@ void Foam::ensightParts::recalculate(const polyMesh& mesh)
         const polyPatch& patch = mesh.boundaryMesh()[patchi];
         if (patch.size() && !isA<processorPolyPatch>(patch))
         {
-            partsList_.set
-            (
-                nPart,
-                new ensightPartFaces(nPart, mesh, patch)
-            );
-
-            nPart++;
-        }
-    }
-
-    // truncate to correct size
-    partsList_.setSize(nPart);
-}
-
-
-void Foam::ensightParts::renumber
-(
-    const labelUList& origCellId,
-    const labelUList& origFaceId
-)
-{
-    forAll(partsList_, partI)
-    {
-        if (partsList_[partI].isCellData())
-        {
-            partsList_[partI].renumber(origCellId);
-        }
-        else
-        {
-            partsList_[partI].renumber(origFaceId);
+            this->append(new ensightPartFaces(nPart++, mesh, patch));
         }
     }
 }
 
 
-void Foam::ensightParts::writeGeometry(ensightGeoFile& os) const
+void Foam::ensightParts::write(ensightGeoFile& os) const
 {
-    // with some feedback
-    Info<< "write geometry part (" << flush;
+    // Some feedback
+    Info<< "Write geometry part (" << flush;
 
-    forAll(partsList_, partI)
+    forAllConstIter(StorageType, *this, iter)
     {
-        Info<< " " << partI << flush;
-        partsList_[partI].writeGeometry(os);
+        Info<< ' ' << (*iter).index() << flush;
+        (*iter).write(os);
     }
     Info<< " )" << endl;
 }
 
 
-bool Foam::ensightParts::writeSummary(Ostream& os) const
+void Foam::ensightParts::writeSummary(Ostream& os) const
 {
-    forAll(partsList_, partI)
+    forAllConstIter(StorageType, *this, iter)
     {
-        partsList_[partI].writeSummary(os);
+        (*iter).writeSummary(os);
     }
-
-    return true;
 }
 
 
-void Foam::ensightParts::writeData(Ostream& os) const
+void Foam::ensightParts::dumpInfo(Ostream& os) const
 {
-    // Begin write list
-    os  << nl << partsList_.size()
-        << nl << token::BEGIN_LIST;
-
-    // Write list contents
-    forAll(partsList_, i)
+    forAllConstIter(StorageType, *this, iter)
     {
-        os  << nl << partsList_[i];
+        (*iter).dumpInfo(os);
     }
-
-    // End write list
-    os  << nl << token::END_LIST << nl;
-
-    // Check state of IOstream
-    os.check("ensightParts::writeData(Ostream&)");
-}
-
-
-// * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
-
-Foam::ensightGeoFile& Foam::operator<<
-(
-    ensightGeoFile& os,
-    const ensightParts& parts
-)
-{
-    parts.writeGeometry(os);
-    return os;
 }
 
 

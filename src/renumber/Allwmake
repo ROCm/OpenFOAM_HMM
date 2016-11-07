@@ -20,8 +20,8 @@ set -x
 
 wmake $targetType renumberMethods
 
-if [ -d "$BOOST_ARCH_PATH/include/boost" ] || \
-   [ "${BOOST_ARCH_PATH##*-}" = system -a -d /usr/include/boost ]
+if [ -f "$BOOST_ARCH_PATH/include/boost/version.hpp" ] || \
+   [ "${BOOST_ARCH_PATH##*-}" = system -a -f /usr/include/boost/version.hpp ]
 then
     wmake $targetType SloanRenumber
 else

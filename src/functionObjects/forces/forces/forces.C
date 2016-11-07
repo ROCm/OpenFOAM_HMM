@@ -846,7 +846,7 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
 
     initialised_ = false;
 
-    Info << type() << " " << name() << ":" << nl;
+    Info<< type() << " " << name() << ":" << nl;
 
     directForceDensity_ = dict.lookupOrDefault("directForceDensity", false);
 
@@ -889,11 +889,11 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
     dict.readIfPresent("porosity", porosity_);
     if (porosity_)
     {
-        Info << "    Including porosity effects" << endl;
+        Info<< "    Including porosity effects" << endl;
     }
     else
     {
-        Info << "    Not including porosity effects" << endl;
+        Info<< "    Not including porosity effects" << endl;
     }
 
     if (dict.found("binData"))
@@ -924,7 +924,7 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
 
     if (writeFields_)
     {
-        Info << "    Fields will be written" << endl;
+        Info<< "    Fields will be written" << endl;
 
         volVectorField* forcePtr
         (

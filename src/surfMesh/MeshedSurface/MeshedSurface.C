@@ -431,7 +431,9 @@ Foam::MeshedSurface<Face>::MeshedSurface
 
 template<class Face>
 Foam::MeshedSurface<Face>::~MeshedSurface()
-{}
+{
+    clear();
+}
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -500,6 +502,9 @@ void Foam::MeshedSurface<Face>::clear()
 template<class Face>
 void Foam::MeshedSurface<Face>::movePoints(const pointField& newPoints)
 {
+    // Changes areas, normals etc.
+    ParentType::clearGeom();
+
     // Adapt for new point position
     ParentType::movePoints(newPoints);
 
@@ -511,9 +516,12 @@ void Foam::MeshedSurface<Face>::movePoints(const pointField& newPoints)
 template<class Face>
 void Foam::MeshedSurface<Face>::scalePoints(const scalar scaleFactor)
 {
-    // avoid bad scaling
+    // Avoid bad scaling
     if (scaleFactor > 0 && scaleFactor != 1.0)
     {
+        // Changes areas, normals etc.
+        ParentType::clearGeom();
+
         pointField newPoints(scaleFactor*this->points());
 
         // Adapt for new point position
@@ -586,7 +594,7 @@ void Foam::MeshedSurface<Face>::reset
 template<class Face>
 void Foam::MeshedSurface<Face>::cleanup(const bool verbose)
 {
-    // merge points (already done for STL, TRI)
+    // Merge points (already done for STL, TRI)
     stitchFaces(SMALL, verbose);
 
     checkFaces(verbose);
@@ -941,8 +949,6 @@ Foam::label Foam::MeshedSurface<Face>::triangulate
     ParentType::clearOut();
     return nTri;
 }
-
-
 
 
 template<class Face>

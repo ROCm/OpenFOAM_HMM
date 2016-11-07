@@ -168,6 +168,12 @@ private:
         //- Face centres
         mutable Field<PointType>* faceCentresPtr_;
 
+        //- Face area vectors
+        mutable Field<PointType>* faceAreasPtr_;
+
+        //- Mag face area
+        mutable Field<scalar>* magFaceAreasPtr_;
+
         //- Face unit normals
         mutable Field<PointType>* faceNormalsPtr_;
 
@@ -209,6 +215,12 @@ private:
 
         //- Calculate face centres
         void calcFaceCentres() const;
+
+        //- Calculate face area vectors
+        void calcFaceAreas() const;
+
+        //- Calculate face area magnitudes
+        void calcMagFaceAreas() const;
 
         //- Calculate unit face normals
         void calcFaceNormals() const;
@@ -381,7 +393,13 @@ public:
             //- Return face centres for patch
             const Field<PointType>& faceCentres() const;
 
-            //- Return face normals for patch
+            //- Return face area vectors for patch
+            const Field<PointType>& faceAreas() const;
+
+            //- Return face area magnitudes for patch
+            const Field<scalar>& magFaceAreas() const;
+
+            //- Return face unit normals for patch
             const Field<PointType>& faceNormals() const;
 
             //- Return point normals for patch

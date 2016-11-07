@@ -1,5 +1,6 @@
-ensightMesh.C
-ensightCloud.C
+ensightOutputCloud.C
+meshSubsetHelper.C
+
 foamToEnsight.C
 
 EXE = $(FOAM_APPBIN)/foamToEnsight

@@ -111,7 +111,7 @@ bool Foam::functionObjects::timeActivatedFileUpdate::read
     lastIndex_ = -1;
     fileToUpdate_.expand();
 
-    Log << type() << " " << name() << " output:" << nl
+    Info<< type() << " " << name() << " output:" << nl
         << "    time vs file list:" << endl;
 
     forAll(timeVsFile_, i)
@@ -124,7 +124,7 @@ bool Foam::functionObjects::timeActivatedFileUpdate::read
                 << nl << exit(FatalError);
         }
 
-        Log << "    " << timeVsFile_[i].first() << tab
+        Info<< "    " << timeVsFile_[i].first() << tab
             << timeVsFile_[i].second() << endl;
     }
 

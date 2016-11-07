@@ -69,9 +69,12 @@ bool Foam::IOobject::typeHeaderOk(const bool checkType)
             {
                 if (checkType && headerClassName_ != Type::typeName)
                 {
-                    IOWarningInFunction(*isPtr)
-                        << "unexpected class name " << headerClassName_
-                        << " expected " << Type::typeName << endl;
+                    if (debug)
+                    {
+                        IOWarningInFunction(*isPtr)
+                            << "unexpected class name " << headerClassName_
+                            << " expected " << Type::typeName << endl;
+                    }
 
                     ok = false;
                 }

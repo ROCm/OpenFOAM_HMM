@@ -122,6 +122,7 @@ Foam::functionObjects::fieldMinMax::~fieldMinMax()
 bool Foam::functionObjects::fieldMinMax::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
+    writeFile::read(dict);
 
     location_ = dict.lookupOrDefault<Switch>("location", true);
 

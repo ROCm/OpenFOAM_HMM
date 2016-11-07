@@ -143,7 +143,7 @@ bool Foam::functionObjects::wallShearStress::read(const dictionary& dict)
             wordReList(dict.lookupOrDefault("patches", wordReList()))
         );
 
-    Log << type() << " " << name() << ":" << nl;
+    Info<< type() << " " << name() << ":" << nl;
 
     if (patchSet_.empty())
     {
@@ -155,7 +155,7 @@ bool Foam::functionObjects::wallShearStress::read(const dictionary& dict)
             }
         }
 
-        Log << "    processing all wall patches" << nl << endl;
+        Info<< "    processing all wall patches" << nl << endl;
     }
     else
     {
@@ -177,7 +177,7 @@ bool Foam::functionObjects::wallShearStress::read(const dictionary& dict)
             }
         }
 
-        Log << endl;
+        Info<< endl;
 
         patchSet_ = filteredPatchSet;
     }

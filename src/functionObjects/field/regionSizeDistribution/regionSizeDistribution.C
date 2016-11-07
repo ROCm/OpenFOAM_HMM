@@ -354,6 +354,7 @@ Foam::functionObjects::regionSizeDistribution::~regionSizeDistribution()
 bool Foam::functionObjects::regionSizeDistribution::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
+    writeFile::read(dict);
 
     dict.lookup("field") >> alphaName_;
     dict.lookup("patches") >> patchNames_;
@@ -371,7 +372,7 @@ bool Foam::functionObjects::regionSizeDistribution::read(const dictionary& dict)
     {
         coordSysPtr_.reset(new coordinateSystem(obr_, dict));
 
-        Log << "Transforming all vectorFields with coordinate system "
+        Info<< "Transforming all vectorFields with coordinate system "
             << coordSysPtr_().name() << endl;
     }
 

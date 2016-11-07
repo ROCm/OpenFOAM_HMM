@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,13 +29,13 @@ Description
 
 SourceFiles
     ensightParts.C
-    ensightPartsTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef ensightParts_H
 #define ensightParts_H
 
+#include "SLPtrList.H"
 #include "ensightPart.H"
 #include "ensightPartFaces.H"
 #include "ensightPartCells.H"
@@ -46,42 +46,33 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
-class ensightParts;
-
-ensightGeoFile& operator<<(ensightGeoFile&, const ensightParts&);
-
-
 /*---------------------------------------------------------------------------*\
-                       Class ensightParts Declaration
+                        Class ensightParts Declaration
 \*---------------------------------------------------------------------------*/
 
 class ensightParts
+:
+    public SLPtrList<ensightPart>
 {
-    // Private Data
-
-        //- List of parts
-        PtrList<ensightPart> partsList_;
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        ensightParts(const ensightParts&);
+        ensightParts(const ensightParts&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const ensightParts&);
+        void operator=(const ensightParts&) = delete;
 
 
 public:
+
+    //- Storage type used
+    typedef SLPtrList<ensightPart> StorageType;
+
 
     // Constructors
 
         //- Construct from polyMesh
         ensightParts(const polyMesh&);
-
-        //- Construct from IOobject
-        ensightParts(const IOobject&);
 
 
     //- Destructor
@@ -93,41 +84,19 @@ public:
         //- Clear old information and construct anew from polyMesh
         void recalculate(const polyMesh&);
 
-        //- Renumber elements
-        void renumber
-        (
-            const labelUList& origCellId,
-            const labelUList& origFaceId
-        );
-
         //- Number of parts
-        label size() const
-        {
-            return partsList_.size();
-        }
+        using StorageType::size;
+
 
         //- Write the geometry
-        void writeGeometry(ensightGeoFile&) const;
+        void write(ensightGeoFile&) const;
 
         //- Write summary information about the objects
-        bool writeSummary(Ostream&) const;
+        void writeSummary(Ostream&) const;
 
-        //- Write the lists
-        void writeData(Ostream&) const;
+        //- Print various types of debugging information
+        void dumpInfo(Ostream&) const;
 
-        //- Write generalized volume field components
-        template<class Type>
-        void writeField
-        (
-            ensightFile&,
-            const GeometricField<Type, fvPatchField, volMesh>&
-        ) const;
-
-
-    // Friend Operators
-
-        //- Write geometry
-        friend ensightGeoFile& operator<<(ensightGeoFile&, const ensightParts&);
 };
 
 
@@ -136,10 +105,6 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "ensightPartsTemplates.C"
-#endif
 
 #endif
 

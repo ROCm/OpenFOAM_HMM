@@ -727,21 +727,17 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
         }
     }
 
-    // Provide some output
-    if (log)
+    Info<< type() << " " << name() << " output:" << nl;
+
+    forAll(faceZoneName_, zonei)
     {
-        Info<< type() << " " << name() << " output:" << nl;
+        const word& zoneName = faceZoneName_[zonei];
+        scalar zoneArea = faceArea_[zonei];
 
-        forAll(faceZoneName_, zonei)
-        {
-            const word& zoneName = faceZoneName_[zonei];
-            scalar zoneArea = faceArea_[zonei];
-
-            Info<< "    Zone: " << zoneName << ", area: " << zoneArea << nl;
-        }
-
-        Info<< endl;
+        Info<< "    Zone: " << zoneName << ", area: " << zoneArea << nl;
     }
+
+    Info<< endl;
 
     return true;
 }

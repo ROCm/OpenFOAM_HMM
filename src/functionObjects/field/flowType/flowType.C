@@ -21,28 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    flowType
-
-Group
-    grpPostProcessingUtilities
-
-Description
-    Calculates and writes the flowType of velocity field U.
-
-    The -noWrite option has no meaning.
-
-    The flow type parameter is obtained according to the following equation:
-    \verbatim
-                 |D| - |Omega|
-        lambda = -------------
-                 |D| + |Omega|
-
-        -1 = rotational flow
-         0 = simple shear flow
-         1 = planar extensional flow
-    \endverbatim
-
 \*---------------------------------------------------------------------------*/
 
 #include "flowType.H"

@@ -54,6 +54,9 @@ class sampledIsoSurfaceCell
     public sampledSurface,
     public triSurface
 {
+    //- Private typedef for convenience
+    typedef triSurface MeshStorage;
+
     // Private data
 
         //- Field to get isoSurface of
@@ -145,7 +148,7 @@ public:
         //- Points of surface
         virtual const pointField& points() const
         {
-            return triSurface::points();
+            return MeshStorage::points();
         }
 
         //- Faces of surface
@@ -163,6 +166,24 @@ public:
                 }
             }
             return facesPtr_;
+        }
+
+        //- Face area magnitudes
+        virtual const vectorField& Sf() const
+        {
+            return MeshStorage::Sf();
+        }
+
+        //- Face area magnitudes
+        virtual const scalarField& magSf() const
+        {
+            return MeshStorage::magSf();
+        }
+
+        //- Face centres
+        virtual const vectorField& Cf() const
+        {
+            return MeshStorage::Cf();
         }
 
 

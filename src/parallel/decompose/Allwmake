@@ -4,8 +4,21 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Parse arguments for library compilation
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
+unset METIS_ARCH_PATH SCOTCH_ARCH_PATH
+
+# get METIS_VERSION, METIS_ARCH_PATH
+if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/metis)
+then
+    . $settings
+    echo "using METIS_ARCH_PATH=$METIS_ARCH_PATH"
+else
+    echo
+    echo "Error: no config.sh/metis settings"
+    echo
+fi
+
 # get SCOTCH_VERSION, SCOTCH_ARCH_PATH
-if settings=`$WM_PROJECT_DIR/bin/foamEtcFile config.sh/scotch`
+if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/scotch)
 then
     . $settings
     echo "using SCOTCH_ARCH_PATH=$SCOTCH_ARCH_PATH"
@@ -45,21 +58,12 @@ set -x
 
 wmakeLnInclude decompositionMethods
 
-if [ -n "$SCOTCH_ARCH_PATH" ]
+if [ -f $SCOTCH_ARCH_PATH/include/scotch.h \
+  -a -r $FOAM_EXT_LIBBIN/libscotch.so ]
 then
     wmake $targetType scotchDecomp
-
     if [ -d "$FOAM_LIBBIN/$FOAM_MPI" ]
     then
-        #- Bit of a hack: ptscotch 6 requires scotch linked as well as. Can be
-        #  removed once ptscotch declares dependency on scotch itself.
-        case "$SCOTCH_VERSION" in
-        scotch_6.*)
-            export LINK_FLAGS="-lscotch"
-            ;;
-        esac
-
-
         wmakeMpiLib ptscotchDecomp
     fi
 else
@@ -69,8 +73,15 @@ else
 fi
 
 
-# Try and build metisDecomp (has own logic)
-(cd metisDecomp && ./Allwmake $targetType)
+if [ -f $METIS_ARCH_PATH/include/metis.h \
+  -a -r $FOAM_EXT_LIBBIN/libmetis.so ]
+then
+    wmake $targetType metisDecomp
+else
+    echo
+    echo "Skipping metisDecomp: metis not installed"
+    echo
+fi
 
 
 wmake $targetType decompositionMethods
