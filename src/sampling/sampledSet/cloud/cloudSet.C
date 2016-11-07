@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,6 +65,16 @@ void Foam::cloudSet::calcSamples
             samplingSegments.append(0);
             samplingCurveDist.append(1.0 * sampleI);
         }
+    }
+
+    label nTotalCells = returnReduce(samplingPts.size(), sumOp<label>());
+    if (nTotalCells < sampleCoords_.size())
+    {
+        WarningInFunction
+            << "For sample set " << name()
+            << " found only " << nTotalCells << " out of "
+            << sampleCoords_.size()
+            << " input points." << endl;
     }
 }
 
