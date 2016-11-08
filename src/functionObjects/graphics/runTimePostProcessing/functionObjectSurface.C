@@ -93,21 +93,24 @@ addGeometryToScene
         return;
     }
 
-    const dictionary dict =
-        geometryBase::parent_.getObjectProperty
-        (
-            functionObject_,
-            fieldName_,
-            dictionary::null
-        );
+    dictionary dict;
+    if (!geometryBase::parent_.getObjectDict(functionObject_, fieldName_, dict))
+    {
+        WarningInFunction
+            << "Unable to find function object " << functionObject_
+            << " output for field " << fieldName_
+            << ". Surface will not be processed"
+            << endl;
+        return;
+    }
 
     fileName fName;
     if (!dict.readIfPresent("file", fName))
     {
         WarningInFunction
-            << "Unable to find function object " << functionObject_
-            << " output for field " << fieldName_
-            << ". functionObjectSurface will not be processed"
+            << "Unable to read file name from function object "
+            << functionObject_ << " for field " << fieldName_
+            << ". Surface will not be processed"
             << endl;
         return;
     }
