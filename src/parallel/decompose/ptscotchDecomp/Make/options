@@ -8,8 +8,12 @@ EXE_INC = \
     -I/usr/include/scotch \
     -I../decompositionMethods/lnInclude
 
+/*
+ * The '-lscotch' is a slight hack:
+ * ptscotch 6 requires scotch linked in, but does not declare the dependency
+ */
 LIB_LIBS = \
-    -L$(SCOTCH_ARCH_PATH)/lib \
+    -L$(FOAM_EXT_LIBBIN) \
     -L$(FOAM_EXT_LIBBIN)/$(FOAM_MPI) \
     -lptscotch \
     -lptscotcherrexit \

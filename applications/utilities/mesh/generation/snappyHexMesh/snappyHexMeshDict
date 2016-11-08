@@ -138,8 +138,10 @@ castellatedMeshControls
     (
         //{
         //    file "someLine.eMesh";
-        //    //level 2;
-        //    levels ((0.0 2) (1.0 3));
+        //    //level 2;        // Have level 2 for all cells intersected
+        //                      // by feature.
+        //    levels ((0.1 2);  // Have level 2 for all cells within
+        //                      // 0.1 of feature.
         //}
     );
 

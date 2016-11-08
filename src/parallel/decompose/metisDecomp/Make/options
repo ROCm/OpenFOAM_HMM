@@ -4,4 +4,5 @@ EXE_INC = \
     -I../decompositionMethods/lnInclude
 
 LIB_LIBS = \
-    -L$(METIS_ARCH_PATH)/lib -lmetis
+    -L$(FOAM_EXT_LIBBIN) \
+    -lmetis
