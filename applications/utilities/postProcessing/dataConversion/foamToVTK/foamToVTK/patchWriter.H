@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,11 +40,8 @@ SourceFiles
 #include "OFstream.H"
 #include "volFields.H"
 #include "pointFields.H"
-#include "vtkMesh.H"
 #include "indirectPrimitivePatch.H"
 #include "PrimitivePatchInterpolation.H"
-
-using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,7 +56,8 @@ class volPointInterpolation;
 
 class patchWriter
 {
-    const vtkMesh& vMesh_;
+    //- Reference to the OpenFOAM mesh (or subset)
+    const fvMesh& mesh_;
 
     const bool binary_;
 
@@ -82,7 +80,7 @@ public:
         //- Construct from components
         patchWriter
         (
-            const vtkMesh&,
+            const fvMesh&,
             const bool binary,
             const bool nearCellValue,
             const fileName&,

@@ -54,6 +54,17 @@ class Time;
 
 class meshSubsetHelper
 {
+public:
+
+        //- Internal book-keeping for subset type
+        enum subsetType
+        {
+            NONE,       //<! Not a subset
+            SET,        //<! Using a cellSet for the subset
+            ZONE        //<! Using a cellZone for the subset
+        };
+
+
     // Private data
 
         //- Reference to mesh
@@ -62,11 +73,11 @@ class meshSubsetHelper
         //- Subsetting engine + sub-fvMesh
         fvMeshSubset subsetter_;
 
+        //- Subset type if any.
+        const subsetType type_;
+
         //- Name of current cellSet/cellZone (or empty)
         const word name_;
-
-        //- Internal book-keeping. 0 = unused, 1 = set, 2 = zone
-        const int type_;
 
 
     // Private Member Functions
@@ -83,11 +94,14 @@ public:
     // Constructors
 
         //- Construct from components
+        meshSubsetHelper(fvMesh& baseMesh);
+
+        //- Construct from components
         meshSubsetHelper
         (
             fvMesh& baseMesh,
-            const word& name = word::null,
-            const bool isCellSet = false
+            const subsetType,
+            const word& name
         );
 
 
@@ -110,7 +124,7 @@ public:
         //- Check if running a sub-mesh is being used
         inline bool useSubMesh() const
         {
-            return type_;
+            return type_ != NONE;
         }
 
         //- Access either mesh or submesh
@@ -146,7 +160,7 @@ public:
                 Type,
                 fvPatchField,
                 volMesh
-            >::Internal& df
+            >::Internal&
         );
 
 
@@ -174,6 +188,11 @@ public:
             >::Internal&
         ) const;
 
+
+        //- Map volume field (does in fact do very little interpolation;
+        //  just copied from fvMeshSubset)
+        template<class GeoField>
+        tmp<GeoField> interpolate(const GeoField& fld) const;
 };
 
 

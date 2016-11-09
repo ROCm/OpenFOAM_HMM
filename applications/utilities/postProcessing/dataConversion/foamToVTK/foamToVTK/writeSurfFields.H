@@ -35,7 +35,7 @@ SourceFiles
 #ifndef writeSurfFields_H
 #define writeSurfFields_H
 
-#include "vtkMesh.H"
+#include "fvMesh.H"
 #include "surfaceMesh.H"
 #include "surfaceFieldsFwd.H"
 
@@ -48,7 +48,7 @@ namespace Foam
 void writeSurfFields
 (
     const bool binary,
-    const vtkMesh& vMesh,
+    const fvMesh&,
     const fileName& fileName,
     const UPtrList<const surfaceVectorField>& surfVectorFields
 );

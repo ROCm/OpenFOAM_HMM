@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +34,7 @@ SourceFiles
 #ifndef readFields_H
 #define readFields_H
 
-#include "fvMesh.H"
+#include "meshSubsetHelper.H"
 #include "PtrList.H"
 #include "IOobjectList.H"
 #include "HashSet.H"
@@ -48,7 +48,7 @@ namespace Foam
 template<class GeoField>
 void readFields
 (
-    const vtkMesh& vMesh,
+    const meshSubsetHelper&,
     const typename GeoField::Mesh& mesh,
     const IOobjectList& objects,
     const HashSet<word>& selectedFields,

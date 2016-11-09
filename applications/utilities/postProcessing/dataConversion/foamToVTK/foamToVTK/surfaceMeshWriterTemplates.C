@@ -29,7 +29,8 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Field<Type>> Foam::surfaceMeshWriter::getFaceField
+Foam::tmp<Foam::Field<Type>>
+Foam::surfaceMeshWriter::getFaceField
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& sfld
 ) const

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,46 +36,35 @@ SourceFiles
 #ifndef vtkMesh_H
 #define vtkMesh_H
 
+#include "meshSubsetHelper.H"
 #include "vtkTopo.H"
-#include "fvMeshSubset.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
-class Time;
-
 /*---------------------------------------------------------------------------*\
                            Class vtkMesh Declaration
 \*---------------------------------------------------------------------------*/
 
 class vtkMesh
+:
+    public meshSubsetHelper
 {
     // Private data
-
-        //- Reference to mesh
-        fvMesh& baseMesh_;
-
-        //- Subsetting engine + sub-fvMesh
-        fvMeshSubset subsetter_;
-
-        //- Current cellSet (or empty)
-        const word setName_;
 
         //- Current decomposition of topology
         mutable autoPtr<vtkTopo> topoPtr_;
 
 
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        vtkMesh(const vtkMesh&);
+        vtkMesh(const vtkMesh&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const vtkMesh&);
+        void operator=(const vtkMesh&) = delete;
 
 
 public:
@@ -83,31 +72,17 @@ public:
     // Constructors
 
         //- Construct from components
-        vtkMesh(fvMesh& baseMesh, const word& setName = "");
+        vtkMesh(fvMesh& baseMesh, const word& setName = word::null)
+        :
+            meshSubsetHelper(baseMesh, meshSubsetHelper::SET, setName)
+        {}
 
 
     // Member Functions
 
         // Access
 
-            //- Whole mesh
-            const fvMesh& baseMesh() const
-            {
-                return baseMesh_;
-            }
-
-            const fvMeshSubset& subsetter() const
-            {
-                return subsetter_;
-            }
-
-            //- Check if running subMesh
-            bool useSubMesh() const
-            {
-                return setName_.size();
-            }
-
-            //- topology
+            //- Topology
             const vtkTopo& topo() const
             {
                 if (topoPtr_.empty())
@@ -117,24 +92,13 @@ public:
                 return topoPtr_();
             }
 
-            //- Access either mesh or submesh
-            const fvMesh& mesh() const
-            {
-                if (useSubMesh())
-                {
-                    return subsetter_.subMesh();
-                }
-                else
-                {
-                    return baseMesh_;
-                }
-            }
 
             //- Number of field cells
             label nFieldCells() const
             {
                 return topo().cellTypes().size();
             }
+
 
             //- Number of field points
             label nFieldPoints() const
@@ -145,26 +109,20 @@ public:
 
         // Edit
 
-            //- Read mesh
-            polyMesh::readUpdateState readUpdate();
-
-
-            //- Map volume field (does in fact do very little interpolation;
-            //  just copied from fvMeshSubset)
-            template<class GeoField>
-            tmp<GeoField> interpolate(const GeoField& fld) const
+            //- Read mesh, forcing topo update if necessary
+            polyMesh::readUpdateState readUpdate()
             {
-                if (useSubMesh())
+                polyMesh::readUpdateState meshState
+                    = meshSubsetHelper::readUpdate();
+
+                if (meshState != polyMesh::UNCHANGED)
                 {
-                    tmp<GeoField> subFld = subsetter_.interpolate(fld);
-                    subFld.ref().rename(fld.name());
-                    return subFld;
+                    topoPtr_.clear();
                 }
-                else
-                {
-                    return fld;
-                }
+
+                return meshState;
             }
+
 };
 
 

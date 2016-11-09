@@ -116,4 +116,25 @@ Foam::meshSubsetHelper::interpolate
 }
 
 
+template<class GeoField>
+Foam::tmp<GeoField>
+Foam::meshSubsetHelper::interpolate
+(
+    const GeoField& fld
+) const
+{
+    if (subsetter_.hasSubMesh())
+    {
+        tmp<GeoField> subFld = subsetter_.interpolate(fld);
+        subFld.ref().checkOut();
+        subFld.ref().rename(fld.name());
+        return subFld;
+    }
+    else
+    {
+        return fld;
+    }
+}
+
+
 // ************************************************************************* //

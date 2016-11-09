@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,9 +40,6 @@ SourceFiles
 #include "Cloud.H"
 #include "volFields.H"
 #include "pointFields.H"
-#include "vtkMesh.H"
-
-using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,7 +54,7 @@ class volPointInterpolation;
 
 class lagrangianWriter
 {
-    const vtkMesh& vMesh_;
+    const fvMesh& mesh_;
 
     const bool binary_;
 
@@ -77,7 +74,7 @@ public:
         //- Construct from components
         lagrangianWriter
         (
-            const vtkMesh&,
+            const fvMesh&,
             const bool binary,
             const fileName&,
             const word&,
