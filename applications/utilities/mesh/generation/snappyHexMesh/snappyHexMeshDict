@@ -20,23 +20,18 @@ snap            true;
 addLayers       false;
 
 
-//Optional: single region surfaces get patch names according to
-//          surface only. Multi-region surfaces get patch name
-//          surface "_ "region. Default is true
-//singleRegionName false;
+// Optional: single region surfaces get patch names according to
+//           surface only. Multi-region surfaces get patch name
+//           surface "_ "region. Default is true
+// singleRegionName false;
 
 // Optional: avoid patch-face merging. Allows mesh to be used for
 //           refinement/unrefinement
-//mergePatchFaces    false; // default true
+// mergePatchFaces    false; // default true
 
-// Optional: keep zero-sized patches. By default snappyHexMesh filters
-//           these out.
-//keepPatches    true; // default false
-
-
-//Optional: preserve all generated patches. Default is to remove
+// Optional: preserve all generated patches. Default is to remove
 //          zero-sized patches.
-//keepPatches true;
+// keepPatches true;
 
 
 // Geometry. Definition of all surfaces. All surfaces are of class
@@ -140,7 +135,7 @@ castellatedMeshControls
         //    file "someLine.eMesh";
         //    //level 2;        // Have level 2 for all cells intersected
         //                      // by feature.
-        //    levels ((0.1 2);  // Have level 2 for all cells within
+        //    levels ((0.1 2)); // Have level 2 for all cells within
         //                      // 0.1 of feature.
         //}
     );
