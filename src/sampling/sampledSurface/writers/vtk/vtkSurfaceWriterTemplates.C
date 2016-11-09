@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,8 +49,7 @@ Foam::fileName Foam::vtkSurfaceWriter::writeTemplate
 (
     const fileName& outputDir,
     const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
+    const meshedSurf& surf,
     const word& fieldName,
     const Field<Type>& values,
     const bool isNodeValues,
@@ -70,7 +69,7 @@ Foam::fileName Foam::vtkSurfaceWriter::writeTemplate
         Info<< "Writing field " << fieldName << " to " << os.name() << endl;
     }
 
-    writeGeometry(os, points, faces);
+    writeGeometry(os, surf);
 
     // start writing data
     if (isNodeValues)

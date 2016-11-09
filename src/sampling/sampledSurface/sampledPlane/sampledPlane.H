@@ -137,7 +137,14 @@ public:
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            return cuttingPlane::faces();
+            return cuttingPlane::surfFaces();
+        }
+
+        //- Const access to per-face zone/region information
+        //  Could instead return meshCells or cellZoneId of the meshCells.
+        virtual const labelList& zoneIds() const
+        {
+            return Foam::emptyLabelList;
         }
 
         //- Face area magnitudes

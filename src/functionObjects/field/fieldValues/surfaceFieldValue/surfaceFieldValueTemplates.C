@@ -328,8 +328,11 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
                 (
                     outputDir(),
                     regionTypeNames_[regionType_] + ("_" + regionName_),
-                    points,
-                    faces,
+                    meshedSurfRef
+                    (
+                        points,
+                        faces
+                    ),
                     fieldName,
                     allValues,
                     false

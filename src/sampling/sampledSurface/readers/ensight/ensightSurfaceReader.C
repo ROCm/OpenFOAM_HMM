@@ -333,7 +333,7 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
                 Info<< "binary" << endl;
             }
         }
-            
+
 
         ensightReadFile is(baseDir_/meshFileName_, streamFormat_);
 
@@ -343,7 +343,7 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
         }
 
         readGeometryHeader(is);
-        
+
         label nPoints;
         is.read(nPoints);
 

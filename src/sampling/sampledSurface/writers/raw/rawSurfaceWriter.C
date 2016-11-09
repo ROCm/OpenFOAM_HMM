@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,11 +40,9 @@ namespace Foam
 inline void Foam::rawSurfaceWriter::writeLocation
 (
     Ostream& os,
-    const pointField& points,
-    const label pointi
+    const point& pt
 )
 {
-    const point& pt = points[pointi];
     os  << pt.x() << ' ' << pt.y() << ' ' << pt.z() << ' ';
 }
 
@@ -53,12 +51,10 @@ inline void Foam::rawSurfaceWriter::writeLocation
 (
     Ostream& os,
     const pointField& points,
-    const faceList& faces,
-    const label facei
+    const face& f
 )
 {
-    const point& ct = faces[facei].centre(points);
-    os  << ct.x() << ' ' << ct.y() << ' ' << ct.z() << ' ';
+    writeLocation(os, f.centre(points));
 }
 
 
@@ -238,11 +234,13 @@ Foam::fileName Foam::rawSurfaceWriter::write
 (
     const fileName& outputDir,
     const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
+    const meshedSurf& surf,
     const bool verbose
 ) const
 {
+    const pointField& points = surf.points();
+    const faceList&    faces = surf.faces();
+
     if (!isDir(outputDir))
     {
         mkDir(outputDir);
@@ -269,7 +267,7 @@ Foam::fileName Foam::rawSurfaceWriter::write
     // Write faces centres
     forAll(faces, elemI)
     {
-        writeLocation(os, points, faces, elemI);
+        writeLocation(os, points, faces[elemI]);
         os  << nl;
     }
 

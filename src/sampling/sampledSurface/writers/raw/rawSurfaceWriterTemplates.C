@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,14 +34,16 @@ Foam::fileName Foam::rawSurfaceWriter::writeTemplate
 (
     const fileName& outputDir,
     const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
+    const meshedSurf& surf,
     const word& fieldName,
     const Field<Type>& values,
     const bool isNodeValues,
     const bool verbose
 ) const
 {
+    const pointField& points = surf.points();
+    const faceList&    faces = surf.faces();
+
     if (!isDir(outputDir))
     {
         mkDir(outputDir);
@@ -73,7 +75,7 @@ Foam::fileName Foam::rawSurfaceWriter::writeTemplate
     {
         forAll(values, elemI)
         {
-            writeLocation(os, points, elemI);
+            writeLocation(os, points[elemI]);
             writeData(os, values[elemI]);
         }
     }
@@ -81,7 +83,7 @@ Foam::fileName Foam::rawSurfaceWriter::writeTemplate
     {
         forAll(values, elemI)
         {
-            writeLocation(os, points, faces, elemI);
+            writeLocation(os, points, faces[elemI]);
             writeData(os, values[elemI]);
         }
     }

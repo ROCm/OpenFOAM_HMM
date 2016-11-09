@@ -232,7 +232,7 @@ Foam::shortEdgeFilter2D::filter()
     // These are global indices.
     const pointField& points = ms_.points();
     const edgeList& edges = ms_.edges();
-    const faceList& faces = ms_.faces();
+    const faceList& faces = ms_.surfFaces();
     const labelList& meshPoints = ms_.meshPoints();
     const labelList& boundaryPoints = ms_.boundaryPoints();
 

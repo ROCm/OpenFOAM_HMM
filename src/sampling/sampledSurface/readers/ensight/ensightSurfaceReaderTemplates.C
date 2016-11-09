@@ -88,7 +88,7 @@ Foam::tmp<Foam::Field<Type> > Foam::ensightSurfaceReader::readField
     const word indexStr = oss.str();
     fieldFileName.replace(maskStr, indexStr);
 
-    
+
     ensightReadFile is(baseDir_/fieldFileName, streamFormat_);
 
     if (!is.good())
@@ -102,7 +102,7 @@ Foam::tmp<Foam::Field<Type> > Foam::ensightSurfaceReader::readField
     // Check that data type is as expected
     string primitiveType;
     is.read(primitiveType);
-    
+
 
     if (debug)
     {

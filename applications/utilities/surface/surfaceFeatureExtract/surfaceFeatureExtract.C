@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1643,8 +1643,11 @@ int main(int argc, char *argv[])
                 (
                     runTime.constantPath()/"triSurface",// outputDir
                     sFeatFileName,                      // surfaceName
-                    surf.points(),
-                    faces,
+                    meshedSurfRef
+                    (
+                        surf.points(),
+                        faces
+                    ),
                     "internalCloseness",                // fieldName
                     internalCloseness,
                     false,                              // isNodeValues
@@ -1655,8 +1658,11 @@ int main(int argc, char *argv[])
                 (
                     runTime.constantPath()/"triSurface",// outputDir
                     sFeatFileName,                      // surfaceName
-                    surf.points(),
-                    faces,
+                    meshedSurfRef
+                    (
+                        surf.points(),
+                        faces
+                    ),
                     "externalCloseness",                // fieldName
                     externalCloseness,
                     false,                              // isNodeValues
@@ -1691,8 +1697,11 @@ int main(int argc, char *argv[])
                 (
                     runTime.constantPath()/"triSurface",// outputDir
                     sFeatFileName,                      // surfaceName
-                    surf.points(),
-                    faces,
+                    meshedSurfRef
+                    (
+                        surf.points(),
+                        faces
+                    ),
                     "curvature",                        // fieldName
                     k,
                     true,                               // isNodeValues
@@ -1769,8 +1778,11 @@ int main(int argc, char *argv[])
                 (
                     runTime.constantPath()/"triSurface",// outputDir
                     sFeatFileName,                      // surfaceName
-                    surf.points(),
-                    faces,
+                    meshedSurfRef
+                    (
+                        surf.points(),
+                        faces
+                    ),
                     "featureProximity",                 // fieldName
                     featureProximity,
                     false,                              // isNodeValues

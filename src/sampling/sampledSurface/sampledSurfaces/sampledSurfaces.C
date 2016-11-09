@@ -66,26 +66,19 @@ void Foam::sampledSurfaces::writeGeometry() const
 
         if (Pstream::parRun())
         {
-            if (Pstream::master() && mergeList_[surfI].faces.size())
+            if (Pstream::master() && mergedList_[surfI].size())
             {
                 formatter_->write
                 (
                     outputDir,
                     s.name(),
-                    mergeList_[surfI].points,
-                    mergeList_[surfI].faces
+                    mergedList_[surfI]
                 );
             }
         }
         else if (s.faces().size())
         {
-            formatter_->write
-            (
-                outputDir,
-                s.name(),
-                s.points(),
-                s.faces()
-            );
+            formatter_->write(outputDir, s.name(), s);
         }
     }
 }
@@ -107,7 +100,7 @@ Foam::sampledSurfaces::sampledSurfaces
     outputPath_(fileName::null),
     fieldSelection_(),
     interpolationScheme_(word::null),
-    mergeList_(),
+    mergedList_(),
     formatter_(nullptr)
 {
     if (Pstream::parRun())
@@ -138,7 +131,7 @@ Foam::sampledSurfaces::sampledSurfaces
     outputPath_(fileName::null),
     fieldSelection_(),
     interpolationScheme_(word::null),
-    mergeList_(),
+    mergedList_(),
     formatter_(nullptr)
 {
     read(dict);
@@ -239,7 +232,7 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
 
         if (Pstream::parRun())
         {
-            mergeList_.setSize(size());
+            mergedList_.setSize(size());
         }
 
         // Ensure all surfaces and merge information are expired
@@ -329,7 +322,7 @@ bool Foam::sampledSurfaces::expire()
         // Clear merge information
         if (Pstream::parRun())
         {
-            mergeList_[surfI].clear();
+            mergedList_[surfI].clear();
         }
     }
 
@@ -377,24 +370,8 @@ bool Foam::sampledSurfaces::update()
         if (s.update())
         {
             updated = true;
+            mergedList_[surfI].merge(s, mergeDim);
         }
-        else
-        {
-            continue;
-        }
-
-        PatchTools::gatherAndMerge
-        (
-            mergeDim,
-            primitivePatch
-            (
-                SubList<face>(s.faces(), s.faces().size()),
-                s.points()
-            ),
-            mergeList_[surfI].points,
-            mergeList_[surfI].faces,
-            mergeList_[surfI].pointsMap
-        );
     }
 
     return updated;

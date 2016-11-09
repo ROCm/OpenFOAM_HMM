@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,21 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::proxySurfaceWriter
+    Foam::meshedSurfRef
 
 Description
-    A surfaceWriter that writes the geometry via the MeshedSurfaceProxy, but
-    which does not support any fields.
-
-SourceFiles
-    proxySurfaceWriter.C
+    Implements a meshed surface by referencing existing faces and points.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef proxySurfaceWriter_H
-#define proxySurfaceWriter_H
+#ifndef meshedSurfRef_H
+#define meshedSurfRef_H
 
-#include "surfaceWriter.H"
+#include "meshedSurf.H"
+#include "labelList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,56 +41,72 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class proxySurfaceWriter Declaration
+                        Class meshedSurfRef Declaration
 \*---------------------------------------------------------------------------*/
 
-class proxySurfaceWriter
+class meshedSurfRef
 :
-    public surfaceWriter
+    public meshedSurf
 {
+    const pointField& points_;
+    const faceList&   faces_;
+    const labelList&  zoneIds_;
 
-    // Private data
 
-        //- The associated file extension
-        word ext_;
+    // Private Member Functions
+
+        //- Disallow construct as copy
+        meshedSurfRef(const meshedSurfRef&) = delete;
+
+        //- Disallow default bitwise assignment
+        void operator=(const meshedSurfRef&) = delete;
 
 public:
 
-    //- Runtime type information
-    TypeName("proxy");
-
+    // Public Member Functions
 
     // Constructors
 
-        //- Construct for a given extension
-        proxySurfaceWriter(const word& ext);
+        //- Construct from components
+        meshedSurfRef
+        (
+            const pointField& pts,
+            const faceList& faces,
+            const labelList& ids = Foam::emptyLabelList
+        )
+        :
+            points_(pts),
+            faces_(faces),
+            zoneIds_(ids)
+        {}
 
 
     //- Destructor
-    virtual ~proxySurfaceWriter();
+    virtual ~meshedSurfRef()
+    {}
 
 
-    // Member Functions
+    // Access Member Functions
 
-
-        //- True if the surface format supports geometry in a separate file.
-        //  False if geometry and field must be in a single file
-        virtual bool separateGeometry() const
+        //- Const access to (global) points used for the surface
+        virtual const pointField& points() const
         {
-            return true;
+            return points_;
         }
 
+        //- Const access to the surface faces
+        virtual const faceList& faces() const
+        {
+            return faces_;
+        }
 
-        //- Write single surface geometry to file.
-        virtual fileName write
-        (
-            const fileName& outputDir,
-            const fileName& surfaceName,
-            const meshedSurf& surf,
-            const bool verbose = false
-        ) const; // override
+        //- Const access to per-face zone/region information
+        virtual const labelList& zoneIds() const
+        {
+            return zoneIds_;
+        }
+
 };
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

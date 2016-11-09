@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +40,7 @@ SourceFiles
 #include "regionFunctionObject.H"
 #include "sampledSurface.H"
 #include "surfaceWriter.H"
+#include "mergedSurf.H"
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "wordReList.H"
@@ -64,26 +65,6 @@ class sampledSurfaces
     public functionObjects::regionFunctionObject,
     public PtrList<sampledSurface>
 {
-    // Private classes
-
-        //- Class used for surface merging information
-        class mergeInfo
-        {
-        public:
-            pointField points;
-            faceList   faces;
-            labelList  pointsMap;
-
-            //- Clear all storage
-            void clear()
-            {
-                points.clear();
-                faces.clear();
-                pointsMap.clear();
-            }
-        };
-
-
     // Static data members
 
         //- Output verbosity
@@ -116,8 +97,8 @@ class sampledSurfaces
 
         // surfaces
 
-            //- Information for merging surfaces
-            List<mergeInfo> mergeList_;
+            //- Merged meshed surfaces (parallel only)
+            List<mergedSurf> mergedList_;
 
 
         // Calculated

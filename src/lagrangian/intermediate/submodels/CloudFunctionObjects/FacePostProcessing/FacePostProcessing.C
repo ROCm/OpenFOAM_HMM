@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -204,8 +204,7 @@ void Foam::FacePostProcessing<CloudType>::write()
                 (
                     this->writeTimeDir(),
                     fZone.name(),
-                    allPoints,
-                    allFaces,
+                    meshedSurfRef(allPoints, allFaces),
                     "massTotal",
                     zoneMassTotal[zoneI],
                     false
@@ -215,8 +214,7 @@ void Foam::FacePostProcessing<CloudType>::write()
                 (
                     this->writeTimeDir(),
                     fZone.name(),
-                    allPoints,
-                    allFaces,
+                    meshedSurfRef(allPoints, allFaces),
                     "massFlowRate",
                     zoneMassFlowRate[zoneI],
                     false
