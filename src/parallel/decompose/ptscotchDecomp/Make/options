@@ -11,8 +11,12 @@ EXE_INC = \
 /*
  * The '-lscotch' is a slight hack:
  * ptscotch 6 requires scotch linked in, but does not declare the dependency
+ *
+ * The $(SCOTCH_ARCH_PATH)/lib$WM_COMPILER_LIB_ARCH path is provided
+ * to support central, non-thirdparty installations
  */
 LIB_LIBS = \
+    -L$(SCOTCH_ARCH_PATH)/lib$(WM_COMPILER_LIB_ARCH) \
     -L$(FOAM_EXT_LIBBIN) \
     -L$(FOAM_EXT_LIBBIN)/$(FOAM_MPI) \
     -lptscotch \
