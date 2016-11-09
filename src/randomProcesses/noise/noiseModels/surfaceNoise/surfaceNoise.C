@@ -385,9 +385,9 @@ Foam::scalar surfaceNoise::surfaceAverage
     }
     else
     {
-        const meshedSurface& surf = readerPtr_->geometry();
 
         // TO BE VERIFIED: area-averaged values
+        // const meshedSurface& surf = readerPtr_->geometry();
         // return sum(data*surf.magSf())/sum(surf.magSf());
         return sum(data)/data.size();
     }
