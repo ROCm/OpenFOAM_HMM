@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ Class
 Description
     A surface writer for the Nastran file format - both surface mesh and fields
 
+    \verbatim
     formatOptions
     {
         nastran
@@ -43,6 +44,7 @@ Description
             format free;    //short, long, free
         }
     };
+    \endverbatim
 
 SourceFiles
     nastranSurfaceWriter.C
@@ -80,26 +82,25 @@ public:
         wfFree
     };
 
-    static const NamedEnum<writeFormat, 3> writeFormatNames_;
-
     enum dataFormat
     {
         dfPLOAD2,
         dfPLOAD4
     };
 
-    static const NamedEnum<dataFormat, 2> dataFormatNames_;
-
 
 private:
 
     // Private data
 
+        static const NamedEnum<writeFormat, 3> writeFormatNames_;
+        static const NamedEnum<dataFormat,  2> dataFormatNames_;
+
         //- Write option
         writeFormat writeFormat_;
 
         //- Mapping from field name to data format enumeration
-        HashTable<dataFormat, word> fieldMap_;
+        HashTable<dataFormat> fieldMap_;
 
         //- Scale to apply to values (default = 1.0)
         scalar scale_;
@@ -110,62 +111,59 @@ private:
 
     // Private Member Functions
 
-        //- Initialise the output stream format params
-        void formatOS(OFstream& os) const;
+        //- Initialise the output stream format parameters
+        void formatOS(Ostream& os) const;
 
-        //- Write a co-ordinate
+        //- Write a coordinate
         void writeCoord
         (
+            Ostream& os,
             const point& p,
-            const label pointi,
-            OFstream& os
+            const label pointI  //!< 0-based Point Id
         ) const;
 
         //- Write a face element (CTRIA3 or CQUAD4)
         void writeFace
         (
+            Ostream& os,
             const word& faceType,
-            const labelList& facePts,
-            label& nFace,
-            OFstream& os
+            const labelUList& facePts,
+            const label EID,    //!< 1-based Element Id
+            const label PID     //!< 1-based Property Id
         ) const;
 
         //- Main driver to write the surface mesh geometry
         void writeGeometry
         (
-            const pointField& points,
-            const faceList& faces,
-            List<DynamicList<face>>& decomposedFaces,
-            OFstream& os
+            Ostream& os,
+            const meshedSurf& surf,
+            List<DynamicList<face>>& decomposedFaces
         ) const;
 
         //- Write the formatted keyword to the output stream
-        void writeKeyword
+        Ostream& writeKeyword
         (
-            const word& keyword,
-            Ostream& os
+            Ostream& os,
+            const word& keyword
         ) const;
 
         //- Write the footer information
-        void writeFooter(Ostream& os) const;
+        Ostream& writeFooter(Ostream& os, const meshedSurf& surf) const;
 
         //- Write a formatted value to the output stream
         template<class Type>
-        void writeValue
-        (
-            const Type& value,
-            Ostream& os
-        ) const;
+        Ostream& writeValue(Ostream& os, const Type& value) const;
 
         //- Write a face-based value
         template<class Type>
-        void writeFaceValue
+        Ostream& writeFaceValue
         (
+            Ostream& os,
             const dataFormat& format,
             const Type& value,
-            const label EID,
-            Ostream& os
+            const label EID     //!< 1-based Element Id
         ) const;
+
 
         //- Templated write operation
         template<class Type>
@@ -173,8 +171,7 @@ private:
         (
             const fileName& outputDir,
             const fileName& surfaceName,
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const word& fieldName,
             const Field<Type>& values,
             const bool isNodeValues,
@@ -215,10 +212,9 @@ public:
         (
             const fileName& outputDir,
             const fileName& surfaceName,
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const bool verbose = false
-        ) const;
+        ) const; // override
 
         //- Write scalarField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
@@ -226,13 +222,12 @@ public:
         (
             const fileName& outputDir,
             const fileName& surfaceName,
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const word& fieldName,
             const Field<scalar>& values,
             const bool isNodeValues,
             const bool verbose = false
-        ) const;
+        ) const; // override
 
         //- Write vectorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
@@ -240,13 +235,12 @@ public:
         (
             const fileName& outputDir,
             const fileName& surfaceName,
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const word& fieldName,
             const Field<vector>& values,
             const bool isNodeValues,
             const bool verbose = false
-        ) const;
+        ) const; // override
 
         //- Write sphericalTensorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
@@ -254,13 +248,12 @@ public:
         (
             const fileName& outputDir,
             const fileName& surfaceName,
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const word& fieldName,
             const Field<sphericalTensor>& values,
             const bool isNodeValues,
             const bool verbose = false
-        ) const;
+        ) const; // override
 
         //- Write symmTensorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
@@ -268,13 +261,12 @@ public:
         (
             const fileName& outputDir,
             const fileName& surfaceName,
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const word& fieldName,
             const Field<symmTensor>& values,
             const bool isNodeValues,
             const bool verbose = false
-        ) const;
+        ) const; // override
 
         //- Write tensorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
@@ -282,13 +274,12 @@ public:
         (
             const fileName& outputDir,
             const fileName& surfaceName,
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const word& fieldName,
             const Field<tensor>& values,
             const bool isNodeValues,
             const bool verbose = false
-        ) const;
+        ) const; // override
 };
 
 

@@ -209,7 +209,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
     const MeshedSurface<Face>& surf
 )
 :
-    ParentType(surf.faces(), surf.points()),
+    ParentType(surf.surfFaces(), surf.points()),
     zones_(surf.surfZones())
 {}
 
@@ -225,7 +225,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
     labelList faceMap;
     this->storedZones() = surf.sortedZones(faceMap);
 
-    const List<Face>& origFaces = surf.faces();
+    const List<Face>& origFaces = surf;
     List<Face> newFaces(origFaces.size());
 
     forAll(newFaces, facei)
@@ -1167,7 +1167,7 @@ void Foam::MeshedSurface<Face>::operator=(const MeshedSurface& surf)
     clear();
 
     this->storedPoints() = surf.points();
-    this->storedFaces()  = surf.faces();
+    this->storedFaces()  = surf.surfFaces();
     this->storedZones()  = surf.surfZones();
 }
 
@@ -1178,7 +1178,7 @@ Foam::MeshedSurface<Face>::operator Foam::MeshedSurfaceProxy<Face>() const
     return MeshedSurfaceProxy<Face>
     (
         this->points(),
-        this->faces(),
+        this->surfFaces(),
         this->surfZones()
     );
 }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,7 @@ bool Foam::triSurface::readVTK(const fileName& fName)
     // Read (and triangulate) point, faces, zone info
     fileFormats::VTKsurfaceFormat<triFace> surf(fName);
 
-    List<labelledTri> tris(surf.faces().size());
+    List<labelledTri> tris(surf.size());
     forAll(tris, i)
     {
         const triFace& f = surf[i];

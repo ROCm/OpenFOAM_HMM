@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -409,10 +409,10 @@ void Foam::ParticleCollector<CloudType>::write()
 
     Info<< type() << " output:" << nl;
 
-    Field<scalar> faceMassTotal(mass_.size(), 0.0);
+    Field<scalar> faceMassTotal(mass_.size(), Zero);
     this->getModelProperty("massTotal", faceMassTotal);
 
-    Field<scalar> faceMassFlowRate(massFlowRate_.size(), 0.0);
+    Field<scalar> faceMassFlowRate(massFlowRate_.size(), Zero);
     this->getModelProperty("massFlowRate", faceMassFlowRate);
 
 
@@ -467,8 +467,7 @@ void Foam::ParticleCollector<CloudType>::write()
             (
                 this->writeTimeDir(),
                 "collector",
-                points_,
-                faces_,
+                meshedSurfRef(points_, faces_),
                 "massTotal",
                 faceMassTotal,
                 false
@@ -478,8 +477,7 @@ void Foam::ParticleCollector<CloudType>::write()
             (
                 this->writeTimeDir(),
                 "collector",
-                points_,
-                faces_,
+                meshedSurfRef(points_, faces_),
                 "massFlowRate",
                 faceMassFlowRate,
                 false
@@ -490,7 +488,7 @@ void Foam::ParticleCollector<CloudType>::write()
 
     if (resetOnWrite_)
     {
-        Field<scalar> dummy(faceMassTotal.size(), 0.0);
+        Field<scalar> dummy(faceMassTotal.size(), Zero);
         this->setModelProperty("massTotal", dummy);
         this->setModelProperty("massFlowRate", dummy);
 

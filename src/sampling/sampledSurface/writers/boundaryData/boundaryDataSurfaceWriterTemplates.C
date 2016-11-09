@@ -37,8 +37,7 @@ Foam::fileName Foam::boundaryDataSurfaceWriter::writeTemplate
 (
     const fileName& outputDir,
     const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
+    const meshedSurf& surf,
     const word& fieldName,
     const Field<Type>& values,
     const bool isNodeValues,
@@ -47,6 +46,9 @@ Foam::fileName Foam::boundaryDataSurfaceWriter::writeTemplate
 {
     const fileName baseDir(outputDir.path()/surfaceName);
     const fileName timeName(outputDir.name());
+
+    const pointField& points = surf.points();
+    const faceList&    faces = surf.faces();
 
 
     // Construct dummy time to use as an objectRegistry

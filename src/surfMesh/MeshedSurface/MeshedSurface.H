@@ -326,7 +326,7 @@ public:
             }
 
             //- Return const access to the faces
-            inline const List<Face>& faces() const
+            inline const List<Face>& surfFaces() const
             {
                 return static_cast<const List<Face>&>(*this);
             }

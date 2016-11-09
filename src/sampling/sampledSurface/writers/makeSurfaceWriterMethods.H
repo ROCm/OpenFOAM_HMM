@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,20 +51,18 @@ namespace Foam
     (                                                                          \
         const fileName& outputDir,                                             \
         const fileName& surfaceName,                                           \
-        const pointField& points,                                              \
-        const faceList& faces,                                                 \
+        const meshedSurf& surf,                                                \
         const word& fieldName,                                                 \
         const Field<FieldType>& values,                                        \
         const bool isNodeValues,                                               \
         const bool verbose                                                     \
     ) const                                                                    \
     {                                                                          \
-        return writeTemplate                                                          \
+        return writeTemplate                                                   \
         (                                                                      \
             outputDir,                                                         \
             surfaceName,                                                       \
-            points,                                                            \
-            faces,                                                             \
+            surf,                                                              \
             fieldName,                                                         \
             values,                                                            \
             isNodeValues,                                                      \

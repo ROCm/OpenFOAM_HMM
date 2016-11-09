@@ -87,7 +87,7 @@ class meshSearch;
 class sampledTriSurfaceMesh
 :
     public sampledSurface,
-    public MeshedSurface<face>
+    public UnsortedMeshedSurface<face>
 {
 public:
         //- Types of communications
@@ -101,7 +101,7 @@ public:
 private:
 
     //- Private typedefs for convenience
-        typedef MeshedSurface<face> MeshStorage;
+        typedef UnsortedMeshedSurface<face> MeshStorage;
 
 
     // Private data
@@ -213,7 +213,13 @@ public:
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            return MeshStorage::faces();
+            return MeshStorage::surfFaces();
+        }
+
+        //- Const access to per-face zone/region information
+        virtual const labelList& zoneIds() const
+        {
+            return MeshStorage::zoneIds();
         }
 
         //- Face area vectors

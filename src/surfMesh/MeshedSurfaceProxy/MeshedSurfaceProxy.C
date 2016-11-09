@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -171,11 +171,11 @@ void Foam::MeshedSurfaceProxy<Face>::write
         if (this->useFaceMap())
         {
             // this is really a bit annoying (and wasteful) but no other way
-            os  << reorder(this->faceMap(), this->faces());
+            os  << reorder(this->faceMap(), this->surfFaces());
         }
         else
         {
-            os  << this->faces();
+            os  << this->surfFaces();
         }
 
         io.writeEndDivider(os);

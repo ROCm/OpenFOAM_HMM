@@ -84,11 +84,12 @@ Foam::fileName Foam::ensightSurfaceWriter::write
 (
     const fileName& outputDir,
     const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
+    const meshedSurf& surf,
     const bool verbose
 ) const
 {
+    const pointField& points = surf.points();
+    const faceList&   faces  = surf.faces();
     const ensight::FileName surfName(surfaceName);
 
     if (!isDir(outputDir))

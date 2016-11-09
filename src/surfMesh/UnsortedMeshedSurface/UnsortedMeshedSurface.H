@@ -126,7 +126,7 @@ protected:
     // Protected Member functions
 
         //- Return non-const access to the zone Ids
-        List<label>& storedZoneIds()
+        labelList& storedZoneIds()
         {
             return zoneIds_;
         }
@@ -289,7 +289,7 @@ public:
             void setSize(const label);
 
             //- Return const access to the zone ids
-            const List<label>& zoneIds() const
+            virtual const labelList& zoneIds() const
             {
                 return zoneIds_;
             }

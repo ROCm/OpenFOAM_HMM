@@ -228,8 +228,11 @@ void writeZoning
     (
         surfFilePath,
         surfFileNameBase,
-        surf.points(),
-        faces,
+        meshedSurfRef
+        (
+            surf.points(),
+            faces
+        ),
         fieldName,
         scalarFaceZone,
         false               // face based data

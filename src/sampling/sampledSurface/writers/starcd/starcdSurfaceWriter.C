@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,8 +94,7 @@ Foam::fileName Foam::starcdSurfaceWriter::write
 (
     const fileName& outputDir,
     const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
+    const meshedSurf& surf,
     const bool verbose
 ) const
 {
@@ -111,7 +110,7 @@ Foam::fileName Foam::starcdSurfaceWriter::write
         Info<< "Writing geometry to " << outName << endl;
     }
 
-    MeshedSurfaceProxy<face>(points, faces).write(outName);
+    MeshedSurfaceProxy<face>(surf.points(), surf.faces()).write(outName);
 
     return outName;
 }

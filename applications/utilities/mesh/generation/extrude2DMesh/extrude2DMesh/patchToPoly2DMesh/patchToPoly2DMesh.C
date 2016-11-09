@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -172,7 +172,7 @@ void Foam::patchToPoly2DMesh::addPatchFacesToFaces()
 void Foam::patchToPoly2DMesh::addPatchFacesToOwner()
 {
     const label nInternalEdges = patch_.nInternalEdges();
-    const faceList& faces = patch_.faces();
+    const faceList& faces = patch_.surfFaces();
     const label nExternalEdges = patch_.edges().size() - nInternalEdges;
     const labelList& meshPoints = patch_.meshPoints();
 
