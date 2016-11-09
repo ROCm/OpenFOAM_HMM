@@ -30,6 +30,7 @@ License
 #include "polyMesh.H"
 #include "addToRunTimeSelectionTable.H"
 #include "word.H"
+#include "DynamicField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -53,6 +54,7 @@ void Foam::cloudSet::calcSamples
 {
     const meshSearch& queryMesh = searchEngine();
 
+    labelList foundProc(sampleCoords_.size(), -1);
     forAll(sampleCoords_, sampleI)
     {
         label celli = queryMesh.findCell(sampleCoords_[sampleI]);
@@ -64,17 +66,73 @@ void Foam::cloudSet::calcSamples
             samplingFaces.append(-1);
             samplingSegments.append(0);
             samplingCurveDist.append(1.0 * sampleI);
+
+            foundProc[sampleI] = Pstream::myProcNo();
         }
     }
 
-    label nTotalCells = returnReduce(samplingPts.size(), sumOp<label>());
-    if (nTotalCells < sampleCoords_.size())
+    // Check that all have been found
+    labelList maxFoundProc(foundProc);
+    Pstream::listCombineGather(maxFoundProc, maxEqOp<label>());
+    Pstream::listCombineScatter(maxFoundProc);
+
+    labelList minFoundProc(foundProc.size(), labelMax);
+    forAll(foundProc, i)
     {
-        WarningInFunction
-            << "For sample set " << name()
-            << " found only " << nTotalCells << " out of "
-            << sampleCoords_.size()
-            << " input points." << endl;
+        if (foundProc[i] != -1)
+        {
+            minFoundProc[i] = foundProc[i];
+        }
+    }
+    Pstream::listCombineGather(minFoundProc, minEqOp<label>());
+    Pstream::listCombineScatter(minFoundProc);
+
+
+    DynamicField<point> missingPoints(sampleCoords_.size());
+
+    forAll(sampleCoords_, sampleI)
+    {
+        if (maxFoundProc[sampleI] == -1)
+        {
+            // No processor has found the location.
+            missingPoints.append(sampleCoords_[sampleI]);
+        }
+        else if (minFoundProc[sampleI] != maxFoundProc[sampleI])
+        {
+            WarningInFunction
+                << "For sample set " << name()
+                << " location " << sampleCoords_[sampleI]
+                << " seems to be on multiple domains: "
+                << minFoundProc[sampleI] << " and " << maxFoundProc[sampleI]
+                << nl
+                << "This might happen if the location is on"
+                << " a processor patch. Change the location slightly"
+                << " to prevent this." << endl;
+        }
+    }
+
+
+    if (missingPoints.size() > 0)
+    {
+        if (missingPoints.size() < 100 || debug)
+        {
+            WarningInFunction
+                << "For sample set " << name()
+                << " did not found " << missingPoints.size()
+                << " points out of " << sampleCoords_.size()
+                << nl
+                << "Missing points:" << missingPoints << endl;
+        }
+        else
+        {
+            WarningInFunction
+                << "For sample set " << name()
+                << " did not found " << missingPoints.size()
+                << " points out of " << sampleCoords_.size()
+                << nl
+                << "Print missing points by setting the debug flag"
+                << " for " << cloudSet::typeName << endl;
+        }
     }
 }
 
