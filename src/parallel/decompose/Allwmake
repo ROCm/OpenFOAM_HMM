@@ -4,88 +4,196 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Parse arguments for library compilation
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
-unset METIS_ARCH_PATH SCOTCH_ARCH_PATH
 
-# get METIS_VERSION, METIS_ARCH_PATH
-if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/metis)
-then
+# Extract an integer value from '#define NAME ...'
+getIntDefine()
+{
+    local name="$1"
+    local file="$2"
+    local val=$(sed -ne \
+        's/^[ tab]*#[ tab]*define[ tab][ tab]*'"$name"'[ tab][ tab]*\([1-9][0-9]\).*/\1/p' \
+        "$file")
+    echo "${val:-0}"
+}
+
+
+# Test for metis.
+# - return 0 and export METIS_ARCH_PATH on success
+hasMetis()
+{
+    echo
+    echo "Metis decomposition"
+
+    unset METIS_ARCH_PATH METIS_VERSION
+    settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/metis) || {
+        echo
+        echo "Error: no config.sh/metis settings"
+        echo
+        return 1
+    }
+
     . $settings
+    if [ -z "$METIS_ARCH_PATH" -o "${METIS_ARCH_PATH##*-}" = none ]
+    then
+        echo "   skipping - no metis"
+        echo
+        return 1
+    fi
+
+    # Header
+    local header=$METIS_ARCH_PATH/include/metis.h
+    if [ "${METIS_ARCH_PATH##*-}" = system ]
+    then
+        [ -f "$header" ] || header=/usr/include/metis.h
+    fi
+    [ -f "$header" ] || {
+        echo "    skipping - no metis header"
+        echo
+        return 2  # file not found
+    }
+
+    # Library
+    [ -r $FOAM_EXT_LIBBIN/libmetis.so ] || \
+    [ -r $METIS_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/libmetis.so ] || \
+    [ "${METIS_ARCH_PATH##*-}" = system ] || {
+        echo "   skipping - missing library"
+        echo
+        return 2
+    }
+
+    # Ensure consistent sizes between OpenFOAM and metis header
+    local label=$(getIntDefine  IDXTYPEWIDTH  $header)
+    local scalar=$(getIntDefine REALTYPEWIDTH $header)
+
+    [ "$WM_LABEL_SIZE" = "$label" ] || {
+        echo "   skipping - label=$WM_LABEL_SIZE, metis.h has '$label'"
+        echo
+        return 1
+    }
+
+    [ "$WM_PRECISION_OPTION" = SP -a "$scalar" = 32 ] || \
+    [ "$WM_PRECISION_OPTION" = DP -a "$scalar" = 64 ] || {
+        echo "   skipping - scalar='$WM_PRECISION_OPTION', metis.h has '$scalar'"
+        echo
+        return 1
+    }
+
     echo "using METIS_ARCH_PATH=$METIS_ARCH_PATH"
-else
+    echo "    label=$label, scalar=$scalar"
     echo
-    echo "Error: no config.sh/metis settings"
-    echo
-fi
+    export METIS_ARCH_PATH
+    return 0 # success
+}
 
-# get SCOTCH_VERSION, SCOTCH_ARCH_PATH
-if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/scotch)
-then
+
+# Test for scotch.
+# - return 0 and export SCOTCH_ARCH_PATH, SCOTCH_VERSION on success
+hasScotch()
+{
+    echo
+    echo "Scotch decomposition"
+
+    unset SCOTCH_ARCH_PATH SCOTCH_VERSION
+    settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/scotch) || {
+        echo
+        echo "Error: no config.sh/scotch settings"
+        echo
+        return 1
+    }
+
     . $settings
+    if [ -z "$SCOTCH_ARCH_PATH" -o "${SCOTCH_ARCH_PATH##*-}" = none ]
+    then
+        echo "    skipping - no scotch"
+        echo
+        return 1
+    fi
+
+    # Header
+    local header=$SCOTCH_ARCH_PATH/include/scotch.h
+    if [ "${SCOTCH_ARCH_PATH##*-}" = system ]
+    then
+        [ -f "$header" ] || header=/usr/include/scotch.h
+    fi
+    [ -f "$header" ] || {
+        echo "    skipping - no scotch header"
+        echo
+        return 2  # file not found
+    }
+
+    # Library
+    [ -r $FOAM_EXT_LIBBIN/libscotch.so ] || \
+    [ -r $SCOTCH_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/libscotch.so ] || \
+    [ "${SCOTCH_ARCH_PATH##*-}" = system ] || {
+        echo "    skipping - missing library"
+        echo
+        return 2
+    }
+
+    # Ensure consistent sizes between OpenFOAM and scotch header
+    # extract 'typedef int64_t SCOTCH_Num' or equivalent
+    local label=$(sed -ne \
+        's/^.*typedef *\([^ ]*\) *SCOTCH_Num.*/\1/ip' \
+        "$header")
+
+    : ${label:=unknown}
+    [ "$WM_LABEL_SIZE" = 32 -a \( "$label" = int32_t -o "$label" = int  \) ] || \
+    [ "$WM_LABEL_SIZE" = 64 -a \( "$label" = int64_t -o "$label" = long \) ] || {
+        echo "   skipping - label='$WM_LABEL_SIZE', scotch.h has '$label'"
+        echo
+        return 1
+    }
+
     echo "using SCOTCH_ARCH_PATH=$SCOTCH_ARCH_PATH"
-else
+    echo "    label=$label ($WM_LABEL_SIZE)"
     echo
-    echo "Error: no config.sh/scotch settings"
-    echo
-fi
+    export SCOTCH_ARCH_PATH SCOTCH_VERSION
+    return 0 # success
+}
 
 
 #
-# define how to create an mpi-versioned library of $targetType
+# Define how to create an mpi-versioned library of $targetType
 # compile into qualified directory
-# use sentinel file to handle version changes
+# use sentinel file(s) to handle version changes
 #
 wmakeMpiLib()
 {
-    set +x
+    local decompName="$1"
+    shift
     for libName
     do
     (
         WM_OPTIONS="$WM_OPTIONS$WM_MPLIB"
         libDir="$WM_PROJECT_DIR/platforms/$WM_OPTIONS/src/parallel/decompose/$libName"
         whichmpi="$libDir/using:$FOAM_MPI"
-        whichscotch="$libDir/using:$SCOTCH_VERSION"
-        [ -e "$whichmpi" -a -e "$whichscotch" ] || wclean $libName
+        whichdecomp="$libDir/using:$decompName"
+        [ -e "$whichmpi" -a -e "$whichdecomp" ] || wclean $libName
         echo "wmake $targetType $libName"
         wmake $targetType $libName
         mkdir -p "$libDir"
-        touch "$whichmpi" "$whichscotch"
+        touch "$whichdecomp" "$whichmpi"
     )
     done
-    set -x
 }
-
-set -x
 
 wmakeLnInclude decompositionMethods
 
-if [ -f $SCOTCH_ARCH_PATH/include/scotch.h \
-  -a -r $FOAM_EXT_LIBBIN/libscotch.so ]
+if hasScotch
 then
     wmake $targetType scotchDecomp
     if [ -d "$FOAM_LIBBIN/$FOAM_MPI" ]
     then
-        wmakeMpiLib ptscotchDecomp
+        wmakeMpiLib "$SCOTCH_VERSION" ptscotchDecomp
     fi
-else
-    echo
-    echo "Skipping scotchDecomp (ptscotchDecomp)"
-    echo
 fi
 
-
-if [ -f $METIS_ARCH_PATH/include/metis.h \
-  -a -r $FOAM_EXT_LIBBIN/libmetis.so ]
+if hasMetis
 then
     wmake $targetType metisDecomp
-else
-    echo
-    echo "Skipping metisDecomp: metis not installed"
-    echo
 fi
 
-
 wmake $targetType decompositionMethods
-
 wmake $targetType decompose
 
 #------------------------------------------------------------------------------
