@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,9 +68,6 @@ Usage
         information as a single argument. The double quotes denote a regular
         expression.
 
-      - \par -useTimeName
-        use the time index in the VTK file name instead of the time index
-
 \*---------------------------------------------------------------------------*/
 
 #include "pointMesh.H"
@@ -86,7 +83,7 @@ Usage
 #include "stringListOps.H"
 #include "wordRe.H"
 
-#include "vtkMesh.H"
+#include "meshSubsetHelper.H"
 #include "readFields.H"
 #include "tecplotWriter.H"
 
@@ -99,7 +96,7 @@ Usage
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class GeoField>
-void print(const char* msg, Ostream& os, const PtrList<GeoField>& flds)
+void print(const char* msg, Ostream& os, const PtrList<const GeoField>& flds)
 {
     if (flds.size())
     {
@@ -140,7 +137,7 @@ labelList getSelectedPatches
         if
         (
             isType<emptyPolyPatch>(pp)
-            || (Pstream::parRun() && isType<processorPolyPatch>(pp))
+         || (Pstream::parRun() && isType<processorPolyPatch>(pp))
         )
         {
             Info<< "    discarding empty/processor patch " << patchi
@@ -161,8 +158,7 @@ labelList getSelectedPatches
 }
 
 
-
-
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
@@ -170,10 +166,8 @@ int main(int argc, char *argv[])
     (
         "Tecplot binary file format writer"
     );
-
     timeSelector::addOptions();
     #include "addRegionOption.H"
-
     argList::addOption
     (
         "fields",
@@ -190,7 +184,7 @@ int main(int argc, char *argv[])
     (
         "faceSet",
         "name",
-        "restrict conversion to the specified cellSet"
+        "restrict conversion to the specified faceSet"
     );
     argList::addBoolOption
     (
@@ -248,7 +242,8 @@ int main(int argc, char *argv[])
     }
 
     word cellSetName;
-    string vtkName;
+    word faceSetName;
+    string vtkName = runTime.caseName();
 
     if (args.optionReadIfPresent("cellSet", cellSetName))
     {
@@ -266,11 +261,7 @@ int main(int argc, char *argv[])
             vtkName = vtkName.substr(i);
         }
     }
-    else
-    {
-        vtkName = runTime.caseName();
-    }
-
+    args.optionReadIfPresent("faceSet", faceSetName);
 
     instantList timeDirs = timeSelector::select0(runTime, args);
 
@@ -294,10 +285,11 @@ int main(int argc, char *argv[])
             args.optionFound("time")
          || args.optionFound("latestTime")
          || cellSetName.size()
+         || faceSetName.size()
          || regionName != polyMesh::defaultRegion
         )
         {
-            Info<< "Keeping old files in " << fvPath << nl << endl;
+            Info<< "Keeping old tecplot files in " << fvPath << nl << endl;
         }
         else
         {
@@ -309,9 +301,8 @@ int main(int argc, char *argv[])
 
     mkDir(fvPath);
 
-
-    // mesh wrapper; does subsetting and decomposition
-    vtkMesh vMesh(mesh, cellSetName);
+    // Mesh wrapper: does subsetting
+    meshSubsetHelper myMesh(mesh, meshSubsetHelper::SET, cellSetName);
 
     forAll(timeDirs, timeI)
     {
@@ -319,13 +310,12 @@ int main(int argc, char *argv[])
 
         Info<< "Time: " << runTime.timeName() << endl;
 
-        const word timeDesc = name(timeI);    //name(runTime.timeIndex());
+        const word timeDesc = name(timeI); // Foam::name(runTime.timeIndex());
 
         // Check for new polyMesh/ and update mesh, fvMeshSubset and cell
         // decomposition.
-        polyMesh::readUpdateState meshState = vMesh.readUpdate();
-
-        const fvMesh& mesh = vMesh.mesh();
+        polyMesh::readUpdateState meshState = myMesh.readUpdate();
+        const fvMesh& mesh = myMesh.mesh();
 
         INTEGER4 nFaceNodes = 0;
         forAll(mesh.faces(), facei)
@@ -348,24 +338,24 @@ int main(int argc, char *argv[])
 
         // Construct the vol fields (on the original mesh if subsetted)
 
-        PtrList<volScalarField> vsf;
-        readFields(vMesh, vMesh.baseMesh(), objects, selectedFields, vsf);
+        PtrList<const volScalarField> vsf;
+        readFields(myMesh, myMesh.baseMesh(), objects, selectedFields, vsf);
         print("    volScalarFields            :", Info, vsf);
 
-        PtrList<volVectorField> vvf;
-        readFields(vMesh, vMesh.baseMesh(), objects, selectedFields, vvf);
+        PtrList<const volVectorField> vvf;
+        readFields(myMesh, myMesh.baseMesh(), objects, selectedFields, vvf);
         print("    volVectorFields            :", Info, vvf);
 
-        PtrList<volSphericalTensorField> vSpheretf;
-        readFields(vMesh, vMesh.baseMesh(), objects, selectedFields, vSpheretf);
+        PtrList<const volSphericalTensorField> vSpheretf;
+        readFields(myMesh, myMesh.baseMesh(), objects, selectedFields, vSpheretf);
         print("    volSphericalTensorFields   :", Info, vSpheretf);
 
-        PtrList<volSymmTensorField> vSymmtf;
-        readFields(vMesh, vMesh.baseMesh(), objects, selectedFields, vSymmtf);
+        PtrList<const volSymmTensorField> vSymmtf;
+        readFields(myMesh, myMesh.baseMesh(), objects, selectedFields, vSymmtf);
         print("    volSymmTensorFields        :", Info, vSymmtf);
 
-        PtrList<volTensorField> vtf;
-        readFields(vMesh, vMesh.baseMesh(), objects, selectedFields, vtf);
+        PtrList<const volTensorField> vtf;
+        readFields(myMesh, myMesh.baseMesh(), objects, selectedFields, vtf);
         print("    volTensorFields            :", Info, vtf);
 
 
@@ -379,11 +369,11 @@ int main(int argc, char *argv[])
                 << " (\"-noPointValues\" (at your option)\n";
         }
 
-        PtrList<pointScalarField> psf;
-        PtrList<pointVectorField> pvf;
-        //PtrList<pointSphericalTensorField> pSpheretf;
-        //PtrList<pointSymmTensorField> pSymmtf;
-        //PtrList<pointTensorField> ptf;
+        PtrList<const pointScalarField> psf;
+        PtrList<const pointVectorField> pvf;
+        //PtrList<const pointSphericalTensorField> pSpheretf;
+        //PtrList<const pointSymmTensorField> pSymmtf;
+        //PtrList<const pointTensorField> ptf;
 
 
         if (!noPointValues)
@@ -418,8 +408,8 @@ int main(int argc, char *argv[])
 
             readFields
             (
-                vMesh,
-                pointMesh::New(vMesh.baseMesh()),
+                myMesh,
+                pointMesh::New(myMesh.baseMesh()),
                 objects,
                 selectedFields,
                 psf
@@ -428,8 +418,8 @@ int main(int argc, char *argv[])
 
             readFields
             (
-                vMesh,
-                pointMesh::New(vMesh.baseMesh()),
+                myMesh,
+                pointMesh::New(myMesh.baseMesh()),
                 objects,
                 selectedFields,
                 pvf
@@ -438,8 +428,8 @@ int main(int argc, char *argv[])
 
             //readFields
             //(
-            //    vMesh,
-            //    pointMesh::New(vMesh.baseMesh()),
+            //    myMesh,
+            //    pointMesh::New(myMesh.baseMesh()),
             //    objects,
             //    selectedFields,
             //    pSpheretf
@@ -448,8 +438,8 @@ int main(int argc, char *argv[])
             //
             //readFields
             //(
-            //    vMesh,
-            //    pointMesh::New(vMesh.baseMesh()),
+            //    myMesh,
+            //    pointMesh::New(myMesh.baseMesh()),
             //    objects,
             //    selectedFields,
             //    pSymmtf
@@ -458,8 +448,8 @@ int main(int argc, char *argv[])
             //
             //readFields
             //(
-            //    vMesh,
-            //    pointMesh::New(vMesh.baseMesh()),
+            //    myMesh,
+            //    pointMesh::New(myMesh.baseMesh()),
             //    objects,
             //    selectedFields,
             //    ptf
@@ -769,11 +759,10 @@ int main(int argc, char *argv[])
         //
         //---------------------------------------------------------------------
 
-        if (args.optionFound("faceSet"))
+        if (faceSetName.size())
         {
             // Load the faceSet
-            const word setName = args["faceSet"];
-            labelList faceLabels(faceSet(mesh, setName).toc());
+            labelList faceLabels(faceSet(mesh, faceSetName).toc());
 
             // Filename as if patch with same name.
             mkDir(fvPath/setName);
@@ -886,7 +875,6 @@ int main(int argc, char *argv[])
         }
 
 
-
         //---------------------------------------------------------------------
         //
         // Write patches as multi-zone file
@@ -901,7 +889,7 @@ int main(int argc, char *argv[])
 
         fileName patchFileName;
 
-        if (vMesh.useSubMesh())
+        if (myMesh.useSubMesh())
         {
             patchFileName =
                 fvPath/"boundaryMesh"/cellSetName
@@ -1072,7 +1060,7 @@ int main(int argc, char *argv[])
 
             fileName patchFileName;
 
-            if (vMesh.useSubMesh())
+            if (myMesh.useSubMesh())
             {
                 patchFileName =
                     fvPath/"faceZoneMesh"/cellSetName

@@ -1,0 +1,28 @@
+#!/bin/sh
+#
+# Build optional components (eg, may depend on third-party libraries)
+#------------------------------------------------------------------------------
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Parse arguments for compilation (at least for error catching)
+. $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
+
+. $WM_PROJECT_DIR/etc/config.sh/functions
+_foamSource $($WM_PROJECT_DIR/bin/foamEtcFile config.sh/ccmio)
+
+# Link with static libccmio only (possibly fewer issues)
+if [ "$WM_LABEL_SIZE" = 64 ]
+then
+    # The libccmio uses int32_t.
+    # The OpenFOAM adapter thus requires additional work for 64-bit labels.
+    echo "Skipping optional component libccm"
+    echo "    does not support 64-bit labels"
+elif [ -e $CCMIO_ARCH_PATH/include/libccmio/ccmio.h \
+    -a -e $CCMIO_ARCH_PATH/lib/libccmio.a ]
+then
+    wmake libso
+else
+    echo "Skipping optional component libccm"
+fi
+
+#------------------------------------------------------------------------------

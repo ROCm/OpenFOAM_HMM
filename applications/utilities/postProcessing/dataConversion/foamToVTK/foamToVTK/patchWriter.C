@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,21 +30,20 @@ License
 
 Foam::patchWriter::patchWriter
 (
-    const vtkMesh& vMesh,
+    const fvMesh& mesh,
     const bool binary,
     const bool nearCellValue,
     const fileName& fName,
     const labelList& patchIDs
 )
 :
-    vMesh_(vMesh),
+    mesh_(mesh),
     binary_(binary),
     nearCellValue_(nearCellValue),
     fName_(fName),
     patchIDs_(patchIDs),
     os_(fName.c_str())
 {
-    const fvMesh& mesh = vMesh_.mesh();
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     // Write header
@@ -115,8 +114,6 @@ Foam::patchWriter::patchWriter
 
 void Foam::patchWriter::writePatchIDs()
 {
-    const fvMesh& mesh = vMesh_.mesh();
-
     DynamicList<floatScalar> fField(nFaces_);
 
     os_ << "patchID 1 " << nFaces_ << " float" << std::endl;
@@ -125,7 +122,7 @@ void Foam::patchWriter::writePatchIDs()
     {
         label patchi = patchIDs_[i];
 
-        const polyPatch& pp = mesh.boundaryMesh()[patchi];
+        const polyPatch& pp = mesh_.boundaryMesh()[patchi];
 
         if (!isA<emptyPolyPatch>(pp))
         {

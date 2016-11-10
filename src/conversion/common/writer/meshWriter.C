@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,15 +68,24 @@ lookup
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::meshWriter::meshWriter(const polyMesh& mesh, const scalar scaleFactor)
+Foam::meshWriter::meshWriter
+(
+    const polyMesh& mesh,
+    const scalar scaling
+)
 :
     mesh_(mesh),
-    scaleFactor_(scaleFactor),
-    writeBoundary_(true),
+    scaleFactor_(scaling),
     boundaryRegion_(),
     cellTable_(),
     cellTableId_()
-{}
+{
+    // Sanity
+    if (scaleFactor_ <= VSMALL)
+    {
+        scaleFactor_ = 1;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

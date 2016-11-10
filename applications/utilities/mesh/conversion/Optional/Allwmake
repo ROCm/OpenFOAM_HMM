@@ -6,6 +6,7 @@ cd ${0%/*} || exit 1    # Run from this directory
 
 # Parse arguments for compilation (at least for error catching)
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
+
 # Get version info and arch-path
 . $WM_PROJECT_DIR/etc/config.sh/functions
 _foamSource $($WM_PROJECT_DIR/bin/foamEtcFile config.sh/ccmio)

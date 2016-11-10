@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,23 +32,21 @@ License
 
 Foam::lagrangianWriter::lagrangianWriter
 (
-    const vtkMesh& vMesh,
+    const fvMesh& mesh,
     const bool binary,
     const fileName& fName,
     const word& cloudName,
     const bool dummyCloud
 )
 :
-    vMesh_(vMesh),
+    mesh_(mesh),
     binary_(binary),
     fName_(fName),
     cloudName_(cloudName),
     os_(fName.c_str())
 {
-    const fvMesh& mesh = vMesh_.mesh();
-
     // Write header
-    writeFuns::writeHeader(os_, binary_, mesh.time().caseName());
+    writeFuns::writeHeader(os_, binary_, mesh_.time().caseName());
     os_ << "DATASET POLYDATA" << std::endl;
 
     if (dummyCloud)

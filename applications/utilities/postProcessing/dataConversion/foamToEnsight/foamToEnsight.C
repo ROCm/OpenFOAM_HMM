@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
             << mesh.boundaryMesh()[0].name() << ")"
             << endl;
     }
-    meshSubsetHelper myMesh(mesh, cellZoneName);
+    meshSubsetHelper myMesh(mesh, meshSubsetHelper::ZONE, cellZoneName);
 
     //
     // Open new ensight case file, initialize header etc.

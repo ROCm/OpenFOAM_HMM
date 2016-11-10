@@ -213,7 +213,13 @@ Foam::meshReader::meshReader
     baffleFaces_(0),
     cellTableId_(0),
     cellTable_()
-{}
+{
+    // Sanity
+    if (scaleFactor_ <= VSMALL)
+    {
+        scaleFactor_ = 1;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

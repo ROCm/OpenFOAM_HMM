@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,60 +23,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "vtkMesh.H"
-#include "fvMeshSubset.H"
-#include "Time.H"
-#include "cellSet.H"
+#include "foamVtkAppendBase64Formatter.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const char* Foam::foamVtkAppendBase64Formatter::name_     = "append";
+const char* Foam::foamVtkAppendBase64Formatter::encoding_ = "base64";
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-Foam::vtkMesh::vtkMesh
+Foam::foamVtkAppendBase64Formatter::foamVtkAppendBase64Formatter
 (
-    fvMesh& baseMesh,
-    const word& setName
+    std::ostream& os
 )
 :
-    baseMesh_(baseMesh),
-    subsetter_(baseMesh),
-    setName_(setName)
-{
-    if (setName.size())
-    {
-        // Read cellSet using whole mesh
-        cellSet currentSet(baseMesh_, setName_);
+    foamVtkBase64Formatter(os)
+{}
 
-        // Set current subset
-        subsetter_.setLargeCellSubset(currentSet);
-    }
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::foamVtkAppendBase64Formatter::~foamVtkAppendBase64Formatter()
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+const char* Foam::foamVtkAppendBase64Formatter::name() const
+{
+    return name_;
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::polyMesh::readUpdateState Foam::vtkMesh::readUpdate()
+const char* Foam::foamVtkAppendBase64Formatter::encoding() const
 {
-    polyMesh::readUpdateState meshState = baseMesh_.readUpdate();
-
-    if (meshState != polyMesh::UNCHANGED)
-    {
-        // Note: since fvMeshSubset has no movePoints() functionality
-        // reconstruct the subset even if only movement.
-
-//        topoPtr_.clear();
-
-        if (setName_.size())
-        {
-            Info<< "Subsetting mesh based on cellSet " << setName_ << endl;
-
-            // Read cellSet using whole mesh
-            cellSet currentSet(baseMesh_, setName_);
-
-            subsetter_.setLargeCellSubset(currentSet);
-        }
-    }
-
-    return meshState;
+    return encoding_;
 }
 
 

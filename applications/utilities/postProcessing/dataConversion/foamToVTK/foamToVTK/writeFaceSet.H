@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,7 @@ SourceFiles
 #ifndef writeFaceSet_H
 #define writeFaceSet_H
 
-#include "vtkMesh.H"
+#include "fvMesh.H"
 #include "faceSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -48,7 +48,7 @@ namespace Foam
 void writeFaceSet
 (
     const bool binary,
-    const vtkMesh& vMesh,
+    const fvMesh&,
     const faceSet& set,
     const fileName& fileName
 );

@@ -28,21 +28,34 @@ License
 #include "cellSet.H"
 #include "cellZone.H"
 #include "Time.H"
-#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::meshSubsetHelper::meshSubsetHelper
 (
-    fvMesh& baseMesh,
-    const word& name,
-    const bool isCellSet
+    fvMesh& baseMesh
 )
 :
     baseMesh_(baseMesh),
     subsetter_(baseMesh),
-    name_(name),
-    type_(name_.empty() ? 0 : isCellSet ? 1 : 2)
+    type_(NONE),
+    name_()
+{
+    correct();
+}
+
+
+Foam::meshSubsetHelper::meshSubsetHelper
+(
+    fvMesh& baseMesh,
+    const subsetType type,
+    const word& name
+)
+:
+    baseMesh_(baseMesh),
+    subsetter_(baseMesh),
+    type_(name.empty() ? NONE : type),
+    name_(name)
 {
     correct();
 }
@@ -52,7 +65,7 @@ Foam::meshSubsetHelper::meshSubsetHelper
 
 void Foam::meshSubsetHelper::correct(bool verbose)
 {
-    if (type_ == 1)
+    if (type_ == SET)
     {
         if (verbose)
         {
@@ -62,7 +75,7 @@ void Foam::meshSubsetHelper::correct(bool verbose)
         cellSet subset(baseMesh_, name_);
         subsetter_.setLargeCellSubset(subset);
     }
-    else if (type_ == 2)
+    else if (type_ == ZONE)
     {
         if (verbose)
         {

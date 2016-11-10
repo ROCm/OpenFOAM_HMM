@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,53 +23,33 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "vtkUnstructuredReader.H"
-#include "labelIOField.H"
-#include "scalarIOField.H"
-#include "stringIOList.H"
-#include "cellModeller.H"
-#include "vectorIOField.H"
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-template<class T>
-void Foam::vtkUnstructuredReader::readBlock
-(
-    Istream& inFile,
-    const label n,
-    List<T>& lst
-) const
+inline bool Foam::foamVtkOutputOptions::legacy() const
 {
-    lst.setSize(n);
-    forAll(lst, i)
-    {
-        inFile >> lst[i];
-    }
+    return (type_ & LEGACY);
 }
 
 
-template<class Type>
-void Foam::vtkUnstructuredReader::printFieldStats
-(
-    const objectRegistry& obj
-) const
+inline bool Foam::foamVtkOutputOptions::xml() const
 {
-    wordList fieldNames(obj.names(Type::typeName));
+    return !legacy();
+}
 
-    if (fieldNames.size() > 0)
-    {
-        Info<< "Read " << fieldNames.size() << " " << Type::typeName
-            << " fields:" << endl;
-        Info<< "Size\tName" << nl
-            << "----\t----" << endl;
-        forAll(fieldNames, i)
-        {
-            Info<< obj.lookupObject<Type>(fieldNames[i]).size()
-                << "\t" << fieldNames[i]
-                << endl;
-        }
-        Info<< endl;
-    }
+
+inline bool Foam::foamVtkOutputOptions::append() const
+{
+    return (type_ & APPEND);
+}
+
+
+inline bool Foam::foamVtkOutputOptions::insitu() const
+{
+    return !(type_ & APPEND);
+}
+
+
+inline bool Foam::foamVtkOutputOptions::ascii() const
+{
+    return !(type_ & (BINARY | BASE64));
 }
 
 

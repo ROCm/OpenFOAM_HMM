@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,20 +28,6 @@ License
 #include "Time.H"
 #include "SortableList.H"
 #include "OFstream.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const char* Foam::fileFormats::STARCDMeshWriter::defaultBoundaryName =
-    "Default_Boundary_Region";
-
-const Foam::label Foam::fileFormats::STARCDMeshWriter::foamToStarFaceAddr[4][6] =
-{
-    { 4, 5, 2, 3, 0, 1 },     // 11 = pro-STAR hex
-    { 0, 1, 4, 5, 2, -1 },    // 12 = pro-STAR prism
-    { 5, 4, 2, 0, -1, -1 },   // 13 = pro-STAR tetra
-    { 0, 4, 3, 5, 2, -1 }     // 14 = pro-STAR pyramid
-};
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -171,66 +157,37 @@ void Foam::fileFormats::STARCDMeshWriter::getCellTable()
 }
 
 
-void Foam::fileFormats::STARCDMeshWriter::writeHeader(Ostream& os, const char* filetype)
-{
-    os  << "PROSTAR_" << filetype << nl
-        << 4000
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << endl;
-}
-
-
-void Foam::fileFormats::STARCDMeshWriter::writePoints(const fileName& prefix) const
-{
-    OFstream os(prefix + ".vrt");
-    writeHeader(os, "VERTEX");
-
-    // Set the precision of the points data to 10
-    os.precision(10);
-
-    // force decimal point for Fortran input
-    os.setf(std::ios::showpoint);
-
-    const pointField& points = mesh_.points();
-
-    Info<< "Writing " << os.name() << " : "
-        << points.size() << " points" << endl;
-
-    forAll(points, ptI)
-    {
-        // convert [m] -> [mm]
-        os
-            << ptI + 1 << " "
-            << scaleFactor_ * points[ptI].x() << " "
-            << scaleFactor_ * points[ptI].y() << " "
-            << scaleFactor_ * points[ptI].z() << nl;
-    }
-    os.flush();
-
-}
-
-
 void Foam::fileFormats::STARCDMeshWriter::writeCells
 (
     const fileName& prefix
 ) const
 {
-    OFstream os(prefix + ".cel");
-    writeHeader(os, "CELL");
+    OFstream os(starFileName(prefix, STARCDCore::CEL_FILE));
+    writeHeader(os, STARCDCore::HEADER_CEL);
 
     // this is what we seem to need
     // map foam cellModeller index -> star shape
     Map<label> shapeLookupIndex;
-    shapeLookupIndex.insert(hexModel->index(), 11);
-    shapeLookupIndex.insert(prismModel->index(), 12);
-    shapeLookupIndex.insert(tetModel->index(), 13);
-    shapeLookupIndex.insert(pyrModel->index(), 14);
+    shapeLookupIndex.insert
+    (
+        hexModel->index(),
+        STARCDCore::starcdHex
+    );
+    shapeLookupIndex.insert
+    (
+        prismModel->index(),
+        STARCDCore::starcdPrism
+    );
+    shapeLookupIndex.insert
+    (
+        tetModel->index(),
+        STARCDCore::starcdTet
+    );
+    shapeLookupIndex.insert
+    (
+        pyrModel->index(),
+        STARCDCore::starcdPyr
+    );
 
     const cellShapeList& shapes = mesh_.cellShapes();
     const cellList& cells  = mesh_.cells();
@@ -242,30 +199,30 @@ void Foam::fileFormats::STARCDMeshWriter::writeCells
 
     forAll(cells, cellId)
     {
-        label tableId = cellTableId_[cellId];
-        label materialType  = 1;        // 1(fluid)
+        const label tableId = cellTableId_[cellId];
+        label materialType = STARCDCore::starcdFluidType; // 1(fluid)
         if (cellTable_.found(tableId))
         {
             const dictionary& dict = cellTable_[tableId];
-            if (dict.found("MaterialType"))
-            {
-                word matType;
-                dict.lookup("MaterialType") >> matType;
-                if (matType == "solid")
-                {
-                    materialType = 2;
-                }
+            word matType;
 
+            if
+            (
+                dict.readIfPresent("MaterialType", matType)
+             && matType == "solid"
+            )
+            {
+                materialType = STARCDCore::starcdSolidType; // 2(solid)
             }
         }
 
         const cellShape& shape = shapes[cellId];
-        label mapIndex = shape.model().index();
+        const label mapIndex = shape.model().index();
 
         // a registered primitive type
         if (shapeLookupIndex.found(mapIndex))
         {
-            label shapeId = shapeLookupIndex[mapIndex];
+            const label shapeId = shapeLookupIndex[mapIndex];
             const labelList& vrtList = shapes[cellId];
 
             os  << cellId + 1
@@ -288,11 +245,11 @@ void Foam::fileFormats::STARCDMeshWriter::writeCells
                 count++;
             }
             os << endl;
-
         }
         else
         {
-            label shapeId = 255;        // treat as general polyhedral
+            // treat as general polyhedral
+            const label shapeId = STARCDCore::starcdPoly;
             const labelList& cFaces  = cells[cellId];
 
             // create (beg,end) indices
@@ -366,8 +323,8 @@ void Foam::fileFormats::STARCDMeshWriter::writeBoundary
     const fileName& prefix
 ) const
 {
-    OFstream os(prefix + ".bnd");
-    writeHeader(os, "BOUNDARY");
+    OFstream os(starFileName(prefix, STARCDCore::BND_FILE));
+    writeHeader(os, STARCDCore::HEADER_BND);
 
     const cellShapeList& shapes = mesh_.cellShapes();
     const cellList& cells  = mesh_.cells();
@@ -375,20 +332,23 @@ void Foam::fileFormats::STARCDMeshWriter::writeBoundary
     const labelList& owner = mesh_.faceOwner();
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    // this is what we seem to need
-    // these MUST correspond to foamToStarFaceAddr
     //
-    Map<label> faceLookupIndex;
-    faceLookupIndex.insert(hexModel->index(), 0);
-    faceLookupIndex.insert(prismModel->index(), 1);
-    faceLookupIndex.insert(tetModel->index(), 2);
-    faceLookupIndex.insert(pyrModel->index(), 3);
+    // Mapping between OpenFOAM and PROSTAR primitives
+    // - needed for face mapping
+    //
+    const Map<label> prostarShapeLookup =
+    {
+        { hexModel->index(),   STARCDCore::starcdHex },
+        { prismModel->index(), STARCDCore::starcdPrism },
+        { tetModel->index(),   STARCDCore::starcdTet },
+        { pyrModel->index(),   STARCDCore::starcdPyr }
+    };
 
     Info<< "Writing " << os.name() << " : "
         << (mesh_.nFaces() - patches[0].start()) << " boundaries" << endl;
 
 
-    label defaultId = findDefaultBoundary();
+    const label defaultId = findDefaultBoundary();
 
     //
     // write boundary faces - skip Default_Boundary_Region entirely
@@ -435,8 +395,8 @@ void Foam::fileFormats::STARCDMeshWriter::writeBoundary
 
             label mapIndex = shape.model().index();
 
-            // a registered primitive type
-            if (faceLookupIndex.found(mapIndex))
+            // A registered primitive type
+            if (prostarShapeLookup.found(mapIndex))
             {
                 const faceList sFaces = shape.faces();
                 forAll(sFaces, sFacei)
@@ -448,8 +408,8 @@ void Foam::fileFormats::STARCDMeshWriter::writeBoundary
                     }
                 }
 
-                mapIndex = faceLookupIndex[mapIndex];
-                cellFaceId = foamToStarFaceAddr[mapIndex][cellFaceId];
+                mapIndex = prostarShapeLookup[mapIndex];
+                cellFaceId = STARCDCore::foamToStarFaceAddr[mapIndex][cellFaceId];
             }
             // Info<< endl;
 
@@ -473,10 +433,12 @@ void Foam::fileFormats::STARCDMeshWriter::writeBoundary
 Foam::fileFormats::STARCDMeshWriter::STARCDMeshWriter
 (
     const polyMesh& mesh,
-    const scalar scaleFactor
+    const scalar scaleFactor,
+    const bool writeBndFile
 )
 :
-    meshWriter(mesh, scaleFactor)
+    meshWriter(mesh, scaleFactor),
+    writeBoundary_(writeBndFile)
 {
     boundaryRegion_.readDict(mesh_);
     cellTable_.readDict(mesh_);
@@ -491,15 +453,6 @@ Foam::fileFormats::STARCDMeshWriter::~STARCDMeshWriter()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::fileFormats::STARCDMeshWriter::rmFiles(const fileName& baseName) const
-{
-    rm(baseName + ".vrt");
-    rm(baseName + ".cel");
-    rm(baseName + ".bnd");
-    rm(baseName + ".inp");
-}
-
 
 bool Foam::fileFormats::STARCDMeshWriter::write(const fileName& meshName) const
 {
@@ -519,10 +472,25 @@ bool Foam::fileFormats::STARCDMeshWriter::write(const fileName& meshName) const
         }
     }
 
-    rmFiles(baseName);
-    writePoints(baseName);
+    STARCDCore::removeFiles(baseName);
+
+    // points
+    {
+        OFstream os
+        (
+            starFileName(baseName, STARCDCore::VRT_FILE)
+        );
+
+        Info<< "Writing " << os.name() << " : "
+            << mesh_.nPoints() << " points" << endl;
+
+        writePoints(os, mesh_.points(), scaleFactor_);
+    }
+
+    // cells
     writeCells(baseName);
 
+    // boundaries
     if (writeBoundary_)
     {
         writeBoundary(baseName);

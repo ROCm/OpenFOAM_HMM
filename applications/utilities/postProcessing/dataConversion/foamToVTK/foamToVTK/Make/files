@@ -6,7 +6,6 @@ writeFuns.C
 writeFaceSet.C
 writePointSet.C
 writeSurfFields.C
-vtkMesh.C
 vtkTopo.C
 
 writeVTK/writeVTK.C

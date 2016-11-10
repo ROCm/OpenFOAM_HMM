@@ -41,8 +41,6 @@ SourceFiles
 #include "pointFields.H"
 #include "vtkMesh.H"
 
-using namespace Foam;
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam

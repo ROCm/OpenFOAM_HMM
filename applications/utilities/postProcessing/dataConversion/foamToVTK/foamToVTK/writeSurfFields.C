@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,13 +35,11 @@ License
 void Foam::writeSurfFields
 (
     const bool binary,
-    const vtkMesh& vMesh,
+    const fvMesh& mesh,
     const fileName& fileName,
     const UPtrList<const surfaceVectorField>& surfVectorFields
 )
 {
-    const fvMesh& mesh = vMesh.mesh();
-
     std::ofstream str(fileName.c_str());
 
     writeFuns::writeHeader

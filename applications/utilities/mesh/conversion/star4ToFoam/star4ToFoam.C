@@ -48,7 +48,7 @@ Usage
 Note
     Baffles are written as interfaces for later use
 
-See Also
+See also
     Foam::cellTable, Foam::meshReader and Foam::fileFormats::STARCDMeshReader
 
 \*---------------------------------------------------------------------------*/
@@ -88,32 +88,35 @@ int main(int argc, char *argv[])
         "retain solid cells and treat them like fluid cells"
     );
 
+
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());
 
-    // default rescale from [mm] to [m]
-    scalar scaleFactor = args.optionLookupOrDefault("scale", 0.001);
-    if (scaleFactor <= 0)
-    {
-        scaleFactor = 1;
-    }
+    // Binary output, unless otherwise specified
+    const IOstream::streamFormat format =
+    (
+        args.optionFound("ascii")
+      ? IOstream::ASCII
+      : IOstream::BINARY
+    );
 
-    fileFormats::STARCDMeshReader::keepSolids = args.optionFound("solids");
-
-    // default to binary output, unless otherwise specified
-    IOstream::streamFormat format = IOstream::BINARY;
-    if (args.optionFound("ascii"))
-    {
-        format = IOstream::ASCII;
-    }
-
-    // increase the precision of the points data
+    // Increase the precision of the points data
     IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
 
-    // remove extensions and/or trailing '.'
+
+    // Remove extensions and/or trailing '.'
     const fileName prefix = fileName(args[1]).lessExt();
 
-    fileFormats::STARCDMeshReader reader(prefix, runTime, scaleFactor);
+
+    fileFormats::STARCDMeshReader reader
+    (
+        prefix,
+        runTime,
+        // Default rescale from [mm] to [m]
+        args.optionLookupOrDefault("scale", 0.001),
+        args.optionFound("solids")
+    );
+
 
     autoPtr<polyMesh> mesh = reader.mesh(runTime);
     reader.writeMesh(mesh, format);

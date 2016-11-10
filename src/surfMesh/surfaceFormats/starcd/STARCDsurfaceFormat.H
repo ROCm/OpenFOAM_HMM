@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,15 +63,6 @@ class STARCDsurfaceFormat
     public MeshedSurface<Face>,
     public STARCDsurfaceFormatCore
 {
-    // Private Data
-
-        //- STAR-CD identifier for shell shapes (2d elements)
-        static const int starcdShellShape_ = 3;
-
-        //- STAR-CD identifier for shell type (shells vs. baffles)
-        static const int starcdShellType_  = 4;
-
-
     // Private Member Functions
 
         static inline void writeShell
@@ -83,10 +74,10 @@ class STARCDsurfaceFormat
         );
 
         //- Disallow default bitwise copy construct
-        STARCDsurfaceFormat(const STARCDsurfaceFormat<Face>&);
+        STARCDsurfaceFormat(const STARCDsurfaceFormat<Face>&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const STARCDsurfaceFormat<Face>&);
+        void operator=(const STARCDsurfaceFormat<Face>&) = delete;
 
 
 public:

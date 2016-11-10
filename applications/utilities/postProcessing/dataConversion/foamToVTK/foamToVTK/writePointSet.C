@@ -37,7 +37,7 @@ namespace Foam
 void writePointSet
 (
     const bool binary,
-    const vtkMesh& vMesh,
+    const fvMesh& mesh,
     const pointSet& set,
     const fileName& fileName
 )
@@ -68,7 +68,7 @@ void writePointSet
 
     writeFuns::insert
     (
-        UIndirectList<point>(vMesh.mesh().points(), set.toc())(),
+        UIndirectList<point>(mesh.points(), set.toc())(),
         ptField
     );
 
