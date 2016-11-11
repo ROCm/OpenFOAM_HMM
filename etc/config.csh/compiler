@@ -90,6 +90,10 @@ case Clang:
     setenv WM_CC 'clang'
     setenv WM_CXX 'clang++'
     breaksw
+case Icc:
+    setenv WM_CC 'icc'
+    setenv WM_CXX 'icpc'
+    breaksw
 endsw
 
 #------------------------------------------------------------------------------

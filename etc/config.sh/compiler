@@ -87,6 +87,10 @@ Clang)
     export WM_CC='clang'
     export WM_CXX='clang++'
     ;;
+Icc)
+    export WM_CC='icc'
+    export WM_CXX='icpc'
+    ;;
 esac
 
 #------------------------------------------------------------------------------
