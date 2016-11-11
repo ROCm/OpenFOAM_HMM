@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,14 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-//extern "C"
-//{
-    #include "MASTER.h"
-    #include "GLOBAL.h"
-//}
-
 #include "tecplotWriter.H"
-
+#include "TECIO.h"
 #include "fvc.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -38,39 +32,71 @@ License
 template<class Type>
 void Foam::tecplotWriter::writeField(const Field<Type>& fld) const
 {
-    for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
+    typedef typename pTraits<Type>::cmptType cmptType;
+
+    for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; ++cmpt)
     {
-        scalarField cmptFld(fld.component(cmpt));
+        tmp<Field<cmptType>> tcmptFld = fld.component(cmpt);
+        const Field<cmptType>& cmptFld = tcmptFld();
+
+        const int32_t size = int32_t(cmptFld.size());
 
         // Convert to float
-        Field<float> floats(cmptFld.size());
+        Field<float> floats(size);
         forAll(cmptFld, i)
         {
             floats[i] = float(cmptFld[i]);
         }
 
-        INTEGER4 size = INTEGER4(floats.size());
-        INTEGER4 IsDouble = 0;  //float
-
         //Pout<< "Writing component:" << cmpt << " of size:" << size
         //    << " floats." << endl;
 
-        if (!TECDAT112(&size, floats.begin(), &IsDouble))
+        if
+        (
+            tecdat142
+            (
+                &size,
+                floats.cdata(),
+                &tecConst_False     //< VIsDouble (0: single, 1: double)
+            )
+        )
         {
-//            FatalErrorInFunction
-//                << "Error in TECDAT112." << exit(FatalError);
+            FatalErrorInFunction
+                << "Error in tecdat142."
+                << exit(FatalError);
         }
     }
 }
 
 
 template<class Type>
-Foam::tmp<Field<Type>> Foam::tecplotWriter::getPatchField
+void Foam::tecplotWriter::writeField(const tmp<Field<Type>>& tfld) const
+{
+    writeField(tfld());
+}
+
+
+template<class GeoField>
+void Foam::tecplotWriter::writeFields
+(
+    const PtrList<const GeoField>& flds
+) const
+{
+    forAll(flds, i)
+    {
+        writeField(flds[i]);
+    }
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::tecplotWriter::getPatchField
 (
     const bool nearCellValue,
     const GeometricField<Type, fvPatchField, volMesh>& vfld,
     const label patchi
-) const
+)
 {
     if (nearCellValue)
     {
@@ -84,11 +110,12 @@ Foam::tmp<Field<Type>> Foam::tecplotWriter::getPatchField
 
 
 template<class Type>
-Foam::tmp<Field<Type>> Foam::tecplotWriter::getFaceField
+Foam::tmp<Foam::Field<Type>>
+Foam::tecplotWriter::getFaceField
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& sfld,
-    const labelList& faceLabels
-) const
+    const labelUList& faceLabels
+)
 {
     const polyBoundaryMesh& patches = sfld.mesh().boundaryMesh();
 
@@ -97,9 +124,8 @@ Foam::tmp<Field<Type>> Foam::tecplotWriter::getFaceField
 
     forAll(faceLabels, i)
     {
-        label facei = faceLabels[i];
-
-        label patchi = patches.whichPatch(facei);
+        const label facei  = faceLabels[i];
+        const label patchi = patches.whichPatch(facei);
 
         if (patchi == -1)
         {
@@ -117,9 +143,10 @@ Foam::tmp<Field<Type>> Foam::tecplotWriter::getFaceField
 
 
 template<class GeoField>
-Foam::wordList Foam::tecplotWriter::getNames
+Foam::wordList
+Foam::tecplotWriter::getNames
 (
-    const PtrList<GeoField>& flds
+    const PtrList<const GeoField>& flds
 )
 {
     wordList names(flds.size());
@@ -135,19 +162,19 @@ template<class Type>
 void Foam::tecplotWriter::getTecplotNames
 (
     const wordList& names,
-    const INTEGER4 loc,
+    const int32_t loc,
     string& varNames,
-    DynamicList<INTEGER4>& varLocation
+    DynamicList<int32_t>& varLocation
 )
 {
+    const direction nCmpts = pTraits<Type>::nComponents;
+
     forAll(names, i)
     {
         if (!varNames.empty())
         {
             varNames += " ";
         }
-
-        label nCmpts = pTraits<Type>::nComponents;
 
         if (nCmpts == 1)
         {
@@ -156,19 +183,13 @@ void Foam::tecplotWriter::getTecplotNames
         }
         else
         {
-            for
-            (
-                direction cmpt = 0;
-                cmpt < nCmpts;
-                cmpt++
-            )
+            for (direction cmpt = 0; cmpt < nCmpts; ++cmpt)
             {
-                string fldName =
-                    (cmpt != 0 ? " " : string::null)
-                  + names[i]
-                  + "_"
-                  + pTraits<Type>::componentNames[cmpt];
-                varNames += fldName;
+                varNames +=
+                (
+                    (cmpt ? " " : string::null)
+                  + names[i] + "_" + pTraits<Type>::componentNames[cmpt]
+                );
                 varLocation.append(loc);
             }
         }
@@ -180,9 +201,9 @@ template<class GeoField>
 void Foam::tecplotWriter::getTecplotNames
 (
     const PtrList<GeoField>& flds,
-    const INTEGER4 loc,
+    const int32_t loc,
     string& varNames,
-    DynamicList<INTEGER4>& varLocation
+    DynamicList<int32_t>& varLocation
 )
 {
     getTecplotNames<typename GeoField::value_type>

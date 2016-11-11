@@ -1,14 +1,14 @@
+/* Tecio doesn't have many files, so they are just in a single directory */
+
 EXE_INC = \
-    -I$(WM_THIRD_PARTY_DIR)/tecio/tecsrc/lnInclude \
+    -I$(TECIO_ARCH_PATH) \
     -I$(LIB_SRC)/lagrangian/basic/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude
 
-
 EXE_LIBS = \
+    -L$(TECIO_ARCH_PATH) -ltecio \
     -llagrangian \
     -ldynamicMesh \
-    -ldynamicMesh \
-    -lgenericPatchFields \
-    -L$(FOAM_EXT_LIBBIN) -ltecio
+    -lgenericPatchFields

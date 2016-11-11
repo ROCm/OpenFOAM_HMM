@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,13 +25,23 @@ License
 
 #include "tecplotWriter.H"
 #include "fvMesh.H"
+#include "TECIO.h"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const int32_t Foam::tecplotWriter::tecConst_0 = 0;
+const int32_t Foam::tecplotWriter::tecConst_1 = 1;
+const int32_t Foam::tecplotWriter::tecConst_False = 0;
+const int32_t Foam::tecplotWriter::tecConst_True  = 1;
+
+const Foam::string Foam::tecplotWriter::XYZ = "X Y Z";
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::tecplotWriter::tecplotWriter(const Time& runTime)
 :
-    runTime_(runTime)
+    time_(runTime)
 {}
 
 
@@ -42,35 +52,37 @@ void Foam::tecplotWriter::writeInit
     const word& name,
     const string& varNames,
     const fileName& fName,
-    INTEGER4 tecplotFileType
+    const dataFileType fileType
 ) const
 {
-Pout<< endl
-    << endl
-    << "Name:" << name
-    << " varNames:" << varNames
-    << " to file:" << fName
-    << " of type:" << tecplotFileType
-    << endl;
+    const int32_t FileType   = fileType;
+    const int32_t FileFormat = 0; // 0 = binary (plt), 1 = subzone (.szplt)
 
-    INTEGER4 IsDouble = 0;  //float
-    INTEGER4 Debug = 0;     //nodebug
+    Pout<< nl << nl
+        << "Name:" << name
+        << " varNames:" << varNames
+        << " to file:" << fName
+        << " of type:" << int(fileType)
+        << endl;
+
     if
     (
-        !TECINI112
+        tecini142
         (
-            const_cast<char*>(name.c_str()),       /* Data Set Title       */
-            const_cast<char*>(varNames.c_str()),   /* Variable List        */
-            const_cast<char*>(fName.c_str()),      /* File Name            */
-            const_cast<char*>(runTime_.path().c_str()), /* Scratch Directory */
-            &tecplotFileType,
-            &Debug,
-            &IsDouble
+            name.c_str(),       //< DataSet Title
+            varNames.c_str(),   //< Variables List
+            fName.c_str(),      //< FileName
+            time_.path().c_str(), //< ScratchDir
+            &FileFormat,        //< FileFormat
+            &FileType,          //< FileType
+            &tecConst_False,    //< Debug (0: no debug, 1: debug)
+            &tecConst_False     //< VIsDouble (0: single, 1: double)
         )
     )
     {
-//        FatalErrorInFunction
-//            << "Error in TECINI112." << exit(FatalError);
+        FatalErrorInFunction
+            << "Error in tecini142."
+            << exit(FatalError);
     }
 }
 
@@ -78,78 +90,60 @@ Pout<< endl
 void Foam::tecplotWriter::writePolyhedralZone
 (
     const word& zoneName,
-    INTEGER4 strandID,
+    const int32_t strandID,
     const fvMesh& mesh,
-    const List<INTEGER4>& varLocArray,
-    INTEGER4 nFaceNodes
+    const UList<int32_t>& varLocArray,
+    const int32_t NumFaceNodes
 ) const
 {
-    /* Call TECZNE112 */
-    INTEGER4  NumNodes   = mesh.nPoints();         /* number of unique nodes */
-    INTEGER4  NumElems   = mesh.nCells();         /* number of elements */
-    INTEGER4  NumFaces   = mesh.nFaces();         /* number of unique faces */
+    const int32_t NumNodes = mesh.nPoints();    // Number of unique nodes
+    const int32_t NumElems = mesh.nCells();     // Number of elements
+    const int32_t NumFaces = mesh.nFaces();     // Number of unique faces
+    const double  SolTime  = time_.value();     // Solution time
 
-    INTEGER4  ICellMax   = 0;         /* Not Used, set to zero */
-    INTEGER4  JCellMax   = 0;         /* Not Used, set to zero */
-    INTEGER4  KCellMax   = 0;         /* Not Used, set to zero */
+    const int32_t ParentZone = 0;   // Bool: 0 = no parent zone
+    const int32_t ShrConn   = 0;
+    const int32_t NumBConns = 0;    // No Boundary Connections
+    const int32_t NumBItems = 0;    // No Boundary Items
 
-    double    SolTime    = runTime_.value();     /* solution time   */
-    INTEGER4  ParentZone = 0;         /* no parent zone  */
+    Pout<< "zoneName:" << zoneName
+        //<< " varLocArray:" << varLocArray
+        << " solTime:" << SolTime
+        << " strand:"  << strandID
+        << endl;
 
-    INTEGER4  IsBlock    = 1;         /* block format  */
-
-    INTEGER4  NFConns    = 0;         /* not used for FEPolyhedron
-                                       * zones
-                                       */
-    INTEGER4  FNMode     = 0;         /* not used for FEPolyhedron
-                                       * zones
-                                       */
-Pout<< "zoneName:" << zoneName
-    //<< " varLocArray:" << varLocArray
-    << " solTime:" << SolTime
-    << endl;
-
-
-
-    INTEGER4 *PassiveVarArray = nullptr;
-    INTEGER4 *VarShareArray   = nullptr;
-    INTEGER4  ShrConn         = 0;
-
-    INTEGER4  NumBConns       = 0;   /* No Boundary Connections */
-    INTEGER4  NumBItems       = 0;   /* No Boundary Items */
-
-    INTEGER4  ZoneType = ZoneType_FEPolyhedron;
-
+    const int32_t ZoneType  = ZONE_FEPOLYHEDRON;
     if
     (
-       !TECZNE112
+        teczne142
         (
-            const_cast<char*>(zoneName.c_str()),
-            &ZoneType,
-            &NumNodes,
-            &NumElems,
-            &NumFaces,
-            &ICellMax,
-            &JCellMax,
-            &KCellMax,
-            &SolTime,
-            &strandID,
-            &ParentZone,
-            &IsBlock,
-            &NFConns,
-            &FNMode,
-            &nFaceNodes,
-            &NumBConns,
-            &NumBItems,
-            PassiveVarArray,
-            const_cast<INTEGER4*>(varLocArray.begin()),
-            VarShareArray,
-            &ShrConn
+            zoneName.c_str(),   //< ZoneTitle
+            &ZoneType,          //< ZoneType
+            &NumNodes,          //< IMxOrNumPts
+            &NumElems,          //< JMxOrNumElements
+            &NumFaces,          //< KMxOrNumFaces
+            &tecConst_0,        //< (unused set to zero) ICellMax
+            &tecConst_0,        //< (unused set to zero) JCellMax
+            &tecConst_0,        //< (unused set to zero) KCellMax
+            &SolTime,           //< SolutionTime
+            &strandID,          //< StrandID
+            &ParentZone,        //< ParentZone
+            &tecConst_True,     //< IsBlock
+            &tecConst_0,        //< (unused) NumFaceConnections
+            &tecConst_0,        //< (unused) FaceNeighborMode
+            &NumFaceNodes,      //< TotalNumFaceNodes
+            &NumBConns,         //< NumConnectedBoundaryFaces
+            &NumBItems,         //< TotalNumBoundaryConnections
+            nullptr,            //< PassiveVarList
+            varLocArray.cdata(), //< ValueLocation
+            nullptr,            //< ShareVarFromZone
+            &ShrConn            //< ShareConnectivityFromZone
         )
     )
     {
-//        FatalErrorInFunction
-//            << "Error in TECZNE112." << exit(FatalError);
+        FatalErrorInFunction
+            << "Error in teczne142 - writing polyhedron zones."
+            << exit(FatalError);
     }
 }
 
@@ -157,79 +151,61 @@ Pout<< "zoneName:" << zoneName
 void Foam::tecplotWriter::writePolygonalZone
 (
     const word& zoneName,
-    INTEGER4 strandID,
+    const int32_t strandID,
     const indirectPrimitivePatch& pp,
-    const List<INTEGER4>& varLocArray
+    const UList<int32_t>& varLocArray
 ) const
 {
-    /* Call TECZNE112 */
-    INTEGER4  NumNodes   = pp.nPoints();         /* number of unique nodes */
-    INTEGER4  NumElems   = pp.size();         /* number of elements */
-    INTEGER4  NumFaces   = pp.nEdges();         /* number of unique faces */
+    const int32_t NumNodes = pp.nPoints();      // Number of unique nodes
+    const int32_t NumElems = pp.size();         // Number of elements
+    const int32_t NumFaces = pp.nEdges();       // Number of unique faces
+    const double  SolTime  = time_.value();     // Solution time
 
-    INTEGER4  ICellMax   = 0;         /* Not Used, set to zero */
-    INTEGER4  JCellMax   = 0;         /* Not Used, set to zero */
-    INTEGER4  KCellMax   = 0;         /* Not Used, set to zero */
+    const int32_t ParentZone = 0;   // Int: 0 = no parent zone
+    const int32_t NumFaceNodes = 2*pp.nEdges();
 
-    double    SolTime    = runTime_.value();     /* solution time   */
-    INTEGER4  ParentZone = 0;         /* no parent zone  */
+    const int32_t ShrConn   = 0;
+    const int32_t NumBConns = 0;    // No Boundary Connections
+    const int32_t NumBItems = 0;    // No Boundary Items
 
-    INTEGER4  IsBlock    = 1;         /* block format  */
+    Pout<< "zoneName:" << zoneName
+        << " strandID:" << strandID
+        //<< " varLocArray:" << varLocArray
+        << " solTime:" << SolTime
+        << endl;
 
-    INTEGER4  NFConns    = 0;         /* not used for FEPolyhedron
-                                       * zones
-                                       */
-    INTEGER4  FNMode     = 0;         /* not used for FEPolyhedron
-                                       * zones
-                                       */
-    INTEGER4  NumFaceNodes    = 2*pp.nEdges();
-
-Pout<< "zoneName:" << zoneName
-    << " strandID:" << strandID
-    //<< " varLocArray:" << varLocArray
-    << " solTime:" << SolTime
-    << endl;
-
-
-    INTEGER4 *PassiveVarArray = nullptr;
-    INTEGER4 *VarShareArray   = nullptr;
-    INTEGER4  ShrConn         = 0;
-
-    INTEGER4  NumBConns       = 0;   /* No Boundary Connections */
-    INTEGER4  NumBItems       = 0;   /* No Boundary Items */
-
-    INTEGER4  ZoneType = ZoneType_FEPolygon;
-
+    const int32_t ZoneType = ZONE_FEPOLYGON;
     if
     (
-       !TECZNE112
+        teczne142
         (
-            const_cast<char*>(zoneName.c_str()),
-            &ZoneType,
-            &NumNodes,
-            &NumElems,
-            &NumFaces,
-            &ICellMax,
-            &JCellMax,
-            &KCellMax,
-            &SolTime,
-            &strandID,
-            &ParentZone,
-            &IsBlock,
-            &NFConns,
-            &FNMode,
-            &NumFaceNodes,
-            &NumBConns,
-            &NumBItems,
-            PassiveVarArray,
-            const_cast<INTEGER4*>(varLocArray.begin()),
-            VarShareArray,
-            &ShrConn
+            zoneName.c_str(),   //< ZoneTitle
+            &ZoneType,          //< ZoneType
+            &NumNodes,          //< IMax or NumPts
+            &NumElems,          //< JMax or NumElements
+            &NumFaces,          //< KMax or NumFaces
+            &tecConst_0,        //< (Unused set to zero) ICellMax
+            &tecConst_0,        //< (Unused set to zero) JCellMax
+            &tecConst_0,        //< (Unused set to zero) KCellMax
+            &SolTime,           //< SolutionTime
+            &strandID,          //< StrandID
+            &ParentZone,        //< ParentZone
+            &tecConst_True,     //< IsBlock
+            &tecConst_0,        //< (Unused for polygon zone) NumFaceConnections
+            &tecConst_0,        //< (Unused for polygon zone) FaceNeighborMode
+            &NumFaceNodes,      //< TotalNumFaceNodes
+            &NumBConns,         //< NumConnectedBoundaryFaces
+            &NumBItems,         //< TotalNumBoundaryConnections
+            nullptr,            //< PassiveVarList
+            varLocArray.cdata(), //< ValueLocation
+            nullptr,            //< ShareVarFromZone
+            &ShrConn            //< ShareConnectivityFromZone
         )
     )
     {
-//        FatalErrorInFunction
-//            << "Error in TECZNE112." << exit(FatalError);
+        FatalErrorInFunction
+            << "Error in teczne142 - writing polygon zones."
+            << exit(FatalError);
     }
 }
 
@@ -237,120 +213,99 @@ Pout<< "zoneName:" << zoneName
 void Foam::tecplotWriter::writeOrderedZone
 (
     const word& zoneName,
-    INTEGER4 strandID,
+    const int32_t strandID,
     const label n,
-    const List<INTEGER4>& varLocArray
+    const UList<int32_t>& varLocArray
 ) const
 {
-    /* Call TECZNE112 */
-    INTEGER4  IMax   = n;         /* number of unique nodes */
-    INTEGER4  JMax   = 1;         /* number of elements */
-    INTEGER4  KMax   = 1;         /* number of unique faces */
+    const int32_t IMax = n;     // Number in I direction
+    const int32_t JMax = 1;     // Number in J direction
+    const int32_t KMax = 1;     // Number in K direction
+    const double  SolTime = time_.value();  // Solution time
 
-    INTEGER4  ICellMax   = 0;         /* Not Used, set to zero */
-    INTEGER4  JCellMax   = 0;         /* Not Used, set to zero */
-    INTEGER4  KCellMax   = 0;         /* Not Used, set to zero */
+    const int32_t ParentZone = 0;   // Bool: no parent zone
+    const int32_t NFConns = 0;      // Unused for ordered zones
+    const int32_t FNMode  = 0;      // Unused for ordered zones
 
-    double    SolTime    = runTime_.value();     /* solution time   */
-    INTEGER4  ParentZone = 0;         /* no parent zone  */
+    const int32_t ShrConn  = 0;
+    const int32_t NumFaceNodes = 1;
+    const int32_t NumBConns = 0;    // No Boundary Connections
+    const int32_t NumBItems = 0;    // No Boundary Items
 
-    INTEGER4  IsBlock    = 1;         /* block format  */
+    Pout<< "zoneName:" << zoneName
+        << " strandID:" << strandID
+        //<< " varLocArray:" << varLocArray
+        << " solTime:" << SolTime
+        << endl;
 
-    INTEGER4  NFConns    = 0;         /* not used for FEPolyhedron
-                                       * zones
-                                       */
-    INTEGER4  FNMode     = 0;         /* not used for FEPolyhedron
-                                       * zones
-                                       */
-    INTEGER4  NumFaceNodes    = 1;
-    INTEGER4  NumBConns       = 1;   /* No Boundary Connections */
-    INTEGER4  NumBItems       = 1;   /* No Boundary Items */
-
-Pout<< "zoneName:" << zoneName
-    << " strandID:" << strandID
-    //<< " varLocArray:" << varLocArray
-    << " solTime:" << SolTime
-    << endl;
-
-
-    INTEGER4 *PassiveVarArray = nullptr;
-    INTEGER4 *VarShareArray   = nullptr;
-    INTEGER4  ShrConn         = 0;
-
-
-    INTEGER4  ZoneType = ZoneType_Ordered;
-
+    const int32_t ZoneType = ZONE_ORDERED;
     if
     (
-       !TECZNE112
+        teczne142
         (
-            const_cast<char*>(zoneName.c_str()),
-            &ZoneType,
-            &IMax,
-            &JMax,
-            &KMax,
-            &ICellMax,
-            &JCellMax,
-            &KCellMax,
-            &SolTime,
-            &strandID,
-            &ParentZone,
-            &IsBlock,
-            &NFConns,
-            &FNMode,
-            &NumFaceNodes,
-            &NumBConns,
-            &NumBItems,
-            PassiveVarArray,
-            const_cast<INTEGER4*>(varLocArray.begin()),
-            VarShareArray,
-            &ShrConn
+            zoneName.c_str(),   //< ZoneTitle
+            &ZoneType,          //< ZoneType
+            &IMax,              //< IMax or NumPts
+            &JMax,              //< JMax or NumElements
+            &KMax,              //< KMax or NumFaces
+            &tecConst_0,        //< (Unused set to zero) ICellMax
+            &tecConst_0,        //< (Unused set to zero) JCellMax
+            &tecConst_0,        //< (Unused set to zero) KCellMax
+            &SolTime,           //< SolutionTime
+            &strandID,          //< StrandID
+            &ParentZone,        //< ParentZone
+            &tecConst_True,     //< IsBlock
+            &NFConns,           //< NumFaceConnections
+            &FNMode,            //< FaceNeighborMode
+            &NumFaceNodes,      //< TotalNumFaceNodes
+            &NumBConns,         //< NumConnectedBoundaryFaces
+            &NumBItems,         //< TotalNumBoundaryConnections
+            nullptr,            //< PassiveVarList
+            varLocArray.cdata(), //< ValueLocation
+            nullptr,            //< ShareVarFromZone
+            &ShrConn            //< ShareConnectivityFromZone
         )
     )
     {
-//        FatalErrorInFunction
-//            << "Error in TECZNE112." << exit(FatalError);
+        FatalErrorInFunction
+            << "Error in teczne142 - writing ordered zones."
+            << exit(FatalError);
     }
 }
 
 
 void Foam::tecplotWriter::writeConnectivity(const fvMesh& mesh) const
 {
-    List<INTEGER4> FaceNodeCounts(mesh.nFaces());
-
+    // first pass: get the sizes
+    List<int32_t> FaceNodeCounts(mesh.nFaces());
+    label nFaceNodes = 0;
     forAll(mesh.faces(), facei)
     {
         const face& f = mesh.faces()[facei];
-        FaceNodeCounts[facei] = INTEGER4(f.size());
+        nFaceNodes += f.size();
+        FaceNodeCounts[facei] = int32_t(f.size());
     }
 
-
-    INTEGER4 nFaceNodes = 0;
-    forAll(mesh.faces(), facei)
-    {
-        nFaceNodes += mesh.faces()[facei].size();
-    }
-
-
-    List<INTEGER4> FaceNodes(nFaceNodes);
+    // second pass: get the nodes as a flat list
+    List<int32_t> FaceNodes(nFaceNodes);
     label nodeI = 0;
     forAll(mesh.faces(), facei)
     {
         const face& f = mesh.faces()[facei];
         forAll(f, fp)
         {
-            FaceNodes[nodeI++] = INTEGER4(f[fp]+1);
+            FaceNodes[nodeI++] = int32_t(f[fp]+1);
         }
     }
 
 
-    List<INTEGER4> FaceLeftElems(mesh.nFaces());
+    List<int32_t> FaceLeftElems(mesh.nFaces());
     forAll(mesh.faceOwner(), facei)
     {
         FaceLeftElems[facei] = mesh.faceOwner()[facei]+1;
     }
 
-    List<INTEGER4> FaceRightElems(mesh.nFaces());
+    List<int32_t> FaceRightElems(mesh.nFaces());
     forAll(mesh.faceNeighbour(), facei)
     {
         FaceRightElems[facei] = mesh.faceNeighbour()[facei]+1;
@@ -367,20 +322,21 @@ void Foam::tecplotWriter::writeConnectivity(const fvMesh& mesh) const
 
     if
     (
-       !TECPOLY112
+        tecpoly142
         (
-            FaceNodeCounts.begin(), /* The face node counts array */
-            FaceNodes.begin(),      /* The face nodes array */
-            FaceLeftElems.begin(),  /* The left elements array  */
-            FaceRightElems.begin(), /* The right elements array  */
-            nullptr,       /* No boundary connection counts */
-            nullptr,       /* No boundary connection elements */
-            nullptr        /* No boundary connection zones */
+            FaceNodeCounts.cdata(), // The face node counts array
+            FaceNodes.cdata(),      // The face nodes array
+            FaceLeftElems.cdata(),  // The left elements array
+            FaceRightElems.cdata(), // The right elements array
+            nullptr,       // No face boundary connection counts
+            nullptr,       // No face boundary connection elements
+            nullptr        // No face boundary connection zones
         )
     )
     {
-//        FatalErrorInFunction
-//            << "Error in TECPOLY112." << exit(FatalError);
+        FatalErrorInFunction
+            << "Error in tecpoly142."
+            << exit(FatalError);
     }
 }
 
@@ -389,25 +345,25 @@ void Foam::tecplotWriter::writeConnectivity
     const indirectPrimitivePatch& pp
 ) const
 {
-    INTEGER4  NumFaces   = pp.nEdges();         /* number of unique faces */
-    INTEGER4  NumFaceNodes    = 2*pp.nEdges();
+    const int32_t NumFaces     = pp.nEdges();   // Number of unique faces
+    const int32_t NumFaceNodes = 2*NumFaces;    // 2 nodes per edge
 
     // All faces (=edges) have 2 nodes
-    List<INTEGER4> FaceNodeCounts(NumFaces);
+    List<int32_t> FaceNodeCounts(NumFaces);
     FaceNodeCounts = 2;
 
-    List<INTEGER4> FaceNodes(NumFaceNodes);
+    List<int32_t> FaceNodes(NumFaceNodes);
     label nodeI = 0;
-    forAll(pp.edges(), edgeI)
+    forAll(pp.edges(), edgei)
     {
-        edge e = pp.edges()[edgeI];
+        edge e = pp.edges()[edgei];
         if (e[0] > e[1])
         {
             e.flip();
         }
 
-        FaceNodes[nodeI++] = INTEGER4(e[0]+1);
-        FaceNodes[nodeI++] = INTEGER4(e[1]+1);
+        FaceNodes[nodeI++] = int32_t(e[0]+1);
+        FaceNodes[nodeI++] = int32_t(e[1]+1);
     }
 
     /* Define the right and left elements of each face.
@@ -430,22 +386,22 @@ void Foam::tecplotWriter::writeConnectivity
      * (element 0).
      */
 
-    List<INTEGER4> FaceLeftElems(NumFaces);
-    List<INTEGER4> FaceRightElems(NumFaces);
+    List<int32_t> FaceLeftElems(NumFaces);
+    List<int32_t> FaceRightElems(NumFaces);
 
     const labelListList& edgeFaces = pp.edgeFaces();
-    forAll(edgeFaces, edgeI)
+    forAll(edgeFaces, edgei)
     {
-        const labelList& eFaces = edgeFaces[edgeI];
+        const labelList& eFaces = edgeFaces[edgei];
 
         if (eFaces.size() == 1)
         {
-            FaceLeftElems[edgeI] = 0;
-            FaceRightElems[edgeI] = eFaces[0]+1;
+            FaceLeftElems[edgei]  = 0;
+            FaceRightElems[edgei] = eFaces[0]+1;
         }
         else if (eFaces.size() == 2)
         {
-            edge e = pp.edges()[edgeI];
+            edge e = pp.edges()[edgei];
             if (e[0] > e[1])
             {
                 e.flip();
@@ -456,59 +412,60 @@ void Foam::tecplotWriter::writeConnectivity
             // The face that uses the vertices of e in increasing order
             // is the left face.
 
-            label fp = findIndex(f0, e[0]);
-            bool f0IsLeft = (f0.nextLabel(fp) == e[1]);
+            const label fp = findIndex(f0, e[0]);
+            const bool f0IsLeft = (f0.nextLabel(fp) == e[1]);
 
             if (f0IsLeft)
             {
-                FaceLeftElems[edgeI] = eFaces[0]+1;
-                FaceRightElems[edgeI] = eFaces[1]+1;
+                FaceLeftElems[edgei]  = eFaces[0]+1;
+                FaceRightElems[edgei] = eFaces[1]+1;
             }
             else
             {
-                FaceLeftElems[edgeI] = eFaces[1]+1;
-                FaceRightElems[edgeI] = eFaces[0]+1;
+                FaceLeftElems[edgei]  = eFaces[1]+1;
+                FaceRightElems[edgei] = eFaces[0]+1;
             }
         }
         else
         {
             // non-manifold. Treat as if open.
-            FaceLeftElems[edgeI] = 0;
-            FaceRightElems[edgeI] = eFaces[0]+1;
+            FaceLeftElems[edgei]  = 0;
+            FaceRightElems[edgei] = eFaces[0]+1;
         }
     }
 
-    /* Write the face map (created above) using TECPOLY112. */
+    // Write the face map (created above)
     if
     (
-       !TECPOLY112
+        tecpoly142
         (
-            FaceNodeCounts.begin(), /* The face node counts array */
-            FaceNodes.begin(),      /* The face nodes array */
-            FaceLeftElems.begin(),  /* The left elements array  */
-            FaceRightElems.begin(), /* The right elements array  */
-            nullptr,       /* No boundary connection counts */
-            nullptr,       /* No boundary connection elements */
-            nullptr        /* No boundary connection zones */
+            FaceNodeCounts.cdata(),     // Face node counts array
+            FaceNodes.cdata(),          // Face nodes array
+            FaceLeftElems.cdata(),      // Left elements array
+            FaceRightElems.cdata(),     // Right elements array
+            nullptr,                    // No boundary connection counts
+            nullptr,                    // No boundary connection elements
+            nullptr                     // No boundary connection zones
         )
     )
     {
-//        FatalErrorInFunction
-//            << "Error in TECPOLY112." << exit(FatalError);
+        FatalErrorInFunction
+            << "Error in tecpoly142."
+            << exit(FatalError);
     }
 }
 
 
 void Foam::tecplotWriter::writeEnd() const
 {
-Pout<< "writeEnd" << endl;
+    Pout<< "writeEnd" << endl;
 
-    if (!TECEND112())
+    if (tecend142())
     {
-//        FatalErrorInFunction
-//            << "Error in TECEND112." << exit(FatalError);
+        FatalErrorInFunction
+            << "Error in tecend142."
+            << exit(FatalError);
     }
-
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,11 @@ Class
 Description
     Write binary tecplot files using tecio.
 
+Note
+    The tecplot API uses pass by reference for all routines.
+    Its standard integer is defined as INTEGER4 (ie, int32_t),
+    which is also used when passing boolean values.
+
 SourceFiles
     tecplotWriter.C
     tecplotWriterTemplates.C
@@ -36,13 +41,10 @@ SourceFiles
 #ifndef tecplotWriter_H
 #define tecplotWriter_H
 
-#include "TECIO.h"
 #include "Time.H"
 #include "indirectPrimitivePatch.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-
-using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,14 +54,75 @@ namespace Foam
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class tecplotWriter Declaration
+                        Class tecplotWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 class tecplotWriter
 {
-    const Time& runTime_;
+    //- Tecplot ZoneTypes
+    enum tecplotZoneType
+    {
+        ZONE_ORDERED         = 0,
+        ZONE_FELINESEG       = 1,
+        ZONE_FETRIANGLE      = 2,
+        ZONE_FEQUADRILATERAL = 3,
+        ZONE_FETETRAHEDRON   = 4,
+        ZONE_FEBRICK         = 5,
+        ZONE_FEPOLYGON       = 6,
+        ZONE_FEPOLYHEDRON    = 7
+    };
+
+
+    // Static data members
+
+        // Values commonly used internally
+        static const int32_t tecConst_0;
+        static const int32_t tecConst_1;
+        static const int32_t tecConst_False;
+        static const int32_t tecConst_True;
+
+
+    // Private data
+
+        //- Time reference. Used for paths and the solution time.
+        const Time& time_;
+
+
+    // Private Member Functions
+
+        template<class GeoField>
+        static wordList getNames(const PtrList<const GeoField>&);
+
+        //- Disallow default bitwise copy construct
+        tecplotWriter(const tecplotWriter&) = delete;
+
+        //- Disallow default bitwise assignment
+        void operator=(const tecplotWriter&) = delete;
 
 public:
+
+    //- Data location types
+    enum dataLocation
+    {
+        CELL_CENTERED = 0,
+        NODE_CENTERED = 1
+    };
+
+
+    //- Data file type
+    enum dataFileType
+    {
+        FILETYPE_FULL = 0,
+        FILETYPE_GRID = 1,
+        FILETYPE_SOLUTION = 2
+    };
+
+
+    // Static data members
+
+        //- Commonly used "X Y Z" string
+        static const string XYZ;
+
 
     // Constructors
 
@@ -69,92 +132,103 @@ public:
 
     // Member Functions
 
+        //- Initialize writing
         void writeInit
         (
             const word& name,
             const string& varNames,
             const fileName&,
-            INTEGER4 tecplotFileType
+            const dataFileType fileType
         ) const;
 
         //- Write mesh as polyhedral zone
         void writePolyhedralZone
         (
             const word& zoneName,
-            const INTEGER4 strandID,
+            const int32_t strandID,
             const fvMesh& mesh,
-            const List<INTEGER4>& varLocArray,
-            INTEGER4 nFaceNodes
+            const UList<int32_t>& varLocArray,
+            const int32_t NumFaceNodes
         ) const;
 
         //- Write surface as polygonal zone
         void writePolygonalZone
         (
             const word& zoneName,
-            const INTEGER4 strandID,
+            const int32_t strandID,
             const indirectPrimitivePatch& pp,
-            const List<INTEGER4>& varLocArray
+            const UList<int32_t>& varLocArray
         ) const;
 
         //- Write unordered data (or rather 1D ordered)
         void writeOrderedZone
         (
             const word& zoneName,
-            INTEGER4 strandID,
+            const int32_t strandID,
             const label n,
-            const List<INTEGER4>& varLocArray
+            const UList<int32_t>& varLocArray
         ) const;
 
         //- Write mesh
-        void writeConnectivity(const fvMesh& mesh) const;
+        void writeConnectivity(const fvMesh&) const;
 
         //- Write surface
         void writeConnectivity(const indirectPrimitivePatch& pp) const;
 
+        //- Finalize writing
         void writeEnd() const;
 
-        //- Write generic Field
+
+        //- Write generic Field, component-wise
         template<class Type>
-        void writeField(const Field<Type>& fld) const;
+        void writeField(const Field<Type>&) const;
+
+        //- Write generic Field, component-wise
+        template<class Type>
+        void writeField(const tmp<Field<Type>>&) const;
+
+        //- Write all fields listed
+        template<class GeoField>
+        void writeFields(const PtrList<const GeoField>&) const;
 
 
         //- Get either fvPatchField or patchInternalField
         template<class Type>
-        tmp<Field<Type>> getPatchField
+        static tmp<Field<Type>> getPatchField
         (
             const bool nearCellValue,
-            const GeometricField<Type, fvPatchField, volMesh>& vfld,
+            const GeometricField<Type, fvPatchField, volMesh>&,
             const label patchi
-        ) const;
+        );
 
         //- Get mixed field: fvsPatchField for boundary faces and
         //  internalField for internal faces.
         template<class Type>
-        tmp<Field<Type>> getFaceField
+        static tmp<Field<Type>> getFaceField
         (
             const GeometricField<Type, fvsPatchField, surfaceMesh>&,
-            const labelList& faceLabels
-        ) const;
+            const labelUList& faceLabels
+        );
 
-        template<class GeoField>
-        static wordList getNames(const PtrList<GeoField>&);
 
+        //- Fill in tecplot names/locations for the given input names
         template<class Type>
         static void getTecplotNames
         (
             const wordList& names,
-            const INTEGER4 loc,
+            const int32_t loc,
             string& varNames,
-            DynamicList<INTEGER4>& varLocation
+            DynamicList<int32_t>& varLocation
         );
 
+        //- Fill in tecplot names/locations for the given input fields
         template<class GeoField>
         static void getTecplotNames
         (
             const PtrList<GeoField>& flds,
-            const INTEGER4 loc,
+            const int32_t loc,
             string& varNames,
-            DynamicList<INTEGER4>& varLocation
+            DynamicList<int32_t>& varLocation
         );
 
 };
