@@ -39,7 +39,7 @@
 #
 
 foamFile=$($WM_PROJECT_DIR/bin/foamEtcFile -mode o config.sh/paraview 2>/dev/null)
-[ $? -eq 0 ] && . $foamFile ParaView_VERSION=3.12.0
+[ $? -eq 0 ] && . $foamFile ParaView_VERSION=5.0.1
 
 unset foamFile
 
