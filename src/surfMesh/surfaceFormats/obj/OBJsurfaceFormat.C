@@ -51,7 +51,6 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
-    const bool mustTriangulate = this->isTri();
     this->clear();
 
     IFstream is(filename);
@@ -173,7 +172,7 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
 
             labelUList& f = static_cast<labelUList&>(dynVertices);
 
-            if (mustTriangulate && f.size() > 3)
+            if (MeshedSurface<Face>::isTri() && f.size() > 3)
             {
                 // simple face triangulation about f[0]
                 // points may be incomplete
@@ -200,9 +199,9 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
     this->storedPoints().transfer(dynPoints);
 
     this->sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
+    this->addZones(dynSizes, dynNames, true); // add zones, cull empty ones
+    this->addZonesToFaces(); // for labelledTri
 
-    // add zones, culling empty ones
-    this->addZones(dynSizes, dynNames, true);
     return true;
 }
 

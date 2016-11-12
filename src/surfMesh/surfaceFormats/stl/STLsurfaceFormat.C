@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STLsurfaceFormat.H"
-#include "ListOps.H"
+#include "labelledTri.H"
 #include "triPointRef.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -180,11 +180,11 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
     {
         this->addZones(sizes);
     }
-
+    this->addZonesToFaces(); // for labelledTri
     this->stitchFaces(SMALL);
+
     return true;
 }
-
 
 
 template<class Face>
@@ -271,22 +271,8 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBinary
 
     const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
 
-
-    unsigned int nTris = 0;
-    if (MeshedSurface<Face>::isTri())
-    {
-        nTris = faceLst.size();
-    }
-    else
-    {
-        // count triangles for on-the-fly triangulation
-        forAll(faceLst, facei)
-        {
-            nTris += faceLst[facei].size() - 2;
-        }
-    }
-
     // Write the STL header
+    unsigned int nTris = surf.nTriangles();
     STLsurfaceFormatCore::writeHeaderBINARY(os, nTris);
 
     label faceIndex = 0;
@@ -345,7 +331,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeAscii
     // a single zone - we can skip sorting
     if (surf.zoneToc().size() == 1)
     {
-        os << "solid " << surf.zoneToc()[0].name() << endl;
+        os << "solid " << surf.zoneToc()[0].name() << nl;
         forAll(faceLst, facei)
         {
             writeShell(os, pointLst, faceLst[facei]);
@@ -391,21 +377,8 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBinary
     const List<Face>&  faceLst  = surf.surfFaces();
     const List<label>& zoneIds  = surf.zoneIds();
 
-    unsigned int nTris = 0;
-    if (MeshedSurface<Face>::isTri())
-    {
-        nTris = faceLst.size();
-    }
-    else
-    {
-        // count triangles for on-the-fly triangulation
-        forAll(faceLst, facei)
-        {
-            nTris += faceLst[facei].size() - 2;
-        }
-    }
-
     // Write the STL header
+    unsigned int nTris = surf.nTriangles();
     STLsurfaceFormatCore::writeHeaderBINARY(os, nTris);
 
     // always write unsorted

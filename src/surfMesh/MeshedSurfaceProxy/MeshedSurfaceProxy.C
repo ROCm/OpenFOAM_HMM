@@ -235,4 +235,41 @@ Foam::MeshedSurfaceProxy<Face>::~MeshedSurfaceProxy()
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+
+namespace Foam
+{
+
+// Number of triangles for a triFace surface
+template<>
+inline label MeshedSurfaceProxy<triFace>::nTriangles() const
+{
+    return this->size();
+}
+
+// Number of triangles for a labelledTri surface
+template<>
+inline label MeshedSurfaceProxy<labelledTri>::nTriangles() const
+{
+    return this->size();
+}
+
+}
+
+
+template<class Face>
+inline Foam::label Foam::MeshedSurfaceProxy<Face>::nTriangles() const
+{
+    label nTri = 0;
+    const List<Face>& faceLst = this->surfFaces();
+    forAll(faceLst, facei)
+    {
+        nTri += faceLst[facei].nTriangles();
+    }
+
+    return nTri;
+}
+
+
 // ************************************************************************* //

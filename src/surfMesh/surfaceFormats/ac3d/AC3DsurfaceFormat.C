@@ -49,7 +49,6 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
-    const bool mustTriangulate = this->isTri();
     this->clear();
 
     IFstream is(filename);
@@ -199,7 +198,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
 
                     labelUList& f = static_cast<labelUList&>(verts);
 
-                    if (mustTriangulate && f.size() > 3)
+                    if (MeshedSurface<Face>::isTri() && f.size() > 3)
                     {
                         // simple face triangulation about f[0]
                         // points may be incomplete
@@ -248,7 +247,9 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
 
     // add zones, culling empty ones
     this->addZones(sizes, names, true);
+    this->addZonesToFaces(); // for labelledTri
     this->stitchFaces(SMALL);
+
     return true;
 }
 
