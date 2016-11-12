@@ -7,7 +7,7 @@ MeshedSurface/MeshedSurfaceCore.C
 MeshedSurface/MeshedSurfaces.C
 UnsortedMeshedSurface/UnsortedMeshedSurfaces.C
 
-MeshedSurfaceProxy/MeshedSurfaceProxyCore.C
+MeshedSurfaceProxy/MeshedSurfaceProxys.C
 
 mergedSurf/mergedSurf.C
 

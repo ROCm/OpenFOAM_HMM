@@ -30,7 +30,7 @@ Description
 
 SourceFiles
     MeshedSurfaceProxy.C
-    MeshedSurfaceProxyCore.C
+    MeshedSurfaceProxys.C
 
 \*---------------------------------------------------------------------------*/
 
