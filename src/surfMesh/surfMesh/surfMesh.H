@@ -277,6 +277,15 @@ public:
                 const bool validate = true
             );
 
+            //- Reset mesh primitive data.
+            void resetPrimitives
+            (
+                const Xfer<List<point>>& points,
+                const Xfer<faceList>& faces,
+                const Xfer<surfZoneList>& zones,
+                const bool validate = true
+            );
+
 
             //- Transfer the contents of the argument and annul the argument
             void transfer(MeshedSurface<face>&);

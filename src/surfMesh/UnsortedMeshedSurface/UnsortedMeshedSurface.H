@@ -366,6 +366,9 @@ public:
             //- Transfer contents to the Xfer container
             Xfer<UnsortedMeshedSurface<Face>> xfer();
 
+            //- Transfer stored zoneIds to an Xfer container
+            Xfer<labelList> xferZoneIds();
+
 
         // Read
 

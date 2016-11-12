@@ -535,6 +535,16 @@ void Foam::MeshedSurface<Face>::scalePoints(const scalar scaleFactor)
 template<class Face>
 void Foam::MeshedSurface<Face>::reset
 (
+    const Xfer<MeshedSurface<Face>>& surf
+)
+{
+    transfer(surf());
+}
+
+
+template<class Face>
+void Foam::MeshedSurface<Face>::reset
+(
     const Xfer<pointField>& pointLst,
     const Xfer<List<Face>>& faceLst,
     const Xfer<surfZoneList>& zoneLst
@@ -1112,12 +1122,11 @@ void Foam::MeshedSurface<Face>::transfer
     MeshedSurface<Face>& surf
 )
 {
-    reset
-    (
-        xferMove(surf.storedPoints()),
-        xferMove(surf.storedFaces()),
-        xferMove(surf.storedZones())
-    );
+    ParentType::clearOut();
+
+    this->storedPoints().transfer(surf.storedPoints());
+    this->storedFaces().transfer(surf.storedFaces());
+    this->storedZones().transfer(surf.storedZones());
 
     surf.clear();
 }
@@ -1167,9 +1176,40 @@ void Foam::MeshedSurface<Face>::transfer
 
 
 template<class Face>
-Foam::Xfer<Foam::MeshedSurface<Face>> Foam::MeshedSurface<Face>::xfer()
+Foam::Xfer<Foam::MeshedSurface<Face>>
+Foam::MeshedSurface<Face>::xfer()
 {
     return xferMove(*this);
+}
+
+
+template<class Face>
+Foam::Xfer<Foam::List<Face>>
+Foam::MeshedSurface<Face>::xferFaces()
+{
+    // Topology changed because of transfer
+    ParentType::clearOut();
+
+    return this->storedFaces().xfer();
+}
+
+
+template<class Face>
+Foam::Xfer<Foam::List<Foam::point>>
+Foam::MeshedSurface<Face>::xferPoints()
+{
+    // Topology changed because of transfer
+    ParentType::clearOut();
+
+    return this->storedPoints().xfer();
+}
+
+
+template<class Face>
+Foam::Xfer<Foam::surfZoneList>
+Foam::MeshedSurface<Face>::xferZones()
+{
+    return this->storedZones().xfer();
 }
 
 

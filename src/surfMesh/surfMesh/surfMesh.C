@@ -272,6 +272,27 @@ void Foam::surfMesh::resetPrimitives
 }
 
 
+void Foam::surfMesh::resetPrimitives
+(
+    const Xfer<List<point>>& points,
+    const Xfer<faceList>& faces,
+    const Xfer<surfZoneList>& zones,
+    const bool validate
+)
+{
+    // Clear addressing.
+    clearOut();
+
+    Allocator::reset(points, faces, zones);
+    this->updateRefs();
+
+    if (validate)
+    {
+        checkZones();
+    }
+}
+
+
 void Foam::surfMesh::transfer
 (
     MeshedSurface<face>& surf
@@ -288,7 +309,8 @@ void Foam::surfMesh::transfer
 }
 
 
-Foam::Xfer<Foam::MeshedSurface<Foam::face>> Foam::surfMesh::xfer()
+Foam::Xfer<Foam::MeshedSurface<Foam::face>>
+Foam::surfMesh::xfer()
 {
     Xfer<MeshedSurface<face>> xf;
 

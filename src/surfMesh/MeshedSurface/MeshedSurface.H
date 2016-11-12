@@ -405,6 +405,12 @@ public:
             //- Scale points. A non-positive factor is ignored
             virtual void scalePoints(const scalar);
 
+            //- Reset by transferring contents of the argument and annul it
+            virtual void reset
+            (
+                const Xfer<MeshedSurface<Face>>&
+            );
+
             //- Reset primitive data (points, faces and zones)
             //  Note, optimized to avoid overwriting data (with Xfer::null)
             virtual void reset
@@ -475,6 +481,15 @@ public:
 
             //- Transfer contents to the Xfer container
             Xfer<MeshedSurface<Face>> xfer();
+
+            //- Transfer stored faces to an Xfer container
+            Xfer<List<Face>> xferFaces();
+
+            //- Transfer stored points to an Xfer container
+            Xfer<List<point>> xferPoints();
+
+            //- Transfer stored zones to an Xfer container
+            Xfer<surfZoneList> xferZones();
 
 
         // Read
