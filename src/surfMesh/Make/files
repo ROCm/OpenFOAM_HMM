@@ -40,8 +40,6 @@ $(surfaceFormats)/tri/TRIsurfaceFormatCore.C
 $(surfaceFormats)/tri/TRIsurfaceFormatRunTime.C
 $(surfaceFormats)/vtk/VTKsurfaceFormatCore.C
 $(surfaceFormats)/vtk/VTKsurfaceFormatRunTime.C
-$(surfaceFormats)/wrl/WRLsurfaceFormatCore.C
-$(surfaceFormats)/wrl/WRLsurfaceFormatRunTime.C
 $(surfaceFormats)/x3d/X3DsurfaceFormatCore.C
 $(surfaceFormats)/x3d/X3DsurfaceFormatRunTime.C
 
