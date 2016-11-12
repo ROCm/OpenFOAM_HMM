@@ -57,7 +57,7 @@ inline Foam::face::face(const labelUList& lst)
 {}
 
 
-inline Foam::face::face(const labelList& lst)
+inline Foam::face::face(std::initializer_list<label> lst)
 :
     labelList(lst)
 {}
@@ -79,7 +79,7 @@ inline Foam::face::face(Istream& is)
 
 inline Foam::pointField Foam::face::points(const pointField& meshPoints) const
 {
-    // There are as many points as there labels for them
+    // There are as many points as there are labels for them
     pointField p(size());
 
     // For each point in list, set it to the point in 'pnts' addressed

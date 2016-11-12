@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,28 +64,43 @@ class labelledTri
         label region_;
 
 
+    // Private Member Functions
+
+        //- Assign from a list of 3 or 4 labels.
+        //  Default region is 0.
+        inline void assign(const labelUList&);
+
 public:
 
     // Constructors
 
-        //- Construct null
+        //- Construct null with invalid point labels and region (-1).
         inline labelledTri();
 
-        //- Construct from triFace and a region label
+        //- Construct from triFace and region label.
+        //  Default region is 0 if not specified.
         inline labelledTri
         (
             const triFace&,
-            const label region
+            const label region = 0
         );
 
-        //- Construct from three point labels and a region label
+        //- Construct from three point labels and a region label.
+        //  Default region is 0 if not specified.
         inline labelledTri
         (
             const label a,
             const label b,
             const label c,
-            const label region
+            const label region = 0
         );
+
+        //- Construct from a list of 3 or 4 labels.
+        //  Default region is 0.
+        explicit inline labelledTri(const labelUList&);
+
+        //- Construct from an initializer list of 3 or 4 labels.
+        explicit inline labelledTri(std::initializer_list<label>);
 
         //- Construct from Istream
         inline labelledTri(Istream&);
@@ -101,17 +116,6 @@ public:
             //- Return region label
             inline label& region();
 
-
-        // Check
-
-        // Edit
-
-        // Write
-
-
-    // Friend Functions
-
-    // Friend Operators
 
     // IOstream Operators
 

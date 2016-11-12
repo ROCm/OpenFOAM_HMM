@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,10 +25,34 @@ License
 
 #include "IOstreams.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+inline void Foam::labelledTri::assign(const labelUList& lst)
+{
+    const label sz = lst.size();
+
+    // checkSize
+    if (sz < 3 || sz > 4)
+    {
+         FatalErrorInFunction
+            << "size " << sz << " != (3 or 4)"
+            << abort(FatalError);
+    }
+
+    for (label i=0; i<3; ++i)
+    {
+        operator[](i) = lst[i];
+    }
+
+    region_ = (sz > 3 ? lst[3] : 0);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::labelledTri::labelledTri()
 :
+    triFace(),
     region_(-1)
 {}
 
@@ -55,6 +79,24 @@ inline Foam::labelledTri::labelledTri
     triFace(a, b, c),
     region_(region)
 {}
+
+
+inline Foam::labelledTri::labelledTri(const labelUList& lst)
+:
+    triFace(),
+    region_(0)
+{
+    assign(lst);
+}
+
+
+inline Foam::labelledTri::labelledTri(std::initializer_list<label> initLst)
+:
+    triFace(),
+    region_(0)
+{
+    assign(labelList(initLst));
+}
 
 
 inline Foam::labelledTri::labelledTri(Istream& is)
