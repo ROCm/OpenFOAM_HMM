@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,10 +83,10 @@ class STLsurfaceFormat
 
 
         //- Disallow default bitwise copy construct
-        STLsurfaceFormat(const STLsurfaceFormat<Face>&);
+        STLsurfaceFormat(const STLsurfaceFormat<Face>&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const STLsurfaceFormat<Face>&);
+        void operator=(const STLsurfaceFormat<Face>&) = delete;
 
 
 public:
@@ -132,7 +132,11 @@ public:
 
         //- Write surface mesh components by proxy
         //  as ASCII or BINARY, depending on the extension
-        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
+        static void write
+        (
+            const fileName&,
+            const MeshedSurfaceProxy<Face>&
+        );
 
         //- Write surface mesh components by proxy
         //  as ASCII or BINARY or dependent on the extension
@@ -159,7 +163,11 @@ public:
 
         //- Write UnsortedMeshedSurface
         //  as ASCII or BINARY, depending on the extension
-        static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
+        static void write
+        (
+            const fileName&,
+            const UnsortedMeshedSurface<Face>&
+        );
 
         //- Write UnsortedMeshedSurface
         //  as ASCII or BINARY or dependent on the extension

@@ -38,10 +38,6 @@ SourceFiles
 #include "surfaceFormatsCore.H"
 #include "triFace.H"
 
-#include "IFstream.H"
-#include "Ostream.H"
-#include "OFstream.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -74,10 +70,10 @@ class TRIsurfaceFormatCore
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        TRIsurfaceFormatCore(const TRIsurfaceFormatCore&);
+        TRIsurfaceFormatCore(const TRIsurfaceFormatCore&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const TRIsurfaceFormatCore&);
+        void operator=(const TRIsurfaceFormatCore&) = delete;
 
         bool read(const fileName&);
 
