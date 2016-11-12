@@ -500,6 +500,7 @@ public:
     // IOstream Operators
 
         //- Read MeshedSurface from Istream.
+        //  Avoid using to read/write file content (fragile).
         friend Istream& operator>> <Face>
         (
             Istream&,
@@ -508,6 +509,7 @@ public:
 
 
         //- Write MeshedSurface to Ostream.
+        //  Avoid using to read/write file content (fragile).
         friend Ostream& operator<< <Face>
         (
             Ostream&,

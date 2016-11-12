@@ -403,6 +403,7 @@ public:
     // IOstream Operators
 
         //- Read UnsortedMeshedSurface from Istream.
+        //  Avoid using to read/write file content (fragile).
         friend Istream& operator>> <Face>
         (
             Istream&,
@@ -411,6 +412,7 @@ public:
 
 
         //- Write UnsortedMeshedSurface to Ostream.
+        //  Avoid using to read/write file content (fragile).
         friend Ostream& operator<< <Face>
         (
             Ostream&,
