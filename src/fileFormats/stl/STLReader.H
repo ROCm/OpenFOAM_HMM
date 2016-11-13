@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,22 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fileFormats::STLsurfaceFormatCore
+    Foam::fileFormats::STLReader
 
 Description
     Internal class used by the STLsurfaceFormat
 
 SourceFiles
-    STLsurfaceFormatCore.C
+    STLReader.C
     STLsurfaceFormatASCII.L
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef STLsurfaceFormatCore_H
-#define STLsurfaceFormatCore_H
+#ifndef STLReader_H
+#define STLReader_H
 
-#include "STLtriangle.H"
-#include "triFace.H"
+#include "STLCore.H"
+#include "labelledTri.H"
 #include "IFstream.H"
 #include "Ostream.H"
 
@@ -49,10 +49,12 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class STLsurfaceFormatCore Declaration
+                   Class fileFormats::STLReader Declaration
 \*---------------------------------------------------------------------------*/
 
-class STLsurfaceFormatCore
+class STLReader
+:
+    public STLCore
 {
     // Private Data
 
@@ -73,44 +75,37 @@ class STLsurfaceFormatCore
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        STLsurfaceFormatCore(const STLsurfaceFormatCore&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const STLsurfaceFormatCore&);
-
-        //- Determine the file type
-        static int detectBINARY(const fileName&);
-
         //- Read ASCII
-        bool readASCII(istream&, const off_t);
+        bool readASCII(const fileName&);
 
         //- Read BINARY
-        bool readBINARY(istream&, const off_t);
+        bool readBINARY(const fileName&);
+
+        //- Read ASCII or BINARY
+        bool readFile(const fileName&, const STLFormat&);
+
+
+        //- Disallow default bitwise copy construct
+        STLReader(const STLReader&) = delete;
+
+        //- Disallow default bitwise assignment
+        void operator=(const STLReader&) = delete;
 
 
 public:
 
-    // Static Data
-
-        //- The number of bytes in the STL binary header
-        static const unsigned int headerSize = 80;
-
-
-    // Static Member Functions
-
-        //- Write "STL binary file" and number of triangles to stream
-        static void writeHeaderBINARY(ostream&, unsigned int);
-
-
     // Constructors
 
         //- Read from file, filling in the information
-        STLsurfaceFormatCore(const fileName&);
+        STLReader(const fileName&);
+
+        //- Read from file, filling in the information.
+        //  Manually selected choice of ascii/binary/detect.
+        STLReader(const fileName&, const STLFormat&);
 
 
     //- Destructor
-    ~STLsurfaceFormatCore();
+    ~STLReader();
 
 
     // Member Functions

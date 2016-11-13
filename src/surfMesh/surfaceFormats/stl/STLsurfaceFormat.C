@@ -51,20 +51,17 @@ inline void Foam::fileFormats::STLsurfaceFormat<Face>::writeShell
     const point& p0 = pointLst[f[0]];
     for (label fp1 = 1; fp1 < f.size() - 1; ++fp1)
     {
-        label fp2 = f.fcIndex(fp1);
+        const label fp2 = f.fcIndex(fp1);
 
-        const point& p1 = pointLst[f[fp1]];
-        const point& p2 = pointLst[f[fp2]];
-
-        // write STL triangle
-        os  << " facet normal "
-            << norm.x() << ' ' << norm.y() << ' ' << norm.z() << nl
-            << "  outer loop\n"
-            << "   vertex " << p0.x() << ' ' << p0.y() << ' ' << p0.z() << nl
-            << "   vertex " << p1.x() << ' ' << p1.y() << ' ' << p1.z() << nl
-            << "   vertex " << p2.x() << ' ' << p2.y() << ' ' << p2.z() << nl
-            << "  endloop\n"
-            << " endfacet" << endl;
+        // Write ASCII
+        STLtriangle::write
+        (
+            os,
+            norm,
+            p0,
+            pointLst[f[fp1]],
+            pointLst[f[fp2]]
+        );
     }
 }
 
@@ -92,18 +89,17 @@ inline void Foam::fileFormats::STLsurfaceFormat<Face>::writeShell
     const point& p0 = pointLst[f[0]];
     for (label fp1 = 1; fp1 < f.size() - 1; ++fp1)
     {
-        label fp2 = f.fcIndex(fp1);
+        const label fp2 = f.fcIndex(fp1);
 
-        STLtriangle stlTri
+        // Write BINARY
+        STLtriangle
         (
             norm,
             p0,
             pointLst[f[fp1]],
             pointLst[f[fp2]],
             zoneI
-        );
-
-        stlTri.write(os);
+        ).write(os);
     }
 }
 
@@ -131,7 +127,7 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
     this->clear();
 
     // read in the values
-    STLsurfaceFormatCore reader(filename);
+    STLReader reader(filename);
 
     // transfer points
     this->storedPoints().transfer(reader.points());
@@ -273,7 +269,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBinary
 
     // Write the STL header
     unsigned int nTris = surf.nTriangles();
-    STLsurfaceFormatCore::writeHeaderBINARY(os, nTris);
+    STLCore::writeBinaryHeader(os, nTris);
 
     label faceIndex = 0;
     forAll(zones, zoneI)
@@ -379,7 +375,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBinary
 
     // Write the STL header
     unsigned int nTris = surf.nTriangles();
-    STLsurfaceFormatCore::writeHeaderBINARY(os, nTris);
+    STLCore::writeBinaryHeader(os, nTris);
 
     // always write unsorted
     forAll(faceLst, facei)
@@ -402,10 +398,20 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
     const MeshedSurfaceProxy<Face>& surf
 )
 {
-    const word ext = filename.ext();
+    // Auto-detect ASCII/BINARY extension
+    write(filename, surf, STLCore::DETECT);
+}
 
-    // handle 'stlb' as binary directly
-    if (ext == "stlb")
+
+template<class Face>
+void Foam::fileFormats::STLsurfaceFormat<Face>::write
+(
+    const fileName& filename,
+    const MeshedSurfaceProxy<Face>& surf,
+    const STLFormat& format
+)
+{
+    if (STLCore::isBinaryName(filename, format))
     {
         writeBinary(filename, surf);
     }
@@ -423,10 +429,20 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
     const UnsortedMeshedSurface<Face>& surf
 )
 {
-    word ext = filename.ext();
+    // Auto-detect ASCII/BINARY extension
+    write(filename, surf, STLCore::DETECT);
+}
 
-    // handle 'stlb' as binary directly
-    if (ext == "stlb")
+
+template<class Face>
+void Foam::fileFormats::STLsurfaceFormat<Face>::write
+(
+    const fileName& filename,
+    const UnsortedMeshedSurface<Face>& surf,
+    const STLFormat& format
+)
+{
+    if (STLCore::isBinaryName(filename, format))
     {
         writeBinary(filename, surf);
     }

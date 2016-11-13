@@ -25,7 +25,7 @@ Class
     Foam::fileFormats::STLsurfaceFormat
 
 Description
-    Provide a means of reading/writing STL files (ASCII and binary).
+    Provide a means of reading/writing STL files (ASCII and BINARY).
 
 Note
     For efficiency, the zones are sorted before creating the faces.
@@ -40,7 +40,7 @@ SourceFiles
 #ifndef STLsurfaceFormat_H
 #define STLsurfaceFormat_H
 
-#include "STLsurfaceFormatCore.H"
+#include "STLReader.H"
 #include "MeshedSurface.H"
 #include "MeshedSurfaceProxy.H"
 #include "UnsortedMeshedSurface.H"
@@ -59,7 +59,8 @@ namespace fileFormats
 template<class Face>
 class STLsurfaceFormat
 :
-    public MeshedSurface<Face>
+    public MeshedSurface<Face>,
+    public STLCore
 {
     // Private Member Functions
 
@@ -79,6 +80,7 @@ class STLsurfaceFormat
             const Face&,
             const label zoneI
         );
+
 
         //- Disallow default bitwise copy construct
         STLsurfaceFormat(const STLsurfaceFormat<Face>&);
@@ -132,6 +134,15 @@ public:
         //  as ASCII or BINARY, depending on the extension
         static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
 
+        //- Write surface mesh components by proxy
+        //  as ASCII or BINARY or dependent on the extension
+        static void write
+        (
+            const fileName&,
+            const MeshedSurfaceProxy<Face>&,
+            const STLFormat&
+        );
+
         //- Write UnsortedMeshedSurface (as ASCII) sorted by zone
         static void writeAscii
         (
@@ -149,6 +160,15 @@ public:
         //- Write UnsortedMeshedSurface
         //  as ASCII or BINARY, depending on the extension
         static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
+
+        //- Write UnsortedMeshedSurface
+        //  as ASCII or BINARY or dependent on the extension
+        static void write
+        (
+            const fileName&,
+            const UnsortedMeshedSurface<Face>&,
+            const STLFormat&
+        );
 
         //- Read from file
         virtual bool read(const fileName&);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,74 +22,90 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::STLpoint
+    Foam::fileFormats::STLCore
 
 Description
-    A vertex point representation for STL files.
+    Core routines used when reading/writing STL files.
 
 SourceFiles
+    STLCore.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef STLpoint_H
-#define STLpoint_H
+#ifndef STLCore_H
+#define STLCore_H
 
-#include "point.H"
-#include "Istream.H"
+#include "STLpoint.H"
+#include "STLtriangle.H"
+#include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                          Class STLpoint Declaration
-\*---------------------------------------------------------------------------*/
-
-class STLpoint
-:
-    public Vector<float>
+namespace fileFormats
 {
 
+/*---------------------------------------------------------------------------*\
+                    Class fileFormats::STLCore Declaration
+\*---------------------------------------------------------------------------*/
+
+class STLCore
+{
 public:
+
+    // Public data types
+
+        //- Enumeration for the format of data in the stream
+        enum STLFormat
+        {
+            ASCII,  //!< ASCII
+            BINARY, //!< BINARY
+            DETECT  //!< Detect based on (input) content or (output) extension
+        };
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Detect 'stlb' extension as binary
+        static bool isBinaryName
+        (
+            const fileName& filename,
+            const STLFormat& format
+        );
+
+
+        //- Check contents to detect if the file is a binary STL.
+        //  Return the estimated number of triangles or 0 on error.
+        static int detectBinaryHeader(const fileName&);
+
+
+        //- Read STL binary file header.
+        //  Return the opened file stream and estimated number of triangles.
+        //  The stream is invalid and number of triangles is 0 on error.
+        static autoPtr<std::istream> readBinaryHeader
+        (
+            const fileName& filename,
+            label& nTrisEstimated
+        );
+
+        //- Write STL binary file and number of triangles to stream
+        static void writeBinaryHeader(ostream&, unsigned int);
+
 
     // Constructors
 
         //- Construct null
-        inline STLpoint()
-        {}
+        STLCore();
 
-        //- Construct from components
-        inline STLpoint(float x, float y, float z)
-        :
-            Vector<float>(x, y, z)
-        {}
-
-        //- Construct from point
-        inline STLpoint(const point& pt)
-        :
-            Vector<float>(float(pt.x()), float(pt.y()), float(pt.z()))
-        {}
-
-        //- Construct from istream
-        inline STLpoint(Istream& is)
-        :
-            Vector<float>(is)
-        {}
-
-
-    // Member Operators
-
-        //- Conversion to point
-        inline operator point() const
-        {
-            return point(x(), y(), z());
-        }
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fileFormats
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

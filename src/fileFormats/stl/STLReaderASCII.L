@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,8 @@ License
    ------ local definitions
  \* ------------------------------------------------------------------------ */
 
-#include "STLsurfaceFormatCore.H"
+#include "STLReader.H"
+#include "OSspecific.H"
 
 using namespace Foam;
 
@@ -97,32 +98,32 @@ public:
     // Access
 
         //- Do all the solid groups appear in order
-        bool sorted() const
+        inline bool sorted() const
         {
             return sorted_;
         }
 
         //- A list of points corresponding to a pointField
-        DynamicList<point>& points()
+        inline DynamicList<point>& points()
         {
             return points_;
         }
 
         //- A list of facet IDs (group IDs)
         //  corresponds to the number of triangles
-        DynamicList<label>& facets()
+        inline DynamicList<label>& facets()
         {
             return facets_;
         }
 
         //- Names
-        DynamicList<word>& names()
+        inline DynamicList<word>& names()
         {
             return names_;
         }
 
         //- Sizes
-        DynamicList<label>& sizes()
+        inline DynamicList<label>& sizes()
         {
             return sizes_;
         }
@@ -390,20 +391,27 @@ endsolid              {space}("endsolid"|"ENDSOLID")({some_space}{word})*
 //
 // member function
 //
-bool Foam::fileFormats::STLsurfaceFormatCore::readASCII
+bool Foam::fileFormats::STLReader::readASCII
 (
-    istream& is,
-    const off_t dataFileSize
+    const fileName& filename
 )
 {
+    IFstream is(filename);
+    if (!is)
+    {
+        FatalErrorInFunction
+            << "file " << filename << " not found"
+            << exit(FatalError);
+    }
+
     // Create the lexer with the approximate number of vertices in the STL
     // from the file size
-    STLASCIILexer lexer(&is, dataFileSize/400);
+    STLASCIILexer lexer(&(is.stdStream()), Foam::fileSize(filename)/400);
     while (lexer.lex() != 0) {}
 
     sorted_ = lexer.sorted();
 
-    // transfer to normal lists
+    // Transfer to normal lists
     points_.transfer(lexer.points());
     zoneIds_.transfer(lexer.facets());
     names_.transfer(lexer.names());
@@ -413,5 +421,5 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readASCII
 }
 
  /* ------------------------------------------------------------------------ *\
-    ------ End of STLfileFormatASCII.L
+    ------ End of STLReaderASCII.L
  \* ------------------------------------------------------------------------ */
