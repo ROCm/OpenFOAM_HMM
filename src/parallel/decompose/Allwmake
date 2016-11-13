@@ -4,19 +4,6 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Parse arguments for library compilation
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
-
-# Extract an integer value from '#define NAME ...'
-getIntDefine()
-{
-    local name="$1"
-    local file="$2"
-    local val=$(sed -ne \
-        's/^[ tab]*#[ tab]*define[ tab][ tab]*'"$name"'[ tab][ tab]*\([1-9][0-9]\).*/\1/p' \
-        "$file")
-    echo "${val:-0}"
-}
-
-
 # Test for metis.
 # - return 0 and export METIS_ARCH_PATH on success
 hasMetis()
@@ -62,24 +49,16 @@ hasMetis()
     }
 
     # Ensure consistent sizes between OpenFOAM and metis header
-    local label=$(getIntDefine  IDXTYPEWIDTH  $header)
-    local scalar=$(getIntDefine REALTYPEWIDTH $header)
-
+    # Extract IDXTYPEWIDTH from metis.h: regex as per ThirdParty Allwmake
+    local label=$(sed -ne 's/^.*#define  *IDXTYPEWIDTH  *\([1-9][0-9]\).*/\1/p' $header)
     [ "$WM_LABEL_SIZE" = "$label" ] || {
         echo "   skipping - label=$WM_LABEL_SIZE, metis.h has '$label'"
         echo
         return 1
     }
 
-    [ "$WM_PRECISION_OPTION" = SP -a "$scalar" = 32 ] || \
-    [ "$WM_PRECISION_OPTION" = DP -a "$scalar" = 64 ] || {
-        echo "   skipping - scalar='$WM_PRECISION_OPTION', metis.h has '$scalar'"
-        echo
-        return 1
-    }
-
     echo "using METIS_ARCH_PATH=$METIS_ARCH_PATH"
-    echo "    label=$label, scalar=$scalar"
+    echo "    label=$label"
     echo
     export METIS_ARCH_PATH
     return 0 # success

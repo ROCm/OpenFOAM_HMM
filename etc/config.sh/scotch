@@ -28,7 +28,7 @@
 #     Setup file for scotch include/libraries.
 #     Sourced during wmake process only.
 #
-#     Normally used to specify the metis version and location for a
+#     Normally used to specify the scotch version and location for a
 #     ThirdParty installation.
 #
 #     If using system-wide installations, use the following setting:
