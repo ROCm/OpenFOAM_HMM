@@ -34,6 +34,8 @@ Description
 #include "labelList.H"
 #include "DynamicList.H"
 #include "face.H"
+#include "pointField.H"
+#include "DynamicField.H"
 
 using namespace Foam;
 
@@ -45,7 +47,10 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     List<label> lstA(10);
-    List<label> lstC(IStringStream("(1 2 3 4)")());
+    List<label> lstC
+    {
+        1, 2, 3, 4
+    };
 
     forAll(lstA, i)
     {
@@ -127,6 +132,57 @@ int main(int argc, char *argv[])
     f3.flip();
     Info<< "f1: " << f1 << endl;
     Info<< "f3: " << f3 << endl;
+
+
+    {
+        Info<<"\nTest xfer with fields:" << endl;
+        List<point> list1
+        {
+            { 0, 1, 2 },
+            { 3, 4, 5 },
+            { 6, 7, 8 },
+            { 9, 10, 11 },
+        };
+
+        // Field from Xfer<List>
+        pointField field1(list1.xfer());
+        Info<<nl
+            << "xfer construct from List" << nl
+            <<"input (list) = " << list1 << nl
+            <<"output (field) = " << field1 << nl;
+
+
+        // Field from Xfer<List> ... again
+        pointField field2(field1.xfer());
+        Info<<nl
+            <<"xfer construct from Field (as List): " << nl
+            <<"input (field) = " << field1 << nl
+            <<"output (field) = " << field2 << nl;
+
+
+        // Field from Xfer<Field>
+        pointField field3(xferMove(field2));
+        Info<<nl
+            <<"xfer construct from Field (as Field): " << nl
+            <<"input (field) = " << field2 << nl
+            <<"output (field) = " << field3 << nl;
+
+
+        // Field from Xfer<Field> .. again
+        pointField field4(xferCopy(field3));
+        Info<<nl
+            <<"xfer copy construct from Field (as Field): " << nl
+            <<"input (field) = " << field3 << nl
+            <<"output (field) = " << field4 << nl;
+
+
+        DynamicField<point> dyfield1(xferCopy(field4));
+        Info<<nl
+            <<"xfer copy construct from Field (as Field): " << nl
+            <<"input (field) = " << field4 << nl
+            <<"output (dyn-field) = " << dyfield1 << nl;
+
+    }
 
     return 0;
 }
