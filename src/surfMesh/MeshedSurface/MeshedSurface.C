@@ -1118,6 +1118,8 @@ void Foam::MeshedSurface<Face>::transfer
         xferMove(surf.storedFaces()),
         xferMove(surf.storedZones())
     );
+
+    surf.clear();
 }
 
 
