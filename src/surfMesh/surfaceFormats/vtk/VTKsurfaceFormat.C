@@ -26,6 +26,7 @@ License
 #include "VTKsurfaceFormat.H"
 #include "vtkUnstructuredReader.H"
 #include "scalarIOField.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -69,7 +70,6 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
-    const bool mustTriangulate = this->isTri();
     this->clear();
 
     IFstream is(filename);
@@ -148,18 +148,21 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
     }
 
 
-    // See if needs triangulation
+    // Check if it needs triangulation
     label nTri = 0;
-    if (mustTriangulate)
+    if (MeshedSurface<Face>::isTri())
     {
         forAll(faces, facei)
         {
-            nTri += faces[facei].size()-2;
+            nTri += faces[facei].nTriangles();
         }
     }
 
-    if (nTri > 0)
+    if (nTri > faces.size())
     {
+        // We are here if the target surface needs triangles and
+        // the source surface has non-triangles
+
         DynamicList<Face> dynFaces(nTri);
         DynamicList<label> dynZones(nTri);
         forAll(faces, facei)
@@ -207,6 +210,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
         // add zones, culling empty ones
         this->addZones(zoneSizes, zoneNames, true);
     }
+    this->addZonesToFaces(); // for labelledTri
 
     // transfer to normal lists
     this->storedPoints().transfer(reader.points());

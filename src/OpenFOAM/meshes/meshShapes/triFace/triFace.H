@@ -75,7 +75,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Construct null with invalid point labels (-1)
         inline triFace();
 
         //- Construct from three point labels
@@ -86,8 +86,11 @@ public:
             const label c
         );
 
-        //- Construct from a list of labels
+        //- Construct from a list of 3 labels.
         explicit inline triFace(const labelUList&);
+
+        //- Construct from an initializer list of 3 labels
+        explicit inline triFace(std::initializer_list<label>);
 
         //- Construct from Istream
         inline triFace(Istream&);

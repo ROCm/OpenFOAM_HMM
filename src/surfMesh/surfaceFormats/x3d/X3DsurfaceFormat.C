@@ -24,12 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "X3DsurfaceFormat.H"
-#include "clock.H"
-#include "IFstream.H"
-#include "IStringStream.H"
-#include "Ostream.H"
 #include "OFstream.H"
-#include "ListOps.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -55,7 +50,7 @@ void Foam::fileFormats::X3DsurfaceFormat<Face>::write
     const List<surfZone>& zones =
     (
         surf.surfZones().empty()
-      ? surfaceFormatsCore::oneZone(faceLst, "")
+      ? surfaceFormatsCore::oneZone(faceLst, word::null)
       : surf.surfZones()
     );
 

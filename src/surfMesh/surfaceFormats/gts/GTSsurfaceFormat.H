@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,10 +60,10 @@ class GTSsurfaceFormat
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        GTSsurfaceFormat(const GTSsurfaceFormat<Face>&);
+        GTSsurfaceFormat(const GTSsurfaceFormat<Face>&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const GTSsurfaceFormat<Face>&);
+        void operator=(const GTSsurfaceFormat<Face>&) = delete;
 
 
 public:
@@ -94,10 +94,18 @@ public:
     // Member Functions
 
         //- Write MeshedSurface
-        static void write(const fileName&, const MeshedSurface<Face>&);
+        static void write
+        (
+            const fileName&,
+            const MeshedSurface<Face>&
+        );
 
         //- Write UnsortedMeshedSurface, the output remains unsorted
-        static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
+        static void write
+        (
+            const fileName&,
+            const UnsortedMeshedSurface<Face>&
+        );
 
         //- Read from file
         virtual bool read(const fileName&);

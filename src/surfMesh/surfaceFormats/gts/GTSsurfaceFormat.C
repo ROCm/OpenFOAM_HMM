@@ -203,6 +203,7 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
     }
 
     this->storedZoneToc().transfer(newZones);
+    this->addZonesToFaces(); // for labelledTri
 
     return true;
 }

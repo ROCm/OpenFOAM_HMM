@@ -108,7 +108,11 @@ public:
     // Member Functions
 
         //- Write surface mesh components by proxy
-        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
+        static void write
+        (
+            const fileName&,
+            const MeshedSurfaceProxy<Face>&
+        );
 
         //- Read from file
         virtual bool read(const fileName&);

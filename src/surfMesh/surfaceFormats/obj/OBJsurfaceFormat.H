@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,10 +60,10 @@ class OBJsurfaceFormat
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        OBJsurfaceFormat(const OBJsurfaceFormat<Face>&);
+        OBJsurfaceFormat(const OBJsurfaceFormat<Face>&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const OBJsurfaceFormat<Face>&);
+        void operator=(const OBJsurfaceFormat<Face>&) = delete;
 
 
 public:
@@ -94,7 +94,11 @@ public:
     // Member Functions
 
         //- Write surface mesh components by proxy
-        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
+        static void write
+        (
+            const fileName&,
+            const MeshedSurfaceProxy<Face>&
+        );
 
         //- Read from file
         virtual bool read(const fileName&);

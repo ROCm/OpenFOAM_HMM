@@ -722,6 +722,14 @@ Foam::UnsortedMeshedSurface<Face>::xfer()
 }
 
 
+template<class Face>
+Foam::Xfer<Foam::labelList>
+Foam::UnsortedMeshedSurface<Face>::xferZoneIds()
+{
+    return this->storedZoneIds().xfer();
+}
+
+
 // Read from file, determine format from extension
 template<class Face>
 bool Foam::UnsortedMeshedSurface<Face>::read(const fileName& name)

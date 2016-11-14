@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,28 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fileFormats::SMESHsurfaceFormat
+    Foam::fileFormats::STLCore
 
 Description
-    Provide a means of writing tetgen SMESH format.
-
-    Tetgen http://tetgen.berlios.de
-
-See also
-    File format information:
-    http://tetgen.berlios.de/fformats.smesh.html
+    Core routines used when reading/writing STL files.
 
 SourceFiles
-    SMESHsurfaceFormat.C
+    STLCore.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SMESHsurfaceFormat_H
-#define SMESHsurfaceFormat_H
+#ifndef STLCore_H
+#define STLCore_H
 
-#include "MeshedSurface.H"
-#include "MeshedSurfaceProxy.H"
-#include "UnsortedMeshedSurface.H"
+#include "STLpoint.H"
+#include "STLtriangle.H"
+#include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,50 +47,59 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class SMESHsurfaceFormat Declaration
+                    Class fileFormats::STLCore Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Face>
-class SMESHsurfaceFormat
-:
-    public MeshedSurface<Face>
+class STLCore
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        SMESHsurfaceFormat(const SMESHsurfaceFormat<Face>&) = delete;
-
-        //- Disallow default bitwise assignment
-        void operator=(const SMESHsurfaceFormat<Face>&) = delete;
-
-
 public:
+
+    // Public data types
+
+        //- Enumeration for the format of data in the stream
+        enum STLFormat
+        {
+            ASCII,  //!< ASCII
+            BINARY, //!< BINARY
+            DETECT  //!< Detect based on (input) content or (output) extension
+        };
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Detect 'stlb' extension as binary
+        static bool isBinaryName
+        (
+            const fileName& filename,
+            const STLFormat& format
+        );
+
+
+        //- Check contents to detect if the file is a binary STL.
+        //  Return the estimated number of triangles or 0 on error.
+        static int detectBinaryHeader(const fileName&);
+
+
+        //- Read STL binary file header.
+        //  Return the opened file stream and estimated number of triangles.
+        //  The stream is invalid and number of triangles is 0 on error.
+        static autoPtr<std::istream> readBinaryHeader
+        (
+            const fileName& filename,
+            label& nTrisEstimated
+        );
+
+        //- Write STL binary file and number of triangles to stream
+        static void writeBinaryHeader(ostream&, unsigned int);
+
 
     // Constructors
 
         //- Construct null
-        SMESHsurfaceFormat();
+        STLCore();
 
-
-    //- Destructor
-    virtual ~SMESHsurfaceFormat()
-    {}
-
-
-    // Member Functions
-
-        //- Write surface mesh components by proxy
-        static void write
-        (
-            const fileName&,
-            const MeshedSurfaceProxy<Face>&
-        );
-
-        //- Write object
-        virtual void write(const fileName& name) const
-        {
-            write(name, MeshedSurfaceProxy<Face>(*this));
-        }
 };
 
 
@@ -104,12 +107,6 @@ public:
 
 } // End namespace fileFormats
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "SMESHsurfaceFormat.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

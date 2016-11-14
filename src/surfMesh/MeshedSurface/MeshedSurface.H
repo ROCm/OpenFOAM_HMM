@@ -51,7 +51,7 @@ SourceFiles
 #include "PatchTools.H"
 #include "pointField.H"
 #include "face.H"
-#include "triFace.H"
+#include "labelledTri.H"
 
 #include "surfZoneList.H"
 #include "surfaceFormatsCore.H"
@@ -134,7 +134,10 @@ protected:
 
     // Protected Member functions
 
-        //- Transfer points/zones and transcribe face -> triFace
+        //- Transfer points/zones from 'face' to other other shapes.
+        //  Eg, transcribe face to triFace, or face -> labelledTri, including
+        //  any addZonesToFaces adjustment.
+        //  No general form, only specializations.
         void transcribe(MeshedSurface<face>&);
 
         //- Basic sanity check on zones
@@ -386,6 +389,12 @@ public:
                 const bool cullEmpty=false
             );
 
+            //- Propagate zone information on face regions.
+            //  Normally a no-op, only used by the labelledTri specialization.
+            //  Specializations return true, others return false.
+            bool addZonesToFaces();
+
+
             //- Remove surface zones
             virtual void removeZones();
 
@@ -395,6 +404,12 @@ public:
 
             //- Scale points. A non-positive factor is ignored
             virtual void scalePoints(const scalar);
+
+            //- Reset by transferring contents of the argument and annul it
+            virtual void reset
+            (
+                const Xfer<MeshedSurface<Face>>&
+            );
 
             //- Reset primitive data (points, faces and zones)
             //  Note, optimized to avoid overwriting data (with Xfer::null)
@@ -428,14 +443,20 @@ public:
                 const bool verbose=false
             );
 
-            //- Triangulate in-place, returning the number of triangles added
+            //- Count number of triangles.
+            virtual label nTriangles() const;
+
+            //- Count number of triangles, returning a face map of original ids.
+            //  The faceMap is zero-sized when no triangulation would be needed.
+            virtual label nTriangles(List<label>& faceMap) const;
+
+            //- Triangulate in-place, returning the number of triangles added.
             virtual label triangulate();
 
             //- Triangulate in-place, returning the number of triangles added
             //  and setting a map of original face Ids.
             //  The faceMap is zero-sized when no triangulation was done.
             virtual label triangulate(List<label>& faceMap);
-
 
             //- Return new surface.
             //  Returns return pointMap, faceMap from subsetMeshMap
@@ -460,6 +481,15 @@ public:
 
             //- Transfer contents to the Xfer container
             Xfer<MeshedSurface<Face>> xfer();
+
+            //- Transfer stored faces to an Xfer container
+            Xfer<List<Face>> xferFaces();
+
+            //- Transfer stored points to an Xfer container
+            Xfer<List<point>> xferPoints();
+
+            //- Transfer stored zones to an Xfer container
+            Xfer<surfZoneList> xferZones();
 
 
         // Read
@@ -521,33 +551,10 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Specialization for holding triangulated information
+//- Specialization for labelledTri.
 template<>
-inline bool MeshedSurface<triFace>::isTri()
-{
-    return true;
-}
+bool MeshedSurface<labelledTri>::addZonesToFaces();
 
-
-//- Specialization for holding triangulated information
-template<>
-inline label MeshedSurface<triFace>::triangulate()
-{
-    return 0;
-}
-
-
-//- Specialization for holding triangulated information
-template<>
-inline label MeshedSurface<triFace>::triangulate(List<label>& faceMap)
-{
-    if (notNull(faceMap))
-    {
-        faceMap.clear();
-    }
-
-    return 0;
-}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -555,6 +562,8 @@ inline label MeshedSurface<triFace>::triangulate(List<label>& faceMap)
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "MeshedSurfaceI.H"
 
 #ifdef NoRepository
     #include "MeshedSurface.C"

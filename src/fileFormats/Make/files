@@ -10,6 +10,9 @@ ensight/type/ensightPTraits.C
 nas/NASCore.C
 fire/FIRECore.C
 starcd/STARCDCore.C
+stl/STLCore.C
+stl/STLReader.C
+stl/STLReaderASCII.L
 
 vtk/foamVtkCore.C
 vtk/format/foamVtkAppendBase64Formatter.C

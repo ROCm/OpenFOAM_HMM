@@ -35,9 +35,8 @@ SourceFiles
 #ifndef VTKsurfaceFormatCore_H
 #define VTKsurfaceFormatCore_H
 
-#include "Ostream.H"
-#include "OFstream.H"
 #include "MeshedSurface.H"
+#include "Ostream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

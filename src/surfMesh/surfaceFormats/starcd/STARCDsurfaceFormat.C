@@ -79,7 +79,6 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
-    const bool mustTriangulate = this->isTri();
     this->clear();
 
     fileName baseName = filename.lessExt();
@@ -194,24 +193,19 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
             }
 
             SubList<label> vertices(vertexLabels, vertexLabels.size());
-            if (mustTriangulate && nLabels > 3)
+            if (MeshedSurface<Face>::isTri() && nLabels > 3)
             {
+                // face needs triangulation
                 face f(vertices);
 
-                faceList triFaces(f.nTriangles());
+                faceList trias(f.nTriangles());
                 label nTri = 0;
-                f.triangles(this->points(), nTri, triFaces);
+                f.triangles(this->points(), nTri, trias);
 
-                forAll(triFaces, facei)
+                forAll(trias, facei)
                 {
-                    // a triangular face, but not yet a triFace
-                    dynFaces.append
-                    (
-                        triFace
-                        (
-                            static_cast<labelUList&>(triFaces[facei])
-                        )
-                    );
+                    // a triangular 'face', convert to 'triFace' etc
+                    dynFaces.append(Face(trias[facei]));
                     dynZones.append(zoneI);
                     dynSizes[zoneI]++;
                 }
@@ -228,8 +222,9 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
     this->sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
 
-    // add zones, culling empty ones
-    this->addZones(dynSizes, dynNames, true);
+    this->addZones(dynSizes, dynNames, true); // add zones, cull empty ones
+    this->addZonesToFaces(); // for labelledTri
+
     return true;
 }
 

@@ -149,6 +149,7 @@ momentOfInertia/momentOfInertia.C
 
 surfaceSets/surfaceSets.C
 
+triSurface/faceTriangulation/faceTriangulation.C
 triSurface/orientedSurface/orientedSurface.C
 triSurface/surfaceLocation/surfaceLocation.C
 

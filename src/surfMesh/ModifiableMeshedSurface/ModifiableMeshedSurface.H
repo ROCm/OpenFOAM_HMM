@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,20 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::STLpoint
+    Foam::ModifiableMeshedSurface
 
 Description
-    A vertex point representation for STL files.
+    A special purpose MeshedSurface that exposes the stored values
+    for direct modification.
 
-SourceFiles
+    Its usage should be restricted to special cases where the surface
+    needs modifications as an atomic operation.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef STLpoint_H
-#define STLpoint_H
+#ifndef ModifiableMeshedSurface_H
+#define ModifiableMeshedSurface_H
 
-#include "point.H"
-#include "Istream.H"
+#include "MeshedSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,48 +44,58 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class STLpoint Declaration
+                   Class ModifiableMeshedSurface Declaration
 \*---------------------------------------------------------------------------*/
 
-class STLpoint
+template<class Face>
+class ModifiableMeshedSurface
 :
-    public Vector<float>
+    public MeshedSurface<Face>
 {
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        ModifiableMeshedSurface(const ModifiableMeshedSurface<Face>&) = delete;
+
+        //- Disallow default bitwise assignment
+        void operator=(const ModifiableMeshedSurface<Face>&) = delete;
+
 
 public:
 
     // Constructors
 
-        //- Construct null
-        inline STLpoint()
-        {}
-
-        //- Construct from components
-        inline STLpoint(float x, float y, float z)
+        //- Construct null, use reset/transfer to adjust contents
+        ModifiableMeshedSurface()
         :
-            Vector<float>(x, y, z)
+            MeshedSurface<Face>()
         {}
 
-        //- Construct from point
-        inline STLpoint(const point& pt)
+
+        //- Construct by transferring the contents from a MeshedSurface
+        explicit ModifiableMeshedSurface
+        (
+            const Xfer<MeshedSurface<Face>>& surf
+        )
         :
-            Vector<float>(float(pt.x()), float(pt.y()), float(pt.z()))
-        {}
-
-        //- Construct from istream
-        inline STLpoint(Istream& is)
-        :
-            Vector<float>(is)
+            MeshedSurface<Face>(surf)
         {}
 
 
-    // Member Operators
+    //- Destructor
+    virtual ~ModifiableMeshedSurface()
+    {}
 
-        //- Conversion to point
-        inline operator point() const
-        {
-            return point(x(), y(), z());
-        }
+
+    // Member Functions
+
+        // Edit
+
+            // Expose protected methods
+            using MeshedSurface<Face>::storedFaces;
+            using MeshedSurface<Face>::storedPoints;
+            using MeshedSurface<Face>::storedZones;
+
 };
 
 

@@ -155,8 +155,8 @@ public:
         //- Construct from list of labels
         explicit inline face(const labelUList&);
 
-        //- Construct from list of labels
-        explicit inline face(const labelList&);
+        //- Construct from an initializer list of labels
+        explicit inline face(std::initializer_list<label>);
 
         //- Construct by transferring the parameter contents
         explicit inline face(const Xfer<labelList>&);

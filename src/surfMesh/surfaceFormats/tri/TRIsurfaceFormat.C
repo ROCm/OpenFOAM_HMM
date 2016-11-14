@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "TRIsurfaceFormat.H"
-#include "ListOps.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -51,7 +51,7 @@ inline void Foam::fileFormats::TRIsurfaceFormat<Face>::writeShell
             << p1.x() << ' ' << p1.y() << ' ' << p1.z() << ' '
             << p2.x() << ' ' << p2.y() << ' ' << p2.z() << ' '
             // zone as colour
-            << "0x" << hex << zoneI << dec << endl;
+            << "0x" << hex << zoneI << dec << nl;
     }
 }
 
@@ -120,6 +120,7 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
     this->storedFaces().transfer(faceLst);
 
     this->addZones(sizes);
+    this->addZonesToFaces(); // for labelledTri
     this->stitchFaces(SMALL);
     return true;
 }

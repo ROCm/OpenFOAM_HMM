@@ -94,7 +94,7 @@ bool Foam::triSurface::readVTK(const fileName& fName)
     (
         tris.xfer(),
         patches,
-        xferCopy<List<point>>(surf.points())
+        surf.xferPoints()
     );
 
     return true;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,105 +22,70 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sortLabelledTri
+    Foam::STLpoint
 
 Description
-    Helper class which when constructed with a triSurface
-    sorts the faces according to region number (or rather constructs a
-    mapping).
-
-SourceFiles
-    sortLabelledTri.C
+    A vertex point representation for STL files.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sortLabelledTri_H
-#define sortLabelledTri_H
+#ifndef STLpoint_H
+#define STLpoint_H
 
-#include "labelList.H"
+#include "point.H"
+#include "floatVector.H"
+#include "Istream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class sortLabelledTri;
-class triSurface;
-
 /*---------------------------------------------------------------------------*\
-                         Class surfAndLabel Declaration
+                          Class STLpoint Declaration
 \*---------------------------------------------------------------------------*/
 
-//- Hold surface and label
-class surfAndLabel
+class STLpoint
+:
+    public Vector<float>
 {
-    const triSurface* surfPtr_;
-
-    label index_;
-
-    // Private Classes
-
-        //- Scalar comparison function used for sorting
-        class less
-        {
-        public:
-
-            inline bool operator()
-            (
-                const surfAndLabel& one,
-                const surfAndLabel& two
-            ) const;
-        };
-
 
 public:
-
-    friend class sortLabelledTri;
 
     // Constructors
 
         //- Construct null
-        surfAndLabel()
-        :
-            surfPtr_(nullptr),
-            index_(-1)
+        inline STLpoint()
         {}
 
-        //- Construct from surface and index
-        surfAndLabel(const triSurface& surf, const label index)
+        //- Construct from components
+        inline STLpoint(float x, float y, float z)
         :
-            surfPtr_(&surf),
-            index_(index)
+            Vector<float>(x, y, z)
         {}
-};
+
+        //- Construct from point
+        inline STLpoint(const point& pt)
+        :
+            Vector<float>(float(pt.x()), float(pt.y()), float(pt.z()))
+        {}
+
+        //- Construct from istream
+        inline STLpoint(Istream& is)
+        :
+            Vector<float>(is)
+        {}
 
 
-/*---------------------------------------------------------------------------*\
-                           Class sortLabelledTri Declaration
-\*---------------------------------------------------------------------------*/
+    // Member Operators
 
-class sortLabelledTri
-:
-    public List<surfAndLabel>
-{
-
-public:
-
-    // Constructors
-
-        //- Construct from surface, sorting the faces according to patch
-        sortLabelledTri(const triSurface&);
-
-
-    // Member Functions
-
-        // Access
-
-            //- Set the labelList to those of sorted point indices
-            void indices(labelList&) const;
-
-            //- Return the list of sorted point indices
-            labelList indices() const;
+        #ifdef WM_DP
+        //- Conversion to double-precision point
+        inline operator point() const
+        {
+            return point(x(), y(), z());
+        }
+        #endif
 };
 
 

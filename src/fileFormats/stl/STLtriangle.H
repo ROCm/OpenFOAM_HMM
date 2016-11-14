@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,11 +45,8 @@ namespace Foam
 {
 
 // Forward declaration of friend functions and operators
-
 class STLtriangle;
-
 Ostream& operator<<(Ostream&, const STLtriangle&);
-
 
 /*---------------------------------------------------------------------------*\
                          Class STLtriangle Declaration
@@ -62,7 +59,7 @@ class STLtriangle
         //- Attribute is 16-bit
         typedef unsigned short STLattrib;
 
-        //- The face normal, many programs write zore or other junk
+        //- The face normal, many programs write zero or other junk
         STLpoint normal_;
 
         //- The three points defining the triangle
@@ -113,7 +110,30 @@ public:
         // Write
 
             //- Write to ostream (binary)
-            inline void write(ostream&);
+            inline void write(ostream&) const;
+
+            //- Write to Ostream (ASCII)
+            inline Ostream& print(Ostream& os) const;
+
+
+            //- Write components to Ostream (ASCII)
+            inline static void write
+            (
+                Ostream& os,
+                const vector& norm,
+                const point& pt0,
+                const point& pt1,
+                const point& pt2
+            );
+
+            //- Write components to Ostream (ASCII), calculating the normal
+            inline static void write
+            (
+                Ostream& os,
+                const point& pt0,
+                const point& pt1,
+                const point& pt2
+            );
 
 
     // Ostream operator

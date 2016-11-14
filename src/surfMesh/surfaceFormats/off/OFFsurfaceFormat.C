@@ -50,7 +50,6 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
-    const bool mustTriangulate = this->isTri();
     this->clear();
 
     IFstream is(filename);
@@ -116,7 +115,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
 
             labelUList& f = static_cast<labelUList&>(verts);
 
-            if (mustTriangulate && f.size() > 3)
+            if (MeshedSurface<Face>::isTri() && f.size() > 3)
             {
                 // simple face triangulation about f[0]
                 // cannot use face::triangulation (points may be incomplete)

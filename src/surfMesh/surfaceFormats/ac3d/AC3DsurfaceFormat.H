@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,10 +67,10 @@ class AC3DsurfaceFormat
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        AC3DsurfaceFormat(const AC3DsurfaceFormat<Face>&);
+        AC3DsurfaceFormat(const AC3DsurfaceFormat<Face>&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const AC3DsurfaceFormat<Face>&);
+        void operator=(const AC3DsurfaceFormat<Face>&) = delete;
 
 
 public:
@@ -101,10 +101,18 @@ public:
     // Member Functions
 
         //- Write surface mesh components by proxy
-        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
+        static void write
+        (
+            const fileName&,
+            const MeshedSurfaceProxy<Face>&
+        );
 
         //- Write UnsortedMeshedSurface, the output is always sorted by zones.
-        static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
+        static void write
+        (
+            const fileName&,
+            const UnsortedMeshedSurface<Face>&
+        );
 
         //- Read from file
         virtual bool read(const fileName&);

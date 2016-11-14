@@ -41,6 +41,9 @@ Usage
       - \par -orient
         Check face orientation on the input surface
 
+      - \par -testModify
+        Test modification mechanism
+
       - \par -scale \<scale\>
         Specify a scaling factor for writing the files
 
@@ -65,6 +68,7 @@ Note
 #include "PackedBoolList.H"
 
 #include "MeshedSurfaces.H"
+#include "ModifiableMeshedSurface.H"
 #include "UnsortedMeshedSurfaces.H"
 
 #include "IStringStream.H"
@@ -93,6 +97,13 @@ int main(int argc, char *argv[])
         "orient",
         "check surface orientation"
     );
+
+    argList::addBoolOption
+    (
+        "testModify",
+        "Test modification mechanism (MeshedSurface)"
+    );
+
     argList::addBoolOption
     (
         "surfMesh",
@@ -386,6 +397,34 @@ int main(int argc, char *argv[])
             Info<< "Cleaning up surface" << endl;
             surf.cleanup(true);
             surf.writeStats(Info);
+            Info<< endl;
+        }
+
+        if (args.optionFound("testModify"))
+        {
+            Info<< "Use ModifiableMeshedSurface to shift (1, 0, 0)" << endl;
+            Info<< "original" << nl;
+            surf.writeStats(Info);
+            Info<< endl;
+
+            ModifiableMeshedSurface<face> tsurf(surf.xfer());
+            // ModifiableMeshedSurface<face> tsurf;
+            // tsurf.reset(surf.xfer());
+
+            Info<< "in-progress" << nl;
+            surf.writeStats(Info);
+            Info<< endl;
+
+            tsurf.storedPoints() += vector(1, 0, 0);
+
+            surf.transfer(tsurf);
+
+            Info<< "updated" << nl;
+            surf.writeStats(Info);
+            Info<< endl;
+
+            Info<< "modifier" << nl;
+            tsurf.writeStats(Info);
             Info<< endl;
         }
 

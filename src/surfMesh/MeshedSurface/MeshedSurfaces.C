@@ -46,6 +46,7 @@ namespace Foam
 
 makeSurface(MeshedSurface, face)
 makeSurface(MeshedSurface, triFace)
+makeSurface(MeshedSurface, labelledTri)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

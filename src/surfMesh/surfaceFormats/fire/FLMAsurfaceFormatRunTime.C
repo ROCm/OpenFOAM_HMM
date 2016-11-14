@@ -54,6 +54,15 @@ addNamedTemplatedToMemberFunctionSelectionTable
     fileExtension,
     flma
 );
+addNamedTemplatedToMemberFunctionSelectionTable
+(
+    MeshedSurfaceProxy,
+    FLMAsurfaceFormat,
+    labelledTri,
+    write,
+    fileExtension,
+    flma
+);
 
 
 // write MeshedSurfaceProxy (comnpressed versions of above)
@@ -71,6 +80,15 @@ addNamedTemplatedToMemberFunctionSelectionTable
     MeshedSurfaceProxy,
     FLMAZsurfaceFormat,
     triFace,
+    write,
+    fileExtension,
+    flmaz
+);
+addNamedTemplatedToMemberFunctionSelectionTable
+(
+    MeshedSurfaceProxy,
+    FLMAZsurfaceFormat,
+    labelledTri,
     write,
     fileExtension,
     flmaz

@@ -40,7 +40,6 @@ SourceFiles
 
 #include "word.H"
 #include "label.H"
-#include "typeInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +55,7 @@ Istream& operator>>(Istream&, surfZoneIdentifier&);
 Ostream& operator<<(Ostream&, const surfZoneIdentifier&);
 
 /*---------------------------------------------------------------------------*\
-                    Class surfZoneIdentifier Declaration
+                     Class surfZoneIdentifier Declaration
 \*---------------------------------------------------------------------------*/
 
 class surfZoneIdentifier

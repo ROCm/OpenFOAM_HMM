@@ -25,9 +25,7 @@ License
 
 #include "SMESHsurfaceFormat.H"
 #include "clock.H"
-#include "IFstream.H"
 #include "OFstream.H"
-#include "Ostream.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -57,7 +55,6 @@ void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
     );
 
     const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
-
 
     OFstream os(filename);
     if (!os.good())

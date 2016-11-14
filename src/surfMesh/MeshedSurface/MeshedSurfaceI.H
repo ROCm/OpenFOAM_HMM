@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,65 +23,76 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sortLabelledTri.H"
-#include "labelledTri.H"
-#include "triSurface.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * Private Classes * * * * * * * * * * * * * * //
-
-inline bool surfAndLabel::less::operator()
-(
-    const surfAndLabel& one,
-    const surfAndLabel& two
-) const
+// A triFace surface only handles triangulated faces
+template<>
+inline bool MeshedSurface<triFace>::isTri()
 {
-    const triSurface& surf = *one.surfPtr_;
-    return surf[one.index_].region() < surf[two.index_].region();
+    return true;
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-// Construct from components
-sortLabelledTri::sortLabelledTri(const triSurface& surf)
-:
-    List<surfAndLabel>(surf.size(), surfAndLabel(surf, -1))
+// A labelledTri surface only handles triangulated faces
+template<>
+inline bool MeshedSurface<labelledTri>::isTri()
 {
+    return true;
+}
 
-    // Set the face label
-    forAll(surf, facei)
+
+// Number of triangles for a triFace surface
+template<>
+inline label MeshedSurface<triFace>::nTriangles() const
+{
+    return ParentType::size();
+}
+
+// Number of triangles for a labelledTri surface
+template<>
+inline label MeshedSurface<labelledTri>::nTriangles() const
+{
+    return ParentType::size();
+}
+
+
+// Inplace triangulation of triFace surface = no-op
+template<>
+inline label MeshedSurface<triFace>::triangulate()
+{
+    return 0;
+}
+
+// Inplace triangulation of labelledTri surface = no-op
+template<>
+inline label MeshedSurface<labelledTri>::triangulate()
+{
+    return 0;
+}
+
+// Inplace triangulation of triFace surface (with face map) = no-op
+template<>
+inline label MeshedSurface<triFace>::triangulate(List<label>& faceMap)
+{
+    if (notNull(faceMap))
     {
-        operator[](facei).index_ = facei;
+        faceMap.clear();
     }
-
-    // Sort according to region number.
-    sort(*this, surfAndLabel::less());
+    return 0;
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void sortLabelledTri::indices(labelList& newIndices) const
+// Inplace triangulation of labelledTri surface (with face map) = no-op
+template<>
+inline label MeshedSurface<labelledTri>::triangulate(List<label>& faceMap)
 {
-    newIndices.setSize(size());
-
-    forAll(newIndices, i)
+    if (notNull(faceMap))
     {
-        newIndices[i] = operator[](i).index_;
+        faceMap.clear();
     }
-}
-
-
-labelList sortLabelledTri::indices() const
-{
-    labelList newIndices(size());
-    indices(newIndices);
-    return newIndices;
+    return 0;
 }
 
 

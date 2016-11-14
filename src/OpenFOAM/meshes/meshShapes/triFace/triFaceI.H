@@ -62,6 +62,8 @@ inline int Foam::triFace::compare(const triFace& a, const triFace& b)
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::triFace::triFace()
+:
+    FixedList<label, 3>(-1)
 {}
 
 
@@ -79,6 +81,12 @@ inline Foam::triFace::triFace
 
 
 inline Foam::triFace::triFace(const labelUList& lst)
+:
+    FixedList<label, 3>(lst)
+{}
+
+
+inline Foam::triFace::triFace(std::initializer_list<label> lst)
 :
     FixedList<label, 3>(lst)
 {}

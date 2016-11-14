@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +35,7 @@ namespace Foam
 namespace fileFormats
 {
 
-// read MeshedSurface - .bdf (Bulk Data Format)
+// read MeshedSurface - .bdf (Bulk Data Format) and nas (Nastran)
 addNamedTemplatedToRunTimeSelectionTable
 (
     MeshedSurface,
@@ -53,7 +53,6 @@ addNamedTemplatedToRunTimeSelectionTable
     nas
 );
 
-// read MeshedSurface - .nas (Nastran)
 addNamedTemplatedToRunTimeSelectionTable
 (
     MeshedSurface,
@@ -67,6 +66,23 @@ addNamedTemplatedToRunTimeSelectionTable
     MeshedSurface,
     NASsurfaceFormat,
     triFace,
+    fileExtension,
+    nas
+);
+
+addNamedTemplatedToRunTimeSelectionTable
+(
+    MeshedSurface,
+    NASsurfaceFormat,
+    labelledTri,
+    fileExtension,
+    bdf
+);
+addNamedTemplatedToRunTimeSelectionTable
+(
+    MeshedSurface,
+    NASsurfaceFormat,
+    labelledTri,
     fileExtension,
     nas
 );

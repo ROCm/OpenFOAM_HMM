@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,6 +22,8 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
+
+#include "triPointRef.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -91,10 +93,61 @@ inline void Foam::STLtriangle::read(istream& is)
 }
 
 
-inline void Foam::STLtriangle::write(ostream& os)
+inline void Foam::STLtriangle::write(ostream& os) const
 {
-    os.write(reinterpret_cast<char*>(this), 4*sizeof(STLpoint));
-    os.write(reinterpret_cast<char*>(&attrib_), sizeof(STLattrib));
+    os.write(reinterpret_cast<const char*>(this), 4*sizeof(STLpoint));
+    os.write(reinterpret_cast<const char*>(&attrib_), sizeof(STLattrib));
+}
+
+
+inline Foam::Ostream& Foam::STLtriangle::print(Ostream& os) const
+{
+    os  << " facet normal "
+        << normal_.x() << ' ' << normal_.y() << ' ' << normal_.z() << nl
+        << "  outer loop" << nl
+        << "   vertex " << a_.x() << ' ' << a_.y() << ' ' << a_.z() << nl
+        << "   vertex " << b_.x() << ' ' << b_.y() << ' ' << b_.z() << nl
+        << "   vertex " << c_.x() << ' ' << c_.y() << ' ' << c_.z() << nl
+        << "  endloop" << nl
+        << " endfacet" << nl;
+
+    return os;
+}
+
+
+inline void Foam::STLtriangle::write
+(
+    Ostream& os,
+    const vector& norm,
+    const point& pt0,
+    const point& pt1,
+    const point& pt2
+)
+{
+    os  << " facet normal "
+        << norm.x() << ' ' << norm.y() << ' ' << norm.z() << nl
+        << "  outer loop" << nl
+        << "   vertex " << pt0.x() << ' ' << pt0.y() << ' ' << pt0.z() << nl
+        << "   vertex " << pt1.x() << ' ' << pt1.y() << ' ' << pt1.z() << nl
+        << "   vertex " << pt2.x() << ' ' << pt2.y() << ' ' << pt2.z() << nl
+        << "  endloop" << nl
+        << " endfacet" << nl;
+}
+
+
+inline void Foam::STLtriangle::write
+(
+    Ostream& os,
+    const point& pt0,
+    const point& pt1,
+    const point& pt2
+)
+{
+    // calculate the normal ourselves
+    vector norm = triPointRef(pt0, pt1, pt2).normal();
+    norm /= mag(norm) + VSMALL;
+
+    write(os, norm, pt0, pt1, pt2);
 }
 
 

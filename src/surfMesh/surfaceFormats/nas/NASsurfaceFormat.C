@@ -47,7 +47,6 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
-    const bool mustTriangulate = this->isTri();
     this->clear();
 
     IFstream is(filename);
@@ -253,7 +252,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
             }
 
 
-            if (mustTriangulate)
+            if (MeshedSurface<Face>::isTri())
             {
                 dynFaces.append(triFace(f[0], f[1], f[2]));
                 dynFaces.append(triFace(f[0], f[2], f[3]));
@@ -374,9 +373,8 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     }
 
     this->sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
-
-    // add zones, culling empty ones
-    this->addZones(dynSizes, names, true);
+    this->addZones(dynSizes, names, true); // add zones, cull empty ones
+    this->addZonesToFaces(); // for labelledTri
 
     return true;
 }
