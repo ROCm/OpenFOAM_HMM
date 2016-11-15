@@ -49,7 +49,54 @@ namespace Foam
 
 Foam::word Foam::externalCoupledFunctionObject::lockName = "OpenFOAM";
 
-Foam::string Foam::externalCoupledFunctionObject::patchKey = "# Patch: ";
+Foam::string Foam::externalCoupledFunctionObject::patchKey = "// Patch:";
+
+template<>
+const char* Foam::NamedEnum
+<
+    Foam::externalCoupledFunctionObject::stateEnd,
+    2
+>::names[] =
+{
+    "remove",
+    "done"
+};
+
+const Foam::NamedEnum
+<
+    Foam::externalCoupledFunctionObject::stateEnd,
+    2
+> Foam::externalCoupledFunctionObject::stateEndNames_;
+
+
+namespace Foam
+{
+//! \cond fileScope
+//- Write list content with size, bracket, content, bracket one-per-line.
+//  This makes for consistent for parsing, regardless of the list length.
+template <class T>
+static void writeList(Ostream& os, const string& header, const UList<T>& L)
+{
+    // Header string
+    os  << header.c_str() << nl;
+
+    // Write size and start delimiter
+    os  << L.size() << nl
+        << token::BEGIN_LIST;
+
+    // Write contents
+    forAll(L, i)
+    {
+        os << nl << L[i];
+    }
+
+    // Write end delimiter
+    os << nl << token::END_LIST << nl << endl;
+}
+//! \endcond
+
+}
+// namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -88,7 +135,7 @@ Foam::fileName Foam::externalCoupledFunctionObject::lockFile() const
 }
 
 
-void Foam::externalCoupledFunctionObject::createLockFile() const
+void Foam::externalCoupledFunctionObject::useMaster() const
 {
     if (!Pstream::master())
     {
@@ -104,13 +151,13 @@ void Foam::externalCoupledFunctionObject::createLockFile() const
         if (log_) Info<< type() << ": creating lock file" << endl;
 
         OFstream os(fName);
-        os  << "lock file";
+        os  << "status=openfoam\n";
         os.flush();
     }
 }
 
 
-void Foam::externalCoupledFunctionObject::removeLockFile() const
+void Foam::externalCoupledFunctionObject::useSlave() const
 {
     if (!Pstream::master())
     {
@@ -119,7 +166,35 @@ void Foam::externalCoupledFunctionObject::removeLockFile() const
 
     if (log_) Info<< type() << ": removing lock file" << endl;
 
-    rm(lockFile());
+    Foam::rm(lockFile());
+}
+
+
+void Foam::externalCoupledFunctionObject::cleanup() const
+{
+    if (!Pstream::master())
+    {
+        return;
+    }
+
+    const fileName lck(lockFile());
+    switch (stateEnd_)
+    {
+        case REMOVE:
+            {
+                if (log_) Info<< type() << ": removing lock file" << endl;
+                Foam::rm(lck);
+            }
+            break;
+        case DONE:
+            {
+                if (log_) Info<< type() << ": lock file status=done" << endl;
+                OFstream os(lck);
+                os  << "status=done\n";
+                os.flush();
+            }
+            break;
+    }
 }
 
 
@@ -189,30 +264,29 @@ void Foam::externalCoupledFunctionObject::removeWriteFiles() const
 }
 
 
-void Foam::externalCoupledFunctionObject::wait() const
+void Foam::externalCoupledFunctionObject::waitForSlave() const
 {
     const fileName fName(lockFile());
-    label found = 0;
     label totalTime = 0;
+    bool found = false;
 
     if (log_) Info<< type() << ": beginning wait for lock file " << fName << nl;
 
-    while (found == 0)
+    while (!found)
     {
         if (Pstream::master())
         {
             if (totalTime > timeOut_)
             {
                 FatalErrorInFunction
-                    << "Wait time exceeded time out time of " << timeOut_
+                    << "Wait time exceeded timeout of " << timeOut_
                     << " s" << abort(FatalError);
             }
 
             IFstream is(fName);
-
             if (is.good())
             {
-                found++;
+                found = true;
 
                 if (log_)
                 {
@@ -232,7 +306,7 @@ void Foam::externalCoupledFunctionObject::wait() const
         }
 
         // prevent other procs from racing ahead
-        reduce(found, sumOp<label>());
+        reduce(found, orOp<bool>());
     }
 }
 
@@ -387,11 +461,6 @@ void Foam::externalCoupledFunctionObject::writeGeometry
 
     fileName dir(groupDir(commsDir, compositeName(regionNames), groupName));
 
-    //if (log_)
-    {
-        Info<< typeName << ": writing geometry to " << dir << endl;
-    }
-
     autoPtr<OFstream> osPointsPtr;
     autoPtr<OFstream> osFacesPtr;
     if (Pstream::master())
@@ -399,12 +468,20 @@ void Foam::externalCoupledFunctionObject::writeGeometry
         mkDir(dir);
         osPointsPtr.reset(new OFstream(dir/"patchPoints"));
         osFacesPtr.reset(new OFstream(dir/"patchFaces"));
+
+        osPointsPtr() << "// Group: " << groupName << endl;
+        osFacesPtr()  << "// Group: " << groupName << endl;
+
+        Info<< typeName << ": writing geometry to " << dir << endl;
     }
 
+    // Individual region/patch entries
 
-    DynamicList<face> allMeshesFaces;
-    DynamicField<point> allMeshesPoints;
+    DynamicList<face> allFaces;
+    DynamicField<point> allPoints;
 
+    labelList pointToGlobal;
+    labelList uniquePointIDs;
     forAll(meshes, meshI)
     {
         const fvMesh& mesh = meshes[meshI];
@@ -417,109 +494,61 @@ void Foam::externalCoupledFunctionObject::writeGeometry
             ).sortedToc()
         );
 
-        // Count faces
-        label nFaces = 0;
-        forAll(patchIDs, i)
-        {
-            nFaces += mesh.boundaryMesh()[patchIDs[i]].size();
-        }
-
-        // Collect faces
-        DynamicList<label> allFaceIDs(nFaces);
         forAll(patchIDs, i)
         {
             const polyPatch& p = mesh.boundaryMesh()[patchIDs[i]];
 
-            forAll(p, pI)
+            mesh.globalData().mergePoints
+            (
+                p.meshPoints(),
+                p.meshPointMap(),
+                pointToGlobal,
+                uniquePointIDs
+            );
+
+            label procI = Pstream::myProcNo();
+
+            List<pointField> collectedPoints(Pstream::nProcs());
+            collectedPoints[procI] = pointField(mesh.points(), uniquePointIDs);
+            Pstream::gatherList(collectedPoints);
+
+            List<faceList> collectedFaces(Pstream::nProcs());
+            faceList& patchFaces = collectedFaces[procI];
+            patchFaces = p.localFaces();
+            forAll(patchFaces, faceI)
             {
-                allFaceIDs.append(p.start()+pI);
+                inplaceRenumber(pointToGlobal, patchFaces[faceI]);
             }
-        }
+            Pstream::gatherList(collectedFaces);
 
-        // Construct overall patch
-        indirectPrimitivePatch allPatch
-        (
-            IndirectList<face>(mesh.faces(), allFaceIDs),
-            mesh.points()
-        );
-
-        labelList pointToGlobal;
-        labelList uniquePointIDs;
-        mesh.globalData().mergePoints
-        (
-            allPatch.meshPoints(),
-            allPatch.meshPointMap(),
-            pointToGlobal,
-            uniquePointIDs
-        );
-
-        label procI = Pstream::myProcNo();
-
-        List<pointField> collectedPoints(Pstream::nProcs());
-        collectedPoints[procI] = pointField(mesh.points(), uniquePointIDs);
-        Pstream::gatherList(collectedPoints);
-
-        List<faceList> collectedFaces(Pstream::nProcs());
-        faceList& patchFaces = collectedFaces[procI];
-        patchFaces = allPatch.localFaces();
-        forAll(patchFaces, faceI)
-        {
-            inplaceRenumber(pointToGlobal, patchFaces[faceI]);
-        }
-        Pstream::gatherList(collectedFaces);
-
-        if (Pstream::master())
-        {
-            // Append and renumber
-            label nPoints = allMeshesPoints.size();
-
-            forAll(collectedPoints, procI)
+            if (Pstream::master())
             {
-                allMeshesPoints.append(collectedPoints[procI]);
+                allPoints.clear();
+                allFaces.clear();
 
-            }
-            face newFace;
-            forAll(collectedFaces, procI)
-            {
-                const faceList& procFaces = collectedFaces[procI];
-
-                forAll(procFaces, faceI)
+                for (label procI=0; procI < Pstream::nProcs(); ++procI)
                 {
-                    const face& f = procFaces[faceI];
-
-                    newFace.setSize(f.size());
-                    forAll(f, fp)
-                    {
-                        newFace[fp] = f[fp]+nPoints;
-                    }
-                    allMeshesFaces.append(newFace);
+                    allPoints.append(collectedPoints[procI]);
+                    allFaces.append(collectedFaces[procI]);
                 }
 
-                nPoints += collectedPoints[procI].size();
+                Info<< typeName << ": mesh " << mesh.name()
+                    << ", patch " << p.name()
+                    << ": writing " << allPoints.size() << " points to "
+                    << osPointsPtr().name() << nl
+                    << typeName << ": mesh " << mesh.name()
+                    << ", patch " << p.name()
+                    << ": writing " << allFaces.size() << " faces to "
+                    << osFacesPtr().name() << endl;
+
+                // The entry name (region / patch)
+                const string entryHeader =
+                    patchKey + ' ' + mesh.name() + ' ' + p.name();
+
+                writeList(osPointsPtr(), entryHeader, allPoints);
+                writeList(osFacesPtr(),  entryHeader, allFaces);
             }
         }
-
-        //if (log_)
-        {
-            Info<< typeName << ": for mesh " << mesh.name()
-                << " writing " << allMeshesPoints.size() << " points to "
-                << osPointsPtr().name() << endl;
-            Info<< typeName << ": for mesh " << mesh.name()
-                << " writing " << allMeshesFaces.size() << " faces to "
-                << osFacesPtr().name() << endl;
-        }
-    }
-
-    // Write points
-    if (osPointsPtr.valid())
-    {
-        osPointsPtr() << allMeshesPoints << endl;
-    }
-
-    // Write faces
-    if (osFacesPtr.valid())
-    {
-        osFacesPtr() << allMeshesFaces << endl;
     }
 }
 
@@ -541,7 +570,7 @@ Foam::word Foam::externalCoupledFunctionObject::compositeName
         {
             // For compatibility with single region cases suppress single
             // region name
-            return word("");
+            return word::null;
         }
         else
         {
@@ -768,7 +797,7 @@ void Foam::externalCoupledFunctionObject::initialise()
     if (initByExternal_)
     {
         // Wait for initial data to be made available
-        wait();
+        waitForSlave();
 
         // Read data passed back from external source
         readData();
@@ -790,6 +819,7 @@ Foam::externalCoupledFunctionObject::externalCoupledFunctionObject
     functionObject(name),
     time_(runTime),
     enabled_(true),
+    stateEnd_(REMOVE),
     initialised_(false)
 {
     read(dict);
@@ -801,7 +831,7 @@ Foam::externalCoupledFunctionObject::externalCoupledFunctionObject
 
     if (!initByExternal_)
     {
-        createLockFile();
+        useMaster();
     }
 }
 
@@ -809,7 +839,12 @@ Foam::externalCoupledFunctionObject::externalCoupledFunctionObject
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::externalCoupledFunctionObject::~externalCoupledFunctionObject()
-{}
+{
+    if (enabled())
+    {
+        cleanup();
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -846,11 +881,12 @@ bool Foam::externalCoupledFunctionObject::execute(const bool forceWrite)
         // Write data for external source
         writeData();
 
-        // remove lock file, signalling external source to execute
-        removeLockFile();
+        // Signal external source to execute (by removing lock file)
+        // - Wait for slave to provide data
+        useSlave();
 
         // Wait for response
-        wait();
+        waitForSlave();
 
         // Remove old data files from OpenFOAM
         removeWriteFiles();
@@ -858,8 +894,8 @@ bool Foam::externalCoupledFunctionObject::execute(const bool forceWrite)
         // Read data passed back from external source
         readData();
 
-        // create lock file for external source
-        createLockFile();
+        // Signal external source to wait (by creating the lock file)
+        useMaster();
 
         return true;
     }
@@ -877,7 +913,7 @@ bool Foam::externalCoupledFunctionObject::end()
         // Remove old data files
         removeReadFiles();
         removeWriteFiles();
-        removeLockFile();
+        cleanup();
     }
 
     return true;
@@ -906,19 +942,24 @@ bool Foam::externalCoupledFunctionObject::read(const dictionary& dict)
         return true;
     }
 
+    calcFrequency_  = dict.lookupOrDefault("calcFrequency", 1);
+
     dict.lookup("commsDir") >> commsDir_;
     commsDir_.expand();
+    commsDir_.clean();
 
-    waitInterval_ = dict.lookupOrDefault("waitInterval", 1);
-    timeOut_ = dict.lookupOrDefault("timeOut", 100*waitInterval_);
-    calcFrequency_ = dict.lookupOrDefault("calcFrequency", 1);
+    waitInterval_   = dict.lookupOrDefault("waitInterval", 1);
+    timeOut_        = dict.lookupOrDefault("timeOut", 100*waitInterval_);
     initByExternal_ = readBool(dict.lookup("initByExternal"));
+    // initByExternal_ = dict.lookupOrDefault<Switch>("initByExternal", false);
+    stateEnd_       =
+        stateEndNames_[dict.lookupOrDefault<word>("stateEnd", "remove")];
+
     log_ = dict.lookupOrDefault("log", false);
 
 
     // Get names of all fvMeshes (and derived types)
     wordList allRegionNames(time_.lookupClass<fvMesh>().sortedToc());
-
 
 
     const dictionary& allRegionsDict = dict.subDict("regions");
