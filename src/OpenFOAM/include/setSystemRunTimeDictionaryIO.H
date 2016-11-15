@@ -1,7 +1,6 @@
-fileName dictPath = "";
-if (args.optionFound("dict"))
+fileName dictPath;
+if (args.optionReadIfPresent("dict", dictPath))
 {
-    dictPath = args["dict"];
     if (isDir(dictPath))
     {
         dictPath = dictPath / dictName;

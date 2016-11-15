@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,6 +64,7 @@ Usage
 #include "fvMeshTools.H"
 #include "fvMeshDistribute.H"
 #include "decompositionMethod.H"
+#include "decompositionModel.H"
 #include "timeSelector.H"
 #include "PstreamReduceOps.H"
 #include "volFields.H"
@@ -74,7 +75,6 @@ Usage
 #include "loadOrCreateMesh.H"
 #include "processorFvPatchField.H"
 #include "zeroGradientFvPatchFields.H"
-#include "decompositionModel.H"
 
 #include "parFvFieldReconstructor.H"
 #include "parLagrangianRedistributor.H"
@@ -2153,7 +2153,6 @@ int main(int argc, char *argv[])
     bool newTimes = args.optionFound("newTimes");
 
 
-
     if (env("FOAM_SIGFPE"))
     {
         WarningInFunction
@@ -2246,8 +2245,6 @@ int main(int argc, char *argv[])
     Pstream::scatter(decompose);
 
 
-
-
     // If running distributed we have problem of new processors not finding
     // a system/controlDict. However if we switch on the master-only reading
     // the problem becomes that the time directories are differing sizes and
@@ -2331,7 +2328,6 @@ int main(int argc, char *argv[])
     // Determine any region
     word regionName = polyMesh::defaultRegion;
     fileName meshSubDir;
-
     if (args.optionReadIfPresent("region", regionName))
     {
         meshSubDir = regionName/polyMesh::meshSubDir;
@@ -2775,13 +2771,7 @@ int main(int argc, char *argv[])
 
         // Allow override of decomposeParDict location
         fileName decompDictFile;
-        if (args.optionReadIfPresent("decomposeParDict", decompDictFile))
-        {
-            if (isDir(decompDictFile))
-            {
-                decompDictFile = decompDictFile / "decomposeParDict";
-            }
-        }
+        args.optionReadIfPresent("decomposeParDict", decompDictFile);
 
 
         // Determine decomposition
