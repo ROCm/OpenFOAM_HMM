@@ -1,0 +1,4 @@
+waveInletVelocity/waveInletVelocityFvPatchVectorField.C
+waveInletAlpha/waveInletAlphaFvPatchScalarField.C
+
+LIB = $(FOAM_USER_LIBBIN)/libwaveBCs
