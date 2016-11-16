@@ -63,6 +63,7 @@ Description
 #include "decompositionModel.H"
 #include "fvMeshTools.H"
 #include "profiling.H"
+#include "processorMeshes.H"
 
 using namespace Foam;
 
@@ -673,6 +674,11 @@ void writeMesh
         meshRefinement::writeType(writeLevel | meshRefinement::WRITEMESH),
         mesh.time().path()/meshRefiner.timeName()
     );
+    processorMeshes::removeFiles(mesh);
+    if (!debugLevel)
+    {
+        topoSet::removeFiles(mesh);
+    }
     Info<< "Wrote mesh in = "
         << mesh.time().cpuTimeIncrement() << " s." << endl;
 }

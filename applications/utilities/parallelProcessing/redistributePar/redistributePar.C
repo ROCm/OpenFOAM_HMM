@@ -75,6 +75,7 @@ Usage
 #include "processorFvPatchField.H"
 #include "zeroGradientFvPatchFields.H"
 #include "decompositionModel.H"
+#include "topoSet.H"
 
 #include "parFvFieldReconstructor.H"
 #include "parLagrangianRedistributor.H"
@@ -1136,6 +1137,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             runTime.TimePaths::caseName() = baseRunTime.caseName();
 
             mesh.write();
+            topoSet::removeFiles(mesh);
 
             // Now we've written all. Reset caseName on master
             Info<< "Restoring caseName to " << proc0CaseName << endl;
@@ -1145,6 +1147,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     else
     {
         mesh.write();
+        topoSet::removeFiles(mesh);
     }
     Info<< "Written redistributed mesh to " << mesh.facesInstance() << nl
         << endl;
@@ -1208,6 +1211,55 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             refData.write();
         }
     }
+
+    //// Sets. Disabled for now.
+    //{
+    //    // Read sets
+    //    if (Pstream::master() && decompose)
+    //    {
+    //        runTime.TimePaths::caseName() = baseRunTime.caseName();
+    //    }
+    //    IOobjectList objects(mesh, mesh.facesInstance(), "polyMesh/sets");
+    //
+    //    PtrList<cellSet> cellSets;
+    //    ReadFields(objects, cellSets);
+    //
+    //    if (Pstream::master() && decompose)
+    //    {
+    //        runTime.TimePaths::caseName() = proc0CaseName;
+    //    }
+    //
+    //    forAll(cellSets, i)
+    //    {
+    //        cellSets[i].distribute(map);
+    //    }
+    //
+    //    if (nDestProcs == 1)
+    //    {
+    //        if (Pstream::master())
+    //        {
+    //            Info<< "Setting caseName to " << baseRunTime.caseName()
+    //                << " to write reconstructed refinement data." << endl;
+    //            runTime.TimePaths::caseName() = baseRunTime.caseName();
+    //
+    //            forAll(cellSets, i)
+    //            {
+    //                cellSets[i].distribute(map);
+    //            }
+    //
+    //            // Now we've written all. Reset caseName on master
+    //            Info<< "Restoring caseName to " << proc0CaseName << endl;
+    //            runTime.TimePaths::caseName() = proc0CaseName;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        forAll(cellSets, i)
+    //        {
+    //            cellSets[i].distribute(map);
+    //        }
+    //    }
+    //}
 
 
     return autoPtr<mapDistributePolyMesh>
