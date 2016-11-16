@@ -1,0 +1,16 @@
+sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
+sinclude $(RULES)/mplib$(WM_MPLIB)
+
+EXE_INC = \
+    -DOFVERSION=$(OF_VERSION) \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I./IH_Waves_InletVelocity/velProfiles \
+    -I./IH_Waves_InletVelocityWind/velProfilesWind \
+    -I../common \
+    -I../common/checks \
+    -I../common/calculateWaterLevel \
+     $(PFLAGS) $(PINC)
+
+LIB_LIBS = \
+    -lfiniteVolume \
+    $(PLIBS)
