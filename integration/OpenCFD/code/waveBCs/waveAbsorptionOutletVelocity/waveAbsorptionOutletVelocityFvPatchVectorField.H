@@ -32,7 +32,6 @@ Description
         type            waveAbsorptionOutletVelocity;
         waveDict        wavesDict;
         value           uniform (0 0 0);
-	    leftORright	      1.0;
     }
     \endverbatim
 
@@ -40,8 +39,7 @@ Usage
     \table
         Property     | Description             | Required    | Default value
         type         | type: waveAbsorptionOutletVelocity | yes         |
-        waveDict     | Dictionary where variables for generation/absorption are defined | yes | waveDict
-	    leftORright  | Define location of Boundary condition: Left(1) or Right (-1) | yes | -1
+        waveDict    | Dictionary specifying wave variables | no | waveProperties
     \endtable
 
 Note
@@ -58,7 +56,6 @@ SourceFiles
 #define waveAbsorptionOutletVelocityFvPatchVectorField_H
 
 #include "fixedValueFvPatchFields.H"
-#include "waveModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,12 +73,6 @@ class waveAbsorptionOutletVelocityFvPatchVectorField
 
         //- Dictionary name
         word waveDictName_;
-
-        //- Pointer to the wave model
-        tmp<waveModel> waveModel_;
-
-        //- Help function to retrieve the wave model
-        waveModel& getWaveModel();
 
 
 public:

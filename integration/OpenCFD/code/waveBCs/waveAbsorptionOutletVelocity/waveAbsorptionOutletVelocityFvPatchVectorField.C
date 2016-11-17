@@ -26,26 +26,7 @@ License
 #include "waveAbsorptionOutletVelocityFvPatchVectorField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
-
-Foam::waveModel&
-Foam::waveAbsorptionOutletVelocityFvPatchVectorField::getWaveModel()
-{
-    // Return waveModel from database if present, or create
-
-    if (!waveModel_.valid())
-    {
-        waveModel_ =
-            waveModel::lookupOrCreate
-            (
-                patch().patch(),
-                internalField().mesh(),
-                waveDictName_
-            );
-    }
-
-    return waveModel_.ref();
-}
-
+#include "waveModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -57,8 +38,7 @@ waveAbsorptionOutletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF),
-    waveDictName_(waveModel::dictName),
-    waveModelPtr_()
+    waveDictName_(waveModel::dictName)
 {}
 
 
@@ -72,8 +52,7 @@ waveAbsorptionOutletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
-    waveDictName_(ptf.waveDictName_),
-    waveModelPtr_()
+    waveDictName_(ptf.waveDictName_)
 {}
 
 
@@ -86,8 +65,7 @@ waveAbsorptionOutletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF, dict),
-    waveDictName_(dict.lookupOrDefault<word>("waveDict", waveModel::dictName)),
-    waveModelPtr_()
+    waveDictName_(dict.lookupOrDefault<word>("waveDict", waveModel::dictName))
 {}
 
 
@@ -98,8 +76,7 @@ waveAbsorptionOutletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf),
-    waveDictName_(ptf.waveDictName_),
-    waveModelPtr_()
+    waveDictName_(ptf.waveDictName_)
 {}
 
 
@@ -111,8 +88,7 @@ waveAbsorptionOutletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, iF),
-    waveDictName_(ptf.waveDictName_),
-    waveModelPtr_()
+    waveDictName_(ptf.waveDictName_)
 {}
 
 

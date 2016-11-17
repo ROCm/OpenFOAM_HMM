@@ -76,6 +76,7 @@ public:
     //- Destructor
     virtual ~waveAbsorptionModel();
 
+
     // Public Member Functions
 
         //- Read from dictionary

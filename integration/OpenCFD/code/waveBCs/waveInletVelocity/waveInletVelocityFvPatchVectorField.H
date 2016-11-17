@@ -31,7 +31,6 @@ Description
     {
         type            waveInletVelocity;
         value           uniform (0 0 0);
-	    leftORright	      1.0;
     }
     \endverbatim
 
@@ -40,7 +39,6 @@ Usage
         Property    | Description             | Required   | Default value
         type        | type: waveInletVelocity | yes        |
         waveDict    | Dictionary specifying wave variables | no | waveProperties
-	    leftORright | Define location of Boundary condition: Left(1) or Right (-1) | yes | -1
     \endtable
 
 Note
@@ -57,7 +55,6 @@ SourceFiles
 #define waveInletVelocityFvPatchVectorField_H
 
 #include "fixedValueFvPatchFields.H"
-#include "waveModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,12 +72,6 @@ class waveInletVelocityFvPatchVectorField
 
         //- Dictionary name
         word waveDictName_;
-
-        //- Pointer to the wave model
-        tmp<waveModel> waveModel_;
-
-        //- Help function to retrieve the wave model
-        waveModel& getWaveModel();
 
 
 public:

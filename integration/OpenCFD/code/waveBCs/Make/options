@@ -1,7 +1,6 @@
 DEV_PATH = ..
 
 EXE_INC = \
-    -DFULLDEBUG -g -O0 \
     -I$(DEV_PATH)/waveModel/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude
 

@@ -26,27 +26,7 @@ License
 #include "waveInletVelocityFvPatchVectorField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-Foam::waveModel& Foam::waveInletVelocityFvPatchVectorField::getWaveModel()
-{
-    // Return waveModel from database if present, or create
-
-    if (!waveModel_.valid())
-    {
-        waveModel_ =
-            waveModel::lookupOrCreate
-            (
-                patch().patch(),
-                internalField().mesh(),
-                waveDictName_
-            );
-    }
-
-    return waveModel_.ref();
-}
-
+#include "waveModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -57,8 +37,7 @@ Foam::waveInletVelocityFvPatchVectorField::waveInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF),
-    waveDictName_(waveModel::dictName),
-    waveModel_()
+    waveDictName_(waveModel::dictName)
 {}
 
 
@@ -71,8 +50,7 @@ Foam::waveInletVelocityFvPatchVectorField::waveInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
-    waveDictName_(ptf.waveDictName_),
-    waveModel_()
+    waveDictName_(ptf.waveDictName_)
 {}
 
 
@@ -84,8 +62,7 @@ Foam::waveInletVelocityFvPatchVectorField::waveInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF, dict),
-    waveDictName_(dict.lookupOrDefault<word>("waveDict", waveModel::dictName)),
-    waveModel_()
+    waveDictName_(dict.lookupOrDefault<word>("waveDict", waveModel::dictName))
 {}
 
 
@@ -95,8 +72,7 @@ Foam::waveInletVelocityFvPatchVectorField::waveInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf),
-    waveDictName_(ptf.waveDictName_),
-    waveModel_()
+    waveDictName_(ptf.waveDictName_)
 {}
 
 
@@ -107,8 +83,7 @@ Foam::waveInletVelocityFvPatchVectorField::waveInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, iF),
-    waveDictName_(ptf.waveDictName_),
-    waveModel_()
+    waveDictName_(ptf.waveDictName_)
 {}
 
 

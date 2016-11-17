@@ -26,27 +26,7 @@ License
 #include "waveInletAlphaFvPatchScalarField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-Foam::waveModel& Foam::waveInletAlphaFvPatchScalarField::getWaveModel()
-{
-    // Return waveModel from database if present, or create
-
-    if (!waveModel_.valid())
-    {
-        waveModel_ =
-            waveModel::lookupOrCreate
-            (
-                patch().patch(),
-                internalField().mesh(),
-                waveDictName_
-            );
-    }
-
-    return waveModel_.ref();
-}
-
+#include "waveModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -57,8 +37,7 @@ Foam::waveInletAlphaFvPatchScalarField::waveInletAlphaFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF),
-    waveDictName_(waveModel::dictName),
-    waveModel_()
+    waveDictName_(waveModel::dictName)
 {}
 
 
@@ -71,8 +50,7 @@ Foam::waveInletAlphaFvPatchScalarField::waveInletAlphaFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ptf, p, iF, mapper),
-    waveDictName_(ptf.waveDictName_),
-    waveModel_()
+    waveDictName_(ptf.waveDictName_)
 {}
 
 
@@ -84,8 +62,7 @@ Foam::waveInletAlphaFvPatchScalarField::waveInletAlphaFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF, dict),
-    waveDictName_(dict.lookupOrDefault<word>("waveDict", waveModel::dictName)),
-    waveModel_()
+    waveDictName_(dict.lookupOrDefault<word>("waveDict", waveModel::dictName))
 {}
 
 
@@ -95,8 +72,7 @@ Foam::waveInletAlphaFvPatchScalarField::waveInletAlphaFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ptf),
-    waveDictName_(ptf.waveDictName_),
-    waveModel_()
+    waveDictName_(ptf.waveDictName_)
 {}
 
 
@@ -107,8 +83,7 @@ Foam::waveInletAlphaFvPatchScalarField::waveInletAlphaFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ptf, iF),
-    waveDictName_(ptf.waveDictName_),
-    waveModel_()
+    waveDictName_(ptf.waveDictName_)
 {}
 
 

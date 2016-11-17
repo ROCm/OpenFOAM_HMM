@@ -70,6 +70,7 @@ protected:
         //- Wave phase
         scalar wavePhase_;
 
+
     // Protected Member Functions
 
         //- Return word description of wave type
