@@ -276,6 +276,7 @@ Foam::waveModel::waveModel
     waterDepthRef_(0),
     initialDepth_(0),
     rampTime_(VSMALL),
+    currTimeIndex_(-1),
     activeAbsorption_(false),
     U_(patch.size(), vector::zero),
     alpha_(patch.size(), 0)
@@ -338,9 +339,7 @@ bool Foam::waveModel::read()
 
 void Foam::waveModel::correct(const scalar t)
 {
-    static label timeIndex = -1;
-
-    if (mesh_.time().timeIndex() != timeIndex)
+    if (mesh_.time().timeIndex() != currTimeIndex_)
     {
         Info<< "Updating " << type() << " wave model for patch "
             << patch_.name() << endl;
@@ -394,7 +393,7 @@ void Foam::waveModel::correct(const scalar t)
         // Transform velocity into global co-ordinate system
         U_ = Rlg_ & U_;
 
-        timeIndex = mesh_.time().timeIndex();
+        currTimeIndex_ = mesh_.time().timeIndex();
     }
 }
 

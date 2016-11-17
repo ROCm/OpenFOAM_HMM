@@ -114,8 +114,12 @@ protected:
         //- Ramp time
         scalar rampTime_;
 
+        //- Time index used for updating
+        label currTimeIndex_;
+
         //- Active wave absorption switch
         bool activeAbsorption_;
+
 
         // Current values
 
