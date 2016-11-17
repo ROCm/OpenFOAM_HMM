@@ -125,9 +125,9 @@ void Foam::functionObjects::thermoCoupleProbes::derivatives
     muc = this->sample(thermo_.mu()());
     Cpc = this->sample(thermo_.Cp()());
 
-    scalarField Re(rhoc*Uc*d_/(muc + ROOTVSMALL));
-    scalarField Pr(Cpc*muc/(kappac + ROOTVSMALL));
-    //scalarField Nu(2.0 + 0.6*sqrt(Re)*cbrt(Pr));
+    scalarField Re(rhoc*Uc*d_/muc);
+    scalarField Pr(Cpc*muc/kappac);
+    Pr = max(ROOTVSMALL, Pr);
     scalarField Nu(2.0 + (0.4*sqrt(Re) + 0.06*pow(Re, 2/3))*pow(Pr, 0.4));
     scalarField htc(Nu*kappac/d_);
 
