@@ -160,6 +160,7 @@ Foam::functionObjects::writeFile::writeFile
 :
     fileObr_(obr),
     prefix_(prefix),
+    fileName_(fileName),
     filePtr_(),
     writePrecision_(IOstream::defaultPrecision()),
     writeToFile_(true)

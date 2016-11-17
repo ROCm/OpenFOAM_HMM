@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,18 +30,34 @@ License
 namespace Foam
 {
 
-    // specialization: from face -> triFace
+    // Transcribe 'face' to 'face' (ie, just transfer)
     template<>
-    void Foam::MeshedSurface<triFace>::transcribe(MeshedSurface<face>& surf)
+    void Foam::MeshedSurface<Foam::face>::transcribe
+    (
+        MeshedSurface<face>& surf
+    )
     {
-        // first triangulate
+        this->transfer(surf);
+        this->addZonesToFaces(); // currently a no-op
+    }
+
+    // Transcribe 'face' to 'triFace'
+    // Transfer points/zones and triangulate faces
+    template<>
+    void Foam::MeshedSurface<Foam::triFace>::transcribe
+    (
+        MeshedSurface<face>& surf
+    )
+    {
+        // First triangulate
+        // - slightly wasteful for space, but manages adjusts the zones too!
         surf.triangulate();
         this->storedPoints().transfer(surf.storedPoints());
         this->storedZones().transfer(surf.storedZones());
 
         // transcribe from face -> triFace
-        List<face>&    origFaces = surf.storedFaces();
-        List<triFace>  newFaces(origFaces.size());
+        const List<face>& origFaces = surf.surfFaces();
+        List<triFace> newFaces(origFaces.size());
         forAll(origFaces, facei)
         {
             newFaces[facei] = triFace
@@ -52,18 +68,65 @@ namespace Foam
         surf.clear();
 
         this->storedFaces().transfer(newFaces);
+        this->addZonesToFaces(); // currently a no-op
     }
 
 
-    // specialization: from face -> face
+    // Transcribe 'face' to 'labelledTri'
+    // Transfer points/zones and triangulate faces
     template<>
-    void Foam::MeshedSurface<face>::transcribe(MeshedSurface<face>& surf)
+    void Foam::MeshedSurface<Foam::labelledTri>::transcribe
+    (
+        MeshedSurface<face>& surf
+    )
     {
-        this->transfer(surf);
+        // First triangulate
+        // - slightly wasteful for space, but manages adjusts the zones too!
+        surf.triangulate();
+        this->storedPoints().transfer(surf.storedPoints());
+        this->storedZones().transfer(surf.storedZones());
+
+        // transcribe from face -> triFace
+        const List<face>& origFaces = surf.surfFaces();
+        List<labelledTri> newFaces(origFaces.size());
+        forAll(origFaces, facei)
+        {
+            newFaces[facei] = triFace
+            (
+                static_cast<const labelUList&>(origFaces[facei])
+            );
+        }
+        surf.clear();
+
+        this->storedFaces().transfer(newFaces);
+        this->addZonesToFaces(); // for labelledTri
+    }
+
+
+    // Propagate zone information on face regions for labelledTri.
+    template<>
+    bool Foam::MeshedSurface<Foam::labelledTri>::addZonesToFaces()
+    {
+        List<labelledTri>& faceLst = this->storedFaces();
+        const surfZoneList& zones = this->surfZones();
+
+        forAll(zones, zoneI)
+        {
+            const surfZone& zone = zones[zoneI];
+
+            label faceI = zone.start();
+            forAll(zone, i)
+            {
+                faceLst[faceI++].region() = zoneI;
+            }
+        }
+
+        return true;
     }
 
 
 }  // end of namespace Foam
+
 
 
 // ************************************************************************* //

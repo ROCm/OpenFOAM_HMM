@@ -128,7 +128,6 @@ bool Foam::functionObjects::fieldValues::fieldValueDelta::read
 )
 {
     fvMeshFunctionObject::read(dict);
-
     writeFile::read(dict);
 
     region1Ptr_.reset
@@ -210,9 +209,9 @@ bool Foam::functionObjects::fieldValues::fieldValueDelta::write()
         applyOperation<symmTensor>(type1, name1, name2, entry1, entry2, found);
         applyOperation<tensor>(type1, name1, name2, entry1, entry2, found);
 
-        if (log && !found)
+        if (!found)
         {
-            Info<< "Operation between "
+            Log << "Operation between "
                 << name1 << " with result " << entry1 << " and "
                 << name2 << " with result " << entry2 << " not applied"
                 << endl;

@@ -126,7 +126,7 @@ protected:
     // Protected Member functions
 
         //- Return non-const access to the zone Ids
-        List<label>& storedZoneIds()
+        labelList& storedZoneIds()
         {
             return zoneIds_;
         }
@@ -289,7 +289,7 @@ public:
             void setSize(const label);
 
             //- Return const access to the zone ids
-            const List<label>& zoneIds() const
+            virtual const labelList& zoneIds() const
             {
                 return zoneIds_;
             }
@@ -366,6 +366,9 @@ public:
             //- Transfer contents to the Xfer container
             Xfer<UnsortedMeshedSurface<Face>> xfer();
 
+            //- Transfer stored zoneIds to an Xfer container
+            Xfer<labelList> xferZoneIds();
+
 
         // Read
 
@@ -403,6 +406,7 @@ public:
     // IOstream Operators
 
         //- Read UnsortedMeshedSurface from Istream.
+        //  Avoid using to read/write file content (fragile).
         friend Istream& operator>> <Face>
         (
             Istream&,
@@ -411,6 +415,7 @@ public:
 
 
         //- Write UnsortedMeshedSurface to Ostream.
+        //  Avoid using to read/write file content (fragile).
         friend Ostream& operator<< <Face>
         (
             Ostream&,

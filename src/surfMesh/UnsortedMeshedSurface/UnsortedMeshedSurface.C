@@ -202,7 +202,7 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     ParentType
     (
         xferCopy(surf.points()),
-        xferCopy(surf.faces())
+        xferCopy(surf.surfFaces())
     ),
     zoneIds_(surf.zoneIds()),
     zoneToc_(surf.zoneToc())
@@ -218,7 +218,7 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     ParentType
     (
         xferCopy(surf.points()),
-        xferCopy(surf.faces())
+        xferCopy(surf.surfFaces())
     )
 {
     setZones(surf.surfZones());
@@ -456,7 +456,7 @@ Foam::Ostream& Foam::UnsortedMeshedSurface<Face>::write(Ostream& os) const
 {
     os  << this->zoneIds()
         << this->points()
-        << this->faces();
+        << this->surfFaces();
 
     os.check("UnsortedMeshedSurface::write(Ostream&) const");
     return os;
@@ -722,6 +722,14 @@ Foam::UnsortedMeshedSurface<Face>::xfer()
 }
 
 
+template<class Face>
+Foam::Xfer<Foam::labelList>
+Foam::UnsortedMeshedSurface<Face>::xferZoneIds()
+{
+    return this->storedZoneIds().xfer();
+}
+
+
 // Read from file, determine format from extension
 template<class Face>
 bool Foam::UnsortedMeshedSurface<Face>::read(const fileName& name)
@@ -777,7 +785,7 @@ void Foam::UnsortedMeshedSurface<Face>::operator=
     clear();
 
     this->storedPoints() = surf.points();
-    this->storedFaces()  = surf.faces();
+    this->storedFaces()  = surf.surfFaces();
     zoneIds_ = surf.zoneIds_;
     zoneToc_ = surf.zoneToc_;
 }
@@ -793,7 +801,7 @@ Foam::MeshedSurfaceProxy<Face>() const
     return MeshedSurfaceProxy<Face>
     (
         this->points(),
-        this->faces(),
+        this->surfFaces(),
         zoneLst,
         faceMap
     );

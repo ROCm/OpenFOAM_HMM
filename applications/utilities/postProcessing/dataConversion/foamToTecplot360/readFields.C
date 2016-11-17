@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,37 +36,32 @@ namespace Foam
 template<class GeoField>
 void readFields
 (
-    const vtkMesh& vMesh,
+    const meshSubsetHelper& helper,
     const typename GeoField::Mesh& mesh,
     const IOobjectList& objects,
     const HashSet<word>& selectedFields,
-    PtrList<GeoField>& fields
+    PtrList<const GeoField>& fields
 )
 {
-    // Search list of objects for volScalarFields
+    // Search list of objects for fields of type GeomField
     IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
 
-    // Construct the vol scalar fields
-    label nFields = fields.size();
-    fields.setSize(nFields + fieldObjects.size());
+    // Construct the fields
+    fields.setSize(fieldObjects.size());
+    label nFields = 0;
 
-    forAllIter(IOobjectList, fieldObjects, iter)
+    forAllConstIter(IOobjectList, fieldObjects, iter)
     {
         if (selectedFields.empty() || selectedFields.found(iter()->name()))
         {
             fields.set
             (
-                nFields,
-                vMesh.interpolate
+                nFields++,
+                helper.interpolate
                 (
-                    GeoField
-                    (
-                        *iter(),
-                        mesh
-                    )
-                )
+                    GeoField(*iter(), mesh)
+                ).ptr()
             );
-            nFields++;
         }
     }
 

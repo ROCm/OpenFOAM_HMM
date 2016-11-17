@@ -108,8 +108,7 @@ void Foam::functionObjects::fieldAverage::initialize()
 
 void Foam::functionObjects::fieldAverage::restart()
 {
-    Log
-        << "    Restarting averaging at time " << obr_.time().timeName()
+    Log << "    Restarting averaging at time " << obr_.time().timeName()
         << nl << endl;
 
     totalIter_.clear();
@@ -159,8 +158,7 @@ void Foam::functionObjects::fieldAverage::calcAverages()
         restart();
     }
 
-    Log
-        << type() << " " << name() << " write:" << nl
+    Log << type() << " " << name() << " write:" << nl
         << "    Calculating averages" << nl;
 
     addMeanSqrToPrime2Mean<scalar, scalar>();
@@ -221,14 +219,14 @@ void Foam::functionObjects::fieldAverage::readAveragingProperties()
     totalTime_.clear();
     totalTime_.setSize(faItems_.size(), obr_.time().deltaTValue());
 
-    if ((restartOnRestart_ || restartOnOutput_) && log)
+    if (restartOnRestart_ || restartOnOutput_)
     {
         Info<< "    Starting averaging at time " << obr_.time().timeName()
             << nl;
     }
     else
     {
-        Log << "    Restarting averaging for fields:" << nl;
+        Info<< "    Restarting averaging for fields:" << nl;
 
 
         forAll(faItems_, fieldi)
@@ -242,15 +240,13 @@ void Foam::functionObjects::fieldAverage::readAveragingProperties()
                 totalIter_[fieldi] = readLabel(fieldDict.lookup("totalIter"));
                 totalTime_[fieldi] = readScalar(fieldDict.lookup("totalTime"));
 
-                Log
-                    << "        " << fieldName
+                Info<< "        " << fieldName
                     << " iters = " << totalIter_[fieldi]
                     << " time = " << totalTime_[fieldi] << nl;
             }
             else
             {
-                Log
-                    << "        " << fieldName
+                Info<< "        " << fieldName
                     << ": starting averaging at time "
                     << obr_.time().timeName() << endl;
             }
@@ -299,7 +295,7 @@ bool Foam::functionObjects::fieldAverage::read(const dictionary& dict)
 
     initialised_ = false;
 
-    Log << type() << " " << name() << ":" << nl;
+    Info<< type() << " " << name() << ":" << nl;
 
     dict.readIfPresent("restartOnRestart", restartOnRestart_);
     dict.readIfPresent("restartOnOutput", restartOnOutput_);
@@ -309,8 +305,7 @@ bool Foam::functionObjects::fieldAverage::read(const dictionary& dict)
     if (periodicRestart_)
     {
         dict.lookup("restartPeriod") >> restartPeriod_;
-        Log
-            << "    Restart period " << restartPeriod_
+        Info<< "    Restart period " << restartPeriod_
             << nl << endl;
     }
 
@@ -324,15 +319,14 @@ bool Foam::functionObjects::fieldAverage::read(const dictionary& dict)
         }
         else
         {
-            Log
-                << "    Restart scheduled at time " << restartTime_
+            Info<< "    Restart scheduled at time " << restartTime_
                 << nl << endl;
         }
     }
 
     readAveragingProperties();
 
-    Log << endl;
+    Info<< endl;
 
     return true;
 }

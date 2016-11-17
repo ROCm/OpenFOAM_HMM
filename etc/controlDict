@@ -794,7 +794,6 @@ DebugSwitches
     surfaceIntersection 0;
     surfaceNormalFixedValue 0;
     surfacePatch        0;
-    surfacePatchIOList  0;
     surfaceScalarField  0;
     surfaceScalarField::Internal 0;
     surfaceSlipDisplacement 0;

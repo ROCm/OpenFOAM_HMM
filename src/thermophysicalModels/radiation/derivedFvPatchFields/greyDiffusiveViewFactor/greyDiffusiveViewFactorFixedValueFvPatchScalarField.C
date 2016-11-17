@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,6 +112,32 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::radiation::greyDiffusiveViewFactorFixedValueFvPatchScalarField::
+autoMap
+(
+    const fvPatchFieldMapper& m
+)
+{
+    fixedValueFvPatchScalarField::autoMap(m);
+    Qro_.autoMap(m);
+}
+
+
+void Foam::radiation::greyDiffusiveViewFactorFixedValueFvPatchScalarField::rmap
+(
+    const fvPatchScalarField& ptf,
+    const labelList& addr
+)
+{
+    fixedValueFvPatchScalarField::rmap(ptf, addr);
+
+    const greyDiffusiveViewFactorFixedValueFvPatchScalarField& mrptf =
+        refCast<const greyDiffusiveViewFactorFixedValueFvPatchScalarField>(ptf);
+
+    Qro_.rmap(mrptf.Qro_, addr);
+}
+
 
 void Foam::radiation::greyDiffusiveViewFactorFixedValueFvPatchScalarField::
 updateCoeffs()

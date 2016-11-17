@@ -205,7 +205,7 @@ bool Foam::meshToMeshMethod::initialise
     {
         if (debug)
         {
-            Pout<< "mesh interpolation: hhave " << src_.nCells() << " source "
+            Pout<< "mesh interpolation: have " << src_.nCells() << " source "
                 << " cells but no target cells" << endl;
         }
 

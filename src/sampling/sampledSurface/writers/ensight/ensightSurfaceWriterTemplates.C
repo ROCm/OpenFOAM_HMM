@@ -28,6 +28,7 @@ License
 #include "OFstream.H"
 #include "OSspecific.H"
 #include "ensightPartFaces.H"
+#include "ensightSerialOutput.H"
 #include "ensightPTraits.H"
 #include "OStringStream.H"
 #include "regExp.H"
@@ -39,8 +40,7 @@ Foam::fileName Foam::ensightSurfaceWriter::writeUncollated
 (
     const fileName& outputDir,
     const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
+    const meshedSurf& surf,
     const word& fieldName,
     const Field<Type>& values,
     const bool isNodeValues,
@@ -116,12 +116,25 @@ Foam::fileName Foam::ensightSurfaceWriter::writeUncollated
         << "    " << timeValue
         << nl << nl << "# end" << nl;
 
-    ensightPartFaces ensPart(0, osGeom.name().name(), points, faces, true);
+    ensightPartFaces ensPart
+    (
+        0,
+        osGeom.name().name(),
+        surf.points(),
+        surf.faces(),
+        true // contiguous points
+    );
     osGeom << ensPart;
 
     // Write field
     osField.writeKeyword(ensightPTraits<Type>::typeName);
-    ensPart.writeField(osField, values, isNodeValues);
+    ensightSerialOutput::writeField
+    (
+        values,
+        ensPart,
+        osField,
+        isNodeValues
+    );
 
     return osCase.name();
 }
@@ -132,8 +145,7 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
 (
     const fileName& outputDir,
     const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
+    const meshedSurf& surf,
     const word& fieldName,
     const Field<Type>& values,
     const bool isNodeValues,
@@ -303,7 +315,14 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
 
 
     // Write geometry
-    ensightPartFaces ensPart(0, meshFile.name(), points, faces, true);
+    ensightPartFaces ensPart
+    (
+        0,
+        meshFile.name(),
+        surf.points(),
+        surf.faces(),
+        true // contiguous points
+    );
     if (!exists(meshFile))
     {
         if (verbose)
@@ -337,12 +356,21 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
         varName,
         writeFormat_
     );
+
     if (verbose)
     {
         Info<< "Writing field file to " << osField.name() << endl;
     }
+
+    // Write field
     osField.writeKeyword(ensightPTraits<Type>::typeName);
-    ensPart.writeField(osField, values, isNodeValues);
+    ensightSerialOutput::writeField
+    (
+        values,
+        ensPart,
+        osField,
+        isNodeValues
+    );
 
     // place a timestamp in the directory for future reference
     {
@@ -361,8 +389,7 @@ Foam::fileName Foam::ensightSurfaceWriter::writeTemplate
 (
     const fileName& outputDir,
     const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
+    const meshedSurf& surf,
     const word& fieldName,
     const Field<Type>& values,
     const bool isNodeValues,
@@ -375,8 +402,7 @@ Foam::fileName Foam::ensightSurfaceWriter::writeTemplate
         (
             outputDir,
             surfaceName,
-            points,
-            faces,
+            surf,
             fieldName,
             values,
             isNodeValues,
@@ -389,8 +415,7 @@ Foam::fileName Foam::ensightSurfaceWriter::writeTemplate
         (
             outputDir,
             surfaceName,
-            points,
-            faces,
+            surf,
             fieldName,
             values,
             isNodeValues,

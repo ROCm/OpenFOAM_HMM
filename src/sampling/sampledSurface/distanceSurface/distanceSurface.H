@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -193,6 +193,32 @@ public:
             return facesPtr_;
         }
 
+        //- Const access to per-face zone/region information
+        virtual const labelList& zoneIds() const
+        {
+            return Foam::emptyLabelList;
+        }
+
+        //- Face area vectors
+        virtual const vectorField& Sf() const
+        {
+            return surface().Sf();
+        }
+
+        //- Face area magnitudes
+        virtual const scalarField& magSf() const
+        {
+            return surface().magSf();
+        }
+
+        //- Face centres
+        virtual const vectorField& Cf() const
+        {
+            return surface().Cf();
+        }
+
+
+        //- The underlying surface
         const triSurface& surface() const
         {
             if (cell_)

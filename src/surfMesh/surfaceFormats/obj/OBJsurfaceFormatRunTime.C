@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,6 +52,14 @@ addNamedTemplatedToRunTimeSelectionTable
     fileExtension,
     obj
 );
+addNamedTemplatedToRunTimeSelectionTable
+(
+    MeshedSurface,
+    OBJsurfaceFormat,
+    labelledTri,
+    fileExtension,
+    obj
+);
 
 // write MeshedSurfaceProxy
 addNamedTemplatedToMemberFunctionSelectionTable
@@ -68,6 +76,15 @@ addNamedTemplatedToMemberFunctionSelectionTable
     MeshedSurfaceProxy,
     OBJsurfaceFormat,
     triFace,
+    write,
+    fileExtension,
+    obj
+);
+addNamedTemplatedToMemberFunctionSelectionTable
+(
+    MeshedSurfaceProxy,
+    OBJsurfaceFormat,
+    labelledTri,
     write,
     fileExtension,
     obj

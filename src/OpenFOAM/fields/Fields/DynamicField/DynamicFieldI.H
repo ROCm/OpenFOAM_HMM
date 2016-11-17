@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,6 +62,17 @@ template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline Foam::DynamicField<T, SizeInc, SizeMult, SizeDiv>::DynamicField
 (
     const Xfer<List<T>>& lst
+)
+:
+    Field<T>(lst),
+    capacity_(Field<T>::size())
+{}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline Foam::DynamicField<T, SizeInc, SizeMult, SizeDiv>::DynamicField
+(
+    const Xfer<Field<T>>& lst
 )
 :
     Field<T>(lst),

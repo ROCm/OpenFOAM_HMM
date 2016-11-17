@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -171,11 +171,11 @@ void Foam::MeshedSurfaceProxy<Face>::write
         if (this->useFaceMap())
         {
             // this is really a bit annoying (and wasteful) but no other way
-            os  << reorder(this->faceMap(), this->faces());
+            os  << reorder(this->faceMap(), this->surfFaces());
         }
         else
         {
-            os  << this->faces();
+            os  << this->surfFaces();
         }
 
         io.writeEndDivider(os);
@@ -233,6 +233,43 @@ Foam::MeshedSurfaceProxy<Face>::MeshedSurfaceProxy
 template<class Face>
 Foam::MeshedSurfaceProxy<Face>::~MeshedSurfaceProxy()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+
+namespace Foam
+{
+
+// Number of triangles for a triFace surface
+template<>
+inline label MeshedSurfaceProxy<triFace>::nTriangles() const
+{
+    return this->size();
+}
+
+// Number of triangles for a labelledTri surface
+template<>
+inline label MeshedSurfaceProxy<labelledTri>::nTriangles() const
+{
+    return this->size();
+}
+
+}
+
+
+template<class Face>
+inline Foam::label Foam::MeshedSurfaceProxy<Face>::nTriangles() const
+{
+    label nTri = 0;
+    const List<Face>& faceLst = this->surfFaces();
+    forAll(faceLst, facei)
+    {
+        nTri += faceLst[facei].nTriangles();
+    }
+
+    return nTri;
+}
 
 
 // ************************************************************************* //

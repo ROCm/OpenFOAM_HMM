@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -289,8 +289,11 @@ Foam::tmp<Foam::triSurfacePointScalarField> Foam::automatic::load()
         (
             surface_.searchableSurface::time().constant()/"triSurface",
             surfaceName_.lessExt().name(),
-            surface_.points(),
-            faces,
+            meshedSurfRef
+            (
+                surface_.points(),
+                faces
+            ),
             "cellSize",
             pointCellSize,
             true,

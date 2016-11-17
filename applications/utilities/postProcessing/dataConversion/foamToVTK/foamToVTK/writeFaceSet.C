@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,12 +32,12 @@ License
 void Foam::writeFaceSet
 (
     const bool binary,
-    const vtkMesh& vMesh,
+    const fvMesh& mesh,
     const faceSet& set,
     const fileName& fileName
 )
 {
-    const faceList& faces = vMesh.mesh().faces();
+    const faceList& faces = mesh.faces();
 
     std::ofstream ostr(fileName.c_str());
 
@@ -69,7 +69,7 @@ void Foam::writeFaceSet
         setFaces[setFacei] = faces[iter.key()];
         setFacei++;
     }
-    primitiveFacePatch fp(setFaces, vMesh.mesh().points());
+    primitiveFacePatch fp(setFaces, mesh.points());
 
 
     // Write points and faces as polygons

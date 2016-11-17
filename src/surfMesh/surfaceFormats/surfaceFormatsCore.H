@@ -99,15 +99,26 @@ public:
 
         //- Return the local file name (within time directory)
         //  NEEDS FIXING
-        static fileName localMeshFileName(const word& surfName="");
+        static fileName localMeshFileName
+        (
+            const word& surfName = word::null
+        );
 
         //- Find instance with surfName
         //  NEEDS FIXING
-        static fileName findMeshInstance(const Time&, const word& surfName="");
+        static fileName findMeshInstance
+        (
+            const Time&,
+            const word& surfName = word::null
+        );
 
         //- Find mesh file with surfName
         //  NEEDS FIXING
-        static fileName findMeshFile(const Time&, const word& surfName="");
+        static fileName findMeshFile
+        (
+            const Time&,
+            const word& surfName = word::null
+        );
 
 
     // Constructors
@@ -118,6 +129,7 @@ public:
 
     //- Destructor
     virtual ~surfaceFormatsCore();
+
 };
 
 

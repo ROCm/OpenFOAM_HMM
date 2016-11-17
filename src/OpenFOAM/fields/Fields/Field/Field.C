@@ -233,8 +233,10 @@ Foam::Field<Type>::Field(const Xfer<List<Type>>& f)
 template<class Type>
 Foam::Field<Type>::Field(const Xfer<Field<Type>>& f)
 :
-    List<Type>(f)
-{}
+    List<Type>()
+{
+    List<Type>::transfer(f());
+}
 
 
 template<class Type>

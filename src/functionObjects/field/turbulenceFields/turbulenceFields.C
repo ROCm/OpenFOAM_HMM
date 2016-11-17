@@ -157,19 +157,19 @@ bool Foam::functionObjects::turbulenceFields::read(const dictionary& dict)
         fieldSet_.insert(wordList(dict.lookup("fields")));
     }
 
-    Log << type() << " " << name() << ": ";
+    Info<< type() << " " << name() << ": ";
     if (fieldSet_.size())
     {
-        Log << "storing fields:" << nl;
+        Info<< "storing fields:" << nl;
         forAllConstIter(wordHashSet, fieldSet_, iter)
         {
-            Log << "    " << modelName << ':' << iter.key() << nl;
+            Info<< "    " << modelName << ':' << iter.key() << nl;
         }
-        Log << endl;
+        Info<< endl;
     }
     else
     {
-        Log << "no fields requested to be stored" << nl << endl;
+        Info<< "no fields requested to be stored" << nl << endl;
     }
 
     return true;

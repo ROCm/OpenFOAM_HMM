@@ -1,6 +1,29 @@
-vtk/vtkUnstructuredReader.C
+ensight/file/ensightCase.C
+ensight/file/ensightCaseOptions.C
+ensight/file/ensightFile.C
+ensight/file/ensightGeoFile.C
+ensight/part/ensightCells.C
+ensight/part/ensightFaces.C
+ensight/read/ensightReadFile.C
+ensight/type/ensightPTraits.C
+
 nas/NASCore.C
+fire/FIRECore.C
 starcd/STARCDCore.C
+stl/STLCore.C
+stl/STLReader.C
+stl/STLReaderASCII.L
+
+vtk/foamVtkCore.C
+vtk/format/foamVtkAppendBase64Formatter.C
+vtk/format/foamVtkAppendRawFormatter.C
+vtk/format/foamVtkAsciiFormatter.C
+vtk/format/foamVtkBase64Formatter.C
+vtk/format/foamVtkLegacyFormatter.C
+vtk/format/foamVtkFormatter.C
+vtk/format/foamVtkOutputOptions.C
+vtk/read/vtkUnstructuredReader.C
+vtk/type/foamVtkPTraits.C
 
 coordSet/coordSet.C
 
@@ -8,7 +31,6 @@ setWriters = sampledSetWriters
 
 $(setWriters)/writers.C
 $(setWriters)/ensight/ensightSetWriterRunTime.C
-$(setWriters)/ensight/ensightPTraits.C
 $(setWriters)/gnuplot/gnuplotSetWriterRunTime.C
 $(setWriters)/jplot/jplotSetWriterRunTime.C
 $(setWriters)/raw/rawSetWriterRunTime.C

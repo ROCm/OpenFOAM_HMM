@@ -4,11 +4,13 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Parse arguments for application compilation (at least for error control)
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
-if [ ! -d ${WM_THIRD_PARTY_DIR}/tecio ]
+export TECIO_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/tecio
+if [ -f $TECIO_ARCH_PATH/TECIO.h -a -r $TECIO_ARCH_PATH/libtecio.a ]
 then
-    echo "Did not find tecio in ${WM_THIRD_PARTY_DIR}. Not building foamToTecplot360."
-else
+    echo "Building optional tecplot conversion component."
     wmake $targetType
+else
+    echo "Skipping optional tecplot conversion components (no tecio detected)."
 fi
 
 #------------------------------------------------------------------------------

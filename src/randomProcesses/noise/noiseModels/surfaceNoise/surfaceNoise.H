@@ -116,7 +116,7 @@ protected:
     // Protected Data
 
         //- Input file name
-        const fileName inputFileName_;
+        fileName inputFileName_;
 
         //- Index of pressure field in reader field list
         label pIndex_;

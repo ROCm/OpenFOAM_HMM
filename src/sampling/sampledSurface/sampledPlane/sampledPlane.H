@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -137,8 +137,34 @@ public:
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            return cuttingPlane::faces();
+            return cuttingPlane::surfFaces();
         }
+
+        //- Const access to per-face zone/region information
+        //  Could instead return meshCells or cellZoneId of the meshCells.
+        virtual const labelList& zoneIds() const
+        {
+            return Foam::emptyLabelList;
+        }
+
+        //- Face area magnitudes
+        virtual const vectorField& Sf() const
+        {
+            return cuttingPlane::Sf();
+        }
+
+        //- Face area magnitudes
+        virtual const scalarField& magSf() const
+        {
+            return cuttingPlane::magSf();
+        }
+
+        //- Face centres
+        virtual const vectorField& Cf() const
+        {
+            return cuttingPlane::Cf();
+        }
+
 
         //- For every face original cell in mesh
         const labelList& meshCells() const

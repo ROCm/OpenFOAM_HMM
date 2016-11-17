@@ -55,7 +55,7 @@ void Foam::functionObjects::mapFields::createInterpolation
     const fvMesh& meshTarget = mesh_;
     const word mapRegionName(dict.lookup("mapRegion"));
 
-    Log << name() << ':' << nl
+    Info<< name() << ':' << nl
         << "    Reading mesh " << mapRegionName << endl;
 
     mapRegionPtr_.reset
@@ -97,12 +97,12 @@ void Foam::functionObjects::mapFields::createInterpolation
     // Optionally override
     if (dict.readIfPresent("patchMapMethod", patchMapMethodName))
     {
-        Log << "    Patch mapping method: " << patchMapMethodName << endl;
+        Info<< "    Patch mapping method: " << patchMapMethodName << endl;
     }
 
     bool consistent = readBool(dict.lookup("consistent"));
 
-    Log << "    Creating mesh to mesh interpolation" << endl;
+    Info<< "    Creating mesh to mesh interpolation" << endl;
 
     if (consistent)
     {

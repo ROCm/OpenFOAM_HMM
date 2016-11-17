@@ -410,7 +410,6 @@ int main(int argc, char *argv[])
     args.optionReadIfPresent("pointSet", pointSetName);
 
 
-
     instantList timeDirs = timeSelector::select0(runTime, args);
 
     #include "createNamedMesh.H"
@@ -450,7 +449,7 @@ int main(int argc, char *argv[])
 
     mkDir(fvPath);
 
-    // Mesh wrapper; does subsetting and decomposition
+    // Mesh wrapper: does subsetting and decomposition
     vtkMesh vMesh(mesh, cellSetName);
 
     Info<< "VTK mesh topology: "
@@ -503,7 +502,7 @@ int main(int argc, char *argv[])
 
             Info<< "    FaceSet   : " << patchFileName << endl;
 
-            writeFaceSet(binary, vMesh, set, patchFileName);
+            writeFaceSet(binary, vMesh.mesh(), set, patchFileName);
 
             continue;
         }
@@ -526,7 +525,7 @@ int main(int argc, char *argv[])
 
             Info<< "    pointSet   : " << patchFileName << endl;
 
-            writePointSet(binary, vMesh, set, patchFileName);
+            writePointSet(binary, vMesh.mesh(), set, patchFileName);
 
             continue;
         }
@@ -849,7 +848,7 @@ int main(int argc, char *argv[])
                 writeSurfFields
                 (
                     binary,
-                    vMesh,
+                    vMesh.mesh(),
                     surfFileName,
                     svf
                 );
@@ -892,7 +891,7 @@ int main(int argc, char *argv[])
 
             patchWriter writer
             (
-                vMesh,
+                vMesh.mesh(),
                 binary,
                 nearCellValue,
                 patchFileName,
@@ -970,7 +969,7 @@ int main(int argc, char *argv[])
 
                     patchWriter writer
                     (
-                        vMesh,
+                        vMesh.mesh(),
                         binary,
                         nearCellValue,
                         patchFileName,
@@ -1188,7 +1187,7 @@ int main(int argc, char *argv[])
 
                 lagrangianWriter writer
                 (
-                    vMesh,
+                    vMesh.mesh(),
                     binary,
                     lagrFileName,
                     cloudName,
@@ -1218,7 +1217,7 @@ int main(int argc, char *argv[])
             {
                 lagrangianWriter writer
                 (
-                    vMesh,
+                    vMesh.mesh(),
                     binary,
                     lagrFileName,
                     cloudName,

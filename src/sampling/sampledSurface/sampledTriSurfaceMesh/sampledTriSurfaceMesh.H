@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,7 +87,7 @@ class meshSearch;
 class sampledTriSurfaceMesh
 :
     public sampledSurface,
-    public MeshedSurface<face>
+    public UnsortedMeshedSurface<face>
 {
 public:
         //- Types of communications
@@ -101,7 +101,7 @@ public:
 private:
 
     //- Private typedefs for convenience
-        typedef MeshedSurface<face> MeshStorage;
+        typedef UnsortedMeshedSurface<face> MeshStorage;
 
 
     // Private data
@@ -213,7 +213,31 @@ public:
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            return MeshStorage::faces();
+            return MeshStorage::surfFaces();
+        }
+
+        //- Const access to per-face zone/region information
+        virtual const labelList& zoneIds() const
+        {
+            return MeshStorage::zoneIds();
+        }
+
+        //- Face area vectors
+        virtual const vectorField& Sf() const
+        {
+            return MeshStorage::Sf();
+        }
+
+        //- Face area magnitudes
+        virtual const scalarField& magSf() const
+        {
+            return MeshStorage::magSf();
+        }
+
+        //- Face centres
+        virtual const vectorField& Cf() const
+        {
+            return MeshStorage::Cf();
         }
 
 

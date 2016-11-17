@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 #include "VTKsurfaceFormat.H"
 #include "vtkUnstructuredReader.H"
 #include "scalarIOField.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -69,7 +70,6 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
-    const bool mustTriangulate = this->isTri();
     this->clear();
 
     IFstream is(filename);
@@ -148,18 +148,21 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
     }
 
 
-    // See if needs triangulation
+    // Check if it needs triangulation
     label nTri = 0;
-    if (mustTriangulate)
+    if (MeshedSurface<Face>::isTri())
     {
         forAll(faces, facei)
         {
-            nTri += faces[facei].size()-2;
+            nTri += faces[facei].nTriangles();
         }
     }
 
-    if (nTri > 0)
+    if (nTri > faces.size())
     {
+        // We are here if the target surface needs triangles and
+        // the source surface has non-triangles
+
         DynamicList<Face> dynFaces(nTri);
         DynamicList<label> dynZones(nTri);
         forAll(faces, facei)
@@ -207,6 +210,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
         // add zones, culling empty ones
         this->addZones(zoneSizes, zoneNames, true);
     }
+    this->addZonesToFaces(); // for labelledTri
 
     // transfer to normal lists
     this->storedPoints().transfer(reader.points());
@@ -223,7 +227,7 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
 )
 {
     const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.faces();
+    const List<Face>&  faceLst = surf.surfFaces();
     const List<label>& faceMap = surf.faceMap();
 
     const List<surfZone>& zones =
@@ -302,7 +306,7 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
     }
 
 
-    const List<Face>& faceLst = surf.faces();
+    const List<Face>& faceLst = surf.surfFaces();
 
     writeHeader(os, surf.points());
     writeHeaderPolygons(os, faceLst);

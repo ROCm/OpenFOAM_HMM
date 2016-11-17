@@ -138,10 +138,10 @@ writeSpeciesRR()
     prodFilePtr_() << "delta T : "<< mesh_.time().deltaT().value() << nl << nl;
 
     consIntFilePtr_() << "start time : " << startTime_ << tab
-            << "end time :" <<  endTime_ << nl;
+        << "end time :" <<  endTime_ << nl;
 
     prodIntFilePtr_() << "start time : " << startTime_ << tab
-            << "end time :" <<  endTime_ << nl;
+        << "end time :" <<  endTime_ << nl;
 
     for (label reactioni = 0; reactioni < nReactions_; ++reactioni)
     {
@@ -202,7 +202,7 @@ reactionsSensitivityAnalysis
     if (mesh_.nCells() != 1)
     {
         FatalErrorInFunction
-            << "Function object only applicable to single cell cases "
+            << "Function object only applicable to single cell cases"
             << abort(FatalError);
     }
 
@@ -243,9 +243,9 @@ reactionsSensitivityAnalysis
     }
     else
     {
-         FatalErrorInFunction
-            << " Not chemistry model found. "
-            << " Object available are : " << mesh_.names()
+        FatalErrorInFunction
+            << " No chemistry model found. "
+            << " Objects available are : " << mesh_.names()
             << exit(FatalError);
     }
 }

@@ -228,8 +228,11 @@ void writeZoning
     (
         surfFilePath,
         surfFileNameBase,
-        surf.points(),
-        faces,
+        meshedSurfRef
+        (
+            surf.points(),
+            faces
+        ),
         fieldName,
         scalarFaceZone,
         false               // face based data
@@ -795,6 +798,12 @@ int main(int argc, char *argv[])
             Info<< "Splitting surface into parts ..." << endl << endl;
 
             writeZoning(surf, faceZone, "zone", surfFilePath, surfFileNameBase);
+
+            if (numZones > outputThreshold)
+            {
+                Info<< "Limiting number of files to " << outputThreshold
+                    << endl;
+            }
             writeParts
             (
                 surf,
@@ -849,6 +858,12 @@ int main(int argc, char *argv[])
                 surfFilePath,
                 surfFileNameBase
             );
+
+            if (numNormalZones > outputThreshold)
+            {
+                Info<< "Limiting number of files to " << outputThreshold
+                    << endl;
+            }
             writeParts
             (
                 surf,
@@ -885,27 +900,77 @@ int main(int argc, char *argv[])
         forAll(surf.edges(), edgei)
         {
             const edge& e = surf.edges()[edgei];
+            const point& start = surf.points()[surf.meshPoints()[e[0]]];
+            const point& end = surf.points()[surf.meshPoints()[e[1]]];
 
-            pointIndexHit hitInfo
-            (
-                tree.findLine
-                (
-                    surf.points()[surf.meshPoints()[e[0]]],
-                    surf.points()[surf.meshPoints()[e[1]]],
-                    treeDataTriSurface::findSelfIntersectOp
-                    (
-                        tree,
-                        edgei
-                    )
-                )
-            );
+            // Exclude hits of connected triangles
+            treeDataTriSurface::findSelfIntersectOp exclOp(tree, edgei);
 
-            if (hitInfo.hit() && intStreamPtr.valid())
+            pointIndexHit hitInfo(tree.findLineAny(start, end, exclOp));
+
+            if (hitInfo.hit())
             {
-                intStreamPtr().write(hitInfo.hitPoint());
                 nInt++;
+
+                if (intStreamPtr.valid())
+                {
+                    intStreamPtr().write(hitInfo.hitPoint());
+                }
+
+                // Try and find from other side.
+                pointIndexHit hitInfo2(tree.findLineAny(end, start, exclOp));
+
+                if (hitInfo2.hit() && hitInfo.index() != hitInfo2.index())
+                {
+                    nInt++;
+
+                    if (intStreamPtr.valid())
+                    {
+                        intStreamPtr().write(hitInfo2.hitPoint());
+                    }
+                }
             }
         }
+
+        //// Check very near triangles
+        //{
+        //    const pointField& localPoints = surf.localPoints();
+        //
+        //    const boundBox bb(localPoints);
+        //    scalar smallDim = 1e-6 * bb.mag();
+        //    scalar smallDimSqr = Foam::sqr(smallDim);
+        //
+        //    const pointField& faceCentres = surf.faceCentres();
+        //    forAll(faceCentres, faceI)
+        //    {
+        //        const point& fc = faceCentres[faceI];
+        //        pointIndexHit hitInfo
+        //        (
+        //            tree.findNearest
+        //            (
+        //                fc,
+        //                smallDimSqr,
+        //                findSelfNearOp(tree, faceI)
+        //            )
+        //        );
+        //
+        //        if (hitInfo.hit() && intStreamPtr.valid())
+        //        {
+        //            intStreamPtr().write(hitInfo.hitPoint());
+        //
+        //            label nearFaceI = hitInfo.index();
+        //            triPointRef nearTri(surf[nearFaceI].tri(surf.points()));
+        //            triStreamPtr().write
+        //            (
+        //                surf[faceI].tri(surf.points()),
+        //                false
+        //            );
+        //            triStreamPtr().write(nearTri, false);
+        //            nInt++;
+        //        }
+        //    }
+        //}
+
 
         if (nInt == 0)
         {

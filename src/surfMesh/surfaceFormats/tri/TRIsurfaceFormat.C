@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "TRIsurfaceFormat.H"
-#include "ListOps.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -51,7 +51,7 @@ inline void Foam::fileFormats::TRIsurfaceFormat<Face>::writeShell
             << p1.x() << ' ' << p1.y() << ' ' << p1.z() << ' '
             << p2.x() << ' ' << p2.y() << ' ' << p2.z() << ' '
             // zone as colour
-            << "0x" << hex << zoneI << dec << endl;
+            << "0x" << hex << zoneI << dec << nl;
     }
 }
 
@@ -120,6 +120,7 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
     this->storedFaces().transfer(faceLst);
 
     this->addZones(sizes);
+    this->addZonesToFaces(); // for labelledTri
     this->stitchFaces(SMALL);
     return true;
 }
@@ -133,7 +134,7 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
 )
 {
     const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.faces();
+    const List<Face>&  faceLst = surf.surfFaces();
     const List<label>& faceMap = surf.faceMap();
 
     const List<surfZone>& zones =
@@ -186,7 +187,7 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
 )
 {
     const pointField& pointLst = surf.points();
-    const List<Face>& faceLst  = surf.faces();
+    const List<Face>& faceLst  = surf.surfFaces();
 
     OFstream os(filename);
     if (!os.good())

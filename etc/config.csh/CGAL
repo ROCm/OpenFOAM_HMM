@@ -68,12 +68,12 @@ endif
 
 set ending="${BOOST_ARCH_PATH:t}"
 if ( "$ending" != "boost-none" && "$ending" != "boost-system" ) then
-    _foamAddLib $BOOST_ARCH_PATH/lib
+    _foamAddLib $BOOST_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
 endif
 
 set ending="${CGAL_ARCH_PATH:t}"
 if ( "$ending" != "cgal-none" && "$ending" != "cgal-system" ) then
-    _foamAddLib $CGAL_ARCH_PATH/lib
+    _foamAddLib $CGAL_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
 endif
 
 unset boost_version cgal_version ending

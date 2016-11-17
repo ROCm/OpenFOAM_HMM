@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,10 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "AC3DsurfaceFormat.H"
-#include "clock.H"
 #include "IStringStream.H"
-#include "tensor.H"
-#include "primitivePatch.H"
+#include "PrimitivePatch.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -49,7 +47,6 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
-    const bool mustTriangulate = this->isTri();
     this->clear();
 
     IFstream is(filename);
@@ -199,7 +196,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
 
                     labelUList& f = static_cast<labelUList&>(verts);
 
-                    if (mustTriangulate && f.size() > 3)
+                    if (MeshedSurface<Face>::isTri() && f.size() > 3)
                     {
                         // simple face triangulation about f[0]
                         // points may be incomplete
@@ -248,10 +245,63 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
 
     // add zones, culling empty ones
     this->addZones(sizes, names, true);
+    this->addZonesToFaces(); // for labelledTri
     this->stitchFaces(SMALL);
+
     return true;
 }
 
+
+namespace Foam
+{
+// file-scope writing of a patch of faces
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+static void writeZone
+(
+    Ostream& os,
+    const PrimitivePatch<Face, FaceList, PointField, PointType>& patch,
+    const word& name,
+    const label zoneI
+)
+{
+    // An isolated surface region (patch).
+    os  << "OBJECT poly" << nl
+        << "name \"" << name << "\"" << nl;
+
+    os << "numvert " << patch.nPoints() << nl;
+
+    forAll(patch.localPoints(), pti)
+    {
+        const point& pt = patch.localPoints()[pti];
+
+        os << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
+    }
+
+    os << "numsurf " << patch.size() << nl;
+
+    forAll(patch.localFaces(), facei)
+    {
+        const Face& f = patch.localFaces()[facei];
+
+        os  << "SURF 0x20" << nl          // polygon
+            << "mat " << zoneI << nl
+            << "refs " << f.size() << nl;
+
+        forAll(f, fp)
+        {
+            os << f[fp] << " 0 0" << nl;
+        }
+    }
+
+    os << "kids 0" << endl;
+}
+}
 
 template<class Face>
 void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
@@ -261,7 +311,7 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
 )
 {
     const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.faces();
+    const List<Face>&  faceLst = surf.surfFaces();
 
     const List<surfZone>& zones =
     (
@@ -271,14 +321,6 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
     );
 
     const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
-
-    if (useFaceMap)
-    {
-        FatalErrorInFunction
-            << "output with faceMap is not supported " << filename
-            << exit(FatalError);
-    }
-
 
     OFstream os(filename);
     if (!os.good())
@@ -290,52 +332,42 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
 
     writeHeader(os, zones);
 
+    if (zones.size() == 1)
+    {
+        PrimitivePatch<Face, UList, const pointField&> patch
+        (
+            faceLst, pointLst
+        );
+
+        writeZone(os, patch, zones[0].name(), 0);
+        return;
+    }
+
     forAll(zones, zoneI)
     {
         const surfZone& zone = zones[zoneI];
 
-        os  << "OBJECT poly" << nl
-            << "name \"" << zone.name() << "\"\n";
-
-        // Temporary PrimitivePatch to calculate compact points & faces
-        // use 'UList' to avoid allocations!
-        PrimitivePatch<Face, UList, const pointField&> patch
-        (
-            SubList<Face>
+        if (useFaceMap)
+        {
+            SubList<label> zoneMap(surf.faceMap(), zone.size(), zone.start());
+            PrimitivePatch<Face, UIndirectList, const pointField&> patch
             (
-                faceLst,
-                zone.size(),
-                zone.start()
-            ),
-            pointLst
-        );
+                UIndirectList<Face>(faceLst, zoneMap),
+                pointLst
+            );
 
-        os << "numvert " << patch.nPoints() << endl;
-
-        forAll(patch.localPoints(), ptI)
-        {
-            const point& pt = patch.localPoints()[ptI];
-
-            os << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
+            writeZone(os, patch, zone.name(), zoneI);
         }
-
-        os << "numsurf " << patch.localFaces().size() << endl;
-
-        forAll(patch.localFaces(), localFacei)
+        else
         {
-            const Face& f = patch.localFaces()[localFacei];
+            PrimitivePatch<Face, UList, const pointField&> patch
+            (
+                SubList<Face>(faceLst, zone.size(), zone.start()),
+                pointLst
+            );
 
-            os  << "SURF 0x20" << nl          // polygon
-                << "mat " << zoneI << nl
-                << "refs " << f.size() << nl;
-
-            forAll(f, fp)
-            {
-                os << f[fp] << " 0 0" << nl;
-            }
+            writeZone(os, patch, zone.name(), zoneI);
         }
-
-        os << "kids 0" << endl;
     }
 }
 
@@ -347,81 +379,44 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
     const UnsortedMeshedSurface<Face>& surf
 )
 {
+    OFstream os(filename);
+    if (!os.good())
+    {
+        FatalErrorInFunction
+            << "Cannot open file for writing " << filename
+            << exit(FatalError);
+    }
+
     labelList faceMap;
     List<surfZone> zoneLst = surf.sortedZones(faceMap);
 
     if (zoneLst.size() <= 1)
     {
-        write
+        const List<surfZone>& zones =
         (
-            filename,
-            MeshedSurfaceProxy<Face>
-            (
-                surf.points(),
-                surf.faces(),
-                zoneLst
-            )
+            zoneLst.size()
+          ? zoneLst
+          : surfaceFormatsCore::oneZone(surf.surfFaces())
         );
+
+        writeHeader(os, zones);
+        writeZone(os, surf, zones[0].name(), 0);
+        return;
     }
-    else
+
+    writeHeader(os, zoneLst);
+    forAll(zoneLst, zoneI)
     {
-        OFstream os(filename);
-        if (!os.good())
-        {
-            FatalErrorInFunction
-                << "Cannot open file for writing " << filename
-                << exit(FatalError);
-        }
+        const surfZone& zone = zoneLst[zoneI];
 
-        writeHeader(os, zoneLst);
+        SubList<label> zoneMap(faceMap, zone.size(), zone.start());
+        PrimitivePatch<Face, UIndirectList, const pointField&> patch
+        (
+            UIndirectList<Face>(surf.surfFaces(), zoneMap),
+            surf.points()
+        );
 
-        label faceIndex = 0;
-        forAll(zoneLst, zoneI)
-        {
-            const surfZone& zone = zoneLst[zoneI];
-
-            os  << "OBJECT poly" << nl
-                << "name \"" << zone.name() << "\"\n";
-
-            // Create zone with only zone faces included for ease of addressing
-            labelHashSet include(surf.size());
-
-            forAll(zone, localFacei)
-            {
-                const label facei = faceMap[faceIndex++];
-                include.insert(facei);
-            }
-
-            UnsortedMeshedSurface<Face> subm = surf.subsetMesh(include);
-
-            // Now we have isolated surface for this patch alone. Write it.
-            os << "numvert " << subm.nPoints() << endl;
-
-            forAll(subm.localPoints(), ptI)
-            {
-                const point& pt = subm.localPoints()[ptI];
-
-                os << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
-            }
-
-            os << "numsurf " << subm.localFaces().size() << endl;
-
-            forAll(subm.localFaces(), localFacei)
-            {
-                const Face& f = subm.localFaces()[localFacei];
-
-                os  << "SURF 0x20" << nl          // polygon
-                    << "mat " << zoneI << nl
-                    << "refs " << f.size() << nl;
-
-                forAll(f, fp)
-                {
-                    os << f[fp] << " 0 0" << nl;
-                }
-            }
-
-            os << "kids 0" << endl;
-        }
+        writeZone(os, patch, zone.name(), zoneI);
     }
 }
 

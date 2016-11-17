@@ -40,10 +40,7 @@ SourceFiles
 #include "OFstream.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "vtkMesh.H"
 #include "indirectPrimitivePatch.H"
-
-using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

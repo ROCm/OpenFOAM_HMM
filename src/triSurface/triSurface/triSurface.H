@@ -270,7 +270,7 @@ public:
             const bool reuse
         );
 
-        //- Construct from triangles, patches, points.
+        //- Construct by transferring (triangles, points) components.
         triSurface
         (
             const Xfer<List<labelledTri>>&,
@@ -278,7 +278,7 @@ public:
             const Xfer<List<point>>&
         );
 
-        //- Construct from triangles, points. Set patchnames to default.
+        //- Construct from triangles, points. Set patch names to default.
         triSurface(const List<labelledTri>&, const pointField&);
 
         //- Construct from triangles, points. Set region to 0 and default
@@ -299,7 +299,7 @@ public:
 
 
     //- Destructor
-    ~triSurface();
+    virtual ~triSurface();
 
         void clearOut();
 
@@ -333,6 +333,25 @@ public:
             //  If 1 neighbour: label of only face.
             //  If >2 neighbours: undetermined.
             const labelList& edgeOwner() const;
+
+
+            //- Face area vectors (normals)
+            inline const vectorField& Sf() const
+            {
+                return ParentType::faceAreas();
+            }
+
+            //- Face area magnitudes
+            inline const scalarField& magSf() const
+            {
+                return ParentType::magFaceAreas();
+            }
+
+            //- Face centres
+            inline const vectorField& Cf() const
+            {
+                return ParentType::faceCentres();
+            }
 
 
         // Edit

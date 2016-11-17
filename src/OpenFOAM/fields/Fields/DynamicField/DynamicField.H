@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,6 +113,9 @@ public:
 
         //- Construct by transferring the parameter contents
         explicit inline DynamicField(const Xfer<List<T>>&);
+
+        //- Construct by transferring the parameter contents
+        explicit inline DynamicField(const Xfer<Field<T>>&);
 
         //- Construct by 1 to 1 mapping from the given field
         inline DynamicField

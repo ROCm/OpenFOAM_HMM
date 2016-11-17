@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ calcMeshData() const
     if (meshPointsPtr_ || localFacesPtr_)
     {
         FatalErrorInFunction
-            << "meshPointsPtr_ or localFacesPtr_already allocated"
+            << "meshPointsPtr_ or localFacesPtr_ already allocated"
             << abort(FatalError);
     }
 
@@ -210,7 +210,7 @@ calcLocalPoints() const
     if (localPointsPtr_)
     {
         FatalErrorInFunction
-            << "localPointsPtr_already allocated"
+            << "localPointsPtr_ already allocated"
             << abort(FatalError);
     }
 
@@ -259,7 +259,7 @@ calcPointNormals() const
     if (pointNormalsPtr_)
     {
         FatalErrorInFunction
-            << "pointNormalsPtr_already allocated"
+            << "pointNormalsPtr_ already allocated"
             << abort(FatalError);
     }
 
@@ -323,7 +323,7 @@ calcFaceCentres() const
     if (faceCentresPtr_)
     {
         FatalErrorInFunction
-            << "faceCentresPtr_already allocated"
+            << "faceCentresPtr_ already allocated"
             << abort(FatalError);
     }
 
@@ -355,6 +355,98 @@ template
 >
 void
 Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+calcMagFaceAreas() const
+{
+    if (debug)
+    {
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+               "calcMagFaceAreas() : "
+               "calculating magFaceAreas in PrimitivePatch"
+            << endl;
+    }
+
+    // It is an error to calculate these more than once.
+    if (magFaceAreasPtr_)
+    {
+        FatalErrorInFunction
+            << "magFaceAreasPtr_ already allocated"
+            << abort(FatalError);
+    }
+
+    magFaceAreasPtr_ = new Field<scalar>(this->size());
+    Field<scalar>& a = *magFaceAreasPtr_;
+
+    forAll(a, facei)
+    {
+        a[facei] = this->operator[](facei).mag(points_);
+    }
+
+    if (debug)
+    {
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+               "calcMagFaceAreas() : "
+               "finished calculating magFaceAreas in PrimitivePatch"
+            << endl;
+    }
+}
+
+
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+void
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+calcFaceAreas() const
+{
+    if (debug)
+    {
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+               "calcFaceAreas() : "
+               "calculating faceAreas in PrimitivePatch"
+            << endl;
+    }
+
+    // It is considered an error to attempt to recalculate faceNormals
+    // if they have already been calculated.
+    if (faceAreasPtr_)
+    {
+        FatalErrorInFunction
+            << "faceAreasPtr_ already allocated"
+            << abort(FatalError);
+    }
+
+    faceAreasPtr_ = new Field<PointType>(this->size());
+
+    Field<PointType>& n = *faceAreasPtr_;
+
+    forAll(n, facei)
+    {
+        n[facei] = this->operator[](facei).normal(points_);
+    }
+
+    if (debug)
+    {
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+               "calcFaceAreas() : "
+               "finished calculating faceAreas in PrimitivePatch"
+            << endl;
+    }
+}
+
+
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+void
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
 calcFaceNormals() const
 {
     if (debug)
@@ -370,7 +462,7 @@ calcFaceNormals() const
     if (faceNormalsPtr_)
     {
         FatalErrorInFunction
-            << "faceNormalsPtr_already allocated"
+            << "faceNormalsPtr_ already allocated"
             << abort(FatalError);
     }
 

@@ -65,10 +65,10 @@ class MeshedSurfaceIOAllocator
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        MeshedSurfaceIOAllocator(const MeshedSurfaceIOAllocator&);
+        MeshedSurfaceIOAllocator(const MeshedSurfaceIOAllocator&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const MeshedSurfaceIOAllocator&);
+        void operator=(const MeshedSurfaceIOAllocator&) = delete;
 
 
 public:
@@ -152,7 +152,7 @@ public:
             //- Clear primitive data (points, faces and zones)
             void clear();
 
-            //- Reset primitive data (points, faces and zones)
+            //- Reset primitive data (faces and zones)
             //  Note, optimized to avoid overwriting data (with Xfer::null)
             void resetFaces
             (

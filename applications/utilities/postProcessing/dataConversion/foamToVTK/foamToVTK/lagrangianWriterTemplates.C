@@ -39,9 +39,9 @@ void Foam::lagrangianWriter::writeIOField(const wordList& objects)
         IOobject header
         (
             object,
-            vMesh_.mesh().time().timeName(),
+            mesh_.time().timeName(),
             cloud::prefix/cloudName_,
-            vMesh_.mesh(),
+            mesh_,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
             false

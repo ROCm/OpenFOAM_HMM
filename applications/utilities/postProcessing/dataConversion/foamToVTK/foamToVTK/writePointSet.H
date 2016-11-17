@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,7 @@ SourceFiles
 #ifndef writePointSet_H
 #define writePointSet_H
 
-#include "vtkMesh.H"
+#include "fvMesh.H"
 #include "pointSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -48,7 +48,7 @@ namespace Foam
 void writePointSet
 (
     const bool binary,
-    const vtkMesh& vMesh,
+    const fvMesh& mesh,
     const pointSet& set,
     const fileName& fileName
 );

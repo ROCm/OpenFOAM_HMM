@@ -30,7 +30,7 @@ Description
 
 SourceFiles
     MeshedSurfaceProxy.C
-    MeshedSurfaceProxyCore.C
+    MeshedSurfaceProxys.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -38,8 +38,7 @@ SourceFiles
 #define MeshedSurfaceProxy_H
 
 #include "pointField.H"
-#include "face.H"
-#include "triFace.H"
+#include "labelledTri.H"
 
 #include "surfZoneList.H"
 #include "surfaceFormatsCore.H"
@@ -139,6 +138,12 @@ public:
 
         // Access
 
+            //- The surface size is the number of faces
+            inline label size() const
+            {
+                return faces_.size();
+            }
+
             //- Return const access to the points
             inline const pointField& points() const
             {
@@ -146,7 +151,7 @@ public:
             }
 
             //- Return const access to the faces
-            inline const List<Face>& faces() const
+            inline const List<Face>& surfFaces() const
             {
                 return faces_;
             }
@@ -170,6 +175,10 @@ public:
             {
                 return faceMap_.size() == faces_.size();
             }
+
+            //- Count number of triangles.
+            inline label nTriangles() const;
+
 
         // Write
 

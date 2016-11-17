@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -145,8 +145,33 @@ public:
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            return MeshStorage::faces();
+            return MeshStorage::surfFaces();
         }
+
+        //- Const access to per-face zone/region information
+        virtual const labelList& zoneIds() const
+        {
+            return Foam::emptyLabelList;
+        }
+
+        //- Face area vectors (normals)
+        virtual const vectorField& Sf() const
+        {
+            return MeshStorage::Sf();
+        }
+
+        //- Face area magnitudes
+        virtual const scalarField& magSf() const
+        {
+            return MeshStorage::magSf();
+        }
+
+        //- Face centres
+        virtual const vectorField& Cf() const
+        {
+            return MeshStorage::Cf();
+        }
+
 
         //- Sample field on surface
         virtual tmp<scalarField> sample(const volScalarField&) const;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,6 +54,9 @@ class sampledIsoSurfaceCell
     public sampledSurface,
     public triSurface
 {
+    //- Private typedef for convenience
+    typedef triSurface MeshStorage;
+
     // Private data
 
         //- Field to get isoSurface of
@@ -145,7 +148,7 @@ public:
         //- Points of surface
         virtual const pointField& points() const
         {
-            return triSurface::points();
+            return MeshStorage::points();
         }
 
         //- Faces of surface
@@ -163,6 +166,30 @@ public:
                 }
             }
             return facesPtr_;
+        }
+
+        //- Const access to per-face zone/region information
+        virtual const labelList& zoneIds() const
+        {
+            return Foam::emptyLabelList;
+        }
+
+        //- Face area magnitudes
+        virtual const vectorField& Sf() const
+        {
+            return MeshStorage::Sf();
+        }
+
+        //- Face area magnitudes
+        virtual const scalarField& magSf() const
+        {
+            return MeshStorage::magSf();
+        }
+
+        //- Face centres
+        virtual const vectorField& Cf() const
+        {
+            return MeshStorage::Cf();
         }
 
 

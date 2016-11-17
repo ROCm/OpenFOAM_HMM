@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,7 @@ inline void Foam::fileFormats::STARCDedgeFormat::writeLines
     const edgeList& edges
 )
 {
-    writeHeader(os, "CELL");
+    writeHeader(os, STARCDCore::HEADER_CEL);
 
     forAll(edges, edgeI)
     {
@@ -45,10 +45,10 @@ inline void Foam::fileFormats::STARCDedgeFormat::writeLines
         const label cellId = edgeI + 1;
 
         os  << cellId                    // includes 1 offset
-            << ' ' << starcdLineShape_   // 2(line) shape
+            << ' ' << starcdLine         // 2(line) shape
             << ' ' << e.size()
             << ' ' << 401                // arbitrary value
-            << ' ' << starcdLineType_;   // 5(line)
+            << ' ' << starcdLineType;    // 5(line)
 
         os  << nl << "  " << cellId << "  "
             << (e[0]+1) << "  " << (e[1]+1) << nl;
@@ -118,7 +118,7 @@ bool Foam::fileFormats::STARCDedgeFormat::read
     // read points from .vrt file
     readPoints
     (
-        IFstream(baseName + ".vrt")(),
+        IFstream(starFileName(baseName, STARCDCore::VRT_FILE))(),
         storedPoints(),
         pointId
     );
@@ -137,7 +137,7 @@ bool Foam::fileFormats::STARCDedgeFormat::read
     //
     // read .cel file
     // ~~~~~~~~~~~~~~
-    IFstream is(baseName + ".cel");
+    IFstream is(starFileName(baseName, STARCDCore::CEL_FILE));
     if (!is.good())
     {
         FatalErrorInFunction
@@ -145,7 +145,7 @@ bool Foam::fileFormats::STARCDedgeFormat::read
             << exit(FatalError);
     }
 
-    readHeader(is, "PROSTAR_CELL");
+    readHeader(is, STARCDCore::HEADER_CEL);
 
     DynamicList<edge>  dynEdges;
 
@@ -173,7 +173,7 @@ bool Foam::fileFormats::STARCDedgeFormat::read
             vertexLabels.append(mapPointId[vrtId]);
         }
 
-        if (typeId == starcdLineType_)
+        if (typeId == starcdLineType)
         {
             if (vertexLabels.size() >= 2)
             {
@@ -239,13 +239,21 @@ void Foam::fileFormats::STARCDedgeFormat::write
 
     fileName baseName = filename.lessExt();
 
-    writePoints(OFstream(baseName + ".vrt")(), pointLst);
-    writeLines(OFstream(baseName + ".cel")(), edgeLst);
+    writePoints
+    (
+        OFstream(starFileName(baseName, STARCDCore::VRT_FILE))(),
+        pointLst
+    );
+    writeLines
+    (
+        OFstream(starFileName(baseName, STARCDCore::CEL_FILE))(),
+        edgeLst
+    );
 
     // write a simple .inp file
     writeCase
     (
-        OFstream(baseName + ".inp")(),
+        OFstream(starFileName(baseName, STARCDCore::INP_FILE))(),
         pointLst,
         edgeLst.size()
     );

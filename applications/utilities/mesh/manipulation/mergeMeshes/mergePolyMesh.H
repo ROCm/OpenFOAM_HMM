@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,6 +88,9 @@ class mergePolyMesh
 
         //- Return zone index given a list of active zones and a name
         label zoneIndex(DynamicList<word>&, const word&);
+
+        //- Shuffle processor patches to be last
+        void sortProcessorPatches();
 
 
 public:

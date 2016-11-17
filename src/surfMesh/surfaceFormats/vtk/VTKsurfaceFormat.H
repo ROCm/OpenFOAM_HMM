@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,10 +64,10 @@ class VTKsurfaceFormat
         static void writeHeaderPolygons(Ostream&, const UList<Face>&);
 
         //- Disallow default bitwise copy construct
-        VTKsurfaceFormat(const VTKsurfaceFormat<Face>&);
+        VTKsurfaceFormat(const VTKsurfaceFormat<Face>&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const VTKsurfaceFormat<Face>&);
+        void operator=(const VTKsurfaceFormat<Face>&) = delete;
 
 
 public:
@@ -89,6 +89,7 @@ public:
             );
         }
 
+
     //- Destructor
     virtual ~VTKsurfaceFormat()
     {}
@@ -99,10 +100,18 @@ public:
         // Write
 
         //- Write surface mesh components by proxy
-        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
+        static void write
+        (
+            const fileName&,
+            const MeshedSurfaceProxy<Face>&
+        );
 
         //- Write UnsortedMeshedSurface, the output remains unsorted
-        static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
+        static void write
+        (
+            const fileName&,
+            const UnsortedMeshedSurface<Face>&
+        );
 
         //- Read from file
         virtual bool read(const fileName&);

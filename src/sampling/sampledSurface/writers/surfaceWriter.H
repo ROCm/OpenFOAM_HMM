@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,10 +37,8 @@ SourceFiles
 
 #include "typeInfo.H"
 #include "autoPtr.H"
-#include "pointField.H"
-#include "faceList.H"
 #include "fileName.H"
-
+#include "meshedSurfRef.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -120,8 +118,7 @@ public:
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const bool verbose = false
         ) const
         {
@@ -134,8 +131,7 @@ public:
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const word& fieldName,          // name of field
             const Field<scalar>& values,
             const bool isNodeValues,
@@ -151,8 +147,7 @@ public:
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const word& fieldName,          // name of field
             const Field<vector>& values,
             const bool isNodeValues,
@@ -168,8 +163,7 @@ public:
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const word& fieldName,          // name of field
             const Field<sphericalTensor>& values,
             const bool isNodeValues,
@@ -185,8 +179,7 @@ public:
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const word& fieldName,          // name of field
             const Field<symmTensor>& values,
             const bool isNodeValues,
@@ -202,8 +195,7 @@ public:
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const word& fieldName,          // name of field
             const Field<tensor>& values,
             const bool isNodeValues,

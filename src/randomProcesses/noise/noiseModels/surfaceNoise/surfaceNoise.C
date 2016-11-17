@@ -46,6 +46,11 @@ addToRunTimeSelectionTable(noiseModel, surfaceNoise, dictionary);
 
 void surfaceNoise::initialise(const dictionary& dict)
 {
+    dict.lookup("inputFile") >> inputFileName_;
+    inputFileName_.expand();
+
+    dict.readIfPresent("fftWriteInterval", fftWriteInterval_);
+
     label nAvailableTimes = 0;
 
     // All reading performed on the master processor only
@@ -285,25 +290,23 @@ Foam::scalar surfaceNoise::writeSurfaceData
                 }
             }
 
+            // could also have meshedSurface implement meshedSurf
             fileName outFileName = writerPtr_->write
             (
                 outDir,
                 fName,
-                surf.points(),
-                surf.faces(),
+                meshedSurfRef
+                (
+                    surf.points(),
+                    surf.surfFaces()
+                ),
                 title,
                 allData,
                 false
             );
 
-            // TODO: Move faceAreas to demand-driven function in MeshedSurface
-            // scalarField faceAreas(surf.faces().size());
-            // forAll(faceAreas, i)
-            // {
-            //     faceAreas[i] = surf.faces()[i].mag(surf.points());
-            // }
-            //
-            // areaAverage = sum(allData*faceAreas)/sum(faceAreas);
+            // TO BE VERIFIED: area-averaged values
+            // areaAverage = sum(allData*surf.magSf())/sum(surf.magSf());
             areaAverage = sum(allData)/allData.size();
         }
         Pstream::scatter(areaAverage);
@@ -314,25 +317,23 @@ Foam::scalar surfaceNoise::writeSurfaceData
     {
         const meshedSurface& surf = readerPtr_->geometry();
 
+        // could also have meshedSurface implement meshedSurf
         writerPtr_->write
         (
             outDir,
             fName,
-            surf.points(),
-            surf.faces(),
+            meshedSurfRef
+            (
+                surf.points(),
+                surf.surfFaces()
+            ),
             title,
             data,
             false
         );
 
-        // TODO: Move faceAreas to demand-driven function in MeshedSurface
-        // scalarField faceAreas(surf.faces().size());
-        // forAll(faceAreas, i)
-        // {
-        //     faceAreas[i] = surf.faces()[i].mag(surf.points());
-        // }
-        //
-        // return sum(data*faceAreas)/sum(faceAreas);
+        // TO BE VERIFIED: area-averaged values
+        // return sum(data*surf.magSf())/sum(surf.magSf());
         return sum(data)/data.size();
     }
 }
@@ -382,14 +383,8 @@ Foam::scalar surfaceNoise::surfaceAverage
                 }
             }
 
-            // TODO: Move faceAreas to demand-driven function in MeshedSurface
-            scalarField faceAreas(surf.faces().size());
-            forAll(faceAreas, i)
-            {
-                faceAreas[i] = surf.faces()[i].mag(surf.points());
-            }
-
-//            areaAverage = sum(allData*faceAreas)/sum(faceAreas);
+            // TO BE VERIFIED: area-averaged values
+            // areaAverage = sum(allData*surf.magSf())/sum(surf.magSf());
             areaAverage = sum(allData)/allData.size();
         }
         Pstream::scatter(areaAverage);
@@ -398,16 +393,10 @@ Foam::scalar surfaceNoise::surfaceAverage
     }
     else
     {
-        const meshedSurface& surf = readerPtr_->geometry();
 
-        // TODO: Move faceAreas to demand-driven function in MeshedSurface
-        scalarField faceAreas(surf.faces().size());
-        forAll(faceAreas, i)
-        {
-            faceAreas[i] = surf.faces()[i].mag(surf.points());
-        }
-
-//        return sum(data*faceAreas)/sum(faceAreas);
+        // TO BE VERIFIED: area-averaged values
+        // const meshedSurface& surf = readerPtr_->geometry();
+        // return sum(data*surf.magSf())/sum(surf.magSf());
         return sum(data)/data.size();
     }
 }
@@ -418,13 +407,13 @@ Foam::scalar surfaceNoise::surfaceAverage
 surfaceNoise::surfaceNoise(const dictionary& dict)
 :
     noiseModel(dict),
-    inputFileName_(dict.lookup("inputFile")),
+    inputFileName_("unknown-inputFile"),
     pIndex_(0),
     times_(),
     deltaT_(0),
     startTimeIndex_(0),
     nFace_(0),
-    fftWriteInterval_(dict.lookupOrDefault("fftWriteInterval", 1))
+    fftWriteInterval_(1)
 {
     initialise(dict);
 }
@@ -545,9 +534,6 @@ void surfaceNoise::calculate()
             surfPSD13f[freqI][faceI] = PSD13f.y()[freqI];
             surfPrms13f2[freqI][faceI] = Prms13f2.y()[freqI];
         }
-
-        // Free the storage for p
-//        p.clear();
     }
 
     // Output directory for graphs

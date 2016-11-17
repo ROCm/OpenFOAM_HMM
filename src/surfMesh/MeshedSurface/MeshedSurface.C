@@ -209,7 +209,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
     const MeshedSurface<Face>& surf
 )
 :
-    ParentType(surf.faces(), surf.points()),
+    ParentType(surf.surfFaces(), surf.points()),
     zones_(surf.surfZones())
 {}
 
@@ -225,7 +225,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
     labelList faceMap;
     this->storedZones() = surf.sortedZones(faceMap);
 
-    const List<Face>& origFaces = surf.faces();
+    const List<Face>& origFaces = surf;
     List<Face> newFaces(origFaces.size());
 
     forAll(newFaces, facei)
@@ -431,7 +431,9 @@ Foam::MeshedSurface<Face>::MeshedSurface
 
 template<class Face>
 Foam::MeshedSurface<Face>::~MeshedSurface()
-{}
+{
+    clear();
+}
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -500,6 +502,9 @@ void Foam::MeshedSurface<Face>::clear()
 template<class Face>
 void Foam::MeshedSurface<Face>::movePoints(const pointField& newPoints)
 {
+    // Changes areas, normals etc.
+    ParentType::clearGeom();
+
     // Adapt for new point position
     ParentType::movePoints(newPoints);
 
@@ -511,9 +516,12 @@ void Foam::MeshedSurface<Face>::movePoints(const pointField& newPoints)
 template<class Face>
 void Foam::MeshedSurface<Face>::scalePoints(const scalar scaleFactor)
 {
-    // avoid bad scaling
+    // Avoid bad scaling
     if (scaleFactor > 0 && scaleFactor != 1.0)
     {
+        // Changes areas, normals etc.
+        ParentType::clearGeom();
+
         pointField newPoints(scaleFactor*this->points());
 
         // Adapt for new point position
@@ -521,6 +529,16 @@ void Foam::MeshedSurface<Face>::scalePoints(const scalar scaleFactor)
 
         storedPoints() = newPoints;
     }
+}
+
+
+template<class Face>
+void Foam::MeshedSurface<Face>::reset
+(
+    const Xfer<MeshedSurface<Face>>& surf
+)
+{
+    transfer(surf());
 }
 
 
@@ -586,7 +604,7 @@ void Foam::MeshedSurface<Face>::reset
 template<class Face>
 void Foam::MeshedSurface<Face>::cleanup(const bool verbose)
 {
-    // merge points (already done for STL, TRI)
+    // Merge points (already done for STL, TRI)
     stitchFaces(SMALL, verbose);
 
     checkFaces(verbose);
@@ -830,6 +848,61 @@ bool Foam::MeshedSurface<Face>::checkFaces
 
 
 template<class Face>
+Foam::label Foam::MeshedSurface<Face>::nTriangles() const
+{
+    return nTriangles
+    (
+        const_cast<List<label>&>(List<label>::null())
+    );
+}
+
+
+template<class Face>
+Foam::label Foam::MeshedSurface<Face>::nTriangles
+(
+    List<label>& faceMap
+) const
+{
+    label nTri = 0;
+    const List<Face>& faceLst = surfFaces();
+
+    // Count triangles needed
+    forAll(faceLst, facei)
+    {
+        nTri += faceLst[facei].nTriangles();
+    }
+
+    // Nothing to do
+    if (nTri <= faceLst.size())
+    {
+        if (notNull(faceMap))
+        {
+            faceMap.clear();
+        }
+    }
+    else if (notNull(faceMap))
+    {
+        // face map requested
+        faceMap.setSize(nTri);
+
+        nTri = 0;
+        forAll(faceLst, facei)
+        {
+            label n = faceLst[facei].nTriangles();
+            while (n-- > 0)
+            {
+                faceMap[nTri++] = facei;
+            }
+        }
+
+        faceMap.setSize(nTri);
+    }
+
+    return nTri;
+}
+
+
+template<class Face>
 Foam::label Foam::MeshedSurface<Face>::triangulate()
 {
     return triangulate
@@ -880,14 +953,11 @@ Foam::label Foam::MeshedSurface<Face>::triangulate
     }
     faceMap.setSize(nTri);
 
-    // remember the number of *additional* faces
-    nTri -= faceLst.size();
-
     if (this->points().empty())
     {
         // triangulate without points
         // simple face triangulation around f[0]
-        label newFacei = 0;
+        nTri = 0;
         forAll(faceLst, facei)
         {
             const Face& f = faceLst[facei];
@@ -896,9 +966,9 @@ Foam::label Foam::MeshedSurface<Face>::triangulate
             {
                 label fp1 = f.fcIndex(fp);
 
-                newFaces[newFacei] = triFace(f[0], f[fp], f[fp1]);
-                faceMap[newFacei] = facei;
-                newFacei++;
+                newFaces[nTri] = triFace(f[0], f[fp], f[fp1]);
+                faceMap[nTri] = facei;
+                nTri++;
             }
         }
     }
@@ -907,7 +977,7 @@ Foam::label Foam::MeshedSurface<Face>::triangulate
         // triangulate with points
         List<face> tmpTri(maxTri);
 
-        label newFacei = 0;
+        nTri = 0;
         forAll(faceLst, facei)
         {
             // 'face' not '<Face>'
@@ -917,15 +987,18 @@ Foam::label Foam::MeshedSurface<Face>::triangulate
             f.triangles(this->points(), nTmp, tmpTri);
             for (label triI = 0; triI < nTmp; triI++)
             {
-                newFaces[newFacei] = Face
+                newFaces[nTri] = Face
                 (
                     static_cast<labelUList&>(tmpTri[triI])
                 );
-                faceMap[newFacei] = facei;
-                newFacei++;
+                faceMap[nTri] = facei;
+                nTri++;
             }
         }
     }
+
+    // The number of *additional* faces
+    nTri -= faceLst.size();
 
     faceLst.transfer(newFaces);
     remapFaces(faceMap);
@@ -939,10 +1012,9 @@ Foam::label Foam::MeshedSurface<Face>::triangulate
 
     // Topology can change because of renumbering
     ParentType::clearOut();
+
     return nTri;
 }
-
-
 
 
 template<class Face>
@@ -1050,12 +1122,13 @@ void Foam::MeshedSurface<Face>::transfer
     MeshedSurface<Face>& surf
 )
 {
-    reset
-    (
-        xferMove(surf.storedPoints()),
-        xferMove(surf.storedFaces()),
-        xferMove(surf.storedZones())
-    );
+    ParentType::clearOut();
+
+    this->storedPoints().transfer(surf.storedPoints());
+    this->storedFaces().transfer(surf.storedFaces());
+    this->storedZones().transfer(surf.storedZones());
+
+    surf.clear();
 }
 
 
@@ -1103,9 +1176,40 @@ void Foam::MeshedSurface<Face>::transfer
 
 
 template<class Face>
-Foam::Xfer<Foam::MeshedSurface<Face>> Foam::MeshedSurface<Face>::xfer()
+Foam::Xfer<Foam::MeshedSurface<Face>>
+Foam::MeshedSurface<Face>::xfer()
 {
     return xferMove(*this);
+}
+
+
+template<class Face>
+Foam::Xfer<Foam::List<Face>>
+Foam::MeshedSurface<Face>::xferFaces()
+{
+    // Topology changed because of transfer
+    ParentType::clearOut();
+
+    return this->storedFaces().xfer();
+}
+
+
+template<class Face>
+Foam::Xfer<Foam::List<Foam::point>>
+Foam::MeshedSurface<Face>::xferPoints()
+{
+    // Topology changed because of transfer
+    ParentType::clearOut();
+
+    return this->storedPoints().xfer();
+}
+
+
+template<class Face>
+Foam::Xfer<Foam::surfZoneList>
+Foam::MeshedSurface<Face>::xferZones()
+{
+    return this->storedZones().xfer();
 }
 
 
@@ -1161,7 +1265,7 @@ void Foam::MeshedSurface<Face>::operator=(const MeshedSurface& surf)
     clear();
 
     this->storedPoints() = surf.points();
-    this->storedFaces()  = surf.faces();
+    this->storedFaces()  = surf.surfFaces();
     this->storedZones()  = surf.surfZones();
 }
 
@@ -1172,7 +1276,7 @@ Foam::MeshedSurface<Face>::operator Foam::MeshedSurfaceProxy<Face>() const
     return MeshedSurfaceProxy<Face>
     (
         this->points(),
-        this->faces(),
+        this->surfFaces(),
         this->surfZones()
     );
 }

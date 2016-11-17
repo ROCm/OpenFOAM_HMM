@@ -28,16 +28,33 @@
 #     Setup file for scotch include/libraries.
 #     Sourced during wmake process only.
 #
+#     Normally used to specify the scotch version and location for a
+#     ThirdParty installation.
+#
+#     If using system-wide installations, use the following setting:
+#
+#         SCOTCH_VERSION=scotch-system
+#
+#     If the system scotch is unusable (eg, too old) and you don't
+#     have or want a ThirdParty installation:
+#
+#         SCOTCH_VERSION=scotch-none
+#
+#     If using a central installation, but not located under ThirdParty:
+#         - specify scotch-system
+#         - provide full path for SCOTCH_ARCH_PATH
+#
 # Note
 #     A csh version is not needed, since the values here are only sourced
-#     during the wmake process
+#     during the wmake process.
 #
-#     If Scotch is to be entirely disabled, either rename this file or create
-#     an empty one with the same name at a user or site location.
+#     Scotch can also be entirely disabled, by either renaming this file or
+#     by creating an empty one with the same name at a user or site location.
 #
 #------------------------------------------------------------------------------
 
-export SCOTCH_VERSION=scotch_6.0.3
+SCOTCH_VERSION=scotch_6.0.3
+
 export SCOTCH_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_LABEL_OPTION/$SCOTCH_VERSION
 
 #------------------------------------------------------------------------------

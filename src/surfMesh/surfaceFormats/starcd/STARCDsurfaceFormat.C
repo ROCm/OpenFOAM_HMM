@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,10 +38,10 @@ inline void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
 )
 {
     os  << cellId                    // includes 1 offset
-        << ' ' << starcdShellShape_  // 3(shell) shape
+        << ' ' << starcdShell        // 3(shell) shape
         << ' ' << f.size()
         << ' ' << cellTableId
-        << ' ' << starcdShellType_;  // 4(shell)
+        << ' ' << starcdShellType;   // 4(shell)
 
     // primitives have <= 8 vertices, but prevent overrun anyhow
     // indent following lines for ease of reading
@@ -79,21 +79,15 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
-    const bool mustTriangulate = this->isTri();
     this->clear();
 
     fileName baseName = filename.lessExt();
 
     // read cellTable names (if possible)
-    Map<word> cellTableLookup;
-
-    {
-        IFstream is(baseName + ".inp");
-        if (is.good())
-        {
-            cellTableLookup = readInpCellTable(is);
-        }
-    }
+    Map<word> cellTableLookup = readInpCellTable
+    (
+        IFstream(starFileName(baseName, STARCDCore::INP_FILE))()
+    );
 
 
     // STAR-CD index of points
@@ -102,7 +96,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     // read points from .vrt file
     readPoints
     (
-        IFstream(baseName + ".vrt")(),
+        IFstream(starFileName(baseName, STARCDCore::VRT_FILE))(),
         this->storedPoints(),
         pointId
     );
@@ -115,10 +109,10 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     }
     pointId.clear();
 
-    //
+
     // read .cel file
     // ~~~~~~~~~~~~~~
-    IFstream is(baseName + ".cel");
+    IFstream is(starFileName(baseName, STARCDCore::CEL_FILE));
     if (!is.good())
     {
         FatalErrorInFunction
@@ -126,7 +120,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
             << exit(FatalError);
     }
 
-    readHeader(is, "PROSTAR_CELL");
+    readHeader(is, STARCDCore::HEADER_CEL);
 
     DynamicList<Face>  dynFaces;
     DynamicList<label> dynZones;
@@ -162,7 +156,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
             vertexLabels.append(mapPointId[vrtId]);
         }
 
-        if (typeId == starcdShellType_)
+        if (typeId == starcdShellType)
         {
             // Convert groupID into zoneID
             Map<label>::const_iterator fnd = lookup.find(cellTableId);
@@ -199,24 +193,19 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
             }
 
             SubList<label> vertices(vertexLabels, vertexLabels.size());
-            if (mustTriangulate && nLabels > 3)
+            if (MeshedSurface<Face>::isTri() && nLabels > 3)
             {
+                // face needs triangulation
                 face f(vertices);
 
-                faceList triFaces(f.nTriangles());
+                faceList trias(f.nTriangles());
                 label nTri = 0;
-                f.triangles(this->points(), nTri, triFaces);
+                f.triangles(this->points(), nTri, trias);
 
-                forAll(triFaces, facei)
+                forAll(trias, facei)
                 {
-                    // a triangular face, but not yet a triFace
-                    dynFaces.append
-                    (
-                        triFace
-                        (
-                            static_cast<labelUList&>(triFaces[facei])
-                        )
-                    );
+                    // a triangular 'face', convert to 'triFace' etc
+                    dynFaces.append(Face(trias[facei]));
                     dynZones.append(zoneI);
                     dynSizes[zoneI]++;
                 }
@@ -233,8 +222,9 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
     this->sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
 
-    // add zones, culling empty ones
-    this->addZones(dynSizes, dynNames, true);
+    this->addZones(dynSizes, dynNames, true); // add zones, cull empty ones
+    this->addZonesToFaces(); // for labelledTri
+
     return true;
 }
 
@@ -247,7 +237,7 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
 )
 {
     const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.faces();
+    const List<Face>&  faceLst = surf.surfFaces();
     const List<label>& faceMap = surf.faceMap();
 
     const List<surfZone>& zones =
@@ -262,9 +252,13 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
 
     fileName baseName = filename.lessExt();
 
-    writePoints(OFstream(baseName + ".vrt")(), pointLst);
-    OFstream os(baseName + ".cel");
-    writeHeader(os, "CELL");
+    writePoints
+    (
+        OFstream(starFileName(baseName, STARCDCore::VRT_FILE))(),
+        pointLst
+    );
+    OFstream os(starFileName(baseName, STARCDCore::CEL_FILE));
+    writeHeader(os, STARCDCore::HEADER_CEL);
 
     label faceIndex = 0;
     forAll(zones, zoneI)
@@ -292,7 +286,7 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     // write simple .inp file
     writeCase
     (
-        OFstream(baseName + ".inp")(),
+        OFstream(starFileName(baseName, STARCDCore::INP_FILE))(),
         pointLst,
         faceLst.size(),
         zones

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,6 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     const fileName& filename
 )
 {
-    const bool mustTriangulate = this->isTri();
     this->clear();
 
     IFstream is(filename);
@@ -116,7 +115,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
 
             labelUList& f = static_cast<labelUList&>(verts);
 
-            if (mustTriangulate && f.size() > 3)
+            if (MeshedSurface<Face>::isTri() && f.size() > 3)
             {
                 // simple face triangulation about f[0]
                 // cannot use face::triangulation (points may be incomplete)
@@ -149,7 +148,7 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
 )
 {
     const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.faces();
+    const List<Face>&  faceLst = surf.surfFaces();
     const List<label>& faceMap = surf.faceMap();
     const List<surfZone>& zoneLst = surf.surfZones();
 

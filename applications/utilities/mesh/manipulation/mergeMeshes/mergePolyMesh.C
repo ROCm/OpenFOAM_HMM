@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,7 @@ License
 #include "polyAddPoint.H"
 #include "polyAddCell.H"
 #include "polyAddFace.H"
+#include "processorPolyPatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -104,11 +105,11 @@ Foam::label Foam::mergePolyMesh::zoneIndex
     const word& curName
 )
 {
-    forAll(names, zoneI)
+    forAll(names, zonei)
     {
-        if (names[zoneI] == curName)
+        if (names[zonei] == curName)
         {
-            return zoneI;
+            return zonei;
         }
     }
 
@@ -116,6 +117,84 @@ Foam::label Foam::mergePolyMesh::zoneIndex
     names.append(curName);
 
     return names.size() - 1;
+}
+
+
+void Foam::mergePolyMesh::sortProcessorPatches()
+{
+    Info<< "Reordering processor patches last" << endl;
+
+    // Updates boundaryMesh() and meshMod_ to guarantee processor patches
+    // are last. This could be done inside the merge() but it is far easier
+    // to do separately.
+
+
+    // 1. Shuffle the patches in the boundaryMesh
+
+    const polyBoundaryMesh& oldPatches = boundaryMesh();
+
+    DynamicList<polyPatch*> newPatches(oldPatches.size());
+
+    labelList oldToSorted(oldPatches.size());
+
+    forAll(oldPatches, patchi)
+    {
+        const polyPatch& pp = oldPatches[patchi];
+
+        if (!isA<processorPolyPatch>(pp))
+        {
+            oldToSorted[patchi] = newPatches.size();
+            newPatches.append
+            (
+                pp.clone
+                (
+                    oldPatches,
+                    oldToSorted[patchi],
+                    0,
+                    nInternalFaces()
+                ).ptr()
+            );
+        }
+    }
+    forAll(oldPatches, patchi)
+    {
+        const polyPatch& pp = oldPatches[patchi];
+
+        if (isA<processorPolyPatch>(pp))
+        {
+            oldToSorted[patchi] = newPatches.size();
+            newPatches.append
+            (
+                pp.clone
+                (
+                    oldPatches,
+                    oldToSorted[patchi],
+                    0,
+                    nInternalFaces()
+                ).ptr()
+            );
+        }
+    }
+
+
+    removeBoundary();
+    addPatches(newPatches);
+
+
+    // Update the polyTopoChange
+    DynamicList<label>& patchID = const_cast<DynamicList<label>&>
+    (
+        meshMod_.region()
+    );
+
+    forAll(patchID, facei)
+    {
+        label patchi = patchID[facei];
+        if (patchi != -1)
+        {
+            patchID[facei] = oldToSorted[patchID[facei]];
+        }
+    }
 }
 
 
@@ -181,9 +260,6 @@ Foam::mergePolyMesh::mergePolyMesh(const IOobject& io)
         cellZoneNames_.append(curCellZoneNames[zoneI]);
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -505,6 +581,10 @@ void Foam::mergePolyMesh::merge()
             );
         }
     }
+
+
+    // Shuffle the processor patches to be last
+    sortProcessorPatches();
 
     // Change mesh. No inflation
     meshMod_.changeMesh(*this, false);

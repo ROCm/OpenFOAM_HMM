@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ class dxSurfaceWriter
 
     // Private Member Functions
 
-        static void writeGeometry(Ostream&, const pointField&, const faceList&);
+        static void writeGeometry(Ostream&, const meshedSurf&);
         static void writeTrailer(Ostream&, const bool isNodeValues);
 
         template<class Type>
@@ -65,8 +65,7 @@ class dxSurfaceWriter
         (
             const fileName& outputDir,
             const fileName& surfaceName,
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const word& fieldName,
             const Field<Type>& values,
             const bool isNodeValues,
@@ -98,13 +97,12 @@ public:
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const word& fieldName,          // name of field
             const Field<scalar>& values,
             const bool isNodeValues,
             const bool verbose = false
-        ) const;
+        ) const; // override
 
         //- Write vectorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
@@ -112,13 +110,12 @@ public:
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const word& fieldName,          // name of field
             const Field<vector>& values,
             const bool isNodeValues,
             const bool verbose = false
-        ) const;
+        ) const; // override
 
         //- Write sphericalTensorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
@@ -126,13 +123,12 @@ public:
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const word& fieldName,          // name of field
             const Field<sphericalTensor>& values,
             const bool isNodeValues,
             const bool verbose = false
-        ) const;
+        ) const; // override
 
         //- Write symmTensorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
@@ -140,13 +136,12 @@ public:
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const word& fieldName,          // name of field
             const Field<symmTensor>& values,
             const bool isNodeValues,
             const bool verbose = false
-        ) const;
+        ) const; // override
 
         //- Write tensorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
@@ -154,13 +149,12 @@ public:
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
-            const pointField& points,
-            const faceList& faces,
+            const meshedSurf& surf,
             const word& fieldName,          // name of field
             const Field<tensor>& values,
             const bool isNodeValues,
             const bool verbose = false
-        ) const;
+        ) const; // override
 };
 
 

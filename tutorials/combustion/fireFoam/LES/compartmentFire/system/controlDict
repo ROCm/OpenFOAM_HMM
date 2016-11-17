@@ -59,8 +59,7 @@ functions
     patchInlet_phi
     {
         type                surfaceFieldValue;
-        functionObjectLibs  ("libfieldFunctionObjects.so");
-        enabled             true;
+        libs                ("libfieldFunctionObjects.so");
         writeControl        timeStep;
         writeInterval       20;
         log                 true;
@@ -74,17 +73,16 @@ functions
     wallPanel_Qin
     {
         type                patchProbes;
-        functionObjectLibs  ("libsampling.so");
-        enabled             true;
-        writeControl        outputTime;
+        libs                ("libsampling.so");
+        writeControl        writeTime;
         writeInterval       20;
         log                 true;
         patchName           region0_to_panelRegion_wallPanel;
         probeLocations
         (
-            ( 0.15 0.0 0.01 ) //HF2
-            ( 0.2 0.2 0.01 )  //HF3
-            ( 0.0 0.4 0.01 )  //HF4
+            (0.15 0.0 0.01)  // HF2
+            (0.2  0.2 0.01)  // HF3
+            (0.0  0.4 0.01)  // HF4
         );
         fields              (Qin);
     }
@@ -92,19 +90,18 @@ functions
     inletQr_Qin
     {
         type                patchProbes;
-        functionObjectLibs ("libsampling.so");
-        enabled            true;
-        writeControl       outputTime;
-        writeInterval      20;
-        log                true;
-        patchName          inlet;
+        libs                ("libsampling.so");
+        writeControl        writeTime;
+        writeInterval       20;
+        log                 true;
+        patchName           inlet;
         probeLocations
         (
-            ( 0.0 0.0 0.0 )     //HF1
-            ( 0.02 0.0 0.02 )   //HF2
-            ( 0.02 0.0 -0.02 )  //HF3
-            ( -0.02 0.0 0.02 )  //HF4
-            ( -0.02 0.0 -0.02 ) //HF5
+            ( 0.0  0.0  0.0 ) // HF1
+            ( 0.02 0.0  0.02) // HF2
+            ( 0.02 0.0 -0.02) // HF3
+            (-0.02 0.0  0.02) // HF4
+            (-0.02 0.0 -0.02) // HF5
         );
         fields    (Qr Qin);
     }
@@ -112,10 +109,9 @@ functions
     thermoCouple
     {
         type            thermoCoupleProbes;
-
-        functionObjectLibs      ("libutilityFunctionObjects.so");
-        writeControl           timeStep;
-        writeInterval          100;
+        libs            ("libutilityFunctionObjects.so");
+        writeControl    timeStep;
+        writeInterval   100;
 
         solver          Euler;
         absTol          1e-4;
@@ -123,13 +119,13 @@ functions
 
         interpolationScheme cell;
 
-        // thermocouple properties
+        // Thermocouple properties
         rho             8908;
         Cp              440;
         d               1e-3;
         epsilon         0.9;
 
-        radName         G;
+        radiationField  G;
 
         probeLocations
         (
@@ -157,17 +153,17 @@ functions
     probes_O2
     {
         type                probes;
-        functionObjectLibs ("libsampling.so");
-        writeControl       outputTime;
-        writeInterval      30;
+        libs                ("libsampling.so");
+        writeControl        writeTime;
+        writeInterval       30;
         probeLocations
         (
-            (-0.1 0.02 0.0)    //lower Gas
-            (-0.1 0.38 0.0)    //Upper Gas
+            (-0.1 0.02 0.0)    // Lower Gas
+            (-0.1 0.38 0.0)    // Upper Gas
         );
         fields  (O2);
-
     }
 }
+
 
 // ************************************************************************* //

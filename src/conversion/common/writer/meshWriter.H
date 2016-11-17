@@ -98,9 +98,6 @@ protected:
         //- Scaling factor for points (eg, [m] -> [mm])
         scalar scaleFactor_;
 
-        //- Write bnd file
-        bool writeBoundary_;
-
         //- boundaryRegion persistent data saved as a dictionary
         boundaryRegion boundaryRegion_;
 
@@ -125,13 +122,14 @@ public:
         //- Specify a default mesh name
         static string defaultMeshName;
 
+
     // Constructors
 
-        //- Create a writer object
+        //- Create a writer object with given output scaling
         meshWriter
         (
             const polyMesh&,
-            const scalar scaleFactor = 1.0
+            const scalar scaling = 1.0
         );
 
 
@@ -141,28 +139,13 @@ public:
 
     // Member Functions
 
-        // Edit
+    // Write
 
-            //- Set points scaling
-            void scaleFactor(const scalar scaling)
-            {
-                scaleFactor_ = scaling;
-            }
-
-            //- Suppress writing boundary (bnd) file
-            void noBoundary()
-            {
-                writeBoundary_ = false;
-            }
-
-
-        // Write
-
-            //- Write volume mesh. Subclass must supply this method
-            virtual bool write
-            (
-                const fileName& timeName = fileName::null
-            ) const = 0;
+        //- Write volume mesh. Subclass must supply this method
+        virtual bool write
+        (
+            const fileName& timeName = fileName::null
+        ) const = 0;
 
 };
 
