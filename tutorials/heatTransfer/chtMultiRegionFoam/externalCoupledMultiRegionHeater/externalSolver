@@ -20,12 +20,16 @@ fieldName="T"
 
 lockFile="${commsDir}/OpenFOAM.lock"
 dataFile="${commsDir}/${regionGroupName}/${patchGroupName}/${fieldName}"
-waitSec=1
-timeOut=10
-nSteps=200  # maximum number of time steps. Note: should be more than
+waitSec=5
+timeOut=100
+nSteps=1000 # maximum number of time steps. Note: should be more than
             # number of iterations on the OpenFOAM side
 refGrad=0
 valueFraction=1
+
+
+# Remove any old junk
+\rm -f $lockFile 2>/dev/null
 
 log()
 {
@@ -53,14 +57,13 @@ init()
         echo "$refValue2 $refGrad $valueFraction" >> "${dataFile}.in"
     done
 
-    # create lock file to pass control to OF
+    # Create lock file to pass control to OpenFOAM
     touch ${lockFile}
 }
 
 
 # create the comms directory
 mkdir -p ${commsDir}/${regionGroupName}/${patchGroupName}
-
 
 # tutorial case employs the 'initByExternalOption', so we need to provide
 # the initial values
@@ -69,11 +72,24 @@ init
 
 totalWait=0
 step=0
-while [ $step -lt $nSteps ]; do
-    if [ -f $lockFile ]; then
-        log "found lock file ${lockFile} - waiting"
+while [ $step -lt $nSteps ]
+do
+    if [ -f $lockFile ]
+    then
+        if grep -q "status=done" ${lockFile}
+        then
+             log "found lock file ${lockFile} with 'status=done' - finished"
+             break
+        elif [ -s $lockFile ]
+        then
+             log "found lock file ${lockFile} containing '$(cat $lockFile)' - waiting"
+        else
+             log "found lock file ${lockFile} - waiting"
+        fi
+
         totalWait=$(expr $totalWait + $waitSec)
-        if [ $totalWait -gt $timeOut ]; then
+        if [ $totalWait -gt $timeOut ]
+        then
             log "timeout"
             break
         else
@@ -91,7 +107,7 @@ while [ $step -lt $nSteps ]; do
         log "updating ${dataFile}.in from ${dataFile}.out"
 
         awk '{if( $1 != "#" ){print $1+1 " 0 1"}}' \
-            ${dataFile}.out | tee ${dataFile}.in
+            ${dataFile}.out >| ${dataFile}.in
 
         log "creating lock file ${lockFile}"
         touch ${lockFile}
@@ -100,5 +116,7 @@ done
 
 log "done"
 
+# Remove the lock file too
+\rm -f $lockFile 2>/dev/null
 
 #------------------------------------------------------------------------------
