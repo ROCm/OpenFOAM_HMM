@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -614,10 +614,29 @@ void Foam::argList::parse
             // Establish rootPath_/globalCase_/case_ for master
             getRootCase();
 
-            // See if running distributed (different roots for different procs)
-            label dictNProcs = -1;
-            fileName source;
+            // Establish location of decomposeParDict, allow override with
+            // the -decomposeParDict option.
+            fileName source = rootPath_/globalCase_/"system"/"decomposeParDict";
+            if (options_.found("decomposeParDict"))
+            {
+                bool adjustOpt = false;
 
+                source = options_["decomposeParDict"];
+                if (isDir(source))
+                {
+                    adjustOpt = true;
+                    source = source/"decomposeParDict";
+                }
+                // Could also check for absolute path, but shouldn't be needed
+                if (adjustOpt)
+                {
+                    source.clean();
+                    options_.set("decomposeParDict", source);
+                }
+            }
+
+            // If running distributed (different roots for different procs)
+            label dictNProcs = -1;
             if (options_.found("roots"))
             {
                 source = "-roots";
@@ -631,16 +650,8 @@ void Foam::argList::parse
             }
             else
             {
-                source = rootPath_/globalCase_/"system"/"decomposeParDict";
-                // Override with -decomposeParDict
-                if (options_.found("decomposeParDict"))
-                {
-                    source = options_["decomposeParDict"];
-                    if (isDir(source))
-                    {
-                        source = source/"decomposeParDict";
-                    }
-                }
+                // Use values from decomposeParDict, the location was already
+                // established above.
 
                 IFstream decompDictStream(source);
 

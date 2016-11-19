@@ -524,13 +524,7 @@ int main(int argc, char *argv[])
 
         // Allow override of decomposeParDict location
         fileName decompDictFile;
-        if (args.optionReadIfPresent("decomposeParDict", decompDictFile))
-        {
-            if (isDir(decompDictFile))
-            {
-                decompDictFile = decompDictFile / "decomposeParDict";
-            }
-        }
+        args.optionReadIfPresent("decomposeParDict", decompDictFile);
 
         labelList decomp = decompositionModel::New
         (

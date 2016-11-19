@@ -270,14 +270,7 @@ int main(int argc, char *argv[])
 
     // Allow override of decomposeParDict location
     fileName decompDictFile;
-    if (args.optionReadIfPresent("decomposeParDict", decompDictFile))
-    {
-        if (isDir(decompDictFile))
-        {
-            decompDictFile = decompDictFile/"decomposeParDict";
-        }
-    }
-
+    args.optionReadIfPresent("decomposeParDict", decompDictFile);
 
     wordList regionNames;
     wordList regionDirs;
@@ -360,7 +353,6 @@ int main(int argc, char *argv[])
                     ),
                     decompDictFile
                 )
-
             ).lookup("numberOfSubdomains")
         );
 
