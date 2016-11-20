@@ -17,4 +17,4 @@ runParallel -s decompose redistributePar -decompose -latestTime
 runParallel -s restart $(getApplication)
 
 
-# ----------------------------------------------------------------- end-of-file
+# -----------------------------------------------------------------------------

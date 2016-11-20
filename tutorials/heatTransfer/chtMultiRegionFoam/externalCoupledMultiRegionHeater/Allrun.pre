@@ -1,7 +1,6 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # Run from this directory
 
-
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
@@ -30,4 +29,4 @@ echo "creating files for paraview post-processing"
 echo
 paraFoam -touchAll 2>/dev/null
 
-# ----------------------------------------------------------------- end-of-file
+# -----------------------------------------------------------------------------

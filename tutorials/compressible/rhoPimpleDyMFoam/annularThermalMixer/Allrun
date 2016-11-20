@@ -9,7 +9,7 @@ runApplication surfaceFeatureExtract
 runApplication blockMesh
 runApplication snappyHexMesh -overwrite
 
-\rm -rf 0
+rm -rf 0
 
 runApplication createBaffles -overwrite
 runApplication mergeOrSplitBaffles -split -overwrite

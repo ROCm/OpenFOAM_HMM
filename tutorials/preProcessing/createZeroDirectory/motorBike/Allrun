@@ -22,4 +22,4 @@ runParallel $(getApplication)
 runApplication reconstructParMesh -constant
 runApplication reconstructPar -latestTime
 
-# ----------------------------------------------------------------- end-of-file
+# -----------------------------------------------------------------------------

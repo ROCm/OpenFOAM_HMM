@@ -17,4 +17,4 @@ runApplication decomposePar -cellDist
 runParallel $application
 #runApplication reconstructPar -latestTime
 
-# ----------------------------------------------------------------- end-of-file
+# -----------------------------------------------------------------------------
