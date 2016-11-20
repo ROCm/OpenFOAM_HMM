@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "sixDoFSolver.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -36,11 +37,21 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDoFSolver::sixDoFSolver(sixDoFRigidBodyMotion& body)
+Foam::sixDoFSolver::sixDoFSolver
+(
+    const dictionary& dict,
+    sixDoFRigidBodyMotion& body
+)
 :
-    body_(body)
+    body_(body),
+    dict_(dict)
 {}
 
+
+void Foam::sixDoFSolver::write(Ostream& os) const
+{
+    os << dict_;
+}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 

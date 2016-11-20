@@ -46,7 +46,7 @@ Foam::sixDoFSolvers::symplectic::symplectic
     sixDoFRigidBodyMotion& body
 )
 :
-    sixDoFSolver(body)
+    sixDoFSolver(dict, body)
 {}
 
 
@@ -89,6 +89,5 @@ void Foam::sixDoFSolvers::symplectic::solve
     v() += tConstraints() & aDamp()*0.5*deltaT*a();
     pi() += rConstraints() & aDamp()*0.5*deltaT*tau();
 }
-
 
 // ************************************************************************* //

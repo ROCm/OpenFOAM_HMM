@@ -46,7 +46,7 @@ Foam::sixDoFSolvers::Newmark::Newmark
     sixDoFRigidBodyMotion& body
 )
 :
-    sixDoFSolver(body),
+    sixDoFSolver(dict, body),
     gamma_(dict.lookupOrDefault<scalar>("gamma", 0.5)),
     beta_
     (
@@ -110,6 +110,5 @@ void Foam::sixDoFSolvers::Newmark::solve
     Tuple2<tensor, vector> Qpi = rotate(Q0(), piDeltaT, 1);
     Q() = Qpi.first();
 }
-
 
 // ************************************************************************* //
