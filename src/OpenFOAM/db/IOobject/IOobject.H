@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -400,7 +400,7 @@ public:
             fileName path
             (
                 const word& instance,
-                const fileName& local = ""
+                const fileName& local = fileName::null
             ) const;
 
             //- Return complete path + object name
@@ -409,11 +409,15 @@ public:
                 return path()/name();
             }
 
-            //- Helper for filePath that searches locally
-            fileName localFilePath() const;
+            //- Helper for filePath that searches locally.
+            //  When search is false, simply use the current instance,
+            //  otherwise search previous instances.
+            fileName localFilePath(const bool search=true) const;
 
             //- Helper for filePath that searches up if in parallel
-            fileName globalFilePath() const;
+            //  When search is false, simply use the current instance,
+            //  otherwise search previous instances.
+            fileName globalFilePath(const bool search=true) const;
 
 
         // Reading

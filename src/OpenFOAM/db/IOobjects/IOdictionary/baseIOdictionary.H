@@ -28,8 +28,8 @@ Description
     baseIOdictionary is derived from dictionary and IOobject to give the
     dictionary automatic IO functionality via the objectRegistry.
     To facilitate IO,
-    IOdictioanry is provided with a constructor from IOobject and writeData and
-    write functions.
+    baseIOdictionary is provided with a constructor from IOobject and with
+    readData/writeData functions.
 
 SourceFiles
     baseIOdictionary.C
@@ -49,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class baseIOdictionary Declaration
+                      Class baseIOdictionary Declaration
 \*---------------------------------------------------------------------------*/
 
 class baseIOdictionary
