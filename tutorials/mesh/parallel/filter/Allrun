@@ -29,5 +29,4 @@ runParallel -s parallel $application
 #- Reconstruct all times
 runParallel -s 1 redistributePar -reconstruct
 
-
-# ----------------------------------------------------------------- end-of-file
+# -----------------------------------------------------------------------------
