@@ -93,10 +93,9 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~~~~~~~~~
     CV2D mesh(runTime, controlDict);
 
-    if (args.options().found("pointsFile"))
+    if (args.optionFound("pointsFile"))
     {
-        fileName pointFileName(IStringStream(args.options()["pointsFile"])());
-        mesh.insertPoints(pointFileName);
+        mesh.insertPoints(args["pointsFile"]);
     }
     else
     {

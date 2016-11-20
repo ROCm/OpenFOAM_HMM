@@ -374,7 +374,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     runTime.functionObjects().off();
 
-    const fileName exportName = args.args()[1];
+    const fileName exportName = args[1];
 
     Info<< "Reading surfaces as specified in the foamyHexMeshDict and"
         << " writing a re-sampled surface to " << exportName

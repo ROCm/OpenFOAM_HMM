@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
 
-    const Switch inflate(args.args()[1]);
+    const Switch inflate(args[1]);
 
     if (inflate)
     {
