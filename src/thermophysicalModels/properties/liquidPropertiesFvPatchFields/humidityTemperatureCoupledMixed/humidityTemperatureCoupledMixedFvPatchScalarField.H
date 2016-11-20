@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,6 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-
     Foam::
     compressible::
     humidityTemperatureCoupledMixedFvPatchScalarField
@@ -94,8 +93,8 @@ Description
     myInterfacePatchName
     {
         type            thermalHumidityCoupledMixed;
-        kappa           fluidThermo;
-        kappaName       none;
+        kappaMethod     fluidThermo;
+        kappa           none;
 
         // Modes of operation: inert, condensation, vaporization, condEvap
         mode            condEvap;
@@ -137,8 +136,8 @@ Description
     myInterfacePatchName
     {
         type            thermalInertiaMassTransferCoupledMixed;
-        kappa           solidThermo;
-        kappaName       none;
+        kappaMethod     solidThermo;
+        kappa           none;
         value           uniform 260;
     }
     \endverbatim

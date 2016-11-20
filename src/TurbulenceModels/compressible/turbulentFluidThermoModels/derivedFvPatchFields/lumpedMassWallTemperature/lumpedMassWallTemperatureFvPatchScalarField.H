@@ -36,9 +36,9 @@ Description
 Usage
     \table
         Property     | Description                 | Required | Default value
-        kappa        | thermal conductivity option | yes      |
-        Cp           | Heat capacity [J/Kg K]]     | yes      |
-        mass         | Total mass [Kg]             | yes      |
+        kappaMethod  | thermal conductivity option | yes      |
+        Cp           | Heat capacity [J/kg.K]      | yes      |
+        mass         | Total mass [kg]             | yes      |
     \endtable
 
     Example of the boundary condition specification:
@@ -47,7 +47,7 @@ Usage
     {
         type            lumpedMassWallTemperature;
         kappaMethod     fluidThermo;
-        kappaName       none;
+        kappa           none;
         mass            1000;
         Cp              4100;
         value           uniform 300.0;
@@ -86,7 +86,7 @@ private:
         //- Specifc heat capacity [J/kg/K]
         scalar Cp_;
 
-        //- Mass / [kg]
+        //- Mass [kg]
         scalar mass_;
 
         //- Current time index (used for updating)

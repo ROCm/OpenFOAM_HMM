@@ -204,10 +204,10 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
                     << "Did not find field " << kappaName_
                     << " on mesh " << mesh.name() << " patch " << patch_.name()
                     << nl
-                    << "Please set 'kappa' to one of "
+                    << "Please set 'kappaMethod' to one of "
                     << KMethodTypeNames_.toc()
-                    << " and 'kappaName' to the name of the volScalar"
-                    << " or volSymmTensor field (if kappa=lookup)"
+                    << " and 'kappa' to the name of the volScalar"
+                    << " or volSymmTensor field (if kappaMethod=lookup)"
                     << exit(FatalError);
             }
 
@@ -218,9 +218,10 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
         {
             FatalErrorInFunction
                 << "Unimplemented method " << KMethodTypeNames_[method_] << nl
-                << "Please set 'kappa' to one of " << KMethodTypeNames_.toc()
-                << " and 'kappaName' to the name of the volScalar"
-                << " or volSymmTensor field (if kappa=lookup)"
+                << "Please set 'kappaMethod' to one of "
+                << KMethodTypeNames_.toc()
+                << " and 'kappa' to the name of the volScalar"
+                << " or volSymmTensor field (if kappaMethod=lookup)"
                 << exit(FatalError);
         }
     }

@@ -30,10 +30,10 @@ boundaryField
     {
         type            lumpedMassWallTemperature;
         kappaMethod     fluidThermo;
-        kappaName       none;
+        kappa           none;
         mass            1000;
         Cp              4100;
-        value           uniform 300.0;
+        value           uniform 300;
     }
 
     fixedWalls
@@ -41,5 +41,6 @@ boundaryField
         type            zeroGradient;
     }
 }
+
 
 // ************************************************************************* //
