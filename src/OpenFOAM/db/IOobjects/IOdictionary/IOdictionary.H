@@ -27,8 +27,8 @@ Class
 Description
     IOdictionary is derived from dictionary and IOobject to give the dictionary
     automatic IO functionality via the objectRegistry.  To facilitate IO,
-    IOdictioanry is provided with a constructor from IOobject and writeData and
-    write functions.
+    IOdictionary is provided with a constructor from IOobject and with
+    readData/writeData functions.
 
 SourceFiles
     IOdictionary.C
@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class IOdictionary Declaration
+                        Class IOdictionary Declaration
 \*---------------------------------------------------------------------------*/
 
 class IOdictionary

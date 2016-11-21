@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -417,7 +417,7 @@ Foam::fileName Foam::IOobject::path
 }
 
 
-Foam::fileName Foam::IOobject::localFilePath() const
+Foam::fileName Foam::IOobject::localFilePath(const bool search) const
 {
     if (instance().isAbsolute())
     {
@@ -443,7 +443,7 @@ Foam::fileName Foam::IOobject::localFilePath() const
         }
         else
         {
-            if (!isDir(path))
+            if (!isDir(path) && search)
             {
                 word newInstancePath = time().findInstancePath
                 (
@@ -471,7 +471,7 @@ Foam::fileName Foam::IOobject::localFilePath() const
 }
 
 
-Foam::fileName Foam::IOobject::globalFilePath() const
+Foam::fileName Foam::IOobject::globalFilePath(const bool search) const
 {
     if (instance().isAbsolute())
     {
@@ -536,8 +536,8 @@ Foam::fileName Foam::IOobject::globalFilePath() const
                 }
             }
 
-            // Check for approximately same time
-            if (!isDir(path))
+            // Check for approximately same (local) time
+            if (!isDir(path) && search)
             {
                 word newInstancePath = time().findInstancePath
                 (

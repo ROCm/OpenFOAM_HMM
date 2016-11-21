@@ -32,7 +32,11 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-bool Foam::IOobject::typeHeaderOk(const bool checkType)
+bool Foam::IOobject::typeHeaderOk
+(
+    const bool checkType,
+    const bool search
+)
 {
     bool ok = true;
 
@@ -48,7 +52,7 @@ bool Foam::IOobject::typeHeaderOk(const bool checkType)
     // Determine local status
     if (!masterOnly || Pstream::master())
     {
-        Istream* isPtr = objectStream(typeFilePath<Type>(*this));
+        Istream* isPtr = objectStream(typeFilePath<Type>(*this, search));
 
         // If the stream has failed return
         if (!isPtr)

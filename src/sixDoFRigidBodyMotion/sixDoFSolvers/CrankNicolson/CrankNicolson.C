@@ -46,7 +46,7 @@ Foam::sixDoFSolvers::CrankNicolson::CrankNicolson
     sixDoFRigidBodyMotion& body
 )
 :
-    sixDoFSolver(body),
+    sixDoFSolver(dict, body),
     aoc_(dict.lookupOrDefault<scalar>("aoc", 0.5)),
     voc_(dict.lookupOrDefault<scalar>("voc", 0.5))
 {}
@@ -89,6 +89,5 @@ void Foam::sixDoFSolvers::CrankNicolson::solve
         rotate(Q0(), (voc_*pi() + (1 - voc_)*pi0()), deltaT);
     Q() = Qpi.first();
 }
-
 
 // ************************************************************************* //

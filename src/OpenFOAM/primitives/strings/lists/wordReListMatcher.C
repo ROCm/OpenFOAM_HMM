@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,19 +23,34 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IOMap.H"
+#include "wordReListMatcher.H"
+#include "HashSet.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-namespace Foam
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::wordReList Foam::wordReListMatcher::uniq(const UList<wordRe>& input)
 {
-    defineTemplateTypeNameAndDebug(IOMap<dictionary>, 0);
+    wordReList retain(input.size());
+    wordHashSet uniqWord;
 
-    //- Template specialization for global status
-    template<>
-    bool typeGlobal<IOMap<dictionary>>()
+    label nUniq = 0;
+    forAll(input, i)
     {
-        return true;
+        const wordRe& select = input[i];
+
+        if
+        (
+            select.isPattern()
+         || uniqWord.insert(static_cast<const word&>(select))
+        )
+        {
+            retain[nUniq++] = select;
+        }
     }
+
+    retain.setSize(nUniq);
+    return retain;
 }
+
 
 // ************************************************************************* //

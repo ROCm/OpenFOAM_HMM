@@ -6,7 +6,7 @@ cd ${0%/*} || exit 1    # Run from this directory
 
 cleanCase
 rm -rf VTK
-rm -rf constant/cellToRegion constant/polyMesh/sets
+rm -rf constant/cellToRegion
 rm -rf 0/bottomAir
 rm -rf 0/topAir
 rm -rf 0/heater
@@ -27,7 +27,6 @@ rm -f constant/bottomAir/globalFaceFaces
 rm -f constant/bottomAir/subMap
 rm -f constant/bottomAir/visibleFaceFaces
 rm -f constant/bottomAir/mapDist
-
 
 rm -f constant/topAir/F
 rm -f constant/topAir/constructMap*

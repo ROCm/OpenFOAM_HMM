@@ -1,20 +1,17 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # run from this directory
+cd ${0%/*} || exit 1    # Run from this directory
 
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
-# Get application directory
-application=$(getApplication)
-
 runApplication blockMesh
 
 #- Run serial
-#runApplication $application
+#runApplication $(getApplication)
 
 #- Run parallel
 runApplication decomposePar -cellDist
-runParallel $application
+runParallel $(getApplication)
 #runApplication reconstructPar -latestTime
 
-# ----------------------------------------------------------------- end-of-file
+# -----------------------------------------------------------------------------

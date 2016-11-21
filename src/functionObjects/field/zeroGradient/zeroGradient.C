@@ -27,6 +27,7 @@ License
 
 #include "volFields.H"
 #include "dictionary.H"
+#include "wordReListMatcher.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -76,25 +77,6 @@ bool Foam::functionObjects::zeroGradient::checkFormatName(const word& str)
 }
 
 
-void Foam::functionObjects::zeroGradient::uniqWords(wordReList& lst)
-{
-    boolList retain(lst.size());
-    wordHashSet uniq;
-    forAll(lst, i)
-    {
-        const wordRe& select = lst[i];
-
-        retain[i] =
-        (
-            select.isPattern()
-         || uniq.insert(static_cast<const word&>(select))
-        );
-    }
-
-    inplaceSubset(retain, lst);
-}
-
-
 int Foam::functionObjects::zeroGradient::process(const word& fieldName)
 {
     int state = 0;
@@ -118,6 +100,7 @@ Foam::functionObjects::zeroGradient::zeroGradient
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
+    prevTimeIndex_(-1),
     selectFields_(),
     resultName_(string::null),
     results_()
@@ -138,8 +121,11 @@ bool Foam::functionObjects::zeroGradient::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
 
-    dict.lookup("fields") >> selectFields_;
-    uniqWords(selectFields_);
+    selectFields_ = wordReListMatcher::uniq
+    (
+        wordReList(dict.lookup("fields"))
+    );
+    Info<< type() << " fields: " << selectFields_ << nl;
 
     resultName_ = dict.lookupOrDefault<word>("result", type() + "(@@)");
     return checkFormatName(resultName_);
@@ -189,12 +175,20 @@ bool Foam::functionObjects::zeroGradient::execute()
             << "Unprocessed field " << ignored << endl;
     }
 
+    // Update time index
+    prevTimeIndex_ = obr_.time().timeIndex();
+
     return true;
 }
 
 
 bool Foam::functionObjects::zeroGradient::write()
 {
+    if (prevTimeIndex_ < obr_.time().timeIndex())
+    {
+        // Ensure written results reflect the current state
+        execute();
+    }
     if (results_.size())
     {
         Log << type() << ' ' << name() << " write:" << endl;

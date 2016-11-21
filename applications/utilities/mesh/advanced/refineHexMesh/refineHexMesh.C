@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     #include "createNamedMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    word cellSetName(args.args()[1]);
+    word cellSetName(args[1]);
     const bool overwrite = args.optionFound("overwrite");
 
     const bool minSet = args.optionFound("minSet");

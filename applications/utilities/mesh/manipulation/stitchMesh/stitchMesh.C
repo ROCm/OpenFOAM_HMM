@@ -297,13 +297,13 @@ int main(int argc, char *argv[])
 
     // set up the tolerances for the sliding mesh
     dictionary slidingTolerances;
-    if (args.options().found("toleranceDict"))
+    if (args.optionFound("toleranceDict"))
     {
         IOdictionary toleranceFile
         (
             IOobject
             (
-                args.options()["toleranceDict"],
+                args["toleranceDict"],
                 runTime.constant(),
                 mesh,
                 IOobject::MUST_READ_IF_MODIFIED,

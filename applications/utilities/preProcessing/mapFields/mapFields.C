@@ -51,13 +51,11 @@ int readNumProcs
     const Time& runTime
 )
 {
+    const word dictName = "decomposeParDict";
     fileName dictFile;
-    if (args.optionReadIfPresent(optionName, dictFile))
+    if (args.optionReadIfPresent(optionName, dictFile) && isDir(dictFile))
     {
-        if (isDir(dictFile))
-        {
-            dictFile = dictFile/"decomposeParDict";
-        }
+        dictFile = dictFile / dictName;
     }
 
     return readInt
@@ -68,7 +66,7 @@ int readNumProcs
             (
                 IOobject
                 (
-                    "decomposeParDict",
+                    dictName,
                     runTime.system(),
                     runTime,
                     IOobject::MUST_READ_IF_MODIFIED,
@@ -376,7 +374,7 @@ int main(int argc, char *argv[])
 
     if (parallelSource && !parallelTarget)
     {
-        int nProcs = readNumProcs
+        const int nProcs = readNumProcs
         (
             args,
             "sourceDecomposeParDict",
@@ -448,7 +446,7 @@ int main(int argc, char *argv[])
     }
     else if (!parallelSource && parallelTarget)
     {
-        int nProcs = readNumProcs
+        const int nProcs = readNumProcs
         (
             args,
             "targetDecomposeParDict",
@@ -521,13 +519,13 @@ int main(int argc, char *argv[])
     }
     else if (parallelSource && parallelTarget)
     {
-        int nProcsSource = readNumProcs
+        const int nProcsSource = readNumProcs
         (
             args,
             "sourceDecomposeParDict",
             runTimeSource
         );
-        int nProcsTarget = readNumProcs
+        const int nProcsTarget = readNumProcs
         (
             args,
             "targetDecomposeParDict",

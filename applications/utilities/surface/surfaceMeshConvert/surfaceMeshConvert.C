@@ -157,14 +157,10 @@ int main(int argc, char *argv[])
         // Note: cannot use setSystemRunTimeDictionaryIO.H since dictionary
         //       is in constant
 
-        fileName dictPath = "";
-        if (args.optionFound("dict"))
+        fileName dictPath;
+        if (args.optionReadIfPresent("dict", dictPath) && isDir(dictPath))
         {
-            dictPath = args["dict"];
-            if (isDir(dictPath))
-            {
-                dictPath = dictPath / dictName;
-            }
+            dictPath = dictPath / dictName;
         }
 
         if (dictPath.size())

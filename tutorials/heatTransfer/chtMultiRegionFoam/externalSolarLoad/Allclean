@@ -1,5 +1,5 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # run from this directory
+cd ${0%/*} || exit 1    # Run from this directory
 
 # Source tutorial clean functions
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions
@@ -7,7 +7,7 @@ cd ${0%/*} || exit 1    # run from this directory
 cleanCase
 
 rm -rf VTK
-rm -rf constant/cellToRegion constant/polyMesh/sets
+rm -rf constant/cellToRegion
 
 rm -rf constant/air/polyMesh
 rm -rf constant/solid/polyMesh
@@ -28,6 +28,4 @@ rm -f 0/floor/cellToRegion
 rm -f 0/solid/cellToRegion
 rm -f 0/cellToRegion
 
-
-
-# ----------------------------------------------------------------- end-of-file
+#------------------------------------------------------------------------------

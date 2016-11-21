@@ -4,14 +4,16 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
+decompDict="-decomposeParDict system/decomposeParDict.6"
+
 # copy motorbike surface from resources directory
 \cp $FOAM_TUTORIALS/resources/geometry/motorBike.obj.gz constant/triSurface/
 runApplication surfaceFeatureExtract
 
 runApplication blockMesh
 
-runApplication decomposePar
-runParallel snappyHexMesh -overwrite
+runApplication decomposePar $decompDict
+runParallel $decompDict snappyHexMesh -overwrite
 
 #- For non-parallel running: - set the initial fields
 # restore0Dir
@@ -19,9 +21,9 @@ runParallel snappyHexMesh -overwrite
 #- For parallel running: set the initial fields
 restore0Dir -processor
 
-runParallel patchSummary
-runParallel potentialFoam
-runParallel $(getApplication)
+runParallel $decompDict patchSummary
+runParallel $decompDict potentialFoam
+runParallel $decompDict $(getApplication)
 
 runApplication reconstructParMesh -constant
 runApplication reconstructPar -latestTime

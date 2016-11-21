@@ -36,6 +36,7 @@ Description
 #include "searchableSurfaces.H"
 #include "conformationSurfaces.H"
 #include "triSurfaceMesh.H"
+#include "labelVector.H"
 
 #include "MarchingCubes.h"
 
@@ -52,7 +53,6 @@ int main(int argc, char *argv[])
     (
         "Re-sample surfaces used in foamyHexMesh operation"
     );
-    //argList::validArgs.append("inputFile");
     argList::validArgs.append("(nx ny nz)");
     argList::validArgs.append("outputName");
 
@@ -60,8 +60,8 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     runTime.functionObjects().off();
 
-    const Vector<label> n(IStringStream(args.args()[1])());
-    const fileName exportName = args.args()[2];
+    const labelVector n(args.argRead<labelVector>(1));
+    const fileName exportName = args[2];
 
     Info<< "Reading surfaces as specified in the foamyHexMeshDict and"
         << " writing re-sampled " << n << " to " << exportName

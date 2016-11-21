@@ -18,8 +18,10 @@ if (!fieldsToUse.found(fieldName))
                 fieldName,
                 timeDirs[n1].name(),
                 mesh,
-                IOobject::NO_READ
-            ).typeHeaderOk<volScalarField>(false)
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false  // no register
+            ).typeHeaderOk<volScalarField>(false, false)
         );
 
         if (variableGood)

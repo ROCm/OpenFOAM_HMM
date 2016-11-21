@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 
     const pointConstraints& pc = pointConstraints::New(pointMesh::New(mesh));
 
-    const Switch inflate(args.args()[1]);
+    const Switch inflate(args[1]);
 
     if (inflate)
     {

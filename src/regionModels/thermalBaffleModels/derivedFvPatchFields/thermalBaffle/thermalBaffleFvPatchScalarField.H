@@ -52,8 +52,8 @@ Usage
 
         // Underlaying coupled boundary condition
         Tnbr               T;
-        kappa              fluidThermo; // or solidThermo
-        KappaName          none;
+        kappaMethod        fluidThermo; // or solidThermo
+        kappa              none;
         QrNbr              Qr;//or none.Name of Qr field on neighbourregion
         Qr                 none;// or none.Name of Qr field on localregion
         value              uniform 300;
@@ -122,8 +122,8 @@ Usage
     <slavePatchName>
     {
         type                compressible::thermalBaffle;
-        kappa               fluidThermo;
-        kappaName           none;
+        kappaMethod         fluidThermo;
+        kappa               none;
         value               uniform 300;
     \endverbatim
 
@@ -132,16 +132,16 @@ Usage
     bottom
     {
         type                compressible::thermalBaffle;
-        kappa               solidThermo;
-        kappaName           none;
+        kappaMethod         solidThermo;
+        kappa               none;
         value               uniform 300;
     }
 
     top
     {
         type                compressible::thermalBaffle;
-        kappa               solidThermo;
-        kappaName           none;
+        kappaMethod         solidThermo;
+        kappa               none;
         value               uniform 300;
     }
     \endverbatim
