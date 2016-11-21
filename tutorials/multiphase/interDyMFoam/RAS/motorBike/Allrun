@@ -16,5 +16,4 @@ runParallel -s reconstruct redistributePar -reconstruct
 runParallel -s decompose redistributePar -decompose -latestTime
 runParallel -s restart $(getApplication)
 
-
 # -----------------------------------------------------------------------------

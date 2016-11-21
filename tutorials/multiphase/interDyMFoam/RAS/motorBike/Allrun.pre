@@ -29,3 +29,5 @@ runParallel snappyHexMesh -overwrite
 restore0Dir -processor
 
 runParallel setFields
+
+#------------------------------------------------------------------------------
