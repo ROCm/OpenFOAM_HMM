@@ -425,10 +425,16 @@ public:
             //- Read header
             bool readHeader(Istream&);
 
-            //- Read header (uses typeFilePath to find file) and check header
-            //  info. Optionally checks headerClassName against type
+            //- Read header (uses typeFilePath to find file) and check its info.
+            //  Optionally checks headerClassName against the type-name.
+            //  When search is false, simply use the current instance,
+            //  otherwise search previous instances.
             template<class Type>
-            bool typeHeaderOk(const bool checkType = true);
+            bool typeHeaderOk
+            (
+                const bool checkType = true,
+                const bool search = true
+            );
 
             //- Helper: warn that type does not support re-reading
             template<class Type>
@@ -489,18 +495,23 @@ template<>
 Ostream& operator<<(Ostream& os, const InfoProxy<IOobject>& ip);
 
 
-//- Template function for obtaining global status
+//- Template function for obtaining global vs. local status
 template<class T>
 inline bool typeGlobal()
 {
     return false;
 }
 
-//- Template function for obtaining filePath
+//- Template function for obtaining local or global filePath
 template<class T>
-inline fileName typeFilePath(const IOobject& io)
+inline fileName typeFilePath(const IOobject& io, const bool search=true)
 {
-    return (typeGlobal<T>() ? io.globalFilePath() : io.localFilePath());
+    return
+    (
+        typeGlobal<T>()
+      ? io.globalFilePath(search)
+      : io.localFilePath(search)
+    );
 }
 
 

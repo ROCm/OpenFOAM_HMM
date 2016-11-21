@@ -8,15 +8,12 @@ if (timeDirs.size() > 1 && Pstream::master())
     // We already loaded a mesh (usually from constant).
     // See if any other "polyMesh/points" files exist too.
 
-    const fileName& baseDir = mesh.time().path();
-
     Info<< "Search for moving mesh ... " << flush;
     forAll(timeDirs, timeI)
     {
         meshMoving =
         (
-            isDir(baseDir/timeDirs[timeI].name()/polyMesh::meshSubDir)
-         && IOobject
+            IOobject
             (
                 "points",
                 timeDirs[timeI].name(),
@@ -25,7 +22,7 @@ if (timeDirs.size() > 1 && Pstream::master())
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false  // no register
-            ).typeHeaderOk<pointIOField>(true)
+            ).typeHeaderOk<pointIOField>(true, false)
         );
 
         if (meshMoving)

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,11 +30,11 @@ namespace Foam
 {
     defineTemplateTypeNameAndDebug(IOMap<dictionary>, 0);
 
-    //- Template specialisation for obtaining filePath
+    //- Template specialization for global status
     template<>
-    fileName typeFilePath<IOMap<dictionary>>(const IOobject& io)
+    bool typeGlobal<IOMap<dictionary>>()
     {
-        return io.globalFilePath();
+        return true;
     }
 }
 
