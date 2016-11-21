@@ -3038,6 +3038,30 @@ void Foam::meshRefinement::write
 }
 
 
+void Foam::meshRefinement::removeFiles(const polyMesh& mesh)
+{
+    IOobject io
+    (
+        "dummy",
+        mesh.facesInstance(),
+        mesh.meshSubDir,
+        mesh
+    );
+    fileName setsDir(io.path());
+
+    if (topoSet::debug) DebugVar(setsDir);
+
+    // Remove local files
+    if (exists(setsDir/"surfaceIndex"))
+    {
+        rm(setsDir/"surfaceIndex");
+    }
+
+    // Remove other files
+    hexRef8::removeFiles(mesh);
+}
+
+
 Foam::meshRefinement::writeType Foam::meshRefinement::writeLevel()
 {
     return writeLevel_;

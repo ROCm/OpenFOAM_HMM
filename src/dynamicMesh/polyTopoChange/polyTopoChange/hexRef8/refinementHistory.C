@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ License
 #include "mapDistributePolyMesh.H"
 #include "polyMesh.H"
 #include "syncTools.H"
+#include "topoSet.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1733,6 +1734,26 @@ bool Foam::refinementHistory::writeData(Ostream& os) const
     os << *this;
 
     return os.good();
+}
+
+
+void Foam::refinementHistory::removeFiles(const polyMesh& mesh)
+{
+    IOobject io
+    (
+        "dummy",
+        mesh.facesInstance(),
+        mesh.meshSubDir,
+        mesh
+    );
+    fileName setsDir(io.path());
+
+    if (topoSet::debug) DebugVar(setsDir);
+
+    if (exists(setsDir/typeName))
+    {
+        rm(setsDir/typeName);
+    }
 }
 
 

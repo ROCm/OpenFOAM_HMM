@@ -26,6 +26,7 @@ License
 #include "processorMeshes.H"
 #include "Time.H"
 #include "primitiveMesh.H"
+#include "topoSet.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -279,7 +280,7 @@ void Foam::processorMeshes::removeFiles(const polyMesh& mesh)
             mesh
         ).objectPath()
     );
-    if (debug) DebugVar(pointPath);
+    if (topoSet::debug) DebugVar(pointPath);
     rm(pointPath);
 
     rm

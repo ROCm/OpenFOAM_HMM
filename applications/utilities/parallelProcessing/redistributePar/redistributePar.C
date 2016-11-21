@@ -81,6 +81,7 @@ Usage
 #include "parLagrangianRedistributor.H"
 #include "unmappedPassiveParticleCloud.H"
 #include "hexRef8Data.H"
+#include "pointFields.H"
 
 using namespace Foam;
 
@@ -838,6 +839,8 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     PtrList<DimensionedField<symmTensor, volMesh>> dimSymmTensorFields;
     PtrList<DimensionedField<tensor, volMesh>> dimTensorFields;
 
+    DynamicList<word> pointFieldNames;
+
 
     if (doReadFields)
     {
@@ -1051,6 +1054,40 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         );
 
 
+        // pointFields currently not supported. Read their names so we
+        // can delete them.
+        {
+            // Get my objects of type
+            pointFieldNames.append
+            (
+                objects.lookupClass(pointScalarField::typeName).sortedNames()
+            );
+            pointFieldNames.append
+            (
+                objects.lookupClass(pointVectorField::typeName).sortedNames()
+            );
+            pointFieldNames.append
+            (
+                objects.lookupClass
+                (
+                    pointSphericalTensorField::typeName
+                ).sortedNames()
+            );
+            pointFieldNames.append
+            (
+                objects.lookupClass
+                (
+                    pointSymmTensorField::typeName
+                ).sortedNames()
+            );
+            pointFieldNames.append
+            (
+                objects.lookupClass(pointTensorField::typeName).sortedNames()
+            );
+
+            // Make sure all processors have the same set
+            Pstream::scatter(pointFieldNames);
+        }
 
         if (Pstream::master() && decompose)
         {
@@ -1138,6 +1175,19 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
             mesh.write();
             topoSet::removeFiles(mesh);
+            forAll(pointFieldNames, i)
+            {
+                IOobject io
+                (
+                    pointFieldNames[i],
+                    runTime.timeName(),
+                    mesh
+                );
+
+                fileName fieldFile(io.objectPath());
+                if (topoSet::debug) DebugVar(fieldFile);
+                rm(fieldFile);
+            }
 
             // Now we've written all. Reset caseName on master
             Info<< "Restoring caseName to " << proc0CaseName << endl;
@@ -1148,6 +1198,19 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     {
         mesh.write();
         topoSet::removeFiles(mesh);
+        forAll(pointFieldNames, i)
+        {
+            IOobject io
+            (
+                pointFieldNames[i],
+                runTime.timeName(),
+                mesh
+            );
+
+            fileName fieldFile(io.objectPath());
+            if (topoSet::debug) DebugVar(fieldFile);
+            rm(fieldFile);
+        }
     }
     Info<< "Written redistributed mesh to " << mesh.facesInstance() << nl
         << endl;

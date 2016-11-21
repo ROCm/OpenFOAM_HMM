@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -5751,8 +5751,41 @@ bool Foam::hexRef8::write() const
     {
         writeOk = writeOk && history_.write();
     }
+    else
+    {
+        refinementHistory::removeFiles(mesh_);
+    }
 
     return writeOk;
+}
+
+
+void Foam::hexRef8::removeFiles(const polyMesh& mesh)
+{
+    IOobject io
+    (
+        "dummy",
+        mesh.facesInstance(),
+        mesh.meshSubDir,
+        mesh
+    );
+    fileName setsDir(io.path());
+
+    if (topoSet::debug) DebugVar(setsDir);
+
+    if (exists(setsDir/"cellLevel"))
+    {
+        rm(setsDir/"cellLevel");
+    }
+    if (exists(setsDir/"pointLevel"))
+    {
+        rm(setsDir/"pointLevel");
+    }
+    if (exists(setsDir/"level0Edge"))
+    {
+        rm(setsDir/"level0Edge");
+    }
+    refinementHistory::removeFiles(mesh);
 }
 
 
