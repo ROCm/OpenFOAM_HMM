@@ -27,6 +27,7 @@ License
 
 #include "volFields.H"
 #include "dictionary.H"
+#include "wordReListMatcher.H"
 #include "steadyStateDdtScheme.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -74,25 +75,6 @@ bool Foam::functionObjects::ddt2::checkFormatName(const word& str)
     {
         return true;
     }
-}
-
-
-void Foam::functionObjects::ddt2::uniqWords(wordReList& lst)
-{
-    boolList retain(lst.size());
-    wordHashSet uniq;
-    forAll(lst, i)
-    {
-        const wordRe& select = lst[i];
-
-        retain[i] =
-        (
-            select.isPattern()
-         || uniq.insert(static_cast<const word&>(select))
-        );
-    }
-
-    inplaceSubset(retain, lst);
 }
 
 
@@ -160,10 +142,11 @@ bool Foam::functionObjects::ddt2::read(const dictionary& dict)
         return false;
     }
 
-    fvMeshFunctionObject::read(dict);
-
-    dict.lookup("fields") >> selectFields_;
-    uniqWords(selectFields_);
+    selectFields_ = wordReListMatcher::uniq
+    (
+        wordReList(dict.lookup("fields"))
+    );
+    Info<< type() << " fields: " << selectFields_ << nl;
 
     resultName_ = dict.lookupOrDefault<word>
     (

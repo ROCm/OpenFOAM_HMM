@@ -27,6 +27,7 @@ License
 
 #include "volFields.H"
 #include "dictionary.H"
+#include "wordReListMatcher.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -76,25 +77,6 @@ bool Foam::functionObjects::zeroGradient::checkFormatName(const word& str)
 }
 
 
-void Foam::functionObjects::zeroGradient::uniqWords(wordReList& lst)
-{
-    boolList retain(lst.size());
-    wordHashSet uniq;
-    forAll(lst, i)
-    {
-        const wordRe& select = lst[i];
-
-        retain[i] =
-        (
-            select.isPattern()
-         || uniq.insert(static_cast<const word&>(select))
-        );
-    }
-
-    inplaceSubset(retain, lst);
-}
-
-
 int Foam::functionObjects::zeroGradient::process(const word& fieldName)
 {
     int state = 0;
@@ -138,8 +120,11 @@ bool Foam::functionObjects::zeroGradient::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
 
-    dict.lookup("fields") >> selectFields_;
-    uniqWords(selectFields_);
+    selectFields_ = wordReListMatcher::uniq
+    (
+        wordReList(dict.lookup("fields"))
+    );
+    Info<< type() << " fields: " << selectFields_ << nl;
 
     resultName_ = dict.lookupOrDefault<word>("result", type() + "(@@)");
     return checkFormatName(resultName_);

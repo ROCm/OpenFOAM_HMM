@@ -124,9 +124,6 @@ class ddt2
         //- Check that the word contains the appropriate substitution token(s).
         static bool checkFormatName(const word&);
 
-        //- Eliminate duplicate 'word' entries
-        static void uniqWords(wordReList&);
-
 
         //- Accept unless field name appears to have already been processed
         bool accept(const word& fieldName) const;

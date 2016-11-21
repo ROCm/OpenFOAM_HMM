@@ -110,9 +110,6 @@ class zeroGradient
         //- Check that the word contains the appropriate substitution token(s).
         static bool checkFormatName(const word&);
 
-        //- Eliminate duplicate 'word' entries
-        static void uniqWords(wordReList&);
-
 
         //- Accept unless field only has constraint patches
         //  (ie, empty/zero-gradient/processor).

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,12 +77,19 @@ public:
             inline const UList<wordRe>& operator()() const;
 
 
-    // Searching
+        // Searching
 
             //- Return true if string matches any of the regular expressions
             //  Smart match as regular expression or as a string.
             //  Optionally specify a literal match only.
             inline bool match(const string&, bool literalMatch=false) const;
+
+
+        // Helpers
+
+            //- Return a wordReList with duplicate words filtered out.
+            //  No filtering is done on regular expressions.
+            static wordReList uniq(const UList<wordRe>& input);
 
 };
 
