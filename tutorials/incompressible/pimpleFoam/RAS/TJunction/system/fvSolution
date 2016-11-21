@@ -33,7 +33,7 @@ solvers
         smoother        GaussSeidel;
     }
 
-    "(U|k|epsilon)"
+    "(U|k|epsilon|s)"
     {
         solver          smoothSolver;
         smoother        symGaussSeidel;
@@ -41,7 +41,7 @@ solvers
         relTol          0.1;
     }
 
-    "(U|k|epsilon)Final"
+    "(U|k|epsilon|s)Final"
     {
         $U;
         tolerance       1e-05;
@@ -65,6 +65,7 @@ relaxationFactors
         "U.*"           1;
         "k.*"           1;
         "epsilon.*"     1;
+        "s.*"           1;
     }
 }
 

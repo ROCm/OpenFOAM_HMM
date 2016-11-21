@@ -67,7 +67,7 @@ solvers
         relTol          0;
     }
 
-    "(U|k|omega).*"
+    "(U|k|omega|s).*"
     {
         solver          smoothSolver;
         smoother        symGaussSeidel;

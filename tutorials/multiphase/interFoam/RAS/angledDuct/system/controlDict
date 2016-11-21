@@ -52,5 +52,46 @@ maxAlphaCo      1;
 
 maxDeltaT       1;
 
+functions
+{
+    sTransport
+    {
+        type            scalarTransport;
+        libs            ("libsolverFunctionObjects.so");
+
+        enabled         true;
+        writeControl    outputTime;
+        writeInterval   1;
+
+        field           s;
+
+        write           true;
+
+        phase           alpha.water;
+        bounded01       false;
+
+        // Adding fvOption source for residence time
+        fvOptions
+        {
+            unitySource
+            {
+                type            scalarSemiImplicitSource;
+                enabled         true;
+
+                scalarSemiImplicitSourceCoeffs
+                {
+                    selectionMode   all;
+                    volumeMode      specific;
+                    injectionRateSuSp
+                    {
+                        s           (1 0);
+                    }
+                }
+            }
+        }
+
+        resetOnStartUp  false;
+    }
+}
 
 // ************************************************************************* //

@@ -79,6 +79,41 @@ functions
             (0.21 0 0.01)         // at central block
         );
     }
+
+    sTransport
+    {
+        type            scalarTransport;
+        libs            ("libsolverFunctionObjects.so");
+
+        enabled         true;
+        writeControl    outputTime;
+        writeInterval   1;
+
+        field           s;
+
+        write           true;
+
+        fvOptions
+        {
+            unitySource
+            {
+                type            scalarSemiImplicitSource;
+                enabled         true;
+
+                scalarSemiImplicitSourceCoeffs
+                {
+                    selectionMode   all;
+                    volumeMode      specific;
+                    injectionRateSuSp
+                    {
+                        s           (1 0);
+                    }
+                }
+            }
+        }
+
+        resetOnStartUp  false;
+    }
 }
 
 // ************************************************************************* //

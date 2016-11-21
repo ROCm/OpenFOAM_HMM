@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,8 +33,12 @@ Description
     - To specify the field name set the 'field' entry
     - To employ the same numerical schemes as another field set
       the 'schemesField' entry,
-    - The diffusivity can be set manually using the 'D' entry, or retrieved
-      from the turbulence model (if applicable).
+    - The diffusivity can be set manually using the 'D' entry, retrieved
+      from the turbulence model or specified nut
+    - To specify a different flux derived from U enter UPhi velocity field name
+      (the phi used will be calculated based on this UPhi)
+    - To specify a transport quantity within a phase enter phase.
+    - bounded01 bounds the transported scalar within 0 and 1.
 
 Usage
     Example of function object specification to solve a scalar transport
@@ -47,10 +51,60 @@ Usage
             type            scalarTransport;
             libs            ("libutilityFunctionObjects.so");
 
+            resetOnStartUp  no;
+            region          cabin;
+            field           H2O;
+
+
             fvOptions
             {
                 ...
             }
+        }
+    }
+    \endverbatim
+
+    Example of function object specification to solve a residency time
+    in a two phase flow:
+    equation:
+    \verbatim
+    functions
+    {
+        sTransport
+        {
+            type            scalarTransport;
+            libs            ("libsolverFunctionObjects.so");
+
+            enabled         true;
+            writeControl    outputTime;
+            writeInterval   1;
+
+            field           s;
+            bounded01       false;
+            phase           alpha.water;
+
+            write           true;
+
+            fvOptions
+            {
+                unitySource
+                {
+                    type            scalarSemiImplicitSource;
+                    enabled         true;
+
+                    scalarSemiImplicitSourceCoeffs
+                    {
+                        selectionMode   all;
+                        volumeMode      specific;
+                        injectionRateSuSp
+                        {
+                            s           (1 0);
+                        }
+                    }
+                }
+            }
+
+            resetOnStartUp  false;
         }
     }
     \endverbatim
@@ -61,11 +115,16 @@ Usage
         type         | Type name: scalarTransport | yes      |
         phi          | Name of flux field      | no          | phi
         rho          | Name of density field   | no          | rho
-        D            | Diffision coefficient   | no          | auto generated
+        UPhi         | Name of U to generate phi  | no          | none
+        phase        | Name of the phase name  | no          | none
+        nut          | Name of the turbulence viscocity | no | none
+        D            | Diffusion coefficient   | no          | auto generated
         nCorr        | Number of correctors    | no          | 0
         resetOnStartUp | Reset scalar to zero on start-up | no | no
         schemesField | Name of field to specify schemes | no | fieldName
         fvOptions    | List of scalar sources  | no          |
+        bounded01    | Bounds scalar betwee 0-1 for multiphase | no |true
+        phasePhiCompressed |Compressed flux for VOF | no | alphaPhiUn
     \endtable
 
 See also
@@ -106,8 +165,21 @@ class scalarTransport
         //- Name of flux field (optional)
         word phiName_;
 
+        //- Name of velocity field from which the flux is obtained if phiName is
+        //  not given (optional)
+        word UPhiName_;
+
         //- Name of density field (optional)
         word rhoName_;
+
+        //- Name of turbulent viscosity field (optional)
+        word nutName_;
+
+        //- Name of phase field
+        word phaseName_;
+
+        //- Name of phase field compressed flux
+        word phasePhiCompressedName_;
 
         //- Diffusion coefficient (optional)
         scalar D_;
@@ -127,6 +199,9 @@ class scalarTransport
         //- Run-time selectable finite volume options, e.g. sources, constraints
         fv::optionList fvOptions_;
 
+        //- Bound scalar between 0-1 using MULES for multiphase case
+        bool bounded01_;
+
 
     // Private Member Functions
 
@@ -137,7 +212,8 @@ class scalarTransport
         tmp<volScalarField> D
         (
             const volScalarField& s,
-            const surfaceScalarField& phi
+            const surfaceScalarField& phi,
+            const volScalarField& alpha
         ) const;
 
         //- Disallow default bitwise copy construct
