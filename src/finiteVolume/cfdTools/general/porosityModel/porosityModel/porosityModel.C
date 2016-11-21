@@ -128,30 +128,30 @@ Foam::porosityModel::porosityModel
     const pointField& points = mesh_.points();
     const cellList& cells = mesh_.cells();
     const faceList& faces = mesh_.faces();
-    DynamicList<point> localPoints;
     forAll(cellZoneIDs_, zoneI)
     {
         const cellZone& cZone = mesh_.cellZones()[cellZoneIDs_[zoneI]];
-        localPoints.setCapacity(10*cells.size());
+        point bbMin = point::max;
+        point bbMax = point::min;
 
         forAll(cZone, i)
         {
             const label cellI = cZone[i];
-            const cell& c = mesh_.cells()[cellI];
+            const cell& c = cells[cellI];
             const pointField cellPoints(c.points(faces, points));
 
             forAll(cellPoints, pointI)
             {
-                const point& pt = cellPoints[pointI];
-                localPoints.append(coordSys_.localPosition(pt));
+                const point pt = coordSys_.localPosition(cellPoints[pointI]);
+                bbMin = min(bbMin, pt);
+                bbMax = max(bbMax, pt);
             }
         }
 
-        boundBox bb(localPoints, true);
+        reduce(bbMin, minOp<point>());
+        reduce(bbMax, maxOp<point>());
 
-        Info<< "    local bounds: " << bb << endl;
-
-        localPoints.clear();
+        Info<< "    local bounds: " << (bbMax - bbMin) << nl << endl;
     }
 }
 
