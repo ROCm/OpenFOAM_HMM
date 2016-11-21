@@ -48,7 +48,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default         Gauss linear uncorrected;
+    default         Gauss linear orthogonal;
 }
 
 interpolationSchemes
@@ -58,7 +58,7 @@ interpolationSchemes
 
 snGradSchemes
 {
-    default         uncorrected;
+    default         orthogonal;
 }
 
 fluxRequired

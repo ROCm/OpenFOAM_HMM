@@ -32,8 +32,7 @@ LES
 
     kEqnCoeffs
     {
-        Ck      0.074;
-        Ce      1.048;
+        Ck  0.06;
     }
 
     cubeRootVolCoeffs

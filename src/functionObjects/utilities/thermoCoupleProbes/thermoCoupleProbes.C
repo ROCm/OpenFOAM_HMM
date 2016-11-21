@@ -67,9 +67,9 @@ Foam::functionObjects::thermoCoupleProbes::thermoCoupleProbes
     }
 
     // Check if the property exist (resume old calculation)
-    // or of it is new
+    // or of it is new.
     dictionary probeDict;
-    if (getDict(name, probeDict))
+    if (getDict(typeName, probeDict))
     {
         probeDict.lookup("Tc") >> Ttc_;
     }
@@ -172,7 +172,7 @@ bool Foam::functionObjects::thermoCoupleProbes::write()
 
         dictionary probeDict;
         probeDict.add("Tc", Ttc_);
-        setProperty(name(), probeDict);
+        setProperty(typeName, probeDict);
         return true;
     }
 

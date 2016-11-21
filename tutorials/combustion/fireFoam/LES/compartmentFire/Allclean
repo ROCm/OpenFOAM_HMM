@@ -6,5 +6,6 @@
 cleanCase
 rm -rf constant/panelRegion/polyMesh
 rm -f constant/polyMesh/boundary
+rm -f validation/*.eps
 
 # -----------------------------------------------------------------------------
