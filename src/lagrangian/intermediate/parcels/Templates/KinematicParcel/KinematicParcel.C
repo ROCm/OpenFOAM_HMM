@@ -345,6 +345,8 @@ bool Foam::KinematicParcel<ParcelType>::move
             p.calc(td, dt, cellI);
         }
 
+        p.age() += dt;
+
         if (p.onBoundary() && td.keepParticle)
         {
             if (isA<processorPolyPatch>(pbMesh[p.patch(p.face())]))
@@ -352,8 +354,6 @@ bool Foam::KinematicParcel<ParcelType>::move
                 td.switchProcessor = true;
             }
         }
-
-        p.age() += dt;
 
         td.cloud().functions().postMove(p, cellI, dt, start, td.keepParticle);
     }
