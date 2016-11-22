@@ -59,15 +59,6 @@ protected:
         scalar waveAngle_;
 
 
-    // Protected Member Functions
-
-        //- Wave direction
-        virtual scalar direction() const
-        {
-            return 1;
-        }
-
-
 public:
 
     //- Runtime type information

@@ -154,9 +154,6 @@ protected:
             const scalarField& level
         ) = 0;
 
-        //- Wave direction
-        virtual scalar direction() const = 0;
-
         //- Set the alpha field based on the water level
         virtual void setAlpha(const scalarField& level);
 

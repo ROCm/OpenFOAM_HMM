@@ -372,8 +372,6 @@ void Foam::waveModel::correct(const scalar t)
 
             if (patch_.size())
             {
-                const scalar d = direction();
-
                 forAll(activeLevel, facei)
                 {
                     const label paddlei = faceToPaddle_[facei];
@@ -384,7 +382,7 @@ void Foam::waveModel::correct(const scalar t)
                             (calculatedLevel[paddlei] - activeLevel[paddlei])
                            *sqrt(mag(g_)/activeLevel[paddlei]);
 
-                        U_[facei].x() += d*UCorr;
+                        U_[facei].x() += UCorr;
                     }
                 }
             }

@@ -48,16 +48,6 @@ class waveAbsorptionModel
 :
     public waveModel
 {
-protected:
-
-    // Protected Member Functions
-
-        //- Wave direction
-        virtual scalar direction() const
-        {
-            return -1;
-        }
-
 
 public:
 
