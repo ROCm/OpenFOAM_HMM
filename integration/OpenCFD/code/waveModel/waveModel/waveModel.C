@@ -384,6 +384,10 @@ void Foam::waveModel::correct(const scalar t)
 
                         U_[facei].x() += UCorr;
                     }
+                    else
+                    {
+                        U_[facei] = vector::zero;
+                    }
                 }
             }
         }
