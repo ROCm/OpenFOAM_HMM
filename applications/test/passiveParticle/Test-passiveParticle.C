@@ -36,7 +36,7 @@ Description
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("cloudName");
+    argList::validArgs.append("cloud");
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"

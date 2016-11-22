@@ -207,10 +207,10 @@ Foam::fv::tabulatedNTUHeatTransfer::tabulatedNTUHeatTransfer
 )
 :
     interRegionHeatTransferModel(name, modelType, dict, mesh),
-    UName_(coeffs_.lookupOrDefault<word>("UName", "U")),
-    UNbrName_(coeffs_.lookupOrDefault<word>("UNbrName", "U")),
-    rhoName_(coeffs_.lookupOrDefault<word>("rhoName", "rho")),
-    rhoNbrName_(coeffs_.lookupOrDefault<word>("rhoNbrName", "rho")),
+    UName_(coeffs_.lookupOrDefault<word>("U", "U")),
+    UNbrName_(coeffs_.lookupOrDefault<word>("UNbr", "U")),
+    rhoName_(coeffs_.lookupOrDefault<word>("rho", "rho")),
+    rhoNbrName_(coeffs_.lookupOrDefault<word>("rhoNbr", "rho")),
     ntuTable_(),
     geometryMode_(gmCalculated),
     Ain_(-1),
@@ -275,10 +275,10 @@ bool Foam::fv::tabulatedNTUHeatTransfer::read(const dictionary& dict)
 {
     if (option::read(dict))
     {
-        coeffs_.readIfPresent("UName", UName_);
-        coeffs_.readIfPresent("UNbrName", UNbrName_);
-        coeffs_.readIfPresent("rhoName", rhoName_);
-        coeffs_.readIfPresent("rhoNbrName", rhoNbrName_);
+        coeffs_.readIfPresent("U", UName_);
+        coeffs_.readIfPresent("UNbr", UNbrName_);
+        coeffs_.readIfPresent("rho", rhoName_);
+        coeffs_.readIfPresent("rhoNbr", rhoNbrName_);
 
         // Force geometry re-initialisation
         Ain_ = -1;

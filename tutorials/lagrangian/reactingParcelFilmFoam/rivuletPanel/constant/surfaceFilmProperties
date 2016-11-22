@@ -11,13 +11,13 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      SurfaceFilmProperties;
+    object      surfaceFilmProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 surfaceFilmModel kinematicSingleLayer;
 
-regionName      wallFilmRegion;
+region          wallFilmRegion;
 
 active          true;
 

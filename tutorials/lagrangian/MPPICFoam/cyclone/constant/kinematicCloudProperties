@@ -72,7 +72,7 @@ subModels
             massTotal       40;
             SOI             1;
             parcelBasisType mass;
-            patchName       inlet;
+            patch           inlet;
             duration        4;
             parcelsPerSecond 100644;
             U0              (-10 0 0);

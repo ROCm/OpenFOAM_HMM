@@ -25,7 +25,7 @@ Class
     Foam::chemistryReductionMethods::DAC
 
 Description
-    The Dynamic Adaptive Chemistry (DAC) method [1] simplify the chemistry
+    The Dynamic Adaptive Chemistry (DAC) method [1] simplifies the chemistry
     using the matrix rAB defined by (DRGEP algorithm [2])
 
             |sum_i=1->Nr vAi wi dBi|
@@ -40,13 +40,14 @@ Description
     stoechiometric coefficient of species A in the ith reaction (vAi = v''-v')
     , wi is the progress variable of reaction i and dBi equals 1 if reaction i
     involves B and O otherwise.
-    rAB show the error introduced to the production rates of A when B and all
+
+    rAB shows the error introduced to the production rates of A when B and all
     the reactions including it are removed. It is computed as in [3] so that
     the algorithm is O(Nr).
 
-    DAC uses a initial set of species that represents the major parts of the
+    DAC uses an initial set of species that represent the major parts of the
     combustion mechanism, i.e. H2/O2, fuel decomposition and CO2 production.
-    Usualy, it includes the fuel, HO2 and CO. Then it computes the dependance
+    Usually, it includes the fuel, HO2 and CO. Then it computes the dependance
     of these set to the other species. This is done by introducing R-value
     defined by
 
@@ -121,6 +122,7 @@ class DAC
         List<label> fuelSpeciesID_;
         word CO2Name_, COName_, HO2Name_, H2OName_, NOName_;
         Switch forceFuelInclusion_;
+
 
 public:
 

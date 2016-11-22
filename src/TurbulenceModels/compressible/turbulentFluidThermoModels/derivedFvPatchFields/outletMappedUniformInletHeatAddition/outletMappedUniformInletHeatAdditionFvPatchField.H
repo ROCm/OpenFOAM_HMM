@@ -29,7 +29,7 @@ Group
 
 Description
     This temperature boundary conditon averages the temperature over the
-    "outlet" patch specified by name "outletPatchName" and applies an extra
+    "outlet" patch specified by name "outletPatch" and applies an extra
     heat source. This is set as a uniform temperature value on this patch.
     Additionally minTempLimit/maxTempLimit limits can be applied
 
@@ -37,7 +37,7 @@ Description
 
     \table
         Property        | Description             | Required    | Default value
-        outletPatchName | name of outlet patch    | yes         |
+        outletPatch     | name of outlet patch    | yes         |
         Q               | Heat addition           | yes
         phi             | flux field name         | no          | phi
         minTempLimit    | min temperature limit   | no          | 0.0
@@ -49,7 +49,7 @@ Description
     myPatch
     {
         type            outletMappedUniformInletHeatAddition;
-        outletPatchName aPatch;
+        outletPatch     aPatch;
         Q               10;     // Heat addition in W
         phi             phi;
         value           uniform 0;
@@ -99,6 +99,7 @@ class outletMappedUniformInletHeatAdditionFvPatchField
 
         //- Maxmum Temperature Limit
         scalar maxTempLimit_;
+
 
 public:
 

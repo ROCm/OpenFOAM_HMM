@@ -55,7 +55,7 @@ boundaryField
         // Mode of operation: inert, condensation, vaporization,
         // condensationAndEvaporation
         mode            condensationAndEvaporation;
-        specieName      H2O;
+        specie          H2O;
         carrierMolWeight  28.9 ;//Air from thermophysicalProperties
         L               0.1;
         Tvap            273;    //Minimum temperature for evaporation

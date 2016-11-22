@@ -37,23 +37,14 @@ Foam::InterfaceForce<CloudType>::InterfaceForce
 )
 :
     ParticleForce<CloudType>(owner, mesh, dict, typeName, true),
-    alpaName_
-    (
-        this->coeffs().template lookup("alphaName")
-    ),
-    C_
-    (
-        readScalar(this->coeffs().lookup("C"))
-    ),
+    alpaName_(this->coeffs().lookup("alpha")),
+    C_(readScalar(this->coeffs().lookup("C"))),
     gradInterForceInterpPtr_(nullptr)
 {}
 
 
 template<class CloudType>
-Foam::InterfaceForce<CloudType>::InterfaceForce
-(
-    const InterfaceForce& pf
-)
+Foam::InterfaceForce<CloudType>::InterfaceForce(const InterfaceForce& pf)
 :
     ParticleForce<CloudType>(pf),
     alpaName_(pf.alpaName_),

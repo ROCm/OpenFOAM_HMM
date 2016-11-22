@@ -80,7 +80,7 @@ subModels
             SOI             0.01;
             massTotal       8;
             parcelBasisType mass;
-            patchName       inletCentral;
+            patch           inletCentral;
             duration        10000;
             parcelsPerSecond 1e5;
             U0              (40 0 0);

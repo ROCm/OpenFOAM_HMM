@@ -74,7 +74,7 @@ outletMappedUniformInletHeatAdditionFvPatchField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    outletPatchName_(dict.lookup("outletPatchName")),
+    outletPatchName_(dict.lookup("outletPatch")),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     Q_(readScalar(dict.lookup("Q"))),
     minTempLimit_(dict.lookupOrDefault<scalar>("minTempLimit", 0)),
@@ -167,8 +167,7 @@ void Foam::outletMappedUniformInletHeatAdditionFvPatchField::updateCoeffs()
         scalar averageOutletField =
             gSum(outletPatchPhi*outletPatchField)/sumOutletPatchPhi;
 
-        const scalarField Cpf =
-            thermo.Cp()().boundaryField()[outletPatchID];
+        const scalarField Cpf(thermo.Cp()().boundaryField()[outletPatchID]);
 
         scalar totalPhiCp = gSum(outletPatchPhi)*gAverage(Cpf);
 
@@ -198,11 +197,13 @@ void Foam::outletMappedUniformInletHeatAdditionFvPatchField::updateCoeffs()
 }
 
 
-void Foam::outletMappedUniformInletHeatAdditionFvPatchField::
-write(Ostream& os) const
+void Foam::outletMappedUniformInletHeatAdditionFvPatchField::write
+(
+    Ostream& os
+) const
 {
     fvPatchScalarField::write(os);
-    os.writeKeyword("outletPatchName")
+    os.writeKeyword("outletPatch")
         << outletPatchName_ << token::END_STATEMENT << nl;
 
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
@@ -215,6 +216,7 @@ write(Ostream& os) const
 
     this->writeEntry("value", os);
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

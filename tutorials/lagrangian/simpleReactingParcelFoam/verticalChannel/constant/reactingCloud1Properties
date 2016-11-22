@@ -84,7 +84,7 @@ subModels
             type            patchInjection;
             massFlowRate    0.8e-03;
             parcelBasisType mass;
-            patchName       inletCentral;
+            patch           inletCentral;
             parcelsPerSecond 100;
             duration        1; // NOTE: set to 1 for steady state
             U0              (0 40 0);

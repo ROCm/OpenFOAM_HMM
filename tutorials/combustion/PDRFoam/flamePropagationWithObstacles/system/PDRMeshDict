@@ -23,8 +23,8 @@ coupledFaces
 
     coupledFacesSet
     {
-        wallPatchName               baffleWall;
-        cyclicMasterPatchName       baffleCyclic_half0;
+        wallPatch                   baffleWall;
+        cyclicMasterPatch           baffleCyclic_half0;
     }
 }
 

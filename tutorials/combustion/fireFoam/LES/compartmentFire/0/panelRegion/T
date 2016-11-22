@@ -44,7 +44,7 @@ boundaryField
     "region0_to_.*"
     {
         type                compressible::turbulentTemperatureRadCoupledMixed;
-        neighbourFieldName  T;
+        neighbourField      T;
         kappaMethod         solidThermo;
         QrNbr               Qr;
         Qr                  none;

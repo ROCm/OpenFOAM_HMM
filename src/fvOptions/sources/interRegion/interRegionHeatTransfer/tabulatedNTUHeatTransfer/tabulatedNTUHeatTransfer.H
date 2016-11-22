@@ -68,13 +68,13 @@ Description
         tabulatedNTUHeatTransferCoeffs
         {
             interpolationMethod cellVolumeWeight;
-            nbrRegionName   air;
+            nbrRegion       air;
             master          true;
 
             fieldNames      (h);
             outOfBounds     clamp;
             fileName        "ntuTable";
-            nbrModelName    airToCooler;
+            nbrModel        airToCooler;
             semiImplicit    no;
 
 

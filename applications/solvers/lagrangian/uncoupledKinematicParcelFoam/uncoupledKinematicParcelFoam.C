@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 {
     argList::addOption
     (
-        "cloudName",
+        "cloud",
         "name",
         "specify alternative cloud name. default is 'kinematicCloud'"
     );

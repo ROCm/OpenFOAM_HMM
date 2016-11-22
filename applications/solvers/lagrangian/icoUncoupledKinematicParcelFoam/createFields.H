@@ -58,7 +58,7 @@ volScalarField mu
 );
 
 word kinematicCloudName("kinematicCloud");
-args.optionReadIfPresent("cloudName", kinematicCloudName);
+args.optionReadIfPresent("cloud", kinematicCloudName);
 
 Info<< "Constructing kinematicCloud " << kinematicCloudName << endl;
 basicKinematicCollidingCloud kinematicCloud

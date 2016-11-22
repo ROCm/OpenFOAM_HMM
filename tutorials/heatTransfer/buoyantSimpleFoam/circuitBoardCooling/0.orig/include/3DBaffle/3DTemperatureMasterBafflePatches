@@ -8,17 +8,17 @@
 
 T
 {
-        type                compressible::thermalBaffle;
-        kappaMethod         fluidThermo;
-        value               uniform 300;
+    type            compressible::thermalBaffle;
+    kappaMethod     fluidThermo;
+    value           uniform 300;
 
-        regionName          ${baffleRegionName};
-        active              yes;
+    region          ${baffleRegion};
+    active          yes;
 
-        # include "3DbaffleSolidThermo"
+    # include "3DbaffleSolidThermo"
 
-        // New fvMesh (region) information
-        # include "extrudeModel"
+    // New fvMesh (region) information
+    # include "extrudeModel"
 }
 
 // ************************************************************************* //

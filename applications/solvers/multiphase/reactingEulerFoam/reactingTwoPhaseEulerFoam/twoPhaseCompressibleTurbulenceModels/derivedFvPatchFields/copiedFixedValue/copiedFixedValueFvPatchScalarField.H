@@ -62,6 +62,7 @@ protected:
 
         word sourceFieldName_;
 
+
 public:
 
     //- Runtime type information
