@@ -403,7 +403,7 @@ bool Foam::chemPointISAT<CompType, ThermoType>::inEOA(const scalarField& phiq)
             label maxIndex = -1;
             for (label i=0; i<completeSpaceSize(); i++)
             {
-                if(max < propEps[i])
+                if (max < propEps[i])
                 {
                     max = propEps[i];
                     maxIndex = i;
@@ -412,11 +412,11 @@ bool Foam::chemPointISAT<CompType, ThermoType>::inEOA(const scalarField& phiq)
             word propName;
             if (maxIndex >= completeSpaceSize()-2)
             {
-                if(maxIndex == completeSpaceSize()-2)
+                if (maxIndex == completeSpaceSize()-2)
                 {
                     propName = "T";
                 }
-                else if(maxIndex == completeSpaceSize()-1)
+                else if (maxIndex == completeSpaceSize()-1)
                 {
                     propName = "p";
                 }
