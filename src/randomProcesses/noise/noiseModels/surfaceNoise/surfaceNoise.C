@@ -61,7 +61,7 @@ void surfaceNoise::initialise(const dictionary& dict)
         readerPtr_.reset(surfaceReader::New(readerType, inputFileName_).ptr());
 
         // Find the index of the pressure data
-        const word pName(dict.lookupOrDefault<word>("pName", "p"));
+        const word pName(dict.lookupOrDefault<word>("p", "p"));
         const List<word> fieldNames(readerPtr_->fieldNames(0));
         pIndex_ = findIndex(fieldNames, pName);
         if (pIndex_ == -1)

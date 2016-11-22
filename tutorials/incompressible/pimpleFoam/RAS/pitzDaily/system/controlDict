@@ -48,19 +48,6 @@ runTimeModifiable yes;
 adjustTimeStep  yes;
 
 maxCo           5;
-functions
-{
-    mag(U)
-    {
-        type            mag;
-        libs            ( "libfieldFunctionObjects.so" );
-        field           U;
-        executeControl  writeTime;
-        writeControl    writeTime;
-        fields          1 ( U );
-        result          myMagU;
-    }
-}
 
 
 // ************************************************************************* //
