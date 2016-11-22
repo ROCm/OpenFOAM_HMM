@@ -1104,9 +1104,9 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::write(Ostream& os) const
     fvPatchField<vector>::write(os);
     writeEntry("value", os);
     os.writeKeyword("delta") << delta_ << token::END_STATEMENT << nl;
-    writeEntryIfDifferent(os, "d", 1.0, d_);
-    writeEntryIfDifferent(os, "kappa", 0.41, kappa_);
-    writeEntryIfDifferent(os, "perturb", 1e-5, perturb_);
+    writeEntryIfDifferent<scalar>(os, "d", 1.0, d_);
+    writeEntryIfDifferent<scalar>(os, "kappa", 0.41, kappa_);
+    writeEntryIfDifferent<scalar>(os, "perturb", 1e-5, perturb_);
     writeEntryIfDifferent<label>(os, "nCellPerEddy", 5, nCellPerEddy_);
     writeEntryIfDifferent(os, "writeEddies", false, writeEddies_);
 
