@@ -26,6 +26,28 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+template<class Type>
+Foam::foamVtkFormatter&
+Foam::foamVtkFormatter::xmlAttribute
+(
+    const word& k,
+    const Type& v,
+    const char quote
+)
+{
+    if (!inTag_)
+    {
+        WarningInFunction
+            << "xml attribute '" << k << "' but not within a tag!"
+            << endl;
+    }
+
+    os_ << ' ' << k << '=' << quote << v << quote;
+
+    return *this;
+}
+
+
 template<class Type, int nComp>
 Foam::foamVtkFormatter& Foam::foamVtkFormatter::openDataArray
 (

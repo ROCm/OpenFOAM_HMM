@@ -77,8 +77,9 @@ void Foam::foamVtkLegacyFormatter::writeSize(const uint64_t)
 
 void Foam::foamVtkLegacyFormatter::write(const uint8_t val)
 {
-    // Can only handle integers
-    int copy(val);
+    // Legacy can only handle 32-bit integers.
+    // Nonetheless promote to 'label' (32 or 64 bit) and deal with it later
+    label copy(val);
     write(copy);
 }
 

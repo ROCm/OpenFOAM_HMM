@@ -70,6 +70,16 @@ class foamVtkFormatter
         mutable bool inTag_;
 
 
+        //- Write XML attribute
+        template<class Type>
+        foamVtkFormatter& xmlAttribute
+        (
+            const word&,
+            const Type&,
+            const char quote
+        );
+
+
 protected:
 
     // Protected Member Functions
@@ -113,9 +123,9 @@ public:
         virtual void writeSize(const uint64_t) = 0;
 
         virtual void write(const uint8_t) = 0;
-        virtual void write(const label) = 0;
-        virtual void write(const float) = 0;
-        virtual void write(const double) = 0;
+        virtual void write(const label)   = 0;
+        virtual void write(const float)   = 0;
+        virtual void write(const double)  = 0;
         virtual void flush() = 0;
 
 
@@ -136,7 +146,7 @@ public:
 
         //- Close XML tag, optional as an empty container.
         //  Always adds a trailing newline.
-        foamVtkFormatter& closeTag(bool isEmpty = false);
+        foamVtkFormatter& closeTag(const bool isEmpty = false);
 
         //- End XML tag, optional with sanity check
         //  Always adds a trailing newline.
@@ -164,21 +174,28 @@ public:
         }
 
 
-
         //- Write XML attribute
         foamVtkFormatter& xmlAttr
         (
             const word&,
             const std::string&,
-            const char quote='\''
+            const char quote = '\''
         );
 
         //- Write XML attribute
         foamVtkFormatter& xmlAttr
         (
             const word&,
-            const label,
-            const char quote='\''
+            const int32_t,
+            const char quote = '\''
+        );
+
+        //- Write XML attribute
+        foamVtkFormatter& xmlAttr
+        (
+            const word&,
+            const int64_t,
+            const char quote = '\''
         );
 
         //- Write XML attribute
@@ -186,7 +203,7 @@ public:
         (
             const word&,
             const uint64_t,
-            const char quote='\''
+            const char quote = '\''
         );
 
         //- Write XML attribute
@@ -194,7 +211,7 @@ public:
         (
             const word&,
             const scalar,
-            const char quote='\''
+            const char quote = '\''
         );
 
 
@@ -205,7 +222,10 @@ public:
         foamVtkFormatter& operator()(const word&, const std::string&);
 
         //- Write XML attribute
-        foamVtkFormatter& operator()(const word&, const label);
+        foamVtkFormatter& operator()(const word&, const int32_t);
+
+        //- Write XML attribute
+        foamVtkFormatter& operator()(const word&, const int64_t);
 
         //- Write XML attribute
         foamVtkFormatter& operator()(const word&, const uint64_t);
