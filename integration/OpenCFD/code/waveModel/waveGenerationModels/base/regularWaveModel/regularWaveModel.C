@@ -76,7 +76,7 @@ Foam::waveModels::regularWaveModel::regularWaveModel
 {
     if (readFields)
     {
-        read();
+        read(dict);
     }
 }
 
@@ -89,9 +89,9 @@ Foam::waveModels::regularWaveModel::~regularWaveModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModels::regularWaveModel::read()
+bool Foam::waveModels::regularWaveModel::read(const dictionary& overrideDict)
 {
-    if (waveGenerationModel::read())
+    if (waveGenerationModel::read(overrideDict))
     {
         lookup("wavePeriod") >> wavePeriod_;
         if (wavePeriod_ < 0)

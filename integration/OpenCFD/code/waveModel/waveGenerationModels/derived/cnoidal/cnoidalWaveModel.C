@@ -277,7 +277,7 @@ Foam::waveModels::cnoidal::cnoidal
 {
     if (readFields)
     {
-        read();
+        read(dict);
     }
 }
 
@@ -290,9 +290,9 @@ Foam::waveModels::cnoidal::~cnoidal()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModels::cnoidal::read()
+bool Foam::waveModels::cnoidal::read(const dictionary& overrideDict)
 {
-    if (regularWaveModel::read())
+    if (regularWaveModel::read(overrideDict))
     {
         // Initialise m parameter and wavelength
         initialise

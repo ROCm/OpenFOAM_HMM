@@ -51,39 +51,6 @@ Foam::word Foam::waveModel::modelName(const word& patchName)
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-Foam::IOdictionary Foam::waveModel::initialiseDict
-(
-    const fvMesh& mesh,
-    const word& patchName
-)
-{
-    IOobject io
-    (
-        modelName(patchName),
-        Time::timeName(mesh.time().startTime().value()),
-        "uniform",
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    );
-
-    const word oldTypeName = IOdictionary::typeName;
-
-    const_cast<word&>(IOdictionary::typeName) = word::null;
-
-    if (!io.typeHeaderOk<IOdictionary>(false))
-    {
-        io.readOpt() = IOobject::NO_READ;
-    }
-
-    IOdictionary dict(io);
-
-    const_cast<word&>(IOdictionary::typeName) = oldTypeName;
-
-    return dict;
-}
-
-
 void Foam::waveModel::initialiseGeometry()
 {
     // Determine local patch co-ordinate system given by:
@@ -274,7 +241,18 @@ Foam::waveModel::waveModel
     const bool readFields
 )
 :
-    IOdictionary(initialiseDict(mesh, patch.name())),
+    IOdictionary
+    (
+        IOobject
+        (
+            modelName(patch.name()),
+            Time::timeName(mesh.time().startTime().value()),
+            "uniform",
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        )
+    ),
     mesh_(mesh),
     patch_(patch),
     g_(mesh.lookupObject<uniformDimensionedVectorField>("g").value()),
@@ -297,11 +275,9 @@ Foam::waveModel::waveModel
     U_(patch.size(), vector::zero),
     alpha_(patch.size(), 0)
 {
-    merge(dict);
-
     if (readFields)
     {
-        read();
+        read(dict);
     }
 }
 
@@ -314,8 +290,16 @@ Foam::waveModel::~waveModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModel::read()
+bool Foam::waveModel::read(const dictionary& overrideDict)
 {
+    readOpt() = IOobject::READ_IF_PRESENT;
+    if (headerOk())
+    {
+        IOdictionary::regIOobject::read();
+    }
+
+    merge(overrideDict);
+
     readIfPresent("U", UName_);
     readIfPresent("alpha", alphaName_);
 

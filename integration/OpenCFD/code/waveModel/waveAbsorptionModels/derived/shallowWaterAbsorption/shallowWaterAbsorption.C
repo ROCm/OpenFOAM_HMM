@@ -92,7 +92,7 @@ Foam::waveModels::shallowWaterAbsorption::shallowWaterAbsorption
 {
     if (readFields)
     {
-        read();
+        read(dict);
     }
 }
 
@@ -105,9 +105,12 @@ Foam::waveModels::shallowWaterAbsorption::~shallowWaterAbsorption()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModels::shallowWaterAbsorption::read()
+bool Foam::waveModels::shallowWaterAbsorption::read
+(
+    const dictionary& overrideDict
+)
 {
-    return waveAbsorptionModel::read();
+    return waveAbsorptionModel::read(overrideDict);
 }
 
 

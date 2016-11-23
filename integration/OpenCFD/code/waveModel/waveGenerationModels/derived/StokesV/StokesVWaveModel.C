@@ -788,7 +788,7 @@ Foam::waveModels::StokesV::StokesV
 {
     if (readFields)
     {
-        read();
+        read(dict);
     }
 }
 
@@ -801,9 +801,9 @@ Foam::waveModels::StokesV::~StokesV()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModels::StokesV::read()
+bool Foam::waveModels::StokesV::read(const dictionary& overrideDict)
 {
-    if (regularWaveModel::read())
+    if (regularWaveModel::read(overrideDict))
     {
         scalar f1;
         scalar f2;

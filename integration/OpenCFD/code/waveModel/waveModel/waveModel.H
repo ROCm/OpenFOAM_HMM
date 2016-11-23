@@ -132,13 +132,6 @@ protected:
 
     // Protected Member Functions
 
-        //- Initialise dictionary
-        virtual IOdictionary initialiseDict
-        (
-            const fvMesh& mesh,
-            const word& patchName
-        );
-
         //- Initialise
         virtual void initialiseGeometry();
 
@@ -237,7 +230,7 @@ public:
         static word modelName(const word& patchName);
 
         //- Read from dictionary
-        virtual bool read();
+        virtual bool read(const dictionary& overrideDict);
 
         //- Return the latest wave velocity prediction
         virtual const vectorField& U() const;

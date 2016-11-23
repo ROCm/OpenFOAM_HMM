@@ -50,7 +50,7 @@ Foam::waveModels::waveAbsorptionModel::waveAbsorptionModel
 {
     if (readFields)
     {
-        read();
+        read(dict);
     }
 }
 
@@ -63,9 +63,9 @@ Foam::waveModels::waveAbsorptionModel::~waveAbsorptionModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModels::waveAbsorptionModel::read()
+bool Foam::waveModels::waveAbsorptionModel::read(const dictionary& overrideDict)
 {
-    if (waveModel::read())
+    if (waveModel::read(overrideDict))
     {
         // Note: always set to true
         activeAbsorption_ = true;

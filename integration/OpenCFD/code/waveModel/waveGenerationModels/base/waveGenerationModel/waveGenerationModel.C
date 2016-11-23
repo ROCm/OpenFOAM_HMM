@@ -55,7 +55,7 @@ Foam::waveModels::waveGenerationModel::waveGenerationModel
 {
     if (readFields)
     {
-        read();
+        read(dict);
     }
 }
 
@@ -68,9 +68,9 @@ Foam::waveModels::waveGenerationModel::~waveGenerationModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModels::waveGenerationModel::read()
+bool Foam::waveModels::waveGenerationModel::read(const dictionary& overrideDict)
 {
-    if (waveModel::read())
+    if (waveModel::read(overrideDict))
     {
         lookup("rampTime") >> rampTime_;
         lookup("activeAbsorption") >> activeAbsorption_;

@@ -179,7 +179,7 @@ Foam::waveModels::Boussinesq::Boussinesq
 {
     if (readFields)
     {
-        read();
+        read(dict);
     }
 }
 
@@ -192,9 +192,9 @@ Foam::waveModels::Boussinesq::~Boussinesq()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModels::Boussinesq::read()
+bool Foam::waveModels::Boussinesq::read(const dictionary& overrideDict)
 {
-    if (solitaryWaveModel::read())
+    if (solitaryWaveModel::read(overrideDict))
     {
         return true;
     }

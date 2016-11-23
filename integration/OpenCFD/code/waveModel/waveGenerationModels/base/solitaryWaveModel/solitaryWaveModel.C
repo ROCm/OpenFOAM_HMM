@@ -56,7 +56,7 @@ Foam::waveModels::solitaryWaveModel::solitaryWaveModel
 {
     if (readFields)
     {
-        read();
+        read(dict);
     }
 }
 
@@ -69,9 +69,9 @@ Foam::waveModels::solitaryWaveModel::~solitaryWaveModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModels::solitaryWaveModel::read()
+bool Foam::waveModels::solitaryWaveModel::read(const dictionary& overrideDict)
 {
-    if (waveGenerationModel::read())
+    if (waveGenerationModel::read(overrideDict))
     {
         return true;
     }

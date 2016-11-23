@@ -127,7 +127,7 @@ public:
     // Public Member Functions
 
         //- Read from dictionary
-        virtual bool read();
+        virtual bool read(const dictionary& overrideDict);
 
         //- Info
         virtual void info(Ostream& os) const;

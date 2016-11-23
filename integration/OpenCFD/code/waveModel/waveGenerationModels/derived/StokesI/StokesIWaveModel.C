@@ -155,7 +155,7 @@ Foam::waveModels::StokesI::StokesI
 {
     if (readFields)
     {
-        read();
+        read(dict);
     }
 }
 
@@ -168,9 +168,9 @@ Foam::waveModels::StokesI::~StokesI()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModels::StokesI::read()
+bool Foam::waveModels::StokesI::read(const dictionary& overrideDict)
 {
-    if (regularWaveModel::read())
+    if (regularWaveModel::read(overrideDict))
     {
 		waveLength_ = waveLength(waterDepthRef_, wavePeriod_);
 
