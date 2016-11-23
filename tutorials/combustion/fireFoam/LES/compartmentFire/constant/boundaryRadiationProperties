@@ -18,7 +18,7 @@ FoamFile
 ".*"
 {
     mode            lookup;
-    emissivity      1.0;
+    emissivity      0.8;
     absorptivity    0.0;
 }
 

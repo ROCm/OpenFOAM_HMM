@@ -126,35 +126,35 @@
     {
         surfaceScalarField phir(phic*mixture.nHatf());
 
-        tmp<surfaceScalarField> talphaPhiUn
-        (
-            fvc::flux
+        alphaPhiUn =
             (
-                phi,
-                alpha1,
-                alphaScheme
-            )
-          + fvc::flux
-            (
-               -fvc::flux(-phir, alpha2, alpharScheme),
-                alpha1,
-                alpharScheme
-            )
-        );
+                fvc::flux
+                (
+                    phi,
+                    alpha1,
+                    alphaScheme
+                )
+            + fvc::flux
+                (
+                -fvc::flux(-phir, alpha2, alpharScheme),
+                    alpha1,
+                    alpharScheme
+                )
+            );
 
         // Calculate the Crank-Nicolson off-centred alpha flux
         if (ocCoeff > 0)
         {
-            talphaPhiUn =
-                cnCoeff*talphaPhiUn + (1.0 - cnCoeff)*alphaPhi.oldTime();
+            alphaPhiUn =
+                cnCoeff*alphaPhiUn + (1.0 - cnCoeff)*alphaPhi.oldTime();
         }
 
         if (MULESCorr)
         {
-            tmp<surfaceScalarField> talphaPhiCorr(talphaPhiUn() - alphaPhi);
+            tmp<surfaceScalarField> talphaPhiCorr(alphaPhiUn - alphaPhi);
             volScalarField alpha10("alpha10", alpha1);
 
-            MULES::correct(alpha1, talphaPhiUn(), talphaPhiCorr.ref(), 1, 0);
+            MULES::correct(alpha1, alphaPhiUn, talphaPhiCorr.ref(), 1, 0);
 
             // Under-relax the correction for all but the 1st corrector
             if (aCorr == 0)
@@ -169,7 +169,7 @@
         }
         else
         {
-            alphaPhi = talphaPhiUn;
+            alphaPhi = alphaPhiUn;
 
             MULES::explicitSolve(alpha1, phiCN, alphaPhi, 1, 0);
         }

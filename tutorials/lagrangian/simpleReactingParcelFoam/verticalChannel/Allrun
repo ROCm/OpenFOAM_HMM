@@ -10,7 +10,7 @@ runApplication blockMesh
 
 runApplication potentialFoam
 
-# remove incompatible (volumetric) flux field
+# Remove incompatible (volumetric) flux field
 \rm -f 0/phi 2>/dev/null
 
 runApplication $(getApplication)

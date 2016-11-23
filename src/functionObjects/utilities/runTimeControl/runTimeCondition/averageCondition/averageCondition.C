@@ -53,7 +53,7 @@ Foam::functionObjects::runTimeControls::averageCondition::averageCondition
 )
 :
     runTimeCondition(name, obr, dict, state),
-    functionObjectName_(dict.lookup("functionObjectName")),
+    functionObjectName_(dict.lookup("functionObject")),
     fieldNames_(dict.lookup("fields")),
     tolerance_(readScalar(dict.lookup("tolerance"))),
     window_(dict.lookupOrDefault<scalar>("window", -1)),

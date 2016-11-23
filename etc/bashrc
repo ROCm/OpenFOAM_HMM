@@ -86,7 +86,7 @@ export WM_COMPILE_OPTION=Opt
 #- MPI implementation:
 #    WM_MPLIB = SYSTEMOPENMPI | OPENMPI | SYSTEMMPI | MPICH | MPICH-GM | HPMPI
 #               | MPI | QSMPI | SGIMPI
-export WM_MPLIB=OPENMPI
+export WM_MPLIB=SYSTEMOPENMPI
 
 #- Operating System:
 #    WM_OSTYPE = POSIX | ???

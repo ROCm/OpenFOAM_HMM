@@ -11,7 +11,7 @@ word continuousPhaseName
             mesh,
             IOobject::MUST_READ
         )
-    ).lookup("continuousPhaseName")
+    ).lookup("continuousPhase")
 );
 
 Info<< "Reading field U\n" << endl;
@@ -123,7 +123,7 @@ volScalarField alphac
 );
 
 word kinematicCloudName("kinematicCloud");
-args.optionReadIfPresent("cloudName", kinematicCloudName);
+args.optionReadIfPresent("cloud", kinematicCloudName);
 
 Info<< "Constructing kinematicCloud " << kinematicCloudName << endl;
 basicKinematicTypeCloud kinematicCloud

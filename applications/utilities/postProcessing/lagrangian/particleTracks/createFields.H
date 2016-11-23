@@ -9,7 +9,7 @@ IOdictionary propsDict
     )
 );
 
-const word cloudName(propsDict.lookup("cloudName"));
+const word cloudName(propsDict.lookup("cloud"));
 
 label sampleFrequency(readLabel(propsDict.lookup("sampleFrequency")));
 

@@ -23,7 +23,7 @@ eddyDissipationDiffusionModelCoeffs
 {
     semiImplicit    false;
     CEDC            4;
-    Cd              6;
+    Cd              4;
 }
 
 infinitelyFastChemistryCoeffs

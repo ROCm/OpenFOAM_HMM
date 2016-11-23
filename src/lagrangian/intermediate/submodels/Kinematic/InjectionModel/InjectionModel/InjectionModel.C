@@ -318,16 +318,19 @@ Foam::InjectionModel<CloudType>::InjectionModel
         Info<< "    injector ID: " << injectorID_ << endl;
     }
 
-    if (owner.solution().transient())
+    if (owner.solution().active())
     {
-        this->coeffDict().lookup("massTotal") >> massTotal_;
-        this->coeffDict().lookup("SOI") >> SOI_;
-    }
-    else
-    {
-        massFlowRate_.reset(this->coeffDict());
-        massTotal_ = massFlowRate_.value(owner.db().time().value());
-        this->coeffDict().readIfPresent("SOI", SOI_);
+        if (owner.solution().transient())
+        {
+            this->coeffDict().lookup("massTotal") >> massTotal_;
+            this->coeffDict().lookup("SOI") >> SOI_;
+        }
+        else
+        {
+            massFlowRate_.reset(this->coeffDict());
+            massTotal_ = massFlowRate_.value(owner.db().time().value());
+            this->coeffDict().readIfPresent("SOI", SOI_);
+        }
     }
 
     SOI_ = owner.db().time().userTimeToTime(SOI_);

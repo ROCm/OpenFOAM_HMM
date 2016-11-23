@@ -558,7 +558,7 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
 
     //Info<< "    using interpolation " << interpolationScheme_ << endl;
 
-    cloudName_ = dict.lookupOrDefault<word>("cloudName", type());
+    cloudName_ = dict.lookupOrDefault<word>("cloud", type());
     dict.lookup("seedSampleSet") >> seedSet_;
 
     const dictionary& coeffsDict = dict.subDict(seedSet_ + "Coeffs");

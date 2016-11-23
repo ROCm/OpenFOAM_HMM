@@ -106,7 +106,7 @@ Foam::fv::acousticDampingSource::acousticDampingSource
             zeroGradientFvPatchField<vector>::typeName
         )
     ),
-    URefName_("unknown-URefName"),
+    URefName_("unknown-URef"),
     x0_(Zero),
     r1_(0),
     r2_(0),

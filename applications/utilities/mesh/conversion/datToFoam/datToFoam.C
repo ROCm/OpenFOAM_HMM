@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
 
-    std::ifstream plot3dFile(args.args()[1].c_str());
+    std::ifstream plot3dFile(args[1].c_str());
 
     string line;
     std::getline(plot3dFile, line);

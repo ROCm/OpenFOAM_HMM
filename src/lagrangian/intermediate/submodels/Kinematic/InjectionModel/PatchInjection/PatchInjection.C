@@ -38,7 +38,7 @@ Foam::PatchInjection<CloudType>::PatchInjection
 )
 :
     InjectionModel<CloudType>(dict, owner, modelName, typeName),
-    patchInjectionBase(owner.mesh(), this->coeffDict().lookup("patchName")),
+    patchInjectionBase(owner.mesh(), this->coeffDict().lookup("patch")),
     duration_(readScalar(this->coeffDict().lookup("duration"))),
     parcelsPerSecond_
     (

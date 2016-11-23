@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -121,6 +121,37 @@ Foam::porosityModel::porosityModel
         FatalErrorInFunction
             << "cannot find porous cellZone " << zoneName_
             << exit(FatalError);
+    }
+
+    Info<< incrIndent << indent << coordSys_ << decrIndent << endl;
+
+    const pointField& points = mesh_.points();
+    const cellList& cells = mesh_.cells();
+    const faceList& faces = mesh_.faces();
+    DynamicList<point> localPoints;
+    forAll(cellZoneIDs_, zoneI)
+    {
+        const cellZone& cZone = mesh_.cellZones()[cellZoneIDs_[zoneI]];
+        localPoints.setCapacity(10*cells.size());
+
+        forAll(cZone, i)
+        {
+            const label cellI = cZone[i];
+            const cell& c = mesh_.cells()[cellI];
+            const pointField cellPoints(c.points(faces, points));
+
+            forAll(cellPoints, pointI)
+            {
+                const point& pt = cellPoints[pointI];
+                localPoints.append(coordSys_.localPosition(pt));
+            }
+        }
+
+        boundBox bb(localPoints, true);
+
+        Info<< "    local bounds: " << bb << endl;
+
+        localPoints.clear();
     }
 }
 

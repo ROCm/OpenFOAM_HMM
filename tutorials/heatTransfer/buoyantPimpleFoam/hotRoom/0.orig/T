@@ -9,52 +9,36 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    location    "0/bottomWater";
-    object      U;
+    class       volScalarField;
+    object      T;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 -1 0 0 0 0];
+dimensions      [0 0 0 1 0 0 0];
 
-internalField   uniform (0.001 0 0);
+internalField   uniform 300;
 
 boundaryField
 {
-    minX
+    floor
     {
         type            fixedValue;
-        value           uniform (0.001 0 0);
+        value           uniform 300;
     }
-    maxX
+
+    ceiling
     {
-        type            inletOutlet;
-        value           uniform (0.01 0 0);
-        inletValue      uniform (0 0 0);
+        type            lumpedMassWallTemperature;
+        kappaMethod     fluidThermo;
+        kappa           none;
+        mass            1000;
+        Cp              4100;
+        value           uniform 300;
     }
-    minY
+
+    fixedWalls
     {
-        type            noSlip;
-    }
-    minZ
-    {
-        type            noSlip;
-    }
-    maxZ
-    {
-        type            noSlip;
-    }
-    bottomWater_to_rightSolid
-    {
-        type            noSlip;
-    }
-    bottomWater_to_leftSolid
-    {
-        type            noSlip;
-    }
-    bottomWater_to_heater
-    {
-        type            noSlip;
+        type            zeroGradient;
     }
 }
 

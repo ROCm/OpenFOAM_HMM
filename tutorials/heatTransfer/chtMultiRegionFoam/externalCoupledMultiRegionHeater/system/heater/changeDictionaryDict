@@ -14,62 +14,56 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dictionaryReplacement
+boundary
 {
-    boundary
+    minY
     {
+        type            patch;
+        inGroups        (coupleGroup);
+    }
+    minZ
+    {
+        type            patch;
+    }
+    maxZ
+    {
+        type            patch;
+    }
+}
+
+T
+{
+    internalField   uniform 300;
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            zeroGradient;
+            value           uniform 300;
+        }
+        "heater_to_.*"
+        {
+            type            compressible::turbulentTemperatureCoupledBaffleMixed;
+            Tnbr            T;
+            kappaMethod     solidThermo;
+            value           uniform 300;
+        }
+
+        heater_to_leftSolid
+        {
+            type            compressible::turbulentTemperatureCoupledBaffleMixed;
+            Tnbr            T;
+            kappaMethod     solidThermo;
+            thicknessLayers (1e-3);
+            kappaLayers     (5e-4);
+            value           uniform 300;
+        }
+
         minY
         {
-            type            patch;
-            inGroups        (coupleGroup);
-        }
-        minZ
-        {
-            type            patch;
-        }
-        maxZ
-        {
-            type            patch;
-        }
-    }
-
-
-    T
-    {
-        internalField   uniform 300;
-
-        boundaryField
-        {
-            ".*"
-            {
-                type            zeroGradient;
-                value           uniform 300;
-            }
-            "heater_to_.*"
-            {
-                type            compressible::turbulentTemperatureCoupledBaffleMixed;
-                Tnbr            T;
-                kappaMethod     solidThermo;
-                kappa           none;
-                value           uniform 300;
-            }
-
-            heater_to_leftSolid
-            {
-                type            compressible::turbulentTemperatureCoupledBaffleMixed;
-                Tnbr            T;
-                kappaMethod     solidThermo;
-                kappa           none;
-                thicknessLayers (1e-3);
-                kappaLayers     (5e-4);
-                value           uniform 300;
-            }
-
-            minY
-            {
-                type            fixedValue;
-                value           uniform 500;
-            }
+            type            fixedValue;
+            value           uniform 500;
         }
     }
 }

@@ -605,7 +605,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     runTime.functionObjects().off();
 
-    const word inputName(args.args()[1]);
+    const word inputName(args[1]);
     const scalar distance(args.argRead<scalar>(2));
     const scalar extendFactor(args.argRead<scalar>(3));
     const bool checkSelfIntersect = args.optionFound("checkSelfIntersection");

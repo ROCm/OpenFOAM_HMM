@@ -49,7 +49,7 @@ Foam::copiedFixedValueFvPatchScalarField::copiedFixedValueFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    sourceFieldName_(dict.lookup("sourceFieldName"))
+    sourceFieldName_(dict.lookup("sourceField"))
 {}
 
 
@@ -109,7 +109,7 @@ void Foam::copiedFixedValueFvPatchScalarField::updateCoeffs()
 void Foam::copiedFixedValueFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeKeyword("sourceFieldName")
+    os.writeKeyword("sourceField")
         << sourceFieldName_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }

@@ -135,6 +135,21 @@ surfaceScalarField alphaPhi
     phi*fvc::interpolate(alpha1)
 );
 
+// MULES compressed flux is registered in case scalarTransport FO needs it.
+surfaceScalarField alphaPhiUn
+(
+    IOobject
+    (
+        "alphaPhiUn",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedScalar("zero", phi.dimensions(), 0.0)
+);
+
 // MULES Correction
 tmp<surfaceScalarField> talphaPhiCorr0;
 

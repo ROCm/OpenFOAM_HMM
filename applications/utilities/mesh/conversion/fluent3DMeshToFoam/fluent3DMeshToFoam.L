@@ -811,7 +811,7 @@ int main(int argc, char *argv[])
     args.optionReadIfPresent("ignoreCellGroups", ignoreCellGroups);
     args.optionReadIfPresent("ignoreFaceGroups", ignoreFaceGroups);
 
-    cubitFile = args.options().found("cubit");
+    cubitFile = args.optionFound("cubit");
 
     if (cubitFile)
     {

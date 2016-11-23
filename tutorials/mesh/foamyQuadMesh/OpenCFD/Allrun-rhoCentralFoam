@@ -11,5 +11,4 @@ runApplication decomposePar
 runParallel rhoCentralFoam
 runApplication reconstructPar
 
-
 #------------------------------------------------------------------------------

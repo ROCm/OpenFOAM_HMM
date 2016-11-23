@@ -52,6 +52,7 @@ SourceFiles
 #include "sixDoFRigidBodyMotionConstraint.H"
 #include "Tuple2.H"
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam

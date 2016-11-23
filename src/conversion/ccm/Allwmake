@@ -15,8 +15,13 @@ if [ "$WM_LABEL_SIZE" = 64 ]
 then
     # The libccmio uses int32_t.
     # The OpenFOAM adapter thus requires additional work for 64-bit labels.
-    echo "Skipping optional component libccm"
+    echo "Skipping optional 'libccm' adapter component"
     echo "    does not support 64-bit labels"
+elif [ "$WM_PRECISION_OPTION" = SP ]
+then
+    # The OpenFOAM adapter was originally only designed for 'double'
+    echo "Skipping optional 'libccm' adapter component"
+    echo "    was not originally designed for 'single precision' values"
 elif [ -e $CCMIO_ARCH_PATH/include/libccmio/ccmio.h \
     -a -e $CCMIO_ARCH_PATH/lib/libccmio.a ]
 then

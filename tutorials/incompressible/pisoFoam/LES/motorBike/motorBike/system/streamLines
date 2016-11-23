@@ -32,7 +32,7 @@ streamLines
     nSubCycle       5;
 
     // Cloud name to use
-    cloudName       particleTracks;
+    cloud           particleTracks;
 
     // Seeding method.
     seedSampleSet   uniform;  //cloud; //triSurfaceMeshPointSet;

@@ -82,6 +82,7 @@ Usage
         log             yes;
         commsDir        "${FOAM_CASE}/comms";
         initByExternal  yes;
+        stateEnd        remove;  // (remove | done)
 
         regions
         {
@@ -113,6 +114,7 @@ Usage
     application.
 
 SourceFiles
+    externalCoupled.C
     externalCoupledTemplates.C
 
 \*---------------------------------------------------------------------------*/
@@ -124,6 +126,7 @@ SourceFiles
 #include "DynamicList.H"
 #include "wordReList.H"
 #include "scalarField.H"
+#include "NamedEnum.H"
 #include "Switch.H"
 #include "UPtrList.H"
 
@@ -147,13 +150,28 @@ class externalCoupled
 :
     public functionObject
 {
+public:
+
+    // Public data types
+
+        //- Lockfile state on termination
+        enum stateEnd
+        {
+            REMOVE,     //!< Remove lock file on end
+            DONE,       //!< Lock file contains status=done on end
+            IGNORE      //!< Internal use only (for handling cleanup).
+        };
+
+private:
+
+        //- State end names
+        static const NamedEnum<stateEnd, 2> stateEndNames_;
+
+
     // Private data
 
         //- Reference to the time database
         const Time& time_;
-
-        //- Switch for the execution - defaults to 'yes/on'
-        Switch enabled_;
 
         //- Path to communications directory
         fileName commsDir_;
@@ -169,6 +187,9 @@ class externalCoupled
 
         //- Flag to indicate values are initialised by external application
         bool initByExternal_;
+
+        //- Lockfile state on termination
+        stateEnd stateEnd_;
 
         //- Names of (composite) regions
         DynamicList<word> regionGroupNames_;
@@ -208,11 +229,15 @@ class externalCoupled
         //- Return the file path to the lock file
         fileName lockFile() const;
 
-        //- Create lock file
-        void createLockFile() const;
 
-        //- Remove lock file
-        void removeLockFile() const;
+        //- Create lock file to indicate that OpenFOAM is in charge
+        void useMaster() const;
+
+        //- Remove lock file to indicate that the external program is in charge
+        void useSlave() const;
+
+        //- Remove lock file or status=done in lock.
+        void cleanup() const;
 
         //- Remove files written by OpenFOAM
         void removeWriteFiles() const;
@@ -220,8 +245,9 @@ class externalCoupled
         //- Remove files written by external code
         void removeReadFiles() const;
 
-        //- Wait for response from external source
-        void wait() const;
+        //- Wait for indication that the external program has supplied input
+        //  (ie, for the lock file to reappear).
+        void waitForSlave() const;
 
 
         //- Read data for a single region, single field
@@ -290,10 +316,10 @@ public:
     //- Runtime type information
     TypeName("externalCoupled");
 
-    //- Name of lock file
+    //- Name of lock file (normally 'OpenFOAM.lock')
     static word lockName;
 
-    //- Name of patch key, e.g. '# Patch:' when looking for start of patch data
+    //- Name of patch key, e.g. '// Patch:' when looking for start of patch data
     static string patchKey;
 
 
@@ -335,7 +361,7 @@ public:
             //  separated by '_'
             static word compositeName(const wordList&);
 
-            //- Write geometry for the group/patch
+            //- Write geometry for the group as region/patch
             static void writeGeometry
             (
                 const UPtrList<const fvMesh>& meshes,

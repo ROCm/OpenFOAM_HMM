@@ -41,7 +41,7 @@ Foam::NonInertialFrameForce<CloudType>::NonInertialFrameForce
     (
         this->coeffs().template lookupOrDefault<word>
         (
-            "linearAccelerationName",
+            "linearAcceleration",
             "linearAcceleration"
         )
     ),
@@ -50,7 +50,7 @@ Foam::NonInertialFrameForce<CloudType>::NonInertialFrameForce
     (
         this->coeffs().template lookupOrDefault<word>
         (
-            "angularVelocityName",
+            "angularVelocity",
             "angularVelocity"
         )
     ),
@@ -59,7 +59,7 @@ Foam::NonInertialFrameForce<CloudType>::NonInertialFrameForce
     (
         this->coeffs().template lookupOrDefault<word>
         (
-            "angularAccelerationName",
+            "angularAcceleration",
             "angularAcceleration"
         )
     ),
@@ -68,7 +68,7 @@ Foam::NonInertialFrameForce<CloudType>::NonInertialFrameForce
     (
         this->coeffs().template lookupOrDefault<word>
         (
-            "centreOfRotationName",
+            "centreOfRotation",
             "centreOfRotation"
         )
     ),

@@ -6,9 +6,6 @@ cd ${0%/*} || exit 1    # Run from this directory
 
 cp system/controlDict.flow system/controlDict
 
-# Set application name
-application=$(getApplication)
-
 rm -rf 0
 
 runApplication createBaffles -overwrite
@@ -17,7 +14,7 @@ runApplication mergeOrSplitBaffles -split -overwrite
 # Get rid of zero faced patches
 runApplication createPatch -overwrite
 
-# Copy fields after meshing to avoind the generation of unnecessary patch fields
+# Copy fields after meshing to avoid the generation of unnecessary patch fields
 restore0Dir
 
 # Initialize alpha
@@ -28,7 +25,7 @@ runApplication -s main \
     decomposePar -force
 
 # Run
-runParallel $application
+runParallel $(getApplication)
 
 # Reconstruct
 runApplication reconstructPar -noFunctionObjects

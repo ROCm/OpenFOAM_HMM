@@ -6,17 +6,17 @@ cd ${0%/*} || exit 1    # Run from this directory
 
 ./Allrun.pre
 
-# Set application name
-application=$(getApplication)
-
-# decompose
+# Decompose
 runApplication -s cabin decomposePar -region cabin
 runApplication -s ice decomposePar -region ice
 runApplication -s exterior decomposePar -region exterior
 
-runParallel $application
+runParallel $(getApplication)
 
+# Reconstruct
 runApplication -s cabin reconstructPar -region cabin
 runApplication -s ice reconstructPar -region ice
 runApplication -s exterior reconstructPar -region exterior
 
+
+# -----------------------------------------------------------------------------

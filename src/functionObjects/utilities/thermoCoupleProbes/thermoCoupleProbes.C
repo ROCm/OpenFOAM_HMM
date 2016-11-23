@@ -67,9 +67,9 @@ Foam::functionObjects::thermoCoupleProbes::thermoCoupleProbes
     }
 
     // Check if the property exist (resume old calculation)
-    // or of it is new
+    // or of it is new.
     dictionary probeDict;
-    if (getDict(name, probeDict))
+    if (getDict(typeName, probeDict))
     {
         probeDict.lookup("Tc") >> Ttc_;
     }
@@ -125,9 +125,9 @@ void Foam::functionObjects::thermoCoupleProbes::derivatives
     muc = this->sample(thermo_.mu()());
     Cpc = this->sample(thermo_.Cp()());
 
-    scalarField Re(rhoc*Uc*d_/(muc + ROOTVSMALL));
-    scalarField Pr(Cpc*muc/(kappac + ROOTVSMALL));
-    //scalarField Nu(2.0 + 0.6*sqrt(Re)*cbrt(Pr));
+    scalarField Re(rhoc*Uc*d_/muc);
+    scalarField Pr(Cpc*muc/kappac);
+    Pr = max(ROOTVSMALL, Pr);
     scalarField Nu(2.0 + (0.4*sqrt(Re) + 0.06*pow(Re, 2/3))*pow(Pr, 0.4));
     scalarField htc(Nu*kappac/d_);
 
@@ -172,7 +172,7 @@ bool Foam::functionObjects::thermoCoupleProbes::write()
 
         dictionary probeDict;
         probeDict.add("Tc", Ttc_);
-        setProperty(name(), probeDict);
+        setProperty(typeName, probeDict);
         return true;
     }
 

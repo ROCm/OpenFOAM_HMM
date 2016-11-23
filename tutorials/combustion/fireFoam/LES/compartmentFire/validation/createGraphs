@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -76,6 +76,8 @@ EXPT="$DATAFILET"
 
 echo $OF
 echo $EXPT
+
+#
 
 #createEpsT $OF 2 $EXPT 12 Temperature
 #createEpsT $OF 3 $EXPT 10 Temperature

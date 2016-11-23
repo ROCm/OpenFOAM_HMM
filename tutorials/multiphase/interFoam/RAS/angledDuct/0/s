@@ -10,57 +10,43 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0/bottomWater";
-    object      k;
+    location    "0";
+    object      s;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
+dimensions      [0 0 0 0 0 0 0];
 
-internalField   uniform 0.1;
+internalField   uniform 0;
 
 boundaryField
 {
-    minX
-    {
-        type            inletOutlet;
-        value           uniform 0.1;
-        inletValue      uniform 0.1;
-    }
-    maxX
+    front
     {
         type            zeroGradient;
-        value           uniform 0.1;
     }
-    minY
+    back
     {
-        type            kqRWallFunction;
-        value           uniform 0.1;
+        type            zeroGradient;
     }
-    minZ
+    walls
     {
-        type            kqRWallFunction;
-        value           uniform 0.1;
+        type            zeroGradient;
     }
-    maxZ
+    porosityWall
     {
-        type            kqRWallFunction;
-        value           uniform 0.1;
+        type            zeroGradient;
     }
-    bottomWater_to_rightSolid
+    inlet
     {
-        type            kqRWallFunction;
-        value           uniform 0.1;
+        type            fixedValue;
+        value           uniform 0;
     }
-    bottomWater_to_leftSolid
+    outlet
     {
-        type            kqRWallFunction;
-        value           uniform 0.1;
-    }
-    bottomWater_to_heater
-    {
-        type            kqRWallFunction;
-        value           uniform 0.1;
+        type            inletOutlet;
+        inletValue      uniform 0;
+        value           uniform 0;
     }
 }
 

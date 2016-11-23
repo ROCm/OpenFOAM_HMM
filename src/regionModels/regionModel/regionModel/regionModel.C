@@ -431,7 +431,7 @@ Foam::regionModels::regionModel::regionModel
     outputPropertiesPtr_(nullptr),
     primaryPatchIDs_(),
     intCoupledPatchIDs_(),
-    regionName_(lookup("regionName")),
+    regionName_(lookup("region")),
     functions_(*this, subOrEmptyDict("functions"))
 {
     if (active_)
@@ -479,7 +479,7 @@ Foam::regionModels::regionModel::regionModel
     outputPropertiesPtr_(nullptr),
     primaryPatchIDs_(),
     intCoupledPatchIDs_(),
-    regionName_(dict.lookup("regionName")),
+    regionName_(dict.lookup("region")),
     functions_(*this, subOrEmptyDict("functions"))
 {
     if (active_)

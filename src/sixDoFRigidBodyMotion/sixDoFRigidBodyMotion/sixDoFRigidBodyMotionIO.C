@@ -25,6 +25,7 @@ License
 
 #include "sixDoFRigidBodyMotion.H"
 #include "IOstreams.H"
+#include "sixDoFSolver.H"
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
@@ -111,6 +112,12 @@ void Foam::sixDoFRigidBodyMotion::write(Ostream& os) const
         }
 
         os  << decrIndent << indent << token::END_BLOCK << nl;
+    }
+
+    if (!solver_.empty())
+    {
+        os  << indent << "solver";
+        solver_->write(os);
     }
 }
 

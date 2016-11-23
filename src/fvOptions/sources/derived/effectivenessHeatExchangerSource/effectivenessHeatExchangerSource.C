@@ -304,9 +304,9 @@ bool Foam::fv::effectivenessHeatExchangerSource::read(const dictionary& dict)
 {
     if (cellSetOption::read(dict))
     {
-        UName_ = coeffs_.lookupOrDefault<word>("UName", "U");
-        TName_ = coeffs_.lookupOrDefault<word>("TName", "T");
-        phiName_ = coeffs_.lookupOrDefault<word>("phiName", "phi");
+        UName_ = coeffs_.lookupOrDefault<word>("U", "U");
+        TName_ = coeffs_.lookupOrDefault<word>("T", "T");
+        phiName_ = coeffs_.lookupOrDefault<word>("phi", "phi");
         coeffs_.lookup("faceZone") >> faceZoneName_;
 
         coeffs_.lookup("secondaryMassFlowRate") >> secondaryMassFlowRate_;

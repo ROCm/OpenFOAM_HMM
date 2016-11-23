@@ -623,7 +623,7 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
     writeFile::read(dict);
 
     mode_ = modeTypeNames_.read(dict.lookup("mode"));
-    phiName_= dict.lookupOrDefault<word>("phiName", "phi");
+    phiName_= dict.lookupOrDefault<word>("phi", "phi");
     dict.readIfPresent("scaleFactor", scaleFactor_);
     dict.readIfPresent("tolerance", tolerance_);
 

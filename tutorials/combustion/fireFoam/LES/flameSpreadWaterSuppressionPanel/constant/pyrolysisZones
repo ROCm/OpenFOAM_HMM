@@ -21,7 +21,7 @@ pyrolysis
 
     pyrolysisModel  reactingOneDim;
 
-    regionName pyrolysisRegion;
+    region          pyrolysisRegion;
 
     reactingOneDimCoeffs
     {

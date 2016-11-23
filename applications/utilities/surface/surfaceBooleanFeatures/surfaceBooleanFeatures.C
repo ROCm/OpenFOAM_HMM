@@ -1558,12 +1558,14 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    word action(args.args()[1]);
+    const word action(args[1]);
 
-    HashTable<booleanSurface::booleanOpType> validActions;
-    validActions.insert("intersection", booleanSurface::INTERSECTION);
-    validActions.insert("union", booleanSurface::UNION);
-    validActions.insert("difference", booleanSurface::DIFFERENCE);
+    const HashTable<booleanSurface::booleanOpType> validActions
+    {
+        {"intersection", booleanSurface::INTERSECTION},
+        {"union", booleanSurface::UNION},
+        {"difference", booleanSurface::DIFFERENCE}
+    };
 
     if (!validActions.found(action))
     {
@@ -1580,7 +1582,7 @@ int main(int argc, char *argv[])
     }
 
 
-    const word surf1Name(args.args()[2]);
+    const word surf1Name(args[2]);
     Info<< "Reading surface " << surf1Name << endl;
     triSurfaceMesh surf1
     (

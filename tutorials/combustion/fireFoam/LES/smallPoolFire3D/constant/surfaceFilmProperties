@@ -11,12 +11,12 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      SurfaceFilmProperties;
+    object      surfaceFilmProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 surfaceFilmModel none;
 
-regionName      none;
+region          none;
 
 active          false;

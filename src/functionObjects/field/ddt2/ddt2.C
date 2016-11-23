@@ -27,6 +27,7 @@ License
 
 #include "volFields.H"
 #include "dictionary.H"
+#include "wordReListMatcher.H"
 #include "steadyStateDdtScheme.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -77,25 +78,6 @@ bool Foam::functionObjects::ddt2::checkFormatName(const word& str)
 }
 
 
-void Foam::functionObjects::ddt2::uniqWords(wordReList& lst)
-{
-    boolList retain(lst.size());
-    wordHashSet uniq;
-    forAll(lst, i)
-    {
-        const wordRe& select = lst[i];
-
-        retain[i] =
-        (
-            select.isPattern()
-         || uniq.insert(static_cast<const word&>(select))
-        );
-    }
-
-    inplaceSubset(retain, lst);
-}
-
-
 bool Foam::functionObjects::ddt2::accept(const word& fieldName) const
 {
     // check input vs possible result names
@@ -130,6 +112,7 @@ Foam::functionObjects::ddt2::ddt2
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
+    prevTimeIndex_(-1),
     selectFields_(),
     resultName_(word::null),
     blacklist_(),
@@ -160,10 +143,11 @@ bool Foam::functionObjects::ddt2::read(const dictionary& dict)
         return false;
     }
 
-    fvMeshFunctionObject::read(dict);
-
-    dict.lookup("fields") >> selectFields_;
-    uniqWords(selectFields_);
+    selectFields_ = wordReListMatcher::uniq
+    (
+        wordReList(dict.lookup("fields"))
+    );
+    Info<< type() << " fields: " << selectFields_ << nl;
 
     resultName_ = dict.lookupOrDefault<word>
     (
@@ -234,12 +218,20 @@ bool Foam::functionObjects::ddt2::execute()
             << "Unprocessed field " << ignored << endl;
     }
 
+    // Update time index
+    prevTimeIndex_ = obr_.time().timeIndex();
+
     return true;
 }
 
 
 bool Foam::functionObjects::ddt2::write()
 {
+    if (prevTimeIndex_ < obr_.time().timeIndex())
+    {
+        // Ensure written results reflect the current state
+        execute();
+    }
     if (results_.size())
     {
         Log << type() << ' ' << name() << " write:" << endl;

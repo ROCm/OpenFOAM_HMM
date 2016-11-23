@@ -514,7 +514,7 @@ Foam::functionObjects::fieldVisualisationBase::fieldVisualisationBase
 :
     parent_(parent),
     colours_(colours),
-    fieldName_(dict.lookup("fieldName")),
+    fieldName_(dict.lookup("field")),
     colourBy_(cbColour),
     colourMap_(cmRainbow),
     range_()

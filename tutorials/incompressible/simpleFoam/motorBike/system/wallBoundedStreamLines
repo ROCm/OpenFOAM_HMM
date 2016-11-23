@@ -18,7 +18,7 @@ near
     writeControl    writeTime;
 
     // Calculate every
-    executeControl   writeTime;
+    executeControl  writeTime;
 
     // Fields to be sampled. Per field original name and mapped field to
     // create.
@@ -29,10 +29,10 @@ near
     );
 
     // Patches/groups to sample (regular expressions)
-    patches (motorBikeGroup);
+    patches         (motorBikeGroup);
 
     // Distance to sample
-    distance 0.001;
+    distance        0.001;
 }
 
 // Use UNear to track along wall
@@ -48,7 +48,7 @@ wallBoundedStreamLines
     setFormat       vtk; //gnuplot; //xmgr; //raw; //jplot;
 
     // Velocity field to use for tracking.
-    U     UNear;
+    U               UNear;
 
     // Interpolation method. Default is cellPoint.
     // interpolationScheme pointMVC;
@@ -65,7 +65,7 @@ wallBoundedStreamLines
     lifeTime        100;
 
     // Cloud name to use
-    cloudName       wallBoundedParticleTracks;
+    cloud           wallBoundedParticleTracks;
 
     // Seeding method.
     seedSampleSet   patchSeed;    //cloud; //triSurfaceMeshPointSet;

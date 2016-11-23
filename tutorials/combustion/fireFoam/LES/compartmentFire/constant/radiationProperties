@@ -23,14 +23,14 @@ radiationModel  fvDOM;
 
 fvDOMCoeffs
 {
-    nPhi    4;
+    nPhi    2;
     nTheta  4;
-    convergence 1e-3;
-    maxIter 3;
+    convergence 1e-5;
+    maxIter 5;
 }
 
 // Number of flow iterations per radiation iteration
-solverFreq 20;
+solverFreq 15;
 
 absorptionEmissionModel greyMeanAbsorptionEmission;
 
@@ -44,7 +44,7 @@ constantAbsorptionEmissionCoeffs
 greyMeanAbsorptionEmissionCoeffs
 {
     //lookUpTableFileName     "SpeciesTable";
-    EhrrCoeff                0.2;
+    EhrrCoeff                0.15;
     CO2
     {
         Tcommon         200;   //Common Temp
@@ -64,11 +64,11 @@ greyMeanAbsorptionEmissionCoeffs
         hiTcoeffs        //coefss for T > Tcommon
         (
             18.741
-            -121.31e3
+           -121.31e3
             273.5e6
-            -194.05e9
+           -194.05e9
             56.31e12
-            -5.8169e15
+           -5.8169e15
         );
 
     }
@@ -119,10 +119,10 @@ greyMeanAbsorptionEmissionCoeffs
         hiTcoeffs
         (
             6.6334
-            -0.0035686
+           -0.0035686
             1.6682e-8
             2.5611e-10
-            -2.6558e-14
+           -2.6558e-14
             0
         );
     }
@@ -145,7 +145,7 @@ greyMeanAbsorptionEmissionCoeffs
         );
         hiTcoeffs
         (
-            0.1
+            0.01
             0
             0
             0
@@ -173,7 +173,7 @@ greyMeanAbsorptionEmissionCoeffs
         );
         hiTcoeffs
         (
-            0.1
+            0.01
             0
             0
             0

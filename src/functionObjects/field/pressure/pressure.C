@@ -79,8 +79,8 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::rhoScale
             FatalErrorInFunction
                 << type() << " " << name() << ": "
                 << "pressure identified as incompressible, but reference "
-                << "density is not set.  Please set rhoName to rhoInf, and "
-                << "set an appropriate value for rhoInf"
+                << "density is not set.  Please set 'rho' to 'rhoInf', and "
+                << "set an appropriate value for 'rhoInf'"
                 << exit(FatalError);
         }
 

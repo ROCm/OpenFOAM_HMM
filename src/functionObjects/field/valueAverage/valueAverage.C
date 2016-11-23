@@ -70,7 +70,7 @@ Foam::functionObjects::valueAverage::valueAverage
 :
     regionFunctionObject(name, runTime, dict),
     writeFile(obr_, name, typeName, dict),
-    functionObjectName_("unknown-functionObjectName"),
+    functionObjectName_("unknown-functionObject"),
     fieldNames_(),
     window_(-1),
     totalTime_(),
@@ -109,7 +109,7 @@ bool Foam::functionObjects::valueAverage::read(const dictionary& dict)
     regionFunctionObject::read(dict);
     writeFile::read(dict);
 
-    dict.lookup("functionObjectName") >> functionObjectName_;
+    dict.lookup("functionObject") >> functionObjectName_;
     dict.lookup("fields") >> fieldNames_;
     window_ = dict.lookupOrDefault<scalar>("window", -1);
 

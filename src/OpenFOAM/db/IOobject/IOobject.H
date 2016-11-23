@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -400,7 +400,7 @@ public:
             fileName path
             (
                 const word& instance,
-                const fileName& local = ""
+                const fileName& local = fileName::null
             ) const;
 
             //- Return complete path + object name
@@ -409,11 +409,15 @@ public:
                 return path()/name();
             }
 
-            //- Helper for filePath that searches locally
-            fileName localFilePath() const;
+            //- Helper for filePath that searches locally.
+            //  When search is false, simply use the current instance,
+            //  otherwise search previous instances.
+            fileName localFilePath(const bool search=true) const;
 
             //- Helper for filePath that searches up if in parallel
-            fileName globalFilePath() const;
+            //  When search is false, simply use the current instance,
+            //  otherwise search previous instances.
+            fileName globalFilePath(const bool search=true) const;
 
 
         // Reading
@@ -421,10 +425,16 @@ public:
             //- Read header
             bool readHeader(Istream&);
 
-            //- Read header (uses typeFilePath to find file) and check header
-            //  info. Optionally checks headerClassName against type
+            //- Read header (uses typeFilePath to find file) and check its info.
+            //  Optionally checks headerClassName against the type-name.
+            //  When search is false, simply use the current instance,
+            //  otherwise search previous instances.
             template<class Type>
-            bool typeHeaderOk(const bool checkType = true);
+            bool typeHeaderOk
+            (
+                const bool checkType = true,
+                const bool search = true
+            );
 
             //- Helper: warn that type does not support re-reading
             template<class Type>
@@ -485,18 +495,23 @@ template<>
 Ostream& operator<<(Ostream& os, const InfoProxy<IOobject>& ip);
 
 
-//- Template function for obtaining global status
+//- Template function for obtaining global vs. local status
 template<class T>
 inline bool typeGlobal()
 {
     return false;
 }
 
-//- Template function for obtaining filePath
+//- Template function for obtaining local or global filePath
 template<class T>
-inline fileName typeFilePath(const IOobject& io)
+inline fileName typeFilePath(const IOobject& io, const bool search=true)
 {
-    return (typeGlobal<T>() ? io.globalFilePath() : io.localFilePath());
+    return
+    (
+        typeGlobal<T>()
+      ? io.globalFilePath(search)
+      : io.localFilePath(search)
+    );
 }
 
 

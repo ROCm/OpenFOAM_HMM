@@ -16,8 +16,6 @@ intersectSurfaces()
         surfaceBooleanFeatures intersection "$@"
 }
 
-# Set application name
-application=$(getApplication)
 
 \rm -rf 0
 

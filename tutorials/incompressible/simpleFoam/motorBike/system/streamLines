@@ -39,7 +39,7 @@ streamLines
 
 
     // Cloud name to use
-    cloudName       particleTracks;
+    cloud           particleTracks;
 
     // Seeding method.
     seedSampleSet   uniform;  //cloud; //triSurfaceMeshPointSet;

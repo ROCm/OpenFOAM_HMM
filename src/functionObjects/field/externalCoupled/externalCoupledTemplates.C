@@ -81,8 +81,6 @@ bool Foam::functionObjects::externalCoupled::readData
 
 
     label nFound = 0;
-
-
     forAll(meshes, i)
     {
         const fvMesh& mesh = meshes[i];

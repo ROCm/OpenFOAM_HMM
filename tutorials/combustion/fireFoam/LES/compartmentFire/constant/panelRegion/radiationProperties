@@ -20,13 +20,7 @@ radiation       on;
 
 radiationModel  opaqueSolid;
 
-absorptionEmissionModel multiBandSolidAbsorptionEmission;
-
-multiBandSolidAbsorptionEmissionCoeffs
-{
-    absorptivity    (0 0);
-    emissivity      (1 1);
-}
+absorptionEmissionModel none;
 
 transmissivityModel none;
 

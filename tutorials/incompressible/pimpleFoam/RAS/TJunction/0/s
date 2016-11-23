@@ -10,56 +10,38 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0/bottomWater";
-    object      p_rgh;
+    location    "0";
+    object      s;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 -1 -2 0 0 0 0];
+dimensions      [0 0 0 0 0 0 0];
 
 internalField   uniform 0;
 
 boundaryField
 {
-    minX
-    {
-        type            zeroGradient;
-        value           uniform 0;
-    }
-    maxX
+    inlet
     {
         type            fixedValue;
-        value           uniform 0;
+        value           $internalField;
     }
-    minY
+
+    outlet1
     {
-        type            fixedFluxPressure;
-        value           uniform 0;
+        type            inletOutlet;
+        inletValue      $internalField;
     }
-    minZ
+
+    outlet2
     {
-        type            fixedFluxPressure;
-        value           uniform 0;
+        type            inletOutlet;
+        inletValue      $internalField;
     }
-    maxZ
+
+    defaultFaces
     {
-        type            fixedFluxPressure;
-        value           uniform 0;
-    }
-    bottomWater_to_rightSolid
-    {
-        type            fixedFluxPressure;
-        value           uniform 0;
-    }
-    bottomWater_to_leftSolid
-    {
-        type            fixedFluxPressure;
-        value           uniform 0;
-    }
-    bottomWater_to_heater
-    {
-        type            fixedFluxPressure;
-        value           uniform 0;
+        type            zeroGradient;
     }
 }
 

@@ -6,22 +6,22 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-baffleRegionName    baffle3DRegion;
+baffleRegion    baffle3DRegion;
 
-masterPatchName     baffle3DRegionMaster;
+masterPatch     baffle3DRegionMaster;
 
-slavePatchName      baffle3DRegionSlave;
+slavePatch      baffle3DRegionSlave;
 
-oneD                false;
+oneD            false;
 
-nLayers             50;
+nLayers         50;
 
-thickness           0.02;
+thickness       0.02;
 
-Kappa               0.01;
+Kappa           0.01;
 
-Cp                  15;
+Cp              15;
 
-rho                 80;
+rho             80;
 
 // ************************************************************************* //

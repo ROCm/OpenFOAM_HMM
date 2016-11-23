@@ -28,7 +28,7 @@ deltaT          0.001;
 
 writeControl    adjustableRunTime;
 
-writeInterval   10;
+writeInterval   20;
 
 purgeWrite      0;
 
@@ -44,11 +44,11 @@ timePrecision   6;
 
 graphFormat     raw;
 
-runTimeModifiable yes;
+runTimeModifiable no;
 
 adjustTimeStep  yes;
 
-maxCo           1.2;
+maxCo           2;
 
 maxDi           0.25;
 
@@ -61,7 +61,7 @@ functions
         type                surfaceFieldValue;
         libs                ("libfieldFunctionObjects.so");
         writeControl        timeStep;
-        writeInterval       20;
+        writeInterval       200;
         log                 true;
         writeFields         no;
         regionType          patch;
@@ -74,10 +74,10 @@ functions
     {
         type                patchProbes;
         libs                ("libsampling.so");
-        writeControl        writeTime;
-        writeInterval       20;
+        writeControl        timeStep;
+        writeInterval       200;
         log                 true;
-        patchName           region0_to_panelRegion_wallPanel;
+        patch               region0_to_panelRegion_wallPanel;
         probeLocations
         (
             (0.15 0.0 0.01)  // HF2
@@ -91,10 +91,10 @@ functions
     {
         type                patchProbes;
         libs                ("libsampling.so");
-        writeControl        writeTime;
-        writeInterval       20;
+        writeControl        timeStep;
+        writeInterval       200;
         log                 true;
-        patchName           inlet;
+        patch               inlet;
         probeLocations
         (
             ( 0.0  0.0  0.0 ) // HF1
@@ -154,8 +154,8 @@ functions
     {
         type                probes;
         libs                ("libsampling.so");
-        writeControl        writeTime;
-        writeInterval       30;
+        writeControl        timeStep;
+        writeInterval       200;
         probeLocations
         (
             (-0.1 0.02 0.0)    // Lower Gas

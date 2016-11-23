@@ -1,4 +1,7 @@
 #!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 restore0Dir
@@ -29,3 +32,5 @@ runApplication createPatch -region wallFilmRegion -overwrite
 
 paraFoam -touch
 paraFoam -touch -region wallFilmRegion
+
+#------------------------------------------------------------------------------
