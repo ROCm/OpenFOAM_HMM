@@ -370,24 +370,21 @@ void Foam::waveModel::correct(const scalar t)
         {
             const scalarField activeLevel(this->waterLevel());
 
-            if (patch_.size())
+            forAll(U_, facei)
             {
-                forAll(activeLevel, facei)
+                const label paddlei = faceToPaddle_[facei];
+
+                if (zMin_[facei] < activeLevel[paddlei])
                 {
-                    const label paddlei = faceToPaddle_[facei];
+                    scalar UCorr =
+                        (calculatedLevel[paddlei] - activeLevel[paddlei])
+                       *sqrt(mag(g_)/activeLevel[paddlei]);
 
-                    if (zMin_[facei] < activeLevel[paddlei])
-                    {
-                        scalar UCorr =
-                            (calculatedLevel[paddlei] - activeLevel[paddlei])
-                           *sqrt(mag(g_)/activeLevel[paddlei]);
-
-                        U_[facei].x() += UCorr;
-                    }
-                    else
-                    {
-                        U_[facei] = vector::zero;
-                    }
+                    U_[facei].x() += UCorr;
+                }
+                else
+                {
+                    U_[facei].x() = 0;
                 }
             }
         }
