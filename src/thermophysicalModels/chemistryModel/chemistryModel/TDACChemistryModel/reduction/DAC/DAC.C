@@ -37,11 +37,11 @@ Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::DAC
     chemistryReductionMethod<CompType, ThermoType>(dict, chemistry),
     searchInitSet_(this->coeffsDict_.subDict("initialSet").size()),
     zprime_(0),
-    nbCLarge_(3),
-    sC_(this->nSpecie_,0),
-    sH_(this->nSpecie_,0),
-    sO_(this->nSpecie_,0),
-    sN_(this->nSpecie_,0),
+    nbCLarge_(this->coeffsDict_.template lookupOrDefault<label>("nbCLarge", 3)),
+    sC_(this->nSpecie_, 0),
+    sH_(this->nSpecie_, 0),
+    sO_(this->nSpecie_, 0),
+    sN_(this->nSpecie_, 0),
     CO2Id_(-1),
     COId_(-1),
     HO2Id_(-1),
@@ -49,24 +49,39 @@ Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::DAC
     NOId_(-1),
     automaticSIS_
     (
-        this->coeffsDict_.lookupOrDefault<Switch>("automaticSIS", true)
+        this->coeffsDict_.template lookupOrDefault<Switch>
+        (
+            "automaticSIS",
+            true
+        )
     ),
     phiTol_
     (
-        this->coeffsDict_.lookupOrDefault<scalar>("phiTol", this->tolerance())
+        this->coeffsDict_.template lookupOrDefault<scalar>
+        (
+            "phiTol", this->tolerance()
+        )
     ),
     NOxThreshold_
     (
-        this->coeffsDict_.lookupOrDefault<scalar>("NOxThreshold", 1800)
+        this->coeffsDict_.template lookupOrDefault<scalar>
+        (
+            "NOxThreshold",
+            1800
+        )
     ),
-    CO2Name_(dict.subDict("reduction").lookupOrDefault<word>("CO2","CO2")),
-    COName_(dict.subDict("reduction").lookupOrDefault<word>("CO","CO")),
-    HO2Name_(dict.subDict("reduction").lookupOrDefault<word>("HO2","HO2")),
-    H2OName_(dict.subDict("reduction").lookupOrDefault<word>("H2O","H2O")),
-    NOName_(dict.subDict("reduction").lookupOrDefault<word>("NO","NO")),
+    CO2Name_(this->coeffsDict_.template lookupOrDefault<word>("CO2", "CO2")),
+    COName_(this->coeffsDict_.template lookupOrDefault<word>("CO", "CO")),
+    HO2Name_(this->coeffsDict_.template lookupOrDefault<word>("HO2", "HO2")),
+    H2OName_(this->coeffsDict_.template lookupOrDefault<word>("H2O", "H2O")),
+    NOName_(this->coeffsDict_.template lookupOrDefault<word>("NO", "NO")),
     forceFuelInclusion_
     (
-        this->coeffsDict_.lookupOrDefault<Switch>("forceFuelInclusion", false)
+        this->coeffsDict_.template lookupOrDefault<Switch>
+        (
+            "forceFuelInclusion",
+            false
+        )
     )
 {
     label j = 0;
@@ -121,7 +136,8 @@ Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::DAC
             }
             else
             {
-                Info<< "element not considered" <<endl;
+                Info<< "    element " << curElement.name() << " not considered"
+                    << endl;
             }
         }
         if (this->chemistry_.Y()[i].name() == CO2Name_)
@@ -180,10 +196,6 @@ Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::DAC
                 << exit(FatalError);
         }
 
-        if (this->coeffsDict_.found("nbCLarge"))
-        {
-            nbCLarge_ = readLabel(fuelDict.lookup("nbCLarge"));
-        }
 
         fuelSpeciesID_.setSize(fuelSpecies_.size());
         fuelSpeciesProp_.setSize(fuelSpecies_.size());
@@ -251,9 +263,9 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
     c1[this->nSpecie_+1] = p;
 
     // Compute the rAB matrix
-    RectangularMatrix<scalar> rABNum(this->nSpecie_, this->nSpecie_,0.0);
-    scalarField PA(this->nSpecie_,0.0);
-    scalarField CA(this->nSpecie_,0.0);
+    RectangularMatrix<scalar> rABNum(this->nSpecie_, this->nSpecie_, 0.0);
+    scalarField PA(this->nSpecie_, 0.0);
+    scalarField CA(this->nSpecie_, 0.0);
 
     // Number of initialized rAB for each lines
     Field<label> NbrABInit(this->nSpecie_,0);
@@ -372,7 +384,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
             // Disable for self reference (by definition rAA=0)
             deltaBi[ss] = false;
 
-            while(!usedIndex.empty())
+            while (!usedIndex.empty())
             {
                 label curIndex = usedIndex.pop();
                 if (deltaBi[curIndex])
@@ -583,7 +595,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
             }
         }
 
-        if (T>NOxThreshold_ && NOId_!=-1)
+        if (T > NOxThreshold_ && NOId_ != -1)
         {
             Q.push(NOId_);
             speciesNumber++;
