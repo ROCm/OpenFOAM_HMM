@@ -132,6 +132,13 @@ protected:
 
     // Protected Member Functions
 
+        //- Initialise dictionary
+        virtual IOdictionary initialiseDict
+        (
+            const fvMesh& mesh,
+            const word& patchName
+        );
+
         //- Initialise
         virtual void initialiseGeometry();
 

@@ -45,18 +45,44 @@ const Foam::word Foam::waveModel::dictName("waveProperties");
 
 Foam::word Foam::waveModel::modelName(const word& patchName)
 {
-    word name = dictName + '.' + patchName;
-
-    if (Pstream::parRun())
-    {
-        name += ".proc" + Foam::name(Pstream::myProcNo());
-    }
-
-    return name;
+    return dictName + '.' + patchName;
 }
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+Foam::IOdictionary Foam::waveModel::initialiseDict
+(
+    const fvMesh& mesh,
+    const word& patchName
+)
+{
+    IOobject io
+    (
+        modelName(patchName),
+        Time::timeName(mesh.time().startTime().value()),
+        "uniform",
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    );
+
+    const word oldTypeName = IOdictionary::typeName;
+
+    const_cast<word&>(IOdictionary::typeName) = word::null;
+
+    if (!io.typeHeaderOk<IOdictionary>(false))
+    {
+        io.readOpt() = IOobject::NO_READ;
+    }
+
+    IOdictionary dict(io);
+
+    const_cast<word&>(IOdictionary::typeName) = oldTypeName;
+
+    return dict;
+}
+
 
 void Foam::waveModel::initialiseGeometry()
 {
@@ -248,17 +274,7 @@ Foam::waveModel::waveModel
     const bool readFields
 )
 :
-    IOdictionary
-    (
-        IOobject
-        (
-            modelName(patch.name()),
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ
-        ),
-        dict
-    ),
+    IOdictionary(initialiseDict(mesh, patch.name())),
     mesh_(mesh),
     patch_(patch),
     g_(mesh.lookupObject<uniformDimensionedVectorField>("g").value()),
@@ -281,6 +297,8 @@ Foam::waveModel::waveModel
     U_(patch.size(), vector::zero),
     alpha_(patch.size(), 0)
 {
+    merge(dict);
+
     if (readFields)
     {
         read();
@@ -331,6 +349,9 @@ bool Foam::waveModel::read()
                 waterDepthRef_ = level.first();
             }
         }
+
+        // Insert the reference water depth into [this] to enable restart
+        add("waterDepthRef", waterDepthRef_);
     }
 
     return true;
