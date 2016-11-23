@@ -51,7 +51,7 @@
 #
 #------------------------------------------------------------------------------
 
-ParaView_VERSION=5.1.2
+ParaView_VERSION=5.2.0
 ParaView_MAJOR=detect                   # Automatically determine major version
 
 cmake_version=cmake-system
@@ -66,14 +66,11 @@ cleaned=$($WM_PROJECT_DIR/bin/foamCleanPath "$PATH" \
         ) \
         && PATH="$cleaned"
 
-# Environment for ThirdParty cmake
-unset CMAKE_HOME
+# ThirdParty cmake
 cmake=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cmake_version
-if [ -r $cmake ]
+if [ -r $cmake/bin/cmake ]
 then
-    export CMAKE_HOME=$cmake
-    export CMAKE_ROOT=$cmake
-    export PATH=$CMAKE_HOME/bin:$PATH
+    _foamAddPath $cmake/bin
 fi
 
 # Evaluate command-line parameters for ParaView
@@ -125,9 +122,9 @@ then
         pvLibDir=$ParaView_DIR/lib/$pvMajor
         pvPython=$ParaView_DIR/Utilities/VTKPythonWrapping
 
+        export PATH=$ParaView_DIR/bin:$PATH
         export ParaView_INCLUDE_DIR=$ParaView_DIR/include/$pvMajor
         export PV_PLUGIN_PATH=$FOAM_LIBBIN/$pvMajor
-        export PATH=$ParaView_DIR/bin:$PATH
         export LD_LIBRARY_PATH=$pvLibDir:$LD_LIBRARY_PATH
 
         # Add in python libraries if required
