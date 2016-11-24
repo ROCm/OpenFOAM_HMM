@@ -28,8 +28,6 @@ Description
 
 #include "cuttingPlane.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -38,7 +36,7 @@ Foam::tmp<Foam::Field<Type>> Foam::cuttingPlane::sample
     const Field<Type>& fld
 ) const
 {
-    return tmp<Field<Type>>(new Field<Type>(fld, cutCells()));
+    return tmp<Field<Type>>(new Field<Type>(fld, meshCells()));
 }
 
 
