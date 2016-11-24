@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
                     "decomposeParDict",
                     runTime.system(),
                     runTime,
-                    IOobject::MUST_READ_IF_MODIFIED,
+                    IOobject::MUST_READ,
                     IOobject::NO_WRITE
                 ),
                 decompDictFile
