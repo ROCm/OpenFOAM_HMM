@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,7 @@ License
 #include "boundBox.H"
 #include "SortableList.H"
 #include "PackedBoolList.H"
+#include "surfZoneList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -488,7 +489,8 @@ void Foam::triSurface::write
 
 // Returns patch info. Sets faceMap to the indexing according to patch
 // numbers. Patch numbers start at 0.
-Foam::surfacePatchList Foam::triSurface::calcPatches(labelList& faceMap) const
+Foam::surfacePatchList
+Foam::triSurface::calcPatches(labelList& faceMap) const
 {
     // Sort according to region numbers of labelledTri
     SortableList<label> sortedRegion(size());
@@ -533,30 +535,29 @@ Foam::surfacePatchList Foam::triSurface::calcPatches(labelList& faceMap) const
         surfacePatch& newPatch = newPatches[newPatchi];
 
         newPatch.index() = newPatchi;
-
-        label oldPatchi = newPatchi;
-
-        // start of patch
         newPatch.start() = startFacei;
 
-
         // Take over any information from existing patches
-        if ((oldPatchi < patches_.size()) && (patches_[oldPatchi].name() != ""))
+        if
+        (
+            newPatchi < patches_.size()
+         && !patches_[newPatchi].name().empty()
+        )
         {
-            newPatch.name() = patches_[oldPatchi].name();
+            newPatch.name() = patches_[newPatchi].name();
         }
         else
         {
-            newPatch.name() = word("patch") + name(newPatchi);
+            newPatch.name() = word("patch") + Foam::name(newPatchi);
         }
 
         if
         (
-            (oldPatchi < patches_.size())
-         && (patches_[oldPatchi].geometricType() != "")
+            newPatchi < patches_.size()
+         && !patches_[newPatchi].geometricType().empty()
         )
         {
-            newPatch.geometricType() = patches_[oldPatchi].geometricType();
+            newPatch.geometricType() = patches_[newPatchi].geometricType();
         }
         else
         {
@@ -826,6 +827,42 @@ void Foam::triSurface::cleanup(const bool verbose)
     checkTriangles(verbose);
 
     checkEdges(verbose);
+}
+
+
+Foam::List<Foam::surfZone>
+Foam::triSurface::sortedZones(labelList& faceMap) const
+{
+    surfacePatchList patches(calcPatches(faceMap));
+
+    surfZoneList zones(patches.size());
+    forAll(patches, patchi)
+    {
+        zones[patchi] = surfZone(patches[patchi]);
+    }
+
+    return zones;
+}
+
+
+void Foam::triSurface::triFaceFaces(List<face>& plainFaces) const
+{
+    plainFaces.setSize(size());
+
+    forAll(*this, facei)
+    {
+        plainFaces[facei] = operator[](facei).triFaceFace();
+    }
+}
+
+
+Foam::Xfer<Foam::List<Foam::point>>
+Foam::triSurface::xferPoints()
+{
+    // Topology changed because of transfer
+    clearOut();
+
+    return this->storedPoints().xfer();
 }
 
 
