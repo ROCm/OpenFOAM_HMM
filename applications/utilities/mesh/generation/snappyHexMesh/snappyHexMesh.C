@@ -901,33 +901,42 @@ int main(int argc, char *argv[])
 
     // Read decomposePar dictionary
     dictionary decomposeDict;
+    if (Pstream::parRun())
     {
-        if (Pstream::parRun())
-        {
-            fileName decompDictFile;
-            args.optionReadIfPresent("decomposeParDict", decompDictFile);
+        fileName decompDictFile;
+        args.optionReadIfPresent("decomposeParDict", decompDictFile);
 
-            decomposeDict = IOdictionary
+        // A demand-driven decompositionMethod can have issues finding
+        // an alternative decomposeParDict location.
+
+        IOdictionary* dictPtr = new IOdictionary
+        (
+            decompositionModel::selectIO
             (
-                decompositionModel::selectIO
+                IOobject
                 (
-                    IOobject
-                    (
-                        "decomposeParDict",
-                        runTime.system(),
-                        mesh,
-                        IOobject::MUST_READ,
-                        IOobject::NO_WRITE
-                    ),
-                    decompDictFile
-                )
-            );
-        }
-        else
-        {
-            decomposeDict.add("method", "none");
-            decomposeDict.add("numberOfSubdomains", 1);
-        }
+                    "decomposeParDict",
+                    runTime.system(),
+                    runTime,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                ),
+                decompDictFile
+            )
+        );
+
+        // Store it on the object registry, but to be found it must also
+        // have the expected "decomposeParDict" name.
+
+        dictPtr->rename("decomposeParDict");
+        runTime.store(dictPtr);
+
+        decomposeDict = *dictPtr;
+    }
+    else
+    {
+        decomposeDict.add("method", "none");
+        decomposeDict.add("numberOfSubdomains", 1);
     }
 
 

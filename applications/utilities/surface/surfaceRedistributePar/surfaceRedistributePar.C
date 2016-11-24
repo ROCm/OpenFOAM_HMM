@@ -161,7 +161,10 @@ int main(int argc, char *argv[])
         fileName decompDictFile;
         args.optionReadIfPresent("decomposeParDict", decompDictFile);
 
-        IOdictionary* dict = new IOdictionary
+        // A demand-driven decompositionMethod can have issues finding
+        // an alternative decomposeParDict location.
+
+        IOdictionary* dictPtr = new IOdictionary
         (
             decompositionModel::selectIO
             (
@@ -177,11 +180,11 @@ int main(int argc, char *argv[])
             )
         );
 
-        // The object must have the expected "decomposeParDict" name.
-        // This also implies that it cannot be changed during the run.
-        dict->rename("decomposeParDict");
+        // Store it on the object registry, but to be found it must also
+        // have the expected "decomposeParDict" name.
 
-        runTime.store(dict);
+        dictPtr->rename("decomposeParDict");
+        runTime.store(dictPtr);
     }
 
     // Determine mesh bounding boxes:
