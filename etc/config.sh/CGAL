@@ -49,8 +49,8 @@
 #         - the LD_LIBRARY_PATH is not adjusted.
 #------------------------------------------------------------------------------
 
-boost_version=boost_1_61_0
-cgal_version=CGAL-4.8
+boost_version=boost_1_62_0
+cgal_version=CGAL-4.9
 
 export BOOST_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost_version
 export CGAL_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cgal_version

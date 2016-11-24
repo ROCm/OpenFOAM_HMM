@@ -51,7 +51,7 @@
 #
 #------------------------------------------------------------------------------
 
-setenv ParaView_VERSION 5.1.2
+setenv ParaView_VERSION 5.2.0
 setenv ParaView_MAJOR detect            # Automatically determine major version
 
 set cmake_version=cmake-system
@@ -63,12 +63,10 @@ if ( ! $?ParaView_DIR ) setenv ParaView_DIR
 set cleaned=`$WM_PROJECT_DIR/bin/foamCleanPath "$PATH" "$ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/cmake- $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-"`
 if ( $status == 0 ) setenv PATH $cleaned
 
-# Environment for ThirdParty cmake
-unsetenv CMAKE_HOME
+# ThirdParty cmake
 set cmake=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cmake_version
-if ( -r $cmake ) then
-    setenv CMAKE_HOME $cmake
-    setenv PATH ${CMAKE_HOME}/bin:${PATH}
+if ( -r $cmake/bin/cmake ) then
+    _foamAddPath $cmake/bin
 endif
 
 # Evaluate command-line parameters for ParaView
@@ -112,9 +110,9 @@ if ( $?ParaView_VERSION ) then
         set pvLibDir=${ParaView_DIR}/lib/$pvMajor
         set pvPython=$ParaView_DIR/Utilities/VTKPythonWrapping
 
+        setenv PATH ${ParaView_DIR}/bin:${PATH}
         setenv ParaView_INCLUDE_DIR $ParaView_DIR/include/$pvMajor
         setenv PV_PLUGIN_PATH $FOAM_LIBBIN/$pvMajor
-        setenv PATH ${ParaView_DIR}/bin:${PATH}
         setenv LD_LIBRARY_PATH "${pvLibDir}:${LD_LIBRARY_PATH}"
 
         # Add in python libraries if required

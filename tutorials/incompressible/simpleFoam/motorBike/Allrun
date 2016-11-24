@@ -4,7 +4,10 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
+# Alternative decomposeParDict name:
 decompDict="-decomposeParDict system/decomposeParDict.6"
+## Standard decomposeParDict name:
+# unset decompDict
 
 # copy motorbike surface from resources directory
 \cp $FOAM_TUTORIALS/resources/geometry/motorBike.obj.gz constant/triSurface/
@@ -13,6 +16,14 @@ runApplication surfaceFeatureExtract
 runApplication blockMesh
 
 runApplication decomposePar $decompDict
+
+# Using distributedTriSurfaceMesh?
+if foamDictionary -entry geometry -value system/snappyHexMeshDict | \
+   grep -q distributedTriSurfaceMesh
+then
+    runParallel $decompDict surfaceRedistributePar motorBike.obj independent
+fi
+
 runParallel $decompDict snappyHexMesh -overwrite
 
 #- For non-parallel running: - set the initial fields
