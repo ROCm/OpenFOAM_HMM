@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,11 +50,14 @@ namespace Foam
 {
 
 // Forward declaration of classes
-class triSurface;
 class edge;
 class labelledTri;
 class polyBoundaryMesh;
 class plane;
+class triSurface;
+class face;
+template<class Face> class MeshedSurface;
+
 
 /*---------------------------------------------------------------------------*\
                            Class triSurfaceTools Declaration
@@ -514,6 +517,15 @@ public:
         //- Do unconstrained Delaunay of points. Returns triSurface with 3D
         //  points with z=0. All triangles in region 0.
         static triSurface delaunay2D(const List<vector2D>&);
+
+
+    // Surface checking functionality
+
+        //- Check single triangle for (topological) validity
+        static bool validTri(const triSurface&, const label facei);
+
+        //- Check single triangle for (topological) validity
+        static bool validTri(const MeshedSurface<face>&, const label facei);
 
 
     // Tracking
