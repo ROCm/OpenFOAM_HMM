@@ -43,14 +43,12 @@ addToRunTimeSelectionTable(noiseModel, pointNoise, dictionary);
 
 void pointNoise::filterTimeData
 (
-    const Function1Types::CSV<scalar>& pData,
+    const scalarField& t0,
+    const scalarField& p0,
     scalarField& t,
     scalarField& p
-)
+) const
 {
-    const scalarField t0(pData.x());
-    const scalarField p0(pData.y());
-
     DynamicList<scalar> tf(t0.size());
     DynamicList<scalar> pf(t0.size());
 
@@ -68,23 +66,15 @@ void pointNoise::filterTimeData
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void pointNoise::calculate()
+void pointNoise::processData(const Function1Types::CSV<scalar>& data)
 {
-    // Point data only handled by master
-    if (!Pstream::master())
-    {
-        return;
-    }
+    Info<< "Reading data file " << data.fName() << endl;
 
-    Info<< "Reading data file" << endl;
-
-    Function1Types::CSV<scalar> pData("pressure", dict_, "Data");
+    const fileName& fNameBase = data.fName()(true);
 
     // Time and pressure history data
     scalarField t, p;
-    filterTimeData(pData, t, p);
+    filterTimeData(data.x(), data.y(), t, p);
     p *= rhoRef_;
 
     Info<< "    read " << t.size() << " values" << nl << endl;
@@ -96,7 +86,7 @@ void pointNoise::calculate()
     windowModelPtr_->validate(t.size());
     const windowModel& win = windowModelPtr_();
     const scalar deltaf = 1.0/(deltaT*win.nSamples());
-    fileName outDir(fileName("postProcessing")/"noise"/typeName);
+    fileName outDir(fileName("postProcessing")/"noise"/typeName/fNameBase);
 
     // Create the fft
     noiseFFT nfft(deltaT, p);
@@ -185,18 +175,63 @@ void pointNoise::calculate()
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void pointNoise::calculate()
+{
+    // Point data only handled by master
+    if (!Pstream::master())
+    {
+        return;
+    }
+
+
+    if (inputFileNames_.size())
+    {
+        forAll(inputFileNames_, i)
+        {
+            const fileName fName = inputFileNames_[i].expand();
+            Function1Types::CSV<scalar> data("pressure", dict_, "Data", fName);
+            processData(data);
+        }
+    }
+    else
+    {
+        Function1Types::CSV<scalar> data("pressure", dict_, "Data");
+        processData(data);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-pointNoise::pointNoise(const dictionary& dict)
+pointNoise::pointNoise(const dictionary& dict, const bool readFields)
 :
     noiseModel(dict)
-{}
+{
+    if (readFields)
+    {
+        read(dict);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 pointNoise::~pointNoise()
 {}
+
+
+bool pointNoise::read(const dictionary& dict)
+{
+    if (noiseModel::read(dict))
+    {
+        dict.readIfPresent("inputFiles", inputFileNames_);
+        return true;
+    }
+
+    return false;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
