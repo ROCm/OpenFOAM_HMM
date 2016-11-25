@@ -79,7 +79,7 @@ Foam::vector Foam::waveModels::Boussinesq::Deta
     vector deta(vector::zero);
 
     scalar C = sqrt(mag(g_)*(H + h));
-    scalar ts = 3*h/sqrt(H/h);
+    scalar ts = 3.5*h/sqrt(H/h);
     scalar a = sqrt(3*H/(4*h))/h;
     scalar Xa = -C*t + ts - X0 + x*cos(theta) + y*sin(theta);
     scalar expTerm = exp(2*a*Xa);
