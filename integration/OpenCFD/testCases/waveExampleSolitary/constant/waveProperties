@@ -1,8 +1,8 @@
-/*--------------------------------*- C++ -*----------------------------------*\
+/*---------------------------------------------------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  plus                                  |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      http://www.openfoam.com               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,20 +10,36 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      decomposeParDict;
+    location    "constant";
+    object      wavesProperties;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains 2;
-
-method          hierarchical;
-
-hierarchicalCoeffs
+inlet
 {
-    n           (2 1 1);
-    delta       0.001;
-    order       xyz;
+    alpha           alpha.water;
+
+    waveModel       Boussinesq;
+
+    nPaddle         1;
+
+    waveHeight      0.3;
+
+    waveAngle       0.0;
+
+    activeAbsorption yes;
+
+    wavePeriod      0.0;
 }
+
+outlet
+{
+    alpha           alpha.water;
+
+    waveModel       shallowWaterAbsorption;
+
+    nPaddle         1;
+}
+
 
 // ************************************************************************* //

@@ -21,7 +21,7 @@ solvers
     "alpha.water.*"
     {
         nAlphaCorr      1;
-        nAlphaSubCycles 2;
+        nAlphaSubCycles 3;
         alphaOuterCorrectors yes;
         cAlpha          1;
 
@@ -47,41 +47,32 @@ solvers
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-6;
-        relTol          0;
+        relTol          0.1;
     }
 
     p_rghFinal
     {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-6;
+        solver          GAMG;
+        smoother        GaussSeidel;
+        nPreSweeps      0;
+        nPostSweeps     2;
+        cacheAgglomeration on;
+        agglomerator    faceAreaPair;
+        nCellsInCoarsestLevel 10;
+        mergeLevels     1;
+        tolerance       1e-7;
         relTol          0;
     }
 
-    "(U|k|epsilon|omega)"
+    U
     {
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-6;
-        relTol          0;
+        relTol          0.1;
     }
 
-    "(U|k|epsilon|omega)Final"
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-6;
-        relTol          0;
-    }
-    R
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-6;
-        relTol          0;
-    }
-
-    nuTilda
+    UFinal
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -93,7 +84,7 @@ solvers
 PIMPLE
 {
     momentumPredictor no;
-    nCorrectors     3;
+    nCorrectors     2;
     nNonOrthogonalCorrectors 0;
 }
 

@@ -2,28 +2,51 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  plus                                  |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.com               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      decomposeParDict;
+    class       volScalarField;
+    object      alpha.water;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains 2;
+dimensions      [0 0 0 0 0 0 0];
 
-method          hierarchical;
+internalField   uniform 0;
 
-hierarchicalCoeffs
+boundaryField
 {
-    n           (2 1 1);
-    delta       0.001;
-    order       xyz;
+    inlet
+    {
+        type            waveInletAlpha;
+        value           uniform 0;
+    }
+
+    outlet
+    {
+        type            zeroGradient;
+    }
+
+    ground
+    {
+        type            zeroGradient;
+    }
+
+    sides
+    {
+	    type            empty;
+    }
+
+    top
+    {
+        type            inletOutlet;
+        inletValue      uniform 0;
+        value           uniform 0;
+    }
 }
 
 // ************************************************************************* //

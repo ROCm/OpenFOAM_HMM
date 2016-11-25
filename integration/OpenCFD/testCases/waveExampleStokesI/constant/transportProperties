@@ -1,8 +1,8 @@
-/*--------------------------------*- C++ -*----------------------------------*\
+/*---------------------------------------------------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  plus                                  |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.com               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,20 +10,28 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      decomposeParDict;
+    location    "constant";
+    object      transportProperties;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains 2;
+phases (water air);
 
-method          hierarchical;
-
-hierarchicalCoeffs
+water
 {
-    n           (2 1 1);
-    delta       0.001;
-    order       xyz;
+    transportModel  Newtonian;
+    nu              [0 2 -1 0 0 0 0] 1e-06;
+    rho             [1 -3 0 0 0 0 0] 1000;
 }
+
+air
+{
+    transportModel  Newtonian;
+    nu              [0 2 -1 0 0 0 0] 1.48e-05;
+    rho             [1 -3 0 0 0 0 0] 1;
+}
+
+sigma           [1 0 -2 0 0 0 0] 0.07;
+
 
 // ************************************************************************* //
