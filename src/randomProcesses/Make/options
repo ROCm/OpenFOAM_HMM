@@ -5,6 +5,8 @@ EXE_INC = \
     -I$(LIB_SRC)/surfMesh/lnInclude
 
 LIB_LIBS = \
-    -L$(FFTW_ARCH_PATH)/lib$(WM_COMPILER_LIB_ARCH) -lfftw3 \
+    -L$(FFTW_ARCH_PATH)/lib \
+    -L$(FFTW_ARCH_PATH)/lib$(WM_COMPILER_LIB_ARCH) \
+    -lfftw3 \
     -lfiniteVolume \
     -lsampling
