@@ -41,13 +41,20 @@ namespace waveModels
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class waveAbsorptionModel Declaration
+                     Class waveAbsorptionModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class waveAbsorptionModel
 :
     public waveModel
 {
+protected:
+
+    // Protected Member Functions
+
+        //- Return the time scaling coefficient
+        virtual scalar timeCoeff(const scalar t) const;
+
 
 public:
 

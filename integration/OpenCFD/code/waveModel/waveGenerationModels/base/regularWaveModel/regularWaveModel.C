@@ -41,6 +41,15 @@ namespace waveModels
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+Foam::scalar Foam::waveModels::regularWaveModel::timeCoeff
+(
+    const scalar t
+) const
+{
+    return max(0, min(t/rampTime_, 1));
+}
+
+
 Foam::word Foam::waveModels::regularWaveModel::waveType() const
 {
     scalar waveK = 2.0*mathematical::pi/waveLength_;
@@ -70,6 +79,7 @@ Foam::waveModels::regularWaveModel::regularWaveModel
 )
 :
     waveGenerationModel(dict, mesh, patch, false),
+    rampTime_(VSMALL),
     wavePeriod_(0),
     waveLength_(0),
     wavePhase_(1.5*mathematical::pi)
@@ -93,6 +103,8 @@ bool Foam::waveModels::regularWaveModel::read(const dictionary& overrideDict)
 {
     if (waveGenerationModel::read(overrideDict))
     {
+        lookup("rampTime") >> rampTime_;
+
         lookup("wavePeriod") >> wavePeriod_;
         if (wavePeriod_ < 0)
         {
@@ -117,7 +129,8 @@ void Foam::waveModels::regularWaveModel::info(Ostream& os) const
 {
     waveGenerationModel::info(os);
 
-    os  << "    Wave period : " << wavePeriod_ << nl
+    os  << "    Ramp time : " << rampTime_ << nl
+        << "    Wave period : " << wavePeriod_ << nl
         << "    Wave length : " << waveLength_ << nl
         << "    Wave phase : " << wavePhase_ << nl;
 }

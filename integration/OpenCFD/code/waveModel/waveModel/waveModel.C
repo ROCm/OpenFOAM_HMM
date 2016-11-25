@@ -269,7 +269,6 @@ Foam::waveModel::waveModel
     zMax_(),
     waterDepthRef_(0),
     initialDepth_(0),
-    rampTime_(VSMALL),
     currTimeIndex_(-1),
     activeAbsorption_(false),
     U_(patch.size(), vector::zero),
@@ -350,7 +349,7 @@ void Foam::waveModel::correct(const scalar t)
             << patch_.name() << endl;
 
         // Time ramp weight
-        const scalar tCoeff = max(0, min(t/rampTime_, 1));
+        const scalar tCoeff = timeCoeff(t);
 
         // Reset the velocity and phase fraction fields
         U_ = vector::zero;

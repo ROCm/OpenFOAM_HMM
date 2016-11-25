@@ -111,9 +111,6 @@ protected:
         //- Initial depth / [m]
         scalar initialDepth_;
 
-        //- Ramp time
-        scalar rampTime_;
-
         //- Time index used for updating
         label currTimeIndex_;
 
@@ -137,6 +134,9 @@ protected:
 
         //- Water level
         virtual tmp<scalarField> waterLevel() const;
+
+        //- Return the time scaling coefficient
+        virtual scalar timeCoeff(const scalar t) const = 0;
 
         //- Set the water level
         virtual void setLevel

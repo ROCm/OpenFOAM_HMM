@@ -61,6 +61,9 @@ protected:
 
     // Protected data
 
+        //- Ramp time
+        scalar rampTime_;
+
         //- Wave period
         scalar wavePeriod_;
 
@@ -73,8 +76,11 @@ protected:
 
     // Protected Member Functions
 
+        //- Return the time scaling coefficient
+        virtual scalar timeCoeff(const scalar t) const;
+
         //- Return word description of wave type
-        word waveType() const;
+        virtual word waveType() const;
 
 
 public:

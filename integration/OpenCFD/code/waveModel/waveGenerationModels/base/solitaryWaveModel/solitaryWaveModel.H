@@ -59,6 +59,12 @@ protected:
         const scalar x0_;
 
 
+    // Protected Member Functions
+
+        //- Return the time scaling coefficient
+        virtual scalar timeCoeff(const scalar t) const;
+
+
 public:
 
     //- Runtime type information

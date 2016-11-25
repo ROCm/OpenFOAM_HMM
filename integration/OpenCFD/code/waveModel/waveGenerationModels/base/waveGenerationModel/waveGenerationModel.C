@@ -72,7 +72,6 @@ bool Foam::waveModels::waveGenerationModel::read(const dictionary& overrideDict)
 {
     if (waveModel::read(overrideDict))
     {
-        lookup("rampTime") >> rampTime_;
         lookup("activeAbsorption") >> activeAbsorption_;
 
         lookup("waveHeight") >> waveHeight_;
@@ -98,8 +97,7 @@ void Foam::waveModels::waveGenerationModel::info(Ostream& os) const
 {
     waveModel::info(os);
 
-    os  << "    Ramp time : " << rampTime_ << nl
-        << "    Wave height : " << waveHeight_ << nl
+    os  << "    Wave height : " << waveHeight_ << nl
         << "    Wave angle  : " << 180/mathematical::pi*waveAngle_ << nl;
 }
 

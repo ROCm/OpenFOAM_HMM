@@ -36,6 +36,18 @@ namespace waveModels
 }
 
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+Foam::scalar Foam::waveModels::waveAbsorptionModel::timeCoeff
+(
+    const scalar t
+) const
+{
+    // No time ramping applied applied for absorption
+    return 1;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::waveModels::waveAbsorptionModel::waveAbsorptionModel

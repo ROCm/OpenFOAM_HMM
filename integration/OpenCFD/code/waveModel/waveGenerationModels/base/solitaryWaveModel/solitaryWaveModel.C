@@ -27,12 +27,26 @@ License
 #include "polyPatch.H"
 #include "SubField.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
 namespace Foam
 {
 namespace waveModels
 {
     defineTypeNameAndDebug(solitaryWaveModel, 0);
 }
+}
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+Foam::scalar Foam::waveModels::solitaryWaveModel::timeCoeff
+(
+    const scalar t
+) const
+{
+    // Ramping not applicable to solitary waves
+    return 1;
 }
 
 
