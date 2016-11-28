@@ -5,7 +5,9 @@ EXE_INC = \
     -I$(LIB_SRC)/renumber/renumberMethods/lnInclude
 
 LIB_LIBS = \
-    -L$(BOOST_ARCH_PATH)/lib$(WM_COMPILER_LIB_ARCH) -lboost_system \
+    -L$(BOOST_ARCH_PATH)/lib \
+    -L$(BOOST_ARCH_PATH)/lib$(WM_COMPILER_LIB_ARCH) \
+    -lboost_system \
     -lmeshTools \
     -ldecompositionMethods \
     -lrenumberMethods

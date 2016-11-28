@@ -22,7 +22,7 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     etc/config.sh/FFTW
+#     etc/config.csh/FFTW
 #
 # Description
 #     Setup file for FFTW include/libraries.
@@ -48,7 +48,7 @@
 #
 #------------------------------------------------------------------------------
 
-set fftw_version=fftw-3.3.4
+set fftw_version=fftw-3.3.5
 
 setenv FFTW_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$fftw_version
 

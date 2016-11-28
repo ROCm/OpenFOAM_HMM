@@ -54,7 +54,7 @@ SYSTEMOPENMPI)
     ;;
 
 OPENMPI)
-    export FOAM_MPI=openmpi-1.10.2
+    export FOAM_MPI=openmpi-1.10.4
     # Optional configuration tweaks:
     _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/openmpi`
 

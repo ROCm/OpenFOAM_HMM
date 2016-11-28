@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -115,7 +115,6 @@ fi
 # Unset Ensight/ParaView-related environment variables
 
 unset ENSIGHT9_READER
-unset CMAKE_HOME
 unset ParaView_DIR
 unset ParaView_INCLUDE_DIR
 unset ParaView_MAJOR
@@ -125,12 +124,15 @@ unset PV_PLUGIN_PATH
 #------------------------------------------------------------------------------
 # unset other ThirdParty environment variables
 
+unset ADIOS_ARCH_PATH
 unset BOOST_ARCH_PATH
 unset CCMIO_ARCH_PATH
 unset CGAL_ARCH_PATH
 unset FFTW_ARCH_PATH
+unset GPERFTOOLS_ARCH_PATH
 unset GMP_ARCH_PATH
 unset MPFR_ARCH_PATH
+unset METIS_ARCH_PATH
 unset SCOTCH_ARCH_PATH
 
 #------------------------------------------------------------------------------
