@@ -112,7 +112,6 @@ Foam::functionObjects::ddt2::ddt2
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    prevTimeIndex_(-1),
     selectFields_(),
     resultName_(word::null),
     blacklist_(),
@@ -218,20 +217,12 @@ bool Foam::functionObjects::ddt2::execute()
             << "Unprocessed field " << ignored << endl;
     }
 
-    // Update time index
-    prevTimeIndex_ = obr_.time().timeIndex();
-
     return true;
 }
 
 
 bool Foam::functionObjects::ddt2::write()
 {
-    if (prevTimeIndex_ < obr_.time().timeIndex())
-    {
-        // Ensure written results reflect the current state
-        execute();
-    }
     if (results_.size())
     {
         Log << type() << ' ' << name() << " write:" << endl;
