@@ -41,12 +41,12 @@
 #     If using a central installation not located under ThirdParty, you will
 #     need to set some environment values directly. For example,
 #
-#         export ParaView_DIR=/opt/paraview/paraview-5.2.0
-#         export ParaView_INCLUDE_DIR=$ParaView_DIR/include/paraview-5.2
-#         export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview-5.2
+#         export ParaView_DIR=/opt/paraview/paraview-5.0.1
+#         export ParaView_INCLUDE_DIR=$ParaView_DIR/include/paraview-5.0
+#         export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview-5.0
 #
 #         export PATH=$ParaView_DIR/bin:$PATH
-#         export LD_LIBRARY_PATH=$ParaView_DIR/lib/paraview-5.2:$LD_LIBRARY_PATH
+#         export LD_LIBRARY_PATH=$ParaView_DIR/lib/paraview-5.0:$LD_LIBRARY_PATH
 #         unset ParaView_VERSION        # avoid using ThirdParty settings
 #
 # Note
@@ -54,7 +54,7 @@
 #         - the ParaView_VERSION variable is retained.
 #------------------------------------------------------------------------------
 
-ParaView_VERSION=5.2.0
+ParaView_VERSION=5.0.1
 ParaView_MAJOR=detect                   # Automatically determine major version
 
 cmake_version=cmake-system
