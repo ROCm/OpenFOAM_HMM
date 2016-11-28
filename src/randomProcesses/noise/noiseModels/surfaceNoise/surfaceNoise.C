@@ -427,7 +427,16 @@ bool surfaceNoise::read(const dictionary& dict)
 {
     if (noiseModel::read(dict))
     {
-        dict.lookup("inputFiles") >> inputFileNames_;
+        if (dict.found("inputFile"))
+        {
+            inputFileNames_.setSize(1);
+            dict.lookup("inputFile") >> inputFileNames_[0];
+        }
+        else
+        {
+            dict.lookup("inputFiles") >> inputFileNames_;
+        }
+
         dict.readIfPresent("fftWriteInterval", fftWriteInterval_);
         dict.readIfPresent("p", pName_);
 
