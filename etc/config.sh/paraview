@@ -49,6 +49,9 @@
 #         export LD_LIBRARY_PATH=$ParaView_DIR/lib/paraview-5.2:$LD_LIBRARY_PATH
 #         unset ParaView_VERSION        # avoid using ThirdParty settings
 #
+# Note
+#     When _foamAddLib is unset (eg, called from makeParaView or from foamPV):
+#         - the ParaView_VERSION variable is retained.
 #------------------------------------------------------------------------------
 
 ParaView_VERSION=5.2.0
@@ -70,7 +73,8 @@ cleaned=$($WM_PROJECT_DIR/bin/foamCleanPath "$PATH" \
 cmake=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cmake_version
 if [ -r $cmake/bin/cmake ]
 then
-    _foamAddPath $cmake/bin
+    # _foamAddPath not available when foamPV function is used
+    PATH=$cmake/bin:$PATH
 fi
 
 # Evaluate command-line parameters for ParaView
@@ -112,12 +116,11 @@ then
 
     pvName=ParaView-$ParaView_VERSION
     pvMajor=paraview-$ParaView_MAJOR
-    pvSrcDir=$WM_THIRD_PARTY_DIR/$pvName
 
     export ParaView_DIR=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$pvName
 
     # Set paths if binaries or source are present
-    if [ -r $ParaView_DIR -o -r $pvSrcDir ]
+    if [ -r $ParaView_DIR ]
     then
         pvLibDir=$ParaView_DIR/lib/$pvMajor
         pvPython=$ParaView_DIR/Utilities/VTKPythonWrapping
@@ -147,13 +150,24 @@ then
             echo "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH"
         fi
     else
+        if [ "$FOAM_VERBOSE" -a "$PS1" ]
+        then
+            echo "No paraview found"
+            echo "    ParaView_DIR         : $ParaView_DIR"
+        fi
+
         unset ParaView_DIR ParaView_INCLUDE_DIR PV_PLUGIN_PATH
     fi
 
 fi
 
 unset -f _foamParaviewEval
-unset cleaned cmake cmake_version pvName pvMajor pvSrcDir pvLibDir pvPython
-unset ParaView_VERSION ParaView_MAJOR
+unset cleaned cmake cmake_version pvName pvMajor pvLibDir pvPython
+unset ParaView_MAJOR
+
+if type _foamAddLib > /dev/null 2>&1    # normal sourcing
+then
+    unset ParaView_VERSION
+fi
 
 #------------------------------------------------------------------------------
