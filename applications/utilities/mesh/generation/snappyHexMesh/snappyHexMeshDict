@@ -431,7 +431,11 @@ snapControls
         // (wip) Optional for explicit feature snapping:
         //- Detect baffle edges. Default is true.
         //detectBaffles false;
-        //- Erase attraction close to feature point. Default is false.
+        //- On any faces where points are on multiple regions (see
+        //  multiRegionFeatureSnap) have the other points follow these points
+        //  instead of having their own independent movement, i.e. have snapping
+        //  to multi-region edges/points take priority. This might aid snapping
+        //  to sharp edges that are also region edges. The default is false.
         //releasePoints true;
         //- Walk along feature edges, adding missing ones. Default is true.
         //stringFeatures false;
