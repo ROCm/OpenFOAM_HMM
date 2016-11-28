@@ -76,8 +76,8 @@ SeeAlso
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointNoise_H
-#define pointNoise_H
+#ifndef noiseModels_pointNoise_H
+#define noiseModels_pointNoise_H
 
 #include "noiseModel.H"
 #include "CSV.H"
@@ -100,14 +100,24 @@ class pointNoise
 
 protected:
 
+    // Protected data
+
+        //- Input file names - optional
+        List<fileName> inputFileNames_;
+
+
     // Protected Member Functions
 
         void filterTimeData
         (
-            const Function1Types::CSV<scalar>& pData,
+            const scalarField& t0,
+            const scalarField& p0,
             scalarField& t,
             scalarField& p
-        );
+        ) const;
+
+        //- Process the CSV data
+        void processData(const Function1Types::CSV<scalar>& data);
 
 
 public:
@@ -116,13 +126,16 @@ public:
     TypeName("pointNoise");
 
     //- Constructor
-    pointNoise(const dictionary& dict);
+    pointNoise(const dictionary& dict, const bool readFields = true);
 
     //- Destructor
     virtual ~pointNoise();
 
 
     // Public Member Functions
+
+        //- Read from dictionary
+        virtual bool read(const dictionary& dict);
 
         //- Calculate
         virtual void calculate();

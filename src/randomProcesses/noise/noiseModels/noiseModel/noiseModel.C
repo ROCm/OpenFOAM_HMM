@@ -94,17 +94,41 @@ Foam::label Foam::noiseModel::findStartTimeIndex
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::noiseModel::noiseModel(const dictionary& dict)
+Foam::noiseModel::noiseModel(const dictionary& dict, const bool readFields)
 :
     dict_(dict),
-    rhoRef_(dict.lookupOrDefault<scalar>("rhoRef", 1)),
-    nSamples_(dict.lookupOrDefault<label>("N", 65536)),
-    fLower_(dict.lookupOrDefault<scalar>("fl", 25)),
-    fUpper_(dict.lookupOrDefault<scalar>("fu", 10000)),
-    startTime_(dict.lookupOrDefault<scalar>("startTime", 0)),
-    windowModelPtr_(windowModel::New(dict, nSamples_)),
-    graphFormat_(dict.lookupOrDefault<word>("graphFormat", "raw"))
+    rhoRef_(1),
+    nSamples_(65536),
+    fLower_(25),
+    fUpper_(10000),
+    startTime_(0),
+    windowModelPtr_(),
+    graphFormat_("raw")
 {
+    if (readFields)
+    {
+        read(dict);
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::noiseModel::~noiseModel()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::noiseModel::read(const dictionary& dict)
+{
+    dict.readIfPresent("rhoRef", rhoRef_);
+    dict.readIfPresent("N", nSamples_);
+    dict.readIfPresent("fl", fLower_);
+    dict.readIfPresent("fu", fUpper_);
+    dict.readIfPresent("startTime", startTime_);
+    dict.readIfPresent("graphFormat", graphFormat_);
+
     // Check number of samples  - must be a power of 2 for our FFT
     bool powerOf2 = ((nSamples_ != 0) && !(nSamples_ & (nSamples_ - 1)));
     if (!powerOf2)
@@ -139,13 +163,11 @@ Foam::noiseModel::noiseModel(const dictionary& dict)
             << exit(FatalIOError);
 
     }
+
+    windowModelPtr_ = windowModel::New(dict, nSamples_);
+
+    return true;
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::noiseModel::~noiseModel()
-{}
 
 
 // ************************************************************************* //

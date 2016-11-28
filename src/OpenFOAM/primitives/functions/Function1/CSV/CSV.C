@@ -204,7 +204,8 @@ Foam::Function1Types::CSV<Type>::CSV
 (
     const word& entryName,
     const dictionary& dict,
-    const word& ext
+    const word& ext,
+    const fileName& fName
 )
 :
     TableBase<Type>(entryName, dict.subDict(entryName + ext)),
@@ -214,7 +215,7 @@ Foam::Function1Types::CSV<Type>::CSV
     componentColumns_(coeffs_.lookup("componentColumns")),
     separator_(coeffs_.lookupOrDefault<string>("separator", string(","))[0]),
     mergeSeparators_(readBool(coeffs_.lookup("mergeSeparators"))),
-    fName_(coeffs_.lookup("fileName"))
+    fName_(fName != fileName::null ? fName : coeffs_.lookup("fileName"))
 {
     if (componentColumns_.size() != pTraits<Type>::nComponents)
     {
