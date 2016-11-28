@@ -49,6 +49,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+class vtkActor;
 class vtkRenderer;
 class vtkRenderWindow;
 
@@ -58,22 +59,12 @@ namespace functionObjects
 {
 namespace runTimePostPro
 {
-
 /*---------------------------------------------------------------------------*\
                            Class scene Declaration
 \*---------------------------------------------------------------------------*/
 
 class scene
 {
-public:
-
-    enum modeType{mtStatic, mtFlightPath};
-
-    NamedEnum<modeType, 2> modeTypeNames_;
-
-
-private:
-
     // Private data
 
         //- Reference to the object registry
@@ -88,7 +79,7 @@ private:
         //- Read camera properties
         void readCamera(const dictionary& dict);
 
-        //- Read solour properties
+        //- Read colour properties
         void readColours(const dictionary& dict);
 
         //- Disallow default bitwise copy construct
@@ -108,9 +99,6 @@ protected:
 
         // Camera settings
 
-            //- Mode
-            modeType mode_;
-
             //- Position
             autoPtr<Function1<point>> cameraPosition_;
 
@@ -123,11 +111,19 @@ protected:
             //- View angle
             autoPtr<Function1<scalar>> cameraViewAngle_;
 
+            //- Zoom: 1 = do nothing, >1 = zoom in, <1 = zoom out
+            //  - perspective mode: reduces view angle
+            //  - parallel mode: manipulate parallel scale
+            autoPtr<Function1<scalar>> cameraZoom_;
+
 
         // Scene management
 
             //- Clipping box
             boundBox clipBox_;
+
+            //- Clipping box actor
+            vtkSmartPointer<vtkActor> clipBoxActor_;
 
             //- Parallel projection flag
             bool parallelProjection_;
