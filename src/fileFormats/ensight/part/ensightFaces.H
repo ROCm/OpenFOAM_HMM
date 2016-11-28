@@ -132,83 +132,82 @@ public:
 
     // Member Functions
 
-    // Access
+        // Access
 
-        //- The index in a list.
-        inline label index() const;
+            //- The index in a list.
+            inline label index() const;
 
-        //- The index in a list, non-const access.
-        inline label& index();
+            //- The index in a list, non-const access.
+            inline label& index();
 
-        //- The processor local size of all elements.
-        inline label size() const;
+            //- The processor local size of all elements.
+            inline label size() const;
 
-        //- The global number of the specified element type.
-        //  This value is only meaningful after a reduce operation.
-        inline label total(const enum elemType) const;
+            //- The global number of the specified element type.
+            //  This value is only meaningful after a reduce operation.
+            inline label total(const enum elemType) const;
 
-        //- The global number of all element types.
-        //  This value is only meaningful after a reduce operation.
-        label total() const;
-
-
-        //- The processor local sizes per element type.
-        FixedList<label, 3> sizes() const;
-
-        //- The global numbers per element type.
-        //  This value is only meaningful after a reduce operation.
-        const FixedList<label, 3>& totals() const;
+            //- The global number of all element types.
+            //  This value is only meaningful after a reduce operation.
+            label total() const;
 
 
-        //- Return the (local) face ids of the specified element type
-        inline const labelUList& faceIds(const enum elemType) const;
+            //- The processor local sizes per element type.
+            FixedList<label, 3> sizes() const;
 
-        //- Return the face ids of all elements
-        inline const labelUList& faceIds() const;
-
-        //- Return the flip-map of all elements
-        inline const boolList& flipMap() const;
+            //- The global numbers per element type.
+            //  This value is only meaningful after a reduce operation.
+            const FixedList<label, 3>& totals() const;
 
 
-        //- Starting offset of element type.
-        label offset(const enum elemType what) const;
+            //- Return the (local) face ids of the specified element type
+            inline const labelUList& faceIds(const enum elemType) const;
+
+            //- Return the face ids of all elements
+            inline const labelUList& faceIds() const;
+
+            //- Return the flip-map of all elements
+            inline const boolList& flipMap() const;
 
 
-    // Edit
-
-        //- Classify the face types, set element list.
-        void classify(const faceList& faces);
+            //- Starting offset of element type.
+            label offset(const enum elemType what) const;
 
 
-        //- Classify the face types, set element list.
-        //  The indirect addressing can be used when classifying groups of
-        //  face (eg, from a faceZone etc) with an optional flipMap.
-        //  The optional exclude marker can be used to skip faces on particular
-        //  boundary types or regions.
-        void classify
-        (
-            const faceList& faces,
-            const labelUList& addressing,
-            const boolList& flipMap = boolList(),
-            const PackedBoolList& exclude = PackedBoolList()
-        );
+        // Edit
+
+            //- Classify the face types, set element list.
+            void classify(const faceList& faces);
 
 
-        //- Set addressable sizes to zero, free up addressing memory.
-        void clear();
+            //- Classify the face types, set element list.
+            //  The indirect addressing can be used when classifying groups of
+            //  face (eg, from a faceZone etc) with an optional flipMap.
+            //  The optional exclude marker can be used to skip faces on particular
+            //  boundary types or regions.
+            void classify
+            (
+                const faceList& faces,
+                const labelUList& addressing,
+                const boolList& flipMap = boolList(),
+                const PackedBoolList& exclude = PackedBoolList()
+            );
 
-        //- Sum element counts across all processes.
-        void reduce();
 
-        //- Sort element lists numerically.
-        void sort();
+            //- Set addressable sizes to zero, free up addressing memory.
+            void clear();
+
+            //- Sum element counts across all processes.
+            void reduce();
+
+            //- Sort element lists numerically.
+            void sort();
 
 
     // Member operators
 
         //- Return element from linear-list.
         inline label operator[](const label i) const;
-
 };
 
 
