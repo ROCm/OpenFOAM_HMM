@@ -76,8 +76,6 @@ template<class T> class IndirectList;
 template<class T> class UIndirectList;
 template<class T> class BiIndirectList;
 
-typedef UList<label> unallocLabelList;
-
 /*---------------------------------------------------------------------------*\
                            Class List Declaration
 \*---------------------------------------------------------------------------*/

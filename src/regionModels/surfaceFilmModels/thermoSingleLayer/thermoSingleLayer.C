@@ -789,7 +789,7 @@ tmp<volScalarField::Internal> thermoSingleLayer::Srho() const
         toPrimary(filmPatchi, patchMass);
 
         const label primaryPatchi = primaryPatchIDs()[i];
-        const unallocLabelList& cells =
+        const labelUList& cells =
             primaryMesh().boundaryMesh()[primaryPatchi].faceCells();
 
         forAll(patchMass, j)
@@ -843,7 +843,7 @@ tmp<volScalarField::Internal> thermoSingleLayer::Srho
             toPrimary(filmPatchi, patchMass);
 
             const label primaryPatchi = primaryPatchIDs()[i];
-            const unallocLabelList& cells =
+            const labelUList& cells =
                 primaryMesh().boundaryMesh()[primaryPatchi].faceCells();
 
             forAll(patchMass, j)
@@ -893,7 +893,7 @@ tmp<volScalarField::Internal> thermoSingleLayer::Sh() const
         toPrimary(filmPatchi, patchEnergy);
 
         const label primaryPatchi = primaryPatchIDs()[i];
-        const unallocLabelList& cells =
+        const labelUList& cells =
             primaryMesh().boundaryMesh()[primaryPatchi].faceCells();
 
         forAll(patchEnergy, j)
