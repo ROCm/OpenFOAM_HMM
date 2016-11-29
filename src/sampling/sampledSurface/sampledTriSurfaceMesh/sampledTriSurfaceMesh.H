@@ -62,6 +62,7 @@ Description
 
 SourceFiles
     sampledTriSurfaceMesh.C
+    sampledTriSurfaceMeshTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -71,6 +72,7 @@ SourceFiles
 #include "sampledSurface.H"
 #include "triSurfaceMesh.H"
 #include "MeshedSurface.H"
+#include "MeshedSurfacesFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -87,7 +89,7 @@ class meshSearch;
 class sampledTriSurfaceMesh
 :
     public sampledSurface,
-    public UnsortedMeshedSurface<face>
+    public meshedSurface
 {
 public:
         //- Types of communications
@@ -95,13 +97,13 @@ public:
         {
             cells,
             insideCells,
-            boundaryFaces,
+            boundaryFaces
         };
 
 private:
 
     //- Private typedefs for convenience
-        typedef UnsortedMeshedSurface<face> MeshStorage;
+        typedef meshedSurface MeshStorage;
 
 
     // Private data
@@ -126,6 +128,9 @@ private:
 
         //- Search tree for all non-coupled boundary faces
         mutable autoPtr<indexedOctree<treeDataFace>> boundaryTreePtr_;
+
+        //- For compatibility with the meshSurf interface
+        labelList zoneIds_;
 
         //- From local surface triangle to mesh cell/face.
         labelList sampleElements_;
@@ -194,6 +199,10 @@ public:
 
     // Member Functions
 
+        //- Set new zoneIds list based on the surfZoneList information
+        static void setZoneMap(const surfZoneList&, labelList& zoneIds);
+
+
         //- Does the surface need an update?
         virtual bool needsUpdate() const;
 
@@ -226,7 +235,7 @@ public:
         //- Const access to per-face zone/region information
         virtual const labelList& zoneIds() const
         {
-            return MeshStorage::zoneIds();
+            return zoneIds_;
         }
 
         //- Face area vectors
@@ -258,6 +267,12 @@ public:
         const labelList& originalIds() const
         {
             return originalIds_;
+        }
+
+        //- Sampling boundary values instead of cell values
+        bool onBoundary() const
+        {
+            return sampleSource_ == boundaryFaces;
         }
 
 
@@ -323,7 +338,7 @@ public:
             const interpolation<tensor>&
         ) const;
 
-        //- Write
+        //- Write information
         virtual void print(Ostream&) const;
 };
 

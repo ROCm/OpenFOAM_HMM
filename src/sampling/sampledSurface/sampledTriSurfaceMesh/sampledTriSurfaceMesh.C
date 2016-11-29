@@ -78,6 +78,32 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+void Foam::sampledTriSurfaceMesh::setZoneMap
+(
+    const surfZoneList& zoneLst,
+    labelList& zoneIds
+)
+{
+    label sz = 0;
+    forAll(zoneLst, zonei)
+    {
+        const surfZone& zn = zoneLst[zonei];
+        sz += zn.size();
+    }
+
+    zoneIds.setSize(sz);
+    forAll(zoneLst, zonei)
+    {
+        const surfZone& zn = zoneLst[zonei];
+
+        // Assign sub-zone Ids
+        SubList<label>(zoneIds, zn.size(), zn.start()) = zonei;
+    }
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 const Foam::indexedOctree<Foam::treeDataFace>&
@@ -146,16 +172,11 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
 
     // Global numbering for cells/faces - only used to uniquely identify local
     // elements
-    globalIndex globalCells
-    (
-        (sampleSource_ == cells || sampleSource_ == insideCells)
-      ? mesh().nCells()
-      : mesh().nFaces()
-    );
+    globalIndex globalCells(onBoundary() ? mesh().nFaces() : mesh().nCells());
 
     forAll(nearest, i)
     {
-        nearest[i].first() = GREAT;
+        nearest[i].first()  = GREAT;
         nearest[i].second() = labelMax;
     }
 
@@ -174,7 +195,7 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
             );
             if (nearInfo.hit())
             {
-                nearest[triI].first() = magSqr(nearInfo.hitPoint()-fc[triI]);
+                nearest[triI].first()  = magSqr(nearInfo.hitPoint()-fc[triI]);
                 nearest[triI].second() = globalCells.toGlobal(nearInfo.index());
             }
         }
@@ -192,7 +213,7 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
                 const label index = cellTree.findInside(fc[triI]);
                 if (index != -1)
                 {
-                    nearest[triI].first() = 0.0;
+                    nearest[triI].first()  = 0.0;
                     nearest[triI].second() = globalCells.toGlobal(index);
                 }
             }
@@ -216,7 +237,7 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
             );
             if (nearInfo.hit())
             {
-                nearest[triI].first() = magSqr(nearInfo.hitPoint()-fc[triI]);
+                nearest[triI].first()  = magSqr(nearInfo.hitPoint()-fc[triI]);
                 nearest[triI].second() = globalCells.toGlobal
                 (
                     bTree.shapes().faceLabels()[nearInfo.index()]
@@ -270,6 +291,37 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
     // From original point to compact points
     labelList reversePointMap(s.points().size(), -1);
 
+    // Handle region-wise sorting (makes things slightly more complicated)
+    zoneIds_.setSize(s.size(), -1);
+
+    // Better not to use triSurface::sortedZones here,
+    // since we'll sort ourselves
+
+    // Get zone/region sizes used, store under the original region Id
+    Map<label> zoneSizes;
+
+    // Recover region names from the input surface
+    Map<word> zoneNames;
+    {
+        const geometricSurfacePatchList& patches = s.patches();
+
+        forAll(patches, patchi)
+        {
+            zoneNames.set
+            (
+                patchi,
+                (
+                    patches[patchi].name().empty()
+                  ? Foam::name("patch%d", patchi)
+                  : patches[patchi].name()
+                )
+            );
+
+            zoneSizes.set(patchi, 0);
+        }
+    }
+
+
     {
         label newPointi = 0;
         label newFacei = 0;
@@ -278,57 +330,139 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
         {
             if (cellOrFaceLabels[facei] != -1)
             {
-                faceMap[newFacei++] = facei;
-
                 const triSurface::FaceType& f = s[facei];
+                const label regionid = f.region();
+
+                Map<label>::iterator fnd = zoneSizes.find(regionid);
+                if (fnd != zoneSizes.end())
+                {
+                    fnd()++;
+                }
+                else
+                {
+                    // This shouldn't happen
+                    zoneSizes.insert(regionid, 1);
+                    zoneNames.set
+                    (
+                        regionid,
+                        Foam::name("patch%d", regionid)
+                    );
+                }
+
+                // Store new faces compact
+                faceMap[newFacei] = facei;
+                zoneIds_[newFacei] = regionid;
+                ++newFacei;
+
+                // Renumber face points
                 forAll(f, fp)
                 {
-                    if (reversePointMap[f[fp]] == -1)
+                    const label labI = f[fp];
+
+                    if (reversePointMap[labI] == -1)
                     {
-                        pointMap[newPointi] = f[fp];
-                        reversePointMap[f[fp]] = newPointi++;
+                        pointMap[newPointi] = labI;
+                        reversePointMap[labI] = newPointi++;
                     }
                 }
             }
         }
+
+        // Trim
         faceMap.setSize(newFacei);
+        zoneIds_.setSize(newFacei);
         pointMap.setSize(newPointi);
     }
 
+
+    // Assign start/size (and name) to the newZones
+    // re-use the lookup to map (zoneId => zoneI)
+    surfZoneList zoneLst(zoneSizes.size());
+    label start = 0;
+    label zoneI = 0;
+    forAllIter(Map<label>, zoneSizes, iter)
+    {
+        // No negative regionids, so Map<label> sorts properly
+        const label regionid = iter.key();
+
+        word name;
+        Map<word>::const_iterator fnd = zoneNames.find(regionid);
+        if (fnd != zoneNames.end())
+        {
+            name = fnd();
+        }
+        if (name.empty())
+        {
+            name = ::Foam::name("patch%d", regionid);
+        }
+
+        zoneLst[zoneI] = surfZone
+        (
+            name,
+            0,           // initialize with zero size
+            start,
+            zoneI
+        );
+
+        // Adjust start for the next zone and save (zoneId => zoneI) mapping
+        start += iter();
+        iter() = zoneI++;
+    }
+
+
+    // At this stage:
+    // - faceMap to map the (unsorted) compact to original triangle
+    // - zoneIds for the next sorting
+    // - zoneSizes contains region -> count information
+
+    // Rebuild the faceMap for the sorted order
+    labelList sortedFaceMap(faceMap.size());
+
+    forAll(zoneIds_, facei)
+    {
+        label zonei = zoneIds_[facei];
+        label sortedFacei = zoneLst[zonei].start() + zoneLst[zonei].size()++;
+        sortedFaceMap[sortedFacei] = faceMap[facei];
+    }
+
+    // zoneIds are now simply flat values
+    setZoneMap(zoneLst, zoneIds_);
+
+    // Replace the faceMap with the properly sorted face map
+    faceMap.transfer(sortedFaceMap);
 
     if (keepIds_)
     {
         originalIds_ = faceMap;
     }
 
-    // Subset cellOrFaceLabels
+    // Subset cellOrFaceLabels (for compact faces)
     cellOrFaceLabels = UIndirectList<label>(cellOrFaceLabels, faceMap)();
 
     // Store any face per point (without using pointFaces())
     labelList pointToFace(pointMap.size());
 
     // Create faces and points for subsetted surface
-    faceList& faces = this->storedFaces();
-    faces.setSize(faceMap.size());
+    faceList& surfFaces = this->storedFaces();
+    surfFaces.setSize(faceMap.size());
 
-    labelList& zoneIds = this->storedZoneIds();
-    zoneIds.setSize(faceMap.size());
+    this->storedZones().transfer(zoneLst);
 
-    forAll(faceMap, i)
+    forAll(faceMap, facei)
     {
-        const labelledTri& f = s[faceMap[i]];
-        triFace newF
-        (
-            reversePointMap[f[0]],
-            reversePointMap[f[1]],
-            reversePointMap[f[2]]
-        );
-        faces[i]   = newF.triFaceFace();
-        zoneIds[i] = f.region(); // preserve zone information
+        const labelledTri& origF = s[faceMap[facei]];
+        face& f = surfFaces[facei];
 
-        forAll(newF, fp)
+        f = triFace
+        (
+            reversePointMap[origF[0]],
+            reversePointMap[origF[1]],
+            reversePointMap[origF[2]]
+        );
+
+        forAll(f, fp)
         {
-            pointToFace[newF[fp]] = i;
+            pointToFace[f[fp]] = facei;
         }
     }
 
@@ -418,7 +552,7 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
                 const point& pt = points()[pointi];
                 label facei = cellOrFaceLabels[pointToFace[pointi]];
                 sampleElements_[pointi] = facei;
-                samplePoints_[pointi] =  mesh().faces()[facei].nearestPoint
+                samplePoints_[pointi] = mesh().faces()[facei].nearestPoint
                 (
                     pt,
                     mesh().points()
@@ -429,16 +563,16 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
     else
     {
         // if sampleSource_ == cells:
-        //      samplePoints_   : n/a
         //      sampleElements_ : per surface triangle the cell
+        //      samplePoints_   : n/a
         // if sampleSource_ == insideCells:
-        //      samplePoints_   : n/a
         //      sampleElements_ : -1 or per surface triangle the cell
-        // else:
         //      samplePoints_   : n/a
+        // else:
         //      sampleElements_ : per surface triangle the boundary face
-        samplePoints_.clear();
+        //      samplePoints_   : n/a
         sampleElements_.transfer(cellOrFaceLabels);
+        samplePoints_.clear();
     }
 
 
@@ -448,76 +582,46 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
         OFstream str(mesh().time().path()/"surfaceToMesh.obj");
         Info<< "Dumping correspondence from local surface (points or faces)"
             << " to mesh (cells or faces) to " << str.name() << endl;
-        label vertI = 0;
+
+        const vectorField& centres =
+        (
+            onBoundary()
+          ? mesh().faceCentres()
+          : mesh().cellCentres()
+        );
 
         if (sampledSurface::interpolate())
         {
-            if (sampleSource_ == cells || sampleSource_ == insideCells)
+            label vertI = 0;
+            forAll(samplePoints_, pointi)
             {
-                forAll(samplePoints_, pointi)
-                {
-                    meshTools::writeOBJ(str, points()[pointi]);
-                    vertI++;
+                meshTools::writeOBJ(str, points()[pointi]);
+                vertI++;
 
-                    meshTools::writeOBJ(str, samplePoints_[pointi]);
-                    vertI++;
+                meshTools::writeOBJ(str, samplePoints_[pointi]);
+                vertI++;
 
-                    label celli = sampleElements_[pointi];
-                    meshTools::writeOBJ(str, mesh().cellCentres()[celli]);
-                    vertI++;
-                    str << "l " << vertI-2 << ' ' << vertI-1 << ' ' << vertI
-                        << nl;
-                }
-            }
-            else
-            {
-                forAll(samplePoints_, pointi)
-                {
-                    meshTools::writeOBJ(str, points()[pointi]);
-                    vertI++;
-
-                    meshTools::writeOBJ(str, samplePoints_[pointi]);
-                    vertI++;
-
-                    label facei = sampleElements_[pointi];
-                    meshTools::writeOBJ(str, mesh().faceCentres()[facei]);
-                    vertI++;
-                    str << "l " << vertI-2 << ' ' << vertI-1 << ' ' << vertI
-                        << nl;
-                }
+                label elemi = sampleElements_[pointi];
+                meshTools::writeOBJ(str, centres[elemi]);
+                vertI++;
+                str << "l " << vertI-2 << ' ' << vertI-1 << ' ' << vertI << nl;
             }
         }
         else
         {
-            if (sampleSource_ == cells || sampleSource_ == insideCells)
+            label vertI = 0;
+            forAll(sampleElements_, triI)
             {
-                forAll(sampleElements_, triI)
-                {
-                    meshTools::writeOBJ(str, faceCentres()[triI]);
-                    vertI++;
+                meshTools::writeOBJ(str, faceCentres()[triI]);
+                vertI++;
 
-                    label celli = sampleElements_[triI];
-                    meshTools::writeOBJ(str, mesh().cellCentres()[celli]);
-                    vertI++;
-                    str << "l " << vertI-1 << ' ' << vertI << nl;
-                }
-            }
-            else
-            {
-                forAll(sampleElements_, triI)
-                {
-                    meshTools::writeOBJ(str, faceCentres()[triI]);
-                    vertI++;
-
-                    label facei = sampleElements_[triI];
-                    meshTools::writeOBJ(str, mesh().faceCentres()[facei]);
-                    vertI++;
-                    str << "l " << vertI-1 << ' ' << vertI << nl;
-                }
+                label elemi = sampleElements_[triI];
+                meshTools::writeOBJ(str, centres[elemi]);
+                vertI++;
+                str << "l " << vertI-1 << ' ' << vertI << nl;
             }
         }
     }
-
 
     needsUpdate_ = false;
     return true;
@@ -553,6 +657,7 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
     needsUpdate_(true),
     keepIds_(false),
     originalIds_(),
+    zoneIds_(),
     sampleElements_(0),
     samplePoints_(0)
 {}
@@ -584,6 +689,7 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
     needsUpdate_(true),
     keepIds_(dict.lookupOrDefault<Switch>("keepIds", false)),
     originalIds_(),
+    zoneIds_(),
     sampleElements_(0),
     samplePoints_(0)
 {}
@@ -617,6 +723,7 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
     needsUpdate_(true),
     keepIds_(false),
     originalIds_(),
+    zoneIds_(),
     sampleElements_(0),
     samplePoints_(0)
 {}
@@ -646,6 +753,7 @@ bool Foam::sampledTriSurfaceMesh::expire()
 
     sampledSurface::clearGeom();
     MeshStorage::clear();
+    zoneIds_.clear();
 
     originalIds_.clear();
     boundaryTreePtr_.clear();

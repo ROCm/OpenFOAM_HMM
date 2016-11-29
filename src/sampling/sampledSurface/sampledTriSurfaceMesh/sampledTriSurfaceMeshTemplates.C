@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,7 @@ Foam::sampledTriSurfaceMesh::sampleField
     tmp<Field<Type>> tvalues(new Field<Type>(sampleElements_.size()));
     Field<Type>& values = tvalues.ref();
 
-    if (sampleSource_ == cells || sampleSource_ == insideCells)
+    if (!onBoundary())
     {
         // Sample cells
 
@@ -52,7 +52,7 @@ Foam::sampledTriSurfaceMesh::sampleField
         // Sample boundary faces
 
         const polyBoundaryMesh& pbm = mesh().boundaryMesh();
-        label nBnd = mesh().nFaces()-mesh().nInternalFaces();
+        const label nBnd = mesh().nFaces()-mesh().nInternalFaces();
 
         // Create flat boundary field
 
@@ -94,7 +94,7 @@ Foam::sampledTriSurfaceMesh::interpolateField
     tmp<Field<Type>> tvalues(new Field<Type>(sampleElements_.size()));
     Field<Type>& values = tvalues.ref();
 
-    if (sampleSource_ == cells || sampleSource_ == insideCells)
+    if (!onBoundary())
     {
         // Sample cells.
 
