@@ -233,28 +233,25 @@ void Foam::ensightFaces::sort()
 {
     if (flipMap_.size() == address_.size())
     {
-        // sort flip too
+        // sort flip map too
 
         labelList order;
         label start = 0;
 
         forAll(lists_, typeI)
         {
-            if (lists_[typeI])
+            SubList<label>& idLst = *(lists_[typeI]);
+            const label sz = idLst.size();
+
+            if (sz)
             {
-                SubList<label>& idLst = *(lists_[typeI]);
-                const label sz = idLst.size();
+                SubList<bool> flip(flipMap_, sz, start);
+                start += sz; // for next sub-list
 
-                if (sz)
-                {
-                    SubList<bool> flip(flipMap_, sz, start);
-                    start += sz; // for next sub-list
+                Foam::sortedOrder(idLst, order);
 
-                    sortedOrder(idLst, order);
-
-                    idLst = reorder<labelList>(order, idLst);
-                    flip  = reorder<boolList>(order,  flip);
-                }
+                idLst = reorder<labelList>(order, idLst);
+                flip  = reorder<boolList>(order,  flip);
             }
         }
     }
@@ -263,16 +260,9 @@ void Foam::ensightFaces::sort()
         // no flip-maps, simpler to sort
         forAll(lists_, typeI)
         {
-            if (lists_[typeI])
-            {
-                SubList<label>& idLst = *(lists_[typeI]);
-                const label sz = idLst.size();
-                if (sz)
-                {
-                    Foam::sort(idLst);
-                }
-            }
+            Foam::sort(*(lists_[typeI]));
         }
+        flipMap_.clear();  // for safety
     }
 }
 
