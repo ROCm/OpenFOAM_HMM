@@ -43,6 +43,7 @@ SourceFiles
 #include "dictionary.H"
 #include "forceSuSp.H"
 #include "fvMesh.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,7 +65,7 @@ class ParticleForce
         //- Reference to the mesh database
         const fvMesh& mesh_;
 
-        //- Force coefficients dictaionary
+        //- Force coefficients dictionary
         const dictionary coeffs_;
 
 
@@ -138,7 +139,7 @@ public:
             //- Return const access to the cloud owner
             inline const CloudType& owner() const;
 
-            //- Return refernce to the cloud owner
+            //- Return reference to the cloud owner
             inline CloudType& owner();
 
             //- Return the mesh database

@@ -44,6 +44,7 @@ SourceFiles
 #include "CollisionRecordList.H"
 #include "labelFieldIOField.H"
 #include "vectorFieldIOField.H"
+#include "demandDrivenEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
