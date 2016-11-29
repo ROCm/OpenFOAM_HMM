@@ -125,8 +125,8 @@ SYSTEMMPI)
 
 MPICH)
     export FOAM_MPI=mpich2-1.1.1p1
-    export MPI_HOME=$WM_THIRD_PARTY_DIR/$FOAM_MPI
     export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
+    export MPI_HOME=$MPI_ARCH_PATH
 
     _foamAddPath    $MPI_ARCH_PATH/bin
 
