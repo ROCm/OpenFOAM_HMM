@@ -1,6 +1,7 @@
 distributionModel/distributionModel.C
 distributionModel/distributionModelNew.C
 
+binned/binned.C
 exponential/exponential.C
 fixedValue/fixedValue.C
 general/general.C
