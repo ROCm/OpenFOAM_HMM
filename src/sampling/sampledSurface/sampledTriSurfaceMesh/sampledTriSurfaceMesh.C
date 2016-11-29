@@ -65,7 +65,6 @@ namespace Foam
 
     class nearestEqOp
     {
-
     public:
 
         void operator()(nearInfo& x, const nearInfo& y) const
@@ -110,6 +109,7 @@ Foam::sampledTriSurfaceMesh::nonCoupledboundaryTree() const
 
         treeBoundBox overallBb(mesh().points());
         Random rndGen(123456);
+        // Extend slightly and make 3D
         overallBb = overallBb.extend(rndGen, 1e-4);
         overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
@@ -189,7 +189,7 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
         {
             if (cellTree.bb().contains(fc[triI]))
             {
-                label index = cellTree.findInside(fc[triI]);
+                const label index = cellTree.findInside(fc[triI]);
                 if (index != -1)
                 {
                     nearest[triI].first() = 0.0;
@@ -535,6 +535,7 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
 )
 :
     sampledSurface(name, mesh),
+    MeshStorage(),
     surface_
     (
         IOobject
@@ -565,6 +566,7 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
 )
 :
     sampledSurface(name, mesh, dict),
+    MeshStorage(),
     surface_
     (
         IOobject
@@ -596,6 +598,7 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
 )
 :
     sampledSurface(name, mesh),
+    MeshStorage(),
     surface_
     (
         IOobject

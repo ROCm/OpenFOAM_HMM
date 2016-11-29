@@ -96,9 +96,6 @@ class sampledCuttingPlane
         //autoPtr<isoSurfaceCell> isoSurfPtr_;
         autoPtr<isoSurface> isoSurfPtr_;
 
-        //- Triangles converted to faceList
-        mutable autoPtr<faceList> facesPtr_;
-
 
     // Private Member Functions
 
@@ -168,18 +165,7 @@ public:
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            if (facesPtr_.empty())
-            {
-                const triSurface& s = surface();
-
-                facesPtr_.reset(new faceList(s.size()));
-
-                forAll(s, i)
-                {
-                    facesPtr_()[i] = s[i].triFaceFace();
-                }
-            }
-            return facesPtr_;
+            return surface().surfFaces();
         }
 
         //- Const access to per-face zone/region information

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,16 +24,17 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "isoSurfaceCell.H"
+#include "isoSurface.H"
 #include "dictionary.H"
 #include "polyMesh.H"
 #include "mergePoints.H"
 #include "tetMatcher.H"
 #include "syncTools.H"
+#include "triSurface.H"
 #include "triSurfaceTools.H"
-#include "addToRunTimeSelectionTable.H"
 #include "Time.H"
 #include "triPoints.H"
-#include "isoSurface.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1310,6 +1311,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
     const scalar mergeTol
 )
 :
+    MeshStorage(),
     mesh_(mesh),
     cVals_(cVals),
     pVals_(pVals),
@@ -1398,6 +1400,9 @@ Foam::isoSurfaceCell::isoSurfaceCell
     }
 
 
+    // Use a triSurface as a temporary for various operations
+    triSurface tmpsurf;
+
     {
         DynamicList<point> triPoints(nCutCells_);
         DynamicList<label> triMeshCells(nCutCells_);
@@ -1448,16 +1453,13 @@ Foam::isoSurfaceCell::isoSurfaceCell
 
 
         // Merge points and compact out non-valid triangles
-        labelList triMap;
-        triSurface::operator=
+        labelList triMap;           // merged to unmerged triangle
+        tmpsurf = stitchTriPoints
         (
-            stitchTriPoints
-            (
-                regularise,         // check for duplicate tris
-                triPoints,
-                triPointMergeMap_,  // unmerged to merged point
-                triMap              // merged to unmerged triangle
-            )
+            regularise,         // check for duplicate tris
+            triPoints,
+            triPointMergeMap_,  // unmerged to merged point
+            triMap              // merged to unmerged triangle
         );
 
         if (debug)
@@ -1498,12 +1500,12 @@ Foam::isoSurfaceCell::isoSurfaceCell
 
     if (debug)
     {
-        Pout<< "isoSurfaceCell : checking " << size()
+        Pout<< "isoSurfaceCell : checking " << tmpsurf.size()
             << " triangles for validity." << endl;
 
-        forAll(*this, triI)
+        forAll(tmpsurf, triI)
         {
-            triSurfaceTools::validTri(*this, triI);
+            triSurfaceTools::validTri(tmpsurf, triI);
         }
     }
 
@@ -1520,7 +1522,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
             // Calculate addressing
             calcAddressing
             (
-                *this,
+                tmpsurf,
                 faceEdges,
                 edgeFace0,
                 edgeFace1,
@@ -1554,21 +1556,33 @@ Foam::isoSurfaceCell::isoSurfaceCell
 
             labelList subsetPointMap;
             labelList reversePointMap;
-            triSurface::operator=
+            tmpsurf = subsetMesh
             (
-                subsetMesh
-                (
-                    *this,
-                    subsetTriMap,
-                    reversePointMap,
-                    subsetPointMap
-                )
+                tmpsurf,
+                subsetTriMap,
+                reversePointMap,
+                subsetPointMap
             );
             meshCells_ = labelField(meshCells_, subsetTriMap);
             inplaceRenumber(reversePointMap, triPointMergeMap_);
         }
     }
-}
 
+
+    // Transfer to mesh storage
+    {
+        faceList faces;
+        tmpsurf.triFaceFaces(faces);
+
+        // An iso-surface has no zones
+        surfZoneList zones(0);
+
+        // Reset primitive data (points, faces and zones)
+        this->MeshStorage::reset
+        (
+            tmpsurf.xferPoints(), faces.xfer(), zones.xfer()
+        );
+    }
+}
 
 // ************************************************************************* //
