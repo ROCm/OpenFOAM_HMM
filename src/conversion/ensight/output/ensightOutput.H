@@ -55,27 +55,42 @@ class ensightOutput
 {
     // Private Methods
 
-    template<class Type>
-    static void writeField
+    //- Write field content (component-wise) for the given ensight element type
+    template<template<typename> class FieldContainer, class Type>
+    static void writeFieldContent
     (
         const char* key,
+        const FieldContainer<Type>& fld,
+        ensightFile& os
+    );
+
+    //- Write a field of faces values as an indirect list,
+    //  using the face ids from ensightFaces
+    template<class Type>
+    static bool writeFaceField
+    (
         const Field<Type>& fld,
+        const ensightFaces&,
         ensightFile& os
     );
 
+    //- Write a field of faces values as a sublist,
+    //  using the sublist sizes ensightFaces
     template<class Type>
-    static bool writePatchField
+    static bool writeFaceSubField
     (
-        const Field<Type>& pf,
-        const ensightFaces& ensFaces,
+        const Field<Type>& fld,
+        const ensightFaces&,
         ensightFile& os
     );
 
+    //- Write a field of cell values as an indirect list,
+    //  using the cell ids from ensightCells
     template<class Type>
-    static bool writeVolField
+    static bool writeCellField
     (
-        const Field<Type>& vf,
-        const ensightCells& ensCells,
+        const Field<Type>& fld,
+        const ensightCells&,
         ensightFile& os,
         const bool deprecatedOrder = false
     );
