@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -148,6 +148,15 @@ int main(int argc, char *argv[])
         dictPath =
             runTime.constant()
            /regionPath/polyMesh::meshSubDir/dictName;
+
+        // Warn that constant/polyMesh/blockMesh was selected instead of
+        // system/blockMesh
+        WarningIn(args[0])
+            << "Using the old blockMeshDict location: "
+            << dictPath << nl
+            << "    instead of the default location:  "
+            << runTime.system()/regionPath/dictName << nl
+            << endl;
     }
     // Otherwise assume the dictionary is present in the system directory
     else
