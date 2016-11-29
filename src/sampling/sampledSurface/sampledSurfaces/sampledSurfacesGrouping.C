@@ -60,7 +60,6 @@ Foam::label Foam::sampledSurfaces::classifyFields()
     {
         // Check currently available fields
         wordList allFields = obr_.sortedNames();
-        labelList indices = findStrings(fieldSelection_, allFields);
 
         forAll(fieldSelection_, i)
         {

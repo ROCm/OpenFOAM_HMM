@@ -116,6 +116,9 @@ class sampledSurfaces
         //- Write geometry only
         void writeGeometry() const;
 
+        //- Write scalar field with original ids
+        void writeOriginalIds();
+
         //- Write sampled fieldName on surface and on outputDir path
         template<class Type>
         void writeSurface
