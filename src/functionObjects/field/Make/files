@@ -72,6 +72,8 @@ externalCoupled/externalCoupled.C
 externalCoupled/externalCoupledMixed/externalCoupledMixedFvPatchFields.C
 externalCoupled/externalCoupledTemperatureMixed/externalCoupledTemperatureMixedFvPatchScalarField.C
 
+extractEulerianParticles/extractEulerianParticles/extractEulerianParticles.C
+
 ddt2/ddt2.C
 zeroGradient/zeroGradient.C
 
