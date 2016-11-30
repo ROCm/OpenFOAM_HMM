@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,55 +23,37 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "cloud.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
+template<class Type>
+Foam::IOField<Type>& Foam::cloud::createIOField
+(
+    const word& fieldName,
+    const label nParticle,
+    objectRegistry& obr
+)
 {
-    defineTypeNameAndDebug(cloud, 0);
-
-    const word cloud::prefix("lagrangian");
-    word cloud::defaultName("defaultCloud");
-}
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::cloud::cloud(const objectRegistry& obr, const word& cloudName)
-:
-    objectRegistry
+    IOField<Type>* fieldPtr
     (
-        IOobject
+        new IOField<Type>
         (
-            cloudName,
-            obr.time().timeName(),
-            prefix,
-            obr,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            IOobject
+            (
+                fieldName,
+                obr.time().timeName(),
+                obr,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            nParticle
         )
-    )
-{}
+    );
 
+    fieldPtr->store();
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cloud::~cloud()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::cloud::autoMap(const mapPolyMesh&)
-{
-    NotImplemented;
-}
-
-
-void Foam::cloud::writeObjects(objectRegistry& obr) const
-{
-    NotImplemented;
+    return *fieldPtr;
 }
 
 

@@ -234,6 +234,76 @@ void Foam::ReactingParcel<ParcelType>::writeFields
 }
 
 
+template<class ParcelType>
+template<class CloudType>
+void Foam::ReactingParcel<ParcelType>::writeObjects
+(
+    const CloudType& c,
+    objectRegistry& obr
+)
+{
+    ParcelType::writeObjects(c, obr);
+}
+
+
+template<class ParcelType>
+template<class CloudType, class CompositionType>
+void Foam::ReactingParcel<ParcelType>::writeObjects
+(
+    const CloudType& c,
+    const CompositionType& compModel,
+    objectRegistry& obr
+)
+{
+DebugInFunction << endl;
+
+    ParcelType::writeObjects(c, obr);
+
+    label np = c.size();
+
+    if (np > 0)
+    {
+        IOField<scalar>& mass0(cloud::createIOField<scalar>("mass0", np, obr));
+
+        label i = 0;
+        forAllConstIter(typename Cloud<ReactingParcel<ParcelType>>, c, iter)
+        {
+            const ReactingParcel<ParcelType>& p = iter();
+            mass0[i++] = p.mass0_;
+        }
+
+        // Write the composition fractions
+        const wordList& phaseTypes = compModel.phaseTypes();
+        wordList stateLabels(phaseTypes.size(), "");
+        if (compModel.nPhase() == 1)
+        {
+            stateLabels = compModel.stateLabels()[0];
+        }
+
+        forAll(phaseTypes, j)
+        {
+            const word fieldName = "Y" + phaseTypes[j] + stateLabels[j];
+            IOField<scalar>& Y
+            (
+                cloud::createIOField<scalar>(fieldName, np, obr)
+            );
+
+            label i = 0;
+            forAllConstIter
+            (
+                typename Cloud<ReactingParcel<ParcelType>>,
+                c,
+                iter
+            )
+            {
+                const ReactingParcel<ParcelType>& p = iter();
+                Y[i++] = p.Y()[j];
+            }
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class ParcelType>
