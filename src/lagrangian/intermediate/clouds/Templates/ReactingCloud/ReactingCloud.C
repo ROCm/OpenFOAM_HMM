@@ -362,4 +362,11 @@ void Foam::ReactingCloud<CloudType>::writeFields() const
 }
 
 
+template<class CloudType>
+void Foam::ReactingCloud<CloudType>::writeObjects(objectRegistry& obr) const
+{
+    CloudType::particleType::writeObjects(*this, this->composition(), obr);
+}
+
+
 // ************************************************************************* //

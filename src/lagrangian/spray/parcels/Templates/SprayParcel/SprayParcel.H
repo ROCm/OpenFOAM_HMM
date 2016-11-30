@@ -506,6 +506,24 @@ public:
             template<class CloudType>
             static void writeFields(const CloudType& c);
 
+            //- Write particle fields as objects into the obr registry
+            //  - no composition
+            template<class CloudType>
+            static void writeObjects
+            (
+                const CloudType& c,
+                objectRegistry& obr
+            );
+
+            //- Write particle fields as objects into the obr registry
+            template<class CloudType, class CompositionType>
+            static void writeObjects
+            (
+                const CloudType& c,
+                const CompositionType& compModel,
+                objectRegistry& obr
+            );
+
 
     // Ostream Operator
 

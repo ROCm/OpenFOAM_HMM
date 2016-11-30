@@ -274,6 +274,39 @@ void Foam::CollidingParcel<ParcelType>::writeFields(const CloudType& c)
 }
 
 
+template<class ParcelType>
+template<class CloudType>
+void Foam::CollidingParcel<ParcelType>::writeObjects
+(
+    const CloudType& c,
+    objectRegistry& obr
+)
+{
+    ParcelType::writeObjects(c, obr);
+
+    label np = c.size();
+
+    IOField<vector>& f(cloud::createIOField<vector>("f", np, obr));
+    IOField<vector>& angularMomentum
+    (
+        cloud::createIOField<vector>("angularMomentum", np, obr)
+    );
+    IOField<vector>& torque(cloud::createIOField<vector>("torque", np, obr));
+
+    label i = 0;
+    forAllConstIter(typename CloudType, c, iter)
+    {
+        const CollidingParcel<ParcelType>& p = iter();
+
+        f[i] = p.f();
+        angularMomentum[i] = p.angularMomentum();
+        torque[i] = p.torque();
+
+        i++;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class ParcelType>
