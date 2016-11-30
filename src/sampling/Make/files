@@ -17,14 +17,15 @@ sampledSet/triSurfaceMeshPointSet/triSurfaceMeshPointSet.C
 sampledSet/uniform/uniformSet.C
 sampledSet/array/arraySet.C
 
-cuttingPlane/cuttingPlane.C
+surface/cuttingPlane/cuttingPlane.C
+surface/isoSurface/isoSurface.C
+surface/isoSurface/isoSurfaceCell.C
+surface/thresholdCellFaces/thresholdCellFaces.C
 
 sampledSurface/sampledPatch/sampledPatch.C
 sampledSurface/sampledPatchInternalField/sampledPatchInternalField.C
 sampledSurface/sampledPlane/sampledPlane.C
-sampledSurface/isoSurface/isoSurface.C
 sampledSurface/isoSurface/sampledIsoSurface.C
-sampledSurface/isoSurface/isoSurfaceCell.C
 sampledSurface/isoSurface/sampledIsoSurfaceCell.C
 sampledSurface/distanceSurface/distanceSurface.C
 sampledSurface/sampledCuttingPlane/sampledCuttingPlane.C
@@ -32,7 +33,6 @@ sampledSurface/sampledSurface/sampledSurface.C
 sampledSurface/sampledSurfaces/sampledSurfaces.C
 sampledSurface/sampledSurfaces/sampledSurfacesGrouping.C
 sampledSurface/sampledTriSurfaceMesh/sampledTriSurfaceMesh.C
-sampledSurface/thresholdCellFaces/thresholdCellFaces.C
 sampledSurface/thresholdCellFaces/sampledThresholdCellFaces.C
 
 surfWriters = sampledSurface/writers
