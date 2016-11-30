@@ -29,13 +29,6 @@ Group
 Description
     Generates particle size information from Eulerian calculations, e.g. VoF.
 
-    Particle data is written to the directory:
-
-    \verbatim
-        $FOAM_CASE/postProcessing/<name>/rawParticlesDict
-        $FOAM_CASE/postProcessing/<name>/particleDistribution
-    \endverbatim
-
 Usage
     extractEulerianParticles1
     {
@@ -48,12 +41,6 @@ Usage
         UName           U;
         rhoName         rho;
         phiName         phi;
-
-        createDistribution yes;
-        distributionBinWidth 1e-4;
-        resetDistributionOnWrite no;
-
-        writeRawData    yes;
     }
     \endverbatim
 
@@ -66,9 +53,6 @@ Usage
         aplhaName    | Name of phase indicator field | yes   |
         rhoName      | Name of density field   |      yes |
         phiNane      | Name of flux field      |      yes |
-        createDistribution | Flag to create a binned distribution | yes |
-        distributionBinWidth | Binned distribution bin width| yes |
-        writeRawData | Flag to write raw particle data | yes |
     \endtable
 
 SourceFiles
@@ -89,6 +73,7 @@ SourceFiles
 #include "cachedRandom.H"
 #include "eulerianParticle.H"
 #include "IOdictionary.H"
+#include "injectedParticleCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -97,7 +82,7 @@ namespace Foam
 namespace functionObjects
 {
 /*---------------------------------------------------------------------------*\
-         Class extractEulerianParticlesFunctionObject Declaration
+           Class extractEulerianParticlesFunctionObject Declaration
 \*---------------------------------------------------------------------------*/
 
 class extractEulerianParticles
@@ -110,14 +95,8 @@ protected:
 
     // Protected data
 
-        //- Flag to write the raw collected particle data
-        bool writeRawData_;
-
-        //- Raw particle output dictionary
-        autoPtr<IOdictionary> rawParticlesDictPtr_;
-
-        //- List to keep track of output times
-        DynamicList<scalar> outputTimes_;
+        //- Storage for collected particles
+        injectedParticleCloud cloud_;
 
 
         // faceZone info
@@ -149,7 +128,7 @@ protected:
             //- Name of the velocity field, default = U
             word UName_;
 
-            //- Name of the density field, defauls = rho
+            //- Name of the density field, default = rho
             word rhoName_;
 
             //- Name of the flux field, default ="rho"
@@ -164,20 +143,14 @@ protected:
             //- Agglomeration addressing from fine to coarse
             labelList fineToCoarseAddr_;
 
-            //- Agglomeration addressing from coarse to fine
-            labelListList coarseToFineAddr_;
-
             //- Coarse face positions
-            vectorList coarsePosition_;
+            vectorField coarsePosition_;
 
             //- Global coarse face addressing
             globalIndex globalCoarseFaces_;
 
 
         // Particle collection info
-
-            //- Time of last write step
-            scalar lastOutputTime_;
 
             //- Region indices in faceZone faces from last iteration
             labelList regions0_;
@@ -191,9 +164,6 @@ protected:
             //- Map from region to index in particles_ list
             Map<label> regionToParticleMap_;
 
-            // Collected particles
-            DynamicList<eulerianParticle> collectedParticles_;
-
             //- Minimum diameter (optional)
             //  Can be used to filter out 'small' particles
             scalar minDiameter_;
@@ -201,15 +171,6 @@ protected:
             //- Maximum diameter (optional)
             //  Can be used to filter out 'large' particles
             scalar maxDiameter_;
-
-            //- Flag to create a distribution
-            bool createDistribution_;
-
-            //- Flag to reset the distribution on each write
-            bool resetDistributionOnWrite_;
-
-            //- Diameter distribution bin width
-            scalar distributionBinWidth_;
 
             //- Random class needed by distribution models
             cachedRandom rndGen_;
@@ -274,9 +235,6 @@ protected:
             const faceZone& fz
         );
 
-        //- Write agglomerated particle data to stream
-        virtual void writeBinnedParticleData();
-
         template<class Type>
         inline Type faceValue
         (
@@ -296,7 +254,7 @@ public:
 
     // Static data members
 
-        //- Static data staticData
+        //- Runtime type information
         TypeName("extractEulerianParticles");
 
 

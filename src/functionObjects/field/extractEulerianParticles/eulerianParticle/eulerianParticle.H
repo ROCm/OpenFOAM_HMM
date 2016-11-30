@@ -92,9 +92,6 @@ public:
         //- Injection time - set at collection [s]
         scalar time;
 
-        //- Index of last output time
-        label timeIndex;
-
 
     //- Constructor
     eulerianParticle();
@@ -122,8 +119,7 @@ public:
              && a.VC == b.VC
              && a.VU == b.VU
              && a.V == b.V
-             && a.time == b.time
-             && a.timeIndex == b.timeIndex;
+             && a.time == b.time;
         }
 
         friend bool operator!=

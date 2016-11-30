@@ -36,34 +36,39 @@ Foam::functionObjects::eulerianParticle::eulerianParticle()
     VC(vector::zero),
     VU(vector::zero),
     V(0),
-    time(0),
-    timeIndex(0)
+    time(0)
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const eulerianParticle& p)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const functionObjects::eulerianParticle& p
+)
 {
     os  << p.globalFaceIHit << token::SPACE
         << p.VC << token::SPACE
         << p.VU << token::SPACE
         << p.V << token::SPACE
-        << p.time << token::SPACE
-        << p.timeIndex;
+        << p.time;
 
     return os;
 }
 
 
-Foam::Istream& Foam::operator>>(Istream& is, eulerianParticle& p)
+Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    functionObjects::eulerianParticle& p
+)
 {
     is  >> p.globalFaceIHit
         >> p.VC
         >> p.VU
         >> p.V
-        >> p.time
-        >> p.timeIndex;
+        >> p.time;
 
     return is;
 }

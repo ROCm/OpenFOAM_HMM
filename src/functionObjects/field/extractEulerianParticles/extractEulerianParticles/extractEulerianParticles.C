@@ -101,7 +101,7 @@ void Foam::functionObjects::extractEulerianParticles::checkFaceZone()
             << exit(FatalError);
     }
 
-    Log << type() << " " << name() << " output:" << nl
+    Info<< type() << " " << name() << " output:" << nl
         << "    faceZone : " << faceZoneName_ << nl
         << "    faces    : " << allFaces << nl
         << endl;
@@ -154,27 +154,21 @@ void Foam::functionObjects::extractEulerianParticles::initialiseBins()
     {
         fineToCoarseAddr_ = ppa.restrictTopBottomAddressing();
         nCoarseFaces = max(fineToCoarseAddr_) + 1;
-        coarseToFineAddr_ = invertOneToMany(nCoarseFaces, fineToCoarseAddr_);
 
         // Set coarse face centres as area average of fine face centres
         const vectorField& faceCentres = mesh_.faceCentres();
         const vectorField& faceAreas = mesh_.faceAreas();
-        coarsePosition_.setSize(coarseToFineAddr_.size());
-        forAll(coarseToFineAddr_, coarsei)
+        coarsePosition_.setSize(nCoarseFaces);
+        scalarField coarseArea(nCoarseFaces);
+        forAll(coarsePosition_, i)
         {
-            const labelList& fineFaces = coarseToFineAddr_[coarsei];
-
-            scalar sumArea = 0;
-            vector averagePosition(vector::zero);
-            forAll(fineFaces, i)
-            {
-                label facei = fz[fineFaces[i]];
-                scalar magSf = mag(faceAreas[facei]);
-                sumArea += magSf;
-                averagePosition += magSf*faceCentres[facei];
-            }
-            coarsePosition_[coarsei] = averagePosition/sumArea;
+            const label facei = fz[i];
+            const label coarseFacei = fineToCoarseAddr_[i];
+            const scalar magSf = mag(faceAreas[facei]);
+            coarseArea[coarseFacei] += magSf;
+            coarsePosition_[coarseFacei] += magSf*faceCentres[facei];
         }
+        coarsePosition_ /= coarseArea + ROOTVSMALL;
     }
 
     // Create global addressing for coarse face addressing
@@ -198,7 +192,7 @@ Foam::functionObjects::extractEulerianParticles::phiU() const
     if (phi.dimensions() == dimMass/dimTime)
     {
         const volScalarField& rho =
-            obr_.lookupObject<volScalarField>(rhoName_);
+            mesh_.lookupObject<volScalarField>(rhoName_);
 
         return phi/fvc::interpolate(rho);
     }
@@ -297,6 +291,13 @@ void Foam::functionObjects::extractEulerianParticles::collectParticles
         {
             // Particle on local processor
             p = particles_[iter()];
+
+            if (nInjectorLocations_)
+            {
+                // Use coarse face index and position for output
+                p.globalFaceIHit = fineToCoarseAddr_[p.globalFaceIHit];
+                p.VC = p.V*coarsePosition_[p.globalFaceIHit];
+            }
         }
         reduce(p, sumParticleOp<eulerianParticle>());
 
@@ -304,21 +305,22 @@ void Foam::functionObjects::extractEulerianParticles::collectParticles
 
         if ((pDiameter > minDiameter_) && (pDiameter < maxDiameter_))
         {
-            p.time = time;
-            p.timeIndex = outputTimes_.size() - 1;
-
-            if (Pstream::master() && writeRawData_)
+            if (Pstream::master())
             {
-                rawParticlesDictPtr_->add
+                const scalar d = cbrt(6*p.V/constant::mathematical::pi);
+                const point position = p.VC/(p.V + ROOTVSMALL);
+                const vector U = p.VU/(p.V + ROOTVSMALL);
+
+                injectedParticle* ip = new injectedParticle
                 (
-                    word("particle" + Foam::name(nCollectedParticles_)),
-                    p.writeDict()
+                    mesh_,
+                    position,
+                    time,
+                    d,
+                    U
                 );
-            }
 
-            if (globalFaces_.isLocal(p.globalFaceIHit))
-            {
-                collectedParticles_.append(p);
+                cloud_.addParticle(ip);
             }
 
             nCollectedParticles_++;
@@ -522,176 +524,6 @@ void Foam::functionObjects::extractEulerianParticles::accumulateParticleInfo
 }
 
 
-void Foam::functionObjects::extractEulerianParticles::writeBinnedParticleData()
-{
-    DebugInFunction << endl;
-
-    if (!createDistribution_)
-    {
-        // No need to store collected particles if not creating a distribution
-        collectedParticles_.clear();
-        return;
-    }
-
-    // Gather particles ready for collection from all procs
-    List<List<eulerianParticle> > allProcParticles(Pstream::nProcs());
-    allProcParticles[Pstream::myProcNo()] = collectedParticles_;
-    Pstream::gatherList(allProcParticles);
-    Pstream::scatterList(allProcParticles);
-    List<eulerianParticle> allParticles =
-        ListListOps::combine<List<eulerianParticle> >
-        (
-            allProcParticles,
-            accessOp<List<eulerianParticle> >()
-        );
-
-
-    // Determine coarse face index (global) and position for each particle
-    label nCoarseFaces = globalCoarseFaces_.size();
-    List<label> particleCoarseFacei(allParticles.size(), -1);
-    List<point> particleCoarseFacePosition(nCoarseFaces, point::min);
-
-    forAll(allParticles, particlei)
-    {
-        const eulerianParticle& p = allParticles[particlei];
-        label globalFaceHiti = p.globalFaceIHit;
-
-        if (globalFaces_.isLocal(globalFaceHiti))
-        {
-            label localFacei = globalFaces_.toLocal(globalFaceHiti);
-            label coarseFacei = fineToCoarseAddr_[localFacei];
-            label globalCoarseFacei = globalCoarseFaces_.toGlobal(coarseFacei);
-
-            particleCoarseFacei[particlei] = globalCoarseFacei;
-            particleCoarseFacePosition[globalCoarseFacei] =
-                coarsePosition_[coarseFacei];
-        }
-    }
-    Pstream::listCombineGather(particleCoarseFacei, maxEqOp<label>());
-    Pstream::listCombineGather(particleCoarseFacePosition, maxEqOp<point>());
-
-    // Write the agglomerated particle data to file
-    DynamicList<label> processedCoarseFaces;
-    if (Pstream::master())
-    {
-        fileName baseDir(dictBaseFileDir()/name());
-
-        IOdictionary dict
-        (
-            IOobject
-            (
-                "particleDistribution",
-                obr_.time().timeName(),
-                baseDir,
-                obr_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            )
-        );
-
-        labelListList coarseFaceToParticle =
-            invertOneToMany(nCoarseFaces, particleCoarseFacei);
-
-        // Process the allParticles per coarse face
-        forAll(coarseFaceToParticle, globalCoarseFacei)
-        {
-            const List<label>& particleIDs =
-                coarseFaceToParticle[globalCoarseFacei];
-
-            const label nParticle = particleIDs.size();
-
-            if (nParticle == 0)
-            {
-                continue;
-            }
-
-            Field<scalar> pd(particleIDs.size());
-            scalar sumV = 0;
-            vector sumVU = vector::zero;
-            scalar startTime = GREAT;
-            scalar endTime = -GREAT;
-            forAll(particleIDs, i)
-            {
-                const label particlei = particleIDs[i];
-                const eulerianParticle& p = allParticles[particlei];
-                scalar pDiameter = cbrt(6*p.V/constant::mathematical::pi);
-                pd[i] = pDiameter;
-                sumV += p.V;
-                sumVU += p.VU;
-
-                startTime = min(startTime, outputTimes_[p.timeIndex]);
-                endTime = max(endTime, outputTimes_[p.timeIndex + 1]);
-            }
-
-            if (sumV < ROOTVSMALL)
-            {
-                // Started collecting particle info, but not accumulated any
-                // volume yet
-                continue;
-            }
-
-
-            distributionModels::binned binnedDiameters
-            (
-                pd,
-                distributionBinWidth_,
-                rndGen_
-            );
-
-            // Velocity info hard-coded to volume average
-            vector Uave = sumVU/sumV;
-
-            dictionary particleDict;
-            particleDict.add("startTime", startTime);
-            particleDict.add("endTime", endTime);
-            particleDict.add("nParticle", nParticle);
-            particleDict.add
-            (
-                "position",
-                particleCoarseFacePosition[globalCoarseFacei]
-            );
-            particleDict.add("volume", sumV);
-            particleDict.add("U", Uave);
-            particleDict.add
-            (
-                "binnedDistribution",
-                binnedDiameters.writeDict("distribution")
-            );
-            dict.add
-            (
-                word("sample" + Foam::name(globalCoarseFacei)),
-                particleDict
-            );
-
-            processedCoarseFaces.append(globalCoarseFacei);
-        }
-
-        dict.regIOobject::write();
-    }
-
-
-    if (resetDistributionOnWrite_)
-    {
-        // Remove processed coarse faces from collectedParticles_
-        Pstream::scatter(processedCoarseFaces);
-        labelHashSet processedFaces(processedCoarseFaces);
-        DynamicList<eulerianParticle> nonProcessedParticles;
-        forAll(collectedParticles_, particlei)
-        {
-            const eulerianParticle& p = collectedParticles_[particlei];
-            label localFacei = globalFaces_.toLocal(p.globalFaceIHit);
-            label coarseFacei = fineToCoarseAddr_[localFacei];
-            label globalCoarseFacei = globalCoarseFaces_.toGlobal(coarseFacei);
-            if (!processedFaces.found(globalCoarseFacei))
-            {
-                nonProcessedParticles.append(p);
-            }
-        }
-        collectedParticles_.transfer(nonProcessedParticles);
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
 Foam::functionObjects::extractEulerianParticles::extractEulerianParticles
@@ -703,9 +535,7 @@ Foam::functionObjects::extractEulerianParticles::extractEulerianParticles
 :
     fvMeshFunctionObject(name, runTime, dict),
     writeFile(runTime, name),
-    writeRawData_(false),
-    rawParticlesDictPtr_(NULL),
-    outputTimes_(100),
+    cloud_(mesh_, "eulerianParticleCloud"),
     faceZoneName_(word::null),
     zoneID_(-1),
     patchIDs_(),
@@ -715,21 +545,16 @@ Foam::functionObjects::extractEulerianParticles::extractEulerianParticles
     UName_("U"),
     rhoName_("rho"),
     phiName_("phi"),
-    nInjectorLocations_(0),
+    nInjectorLocations_(-1),
     fineToCoarseAddr_(),
-    coarseToFineAddr_(),
     coarsePosition_(),
     globalCoarseFaces_(),
     regions0_(),
     nRegions0_(0),
     particles_(),
     regionToParticleMap_(),
-    collectedParticles_(),
     minDiameter_(ROOTVSMALL),
     maxDiameter_(GREAT),
-    createDistribution_(false),
-    resetDistributionOnWrite_(false),
-    distributionBinWidth_(0),
     rndGen_(1234, -1),
     nCollectedParticles_(0),
     nDiscardedParticles_(0),
@@ -743,32 +568,6 @@ Foam::functionObjects::extractEulerianParticles::extractEulerianParticles
     }
 
     read(dict);
-
-    if (Pstream::master() && writeRawData_)
-    {
-        fileName baseDir(dictBaseFileDir()/name);
-
-        rawParticlesDictPtr_.reset
-        (
-            new IOdictionary
-            (
-                IOobject
-                (
-                    "rawParticlesDict",
-                    mesh_.time().timeName(),
-                    baseDir,
-                    mesh_,
-                    IOobject::NO_READ, // _IF_PRESENT,
-                    IOobject::NO_WRITE
-                )
-            )
-        );
-
-DebugVar(rawParticlesDictPtr_->objectPath());
-DebugVar(rawParticlesDictPtr_->path());
-    }
-
-    outputTimes_.append(mesh_.time().value());
 }
 
 
@@ -780,17 +579,17 @@ Foam::functionObjects::extractEulerianParticles::~extractEulerianParticles()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-
-bool Foam::functionObjects::extractEulerianParticles::read(const dictionary& dict)
+bool Foam::functionObjects::extractEulerianParticles::read
+(
+    const dictionary& dict
+)
 {
     DebugInFunction << endl;
 
     if (fvMeshFunctionObject::read(dict) && writeFile::read(dict))
     {
-        dict.lookup("writeRawData") >> writeRawData_;
-
         dict.lookup("faceZone") >> faceZoneName_;
-        dict.lookup("nLocations") >> nInjectorLocations_;
+        dict.readIfPresent("nLocations", nInjectorLocations_);
         dict.lookup("alphaName") >> alphaName_;
         dict.readIfPresent("alphaThreshold", alphaThreshold_);
         dict.lookup("UName") >> UName_;
@@ -799,13 +598,13 @@ bool Foam::functionObjects::extractEulerianParticles::read(const dictionary& dic
 
         dict.readIfPresent("minDiameter", minDiameter_);
         dict.readIfPresent("maxDiameter", maxDiameter_);
-        dict.lookup("createDistribution") >> createDistribution_;
-        dict.lookup("distributionBinWidth") >> distributionBinWidth_;
-        dict.lookup("resetDistributionOnWrite") >> resetDistributionOnWrite_;
 
         checkFaceZone();
 
-        initialiseBins();
+        if (nInjectorLocations_)
+        {
+            initialiseBins();
+        }
 
         return true;
     }
@@ -859,7 +658,7 @@ bool Foam::functionObjects::extractEulerianParticles::execute()
     tmp<surfaceScalarField> tphi = phiU();
     accumulateParticleInfo(alphaf, tphi(), regionFaceIDs, fz);
 
-    // Reset the blocked faces fot the next integration step
+    // Reset the blocked faces for the next integration step
     nRegions0_ = nRegionsNew;
     regions0_ = regionFaceIDs;
 
@@ -876,18 +675,13 @@ bool Foam::functionObjects::extractEulerianParticles::write()
 {
     DebugInFunction << endl;
 
-    outputTimes_.append(obr_.time().value());
-
-    writeBinnedParticleData();
-
-    if (Pstream::master() && writeRawData_)
+    if (Pstream::master())
     {
-        rawParticlesDictPtr_->regIOobject::write();
+        cloud_.write();
     }
 
     return true;
 }
-
 
 
 // ************************************************************************* //
