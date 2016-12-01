@@ -200,7 +200,14 @@ public:
             const fileName& facesInstance() const;
 
             //- Set the instance for mesh files
-            void setInstance(const fileName&);
+            void setInstance
+            (
+                const fileName&,
+                IOobject::writeOption = IOobject::AUTO_WRITE
+            );
+
+            //- Adjust the write option for all components
+            void setWriteOption(IOobject::writeOption);
 
 
         // Access
@@ -322,6 +329,7 @@ public:
 
             //- Remove all files from mesh instance()
             void removeFiles() const;
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
