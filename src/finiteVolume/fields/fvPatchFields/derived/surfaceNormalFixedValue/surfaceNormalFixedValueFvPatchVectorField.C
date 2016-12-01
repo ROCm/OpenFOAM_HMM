@@ -67,18 +67,13 @@ surfaceNormalFixedValueFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    refValue_(ptf.refValue_, mapper)
+    refValue_(ptf.refValue_, mapper, 0.0)
 {
-    // Note: calculate product only on ptf to avoid multiplication on
-    // unset values in reconstructPar.
-    fvPatchVectorField::operator=
-    (
-        vectorField
-        (
-            ptf.refValue_*ptf.patch().nf(),
-            mapper
-        )
-    );
+    // Note: refValue_ will have default value 0.0 for unmapped faces. This
+    // can temporarily happen during e.g. redistributePar. We should not
+    // access ptf.patch() instead since redistributePar has destroyed this
+    // at the time of mapping.
+    fvPatchVectorField::operator=(refValue_*patch().nf());
 }
 
 
