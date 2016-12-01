@@ -22,10 +22,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::binned
+    Foam::distributionModels::binned
 
 Description
-    A binned distribution model
+    A binned distribution model where the random sample is taken from a
+    discrete set of bins
 
 SourceFiles
     binned.C
@@ -69,23 +70,19 @@ class binned
 {
     // Private data
 
-        //- Distribution minimum
-        scalar minValue_;
+        typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
 
-        //- Distribution maximum
-        scalar maxValue_;
+        // List of (bin probability)
+        List<pair> xy_;
 
         //- Distribution mean value
         scalar meanValue_;
 
 
-        // Model coefficients
+    // Private member functions
 
-            //- List of bin boundaries
-            Field<scalar> binBoundaries_;
-
-            //- List of normalised bin values
-            Field<scalar> values_;
+        //- Initialise the distribution parameters
+        void initialise();
 
 
 public:
@@ -104,7 +101,7 @@ public:
         //- Construct from components
         binned
         (
-            const scalarField& values,
+            const UList<scalar>& sampleData,
             const scalar binWidth,
             cachedRandom& rndGen
         );

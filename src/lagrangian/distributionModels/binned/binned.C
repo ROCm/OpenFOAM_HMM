@@ -39,7 +39,38 @@ namespace Foam
 
 
 const char* Foam::distributionModels::binned::header =
-    "minValue maxValue (binBoundaries) (values)";
+    "(bin probability)";
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::distributionModels::binned::initialise()
+{
+    const label nSample(xy_.size());
+    forAll(xy_, bini)
+    {
+        xy_[bini][1] /= scalar(nSample);
+    }
+
+    // Convert values to integral values
+    for (label bini = 1; bini < nSample; ++bini)
+    {
+        xy_[bini][1] += xy_[bini - 1][1];
+    }
+
+    // Calculate the mean value
+    label bini = 0;
+    forAll(xy_, i)
+    {
+        if (xy_[i][1] > 0.5)
+        {
+            bini = i;
+            break;
+        }
+    }
+
+    meanValue_ = xy_[bini][1];
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -51,121 +82,93 @@ Foam::distributionModels::binned::binned
 )
 :
     distributionModel(typeName, dict, rndGen),
-    minValue_(readScalar(distributionModelDict_.lookup("minValue"))),
-    maxValue_(readScalar(distributionModelDict_.lookup("maxValue"))),
-    meanValue_(0),
-    binBoundaries_(distributionModelDict_.lookup("binBoundaries")),
-    values_(distributionModelDict_.lookup("values"))
+    xy_(distributionModelDict_.lookup("distribution")),
+    meanValue_(0)
 {
-    if (minValue_ < 0)
-    {
-        FatalErrorInFunction
-            << "Minimum value must be greater than zero. "
-            << "Supplied minValue = " << minValue_
-            << exit(FatalError);
-    }
-
-    if (maxValue_ < minValue_)
+    if (maxValue() < minValue())
     {
         FatalErrorInFunction
             << "Maximum value is smaller than the minimum value:"
-            << "    maxValue = " << maxValue_ << ", minValue = " << minValue_
+            << "    maxValue = " << maxValue()
+            << ", minValue = " << minValue()
             << exit(FatalError);
     }
 
-    if (binBoundaries_.size() != values_.size() + 1)
-    {
-        FatalErrorInFunction
-            << "Number of bin boundaries must be number of values + 1"
-            << "    number of binBoundaries : " << binBoundaries_.size() << nl
-            << "    number of values        : " << values_.size() << nl
-            << exit(FatalError);
-    }
+    initialise();
 }
 
 
 Foam::distributionModels::binned::binned
 (
-    const scalarField& values,
+    const UList<scalar>& sampleData,
     const scalar binWidth,
     cachedRandom& rndGen
 )
 :
     distributionModel(typeName, dictionary::null, rndGen),
-    minValue_(0),
-    maxValue_(0),
-    meanValue_(0),
-    binBoundaries_(),
-    values_()
+    xy_(),
+    meanValue_(0)
 {
-    label bin0 = floor(min(values)/binWidth);
-    label bin1 = ceil(max(values)/binWidth);
-    label nBin = bin1 - bin0;
+    scalar minValue = GREAT;
+    scalar maxValue = -GREAT;
+    forAll(sampleData, i)
+    {
+        minValue = min(minValue, sampleData[i]);
+        maxValue = max(maxValue, sampleData[i]);
+    }
 
-    minValue_ = bin0*binWidth;
-    maxValue_ = bin1*binWidth;
+    const label bin0 = floor(minValue/binWidth);
+    const label bin1 = ceil(maxValue/binWidth);
+    const label nBin = bin1 - bin0;
 
     if (nBin == 0)
     {
         WarningInFunction
             << "Data cannot be binned - zero bins generated" << nl
-            << "   Bin width : " << binWidth << nl
-            << "   Values    : " << values
+            << "   Bin width   : " << binWidth << nl
+            << "   Sample data : " << sampleData
             << endl;
 
         return;
     }
 
-    // Create the bins
-    binBoundaries_.setSize(nBin + 1);
-    forAll(binBoundaries_, binI)
+    // Populate bin boundaries and initialise occurrences
+    xy_.setSize(nBin);
+    forAll(xy_, bini)
     {
-        binBoundaries_[binI] = (bin0 + binI)*binWidth;
+        xy_[bini][0] = (bin0 + bini)*binWidth;
+        xy_[bini][1] = 0;
     }
 
-    // Bin and normalise the data
-    values_.setSize(nBin, 0);
-    forAll(values, i)
+    // Bin the data
+    forAll(sampleData, i)
     {
-        label binI = floor(values[i]/binWidth) - bin0;
-        values_[binI]++;
-    }
-    values_ /= sum(values_);
+        // Choose the nearest bin
+        label bini = floor(sampleData[i]/binWidth) - bin0;
+        label binii = min(bini + 1, nBin - 1);
 
-    // Calculate the mean value
-    scalar sum = 0;
-    label valueI = 0;
-    forAll(values_, i)
-    {
-        sum += values_[i];
-        if (sum > 0.5)
+        scalar d1 = mag(sampleData[i] - xy_[bini][0]);
+        scalar d2 = mag(xy_[binii][0] - sampleData[i]);
+
+        if (d1 < d2)
         {
-            valueI = i;
-            break;
+            xy_[bini][1]++;
+        }
+        else
+        {
+            xy_[binii][1]++;
         }
     }
 
-    if (valueI == 0)
-    {
-        meanValue_ = binBoundaries_[valueI];
-    }
-    else
-    {
-        meanValue_ =
-            binBoundaries_[valueI]
-          + (0.5 - binBoundaries_[valueI])
-          / (binBoundaries_[valueI + 1] - binBoundaries_[valueI]);
-    }
+    initialise();
 }
 
 
 Foam::distributionModels::binned::binned(const binned& p)
 :
     distributionModel(p),
-    minValue_(p.minValue_),
-    maxValue_(p.maxValue_),
-    binBoundaries_(p.binBoundaries_),
-    values_(p.values_)
+    xy_(p.xy_),
+    meanValue_(p.meanValue_)
 {}
 
 
@@ -181,31 +184,36 @@ Foam::scalar Foam::distributionModels::binned::sample() const
 {
     scalar y = rndGen_.sample01<scalar>();
 
-    scalar sum = 0;
-    forAll(values_, i)
+    for (label i = 0; i < xy_.size() - 1; ++i)
     {
-        sum += values_[i];
-        if (sum > y)
+        if (xy_[i][1] > y)
         {
-            scalar binMin = binBoundaries_[i];
-            scalar binMax = binBoundaries_[i + 1];
-            return binMin + (1 - (sum - y)/values_[i])*(binMax - binMin);
+            scalar d1 = y - xy_[i][1];
+            scalar d2 = xy_[i+1][1] - y;
+            if (d1 < d2)
+            {
+                return xy_[i][0];
+            }
+            else
+            {
+                return xy_[i+1][0];
+            }
         }
     }
 
-    return maxValue_;
+    return xy_.last()[0];
 }
 
 
 Foam::scalar Foam::distributionModels::binned::minValue() const
 {
-    return minValue_;
+    return xy_.first()[0];
 }
 
 
 Foam::scalar Foam::distributionModels::binned::maxValue() const
 {
-    return maxValue_;
+    return xy_.last()[0];
 }
 
 
@@ -218,20 +226,14 @@ Foam::scalar Foam::distributionModels::binned::meanValue() const
 void Foam::distributionModels::binned::readData(Istream& is)
 {
 //    distributionModel::readData(is);
-    is  >> minValue_
-        >> maxValue_
-        >> binBoundaries_
-        >> values_;
+    is  >> xy_;
 }
 
 
 void Foam::distributionModels::binned::writeData(Ostream& os) const
 {
 //    distributionModel::writeData(os);
-    os  << minValue_ << token::SPACE
-        << maxValue_ << token::SPACE
-        << binBoundaries_ << token::SPACE
-        << values_;
+    os  << xy_ ;
 }
 
 
@@ -242,11 +244,7 @@ Foam::dictionary Foam::distributionModels::binned::writeDict
 {
 //    dictionary dict = distributionModel::writeDict(dictName);
     dictionary dict(dictName);
-
-    dict.add("minValue", minValue_);
-    dict.add("maxValue", maxValue_);
-    dict.add("binBoundaries", binBoundaries_);
-    dict.add("values", values_);
+    dict.add("distribution", xy_);
 
     return dict;
 }
@@ -255,26 +253,26 @@ Foam::dictionary Foam::distributionModels::binned::writeDict
 void Foam::distributionModels::binned::readDict(const dictionary& dict)
 {
 //    distributionModel::readDict(dict);
-
-    dict.lookup("minValue") >> minValue_;
-    dict.lookup("maxValue") >> maxValue_;
-    dict.lookup("binBoundaries") >> binBoundaries_;
-    dict.lookup("values") >> values_;
+    dict.lookup("distribution") >> xy_;
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const distributionModels::binned& b)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const distributionModels::binned& b
+)
 {
-    os.check("Foam::Ostream& Foam::operator<<(Ostream&, const binned&)");
+    os.check(FUNCTION_NAME);
 
     b.writeData(os);
     return os;
 }
 
 
-Foam::Istream&  Foam::operator>>(Istream& is, distributionModels::binned& b)
+Foam::Istream& Foam::operator>>(Istream& is, distributionModels::binned& b)
 {
-    is.check("Foam::Istream& Foam::operator>>(Istream&, binned&)");
+    is.check(FUNCTION_NAME);
 
     b.readData(is);
     return is;
