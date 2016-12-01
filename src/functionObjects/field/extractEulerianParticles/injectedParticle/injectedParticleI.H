@@ -30,13 +30,24 @@ inline Foam::injectedParticle::injectedParticle
 (
     const polyMesh& mesh,
     const vector& position,
+    const label tag,
     const scalar soi,
     const scalar d,
     const vector& U
 )
 :
-    particle(mesh, position, -1, false)
+    particle(mesh, position, -1, false),
+    tag_(tag),
+    soi_(soi),
+    d_(d),
+    U_(U)
 {}
+
+
+inline Foam::label Foam::injectedParticle::tag() const
+{
+    return tag_;
+}
 
 
 inline Foam::scalar Foam::injectedParticle::soi() const
@@ -54,6 +65,12 @@ inline Foam::scalar Foam::injectedParticle::d() const
 inline const Foam::vector& Foam::injectedParticle::U() const
 {
     return U_;
+}
+
+
+inline Foam::label& Foam::injectedParticle::tag()
+{
+    return tag_;
 }
 
 

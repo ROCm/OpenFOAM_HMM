@@ -119,6 +119,11 @@ void Foam::functionObjects::extractEulerianParticles::initialiseBins()
 {
     DebugInFunction << endl;
 
+    if (!nInjectorLocations_)
+    {
+        return;
+    }
+
     const faceZone& fz = mesh_.faceZones()[zoneID_];
 
     // Agglomerate faceZone faces into nInjectorLocations_ global locations
@@ -159,8 +164,9 @@ void Foam::functionObjects::extractEulerianParticles::initialiseBins()
         const vectorField& faceCentres = mesh_.faceCentres();
         const vectorField& faceAreas = mesh_.faceAreas();
         coarsePosition_.setSize(nCoarseFaces);
-        scalarField coarseArea(nCoarseFaces);
-        forAll(coarsePosition_, i)
+        coarsePosition_ = vector::zero;
+        scalarField coarseArea(nCoarseFaces, 0);
+        forAll(fz, i)
         {
             const label facei = fz[i];
             const label coarseFacei = fineToCoarseAddr_[i];
@@ -168,6 +174,7 @@ void Foam::functionObjects::extractEulerianParticles::initialiseBins()
             coarseArea[coarseFacei] += magSf;
             coarsePosition_[coarseFacei] += magSf*faceCentres[facei];
         }
+
         coarsePosition_ /= coarseArea + ROOTVSMALL;
     }
 
@@ -310,11 +317,16 @@ void Foam::functionObjects::extractEulerianParticles::collectParticles
                 const scalar d = cbrt(6*p.V/constant::mathematical::pi);
                 const point position = p.VC/(p.V + ROOTVSMALL);
                 const vector U = p.VU/(p.V + ROOTVSMALL);
-
+                label tag = -1;
+                if (nInjectorLocations_)
+                {
+                    tag = p.globalFaceIHit;
+                }
                 injectedParticle* ip = new injectedParticle
                 (
                     mesh_,
                     position,
+                    tag,
                     time,
                     d,
                     U
@@ -545,7 +557,7 @@ Foam::functionObjects::extractEulerianParticles::extractEulerianParticles
     UName_("U"),
     rhoName_("rho"),
     phiName_("phi"),
-    nInjectorLocations_(-1),
+    nInjectorLocations_(0),
     fineToCoarseAddr_(),
     coarsePosition_(),
     globalCoarseFaces_(),
@@ -555,7 +567,6 @@ Foam::functionObjects::extractEulerianParticles::extractEulerianParticles
     regionToParticleMap_(),
     minDiameter_(ROOTVSMALL),
     maxDiameter_(GREAT),
-    rndGen_(1234, -1),
     nCollectedParticles_(0),
     nDiscardedParticles_(0),
     discardedVolume_(0)
@@ -675,10 +686,7 @@ bool Foam::functionObjects::extractEulerianParticles::write()
 {
     DebugInFunction << endl;
 
-    if (Pstream::master())
-    {
-        cloud_.write();
-    }
+    cloud_.write();
 
     return true;
 }

@@ -80,6 +80,14 @@ public:
 
     //- Destructor
     virtual ~injectedParticleCloud();
+
+
+    // Member Functions
+
+        // I-O
+
+            //- Write particle fields as objects into the obr registry
+            virtual void writeObjects(objectRegistry& obr) const;
 };
 
 

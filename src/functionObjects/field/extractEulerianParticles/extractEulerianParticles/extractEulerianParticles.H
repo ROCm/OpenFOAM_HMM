@@ -172,9 +172,6 @@ protected:
             //  Can be used to filter out 'large' particles
             scalar maxDiameter_;
 
-            //- Random class needed by distribution models
-            cachedRandom rndGen_;
-
 
         // Statistics
 

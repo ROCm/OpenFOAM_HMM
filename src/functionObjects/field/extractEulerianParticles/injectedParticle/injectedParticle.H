@@ -74,6 +74,9 @@ protected:
 
         // Particle properties
 
+            //- Tag
+            label tag_;
+
             //- Start of injection [s]
             scalar soi_;
 
@@ -95,7 +98,8 @@ public:
         AddToPropertyList
         (
             particle,
-            " soi"
+            " tag"
+          + " soi"
           + " d"
           + " (Ux Uy Uz)";
         );
@@ -104,7 +108,8 @@ public:
         AddToPropertyTypes
         (
             particle,
-            "{scalar"
+            "{label"
+          + " scalar"
           + " scalar"
           + " vector}"
         );
@@ -117,6 +122,7 @@ public:
         (
             const polyMesh& mesh,
             const vector& position,
+            const label tag,
             const scalar soi,
             const scalar d,
             const vector& U
@@ -175,6 +181,9 @@ public:
 
         // Access
 
+            //- Return const access to the tag
+            inline label tag() const;
+
             //- Return const access to the start of injection
             inline scalar soi() const;
 
@@ -187,7 +196,10 @@ public:
 
         // Edit
 
-            //- Return start of injection
+            //- Return the tag
+            inline label& tag();
+
+            //- Return the start of injection
             inline scalar& soi();
 
             //- Return access to diameter
@@ -204,6 +216,13 @@ public:
 
             //- Write
             static void writeFields(const Cloud<injectedParticle>& c);
+
+            //- Write particle fields as objects into the obr registry
+            static void writeObjects
+            (
+                const Cloud<injectedParticle>& c,
+                objectRegistry& obr
+            );
 
 
     // Ostream Operator

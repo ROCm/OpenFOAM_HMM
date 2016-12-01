@@ -23,42 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "injectedParticleCloud.H"
+#include "injectedParticle.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineNamedTemplateTypeNameAndDebug(Cloud<injectedParticle>, 0);
-}
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::injectedParticleCloud::injectedParticleCloud
-(
-    const polyMesh& mesh,
-    const word& cloudName,
-    bool readFields
-)
-:
-    Cloud<injectedParticle>(mesh, cloudName, false)
-{
-    if (readFields)
-    {
-        injectedParticle::readFields(*this);
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::injectedParticleCloud::~injectedParticleCloud()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::injectedParticleCloud::writeObjects(objectRegistry& obr) const
-{
-    injectedParticle::writeObjects(*this, obr);
+    defineTypeNameAndDebug(injectedParticle, 0);
 }
 
 

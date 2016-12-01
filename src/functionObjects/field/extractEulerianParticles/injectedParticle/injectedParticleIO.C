@@ -38,7 +38,7 @@ Foam::string Foam::injectedParticle::propertyTypes_ =
 
 const std::size_t Foam::injectedParticle::sizeofFields
 (
-    sizeof(scalar) + sizeof(scalar) + sizeof(vector)
+    sizeof(label) + sizeof(scalar) + sizeof(scalar) + sizeof(vector)
 );
 
 
@@ -52,6 +52,7 @@ Foam::injectedParticle::injectedParticle
 )
 :
     particle(mesh, is, readFields),
+    tag_(-1),
     soi_(0.0),
     d_(0.0),
     U_(Zero)
@@ -60,6 +61,7 @@ Foam::injectedParticle::injectedParticle
     {
         if (is.format() == IOstream::ASCII)
         {
+            tag_ = readLabel(is);
             soi_ = readScalar(is);
             d_ = readScalar(is);
             is >> U_;
@@ -88,6 +90,9 @@ void Foam::injectedParticle::readFields(Cloud<injectedParticle>& c)
 
     particle::readFields(c);
 
+    IOField<label> tag(c.fieldIOobject("tag", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, tag);
+
     IOField<scalar> soi(c.fieldIOobject("soi", IOobject::MUST_READ));
     c.checkFieldIOobject(c, soi);
 
@@ -103,6 +108,7 @@ void Foam::injectedParticle::readFields(Cloud<injectedParticle>& c)
     {
         injectedParticle& p = iter();
 
+        p.tag_ = tag[i];
         p.soi_ = soi[i];
         p.d_ = d[i];
         p.U_ = U[i];
@@ -118,6 +124,7 @@ void Foam::injectedParticle::writeFields(const Cloud<injectedParticle>& c)
 
     label np =  c.size();
 
+    IOField<label> tag(c.fieldIOobject("tag", IOobject::NO_READ), np);
     IOField<scalar> soi(c.fieldIOobject("soi", IOobject::NO_READ), np);
     IOField<scalar> d(c.fieldIOobject("d", IOobject::NO_READ), np);
     IOField<vector> U(c.fieldIOobject("U", IOobject::NO_READ), np);
@@ -128,6 +135,7 @@ void Foam::injectedParticle::writeFields(const Cloud<injectedParticle>& c)
     {
         const injectedParticle& p = iter();
 
+        tag[i] = p.tag();
         soi[i] = p.soi();
         d[i] = p.d();
         U[i] = p.U();
@@ -135,9 +143,41 @@ void Foam::injectedParticle::writeFields(const Cloud<injectedParticle>& c)
         i++;
     }
 
+    tag.write();
     soi.write();
     d.write();
     U.write();
+}
+
+
+void Foam::injectedParticle::writeObjects
+(
+    const Cloud<injectedParticle>& c,
+    objectRegistry& obr
+)
+{
+    particle::writeObjects(c, obr);
+
+    label np = c.size();
+
+    IOField<label>& tag(cloud::createIOField<label>("tag", np, obr));
+    IOField<scalar>& soi(cloud::createIOField<scalar>("soi", np, obr));
+    IOField<scalar>& d(cloud::createIOField<scalar>("d", np, obr));
+    IOField<vector>& U(cloud::createIOField<vector>("U", np, obr));
+
+    label i = 0;
+
+    forAllConstIter(Cloud<injectedParticle>, c, iter)
+    {
+        const injectedParticle& p = iter();
+
+        tag[i] = p.tag();
+        soi[i] = p.soi();
+        d[i] = p.d();
+        U[i] = p.U();
+
+        i++;
+    }
 }
 
 
@@ -152,6 +192,7 @@ Foam::Ostream& Foam::operator<<
     if (os.format() == IOstream::ASCII)
     {
         os  << static_cast<const particle&>(p)
+            << token::SPACE << p.tag()
             << token::SPACE << p.soi()
             << token::SPACE << p.d()
             << token::SPACE << p.U();
