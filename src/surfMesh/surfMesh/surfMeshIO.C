@@ -200,4 +200,15 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
 }
 
 
+bool Foam::surfMesh::writeObject
+(
+    IOstream::streamFormat fmt,
+    IOstream::versionNumber ver,
+    IOstream::compressionType cmp
+) const
+{
+    return Allocator::writeObject(fmt, ver, cmp);
+}
+
+
 // ************************************************************************* //
