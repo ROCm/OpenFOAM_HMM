@@ -229,7 +229,6 @@ void Foam::KinematicParcel<ParcelType>::writeObjects
     objectRegistry& obr
 )
 {
-DebugInFunction << endl;
     ParcelType::writeObjects(c, obr);
 
     label np = c.size();

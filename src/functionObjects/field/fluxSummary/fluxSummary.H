@@ -41,7 +41,7 @@ Usage
     fluxSummary1
     {
         type        fluxSummary;
-        libs        ("libutilityFunctionObjects.so");
+        libs        ("libfieldFunctionObjects.so");
         ...
         write       yes;
         log         yes;
@@ -240,7 +240,7 @@ public:
 
     // Member Functions
 
-        //- Read the field min/max data
+        //- Read the field fluxSummary data
         virtual bool read(const dictionary&);
 
         //- Execute, currently does nothing

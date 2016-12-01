@@ -145,7 +145,6 @@ void Foam::ThermoParcel<ParcelType>::writeObjects
     objectRegistry& obr
 )
 {
-DebugInFunction << endl;
     ParcelType::writeObjects(c, obr);
 
     label np = c.size();
