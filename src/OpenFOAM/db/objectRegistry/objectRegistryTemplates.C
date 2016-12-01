@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ Foam::wordList Foam::objectRegistry::names() const
 
 
 template<class Type>
-Foam::wordList Foam::objectRegistry::names(const wordRe& name) const
+Foam::wordList Foam::objectRegistry::names(const wordRe& matcher) const
 {
     wordList objectNames(size());
 
@@ -60,7 +60,7 @@ Foam::wordList Foam::objectRegistry::names(const wordRe& name) const
         {
             const word& objectName = iter()->name();
 
-            if (name.match(objectName))
+            if (matcher.match(objectName))
             {
                 objectNames[count++] = objectName;
             }
@@ -74,11 +74,46 @@ Foam::wordList Foam::objectRegistry::names(const wordRe& name) const
 
 
 template<class Type>
-Foam::wordList Foam::objectRegistry::names(const wordReList& patterns) const
+Foam::wordList Foam::objectRegistry::names(const wordReList& matcher) const
 {
     wordList names(this->names<Type>());
 
-    return wordList(names, findStrings(patterns, names));
+    return wordList(names, findStrings(matcher, names));
+}
+
+
+template<class Type>
+Foam::wordList Foam::objectRegistry::sortedNames() const
+{
+    wordList sorted(this->names<Type>());
+    sort(sorted);
+
+    return sorted;
+}
+
+template<class Type>
+Foam::wordList Foam::objectRegistry::sortedNames
+(
+    const wordRe& match
+) const
+{
+    wordList sorted(this->names<Type>(match));
+    sort(sorted);
+
+    return sorted;
+}
+
+
+template<class Type>
+Foam::wordList Foam::objectRegistry::sortedNames
+(
+    const wordReList& matcher
+) const
+{
+    wordList sorted(this->names<Type>(matcher));
+    sort(sorted);
+
+    return sorted;
 }
 
 
@@ -139,40 +174,41 @@ Foam::HashTable<Type*> Foam::objectRegistry::lookupClass
 
 
 template<class Type>
-bool Foam::objectRegistry::foundObject(const word& name) const
+bool Foam::objectRegistry::foundObject
+(
+    const word& name,
+    const bool recursive
+) const
 {
-    const_iterator iter = find(name);
+    const Type* ptr = this->lookupObjectPtr<Type>(name, recursive);
 
-    if (iter != end())
+    if (ptr)
     {
-        const Type* vpsiPtr_ = dynamic_cast<const Type*>(iter());
-
-        if (vpsiPtr_)
-        {
-            return true;
-        }
+        return true;
     }
-    else if (this->parentNotTime())
+    else
     {
-        return parent_.foundObject<Type>(name);
+        return false;
     }
-
-    return false;
 }
 
 
 template<class Type>
-const Type& Foam::objectRegistry::lookupObject(const word& name) const
+const Type& Foam::objectRegistry::lookupObject
+(
+    const word& name,
+    const bool recursive
+) const
 {
     const_iterator iter = find(name);
 
     if (iter != end())
     {
-        const Type* vpsiPtr_ = dynamic_cast<const Type*>(iter());
+        const Type* ptr = dynamic_cast<const Type*>(iter());
 
-        if (vpsiPtr_)
+        if (ptr)
         {
-            return *vpsiPtr_;
+            return *ptr;
         }
 
         FatalErrorInFunction
@@ -183,24 +219,75 @@ const Type& Foam::objectRegistry::lookupObject(const word& name) const
             << ", it is a " << iter()->type()
             << abort(FatalError);
     }
-    else
+    else if (recursive && this->parentNotTime())
     {
-        if (this->parentNotTime())
-        {
-            return parent_.lookupObject<Type>(name);
-        }
-
-        FatalErrorInFunction
-            << nl
-            << "    request for " << Type::typeName
-            << " " << name << " from objectRegistry " << this->name()
-            << " failed\n    available objects of type " << Type::typeName
-            << " are" << nl
-            << names<Type>()
-            << abort(FatalError);
+        return parent_.lookupObject<Type>(name, recursive);
     }
 
+    FatalErrorInFunction
+        << nl
+        << "    request for " << Type::typeName
+        << " " << name << " from objectRegistry " << this->name()
+        << " failed\n    available objects of type " << Type::typeName
+        << " are" << nl
+        << names<Type>()
+        << abort(FatalError);
+
     return NullObjectRef<Type>();
+}
+
+
+template<class Type>
+Type& Foam::objectRegistry::lookupObjectRef
+(
+    const word& name,
+    const bool recursive
+) const
+{
+    const Type& ref = this->lookupObject<Type>(name, recursive);
+    // The above will already fail if things didn't work
+
+    return const_cast<Type&>(ref);
+}
+
+
+template<class Type>
+const Type* Foam::objectRegistry::lookupObjectPtr
+(
+    const word& name,
+    const bool recursive
+) const
+{
+    const_iterator iter = find(name);
+
+    if (iter != end())
+    {
+        const Type* ptr = dynamic_cast<const Type*>(iter());
+
+        if (ptr)
+        {
+            return ptr;
+        }
+    }
+    else if (recursive && this->parentNotTime())
+    {
+        return parent_.lookupObjectPtr<Type>(name, recursive);
+    }
+
+    return nullptr;
+}
+
+
+template<class Type>
+Type* Foam::objectRegistry::lookupObjectRefPtr
+(
+    const word& name,
+    const bool recursive
+) const
+{
+    const Type* ptr = this->lookupObjectPtr<Type>(name, recursive);
+
+    return const_cast<Type*>(ptr);
 }
 
 

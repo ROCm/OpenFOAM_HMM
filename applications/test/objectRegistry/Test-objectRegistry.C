@@ -76,9 +76,8 @@ void printRegistry
     Foam::label indent
 )
 {
-    hashedWordList regs = obr.names<objectRegistry>();
-    regs.sort();
     wordList names = obr.sortedNames();
+    hashedWordList regs = obr.sortedNames<objectRegistry>();
 
     std::string prefix;
     for (label i=indent; i; --i)
@@ -121,7 +120,8 @@ void printRegistry
         const word& name = regs[i];
         const objectRegistry& next = obr.lookupObject<objectRegistry>
         (
-            name
+            name,
+            recursive
         );
 
         os  << prefix.c_str()
@@ -158,13 +158,13 @@ int main(int argc, char *argv[])
         "skip",
         "skip some parts"
     );
-    // argList::validArgs.append("recursive (true|false)");
+    argList::validArgs.append("recursive (true|false)");
 
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createPolyMesh.H"
 
-    // recursive = Switch(args[1]);
+    recursive = Switch(args[1]);
 
     const bool optMesh   = args.optionFound("mesh");
     const bool optSkip   = args.optionFound("skip");
@@ -183,7 +183,8 @@ int main(int argc, char *argv[])
         db.subRegistry
         (
             entryName,
-            true
+            true,
+            recursive
         );
     }
 
@@ -200,7 +201,8 @@ int main(int argc, char *argv[])
         const objectRegistry& subreg = db.subRegistry
         (
             regName,
-            true
+            true,
+            recursive
         );
 
         for (label j = 0; j < 3; ++j)
@@ -210,12 +212,14 @@ int main(int argc, char *argv[])
             subreg.subRegistry
             (
                 entryName,
-                true
+                true,
+                recursive
             );
             subreg.subRegistry
             (
                 "$" + entryName, // qualified to avoid collisions
-                true
+                true,
+                recursive
             );
         }
     }
@@ -231,7 +235,8 @@ int main(int argc, char *argv[])
         db.subRegistry
         (
             entryName,
-            true
+            true,
+            recursive
         );
     }
 
@@ -249,7 +254,8 @@ int main(int argc, char *argv[])
         const objectRegistry& subreg = db.subRegistry
         (
             regName,
-            false
+            false,
+            recursive
         );
 
         if (!optSkip)
@@ -261,7 +267,8 @@ int main(int argc, char *argv[])
                 subreg.subRegistry
                 (
                     entryName,
-                    true
+                    true,
+                    recursive
                 );
             }
         }
