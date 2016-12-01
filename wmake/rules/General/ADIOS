@@ -4,16 +4,8 @@
 sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
 sinclude $(RULES)/mplib$(WM_MPLIB)
 
-ADIOS_INC = -I$(ADIOS_ARCH_PATH)/include
-
-ADIOS_LIBS := \
-    -L$(ADIOS_ARCH_PATH)/lib$(WM_COMPILER_LIB_ARCH) \
-    -ladios_$(FOAM_MPI)
-
-# ADIOS dependent libraries. Eg, after -L/usr/lib64 ...
-# Query as sequential to reduce mpi-dependencies
-
-ADIOS_LIBS +=
-    $(shell $(ADIOS_ARCH_PATH)/bin/adios_config -s -l | sed -e 's@^.*-L/usr/lib[^ ]*@@')
+# Obtain compile/link flags via adios_config
+ADIOS_INC  := $(shell $(ADIOS_ARCH_PATH)/bin/adios_config -c)
+ADIOS_LIBS := $(shell $(ADIOS_ARCH_PATH)/bin/adios_config -l)
 
 #------------------------------------------------------------------------------

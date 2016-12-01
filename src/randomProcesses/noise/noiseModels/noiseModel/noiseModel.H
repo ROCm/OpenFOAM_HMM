@@ -124,7 +124,7 @@ protected:
         scalar checkUniformTimeStep
         (
             const scalarList& times
-        ) const; 
+        ) const;
 
         //- Find and return start time index
         label findStartTimeIndex
@@ -139,7 +139,7 @@ public:
     //- Runtime type information
     TypeName("noiseModel");
 
-    //- Run time selection table  
+    //- Run time selection table
     declareRunTimeSelectionTable
     (
         autoPtr,
@@ -155,13 +155,16 @@ public:
     static autoPtr<noiseModel> New(const dictionary& dict);
 
     //- Constructor
-    noiseModel(const dictionary& dict);
+    noiseModel(const dictionary& dict, const bool readFields = true);
 
     //- Destructor
     virtual ~noiseModel();
 
 
     // Public Member Functions
+
+        //- Read from dictionary
+        virtual bool read(const dictionary& dict);
 
         //- Abstract call to calculate
         virtual void calculate() = 0;

@@ -95,9 +95,6 @@ class zeroGradient
 {
     // Private data
 
-        //- Time at last execute, ensures write uses up-to-date values
-        label prevTimeIndex_;
-
         //- Name of fields to process
         wordReList selectFields_;
 

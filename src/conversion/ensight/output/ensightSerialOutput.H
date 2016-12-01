@@ -55,12 +55,12 @@ class ensightSerialOutput
 {
     // Private Methods
 
-    //- Write field component-wise
-    template<class Type>
-    static void writeField
+    //- Write field content (component-wise) for the given ensight element type
+    template<template<typename> class FieldContainer, class Type>
+    static void writeFieldContent
     (
         const word& key,
-        const Field<Type>& field,
+        const FieldContainer<Type>& fld,
         ensightFile& os
     );
 

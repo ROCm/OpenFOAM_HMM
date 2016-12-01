@@ -258,9 +258,9 @@ void Foam::ensightMesh::correct()
         Foam::sort(selectZones);
 
         // Count face types in each selected faceZone
-        forAll(selectZones, zoneI)
+        forAll(selectZones, zonei)
         {
-            const word& zoneName = selectZones[zoneI];
+            const word& zoneName = selectZones[zonei];
             const label zoneID = mesh_.faceZones().findZoneID(zoneName);
             const faceZone& fz = mesh_.faceZones()[zoneID];
 
@@ -342,12 +342,12 @@ void Foam::ensightMesh::write(ensightGeoFile& os) const
             (
                 pp.meshPoints(),
                 pp.meshPointMap(),
-                pointToGlobal,
-                uniqueMeshPointLabels
+                pointToGlobal, // local patch point to unique global index
+                uniqueMeshPointLabels // unique global points
             );
 
-        pointField uniquePoints(mesh_.points(), uniqueMeshPointLabels);
-        // Renumber the patch faces
+        // Renumber the patch faces,
+        // from local patch indexing to unique global index
         faceList patchFaces(pp.localFaces());
         forAll(patchFaces, i)
         {
@@ -359,7 +359,7 @@ void Foam::ensightMesh::write(ensightGeoFile& os) const
             ensFaces.index(),
             patchName,
             globalPointsPtr().size(),
-            uniquePoints,
+            pointField(mesh_.points(), uniqueMeshPointLabels),
             os
         );
 
@@ -391,30 +391,28 @@ void Foam::ensightMesh::write(ensightGeoFile& os) const
                 uniqueMeshPointLabels
             );
 
-        pointField uniquePoints(mesh_.points(), uniqueMeshPointLabels);
-
-        primitiveFacePatch facePatch
+        // Make a copy in the proper order
+        primitiveFacePatch pp
         (
             faceList(mesh_.faces(), ensFaces.faceIds()),
             mesh_.points()
         );
 
         const boolList& flip = ensFaces.flipMap();
-        forAll(facePatch[faceI], faceI)
+        forAll(pp, facei)
         {
-            if (flip[faceI])
+            if (flip[facei])
             {
-                facePatch[faceI].flip();
+                pp[facei].flip();
             }
         }
 
-        // Faces belonging to the faceZone, in local numbering
-        faceList localFaces(facePatch.localFaces());
-
-        // Renumber the faceZone master faces
-        forAll(localFaces, i)
+        // Renumber the faces belonging to the faceZone,
+        // from local numbering to unique global index
+        faceList patchFaces(pp.localFaces());
+        forAll(patchFaces, i)
         {
-            inplaceRenumber(pointToGlobal, localFaces[i]);
+            inplaceRenumber(pointToGlobal, patchFaces[i]);
         }
 
         writeAllPoints
@@ -422,11 +420,11 @@ void Foam::ensightMesh::write(ensightGeoFile& os) const
             ensFaces.index(),
             zoneName,
             globalPointsPtr().size(),
-            uniquePoints,
+            pointField(mesh_.points(), uniqueMeshPointLabels),
             os
         );
 
-        writeFaceConnectivity(ensFaces, localFaces, os, true);
+        writeFaceConnectivity(ensFaces, patchFaces, os, true);
     }
 }
 

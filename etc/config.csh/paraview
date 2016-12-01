@@ -41,17 +41,17 @@
 #     If using a central installation not located under ThirdParty, you will
 #     need to set some environment values directly. For example,
 #
-#         setenv ParaView_DIR /opt/paraview/paraview-5.2.0
-#         setenv ParaView_INCLUDE_DIR $ParaView_DIR/include/paraview-5.2
-#         setenv PV_PLUGIN_PATH $FOAM_LIBBIN/paraview-5.2
+#         setenv ParaView_DIR /opt/paraview/paraview-5.0.1
+#         setenv ParaView_INCLUDE_DIR $ParaView_DIR/include/paraview-5.0
+#         setenv PV_PLUGIN_PATH $FOAM_LIBBIN/paraview-5.0
 #
 #         setenv PATH ${ParaView_DIR}/bin:${PATH}
-#         setenv LD_LIBRARY_PATH ${ParaView_DIR}/lib/paraview-5.2:${LD_LIBRARY_PATH}
+#         setenv LD_LIBRARY_PATH ${ParaView_DIR}/lib/paraview-5.0:${LD_LIBRARY_PATH}
 #         unsetenv ParaView_VERSION     # avoid using ThirdParty settings
 #
 #------------------------------------------------------------------------------
 
-setenv ParaView_VERSION 5.2.0
+setenv ParaView_VERSION 5.0.1
 setenv ParaView_MAJOR detect            # Automatically determine major version
 
 set cmake_version=cmake-system
@@ -66,7 +66,8 @@ if ( $status == 0 ) setenv PATH $cleaned
 # ThirdParty cmake
 set cmake=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cmake_version
 if ( -r $cmake/bin/cmake ) then
-    _foamAddPath $cmake/bin
+    # _foamAddPath not available when foamPV alias is used
+    setenv PATH $cmake/bin:${PATH}
 endif
 
 # Evaluate command-line parameters for ParaView
@@ -101,12 +102,11 @@ if ( $?ParaView_VERSION ) then
 
     set pvName=ParaView-$ParaView_VERSION
     set pvMajor=paraview-$ParaView_MAJOR
-    set pvSrcDir=$WM_THIRD_PARTY_DIR/$pvName
 
     setenv ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$pvName
 
-    # Set paths if binaries or source are present
-    if ( -r $ParaView_DIR || -r $pvSrcDir ) then
+    # Set paths if binaries are present
+    if ( -r $ParaView_DIR ) then
         set pvLibDir=${ParaView_DIR}/lib/$pvMajor
         set pvPython=$ParaView_DIR/Utilities/VTKPythonWrapping
 
@@ -132,13 +132,18 @@ if ( $?ParaView_VERSION ) then
             echo "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH"
         endif
     else
+        if ($?FOAM_VERBOSE && $?prompt) then
+            echo "No paraview found"
+            echo "    ParaView_DIR         : $ParaView_DIR"
+        endif
+
         unsetenv ParaView_INCLUDE_DIR PV_PLUGIN_PATH
         setenv ParaView_DIR   # Defined but empty (used by foamPV alias)
     endif
 
 endif
 
-unset cleaned cmake cmake_version pvName pvMajor pvSrcDir pvLibDir pvPython
-unsetenv ParaView_VERSION ParaView_MAJOR
+unset cleaned cmake cmake_version pvName pvMajor pvLibDir pvPython
+unsetenv ParaView_MAJOR ParaView_VERSION
 
 #------------------------------------------------------------------------------

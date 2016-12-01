@@ -35,7 +35,7 @@
 #------------------------------------------------------------------------------
 
 #
-# Use other (shipped) paraview.csh with a different ParaView_VERSION
+# Use other (shipped) paraview with a different ParaView_VERSION
 #
 
 set foamFile=`$WM_PROJECT_DIR/bin/foamEtcFile -mode o config.csh/paraview`
