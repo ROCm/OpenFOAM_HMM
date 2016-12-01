@@ -74,8 +74,11 @@ externalCoupled/externalCoupledTemperatureMixed/externalCoupledTemperatureMixedF
 
 extractEulerianParticles/extractEulerianParticles/extractEulerianParticles.C
 extractEulerianParticles/eulerianParticle/eulerianParticle.C
+extractEulerianParticles/injectedParticle/injectedParticle.C
 extractEulerianParticles/injectedParticle/injectedParticleIO.C
 extractEulerianParticles/injectedParticle/injectedParticleCloud.C
+
+particleDistribution/particleDistribution.C
 
 
 ddt2/ddt2.C
