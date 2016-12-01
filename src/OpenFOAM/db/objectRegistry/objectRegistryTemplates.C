@@ -127,11 +127,7 @@ Foam::HashTable<const Type*> Foam::objectRegistry::lookupClass
 
     forAllConstIter(HashTable<regIOobject*>, *this, iter)
     {
-        if
-        (
-            (strict && isType<Type>(*iter()))
-         || (!strict && isA<Type>(*iter()))
-        )
+        if (strict ? isType<Type>(*iter()) : isA<Type>(*iter()))
         {
             objectsOfClass.insert
             (
@@ -155,11 +151,7 @@ Foam::HashTable<Type*> Foam::objectRegistry::lookupClass
 
     forAllIter(HashTable<regIOobject*>, *this, iter)
     {
-        if
-        (
-            (strict && isType<Type>(*iter()))
-         || (!strict && isA<Type>(*iter()))
-        )
+        if (strict ? isType<Type>(*iter()) : isA<Type>(*iter()))
         {
             objectsOfClass.insert
             (
