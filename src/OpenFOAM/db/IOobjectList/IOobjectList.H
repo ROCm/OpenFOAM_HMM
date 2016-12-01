@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,7 @@ class IOobjectList
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const IOobjectList&);
+        void operator=(const IOobjectList&) = delete;
 
 
 public:
@@ -104,17 +104,35 @@ public:
         //- Return the list for all IOobjects of a given class
         IOobjectList lookupClass(const word& className) const;
 
-        //- Return the list of names of the IOobjects
+
+        //- A list of names of the IOobjects
         wordList names() const;
 
-        //- Return the sorted list of names of the IOobjects
-        wordList sortedNames() const;
-
-        //- Return the list of names of the IOobjects of given class
+        //- A list of names of IOobjects of the given class
         wordList names(const word& className) const;
 
-        //- Return the sorted list of names of the IOobjects of given class
+        //- A list of names of IOobjects of the given class,
+        //  and that also satisfy the input matcher
+        wordList names(const word& className, const wordRe&) const;
+
+        //- A list of names of IOobjects of the given class,
+        //  and that also satisfy the input matchers
+        wordList names(const word& className, const wordReList&) const;
+
+
+        //- A sorted list of names of the IOobjects
+        wordList sortedNames() const;
+
+        //- A sorted list of names of IOobjects of given class
         wordList sortedNames(const word& className) const;
+
+        //- A sorted list of names of IOobjects of the given class,
+        //  and that also satisfy the input matcher
+        wordList sortedNames(const word& className, const wordRe&) const;
+
+        //- A sorted list of names of IOobjects of the given class,
+        //  and that also satisfy the input matchers
+        wordList sortedNames(const word& className, const wordReList&) const;
 };
 
 
