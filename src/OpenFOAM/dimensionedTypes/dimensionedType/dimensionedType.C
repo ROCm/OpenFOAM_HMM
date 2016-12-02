@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -165,6 +165,18 @@ Foam::dimensioned<Type>::dimensioned
 :
     name_("undefined"),
     dimensions_(dimless),
+    value_(Zero)
+{}
+
+
+template<class Type>
+Foam::dimensioned<Type>::dimensioned
+(
+    const dimensionSet& dimSet
+)
+:
+    name_("0"),
+    dimensions_(dimSet),
     value_(Zero)
 {}
 
