@@ -114,8 +114,16 @@ Usage
         minDiameter  | minimum region equivalent diameter | no  | 0
         setFormat    | writing format          | yes         |
         origin       | origin of local co-ordinate system | yes    |
-        coordinateRoation | orientation of local co-ordinate system | no         |
+        coordinateRoation | orientation of local co-ordinate system | no
         log          | Log to standard output  | no          | yes
+        isoPlanes    | switch for isoPlanes    | no          | false
+        origin       | origin of the plane when isoPlanes is used | no | none
+        direction    | direction of the plane when isoPlanes is used | no | none
+        maxDiameter  | maximum diameter of the sampling cylinder when
+                       isoPlanes is used | no | none
+        nDownstreamBins  | number of bins when isoPlanes is used | no | none
+        maxDownstream  | maximum distance from origin when isoPlanes is used
+                       | no | none
     \endtable
 
 See also
