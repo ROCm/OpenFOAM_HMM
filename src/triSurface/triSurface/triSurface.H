@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,7 @@ namespace Foam
 
 class Time;
 class IFstream;
-
+class surfZone;
 
 // Forward declaration of friend functions and operators
 
@@ -354,6 +354,17 @@ public:
             }
 
 
+        // Interoperability with other surface mesh classes
+
+            //- Sort faces according to zoneIds
+            //  Returns a surfZoneList and sets faceMap to index within faces()
+            //  (i.e. map from original,unsorted to sorted)
+            List<surfZone> sortedZones(labelList& faceMap) const;
+
+            //- Create a list of faces from the triFaces
+            void triFaceFaces(List<face>& plainFaceList) const;
+
+
         // Edit
 
             //- Move points
@@ -410,6 +421,10 @@ public:
                 labelList& pointMap,
                 labelList& faceMap
             ) const;
+
+
+            //- Transfer stored points to an Xfer container
+            Xfer<List<point>> xferPoints();
 
 
         // Write

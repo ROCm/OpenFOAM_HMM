@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "noClean",
-        "perform some surface checking/cleanup on the input surface"
+        "suppress surface checking/cleanup on the input surface"
     );
     argList args(argc, argv);
 

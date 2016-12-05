@@ -169,7 +169,7 @@ public:
         //- For every face original cell in mesh
         const labelList& meshCells() const
         {
-            return cuttingPlane::cutCells();
+            return cuttingPlane::meshCells();
         }
 
         //- Sample field on surface

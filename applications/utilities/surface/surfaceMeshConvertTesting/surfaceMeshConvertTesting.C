@@ -91,7 +91,11 @@ int main(int argc, char *argv[])
     argList::validArgs.append("inputFile");
     argList::validArgs.append("outputFile");
 
-    argList::addBoolOption("clean");
+    argList::addBoolOption
+    (
+        "clean",
+        "perform some surface checking/cleanup on the input surface"
+    );
     argList::addBoolOption
     (
         "orient",

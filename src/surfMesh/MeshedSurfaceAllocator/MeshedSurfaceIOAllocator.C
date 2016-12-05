@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,7 +72,31 @@ Foam::MeshedSurfaceIOAllocator::MeshedSurfaceIOAllocator
 {}
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::MeshedSurfaceIOAllocator::~MeshedSurfaceIOAllocator()
+{
+    clear();
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::MeshedSurfaceIOAllocator::setInstance(const fileName& inst)
+{
+    points_.instance() = inst;
+    faces_.instance()  = inst;
+    zones_.instance()  = inst;
+}
+
+
+void Foam::MeshedSurfaceIOAllocator::setWriteOption(IOobject::writeOption w)
+{
+    points_.writeOpt() = w;
+    faces_.writeOpt()  = w;
+    zones_.writeOpt()  = w;
+}
+
 
 void Foam::MeshedSurfaceIOAllocator::clear()
 {
@@ -133,6 +157,22 @@ void Foam::MeshedSurfaceIOAllocator::reset
     }
 
     resetFaces(faces, zones);
+}
+
+
+bool Foam::MeshedSurfaceIOAllocator::writeObject
+(
+    IOstream::streamFormat fmt,
+    IOstream::versionNumber ver,
+    IOstream::compressionType cmp
+) const
+{
+    return
+    (
+        points_.writeObject(fmt, ver, cmp)
+     && faces_.writeObject(fmt, ver, cmp)
+     && zones_.writeObject(fmt, ver, cmp)
+    );
 }
 
 

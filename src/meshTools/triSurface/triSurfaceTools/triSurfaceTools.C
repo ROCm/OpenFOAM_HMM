@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 #include "triSurfaceTools.H"
 
 #include "triSurface.H"
+#include "MeshedSurface.H"
 #include "OFstream.H"
 #include "mergePoints.H"
 #include "polyMesh.H"
@@ -2743,8 +2744,168 @@ void Foam::triSurfaceTools::calcInterpolationWeights
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Tracking:
+// Checking:
 
+bool Foam::triSurfaceTools::validTri
+(
+    const triSurface& surf,
+    const label facei
+)
+{
+    typedef labelledTri FaceType;
+    const FaceType& f = surf[facei];
+
+    // Simple check on indices ok.
+    forAll(f, fp)
+    {
+        if (f[fp] < 0 || f[fp] >= surf.points().size())
+        {
+            WarningInFunction
+                << "triangle " << facei << " vertices " << f
+                << " uses point indices outside point range 0.."
+                << surf.points().size()-1
+                << endl;
+            return false;
+        }
+    }
+
+    if (f[0] == f[1] || f[0] == f[2] || f[1] == f[2])
+    {
+        WarningInFunction
+            << "triangle " << facei
+            << " uses non-unique vertices " << f
+            << " coords:" << f.points(surf.points())
+            << endl;
+        return false;
+    }
+
+    // duplicate triangle check
+
+    const labelList& fFaces = surf.faceFaces()[facei];
+
+    // Check if faceNeighbours use same points as this face.
+    // Note: discards normal information - sides of baffle are merged.
+    forAll(fFaces, i)
+    {
+        label nbrFacei = fFaces[i];
+
+        if (nbrFacei <= facei)
+        {
+            // lower numbered faces already checked
+            continue;
+        }
+
+        const FaceType& nbrF = surf[nbrFacei];
+
+        // Same as calling triFace::compare(f, nbrF) == 1 only
+        if
+        (
+            (f[0] == nbrF[0] || f[0] == nbrF[1] || f[0] == nbrF[2])
+         && (f[1] == nbrF[0] || f[1] == nbrF[1] || f[1] == nbrF[2])
+         && (f[2] == nbrF[0] || f[2] == nbrF[1] || f[2] == nbrF[2])
+        )
+        {
+            WarningInFunction
+                << "triangle " << facei << " vertices " << f
+                << " has the same vertices as triangle " << nbrFacei
+                << " vertices " << nbrF
+                << " coords:" << f.points(surf.points())
+                << endl;
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+bool Foam::triSurfaceTools::validTri
+(
+    const MeshedSurface<face>& surf,
+    const label facei
+)
+{
+    typedef face FaceType;
+    const FaceType& f = surf[facei];
+
+    if (f.size() != 3)
+    {
+        WarningInFunction
+            << "face " << facei
+            << " is not a triangle, it has " << f.size()
+            << " indices"
+            << endl;
+        return false;
+    }
+
+    // Simple check on indices ok.
+    forAll(f, fp)
+    {
+        if (f[fp] < 0 || f[fp] >= surf.points().size())
+        {
+            WarningInFunction
+                << "triangle " << facei << " vertices " << f
+                << " uses point indices outside point range 0.."
+                << surf.points().size()-1
+                << endl;
+            return false;
+        }
+    }
+
+    if (f[0] == f[1] || f[0] == f[2] || f[1] == f[2])
+    {
+        WarningInFunction
+            << "triangle " << facei
+            << " uses non-unique vertices " << f
+            << " coords:" << f.points(surf.points())
+            << endl;
+        return false;
+    }
+
+    // duplicate triangle check
+
+    const labelList& fFaces = surf.faceFaces()[facei];
+
+    // Check if faceNeighbours use same points as this face.
+    // Note: discards normal information - sides of baffle are merged.
+    forAll(fFaces, i)
+    {
+        label nbrFacei = fFaces[i];
+
+        if (nbrFacei <= facei)
+        {
+            // lower numbered faces already checked
+            continue;
+        }
+
+        const FaceType& nbrF = surf[nbrFacei];
+
+        // Same as calling triFace::compare(f, nbrF) == 1 only
+        if
+        (
+            (f[0] == nbrF[0] || f[0] == nbrF[1] || f[0] == nbrF[2])
+         && (f[1] == nbrF[0] || f[1] == nbrF[1] || f[1] == nbrF[2])
+         && (f[2] == nbrF[0] || f[2] == nbrF[1] || f[2] == nbrF[2])
+        )
+        {
+            WarningInFunction
+                << "triangle " << facei << " vertices " << f
+                << " has the same vertices as triangle " << nbrFacei
+                << " vertices " << nbrF
+                << " coords:" << f.points(surf.points())
+                << endl;
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Tracking:
 
 // Test point on surface to see if is on face,edge or point.
 Foam::surfaceLocation Foam::triSurfaceTools::classify

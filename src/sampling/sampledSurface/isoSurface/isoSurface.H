@@ -377,9 +377,6 @@ class isoSurface
             List<FixedList<scalar, 3>>& interpolationWeights
         );
 
-        //- Check single triangle for (topological) validity
-        static bool validTri(const triSurface&, const label facei);
-
         static triSurface subsetMesh
         (
             const triSurface& s,

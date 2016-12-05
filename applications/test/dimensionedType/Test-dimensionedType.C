@@ -81,6 +81,10 @@ int main(int argc, char *argv[])
     }
 
 
+    Pout<< "zero scalar (time): " << dimensionedScalar(dimTime) << endl;
+    Pout<< "zero vector: " << dimensionedVector(dimLength) << endl;
+    Pout<< "zero tensor: " << dimensionedTensor(dimLength) << endl;
+
     Info<< "End\n" << endl;
 
     return 0;
