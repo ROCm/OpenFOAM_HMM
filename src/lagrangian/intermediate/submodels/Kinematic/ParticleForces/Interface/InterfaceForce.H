@@ -57,13 +57,13 @@ class InterfaceForce
 {
     // Private data
 
-        //- Name of VOF field
-        const word alpaName_;
+        //- Name of phase fraction field
+        const word alphaName_;
 
         //- Model constant
         const scalar C_;
 
-        //- gradInterForce interpolator
+        //- Interpolator for gradInterForce
         autoPtr<interpolation<vector>> gradInterForceInterpPtr_;
 
 

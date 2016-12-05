@@ -40,7 +40,7 @@ boundaryField
     wall2
     {
         type            copiedFixedValue;
-        sourceFieldName T.liquid;
+        sourceField     T.liquid;
         value           uniform 368;
     }
     defaultFaces

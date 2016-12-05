@@ -20,5 +20,6 @@ EXE_INC = \
     -I/usr/include/Qt
 
 LIB_LIBS = \
+    -L$(CGAL_ARCH_PATH)/lib \
     -L$(CGAL_ARCH_PATH)/lib$(WM_COMPILER_LIB_ARCH) \
     -ltriSurface

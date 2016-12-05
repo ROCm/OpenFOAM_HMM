@@ -41,7 +41,7 @@ Foam::surfZoneIdentifier::surfZoneIdentifier()
 {}
 
 
-Foam::surfZoneIdentifier::surfZoneIdentifier(label index)
+Foam::surfZoneIdentifier::surfZoneIdentifier(const label index)
 :
     name_(),
     index_(index),

@@ -11,7 +11,7 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      SurfaceFilmProperties;
+    object      surfaceFilmProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -19,7 +19,7 @@ active          true;
 
 surfaceFilmModel thermoSingleLayer;
 
-regionName      filmRegion;
+region          filmRegion;
 
 thermoSingleLayerCoeffs
 {

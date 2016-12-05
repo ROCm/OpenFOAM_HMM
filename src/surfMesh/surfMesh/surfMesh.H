@@ -186,7 +186,7 @@ public:
 
     // Member Functions
 
-        // Database
+      // Database
 
             //- Return the local mesh directory (dbDir()/meshSubDir)
             fileName meshDir() const;
@@ -200,10 +200,17 @@ public:
             const fileName& facesInstance() const;
 
             //- Set the instance for mesh files
-            void setInstance(const fileName&);
+            void setInstance
+            (
+                const fileName&,
+                IOobject::writeOption = IOobject::AUTO_WRITE
+            );
+
+            //- Adjust the write option for all components
+            void setWriteOption(IOobject::writeOption);
 
 
-        // Access
+      // Access
 
             //- Return the number of raw points
             virtual label nPoints() const;
@@ -263,7 +270,6 @@ public:
             //  time directories
             virtual readUpdateState readUpdate();
 
-            //- Update the mesh corresponding to given map
 
             //- Remove surface zones
             void removeZones();
@@ -291,8 +297,18 @@ public:
             void transfer(MeshedSurface<face>&);
 
 
+      // Writing
+
         //- Avoid masking the normal objectRegistry write
         using surfaceRegistry::write;
+
+        //- Write all components using given format, version and compression
+        virtual bool writeObject
+        (
+            IOstream::streamFormat fmt,
+            IOstream::versionNumber ver,
+            IOstream::compressionType cmp
+        ) const;
 
         //- Write to file
         static void write(const fileName&, const surfMesh&);
@@ -300,7 +316,8 @@ public:
         //- Write to file
         void write(const fileName&);
 
-        //  Storage management
+
+      // Storage management
 
             //- Transfer contents to the Xfer container as a MeshedSurface
             Xfer<MeshedSurface<face>> xfer();
@@ -322,6 +339,7 @@ public:
 
             //- Remove all files from mesh instance()
             void removeFiles() const;
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

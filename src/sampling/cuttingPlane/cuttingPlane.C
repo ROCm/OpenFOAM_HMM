@@ -55,7 +55,7 @@ void Foam::cuttingPlane::calcCutCells
         listSize = cellIdLabels.size();
     }
 
-    cutCells_.setSize(listSize);
+    meshCells_.setSize(listSize);
     label cutcelli(0);
 
     // Find the cut cells by detecting any cell that uses points with
@@ -70,9 +70,7 @@ void Foam::cuttingPlane::calcCutCells
         }
 
         const labelList& cEdges = cellEdges[celli];
-
         label nCutEdges = 0;
-
         forAll(cEdges, i)
         {
             const edge& e = edges[cEdges[i]];
@@ -87,8 +85,7 @@ void Foam::cuttingPlane::calcCutCells
 
                 if (nCutEdges > 2)
                 {
-                    cutCells_[cutcelli++] = celli;
-
+                    meshCells_[cutcelli++] = celli;
                     break;
                 }
             }
@@ -96,7 +93,7 @@ void Foam::cuttingPlane::calcCutCells
     }
 
     // Set correct list size
-    cutCells_.setSize(cutcelli);
+    meshCells_.setSize(cutcelli);
 }
 
 
@@ -114,7 +111,7 @@ void Foam::cuttingPlane::intersectEdges
     // Per edge -1 or the label of the intersection point
     edgePoint.setSize(edges.size());
 
-    DynamicList<point> dynCuttingPoints(4*cutCells_.size());
+    DynamicList<point> dynCuttingPoints(4*meshCells_.size());
 
     forAll(edges, edgeI)
     {
@@ -258,15 +255,15 @@ void Foam::cuttingPlane::walkCellCuts
     const pointField& cutPoints = this->points();
 
     // use dynamic lists to handle triangulation and/or missed cuts
-    DynamicList<face>  dynCutFaces(cutCells_.size());
-    DynamicList<label> dynCutCells(cutCells_.size());
+    DynamicList<face>  dynCutFaces(meshCells_.size());
+    DynamicList<label> dynCutCells(meshCells_.size());
 
     // scratch space for calculating the face vertices
     DynamicList<label> faceVerts(10);
 
-    forAll(cutCells_, i)
+    forAll(meshCells_, i)
     {
-        label celli = cutCells_[i];
+        label celli = meshCells_[i];
 
         // Find the starting edge to walk from.
         const labelList& cEdges = mesh.cellEdges()[celli];
@@ -330,20 +327,18 @@ void Foam::cuttingPlane::walkCellCuts
     }
 
     this->storedFaces().transfer(dynCutFaces);
-    cutCells_.transfer(dynCutCells);
+    meshCells_.transfer(dynCutCells);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct without cutting
 Foam::cuttingPlane::cuttingPlane(const plane& pln)
 :
     plane(pln)
 {}
 
 
-// Construct from plane and mesh reference, restricted to a list of cells
 Foam::cuttingPlane::cuttingPlane
 (
     const plane& pln,
@@ -369,7 +364,7 @@ void Foam::cuttingPlane::reCut
 )
 {
     MeshStorage::clear();
-    cutCells_.clear();
+    meshCells_.clear();
 
     const scalarField dotProducts((mesh.points() - refPoint()) & normal());
 
@@ -391,7 +386,7 @@ void Foam::cuttingPlane::remapFaces
     const labelUList& faceMap
 )
 {
-    // recalculate the cells cut
+    // Recalculate the cells cut
     if (notNull(faceMap) && faceMap.size())
     {
         MeshStorage::remapFaces(faceMap);
@@ -399,9 +394,9 @@ void Foam::cuttingPlane::remapFaces
         List<label> newCutCells(faceMap.size());
         forAll(faceMap, facei)
         {
-            newCutCells[facei] = cutCells_[faceMap[facei]];
+            newCutCells[facei] = meshCells_[faceMap[facei]];
         }
-        cutCells_.transfer(newCutCells);
+        meshCells_.transfer(newCutCells);
     }
 }
 
@@ -420,7 +415,7 @@ void Foam::cuttingPlane::operator=(const cuttingPlane& rhs)
 
     static_cast<MeshStorage&>(*this) = rhs;
     static_cast<plane&>(*this) = rhs;
-    cutCells_ = rhs.cutCells();
+    meshCells_ = rhs.meshCells();
 }
 
 

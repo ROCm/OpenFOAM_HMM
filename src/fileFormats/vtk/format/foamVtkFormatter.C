@@ -116,7 +116,7 @@ Foam::foamVtkFormatter::openTag(const word& tag)
 
 
 Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::closeTag(bool isEmpty)
+Foam::foamVtkFormatter::closeTag(const bool isEmpty)
 {
     if (!inTag_)
     {
@@ -207,20 +207,23 @@ Foam::foamVtkFormatter&
 Foam::foamVtkFormatter::xmlAttr
 (
     const word& k,
-    const label v,
+    const int32_t v,
     const char quote
 )
 {
-    if (!inTag_)
-    {
-        WarningInFunction
-            << "xml attribute '" << k << "' but not within a tag!"
-            << endl;
-    }
+    return xmlAttribute(k, v, quote);
+}
 
-    os_ << ' ' << k << '=' << quote << v << quote;
 
-    return *this;
+Foam::foamVtkFormatter&
+Foam::foamVtkFormatter::xmlAttr
+(
+    const word& k,
+    const int64_t v,
+    const char quote
+)
+{
+    return xmlAttribute(k, v, quote);
 }
 
 
@@ -232,16 +235,7 @@ Foam::foamVtkFormatter::xmlAttr
     const char quote
 )
 {
-    if (!inTag_)
-    {
-        WarningInFunction
-            << "xml attribute '" << k << "' but not within a tag!"
-            << endl;
-    }
-
-    os_ << ' ' << k << '=' << quote << v << quote;
-
-    return *this;
+    return xmlAttribute(k, v, quote);
 }
 
 
@@ -253,16 +247,7 @@ Foam::foamVtkFormatter::xmlAttr
     const char quote
 )
 {
-    if (!inTag_)
-    {
-        WarningInFunction
-            << "xml attribute '" << k << "' but not within a tag!"
-            << endl;
-    }
-
-    os_ << ' ' << k << '=' << quote << v << quote;
-
-    return *this;
+    return xmlAttribute(k, v, quote);
 }
 
 
@@ -283,7 +268,18 @@ Foam::foamVtkFormatter&
 Foam::foamVtkFormatter::operator()
 (
     const word& k,
-    const label v
+    const int32_t v
+)
+{
+    return xmlAttr(k, v);
+}
+
+
+Foam::foamVtkFormatter&
+Foam::foamVtkFormatter::operator()
+(
+    const word& k,
+    const int64_t v
 )
 {
     return xmlAttr(k, v);

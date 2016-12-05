@@ -25,7 +25,7 @@ Class
     Foam::cartesianCS
 
 Description
-    Cylindrical coordinate system
+    Cartesian coordinate system
 
 SourceFiles
     cartesianCS.C

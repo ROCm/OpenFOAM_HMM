@@ -40,7 +40,7 @@ Foam::PatchFlowRateInjection<CloudType>::PatchFlowRateInjection
 )
 :
     InjectionModel<CloudType>(dict, owner, modelName,typeName),
-    patchInjectionBase(owner.mesh(), this->coeffDict().lookup("patchName")),
+    patchInjectionBase(owner.mesh(), this->coeffDict().lookup("patch")),
     phiName_(this->coeffDict().template lookupOrDefault<word>("phi", "phi")),
     rhoName_(this->coeffDict().template lookupOrDefault<word>("rho", "rho")),
     duration_(readScalar(this->coeffDict().lookup("duration"))),

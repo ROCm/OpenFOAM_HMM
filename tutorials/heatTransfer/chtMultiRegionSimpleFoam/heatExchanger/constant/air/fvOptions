@@ -23,7 +23,7 @@ airToporous
     constantHeatTransferCoeffs
     {
         interpolationMethod cellVolumeWeight;
-        nbrRegionName   porous;
+        nbrRegion       porous;
         master          false;
 
         nbrModel        porousToair;
@@ -40,7 +40,7 @@ porosityBlockage
     interRegionExplicitPorositySourceCoeffs
     {
         interpolationMethod cellVolumeWeight;
-        nbrRegionName   porous;
+        nbrRegion       porous;
 
         type            DarcyForchheimer;
 

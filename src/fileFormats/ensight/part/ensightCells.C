@@ -191,10 +191,7 @@ void Foam::ensightCells::sort()
 {
     forAll(lists_, typeI)
     {
-        if (lists_[typeI])
-        {
-            Foam::sort(*(lists_[typeI]));
-        }
+        Foam::sort(*(lists_[typeI]));
     }
 }
 

@@ -272,9 +272,6 @@ class isoSurfaceCell
             labelList& triMap               // merged to unmerged triangle
         ) const;
 
-        //- Check single triangle for (topological) validity
-        static bool validTri(const triSurface&, const label);
-
         //- Determine edge-face addressing
         void calcAddressing
         (

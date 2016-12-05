@@ -77,7 +77,7 @@ functions
         writeControl        timeStep;
         writeInterval       200;
         log                 true;
-        patchName           region0_to_panelRegion_wallPanel;
+        patch               region0_to_panelRegion_wallPanel;
         probeLocations
         (
             (0.15 0.0 0.01)  // HF2
@@ -94,7 +94,7 @@ functions
         writeControl        timeStep;
         writeInterval       200;
         log                 true;
-        patchName           inlet;
+        patch               inlet;
         probeLocations
         (
             ( 0.0  0.0  0.0 ) // HF1

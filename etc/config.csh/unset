@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -119,7 +119,6 @@ unsetenv OPAL_PREFIX
 # Unset Ensight/ParaView-related environment variables
 
 unsetenv ENSIGHT9_READER
-unsetenv CMAKE_HOME
 unsetenv ParaView_DIR
 unsetenv ParaView_INCLUDE_DIR
 unsetenv ParaView_MAJOR
@@ -129,12 +128,15 @@ unsetenv PV_PLUGIN_PATH
 #------------------------------------------------------------------------------
 # unset other ThirdParty environment variables
 
+unsetenv ADIOS_ARCH_PATH
 unsetenv BOOST_ARCH_PATH
 unsetenv CCMIO_ARCH_PATH
 unsetenv CGAL_ARCH_PATH
 unsetenv FFTW_ARCH_PATH
+unsetenv GPERFTOOLS_ARCH_PATH
 unsetenv GMP_ARCH_PATH
 unsetenv MPFR_ARCH_PATH
+unsetenv METIS_ARCH_PATH
 unsetenv SCOTCH_ARCH_PATH
 
 #------------------------------------------------------------------------------
@@ -174,7 +176,6 @@ unalias wm32
 unalias wmSP
 unalias wmDP
 
-unalias wmRefresh
 unalias wmUnset
 
 unalias wmSchedOn
@@ -191,6 +192,7 @@ unalias util
 unalias tut
 unalias run
 
+unalias wmRefresh
 unalias foamVersion
 unalias foamPV
 

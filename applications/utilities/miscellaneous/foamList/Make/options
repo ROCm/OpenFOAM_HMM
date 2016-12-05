@@ -15,10 +15,12 @@ EXE_LIBS = \
     -lchemistryModel \
     -lcoalCombustion \
     -lcombustionModels \
-    -lcompressibleTransportModels \
+    -lcompressibleEulerianInterfacialModels \
+    -lcompressibleMultiphaseEulerianInterfacialModels \
     -lcompressibleTurbulenceModels \
-    -lconversion \
-    -ldecompose \
+    -lCompressibleTwoPhaseMixtureTurbulenceModels \
+    -lcompressibleTwoPhaseSystem \
+    -lconformalVoronoiMesh \
     -ldecompositionMethods \
     -ldistributed \
     -ldistributionModels \
@@ -35,29 +37,32 @@ EXE_LIBS = \
     -lfileFormats \
     -lfiniteVolume \
     -lfluidThermophysicalModels \
+    -lfoamToVTK \
     -lforces \
     -lfvMotionSolvers \
     -lfvOptions \
     -lgenericPatchFields \
-    -limmiscibleIncompressibleTwoPhaseMixture \
+    -lhelpTypes \
     -lincompressibleTransportModels \
     -lincompressibleTurbulenceModels \
     -linterfaceProperties \
     -llagrangianFunctionObjects \
     -llagrangianIntermediate \
-    -llagrangian \
     -llagrangianSpray \
     -llagrangianTurbulence \
     -llaminarFlameSpeedModels \
-    -lliquidMixtureProperties \
+    -lliquidPropertiesFvPatchFields \
     -lliquidProperties \
     -lmeshTools \
-    -lmolecularMeasurements \
-    -lmolecule \
+    -lmultiphaseInterFoam \
+    -lmultiphaseMixtureThermo \
+    -lmultiphaseReactingTurbulenceModels \
+    -lmultiphaseSystem \
     -lODE \
     -lOpenFOAM \
-    -lpairPatchAgglomeration \
     -lphaseChangeTwoPhaseMixtures \
+    -lphaseCompressibleTurbulenceModels \
+    -lphaseTemperatureChangeTwoPhaseMixtures \
     -lpotential \
     -lpyrolysisModels \
     -lradiationModels \
@@ -68,7 +73,6 @@ EXE_LIBS = \
     -lreactingPhaseSystem \
     -lreactingTwoPhaseSystem \
     -lreactionThermophysicalModels \
-    -lreconstruct \
     -lregionCoupled \
     -lregionCoupling \
     -lregionModels \
@@ -79,11 +83,9 @@ EXE_LIBS = \
     -lsampling \
     -lscotchDecomp \
     -lsixDoFRigidBodyMotion \
-    -lSLGThermo \
+    -lSloanRenumber \
     -lsnappyHexMesh \
     -lsolidChemistryModel \
-    -lsolidMixtureProperties \
-    -lsolidParticle \
     -lsolidProperties \
     -lsolidSpecie \
     -lsolidThermo \
@@ -92,13 +94,12 @@ EXE_LIBS = \
     -lsurfaceFilmDerivedFvPatchFields \
     -lsurfaceFilmModels \
     -lsurfMesh \
+    -ltabulatedWallFunctions \
     -lthermalBaffleModels \
     -lthermophysicalFunctions \
     -ltopoChangerFvMesh \
-    -ltriSurface \
+    -lturbulenceModelSchemes \
     -lturbulenceModels \
-    -ltwoPhaseMixture \
-    -ltwoPhaseMixtureThermo \
     -ltwoPhaseProperties \
     -ltwoPhaseReactingTurbulenceModels \
     -lutilityFunctionObjects

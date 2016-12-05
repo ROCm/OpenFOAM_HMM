@@ -138,44 +138,43 @@ public:
 
     // Member Functions
 
-    // Access
+        // Access
 
-        //- Part index (0-based)
-        virtual label index() const
-        {
-            return ensightFaces::index();
-        }
-
-
-        //- Number of elements in this part
-        virtual label size() const
-        {
-            return ensightFaces::size();
-        }
+            //- Part index (0-based)
+            virtual label index() const
+            {
+                return ensightFaces::index();
+            }
 
 
-        //- Return the patch index, -1 when not in use.
-        inline label patchIndex() const
-        {
-            return patchIndex_;
-        }
+            //- Number of elements in this part
+            virtual label size() const
+            {
+                return ensightFaces::size();
+            }
 
 
-    // Output
-
-        //- Write summary information about the object
-        virtual void writeSummary(Ostream&) const;
-
-        //- Write geometry
-        virtual void write(ensightGeoFile&) const;
-
-        //- Helper: write geometry given the pointField
-        virtual void write(ensightGeoFile&, const pointField&) const;
+            //- Return the patch index, -1 when not in use.
+            inline label patchIndex() const
+            {
+                return patchIndex_;
+            }
 
 
-        //- Print various types of debugging information
-        virtual void dumpInfo(Ostream&) const;
+        // Output
 
+            //- Write summary information about the object
+            virtual void writeSummary(Ostream&) const;
+
+            //- Write geometry
+            virtual void write(ensightGeoFile&) const;
+
+            //- Helper: write geometry given the pointField
+            virtual void write(ensightGeoFile&, const pointField&) const;
+
+
+            //- Print various types of debugging information
+            virtual void dumpInfo(Ostream&) const;
 };
 
 

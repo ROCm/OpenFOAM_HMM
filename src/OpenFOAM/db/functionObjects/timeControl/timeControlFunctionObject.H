@@ -99,6 +99,9 @@ class timeControl
         //- The functionObject to execute
         autoPtr<functionObject> foPtr_;
 
+        //- Time index of the last execute call
+        label executeTimeIndex_;
+
 
     // Private Member Functions
 

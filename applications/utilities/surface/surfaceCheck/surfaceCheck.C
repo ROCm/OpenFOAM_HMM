@@ -55,6 +55,7 @@ Usage
 #include "triangle.H"
 #include "triSurface.H"
 #include "triSurfaceSearch.H"
+#include "triSurfaceTools.H"
 #include "argList.H"
 #include "OFstream.H"
 #include "OBJstream.H"
@@ -63,79 +64,6 @@ Usage
 #include "vtkSurfaceWriter.H"
 
 using namespace Foam;
-
-// Does face use valid vertices?
-bool validTri
-(
-    const bool verbose,
-    const triSurface& surf,
-    const label facei
-)
-{
-    // Simple check on indices ok.
-
-    const labelledTri& f = surf[facei];
-
-    forAll(f, fp)
-    {
-        if (f[fp] < 0 || f[fp] >= surf.points().size())
-        {
-            WarningInFunction
-                << "triangle " << facei << " vertices " << f
-                << " uses point indices outside point range 0.."
-                << surf.points().size()-1 << endl;
-            return false;
-        }
-    }
-
-    if ((f[0] == f[1]) || (f[0] == f[2]) || (f[1] == f[2]))
-    {
-        WarningInFunction
-            << "triangle " << facei
-            << " uses non-unique vertices " << f
-            << " coords:" << f.points(surf.points())
-            << endl;
-        return false;
-    }
-
-    // duplicate triangle check
-
-    const labelList& fFaces = surf.faceFaces()[facei];
-
-    // Check if faceNeighbours use same points as this face.
-    // Note: discards normal information - sides of baffle are merged.
-    forAll(fFaces, i)
-    {
-        label nbrFacei = fFaces[i];
-
-        if (nbrFacei <= facei)
-        {
-            // lower numbered faces already checked
-            continue;
-        }
-
-        const labelledTri& nbrF = surf[nbrFacei];
-
-        if
-        (
-            ((f[0] == nbrF[0]) || (f[0] == nbrF[1]) || (f[0] == nbrF[2]))
-         && ((f[1] == nbrF[0]) || (f[1] == nbrF[1]) || (f[1] == nbrF[2]))
-         && ((f[2] == nbrF[0]) || (f[2] == nbrF[1]) || (f[2] == nbrF[2]))
-        )
-        {
-            WarningInFunction
-                << "triangle " << facei << " vertices " << f
-                << " has the same vertices as triangle " << nbrFacei
-                << " vertices " << nbrF
-                << " coords:" << f.points(surf.points())
-                << endl;
-
-            return false;
-        }
-    }
-    return true;
-}
-
 
 labelList countBins
 (
@@ -377,13 +305,11 @@ int main(int argc, char *argv[])
 
     const fileName surfFileName = args[1];
     const bool checkSelfIntersect = args.optionFound("checkSelfIntersection");
-    const bool verbose = args.optionFound("verbose");
     const bool splitNonManifold = args.optionFound("splitNonManifold");
     label outputThreshold = 10;
     args.optionReadIfPresent("outputThreshold", outputThreshold);
 
     Info<< "Reading surface from " << surfFileName << " ..." << nl << endl;
-
 
     // Read
     // ~~~~
@@ -479,7 +405,7 @@ int main(int argc, char *argv[])
 
         forAll(surf, facei)
         {
-            if (!validTri(verbose, surf, facei))
+            if (!triSurfaceTools::validTri(surf, facei))
             {
                 illegalFaces.append(facei);
             }

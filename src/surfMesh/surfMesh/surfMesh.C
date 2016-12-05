@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -229,18 +229,25 @@ Foam::surfMesh::~surfMesh()
 
 void Foam::surfMesh::updatePointsRef()
 {
-    // Assign the reference to the points (this is truly ugly)
-    reinterpret_cast<SubField<point>&>
+    // Assign the reference to the points (quite ugly)
+    // points() are returned as Field but are actually stored as SubField
+    reinterpret_cast<typename MeshReference::PointFieldType&>
     (
         const_cast<Field<point>&>(MeshReference::points())
-    ) = reinterpret_cast<SubField<point>&>(this->storedPoints());
+    ).shallowCopy
+    (
+        this->storedPoints()
+    );
 }
 
 
 void Foam::surfMesh::updateFacesRef()
 {
-    // Assign the reference to the faces
-    shallowCopy(this->storedFaces());
+    // Assign the reference to the faces (UList)
+    static_cast<MeshReference&>(*this).shallowCopy
+    (
+        this->storedFaces()
+    );
 }
 
 

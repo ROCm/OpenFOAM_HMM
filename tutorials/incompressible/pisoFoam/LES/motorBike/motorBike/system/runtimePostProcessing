@@ -57,7 +57,7 @@ postPro1
             visible         yes;
             tubeRadius      0.01;
             colourBy        field;
-            fieldName       U;
+            field           U;
             range           (0 20);
             opacity         1;
             scalarBar
@@ -97,7 +97,7 @@ postPro1
             visible         yes;
             featureEdges    no;
             colourBy        field;
-            fieldName       U;
+            field           U;
             range           (0 30);
             opacity         1;
             scalarBar

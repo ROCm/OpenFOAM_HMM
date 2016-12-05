@@ -100,7 +100,6 @@ Foam::functionObjects::zeroGradient::zeroGradient
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    prevTimeIndex_(-1),
     selectFields_(),
     resultName_(string::null),
     results_()
@@ -175,20 +174,12 @@ bool Foam::functionObjects::zeroGradient::execute()
             << "Unprocessed field " << ignored << endl;
     }
 
-    // Update time index
-    prevTimeIndex_ = obr_.time().timeIndex();
-
     return true;
 }
 
 
 bool Foam::functionObjects::zeroGradient::write()
 {
-    if (prevTimeIndex_ < obr_.time().timeIndex())
-    {
-        // Ensure written results reflect the current state
-        execute();
-    }
     if (results_.size())
     {
         Log << type() << ' ' << name() << " write:" << endl;

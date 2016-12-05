@@ -847,7 +847,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
                             "decomposeParDict",
                             searchableSurface::time().system(),
                             searchableSurface::time(),
-                            IOobject::MUST_READ_IF_MODIFIED,
+                            IOobject::MUST_READ,
                             IOobject::NO_WRITE
                         )
                     )

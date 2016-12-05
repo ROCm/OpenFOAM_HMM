@@ -31,11 +31,11 @@ License
 
 // * * * * * * * * * * Static Private Member Functions * * * * * * * * * * * //
 
-template<class Type>
-void Foam::ensightSerialOutput::writeField
+template<template<typename> class FieldContainer, class Type>
+void Foam::ensightSerialOutput::writeFieldContent
 (
     const word& key,
-    const Field<Type>& fld,
+    const FieldContainer<Type>& fld,
     ensightFile& os
 )
 {
@@ -82,14 +82,11 @@ bool Foam::ensightSerialOutput::writeField
         {
             os.beginPart(part.index());
 
-            const List<ensightFaces::elemType> enums =
-                ensightFaces::elemEnum.enums();
-
-            forAllConstIter(List<ensightFaces::elemType>, enums, iter)
+            for (label typei=0; typei < ensightFaces::nTypes; ++typei)
             {
-                const ensightFaces::elemType what = *iter;
+                const ensightFaces::elemType what = ensightFaces::elemType(typei);
 
-                writeField
+                writeFieldContent
                 (
                     ensightFaces::key(what),
                     Field<Type>(fld, part.faceIds(what)),
@@ -115,14 +112,11 @@ bool Foam::ensightSerialOutput::writeField
     {
         os.beginPart(part.index());
 
-        const List<ensightCells::elemType> enums =
-            ensightCells::elemEnum.enums();
-
-        forAllConstIter(List<ensightCells::elemType>, enums, iter)
+        for (label typei=0; typei < ensightCells::nTypes; ++typei)
         {
-            const ensightCells::elemType what = *iter;
+            const ensightCells::elemType what = ensightCells::elemType(typei);
 
-            writeField
+            writeFieldContent
             (
                 ensightCells::key(what),
                 Field<Type>(fld, part.cellIds(what)),

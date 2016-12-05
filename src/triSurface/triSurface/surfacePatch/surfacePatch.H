@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,6 @@ SourceFiles
 #define surfacePatch_H
 
 #include "geometricSurfacePatch.H"
-#include "word.H"
-#include "label.H"
 #include "className.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -48,12 +46,13 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class surfacePatch;
+class surfZone;
 
 Ostream& operator<<(Ostream&, const surfacePatch&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class surfacePatch Declaration
+                        Class surfacePatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class surfacePatch
@@ -78,6 +77,9 @@ public:
 
         //- Construct null
         surfacePatch();
+
+        //- Construct null with specified index
+        explicit surfacePatch(const label index);
 
         //- Construct from components
         surfacePatch
@@ -106,25 +108,25 @@ public:
 
     // Member Functions
 
-        //- Return start label of this patch in the polyMesh face list
+        //- Return start label of this patch in the face list
         label start() const
         {
             return start_;
         }
 
-        //- Return start label of this patch in the polyMesh face list
+        //- Return start label of this patch in the face list
         label& start()
         {
             return start_;
         }
 
-        //- Return size of this patch in the polyMesh face list
+        //- Return size of this patch in the face list
         label size() const
         {
             return size_;
         }
 
-        //- Return size of this patch in the polyMesh face list
+        //- Return size of this patch in the face list
         label& size()
         {
             return size_;
@@ -139,10 +141,16 @@ public:
 
     // Member Operators
 
+        //- Conversion to surfZone representation
+        explicit operator surfZone() const;
+
+
+        //- Compare.
         bool operator!=(const surfacePatch&) const;
 
-        //- compare.
+        //- Compare.
         bool operator==(const surfacePatch&) const;
+
 
     // IOstream Operators
 

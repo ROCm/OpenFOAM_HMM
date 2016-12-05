@@ -230,7 +230,7 @@ void Foam::fileFormats::STARCDCore::writePoints
 (
     Ostream& os,
     const pointField& points,
-    const double scaleFactor
+    const scalar scaleFactor
 )
 {
     writeHeader(os, HEADER_VRT);

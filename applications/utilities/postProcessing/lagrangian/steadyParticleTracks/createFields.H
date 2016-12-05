@@ -4,6 +4,6 @@ const word dictName("particleTrackDict");
 
 IOdictionary propsDict(dictIO);
 
-word cloudName(propsDict.lookup("cloudName"));
+word cloudName(propsDict.lookup("cloud"));
 
 List<word> userFields(propsDict.lookup("fields"));

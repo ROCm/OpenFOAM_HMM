@@ -117,8 +117,8 @@ tmp<scalarField> curvatureSeparation::calcCosAngle
 {
     const fvMesh& mesh = owner().regionMesh();
     const vectorField nf(mesh.Sf()/mesh.magSf());
-    const unallocLabelList& own = mesh.owner();
-    const unallocLabelList& nbr = mesh.neighbour();
+    const labelUList& own = mesh.owner();
+    const labelUList& nbr = mesh.neighbour();
 
     scalarField phiMax(mesh.nCells(), -GREAT);
     scalarField cosAngle(mesh.nCells(), 0.0);

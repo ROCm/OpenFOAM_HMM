@@ -226,7 +226,7 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     TnbrName_(dict.lookupOrDefault<word>("Tnbr", "T")),
     QrNbrName_(dict.lookupOrDefault<word>("QrNbr", "none")),
     QrName_(dict.lookupOrDefault<word>("Qr", "none")),
-    specieName_(dict.lookupOrDefault<word>("specieName", "none")),
+    specieName_(dict.lookupOrDefault<word>("specie", "none")),
     liquid_(nullptr),
     liquidDict_(),
     mass_(patch().size(), 0.0),
@@ -749,7 +749,7 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::write
         os.writeKeyword("mode")<< massModeTypeNames_[mode_]
             << token::END_STATEMENT <<nl;
 
-        writeEntryIfDifferent<word>(os, "specieName", "none", specieName_);
+        writeEntryIfDifferent<word>(os, "specie", "none", specieName_);
 
         os.writeKeyword("carrierMolWeight")<< Mcomp_
             << token::END_STATEMENT <<nl;

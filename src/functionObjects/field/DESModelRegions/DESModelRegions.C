@@ -113,7 +113,7 @@ bool Foam::functionObjects::DESModelRegions::read(const dictionary& dict)
     fvMeshFunctionObject::read(dict);
     writeFile::read(dict);
 
-    dict.readIfPresent("resultName", resultName_);
+    dict.readIfPresent("result", resultName_);
 
     return true;
 }

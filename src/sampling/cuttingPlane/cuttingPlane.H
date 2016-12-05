@@ -70,7 +70,7 @@ class cuttingPlane
     // Private data
 
         //- List of cells cut by the plane
-        labelList cutCells_;
+        labelList meshCells_;
 
 
     // Private Member Functions
@@ -121,7 +121,7 @@ protected:
 
     // Protected Member Functions
 
-        //- Recut mesh with existing planeDesc, restricted to a list of cells
+        //- Recut mesh with existing plane, restricted to a list of cells
         void reCut
         (
             const primitiveMesh&,
@@ -157,15 +157,15 @@ public:
         }
 
         //- Return List of cells cut by the plane
-        const labelList& cutCells() const
+        const labelList& meshCells() const
         {
-            return cutCells_;
+            return meshCells_;
         }
 
         //- Return true or false to question: have any cells been cut?
         bool cut() const
         {
-            return cutCells_.size();
+            return meshCells_.size();
         }
 
         //- Sample the cell field

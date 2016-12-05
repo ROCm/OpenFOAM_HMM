@@ -20,7 +20,7 @@ FoamFile
 
         pyrolysisModel  thermo;
 
-        regionName      panelRegion;
+        region          panelRegion;
 
         noPyrolysisCoeffs
         {

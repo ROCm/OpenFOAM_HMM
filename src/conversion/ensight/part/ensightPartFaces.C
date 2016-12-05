@@ -48,10 +48,10 @@ Foam::ensightPart::localPoints Foam::ensightPartFaces::calcLocalPoints() const
     labelList& usedPoints = ptList.list;
     label nPoints = 0;
 
-    // add all points from faces
+    // Add all points from faces
     const labelUList& idList = this->faceIds();
 
-    // add all points from faces
+    // Add all points from faces
     forAll(idList, i)
     {
         const label id = idList[i] + start_;
@@ -67,7 +67,7 @@ Foam::ensightPart::localPoints Foam::ensightPartFaces::calcLocalPoints() const
     }
 
 
-    // this is not absolutely necessary, but renumber anyhow
+    // This is not absolutely necessary, but renumber anyhow
     nPoints = 0;
     forAll(usedPoints, ptI)
     {
@@ -101,7 +101,7 @@ Foam::ensightPartFaces::ensightPartFaces
     points_(points),
     contiguousPoints_(contiguousPoints)
 {
-    // classify the face shapes
+    // Classify the face shapes
     classify(faces);
 }
 
@@ -121,7 +121,7 @@ Foam::ensightPartFaces::ensightPartFaces
     points_(mesh.points()),
     contiguousPoints_(false)
 {
-    // classify the face shapes
+    // Classify the face shapes
     classify(patch);
 }
 
@@ -149,10 +149,10 @@ void Foam::ensightPartFaces::writeConnectivity
     os.write(idList.size());
     os.newline();
 
-    // write (polygon) face sizes
+    // Write (polygon) face sizes
     if (key == "nsided")
     {
-        // write the number of points per face
+        // Write the number of points per face
         forAll(idList, i)
         {
             const label id = idList[i] + start_;
@@ -163,13 +163,13 @@ void Foam::ensightPartFaces::writeConnectivity
         }
     }
 
-    // write the points describing the face
+    // Write the points describing the face
     forAll(idList, i)
     {
         const label id = idList[i] + start_;
         const face& f = faces[id];
 
-        // convert global -> local index
+        // Convert global -> local index
         // (note: Ensight indices start with 1)
         forAll(f, fp)
         {
@@ -205,7 +205,7 @@ void Foam::ensightPartFaces::write
     const pointField& points
 ) const
 {
-    if (ensightPart::size())
+    if (size())
     {
         const localPoints ptList = calcLocalPoints();
         const labelUList& pointMap = ptList.list;

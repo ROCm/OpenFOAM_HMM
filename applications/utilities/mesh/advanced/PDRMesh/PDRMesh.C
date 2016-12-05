@@ -602,8 +602,8 @@ int main(int argc, char *argv[])
         const word& key = iter().keyword();
 
         const dictionary& dict = iter().dict();
-        const word cyclicName = dict.lookup("cyclicMasterPatchName");
-        const word wallName = dict.lookup("wallPatchName");
+        const word cyclicName = dict.lookup("cyclicMasterPatch");
+        const word wallName = dict.lookup("wallPatch");
         FixedList<word, 3> nameAndType;
         nameAndType[0] = key;
         nameAndType[1] = wallName;

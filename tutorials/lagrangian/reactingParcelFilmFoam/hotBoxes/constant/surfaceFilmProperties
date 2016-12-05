@@ -11,13 +11,13 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      SurfaceFilmProperties;
+    object      surfaceFilmProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 surfaceFilmModel thermoSingleLayer;
 
-regionName      wallFilmRegion;
+region          wallFilmRegion;
 
 active          true;
 
@@ -108,7 +108,7 @@ thermoSingleLayerCoeffs
 
     drippingInjectionCoeffs
     {
-        cloudName    reactingCloud1;
+        cloud        reactingCloud1;
         deltaStable  0;
 
         particlesPerParcel 100.0;

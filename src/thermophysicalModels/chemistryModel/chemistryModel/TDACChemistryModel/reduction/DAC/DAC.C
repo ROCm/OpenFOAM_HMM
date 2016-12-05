@@ -37,66 +37,65 @@ Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::DAC
     chemistryReductionMethod<CompType, ThermoType>(dict, chemistry),
     searchInitSet_(this->coeffsDict_.subDict("initialSet").size()),
     zprime_(0),
-    nbCLarge_(3),
-    sC_(this->nSpecie_,0),
-    sH_(this->nSpecie_,0),
-    sO_(this->nSpecie_,0),
-    sN_(this->nSpecie_,0),
+    nbCLarge_(this->coeffsDict_.template lookupOrDefault<label>("nbCLarge", 3)),
+    sC_(this->nSpecie_, 0),
+    sH_(this->nSpecie_, 0),
+    sO_(this->nSpecie_, 0),
+    sN_(this->nSpecie_, 0),
     CO2Id_(-1),
     COId_(-1),
     HO2Id_(-1),
     H2OId_(-1),
     NOId_(-1),
-    automaticSIS_(true),
-    phiTol_(this->tolerance()),
-    NOxThreshold_(1800),
-    CO2Name_
+    automaticSIS_
     (
-        dict.subDict("reduction").lookupOrDefault<word>
+        this->coeffsDict_.template lookupOrDefault<Switch>
         (
-            "CO2Name","CO2"
+            "automaticSIS",
+            true
         )
     ),
-    COName_
+    phiTol_
     (
-        dict.subDict("reduction").lookupOrDefault<word>
+        this->coeffsDict_.template lookupOrDefault<scalar>
         (
-            "COName","CO"
+            "phiTol", this->tolerance()
         )
     ),
-    HO2Name_
+    NOxThreshold_
     (
-        dict.subDict("reduction").lookupOrDefault<word>
+        this->coeffsDict_.template lookupOrDefault<scalar>
         (
-            "HO2Name","HO2"
+            "NOxThreshold",
+            1800
         )
     ),
-    H2OName_
+    CO2Name_(this->coeffsDict_.template lookupOrDefault<word>("CO2", "CO2")),
+    COName_(this->coeffsDict_.template lookupOrDefault<word>("CO", "CO")),
+    HO2Name_(this->coeffsDict_.template lookupOrDefault<word>("HO2", "HO2")),
+    H2OName_(this->coeffsDict_.template lookupOrDefault<word>("H2O", "H2O")),
+    NOName_(this->coeffsDict_.template lookupOrDefault<word>("NO", "NO")),
+    forceFuelInclusion_
     (
-        dict.subDict("reduction").lookupOrDefault<word>
+        this->coeffsDict_.template lookupOrDefault<Switch>
         (
-            "H2OName","H2O"
+            "forceFuelInclusion",
+            false
         )
-    ),
-    NOName_
-    (
-        dict.subDict("reduction").lookupOrDefault<word>
-        (
-            "NOName","NO"
-        )
-    ),
-    forceFuelInclusion_(false)
+    )
 {
-    label j=0;
+    label j = 0;
     dictionary initSet = this->coeffsDict_.subDict("initialSet");
-    for (label i=0; i<chemistry.nSpecie(); i++)
+
+    for (label i = 0; i < chemistry.nSpecie(); i++)
     {
         if (initSet.found(chemistry.Y()[i].name()))
         {
             searchInitSet_[j++] = i;
         }
     }
-    if (j<searchInitSet_.size())
+
+    if (j < searchInitSet_.size())
     {
         FatalErrorInFunction
             << searchInitSet_.size()-j
@@ -105,28 +104,7 @@ Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::DAC
             << exit(FatalError);
     }
 
-    if (this->coeffsDict_.found("automaticSIS"))
-    {
-        automaticSIS_.readIfPresent("automaticSIS", this->coeffsDict_);
-    }
 
-    if (this->coeffsDict_.found("forceFuelInclusion"))
-    {
-        forceFuelInclusion_.readIfPresent
-        (
-            "forceFuelInclusion",this->coeffsDict_
-        );
-    }
-
-    if (this->coeffsDict_.found("phiTol"))
-    {
-        phiTol_ = readScalar(this->coeffsDict_.lookup("phiTol"));
-    }
-
-    if (this->coeffsDict_.found("NOxThreshold"))
-    {
-        NOxThreshold_ = readScalar(this->coeffsDict_.lookup("NOxThreshold"));
-    }
     const List<List<specieElement>>& specieComposition =
         chemistry.specieComp();
 
@@ -134,11 +112,12 @@ Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::DAC
     {
         const List<specieElement>& curSpecieComposition =
             specieComposition[i];
+
         // For all elements in the current species
         forAll(curSpecieComposition, j)
         {
-            const specieElement& curElement =
-                curSpecieComposition[j];
+            const specieElement& curElement = curSpecieComposition[j];
+
             if (curElement.name() == "C")
             {
                 sC_[i] = curElement.nAtoms();
@@ -157,7 +136,8 @@ Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::DAC
             }
             else
             {
-                Info<< "element not considered"<<endl;
+                Info<< "    element " << curElement.name() << " not considered"
+                    << endl;
             }
         }
         if (this->chemistry_.Y()[i].name() == CO2Name_)
@@ -216,10 +196,6 @@ Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::DAC
                 << exit(FatalError);
         }
 
-        if (this->coeffsDict_.found("nbCLarge"))
-        {
-            nbCLarge_ = readLabel(fuelDict.lookup("nbCLarge"));
-        }
 
         fuelSpeciesID_.setSize(fuelSpecies_.size());
         fuelSpeciesProp_.setSize(fuelSpecies_.size());
@@ -287,9 +263,9 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
     c1[this->nSpecie_+1] = p;
 
     // Compute the rAB matrix
-    RectangularMatrix<scalar> rABNum(this->nSpecie_,this->nSpecie_,0.0);
-    scalarField PA(this->nSpecie_,0.0);
-    scalarField CA(this->nSpecie_,0.0);
+    RectangularMatrix<scalar> rABNum(this->nSpecie_, this->nSpecie_, 0.0);
+    scalarField PA(this->nSpecie_, 0.0);
+    scalarField CA(this->nSpecie_, 0.0);
 
     // Number of initialized rAB for each lines
     Field<label> NbrABInit(this->nSpecie_,0);
@@ -319,8 +295,8 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
         // of the species. It stores the species encountered in the reaction but
         // use another list to see if this species has already been used
 
-        DynamicList<scalar> wA(R.lhs().size()+R.rhs().size());
-        DynamicList<label> wAID(R.lhs().size()+R.rhs().size());
+        DynamicList<scalar> wA(R.lhs().size() + R.rhs().size());
+        DynamicList<label> wAID(R.lhs().size() + R.rhs().size());
 
         forAll(R.lhs(), s) // Compute rAB for all species in the left hand side
         {
@@ -344,7 +320,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
             // Disable for self reference (by definition rAA=0)
             deltaBi[ss] = false;
 
-            while(!usedIndex.empty())
+            while (!usedIndex.empty())
             {
                 label curIndex = usedIndex.pop();
                 if (deltaBi[curIndex])
@@ -352,7 +328,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
                     // Disable to avoid counting it more than once
                     deltaBi[curIndex] = false;
                     // Test if this rAB is not initialized
-                    if (rABPos(ss, curIndex)==-1)
+                    if (rABPos(ss, curIndex) == -1)
                     {
                         // It starts at rABPos(ss, sj)=0
                         rABPos(ss, curIndex) = NbrABInit[ss];
@@ -372,7 +348,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
             bool found(false);
             forAll(wAID, id)
             {
-                if (ss==wAID[id])
+                if (ss == wAID[id])
                 {
                     wA[id] += sl*omegai;
                     found = true;
@@ -385,7 +361,8 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
             }
         }
 
-        forAll(R.rhs(), s) // Compute rAB for all species in the right hand side
+        // Compute rAB for all species in the right hand side
+        forAll(R.rhs(), s)
         {
             label ss = R.rhs()[s].index;
             scalar sl = R.rhs()[s].stoichCoeff; // vAi = v''-v' => here v''
@@ -407,7 +384,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
             // Disable for self reference (by definition rAA=0)
             deltaBi[ss] = false;
 
-            while(!usedIndex.empty())
+            while (!usedIndex.empty())
             {
                 label curIndex = usedIndex.pop();
                 if (deltaBi[curIndex])
@@ -488,8 +465,8 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
         label nElements = 4; // 4 main elements (C, H, O, N)
 
         // Total number of C, H and O (in this order)
-        scalarList Na(nElements,0.0);
-        scalarList Nal(nElements,0.0); // for large hydrocarbons
+        scalarList Na(nElements, 0.0);
+        scalarList Nal(nElements, 0.0); // for large hydrocarbons
 
         for (label i=0; i<this->nSpecie_; i++)
         {
@@ -502,6 +479,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
             {
                 continue;
             }
+
             Na[0] += sC_[i]*c[i];
             Na[1] += sH_[i]*c[i];
             Na[2] += sO_[i]*c[i];
@@ -523,12 +501,12 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
         //                                           2Cl + Hl/2
         // Equivalence ratio for fuel decomposition = ----------
         //                                            Ol(+O2)
-        phiLarge = (2*Nal[0]+Nal[1]/2)/Nal[2];
+        phiLarge = (2*Nal[0] + Nal[1]/2)/Nal[2];
     }
 
     // Using the rAB matrix (numerator and denominator separated)
     // compute the R value according to the search initiating set
-    scalarField Rvalue(this->nSpecie_,0.0);
+    scalarField Rvalue(this->nSpecie_, 0.0);
     label speciesNumber = 0;
 
     // Set all species to inactive and activate them according
@@ -583,7 +561,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
 
             if (forceFuelInclusion_)
             {
-                forAll(fuelSpeciesID_,i)
+                forAll(fuelSpeciesID_, i)
                 {
                     Q.push(fuelSpeciesID_[i]);
                     speciesNumber++;
@@ -607,7 +585,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
             Rvalue[H2OId_] = 1.0;
             if (forceFuelInclusion_)
             {
-                forAll(fuelSpeciesID_,i)
+                forAll(fuelSpeciesID_, i)
                 {
                     Q.push(fuelSpeciesID_[i]);
                     speciesNumber++;
@@ -617,7 +595,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
             }
         }
 
-        if (T>NOxThreshold_ && NOId_!=-1)
+        if (T > NOxThreshold_ && NOId_ != -1)
         {
             Q.push(NOId_);
             speciesNumber++;
@@ -641,7 +619,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
     while (!Q.empty())
     {
         label u = Q.pop();
-        scalar Den = max(PA[u],CA[u]);
+        scalar Den = max(PA[u], CA[u]);
         if (Den!=0.0)
         {
             for (label v=0; v<NbrABInit[u]; v++)
@@ -709,7 +687,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
 
     this->NsSimp_ = speciesNumber;
     scalarField& simplifiedC(this->chemistry_.simplifiedC());
-    simplifiedC.setSize(this->NsSimp_+2);
+    simplifiedC.setSize(this->NsSimp_ + 2);
     DynamicList<label>& s2c(this->chemistry_.simplifiedToCompleteIndex());
     s2c.setSize(this->NsSimp_);
     Field<label>& c2s(this->chemistry_.completeToSimplifiedIndex());

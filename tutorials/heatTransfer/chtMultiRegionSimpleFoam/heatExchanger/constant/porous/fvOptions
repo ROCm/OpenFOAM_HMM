@@ -23,7 +23,7 @@ porousToair
     constantHeatTransferCoeffs
     {
         interpolationMethod cellVolumeWeight;
-        nbrRegionName   air;
+        nbrRegion       air;
         master          true;
 
         nbrModel        airToporous;

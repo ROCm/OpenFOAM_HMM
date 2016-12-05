@@ -56,15 +56,17 @@ isTest()
 #
 getNumberOfProcessors()
 {
+    local dict="${1:-system/decomposeParDict}"
+
     # Re-use positional parameters for automatic whitespace elimination
-    set -- $(foamDictionary -entry numberOfSubdomains -value "${1:-system/decomposeParDict}")
+    set -- $(foamDictionary -entry numberOfSubdomains -value "$dict" 2>/dev/null)
 
     if [ "$#" -eq 1 ]
     then
         echo "$1"
     else
-        echo "Error retrieving 'numberOfSubdomains' from decomposeParDict" 1>&2
-        echo 1
+        echo "Warning no 'numberOfSubdomains' in '$dict'" 1>&2
+        echo 1 # serial as fallback
         return 1
     fi
 }

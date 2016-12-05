@@ -296,7 +296,7 @@ bool Foam::functionObjects::scalarTransport::execute()
             mesh_.lookupObject<surfaceScalarField>(phiName_)
         );
     }
-    else if(UPhiName_ != "none")
+    else if (UPhiName_ != "none")
     {
         const volVectorField& Uphi =
             mesh_.lookupObject<volVectorField>(UPhiName_);

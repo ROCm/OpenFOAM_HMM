@@ -58,7 +58,7 @@ functions
         fields          (p U);
         lifeTime        10000;
         nSubCycle       5;
-        cloudName       particleTracks;
+        cloud           particleTracks;
         seedSampleSet   uniform;
         uniformCoeffs
         {
