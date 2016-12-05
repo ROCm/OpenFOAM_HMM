@@ -313,6 +313,16 @@ void Foam::processorMeshes::removeFiles(const polyMesh& mesh)
             mesh
         ).objectPath()
     );
+    rm
+    (
+        IOobject
+        (
+            "procAddressing",
+            mesh.facesInstance(),
+            mesh.meshSubDir,
+            mesh
+        ).objectPath()
+    );
 }
 
 

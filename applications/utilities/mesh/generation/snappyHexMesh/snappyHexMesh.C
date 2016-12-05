@@ -659,6 +659,13 @@ void writeMesh
     meshRefiner.printMeshInfo(debugLevel, msg);
     Info<< "Writing mesh to time " << meshRefiner.timeName() << endl;
 
+    processorMeshes::removeFiles(mesh);
+    if (!debugLevel)
+    {
+        topoSet::removeFiles(mesh);
+    }
+    refinementHistory::removeFiles(mesh);
+
     //label flag = meshRefinement::MESH;
     //if (writeLevel)
     //{
@@ -674,11 +681,6 @@ void writeMesh
         meshRefinement::writeType(writeLevel | meshRefinement::WRITEMESH),
         mesh.time().path()/meshRefiner.timeName()
     );
-    processorMeshes::removeFiles(mesh);
-    if (!debugLevel)
-    {
-        topoSet::removeFiles(mesh);
-    }
     Info<< "Wrote mesh in = "
         << mesh.time().cpuTimeIncrement() << " s." << endl;
 }

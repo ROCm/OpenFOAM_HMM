@@ -52,6 +52,8 @@ Description
 #include "cellSet.H"
 #include "faceSet.H"
 #include "pointSet.H"
+#include "processorMeshes.H"
+#include "hexRef8.H"
 
 #ifdef FOAM_USE_ZOLTAN
     #include "zoltanRenumber.H"
@@ -1146,6 +1148,7 @@ int main(int argc, char *argv[])
     }
 
 
+
     // Move mesh (since morphing might not do this)
     if (map().hasMotionPoints())
     {
@@ -1259,6 +1262,8 @@ int main(int argc, char *argv[])
 
     Info<< "Writing mesh to " << mesh.facesInstance() << endl;
 
+    processorMeshes::removeFiles(mesh);
+    hexRef8::removeFiles(mesh);
     topoSet::updateMesh(mesh.facesInstance(), map(), cellSets);
     topoSet::updateMesh(mesh.facesInstance(), map(), faceSets);
     topoSet::updateMesh(mesh.facesInstance(), map(), pointSets);
