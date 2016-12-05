@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,20 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::cubeRootVolDelta
+    Foam::maxDeltaxyzCubeRootLESDelta
 
 Description
-    Simple cube-root of cell volume delta used in LES models.
+    Maximum delta between maxDeltaxyz and cubeRootVolDelta.
 
 SourceFiles
-    cubeRootVolDelta.C
+    maxDeltaxyzCubeRootLESDelta.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cubeRootVolDelta_H
-#define cubeRootVolDelta_H
+#ifndef maxDeltaxyzCubeRootLESDelta_H
+#define maxDeltaxyzCubeRootLESDelta_H
 
 #include "LESdelta.H"
+#include "maxDeltaxyz.H"
+#include "cubeRootVolDelta.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,35 +47,40 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class cubeRootVolDelta Declaration
+                   Class maxDeltaxyzCubeRootLESDelta Declaration
 \*---------------------------------------------------------------------------*/
 
-class cubeRootVolDelta
+class maxDeltaxyzCubeRootLESDelta
 :
     public LESdelta
 {
-    // Private data
-
-        scalar deltaCoeff_;
-
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct and assignment
-        cubeRootVolDelta(const cubeRootVolDelta&);
-        void operator=(const cubeRootVolDelta&);
+        maxDeltaxyzCubeRootLESDelta(const maxDeltaxyzCubeRootLESDelta&);
+        void operator=(const maxDeltaxyzCubeRootLESDelta&);
+
+        // Calculate the delta values
+        void calcDelta();
+
+        //- maxDeltaxyz model
+        maxDeltaxyz maxDeltaxyz_;
+
+        //- cubeRootVolDelta model
+        cubeRootVolDelta cubeRootVolDelta_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("cubeRootVol");
+    TypeName("maxDeltaxyzCubeRoot");
 
 
     // Constructors
 
         //- Construct from name, turbulenceModel and dictionary
-        cubeRootVolDelta
+        maxDeltaxyzCubeRootLESDelta
         (
             const word& name,
             const turbulenceModel& turbulence,
@@ -82,21 +89,18 @@ public:
 
 
     //- Destructor
-    virtual ~cubeRootVolDelta()
+    virtual ~maxDeltaxyzCubeRootLESDelta()
     {}
 
 
     // Member Functions
-
-
-        //- Calculate the delta values
-        void calcDelta();
 
         //- Read the LESdelta dictionary
         virtual void read(const dictionary&);
 
         // Correct values
         virtual void correct();
+
 };
 
 
