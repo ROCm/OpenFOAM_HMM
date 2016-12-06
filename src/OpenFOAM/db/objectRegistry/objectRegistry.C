@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -155,12 +155,13 @@ Foam::wordList Foam::objectRegistry::sortedNames(const word& ClassName) const
 const Foam::objectRegistry& Foam::objectRegistry::subRegistry
 (
     const word& name,
-    const bool forceCreate
+    const bool forceCreate,
+    const bool recursive
 ) const
 {
-    if (forceCreate && !foundObject<objectRegistry>(name))
+    if (forceCreate && !foundObject<objectRegistry>(name, recursive))
     {
-        objectRegistry* fieldsCachePtr = new objectRegistry
+        objectRegistry* subObr = new objectRegistry
         (
             IOobject
             (
@@ -171,9 +172,10 @@ const Foam::objectRegistry& Foam::objectRegistry::subRegistry
                 IOobject::NO_WRITE
             )
         );
-        fieldsCachePtr->store();
+        subObr->store();
     }
-    return lookupObject<objectRegistry>(name);
+
+    return lookupObject<objectRegistry>(name, recursive);
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ Description
 
 SourceFiles
     objectRegistry.C
+    objectRegistryTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -75,10 +76,10 @@ class objectRegistry
         bool parentNotTime() const;
 
         //- Disallow Copy constructor
-        objectRegistry(const objectRegistry&);
+        objectRegistry(const objectRegistry&) = delete;
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const objectRegistry&);
+        void operator=(const objectRegistry&) = delete;
 
 
 public:
@@ -132,37 +133,57 @@ public:
                 return dbDir_;
             }
 
-            //- Return the list of names of the IOobjects
+            //- A list of names of the objects
             wordList names() const;
 
-            //- Return the sorted list of names of the IOobjects
+            //- A sorted list of names of the objects
             wordList sortedNames() const;
 
-            //- Return the list of names of IOobjects of given class name
+            //- A list of names of objects that have the given class name
             wordList names(const word& className) const;
 
-            //- Return the sorted list of names of IOobjects of given class name
+            //- A sorted list of names of objects that have the given class name
             wordList sortedNames(const word& className) const;
 
-            //- Return the list of names of the IOobjects of given type
+            //- A list of names of objects that have the given type
             template<class Type>
             wordList names() const;
 
-            //- Return the list of objects whose name matches the input regExp
+            //- A list of names of objects that have the given type,
+            //  and that also satisfy the input matcher
             template<class Type>
-            wordList names(const wordRe& name) const;
+            wordList names(const wordRe&) const;
 
-            //- Return the list of objects whose name matches the input regExp
+            //- A list of names for objects that have the given type,
+            //  and that also satisfy the input matchers
             template<class Type>
-            wordList names(const wordReList& name) const;
+            wordList names(const wordReList&) const;
 
-            //- Lookup and return a const sub-objectRegistry. Optionally create
-            //  it if it does not exist.
+            //- A sorted list of names of objects that have the given type
+            template<class Type>
+            wordList sortedNames() const;
+
+            //- A sorted list of names of objects that have the given type,
+            //  and that also satisfy the input matcher
+            template<class Type>
+            wordList sortedNames(const wordRe&) const;
+
+            //- A sorted list of names of objects that have the given type,
+            //  and that also satisfy the input matchers
+            template<class Type>
+            wordList sortedNames(const wordReList&) const;
+
+
+            //- Lookup and return a const sub-objectRegistry.
+            //  Optionally create it if it does not exist.
+            //  If recursive, search parent registries.
             const objectRegistry& subRegistry
             (
                 const word& name,
-                const bool forceCreate = false
+                const bool forceCreate = false,
+                const bool recursive = false
             ) const;
+
 
             //- Lookup and return all objects of the given Type
             template<class Type>
@@ -173,12 +194,56 @@ public:
             HashTable<Type*> lookupClass(const bool strict = false);
 
             //- Is the named Type found?
+            //  If recursive, search parent registries.
             template<class Type>
-            bool foundObject(const word& name) const;
+            bool foundObject
+            (
+                const word& name,
+                const bool recursive = false
+            ) const;
 
-            //- Lookup and return the object of the given Type
+            //- Lookup and return the object of the given Type.
+            //  If recursive, search parent registries.
             template<class Type>
-            const Type& lookupObject(const word& name) const;
+            const Type& lookupObject
+            (
+                const word& name,
+                const bool recursive = false
+            ) const;
+
+            //- Lookup and return the object of the given Type.
+            //  If recursive, search parent registries.
+            template<class Type>
+            Type& lookupObjectRef
+            (
+                const word& name,
+                const bool recursive = false
+            ) const;
+
+            //- Lookup and return pointer to the object of the given Type,
+            //  otherwise nullptr if the object was not found,
+            //  or had the incorrect type.
+            //  If recursive, search parent registries.
+            template<class Type>
+            const Type* lookupObjectPtr
+            (
+                const word& name,
+                const bool recursive = false
+            ) const;
+
+
+            //- Lookup and return non-const pointer to the object
+            //  of the given Type,
+            //  otherwise nullptr if the object was not found,
+            //  or had the incorrect type.
+            //  If recursive, search parent registries.
+            template<class Type>
+            Type* lookupObjectRefPtr
+            (
+                const word& name,
+                const bool recursive = false
+            ) const;
+
 
             //- Return new event number.
             label getEvent() const;
@@ -194,6 +259,7 @@ public:
 
             //- Remove an regIOobject from registry
             bool checkOut(regIOobject&) const;
+
 
         // Reading
 
