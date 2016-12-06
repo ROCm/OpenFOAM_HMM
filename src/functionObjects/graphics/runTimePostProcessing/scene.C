@@ -38,28 +38,6 @@ License
 #include "vtkRenderWindow.h"
 #include "vtkWindowToImageFilter.h"
 
-// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    template<>
-    const char* NamedEnum
-    <
-        functionObjects::runTimePostPro::scene::modeType,
-        2
-    >::names[] =
-    {
-        "static",
-        "flightPath"
-    };
-}
-
-const Foam::NamedEnum
-<
-    Foam::functionObjects::runTimePostPro::scene::modeType,
-    2
-> modeTypeNames_;
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -92,9 +70,6 @@ void Foam::functionObjects::runTimePostPro::scene::readCamera
         }
     }
 
-
-    dict.lookup("parallelProjection") >> parallelProjection_;
-
     if (nFrameTotal_ > 1)
     {
         scalar endPosition = dict.lookupOrDefault<scalar>("endPosition", 1);
@@ -107,60 +82,36 @@ void Foam::functionObjects::runTimePostPro::scene::readCamera
         dPosition_ = (endPosition - startPosition_)/scalar(nFrameTotal_ - 1);
     }
 
-    mode_ = modeTypeNames_.read(dict.lookup("mode"));
+    cameraPosition_ = Function1<vector>::New("position", dict);
+    cameraFocalPoint_ = Function1<point>::New("focalPoint", dict);
+    cameraUp_ = Function1<vector>::New("up", dict);
 
-    word coeffsName = modeTypeNames_[mode_] + word("Coeffs");
-    const dictionary& coeffs = dict.subDict(coeffsName);
-
-    switch (mode_)
+    dict.readIfPresent("clipBox", clipBox_);
+    dict.lookup("parallelProjection") >> parallelProjection_;
+    if (!parallelProjection_)
     {
-        case mtStatic:
+        if (dict.found("viewAngle"))
         {
-            clipBox_ = boundBox(coeffs.lookup("clipBox"));
-            const vector lookDir(vector(coeffs.lookup("lookDir")));
-            cameraPosition_.reset
-            (
-                new Function1Types::Constant<point>("position", -lookDir)
-            );
-            const vector focalPoint(coeffs.lookup("focalPoint"));
-            cameraFocalPoint_.reset
-            (
-                new Function1Types::Constant<point>("focalPoint", focalPoint)
-            );
-            const vector up(coeffs.lookup("up"));
-            cameraUp_.reset(new Function1Types::Constant<point>("up", up));
-            break;
+            cameraViewAngle_ = Function1<scalar>::New("viewAngle", dict);
         }
-        case mtFlightPath:
+        else
         {
-            cameraPosition_.reset
+            cameraViewAngle_.reset
             (
-                Function1<vector>::New("position", coeffs).ptr()
+                new Function1Types::Constant<scalar>("viewAngle", 35.0)
             );
-            cameraFocalPoint_.reset
-            (
-                Function1<point>::New("focalPoint", coeffs).ptr()
-            );
-            cameraUp_.reset(Function1<vector>::New("up", coeffs).ptr());
-            break;
-        }
-        default:
-        {
-            FatalErrorInFunction
-                << "Unhandled enumeration " << modeTypeNames_[mode_]
-                << abort(FatalError);
         }
     }
 
-    if (dict.found("viewAngle"))
+    if (dict.found("zoom"))
     {
-        cameraViewAngle_.reset(Function1<scalar>::New("viewAngle", dict).ptr());
+        cameraZoom_ = Function1<scalar>::New("zoom", dict);
     }
     else
     {
-        cameraViewAngle_.reset
+        cameraZoom_.reset
         (
-            new Function1Types::Constant<scalar>("viewAngle", 35.0)
+            new Function1Types::Constant<scalar>("zoom", 1.0)
         );
     }
 }
@@ -224,25 +175,11 @@ void Foam::functionObjects::runTimePostPro::scene::initialise
     camera->SetParallelProjection(parallelProjection_);
     renderer->SetActiveCamera(camera);
 
-
-    // Initialise the camera
-    const vector up = cameraUp_->value(position_);
-    const vector pos = cameraPosition_->value(position_);
-    const point focalPoint = cameraFocalPoint_->value(position_);
-
-    camera->SetViewUp(up.x(), up.y(), up.z());
-    camera->SetPosition(pos.x(), pos.y(), pos.z());
-    camera->SetFocalPoint(focalPoint.x(), focalPoint.y(), focalPoint.z());
-    camera->Modified();
-
-
     // Add the lights
     vtkSmartPointer<vtkLightKit> lightKit = vtkSmartPointer<vtkLightKit>::New();
     lightKit->AddLightsToRenderer(renderer);
 
-
-    // For static mode initialise the clip box
-    if (mode_ == mtStatic)
+    if (clipBox_ != boundBox::greatBox)
     {
         const point& min = clipBox_.min();
         const point& max = clipBox_.max();
@@ -261,15 +198,10 @@ void Foam::functionObjects::runTimePostPro::scene::initialise
             vtkSmartPointer<vtkPolyDataMapper>::New();
         clipMapper->SetInputConnection(clipBox->GetOutputPort());
 
-        vtkSmartPointer<vtkActor> clipActor = vtkSmartPointer<vtkActor>::New();
-        clipActor->SetMapper(clipMapper);
-        clipActor->VisibilityOff();
-        renderer->AddActor(clipActor);
-
-        // Call resetCamera to fit clip box in view
-        clipActor->VisibilityOn();
-        renderer->ResetCamera();
-        clipActor->VisibilityOff();
+        clipBoxActor_ = vtkSmartPointer<vtkActor>::New();
+        clipBoxActor_->SetMapper(clipMapper);
+        clipBoxActor_->VisibilityOff();
+        renderer->AddActor(clipBoxActor_);
     }
 }
 
@@ -279,26 +211,44 @@ void Foam::functionObjects::runTimePostPro::scene::setCamera
     vtkRenderer* renderer
 ) const
 {
-    if (mode_ == mtFlightPath)
+    vtkCamera* camera = renderer->GetActiveCamera();
+
+    if (parallelProjection_)
     {
-        const vector up = cameraUp_->value(position_);
-        const vector pos = cameraPosition_->value(position_);
-        const point focalPoint = cameraFocalPoint_->value(position_);
-
-        vtkCamera* camera = renderer->GetActiveCamera();
-        camera->SetViewUp(up.x(), up.y(), up.z());
-        camera->SetPosition(pos.x(), pos.y(), pos.z());
-        camera->SetFocalPoint(focalPoint.x(), focalPoint.y(), focalPoint.z());
-        camera->Modified();
+        // Restore parallel scale to allow application of zoom (later)
+        camera->SetParallelScale(1);
     }
-
-    if (!parallelProjection_)
+    else
     {
         // Restore viewAngle (it might be reset by clipping)
-        vtkCamera* camera = renderer->GetActiveCamera();
         camera->SetViewAngle(cameraViewAngle_->value(position_));
-        camera->Modified();
     }
+
+    const vector up = cameraUp_->value(position_);
+    const vector pos = cameraPosition_->value(position_);
+    const point focalPoint = cameraFocalPoint_->value(position_);
+    const scalar zoom = cameraZoom_->value(position_);
+
+    camera->SetViewUp(up.x(), up.y(), up.z());
+    camera->SetPosition(pos.x(), pos.y(), pos.z());
+    camera->SetFocalPoint(focalPoint.x(), focalPoint.y(), focalPoint.z());
+
+
+    // Apply clipping if required
+    // Note: possible optimisation - if the camera is static, this only needs
+    //       to be done once on initialisation
+    if (clipBox_ != boundBox::greatBox)
+    {
+        // Call ResetCamera() to fit clip box in view
+        clipBoxActor_->VisibilityOn();
+        renderer->ResetCamera();
+        clipBoxActor_->VisibilityOff();
+    }
+
+    // Zoom applied after all other operations
+    camera->Zoom(zoom);
+
+    camera->Modified();
 }
 
 
@@ -323,12 +273,13 @@ Foam::functionObjects::runTimePostPro::scene::scene
     obr_(obr),
     name_(name),
     colours_(),
-    mode_(mtStatic),
     cameraPosition_(nullptr),
     cameraFocalPoint_(nullptr),
     cameraUp_(nullptr),
     cameraViewAngle_(nullptr),
-    clipBox_(),
+    cameraZoom_(nullptr),
+    clipBox_(boundBox::greatBox),
+    clipBoxActor_(),
     parallelProjection_(true),
     nFrameTotal_(1),
     startPosition_(0),
@@ -366,7 +317,10 @@ Foam::scalar Foam::functionObjects::runTimePostPro::scene::position() const
 }
 
 
-void Foam::functionObjects::runTimePostPro::scene::read(const dictionary& dict)
+void Foam::functionObjects::runTimePostPro::scene::read
+(
+    const dictionary& dict
+)
 {
     readCamera(dict.subDict("camera"));
     readColours(dict.subDict("colours"));
