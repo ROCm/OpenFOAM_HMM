@@ -103,7 +103,17 @@ void Foam::functionObjects::runTimePostPro::scene::readCamera
         }
     }
 
-    cameraZoom_ = Function1<scalar>::New("zoom", dict);
+    if (dict.found("zoom"))
+    {
+        cameraZoom_ = Function1<scalar>::New("zoom", dict);
+    }
+    else
+    {
+        cameraZoom_.reset
+        (
+            new Function1Types::Constant<scalar>("zoom", 1.0)
+        );
+    }
 }
 
 
