@@ -25,6 +25,28 @@ Class
     Foam::functionObjects::runTimePostPro::scene
 
 Description
+    Class to control scene construction and provide main rendering loop
+
+Usage
+    \verbatim
+    camera
+    {
+        // Total number of frames to generate
+        nFrameTotal 1;
+
+        // Parallel projection flag
+        parallelProjection no;
+
+        focalPoint  (0 0 0);
+        up          (0 1 0);
+        position    (0 0 1);
+
+        // Optional entries
+        clipBox     (-0.0206 -0.0254 -0.0005) (0.29 0.0254 0.0005);
+        viewAngle   20;
+        zoom        1.1;
+    }
+    \endverbatim
 
 SourceFiles
     scene.C
