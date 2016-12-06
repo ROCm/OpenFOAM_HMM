@@ -562,7 +562,7 @@ void surfaceNoise::calculate()
 
         forAll(surfPrmsf, i)
         {
-            label freqI = i*fftWriteInterval_;
+            label freqI = (i + 1)*fftWriteInterval_ - 1;
             fOut[i] = freq1[freqI];
             const word& fName = inputFileName_.name(true);
             const word gName = "fft";
