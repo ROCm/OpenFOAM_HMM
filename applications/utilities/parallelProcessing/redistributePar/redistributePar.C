@@ -81,6 +81,7 @@ Usage
 #include "parLagrangianRedistributor.H"
 #include "unmappedPassiveParticleCloud.H"
 #include "hexRef8Data.H"
+#include "meshRefinement.H"
 #include "pointFields.H"
 
 using namespace Foam;
@@ -1246,13 +1247,17 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         {
             runTime.TimePaths::caseName() = proc0CaseName;
         }
+
         // Make sure all processors have valid data (since only some will
         // read)
         refData.sync(io);
 
-
         // Distribute
         refData.distribute(map);
+
+
+        // Now we've read refinement data we can remove it
+        meshRefinement::removeFiles(mesh);
 
         if (nDestProcs == 1)
         {
