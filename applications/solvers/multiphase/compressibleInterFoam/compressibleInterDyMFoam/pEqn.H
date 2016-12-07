@@ -87,15 +87,6 @@
 
         if (pimple.finalNonOrthogonalIter())
         {
-            p = max(p_rgh + (alpha1*rho1 + alpha2*rho2)*gh, pMin);
-            p_rgh = p - (alpha1*rho1 + alpha2*rho2)*gh;
-
-            dgdt =
-            (
-                pos(alpha2)*(p_rghEqnComp2 & p_rgh)/rho2
-              - pos(alpha1)*(p_rghEqnComp1 & p_rgh)/rho1
-            );
-
             phi = phiHbyA + p_rghEqnIncomp.flux();
 
             U = HbyA
@@ -116,8 +107,19 @@
 
     rho = alpha1*rho1 + alpha2*rho2;
 
+    p = max(p_rgh + rho*gh, pMin);
+    p_rgh = p - rho*gh;
+
+    dgdt =
+    (
+        pos(alpha2)*(p_rghEqnComp2 & p_rgh)/rho2
+      - pos(alpha1)*(p_rghEqnComp1 & p_rgh)/rho1
+    );
+
     K = 0.5*magSqr(U);
 
     Info<< "max(U) " << max(mag(U)).value() << endl;
     Info<< "min(p_rgh) " << min(p_rgh).value() << endl;
 }
+
+

@@ -70,6 +70,21 @@ int main(int argc, char *argv[])
 
     turbulence->validate();
 
+
+    volScalarField rAU
+    (
+        IOobject
+        (
+            "rAU",
+            runTime.timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedScalar("rAU", dimTime/rho.dimensions(), 1.0)
+    );
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     Info<< "\nStarting time loop\n" << endl;
 
@@ -77,45 +92,17 @@ int main(int argc, char *argv[])
     {
         #include "readControls.H"
 
-        {
-            // Store divU from the previous mesh so that it can be mapped
-            // and used in correctPhi to ensure the corrected phi has the
-            // same divergence
-            volScalarField divU("divU0", fvc::div(fvc::absolute(phi, U)));
+        // Store divU from the previous mesh so that it can be mapped
+        // and used in correctPhi to ensure the corrected phi has the
+        // same divergence
+        volScalarField divU("divU0",fvc::div(fvc::absolute(phi, U)));
 
-            #include "CourantNo.H"
-            #include "setDeltaT.H"
+        #include "CourantNo.H"
+        #include "setDeltaT.H"
 
-            runTime++;
+        runTime++;
 
-            Info<< "Time = " << runTime.timeName() << nl << endl;
-
-            scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
-
-            // Do any mesh changes
-            mesh.update();
-
-            if (mesh.changing())
-            {
-                Info<< "Execution time for mesh.update() = "
-                    << runTime.elapsedCpuTime() - timeBeforeMeshUpdate
-                    << " s" << endl;
-
-                gh = (g & mesh.C()) - ghRef;
-                ghf = (g & mesh.Cf()) - ghRef;
-            }
-
-            if (mesh.changing() && correctPhi)
-            {
-                // Calculate absolute flux from the mapped surface velocity
-                phi = mesh.Sf() & Uf;
-
-                #include "correctPhi.H"
-
-                // Make the fluxes relative to the mesh motion
-                fvc::makeRelative(phi, U);
-            }
-        }
+        Info<< "Time = " << runTime.timeName() << nl << endl;
 
         if (mesh.changing() && checkMeshCourantNo)
         {
@@ -127,6 +114,46 @@ int main(int argc, char *argv[])
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
+            if (pimple.firstIter())
+            {
+                scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
+
+                mesh.update();
+
+                if (mesh.changing())
+                {
+                    Info<< "Execution time for mesh.update() = "
+                        << runTime.elapsedCpuTime() - timeBeforeMeshUpdate
+                        << " s" << endl;
+
+                    gh = (g & mesh.C()) - ghRef;
+                    ghf = (g & mesh.Cf()) - ghRef;
+                }
+
+                if ((correctPhi && mesh.changing()) || mesh.topoChanging())
+                {
+                    // Calculate absolute flux from the mapped surface velocity
+                    // SAF: temporary fix until mapped Uf is assessed
+                    Uf = fvc::interpolate(U);
+
+                    phi = mesh.Sf() & Uf;
+
+                    #include "correctPhi.H"
+
+                    fvc::makeRelative(phi, U);
+
+                    mixture.correct();
+
+                    mesh.topoChanging(false);
+                }
+
+                if (mesh.changing() && checkMeshCourantNo)
+                {
+                    #include "meshCourantNo.H"
+                }
+            }
+
+
             #include "alphaEqnsSubCycle.H"
 
             // correct interface on first PIMPLE corrector
@@ -144,6 +171,11 @@ int main(int argc, char *argv[])
             while (pimple.correct())
             {
                 #include "pEqn.H"
+            }
+
+            if (pimple.turbCorr())
+            {
+                turbulence->correct();
             }
         }
 

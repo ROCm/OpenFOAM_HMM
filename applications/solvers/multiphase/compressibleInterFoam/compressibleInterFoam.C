@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
             solve(fvm::ddt(rho) + fvc::div(rhoPhi));
 
             #include "UEqn.H"
+            volScalarField divU(fvc::div(fvc::absolute(phi, U)));
             #include "TEqn.H"
 
             // --- Pressure corrector loop
