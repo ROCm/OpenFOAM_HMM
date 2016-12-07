@@ -195,7 +195,8 @@ void Foam::pairPatchAgglomeration::setEdgeWeights
 
 Foam::pairPatchAgglomeration::pairPatchAgglomeration
 (
-    const indirectPrimitivePatch& patch,
+    const faceList& faces,
+    const pointField& points,
     const dictionary& controlDict
 )
 :
@@ -218,23 +219,15 @@ Foam::pairPatchAgglomeration::pairPatchAgglomeration
     ),
     nFaces_(maxLevels_),
     restrictAddressing_(maxLevels_),
-    restrictTopBottomAddressing_(identity(patch.size())),
+    restrictTopBottomAddressing_(identity(faces.size())),
     patchLevels_(maxLevels_),
-    facePairWeight_(patch.size())
+    facePairWeight_(faces.size())
 {
     // Set base fine patch
-    patchLevels_.set
-    (
-        0,
-        new bPatch
-        (
-            patch.localFaces(),
-            patch.localPoints()
-        )
-    );
+    patchLevels_.set(0, new bPatch(faces, points));
 
     // Set number of faces for the base patch
-    nFaces_[0] = patch.size();
+    nFaces_[0] = faces.size();
 
     // Set edge weights for level 0
     setLevel0EdgeWeights();
@@ -243,7 +236,8 @@ Foam::pairPatchAgglomeration::pairPatchAgglomeration
 
 Foam::pairPatchAgglomeration::pairPatchAgglomeration
 (
-    const indirectPrimitivePatch& patch,
+    const faceList& faces,
+    const pointField& points,
     const label mergeLevels,
     const label maxLevels,
     const label nFacesInCoarsestLevel,          // local number of cells
@@ -258,23 +252,15 @@ Foam::pairPatchAgglomeration::pairPatchAgglomeration
     featureAngle_(featureAngle),
     nFaces_(maxLevels_),
     restrictAddressing_(maxLevels_),
-    restrictTopBottomAddressing_(identity(patch.size())),
+    restrictTopBottomAddressing_(identity(faces.size())),
     patchLevels_(maxLevels_),
-    facePairWeight_(patch.size())
+    facePairWeight_(faces.size())
 {
     // Set base fine patch
-    patchLevels_.set
-    (
-        0,
-        new bPatch
-        (
-            patch.localFaces(),
-            patch.localPoints()
-        )
-    );
+    patchLevels_.set(0, new bPatch(faces, points));
 
     // Set number of faces for the base patch
-    nFaces_[0] = patch.size();
+    nFaces_[0] = faces.size();
 
     // Set edge weights for level 0
     setLevel0EdgeWeights();
@@ -289,7 +275,8 @@ Foam::pairPatchAgglomeration::~pairPatchAgglomeration()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::bPatch& Foam::pairPatchAgglomeration::patchLevel
+const Foam::pairPatchAgglomeration::bPatch&
+Foam::pairPatchAgglomeration::patchLevel
 (
     const label i
 ) const

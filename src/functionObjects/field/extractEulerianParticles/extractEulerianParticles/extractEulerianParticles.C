@@ -151,7 +151,17 @@ void Foam::functionObjects::extractEulerianParticles::initialiseBins()
         }
     }
 
-    pairPatchAgglomeration ppa(patch, 10, 50, nLocations, labelMax, 180);
+    pairPatchAgglomeration ppa
+    (
+        patch.localFaces(),
+        patch.localPoints(),
+        10,
+        50,
+        nLocations,
+        labelMax,
+        180
+    );
+
     ppa.agglomerate();
 
     label nCoarseFaces = 0;
@@ -601,11 +611,11 @@ bool Foam::functionObjects::extractEulerianParticles::read
     {
         dict.lookup("faceZone") >> faceZoneName_;
         dict.readIfPresent("nLocations", nInjectorLocations_);
-        dict.lookup("alphaName") >> alphaName_;
+        dict.lookup("alpha") >> alphaName_;
         dict.readIfPresent("alphaThreshold", alphaThreshold_);
-        dict.lookup("UName") >> UName_;
-        dict.lookup("rhoName") >> rhoName_;
-        dict.lookup("phiName") >> phiName_;
+        dict.lookup("U") >> UName_;
+        dict.lookup("rho") >> rhoName_;
+        dict.lookup("phi") >> phiName_;
 
         dict.readIfPresent("minDiameter", minDiameter_);
         dict.readIfPresent("maxDiameter", maxDiameter_);

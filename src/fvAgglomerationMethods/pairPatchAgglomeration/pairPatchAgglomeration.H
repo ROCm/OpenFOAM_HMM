@@ -40,11 +40,6 @@ SourceFiles
 #include "List.H"
 #include "EdgeMap.H"
 
-namespace Foam
-{
-    typedef PrimitivePatch<face, List, const pointField> bPatch;
-}
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -57,6 +52,8 @@ namespace Foam
 class pairPatchAgglomeration
 {
 protected:
+
+    typedef PrimitivePatch<face, List, const pointField> bPatch;
 
     // Protected data
 
@@ -144,17 +141,19 @@ public:
 
     // Constructors
 
-        //- Construct given patch and controls
+        //- Construct given faces, points and control dictionary
         pairPatchAgglomeration
         (
-            const indirectPrimitivePatch& patch,
+            const faceList& faces,
+            const pointField& points,
             const dictionary& controlDict
         );
 
         //- Construct from components
         pairPatchAgglomeration
         (
-            const indirectPrimitivePatch& patch,
+            const faceList& faces,
+            const pointField& points,
             const label mergeLevels,
             const label maxLevels,
             const label nFacesInCoarsestLevel,
