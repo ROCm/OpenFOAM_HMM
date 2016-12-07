@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -547,6 +547,26 @@ bool Foam::topoSet::writeData(Ostream& os) const
 void Foam::topoSet::updateMesh(const mapPolyMesh&)
 {
     NotImplemented;
+}
+
+
+void Foam::topoSet::removeFiles(const polyMesh& mesh)
+{
+    IOobject io
+    (
+        "dummy",
+        mesh.facesInstance(),
+        mesh.meshSubDir/"sets",
+        mesh
+    );
+    fileName setsDir(io.path());
+
+    if (debug) DebugVar(setsDir);
+
+    if (isDir(setsDir))
+    {
+        rmDir(setsDir);
+    }
 }
 
 

@@ -56,6 +56,7 @@ Description
 #include "wedgePolyPatch.H"
 #include "planeExtrusion.H"
 #include "emptyPolyPatch.H"
+#include "processorMeshes.H"
 
 using namespace Foam;
 
@@ -1058,6 +1059,8 @@ int main(int argc, char *argv[])
         FatalErrorInFunction
             << exit(FatalError);
     }
+    // Remove any left-over files
+    processorMeshes::removeFiles(mesh);
 
     // Need writing cellSet
     label nAdded = returnReduce(addedCellsSet.size(), sumOp<label>());

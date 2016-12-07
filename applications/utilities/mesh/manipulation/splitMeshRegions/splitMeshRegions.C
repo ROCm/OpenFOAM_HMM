@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,6 +107,7 @@ Description
 #include "mappedWallPolyPatch.H"
 #include "fvMeshTools.H"
 #include "zeroGradientFvPatchFields.H"
+#include "processorMeshes.H"
 
 using namespace Foam;
 
@@ -941,6 +942,8 @@ void createAndWriteRegion
 
     newMesh().setInstance(newMeshInstance);
     newMesh().write();
+    topoSet::removeFiles(newMesh());
+    processorMeshes::removeFiles(newMesh());
 
     // Write addressing files like decomposePar
     Info<< "Writing addressing to base mesh" << endl;
