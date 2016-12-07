@@ -28,8 +28,9 @@ Group
     grpInletBoundaryConditions
 
 Description
-    This temperature boundary conditon averages the temperature over the
-    "outlet" patch specified by name "outletPatch" and applies an extra
+
+    This temperature boundary condition averages the temperature over the
+    "outlet" patch specified by name "outletPatchName" and applies an extra
     heat source. This is set as a uniform temperature value on this patch.
     Additionally minTempLimit/maxTempLimit limits can be applied
 
