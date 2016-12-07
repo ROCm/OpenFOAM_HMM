@@ -33,4 +33,30 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::injectedParticle::injectedParticle(const injectedParticle& p)
+:
+    particle(p),
+    tag_(p.tag_),
+    soi_(p.soi_),
+    d_(p.d_),
+    U_(p.U_)
+{}
+
+
+Foam::injectedParticle::injectedParticle
+(
+    const injectedParticle& p,
+    const polyMesh& mesh
+)
+:
+    particle(p, mesh),
+    tag_(p.tag_),
+    soi_(p.soi_),
+    d_(p.d_),
+    U_(p.U_)
+{}
+
+
 // ************************************************************************* //

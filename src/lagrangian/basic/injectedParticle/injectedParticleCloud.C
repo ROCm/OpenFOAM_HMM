@@ -48,6 +48,16 @@ Foam::injectedParticleCloud::injectedParticleCloud
 }
 
 
+Foam::injectedParticleCloud::injectedParticleCloud
+(
+    const injectedParticleCloud& c,
+    const word& cloudName
+)
+:
+    Cloud<injectedParticle>(c.pMesh(), cloudName, c)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::injectedParticleCloud::~injectedParticleCloud()

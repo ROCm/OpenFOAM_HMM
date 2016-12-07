@@ -202,7 +202,7 @@ Foam::Ostream& Foam::operator<<
         os  << static_cast<const particle&>(p);
         os.write
         (
-            reinterpret_cast<const char*>(&p.soi_),
+            reinterpret_cast<const char*>(&p.tag_),
             injectedParticle::sizeofFields
         );
     }

@@ -69,13 +69,25 @@ public:
 
     // Constructors
 
-        //-
+        //- Construct from mesh and cloud name
         injectedParticleCloud
         (
             const polyMesh& mesh,
             const word& name,
             const bool readFields = true
         );
+
+        //- Copy constructor with new name
+        injectedParticleCloud(const injectedParticleCloud& c, const word& name);
+
+        //- Construct and return clone based on (this) with new name
+        virtual autoPtr<injectedParticleCloud> clone(const word& name) const
+        {
+            return autoPtr<injectedParticleCloud>
+            (
+                new injectedParticleCloud(*this, name)
+            );
+        }
 
 
     //- Destructor
