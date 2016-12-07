@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,19 +40,46 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
+const Foam::objectRegistry&
+Foam::functionObjects::regionFunctionObject::whichSubRegistry
+(
+    const objectRegistry& obr,
+    const dictionary& dict
+)
+{
+    word subName;
+    if (dict.readIfPresent("subRegion", subName))
+    {
+        return obr.lookupObject<objectRegistry>(subName);
+    }
+    else
+    {
+        return obr;
+    }
+}
+
+
+const Foam::objectRegistry&
+Foam::functionObjects::regionFunctionObject::obr() const
+{
+    return subObr_;
+}
+
+
 bool Foam::functionObjects::regionFunctionObject::writeObject
 (
     const word& fieldName
 )
 {
-    if (obr_.foundObject<regIOobject>(fieldName))
+    const regIOobject* objPtr =
+        this->lookupObjectPtr<regIOobject>(fieldName);
+
+    if (objPtr)
     {
-        const regIOobject& field = obr_.lookupObject<regIOobject>(fieldName);
-
         Log << "    functionObjects::" << type() << " " << name()
-            << " writing field: " << field.name() << endl;
+            << " writing field: " << objPtr->name() << endl;
 
-        field.write();
+        objPtr->write();
 
         return true;
     }
@@ -68,13 +95,12 @@ bool Foam::functionObjects::regionFunctionObject::clearObject
     const word& fieldName
 )
 {
-    if (foundObject<regIOobject>(fieldName))
+    regIOobject* objPtr = lookupObjectRefPtr<regIOobject>(fieldName);
+    if (objPtr)
     {
-        const regIOobject& resultObject = lookupObject<regIOobject>(fieldName);
-
-        if (resultObject.ownedByRegistry())
+        if (objPtr->ownedByRegistry())
         {
-            return const_cast<regIOobject&>(resultObject).checkOut();
+            return objPtr->checkOut();
         }
         else
         {
@@ -104,7 +130,8 @@ Foam::functionObjects::regionFunctionObject::regionFunctionObject
         (
             dict.lookupOrDefault("region", polyMesh::defaultRegion)
         )
-    )
+    ),
+    subObr_(whichSubRegistry(obr_, dict))
 {}
 
 
@@ -116,7 +143,8 @@ Foam::functionObjects::regionFunctionObject::regionFunctionObject
 )
 :
     stateFunctionObject(name, obr.time()),
-    obr_(obr)
+    obr_(obr),
+    subObr_(whichSubRegistry(obr_, dict))
 {}
 
 
