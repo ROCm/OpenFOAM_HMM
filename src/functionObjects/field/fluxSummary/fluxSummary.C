@@ -616,9 +616,9 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
     writeFile::read(dict);
 
     mode_ = modeTypeNames_.read(dict.lookup("mode"));
-    phiName_= dict.lookupOrDefault<word>("phi", "phi");
-    dict.readIfPresent("scaleFactor", scaleFactor_);
-    dict.readIfPresent("tolerance", tolerance_);
+    phiName_ = dict.lookupOrDefault<word>("phi", "phi");
+    scaleFactor_ = dict.lookupOrDefault<scalar>("scaleFactor", 1.0);
+    tolerance_   = dict.lookupOrDefault<scalar>("tolerance", 0.8);
 
     // Initialise with capacity of 10 faceZones
     DynamicList<vector> refDir(10);
