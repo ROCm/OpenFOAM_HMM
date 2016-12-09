@@ -46,6 +46,10 @@ Usage: $Script [OPTIONS]
 Executing $Script is equivalent to
 
    wmake -all [OPTIONS]
+
+With these additional options:
+   -l | -log
+
 USAGE
 
     wmake -help
@@ -57,8 +61,7 @@ USAGE
 # Parse the arguments and options
 #------------------------------------------------------------------------------
 
-fromWmake=
-qOpt=
+unset fromWmake optLog optQueue
 
 for arg in "$@"
 do
@@ -70,17 +73,20 @@ do
             usage
             exit 0
             ;;
-        # Check if called from wmake to avoid recusion
         -fromWmake)
-            fromWmake="fromWmake"
+            # If called from wmake (to avoid recursion)
+            fromWmake=true
             ;;
-        -q)
-            qOpt="-q"
-            # Permanently remove arg
-            continue
+        -l | -log)
+            optLog=true
+            continue    # Permanently remove arg
             ;;
-        # Target type
+        -q | -queue)
+            optQueue="-q"
+            continue    # Permanently remove arg
+            ;;
         lib | libo | libso | dep | objects)
+            # Target type
             targetType=$arg
             ;;
     esac
@@ -96,7 +102,13 @@ done
 
 if [ -z "$fromWmake" ]
 then
-    exec wmake -all $qOpt $*
+    if [ -z "$optLog" ]
+    then
+        exec wmake -all $optQueue $*
+    else
+        echo "logging wmake -all output to 'log.Allwmake'" 1>&2
+        exec wmake -all $optQueue $* 2>&1 | tee log.Allwmake
+    fi
 fi
 
 
@@ -114,7 +126,8 @@ fi
 # Cleanup local variables and functions
 #------------------------------------------------------------------------------
 
-unset Script usage fromWmake
+unset Script fromWmake optLog optQueue
+unset -f usage
 
 
 #------------------------------------------------------------------------------
