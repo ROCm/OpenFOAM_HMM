@@ -268,6 +268,9 @@ public:
         //- Number of polling cycles in processor updates
         static int nPollProcInterfaces;
 
+        //- Optional maximum message size (bytes)
+        static int maxCommsSize;
+
         //- Default communicator (all processors)
         static label worldComm;
 
