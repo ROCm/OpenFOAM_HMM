@@ -86,7 +86,7 @@ protected:
         //- Pointer to the surface
         autoPtr<meshedSurface> surfPtr_;
 
-        List<Tuple2<string, label> > schema_;
+        List<Tuple2<string, label>> schema_;
 
 
     // Protected Member Functions
@@ -126,7 +126,7 @@ protected:
 
         //- Helper function to return a field
         template<class Type>
-        tmp<Field<Type> > readField
+        tmp<Field<Type>> readField
         (
             const label timeIndex,
             const label fieldIndex
@@ -160,7 +160,7 @@ public:
         virtual wordList fieldNames(const label timeIndex) const;
 
         //- Return a scalar field at a given time
-        virtual tmp<Field<scalar> > field
+        virtual tmp<Field<scalar>> field
         (
             const label timeIndex,
             const label fieldIndex,
@@ -168,7 +168,7 @@ public:
         ) const;
 
         //- Return a scalar field at a given time
-        virtual tmp<Field<vector> > field
+        virtual tmp<Field<vector>> field
         (
             const label timeIndex,
             const label fieldIndex,
@@ -176,7 +176,7 @@ public:
         ) const;
 
         //- Return a sphericalTensor field at a given time
-        virtual tmp<Field<sphericalTensor> > field
+        virtual tmp<Field<sphericalTensor>> field
         (
             const label timeIndex,
             const label fieldIndex,
@@ -184,7 +184,7 @@ public:
         ) const;
 
         //- Return a symmTensor field at a given time
-        virtual tmp<Field<symmTensor> > field
+        virtual tmp<Field<symmTensor>> field
         (
             const label timeIndex,
             const label fieldIndex,
@@ -192,7 +192,7 @@ public:
         ) const;
 
         //- Return a tensor field at a given time
-        virtual tmp<Field<tensor> > field
+        virtual tmp<Field<tensor>> field
         (
             const label timeIndex,
             const label fieldIndex,

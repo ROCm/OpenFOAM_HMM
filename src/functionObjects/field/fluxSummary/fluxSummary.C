@@ -79,21 +79,19 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZone
     DynamicList<List<scalar>>& faceSign
 ) const
 {
-    const fvMesh& mesh = refCast<const fvMesh>(obr_);
-
-    label zonei = mesh.faceZones().findZoneID(faceZoneName);
+    label zonei = mesh_.faceZones().findZoneID(faceZoneName);
 
     if (zonei == -1)
     {
         FatalErrorInFunction
             << "Unable to find faceZone " << faceZoneName
-            << ".  Valid faceZones are: " << mesh.faceZones().names()
+            << ".  Valid faceZones are: " << mesh_.faceZones().names()
             << exit(FatalError);
     }
 
     faceZoneNames.append(faceZoneName);
 
-    const faceZone& fZone = mesh.faceZones()[zonei];
+    const faceZone& fZone = mesh_.faceZones()[zonei];
 
     DynamicList<label> faceIDs(fZone.size());
     DynamicList<label> facePatchIDs(fZone.size());
@@ -105,15 +103,15 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZone
 
         label faceID = -1;
         label facePatchID = -1;
-        if (mesh.isInternalFace(facei))
+        if (mesh_.isInternalFace(facei))
         {
             faceID = facei;
             facePatchID = -1;
         }
         else
         {
-            facePatchID = mesh.boundaryMesh().whichPatch(facei);
-            const polyPatch& pp = mesh.boundaryMesh()[facePatchID];
+            facePatchID = mesh_.boundaryMesh().whichPatch(facei);
+            const polyPatch& pp = mesh_.boundaryMesh()[facePatchID];
             if (isA<coupledPolyPatch>(pp))
             {
                 if (refCast<const coupledPolyPatch>(pp).owner())
@@ -170,31 +168,29 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZoneAndDirection
     DynamicList<List<scalar>>& faceSign
 ) const
 {
-    const fvMesh& mesh = refCast<const fvMesh>(obr_);
-
     vector refDir = dir/(mag(dir) + ROOTVSMALL);
 
-    label zonei = mesh.faceZones().findZoneID(faceZoneName);
+    label zonei = mesh_.faceZones().findZoneID(faceZoneName);
 
     if (zonei == -1)
     {
          FatalErrorInFunction
             << "Unable to find faceZone " << faceZoneName
-            << ".  Valid faceZones are: " << mesh.faceZones().names()
+            << ".  Valid faceZones are: " << mesh_.faceZones().names()
             << exit(FatalError);
     }
 
     faceZoneNames.append(faceZoneName);
     zoneRefDir.append(refDir);
 
-    const faceZone& fZone = mesh.faceZones()[zonei];
+    const faceZone& fZone = mesh_.faceZones()[zonei];
 
     DynamicList<label> faceIDs(fZone.size());
     DynamicList<label> facePatchIDs(fZone.size());
     DynamicList<scalar> faceSigns(fZone.size());
 
-    const surfaceVectorField& Sf = mesh.Sf();
-    const surfaceScalarField& magSf = mesh.magSf();
+    const surfaceVectorField& Sf = mesh_.Sf();
+    const surfaceScalarField& magSf = mesh_.magSf();
 
     vector n(Zero);
 
@@ -204,15 +200,15 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZoneAndDirection
 
         label faceID = -1;
         label facePatchID = -1;
-        if (mesh.isInternalFace(facei))
+        if (mesh_.isInternalFace(facei))
         {
             faceID = facei;
             facePatchID = -1;
         }
         else
         {
-            facePatchID = mesh.boundaryMesh().whichPatch(facei);
-            const polyPatch& pp = mesh.boundaryMesh()[facePatchID];
+            facePatchID = mesh_.boundaryMesh().whichPatch(facei);
+            const polyPatch& pp = mesh_.boundaryMesh()[facePatchID];
             if (isA<coupledPolyPatch>(pp))
             {
                 if (refCast<const coupledPolyPatch>(pp).owner())
@@ -279,27 +275,25 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
     DynamicList<List<scalar>>& faceSign
 ) const
 {
-    const fvMesh& mesh = refCast<const fvMesh>(obr_);
-
     vector refDir = dir/(mag(dir) + ROOTVSMALL);
 
-    const label cellZonei = mesh.cellZones().findZoneID(cellZoneName);
+    const label cellZonei = mesh_.cellZones().findZoneID(cellZoneName);
 
     if (cellZonei == -1)
     {
         FatalErrorInFunction
             << "Unable to find cellZone " << cellZoneName
-            << ". Valid zones are: " << mesh.cellZones().names()
+            << ". Valid zones are: " << mesh_.cellZones().names()
             << exit(FatalError);
     }
 
-    const label nInternalFaces = mesh.nInternalFaces();
-    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+    const label nInternalFaces = mesh_.nInternalFaces();
+    const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 
-    labelList cellAddr(mesh.nCells(), -1);
-    const labelList& cellIDs = mesh.cellZones()[cellZonei];
+    labelList cellAddr(mesh_.nCells(), -1);
+    const labelList& cellIDs = mesh_.cellZones()[cellZonei];
     UIndirectList<label>(cellAddr, cellIDs) = identity(cellIDs.size());
-    labelList nbrFaceCellAddr(mesh.nFaces() - nInternalFaces, -1);
+    labelList nbrFaceCellAddr(mesh_.nFaces() - nInternalFaces, -1);
 
     forAll(pbm, patchi)
     {
@@ -311,17 +305,17 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
             {
                 label facei = pp.start() + i;
                 label nbrFacei = facei - nInternalFaces;
-                label own = mesh.faceOwner()[facei];
+                label own = mesh_.faceOwner()[facei];
                 nbrFaceCellAddr[nbrFacei] = cellAddr[own];
             }
         }
     }
 
     // Correct boundary values for parallel running
-    syncTools::swapBoundaryFaceList(mesh, nbrFaceCellAddr);
+    syncTools::swapBoundaryFaceList(mesh_, nbrFaceCellAddr);
 
     // Collect faces
-    DynamicList<label> faceIDs(floor(0.1*mesh.nFaces()));
+    DynamicList<label> faceIDs(floor(0.1*mesh_.nFaces()));
     DynamicList<label> facePatchIDs(faceIDs.size());
     DynamicList<label> faceLocalPatchIDs(faceIDs.size());
     DynamicList<scalar> faceSigns(faceIDs.size());
@@ -329,12 +323,12 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
     // Internal faces
     for (label facei = 0; facei < nInternalFaces; facei++)
     {
-        const label own = cellAddr[mesh.faceOwner()[facei]];
-        const label nbr = cellAddr[mesh.faceNeighbour()[facei]];
+        const label own = cellAddr[mesh_.faceOwner()[facei]];
+        const label nbr = cellAddr[mesh_.faceNeighbour()[facei]];
 
         if (((own != -1) && (nbr == -1)) || ((own == -1) && (nbr != -1)))
         {
-            vector n = mesh.faces()[facei].normal(mesh.points());
+            vector n = mesh_.faces()[facei].normal(mesh_.points());
             n /= mag(n) + ROOTVSMALL;
 
             if ((n & refDir) > tolerance_)
@@ -362,12 +356,12 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
         forAll(pp, localFacei)
         {
             const label facei = pp.start() + localFacei;
-            const label own = cellAddr[mesh.faceOwner()[facei]];
+            const label own = cellAddr[mesh_.faceOwner()[facei]];
             const label nbr = nbrFaceCellAddr[facei - nInternalFaces];
 
             if ((own != -1) && (nbr == -1))
             {
-                vector n = mesh.faces()[facei].normal(mesh.points());
+                vector n = mesh_.faces()[facei].normal(mesh_.points());
                 n /= mag(n) + ROOTVSMALL;
 
                 if ((n & refDir) > tolerance_)
@@ -391,15 +385,15 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
     // Convert into primitivePatch for convenience
     indirectPrimitivePatch patch
     (
-        IndirectList<face>(mesh.faces(), faceIDs),
-        mesh.points()
+        IndirectList<face>(mesh_.faces(), faceIDs),
+        mesh_.points()
     );
 
     if (debug)
     {
-        OBJstream os(mesh.time().path()/"patch.obj");
+        OBJstream os(mesh_.time().path()/"patch.obj");
         faceList faces(patch);
-        os.write(faces, mesh.points(), false);
+        os.write(faces, mesh_.points(), false);
     }
 
 
@@ -467,7 +461,7 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
             patchEdgeFaceRegion
         > calc
         (
-            mesh,
+            mesh_,
             patch,
             changedEdges,
             changedInfo,
@@ -524,9 +518,9 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
         // Write OBj of faces to file
         if (debug)
         {
-            OBJstream os(mesh.time().path()/zoneName + ".obj");
-            faceList faces(mesh.faces(), regionFaceIDs[regioni]);
-            os.write(faces, mesh.points(), false);
+            OBJstream os(mesh_.time().path()/zoneName + ".obj");
+            faceList faces(mesh_.faces(), regionFaceIDs[regioni]);
+            os.write(faces, mesh_.points(), false);
         }
     }
 
@@ -552,8 +546,7 @@ void Foam::functionObjects::fluxSummary::initialiseFaceArea()
 {
     faceArea_.setSize(faceID_.size(), 0);
 
-    const fvMesh& mesh = refCast<const fvMesh>(obr_);
-    const surfaceScalarField& magSf = mesh.magSf();
+    const surfaceScalarField& magSf = mesh_.magSf();
 
     forAll(faceID_, zonei)
     {
@@ -623,9 +616,9 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
     writeFile::read(dict);
 
     mode_ = modeTypeNames_.read(dict.lookup("mode"));
-    phiName_= dict.lookupOrDefault<word>("phi", "phi");
-    dict.readIfPresent("scaleFactor", scaleFactor_);
-    dict.readIfPresent("tolerance", tolerance_);
+    phiName_ = dict.lookupOrDefault<word>("phi", "phi");
+    scaleFactor_ = dict.lookupOrDefault<scalar>("scaleFactor", 1.0);
+    tolerance_   = dict.lookupOrDefault<scalar>("tolerance", 0.8);
 
     // Initialise with capacity of 10 faceZones
     DynamicList<vector> refDir(10);
@@ -788,7 +781,7 @@ bool Foam::functionObjects::fluxSummary::write()
 {
     const surfaceScalarField& phi = lookupObject<surfaceScalarField>(phiName_);
 
-    word flowType = "";
+    word flowType;
     if (phi.dimensions() == dimVolume/dimTime)
     {
         flowType = "volumetric";
@@ -801,7 +794,7 @@ bool Foam::functionObjects::fluxSummary::write()
     {
         FatalErrorInFunction
             << "Unsupported flux field " << phi.name() << " with dimensions "
-            << phi.dimensions() << ".  Expected eithe mass flow or volumetric "
+            << phi.dimensions() << ".  Expected either mass flow or volumetric "
             << "flow rate" << abort(FatalError);
     }
 

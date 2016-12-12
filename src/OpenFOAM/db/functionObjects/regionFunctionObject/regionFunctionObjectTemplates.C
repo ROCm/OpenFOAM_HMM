@@ -34,7 +34,7 @@ bool Foam::functionObjects::regionFunctionObject::foundObject
     const word& fieldName
 ) const
 {
-    return obr_.foundObject<ObjectType>(fieldName);
+    return obr().foundObject<ObjectType>(fieldName);
 }
 
 
@@ -44,7 +44,37 @@ const ObjectType& Foam::functionObjects::regionFunctionObject::lookupObject
     const word& fieldName
 ) const
 {
-    return obr_.lookupObject<ObjectType>(fieldName);
+    return obr().lookupObject<ObjectType>(fieldName);
+}
+
+
+template<class ObjectType>
+ObjectType& Foam::functionObjects::regionFunctionObject::lookupObjectRef
+(
+    const word& fieldName
+) const
+{
+    return obr().lookupObjectRef<ObjectType>(fieldName);
+}
+
+
+template<class ObjectType>
+const ObjectType* Foam::functionObjects::regionFunctionObject::lookupObjectPtr
+(
+    const word& fieldName
+) const
+{
+    return obr().lookupObjectPtr<ObjectType>(fieldName);
+}
+
+
+template<class ObjectType>
+ObjectType* Foam::functionObjects::regionFunctionObject::lookupObjectRefPtr
+(
+    const word& fieldName
+) const
+{
+    return obr().lookupObjectRefPtr<ObjectType>(fieldName);
 }
 
 
@@ -72,8 +102,8 @@ bool Foam::functionObjects::regionFunctionObject::store
     {
         const ObjectType& field = lookupObject<ObjectType>(fieldName);
 
-        // If there is a result field already registered assign to the new
-        // result field otherwise transfer ownership of the new result field to
+        // If there is a result field already registered, assign to the new
+        // result field. Otherwise transfer ownership of the new result field to
         // the object registry
         if (&field != &tfield())
         {
@@ -81,7 +111,7 @@ bool Foam::functionObjects::regionFunctionObject::store
         }
         else
         {
-            obr_.objectRegistry::store(tfield.ptr());
+            obr().objectRegistry::store(tfield.ptr());
         }
     }
     else
@@ -95,7 +125,7 @@ bool Foam::functionObjects::regionFunctionObject::store
             fieldName = tfield().name();
         }
 
-        obr_.objectRegistry::store(tfield.ptr());
+        obr().objectRegistry::store(tfield.ptr());
     }
 
     return true;

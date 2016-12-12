@@ -12,4 +12,5 @@ CGAL_LIBS = \
     -L$(BOOST_ARCH_PATH)/lib$(WM_COMPILER_LIB_ARCH) \
     -L$(CGAL_ARCH_PATH)/lib \
     -L$(CGAL_ARCH_PATH)/lib$(WM_COMPILER_LIB_ARCH) \
-    -lCGAL
+    -lCGAL \
+    -lmpfr

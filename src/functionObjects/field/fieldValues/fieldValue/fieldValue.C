@@ -97,7 +97,7 @@ bool Foam::functionObjects::fieldValue::read(const dictionary& dict)
 
     dict.lookup("fields") >> fields_;
     dict.lookup("writeFields") >> writeFields_;
-    dict.readIfPresent("scaleFactor", scaleFactor_);
+    scaleFactor_ = dict.lookupOrDefault<scalar>("scaleFactor", 1.0);
 
     return true;
 }

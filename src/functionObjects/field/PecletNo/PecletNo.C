@@ -157,7 +157,7 @@ Foam::functionObjects::PecletNo::~PecletNo()
 
 bool Foam::functionObjects::PecletNo::read(const dictionary& dict)
 {
-    dict.readIfPresent("rho", rhoName_);
+    rhoName_ = dict.lookupOrDefault<word>("rho", "rho");
 
     return true;
 }

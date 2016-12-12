@@ -95,7 +95,7 @@ protected:
 
     // Protected data
 
-        //- Name of function object to retrueve data from
+        //- Name of function object to retrieve data from
         word functionObjectName_;
 
         //- List of fields on which to operate

@@ -27,6 +27,8 @@ Class
 Description
     Specialization of Foam::functionObject for a region and providing a
     reference to the region Foam::objectRegistry.
+    Also provides support for referencing a sub-region, which is typically
+    needed when dealing with surfMesh and their fields.
 
 See also
     Foam::functionObjects::stateFunctionObject
@@ -68,18 +70,51 @@ protected:
         //- Reference to the region objectRegistry
         const objectRegistry& obr_;
 
+        //- Optional reference to the sub-region objectRegistry.
+        //  If a sub-region is not in effect, this reference is identical
+        //  to the usual region objectRegistry.
+        const objectRegistry& subObr_;
+
 
     // Protected member functions
 
-        //- Find field in the objectRegistry
+        //- Selector for alternative sub-registry,
+        //  when the keyword %subRegion is present in the dictionary
+        static const objectRegistry& whichSubRegistry
+        (
+            const objectRegistry& obr,
+            const dictionary& dict
+        );
+
+        //- The region or sub-region registry being used
+        const objectRegistry& obr() const;
+
+
+        //- Find object (eg, a field) in the (sub) objectRegistry
         template<class ObjectType>
         bool foundObject(const word& fieldName) const;
 
-        //- Lookup field from the objectRegistry
+        //- Lookup and return object (eg, a field) from the (sub) objectRegistry
         template<class ObjectType>
         const ObjectType& lookupObject(const word& fieldName) const;
 
-        //- Store the given field in the objectRegistry under the given name
+        //- Lookup and return object (eg, a field) from the (sub) objectRegistry
+        template<class ObjectType>
+        ObjectType& lookupObjectRef(const word& fieldName) const;
+
+        //- Lookup and return pointer to the object,
+        //  otherwise nullptr if the object was not found,
+        //  or had the incorrect type.
+        template<class ObjectType>
+        const ObjectType* lookupObjectPtr(const word& fieldName) const;
+
+        //- Lookup and return non-const pointer to the object,
+        //  otherwise nullptr if the object was not found,
+        //  or had the incorrect type.
+        template<class ObjectType>
+        ObjectType* lookupObjectRefPtr(const word& fieldName) const;
+
+        //- Store the given field in the (sub) objectRegistry under the given name
         //  Note: sets the fieldName to tfield().name() if not already set
         template<class ObjectType>
         bool store
@@ -89,10 +124,10 @@ protected:
             bool cacheable = false
         );
 
-        //- Write field if present in objectRegistry
+        //- Write field if present in the (sub) objectRegistry
         bool writeObject(const word& fieldName);
 
-        //- Clear field from the objectRegistry if present
+        //- Clear field from the (sub) objectRegistry if present
         bool clearObject(const word& fieldName);
 
 
@@ -101,10 +136,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        regionFunctionObject(const regionFunctionObject&);
+        regionFunctionObject(const regionFunctionObject&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const regionFunctionObject&);
+        void operator=(const regionFunctionObject&) = delete;
 
 
 public:
