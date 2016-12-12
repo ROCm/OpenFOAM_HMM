@@ -15,7 +15,7 @@ runApplication blockMesh
 runApplication decomposePar -decomposeParDict system/decomposeParDict.hierarchical
 
 # \cp system/decomposeParDict.ptscotch system/decomposeParDict
-runParallel snappyHexMesh -decomposeParDict system/decomposeParDict.ptscotch -profiling -overwrite -parallel
+runParallel snappyHexMesh -decomposeParDict system/decomposeParDict.ptscotch -profiling -overwrite
 
 find . -type f -iname "*level*" -exec rm {} \;
 

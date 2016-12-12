@@ -28,6 +28,8 @@ License
 #include "SubField.H"
 #include "cachedRandom.H"
 #include "triPointRef.H"
+#include "volFields.H"
+#include "polyMeshTetDecomposition.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -148,7 +150,7 @@ void Foam::patchInjectionBase::updateMesh(const polyMesh& mesh)
 
 void Foam::patchInjectionBase::setPositionAndCell
 (
-    const polyMesh& mesh,
+    const fvMesh& mesh,
     cachedRandom& rnd,
     vector& position,
     label& cellOwner,
@@ -174,25 +176,25 @@ void Foam::patchInjectionBase::setPositionAndCell
         if (Pstream::myProcNo() == proci)
         {
             // Find corresponding decomposed face triangle
-            label triI = 0;
+            label trii = 0;
             scalar offset = sumTriMagSf_[proci];
             forAllReverse(triCumulativeMagSf_, i)
             {
                 if (areaFraction > triCumulativeMagSf_[i] + offset)
                 {
-                    triI = i;
+                    trii = i;
                     break;
                 }
             }
 
             // Set cellOwner
-            label facei = triToFace_[triI];
+            label facei = triToFace_[trii];
             cellOwner = cellOwners_[facei];
 
             // Find random point in triangle
             const polyPatch& patch = mesh.boundaryMesh()[patchId_];
             const pointField& points = patch.points();
-            const face& tf = triFace_[triI];
+            const face& tf = triFace_[trii];
             const triPointRef tri(points[tf[0]], points[tf[1]], points[tf[2]]);
             const point pf(tri.randomPoint(rnd));
 

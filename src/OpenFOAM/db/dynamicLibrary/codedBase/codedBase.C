@@ -316,6 +316,8 @@ void Foam::codedBase::createLibrary
 }
 
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
 void Foam::codedBase::updateLibrary
 (
     const word& name
@@ -386,9 +388,6 @@ Foam::codedBase::codedBase()
 
 Foam::codedBase::~codedBase()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

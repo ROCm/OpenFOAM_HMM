@@ -78,9 +78,9 @@ ENDIF()
 TARGET_LINK_LIBRARIES(
     PVFoamReader_SM
     LINK_PUBLIC
-    OpenFOAM
-    finiteVolume
     vtkPVFoam
+    finiteVolume
+    OpenFOAM
 )
 
 #-----------------------------------------------------------------------------

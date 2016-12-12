@@ -62,12 +62,14 @@ Foam::blockEdges::splineEdge::splineEdge
 
 Foam::blockEdges::splineEdge::splineEdge
 (
+    const dictionary& dict,
+    const label index,
     const searchableSurfaces& geometry,
     const pointField& points,
     Istream& is
 )
 :
-    blockEdge(points, is),
+    blockEdge(dict, index, points, is),
     CatmullRomSpline(appendEndPoints(points, start_, end_, pointField(is)))
 {
     token t(is);

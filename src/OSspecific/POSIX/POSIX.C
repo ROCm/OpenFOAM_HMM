@@ -542,6 +542,22 @@ time_t Foam::lastModified(const fileName& name, const bool followLink)
 }
 
 
+double Foam::highResLastModified(const fileName& name)
+{
+    fileStat fileStatus(name);
+    if (fileStatus.isValid())
+    {
+        return
+            fileStatus.status().st_mtime
+          + 1e-9*fileStatus.status().st_atim.tv_nsec;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+
 Foam::fileNameList Foam::readDir
 (
     const fileName& directory,

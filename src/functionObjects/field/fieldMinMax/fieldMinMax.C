@@ -52,7 +52,7 @@ const Foam::NamedEnum
 > Foam::functionObjects::fieldMinMax::modeTypeNames_;
 
 
-// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::functionObjects::fieldMinMax::writeFileHeader(Ostream& os) const
 {

@@ -88,6 +88,7 @@ public:
         (
             const word& modelType,
             const fvMesh& mesh,
+            const word& combustionProperties,
             const word& phaseName
         );
 
@@ -98,22 +99,17 @@ public:
 
     // Member Functions
 
-        // Evolution
+        //- Fuel consumption rate matrix
+        virtual tmp<fvScalarMatrix> R(volScalarField& Y) const;
 
-            //- Fuel consumption rate matrix
-            virtual tmp<fvScalarMatrix> R(volScalarField& Y) const;
+        //- Heat release rate calculated from fuel consumption rate matrix
+        virtual tmp<volScalarField> dQ() const;
 
-            //- Heat release rate calculated from fuel consumption rate matrix
-            virtual tmp<volScalarField> dQ() const;
+        //- Sensible enthalpy source term
+        virtual tmp<volScalarField> Sh() const;
 
-            //- Sensible enthalpy source term
-            virtual tmp<volScalarField> Sh() const;
-
-
-        // IO
-
-            //- Update properties from given dictionary
-            virtual bool read();
+        //- Update properties from given dictionary
+        virtual bool read();
 };
 
 

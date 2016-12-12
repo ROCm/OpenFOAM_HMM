@@ -57,7 +57,6 @@ class psiCombustionModel
 :
     public combustionModel
 {
-
     // Private Member Functions
 
         //- Construct as copy (not implemented)
@@ -68,6 +67,9 @@ class psiCombustionModel
 
 
 public:
+
+    typedef psiReactionThermo ReactionThermo;
+
 
     //- Runtime type information
     TypeName("psiCombustionModel");
@@ -82,9 +84,10 @@ public:
         (
             const word& modelType,
             const fvMesh& mesh,
+            const word& combustionProperties,
             const word& phaseName
         ),
-        (modelType, mesh, phaseName)
+        (modelType, mesh, combustionProperties, phaseName)
     );
 
 
@@ -95,17 +98,18 @@ public:
         (
             const word& modelType,
             const fvMesh& mesh,
+            const word& combustionProperties,
             const word& phaseName
         );
 
 
-
-    //- Selector
-    static autoPtr<psiCombustionModel> New
-    (
-        const fvMesh& mesh,
-        const word& phaseName=word::null
-    );
+        //- Selector
+        static autoPtr<psiCombustionModel> New
+        (
+            const fvMesh& mesh,
+            const word& combustionProperties=combustionPropertiesName,
+            const word& phaseName=word::null
+        );
 
 
     //- Destructor

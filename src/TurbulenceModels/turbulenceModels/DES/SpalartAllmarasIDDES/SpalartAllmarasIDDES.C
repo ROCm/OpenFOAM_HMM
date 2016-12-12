@@ -104,8 +104,6 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::rd
 }
 
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
 template<class BasicTurbulenceModel>
 tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::fdt
 (
@@ -115,6 +113,8 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::fdt
     return 1 - tanh(pow(Cdt1_*rd(this->nut_, magGradU), Cdt2_));
 }
 
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
 tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::dTilda

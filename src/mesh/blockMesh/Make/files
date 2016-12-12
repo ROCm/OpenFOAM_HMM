@@ -1,6 +1,7 @@
 blockVertices/blockVertex/blockVertex.C
 blockVertices/pointVertex/pointVertex.C
 blockVertices/projectVertex/projectVertex.C
+blockVertices/namedVertex/namedVertex.C
 
 blockEdges/bezier/bezier.C
 blockEdges/blockEdge/blockEdge.C
@@ -14,6 +15,7 @@ blockEdges/BSplineEdge/BSplineEdge.C
 blockEdges/splineEdge/CatmullRomSpline.C
 blockEdges/splineEdge/splineEdge.C
 blockEdges/projectEdge/projectEdge.C
+blockEdges/projectCurveEdge/projectCurveEdge.C
 
 blockFaces/blockFace/blockFace.C
 blockFaces/projectFace/projectFace.C
@@ -24,8 +26,9 @@ gradingDescriptor/gradingDescriptors.C
 blockDescriptor/blockDescriptor.C
 blockDescriptor/blockDescriptorEdges.C
 
-block/block.C
-block/blockCreate.C
+blocks/block/block.C
+blocks/block/blockCreate.C
+blocks/namedBlock/namedBlock.C
 
 blockMesh/blockMesh.C
 blockMesh/blockMeshCreate.C
@@ -33,5 +36,9 @@ blockMesh/blockMeshTopology.C
 blockMesh/blockMeshCheck.C
 blockMesh/blockMeshMerge.C
 blockMesh/blockMeshMergeFast.C
+
+blockMeshTools/blockMeshTools.C
+
+searchableExtrudedCircle/searchableExtrudedCircle.C
 
 LIB = $(FOAM_LIBBIN)/libblockMesh

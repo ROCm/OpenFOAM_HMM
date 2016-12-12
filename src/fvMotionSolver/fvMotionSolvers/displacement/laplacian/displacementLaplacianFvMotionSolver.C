@@ -63,7 +63,7 @@ Foam::displacementLaplacianFvMotionSolver::displacementLaplacianFvMotionSolver
 )
 :
     displacementMotionSolver(mesh, dict, typeName),
-    fvMotionSolverCore(mesh),
+    fvMotionSolver(mesh),
     cellDisplacement_
     (
         IOobject
@@ -153,7 +153,7 @@ displacementLaplacianFvMotionSolver
 )
 :
     displacementMotionSolver(mesh, dict, pointDisplacement, points0, typeName),
-    fvMotionSolverCore(mesh),
+    fvMotionSolver(mesh),
     cellDisplacement_
     (
         IOobject
