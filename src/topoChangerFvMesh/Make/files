@@ -1,5 +1,6 @@
 topoChangerFvMesh/topoChangerFvMesh.C
 rawTopoChangerFvMesh/rawTopoChangerFvMesh.C
+dynamicMotionSolverTopoFvMesh/dynamicMotionSolverTopoFvMesh.C
 
 /*
 linearValveFvMesh/linearValveFvMesh.C
