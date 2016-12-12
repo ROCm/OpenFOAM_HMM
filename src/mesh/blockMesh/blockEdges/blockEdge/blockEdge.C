@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "blockEdge.H"
+#include "blockVertex.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -51,13 +52,15 @@ Foam::blockEdge::blockEdge
 
 Foam::blockEdge::blockEdge
 (
+    const dictionary& dict,
+    const label index,
     const pointField& points,
     Istream& is
 )
 :
     points_(points),
-    start_(readLabel(is)),
-    end_(readLabel(is))
+    start_(blockVertex::read(is, dict)),
+    end_(blockVertex::read(is, dict))
 {}
 
 
@@ -70,6 +73,8 @@ Foam::autoPtr<Foam::blockEdge> Foam::blockEdge::clone() const
 
 Foam::autoPtr<Foam::blockEdge> Foam::blockEdge::New
 (
+    const dictionary& dict,
+    const label index,
     const searchableSurfaces& geometry,
     const pointField& points,
     Istream& is
@@ -95,7 +100,7 @@ Foam::autoPtr<Foam::blockEdge> Foam::blockEdge::New
             << abort(FatalError);
     }
 
-    return autoPtr<blockEdge>(cstrIter()(geometry, points, is));
+    return autoPtr<blockEdge>(cstrIter()(dict, index, geometry, points, is));
 }
 
 
@@ -136,6 +141,15 @@ Foam::blockEdge::position(const scalarList& lambdas) const
         points[i] = position(lambdas[i]);
     }
     return tpoints;
+}
+
+
+void Foam::blockEdge::write(Ostream& os, const dictionary& d) const
+{
+    blockVertex::write(os, start_, d);
+    os << tab;
+    blockVertex::write(os, end_, d);
+    os << endl;
 }
 
 

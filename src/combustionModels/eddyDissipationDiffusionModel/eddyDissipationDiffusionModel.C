@@ -35,13 +35,17 @@ template<class CombThermoType, class ThermoType>
 eddyDissipationDiffusionModel<CombThermoType, ThermoType>::
 eddyDissipationDiffusionModel
 (
-    const word& modelType, const fvMesh& mesh, const word& phaseName
+    const word& modelType,
+    const fvMesh& mesh,
+    const word& combustionProperties,
+    const word& phaseName
 )
 :
     eddyDissipationModelBase<CombThermoType, ThermoType>
     (
         modelType,
         mesh,
+        combustionProperties,
         phaseName
     ),
     Cd_(readScalar(this->coeffs().lookup("Cd")))

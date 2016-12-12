@@ -117,8 +117,13 @@ bool Foam::functionObjects::blendingFactor::read(const dictionary& dict)
     writeFile::read(dict);
 
     phiName_ = dict.lookupOrDefault<word>("phi", "phi");
-    dict.readIfPresent("tolerance", tolerance_);
-    if ((tolerance_ < 0) || (tolerance_ > 1))
+
+    tolerance_ = 0.001;
+    if
+    (
+        dict.readIfPresent("tolerance", tolerance_)
+     && (tolerance_ < 0 || tolerance_ > 1)
+    )
     {
         FatalErrorInFunction
             << "tolerance must be in the range 0 to 1.  Supplied value: "

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,6 +52,8 @@ Description
 #include "cellSet.H"
 #include "faceSet.H"
 #include "pointSet.H"
+#include "processorMeshes.H"
+#include "hexRef8.H"
 
 #ifdef FOAM_USE_ZOLTAN
     #include "zoltanRenumber.H"
@@ -696,7 +698,6 @@ int main(int argc, char *argv[])
     bool writeMaps = false;
     bool orderPoints = false;
     label blockSize = 0;
-    bool renumberSets = true;
 
     // Construct renumberMethod
     autoPtr<IOdictionary> renumberDictPtr;
@@ -756,8 +757,6 @@ int main(int argc, char *argv[])
             Info<< "Writing renumber maps (new to old) to polyMesh." << nl
                 << endl;
         }
-
-        renumberSets = renumberDict.lookupOrDefault("renumberSets", true);
     }
     else
     {
@@ -884,46 +883,12 @@ int main(int argc, char *argv[])
     PtrList<cellSet> cellSets;
     PtrList<faceSet> faceSets;
     PtrList<pointSet> pointSets;
-    if (renumberSets)
     {
         // Read sets
         IOobjectList objects(mesh, mesh.facesInstance(), "polyMesh/sets");
-        {
-            IOobjectList cSets(objects.lookupClass(cellSet::typeName));
-            if (cSets.size())
-            {
-                Info<< "Reading cellSets:" << endl;
-                forAllConstIter(IOobjectList, cSets, iter)
-                {
-                    cellSets.append(new cellSet(*iter()));
-                    Info<< "    " << cellSets.last().name() << endl;
-                }
-            }
-        }
-        {
-            IOobjectList fSets(objects.lookupClass(faceSet::typeName));
-            if (fSets.size())
-            {
-                Info<< "Reading faceSets:" << endl;
-                forAllConstIter(IOobjectList, fSets, iter)
-                {
-                    faceSets.append(new faceSet(*iter()));
-                    Info<< "    " << faceSets.last().name() << endl;
-                }
-            }
-        }
-        {
-            IOobjectList pSets(objects.lookupClass(pointSet::typeName));
-            if (pSets.size())
-            {
-                Info<< "Reading pointSets:" << endl;
-                forAllConstIter(IOobjectList, pSets, iter)
-                {
-                    pointSets.append(new pointSet(*iter()));
-                    Info<< "    " << pointSets.last().name() << endl;
-                }
-            }
-        }
+        ReadFields(objects, cellSets);
+        ReadFields(objects, faceSets);
+        ReadFields(objects, pointSets);
     }
 
 
@@ -1183,6 +1148,7 @@ int main(int argc, char *argv[])
     }
 
 
+
     // Move mesh (since morphing might not do this)
     if (map().hasMotionPoints())
     {
@@ -1288,8 +1254,19 @@ int main(int argc, char *argv[])
     {
         mesh.setInstance(oldInstance);
     }
+    else
+    {
+        mesh.setInstance(runTime.timeName());
+    }
+
 
     Info<< "Writing mesh to " << mesh.facesInstance() << endl;
+
+    processorMeshes::removeFiles(mesh);
+    hexRef8::removeFiles(mesh);
+    topoSet::updateMesh(mesh.facesInstance(), map(), cellSets);
+    topoSet::updateMesh(mesh.facesInstance(), map(), faceSets);
+    topoSet::updateMesh(mesh.facesInstance(), map(), pointSets);
 
     mesh.write();
 
@@ -1437,27 +1414,6 @@ int main(int argc, char *argv[])
         ).write();
     }
 
-    if (renumberSets)
-    {
-        forAll(cellSets, i)
-        {
-            cellSets[i].updateMesh(map());
-            cellSets[i].instance() = mesh.facesInstance();
-            cellSets[i].write();
-        }
-        forAll(faceSets, i)
-        {
-            faceSets[i].updateMesh(map());
-            faceSets[i].instance() = mesh.facesInstance();
-            faceSets[i].write();
-        }
-        forAll(pointSets, i)
-        {
-            pointSets[i].updateMesh(map());
-            pointSets[i].instance() = mesh.facesInstance();
-            pointSets[i].write();
-        }
-    }
 
     Info<< "End\n" << endl;
 

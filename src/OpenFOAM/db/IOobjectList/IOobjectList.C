@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 #include "Time.H"
 #include "OSspecific.H"
 #include "IOList.H"
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -228,7 +229,10 @@ Foam::wordList Foam::IOobjectList::sortedNames() const
 }
 
 
-Foam::wordList Foam::IOobjectList::names(const word& ClassName) const
+Foam::wordList Foam::IOobjectList::names
+(
+    const word& ClassName
+) const
 {
     wordList objectNames(size());
 
@@ -247,9 +251,62 @@ Foam::wordList Foam::IOobjectList::names(const word& ClassName) const
 }
 
 
-Foam::wordList Foam::IOobjectList::sortedNames(const word& ClassName) const
+Foam::wordList Foam::IOobjectList::names
+(
+    const word& ClassName,
+    const wordRe& matcher
+) const
+{
+    wordList objNames = names(ClassName);
+
+    return wordList(objNames, findStrings(matcher, objNames));
+}
+
+
+Foam::wordList Foam::IOobjectList::names
+(
+    const word& ClassName,
+    const wordReList& matcher
+) const
+{
+    wordList objNames = names(ClassName);
+
+    return wordList(objNames, findStrings(matcher, objNames));
+}
+
+
+Foam::wordList Foam::IOobjectList::sortedNames
+(
+    const word& ClassName
+) const
 {
     wordList sortedLst = names(ClassName);
+    sort(sortedLst);
+
+    return sortedLst;
+}
+
+
+Foam::wordList Foam::IOobjectList::sortedNames
+(
+    const word& ClassName,
+    const wordRe& matcher
+) const
+{
+    wordList sortedLst = names(ClassName, matcher);
+    sort(sortedLst);
+
+    return sortedLst;
+}
+
+
+Foam::wordList Foam::IOobjectList::sortedNames
+(
+    const word& ClassName,
+    const wordReList& matcher
+) const
+{
+    wordList sortedLst = names(ClassName, matcher);
     sort(sortedLst);
 
     return sortedLst;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,7 @@ Description
 
 SourceFiles
     topoSet.C
+    topoSetTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -54,6 +55,7 @@ namespace Foam
 class mapPolyMesh;
 class polyMesh;
 class primitiveMesh;
+class mapDistributePolyMesh;
 
 /*---------------------------------------------------------------------------*\
                            Class topoSet Declaration
@@ -297,9 +299,28 @@ public:
         //- Update any stored data for new labels. Not implemented.
         virtual void updateMesh(const mapPolyMesh& morphMap);
 
+        //- Update any stored data for mesh redistribution.
+        virtual void distribute(const mapDistributePolyMesh&) = 0;
+
         //- Return max allowable index (+1). Not implemented.
         virtual label maxSize(const polyMesh& mesh) const = 0;
 
+        //- Helper: call updateMesh on all sets in container (and
+        //  updates instance)
+        template<class Container>
+        static void updateMesh
+        (
+            const fileName& instance,
+            const mapPolyMesh&,
+            Container&
+        );
+
+        //- Helper: set instance on all sets in container
+        template<class Container>
+        static void setInstance(const fileName& instance, Container&);
+
+        //- Helper: remove all sets files from mesh instance
+        static void removeFiles(const polyMesh&);
 
 
     // Member operators
@@ -313,6 +334,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "topoSetTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

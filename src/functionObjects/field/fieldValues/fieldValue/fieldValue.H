@@ -70,7 +70,7 @@ protected:
 
     // Protected data
 
-        //- Optional scale value
+        //- Optional scaling factor
         scalar scaleFactor_;
 
         //- Construction dictionary

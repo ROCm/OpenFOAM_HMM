@@ -1447,6 +1447,9 @@ public:
                 const fileName&
             ) const;
 
+            //- Helper: remove all relevant files from mesh instance
+            static void removeFiles(const polyMesh&);
+
             //- Helper: calculate average
             template<class T>
             static T gAverage
@@ -1468,7 +1471,6 @@ public:
             //  NamedEnum
             template<class Enum>
             static int readFlags(const Enum& namedEnum, const wordList&);
-
 };
 
 

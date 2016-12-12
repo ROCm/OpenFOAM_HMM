@@ -144,6 +144,7 @@ transFunc(atanh)
 transFunc(erf)
 transFunc(erfc)
 transFunc(lgamma)
+transFunc(tgamma)
 
 transFunc(j0)
 transFunc(j1)
@@ -312,10 +313,17 @@ inline Scalar cmptAv(const Scalar s)
 }
 
 
+inline Scalar cmptSqr(const Scalar s)
+{
+    return sqr(s);
+}
+
+
 inline Scalar cmptMag(const Scalar s)
 {
     return mag(s);
 }
+
 
 inline Scalar sqrtSumSqr(const Scalar a, const Scalar b)
 {
@@ -333,7 +341,7 @@ inline Scalar sqrtSumSqr(const Scalar a, const Scalar b)
 }
 
 
-// Stabilisation around zero for division
+//- Stabilisation around zero for division
 inline Scalar stabilise(const Scalar s, const Scalar small)
 {
     if (s >= 0)

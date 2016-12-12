@@ -72,7 +72,7 @@ protected:
         volScalarField nu_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- Calculate and return the laminar viscosity
         void calcNu();

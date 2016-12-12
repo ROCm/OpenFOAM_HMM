@@ -35,13 +35,17 @@ namespace combustionModels
 template<class CombThermoType, class ThermoType>
 eddyDissipationModelBase<CombThermoType, ThermoType>::eddyDissipationModelBase
 (
-    const word& modelType, const fvMesh& mesh,  const word& phaseName
+    const word& modelType,
+    const fvMesh& mesh,
+    const word& combustionProperties,
+    const word& phaseName
 )
 :
     singleStepCombustion<CombThermoType, ThermoType>
     (
         modelType,
         mesh,
+        combustionProperties,
         phaseName
     ),
     CEDC_(readScalar(this->coeffs().lookup("CEDC")))

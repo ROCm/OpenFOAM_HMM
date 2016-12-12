@@ -30,16 +30,17 @@
       </Documentation>
     </IntVectorProperty>
 
-    <!-- Update GUI check box -->
+    <!-- Refresh button -->
     <IntVectorProperty
-      name="UpdateGUI"
-      command="SetUpdateGUI"
+      name="UiRefresh"
+      command="SetRefresh"
       number_of_elements="1"
+      is_internal="0"
       default_values="0"
       animateable="0">
       <BooleanDomain name="bool"/>
       <Documentation>
-        A simple way to cause a reader GUI modification.
+        Rescan for updated blockMeshDict.
       </Documentation>
     </IntVectorProperty>
 
@@ -102,6 +103,7 @@
 
   <Hints>
     <Property name="FileName" show="0"/>
+    <Property name="UiRefresh" show="0"/>
     <Property name="UiShowPointNumbers" show="0"/>
     <ReaderFactory extensions="blockMesh"
                    file_description="OpenFOAM blockMesh"/>

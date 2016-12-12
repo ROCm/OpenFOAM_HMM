@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 #include "mapPolyMesh.H"
 #include "polyMesh.H"
 #include "syncTools.H"
+#include "mapDistributePolyMesh.H"
 
 #include "addToRunTimeSelectionTable.H"
 
@@ -153,6 +154,37 @@ label pointSet::maxSize(const polyMesh& mesh) const
 void pointSet::updateMesh(const mapPolyMesh& morphMap)
 {
     updateLabels(morphMap.reversePointMap());
+}
+
+
+void pointSet::distribute(const mapDistributePolyMesh& map)
+{
+    boolList inSet(map.nOldPoints());
+    forAllConstIter(pointSet, *this, iter)
+    {
+        inSet[iter.key()] = true;
+    }
+    map.distributePointData(inSet);
+
+    // Count
+    label n = 0;
+    forAll(inSet, pointi)
+    {
+        if (inSet[pointi])
+        {
+            n++;
+        }
+    }
+
+    clear();
+    resize(n);
+    forAll(inSet, pointi)
+    {
+        if (inSet[pointi])
+        {
+            insert(pointi);
+        }
+    }
 }
 
 

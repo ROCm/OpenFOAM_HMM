@@ -77,10 +77,8 @@ public:
     vtkGetMacro(ShowPointNumbers, int);
 
     // Description:
-    // GUI update control
-    vtkSetMacro(UpdateGUI, int);
-    vtkGetMacro(UpdateGUI, int);
-
+    // Refresh blockMesh from changes to blockMeshDict
+    virtual void SetRefresh(int);
 
     // Description:
     // Blocks selection list control
@@ -157,9 +155,6 @@ private:
 
     //- Show Point Numbers
     int ShowPointNumbers;
-
-    //- Dummy variable/switch to invoke a reader update
-    int UpdateGUI;
 
     vtkDataArraySelection* BlockSelection;
 

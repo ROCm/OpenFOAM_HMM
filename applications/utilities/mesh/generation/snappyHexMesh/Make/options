@@ -9,6 +9,7 @@ EXE_INC = \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/edgeMesh/lnInclude \
     -I$(LIB_SRC)/parallel/decompose/decompose/lnInclude \
+    -I$(LIB_SRC)/parallel/reconstruct/reconstruct/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude
 
 EXE_LIBS = \
@@ -22,4 +23,5 @@ EXE_LIBS = \
     -lfileFormats \
     -ldynamicMesh \
     -ldecompose \
+    -lreconstruct \
     -lsnappyHexMesh

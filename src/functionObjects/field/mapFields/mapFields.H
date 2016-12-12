@@ -50,7 +50,7 @@ Usage
     \table
         Property     | Description                | Required  | Default value
         type         | Type name: mapFields       | yes       |
-        mapRgion     | Name of region to map to   | yes       |
+        mapRegion    | Name of region to map to   | yes       |
         mapMethod    | Mapping method             | yes       |
         patchMapMethod | Patch mapping method     | no        | <auto>
         consistent   | Mapping meshes have consistent boundaries | yes |
@@ -61,7 +61,6 @@ Usage
 
 SourceFiles
     mapFields.C
-    IOmapFields.H
 
 \*---------------------------------------------------------------------------*/
 

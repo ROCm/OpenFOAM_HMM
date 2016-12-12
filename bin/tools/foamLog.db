@@ -36,8 +36,9 @@ contCumulative/time step continuity errors :/cumulative =
 minFu/min\(fu\) = /min(fu) = 
 minFt/min\(ft\) = /min(ft) = 
 
-#- Execution time:
+#- Timing:
 executionTime/ExecutionTime = /ExecutionTime = 
+clockTime/ClockTime = /ClockTime =
 
 #- Interface Courant no:
 IntCourantMax/Interface Courant Number /max: 

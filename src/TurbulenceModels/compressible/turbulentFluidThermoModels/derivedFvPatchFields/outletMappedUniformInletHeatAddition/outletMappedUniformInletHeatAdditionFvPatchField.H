@@ -32,17 +32,17 @@ Description
     This temperature boundary condition averages the temperature over the
     "outlet" patch specified by name "outletPatchName" and applies an extra
     heat source. This is set as a uniform temperature value on this patch.
-    Additionally minTempLimit/maxTempLimit limits can be applied
+    Additionally TMin/TMax limits can be applied
 
     \heading Patch usage
 
     \table
-        Property        | Description             | Required    | Default value
-        outletPatch     | name of outlet patch    | yes         |
-        Q               | Heat addition           | yes
-        phi             | flux field name         | no          | phi
-        minTempLimit    | min temperature limit   | no          | 0.0
-        maxTempLimit    | max temperature limit   | no          | 5000.0
+        Property    | Description             | Required    | Default value
+        outletPatch | name of outlet patch    | yes         |
+        Q           | Heat addition           | yes
+        phi         | flux field name         | no          | phi
+        TMin        | min temperature limit   | no          | 0.0
+        TMax        | max temperature limit   | no          | 5000.0
     \endtable
 
     Example of the boundary condition specification:
@@ -96,10 +96,10 @@ class outletMappedUniformInletHeatAdditionFvPatchField
         scalar Q_;
 
         //- Minimum Temperature Limit
-        scalar minTempLimit_;
+        scalar TMin_;
 
         //- Maxmum Temperature Limit
-        scalar maxTempLimit_;
+        scalar TMax_;
 
 
 public:

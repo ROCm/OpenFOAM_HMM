@@ -152,6 +152,8 @@ public:
         //- Construct from Istream
         blockDescriptor
         (
+            const dictionary& dict,
+            const label index,
             const pointField& vertices,
             const blockEdgeList&,
             const blockFaceList&,
@@ -160,6 +162,9 @@ public:
 
 
     // Member Functions
+
+        //- Reference to point field defining the block mesh
+        inline const pointField& vertices() const;
 
         //- Return reference to the list of curved faces
         inline const blockFaceList& faces() const;
@@ -232,6 +237,9 @@ public:
         //- Correct the location of the given face-points
         //  to lie on the faces of the block
         void correctFacePoints(FixedList<pointField, 6>&) const;
+
+        //- Write block index with dictionary lookup
+        static void write(Ostream&, const label blocki, const dictionary&);
 
 
     // IOstream Operators

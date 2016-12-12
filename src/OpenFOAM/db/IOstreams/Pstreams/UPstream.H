@@ -238,6 +238,7 @@ private:
             const label index
         );
 
+
 protected:
 
     // Protected data

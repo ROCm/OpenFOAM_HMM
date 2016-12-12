@@ -39,6 +39,7 @@ $(ints)/lists/labelListIOList.C
 primitives/Scalar/doubleScalar/doubleScalar.C
 primitives/Scalar/floatScalar/floatScalar.C
 primitives/Scalar/scalar/scalar.C
+primitives/Scalar/scalar/invIncGamma.C
 primitives/Scalar/lists/scalarList.C
 primitives/Scalar/lists/scalarIOList.C
 primitives/Scalar/lists/scalarListIOList.C
@@ -186,6 +187,10 @@ $(primitiveEntry)/primitiveEntryIO.C
 dictionaryEntry = $(dictionary)/dictionaryEntry
 $(dictionaryEntry)/dictionaryEntry.C
 $(dictionaryEntry)/dictionaryEntryIO.C
+
+dictionaryListEntry = $(dictionary)/dictionaryListEntry
+$(dictionaryListEntry)/dictionaryListEntry.C
+$(dictionaryListEntry)/dictionaryListEntryIO.C
 
 functionEntries = $(dictionary)/functionEntries
 $(functionEntries)/calcEntry/calcEntry.C

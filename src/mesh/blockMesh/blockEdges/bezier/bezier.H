@@ -87,7 +87,7 @@ public:
         //- Construct from components
         bezier
         (
-            const pointField&,
+            const pointField& points,
             const label start,
             const label end,
             const pointField& control
@@ -96,6 +96,8 @@ public:
         //- Construct from Istream
         bezier
         (
+            const dictionary& dict,
+            const label index,
             const searchableSurfaces& geometry,
             const pointField&,
             Istream&

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +56,9 @@ Description
 #include "mapPolyMesh.H"
 #include "faceSet.H"
 #include "cellSet.H"
+#include "pointSet.H"
 #include "syncTools.H"
+#include "ReadFields.H"
 #include "polyTopoChange.H"
 #include "polyModifyFace.H"
 #include "polyAddFace.H"
@@ -309,6 +311,59 @@ void initCreatedPatches
                 {
                     fieldBf[patchi] == initValue;
                 }
+            }
+        }
+    }
+}
+
+
+template<class TopoSet>
+void subsetTopoSets
+(
+    const fvMesh& mesh,
+    const IOobjectList& objectsList,
+    const labelList& map,
+    const fvMesh& subMesh,
+    PtrList<TopoSet>& subSets
+)
+{
+    // Read original sets
+    PtrList<TopoSet> sets;
+    ReadFields<TopoSet>(objectsList, sets);
+
+    subSets.setSize(sets.size());
+    forAll(sets, i)
+    {
+        TopoSet& set = sets[i];
+
+        Info<< "Subsetting " << set.type() << " " << set.name() << endl;
+
+        // Map the data
+        PackedBoolList isSet(set.maxSize(mesh));
+        forAllConstIter(labelHashSet, set, iter)
+        {
+            isSet[iter.key()] = true;
+        }
+        label nSet = 0;
+        forAll(map, i)
+        {
+            if (isSet[map[i]])
+            {
+                nSet++;
+            }
+        }
+
+        subSets.set
+        (
+            i,
+            new TopoSet(subMesh, set.name(), nSet, IOobject::AUTO_WRITE)
+        );
+        TopoSet& subSet = subSets[i];
+        forAll(map, i)
+        {
+            if (isSet[map[i]])
+            {
+                subSet.insert(i);
             }
         }
     }
@@ -923,6 +978,41 @@ int main(int argc, char *argv[])
         surfTensorFlds
     );
 
+
+    // Set handling
+    PtrList<cellSet> cellSets;
+    PtrList<faceSet> faceSets;
+    PtrList<pointSet> pointSets;
+    {
+        IOobjectList objects(mesh, mesh.facesInstance(), "polyMesh/sets");
+        subsetTopoSets
+        (
+            mesh,
+            objects,
+            subsetter.cellMap(),
+            subsetter.subMesh(),
+            cellSets
+        );
+        subsetTopoSets
+        (
+            mesh,
+            objects,
+            subsetter.faceMap(),
+            subsetter.subMesh(),
+            faceSets
+        );
+        subsetTopoSets
+        (
+            mesh,
+            objects,
+            subsetter.pointMap(),
+            subsetter.subMesh(),
+            pointSets
+        );
+    }
+
+
+
     if (!overwrite)
     {
         runTime++;
@@ -1133,6 +1223,11 @@ int main(int argc, char *argv[])
         map,
         Zero
     );
+
+    // Update numbering of topoSets
+    topoSet::updateMesh(subsetter.subMesh().facesInstance(), map, cellSets);
+    topoSet::updateMesh(subsetter.subMesh().facesInstance(), map, faceSets);
+    topoSet::updateMesh(subsetter.subMesh().facesInstance(), map, pointSets);
 
 
     // Move mesh (since morphing might not do this)

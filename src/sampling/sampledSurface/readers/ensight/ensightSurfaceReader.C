@@ -212,14 +212,14 @@ void Foam::ensightSurfaceReader::readCase(IFstream& is)
     }
 
     // Start reading time information
-    readLine(is, buffer); // time set: 1
+    readLine(is, buffer);                       // time set: <int>
 
     readLine(is, buffer);
-    readFromLine(3, buffer, nTimeSteps_);
+    readFromLine(3, buffer, nTimeSteps_);       // number of steps: <int>
     readLine(is, buffer);
-    readFromLine(3, buffer, timeStartIndex_);
+    readFromLine(3, buffer, timeStartIndex_);   // filename start number: <int>
     readLine(is, buffer);
-    readFromLine(2, buffer, timeIncrement_);
+    readFromLine(2, buffer, timeIncrement_);    // filename increment: <int>
 
     if (debug)
     {
@@ -369,7 +369,7 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
 
         // Read faces - may be a mix of tris, quads and polys
         DynamicList<face> faces(ceil(nPoints/3));
-        DynamicList<Tuple2<string, label> > schema(faces.size());
+        DynamicList<Tuple2<string, label>> schema(faces.size());
         string faceType = "";
         label nFace = 0;
         while (is.good()) // (is.peek() != EOF)
@@ -494,7 +494,7 @@ Foam::wordList Foam::ensightSurfaceReader::fieldNames
 }
 
 
-Foam::tmp<Foam::Field<Foam::scalar> > Foam::ensightSurfaceReader::field
+Foam::tmp<Foam::Field<Foam::scalar>> Foam::ensightSurfaceReader::field
 (
     const label timeIndex,
     const label fieldIndex,
@@ -505,7 +505,7 @@ Foam::tmp<Foam::Field<Foam::scalar> > Foam::ensightSurfaceReader::field
 }
 
 
-Foam::tmp<Foam::Field<Foam::vector> > Foam::ensightSurfaceReader::field
+Foam::tmp<Foam::Field<Foam::vector>> Foam::ensightSurfaceReader::field
 (
     const label timeIndex,
     const label fieldIndex,
@@ -516,7 +516,7 @@ Foam::tmp<Foam::Field<Foam::vector> > Foam::ensightSurfaceReader::field
 }
 
 
-Foam::tmp<Foam::Field<Foam::sphericalTensor> >
+Foam::tmp<Foam::Field<Foam::sphericalTensor>>
 Foam::ensightSurfaceReader::field
 (
     const label timeIndex,
@@ -528,7 +528,7 @@ Foam::ensightSurfaceReader::field
 }
 
 
-Foam::tmp<Foam::Field<Foam::symmTensor> > Foam::ensightSurfaceReader::field
+Foam::tmp<Foam::Field<Foam::symmTensor>> Foam::ensightSurfaceReader::field
 (
     const label timeIndex,
     const label fieldIndex,
@@ -539,7 +539,7 @@ Foam::tmp<Foam::Field<Foam::symmTensor> > Foam::ensightSurfaceReader::field
 }
 
 
-Foam::tmp<Foam::Field<Foam::tensor> > Foam::ensightSurfaceReader::field
+Foam::tmp<Foam::Field<Foam::tensor>> Foam::ensightSurfaceReader::field
 (
     const label timeIndex,
     const label fieldIndex,

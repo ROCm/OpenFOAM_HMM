@@ -32,7 +32,7 @@ License
 namespace Foam
 {
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 template<class BasicEddyViscosityModel>
 tmp<volScalarField> kOmegaSSTBase<BasicEddyViscosityModel>::F1

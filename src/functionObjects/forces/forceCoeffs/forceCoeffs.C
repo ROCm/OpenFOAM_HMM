@@ -256,8 +256,6 @@ bool Foam::functionObjects::forceCoeffs::read(const dictionary& dict)
 
     if (writeFields_)
     {
-        const fvMesh& mesh = refCast<const fvMesh>(obr_);
-
         volVectorField* forceCoeffPtr
         (
             new volVectorField
@@ -265,12 +263,12 @@ bool Foam::functionObjects::forceCoeffs::read(const dictionary& dict)
                 IOobject
                 (
                     fieldName("forceCoeff"),
-                    mesh.time().timeName(),
-                    mesh,
+                    mesh_.time().timeName(),
+                    mesh_,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE
                 ),
-                mesh,
+                mesh_,
                 dimensionedVector("0", dimless, Zero)
             )
         );
@@ -284,12 +282,12 @@ bool Foam::functionObjects::forceCoeffs::read(const dictionary& dict)
                 IOobject
                 (
                     fieldName("momentCoeff"),
-                    mesh.time().timeName(),
-                    mesh,
+                    mesh_.time().timeName(),
+                    mesh_,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE
                 ),
-                mesh,
+                mesh_,
                 dimensionedVector("0", dimless, Zero)
             )
         );

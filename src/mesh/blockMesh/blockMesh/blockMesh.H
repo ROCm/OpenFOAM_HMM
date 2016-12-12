@@ -65,6 +65,9 @@ class blockMesh
 {
     // Private data
 
+        //- Reference to mesh dictionary
+        const IOdictionary& meshDict_;
+
         //- Switch for verbose output
         bool verboseOutput;
 
@@ -139,7 +142,7 @@ class blockMesh
 
         polyMesh* createTopology(const IOdictionary&, const word& regionName);
 
-        void check(const polyMesh&) const;
+        void check(const polyMesh&, const dictionary&) const;
 
         //- Determine the merge info and the final number of cells/points
         void calcMergeInfo();
@@ -177,6 +180,12 @@ public:
     // Member Functions
 
         // Access
+
+            //- Access to input dictionary
+            const dictionary& meshDict() const
+            {
+                return meshDict_;
+            }
 
             //- Optional searchable geometry to project face-points to
             const searchableSurfaces& geometry() const

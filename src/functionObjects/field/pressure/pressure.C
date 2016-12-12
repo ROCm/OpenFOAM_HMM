@@ -232,8 +232,8 @@ bool Foam::functionObjects::pressure::read(const dictionary& dict)
 {
     fieldExpression::read(dict);
 
-    dict.readIfPresent("U", UName_);
-    dict.readIfPresent("rho", rhoName_);
+    UName_   = dict.lookupOrDefault<word>("U", "U");
+    rhoName_ = dict.lookupOrDefault<word>("rho", "rho");
 
     if (rhoName_ == "rhoInf")
     {

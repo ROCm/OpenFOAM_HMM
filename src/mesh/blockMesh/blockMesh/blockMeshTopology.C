@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "blockMesh.H"
+#include "blockMeshTools.H"
 #include "Time.H"
 #include "preservePatchTypes.H"
 #include "emptyPolyPatch.H"
@@ -110,6 +111,11 @@ void Foam::blockMesh::readPatches
     wordList& nbrPatchNames
 )
 {
+    // Collect all variables
+    dictionary varDict(meshDescription.subOrEmptyDict("namedVertices"));
+    varDict.merge(meshDescription.subOrEmptyDict("namedBlocks"));
+
+
     ITstream& patchStream(meshDescription.lookup("patches"));
 
     // Read number of patches in mesh
@@ -160,7 +166,11 @@ void Foam::blockMesh::readPatches
             >> patchNames[nPatches];
 
         // Read patch faces
-        patchStream >> tmpBlocksPatches[nPatches];
+        tmpBlocksPatches[nPatches] = blockMeshTools::read<face>
+        (
+            patchStream,
+            varDict
+        );
 
 
         // Check for multiple patches
@@ -258,6 +268,11 @@ void Foam::blockMesh::readBoundary
     PtrList<dictionary>& patchDicts
 )
 {
+    // Collect all variables
+    dictionary varDict(meshDescription.subOrEmptyDict("namedVertices"));
+    varDict.merge(meshDescription.subOrEmptyDict("namedBlocks"));
+
+
     // Read like boundary file
     const PtrList<entry> patchesInfo
     (
@@ -286,7 +301,12 @@ void Foam::blockMesh::readBoundary
         patchDicts.set(patchi, new dictionary(patchInfo.dict()));
 
         // Read block faces
-        patchDicts[patchi].lookup("faces") >> tmpBlocksPatches[patchi];
+        tmpBlocksPatches[patchi] = blockMeshTools::read<face>
+        (
+            patchDicts[patchi].lookup("faces"),
+            varDict
+        );
+
 
         checkPatchLabels
         (
@@ -353,7 +373,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology
         blockEdgeList edges
         (
             meshDescription.lookup("edges"),
-            blockEdge::iNew(geometry_, vertices_)
+            blockEdge::iNew(meshDescription, geometry_, vertices_)
         );
 
         edges_.transfer(edges);
@@ -375,7 +395,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology
         blockFaceList faces
         (
             meshDescription.lookup("faces"),
-            blockFace::iNew(geometry_)
+            blockFace::iNew(meshDescription, geometry_)
         );
 
         faces_.transfer(faces);
@@ -395,7 +415,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology
         blockList blocks
         (
             meshDescription.lookup("blocks"),
-            block::iNew(vertices_, edges_, faces_)
+            block::iNew(meshDescription, vertices_, edges_, faces_)
         );
 
         transfer(blocks);
@@ -545,7 +565,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology
         );
     }
 
-    check(*blockMeshPtr);
+    check(*blockMeshPtr, meshDescription);
 
     return blockMeshPtr;
 }

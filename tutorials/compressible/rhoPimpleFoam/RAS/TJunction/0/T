@@ -26,8 +26,8 @@ boundaryField
         type            outletMappedUniformInletHeatAddition;
         outletPatchName outlet1;
         Q               5;     // Heat addition in W
-        minTempLimit    300;
-        maxTempLimit    500;
+        TMin            300;
+        TMax            500;
         value           $internalField;
     }
 

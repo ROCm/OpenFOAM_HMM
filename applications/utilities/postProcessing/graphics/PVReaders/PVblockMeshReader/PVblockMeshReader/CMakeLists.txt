@@ -79,9 +79,9 @@ ENDIF()
 TARGET_LINK_LIBRARIES(
     PVblockMeshReader_SM
     LINK_PUBLIC
-    OpenFOAM
-    blockMesh
     vtkPVblockMesh
+    blockMesh
+    OpenFOAM
 )
 
 #-----------------------------------------------------------------------------

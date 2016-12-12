@@ -490,6 +490,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
 }
 
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
 template<class ParcelType>
 template<class TrackData>
 void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,6 +115,9 @@ public:
 
         //- Update any stored data for new labels
         virtual void updateMesh(const mapPolyMesh& morphMap);
+
+        //- Update any stored data for mesh redistribution.
+        virtual void distribute(const mapDistributePolyMesh&);
 
         //- Write maxLen items with label and coordinates.
         virtual void writeDebug

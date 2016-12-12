@@ -73,10 +73,6 @@ class foamVtkOutputOptions
         //- The output format type
         unsigned short type_;
 
-        //- The output style tuning
-        unsigned short style_;
-
-
         //- ASCII write precision
         mutable unsigned precision_;
 

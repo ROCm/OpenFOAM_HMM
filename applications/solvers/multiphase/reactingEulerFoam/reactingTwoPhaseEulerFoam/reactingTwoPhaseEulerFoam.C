@@ -43,6 +43,22 @@ Description
 #include "localEulerDdtScheme.H"
 #include "fvcSmooth.H"
 
+namespace Foam
+{
+    tmp<surfaceScalarField> byDt(const surfaceScalarField& sf)
+    {
+        if (fv::localEulerDdt::enabled(sf.mesh()))
+        {
+            return fv::localEulerDdt::localRDeltaTf(sf.mesh())*sf;
+        }
+        else
+        {
+            return sf/sf.mesh().time().deltaT();
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
@@ -76,12 +92,8 @@ int main(int argc, char *argv[])
         )
     );
 
+    #include "createRDeltaTf.H"
     #include "pUf/createDDtU.H"
-
-    int nEnergyCorrectors
-    (
-        pimple.dict().lookupOrDefault<int>("nEnergyCorrectors", 1)
-    );
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -91,9 +103,18 @@ int main(int argc, char *argv[])
     {
         #include "readTimeControls.H"
 
+        int nEnergyCorrectors
+        (
+            pimple.dict().lookupOrDefault<int>("nEnergyCorrectors", 1)
+        );
+
         if (LTS)
         {
             #include "setRDeltaT.H"
+            if (faceMomentum)
+            {
+                #include "setRDeltaTf.H"
+            }
         }
         else
         {

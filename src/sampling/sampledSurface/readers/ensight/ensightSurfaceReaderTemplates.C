@@ -57,7 +57,7 @@ void Foam::ensightSurfaceReader::readFromLine
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::ensightSurfaceReader::readField
+Foam::tmp<Foam::Field<Type>> Foam::ensightSurfaceReader::readField
 (
     const label timeIndex,
     const label fieldIndex
@@ -126,7 +126,7 @@ Foam::tmp<Foam::Field<Type> > Foam::ensightSurfaceReader::readField
     is.read(iValue);
 
     // Allocate storage for data as a list per component
-    List<DynamicList<scalar> > values(pTraits<Type>::nComponents);
+    List<DynamicList<scalar>> values(pTraits<Type>::nComponents);
     label n = surfPtr_->size();
     forAll(values, cmptI)
     {
@@ -164,7 +164,7 @@ Foam::tmp<Foam::Field<Type> > Foam::ensightSurfaceReader::readField
         }
     }
 
-    tmp<Field<Type> > tField(new Field<Type>(n, pTraits<Type>::zero));
+    tmp<Field<Type>> tField(new Field<Type>(n, pTraits<Type>::zero));
     Field<Type>& field = tField.ref();
 
     for
