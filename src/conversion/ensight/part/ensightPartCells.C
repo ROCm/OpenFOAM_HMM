@@ -263,12 +263,9 @@ void Foam::ensightPartCells::write
         }
 
         // write each element type
-        const List<ensightCells::elemType> enums =
-            ensightCells::elemEnum.enums();
-
-        forAllConstIter(List<ensightCells::elemType>, enums, iter)
+        for (label typei=0; typei < ensightCells::nTypes; ++typei)
         {
-            const ensightCells::elemType what = *iter;
+            const ensightCells::elemType what = ensightCells::elemType(typei);
 
             writeConnectivity
             (
@@ -308,10 +305,9 @@ void Foam::ensightPartCells::dumpInfo(Ostream& os) const
     os.writeEntry("name",   name());
     os.writeEntry("size",   size());
 
-    const List<ensightCells::elemType> enums = ensightCells::elemEnum.enums();
-    forAllConstIter(List<ensightCells::elemType>, enums, iter)
+    for (label typei=0; typei < ensightCells::nTypes; ++typei)
     {
-        const ensightCells::elemType what = *iter;
+        const ensightCells::elemType what = ensightCells::elemType(typei);
         const labelUList& addr = this->cellIds(what);
 
         os.writeKeyword(ensightCells::key(what));

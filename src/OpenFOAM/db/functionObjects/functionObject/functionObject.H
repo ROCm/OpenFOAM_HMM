@@ -82,7 +82,7 @@ Description
         runTime           | Execute/write every 'Interval' run time period
         clockTime         | Execute/write every 'Interval' clock time period
         cpuTime           | Execute/write every 'Interval' CPU time period
-        none              | Execute/write every time-step
+        none              | Execute/write disabled
     \endtable
 
     The sub-dictionary name \c \<functionObjectName\> is chosen by the user, and

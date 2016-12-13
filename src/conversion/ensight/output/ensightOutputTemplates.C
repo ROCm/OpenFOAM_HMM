@@ -101,7 +101,8 @@ bool Foam::ensightOutput::writeFaceField
 
         for (label typei=0; typei < ensightFaces::nTypes; ++typei)
         {
-            const ensightFaces::elemType what = ensightFaces::elemType(typei);
+            const ensightFaces::elemType what =
+                ensightFaces::elemType(typei);
 
             writeFieldContent
             (
@@ -136,7 +137,7 @@ bool Foam::ensightOutput::writeFaceSubField
         }
 
         label start = 0; // start of sublist
-        for (label typei = 0; typei < ensightFaces::nTypes; ++typei)
+        for (label typei=0; typei < ensightFaces::nTypes; ++typei)
         {
             const ensightFaces::elemType what = ensightFaces::elemType(typei);
             const label size = ensFaces.faceIds(what).size();

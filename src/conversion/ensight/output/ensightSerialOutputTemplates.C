@@ -84,7 +84,8 @@ bool Foam::ensightSerialOutput::writeField
 
             for (label typei=0; typei < ensightFaces::nTypes; ++typei)
             {
-                const ensightFaces::elemType what = ensightFaces::elemType(typei);
+                const ensightFaces::elemType what =
+                    ensightFaces::elemType(typei);
 
                 writeFieldContent
                 (

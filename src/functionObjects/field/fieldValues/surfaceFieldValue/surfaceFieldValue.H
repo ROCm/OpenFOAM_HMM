@@ -109,14 +109,15 @@ Usage
        sumDirectionBalance | sum of balance of values in given direction
        average       | ensemble average
        weightedAverage | weighted average
-       areaAverage   | area weighted average
+       areaAverage   | area-weighted average
        weightedAreaAverage | weighted area average
        areaIntegrate | area integral
+       weightedAreaIntegrate | weighted area integral
        min           | minimum
        max           | maximum
        CoV           | coefficient of variation: standard deviation/mean
-       areaNormalAverage| area weighted average in face normal direction
-       areaNormalIntegrate | area weighted integral in face normal directon
+       areaNormalAverage| area-weighted average in face normal direction
+       areaNormalIntegrate | area-weighted integral in face normal directon
     \endplaintable
 
 Note
@@ -210,6 +211,7 @@ public:
             opAreaAverage,          //!< Area average
             opWeightedAreaAverage,  //!< Weighted area average
             opAreaIntegrate,        //!< Area integral
+            opWeightedAreaIntegrate, //!< Weighted area integral
             opMin,                  //!< Minimum
             opMax,                  //!< Maximum
             opCoV,                  //!< Coefficient of variation
@@ -218,7 +220,7 @@ public:
         };
 
         //- Operation type names
-        static const NamedEnum<operationType, 15> operationTypeNames_;
+        static const NamedEnum<operationType, 16> operationTypeNames_;
 
 
 private:

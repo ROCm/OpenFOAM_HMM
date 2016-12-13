@@ -15,15 +15,15 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dynamicFvMesh   solidBodyMotionFvMesh;
+dynamicFvMesh   dynamicMotionSolverFvMesh;
 
-motionSolverLibs ( "libfvMotionSolvers.so" );
+solver          solidBody;
 
-solidBodyMotionFvMeshCoeffs
+solidBodyCoeffs
 {
     cellZone        inletChannel;
 
-    solidBodyMotionFunction  oscillatingLinearMotion;
+    solidBodyMotionFunction oscillatingLinearMotion;
 
     oscillatingLinearMotionCoeffs
     {

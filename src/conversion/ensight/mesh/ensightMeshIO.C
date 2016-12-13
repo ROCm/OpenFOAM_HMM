@@ -452,24 +452,21 @@ void Foam::ensightMesh::writeCellConnectivity
             ensightCells::NFACED
         };
 
-        for (int i=0; i < 5; ++i)
+        for (label typei=0; typei < ensightCells::nTypes; ++typei)
         {
-            const ensightCells::elemType& what = oldOrder[i];
+            const ensightCells::elemType& what = oldOrder[typei];
 
             writeCellConnectivity(what, ensCells, pointToGlobal, os);
         }
+
+        return;
     }
-    else
+
+    for (label typei=0; typei < ensightCells::nTypes; ++typei)
     {
-        const List<ensightCells::elemType> enums =
-            ensightCells::elemEnum.enums();
+        const ensightCells::elemType what = ensightCells::elemType(typei);
 
-        forAllConstIter(List<ensightCells::elemType>, enums, iter)
-        {
-            const ensightCells::elemType what = *iter;
-
-            writeCellConnectivity(what, ensCells, pointToGlobal, os);
-        }
+        writeCellConnectivity(what, ensCells, pointToGlobal, os);
     }
 }
 
@@ -614,13 +611,11 @@ void Foam::ensightMesh::writeFaceConnectivity
     const bool raw
 ) const
 {
-    const List<ensightFaces::elemType> enums = ensightFaces::elemEnum.enums();
-
     if (raw)
     {
-        forAllConstIter(List<ensightFaces::elemType>, enums, iter)
+        for (label typei=0; typei < ensightFaces::nTypes; ++typei)
         {
-            const ensightFaces::elemType what = *iter;
+            const ensightFaces::elemType what = ensightFaces::elemType(typei);
 
             writeFaceConnectivity
             (
@@ -638,9 +633,9 @@ void Foam::ensightMesh::writeFaceConnectivity
     }
     else
     {
-        forAllConstIter(List<ensightFaces::elemType>, enums, iter)
+        for (label typei=0; typei < ensightFaces::nTypes; ++typei)
         {
-            const ensightFaces::elemType what = *iter;
+            const ensightFaces::elemType what = ensightFaces::elemType(typei);
 
             writeFaceConnectivity
             (
