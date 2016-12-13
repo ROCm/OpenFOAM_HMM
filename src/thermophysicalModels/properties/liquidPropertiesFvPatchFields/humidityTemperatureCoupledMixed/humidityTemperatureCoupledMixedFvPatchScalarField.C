@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -449,7 +449,14 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
     scalarField nbrIntFld(nbrField.patchInternalField());
     mpp.distribute(nbrIntFld);
 
+
     scalarField& Tp = *this;
+
+    const volScalarField& T =
+        static_cast<const volScalarField&>(dimensionedInternalField());
+
+    const fvPatchField<scalar>& TpOld = T.boundaryField()[patch().index()];
+
     scalarField Tin(patchInternalField());
 
     const scalarField K(this->kappa(*this));
@@ -463,6 +470,7 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
     mpp.distribute(nrbDeltaCoeffs);
 
     scalarField KDeltaNbr(nbrK*nrbDeltaCoeffs);
+    mpp.distribute(KDeltaNbr);
 
     myKDelta_ = K*patch().deltaCoeffs();
 
@@ -655,15 +663,11 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
         }
     }
 
-    scalarField myKDeltaNbr(patch().size(), 0.0);
     scalarField mpCpTpNbr(patch().size(), 0.0);
     scalarField dmHfgNbr(patch().size(), 0.0);
 
     if (!fluid_)
     {
-        myKDeltaNbr = nbrField.myKDelta();
-        mpp.distribute(myKDeltaNbr);
-
         mpCpTpNbr = nbrField.mpCpTp();
         mpp.distribute(mpCpTpNbr);
 
@@ -690,11 +694,11 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
     const scalarField mpCpdt(mpCpTpNbr + mpCpTp_);
 
     // Qr > 0 (heat up the wall)
-    scalarField alpha(KDeltaNbr + mpCpdt - (Qr + QrNbr + dmHfg)/Tp);
+    scalarField alpha(KDeltaNbr + mpCpdt - (Qr + QrNbr)/Tp);
 
     valueFraction() = alpha/(alpha + myKDelta_);
 
-    refValue() = (KDeltaNbr*nbrIntFld + mpCpdt*Tp)/alpha;
+    refValue() = (KDeltaNbr*nbrIntFld + mpCpdt*TpOld + dmHfg)/alpha;
 
     mixedFvPatchScalarField::updateCoeffs();
 
