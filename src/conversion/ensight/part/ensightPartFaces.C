@@ -226,12 +226,9 @@ void Foam::ensightPartFaces::write
         }
 
         // write part
-        const List<ensightFaces::elemType> enums =
-            ensightFaces::elemEnum.enums();
-
-        forAllConstIter(List<ensightFaces::elemType>, enums, iter)
+        for (label typei=0; typei < ensightFaces::nTypes; ++typei)
         {
-            const ensightFaces::elemType what = *iter;
+            const ensightFaces::elemType what = ensightFaces::elemType(typei);
 
             writeConnectivity
             (
@@ -273,10 +270,9 @@ void Foam::ensightPartFaces::dumpInfo(Ostream& os) const
     os.writeEntry("start",  start_);
     os.writeEntry("size",   size());
 
-    const List<ensightFaces::elemType> enums = ensightFaces::elemEnum.enums();
-    forAllConstIter(List<ensightFaces::elemType>, enums, iter)
+    for (label typei=0; typei < ensightFaces::nTypes; ++typei)
     {
-        const ensightFaces::elemType what = *iter;
+        const ensightFaces::elemType what = ensightFaces::elemType(typei);
         const labelUList& addr = this->faceIds(what);
 
         os.writeKeyword(ensightFaces::key(what));
