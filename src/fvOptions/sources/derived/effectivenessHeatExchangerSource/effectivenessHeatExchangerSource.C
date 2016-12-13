@@ -290,12 +290,13 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
         }
     }
 
-    Info<< type() << ": " << name() << nl
+    Info<< type() << ": " << name() << nl << incrIndent
         << indent << "Net mass flux [Kg/s]      : " << sumPhi << nl
         << indent << "Total energy exchange [W] : " << Qt << nl
         << indent << "Tref [K]                  : " << Tref << nl
-        << indent << "Efficiency                : "
-        << eTable_()(mag(sumPhi), secondaryMassFlowRate_) << nl << endl;
+        << indent << "Effectiveness             : "
+        << eTable_()(mag(sumPhi), secondaryMassFlowRate_) << decrIndent
+        << nl << endl;
 }
 
 
