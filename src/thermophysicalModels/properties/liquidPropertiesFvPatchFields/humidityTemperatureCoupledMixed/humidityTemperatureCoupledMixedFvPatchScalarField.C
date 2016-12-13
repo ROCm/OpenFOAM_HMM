@@ -192,7 +192,7 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     QrNbrName_(psf.QrNbrName_),
     QrName_(psf.QrName_),
     specieName_(psf.specieName_),
-    liquid_(psf.liquid_),
+    liquid_(psf.liquid_, false),
     liquidDict_(psf.liquidDict_),
     mass_(psf.mass_, mapper),
     Tvap_(psf.Tvap_),
@@ -351,7 +351,7 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     QrNbrName_(psf.QrNbrName_),
     QrName_(psf.QrName_),
     specieName_(psf.specieName_),
-    liquid_(psf.liquid_),
+    liquid_(psf.liquid_, false),
     liquidDict_(psf.liquidDict_),
     mass_(psf.mass_),
     Tvap_(psf.Tvap_),
@@ -455,7 +455,7 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
     const volScalarField& T =
         static_cast<const volScalarField&>(dimensionedInternalField());
 
-    const fvPatchField<scalar>& TpOld = T.boundaryField()[patch().index()];
+    const scalarField TpOld(T.oldTime().boundaryField()[patch().index()]);
 
     scalarField Tin(patchInternalField());
 
