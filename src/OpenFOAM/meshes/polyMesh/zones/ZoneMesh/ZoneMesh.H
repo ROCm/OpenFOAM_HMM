@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +40,7 @@ SourceFiles
 #include "pointField.H"
 #include "Map.H"
 #include "PackedBoolList.H"
+#include "wordReList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,10 +81,10 @@ class ZoneMesh
         bool read();
 
         //- Disallow construct as copy
-        ZoneMesh(const ZoneMesh&);
+        ZoneMesh(const ZoneMesh&) = delete;
 
         //- Disallow assignment
-        void operator=(const ZoneMesh<ZoneType, MeshType>&);
+        void operator=(const ZoneMesh<ZoneType, MeshType>&) = delete;
 
 
         //- Create zone map
@@ -141,8 +142,24 @@ public:
         //- Return a list of zone types
         wordList types() const;
 
-        //- Return a list of zone names
+        //- A list of the zone names
         wordList names() const;
+
+        //- A list of the zone names satisfying the input matcher
+        wordList names(const wordRe&) const;
+
+        //- A list of the zone names satisfying the input matchers
+        wordList names(const wordReList&) const;
+
+        //- Sorted list of the zone names
+        wordList sortedNames() const;
+
+        //- Sorted list of the zone names satisfying the input matcher
+        wordList sortedNames(const wordRe&) const;
+
+        //- Sorted list of the zone names satisfying the input matchers
+        wordList sortedNames(const wordReList&) const;
+
 
         //- Return zone indices for all matches
         labelList findIndices(const keyType&) const;

@@ -264,6 +264,68 @@ Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::names() const
 
 
 template<class ZoneType, class MeshType>
+Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::names
+(
+    const wordRe& matcher
+) const
+{
+    wordList lst = this->names();
+
+    return wordList(lst, findStrings(matcher, lst));
+}
+
+
+template<class ZoneType, class MeshType>
+Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::names
+(
+    const wordReList& matcher
+)
+const
+{
+    wordList lst = this->names();
+
+    return wordList(lst, findStrings(matcher, lst));
+}
+
+
+template<class ZoneType, class MeshType>
+Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::sortedNames() const
+{
+    wordList sortedLst = this->names();
+    sort(sortedLst);
+
+    return sortedLst;
+}
+
+
+template<class ZoneType, class MeshType>
+Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::sortedNames
+(
+    const wordRe& matcher
+) const
+{
+    wordList sortedLst = this->names(matcher);
+    sort(sortedLst);
+
+    return sortedLst;
+}
+
+
+template<class ZoneType, class MeshType>
+Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::sortedNames
+(
+    const wordReList& matcher
+)
+const
+{
+    wordList sortedLst = this->names(matcher);
+    sort(sortedLst);
+
+    return sortedLst;
+}
+
+
+template<class ZoneType, class MeshType>
 Foam::labelList Foam::ZoneMesh<ZoneType, MeshType>::findIndices
 (
     const keyType& key
