@@ -89,21 +89,19 @@ private:
         //- Linear list of ids, sub-sectioned per element type via SubLists
         labelList address_;
 
-        //- List of sizes for each element type
+        //- List of global sizes for each element type.
+        //  Used temporarily for local sizes when building the element lists.
         FixedList<label, 5> sizes_;
 
-        //- List of ids for each element type
+        //- List of ids for each element type.
         //  Managed via pointers, since a SubList cannot be relocated/resized.
         FixedList<SubList<label>*, 5> lists_;
 
 
     // Private Member Functions
 
-        //- Low-level offset routine
-        inline label offset(const enum elemType what, const label i) const;
-
-        //- Use current sizes to redimension the element lists
-        void resize();
+        //- Use temporarily stored sizes to redimension the element lists
+        void resizeAll();
 
         //- Disallow default bitwise assignment
         void operator=(const ensightCells&) = delete;
@@ -126,7 +124,7 @@ public:
 
     // Member Functions
 
-    // Access
+      // Access
 
         //- The index in a list.
         inline label index() const;
@@ -145,22 +143,21 @@ public:
         //  This value is only meaningful after a reduce operation.
         label total() const;
 
-        //- The processor local sizes per element type.
-        FixedList<label, 5> sizes() const;
-
         //- The global numbers per element type.
         //  This value is only meaningful after a reduce operation.
         inline const FixedList<label, 5>& totals() const;
 
+        //- The processor local sizes per element type.
+        FixedList<label, 5> sizes() const;
+
+        //- Processor local starting offset of element type.
+        label offset(const enum elemType what) const;
 
         //- Return the (local) cell ids of the specified element type
         inline const labelUList& cellIds(const enum elemType) const;
 
         //- Return the cell ids of all elements
         inline const labelUList& cellIds() const;
-
-        //- Starting offset of element type.
-        label offset(const enum elemType what) const;
 
 
     // Edit

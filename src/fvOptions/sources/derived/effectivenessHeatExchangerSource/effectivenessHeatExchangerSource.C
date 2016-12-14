@@ -227,8 +227,8 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
     reduce(sumMagPhi, sumOp<scalar>());
     reduce(primaryInletTfMean, sumOp<scalar>());
 
-    primaryInletTfMean /= sumMagPhi;
-    CpfMean /= sumMagPhi;
+    primaryInletTfMean /= sumMagPhi + ROOTVSMALL;
+    CpfMean /= sumMagPhi + ROOTVSMALL;
 
     scalar primaryInletT = primaryInletT_;
     if (!userPrimaryInletT_)
@@ -285,18 +285,18 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
         {
             label celli = cells_[i];
             heSource[celli] -=
-                Qt*V[celli]*mag(U[celli])*deltaTCells[i]/sumWeight;
+                Qt*V[celli]*mag(U[celli])*deltaTCells[i]
+               /(sumWeight + ROOTVSMALL);
         }
     }
 
-    if (debug && Pstream::master())
-    {
-        Info<< indent << "Net mass flux [Kg/s]      : " << sumPhi << nl;
-        Info<< indent << "Total energy exchange [W] : " << Qt << nl;
-        Info<< indent << "Tref [K]                  : " << Tref << nl;
-        Info<< indent << "Efficiency                : "
-            << eTable_()(mag(sumPhi), secondaryMassFlowRate_) << endl;
-    }
+    Info<< type() << ": " << name() << nl << incrIndent
+        << indent << "Net mass flux [Kg/s]      : " << sumPhi << nl
+        << indent << "Total energy exchange [W] : " << Qt << nl
+        << indent << "Tref [K]                  : " << Tref << nl
+        << indent << "Effectiveness             : "
+        << eTable_()(mag(sumPhi), secondaryMassFlowRate_) << decrIndent
+        << nl << endl;
 }
 
 

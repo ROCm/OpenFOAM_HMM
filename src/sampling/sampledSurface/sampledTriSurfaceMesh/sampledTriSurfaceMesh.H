@@ -117,6 +117,13 @@ private:
         //- Track if the surface needs an update
         mutable bool needsUpdate_;
 
+        //- Retain element ids/order of original surface
+        bool keepIds_;
+
+        //- List of element ids/order of the original surface,
+        //  when keepIds is active.
+        labelList originalIds_;
+
         //- Search tree for all non-coupled boundary faces
         mutable autoPtr<indexedOctree<treeDataFace>> boundaryTreePtr_;
 
@@ -238,6 +245,19 @@ public:
         virtual const vectorField& Cf() const
         {
             return MeshStorage::Cf();
+        }
+
+        //- If element ids/order of the original surface are kept
+        bool keepIds() const
+        {
+            return keepIds_;
+        }
+
+        //- List of element ids/order of the original surface,
+        //  when keepIds is active.
+        const labelList& originalIds() const
+        {
+            return originalIds_;
         }
 
 

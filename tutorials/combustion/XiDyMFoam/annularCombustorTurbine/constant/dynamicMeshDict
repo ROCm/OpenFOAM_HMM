@@ -15,11 +15,11 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dynamicFvMesh   solidBodyMotionFvMesh;
+dynamicFvMesh   dynamicMotionSolverFvMesh;
 
-motionSolverLibs ( "libfvMotionSolvers.so" );
+solver          solidBody;
 
-solidBodyMotionFvMeshCoeffs
+solidBodyCoeffs
 {
     cellZone        rotating;
 

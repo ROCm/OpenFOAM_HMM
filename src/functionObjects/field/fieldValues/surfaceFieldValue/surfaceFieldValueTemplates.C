@@ -176,10 +176,9 @@ processSameTypeValues
         }
         case opWeightedAverage:
         {
-            label wSize = returnReduce(weightField.size(), sumOp<label>());
-
-            if (wSize > 0)
+            if (returnReduce(weightField.size(), sumOp<label>()))
             {
+                // has weights
                 result =
                     gSum(weightField*values)/(gSum(weightField) + ROOTVSMALL);
             }
@@ -192,31 +191,40 @@ processSameTypeValues
         }
         case opAreaAverage:
         {
-            const scalarField magSf(mag(Sf));
+            const scalarField factor(mag(Sf));
 
-            result = gSum(magSf*values)/gSum(magSf);
+            result = gSum(factor*values)/gSum(factor);
             break;
         }
         case opWeightedAreaAverage:
         {
-            const scalarField magSf(mag(Sf));
-            label wSize = returnReduce(weightField.size(), sumOp<label>());
+            const scalarField factor
+            (
+                returnReduce(weightField.size(), sumOp<label>()) // has weights
+              ? weightField*mag(Sf)
+              : mag(Sf)
+            );
 
-            if (wSize > 0)
-            {
-                result = gSum(weightField*magSf*values)/gSum(magSf*weightField);
-            }
-            else
-            {
-                result = gSum(magSf*values)/gSum(magSf);
-            }
+            result = gSum(factor*values)/gSum(factor);
             break;
         }
         case opAreaIntegrate:
         {
-            const scalarField magSf(mag(Sf));
+            const scalarField factor(mag(Sf));
 
-            result = gSum(magSf*values);
+            result = gSum(factor*values);
+            break;
+        }
+        case opWeightedAreaIntegrate:
+        {
+            const scalarField factor
+            (
+                returnReduce(weightField.size(), sumOp<label>()) // has weights
+              ? weightField*mag(Sf)
+              : mag(Sf)
+            );
+
+            result = gSum(factor*values);
             break;
         }
         case opMin:
