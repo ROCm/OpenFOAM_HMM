@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -262,8 +262,8 @@ Foam::InjectionModel<CloudType>::InjectionModel(CloudType& owner)
 :
     CloudSubModelBase<CloudType>(owner),
     SOI_(0.0),
-    volumeTotal_(0.0),
-    massTotal_(0.0),
+    volumeTotal_(this->template getModelProperty<scalar>("volumeTotal")),
+    massTotal_(0),
     massFlowRate_(owner.db().time(), "massFlowRate"),
     massInjected_(this->template getModelProperty<scalar>("massInjected")),
     nInjections_(this->template getModelProperty<label>("nInjections")),
@@ -291,8 +291,8 @@ Foam::InjectionModel<CloudType>::InjectionModel
 :
     CloudSubModelBase<CloudType>(modelName, owner, dict, typeName, modelType),
     SOI_(0.0),
-    volumeTotal_(0.0),
-    massTotal_(0.0),
+    volumeTotal_(this->template getModelProperty<scalar>("volumeTotal")),
+    massTotal_(0),
     massFlowRate_(owner.db().time(), "massFlowRate"),
     massInjected_(this->template getModelProperty<scalar>("massInjected")),
     nInjections_(this->template getModelProperty<scalar>("nInjections")),
@@ -438,7 +438,6 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
 
     if (prepareForNextTimeStep(time, newParcels, newVolumeFraction))
     {
-
         const scalar trackTime = this->owner().solution().trackTime();
         const polyMesh& mesh = this->owner().mesh();
         typename TrackData::cloudType& cloud = td.cloud();
@@ -659,6 +658,7 @@ void Foam::InjectionModel<CloudType>::info(Ostream& os)
 
     if (this->writeTime())
     {
+        this->setModelProperty("volumeTotal", volumeTotal_);
         this->setModelProperty("massInjected", massInjected_);
         this->setModelProperty("nInjections", nInjections_);
         this->setModelProperty("parcelsAddedTotal", parcelsAddedTotal_);
