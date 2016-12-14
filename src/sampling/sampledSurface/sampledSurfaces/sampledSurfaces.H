@@ -29,6 +29,41 @@ Description
 
     The write() method is used to sample and write files.
 
+    Example of function object specification:
+
+    \verbatim
+    surfaces
+    {
+        type    surfaces;
+        libs    ("libsampling.so");
+
+        // Write at same frequency as fields
+        writeControl    outputTime;
+        writeInterval   1;
+
+        // Fields to be sampled
+        fields          (p U);
+
+        // Interpolation scheme to use
+        interpolationScheme cell;
+
+        // Output surface format
+        surfaceFormat   vtk;
+        formatOptions   {  }
+
+        surfaces
+        (
+            f0surf
+            {
+                type        sampledTriSurfaceMesh;
+                surface     f0surf.obj;
+                source      cells;
+                keepIds     true;
+            }
+        );
+    }
+    \endverbatim
+
 SourceFiles
     sampledSurfaces.C
 
