@@ -88,11 +88,14 @@ SourceFiles
 #include "writeFile.H"
 #include "vector.H"
 #include "DynamicList.H"
+#include "boolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+class dimensionSet;
+
 namespace functionObjects
 {
 /*---------------------------------------------------------------------------*\
@@ -134,13 +137,10 @@ protected:
         word phiName_;
 
 
-        // Per-faceZone information
+        // Per-faceZone/surface information
 
-            //- Region names
-            List<word> faceZoneName_;
-
-            //- Reference direction
-            List<vector> refDir_;
+            //- Region (zone/surface) names
+            List<word> zoneNames_;
 
             //- Face IDs
             List<List<label>> faceID_;
@@ -149,10 +149,7 @@ protected:
             List<List<label>> facePatchID_;
 
             //- Face flip map signs
-            List<List<scalar>> faceSign_;
-
-            //- Sum of face areas
-            List<scalar> faceArea_;
+            List<boolList> faceFlip_;
 
             //- Output file per face zone
             PtrList<OFstream> filePtrs_;
@@ -164,14 +161,23 @@ protected:
 
     // Private Member Functions
 
+        //- Check flowType (mass or volume).
+        //  Return name on success, fatal error on failure.
+        word checkFlowType
+        (
+            const dimensionSet& dims,
+            const word& fieldName
+        ) const;
+
         //- Initialise face set from face zone
         void initialiseFaceZone
         (
             const word& faceZoneName,
-            DynamicList<word>& faceZoneNames,
+            DynamicList<word>& names,
+            DynamicList<vector>& dir,
             DynamicList<List<label>>& faceID,
             DynamicList<List<label>>& facePatchID,
-            DynamicList<List<scalar>>& faceSign
+            DynamicList<boolList>& faceFlip
         ) const;
 
         //- Initialise face set from face zone and direction
@@ -179,11 +185,11 @@ protected:
         (
             const word& faceZoneName,
             const vector& refDir,
+            DynamicList<word>& names,
             DynamicList<vector>& dir,
-            DynamicList<word>& faceZoneNames,
             DynamicList<List<label>>& faceID,
             DynamicList<List<label>>& facePatchID,
-            DynamicList<List<scalar>>& faceSign
+            DynamicList<boolList>& faceFlip
         ) const;
 
         //- Initialise face set from cell zone and direction
@@ -191,20 +197,20 @@ protected:
         (
             const word& cellZoneName,
             const vector& refDir,
+            DynamicList<word>& names,
             DynamicList<vector>& dir,
-            DynamicList<word>& faceZoneNames,
             DynamicList<List<label>>& faceID,
             DynamicList<List<label>>& facePatchID,
-            DynamicList<List<scalar>>& faceSign
+            DynamicList<boolList>& faceFlip
         ) const;
 
-        //- Initialise the total area per derived faceZone
-        void initialiseFaceArea();
+        //- Calculate the total area for the derived faceZone
+        scalar totalArea(const label zonei) const;
 
         //- Output file header information
         virtual void writeFileHeader
         (
-            const word& fzName,
+            const word& zoneName,
             const scalar area,
             const vector& refDir,
             Ostream& os

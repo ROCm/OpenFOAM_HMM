@@ -70,17 +70,44 @@ Foam::functionObjects::fluxSummary::modeTypeNames_;
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+Foam::word Foam::functionObjects::fluxSummary::checkFlowType
+(
+    const dimensionSet& dims,
+    const word& fieldName
+) const
+{
+    if (dims == dimVolume/dimTime)
+    {
+        return "volumetric";
+    }
+    else if (dims == dimMass/dimTime)
+    {
+        return "mass";
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "Unsupported flux field " << fieldName << " with dimensions "
+            << dims
+            << ".  Expected either mass flow or volumetric flow rate."
+            << abort(FatalError);
+
+        return Foam::word::null;
+    }
+}
+
+
 void Foam::functionObjects::fluxSummary::initialiseFaceZone
 (
     const word& faceZoneName,
-    DynamicList<word>& faceZoneNames,
+    DynamicList<word>& names,
+    DynamicList<vector>& directions,
     DynamicList<List<label>>& faceID,
     DynamicList<List<label>>& facePatchID,
-    DynamicList<List<scalar>>& faceSign
+    DynamicList<boolList>& faceFlip
 ) const
 {
     label zonei = mesh_.faceZones().findZoneID(faceZoneName);
-
     if (zonei == -1)
     {
         FatalErrorInFunction
@@ -88,14 +115,14 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZone
             << ".  Valid faceZones are: " << mesh_.faceZones().names()
             << exit(FatalError);
     }
-
-    faceZoneNames.append(faceZoneName);
-
     const faceZone& fZone = mesh_.faceZones()[zonei];
+
+    names.append(faceZoneName);
+    directions.append(Zero); // dummy value
 
     DynamicList<label> faceIDs(fZone.size());
     DynamicList<label> facePatchIDs(fZone.size());
-    DynamicList<scalar> faceSigns(fZone.size());
+    DynamicList<bool>  flips(fZone.size());
 
     forAll(fZone, i)
     {
@@ -139,11 +166,11 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZone
             // Orientation set by faceZone flip map
             if (fZone.flipMap()[facei])
             {
-                faceSigns.append(-1);
+                flips.append(true);
             }
             else
             {
-                faceSigns.append(1);
+                flips.append(false);
             }
 
             faceIDs.append(faceID);
@@ -151,9 +178,10 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZone
         }
     }
 
+    // could reduce some copying here
     faceID.append(faceIDs);
     facePatchID.append(facePatchIDs);
-    faceSign.append(faceSigns);
+    faceFlip.append(flips);
 }
 
 
@@ -161,17 +189,16 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZoneAndDirection
 (
     const word& faceZoneName,
     const vector& dir,
-    DynamicList<vector>& zoneRefDir,
-    DynamicList<word>& faceZoneNames,
+    DynamicList<word>& names,
+    DynamicList<vector>& directions,
     DynamicList<List<label>>& faceID,
     DynamicList<List<label>>& facePatchID,
-    DynamicList<List<scalar>>& faceSign
+    DynamicList<boolList>& faceFlip
 ) const
 {
-    vector refDir = dir/(mag(dir) + ROOTVSMALL);
+    const vector refDir = dir/(mag(dir) + ROOTVSMALL);
 
     label zonei = mesh_.faceZones().findZoneID(faceZoneName);
-
     if (zonei == -1)
     {
          FatalErrorInFunction
@@ -179,15 +206,14 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZoneAndDirection
             << ".  Valid faceZones are: " << mesh_.faceZones().names()
             << exit(FatalError);
     }
-
-    faceZoneNames.append(faceZoneName);
-    zoneRefDir.append(refDir);
-
     const faceZone& fZone = mesh_.faceZones()[zonei];
+
+    names.append(faceZoneName);
+    directions.append(refDir);
 
     DynamicList<label> faceIDs(fZone.size());
     DynamicList<label> facePatchIDs(fZone.size());
-    DynamicList<scalar> faceSigns(fZone.size());
+    DynamicList<bool>  flips(fZone.size());
 
     const surfaceVectorField& Sf = mesh_.Sf();
     const surfaceScalarField& magSf = mesh_.magSf();
@@ -246,11 +272,11 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZoneAndDirection
 
             if ((n & refDir) > tolerance_)
             {
-                faceSigns.append(1);
+                flips.append(false);
             }
             else
             {
-                faceSigns.append(-1);
+                flips.append(true);
             }
 
             faceIDs.append(faceID);
@@ -258,9 +284,10 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZoneAndDirection
         }
     }
 
+    // could reduce copying here
     faceID.append(faceIDs);
     facePatchID.append(facePatchIDs);
-    faceSign.append(faceSigns);
+    faceFlip.append(flips);
 }
 
 
@@ -268,17 +295,16 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
 (
     const word& cellZoneName,
     const vector& dir,
-    DynamicList<vector>& zoneRefDir,
-    DynamicList<word>& faceZoneNames,
+    DynamicList<word>& names,
+    DynamicList<vector>& directions,
     DynamicList<List<label>>& faceID,
     DynamicList<List<label>>& facePatchID,
-    DynamicList<List<scalar>>& faceSign
+    DynamicList<boolList>& faceFlip
 ) const
 {
-    vector refDir = dir/(mag(dir) + ROOTVSMALL);
+    const vector refDir = dir/(mag(dir) + ROOTVSMALL);
 
     const label cellZonei = mesh_.cellZones().findZoneID(cellZoneName);
-
     if (cellZonei == -1)
     {
         FatalErrorInFunction
@@ -318,7 +344,7 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
     DynamicList<label> faceIDs(floor(0.1*mesh_.nFaces()));
     DynamicList<label> facePatchIDs(faceIDs.size());
     DynamicList<label> faceLocalPatchIDs(faceIDs.size());
-    DynamicList<scalar> faceSigns(faceIDs.size());
+    DynamicList<bool>  flips(faceIDs.size());
 
     // Internal faces
     for (label facei = 0; facei < nInternalFaces; facei++)
@@ -336,14 +362,14 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
                 faceIDs.append(facei);
                 faceLocalPatchIDs.append(facei);
                 facePatchIDs.append(-1);
-                faceSigns.append(1);
+                flips.append(false);
             }
             else if ((n & -refDir) > tolerance_)
             {
                 faceIDs.append(facei);
                 faceLocalPatchIDs.append(facei);
                 facePatchIDs.append(-1);
-                faceSigns.append(-1);
+                flips.append(true);
             }
         }
     }
@@ -369,14 +395,14 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
                     faceIDs.append(facei);
                     faceLocalPatchIDs.append(localFacei);
                     facePatchIDs.append(patchi);
-                    faceSigns.append(1);
+                    flips.append(false);
                 }
                 else if ((n & -refDir) > tolerance_)
                 {
                     faceIDs.append(facei);
                     faceLocalPatchIDs.append(localFacei);
                     facePatchIDs.append(patchi);
-                    faceSigns.append(-1);
+                    flips.append(true);
                 }
             }
         }
@@ -494,7 +520,7 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
 
     List<DynamicList<label>> regionFaceIDs(nRegion);
     List<DynamicList<label>> regionFacePatchIDs(nRegion);
-    List<DynamicList<scalar>> regionFaceSigns(nRegion);
+    List<DynamicList<bool>>  regionFaceFlips(nRegion);
 
     forAll(allFaceInfo, facei)
     {
@@ -502,18 +528,18 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
 
         regionFaceIDs[regioni].append(faceLocalPatchIDs[facei]);
         regionFacePatchIDs[regioni].append(facePatchIDs[facei]);
-        regionFaceSigns[regioni].append(faceSigns[facei]);
+        regionFaceFlips[regioni].append(flips[facei]);
     }
 
     // Transfer to persistent storage
     forAll(regionFaceIDs, regioni)
     {
         const word zoneName = cellZoneName + ":faceZone" + Foam::name(regioni);
-        faceZoneNames.append(zoneName);
-        zoneRefDir.append(refDir);
+        names.append(zoneName);
+        directions.append(refDir);
         faceID.append(regionFaceIDs[regioni]);
         facePatchID.append(regionFacePatchIDs[regioni]);
-        faceSign.append(regionFaceSigns[regioni]);
+        faceFlip.append(regionFaceFlips[regioni]);
 
         // Write OBj of faces to file
         if (debug)
@@ -530,10 +556,10 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
             << "    Created " << faceID.size()
             << " separate face zones from cell zone " << cellZoneName << nl;
 
-        forAll(faceZoneNames, i)
+        forAll(names, i)
         {
             label nFaces = returnReduce(faceID[i].size(), sumOp<label>());
-            Info<< "    " << faceZoneNames[i] << ": "
+            Info<< "    " << names[i] << ": "
                 << nFaces << " faces" << nl;
         }
 
@@ -542,36 +568,33 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
 }
 
 
-void Foam::functionObjects::fluxSummary::initialiseFaceArea()
+Foam::scalar Foam::functionObjects::fluxSummary::totalArea
+(
+    const label zonei
+) const
 {
-    faceArea_.setSize(faceID_.size(), 0);
-
     const surfaceScalarField& magSf = mesh_.magSf();
 
-    forAll(faceID_, zonei)
+    const labelList& faceIDs = faceID_[zonei];
+    const labelList& facePatchIDs = facePatchID_[zonei];
+
+    scalar sumMagSf = 0;
+    forAll(faceIDs, i)
     {
-        const labelList& faceIDs = faceID_[zonei];
-        const labelList& facePatchIDs = facePatchID_[zonei];
+        label facei = faceIDs[i];
 
-        scalar sumMagSf = 0;
-
-        forAll(faceIDs, i)
+        if (facePatchIDs[i] == -1)
         {
-            label facei = faceIDs[i];
-
-            if (facePatchIDs[i] == -1)
-            {
-                sumMagSf += magSf[facei];
-            }
-            else
-            {
-                label patchi = facePatchIDs[i];
-                sumMagSf += magSf.boundaryField()[patchi][facei];
-            }
+            sumMagSf += magSf[facei];
         }
-
-        faceArea_[zonei] = returnReduce(sumMagSf, sumOp<scalar>());
+        else
+        {
+            label patchi = facePatchIDs[i];
+            sumMagSf += magSf.boundaryField()[patchi][facei];
+        }
     }
+
+    return returnReduce(sumMagSf, sumOp<scalar>());
 }
 
 
@@ -589,12 +612,10 @@ Foam::functionObjects::fluxSummary::fluxSummary
     mode_(mdFaceZone),
     scaleFactor_(1),
     phiName_("phi"),
-    faceZoneName_(),
-    refDir_(),
+    zoneNames_(),
     faceID_(),
     facePatchID_(),
-    faceSign_(),
-    faceArea_(),
+    faceFlip_(),
     filePtrs_(),
     tolerance_(0.8)
 {
@@ -621,11 +642,11 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
     tolerance_   = dict.lookupOrDefault<scalar>("tolerance", 0.8);
 
     // Initialise with capacity of 10 faceZones
-    DynamicList<vector> refDir(10);
-    DynamicList<word> faceZoneName(refDir.size());
-    DynamicList<List<label>> faceID(refDir.size());
-    DynamicList<List<label>> facePatchID(refDir.size());
-    DynamicList<List<scalar>> faceSign(refDir.size());
+    DynamicList<word> faceZoneName(10);
+    DynamicList<vector>       refDir(faceZoneName.capacity());
+    DynamicList<List<label>>  faceID(faceZoneName.capacity());
+    DynamicList<List<label>>  facePatchID(faceZoneName.capacity());
+    DynamicList<boolList>     faceFlips(faceZoneName.capacity());
 
     switch (mode_)
     {
@@ -639,9 +660,10 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
                 (
                     zones[i],
                     faceZoneName,
+                    refDir, // fill with dummy value
                     faceID,
                     facePatchID,
-                    faceSign
+                    faceFlips
                 );
             }
             break;
@@ -657,11 +679,11 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
                 (
                     zoneAndDirection[i].first(),
                     zoneAndDirection[i].second(),
-                    refDir,
                     faceZoneName,
+                    refDir,
                     faceID,
                     facePatchID,
-                    faceSign
+                    faceFlips
                 );
             }
             break;
@@ -677,11 +699,11 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
                 (
                     zoneAndDirection[i].first(),
                     zoneAndDirection[i].second(),
-                    refDir,
                     faceZoneName,
+                    refDir,
                     faceID,
                     facePatchID,
-                    faceSign
+                    faceFlips
                 );
             }
             break;
@@ -694,43 +716,41 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
         }
     }
 
-    faceZoneName_.transfer(faceZoneName);
-    refDir_.transfer(refDir);
+    zoneNames_.transfer(faceZoneName);
     faceID_.transfer(faceID);
     facePatchID_.transfer(facePatchID);
-    faceSign_.transfer(faceSign);
-
-    initialiseFaceArea();
-
-    if (writeToFile())
-    {
-        filePtrs_.setSize(faceZoneName_.size());
-
-        forAll(filePtrs_, filei)
-        {
-            const word& fzName = faceZoneName_[filei];
-            filePtrs_.set(filei, createFile(fzName));
-            writeFileHeader
-            (
-                fzName,
-                faceArea_[filei],
-                refDir_[filei],
-                filePtrs_[filei]
-            );
-        }
-    }
+    faceFlip_.transfer(faceFlips);
 
     Info<< type() << " " << name() << " output:" << nl;
 
-    forAll(faceZoneName_, zonei)
+    // Calculate and report areas
+    List<scalar> areas(zoneNames_.size());
+    forAll(zoneNames_, zonei)
     {
-        const word& zoneName = faceZoneName_[zonei];
-        scalar zoneArea = faceArea_[zonei];
+        const word& zoneName = zoneNames_[zonei];
+        areas[zonei] = totalArea(zonei);
 
-        Info<< "    Zone: " << zoneName << ", area: " << zoneArea << nl;
+        Info<< "    Zone: " << zoneName << ", area: " << areas[zonei] << nl;
     }
-
     Info<< endl;
+
+    if (writeToFile())
+    {
+        filePtrs_.setSize(zoneNames_.size());
+
+        forAll(filePtrs_, zonei)
+        {
+            const word& zoneName = zoneNames_[zonei];
+            filePtrs_.set(zonei, createFile(zoneName));
+            writeFileHeader
+            (
+                zoneName,
+                areas[zonei],
+                refDir[zonei],
+                filePtrs_[zonei]
+            );
+        }
+    }
 
     return true;
 }
@@ -738,14 +758,14 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
 
 void Foam::functionObjects::fluxSummary::writeFileHeader
 (
-    const word& fzName,
+    const word& zoneName,
     const scalar area,
     const vector& refDir,
     Ostream& os
 ) const
 {
     writeHeader(os, "Flux summary");
-    writeHeaderValue(os, "Face zone", fzName);
+    writeHeaderValue(os, "Face zone", zoneName);
     writeHeaderValue(os, "Total area", area);
 
     switch (mode_)
@@ -781,30 +801,14 @@ bool Foam::functionObjects::fluxSummary::write()
 {
     const surfaceScalarField& phi = lookupObject<surfaceScalarField>(phiName_);
 
-    word flowType;
-    if (phi.dimensions() == dimVolume/dimTime)
-    {
-        flowType = "volumetric";
-    }
-    else if (phi.dimensions() == dimMass/dimTime)
-    {
-        flowType = "mass";
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "Unsupported flux field " << phi.name() << " with dimensions "
-            << phi.dimensions() << ".  Expected either mass flow or volumetric "
-            << "flow rate" << abort(FatalError);
-    }
+    Log << type() << ' ' << name() << ' '
+        << checkFlowType(phi.dimensions(), phi.name()) << " write:" << nl;
 
-    Log << type() << " " << name() << ' ' << flowType << " write:" << nl;
-
-    forAll(faceZoneName_, zonei)
+    forAll(zoneNames_, zonei)
     {
         const labelList& faceID = faceID_[zonei];
         const labelList& facePatchID = facePatchID_[zonei];
-        const scalarList& faceSign = faceSign_[zonei];
+        const boolList&  faceFlips = faceFlip_[zonei];
 
         scalar phiPos = scalar(0);
         scalar phiNeg = scalar(0);
@@ -824,7 +828,10 @@ bool Foam::functionObjects::fluxSummary::write()
                 phif = phi[facei];
             }
 
-            phif *= faceSign[i];
+            if (faceFlips[i])
+            {
+                phif *= -1;
+            }
 
             if (phif > 0)
             {
@@ -845,7 +852,7 @@ bool Foam::functionObjects::fluxSummary::write()
         scalar netFlux = phiPos + phiNeg;
         scalar absoluteFlux = phiPos - phiNeg;
 
-        Log << "    faceZone " << faceZoneName_[zonei] << ':' << nl
+        Log << "    faceZone " << zoneNames_[zonei] << ':' << nl
             << "        positive : " << phiPos << nl
             << "        negative : " << phiNeg << nl
             << "        net      : " << netFlux << nl
