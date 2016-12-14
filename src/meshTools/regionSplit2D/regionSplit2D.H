@@ -94,7 +94,7 @@ public:
 
     // Member Functions
 
-        //- Return the number of regions
+        //- Return the global number of regions
         label nRegions() const
         {
             return nRegions_;
