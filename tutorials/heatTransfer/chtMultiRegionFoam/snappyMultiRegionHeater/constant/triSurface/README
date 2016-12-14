@@ -1,7 +1,0 @@
-Created from separate surfaces with surfaceAdd:
-
-cp bottomAir.stl geom.stl
-surfaceAdd -mergeRegions heater.stl geom.stl geom.stl
-surfaceAdd -mergeRegions leftSolid.stl geom.stl geom.stl
-surfaceAdd -mergeRegions rightSolid.stl geom.stl geom.stl
-surfaceAdd -mergeRegions topAir.stl geom.stl geom.stl
