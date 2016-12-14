@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,10 @@ Foam::distributionModels::distributionModel::New
             << exit(FatalError);
     }
 
-    return autoPtr<distributionModel>(cstrIter()(dict, rndGen));
+    const dictionary distributionDict =
+        dict.subOrEmptyDict(modelType & "Distribution");
+
+    return autoPtr<distributionModel>(cstrIter()(distributionDict, rndGen));
 }
 
 

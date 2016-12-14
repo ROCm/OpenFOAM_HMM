@@ -162,7 +162,7 @@ void Foam::particle::writeFields(const CloudType& c)
     IOPosition<CloudType> ioP(c);
     ioP.write();
 
-    label np =  c.size();
+    label np = c.size();
 
     IOField<label> origProc
     (
@@ -181,6 +181,29 @@ void Foam::particle::writeFields(const CloudType& c)
 
     origProc.write();
     origId.write();
+}
+
+
+template<class CloudType>
+void Foam::particle::writeObjects(const CloudType& c, objectRegistry& obr)
+{
+    label np = c.size();
+
+    IOField<vector>& position
+    (
+        cloud::createIOField<vector>("position", np, obr)
+    );
+    IOField<label>& origProc(cloud::createIOField<label>("origProc", np, obr));
+    IOField<label>& origId(cloud::createIOField<label>("origId", np, obr));
+
+    label i = 0;
+    forAllConstIter(typename CloudType, c, iter)
+    {
+        position[i] = iter().position_;
+        origProc[i] = iter().origProc_;
+        origId[i] = iter().origId_;
+        i++;
+    }
 }
 
 

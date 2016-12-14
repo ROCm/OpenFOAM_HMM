@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,6 @@ namespace Foam
     word cloud::defaultName("defaultCloud");
 }
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::cloud::cloud(const objectRegistry& obr, const word& cloudName)
@@ -65,6 +64,12 @@ Foam::cloud::~cloud()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::cloud::autoMap(const mapPolyMesh&)
+{
+    NotImplemented;
+}
+
+
+void Foam::cloud::writeObjects(objectRegistry& obr) const
 {
     NotImplemented;
 }

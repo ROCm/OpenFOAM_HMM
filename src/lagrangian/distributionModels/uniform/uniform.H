@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::uniform
+    Foam::distributionModels::uniform
 
 Description
     Uniform/equally-weighted distribution model
@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uniform_H
-#define uniform_H
+#ifndef distributionModels_uniform_H
+#define distributionModels_uniform_H
 
 #include "distributionModel.H"
 

@@ -137,6 +137,33 @@ void Foam::ThermoParcel<ParcelType>::writeFields(const CloudType& c)
 }
 
 
+template<class ParcelType>
+template<class CloudType>
+void Foam::ThermoParcel<ParcelType>::writeObjects
+(
+    const CloudType& c,
+    objectRegistry& obr
+)
+{
+    ParcelType::writeObjects(c, obr);
+
+    label np = c.size();
+
+    IOField<scalar>& T(cloud::createIOField<scalar>("T", np, obr));
+    IOField<scalar>& Cp(cloud::createIOField<scalar>("Cp", np, obr));
+
+    label i = 0;
+    forAllConstIter(typename Cloud<ThermoParcel<ParcelType>>, c, iter)
+    {
+        const ThermoParcel<ParcelType>& p = iter();
+
+        T[i] = p.T_;
+        Cp[i] = p.Cp_;
+        i++;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class ParcelType>

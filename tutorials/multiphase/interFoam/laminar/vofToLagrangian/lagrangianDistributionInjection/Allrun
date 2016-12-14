@@ -1,0 +1,55 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+eulerianCase=../eulerianInjection
+
+checkPrecursorCase() {
+    if [ ! -f ${1}/system/controlDict ]
+    then
+        echo "Error: unable to find precursor Eulerian case $eulerianCase"
+        exit 1
+    fi
+}
+
+copyLagrangianData() {
+    dir=$1
+    latestTime=$(\cd $dir && foamListTimes -latestTime)
+    if [ ! "$latestTime" ]
+    then
+        # Try a processor directory
+        latestTime=$(\cd $dir && foamListTimes -latestTime -processor)
+        if [ "$latestTime" ]
+        then
+            dir="${dir}/processor0"
+        fi
+    fi
+
+    if [ ! "$latestTime" ]
+    then
+        echo "Error: unable to find Lagrangian data in case $eulerianCase"
+        exit 1
+    fi
+
+    dir=$dir/${latestTime}/lagrangian
+
+    echo "Copying lagrangian data from $dir to 0 directory"
+    \cp -r $dir 0
+}
+
+
+checkPrecursorCase ${eulerianCase}
+
+restore0Dir;
+
+copyLagrangianData ${eulerianCase}
+
+runApplication blockMesh
+
+runApplication decomposePar
+
+runParallel $(getApplication)
+
+runApplication reconstructPar

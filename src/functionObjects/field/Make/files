@@ -69,12 +69,18 @@ streamFunction/streamFunction.C
 valueAverage/valueAverage.C
 fluxSummary/fluxSummary.C
 mapFields/mapFields.C
-reactionSensitivityAnalysis/reactionsSensitivityAnalysisObjects.C 
+reactionSensitivityAnalysis/reactionsSensitivityAnalysisObjects.C
 DESModelRegions/DESModelRegions.C
 
 externalCoupled/externalCoupled.C
 externalCoupled/externalCoupledMixed/externalCoupledMixedFvPatchFields.C
 externalCoupled/externalCoupledTemperatureMixed/externalCoupledTemperatureMixedFvPatchScalarField.C
+
+extractEulerianParticles/extractEulerianParticles/extractEulerianParticles.C
+extractEulerianParticles/eulerianParticle/eulerianParticle.C
+
+particleDistribution/particleDistribution.C
+
 
 ddt2/ddt2.C
 zeroGradient/zeroGradient.C

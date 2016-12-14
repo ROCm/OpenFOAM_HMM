@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,15 +36,9 @@ SourceFiles
 #define pairPatchAgglomeration_H
 
 #include "mathematicalConstants.H"
-#include "polyPatch.H"
 #include "indirectPrimitivePatch.H"
 #include "List.H"
 #include "EdgeMap.H"
-
-namespace Foam
-{
-    typedef PrimitivePatch<face, List, const pointField> bPatch;
-}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,6 +53,8 @@ class pairPatchAgglomeration
 {
 protected:
 
+    typedef PrimitivePatch<face, List, const pointField> bPatch;
+
     // Protected data
 
         //- Number of levels to merge, 1 = don't merge, 2 = merge pairs etc.
@@ -69,6 +65,9 @@ protected:
 
         //- Number of faces in coarsest level
         label nFacesInCoarsestLevel_;
+
+        //- Global number of faces in coarsest level
+        label nGlobalFacesInCoarsestLevel_;
 
         //- Feature angle
         scalar featureAngle_;
@@ -116,13 +115,17 @@ private:
         void compactLevels(const label fineLevelIndex);
 
         //- Check the need for further agglomeration
-        bool continueAgglomerating(const label fineLevelIndex);
+        bool continueAgglomerating
+        (
+            const label nLocal,
+            const label nLocalOld
+        );
 
         //- Set edge weights
         void setEdgeWeights(const label indexLevel);
 
         //- Set base patch edge weights
-        void setBasedEdgeWeights();
+        void setLevel0EdgeWeights();
 
         //- Maps current level with base patch
         void mapBaseToTopAgglom(const label fineLevelIndex);
@@ -138,12 +141,24 @@ public:
 
     // Constructors
 
-        //- Construct given mesh and controls
+        //- Construct given faces, points and control dictionary
         pairPatchAgglomeration
         (
-            const polyPatch& patch,
-            const dictionary& controlDict,
-            const bool additionalWeights = false
+            const faceList& faces,
+            const pointField& points,
+            const dictionary& controlDict
+        );
+
+        //- Construct from components
+        pairPatchAgglomeration
+        (
+            const faceList& faces,
+            const pointField& points,
+            const label mergeLevels,
+            const label maxLevels,
+            const label nFacesInCoarsestLevel,
+            const label nGlobalFacesInCoarsestLevel,
+            const scalar featureAngle = 0
         );
 
 

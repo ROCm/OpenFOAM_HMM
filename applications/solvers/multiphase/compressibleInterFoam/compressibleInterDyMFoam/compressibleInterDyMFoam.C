@@ -82,12 +82,12 @@ int main(int argc, char *argv[])
     {
         #include "readControls.H"
 
-        {
-            // Store divU from the previous mesh so that it can be mapped
-            // and used in correctPhi to ensure the corrected phi has the
-            // same divergence
-            volScalarField divU("divU0", fvc::div(fvc::absolute(phi, U)));
+        // Store divU from the previous mesh so that it can be mapped
+        // and used in correctPhi to ensure the corrected phi has the
+        // same divergence
+        volScalarField divU("divU0", fvc::div(fvc::absolute(phi, U)));
 
+        {
             #include "CourantNo.H"
             #include "setDeltaT.H"
 
@@ -110,8 +110,12 @@ int main(int argc, char *argv[])
                 ghf = (g & mesh.Cf()) - ghRef;
             }
 
-            if (mesh.changing() && correctPhi)
+            if ((correctPhi && mesh.changing()) || mesh.topoChanging())
             {
+                // Calculate absolute flux from the mapped surface velocity
+                // SAF: temporary fix until mapped Uf is assessed
+                Uf = fvc::interpolate(U);
+
                 // Calculate absolute flux from the mapped surface velocity
                 phi = mesh.Sf() & Uf;
 
@@ -119,6 +123,8 @@ int main(int argc, char *argv[])
 
                 // Make the fluxes relative to the mesh motion
                 fvc::makeRelative(phi, U);
+
+                mesh.topoChanging(false);
             }
         }
 

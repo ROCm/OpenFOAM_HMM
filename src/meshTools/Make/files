@@ -55,6 +55,8 @@ $(meshWave)/FaceCellWaveName.C
 regionSplit/regionSplit.C
 regionSplit/localPointRegion.C
 
+regionSplit2D/regionSplit2D.C
+
 indexedOctree/treeDataEdge.C
 indexedOctree/treeDataFace.C
 indexedOctree/treeDataPoint.C

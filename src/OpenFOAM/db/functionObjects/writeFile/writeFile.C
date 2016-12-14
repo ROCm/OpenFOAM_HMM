@@ -182,7 +182,7 @@ Foam::functionObjects::writeFile::~writeFile()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::functionObjects::writeFile::read(const dictionary& dict)
+bool Foam::functionObjects::writeFile::read(const dictionary& dict)
 {
     writePrecision_ =
         dict.lookupOrDefault("writePrecision", IOstream::defaultPrecision());
@@ -190,6 +190,8 @@ void Foam::functionObjects::writeFile::read(const dictionary& dict)
     // Only write on master process
     writeToFile_ = dict.lookupOrDefault("writeToFile", true);
     writeToFile_ = writeToFile_ && Pstream::master();
+
+    return true;
 }
 
 

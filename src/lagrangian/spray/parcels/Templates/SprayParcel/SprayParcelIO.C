@@ -283,6 +283,76 @@ void Foam::SprayParcel<ParcelType>::writeFields
 }
 
 
+template<class ParcelType>
+template<class CloudType>
+void Foam::SprayParcel<ParcelType>::writeObjects
+(
+    const CloudType& c,
+    objectRegistry& obr
+)
+{
+    ParcelType::writeObjects(c, obr);
+}
+
+
+template<class ParcelType>
+template<class CloudType, class CompositionType>
+void Foam::SprayParcel<ParcelType>::writeObjects
+(
+    const CloudType& c,
+    const CompositionType& compModel,
+    objectRegistry& obr
+)
+{
+    ParcelType::writeObjects(c, compModel, obr);
+
+    label np = c.size();
+
+    IOField<scalar>& d0(cloud::createIOField<scalar>("d0", np, obr));
+    IOField<vector>& position0
+    (
+        cloud::createIOField<vector>("position0", np, obr)
+    );
+    IOField<scalar>& sigma(cloud::createIOField<scalar>("sigma", np, obr));
+    IOField<scalar>& mu(cloud::createIOField<scalar>("mu", np, obr));
+    IOField<scalar>& liquidCore
+    (
+        cloud::createIOField<scalar>("liquidCore", np, obr)
+    );
+    IOField<scalar>& KHindex(cloud::createIOField<scalar>("KHindex", np, obr));
+    IOField<scalar>& y(cloud::createIOField<scalar>("y", np, obr));
+    IOField<scalar>& yDot(cloud::createIOField<scalar>("yDot", np, obr));
+    IOField<scalar>& tc(cloud::createIOField<scalar>("tc", np, obr));
+    IOField<scalar>& ms(cloud::createIOField<scalar>("ms", np, obr));
+    IOField<scalar>& injector
+    (
+        cloud::createIOField<scalar>("injector", np, obr)
+    );
+    IOField<scalar>& tMom(cloud::createIOField<scalar>("tMom", np, obr));
+    IOField<scalar>& user(cloud::createIOField<scalar>("user", np, obr));
+
+    label i = 0;
+    forAllConstIter(typename Cloud<SprayParcel<ParcelType>>, c, iter)
+    {
+        const SprayParcel<ParcelType>& p = iter();
+        d0[i] = p.d0_;
+        position0[i] = p.position0_;
+        sigma[i] = p.sigma_;
+        mu[i] = p.mu_;
+        liquidCore[i] = p.liquidCore_;
+        KHindex[i] = p.KHindex_;
+        y[i] = p.y_;
+        yDot[i] = p.yDot_;
+        tc[i] = p.tc_;
+        ms[i] = p.ms_;
+        injector[i] = p.injector_;
+        tMom[i] = p.tMom_;
+        user[i] = p.user_;
+        i++;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class ParcelType>

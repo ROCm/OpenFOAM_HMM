@@ -32,6 +32,8 @@ License
 #include "ConeInjection.H"
 #include "ConeNozzleInjection.H"
 #include "FieldActivatedInjection.H"
+#include "InjectedParticleDistributionInjection.H"
+#include "InjectedParticleInjection.H"
 #include "InflationInjection.H"
 #include "KinematicLookupTableInjection.H"
 #include "ManualInjection.H"
@@ -49,6 +51,8 @@ License
     makeInjectionModelType(ConeInjection, CloudType);                          \
     makeInjectionModelType(ConeNozzleInjection, CloudType);                    \
     makeInjectionModelType(FieldActivatedInjection, CloudType);                \
+    makeInjectionModelType(InjectedParticleDistributionInjection, CloudType);  \
+    makeInjectionModelType(InjectedParticleInjection, CloudType);              \
     makeInjectionModelType(InflationInjection, CloudType);                     \
     makeInjectionModelType(KinematicLookupTableInjection, CloudType);          \
     makeInjectionModelType(ManualInjection, CloudType);                        \

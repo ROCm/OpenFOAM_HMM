@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::general
+    Foam::distributionModels::general
 
 Description
     general distribution model
@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef general_H
-#define general_H
+#ifndef distributionModels_general_H
+#define distributionModels_general_H
 
 #include "distributionModel.H"
 #include "Vector.H"
@@ -43,6 +43,20 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward declaration of classes
+class Istream;
+class Ostream;
+
+namespace distributionModels
+{
+    class general;
+}
+
+// Forward declaration of friend functions and operators
+Istream& operator>>(Istream&, distributionModels::general&);
+Ostream& operator<<(Ostream&, const distributionModels::general&);
+
 namespace distributionModels
 {
 
@@ -58,17 +72,18 @@ class general
 
         typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
 
+        // List of (bin probability)
         List<pair> xy_;
-
-        label nEntries_;
-
-        //- Min and max values of the distribution
-        scalar minValue_;
-        scalar maxValue_;
 
         scalar meanValue_;
 
         List<scalar> integral_;
+
+
+    // Private member functions
+
+        //- Initialise the distribution parameters
+        void initialise();
 
 
 public:
@@ -81,6 +96,14 @@ public:
 
         //- Construct from components
         general(const dictionary& dict, cachedRandom& rndGen);
+
+        //- Construct from components
+        general
+        (
+            const UList<scalar>& sampleData,
+            const scalar binWidth,
+            cachedRandom& rndGen
+        );
 
         //- Construct copy
         general(const general& p);
@@ -109,6 +132,18 @@ public:
 
         //- Return the mean value
         virtual scalar meanValue() const;
+
+        //- Write data to stream
+        virtual void writeData(Ostream& os) const;
+
+        //- Read data from stream
+        virtual void readData(Istream& os);
+
+        //- Write data in dictionary format
+        virtual dictionary writeDict(const word& dictName) const;
+
+        //- Read data from dictionary
+        virtual void readDict(const dictionary& dict);
 };
 
 
