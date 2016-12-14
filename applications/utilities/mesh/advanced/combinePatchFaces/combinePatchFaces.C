@@ -48,7 +48,6 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "PstreamReduceOps.H"
 #include "argList.H"
 #include "Time.H"
 #include "polyTopoChange.H"
@@ -62,6 +61,7 @@ Description
 #include "motionSmoother.H"
 #include "topoSet.H"
 #include "processorMeshes.H"
+#include "PstreamReduceOps.H"
 
 using namespace Foam;
 
