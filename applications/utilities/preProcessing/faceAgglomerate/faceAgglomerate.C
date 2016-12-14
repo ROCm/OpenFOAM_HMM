@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
         {
             forAll(pp, i)
             {
-                const label agglomi = pp.start() - mesh.nInternalFaces() + i
+                const label agglomi = pp.start() - mesh.nInternalFaces() + i;
                 finalAgglom[patchi][i] = nbrAgglom[agglomi];
             }
         }
