@@ -28,6 +28,7 @@ License
 #include "dynamicCode.H"
 #include "dynamicCodeContext.H"
 #include "dlLibraryTable.H"
+#include "Pstream.H"
 #include "PstreamReduceOps.H"
 #include "OSspecific.H"
 #include "Ostream.H"

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,6 +55,37 @@ class Pstream
 :
     public UPstream
 {
+   // Private Static Functions
+
+        //- Exchange contiguous data. Sends sendData, receives into
+        //  recvData. If block=true will wait for all transfers to finish.
+        //  Data provided and received as container.
+        template<class Container, class T>
+        static void exchangeContainer
+        (
+            const UList<Container>& sendBufs,
+            const labelUList& recvSizes,
+            List<Container>& recvBufs,
+            const int tag,
+            const label comm,
+            const bool block
+        );
+
+        //- Exchange contiguous data. Sends sendData, receives into
+        //  recvData. If block=true will wait for all transfers to finish.
+        //  Data provided and received as pointers.
+        template<class T>
+        static void exchangeBuf
+        (
+            const labelUList& sendSizes,    // number of T, not number of char
+            const UList<const char*>& sendBufs,
+            const labelUList& recvSizes,    // number of T, not number of char
+            List<char*>& recvBufs,
+            const int tag,
+            const label comm,
+            const bool block
+        );
+
 
 protected:
 
@@ -62,6 +93,7 @@ protected:
 
         //- Transfer buffer
         DynamicList<char> buf_;
+
 
 public:
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,10 +28,156 @@ Description
 
 #include "Pstream.H"
 #include "contiguous.H"
-#include "PstreamCombineReduceOps.H"
-#include "UPstream.H"
+#include "PstreamReduceOps.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Container, class T>
+void Foam::Pstream::exchangeContainer
+(
+    const UList<Container>& sendBufs,
+    const labelUList& recvSizes,
+    List<Container>& recvBufs,
+    const int tag,
+    const label comm,
+    const bool block
+)
+{
+    label startOfRequests = Pstream::nRequests();
+
+    // Set up receives
+    // ~~~~~~~~~~~~~~~
+
+    forAll(recvSizes, proci)
+    {
+        if (proci != Pstream::myProcNo(comm) && recvSizes[proci] > 0)
+        {
+            UIPstream::read
+            (
+                UPstream::nonBlocking,
+                proci,
+                reinterpret_cast<char*>(recvBufs[proci].begin()),
+                recvSizes[proci]*sizeof(T),
+                tag,
+                comm
+            );
+        }
+    }
+
+
+    // Set up sends
+    // ~~~~~~~~~~~~
+
+    forAll(sendBufs, proci)
+    {
+        if (proci != Pstream::myProcNo(comm) && sendBufs[proci].size() > 0)
+        {
+            if
+            (
+               !UOPstream::write
+                (
+                    UPstream::nonBlocking,
+                    proci,
+                    reinterpret_cast<const char*>(sendBufs[proci].begin()),
+                    sendBufs[proci].size()*sizeof(T),
+                    tag,
+                    comm
+                )
+            )
+            {
+                FatalErrorInFunction
+                    << "Cannot send outgoing message. "
+                    << "to:" << proci << " nBytes:"
+                    << label(sendBufs[proci].size()*sizeof(T))
+                    << Foam::abort(FatalError);
+            }
+        }
+    }
+
+
+    // Wait for all to finish
+    // ~~~~~~~~~~~~~~~~~~~~~~
+
+    if (block)
+    {
+        Pstream::waitRequests(startOfRequests);
+    }
+}
+
+
+template<class T>
+void Foam::Pstream::exchangeBuf
+(
+    const labelUList& sendSizes,
+    const UList<const char*>& sendBufs,
+    const labelUList& recvSizes,
+    List<char*>& recvBufs,
+    const int tag,
+    const label comm,
+    const bool block
+)
+{
+    label startOfRequests = Pstream::nRequests();
+
+    // Set up receives
+    // ~~~~~~~~~~~~~~~
+
+    forAll(recvSizes, proci)
+    {
+        if (proci != Pstream::myProcNo(comm) && recvSizes[proci] > 0)
+        {
+            UIPstream::read
+            (
+                UPstream::nonBlocking,
+                proci,
+                recvBufs[proci],
+                recvSizes[proci]*sizeof(T),
+                tag,
+                comm
+            );
+        }
+    }
+
+
+    // Set up sends
+    // ~~~~~~~~~~~~
+
+    forAll(sendBufs, proci)
+    {
+        if (proci != Pstream::myProcNo(comm) && sendSizes[proci] > 0)
+        {
+            if
+            (
+               !UOPstream::write
+                (
+                    UPstream::nonBlocking,
+                    proci,
+                    sendBufs[proci],
+                    sendSizes[proci]*sizeof(T),
+                    tag,
+                    comm
+                )
+            )
+            {
+                FatalErrorInFunction
+                    << "Cannot send outgoing message. "
+                    << "to:" << proci << " nBytes:"
+                    << label(sendSizes[proci]*sizeof(T))
+                    << Foam::abort(FatalError);
+            }
+        }
+    }
+
+
+    // Wait for all to finish
+    // ~~~~~~~~~~~~~~~~~~~~~~
+
+    if (block)
+    {
+        Pstream::waitRequests(startOfRequests);
+    }
+}
+
 
 template<class Container, class T>
 void Foam::Pstream::exchange
@@ -63,11 +209,7 @@ void Foam::Pstream::exchange
 
     if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
-        label startOfRequests = Pstream::nRequests();
-
-        // Set up receives
-        // ~~~~~~~~~~~~~~~
-
+        // Presize all receive buffers
         forAll(recvSizes, proci)
         {
             label nRecv = recvSizes[proci];
@@ -75,55 +217,121 @@ void Foam::Pstream::exchange
             if (proci != Pstream::myProcNo(comm) && nRecv > 0)
             {
                 recvBufs[proci].setSize(nRecv);
-                UIPstream::read
-                (
-                    UPstream::nonBlocking,
-                    proci,
-                    reinterpret_cast<char*>(recvBufs[proci].begin()),
-                    nRecv*sizeof(T),
-                    tag,
-                    comm
-                );
             }
         }
 
-
-        // Set up sends
-        // ~~~~~~~~~~~~
-
-        forAll(sendBufs, proci)
+        if (Pstream::maxCommsSize <= 0)
         {
-            if (proci != Pstream::myProcNo(comm) && sendBufs[proci].size() > 0)
+            // Do the exchanging in one go
+            exchangeContainer<Container, T>
+            (
+                sendBufs,
+                recvSizes,
+                recvBufs,
+                tag,
+                comm,
+                block
+            );
+        }
+        else
+        {
+            // Determine the number of chunks to send. Note that we
+            // only have to look at the sending data since we are
+            // guaranteed that some processor's sending size is some other
+            // processor's receive size. Also we can ignore any local comms.
+
+            label maxNSend = 0;
+            forAll(sendBufs, proci)
             {
-                if
-                (
-                   !UOPstream::write
-                    (
-                        UPstream::nonBlocking,
-                        proci,
-                        reinterpret_cast<const char*>(sendBufs[proci].begin()),
-                        sendBufs[proci].size()*sizeof(T),
-                        tag,
-                        comm
-                    )
-                )
+                if (proci != Pstream::myProcNo(comm))
                 {
-                    FatalErrorInFunction
-                        << "Cannot send outgoing message. "
-                        << "to:" << proci << " nBytes:"
-                        << label(sendBufs[proci].size()*sizeof(T))
-                        << Foam::abort(FatalError);
+                    maxNSend = max(maxNSend, sendBufs[proci].size());
                 }
             }
-        }
+
+            const label maxNBytes = sizeof(T)*maxNSend;
+
+            // We need to send maxNBytes bytes so the number of iterations:
+            //  maxNBytes                           iterations
+            //  ---------                           ----------
+            //  0                                   0
+            //  1..maxCommsSize                     1
+            //  maxCommsSize+1..2*maxCommsSize      2
+            //      etc.
+
+            label nIter;
+            if (maxNBytes == 0)
+            {
+                nIter = 0;
+            }
+            else
+            {
+                nIter = (maxNBytes-1)/Pstream::maxCommsSize+1;
+            }
+            reduce(nIter, maxOp<label>(), tag, comm);
 
 
-        // Wait for all to finish
-        // ~~~~~~~~~~~~~~~~~~~~~~
+            List<const char*> charSendBufs(sendBufs.size());
+            List<char*> charRecvBufs(sendBufs.size());
 
-        if (block)
-        {
-            Pstream::waitRequests(startOfRequests);
+            labelList nRecv(sendBufs.size());
+            labelList startRecv(sendBufs.size(), 0);
+            labelList nSend(sendBufs.size());
+            labelList startSend(sendBufs.size(), 0);
+
+            for (label iter = 0; iter < nIter; iter++)
+            {
+                forAll(sendBufs, proci)
+                {
+                    nSend[proci] = min
+                    (
+                        Pstream::maxCommsSize,
+                        sendBufs[proci].size()-startSend[proci]
+                    );
+                    charSendBufs[proci] =
+                    (
+                        nSend[proci] > 0
+                      ? reinterpret_cast<const char*>
+                        (
+                            &(sendBufs[proci][startSend[proci]])
+                        )
+                      : nullptr
+                    );
+
+                    nRecv[proci] = min
+                    (
+                        Pstream::maxCommsSize,
+                        recvBufs[proci].size()-startRecv[proci]
+                    );
+
+                    charRecvBufs[proci] =
+                    (
+                        nRecv[proci] > 0
+                      ? reinterpret_cast<char*>
+                        (
+                            &(recvBufs[proci][startRecv[proci]])
+                        )
+                      : nullptr
+                    );
+                }
+
+                exchangeBuf<T>
+                (
+                    nSend,
+                    charSendBufs,
+                    nRecv,
+                    charRecvBufs,
+                    tag,
+                    comm,
+                    block
+                );
+
+                forAll(nSend, proci)
+                {
+                    startSend[proci] += nSend[proci];
+                    startRecv[proci] += nRecv[proci];
+                }
+            }
         }
     }
 
