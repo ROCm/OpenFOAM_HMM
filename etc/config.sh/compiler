@@ -53,14 +53,14 @@ ThirdParty)
     Gcc53)
         gcc_version=gcc-5.3.0
         ;;
-    Gcc61)
-        gcc_version=gcc-6.1.0
-        ;;
     Gcc54)
         gcc_version=gcc-5.4.0
         ;;
     Gcc61)
         gcc_version=gcc-6.1.0
+        ;;
+    Gcc62)
+        gcc_version=gcc-6.2.0
         ;;
     Clang)
         clang_version=llvm-3.7.0
