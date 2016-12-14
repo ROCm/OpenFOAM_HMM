@@ -121,6 +121,7 @@ void Foam::ensightMesh::writeFaceSizes
         const face& f = faceLst[i];
 
         os.write(f.size());
+        os.newline();
     }
 }
 
@@ -136,6 +137,7 @@ void Foam::ensightMesh::writeFaceSizes
         const face& f = faceLst[i];
 
         os.write(f.size());
+        os.newline();
     }
 }
 
@@ -173,10 +175,13 @@ void Foam::ensightMesh::writePolysNFaces
     ensightGeoFile& os
 ) const
 {
+    // write the number of faces per element (1/line in ASCII)
     forAll(addr, i)
     {
-        const labelList& cf = cellFaces[addr[i]];
+        const labelUList& cf = cellFaces[addr[i]];
+
         os.write(cf.size());
+        os.newline();
     }
 }
 
@@ -189,13 +194,15 @@ void Foam::ensightMesh::writePolysNPointsPerFace
     ensightGeoFile& os
 ) const
 {
+    // write the number of points per element face (1/line in ASCII)
     forAll(addr, i)
     {
-        const labelList& cf = cellFaces[addr[i]];
+        const labelUList& cf = cellFaces[addr[i]];
 
-        forAll(cf, faceI)
+        forAll(cf, facei)
         {
-            os.write(faces[cf[faceI]].size());
+            os.write(faces[cf[facei]].size());
+            os.newline();
         }
     }
 }
@@ -213,11 +220,11 @@ void Foam::ensightMesh::writePolysPoints
     forAll(addr, i)
     {
         const label cellId = addr[i];
-        const labelList& cf = cellFaces[cellId];
+        const labelUList& cf = cellFaces[cellId];
 
-        forAll(cf, faceI)
+        forAll(cf, facei)
         {
-            const label faceId = cf[faceI];
+            const label faceId = cf[facei];
             const face& f = faces[faceId];  // face points (in global points)
 
             if (faceId < faceOwner.size() && faceOwner[faceId] != cellId)

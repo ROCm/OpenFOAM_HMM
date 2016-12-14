@@ -342,7 +342,7 @@ void Foam::ensightMesh::write(ensightGeoFile& os) const
             (
                 pp.meshPoints(),
                 pp.meshPointMap(),
-                pointToGlobal, // local patch point to unique global index
+                pointToGlobal, // local point to unique global index
                 uniqueMeshPointLabels // unique global points
             );
 
@@ -376,43 +376,43 @@ void Foam::ensightMesh::write(ensightGeoFile& os) const
         const word& zoneName = zoneNames[zonei];
         const ensightFaces& ensFaces = faceZoneFaces_[zoneName];
 
-        label zoneId = mesh_.faceZones().findZoneID(zoneName);
-        const faceZone& fz = mesh_.faceZones()[zoneId];
+        // Use the properly sorted faceIds (ensightFaces) and do NOT use the
+        // faceZone directly, otherwise the point-maps will not correspond.
+        // - perform face-flipping later
 
-        // Renumber the faceZone points/faces into unique points
+        indirectPrimitivePatch pp
+        (
+            IndirectList<face>(mesh_.faces(), ensFaces.faceIds()),
+            mesh_.points()
+        );
+
+        // Renumber the points/faces into unique points
         labelList pointToGlobal;
         labelList uniqueMeshPointLabels;
         autoPtr<globalIndex> globalPointsPtr =
             mesh_.globalData().mergePoints
             (
-                fz().meshPoints(),
-                fz().meshPointMap(),
-                pointToGlobal,
-                uniqueMeshPointLabels
+                pp.meshPoints(),
+                pp.meshPointMap(),
+                pointToGlobal, // local point to unique global index
+                uniqueMeshPointLabels // unique global points
             );
 
-        // Make a copy in the proper order
-        primitiveFacePatch pp
-        (
-            faceList(mesh_.faces(), ensFaces.faceIds()),
-            mesh_.points()
-        );
-
+        // Renumber the faces belonging to the faceZone,
+        // from local numbering to unique global index.
+        // Also a good place to perform face flipping
         const boolList& flip = ensFaces.flipMap();
-        forAll(pp, facei)
+        faceList patchFaces(pp.localFaces());
+        forAll(patchFaces, facei)
         {
+            face& f = patchFaces[facei];
+
             if (flip[facei])
             {
-                pp[facei].flip();
+                f.flip();
             }
-        }
 
-        // Renumber the faces belonging to the faceZone,
-        // from local numbering to unique global index
-        faceList patchFaces(pp.localFaces());
-        forAll(patchFaces, i)
-        {
-            inplaceRenumber(pointToGlobal, patchFaces[i]);
+            inplaceRenumber(pointToGlobal, f);
         }
 
         writeAllPoints
