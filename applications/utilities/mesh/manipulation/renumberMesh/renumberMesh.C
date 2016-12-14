@@ -778,7 +778,8 @@ int main(int argc, char *argv[])
             mesh.facesInstance(),
             polyMesh::meshSubDir,
             mesh,
-            IOobject::READ_IF_PRESENT
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
         ),
         labelList(0)
     );
@@ -791,7 +792,8 @@ int main(int argc, char *argv[])
             mesh.facesInstance(),
             polyMesh::meshSubDir,
             mesh,
-            IOobject::READ_IF_PRESENT
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
         ),
         labelList(0)
     );
@@ -803,7 +805,8 @@ int main(int argc, char *argv[])
             mesh.pointsInstance(),
             polyMesh::meshSubDir,
             mesh,
-            IOobject::READ_IF_PRESENT
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
         ),
         labelList(0)
     );
@@ -815,7 +818,8 @@ int main(int argc, char *argv[])
             mesh.pointsInstance(),
             polyMesh::meshSubDir,
             mesh,
-            IOobject::READ_IF_PRESENT
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
         ),
         labelList(0)
     );
@@ -1088,63 +1092,87 @@ int main(int argc, char *argv[])
     mesh.updateMesh(map);
 
     // Update proc maps
-    if
-    (
-        cellProcAddressing.headerOk()
-     && cellProcAddressing.size() == mesh.nCells()
-    )
+    if (cellProcAddressing.headerOk())
     {
-        Info<< "Renumbering processor cell decomposition map "
-            << cellProcAddressing.name() << endl;
-
-        cellProcAddressing = labelList
-        (
-            UIndirectList<label>(cellProcAddressing, map().cellMap())
-        );
-    }
-    if
-    (
-        faceProcAddressing.headerOk()
-     && faceProcAddressing.size() == mesh.nFaces()
-    )
-    {
-        Info<< "Renumbering processor face decomposition map "
-            << faceProcAddressing.name() << endl;
-
-        faceProcAddressing = labelList
-        (
-            UIndirectList<label>(faceProcAddressing, map().faceMap())
-        );
-
-        // Detect any flips.
-        const labelHashSet& fff = map().flipFaceFlux();
-        forAllConstIter(labelHashSet, fff, iter)
+        if (cellProcAddressing.size() == mesh.nCells())
         {
-            label facei = iter.key();
-            label masterFacei = faceProcAddressing[facei];
+            Info<< "Renumbering processor cell decomposition map "
+                << cellProcAddressing.name() << endl;
 
-            faceProcAddressing[facei] = -masterFacei;
-
-            if (masterFacei == 0)
-            {
-                FatalErrorInFunction
-                    << " masterFacei:" << masterFacei << exit(FatalError);
-            }
+            cellProcAddressing = labelList
+            (
+                UIndirectList<label>(cellProcAddressing, map().cellMap())
+            );
+        }
+        else
+        {
+            Info<< "Not writing inconsistent processor cell decomposition"
+                << " map " << cellProcAddressing.filePath() << endl;
+            cellProcAddressing.writeOpt() = IOobject::NO_WRITE;
         }
     }
-    if
-    (
-        pointProcAddressing.headerOk()
-     && pointProcAddressing.size() == mesh.nPoints()
-    )
+    if (faceProcAddressing.headerOk())
     {
-        Info<< "Renumbering processor point decomposition map "
-            << pointProcAddressing.name() << endl;
+        if (faceProcAddressing.size() == mesh.nFaces())
+        {
+            Info<< "Renumbering processor face decomposition map "
+                << faceProcAddressing.name() << endl;
 
-        pointProcAddressing = labelList
-        (
-            UIndirectList<label>(pointProcAddressing, map().pointMap())
-        );
+            faceProcAddressing = labelList
+            (
+                UIndirectList<label>(faceProcAddressing, map().faceMap())
+            );
+
+            // Detect any flips.
+            const labelHashSet& fff = map().flipFaceFlux();
+            forAllConstIter(labelHashSet, fff, iter)
+            {
+                label facei = iter.key();
+                label masterFacei = faceProcAddressing[facei];
+
+                faceProcAddressing[facei] = -masterFacei;
+
+                if (masterFacei == 0)
+                {
+                    FatalErrorInFunction
+                        << " masterFacei:" << masterFacei << exit(FatalError);
+                }
+            }
+        }
+        else
+        {
+            Info<< "Not writing inconsistent processor face decomposition"
+                << " map " << faceProcAddressing.filePath() << endl;
+            faceProcAddressing.writeOpt() = IOobject::NO_WRITE;
+        }
+    }
+    if (pointProcAddressing.headerOk())
+    {
+        if (pointProcAddressing.size() == mesh.nPoints())
+        {
+            Info<< "Renumbering processor point decomposition map "
+                << pointProcAddressing.name() << endl;
+
+            pointProcAddressing = labelList
+            (
+                UIndirectList<label>(pointProcAddressing, map().pointMap())
+            );
+        }
+        else
+        {
+            Info<< "Not writing consistent processor point decomposition"
+                << " map " << pointProcAddressing.filePath() << endl;
+            pointProcAddressing.writeOpt() = IOobject::NO_WRITE;
+        }
+    }
+    if (boundaryProcAddressing.headerOk())
+    {
+        if (boundaryProcAddressing.size() != mesh.boundaryMesh().size())
+        {
+            Info<< "Not writing consistent processor patch decomposition"
+                << " map " << boundaryProcAddressing.filePath() << endl;
+            boundaryProcAddressing.writeOpt() = IOobject::NO_WRITE;
+        }
     }
 
 
@@ -1262,90 +1290,16 @@ int main(int argc, char *argv[])
 
     Info<< "Writing mesh to " << mesh.facesInstance() << endl;
 
+    // Remove old procAddressing files
     processorMeshes::removeFiles(mesh);
+    // Remove refinement data
     hexRef8::removeFiles(mesh);
+    // Update sets
     topoSet::updateMesh(mesh.facesInstance(), map(), cellSets);
     topoSet::updateMesh(mesh.facesInstance(), map(), faceSets);
     topoSet::updateMesh(mesh.facesInstance(), map(), pointSets);
 
     mesh.write();
-
-    if (cellProcAddressing.headerOk())
-    {
-        cellProcAddressing.instance() = mesh.facesInstance();
-        if (cellProcAddressing.size() == mesh.nCells())
-        {
-            cellProcAddressing.write();
-        }
-        else
-        {
-            // procAddressing file no longer valid. Delete it.
-            const fileName fName(cellProcAddressing.filePath());
-            if (fName.size())
-            {
-                Info<< "Deleting inconsistent processor cell decomposition"
-                    << " map " << fName << endl;
-                rm(fName);
-            }
-        }
-    }
-
-    if (faceProcAddressing.headerOk())
-    {
-        faceProcAddressing.instance() = mesh.facesInstance();
-        if (faceProcAddressing.size() == mesh.nFaces())
-        {
-            faceProcAddressing.write();
-        }
-        else
-        {
-            const fileName fName(faceProcAddressing.filePath());
-            if (fName.size())
-            {
-                Info<< "Deleting inconsistent processor face decomposition"
-                    << " map " << fName << endl;
-                rm(fName);
-            }
-        }
-    }
-
-    if (pointProcAddressing.headerOk())
-    {
-        pointProcAddressing.instance() = mesh.facesInstance();
-        if (pointProcAddressing.size() == mesh.nPoints())
-        {
-            pointProcAddressing.write();
-        }
-        else
-        {
-            const fileName fName(pointProcAddressing.filePath());
-            if (fName.size())
-            {
-                Info<< "Deleting inconsistent processor point decomposition"
-                    << " map " << fName << endl;
-                rm(fName);
-            }
-        }
-    }
-
-    if (boundaryProcAddressing.headerOk())
-    {
-        boundaryProcAddressing.instance() = mesh.facesInstance();
-        if (boundaryProcAddressing.size() == mesh.boundaryMesh().size())
-        {
-            boundaryProcAddressing.write();
-        }
-        else
-        {
-            const fileName fName(boundaryProcAddressing.filePath());
-            if (fName.size())
-            {
-                Info<< "Deleting inconsistent processor patch decomposition"
-                    << " map " << fName << endl;
-                rm(fName);
-            }
-        }
-    }
 
     if (writeMaps)
     {
