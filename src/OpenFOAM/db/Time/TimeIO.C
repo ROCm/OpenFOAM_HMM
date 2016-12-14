@@ -439,7 +439,7 @@ void Foam::Time::readModifiedObjects()
 
 bool Foam::Time::writeTimeDict() const
 {
-        addProfiling(writing, "objectRegistry::writeObject");
+    addProfiling(writing, "objectRegistry::writeObject");
 
     const word tmName(timeName());
 
