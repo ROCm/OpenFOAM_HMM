@@ -32,7 +32,7 @@ using namespace Foam::constant;
 
 Foam::functionObjects::eulerianParticle::eulerianParticle()
 :
-    globalFaceIHit(-1),
+    faceIHit(-1),
     VC(vector::zero),
     VU(vector::zero),
     V(0),
@@ -48,7 +48,7 @@ Foam::Ostream& Foam::operator<<
     const functionObjects::eulerianParticle& p
 )
 {
-    os  << p.globalFaceIHit << token::SPACE
+    os  << p.faceIHit << token::SPACE
         << p.VC << token::SPACE
         << p.VU << token::SPACE
         << p.V << token::SPACE
@@ -64,7 +64,7 @@ Foam::Istream& Foam::operator>>
     functionObjects::eulerianParticle& p
 )
 {
-    is  >> p.globalFaceIHit
+    is  >> p.faceIHit
         >> p.VC
         >> p.VU
         >> p.V
@@ -81,7 +81,7 @@ void Foam::functionObjects::eulerianParticle::write(Ostream& os) const
     vector C = VC/(V + ROOTVSMALL);
 
     os  << time << token::SPACE
-        << globalFaceIHit << token::SPACE
+        << faceIHit << token::SPACE
         << C << token::SPACE
         << pDiameter << token::SPACE
         << U << token::SPACE
@@ -97,7 +97,7 @@ Foam::dictionary Foam::functionObjects::eulerianParticle::writeDict() const
 
     dictionary dict;
     dict.add("time", time);
-    dict.add("meshFace", globalFaceIHit);
+    dict.add("meshFace", faceIHit);
     dict.add("position", C);
     dict.add("diameter", pDiameter);
     dict.add("U", U);

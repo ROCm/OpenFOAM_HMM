@@ -113,9 +113,6 @@ protected:
             //- Patch face indices where faceZone face intersect patch
             labelList patchFaceIDs_;
 
-            //- Global face addressing
-            globalIndex globalFaces_;
-
 
         // Field names
 
@@ -140,11 +137,8 @@ protected:
             //- Number of sample locations to generate
             label nInjectorLocations_;
 
-            //- Agglomeration addressing from fine to coarse
+            //- Agglomeration addressing from fine to coarse (local proc only)
             labelList fineToCoarseAddr_;
-
-            //- Coarse face positions
-            vectorField coarsePosition_;
 
             //- Global coarse face addressing
             globalIndex globalCoarseFaces_;

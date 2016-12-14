@@ -40,15 +40,15 @@ class sumParticleOp
         const eulerianParticle& p1
     ) const
     {
-        if ((p0.globalFaceIHit != -1) && (p1.globalFaceIHit == -1))
+        if ((p0.faceIHit != -1) && (p1.faceIHit == -1))
         {
             return p0;
         }
-        else if ((p0.globalFaceIHit == -1) && (p1.globalFaceIHit != -1))
+        else if ((p0.faceIHit == -1) && (p1.faceIHit != -1))
         {
             return p1;
         }
-        else if ((p0.globalFaceIHit != -1) && (p1.globalFaceIHit != -1))
+        else if ((p0.faceIHit != -1) && (p1.faceIHit != -1))
         {
             // Choose particle with the largest collected volume and
             // accumulate total volume

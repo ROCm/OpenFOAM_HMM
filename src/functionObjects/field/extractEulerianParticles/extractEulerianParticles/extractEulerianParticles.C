@@ -57,7 +57,7 @@ namespace functionObjects
 Foam::fileName
 Foam::functionObjects::extractEulerianParticles::dictBaseFileDir() const
 {
-    fileName baseDir(".."); //  = obr_.time().path();
+    fileName baseDir(".."); //  = mesh_.time().path();
 
     if (Pstream::parRun())
     {
@@ -83,7 +83,7 @@ void Foam::functionObjects::extractEulerianParticles::checkFaceZone()
     {
         FatalErrorInFunction
             << "Unable to find faceZone " << faceZoneName_
-            << ".  Available faceZones are: "
+            << ".  Available faceZones are: " << mesh_.faceZones().names()
             << exit(FatalError);
     }
 
@@ -109,9 +109,6 @@ void Foam::functionObjects::extractEulerianParticles::checkFaceZone()
     // Initialise old iteration blocked faces
     // Note: for restart, this info needs to be written/read
     regions0_.setSize(fz.size(), -1);
-
-    // Create global addressing for faceZone
-    globalFaces_ = globalIndex(fz.size());
 }
 
 
@@ -169,26 +166,8 @@ void Foam::functionObjects::extractEulerianParticles::initialiseBins()
     {
         fineToCoarseAddr_ = ppa.restrictTopBottomAddressing();
         nCoarseFaces = max(fineToCoarseAddr_) + 1;
-
-        // Set coarse face centres as area average of fine face centres
-        const vectorField& faceCentres = mesh_.faceCentres();
-        const vectorField& faceAreas = mesh_.faceAreas();
-        coarsePosition_.setSize(nCoarseFaces);
-        coarsePosition_ = vector::zero;
-        scalarField coarseArea(nCoarseFaces, 0);
-        forAll(fz, i)
-        {
-            const label facei = fz[i];
-            const label coarseFacei = fineToCoarseAddr_[i];
-            const scalar magSf = mag(faceAreas[facei]);
-            coarseArea[coarseFacei] += magSf;
-            coarsePosition_[coarseFacei] += magSf*faceCentres[facei];
-        }
-
-        coarsePosition_ /= coarseArea + ROOTVSMALL;
     }
 
-    // Create global addressing for coarse face addressing
     globalCoarseFaces_ = globalIndex(nCoarseFaces);
 
     Info<< "Created " << returnReduce(nCoarseFaces, sumOp<label>())
@@ -302,20 +281,15 @@ void Foam::functionObjects::extractEulerianParticles::collectParticles
         }
 
         Map<label>::const_iterator iter = regionToParticleMap_.find(regioni);
+        eulerianParticle p = particles_[iter()];
 
-        eulerianParticle p;
-        if (iter != Map<label>::end())
+        if (p.faceIHit != -1 && nInjectorLocations_)
         {
-            // Particle on local processor
-            p = particles_[iter()];
-
-            if (nInjectorLocations_)
-            {
-                // Use coarse face index and position for output
-                p.globalFaceIHit = fineToCoarseAddr_[p.globalFaceIHit];
-                p.VC = p.V*coarsePosition_[p.globalFaceIHit];
-            }
+            // Use coarse face index for tag output
+            label coarseFacei = fineToCoarseAddr_[p.faceIHit];
+            p.faceIHit = globalCoarseFaces_.toGlobal(coarseFacei);
         }
+
         reduce(p, sumParticleOp<eulerianParticle>());
 
         const scalar pDiameter = cbrt(6.0*p.V/constant::mathematical::pi);
@@ -330,8 +304,9 @@ void Foam::functionObjects::extractEulerianParticles::collectParticles
                 label tag = -1;
                 if (nInjectorLocations_)
                 {
-                    tag = p.globalFaceIHit;
+                    tag = p.faceIHit;
                 }
+
                 injectedParticle* ip = new injectedParticle
                 (
                     mesh_,
@@ -525,10 +500,10 @@ void Foam::functionObjects::extractEulerianParticles::accumulateParticleInfo
             const label meshFacei = fz[localFacei];
             eulerianParticle& p = particles_[particlei];
 
-            if (p.globalFaceIHit < 0)
+            if (p.faceIHit < 0)
             {
                 // New particle - does not exist in particles_ list
-                p.globalFaceIHit = globalFaces_.toGlobal(localFacei);
+                p.faceIHit = localFacei;
                 p.V = 0;
                 p.VC = vector::zero;
                 p.VU = vector::zero;
@@ -569,7 +544,6 @@ Foam::functionObjects::extractEulerianParticles::extractEulerianParticles
     phiName_("phi"),
     nInjectorLocations_(0),
     fineToCoarseAddr_(),
-    coarsePosition_(),
     globalCoarseFaces_(),
     regions0_(),
     nRegions0_(0),
@@ -610,13 +584,13 @@ bool Foam::functionObjects::extractEulerianParticles::read
     if (fvMeshFunctionObject::read(dict) && writeFile::read(dict))
     {
         dict.lookup("faceZone") >> faceZoneName_;
-        dict.readIfPresent("nLocations", nInjectorLocations_);
         dict.lookup("alpha") >> alphaName_;
-        dict.readIfPresent("alphaThreshold", alphaThreshold_);
-        dict.lookup("U") >> UName_;
-        dict.lookup("rho") >> rhoName_;
-        dict.lookup("phi") >> phiName_;
 
+        dict.readIfPresent("alphaThreshold", alphaThreshold_);
+        dict.readIfPresent("U", UName_);
+        dict.readIfPresent("rho", rhoName_);
+        dict.readIfPresent("phi", phiName_);
+        dict.readIfPresent("nLocations", nInjectorLocations_);
         dict.readIfPresent("minDiameter", minDiameter_);
         dict.readIfPresent("maxDiameter", maxDiameter_);
 
@@ -641,7 +615,7 @@ bool Foam::functionObjects::extractEulerianParticles::execute()
     Log << type() << " " << name() << " output:" << nl;
 
     const volScalarField& alpha =
-        obr_.lookupObject<volScalarField>(alphaName_);
+        mesh_.lookupObject<volScalarField>(alphaName_);
 
     const surfaceScalarField alphaf
     (
@@ -663,6 +637,8 @@ bool Foam::functionObjects::extractEulerianParticles::execute()
     // Split the  faceZone according to the blockedFaces
     // - Returns a list of (disconnected) region index per face zone face
     regionSplit2D regionFaceIDs(mesh_, patch, blockedFaces);
+
+    // Global number of regions
     const label nRegionsNew = regionFaceIDs.nRegions();
 
     // Calculate the addressing between the old and new region information

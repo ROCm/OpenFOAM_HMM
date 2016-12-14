@@ -78,7 +78,7 @@ public:
         //  identify the index of the coarse face of the surface agglomeration
         //  Note: value of -1 used to indicate that the particle has not
         //        been initialised
-        label globalFaceIHit;
+        label faceIHit;
 
         //- Volume multiplied by face centres [m4]
         vector VC;
@@ -115,7 +115,7 @@ public:
         )
         {
             return
-                a.globalFaceIHit == b.globalFaceIHit
+                a.faceIHit == b.faceIHit
              && a.VC == b.VC
              && a.VU == b.VU
              && a.V == b.V
