@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::multiNormal
+    Foam::distributionModels::multiNormal
 
 Description
     A multiNormal distribution model
@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef multiNormal_H
-#define multiNormal_H
+#ifndef distributionModels_multiNormal_H
+#define distributionModels_multiNormal_H
 
 #include "distributionModel.H"
 
@@ -50,7 +50,7 @@ namespace distributionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class multiNormal Declaration
+                         Class multiNormal Declaration
 \*---------------------------------------------------------------------------*/
 
 class multiNormal

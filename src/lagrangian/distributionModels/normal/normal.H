@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::normal
+    Foam::distributionModels::normal
 
 Description
     A normal distribution model
@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef normal_H
-#define normal_H
+#ifndef distributionModels_normal_H
+#define distributionModels_normal_H
 
 #include "distributionModel.H"
 

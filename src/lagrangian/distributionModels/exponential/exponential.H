@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::exponential
+    Foam::distributionModels::exponential
 
 Description
     exponential distribution model
@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef exponential_H
-#define exponential_H
+#ifndef distributionModels_exponential_H
+#define distributionModels_exponential_H
 
 #include "distributionModel.H"
 

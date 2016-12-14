@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fixedValue
+    Foam::distributionModels::fixedValue
 
 Description
     Returns a fixed value
@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef distributionModelFixedValue_H
-#define distributionModelFixedValue_H
+#ifndef distributionModels_fixedValue_H
+#define distributionModels_fixedValue_H
 
 #include "distributionModel.H"
 
@@ -44,7 +44,7 @@ namespace Foam
 namespace distributionModels
 {
 /*---------------------------------------------------------------------------*\
-                       Class fixedValue Declaration
+                         Class fixedValue Declaration
 \*---------------------------------------------------------------------------*/
 
 class fixedValue
