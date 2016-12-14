@@ -29,6 +29,8 @@ FSD/FSDs.C
 
 diffusionMulticomponent/diffusionMulticomponents.C
 
+zoneCombustion/zoneCombustions.C
+
 noCombustion/noCombustions.C
 
 LIB = $(FOAM_LIBBIN)/libcombustionModels

@@ -65,7 +65,7 @@ Foam::displacementSBRStressFvMotionSolver::displacementSBRStressFvMotionSolver
 )
 :
     displacementMotionSolver(mesh, dict, dict.lookup("solver")),
-    fvMotionSolverCore(mesh),
+    fvMotionSolver(mesh),
     cellDisplacement_
     (
         IOobject
@@ -108,7 +108,7 @@ displacementSBRStressFvMotionSolver
 )
 :
     displacementMotionSolver(mesh, dict, pointDisplacement, points0, typeName),
-    fvMotionSolverCore(mesh),
+    fvMotionSolver(mesh),
     cellDisplacement_
     (
         IOobject

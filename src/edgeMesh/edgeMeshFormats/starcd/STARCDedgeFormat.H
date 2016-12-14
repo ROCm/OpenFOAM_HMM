@@ -87,6 +87,7 @@ protected:
         const label nEdges
     );
 
+
 public:
 
     // Constructors

@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "blockDescriptor.H"
+#include "blockMeshTools.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -164,6 +165,8 @@ Foam::blockDescriptor::blockDescriptor
 
 Foam::blockDescriptor::blockDescriptor
 (
+    const dictionary& dict,
+    const label index,
     const pointField& vertices,
     const blockEdgeList& edges,
     const blockFaceList& faces,
@@ -173,13 +176,24 @@ Foam::blockDescriptor::blockDescriptor
     vertices_(vertices),
     edges_(edges),
     faces_(faces),
-    blockShape_(is),
     density_(),
     expand_(12, gradingDescriptors()),
     zoneName_(),
     curvedFaces_(-1),
     nCurvedFaces_(0)
 {
+    // Read cell model and list of vertices (potentially with variables)
+    word model(is);
+    blockShape_ = cellShape
+    (
+        model,
+        blockMeshTools::read<label>
+        (
+            is,
+            dict.subOrEmptyDict("namedVertices")
+        )
+    );
+
     // Examine next token
     token t(is);
 
@@ -343,6 +357,25 @@ void Foam::blockDescriptor::correctFacePoints
                 facePoints[blockFacei]
             );
         }
+    }
+}
+
+
+void Foam::blockDescriptor::write
+(
+    Ostream& os,
+    const label val,
+    const dictionary& d
+)
+{
+    const dictionary* varDictPtr = d.subDictPtr("namedBlocks");
+    if (varDictPtr)
+    {
+        blockMeshTools::write(os, val, *varDictPtr);
+    }
+    else
+    {
+        os << val;
     }
 }
 

@@ -122,7 +122,8 @@ public:
         (
             const word& entryName,
             const dictionary& dict,
-            const word& ext = "Coeffs"
+            const word& ext = "Coeffs",
+            const fileName& fName = fileName::null
         );
 
         //- Copy constructor

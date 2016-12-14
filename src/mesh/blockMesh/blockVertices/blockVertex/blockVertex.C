@@ -25,6 +25,7 @@ License
 
 #include "blockVertex.H"
 #include "pointVertex.H"
+#include "blockMeshTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -50,6 +51,8 @@ Foam::autoPtr<Foam::blockVertex> Foam::blockVertex::clone() const
 
 Foam::autoPtr<Foam::blockVertex> Foam::blockVertex::New
 (
+    const dictionary& dict,
+    const label index,
     const searchableSurfaces& geometry,
     Istream& is
 )
@@ -61,14 +64,14 @@ Foam::autoPtr<Foam::blockVertex> Foam::blockVertex::New
 
     token firstToken(is);
 
-    if (firstToken.pToken() == token::BEGIN_LIST)
+    if (firstToken.isPunctuation() && firstToken.pToken() == token::BEGIN_LIST)
     {
         // Putback the opening bracket
         is.putBack(firstToken);
 
         return autoPtr<blockVertex>
         (
-            new blockVertices::pointVertex(geometry, is)
+            new blockVertices::pointVertex(dict, index, geometry, is)
         );
     }
     else if (firstToken.isWord())
@@ -88,7 +91,7 @@ Foam::autoPtr<Foam::blockVertex> Foam::blockVertex::New
                 << abort(FatalError);
         }
 
-        return autoPtr<blockVertex>(cstrIter()(geometry, is));
+        return autoPtr<blockVertex>(cstrIter()(dict, index, geometry, is));
     }
     else
     {
@@ -98,6 +101,36 @@ Foam::autoPtr<Foam::blockVertex> Foam::blockVertex::New
             << exit(FatalIOError);
 
         return autoPtr<blockVertex>(nullptr);
+    }
+}
+
+
+Foam::label Foam::blockVertex::read(Istream& is, const dictionary& dict)
+{
+    const dictionary* varDictPtr = dict.subDictPtr("namedVertices");
+    if (varDictPtr)
+    {
+        return blockMeshTools::read(is, *varDictPtr);
+    }
+    return readLabel(is);
+}
+
+
+void Foam::blockVertex::write
+(
+    Ostream& os,
+    const label val,
+    const dictionary& d
+)
+{
+    const dictionary* varDictPtr = d.subDictPtr("namedVertices");
+    if (varDictPtr)
+    {
+        blockMeshTools::write(os, val, *varDictPtr);
+    }
+    else
+    {
+        os << val;
     }
 }
 

@@ -202,7 +202,7 @@ void Foam::LduMatrix<Type, DType, LUType>::sumA
     {
         if (interfaces_.set(patchi))
         {
-            const unallocLabelList& pa = lduAddr().patchAddr(patchi);
+            const labelUList& pa = lduAddr().patchAddr(patchi);
             const Field<LUType>& pCoeffs = interfacesUpper_[patchi];
 
             forAll(pa, face)

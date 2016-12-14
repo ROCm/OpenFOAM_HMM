@@ -86,10 +86,7 @@ public:
         surfZoneIdentifier();
 
         //- Construct null with specified index
-        explicit surfZoneIdentifier
-        (
-            const label index
-        );
+        explicit surfZoneIdentifier(const label index);
 
         //- Construct from components
         surfZoneIdentifier

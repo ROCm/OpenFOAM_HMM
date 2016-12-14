@@ -39,15 +39,13 @@ License
 Foam::foamVtkOutputOptions::foamVtkOutputOptions()
 :
     type_(ASCII),
-    style_(NONE),
     precision_(IOstream::defaultPrecision())
 {}
 
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::foamVtkFormatter>
-Foam::foamVtkOutputOptions::newFormatter
+Foam::autoPtr<Foam::foamVtkFormatter> Foam::foamVtkOutputOptions::newFormatter
 (
     std::ostream& os
 ) const
@@ -188,8 +186,7 @@ void Foam::foamVtkOutputOptions::precision(unsigned val) const
 }
 
 
-Foam::Ostream&
-Foam::foamVtkOutputOptions::info(Ostream& os) const
+Foam::Ostream& Foam::foamVtkOutputOptions::info(Ostream& os) const
 {
     os << "type: " << type_;
 

@@ -29,6 +29,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "pointConstraint.H"
 #include "OBJstream.H"
+#include "linearInterpolationWeights.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -79,12 +80,14 @@ void Foam::projectEdge::findNearest
 
 Foam::projectEdge::projectEdge
 (
+    const dictionary& dict,
+    const label index,
     const searchableSurfaces& geometry,
     const pointField& points,
     Istream& is
 )
 :
-    blockEdge(points, is),
+    blockEdge(dict, index, points, is),
     geometry_(geometry)
 {
     wordList names(is);
@@ -108,7 +111,7 @@ Foam::projectEdge::projectEdge
 Foam::point Foam::projectEdge::position(const scalar lambda) const
 {
     // Initial guess
-    const point start(points_[start_]+lambda*(points_[end_]-points_[start_]));
+    const point start(points_[start_] + lambda*(points_[end_]-points_[start_]));
 
     point near(start);
 
@@ -125,7 +128,20 @@ Foam::point Foam::projectEdge::position(const scalar lambda) const
 Foam::tmp<Foam::pointField>
 Foam::projectEdge::position(const scalarList& lambdas) const
 {
-    static label iter = 0;
+    // For debugging to tag the output
+    static label eIter = 0;
+
+    autoPtr<OBJstream> debugStr;
+    if (debug)
+    {
+        debugStr.reset
+        (
+            new OBJstream("projectEdge_" + Foam::name(eIter++) + ".obj")
+        );
+        Info<< "Writing lines from straight-line start points"
+            << " to projected points to " << debugStr().name() << endl;
+    }
+
 
     tmp<pointField> tpoints(new pointField(lambdas.size()));
     pointField& points = tpoints.ref();
@@ -141,17 +157,26 @@ Foam::projectEdge::position(const scalarList& lambdas) const
     }
 
 
-    for (label i = 0; i < 3; i++)
+    // Upper limit for number of iterations
+    const label maxIter = 10;
+    // Residual tolerance
+    const scalar relTol = 0.1;
+    const scalar absTol = 1e-4;
+
+    scalar initialResidual = 0.0;
+
+    for (label iter = 0; iter < maxIter; iter++)
     {
         // Do projection
         {
             List<pointConstraint> constraints(lambdas.size());
+            pointField start(points);
             searchableSurfacesQueries::findNearest
             (
                 geometry_,
                 surfaces_,
-                pointField(points),
-                scalarField(points.size(), magSqr(d)),
+                start,
+                scalarField(start.size(), magSqr(d)),
                 points,
                 constraints
             );
@@ -165,63 +190,77 @@ Foam::projectEdge::position(const scalarList& lambdas) const
             {
                 points.last() = endPt;
             }
-        }
 
-        // Calculate distances
-        scalarField nearLength(points.size());
-        {
-            nearLength[0] = 0.0;
-            for(label i = 1; i < points.size(); i++)
+            if (debugStr.valid())
             {
-                nearLength[i] = nearLength[i-1] + mag(points[i]-points[i-1]);
+                forAll(points, i)
+                {
+                    debugStr().write(linePointRef(start[i], points[i]));
+                }
             }
         }
 
+        // Calculate lambdas (normalised coordinate along edge)
+        scalarField projLambdas(points.size());
+        {
+            projLambdas[0] = 0.0;
+            for (label i = 1; i < points.size(); i++)
+            {
+                projLambdas[i] = projLambdas[i-1] + mag(points[i]-points[i-1]);
+            }
+            projLambdas /= projLambdas.last();
+        }
+        linearInterpolationWeights interpolator(projLambdas);
+
         // Compare actual distances and move points (along straight line;
         // not along surface)
-        for(label i = 1; i < points.size() - 1; i++)
+        vectorField residual(points.size(), vector::zero);
+        labelList indices;
+        scalarField weights;
+        for (label i = 1; i < points.size() - 1; i++)
         {
-            scalar nearDelta = mag(points[i]-points[i-1])/nearLength.last();
-            scalar wantedDelta = lambdas[i]-lambdas[i-1];
+            interpolator.valueWeights(lambdas[i], indices, weights);
 
-            vector v(points[i]-points[i-1]);
-            points[i] = points[i-1]+wantedDelta/nearDelta*v;
-        }
-    }
-
-
-    if (debug)
-    {
-        OBJstream str("projectEdge_" + Foam::name(iter++) + ".obj");
-        Info<< "Writing lines from straight-line start points"
-            << " to projected points to " << str.name() << endl;
-
-        pointField startPts(lambdas.size());
-        forAll(lambdas, i)
-        {
-            startPts[i] = startPt+lambdas[i]*d;
+            point predicted = vector::zero;
+            forAll(indices, indexi)
+            {
+                predicted += weights[indexi]*points[indices[indexi]];
+            }
+            residual[i] = predicted-points[i];
         }
 
-        pointField nearPts(lambdas.size());
-        List<pointConstraint> nearConstraints(lambdas.size());
+        scalar scalarResidual = sum(mag(residual));
+
+        if (debug)
         {
-            const scalar distSqr = magSqr(d);
-            searchableSurfacesQueries::findNearest
-            (
-                geometry_,
-                surfaces_,
-                startPts,
-                scalarField(startPts.size(), distSqr),
-                nearPts,
-                nearConstraints
-            );
+            Pout<< "Iter:" << iter << " initialResidual:" << initialResidual
+                << " residual:" << scalarResidual << endl;
         }
 
-        forAll(startPts, i)
+        if (scalarResidual < absTol*0.5*lambdas.size())
         {
-            str.write(linePointRef(startPts[i], nearPts[i]));
-            str.write(linePointRef(nearPts[i], points[i]));
+            break;
         }
+        else if (iter == 0)
+        {
+            initialResidual = scalarResidual;
+        }
+        else if (scalarResidual/initialResidual < relTol)
+        {
+            break;
+        }
+
+
+        if (debugStr.valid())
+        {
+            forAll(points, i)
+            {
+                const point predicted(points[i] + residual[i]);
+                debugStr().write(linePointRef(points[i], predicted));
+            }
+        }
+
+        points += residual;
     }
 
     return tpoints;

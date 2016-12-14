@@ -53,7 +53,7 @@ Description
     }
 
     // Input file
-    inputFile   "postProcessing/faceSource1/surface/patch/patch.case";
+    inputFiles  ("postProcessing/faceSource1/surface/patch/patch.case");
 
     // Write interval for FFT data, default = 1
     fftWriteInterval 100;
@@ -83,8 +83,8 @@ SeeAlso
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceNoise_H
-#define surfaceNoise_H
+#ifndef noiseModels_surfaceNoise_H
+#define noiseModels_surfaceNoise_H
 
 #include "noiseModel.H"
 #include "labelList.H"
@@ -115,8 +115,11 @@ protected:
 
     // Protected Data
 
-        //- Input file name
-        fileName inputFileName_;
+        //- Input file names
+        List<fileName> inputFileNames_;
+
+        //- Name of pressure field
+        word pName_;
 
         //- Index of pressure field in reader field list
         label pIndex_;
@@ -138,17 +141,20 @@ protected:
         //  result in a very large number of output files (1 per frequency)
         label fftWriteInterval_;
 
+        //- Reader type
+        word readerType_;
+
         //- Pointer to the surface reader
         mutable autoPtr<surfaceReader> readerPtr_;
 
         //- Pointer to the surface writer
-        autoPtr<surfaceWriter> writerPtr_;
+        mutable autoPtr<surfaceWriter> writerPtr_;
 
 
     // Protected Member Functions
 
         //- Initialise
-        void initialise(const dictionary& dict);
+        void initialise(const fileName& fName);
 
         //- Read surface data
         void readSurfaceData
@@ -183,13 +189,16 @@ public:
     TypeName("surfaceNoise");
 
     //- Constructor
-    surfaceNoise(const dictionary& dict);
+    surfaceNoise(const dictionary& dict, const bool readFields = true);
 
     //- Destructor
     virtual ~surfaceNoise();
 
 
     // Public Member Functions
+
+        //- Read from dictionary
+        virtual bool read(const dictionary& dict);
 
         //- Calculate
         virtual void calculate();

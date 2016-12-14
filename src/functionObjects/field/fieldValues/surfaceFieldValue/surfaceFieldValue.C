@@ -64,7 +64,7 @@ template<>
 const char* Foam::NamedEnum
 <
     Foam::functionObjects::fieldValues::surfaceFieldValue::operationType,
-    15
+    16
 >::names[] =
 {
     "none",
@@ -77,6 +77,7 @@ const char* Foam::NamedEnum
     "areaAverage",
     "weightedAreaAverage",
     "areaIntegrate",
+    "weightedAreaIntegrate",
     "min",
     "max",
     "CoV",
@@ -93,11 +94,11 @@ const Foam::NamedEnum
 const Foam::NamedEnum
 <
     Foam::functionObjects::fieldValues::surfaceFieldValue::operationType,
-    15
+    16
 > Foam::functionObjects::fieldValues::surfaceFieldValue::operationTypeNames_;
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::functionObjects::fieldValues::surfaceFieldValue::setFaceZoneFaces()
 {

@@ -72,9 +72,12 @@ protected:
 
     // Protected member functions
 
-        virtual bool calc();
+        virtual bool calc() = 0;
 
         void setResultName(const word& typeName, const word& defaultArg);
+
+        template<class Type>
+        bool foundObject(const word& name);
 
 
 private:
@@ -131,6 +134,12 @@ public:
 
 } // End namespace functionObjects
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "fieldExpressionTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

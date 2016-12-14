@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,6 +56,7 @@ Description
 #include "attachPolyTopoChanger.H"
 #include "regionSide.H"
 #include "primitiveFacePatch.H"
+#include "processorMeshes.H"
 
 using namespace Foam;
 
@@ -287,6 +288,9 @@ int main(int argc, char *argv[])
             << "Failed writing polyMesh."
             << exit(FatalError);
     }
+    topoSet::removeFiles(mesh);
+    processorMeshes::removeFiles(mesh);
+
 
     Info<< nl << "End" << nl << endl;
 

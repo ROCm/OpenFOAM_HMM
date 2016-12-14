@@ -31,6 +31,7 @@ License
 #include "volPointInterpolation.H"
 #include "PatchTools.H"
 #include "mapPolyMesh.H"
+#include "sampledTriSurfaceMesh.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -79,6 +80,37 @@ void Foam::sampledSurfaces::writeGeometry() const
         else if (s.faces().size())
         {
             formatter_->write(outputDir, s.name(), s);
+        }
+    }
+}
+
+
+void Foam::sampledSurfaces::writeOriginalIds()
+{
+    const word fieldName = "Ids";
+    const fileName outputDir = outputPath_/time_.timeName();
+
+    forAll(*this, surfI)
+    {
+        const sampledSurface& s = operator[](surfI);
+
+        if (isA<sampledTriSurfaceMesh>(s))
+        {
+            const sampledTriSurfaceMesh& surf =
+                dynamicCast<const sampledTriSurfaceMesh&>(s);
+
+            if (surf.keepIds())
+            {
+                const labelList& idLst = surf.originalIds();
+
+                Field<scalar> ids(idLst.size());
+                forAll(idLst, i)
+                {
+                    ids[i] = idLst[i];
+                }
+
+                writeSurface(ids, surfI, fieldName, outputDir);
+            }
         }
     }
 }

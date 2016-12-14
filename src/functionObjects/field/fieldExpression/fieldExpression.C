@@ -39,13 +39,6 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-bool Foam::functionObjects::fieldExpression::calc()
-{
-    NotImplemented;
-    return false;
-}
-
-
 void Foam::functionObjects::fieldExpression::setResultName
 (
     const word& typeName,
@@ -122,7 +115,7 @@ bool Foam::functionObjects::fieldExpression::execute()
     {
         Warning
             << "    functionObjects::" << type() << " " << name()
-            << " cannot find required field " << fieldName_ << endl;
+            << " failed to execute." << endl;
 
         // Clear the result field from the objectRegistry if present
         clear();

@@ -205,7 +205,6 @@ private:
 
     // Private Member Functions
 
-
         //- Disallow default bitwise copy construct
         effectivenessHeatExchangerSource
         (

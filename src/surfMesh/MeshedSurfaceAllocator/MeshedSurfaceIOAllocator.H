@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,7 +106,20 @@ public:
         );
 
 
+    //- Destructor
+    virtual ~MeshedSurfaceIOAllocator();
+
+
     // Member Functions
+
+        // Database
+
+            //- Set the instance for mesh files
+            void setInstance(const fileName&);
+
+            //- Adjust the write option for all components
+            void setWriteOption(IOobject::writeOption);
+
 
         // Access
 
@@ -177,6 +190,18 @@ public:
                 const Xfer<faceList>& faces,
                 const Xfer<surfZoneList>& zones
             );
+
+
+        // Writing
+
+            //- Write using given format, version and compression
+            virtual bool writeObject
+            (
+                IOstream::streamFormat,
+                IOstream::versionNumber,
+                IOstream::compressionType
+            ) const;
+
 };
 
 

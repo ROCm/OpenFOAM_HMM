@@ -49,41 +49,25 @@ const Foam::NamedEnum<Foam::ensightCells::elemType, 5>
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline Foam::label Foam::ensightCells::offset
-(
-    const enum elemType what,
-    const label i
-) const
-{
-    label n = i;
-    for (label typeI = 0; typeI < label(what); ++typeI)
-    {
-        n += sizes_[typeI];
-    }
-
-    return n;
-}
-
-
-void Foam::ensightCells::resize()
+void Foam::ensightCells::resizeAll()
 {
     // overall required size
     label n = 0;
-    forAll(sizes_, typeI)
+    forAll(sizes_, typei)
     {
-        n += sizes_[typeI];
+        n += sizes_[typei];
     }
     address_.setSize(n, Zero);
 
     // assign corresponding sub-lists
     n = 0;
-    forAll(sizes_, typeI)
+    forAll(sizes_, typei)
     {
-        deleteDemandDrivenData(lists_[typeI]);
+        deleteDemandDrivenData(lists_[typei]);
 
-        lists_[typeI] = new SubList<label>(address_, sizes_[typeI], n);
+        lists_[typei] = new SubList<label>(address_, sizes_[typei], n);
 
-        n += sizes_[typeI];
+        n += sizes_[typei];
     }
 }
 
@@ -98,12 +82,12 @@ Foam::ensightCells::ensightCells(const label partIndex)
     lists_()
 {
     // Ensure sub-lists are properly initialized to nullptr
-    forAll(lists_, typeI)
+    forAll(lists_, typei)
     {
-        lists_[typeI] = nullptr;
+        lists_[typei] = nullptr;
     }
 
-    resize();   // adjust allocation
+    resizeAll(); // adjust allocation
 }
 
 
@@ -115,9 +99,9 @@ Foam::ensightCells::ensightCells(const ensightCells& obj)
     lists_()
 {
     // Ensure sub-lists are properly initialized to nullptr
-    forAll(lists_, typeI)
+    forAll(lists_, typei)
     {
-        lists_[typeI] = nullptr;
+        lists_[typei] = nullptr;
     }
 
     // Total (reduced) sizes
@@ -126,7 +110,7 @@ Foam::ensightCells::ensightCells(const ensightCells& obj)
     // Local sizes
     this->sizes_ = obj.sizes();
 
-    resize();   // adjust allocation
+    resizeAll(); // adjust allocation
 
     // Restore total (reduced) sizes
     this->sizes_ = totSizes;
@@ -137,9 +121,9 @@ Foam::ensightCells::ensightCells(const ensightCells& obj)
 
 Foam::ensightCells::~ensightCells()
 {
-    forAll(lists_, typeI)
+    forAll(lists_, typei)
     {
-        deleteDemandDrivenData(lists_[typeI]);
+        deleteDemandDrivenData(lists_[typei]);
     }
     address_.clear();
 }
@@ -150,21 +134,33 @@ Foam::ensightCells::~ensightCells()
 Foam::FixedList<Foam::label, 5> Foam::ensightCells::sizes() const
 {
     FixedList<label, 5> count;
-    forAll(lists_, typeI)
+    forAll(lists_, typei)
     {
-        count[typeI] = lists_[typeI]->size();
+        count[typei] = lists_[typei]->size();
     }
 
     return count;
 }
 
 
+Foam::label Foam::ensightCells::offset(const enum elemType what) const
+{
+    label n = 0;
+    for (label typei = 0; typei < label(what); ++typei)
+    {
+        n += lists_[typei]->size();
+    }
+
+    return n;
+}
+
+
 Foam::label Foam::ensightCells::total() const
 {
     label n = 0;
-    forAll(sizes_, typeI)
+    forAll(sizes_, typei)
     {
-        n += sizes_[typeI];
+        n += sizes_[typei];
     }
     return n;
 }
@@ -173,28 +169,25 @@ Foam::label Foam::ensightCells::total() const
 void Foam::ensightCells::clear()
 {
     sizes_ = Zero;  // reset sizes
-    resize();
+    resizeAll();
 }
 
 
 void Foam::ensightCells::reduce()
 {
-    forAll(sizes_, typeI)
+    forAll(sizes_, typei)
     {
-        sizes_[typeI] = lists_[typeI]->size();
-        Foam::reduce(sizes_[typeI], sumOp<label>());
+        sizes_[typei] = lists_[typei]->size();
+        Foam::reduce(sizes_[typei], sumOp<label>());
     }
 }
 
 
 void Foam::ensightCells::sort()
 {
-    forAll(lists_, typeI)
+    forAll(lists_, typei)
     {
-        if (lists_[typeI])
-        {
-            Foam::sort(*(lists_[typeI]));
-        }
+        Foam::sort(*(lists_[typei]));
     }
 }
 
@@ -220,9 +213,9 @@ void Foam::ensightCells::classify
     // Can avoid double looping, but only at the expense of allocation
 
     sizes_ = Zero;  // reset sizes
-    for (label listI = 0; listI < sz; ++listI)
+    for (label listi = 0; listi < sz; ++listi)
     {
-        const label id = indirect ? addressing[listI] : listI;
+        const label id = indirect ? addressing[listi] : listi;
         const cellModel& model = shapes[id].model();
 
         enum elemType what = NFACED;
@@ -246,13 +239,13 @@ void Foam::ensightCells::classify
         sizes_[what]++;
     }
 
-    resize();       // adjust allocation
+    resizeAll();    // adjust allocation
     sizes_ = Zero;  // reset sizes
 
     // Assign cell-id per shape type
-    for (label listI = 0; listI < sz; ++listI)
+    for (label listi = 0; listi < sz; ++listi)
     {
-        const label id = indirect ? addressing[listI] : listI;
+        const label id = indirect ? addressing[listi] : listi;
         const cellModel& model = shapes[id].model();
 
         enum elemType what = NFACED;
@@ -276,12 +269,6 @@ void Foam::ensightCells::classify
         // eg, the processor local cellId
         lists_[what]->operator[](sizes_[what]++) = id;
     }
-}
-
-
-Foam::label Foam::ensightCells::offset(const enum elemType what) const
-{
-    return offset(what, 0);
 }
 
 

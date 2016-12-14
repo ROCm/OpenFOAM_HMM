@@ -62,6 +62,15 @@ OptimisationSwitches
     floatTransfer   0;
     nProcsSimpleSum 0;
 
+    // Optional max size (bytes) for unstructured data exchanges. In some
+    // phases of OpenFOAM it can send over very large data chunks
+    // (e.g. in parallel load balancing) and some Pstream implementations have
+    // problems with this. Setting this variable > 0 indicates that the
+    // data exchange needs to be done in multiple passes, each of maxCommsSize.
+    // This is not switched on by default since it requires an additional
+    // global reduction, even if multi-pass is not needed)
+    maxCommsSize    0;
+
     // Force dumping (at next timestep) upon signal (-1 to disable)
     writeNowSignal              -1; // 10;
 
@@ -888,7 +897,6 @@ DebugSwitches
     wallHeatTransfer    0;
     wallLayerCells      0;
     wallModel           0;
-    warnUnboundedGauss  1;
     waveTransmissive    0;
     wedge               0;
     weighted            0;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -567,6 +567,9 @@ public:
 
             //- Force writing refinement+history to polyMesh directory.
             bool write() const;
+
+            //- Helper: remove all relevant files from mesh instance
+            static void removeFiles(const polyMesh&);
 
 };
 

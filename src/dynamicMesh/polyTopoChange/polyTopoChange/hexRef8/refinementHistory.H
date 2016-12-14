@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,7 +87,7 @@ namespace Foam
 // Forward declaration of classes
 class mapPolyMesh;
 class mapDistributePolyMesh;
-
+class polyMesh;
 
 // Forward declaration of friend functions and operators
 
@@ -399,6 +399,10 @@ public:
                 const List<labelPair>& explicitConnections,
                 labelList& decomposition
             ) const;
+
+
+        //- Helper: remove all sets files from mesh instance
+        static void removeFiles(const polyMesh&);
 
 
     // IOstream Operators

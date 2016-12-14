@@ -89,7 +89,8 @@ private:
         //- Linear list of face-flips
         boolList flipMap_;
 
-        //- List of global sizes for each element type
+        //- List of global sizes for each element type.
+        //  Used temporarily for local sizes when building the element lists.
         FixedList<label, 3> sizes_;
 
         //- SubLists of ids for each element type.
@@ -102,14 +103,11 @@ private:
         //- Simple classifier
         inline static elemType whatType(const face&);
 
-        //- Low-level addition routine
+        //- Low-level internal addition routine
         inline void add(const face&, const label id, const bool flip = false);
 
-        //- Low-level offset routine
-        inline label offset(const enum elemType what, const label i) const;
-
-        //- Use current sizes to redimension the element lists
-        void resize();
+        //- Use temporarily stored sizes to redimension the element lists
+        void resizeAll();
 
         //- Disallow default bitwise assignment
         void operator=(const ensightFaces&) = delete;
@@ -132,7 +130,7 @@ public:
 
     // Member Functions
 
-    // Access
+      // Access
 
         //- The index in a list.
         inline label index() const;
@@ -151,30 +149,27 @@ public:
         //  This value is only meaningful after a reduce operation.
         label total() const;
 
+        //- The global numbers per element type.
+        //  This value is only meaningful after a reduce operation.
+        inline const FixedList<label, 3>& totals() const;
 
         //- The processor local sizes per element type.
         FixedList<label, 3> sizes() const;
 
-        //- The global numbers per element type.
-        //  This value is only meaningful after a reduce operation.
-        const FixedList<label, 3>& totals() const;
-
+        //- Processor local starting offset of element type.
+        label offset(const enum elemType what) const;
 
         //- Return the (local) face ids of the specified element type
         inline const labelUList& faceIds(const enum elemType) const;
 
-        //- Return the face ids of all elements
+        //- Return the processor local face ids of all elements
         inline const labelUList& faceIds() const;
 
-        //- Return the flip-map of all elements
+        //- Return the processor local flip-map of all elements
         inline const boolList& flipMap() const;
 
 
-        //- Starting offset of element type.
-        label offset(const enum elemType what) const;
-
-
-    // Edit
+      // Edit
 
         //- Classify the face types, set element list.
         void classify(const faceList& faces);
@@ -208,7 +203,6 @@ public:
 
         //- Return element from linear-list.
         inline label operator[](const label i) const;
-
 };
 
 

@@ -43,25 +43,27 @@ namespace blockEdges
 
 Foam::blockEdges::bezier::bezier
 (
-    const pointField& ps,
+    const pointField& points,
     const label start,
     const label end,
     const pointField& control
 )
 :
-    blockEdge(ps, start, end),
+    blockEdge(points, start, end),
     control_(control)
 {}
 
 
 Foam::blockEdges::bezier::bezier
 (
+    const dictionary& dict,
+    const label index,
     const searchableSurfaces& geometry,
     const pointField& points,
     Istream& is
 )
 :
-    blockEdge(points, is),
+    blockEdge(dict, index, points, is),
     control_(appendEndPoints(points, start_, end_, pointField(is)))
 {}
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -141,6 +141,7 @@ Notes:
 #include "fvMeshTools.H"
 #include "OBJstream.H"
 #include "PatchTools.H"
+#include "processorMeshes.H"
 
 using namespace Foam;
 
@@ -2646,6 +2647,8 @@ int main(int argc, char *argv[])
             << " at location " << regionMesh.facesInstance()
             << exit(FatalError);
     }
+    topoSet::removeFiles(regionMesh);
+    processorMeshes::removeFiles(regionMesh);
 
 
     // See if we need to extrude coordinates as well
@@ -2847,6 +2850,8 @@ int main(int argc, char *argv[])
                 << " at location " << mesh.facesInstance()
                 << exit(FatalError);
         }
+        topoSet::removeFiles(mesh);
+        processorMeshes::removeFiles(mesh);
     }
 
     Info << "End\n" << endl;

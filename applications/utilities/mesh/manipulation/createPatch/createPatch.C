@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,6 +52,7 @@ Description
 #include "polyTopoChange.H"
 #include "polyModifyFace.H"
 #include "wordReList.H"
+#include "processorMeshes.H"
 
 using namespace Foam;
 
@@ -900,6 +901,8 @@ int main(int argc, char *argv[])
     // Write resulting mesh
     Info<< "Writing repatched mesh to " << runTime.timeName() << nl << endl;
     mesh.write();
+    topoSet::removeFiles(mesh);
+    processorMeshes::removeFiles(mesh);
 
     Info<< "End\n" << endl;
 

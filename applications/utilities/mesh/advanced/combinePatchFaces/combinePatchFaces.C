@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,6 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "PstreamReduceOps.H"
 #include "argList.H"
 #include "Time.H"
 #include "polyTopoChange.H"
@@ -60,6 +59,9 @@ Description
 #include "mapPolyMesh.H"
 #include "unitConversion.H"
 #include "motionSmoother.H"
+#include "topoSet.H"
+#include "processorMeshes.H"
+#include "PstreamReduceOps.H"
 
 using namespace Foam;
 
@@ -450,6 +452,8 @@ int main(int argc, char *argv[])
         Info<< "Writing morphed mesh to time " << runTime.timeName() << endl;
 
         mesh.write();
+        topoSet::removeFiles(mesh);
+        processorMeshes::removeFiles(mesh);
     }
     else
     {

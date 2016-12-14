@@ -49,9 +49,7 @@ void Foam::sampledSurfaces::writeSurface
         gatheredValues[Pstream::myProcNo()] = values;
         Pstream::gatherList(gatheredValues);
 
-
         fileName sampleFile;
-
         if (Pstream::master())
         {
             // Combine values into single field
@@ -181,24 +179,21 @@ void Foam::sampledSurfaces::sampleAndWrite
 template<class GeoField>
 void Foam::sampledSurfaces::sampleAndWrite(const IOobjectList& objects)
 {
-    wordList names;
+    wordList fieldNames;
     if (loadFromFiles_)
     {
-        IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
-        names = fieldObjects.names();
+        fieldNames = objects.sortedNames(GeoField::typeName, fieldSelection_);
     }
     else
     {
-        names = mesh_.thisDb().names<GeoField>();
+        fieldNames = mesh_.thisDb().sortedNames<GeoField>(fieldSelection_);
+
+        writeOriginalIds();
     }
 
-    labelList nameIDs(findStrings(fieldSelection_, names));
-
-    wordHashSet fieldNames(wordList(names, nameIDs));
-
-    forAllConstIter(wordHashSet, fieldNames, iter)
+    forAll(fieldNames, fieldi)
     {
-        const word& fieldName = iter.key();
+        const word& fieldName = fieldNames[fieldi];
 
         if ((Pstream::master()) && verbose_)
         {

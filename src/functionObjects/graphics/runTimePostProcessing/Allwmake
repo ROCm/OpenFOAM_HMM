@@ -4,37 +4,58 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Source the wmake functions
 . $WM_DIR/scripts/wmakeFunctions
 
-# The source directory
-sourceDir=$PWD
-
-# Where are any generated files stored?
-findObjectDir $sourceDir
-depDir="$objectsDir"
+# Ensure CMake gets the correct C/C++ compilers
+[ -n "$WM_CC" ]  && export CC="$WM_CC"
+[ -n "$WM_CXX" ] && export CXX="$WM_CXX"
 
 echo
 echo "======================================================================"
 echo "${PWD##*/} : $PWD"
 echo
 
+
+# CMake into objectsDir,
+# with an additional attempt if (possibly incorrect) CMakeCache.txt existed
+doCmake()
+{
+    local sourceDir="$1"
+
+    findObjectDir $sourceDir # Where are generated files stored?
+    test -f "$objectsDir/CMakeCache.txt"
+    retry=$? # CMakeCache.txt exists, but sources may have moved
+
+    mkdir -p $objectsDir && \
+    (
+        cd $objectsDir || exit 1
+
+        cmake $sourceDir || {
+            if [ $retry -eq 0 ]
+            then
+                echo "Removing CMakeCache.txt and attempt again"
+                rm -f CMakeCache.txt
+                cmake $sourceDir
+            else
+                exit 1
+            fi
+        } && make
+    )
+}
+
+
 if [ -d "$VTK_DIR" -o -d "$ParaView_DIR" ]
 then
-    # ensure CMake gets the correct C/C++ compilers
-    [ -n "$WM_CC" ]  && export CC="$WM_CC"
-    [ -n "$WM_CXX" ] && export CXX="$WM_CXX"
-
-    if type cmake > /dev/null 2>&1
+    if [ "$targetType" != objects ]
     then
-    (
-        mkdir -p $depDir \
-        && cd $depDir \
-        && cmake $sourceDir \
-        && make
-    ) || {
-        echo
-        echo "WARNING: incomplete build of VTK-based post-processing"
-    }
-    else
-        echo "WARNING: skipped - needs cmake"
+        if type cmake > /dev/null 2>&1
+        then
+            doCmake $PWD || {
+                echo
+                echo "    WARNING: incomplete build of VTK-based post-processing"
+                echo
+            }
+        else
+            echo "WARNING: skipped - needs cmake"
+        fi
     fi
 else
     echo "WARNING: skipped - needs a VTK or a ParaView installation"
@@ -45,4 +66,4 @@ fi
 echo "======================================================================"
 echo
 
-# ----------------------------------------------------------------- end-of-file
+# -----------------------------------------------------------------------------

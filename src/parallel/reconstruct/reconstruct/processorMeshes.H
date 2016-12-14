@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,6 +89,10 @@ class processorMeshes
 
 public:
 
+    //- Runtime type information
+    ClassName("processorMeshes");
+
+
     // Constructors
 
         //- Construct from components
@@ -133,7 +137,8 @@ public:
             return boundaryProcAddressing_;
         }
 
-
+        //- Helper: remove all procAddressing files from mesh instance
+        static void removeFiles(const polyMesh& mesh);
 };
 
 

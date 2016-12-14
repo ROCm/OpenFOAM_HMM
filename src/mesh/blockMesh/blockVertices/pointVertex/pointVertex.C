@@ -42,6 +42,8 @@ namespace blockVertices
 
 Foam::blockVertices::pointVertex::pointVertex
 (
+    const dictionary&,
+    const label index,
     const searchableSurfaces& geometry,
     Istream& is
 )

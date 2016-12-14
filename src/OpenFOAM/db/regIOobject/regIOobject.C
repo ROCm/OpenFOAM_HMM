@@ -35,14 +35,14 @@ namespace Foam
     defineTypeNameAndDebug(regIOobject, 0);
 }
 
-int Foam::regIOobject::fileModificationSkew
+float Foam::regIOobject::fileModificationSkew
 (
-    Foam::debug::optimisationSwitch("fileModificationSkew", 30)
+    Foam::debug::floatOptimisationSwitch("fileModificationSkew", 30)
 );
 registerOptSwitch
 (
     "fileModificationSkew",
-    int,
+    float,
     Foam::regIOobject::fileModificationSkew
 );
 

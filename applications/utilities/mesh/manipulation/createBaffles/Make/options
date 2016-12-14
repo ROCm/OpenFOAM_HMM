@@ -2,10 +2,12 @@ EXE_INC = \
     -IfaceSelection \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
+    -I$(LIB_SRC)/parallel/reconstruct/reconstruct/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude
 
 EXE_LIBS = \
     -ldynamicMesh \
     -lmeshTools \
     -lfiniteVolume \
+    -lreconstruct \
     -lgenericPatchFields

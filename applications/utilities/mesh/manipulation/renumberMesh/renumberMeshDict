@@ -34,9 +34,6 @@ sortCoupledFaceCells false;
 // Optional entry: sort points into internal and boundary points
 //orderPoints false;
 
-// Optional: suppress renumbering cellSets,faceSets,pointSets
-//renumberSets false;
-
 
 method          CuthillMcKee;
 //method          Sloan;

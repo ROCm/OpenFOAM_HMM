@@ -20,7 +20,6 @@ then
     export LINK_FLAGS="${LINK_FLAGS} -lzoltanRenumber -L${ZOLTAN_ARCH_PATH}/lib -lzoltan"
 fi
 
-set -x
 wmake $targetType
 
 #------------------------------------------------------------------------------

@@ -11,7 +11,6 @@ cd ${0%/*} || exit 1    # Run from this directory
 . $WM_PROJECT_DIR/etc/config.sh/functions
 _foamSource $($WM_PROJECT_DIR/bin/foamEtcFile config.sh/ccmio)
 
-set -x
 
 # Build libccmio (.a|.so)
 $WM_THIRD_PARTY_DIR/makeCCMIO lib # libso

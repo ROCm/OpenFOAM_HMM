@@ -40,7 +40,7 @@ namespace functionObjects
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::functionObjects::fieldAverage::resetFields()
 {
@@ -302,17 +302,39 @@ bool Foam::functionObjects::fieldAverage::read(const dictionary& dict)
     dict.readIfPresent("periodicRestart", periodicRestart_);
     dict.lookup("fields") >> faItems_;
 
+    const scalar currentTime = obr().time().value();
+
     if (periodicRestart_)
     {
         dict.lookup("restartPeriod") >> restartPeriod_;
-        Info<< "    Restart period " << restartPeriod_
-            << nl << endl;
+
+        if (restartPeriod_ > 0)
+        {
+            // Determine the appropriate interval for the next restart
+            periodIndex_ = 1;
+            while (currentTime > restartPeriod_*periodIndex_)
+            {
+                ++periodIndex_;
+            }
+
+            Info<< "    Restart period " << restartPeriod_
+                << " - next restart at " << (restartPeriod_*periodIndex_)
+                << nl << endl;
+        }
+        else
+        {
+            periodicRestart_ = false;
+
+            Info<< "    Restart period " << restartPeriod_
+                << " - ignored"
+                << nl << endl;
+        }
     }
 
     restartTime_ = GREAT;
     if (dict.readIfPresent("restartTime", restartTime_))
     {
-        if (restartTime_ < obr_.time().value())
+        if (currentTime > restartTime_)
         {
             // The restart time is already in the past - ignore
             restartTime_ = GREAT;

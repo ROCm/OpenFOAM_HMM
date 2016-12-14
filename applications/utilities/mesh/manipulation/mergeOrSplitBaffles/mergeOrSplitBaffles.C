@@ -79,6 +79,7 @@ Note
 #include "ReadFields.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "processorMeshes.H"
 
 using namespace Foam;
 
@@ -537,6 +538,8 @@ int main(int argc, char *argv[])
         Info<< "Writing mesh to time " << runTime.timeName() << endl;
         mesh.write();
 
+        topoSet::removeFiles(mesh);
+        processorMeshes::removeFiles(mesh);
 
         // Dump duplicated points (if any)
         const labelList& pointMap = map().pointMap();

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::surfMesh::setInstance(const fileName& inst)
+void Foam::surfMesh::setInstance(const fileName& inst, IOobject::writeOption w)
 {
     if (debug)
     {
@@ -36,15 +36,16 @@ void Foam::surfMesh::setInstance(const fileName& inst)
     }
 
     instance() = inst;
+    Allocator::setInstance(inst);
 
-    storedIOPoints().writeOpt() = IOobject::AUTO_WRITE;
-    storedIOPoints().instance() = inst;
+    setWriteOption(w);
+}
 
-    storedIOFaces().writeOpt() = IOobject::AUTO_WRITE;
-    storedIOFaces().instance() = inst;
 
-    storedIOZones().writeOpt() = IOobject::AUTO_WRITE;
-    storedIOZones().instance() = inst;
+void Foam::surfMesh::setWriteOption(IOobject::writeOption w)
+{
+    writeOpt() = w;
+    Allocator::setWriteOption(w);
 }
 
 
@@ -196,6 +197,17 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
     }
 
     return surfMesh::UNCHANGED;
+}
+
+
+bool Foam::surfMesh::writeObject
+(
+    IOstream::streamFormat fmt,
+    IOstream::versionNumber ver,
+    IOstream::compressionType cmp
+) const
+{
+    return Allocator::writeObject(fmt, ver, cmp);
 }
 
 

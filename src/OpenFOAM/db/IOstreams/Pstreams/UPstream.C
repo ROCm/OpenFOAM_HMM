@@ -464,4 +464,16 @@ registerOptSwitch
 );
 
 
+int Foam::UPstream::maxCommsSize
+(
+    Foam::debug::optimisationSwitch("maxCommsSize", 0)
+);
+registerOptSwitch
+(
+    "maxCommsSize",
+    int,
+    Foam::UPstream::maxCommsSize
+);
+
+
 // ************************************************************************* //

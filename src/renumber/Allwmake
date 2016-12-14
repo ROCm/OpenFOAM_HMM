@@ -16,8 +16,6 @@ targetType=libso
 #    echo
 #fi
 
-set -x
-
 wmake $targetType renumberMethods
 
 if [ -f "$BOOST_ARCH_PATH/include/boost/version.hpp" ] || \

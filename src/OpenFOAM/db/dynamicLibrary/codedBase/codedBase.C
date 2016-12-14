@@ -28,6 +28,7 @@ License
 #include "dynamicCode.H"
 #include "dynamicCodeContext.H"
 #include "dlLibraryTable.H"
+#include "Pstream.H"
 #include "PstreamReduceOps.H"
 #include "OSspecific.H"
 #include "Ostream.H"
@@ -316,6 +317,8 @@ void Foam::codedBase::createLibrary
 }
 
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
 void Foam::codedBase::updateLibrary
 (
     const word& name
@@ -386,9 +389,6 @@ Foam::codedBase::codedBase()
 
 Foam::codedBase::~codedBase()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

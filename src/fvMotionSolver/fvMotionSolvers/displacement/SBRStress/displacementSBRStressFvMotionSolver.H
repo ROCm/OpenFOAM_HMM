@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,7 @@ SourceFiles
 #define displacementSBRStressFvMotionSolver_H
 
 #include "displacementMotionSolver.H"
-#include "fvMotionSolverCore.H"
+#include "fvMotionSolver.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +58,7 @@ class motionDiffusivity;
 class displacementSBRStressFvMotionSolver
 :
     public displacementMotionSolver,
-    public fvMotionSolverCore
+    public fvMotionSolver
 {
     // Private data
 

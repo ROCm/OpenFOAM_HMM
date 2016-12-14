@@ -113,9 +113,6 @@ protected:
         //- Build primitive patch
         void calcFaceZonePatch() const;
 
-        //- Return map of local face indices
-        const Map<label>& faceLookupMap() const;
-
         //- Calculate master and slave face layer
         void calcCellLayers() const;
 

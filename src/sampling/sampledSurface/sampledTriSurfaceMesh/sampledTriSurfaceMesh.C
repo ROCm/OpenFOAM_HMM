@@ -296,6 +296,11 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
     }
 
 
+    if (keepIds_)
+    {
+        originalIds_ = faceMap;
+    }
+
     // Subset cellOrFaceLabels
     cellOrFaceLabels = UIndirectList<label>(cellOrFaceLabels, faceMap)();
 
@@ -545,6 +550,8 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
     ),
     sampleSource_(sampleSource),
     needsUpdate_(true),
+    keepIds_(false),
+    originalIds_(),
     sampleElements_(0),
     samplePoints_(0)
 {}
@@ -573,6 +580,8 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
     ),
     sampleSource_(samplingSourceNames_[dict.lookup("source")]),
     needsUpdate_(true),
+    keepIds_(dict.lookupOrDefault<Switch>("keepIds", false)),
+    originalIds_(),
     sampleElements_(0),
     samplePoints_(0)
 {}
@@ -594,7 +603,7 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
             name,
             mesh.time().constant(), // instance
             "triSurface",           // local
-            mesh,                  // registry
+            mesh,                   // registry
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false
@@ -603,6 +612,8 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
     ),
     sampleSource_(samplingSourceNames_[sampleSourceName]),
     needsUpdate_(true),
+    keepIds_(false),
+    originalIds_(),
     sampleElements_(0),
     samplePoints_(0)
 {}
@@ -633,6 +644,7 @@ bool Foam::sampledTriSurfaceMesh::expire()
     sampledSurface::clearGeom();
     MeshStorage::clear();
 
+    originalIds_.clear();
     boundaryTreePtr_.clear();
     sampleElements_.clear();
     samplePoints_.clear();

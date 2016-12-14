@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,9 +63,6 @@ class cubeRootVolDelta
         cubeRootVolDelta(const cubeRootVolDelta&);
         void operator=(const cubeRootVolDelta&);
 
-        // Calculate the delta values
-        void calcDelta();
-
 
 public:
 
@@ -90,6 +87,10 @@ public:
 
 
     // Member Functions
+
+
+        //- Calculate the delta values
+        void calcDelta();
 
         //- Read the LESdelta dictionary
         virtual void read(const dictionary&);

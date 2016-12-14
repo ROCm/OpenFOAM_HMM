@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,8 +117,11 @@ public:
         //- Construct from dictionary lookup with a given name and dimensions
         dimensioned(const word&, const dimensionSet&, const dictionary&);
 
-        //- Null constructor
+        //- Null constructor - a dimensionless Zero, named "undefined"
         dimensioned();
+
+        //- A dimensioned Zero, named "0"
+        explicit dimensioned(const dimensionSet&);
 
 
     // Static member functions

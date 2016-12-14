@@ -125,10 +125,13 @@ template<class CombThermoType, class ThermoType>
 Foam::combustionModels::diffusionMulticomponent<CombThermoType, ThermoType>::
 diffusionMulticomponent
 (
-    const word& modelType, const fvMesh& mesh, const word& phaseName
+    const word& modelType,
+    const fvMesh& mesh,
+    const word& combustionProperties,
+    const word& phaseName
 )
 :
-    CombThermoType(modelType, mesh, phaseName),
+    CombThermoType(modelType, mesh, combustionProperties, phaseName),
     reactions_
     (
         dynamic_cast<const reactingMixture<ThermoType>&>(this->thermo())

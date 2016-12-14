@@ -77,7 +77,8 @@ Foam::functionObjects::timeControl::timeControl
     ),
     executeControl_(t, dict, "execute"),
     writeControl_(t, dict, "write"),
-    foPtr_(functionObject::New(name, t, dict_))
+    foPtr_(functionObject::New(name, t, dict_)),
+    executeTimeIndex_(-1)
 {
     readControls();
 }
@@ -89,6 +90,7 @@ bool Foam::functionObjects::timeControl::execute()
 {
     if (active() && (postProcess || executeControl_.execute()))
     {
+        executeTimeIndex_ = time_.timeIndex();
         foPtr_->execute();
     }
 
@@ -100,6 +102,13 @@ bool Foam::functionObjects::timeControl::write()
 {
     if (active() && (postProcess || writeControl_.execute()))
     {
+        // Ensure written results reflect the current state
+        if (executeTimeIndex_ != time_.timeIndex())
+        {
+            executeTimeIndex_ = time_.timeIndex();
+            foPtr_->execute();
+        }
+
         foPtr_->write();
     }
 

@@ -29,34 +29,10 @@ addLayers       false;
 // - to 'snap' the mesh boundary to the surface
 geometry
 {
-    bottomAir.stl
+    geom.stl
     {
         type triSurfaceMesh;
-        name bottomAir;
-    }
-
-    topAir.stl
-    {
-        type triSurfaceMesh;
-        name topAir;
-    }
-
-    leftSolid.stl
-    {
-        type triSurfaceMesh;
-        name leftSolid;
-    }
-
-    rightSolid.stl
-    {
-        type triSurfaceMesh;
-        name rightSolid;
-    }
-
-    heater.stl
-    {
-        type triSurfaceMesh;
-        name heater;
+        name geom;
     }
 };
 
@@ -103,23 +79,7 @@ castellatedMeshControls
     features
     (
         {
-            file "bottomAir.eMesh";
-            level 1;
-        }
-        {
-            file "heater.eMesh";
-            level 1;
-        }
-        {
-            file "leftSolid.eMesh";
-            level 1;
-        }
-        {
-            file "rightSolid.eMesh";
-            level 1;
-        }
-        {
-            file "topAir.eMesh";
+            file "geom.extendedFeatureEdgeMesh";    //"geom.eMesh";
             level 1;
         }
     );
@@ -137,54 +97,10 @@ castellatedMeshControls
 
     refinementSurfaces
     {
-        bottomAir
+        geom
         {
             // Surface-wise min and max refinement level
             level (1 1);
-
-            faceZone bottomAir;
-            cellZone bottomAir;
-            cellZoneInside inside;
-        }
-
-        topAir
-        {
-            // Surface-wise min and max refinement level
-            level (1 1);
-
-            faceZone topAir;
-            cellZone topAir;
-            cellZoneInside inside;
-        }
-
-        heater
-        {
-            // Surface-wise min and max refinement level
-            level (0 0);
-
-            faceZone heater;
-            cellZone heater;
-            cellZoneInside inside;
-        }
-
-        leftSolid
-        {
-            // Surface-wise min and max refinement level
-            level (1 1);
-
-            faceZone leftSolid;
-            cellZone leftSolid;
-            cellZoneInside inside;
-        }
-
-        rightSolid
-        {
-            // Surface-wise min and max refinement level
-            level (1 1);
-
-            faceZone rightSolid;
-            cellZone rightSolid;
-            cellZoneInside inside;
         }
     }
 
@@ -223,7 +139,14 @@ castellatedMeshControls
     // section reachable from the locationInMesh is kept.
     // NOTE: This point should never be on a face, always inside a cell, even
     // after refinement.
-    locationInMesh (0.01 0.01 0.01);
+    locationsInMesh 
+    (
+        (( 0.005 0.005  0.005) heater)
+        (( 0.05  0.005  0.005) rightSolid)
+        ((-0.05  0.005  0.005) leftSolid)
+        ((-0.05  0.015  0.005) topAir)
+        ((-0.05 -0.015  0.005) bottomAir)
+    );
 
 
     // Whether any faceZones (as specified in the refinementSurfaces)

@@ -137,7 +137,7 @@ public:
         );
 
         //- Construct from three points in plane
-        explicit plane
+        plane
         (
             const point& point1,
             const point& point2,

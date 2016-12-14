@@ -42,8 +42,8 @@ outletMappedUniformInletHeatAdditionFvPatchField
     outletPatchName_(),
     phiName_("phi"),
     Q_(0),
-    minTempLimit_(0),
-    maxTempLimit_(5000)
+    TMin_(0),
+    TMax_(5000)
 {}
 
 
@@ -60,8 +60,8 @@ outletMappedUniformInletHeatAdditionFvPatchField
     outletPatchName_(ptf.outletPatchName_),
     phiName_(ptf.phiName_),
     Q_(ptf.Q_),
-    minTempLimit_(ptf.minTempLimit_),
-    maxTempLimit_(ptf.maxTempLimit_)
+    TMin_(ptf.TMin_),
+    TMax_(ptf.TMax_)
 {}
 
 
@@ -77,8 +77,8 @@ outletMappedUniformInletHeatAdditionFvPatchField
     outletPatchName_(dict.lookup("outletPatch")),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     Q_(readScalar(dict.lookup("Q"))),
-    minTempLimit_(dict.lookupOrDefault<scalar>("minTempLimit", 0)),
-    maxTempLimit_(dict.lookupOrDefault<scalar>("maxTempLimit", 5000))
+    TMin_(dict.lookupOrDefault<scalar>("TMin", 0)),
+    TMax_(dict.lookupOrDefault<scalar>("TMax", 5000))
 {}
 
 
@@ -93,8 +93,8 @@ outletMappedUniformInletHeatAdditionFvPatchField
     outletPatchName_(ptf.outletPatchName_),
     phiName_(ptf.phiName_),
     Q_(ptf.Q_),
-    minTempLimit_(ptf.minTempLimit_),
-    maxTempLimit_(ptf.maxTempLimit_)
+    TMin_(ptf.TMin_),
+    TMax_(ptf.TMax_)
 {}
 
 
@@ -110,8 +110,8 @@ outletMappedUniformInletHeatAdditionFvPatchField
     outletPatchName_(ptf.outletPatchName_),
     phiName_(ptf.phiName_),
     Q_(ptf.Q_),
-    minTempLimit_(ptf.minTempLimit_),
-    maxTempLimit_(ptf.maxTempLimit_)
+    TMin_(ptf.TMin_),
+    TMax_(ptf.TMax_)
 {}
 
 
@@ -125,18 +125,15 @@ void Foam::outletMappedUniformInletHeatAdditionFvPatchField::updateCoeffs()
         return;
     }
 
-    const GeometricField<scalar, fvPatchField, volMesh>& f
+    const volScalarField& vsf =
     (
-        dynamic_cast<const GeometricField<scalar, fvPatchField, volMesh>&>
-        (
-            this->internalField()
-        )
+        dynamic_cast<const volScalarField&>(this->internalField())
     );
 
-    const fvPatch& p = this->patch();
+    const fvPatch& fvp = this->patch();
 
     label outletPatchID =
-        p.patch().boundaryMesh().findPatchID(outletPatchName_);
+        fvp.patch().boundaryMesh().findPatchID(outletPatchName_);
 
     if (outletPatchID < 0)
     {
@@ -145,16 +142,13 @@ void Foam::outletMappedUniformInletHeatAdditionFvPatchField::updateCoeffs()
             << abort(FatalError);
     }
 
-    const fvPatch& outletPatch = p.boundaryMesh()[outletPatchID];
+    const fvPatch& outletPatch = fvp.boundaryMesh()[outletPatchID];
 
     const fvPatchField<scalar>& outletPatchField =
-        f.boundaryField()[outletPatchID];
+        vsf.boundaryField()[outletPatchID];
 
     const surfaceScalarField& phi =
-        this->db().lookupObject<surfaceScalarField>
-        (
-            phiName_
-        );
+        db().lookupObject<surfaceScalarField>(phiName_);
 
     const scalarField& outletPatchPhi = phi.boundaryField()[outletPatchID];
     scalar sumOutletPatchPhi = gSum(outletPatchPhi);
@@ -162,27 +156,19 @@ void Foam::outletMappedUniformInletHeatAdditionFvPatchField::updateCoeffs()
     if (sumOutletPatchPhi > SMALL)
     {
         const basicThermo& thermo =
-             this->db().lookupObject<basicThermo>(basicThermo::dictName);
+            db().lookupObject<basicThermo>(basicThermo::dictName);
+
+        const scalarField& pp = thermo.p().boundaryField()[outletPatchID];
+        const scalarField& pT = thermo.T().boundaryField()[outletPatchID];
 
         scalar averageOutletField =
             gSum(outletPatchPhi*outletPatchField)/sumOutletPatchPhi;
 
-        const scalarField Cpf(thermo.Cp()().boundaryField()[outletPatchID]);
+        const scalarField Cpf(thermo.Cp(pp, pT, outletPatchID));
 
         scalar totalPhiCp = gSum(outletPatchPhi)*gAverage(Cpf);
 
-        operator==
-        (
-            min
-            (
-                max
-                (
-                    averageOutletField + Q_/totalPhiCp,
-                    minTempLimit_
-                ),
-                maxTempLimit_
-            )
-        );
+        operator==(min(max(averageOutletField + Q_/totalPhiCp, TMin_), TMax_));
     }
     else
     {
@@ -205,14 +191,10 @@ void Foam::outletMappedUniformInletHeatAdditionFvPatchField::write
     fvPatchScalarField::write(os);
     os.writeKeyword("outletPatch")
         << outletPatchName_ << token::END_STATEMENT << nl;
-
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-
     os.writeKeyword("Q") << Q_ << token::END_STATEMENT << nl;
-    os.writeKeyword("minTempLimit")
-        << minTempLimit_ << token::END_STATEMENT << nl;
-    os.writeKeyword("maxTempLimit")
-        << maxTempLimit_ << token::END_STATEMENT << nl;
+    os.writeKeyword("TMin") << TMin_ << token::END_STATEMENT << nl;
+    os.writeKeyword("TMax") << TMax_ << token::END_STATEMENT << nl;
 
     this->writeEntry("value", os);
 }

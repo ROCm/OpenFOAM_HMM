@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ License
 #include "polyMesh.H"
 #include "Time.H"
 #include "addToRunTimeSelectionTable.H"
+#include "mapDistributePolyMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -225,6 +226,37 @@ label cellSet::maxSize(const polyMesh& mesh) const
 void cellSet::updateMesh(const mapPolyMesh& morphMap)
 {
     updateLabels(morphMap.reverseCellMap());
+}
+
+
+void cellSet::distribute(const mapDistributePolyMesh& map)
+{
+    boolList inSet(map.nOldCells());
+    forAllConstIter(cellSet, *this, iter)
+    {
+        inSet[iter.key()] = true;
+    }
+    map.distributeCellData(inSet);
+
+    // Count
+    label n = 0;
+    forAll(inSet, celli)
+    {
+        if (inSet[celli])
+        {
+            n++;
+        }
+    }
+
+    clear();
+    resize(n);
+    forAll(inSet, celli)
+    {
+        if (inSet[celli])
+        {
+            insert(celli);
+        }
+    }
 }
 
 
