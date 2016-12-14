@@ -48,7 +48,7 @@ Executing $Script is equivalent to
    wmake -all [OPTIONS]
 
 With these additional options:
-   -l | -log
+   -l | -log | -log=name
 
 USAGE
 
@@ -78,7 +78,12 @@ do
             fromWmake=true
             ;;
         -l | -log)
-            optLog=true
+            optLog="log.Allwmake"
+            continue    # Permanently remove arg
+            ;;
+        -log=*)
+            optLog="${arg##*=}"
+            [ -n "$optLog" ] || optLog="log.Allwmake"
             continue    # Permanently remove arg
             ;;
         -q | -queue)
@@ -106,8 +111,8 @@ then
     then
         exec wmake -all $optQueue $*
     else
-        echo "logging wmake -all output to 'log.Allwmake'" 1>&2
-        exec wmake -all $optQueue $* 2>&1 | tee log.Allwmake
+        echo "logging wmake -all output to '$optLog'" 1>&2
+        exec wmake -all $optQueue $* 2>&1 | tee $optLog
     fi
 fi
 
