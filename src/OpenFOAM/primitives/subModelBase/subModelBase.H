@@ -179,6 +179,13 @@ public:
 
             // Model properties
 
+                //- Retrieve dictionary, return true if set
+                bool getModelDict
+                (
+                    const word& entryName,
+                    dictionary& dict
+                ) const;
+
                 //- Retrieve generic property from the sub-model
                 template<class Type>
                 void getModelProperty(const word& entryName, Type& value) const;

@@ -63,10 +63,14 @@ public:
     //- Runtime type information
     TypeName("kinematicCloud");
 
+
     // Constructors
 
         //- Null constructor
         kinematicCloud();
+
+    //- Destructor
+    virtual ~kinematicCloud();
 
 
     // Member functions
@@ -92,26 +96,22 @@ public:
             virtual scalar Dmax() const = 0;
 
 
-            // Fields
+        // Fields
 
-                //- Volume swept rate of parcels per cell
-                virtual const tmp<volScalarField> vDotSweep() const = 0;
+            //- Volume swept rate of parcels per cell
+            virtual const tmp<volScalarField> vDotSweep() const = 0;
 
-                //- Return the particle volume fraction field
-                //  Note: for particles belonging to this cloud only
-                virtual const tmp<volScalarField> theta() const = 0;
+            //- Return the particle volume fraction field
+            //  Note: for particles belonging to this cloud only
+            virtual const tmp<volScalarField> theta() const = 0;
 
-                //- Return the particle mass fraction field
-                //  Note: for particles belonging to this cloud only
-                virtual const tmp<volScalarField> alpha() const = 0;
+            //- Return the particle mass fraction field
+            //  Note: for particles belonging to this cloud only
+            virtual const tmp<volScalarField> alpha() const = 0;
 
-                //- Return the particle effective density field
-                //  Note: for particles belonging to this cloud only
-                virtual const tmp<volScalarField> rhoEff() const = 0;
-
-
-    //- Destructor
-    virtual ~kinematicCloud();
+            //- Return the particle effective density field
+            //  Note: for particles belonging to this cloud only
+            virtual const tmp<volScalarField> rhoEff() const = 0;
 };
 
 

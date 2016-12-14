@@ -69,7 +69,7 @@ Foam::distributionModels::distributionModel::distributionModel
     cachedRandom& rndGen
 )
 :
-    distributionModelDict_(dict.subDict(name + "Distribution")),
+    distributionModelDict_(dict),
     rndGen_(rndGen)
 {}
 

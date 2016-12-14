@@ -208,7 +208,7 @@ template<class ListType>
 label findMin(const ListType&, const label start=0);
 
 
-//- Find first occurence of given element in sorted list and return index,
+//- Find first occurrence of given element in sorted list and return index,
 //  return -1 if not found. Binary search.
 template<class ListType>
 label findSortedIndex

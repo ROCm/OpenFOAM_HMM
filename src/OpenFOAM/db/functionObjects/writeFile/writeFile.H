@@ -148,28 +148,28 @@ public:
     // Member Functions
 
         //- Read
-        void read(const dictionary& dict);
+        virtual bool read(const dictionary& dict);
 
         //- Return access to the file (if only 1)
-        OFstream& file();
+        virtual OFstream& file();
 
         //- Flag to allow writing to file
-        bool writeToFile() const;
+        virtual bool writeToFile() const;
 
         //- Return width of character stream output
-        label charWidth() const;
+        virtual label charWidth() const;
 
         //- Write a commented string to stream
-        void writeCommented(Ostream& os, const string& str) const;
+        virtual void writeCommented(Ostream& os, const string& str) const;
 
         //- Write a tabbed string to stream
-        void writeTabbed(Ostream& os, const string& str) const;
+        virtual void writeTabbed(Ostream& os, const string& str) const;
 
         //- Write a commented header to stream
-        void writeHeader(Ostream& os, const string& str) const;
+        virtual void writeHeader(Ostream& os, const string& str) const;
 
         //- Write the current time to stream
-        void writeTime(Ostream& os) const;
+        virtual void writeTime(Ostream& os) const;
 
         //- Write a (commented) header property and value pair
         template<class Type>

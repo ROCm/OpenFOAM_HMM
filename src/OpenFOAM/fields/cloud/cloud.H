@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,7 @@ SourceFiles
 #define cloud_H
 
 #include "objectRegistry.H"
+#include "IOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -92,12 +93,36 @@ public:
             //- Remap the cells of particles corresponding to the
             //  mesh topology change
             virtual void autoMap(const mapPolyMesh&);
+
+
+        // I-O
+
+            //- Read particle fields from objects in the obr registry
+            //virtual void readObjects(objectRegistry& obr);
+
+            //- Write particle fields as objects into the obr registry
+            virtual void writeObjects(objectRegistry& obr) const;
+
+            //- Helper to construct IOField on a supplied object registry
+            template<class Type>
+            static IOField<Type>& createIOField
+            (
+                const word& fieldName,
+                const label nParticle,
+                objectRegistry& obr
+            );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "cloudTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

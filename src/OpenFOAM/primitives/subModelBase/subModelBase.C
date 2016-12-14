@@ -167,6 +167,34 @@ bool Foam::subModelBase::writeTime() const
 }
 
 
+bool Foam::subModelBase::getModelDict
+(
+    const word& entryName,
+    dictionary& dict
+) const
+{
+    if (properties_.found(baseName_))
+    {
+        const dictionary& baseDict = properties_.subDict(baseName_);
+
+        if (inLine() && baseDict.found(modelName_))
+        {
+            const dictionary& modelDict = baseDict.subDict(modelName_);
+            dict = modelDict.subOrEmptyDict(entryName);
+            return true;
+        }
+        else if (baseDict.found(modelType_))
+        {
+            const dictionary& modelDict = baseDict.subDict(modelType_);
+            dict = modelDict.subOrEmptyDict(entryName);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 void Foam::subModelBase::write(Ostream& os) const
 {
     os  << coeffDict_;

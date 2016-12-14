@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RosinRammler
+    Foam::distributionModels::RosinRammler
 
 Description
     Rosin-Rammler distributionModel
@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef RosinRammler_H
-#define RosinRammler_H
+#ifndef distributionModels_RosinRammler_H
+#define distributionModels_RosinRammler_H
 
 #include "distributionModel.H"
 
