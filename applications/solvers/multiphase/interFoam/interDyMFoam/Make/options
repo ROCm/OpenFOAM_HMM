@@ -24,4 +24,5 @@ EXE_LIBS = \
     -ltopoChangerFvMesh \
     -lmeshTools \
     -lfvOptions \
-    -lsampling
+    -lsampling \
+    -lwaveModels

@@ -70,6 +70,7 @@ lagrangian/Allwmake $targetType $*
 mesh/Allwmake $targetType $*
 renumber/Allwmake $targetType $*
 fvAgglomerationMethods/Allwmake $targetType $*
+wmake $targetType waveModels
 
 wmake $targetType engine
 wmake $targetType fvOptions

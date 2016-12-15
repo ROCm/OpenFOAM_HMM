@@ -23,4 +23,5 @@ EXE_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
     -lfvOptions \
-    -lsampling
+    -lsampling \
+    -lwaveModels
