@@ -25,6 +25,8 @@ License
 
 #include "fluxSummary.H"
 #include "surfaceFields.H"
+#include "surfFields.H"
+#include "surfMesh.H"
 #include "dictionary.H"
 #include "Time.H"
 #include "syncTools.H"
@@ -54,33 +56,59 @@ template<>
 const char* NamedEnum
 <
     functionObjects::fluxSummary::modeType,
-    3
+    5
 >::names[] =
 {
     "faceZone",
     "faceZoneAndDirection",
-    "cellZoneAndDirection"
+    "cellZoneAndDirection",
+    "surface",
+    "surfaceAndDirection"
 };
 }
 
 
-const Foam::NamedEnum<Foam::functionObjects::fluxSummary::modeType, 3>
+const Foam::NamedEnum<Foam::functionObjects::fluxSummary::modeType, 5>
 Foam::functionObjects::fluxSummary::modeTypeNames_;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+bool Foam::functionObjects::fluxSummary::isSurfaceMode() const
+{
+    bool isSurf = false;
+
+    switch (mode_)
+    {
+        case mdSurface:
+        case mdSurfaceAndDirection:
+            isSurf = true;
+            break;
+
+        default:
+            break;
+    }
+
+    return isSurf;
+}
+
+
 Foam::word Foam::functionObjects::fluxSummary::checkFlowType
 (
-    const dimensionSet& dims,
+    const dimensionSet& fieldDims,
     const word& fieldName
 ) const
 {
-    if (dims == dimVolume/dimTime)
+    // Surfaces are multipled by their area, so account for that
+    // in the dimension checking
+    dimensionSet dims =
+        fieldDims * (isSurfaceMode() ? dimTime*dimArea : dimTime);
+
+    if (dims == dimVolume)
     {
         return "volumetric";
     }
-    else if (dims == dimMass/dimTime)
+    else if (dims == dimMass)
     {
         return "mass";
     }
@@ -88,11 +116,81 @@ Foam::word Foam::functionObjects::fluxSummary::checkFlowType
     {
         FatalErrorInFunction
             << "Unsupported flux field " << fieldName << " with dimensions "
-            << dims
+            << fieldDims
             << ".  Expected either mass flow or volumetric flow rate."
             << abort(FatalError);
 
         return Foam::word::null;
+    }
+}
+
+
+void Foam::functionObjects::fluxSummary::initialiseSurface
+(
+    const word& surfName,
+    DynamicList<word>& names,
+    DynamicList<vector>& directions,
+    DynamicList<boolList>& faceFlip
+) const
+{
+    const surfMesh* sPtr = mesh_.lookupObjectPtr<surfMesh>(surfName);
+    if (!sPtr)
+    {
+        FatalErrorInFunction
+            << "Unable to find surface " << surfName
+            << ".  Valid surfaces are: " << mesh_.sortedNames<surfMesh>()
+            << '.'
+            << exit(FatalError);
+    }
+
+    names.append(surfName);
+    directions.append(Zero); // dummy value
+    faceFlip.append(boolList(0)); // no flip-map
+}
+
+
+void Foam::functionObjects::fluxSummary::initialiseSurfaceAndDirection
+(
+    const word& surfName,
+    const vector& dir,
+    DynamicList<word>& names,
+    DynamicList<vector>& directions,
+    DynamicList<boolList>& faceFlip
+) const
+{
+    const surfMesh* sPtr = mesh_.lookupObjectPtr<surfMesh>(surfName);
+    if (!sPtr)
+    {
+        FatalErrorInFunction
+            << "Unable to find surface " << surfName
+            << ".  Valid surfaces are: " << mesh_.sortedNames<surfMesh>()
+            << '.'
+            << exit(FatalError);
+    }
+
+    const surfMesh& s = *sPtr;
+    const vector refDir = dir/(mag(dir) + ROOTVSMALL);
+
+    names.append(surfName);
+    directions.append(refDir);
+    faceFlip.append(boolList(0));
+
+    boolList& flips = faceFlip[faceFlip.size()-1];
+    flips.setSize(s.size(), false);
+
+    forAll(s, i)
+    {
+        // orientation set by comparison with reference direction
+        const vector& n = s.faceNormals()[i];
+
+        if ((n & refDir) > tolerance_)
+        {
+            flips[i] = false;
+        }
+        else
+        {
+            flips[i] = true;
+        }
     }
 }
 
@@ -570,31 +668,120 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
 
 Foam::scalar Foam::functionObjects::fluxSummary::totalArea
 (
-    const label zonei
+    const label idx
 ) const
 {
-    const surfaceScalarField& magSf = mesh_.magSf();
-
-    const labelList& faceIDs = faceID_[zonei];
-    const labelList& facePatchIDs = facePatchID_[zonei];
-
     scalar sumMagSf = 0;
-    forAll(faceIDs, i)
-    {
-        label facei = faceIDs[i];
 
-        if (facePatchIDs[i] == -1)
+    if (isSurfaceMode())
+    {
+        const surfMesh& s = mesh_.lookupObject<surfMesh>(zoneNames_[idx]);
+        sumMagSf = sum(s.magSf());
+    }
+    else
+    {
+        const surfaceScalarField& magSf = mesh_.magSf();
+
+        const labelList& faceIDs = faceID_[idx];
+        const labelList& facePatchIDs = facePatchID_[idx];
+
+        forAll(faceIDs, i)
         {
-            sumMagSf += magSf[facei];
-        }
-        else
-        {
-            label patchi = facePatchIDs[i];
-            sumMagSf += magSf.boundaryField()[patchi][facei];
+            label facei = faceIDs[i];
+
+            if (facePatchIDs[i] == -1)
+            {
+                sumMagSf += magSf[facei];
+            }
+            else
+            {
+                label patchi = facePatchIDs[i];
+                sumMagSf += magSf.boundaryField()[patchi][facei];
+            }
         }
     }
 
     return returnReduce(sumMagSf, sumOp<scalar>());
+}
+
+
+bool Foam::functionObjects::fluxSummary::surfaceModeWrite()
+{
+    if (zoneNames_.size())
+    {
+        const label surfi = 0;
+        const surfMesh& s = mesh_.lookupObject<surfMesh>(zoneNames_[surfi]);
+        const surfVectorField& phi = s.lookupObject<surfVectorField>(phiName_);
+
+        Log << type() << ' ' << name() << ' '
+            << checkFlowType(phi.dimensions(), phi.name()) << " write:" << nl;
+    }
+
+
+    forAll(zoneNames_, surfi)
+    {
+        const surfMesh& s = mesh_.lookupObject<surfMesh>(zoneNames_[surfi]);
+        const surfVectorField& phi = s.lookupObject<surfVectorField>(phiName_);
+
+        checkFlowType(phi.dimensions(), phi.name());
+
+        const boolList& flips = faceFlip_[surfi];
+
+        scalar phiPos = scalar(0);
+        scalar phiNeg = scalar(0);
+
+        tmp<scalarField> tphis = phi & s.Sf();
+        const scalarField& phis = tphis();
+
+        forAll(s, i)
+        {
+            scalar phif = phis[i];
+            if (flips[i])
+            {
+                phif *= -1;
+            }
+
+            if (phif > 0)
+            {
+                phiPos += phif;
+            }
+            else
+            {
+                phiNeg += phif;
+            }
+        }
+
+        reduce(phiPos, sumOp<scalar>());
+        reduce(phiNeg, sumOp<scalar>());
+
+        phiPos *= scaleFactor_;
+        phiNeg *= scaleFactor_;
+
+        scalar netFlux = phiPos + phiNeg;
+        scalar absoluteFlux = phiPos - phiNeg;
+
+        Log << "    surface " << zoneNames_[surfi] << ':' << nl
+            << "        positive : " << phiPos << nl
+            << "        negative : " << phiNeg << nl
+            << "        net      : " << netFlux << nl
+            << "        absolute : " << absoluteFlux
+            << nl << endl;
+
+        if (writeToFile())
+        {
+            filePtrs_[surfi]
+                << time_.value() << token::TAB
+                << phiPos << token::TAB
+                << phiNeg << token::TAB
+                << netFlux << token::TAB
+                << absoluteFlux
+                << endl;
+        }
+    }
+
+    Log << endl;
+
+    return true;
 }
 
 
@@ -708,6 +895,40 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
             }
             break;
         }
+        case mdSurface:
+        {
+            List<word> surfs(dict.lookup("surfaces"));
+
+            forAll(surfs, i)
+            {
+                initialiseSurface
+                (
+                    surfs[i],
+                    faceZoneName,
+                    refDir,
+                    faceFlips
+                );
+            }
+            break;
+        }
+        case mdSurfaceAndDirection:
+        {
+            List<Tuple2<word, vector>>
+                surfAndDirection(dict.lookup("surfaceAndDirection"));
+
+            forAll(surfAndDirection, i)
+            {
+                initialiseSurfaceAndDirection
+                (
+                    surfAndDirection[i].first(),
+                    surfAndDirection[i].second(),
+                    faceZoneName,
+                    refDir,
+                    faceFlips
+                );
+            }
+            break;
+        }
         default:
         {
             FatalIOErrorInFunction(dict)
@@ -730,7 +951,16 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
         const word& zoneName = zoneNames_[zonei];
         areas[zonei] = totalArea(zonei);
 
-        Info<< "    Zone: " << zoneName << ", area: " << areas[zonei] << nl;
+        if (isSurfaceMode())
+        {
+            Info<< "    Surface: " << zoneName
+                << ", area: " << areas[zonei] << nl;
+        }
+        else
+        {
+            Info<< "    Zone: " << zoneName
+                << ", area: " << areas[zonei] << nl;
+        }
     }
     Info<< endl;
 
@@ -752,7 +982,7 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
         }
     }
 
-    return true;
+    return !zoneNames_.empty();
 }
 
 
@@ -765,13 +995,21 @@ void Foam::functionObjects::fluxSummary::writeFileHeader
 ) const
 {
     writeHeader(os, "Flux summary");
-    writeHeaderValue(os, "Face zone", zoneName);
+    if (isSurfaceMode())
+    {
+        writeHeaderValue(os, "Surface", zoneName);
+    }
+    else
+    {
+        writeHeaderValue(os, "Face zone", zoneName);
+    }
     writeHeaderValue(os, "Total area", area);
 
     switch (mode_)
     {
         case mdFaceZoneAndDirection:
         case mdCellZoneAndDirection:
+        case mdSurfaceAndDirection:
         {
             writeHeaderValue(os, "Reference direction", refDir);
             break;
@@ -799,6 +1037,11 @@ bool Foam::functionObjects::fluxSummary::execute()
 
 bool Foam::functionObjects::fluxSummary::write()
 {
+    if (isSurfaceMode())
+    {
+        return surfaceModeWrite();
+    }
+
     const surfaceScalarField& phi = lookupObject<surfaceScalarField>(phiName_);
 
     Log << type() << ' ' << name() << ' '

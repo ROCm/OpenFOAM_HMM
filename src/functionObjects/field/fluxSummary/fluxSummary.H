@@ -68,6 +68,8 @@ Usage
     - faceZone
     - faceZoneAndDirection
     - cellZoneAndDirection
+    - surface
+    - surfaceAndDirection
 
     Output data is written to files of the form \<timeDir\>/<faceZoneName>.dat
 
@@ -116,11 +118,13 @@ public:
         {
             mdFaceZone,                 //!< face zone
             mdFaceZoneAndDirection,     //!< face zone with prescribed direction
-            mdCellZoneAndDirection      //!< cell zone with prescribed direction
+            mdCellZoneAndDirection,     //!< cell zone with prescribed direction
+            mdSurface,                  //!< surfMesh
+            mdSurfaceAndDirection       //!< surfMesh with prescribed direction
         };
 
         //- Mode type names
-        static const NamedEnum<modeType, 3> modeTypeNames_;
+        static const NamedEnum<modeType, 5> modeTypeNames_;
 
 
 protected:
@@ -161,12 +165,34 @@ protected:
 
     // Private Member Functions
 
+        //- Check if surface mode instead of zone mode
+        bool isSurfaceMode() const;
+
         //- Check flowType (mass or volume).
         //  Return name on success, fatal error on failure.
         word checkFlowType
         (
-            const dimensionSet& dims,
+            const dimensionSet& fieldDims,
             const word& fieldName
+        ) const;
+
+        //- Initialise for given surface name
+        void initialiseSurface
+        (
+            const word& surfName,
+            DynamicList<word>& names,
+            DynamicList<vector>& dir,
+            DynamicList<boolList>& faceFlip
+        ) const;
+
+        //- Initialise for given surface name and direction
+        void initialiseSurfaceAndDirection
+        (
+            const word& surfName,
+            const vector& refDir,
+            DynamicList<word>& names,
+            DynamicList<vector>& dir,
+            DynamicList<boolList>& faceFlip
         ) const;
 
         //- Initialise face set from face zone
@@ -204,8 +230,8 @@ protected:
             DynamicList<boolList>& faceFlip
         ) const;
 
-        //- Calculate the total area for the derived faceZone
-        scalar totalArea(const label zonei) const;
+        //- Calculate the total area for the surface or derived faceZone
+        scalar totalArea(const label idx) const;
 
         //- Output file header information
         virtual void writeFileHeader
@@ -215,6 +241,9 @@ protected:
             const vector& refDir,
             Ostream& os
         ) const;
+
+        //- Specialized write for surfaces
+        bool surfaceModeWrite();
 
         //- Disallow default bitwise copy construct
         fluxSummary(const fluxSummary&) = delete;
