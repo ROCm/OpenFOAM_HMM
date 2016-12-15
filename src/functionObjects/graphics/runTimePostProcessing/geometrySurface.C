@@ -211,4 +211,13 @@ void Foam::functionObjects::runTimePostPro::geometrySurface::updateActors
 }
 
 
+bool Foam::functionObjects::runTimePostPro::geometrySurface::clear()
+{
+    // Note: not removing geometry files
+    // - these are usually static files that are used e.g. for meshing
+
+    return true;
+}
+
+
 // ************************************************************************* //

@@ -507,12 +507,10 @@ void Foam::functionObjects::fieldVisualisationBase::addGlyphs
 
 Foam::functionObjects::fieldVisualisationBase::fieldVisualisationBase
 (
-    const runTimePostProcessing& parent,
     const dictionary& dict,
     const HashPtrTable<Function1<vector>, word>& colours
 )
 :
-    parent_(parent),
     colours_(colours),
     fieldName_(dict.lookup("field")),
     colourBy_(cbColour),

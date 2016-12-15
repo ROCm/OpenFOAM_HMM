@@ -127,6 +127,9 @@ public:
 
         //- Update actors
         virtual void updateActors(const scalar position);
+
+        //- Clear files used to create the object(s)
+        virtual bool clear();
 };
 
 

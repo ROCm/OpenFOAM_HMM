@@ -62,14 +62,8 @@ functionObjectSurface
 )
 :
     geometrySurface(parent, dict, colours, List<fileName>()),
-    fieldVisualisationBase(parent, dict, colours),
-    functionObject_("")
-{
-    if (visible_)
-    {
-        dict.lookup("functionObject") >> functionObject_;
-    }
-}
+    functionObjectBase(parent, dict, colours)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -93,23 +87,12 @@ addGeometryToScene
         return;
     }
 
-    dictionary dict;
-    if (!geometryBase::parent_.getObjectDict(functionObject_, fieldName_, dict))
-    {
-        WarningInFunction
-            << "Unable to find function object " << functionObject_
-            << " output for field " << fieldName_
-            << ". Surface will not be processed"
-            << endl;
-        return;
-    }
-
-    fileName fName;
-    if (!dict.readIfPresent("file", fName))
+    fileName fName = getFileName("file", fieldName_);
+    if (fName.empty())
     {
         WarningInFunction
             << "Unable to read file name from function object "
-            << functionObject_ << " for field " << fieldName_
+            << functionObjectName_ << " for field " << fieldName_
             << ". Surface will not be processed"
             << endl;
         return;
@@ -164,6 +147,17 @@ addGeometryToScene
                 << endl;
         }
     }
+}
+
+
+bool Foam::functionObjects::runTimePostPro::functionObjectSurface::clear()
+{
+    if (functionObjectBase::clear())
+    {
+        return removeFile("file", fieldName_);
+    }
+
+    return false;
 }
 
 

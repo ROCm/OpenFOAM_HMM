@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,21 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjects::runTimePostPro::functionObjectSurface
+    Foam::functionObjects::runTimePostPro::functionObjectBase
 
 Description
-    Visualisation of surface data from function object output
+    Base class for function object visualisation
 
 SourceFiles
-    functionObjectfunctionObjectSurface.C
+    functionObjectBase.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_runTimePostPro_functionObjectSurface_H
-#define functionObjects_runTimePostPro_functionObjectSurface_H
+#ifndef functionObjects_runTimePostPro_functionObjectBase_H
+#define functionObjects_runTimePostPro_functionObjectBase_H
 
-#include "geometrySurface.H"
-#include "functionObjectBase.H"
+#include "fieldVisualisationBase.H"
+#include "stateFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,55 +48,69 @@ namespace runTimePostPro
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class functionObjectSurface Declaration
+                     Class functionObjectBase Declaration
 \*---------------------------------------------------------------------------*/
 
-class functionObjectSurface
+class functionObjectBase
 :
-    public geometrySurface,
-    public functionObjectBase
+    public fieldVisualisationBase
 {
-
 private:
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        functionObjectSurface(const functionObjectSurface&) = delete;
+        functionObjectBase(const functionObjectBase&);
 
         //- Disallow default bitwise assignment
-        void operator=(const functionObjectSurface&) = delete;
+        void operator=(const functionObjectBase&);
+
+
+protected:
+
+    // Protected data
+
+        //- Reference to the state
+        const stateFunctionObject& state_;
+
+        //- Function object name
+        word functionObjectName_;
+
+        //- Flag to indicate that source data should be cleared after use
+        bool clearObjects_;
+
+
+    // Protected Member Functions
+
+        //- Retrieve file used to create the scene object
+        fileName getFileName(const word& keyword, const word& fieldName) const;
+
+        //- Remove file used to create the scene object
+        bool removeFile(const word& keyword, const word& fieldName);
 
 
 public:
 
     //- Run-time type information
-    TypeName("functionObjectSurface");
+    TypeName("functionObjectBase");
 
 
     // Constructors
 
         //- Construct from dictionary
-        functionObjectSurface
+        functionObjectBase
         (
-            const runTimePostProcessing& parent,
+            const stateFunctionObject& state,
             const dictionary& dict,
             const HashPtrTable<Function1<vector>, word>& colours
         );
 
 
     //- Destructor
-    virtual ~functionObjectSurface();
+    virtual ~functionObjectBase();
 
 
     // Member Functions
-
-        //- Add functionObjectSurface(s) to scene
-        virtual void addGeometryToScene
-        (
-            const scalar position,
-            vtkRenderer* renderer
-        );
 
         //- Clear files used to create the object(s)
         virtual bool clear();

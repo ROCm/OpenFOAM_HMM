@@ -36,7 +36,7 @@ SourceFiles
 #define functionObjects_runTimePostPro_functionObjectCloud_H
 
 #include "pointData.H"
-#include "fieldVisualisationBase.H"
+#include "functionObjectBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ namespace runTimePostPro
 class functionObjectCloud
 :
     public pointData,
-    public fieldVisualisationBase
+    public functionObjectBase
 {
 private:
 
@@ -73,9 +73,6 @@ protected:
 
         //- Name of functionObjectCloud
         word cloudName_;
-
-        //- Name of functionObjectCloud function object result to render
-        word functionObject_;
 
         //- Name of field to colour by
         word colourFieldName_;
@@ -116,6 +113,9 @@ public:
 
         //- Update actors
         virtual void updateActors(const scalar position);
+
+        //- Clear files used to create the object(s)
+        virtual bool clear();
 };
 
 

@@ -115,7 +115,13 @@ void Foam::functionObjects::runTimePostPro::text::updateActors
     const scalar position
 )
 {
-    // do nothing - all handled by addGeometryToScene
+    // Do nothing - all handled by addGeometryToScene
+}
+
+
+bool Foam::functionObjects::runTimePostPro::text::clear()
+{
+    return true;
 }
 
 

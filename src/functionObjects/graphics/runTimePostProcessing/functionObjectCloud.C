@@ -62,9 +62,8 @@ Foam::functionObjects::runTimePostPro::functionObjectCloud::functionObjectCloud
 )
 :
     pointData(parent, dict, colours),
-    fieldVisualisationBase(parent, dict, colours),
+    functionObjectBase(parent, dict, colours),
     cloudName_(dict.lookup("cloud")),
-    functionObject_(dict.lookup("functionObject")),
     colourFieldName_(dict.lookup("colourField")),
     actor_()
 {
@@ -103,18 +102,18 @@ addGeometryToScene
     if (cloudDict.found("functionObjectCloud"))
     {
         const dictionary& foDict = cloudDict.subDict("cloudFunctionObject");
-        if (foDict.found(functionObject_))
+        if (foDict.found(functionObjectName_))
         {
-            foDict.subDict(functionObject_).readIfPresent("file", fName);
+            foDict.subDict(functionObjectName_).readIfPresent("file", fName);
         }
     }
 
     if (fName.empty())
     {
         WarningInFunction
-            << "Unable to find function object " << functionObject_
+            << "Unable to find function object " << functionObjectName_
             << " output for field " << fieldName_
-            << ". Line will not be processed"
+            << ". Cloud will not be processed"
             << endl;
         return;
     }
@@ -156,6 +155,38 @@ void Foam::functionObjects::runTimePostPro::functionObjectCloud::updateActors
 
     vector pc = pointColour_->value(position);
     actor_->GetProperty()->SetColor(pc[0], pc[1], pc[2]);
+}
+
+
+bool Foam::functionObjects::runTimePostPro::functionObjectCloud::clear()
+{
+    if (functionObjectBase::clear())
+    {
+        const dictionary& cloudDict =
+            geometryBase::parent_.mesh().lookupObject<IOdictionary>
+            (
+                cloudName_ & "OutputProperties"
+            );
+
+        if (cloudDict.found("functionObjectCloud"))
+        {
+            const dictionary& foDict = cloudDict.subDict("functionObjectCloud");
+            if (foDict.found(functionObjectName_))
+            {
+                const dictionary& functionDict =
+                    foDict.subDict(functionObjectName_);
+
+                fileName fName;
+                if (functionDict.readIfPresent("file", fName))
+                {
+                    Foam::rm(fName);
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
 }
 
 
