@@ -63,12 +63,13 @@ int main(int argc, char *argv[])
     pimpleControl pimple(mesh);
 
     #include "readGravitationalAcceleration.H"
-    #include "initContinuityErrs.H"
     #include "createFields.H"
     #include "createFvOptions.H"
     #include "createTimeControls.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,7 +77,7 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "readTimeControls.H"
+        #include "createTimeControls.H"
         #include "CourantNo.H"
         #include "setDeltaT.H"
 
@@ -101,8 +102,11 @@ int main(int argc, char *argv[])
                 dimensionedScalar("0", dimMass/dimTime, 0)
             );
 
-            #include "alphaEqnSubCycle.H"
             mixture->correct();
+
+            #include "alphaEqnSubCycle.H"
+
+            solve(fvm::ddt(rho) + fvc::div(rhoPhi));
 
             #include "UEqn.H"
             #include "eEqn.H"
@@ -113,13 +117,13 @@ int main(int argc, char *argv[])
                 #include "pEqn.H"
             }
 
-            #include "continuityError.H"
-
             if (pimple.turbCorr())
             {
                 turbulence->correct();
             }
         }
+
+        rho = alpha1*rho1 + alpha2*rho2;
 
         runTime.write();
 

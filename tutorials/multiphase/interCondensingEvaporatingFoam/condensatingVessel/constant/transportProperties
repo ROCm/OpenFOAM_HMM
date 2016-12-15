@@ -17,7 +17,7 @@ FoamFile
 phases (liquid vapour);// FC-72
 
 
-sigma           sigma [1 0 -2 0 0 0 0] 0.07;
+sigma           sigma [1 0 -2 0 0 0 0] 0.0;
 
 liquid
 {

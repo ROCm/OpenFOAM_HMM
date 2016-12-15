@@ -17,9 +17,14 @@ FoamFile
 
 solvers
 {
+    ".*(rho|rhoFinal)"
+    {
+        solver          diagonal;
+    }
+
     "alpha.liquid.*"
     {
-        cAlpha          1;
+        cAlpha          0;
         nAlphaCorr      2;
         nAlphaSubCycles 2;
 
@@ -55,6 +60,7 @@ solvers
         nCellsInCoarsestLevel 10;
         agglomerator    faceAreaPair;
         mergeLevels     1;
+        maxIter         100;
     };
 
     p_rghFinal
@@ -111,7 +117,7 @@ PIMPLE
 {
     momentumPredictor   false;
     nOuterCorrectors    1;
-    nCorrectors         3;
+    nCorrectors         2;
     nNonOrthogonalCorrectors 0;
 }
 

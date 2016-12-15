@@ -14,9 +14,7 @@
     fvScalarMatrix eEqn
     (
         fvm::ddt(rho, e)
-      + fvc::ddt(rho, K) + fvc::div(rhoPhi, K)
       + fvm::div(rhoPhi, e)
-      - fvm::Sp(fvc::ddt(rho) + fvc::div(rhoPhi), e)
       - fvm::laplacian(kappaEff/cp, e)
       + pDivU
     );

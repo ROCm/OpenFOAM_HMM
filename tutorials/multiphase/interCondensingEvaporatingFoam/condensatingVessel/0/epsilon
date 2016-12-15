@@ -11,19 +11,19 @@ FoamFile
     format      ascii;
     class       volScalarField;
     location    "0";
-    object      k;
+    object      epsilon;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [ 0 2 -2 0 0 0 0 ];
+dimensions      [0 2 -3 0 0 0 0];
 
-internalField   uniform 0.1;
+internalField   uniform 1;
 
 boundaryField
 {
     bottom
     {
-        type            kqRWallFunction;
+        type            epsilonWallFunction;
         value           $internalField;
     }
 
@@ -36,13 +36,13 @@ boundaryField
 
     left
     {
-        type            kqRWallFunction;
+        type            epsilonWallFunction;
         value           $internalField;
     }
 
     right
     {
-        type            kqRWallFunction;
+        type            epsilonWallFunction;
         value           $internalField;
     }
 

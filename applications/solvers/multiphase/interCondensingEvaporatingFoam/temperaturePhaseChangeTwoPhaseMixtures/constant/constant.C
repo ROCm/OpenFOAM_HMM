@@ -78,8 +78,8 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDotAlphal() const
 
     return Pair<tmp<volScalarField>>
     (
-        coeffC_*mixture_.rho2()*max(TSat - T, T0),
-       -coeffE_*mixture_.rho1()*max(T - TSat, T0)
+        coeffC_*mixture_.rho2()*max(TSat - T.oldTime(), T0),
+       -coeffE_*mixture_.rho1()*max(T.oldTime() - TSat, T0)
     );
 }
 
@@ -112,8 +112,8 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDot() const
 
     return Pair<tmp<volScalarField>>
     (
-        coeffC_*mixture_.rho2()*limitedAlpha2*max(TSat - T, T0),
-        coeffE_*mixture_.rho1()*limitedAlpha1*max(T - TSat, T0)
+        coeffC_*mixture_.rho2()*limitedAlpha2*max(TSat - T.oldTime(), T0),
+        coeffE_*mixture_.rho1()*limitedAlpha1*max(T.oldTime() - TSat, T0)
     );
 }
 
@@ -144,8 +144,8 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDotDeltaT() const
 
     return Pair<tmp<volScalarField>>
     (
-        coeffC_*mixture_.rho2()*limitedAlpha2*pos(TSat - T),
-        coeffE_*mixture_.rho1()*limitedAlpha1*pos(T - TSat)
+        coeffC_*mixture_.rho2()*limitedAlpha2*pos(TSat - T.oldTime()),
+        coeffE_*mixture_.rho1()*limitedAlpha1*pos(T.oldTime() - TSat)
     );
 }
 
