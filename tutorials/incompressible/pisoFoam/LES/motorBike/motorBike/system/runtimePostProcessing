@@ -21,17 +21,11 @@ postPro1
         // Parallel projection flag
         parallelProjection  no;
 
-        // Camera mode:
-        // - flightPath: define flight path
-        // - static: fixed position
-        mode                static;
-        staticCoeffs
-        {
-            clipBox         (-0.2 -0.2 0)(1.65 0.2 1.25); // optional
-            focalPoint      (1.2 1.1 0.2);
-            up              (0 0 1);
-            lookDir         (2.4 4.0 -1.5);
-        }
+        clipBox         (-0.2 -0.2 0)(1.65 0.2 1.25); // optional
+
+        focalPoint      (1.2 1.1 0.2);
+        up              (0 0 1);
+        position        (3.6 5.1 -1.3);
     }
 
     // Default colours
