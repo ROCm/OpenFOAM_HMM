@@ -50,6 +50,7 @@ namespace Foam
 {
 namespace functionObjects
 {
+
 class runTimePostProcessing;
 
 namespace runTimePostPro
@@ -163,6 +164,9 @@ public:
 
         //- Update the actors
         virtual void updateActors(const scalar position) = 0;
+
+        //- Clear files used to create the object(s)
+        virtual bool clear() = 0;
 };
 
 

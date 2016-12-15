@@ -61,8 +61,7 @@ Foam::functionObjects::runTimePostPro::functionObjectLine::functionObjectLine
 )
 :
     pathline(parent, dict, colours),
-    fieldVisualisationBase(parent, dict, colours),
-    functionObject_(dict.lookup("functionObject")),
+    functionObjectBase(parent, dict, colours),
     actor_()
 {
     actor_ = vtkSmartPointer<vtkActor>::New();
@@ -89,23 +88,12 @@ addGeometryToScene
         return;
     }
 
-    dictionary dict;
-    if (!geometryBase::parent_.getObjectDict(functionObject_, fieldName_, dict))
-    {
-        WarningInFunction
-            << "Unable to find function object " << functionObject_
-            << " output for field " << fieldName_
-            << ". Line will not be processed"
-            << endl;
-        return;
-    }
-
-    fileName fName;
-    if (!dict.readIfPresent("file", fName))
+    fileName fName = getFileName("file", fieldName_);
+    if (fName.empty())
     {
         WarningInFunction
             << "Unable to read file name from function object "
-            << functionObject_ << " for field " << fieldName_
+            << functionObjectName_ << " for field " << fieldName_
             << ". Line will not be processed"
             << endl;
         return;
@@ -138,6 +126,16 @@ void Foam::functionObjects::runTimePostPro::functionObjectLine::updateActors
 {
     actor_->GetProperty()->SetLineWidth(2);
     actor_->GetProperty()->SetOpacity(opacity(position));
+}
+
+bool Foam::functionObjects::runTimePostPro::functionObjectLine::clear()
+{
+    if (functionObjectBase::clear())
+    {
+        return removeFile("file", fieldName_);
+    }
+
+    return false;
 }
 
 

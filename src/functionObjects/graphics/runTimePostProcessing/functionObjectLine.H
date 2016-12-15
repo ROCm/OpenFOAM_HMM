@@ -36,7 +36,7 @@ SourceFiles
 #define functionObjects_runTimePostPro_functionObjectLine_H
 
 #include "pathline.H"
-#include "fieldVisualisationBase.H"
+#include "functionObjectBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ namespace runTimePostPro
 class functionObjectLine
 :
     public pathline,
-    public fieldVisualisationBase
+    public functionObjectBase
 {
 private:
 
@@ -70,9 +70,6 @@ private:
 protected:
 
     // Protected data
-
-        //- Name of function object result to render
-        word functionObject_;
 
         //- Actor
         vtkSmartPointer<vtkActor> actor_;
@@ -110,6 +107,9 @@ public:
 
         //- Update actors
         virtual void updateActors(const scalar position);
+
+        //- Clear files used to create the object(s)
+        virtual bool clear();
 };
 
 
