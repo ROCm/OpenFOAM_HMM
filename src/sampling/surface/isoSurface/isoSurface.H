@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,18 +57,18 @@ Description
 
 SourceFiles
     isoSurface.C
+    isoSurfaceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef isoSurface_H
 #define isoSurface_H
 
-#include "triSurface.H"
-#include "labelPair.H"
-#include "pointIndexHit.H"
 #include "PackedBoolList.H"
 #include "volFields.H"
 #include "slicedVolFields.H"
+#include "MeshedSurface.H"
+#include "MeshedSurfacesFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -78,6 +78,7 @@ namespace Foam
 class fvMesh;
 class plane;
 class treeBoundBox;
+class triSurface;
 
 /*---------------------------------------------------------------------------*\
                        Class isoSurface Declaration
@@ -85,8 +86,12 @@ class treeBoundBox;
 
 class isoSurface
 :
-    public triSurface
+    public meshedSurface
 {
+    // Private typedefs for convenience
+    typedef meshedSurface MeshStorage;
+
+
     // Private data
 
         enum segmentCutType
@@ -379,7 +384,7 @@ class isoSurface
 
         static triSurface subsetMesh
         (
-            const triSurface& s,
+            const triSurface&,
             const labelList& newToOldFaces,
             labelList& oldToNewPoints,
             labelList& newToOldPoints
@@ -413,7 +418,7 @@ public:
 
     // Member Functions
 
-        //- For every triangle the original cell in mesh
+        //- For every face, the original cell in mesh
         const labelList& meshCells() const
         {
             return meshCells_;

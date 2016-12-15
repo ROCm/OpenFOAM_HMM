@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,6 @@ void Foam::distanceSurface::createGeometry()
     }
 
     // Clear any stored topologies
-    facesPtr_.clear();
     isoSurfCellPtr_.clear();
     isoSurfPtr_.clear();
 
@@ -339,8 +338,7 @@ Foam::distanceSurface::distanceSurface
     zoneKey_(keyType::null),
     needsUpdate_(true),
     isoSurfCellPtr_(nullptr),
-    isoSurfPtr_(nullptr),
-    facesPtr_(nullptr)
+    isoSurfPtr_(nullptr)
 {
 //    dict.readIfPresent("zone", zoneKey_);
 //
@@ -395,8 +393,7 @@ Foam::distanceSurface::distanceSurface
     zoneKey_(keyType::null),
     needsUpdate_(true),
     isoSurfCellPtr_(nullptr),
-    isoSurfPtr_(nullptr),
-    facesPtr_(nullptr)
+    isoSurfPtr_(nullptr)
 {}
 
 
@@ -419,12 +416,8 @@ bool Foam::distanceSurface::expire()
     if (debug)
     {
         Pout<< "distanceSurface::expire :"
-            << " have-facesPtr_:" << facesPtr_.valid()
-            << " needsUpdate_:" << needsUpdate_ << endl;
+            << " needsUpdate:" << needsUpdate_ << endl;
     }
-
-    // Clear any stored topologies
-    facesPtr_.clear();
 
     // Clear derived data
     clearGeom();
@@ -445,8 +438,7 @@ bool Foam::distanceSurface::update()
     if (debug)
     {
         Pout<< "distanceSurface::update :"
-            << " have-facesPtr_:" << facesPtr_.valid()
-            << " needsUpdate_:" << needsUpdate_ << endl;
+            << " needsUpdate:" << needsUpdate_ << endl;
     }
 
     if (!needsUpdate_)

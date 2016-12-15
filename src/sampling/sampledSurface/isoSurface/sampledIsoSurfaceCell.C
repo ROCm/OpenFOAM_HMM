@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,9 +58,6 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
     }
 
     prevTimeIndex_ = fvm.time().timeIndex();
-
-    // Clear any stored topo
-    facesPtr_.clear();
 
     // Clear derived data
     sampledSurface::clearGeom();
@@ -142,7 +139,7 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
             cellAvg[celli] /= nPointCells[celli];
         }
 
-        const isoSurfaceCell iso
+        isoSurfaceCell iso
         (
             fvm,
             cellAvg,
@@ -155,13 +152,13 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
         const_cast<sampledIsoSurfaceCell&>
         (
             *this
-        ).triSurface::operator=(iso);
+        ).transfer(static_cast<meshedSurface&>(iso));
         meshCells_ = iso.meshCells();
     }
     else
     {
         //- Direct from cell field and point field. Gives bad continuity.
-        const isoSurfaceCell iso
+        isoSurfaceCell iso
         (
             fvm,
             cellFld.primitiveField(),
@@ -174,7 +171,7 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
         const_cast<sampledIsoSurfaceCell&>
         (
             *this
-        ).triSurface::operator=(iso);
+        ).transfer(static_cast<meshedSurface&>(iso));
         meshCells_ = iso.meshCells();
     }
 
@@ -189,7 +186,7 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
             << "    isoValue       : " << isoVal_ << nl
             << "    bounds         : " << bounds_ << nl
             << "    points         : " << points().size() << nl
-            << "    tris           : " << triSurface::size() << nl
+            << "    faces          : " << MeshStorage::size() << nl
             << "    cut cells      : " << meshCells_.size() << endl;
     }
 
@@ -207,13 +204,13 @@ Foam::sampledIsoSurfaceCell::sampledIsoSurfaceCell
 )
 :
     sampledSurface(name, mesh, dict),
+    MeshStorage(),
     isoField_(dict.lookup("isoField")),
     isoVal_(readScalar(dict.lookup("isoValue"))),
     bounds_(dict.lookupOrDefault("bounds", boundBox::greatBox)),
     regularise_(dict.lookupOrDefault("regularise", true)),
     average_(dict.lookupOrDefault("average", true)),
     zoneKey_(keyType::null),
-    facesPtr_(nullptr),
     prevTimeIndex_(-1),
     meshCells_(0)
 {}
@@ -237,8 +234,6 @@ bool Foam::sampledIsoSurfaceCell::needsUpdate() const
 
 bool Foam::sampledIsoSurfaceCell::expire()
 {
-    facesPtr_.clear();
-
     // Clear derived data
     sampledSurface::clearGeom();
 

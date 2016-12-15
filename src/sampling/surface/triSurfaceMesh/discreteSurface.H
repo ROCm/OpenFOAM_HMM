@@ -22,11 +22,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sampledTriSurfaceMesh
+    Foam::discreteSurface
 
 Description
-    A sampledSurface from a triSurfaceMesh. It samples on the points/triangles
-    of the triSurface.
+    The basis for sampling from triSurfaceMesh.
+    It samples on the points/triangles of the triSurface.
 
     - it either samples cells or (non-coupled) boundary faces
 
@@ -61,13 +61,13 @@ Description
     the original surface should be complete.
 
 SourceFiles
-    sampledTriSurfaceMesh.C
-    sampledTriSurfaceMeshTemplates.C
+    discreteSurface.C
+    discreteSurfaceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledTriSurfaceMesh_H
-#define sampledTriSurfaceMesh_H
+#ifndef discreteSurface_H
+#define discreteSurface_H
 
 #include "sampledSurface.H"
 #include "triSurfaceMesh.H"
@@ -83,12 +83,11 @@ class treeDataFace;
 class meshSearch;
 
 /*---------------------------------------------------------------------------*\
-                       Class sampledTriSurfaceMesh Declaration
+                       Class discreteSurface Declaration
 \*---------------------------------------------------------------------------*/
 
-class sampledTriSurfaceMesh
+class discreteSurface
 :
-    public sampledSurface,
     public meshedSurface
 {
 public:
@@ -109,6 +108,15 @@ private:
     // Private data
 
         static const NamedEnum<samplingSource, 3> samplingSourceNames_;
+
+        //- Reference to mesh
+        const polyMesh& mesh_;
+
+        //- Do we allow interpolation?
+        const bool allowInterpolate_;
+
+        //- Do we intend to interpolate the information?
+        bool interpolate_;
 
         //- Surface to sample on
         const triSurfaceMesh surface_;
@@ -144,63 +152,80 @@ private:
         //- Get tree of all non-coupled boundary faces
         const indexedOctree<treeDataFace>& nonCoupledboundaryTree() const;
 
-        //- Sample field on faces
+        bool update(const meshSearch& meshSearcher);
+
+
+        //- Sample the volume field onto surface,
+        //  store it (temporarily) onto the given registry
         template<class Type>
-        tmp<Field<Type>> sampleField
+        bool sampleType
         (
-            const GeometricField<Type, fvPatchField, volMesh>& vField
+            const objectRegistry& store,
+            const word& fieldName
         ) const;
 
-
-        template<class Type>
-        tmp<Field<Type>>
-        interpolateField(const interpolation<Type>&) const;
-
-        bool update(const meshSearch& meshSearcher);
 
 public:
 
     //- Runtime type information
-    TypeName("sampledTriSurfaceMesh");
+    TypeName("discreteSurface");
 
 
     // Constructors
 
         //- Construct from components
-        sampledTriSurfaceMesh
+        discreteSurface
         (
-            const word& name,
             const polyMesh& mesh,
             const word& surfaceName,
-            const samplingSource sampleSource
+            const samplingSource sampleSource,
+            const bool allowInterpolate = true
         );
 
         //- Construct from dictionary
-        sampledTriSurfaceMesh
+        discreteSurface
         (
-            const word& name,
             const polyMesh& mesh,
-            const dictionary& dict
+            const dictionary& dict,
+            const bool allowInterpolate = true
         );
 
         //- Construct from triSurface
-        sampledTriSurfaceMesh
+        discreteSurface
         (
             const word& name,
             const polyMesh& mesh,
             const triSurface& surface,
-            const word& sampleSourceName
+            const word& sampleSourceName,
+            const bool allowInterpolate = true
         );
 
 
     //- Destructor
-    virtual ~sampledTriSurfaceMesh();
+    virtual ~discreteSurface();
 
 
     // Member Functions
 
         //- Set new zoneIds list based on the surfZoneList information
         static void setZoneMap(const surfZoneList&, labelList& zoneIds);
+
+
+      // Access
+
+        //- Access to the underlying mesh
+        const polyMesh& mesh() const
+        {
+            return mesh_;
+        }
+
+        //- Interpolation requested for surface
+        bool interpolate() const;
+
+        //- Change interpolation request for surface.
+        //  Return false if the value did not change.
+        //  Use with caution.
+        bool interpolate(bool b);
 
 
         //- Does the surface need an update?
@@ -220,40 +245,11 @@ public:
         //  Do nothing (and return false) if no update was needed
         bool update(const treeBoundBox&);
 
-        //- Points of surface
-        virtual const pointField& points() const
-        {
-            return MeshStorage::points();
-        }
-
-        //- Faces of surface
-        virtual const faceList& faces() const
-        {
-            return MeshStorage::surfFaces();
-        }
 
         //- Const access to per-face zone/region information
         virtual const labelList& zoneIds() const
         {
             return zoneIds_;
-        }
-
-        //- Face area vectors
-        virtual const vectorField& Sf() const
-        {
-            return MeshStorage::Sf();
-        }
-
-        //- Face area magnitudes
-        virtual const scalarField& magSf() const
-        {
-            return MeshStorage::magSf();
-        }
-
-        //- Face centres
-        virtual const vectorField& Cf() const
-        {
-            return MeshStorage::Cf();
         }
 
         //- If element ids/order of the original surface are kept
@@ -269,6 +265,7 @@ public:
             return originalIds_;
         }
 
+
         //- Sampling boundary values instead of cell values
         bool onBoundary() const
         {
@@ -276,67 +273,51 @@ public:
         }
 
 
-        //- Sample field on surface
-        virtual tmp<scalarField> sample
+        //- From local surface face to mesh cell/face.
+        const labelList& sampleElements() const
+        {
+            return sampleElements_;
+        }
+
+        //- Local points to sample per point
+        const pointField& samplePoints() const
+        {
+            return samplePoints_;
+        }
+
+
+        //- Sample the volume field onto surface,
+        //  store it (temporarily) onto the given registry
+        virtual bool sampleAndStore
         (
-            const volScalarField&
+            const objectRegistry& store,
+            const word& fieldName
         ) const;
 
-        //- Sample field on surface
-        virtual tmp<vectorField> sample
+
+        //- Sample field on surface. The tmp field is 'valid' on success.
+        template<class Type>
+        tmp<Field<Type>> sampleType
         (
-            const volVectorField&
+            const word& fieldName
         ) const;
 
-        //- Sample field on surface
-        virtual tmp<sphericalTensorField> sample
-        (
-            const volSphericalTensorField&
-        ) const;
 
         //- Sample field on surface
-        virtual tmp<symmTensorField> sample
+        template<class Type>
+        tmp<Field<Type>> sampleField
         (
-            const volSymmTensorField&
-        ) const;
-
-        //- Sample field on surface
-        virtual tmp<tensorField> sample
-        (
-            const volTensorField&
+            const GeometricField<Type, fvPatchField, volMesh>&
         ) const;
 
 
         //- Interpolate field on surface
-        virtual tmp<scalarField> interpolate
+        template<class Type>
+        tmp<Field<Type>> interpolateField
         (
-            const interpolation<scalar>&
+            const interpolation<Type>&
         ) const;
 
-
-        //- Interpolate field on surface
-        virtual tmp<vectorField> interpolate
-        (
-            const interpolation<vector>&
-        ) const;
-
-        //- Interpolate field on surface
-        virtual tmp<sphericalTensorField> interpolate
-        (
-            const interpolation<sphericalTensor>&
-        ) const;
-
-        //- Interpolate field on surface
-        virtual tmp<symmTensorField> interpolate
-        (
-            const interpolation<symmTensor>&
-        ) const;
-
-        //- Interpolate field on surface
-        virtual tmp<tensorField> interpolate
-        (
-            const interpolation<tensor>&
-        ) const;
 
         //- Write information
         virtual void print(Ostream&) const;
@@ -350,7 +331,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "sampledTriSurfaceMeshTemplates.C"
+    #include "discreteSurfaceTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

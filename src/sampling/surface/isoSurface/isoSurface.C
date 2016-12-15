@@ -37,6 +37,7 @@ License
 #include "surfaceIntersection.H"
 #include "intersectedSurface.H"
 #include "searchableBox.H"
+#include "triSurface.H"
 #include "triSurfaceMesh.H"
 #include "triPoints.H"
 
@@ -686,7 +687,6 @@ void Foam::isoSurface::calcSnappedPoint
     const pointField& cc = mesh_.cellCentres();
 
     pointField collapsedPoint(mesh_.nPoints(), point::max);
-
 
     // Work arrays
     DynamicList<point, 64> localTriPoints(100);
@@ -1342,6 +1342,7 @@ Foam::isoSurface::isoSurface
     const scalar mergeTol
 )
 :
+    MeshStorage(),
     mesh_(cVals.mesh()),
     pVals_(pVals),
     iso_(iso),
@@ -1582,6 +1583,9 @@ Foam::isoSurface::isoSurface
     }
 
 
+    // Use a triSurface as a temporary for various operations
+    triSurface tmpsurf;
+
     {
         DynamicList<point> triPoints(3*nCutCells_);
         DynamicList<label> triMeshCells(nCutCells_);
@@ -1633,15 +1637,12 @@ Foam::isoSurface::isoSurface
 
         // Merge points and compact out non-valid triangles
         labelList triMap;           // merged to unmerged triangle
-        triSurface::operator=
+        tmpsurf = stitchTriPoints
         (
-            stitchTriPoints
-            (
-                true,               // check for duplicate tris
-                triPoints,
-                triPointMergeMap_,  // unmerged to merged point
-                triMap
-            )
+            true,               // check for duplicate tris
+            triPoints,
+            triPointMergeMap_,  // unmerged to merged point
+            triMap
         );
 
         if (debug)
@@ -1682,17 +1683,33 @@ Foam::isoSurface::isoSurface
 
     if (debug)
     {
-        Pout<< "isoSurface : checking " << size()
+        Pout<< "isoSurface : checking " << tmpsurf.size()
             << " triangles for validity." << endl;
 
-        forAll(*this, triI)
+        forAll(tmpsurf, facei)
         {
-            triSurfaceTools::validTri(*this, triI);
+            triSurfaceTools::validTri(tmpsurf, facei);
         }
 
         fileName stlFile = mesh_.time().path() + ".stl";
         Pout<< "Dumping surface to " << stlFile << endl;
-        triSurface::write(stlFile);
+        tmpsurf.write(stlFile);
+    }
+
+
+    // Transfer to mesh storage
+    {
+        faceList faces;
+        tmpsurf.triFaceFaces(faces);
+
+        // An iso-surface has no zones
+        surfZoneList zones(0);
+
+        // Reset primitive data (points, faces and zones)
+        this->MeshStorage::reset
+        (
+            tmpsurf.xferPoints(), faces.xfer(), zones.xfer()
+        );
     }
 }
 
