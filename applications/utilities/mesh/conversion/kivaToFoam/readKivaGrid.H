@@ -575,6 +575,7 @@ polyMesh pShapeMesh
 );
 
 Info << "Writing polyMesh" << endl;
+pShapeMesh.removeFiles();
 pShapeMesh.write();
 
 fileName czPath

@@ -80,8 +80,8 @@ int main(int argc, char *argv[])
 
     Info<< "Writing mesh ..." << endl;
 
+    mesh.removeFiles();
     mesh.write();
-
 
     Info<< "End\n" << endl;
 

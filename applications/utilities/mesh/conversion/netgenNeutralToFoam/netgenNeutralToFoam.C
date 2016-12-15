@@ -313,10 +313,9 @@ int main(int argc, char *argv[])
         patchPhysicalTypes
     );
 
-    Info<< "Writing mesh to " << runTime.constant() << endl << endl;
-
+    Info<< "Writing mesh ..." << endl;
+    mesh.removeFiles();
     mesh.write();
-
 
     Info<< "End\n" << endl;
 

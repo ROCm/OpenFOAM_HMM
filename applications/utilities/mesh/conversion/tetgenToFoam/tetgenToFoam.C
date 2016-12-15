@@ -342,7 +342,6 @@ int main(int argc, char *argv[])
     const polyMesh& mesh = meshPtr;
 
 
-
     if (readFaceFile)
     {
         label nPatches = 0;
@@ -474,7 +473,7 @@ int main(int argc, char *argv[])
         boundaryPatch.setSize(facei);
 
 
-         // Print region to patch mapping
+        // Print region to patch mapping
         Info<< "Regions:" << endl;
 
         forAllConstIter(Map<label>, regionToPatch, iter)
@@ -548,6 +547,7 @@ int main(int argc, char *argv[])
 
     Info<< "Writing mesh to " << runTime.constant() << endl << endl;
 
+    meshPtr().removeFiles();
     meshPtr().write();
 
     Info<< "End\n" << endl;

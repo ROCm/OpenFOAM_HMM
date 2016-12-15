@@ -530,9 +530,6 @@ Foam::polyMesh::polyMesh
         Info<<"Constructing polyMesh from cell and boundary shapes." << endl;
     }
 
-    // Remove all of the old mesh files if they exist
-    removeFiles(instance());
-
     // Calculate faces and cells
     labelList patchSizes;
     labelList patchStarts;
@@ -813,9 +810,6 @@ Foam::polyMesh::polyMesh
     {
         Info<<"Constructing polyMesh from cell and boundary shapes." << endl;
     }
-
-    // Remove all of the old mesh files if they exist
-    removeFiles(instance());
 
     // Calculate faces and cells
     labelList patchSizes;
