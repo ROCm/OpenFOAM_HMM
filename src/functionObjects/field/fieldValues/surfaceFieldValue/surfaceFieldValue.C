@@ -85,6 +85,18 @@ const char* Foam::NamedEnum
     "areaNormalIntegrate"
 };
 
+template<>
+const char* Foam::NamedEnum
+<
+    Foam::functionObjects::fieldValues::surfaceFieldValue::postOperationType,
+    2
+>::names[] =
+{
+    "none",
+    "sqrt"
+};
+
+
 const Foam::NamedEnum
 <
     Foam::functionObjects::fieldValues::surfaceFieldValue::regionTypes,
@@ -96,6 +108,13 @@ const Foam::NamedEnum
     Foam::functionObjects::fieldValues::surfaceFieldValue::operationType,
     16
 > Foam::functionObjects::fieldValues::surfaceFieldValue::operationTypeNames_;
+
+const Foam::NamedEnum
+<
+    Foam::functionObjects::fieldValues::surfaceFieldValue::postOperationType,
+    2
+>
+Foam::functionObjects::fieldValues::surfaceFieldValue::postOperationTypeNames_;
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -649,6 +668,11 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
     surfaceWriterPtr_(nullptr),
     regionType_(regionTypeNames_.read(dict.lookup("regionType"))),
     operation_(operationTypeNames_.read(dict.lookup("operation"))),
+    postOperation_
+    (
+        postOperationTypeNames_
+        [dict.lookupOrDefault<word>("postOperation", "none")]
+    ),
     weightFieldName_("none"),
     orientWeightField_(false),
     orientedFieldsStart_(labelMax),
@@ -674,6 +698,11 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
     surfaceWriterPtr_(nullptr),
     regionType_(regionTypeNames_.read(dict.lookup("regionType"))),
     operation_(operationTypeNames_.read(dict.lookup("operation"))),
+    postOperation_
+    (
+        postOperationTypeNames_
+        [dict.lookupOrDefault<word>("postOperation", "none")]
+    ),
     weightFieldName_("none"),
     orientWeightField_(false),
     orientedFieldsStart_(labelMax),

@@ -286,11 +286,11 @@ Type Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
+template<class Type, class WeightType>
 bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
 (
     const word& fieldName,
-    const scalarField& weightField,
+    const Field<WeightType>& weightField,
     const bool orient
 )
 {
@@ -354,6 +354,22 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
             values *= scaleFactor_;
 
             Type result = processValues(values, Sf, weightField);
+
+            switch (postOperation_)
+            {
+                case postOpNone:
+                    break;
+                case postOpSqrt:
+                    {
+                        // sqrt: component-wise - doesn't change the type
+                        for (direction d=0; d < pTraits<Type>::nComponents; ++d)
+                        {
+                            setComponent(result,  d)
+                                = sqrt(mag(component(result,  d)));
+                        }
+                    }
+                    break;
+            }
 
             file()<< tab << result;
 

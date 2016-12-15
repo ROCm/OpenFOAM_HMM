@@ -86,6 +86,7 @@ Usage
         regionType   | face regionType: see below  | yes         |
         name         | name of face regionType if required  | no |
         operation    | operation to perform    | yes         |
+        postOperation | post-operation to perform    | no | none |
         weightField  | name of field to apply weighting | no |
         orientedWeightField  | name of oriented field to apply weighting | no |
         scaleFactor  | scale factor            | no          | 1
@@ -223,6 +224,17 @@ public:
         static const NamedEnum<operationType, 16> operationTypeNames_;
 
 
+        //- Post-operation type enumeration
+        enum postOperationType
+        {
+            postOpNone,
+            postOpSqrt
+        };
+
+        //- Operation type names
+        static const NamedEnum<postOperationType, 2> postOperationTypeNames_;
+
+
 private:
 
     // Private Member Functions
@@ -266,6 +278,9 @@ protected:
 
         //- Operation to apply to values
         operationType operation_;
+
+        //- Optional post-evaluation operation
+        postOperationType postOperation_;
 
         //- Weight field name - optional
         word weightFieldName_;
@@ -394,11 +409,11 @@ public:
         inline fileName outputDir() const;
 
         //- Templated helper function to output field values
-        template<class Type>
+        template<class Type, class WeightType>
         bool writeValues
         (
             const word& fieldName,
-            const scalarField& weightField,
+            const Field<WeightType>& weightField,
             const bool orient
         );
 
