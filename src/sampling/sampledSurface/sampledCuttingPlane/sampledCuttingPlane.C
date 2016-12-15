@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,6 @@ void Foam::sampledCuttingPlane::createGeometry()
     }
 
     // Clear any stored topologies
-    facesPtr_.clear();
     isoSurfPtr_.ptr();
     pointDistance_.clear();
     cellDistancePtr_.clear();
@@ -273,8 +272,7 @@ Foam::sampledCuttingPlane::sampledCuttingPlane
     needsUpdate_(true),
     subMeshPtr_(nullptr),
     cellDistancePtr_(nullptr),
-    isoSurfPtr_(nullptr),
-    facesPtr_(nullptr)
+    isoSurfPtr_(nullptr)
 {
     if (zoneID_.index() != -1)
     {
@@ -318,12 +316,8 @@ bool Foam::sampledCuttingPlane::expire()
     if (debug)
     {
         Pout<< "sampledCuttingPlane::expire :"
-            << " have-facesPtr_:" << facesPtr_.valid()
-            << " needsUpdate_:" << needsUpdate_ << endl;
+            << " needsUpdate:" << needsUpdate_ << endl;
     }
-
-    // Clear any stored topologies
-    facesPtr_.clear();
 
     // Clear derived data
     clearGeom();
@@ -344,8 +338,7 @@ bool Foam::sampledCuttingPlane::update()
     if (debug)
     {
         Pout<< "sampledCuttingPlane::update :"
-            << " have-facesPtr_:" << facesPtr_.valid()
-            << " needsUpdate_:" << needsUpdate_ << endl;
+            << " needsUpdate:" << needsUpdate_ << endl;
     }
 
     if (!needsUpdate_)

@@ -24,9 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "isoSurfaceCell.H"
+#include "isoSurface.H"
 #include "polyMesh.H"
 #include "tetMatcher.H"
-#include "isoSurface.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -556,7 +556,7 @@ Foam::isoSurfaceCell::interpolate
 
     return isoSurface::interpolate
     (
-        points().size(),
+        this->points().size(),
         triPointMergeMap_,
         interpolatedPoints_,
         interpolatedOldPoints_,

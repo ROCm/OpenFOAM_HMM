@@ -22,85 +22,53 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sampledCuttingPlane
+    Foam::sampledDiscreteSurface
 
 Description
-    A sampledSurface defined by a plane using the iso-surface algorithm
-    to 'cut' the mesh.
+    A sampledSurface from a triSurfaceMesh.
+    It samples on the points/triangles of a triSurfaceMesh.
+
+See Also
+    discreteSurface, sampledSurface
 
 SourceFiles
-    sampledCuttingPlane.C
+    sampledDiscreteSurface.C
+    sampledDiscreteSurfaceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledCuttingPlane_H
-#define sampledCuttingPlane_H
+#ifndef sampledDiscreteSurface_H
+#define sampledDiscreteSurface_H
 
 #include "sampledSurface.H"
-#include "isoSurface.H"
-//#include "isoSurfaceCell.H"
-#include "plane.H"
-#include "ZoneIDs.H"
-#include "fvMeshSubset.H"
+#include "discreteSurface.H"
+#include "triSurfaceMesh.H"
+#include "MeshedSurface.H"
+#include "MeshedSurfacesFwd.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+class sampledDiscreteSurface;
+
 /*---------------------------------------------------------------------------*\
-                       Class sampledCuttingPlane Declaration
+                   Class sampledDiscreteSurface Declaration
 \*---------------------------------------------------------------------------*/
 
-class sampledCuttingPlane
+class sampledDiscreteSurface
 :
-    public sampledSurface
+    public sampledSurface,
+    public discreteSurface
 {
-    // Private data
-
-        //- Plane
-        const plane plane_;
-
-        //- Optional bounding box to trim triangles against
-        const boundBox bounds_;
-
-        //- Merge tolerance
-        const scalar mergeTol_;
-
-        //- Whether to coarsen
-        const Switch regularise_;
-
-        //- Whether to recalculate cell values as average of point values
-        const Switch average_;
-
-        //- Zone name/index (if restricted to zones)
-        mutable cellZoneID zoneID_;
-
-        //- For zones: patch to put exposed faces into
-        mutable word exposedPatchName_;
-
-        //- Track if the surface needs an update
-        mutable bool needsUpdate_;
-
-
-        //- Optional subsetted mesh
-        autoPtr<fvMeshSubset> subMeshPtr_;
-
-        //- Distance to cell centres
-        autoPtr<volScalarField> cellDistancePtr_;
-
-        //- Distance to points
-        scalarField pointDistance_;
-
-        //- Constructed iso surface
-        //autoPtr<isoSurfaceCell> isoSurfPtr_;
-        autoPtr<isoSurface> isoSurfPtr_;
+    //- Private typedefs for convenience
+    typedef discreteSurface MeshStorage;
+    typedef discreteSurface SurfaceSource;
 
 
     // Private Member Functions
-
-        //- Create iso surface
-        void createGeometry();
 
         //- Sample field on faces
         template<class Type>
@@ -118,31 +86,43 @@ class sampledCuttingPlane
 public:
 
     //- Runtime type information
-    TypeName("sampledCuttingPlane");
+    TypeName("sampledDiscreteSurface");
 
 
     // Constructors
 
+        //- Construct from components
+        sampledDiscreteSurface
+        (
+            const word& name,
+            const polyMesh& mesh,
+            const word& surfaceName,
+            const discreteSurface::samplingSource sampleSource
+        );
+
         //- Construct from dictionary
-        sampledCuttingPlane
+        sampledDiscreteSurface
         (
             const word& name,
             const polyMesh& mesh,
             const dictionary& dict
         );
 
+        //- Construct from triSurface
+        sampledDiscreteSurface
+        (
+            const word& name,
+            const polyMesh& mesh,
+            const triSurface& surface,
+            const word& sampleSourceName
+        );
+
 
     //- Destructor
-    virtual ~sampledCuttingPlane();
+    virtual ~sampledDiscreteSurface();
 
 
     // Member Functions
-
-        //const isoSurfaceCell& surface() const
-        const isoSurface& surface() const
-        {
-            return isoSurfPtr_();
-        }
 
         //- Does the surface need an update?
         virtual bool needsUpdate() const;
@@ -156,44 +136,68 @@ public:
         //  Do nothing (and return false) if no update was needed
         virtual bool update();
 
+        //- Update the surface using a bound box to limit the searching.
+        //  For direct use, i.e. not through sample.
+        //  Do nothing (and return false) if no update was needed
+        bool update(const treeBoundBox&);
+
         //- Points of surface
         virtual const pointField& points() const
         {
-            return surface().points();
+            return MeshStorage::points();
         }
 
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            return surface().surfFaces();
+            return MeshStorage::surfFaces();
         }
 
         //- Const access to per-face zone/region information
         virtual const labelList& zoneIds() const
         {
-            return Foam::emptyLabelList;
+            return MeshStorage::zoneIds();
         }
 
-        //- Face area magnitudes
+        //- Face area vectors
         virtual const vectorField& Sf() const
         {
-            return surface().Sf();
+            return MeshStorage::Sf();
         }
 
         //- Face area magnitudes
         virtual const scalarField& magSf() const
         {
-            return surface().magSf();
+            return MeshStorage::magSf();
         }
 
         //- Face centres
         virtual const vectorField& Cf() const
         {
-            return surface().Cf();
+            return MeshStorage::Cf();
         }
 
+        //- If element ids/order of the original surface are kept
+        bool keepIds() const
+        {
+            return MeshStorage::keepIds();
+        }
 
-    // Sample
+        //- List of element ids/order of the original surface,
+        //  when keepIds is active.
+        const labelList& originalIds() const
+        {
+            return MeshStorage::originalIds();
+        }
+
+        //- Sample the volume field onto surface,
+        //  store it (temporarily) onto the given registry
+        virtual bool sampleAndStore
+        (
+            const objectRegistry& store,
+            const word& fieldName
+        ) const;
+
 
         //- Sample field on surface
         virtual tmp<scalarField> sample
@@ -226,13 +230,12 @@ public:
         ) const;
 
 
-    // Interpolate
-
         //- Interpolate field on surface
         virtual tmp<scalarField> interpolate
         (
             const interpolation<scalar>&
         ) const;
+
 
         //- Interpolate field on surface
         virtual tmp<vectorField> interpolate
@@ -258,10 +261,7 @@ public:
             const interpolation<tensor>&
         ) const;
 
-
-    // Output
-
-        //- Write
+        //- Write information
         virtual void print(Ostream&) const;
 };
 
@@ -272,9 +272,9 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifdef NoRepository
-    #include "sampledCuttingPlaneTemplates.C"
-#endif
+// #ifdef NoRepository
+//     #include "sampledDiscreteSurfaceTemplates.C"
+// #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

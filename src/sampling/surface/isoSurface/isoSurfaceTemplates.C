@@ -842,7 +842,7 @@ Foam::isoSurface::interpolate
 
     return interpolate
     (
-        points().size(),
+        this->points().size(),
         triPointMergeMap_,
         interpolatedPoints_,
         interpolatedOldPoints_,

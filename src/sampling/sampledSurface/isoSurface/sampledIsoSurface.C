@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -393,7 +393,6 @@ bool Foam::sampledIsoSurface::updateGeometry() const
 
     // Clear any stored topo
     surfPtr_.clear();
-    facesPtr_.clear();
 
     // Clear derived data
     clearGeom();
@@ -448,7 +447,7 @@ bool Foam::sampledIsoSurface::updateGeometry() const
                 << nl;
         }
         Pout<< "    points         : " << points().size() << nl
-            << "    tris           : " << surface().size() << nl
+            << "    faces          : " << surface().size() << nl
             << "    cut cells      : " << surface().meshCells().size()
             << endl;
     }
@@ -476,7 +475,6 @@ Foam::sampledIsoSurface::sampledIsoSurface
     zoneID_(dict.lookupOrDefault("zone", word::null), mesh.cellZones()),
     exposedPatchName_(word::null),
     surfPtr_(nullptr),
-    facesPtr_(nullptr),
     prevTimeIndex_(-1),
     storedVolFieldPtr_(nullptr),
     volFieldPtr_(nullptr),
@@ -535,7 +533,6 @@ bool Foam::sampledIsoSurface::needsUpdate() const
 bool Foam::sampledIsoSurface::expire()
 {
     surfPtr_.clear();
-    facesPtr_.clear();
     subMeshPtr_.clear();
 
     // Clear derived data

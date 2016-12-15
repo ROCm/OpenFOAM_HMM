@@ -38,7 +38,8 @@ SourceFiles
 #define sampledIsoSurfaceCell_H
 
 #include "sampledSurface.H"
-#include "triSurface.H"
+#include "MeshedSurface.H"
+#include "MeshedSurfacesFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,10 +53,10 @@ namespace Foam
 class sampledIsoSurfaceCell
 :
     public sampledSurface,
-    public triSurface
+    public meshedSurface
 {
-    //- Private typedef for convenience
-    typedef triSurface MeshStorage;
+    // Private typedefs for convenience
+    typedef meshedSurface MeshStorage;
 
     // Private data
 
@@ -76,9 +77,6 @@ class sampledIsoSurfaceCell
 
         //- If restricted to zones, name of this zone or a regular expression
         keyType zoneKey_;
-
-        //- Triangles converted to faceList
-        mutable autoPtr<faceList> facesPtr_;
 
 
         // Recreated for every isoSurface
@@ -154,18 +152,7 @@ public:
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            if (facesPtr_.empty())
-            {
-                const triSurface& s = *this;
-
-                facesPtr_.reset(new faceList(s.size()));
-
-                forAll(s, i)
-                {
-                    facesPtr_()[i] = s[i].triFaceFace();
-                }
-            }
-            return facesPtr_;
+            return MeshStorage::surfFaces();
         }
 
         //- Const access to per-face zone/region information

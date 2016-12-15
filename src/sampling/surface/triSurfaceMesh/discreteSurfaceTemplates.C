@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,13 +23,113 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sampledTriSurfaceMesh.H"
+#include "discreteSurface.H"
+#include "surfFields.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
+bool Foam::discreteSurface::sampleType
+(
+    const objectRegistry& obr,
+    const word& fieldName
+) const
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
+    typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
+    typedef IOField<Type> TmpFieldType;
+
+    if (!mesh().foundObject<VolFieldType>(fieldName))
+    {
+        return false;
+    }
+
+    const VolFieldType& fld = mesh().lookupObject<VolFieldType>(fieldName);
+    tmp<Field<Type>> tfield = sampleField(fld);
+
+    // The rest could be moved into a separate helper
+    if (isA<surfMesh>(obr))
+    {
+        const surfMesh& surf = dynamicCast<const surfMesh>(obr);
+
+        SurfFieldType* ptr = surf.lookupObjectRefPtr<SurfFieldType>(fieldName);
+        if (!ptr)
+        {
+            // Doesn't exist or the wrong type
+            ptr = new SurfFieldType
+            (
+                IOobject
+                (
+                    fieldName,
+                    surf.time().timeName(),
+                    surf,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                surf,
+                dimensioned<Type>("0", fld.dimensions(), Zero)
+            );
+            ptr->writeOpt() = IOobject::NO_WRITE;
+
+            surf.store(ptr);
+        }
+
+        ptr->field() = tfield;
+    }
+    else
+    {
+        TmpFieldType* ptr = obr.lookupObjectRefPtr<TmpFieldType>(fieldName);
+        if (!ptr)
+        {
+            // Doesn't exist or the wrong type
+            ptr = new TmpFieldType
+            (
+                IOobject
+                (
+                    fieldName,
+                    obr.time().timeName(),
+                    obr,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                tfield().size()
+            );
+            ptr->writeOpt() = IOobject::NO_WRITE;
+
+            obr.store(ptr);
+        }
+
+        *ptr = tfield;
+    }
+
+    return true;
+}
+
+
+template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::sampledTriSurfaceMesh::sampleField
+Foam::discreteSurface::sampleType
+(
+    const word& fieldName
+) const
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
+
+    if (mesh().foundObject<VolFieldType>(fieldName))
+    {
+        const VolFieldType& fld = mesh().lookupObject<VolFieldType>(fieldName);
+        return sampleField(fld);
+    }
+    else
+    {
+        return tmp<Field<Type>>();
+    }
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::discreteSurface::sampleField
 (
     const GeometricField<Type, fvPatchField, volMesh>& vField
 ) const
@@ -85,7 +185,7 @@ Foam::sampledTriSurfaceMesh::sampleField
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::sampledTriSurfaceMesh::interpolateField
+Foam::discreteSurface::interpolateField
 (
     const interpolation<Type>& interpolator
 ) const
