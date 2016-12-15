@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,34 +22,37 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sampledSurfaces
+    Foam::surfMeshSamplers
 
 Description
-    Set of surfaces to sample.
+    Set of surfaces to sample into a surfMesh/surfField.
 
-    The write() method is used to sample and write files.
-
-    Example of function object specification:
+    The execute() method is used to sample, and the write() method to write.
+    It is fairly common to use for sampling only and have the write disabled.
 
     \verbatim
     surfaces
     {
-        type    surfaces;
+        type    surfMeshes;
         libs    ("libsampling.so");
 
-        // Write at same frequency as fields
-        writeControl    outputTime;
+        // Sample at every time-step
+        executeControl  timeStep;
+        executeInterval   1;
+
+        // Disable writing (or write at same frequency as fields)
+        writeControl    none;
         writeInterval   1;
 
         // Fields to be sampled
         fields          (p U);
 
-        // Interpolation scheme to use
-        interpolationScheme cell;
+        // Optional: pre-defined derived fields to be sampled
+        derived         (rhoU pTotal);
 
-        // Output surface format
-        surfaceFormat   vtk;
-        formatOptions   {  }
+        // Optional: create surface immediately on read
+        // The default is to create a placeholder without any faces.
+        createOnRead    false;
 
         surfaces
         (
@@ -58,27 +61,25 @@ Description
                 type        sampledTriSurfaceMesh;
                 surface     f0surf.obj;
                 source      cells;
-                keepIds     true;
             }
         );
     }
     \endverbatim
 
+
 See also
-    Foam::surfMeshSamplers
+    Foam::sampledSurfaces
 
 SourceFiles
-    sampledSurfaces.C
+    surfMeshSamplers.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledSurfaces_H
-#define sampledSurfaces_H
+#ifndef surfMeshSamplers_H
+#define surfMeshSamplers_H
 
 #include "regionFunctionObject.H"
-#include "sampledSurface.H"
-#include "surfaceWriter.H"
-#include "mergedSurf.H"
+#include "surfMeshSampler.H"
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "wordReList.H"
@@ -95,21 +96,18 @@ class fvMesh;
 class dictionary;
 
 /*---------------------------------------------------------------------------*\
-                       Class sampledSurfaces Declaration
+                       Class surfMeshSamplers Declaration
 \*---------------------------------------------------------------------------*/
 
-class sampledSurfaces
+class surfMeshSamplers
 :
     public functionObjects::regionFunctionObject,
-    public PtrList<sampledSurface>
+    public PtrList<surfMeshSampler>
 {
     // Static data members
 
-        //- Output verbosity
+        //- output verbosity
         static bool verbose_;
-
-        //- Tolerance for merging points (fraction of mesh bounding box)
-        static scalar mergeTol_;
 
 
     // Private data
@@ -117,88 +115,46 @@ class sampledSurfaces
         //- Const reference to fvMesh
         const fvMesh& mesh_;
 
-        //- Load fields from files (not from objectRegistry)
-        const bool loadFromFiles_;
 
-        //- Output path
-        fileName outputPath_;
+      // Read from dictonary
 
+        //- Names of fields to sample
+        wordReList fieldSelection_;
 
-        // Read from dictonary
-
-            //- Names of fields to sample
-            wordReList fieldSelection_;
-
-            //- Interpolation scheme to use
-            word interpolationScheme_;
-
-
-        // surfaces
-
-            //- Merged meshed surfaces (parallel only)
-            List<mergedSurf> mergedList_;
-
-
-        // Calculated
-
-            //- Surface formatter
-            autoPtr<surfaceWriter> formatter_;
+        //- Names of derived fields to create and sample
+        wordList derivedNames_;
 
 
     // Private Member Functions
 
-
-        //- Return number of fields
-        label classifyFields();
-
-        //- Write geometry only
-        void writeGeometry() const;
-
-        //- Write scalar field with original ids
-        void writeOriginalIds();
-
-        //- Write sampled fieldName on surface and on outputDir path
-        template<class Type>
-        void writeSurface
+        //- Remove items by name from objectRegistry
+        static void checkOutNames
         (
-            const Field<Type>& values,
-            const label surfI,
-            const word& fieldName,
-            const fileName& outputDir
+            const objectRegistry& registry,
+            const UList<word>& names
         );
 
-        //- Sample and write a particular volume field
-        template<class Type>
-        void sampleAndWrite
-        (
-            const GeometricField<Type, fvPatchField, volMesh>&
-        );
 
-        //- Sample and write a particular surface field
+        //- Filter acceptable fields types
         template<class Type>
-        void sampleAndWrite
-        (
-            const GeometricField<Type, fvsPatchField, surfaceMesh>&
-        );
+        wordList acceptType() const;
 
-        //- Sample and write all sampled fields
-        template<class Type> void sampleAndWrite(const IOobjectList& objects);
 
         //- Disallow default bitwise copy construct and assignment
-        sampledSurfaces(const sampledSurfaces&);
-        void operator=(const sampledSurfaces&);
+        surfMeshSamplers(const surfMeshSamplers&) = delete;
+        void operator=(const surfMeshSamplers&) = delete;
 
 
 public:
 
     //- Runtime type information
-    TypeName("surfaces");
+    TypeName("surfMeshes");
 
 
     // Constructors
 
         //- Construct from Time and dictionary
-        sampledSurfaces
+        surfMeshSamplers
         (
             const word& name,
             const Time& time,
@@ -206,23 +162,21 @@ public:
         );
 
         //- Construct for given objectRegistry and dictionary
-        //  allow the possibility to load fields from files
-        sampledSurfaces
+        surfMeshSamplers
         (
             const word& name,
             const objectRegistry&,
-            const dictionary&,
-            const bool loadFromFiles = false
+            const dictionary&
         );
 
 
     //- Destructor
-    virtual ~sampledSurfaces();
+    virtual ~surfMeshSamplers();
 
 
     // Member Functions
 
-        //- Does any of the surfaces need an update?
+        //- Do any of the surfaces need an update?
         virtual bool needsUpdate() const;
 
         //- Mark the surfaces as needing an update.
@@ -234,16 +188,16 @@ public:
         //  Return false if no surfaces required an update.
         virtual bool update();
 
-        //- Set verbosity level
+        //- set verbosity level
         void verbose(const bool verbosity = true);
 
-        //- Read the sampledSurfaces dictionary
+        //- Read the surfMeshSamplers dictionary
         virtual bool read(const dictionary&);
 
-        //- Execute, currently does nothing
+        //- Execute, does sampling
         virtual bool execute();
 
-        //- Sample and write
+        //- Write sampled values
         virtual bool write();
 
         //- Update for changes of mesh - expires the surfaces
@@ -254,12 +208,6 @@ public:
 
         //- Update for changes of mesh due to readUpdate - expires the surfaces
         virtual void readUpdate(const polyMesh::readUpdateState state);
-
-        //- Get merge tolerance
-        static scalar mergeTol();
-
-        //- Set tolerance (and return old tolerance)
-        static scalar mergeTol(const scalar);
 };
 
 
@@ -270,7 +218,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "sampledSurfacesTemplates.C"
+    #include "surfMeshSamplersTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

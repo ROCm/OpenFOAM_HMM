@@ -21,6 +21,12 @@ surface/cuttingPlane/cuttingPlane.C
 surface/isoSurface/isoSurface.C
 surface/isoSurface/isoSurfaceCell.C
 surface/thresholdCellFaces/thresholdCellFaces.C
+surface/triSurfaceMesh/discreteSurface.C
+
+surfMeshSampler/surfMeshSampler/surfMeshSampler.C
+surfMeshSampler/surfMeshSamplers/surfMeshSamplers.C
+surfMeshSampler/plane/surfMeshPlaneSampler.C
+surfMeshSampler/triSurfaceMesh/surfMeshDiscreteSampler.C
 
 sampledSurface/sampledPatch/sampledPatch.C
 sampledSurface/sampledPatchInternalField/sampledPatchInternalField.C
@@ -34,6 +40,10 @@ sampledSurface/sampledSurfaces/sampledSurfaces.C
 sampledSurface/sampledSurfaces/sampledSurfacesGrouping.C
 sampledSurface/sampledTriSurfaceMesh/sampledTriSurfaceMesh.C
 sampledSurface/thresholdCellFaces/sampledThresholdCellFaces.C
+
+/* Proof-of-concept: */
+/* sampledSurface/triSurfaceMesh/sampledDiscreteSurface.C */
+
 
 surfWriters = sampledSurface/writers
 
