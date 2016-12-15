@@ -93,12 +93,6 @@ public:
 
 private:
 
-    // Private data
-
-        //- Reference to the parent function object
-        const runTimePostProcessing& parent_;
-
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -185,7 +179,6 @@ public:
         //- Construct from dictionary
         fieldVisualisationBase
         (
-            const runTimePostProcessing& parent,
             const dictionary& dict,
             const HashPtrTable<Function1<vector>, word>& colours
         );

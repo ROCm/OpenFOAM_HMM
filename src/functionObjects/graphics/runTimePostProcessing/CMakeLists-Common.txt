@@ -48,6 +48,7 @@ set(LIBRARY_OUTPUT_PATH $ENV{FOAM_LIBBIN}
 
 file(GLOB SOURCE_FILES
     fieldVisualisationBase.C
+    functionObjectBase.C
     functionObjectCloud.C
     functionObjectLine.C
     functionObjectSurface.C

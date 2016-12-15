@@ -217,6 +217,24 @@ bool Foam::functionObjects::runTimePostProcessing::write()
         }
     }
 
+    // Clean up
+    forAll(text_, i)
+    {
+        text_[i].clear();
+    }
+    forAll(points_, i)
+    {
+        points_[i].clear();
+    }
+    forAll(lines_, i)
+    {
+        lines_[i].clear();
+    }
+    forAll(surfaces_, i)
+    {
+        surfaces_[i].clear();
+    }
+
     // Reset any floating point trapping
     sigFpe::set(false);
 
