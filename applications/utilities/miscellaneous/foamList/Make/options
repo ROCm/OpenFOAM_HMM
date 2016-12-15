@@ -56,7 +56,6 @@ EXE_LIBS = \
     -lpotential \
     -lpyrolysisModels \
     -lradiationModels \
-    -lrandomProcesses \
     -lreactionThermophysicalModels \
     -lregionCoupled \
     -lregionCoupling \
@@ -79,7 +78,6 @@ EXE_LIBS = \
     -lsurfaceFilmDerivedFvPatchFields \
     -lsurfaceFilmModels \
     -lsurfMesh \
-    -ltabulatedWallFunctions \
     -lthermalBaffleModels \
     -lthermophysicalFunctions \
     -ltopoChangerFvMesh \
