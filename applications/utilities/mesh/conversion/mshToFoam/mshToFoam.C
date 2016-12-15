@@ -154,6 +154,9 @@ int main(int argc, char *argv[])
         wordList(0)
     );
 
+    // Set the precision of the points data to 10
+    IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
+
     Info<< "Writing mesh ..." << endl;
 
     mesh.removeFiles();
