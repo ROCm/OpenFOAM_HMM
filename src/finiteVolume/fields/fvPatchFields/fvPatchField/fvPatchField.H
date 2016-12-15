@@ -32,7 +32,7 @@ Description
     zero-gradient, fixed-gradient, fixed-value and mixed conditions.
 
     The next level of derivation covers all the specialised types with
-    specific evaluation proceedures, particularly with respect to specific
+    specific evaluation procedures, particularly with respect to specific
     fields.
 
 SourceFiles
@@ -344,8 +344,7 @@ public:
             }
 
             //- Return dimensioned internal field reference
-            const DimensionedField<Type, volMesh>&
-            internalField() const
+            const DimensionedField<Type, volMesh>& internalField() const
             {
                 return internalField_;
             }
@@ -418,7 +417,7 @@ public:
             virtual void updateCoeffs();
 
             //- Update the coefficients associated with the patch field
-            //  with a weight field (0..1). This weight field is ususally
+            //  with a weight field (0..1). This weight field is usually
             //  provided as the amount of geometric overlap for 'duplicate'
             //  patches. Sets Updated to true
             virtual void updateWeightedCoeffs(const scalarField& weights);
