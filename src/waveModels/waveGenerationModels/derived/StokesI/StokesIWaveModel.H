@@ -25,6 +25,7 @@ Class
     Foam::waveModels::StokesI
 
 Description
+    Stokes I wave model
 
 \*---------------------------------------------------------------------------*/
 
@@ -55,6 +56,7 @@ protected:
         //- Return the wavelength
         virtual scalar waveLength(const scalar h, const scalar T) const;
 
+        //- Wave height
         virtual scalar eta
         (
             const scalar H,
@@ -67,6 +69,7 @@ protected:
             const scalar phase
         ) const;
 
+        //- Wave velocity
         virtual vector U
         (
             const scalar H,

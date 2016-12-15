@@ -25,6 +25,14 @@ Class
     Foam::waveModels::StokesV
 
 Description
+    Stokes V wave model
+
+    Reference
+    \verbatim
+        Skjelbreia, L., Hendrickson, J. (1960).
+        Fifth order gravity wave theory.
+        Proc. Coastal Engineering Conf., pp. 184-196.
+    \endverbatim
 
 \*---------------------------------------------------------------------------*/
 
@@ -58,79 +66,58 @@ protected:
 
     // Protected Member Functions
 
-        //-
-        virtual scalar A11(const scalar h, const scalar k) const;
+        // Model coefficients
 
-        //-
-        virtual scalar A13(const scalar h, const scalar k) const;
+            virtual scalar A11(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar A15(const scalar h, const scalar k) const;
+            virtual scalar A13(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar A22(const scalar h, const scalar k) const;
+            virtual scalar A15(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar A24(const scalar h, const scalar k) const;
+            virtual scalar A22(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar A33(const scalar h, const scalar k) const;
+            virtual scalar A24(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar A35(const scalar h, const scalar k) const;
+            virtual scalar A33(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar A44(const scalar h, const scalar k) const;
+            virtual scalar A35(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar A55(const scalar h, const scalar k) const;
+            virtual scalar A44(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar B22(const scalar h, const scalar k) const;
+            virtual scalar A55(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar B24(const scalar h, const scalar k) const;
+            virtual scalar B22(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar B33(const scalar h, const scalar k) const;
+            virtual scalar B24(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar B33k(const scalar h, const scalar k) const;
+            virtual scalar B33(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar B35(const scalar h, const scalar k) const;
+            virtual scalar B33k(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar B35k(const scalar h, const scalar k) const;
+            virtual scalar B35(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar B44(const scalar h, const scalar k) const;
+            virtual scalar B35k(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar B55(const scalar h, const scalar k) const;
+            virtual scalar B44(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar B55k(const scalar h, const scalar k) const;
+            virtual scalar B55(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar C1(const scalar h, const scalar k) const;
+            virtual scalar B55k(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar C1k(const scalar h, const scalar k) const;
+            virtual scalar C1(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar C2(const scalar h, const scalar k) const;
+            virtual scalar C1k(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar C2k(const scalar h, const scalar k) const;
+            virtual scalar C2(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar C3(const scalar h, const scalar k) const;
+            virtual scalar C2k(const scalar h, const scalar k) const;
 
-        //-
-        virtual scalar C4(const scalar h, const scalar k) const;
+            virtual scalar C3(const scalar h, const scalar k) const;
 
-        //-
+            virtual scalar C4(const scalar h, const scalar k) const;
+
+
+        //- Model intialisation
         virtual void initialise
         (
             const scalar H,
@@ -142,7 +129,7 @@ protected:
             scalar& f2Out
         ) const;
 
-        //-
+        //- Wave height
         virtual scalar eta
         (
             const scalar h,
@@ -156,7 +143,7 @@ protected:
             const scalar phase
         ) const;
 
-        //-
+        //- Wave velocity
         virtual vector U
         (
             const scalar d,

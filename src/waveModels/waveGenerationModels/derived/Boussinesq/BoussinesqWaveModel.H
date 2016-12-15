@@ -25,6 +25,7 @@ Class
     Foam::waveModels::Boussinesq
 
 Description
+    Boussinesq wave model
 
 \*---------------------------------------------------------------------------*/
 
@@ -41,7 +42,7 @@ namespace waveModels
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class Boussinesq Declaration
+                         Class Boussinesq Declaration
 \*---------------------------------------------------------------------------*/
 
 class Boussinesq
@@ -64,7 +65,7 @@ protected:
             const scalar X0
         ) const;
 
-        //- wave
+        //- Wave
         virtual vector Deta
         (
             const scalar H,

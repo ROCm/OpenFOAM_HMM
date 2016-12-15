@@ -25,6 +25,7 @@ Class
     Foam::waveModels::StokesII
 
 Description
+    Stokes II wave model
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,6 +53,7 @@ protected:
 
     // Protected Member Functions
 
+        //- Wave height
         virtual scalar eta
         (
             const scalar H,
@@ -65,6 +67,7 @@ protected:
             const scalar phase
         ) const;
 
+        //- Wave velocity
         virtual vector U
         (
             const scalar H,
@@ -78,7 +81,6 @@ protected:
             const scalar phase,
             const scalar z
         ) const;
-
 
         //- Set the water level
         virtual void setLevel

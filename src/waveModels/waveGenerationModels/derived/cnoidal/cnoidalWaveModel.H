@@ -25,6 +25,7 @@ Class
     Foam::waveModels::cnoidal
 
 Description
+    Cnoidal wave model
 
 \*---------------------------------------------------------------------------*/
 
@@ -41,7 +42,7 @@ namespace waveModels
 {
 
 /*---------------------------------------------------------------------------*\
-                            Class cnoidal Declaration
+                           Class cnoidal Declaration
 \*---------------------------------------------------------------------------*/
 
 class cnoidal
@@ -67,6 +68,7 @@ protected:
             scalar& LOut
         ) const;
 
+        //- Wave height
         virtual scalar eta
         (
             const scalar H,
@@ -104,6 +106,7 @@ protected:
             const scalar E
         ) const;
 
+        //- Wave velocity
         virtual vector U
         (
             const scalar H,
