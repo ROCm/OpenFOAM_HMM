@@ -1,3 +1,0 @@
-IH_3D_3DAbsorption_InletVelocity/IH_3D_3DAbsorption_InletVelocityFvPatchVectorField.C
-
-LIB = $(FOAM_USER_LIBBIN)/libIHwaveAbsorptionV2esi
