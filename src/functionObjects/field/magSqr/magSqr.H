@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,7 @@ Description
 
     The operation can be applied to any volume or surface field generating a
     volume or surface scalar field.
+    With the %subRegion option, also supports fields on a surfMesh.
 
 See also
     Foam::functionObjects::fvMeshFunctionObject

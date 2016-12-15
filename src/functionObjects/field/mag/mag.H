@@ -32,6 +32,7 @@ Description
 
     The operation can be applied to any volume or surface fields generating a
     volume or surface scalar field.
+    With the %subRegion option, also supports fields on a surfMesh.
 
 See also
     Foam::functionObjects::fvMeshFunctionObject

@@ -48,17 +48,17 @@ void Foam::functionObjects::fieldAverage::resetFields()
     {
         if (faItems_[i].mean())
         {
-            if (obr_.found(faItems_[i].meanFieldName()))
+            if (obr().found(faItems_[i].meanFieldName()))
             {
-                obr_.checkOut(*obr_[faItems_[i].meanFieldName()]);
+                obr().checkOut(*obr()[faItems_[i].meanFieldName()]);
             }
         }
 
         if (faItems_[i].prime2Mean())
         {
-            if (obr_.found(faItems_[i].prime2MeanFieldName()))
+            if (obr().found(faItems_[i].prime2MeanFieldName()))
             {
-                obr_.checkOut(*obr_[faItems_[i].prime2MeanFieldName()]);
+                obr().checkOut(*obr()[faItems_[i].prime2MeanFieldName()]);
             }
         }
     }
@@ -108,14 +108,14 @@ void Foam::functionObjects::fieldAverage::initialize()
 
 void Foam::functionObjects::fieldAverage::restart()
 {
-    Log << "    Restarting averaging at time " << obr_.time().timeName()
+    Log << "    Restarting averaging at time " << obr().time().timeName()
         << nl << endl;
 
     totalIter_.clear();
     totalIter_.setSize(faItems_.size(), 1);
 
     totalTime_.clear();
-    totalTime_.setSize(faItems_.size(), obr_.time().deltaTValue());
+    totalTime_.setSize(faItems_.size(), obr().time().deltaTValue());
 
     initialize();
 }
@@ -128,8 +128,8 @@ void Foam::functionObjects::fieldAverage::calcAverages()
         initialize();
     }
 
-    const label currentTimeIndex = obr_.time().timeIndex();
-    const scalar currentTime = obr_.time().value();
+    const label currentTimeIndex = obr().time().timeIndex();
+    const scalar currentTime = obr().time().value();
 
     if (prevTimeIndex_ == currentTimeIndex)
     {
@@ -176,7 +176,7 @@ void Foam::functionObjects::fieldAverage::calcAverages()
     forAll(faItems_, fieldi)
     {
         totalIter_[fieldi]++;
-        totalTime_[fieldi] += obr_.time().deltaTValue();
+        totalTime_[fieldi] += obr().time().deltaTValue();
     }
 
     Log << endl;
@@ -217,11 +217,11 @@ void Foam::functionObjects::fieldAverage::readAveragingProperties()
     totalIter_.setSize(faItems_.size(), 1);
 
     totalTime_.clear();
-    totalTime_.setSize(faItems_.size(), obr_.time().deltaTValue());
+    totalTime_.setSize(faItems_.size(), obr().time().deltaTValue());
 
     if (restartOnRestart_ || restartOnOutput_)
     {
-        Info<< "    Starting averaging at time " << obr_.time().timeName()
+        Info<< "    Starting averaging at time " << obr().time().timeName()
             << nl;
     }
     else
@@ -248,7 +248,7 @@ void Foam::functionObjects::fieldAverage::readAveragingProperties()
             {
                 Info<< "        " << fieldName
                     << ": starting averaging at time "
-                    << obr_.time().timeName() << endl;
+                    << obr().time().timeName() << endl;
             }
         }
     }

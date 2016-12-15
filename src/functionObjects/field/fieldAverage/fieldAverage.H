@@ -30,6 +30,7 @@ Group
 Description
     Calculates average quantities for a user-specified selection of volumetric
     and surface fields.
+    With the %subRegion option, also supports fields on a surfMesh.
 
     Fields are entered as a list of sub-dictionaries, which indicate the type of
     averages to perform, and can be updated during the calculation.  The current
@@ -108,6 +109,7 @@ Usage
         restartPeriod     | Periodic restart period | conditional |
         restartTime       | One-shot reset of the averaging | no | great
         fields            | list of fields and averaging options | yes |
+        subRegion         | name of a sub-region such as a surface name | no |
     \endtable
 
 
@@ -272,10 +274,10 @@ protected:
 
 
         //- Disallow default bitwise copy construct
-        fieldAverage(const fieldAverage&);
+        fieldAverage(const fieldAverage&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const fieldAverage&);
+        void operator=(const fieldAverage&) = delete;
 
 
 public:

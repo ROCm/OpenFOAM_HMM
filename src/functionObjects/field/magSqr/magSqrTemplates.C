@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,7 @@ License
 
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "surfFields.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -33,6 +34,7 @@ bool Foam::functionObjects::magSqr::calcMagSqr()
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
+    typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
 
     if (foundObject<VolFieldType>(fieldName_))
     {
@@ -48,6 +50,14 @@ bool Foam::functionObjects::magSqr::calcMagSqr()
         (
             resultName_,
             Foam::magSqr(lookupObject<SurfaceFieldType>(fieldName_))
+        );
+    }
+    else if (foundObject<SurfFieldType>(fieldName_))
+    {
+        return store
+        (
+            resultName_,
+            Foam::magSqr(lookupObject<SurfFieldType>(fieldName_))
         );
     }
     else

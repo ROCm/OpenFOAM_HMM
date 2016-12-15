@@ -26,6 +26,7 @@ License
 #include "readFields.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "surfFields.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -35,6 +36,7 @@ bool Foam::functionObjects::readFields::loadField(const word& fieldName)
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
+    typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
 
     if (foundObject<VolFieldType>(fieldName))
     {
@@ -46,6 +48,12 @@ bool Foam::functionObjects::readFields::loadField(const word& fieldName)
     else if (foundObject<SurfaceFieldType>(fieldName))
     {
         DebugInfo<< "readFields: " << SurfaceFieldType::typeName
+            << " " << fieldName << " already exists in database"
+            << " already in database" << endl;
+    }
+    else if (foundObject<SurfFieldType>(fieldName))
+    {
+        DebugInfo<< "readFields: " << SurfFieldType::typeName
             << " " << fieldName << " already exists in database"
             << " already in database" << endl;
     }
@@ -75,6 +83,23 @@ bool Foam::functionObjects::readFields::loadField(const word& fieldName)
             SurfaceFieldType* sfPtr(new SurfaceFieldType(fieldHeader, mesh_));
             mesh_.objectRegistry::store(sfPtr);
             return true;
+        }
+        else if (fieldHeader.typeHeaderOk<SurfFieldType>(true))
+        {
+            if (isA<surfMesh>(obr()))
+            {
+                const surfMesh& s = dynamicCast<const surfMesh>(obr());
+
+                // Store field on surfMesh database
+                Log << "    Reading " << fieldName << endl;
+                SurfFieldType* sfPtr(new SurfFieldType(fieldHeader, s));
+                s.store(sfPtr);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 
