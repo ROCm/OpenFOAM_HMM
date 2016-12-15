@@ -32,18 +32,13 @@
 #     . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 #
 #------------------------------------------------------------------------------
-Script=${0##*/}
-
 usage() {
     exec 1>&2
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
 
     # Print normal usage options
     cat<<USAGE
-
-Usage: $Script [OPTIONS]
-
-Executing $Script is equivalent to
+Executing ${0##*/} is equivalent to
 
    wmake -all [OPTIONS]
 
@@ -53,7 +48,7 @@ With these additional options:
 USAGE
 
     wmake -help
-    exit 1
+    exit 0
 }
 
 
@@ -69,31 +64,30 @@ do
     shift
 
     case "$arg" in
-        -h | -help)
-            usage
-            exit 0
-            ;;
-        -fromWmake)
-            # If called from wmake (to avoid recursion)
-            fromWmake=true
-            ;;
-        -l | -log)
-            optLog="log.Allwmake"
-            continue    # Permanently remove arg
-            ;;
-        -log=*)
-            optLog="${arg##*=}"
-            [ -n "$optLog" ] || optLog="log.Allwmake"
-            continue    # Permanently remove arg
-            ;;
-        -q | -queue)
-            optQueue="-q"
-            continue    # Permanently remove arg
-            ;;
-        lib | libo | libso | dep | objects)
-            # Target type
-            targetType=$arg
-            ;;
+    -h | -help)
+        usage
+        ;;
+    -fromWmake)
+        # If called from wmake (to avoid recursion)
+        fromWmake=true
+        ;;
+    -l | -log)
+        optLog="log.${WM_OPTIONS:-Allwmake}"
+        continue    # Permanently remove arg
+        ;;
+    -log=*)
+        optLog="${arg##*=}"
+        [ -n "$optLog" ] || optLog="log.${WM_OPTIONS:-Allwmake}"
+        continue    # Permanently remove arg
+        ;;
+    -q | -queue)
+        optQueue="-q"
+        continue    # Permanently remove arg
+        ;;
+    lib | libo | libso | dep | objects)
+        # Target type
+        targetType=$arg
+        ;;
     esac
 
     # Re-insert arg
@@ -131,7 +125,7 @@ fi
 # Cleanup local variables and functions
 #------------------------------------------------------------------------------
 
-unset Script fromWmake optLog optQueue
+unset fromWmake optLog optQueue
 unset -f usage
 
 
