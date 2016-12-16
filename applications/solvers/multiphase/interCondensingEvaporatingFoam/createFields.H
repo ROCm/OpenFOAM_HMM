@@ -28,20 +28,6 @@
 
     #include "createPhi.H"
 
-    // Create p before the thermo
-    volScalarField p
-    (
-        IOobject
-        (
-            "p",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        p_rgh
-    );
-
     // Creating e based thermo
     autoPtr<twoPhaseMixtureEThermo> thermo;
     thermo.set(new twoPhaseMixtureEThermo(U, phi));
@@ -54,9 +40,10 @@
 
     volScalarField& T = thermo->T();
     volScalarField& e = thermo->he();
+    e.oldTime();
 
     // Correct e from T and alpha
-    thermo->correct();
+    //thermo->correct();
 
     volScalarField& alpha1(thermo->alpha1());
     volScalarField& alpha2(thermo->alpha2());
@@ -80,7 +67,6 @@
     );
     rho.oldTime();
 
-
     // Construct interface from alpha1 distribution
     interfaceProperties interface
     (
@@ -100,8 +86,7 @@
     volScalarField gh("gh", g & mesh.C());
     surfaceScalarField ghf("ghf", g & mesh.Cf());
 
-    //Update p with rho
-    p = p_rgh + rho*gh;
+    volScalarField& p = thermo->p();
 
     label pRefCell = 0;
     scalar pRefValue = 0.0;

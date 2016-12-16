@@ -702,6 +702,7 @@ int main(int argc, char *argv[])
     IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
 
     Info<< "Writing polyMesh" << endl;
+    pShapeMesh.removeFiles();
     pShapeMesh.write();
 
     Info<< nl << "end" << endl;

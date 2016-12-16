@@ -574,7 +574,11 @@ polyMesh pShapeMesh
     defaultFacesType
 );
 
+// Set the precision of the points data to 10
+IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
+
 Info << "Writing polyMesh" << endl;
+pShapeMesh.removeFiles();
 pShapeMesh.write();
 
 fileName czPath

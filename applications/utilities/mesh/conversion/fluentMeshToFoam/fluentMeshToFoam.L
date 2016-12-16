@@ -1177,6 +1177,9 @@ int main(int argc, char *argv[])
         patchPhysicalTypes
     );
 
+    // Remove files now, to ensure all mesh files written are consistent.
+    pShapeMesh.removeFiles();
+
     //dont write mesh yet, otherwise preservePatchTypes will be broken
     //and zones wont be written
     //checkmesh done after patch addition as well

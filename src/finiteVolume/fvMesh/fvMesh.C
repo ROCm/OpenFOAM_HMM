@@ -335,54 +335,6 @@ Foam::fvMesh::fvMesh
 (
     const IOobject& io,
     const Xfer<pointField>& points,
-    const cellShapeList& shapes,
-    const faceListList& boundaryFaces,
-    const wordList& boundaryPatchNames,
-    const PtrList<dictionary>& boundaryDicts,
-    const word& defaultBoundaryPatchName,
-    const word& defaultBoundaryPatchType,
-    const bool syncPar
-)
-:
-    polyMesh
-    (
-        io,
-        points,
-        shapes,
-        boundaryFaces,
-        boundaryPatchNames,
-        boundaryDicts,
-        defaultBoundaryPatchName,
-        defaultBoundaryPatchType,
-        syncPar
-    ),
-    surfaceInterpolation(*this),
-    fvSchemes(static_cast<const objectRegistry&>(*this)),
-    fvSolution(static_cast<const objectRegistry&>(*this)),
-    data(static_cast<const objectRegistry&>(*this)),
-    boundary_(*this, boundaryMesh()),
-    lduPtr_(nullptr),
-    curTimeIndex_(time().timeIndex()),
-    VPtr_(nullptr),
-    V0Ptr_(nullptr),
-    V00Ptr_(nullptr),
-    SfPtr_(nullptr),
-    magSfPtr_(nullptr),
-    CPtr_(nullptr),
-    CfPtr_(nullptr),
-    phiPtr_(nullptr)
-{
-    if (debug)
-    {
-        InfoInFunction << "Constructing fvMesh from cellShapes" << endl;
-    }
-}
-
-
-Foam::fvMesh::fvMesh
-(
-    const IOobject& io,
-    const Xfer<pointField>& points,
     const Xfer<faceList>& faces,
     const Xfer<labelList>& allOwner,
     const Xfer<labelList>& allNeighbour,

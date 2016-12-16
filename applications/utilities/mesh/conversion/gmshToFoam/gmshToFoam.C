@@ -942,6 +942,9 @@ int main(int argc, char *argv[])
         boundaryPatchPhysicalTypes
     );
 
+    // Remove files now, to ensure all mesh files written are consistent.
+    mesh.removeFiles();
+
     repatchPolyTopoChanger repatcher(mesh);
 
     // Now use the patchFaces to patch up the outside faces of the mesh.
@@ -1139,6 +1142,9 @@ int main(int argc, char *argv[])
         }
         repatcher.changePatches(newPatchPtrList);
     }
+
+    // Set the precision of the points data to 10
+    IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
 
     mesh.write();
 

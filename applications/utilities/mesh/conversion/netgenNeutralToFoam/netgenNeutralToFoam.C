@@ -313,10 +313,12 @@ int main(int argc, char *argv[])
         patchPhysicalTypes
     );
 
-    Info<< "Writing mesh to " << runTime.constant() << endl << endl;
+    // Set the precision of the points data to 10
+    IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
 
+    Info<< "Writing mesh ..." << endl;
+    mesh.removeFiles();
     mesh.write();
-
 
     Info<< "End\n" << endl;
 

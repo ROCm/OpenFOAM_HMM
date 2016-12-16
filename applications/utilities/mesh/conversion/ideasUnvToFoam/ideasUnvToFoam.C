@@ -1158,8 +1158,6 @@ int main(int argc, char *argv[])
 
     Info<< endl;
 
-
-
     // Construct mesh
     polyMesh mesh
     (
@@ -1179,8 +1177,10 @@ int main(int argc, char *argv[])
         wordList(0)                 // boundaryPatchPhysicalTypes
     );
 
+    // Remove files now, to ensure all mesh files written are consistent.
+    mesh.removeFiles();
 
-    if (faceZones.size() > 0 || cellZones.size() > 0)
+    if (faceZones.size() || cellZones.size())
     {
         Info << "Adding cell and face zones" << endl;
 
@@ -1188,7 +1188,7 @@ int main(int argc, char *argv[])
         List<faceZone*> fZones(faceZones.size());
         List<cellZone*> cZones(cellZones.size());
 
-        if (cellZones.size() > 0)
+        if (cellZones.size())
         {
             forAll(cellZones.toc(), cnt)
             {
@@ -1205,7 +1205,7 @@ int main(int argc, char *argv[])
                 );
             }
         }
-        if (faceZones.size() > 0)
+        if (faceZones.size())
         {
             const labelList& own = mesh.faceOwner();
             const labelList& nei = mesh.faceNeighbour();
@@ -1288,6 +1288,9 @@ int main(int argc, char *argv[])
 
         Info << endl;
     }
+
+    // Set the precision of the points data to 10
+    IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
 
     mesh.write();
 
