@@ -514,6 +514,8 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
     dict.lookup("fields") >> fields_;
     UName_ = dict.lookupOrDefault<word>("U", "U");
 
+    Info<< "    Employing velocity field " << UName_ << endl;
+
     if (findIndex(fields_, UName_) == -1)
     {
         FatalIOErrorInFunction(dict)
