@@ -24,6 +24,10 @@ Class
     Foam::combustionModels::eddyDissipationModelBase
 
 Description
+    Standard Eddy Dissipation Model based on the assumption that the
+    reaction rates are controlled by the turbulece time length scale.
+    The chemical reaction rate is governed by the large-eddy mixing scale,
+    (ie k/epsilon). Combustion takes place whenever the turbulence is present.
 
 
 SourceFiles
@@ -54,7 +58,7 @@ class eddyDissipationModelBase
 {
     // Private data
 
-        //- EDC model constant
+        //- EDM constant
         scalar CEDC_;
 
 
@@ -68,10 +72,6 @@ class eddyDissipationModelBase
 
 
 public:
-
-    //- Runtime type information
-    //TypeName("eddyDissipationModelBase");
-
 
     // Constructors
 
