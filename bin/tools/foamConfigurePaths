@@ -53,12 +53,16 @@ usage: ${0##*/}
   -fftwArchPath dir       specify FFTW_ARCH_PATH
   -metis ver              specify METIS_VERSION
   -metisArchPath dir      specify METIS_ARCH_PATH
-  -paraview ver           specify ParaView_VERSION (e.g. 3.12.0)
-  -paraviewInstall dir    specify ParaView_DIR (e.g. /opt/paraviewopenfoam3120)
-  -scotch ver             specify SCOTCH_VERSION (e.g. 6.0.0)
-  -scotchArchPath dir     specify SCOTCH_ARCH_PATH (e.g. /opt/OpenFOAM-scotch-6.0.0/)
+  -paraview ver           specify ParaView_VERSION (eg, 5.0.1)
+  -paraviewInstall dir    specify ParaView_DIR (eg, /opt/paraviewopenfoam3120)
+  -scotch ver             specify SCOTCH_VERSION (eg, scotch_6.0.4)
+  -scotchArchPath dir     specify SCOTCH_ARCH_PATH (eg, /opt/OpenFOAM-scotch_6.0.4)
+  -vtk  ver               specify vtk_version (eg, VTK-7.1.0)
+  -mesa ver               specify mesa_version (eg, mesa-13.0.1)
 
 * Adjust hardcoded installation paths and versions
+
+- unless otherwise specified, the default mpi is SYSTEMOPENMPI
 
 USAGE
     exit 1
@@ -69,8 +73,10 @@ die()
 {
     exec 1>&2
     echo
-    echo "Error: see '${0##*/} -help' for usage"
+    echo "Error encountered:"
     while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See '${0##*/} -help' for usage"
     echo
     exit 1
 }
@@ -212,14 +218,13 @@ do
         shift
         ;;
 
-    -third[Pp]arty)
+    -[Tt]hird[Pp]arty | -[Tt]hird)
         # Replace WM_COMPILER_TYPE=... and WM_COMPILER=...
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         replace etc/bashrc  WM_COMPILER_TYPE ThirdParty  WM_COMPILER "$2"
         adjusted=true
         shift
         ;;
-
 
     -boost)
         # Replace boost_version=...
@@ -329,6 +334,22 @@ do
         # Replace SCOTCH_ARCH_PATH=...
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         replace etc/config.sh/scotch  SCOTCH_ARCH_PATH "$2"
+        adjusted=true
+        shift
+        ;;
+
+    -vtk)
+        # Replace vtk_version=...
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        replace etc/config.sh/vtk  vtk_version "$2"
+        adjusted=true
+        shift
+        ;;
+
+    -mesa)
+        # Replace mesa_version=...
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        replace etc/config.sh/vtk  mesa_version "$2"
         adjusted=true
         shift
         ;;

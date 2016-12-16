@@ -119,7 +119,7 @@ then
 
     export ParaView_DIR=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$pvName
 
-    # Set paths if binaries or source are present
+    # Set paths if binaries are present
     if [ -r $ParaView_DIR ]
     then
         pvLibDir=$ParaView_DIR/lib/$pvMajor
