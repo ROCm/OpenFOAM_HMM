@@ -130,7 +130,7 @@ void Foam::ccm::writer::writeSolution
 
     if (!isA<fvMesh>(mesh_))
     {
-        WarningIn("ccm::writer::writeSolution(const IOobjectList&, const fileName&)")
+        WarningInFunction
             << "cannot write solutions with a polyMesh instead of a fvMesh"
             << endl;
         return;

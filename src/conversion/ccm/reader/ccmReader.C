@@ -109,7 +109,7 @@ std::string Foam::ccm::reader::ccmReadNodestr
         str = strval;
     }
 
-    // allocated by CCMIOReadNodestr
+    // Allocated by CCMIOReadNodestr
     if (strval)
     {
         free(strval);
@@ -189,7 +189,7 @@ Foam::word Foam::ccm::reader::validateWord
             {
                 first = false;
 
-                // start with a digit? need to prefix with '_'
+                // Start with a digit? need to prefix with '_'
                 if (isdigit(*iter))
                 {
                     prefix = true;
@@ -237,7 +237,7 @@ Foam::word Foam::ccm::reader::validateWord
 }
 
 
-// read map data and check error
+// Read map data and check error
 void Foam::ccm::reader::readMap
 (
     const ccmID& mapId,
@@ -305,7 +305,7 @@ void Foam::ccm::reader::readInterfaceDefinitions()
         )
      == kCCMIONoErr
 
-        // get "/InterfaceDefinitions"
+        // Get "/InterfaceDefinitions"
      &&
         CCMIOGetNode
         (
@@ -319,7 +319,7 @@ void Foam::ccm::reader::readInterfaceDefinitions()
     {
         CCMIONode interfaceNode;
 
-        // simulate CCMIONextEntity
+        // Simulate CCMIONextEntity
         for
         (
             int index = 0;
@@ -405,7 +405,7 @@ void Foam::ccm::reader::readProblemDescription_boundaryRegion
         /* nop */
     )
     {
-        // read boundaryRegionId
+        // Read boundaryRegionId
         int Id = 0;
         CCMIOGetEntityIndex
         (
@@ -430,7 +430,7 @@ void Foam::ccm::reader::readProblemDescription_boundaryRegion
             }
             else if (str == "internal")
             {
-                // old PROSTAR bug: "monitoring" mislabeled as "internal"
+                // Old PROSTAR bug: "monitoring" mislabeled as "internal"
                 dict.add(opt, "monitoring");
             }
             else
@@ -461,7 +461,7 @@ void Foam::ccm::reader::readProblemDescription_boundaryRegion
 #ifdef DEBUG_CCMIOREAD
                 Info<< "boundary is on an interface: remap name for  " << Id << endl;
 #endif
-                // substitute immediately with interface name
+                // Substitute immediately with interface name
                 str = interfaceDefinitions_.interfaceName(Id);
             }
             else if
@@ -470,7 +470,7 @@ void Foam::ccm::reader::readProblemDescription_boundaryRegion
              && (str = ccmReadOptstr("BoundaryName", node)).empty()
             )
             {
-                // fallback
+                // Fallback
                 str = word(dict["BoundaryType"]) + "_" + ::Foam::name(Id);
             }
 
@@ -687,7 +687,7 @@ bool Foam::ccm::reader::remapMeshInfo
     }
     else
     {
-        // specified (absolute) name: treat like MUST_READ
+        // Specified (absolute) name: treat like MUST_READ
         remapDict = dictionary(IFstream(remappingDictName)());
     }
 
@@ -699,14 +699,14 @@ bool Foam::ccm::reader::remapMeshInfo
     }
 
 
-    // merge specified cellTable entries together
+    // Merge specified cellTable entries together
     if (remapDict.isDict("cellTable"))
     {
         cellTable_.combine(remapDict.subDict("cellTable"), cellTableId_);
         ok = true;
     }
 
-    // rename boundaries
+    // Rename boundaries
     if (remapDict.isDict("boundaryRegion"))
     {
         boundaryRegion_.rename(remapDict.subDict("boundaryRegion"));
@@ -720,11 +720,7 @@ bool Foam::ccm::reader::remapMeshInfo
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from reading a file
-Foam::ccm::reader::reader
-(
-    const fileName& file,
-    const reader::options& opts
-)
+Foam::ccm::reader::reader(const fileName& file, const reader::options& opts)
 :
     base(),
     options_(new options(opts)),
@@ -754,14 +750,14 @@ Foam::ccm::reader::reader
 {
     if (!option().keptSomeRegion())
     {
-        FatalErrorIn("ccm::reader(const fileName&)")
+        FatalErrorInFunction
             << "must retain at least one region type: fluid | porous | solid"
             << exit(FatalError);
     }
 
     if (!isFile(file, false))
     {
-        FatalErrorIn("ccm::reader(const fileName&)")
+        FatalErrorInFunction
             << "Cannot read file " << file
             << exit(FatalError);
     }

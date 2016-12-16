@@ -519,7 +519,7 @@ void Foam::ccm::writer::writeCells
         }
         else
         {
-            WarningIn("ccm::writer::writeCells(polyMesh&)")
+            WarningInFunction
                 << ioList.objectPath() << endl
                 << "    Has incorrect number of cells: "
                 << ioList.size() << " instead of " << mesh_.nCells()

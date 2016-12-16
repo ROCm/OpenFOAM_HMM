@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        FatalErrorIn("ccmToFoam")
+        FatalErrorInFunction
             << "could not read geometry"
             << exit(FatalError);
     }

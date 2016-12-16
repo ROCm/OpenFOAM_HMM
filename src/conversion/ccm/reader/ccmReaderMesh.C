@@ -45,10 +45,7 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::labelList Foam::ccm::reader::patchStartList
-(
-    label initial
-) const
+Foam::labelList Foam::ccm::reader::patchStartList(label initial) const
 {
     labelList startLst(patchSizes_.size(), Zero);
 
@@ -289,7 +286,7 @@ Foam::labelList Foam::ccm::reader::readVertices
 
     if (dims != 3)
     {
-        FatalErrorIn("ccm::reader::readVertices")
+        FatalErrorInFunction
             << "can only handle 3-dimensional vertices"
             << exit(FatalError);
     }
@@ -2272,7 +2269,7 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
 
     if (nFaceUsed != extFaceI)
     {
-        FatalErrorIn("ccm::reader::mergeInplaceInterfaces")
+        FatalErrorInFunction
             << "coding error: used " << nFaceUsed
             << " faces, but expected to use " << extFaceI << " faces"
             << exit(FatalError);
@@ -2335,7 +2332,7 @@ void Foam::ccm::reader::reorderMesh()
 
         if (nbr >= cellTableId_.size() || own >= cellTableId_.size())
         {
-            FatalErrorIn("ccm::reader::reorderMesh")
+            FatalErrorInFunction
                 << "face:" << faceI
                 << " nbr:" << nbr
                 << " own:" << own
@@ -2357,7 +2354,7 @@ void Foam::ccm::reader::reorderMesh()
         {
             if (f[fp] < 0 || f[fp] >= points_.size())
             {
-                FatalErrorIn("ccm::reader::reorderMesh")
+                FatalErrorInFunction
                     << "face:" << faceI << " f:" << f
                     << abort(FatalError);
             }
@@ -2569,7 +2566,7 @@ void Foam::ccm::reader::addPatches
 
     if (meshFaceI != mesh.nFaces())
     {
-        FatalErrorIn("ccm::reader::addPatches(polyMesh& mesh)")
+        FatalErrorInFunction
             << "meshFaceI:" << meshFaceI << " nFaces:" << mesh.nFaces()
             << abort(FatalError);
     }

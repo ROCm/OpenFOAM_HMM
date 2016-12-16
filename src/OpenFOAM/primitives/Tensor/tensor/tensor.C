@@ -154,7 +154,7 @@ Foam::vector Foam::eigenValues(const tensor& T)
         // based on the above logic, PPP must be less than QQ
         else
         {
-            WarningIn("eigenValues(const tensor&)")
+            WarningInFunction
                 << "complex eigenvalues detected for tensor: " << T
                 << endl;
 
