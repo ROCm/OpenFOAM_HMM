@@ -39,7 +39,7 @@ Usage
     yPlus1
     {
         type        yPlus;
-        libs        ("libutilityFunctionObjects.so");
+        libs        ("libfieldFunctionObjects.so");
         ...
     }
     \endverbatim

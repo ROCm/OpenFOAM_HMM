@@ -38,7 +38,7 @@ Usage
     vorticity1
     {
         type        vorticity;
-        libs        ("libutilityFunctionObjects.so");
+        libs        ("libfieldFunctionObjects.so");
         ...
     }
     \endverbatim
