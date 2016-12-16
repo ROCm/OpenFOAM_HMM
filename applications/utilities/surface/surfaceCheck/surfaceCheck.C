@@ -31,24 +31,25 @@ Description
     Checks geometric and topological quality of a surface.
 
 Usage
-    - surfaceCheck surfaceFile [OPTION]
+    \b surfaceCheck [OPTION] surfaceFile
 
-    \param -checkSelfIntersection \n
-    Check for self-intersection.
+    Options:
+      - \par -checkSelfIntersection
+        Check for self-intersection.
 
-    \param -splitNonManifold \n
-    Split surface along non-manifold edges.
+      - \par -splitNonManifold
+        Split surface along non-manifold edges.
 
-    \param -verbose \n
-    Extra verbosity.
+      - \par -verbose
+        Extra verbosity.
 
-    \param -blockMesh \n
-    Write vertices/blocks for tight-fitting 1 cell blockMeshDict.
+      - \par -blockMesh
+        Write vertices/blocks for tight-fitting 1 cell blockMeshDict.
 
-    \param -outputThreshold \<num files\> \n
-    Specifies upper limit for the number of files written. This is useful to
-    prevent surfaces with lots of disconnected parts to write lots of files.
-    Default is 10. A special case is 0 which prevents writing any files.
+      - \par -outputThreshold \<num files\>
+        Upper limit on the number of files written.
+        Prevent surfaces with many disconnected parts from writing many files.
+        The default is 10. A value of 0 suppresses file writing.
 
 \*---------------------------------------------------------------------------*/
 
@@ -300,14 +301,21 @@ int main(int argc, char *argv[])
         "blockMesh",
         "write vertices/blocks for blockMeshDict"
     );
+    argList::addOption
+    (
+        "outputThreshold",
+        "number",
+        "upper limit on the number of files written."
+        " Default is 10, using 0 suppresses file writing."
+    );
 
     argList args(argc, argv);
 
     const fileName surfFileName = args[1];
     const bool checkSelfIntersect = args.optionFound("checkSelfIntersection");
     const bool splitNonManifold = args.optionFound("splitNonManifold");
-    label outputThreshold = 10;
-    args.optionReadIfPresent("outputThreshold", outputThreshold);
+    const label outputThreshold =
+        args.optionLookupOrDefault("outputThreshold", 10);
 
     Info<< "Reading surface from " << surfFileName << " ..." << nl << endl;
 
