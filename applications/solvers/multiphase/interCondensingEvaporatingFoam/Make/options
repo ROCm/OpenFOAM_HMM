@@ -1,6 +1,7 @@
 interPhaseChangePath = $(FOAM_SOLVERS)/multiphase/interPhaseChangeFoam
 
 EXE_INC = \
+    -I. \
     -ItemperaturePhaseChangeTwoPhaseMixtures/lnInclude \
     -I$(interPhaseChangePath) \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
