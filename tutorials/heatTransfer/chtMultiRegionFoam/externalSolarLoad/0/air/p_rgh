@@ -24,79 +24,37 @@ boundaryField
     maxY
     {
         type            totalPressure;
-        value           $internalField;
         p0              $internalField;
-        U               U;
-        phi             phi;
-        rho             rho;
-        psi             none;
-        gamma           0;
     }
     minX
     {
         type            totalPressure;
-        value           $internalField;
         p0              $internalField;
-        U               U;
-        phi             phi;
-        rho             rho;
-        psi             none;
-        gamma           0;
     }
     maxX
     {
         type            totalPressure;
-        value           $internalField;
         p0              $internalField;
-        U               U;
-        phi             phi;
-        rho             rho;
-        psi             none;
-        gamma           0;
     }
     minY
     {
         type            totalPressure;
-        value           $internalField;
         p0              $internalField;
-        U               U;
-        phi             phi;
-        rho             rho;
-        psi             none;
-        gamma           0;
     }
     maxZ
     {
         type            totalPressure;
-        value           $internalField;
         p0              $internalField;
-        U               U;
-        phi             phi;
-        rho             rho;
-        psi             none;
-        gamma           0;
     }
     air_to_floor
     {
         type            fixedFluxPressure;
-        value           uniform 100000;
         p0              $internalField;
-        U               U;
-        phi             phi;
-        rho             rho;
-        psi             none;
-        gamma           0;
     }
     air_to_solid
     {
         type            fixedFluxPressure;
-        value           uniform 100000;
         p0              $internalField;
-        U               U;
-        phi             phi;
-        rho             rho;
-        psi             none;
-        gamma           0;
     }
 }
 

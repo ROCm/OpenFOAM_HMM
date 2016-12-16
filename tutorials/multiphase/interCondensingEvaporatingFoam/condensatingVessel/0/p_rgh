@@ -28,14 +28,8 @@ boundaryField
 
     top
     {
-        type                totalPressure;
-        p0                  $internalField;
-        U                   U;
-        phi                 phi;
-        rho                 rho;
-        psi                 none;
-        gamma               1;
-        value               $internalField;
+        type            totalPressure;
+        p0              $internalField;
     }
 
     left

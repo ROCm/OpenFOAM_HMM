@@ -54,7 +54,7 @@ solvers
 
     Yi
     {
-        solver          PBiCG;
+        solver          PBiCGStab;
         preconditioner  DILU;
         tolerance       1e-8;
         relTol          0;
@@ -62,7 +62,7 @@ solvers
 
     U
     {
-        solver          PBiCG;
+        solver          PBiCGStab;
         preconditioner  DILU;
         tolerance       1e-6;
         relTol          0.0;
@@ -70,7 +70,7 @@ solvers
 
     UFinal
     {
-        solver          PBiCG;
+        solver          PBiCGStab;
         preconditioner  DILU;
         tolerance       1e-7;
         relTol          0;
@@ -78,7 +78,7 @@ solvers
 
     k
     {
-        solver          PBiCG;
+        solver          PBiCGStab;
         preconditioner  DILU;
         tolerance       1e-8;
         relTol          0;
@@ -87,7 +87,7 @@ solvers
     //hs
     h
     {
-        solver          PBiCG;
+        solver          PBiCGStab;
         preconditioner  DILU;
         tolerance       1e-8;
         relTol          0;
@@ -95,7 +95,7 @@ solvers
 
     Ii
     {
-        solver          PBiCG;
+        solver          PBiCGStab;
         preconditioner  DILU;
         tolerance       1e-8;
         relTol          0;

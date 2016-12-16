@@ -37,13 +37,7 @@ boundaryField
     side
     {
         type            totalPressure;
-        U               U;
-        phi             phi;
-        rho             rho;
-        psi             none;
-        gamma           1.4;
         p0              $internalField;
-        value           $internalField;
     }
 
     frontAndBack

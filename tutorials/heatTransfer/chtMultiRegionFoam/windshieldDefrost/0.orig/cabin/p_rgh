@@ -30,11 +30,7 @@ boundaryField
     outlet
     {
         type            totalPressure;
-        rho             rho;
-        psi             none;
-        gamma           1;
         p0              uniform 100000;
-        value           uniform 100000;
     }
     symmetry
     {

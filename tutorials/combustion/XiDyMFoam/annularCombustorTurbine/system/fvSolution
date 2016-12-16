@@ -43,7 +43,7 @@ solvers
 
     "(U|b|ft|fu|Su|Xi|ha|hau|k|epsilon)"
     {
-        solver          PBiCG;
+        solver          PBiCGStab;
         preconditioner  DILU;
         tolerance       1e-05;
         relTol          0.1;
@@ -52,7 +52,7 @@ solvers
 
     "(U|b|ft|fu|Su|Xi|ha|hau|k|epsilon)Final"
     {
-        solver          PBiCG;
+        solver          PBiCGStab;
         preconditioner  DILU;
         tolerance       1e-05;
         relTol          0;

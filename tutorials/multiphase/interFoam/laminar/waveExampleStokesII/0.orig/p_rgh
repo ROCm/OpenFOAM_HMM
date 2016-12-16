@@ -40,19 +40,13 @@ boundaryField
 
     sides
     {
-	type            empty;
+        type            empty;
     }
 
     top
     {
         type            totalPressure;
-        U               U;
-        phi             phi;
-        rho             rho;
-        psi             none;
-        gamma           1;
         p0              uniform 0;
-        value           uniform 0;
     }
 }
 

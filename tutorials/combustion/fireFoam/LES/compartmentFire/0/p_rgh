@@ -30,20 +30,12 @@ boundaryField
     entrainment
     {
         type            totalPressure;
-        rho             rho;
-        psi             none;
-        gamma           1.4;
         p0              uniform 101325;
-        value           uniform 101325;
     }
     outlet
     {
         type            totalPressure;
-        rho             rho;
-        psi             none;
-        gamma           1.4;
         p0              uniform 101325;
-        value           uniform 101325;
     }
     region0_to_panelRegion_wallPanel
     {
