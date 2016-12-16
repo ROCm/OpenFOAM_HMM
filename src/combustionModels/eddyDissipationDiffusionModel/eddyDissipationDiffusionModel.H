@@ -26,6 +26,10 @@ Class
 Description
     Eddy dissipation model based on the principle of mixed is burnt.
 
+    The time scale is determined by the minimum between the turbulent
+    and diffusive time scales.
+
+
 SourceFiles
     eddyDissipationDiffusionModel.C
 
@@ -71,7 +75,7 @@ class eddyDissipationDiffusionModel
 public:
 
     //- Runtime type information
-    TypeName("EDC");
+    TypeName("EDM");
 
 
     // Constructors
