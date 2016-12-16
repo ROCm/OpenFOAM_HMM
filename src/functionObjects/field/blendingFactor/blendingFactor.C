@@ -79,7 +79,7 @@ Foam::functionObjects::blendingFactor::blendingFactor
 {
     read(dict);
     writeFileHeader(file());
-    setResultName(typeName, fieldName_);
+    setResultName(typeName, "");
 
     tmp<volScalarField> indicatorPtr
     (
@@ -113,24 +113,28 @@ Foam::functionObjects::blendingFactor::~blendingFactor()
 
 bool Foam::functionObjects::blendingFactor::read(const dictionary& dict)
 {
-    fieldExpression::read(dict);
-    writeFile::read(dict);
-
-    phiName_ = dict.lookupOrDefault<word>("phi", "phi");
-
-    tolerance_ = 0.001;
-    if
-    (
-        dict.readIfPresent("tolerance", tolerance_)
-     && (tolerance_ < 0 || tolerance_ > 1)
-    )
+    if (fieldExpression::read(dict) && writeFile::read(dict))
     {
-        FatalErrorInFunction
-            << "tolerance must be in the range 0 to 1.  Supplied value: "
-            << tolerance_ << exit(FatalError);
-    }
+        phiName_ = dict.lookupOrDefault<word>("phi", "phi");
 
-    return true;
+        tolerance_ = 0.001;
+        if
+        (
+            dict.readIfPresent("tolerance", tolerance_)
+         && (tolerance_ < 0 || tolerance_ > 1)
+        )
+        {
+            FatalErrorInFunction
+                << "tolerance must be in the range 0 to 1.  Supplied value: "
+                << tolerance_ << exit(FatalError);
+        }
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 
