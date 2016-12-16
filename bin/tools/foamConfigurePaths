@@ -1,5 +1,5 @@
 #!/bin/sh
-#---------------------------------*- sh -*-------------------------------------
+#------------------------------------------------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
@@ -26,7 +26,7 @@
 #     foamConfigurePaths
 #
 # Description
-#     Adjust hardcoded installation paths and versions
+#     Adjust hardcoded versions and installation paths (for bash, POSIX shell).
 #
 #------------------------------------------------------------------------------
 usage() {
@@ -35,38 +35,59 @@ usage() {
     cat<<USAGE
 
 usage: ${0##*/}
-  -foamInstall dir        specify installation directory (e.g. /opt)
-  -projectName name       specify project name (e.g. openfoam220)
-  -projectVersion ver     specify project version (e.g. 2.2.0)
-  -archOption 32|64       specify architecture option
-  -label 32|64            specify label size
+  -foamInstall dir        specify installation directory (eg, /opt)
+  -foamVersion ver        specify project version (eg, 1612)
+  -projectName name       specify project directory name (eg, openfoam1612)
+  -archOption 32|64       specify 'WM_ARCH_OPTION' architecture option
+  -int32  | -int64        specify 'WM_LABEL_SIZE'
+  -SP     | -DP           specify 'WM_PRECISION_OPTION'
   -system name            specify 'system' compiler to be used
-  -thirdParty name        specify 'ThirdParty' compiler to be used
+  -third  name            specify 'ThirdParty' compiler to be used
+  -boost ver              specify 'boost_version'
+  -boost-path dir         specify 'BOOST_ARCH_PATH'
+  -cgal ver               specify 'cgal_version'
+  -cgal-path dir          specify 'CGAL_ARCH_PATH'
+  -clang ver              specify 'clang_version' for ThirdParty Clang
+  -cmake ver              specify 'cmake_version'
+  -fftw ver               specify 'fffw_version'
+  -fftw-path dir          specify 'FFTW_ARCH_PATH'
+  -metis ver              specify 'METIS_VERSION'
+  -metis-path dir         specify 'METIS_ARCH_PATH'
+  -paraview ver           specify 'ParaView_VERSION' (eg, 5.0.1)
+  -paraview-path dir      specify 'ParaView_DIR' (eg, /opt/paraviewopenfoam3120)
+  -openmpi ver            specify ThirdParty openmpi version for 'FOAM_MPI'
+  -openmpi-system         activate system openmpi
+  -openmpi-third          activate ThirdParty openmpi (using default version)
+  -scotch ver             specify 'SCOTCH_VERSION' (eg, scotch_6.0.4)
+  -scotch-path dir        specify 'SCOTCH_ARCH_PATH' (eg, /opt/OpenFOAM-scotch_6.0.4)
+  -vtk  ver               specify 'vtk_version' (eg, VTK-7.1.0)
+  -mesa ver               specify 'mesa_version' (eg, mesa-13.0.1)
+  -sigfpe | -no-sigfpe    activate/deactivate FOAM_SIGFPE handling
+  gmp-VERSION             for ThirdParty gcc (gmp-system for system library)
+  mpfr-VERSION            for ThirdParty gcc (mpfr-system for system library)
+  mpc-VERSION             for ThirdParty gcc (mpc-system for system library)
 
-  -boost ver              specify boost_version
-  -boostArchPath dir      specify BOOST_ARCH_PATH
-  -cgal ver               specify cgal_version
-  -cgalArchPath dir       specify CGAL_ARCH_PATH
-  -clang ver              specify clang_version for ThirdParty Clang
-  -cmake ver              specify cmake_version
-  -fftw ver               specify fffw_version
-  -fftwArchPath dir       specify FFTW_ARCH_PATH
-  -metis ver              specify METIS_VERSION
-  -metisArchPath dir      specify METIS_ARCH_PATH
-  -paraview ver           specify ParaView_VERSION (eg, 5.0.1)
-  -paraviewInstall dir    specify ParaView_DIR (eg, /opt/paraviewopenfoam3120)
-  -scotch ver             specify SCOTCH_VERSION (eg, scotch_6.0.4)
-  -scotchArchPath dir     specify SCOTCH_ARCH_PATH (eg, /opt/OpenFOAM-scotch_6.0.4)
-  -vtk  ver               specify vtk_version (eg, VTK-7.1.0)
-  -mesa ver               specify mesa_version (eg, mesa-13.0.1)
+* Adjust hardcoded versions and installation paths (for bash, POSIX shell).
 
-* Adjust hardcoded installation paths and versions
-
-- unless otherwise specified, the default mpi is SYSTEMOPENMPI
+Equivalent options:
+  -foamInstall          --foamInstall
+  -foamVersion          --projectVersion
+  -projectName          --projectName
+  -archOption           --archOption
+  -third                -ThirdParty
+  -paraview             --paraviewVersion | -paraviewVersion
+  -paraview-path        --paraviewInstall | -paraviewInstall
+  -scotch               --scotchVersion | -scotchVersion
+  -scotch-path          --scotchArchPath | -scotchArchPath
 
 USAGE
     exit 1
 }
+
+# Check that it appears to be an OpenFOAM installation
+[ -f etc/bashrc -a -d etc/config.sh ] || \
+    usage "Please run from top-level directory of installation"
+
 
 # Report error and exit
 die()
@@ -79,6 +100,25 @@ die()
     echo "See '${0##*/} -help' for usage"
     echo
     exit 1
+}
+
+
+# Check if argument matches the expected input. Respects case.
+# Uses sed for consistency with the replacement routines.
+#
+# _matches <arg> <matcher> [... <matcherN>]
+#
+_matches()
+{
+    local input="$1"
+    shift
+    local result
+    for regexp
+    do
+        result=$(echo "$input" | sed -n -e "/^$regexp"'$/p')
+        test -n "$result" && return 0  # successful match
+    done
+    return 1
 }
 
 
@@ -102,7 +142,7 @@ _inlineSed()
         return 1
     }
 
-    echo "Okay: $msg in $file"
+    echo "    $msg  ($file)"
     return 0
 }
 
@@ -128,22 +168,22 @@ replace()
             $file \
             "$key=.*" \
             "$key=$val" \
-            "Replacing $key setting by '$val'"
+            "Replaced $key setting by '$val'"
     done
 }
 
-
-[ -f etc/bashrc ] || usage "Please run from top-level directory of installation"
-
 #------------------------------------------------------------------------------
 
-unset adjusted
+unset adjusted optMpi
 # Parse options
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h | -help | --help)
         usage
+        ;;
+    '')
+        # Discard empty arguments
         ;;
 
     -foamInstall | --foamInstall)
@@ -154,7 +194,7 @@ do
             etc/bashrc \
             '\(.*BASH_SOURCE.*\)' \
             '##\1' \
-            "Removing default FOAM_INST_DIR setting"
+            "Removed default FOAM_INST_DIR setting"
         _inlineSed \
             etc/bashrc \
             '^ *FOAM_INST_DIR=.*' \
@@ -173,13 +213,13 @@ do
             etc/bashrc \
             'WM_PROJECT_DIR=.*' \
             'WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/'"$projectName" \
-            "Replacing WM_PROJECT_DIR setting by $projectName"
+            "Replaced WM_PROJECT_DIR setting by $projectName"
 
         adjusted=true
         shift
         ;;
 
-   -projectVersion | --projectVersion)
+   -foamVersion | --projectVersion)
         # Replace WM_PROJECT_VERSION=...
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         replace etc/bashrc  WM_PROJECT_VERSION "$2"
@@ -190,24 +230,32 @@ do
     -archOption | --archOption)
         # Replace WM_ARCH_OPTION=...
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
-        archOption="$2"
-        current="$(sed -ne '/^[^#]/s/^.* WM_ARCH_OPTION=//p' etc/bashrc)"
-        if [ "$archOption" = "$current" ]
+        _matches "$2" 32 64 || die "'$1' option has bad value: '$2'"
+
+        optionValue="$2"
+        if [ "$optionValue" = "$(sed -ne '/^[^#]/s/^.* WM_ARCH_OPTION=//p' etc/bashrc)" ]
         then
-            echo "WM_ARCH_OPTION already set to $archOption"
+            echo "WM_ARCH_OPTION already set to $optionValue"
+            : ${adjusted:=false}
         else
-            replace etc/bashrc  WM_ARCH_OPTION "$2"
+            replace etc/bashrc  WM_ARCH_OPTION "$optionValue"
+            adjusted=true
         fi
-        adjusted=true
         shift
         ;;
 
-    -label)
+    -int32 | -int64)
         # Replace WM_LABEL_SIZE=...
-        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
-        replace etc/bashrc  WM_LABEL_SIZE "$2"
+        optionValue="${1#-int}"
+        replace etc/bashrc  WM_LABEL_SIZE "$optionValue"
         adjusted=true
-        shift
+        ;;
+
+    -SP | -DP)
+        # Replace WM_PRECISION_OPTION=...
+        optionValue="${1#-}"
+        replace etc/bashrc  WM_PRECISION_OPTION "$optionValue"
+        adjusted=true
         ;;
 
     -system)
@@ -218,7 +266,7 @@ do
         shift
         ;;
 
-    -[Tt]hird[Pp]arty | -[Tt]hird)
+    -third | -ThirdParty)
         # Replace WM_COMPILER_TYPE=... and WM_COMPILER=...
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         replace etc/bashrc  WM_COMPILER_TYPE ThirdParty  WM_COMPILER "$2"
@@ -234,7 +282,7 @@ do
         shift
         ;;
 
-    -boostArchPath)
+    -boost-path)
         # Replace BOOST_ARCH_PATH=...
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         replace etc/config.sh/CGAL  BOOST_ARCH_PATH "$2"
@@ -250,7 +298,7 @@ do
         shift
         ;;
 
-    -cgalArchPath)
+    -cgal-path)
         # Replace CGAL_ARCH_PATH=...
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         replace etc/config.sh/CGAL  CGAL_ARCH_PATH "$2"
@@ -266,7 +314,7 @@ do
         shift
         ;;
 
-    -fftwArchPath)
+    -fftw-path)
         # Replace FFTW_ARCH_PATH=...
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         replace etc/config.sh/FFTW  FFTW_ARCH_PATH "$2"
@@ -290,15 +338,50 @@ do
         shift
         ;;
 
+    -openmpi)
+        # Replace FOAM_MPI=openmpi-<digits>.. and set to use third-party
+        #  The edit is slightly fragile, but works
+        expected="openmpi-[1-9][.0-9]*"
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        optMpi="$2"
+        _matches "$optMpi" "$expected" || die "'$1' option has bad value: '$optMpi'"
+
+        _inlineSed etc/config.sh/mpi \
+            "FOAM_MPI=$expected" \
+            "FOAM_MPI=$optMpi" \
+            "Replaced 'FOAM_MPI=$expected' setting by 'FOAM_MPI=$optMpi'"
+
+        replace etc/bashrc  WM_MPLIB OPENMPI
+        adjusted=true
+        shift
+        ;;
+
+    -openmpi-system)
+        # Explicitly set WM_MPLIB=SYSTEMOPENMPI
+        replace etc/bashrc  WM_MPLIB SYSTEMOPENMPI
+        optMpi=system
+        adjusted=true
+        ;;
+
+    -openmpi-third)
+        # Explicitly set WM_MPLIB=OPENMPI, using default setting for openmpi
+        replace etc/bashrc  WM_MPLIB OPENMPI
+        optMpi=third
+        adjusted=true
+        ;;
+
     -paraview | -paraviewVersion | --paraviewVersion)
         # Replace ParaView_VERSION=...
+        expected="[5-9][.0-9]*"
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        _matches "$2" "$expected" || die "'$1' option has bad value: '$2'"
+
         replace etc/config.sh/paraview  ParaView_VERSION "$2"
         adjusted=true
         shift
         ;;
 
-    -paraviewInstall | --paraviewInstall)
+    -paraview-path | -paraviewInstall | --paraviewInstall)
         # Replace ParaView_DIR=...
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         replace etc/config.sh/paraview  ParaView_DIR "$2"
@@ -314,7 +397,7 @@ do
         shift
         ;;
 
-    -metisArchPath)
+    -metis-path)
         # Replace METIS_ARCH_PATH=...
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         replace etc/config.sh/metis  METIS_ARCH_PATH "$2"
@@ -330,7 +413,7 @@ do
         shift
         ;;
 
-    -scotchArchPath | --scotchArchPath)
+    -scotch-path | -scotchArchPath | --scotchArchPath)
         # Replace SCOTCH_ARCH_PATH=...
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         replace etc/config.sh/scotch  SCOTCH_ARCH_PATH "$2"
@@ -354,6 +437,40 @@ do
         shift
         ;;
 
+    gmp-[4-9]* | gmp-system)
+        # gcc-related package
+        replace etc/config.sh/compiler  gmp_version "$1"
+        adjusted=true
+        ;;
+
+    mpfr-[2-9]* | mpfr-system)
+        # gcc-related package
+        replace etc/config.sh/compiler  mpfr_version "$1"
+        adjusted=true
+        ;;
+
+    mpc-[0-9]* | mpc-system)
+        # gcc-related package
+        replace etc/config.sh/compiler  mpc_version "$1"
+        adjusted=true
+        ;;
+
+    -sigfpe)
+        # Enable FOAM_SIGFPE handling
+        _inlineSed etc/bashrc \
+            "[a-z][a-z]* FOAM_SIGFPE.*" \
+            "export FOAM_SIGFPE=" \
+            "Activate FOAM_SIGFPE handling"
+        ;;
+
+    -no-sigfpe)
+        # Disable FOAM_SIGFPE handling
+        _inlineSed etc/bashrc \
+            "[a-z][a-z]* FOAM_SIGFPE.*" \
+            "unset FOAM_SIGFPE" \
+            "Deactivate FOAM_SIGFPE handling"
+        ;;
+
     *)
         die "unknown option/argument: '$1'"
         ;;
@@ -361,12 +478,13 @@ do
     shift
 done
 
-[ -n "$adjusted" ] || die "Please specify at least one configure option"
-
-# Set WM_MPLIB=SYSTEMOPENMPI always
-replace etc/bashrc  WM_MPLIB SYSTEMOPENMPI
-
-## Set WM_COMPILER_TYPE=system always
-# replace etc/bashrc  WM_COMPILER_TYPE system
+if [ "$adjusted" = false ]
+then
+    echo "Nothing adjusted"
+    exit 0
+elif [ -z "$adjusted" ]
+then
+    die "Please specify at least one configure option"
+fi
 
 #------------------------------------------------------------------------------
