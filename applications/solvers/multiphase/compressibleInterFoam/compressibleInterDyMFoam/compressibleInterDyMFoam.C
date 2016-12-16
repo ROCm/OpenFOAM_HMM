@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
             if ((correctPhi && mesh.changing()) || mesh.topoChanging())
             {
                 // Calculate absolute flux from the mapped surface velocity
-                // SAF: temporary fix until mapped Uf is assessed
+                // Note: temporary fix until mapped Uf is assessed
                 Uf = fvc::interpolate(U);
 
                 // Calculate absolute flux from the mapped surface velocity

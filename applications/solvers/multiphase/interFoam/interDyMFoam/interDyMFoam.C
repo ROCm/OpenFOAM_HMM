@@ -132,9 +132,12 @@ int main(int argc, char *argv[])
                     ghf = (g & mesh.Cf()) - ghRef;
                 }
 
-                if (mesh.changing() && correctPhi)
+                if ((mesh.changing() && correctPhi) || mesh.topoChanging())
                 {
                     // Calculate absolute flux from the mapped surface velocity
+                    // SAF: temporary fix until mapped Uf is assessed
+                    Uf = fvc::interpolate(U);
+
                     phi = mesh.Sf() & Uf;
 
                     #include "correctPhi.H"
@@ -143,6 +146,8 @@ int main(int argc, char *argv[])
                     fvc::makeRelative(phi, U);
 
                     mixture.correct();
+
+                    mesh.topoChanging(false);
                 }
 
                 if (mesh.changing() && checkMeshCourantNo)
