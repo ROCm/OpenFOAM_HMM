@@ -36,7 +36,7 @@ bool Foam::functionObjects::mag::calcMag()
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
     typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
 
-    if (foundObject<VolFieldType>(fieldName_))
+    if (foundObject<VolFieldType>(fieldName_, false))
     {
         return store
         (
@@ -44,7 +44,7 @@ bool Foam::functionObjects::mag::calcMag()
             Foam::mag(lookupObject<VolFieldType>(fieldName_))
         );
     }
-    else if (foundObject<SurfaceFieldType>(fieldName_))
+    else if (foundObject<SurfaceFieldType>(fieldName_, false))
     {
         return store
         (
@@ -52,7 +52,7 @@ bool Foam::functionObjects::mag::calcMag()
             Foam::mag(lookupObject<SurfaceFieldType>(fieldName_))
         );
     }
-    else if (foundObject<SurfFieldType>(fieldName_))
+    else if (foundObject<SurfFieldType>(fieldName_, false))
     {
         return store
         (

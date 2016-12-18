@@ -33,7 +33,7 @@ bool Foam::functionObjects::grad::calcGrad()
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
 
-    if (foundObject<VolFieldType>(fieldName_))
+    if (foundObject<VolFieldType>(fieldName_, false))
     {
         return store
         (
@@ -42,7 +42,7 @@ bool Foam::functionObjects::grad::calcGrad()
             mesh_.changing() && mesh_.cache(resultName_)
         );
     }
-    else if (foundObject<SurfaceFieldType>(fieldName_))
+    else if (foundObject<SurfaceFieldType>(fieldName_, false))
     {
         return store
         (
