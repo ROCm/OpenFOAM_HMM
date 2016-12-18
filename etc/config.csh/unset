@@ -124,6 +124,7 @@ unsetenv ParaView_INCLUDE_DIR
 unsetenv ParaView_MAJOR
 unsetenv ParaView_VERSION
 unsetenv PV_PLUGIN_PATH
+unsetenv VTK_DIR
 
 #------------------------------------------------------------------------------
 # unset other ThirdParty environment variables
@@ -136,6 +137,7 @@ unsetenv FFTW_ARCH_PATH
 unsetenv GPERFTOOLS_ARCH_PATH
 unsetenv GMP_ARCH_PATH
 unsetenv MPFR_ARCH_PATH
+unsetenv MESA_ARCH_PATH
 unsetenv METIS_ARCH_PATH
 unsetenv SCOTCH_ARCH_PATH
 

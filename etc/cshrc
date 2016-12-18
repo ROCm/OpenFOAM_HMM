@@ -215,6 +215,7 @@ _foamSource $WM_PROJECT_DIR/etc/config.csh/aliases
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/mpi`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/paraview`
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/vtk`
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/ensight`
 
 ##_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/ADIOS`
