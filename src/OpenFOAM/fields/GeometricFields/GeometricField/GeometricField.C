@@ -766,10 +766,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::storeOldTimes() const
     (
         field0Ptr_
      && timeIndex_ != this->time().timeIndex()
-     && !(
-            this->name().size() > 2
-         && this->name()(this->name().size()-2, 2) == "_0"
-         )
+     && !this->name().endsWith("_0")
     )
     {
         storeOldTime();
