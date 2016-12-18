@@ -37,11 +37,46 @@ const Foam::fileName Foam::fileName::null;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fileName::fileName(const wordList& lst)
+Foam::fileName::fileName(const UList<word>& lst)
 {
-    forAll(lst, elemI)
+    // Estimate overall size
+    size_type sz = lst.size();
+    for (const word& item : lst)
     {
-        operator=((*this)/lst[elemI]);
+        sz += item.size();
+    }
+    reserve(sz);
+
+    sz = 0;
+    for (const word& item : lst)
+    {
+        if (item.size())
+        {
+            if (sz++) operator+=('/');
+            operator+=(item);
+        }
+    }
+}
+
+
+Foam::fileName::fileName(std::initializer_list<word> lst)
+{
+    // Estimate overall size
+    size_type sz = lst.size();
+    for (const word& item : lst)
+    {
+        sz += item.size();
+    }
+    reserve(sz);
+
+    sz = 0;
+    for (const word& item : lst)
+    {
+        if (item.size())
+        {
+            if (sz++) operator+=('/');
+            operator+=(item);
+        }
     }
 }
 

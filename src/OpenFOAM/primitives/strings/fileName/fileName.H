@@ -53,10 +53,10 @@ namespace Foam
 {
 
 template<class T> class List;
+template<class T> class UList;
 typedef List<word> wordList;
 
 // Forward declaration of friend functions and operators
-
 class fileName;
 
 Istream& operator>>(Istream&, fileName&);
@@ -119,7 +119,11 @@ public:
         inline fileName(const char*, const bool doStripInvalid=true);
 
         //- Construct by concatenating elements of wordList separated by '/'
-        explicit fileName(const wordList&);
+        explicit fileName(const UList<word>&);
+
+        //- Construct by concatenating words separated by '/'
+        explicit fileName(std::initializer_list<word>);
+
 
         //- Construct from Istream
         fileName(Istream&);

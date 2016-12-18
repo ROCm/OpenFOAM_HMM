@@ -29,26 +29,98 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "argList.H"
 #include "fileName.H"
 #include "SubList.H"
+#include "DynamicList.H"
 #include "IOobject.H"
 #include "IOstreams.H"
 #include "OSspecific.H"
 #include "POSIX.H"
+#include "etcFiles.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
-int main()
+int main(int argc, char *argv[])
 {
-    wordList wrdList(5);
-    wrdList[0] = "hello";
-    wrdList[1] = "hello1";
-    wrdList[2] = "hello2";
-    wrdList[3] = "hello3";
-    wrdList[4] = "hello4.hmm";
+    argList::noParallel();
+    argList::addBoolOption("construct", "test constructors");
+    argList::addBoolOption("default", "reinstate default tests");
+    argList::addNote("runs default tests or specified ones only");
+
+    #include "setRootCase.H"
+
+    // Run default tests, unless only specific tests are requested
+    const bool defaultTests =
+        args.optionFound("default") || args.options().empty();
+
+    if (args.optionFound("construct"))
+    {
+        Info<< "From initializer_list<word> = ";
+        fileName file1
+        {
+            "hello",
+            "hello1",
+            "hello2",
+            "hello3",
+            "hello4.hmm"
+        };
+
+        Info<< file1 << nl;
+
+        Info<< "From initializer_list<fileName> = ";
+        fileName file2
+        {
+            file1,
+            "some",
+            "more/things.hmm"
+        };
+
+        Info<< file2 << nl;
+
+
+        Info<< "From initializer_list<fileName> with nesting = ";
+        fileName file3
+        {
+            std::string("ffO"),
+            "some",
+            "more/things.hmm"
+        };
+        Info<< file3 << nl;
+
+        DynamicList<word> base
+        {
+            "hello",
+            "hello1"
+        };
+
+        fileName file4
+        {
+            "some",
+            file3,
+            "more/things.hmm",
+            file1
+        };
+        Info<< "All ==> " << file4 << nl;
+    }
+
+
+    if (!defaultTests)
+    {
+        return 0;
+    }
+
+    DynamicList<word> wrdList
+    {
+        "hello",
+        "hello1",
+        "hello2",
+        "hello3",
+        "hello4.hmm"
+    };
 
     fileName pathName(wrdList);
 
@@ -189,7 +261,6 @@ int main()
         Foam::rmDir(dirA);
         Foam::rm(lnA);
     }
-
 
 
     // test findEtcFile
