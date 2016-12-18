@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,11 +29,30 @@ Description
 
 #include "IOobject.H"
 #include "objectRegistry.H"
+#include "endian.H"
+#include "label.H"
+#include "scalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 bool Foam::IOobject::writeHeader(Ostream& os, const word& type) const
 {
+    static std::string archHint;
+
+    // Hint about machine endian, OpenFOAM label and scalar sizes
+    if (archHint.empty())
+    {
+        #ifdef WM_LITTLE_ENDIAN
+        archHint.append("LSB;");
+        #elif defined (WM_BIG_ENDIAN)
+        archHint.append("MSB;");
+        #endif
+        archHint.append("label=");
+        archHint.append(std::to_string(8*sizeof(label)));
+        archHint.append(";scalar=");
+        archHint.append(std::to_string(8*sizeof(scalar)));
+    }
+
     if (!os.good())
     {
         InfoInFunction
@@ -47,6 +66,7 @@ bool Foam::IOobject::writeHeader(Ostream& os, const word& type) const
         << "FoamFile\n{\n"
         << "    version     " << os.version() << ";\n"
         << "    format      " << os.format() << ";\n"
+        << "    arch        " << archHint << ";\n"
         << "    class       " << type << ";\n";
 
     if (note().size())
