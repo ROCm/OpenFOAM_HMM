@@ -33,26 +33,28 @@ Description
 #include "label.H"
 #include "scalar.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+// file-scope
+// Hint about machine endian, OpenFOAM label and scalar sizes
+static const std::string archHint =
+(
+#ifdef WM_LITTLE_ENDIAN
+    "LSB"
+#elif defined (WM_BIG_ENDIAN)
+    "MSB"
+#else
+    "???"
+#endif
+    ";label="  + std::to_string(8*sizeof(Foam::label))
+  + ";scalar=" + std::to_string(8*sizeof(Foam::scalar))
+);
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 bool Foam::IOobject::writeHeader(Ostream& os, const word& type) const
 {
-    static std::string archHint;
-
-    // Hint about machine endian, OpenFOAM label and scalar sizes
-    if (archHint.empty())
-    {
-        #ifdef WM_LITTLE_ENDIAN
-        archHint.append("LSB;");
-        #elif defined (WM_BIG_ENDIAN)
-        archHint.append("MSB;");
-        #endif
-        archHint.append("label=");
-        archHint.append(std::to_string(8*sizeof(label)));
-        archHint.append(";scalar=");
-        archHint.append(std::to_string(8*sizeof(scalar)));
-    }
-
     if (!os.good())
     {
         InfoInFunction
@@ -66,10 +68,14 @@ bool Foam::IOobject::writeHeader(Ostream& os, const word& type) const
         << "FoamFile\n{\n"
         << "    version     " << os.version() << ";\n"
         << "    format      " << os.format() << ";\n"
-        << "    arch        " << archHint << ";\n"
         << "    class       " << type << ";\n";
 
-    if (note().size())
+    if (os.format() == IOstream::BINARY)
+    {
+        os  << "    arch        " << archHint << ";\n";
+    }
+
+    if (!note().empty())
     {
         os  << "    note        " << note() << ";\n";
     }
