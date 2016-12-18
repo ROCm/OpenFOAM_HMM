@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,49 +104,53 @@ public:
         inline string();
 
         //- Construct from std::string
-        inline string(const std::string&);
+        inline string(const std::string& str);
 
         //- Construct as copy of character array
-        inline string(const char*);
+        inline string(const char* str);
 
         //- Construct as copy of specified number of characters
-        inline string(const char*, const size_type);
+        inline string(const char* str, const size_type len);
 
         //- Construct from a single character
-        inline string(const char);
+        inline string(const char c);
 
         //- Construct from Istream
-        string(Istream&);
+        string(Istream& is);
 
 
     // Member Functions
 
         //- Count and return the number of a given character in the string
-        size_type count(const char) const;
+        size_type count(const char c) const;
 
         //- Is this string type valid?
         template<class String>
-        static inline bool valid(const string&);
+        static inline bool valid(const string& str);
 
         //- Does this string have particular meta-characters?
         //  The meta characters can be optionally quoted.
         template<class String>
-        static inline bool meta(const string&, const char quote='\\');
+        static inline bool meta(const string& str, const char quote = '\\');
 
         //- Strip invalid characters from the given string
         template<class String>
-        static inline bool stripInvalid(string&);
+        static inline bool stripInvalid(string& str);
 
         //- Return a valid String from the given string
         template<class String>
-        static inline String validate(const string&);
+        static inline String validate(const string& str);
 
         //- Return a String with quoted meta-characters from the given string
         template<class String>
-        static inline string quotemeta(const string&, const char quote='\\');
+        static inline string quotemeta
+        (
+            const string& str,
+            const char quote = '\\'
+        );
 
         //- True when strings match literally
-        inline bool match(const std::string&) const;
+        inline bool match(const std::string& str) const;
 
         //- Avoid masking the normal std::string replace
         using std::string::replace;
@@ -186,16 +190,26 @@ public:
         string& expand(const bool allowEmpty = false);
 
         //- Remove repeated characters returning true if string changed
-        bool removeRepeated(const char);
+        bool removeRepeated(const char character);
 
         //- Return string with repeated characters removed
-        string removeRepeated(const char) const;
+        string removeRepeated(const char character) const;
 
         //- Remove trailing character returning true if string changed
-        bool removeTrailing(const char);
+        bool removeTrailing(const char character);
 
         //- Return string with trailing character removed
-        string removeTrailing(const char) const;
+        string removeTrailing(const char character) const;
+
+        //- True if the string starts with the given text.
+        //  Always true if the given text is empty or if the string
+        //  is identical to the given text.
+        bool startsWith(const std::string& text) const;
+
+        //- True if the string ends with the given text.
+        //  Always true if the given text is empty or if the string
+        //  is identical to the given text.
+        bool endsWith(const std::string& text) const;
 
 
     // Member Operators
@@ -216,8 +230,8 @@ public:
 
     // IOstream Operators
 
-        friend Istream& operator>>(Istream&, string&);
-        friend Ostream& operator<<(Ostream&, const string&);
+        friend Istream& operator>>(Istream& is, string& s);
+        friend Ostream& operator<<(Ostream& os, const string& s);
 };
 
 

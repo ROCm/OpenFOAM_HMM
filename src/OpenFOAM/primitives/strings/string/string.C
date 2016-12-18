@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,6 @@ License
 
 #include "string.H"
 #include "stringOps.H"
-
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -165,6 +164,32 @@ Foam::string Foam::string::removeTrailing(const char character) const
     string str(*this);
     str.removeTrailing(character);
     return str;
+}
+
+
+bool Foam::string::startsWith(const std::string& text) const
+{
+    const size_type strLen = this->size();
+    const size_type txtLen = text.size();
+
+    return
+    (
+        !txtLen
+     || (strLen >= txtLen && !compare(0, txtLen, text))
+    );
+}
+
+
+bool Foam::string::endsWith(const std::string& text) const
+{
+    const size_type strLen = this->size();
+    const size_type txtLen = text.size();
+
+    return
+    (
+        !txtLen
+     || (strLen >= txtLen && !compare(strLen - txtLen, npos, text))
+    );
 }
 
 
