@@ -169,7 +169,7 @@ void Foam::boundaryInfo::setType(const label patchI, const word& condition)
         return;
     }
 
-    if (wordRe(".*[mM]apped.*", wordRe::DETECT).match(types_[patchI]))
+    if (wordRe(".*[Mm]apped.*", wordRe::REGEXP).match(types_[patchI]))
     {
         // ugly hack to avoid overriding mapped types
         return;
