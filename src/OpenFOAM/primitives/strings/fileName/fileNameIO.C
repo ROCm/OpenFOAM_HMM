@@ -78,5 +78,3 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const fileName& fn)
 
 
 // ************************************************************************* //
-
-

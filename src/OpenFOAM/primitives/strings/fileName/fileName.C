@@ -27,6 +27,7 @@ License
 #include "wordList.H"
 #include "DynamicList.H"
 #include "OSspecific.H"
+#include "wordRe.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -303,9 +304,9 @@ Foam::fileName Foam::fileName::path() const
 
 Foam::fileName Foam::fileName::lessExt() const
 {
-    size_type i = find_last_of("./");
+    size_type i = find_ext();
 
-    if (i == npos || i == 0 || operator[](i) == '/')
+    if (i == npos)
     {
         return *this;
     }
@@ -318,15 +319,80 @@ Foam::fileName Foam::fileName::lessExt() const
 
 Foam::word Foam::fileName::ext() const
 {
-    size_type i = find_last_of("./");
+    size_type i = find_ext();
 
-    if (i == npos || i == 0 || operator[](i) == '/')
+    if (i == npos)
     {
         return word::null;
     }
     else
     {
         return substr(i+1, npos);
+    }
+}
+
+
+Foam::fileName& Foam::fileName::ext(const word& ending)
+{
+    if (!ending.empty() && !empty() && operator[](size()-1) != '/')
+    {
+        append(".");
+        append(ending);
+    }
+
+    return *this;
+}
+
+
+bool Foam::fileName::hasExt() const
+{
+    return (find_ext() != npos);
+}
+
+
+bool Foam::fileName::hasExt(const word& ending) const
+{
+    size_type i = find_ext();
+    if (i == npos)
+    {
+        return false;
+    }
+
+    ++i; // Do next comparison *after* the dot
+    return
+    (
+        // Lengths must match
+        ((size() - i) == ending.size())
+     && !compare(i, npos, ending)
+    );
+}
+
+
+bool Foam::fileName::hasExt(const wordRe& ending) const
+{
+    size_type i = find_ext();
+    if (i == npos)
+    {
+        return false;
+    }
+
+    std::string end = substr(i+1, npos);
+    return ending.match(end);
+}
+
+
+bool Foam::fileName::removeExt()
+{
+    const size_type i = find_ext();
+
+    if (i == npos)
+    {
+        return false;
+    }
+    else
+    {
+        this->resize(i);
+        return true;
     }
 }
 
