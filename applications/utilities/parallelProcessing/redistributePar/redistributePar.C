@@ -2532,14 +2532,40 @@ int main(int argc, char *argv[])
             bool haveAddressing = false;
             if (haveMesh[Pstream::myProcNo()])
             {
-                haveAddressing = IOobject
+                // Read faces (just to know their size)
+                faceCompactIOList faces
                 (
-                    "faceProcAddressing",
-                    facesInstance,
-                    meshSubDir,
-                    runTime,
-                    IOobject::READ_IF_PRESENT
-                ).typeHeaderOk<labelIOList>(true);
+                    IOobject
+                    (
+                        "faces",
+                        facesInstance,
+                        meshSubDir,
+                        runTime,
+                        IOobject::MUST_READ
+                    )
+                );
+
+                // Check faceProcAddressing
+                labelIOList faceProcAddressing
+                (
+                    IOobject
+                    (
+                        "faceProcAddressing",
+                        facesInstance,
+                        meshSubDir,
+                        runTime,
+                        IOobject::READ_IF_PRESENT
+                    ),
+                    labelList(0)
+                );
+                if
+                (
+                    faceProcAddressing.headerOk()
+                 && faceProcAddressing.size() == faces.size()
+                )
+                {
+                    haveAddressing = true;
+                }
             }
             else
             {

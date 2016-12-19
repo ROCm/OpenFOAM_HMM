@@ -1111,6 +1111,11 @@ int main(int argc, char *argv[])
             cellProcAddressing.writeOpt() = IOobject::NO_WRITE;
         }
     }
+    else
+    {
+        cellProcAddressing.writeOpt() = IOobject::NO_WRITE;
+    }
+
     if (faceProcAddressing.headerOk())
     {
         if (faceProcAddressing.size() == mesh.nFaces())
@@ -1146,6 +1151,11 @@ int main(int argc, char *argv[])
             faceProcAddressing.writeOpt() = IOobject::NO_WRITE;
         }
     }
+    else
+    {
+        faceProcAddressing.writeOpt() = IOobject::NO_WRITE;
+    }
+
     if (pointProcAddressing.headerOk())
     {
         if (pointProcAddressing.size() == mesh.nPoints())
@@ -1160,20 +1170,30 @@ int main(int argc, char *argv[])
         }
         else
         {
-            Info<< "Not writing consistent processor point decomposition"
+            Info<< "Not writing inconsistent processor point decomposition"
                 << " map " << pointProcAddressing.filePath() << endl;
             pointProcAddressing.writeOpt() = IOobject::NO_WRITE;
         }
     }
+    else
+    {
+        pointProcAddressing.writeOpt() = IOobject::NO_WRITE;
+    }
+
     if (boundaryProcAddressing.headerOk())
     {
         if (boundaryProcAddressing.size() != mesh.boundaryMesh().size())
         {
-            Info<< "Not writing consistent processor patch decomposition"
+            Info<< "Not writing inconsistent processor patch decomposition"
                 << " map " << boundaryProcAddressing.filePath() << endl;
             boundaryProcAddressing.writeOpt() = IOobject::NO_WRITE;
         }
     }
+    else
+    {
+        boundaryProcAddressing.writeOpt() = IOobject::NO_WRITE;
+    }
+
 
 
 

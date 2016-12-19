@@ -44,7 +44,7 @@ export MESA_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mesa_v
 #------------------------------------------------------------------------------
 if [ "$FOAM_VERBOSE" -a "$PS1" ]
 then
-    echo "Using vtk  ($vtk_version)  ->  $VTK_ARCH_PATH" 1>&2
+    echo "Using vtk  ($vtk_version)  ->  $VTK_DIR" 1>&2
     echo "Using mesa ($mesa_version)  ->  $MESA_ARCH_PATH" 1>&2
 fi
 
