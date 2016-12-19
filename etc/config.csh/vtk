@@ -45,7 +45,7 @@ setenv MESA_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mesa_v
 
 #------------------------------------------------------------------------------
 if ($?FOAM_VERBOSE && $?prompt) then
-    echo "Using vtk  ($vtk_version)  ->  $VTK_ARCH_PATH"
+    echo "Using vtk  ($vtk_version)  ->  $VTK_DIR"
     echo "Using mesa ($mesa_version)  ->  $MESA_ARCH_PATH"
 endif
 
