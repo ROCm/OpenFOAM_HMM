@@ -30,7 +30,7 @@ License
 template<class FieldType>
 bool Foam::functionObjects::div::calcDiv()
 {
-    if (foundObject<FieldType>(fieldName_))
+    if (foundObject<FieldType>(fieldName_, false))
     {
         return store
         (

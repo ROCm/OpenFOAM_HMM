@@ -42,6 +42,8 @@ namespace distributionModels
 
 void Foam::distributionModels::general::initialise()
 {
+    static scalar eps = ROOTVSMALL;
+
     const label nEntries = xy_.size();
 
     integral_.setSize(nEntries);
@@ -50,7 +52,7 @@ void Foam::distributionModels::general::initialise()
     integral_[0] = 0.0;
     for (label i = 1; i < nEntries; i++)
     {
-        scalar k = (xy_[i][1] - xy_[i-1][1])/(xy_[i][0] - xy_[i-1][0]);
+        scalar k = (xy_[i][1] - xy_[i-1][1])/(xy_[i][0] - xy_[i-1][0] + eps);
         scalar d = xy_[i-1][1] - k*xy_[i-1][0];
         scalar y1 = xy_[i][0]*(0.5*k*xy_[i][0] + d);
         scalar y0 = xy_[i-1][0]*(0.5*k*xy_[i-1][0] + d);
@@ -61,12 +63,12 @@ void Foam::distributionModels::general::initialise()
 
     scalar sumArea = integral_.last();
 
-    meanValue_ = sumArea/(maxValue() - minValue());
+    meanValue_ = sumArea/(maxValue() - minValue() + eps);
 
     for (label i=0; i < nEntries; i++)
     {
-        xy_[i][1] /= sumArea;
-        integral_[i] /= sumArea;
+        xy_[i][1] /= sumArea + eps;
+        integral_[i] /= sumArea + eps;
     }
 }
 
@@ -243,9 +245,10 @@ Foam::dictionary Foam::distributionModels::general::writeDict
     const word& dictName
 ) const
 {
-//    dictionary dict = distributionModel::writeDict(dictName);
+    // dictionary dict = distributionModel::writeDict(dictName);
     dictionary dict(dictName);
-    dict.add("distribution", xy_);
+    dict.add("x", x());
+    dict.add("y", y());
 
     return dict;
 }
@@ -253,9 +256,46 @@ Foam::dictionary Foam::distributionModels::general::writeDict
 
 void Foam::distributionModels::general::readDict(const dictionary& dict)
 {
-//    distributionModel::readDict(dict);
-    dict.lookup("distribution") >> xy_;
+    // distributionModel::readDict(dict);
+    List<scalar> x(dict.lookup("x"));
+    List<scalar> y(dict.lookup("y"));
+
+    xy_.setSize(x.size());
+    forAll(xy_, i)
+    {
+        xy_[i][0] = x[i];
+        xy_[i][1] = y[i];
+    }
+
     initialise();
+}
+
+
+Foam::tmp<Foam::Field<Foam::scalar>>
+Foam::distributionModels::general::x() const
+{
+    tmp<Field<scalar>> tx(new Field<scalar>(xy_.size()));
+    scalarField& xi = tx.ref();
+    forAll(xy_, i)
+    {
+        xi[i] = xy_[i][0];
+    }
+
+    return tx;
+}
+
+
+Foam::tmp<Foam::Field<Foam::scalar>>
+Foam::distributionModels::general::y() const
+{
+    tmp<Field<scalar>> ty(new Field<scalar>(xy_.size()));
+    scalarField& yi = ty.ref();
+    forAll(xy_, i)
+    {
+        yi[i] = xy_[i][1];
+    }
+
+    return ty;
 }
 
 

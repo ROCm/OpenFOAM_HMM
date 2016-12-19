@@ -49,7 +49,7 @@ Usage
         scalar1
         {
             type            scalarTransport;
-            libs            ("libutilityFunctionObjects.so");
+            libs            ("libsolverFunctionObjects.so");
 
             resetOnStartUp  no;
             region          cabin;
@@ -64,7 +64,7 @@ Usage
     }
     \endverbatim
 
-    Example of function object specification to solve a residency time
+    Example of function object specification to solve a residence time
     in a two phase flow:
     equation:
     \verbatim
@@ -117,13 +117,13 @@ Usage
         rho          | Name of density field   | no          | rho
         UPhi         | Name of U to generate phi  | no          | none
         phase        | Name of the phase name  | no          | none
-        nut          | Name of the turbulence viscocity | no | none
+        nut          | Name of the turbulence viscosity | no | none
         D            | Diffusion coefficient   | no          | auto generated
         nCorr        | Number of correctors    | no          | 0
         resetOnStartUp | Reset scalar to zero on start-up | no | no
         schemesField | Name of field to specify schemes | no | fieldName
         fvOptions    | List of scalar sources  | no          |
-        bounded01    | Bounds scalar betwee 0-1 for multiphase | no |true
+        bounded01    | Bounds scalar between 0-1 for multiphase | no |true
         phasePhiCompressed |Compressed flux for VOF | no | alphaPhiUn
     \endtable
 

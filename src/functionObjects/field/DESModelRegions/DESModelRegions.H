@@ -42,7 +42,7 @@ Usage
     DESModelRegions1
     {
         type        DESModelRegions;
-        libs        ("libutilityFunctionObjects.so");
+        libs        ("libfieldFunctionObjects.so");
         ...
     }
     \endverbatim

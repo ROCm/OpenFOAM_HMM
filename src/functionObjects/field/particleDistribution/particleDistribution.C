@@ -46,6 +46,7 @@ namespace functionObjects
 }
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::particleDistribution::particleDistribution
@@ -56,12 +57,12 @@ Foam::functionObjects::particleDistribution::particleDistribution
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    writeFile(runTime, name, typeName, dict),
+    writeFile(runTime, name),
     cloudName_("unknown-cloudName"),
-    fieldNames_(),
-    tagFieldName_("unknown-tagFieldName"),
-    distributionBinWidth_(0),
-    rndGen_(1234, -1)
+    nameVsBinWidth_(),
+    tagFieldName_("none"),
+    rndGen_(1234, -1),
+    writerPtr_(nullptr)
 {
     read(dict);
 }
@@ -80,11 +81,12 @@ bool Foam::functionObjects::particleDistribution::read(const dictionary& dict)
     if (fvMeshFunctionObject::read(dict) && writeFile::read(dict))
     {
         dict.lookup("cloud") >> cloudName_;
-        dict.lookup("fields") >> fieldNames_;
-        dict.lookup("tagField") >> tagFieldName_;
-        dict.lookup("distributionBinWidth") >> distributionBinWidth_;
+        dict.lookup("nameVsBinWidth") >> nameVsBinWidth_;
+        dict.readIfPresent("tagField", tagFieldName_);
+        word format(dict.lookup("setFormat"));
+        writerPtr_ = writer<scalar>::New(format);
 
-        Info<< type() << " " << name() << " output:"
+        Info<< type() << " " << name() << " output:" << nl
             << "    Processing cloud : " << cloudName_ << nl
             << endl;
 
@@ -107,9 +109,12 @@ bool Foam::functionObjects::particleDistribution::write()
 
     if (!mesh_.foundObject<cloud>(cloudName_))
     {
+        wordList cloudNames(mesh_.names<cloud>());
+
         WarningInFunction
             << "Unable to find cloud " << cloudName_
-            << " in the mesh database" << endl;
+            << " in the mesh database.  Available clouds include:"
+            << cloudNames << endl;
 
         return false;
     }
@@ -152,25 +157,25 @@ bool Foam::functionObjects::particleDistribution::write()
         }
     }
 
+
     bool ok = false;
-    forAll(fieldNames_, i)
+    forAll(nameVsBinWidth_, i)
     {
-        const word fName = fieldNames_[i];
-        ok = ok || processField<scalar>(cloudObr, fName, tagAddr);
-        ok = ok || processField<vector>(cloudObr, fName, tagAddr);
-        ok = ok || processField<tensor>(cloudObr, fName, tagAddr);
-        ok = ok || processField<sphericalTensor>(cloudObr, fName, tagAddr);
-        ok = ok || processField<symmTensor>(cloudObr, fName, tagAddr);
-        ok = ok || processField<tensor>(cloudObr, fName, tagAddr);
+        ok = false;
+        ok = ok || processField<scalar>(cloudObr, i, tagAddr);
+        ok = ok || processField<vector>(cloudObr, i, tagAddr);
+        ok = ok || processField<tensor>(cloudObr, i, tagAddr);
+        ok = ok || processField<sphericalTensor>(cloudObr, i, tagAddr);
+        ok = ok || processField<symmTensor>(cloudObr, i, tagAddr);
+        ok = ok || processField<tensor>(cloudObr, i, tagAddr);
 
         if (log && !ok)
         {
             WarningInFunction
-                << "Unable to find field " << fName << " in the "
-                << cloudName_ << " cloud database" << endl;
+                << "Unable to find field " << nameVsBinWidth_[i].first()
+                << " in the " << cloudName_ << " cloud database" << endl;
         }
     }
-
 
     return true;
 }
@@ -180,26 +185,53 @@ void Foam::functionObjects::particleDistribution::generateDistribution
 (
     const word& fieldName,
     const scalarField& field,
+    const scalar binWidth,
     const label tag
 )
 {
-    Ostream& os = file();
+    if (field.empty())
+    {
+        return;
+    }
 
+    word fName(fieldName);
     if (tag != -1)
     {
-        os  << tag << token::TAB;
+        fName = fName + '_' + Foam::name(tag);
     }
 
     distributionModels::general distribution
     (
         field,
-        distributionBinWidth_,
+        binWidth,
         rndGen_
     );
 
-    distribution.writeData(os);
+    const Field<scalar> distX(distribution.x());
+    const Field<scalar> distY(distribution.y());
 
-    os  << endl;
+    pointField xBin(distX.size(), Zero);
+    xBin.replace(0, distX);
+    const coordSet coords
+    (
+        fName,
+        "x",
+        xBin,
+        distX
+    );
+
+    const wordList fieldNames(1, fName);
+
+    fileName outputPath(baseTimeDir());
+    mkDir(outputPath);
+    OFstream graphFile(outputPath/writerPtr_->getFileName(coords, fieldNames));
+
+    Log << "    Writing distribution of " << fieldName
+        << " to " << graphFile.name() << endl;
+
+    List<const scalarField*> yPtrs(1);
+    yPtrs[0] = &distY;
+    writerPtr_->write(coords, fieldNames, yPtrs, graphFile);
 }
 
 

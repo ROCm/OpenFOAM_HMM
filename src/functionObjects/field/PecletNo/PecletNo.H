@@ -36,7 +36,7 @@ Usage
     PecletNo1
     {
         type        PecletNo;
-        libs        ("libutilityFunctionObjects.so");
+        libs        ("libfieldFunctionObjects.so");
         ...
     }
     \endverbatim

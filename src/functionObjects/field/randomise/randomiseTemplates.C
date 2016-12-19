@@ -33,11 +33,11 @@ bool Foam::functionObjects::randomise::calcRandomised()
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
-    if (foundObject<VolFieldType>(fieldName_))
+    if (foundObject<VolFieldType>(fieldName_, false))
     {
         const VolFieldType& field = lookupObject<VolFieldType>(fieldName_);
 
-        resultName_ = fieldName_ + "Random";
+        resultName_ = fieldName_ & "Random";
 
         tmp<VolFieldType> rfieldt(new VolFieldType(field));
         VolFieldType& rfield = rfieldt.ref();

@@ -147,8 +147,8 @@ Foam::tmp<Foam::scalarField> Foam::waveModel::waterLevel() const
         reduce(paddleMagSf[paddlei], sumOp<scalar>());
         reduce(paddleWettedMagSf[paddlei], sumOp<scalar>());
         level[paddlei] +=
-            paddleWettedMagSf[paddlei]
-           /(paddleMagSf[paddlei]*zSpan_ + ROOTVSMALL);
+            paddleWettedMagSf[paddlei]*zSpan_
+           /(paddleMagSf[paddlei] + ROOTVSMALL);
     }
 
     return tlevel;

@@ -29,10 +29,13 @@ template<class Type>
 bool Foam::functionObjects::particleDistribution::processField
 (
     const objectRegistry& obr,
-    const word& fieldName,
+    const label fieldi,
     const List<DynamicList<label>>& addr
 )
 {
+    const word& fieldName = nameVsBinWidth_[fieldi].first();
+    const scalar binWidth = nameVsBinWidth_[fieldi].second();
+
     if (obr.foundObject<IOField<Type>>(fieldName))
     {
         const IOField<Type>& field =
@@ -45,7 +48,13 @@ bool Foam::functionObjects::particleDistribution::processField
                 const Field<Type> subField(field, addr[i]);
                 for (direction d = 0; d < pTraits<Type>::nComponents; ++d)
                 {
-                    generateDistribution(fieldName, subField.component(d), i);
+                    generateDistribution
+                    (
+                        fieldName,
+                        subField.component(d),
+                        binWidth,
+                        i
+                    );
                 }
             }
         }
@@ -53,7 +62,8 @@ bool Foam::functionObjects::particleDistribution::processField
         {
             for (direction d = 0; d < pTraits<Type>::nComponents; ++d)
             {
-                generateDistribution(fieldName, field.component(d));
+                const word fName = fieldName + pTraits<Type>::componentNames[d];
+                generateDistribution(fName, field.component(d), binWidth);
             }
         }
 

@@ -22,16 +22,7 @@ solvers
     {
         nAlphaCorr      1;
         nAlphaSubCycles 3;
-        alphaOuterCorrectors yes;
         cAlpha          1;
-
-        MULESCorr       no;
-        nLimiterIter    3;
-
-        solver          smoothSolver;
-        smoother        symGaussSeidel;
-        tolerance       1e-8;
-        relTol          0;
     }
 
     pcorr
@@ -53,13 +44,7 @@ solvers
     p_rghFinal
     {
         solver          GAMG;
-        smoother        GaussSeidel;
-        nPreSweeps      0;
-        nPostSweeps     2;
-        cacheAgglomeration on;
-        agglomerator    faceAreaPair;
-        nCellsInCoarsestLevel 10;
-        mergeLevels     1;
+        smoother        DIC;
         tolerance       1e-7;
         relTol          0;
     }

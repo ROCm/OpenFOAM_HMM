@@ -16,7 +16,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Write maps from renumbered back to original mesh
-writeMaps true;
+writeMaps false;
 
 // Optional entry: sort cells on coupled boundaries to last for use with
 // e.g. nonBlockingGaussSeidel.

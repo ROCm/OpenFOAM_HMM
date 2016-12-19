@@ -30,8 +30,9 @@ License
 template<class Type>
 bool Foam::functionObjects::fieldExpression::foundObject
 (
-    const word& name
-)
+    const word& name,
+    const bool verbose
+) const
 {
     if (fvMeshFunctionObject::foundObject<Type>(name))
     {
@@ -39,10 +40,13 @@ bool Foam::functionObjects::fieldExpression::foundObject
     }
     else
     {
-        Warning
-            << "    functionObjects::" << type() << " " << this->name()
-            << " cannot find required object " << name << " of type "
-            << Type::typeName << endl;
+        if (verbose)
+        {
+            Warning
+                << "    functionObjects::" << type() << " " << this->name()
+                << " cannot find required object " << name << " of type "
+                << Type::typeName << endl;
+        }
 
         return false;
     }

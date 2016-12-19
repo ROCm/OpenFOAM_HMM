@@ -28,7 +28,7 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Generates a particle distrbution for lagrangian data.
+    Generates a particle distribution for lagrangian data at a given time.
 
 Usage
     \verbatim
@@ -38,8 +38,12 @@ Usage
         libs        ("libfieldFunctionObjects.so");
         ...
         cloud       "myCloud";
-        field       "d"
-        distributionBinWidth 0.1;
+        nameVsBinWidth
+        (
+            (d 0.1)
+            (U 10)
+        );
+        setFormat   raw;
     }
     \endverbatim
 
@@ -48,8 +52,9 @@ Usage
         Property    | Description              |  Required  | Default value
         type        | Type name: particleDistribution | yes |
         cloud       | Name of cloud to process | Yes        |
-        field       | Name of cloud field to process | Yes  |
-        distributionBinWidth | Width of distribution bins | yes |
+        nameVsBinWidth | List of cloud field vs bin width | Yes |
+        tagField    | Name of cloud field to use to group particles | no | none
+        setFormat   | Output format            | yes         |
     \endtable
 
 See also
@@ -69,6 +74,8 @@ SourceFiles
 #include "writeFile.H"
 #include "scalarField.H"
 #include "cachedRandom.H"
+#include "Tuple2.H"
+#include "writer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -93,26 +100,27 @@ protected:
         //- Cloud name
         word cloudName_;
 
-        //- Field name
-        wordList fieldNames_;
+        //- List of field name vs. bin width
+        List<Tuple2<word, scalar>> nameVsBinWidth_;
 
         //- Tag field name - used to filter the particles into groups
         word tagFieldName_;
 
-        //- Distribution bin width
-        scalar distributionBinWidth_;
-
         //- Random number generator - used by distribution models
         cachedRandom rndGen_;
 
+        //- Writer
+        autoPtr<writer<scalar>> writerPtr_;
 
-    // Private Member Functions
+
+    // Protected Member Functions
 
         //- Generate the distribution
         void generateDistribution
         (
             const word& fieldName,
             const scalarField& field,
+            const scalar binWidth,
             const label tag = -1
         );
 
@@ -121,7 +129,7 @@ protected:
         bool processField
         (
             const objectRegistry& obr,
-            const word& fieldName,
+            const label fieldi,
             const List<DynamicList<label>>& addr
         );
 
