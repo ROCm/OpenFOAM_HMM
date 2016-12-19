@@ -23,11 +23,14 @@ License
 Class
     Foam::combustionModels::eddyDissipationDiffusionModel
 
+Group
+    grpCombustionModels
+
 Description
     Eddy dissipation model based on the principle of mixed is burnt.
 
-    The time scale is determined by the minimum between the turbulent
-    and diffusive time scales.
+    The time scale is determined by the minimum of the turbulence
+    and diffusion time scales.
 
 
 SourceFiles
