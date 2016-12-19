@@ -109,6 +109,8 @@ if (closedVolume)
 rho = thermo.rho();
 rho = max(rho, rhoMin);
 rho = min(rho, rhoMax);
+thermo.rho() = max(thermo.rho(), rhoMin);
+thermo.rho() = min(thermo.rho(), rhoMax);
 
 if (!simple.transonic())
 {
