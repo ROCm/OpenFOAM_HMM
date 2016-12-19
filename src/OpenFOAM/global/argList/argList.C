@@ -158,6 +158,21 @@ void Foam::argList::noBanner()
 }
 
 
+void Foam::argList::noFunctionObjects(bool addWithOption)
+{
+    removeOption("noFunctionObjects");
+
+    if (addWithOption)
+    {
+        addBoolOption
+        (
+            "withFunctionObjects",
+            "execute functionObjects"
+        );
+    }
+}
+
+
 void Foam::argList::noParallel()
 {
     removeOption("parallel");
@@ -459,6 +474,9 @@ Foam::argList::argList
                 )
             )
             {
+                // If the option is known to require an argument,
+                // get it or emit a FatalError.
+
                 ++argI;
                 if (argI >= args_.size())
                 {
@@ -475,6 +493,9 @@ Foam::argList::argList
             }
             else
             {
+                // All other options (including unknown ones) are simply
+                // registered as existing.
+
                 options_.insert(optionName, "");
             }
         }
@@ -527,29 +548,31 @@ void Foam::argList::parse
     //   -help    print the usage
     //   -doc     display application documentation in browser
     //   -srcDoc  display source code in browser
-    if
-    (
-        options_.found("help")
-     || options_.found("doc")
-     || options_.found("srcDoc")
-    )
     {
+        bool quickExit = false;
+
         if (options_.found("help"))
         {
             printUsage();
+            quickExit = true;
         }
 
         // Only display one or the other
         if (options_.found("srcDoc"))
         {
             displayDoc(true);
+            quickExit = true;
         }
         else if (options_.found("doc"))
         {
             displayDoc(false);
+            quickExit = true;
         }
 
-        ::exit(0);
+        if (quickExit)
+        {
+            ::exit(0);
+        }
     }
 
     // Print the usage message and exit if the number of arguments is incorrect
