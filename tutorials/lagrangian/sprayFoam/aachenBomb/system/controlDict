@@ -49,5 +49,22 @@ maxCo           0.1;
 
 runTimeModifiable yes;
 
+functions
+{
+    distribtion1
+    {
+        type            particleDistribution;
+        libs            ("libfieldFunctionObjects.so");
+        writeControl    writeTime;
+        cloud           sprayCloud;
+        nameVsBinWidth
+        (
+            (d 1e-5)
+            (U 10)
+        );
+        distributionBinWidth 1e-5;
+    }
+}
+
 
 // ************************************************************************* //
