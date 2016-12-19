@@ -247,17 +247,8 @@ Foam::dictionary Foam::distributionModels::general::writeDict
 {
     // dictionary dict = distributionModel::writeDict(dictName);
     dictionary dict(dictName);
-    List<scalar> data(xy_.size());
-    forAll(data, i)
-    {
-        data[i] = xy_[i][0];
-    }
-    dict.add("x", data);
-    forAll(data, i)
-    {
-        data[i] = xy_[i][1];
-    }
-    dict.add("y", data);
+    dict.add("x", x());
+    dict.add("y", y());
 
     return dict;
 }
@@ -277,6 +268,34 @@ void Foam::distributionModels::general::readDict(const dictionary& dict)
     }
 
     initialise();
+}
+
+
+Foam::tmp<Foam::Field<Foam::scalar>>
+Foam::distributionModels::general::x() const
+{
+    tmp<Field<scalar>> tx(new Field<scalar>(xy_.size()));
+    scalarField& xi = tx.ref();
+    forAll(xy_, i)
+    {
+        xi[i] = xy_[i][0];
+    }
+
+    return tx;
+}
+
+
+Foam::tmp<Foam::Field<Foam::scalar>>
+Foam::distributionModels::general::y() const
+{
+    tmp<Field<scalar>> ty(new Field<scalar>(xy_.size()));
+    scalarField& yi = ty.ref();
+    forAll(xy_, i)
+    {
+        yi[i] = xy_[i][1];
+    }
+
+    return ty;
 }
 
 

@@ -38,6 +38,7 @@ SourceFiles
 #include "distributionModel.H"
 #include "Vector.H"
 #include "VectorSpace.H"
+#include "Field.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -120,6 +121,12 @@ public:
 
 
     // Member Functions
+
+        //- Bin boundaries
+        virtual tmp<Field<scalar>> x() const;
+
+        //- Probabilities
+        virtual tmp<Field<scalar>> y() const;
 
         //- Sample the distributionModel
         virtual scalar sample() const;

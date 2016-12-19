@@ -47,28 +47,6 @@ namespace functionObjects
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::functionObjects::particleDistribution::writeFileHeader
-(
-    Ostream& os
-) const
-{
-    writeHeader(os, "Particle distribution");
-    writeHeaderValue(os, "Cloud", cloudName_);
-    forAll(nameVsBinWidth_, i)
-    {
-        writeHeaderValue
-        (
-            os,
-            "Field:" + nameVsBinWidth_[i].first(),
-            nameVsBinWidth_[i].second()
-        );
-    }
-    os << endl;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::particleDistribution::particleDistribution
@@ -79,14 +57,14 @@ Foam::functionObjects::particleDistribution::particleDistribution
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    writeFile(runTime, name, typeName, dict),
+    writeFile(runTime, name),
     cloudName_("unknown-cloudName"),
     nameVsBinWidth_(),
     tagFieldName_("none"),
-    rndGen_(1234, -1)
+    rndGen_(1234, -1),
+    writerPtr_(nullptr)
 {
     read(dict);
-    writeFileHeader(file());
 }
 
 
@@ -105,6 +83,8 @@ bool Foam::functionObjects::particleDistribution::read(const dictionary& dict)
         dict.lookup("cloud") >> cloudName_;
         dict.lookup("nameVsBinWidth") >> nameVsBinWidth_;
         dict.readIfPresent("tagField", tagFieldName_);
+        word format(dict.lookup("setFormat"));
+        writerPtr_ = writer<scalar>::New(format);
 
         Info<< type() << " " << name() << " output:" << nl
             << "    Processing cloud : " << cloudName_ << nl
@@ -177,7 +157,6 @@ bool Foam::functionObjects::particleDistribution::write()
         }
     }
 
-    file() << "# Time: " << mesh_.time().timeName() << nl;
 
     bool ok = false;
     forAll(nameVsBinWidth_, i)
@@ -198,11 +177,6 @@ bool Foam::functionObjects::particleDistribution::write()
         }
     }
 
-    if (ok)
-    {
-        file() << nl;
-    }
-
     return true;
 }
 
@@ -220,11 +194,10 @@ void Foam::functionObjects::particleDistribution::generateDistribution
         return;
     }
 
-    Ostream& os = file();
-
+    word fName(fieldName);
     if (tag != -1)
     {
-        os  << tag << token::TAB;
+        fName = fName + '_' + Foam::name(tag);
     }
 
     distributionModels::general distribution
@@ -234,7 +207,31 @@ void Foam::functionObjects::particleDistribution::generateDistribution
         rndGen_
     );
 
-    os  << fieldName << distribution.writeDict(mesh_.time().timeName());
+    const Field<scalar> distX(distribution.x());
+    const Field<scalar> distY(distribution.y());
+
+    pointField xBin(distX.size(), Zero);
+    xBin.replace(0, distX);
+    const coordSet coords
+    (
+        fName,
+        "x",
+        xBin,
+        distX
+    );
+
+    const wordList fieldNames(1, fName);
+
+    fileName outputPath(baseTimeDir());
+    mkDir(outputPath);
+    OFstream graphFile(outputPath/writerPtr_->getFileName(coords, fieldNames));
+
+    Log << "    Writing distribution of " << fieldName
+        << " to " << graphFile.name() << endl;
+
+    List<const scalarField*> yPtrs(1);
+    yPtrs[0] = &distY;
+    writerPtr_->write(coords, fieldNames, yPtrs, graphFile);
 }
 
 

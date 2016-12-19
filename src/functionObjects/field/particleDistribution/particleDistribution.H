@@ -28,7 +28,7 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Generates a particle distrbution for lagrangian data at a given time.
+    Generates a particle distribution for lagrangian data at a given time.
 
 Usage
     \verbatim
@@ -43,6 +43,7 @@ Usage
             (d 0.1)
             (U 10)
         );
+        setFormat   raw;
     }
     \endverbatim
 
@@ -53,6 +54,7 @@ Usage
         cloud       | Name of cloud to process | Yes        |
         nameVsBinWidth | List of cloud field vs bin width | Yes |
         tagField    | Name of cloud field to use to group particles | no | none
+        setFormat   | Output format            | yes         |
     \endtable
 
 See also
@@ -73,6 +75,7 @@ SourceFiles
 #include "scalarField.H"
 #include "cachedRandom.H"
 #include "Tuple2.H"
+#include "writer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -106,6 +109,9 @@ protected:
         //- Random number generator - used by distribution models
         cachedRandom rndGen_;
 
+        //- Writer
+        autoPtr<writer<scalar>> writerPtr_;
+
 
     // Protected Member Functions
 
@@ -132,9 +138,6 @@ protected:
 
         //- Disallow default bitwise assignment
         void operator=(const particleDistribution&) = delete;
-
-        //- Output file header information
-        virtual void writeFileHeader(Ostream& os) const;
 
 
 public:

@@ -62,7 +62,7 @@ functions
             (d 1e-5)
             (U 10)
         );
-        distributionBinWidth 1e-5;
+        setFormat       raw;
     }
 }
 
