@@ -146,7 +146,7 @@ public:
 
             forAll(vff, facei)
             {
-                vff[facei] = minMod(vf[own[facei]], vf[nei[facei]]);
+                vff[facei] = min(vf[own[facei]], vf[nei[facei]]);
             }
 
             typename GeometricField<Type, fvsPatchField, surfaceMesh>::
@@ -167,7 +167,7 @@ public:
 
                     forAll(pff, i)
                     {
-                        pff[i] = minMod(pif[i], pnf[i]);
+                        pff[i] = min(pif[i], pnf[i]);
                     }
                 }
                 else
