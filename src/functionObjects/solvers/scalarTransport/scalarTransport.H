@@ -212,8 +212,7 @@ class scalarTransport
         tmp<volScalarField> D
         (
             const volScalarField& s,
-            const surfaceScalarField& phi,
-            const volScalarField& alpha
+            const surfaceScalarField& phi
         ) const;
 
         //- Disallow default bitwise copy construct

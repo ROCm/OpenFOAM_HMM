@@ -74,6 +74,11 @@ Foam::volScalarField& Foam::functionObjects::scalarTransport::transportedField()
             )
         );
         store(fieldName_, tfldPtr);
+
+        if (phaseName_ != "none")
+        {
+            mesh_.setFluxRequired(fieldName_);
+        }
     }
 
     return const_cast<volScalarField&>
@@ -86,16 +91,13 @@ Foam::volScalarField& Foam::functionObjects::scalarTransport::transportedField()
 Foam::tmp<Foam::volScalarField> Foam::functionObjects::scalarTransport::D
 (
     const volScalarField& s,
-    const surfaceScalarField& phi,
-    const volScalarField& alpha
+    const surfaceScalarField& phi
 ) const
 {
     typedef incompressible::turbulenceModel icoModel;
     typedef compressible::turbulenceModel cmpModel;
 
     word Dname("D" + s.name());
-
-    volScalarField phaseMask(pos(alpha - 0.99));
 
     if (constantD_)
     {
@@ -116,7 +118,7 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::scalarTransport::D
             )
         );
 
-        return phaseMask*tD;
+        return tD;
     }
     else if (nutName_ != "none")
     {
@@ -125,7 +127,7 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::scalarTransport::D
 
         return tmp<volScalarField>
         (
-            new volScalarField(Dname, phaseMask*nutMean)
+            new volScalarField(Dname, nutMean)
         );
     }
     else if (foundObject<icoModel>(turbulenceModel::propertiesName))
@@ -137,7 +139,7 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::scalarTransport::D
 
         return tmp<volScalarField>
         (
-             new volScalarField(Dname, phaseMask*model.nuEff())
+             new volScalarField(Dname, model.nuEff())
         );
     }
     else if (foundObject<cmpModel>(turbulenceModel::propertiesName))
@@ -149,7 +151,7 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::scalarTransport::D
 
         return tmp<volScalarField>
         (
-             new volScalarField(Dname, phaseMask*model.muEff())
+             new volScalarField(Dname, model.muEff())
         );
     }
     else
@@ -268,7 +270,8 @@ bool Foam::functionObjects::scalarTransport::execute()
                 mesh_.time().timeName(),
                 mesh_.time(),
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false
             ),
             mesh_,
             dimensionedScalar("tPhi", dimMass/dimTime, 0.0)
@@ -288,7 +291,7 @@ bool Foam::functionObjects::scalarTransport::execute()
         phi.dimensions().reset(dimVolume/dimTime);
     }
 
-    //Obtain phi from phiName or constructed from UPhiName
+    // Obtain phi from phiName or constructed from UPhiName
     if (phiName_ != "none")
     {
         phi = const_cast<surfaceScalarField&>
@@ -314,37 +317,10 @@ bool Foam::functionObjects::scalarTransport::execute()
         }
     }
 
-    tmp<volScalarField> tPhaseMask
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "tPhaseMask",
-                mesh_.time().timeName(),
-                mesh_.time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            dimensionedScalar("tPhaseMask", dimless, 1.0)
-        )
-    );
-    volScalarField& phaseMask = tPhaseMask.ref();
-
-    // Set phaseMask if s is transported in a phase
-    if (phaseName_ != "none")
-    {
-        const volScalarField& alpha =
-            mesh_.lookupObject<volScalarField>(phaseName_);
-
-        phaseMask = alpha;
-    }
-
     volScalarField& s = transportedField();
 
     // Calculate the diffusivity
-    volScalarField D(this->D(s, phi, phaseMask));
+    volScalarField D(this->D(s, phi));
 
     word divScheme("div(phi," + schemesField_ + ")");
     word laplacianScheme("laplacian(" + D.name() + "," + schemesField_ + ")");
@@ -356,7 +332,7 @@ bool Foam::functionObjects::scalarTransport::execute()
         relaxCoeff = mesh_.equationRelaxationFactor(schemesField_);
     }
 
-    // two phase scalar transport
+    // Two phase scalar transport
     if (phaseName_ != "none")
     {
         const volScalarField& alpha =
@@ -365,6 +341,7 @@ bool Foam::functionObjects::scalarTransport::execute()
         const surfaceScalarField& limitedPhiAlpa =
             mesh_.lookupObject<surfaceScalarField>(phasePhiCompressedName_);
 
+        D *= pos(alpha - 0.99);
 /*
         surfaceScalarField phic(2.0*mag(phi/mesh_.magSf()));
 
@@ -402,8 +379,8 @@ bool Foam::functionObjects::scalarTransport::execute()
         // Reset D dimensions consistent with limitedPhiAlpa
         D.dimensions().reset(limitedPhiAlpa.dimensions()/dimLength);
 
-        tmp<surfaceScalarField> tTPhiUD;
         // Solve
+        tmp<surfaceScalarField> tTPhiUD;
         for (label i = 0; i <= nCorr_; i++)
         {
             fvScalarMatrix sEqn
