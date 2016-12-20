@@ -1,0 +1,47 @@
+OpenFOAM-v1612+
+==================
+Known Build Issues
+==================
+
+--------------
+Intel Compiler
+--------------
+
+  Since OpenFOAM uses C++11, a fairly recent version is required.
+
+  The Intel compiler - icc (ICC) 17.0.0 20160721 - has a bug that
+  will result in these types of error messages.
+
+    MatrixSpaceI.H(492): error: no instance of overloaded function
+    "Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::Block<SubTensor,
+    BRowStart, BColStart>::operator=" matches the specified type
+
+
+  There is a update patch for the icc compiler to address this bug.
+
+
+---
+VTK
+---
+
+If using the runTimePostProcessing to create on-the-fly images, you
+can either simply just compile ParaView-5.0.1 and these libraries will
+be used.
+
+If you decide to use a separate VTK compilation (for example for
+off-screen rendering), it is advisable to reuse the VTK libraries that
+are provided with ParaView-5.0.1, by making an appropriate symlink
+prior to using makeVTK. This doesn't just reduce diskspace, but works
+much better than using the VTK-7.1.0.tar file.
+
+Building runTimePostProcessing with the 'plain' VTK-7.1.0 libraries
+generally works, but yields odd error and unpleasant looking errors
+when exiting:
+
+    symbol lookup error: .../linux64Gcc/VTK-7.1.0/lib/libvtkCommonExecutionModel-7.1.so.1:
+    undefined symbol: _ZN33vtkFilteringInformationKeyManager13ClassFinalizeEv
+
+    symbol lookup error: .../linux64Gcc/VTK-7.1.0/lib/libvtkCommonDataModel-7.1.so.1:
+    undefined symbol: _ZN49vtkInformationQuadratureSchemeDefinitionVectorKeyD1Ev
+
+--
