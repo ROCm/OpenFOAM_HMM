@@ -188,7 +188,6 @@ Foam::functionObjects::scalarTransport::scalarTransport
     fvMeshFunctionObject(name, runTime, dict),
     fieldName_(dict.lookupOrDefault<word>("field", "s")),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    UPhiName_(dict.lookupOrDefault<word>("UPhi", "none")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     nutName_(dict.lookupOrDefault<word>("nut", "none")),
     phaseName_(dict.lookupOrDefault<word>("phase", "none")),
@@ -231,7 +230,6 @@ bool Foam::functionObjects::scalarTransport::read(const dictionary& dict)
 
     dict.readIfPresent("phi", phiName_);
     dict.readIfPresent("rho", rhoName_);
-    dict.readIfPresent("UPhi", UPhiName_);
     dict.readIfPresent("nut", nutName_);
     dict.readIfPresent("phase", phaseName_);
     dict.readIfPresent("bounded01", bounded01_);
@@ -260,64 +258,10 @@ bool Foam::functionObjects::scalarTransport::execute()
 {
     Log << type() << " write:" << endl;
 
-    tmp<surfaceScalarField> tPhi
-    (
-        new surfaceScalarField
-        (
-            IOobject
-            (
-                "phi",
-                mesh_.time().timeName(),
-                mesh_.time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedScalar("tPhi", dimMass/dimTime, 0.0)
-        )
-    );
-    surfaceScalarField& phi = tPhi.ref();
-
-    const dimensionSet dim
-    (
-        mesh_.lookupObject<surfaceScalarField>(phiName_).dimensions()
-    );
-
-    bool compressible = true;
-    if (dim == dimVolume/dimTime)
-    {
-        compressible = false;
-        phi.dimensions().reset(dimVolume/dimTime);
-    }
-
-    // Obtain phi from phiName or constructed from UPhiName
-    if (phiName_ != "none")
-    {
-        phi = const_cast<surfaceScalarField&>
-        (
-            mesh_.lookupObject<surfaceScalarField>(phiName_)
-        );
-    }
-    else if (UPhiName_ != "none")
-    {
-        const volVectorField& Uphi =
-            mesh_.lookupObject<volVectorField>(UPhiName_);
-
-        if (!compressible)
-        {
-            phi = fvc::interpolate(Uphi) & mesh_.Sf();
-        }
-        else
-        {
-            const volScalarField& rho =
-                mesh_.lookupObject<volScalarField>(rhoName_);
-
-            phi = fvc::interpolate(rho*Uphi) & mesh_.Sf();
-        }
-    }
-
     volScalarField& s = transportedField();
+
+    const surfaceScalarField& phi = 
+        mesh_.lookupObject<surfaceScalarField>(phiName_);
 
     // Calculate the diffusivity
     volScalarField D(this->D(s, phi));
@@ -342,40 +286,7 @@ bool Foam::functionObjects::scalarTransport::execute()
             mesh_.lookupObject<surfaceScalarField>(phasePhiCompressedName_);
 
         D *= pos(alpha - 0.99);
-/*
-        surfaceScalarField phic(2.0*mag(phi/mesh_.magSf()));
 
-        const volVectorField gradAlpha(fvc::grad(alpha, "nHat"));
-
-        surfaceVectorField gradAlphaf(fvc::interpolate(gradAlpha));
-
-        dimensionedScalar deltaN
-        (
-            "deltaN", 1e-8/pow(average(mesh_.V()), 1.0/3.0)
-        );
-
-        surfaceVectorField nHatfv(gradAlphaf/(mag(gradAlphaf) + deltaN));
-
-        surfaceScalarField nHat(nHatfv & mesh_.Sf());
-
-        surfaceScalarField phir(phic*nHat);
-
-        surfaceScalarField limitedPhiAlpa
-        (
-            fvc::flux
-            (
-                phi,
-                alpha,
-                "div(phi,s)"
-            )
-          + fvc::flux
-            (
-               -fvc::flux(-phir, (1-alpha), "div(phirb,s)"),
-                alpha,
-                "div(phirb,s)"
-            )
-        );
-*/
         // Reset D dimensions consistent with limitedPhiAlpa
         D.dimensions().reset(limitedPhiAlpa.dimensions()/dimLength);
 
@@ -404,7 +315,7 @@ bool Foam::functionObjects::scalarTransport::execute()
             MULES::explicitSolve(s, phi, tTPhiUD.ref(), 1, 0);
         }
     }
-    else if (compressible)
+    else if (phi.dimensions() == dimMass/dimTime)
     {
         const volScalarField& rho = lookupObject<volScalarField>(rhoName_);
 
@@ -427,7 +338,7 @@ bool Foam::functionObjects::scalarTransport::execute()
             sEqn.solve(mesh_.solverDict(schemesField_));
         }
     }
-    else if (!compressible)
+    else if (phi.dimensions() == dimVolume/dimTime)
     {
         for (label i = 0; i <= nCorr_; i++)
         {

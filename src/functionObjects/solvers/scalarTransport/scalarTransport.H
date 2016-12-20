@@ -165,10 +165,6 @@ class scalarTransport
         //- Name of flux field (optional)
         word phiName_;
 
-        //- Name of velocity field from which the flux is obtained if phiName is
-        //  not given (optional)
-        word UPhiName_;
-
         //- Name of density field (optional)
         word rhoName_;
 
