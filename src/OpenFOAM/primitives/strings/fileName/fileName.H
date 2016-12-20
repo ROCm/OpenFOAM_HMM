@@ -53,10 +53,11 @@ namespace Foam
 {
 
 template<class T> class List;
+template<class T> class UList;
 typedef List<word> wordList;
 
 // Forward declaration of friend functions and operators
-
+class wordRe;
 class fileName;
 
 Istream& operator>>(Istream&, fileName&);
@@ -72,6 +73,10 @@ class fileName
     public string
 {
     // Private Member Functions
+
+        //- Find position of the file extension dot, return npos on failure.
+        //  A wrapped version of find_last_of("./") with additional logic.
+        inline size_type find_ext() const;
 
         //- Strip invalid characters
         inline void stripInvalid();
@@ -104,31 +109,35 @@ public:
         inline fileName();
 
         //- Construct as copy
-        inline fileName(const fileName&);
+        inline fileName(const fileName& fn);
 
         //- Construct as copy of word
-        inline fileName(const word&);
+        inline fileName(const word& s);
 
         //- Construct as copy of string
-        inline fileName(const string&, const bool doStripInvalid=true);
+        inline fileName(const string& s, const bool doStripInvalid=true);
 
         //- Construct as copy of std::string
-        inline fileName(const std::string&, const bool doStripInvalid=true);
+        inline fileName(const std::string& s, const bool doStripInvalid=true);
 
         //- Construct as copy of character array
-        inline fileName(const char*, const bool doStripInvalid=true);
+        inline fileName(const char* s, const bool doStripInvalid=true);
 
         //- Construct by concatenating elements of wordList separated by '/'
-        explicit fileName(const wordList&);
+        explicit fileName(const UList<word>& lst);
+
+        //- Construct by concatenating words separated by '/'
+        explicit fileName(std::initializer_list<word> lst);
+
 
         //- Construct from Istream
-        fileName(Istream&);
+        fileName(Istream& is);
 
 
     // Member functions
 
         //- Is this character valid for a fileName?
-        inline static bool valid(char);
+        inline static bool valid(char c);
 
         //- Cleanup file name
         //
@@ -205,6 +214,24 @@ public:
             //- Return file name extension (part after last .)
             word ext() const;
 
+            //- Append a '.' and the ending, and return the object.
+            //  The '.' and ending will not be added when the ending is empty,
+            //  or when the file name is empty or ended with a '/'.
+            fileName& ext(const word& ending);
+
+            //- Return true if it has an extension or simply ends with a '.'
+            bool hasExt() const;
+
+            //- Return true if the extension is the same as the given ending.
+            bool hasExt(const word& ending) const;
+
+            //- Return true if the extension matches the given ending.
+            bool hasExt(const wordRe& ending) const;
+
+            //- Remove extension, returning true if string changed.
+            bool removeExt();
+
+
             //- Return path components as wordList
             //
             //  Behaviour:
@@ -215,32 +242,46 @@ public:
             //    "foo/bar"       2("foo", "bar")
             //    "/foo/bar"      2("foo", "bar")
             //    "/foo/bar/"     2("foo", "bar")
-            wordList components(const char delimiter='/') const;
+            wordList components(const char delimiter = '/') const;
 
             //- Return a single component of the path
-            word component(const size_type, const char delimiter='/') const;
+            word component
+            (
+                const size_type cmpt,
+                const char delimiter = '/'
+            ) const;
 
 
     // Member operators
 
-        // Assignment
+      // Assignment
 
-            void operator=(const fileName&);
-            void operator=(const word&);
-            void operator=(const string&);
-            void operator=(const std::string&);
-            void operator=(const char*);
+        //- Copy, no character validation required
+        void operator=(const fileName& str);
+
+        //- Copy, no character validation required
+        void operator=(const word& str);
+
+        //- Copy, stripping invalid characters
+        void operator=(const string& str);
+
+        //- Copy, stripping invalid characters
+        void operator=(const std::string& str);
+
+        //- Copy, stripping invalid characters
+        void operator=(const char* str);
 
 
     // IOstream operators
 
-        friend Istream& operator>>(Istream&, fileName&);
-        friend Ostream& operator<<(Ostream&, const fileName&);
+        friend Istream& operator>>(Istream& is, fileName& fn);
+        friend Ostream& operator<<(Ostream& os, const fileName& fn);
 };
 
 
-//- Assemble words and fileNames as pathnames by adding a '/' separator
-fileName operator/(const string&, const string&);
+//- Assemble words and fileNames as pathnames by adding a '/' separator.
+//  No '/' separator is added if either argument is an empty string.
+fileName operator/(const string& a, const string& b);
 
 
 //- Recursively search the given directory for the file

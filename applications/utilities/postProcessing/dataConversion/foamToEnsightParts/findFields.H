@@ -19,13 +19,9 @@ if (timeDirs.size())
         const word& fieldName = obj.name();
         const word& fieldType = obj.headerClassName();
 
-        if (fieldName.size() > 2 && fieldName(fieldName.size()-2, 2) == "_0")
+        if (volFieldTypes.found(fieldType) && !fieldName.endsWith("_0"))
         {
-            // ignore _0 fields
-        }
-        else if (volFieldTypes.found(fieldType))
-        {
-            // simply ignore types that we don't handle
+            // ignore types that we don't handle, and ignore _0 fields
             volumeFields.insert(fieldName, fieldType);
         }
     }

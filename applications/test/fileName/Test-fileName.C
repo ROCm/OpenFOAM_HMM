@@ -29,26 +29,225 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "argList.H"
 #include "fileName.H"
 #include "SubList.H"
+#include "DynamicList.H"
 #include "IOobject.H"
 #include "IOstreams.H"
 #include "OSspecific.H"
 #include "POSIX.H"
+#include "Switch.H"
+#include "etcFiles.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
-int main()
+int main(int argc, char *argv[])
 {
-    wordList wrdList(5);
-    wrdList[0] = "hello";
-    wrdList[1] = "hello1";
-    wrdList[2] = "hello2";
-    wrdList[3] = "hello3";
-    wrdList[4] = "hello4.hmm";
+    argList::noParallel();
+    argList::addBoolOption("ext", "test handing of file extensions");
+    argList::addBoolOption("construct", "test constructors");
+    argList::addBoolOption("default", "reinstate default tests");
+    argList::addNote("runs default tests or specified ones only");
+
+    #include "setRootCase.H"
+
+    // Run default tests, unless only specific tests are requested
+    const bool defaultTests =
+        args.optionFound("default") || args.options().empty();
+
+    if (args.optionFound("construct"))
+    {
+        Info<< "From initializer_list<word> = ";
+        fileName file1
+        {
+            "hello",
+            "hello1",
+            "hello2",
+            "hello3",
+            "hello4.hmm"
+        };
+
+        Info<< file1 << nl;
+
+        Info<< "From initializer_list<fileName> = ";
+        fileName file2
+        {
+            file1,
+            "some",
+            "more/things.hmm"
+        };
+
+        Info<< file2 << nl;
+
+
+        Info<< "From initializer_list<fileName> with nesting = ";
+        fileName file3
+        {
+            std::string("ffO"),
+            "some",
+            "more/things.hmm"
+        };
+        Info<< file3 << nl;
+
+        DynamicList<word> base
+        {
+            "hello",
+            "hello1"
+        };
+
+        fileName file4
+        {
+            "some",
+            file3,
+            "more/things.hmm",
+            file1
+        };
+        Info<< "All ==> " << file4 << nl;
+    }
+
+
+    // Test various ext() methods
+    if (args.optionFound("ext"))
+    {
+        Info<<nl << nl << "handling of fileName extension" << nl;
+
+        fileName empty;
+        fileName endWithDot("some.path/name.");
+        fileName endWithSlash("some.path/");
+        fileName input0("some.file/with.out/extension");
+        fileName input1("path.to/media/image.png");
+
+        Info<<"File : " << input0 << " ext: "
+            << Switch(input0.hasExt())
+            <<  " = " << input0.ext() << nl;
+        Info<<"File : " << input1 << " ext: "
+            << Switch(input1.hasExt())
+            <<  " = " << input1.ext() << nl;
+        Info<<"File : " << endWithDot << " ext: "
+            << Switch(endWithDot.hasExt())
+            <<  " = " << endWithDot.ext() << " <-- perhaps return false?" << nl;
+        Info<<"File : " << endWithSlash << " ext: "
+            << Switch(endWithSlash.hasExt())
+            <<  " = " << endWithSlash.ext() << nl;
+
+
+        Info<<"Remove extension " << (input0.removeExt());
+        Info<< "  now: " << input0 << nl;
+
+        Info<<"Remove extension " << (input1.removeExt());
+        Info<< "  now: " << input1 << nl;
+
+        Info<<"Remove extension " << (endWithSlash.removeExt());
+        Info<< "  now: " << endWithSlash << nl;
+
+        wordList exts{ "jpg", "png", "txt", word::null };
+        Info<<"Add extension(s): " << input1 << nl;
+        for (const word& e : exts)
+        {
+            Info<<"<" << e << ">  -> " << input1.ext(e) << nl;
+        }
+        Info<< nl;
+
+
+        Info<<"Test hasExt(word)" << nl
+            <<"~~~~~~~~~~~~~~~~~" << nl;
+        Info<<"Has extension(s):" << nl
+            << "input: " << input1 << nl;
+        for (const word& e : exts)
+        {
+            Info<<"  '" << e << "'  -> "
+                << Switch(input1.hasExt(e)) << nl;
+        }
+        Info<< nl;
+
+        Info<<"Has extension(s):" << nl
+            << "input: " << endWithDot << nl;
+        for (const word& e : exts)
+        {
+            Info<<"  '" << e << "'  -> "
+                << Switch(endWithDot.hasExt(e)) << nl;
+        }
+        Info<< nl;
+
+
+        Info<<"Test hasExt(wordRe)" << nl
+            <<"~~~~~~~~~~~~~~~~~~~" << nl;
+
+        // A regex with a zero length matcher doesn't work at all:
+        // eg "(png|jpg|txt|)" regex matcher itself
+
+        wordRe matcher0("()", wordRe::REGEXP);
+        wordRe matcher1("(png|jpg|txt)", wordRe::REGEXP);
+        wordRe matcher2("(png|txt)", wordRe::REGEXP);
+
+        Info<<"Has extension(s):" << nl
+            << "input: " << endWithDot << nl;
+        Info<<"    " << matcher0 << "  -> "
+            << Switch(endWithDot.hasExt(matcher0)) << nl;
+        Info<<"    " << matcher1 << "  -> "
+            << Switch(endWithDot.hasExt(matcher1)) << nl;
+        Info<<"    " << matcher2 << "  -> "
+            << Switch(endWithDot.hasExt(matcher2)) << nl;
+
+        Info<< "input: " << input1 << nl;
+        Info<<"    " << matcher0 << "  -> "
+            << Switch(input1.hasExt(matcher0)) << nl;
+        Info<<"    " << matcher1 << "  -> "
+            << Switch(input1.hasExt(matcher1)) << nl;
+        Info<<"    " << matcher2 << "  -> "
+            << Switch(input1.hasExt(matcher2)) << nl;
+        Info<< nl;
+
+        Info<<"Remove extension(s):" << nl << "input: " << input1 << nl;
+        while (!input1.empty())
+        {
+            if (input1.removeExt())
+            {
+                Info<< "   -> " << input1 << nl;
+            }
+            else
+            {
+                Info<< "stop> " << input1 << nl;
+                break;
+            }
+        }
+        Info<< nl;
+
+        input0.clear();
+        Info<<"test with zero-sized: " << input0 << nl;
+        Info<<"add extension: " << input0.ext("abc") << nl;
+        Info<< nl;
+
+        input0 = "this/";
+        Info<<"test add after slash: " << input0 << nl;
+        Info<<"add extension: " << input0.ext("abc")
+            << " <-- avoids accidentally creating hidden files" << nl;
+        Info<< nl;
+
+        input0 = "this.file.";
+        Info<<"test after dot: " << input0 << nl;
+        Info<<"add extension: " << input0.ext("abc")
+            << " <-- No check for repeated dots (user error!)" << nl;
+        Info<< nl;
+    }
+
+    if (!defaultTests)
+    {
+        return 0;
+    }
+
+    DynamicList<word> wrdList
+    {
+        "hello",
+        "hello1",
+        "hello2",
+        "hello3",
+        "hello4.hmm"
+    };
 
     fileName pathName(wrdList);
 
@@ -189,7 +388,6 @@ int main()
         Foam::rmDir(dirA);
         Foam::rm(lnA);
     }
-
 
 
     // test findEtcFile

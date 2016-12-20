@@ -43,7 +43,7 @@ options
             }
         }
     }
-
+/*
     momentumSource1
     {
         type            vectorSemiImplicitSource;
@@ -55,11 +55,11 @@ options
             volumeMode      absolute;
             injectionRateSuSp
             {
-                U.steam           ((0 1e-1 0) 0); // kg*m/s^2
+                U.steam           ((0 1e-2 0) 0); // kg*m/s^2
             }
         }
     }
-
+*/
     energySource1
     {
         type            scalarSemiImplicitSource;

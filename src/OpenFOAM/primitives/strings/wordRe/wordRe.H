@@ -95,12 +95,12 @@ public:
         //  Note that 'REGEXP' is implicit if 'NOCASE' is specified alone.
         enum compOption
         {
-            LITERAL = 0, //!< treat as a string literal
-            DETECT  = 1, //!< treat as regular expression
-            REGEXP  = 2, //!< detect if the string contains meta-characters
-            NOCASE  = 4, //!< ignore case in regular expression
-            DETECT_NOCASE = DETECT | NOCASE,
-            REGEXP_NOCASE = REGEXP | NOCASE
+            LITERAL = 0, //!< Treat as a string literal
+            DETECT  = 1, //!< Detect if the string contains meta-characters
+            REGEXP  = 2, //!< Treat as regular expression
+            NOCASE  = 4, //!< Ignore case in regular expression
+            DETECT_NOCASE = DETECT | NOCASE,  //!< Combined DETECT and NOCASE
+            REGEXP_NOCASE = REGEXP | NOCASE   //!< Combined REGEXP and NOCASE
         };
 
 

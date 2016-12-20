@@ -1,4 +1,6 @@
 {
+    //const volScalarField& psi = thermo.psi();
+
     volScalarField rAU(1.0/UEqn.A());
     surfaceScalarField rhorAUf("rhorAUf", fvc::interpolate(rho*rAU));
     volVectorField HbyA(constrainHbyA(rAU*UEqn.H(), U, p));
@@ -92,6 +94,9 @@
     rho = thermo.rho();
     rho = max(rho, rhoMin);
     rho = min(rho, rhoMax);
+
+    thermo.rho() = max(thermo.rho(), rhoMin);
+    thermo.rho() = min(thermo.rho(), rhoMax);
 
     if (!simple.transonic())
     {

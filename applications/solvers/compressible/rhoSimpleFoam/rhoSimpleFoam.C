@@ -33,7 +33,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "psiThermo.H"
+#include "rhoThermo.H"
 #include "turbulentFluidThermoModel.H"
 #include "simpleControl.H"
 #include "fvOptions.H"

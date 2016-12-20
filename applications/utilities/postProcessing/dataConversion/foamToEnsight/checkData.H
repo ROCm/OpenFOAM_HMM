@@ -11,9 +11,8 @@ if (!fieldsToUse.found(fieldName))
     {
         variableGood =
         (
-            fieldName.size() > 2 && fieldName(fieldName.size()-2, 2) == "_0"
-          ? false
-          : IOobject
+            !fieldName.endsWith("_0")
+         && IOobject
             (
                 fieldName,
                 timeDirs[n1].name(),
