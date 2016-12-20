@@ -81,7 +81,7 @@ extractEulerianParticles/eulerianParticle/eulerianParticle.C
 
 particleDistribution/particleDistribution.C
 
-
+flux/flux.C
 ddt2/ddt2.C
 zeroGradient/zeroGradient.C
 

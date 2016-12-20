@@ -35,8 +35,6 @@ Description
       the 'schemesField' entry,
     - The diffusivity can be set manually using the 'D' entry, retrieved
       from the turbulence model or specified nut
-    - To specify a different flux derived from U enter UPhi velocity field name
-      (the phi used will be calculated based on this UPhi)
     - To specify a transport quantity within a phase enter phase.
     - bounded01 bounds the transported scalar within 0 and 1.
 
@@ -113,9 +111,8 @@ Usage
     \table
         Property     | Description             | Required    | Default value
         type         | Type name: scalarTransport | yes      |
-        phi          | Name of flux field      | no          | phi
+        phi          | Name of flux field      | yes          |
         rho          | Name of density field   | no          | rho
-        UPhi         | Name of U to generate phi  | no          | none
         phase        | Name of the phase name  | no          | none
         nut          | Name of the turbulence viscosity | no | none
         D            | Diffusion coefficient   | no          | auto generated
@@ -162,7 +159,7 @@ class scalarTransport
         //- Name of field to process
         word fieldName_;
 
-        //- Name of flux field (optional)
+        //- Name of flux field
         word phiName_;
 
         //- Name of density field (optional)
