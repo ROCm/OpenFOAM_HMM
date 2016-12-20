@@ -50,21 +50,20 @@ void Foam::functionObjects::surfaceInterpolate::interpolateFields()
 
         if (fieldMap.found(fld.name()))
         {
-            //const word sName = "interpolate(" + fld.name() + ')';
+            // const word sName = "interpolate(" + fld.name() + ')';
             word& sName = fieldMap[fld.name()];
 
             if (obr_.found(sName))
             {
-                Log << "        surface field " << sName << " already exists"
-                    << endl;
+                Log << "        updating field " << sName << endl;
             }
             else
             {
-                store(sName, linearInterpolate(fld));
-
-                Log << "        interpolated " << fld.name() << " to create "
+                Log << "        interpolating " << fld.name() << " to create "
                     << sName << endl;
             }
+
+            store(sName, linearInterpolate(fld));
         }
     }
 }
