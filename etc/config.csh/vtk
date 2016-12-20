@@ -28,13 +28,18 @@
 #     Setup file for VTK (and MESA)
 #     Sourced from OpenFOAM-<VERSION>/etc/cshrc
 #
-#     The library path is not adjusted with the paths specified here do not exist
+#     The library path is only adjusted when the paths specified here
+#     actually exist at the time of sourcing.
 #
 # Note
 #     When building OpenFOAM, any changes made here MUST be made in the
 #     equivalent config.sh version too, since that is the one which will
 #     be used during the build process.
 #
+# It is recommended to use the VTK sources from ParaView 5.0.1.
+#
+# See the BuildIssues.txt about problems that can be encountered when using
+# the 'plain' VTK sources.
 #------------------------------------------------------------------------------
 
 set vtk_version=VTK-7.1.0
@@ -51,7 +56,8 @@ endif
 
 # Set paths if binaries are present
 if ( -r $VTK_DIR ) then
-    _foamAddLib $VTK_DIR/lib$WM_COMPILER_LIB_ARCH
+    # Uses lib/ and not lib64/
+    _foamAddLib $VTK_DIR/lib
 else
     unset VTK_DIR
 endif
