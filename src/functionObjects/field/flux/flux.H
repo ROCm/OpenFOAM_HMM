@@ -29,7 +29,8 @@ Group
 
 Description
     Calculates the flux of a field.  The operation is limited to
-    surfaceVectorFields and volVectorFields, and the output is a surfaceScalarField.
+    surfaceVectorFields and volVectorFields, and the output is a
+    surfaceScalarField.
 
 See also
     Foam::functionObjects::fieldExpression
@@ -53,7 +54,7 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class flux Declaration
+                            Class flux Declaration
 \*---------------------------------------------------------------------------*/
 
 class flux

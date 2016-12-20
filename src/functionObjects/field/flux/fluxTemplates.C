@@ -31,7 +31,6 @@ License
 template<class FieldType,  class RhoFieldType>
 bool Foam::functionObjects::flux::calcVolFlux(const RhoFieldType& rho)
 {
-
     if (foundObject<FieldType>(fieldName_, false))
     {
         return store
@@ -50,7 +49,6 @@ bool Foam::functionObjects::flux::calcVolFlux(const RhoFieldType& rho)
 template<class FieldType,  class RhoFieldType>
 bool Foam::functionObjects::flux::calcSurFlux(const RhoFieldType& rho)
 {
-
     if (foundObject<FieldType>(fieldName_, false))
     {
         return store
@@ -67,4 +65,6 @@ bool Foam::functionObjects::flux::calcSurFlux(const RhoFieldType& rho)
         return false;
     }
 }
+
+
 // ************************************************************************* //
