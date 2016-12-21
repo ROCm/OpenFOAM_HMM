@@ -86,7 +86,7 @@ bool Foam::functionObjects::blendingFactor::calcScheme()
 {
     typedef GeometricField<Type, fvPatchField, volMesh> FieldType;
 
-    if (!foundObject<FieldType>(fieldName_))
+    if (!foundObject<FieldType>(fieldName_, false))
     {
         return false;
     }

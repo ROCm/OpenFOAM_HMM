@@ -35,7 +35,9 @@ Description
     The weight of a blended scheme is given by a function of the blending
     factor, f:
 
-        weight = f*scheme1 + (1 - f)*scheme2
+    \[f
+        weight = f scheme1 + (1 - f) scheme2
+    \f]
 
     The factor is a face-based quantity, which is converted to a cell-based
     quantity by assigning the minimum blending factor for any cell face.
@@ -60,7 +62,7 @@ Usage
         ...
 
         // Name of field
-        fieldName   U;
+        field       U;
     }
     \endverbatim
 
