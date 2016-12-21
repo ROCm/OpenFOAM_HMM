@@ -103,8 +103,8 @@ Usage
     \table
         Property          | Description           | Required    | Default value
         type              | type name: fieldAverage | yes |
-        restartOnRestart| Restart the averaging on restart | no | no
-        restartOnOutput | Restart the averaging on output | no | no
+        restartOnRestart  | Restart the averaging on restart | no | no
+        restartOnOutput   | Restart the averaging on output | no | no
         periodicRestart   | Periodically restart the averaging | no | no
         restartPeriod     | Periodic restart period | conditional |
         restartTime       | One-shot reset of the averaging | no | great

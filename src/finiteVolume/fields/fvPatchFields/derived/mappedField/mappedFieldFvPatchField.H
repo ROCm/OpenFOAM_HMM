@@ -30,12 +30,12 @@ Group
 Description
     This boundary condition provides a self-contained version of the \c mapped
     condition.  It does not use information on the patch; instead it holds
-    thr data locally.
+    the data locally.
 
 Usage
     \table
         Property     | Description             | Required    | Default value
-        fieldName    | name of field to be mapped | no       | this field name
+        field        | name of field to be mapped | no       | this field name
         setAverage   | flag to activate setting of average value | yes |
         average      | average value to apply if \c setAverage = yes | yes |
     \endtable
@@ -45,7 +45,7 @@ Usage
     <patchName>
     {
         type            mappedField;
-        fieldName       T;              // optional field name
+        field           T;              // optional field name
         setAverage      no;             // apply an average value
         average         0;              // average to apply if setAverage
         value           uniform 0;      // place holder

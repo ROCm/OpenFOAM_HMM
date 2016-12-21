@@ -32,7 +32,7 @@ Description
     Example usage:
 
     {
-        fieldName           T;          // default is same as fvPatchField
+        field               T;          // default is same as fvPatchField
         setAverage          false;
         average             1.0;        // only if setAverage=true
         interpolationScheme cellPoint;  // default is cell
@@ -58,7 +58,7 @@ class mappedPatchBase;
 template<class> class interpolation;
 
 /*---------------------------------------------------------------------------*\
-                  Class mappedPatchFieldBase Declaration
+                    Class mappedPatchFieldBase Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

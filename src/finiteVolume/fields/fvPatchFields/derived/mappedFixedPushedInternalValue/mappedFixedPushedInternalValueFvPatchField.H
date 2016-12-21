@@ -34,7 +34,7 @@ Description
 Usage
     \table
         Property     | Description             | Required    | Default value
-        fieldName    | name of field to be mapped | no       | this field name
+        field        | name of field to be mapped | no       | this field name
         setAverage   | flag to activate setting of average value | yes |
         average      | average value to apply if \c setAverage = yes | yes |
     \endtable
@@ -44,7 +44,7 @@ Usage
     <patchName>
     {
         type            mappedFixedPushedInternalValue;
-        fieldName       T;
+        field           T;
         setAverage      no;
         average         0;
         value           uniform 0;

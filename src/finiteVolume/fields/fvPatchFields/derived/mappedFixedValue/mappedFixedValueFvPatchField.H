@@ -37,7 +37,7 @@ Description
 Usage
     \table
         Property     | Description             | Required    | Default value
-        fieldName    | name of field to be mapped | no       | this field name
+        field        | name of field to be mapped | no       | this field name
         setAverage   | flag to activate setting of average value | yes |
         average      | average value to apply if \c setAverage = yes | yes |
         interpolationScheme | type of interpolation scheme | no |
@@ -48,7 +48,7 @@ Usage
     <patchName>
     {
         type            mapped;
-        fieldName       T;
+        field           T;
         setAverage      no;
         average         0;
         interpolationScheme cell;

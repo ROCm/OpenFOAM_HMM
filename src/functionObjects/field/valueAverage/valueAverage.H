@@ -41,7 +41,7 @@ Usage
         ...
         writeToFile yes;
         log         yes;
-        functionObjectName forceCoeffs1;
+        functionObject forceCoeffs1;
         fields      (Cm Cd Cl);
         window      0.5;
     }
@@ -54,6 +54,8 @@ Usage
         writeToFile  | write average data to file |  no      | yes
         log          | write average data to standard output | no | yes
         fields       | list of fields to process | yes       |
+        functionObject | Name of function object to retrieve data from | yes |
+        resetOnRestart | Reset the averaging on restart | yes |
     \endtable
 
     Output data is written to the file \<timeDir\>/valueAverage.dat
@@ -107,7 +109,7 @@ protected:
         //- Average time per field
         List<scalar> totalTime_;
 
-        //- Reset the averaging process on restart flag
+        //- Reset the averaging process on restart
         bool resetOnRestart_;
 
 
