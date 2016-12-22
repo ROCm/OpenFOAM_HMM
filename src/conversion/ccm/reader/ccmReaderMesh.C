@@ -1919,7 +1919,7 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
             Info<<"Warning : skip interface " << interI << " " << ifentry
                 <<" on patches " << patchPair << nl
                 <<"   has zero or different number of faces: ("
-                << patchSizes_[patchPair[0]]  << " " << patchSizes_[patchPair[0]] << ")"
+                << patchSizes_[patchPair[0]]  << " " << patchSizes_[patchPair[1]] << ")"
                 << endl;
         }
         else
@@ -1985,6 +1985,9 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
 
         const UIndirectList<point> pointsToMerge(points_, addr);
 
+        Info<< "    patch "  << patch0 << ", " << patch1 << ": ("
+            << nPatch0Faces << " and " << nPatch1Faces << " faces) " << flush;
+
         label nMerged = mergePoints
         (
             true,
@@ -1994,8 +1997,7 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
             mergedPointMap
         );
 
-        Info<< "    patch "  << patch0 << ", " << patch1 << ": "
-            << nMerged << " from " << pointsToMerge.size() << " points"
+        Info<< nMerged << " from " << pointsToMerge.size() << " points"
             << endl;
 
         if (nMerged)

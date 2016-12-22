@@ -47,9 +47,6 @@ Usage
       - \par -name \<name\>
         Provide alternative base name for export. Default is <tt>meshExport</tt>.
 
-      - \par -combine
-        Combine identically named patches
-
       - \par -noBaffles
         Remove any baffles by merging the faces.
 
@@ -93,8 +90,9 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Reads CCM files as written by PROSTAR/STARCCM and writes an"
-        " OPENFOAM polyMesh."
+        "Reads CCM files as written by PROSTAR/STARCCM and writes an OPENFOAM "
+        " polyMesh. Multi-region support for PROSTAR meshes should be stable."
+        " Multi-region merging for STARCCM meshes will not always be successful."
     );
 
     argList::noParallel();
@@ -127,11 +125,12 @@ int main(int argc, char *argv[])
         "provide alternative base name when re-exporting (implies -export). "
         "Default is <meshExport>."
     );
-    argList::addBoolOption
-    (
-        "combine",
-        "combine identically named patches"
-    );
+    // This often works, but is not entirely stable
+    //     argList::addBoolOption
+    //     (
+    //         "combine",
+    //         "combine identically named patches"
+    //     );
     argList::addBoolOption
     (
         "noBaffles",
@@ -155,7 +154,7 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "withSolid",
+        "solids",
         "treat any solid cells present just like fluid cells. "
         "the default is to remove them."
     );
