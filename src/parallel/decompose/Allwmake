@@ -8,22 +8,18 @@ cd ${0%/*} || exit 1    # Run from this directory
 # - return 0 and export METIS_ARCH_PATH on success
 hasMetis()
 {
-    echo
-    echo "Metis decomposition"
+    local warning="==> skip metis"
 
     unset METIS_ARCH_PATH METIS_VERSION
     settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/metis) || {
-        echo
-        echo "Error: no config.sh/metis settings"
-        echo
+        echo "$warning (no config.sh/metis settings)"
         return 1
     }
 
     . $settings
     if [ -z "$METIS_ARCH_PATH" -o "${METIS_ARCH_PATH##*-}" = none ]
     then
-        echo "   skipping - no metis"
-        echo
+        echo "$warning (not available)"
         return 1
     fi
 
@@ -34,8 +30,7 @@ hasMetis()
         [ -f "$header" ] || header=/usr/include/metis.h
     fi
     [ -f "$header" ] || {
-        echo "    skipping - no metis header"
-        echo
+        echo "$warning (no header)"
         return 2  # file not found
     }
 
@@ -43,25 +38,23 @@ hasMetis()
     [ -r $FOAM_EXT_LIBBIN/libmetis.so ] || \
     [ -r $METIS_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/libmetis.so ] || \
     [ "${METIS_ARCH_PATH##*-}" = system ] || {
-        echo "   skipping - missing library"
-        echo
+        echo "$warning (missing library)"
         return 2
     }
 
     # Ensure consistent sizes between OpenFOAM and metis header
     # Extract IDXTYPEWIDTH from metis.h: regex as per ThirdParty Allwmake
     local label=$(sed -ne 's/^.*#define  *IDXTYPEWIDTH  *\([1-9][0-9]\).*/\1/p' $header)
-    [ "$WM_LABEL_SIZE" = "$label" ] || {
-        echo "   skipping - label=$WM_LABEL_SIZE, metis.h has '$label'"
-        echo
-        return 1
-    }
+    : ${label:=unknown}
 
-    echo "using METIS_ARCH_PATH=$METIS_ARCH_PATH"
-    echo "    label=$label"
-    echo
-    export METIS_ARCH_PATH
-    return 0 # success
+    if [ "$WM_LABEL_SIZE" = "$label" ]
+    then
+        echo "Metis (label=$label) - $METIS_ARCH_PATH"
+        export METIS_ARCH_PATH
+    else
+        echo "$warning (label=$WM_LABEL_SIZE, metis.h has '$label')"
+        return 1
+    fi
 }
 
 
@@ -69,22 +62,18 @@ hasMetis()
 # - return 0 and export SCOTCH_ARCH_PATH, SCOTCH_VERSION on success
 hasScotch()
 {
-    echo
-    echo "Scotch decomposition"
+    local warning="==> skip scotch"
 
     unset SCOTCH_ARCH_PATH SCOTCH_VERSION
     settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/scotch) || {
-        echo
-        echo "Error: no config.sh/scotch settings"
-        echo
+        echo "$warning (no config.sh/scotch settings)"
         return 1
     }
 
     . $settings
     if [ -z "$SCOTCH_ARCH_PATH" -o "${SCOTCH_ARCH_PATH##*-}" = none ]
     then
-        echo "    skipping - no scotch"
-        echo
+        echo "$warning (not available)"
         return 1
     fi
 
@@ -95,8 +84,7 @@ hasScotch()
         [ -f "$header" ] || header=/usr/include/scotch.h
     fi
     [ -f "$header" ] || {
-        echo "    skipping - no scotch header"
-        echo
+        echo "$warning (no header)"
         return 2  # file not found
     }
 
@@ -104,8 +92,7 @@ hasScotch()
     [ -r $FOAM_EXT_LIBBIN/libscotch.so ] || \
     [ -r $SCOTCH_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/libscotch.so ] || \
     [ "${SCOTCH_ARCH_PATH##*-}" = system ] || {
-        echo "    skipping - missing library"
-        echo
+        echo "$warning (missing library)"
         return 2
     }
 
@@ -116,18 +103,18 @@ hasScotch()
         "$header")
 
     : ${label:=unknown}
-    [ "$WM_LABEL_SIZE" = 32 -a \( "$label" = int32_t -o "$label" = int  \) ] || \
-    [ "$WM_LABEL_SIZE" = 64 -a \( "$label" = int64_t -o "$label" = long \) ] || {
-        echo "   skipping - label='$WM_LABEL_SIZE', scotch.h has '$label'"
-        echo
-        return 1
-    }
 
-    echo "using SCOTCH_ARCH_PATH=$SCOTCH_ARCH_PATH"
-    echo "    label=$label ($WM_LABEL_SIZE)"
-    echo
-    export SCOTCH_ARCH_PATH SCOTCH_VERSION
-    return 0 # success
+    case "$WM_LABEL_SIZE:$label" in
+    (32:int32_t | 32:int | 64:int64_t | 64:long)
+        echo "Scotch (label=$label) - $SCOTCH_ARCH_PATH"
+        export SCOTCH_ARCH_PATH SCOTCH_VERSION
+        ;;
+
+    *)
+        echo "$warning (label='$WM_LABEL_SIZE', scotch.h has '$label')"
+        return 1
+        ;;
+    esac
 }
 
 
@@ -156,7 +143,7 @@ wmakeMpiLib()
     done
 }
 
-wmakeLnInclude decompositionMethods
+wmakeLnInclude -u decompositionMethods
 
 if hasScotch
 then

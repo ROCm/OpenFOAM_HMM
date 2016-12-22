@@ -6,35 +6,31 @@ targetType=libso
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
 ## Get ZOLTAN_ARCH_PATH
-#if settings=`$WM_PROJECT_DIR/bin/foamEtcFile config.sh/zoltan`
+#if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/zoltan)
 #then
 #    . $settings
 #    echo "using ZOLTAN_ARCH_PATH=$ZOLTAN_ARCH_PATH"
 #else
-#    echo
 #    echo "Error: no config.sh/zoltan settings"
-#    echo
 #fi
 
 wmake $targetType renumberMethods
 
+warning="==> skip SloanRenumber"
 if [ -f "$BOOST_ARCH_PATH/include/boost/version.hpp" ] || \
    [ "${BOOST_ARCH_PATH##*-}" = system -a -f /usr/include/boost/version.hpp ]
 then
-    wmake $targetType SloanRenumber
+    wmake $targetType SloanRenumber || echo "$warning (build issues detected)"
 else
-    echo
-    echo "Skipping SloanRenumber (no boost)"
-    echo
+    echo "$warning (no boost)"
 fi
 
+warning="==> skip zoltanRenumber"
 if [ -d "$ZOLTAN_ARCH_PATH" ]
 then
-    wmake $targetType zoltanRenumber
+    wmake $targetType zoltanRenumber || echo "$warning (build issues detected)"
 else
-    echo
-    echo "Skipping zoltanRenumber"
-    echo
+    echo "$warning (no library)"
 fi
 
 #------------------------------------------------------------------------------

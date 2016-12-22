@@ -6,9 +6,7 @@ if [ -f "$FFTW_ARCH_PATH/include/fftw3.h" ] || \
 then
     wmake
 else
-    echo
-    echo "Skipping noise utility (no FFTW)"
-    echo
+    echo "==> skip noise utility (no FFTW)"
 fi
 
 #------------------------------------------------------------------------------

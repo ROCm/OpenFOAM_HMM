@@ -8,11 +8,9 @@ cd ${0%/*} || exit 1    # Run from this directory
 [ -n "$WM_CC" ]  && export CC="$WM_CC"
 [ -n "$WM_CXX" ] && export CXX="$WM_CXX"
 
-echo
 echo "======================================================================"
 echo "${PWD##*/} : $PWD"
 echo
-
 
 # CMake into objectsDir,
 # with an additional attempt if (possibly incorrect) CMakeCache.txt existed
@@ -64,6 +62,5 @@ else
 fi
 
 echo "======================================================================"
-echo
 
 # -----------------------------------------------------------------------------

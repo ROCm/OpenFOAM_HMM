@@ -8,31 +8,25 @@ export WM_CONTINUE_ON_ERROR=true
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
 #
-# There are several prerequisites for building a plugin
+# There are several prerequisites for building plugins
 #
 #set -x
 canBuildPlugin()
 {
     [ -d "$ParaView_DIR" -a -r "$ParaView_DIR" ] || {
-        echo
-        echo "WARNING: cannot build ParaView plugin(s) without paraview directory"
+        echo "==> cannot build ParaView plugins without paraview directory"
         echo "    ParaView_DIR=$ParaView_DIR"
-        echo
         return 1
     }
 
     [ -n "$PV_PLUGIN_PATH" ] || {
-        echo
-        echo "${PWD##*/} : invalid PV_PLUGIN_PATH for building ParaView plugin(s)"
+        echo "==> ${PWD##*/} : invalid PV_PLUGIN_PATH for building ParaView plugins"
         echo "    PV_PLUGIN_PATH=${PV_PLUGIN_PATH:-unset}"
-        echo
         return 1
     }
 
     type cmake > /dev/null 2>&1 || {
-        echo
-        echo "WARNING: cannot build ParaView plugin(s) without cmake"
-        echo
+        echo "==> cannot build ParaView plugins without cmake"
         return 1
     }
 
@@ -62,10 +56,8 @@ case "$major" in
     fi
     ;;
 *)
-    echo
-    echo "NOTE: skipping build of ParaView plugin(s)"
+    echo "==> skip build of ParaView plugins"
     echo "    include directory was for paraview major version '${major:-none}'"
-    echo
     ;;
 esac
 

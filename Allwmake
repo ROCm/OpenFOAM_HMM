@@ -25,14 +25,25 @@ if [ -d "$WM_THIRD_PARTY_DIR" ]
 then
     $WM_THIRD_PARTY_DIR/Allwmake
 else
-    echo "Allwmake: no ThirdParty directory found - skipping"
+    echo "No ThirdParty directory found - skipping"
 fi
 
-# Compile OpenFOAM libraries and applications
+echo "========================================"
+echo "Compile OpenFOAM libraries"
+echo
 src/Allwmake $targetType $*
 
-# Compile OpenFOAM libraries and applications
+echo "========================================"
+echo "Compile OpenFOAM applications"
+echo
 applications/Allwmake $targetType $*
 
-
+# Some summary information
+echo
+/usr/bin/date
+echo "========================================"
+echo "  ${WM_PROJECT_DIR##*/}"
+echo "  $WM_COMPILER $WM_COMPILER_TYPE compiler"
+echo "  ${WM_OPTIONS}, with ${WM_MPLIB} ${FOAM_MPI}"
+echo
 #------------------------------------------------------------------------------

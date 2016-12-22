@@ -7,11 +7,11 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Only build if libraries already exist
 if [ -e $FOAM_LIBBIN/libccm.so ]
 then
-    echo "Building optional ccm conversion components."
+    echo "==> build optional ccm conversion components"
     wmake $targetType ccmToFoam
     wmake $targetType foamToCcm
 else
-    echo "Skipping optional ccm conversion components (no libccm.so)."
+    echo "==> skip optional ccm conversion components (no libccm.so)"
 fi
 
 #------------------------------------------------------------------------------

@@ -71,13 +71,24 @@ do
         # If called from wmake (to avoid recursion)
         fromWmake=true
         ;;
+    -k | -non-stop)
+        # Non-stop compilation, ignoring errors
+        export WM_CONTINUE_ON_ERROR=true
+        continue    # Permanently remove arg
+        ;;
     -l | -log)
         optLog="log.${WM_OPTIONS:-Allwmake}"
         continue    # Permanently remove arg
         ;;
     -log=*)
         optLog="${arg##*=}"
-        [ -n "$optLog" ] || optLog="log.${WM_OPTIONS:-Allwmake}"
+        if [ -d "$optLog" ]
+        then
+            optLog="${optLog%/}/log.${WM_OPTIONS:-Allwmake}"
+        elif [ -z "$optLog" ]
+        then
+            optLog="log.${WM_OPTIONS:-Allwmake}"
+        fi
         continue    # Permanently remove arg
         ;;
     -q | -queue)
@@ -104,15 +115,21 @@ then
     if [ -z "$optLog" ]
     then
         exec wmake -all $optQueue $*
+        exit $? # Unneeded, but just in case something went wrong
     else
-        echo "logging wmake -all output to '$optLog'" 1>&2
-        exec wmake -all $optQueue $* 2>&1 | tee $optLog
+        echo "Logging wmake -all output to '$optLog'" 1>&2
+        echo 1>&2
+        exec wmake -all $optQueue $* 2>&1 | /usr/bin/tee $optLog
+        # Need to cleanup after the tee
+        rc=$? # Error code from tee (not wmake), but not entirely important
+        echo "Done logging to '$optLog'" 1>&2
+        exit $rc
     fi
 fi
 
 
 #------------------------------------------------------------------------------
-# If WM_CONTINUE_ON_ERROR not set activate the shell option "stop on error"
+# Activate the shell option "stop on error" unless WM_CONTINUE_ON_ERROR is set
 #------------------------------------------------------------------------------
 
 if [ -z "${WM_CONTINUE_ON_ERROR}" ]

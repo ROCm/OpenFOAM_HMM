@@ -20,8 +20,8 @@ wmakeCheckPwd "$WM_PROJECT_DIR/src" || {
 # Update OpenFOAM version strings if required
 wmakePrintBuild -check || wrmo OpenFOAM/global/global.o 2>/dev/null
 
-wmakeLnInclude OpenFOAM
-wmakeLnInclude OSspecific/${WM_OSTYPE:-POSIX}
+wmakeLnInclude -u OpenFOAM
+wmakeLnInclude -u OSspecific/${WM_OSTYPE:-POSIX}
 Pstream/Allwmake $targetType $*
 
 OSspecific/${WM_OSTYPE:-POSIX}/Allwmake $targetType $*
@@ -38,7 +38,7 @@ wmake $targetType edgeMesh
 parallel/decompose/AllwmakeLnInclude
 dummyThirdParty/Allwmake $targetType $*
 
-wmakeLnInclude fvOptions
+wmakeLnInclude -u fvOptions
 
 wmake $targetType finiteVolume
 wmake $targetType lagrangian/basic
