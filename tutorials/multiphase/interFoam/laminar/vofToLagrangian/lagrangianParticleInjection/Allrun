@@ -25,7 +25,7 @@ copyLagrangianData()
 
     if [ -z $latestTime ]
     then
-        echo "Error: unable to find Lagrangian data in case $eulerianCase"
+        echo "Error: unable to find Lagrangian data in case $dir"
         exit 1
     fi
 
@@ -37,6 +37,7 @@ copyLagrangianData()
         \cp -r $dir 0
     else
         echo "Error: unable to find Lagrangian data in case $dir"
+        exit 1
     fi
 }
 

@@ -384,6 +384,11 @@ Foam::InjectedParticleDistributionInjection<CloudType>::parcelsToInject
     nParcelsInjected_ += returnReduce(nParcelsInjected0_, sumOp<label>());
     nParcelsInjected0_ = 0;
 
+    if (startTime_.empty() || this->volumeTotal_ < ROOTVSMALL)
+    {
+        return 0;
+    }
+
     scalar targetVolume = 0;
     forAll(startTime_, injectori)
     {
