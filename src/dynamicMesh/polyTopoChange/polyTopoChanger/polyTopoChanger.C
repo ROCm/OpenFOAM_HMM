@@ -276,6 +276,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
     }
     else
     {
+        mesh_.topoChanging(false);
         return autoPtr<mapPolyMesh>(nullptr);
     }
 }
