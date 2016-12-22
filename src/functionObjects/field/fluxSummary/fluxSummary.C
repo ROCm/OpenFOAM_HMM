@@ -795,7 +795,7 @@ Foam::functionObjects::fluxSummary::fluxSummary
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    writeFile(obr_, name, typeName, dict),
+    writeFile(obr_, name),
     mode_(mdFaceZone),
     scaleFactor_(1),
     phiName_("phi"),
