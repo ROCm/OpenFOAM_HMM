@@ -173,8 +173,8 @@ unset cleaned foamClean foamOldDirs
 # Cleanup aliases
 
 unalias wmSet
-unalias wm64
-unalias wm32
+unalias wmInt32
+unalias wmInt64
 unalias wmSP
 unalias wmDP
 
