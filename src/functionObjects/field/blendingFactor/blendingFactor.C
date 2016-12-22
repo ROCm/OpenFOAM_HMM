@@ -171,8 +171,7 @@ bool Foam::functionObjects::blendingFactor::write()
         reduce(nCellsScheme2, sumOp<label>());
         reduce(nCellsBlended, sumOp<label>());
 
-        Log << type() << " " << name() << " write:" << nl
-            << "    scheme 1 cells :  " << nCellsScheme1 << nl
+        Log << "    scheme 1 cells :  " << nCellsScheme1 << nl
             << "    scheme 2 cells :  " << nCellsScheme2 << nl
             << "    blended cells  :  " << nCellsBlended << nl
             << endl;

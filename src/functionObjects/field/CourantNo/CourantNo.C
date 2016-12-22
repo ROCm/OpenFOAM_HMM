@@ -83,7 +83,7 @@ bool Foam::functionObjects::CourantNo::calc()
             )
         );
 
-        if (foundObject<volScalarField>(resultName_))
+        if (foundObject<volScalarField>(resultName_, false))
         {
             volScalarField& Co
             (

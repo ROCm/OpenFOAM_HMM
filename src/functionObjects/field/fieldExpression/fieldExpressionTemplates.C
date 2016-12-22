@@ -40,7 +40,7 @@ bool Foam::functionObjects::fieldExpression::foundObject
     }
     else
     {
-        if (verbose)
+        if (debug || verbose)
         {
             Warning
                 << "    functionObjects::" << type() << " " << this->name()
