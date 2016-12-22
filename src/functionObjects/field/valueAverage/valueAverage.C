@@ -109,6 +109,9 @@ bool Foam::functionObjects::valueAverage::read(const dictionary& dict)
     regionFunctionObject::read(dict);
     writeFile::read(dict);
 
+    // Make certain that the values are consistent with the defaults:
+    resetOnRestart_ = false;
+
     dict.lookup("functionObject") >> functionObjectName_;
     dict.lookup("fields") >> fieldNames_;
     window_ = dict.lookupOrDefault<scalar>("window", -1);
@@ -119,7 +122,7 @@ bool Foam::functionObjects::valueAverage::read(const dictionary& dict)
         totalTime_[i] = time_.deltaTValue();
     }
 
-    resetOnRestart_ = readBool(dict.lookup("resetOnRestart"));
+    dict.readIfPresent("resetOnRestart", resetOnRestart_);
 
     return true;
 }

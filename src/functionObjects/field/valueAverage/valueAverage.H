@@ -55,7 +55,7 @@ Usage
         log          | write average data to standard output | no | yes
         fields       | list of fields to process | yes       |
         functionObject | Name of function object to retrieve data from | yes |
-        resetOnRestart | Reset the averaging on restart | yes |
+        resetOnRestart | Reset the averaging on restart | no | no |
     \endtable
 
     Output data is written to the file \<timeDir\>/valueAverage.dat
@@ -110,7 +110,7 @@ protected:
         List<scalar> totalTime_;
 
         //- Reset the averaging process on restart
-        bool resetOnRestart_;
+        Switch resetOnRestart_;
 
 
     // Protected Member Functions

@@ -293,13 +293,19 @@ bool Foam::functionObjects::fieldAverage::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
 
+    // Make certain that the values are consistent with the defaults:
     initialised_ = false;
+    restartOnRestart_ = false;
+    restartOnOutput_  = false;
+    periodicRestart_  = false;
+    restartPeriod_    = GREAT;
+    restartTime_      = GREAT;
 
     Info<< type() << " " << name() << ":" << nl;
 
     dict.readIfPresent("restartOnRestart", restartOnRestart_);
-    dict.readIfPresent("restartOnOutput", restartOnOutput_);
-    dict.readIfPresent("periodicRestart", periodicRestart_);
+    dict.readIfPresent("restartOnOutput",  restartOnOutput_);
+    dict.readIfPresent("periodicRestart",  periodicRestart_);
     dict.lookup("fields") >> faItems_;
 
     const scalar currentTime = obr().time().value();
@@ -331,7 +337,6 @@ bool Foam::functionObjects::fieldAverage::read(const dictionary& dict)
         }
     }
 
-    restartTime_ = GREAT;
     if (dict.readIfPresent("restartTime", restartTime_))
     {
         if (currentTime > restartTime_)
