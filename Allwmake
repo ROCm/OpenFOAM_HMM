@@ -40,7 +40,7 @@ applications/Allwmake $targetType $*
 
 # Some summary information
 echo
-/usr/bin/date
+date "+%Y-%m-%d %H:%M:%S %z" 2>/dev/null || echo "date is unknown"
 echo "========================================"
 echo "  ${WM_PROJECT_DIR##*/}"
 echo "  $WM_COMPILER $WM_COMPILER_TYPE compiler"
