@@ -207,7 +207,7 @@ void pointNoise::calculate()
 
 pointNoise::pointNoise(const dictionary& dict, const bool readFields)
 :
-    noiseModel(dict)
+    noiseModel(dict, false)
 {
     if (readFields)
     {
