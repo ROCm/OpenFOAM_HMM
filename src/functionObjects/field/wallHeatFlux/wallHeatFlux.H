@@ -56,7 +56,7 @@ Usage
 See also
     Foam::functionObject
     Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::writeFiles
+    Foam::functionObjects::writeFile
     Foam::functionObjects::timeControl
 
 SourceFiles
@@ -68,7 +68,7 @@ SourceFiles
 #define functionObjects_wallHeatFlux_H
 
 #include "fvMeshFunctionObject.H"
-#include "logFiles.H"
+#include "writeFile.H"
 #include "volFieldsFwd.H"
 #include "HashSet.H"
 

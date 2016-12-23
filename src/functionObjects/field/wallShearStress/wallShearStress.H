@@ -69,8 +69,7 @@ Usage
 See also
     Foam::functionObject
     Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::logFiles
-    Foam::functionObjects::pressureTools
+    Foam::functionObjects::writeFile
     Foam::functionObjects::timeControl
 
 SourceFiles
@@ -82,7 +81,7 @@ SourceFiles
 #define functionObjects_wallShearStress_H
 
 #include "fvMeshFunctionObject.H"
-#include "logFiles.H"
+#include "writeFile.H"
 #include "volFieldsFwd.H"
 #include "HashSet.H"
 

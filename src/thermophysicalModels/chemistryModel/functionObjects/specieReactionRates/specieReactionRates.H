@@ -34,7 +34,7 @@ Description
 See also
     Foam::functionObjects::fvMeshFunctionObject
     Foam::functionObjects::volRegion
-    Foam::functionObjects::logFiles
+    Foam::functionObjects::writeFile
 
 SourceFiles
     specieReactionRates.C

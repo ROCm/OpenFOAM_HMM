@@ -59,6 +59,8 @@ void Foam::functionObjects::logFiles::resetNames(const wordList& names)
         filePtrs_.clear();
         filePtrs_.setSize(names_.size());
     }
+
+    createFiles();
 }
 
 

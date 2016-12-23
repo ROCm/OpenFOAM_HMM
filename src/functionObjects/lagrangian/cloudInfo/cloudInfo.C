@@ -88,24 +88,27 @@ Foam::functionObjects::cloudInfo::~cloudInfo()
 
 bool Foam::functionObjects::cloudInfo::read(const dictionary& dict)
 {
-    regionFunctionObject::read(dict);
-
-    logFiles::resetNames(dict.lookup("clouds"));
-
-    Info<< type() << " " << name() << ": ";
-    if (names().size())
+    if (regionFunctionObject::read(dict) && logFiles::read(dict))
     {
-        Info<< "applying to clouds:" << nl;
-        forAll(names(), i)
+        logFiles::resetNames(dict.lookup("clouds"));
+
+        Info<< type() << " " << name() << ": ";
+        if (writeToFile() && names().size())
         {
-            Info<< "    " << names()[i] << nl;
-            writeFileHeader(file(i));
+            Info<< "applying to clouds:" << nl;
+            forAll(names(), i)
+            {
+                Info<< "    " << names()[i] << nl;
+                writeFileHeader(file(i));
+            }
+            Info<< endl;
         }
-        Info<< endl;
-    }
-    else
-    {
-        Info<< "no clouds to be processed" << nl << endl;
+        else
+        {
+            Info<< "no clouds to be processed" << nl << endl;
+        }
+
+        return true;
     }
 
     return true;
@@ -143,7 +146,7 @@ bool Foam::functionObjects::cloudInfo::write()
             << "    D32 diameter      : " << D32 << nl
             << endl;
 
-        if (Pstream::master() && writeToFile())
+        if (writeToFile())
         {
             writeTime(file(i));
             file(i)
