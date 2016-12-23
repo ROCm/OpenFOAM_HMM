@@ -25,11 +25,11 @@ airDeflection
         selectionMode   cellZone;
         cellZone        c1Zone;
 
-        fieldNames  (U);
+        fields      (U);
         flowDir     (1 2 0);        // flow direction
         relaxationFactor    0.3;
 
-        faceZone     f1Zone;
+        faceZone    f1Zone;
 
         //Pressure drop model [Pa]
         model       DarcyForchheimer;//volumetricFlowRateTable/constant
