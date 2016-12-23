@@ -196,7 +196,7 @@ directionalPressureGradientExplicitSource
     relaxationFactor_(coeffs_.lookupOrDefault<scalar>("relaxationFactor",0.3)),
     cellFaceMap_(cells_.size(), -1)
 {
-    coeffs_.lookup("fieldNames") >> fieldNames_;
+    coeffs_.lookup("fields") >> fieldNames_;
 
     flowDir_ /= mag(flowDir_);
 

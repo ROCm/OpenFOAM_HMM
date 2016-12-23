@@ -71,7 +71,7 @@ Description
             nbrRegion       air;
             master          true;
 
-            fieldNames      (h);
+            fields          (h);
             outOfBounds     clamp;
             fileName        "ntuTable";
             nbrModel        airToCooler;

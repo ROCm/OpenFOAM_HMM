@@ -45,7 +45,7 @@ Description
             selectionMode   cellZone;
             cellZone        cZone;
 
-            fieldNames  (U);            // Name of the field
+            fields      (U);            // Name of the field
             flowDir     (1 1 0);        // Desired flow direction
             faceZone    f0Zone;         // Face zone upstream cell zone
             relaxationFactor    0.3;    // Relaxation factor for flow
