@@ -123,8 +123,6 @@ int main(int argc, char *argv[])
 
                 // Make the fluxes relative to the mesh motion
                 fvc::makeRelative(phi, U);
-
-                mesh.topoChanging(false);
             }
         }
 
