@@ -176,11 +176,16 @@ bool Foam::functionObjects::pressure::calc()
     {
         const volScalarField& p = lookupObject<volScalarField>(fieldName_);
 
-        return store
+        tmp<volScalarField> tp
         (
-            resultName_,
-            coeff(pRef(pDyn(p, rhoScale(p))))
+            new volScalarField
+            (
+                resultName_,
+                coeff(pRef(pDyn(p, rhoScale(p))))
+            )
         );
+
+        return store(resultName_, tp);
     }
     else
     {
