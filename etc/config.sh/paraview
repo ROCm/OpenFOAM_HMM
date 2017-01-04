@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -61,13 +61,20 @@ cmake_version=cmake-system
 
 #------------------------------------------------------------------------------
 
-# Clean the PATH
+# Clean PATH and LD_LIBRARY_PATH
 cleaned=$($WM_PROJECT_DIR/bin/foamCleanPath "$PATH" \
+    "$ParaView_DIR \
+    $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/cmake- \
+    $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/ParaView-" \
+) && PATH="$cleaned"
+
+if [ -n "$LD_LIBRARY_PATH" ]
+then
+    cleaned=$($WM_PROJECT_DIR/bin/foamCleanPath "$LD_LIBRARY_PATH" \
         "$ParaView_DIR \
-         $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/cmake- \
-         $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-" \
-        ) \
-        && PATH="$cleaned"
+        $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/ParaView-" \
+    ) && LD_LIBRARY_PATH="$cleaned"
+fi
 
 # ThirdParty cmake
 cmake=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cmake_version
