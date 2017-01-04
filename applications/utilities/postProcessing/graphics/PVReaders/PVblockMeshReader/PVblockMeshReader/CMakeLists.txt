@@ -1,11 +1,4 @@
-# create a plugin that adds a reader to the ParaView GUI
-# it is added in the file dialog when doing opens/saves.
-
-# The qrc file is processed by Qt's resource compiler (rcc)
-# the qrc file must have a resource prefix of "/ParaViewResources"
-# and ParaView will read anything contained under that prefix
-# the pqReader.xml file contains xml defining readers with their
-# file extensions and descriptions.
+# Create a plugin to add a reader to the ParaView GUI
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
@@ -25,7 +18,7 @@ INCLUDE_DIRECTORIES(
 )
 
 ADD_DEFINITIONS(
-    -std=c++0x
+    -std=c++11
     -DWM_$ENV{WM_PRECISION_OPTION}
     -DWM_LABEL_SIZE=$ENV{WM_LABEL_SIZE}
 )
@@ -37,44 +30,44 @@ SET(
     "Single output directory for building all libraries."
 )
 
-#
-# Define combined plugin
-#
 
-# Extend the auto-generated panel
-QT4_WRAP_CPP(MOC_SRCS pqPVblockMeshReaderPanel.h)
-
-ADD_PARAVIEW_OBJECT_PANEL(IFACES IFACE_SRCS
-  CLASS_NAME pqPVblockMeshReaderPanel
-  XML_NAME  PVblockMeshReader           # name of SourceProxy in *SM.xml
-  XML_GROUP sources
-)
-
-# Separate GUI_RESOURCE_FILES deprecated with paraview 4.3
-# so check if version < 4.4
-
-IF(("${PARAVIEW_VERSION_MAJOR}" LESS 5) AND ("${PARAVIEW_VERSION_MINOR}" LESS 4))
-    ADD_PARAVIEW_PLUGIN(
-        PVblockMeshReader_SM "1.0"
-        SERVER_MANAGER_XML PVblockMeshReader_SM.xml
-        SERVER_MANAGER_SOURCES  vtkPVblockMeshReader.cxx
-        GUI_INTERFACES ${IFACES}
-        GUI_SOURCES pqPVblockMeshReaderPanel.cxx
-        ${MOC_SRCS} ${UI_SRCS} ${IFACE_SRCS}
-        GUI_RESOURCE_FILES PVblockMeshReader.xml
-    )
+IF (PARAVIEW_QT_VERSION VERSION_GREATER "4")
+  QT5_WRAP_CPP(MOC_SRCS
+      pqRefreshProperty.h
+      pqShowPointNumbersProperty.h
+  )
 ELSE()
-    ADD_PARAVIEW_PLUGIN(
-        PVblockMeshReader_SM "1.0"
-        SERVER_MANAGER_XML PVblockMeshReader_SM.xml
-        SERVER_MANAGER_SOURCES  vtkPVblockMeshReader.cxx
-        GUI_INTERFACES ${IFACES}
-        GUI_SOURCES pqPVblockMeshReaderPanel.cxx
-        ${MOC_SRCS} ${UI_SRCS} ${IFACE_SRCS}
-    )
+  QT4_WRAP_CPP(MOC_SRCS
+      pqRefreshProperty.h
+      pqShowPointNumbersProperty.h
+  )
 ENDIF()
 
-# Build the client-side plugin
+ADD_PARAVIEW_PROPERTY_WIDGET(IFACES0 IFACES0_SRCS
+    TYPE "openfoam_refresh_button"
+    CLASS_NAME pqRefreshProperty
+)
+
+ADD_PARAVIEW_PROPERTY_WIDGET(IFACES1 IFACES1_SRCS
+    TYPE "openfoam_show_point_numbers"
+    CLASS_NAME pqShowPointNumbersProperty
+)
+
+ADD_PARAVIEW_PLUGIN(
+    PVblockMeshReader_SM "1.0"
+    SERVER_MANAGER_XML PVblockMeshReader_SM.xml
+    SERVER_MANAGER_SOURCES  vtkPVblockMeshReader.cxx
+    GUI_INTERFACES
+        ${IFACES0}
+        ${IFACES1}
+    SOURCES
+        ${IFACES0_SRCS}
+        ${IFACES1_SRCS}
+        ${MOC_SRCS}
+        pqRefreshProperty.cxx
+        pqShowPointNumbersProperty.cxx
+)
+
 
 TARGET_LINK_LIBRARIES(
     PVblockMeshReader_SM

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ vtkPVblockMeshReader::vtkPVblockMeshReader()
     FileName  = nullptr;
     foamData_ = nullptr;
 
-    ShowPointNumbers = 1;
+    ShowPointNumbers = true;
 
     BlockSelection = vtkDataArraySelection::New();
     CurvedEdgesSelection = vtkDataArraySelection::New();
@@ -92,7 +92,7 @@ vtkPVblockMeshReader::vtkPVblockMeshReader()
 
 vtkPVblockMeshReader::~vtkPVblockMeshReader()
 {
-    vtkDebugMacro(<<"Deconstructor");
+    vtkDebugMacro(<<"Destructor");
 
     if (foamData_)
     {
@@ -106,8 +106,8 @@ vtkPVblockMeshReader::~vtkPVblockMeshReader()
         delete [] FileName;
     }
 
-    BlockSelection->RemoveObserver(this->SelectionObserver);
-    CurvedEdgesSelection->RemoveObserver(this->SelectionObserver);
+    BlockSelection->RemoveAllObservers();
+    CurvedEdgesSelection->RemoveAllObservers();
 
     SelectionObserver->Delete();
     BlockSelection->Delete();
@@ -218,7 +218,7 @@ int vtkPVblockMeshReader::RequestData
 }
 
 
-void vtkPVblockMeshReader::SetRefresh(int val)
+void vtkPVblockMeshReader::SetRefresh(bool val)
 {
     // Delete the current blockMesh to force re-read and update
     if (foamData_)
@@ -232,7 +232,7 @@ void vtkPVblockMeshReader::SetRefresh(int val)
 }
 
 
-void vtkPVblockMeshReader::SetShowPointNumbers(const int val)
+void vtkPVblockMeshReader::SetShowPointNumbers(bool val)
 {
     if (ShowPointNumbers != val)
     {

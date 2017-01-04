@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,13 +63,15 @@ void Foam::vtkPVblockMesh::updateInfoBlocks
     vtkDataArraySelection* arraySelection
 )
 {
+    arrayRange& range = arrayRangeBlocks_;
+
     if (debug)
     {
         Info<< "<beg> Foam::vtkPVblockMesh::updateInfoBlocks"
             << " [meshPtr=" << (meshPtr_ ? "set" : "nullptr") << "]" << endl;
     }
 
-    arrayRangeBlocks_.reset( arraySelection->GetNumberOfArrays() );
+    range.reset(arraySelection->GetNumberOfArrays());
 
     const blockMesh& blkMesh = *meshPtr_;
 
@@ -80,21 +82,20 @@ void Foam::vtkPVblockMesh::updateInfoBlocks
 
         // Display either blockI as a number or with its name
         // (looked up from blockMeshDict)
-        OStringStream os;
-        blockDescriptor::write(os, blockI, blkMesh.meshDict());
-        word partName(os.str());
+        OStringStream ostr;
+        blockDescriptor::write(ostr, blockI, blkMesh.meshDict());
 
         // append the (optional) zone name
         if (!blockDef.zoneName().empty())
         {
-            partName += " - " + blockDef.zoneName();
+            ostr << " - " << blockDef.zoneName();
         }
 
-        // Add blockId and zoneName to GUI list
-        arraySelection->AddArray(partName.c_str());
+        // Add "blockId" or "blockId - zoneName" to GUI list
+        arraySelection->AddArray(ostr.str().c_str());
     }
 
-    arrayRangeBlocks_ += nBlocks;
+    range += nBlocks;
 
     if (debug)
     {
@@ -111,18 +112,19 @@ void Foam::vtkPVblockMesh::updateInfoEdges
     vtkDataArraySelection* arraySelection
 )
 {
+    arrayRange& range = arrayRangeEdges_;
+
     if (debug)
     {
         Info<< "<beg> Foam::vtkPVblockMesh::updateInfoEdges"
             << " [meshPtr=" << (meshPtr_ ? "set" : "nullptr") << "]" << endl;
     }
 
-    arrayRangeEdges_.reset( arraySelection->GetNumberOfArrays() );
+    range.reset(arraySelection->GetNumberOfArrays());
 
     const blockMesh& blkMesh = *meshPtr_;
     const blockEdgeList& edges = blkMesh.edges();
 
-    const int nEdges = edges.size();
     forAll(edges, edgeI)
     {
         OStringStream ostr;
@@ -135,7 +137,7 @@ void Foam::vtkPVblockMesh::updateInfoEdges
         arraySelection->AddArray(ostr.str().c_str());
     }
 
-    arrayRangeEdges_ += nEdges;
+    range += edges.size();
 
     if (debug)
     {
@@ -281,18 +283,14 @@ void Foam::vtkPVblockMesh::updateInfo()
     resetCounters();
 
     vtkDataArraySelection* blockSelection = reader_->GetBlockSelection();
-    vtkDataArraySelection* edgeSelection = reader_->GetCurvedEdgesSelection();
+    vtkDataArraySelection* edgeSelection  = reader_->GetCurvedEdgesSelection();
 
     // enable 'internalMesh' on the first call
     // or preserve the enabled selections
     stringList enabledParts;
     stringList enabledEdges;
-    bool firstTime = false;
-    if (!blockSelection->GetNumberOfArrays() && !meshPtr_)
-    {
-        firstTime = true;
-    }
-    else
+    const bool firstTime = (!blockSelection->GetNumberOfArrays() && !meshPtr_);
+    if (!firstTime)
     {
         enabledParts = getSelectedArrayEntries(blockSelection);
         enabledEdges = getSelectedArrayEntries(edgeSelection);
@@ -306,10 +304,10 @@ void Foam::vtkPVblockMesh::updateInfo()
     updateFoamMesh();
 
     // Update mesh parts list
-    updateInfoBlocks( blockSelection );
+    updateInfoBlocks(blockSelection);
 
     // Update curved edges list
-    updateInfoEdges( edgeSelection );
+    updateInfoEdges(edgeSelection);
 
     // restore the enabled selections
     if (!firstTime)

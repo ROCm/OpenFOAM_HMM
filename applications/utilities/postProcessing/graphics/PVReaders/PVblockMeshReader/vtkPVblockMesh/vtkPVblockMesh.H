@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,17 +41,10 @@ SourceFiles
 #ifndef vtkPVblockMesh_H
 #define vtkPVblockMesh_H
 
-// do not include legacy strstream headers
-#ifndef  VTK_EXCLUDE_STRSTREAM_HEADERS
-# define VTK_EXCLUDE_STRSTREAM_HEADERS
-#endif
-
 #include "className.H"
 #include "fileName.H"
 #include "stringList.H"
 #include "wordList.H"
-
-#include "primitivePatch.H"
 
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
 
@@ -198,6 +191,7 @@ class vtkPVblockMesh
         //- List of point numbers for rendering to window
         List<vtkTextActor*> pointNumberTextActorsPtrs_;
 
+
     // Private Member Functions
 
         // Convenience method use to convert the readers from VTK 5
@@ -209,23 +203,6 @@ class vtkPVblockMesh
             const arrayRange&,
             const label datasetNo,
             const std::string& datasetName
-        );
-
-        // Convenience method use to convert the readers from VTK 5
-        // multiblock API to the current composite data infrastructure
-        static vtkDataSet* GetDataSetFromBlock
-        (
-            vtkMultiBlockDataSet* output,
-            const arrayRange&,
-            const label datasetNo
-        );
-
-        // Convenience method use to convert the readers from VTK 5
-        // multiblock API to the current composite data infrastructure
-        static label GetNumberOfDataSets
-        (
-            vtkMultiBlockDataSet* output,
-            const arrayRange&
         );
 
         //- Update boolList from GUI selection
@@ -294,10 +271,10 @@ class vtkPVblockMesh
 
 
         //- Disallow default bitwise copy construct
-        vtkPVblockMesh(const vtkPVblockMesh&);
+        vtkPVblockMesh(const vtkPVblockMesh&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const vtkPVblockMesh&);
+        void operator=(const vtkPVblockMesh&) = delete;
 
 
 public:

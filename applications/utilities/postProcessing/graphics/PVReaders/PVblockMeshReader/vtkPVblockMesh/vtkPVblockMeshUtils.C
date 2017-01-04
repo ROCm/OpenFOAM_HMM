@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -123,47 +123,6 @@ void Foam::vtkPVblockMesh::AddToBlock
             datasetName.c_str()
         );
     }
-}
-
-
-vtkDataSet* Foam::vtkPVblockMesh::GetDataSetFromBlock
-(
-    vtkMultiBlockDataSet* output,
-    const arrayRange& range,
-    const label datasetNo
-)
-{
-    const int blockNo = range.block();
-
-    vtkDataObject* blockDO = output->GetBlock(blockNo);
-    vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast(blockDO);
-
-    if (block)
-    {
-        return vtkDataSet::SafeDownCast(block->GetBlock(datasetNo));
-    }
-
-    return 0;
-}
-
-
-// ununsed at the moment
-Foam::label Foam::vtkPVblockMesh::GetNumberOfDataSets
-(
-    vtkMultiBlockDataSet* output,
-    const arrayRange& range
-)
-{
-    const int blockNo = range.block();
-
-    vtkDataObject* blockDO = output->GetBlock(blockNo);
-    vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast(blockDO);
-    if (block)
-    {
-        return block->GetNumberOfBlocks();
-    }
-
-    return 0;
 }
 
 

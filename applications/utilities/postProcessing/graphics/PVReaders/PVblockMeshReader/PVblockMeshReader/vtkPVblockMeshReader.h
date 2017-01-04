@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,12 +73,12 @@ public:
 
     // Description:
     // Display corner point labels
-    virtual void SetShowPointNumbers(int);
-    vtkGetMacro(ShowPointNumbers, int);
+    virtual void SetShowPointNumbers(bool);
+    vtkGetMacro(ShowPointNumbers, bool);
 
     // Description:
     // Refresh blockMesh from changes to blockMeshDict
-    virtual void SetRefresh(int);
+    virtual void SetRefresh(bool);
 
     // Description:
     // Blocks selection list control
@@ -144,25 +144,23 @@ protected:
 private:
 
     //- Disallow default bitwise copy construct
-    vtkPVblockMeshReader(const vtkPVblockMeshReader&);
+    vtkPVblockMeshReader(const vtkPVblockMeshReader&) = delete;
 
     //- Disallow default bitwise assignment
-    void operator=(const vtkPVblockMeshReader&);
+    void operator=(const vtkPVblockMeshReader&) = delete;
 
     //- Add/remove point numbers to/from the view
     void updatePointNumbersView(const bool show);
 
 
     //- Show Point Numbers
-    int ShowPointNumbers;
+    bool ShowPointNumbers;
 
     vtkDataArraySelection* BlockSelection;
 
     vtkDataArraySelection* CurvedEdgesSelection;
 
-    //BTX
     Foam::vtkPVblockMesh* foamData_;
-    //ETX
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ void Foam::vtkPVblockMesh::convertMeshBlocks
     vtkDataArraySelection* selection = reader_->GetBlockSelection();
     arrayRange& range = arrayRangeBlocks_;
     range.block(blockNo);   // set output block
-    label datasetNo = 0;       // restart at dataset 0
+    label datasetNo = 0;    // restart at dataset 0
 
     const blockMesh& blkMesh = *meshPtr_;
     const Foam::pointField& blockPoints = blkMesh.vertices();
@@ -234,7 +234,6 @@ void Foam::vtkPVblockMesh::convertMeshEdges
         }
     }
 
-
     // anything added?
     if (datasetNo)
     {
@@ -286,7 +285,7 @@ void Foam::vtkPVblockMesh::convertMeshCorners
                 scaleFactor
             );
 
-            vtkcells->InsertNextCell(1, &pointId);
+            vtkcells->InsertNextCell(1, &pointId); // VTK_VERTEX
             pointId++;
         }
 
@@ -296,11 +295,7 @@ void Foam::vtkPVblockMesh::convertMeshCorners
         vtkmesh->SetVerts(vtkcells);
         vtkcells->Delete();
 
-        AddToBlock
-        (
-            output, vtkmesh, range, datasetNo,
-            arrayRangeCorners_.name()
-        );
+        AddToBlock(output, vtkmesh, range, datasetNo, range.name());
         vtkmesh->Delete();
 
         datasetNo++;
