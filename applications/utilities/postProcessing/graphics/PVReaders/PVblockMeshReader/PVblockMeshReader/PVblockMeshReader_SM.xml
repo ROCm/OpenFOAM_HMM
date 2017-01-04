@@ -19,7 +19,6 @@
       name="Refresh"
       command="SetRefresh"
       default_values="0"
-      panel_widget="openfoam_refresh_button"
       number_of_elements="1"
       panel_visibility="default">
       <BooleanDomain name="bool"/>
@@ -31,7 +30,6 @@
       name="ShowPointNumbers"
       command="SetShowPointNumbers"
       default_values="1"
-      panel_widget="openfoam_show_point_numbers"
       number_of_elements="1"
       panel_visibility="default">
       <BooleanDomain name="bool"/>
@@ -94,7 +92,9 @@
       file_description="OpenFOAM blockMesh"/>
   </Hints>
 
-  <PropertyGroup label="General Controls">
+  <PropertyGroup
+    label="General Controls"
+    panel_widget="openfoam_blockMesh_general_controls">
     <Property name="Refresh"/>
     <Property name="ShowPointNumbers"/>
   </PropertyGroup>

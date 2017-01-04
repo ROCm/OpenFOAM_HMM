@@ -1,75 +1,65 @@
 # Create a plugin to add a reader to the ParaView GUI
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+cmake_minimum_required(VERSION 2.6)
 
-FIND_PACKAGE(ParaView REQUIRED)
-INCLUDE(${PARAVIEW_USE_FILE})
+find_package(ParaView REQUIRED)
+include(${PARAVIEW_USE_FILE})
 
-LINK_DIRECTORIES(
+link_directories(
     $ENV{FOAM_LIBBIN}
     $ENV{FOAM_EXT_LIBBIN}
 )
 
-INCLUDE_DIRECTORIES(
+include_directories(
     $ENV{WM_PROJECT_DIR}/src/OpenFOAM/lnInclude
     $ENV{WM_PROJECT_DIR}/src/OSspecific/$ENV{WM_OSTYPE}/lnInclude
     $ENV{WM_PROJECT_DIR}/src/meshing/blockMesh/lnInclude
     ${PROJECT_SOURCE_DIR}/../vtkPVblockMesh
 )
 
-ADD_DEFINITIONS(
+add_definitions(
     -std=c++11
     -DWM_$ENV{WM_PRECISION_OPTION}
     -DWM_LABEL_SIZE=$ENV{WM_LABEL_SIZE}
 )
 
 # Set output library destination to plugin directory
-SET(
+set(
     LIBRARY_OUTPUT_PATH $ENV{PV_PLUGIN_PATH}
     CACHE INTERNAL
     "Single output directory for building all libraries."
 )
 
 
-IF (PARAVIEW_QT_VERSION VERSION_GREATER "4")
-  QT5_WRAP_CPP(MOC_SRCS
-      pqRefreshProperty.h
-      pqShowPointNumbersProperty.h
+if (PARAVIEW_QT_VERSION VERSION_GREATER "4")
+  qt5_wrap_cpp(MOC_SRCS
+      pqFoamBlockMeshControls.h
   )
-ELSE()
-  QT4_WRAP_CPP(MOC_SRCS
-      pqRefreshProperty.h
-      pqShowPointNumbersProperty.h
+else()
+  qt4_wrap_cpp(MOC_SRCS
+      pqFoamBlockMeshControls.h
   )
-ENDIF()
+endif()
 
-ADD_PARAVIEW_PROPERTY_WIDGET(IFACES0 IFACES0_SRCS
-    TYPE "openfoam_refresh_button"
-    CLASS_NAME pqRefreshProperty
+add_paraview_property_group_widget(IFACES0 IFACES0_SRCS
+    TYPE "openfoam_blockMesh_general_controls"
+    CLASS_NAME pqFoamBlockMeshControls
 )
 
-ADD_PARAVIEW_PROPERTY_WIDGET(IFACES1 IFACES1_SRCS
-    TYPE "openfoam_show_point_numbers"
-    CLASS_NAME pqShowPointNumbersProperty
-)
-
-ADD_PARAVIEW_PLUGIN(
+add_paraview_plugin(
     PVblockMeshReader_SM "1.0"
     SERVER_MANAGER_XML PVblockMeshReader_SM.xml
     SERVER_MANAGER_SOURCES  vtkPVblockMeshReader.cxx
     GUI_INTERFACES
         ${IFACES0}
-        ${IFACES1}
     SOURCES
         ${IFACES0_SRCS}
-        ${IFACES1_SRCS}
         ${MOC_SRCS}
-        pqRefreshProperty.cxx
-        pqShowPointNumbersProperty.cxx
+        pqFoamBlockMeshControls.cxx
 )
 
 
-TARGET_LINK_LIBRARIES(
+target_link_libraries(
     PVblockMeshReader_SM
     LINK_PUBLIC
     vtkPVblockMesh

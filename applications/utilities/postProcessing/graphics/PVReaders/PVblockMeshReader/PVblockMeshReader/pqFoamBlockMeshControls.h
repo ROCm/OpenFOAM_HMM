@@ -22,17 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    pqShowPointNumbersProperty
+    pqFoamBlockMeshControls
 
 Description
-    Custom UI handling of show-points (ParaView blockMesh reader)
+    Customized property controls for the ParaView blockMesh reader.
+
+    Refresh and ShowPointNumbers.
 
 SourceFiles
-    pqShowPointNumbersProperty.cxx
+    pqFoamBlockMeshControls.cxx
 
 \*---------------------------------------------------------------------------*/
-#ifndef pqShowPointNumbersProperty_h
-#define pqShowPointNumbersProperty_h
+#ifndef pqFoamBlockMeshControls_h
+#define pqFoamBlockMeshControls_h
 
 #include "pqPropertyWidget.h"
 
@@ -41,10 +43,10 @@ class vtkSMIntVectorProperty;
 
 
 /*---------------------------------------------------------------------------*\
-                 Class pqShowPointNumbersProperty Declaration
+                      Class pqFoamBlockMeshControls Declaration
 \*---------------------------------------------------------------------------*/
 
-class pqShowPointNumbersProperty
+class pqFoamBlockMeshControls
 :
     public pqPropertyWidget
 {
@@ -53,13 +55,28 @@ class pqShowPointNumbersProperty
 
     // Private data
 
+        //- Refresh (bool property - as push button)
+        vtkSMIntVectorProperty* refresh_;
+
         //- Show Point Numbers (bool property)
         vtkSMIntVectorProperty* showPointNumbers_;
+
+
+    // Private Member Functions
+
+    //- Disallow default bitwise copy construct
+    pqFoamBlockMeshControls(const pqFoamBlockMeshControls&) = delete;
+
+    //- Disallow default bitwise assignment
+    void operator=(const pqFoamBlockMeshControls&) = delete;
 
 
 protected slots:
 
     // Protected Member Functions
+
+    //- Trigger refresh
+    void refreshPressed();
 
     //- Sync property with changed checkbox state, update rendered view(s)
     void showPointNumbers(bool checked);
@@ -68,16 +85,16 @@ protected slots:
 public:
 
     //- Construct from components
-    pqShowPointNumbersProperty
+    pqFoamBlockMeshControls
     (
         vtkSMProxy* proxy,
-        vtkSMProperty* prop,
+        vtkSMPropertyGroup* group,
         QWidget* parent = nullptr
     );
 
 
     //- Destructor
-    virtual ~pqShowPointNumbersProperty();
+    virtual ~pqFoamBlockMeshControls();
 
 };
 

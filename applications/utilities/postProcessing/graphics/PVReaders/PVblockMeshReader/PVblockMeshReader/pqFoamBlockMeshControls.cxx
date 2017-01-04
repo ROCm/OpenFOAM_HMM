@@ -23,20 +23,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "pqShowPointNumbersProperty.h"
+#include "pqFoamBlockMeshControls.h"
 
 #include <QCheckBox>
 #include <QGridLayout>
+#include <QPushButton>
 
 #include "pqApplicationCore.h"
 #include "pqView.h"
 #include "vtkSMDocumentation.h"
 #include "vtkSMIntVectorProperty.h"
+#include "vtkSMPropertyGroup.h"
+#include "vtkSMSourceProxy.h"
+
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 // file-scope
-static void setButtonProperties
+static QAbstractButton* setButtonProperties
 (
     QAbstractButton* b,
     vtkSMIntVectorProperty* prop,
@@ -67,12 +71,43 @@ static void setButtonProperties
     {
         b->setChecked(prop->GetElement(0));
     }
+
+    return b;
+}
+
+
+static vtkSMIntVectorProperty* lookupIntProp
+(
+    vtkSMPropertyGroup* group,
+    const char* name
+)
+{
+    vtkSMProperty* prop = group->GetProperty(name);
+
+    if (prop)
+    {
+        return vtkSMIntVectorProperty::SafeDownCast(prop);
+    }
+
+    return nullptr;
 }
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void pqShowPointNumbersProperty::showPointNumbers(bool checked)
+void pqFoamBlockMeshControls::refreshPressed()
+{
+    // Update everything
+    refresh_->Modified();
+
+    vtkSMSourceProxy::SafeDownCast(this->proxy())->UpdatePipeline();
+
+    // Render all views
+    pqApplicationCore::instance()->render();
+}
+
+
+void pqFoamBlockMeshControls::showPointNumbers(bool checked)
 {
     showPointNumbers_->SetElement(0, checked);
 
@@ -89,33 +124,44 @@ void pqShowPointNumbersProperty::showPointNumbers(bool checked)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-pqShowPointNumbersProperty::pqShowPointNumbersProperty
+pqFoamBlockMeshControls::pqFoamBlockMeshControls
 (
     vtkSMProxy* proxy,
-    vtkSMProperty* prop,
+    vtkSMPropertyGroup* group,
     QWidget* parent
 )
 :
     Superclass(proxy, parent),
-    showPointNumbers_(vtkSMIntVectorProperty::SafeDownCast(prop))
+    refresh_(lookupIntProp(group, "Refresh")),
+    showPointNumbers_(lookupIntProp(group, "ShowPointNumbers"))
 {
-    // Replace with our UI content
-    this->setShowLabel(false);
-
     QGridLayout* form = new QGridLayout(this);
 
-    QCheckBox* b = new QCheckBox(this);
-    setButtonProperties(b, showPointNumbers_);
-    form->addWidget(b, 0, 0, Qt::AlignLeft);
+    if (refresh_)
+    {
+        QPushButton* b = new QPushButton(this);
+        setButtonProperties(b, refresh_, false);
+        form->addWidget(b, 0, 0, Qt::AlignLeft);
 
-    connect(b, SIGNAL(toggled(bool)), this, SLOT(showPointNumbers(bool)));
-    showPointNumbers_->SetImmediateUpdate(true);
+        connect(b, SIGNAL(clicked()), this, SLOT(refreshPressed()));
+        refresh_->SetImmediateUpdate(true);
+    }
+
+    if (showPointNumbers_)
+    {
+        QCheckBox* b = new QCheckBox(this);
+        setButtonProperties(b, showPointNumbers_);
+        form->addWidget(b, 0, 1, Qt::AlignLeft);
+
+        connect(b, SIGNAL(toggled(bool)), this, SLOT(showPointNumbers(bool)));
+        showPointNumbers_->SetImmediateUpdate(true);
+    }
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-pqShowPointNumbersProperty::~pqShowPointNumbersProperty()
+pqFoamBlockMeshControls::~pqFoamBlockMeshControls()
 {}
 
 
