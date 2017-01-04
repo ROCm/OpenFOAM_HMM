@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,8 +52,8 @@ void Foam::functionObjects::timeControl::readControls()
 bool Foam::functionObjects::timeControl::active() const
 {
     return
-        time_.value() >= timeStart_
-     && time_.value() <= timeEnd_;
+        time_.value() >= (timeStart_ - 0.5*time_.deltaTValue())
+     && time_.value() <= (timeEnd_ + 0.5*time_.deltaTValue());
 }
 
 
