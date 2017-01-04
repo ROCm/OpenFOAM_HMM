@@ -25,7 +25,7 @@ Class
     Foam::pressureInletOutletVelocityFvPatchVectorField
 
 Group
-    grpInletletBoundaryConditions grpOutletBoundaryConditions
+    grpInletBoundaryConditions grpOutletBoundaryConditions
 
 Description
     This velocity inlet/outlet boundary condition is applied to pressure
@@ -49,7 +49,7 @@ Usage
         type            pressureInletOutletVelocity;
         phi             phi;
         tangentialVelocity uniform (0 0 0);
-        value           uniform 0;
+        value           uniform (0 0 0);
     }
     \endverbatim
 
