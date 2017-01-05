@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,19 +76,19 @@ vtkPVFoamReader::vtkPVFoamReader()
     TimeStepRange[0] = 0;
     TimeStepRange[1] = 0;
 
-    CacheMesh = 1;
-    Refresh = 0;
+    CacheMesh = true;
+    Refresh = false;
 
-    SkipZeroTime = 0;
-    ExtrapolatePatches = 0;
-    UseVTKPolyhedron = 0;
-    IncludeSets = 0;
-    IncludeZones = 0;
-    ShowPatchNames = 0;
-    ShowGroupsOnly = 0;
-    InterpolateVolFields = 1;
+    SkipZeroTime = false;
+    ExtrapolatePatches = false;
+    UseVTKPolyhedron = false;
+    IncludeSets = false;
+    IncludeZones = false;
+    ShowPatchNames = false;
+    ShowGroupsOnly = false;
+    InterpolateVolFields = true;
 
-    UpdateGUI = 0;
+    UpdateGUI = false;
 
     PartSelection = vtkDataArraySelection::New();
     VolFieldSelection = vtkDataArraySelection::New();
@@ -151,10 +151,10 @@ vtkPVFoamReader::~vtkPVFoamReader()
     }
 
 
-    PartSelection->RemoveObserver(this->SelectionObserver);
-    VolFieldSelection->RemoveObserver(this->SelectionObserver);
-    PointFieldSelection->RemoveObserver(this->SelectionObserver);
-    LagrangianFieldSelection->RemoveObserver(this->SelectionObserver);
+    PartSelection->RemoveAllObservers();
+    VolFieldSelection->RemoveAllObservers();
+    PointFieldSelection->RemoveAllObservers();
+    LagrangianFieldSelection->RemoveAllObservers();
 
     SelectionObserver->Delete();
 
@@ -417,13 +417,13 @@ int vtkPVFoamReader::RequestData
 }
 
 
-void vtkPVFoamReader::SetRefresh(int val)
+void vtkPVFoamReader::SetRefresh(bool val)
 {
     Modified();
 }
 
 
-void vtkPVFoamReader::SetIncludeSets(int val)
+void vtkPVFoamReader::SetIncludeSets(bool val)
 {
     if (IncludeSets != val)
     {
@@ -436,7 +436,7 @@ void vtkPVFoamReader::SetIncludeSets(int val)
 }
 
 
-void vtkPVFoamReader::SetIncludeZones(int val)
+void vtkPVFoamReader::SetIncludeZones(bool val)
 {
     if (IncludeZones != val)
     {
@@ -449,7 +449,7 @@ void vtkPVFoamReader::SetIncludeZones(int val)
 }
 
 
-void vtkPVFoamReader::SetShowPatchNames(int val)
+void vtkPVFoamReader::SetShowPatchNames(bool val)
 {
     if (ShowPatchNames != val)
     {
@@ -459,7 +459,7 @@ void vtkPVFoamReader::SetShowPatchNames(int val)
 }
 
 
-void vtkPVFoamReader::SetShowGroupsOnly(int val)
+void vtkPVFoamReader::SetShowGroupsOnly(bool val)
 {
     if (ShowGroupsOnly != val)
     {
@@ -502,7 +502,7 @@ void vtkPVFoamReader::updatePatchNamesView(const bool show)
         );
     }
 
-    // use refresh here?
+    // Use refresh here?
 }
 
 

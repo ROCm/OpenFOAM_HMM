@@ -5,14 +5,14 @@
     class="vtkPVFoamReader">
 
     <!-- File name - compulsory -->
-    <StringVectorProperty
+    <StringVectorProperty animateable="0"
       name="FileName"
       command="SetFileName"
       number_of_elements="1"
-      animateable="0">
+      panel_visibility="never">
       <FileListDomain name="files"/>
       <Documentation>
-        Specifies the filename for the OpenFOAM Reader.
+        The filename for the OpenFOAM reader module.
       </Documentation>
     </StringVectorProperty>
 
@@ -27,157 +27,151 @@
       </Documentation>
     </DoubleVectorProperty>
 
-    <!-- Cache Mesh check-box -->
-    <IntVectorProperty
-      name="UiCacheMesh"
-      command="SetCacheMesh"
-      number_of_elements="1"
-      is_internal="1"
-      default_values="1"
-      animateable="0">
-      <BooleanDomain name="bool"/>
-      <Documentation>
-        Cache the fvMesh in memory.
-      </Documentation>
-    </IntVectorProperty>
-
     <!-- Refresh button -->
-    <IntVectorProperty
-      name="UiRefresh"
+    <IntVectorProperty animateable="0"
+      name="Refresh"
       command="SetRefresh"
-      number_of_elements="1"
-      is_internal="0"
       default_values="0"
-      animateable="0">
+      number_of_elements="1"
+      panel_visibility="default">
       <BooleanDomain name="bool"/>
       <Documentation>
-        Rescan for updated timesteps/fields.
+        Rescan for updated times/fields.
       </Documentation>
     </IntVectorProperty>
 
     <!-- Skip Zero Time check-box -->
-    <IntVectorProperty
-      name="UiZeroTime"
+    <IntVectorProperty animateable="0"
+      name="ZeroTime"
+      label="Skip Zero Time"
       command="SetSkipZeroTime"
+      default_values="1"
       number_of_elements="1"
-      is_internal="1"
-      default_values="0"
-      animateable="0">
+      panel_visibility="default">
       <BooleanDomain name="bool"/>
       <Documentation>
-        Skip including the 0/ time directory
+        Ignore the 0/ time directory.
+      </Documentation>
+    </IntVectorProperty>
+
+    <!-- Include Sets check-box -->
+    <IntVectorProperty animateable="0"
+      name="IncludeSets"
+      command="SetIncludeSets"
+      default_values="0"
+      number_of_elements="1"
+      panel_visibility="default">
+      <BooleanDomain name="bool"/>
+      <Documentation>
+        Search the polyMesh/sets/ directory
+      </Documentation>
+    </IntVectorProperty>
+
+    <!-- Include Zones check-box -->
+    <IntVectorProperty animateable="0"
+      name="IncludeZones"
+      command="SetIncludeZones"
+      default_values="0"
+      number_of_elements="1"
+      panel_visibility="default">
+      <BooleanDomain name="bool"/>
+      <Documentation>
+        ZoneMesh information is used to find {cell,face,point}Zones.
+        The polyMesh/ directory is only checked on startup.
+      </Documentation>
+    </IntVectorProperty>
+
+    <!-- Show Groups Only check-box -->
+    <IntVectorProperty animateable="0"
+      name="ShowGroupsOnly"
+      label="Groups Only"
+      command="SetShowGroupsOnly"
+      default_values="0"
+      number_of_elements="1"
+      panel_visibility="default">
+      <BooleanDomain name="bool"/>
+      <Documentation>
+        Show patchGroups only.
+      </Documentation>
+    </IntVectorProperty>
+
+    <!-- Show Patch Names check-box -->
+    <IntVectorProperty animateable="0"
+      name="ShowPatchNames"
+      label="Patch Names"
+      command="SetShowPatchNames"
+      default_values="0"
+      number_of_elements="1"
+      panel_visibility="default">
+      <BooleanDomain name="bool"/>
+      <Documentation>
+        Show patch names in render window.
       </Documentation>
     </IntVectorProperty>
 
     <!-- Interpolate Fields check-box -->
-    <IntVectorProperty
-      name="UiInterpolateVolFields"
+    <IntVectorProperty animateable="0"
+      name="InterpolateFields"
       command="SetInterpolateVolFields"
-      number_of_elements="1"
-      is_internal="1"
       default_values="1"
-      animateable="0">
+      number_of_elements="1"
+      panel_visibility="default">
       <BooleanDomain name="bool"/>
       <Documentation>
-        Interpolate volume fields into point fields
+        Interpolate volFields into pointFields.
       </Documentation>
     </IntVectorProperty>
 
     <!-- Extrapolate Patches check-box -->
-    <IntVectorProperty
-      name="UiExtrapolatePatches"
+    <IntVectorProperty animateable="0"
+      name="ExtrapolatePatches"
       command="SetExtrapolatePatches"
-      number_of_elements="1"
-      is_internal="1"
       default_values="0"
-      animateable="0">
+      number_of_elements="1"
+      panel_visibility="default">
       <BooleanDomain name="bool"/>
       <Documentation>
-        Extrapolate internalField to non-constraint patches
+        Extrapolate internalField to non-constraint patches.
+      </Documentation>
+    </IntVectorProperty>
+
+    <!-- Force GUI update check box -->
+    <IntVectorProperty animateable="0"
+      name="UpdateGUI"
+      command="SetUpdateGUI"
+      default_values="0"
+      number_of_elements="1"
+      panel_visibility="default">
+      <BooleanDomain name="bool"/>
+      <Documentation>
+        Force reader GUI update.
       </Documentation>
     </IntVectorProperty>
 
     <!-- Use VTK Polyhedron check-box -->
-    <IntVectorProperty
+    <IntVectorProperty animateable="0"
       name="UseVTKPolyhedron"
+      label="Use VTK Polyhedron"
       command="SetUseVTKPolyhedron"
-      number_of_elements="1"
       default_values="0"
-      animateable="0">
+      number_of_elements="1"
+      panel_visibility="default">
       <BooleanDomain name="bool"/>
       <Documentation>
         Use vtkPolyhedron instead of decomposing polyhedra.
       </Documentation>
     </IntVectorProperty>
 
-    <!-- Include Sets check-box -->
-    <IntVectorProperty
-      name="UiIncludeSets"
-      command="SetIncludeSets"
+    <!-- Cache Mesh check-box -->
+    <IntVectorProperty animateable="0"
+      name="CacheMesh"
+      command="SetCacheMesh"
+      default_values="1"
       number_of_elements="1"
-      is_internal="1"
-      default_values="0"
-      animateable="0">
-      <Documentation>
-        Search the polyMesh/sets/ directory
-      </Documentation>
-      <BooleanDomain name="bool"/>
-    </IntVectorProperty>
-
-    <!-- Include Zones check-box -->
-    <IntVectorProperty
-      name="UiIncludeZones"
-      command="SetIncludeZones"
-      number_of_elements="1"
-      is_internal="1"
-      default_values="0"
-      animateable="0">
-      <Documentation>
-        ZoneMesh information is used to find {cell,face,point}Zones.
-        The polyMesh/ directory is only checked on startup.
-      </Documentation>
-      <BooleanDomain name="bool"/>
-    </IntVectorProperty>
-
-    <!-- Show Patch Names check-box -->
-    <IntVectorProperty
-      name="UiShowPatchNames"
-      command="SetShowPatchNames"
-      number_of_elements="1"
-      default_values="0"
-      is_internal="1"
-      animateable="0">
+      panel_visibility="default">
       <BooleanDomain name="bool"/>
       <Documentation>
-        Show patch names in render window
-      </Documentation>
-    </IntVectorProperty>
-
-    <!-- Show Groups Only check-box -->
-    <IntVectorProperty
-      name="UiShowGroupsOnly"
-      command="SetShowGroupsOnly"
-      number_of_elements="1"
-      default_values="0"
-      is_internal="1"
-      animateable="0">
-      <BooleanDomain name="bool"/>
-      <Documentation>
-        Show groups only
-      </Documentation>
-    </IntVectorProperty>
-
-    <!-- Force GUI update check box -->
-    <IntVectorProperty
-      name="UpdateGUI"
-      command="SetUpdateGUI"
-      number_of_elements="1"
-      is_internal="1"
-      default_values="0"
-      animateable="0">
-      <BooleanDomain name="bool"/>
-      <Documentation>
-        A simple way to cause a reader GUI modification.
+        Cache the fvMesh in memory.
       </Documentation>
     </IntVectorProperty>
 
@@ -191,7 +185,7 @@
       information_only="1">
       <ArraySelectionInformationHelper attribute_name="Part"/>
     </StringVectorProperty>
-    <StringVectorProperty
+    <StringVectorProperty animateable="0"
       name="PartStatus"
       label="Mesh Parts"
       command="SetPartArrayStatus"
@@ -199,16 +193,14 @@
       repeat_command="1"
       number_of_elements_per_command="2"
       element_types="2 0"
-      information_property="PartArrayStatus"
-      animateable="0">
+      information_property="PartArrayStatus">
       <ArraySelectionDomain name="array_list">
         <RequiredProperties>
           <Property name="PartArrayStatus" function="ArrayList"/>
         </RequiredProperties>
       </ArraySelectionDomain>
       <Documentation>
-        This property contains a list of the mesh parts
-        (patches, groups, sets, zones).
+        The list of mesh parts (patches, groups, sets, zones).
       </Documentation>
     </StringVectorProperty>
 
@@ -218,7 +210,7 @@
       information_only="1">
       <ArraySelectionInformationHelper attribute_name="VolField"/>
     </StringVectorProperty>
-    <StringVectorProperty
+    <StringVectorProperty animateable="0"
       name="VolFieldStatus"
       label="Volume Fields"
       command="SetVolFieldArrayStatus"
@@ -226,16 +218,13 @@
       repeat_command="1"
       number_of_elements_per_command="2"
       element_types="2 0"
-      information_property="VolFieldArrayStatus"
-      animateable="0">
+      information_property="VolFieldArrayStatus">
       <ArraySelectionDomain name="array_list">
         <RequiredProperties>
           <Property name="VolFieldArrayStatus" function="ArrayList"/>
         </RequiredProperties>
       </ArraySelectionDomain>
-      <Documentation>
-        This property contains a list of the volume fields
-      </Documentation>
+      <Documentation>The list of volume fields.</Documentation>
     </StringVectorProperty>
 
     <!-- Available Lagrangian fields array -->
@@ -244,7 +233,7 @@
       information_only="1">
       <ArraySelectionInformationHelper attribute_name="LagrangianField"/>
     </StringVectorProperty>
-    <StringVectorProperty
+    <StringVectorProperty animateable="0"
       name="LagrangianFieldStatus"
       label="Lagrangian Fields"
       command="SetLagrangianFieldArrayStatus"
@@ -252,16 +241,13 @@
       repeat_command="1"
       number_of_elements_per_command="2"
       element_types="2 0"
-      information_property="LagrangianFieldArrayStatus"
-      animateable="0">
+      information_property="LagrangianFieldArrayStatus">
       <ArraySelectionDomain name="array_list">
         <RequiredProperties>
           <Property name="LagrangianFieldArrayStatus" function="ArrayList"/>
         </RequiredProperties>
       </ArraySelectionDomain>
-      <Documentation>
-        This property contains a list of the lagrangian fields
-      </Documentation>
+      <Documentation>The list of Lagrangian fields.</Documentation>
     </StringVectorProperty>
 
     <!-- Available pointFields array -->
@@ -270,7 +256,7 @@
       information_only="1">
       <ArraySelectionInformationHelper attribute_name="PointField"/>
     </StringVectorProperty>
-    <StringVectorProperty
+    <StringVectorProperty animateable="0"
       name="PointFieldStatus"
       label="Point Fields"
       command="SetPointFieldArrayStatus"
@@ -278,31 +264,50 @@
       repeat_command="1"
       number_of_elements_per_command="2"
       element_types="2 0"
-      information_property="PointFieldArrayStatus"
-      animateable="0">
+      information_property="PointFieldArrayStatus">
       <ArraySelectionDomain name="array_list">
         <RequiredProperties>
           <Property name="PointFieldArrayStatus" function="ArrayList"/>
         </RequiredProperties>
       </ArraySelectionDomain>
-      <Documentation>
-        This property contains a list of the point fields
-      </Documentation>
+      <Documentation>The list of point fields.</Documentation>
     </StringVectorProperty>
 
   <Hints>
-    <Property name="FileName" show="0"/>
-    <Property name="UiCacheMesh" show="0"/>
-    <Property name="UiZeroTime" show="0"/>
-    <Property name="UiRefresh" show="0"/>
-    <Property name="UiShowPatchNames" show="0"/>
-    <Property name="UiShowGroupsOnly" show="0"/>
-    <Property name="UiIncludeSets" show="0"/>
-    <Property name="UiIncludeZones" show="0"/>
-    <ReaderFactory extensions="OpenFOAM"
-                   file_description="OpenFOAM"/>
+    <ReaderFactory
+        extensions="OpenFOAM"
+        file_description="OpenFOAM reader module" />
   </Hints>
 
+  <PropertyGroup
+    label="General Controls"
+    panel_widget="openfoam_reader_general_controls">
+    <Property name="Refresh"/>
+    <Property name="ZeroTime"/>
+    <Property name="IncludeSets"/>
+    <Property name="IncludeZones"/>
+    <Property name="InterpolateFields"/>
+    <Property name="ExtrapolatePatches"/>
+    <Property name="ShowGroupsOnly"/>
+    <Property name="ShowPatchNames"/>
+    <Property name="UpdateGUI"/>
+    <Property name="UseVTKPolyhedron"/>
+    <Property name="CacheMesh"/>
+  </PropertyGroup>
+
+  <PropertyGroup label="Parts">
+    <Property name="PartArrayStatus"/>
+    <Property name="PartStatus"/>
+  </PropertyGroup>
+
+  <PropertyGroup label="Fields">
+    <Property name="VolFieldArrayStatus"/>
+    <Property name="VolFieldStatus"/>
+    <Property name="LagrangianFieldArrayStatus"/>
+    <Property name="LagrangianFieldStatus"/>
+    <Property name="PointFieldArrayStatus"/>
+    <Property name="PointFieldStatus"/>
+  </PropertyGroup>
 
   </SourceProxy>
   </ProxyGroup>

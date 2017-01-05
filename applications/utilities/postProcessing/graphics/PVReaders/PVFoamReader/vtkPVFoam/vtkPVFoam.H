@@ -56,11 +56,6 @@ SourceFiles
 #ifndef vtkPVFoam_H
 #define vtkPVFoam_H
 
-// do not include legacy strstream headers
-#ifndef  VTK_EXCLUDE_STRSTREAM_HEADERS
-# define VTK_EXCLUDE_STRSTREAM_HEADERS
-#endif
-
 #include "className.H"
 #include "fileName.H"
 #include "stringList.H"
