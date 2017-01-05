@@ -62,7 +62,7 @@ add_paraview_plugin(
 target_link_libraries(
     PVblockMeshReader_SM
     LINK_PUBLIC
-    vtkPVblockMesh
+    vtkPVblockMesh-pv${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}
     blockMesh
     OpenFOAM
 )

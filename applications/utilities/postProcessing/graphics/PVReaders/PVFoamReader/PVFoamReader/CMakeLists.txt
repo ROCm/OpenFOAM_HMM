@@ -62,7 +62,7 @@ add_paraview_plugin(
 target_link_libraries(
     PVFoamReader_SM
     LINK_PUBLIC
-    vtkPVFoam
+    vtkPVFoam-pv${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}
     finiteVolume
     OpenFOAM
 )

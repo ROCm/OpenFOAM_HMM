@@ -1,3 +1,5 @@
+sinclude $(GENERAL_RULES)/paraview
+
 EXE_INC = \
     ${c++LESSWARN} \
     -I$(ParaView_INCLUDE_DIR) \

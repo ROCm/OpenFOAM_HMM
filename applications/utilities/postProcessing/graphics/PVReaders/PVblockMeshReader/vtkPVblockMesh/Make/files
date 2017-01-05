@@ -2,4 +2,4 @@ vtkPVblockMesh.C
 vtkPVblockMeshConvert.C
 vtkPVblockMeshUtils.C
 
-LIB = $(FOAM_LIBBIN)/libvtkPVblockMesh
+LIB = $(FOAM_LIBBIN)/libvtkPVblockMesh-pv${ParaView_MAJOR}

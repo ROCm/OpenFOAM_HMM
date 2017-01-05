@@ -2,10 +2,13 @@
 cd ${0%/*} || exit 1    # Run from this directory
 
 # Source the wmake functions
-. $WM_DIR/scripts/wmakeFunctions
+. $WM_PROJECT_DIR/wmake/scripts/wmakeFunctions
 
-# Where are the generated files stored?
-findObjectDir $PWD
+# Cleanup library
+rm -f $FOAM_LIBBIN/librunTimePostProcessing* 2>/dev/null
+
+# Cleanup generated files
+findObjectDir $PWD # remove entire top-level
 rm -rf "$objectsDir" > /dev/null 2>&1
 
 #------------------------------------------------------------------------------

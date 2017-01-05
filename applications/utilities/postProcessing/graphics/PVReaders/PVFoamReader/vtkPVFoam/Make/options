@@ -1,3 +1,5 @@
+sinclude $(GENERAL_RULES)/paraview
+
 EXE_INC = \
     ${c++LESSWARN} \
     -I$(LIB_SRC)/meshTools/lnInclude \
@@ -16,5 +18,5 @@ LIB_LIBS = \
     -lconversion \
     -lgenericPatchFields \
     -llagrangian \
-    -L$(FOAM_LIBBIN) -lvtkPVReaders \
+    -L$(FOAM_LIBBIN) -lvtkPVReaders-pv${ParaView_MAJOR} \
     $(GLIBS)

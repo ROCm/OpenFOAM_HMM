@@ -7,6 +7,11 @@ export WM_CONTINUE_ON_ERROR=true
 # Parse arguments for library compilation
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
+# Source the wmake functions
+. $WM_PROJECT_DIR/wmake/scripts/wmakeFunctions
+
+# -----------------------------------------------------------------------------
+
 #
 # There are several prerequisites for building plugins
 #
@@ -34,6 +39,53 @@ canBuildPlugin()
 }
 
 
+#
+# Check sentinel file(s) to handle paraview version changes
+#
+versionOk()
+{
+    findObjectDir "$1"  # Where generated files are stored
+    local sentinel="$objectsDir/ThirdParty"
+
+    echo $sentinel
+
+    local prev
+    if read -r prev 2>/dev/null < $sentinel
+    then
+        case "$prev" in
+        ("ParaView_DIR=$ParaView_DIR")
+            return 0
+            ;;
+        (*)
+            echo "ParaView_DIR changed between builds" 1>&2
+            return 1
+            ;;
+        esac
+    elif [ -f "$objectsDir/CMakeCache.txt" ]
+    then
+        echo "previous build was incomplete" 1>&2
+        return 1
+    else
+        return 0
+    fi
+}
+
+
+#
+# Build library - use sentinel file(s) to handle paraview version changes
+#
+wmakeLibPv()
+{
+    for libName
+    do
+        sentinel=$(versionOk $libName) || wclean $libName  # version changed
+        wmake $targetType $libName && {
+            echo "ParaView_DIR=$ParaView_DIR" > $sentinel
+        }
+    done
+}
+
+
 # -----------------------------------------------------------------------------
 
 # major version as per paraview include directory:
@@ -45,9 +97,9 @@ case "$major" in
     if canBuildPlugin
     then
     (
-        wmake $targetType vtkPVReaders
+        wmakeLibPv vtkPVReaders
         PVblockMeshReader/Allwmake $targetType $*
-        PVFoamReader/Allwmake $targetType  $*
+        PVFoamReader/Allwmake $targetType $*
 
         # Dummy directory to trigger proper 'wclean all' behaviour
         # - the Allwclean will otherwise not be used
