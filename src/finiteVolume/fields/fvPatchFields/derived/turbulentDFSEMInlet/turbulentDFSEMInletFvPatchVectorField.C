@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -311,6 +311,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::initialisePatch()
 
     // Determine if all eddies spawned from a single processor
     singleProc_ = patch.size() == returnReduce(patch.size(), sumOp<label>());
+    reduce(singleProc_, orOp<bool>());
 }
 
 
