@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,7 +23,116 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+inline void Foam::hashedWordList::rehash(const bool unique)
+{
+    if (unique)
+    {
+        uniq();
+    }
+    else
+    {
+        rehash();
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+inline Foam::hashedWordList::hashedWordList()
+:
+    List<word>(),
+    indices_()
+{}
+
+
+inline Foam::hashedWordList::hashedWordList(const hashedWordList& lst)
+:
+    List<word>(static_cast<const UList<word>&>(lst))
+{
+    rehash();
+}
+
+
+inline Foam::hashedWordList::hashedWordList
+(
+    const UList<word>& lst,
+    const bool removeDuplicates
+)
+:
+    List<word>(lst)
+{
+    rehash(removeDuplicates);
+}
+
+
+inline Foam::hashedWordList::hashedWordList
+(
+    const Xfer<List<word>>& lst,
+    const bool removeDuplicates
+)
+:
+    List<word>(lst)
+{
+    rehash(removeDuplicates);
+}
+
+
+inline Foam::hashedWordList::hashedWordList(std::initializer_list<word> lst)
+:
+    List<word>(lst)
+{
+    rehash();
+}
+
+
+template<class AnyType, class AnyHash>
+inline Foam::hashedWordList::hashedWordList
+(
+    const HashTable<AnyType, word, AnyHash>& h
+)
+:
+    List<word>(h.size())
+{
+    label nElem = 0;
+    for
+    (
+        typename HashTable<AnyType, word, AnyHash>::const_iterator
+        iter = h.cbegin();
+        iter != h.cend();
+        ++iter
+    )
+    {
+        List<word>::operator[](nElem++) = iter.key();
+    }
+
+    this->sort();
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline void Foam::hashedWordList::clear()
+{
+    List<word>::clear();
+    indices_.clear();
+}
+
+
+inline void Foam::hashedWordList::append
+(
+    const word& name,
+    const bool avoidDuplicates
+)
+{
+    // name is either unique or we don't care about duplicates
+    if (indices_.insert(name, size()) || !avoidDuplicates)
+    {
+        List<word>::append(name);
+    }
+}
+
 
 inline const Foam::HashTable<Foam::label,Foam::word>&
 Foam::hashedWordList::lookup() const
@@ -41,6 +150,13 @@ inline bool Foam::hashedWordList::found(const word& name) const
 inline bool Foam::hashedWordList::contains(const word& name) const
 {
     return indices_.found(name);
+}
+
+
+inline void Foam::hashedWordList::sort()
+{
+    Foam::sort(*this);
+    rehash();
 }
 
 
@@ -75,9 +191,9 @@ inline const Foam::word& Foam::hashedWordList::operator[]
 }
 
 
-// could return -1 instead of bombing out
 inline Foam::label Foam::hashedWordList::operator[](const word& name) const
 {
+    // Could return -1 instead of bombing out
     return indices_[name];
 }
 

@@ -52,7 +52,6 @@ int main(int argc, char *argv[])
     );
 
 
-    
     Info<< "Cell centres" << nl << mesh.cellCentres() << endl;
     Info<< "Cell volumes" << nl << mesh.cellVolumes() << endl;
     Info<< "Cell shapes" << nl << mesh.cellShapes() << endl;
