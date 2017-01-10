@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -758,6 +758,28 @@ void Foam::meshToMesh::constructFromCuttingPatches
     const wordList& cuttingPatches
 )
 {
+    const polyBoundaryMesh& srcBm = srcRegion_.boundaryMesh();
+    const polyBoundaryMesh& tgtBm = tgtRegion_.boundaryMesh();
+
+    // set IDs of cutting patches
+    cuttingPatches_.setSize(cuttingPatches.size());
+    forAll(cuttingPatches_, i)
+    {
+        const word& patchName = cuttingPatches[i];
+        label cuttingPatchi = srcBm.findPatchID(patchName);
+
+        if (cuttingPatchi == -1)
+        {
+            FatalErrorInFunction
+                << "Unable to find patch '" << patchName
+                << "' in mesh '" << srcRegion_.name() << "'. "
+                << " Available patches include:" << srcBm.names()
+                << exit(FatalError);
+        }
+
+        cuttingPatches_[i] = cuttingPatchi;
+    }
+
     DynamicList<label> srcIDs(patchMap.size());
     DynamicList<label> tgtIDs(patchMap.size());
 
@@ -766,14 +788,14 @@ void Foam::meshToMesh::constructFromCuttingPatches
         const word& tgtPatchName = iter.key();
         const word& srcPatchName = iter();
 
-        const polyPatch& srcPatch = srcRegion_.boundaryMesh()[srcPatchName];
+        const polyPatch& srcPatch = srcBm[srcPatchName];
 
         // We want to map all the global patches, including constraint
         // patches (since they might have mappable properties, e.g.
         // jumpCyclic). We'll fix the value afterwards.
         if (!isA<processorPolyPatch>(srcPatch))
         {
-            const polyPatch& tgtPatch = tgtRegion_.boundaryMesh()[tgtPatchName];
+            const polyPatch& tgtPatch = tgtBm[tgtPatchName];
 
             srcIDs.append(srcPatch.index());
             tgtIDs.append(tgtPatch.index());
@@ -788,14 +810,6 @@ void Foam::meshToMesh::constructFromCuttingPatches
 
     // calculate patch addressing and weights
     calculatePatchAMIs(AMIMethodName);
-
-    // set IDs of cutting patches on target mesh
-    cuttingPatches_.setSize(cuttingPatches.size());
-    forAll(cuttingPatches_, i)
-    {
-        const word& patchName = cuttingPatches[i];
-        cuttingPatches_[i] = tgtRegion_.boundaryMesh().findPatchID(patchName);
-    }
 }
 
 
