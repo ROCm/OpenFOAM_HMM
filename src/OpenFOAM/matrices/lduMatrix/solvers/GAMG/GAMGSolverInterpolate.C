@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,25 +107,30 @@ void Foam::GAMGSolver::interpolate
     const label nCells = m.diag().size();
     scalar* __restrict__ psiPtr = psi.begin();
     const scalar* const __restrict__ diagPtr = m.diag().begin();
+    const scalar* const __restrict__ psiCPtr = psiC.begin();
+
 
     const label nCCells = psiC.size();
     scalarField corrC(nCCells, 0);
+    scalar* __restrict__ corrCPtr = corrC.begin();
+
     scalarField diagC(nCCells, 0);
+    scalar* __restrict__ diagCPtr = diagC.begin();
 
     for (label celli=0; celli<nCells; celli++)
     {
-        corrC[restrictAddressing[celli]] += diagPtr[celli]*psiPtr[celli];
-        diagC[restrictAddressing[celli]] += diagPtr[celli];
+        corrCPtr[restrictAddressing[celli]] += diagPtr[celli]*psiPtr[celli];
+        diagCPtr[restrictAddressing[celli]] += diagPtr[celli];
     }
 
     for (label ccelli=0; ccelli<nCCells; ccelli++)
     {
-        corrC[ccelli] = psiC[ccelli] - corrC[ccelli]/diagC[ccelli];
+        corrCPtr[ccelli] = psiCPtr[ccelli] - corrCPtr[ccelli]/diagCPtr[ccelli];
     }
 
     for (label celli=0; celli<nCells; celli++)
     {
-        psiPtr[celli] += corrC[restrictAddressing[celli]];
+        psiPtr[celli] += corrCPtr[restrictAddressing[celli]];
     }
 }
 

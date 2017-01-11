@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,13 +48,20 @@ void Foam::GAMGSolver::scale
         cmpt
     );
 
+
+    const label nCells = field.size();
+    scalar* __restrict__ fieldPtr = field.begin();
+    const scalar* const __restrict__ sourcePtr = source.begin();
+    const scalar* const __restrict__ AcfPtr = Acf.begin();
+
+
     scalar scalingFactorNum = 0.0;
     scalar scalingFactorDenom = 0.0;
 
-    forAll(field, i)
+    for (label i=0; i<nCells; i++)
     {
-        scalingFactorNum += source[i]*field[i];
-        scalingFactorDenom += Acf[i]*field[i];
+        scalingFactorNum += sourcePtr[i]*fieldPtr[i];
+        scalingFactorDenom += AcfPtr[i]*fieldPtr[i];
     }
 
     vector2D scalingVector(scalingFactorNum, scalingFactorDenom);
@@ -68,10 +75,11 @@ void Foam::GAMGSolver::scale
     }
 
     const scalarField& D = A.diag();
+    const scalar* const __restrict__ DPtr = D.begin();
 
-    forAll(field, i)
+    for (label i=0; i<nCells; i++)
     {
-        field[i] = sf*field[i] + (source[i] - sf*Acf[i])/D[i];
+        fieldPtr[i] = sf*fieldPtr[i] + (sourcePtr[i] - sf*AcfPtr[i])/DPtr[i];
     }
 }
 
