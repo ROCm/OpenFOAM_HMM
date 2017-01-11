@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -539,7 +539,15 @@ Foam::tmp<Foam::scalarField> Foam::primitiveMeshTools::cellDeterminant
                     }
                 }
 
-                cellDeterminant[celli] = mag(det(areaTensor));
+                // Note:
+                // - normalise to be 0..1 (since cube has eigenvalues 2 2 2)
+                // - we use the determinant (i.e. 3rd invariant) and not e.g.
+                //   condition number (= max ev / min ev) since we are
+                //   interested in the minimum connectivity and not the
+                //   uniformity. Using the condition number on corner cells
+                //   leads to uniformity 1 i.e. equally bad in all three
+                //   directions which is not what we want.
+                cellDeterminant[celli] = mag(det(areaTensor))/8.0;
             }
         }
     }

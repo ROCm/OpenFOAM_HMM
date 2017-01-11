@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,7 +119,7 @@ public:
         const pointField& p
     );
 
-    //- Generate cell determinant field
+    //- Generate cell determinant field. Normalised to 1 for an internal cube.
     static tmp<scalarField> cellDeterminant
     (
         const primitiveMesh& mesh,
