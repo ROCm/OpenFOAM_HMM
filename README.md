@@ -9,7 +9,7 @@ OpenFOAM is free software: you can redistribute it and/or modify it under the te
 
 
 # OpenFOAM Trademark
-OpenCFD Ltd grants use of the OpenFOAM trademark by Third Parties on a licence basis. ESI Group and the OpenFOAM Foundation Ltd are currently permitted to use the trademark. For information on trademark use, please refer to the [trademark policy guidelines](http://www.openfoam.com/legal/trademark-policy.php).
+OpenCFD Ltd grants use of the OpenFOAM trademark by Third Parties on a licence basis. ESI Group and the OpenFOAM Foundation Ltd are currently permitted to use the Name and agreed Domain Name. For information on trademark use, please refer to the [trademark policy guidelines](http://www.openfoam.com/legal/trademark-policy.php).
 
 Please [contact OpenCFD](http://www.openfoam.com/contact) if you have any questions on the use of the OpenFOAM trademark.
 

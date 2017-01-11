@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
     Info<< "Create mesh, no clear-out\n" << endl;
-    fvMesh mesh
+    polyMesh mesh
     (
         IOobject
         (
@@ -51,12 +51,11 @@ int main(int argc, char *argv[])
         )
     );
 
-    Info<< mesh.C() << endl;
-    Info<< mesh.V() << endl;
 
-    surfaceVectorField Cf = mesh.Cf();
-
-    Info<< Cf << endl;
+    Info<< "Cell centres" << nl << mesh.cellCentres() << endl;
+    Info<< "Cell volumes" << nl << mesh.cellVolumes() << endl;
+    Info<< "Cell shapes" << nl << mesh.cellShapes() << endl;
+    Info<< "Cell face centres" << nl << mesh.faceCentres() << endl;
 
     // Test construct from cellShapes
     {
@@ -83,7 +82,7 @@ int main(int argc, char *argv[])
         word defaultBoundaryPatchName = "defaultFaces";
         word defaultBoundaryPatchType = emptyPolyPatch::typeName;
 
-        fvMesh newMesh
+        polyMesh newMesh
         (
             IOobject
             (
@@ -101,12 +100,10 @@ int main(int argc, char *argv[])
             defaultBoundaryPatchType
         );
 
-        Info<< newMesh.C() << endl;
-        Info<< newMesh.V() << endl;
-
-        surfaceVectorField Cf = newMesh.Cf();
-
-        Info<< Cf << endl;
+        Info<< "New cell centres" << nl << newMesh.cellCentres() << endl;
+        Info<< "New cell volumes" << nl << newMesh.cellVolumes() << endl;
+        Info<< "New cell shapes" << nl << newMesh.cellShapes() << endl;
+        Info<< "New cell face centres" << nl << newMesh.faceCentres() << endl;
     }
 
 

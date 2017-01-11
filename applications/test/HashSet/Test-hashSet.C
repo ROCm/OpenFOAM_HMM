@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
         "def",
         "ghi"
     };
-    words = { "def", "ghi", "xy", "all", "begin", "all" };
+    words = { "def", "ghi", "xy", "all", "end", "all" };
 
     wordHashSet setA
     {
@@ -83,6 +83,26 @@ int main(int argc, char *argv[])
     words.uniq();
     Info<< "hashedWordList: " << words << nl
         << "with lookup: "  << words.lookup() << endl;
+
+    {
+        List<word> input = { "def", "ghi", "xy", "all", "end", "all", "def" };
+        hashedWordList words1(input, true);
+
+        Info<< "input word list: " << input << nl
+            << "without dup: "  << words1 << endl;
+
+        Info<< "from wordHashSet: " << hashedWordList(setA) << endl;
+        Info<< "from HashTable: " << hashedWordList(tableA) << endl;
+        Info<< "from HashTable: " << hashedWordList(tableB) << endl;
+
+        // even this works
+        Info<< "from hashSet: "
+            << hashedWordList
+               (
+                   wordHashSet(setA)
+                 | wordHashSet(tableA) | wordHashSet(tableB)
+               ) << endl;
+    }
 
     Info<< "wordHashSet: "    << setA << endl;
     Info<< "Table-HashSet: "  << tableA << endl;

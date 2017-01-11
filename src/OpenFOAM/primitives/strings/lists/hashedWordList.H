@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::hashedWordList
 
 Description
-    A wordList with hashed indices for faster lookup by name.
+    A wordList with hashed indices for additional fast lookup by name.
 
 SourceFiles
     hashedWordListI.H
@@ -62,38 +62,64 @@ class hashedWordList
     // Private data
 
         //- Hash of words/indices
-        HashTable<label,word> indices_;
+        mutable HashTable<label,word> indices_;
 
 
     // Private Member Functions
 
-        //- Rebuild the hash of indices
-        void rehash();
+        //- Rebuild the lookup hash or make unique entries first.
+        inline void rehash(const bool unique);
 
 public:
 
     // Constructors
 
         //- Construct null
-        hashedWordList();
+        inline hashedWordList();
 
         //- Copy constructor.
-        hashedWordList(const hashedWordList&);
+        inline hashedWordList(const hashedWordList& lst);
 
-        //- Construct from list of words
-        hashedWordList(const UList<word>&);
+        //- Construct from list of words,
+        //  optionally eliminating duplicates
+        inline hashedWordList
+        (
+            const UList<word>& lst,
+            const bool removeDuplicates=false
+        );
+
+        //- Construct by transferring the parameter contents,
+        //  optionally eliminating duplicates
+        inline hashedWordList
+        (
+            const Xfer<List<word>>& lst,
+            const bool removeDuplicates=false
+        );
 
         //- Construct from an initializer list
-        hashedWordList(std::initializer_list<word>);
+        inline hashedWordList(std::initializer_list<word>);
 
-        //- Construct by transferring the parameter contents
-        hashedWordList(const Xfer<List<word>>&);
+        //- Construct from the word keys of any HashTable, sorting immediately.
+        //  This also handles a wordHashSet, which is derived from a HashTable.
+        //  The result is similar to a HashTable::sortedToc.
+        template<class AnyType, class AnyHash>
+        explicit inline hashedWordList
+        (
+            const HashTable<AnyType, word, AnyHash>& h
+        );
 
-        //- Construct from number and list of names
-        hashedWordList(const label nNames, const char** names);
+        //- Construct from number and list of words,
+        //  optionally eliminating duplicates
+        hashedWordList
+        (
+            const label count,
+            const char** lst,
+            const bool removeDuplicates=false
+        );
 
-        //- Construct from a nullptr-terminated list of names
-        hashedWordList(const char** names);
+        //- Construct from a nullptr-terminated list of words,
+        //  optionally eliminating duplicates
+        hashedWordList(const char** lst, const bool removeDuplicates=false);
 
         //- Construct from Istream
         hashedWordList(Istream&);
@@ -102,47 +128,53 @@ public:
     // Member Functions
 
         //- Clear the list, i.e. set size to zero.
-        void clear();
+        inline void clear();
 
-        //- Append an element at the end of the list
-        void append(const word&);
-
-        //- Does the list contain the specified name
-        inline bool found(const word&) const;
+        //- Append an element at the end of the list,
+        //  optionally avoid append if it would be a duplicate entry
+        inline void append(const word& name, const bool avoidDuplicates=false);
 
         //- Does the list contain the specified name
-        inline bool contains(const word&) const;
+        inline bool found(const word& name) const;
+
+        //- Does the list contain the specified name
+        inline bool contains(const word& name) const;
 
         //- Return the hash of words/indices for inspection
         inline const HashTable<label,word>& lookup() const;
 
         //- Transfer the contents of the argument List into this list
-        //  and annul the argument list.
-        void transfer(List<word>&);
+        //  and annul the argument list,
+        //  optionally eliminating duplicates
+        void transfer(List<word>& lst, const bool removeDuplicates=false);
+
+        //- Rebuild the lookup hash indices
+        void rehash() const;
 
         //- Sort the list and rehash the indices
-        void sort();
+        inline void sort();
 
-        //- Adjust the list if necessary to eliminate duplicate entries
+        //- Adjust the list if necessary to eliminate duplicate entries,
+        //  and rehash the indices
         void uniq();
 
 
     // Member Operators
 
         //- Assignment operator from list of words
-        inline void operator=(const UList<word>&);
+        inline void operator=(const UList<word>& lst);
 
         //- Assignment operator from initializer list
-        inline void operator=(std::initializer_list<word>);
+        inline void operator=(std::initializer_list<word> lst);
 
         //- Assignment operator.
-        inline void operator=(const hashedWordList&);
+        inline void operator=(const hashedWordList& lst);
 
         //- Return name corresponding to specified index
         inline const word& operator[](const label index) const;
 
         //- Return index corresponding to specified name
-        inline label operator[](const word&) const;
+        inline label operator[](const word& name) const;
 
 
     // Istream operators
