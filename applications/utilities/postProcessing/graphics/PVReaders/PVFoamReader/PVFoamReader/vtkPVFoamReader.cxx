@@ -80,7 +80,6 @@ vtkPVFoamReader::vtkPVFoamReader()
     TimeStepRange[1] = 0;
 
     CacheMesh = true;
-    Refresh = false;
 
     SkipZeroTime = false;
     ExtrapolatePatches = false;
@@ -138,9 +137,11 @@ vtkPVFoamReader::~vtkPVFoamReader()
 
     if (backend_)
     {
-        // remove patch names
+        // Remove text actors
         updatePatchNamesView(false);
+
         delete backend_;
+        backend_ = nullptr;
     }
 
     if (FileName)
@@ -202,13 +203,13 @@ int vtkPVFoamReader::RequestInformation
         }
     }
 
-    if (!backend_)
+    if (backend_)
     {
-        backend_ = new Foam::vtkPVFoam(FileName, this);
+        backend_->updateInfo();
     }
     else
     {
-        backend_->updateInfo();
+        backend_ = new Foam::vtkPVFoam(FileName, this);
     }
 
     std::vector<double> times = backend_->findTimes(this->SkipZeroTime);
@@ -450,7 +451,7 @@ void vtkPVFoamReader::PrintInfo()
 }
 
 
-void vtkPVFoamReader::SetRefresh(bool val)
+void vtkPVFoamReader::Refresh()
 {
     Modified();
 }

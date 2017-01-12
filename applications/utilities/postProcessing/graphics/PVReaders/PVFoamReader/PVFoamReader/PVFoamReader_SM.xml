@@ -27,20 +27,17 @@
       </Documentation>
     </DoubleVectorProperty>
 
-    <!-- Refresh button -->
-    <IntVectorProperty animateable="0"
+    <!-- Refresh (push button) -->
+    <Property
       name="Refresh"
-      command="SetRefresh"
-      default_values="0"
-      number_of_elements="1"
+      command="Refresh"
       panel_visibility="default">
-      <BooleanDomain name="bool"/>
-      <Documentation>
-        Rescan for updated times/fields.
-      </Documentation>
-    </IntVectorProperty>
+      <Documentation>Rescan for updated times/fields.</Documentation>
+    </Property>
 
-    <!-- Skip Zero Time check-box -->
+<!-- General Controls -->
+
+    <!-- Skip Zero Time (check-box) -->
     <IntVectorProperty animateable="0"
       name="ZeroTime"
       label="Skip Zero Time"
@@ -54,7 +51,7 @@
       </Documentation>
     </IntVectorProperty>
 
-    <!-- Include Sets check-box -->
+    <!-- Include Sets (check-box) -->
     <IntVectorProperty animateable="0"
       name="IncludeSets"
       command="SetIncludeSets"
@@ -67,7 +64,7 @@
       </Documentation>
     </IntVectorProperty>
 
-    <!-- Include Zones check-box -->
+    <!-- Include Zones (check-box) -->
     <IntVectorProperty animateable="0"
       name="IncludeZones"
       command="SetIncludeZones"
@@ -81,7 +78,7 @@
       </Documentation>
     </IntVectorProperty>
 
-    <!-- Show Groups Only check-box -->
+    <!-- Show Groups Only (check-box) -->
     <IntVectorProperty animateable="0"
       name="ShowGroupsOnly"
       label="Groups Only"
@@ -95,7 +92,7 @@
       </Documentation>
     </IntVectorProperty>
 
-    <!-- Show Patch Names check-box -->
+    <!-- Show Patch Names (check-box) -->
     <IntVectorProperty animateable="0"
       name="ShowPatchNames"
       label="Patch Names"
@@ -109,7 +106,7 @@
       </Documentation>
     </IntVectorProperty>
 
-    <!-- Interpolate Fields check-box -->
+    <!-- Interpolate Fields (check-box) -->
     <IntVectorProperty animateable="0"
       name="InterpolateFields"
       command="SetInterpolateVolFields"
@@ -122,7 +119,7 @@
       </Documentation>
     </IntVectorProperty>
 
-    <!-- Extrapolate Patches check-box -->
+    <!-- Extrapolate Patches (check-box) -->
     <IntVectorProperty animateable="0"
       name="ExtrapolatePatches"
       command="SetExtrapolatePatches"
@@ -135,7 +132,7 @@
       </Documentation>
     </IntVectorProperty>
 
-    <!-- Force GUI update check box -->
+    <!-- Force GUI update (check-box) -->
     <IntVectorProperty animateable="0"
       name="UpdateGUI"
       command="SetUpdateGUI"
@@ -148,7 +145,7 @@
       </Documentation>
     </IntVectorProperty>
 
-    <!-- Use VTK Polyhedron check-box -->
+    <!-- Use VTK Polyhedron (check-box) -->
     <IntVectorProperty animateable="0"
       name="UseVTKPolyhedron"
       label="Use VTK Polyhedron"
@@ -162,7 +159,7 @@
       </Documentation>
     </IntVectorProperty>
 
-    <!-- Cache Mesh check-box -->
+    <!-- Cache Mesh (check-box) -->
     <IntVectorProperty animateable="0"
       name="CacheMesh"
       command="SetCacheMesh"
@@ -175,9 +172,23 @@
       </Documentation>
     </IntVectorProperty>
 
-    <!--
-       | Selections
-       -->
+  <PropertyGroup
+    label="General Controls"
+    panel_widget="openfoam_reader_general_controls">
+    <Property name="Refresh"/>
+    <Property name="ZeroTime"/>
+    <Property name="IncludeSets"/>
+    <Property name="IncludeZones"/>
+    <Property name="InterpolateFields"/>
+    <Property name="ExtrapolatePatches"/>
+    <Property name="ShowGroupsOnly"/>
+    <Property name="ShowPatchNames"/>
+    <Property name="UpdateGUI"/>
+    <Property name="UseVTKPolyhedron"/>
+    <Property name="CacheMesh"/>
+  </PropertyGroup>
+
+<!-- Parts Selections -->
 
     <!-- Available Parts (volume, patches, lagrangian) array -->
     <StringVectorProperty
@@ -203,6 +214,13 @@
         The list of mesh parts (patches, groups, sets, zones).
       </Documentation>
     </StringVectorProperty>
+
+  <PropertyGroup label="Parts">
+    <Property name="PartArrayStatus"/>
+    <Property name="PartStatus"/>
+  </PropertyGroup>
+
+<!-- Fields Selections -->
 
     <!-- Available volFields array -->
     <StringVectorProperty
@@ -273,6 +291,17 @@
       <Documentation>The list of point fields.</Documentation>
     </StringVectorProperty>
 
+  <PropertyGroup label="Fields">
+    <Property name="VolFieldArrayStatus"/>
+    <Property name="VolFieldStatus"/>
+    <Property name="LagrangianFieldArrayStatus"/>
+    <Property name="LagrangianFieldStatus"/>
+    <Property name="PointFieldArrayStatus"/>
+    <Property name="PointFieldStatus"/>
+  </PropertyGroup>
+
+<!-- Miscellaneous -->
+
     <!-- Print button -->
     <Property animateable="0"
       name="PrintInfo"
@@ -289,36 +318,6 @@
         extensions="OpenFOAM"
         file_description="OpenFOAM reader module" />
   </Hints>
-
-  <PropertyGroup
-    label="General Controls"
-    panel_widget="openfoam_reader_general_controls">
-    <Property name="Refresh"/>
-    <Property name="ZeroTime"/>
-    <Property name="IncludeSets"/>
-    <Property name="IncludeZones"/>
-    <Property name="InterpolateFields"/>
-    <Property name="ExtrapolatePatches"/>
-    <Property name="ShowGroupsOnly"/>
-    <Property name="ShowPatchNames"/>
-    <Property name="UpdateGUI"/>
-    <Property name="UseVTKPolyhedron"/>
-    <Property name="CacheMesh"/>
-  </PropertyGroup>
-
-  <PropertyGroup label="Parts">
-    <Property name="PartArrayStatus"/>
-    <Property name="PartStatus"/>
-  </PropertyGroup>
-
-  <PropertyGroup label="Fields">
-    <Property name="VolFieldArrayStatus"/>
-    <Property name="VolFieldStatus"/>
-    <Property name="LagrangianFieldArrayStatus"/>
-    <Property name="LagrangianFieldStatus"/>
-    <Property name="PointFieldArrayStatus"/>
-    <Property name="PointFieldStatus"/>
-  </PropertyGroup>
 
   </SourceProxy>
   </ProxyGroup>

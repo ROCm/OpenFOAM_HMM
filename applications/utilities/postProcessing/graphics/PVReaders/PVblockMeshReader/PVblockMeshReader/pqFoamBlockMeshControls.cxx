@@ -29,7 +29,7 @@ License
 #include <QGridLayout>
 #include <QPushButton>
 
-#include "pqApplicationCore.h"
+#include "pqPVApplicationCore.h"
 #include "pqView.h"
 #include "vtkSMDocumentation.h"
 #include "vtkSMIntVectorProperty.h"
@@ -43,8 +43,7 @@ License
 static QAbstractButton* setButtonProperties
 (
     QAbstractButton* b,
-    vtkSMIntVectorProperty* prop,
-    bool initChecked = true
+    vtkSMProperty* prop
 )
 {
     QString tip;
@@ -66,10 +65,14 @@ static QAbstractButton* setButtonProperties
     }
     b->setFocusPolicy(Qt::NoFocus); // avoid dotted border
 
-    // initial checked state
-    if (initChecked)
+
+    vtkSMIntVectorProperty* intProp =
+        vtkSMIntVectorProperty::SafeDownCast(prop);
+
+    // initial checked state for integer (bool) properties
+    if (intProp)
     {
-        b->setChecked(prop->GetElement(0));
+        b->setChecked(intProp->GetElement(0));
     }
 
     return b;
@@ -93,23 +96,61 @@ static vtkSMIntVectorProperty* lookupIntProp
 }
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void pqFoamBlockMeshControls::fireCommand(vtkSMProperty* prop)
+{
+    vtkSMProxy* pxy = this->proxy();
+
+    // Fire off command
+    prop->Modified();
+    pxy->UpdateProperty(pxy->GetPropertyName(prop));
+}
+
+
+void pqFoamBlockMeshControls::fireCommand
+(
+    vtkSMIntVectorProperty* prop,
+    bool checked
+)
+{
+    vtkSMProxy* pxy = this->proxy();
+
+    prop->SetElement(0, checked); // Toogle bool
+
+    // Fire off command
+    prop->Modified();
+    pxy->UpdateProperty(pxy->GetPropertyName(prop));
+}
+
+
+void pqFoamBlockMeshControls::updateParts()
+{
+    vtkSMProxy* pxy = this->proxy();
+
+    pxy->UpdatePropertyInformation(pxy->GetProperty("BlockArrayStatus"));
+    pxy->UpdatePropertyInformation(pxy->GetProperty("CurvedEdgesArrayStatus"));
+}
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void pqFoamBlockMeshControls::refreshPressed()
 {
-    // Update everything
-    refresh_->Modified();
+    fireCommand(refresh_);
 
     vtkSMSourceProxy::SafeDownCast(this->proxy())->UpdatePipeline();
 
-    // Render all views
-    pqApplicationCore::instance()->render();
+    // Trigger a rendering (all views)
+    pqPVApplicationCore::instance()->render();
+
+    updateParts();
 }
 
 
-void pqFoamBlockMeshControls::showPointNumbers(bool checked)
+void pqFoamBlockMeshControls::showPatchNames(bool checked)
 {
-    showPointNumbers_->SetElement(0, checked);
+    fireCommand(showPatchNames_, checked);
 
     // Update the active view
     if (this->view())
@@ -118,7 +159,22 @@ void pqFoamBlockMeshControls::showPointNumbers(bool checked)
     }
 
     // OR: update all views
-    // pqApplicationCore::instance()->render();
+    // pqPVApplicationCore::instance()->render();
+}
+
+
+void pqFoamBlockMeshControls::showPointNumbers(bool checked)
+{
+    fireCommand(showPointNumbers_, checked);
+
+    // Update the active view
+    if (this->view())
+    {
+        this->view()->render();
+    }
+
+    // OR: update all views
+    // pqPVApplicationCore::instance()->render();
 }
 
 
@@ -132,7 +188,8 @@ pqFoamBlockMeshControls::pqFoamBlockMeshControls
 )
 :
     Superclass(proxy, parent),
-    refresh_(lookupIntProp(group, "Refresh")),
+    refresh_(group->GetProperty("Refresh")),
+    showPatchNames_(lookupIntProp(group, "ShowPatchNames")),
     showPointNumbers_(lookupIntProp(group, "ShowPointNumbers"))
 {
     QGridLayout* form = new QGridLayout(this);
@@ -140,21 +197,28 @@ pqFoamBlockMeshControls::pqFoamBlockMeshControls
     if (refresh_)
     {
         QPushButton* b = new QPushButton(this);
-        setButtonProperties(b, refresh_, false);
+        setButtonProperties(b, refresh_);
         form->addWidget(b, 0, 0, Qt::AlignLeft);
 
         connect(b, SIGNAL(clicked()), this, SLOT(refreshPressed()));
-        refresh_->SetImmediateUpdate(true);
+    }
+
+    if (showPatchNames_)
+    {
+        QCheckBox* b = new QCheckBox(this);
+        setButtonProperties(b, showPatchNames_);
+        form->addWidget(b, 0, 1, Qt::AlignLeft);
+
+        connect(b, SIGNAL(toggled(bool)), this, SLOT(showPatchNames(bool)));
     }
 
     if (showPointNumbers_)
     {
         QCheckBox* b = new QCheckBox(this);
         setButtonProperties(b, showPointNumbers_);
-        form->addWidget(b, 0, 1, Qt::AlignLeft);
+        form->addWidget(b, 0, 2, Qt::AlignLeft);
 
         connect(b, SIGNAL(toggled(bool)), this, SLOT(showPointNumbers(bool)));
-        showPointNumbers_->SetImmediateUpdate(true);
     }
 }
 

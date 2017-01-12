@@ -223,6 +223,9 @@ class vtkPVFoam
 
     // Private Member Functions
 
+        //- Create a text actor
+        static vtkTextActor* createTextActor(const string& s, const point& pt);
+
         //- Reset data counters
         void resetCounters();
 

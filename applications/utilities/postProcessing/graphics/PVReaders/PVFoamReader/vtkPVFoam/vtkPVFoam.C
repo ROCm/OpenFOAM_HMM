@@ -45,6 +45,35 @@ namespace Foam
     defineTypeNameAndDebug(vtkPVFoam, 0);
 }
 
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+vtkTextActor* Foam::vtkPVFoam::createTextActor
+(
+    const string& s,
+    const point& pt
+)
+{
+    vtkTextActor* txt = vtkTextActor::New();
+    txt->SetInput(s.c_str());
+
+    // Set text properties
+    vtkTextProperty* tprop = txt->GetTextProperty();
+    tprop->SetFontFamilyToArial();
+    tprop->BoldOn();
+    tprop->ShadowOff();
+    tprop->SetLineSpacing(1.0);
+    tprop->SetFontSize(14);
+    tprop->SetColor(1.0, 0.0, 1.0);
+    tprop->SetJustificationToCentered();
+
+    txt->GetPositionCoordinate()->SetCoordinateSystemToWorld();
+    txt->GetPositionCoordinate()->SetValue(pt.x(), pt.y(), pt.z());
+
+    return txt;
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::vtkPVFoam::resetCounters()
@@ -606,11 +635,6 @@ void Foam::vtkPVFoam::renderPatchNames
     const bool show
 )
 {
-    if (!meshPtr_)
-    {
-        return;
-    }
-
     // always remove old actors first
 
     forAll(patchTextActorsPtrs_, patchi)
@@ -620,7 +644,7 @@ void Foam::vtkPVFoam::renderPatchNames
     }
     patchTextActorsPtrs_.clear();
 
-    if (show)
+    if (show && meshPtr_)
     {
         // get the display patches, strip off any suffix
         hashedWordList selectedPatches = getSelected
@@ -737,17 +761,16 @@ void Foam::vtkPVFoam::renderPatchNames
         {
             const polyPatch& pp = pbMesh[patchi];
 
-            label globalZoneI = 0;
-
             // Only selected patches will have a non-zero number of zones
-            label nDisplayZones = min(MAXPATCHZONES, nZones[patchi]);
+            const label nDisplayZones = min(MAXPATCHZONES, nZones[patchi]);
             label increment = 1;
             if (nZones[patchi] >= MAXPATCHZONES)
             {
                 increment = nZones[patchi]/MAXPATCHZONES;
             }
 
-            for (label i = 0; i < nDisplayZones; i++)
+            label globalZoneI = 0;
+            for (label i = 0; i < nDisplayZones; ++i, globalZoneI += increment)
             {
                 if (debug)
                 {
@@ -756,44 +779,23 @@ void Foam::vtkPVFoam::renderPatchNames
                         << "globalZoneI = " << globalZoneI << endl;
                 }
 
-                vtkTextActor* txt = vtkTextActor::New();
-
-                txt->SetInput(pp.name().c_str());
-
-                // Set text properties
-                vtkTextProperty* tprop = txt->GetTextProperty();
-                tprop->SetFontFamilyToArial();
-                tprop->BoldOff();
-                tprop->ShadowOff();
-                tprop->SetLineSpacing(1.0);
-                tprop->SetFontSize(14);
-                tprop->SetColor(1.0, 0.0, 1.0);
-                tprop->SetJustificationToCentered();
-
-                // Set text to use 3-D world co-ordinates
-                txt->GetPositionCoordinate()->SetCoordinateSystemToWorld();
-
-                txt->GetPositionCoordinate()->SetValue
+                // Into a list for later removal
+                patchTextActorsPtrs_[displayZoneI++] = createTextActor
                 (
-                    zoneCentre[patchi][globalZoneI].x(),
-                    zoneCentre[patchi][globalZoneI].y(),
-                    zoneCentre[patchi][globalZoneI].z()
+                    pp.name(),
+                    zoneCentre[patchi][globalZoneI]
                 );
-
-                // Add text to each renderer
-                renderer->AddViewProp(txt);
-
-                // Maintain a list of text labels added so that they can be
-                // removed later
-                patchTextActorsPtrs_[displayZoneI] = txt;
-
-                globalZoneI += increment;
-                displayZoneI++;
             }
         }
 
         // Resize the patch names list to the actual number of patch names added
         patchTextActorsPtrs_.setSize(displayZoneI);
+    }
+
+    // Add text to each renderer
+    forAll(patchTextActorsPtrs_, actori)
+    {
+        renderer->AddViewProp(patchTextActorsPtrs_[actori]);
     }
 }
 

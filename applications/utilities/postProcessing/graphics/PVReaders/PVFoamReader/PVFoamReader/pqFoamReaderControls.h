@@ -37,6 +37,7 @@ SourceFiles
 #include "pqPropertyWidget.h"
 
 // Forward declarations
+class vtkSMProperty;
 class vtkSMIntVectorProperty;
 
 
@@ -53,8 +54,8 @@ class pqFoamReaderControls
 
     // Private data
 
-        //- Refresh (bool property - as push button)
-        vtkSMIntVectorProperty* refresh_;
+        //- Refresh (push button)
+        vtkSMProperty* refresh_;
 
         //- Show Patch Names (bool property)
         vtkSMIntVectorProperty* showPatchNames_;
@@ -72,15 +73,28 @@ class pqFoamReaderControls
         vtkSMIntVectorProperty* cacheMesh_;
 
 
+    // Private Member Functions
+
+    //- Update property
+    void fireCommand(vtkSMProperty* prop);
+
+    //- Toggle and update bool property
+    void fireCommand(vtkSMIntVectorProperty* prop, bool checked);
+
+
+    //- Disallow default bitwise copy construct
+    pqFoamReaderControls(const pqFoamReaderControls&) = delete;
+
+    //- Disallow default bitwise assignment
+    void operator=(const pqFoamReaderControls&) = delete;
+
+
 private slots:
 
     // Private Member Functions
 
     //- Update "PartArrayStatus" property information
-    void updatePartsStatus();
-
-    //- Update "PartArrayStatus" property information
-    void updatePartsStatus(bool unused);
+    void updateParts();
 
 
 protected slots:

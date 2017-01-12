@@ -27,7 +27,7 @@ Class
 Description
     Customized property controls for the ParaView blockMesh reader.
 
-    Refresh and ShowPointNumbers.
+    Refresh, ShowPatchNames, ShowPointNumbers.
 
 SourceFiles
     pqFoamBlockMeshControls.cxx
@@ -39,6 +39,7 @@ SourceFiles
 #include "pqPropertyWidget.h"
 
 // Forward declarations (ParaView)
+class vtkSMProperty;
 class vtkSMIntVectorProperty;
 
 
@@ -55,14 +56,27 @@ class pqFoamBlockMeshControls
 
     // Private data
 
-        //- Refresh (bool property - as push button)
-        vtkSMIntVectorProperty* refresh_;
+        //- Refresh (push button)
+        vtkSMProperty* refresh_;
+
+        //- Show Patch Names (bool property)
+        vtkSMIntVectorProperty* showPatchNames_;
 
         //- Show Point Numbers (bool property)
         vtkSMIntVectorProperty* showPointNumbers_;
 
 
     // Private Member Functions
+
+    //- Update property
+    void fireCommand(vtkSMProperty* prop);
+
+    //- Toggle and update bool property
+    void fireCommand(vtkSMIntVectorProperty* prop, bool checked);
+
+    //- Update "BlockArrayStatus", "CurvedEdgesArrayStatus" information
+    void updateParts();
+
 
     //- Disallow default bitwise copy construct
     pqFoamBlockMeshControls(const pqFoamBlockMeshControls&) = delete;
@@ -77,6 +91,9 @@ protected slots:
 
     //- Trigger refresh
     void refreshPressed();
+
+    //- Sync property with changed checkbox state, update rendered view(s)
+    void showPatchNames(bool checked);
 
     //- Sync property with changed checkbox state, update rendered view(s)
     void showPointNumbers(bool checked);

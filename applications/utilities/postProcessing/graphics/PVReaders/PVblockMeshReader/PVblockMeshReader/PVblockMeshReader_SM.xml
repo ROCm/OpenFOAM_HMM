@@ -14,20 +14,32 @@
       <Documentation>The filename for the OpenFOAM blockMesh reader.</Documentation>
     </StringVectorProperty>
 
-    <!-- Refresh button (push button) -->
-    <IntVectorProperty animateable="0"
+    <!-- Refresh (push button) -->
+    <Property
       name="Refresh"
-      command="SetRefresh"
+      command="Refresh"
+      panel_visibility="default">
+      <Documentation>Rescan for updated blockMeshDict.</Documentation>
+    </Property>
+
+<!-- General Controls -->
+
+    <!-- Show Patch Names (check-box) -->
+    <IntVectorProperty animateable="0"
+      name="ShowPatchNames"
+      label="Patch Names"
+      command="SetShowPatchNames"
       default_values="0"
       number_of_elements="1"
       panel_visibility="default">
       <BooleanDomain name="bool"/>
-      <Documentation>Rescan for updated blockMeshDict.</Documentation>
+      <Documentation>Show patch names in render window.</Documentation>
     </IntVectorProperty>
 
     <!-- Show Point Numbers (check-box) -->
     <IntVectorProperty animateable="0"
       name="ShowPointNumbers"
+      label="Point Numbers"
       command="SetShowPointNumbers"
       default_values="1"
       number_of_elements="1"
@@ -36,9 +48,15 @@
       <Documentation>Show point numbers in render window.</Documentation>
     </IntVectorProperty>
 
-    <!--
-       | Selections
-       -->
+  <PropertyGroup
+    label="General Controls"
+    panel_widget="openfoam_blockMesh_general_controls">
+    <Property name="Refresh"/>
+    <Property name="ShowPatchNames"/>
+    <Property name="ShowPointNumbers"/>
+  </PropertyGroup>
+
+<!-- Selections -->
 
     <!-- Available Blocks array -->
     <StringVectorProperty
@@ -86,25 +104,18 @@
       <Documentation>The list of curved edges</Documentation>
     </StringVectorProperty>
 
-  <Hints>
-    <ReaderFactory
-      extensions="blockMesh"
-      file_description="OpenFOAM blockMesh"/>
-  </Hints>
-
-  <PropertyGroup
-    label="General Controls"
-    panel_widget="openfoam_blockMesh_general_controls">
-    <Property name="Refresh"/>
-    <Property name="ShowPointNumbers"/>
-  </PropertyGroup>
-
   <PropertyGroup label="Selections">
     <Property name="BlockArrayStatus"/>
     <Property name="BlockStatus"/>
     <Property name="CurvedEdgesArrayStatus"/>
     <Property name="CurvedEdgesStatus"/>
   </PropertyGroup>
+
+  <Hints>
+    <ReaderFactory
+      extensions="blockMesh"
+      file_description="OpenFOAM blockMesh"/>
+  </Hints>
 
   </SourceProxy>
   </ProxyGroup>

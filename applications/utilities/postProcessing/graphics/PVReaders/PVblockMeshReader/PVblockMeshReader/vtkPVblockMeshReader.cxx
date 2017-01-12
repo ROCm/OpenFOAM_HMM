@@ -59,6 +59,7 @@ vtkPVblockMeshReader::vtkPVblockMeshReader()
     FileName = nullptr;
     backend_ = nullptr;
 
+    ShowPatchNames   = false;
     ShowPointNumbers = true;
 
     BlockSelection = vtkDataArraySelection::New();
@@ -95,9 +96,12 @@ vtkPVblockMeshReader::~vtkPVblockMeshReader()
 
     if (backend_)
     {
-        // Remove point numbers
+        // Remove text actors
+        updatePatchNamesView(false);
         updatePointNumbersView(false);
+
         delete backend_;
+        backend_ = nullptr;
     }
 
     if (FileName)
@@ -110,6 +114,7 @@ vtkPVblockMeshReader::~vtkPVblockMeshReader()
 
     SelectionObserver->Delete();
     BlockSelection->Delete();
+    CurvedEdgesSelection->Delete();
 }
 
 
@@ -124,35 +129,25 @@ int vtkPVblockMeshReader::RequestInformation
 {
     vtkDebugMacro(<<"RequestInformation");
 
-    if (Foam::vtkPVblockMesh::debug)
-    {
-        cout<<"REQUEST_INFORMATION\n";
-    }
-
     if (!FileName)
     {
         vtkErrorMacro("FileName has to be specified!");
         return 0;
     }
 
-    int nInfo = outputVector->GetNumberOfInformationObjects();
-
     if (Foam::vtkPVblockMesh::debug)
     {
-        cout<<"RequestInformation with " << nInfo << " item(s)\n";
-        for (int infoI = 0; infoI < nInfo; ++infoI)
-        {
-            outputVector->GetInformationObject(infoI)->Print(cout);
-        }
+        cout<<"REQUEST_INFORMATION\n";
+        outputVector->GetInformationObject(0)->Print(cout);
     }
 
-    if (!backend_)
+    if (backend_)
     {
-        backend_ = new Foam::vtkPVblockMesh(FileName, this);
+        backend_->updateInfo();
     }
     else
     {
-        backend_->updateInfo();
+        backend_ = new Foam::vtkPVblockMesh(FileName, this);
     }
 
     return 1;
@@ -181,15 +176,10 @@ int vtkPVblockMeshReader::RequestData
         return 0;
     }
 
-    int nInfo = outputVector->GetNumberOfInformationObjects();
-
     if (Foam::vtkPVblockMesh::debug)
     {
-        cout<<"RequestData with " << nInfo << " item(s)\n";
-        for (int infoI = 0; infoI < nInfo; ++infoI)
-        {
-            outputVector->GetInformationObject(infoI)->Print(cout);
-        }
+        cout<<"REQUEST_DATA:\n";
+        outputVector->GetInformationObject(0)->Print(cout);
     }
 
     vtkMultiBlockDataSet* output = vtkMultiBlockDataSet::SafeDownCast
@@ -207,6 +197,8 @@ int vtkPVblockMeshReader::RequestData
     }
 
     backend_->Update(output);
+
+    updatePatchNamesView(ShowPatchNames);
     updatePointNumbersView(ShowPointNumbers);
 
     // Do any cleanup on the OpenFOAM side
@@ -216,17 +208,30 @@ int vtkPVblockMeshReader::RequestData
 }
 
 
-void vtkPVblockMeshReader::SetRefresh(bool val)
+void vtkPVblockMeshReader::Refresh()
 {
     // Delete the current blockMesh to force re-read and update
     if (backend_)
     {
+        // Remove text actors
+        updatePatchNamesView(false);
         updatePointNumbersView(false);
+
         delete backend_;
         backend_ = nullptr;
     }
 
-    Modified();
+    this->Modified();
+}
+
+
+void vtkPVblockMeshReader::SetShowPatchNames(bool val)
+{
+    if (ShowPatchNames != val)
+    {
+        ShowPatchNames = val;
+        updatePatchNamesView(ShowPatchNames);
+    }
 }
 
 
@@ -237,6 +242,38 @@ void vtkPVblockMeshReader::SetShowPointNumbers(bool val)
         ShowPointNumbers = val;
         updatePointNumbersView(ShowPointNumbers);
     }
+}
+
+
+void vtkPVblockMeshReader::updatePatchNamesView(const bool show)
+{
+    pqApplicationCore* appCore = pqApplicationCore::instance();
+
+    // Need to check this, since our destructor calls this
+    if (!appCore)
+    {
+        return;
+    }
+
+    // Server manager model for querying items in the server manager
+    pqServerManagerModel* smModel = appCore->getServerManagerModel();
+    if (!smModel || !backend_)
+    {
+        return;
+    }
+
+    // Get all the pqRenderView instances
+    QList<pqRenderView*> renderViews = smModel->findItems<pqRenderView*>();
+    for (int viewI=0; viewI<renderViews.size(); ++viewI)
+    {
+        backend_->renderPatchNames
+        (
+            renderViews[viewI]->getRenderViewProxy()->GetRenderer(),
+            show
+        );
+    }
+
+    // Use refresh here?
 }
 
 
@@ -256,7 +293,6 @@ void vtkPVblockMeshReader::updatePointNumbersView(const bool show)
     {
         return;
     }
-
 
     // Get all the pqRenderView instances
     QList<pqRenderView*> renderViews = smModel->findItems<pqRenderView*>();
@@ -290,31 +326,23 @@ void vtkPVblockMeshReader::PrintSelf(ostream& os, vtkIndent indent)
 
 vtkDataArraySelection* vtkPVblockMeshReader::GetBlockSelection()
 {
-    vtkDebugMacro(<<"GetBlockSelection");
     return BlockSelection;
 }
 
-
 int vtkPVblockMeshReader::GetNumberOfBlockArrays()
 {
-    vtkDebugMacro(<<"GetNumberOfBlockArrays");
     return BlockSelection->GetNumberOfArrays();
 }
 
-
 const char* vtkPVblockMeshReader::GetBlockArrayName(int index)
 {
-    vtkDebugMacro(<<"GetBlockArrayName");
     return BlockSelection->GetArrayName(index);
 }
 
-
 int vtkPVblockMeshReader::GetBlockArrayStatus(const char* name)
 {
-    vtkDebugMacro(<<"GetBlockArrayStatus");
     return BlockSelection->ArrayIsEnabled(name);
 }
-
 
 void vtkPVblockMeshReader::SetBlockArrayStatus
 (
@@ -322,7 +350,6 @@ void vtkPVblockMeshReader::SetBlockArrayStatus
     int status
 )
 {
-    vtkDebugMacro(<<"SetBlockArrayStatus");
     if (status)
     {
         BlockSelection->EnableArray(name);
@@ -339,31 +366,23 @@ void vtkPVblockMeshReader::SetBlockArrayStatus
 
 vtkDataArraySelection* vtkPVblockMeshReader::GetCurvedEdgesSelection()
 {
-    vtkDebugMacro(<<"GetCurvedEdgesSelection");
     return CurvedEdgesSelection;
 }
 
-
 int vtkPVblockMeshReader::GetNumberOfCurvedEdgesArrays()
 {
-    vtkDebugMacro(<<"GetNumberOfCurvedEdgesArrays");
     return CurvedEdgesSelection->GetNumberOfArrays();
 }
 
-
 const char* vtkPVblockMeshReader::GetCurvedEdgesArrayName(int index)
 {
-    vtkDebugMacro(<<"GetCurvedEdgesArrayName");
     return CurvedEdgesSelection->GetArrayName(index);
 }
 
-
 int vtkPVblockMeshReader::GetCurvedEdgesArrayStatus(const char* name)
 {
-    vtkDebugMacro(<<"GetCurvedEdgesArrayStatus");
     return CurvedEdgesSelection->ArrayIsEnabled(name);
 }
-
 
 void vtkPVblockMeshReader::SetCurvedEdgesArrayStatus
 (
@@ -371,7 +390,6 @@ void vtkPVblockMeshReader::SetCurvedEdgesArrayStatus
     int status
 )
 {
-    vtkDebugMacro(<<"SetCurvedEdgesArrayStatus");
     if (status)
     {
         CurvedEdgesSelection->EnableArray(name);

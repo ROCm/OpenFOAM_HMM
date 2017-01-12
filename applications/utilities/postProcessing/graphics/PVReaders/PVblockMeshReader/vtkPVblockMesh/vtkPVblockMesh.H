@@ -109,38 +109,38 @@ class vtkPVblockMesh
         //- First instance and size of block corners (only partially used)
         arrayRange arrayRangeCorners_;
 
+        //- List of patch names for rendering to window
+        List<vtkTextActor*> patchTextActorsPtrs_;
+
         //- List of point numbers for rendering to window
-        List<vtkTextActor*> pointNumberTextActorsPtrs_;
+        List<vtkTextActor*> pointTextActorsPtrs_;
 
 
     // Private Member Functions
 
+        //- Create a text actor
+        static vtkTextActor* createTextActor(const string& s, const point& pt);
+
         //- Reset data counters
         void resetCounters();
 
-        // Update information helper functions
+        //- OpenFOAM mesh
+        void updateFoamMesh();
 
-            //- Internal block info
-            void updateInfoBlocks(vtkDataArraySelection*);
+        //- Internal block info
+        void updateInfoBlocks(vtkDataArraySelection* select);
 
-            //- Block curved edges info
-            void updateInfoEdges(vtkDataArraySelection*);
+        //- Block curved edges info
+        void updateInfoEdges(vtkDataArraySelection* select);
 
-        // Update helper functions
+        //- Mesh blocks
+        void convertMeshBlocks(vtkMultiBlockDataSet*, int& blockNo);
 
-            //- OpenFOAM mesh
-            void updateFoamMesh();
+        //- Mesh curved edges
+        void convertMeshEdges(vtkMultiBlockDataSet*, int& blockNo);
 
-        // Mesh conversion functions
-
-            //- Mesh blocks
-            void convertMeshBlocks(vtkMultiBlockDataSet*, int& blockNo);
-
-            //- Mesh curved edges
-            void convertMeshEdges(vtkMultiBlockDataSet*, int& blockNo);
-
-            //- Mesh corners
-            void convertMeshCorners(vtkMultiBlockDataSet*, int& blockNo);
+        //- Mesh corners
+        void convertMeshCorners(vtkMultiBlockDataSet*, int& blockNo);
 
 
         //- Disallow default bitwise copy construct
@@ -180,6 +180,9 @@ public:
 
         //- Clean any storage
         void CleanUp();
+
+        //- Add/remove patch names to/from the view
+        void renderPatchNames(vtkRenderer*, const bool show);
 
         //- Add/remove point numbers to/from the view
         void renderPointNumbers(vtkRenderer*, const bool show);

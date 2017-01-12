@@ -30,7 +30,7 @@ License
 #include <QGridLayout>
 #include <QPushButton>
 
-#include "pqApplicationCore.h"
+#include "pqPVApplicationCore.h"
 #include "pqPipelineRepresentation.h"
 #include "pqView.h"
 #include "vtkSMDocumentation.h"
@@ -45,8 +45,7 @@ License
 static QAbstractButton* setButtonProperties
 (
     QAbstractButton* b,
-    vtkSMIntVectorProperty* prop,
-    bool initChecked = true
+    vtkSMProperty* prop
 )
 {
     QString tip;
@@ -68,10 +67,13 @@ static QAbstractButton* setButtonProperties
     }
     b->setFocusPolicy(Qt::NoFocus); // avoid dotted border
 
-    // initial checked state
-    if (initChecked)
+    vtkSMIntVectorProperty* intProp =
+       vtkSMIntVectorProperty::SafeDownCast(prop);
+
+    // initial checked state for integer (bool) properties
+    if (intProp)
     {
-        b->setChecked(prop->GetElement(0));
+        b->setChecked(intProp->GetElement(0));
     }
 
     return b;
@@ -97,19 +99,27 @@ static vtkSMIntVectorProperty* lookupIntProp
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void pqFoamReaderControls::updatePartsStatus()
+void pqFoamReaderControls::fireCommand
+(
+    vtkSMIntVectorProperty* prop,
+    bool checked
+)
 {
-    vtkSMProperty* prop = this->proxy()->GetProperty("PartArrayStatus");
-    if (prop)
-    {
-        this->proxy()->UpdatePropertyInformation(prop);
-    }
+    vtkSMProxy* pxy = this->proxy();
+
+    prop->SetElement(0, checked); // Toogle bool
+
+    // Fire off command
+    prop->Modified();
+    pxy->UpdateProperty(pxy->GetPropertyName(prop));
 }
 
 
-void pqFoamReaderControls::updatePartsStatus(bool)
+void pqFoamReaderControls::updateParts()
 {
-    updatePartsStatus();
+    vtkSMProxy* pxy = this->proxy();
+
+    pxy->UpdatePropertyInformation(pxy->GetProperty("PartArrayStatus"));
 }
 
 
@@ -117,25 +127,28 @@ void pqFoamReaderControls::updatePartsStatus(bool)
 
 void pqFoamReaderControls::refreshPressed()
 {
-    // Update everything
+    vtkSMProxy* pxy = this->proxy();
+
+    // Fire off command
     refresh_->Modified();
+    pxy->UpdateProperty(pxy->GetPropertyName(refresh_));
 
-    vtkSMSourceProxy::SafeDownCast(this->proxy())->UpdatePipeline();
+    vtkSMSourceProxy::SafeDownCast(pxy)->UpdatePipeline();
 
-    // Update all views
-    pqApplicationCore::instance()->render();
+    // Trigger a rendering (all views)
+    pqPVApplicationCore::instance()->render();
 }
 
 
 void pqFoamReaderControls::cacheMesh(bool checked)
 {
-    cacheMesh_->SetElement(0, checked);
+    fireCommand(cacheMesh_, checked);
 }
 
 
 void pqFoamReaderControls::showPatchNames(bool checked)
 {
-    showPatchNames_->SetElement(0, checked);
+    fireCommand(showPatchNames_, checked);
 
     // update the active view
     if (this->view())
@@ -143,28 +156,28 @@ void pqFoamReaderControls::showPatchNames(bool checked)
         this->view()->render();
     }
     // OR: update all views
-    // pqApplicationCore::instance()->render();
+    // pqPVApplicationCore::instance()->render();
 }
 
 
 void pqFoamReaderControls::showGroupsOnly(bool checked)
 {
-    showGroupsOnly_->SetElement(0, checked);
-    updatePartsStatus();
+    fireCommand(showGroupsOnly_, checked);
+    updateParts();
 }
 
 
 void pqFoamReaderControls::includeSets(bool checked)
 {
-    includeSets_->SetElement(0, checked);
-    updatePartsStatus();
+    fireCommand(includeSets_, checked);
+    updateParts();
 }
 
 
 void pqFoamReaderControls::includeZones(bool checked)
 {
-    includeZones_->SetElement(0, checked);
-    updatePartsStatus();
+    fireCommand(includeZones_, checked);
+    updateParts();
 }
 
 
@@ -178,7 +191,7 @@ pqFoamReaderControls::pqFoamReaderControls
 )
 :
     Superclass(proxy, parent),
-    refresh_(lookupIntProp(group, "Refresh")),
+    refresh_(group->GetProperty("Refresh")),
     showPatchNames_(lookupIntProp(group, "ShowPatchNames")),
     showGroupsOnly_(lookupIntProp(group, "ShowGroupsOnly")),
     includeSets_(lookupIntProp(group, "IncludeSets")),
@@ -196,11 +209,10 @@ pqFoamReaderControls::pqFoamReaderControls
     if (refresh_)
     {
         QPushButton* b = new QPushButton(this);
-        setButtonProperties(b, refresh_, false);
+        setButtonProperties(b, refresh_);
         form->addWidget(b, row, 0, Qt::AlignLeft);
 
         connect(b, SIGNAL(clicked()), this, SLOT(refreshPressed()));
-        refresh_->SetImmediateUpdate(true);
     }
 
     intProp* zeroTime = lookupIntProp(group, "ZeroTime");
@@ -233,9 +245,7 @@ pqFoamReaderControls::pqFoamReaderControls
         form->addWidget(b, row, 0, Qt::AlignLeft);
 
         addPropertyLink(b, "checked", SIGNAL(toggled(bool)), includeSets_);
-
         connect(b, SIGNAL(toggled(bool)), this, SLOT(includeSets(bool)));
-        includeSets_->SetImmediateUpdate(true);
     }
 
     if (showGroupsOnly_)
@@ -245,9 +255,7 @@ pqFoamReaderControls::pqFoamReaderControls
         form->addWidget(b, row, 1, Qt::AlignLeft);
 
         addPropertyLink(b, "checked", SIGNAL(toggled(bool)), showGroupsOnly_);
-
         connect(b, SIGNAL(toggled(bool)), this, SLOT(showGroupsOnly(bool)));
-        showGroupsOnly_->SetImmediateUpdate(true);
     }
 
 
@@ -262,9 +270,7 @@ pqFoamReaderControls::pqFoamReaderControls
         form->addWidget(b, row, 0, Qt::AlignLeft);
 
         addPropertyLink(b, "checked", SIGNAL(toggled(bool)), includeZones_);
-
         connect(b, SIGNAL(toggled(bool)), this, SLOT(includeZones(bool)));
-        includeZones_->SetImmediateUpdate(true);
     }
 
     if (showPatchNames_)
@@ -274,7 +280,6 @@ pqFoamReaderControls::pqFoamReaderControls
         form->addWidget(b, row, 1, Qt::AlignLeft);
 
         connect(b, SIGNAL(toggled(bool)), this, SLOT(showPatchNames(bool)));
-        showPatchNames_->SetImmediateUpdate(true);
     }
 
     // LINE
@@ -327,7 +332,7 @@ pqFoamReaderControls::pqFoamReaderControls
     if (updateGui)
     {
         QPushButton* b = new QPushButton(this);
-        setButtonProperties(b, updateGui, false);
+        setButtonProperties(b, updateGui);
         form->addWidget(b, row, 0, Qt::AlignLeft);
 
         addPropertyLink(b, "checked", SIGNAL(clicked()), updateGui);
@@ -350,7 +355,6 @@ pqFoamReaderControls::pqFoamReaderControls
         form->addWidget(b, row, 2, Qt::AlignLeft);
 
         connect(b, SIGNAL(toggled(bool)), this, SLOT(cacheMesh(bool)));
-        cacheMesh_->SetImmediateUpdate(true);
     }
 }
 

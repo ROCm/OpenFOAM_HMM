@@ -88,7 +88,7 @@ public:
 
     // Description:
     // OpenFOAM refresh times/fields
-    virtual void SetRefresh(bool);
+    virtual void Refresh();
 
     // Description:
     // OpenFOAM skip/include the 0/ time directory
@@ -231,7 +231,6 @@ private:
     void updatePatchNamesView(const bool show);
 
     int TimeStepRange[2];
-    bool Refresh;
     bool CacheMesh;
     bool SkipZeroTime;
 
