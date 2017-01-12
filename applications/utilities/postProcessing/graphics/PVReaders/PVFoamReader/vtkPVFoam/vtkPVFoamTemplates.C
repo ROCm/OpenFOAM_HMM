@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,6 @@ License
 // OpenFOAM includes
 #include "polyPatch.H"
 #include "primitivePatch.H"
-#include "vtkOpenFOAMPoints.H"
 
 // VTK includes
 #include "vtkCellArray.h"
@@ -48,7 +47,7 @@ vtkPolyData* Foam::vtkPVFoam::patchVTKMesh
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::patchVTKMesh - " << name << endl;
+        Info<< "<beg> patchVTKMesh - " << name << endl;
         printMemory();
     }
 
@@ -59,12 +58,11 @@ vtkPolyData* Foam::vtkPVFoam::patchVTKMesh
     vtkpoints->Allocate(points.size());
     forAll(points, i)
     {
-        vtkInsertNextOpenFOAMPoint(vtkpoints, points[i]);
+        vtkpoints->InsertNextPoint(points[i].v_);
     }
 
     vtkmesh->SetPoints(vtkpoints);
     vtkpoints->Delete();
-
 
     // Add faces as polygons
     const faceList& faces = p.localFaces();
@@ -88,7 +86,7 @@ vtkPolyData* Foam::vtkPVFoam::patchVTKMesh
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::patchVTKMesh - " << name << endl;
+        Info<< "<end> patchVTKMesh - " << name << endl;
         printMemory();
     }
 

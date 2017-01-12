@@ -273,6 +273,17 @@
       <Documentation>The list of point fields.</Documentation>
     </StringVectorProperty>
 
+    <!-- Print button -->
+    <Property animateable="0"
+      name="PrintInfo"
+      command="PrintInfo"
+      panel_widget="command_button"
+      panel_visibility="advanced">
+      <Documentation>
+        Print basic information to stdout
+      </Documentation>
+    </Property>
+
   <Hints>
     <ReaderFactory
         extensions="OpenFOAM"

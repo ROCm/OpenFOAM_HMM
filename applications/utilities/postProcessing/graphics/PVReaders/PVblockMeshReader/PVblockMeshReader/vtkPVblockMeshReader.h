@@ -114,7 +114,7 @@ protected:
     vtkPVblockMeshReader();
 
     //- Destructor
-    ~vtkPVblockMeshReader();
+    virtual ~vtkPVblockMeshReader();
 
     //- Return information about mesh, times, etc without loading anything
     virtual int RequestInformation
@@ -160,7 +160,8 @@ private:
 
     vtkDataArraySelection* CurvedEdgesSelection;
 
-    Foam::vtkPVblockMesh* foamData_;
+    //- Backend portion of the reader
+    Foam::vtkPVblockMesh* backend_;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

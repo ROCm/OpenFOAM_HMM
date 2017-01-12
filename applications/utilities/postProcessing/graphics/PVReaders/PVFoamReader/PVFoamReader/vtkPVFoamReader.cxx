@@ -33,6 +33,7 @@ License
 #include "vtkDataArraySelection.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
+#include "vtkInformationDoubleVectorKey.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkObjectFactory.h"
 #include "vtkSMRenderViewProxy.h"
@@ -41,6 +42,9 @@ License
 
 // OpenFOAM includes
 #include "vtkPVFoam.H"
+
+// STL includes
+#include <vector>
 
 #undef EXPERIMENTAL_TIME_CACHING
 
@@ -58,10 +62,9 @@ vtkPVFoamReader::vtkPVFoamReader()
 
     SetNumberOfInputPorts(0);
 
-    FileName  = nullptr;
-    foamData_ = nullptr;
-
-    output0_  = nullptr;
+    FileName = nullptr;
+    backend_ = nullptr;
+    output0_ = nullptr;
 
 #ifdef VTKPVFOAM_DUALPORT
     // Add second output for the Lagrangian
@@ -133,11 +136,11 @@ vtkPVFoamReader::~vtkPVFoamReader()
 {
     vtkDebugMacro(<<"Deconstructor");
 
-    if (foamData_)
+    if (backend_)
     {
         // remove patch names
         updatePatchNamesView(false);
-        delete foamData_;
+        delete backend_;
     }
 
     if (FileName)
@@ -188,7 +191,7 @@ int vtkPVFoamReader::RequestInformation
         return 0;
     }
 
-    int nInfo = outputVector->GetNumberOfInformationObjects();
+    const int nInfo = outputVector->GetNumberOfInformationObjects();
 
     if (Foam::vtkPVFoam::debug)
     {
@@ -199,60 +202,70 @@ int vtkPVFoamReader::RequestInformation
         }
     }
 
-    if (!foamData_)
+    if (!backend_)
     {
-        foamData_ = new Foam::vtkPVFoam(FileName, this);
+        backend_ = new Foam::vtkPVFoam(FileName, this);
     }
     else
     {
-        foamData_->updateInfo();
+        backend_->updateInfo();
     }
 
-    int nTimeSteps = 0;
-    double* timeSteps = foamData_->findTimes(nTimeSteps);
+    std::vector<double> times = backend_->findTimes(this->SkipZeroTime);
 
-    if (!nTimeSteps)
+    if (times.empty())
     {
         vtkErrorMacro("could not find valid OpenFOAM mesh");
 
         // delete foamData and flag it as fatal error
-        delete foamData_;
-        foamData_ = nullptr;
+        delete backend_;
+        backend_ = nullptr;
         return 0;
     }
 
     // set identical time steps for all ports
     for (int infoI = 0; infoI < nInfo; ++infoI)
     {
-        outputVector->GetInformationObject(infoI)->Set
+        vtkInformation *outInfo = outputVector->GetInformationObject(infoI);
+
+        outInfo->Set
         (
             vtkStreamingDemandDrivenPipeline::TIME_STEPS(),
-            timeSteps,
-            nTimeSteps
+            times.data(),
+            static_cast<int>(times.size())
         );
+
+        // Something like this may be useful:
+        // outInfo->Set
+        // (
+        //     vtkStreamingDemandDrivenPipeline::TIME_DEPENDENT_INFORMATION(),
+        //     1
+        // );
     }
 
-    if (nTimeSteps)
+    if (times.size())
     {
-        double timeRange[2];
-        timeRange[0] = timeSteps[0];
-        timeRange[1] = timeSteps[nTimeSteps-1];
+        double timeRange[2]{ times.front(), times.back() };
 
         if (Foam::vtkPVFoam::debug > 1)
         {
-            cout<<"nTimeSteps " << nTimeSteps << "\n"
-                <<"timeRange " << timeRange[0] << " to " << timeRange[1]
-                << "\n";
+            cout
+                <<"nInfo " << nInfo << "\n"
+                <<"time-range " << times.front() << ':' << times.back() << "\n"
+                <<"times " << times.size() << "(";
 
-            for (int timeI = 0; timeI < nTimeSteps; ++timeI)
+            for (const double& val : times)
             {
-                cout<< "step[" << timeI << "] = " << timeSteps[timeI] << "\n";
+                cout<< ' ' << val;
             }
+            cout << " )" << std::endl;
         }
 
         for (int infoI = 0; infoI < nInfo; ++infoI)
         {
-            outputVector->GetInformationObject(infoI)->Set
+            vtkInformation *outInfo = outputVector->GetInformationObject(infoI);
+
+            outInfo->Set
             (
                 vtkStreamingDemandDrivenPipeline::TIME_RANGE(),
                 timeRange,
@@ -260,8 +273,6 @@ int vtkPVFoamReader::RequestInformation
             );
         }
     }
-
-    delete timeSteps;
 
     return 1;
 }
@@ -282,15 +293,14 @@ int vtkPVFoamReader::RequestData
         vtkErrorMacro("FileName has to be specified!");
         return 0;
     }
-
-    // catch previous error
-    if (!foamData_)
+    if (!backend_)
     {
+        // catch some previous error
         vtkErrorMacro("Reader failed - perhaps no mesh?");
         return 0;
     }
 
-    int nInfo = outputVector->GetNumberOfInformationObjects();
+    const int nInfo = outputVector->GetNumberOfInformationObjects();
 
     if (Foam::vtkPVFoam::debug)
     {
@@ -315,23 +325,31 @@ int vtkPVFoamReader::RequestData
     {
         vtkInformation *outInfo = outputVector->GetInformationObject(infoI);
 
+        int nsteps = outInfo->Length(vtkStreamingDemandDrivenPipeline::TIME_STEPS());
+
         if
         (
             outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP())
-         && outInfo->Length(vtkStreamingDemandDrivenPipeline::TIME_STEPS()) > 0
+         && nsteps > 0
         )
         {
-            requestTime[nRequestTime++] =
-                outInfo->Get
-                (
-                    vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()
-                );
+            requestTime[nRequestTime] =
+            (
+                1 == nsteps
+                // Only one time-step available, UPDATE_TIME_STEP is unreliable
+              ? outInfo->Get(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), 0)
+              : outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP())
+            );
+
+            // outInfo->Set(vtkDataObject::DATA_TIME_STEP(), requestTime[nRequestTime]);
+            // this->SetTimeValue(requestedTimeValue);
+            ++nRequestTime;
         }
     }
 
     if (nRequestTime)
     {
-        foamData_->setTime(nRequestTime, requestTime);
+        backend_->setTime(nRequestTime, requestTime);
     }
 
     vtkMultiBlockDataSet* output = vtkMultiBlockDataSet::SafeDownCast
@@ -362,7 +380,7 @@ int vtkPVFoamReader::RequestData
     // but trashes the fields and still triggers the GeometryFilter
     if (needsUpdate)
     {
-        foamData_->Update(output);
+        backend_->Update(output);
         output0_->ShallowCopy(output);
     }
     else
@@ -391,7 +409,7 @@ int vtkPVFoamReader::RequestData
 #else
 
 #ifdef VTKPVFOAM_DUALPORT
-    foamData_->Update
+    backend_->Update
     (
         output,
         vtkMultiBlockDataSet::SafeDownCast
@@ -403,7 +421,7 @@ int vtkPVFoamReader::RequestData
         );
     );
 #else
-    foamData_->Update(output, output);
+    backend_->Update(output, output);
 #endif
 
     updatePatchNamesView(ShowPatchNames);
@@ -411,9 +429,24 @@ int vtkPVFoamReader::RequestData
 #endif
 
     // Do any cleanup on the OpenFOAM side
-    foamData_->CleanUp();
+    backend_->CleanUp();
 
     return 1;
+}
+
+
+void vtkPVFoamReader::PrintInfo()
+{
+    if (backend_)
+    {
+        backend_->printInfo();
+    }
+    else
+    {
+        cout
+            <<"OpenFOAM reader not initialized\n"
+            << std::flush;
+    }
 }
 
 
@@ -428,9 +461,9 @@ void vtkPVFoamReader::SetIncludeSets(bool val)
     if (IncludeSets != val)
     {
         IncludeSets = val;
-        if (foamData_)
+        if (backend_)
         {
-            foamData_->updateInfo();
+            backend_->updateInfo();
         }
     }
 }
@@ -441,9 +474,9 @@ void vtkPVFoamReader::SetIncludeZones(bool val)
     if (IncludeZones != val)
     {
         IncludeZones = val;
-        if (foamData_)
+        if (backend_)
         {
-            foamData_->updateInfo();
+            backend_->updateInfo();
         }
     }
 }
@@ -464,9 +497,9 @@ void vtkPVFoamReader::SetShowGroupsOnly(bool val)
     if (ShowGroupsOnly != val)
     {
         ShowGroupsOnly = val;
-        if (foamData_)
+        if (backend_)
         {
-            foamData_->updateInfo();
+            backend_->updateInfo();
         }
     }
 }
@@ -485,7 +518,7 @@ void vtkPVFoamReader::updatePatchNamesView(const bool show)
     // Server manager model for querying items in the server manager
     pqServerManagerModel* smModel = appCore->getServerManagerModel();
 
-    if (!smModel || !foamData_)
+    if (!smModel || !backend_)
     {
         return;
     }
@@ -495,7 +528,7 @@ void vtkPVFoamReader::updatePatchNamesView(const bool show)
 
     for (int viewI=0; viewI < renderViews.size(); ++viewI)
     {
-        foamData_->renderPatchNames
+        backend_->renderPatchNames
         (
             renderViews[viewI]->getRenderViewProxy()->GetRenderer(),
             show
@@ -514,7 +547,7 @@ void vtkPVFoamReader::PrintSelf(ostream& os, vtkIndent indent)
     os  << indent << "File name: "
         << (this->FileName ? this->FileName : "(none)") << "\n";
 
-    foamData_->PrintSelf(os, indent);
+    backend_->PrintSelf(os, indent);
 
     os  << indent << "Time step range: "
         << this->TimeStepRange[0] << " - " << this->TimeStepRange[1] << "\n"
@@ -524,7 +557,7 @@ void vtkPVFoamReader::PrintSelf(ostream& os, vtkIndent indent)
 
 int vtkPVFoamReader::GetTimeStep()
 {
-    return foamData_ ? foamData_->timeIndex() : -1;
+    return backend_ ? backend_->timeIndex() : -1;
 }
 
 
@@ -533,31 +566,23 @@ int vtkPVFoamReader::GetTimeStep()
 
 vtkDataArraySelection* vtkPVFoamReader::GetPartSelection()
 {
-    vtkDebugMacro(<<"GetPartSelection");
     return PartSelection;
 }
 
-
 int vtkPVFoamReader::GetNumberOfPartArrays()
 {
-    vtkDebugMacro(<<"GetNumberOfPartArrays");
     return PartSelection->GetNumberOfArrays();
 }
 
-
 const char* vtkPVFoamReader::GetPartArrayName(int index)
 {
-    vtkDebugMacro(<<"GetPartArrayName");
     return PartSelection->GetArrayName(index);
 }
 
-
 int vtkPVFoamReader::GetPartArrayStatus(const char* name)
 {
-    vtkDebugMacro(<<"GetPartArrayStatus");
     return PartSelection->ArrayIsEnabled(name);
 }
-
 
 void vtkPVFoamReader::SetPartArrayStatus(const char* name, int status)
 {
@@ -579,35 +604,26 @@ void vtkPVFoamReader::SetPartArrayStatus(const char* name, int status)
 
 vtkDataArraySelection* vtkPVFoamReader::GetVolFieldSelection()
 {
-    vtkDebugMacro(<<"GetVolFieldSelection");
     return VolFieldSelection;
 }
 
-
 int vtkPVFoamReader::GetNumberOfVolFieldArrays()
 {
-    vtkDebugMacro(<<"GetNumberOfVolFieldArrays");
     return VolFieldSelection->GetNumberOfArrays();
 }
 
-
 const char* vtkPVFoamReader::GetVolFieldArrayName(int index)
 {
-    vtkDebugMacro(<<"GetVolFieldArrayName");
     return VolFieldSelection->GetArrayName(index);
 }
 
-
 int vtkPVFoamReader::GetVolFieldArrayStatus(const char* name)
 {
-    vtkDebugMacro(<<"GetVolFieldArrayStatus");
     return VolFieldSelection->ArrayIsEnabled(name);
 }
 
-
 void vtkPVFoamReader::SetVolFieldArrayStatus(const char* name, int status)
 {
-    vtkDebugMacro(<<"SetVolFieldArrayStatus");
     if (status)
     {
         VolFieldSelection->EnableArray(name);
@@ -624,35 +640,26 @@ void vtkPVFoamReader::SetVolFieldArrayStatus(const char* name, int status)
 
 vtkDataArraySelection* vtkPVFoamReader::GetPointFieldSelection()
 {
-    vtkDebugMacro(<<"GetPointFieldSelection");
     return PointFieldSelection;
 }
 
-
 int vtkPVFoamReader::GetNumberOfPointFieldArrays()
 {
-    vtkDebugMacro(<<"GetNumberOfPointFieldArrays");
     return PointFieldSelection->GetNumberOfArrays();
 }
 
-
 const char* vtkPVFoamReader::GetPointFieldArrayName(int index)
 {
-    vtkDebugMacro(<<"GetPointFieldArrayName");
     return PointFieldSelection->GetArrayName(index);
 }
 
-
 int vtkPVFoamReader::GetPointFieldArrayStatus(const char* name)
 {
-    vtkDebugMacro(<<"GetPointFieldArrayStatus");
     return PointFieldSelection->ArrayIsEnabled(name);
 }
 
-
 void vtkPVFoamReader::SetPointFieldArrayStatus(const char* name, int status)
 {
-    vtkDebugMacro(<<"SetPointFieldArrayStatus");
     if (status)
     {
         PointFieldSelection->EnableArray(name);
@@ -669,31 +676,23 @@ void vtkPVFoamReader::SetPointFieldArrayStatus(const char* name, int status)
 
 vtkDataArraySelection* vtkPVFoamReader::GetLagrangianFieldSelection()
 {
-    vtkDebugMacro(<<"GetLagrangianFieldSelection");
     return LagrangianFieldSelection;
 }
 
-
 int vtkPVFoamReader::GetNumberOfLagrangianFieldArrays()
 {
-    vtkDebugMacro(<<"GetNumberOfLagrangianFieldArrays");
     return LagrangianFieldSelection->GetNumberOfArrays();
 }
 
-
 const char* vtkPVFoamReader::GetLagrangianFieldArrayName(int index)
 {
-    vtkDebugMacro(<<"GetLagrangianFieldArrayName");
     return LagrangianFieldSelection->GetArrayName(index);
 }
 
-
 int vtkPVFoamReader::GetLagrangianFieldArrayStatus(const char* name)
 {
-    vtkDebugMacro(<<"GetLagrangianFieldArrayStatus");
     return LagrangianFieldSelection->ArrayIsEnabled(name);
 }
-
 
 void vtkPVFoamReader::SetLagrangianFieldArrayStatus
 (
@@ -701,7 +700,6 @@ void vtkPVFoamReader::SetLagrangianFieldArrayStatus
     int status
 )
 {
-    vtkDebugMacro(<<"SetLagrangianFieldArrayStatus");
     if (status)
     {
         LagrangianFieldSelection->EnableArray(name);

@@ -15,6 +15,7 @@ include_directories(
     $ENV{WM_PROJECT_DIR}/src/OSspecific/$ENV{WM_OSTYPE}/lnInclude
     $ENV{WM_PROJECT_DIR}/src/finiteVolume/lnInclude
     ${PROJECT_SOURCE_DIR}/../vtkPVFoam
+    ${PROJECT_SOURCE_DIR}/../../foamPv/lnInclude
 )
 
 add_definitions(
@@ -63,6 +64,7 @@ target_link_libraries(
     PVFoamReader_SM
     LINK_PUBLIC
     vtkPVFoam-pv${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}
+    foamPv-pv${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}
     finiteVolume
     OpenFOAM
 )

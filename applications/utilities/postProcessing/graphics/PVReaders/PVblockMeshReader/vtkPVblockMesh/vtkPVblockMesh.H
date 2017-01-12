@@ -41,10 +41,7 @@ SourceFiles
 #ifndef vtkPVblockMesh_H
 #define vtkPVblockMesh_H
 
-#include "className.H"
-#include "fileName.H"
-#include "stringList.H"
-#include "wordList.H"
+#include "foamPvCore.H"
 
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
 
@@ -76,85 +73,9 @@ template<class Type> class List;
 \*---------------------------------------------------------------------------*/
 
 class vtkPVblockMesh
+:
+    private foamPvCore
 {
-    // Private classes
-
-        //- Bookkeeping for GUI checklists and the multi-block organization
-        class arrayRange
-        {
-            const char *name_;
-            int block_;
-            int start_;
-            int size_;
-
-        public:
-
-            arrayRange(const char *name, const int blockNo=0)
-            :
-                name_(name),
-                block_(blockNo),
-                start_(0),
-                size_(0)
-            {}
-
-            //- Return the block holding these datasets
-            int block() const
-            {
-                return block_;
-            }
-
-            //- Assign block number, return previous value
-            int block(int blockNo)
-            {
-                int prev = block_;
-                block_ = blockNo;
-                return prev;
-            }
-
-            //- Return block name
-            const char* name() const
-            {
-                return name_;
-            }
-
-            //- Return array start index
-            int start() const
-            {
-                return start_;
-            }
-
-            //- Return array end index
-            int end() const
-            {
-                return start_ + size_;
-            }
-
-            //- Return sublist size
-            int size() const
-            {
-                return size_;
-            }
-
-            bool empty() const
-            {
-                return !size_;
-            }
-
-            //- Reset the size to zero and optionally assign a new start
-            void reset(const int startAt = 0)
-            {
-                start_ = startAt;
-                size_ = 0;
-            }
-
-            //- Increment the size
-            void operator+=(const int n)
-            {
-                size_ += n;
-            }
-        };
-
-
     // Private Data
 
         //- Access to the controlling vtkPVblockMeshReader
@@ -194,24 +115,6 @@ class vtkPVblockMesh
 
     // Private Member Functions
 
-        // Convenience method use to convert the readers from VTK 5
-        // multiblock API to the current composite data infrastructure
-        static void AddToBlock
-        (
-            vtkMultiBlockDataSet* output,
-            vtkDataSet* dataset,
-            const arrayRange&,
-            const label datasetNo,
-            const std::string& datasetName
-        );
-
-        //- Update boolList from GUI selection
-        static void updateBoolListStatus
-        (
-            boolList&,
-            vtkDataArraySelection*
-        );
-
         //- Reset data counters
         void resetCounters();
 
@@ -238,36 +141,6 @@ class vtkPVblockMesh
 
             //- Mesh corners
             void convertMeshCorners(vtkMultiBlockDataSet*, int& blockNo);
-
-
-       // GUI selection helper functions
-
-            //- Retrieve the current selections
-            static wordHashSet getSelected(vtkDataArraySelection*);
-
-            //- Retrieve a sub-list of the current selections
-            static wordHashSet getSelected
-            (
-                vtkDataArraySelection*,
-                const arrayRange&
-            );
-
-            //- Retrieve the current selections
-            static stringList getSelectedArrayEntries(vtkDataArraySelection*);
-
-            //- Retrieve a sub-list of the current selections
-            static stringList getSelectedArrayEntries
-            (
-                vtkDataArraySelection*,
-                const arrayRange&
-            );
-
-            //- Set selection(s)
-            static void setSelectedArrayEntries
-            (
-                vtkDataArraySelection*,
-                const stringList&
-            );
 
 
         //- Disallow default bitwise copy construct

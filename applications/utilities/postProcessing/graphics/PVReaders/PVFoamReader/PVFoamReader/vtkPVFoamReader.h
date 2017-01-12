@@ -78,6 +78,10 @@ public:
     vtkGetStringMacro(FileName);
 
     // Description:
+    // Print some case information
+    virtual void PrintInfo();
+
+    // Description:
     // OpenFOAM mesh caching control
     vtkSetMacro(CacheMesh, bool);
     vtkGetMacro(CacheMesh, bool);
@@ -250,7 +254,8 @@ private:
     //- Cached data for output port0 (experimental!)
     vtkMultiBlockDataSet* output0_;
 
-    Foam::vtkPVFoam* foamData_;
+    //- Backend portion of the reader
+    Foam::vtkPVFoam* backend_;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

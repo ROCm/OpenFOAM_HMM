@@ -67,8 +67,8 @@ void Foam::vtkPVblockMesh::updateInfoBlocks
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVblockMesh::updateInfoBlocks"
-            << " [meshPtr=" << (meshPtr_ ? "set" : "nullptr") << "]" << endl;
+        Info<< "<beg> updateInfoBlocks"
+            << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
     }
 
     range.reset(arraySelection->GetNumberOfArrays());
@@ -99,10 +99,7 @@ void Foam::vtkPVblockMesh::updateInfoBlocks
 
     if (debug)
     {
-        // just for debug info
-        getSelectedArrayEntries(arraySelection);
-
-        Info<< "<end> Foam::vtkPVblockMesh::updateInfoBlocks" << endl;
+        Info<< "<end> updateInfoBlocks" << endl;
     }
 }
 
@@ -116,8 +113,8 @@ void Foam::vtkPVblockMesh::updateInfoEdges
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVblockMesh::updateInfoEdges"
-            << " [meshPtr=" << (meshPtr_ ? "set" : "nullptr") << "]" << endl;
+        Info<< "<beg> updateInfoEdges"
+            << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
     }
 
     range.reset(arraySelection->GetNumberOfArrays());
@@ -141,10 +138,7 @@ void Foam::vtkPVblockMesh::updateInfoEdges
 
     if (debug)
     {
-        // just for debug info
-        getSelectedArrayEntries(arraySelection);
-
-        Info<< "<end> Foam::vtkPVblockMesh::updateInfoEdges" << endl;
+        Info<< "<end> updateInfoEdges" << endl;
     }
 }
 
@@ -168,8 +162,7 @@ Foam::vtkPVblockMesh::vtkPVblockMesh
 {
     if (debug)
     {
-        Info<< "Foam::vtkPVblockMesh::vtkPVblockMesh - "
-            << FileName << endl;
+        Info<< "vtkPVblockMesh - " << FileName << endl;
     }
 
     // avoid argList and get rootPath/caseName directly from the file
@@ -255,7 +248,7 @@ Foam::vtkPVblockMesh::~vtkPVblockMesh()
 {
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVblockMesh::~vtkPVblockMesh" << endl;
+        Info<< "~vtkPVblockMesh" << endl;
     }
 
     // Hmm. pointNumberTextActors are not getting removed
@@ -276,8 +269,8 @@ void Foam::vtkPVblockMesh::updateInfo()
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVblockMesh::updateInfo"
-            << " [meshPtr=" << (meshPtr_ ? "set" : "nullptr") << "] " << endl;
+        Info<< "<beg> updateInfo"
+            << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "] " << endl;
     }
 
     resetCounters();
@@ -285,8 +278,7 @@ void Foam::vtkPVblockMesh::updateInfo()
     vtkDataArraySelection* blockSelection = reader_->GetBlockSelection();
     vtkDataArraySelection* edgeSelection  = reader_->GetCurvedEdgesSelection();
 
-    // enable 'internalMesh' on the first call
-    // or preserve the enabled selections
+    // preserve the enabled selections if possible
     stringList enabledParts;
     stringList enabledEdges;
     const bool firstTime = (!blockSelection->GetNumberOfArrays() && !meshPtr_);
@@ -313,12 +305,12 @@ void Foam::vtkPVblockMesh::updateInfo()
     if (!firstTime)
     {
         setSelectedArrayEntries(blockSelection, enabledParts);
-        setSelectedArrayEntries(edgeSelection, enabledEdges);
+        setSelectedArrayEntries(edgeSelection,  enabledEdges);
     }
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVblockMesh::updateInfo" << endl;
+        Info<< "<end> updateInfo" << endl;
     }
 }
 
@@ -327,7 +319,7 @@ void Foam::vtkPVblockMesh::updateFoamMesh()
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVblockMesh::updateFoamMesh" << endl;
+        Info<< "<beg> updateFoamMesh" << endl;
     }
 
     // Check to see if the OpenFOAM mesh has been created
@@ -377,7 +369,7 @@ void Foam::vtkPVblockMesh::updateFoamMesh()
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVblockMesh::updateFoamMesh" << endl;
+        Info<< "<end> updateFoamMesh" << endl;
     }
 }
 
@@ -390,10 +382,10 @@ void Foam::vtkPVblockMesh::Update
     reader_->UpdateProgress(0.1);
 
     // Set up mesh parts selection(s)
-    updateBoolListStatus(blockStatus_, reader_->GetBlockSelection());
+    getSelected(blockStatus_, reader_->GetBlockSelection());
 
     // Set up curved edges selection(s)
-    updateBoolListStatus(edgeStatus_, reader_->GetCurvedEdgesSelection());
+    getSelected(edgeStatus_,  reader_->GetCurvedEdgesSelection());
 
     reader_->UpdateProgress(0.2);
 

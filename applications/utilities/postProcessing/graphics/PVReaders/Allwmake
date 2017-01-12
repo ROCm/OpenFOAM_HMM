@@ -97,7 +97,7 @@ case "$major" in
     if canBuildPlugin
     then
     (
-        wmakeLibPv vtkPVReaders
+        wmakeLibPv foamPv
         PVblockMeshReader/Allwmake $targetType $*
         PVFoamReader/Allwmake $targetType $*
 

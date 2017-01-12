@@ -56,8 +56,8 @@ vtkPVblockMeshReader::vtkPVblockMeshReader()
 
     SetNumberOfInputPorts(0);
 
-    FileName  = nullptr;
-    foamData_ = nullptr;
+    FileName = nullptr;
+    backend_ = nullptr;
 
     ShowPointNumbers = true;
 
@@ -72,7 +72,6 @@ vtkPVblockMeshReader::vtkPVblockMeshReader()
         &vtkPVblockMeshReader::SelectionModifiedCallback
     );
     SelectionObserver->SetClientData(this);
-
 
     BlockSelection->AddObserver
     (
@@ -94,11 +93,11 @@ vtkPVblockMeshReader::~vtkPVblockMeshReader()
 {
     vtkDebugMacro(<<"Destructor");
 
-    if (foamData_)
+    if (backend_)
     {
         // Remove point numbers
         updatePointNumbersView(false);
-        delete foamData_;
+        delete backend_;
     }
 
     if (FileName)
@@ -147,13 +146,13 @@ int vtkPVblockMeshReader::RequestInformation
         }
     }
 
-    if (!foamData_)
+    if (!backend_)
     {
-        foamData_ = new Foam::vtkPVblockMesh(FileName, this);
+        backend_ = new Foam::vtkPVblockMesh(FileName, this);
     }
     else
     {
-        foamData_->updateInfo();
+        backend_->updateInfo();
     }
 
     return 1;
@@ -176,7 +175,7 @@ int vtkPVblockMeshReader::RequestData
     }
 
     // Catch previous error
-    if (!foamData_)
+    if (!backend_)
     {
         vtkErrorMacro("Reader failed - perhaps no mesh?");
         return 0;
@@ -207,12 +206,11 @@ int vtkPVblockMeshReader::RequestData
             << output->GetNumberOfBlocks() << " blocks\n";
     }
 
-
-    foamData_->Update(output);
+    backend_->Update(output);
     updatePointNumbersView(ShowPointNumbers);
 
     // Do any cleanup on the OpenFOAM side
-    foamData_->CleanUp();
+    backend_->CleanUp();
 
     return 1;
 }
@@ -221,11 +219,11 @@ int vtkPVblockMeshReader::RequestData
 void vtkPVblockMeshReader::SetRefresh(bool val)
 {
     // Delete the current blockMesh to force re-read and update
-    if (foamData_)
+    if (backend_)
     {
         updatePointNumbersView(false);
-        delete foamData_;
-        foamData_ = 0;
+        delete backend_;
+        backend_ = nullptr;
     }
 
     Modified();
@@ -254,7 +252,7 @@ void vtkPVblockMeshReader::updatePointNumbersView(const bool show)
 
     // Server manager model for querying items in the server manager
     pqServerManagerModel* smModel = appCore->getServerManagerModel();
-    if (!smModel || !foamData_)
+    if (!smModel || !backend_)
     {
         return;
     }
@@ -264,7 +262,7 @@ void vtkPVblockMeshReader::updatePointNumbersView(const bool show)
     QList<pqRenderView*> renderViews = smModel->findItems<pqRenderView*>();
     for (int viewI=0; viewI<renderViews.size(); ++viewI)
     {
-        foamData_->renderPointNumbers
+        backend_->renderPointNumbers
         (
             renderViews[viewI]->getRenderViewProxy()->GetRenderer(),
             show
@@ -283,7 +281,7 @@ void vtkPVblockMeshReader::PrintSelf(ostream& os, vtkIndent indent)
     os  << indent << "File name: "
         << (this->FileName ? this->FileName : "(none)") << "\n";
 
-    foamData_->PrintSelf(os, indent);
+    backend_->PrintSelf(os, indent);
 }
 
 

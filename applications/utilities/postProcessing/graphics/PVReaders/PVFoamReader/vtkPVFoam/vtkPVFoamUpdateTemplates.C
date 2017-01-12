@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,8 +26,8 @@ InClass
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef vtkPVFoamUpdateInfoFields_H
-#define vtkPVFoamUpdateInfoFields_H
+#ifndef vtkPVFoamUpdateTemplates_C
+#define vtkPVFoamUpdateTemplates_C
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -39,19 +39,17 @@ void Foam::vtkPVFoam::updateInfoFields
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::updateInfoFields <"
+        Info<< "<beg> updateInfoFields <"
             << meshType::Mesh::typeName
-            << "> [meshPtr=" << (meshPtr_ ? "set" : "nullptr") << "]"
+            << "> [meshPtr=" << (meshPtr_ ? "set" : "null") << "]"
             << endl;
     }
 
     stringList enabledEntries;
-    // enable 'p' and 'U' on the first call
-    if (select->GetNumberOfArrays() == 0 && !meshPtr_)
+    if (!select->GetNumberOfArrays() && !meshPtr_)
     {
-        enabledEntries.setSize(2);
-        enabledEntries[0] = "p";
-        enabledEntries[1] = "U";
+        // enable 'p' and 'U' only on the first call
+        enabledEntries = { "p", "U" };
     }
     else
     {
@@ -72,7 +70,7 @@ void Foam::vtkPVFoam::updateInfoFields
     // Search for list of objects for this time and mesh region
     IOobjectList objects(dbPtr_(), dbPtr_().timeName(), regionPrefix);
 
-    //- Add volume fields to GUI
+    // Add volume fields to GUI
     addToSelection<GeometricField<scalar, patchType, meshType>>
     (
         select,
@@ -93,13 +91,14 @@ void Foam::vtkPVFoam::updateInfoFields
         select,
         objects
     );
+
     addToSelection<GeometricField<tensor, patchType, meshType>>
     (
         select,
         objects
     );
 
-    //- Add dimensioned fields to GUI
+    // Add dimensioned fields to GUI
     addToSelection<DimensionedField<scalar, meshType>>
     (
         select,
@@ -132,7 +131,7 @@ void Foam::vtkPVFoam::updateInfoFields
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::updateInfoFields" << endl;
+        Info<< "<end> updateInfoFields" << endl;
     }
 }
 

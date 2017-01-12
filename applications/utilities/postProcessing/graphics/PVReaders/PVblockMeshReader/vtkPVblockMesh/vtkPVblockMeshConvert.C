@@ -30,8 +30,6 @@ License
 #include "blockMesh.H"
 #include "Time.H"
 
-#include "vtkOpenFOAMPoints.H"
-
 // VTK includes
 #include "vtkCellArray.h"
 #include "vtkDataArraySelection.h"
@@ -40,6 +38,26 @@ License
 #include "vtkPolyData.h"
 #include "vtkUnstructuredGrid.h"
 
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+//! \cond fileScope
+inline static void insertNextPoint
+(
+    vtkPoints *points,
+    const Foam::point& p,
+    const Foam::scalar scaleFactor
+)
+{
+    points->InsertNextPoint
+    (
+        p.x()*scaleFactor,
+        p.y()*scaleFactor,
+        p.z()*scaleFactor
+    );
+}
+
+//! \endcond
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -59,7 +77,7 @@ void Foam::vtkPVblockMesh::convertMeshBlocks
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVblockMesh::convertMeshBlocks" << endl;
+        Info<< "<beg> convertMeshBlocks" << endl;
     }
 
     int blockI = 0;
@@ -79,19 +97,16 @@ void Foam::vtkPVblockMesh::convertMeshBlocks
 
         const blockDescriptor& blockDef = blkMesh[blockI];
 
-        vtkUnstructuredGrid* vtkmesh = vtkUnstructuredGrid::New();
-
         // Convert OpenFOAM mesh vertices to VTK
         vtkPoints *vtkpoints = vtkPoints::New();
-        vtkpoints->Allocate( blockDef.nPoints() );
+        vtkpoints->Allocate(blockDef.nPoints());
         const labelList& blockLabels = blockDef.blockShape();
 
-        vtkmesh->Allocate(1);
         vtkIdType nodeIds[8];
 
         forAll(blockLabels, ptI)
         {
-            vtkInsertNextOpenFOAMPoint
+            insertNextPoint
             (
                 vtkpoints,
                 blockPoints[blockLabels[ptI]],
@@ -101,6 +116,8 @@ void Foam::vtkPVblockMesh::convertMeshBlocks
             nodeIds[ptI] = ptI;
         }
 
+        vtkUnstructuredGrid* vtkmesh = vtkUnstructuredGrid::New();
+        vtkmesh->Allocate(1);
         vtkmesh->InsertNextCell
         (
             VTK_HEXAHEDRON,
@@ -111,7 +128,7 @@ void Foam::vtkPVblockMesh::convertMeshBlocks
         vtkmesh->SetPoints(vtkpoints);
         vtkpoints->Delete();
 
-        AddToBlock
+        addToBlock
         (
             output, vtkmesh, range, datasetNo,
             selection->GetArrayName(partId)
@@ -130,7 +147,7 @@ void Foam::vtkPVblockMesh::convertMeshBlocks
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVblockMesh::convertMeshBlocks" << endl;
+        Info<< "<end> convertMeshBlocks" << endl;
     }
 }
 
@@ -201,7 +218,7 @@ void Foam::vtkPVblockMesh::convertMeshEdges
                 vtkIdType pointIds[edgePoints.size()];
                 forAll(edgePoints, ptI)
                 {
-                    vtkInsertNextOpenFOAMPoint
+                    insertNextPoint
                     (
                         vtkpoints,
                         edgePoints[ptI],
@@ -220,7 +237,7 @@ void Foam::vtkPVblockMesh::convertMeshEdges
                 vtkmesh->SetPoints(vtkpoints);
                 vtkpoints->Delete();
 
-                AddToBlock
+                addToBlock
                 (
                     output, vtkmesh, range, datasetNo,
                     selection->GetArrayName(partId)
@@ -242,7 +259,7 @@ void Foam::vtkPVblockMesh::convertMeshEdges
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVblockMesh::convertMeshEdges" << endl;
+        Info<< "<end> convertMeshEdges" << endl;
     }
 
 }
@@ -263,7 +280,7 @@ void Foam::vtkPVblockMesh::convertMeshCorners
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVblockMesh::convertMeshCorners" << endl;
+        Info<< "<beg> convertMeshCorners" << endl;
     }
 
     if (true)  // or some flag or other condition
@@ -278,7 +295,7 @@ void Foam::vtkPVblockMesh::convertMeshCorners
         vtkIdType pointId = 0;
         forAll(blockPoints, ptI)
         {
-            vtkInsertNextOpenFOAMPoint
+            insertNextPoint
             (
                 vtkpoints,
                 blockPoints[ptI],
@@ -295,7 +312,7 @@ void Foam::vtkPVblockMesh::convertMeshCorners
         vtkmesh->SetVerts(vtkcells);
         vtkcells->Delete();
 
-        AddToBlock(output, vtkmesh, range, datasetNo, range.name());
+        addToBlock(output, vtkmesh, range, datasetNo, range.name());
         vtkmesh->Delete();
 
         datasetNo++;
@@ -309,7 +326,7 @@ void Foam::vtkPVblockMesh::convertMeshCorners
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVblockMesh::convertMeshCorners" << endl;
+        Info<< "<end> convertMeshCorners" << endl;
     }
 }
 

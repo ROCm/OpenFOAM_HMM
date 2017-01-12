@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ void Foam::vtkPVFoam::convertMeshVolume
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::convertMeshVolume" << endl;
+        Info<< "<beg> convertMeshVolume" << endl;
         printMemory();
     }
 
@@ -80,7 +80,7 @@ void Foam::vtkPVFoam::convertMeshVolume
 
         if (vtkmesh)
         {
-            AddToBlock(output, vtkmesh, range, datasetNo, partName);
+            addToBlock(output, vtkmesh, range, datasetNo, partName);
             vtkmesh->Delete();
 
             partDataset_[partId] = datasetNo++;
@@ -95,7 +95,7 @@ void Foam::vtkPVFoam::convertMeshVolume
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::convertMeshVolume" << endl;
+        Info<< "<end> convertMeshVolume" << endl;
         printMemory();
     }
 }
@@ -114,7 +114,7 @@ void Foam::vtkPVFoam::convertMeshLagrangian
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::convertMeshLagrangian" << endl;
+        Info<< "<beg> convertMeshLagrangian" << endl;
         printMemory();
     }
 
@@ -131,7 +131,7 @@ void Foam::vtkPVFoam::convertMeshLagrangian
 
         if (vtkmesh)
         {
-            AddToBlock(output, vtkmesh, range, datasetNo, cloudName);
+            addToBlock(output, vtkmesh, range, datasetNo, cloudName);
             vtkmesh->Delete();
 
             partDataset_[partId] = datasetNo++;
@@ -146,7 +146,7 @@ void Foam::vtkPVFoam::convertMeshLagrangian
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::convertMeshLagrangian" << endl;
+        Info<< "<end> convertMeshLagrangian" << endl;
         printMemory();
     }
 }
@@ -166,7 +166,7 @@ void Foam::vtkPVFoam::convertMeshPatches
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::convertMeshPatches" << endl;
+        Info<< "<beg> convertMeshPatches" << endl;
         printMemory();
     }
 
@@ -201,26 +201,33 @@ void Foam::vtkPVFoam::convertMeshPatches
             {
                 sz += patches[iter.key()].size();
             }
-            labelList meshFaceLabels(sz);
+            labelList faceLabels(sz);
             sz = 0;
             forAllConstIter(labelHashSet, patchIds, iter)
             {
                 const polyPatch& pp = patches[iter.key()];
                 forAll(pp, i)
                 {
-                    meshFaceLabels[sz++] = pp.start()+i;
+                    faceLabels[sz++] = pp.start()+i;
                 }
             }
-            UIndirectList<face> fcs(mesh.faces(), meshFaceLabels);
-            uindirectPrimitivePatch pp(fcs, mesh.points());
+
+            uindirectPrimitivePatch pp
+            (
+                UIndirectList<face>
+                (
+                    mesh.faces(),
+                    faceLabels
+                ),
+                mesh.points()
+            );
 
             vtkmesh = patchVTKMesh(patchName, pp);
         }
 
-
         if (vtkmesh)
         {
-            AddToBlock(output, vtkmesh, range, datasetNo, patchName);
+            addToBlock(output, vtkmesh, range, datasetNo, patchName);
             vtkmesh->Delete();
 
             partDataset_[partId] = datasetNo++;
@@ -235,7 +242,7 @@ void Foam::vtkPVFoam::convertMeshPatches
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::convertMeshPatches" << endl;
+        Info<< "<end> convertMeshPatches" << endl;
         printMemory();
     }
 }
@@ -262,7 +269,7 @@ void Foam::vtkPVFoam::convertMeshCellZones
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::convertMeshCellZones" << endl;
+        Info<< "<beg> convertMeshCellZones" << endl;
         printMemory();
     }
 
@@ -309,7 +316,7 @@ void Foam::vtkPVFoam::convertMeshCellZones
             // copy pointMap as well, otherwise pointFields fail
             zonePolyDecomp_[datasetNo].pointMap() = subsetter.pointMap();
 
-            AddToBlock(output, vtkmesh, range, datasetNo, zoneName);
+            addToBlock(output, vtkmesh, range, datasetNo, zoneName);
             vtkmesh->Delete();
 
             partDataset_[partId] = datasetNo++;
@@ -324,7 +331,7 @@ void Foam::vtkPVFoam::convertMeshCellZones
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::convertMeshCellZones" << endl;
+        Info<< "<end> convertMeshCellZones" << endl;
         printMemory();
     }
 }
@@ -346,7 +353,7 @@ void Foam::vtkPVFoam::convertMeshCellSets
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::convertMeshCellSets" << endl;
+        Info<< "<beg> convertMeshCellSets" << endl;
         printMemory();
     }
 
@@ -391,7 +398,7 @@ void Foam::vtkPVFoam::convertMeshCellSets
             // copy pointMap as well, otherwise pointFields fail
             csetPolyDecomp_[datasetNo].pointMap() = subsetter.pointMap();
 
-            AddToBlock(output, vtkmesh, range, datasetNo, partName);
+            addToBlock(output, vtkmesh, range, datasetNo, partName);
             vtkmesh->Delete();
 
             partDataset_[partId] = datasetNo++;
@@ -406,7 +413,7 @@ void Foam::vtkPVFoam::convertMeshCellSets
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::convertMeshCellSets" << endl;
+        Info<< "<end> convertMeshCellSets" << endl;
         printMemory();
     }
 }
@@ -430,7 +437,7 @@ void Foam::vtkPVFoam::convertMeshFaceZones
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::convertMeshFaceZones" << endl;
+        Info<< "<beg> convertMeshFaceZones" << endl;
         printMemory();
     }
 
@@ -455,7 +462,7 @@ void Foam::vtkPVFoam::convertMeshFaceZones
 
         if (vtkmesh)
         {
-            AddToBlock(output, vtkmesh, range, datasetNo, zoneName);
+            addToBlock(output, vtkmesh, range, datasetNo, zoneName);
             vtkmesh->Delete();
 
             partDataset_[partId] = datasetNo++;
@@ -470,7 +477,7 @@ void Foam::vtkPVFoam::convertMeshFaceZones
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::convertMeshFaceZones" << endl;
+        Info<< "<end> convertMeshFaceZones" << endl;
         printMemory();
     }
 }
@@ -489,7 +496,7 @@ void Foam::vtkPVFoam::convertMeshFaceSets
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::convertMeshFaceSets" << endl;
+        Info<< "<beg> convertMeshFaceSets" << endl;
         printMemory();
     }
 
@@ -507,12 +514,26 @@ void Foam::vtkPVFoam::convertMeshFaceSets
             Info<< "Creating VTK mesh for faceSet=" << partName << endl;
         }
 
-        const faceSet fSet(mesh, partName);
+        // faces in sorted order for more reliability
+        uindirectPrimitivePatch p
+        (
+            UIndirectList<face>
+            (
+                mesh.faces(),
+                faceSet(mesh, partName).sortedToc()
+            ),
+            mesh.points()
+        );
 
-        vtkPolyData* vtkmesh = faceSetVTKMesh(mesh, fSet);
+        if (p.empty())
+        {
+            continue;
+        }
+
+        vtkPolyData* vtkmesh = patchVTKMesh("faceSet:" + partName, p);
         if (vtkmesh)
         {
-            AddToBlock(output, vtkmesh, range, datasetNo, partName);
+            addToBlock(output, vtkmesh, range, datasetNo, partName);
             vtkmesh->Delete();
 
             partDataset_[partId] = datasetNo++;
@@ -527,7 +548,7 @@ void Foam::vtkPVFoam::convertMeshFaceSets
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::convertMeshFaceSets" << endl;
+        Info<< "<end> convertMeshFaceSets" << endl;
         printMemory();
     }
 }
@@ -546,7 +567,7 @@ void Foam::vtkPVFoam::convertMeshPointZones
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::convertMeshPointZones" << endl;
+        Info<< "<beg> convertMeshPointZones" << endl;
         printMemory();
     }
 
@@ -563,10 +584,24 @@ void Foam::vtkPVFoam::convertMeshPointZones
                 continue;
             }
 
-            vtkPolyData* vtkmesh = pointZoneVTKMesh(mesh, zMesh[zoneId]);
+            const labelUList& pointLabels = zMesh[zoneId];
+
+            vtkPoints* vtkpoints = vtkPoints::New();
+            vtkpoints->Allocate(pointLabels.size());
+
+            const pointField& meshPoints = mesh.points();
+            forAll(pointLabels, pointi)
+            {
+                vtkpoints->InsertNextPoint(meshPoints[pointLabels[pointi]].v_);
+            }
+
+            vtkPolyData* vtkmesh = vtkPolyData::New();
+            vtkmesh->SetPoints(vtkpoints);
+            vtkpoints->Delete();
+
             if (vtkmesh)
             {
-                AddToBlock(output, vtkmesh, range, datasetNo, zoneName);
+                addToBlock(output, vtkmesh, range, datasetNo, zoneName);
                 vtkmesh->Delete();
 
                 partDataset_[partId] = datasetNo++;
@@ -582,7 +617,7 @@ void Foam::vtkPVFoam::convertMeshPointZones
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::convertMeshPointZones" << endl;
+        Info<< "<end> convertMeshPointZones" << endl;
         printMemory();
     }
 }
@@ -602,7 +637,7 @@ void Foam::vtkPVFoam::convertMeshPointSets
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::convertMeshPointSets" << endl;
+        Info<< "<beg> convertMeshPointSets" << endl;
         printMemory();
     }
 
@@ -622,10 +657,22 @@ void Foam::vtkPVFoam::convertMeshPointSets
 
         const pointSet pSet(mesh, partName);
 
-        vtkPolyData* vtkmesh = pointSetVTKMesh(mesh, pSet);
+        vtkPoints* vtkpoints = vtkPoints::New();
+        vtkpoints->Allocate(pSet.size());
+
+        const pointField& meshPoints = mesh.points();
+        forAllConstIter(pointSet, pSet, iter)
+        {
+            vtkpoints->InsertNextPoint(meshPoints[iter.key()].v_);
+        }
+
+        vtkPolyData* vtkmesh = vtkPolyData::New();
+        vtkmesh->SetPoints(vtkpoints);
+        vtkpoints->Delete();
+
         if (vtkmesh)
         {
-            AddToBlock(output, vtkmesh, range, datasetNo, partName);
+            addToBlock(output, vtkmesh, range, datasetNo, partName);
             vtkmesh->Delete();
 
             partDataset_[partId] = datasetNo++;
@@ -640,7 +687,7 @@ void Foam::vtkPVFoam::convertMeshPointSets
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::convertMeshPointSets" << endl;
+        Info<< "<end> convertMeshPointSets" << endl;
         printMemory();
     }
 }
