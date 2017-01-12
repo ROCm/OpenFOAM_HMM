@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -48,6 +48,8 @@ options:
   -pkg TAG        specify packager/release tag ('none' marks an empty packager)
   -short          report short version information (ie, without pkg tag)
   -version VER    specify an alternative version
+  -plus           report wmake value of OPENFOAM_PLUS and exit
+  -help
 
 Print the version used when building the project, in this order of precedence:
   * the git head commit (prefixed with \$WM_PROJECT_VERSION)
@@ -58,11 +60,23 @@ USAGE
     exit 1
 }
 
+# Report error and exit
+die()
+{
+    exec 1>&2
+    echo
+    echo "Error encountered:"
+    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See '${0##*/} -help' for usage"
+    echo
+    exit 1
+}
 
 #------------------------------------------------------------------------------
 # Parse arguments and options
 #------------------------------------------------------------------------------
-unset checkOnly update package version shortOpt
+unset checkOnly update package version optPlus optShort
 
 while [ "$#" -gt 0 ]
 do
@@ -81,21 +95,25 @@ do
         update=true
         ;;
     -pkg | -package)
-        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         # Mark empty as 'none', disallow '!' in string
         package=$(echo "${2:-none}" | sed -e 's/!//g')
         shift
         ;;
     -short)
-        shortOpt=true
+        optShort=true
         ;;
     -v | -version)
-        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         version="$2"
         shift
         ;;
+    -plus)
+        optPlus=true
+        break
+        ;;
     *)
-        usage "unknown option/argument: '$1'"
+        die "unknown option/argument: '$1'"
         ;;
     esac
     shift
@@ -105,7 +123,6 @@ done
 
 # Persistent build tag
 build="$WM_PROJECT_DIR/.build"
-
 
 #------------------------------------------------------------------------------
 # Retrieve old values from the $WM_PROJECT_DIR/.build cache, stored as
@@ -139,7 +156,23 @@ printTag()
 # Get the version
 #------------------------------------------------------------------------------
 
-if [ -n "$version" ]
+if [ "$optPlus" = true ]
+then
+    # Retrieve OPENFOAM_PLUS=<digits> from $WM_DIR/rules/General/general
+    version=$(
+        sed -ne 's@^.*OPENFOAM_PLUS=\([0-9][0-9]*\).*@\1@p' \
+        $WM_DIR/rules/General/general 2>/dev/null | tail -1
+    )
+
+    if [ -n "$version" ]
+    then
+        echo "$version"
+        exit 0
+    else
+        echo "no wmake definition for OPENFOAM_PLUS" 1>&2
+        exit 1
+    fi
+elif [ -n "$version" ]
 then
     # Specified a version - no error possible
     rc=0
@@ -164,10 +197,10 @@ else
 fi
 
 
-# Retrieve old values
+# Retrieve old values (oldPackage oldVersion)
 getOldValues
 
-if [ "$shortOpt" = true ]
+if [ "$optShort" = true ]
 then
     unset package oldPackage
 fi
