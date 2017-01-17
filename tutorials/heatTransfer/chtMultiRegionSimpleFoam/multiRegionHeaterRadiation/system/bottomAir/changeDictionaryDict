@@ -19,10 +19,16 @@ boundary
     minX
     {
         type            wall;
+        inGroups        2(wall viewFactorWall);
     }
     maxX
     {
         type            wall;
+        inGroups        2(wall viewFactorWall);
+    }
+    ".*"
+    {
+        inGroups        2(wall viewFactorWall);
     }
 }
 
