@@ -89,13 +89,10 @@ protected:
 
 public:
 
-    // Static Data
+    // Public typedefs
 
-        //- VTK name for the 'byte_order' attribute
-        static const char* const byteOrder;
-
-        //- VTK name for the 'header_type' attribute (UInt64)
-        static const char* const headerType;
+        //- Use UInt64 for header data
+        typedef uint64_t headerType;
 
 
     //- Destructor
@@ -161,6 +158,20 @@ public:
         //- Write XML tag without any attributes. Combines openTag/closeTag.
         foamVtkFormatter& tag(const word& tag);
 
+        //- Add a "VTKFile" XML tag for contentType, followed by a tag for
+        //  the contentType itself. Optionally leave the contentType tag
+        //  open for adding additional attributes.
+        foamVtkFormatter& beginVTKFile
+        (
+            const word& contentType,
+            const word& contentVersion,
+            const bool leaveOpen = false
+        );
+
+        //- Add a "AppendedData" XML tag with the current encoding and  output
+        //  the requisite '_' prefix.
+        foamVtkFormatter& beginAppendedData();
+
 
         //- Open "DataArray" XML tag
         template<class Type, int nComp=0>
@@ -174,9 +185,23 @@ public:
 
 
         //- End "DataArray" XML tag
-        foamVtkFormatter& endDataArray()
+        inline foamVtkFormatter& endDataArray()
         {
             return endTag("DataArray");
+        }
+
+        //- End "AppendedData" XML tag
+        inline foamVtkFormatter& endAppendedData()
+        {
+            flush();     // flush any pending encoded content
+            os_ << '\n'; // clear separation from content.
+            return endTag("AppendedData");
+        }
+
+        //- End "VTKFile" XML tag
+        inline foamVtkFormatter& endVTKFile()
+        {
+            return endTag("VTKFile");
         }
 
 

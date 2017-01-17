@@ -58,6 +58,12 @@ class foamVtkOutput
 
 public:
 
+    // Public typedefs
+
+        //- Use UInt64 for header data
+        typedef foamVtkFormatter::headerType headerType;
+
+
     // Forward declarations
     class legacy;
 

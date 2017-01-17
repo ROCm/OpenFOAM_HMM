@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,14 +62,7 @@ Foam::label Foam::foamVtkOutput::writeVtmFile
 
     vtmFile
         .xmlHeader()
-        .openTag("VTKFile")
-        ( "type",        content )
-        ( "version",     "1.0" )
-        ( "byte_order",  foamVtkFormatter::byteOrder )
-        ( "header_type", foamVtkFormatter::headerType )
-        .closeTag();
-
-    vtmFile.tag(content);
+        .beginVTKFile(content, "1.0");
 
     forAll(files, i)
     {
@@ -80,7 +73,7 @@ Foam::label Foam::foamVtkOutput::writeVtmFile
             .closeTag(true);
     }
 
-    vtmFile.endTag(content).endTag("VTKFile");
+    vtmFile.endTag(content).endVTKFile();
 
     return files.size();
 }
