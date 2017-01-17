@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,8 +27,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* Foam::foamVtkAppendBase64Formatter::name_     = "append";
-const char* Foam::foamVtkAppendBase64Formatter::encoding_ = "base64";
+const char* Foam::foamVtkAppendBase64Formatter::name_ = "append";
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -38,14 +37,16 @@ Foam::foamVtkAppendBase64Formatter::foamVtkAppendBase64Formatter
     std::ostream& os
 )
 :
-    foamVtkBase64Formatter(os)
+    foamVtkBase64Layer(os)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::foamVtkAppendBase64Formatter::~foamVtkAppendBase64Formatter()
-{}
+{
+    base64Layer::close();
+}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
@@ -53,12 +54,6 @@ Foam::foamVtkAppendBase64Formatter::~foamVtkAppendBase64Formatter()
 const char* Foam::foamVtkAppendBase64Formatter::name() const
 {
     return name_;
-}
-
-
-const char* Foam::foamVtkAppendBase64Formatter::encoding() const
-{
-    return encoding_;
 }
 
 

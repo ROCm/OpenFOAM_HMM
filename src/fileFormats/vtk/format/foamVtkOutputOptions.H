@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -88,7 +88,7 @@ public:
     // Selectors
 
         //- Return new data formatter based on the writer options
-        autoPtr<foamVtkFormatter> newFormatter(std::ostream&) const;
+        autoPtr<foamVtkFormatter> newFormatter(std::ostream& os) const;
 
 
     // Member Functions
@@ -117,16 +117,16 @@ public:
         //  In append mode, this switches between base64 and raw binary.
         //  In XML mode, this switches between ASCII and base64.
         //  In legacy mode, this switches between ASCII and binary.
-        void ascii(bool);
+        void ascii(bool on);
 
         //- Toggle append mode on/off.
-        void append(bool);
+        void append(bool on);
 
         //- Toggle legacy mode on/off.
-        void legacy(bool);
+        void legacy(bool on);
 
         //- Set the write precision to be used for new ASCII formatters
-        void precision(unsigned val) const;
+        void precision(unsigned prec) const;
 
 
     // Other

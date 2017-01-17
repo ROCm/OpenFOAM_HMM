@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Description
     Base64 encoding accoding to RFC 4648 specification
     (https://tools.ietf.org/html/rfc4648#page-5).
     It is the obligation of the caller to avoid using normal output
-    while the base-64 encoding layer is actively being used.
+    while the base-64 encoding layer is actively used.
 
 SourceFiles
     base64Layer.C
@@ -70,10 +70,10 @@ class base64Layer
 
     // Private Member Functions
 
-        inline unsigned char encode0();
-        inline unsigned char encode1();
-        inline unsigned char encode2();
-        inline unsigned char encode3();
+        inline unsigned char encode0() const;
+        inline unsigned char encode1() const;
+        inline unsigned char encode2() const;
+        inline unsigned char encode3() const;
 
         //- Disallow default bitwise copy construct
         base64Layer(const base64Layer&) = delete;
@@ -95,7 +95,7 @@ public:
     // Constructors
 
         //- Construct and attach to an output stream
-        base64Layer(std::ostream&);
+        base64Layer(std::ostream& os);
 
 
     //- Destructor
@@ -104,6 +104,10 @@ public:
 
     // Member Functions
 
+        //- The encoded length has 4 bytes out for every 3 bytes in.
+        static std::size_t encodedLength(std::size_t n);
+
+
         //- Encode the character sequence, writing when possible.
         void write(const char* s, std::streamsize n);
 
@@ -111,7 +115,7 @@ public:
         void reset();
 
         //- End the encoding sequence, padding the final characters with '='.
-        //  Return false if no encoding layer was actually used.
+        //  Return false if no encoding was actually performed.
         bool close();
 
 };
