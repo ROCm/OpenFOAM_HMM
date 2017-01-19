@@ -61,7 +61,11 @@ void Foam::waveModels::shallowWaterAbsorption::setVelocity
     const scalarField& level
 )
 {
-    U_ = vector::zero;
+    // Apply zero-gradient condition to z-component of velocity only
+    const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
+    U_ = U.boundaryField()[patch_.index()].patchInternalField();
+    U_.replace(0, 0);
+    U_.replace(1, 0);
 }
 
 
