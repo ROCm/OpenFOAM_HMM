@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,26 +40,16 @@ inline Foam::labelRanges::labelRanges(const label nElem)
 
 // * * * * * * * * * * * * * * * * Iterators * * * * * * * * * * * * * * * * //
 
-inline Foam::labelRanges::const_iterator::const_iterator()
+inline Foam::labelRanges::const_iterator::const_iterator
+(
+    const labelRanges& lst,
+    const bool endIter
+)
 :
-   list_(*reinterpret_cast<Foam::labelRanges* >(0)),
-   index_(-1),
-   subIndex_(-1)
+    list_(lst),
+    index_(endIter ? lst.size() : 0),
+    subIndex_(0)
 {}
-
-
-inline Foam::labelRanges::const_iterator::const_iterator(const labelRanges& lst)
-:
-   list_(lst),
-   index_(0),
-   subIndex_(0)
-{
-    if (list_.empty())
-    {
-        // equivalent to end iterator
-        index_ = subIndex_ = -1;
-    }
-}
 
 
 inline bool Foam::labelRanges::const_iterator::operator==
@@ -69,7 +59,7 @@ inline bool Foam::labelRanges::const_iterator::operator==
 {
     return
     (
-        this->index_ == iter.index_
+        this->index_    == iter.index_
      && this->subIndex_ == iter.subIndex_
     );
 }
@@ -101,13 +91,9 @@ Foam::labelRanges::const_iterator::operator++()
 {
     if (++subIndex_ >= list_[index_].size())
     {
-        // go to next list entry
+        // Next sub-list
+        ++index_;
         subIndex_ = 0;
-        if (++index_ >= list_.size())
-        {
-            // equivalent to end iterator
-            index_ = subIndex_ = -1;
-        }
     }
 
     return *this;
@@ -129,9 +115,9 @@ inline Foam::labelRanges::const_iterator Foam::labelRanges::cbegin() const
 }
 
 
-inline const Foam::labelRanges::const_iterator& Foam::labelRanges::cend() const
+inline const Foam::labelRanges::const_iterator Foam::labelRanges::cend() const
 {
-    return endIter_;
+    return const_iterator(*this, true);
 }
 
 
@@ -141,9 +127,9 @@ inline Foam::labelRanges::const_iterator Foam::labelRanges::begin() const
 }
 
 
-inline const Foam::labelRanges::const_iterator& Foam::labelRanges::end() const
+inline const Foam::labelRanges::const_iterator Foam::labelRanges::end() const
 {
-    return endIter_;
+    return const_iterator(*this, true);
 }
 
 
