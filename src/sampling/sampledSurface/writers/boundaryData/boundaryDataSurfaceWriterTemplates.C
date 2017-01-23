@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -114,8 +114,9 @@ Foam::fileName Foam::boundaryDataSurfaceWriter::writeTemplate
 
     // Write field
     {
-        fileName valsFile(baseDir/timeName/fieldName);
-        OFstream os(valsFile);
+        fileName valsDir(baseDir/timeName);
+        mkDir(valsDir);
+        OFstream os(valsDir/fieldName);
         os  << values;
     }
 
