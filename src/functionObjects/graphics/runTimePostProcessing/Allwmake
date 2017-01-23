@@ -1,87 +1,8 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # Run from this directory
 
-# Source the wmake functions
-. $WM_PROJECT_DIR/wmake/scripts/wmakeFunctions
-
-# Ensure CMake gets the correct C/C++ compilers
-[ -n "$WM_CC" ]  && export CC="$WM_CC"
-[ -n "$WM_CXX" ] && export CXX="$WM_CXX"
-
-# -----------------------------------------------------------------------------
-
-#
-# Check sentinel file(s) to handle vtk/paraview version changes
-#
-versionOk()
-{
-    findObjectDir "$1"  # Where generated files are stored
-    local sentinel="$objectsDir/ThirdParty"
-
-    echo $sentinel
-
-    local prev
-    if read -r prev 2>/dev/null < $sentinel
-    then
-        case "$prev" in
-        ("ParaView_DIR=$ParaView_DIR" | "VTK_DIR=$VTK_DIR")
-            return 0
-            ;;
-        (*)
-            echo "ParaView_DIR or VTK_DIR changed between builds" 1>&2
-            return 1
-            ;;
-        esac
-    elif [ -f "$objectsDir/CMakeCache.txt" ]
-    then
-        echo "previous build was incomplete" 1>&2
-        return 1
-    else
-        return 0
-    fi
-}
-
-
-# CMake into objectsDir,
-# with an additional attempt if (possibly incorrect) CMakeCache.txt existed
-doCmake()
-{
-    local sourceDir="$1"
-    findObjectDir $sourceDir # Where are generated files stored?
-
-    # version changed
-    sentinel=$(versionOk $sourceDir) || rm -rf "$objectsDir" > /dev/null 2>&1
-
-    test -f "$objectsDir/CMakeCache.txt"
-    retry=$? # CMakeCache.txt exists, but sources may have moved
-
-    mkdir -p $objectsDir && \
-    (
-        cd $objectsDir || exit 1
-
-        cmake $sourceDir || {
-            if [ $retry -eq 0 ]
-            then
-                echo "Removing CMakeCache.txt and attempt again"
-                rm -f CMakeCache.txt
-                cmake $sourceDir
-            else
-                exit 1
-            fi
-        } && make && {
-            if [ -d "$VTK_DIR" ]
-            then
-                echo "VTK_DIR=$VTK_DIR"
-            elif [ -d "$ParaView_DIR" ]
-            then
-                echo "ParaView_DIR=$ParaView_DIR"
-            else
-                echo unknown
-            fi > $sentinel
-        }
-    )
-}
-
+# Source CMake functions
+. $WM_PROJECT_DIR/wmake/scripts/cmakeFunctions
 
 # -----------------------------------------------------------------------------
 
@@ -89,13 +10,22 @@ echo "======================================================================"
 echo "${PWD##*/} : $PWD"
 echo
 
-if [ -d "$VTK_DIR" -o -d "$ParaView_DIR" ]
+unset depend
+if [ -d "$VTK_DIR" ]
+then
+    depend="VTK_DIR=$VTK_DIR"
+elif [ -d "$ParaView_DIR" ]
+then
+    depend="ParaView_DIR=$ParaView_DIR"
+fi
+
+if [ -n "$depend" ]
 then
     if [ "$targetType" != objects ]
     then
         if type cmake > /dev/null 2>&1
         then
-            doCmake $PWD || {
+            cmakeVersioned "$depend" $PWD || {
                 echo
                 echo "    WARNING: incomplete build of VTK-based post-processing"
                 echo
