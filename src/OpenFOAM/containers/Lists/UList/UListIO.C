@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -165,7 +165,7 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& L)
             )
         );
         // Check list length
-        label s = elems.size();
+        const label s = elems.size();
 
         if (s != L.size())
         {
@@ -174,14 +174,14 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& L)
                 << " expected " << L.size()
                 << exit(FatalIOError);
         }
-        for (label i=0; i<s; i++)
+        for (label i=0; i<s; ++i)
         {
             L[i] = elems[i];
         }
     }
     else if (firstToken.isLabel())
     {
-        label s = firstToken.labelToken();
+        const label s = firstToken.labelToken();
 
         // Set list length to that read
         if (s != L.size())
@@ -203,7 +203,7 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& L)
             {
                 if (delimiter == token::BEGIN_LIST)
                 {
-                    for (label i=0; i<s; i++)
+                    for (label i=0; i<s; ++i)
                     {
                         is >> L[i];
 
@@ -226,7 +226,7 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& L)
                         "reading the single entry"
                     );
 
-                    for (label i=0; i<s; i++)
+                    for (label i=0; i<s; ++i)
                     {
                         L[i] = element;
                     }
@@ -281,7 +281,7 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& L)
         (
             typename SLList<T>::const_iterator iter = sll.begin();
             iter != sll.end();
-            ++iter
+            ++iter, ++i
         )
         {
             L[i] = iter();
