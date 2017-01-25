@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,12 +79,9 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
             {
                 bndFaces[nFaces++] = pp.start()+i;
                 const face& f = pp[i];
-                forAll(f, fp)
-                {
-                    const point& pt = pp.points()[f[fp]];
-                    overallBb.min() = min(overallBb.min(), pt);
-                    overallBb.max() = max(overallBb.max(), pt);
-                }
+
+                // Without reduction.
+                overallBb.add(pp.points(), f);
             }
         }
 

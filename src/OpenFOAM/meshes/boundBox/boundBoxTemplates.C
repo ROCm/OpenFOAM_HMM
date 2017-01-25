@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,6 @@ License
 #include "boundBox.H"
 #include "FixedList.H"
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<unsigned Size>
@@ -34,7 +33,7 @@ Foam::boundBox::boundBox
 (
     const UList<point>& points,
     const FixedList<label, Size>& indices,
-    const bool doReduce
+    bool doReduce
 )
 :
     min_(Zero),
@@ -45,24 +44,17 @@ Foam::boundBox::boundBox
     {
         if (doReduce && Pstream::parRun())
         {
-            // Use values that get overwritten by reduce minOp, maxOp below
-            min_ = point(VGREAT, VGREAT, VGREAT);
-            max_ = point(-VGREAT, -VGREAT, -VGREAT);
+            // Values that get overwritten by subsequent reduce operation
+            operator=(invertedBox);
         }
     }
     else
     {
-        min_ = points[indices[0]];
-        max_ = points[indices[0]];
-
-        for (unsigned i=1; i < Size; ++i)
-        {
-            min_ = ::Foam::min(min_, points[indices[i]]);
-            max_ = ::Foam::max(max_, points[indices[i]]);
-        }
+        operator=(invertedBox);
+        add(points, indices);
     }
 
-    // Reduce parallel information
+    // Parallel reduction
     if (doReduce)
     {
         reduce();
@@ -73,13 +65,45 @@ Foam::boundBox::boundBox
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<unsigned Size>
+void Foam::boundBox::add
+(
+    const FixedList<point, Size>& points
+)
+{
+    // a FixedList is never empty
+    for (unsigned i=0; i < Size; ++i)
+    {
+        add(points[i]);
+    }
+}
+
+
+template<unsigned Size>
+void Foam::boundBox::add
+(
+    const UList<point>& points,
+    const FixedList<label, Size>& indices
+)
+{
+    // points may be empty, but a FixedList is never empty
+    if (!points.empty())
+    {
+        for (unsigned i=0; i < Size; ++i)
+        {
+            add(points[indices[i]]);
+        }
+    }
+}
+
+
+template<unsigned Size>
 bool Foam::boundBox::contains
 (
     const UList<point>& points,
     const FixedList<label, Size>& indices
 ) const
 {
-    // a FixedList is never empty
+    // points may be empty, but a FixedList is never empty
     if (points.empty())
     {
         return false;
@@ -104,7 +128,7 @@ bool Foam::boundBox::containsAny
     const FixedList<label, Size>& indices
 ) const
 {
-    // a FixedList is never empty
+    // points may be empty, but a FixedList is never empty
     if (points.empty())
     {
         return false;

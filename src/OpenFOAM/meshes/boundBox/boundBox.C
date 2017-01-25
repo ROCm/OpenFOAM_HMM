@@ -49,33 +49,23 @@ const Foam::faceList Foam::boundBox::faces
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::boundBox::calculate(const UList<point>& points, const bool doReduce)
+void Foam::boundBox::calculate(const UList<point>& points, bool doReduce)
 {
     if (points.empty())
     {
-        min_ = Zero;
-        max_ = Zero;
-
         if (doReduce && Pstream::parRun())
         {
-            // Use values that get overwritten by reduce minOp, maxOp below
-            min_ = point(VGREAT, VGREAT, VGREAT);
-            max_ = point(-VGREAT, -VGREAT, -VGREAT);
+            // Values that get overwritten by subsequent reduce operation
+            operator=(invertedBox);
         }
     }
     else
     {
-        min_ = points[0];
-        max_ = points[0];
-
-        for (label i = 1; i < points.size(); i++)
-        {
-            min_ = ::Foam::min(min_, points[i]);
-            max_ = ::Foam::max(max_, points[i]);
-        }
+        operator=(invertedBox);
+        add(points);
     }
 
-    // Reduce parallel information
+    // Parallel reduction
     if (doReduce)
     {
         reduce();
@@ -85,7 +75,7 @@ void Foam::boundBox::calculate(const UList<point>& points, const bool doReduce)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::boundBox::boundBox(const UList<point>& points, const bool doReduce)
+Foam::boundBox::boundBox(const UList<point>& points, bool doReduce)
 :
     min_(Zero),
     max_(Zero)
@@ -94,13 +84,13 @@ Foam::boundBox::boundBox(const UList<point>& points, const bool doReduce)
 }
 
 
-Foam::boundBox::boundBox(const tmp<pointField>& points, const bool doReduce)
+Foam::boundBox::boundBox(const tmp<pointField>& tpoints, bool doReduce)
 :
     min_(Zero),
     max_(Zero)
 {
-    calculate(points(), doReduce);
-    points.clear();
+    calculate(tpoints(), doReduce);
+    tpoints.clear();
 }
 
 
@@ -108,7 +98,7 @@ Foam::boundBox::boundBox
 (
     const UList<point>& points,
     const labelUList& indices,
-    const bool doReduce
+    bool doReduce
 )
 :
     min_(Zero),
@@ -118,24 +108,17 @@ Foam::boundBox::boundBox
     {
         if (doReduce && Pstream::parRun())
         {
-            // Use values that get overwritten by reduce minOp, maxOp below
-            min_ = point(VGREAT, VGREAT, VGREAT);
-            max_ = point(-VGREAT, -VGREAT, -VGREAT);
+            // Values that get overwritten by subsequent reduce operation
+            operator=(invertedBox);
         }
     }
     else
     {
-        min_ = points[indices[0]];
-        max_ = points[indices[0]];
-
-        for (label i=1; i < indices.size(); ++i)
-        {
-            min_ = ::Foam::min(min_, points[indices[i]]);
-            max_ = ::Foam::max(max_, points[indices[i]]);
-        }
+        operator=(invertedBox);
+        add(points, indices);
     }
 
-    // Reduce parallel information
+    // Parallel reduction
     if (doReduce)
     {
         reduce();
@@ -147,8 +130,8 @@ Foam::boundBox::boundBox
 
 Foam::tmp<Foam::pointField> Foam::boundBox::points() const
 {
-    tmp<pointField> tPts = tmp<pointField>(new pointField(8));
-    pointField& pt = tPts.ref();
+    tmp<pointField> tpoints = tmp<pointField>(new pointField(8));
+    pointField& pt = tpoints.ref();
 
     pt[0] = min_;                                   // min-x, min-y, min-z
     pt[1] = point(max_.x(), min_.y(), min_.z());    // max-x, min-y, min-z
@@ -159,13 +142,13 @@ Foam::tmp<Foam::pointField> Foam::boundBox::points() const
     pt[6] = max_;                                   // max-x, max-y, max-z
     pt[7] = point(min_.x(), max_.y(), max_.z());    // min-x, max-y, max-z
 
-    return tPts;
+    return tpoints;
 }
 
 
 void Foam::boundBox::inflate(const scalar s)
 {
-    vector ext = vector::one*s*mag();
+    const vector ext = vector::one*s*mag();
 
     min_ -= ext;
     max_ += ext;
@@ -176,6 +159,15 @@ void Foam::boundBox::reduce()
 {
     Foam::reduce(min_, minOp<point>());
     Foam::reduce(max_, maxOp<point>());
+}
+
+
+bool Foam::boundBox::intersect(const boundBox& bb)
+{
+    min_ = ::Foam::max(min_, bb.min_);
+    max_ = ::Foam::min(max_, bb.max_);
+
+    return !empty();
 }
 
 

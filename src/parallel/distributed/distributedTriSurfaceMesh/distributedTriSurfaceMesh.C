@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -891,28 +891,19 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
 
     // Find bounding box for all triangles on new distribution.
 
-    // Initialise to inverted box (VGREAT, -VGREAT)
+    // Initialise to inverted box (GREAT, -GREAT)
     List<List<treeBoundBox>> bbs(Pstream::nProcs());
     forAll(bbs, procI)
     {
-        bbs[procI].setSize(1);
-        //bbs[procI][0] = boundBox::invertedBox;
-        bbs[procI][0].min() = point( VGREAT,  VGREAT,  VGREAT);
-        bbs[procI][0].max() = point(-VGREAT, -VGREAT, -VGREAT);
+        bbs[procI].setSize(1, treeBoundBox::invertedBox);
     }
 
     forAll(s, triI)
     {
-        point& bbMin = bbs[distribution[triI]][0].min();
-        point& bbMax = bbs[distribution[triI]][0].max();
-
         const triSurface::FaceType& f = s[triI];
-        forAll(f, fp)
-        {
-            const point& pt = s.points()[f[fp]];
-            bbMin = ::Foam::min(bbMin, pt);
-            bbMax = ::Foam::max(bbMax, pt);
-        }
+
+        treeBoundBox& bb = bbs[distribution[triI]][0];
+        bb.add(s.points(), f);
     }
 
     // Now combine for all processors and convert to correct format.
@@ -936,16 +927,13 @@ bool Foam::distributedTriSurfaceMesh::overlaps
     const point& p2
 )
 {
+    treeBoundBox triBb(p0);
+    triBb.add(p1);
+    triBb.add(p2);
+
     forAll(bbs, bbI)
     {
         const treeBoundBox& bb = bbs[bbI];
-
-        treeBoundBox triBb(p0, p0);
-        triBb.min() = min(triBb.min(), p1);
-        triBb.min() = min(triBb.min(), p2);
-
-        triBb.max() = max(triBb.max(), p1);
-        triBb.max() = max(triBb.max(), p2);
 
         // Exact test of triangle intersecting bb
 
@@ -2022,7 +2010,7 @@ Foam::triSurface Foam::distributedTriSurfaceMesh::overlappingSurface
     const scalar eps = 1.0e-4;
     forAll(bbs, i)
     {
-        const point mid = 0.5*(bbs[i].min() + bbs[i].max());
+        const point mid = bbs[i].midpoint();
         const vector halfSpan = (1.0+eps)*(bbs[i].max() - mid);
 
         bbsX[i].min() = mid - halfSpan;

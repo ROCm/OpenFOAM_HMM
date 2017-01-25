@@ -1106,7 +1106,7 @@ void Foam::triSurface::writeStats(Ostream& os) const
     PackedBoolList pointIsUsed(points().size());
 
     label nPoints = 0;
-    boundBox bb = boundBox::invertedBox;
+    boundBox bb(boundBox::invertedBox);
 
     forAll(*this, facei)
     {
@@ -1117,9 +1117,8 @@ void Foam::triSurface::writeStats(Ostream& os) const
             label pointi = f[fp];
             if (pointIsUsed.set(pointi, 1))
             {
-                bb.min() = ::Foam::min(bb.min(), points()[pointi]);
-                bb.max() = ::Foam::max(bb.max(), points()[pointi]);
-                nPoints++;
+                bb.add(points()[pointi]);
+                ++nPoints;
             }
         }
     }

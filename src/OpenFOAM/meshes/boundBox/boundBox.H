@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,21 +60,18 @@ class boundBox
 {
     // Private data
 
-        //- Minimum and maximum describing the bounding box
+        //- Minimum and maximum points describing the bounding box
         point min_, max_;
 
     // Private Member Functions
 
         //- Calculate the bounding box from the given points.
         //  Does parallel communication (doReduce = true)
-        void calculate(const UList<point>&, const bool doReduce = true);
+        void calculate(const UList<point>& points, bool doReduce = true);
 
 public:
 
     // Static data members
-
-        //- The great value used for greatBox and invertedBox
-        static const scalar great;
 
         //- A very large boundBox: min/max == -/+ VGREAT
         static const boundBox greatBox;
@@ -91,45 +88,51 @@ public:
         //- Construct null, setting points to zero
         inline boundBox();
 
+        //- Construct a bounding box containing a single initial point
+        explicit inline boundBox(const point& pt);
+
         //- Construct from components
         inline boundBox(const point& min, const point& max);
 
         //- Construct as the bounding box of the given points
         //  Does parallel communication (doReduce = true)
-        boundBox(const UList<point>&, const bool doReduce = true);
+        explicit boundBox(const UList<point>& points, bool doReduce = true);
 
         //- Construct as the bounding box of the given temporary pointField.
         //  Does parallel communication (doReduce = true)
-        boundBox(const tmp<pointField>&, const bool doReduce = true);
+        explicit boundBox(const tmp<pointField>& tpoints, bool doReduce = true);
 
-        //- Construct bounding box as subset of the pointField.
+        //- Construct bounding box as an indirect subset of the points.
         //  The indices could be from cell/face etc.
         //  Does parallel communication (doReduce = true)
         boundBox
         (
-            const UList<point>&,
+            const UList<point>& points,
             const labelUList& indices,
-            const bool doReduce = true
+            bool doReduce = true
         );
 
-        //- Construct bounding box as subset of the pointField.
+        //- Construct bounding box as an indirect subset of the points.
         //  The indices could be from edge/triFace etc.
         //  Does parallel communication (doReduce = true)
         template<unsigned Size>
         boundBox
         (
-            const UList<point>&,
+            const UList<point>& points,
             const FixedList<label, Size>& indices,
-            const bool doReduce = true
+            bool doReduce = true
         );
 
         //- Construct from Istream
-        inline boundBox(Istream&);
+        inline boundBox(Istream& is);
 
 
     // Member functions
 
         // Access
+
+            //- Bounding box is inverted, contains no points.
+            inline bool empty() const;
 
             //- Minimum describing the bounding box
             inline const point& min() const;
@@ -170,83 +173,130 @@ public:
 
         // Manipulate
 
+            //- Extend to include the second box.
+            inline void add(const boundBox& bb);
+
+            //- Extend to include the point.
+            inline void add(const point& pt);
+
+            //- Extend to include the points.
+            inline void add(const UList<point>& points);
+
+            //- Extend to include the points from the temporary point field.
+            inline void add(const tmp<pointField>& tpoints);
+
+            //- Extend to include the subset of the point field.
+            //  The indices could be from cell/face etc.
+            inline void add
+            (
+                const UList<point>& points,
+                const labelUList& indices
+            );
+
+            //- Extend to include the points.
+            template<unsigned Size>
+            void add(const FixedList<point, Size>& points);
+
+            //- Extend to include the subset of the point field.
+            //  The indices could be from edge/triFace etc.
+            template<unsigned Size>
+            void add
+            (
+                const UList<point>& points,
+                const FixedList<label, Size>& indices
+            );
+
             //- Inflate box by factor*mag(span) in all dimensions
             void inflate(const scalar s);
 
             //- Parallel reduction of min/max values
             void reduce();
 
+            //- Intersection (union) with the second box.
+            //  The return value is true if the intersection is non-empty.
+            bool intersect(const boundBox& bb);
+
 
         // Query
 
             //- Overlaps/touches boundingBox?
-            inline bool overlaps(const boundBox&) const;
+            inline bool overlaps(const boundBox& bb) const;
 
             //- Overlaps boundingSphere (centre + sqr(radius))?
-            inline bool overlaps(const point&, const scalar radiusSqr) const;
+            inline bool overlaps
+            (
+                const point& centre,
+                const scalar radiusSqr
+            ) const;
 
             //- Contains point? (inside or on edge)
-            inline bool contains(const point&) const;
+            inline bool contains(const point& pt) const;
 
             //- Fully contains other boundingBox?
-            inline bool contains(const boundBox&) const;
+            inline bool contains(const boundBox& bb) const;
 
             //- Contains point? (inside only)
-            inline bool containsInside(const point&) const;
+            inline bool containsInside(const point& pt) const;
 
             //- Contains all of the points? (inside or on edge)
-            bool contains(const UList<point>&) const;
+            bool contains(const UList<point>& points) const;
 
-            //- Contains all of the points? (inside or on edge)
+            //- Contains all of the subset of points? (inside or on edge)
             bool contains
             (
-                const UList<point>&,
+                const UList<point>& points,
                 const labelUList& indices
             ) const;
 
-            //- Contains all of the points? (inside or on edge)
+            //- Contains all of the subset of points? (inside or on edge)
             template<unsigned Size>
             bool contains
             (
-                const UList<point>&,
+                const UList<point>& points,
                 const FixedList<label, Size>& indices
             ) const;
 
 
             //- Contains any of the points? (inside or on edge)
-            bool containsAny(const UList<point>&) const;
+            bool containsAny(const UList<point>& points) const;
 
-            //- Contains any of the points? (inside or on edge)
+            //- Contains any of the subset of points? (inside or on edge)
             bool containsAny
             (
-                const UList<point>&,
+                const UList<point>& points,
                 const labelUList& indices
             ) const;
 
-            //- Contains any of the points? (inside or on edge)
+            //- Contains any of the subset of points? (inside or on edge)
             template<unsigned Size>
             bool containsAny
             (
-                const UList<point>&,
+                const UList<point>& points,
                 const FixedList<label, Size>& indices
             ) const;
 
             //- Return the nearest point on the boundBox to the supplied point.
             //  If point is inside the boundBox then the point is returned
             //  unchanged.
-            point nearest(const point&) const;
+            point nearest(const point& pt) const;
+
+
+    // Member Operators
+
+        //- Extend box to include the second box, as per the add() method.
+        inline void operator+=(const boundBox& bb);
 
 
     // Friend Operators
 
-        inline friend bool operator==(const boundBox&, const boundBox&);
-        inline friend bool operator!=(const boundBox&, const boundBox&);
+        inline friend bool operator==(const boundBox& a, const boundBox& b);
+        inline friend bool operator!=(const boundBox& a, const boundBox& b);
 
 
     // IOstream operator
 
-        friend Istream& operator>>(Istream&, boundBox&);
-        friend Ostream& operator<<(Ostream&, const boundBox&);
+        friend Istream& operator>>(Istream& is, boundBox& bb);
+        friend Ostream& operator<<(Ostream& os, const boundBox& bb);
 };
 
 

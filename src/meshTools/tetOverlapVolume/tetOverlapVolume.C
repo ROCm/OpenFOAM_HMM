@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,13 +55,9 @@ Foam::treeBoundBox Foam::tetOverlapVolume::pyrBb
     const point& fc
 )
 {
-    treeBoundBox bb(fc, fc);
-    forAll(f, fp)
-    {
-        const point& pt = points[f[fp]];
-        bb.min() = min(bb.min(), pt);
-        bb.max() = max(bb.max(), pt);
-    }
+    treeBoundBox bb(fc);
+    bb.add(points, f);
+
     return bb;
 }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "boundBox.H"
-#include "pointField.H"
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -33,6 +32,13 @@ inline Foam::boundBox::boundBox()
 :
     min_(Zero),
     max_(Zero)
+{}
+
+
+inline Foam::boundBox::boundBox(const point& pt)
+:
+    min_(pt),
+    max_(pt)
 {}
 
 
@@ -50,6 +56,12 @@ inline Foam::boundBox::boundBox(Istream& is)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline bool Foam::boundBox::empty() const
+{
+    return (min_ > max_);
+}
+
 
 inline const Foam::point& Foam::boundBox::min() const
 {
@@ -117,6 +129,52 @@ inline Foam::scalar Foam::boundBox::avgDim() const
 }
 
 
+inline void Foam::boundBox::add(const boundBox& bb)
+{
+    min_ = ::Foam::min(min_, bb.min_);
+    max_ = ::Foam::max(max_, bb.max_);
+}
+
+
+inline void Foam::boundBox::add(const point& pt)
+{
+    min_ = ::Foam::min(min_, pt);
+    max_ = ::Foam::max(max_, pt);
+}
+
+
+inline void Foam::boundBox::add(const UList<point>& points)
+{
+    forAll(points, i)
+    {
+        add(points[i]);
+    }
+}
+
+
+inline void Foam::boundBox::add(const tmp<pointField>& tpoints)
+{
+    add(tpoints());
+    tpoints.clear();
+}
+
+
+inline void Foam::boundBox::add
+(
+    const UList<point>& points,
+    const labelUList& indices
+)
+{
+    if (!points.empty())
+    {
+        forAll(indices, i)
+        {
+            add(points[indices[i]]);
+        }
+    }
+}
+
+
 inline bool Foam::boundBox::overlaps(const boundBox& bb) const
 {
     return
@@ -138,7 +196,7 @@ inline bool Foam::boundBox::overlaps
     // Find nearest point on bb.
     scalar distSqr = 0;
 
-    for (direction dir = 0; dir < vector::nComponents; dir++)
+    for (direction dir = 0; dir < vector::nComponents; ++dir)
     {
         scalar d0 = min_[dir] - centre[dir];
         scalar d1 = max_[dir] - centre[dir];
@@ -178,7 +236,6 @@ inline bool Foam::boundBox::contains(const point& pt) const
 }
 
 
-// this.bb fully contains bb
 inline bool Foam::boundBox::contains(const boundBox& bb) const
 {
     return contains(bb.min()) && contains(bb.max());
@@ -193,6 +250,14 @@ inline bool Foam::boundBox::containsInside(const point& pt) const
      && pt.y() > min_.y() && pt.y() < max_.y()
      && pt.z() > min_.z() && pt.z() < max_.z()
     );
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline void Foam::boundBox::operator+=(const boundBox& bb)
+{
+    add(bb);
 }
 
 
