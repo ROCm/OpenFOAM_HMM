@@ -464,10 +464,6 @@ void Foam::triSurface::write
     {
         writeTRI(sort, OFstream(name)());
     }
-    else if (ext == "dx")
-    {
-        writeDX(sort, OFstream(name)());
-    }
     else if (ext == "ac")
     {
         writeAC(OFstream(name)());
@@ -483,7 +479,7 @@ void Foam::triSurface::write
             << " for file " << name
             << ". Supported extensions are '.ftr', '.stl', '.stlb', "
             << "'.gts', '.obj', '.vtk'"
-            << ", '.off', '.dx', '.smesh', '.ac' and '.tri'"
+            << ", '.off', '.smesh', '.ac' and '.tri'"
             << exit(FatalError);
     }
 }

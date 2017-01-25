@@ -178,11 +178,6 @@ class triSurface
         //- Write to Ostream in AC3D format. Always sorted by patch.
         void writeAC(Ostream&) const;
 
-        //- For DX writing.
-        void writeDX(const bool, Ostream&) const;
-        void writeDXGeometry(const bool, Ostream&) const;
-        void writeDXTrailer(Ostream&) const;
-
 
     // Static private functions
 
