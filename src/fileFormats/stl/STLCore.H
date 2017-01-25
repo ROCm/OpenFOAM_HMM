@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,7 +61,7 @@ public:
         {
             ASCII,  //!< ASCII
             BINARY, //!< BINARY
-            DETECT  //!< Detect based on (input) content or (output) extension
+            UNKNOWN //!< Detect based on (input) content or (output) extension
         };
 
 

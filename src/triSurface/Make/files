@@ -5,8 +5,6 @@ triSurface/stitchTriangles.C
 interfaces = triSurface/interfaces
 $(interfaces)/STL/writeSTL.C
 $(interfaces)/STL/readSTL.C
-$(interfaces)/STL/readSTLASCII.L
-$(interfaces)/STL/readSTLBINARY.C
 $(interfaces)/GTS/writeGTS.C
 $(interfaces)/GTS/readGTS.C
 $(interfaces)/OBJ/readOBJ.C

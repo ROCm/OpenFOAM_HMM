@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::fileFormats::STLReader
 
 Description
-    Internal class used by the STLsurfaceFormat
+    Internal class used by the STLsurfaceFormat and triSurface.
 
 SourceFiles
     STLReader.C
@@ -72,17 +72,20 @@ class STLReader
         //- The solid count, in the order of their first appearance
         List<label> sizes_;
 
+        //- The STL format used
+        STLFormat format_;
+
 
     // Private Member Functions
 
         //- Read ASCII
-        bool readASCII(const fileName&);
+        bool readASCII(const fileName& filename);
 
         //- Read BINARY
-        bool readBINARY(const fileName&);
+        bool readBINARY(const fileName& filename);
 
         //- Read ASCII or BINARY
-        bool readFile(const fileName&, const STLFormat&);
+        bool readFile(const fileName& filename, const STLFormat& format);
 
 
         //- Disallow default bitwise copy construct
@@ -96,12 +99,13 @@ public:
 
     // Constructors
 
-        //- Read from file, filling in the information
-        STLReader(const fileName&);
+        //- Read from file, filling in the information.
+        //  Auto-detect ASCII/BINARY format.
+        STLReader(const fileName& filename);
 
         //- Read from file, filling in the information.
-        //  Manually selected choice of ascii/binary/detect.
-        STLReader(const fileName&, const STLFormat&);
+        //  Manually selected choice of ASCII/BINARY/UNKNOWN(detect) formats.
+        STLReader(const fileName& filename, const STLFormat& format);
 
 
     //- Destructor
@@ -110,44 +114,43 @@ public:
 
     // Member Functions
 
-        //- File read was already sorted
-        bool sorted() const
+        //- Flush all values
+        void clear();
+
+        //- File read was already sorted?
+        inline bool sorted() const
         {
             return sorted_;
         }
 
-        //- Flush all values
-        void clear()
-        {
-            sorted_ = true;
-            points_.clear();
-            zoneIds_.clear();
-            names_.clear();
-            sizes_.clear();
-        }
-
         //- Return full access to the points
-        pointField& points()
+        inline pointField& points()
         {
             return points_;
         }
 
         //- Return full access to the zoneIds
-        List<label>& zoneIds()
+        inline List<label>& zoneIds()
         {
             return zoneIds_;
         }
 
         //- The list of solid names in the order of their first appearance
-        List<word>& names()
+        inline List<word>& names()
         {
             return names_;
         }
 
         //- The list of solid sizes in the order of their first appearance
-        List<label>& sizes()
+        inline List<label>& sizes()
         {
             return sizes_;
+        }
+
+        //- The STL format used (ASCII or BINARY)
+        inline enum STLFormat stlFormat() const
+        {
+            return format_;
         }
 };
 

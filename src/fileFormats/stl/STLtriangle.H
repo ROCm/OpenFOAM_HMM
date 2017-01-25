@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +46,7 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 class STLtriangle;
-Ostream& operator<<(Ostream&, const STLtriangle&);
+Ostream& operator<<(Ostream& os, const STLtriangle& tri);
 
 /*---------------------------------------------------------------------------*\
                          Class STLtriangle Declaration
@@ -54,18 +54,20 @@ Ostream& operator<<(Ostream&, const STLtriangle&);
 
 class STLtriangle
 {
+    // Typedefs
+
+    //- Attribute is 16-bit
+    typedef unsigned short STLattrib;
+
     // Private data
+    // NB: The order of the members (1 normal, 3 points, 1 attribute) is
+    // essential when reading/writing binary content.
 
-        //- Attribute is 16-bit
-        typedef unsigned short STLattrib;
+        //- The face normal and the three points defining the triangle.
+        //  Some programs may write zero or other junk for the normal.
+        STLpoint normal_, a_, b_, c_;
 
-        //- The face normal, many programs write zero or other junk
-        STLpoint normal_;
-
-        //- The three points defining the triangle
-        STLpoint a_, b_, c_;
-
-        //- The attribute information could for colour or solid id, etc
+        //- The attribute information could be for 'color' or solid id, etc
         STLattrib attrib_;
 
 
@@ -87,7 +89,7 @@ public:
         );
 
         //- Construct from istream (read binary)
-        inline STLtriangle(istream&);
+        inline STLtriangle(std::istream& is);
 
 
     // Member Functions
@@ -104,13 +106,13 @@ public:
         // Read
 
             //- Read from istream (binary)
-            inline void read(istream&);
+            inline void read(std::istream& is);
 
 
         // Write
 
             //- Write to ostream (binary)
-            inline void write(ostream&) const;
+            inline void write(std::ostream& os) const;
 
             //- Write to Ostream (ASCII)
             inline Ostream& print(Ostream& os) const;
@@ -138,7 +140,8 @@ public:
 
     // Ostream operator
 
-        inline friend Ostream& operator<<(Ostream&, const STLtriangle&);
+        //- Print triangle contents
+        inline friend Ostream& operator<<(Ostream& os, const STLtriangle& tri);
 };
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,13 +97,13 @@ public:
 
     // Access
 
-        //- Do all the solid groups appear in order
+        //- Do all the solid groups appear in order?
         inline bool sorted() const
         {
             return sorted_;
         }
 
-        //- A list of points corresponding to a pointField
+        //- A list of unstitched triangle points
         inline DynamicList<point>& points()
         {
             return points_;
@@ -116,13 +116,13 @@ public:
             return facets_;
         }
 
-        //- Names
+        //- Solid names in the order of their appearance.
         inline DynamicList<word>& names()
         {
             return names_;
         }
 
-        //- Sizes
+        //- Solid sizes in the order of their appearance.
         inline DynamicList<label>& sizes()
         {
             return sizes_;
@@ -396,6 +396,8 @@ bool Foam::fileFormats::STLReader::readASCII
     const fileName& filename
 )
 {
+    format_ = UNKNOWN;
+
     IFstream is(filename);
     if (!is)
     {
@@ -417,6 +419,7 @@ bool Foam::fileFormats::STLReader::readASCII
     names_.transfer(lexer.names());
     sizes_.transfer(lexer.sizes());
 
+    format_ = ASCII;
     return true;
 }
 

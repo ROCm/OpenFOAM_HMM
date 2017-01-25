@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,50 +23,68 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "STLReader.H"
+#include "mergePoints.H"
 #include "triSurface.H"
-#include "IFstream.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool triSurface::readSTL(const fileName& STLfileName)
+bool Foam::triSurface::readSTL(const fileName& STLfileName, bool forceBinary)
 {
-    token firstToken;
-    {
-        IFstream str(STLfileName);
+    // Read in the values
+    fileFormats::STLReader reader
+    (
+        STLfileName,
+        (
+            forceBinary
+          ? fileFormats::STLCore::BINARY
+          : fileFormats::STLCore::UNKNOWN
+        )
+    );
 
-        if (!str.good())
-        {
-            return false;
-        }
-        firstToken = token(str);
+    // Stitch points
+    labelList pointMap;
+    label nUniquePoints = mergePoints
+    (
+        reader.points(),
+        (
+            // With the merge distance depending on the input format
+            (reader.stlFormat() == fileFormats::STLCore::BINARY ? 10 : 100)
+          * SMALL
+        ),
+        false,                  // verbose
+        pointMap                // old to new point map
+    );
+
+    const pointField& readpts = reader.points();
+    const labelList&  zoneIds = reader.zoneIds();
+
+    pointField& pointLst = storedPoints();
+    List<Face>& faceLst  = storedFaces();
+
+    // Sizing
+    pointLst.setSize(nUniquePoints);
+    faceLst.setSize(zoneIds.size());
+
+    // Assign points
+    forAll(readpts, pointi)
+    {
+        pointLst[pointMap[pointi]] = readpts[pointi];
     }
 
-    if (firstToken.isWord())
+    // Assign triangles
+    label pointi = 0;
+    forAll(faceLst, i)
     {
-        word firstWord(firstToken.wordToken());
+        Face& f = faceLst[i];
 
-        for (size_t i = 0; i < firstWord.size(); i++)
-        {
-            firstWord[i] = std::toupper(firstWord[i]);
-        }
-
-        if (firstWord == "SOLID" || firstWord(5) == "SOLID")
-        {
-            return readSTLASCII(STLfileName);
-        }
+        f[0] = pointMap[pointi++];
+        f[1] = pointMap[pointi++];
+        f[2] = pointMap[pointi++];
+        f.region() = zoneIds[i];
     }
 
-    return readSTLBINARY(STLfileName);
+    return true;
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
