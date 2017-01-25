@@ -909,11 +909,10 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
     // Now combine for all processors and convert to correct format.
     forAll(bbs, procI)
     {
-        forAll(bbs[procI], i)
-        {
-            bbs[procI][i].reduce();
-        }
+        Pstream::listCombineGather(bbs[procI], plusEqOp<boundBox>());
+        Pstream::listCombineScatter(bbs[procI]);
     }
+
     return bbs;
 }
 
