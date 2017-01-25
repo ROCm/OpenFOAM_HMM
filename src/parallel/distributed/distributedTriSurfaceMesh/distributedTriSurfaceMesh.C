@@ -920,8 +920,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
     {
         forAll(bbs[procI], i)
         {
-            reduce(bbs[procI][i].min(), minOp<point>());
-            reduce(bbs[procI][i].max(), maxOp<point>());
+            bbs[procI][i].reduce();
         }
     }
     return bbs;
@@ -1334,8 +1333,7 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
 {
     read();
 
-    reduce(bounds().min(), minOp<point>());
-    reduce(bounds().max(), maxOp<point>());
+    bounds().reduce();
 
     if (debug)
     {
@@ -1390,8 +1388,7 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
 {
     read();
 
-    reduce(bounds().min(), minOp<point>());
-    reduce(bounds().max(), maxOp<point>());
+    bounds().reduce();
 
     if (debug)
     {
@@ -1452,8 +1449,7 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
 {
     read();
 
-    reduce(bounds().min(), minOp<point>());
-    reduce(bounds().max(), maxOp<point>());
+    bounds().reduce();
 
     if (debug)
     {
@@ -2434,8 +2430,7 @@ void Foam::distributedTriSurfaceMesh::writeStats(Ostream& os) const
     boundBox bb;
     label nPoints;
     PatchTools::calcBounds(static_cast<const triSurface&>(*this), bb, nPoints);
-    reduce(bb.min(), minOp<point>());
-    reduce(bb.max(), maxOp<point>());
+    bb.reduce();
 
     os  << "Triangles    : " << returnReduce(triSurface::size(), sumOp<label>())
         << endl

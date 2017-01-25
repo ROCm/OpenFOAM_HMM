@@ -60,6 +60,18 @@ int main(int argc, char *argv[])
     Info<<"boundBox faces: " << boundBox::faces << endl;
     Info<<"hex faces: " << hex.modelFaces() << endl;
 
+    boundBox bb = boundBox::greatBox;
+    Info<<"great box: " << bb << endl;
+
+    if (Pstream::parRun())
+    {
+        bb = cube(Pstream::myProcNo(), 1.1);
+        Pout<<"box: " << bb << endl;
+
+        bb.reduce();
+        Pout<<"reduced: " << bb << endl;
+    }
+
     return 0;
 }
 

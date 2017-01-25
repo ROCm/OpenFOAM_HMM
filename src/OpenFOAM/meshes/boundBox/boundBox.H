@@ -173,6 +173,9 @@ public:
             //- Inflate box by factor*mag(span) in all dimensions
             void inflate(const scalar s);
 
+            //- Parallel reduction of min/max values
+            void reduce();
+
 
         // Query
 

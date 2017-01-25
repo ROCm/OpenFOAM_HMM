@@ -569,8 +569,7 @@ Foam::label Foam::checkTopology
                             bb.min() = min(bb.min(), pts[mp[i]]);
                             bb.max() = max(bb.max(), pts[mp[i]]);
                         }
-                        reduce(bb.min(), minOp<vector>());
-                        reduce(bb.max(), maxOp<vector>());
+                        bb.reduce();
                         Info<< ' ' << bb;
                     }
                 }
