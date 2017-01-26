@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +61,7 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
 
             if (delimiter == token::BEGIN_LIST)
             {
-                for (label i=0; i<s; i++)
+                for (label i=0; i<s; ++i)
                 {
                     Key key;
                     is >> key;
@@ -166,8 +166,11 @@ void Foam::HashPtrTable<T, Key, Hash>::write(Ostream& os) const
         ++iter
     )
     {
-        const T* ptr = iter();
-        ptr->write(os);
+        const T* ptr = *iter;
+        if (ptr)
+        {
+            ptr->write(os);
+        }
     }
 }
 
@@ -226,7 +229,14 @@ Foam::Ostream& Foam::operator<<
         ++iter
     )
     {
-        os << iter.key() << token::SPACE << *iter() << nl;
+        const T* ptr = *iter;
+
+        os << iter.key();
+        if (ptr)
+        {
+            os << token::SPACE << *ptr;
+        }
+        os << nl;
     }
 
     // Write end delimiter
