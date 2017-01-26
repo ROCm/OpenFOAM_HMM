@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -144,10 +144,10 @@ class HashTable
 
         private:
             //- Disallow default bitwise copy construct
-            hashedEntry(const hashedEntry&);
+            hashedEntry(const hashedEntry&) = delete;
 
             //- Disallow default bitwise assignment
-            void operator=(const hashedEntry&);
+            void operator=(const hashedEntry&) = delete;
         };
 
 
@@ -400,10 +400,6 @@ public:
                 //- Return non-const access to referenced object
                 inline T& object();
 
-                //- Return const access to referenced object
-                inline const T& cobject() const;
-
-
         public:
 
             // Member operators
@@ -412,6 +408,9 @@ public:
 
                 //- Return the Key corresponding to the iterator
                 inline const Key& key() const;
+
+                //- Return const access to referenced object
+                inline const T& cobject() const;
 
                 //- Compare hashedEntry element pointers
                 inline bool operator==(const iteratorBase&) const;
@@ -460,11 +459,14 @@ public:
 
             // Member operators
 
-                //- Return referenced hash value
+                //- Return non-const access to referenced object
+                using iteratorBase::object;
+
+                //- Return non-const access to referenced object
                 inline T& operator*();
                 inline T& operator()();
 
-                //- Return referenced hash value
+                //- Return const access to referenced object
                 inline const T& operator*() const;
                 inline const T& operator()() const;
 
@@ -518,13 +520,12 @@ public:
 
             // Member operators
 
-                //- Return referenced hash value
+                //- Return const access to referenced object
                 inline const T& operator*() const;
                 inline const T& operator()() const;
 
                 inline const_iterator& operator++();
                 inline const_iterator operator++(int);
-
         };
 
 
