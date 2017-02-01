@@ -74,7 +74,7 @@ void Foam::patchCloudSet::calcSamples
 
     labelList patchFaces(sz);
     sz = 0;
-    treeBoundBox bb(treeBoundBox::invertedBox);
+    treeBoundBox bb(boundBox::invertedBox);
     forAllConstIter(labelHashSet, patchSet_, iter)
     {
         const polyPatch& pp = mesh().boundaryMesh()[iter.key()];

@@ -46,6 +46,11 @@ Description
 
     For the front plane add 4 to the point labels.
 
+Note
+    When a bounding box is created without any points, it creates an inverted
+    bounding box. Points can be added later and the bounding box will grow to
+    include them.
+
 SourceFiles
     treeBoundBoxI.H
     treeBoundBox.C
@@ -92,12 +97,6 @@ class treeBoundBox
 public:
 
     // Static data members
-
-        //- As per boundBox::greatBox, but with GREAT instead of VGREAT
-        static const treeBoundBox greatBox;
-
-        //- As per boundBox::invertedBox, but with GREAT instead of VGREAT
-        static const treeBoundBox invertedBox;
 
         //- Bits used for octant/point coding.
         //  Every octant/corner point is the combination of three faces.

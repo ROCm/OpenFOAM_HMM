@@ -27,18 +27,6 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::treeBoundBox Foam::treeBoundBox::greatBox
-(
-    point::uniform(-GREAT),
-    point::uniform(GREAT)
-);
-
-const Foam::treeBoundBox Foam::treeBoundBox::invertedBox
-(
-    point::uniform(GREAT),
-    point::uniform(-GREAT)
-);
-
 const Foam::faceList Foam::treeBoundBox::faces
 ({
     face{0, 4, 6, 2}, // left

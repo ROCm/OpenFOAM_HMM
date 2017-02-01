@@ -36,25 +36,11 @@ Foam::boundBox::boundBox
     bool doReduce
 )
 :
-    min_(Zero),
-    max_(Zero)
+    min_(invertedBox.min()),
+    max_(invertedBox.max())
 {
-    // a FixedList is never empty
-    if (points.empty())
-    {
-        if (doReduce && Pstream::parRun())
-        {
-            // Values that get overwritten by subsequent reduce operation
-            operator=(invertedBox);
-        }
-    }
-    else
-    {
-        operator=(invertedBox);
-        add(points, indices);
-    }
+    add(points, indices);
 
-    // Parallel reduction
     if (doReduce)
     {
         reduce();

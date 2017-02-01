@@ -720,7 +720,7 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
     Pstream::scatterList(allBackgroundMeshBounds_);
 
     // find global bounding box
-    globalBackgroundBounds_ = treeBoundBox::invertedBox;
+    globalBackgroundBounds_ = treeBoundBox(boundBox::invertedBox);
     forAll(allBackgroundMeshBounds_, proci)
     {
         globalBackgroundBounds_.add(allBackgroundMeshBounds_[proci]);

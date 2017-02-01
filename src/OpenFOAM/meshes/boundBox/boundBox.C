@@ -29,11 +29,17 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// (min,max) = (-VGREAT,+VGREAT)
-const Foam::boundBox Foam::boundBox::greatBox(point::min, point::max);
+const Foam::boundBox Foam::boundBox::greatBox
+(
+    point::uniform(-ROOTVGREAT),
+    point::uniform(ROOTVGREAT)
+);
 
-// (min,max) = (+VGREAT,-VGREAT)
-const Foam::boundBox Foam::boundBox::invertedBox(point::max, point::min);
+const Foam::boundBox Foam::boundBox::invertedBox
+(
+    point::uniform(ROOTVGREAT),
+    point::uniform(-ROOTVGREAT)
+);
 
 const Foam::faceList Foam::boundBox::faces
 ({
@@ -47,25 +53,15 @@ const Foam::faceList Foam::boundBox::faces
 });
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-void Foam::boundBox::calculate(const UList<point>& points, bool doReduce)
+Foam::boundBox::boundBox(const UList<point>& points, bool doReduce)
+:
+    min_(invertedBox.min()),
+    max_(invertedBox.max())
 {
-    if (points.empty())
-    {
-        if (doReduce && Pstream::parRun())
-        {
-            // Values that get overwritten by subsequent reduce operation
-            operator=(invertedBox);
-        }
-    }
-    else
-    {
-        operator=(invertedBox);
-        add(points);
-    }
+    add(points);
 
-    // Parallel reduction
     if (doReduce)
     {
         reduce();
@@ -73,24 +69,17 @@ void Foam::boundBox::calculate(const UList<point>& points, bool doReduce)
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::boundBox::boundBox(const UList<point>& points, bool doReduce)
-:
-    min_(Zero),
-    max_(Zero)
-{
-    calculate(points, doReduce);
-}
-
-
 Foam::boundBox::boundBox(const tmp<pointField>& tpoints, bool doReduce)
 :
-    min_(Zero),
-    max_(Zero)
+    min_(invertedBox.min()),
+    max_(invertedBox.max())
 {
-    calculate(tpoints(), doReduce);
-    tpoints.clear();
+    add(tpoints);
+
+    if (doReduce)
+    {
+        reduce();
+    }
 }
 
 
@@ -101,24 +90,11 @@ Foam::boundBox::boundBox
     bool doReduce
 )
 :
-    min_(Zero),
-    max_(Zero)
+    min_(invertedBox.min()),
+    max_(invertedBox.max())
 {
-    if (points.empty() || indices.empty())
-    {
-        if (doReduce && Pstream::parRun())
-        {
-            // Values that get overwritten by subsequent reduce operation
-            operator=(invertedBox);
-        }
-    }
-    else
-    {
-        operator=(invertedBox);
-        add(points, indices);
-    }
+    add(points, indices);
 
-    // Parallel reduction
     if (doReduce)
     {
         reduce();

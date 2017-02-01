@@ -69,7 +69,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
     {
         // Collect mesh faces and bounding box
         labelList bndFaces(nFaces);
-        treeBoundBox overallBb(treeBoundBox::invertedBox);
+        treeBoundBox overallBb(boundBox::invertedBox);
 
         nFaces = 0;
         forAll(patchIDs, i)

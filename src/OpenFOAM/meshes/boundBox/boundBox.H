@@ -27,6 +27,11 @@ Class
 Description
     A bounding box defined in terms of the points at its extremities.
 
+Note
+    When a bounding box is created without any points, it creates an inverted
+    bounding box. Points can be added later and the bounding box will grow to
+    include them.
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef boundBox_H
@@ -63,20 +68,14 @@ class boundBox
         //- Minimum and maximum points describing the bounding box
         point min_, max_;
 
-    // Private Member Functions
-
-        //- Calculate the bounding box from the given points.
-        //  Does parallel communication (doReduce = true)
-        void calculate(const UList<point>& points, bool doReduce = true);
-
 public:
 
     // Static data members
 
-        //- A very large boundBox: min/max == -/+ VGREAT
+        //- A large boundBox: min/max == -/+ ROOTVGREAT
         static const boundBox greatBox;
 
-        //- A very large inverted boundBox: min/max == +/- VGREAT
+        //- A large inverted boundBox: min/max == +/- ROOTVGREAT
         static const boundBox invertedBox;
 
         //- Faces to point addressing, as per a 'hex' cell
@@ -85,7 +84,7 @@ public:
 
     // Constructors
 
-        //- Construct null, setting points to zero
+        //- Construct without any points - an inverted bounding box
         inline boundBox();
 
         //- Construct a bounding box containing a single initial point
@@ -133,6 +132,9 @@ public:
 
             //- Bounding box is inverted, contains no points.
             inline bool empty() const;
+
+            //- Clear bounding box of all points - make it an inverted box
+            inline void clear();
 
             //- Minimum describing the bounding box
             inline const point& min() const;

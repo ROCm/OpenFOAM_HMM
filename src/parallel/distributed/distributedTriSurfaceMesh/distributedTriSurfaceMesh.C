@@ -891,11 +891,11 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
 
     // Find bounding box for all triangles on new distribution.
 
-    // Initialise to inverted box (GREAT, -GREAT)
+    // Initialise to inverted box
     List<List<treeBoundBox>> bbs(Pstream::nProcs());
     forAll(bbs, procI)
     {
-        bbs[procI].setSize(1, treeBoundBox::invertedBox);
+        bbs[procI].setSize(1, treeBoundBox(boundBox::invertedBox));
     }
 
     forAll(s, triI)

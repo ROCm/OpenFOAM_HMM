@@ -30,8 +30,8 @@ License
 
 inline Foam::boundBox::boundBox()
 :
-    min_(Zero),
-    max_(Zero)
+    min_(invertedBox.min()),
+    max_(invertedBox.max())
 {}
 
 
@@ -60,6 +60,13 @@ inline Foam::boundBox::boundBox(Istream& is)
 inline bool Foam::boundBox::empty() const
 {
     return (min_ > max_);
+}
+
+
+inline void Foam::boundBox::clear()
+{
+    min_ = invertedBox.min();
+    max_ = invertedBox.max();
 }
 
 
