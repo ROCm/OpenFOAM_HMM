@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -545,8 +545,8 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
     }
 
 
-    bounds_ = boundBox::greatBox;
-    if (dict.readIfPresent("bounds", bounds_))
+    bounds_ = boundBox::invertedBox;
+    if (dict.readIfPresent("bounds", bounds_) && !bounds_.empty())
     {
         Info<< "    clipping all segments to " << bounds_ << nl << endl;
     }
@@ -701,7 +701,7 @@ bool Foam::functionObjects::streamLineBase::write()
 
     if (Pstream::master())
     {
-        if (bounds_ != boundBox::greatBox)
+        if (!bounds_.empty())
         {
             // Clip to bounding box
             trimToBox(treeBoundBox(bounds_));

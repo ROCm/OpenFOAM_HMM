@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,7 +76,7 @@ Usage
         trackLength  | Tracking segment length | no          |
         nSubCycle    | Number of tracking steps per cell | no|
         cloudName    | Cloud name to use       | yes         |
-        bounds       | Bounding box to trim tracks | no | greatBox
+        bounds       | Bounding box to trim tracks | no | invertedBox
         seedSampleSet| Seeding method (see below)| yes       |
     \endtable
 
@@ -136,10 +136,10 @@ class streamLine
    // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        streamLine(const streamLine&);
+        streamLine(const streamLine&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const streamLine&);
+        void operator=(const streamLine&) = delete;
 
 
 public:

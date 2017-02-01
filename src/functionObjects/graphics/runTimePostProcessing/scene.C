@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -179,7 +179,7 @@ void Foam::functionObjects::runTimePostPro::scene::initialise
     vtkSmartPointer<vtkLightKit> lightKit = vtkSmartPointer<vtkLightKit>::New();
     lightKit->AddLightsToRenderer(renderer);
 
-    if (clipBox_ != boundBox::greatBox)
+    if (!clipBox_.empty())
     {
         const point& min = clipBox_.min();
         const point& max = clipBox_.max();
@@ -237,7 +237,7 @@ void Foam::functionObjects::runTimePostPro::scene::setCamera
     // Apply clipping if required
     // Note: possible optimisation - if the camera is static, this only needs
     //       to be done once on initialisation
-    if (clipBox_ != boundBox::greatBox)
+    if (!clipBox_.empty())
     {
         // Call ResetCamera() to fit clip box in view
         clipBoxActor_->VisibilityOn();
@@ -278,7 +278,7 @@ Foam::functionObjects::runTimePostPro::scene::scene
     cameraUp_(nullptr),
     cameraViewAngle_(nullptr),
     cameraZoom_(nullptr),
-    clipBox_(boundBox::greatBox),
+    clipBox_(boundBox::invertedBox),
     clipBoxActor_(),
     parallelProjection_(true),
     nFrameTotal_(1),
