@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  | Copyright (C) 2015 IH-Cantabria
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,7 @@ Foam::waveModels::waveGenerationModel::waveGenerationModel
 {
     if (readFields)
     {
-        read(dict);
+        readDict(dict);
     }
 }
 
@@ -68,9 +68,12 @@ Foam::waveModels::waveGenerationModel::~waveGenerationModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModels::waveGenerationModel::read(const dictionary& overrideDict)
+bool Foam::waveModels::waveGenerationModel::readDict
+(
+    const dictionary& overrideDict
+)
 {
-    if (waveModel::read(overrideDict))
+    if (waveModel::readDict(overrideDict))
     {
         lookup("activeAbsorption") >> activeAbsorption_;
 
