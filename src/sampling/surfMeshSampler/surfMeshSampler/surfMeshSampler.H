@@ -52,7 +52,6 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "polyMesh.H"
-#include "coordinateSystems.H"
 #include "interpolation.H"
 #include "error.H"
 #include "IOobjectList.H"

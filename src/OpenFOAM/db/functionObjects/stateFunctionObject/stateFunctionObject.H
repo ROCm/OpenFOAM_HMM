@@ -32,7 +32,7 @@ Description
     Note: cannot access the state dictionary until after construction of the
     function objects, since the owner container functionObjectList is owned
     by time, and time owns the state dictionary.  I.e. need to wait for time
-    to be fully consttucted.
+    to be fully constructed.
 
 See also
     Foam::functionObject
