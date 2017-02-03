@@ -194,7 +194,7 @@ Foam::label Foam::checkFireEdges
                 thisEdge.flip();
             }
 
-            if (&points)
+            if (notNull(points))
             {
                 forAll(thisEdge, keyI)
                 {
@@ -220,7 +220,7 @@ Foam::label Foam::checkFireEdges
         {
             labelList keys = strayPoints.sortedToc();
 
-            if (&points)
+            if (notNull(points))
             {
                 forAll(keys, keyI)
                 {
@@ -257,10 +257,9 @@ Foam::label Foam::checkFireEdges
 {
     label nPoints = -1;
 
-    if (&points)
+    if (notNull(points))
     {
         nPoints = points.size();
-
     }
     else
     {
@@ -287,10 +286,7 @@ Foam::label Foam::checkFireEdges
 }
 
 
-Foam::label Foam::checkFireEdges
-(
-    const polyMesh& mesh
-)
+Foam::label Foam::checkFireEdges(const polyMesh& mesh)
 {
     return checkFireEdges(mesh.faces(), mesh.pointFaces(), mesh.points());
 }

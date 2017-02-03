@@ -69,6 +69,13 @@ int main(int argc, char *argv[])
     Info<<"trimRight: " << stringOps::trimRight(test) << endl;
     Info<<"trim: " << stringOps::trim(test) << endl;
 
+    Info<< nl;
+    Info<<"camel-case => " << (word("camel") & "case") << nl;
+    for (const auto& s : { " text with \"spaces'", "08/15 value" })
+    {
+        Info<<"validated \"" << s << "\" => " <<  word::validated(s) << nl;
+    }
+    Info<< nl;
 
     // test sub-strings via iterators
     string::const_iterator iter  = test.end();

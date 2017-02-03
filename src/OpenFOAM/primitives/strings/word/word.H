@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,9 +48,9 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 class word;
-inline word operator&(const word&, const word&);
-Istream& operator>>(Istream&, word&);
-Ostream& operator<<(Ostream&, const word&);
+inline word operator&(const word& a, const word& b);
+Istream& operator>>(Istream& is, word& w);
+Ostream& operator<<(Ostream& os, const word& w);
 
 
 /*---------------------------------------------------------------------------*\
@@ -84,55 +84,60 @@ public:
         inline word();
 
         //- Construct as copy
-        inline word(const word&);
+        inline word(const word& w);
 
         //- Construct as copy of character array
-        inline word(const char*, const bool doStripInvalid=true);
+        inline word(const char* s, const bool doStripInvalid=true);
 
         //- Construct as copy with a maximum number of characters
         inline word
         (
-            const char*,
+            const char* s,
             const size_type,
             const bool doStripInvalid
         );
 
         //- Construct as copy of string
-        inline word(const string&, const bool doStripInvalid=true);
+        inline word(const string& s, const bool doStripInvalid=true);
 
         //- Construct as copy of std::string
-        inline word(const std::string&, const bool doStripInvalid=true);
+        inline word(const std::string& s, const bool doStripInvalid=true);
 
         //- Construct from Istream
-        word(Istream&);
+        word(Istream& is);
 
 
     // Member functions
 
-        //- Is this character valid for a word
-        inline static bool valid(char);
+        //- Is this character valid for a word?
+        inline static bool valid(char c);
+
+        //- Construct a validated word, in which all invalid characters have
+        //  been stripped out and any leading digit is '_'-prefixed.
+        static word validated(const std::string& s);
 
 
     // Member operators
 
         // Assignment
 
-            inline void operator=(const word&);
-            inline void operator=(const string&);
-            inline void operator=(const std::string&);
-            inline void operator=(const char*);
+            inline void operator=(const word& w);
+            inline void operator=(const string& s);
+            inline void operator=(const std::string& s);
+            inline void operator=(const char* s);
 
 
     // Friend Operators
 
-        //- Join word a and bm capitalising first letter of b
+        //- Join word a and b, capitalising the first letter of b
+        //  (so-called camelCase)
         friend word operator&(const word& a, const word& b);
 
 
     // IOstream operators
 
-        friend Istream& operator>>(Istream&, word&);
-        friend Ostream& operator<<(Ostream&, const word&);
+        friend Istream& operator>>(Istream& is, word& w);
+        friend Ostream& operator<<(Ostream& os, const word& w);
 };
 
 

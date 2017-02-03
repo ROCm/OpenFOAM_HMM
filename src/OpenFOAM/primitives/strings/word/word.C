@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,5 +31,64 @@ License
 const char* const Foam::word::typeName = "word";
 int Foam::word::debug(Foam::debug::debugSwitch(word::typeName, 0));
 const Foam::word Foam::word::null;
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::word Foam::word::validated(const std::string& s)
+{
+    std::string::size_type count = 0;
+    bool prefix = false;
+
+    // Count number of valid characters and detect if the first character
+    // happens to be a digit, which we'd like to avoid having since this
+    // will cause parse issues when read back later.
+    for (std::string::const_iterator it = s.cbegin(); it != s.cend(); ++it)
+    {
+        const char c = *it;
+
+        if (word::valid(c))
+        {
+            if (!count && isdigit(c))
+            {
+                // First valid character was a digit - prefix with '_'
+                prefix = true;
+                ++count;
+            }
+
+            ++count;
+        }
+    }
+
+    if (count == s.size() && !prefix)
+    {
+        return word(s, false);  // Already checked, can just return as word
+    }
+
+    word out;
+    out.resize(count);
+    count = 0;
+
+    // Copy valid content.
+    if (prefix)
+    {
+        out[count++] = '_';
+    }
+
+    for (std::string::const_iterator it = s.cbegin(); it != s.cend(); ++it)
+    {
+        const char c = *it;
+
+        if (word::valid(c))
+        {
+            out[count++] = c;
+        }
+    }
+
+    out.resize(count);
+
+    return out;
+}
+
 
 // ************************************************************************* //
