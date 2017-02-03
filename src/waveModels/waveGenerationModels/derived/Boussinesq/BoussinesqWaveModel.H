@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  | Copyright (C) 2015 IH-Cantabria
 -------------------------------------------------------------------------------
 License
@@ -49,12 +49,12 @@ class Boussinesq
 :
     public solitaryWaveModel
 {
-protected:
+private:
 
-    // Protected Member Functions
+    // Private Member Functions
 
         //- Wave height
-        virtual scalar eta
+        scalar eta
         (
             const scalar H,
             const scalar h,
@@ -66,7 +66,7 @@ protected:
         ) const;
 
         //- Wave
-        virtual vector Deta
+        vector Deta
         (
             const scalar H,
             const scalar h,
@@ -78,7 +78,7 @@ protected:
         ) const;
 
         //- Wave velocity
-        virtual vector U
+        vector Uf
         (
             const scalar H,
             const scalar h,
@@ -89,6 +89,11 @@ protected:
             const scalar X0,
             const scalar z
         ) const;
+
+
+protected:
+
+    // Protected Member Functions
 
         //- Set the water level
         virtual void setLevel
@@ -128,11 +133,12 @@ public:
     // Public Member Functions
 
         //- Read from dictionary
-        virtual bool read(const dictionary& overrideDict);
+        virtual bool readDict(const dictionary& overrideDict);
 
         //- Info
         virtual void info(Ostream& os) const;
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

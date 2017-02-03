@@ -277,7 +277,7 @@ Foam::waveModel::waveModel
 {
     if (readFields)
     {
-        read(dict);
+        readDict(dict);
     }
 }
 
@@ -290,7 +290,7 @@ Foam::waveModel::~waveModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModel::read(const dictionary& overrideDict)
+bool Foam::waveModel::readDict(const dictionary& overrideDict)
 {
     readOpt() = IOobject::READ_IF_PRESENT;
     if (headerOk())

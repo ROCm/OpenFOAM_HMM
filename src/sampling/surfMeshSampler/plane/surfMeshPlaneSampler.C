@@ -27,6 +27,7 @@ License
 #include "dictionary.H"
 #include "polyMesh.H"
 #include "volFields.H"
+#include "coordinateSystem.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

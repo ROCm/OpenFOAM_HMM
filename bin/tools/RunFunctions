@@ -148,8 +148,9 @@ runParallel()
 
     # Store any parsed additional arguments e.g. decomposeParDict
     APP_PARARGS=
-    # Check the default decomposeParDict if available
-    nProcs=$(getNumberOfProcessors system/decomposeParDict)
+
+    # Initialise number of procs to unset value
+    nProcs=-1
 
     # Parse options and executable
     while [ $# -gt 0 ] && [ -z "$APP_RUN" ]; do
@@ -185,6 +186,8 @@ runParallel()
         shift
     done
 
+    [ "$nProcs" -eq -1 ] && nProcs=$(getNumberOfProcessors system/decomposeParDict)
+
     if [ -f log.$LOG_SUFFIX ] && [ "$LOG_IGNORE" = "false" ]
     then
         echo "$APP_NAME already run on $PWD:" \
@@ -213,7 +216,7 @@ cloneCase()
     else
         echo "Cloning $2 case from $1"
         mkdir $2
-        cpfiles="0 system constant"
+        cpfiles="0.orig 0 system constant"
         for f in $cpfiles
         do
             \cp -r $1/$f $2

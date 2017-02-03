@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  | Copyright (C) 2015 IH-Cantabria
 -------------------------------------------------------------------------------
 License
@@ -49,16 +49,11 @@ class cnoidal
 :
     public regularWaveModel
 {
-protected:
+private:
 
-    // Protected data
+    // Private Member Functions
 
-        //- `m' coefficient
-        scalar m_;
-
-
-    // Protected Member Functions
-
+        //- Initialise
         void initialise
         (
             const scalar H,
@@ -69,7 +64,7 @@ protected:
         ) const;
 
         //- Wave height
-        virtual scalar eta
+        scalar eta
         (
             const scalar H,
             const scalar Kx,
@@ -107,7 +102,7 @@ protected:
         ) const;
 
         //- Wave velocity
-        virtual vector U
+        vector Uf
         (
             const scalar H,
             const scalar h,
@@ -120,6 +115,18 @@ protected:
             const scalar phase,
             const scalar z
         ) const;
+
+
+protected:
+
+    // Protected data
+
+        //- `m' coefficient
+        scalar m_;
+
+
+    // Protected Member Functions
+
 
         //- Set the water level
         virtual void setLevel
@@ -159,11 +166,12 @@ public:
     // Public Member Functions
 
         //- Read from dictionary
-        virtual bool read(const dictionary& overrideDict);
+        virtual bool readDict(const dictionary& overrideDict);
 
         //- Info
         virtual void info(Ostream& os) const;
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

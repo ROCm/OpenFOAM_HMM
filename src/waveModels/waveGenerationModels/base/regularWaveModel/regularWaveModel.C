@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  | Copyright (C) 2015 IH-Cantabria
 -------------------------------------------------------------------------------
 License
@@ -86,7 +86,7 @@ Foam::waveModels::regularWaveModel::regularWaveModel
 {
     if (readFields)
     {
-        read(dict);
+        readDict(dict);
     }
 }
 
@@ -99,9 +99,12 @@ Foam::waveModels::regularWaveModel::~regularWaveModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModels::regularWaveModel::read(const dictionary& overrideDict)
+bool Foam::waveModels::regularWaveModel::readDict
+(
+    const dictionary& overrideDict
+)
 {
-    if (waveGenerationModel::read(overrideDict))
+    if (waveGenerationModel::readDict(overrideDict))
     {
         lookup("rampTime") >> rampTime_;
 

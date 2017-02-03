@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  | Copyright (C) 2015 IH-Cantabria
 -------------------------------------------------------------------------------
 License
@@ -49,12 +49,12 @@ class StokesII
 :
     public StokesI
 {
-protected:
+private:
 
-    // Protected Member Functions
+    // Private Member Functions
 
         //- Wave height
-        virtual scalar eta
+        scalar eta
         (
             const scalar H,
             const scalar h,
@@ -67,8 +67,13 @@ protected:
             const scalar phase
         ) const;
 
+
+protected:
+
+    // Protected Member Functions
+
         //- Wave velocity
-        virtual vector U
+        virtual vector UfBase
         (
             const scalar H,
             const scalar h,
@@ -112,11 +117,12 @@ public:
     // Public Member Functions
 
         //- Read from dictionary
-        virtual bool read(const dictionary& overrideDict);
+        virtual bool readDict(const dictionary& overrideDict);
 
         //- Info
         virtual void info(Ostream& os) const;
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
