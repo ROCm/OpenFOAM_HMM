@@ -84,6 +84,20 @@ bool Foam::triSurface::readSTL(const fileName& STLfileName, bool forceBinary)
         f.region() = zoneIds[i];
     }
 
+    // Set patch names (and sizes)
+    // - there is likely a more efficient means of doing this
+    if (reader.stlFormat() == fileFormats::STLCore::ASCII)
+    {
+        const List<word>& names = reader.names();
+
+        patches_.setSize(names.size());
+        forAll(names, namei)
+        {
+            patches_[namei].name() = names[namei];
+        }
+        setDefaultPatches();
+    }
+
     return true;
 }
 
