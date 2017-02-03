@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,20 +41,7 @@ namespace Foam
 
 Foam::treeBoundBox Foam::treeDataFace::calcBb(const label facei) const
 {
-    const pointField& points = mesh_.points();
-
-    const face& f = mesh_.faces()[facei];
-
-    treeBoundBox bb(points[f[0]], points[f[0]]);
-
-    for (label fp = 1; fp < f.size(); fp++)
-    {
-        const point& p = points[f[fp]];
-
-        bb.min() = min(bb.min(), p);
-        bb.max() = max(bb.max(), p);
-    }
-    return bb;
+    return treeBoundBox(mesh_.points(), mesh_.faces()[facei]);
 }
 
 

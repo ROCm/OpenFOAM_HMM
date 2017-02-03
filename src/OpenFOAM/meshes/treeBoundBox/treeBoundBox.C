@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,50 +24,21 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "treeBoundBox.H"
-#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::scalar Foam::treeBoundBox::great(GREAT);
-
-const Foam::treeBoundBox Foam::treeBoundBox::greatBox
-(
-    vector(-GREAT, -GREAT, -GREAT),
-    vector(GREAT, GREAT, GREAT)
-);
-
-
-const Foam::treeBoundBox Foam::treeBoundBox::invertedBox
-(
-    vector(GREAT, GREAT, GREAT),
-    vector(-GREAT, -GREAT, -GREAT)
-);
-
-
-//! \cond ignoreDocumentation
-//- Skip documentation : local scope only
-const Foam::label facesArray[6][4] =
-{
-    {0, 4, 6, 2}, // left
-    {1, 3, 7, 5}, // right
-    {0, 1, 5, 4}, // bottom
-    {2, 6, 7, 3}, // top
-    {0, 2, 3, 1}, // back
-    {4, 5, 7, 6}  // front
-};
-//! \endcond
-
-
 const Foam::faceList Foam::treeBoundBox::faces
-(
-    initListList<face, label, 6, 4>(facesArray)
-);
+({
+    face{0, 4, 6, 2}, // left
+    face{1, 3, 7, 5}, // right
+    face{0, 1, 5, 4}, // bottom
+    face{2, 6, 7, 3}, // top
+    face{0, 2, 3, 1}, // back
+    face{4, 5, 7, 6}  // front
+});
 
-
-//! \cond  ignoreDocumentation
-//- Skip documentation : local scope only
-const Foam::label edgesArray[12][2] =
-{
+const Foam::edgeList Foam::treeBoundBox::edges
+({
     {0, 1}, // 0
     {1, 3},
     {2, 3}, // 2
@@ -80,48 +51,17 @@ const Foam::label edgesArray[12][2] =
     {1, 5},
     {3, 7}, // 10
     {2, 6}
-};
-//! \endcond
-
-
-const Foam::edgeList Foam::treeBoundBox::edges
-(
-    //initListList<edge, label, 12, 2>(edgesArray)
-    calcEdges(edgesArray)
-);
-
+});
 
 const Foam::FixedList<Foam::vector, 6> Foam::treeBoundBox::faceNormals
-(
-    calcFaceNormals()
-);
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-Foam::edgeList Foam::treeBoundBox::calcEdges(const label edgesArray[12][2])
-{
-    edgeList edges(12);
-    forAll(edges, edgeI)
-    {
-        edges[edgeI][0] = edgesArray[edgeI][0];
-        edges[edgeI][1] = edgesArray[edgeI][1];
-    }
-    return edges;
-}
-
-
-Foam::FixedList<Foam::vector, 6> Foam::treeBoundBox::calcFaceNormals()
-{
-    FixedList<vector, 6> normals;
-    normals[LEFT]   = vector(-1,  0,  0);
-    normals[RIGHT]  = vector( 1,  0,  0);
-    normals[BOTTOM] = vector( 0, -1,  0);
-    normals[TOP]    = vector( 0,  1,  0);
-    normals[BACK]   = vector( 0,  0, -1);
-    normals[FRONT]  = vector( 0,  0,  1);
-    return normals;
-}
+({
+    vector(-1,  0,  0), // left
+    vector( 1,  0,  0), // right
+    vector( 0, -1,  0), // bottom
+    vector( 0,  1,  0), // top
+    vector( 0,  0, -1), // back
+    vector( 0,  0,  1)  // front
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -164,15 +104,15 @@ Foam::treeBoundBox::treeBoundBox
 
 Foam::tmp<Foam::pointField> Foam::treeBoundBox::points() const
 {
-    tmp<pointField> tPts = tmp<pointField>(new pointField(8));
-    pointField& points = tPts.ref();
+    tmp<pointField> tpoints = tmp<pointField>(new pointField(8));
+    pointField& pts = tpoints.ref();
 
-    forAll(points, octant)
+    forAll(pts, octant)
     {
-        points[octant] = corner(octant);
+        pts[octant] = corner(octant);
     }
 
-    return tPts;
+    return tpoints;
 }
 
 
@@ -394,7 +334,7 @@ bool Foam::treeBoundBox::contains(const vector& dir, const point& pt) const
 {
     // Compare all components against min and max of bb
 
-    for (direction cmpt=0; cmpt<3; cmpt++)
+    for (direction cmpt=0; cmpt<3; ++cmpt)
     {
         if (pt[cmpt] < min()[cmpt])
         {

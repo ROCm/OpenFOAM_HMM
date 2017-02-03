@@ -66,14 +66,14 @@ int main(int argc, char *argv[])
 
     pointField newPoints(mesh.points());
 
-    const point half(0.5*(meshBb.min() + meshBb.max()));
+    const point half = meshBb.midpoint();
 
     forAll(newPoints, pointi)
     {
         point& pt = newPoints[pointi];
 
         // expand around half
-        pt.y() +=  pt.y() - half.y();
+        pt.y() += pt.y() - half.y();
     }
 
     mesh.movePoints(newPoints);

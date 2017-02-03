@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -659,18 +659,14 @@ Foam::boundBox Foam::searchableSurfacesQueries::bounds
     const labelList& surfacesToTest
 )
 {
-    pointField bbPoints(2*surfacesToTest.size());
+    boundBox bb(boundBox::invertedBox);
 
-    forAll(surfacesToTest, testI)
+    forAll(surfacesToTest, testi)
     {
-        const searchableSurface& surface(allSurfaces[surfacesToTest[testI]]);
-
-        bbPoints[2*testI] = surface.bounds().min();
-
-        bbPoints[2*testI + 1] = surface.bounds().max();
+        bb.add(allSurfaces[surfacesToTest[testi]].bounds());
     }
 
-    return boundBox(bbPoints);
+    return bb;
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -198,10 +198,10 @@ void Foam::AABBTree<Type>::createBoxes
     // Assign the objects to min or max bin
 
     DynamicList<label> minBinObjectIDs(objectIDs.size());
-    treeBoundBox minBb(point::max, point::min);
+    treeBoundBox minBb(boundBox::invertedBox);
 
     DynamicList<label> maxBinObjectIDs(objectIDs.size());
-    treeBoundBox maxBb(point::max, point::min);
+    treeBoundBox maxBb(boundBox::invertedBox);
 
     forAll(objectIDs, i)
     {
@@ -229,16 +229,12 @@ void Foam::AABBTree<Type>::createBoxes
         if (intoMin)
         {
             minBinObjectIDs.append(objI);
-            const boundBox objBb(points, obj, false);
-            minBb.min() = min(minBb.min(), objBb.min());
-            minBb.max() = max(minBb.max(), objBb.max());
+            minBb.add(points, obj);
         }
         if (intoMax)
         {
             maxBinObjectIDs.append(objI);
-            const boundBox objBb(points, obj, false);
-            maxBb.min() = min(maxBb.min(), objBb.min());
-            maxBb.max() = max(maxBb.max(), objBb.max());
+            maxBb.add(points, obj);
         }
     }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -244,8 +244,8 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
     subGeom_.setSize(surfI);
     indexOffset_.setSize(surfI+1);
 
-    // Bounds is the overall bounds
-    bounds() = boundBox(point::max, point::min);
+    // Bounds is the overall bounds - prepare for min/max ops
+    bounds() = boundBox::invertedBox;
 
     forAll(subGeom_, surfI)
     {
