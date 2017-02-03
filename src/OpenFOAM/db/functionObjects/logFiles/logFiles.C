@@ -129,7 +129,7 @@ Foam::PtrList<Foam::OFstream>& Foam::functionObjects::logFiles::files()
 }
 
 
-Foam::OFstream& Foam::functionObjects::logFiles::file(const label i)
+Foam::OFstream& Foam::functionObjects::logFiles::files(const label i)
 {
     if (!Pstream::master())
     {
