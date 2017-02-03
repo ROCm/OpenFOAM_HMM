@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,81 +23,77 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkAppendRawFormatter.H"
+#include "foamVtkBase64Layer.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* Foam::foamVtkAppendRawFormatter::name_     = "append";
-const char* Foam::foamVtkAppendRawFormatter::encoding_ = "raw";
+const char* Foam::foamVtkBase64Layer::encoding_ = "base64";
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::foamVtkAppendRawFormatter::write
+void Foam::foamVtkBase64Layer::write
 (
     const char* s,
     std::streamsize n
 )
 {
-    os().write(s, n);
+    base64Layer::write(s, n);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::foamVtkAppendRawFormatter::foamVtkAppendRawFormatter(std::ostream& os)
+Foam::foamVtkBase64Layer::foamVtkBase64Layer(std::ostream& os)
 :
-    foamVtkFormatter(os)
+    foamVtkFormatter(os),
+    base64Layer(os)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamVtkAppendRawFormatter::~foamVtkAppendRawFormatter()
-{}
+Foam::foamVtkBase64Layer::~foamVtkBase64Layer()
+{
+    base64Layer::close();
+}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-const char* Foam::foamVtkAppendRawFormatter::name() const
-{
-    return name_;
-}
-
-
-const char* Foam::foamVtkAppendRawFormatter::encoding() const
+const char* Foam::foamVtkBase64Layer::encoding() const
 {
     return encoding_;
 }
 
 
-void Foam::foamVtkAppendRawFormatter::writeSize(const uint64_t nBytes)
+void Foam::foamVtkBase64Layer::writeSize(const uint64_t nBytes)
 {
     write(reinterpret_cast<const char*>(&nBytes), sizeof(uint64_t));
 }
 
 
-void Foam::foamVtkAppendRawFormatter::write(const uint8_t val)
+void Foam::foamVtkBase64Layer::write(const uint8_t val)
 {
-    write(reinterpret_cast<const char*>(&val), sizeof(uint8_t));
+    base64Layer::add(val);
 }
 
 
-void Foam::foamVtkAppendRawFormatter::write(const label val)
+void Foam::foamVtkBase64Layer::write(const label val)
 {
     // std::cerr<<"label:" << sizeof(val) << "=" << val << '\n';
     write(reinterpret_cast<const char*>(&val), sizeof(label));
 }
 
 
-void Foam::foamVtkAppendRawFormatter::write(const float val)
+void Foam::foamVtkBase64Layer::write(const float val)
 {
     // std::cerr<<"float:" << sizeof(val) << "=" << val << '\n';
     write(reinterpret_cast<const char*>(&val), sizeof(float));
 }
 
 
-void Foam::foamVtkAppendRawFormatter::write(const double val)
+void Foam::foamVtkBase64Layer::write(const double val)
 {
     // std::cerr<<"double as float=" << val << '\n';
     float copy(val);
@@ -105,8 +101,16 @@ void Foam::foamVtkAppendRawFormatter::write(const double val)
 }
 
 
-void Foam::foamVtkAppendRawFormatter::flush()
-{/*nop*/}
+void Foam::foamVtkBase64Layer::flush()
+{
+    base64Layer::close();
+}
+
+
+std::size_t Foam::foamVtkBase64Layer::encodedLength(std::size_t n) const
+{
+    return base64Layer::encodedLength(n);
+}
 
 
 // ************************************************************************* //

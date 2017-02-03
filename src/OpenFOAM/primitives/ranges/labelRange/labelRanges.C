@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,11 +25,6 @@ License
 
 #include "labelRanges.H"
 #include "ListOps.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::labelRanges::const_iterator Foam::labelRanges::endIter_;
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -141,7 +136,7 @@ bool Foam::labelRanges::add(const labelRange& range)
     {
         labelRange& currRange = ParentType::operator[](elemI);
 
-        if (currRange.intersects(range, true))
+        if (currRange.overlaps(range, true))
         {
             // absorb into the existing (adjacent/overlapping) range
             currRange += range;
@@ -150,7 +145,7 @@ bool Foam::labelRanges::add(const labelRange& range)
             for (; elemI < this->size()-1; ++elemI)
             {
                 labelRange& nextRange = ParentType::operator[](elemI+1);
-                if (currRange.intersects(nextRange, true))
+                if (currRange.overlaps(nextRange, true))
                 {
                     currRange += nextRange;
                     nextRange.clear();

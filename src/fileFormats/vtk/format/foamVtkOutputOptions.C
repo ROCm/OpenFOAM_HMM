@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,10 +45,8 @@ Foam::foamVtkOutputOptions::foamVtkOutputOptions()
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::foamVtkFormatter> Foam::foamVtkOutputOptions::newFormatter
-(
-    std::ostream& os
-) const
+Foam::autoPtr<Foam::foamVtkFormatter>
+Foam::foamVtkOutputOptions::newFormatter(std::ostream& os) const
 {
     switch (type_)
     {
@@ -87,9 +85,9 @@ Foam::autoPtr<Foam::foamVtkFormatter> Foam::foamVtkOutputOptions::newFormatter
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::foamVtkOutputOptions::ascii(bool b)
+void Foam::foamVtkOutputOptions::ascii(bool on)
 {
-    if (b)
+    if (on)
     {
         // Force ASCII:
 
@@ -132,9 +130,9 @@ void Foam::foamVtkOutputOptions::ascii(bool b)
 }
 
 
-void Foam::foamVtkOutputOptions::append(bool b)
+void Foam::foamVtkOutputOptions::append(bool on)
 {
-    if (b)
+    if (on)
     {
         if (!(type_ & APPEND))
         {
@@ -153,9 +151,9 @@ void Foam::foamVtkOutputOptions::append(bool b)
 }
 
 
-void Foam::foamVtkOutputOptions::legacy(bool b)
+void Foam::foamVtkOutputOptions::legacy(bool on)
 {
-    if (b)
+    if (on)
     {
         if (type_ & APPEND)
         {
@@ -180,9 +178,9 @@ void Foam::foamVtkOutputOptions::legacy(bool b)
 }
 
 
-void Foam::foamVtkOutputOptions::precision(unsigned val) const
+void Foam::foamVtkOutputOptions::precision(unsigned prec) const
 {
-    precision_ = val;
+    precision_ = prec;
 }
 
 

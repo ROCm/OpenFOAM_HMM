@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::labelRange
 
 Description
-    A label range specifier.
+    A range of labels.
 
 SourceFiles
     labelRange.C
@@ -47,8 +47,8 @@ class Ostream;
 
 // Forward declaration of friend functions and operators
 class labelRange;
-Istream& operator>>(Istream&, labelRange&);
-Ostream& operator<<(Ostream&, const labelRange&);
+Istream& operator>>(Istream& is, labelRange& range);
+Ostream& operator<<(Ostream& os, const labelRange& range);
 
 /*---------------------------------------------------------------------------*\
                          Class labelRange Declaration
@@ -63,7 +63,7 @@ class labelRange
 
 public:
 
-        static int debug;
+    static int debug;
 
 
     // Public classes
@@ -75,30 +75,49 @@ public:
 
             bool operator()(const labelRange& a, const labelRange& b)
             {
-                return a.first() < b.first();
+                return a.operator<(b);
             }
         };
 
+
     // Constructors
 
-        //- Construct an empty range
+        //- Construct an empty range with zero as start and size.
         inline labelRange();
 
-        //- Construct a range
-        //  A negative size is autmatically changed to zero.
-        inline labelRange(const label start, const label size);
+        //- Construct a range from start and size.
+        //  Optionally adjust the start to avoid any negative indices.
+        //  Always reduce a negative size to zero.
+        inline labelRange
+        (
+            const label start,
+            const label size,
+            const bool adjustStart = false
+        );
 
         //- Construct from Istream.
-        labelRange(Istream&);
+        labelRange(Istream& is);
 
 
     // Member Functions
 
-        //- Reset to zero size
+        //- Alias for setSize(const label)
+        inline void resize(const label n);
+
+        //- Adjust size
+        inline void setSize(const label n);
+
+        //- Reset to zero start and zero size
         inline void clear();
 
         //- Is the range empty?
         inline bool empty() const;
+
+        //- Adjust the start to avoid any negative indices
+        void adjust();
+
+        //- Is the range valid (non-empty)?
+        inline bool valid() const;
 
         //- Return the effective size of the range
         inline label size() const;
@@ -109,32 +128,44 @@ public:
         //- The (inclusive) upper value of the range
         inline label last() const;
 
-        //- Return true if the value is within the range
-        inline bool contains(const label) const;
+        //- Reset start and size.
+        //  Optionally adjust the start to avoid any negative indices.
+        //  Always reduce a negative size to zero.
+        //  Return true if the updated range valid (non-empty).
+        inline bool reset
+        (
+            const label start,
+            const label size,
+            const bool adjustStart = false
+        );
 
-        //- Return true if the ranges intersect
+        //- Return true if the value is within the range
+        inline bool contains(const label value) const;
+
+        //- Return true if the ranges overlap.
         //  Optional test for ranges that also just touch each other
-        bool intersects(const labelRange&, const bool touches = false) const;
+        bool overlaps(const labelRange& range, bool touches=false) const;
 
         //- Return a joined range, squashing any gaps in between
-        //  A prior intersects() check can be used to avoid squashing gaps.
-        labelRange join(const labelRange&) const;
+        //  A prior overlaps() check can be used to avoid squashing gaps.
+        labelRange join(const labelRange& range) const;
 
 
     // Member Operators
 
         //- Return element in range, no bounds checking
-        inline label operator[](const label) const;
+        inline label operator[](const label i) const;
 
-        //- Comparison function for sorting, compares the start
+        //- Comparison function for sorting, compares the start.
+        //  If the start values are equal, also compares the size.
         inline bool operator<(const labelRange& rhs) const;
 
         //- Join ranges, squashing any gaps in between
-        //  A prior intersects() check can be used to avoid squashing gaps.
-        labelRange& operator+=(const labelRange&);
+        //  A prior overlaps() check can be used to avoid squashing gaps.
+        void operator+=(const labelRange& rhs);
 
-        inline bool operator==(const labelRange&) const;
-        inline bool operator!=(const labelRange&) const;
+        inline bool operator==(const labelRange& rhs) const;
+        inline bool operator!=(const labelRange& rhs) const;
 
 
     // STL iterator
@@ -142,6 +173,8 @@ public:
         //- An STL const_iterator
         class const_iterator
         {
+            friend class labelRange;
+
             // Private data
 
                 //- Reference to the range for which this is an iterator
@@ -150,54 +183,48 @@ public:
                 //- Current index
                 label index_;
 
-        public:
 
             // Constructors
 
-                //- Construct null - equivalent to an 'end' position
-                inline const_iterator();
+                //- Construct from range at 'begin' or 'end' position
+                inline const_iterator
+                (
+                    const labelRange& range,
+                    const bool endIter = false
+                );
 
-                //- Construct from range, moving to its 'begin' position
-                inline explicit const_iterator(const labelRange&);
-
+        public:
 
             // Member operators
 
-                inline bool operator==(const const_iterator&) const;
+                inline bool operator==(const const_iterator& iter) const;
+                inline bool operator!=(const const_iterator& iter) const;
 
-                inline bool operator!=(const const_iterator&) const;
-
-                inline label operator*();
-                inline label operator()();
+                inline label operator*() const;
+                inline label operator()() const;
 
                 inline const_iterator& operator++();
                 inline const_iterator operator++(int);
         };
 
 
-        //- const_iterator set to the beginning of the range
+        //- A const_iterator set to the beginning of the range
         inline const_iterator cbegin() const;
 
-        //- const_iterator set to beyond the end of the range
-        inline const const_iterator& cend() const;
+        //- A const_iterator set to beyond the end of the range
+        inline const const_iterator cend() const;
 
-        //- const_iterator set to the beginning of the range
+        //- A const_iterator set to the beginning of the range
         inline const_iterator begin() const;
 
-        //- const_iterator set to beyond the end of the range
-        inline const const_iterator& end() const;
+        //- A const_iterator set to beyond the end of the range
+        inline const const_iterator end() const;
 
 
     // IOstream Operators
 
-        friend Istream& operator>>(Istream&, labelRange&);
-        friend Ostream& operator<<(Ostream&, const labelRange&);
-
-
-private:
-
-        //- const_iterator returned by end(), cend()
-        static const const_iterator endIter_;
+        friend Istream& operator>>(Istream& is, labelRange& range);
+        friend Ostream& operator<<(Ostream& os, const labelRange& range);
 
 };
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,8 +33,7 @@ Description
 #ifndef foamVtkBase64Formatter_H
 #define foamVtkBase64Formatter_H
 
-#include "foamVtkFormatter.H"
-#include "base64Layer.H"
+#include "foamVtkBase64Layer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,8 +46,7 @@ namespace Foam
 
 class foamVtkBase64Formatter
 :
-    public foamVtkFormatter,
-    private base64Layer
+    public foamVtkBase64Layer
 {
     // Private Data Members
 
@@ -64,20 +62,12 @@ class foamVtkBase64Formatter
         //- Disallow default bitwise assignment
         void operator=(const foamVtkBase64Formatter&) = delete;
 
-protected:
-
-    // Protected Member Functions
-
-        //- Write
-        void write(const char* s, std::streamsize n);
-
-
 public:
 
     // Constructors
 
         //- Construct and attach to an output stream
-        foamVtkBase64Formatter(std::ostream&);
+        foamVtkBase64Formatter(std::ostream& os);
 
 
     //- Destructor
@@ -90,17 +80,9 @@ public:
         //  The lowercase version of the Legacy output type.
         virtual const char* name() const;
 
-        //- Name for the XML append encoding.
-        virtual const char* encoding() const;
 
-
-        //- Write leading size for binary output
-        virtual void writeSize(const uint64_t);
-
-        virtual void write(const uint8_t);
-        virtual void write(const label);
-        virtual void write(const float);
-        virtual void write(const double);
+        //- End the encoding sequence (padding the final characters with '=')
+        //  and write a newline to the output if any encoding was done.
         virtual void flush();
 
 };

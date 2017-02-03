@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,11 +25,10 @@ Class
     foamVtkLegacyFormatter
 
 Description
-    Binary output for the VTK legacy format, always written as big-endian.
+    Binary output for the VTK legacy format, always written as big-endian
+    and with 32-bit integers.
 
-    The legacy files are always written as big endian.
-    Since integers in the legacy format are limited to 32-bit,
-    this format should not be used for OpenFOAM with 64-bit label sizes.
+    This format should never be used for OpenFOAM with 64-bit label sizes.
 
 SourceFiles
     foamVtkLegacyFormatter.C
@@ -81,7 +80,7 @@ public:
     // Constructors
 
         //- Construct and attach to an output stream
-        foamVtkLegacyFormatter(std::ostream&);
+        foamVtkLegacyFormatter(std::ostream& os);
 
 
     //- Destructor
@@ -90,22 +89,25 @@ public:
 
     // Member Functions
 
-        //- Name for the Legacy output type ("BINARY")
+        //- Name for the legacy binary output type ("BINARY")
         virtual const char* name() const;
 
         //- Name for the XML append encoding (unused)
-        //  Currently simply "BINARY", but this should not be relied upon.
+        //  Currently identical to name(), but do not rely on this.
         virtual const char* encoding() const;
 
 
         //- Write leading size - a no-op for legacy binary output
-        virtual void writeSize(const uint64_t);
+        virtual void writeSize(const uint64_t ignored);
 
-        virtual void write(const uint8_t);
-        virtual void write(const label);
-        virtual void write(const float);
-        virtual void write(const double);
+        virtual void write(const uint8_t val);
+        virtual void write(const label val);
+        virtual void write(const float val);
+        virtual void write(const double val);
+
+        //- Write a newline to the output
         virtual void flush();
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

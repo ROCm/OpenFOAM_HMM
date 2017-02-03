@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,6 +51,12 @@ Foam::foamVtkFormatter::~foamVtkFormatter()
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+std::size_t Foam::foamVtkFormatter::encodedLength(std::size_t n) const
+{
+    return n;
+}
+
 
 void Foam::foamVtkFormatter::indent()
 {
@@ -149,7 +155,6 @@ Foam::foamVtkFormatter::tag(const word& tag)
 }
 
 
-
 Foam::foamVtkFormatter&
 Foam::foamVtkFormatter::endTag(const word& tag)
 {
@@ -179,7 +184,6 @@ Foam::foamVtkFormatter::endTag(const word& tag)
 
     return *this;
 }
-
 
 
 Foam::foamVtkFormatter&

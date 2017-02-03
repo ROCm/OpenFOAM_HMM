@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,11 @@ See also
 #include "vector.H"
 #include "ListOps.H"
 
-#include<list>
+#include "labelRange.H"
+#include "ListOps.H"
+#include "SubList.H"
+
+#include <list>
 
 using namespace Foam;
 
@@ -60,6 +64,19 @@ int main(int argc, char *argv[])
     argList::addBoolOption("flag");
 
     #include "setRootCase.H"
+
+    if (false)
+    {
+        labelList intlist(IStringStream("(0 1 2)")());
+        Info<<"construct from Istream: " << intlist << endl;
+
+        IStringStream("(3 4 5)")() >> static_cast<labelUList&>(intlist);
+        Info<<"is >>: " << intlist << endl;
+
+        IStringStream("(6 7 8)")() >> intlist;
+        Info<<"is >>: " << intlist << endl;
+    }
+
 
     List<vector> list1(IStringStream("1 ((0 1 2))")());
     Info<< "list1: " << list1 << endl;

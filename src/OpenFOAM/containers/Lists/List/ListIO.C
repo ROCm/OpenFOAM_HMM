@@ -64,7 +64,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
     }
     else if (firstToken.isLabel())
     {
-        label s = firstToken.labelToken();
+        const label s = firstToken.labelToken();
 
         // Set list length to that read
         L.setSize(s);

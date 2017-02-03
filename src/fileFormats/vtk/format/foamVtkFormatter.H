@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,8 +74,8 @@ class foamVtkFormatter
         template<class Type>
         foamVtkFormatter& xmlAttribute
         (
-            const word&,
-            const Type&,
+            const word& k,
+            const Type& v,
             const char quote
         );
 
@@ -120,13 +120,19 @@ public:
 
 
         //- Write leading size for binary output
-        virtual void writeSize(const uint64_t) = 0;
+        virtual void writeSize(const uint64_t nBytes) = 0;
 
-        virtual void write(const uint8_t) = 0;
-        virtual void write(const label)   = 0;
-        virtual void write(const float)   = 0;
-        virtual void write(const double)  = 0;
+        virtual void write(const uint8_t val) = 0;
+        virtual void write(const label val)   = 0;
+        virtual void write(const float val)   = 0;
+        virtual void write(const double val)  = 0;
+
+        //- Flush encoding, write newline etc.
         virtual void flush() = 0;
+
+        //- The encoded length for binary output.
+        //  The default is pass-through.
+        virtual std::size_t encodedLength(std::size_t n) const;
 
 
     // Member Functions
@@ -138,7 +144,7 @@ public:
         foamVtkFormatter& xmlHeader();
 
         //- Write XML comment (at the current indentation level)
-        foamVtkFormatter& comment(const std::string&);
+        foamVtkFormatter& comment(const std::string& text);
 
 
         //- Open XML tag
@@ -177,40 +183,40 @@ public:
         //- Write XML attribute
         foamVtkFormatter& xmlAttr
         (
-            const word&,
-            const std::string&,
+            const word& k,
+            const std::string& v,
             const char quote = '\''
         );
 
         //- Write XML attribute
         foamVtkFormatter& xmlAttr
         (
-            const word&,
-            const int32_t,
+            const word& k,
+            const int32_t v,
             const char quote = '\''
         );
 
         //- Write XML attribute
         foamVtkFormatter& xmlAttr
         (
-            const word&,
-            const int64_t,
+            const word& k,
+            const int64_t v,
             const char quote = '\''
         );
 
         //- Write XML attribute
         foamVtkFormatter& xmlAttr
         (
-            const word&,
-            const uint64_t,
+            const word& k,
+            const uint64_t v,
             const char quote = '\''
         );
 
         //- Write XML attribute
         foamVtkFormatter& xmlAttr
         (
-            const word&,
-            const scalar,
+            const word& k,
+            const scalar v,
             const char quote = '\''
         );
 
@@ -219,19 +225,19 @@ public:
     // Member Operators
 
         //- Write XML attribute
-        foamVtkFormatter& operator()(const word&, const std::string&);
+        foamVtkFormatter& operator()(const word& k, const std::string& v);
 
         //- Write XML attribute
-        foamVtkFormatter& operator()(const word&, const int32_t);
+        foamVtkFormatter& operator()(const word& k, const int32_t v);
 
         //- Write XML attribute
-        foamVtkFormatter& operator()(const word&, const int64_t);
+        foamVtkFormatter& operator()(const word& k, const int64_t v);
 
         //- Write XML attribute
-        foamVtkFormatter& operator()(const word&, const uint64_t);
+        foamVtkFormatter& operator()(const word& k, const uint64_t v);
 
         //- Write XML attribute
-        foamVtkFormatter& operator()(const word&, const scalar);
+        foamVtkFormatter& operator()(const word& k, const scalar v);
 
 };
 

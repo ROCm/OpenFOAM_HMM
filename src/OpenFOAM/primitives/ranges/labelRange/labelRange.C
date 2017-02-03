@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,8 +29,6 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::labelRange::const_iterator Foam::labelRange::endIter_;
-
 int Foam::labelRange::debug(::Foam::debug::debugSwitch("labelRange", 0));
 
 
@@ -47,13 +45,24 @@ Foam::labelRange::labelRange(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::labelRange::intersects
-(
-    const labelRange& range,
-    const bool touches
-) const
+void Foam::labelRange::adjust()
 {
-    label final = touches ? 1 : 0;
+    if (start_ < 0)
+    {
+        size_ += start_;
+        start_ = 0;
+    }
+
+    if (size_ < 0)
+    {
+        size_ = 0;
+    }
+}
+
+
+bool Foam::labelRange::overlaps(const labelRange& range, bool touches) const
+{
+    const label final = touches ? 1 : 0;
 
     return
     (
@@ -97,7 +106,7 @@ Foam::labelRange Foam::labelRange::join(const labelRange& range) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-Foam::labelRange& Foam::labelRange::operator+=(const labelRange& rhs)
+void Foam::labelRange::operator+=(const labelRange& rhs)
 {
     if (!size_)
     {
@@ -112,8 +121,6 @@ Foam::labelRange& Foam::labelRange::operator+=(const labelRange& rhs)
         start_ = lower;
         size_  = upper - lower + 1;
     }
-
-    return *this;
 }
 
 
@@ -127,10 +134,10 @@ Foam::Istream& Foam::operator>>(Istream& is, labelRange& range)
 
     is.check("operator>>(Istream&, labelRange&)");
 
-    // disallow invalid sizes
-    if (range.size_ <= 0)
+    // Disallow invalid sizes
+    if (range.size_ < 0)
     {
-        range.clear();
+        range.size_ = 0;
     }
 
     return is;
@@ -139,14 +146,10 @@ Foam::Istream& Foam::operator>>(Istream& is, labelRange& range)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const labelRange& range)
 {
-    // write ASCII only for now
+    // Write ASCII only for now
     os  << token::BEGIN_LIST
         << range.start_ << token::SPACE << range.size_
         << token::END_LIST;
-
-//    os  << token::BEGIN_BLOCK
-//        << range.start_ << "-" << range.last()
-//        << token::END_BLOCK;
 
     os.check("operator<<(Ostream&, const labelRange&)");
     return os;
