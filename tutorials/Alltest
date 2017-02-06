@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -26,20 +26,22 @@
 #     Alltest
 #
 # Description
-#     quickly tests the tutorials and writes out the scheme/solver information
+#     Quickly test the tutorials and write out the scheme/solver information
 #
 #------------------------------------------------------------------------------
 cd ${0%/*} || exit 1    # Run from this directory
 
 usage()
 {
+    exec 1>&2
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
 usage: ${0##*/} [OPTION]
 
 options:
-  -root <dir>       specify root directory to run tests from
+  -git              use git to retrieve the tutorials
+  -root dir         specify root directory to run tests from
   -default          sets up a default scheme on all schemes
   -help             print the usage
 
@@ -49,38 +51,54 @@ USAGE
     exit 1
 }
 
+# Report error and exit
+die()
+{
+    exec 1>&2
+    echo
+    echo "Error encountered:"
+    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See '${0##*/} -help' for usage"
+    echo
+    exit 1
+}
+
 #------------------------------------------------------------------------------
 
-unset DEFAULT_SCHEMES
-
 ROOT="./"
+unset DEFAULT_SCHEMES
+unset useGit
 
 # parse options
 while [ "$#" -gt 0 ]
 do
     case "$1" in
+    -h | -help)
+        usage
+        ;;
     -r | -root)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         ROOT="$2"
         shift
         ;;
-    -h | -help)
-        usage
+    -git)
+        useGit=true
         ;;
     -d | -default)
         DEFAULT_SCHEMES=true
         ;;
-    -*)
-        usage "unknown option: '$*'"
-        ;;
     *)
-        usage "unknown option/argument: '$*'"
+        usage "unknown option/argument: '$1'"
         ;;
     esac
     shift
 done
 
 
+#
+# set up a default scheme on all schemes
+#
 setDefaultFvSchemes()
 {
 cat<<EOF
@@ -110,7 +128,7 @@ EOF
 }
 
 #
-# VARIABLE
+# Location of the main controlDict
 #
 unset MAIN_CONTROL_DICT
 
@@ -152,15 +170,15 @@ SOLVERS_TEMP="FvSolution.temp"
 
 if [ -d "$TEST_RUN_DIR" ]
 then
+    echo "Removing old directory: $TEST_RUN_DIR" 1>&2
     rm -rf $TEST_RUN_DIR
 fi
 
-echo "Modifying ${MAIN_CONTROL_DICT}"
+echo "Modifying ${MAIN_CONTROL_DICT}" 1>&2
 if [ -e ${MAIN_CONTROL_DICT}.orig ]
 then
-    echo "File ${MAIN_CONTROL_DICT}.orig already exists"
-    echo "Did Alltest fail in some way and then run again?"
-    exit 1
+    die "File ${MAIN_CONTROL_DICT}.orig already exists" \
+        "Did Alltest fail in some way and then run again?"
 fi
 
 # Clean up on termination and on Ctrl-C
@@ -169,31 +187,45 @@ trap 'mv ${MAIN_CONTROL_DICT}.orig ${MAIN_CONTROL_DICT} 2>/dev/null; exit 0' \
 cp ${MAIN_CONTROL_DICT} ${MAIN_CONTROL_DICT}.orig
 
 sed \
--e s/"\(fvSchemes[ \t]*\)\([0-9]\);"/"\1 1;"/g \
--e s/"\(solution[ \t]*\)\([0-9]\);"/"\1 1;"/g \
-${MAIN_CONTROL_DICT}.orig > ${MAIN_CONTROL_DICT}
+    -e s/"\(fvSchemes[ \t]*\)\([0-9]\);"/"\1 1;"/g \
+    -e s/"\(solution[ \t]*\)\([0-9]\);"/"\1 1;"/g  \
+    ${MAIN_CONTROL_DICT}.orig > ${MAIN_CONTROL_DICT}
 
-echo "Copying the tutorials"
-cp -a ${TUTORIALS_DIR} ${TEST_RUN_DIR}
+if [ -n "$useGit" ]
+then
+    echo "Copying the tutorials from current git branch" 1>&2
+    if  git rev-parse --is-inside-work-tree > /dev/null 2>&1 && \
+        base="$(git rev-parse --show-toplevel 2>/dev/null)"
+    then
+        mkdir -p ${TEST_RUN_DIR}
+        ( cd $base/tutorials && git archive --format=tar HEAD . ) | \
+        ( cd $TEST_RUN_DIR && tar -xf - )
+    else
+        die "Not in a git-repo"
+    fi
+else
+    echo "Copying the tutorials" 1>&2
+    cp -a ${TUTORIALS_DIR} ${TEST_RUN_DIR}
+fi
 
-echo "Modifying the controlDicts to run only one time step"
+echo "Modifying the controlDicts to run only one time step" 1>&2
 cd ${TEST_RUN_DIR} || exit 1
 
-for CD in `find . -name "controlDict*"`
+for CD in $(find . -type f -name "controlDict*")
 do
     mv ${CD} ${CD}.orig
     sed \
-    -e s/"\(startFrom[ \t]*\)\([a-zA-Z]*\);"/"\1 latestTime;"/g \
-    -e s/"\(stopAt[ \t]*\)\([a-zA-Z]*\);"/"\1 nextWrite;"/g \
-    -e s/"\(writeControl[ \t]*\)\([a-zA-Z]*\);"/"\1 timeStep;"/g \
-    -e s/"\(writeInterval[ \t]*\)\([0-9a-zA-Z.-]*\);"/"\1 1;"/g \
-    ${CD}.orig > ${CD}
+        -e s/"\(startFrom[ \t]*\)\([a-zA-Z]*\);"/"\1 latestTime;"/g \
+        -e s/"\(stopAt[ \t]*\)\([a-zA-Z]*\);"/"\1 nextWrite;"/g \
+        -e s/"\(writeControl[ \t]*\)\([a-zA-Z]*\);"/"\1 timeStep;"/g \
+        -e s/"\(writeInterval[ \t]*\)\([0-9a-zA-Z.-]*\);"/"\1 1;"/g \
+        ${CD}.orig > ${CD}
 done
 
 if [ "$DEFAULT_SCHEMES" = true ]
 then
-    echo "Modifying the fvSchemes to contain only default schemes"
-    for FV_SC in `find . -name fvSchemes`
+    echo "Modifying the fvSchemes to contain only default schemes" 1>&2
+    for FV_SC in $(find . -type f -name fvSchemes)
     do
         for S in $FV_SCHEMES
         do
@@ -204,13 +236,13 @@ then
     done
 fi
 
+
 cp -f $FOAM_TUTORIALS/Allrun .
 ./Allrun
 
-
 sed -e :a -e '/\\$/N; s/\\\n//; ta' Allrun > temp
 APPLICATIONS=\
-    `grep "applications=" temp | sed 's/applications=\"\([A-Za-z \t]*\)\"/\1/g'`
+    $(grep "applications=" temp | sed 's/applications=\"\([A-Za-z \t]*\)\"/\1/g')
 
 rm $SCHEMES_FILE > /dev/null 2>&1
 for APP in $APPLICATIONS
@@ -221,13 +253,13 @@ do
     do
         rm $SCHEMES_TEMP $SOLVERS_TEMP > /dev/null 2>&1
         echo "  ${ST}" >> $SCHEMES_FILE
-        for LOG in `find ${APP} -name "log.${APP}"`
+        for LOG in $(find ${APP} -type f -name "log.${APP}")
         do
-            for S in `grep ${ST} ${LOG} | cut -d" " -f4`
+            for S in $(grep ${ST} ${LOG} | cut -d" " -f4)
             do
                 echo "    ${S}" >> $SCHEMES_TEMP
             done
-        echo `grep solver ${LOG} | cut -d" " -f4` >> $SOLVERS_TEMP
+        echo $(grep solver ${LOG} | cut -d" " -f4) >> $SOLVERS_TEMP
         done
         if [ -f $SCHEMES_TEMP ]
         then
