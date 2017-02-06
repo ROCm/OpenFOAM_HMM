@@ -14,29 +14,29 @@ usage() {
 
 usage: ${0##*/} [OPTION]
 options:
-  -online    use the links to the Github repositories instead of the local source code
+  -online    use links to the Github repositories instead of the local source code
   -help
 
 USAGE
     exit 1
 }
 
+
 defineURL() {
+    WEB_PATH="https://develop.openfoam.com"
+    FOAM_REPO_VERSION="$WM_PROJECT-plus"
 
-  WEB_PATH="https://develop.openfoam.com"
-  FOAM_REPO_VERSION="$WM_PROJECT-plus"
+    case "$WM_PROJECT_VERSION" in
+    v[1-9][.0-9]*)
+        FOAM_REPO_TAG="$WM_PROJECT-$WM_PROJECT_VERSION"
+        ;;
+    *)
+        FOAM_REPO_TAG="master"
+        ;;
+    esac
 
-  case "$WM_PROJECT_VERSION" in
-  v[0-9].[0-9]+)
-    FOAM_REPO_TAG="$WM_PROJECT-$WM_PROJECT_VERSION"
-    ;;
-  *)
-    FOAM_REPO_TAG="master"
-    ;;
-  esac
-
-  export FOAM_BASE_REPO="$WEB_PATH/Development/$FOAM_REPO_VERSION"
-  export FOAM_ONLINE_REPO="$FOAM_BASE_REPO/blob/${FOAM_REPO_TAG}"
+    export FOAM_BASE_REPO="$WEB_PATH/Development/$FOAM_REPO_VERSION"
+    export FOAM_ONLINE_REPO="$FOAM_BASE_REPO/blob/${FOAM_REPO_TAG}"
 }
 
 # parse options
@@ -48,12 +48,12 @@ do
         ;;
     -online)
         defineURL
-        shift
         ;;
     *)
-        usage "unknown option/argument: '$*'"
+        usage "unknown option/argument: '$1'"
         ;;
     esac
+    shift
 done
 
 #------------------------------------------------------------------------------
