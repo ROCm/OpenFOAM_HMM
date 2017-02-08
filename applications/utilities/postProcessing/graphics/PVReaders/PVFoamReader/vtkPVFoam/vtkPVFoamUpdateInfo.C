@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,12 +36,11 @@ License
 #include "Cloud.H"
 #include "vtkPVFoamReader.h"
 
-// local headers
-#include "vtkPVFoamAddToSelection.H"
-#include "vtkPVFoamUpdateInfoFields.H"
-
 // VTK includes
 #include "vtkDataArraySelection.h"
+
+// Templates (only needed here)
+#include "vtkPVFoamUpdateTemplates.C"
 
 
 // * * * * * * * * * * * * * * * Private Classes * * * * * * * * * * * * * * //
@@ -85,14 +84,14 @@ template<class ZoneType>
 Foam::wordList Foam::vtkPVFoam::getZoneNames
 (
     const ZoneMesh<ZoneType, polyMesh>& zmesh
-) const
+)
 {
     wordList names(zmesh.size());
     label nZone = 0;
 
     forAll(zmesh, zoneI)
     {
-        if (zmesh[zoneI].size())
+        if (!zmesh[zoneI].empty())
         {
             names[nZone++] = zmesh[zoneI].name();
         }
@@ -124,7 +123,7 @@ Foam::wordList Foam::vtkPVFoam::getZoneNames(const word& zoneType) const
         false
     );
 
-    if (ioObj.typeHeaderOk<cellZoneMesh>(false))
+    if (ioObj.typeHeaderOk<cellZoneMesh>(false, false))
     {
         zonesEntries zones(ioObj);
 
@@ -146,7 +145,7 @@ void Foam::vtkPVFoam::updateInfoInternalMesh
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::updateInfoInternalMesh" << endl;
+        Info<< "<beg> updateInfoInternalMesh" << endl;
     }
 
     // Determine mesh parts (internalMesh, patches...)
@@ -160,10 +159,7 @@ void Foam::vtkPVFoam::updateInfoInternalMesh
 
     if (debug)
     {
-        // just for debug info
-        getSelectedArrayEntries(arraySelection);
-
-        Info<< "<end> Foam::vtkPVFoam::updateInfoInternalMesh" << endl;
+        Info<< "<end> updateInfoInternalMesh" << endl;
     }
 }
 
@@ -175,7 +171,7 @@ void Foam::vtkPVFoam::updateInfoLagrangian
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::updateInfoLagrangian" << nl
+        Info<< "<beg> updateInfoLagrangian" << nl
             << "    " << dbPtr_->timePath()/cloud::prefix << endl;
     }
 
@@ -211,10 +207,7 @@ void Foam::vtkPVFoam::updateInfoLagrangian
 
     if (debug)
     {
-        // just for debug info
-        getSelectedArrayEntries(arraySelection);
-
-        Info<< "<end> Foam::vtkPVFoam::updateInfoLagrangian" << endl;
+        Info<< "<end> updateInfoLagrangian" << endl;
     }
 }
 
@@ -227,8 +220,8 @@ void Foam::vtkPVFoam::updateInfoPatches
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::updateInfoPatches"
-            << " [meshPtr=" << (meshPtr_ ? "set" : "nullptr") << "]" << endl;
+        Info<< "<beg> updateInfoPatches"
+            << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
     }
 
 
@@ -333,7 +326,7 @@ void Foam::vtkPVFoam::updateInfoPatches
         );
 
         // this should only ever fail if the mesh region doesn't exist
-        if (ioObj.typeHeaderOk<polyBoundaryMesh>(true))
+        if (ioObj.typeHeaderOk<polyBoundaryMesh>(true, false))
         {
             polyBoundaryMeshEntries patchEntries(ioObj);
 
@@ -377,7 +370,7 @@ void Foam::vtkPVFoam::updateInfoPatches
                     }
                     else
                     {
-                        groups.insert(groupNames[groupI], labelList(1, patchi));
+                        groups.insert(groupNames[groupI], labelList{patchi});
                     }
                 }
             }
@@ -455,10 +448,7 @@ void Foam::vtkPVFoam::updateInfoPatches
 
     if (debug)
     {
-        // just for debug info
-        getSelectedArrayEntries(arraySelection);
-
-        Info<< "<end> Foam::vtkPVFoam::updateInfoPatches" << endl;
+        Info<< "<end> updateInfoPatches" << endl;
     }
 }
 
@@ -475,8 +465,8 @@ void Foam::vtkPVFoam::updateInfoZones
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::updateInfoZones"
-            << " [meshPtr=" << (meshPtr_ ? "set" : "nullptr") << "]" << endl;
+        Info<< "<beg> updateInfoZones"
+            << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
     }
 
     wordList namesLst;
@@ -551,10 +541,7 @@ void Foam::vtkPVFoam::updateInfoZones
 
     if (debug)
     {
-        // just for debug info
-        getSelectedArrayEntries(arraySelection);
-
-        Info<< "<end> Foam::vtkPVFoam::updateInfoZones" << endl;
+        Info<< "<end> updateInfoZones" << endl;
     }
 }
 
@@ -571,7 +558,7 @@ void Foam::vtkPVFoam::updateInfoSets
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::updateInfoSets" << endl;
+        Info<< "<beg> updateInfoSets" << endl;
     }
 
     // Add names of sets. Search for last time directory with a sets
@@ -596,7 +583,7 @@ void Foam::vtkPVFoam::updateInfoSets
 
     if (debug)
     {
-        Info<< "     Foam::vtkPVFoam::updateInfoSets read "
+        Info<< "     updateInfoSets read "
             << objects.names() << " from " << setsInstance << endl;
     }
 
@@ -627,28 +614,41 @@ void Foam::vtkPVFoam::updateInfoSets
 
     if (debug)
     {
-        // just for debug info
-        getSelectedArrayEntries(arraySelection);
-
-        Info<< "<end> Foam::vtkPVFoam::updateInfoSets" << endl;
+        Info<< "<end> updateInfoSets" << endl;
     }
 }
 
 
-void Foam::vtkPVFoam::updateInfoLagrangianFields()
+void Foam::vtkPVFoam::updateInfoFields()
+{
+    updateInfoFields<fvPatchField, volMesh>
+    (
+        reader_->GetVolFieldSelection()
+    );
+    updateInfoFields<pointPatchField, pointMesh>
+    (
+        reader_->GetPointFieldSelection()
+    );
+    updateInfoLagrangianFields
+    (
+        reader_->GetLagrangianFieldSelection()
+    );
+}
+
+
+void Foam::vtkPVFoam::updateInfoLagrangianFields
+(
+    vtkDataArraySelection* select
+)
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::updateInfoLagrangianFields"
-            << endl;
+        Info<< "<beg> updateInfoLagrangianFields" << endl;
     }
 
-    vtkDataArraySelection* fieldSelection =
-        reader_->GetLagrangianFieldSelection();
-
     // preserve the enabled selections
-    stringList enabledEntries = getSelectedArrayEntries(fieldSelection);
-    fieldSelection->RemoveAllArrays();
+    stringList enabledEntries = getSelectedArrayEntries(select);
+    select->RemoveAllArrays();
 
     // TODO - currently only get fields from ONE cloud
     // have to decide if the second set of fields get mixed in
@@ -678,44 +678,37 @@ void Foam::vtkPVFoam::updateInfoLagrangianFields()
         lagrangianPrefix/cloudName
     );
 
-    addToSelection<IOField<label>>
-    (
-        fieldSelection,
-        objects
-    );
-    addToSelection<IOField<scalar>>
-    (
-        fieldSelection,
-        objects
-    );
-    addToSelection<IOField<vector>>
-    (
-        fieldSelection,
-        objects
-    );
-    addToSelection<IOField<sphericalTensor>>
-    (
-        fieldSelection,
-
-        objects
-    );
-    addToSelection<IOField<symmTensor>>
-    (
-        fieldSelection,
-        objects
-    );
-    addToSelection<IOField<tensor>>
-    (
-        fieldSelection,
-        objects
-    );
+    addToSelection<IOField<label>>(select, objects);
+    addToSelection<IOField<scalar>>(select, objects);
+    addToSelection<IOField<vector>>(select, objects);
+    addToSelection<IOField<sphericalTensor>>(select, objects);
+    addToSelection<IOField<symmTensor>>(select, objects);
+    addToSelection<IOField<tensor>>(select, objects);
 
     // restore the enabled selections
-    setSelectedArrayEntries(fieldSelection, enabledEntries);
+    setSelectedArrayEntries(select, enabledEntries);
+
+    if (debug > 1)
+    {
+        boolList status;
+        const label nElem = getSelected(status, select);
+
+        forAll(status, i)
+        {
+            Info<< "  lagrangian[" << i << "] = "
+                << status[i]
+                << " : " << select->GetArrayName(i) << nl;
+        }
+
+        if (!nElem)
+        {
+            Info<< "  lagrangian[none]" << nl;
+        }
+    }
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::updateInfoLagrangianFields - "
+        Info<< "<end> updateInfoLagrangianFields - "
             << "lagrangian objects.size() = " << objects.size() << endl;
     }
 }

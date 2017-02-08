@@ -4,49 +4,18 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Parse arguments for library compilation
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
-# Source the wmake functions
-. $WM_DIR/scripts/wmakeFunctions
+# Source CMake functions
+. $WM_PROJECT_DIR/wmake/scripts/cmakeFunctions
 
-# Ensure CMake gets the correct C/C++ compilers
-[ -n "$WM_CC" ]  && export CC="$WM_CC"
-[ -n "$WM_CXX" ] && export CXX="$WM_CXX"
-
-
-# CMake into objectsDir,
-# with an additional attempt if (possibly incorrect) CMakeCache.txt existed
-doCmake()
-{
-    local sourceDir="$1"
-
-    findObjectDir $sourceDir # Where are generated files stored?
-    test -f "$objectsDir/CMakeCache.txt"
-    retry=$? # CMakeCache.txt exists, but sources may have moved
-
-    mkdir -p $objectsDir && \
-    (
-        cd $objectsDir || exit 1
-
-        cmake $sourceDir || {
-            if [ $retry -eq 0 ]
-            then
-                echo "Removing CMakeCache.txt and attempt again"
-                rm -f CMakeCache.txt
-                cmake $sourceDir
-            else
-                exit 1
-            fi
-        } && make
-    )
-}
-
+# -----------------------------------------------------------------------------
 
 if [ -d "$ParaView_DIR" ]
 then
-    wmake $targetType vtkPVblockMesh
+    wmakeLibPv vtkPVblockMesh
 
     if [ "$targetType" != objects ]
     then
-        doCmake $PWD/PVblockMeshReader || {
+        cmakePv $PWD/PVblockMeshReader || {
             echo
             echo "    WARNING: incomplete build of ParaView BlockMesh plugin"
             echo

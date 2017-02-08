@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,6 +47,16 @@ inline void Foam::foamVtkAsciiFormatter::next()
 }
 
 
+inline void Foam::foamVtkAsciiFormatter::done()
+{
+    if (pos_)
+    {
+        os()<< '\n';
+    }
+    pos_ = 0;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::foamVtkAsciiFormatter::foamVtkAsciiFormatter(std::ostream& os)
@@ -73,7 +83,7 @@ Foam::foamVtkAsciiFormatter::foamVtkAsciiFormatter
 
 Foam::foamVtkAsciiFormatter::~foamVtkAsciiFormatter()
 {
-    flush();
+    done();
 }
 
 
@@ -91,7 +101,7 @@ const char* Foam::foamVtkAsciiFormatter::encoding() const
 }
 
 
-void Foam::foamVtkAsciiFormatter::writeSize(const uint64_t)
+void Foam::foamVtkAsciiFormatter::writeSize(const uint64_t ignored)
 {/*nop*/}
 
 
@@ -125,11 +135,14 @@ void Foam::foamVtkAsciiFormatter::write(const double val)
 
 void Foam::foamVtkAsciiFormatter::flush()
 {
-    if (pos_)
-    {
-        os()<< '\n';
-    }
-    pos_ = 0;
+    done();
+}
+
+
+std::size_t
+Foam::foamVtkAsciiFormatter::encodedLength(std::size_t ignored) const
+{
+    return 0;
 }
 
 

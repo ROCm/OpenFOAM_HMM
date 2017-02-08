@@ -1,85 +1,70 @@
-# create a plugin that adds a reader to the ParaView GUI
-# it is added in the file dialog when doing opens/saves.
+# Create a plugin to add a reader to the ParaView GUI
 
-# The qrc file is processed by Qt's resource compiler (rcc)
-# the qrc file must have a resource prefix of "/ParaViewResources"
-# and ParaView will read anything contained under that prefix
-# the pqReader.xml file contains xml defining readers with their
-# file extensions and descriptions.
+cmake_minimum_required(VERSION 2.6)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+find_package(ParaView REQUIRED)
+include(${PARAVIEW_USE_FILE})
 
-FIND_PACKAGE(ParaView REQUIRED)
-INCLUDE(${PARAVIEW_USE_FILE})
-
-LINK_DIRECTORIES(
+link_directories(
     $ENV{FOAM_LIBBIN}
     $ENV{FOAM_EXT_LIBBIN}
 )
 
-INCLUDE_DIRECTORIES(
+include_directories(
     $ENV{WM_PROJECT_DIR}/src/OpenFOAM/lnInclude
     $ENV{WM_PROJECT_DIR}/src/OSspecific/$ENV{WM_OSTYPE}/lnInclude
     $ENV{WM_PROJECT_DIR}/src/meshing/blockMesh/lnInclude
     ${PROJECT_SOURCE_DIR}/../vtkPVblockMesh
+    ${PROJECT_SOURCE_DIR}/../../foamPv/lnInclude
 )
 
-ADD_DEFINITIONS(
-    -std=c++0x
+add_definitions(
+    -std=c++11
     -DWM_$ENV{WM_PRECISION_OPTION}
     -DWM_LABEL_SIZE=$ENV{WM_LABEL_SIZE}
 )
 
 # Set output library destination to plugin directory
-SET(
+set(
     LIBRARY_OUTPUT_PATH $ENV{PV_PLUGIN_PATH}
     CACHE INTERNAL
     "Single output directory for building all libraries."
 )
 
-#
-# Define combined plugin
-#
 
-# Extend the auto-generated panel
-QT4_WRAP_CPP(MOC_SRCS pqPVblockMeshReaderPanel.h)
+if (PARAVIEW_QT_VERSION VERSION_GREATER "4")
+  qt5_wrap_cpp(MOC_SRCS
+      pqFoamBlockMeshControls.h
+  )
+else()
+  qt4_wrap_cpp(MOC_SRCS
+      pqFoamBlockMeshControls.h
+  )
+endif()
 
-ADD_PARAVIEW_OBJECT_PANEL(IFACES IFACE_SRCS
-  CLASS_NAME pqPVblockMeshReaderPanel
-  XML_NAME  PVblockMeshReader           # name of SourceProxy in *SM.xml
-  XML_GROUP sources
+add_paraview_property_group_widget(IFACES0 IFACES0_SRCS
+    TYPE "openfoam_blockMesh_general_controls"
+    CLASS_NAME pqFoamBlockMeshControls
 )
 
-# Separate GUI_RESOURCE_FILES deprecated with paraview 4.3
-# so check if version < 4.4
+add_paraview_plugin(
+    PVblockMeshReader_SM "1.0"
+    SERVER_MANAGER_XML PVblockMeshReader_SM.xml
+    SERVER_MANAGER_SOURCES  vtkPVblockMeshReader.cxx
+    GUI_INTERFACES
+        ${IFACES0}
+    SOURCES
+        ${IFACES0_SRCS}
+        ${MOC_SRCS}
+        pqFoamBlockMeshControls.cxx
+)
 
-IF(("${PARAVIEW_VERSION_MAJOR}" LESS 5) AND ("${PARAVIEW_VERSION_MINOR}" LESS 4))
-    ADD_PARAVIEW_PLUGIN(
-        PVblockMeshReader_SM "1.0"
-        SERVER_MANAGER_XML PVblockMeshReader_SM.xml
-        SERVER_MANAGER_SOURCES  vtkPVblockMeshReader.cxx
-        GUI_INTERFACES ${IFACES}
-        GUI_SOURCES pqPVblockMeshReaderPanel.cxx
-        ${MOC_SRCS} ${UI_SRCS} ${IFACE_SRCS}
-        GUI_RESOURCE_FILES PVblockMeshReader.xml
-    )
-ELSE()
-    ADD_PARAVIEW_PLUGIN(
-        PVblockMeshReader_SM "1.0"
-        SERVER_MANAGER_XML PVblockMeshReader_SM.xml
-        SERVER_MANAGER_SOURCES  vtkPVblockMeshReader.cxx
-        GUI_INTERFACES ${IFACES}
-        GUI_SOURCES pqPVblockMeshReaderPanel.cxx
-        ${MOC_SRCS} ${UI_SRCS} ${IFACE_SRCS}
-    )
-ENDIF()
 
-# Build the client-side plugin
-
-TARGET_LINK_LIBRARIES(
+target_link_libraries(
     PVblockMeshReader_SM
     LINK_PUBLIC
-    vtkPVblockMesh
+    vtkPVblockMesh-pv${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}
+    foamPv-pv${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}
     blockMesh
     OpenFOAM
 )

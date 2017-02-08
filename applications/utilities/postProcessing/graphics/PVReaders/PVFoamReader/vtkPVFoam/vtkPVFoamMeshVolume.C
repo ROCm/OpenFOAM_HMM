@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,8 +29,6 @@ License
 // OpenFOAM includes
 #include "fvMesh.H"
 #include "cellModeller.H"
-#include "vtkOpenFOAMPoints.H"
-#include "Swap.H"
 
 // VTK includes
 #include "vtkCellArray.h"
@@ -56,7 +54,7 @@ vtkUnstructuredGrid* Foam::vtkPVFoam::volumeVTKMesh
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::volumeVTKMesh" << endl;
+        Info<< "<beg> volumeVTKMesh" << endl;
         printMemory();
     }
 
@@ -78,11 +76,6 @@ vtkUnstructuredGrid* Foam::vtkPVFoam::volumeVTKMesh
     // and cells
     if (!reader_->GetUseVTKPolyhedron())
     {
-        if (debug)
-        {
-            Info<< "... scanning for polyhedra" << endl;
-        }
-
         forAll(cellShapes, celli)
         {
             const cellModel& model = cellShapes[celli].model();
@@ -123,20 +116,7 @@ vtkUnstructuredGrid* Foam::vtkPVFoam::volumeVTKMesh
     // Set size of additional cells mapping array
     // (from added cell to original cell)
 
-    if (debug)
-    {
-        Info<<" mesh nCells     = " << mesh.nCells() << nl
-            <<"      nPoints    = " << mesh.nPoints() << nl
-            <<"      nAddCells  = " << nAddCells << nl
-            <<"      nAddPoints = " << nAddPoints << endl;
-    }
-
     superCells.setSize(mesh.nCells() + nAddCells);
-
-    if (debug)
-    {
-        Info<< "... converting points" << endl;
-    }
 
     // Convert OpenFOAM mesh vertices to VTK
     vtkPoints* vtkpoints = vtkPoints::New();
@@ -146,13 +126,7 @@ vtkUnstructuredGrid* Foam::vtkPVFoam::volumeVTKMesh
 
     forAll(points, i)
     {
-        vtkInsertNextOpenFOAMPoint(vtkpoints, points[i]);
-    }
-
-
-    if (debug)
-    {
-        Info<< "... converting cells" << endl;
+        vtkpoints->InsertNextPoint(points[i].v_);
     }
 
     vtkmesh->Allocate(mesh.nCells() + nAddCells);
@@ -329,7 +303,7 @@ vtkUnstructuredGrid* Foam::vtkPVFoam::volumeVTKMesh
 
             // The new vertex from the cell-centre
             const label newVertexLabel = mesh.nPoints() + addPointi;
-            vtkInsertNextOpenFOAMPoint(vtkpoints, mesh.C()[celli]);
+            vtkpoints->InsertNextPoint(mesh.C()[celli].v_);
 
             // Whether to insert cell in place of original or not.
             bool substituteCell = true;
@@ -441,7 +415,10 @@ vtkUnstructuredGrid* Foam::vtkPVFoam::volumeVTKMesh
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::volumeVTKMesh" << endl;
+        Info<<"nCells=" << mesh.nCells() <<" nPoints=" << mesh.nPoints()
+            <<" nAddCells=" << nAddCells <<" nAddPoints=" << nAddPoints
+            << nl
+            << "<end> volumeVTKMesh" << endl;
         printMemory();
     }
 

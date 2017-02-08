@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -558,19 +558,11 @@ Foam::label Foam::checkTopology
 
                 if (allGeometry)
                 {
-                    const pointField& pts = pp.points();
                     const labelList& mp = pp.meshPoints();
 
                     if (returnReduce(mp.size(), sumOp<label>()) > 0)
                     {
-                        boundBox bb(point::max, point::min);
-                        forAll(mp, i)
-                        {
-                            bb.min() = min(bb.min(), pts[mp[i]]);
-                            bb.max() = max(bb.max(), pts[mp[i]]);
-                        }
-                        reduce(bb.min(), minOp<vector>());
-                        reduce(bb.max(), maxOp<vector>());
+                        boundBox bb(pp.points(), mp, true); // reduce
                         Info<< ' ' << bb;
                     }
                 }

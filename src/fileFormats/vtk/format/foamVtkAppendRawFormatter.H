@@ -77,7 +77,7 @@ public:
     // Constructors
 
         //- Construct and attach to an output stream
-        foamVtkAppendRawFormatter(std::ostream&);
+        foamVtkAppendRawFormatter(std::ostream& os);
 
 
     //- Destructor
@@ -94,12 +94,14 @@ public:
 
 
         //- Write leading size for binary output
-        virtual void writeSize(const uint64_t);
+        virtual void writeSize(const uint64_t nBytes);
 
-        virtual void write(const uint8_t);
-        virtual void write(const label);
-        virtual void write(const float);
-        virtual void write(const double);
+        virtual void write(const uint8_t val);
+        virtual void write(const label val);
+        virtual void write(const float val);
+        virtual void write(const double val);
+
+        //- A no-op for this format
         virtual void flush();
 
 };

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,74 +21,44 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Misc helper methods and utilities
-
 \*---------------------------------------------------------------------------*/
 
-#include "vtkPVFoam.H"
-#include "vtkPVFoamReader.h"
+#include "foamPvCore.H"
 
-// OpenFOAM includes
-#include "fvMesh.H"
-#include "Time.H"
-#include "IFstream.H"
 #include "memInfo.H"
+#include "DynamicList.H"
 
-// VTK includes
 #include "vtkDataArraySelection.h"
 #include "vtkDataSet.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkInformation.h"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    //! \cond fileScope
-    //  Extract up to the first non-word characters
-    inline word getFirstWord(const char* str)
-    {
-        if (str)
-        {
-            label n = 0;
-            while (str[n] && word::valid(str[n]))
-            {
-                ++n;
-            }
-            return word(str, n, true);
-        }
-        else
-        {
-            return word::null;
-        }
+    defineTypeNameAndDebug(foamPvCore, 0);
+}
 
-    }
-    //! \endcond
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-} // End namespace Foam
-
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::vtkPVFoam::AddToBlock
+void Foam::foamPvCore::addToBlock
 (
     vtkMultiBlockDataSet* output,
     vtkDataSet* dataset,
-    const arrayRange& range,
+    const arrayRange& selector,
     const label datasetNo,
     const std::string& datasetName
 )
 {
-    const int blockNo = range.block();
+    const int blockNo = selector.block();
 
-    vtkDataObject* blockDO = output->GetBlock(blockNo);
-    vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast(blockDO);
+    vtkDataObject* dataObj = output->GetBlock(blockNo);
+    vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast(dataObj);
 
     if (!block)
     {
-        if (blockDO)
+        if (dataObj)
         {
             FatalErrorInFunction
                 << "Block already has a vtkDataSet assigned to it"
@@ -111,13 +81,13 @@ void Foam::vtkPVFoam::AddToBlock
 
     block->SetBlock(datasetNo, dataset);
 
-    // name the block when assigning dataset 0
+    // name the output block when assigning dataset 0
     if (datasetNo == 0)
     {
         output->GetMetaData(blockNo)->Set
         (
             vtkCompositeDataSet::NAME(),
-            range.name()
+            selector.name()
         );
     }
 
@@ -132,38 +102,19 @@ void Foam::vtkPVFoam::AddToBlock
 }
 
 
-vtkDataSet* Foam::vtkPVFoam::GetDataSetFromBlock
+int Foam::foamPvCore::getNumberOfDataSets
 (
     vtkMultiBlockDataSet* output,
-    const arrayRange& range,
-    const label datasetNo
+    const arrayRange& selector
 )
 {
-    const int blockNo = range.block();
+    const int blockNo = selector.block();
 
-    vtkDataObject* blockDO = output->GetBlock(blockNo);
-    vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast(blockDO);
+    vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast
+    (
+        output->GetBlock(blockNo)
+    );
 
-    if (block)
-    {
-        return vtkDataSet::SafeDownCast(block->GetBlock(datasetNo));
-    }
-
-    return 0;
-}
-
-
-// ununsed at the moment
-Foam::label Foam::vtkPVFoam::GetNumberOfDataSets
-(
-    vtkMultiBlockDataSet* output,
-    const arrayRange& range
-)
-{
-    const int blockNo = range.block();
-
-    vtkDataObject* blockDO = output->GetBlock(blockNo);
-    vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast(blockDO);
     if (block)
     {
         return block->GetNumberOfBlocks();
@@ -173,54 +124,76 @@ Foam::label Foam::vtkPVFoam::GetNumberOfDataSets
 }
 
 
-Foam::word Foam::vtkPVFoam::getPartName(const int partId)
+int Foam::foamPvCore::getSelected
+(
+    boolList& status,
+    vtkDataArraySelection* selection
+)
 {
-    return getFirstWord(reader_->GetPartArrayName(partId));
+    const int n = selection->GetNumberOfArrays();
+    if (status.size() != n)
+    {
+        status.setSize(n);
+        status = false;
+    }
+
+    int count = 0;
+    forAll(status, i)
+    {
+        const bool setting = selection->GetArraySetting(i);
+        if (setting)
+        {
+            ++count;
+        }
+        status[i] = setting;
+    }
+
+    return count;
 }
 
 
-Foam::wordHashSet Foam::vtkPVFoam::getSelected
+Foam::hashedWordList Foam::foamPvCore::getSelected
 (
     vtkDataArraySelection* select
 )
 {
-    int nElem = select->GetNumberOfArrays();
-    wordHashSet selections(2*nElem);
+    const int n = select->GetNumberOfArrays();
+    DynamicList<word> selected(n);
 
-    for (int elemI=0; elemI < nElem; ++elemI)
+    for (int i=0; i < n; ++i)
     {
-        if (select->GetArraySetting(elemI))
+        if (select->GetArraySetting(i))
         {
-            selections.insert(getFirstWord(select->GetArrayName(elemI)));
+            selected.append(getFirstWord(select->GetArrayName(i)));
         }
     }
 
-    return selections;
+    return hashedWordList(selected, true);
 }
 
 
-Foam::wordHashSet Foam::vtkPVFoam::getSelected
+Foam::hashedWordList Foam::foamPvCore::getSelected
 (
     vtkDataArraySelection* select,
-    const arrayRange& range
+    const arrayRange& selector
 )
 {
-    int nElem = select->GetNumberOfArrays();
-    wordHashSet selections(2*nElem);
+    const int n = select->GetNumberOfArrays();
+    DynamicList<word> selected(n);
 
-    for (int elemI = range.start(); elemI < range.end(); ++elemI)
+    for (int i = selector.start(); i < selector.end(); ++i)
     {
-        if (select->GetArraySetting(elemI))
+        if (select->GetArraySetting(i))
         {
-            selections.insert(getFirstWord(select->GetArrayName(elemI)));
+            selected.append(getFirstWord(select->GetArrayName(i)));
         }
     }
 
-    return selections;
+    return hashedWordList(selected, true);
 }
 
 
-Foam::stringList Foam::vtkPVFoam::getSelectedArrayEntries
+Foam::stringList Foam::foamPvCore::getSelectedArrayEntries
 (
     vtkDataArraySelection* select
 )
@@ -237,14 +210,13 @@ Foam::stringList Foam::vtkPVFoam::getSelectedArrayEntries
     }
     selections.setSize(nElem);
 
-
-    if (debug)
+    if (debug > 1)
     {
-        label nElem = select->GetNumberOfArrays();
+        const int n = select->GetNumberOfArrays();
         Info<< "available(";
-        for (int elemI = 0; elemI < nElem; ++elemI)
+        for (int i=0; i < n; ++i)
         {
-            Info<< " \"" << select->GetArrayName(elemI) << "\"";
+            Info<< " \"" << select->GetArrayName(i) << "\"";
         }
         Info<< " )\nselected(";
 
@@ -259,31 +231,30 @@ Foam::stringList Foam::vtkPVFoam::getSelectedArrayEntries
 }
 
 
-Foam::stringList Foam::vtkPVFoam::getSelectedArrayEntries
+Foam::stringList Foam::foamPvCore::getSelectedArrayEntries
 (
     vtkDataArraySelection* select,
-    const arrayRange& range
+    const arrayRange& selector
 )
 {
-    stringList selections(range.size());
+    stringList selections(selector.size());
     label nElem = 0;
 
-    for (int elemI = range.start(); elemI < range.end(); ++elemI)
+    for (int i = selector.start(); i < selector.end(); ++i)
     {
-        if (select->GetArraySetting(elemI))
+        if (select->GetArraySetting(i))
         {
-            selections[nElem++] = select->GetArrayName(elemI);
+            selections[nElem++] = select->GetArrayName(i);
         }
     }
     selections.setSize(nElem);
 
-
-    if (debug)
+    if (debug > 1)
     {
         Info<< "available(";
-        for (int elemI = range.start(); elemI < range.end(); ++elemI)
+        for (int i = selector.start(); i < selector.end(); ++i)
         {
-            Info<< " \"" << select->GetArrayName(elemI) << "\"";
+            Info<< " \"" << select->GetArrayName(i) << "\"";
         }
         Info<< " )\nselected(";
 
@@ -298,19 +269,19 @@ Foam::stringList Foam::vtkPVFoam::getSelectedArrayEntries
 }
 
 
-void Foam::vtkPVFoam::setSelectedArrayEntries
+void Foam::foamPvCore::setSelectedArrayEntries
 (
     vtkDataArraySelection* select,
     const stringList& selections
 )
 {
-    const int nElem = select->GetNumberOfArrays();
+    const int n = select->GetNumberOfArrays();
     select->DisableAllArrays();
 
     // Loop through entries, setting values from selectedEntries
-    for (int elemI=0; elemI < nElem; ++elemI)
+    for (int i=0; i < n; ++i)
     {
-        string arrayName(select->GetArrayName(elemI));
+        const string arrayName(select->GetArrayName(i));
 
         forAll(selections, elemI)
         {
@@ -324,17 +295,33 @@ void Foam::vtkPVFoam::setSelectedArrayEntries
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+Foam::word Foam::foamPvCore::getFirstWord(const char* str)
+{
+    if (str)
+    {
+        label n = 0;
+        while (str[n] && word::valid(str[n]))
+        {
+            ++n;
+        }
+        // don't need to re-check for invalid chars
+        return word(str, n, false);
+    }
+    else
+    {
+        return word::null;
+    }
+}
 
-void Foam::vtkPVFoam::printMemory()
+
+void Foam::foamPvCore::printMemory()
 {
     memInfo mem;
 
     if (mem.valid())
     {
-        Info<< "mem peak/size/rss: " << mem << "\n";
+        Info<< "mem peak/size/rss: " << mem << endl;
     }
 }
-
 
 // ************************************************************************* //

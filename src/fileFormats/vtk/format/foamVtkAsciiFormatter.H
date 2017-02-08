@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,8 +62,11 @@ class foamVtkAsciiFormatter
 
     // Private Member Functions
 
-        //- Advance to next position, adding space or newline as required
+        //- Advance to next position, adding space or newline as needed
         inline void next();
+
+        //- Finish an output line, adding newline as needed
+        inline void done();
 
 
         //- Disallow default bitwise copy construct
@@ -78,10 +81,10 @@ public:
     // Constructors
 
         //- Construct and attach to an output stream, use default precision
-        foamVtkAsciiFormatter(std::ostream&);
+        foamVtkAsciiFormatter(std::ostream& os);
 
         //- Construct and attach to an output stream, use specified precision
-        foamVtkAsciiFormatter(std::ostream&, unsigned precision);
+        foamVtkAsciiFormatter(std::ostream& os, unsigned precision);
 
 
     //- Destructor
@@ -95,18 +98,24 @@ public:
         virtual const char* name() const;
 
         //- Name for the XML append encoding - unused.
-        //  Currently simply "ASCII", but this should not be relied upon.
+        //  Currently identical to name(), but do not rely on this.
         virtual const char* encoding() const;
 
 
         //- Write leading size - this is a no-op for ascii output
-        virtual void writeSize(const uint64_t);
+        virtual void writeSize(const uint64_t ignored);
 
-        virtual void write(const uint8_t);
-        virtual void write(const label);
-        virtual void write(const float);
-        virtual void write(const double);
+        virtual void write(const uint8_t val);
+        virtual void write(const label val);
+        virtual void write(const float val);
+        virtual void write(const double val);
+
+        //- Write a newline if needed to finish a line of output.
         virtual void flush();
+
+        //- The encoded length for ascii output is not applicable.
+        virtual std::size_t encodedLength(std::size_t ignored) const;
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

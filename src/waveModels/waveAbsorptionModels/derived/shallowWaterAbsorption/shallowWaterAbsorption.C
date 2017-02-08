@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  | Copyright (C) 2015 IH-Cantabria
 -------------------------------------------------------------------------------
 License
@@ -96,7 +96,7 @@ Foam::waveModels::shallowWaterAbsorption::shallowWaterAbsorption
 {
     if (readFields)
     {
-        read(dict);
+        readDict(dict);
     }
 }
 
@@ -109,12 +109,12 @@ Foam::waveModels::shallowWaterAbsorption::~shallowWaterAbsorption()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModels::shallowWaterAbsorption::read
+bool Foam::waveModels::shallowWaterAbsorption::readDict
 (
     const dictionary& overrideDict
 )
 {
-    return waveAbsorptionModel::read(overrideDict);
+    return waveAbsorptionModel::readDict(overrideDict);
 }
 
 

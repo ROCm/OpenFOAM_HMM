@@ -83,10 +83,6 @@ protected:
         void operator=(const FIREMeshReader&) = delete;
 
 
-        //- Validate word (eg, avoid leading digits)
-        static word validateWord(const std::string&);
-
-
         //- Read the mesh from the file(s)
         virtual bool readGeometry(const scalar scaleFactor = 1.0);
 

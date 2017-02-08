@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,28 +72,33 @@ public:
     vtkGetStringMacro(FileName);
 
     // Description:
+    // Display patch names
+    virtual void SetShowPatchNames(bool);
+    vtkGetMacro(ShowPatchNames, bool);
+
+    // Description:
     // Display corner point labels
-    virtual void SetShowPointNumbers(int);
-    vtkGetMacro(ShowPointNumbers, int);
+    virtual void SetShowPointNumbers(bool);
+    vtkGetMacro(ShowPointNumbers, bool);
 
     // Description:
     // Refresh blockMesh from changes to blockMeshDict
-    virtual void SetRefresh(int);
+    virtual void Refresh();
 
     // Description:
     // Blocks selection list control
     vtkDataArraySelection* GetBlockSelection();
     int  GetNumberOfBlockArrays();
-    int  GetBlockArrayStatus(const char*);
-    void SetBlockArrayStatus(const char*, int status);
+    int  GetBlockArrayStatus(const char* name);
+    void SetBlockArrayStatus(const char* name, int status);
     const char* GetBlockArrayName(int index);
 
     // Description:
     // CurvedEdges selection list control
     vtkDataArraySelection* GetCurvedEdgesSelection();
     int  GetNumberOfCurvedEdgesArrays();
-    int  GetCurvedEdgesArrayStatus(const char*);
-    void SetCurvedEdgesArrayStatus(const char*, int status);
+    int  GetCurvedEdgesArrayStatus(const char* name);
+    void SetCurvedEdgesArrayStatus(const char* name, int status);
     const char* GetCurvedEdgesArrayName(int index);
 
     // Description:
@@ -114,22 +119,22 @@ protected:
     vtkPVblockMeshReader();
 
     //- Destructor
-    ~vtkPVblockMeshReader();
+    virtual ~vtkPVblockMeshReader();
 
     //- Return information about mesh, times, etc without loading anything
     virtual int RequestInformation
     (
-        vtkInformation*,
-        vtkInformationVector**,
-        vtkInformationVector*
+        vtkInformation* unusedRequest,
+        vtkInformationVector** unusedInputVector,
+        vtkInformationVector* outputVector
     );
 
-    //- Get the mesh/fields for a particular time
+    //- Get the mesh for a particular time
     virtual int RequestData
     (
-        vtkInformation*,
-        vtkInformationVector**,
-        vtkInformationVector*
+        vtkInformation* unusedRequest,
+        vtkInformationVector** unusedInputVector,
+        vtkInformationVector* outputVector
     );
 
     //- Fill in additional port information
@@ -144,25 +149,29 @@ protected:
 private:
 
     //- Disallow default bitwise copy construct
-    vtkPVblockMeshReader(const vtkPVblockMeshReader&);
+    vtkPVblockMeshReader(const vtkPVblockMeshReader&) = delete;
 
     //- Disallow default bitwise assignment
-    void operator=(const vtkPVblockMeshReader&);
+    void operator=(const vtkPVblockMeshReader&) = delete;
+
+    //- Add/remove patch names to/from the view
+    void updatePatchNamesView(const bool show);
 
     //- Add/remove point numbers to/from the view
     void updatePointNumbersView(const bool show);
 
 
+    //- Show Patch Names
+    bool ShowPatchNames;
+
     //- Show Point Numbers
-    int ShowPointNumbers;
+    bool ShowPointNumbers;
 
     vtkDataArraySelection* BlockSelection;
-
     vtkDataArraySelection* CurvedEdgesSelection;
 
-    //BTX
-    Foam::vtkPVblockMesh* foamData_;
-    //ETX
+    //- Backend portion of the reader
+    Foam::vtkPVblockMesh* backend_;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
     }
 
 
+    labelRange range;
     labelRanges ranges;
 
     bool removeMode = false;
@@ -74,14 +75,16 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        label start = 0;
-        label size  = 0;
+        {
+            label start = 0;
+            label size  = 0;
 
-        IStringStream(args[argI])() >> start;
-        ++argI;
-        IStringStream(args[argI])() >> size;
+            IStringStream(args[argI])() >> start;
+            ++argI;
+            IStringStream(args[argI])() >> size;
 
-        labelRange range(start, size);
+            range.reset(start, size);
+        }
 
         Info<< "---------------" << nl;
         if (removeMode)
@@ -107,10 +110,11 @@ int main(int argc, char *argv[])
             ranges.add(range);
         }
 
-        Info<< "<list>" << ranges << "</list>" << nl;
-        forAllConstIter(labelRanges, ranges, iter)
+        Info<< "<list>" << ranges << "</list>" << nl
+            << "content:";
+        for (auto i : ranges)
         {
-            Info<< " " << iter();
+            Info<< " " << i;
         }
         Info<< nl;
     }

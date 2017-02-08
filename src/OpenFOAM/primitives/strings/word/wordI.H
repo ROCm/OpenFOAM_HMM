@@ -31,8 +31,7 @@ License
 
 inline void Foam::word::stripInvalid()
 {
-    // skip stripping unless debug is active to avoid
-    // costly operations
+    // skip stripping unless debug is active (to avoid costly operations)
     if (debug && string::stripInvalid<word>(*this))
     {
         std::cerr
@@ -132,29 +131,29 @@ inline bool Foam::word::valid(char c)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void Foam::word::operator=(const word& q)
+inline void Foam::word::operator=(const word& w)
 {
-    string::operator=(q);
+    string::operator=(w);
 }
 
 
-inline void Foam::word::operator=(const string& q)
+inline void Foam::word::operator=(const string& s)
 {
-    string::operator=(q);
+    string::operator=(s);
     stripInvalid();
 }
 
 
-inline void Foam::word::operator=(const std::string& q)
+inline void Foam::word::operator=(const std::string& s)
 {
-    string::operator=(q);
+    string::operator=(s);
     stripInvalid();
 }
 
 
-inline void Foam::word::operator=(const char* q)
+inline void Foam::word::operator=(const char* s)
 {
-    string::operator=(q);
+    string::operator=(s);
     stripInvalid();
 }
 
@@ -176,6 +175,5 @@ inline Foam::word Foam::operator&(const word& a, const word& b)
     }
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

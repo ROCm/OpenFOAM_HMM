@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -379,7 +379,7 @@ bool Foam::triSurface::read
     }
     else if (ext == "stlb")
     {
-        return readSTLBINARY(name);
+        return readSTL(name, true);
     }
     else if (ext == "gts")
     {
@@ -464,10 +464,6 @@ void Foam::triSurface::write
     {
         writeTRI(sort, OFstream(name)());
     }
-    else if (ext == "dx")
-    {
-        writeDX(sort, OFstream(name)());
-    }
     else if (ext == "ac")
     {
         writeAC(OFstream(name)());
@@ -483,7 +479,7 @@ void Foam::triSurface::write
             << " for file " << name
             << ". Supported extensions are '.ftr', '.stl', '.stlb', "
             << "'.gts', '.obj', '.vtk'"
-            << ", '.off', '.dx', '.smesh', '.ac' and '.tri'"
+            << ", '.off', '.smesh', '.ac' and '.tri'"
             << exit(FatalError);
     }
 }
@@ -1110,7 +1106,7 @@ void Foam::triSurface::writeStats(Ostream& os) const
     PackedBoolList pointIsUsed(points().size());
 
     label nPoints = 0;
-    boundBox bb = boundBox::invertedBox;
+    boundBox bb(boundBox::invertedBox);
 
     forAll(*this, facei)
     {
@@ -1121,9 +1117,8 @@ void Foam::triSurface::writeStats(Ostream& os) const
             label pointi = f[fp];
             if (pointIsUsed.set(pointi, 1))
             {
-                bb.min() = ::Foam::min(bb.min(), points()[pointi]);
-                bb.max() = ::Foam::max(bb.max(), points()[pointi]);
-                nPoints++;
+                bb.add(points()[pointi]);
+                ++nPoints;
             }
         }
     }

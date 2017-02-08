@@ -48,7 +48,7 @@ inline Foam::STLtriangle::STLtriangle
 {}
 
 
-inline Foam::STLtriangle::STLtriangle(istream& is)
+inline Foam::STLtriangle::STLtriangle(std::istream& is)
 {
     read(is);
 }
@@ -86,16 +86,16 @@ inline unsigned short Foam::STLtriangle::attrib() const
 }
 
 
-inline void Foam::STLtriangle::read(istream& is)
+inline void Foam::STLtriangle::read(std::istream& is)
 {
-    is.read(reinterpret_cast<char*>(this), 4*sizeof(STLpoint));
+    is.read(reinterpret_cast<char*>(&normal_), 4*sizeof(STLpoint));
     is.read(reinterpret_cast<char*>(&attrib_), sizeof(STLattrib));
 }
 
 
-inline void Foam::STLtriangle::write(ostream& os) const
+inline void Foam::STLtriangle::write(std::ostream& os) const
 {
-    os.write(reinterpret_cast<const char*>(this), 4*sizeof(STLpoint));
+    os.write(reinterpret_cast<const char*>(&normal_), 4*sizeof(STLpoint));
     os.write(reinterpret_cast<const char*>(&attrib_), sizeof(STLattrib));
 }
 
@@ -153,13 +153,13 @@ inline void Foam::STLtriangle::write
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-inline Foam::Ostream& Foam::operator<<(Ostream& os, const STLtriangle& t)
+inline Foam::Ostream& Foam::operator<<(Ostream& os, const STLtriangle& tri)
 {
-    os  << t.normal_ << token::SPACE
-        << t.a_ << token::SPACE
-        << t.b_ << token::SPACE
-        << t.c_ << token::SPACE
-        << t.attrib_;
+    os  << tri.normal_ << token::SPACE
+        << tri.a_ << token::SPACE
+        << tri.b_ << token::SPACE
+        << tri.c_ << token::SPACE
+        << tri.attrib_;
 
     return os;
 }

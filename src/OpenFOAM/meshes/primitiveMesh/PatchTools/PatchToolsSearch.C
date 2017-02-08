@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -236,9 +236,8 @@ void Foam::PatchTools::calcBounds
             label pointi = f[fp];
             if (pointIsUsed.set(pointi, 1u))
             {
-                bb.min() = ::Foam::min(bb.min(), points[pointi]);
-                bb.max() = ::Foam::max(bb.max(), points[pointi]);
-                nPoints++;
+                bb.add(points[pointi]);
+                ++nPoints;
             }
         }
     }

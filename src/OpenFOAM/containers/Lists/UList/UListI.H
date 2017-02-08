@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,7 @@ template<class T>
 inline Foam::UList<T>::UList()
 :
     size_(0),
-    v_(0)
+    v_(nullptr)
 {}
 
 
@@ -321,7 +321,7 @@ inline bool Foam::UList<T>::empty() const
 template<class T>
 inline void Foam::reverse(UList<T>& ul, const label n)
 {
-    for (int i=0; i<n/2; i++)
+    for (int i=0; i<n/2; ++i)
     {
         Swap(ul[i], ul[n-1-i]);
     }

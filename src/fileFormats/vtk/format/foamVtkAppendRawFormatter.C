@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,9 +71,9 @@ const char* Foam::foamVtkAppendRawFormatter::encoding() const
 }
 
 
-void Foam::foamVtkAppendRawFormatter::writeSize(const uint64_t val)
+void Foam::foamVtkAppendRawFormatter::writeSize(const uint64_t nBytes)
 {
-    write(reinterpret_cast<const char*>(&val), sizeof(uint64_t));
+    write(reinterpret_cast<const char*>(&nBytes), sizeof(uint64_t));
 }
 
 
@@ -85,28 +85,28 @@ void Foam::foamVtkAppendRawFormatter::write(const uint8_t val)
 
 void Foam::foamVtkAppendRawFormatter::write(const label val)
 {
-    // std::cerr<<"label is:" << sizeof(val) << '\n';
+    // std::cerr<<"label:" << sizeof(val) << "=" << val << '\n';
     write(reinterpret_cast<const char*>(&val), sizeof(label));
 }
 
 
 void Foam::foamVtkAppendRawFormatter::write(const float val)
 {
-    // std::cerr<<"float is:" << sizeof(val) << '\n';
+    // std::cerr<<"float:" << sizeof(val) << "=" << val << '\n';
     write(reinterpret_cast<const char*>(&val), sizeof(float));
 }
 
 
 void Foam::foamVtkAppendRawFormatter::write(const double val)
 {
-    // std::cerr<<"write double as float:" << val << '\n';
+    // std::cerr<<"double as float=" << val << '\n';
     float copy(val);
     write(copy);
 }
 
 
 void Foam::foamVtkAppendRawFormatter::flush()
-{}
+{/*nop*/}
 
 
 // ************************************************************************* //

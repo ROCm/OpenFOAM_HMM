@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +70,7 @@ class HashPtrTable
 
         //- Read from Istream using given Istream constructor class
         template<class INew>
-        void read(Istream&, const INew& inewt);
+        void read(Istream& is, const INew& inewt);
 
         //- Read from dictionary using given dictionary constructor class
         template<class INew>
@@ -91,17 +91,17 @@ public:
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>
-        HashPtrTable(Istream&, const INew&);
+        HashPtrTable(Istream& is, const INew& inewt);
 
         //- Construct from Istream using default Istream constructor class
-        HashPtrTable(Istream&);
+        HashPtrTable(Istream& is);
 
         //- Construct from dictionary using default dictionary constructor
         //  class
-        HashPtrTable(const dictionary&);
+        HashPtrTable(const dictionary& dict);
 
         //- Construct as copy
-        HashPtrTable(const HashPtrTable<T, Key, Hash>&);
+        HashPtrTable(const HashPtrTable<T, Key, Hash>& ht);
 
 
     //- Destructor
@@ -113,10 +113,10 @@ public:
         // Edit
 
             //- Remove and return the pointer specified by given iterator
-            T* remove(iterator&);
+            T* remove(iterator& iter);
 
             //- Erase an hashedEntry specified by given iterator
-            bool erase(iterator&);
+            bool erase(iterator& iter);
 
             //- Clear all entries from table
             void clear();
@@ -127,7 +127,8 @@ public:
 
     // Member Operators
 
-        void operator=(const HashPtrTable<T, Key, Hash>&);
+        //- Copy assignment
+        void operator=(const HashPtrTable<T, Key, Hash>& rhs);
 
 
     // IOstream Operators

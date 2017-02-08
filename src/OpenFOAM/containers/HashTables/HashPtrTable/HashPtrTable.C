@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,15 @@ Foam::HashPtrTable<T, Key, Hash>::HashPtrTable
 {
     for (const_iterator iter = ht.begin(); iter != ht.end(); ++iter)
     {
-        this->insert(iter.key(), new T(**iter));
+        const T* ptr = *iter;
+        if (ptr)
+        {
+            this->insert(iter.key(), new T(*ptr));
+        }
+        else
+        {
+            this->insert(iter.key(), nullptr);
+        }
     }
 }
 
@@ -62,24 +70,24 @@ Foam::HashPtrTable<T, Key, Hash>::~HashPtrTable()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
-T* Foam::HashPtrTable<T, Key, Hash>::remove(iterator& it)
+T* Foam::HashPtrTable<T, Key, Hash>::remove(iterator& iter)
 {
-    T* elemPtr = *it;
-    HashTable<T*, Key, Hash>::erase(it);
-    return elemPtr;
+    T* ptr = *iter;
+    HashTable<T*, Key, Hash>::erase(iter);
+    return ptr;
 }
 
 
 template<class T, class Key, class Hash>
-bool Foam::HashPtrTable<T, Key, Hash>::erase(iterator& it)
+bool Foam::HashPtrTable<T, Key, Hash>::erase(iterator& iter)
 {
-    T* elemPtr = *it;
+    T* ptr = *iter;
 
-    if (HashTable<T*, Key, Hash>::erase(it))
+    if (HashTable<T*, Key, Hash>::erase(iter))
     {
-        if (elemPtr)
+        if (ptr)
         {
-            delete elemPtr;
+            delete ptr;
         }
 
         return true;
@@ -128,7 +136,15 @@ void Foam::HashPtrTable<T, Key, Hash>::operator=
 
     for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
     {
-        this->insert(iter.key(), new T(**iter));
+        const T* ptr = *iter;
+        if (ptr)
+        {
+            this->insert(iter.key(), new T(*ptr));
+        }
+        else
+        {
+            this->insert(iter.key(), nullptr);
+        }
     }
 }
 

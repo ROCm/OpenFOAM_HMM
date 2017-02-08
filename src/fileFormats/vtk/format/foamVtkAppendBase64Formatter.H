@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,7 @@ SourceFiles
 #ifndef foamVtkAppendBase64Formatter_H
 #define foamVtkAppendBase64Formatter_H
 
-#include "foamVtkBase64Formatter.H"
+#include "foamVtkBase64Layer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,12 +49,11 @@ namespace Foam
 
 class foamVtkAppendBase64Formatter
 :
-    public foamVtkBase64Formatter
+    public foamVtkBase64Layer
 {
     // Private Data Members
 
         static const char* name_;
-        static const char* encoding_;
 
 
     // Private Member Functions
@@ -71,7 +70,7 @@ public:
     // Constructors
 
         //- Construct and attach to an output stream
-        foamVtkAppendBase64Formatter(std::ostream&);
+        foamVtkAppendBase64Formatter(std::ostream& os);
 
 
     //- Destructor
@@ -82,9 +81,6 @@ public:
 
         //- Output name for XML type ("append")
         virtual const char* name() const;
-
-        //- Name for the XML append encoding ("base64").
-        virtual const char* encoding() const;
 
 };
 

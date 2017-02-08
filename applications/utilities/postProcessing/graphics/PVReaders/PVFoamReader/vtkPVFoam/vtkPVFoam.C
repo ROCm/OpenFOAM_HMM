@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,14 +42,39 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(vtkPVFoam, 0);
+    defineTypeNameAndDebug(vtkPVFoam, 0);
+}
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+vtkTextActor* Foam::vtkPVFoam::createTextActor
+(
+    const string& s,
+    const point& pt
+)
+{
+    vtkTextActor* txt = vtkTextActor::New();
+    txt->SetInput(s.c_str());
+
+    // Set text properties
+    vtkTextProperty* tprop = txt->GetTextProperty();
+    tprop->SetFontFamilyToArial();
+    tprop->BoldOn();
+    tprop->ShadowOff();
+    tprop->SetLineSpacing(1.0);
+    tprop->SetFontSize(14);
+    tprop->SetColor(1.0, 0.0, 1.0);
+    tprop->SetJustificationToCentered();
+
+    txt->GetPositionCoordinate()->SetCoordinateSystemToWorld();
+    txt->GetPositionCoordinate()->SetValue(pt.x(), pt.y(), pt.z());
+
+    return txt;
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-#include "vtkPVFoamAddToSelection.H"
-#include "vtkPVFoamUpdateInfoFields.H"
 
 void Foam::vtkPVFoam::resetCounters()
 {
@@ -116,14 +141,10 @@ int Foam::vtkPVFoam::setTime(int nRequest, const double requestTimes[])
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::setTime(";
+        Info<< "<beg> setTime(";
         for (int requestI = 0; requestI < nRequest; ++requestI)
         {
-            if (requestI)
-            {
-                Info<< ", ";
-            }
-
+            if (requestI) Info<< ", ";
             Info<< requestTimes[requestI];
         }
         Info<< ") - previousIndex = " << timeIndex_
@@ -160,7 +181,7 @@ int Foam::vtkPVFoam::setTime(int nRequest, const double requestTimes[])
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::setTime() - selectedTime="
+        Info<< "<end> setTime() - selectedTime="
             << Times[nearestIndex].name() << " index=" << timeIndex_
             << "/" << Times.size()
             << " meshChanged=" << Switch(meshChanged_)
@@ -175,7 +196,7 @@ void Foam::vtkPVFoam::updateMeshPartsStatus()
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::updateMeshPartsStatus" << endl;
+        Info<< "<beg> updateMeshPartsStatus" << endl;
     }
 
     vtkDataArraySelection* selection = reader_->GetPartSelection();
@@ -203,7 +224,7 @@ void Foam::vtkPVFoam::updateMeshPartsStatus()
             meshChanged_ = true;
         }
 
-        if (debug)
+        if (debug > 1)
         {
             Info<< "  part[" << partId << "] = "
                 << partStatus_[partId]
@@ -212,8 +233,14 @@ void Foam::vtkPVFoam::updateMeshPartsStatus()
     }
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::updateMeshPartsStatus" << endl;
+        Info<< "<end> updateMeshPartsStatus" << endl;
     }
+}
+
+
+Foam::word Foam::vtkPVFoam::getPartName(const int partId)
+{
+    return getFirstWord(reader_->GetPartArrayName(partId));
 }
 
 
@@ -245,7 +272,7 @@ Foam::vtkPVFoam::vtkPVFoam
 {
     if (debug)
     {
-        Info<< "Foam::vtkPVFoam::vtkPVFoam - " << FileName << endl;
+        Info<< "vtkPVFoam - " << FileName << endl;
         printMemory();
     }
 
@@ -333,7 +360,7 @@ Foam::vtkPVFoam::~vtkPVFoam()
 {
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::~vtkPVFoam" << endl;
+        Info<< "~vtkPVFoam" << endl;
     }
 
     delete meshPtr_;
@@ -346,7 +373,7 @@ void Foam::vtkPVFoam::updateInfo()
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::updateInfo"
+        Info<< "<beg> updateInfo"
             << " [meshPtr=" << (meshPtr_ ? "set" : "nullptr") << "] timeIndex="
             << timeIndex_ << endl;
     }
@@ -363,16 +390,15 @@ void Foam::vtkPVFoam::updateInfo()
     // time of the vtkDataArraySelection, but the qt/paraview proxy
     // layer doesn't care about that anyhow.
 
-    // enable 'internalMesh' on the first call
-    // or preserve the enabled selections
     stringList enabledEntries;
     if (!partSelection->GetNumberOfArrays() && !meshPtr_)
     {
-        enabledEntries.setSize(1);
-        enabledEntries[0] = "internalMesh";
+        // enable 'internalMesh' on the first call
+        enabledEntries = { "internalMesh" };
     }
     else
     {
+        // preserve the enabled selections
         enabledEntries = getSelectedArrayEntries(partSelection);
     }
 
@@ -395,23 +421,12 @@ void Foam::vtkPVFoam::updateInfo()
     }
 
     // Update volume, point and lagrangian fields
-    updateInfoFields<fvPatchField, volMesh>
-    (
-        reader_->GetVolFieldSelection()
-    );
-    updateInfoFields<pointPatchField, pointMesh>
-    (
-        reader_->GetPointFieldSelection()
-    );
-    updateInfoLagrangianFields();
+    updateInfoFields();
 
     if (debug)
     {
-        // just for debug info
-        getSelectedArrayEntries(partSelection);
-        Info<< "<end> Foam::vtkPVFoam::updateInfo" << endl;
+        Info<< "<end> updateInfo" << endl;
     }
-
 }
 
 
@@ -419,7 +434,7 @@ void Foam::vtkPVFoam::updateFoamMesh()
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::updateFoamMesh" << endl;
+        Info<< "<beg> updateFoamMesh" << endl;
         printMemory();
     }
 
@@ -463,7 +478,7 @@ void Foam::vtkPVFoam::updateFoamMesh()
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::updateFoamMesh" << endl;
+        Info<< "<end> updateFoamMesh" << endl;
         printMemory();
     }
 }
@@ -532,7 +547,7 @@ void Foam::vtkPVFoam::Update
     convertLagrangianFields(lagrangianOutput);
     if (debug)
     {
-        Info<< "done reader part" << endl;
+        Info<< "done reader part" << nl << endl;
     }
     reader_->UpdateProgress(0.95);
 
@@ -548,68 +563,58 @@ void Foam::vtkPVFoam::CleanUp()
 }
 
 
-double* Foam::vtkPVFoam::findTimes(int& nTimeSteps)
+std::vector<double> Foam::vtkPVFoam::findTimes(const bool skipZero) const
 {
-    int nTimes = 0;
-    double* tsteps = nullptr;
+    std::vector<double> times;
 
     if (dbPtr_.valid())
     {
-        Time& runTime = dbPtr_();
+        const Time& runTime = dbPtr_();
         instantList timeLst = runTime.times();
 
         // find the first time for which this mesh appears to exist
-        label timeI = 0;
-        for (; timeI < timeLst.size(); ++timeI)
+        label begIndex = timeLst.size();
+        forAll(timeLst, timeI)
         {
-            const word& timeName = timeLst[timeI].name();
-
             if
             (
-                isFile(runTime.path()/timeName/meshDir_/"points")
-             && IOobject
+                IOobject
                 (
                     "points",
-                    timeName,
+                    timeLst[timeI].name(),
                     meshDir_,
                     runTime
-                ).typeHeaderOk<pointIOField>(true)
+                ).typeHeaderOk<pointIOField>(false, false)
             )
             {
+                begIndex = timeI;
                 break;
             }
         }
 
-        nTimes = timeLst.size() - timeI;
+        label nTimes = timeLst.size() - begIndex;
 
         // skip "constant" time whenever possible
-        if (timeI == 0 && nTimes > 1)
+        if (begIndex == 0 && nTimes > 1)
         {
-            if (timeLst[timeI].name() == runTime.constant())
+            if (timeLst[begIndex].name() == runTime.constant())
             {
-                ++timeI;
+                ++begIndex;
                 --nTimes;
             }
         }
-
 
         // skip "0/" time if requested and possible
-        if (nTimes > 1 && reader_->GetSkipZeroTime())
+        if (skipZero && nTimes > 1 && timeLst[begIndex].name() == "0")
         {
-            if (mag(timeLst[timeI].value()) < SMALL)
-            {
-                ++timeI;
-                --nTimes;
-            }
+            ++begIndex;
+            --nTimes;
         }
 
-        if (nTimes)
+        times.reserve(nTimes);
+        while (nTimes-- > 0)
         {
-            tsteps = new double[nTimes];
-            for (label stepI = 0; stepI < nTimes; ++stepI, ++timeI)
-            {
-                tsteps[stepI] = timeLst[timeI].value();
-            }
+            times.push_back(timeLst[begIndex++].value());
         }
     }
     else
@@ -620,10 +625,7 @@ double* Foam::vtkPVFoam::findTimes(int& nTimeSteps)
         }
     }
 
-    // vector length returned via the parameter
-    nTimeSteps = nTimes;
-
-    return tsteps;
+    return times;
 }
 
 
@@ -633,11 +635,6 @@ void Foam::vtkPVFoam::renderPatchNames
     const bool show
 )
 {
-    if (!meshPtr_)
-    {
-        return;
-    }
-
     // always remove old actors first
 
     forAll(patchTextActorsPtrs_, patchi)
@@ -647,10 +644,10 @@ void Foam::vtkPVFoam::renderPatchNames
     }
     patchTextActorsPtrs_.clear();
 
-    if (show)
+    if (show && meshPtr_)
     {
         // get the display patches, strip off any suffix
-        wordHashSet selectedPatches = getSelected
+        hashedWordList selectedPatches = getSelected
         (
             reader_->GetPartSelection(),
             arrayRangePatches_
@@ -764,17 +761,16 @@ void Foam::vtkPVFoam::renderPatchNames
         {
             const polyPatch& pp = pbMesh[patchi];
 
-            label globalZoneI = 0;
-
             // Only selected patches will have a non-zero number of zones
-            label nDisplayZones = min(MAXPATCHZONES, nZones[patchi]);
+            const label nDisplayZones = min(MAXPATCHZONES, nZones[patchi]);
             label increment = 1;
             if (nZones[patchi] >= MAXPATCHZONES)
             {
                 increment = nZones[patchi]/MAXPATCHZONES;
             }
 
-            for (label i = 0; i < nDisplayZones; i++)
+            label globalZoneI = 0;
+            for (label i = 0; i < nDisplayZones; ++i, globalZoneI += increment)
             {
                 if (debug)
                 {
@@ -783,44 +779,23 @@ void Foam::vtkPVFoam::renderPatchNames
                         << "globalZoneI = " << globalZoneI << endl;
                 }
 
-                vtkTextActor* txt = vtkTextActor::New();
-
-                txt->SetInput(pp.name().c_str());
-
-                // Set text properties
-                vtkTextProperty* tprop = txt->GetTextProperty();
-                tprop->SetFontFamilyToArial();
-                tprop->BoldOff();
-                tprop->ShadowOff();
-                tprop->SetLineSpacing(1.0);
-                tprop->SetFontSize(12);
-                tprop->SetColor(1.0, 0.0, 0.0);
-                tprop->SetJustificationToCentered();
-
-                // Set text to use 3-D world co-ordinates
-                txt->GetPositionCoordinate()->SetCoordinateSystemToWorld();
-
-                txt->GetPositionCoordinate()->SetValue
+                // Into a list for later removal
+                patchTextActorsPtrs_[displayZoneI++] = createTextActor
                 (
-                    zoneCentre[patchi][globalZoneI].x(),
-                    zoneCentre[patchi][globalZoneI].y(),
-                    zoneCentre[patchi][globalZoneI].z()
+                    pp.name(),
+                    zoneCentre[patchi][globalZoneI]
                 );
-
-                // Add text to each renderer
-                renderer->AddViewProp(txt);
-
-                // Maintain a list of text labels added so that they can be
-                // removed later
-                patchTextActorsPtrs_[displayZoneI] = txt;
-
-                globalZoneI += increment;
-                displayZoneI++;
             }
         }
 
         // Resize the patch names list to the actual number of patch names added
         patchTextActorsPtrs_.setSize(displayZoneI);
+    }
+
+    // Add text to each renderer
+    forAll(patchTextActorsPtrs_, actori)
+    {
+        renderer->AddViewProp(patchTextActorsPtrs_[actori]);
     }
 }
 
@@ -837,6 +812,26 @@ void Foam::vtkPVFoam::PrintSelf(ostream& os, vtkIndent indent) const
         << (dbPtr_.valid() ? dbPtr_().times().size() : 0) << "\n";
 
     os  << indent << "mesh region: " << meshRegion_ << "\n";
+}
+
+
+void Foam::vtkPVFoam::printInfo() const
+{
+    std::cout
+        << "Region: " << meshRegion_ << "\n"
+        << "nPoints: " << (meshPtr_ ? meshPtr_->nPoints() : 0) << "\n"
+        << "nCells: "  << (meshPtr_ ? meshPtr_->nCells() : 0) << "\n"
+        << "nTimes: "
+        << (dbPtr_.valid() ? dbPtr_().times().size() : 0) << "\n";
+
+    std::vector<double> times = this->findTimes(reader_->GetSkipZeroTime());
+
+    std::cout<<"  " << times.size() << "(";
+    for (const double& val : times)
+    {
+        std::cout<< ' ' << val;
+    }
+    std::cout << " )" << std::endl;
 }
 
 

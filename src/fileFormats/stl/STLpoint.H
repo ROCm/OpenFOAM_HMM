@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::STLpoint
 
 Description
-    A vertex point representation for STL files.
+    A vertex point or facet normal representation for STL files.
 
 \*---------------------------------------------------------------------------*/
 
@@ -62,6 +62,12 @@ public:
         inline STLpoint(float x, float y, float z)
         :
             Vector<float>(x, y, z)
+        {}
+
+        //- Construct from components
+        inline STLpoint(double x, double y, double z)
+        :
+            Vector<float>(float(x), float(y), float(z))
         {}
 
         //- Construct from point

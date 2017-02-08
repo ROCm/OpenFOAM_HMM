@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,8 @@ int main()
         {"aec", 10.0}
     };
 
+    // Info<< "\ntable1: " << table1<< endl;
+
     // Erase by key
     table1.erase("aaw");
 
@@ -60,7 +62,7 @@ int main()
     Info<< "\ntable1 sortedToc: " << table1.sortedToc() << endl;
     table1.printInfo(Info)
         << "table1 [" << table1.size() << "] " << endl;
-    forAllIter(HashTable<scalar>, table1, iter)
+    forAllConstIter(HashTable<scalar>, table1, iter)
     {
         Info<< iter.key() << " => " << iter() << nl;
     }
@@ -106,7 +108,7 @@ int main()
     Info<< "\nerase table2 by iterator" << nl;
     forAllIter(HashTable<scalar>, table2, iter)
     {
-        Info<< "erasing " << iter.key() << " => " << iter() << " ... ";
+        Info<< "erasing " << iter.key() << " => " << iter.object() << " ... ";
         table2.erase(iter);
         Info<< "erased" << endl;
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,28 +58,28 @@ public:
 
 
 template<>
-const char* const foamVtkPTraits<uint8_t>::typeName;  // = UInt8
+const char* const foamVtkPTraits<uint8_t>::typeName;  // UInt8
 
 template<>
-const char* const foamVtkPTraits<int32_t>::typeName;  // = Int32
+const char* const foamVtkPTraits<int32_t>::typeName;  // Int32
 
 template<>
-const char* const foamVtkPTraits<int32_t>::typeName;  // = UInt32
+const char* const foamVtkPTraits<uint32_t>::typeName; // UInt32
 
 template<>
-const char* const foamVtkPTraits<int32_t>::typeName;  // = Int64
+const char* const foamVtkPTraits<int64_t>::typeName;  // Int64
 
 template<>
-const char* const foamVtkPTraits<int64_t>::typeName;  // = UInt64
+const char* const foamVtkPTraits<uint64_t>::typeName; // UInt64
 
 template<>
-const char* const foamVtkPTraits<float>::typeName;    // = Float32
+const char* const foamVtkPTraits<float>::typeName;    // Float32
 
 template<>
-const char* const foamVtkPTraits<double>::typeName;   // = Float64
+const char* const foamVtkPTraits<double>::typeName;   // Float64
 
 template<>
-const char* const foamVtkPTraits<::Foam::endian>::typeName;
+const char* const foamVtkPTraits<Foam::endian>::typeName; // (Big|Little)Endian
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

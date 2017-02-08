@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,6 @@ License
 #include "fvMesh.H"
 #include "IOobjectList.H"
 #include "passiveParticle.H"
-#include "vtkOpenFOAMPoints.H"
 
 // VTK includes
 #include "vtkCellArray.h"
@@ -41,7 +40,7 @@ License
 
 vtkPolyData* Foam::vtkPVFoam::lagrangianVTKMesh
 (
-    const fvMesh& mesh,
+    const polyMesh& mesh,
     const word& cloudName
 )
 {
@@ -49,7 +48,7 @@ vtkPolyData* Foam::vtkPVFoam::lagrangianVTKMesh
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::lagrangianVTKMesh - timePath "
+        Info<< "<beg> lagrangianVTKMesh - timePath "
             << mesh.time().timePath()/cloud::prefix/cloudName << endl;
         printMemory();
     }
@@ -83,7 +82,7 @@ vtkPolyData* Foam::vtkPVFoam::lagrangianVTKMesh
         vtkIdType particleId = 0;
         forAllConstIter(Cloud<passiveParticle>, parcels, iter)
         {
-            vtkInsertNextOpenFOAMPoint(vtkpoints, iter().position());
+            vtkpoints->InsertNextPoint(iter().position().v_);
 
             vtkcells->InsertNextCell(1, &particleId);
             particleId++;
@@ -98,7 +97,7 @@ vtkPolyData* Foam::vtkPVFoam::lagrangianVTKMesh
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::lagrangianVTKMesh" << endl;
+        Info<< "<end> lagrangianVTKMesh" << endl;
         printMemory();
     }
 

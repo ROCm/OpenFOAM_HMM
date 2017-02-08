@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,9 +130,7 @@ class triSurface
         //- Generic read routine. Chooses reader based on extension.
         bool read(const fileName&, const word& ext, const bool check = true);
 
-        bool readSTL(const fileName&);
-        bool readSTLASCII(const fileName&);
-        bool readSTLBINARY(const fileName&);
+        bool readSTL(const fileName&, bool forceBinary=false);
         bool readGTS(const fileName&);
         bool readOBJ(const fileName&);
         bool readOFF(const fileName&);
@@ -177,11 +175,6 @@ class triSurface
 
         //- Write to Ostream in AC3D format. Always sorted by patch.
         void writeAC(Ostream&) const;
-
-        //- For DX writing.
-        void writeDX(const bool, Ostream&) const;
-        void writeDXGeometry(const bool, Ostream&) const;
-        void writeDXTrailer(Ostream&) const;
 
 
     // Static private functions

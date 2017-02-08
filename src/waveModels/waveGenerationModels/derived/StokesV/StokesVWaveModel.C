@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  | Copyright (C) 2015 IH-Cantabria
 -------------------------------------------------------------------------------
 License
@@ -680,7 +680,7 @@ Foam::scalar Foam::waveModels::StokesV::eta
 }
 
 
-Foam::vector Foam::waveModels::StokesV::U
+Foam::vector Foam::waveModels::StokesV::Uf
 (
     const scalar d,
     const scalar kx,
@@ -722,17 +722,17 @@ Foam::vector Foam::waveModels::StokesV::U
 
     scalar u =
         a1u*cosh(k*z)*cos(theta)
-      + a2u*cosh(2.0*k*z)*cos(2.0*(theta))
-      + a3u*cosh(3.0*k*z)*cos(3.0*(theta))
-      + a4u*cosh(4.0*k*z)*cos(4.0*(theta))
-      + a5u*cosh(5.0*k*z)*cos(5.0*(theta));
+      + a2u*cosh(2*k*z)*cos(2*theta)
+      + a3u*cosh(3*k*z)*cos(3*theta)
+      + a4u*cosh(4*k*z)*cos(4*theta)
+      + a5u*cosh(5*k*z)*cos(5*theta);
 
     scalar w =
         a1u*sinh(k*z)*sin(theta)
-      + a2u*sinh(2.0*k*z)*sin(2.0*(theta))
-      + a3u*sinh(3.0*k*z)*sin(3.0*(theta))
-      + a4u*sinh(4.0*k*z)*sin(4.0*(theta))
-      + a5u*sinh(5.0*k*z)*sin(5.0*(theta));
+      + a2u*sinh(2*k*z)*sin(2*theta)
+      + a3u*sinh(3*k*z)*sin(3*theta)
+      + a4u*sinh(4*k*z)*sin(4*theta)
+      + a5u*sinh(5*k*z)*sin(5*theta);
 
     scalar v = u*sin(waveAngle_);
     u *= cos(waveAngle_);
@@ -740,6 +740,8 @@ Foam::vector Foam::waveModels::StokesV::U
     return vector(u, v, w);
 }
 
+
+// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 void Foam::waveModels::StokesV::setLevel
 (
@@ -773,71 +775,6 @@ void Foam::waveModels::StokesV::setLevel
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::waveModels::StokesV::StokesV
-(
-    const dictionary& dict,
-    const fvMesh& mesh,
-    const polyPatch& patch,
-    const bool readFields
-)
-:
-    regularWaveModel(dict, mesh, patch, false),
-    lambda_(0)
-{
-    if (readFields)
-    {
-        read(dict);
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModels::StokesV::~StokesV()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::waveModels::StokesV::read(const dictionary& overrideDict)
-{
-    if (regularWaveModel::read(overrideDict))
-    {
-        scalar f1;
-        scalar f2;
-        scalar waveK;
-
-        initialise
-        (
-            waveHeight_,
-            waterDepthRef_,
-            wavePeriod_,
-            waveK,
-            lambda_,
-            f1,
-            f2
-        );
-
-        if (f1 > 0.001 || f2 > 0.001)
-        {
-	        FatalErrorInFunction
-                << "No convergence for Stokes V wave theory" << nl
-                << "    f1: " << f1 << nl
-                << "    f2: " << f2 << nl
-	            << exit(FatalError);
-        }
-
-        waveLength_ = 2.0*mathematical::pi/waveK;
-
-        return true;
-    }
-
-    return false;
-}
-
-
 void Foam::waveModels::StokesV::setVelocity
 (
     const scalar t,
@@ -863,7 +800,7 @@ void Foam::waveModels::StokesV::setVelocity
         {
             const label paddlei = faceToPaddle_[facei];
 
-            const vector Uf = U
+            const vector Uf = this->Uf
 	        (
                 waterDepthRef_,
                 waveKx,
@@ -883,9 +820,72 @@ void Foam::waveModels::StokesV::setVelocity
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::waveModels::StokesV::StokesV
+(
+    const dictionary& dict,
+    const fvMesh& mesh,
+    const polyPatch& patch,
+    const bool readFields
+)
+:
+    StokesI(dict, mesh, patch, false),
+    lambda_(0)
+{
+    if (readFields)
+    {
+        readDict(dict);
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::waveModels::StokesV::~StokesV()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::waveModels::StokesV::readDict(const dictionary& overrideDict)
+{
+    if (StokesI::readDict(overrideDict))
+    {
+        scalar f1;
+        scalar f2;
+        scalar waveK;
+
+        initialise
+        (
+            waveHeight_,
+            waterDepthRef_,
+            wavePeriod_,
+            waveK,
+            lambda_,
+            f1,
+            f2
+        );
+
+        if (f1 > 0.001 || f2 > 0.001)
+        {
+	        FatalErrorInFunction
+                << "No convergence for Stokes V wave theory" << nl
+                << "    f1: " << f1 << nl
+                << "    f2: " << f2 << nl
+	            << exit(FatalError);
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+
 void Foam::waveModels::StokesV::info(Ostream& os) const
 {
-    regularWaveModel::info(os);
+    StokesI::info(os);
 
     os  << "    Lambda : " << lambda_ << nl
         << "    Wave type : " << waveType() << nl;

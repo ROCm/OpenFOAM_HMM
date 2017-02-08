@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -199,21 +199,9 @@ void Foam::shellSurfaces::orient()
 
             if (shell.triSurface::size())
             {
-                const pointField& points = shell.points();
-
                 hasSurface = true;
-
-                boundBox shellBb(points[0], points[0]);
                 // Assume surface is compact!
-                forAll(points, i)
-                {
-                    const point& pt = points[i];
-                    shellBb.min() = min(shellBb.min(), pt);
-                    shellBb.max() = max(shellBb.max(), pt);
-                }
-
-                overallBb.min() = min(overallBb.min(), shellBb.min());
-                overallBb.max() = max(overallBb.max(), shellBb.max());
+                overallBb.add(shell.points());
             }
         }
     }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -719,16 +719,12 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
     Pstream::gatherList(allBackgroundMeshBounds_);
     Pstream::scatterList(allBackgroundMeshBounds_);
 
-    point bbMin(GREAT, GREAT, GREAT);
-    point bbMax(-GREAT, -GREAT, -GREAT);
-
+    // find global bounding box
+    globalBackgroundBounds_ = treeBoundBox(boundBox::invertedBox);
     forAll(allBackgroundMeshBounds_, proci)
     {
-        bbMin = min(bbMin, allBackgroundMeshBounds_[proci].min());
-        bbMax = max(bbMax, allBackgroundMeshBounds_[proci].max());
+        globalBackgroundBounds_.add(allBackgroundMeshBounds_[proci]);
     }
-
-    globalBackgroundBounds_ = treeBoundBox(bbMin, bbMax);
 
     if (false)
     {

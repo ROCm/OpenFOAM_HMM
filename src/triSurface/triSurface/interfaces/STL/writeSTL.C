@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,8 +24,21 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "triSurface.H"
-#include "STLtriangle.H"
+#include "STLCore.H"
 #include "primitivePatch.H"
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+// A file-scope helper class to expose static member(s)
+// This is a temporary measure and is expected to disappear in the future
+struct triSurfaceSTLCore
+:
+    public Foam::fileFormats::STLCore
+{
+    using Foam::fileFormats::STLCore::writeBinaryHeader;
+};
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -53,26 +66,17 @@ void Foam::triSurface::writeSTLASCII(const bool writeSorted, Ostream& os) const
             )
             {
                 const label facei = faceMap[faceIndex++];
-
-                const vector& n = faceNormals()[facei];
-
-                os  << "  facet normal "
-                    << n.x() << ' ' << n.y() << ' ' << n.z() << nl
-                    << "    outer loop" << endl;
-
                 const labelledTri& f = (*this)[facei];
-                const point& pa = points()[f[0]];
-                const point& pb = points()[f[1]];
-                const point& pc = points()[f[2]];
 
-                os  << "       vertex "
-                    << pa.x() << ' ' << pa.y() << ' ' << pa.z() << nl
-                    << "       vertex "
-                    << pb.x() << ' ' << pb.y() << ' ' << pb.z() << nl
-                    << "       vertex "
-                    << pc.x() << ' ' << pc.y() << ' ' << pc.z() << nl
-                    << "    endloop" << nl
-                    << "  endfacet" << endl;
+                // Write ASCII
+                STLtriangle::write
+                (
+                    os,
+                    faceNormals()[facei],
+                    points()[f[0]],
+                    points()[f[1]],
+                    points()[f[2]]
+                );
             }
 
             os  << "endsolid " << patch.name() << endl;
@@ -93,46 +97,35 @@ void Foam::triSurface::writeSTLASCII(const bool writeSorted, Ostream& os) const
         }
 
         label currentPatchi = -1;
-
         forAll(*this, facei)
         {
             if (currentPatchi != patchIDs[facei])
             {
                 if (currentPatchi != -1)
                 {
-                    // Have already valid patch. Close it.
-                    os  << "endsolid " << patches[currentPatchi].name()
-                        << nl;
+                    // Close previous solid
+                    os  << "endsolid " << patches[currentPatchi].name() << nl;
                 }
                 currentPatchi = patchIDs[facei];
                 os  << "solid " << patches[currentPatchi].name() << nl;
             }
 
-            const vector& n = faceNormals()[facei];
-
-            os  << "  facet normal "
-                << n.x() << ' ' << n.y() << ' ' << n.z() << nl
-                << "    outer loop" << endl;
-
             const labelledTri& f = (*this)[facei];
-            const point& pa = points()[f[0]];
-            const point& pb = points()[f[1]];
-            const point& pc = points()[f[2]];
 
-            os  << "       vertex "
-                << pa.x() << ' ' << pa.y() << ' ' << pa.z() << nl
-                << "       vertex "
-                << pb.x() << ' ' << pb.y() << ' ' << pb.z() << nl
-                << "       vertex "
-                << pc.x() << ' ' << pc.y() << ' ' << pc.z() << nl
-                << "    endloop" << nl
-                << "  endfacet" << endl;
+            // Write ASCII
+            STLtriangle::write
+            (
+                os,
+                faceNormals()[facei],
+                points()[f[0]],
+                points()[f[1]],
+                points()[f[2]]
+            );
         }
 
         if (currentPatchi != -1)
         {
-            os  << "endsolid " << patches[currentPatchi].name()
-                << nl;
+            os  << "endsolid " << patches[currentPatchi].name() << nl;
         }
     }
 }
@@ -141,27 +134,21 @@ void Foam::triSurface::writeSTLASCII(const bool writeSorted, Ostream& os) const
 void Foam::triSurface::writeSTLBINARY(std::ostream& os) const
 {
     // Write the STL header
-    string header("Foam binary STL", STLheaderSize);
-    os.write(header.c_str(), STLheaderSize);
-
-    label nTris = size();
-    os.write(reinterpret_cast<char*>(&nTris), sizeof(unsigned int));
-
-    const vectorField& normals = faceNormals();
+    triSurfaceSTLCore::writeBinaryHeader(os, this->size());
 
     forAll(*this, facei)
     {
         const labelledTri& f = (*this)[facei];
 
-        // Convert vector into STL single precision
-        STLpoint n(normals[facei]);
-        STLpoint pa(points()[f[0]]);
-        STLpoint pb(points()[f[1]]);
-        STLpoint pc(points()[f[2]]);
-
-        STLtriangle stlTri(n, pa, pb, pc, f.region());
-
-        stlTri.write(os);
+        // Write BINARY
+        STLtriangle
+        (
+            faceNormals()[facei],
+            points()[f[0]],
+            points()[f[1]],
+            points()[f[2]],
+            f.region()
+        ).write(os);
     }
 }
 

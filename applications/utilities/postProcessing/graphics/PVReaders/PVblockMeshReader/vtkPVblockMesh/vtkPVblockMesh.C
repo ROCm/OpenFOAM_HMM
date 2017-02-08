@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ License
 
 // OpenFOAM includes
 #include "blockMesh.H"
+#include "blockMeshTools.H"
 #include "Time.H"
 #include "patchZones.H"
 #include "OStringStream.H"
@@ -47,6 +48,34 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+vtkTextActor* Foam::vtkPVblockMesh::createTextActor
+(
+    const string& s,
+    const point& pt
+)
+{
+    vtkTextActor* txt = vtkTextActor::New();
+    txt->SetInput(s.c_str());
+
+    // Set text properties
+    vtkTextProperty* tprop = txt->GetTextProperty();
+    tprop->SetFontFamilyToArial();
+    tprop->BoldOn();
+    tprop->ShadowOff();
+    tprop->SetLineSpacing(1.0);
+    tprop->SetFontSize(14);
+    tprop->SetColor(1.0, 0.0, 1.0);
+    tprop->SetJustificationToCentered();
+
+    txt->GetPositionCoordinate()->SetCoordinateSystemToWorld();
+    txt->GetPositionCoordinate()->SetValue(pt.x(), pt.y(), pt.z());
+
+    return txt;
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::vtkPVblockMesh::resetCounters()
@@ -60,16 +89,18 @@ void Foam::vtkPVblockMesh::resetCounters()
 
 void Foam::vtkPVblockMesh::updateInfoBlocks
 (
-    vtkDataArraySelection* arraySelection
+    vtkDataArraySelection* select
 )
 {
+    arrayRange& range = arrayRangeBlocks_;
+
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVblockMesh::updateInfoBlocks"
-            << " [meshPtr=" << (meshPtr_ ? "set" : "nullptr") << "]" << endl;
+        Info<< "<beg> updateInfoBlocks"
+            << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
     }
 
-    arrayRangeBlocks_.reset( arraySelection->GetNumberOfArrays() );
+    range.reset(select->GetNumberOfArrays());
 
     const blockMesh& blkMesh = *meshPtr_;
 
@@ -80,49 +111,46 @@ void Foam::vtkPVblockMesh::updateInfoBlocks
 
         // Display either blockI as a number or with its name
         // (looked up from blockMeshDict)
-        OStringStream os;
-        blockDescriptor::write(os, blockI, blkMesh.meshDict());
-        word partName(os.str());
+        OStringStream ostr;
+        blockDescriptor::write(ostr, blockI, blkMesh.meshDict());
 
         // append the (optional) zone name
         if (!blockDef.zoneName().empty())
         {
-            partName += " - " + blockDef.zoneName();
+            ostr << " - " << blockDef.zoneName();
         }
 
-        // Add blockId and zoneName to GUI list
-        arraySelection->AddArray(partName.c_str());
+        // Add "blockId" or "blockId - zoneName" to GUI list
+        select->AddArray(ostr.str().c_str());
     }
 
-    arrayRangeBlocks_ += nBlocks;
+    range += nBlocks;
 
     if (debug)
     {
-        // just for debug info
-        getSelectedArrayEntries(arraySelection);
-
-        Info<< "<end> Foam::vtkPVblockMesh::updateInfoBlocks" << endl;
+        Info<< "<end> updateInfoBlocks" << endl;
     }
 }
 
 
 void Foam::vtkPVblockMesh::updateInfoEdges
 (
-    vtkDataArraySelection* arraySelection
+    vtkDataArraySelection* select
 )
 {
+    arrayRange& range = arrayRangeEdges_;
+
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVblockMesh::updateInfoEdges"
-            << " [meshPtr=" << (meshPtr_ ? "set" : "nullptr") << "]" << endl;
+        Info<< "<beg> updateInfoEdges"
+            << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
     }
 
-    arrayRangeEdges_.reset( arraySelection->GetNumberOfArrays() );
+    range.reset(select->GetNumberOfArrays());
 
     const blockMesh& blkMesh = *meshPtr_;
     const blockEdgeList& edges = blkMesh.edges();
 
-    const int nEdges = edges.size();
     forAll(edges, edgeI)
     {
         OStringStream ostr;
@@ -132,17 +160,14 @@ void Foam::vtkPVblockMesh::updateInfoEdges
         ostr << " - " << edges[edgeI].type();
 
         // Add "beg:end - type" to GUI list
-        arraySelection->AddArray(ostr.str().c_str());
+        select->AddArray(ostr.str().c_str());
     }
 
-    arrayRangeEdges_ += nEdges;
+    range += edges.size();
 
     if (debug)
     {
-        // just for debug info
-        getSelectedArrayEntries(arraySelection);
-
-        Info<< "<end> Foam::vtkPVblockMesh::updateInfoEdges" << endl;
+        Info<< "<end> updateInfoEdges" << endl;
     }
 }
 
@@ -166,8 +191,7 @@ Foam::vtkPVblockMesh::vtkPVblockMesh
 {
     if (debug)
     {
-        Info<< "Foam::vtkPVblockMesh::vtkPVblockMesh - "
-            << FileName << endl;
+        Info<< "vtkPVblockMesh - " << FileName << endl;
     }
 
     // avoid argList and get rootPath/caseName directly from the file
@@ -253,16 +277,8 @@ Foam::vtkPVblockMesh::~vtkPVblockMesh()
 {
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVblockMesh::~vtkPVblockMesh" << endl;
+        Info<< "~vtkPVblockMesh" << endl;
     }
-
-    // Hmm. pointNumberTextActors are not getting removed
-    //
-    forAll(pointNumberTextActorsPtrs_, pointi)
-    {
-        pointNumberTextActorsPtrs_[pointi]->Delete();
-    }
-    pointNumberTextActorsPtrs_.clear();
 
     delete meshPtr_;
 }
@@ -274,25 +290,20 @@ void Foam::vtkPVblockMesh::updateInfo()
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVblockMesh::updateInfo"
-            << " [meshPtr=" << (meshPtr_ ? "set" : "nullptr") << "] " << endl;
+        Info<< "<beg> updateInfo"
+            << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "] " << endl;
     }
 
     resetCounters();
 
     vtkDataArraySelection* blockSelection = reader_->GetBlockSelection();
-    vtkDataArraySelection* edgeSelection = reader_->GetCurvedEdgesSelection();
+    vtkDataArraySelection* edgeSelection  = reader_->GetCurvedEdgesSelection();
 
-    // enable 'internalMesh' on the first call
-    // or preserve the enabled selections
+    // preserve the enabled selections if possible
     stringList enabledParts;
     stringList enabledEdges;
-    bool firstTime = false;
-    if (!blockSelection->GetNumberOfArrays() && !meshPtr_)
-    {
-        firstTime = true;
-    }
-    else
+    const bool firstTime = (!blockSelection->GetNumberOfArrays() && !meshPtr_);
+    if (!firstTime)
     {
         enabledParts = getSelectedArrayEntries(blockSelection);
         enabledEdges = getSelectedArrayEntries(edgeSelection);
@@ -306,21 +317,21 @@ void Foam::vtkPVblockMesh::updateInfo()
     updateFoamMesh();
 
     // Update mesh parts list
-    updateInfoBlocks( blockSelection );
+    updateInfoBlocks(blockSelection);
 
     // Update curved edges list
-    updateInfoEdges( edgeSelection );
+    updateInfoEdges(edgeSelection);
 
     // restore the enabled selections
     if (!firstTime)
     {
         setSelectedArrayEntries(blockSelection, enabledParts);
-        setSelectedArrayEntries(edgeSelection, enabledEdges);
+        setSelectedArrayEntries(edgeSelection,  enabledEdges);
     }
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVblockMesh::updateInfo" << endl;
+        Info<< "<end> updateInfo" << endl;
     }
 }
 
@@ -329,7 +340,7 @@ void Foam::vtkPVblockMesh::updateFoamMesh()
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVblockMesh::updateFoamMesh" << endl;
+        Info<< "<beg> updateFoamMesh" << endl;
     }
 
     // Check to see if the OpenFOAM mesh has been created
@@ -379,7 +390,7 @@ void Foam::vtkPVblockMesh::updateFoamMesh()
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVblockMesh::updateFoamMesh" << endl;
+        Info<< "<end> updateFoamMesh" << endl;
     }
 }
 
@@ -392,10 +403,10 @@ void Foam::vtkPVblockMesh::Update
     reader_->UpdateProgress(0.1);
 
     // Set up mesh parts selection(s)
-    updateBoolListStatus(blockStatus_, reader_->GetBlockSelection());
+    getSelected(blockStatus_, reader_->GetBlockSelection());
 
     // Set up curved edges selection(s)
-    updateBoolListStatus(edgeStatus_, reader_->GetCurvedEdgesSelection());
+    getSelected(edgeStatus_,  reader_->GetCurvedEdgesSelection());
 
     reader_->UpdateProgress(0.2);
 
@@ -421,6 +432,103 @@ void Foam::vtkPVblockMesh::CleanUp()
 }
 
 
+void Foam::vtkPVblockMesh::renderPatchNames
+(
+    vtkRenderer* renderer,
+    const bool show
+)
+{
+    // always remove old actors first
+    forAll(patchTextActorsPtrs_, actori)
+    {
+        renderer->RemoveViewProp(patchTextActorsPtrs_[actori]);
+        patchTextActorsPtrs_[actori]->Delete();
+    }
+    patchTextActorsPtrs_.clear();
+
+    // the number of text actors
+    label nActors = 0;
+
+    if (show && meshPtr_)
+    {
+        const blockMesh& blkMesh = *meshPtr_;
+        const dictionary& meshDescription = blkMesh.meshDict();
+        const pointField& cornerPts = blkMesh.vertices();
+        const scalar scaleFactor = blkMesh.scaleFactor();
+
+        if (!meshDescription.found("boundary"))
+        {
+            return;
+        }
+
+        // 8 sides per block is plenty
+        patchTextActorsPtrs_.setSize(8*blkMesh.size());
+
+        // Collect all variables
+        dictionary varDict(meshDescription.subOrEmptyDict("namedVertices"));
+        varDict.merge(meshDescription.subOrEmptyDict("namedBlocks"));
+
+        // Read like boundary file
+        const PtrList<entry> patchesInfo(meshDescription.lookup("boundary"));
+
+        forAll(patchesInfo, patchi)
+        {
+            const entry& patchInfo = patchesInfo[patchi];
+
+            if (!patchInfo.isDict())
+            {
+                IOWarningInFunction(meshDescription)
+                    << "Entry " << patchInfo << " in boundary section is not a"
+                    << " valid dictionary."
+                    << endl;
+                break;
+            }
+
+            const word& patchName = patchInfo.keyword();
+
+            // Read block faces
+            faceList patchFaces = blockMeshTools::read<face>
+            (
+                patchInfo.dict().lookup("faces"),
+                varDict
+            );
+
+            forAll(patchFaces, facei)
+            {
+                const face& f = patchFaces[facei];
+
+                // Into a list for later removal
+                patchTextActorsPtrs_[nActors++] = createTextActor
+                (
+                    patchName,
+                    f.centre(cornerPts) * scaleFactor
+                );
+
+                if (nActors == patchTextActorsPtrs_.size())
+                {
+                    // hit max allocated space - bail out
+                    break;
+                }
+            }
+
+            if (nActors == patchTextActorsPtrs_.size())
+            {
+                // hit max allocated space - bail out
+                break;
+            }
+        }
+
+        patchTextActorsPtrs_.setSize(nActors);
+    }
+
+    // Add text to each renderer
+    forAll(patchTextActorsPtrs_, actori)
+    {
+        renderer->AddViewProp(patchTextActorsPtrs_[actori]);
+    }
+}
+
+
 void Foam::vtkPVblockMesh::renderPointNumbers
 (
     vtkRenderer* renderer,
@@ -429,12 +537,12 @@ void Foam::vtkPVblockMesh::renderPointNumbers
 {
     // always remove old actors first
 
-    forAll(pointNumberTextActorsPtrs_, pointi)
+    forAll(pointTextActorsPtrs_, actori)
     {
-        renderer->RemoveViewProp(pointNumberTextActorsPtrs_[pointi]);
-        pointNumberTextActorsPtrs_[pointi]->Delete();
+        renderer->RemoveViewProp(pointTextActorsPtrs_[actori]);
+        pointTextActorsPtrs_[actori]->Delete();
     }
-    pointNumberTextActorsPtrs_.clear();
+    pointTextActorsPtrs_.clear();
 
     if (show && meshPtr_)
     {
@@ -442,49 +550,29 @@ void Foam::vtkPVblockMesh::renderPointNumbers
         const pointField& cornerPts = blkMesh.vertices();
         const scalar scaleFactor = blkMesh.scaleFactor();
 
-        pointNumberTextActorsPtrs_.setSize(cornerPts.size());
+        pointTextActorsPtrs_.setSize(cornerPts.size());
         forAll(cornerPts, pointi)
         {
-            vtkTextActor* txt = vtkTextActor::New();
-
             // Display either pointi as a number or with its name
             // (looked up from blockMeshDict)
-            {
-                OStringStream os;
-                blockVertex::write(os, pointi, blkMesh.meshDict());
-                txt->SetInput(os.str().c_str());
-            }
+            OStringStream os;
+            blockVertex::write(os, pointi, blkMesh.meshDict());
 
-            // Set text properties
-            vtkTextProperty* tprop = txt->GetTextProperty();
-            tprop->SetFontFamilyToArial();
-            tprop->BoldOn();
-            tprop->ShadowOff();
-            tprop->SetLineSpacing(1.0);
-            tprop->SetFontSize(14);
-            tprop->SetColor(1.0, 0.0, 1.0);
-            tprop->SetJustificationToCentered();
-
-            // Set text to use 3-D world co-ordinates
-            txt->GetPositionCoordinate()->SetCoordinateSystemToWorld();
-
-            txt->GetPositionCoordinate()->SetValue
+            // Into a list for later removal
+            pointTextActorsPtrs_[pointi] = createTextActor
             (
-                cornerPts[pointi].x()*scaleFactor,
-                cornerPts[pointi].y()*scaleFactor,
-                cornerPts[pointi].z()*scaleFactor
+                os.str(),
+                cornerPts[pointi]*scaleFactor
             );
-
-            // Add text to each renderer
-            renderer->AddViewProp(txt);
-
-            // Maintain a list of text labels added so that they can be
-            // removed later
-            pointNumberTextActorsPtrs_[pointi] = txt;
         }
     }
-}
 
+    // Add text to each renderer
+    forAll(pointTextActorsPtrs_, actori)
+    {
+        renderer->AddViewProp(pointTextActorsPtrs_[actori]);
+    }
+}
 
 
 void Foam::vtkPVblockMesh::PrintSelf(ostream& os, vtkIndent indent) const

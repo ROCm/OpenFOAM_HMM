@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,11 +78,10 @@ public:
         //- Calculate the bounding box
         inline treeBoundBox bounds() const
         {
-            treeBoundBox bb(operator[](0), operator[](0));
-            for (label i = 1; i < size(); i++)
+            treeBoundBox bb(operator[](0));
+            for (label i = 1; i < size(); ++i)
             {
-                bb.min() = min(bb.min(), operator[](i));
-                bb.max() = max(bb.max(), operator[](i));
+                bb.add(operator[](i));
             }
             return bb;
         }

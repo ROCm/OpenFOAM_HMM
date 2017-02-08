@@ -32,19 +32,25 @@ add_definitions(
 set(CMAKE_BUILD_TYPE Release)
 
 set(CMAKE_CXX_FLAGS_DEBUG
-    "-g -O0 -std=c++0x -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wno-overloaded-virtual"
+    "-g -O0 -std=c++11 -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wno-overloaded-virtual"
 )
-set(CMAKE_C_FLAGS_DEBUG "-g -O0 -std=c++0x")
+set(CMAKE_C_FLAGS_DEBUG "-g -O0 -std=c++11")
 
 set(CMAKE_CXX_FLAGS_RELEASE
-    "-O3 -std=c++0x -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wno-overloaded-virtual")
-set(CMAKE_C_FLAGS_RELEASE "-O3 -std=c++0x")
+    "-O3 -std=c++11 -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wno-overloaded-virtual")
+set(CMAKE_C_FLAGS_RELEASE "-O3 -std=c++11")
 
 # Set output library destination to plugin directory
 set(LIBRARY_OUTPUT_PATH $ENV{FOAM_LIBBIN}
     CACHE INTERNAL
     ""
 )
+
+## Record VTK version for general bookkeeping
+# file(WRITE
+#     ${CMAKE_BINARY_DIR}/version
+#     "VTK_VERSION=${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}.${VTK_BUILD_VERSION}\n"
+# )
 
 file(GLOB SOURCE_FILES
     fieldVisualisationBase.C
@@ -75,11 +81,17 @@ add_library(
     ${SOURCE_FILES}
 )
 
+set_target_properties(
+  runTimePostProcessing
+  PROPERTIES
+  VERSION ${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}.${VTK_BUILD_VERSION}
+  SOVERSION ${VTK_MAJOR_VERSION}
+)
+
 target_link_libraries(
     runTimePostProcessing
     ${VTK_LIBRARIES}
     ${OPENFOAM_LIBRARIES}
 )
-
 
 #-----------------------------------------------------------------------------

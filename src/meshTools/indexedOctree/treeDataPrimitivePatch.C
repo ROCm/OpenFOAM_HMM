@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,26 +32,6 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class PatchType>
-Foam::treeBoundBox Foam::treeDataPrimitivePatch<PatchType>::calcBb
-(
-    const pointField& points,
-    const face& f
-)
-{
-    treeBoundBox bb(points[f[0]], points[f[0]]);
-
-    for (label fp = 1; fp < f.size(); fp++)
-    {
-        const point& p = points[f[fp]];
-
-        bb.min() = min(bb.min(), p);
-        bb.max() = max(bb.max(), p);
-    }
-    return bb;
-}
-
-
-template<class PatchType>
 void Foam::treeDataPrimitivePatch<PatchType>::update()
 {
     if (cacheBb_)
@@ -60,7 +40,7 @@ void Foam::treeDataPrimitivePatch<PatchType>::update()
 
         forAll(patch_, i)
         {
-            bbs_[i] = calcBb(patch_.points(), patch_[i]);
+            bbs_[i] = treeBoundBox(patch_.points(), patch_[i]);
         }
     }
 }
@@ -386,19 +366,14 @@ bool Foam::treeDataPrimitivePatch<PatchType>::overlaps
 ) const
 {
     // 1. Quick rejection: bb does not intersect face bb at all
-    if (cacheBb_)
+    if
+    (
+        cacheBb_
+      ? !cubeBb.overlaps(bbs_[index])
+      : !cubeBb.overlaps(treeBoundBox(patch_.points(), patch_[index]))
+    )
     {
-        if (!cubeBb.overlaps(bbs_[index]))
-        {
-            return false;
-        }
-    }
-    else
-    {
-        if (!cubeBb.overlaps(calcBb(patch_.points(), patch_[index])))
-        {
-            return false;
-        }
+        return false;
     }
 
 
@@ -459,19 +434,14 @@ bool Foam::treeDataPrimitivePatch<PatchType>::overlaps
 ) const
 {
     // 1. Quick rejection: sphere does not intersect face bb at all
-    if (cacheBb_)
+    if
+    (
+        cacheBb_
+      ? !bbs_[index].overlaps(centre, radiusSqr)
+      : !treeBoundBox(patch_.points(),patch_[index]).overlaps(centre, radiusSqr)
+    )
     {
-        if (!bbs_[index].overlaps(centre, radiusSqr))
-        {
-            return false;
-        }
-    }
-    else
-    {
-        if (!calcBb(patch_.points(), patch_[index]).overlaps(centre, radiusSqr))
-        {
-            return false;
-        }
+        return false;
     }
 
     const pointField& points = patch_.points();

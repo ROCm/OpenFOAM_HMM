@@ -320,9 +320,6 @@ private:
         //  return empty string on failure
         std::string ccmReadOptstr(const char* opt, ccmID node);
 
-        //- Strip invalid characters, prefix leading digit with '_'
-        static word validateWord(const std::string&);
-
         //- Read map data and check error
         void readMap(const ccmID& mapId, labelList& data);
 

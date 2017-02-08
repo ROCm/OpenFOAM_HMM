@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,52 +23,62 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef vtkPVFoamAddToSelection_H
-#define vtkPVFoamAddToSelection_H
-
-// OpenFOAM includes
 #include "IOobjectList.H"
-#include "SortableList.H"
-
-// VTK includes
 #include "vtkDataArraySelection.h"
+#include "vtkMultiBlockDataSet.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::label Foam::vtkPVFoam::addToSelection
+Type* Foam::foamPvCore::getDataFromBlock
+(
+    vtkMultiBlockDataSet* output,
+    const arrayRange& selector,
+    const label datasetNo
+)
+{
+    const int blockNo = selector.block();
+
+    vtkMultiBlockDataSet* block =
+    (
+        datasetNo < 0
+      ? nullptr
+      : vtkMultiBlockDataSet::SafeDownCast(output->GetBlock(blockNo))
+    );
+
+    if (block)
+    {
+        return Type::SafeDownCast(block->GetBlock(datasetNo));
+    }
+
+    return nullptr;
+}
+
+
+template<class Type>
+Foam::label Foam::foamPvCore::addToSelection
 (
     vtkDataArraySelection *select,
-    const IOobjectList& objectLst,
+    const IOobjectList& objects,
     const string& suffix
 )
 {
-    SortableList<word> names(objectLst.names(Type::typeName));
+    const wordList names = objects.sortedNames(Type::typeName);
 
-    forAll(names, nameI)
+    forAll(names, i)
     {
-        if (suffix.size())
+        if (suffix.empty())
         {
-            select->AddArray
-            (
-                (names[nameI] + suffix).c_str()
-            );
+            select->AddArray(names[i].c_str());
         }
         else
         {
-            select->AddArray
-            (
-                (names[nameI]).c_str()
-            );
+            select->AddArray((names[i] + suffix).c_str());
         }
     }
 
     return names.size();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

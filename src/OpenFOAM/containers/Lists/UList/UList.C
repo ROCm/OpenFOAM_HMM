@@ -183,7 +183,7 @@ bool Foam::UList<T>::operator<(const UList<T>& a) const
     (
         const_iterator vi = begin(), ai = a.begin();
         vi < end() && ai < a.end();
-        vi++, ai++
+        ++vi, ++ai
     )
     {
         if (*vi < *ai)

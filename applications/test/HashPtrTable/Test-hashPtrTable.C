@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,15 +31,53 @@ Description
 
 using namespace Foam;
 
+template<class T>
+void printTable(const HashPtrTable<T>& table)
+{
+    Info<< table.size() << nl << "(" << nl;
+
+    for
+    (
+        typename HashPtrTable<T>::const_iterator iter = table.cbegin();
+        iter != table.cend();
+        ++iter
+    )
+    {
+        const T* ptr = *iter;
+        Info<< iter.key() << " = ";
+        if (ptr)
+        {
+            Info<< *ptr;
+        }
+        else
+        {
+            Info<< "nullptr";
+        }
+        Info<< nl;
+    }
+
+    Info<< ")" << endl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
 int main()
 {
-    Foam::HashPtrTable<double> myTable;
-    myTable.insert("hello", new double(42.1));
+    HashPtrTable<double> myTable;
+    myTable.insert("abc", new double(42.1));
+    myTable.insert("def", nullptr);
+    myTable.insert("ghi", new double(3.14159));
 
-    Info<< myTable << endl;
+    // Info<< myTable << endl;
+    printTable(myTable);
+
+    HashPtrTable<double> copy(myTable);
+
+    // Info<< copy << endl;
+    printTable(copy);
+    Info<< copy << endl;
 
     return 0;
 }

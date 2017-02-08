@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  | Copyright (C) 2015 IH-Cantabria
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ Description
 #ifndef waveModels_StokesV_H
 #define waveModels_StokesV_H
 
-#include "regularWaveModel.H"
+#include "StokesIWaveModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,71 +54,65 @@ namespace waveModels
 
 class StokesV
 :
-    public regularWaveModel
+    public StokesI
 {
-protected:
+private:
 
-    // Proteced Data
-
-        //-
-        scalar lambda_;
-
-
-    // Protected Member Functions
+    // Private Member Functions
 
         // Model coefficients
 
-            virtual scalar A11(const scalar h, const scalar k) const;
+            scalar A11(const scalar h, const scalar k) const;
 
-            virtual scalar A13(const scalar h, const scalar k) const;
+            scalar A13(const scalar h, const scalar k) const;
 
-            virtual scalar A15(const scalar h, const scalar k) const;
+            scalar A15(const scalar h, const scalar k) const;
 
-            virtual scalar A22(const scalar h, const scalar k) const;
+            scalar A22(const scalar h, const scalar k) const;
 
-            virtual scalar A24(const scalar h, const scalar k) const;
+            scalar A24(const scalar h, const scalar k) const;
 
-            virtual scalar A33(const scalar h, const scalar k) const;
+            scalar A33(const scalar h, const scalar k) const;
 
-            virtual scalar A35(const scalar h, const scalar k) const;
+            scalar A35(const scalar h, const scalar k) const;
 
-            virtual scalar A44(const scalar h, const scalar k) const;
+            scalar A44(const scalar h, const scalar k) const;
 
-            virtual scalar A55(const scalar h, const scalar k) const;
+            scalar A55(const scalar h, const scalar k) const;
 
-            virtual scalar B22(const scalar h, const scalar k) const;
+            scalar B22(const scalar h, const scalar k) const;
 
-            virtual scalar B24(const scalar h, const scalar k) const;
+            scalar B24(const scalar h, const scalar k) const;
 
-            virtual scalar B33(const scalar h, const scalar k) const;
+            scalar B33(const scalar h, const scalar k) const;
 
-            virtual scalar B33k(const scalar h, const scalar k) const;
+            scalar B33k(const scalar h, const scalar k) const;
 
-            virtual scalar B35(const scalar h, const scalar k) const;
+            scalar B35(const scalar h, const scalar k) const;
 
-            virtual scalar B35k(const scalar h, const scalar k) const;
+            scalar B35k(const scalar h, const scalar k) const;
 
-            virtual scalar B44(const scalar h, const scalar k) const;
+            scalar B44(const scalar h, const scalar k) const;
 
-            virtual scalar B55(const scalar h, const scalar k) const;
+            scalar B55(const scalar h, const scalar k) const;
 
-            virtual scalar B55k(const scalar h, const scalar k) const;
+            scalar B55k(const scalar h, const scalar k) const;
 
-            virtual scalar C1(const scalar h, const scalar k) const;
+            scalar C1(const scalar h, const scalar k) const;
 
-            virtual scalar C1k(const scalar h, const scalar k) const;
+            scalar C1k(const scalar h, const scalar k) const;
 
-            virtual scalar C2(const scalar h, const scalar k) const;
+            scalar C2(const scalar h, const scalar k) const;
 
-            virtual scalar C2k(const scalar h, const scalar k) const;
+            scalar C2k(const scalar h, const scalar k) const;
 
-            virtual scalar C3(const scalar h, const scalar k) const;
+            scalar C3(const scalar h, const scalar k) const;
 
-            virtual scalar C4(const scalar h, const scalar k) const;
+            scalar C4(const scalar h, const scalar k) const;
 
 
         //- Model intialisation
-        virtual void initialise
+        void initialise
         (
             const scalar H,
             const scalar d,
@@ -130,7 +124,7 @@ protected:
         ) const;
 
         //- Wave height
-        virtual scalar eta
+        scalar eta
         (
             const scalar h,
             const scalar kx,
@@ -144,7 +138,7 @@ protected:
         ) const;
 
         //- Wave velocity
-        virtual vector U
+        vector Uf
         (
             const scalar d,
             const scalar kx,
@@ -157,6 +151,17 @@ protected:
             const scalar phase,
             const scalar z
         ) const;
+
+
+protected:
+
+    // Proteced Data
+
+        //-
+        scalar lambda_;
+
+
+    // Protected Member Functions
 
         //- Set the water level
         virtual void setLevel
@@ -196,11 +201,12 @@ public:
     // Public Member Functions
 
         //- Read from dictionary
-        virtual bool read(const dictionary& overrideDict);
+        virtual bool readDict(const dictionary& overrideDict);
 
         //- Info
         virtual void info(Ostream& os) const;
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

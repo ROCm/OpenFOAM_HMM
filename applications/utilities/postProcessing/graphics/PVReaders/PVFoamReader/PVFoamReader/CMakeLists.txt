@@ -1,84 +1,70 @@
-# Create a plugin that adds a reader to the ParaView GUI
-# it is added in the file dialog when doing opens/saves.
+# Create a plugin to add a reader to the ParaView GUI
 
-# The qrc file is processed by Qt's resource compiler (rcc)
-# the qrc file must have a resource prefix of "/ParaViewResources"
-# and ParaView will read anything contained under that prefix
-# the pqReader.xml file contains xml defining readers with their
-# file extensions and descriptions.
+cmake_minimum_required(VERSION 2.8)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+find_package(ParaView REQUIRED)
+include(${PARAVIEW_USE_FILE})
 
-FIND_PACKAGE(ParaView REQUIRED)
-INCLUDE(${PARAVIEW_USE_FILE})
-
-LINK_DIRECTORIES(
+link_directories(
     $ENV{FOAM_LIBBIN}
     $ENV{FOAM_EXT_LIBBIN}
 )
 
-INCLUDE_DIRECTORIES(
+include_directories(
     $ENV{WM_PROJECT_DIR}/src/OpenFOAM/lnInclude
     $ENV{WM_PROJECT_DIR}/src/OSspecific/$ENV{WM_OSTYPE}/lnInclude
     $ENV{WM_PROJECT_DIR}/src/finiteVolume/lnInclude
     ${PROJECT_SOURCE_DIR}/../vtkPVFoam
+    ${PROJECT_SOURCE_DIR}/../../foamPv/lnInclude
 )
 
-ADD_DEFINITIONS(
-    -std=c++0x
+add_definitions(
+    -std=c++11
     -DWM_$ENV{WM_PRECISION_OPTION}
     -DWM_LABEL_SIZE=$ENV{WM_LABEL_SIZE}
 )
 
 # Set output library destination to plugin directory
-SET(
+set(
     LIBRARY_OUTPUT_PATH $ENV{PV_PLUGIN_PATH}
     CACHE INTERNAL
     "Single output directory for building all libraries."
 )
 
 
-#
-# Defined combined plugin
-#
+if (PARAVIEW_QT_VERSION VERSION_GREATER "4")
+  qt5_wrap_cpp(MOC_SRCS
+      pqFoamReaderControls.h
+  )
+else()
+  qt4_wrap_cpp(MOC_SRCS
+      pqFoamReaderControls.h
+  )
+endif()
 
-# Extend the auto-generated panel
-QT4_WRAP_CPP(MOC_SRCS pqPVFoamReaderPanel.h)
-
-ADD_PARAVIEW_OBJECT_PANEL(IFACES IFACE_SRCS
-  CLASS_NAME pqPVFoamReaderPanel
-  XML_NAME  PVFoamReader                # name of SourceProxy in *SM.xml
-  XML_GROUP sources
+add_paraview_property_group_widget(IFACES0 IFACES0_SRCS
+    TYPE "openfoam_reader_general_controls"
+    CLASS_NAME pqFoamReaderControls
 )
 
-# Separate GUI_RESOURCE_FILES deprecated with paraview 4.3
-# so check if version < 4.4
+add_paraview_plugin(
+    PVFoamReader_SM "1.0"
+    SERVER_MANAGER_XML PVFoamReader_SM.xml
+    SERVER_MANAGER_SOURCES vtkPVFoamReader.cxx
+    GUI_INTERFACES
+        ${IFACES0}
+    SOURCES
+        ${IFACES0_SRCS}
+        ${MOC_SRCS}
+        pqFoamReaderControls.cxx
+)
 
-IF(("${PARAVIEW_VERSION_MAJOR}" LESS 5) AND ("${PARAVIEW_VERSION_MINOR}" LESS 4))
-    ADD_PARAVIEW_PLUGIN(
-        PVFoamReader_SM "1.0"
-        SERVER_MANAGER_XML PVFoamReader_SM.xml
-        SERVER_MANAGER_SOURCES vtkPVFoamReader.cxx
-        GUI_INTERFACES ${IFACES}
-        GUI_SOURCES pqPVFoamReaderPanel.cxx
-        ${MOC_SRCS} ${UI_SRCS} ${IFACE_SRCS}
-        GUI_RESOURCE_FILES PVFoamReader.xml
-    )
-ELSE()
-    ADD_PARAVIEW_PLUGIN(
-        PVFoamReader_SM "1.0"
-        SERVER_MANAGER_XML PVFoamReader_SM.xml
-        SERVER_MANAGER_SOURCES vtkPVFoamReader.cxx
-        GUI_INTERFACES ${IFACES}
-        GUI_SOURCES pqPVFoamReaderPanel.cxx
-        ${MOC_SRCS} ${UI_SRCS} ${IFACE_SRCS}
-    )
-ENDIF()
 
-TARGET_LINK_LIBRARIES(
+target_link_libraries(
     PVFoamReader_SM
     LINK_PUBLIC
-    vtkPVFoam
+    vtkPVFoam-pv${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}
+    foamPv-pv${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}
     finiteVolume
     OpenFOAM
 )

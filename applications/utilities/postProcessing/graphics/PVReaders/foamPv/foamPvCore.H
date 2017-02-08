@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,44 +21,33 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    Foam::vtkPVReaders
-
 Description
-    A collection of helper functions when building a reader interface in
-    ParaView3.
+    Helpers for OpenFOAM reader interfaces in ParaView.
 
 SourceFiles
-    vtkPVReaders.C
+    foamPvCore.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef vtkPVReaders_H
-#define vtkPVReaders_H
-
-// do not include legacy strstream headers
-#ifndef  VTK_EXCLUDE_STRSTREAM_HEADERS
-# define VTK_EXCLUDE_STRSTREAM_HEADERS
-#endif
+#ifndef foamPvCore_H
+#define foamPvCore_H
 
 #include "className.H"
 #include "fileName.H"
 #include "stringList.H"
+#include "boolList.H"
+#include "pointList.H"
 #include "wordList.H"
-#include "HashSet.H"
+#include "Hash.H"
+#include "hashedWordList.H"
 
+#include "vtkPoints.h"
 
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
 
 class vtkDataArraySelection;
 class vtkDataSet;
-class vtkPoints;
-class vtkPVFoamReader;
-class vtkRenderer;
-class vtkTextActor;
 class vtkMultiBlockDataSet;
-class vtkPolyData;
-class vtkUnstructuredGrid;
 class vtkIndent;
 
 
@@ -66,13 +55,20 @@ class vtkIndent;
 
 namespace Foam
 {
-namespace vtkPVReaders
-{
-    //- Declare name of the class and its debug switch
-    NamespaceName("vtkPVReaders");
 
-    //- Bookkeeping for GUI checklists and the multi-block organization
-    class partInfo
+class IOobjectList;
+
+/*---------------------------------------------------------------------------*\
+                         Class foamPvCore Declaration
+\*---------------------------------------------------------------------------*/
+
+class foamPvCore
+{
+public:
+
+    //- Bookkeeping for GUI checklists and multi-block organization
+    //  Works like a SubList selection.
+    class arrayRange
     {
         const char *name_;
         int block_;
@@ -81,11 +77,12 @@ namespace vtkPVReaders
 
     public:
 
-        partInfo(const char *name, const int blockNo=0)
+        //- Construct with given name for the specified block
+        arrayRange(const char *name, const int blockNo=0)
         :
             name_(name),
             block_(blockNo),
-            start_(-1),
+            start_(0),
             size_(0)
         {}
 
@@ -103,42 +100,47 @@ namespace vtkPVReaders
             return prev;
         }
 
+        //- Return the name
         const char* name() const
         {
             return name_;
         }
 
+        //- The array start index
         int start() const
         {
             return start_;
         }
 
+        //- The array end index
         int end() const
         {
             return start_ + size_;
         }
 
+        //- The sub-list size
         int size() const
         {
             return size_;
         }
 
+        //- True if the sub-list is empty
         bool empty() const
         {
             return !size_;
         }
 
-        void reset()
+        //- Reset the size to zero and optionally assign a new start
+        void reset(const int startAt = 0)
         {
-            start_ = -1;
-            size_ = 0;
+            start_ = startAt;
+            size_  = 0;
         }
 
         //- Assign new start and reset the size
         void operator=(const int i)
         {
-            start_ = i;
-            size_ = 0;
+            reset(i);
         }
 
         //- Increment the size
@@ -146,80 +148,131 @@ namespace vtkPVReaders
         {
             size_ += n;
         }
-    };
+
+    }; // End class arrayRange
 
 
-    //- Convenience method use to convert the readers from VTK 5
-    //  multiblock API to the current composite data infrastructure
-    void AddToBlock
+private:
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        foamPvCore(const foamPvCore&) = delete;
+
+        //- Disallow default bitwise assignment
+        void operator=(const foamPvCore&) = delete;
+
+public:
+
+    //- Static data members
+    ClassName("foamPvCore");
+
+
+    //- Construct null
+    foamPvCore()
+    {}
+
+
+    //- Convenience method for the VTK multiblock API
+    static void addToBlock
     (
         vtkMultiBlockDataSet* output,
         vtkDataSet* dataset,
-        const partInfo& selector,
+        const arrayRange& selector,
         const label datasetNo,
         const std::string& datasetName
     );
 
-
-    //- Convenience method use to convert the readers from VTK 5
-    // multiblock API to the current composite data infrastructure
-    vtkDataSet* GetDataSetFromBlock
+    //- Convenience method for the VTK multiblock API
+    //  Always returns a nullptr if datasetNo is negative
+    template<class Type=vtkDataSet>
+    static Type* getDataFromBlock
     (
         vtkMultiBlockDataSet* output,
-        const partInfo& selector,
+        const arrayRange& selector,
         const label datasetNo
     );
 
-    //- Convenience method use to convert the readers from VTK 5
-    // multiblock API to the current composite data infrastructure
-    // ununsed at the moment
-    label GetNumberOfDataSets
+    //- Convenience method for the VTK multiblock API
+    static int getNumberOfDataSets
     (
         vtkMultiBlockDataSet* output,
-        const partInfo& selector
+        const arrayRange& selector
+    );
+
+    //- Add objects of Type to array selection
+    template<class Type>
+    static label addToSelection
+    (
+        vtkDataArraySelection* select,
+        const IOobjectList& objects,
+        const string& suffix = string::null
     );
 
 
+    //- Retrieve the current selections into a boolList
+    static int getSelected
+    (
+        boolList& lst,
+        vtkDataArraySelection* select
+    );
+
     //- Retrieve the current selections as a wordHashSet
-    wordHashSet getSelected
+    static hashedWordList getSelected
     (
         vtkDataArraySelection* select
     );
 
 
     //- Retrieve a sub-list of the current selections
-    wordHashSet getSelected
+    static hashedWordList getSelected
     (
-        vtkDataArraySelection*,
-        const partInfo&
+        vtkDataArraySelection* select,
+        const arrayRange& selector
     );
 
 
     //- Retrieve the current selections
-    stringList getSelectedArrayEntries(vtkDataArraySelection*);
+    static stringList getSelectedArrayEntries
+    (
+        vtkDataArraySelection* select
+    );
 
     //- Retrieve a sub-list of the current selections
-    stringList getSelectedArrayEntries
+    static stringList getSelectedArrayEntries
     (
         vtkDataArraySelection* select,
-        const partInfo& selector
+        const arrayRange& selector
     );
 
 
     //- Set selection(s)
-    void setSelectedArrayEntries
+    static void setSelectedArrayEntries
     (
-        vtkDataArraySelection*,
-        const stringList&
+        vtkDataArraySelection* select,
+        const stringList& selections
     );
 
+
+    //- Extract up to the first non-word characters
+    static word getFirstWord(const char* str);
+
+    //- Simple memory used debugging information
+    static void printMemory();
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace vtkPV
+}; // End class foamPvCore
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "foamPvCoreTemplates.C"
+#endif
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

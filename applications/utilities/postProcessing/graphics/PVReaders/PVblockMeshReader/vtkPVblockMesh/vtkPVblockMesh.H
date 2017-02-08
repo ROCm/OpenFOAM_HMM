@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,17 +41,7 @@ SourceFiles
 #ifndef vtkPVblockMesh_H
 #define vtkPVblockMesh_H
 
-// do not include legacy strstream headers
-#ifndef  VTK_EXCLUDE_STRSTREAM_HEADERS
-# define VTK_EXCLUDE_STRSTREAM_HEADERS
-#endif
-
-#include "className.H"
-#include "fileName.H"
-#include "stringList.H"
-#include "wordList.H"
-
-#include "primitivePatch.H"
+#include "foamPvCore.H"
 
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
 
@@ -83,85 +73,9 @@ template<class Type> class List;
 \*---------------------------------------------------------------------------*/
 
 class vtkPVblockMesh
+:
+    private foamPvCore
 {
-    // Private classes
-
-        //- Bookkeeping for GUI checklists and the multi-block organization
-        class arrayRange
-        {
-            const char *name_;
-            int block_;
-            int start_;
-            int size_;
-
-        public:
-
-            arrayRange(const char *name, const int blockNo=0)
-            :
-                name_(name),
-                block_(blockNo),
-                start_(0),
-                size_(0)
-            {}
-
-            //- Return the block holding these datasets
-            int block() const
-            {
-                return block_;
-            }
-
-            //- Assign block number, return previous value
-            int block(int blockNo)
-            {
-                int prev = block_;
-                block_ = blockNo;
-                return prev;
-            }
-
-            //- Return block name
-            const char* name() const
-            {
-                return name_;
-            }
-
-            //- Return array start index
-            int start() const
-            {
-                return start_;
-            }
-
-            //- Return array end index
-            int end() const
-            {
-                return start_ + size_;
-            }
-
-            //- Return sublist size
-            int size() const
-            {
-                return size_;
-            }
-
-            bool empty() const
-            {
-                return !size_;
-            }
-
-            //- Reset the size to zero and optionally assign a new start
-            void reset(const int startAt = 0)
-            {
-                start_ = startAt;
-                size_ = 0;
-            }
-
-            //- Increment the size
-            void operator+=(const int n)
-            {
-                size_ += n;
-            }
-        };
-
-
     // Private Data
 
         //- Access to the controlling vtkPVblockMeshReader
@@ -195,109 +109,45 @@ class vtkPVblockMesh
         //- First instance and size of block corners (only partially used)
         arrayRange arrayRangeCorners_;
 
+        //- List of patch names for rendering to window
+        List<vtkTextActor*> patchTextActorsPtrs_;
+
         //- List of point numbers for rendering to window
-        List<vtkTextActor*> pointNumberTextActorsPtrs_;
+        List<vtkTextActor*> pointTextActorsPtrs_;
+
 
     // Private Member Functions
 
-        // Convenience method use to convert the readers from VTK 5
-        // multiblock API to the current composite data infrastructure
-        static void AddToBlock
-        (
-            vtkMultiBlockDataSet* output,
-            vtkDataSet* dataset,
-            const arrayRange&,
-            const label datasetNo,
-            const std::string& datasetName
-        );
-
-        // Convenience method use to convert the readers from VTK 5
-        // multiblock API to the current composite data infrastructure
-        static vtkDataSet* GetDataSetFromBlock
-        (
-            vtkMultiBlockDataSet* output,
-            const arrayRange&,
-            const label datasetNo
-        );
-
-        // Convenience method use to convert the readers from VTK 5
-        // multiblock API to the current composite data infrastructure
-        static label GetNumberOfDataSets
-        (
-            vtkMultiBlockDataSet* output,
-            const arrayRange&
-        );
-
-        //- Update boolList from GUI selection
-        static void updateBoolListStatus
-        (
-            boolList&,
-            vtkDataArraySelection*
-        );
+        //- Create a text actor
+        static vtkTextActor* createTextActor(const string& s, const point& pt);
 
         //- Reset data counters
         void resetCounters();
 
-        // Update information helper functions
+        //- OpenFOAM mesh
+        void updateFoamMesh();
 
-            //- Internal block info
-            void updateInfoBlocks(vtkDataArraySelection*);
+        //- Internal block info
+        void updateInfoBlocks(vtkDataArraySelection* select);
 
-            //- Block curved edges info
-            void updateInfoEdges(vtkDataArraySelection*);
+        //- Block curved edges info
+        void updateInfoEdges(vtkDataArraySelection* select);
 
-        // Update helper functions
+        //- Mesh blocks
+        void convertMeshBlocks(vtkMultiBlockDataSet*, int& blockNo);
 
-            //- OpenFOAM mesh
-            void updateFoamMesh();
+        //- Mesh curved edges
+        void convertMeshEdges(vtkMultiBlockDataSet*, int& blockNo);
 
-        // Mesh conversion functions
-
-            //- Mesh blocks
-            void convertMeshBlocks(vtkMultiBlockDataSet*, int& blockNo);
-
-            //- Mesh curved edges
-            void convertMeshEdges(vtkMultiBlockDataSet*, int& blockNo);
-
-            //- Mesh corners
-            void convertMeshCorners(vtkMultiBlockDataSet*, int& blockNo);
-
-
-       // GUI selection helper functions
-
-            //- Retrieve the current selections
-            static wordHashSet getSelected(vtkDataArraySelection*);
-
-            //- Retrieve a sub-list of the current selections
-            static wordHashSet getSelected
-            (
-                vtkDataArraySelection*,
-                const arrayRange&
-            );
-
-            //- Retrieve the current selections
-            static stringList getSelectedArrayEntries(vtkDataArraySelection*);
-
-            //- Retrieve a sub-list of the current selections
-            static stringList getSelectedArrayEntries
-            (
-                vtkDataArraySelection*,
-                const arrayRange&
-            );
-
-            //- Set selection(s)
-            static void setSelectedArrayEntries
-            (
-                vtkDataArraySelection*,
-                const stringList&
-            );
+        //- Mesh corners
+        void convertMeshCorners(vtkMultiBlockDataSet*, int& blockNo);
 
 
         //- Disallow default bitwise copy construct
-        vtkPVblockMesh(const vtkPVblockMesh&);
+        vtkPVblockMesh(const vtkPVblockMesh&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const vtkPVblockMesh&);
+        void operator=(const vtkPVblockMesh&) = delete;
 
 
 public:
@@ -330,6 +180,9 @@ public:
 
         //- Clean any storage
         void CleanUp();
+
+        //- Add/remove patch names to/from the view
+        void renderPatchNames(vtkRenderer*, const bool show);
 
         //- Add/remove point numbers to/from the view
         void renderPointNumbers(vtkRenderer*, const bool show);

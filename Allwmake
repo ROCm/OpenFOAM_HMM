@@ -1,21 +1,20 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
+# Run from OPENFOAM top-level directory only
+cd ${0%/*} && wmakeCheckPwd "$WM_PROJECT_DIR" 2>/dev/null || {
+    echo "Error (${0##*/}) : not located in \$WM_PROJECT_DIR"
+    echo "    Check your OpenFOAM environment and installation"
+    exit 1
+}
+[ -n "$FOAM_EXT_LIBBIN" ] || {
+    echo "Error (${0##*/}) : FOAM_EXT_LIBBIN not set"
+    echo "    Check your OpenFOAM environment and installation"
+    exit 1
+}
 
 # Parse arguments for library compilation
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
-wmakeCheckPwd "$WM_PROJECT_DIR" || {
-    echo "Allwmake error: Current directory is not \$WM_PROJECT_DIR"
-    echo "    The environment variables are inconsistent with the installation."
-    echo "    Check the OpenFOAM entries in your dot-files and source them."
-    exit 1
-}
-
-[ -n "$FOAM_EXT_LIBBIN" ] || {
-    echo "Allwmake error: FOAM_EXT_LIBBIN not set"
-    echo "    Check the OpenFOAM entries in your dot-files and source them."
-    exit 1
-}
+#------------------------------------------------------------------------------
 
 # Compile wmake support applications
 (cd wmake/src && make)

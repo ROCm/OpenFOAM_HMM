@@ -59,11 +59,11 @@ Foam::foamVtkPTraits<double>::typeName = "Float64";
 #ifdef WM_LITTLE_ENDIAN
 template<>
 const char* const
-Foam::foamVtkPTraits<::Foam::endian>::typeName = "LittleEndian";
+Foam::foamVtkPTraits<Foam::endian>::typeName = "LittleEndian";
 #else
 template<>
 const char* const
-Foam::foamVtkPTraits<::Foam::endian>::typeName = "BigEndian";
+Foam::foamVtkPTraits<Foam::endian>::typeName = "BigEndian";
 #endif
 
 

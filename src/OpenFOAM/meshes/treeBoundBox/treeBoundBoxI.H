@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,15 +34,21 @@ inline Foam::treeBoundBox::treeBoundBox()
 {}
 
 
-inline Foam::treeBoundBox::treeBoundBox(const point& min, const point& max)
-:
-    boundBox(min, max)
-{}
-
-
 inline Foam::treeBoundBox::treeBoundBox(const boundBox& bb)
 :
     boundBox(bb)
+{}
+
+
+inline Foam::treeBoundBox::treeBoundBox(const point& pt)
+:
+    boundBox(pt)
+{}
+
+
+inline Foam::treeBoundBox::treeBoundBox(const point& min, const point& max)
+:
+    boundBox(min, max)
 {}
 
 
@@ -312,7 +318,6 @@ inline void Foam::treeBoundBox::searchOrder
 }
 
 
-//- Return slightly wider bounding box
 inline Foam::treeBoundBox Foam::treeBoundBox::extend
 (
     Random& rndGen,
@@ -326,7 +331,7 @@ inline Foam::treeBoundBox Foam::treeBoundBox::extend
     // Make 3D
     scalar minSpan = s * Foam::mag(newSpan);
 
-    for (direction dir = 0; dir < vector::nComponents; dir++)
+    for (direction dir = 0; dir < vector::nComponents; ++dir)
     {
         newSpan[dir] = Foam::max(newSpan[dir], minSpan);
     }

@@ -5,49 +5,58 @@
     class="vtkPVblockMeshReader">
 
     <!-- File name - compulsory -->
-    <StringVectorProperty
+    <StringVectorProperty animateable="0"
       name="FileName"
       command="SetFileName"
       number_of_elements="1"
-      animateable="0">
+      panel_visibility="never">
       <FileListDomain name="files"/>
-      <Documentation>
-        Specifies the filename for the OpenFOAM blockMesh Reader.
-      </Documentation>
+      <Documentation>The filename for the OpenFOAM blockMesh reader.</Documentation>
     </StringVectorProperty>
 
-    <!-- Show Point Numbers check-box -->
-    <IntVectorProperty
-      name="UiShowPointNumbers"
-      command="SetShowPointNumbers"
-      number_of_elements="1"
-      default_values="1"
-      is_internal="1"
-      animateable="0">
-      <BooleanDomain name="bool"/>
-      <Documentation>
-        Show point numbers in render window.
-      </Documentation>
-    </IntVectorProperty>
+    <!-- Refresh (push button) -->
+    <Property
+      name="Refresh"
+      command="Refresh"
+      panel_visibility="default">
+      <Documentation>Rescan for updated blockMeshDict.</Documentation>
+    </Property>
 
-    <!-- Refresh button -->
-    <IntVectorProperty
-      name="UiRefresh"
-      command="SetRefresh"
-      number_of_elements="1"
-      is_internal="0"
+<!-- General Controls -->
+
+    <!-- Show Patch Names (check-box) -->
+    <IntVectorProperty animateable="0"
+      name="ShowPatchNames"
+      label="Patch Names"
+      command="SetShowPatchNames"
       default_values="0"
-      animateable="0">
+      number_of_elements="1"
+      panel_visibility="default">
       <BooleanDomain name="bool"/>
-      <Documentation>
-        Rescan for updated blockMeshDict.
-      </Documentation>
+      <Documentation>Show patch names in render window.</Documentation>
     </IntVectorProperty>
 
+    <!-- Show Point Numbers (check-box) -->
+    <IntVectorProperty animateable="0"
+      name="ShowPointNumbers"
+      label="Point Numbers"
+      command="SetShowPointNumbers"
+      default_values="1"
+      number_of_elements="1"
+      panel_visibility="default">
+      <BooleanDomain name="bool"/>
+      <Documentation>Show point numbers in render window.</Documentation>
+    </IntVectorProperty>
 
-    <!--
-       | Selections
-       -->
+  <PropertyGroup
+    label="General Controls"
+    panel_widget="openfoam_blockMesh_general_controls">
+    <Property name="Refresh"/>
+    <Property name="ShowPatchNames"/>
+    <Property name="ShowPointNumbers"/>
+  </PropertyGroup>
+
+<!-- Selections -->
 
     <!-- Available Blocks array -->
     <StringVectorProperty
@@ -55,7 +64,7 @@
       information_only="1">
       <ArraySelectionInformationHelper attribute_name="Block"/>
     </StringVectorProperty>
-    <StringVectorProperty
+    <StringVectorProperty animateable="0"
       name="BlockStatus"
       label="Blocks"
       command="SetBlockArrayStatus"
@@ -63,16 +72,13 @@
       repeat_command="1"
       number_of_elements_per_command="2"
       element_types="2 0"
-      information_property="BlockArrayStatus"
-      animateable="0">
+      information_property="BlockArrayStatus">
       <ArraySelectionDomain name="array_list">
         <RequiredProperties>
           <Property name="BlockArrayStatus" function="ArrayList"/>
         </RequiredProperties>
       </ArraySelectionDomain>
-      <Documentation>
-        This property contains a list of the blocks
-      </Documentation>
+      <Documentation>The list of blocks</Documentation>
     </StringVectorProperty>
 
     <!-- Available CurvedEdges array -->
@@ -81,7 +87,7 @@
       information_only="1">
       <ArraySelectionInformationHelper attribute_name="CurvedEdges"/>
     </StringVectorProperty>
-    <StringVectorProperty
+    <StringVectorProperty animateable="0"
       name="CurvedEdgesStatus"
       label="Curved Edges"
       command="SetCurvedEdgesArrayStatus"
@@ -89,24 +95,26 @@
       repeat_command="1"
       number_of_elements_per_command="2"
       element_types="2 0"
-      information_property="CurvedEdgesArrayStatus"
-      animateable="0">
+      information_property="CurvedEdgesArrayStatus">
       <ArraySelectionDomain name="array_list">
         <RequiredProperties>
           <Property name="CurvedEdgesArrayStatus" function="ArrayList"/>
         </RequiredProperties>
       </ArraySelectionDomain>
-      <Documentation>
-        This property contains a list of the curved edges
-      </Documentation>
+      <Documentation>The list of curved edges</Documentation>
     </StringVectorProperty>
 
+  <PropertyGroup label="Selections">
+    <Property name="BlockArrayStatus"/>
+    <Property name="BlockStatus"/>
+    <Property name="CurvedEdgesArrayStatus"/>
+    <Property name="CurvedEdgesStatus"/>
+  </PropertyGroup>
+
   <Hints>
-    <Property name="FileName" show="0"/>
-    <Property name="UiRefresh" show="0"/>
-    <Property name="UiShowPointNumbers" show="0"/>
-    <ReaderFactory extensions="blockMesh"
-                   file_description="OpenFOAM blockMesh"/>
+    <ReaderFactory
+      extensions="blockMesh"
+      file_description="OpenFOAM blockMesh"/>
   </Hints>
 
   </SourceProxy>

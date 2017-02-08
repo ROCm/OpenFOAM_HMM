@@ -1,7 +1,0 @@
-<ParaViewReaders>
-  <!-- deprecated with paraview-4.3, use hints in *SM.xml -->
-  <Reader name="PVFoamReader"
-          extensions="OpenFOAM"
-          file_description="OpenFOAM Reader">
-  </Reader>
-</ParaViewReaders>

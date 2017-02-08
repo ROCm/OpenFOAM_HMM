@@ -2,17 +2,15 @@
 cd ${0%/*} || exit 1    # Run from this directory
 
 # Source the wmake functions
-. $WM_DIR/scripts/wmakeFunctions
+. $WM_PROJECT_DIR/wmake/scripts/wmakeFunctions
 
-#set -x
-
-# deal with client/server vs combined plugins
+# Cleanup client-server and/or combined plugins
 rm -f $FOAM_LIBBIN/libPVblockMeshReader* 2>/dev/null
 
 rm -rf PVblockMeshReader/Make   # safety: old build location
 wclean libso vtkPVblockMesh
 
-# Where are the generated files stored?
+# Cleanup generated files
 findObjectDir $PWD # remove entire top-level
 rm -rf "$objectsDir" > /dev/null 2>&1
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,105 +24,62 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "boundBox.H"
-#include "ListOps.H"
 #include "PstreamReduceOps.H"
 #include "tmp.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::scalar Foam::boundBox::great(VGREAT);
-
 const Foam::boundBox Foam::boundBox::greatBox
 (
-    point(-VGREAT, -VGREAT, -VGREAT),
-    point(VGREAT, VGREAT, VGREAT)
+    point::uniform(-ROOTVGREAT),
+    point::uniform(ROOTVGREAT)
 );
-
 
 const Foam::boundBox Foam::boundBox::invertedBox
 (
-    point(VGREAT, VGREAT, VGREAT),
-    point(-VGREAT, -VGREAT, -VGREAT)
+    point::uniform(ROOTVGREAT),
+    point::uniform(-ROOTVGREAT)
 );
-
-
-//! \cond ignoreDocumentation
-//- Skip documentation : local scope only
-const Foam::label facesArray[6][4] =
-{
-    // point and face order as per hex cellmodel
-    {0, 4, 7, 3}, // x-min
-    {1, 2, 6, 5}, // x-max
-    {0, 1, 5, 4}, // y-min
-    {3, 7, 6, 2}, // y-max
-    {0, 3, 2, 1}, // z-min
-    {4, 5, 6, 7}  // z-max
-};
-//! \endcond
-
 
 const Foam::faceList Foam::boundBox::faces
-(
-    initListList<face, label, 6, 4>(facesArray)
-);
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::boundBox::calculate(const UList<point>& points, const bool doReduce)
-{
-    if (points.empty())
-    {
-        min_ = Zero;
-        max_ = Zero;
-
-        if (doReduce && Pstream::parRun())
-        {
-            // Use values that get overwritten by reduce minOp, maxOp below
-            min_ = point(VGREAT, VGREAT, VGREAT);
-            max_ = point(-VGREAT, -VGREAT, -VGREAT);
-        }
-    }
-    else
-    {
-        min_ = points[0];
-        max_ = points[0];
-
-
-        for (label i = 1; i < points.size(); i++)
-        {
-            min_ = ::Foam::min(min_, points[i]);
-            max_ = ::Foam::max(max_, points[i]);
-        }
-    }
-
-    // Reduce parallel information
-    if (doReduce)
-    {
-        reduce(min_, minOp<point>());
-        reduce(max_, maxOp<point>());
-    }
-}
+({
+    // Point and face order as per hex cellmodel
+    face{0, 4, 7, 3}, // x-min
+    face{1, 2, 6, 5}, // x-max
+    face{0, 1, 5, 4}, // y-min
+    face{3, 7, 6, 2}, // y-max
+    face{0, 3, 2, 1}, // z-min
+    face{4, 5, 6, 7}  // z-max
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::boundBox::boundBox(const UList<point>& points, const bool doReduce)
+Foam::boundBox::boundBox(const UList<point>& points, bool doReduce)
 :
-    min_(Zero),
-    max_(Zero)
+    min_(invertedBox.min()),
+    max_(invertedBox.max())
 {
-    calculate(points, doReduce);
+    add(points);
+
+    if (doReduce)
+    {
+        reduce();
+    }
 }
 
 
-Foam::boundBox::boundBox(const tmp<pointField>& points, const bool doReduce)
+Foam::boundBox::boundBox(const tmp<pointField>& tpoints, bool doReduce)
 :
-    min_(Zero),
-    max_(Zero)
+    min_(invertedBox.min()),
+    max_(invertedBox.max())
 {
-    calculate(points(), doReduce);
-    points.clear();
+    add(tpoints);
+
+    if (doReduce)
+    {
+        reduce();
+    }
 }
 
 
@@ -130,38 +87,17 @@ Foam::boundBox::boundBox
 (
     const UList<point>& points,
     const labelUList& indices,
-    const bool doReduce
+    bool doReduce
 )
 :
-    min_(Zero),
-    max_(Zero)
+    min_(invertedBox.min()),
+    max_(invertedBox.max())
 {
-    if (points.empty() || indices.empty())
-    {
-        if (doReduce && Pstream::parRun())
-        {
-            // Use values that get overwritten by reduce minOp, maxOp below
-            min_ = point(VGREAT, VGREAT, VGREAT);
-            max_ = point(-VGREAT, -VGREAT, -VGREAT);
-        }
-    }
-    else
-    {
-        min_ = points[indices[0]];
-        max_ = points[indices[0]];
+    add(points, indices);
 
-        for (label i=1; i < indices.size(); ++i)
-        {
-            min_ = ::Foam::min(min_, points[indices[i]]);
-            max_ = ::Foam::max(max_, points[indices[i]]);
-        }
-    }
-
-    // Reduce parallel information
     if (doReduce)
     {
-        reduce(min_, minOp<point>());
-        reduce(max_, maxOp<point>());
+        reduce();
     }
 }
 
@@ -170,8 +106,8 @@ Foam::boundBox::boundBox
 
 Foam::tmp<Foam::pointField> Foam::boundBox::points() const
 {
-    tmp<pointField> tPts = tmp<pointField>(new pointField(8));
-    pointField& pt = tPts.ref();
+    tmp<pointField> tpoints = tmp<pointField>(new pointField(8));
+    pointField& pt = tpoints.ref();
 
     pt[0] = min_;                                   // min-x, min-y, min-z
     pt[1] = point(max_.x(), min_.y(), min_.z());    // max-x, min-y, min-z
@@ -182,16 +118,32 @@ Foam::tmp<Foam::pointField> Foam::boundBox::points() const
     pt[6] = max_;                                   // max-x, max-y, max-z
     pt[7] = point(min_.x(), max_.y(), max_.z());    // min-x, max-y, max-z
 
-    return tPts;
+    return tpoints;
 }
 
 
 void Foam::boundBox::inflate(const scalar s)
 {
-    vector ext = vector::one*s*mag();
+    const vector ext = vector::one*s*mag();
 
     min_ -= ext;
     max_ += ext;
+}
+
+
+void Foam::boundBox::reduce()
+{
+    Foam::reduce(min_, minOp<point>());
+    Foam::reduce(max_, maxOp<point>());
+}
+
+
+bool Foam::boundBox::intersect(const boundBox& bb)
+{
+    min_ = ::Foam::max(min_, bb.min_);
+    max_ = ::Foam::min(max_, bb.max_);
+
+    return !empty();
 }
 
 

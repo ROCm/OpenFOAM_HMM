@@ -326,7 +326,7 @@ void Foam::foamVtkCells::correct()
                         nAddVerts += 5;
 
                         vertOffset_[celLoc] = nAddVerts;
-                        decompose_.superCells_[nAddCells++] = celLoc;
+                        decompose_.superCells_[nAddCells++] = cellI;
                     }
 
                     cellTypes_[celLoc] = foamVtkCore::VTK_PYRAMID;
@@ -373,7 +373,7 @@ void Foam::foamVtkCells::correct()
                         nAddVerts += 4;
 
                         vertOffset_[celLoc] = nAddVerts;
-                        decompose_.superCells_[nAddCells++] = celLoc;
+                        decompose_.superCells_[nAddCells++] = cellI;
                     }
 
                     cellTypes_[celLoc] = foamVtkCore::VTK_TETRA;

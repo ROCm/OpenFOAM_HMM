@@ -166,77 +166,6 @@ std::string Foam::ccm::reader::ccmReadOptstr
 }
 
 
-Foam::word Foam::ccm::reader::validateWord
-(
-    const std::string& str
-)
-{
-    std::string::size_type ngood = 0;
-    bool prefix = false;
-    bool first  = true;
-
-    for
-    (
-        std::string::const_iterator iter = str.begin();
-        iter != str.end();
-        ++iter
-    )
-    {
-        if (word::valid(*iter))
-        {
-            ++ngood;
-            if (first)
-            {
-                first = false;
-
-                // Start with a digit? need to prefix with '_'
-                if (isdigit(*iter))
-                {
-                    prefix = true;
-                    ++ngood;
-                }
-            }
-        }
-    }
-
-    if (ngood == str.size() && !prefix)
-    {
-        return str;
-    }
-
-    Foam::word out;
-    out.resize(ngood);
-    ngood = 0;
-
-    Foam::word::iterator iter2 = out.begin();
-    for
-    (
-        std::string::const_iterator iter1 = str.begin();
-        iter1 != str.end();
-        ++iter1
-    )
-    {
-        register char c = *iter1;
-
-        if (Foam::word::valid(c))
-        {
-            if (prefix)
-            {
-                prefix = false;
-                *(iter2++) = '_';
-                ++ngood;
-            }
-            *(iter2++) = c;
-            ++ngood;
-        }
-    }
-
-    out.resize(ngood);
-
-    return out;
-}
-
-
 // Read map data and check error
 void Foam::ccm::reader::readMap
 (
@@ -435,7 +364,7 @@ void Foam::ccm::reader::readProblemDescription_boundaryRegion
             }
             else
             {
-                dict.add(opt, validateWord(str));
+                dict.add(opt, word::validated(str));
             }
         }
 
@@ -476,7 +405,7 @@ void Foam::ccm::reader::readProblemDescription_boundaryRegion
 
             if (!str.empty())
             {
-                dict.add(opt, validateWord(str));
+                dict.add(opt, word::validated(str));
             }
         }
 
@@ -541,7 +470,7 @@ void Foam::ccm::reader::readProblemDescription_cellTable
                 str = "zone_" + ::Foam::name(Id);
             }
 
-            dict.add(opt, validateWord(str));
+            dict.add(opt, word::validated(str));
         }
 
 
@@ -553,7 +482,7 @@ void Foam::ccm::reader::readProblemDescription_cellTable
 
             if (!str.empty())
             {
-                dict.add(opt, validateWord(str));
+                dict.add(opt, word::validated(str));
             }
         }
 
