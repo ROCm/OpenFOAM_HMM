@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,37 @@ License
 #include "Ostream.H"
 #include "token.H"
 #include "contiguous.H"
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class T, unsigned Size>
+void Foam::FixedList<T, Size>::writeEntry(Ostream& os) const
+{
+    const word tag = "List<" + word(pTraits<T>::typeName) + '>';
+    if (token::compound::isCompound(tag))
+    {
+        os  << tag << ' ';
+    }
+
+    os << *this;
+}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+template<class T, unsigned Size>
+void Foam::FixedList<T, Size>::writeEntry
+(
+    const word& keyword,
+    Ostream& os
+) const
+{
+    os.writeKeyword(keyword);
+    writeEntry(os);
+    os << token::END_STATEMENT << endl;
+}
+
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
@@ -85,7 +116,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
 
         if (delimiter == token::BEGIN_LIST)
         {
-            for (unsigned i=0; i<Size; i++)
+            for (unsigned i=0; i<Size; ++i)
             {
                 is >> L[i];
 
@@ -107,7 +138,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
                 "reading the single entry"
             );
 
-            for (unsigned i=0; i<Size; i++)
+            for (unsigned i=0; i<Size; ++i)
             {
                 L[i] = element;
             }
@@ -134,32 +165,6 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
 
 
 // * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
-
-template<class T, unsigned Size>
-void Foam::FixedList<T, Size>::writeEntry(Ostream& os) const
-{
-    const word tag = "List<" + word(pTraits<T>::typeName) + '>';
-    if (token::compound::isCompound(tag))
-    {
-        os  << tag << " ";
-    }
-
-    os << *this;
-}
-
-
-template<class T, unsigned Size>
-void Foam::FixedList<T, Size>::writeEntry
-(
-    const word& keyword,
-    Ostream& os
-) const
-{
-    os.writeKeyword(keyword);
-    writeEntry(os);
-    os << token::END_STATEMENT << endl;
-}
-
 
 template<class T, unsigned Size>
 Foam::Ostream& Foam::operator<<(Ostream& os, const FixedList<T, Size>& L)

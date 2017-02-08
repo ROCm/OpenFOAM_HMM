@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,6 +91,14 @@ class UList
         //  disallow default assignment and provide separate 'shallowCopy' and
         //  'deepCopy' member functions
         void operator=(const UList<T>&) = delete;
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Write the UList with its compound type
+        void writeEntry(Ostream& os) const;
 
 
 public:
@@ -218,12 +226,6 @@ public:
 
         //- Copy elements of the given UList
         void deepCopy(const UList<T>&);
-
-        //- Write the UList with its compound type
-        void writeEntry(Ostream&) const;
-
-        //- Write the UList as a dictionary entry with keyword
-        void writeEntry(const word& keyword, Ostream&) const;
 
 
     // Member operators
@@ -363,6 +365,12 @@ public:
 
         //- Return true if !(a < b). Takes linear time
         bool operator>=(const UList<T>&) const;
+
+
+    // Writing
+
+        //- Write the List as a dictionary entry with keyword
+        void writeEntry(const word& keyword, Ostream& os) const;
 
 
     // Ostream operator

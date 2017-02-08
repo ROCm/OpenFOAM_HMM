@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,6 +84,14 @@ class FixedList
 
         //- Vector of values of type T of size Size.
         T v_[Size];
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Write the FixedList with its compound type
+        void writeEntry(Ostream& os) const;
 
 
 public:
@@ -206,12 +214,6 @@ public:
             //- Copy (not transfer) the argument contents
             //  needed to make FixedList consistent with List
             void transfer(const FixedList<T, Size>&);
-
-        //- Write the FixedList as a dictionary entry
-        void writeEntry(Ostream&) const;
-
-        //- Write the FixedList as a dictionary entry with keyword
-        void writeEntry(const word& keyword, Ostream&) const;
 
 
     // Member operators
@@ -355,6 +357,12 @@ public:
 
         //- Return true if !(a < b). Takes linear time
         bool operator>=(const FixedList<T, Size>&) const;
+
+
+    // Writing
+
+        //- Write the List as a dictionary entry with keyword
+        void writeEntry(const word& keyword, Ostream& os) const;
 
 
     // IOstream operators

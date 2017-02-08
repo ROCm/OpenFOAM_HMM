@@ -727,7 +727,7 @@ template<unsigned nBits>
 inline void Foam::PackedList<nBits>::resize
 (
     const label newSize,
-    const unsigned int& val
+    const unsigned int val
 )
 {
     reserve(newSize);
@@ -821,7 +821,7 @@ template<unsigned nBits>
 inline void Foam::PackedList<nBits>::setSize
 (
     const label newSize,
-    const unsigned int& val
+    const unsigned int val
 )
 {
     resize(newSize, val);

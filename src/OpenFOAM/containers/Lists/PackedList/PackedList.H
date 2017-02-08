@@ -186,6 +186,14 @@ private:
         label size_;
 
 
+protected:
+
+    // Protected Member Functions
+
+        //- Write as a dictionary entry
+        void writeEntry(Ostream& os) const;
+
+
 public:
 
     // Public data
@@ -322,10 +330,10 @@ public:
 
             //- Reset addressable list size, does not shrink the allocated size.
             //  Optionally specify a value for new elements.
-            inline void resize(const label, const unsigned int& val = 0u);
+            inline void resize(const label, const unsigned int val = 0u);
 
             //- Alias for resize()
-            inline void setSize(const label, const unsigned int& val = 0u);
+            inline void setSize(const label, const unsigned int val = 0u);
 
             //- Reserve allocation space for at least this size.
             //  Never shrinks the allocated size.
@@ -354,7 +362,7 @@ public:
         // IO
 
             //- Clear list and read from stream
-            Istream& read(Istream&);
+            Istream& read(Istream& is);
 
             //- Write, optionally with indexedOutput
             //
@@ -372,16 +380,13 @@ public:
             // Note the indexed output is only supported for ASCII streams.
             Ostream& write
             (
-                Ostream&,
+                Ostream& os,
                 const bool indexedOutput=false
             ) const;
 
 
-            //- Write as a dictionary entry
-            void writeEntry(Ostream&) const;
-
             //- Write as a dictionary entry with keyword
-            void writeEntry(const word& keyword, Ostream&) const;
+            void writeEntry(const word& keyword, Ostream& os) const;
 
 
     // Member operators

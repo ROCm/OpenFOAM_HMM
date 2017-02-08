@@ -29,7 +29,7 @@ License
 #include "SLList.H"
 #include "contiguous.H"
 
-// * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class T>
 void Foam::UList<T>::writeEntry(Ostream& os) const
@@ -56,6 +56,8 @@ void Foam::UList<T>::writeEntry(Ostream& os) const
 }
 
 
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
 template<class T>
 void Foam::UList<T>::writeEntry(const word& keyword, Ostream& os) const
 {
@@ -64,6 +66,8 @@ void Foam::UList<T>::writeEntry(const word& keyword, Ostream& os) const
     os << token::END_STATEMENT << endl;
 }
 
+
+// * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
 
 template<class T>
 Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
