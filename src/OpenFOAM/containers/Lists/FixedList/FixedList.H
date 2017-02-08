@@ -125,7 +125,7 @@ public:
         inline FixedList();
 
         //- Construct from value
-        explicit inline FixedList(const T&);
+        explicit inline FixedList(const T& t);
 
         //- Construct from C-array
         explicit inline FixedList(const T v[Size]);
@@ -135,19 +135,19 @@ public:
         inline FixedList(InputIterator first, InputIterator last);
 
         //- Construct from an initializer list
-        inline FixedList(std::initializer_list<T>);
+        inline FixedList(std::initializer_list<T> lst);
 
         //- Construct from UList
-        explicit inline FixedList(const UList<T>&);
+        explicit inline FixedList(const UList<T>& lst);
 
         //- Construct from SLList
-        explicit inline FixedList(const SLList<T>&);
+        explicit inline FixedList(const SLList<T>& lst);
 
         //- Copy constructor
-        inline FixedList(const FixedList<T, Size>&);
+        inline FixedList(const FixedList<T, Size>& lst);
 
         //- Construct from Istream
-        FixedList(Istream&);
+        FixedList(Istream& is);
 
         //- Clone
         inline autoPtr<FixedList<T, Size>> clone() const;
@@ -205,39 +205,39 @@ public:
 
             //- Dummy resize function
             //  needed to make FixedList consistent with List
-            inline void resize(const label);
+            inline void resize(const label s);
 
             //- Dummy setSize function
             //  needed to make FixedList consistent with List
-            inline void setSize(const label);
+            inline void setSize(const label s);
 
             //- Copy (not transfer) the argument contents
             //  needed to make FixedList consistent with List
-            void transfer(const FixedList<T, Size>&);
+            void transfer(const FixedList<T, Size>& lst);
 
 
     // Member operators
 
         //- Return element of FixedList
-        inline T& operator[](const label);
+        inline T& operator[](const label i);
 
         //- Return element of constant FixedList
-        inline const T& operator[](const label) const;
+        inline const T& operator[](const label i) const;
 
         //- Assignment to array operator. Takes linear time
-        inline void operator=(const T v[Size]);
+        inline void operator=(const T lst[Size]);
 
         //- Assignment to UList operator. Takes linear time
-        inline void operator=(const UList<T>&);
+        inline void operator=(const UList<T>& lst);
 
         //- Assignment to SLList operator. Takes linear time
-        inline void operator=(const SLList<T>&);
+        inline void operator=(const SLList<T>& lst);
 
         //- Assignment to an initializer list. Takes linear time
-        inline void operator=(std::initializer_list<T>);
+        inline void operator=(std::initializer_list<T> lst);
 
         //- Assignment of all entries to the given value
-        inline void operator=(const T&);
+        inline void operator=(const T& t);
 
 
     // STL type definitions
@@ -333,7 +333,7 @@ public:
         inline bool empty() const;
 
         //- Swap two FixedLists of the same type in constant time
-        void swap(FixedList<T, Size>&);
+        void swap(FixedList<T, Size>& a);
 
 
     // STL member operators
@@ -341,22 +341,22 @@ public:
         //- Equality operation on FixedLists of the same type.
         //  Returns true when the FixedLists are elementwise equal
         //  (using FixedList::value_type::operator==).  Takes linear time
-        bool operator==(const FixedList<T, Size>&) const;
+        bool operator==(const FixedList<T, Size>& a) const;
 
         //- The opposite of the equality operation. Takes linear time
-        bool operator!=(const FixedList<T, Size>&) const;
+        bool operator!=(const FixedList<T, Size>& a) const;
 
         //- Compare two FixedLists lexicographically. Takes linear time
-        bool operator<(const FixedList<T, Size>&) const;
+        bool operator<(const FixedList<T, Size>& a) const;
 
         //- Compare two FixedLists lexicographically. Takes linear time
-        bool operator>(const FixedList<T, Size>&) const;
+        bool operator>(const FixedList<T, Size>& a) const;
 
         //- Return true if !(a > b). Takes linear time
-        bool operator<=(const FixedList<T, Size>&) const;
+        bool operator<=(const FixedList<T, Size>& a) const;
 
         //- Return true if !(a < b). Takes linear time
-        bool operator>=(const FixedList<T, Size>&) const;
+        bool operator>=(const FixedList<T, Size>& a) const;
 
 
     // Writing
@@ -365,17 +365,21 @@ public:
         void writeEntry(const word& keyword, Ostream& os) const;
 
 
+
     // IOstream operators
 
         //- Read List from Istream, discarding contents of existing List
         friend Istream& operator>> <T, Size>
-        (Istream&, FixedList<T, Size>&);
+        (
+            Istream& is,
+            FixedList<T, Size>& L
+        );
 
         //- Write FixedList to Ostream
         friend Ostream& operator<< <T, Size>
         (
-            Ostream&,
-            const FixedList<T, Size>&
+            Ostream& os,
+            const FixedList<T, Size>& L
         );
 };
 

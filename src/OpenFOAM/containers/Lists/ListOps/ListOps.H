@@ -51,7 +51,7 @@ extern const labelList emptyLabelList;
 template<class Type>
 static const List<Type>& emptyList()
 {
-    return *reinterpret_cast<const List<Type>* >(&emptyLabelList);
+    return *reinterpret_cast<const List<Type>*>(&emptyLabelList);
 }
 
 //- Renumber the values (not the indices) of a list.
@@ -263,7 +263,7 @@ public:
 };
 
 
-//- Helper class for list to append unique elelements of y onto the end of x
+//- Helper class for list to append unique elements of y onto the end of x
 template<class T>
 class ListUniqueEqOp
 {

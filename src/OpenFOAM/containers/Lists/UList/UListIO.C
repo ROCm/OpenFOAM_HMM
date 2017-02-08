@@ -201,7 +201,7 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& L)
         if (is.format() == IOstream::ASCII || !contiguous<T>())
         {
             // Read beginning of contents
-            char delimiter = is.readBeginList("List");
+            const char delimiter = is.readBeginList("List");
 
             if (s)
             {

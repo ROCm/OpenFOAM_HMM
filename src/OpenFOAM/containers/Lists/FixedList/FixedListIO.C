@@ -112,7 +112,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
         }
 
         // Read beginning of contents
-        char delimiter = is.readBeginList("FixedList");
+        const char delimiter = is.readBeginList("FixedList");
 
         if (delimiter == token::BEGIN_LIST)
         {

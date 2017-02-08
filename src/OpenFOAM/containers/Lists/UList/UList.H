@@ -222,27 +222,27 @@ public:
 
 
         //- Copy the pointer held by the given UList
-        inline void shallowCopy(const UList<T>&);
+        inline void shallowCopy(const UList<T>& a);
 
         //- Copy elements of the given UList
-        void deepCopy(const UList<T>&);
+        void deepCopy(const UList<T>& a);
 
 
     // Member operators
 
         //- Return element of UList
-        inline T& operator[](const label);
+        inline T& operator[](const label i);
 
         //- Return element of constant UList
         //  Note that the bool specialization adds lazy evaluation so reading
         //  an out-of-range element returns false without any ill-effects
-        inline const T& operator[](const label) const;
+        inline const T& operator[](const label i) const;
 
         //- Allow cast to a const List<T>&
         inline operator const Foam::List<T>&() const;
 
         //- Assignment of all entries to the given value
-        void operator=(const T&);
+        void operator=(const T& t);
 
         //- Assignment of all entries to zero
         void operator=(const zero);
@@ -341,7 +341,7 @@ public:
         inline bool empty() const;
 
         //- Swap two ULists of the same type in constant time
-        void swap(UList<T>&);
+        void swap(UList<T>& a);
 
 
     // STL member operators
@@ -349,22 +349,22 @@ public:
         //- Equality operation on ULists of the same type.
         //  Returns true when the ULists are element-wise equal
         //  (using UList::value_type::operator==).  Takes linear time
-        bool operator==(const UList<T>&) const;
+        bool operator==(const UList<T>& a) const;
 
         //- The opposite of the equality operation. Takes linear time
-        bool operator!=(const UList<T>&) const;
+        bool operator!=(const UList<T>& a) const;
 
         //- Compare two ULists lexicographically. Takes linear time
-        bool operator<(const UList<T>&) const;
+        bool operator<(const UList<T>& a) const;
 
         //- Compare two ULists lexicographically. Takes linear time
-        bool operator>(const UList<T>&) const;
+        bool operator>(const UList<T>& a) const;
 
         //- Return true if !(a > b). Takes linear time
-        bool operator<=(const UList<T>&) const;
+        bool operator<=(const UList<T>& a) const;
 
         //- Return true if !(a < b). Takes linear time
-        bool operator>=(const UList<T>&) const;
+        bool operator>=(const UList<T>& a) const;
 
 
     // Writing
@@ -373,46 +373,47 @@ public:
         void writeEntry(const word& keyword, Ostream& os) const;
 
 
-    // Ostream operator
 
-        // Write UList to Ostream
+    // IOstream operators
+
+        //- Write List to Ostream, as per write() method with shortListLen=10
         friend Ostream& operator<< <T>
         (
-            Ostream&,
-            const UList<T>&
+            Ostream& os,
+            const UList<T>& L
         );
 
-        //- Read UList contents from Istream. Requires size to have been set
-        //  before
+        //- Read List contents from Istream.
+        //  Requires size to have been set before
         friend Istream& operator>> <T>
         (
-            Istream&,
-            UList<T>&
+            Istream& os,
+            UList<T>& L
         );
 };
 
 template<class T>
-void sort(UList<T>&);
+void sort(UList<T>& a);
 
 template<class T, class Cmp>
-void sort(UList<T>&, const Cmp&);
+void sort(UList<T>& a, const Cmp& cmp);
 
 template<class T>
-void stableSort(UList<T>&);
+void stableSort(UList<T>& a);
 
 template<class T, class Cmp>
-void stableSort(UList<T>&, const Cmp&);
+void stableSort(UList<T>& a, const Cmp& cmp);
 
 template<class T>
-void shuffle(UList<T>&);
+void shuffle(UList<T>& a);
 
 // Reverse the first n elements of the list
 template<class T>
-inline void reverse(UList<T>&, const label n);
+inline void reverse(UList<T>& ul, const label n);
 
 // Reverse all the elements of the list
 template<class T>
-inline void reverse(UList<T>&);
+inline void reverse(UList<T>& ul);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

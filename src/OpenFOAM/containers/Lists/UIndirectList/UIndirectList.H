@@ -70,7 +70,11 @@ public:
     // Constructors
 
         //- Construct given the complete list and the addressing array
-        inline UIndirectList(const UList<T>&, const labelUList&);
+        inline UIndirectList
+        (
+            const UList<T>& completeList,
+            const labelUList& addr
+        );
 
 
     // Member Functions
@@ -108,19 +112,19 @@ public:
             inline List<T> operator()() const;
 
             //- Return non-const access to an element
-            inline T& operator[](const label);
+            inline T& operator[](const label i);
 
             //- Return const access to an element
-            inline const T& operator[](const label) const;
+            inline const T& operator[](const label i) const;
 
             //- Assignment to UList of addressed elements
-            inline void operator=(const UList<T>&);
+            inline void operator=(const UList<T>& ae);
 
             //- Assignment to UIndirectList of addressed elements
-            inline void operator=(const UIndirectList<T>&);
+            inline void operator=(const UIndirectList<T>& ae);
 
             //- Assignment of all entries to the given value
-            inline void operator=(const T&);
+            inline void operator=(const T& t);
 
 
     // STL type definitions
@@ -146,12 +150,11 @@ public:
 
     // Ostream operator
 
-        //- Write UIndirectList to Ostream
-        //  Binary output is currently still a bit of a problem
+        //- Write List to Ostream, as per write() method with shortListLen=10
         friend Ostream& operator<< <T>
         (
-            Ostream&,
-            const UIndirectList<T>&
+            Ostream& os,
+            const UIndirectList<T>& L
         );
 };
 
