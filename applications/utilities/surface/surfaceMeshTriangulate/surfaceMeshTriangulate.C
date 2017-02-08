@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -361,9 +361,13 @@ int main(int argc, char *argv[])
 
         fileName globalCasePath
         (
-            runTime.processorCase()
-          ? runTime.path()/".."/outFileName
-          : runTime.path()/outFileName
+            outFileName.isAbsolute()
+          ? outFileName
+          : (
+                runTime.processorCase()
+              ? runTime.rootPath()/runTime.globalCaseName()/outFileName
+              : runTime.path()/outFileName
+            )
         );
 
         Info<< "Writing merged surface to " << globalCasePath << endl;
