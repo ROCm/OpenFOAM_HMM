@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -26,71 +26,135 @@
 #     Allrun
 #
 # Description
+#     Runs tutorial cases and summarizes the outcome as 'testLoopReport'
 #
 #------------------------------------------------------------------------------
 cd ${0%/*} || exit 1    # Run from this directory
 
-# Source tutorial run functions
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
+usage()
+{
+    exec 1>&2
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+
+usage: ${0##*/} [OPTION]
+
+options:
+  -collect          Collect logs only. Can be useful for aborted runs.
+  -help             print the usage
+
+* Runs tutorial cases and summarizes the outcome as 'testLoopReport'
+
+USAGE
+    exit 1
+}
+
+#------------------------------------------------------------------------------
+
+unset optCollectOnly
+
+# parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    -collect)
+        optCollectOnly=true
+        ;;
+    -*)
+        usage "unknown option: $1"
+        ;;
+    *)
+        break
+        ;;
+    esac
+    shift
+done
+
+#------------------------------------------------------------------------------
 
 # logReport <logfile>
 # Extracts useful info from log file.
 logReport()
 {
-    caseName=`dirname $1 | sed s/"\(.*\)\.\/"/""/g`
-    app=`echo $1 | sed s/"\(.*\)log\."/""/g`
+    local logfile=$1
+
+    # logfile is path/to/case/log.application
+    caseName=$(dirname $logfile | sed -e 's/\(.*\)\.\///g')
+    app=$(echo $logfile | sed -e 's/\(.*\)log\.//g')
     appAndCase="Application $app - case $caseName"
 
-    fatalError=`grep "FOAM FATAL" $1`
-    UxSS=`grep -E "Ux[:| ]*solution singularity" $1`
-    UySS=`grep -E "Uy[:| ]*solution singularity" $1`
-    UzSS=`grep -E "Uz[:| ]*solution singularity" $1`
-    completed=`grep -E "^[\t ]*[eE]nd" $1`
-
-    if [ "$fatalError" ]
+    if grep -q "FOAM FATAL" $logfile
     then
         echo "$appAndCase: ** FOAM FATAL ERROR **"
-    elif [ "$UxSS" -a "$UySS" -a "$UzSS" ]
-    then
-        echo "$appAndCase: ** Solution singularity **"
-    elif [ "$completed" ]
-    then
-        completionTime=`tail -10 $log | grep Execution | cut -d= -f2 | sed 's/^[ \t]*//'`
-        if [ "$completionTime" ]
+        return 1
+    fi
+
+    # Check for solution singularity on U equation
+    for eqn in Ux Uy Uz
+    do
+        if grep -q -E "${eqn}[:| ]*solution singularity" $logfile
         then
-            completionTime="in $completionTime"
+            if [ "$eqn" = Uz ]
+            then
+                # Can only get here if Ux,Uy,Uz all failed
+                echo "$appAndCase: ** Solution singularity **"
+                return 1
+            fi
+        else
+            break
         fi
-        echo "$appAndCase: completed $completionTime"
+    done
+
+    if grep -q -E "^[\t ]*[Ee]nd" $logfile
+    then
+        # Extract time from this type of content
+        ## ExecutionTime = 60.2 s  ClockTime = 63 s --> "60.2 s"
+        completionTime=$(tail -10 $logfile | \
+            sed -n -e '/Execution/{s/^[^=]*=[ \t]*//; s/\( s\) .*$/\1/; p}')
+
+        echo "$appAndCase: completed${completionTime:+ in }$completionTime"
     else
         echo "$appAndCase: unconfirmed completion"
     fi
 }
 
-
-# Recursively run all tutorials
-foamRunTutorials -test -skipFirst
+if [ -z "$optCollectOnly" ]
+then
+    # Recursively run all tutorials
+    foamRunTutorials -test -skipFirst
+fi
 
 
 # Analyse all log files
-rm testLoopReport > /dev/null 2>&1 &
-touch testLoopReport
+echo "Collecting log files..." 1>&2
+rm -f logs testLoopReport > /dev/null 2>&1
+touch logs testLoopReport
 
 for appDir in *
 do
-(
-    [ -d $appDir ] && cd $appDir || exit
+    [ -d $appDir ] || continue
+    echo -n "    $appDir..." 1>&2
 
-    logs=`find . -name "log.*"`
-    [ -n "$logs" ] || exit
+    logs=$(find -L $appDir -type f -name 'log.*')
+    if [ -n "$logs" ]
+    then
+        echo 1>&2
+    else
+        echo " (no logs)" 1>&2
+        continue
+    fi
 
-    for log in `echo $logs | xargs ls -rt`
+    # Sort logs by time-stamp
+    for log in $(echo $logs | xargs ls -rt)
     do
-        logReport $log >> ../testLoopReport
+        # Concatenate and summarize logs
+        cat "$log" >> logs 2>/dev/null
+        logReport $log
     done
-    echo "" >> ../testLoopReport
-)
-done
-
-find . -name "log.*" -exec cat {} \; >> logs
+    echo
+done > testLoopReport
 
 #------------------------------------------------------------------------------
