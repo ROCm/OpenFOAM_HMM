@@ -38,7 +38,7 @@ geometry
 
 //// Optional: avoid patch-face merging. Allows mesh to be used for
 ////           refinement/unrefinement
-//mergePatchFaces off; // default on
+mergePatchFaces on; // default on
 
 
 
