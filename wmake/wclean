@@ -100,10 +100,13 @@ MakeDir=Make
 
 if [ $# -ge 1 ]
 then
-
     if [ -d "$1" ]
     then
         dir=$1
+    elif [ -f "$1" ]
+    then
+        dir="${1%/*}"
+        : ${dir:=.}
     else
         targetType=$1
     fi

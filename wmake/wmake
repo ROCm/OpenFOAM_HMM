@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -250,7 +250,11 @@ if [ $# -ge 1 ]
 then
     if [ -d "$1" ]
     then
-        dir=$1
+        dir="$1"
+    elif [ -f "$1" ]
+    then
+        dir="${1%/*}"
+        : ${dir:=.}
     else
         targetType=$1
     fi
