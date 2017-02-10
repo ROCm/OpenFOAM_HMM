@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,21 +106,12 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    fileName dictName(runTime.system()/"noiseDict");
-    if (args.optionFound("dict"))
-    {
-        dictName = args["dict"];
-    }
+    const word dictName("noiseDict");
+    #include "setSystemRunTimeDictionaryIO.H"
 
-    IOdictionary dict
-    (
-        IOobject
-        (
-            dictName.expand(),
-            runTime,
-            IOobject::MUST_READ
-        )
-    );
+    Info<< "Reading " << dictName << "\n" << endl;
+
+    IOdictionary dict(dictIO);
 
     autoPtr<noiseModel> model(noiseModel::New(dict));
     model->calculate();
