@@ -60,6 +60,92 @@ void Foam::FixedList<T, Size>::writeEntry
 }
 
 
+template<class T, unsigned Size>
+Foam::Ostream& Foam::FixedList<T, Size>::writeList
+(
+    Ostream& os,
+    const label shortListLen
+) const
+{
+    const FixedList<T, Size>& L = *this;
+
+    // Write list contents depending on data format
+    if (os.format() == IOstream::ASCII || !contiguous<T>())
+    {
+        // Can the contents be considered 'uniform' (ie, identical)?
+        bool uniform = (Size > 1 && contiguous<T>());
+        if (uniform)
+        {
+            forAll(L, i)
+            {
+                if (L[i] != L[0])
+                {
+                    uniform = false;
+                    break;
+                }
+            }
+        }
+
+        if (uniform)
+        {
+            // Write size (so it is valid dictionary entry) and start delimiter
+            os << Size << token::BEGIN_BLOCK;
+
+            // Write contents
+            os << L[0];
+
+            // Write end delimiter
+            os << token::END_BLOCK;
+        }
+        else if
+        (
+            Size <= 1 || !shortListLen
+         || (Size <= shortListLen && contiguous<T>())
+        )
+        {
+            // Write start delimiter
+            os << token::BEGIN_LIST;
+
+            // Write contents
+            forAll(L, i)
+            {
+                if (i) os << token::SPACE;
+                os << L[i];
+            }
+
+            // Write end delimiter
+            os << token::END_LIST;
+        }
+        else
+        {
+            // Write start delimiter
+            os << nl << token::BEGIN_LIST << nl;
+
+            // Write contents
+            forAll(L, i)
+            {
+                os << L[i] << nl;
+            }
+
+            // Write end delimiter
+            os << token::END_LIST << nl;
+        }
+    }
+    else
+    {
+        // Contents are binary and contiguous
+
+        // write(...) includes surrounding start/end delimiters
+        os.write(reinterpret_cast<const char*>(L.cdata()), Size*sizeof(T));
+    }
+
+    // Check state of IOstream
+    os.check("const FixedList::writeList(Ostream&)");
+
+    return os;
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class T, unsigned Size>
@@ -164,81 +250,10 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
 }
 
 
-// * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
-
 template<class T, unsigned Size>
 Foam::Ostream& Foam::operator<<(Ostream& os, const FixedList<T, Size>& L)
 {
-    // Write list contents depending on data format
-    if (os.format() == IOstream::ASCII || !contiguous<T>())
-    {
-        // Can the contents be considered 'uniform' (ie, identical)?
-        bool uniform = (Size > 1 && contiguous<T>());
-        if (uniform)
-        {
-            forAll(L, i)
-            {
-                if (L[i] != L[0])
-                {
-                    uniform = false;
-                    break;
-                }
-            }
-        }
-
-        if (uniform)
-        {
-            // Write size (so it is valid dictionary entry) and start delimiter
-            os << L.size() << token::BEGIN_BLOCK;
-
-            // Write contents
-            os << L[0];
-
-            // Write end delimiter
-            os << token::END_BLOCK;
-        }
-        else if (Size <= 1 || (Size < 11 && contiguous<T>()))
-        {
-            // Write start delimiter
-            os << token::BEGIN_LIST;
-
-            // Write contents
-            forAll(L, i)
-            {
-                if (i) os << token::SPACE;
-                os << L[i];
-            }
-
-            // Write end delimiter
-            os << token::END_LIST;
-        }
-        else
-        {
-            // Write start delimiter
-            os << nl << token::BEGIN_LIST;
-
-            // Write contents
-            forAll(L, i)
-            {
-                os << nl << L[i];
-            }
-
-            // Write end delimiter
-            os << nl << token::END_LIST << nl;
-        }
-    }
-    else
-    {
-        // Contents are binary and contiguous
-
-        // write(...) includes surrounding start/end delimiters
-        os.write(reinterpret_cast<const char*>(L.cdata()), Size*sizeof(T));
-    }
-
-    // Check state of IOstream
-    os.check("Ostream& operator<<(Ostream&, const FixedList&)");
-
-    return os;
+    return L.writeList(os, 10);
 }
 
 

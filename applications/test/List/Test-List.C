@@ -40,7 +40,6 @@ See also
 #include "IStringStream.H"
 #include "scalar.H"
 #include "vector.H"
-#include "ListOps.H"
 
 #include "labelRange.H"
 #include "ListOps.H"
@@ -140,10 +139,35 @@ int main(int argc, char *argv[])
     Info<< "Elements " << map << " out of " << list3
         << " => " << subList3 << endl;
 
+    // test flattened output
+    {
+        Info<< nl;
+
+        labelList longLabelList = identity(15);
+
+        Info<< "labels (contiguous=" << contiguous<label>() << ")" << nl;
+
+        Info<< "normal: " << longLabelList << nl;
+        Info<< "flatOutput: " << flatOutput(longLabelList) << nl;
+        // Info<< "flatOutput(14): " << flatOutput(longLabelList, 14) << nl;
+        // Info<< "flatOutput(15): " << flatOutput(longLabelList, 15) << nl;
+
+        stringList longStringList(12);
+        forAll(longStringList, i)
+        {
+            longStringList[i].resize(3, 'a' + i);
+        }
+
+        Info<< "string (contiguous=" << contiguous<string>() << ")" << nl;
+
+        Info<< "normal: " << longStringList << nl;
+        Info<< "flatOutput: " << flatOutput(longStringList) << nl;
+        // contiguous longStringList[i].resize(3, 'a' + i);
+    }
+
     wordReList reLst;
     wordList wLst;
     stringList sLst;
-
 
     scalar xxx(-1);
 
@@ -173,9 +197,9 @@ int main(int argc, char *argv[])
     }
 
     Info<< nl
-        << "-reList: " << reLst << nl
-        << "-wordList: " << wLst << nl
-        << "-stringList: " << sLst << endl;
+        << "-reList:     " << flatOutput(reLst) << nl
+        << "-wordList:   " << flatOutput(wLst)  << nl
+        << "-stringList: " << flatOutput(sLst)  << endl;
 
     return 0;
 }

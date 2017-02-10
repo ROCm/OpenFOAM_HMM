@@ -372,11 +372,14 @@ public:
         //- Write the List as a dictionary entry with keyword
         void writeEntry(const word& keyword, Ostream& os) const;
 
+        //- Write the List, with line-breaks in ASCII if the list length
+        //  exceeds shortListLen. Using '0' suppresses line-breaks entirely.
+        Ostream& writeList(Ostream& os, const label shortListLen=0) const;
 
 
     // IOstream operators
 
-        //- Write List to Ostream, as per write() method with shortListLen=10
+        //- Write List to Ostream, as per writeList() with shortListLen=10
         friend Ostream& operator<< <T>
         (
             Ostream& os,

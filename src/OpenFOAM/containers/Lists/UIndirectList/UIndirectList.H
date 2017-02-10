@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -148,9 +148,17 @@ public:
         typedef label size_type;
 
 
+    // Writing
+
+        //- Write the List, with line-breaks in ASCII if the list length
+        //  exceeds shortListLen. Using '0' suppresses line-breaks entirely.
+        //  Binary output is currently still a bit of an annoyance.
+        Ostream& writeList(Ostream& os, const label shortListLen=0) const;
+
+
     // Ostream operator
 
-        //- Write List to Ostream, as per write() method with shortListLen=10
+        //- Write List to Ostream, as per writeList() with shortListLen=10
         friend Ostream& operator<< <T>
         (
             Ostream& os,

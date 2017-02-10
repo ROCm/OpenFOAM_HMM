@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -405,12 +405,13 @@ Foam::Istream& Foam::PackedList<nBits>::read(Istream& is)
 
 
 template<unsigned nBits>
-Foam::Ostream& Foam::PackedList<nBits>::write
+Foam::Ostream& Foam::PackedList<nBits>::writeList
 (
     Ostream& os,
-    const bool indexedOutput
+    const label shortListLen
 ) const
 {
+    const bool indexedOutput = (shortListLen < 0);
     const PackedList<nBits>& lst = *this;
     const label sz = lst.size();
 
@@ -456,36 +457,33 @@ Foam::Ostream& Foam::PackedList<nBits>::write
 
             os  << token::END_BLOCK << nl;
         }
-        else if (sz < 11)
+        else if (!shortListLen || sz <= shortListLen)
         {
-            // short list:
+            // Shorter list, or line-breaks suppressed
             os  << sz << token::BEGIN_LIST;
             forAll(lst, i)
             {
-                if (i)
-                {
-                    os  << token::SPACE;
-                }
+                if (i) os << token::SPACE;
                 os  << lst[i];
             }
             os  << token::END_LIST;
         }
         else
         {
-            // longer list:
-            os  << nl << sz << nl << token::BEGIN_LIST;
+            // Longer list
+            os << nl << sz << nl << token::BEGIN_LIST << nl;
             forAll(lst, i)
             {
-                os  << nl << lst[i];
+                os << lst[i] << nl;
             }
-            os  << nl << token::END_LIST << nl;
+            os << token::END_LIST << nl;
         }
     }
     else
     {
         // Contents are binary and contiguous
-
         os  << nl << sz << nl;
+
         if (sz)
         {
             // write(...) includes surrounding start/end delimiters
@@ -562,7 +560,7 @@ Foam::Istream& Foam::operator>>(Istream& is, PackedList<nBits>& lst)
 template<unsigned nBits>
 Foam::Ostream& Foam::operator<<(Ostream& os, const PackedList<nBits>& lst)
 {
-    return lst.write(os, false);
+    return lst.writeList(os, 10);
 }
 
 

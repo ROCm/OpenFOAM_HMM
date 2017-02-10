@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -232,19 +232,19 @@ public:
         inline PackedList(const label size, const unsigned val);
 
         //- Construct from Istream
-        inline PackedList(Istream&);
+        inline PackedList(Istream& is);
 
         //- Copy constructor
-        inline PackedList(const PackedList<nBits>&);
+        inline PackedList(const PackedList<nBits>& lst);
 
         //- Construct by transferring the parameter contents
-        inline PackedList(const Xfer<PackedList<nBits>>&);
+        inline PackedList(const Xfer<PackedList<nBits>>& lst);
 
         //- Construct from a list of labels
-        explicit inline PackedList(const labelUList&);
+        explicit inline PackedList(const labelUList& lst);
 
         //- Construct from an indirect list of labels
-        explicit inline PackedList(const UIndirectList<label>&);
+        explicit inline PackedList(const UIndirectList<label>& lst);
 
         //- Clone
         inline autoPtr<PackedList<nBits>> clone() const;
@@ -265,16 +265,16 @@ public:
 
             //- Get value at index I.
             //  Never auto-vivify entries.
-            inline unsigned int get(const label) const;
+            inline unsigned int get(const label i) const;
 
             //- Set value at index I. Return true if value changed.
             //  Does auto-vivify for non-existent entries.
             //  Default value set is the max_value.
-            inline bool set(const label, const unsigned int val = ~0u);
+            inline bool set(const label i, const unsigned int val = ~0u);
 
             //- Unset the entry at index I. Return true if value changed.
             //  Never auto-vivify entries.
-            inline bool unset(const label);
+            inline bool unset(const label i);
 
             //- Return the underlying packed storage
             //  Manipulate with utmost caution
@@ -364,7 +364,10 @@ public:
             //- Clear list and read from stream
             Istream& read(Istream& is);
 
-            //- Write, optionally with indexedOutput
+            //- Write the List, with line-breaks in ASCII if the list length
+            //  exceeds shortListLen. Using '0' suppresses line-breaks entirely.
+            //  A special indexed output (ASCII only) is triggered by specifying
+            //  a negative value for shortListLen.
             //
             // The indexed output may be convenient in some situations.
             // The general format is a group of index/value pairs:
@@ -376,14 +379,7 @@ public:
             // \verbatim
             //     { index1 index2 index3 }
             // \endverbatim
-            //
-            // Note the indexed output is only supported for ASCII streams.
-            Ostream& write
-            (
-                Ostream& os,
-                const bool indexedOutput=false
-            ) const;
-
+            Ostream& writeList(Ostream& os, const label shortListLen=0) const;
 
             //- Write as a dictionary entry with keyword
             void writeEntry(const word& keyword, Ostream& os) const;
@@ -399,24 +395,24 @@ public:
 
             //- Get value at index I
             //  Never auto-vivify entries.
-            inline unsigned int operator[](const label) const;
+            inline unsigned int operator[](const label i) const;
 
             //- Set value at index I.
             //  Returns iterator to perform the actual operation.
             //  Does not auto-vivify entries, but will when assigned to.
-            inline iteratorBase operator[](const label);
+            inline iteratorBase operator[](const label i);
 
             //- Assignment of all entries to the given value. Takes linear time.
             inline void operator=(const unsigned int val);
 
             //- Assignment operator.
-            void operator=(const PackedList<nBits>&);
+            void operator=(const PackedList<nBits>& lst);
 
             //- Assignment operator.
-            void operator=(const labelUList&);
+            void operator=(const labelUList& lst);
 
             //- Assignment operator.
-            void operator=(const UIndirectList<label>&);
+            void operator=(const UIndirectList<label>& lst);
 
 
     // Iterators and helpers
