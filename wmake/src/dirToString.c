@@ -3,7 +3,7 @@
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
    \\  /     A nd            | Copyright (C) 2011 OpenFOAM Foundation
-    \\/      M anipulation   |
+    \\/      M anipulation   | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,21 +33,60 @@ Usage
 
     e.g.
         using sh
-        baseDirName=`echo $dir | sed 's%^\./%%' | $bin/dirToString`
+        baseDirName=$(echo $dir | $bin/dirToString -strip)
 
         using csh
-        set baseDirName=`echo $dir | sed 's%^\./%%' | $bin/dirToString`
+        set baseDirName=`echo $dir | $bin/dirToString -strip`
 
 \*----------------------------------------------------------------------------*/
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 
-int main()
+int main(int argc, char* argv[])
 {
     int c;
     int nextupper = 0;
+
+    if (argc > 1)
+    {
+        if (!strncmp(argv[1], "-h", 2))  /* -h, -help */
+        {
+            fprintf
+            (
+                stderr,
+                "\nUsage: %s [-strip]\n\n",
+                "dirToString"
+            );
+
+            fprintf
+            (
+                stderr,
+                "  -strip    ignore leading [./] characters.\n\n"
+                "Transform dir1/dir2 to camel-case dir1Dir2\n\n"
+            );
+
+            return 0;
+        }
+
+        if (!strcmp(argv[1], "-s") || !strcmp(argv[1], "-strip"))  /* -s, -strip */
+        {
+            while ((c=getchar()) != EOF && (c == '.' || c == '/'))
+            {
+                /* nop */
+            }
+
+            if (c == EOF)
+            {
+                return 0;
+            }
+
+            putchar(c);
+        }
+    }
+
 
     while ((c=getchar()) != EOF)
     {
@@ -60,13 +99,12 @@ int main()
             if (nextupper)
             {
                 putchar(toupper(c));
+                nextupper = 0;
             }
             else
             {
                 putchar(c);
             }
-
-            nextupper = 0;
         }
     }
 

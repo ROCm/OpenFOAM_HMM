@@ -4,7 +4,7 @@
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
    \\  /     A nd            | Copyright (C) 2011-2016 OpenFOAM Foundation
-    \\/      M anipulation   |
+    \\/      M anipulation   | Copyright (C) 2017 OpenCFD Ltd.
 ------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -147,10 +147,29 @@ int main(int argc, char* argv[])
     char *basePos, *dotPos;
     int i, silent;
 
-    if (argc == 1)
+    if (argc < 2)
     {
         fprintf(stderr, "input file not supplied\n");
-        exit(1);
+        return 1;
+    }
+    else if (!strncmp(argv[1], "-h", 2)) /* -h, -help */
+    {
+        fprintf
+        (
+            stderr,
+            "\nUsage: %s [-Idir ... -Idir] [-iheader .. -iheader] filename\n\n",
+            "wmkdep"
+        );
+
+        fprintf
+        (
+            stderr,
+            "  -Idir     Directories to be searched for headers.\n"
+            "  -iheader  Headers to be ignored.\n\n"
+            "Dependency list generator, similar to 'cpp -M'\n\n"
+        );
+
+        return 0;
     }
 
     sourceFile = strdup(argv[argc-1]);
@@ -161,7 +180,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        basePos++;
+        ++basePos;
     }
 
     if
@@ -176,18 +195,18 @@ int main(int argc, char* argv[])
             "cannot find extension in source file name %s\n",
             sourceFile
         );
-        exit(1);
+        return 1;
     }
 
     /* count number of -I directories */
     nDirectories = 0;
-    for (i = 1; i < argc; i++)
+    for (i = 1; i < argc; ++i)
     {
         if (strncmp(argv[i], "-I", 2) == 0)
         {
             if (strlen(argv[i]) > 2)
             {
-                nDirectories++;
+                ++nDirectories;
             }
         }
     }
@@ -196,7 +215,7 @@ int main(int argc, char* argv[])
 
     /* build list of -I directories and add -i ignores */
     nDirectories = 0;
-    for (i = 1; i < argc; i++)
+    for (i = 1; i < argc; ++i)
     {
         if (strncmp(argv[i], "-I", 2) == 0)
         {
@@ -240,7 +259,7 @@ int main(int argc, char* argv[])
 
     puts("\n");
 
-    for (i = 0; i < nDirectories; i++)
+    for (i = 0; i < nDirectories; ++i)
     {
         free(directories[i]);
     }
