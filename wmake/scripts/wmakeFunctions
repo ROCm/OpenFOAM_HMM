@@ -48,6 +48,12 @@ checkEnv()
 # Search up directories tree for the Make sub-directory
 #------------------------------------------------------------------------------
 
+# Return the absolute path for a directory or a file's parent directory
+# expandPath dirName
+# expandPath fileName
+#
+# Sets:
+# - exPath
 expandPath()
 {
     if [ -d "$1" ]
@@ -58,6 +64,19 @@ expandPath()
     fi
 }
 
+# Find the target directory
+# findTarget dirName
+# findTarget fileName
+#
+# Sets:
+# - dir
+#
+# Side-effect variables:
+# - sets exPath
+# - sets wmpdir
+#
+# Global variables used:
+# - WM_PROJECT_DIR, HOME
 findTarget()
 {
     expandPath $WM_PROJECT_DIR
@@ -65,28 +84,38 @@ findTarget()
     expandPath $1
 
     if [ "$exPath" = "$wmpdir" \
-                   -o "$exPath" = "$HOME" \
-                   -o "$exPath" = "/" \
-       ]
+      -o "$exPath" = "$HOME" \
+      -o "$exPath" = "/" \
+    ]
     then
         echo "$Script error: could not find Make directory" 1>&2
         exit 1
-    elif [ -d "$1/Make" ]; then
+    elif [ -d "$1/Make" ]
+    then
         dir=$1
     else
         findTarget "$1/.."
     fi
 }
 
+# Change to 'MakeDir'
+# - 'MakeDir' for its input
+#
+# Sets:
+# - dir
+#
+# Side-effect variables:
+# - sets exPath
+# - unsets targetType
 cdSource()
 {
     if [ ! -d $MakeDir ]
     then
         echo "$Script: '$MakeDir' directory does not exist in $PWD" 1>&2
-        echo "    Searching up directories tree for Make directory"
+        echo "    Searching up directories tree for Make directory" 1>&2
+        unset targetType
 
         findTarget .
-        targetType=
 
         if [ "$dir" ]
         then
@@ -97,13 +126,30 @@ cdSource()
         fi
     fi
 
-
     [ -r $MakeDir/files ] || {
         echo "$Script error: file '$MakeDir/files' does not exist in $PWD" 1>&2
         exit 1
     }
 }
 
+
+# Find the object directory
+# findObjectDir dirName
+# findObjectDir fileName
+#
+# Sets:
+# - dir
+# - path
+# - appDir
+# - objectsDir
+#
+# Side-effect variables:
+# - sets exPath
+# - sets wmpdir
+# - set platformPath
+#
+# Global variables used:
+# - WM_PROJECT_DIR, WM_OPTIONS
 findObjectDir()
 {
     expandPath $WM_PROJECT_DIR
@@ -127,7 +173,18 @@ findObjectDir()
     fi
 }
 
-if [ -n "$BASH_VERSION" ]; then
+
+# depToSource
+# - uses 'depFile' for its input
+#
+# Sets:
+# - sourceFile
+#
+# Global variables used:
+# - WM_OPTIONS
+# - WM_MPLIB
+if [ -n "$BASH_VERSION" ]
+then
     depToSource()
     {
         sourceFile=${depFile%.dep}

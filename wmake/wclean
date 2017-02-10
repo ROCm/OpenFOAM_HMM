@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -34,7 +34,7 @@
 #     lnInclude directories generated for libraries.
 #
 #------------------------------------------------------------------------------
-Script=${0##*/}
+Script=${0##*/}     # Note: need 'Script' for some functions in wmakeFunctions
 
 # Source the wmake functions
 . ${0%/*}/scripts/wmakeFunctions
@@ -82,7 +82,7 @@ do
         shift
         ;;
     -*)
-        usage "unknown option: '$*'"
+        usage "unknown option: '$1'"
         ;;
     *)
         break
@@ -117,7 +117,7 @@ then
     # Specified alternative name for the Make sub-directory:
     [ $# -ge 3 ] && MakeDir=$3
 
-    if [ "$dir" ]
+    if [ -n "$dir" ]
     then
         cd $dir 2>/dev/null || {
             echo "$Script error: could not change to directory '$dir'" 1>&2
@@ -126,8 +126,7 @@ then
     fi
 
     # Print command
-    [ -z "$targetType" ] || targetSpace=" "
-    echo "$Script $targetType$targetSpace${dir:-.}"
+    echo "$Script $targetType${targetType:+ }${dir:-.}"
 fi
 
 
@@ -147,7 +146,6 @@ fi
 if [ "$targetType" = empty ]
 then
     # First pass: clean up empty source code directories
-
     echo "Removing empty directories..."
 
     # Get sub-directories avoiding particular directories
@@ -259,8 +257,8 @@ then
     objectsDir=$MakeDir/$WM_OPTIONS
     if [ $(echo $PWD | grep "$WM_PROJECT_DIR") ]
     then
-        platformPath=$WM_PROJECT_DIR/platforms/${WM_OPTIONS}
-        objectsDir=$platformPath$(echo $PWD | sed s%$WM_PROJECT_DIR%% )
+        buildPath=$WM_PROJECT_DIR/platforms/${WM_OPTIONS}
+        objectsDir=$buildPath$(echo $PWD | sed s%$WM_PROJECT_DIR%%)
     fi
     rm -rf $objectsDir 2>/dev/null
 fi
@@ -270,17 +268,8 @@ fi
 # Remove the lnInclude directory if present
 #------------------------------------------------------------------------------
 
-if [ -d lnInclude ]
-then
-    rm -rf lnInclude 2>/dev/null
-fi
+[ -d lnInclude ] && rm -rf lnInclude 2>/dev/null
 
-
-#------------------------------------------------------------------------------
-# Cleanup local variables and functions
-#------------------------------------------------------------------------------
-
-unset Script usage MakeDir
-
+exit 0 # clean exit
 
 #------------------------------------------------------------------------------

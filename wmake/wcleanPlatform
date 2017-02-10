@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -71,7 +71,8 @@ USAGE
 }
 
 # Print help message
-if [ "$1" = "-h" -o "$1" = "-help" ]; then
+if [ "$1" = "-h" -o "$1" = "-help" ]
+then
     usage
 fi
 
@@ -79,15 +80,11 @@ fi
 [ "$PWD" = "$WM_PROJECT_DIR" ] || \
     usage "Not in the project top-level directory " $WM_PROJECT_DIR
 
-# Get the platforms from the arguments
-platforms="$@"
+# Get the platforms from the arguments or '-current'
+platforms="${@:--current}"
 
-# If no arguments are provided select the current platform
-if [ "$#" -lt 1 ]; then
-    platforms="-current"
-fi
-
-if [ "$platforms" = "-all" ]; then
+if [ "$platforms" = "-all" ]
+then
     echo "Removing all platforms/sub-directories"
     rm -rf platforms/*
 
@@ -116,12 +113,6 @@ else
     done
 fi
 
-
-#------------------------------------------------------------------------------
-# Cleanup local variables and functions
-#------------------------------------------------------------------------------
-
-unset Script platforms
-
+exit 0 # clean exit
 
 #------------------------------------------------------------------------------
