@@ -239,7 +239,8 @@ fi
 
 
 #------------------------------------------------------------------------------
-# Check arguments and change to the directory in which to run wmake
+# Check arguments and change to the directory in which to run wmake.
+# The variables 'targetType' and 'MakeDir' are considered global
 #------------------------------------------------------------------------------
 
 unset dir targetType
@@ -352,7 +353,7 @@ fi
 
 #------------------------------------------------------------------------------
 # Search up the directory tree for the Make sub-directory,
-# check the existance of the 'files' file and build there if present
+# check the existence of the 'files' file and build there if present
 #------------------------------------------------------------------------------
 
 cdSource
@@ -387,11 +388,12 @@ fi
 #------------------------------------------------------------------------------
 
 objectsDir=$MakeDir/$WM_OPTIONS
-if [ $(echo $PWD | grep "$WM_PROJECT_DIR") ]
-then
+case "$PWD" in
+("$WM_PROJECT_DIR"/*)
     buildPath=$WM_PROJECT_DIR/platforms/${WM_OPTIONS}
-    objectsDir=$buildPath$(echo $PWD | sed s%$WM_PROJECT_DIR%%)
-fi
+    objectsDir=$buildPath$(echo $PWD | sed s%$WM_PROJECT_DIR%% )
+    ;;
+esac
 
 (
     unset MAKEFLAGS

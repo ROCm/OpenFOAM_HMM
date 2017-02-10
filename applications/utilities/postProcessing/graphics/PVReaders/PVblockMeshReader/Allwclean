@@ -10,8 +10,7 @@ rm -f $FOAM_LIBBIN/libPVblockMeshReader* 2>/dev/null
 rm -rf PVblockMeshReader/Make   # safety: old build location
 wclean libso vtkPVblockMesh
 
-# Cleanup generated files
-findObjectDir $PWD # remove entire top-level
-rm -rf "$objectsDir" > /dev/null 2>&1
+# Cleanup generated files - remove entire top-level
+removeObjectDir $PWD
 
 #------------------------------------------------------------------------------

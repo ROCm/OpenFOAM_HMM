@@ -44,12 +44,15 @@
 sameDependency()
 {
     local depend="$1"
-    findObjectDir "$2"  # Where generated files are stored
-    local sentinel="$objectsDir/ThirdParty"
+    local sourceDir="$2"
+    local objectsDir sentinel prev
+
+    # Where generated files are stored
+    objectsDir=$(findObjectDir "$sourceDir") || exit 1 # Fatal
+    sentinel="$objectsDir/ThirdParty"
 
     echo $sentinel
 
-    local prev
     if read -r prev 2>/dev/null < $sentinel
     then
         if [ "$prev" = "$depend" ]
@@ -70,35 +73,24 @@ sameDependency()
 
 
 # CMake into objectsDir with external dependency
+# - use sentinel file(s) to handle paraview/vtk version changes
 cmakeVersioned()
 {
     local depend="$1"
     local sourceDir="$2"
-    findObjectDir $sourceDir # Where are generated files stored?
+    local objectsDir sentinel
 
-    local sentinel
+    # Where generated files are stored
+    objectsDir=$(findObjectDir "$sourceDir") || exit 1 # Fatal
 
-    # version changed
-    sentinel=$(sameDependency "$depend" "$sourceDir") \
-        || rm -rf "$objectsDir" > /dev/null 2>&1
-
-    test -f "$objectsDir/CMakeCache.txt"
-    retry=$? # Additional attempt if sources moved
+    # Version changed
+    sentinel=$(sameDependency "$depend" "$sourceDir") || \
+        rm -rf "$objectsDir" > /dev/null 2>&1
 
     mkdir -p $objectsDir && \
     (
-        cd $objectsDir || exit 1
-
-        cmake $sourceDir || {
-            if [ $retry -eq 0 ]
-            then
-                echo "Removing CMakeCache.txt and attempt again" 1>&2
-                rm -f CMakeCache.txt
-                cmake $sourceDir
-            else
-                exit 1
-            fi
-        } && make && { echo "$depend" > $sentinel; }
+        cd $objectsDir && cmake $sourceDir && make \
+     && echo "$depend" > ${sentinel:-/dev/null}
     )
 }
 
@@ -127,9 +119,11 @@ wmakeLibPv()
 
     for libName
     do
-        # version changed
-        sentinel=$(sameDependency "$depend" $libName) || wclean $libName
-        wmake $targetType $libName && { echo "$depend" > $sentinel; }
+        sentinel=$(sameDependency "$depend" $libName) || \
+            wclean $libName
+
+        wmake $targetType $libName \
+        && echo "$depend" > ${sentinel:-/dev/null}
     done
 }
 

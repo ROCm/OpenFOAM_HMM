@@ -126,18 +126,19 @@ hasScotch()
 wmakeMpiLib()
 {
     local decompName="$1"
+    local objectsDir
     shift
     for libName
     do
     (
         WM_OPTIONS="$WM_OPTIONS$WM_MPLIB"
-        libDir="$WM_PROJECT_DIR/platforms/$WM_OPTIONS/src/parallel/decompose/$libName"
-        whichmpi="$libDir/using:$FOAM_MPI"
-        whichdecomp="$libDir/using:$decompName"
+        objectsDir="$WM_PROJECT_DIR/platforms/$WM_OPTIONS/src/parallel/decompose/$libName"
+        whichmpi="$objectsDir/using:$FOAM_MPI"
+        whichdecomp="$objectsDir/using:$decompName"
         [ -e "$whichmpi" -a -e "$whichdecomp" ] || wclean $libName
         echo "wmake $targetType $libName"
         wmake $targetType $libName
-        mkdir -p "$libDir"
+        mkdir -p "$objectsDir"
         touch "$whichdecomp" "$whichmpi"
     )
     done

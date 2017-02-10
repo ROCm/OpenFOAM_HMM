@@ -47,6 +47,7 @@ Usage: $Script [OPTION] [dir]
        $Script [OPTION] target [dir [MakeDir]]
 
 options:
+  -a | -all         Same as the 'all' target
   -s | -silent      Ignored - for compatibility with wmake
   -help             Print the usage
 
@@ -67,10 +68,12 @@ USAGE
     exit 1
 }
 
-
 #------------------------------------------------------------------------------
 # Parse arguments and options
 #------------------------------------------------------------------------------
+
+unset dir targetType
+MakeDir=Make
 
 while [ "$#" -gt 0 ]
 do
@@ -78,8 +81,10 @@ do
     -h | -help)
         usage
         ;;
+    -a | -all | all)
+        targetType=all
+        ;;
     -s | -silent)    # Ignored - for compatibility with wmake
-        shift
         ;;
     -*)
         usage "unknown option: '$1'"
@@ -88,15 +93,13 @@ do
         break
         ;;
     esac
+    shift
 done
 
-
 #------------------------------------------------------------------------------
-# Check arguments and change to the directory in which to run wclean
+# Check arguments and change to the directory in which to run wclean.
+# The variables 'targetType' and 'MakeDir' are considered global
 #------------------------------------------------------------------------------
-
-unset dir targetType
-MakeDir=Make
 
 if [ $# -ge 1 ]
 then
@@ -132,7 +135,7 @@ fi
 
 #------------------------------------------------------------------------------
 # If target not specified search up the directory tree for the Make
-# sub-directory, check the existance of the 'files' file and clean there if
+# sub-directory, check the existence of the 'files' file and clean there if
 # present
 # ------------------------------------------------------------------------------
 
@@ -159,12 +162,11 @@ then
     # Second pass: clean up object directories with WM_PROJECT_DIR that don't
     # have respective source code folders, along with the respective binaries
 
-    expandPath $PWD
-    if [ "$exPath" = "$WM_PROJECT_DIR" ]
+    if [ "$(expandPath $PWD)" = "$WM_PROJECT_DIR" ]
     then
-        findObjectDir $PWD
+        objectsDir=$(findObjectDir $PWD) || exit 1 # Fatal
 
-        if [ -d $objectsDir ]
+        if [ -d "$objectsDir" ]
         then
             echo "    Removing redundant object directories in $objectsDir"
 
@@ -173,7 +175,7 @@ then
             do
                 # Hack'ish way of getting the original source code path
                 depFile=$(dirname $variablesFile)
-                depToSource $depFile
+                sourceFile=$(depToSource $depFile)
 
                 # Check if the original source code directory exists
                 if [ ! -r "$sourceFile" ]
@@ -227,42 +229,39 @@ then
     then
         ./Allclean
         exit $?
-    else
-        # For all the sub-directories containing a 'Make' directory
-        for dir in `find . \( -type d -a -name Make \)`
-        do
-            dir=${dir%/Make} # Parent directory - trim /Make from the end
-
-            # If Allwclean exists execute otherwise wclean
-            if [ -e "$dir/Allwclean" ]
-            then
-                $dir/Allwclean
-            else
-                $0 $dir
-            fi
-        done
     fi
-fi
 
-# targetType is not needed beyond this point
-unset targetType
+    # For all sub-directories containing a 'Make' directory
+    for dir in $(find . -type d -name Make)
+    do
+        dir=${dir%/*} # Parent directory containing the Make directory
+
+        # Use Allwclean if it exists, otherwise wclean
+        if [ -e "$dir/Allwclean" ]
+        then
+            $dir/Allwclean
+        else
+            $0 $dir
+        fi
+    done
+fi
 
 
 #------------------------------------------------------------------------------
 # Clean the 'Make' directory if present
 #------------------------------------------------------------------------------
 
-if [ -d $MakeDir ]
+if [ -d "$MakeDir" ]
 then
     objectsDir=$MakeDir/$WM_OPTIONS
-    if [ $(echo $PWD | grep "$WM_PROJECT_DIR") ]
-    then
+    case "$PWD" in
+    ("$WM_PROJECT_DIR"/*)
         buildPath=$WM_PROJECT_DIR/platforms/${WM_OPTIONS}
-        objectsDir=$buildPath$(echo $PWD | sed s%$WM_PROJECT_DIR%%)
-    fi
+        objectsDir=$buildPath$(echo $PWD | sed s%$WM_PROJECT_DIR%% )
+        ;;
+    esac
     rm -rf $objectsDir 2>/dev/null
 fi
-
 
 #------------------------------------------------------------------------------
 # Remove the lnInclude directory if present

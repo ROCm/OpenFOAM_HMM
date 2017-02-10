@@ -141,7 +141,7 @@ files)
     # Remove the selected .dep files from the object tree
     #-------------------------------------------------------------------------
 
-    findObjectDir .
+    objectsDir=$(findObjectDir .) || exit 1 # Fatal
 
     # With the -a/-all option replace the current platform with a wildcard
     if [ "$all" = all ]
@@ -152,14 +152,15 @@ files)
     if [ "$#" -eq 0 ]
     then
         echo "removing all .dep files ..."
-        find $objectsDir -name '*.dep' -print | xargs -t rm 2>/dev/null
+        find $objectsDir -type f -name '*.dep' -print | xargs -t rm 2>/dev/null
     else
         echo "removing .o files corresponding to"
         echo "    $@ ..."
         for file
         do
-            find $objectsDir -name '*.dep' -exec grep -q "$file" '{}' \; \
-                 -exec rm '{}' \; -print
+            find $objectsDir -type f -name '*.dep' \
+                -exec grep -q "$file" '{}' \; \
+                -exec rm '{}' \; -print
         done
     fi
     ;;
@@ -172,9 +173,9 @@ oldFolders)
 
     for checkDir
     do
-        findObjectDir $checkDir
+        objectsDir=$(findObjectDir $checkDir)
 
-        if [ -d $objectsDir ]
+        if [ -d "$objectsDir" ]
         then
             echo "    searching: $objectsDir"
         else
@@ -182,9 +183,9 @@ oldFolders)
             continue
         fi
 
-        find $objectsDir -name '*.dep' -print | while read depFile
+        find $objectsDir -type f -name '*.dep' -print | while read depFile
         do
-            depToSource $depFile
+            sourceFile=$(depToSource $depFile)
 
             # Check C++ or Flex source file exists
             if [ ! -r "$sourceFile" ]
@@ -204,7 +205,7 @@ updateMode)
     fi
 
     echo "Removing dep files corresponding to source files that no longer exist..."
-    fileNameList=$(find -L src applications -name '*.[CHL]' -type l)
+    fileNameList=$(find -L src applications -type l -name '*.[CHL]')
 
     for filePathAndName in $fileNameList
     do

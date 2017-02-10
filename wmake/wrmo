@@ -62,7 +62,7 @@ USAGE
 #------------------------------------------------------------------------------
 
 # Default to processing only the current platform
-unset all
+unset platform
 
 while [ "$#" -gt 0 ]
 do
@@ -72,7 +72,7 @@ do
         ;;
     # All platforms
     -a | -all | all)
-        all=all
+        platform=all
         shift
         ;;
     -*)
@@ -92,10 +92,10 @@ checkEnv
 # Remove the selected .o files from the object tree
 #------------------------------------------------------------------------------
 
-findObjectDir .
+objectsDir=$(findObjectDir .) || exit 1 # Fatal
 
 # With the -a/-all option replace the current platform with a wildcard
-if [ "$all" = all ]
+if [ "$platform" = all ]
 then
     objectsDir=$(echo $objectsDir | sed s%$WM_OPTIONS%*% )
 fi
@@ -103,7 +103,7 @@ fi
 if [ "$#" -eq 0 ]
 then
     echo "removing all .o files ..."
-    find $objectsDir -name '*.o' -print | xargs -t rm 2>/dev/null
+    find $objectsDir -type f -name '*.o' -print | xargs -t rm 2>/dev/null
 else
     echo "removing .o files corresponding to"
     echo "    $@ ..."

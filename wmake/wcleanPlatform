@@ -103,10 +103,10 @@ else
             [ -n "$platform" ] || continue
         fi
 
-        if [ -d platforms/${platform} ]
+        if [ -d "platforms/$platform" ]
         then
             echo "Cleaning platform $platform"
-            rm -rf platforms/${platform}*
+            rm -rf "platforms/$platform"*
         else
             echo "Platform $platform not built"
         fi
