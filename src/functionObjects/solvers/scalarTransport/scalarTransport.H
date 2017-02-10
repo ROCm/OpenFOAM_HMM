@@ -111,17 +111,18 @@ Usage
     \table
         Property     | Description             | Required    | Default value
         type         | Type name: scalarTransport | yes      |
-        phi          | Name of flux field      | yes          |
+        field        | Name of the scalar field | no         | s
+        phi          | Name of flux field      | no          | phi
         rho          | Name of density field   | no          | rho
-        phase        | Name of the phase name  | no          | none
+        phase        | Name of the phase       | no          | none
         nut          | Name of the turbulence viscosity | no | none
         D            | Diffusion coefficient   | no          | auto generated
         nCorr        | Number of correctors    | no          | 0
         resetOnStartUp | Reset scalar to zero on start-up | no | no
-        schemesField | Name of field to specify schemes | no | fieldName
+        schemesField | Name of field to specify schemes | no | field name
         fvOptions    | List of scalar sources  | no          |
-        bounded01    | Bounds scalar between 0-1 for multiphase | no |true
-        phasePhiCompressed |Compressed flux for VOF | no | alphaPhiUn
+        bounded01    | Bounds scalar between 0-1 for multiphase | no | true
+        phasePhiCompressed | Compressed flux for VOF | no | alphaPhiUn
     \endtable
 
 See also
@@ -156,10 +157,10 @@ class scalarTransport
 {
     // Private data
 
-        //- Name of field to process
+        //- Name of the transport field.
         word fieldName_;
 
-        //- Name of flux field
+        //- Name of flux field (optional)
         word phiName_;
 
         //- Name of density field (optional)
@@ -168,10 +169,10 @@ class scalarTransport
         //- Name of turbulent viscosity field (optional)
         word nutName_;
 
-        //- Name of phase field
+        //- Name of phase field (optional)
         word phaseName_;
 
-        //- Name of phase field compressed flux
+        //- Name of phase field compressed flux (optional)
         word phasePhiCompressedName_;
 
         //- Diffusion coefficient (optional)

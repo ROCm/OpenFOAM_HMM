@@ -51,7 +51,7 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class functionObjectFile Declaration
+                          Class writeFile Declaration
 \*---------------------------------------------------------------------------*/
 
 class writeFile

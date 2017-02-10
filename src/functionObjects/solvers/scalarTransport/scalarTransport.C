@@ -201,7 +201,7 @@ Foam::functionObjects::scalarTransport::scalarTransport
     resetOnStartUp_(false),
     schemesField_("unknown-schemesField"),
     fvOptions_(mesh_),
-    bounded01_(dict.lookupOrDefault<bool>("bounded01", true))
+    bounded01_(dict.lookupOrDefault<Switch>("bounded01", true))
 {
     read(dict);
 
@@ -235,12 +235,7 @@ bool Foam::functionObjects::scalarTransport::read(const dictionary& dict)
     dict.readIfPresent("bounded01", bounded01_);
 
     schemesField_ = dict.lookupOrDefault("schemesField", fieldName_);
-
-    constantD_ = false;
-    if (dict.readIfPresent("D", D_))
-    {
-        constantD_ = true;
-    }
+    constantD_ = dict.readIfPresent("D", D_);
 
     dict.readIfPresent("nCorr", nCorr_);
     dict.readIfPresent("resetOnStartUp", resetOnStartUp_);
@@ -256,11 +251,11 @@ bool Foam::functionObjects::scalarTransport::read(const dictionary& dict)
 
 bool Foam::functionObjects::scalarTransport::execute()
 {
-    Log << type() << " write:" << endl;
-
     volScalarField& s = transportedField();
 
-    const surfaceScalarField& phi = 
+    Log << type() << " execute: " << s.name() << endl;
+
+    const surfaceScalarField& phi =
         mesh_.lookupObject<surfaceScalarField>(phiName_);
 
     // Calculate the diffusivity

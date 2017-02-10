@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  | Copyright (C) 2015 IH-Cantabria
 -------------------------------------------------------------------------------
 License
@@ -49,15 +49,12 @@ class StokesI
 :
     public regularWaveModel
 {
-protected:
+private:
 
-    // Protected Member Functions
-
-        //- Return the wavelength
-        virtual scalar waveLength(const scalar h, const scalar T) const;
+    // Private Member Functions
 
         //- Wave height
-        virtual scalar eta
+        scalar eta
         (
             const scalar H,
             const scalar Kx,
@@ -69,8 +66,16 @@ protected:
             const scalar phase
         ) const;
 
+
+protected:
+
+    // Protected Member Functions
+
+        //- Return the wavelength
+        virtual scalar waveLength(const scalar h, const scalar T) const;
+
         //- Wave velocity
-        virtual vector U
+        virtual vector UfBase
         (
             const scalar H,
             const scalar h,
@@ -83,7 +88,6 @@ protected:
             const scalar phase,
             const scalar z
         ) const;
-
 
         //- Set the water level
         virtual void setLevel
@@ -123,11 +127,12 @@ public:
     // Public Member Functions
 
         //- Read from dictionary
-        virtual bool read(const dictionary& overrideDict);
+        virtual bool readDict(const dictionary& overrideDict);
 
         //- Info
         virtual void info(Ostream& os) const;
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

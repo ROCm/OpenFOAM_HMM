@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,20 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    foamVtkAppendRawFormatter
+    foamVtkBase64Layer
 
 Description
-    Appended raw binary output.
-
-SourceFiles
-    foamVtkAppendRawFormatter.C
+    Base-64 encoded output.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkAppendRawFormatter_H
-#define foamVtkAppendRawFormatter_H
+#ifndef foamVtkBase64Layer_H
+#define foamVtkBase64Layer_H
 
 #include "foamVtkFormatter.H"
+#include "base64Layer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,26 +41,26 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class foamVtkAppendRawFormatter Declaration
+                   Class foamVtkBase64Layer Declaration
 \*---------------------------------------------------------------------------*/
 
-class foamVtkAppendRawFormatter
+class foamVtkBase64Layer
 :
-    public foamVtkFormatter
+    public foamVtkFormatter,
+    protected base64Layer
 {
     // Private Data Members
 
-        static const char* name_;
         static const char* encoding_;
+
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        foamVtkAppendRawFormatter(const foamVtkAppendRawFormatter&) = delete;
+        foamVtkBase64Layer(const foamVtkBase64Layer&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const foamVtkAppendRawFormatter&) = delete;
-
+        void operator=(const foamVtkBase64Layer&) = delete;
 
 protected:
 
@@ -72,24 +70,20 @@ protected:
         void write(const char* s, std::streamsize n);
 
 
-public:
-
     // Constructors
 
         //- Construct and attach to an output stream
-        foamVtkAppendRawFormatter(std::ostream& os);
+        foamVtkBase64Layer(std::ostream& os);
 
+public:
 
     //- Destructor
-    virtual ~foamVtkAppendRawFormatter();
+    virtual ~foamVtkBase64Layer();
 
 
     // Member Functions
 
-        //- Output name for XML type ("append")
-        virtual const char* name() const;
-
-        //- Output name for append encoding type ("raw")
+        //- Name for the XML append encoding ("base64").
         virtual const char* encoding() const;
 
 
@@ -101,8 +95,11 @@ public:
         virtual void write(const float val);
         virtual void write(const double val);
 
-        //- A no-op for this format
+        //- End the encoding sequence (padding the final characters with '=')
         virtual void flush();
+
+        //- The encoded length for base64 encoded output.
+        virtual std::size_t encodedLength(std::size_t n) const;
 
 };
 

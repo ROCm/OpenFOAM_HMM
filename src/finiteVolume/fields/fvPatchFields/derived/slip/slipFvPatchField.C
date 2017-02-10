@@ -34,7 +34,7 @@ Foam::slipFvPatchField<Type>::slipFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-   basicSymmetryFvPatchField<Type>(p, iF)
+    basicSymmetryFvPatchField<Type>(p, iF)
 {}
 
 

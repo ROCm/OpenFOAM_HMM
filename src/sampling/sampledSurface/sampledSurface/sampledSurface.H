@@ -63,7 +63,6 @@ SourceFiles
 #include "surfaceFieldsFwd.H"
 #include "surfaceMesh.H"
 #include "polyMesh.H"
-#include "coordinateSystems.H"
 #include "interpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

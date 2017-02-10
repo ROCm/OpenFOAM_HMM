@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,9 @@ License
 #include "solarCalculator.H"
 #include "Time.H"
 #include "unitConversion.H"
+#include "constants.H"
+
+using namespace Foam::constant;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -104,6 +107,14 @@ void Foam::solarCalculator::calculateBetaTetha()
     beta_ = max(asin(cos(L)*cos(deltaRad)*cos(H) + sin(L)*sin(deltaRad)), 1e-3);
     tetha_ = acos((sin(beta_)*sin(L) - sin(deltaRad))/(cos(beta_)*cos(L)));
 
+    // theta is the angle between the SOUTH axis and the Sun
+    // If the hour angle is lower than zero (morning) the Sun is positioned
+    // on the East side.
+    if (H < 0)
+    {
+        tetha_ += 2*(constant::mathematical::pi - tetha_);
+    }
+
     if (debug)
     {
         Info << tab << "altitude : " << radToDeg(beta_) << endl;
@@ -126,9 +137,10 @@ void Foam::solarCalculator::calculateSunDirection()
         new coordinateSystem("grid", Zero, gridUp_, eastDir_)
     );
 
+    // Assuming 'z' vertical, 'y' North and 'x' East
     direction_.z() = -sin(beta_);
-    direction_.y() =  cos(beta_)*cos(tetha_); //North
-    direction_.x() =  cos(beta_)*sin(tetha_); //East
+    direction_.y() =  cos(beta_)*cos(tetha_); // South axis
+    direction_.x() =  cos(beta_)*sin(tetha_); // West axis
 
     direction_ /= mag(direction_);
 
@@ -137,6 +149,7 @@ void Foam::solarCalculator::calculateSunDirection()
         Info<< "Sun direction in absolute coordinates : " << direction_ <<endl;
     }
 
+    // Transform to actual coordinate system
     direction_ = coord_->R().transform(direction_);
 
     if (debug)

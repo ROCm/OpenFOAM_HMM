@@ -34,7 +34,7 @@ Description
 Usage
     \table
         Property      | Description             | Required    | Default value
-        valueFraction | fraction od value used for boundary [0-1] | yes |
+        valueFraction | fraction of value used for boundary [0-1] | yes |
     \endtable
 
     Example of the boundary condition specification:

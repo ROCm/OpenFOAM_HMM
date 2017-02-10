@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,27 +43,35 @@ static const unsigned char base64Chars[64] =
 //! \endcond
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+std::size_t Foam::base64Layer::encodedLength(std::size_t n)
+{
+    return 4 * ((n / 3) + (n % 3 ? 1 : 0));
+}
+
+
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-inline unsigned char Foam::base64Layer::encode0()
+inline unsigned char Foam::base64Layer::encode0() const
 {
     // Top 6 bits of char0
     return base64Chars[((group_[0] & 0xFC) >> 2)];
 }
 
-inline unsigned char Foam::base64Layer::encode1()
+inline unsigned char Foam::base64Layer::encode1() const
 {
     // Bottom 2 bits of char0, Top 4 bits of char1
     return base64Chars[((group_[0] & 0x03) << 4) | ((group_[1] & 0xF0) >> 4)];
 }
 
-inline unsigned char Foam::base64Layer::encode2()
+inline unsigned char Foam::base64Layer::encode2() const
 {
     // Bottom 4 bits of char1, Top 2 bits of char2
     return base64Chars[((group_[1] & 0x0F) << 2) | ((group_[2] & 0xC0) >> 6)];
 }
 
-inline unsigned char Foam::base64Layer::encode3()
+inline unsigned char Foam::base64Layer::encode3() const
 {
     // Bottom 6 bits of char2
     return base64Chars[(group_[2] & 0x3F)];

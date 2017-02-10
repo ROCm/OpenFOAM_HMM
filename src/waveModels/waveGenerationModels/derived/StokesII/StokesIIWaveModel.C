@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  | Copyright (C) 2015 IH-Cantabria
 -------------------------------------------------------------------------------
 License
@@ -71,7 +71,9 @@ Foam::scalar Foam::waveModels::StokesII::eta
 }
 
 
-Foam::vector Foam::waveModels::StokesII::U
+// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
+
+Foam::vector Foam::waveModels::StokesII::UfBase
 (
     const scalar H,
     const scalar h,
@@ -148,7 +150,7 @@ Foam::waveModels::StokesII::StokesII
 {
     if (readFields)
     {
-        read(dict);
+        readDict(dict);
     }
 }
 
@@ -161,9 +163,9 @@ Foam::waveModels::StokesII::~StokesII()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModels::StokesII::read(const dictionary& overrideDict)
+bool Foam::waveModels::StokesII::readDict(const dictionary& overrideDict)
 {
-    if (StokesI::read(overrideDict))
+    if (StokesI::readDict(overrideDict))
     {
         return true;
     }

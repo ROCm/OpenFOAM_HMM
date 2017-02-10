@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  | Copyright (C) 2015 IH-Cantabria
 -------------------------------------------------------------------------------
 License
@@ -70,7 +70,7 @@ Foam::waveModels::solitaryWaveModel::solitaryWaveModel
 {
     if (readFields)
     {
-        read(dict);
+        readDict(dict);
     }
 }
 
@@ -83,9 +83,12 @@ Foam::waveModels::solitaryWaveModel::~solitaryWaveModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModels::solitaryWaveModel::read(const dictionary& overrideDict)
+bool Foam::waveModels::solitaryWaveModel::readDict
+(
+    const dictionary& overrideDict
+)
 {
-    if (waveGenerationModel::read(overrideDict))
+    if (waveGenerationModel::readDict(overrideDict))
     {
         return true;
     }

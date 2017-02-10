@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjects::runTimePostProcessing
+    Foam::functionObjects::runTimePostPro::runTimePostProcessing
 
 Group
     grpGraphicsFunctionObjects

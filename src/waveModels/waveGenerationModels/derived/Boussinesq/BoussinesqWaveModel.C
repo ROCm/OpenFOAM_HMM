@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  | Copyright (C) 2015 IH-Cantabria
 -------------------------------------------------------------------------------
 License
@@ -101,7 +101,7 @@ Foam::vector Foam::waveModels::Boussinesq::Deta
 }
 
 
-Foam::vector Foam::waveModels::Boussinesq::U
+Foam::vector Foam::waveModels::Boussinesq::Uf
 (
     const scalar H,
     const scalar h,
@@ -139,6 +139,8 @@ Foam::vector Foam::waveModels::Boussinesq::U
 }
 
 
+// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
+
 void Foam::waveModels::Boussinesq::setLevel
 (
     const scalar t,
@@ -165,44 +167,6 @@ void Foam::waveModels::Boussinesq::setLevel
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::waveModels::Boussinesq::Boussinesq
-(
-    const dictionary& dict,
-    const fvMesh& mesh,
-    const polyPatch& patch,
-    const bool readFields
-)
-:
-    solitaryWaveModel(dict, mesh, patch, false)
-{
-    if (readFields)
-    {
-        read(dict);
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModels::Boussinesq::~Boussinesq()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::waveModels::Boussinesq::read(const dictionary& overrideDict)
-{
-    if (solitaryWaveModel::read(overrideDict))
-    {
-        return true;
-    }
-
-    return false;
-}
-
-
 void Foam::waveModels::Boussinesq::setVelocity
 (
     const scalar t,
@@ -224,7 +188,7 @@ void Foam::waveModels::Boussinesq::setVelocity
         {
             const label paddlei = faceToPaddle_[facei];
 
-            const vector Uf = U
+            const vector Uf = this->Uf
 	        (
                 waveHeight_,
                 waterDepthRef_,
@@ -239,6 +203,44 @@ void Foam::waveModels::Boussinesq::setVelocity
             U_[facei] = fraction*Uf*tCoeff;
         }
     }
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::waveModels::Boussinesq::Boussinesq
+(
+    const dictionary& dict,
+    const fvMesh& mesh,
+    const polyPatch& patch,
+    const bool readFields
+)
+:
+    solitaryWaveModel(dict, mesh, patch, false)
+{
+    if (readFields)
+    {
+        readDict(dict);
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::waveModels::Boussinesq::~Boussinesq()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::waveModels::Boussinesq::readDict(const dictionary& overrideDict)
+{
+    if (solitaryWaveModel::readDict(overrideDict))
+    {
+        return true;
+    }
+
+    return false;
 }
 
 

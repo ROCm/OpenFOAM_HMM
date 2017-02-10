@@ -427,7 +427,7 @@ inline void reverse(UList<T>&);
 // \endcode
 // \sa forAllReverse
 #define forAll(list, i) \
-    for (Foam::label i=0; i<(list).size(); i++)
+    for (Foam::label i=0; i<(list).size(); ++i)
 
 //- Reverse loop across all elements in \a list
 //  \par Usage
@@ -439,7 +439,7 @@ inline void reverse(UList<T>&);
 //  \endcode
 //  \sa forAll
 #define forAllReverse(list, i) \
-    for (Foam::label i=(list).size()-1; i>=0; i--)
+    for (Foam::label i=(list).size()-1; i>=0; --i)
 
 //- Iterate across all elements in the \a container object of type
 //  \a Container.
@@ -472,8 +472,8 @@ inline void reverse(UList<T>&);
 #define forAllConstIter(Container,container,iter)                              \
     for                                                                        \
     (                                                                          \
-        Container::const_iterator iter = (container).begin();                  \
-        iter != (container).end();                                             \
+        Container::const_iterator iter = (container).cbegin();                 \
+        iter != (container).cend();                                            \
         ++iter                                                                 \
     )
 
