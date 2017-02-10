@@ -20,7 +20,7 @@ if (dictPath.size())
 {
     dictIO = IOobject
     (
-        dictPath,
+        dictPath.expand(),
         mesh,
         IOobject::MUST_READ_IF_MODIFIED,
         IOobject::NO_WRITE
