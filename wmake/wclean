@@ -256,7 +256,7 @@ then
     objectsDir=$MakeDir/$WM_OPTIONS
     case "$PWD" in
     ("$WM_PROJECT_DIR"/*)
-        buildPath=$WM_PROJECT_DIR/platforms/${WM_OPTIONS}
+        buildPath=$WM_PROJECT_DIR/build/${WM_OPTIONS}
         objectsDir=$buildPath$(echo $PWD | sed s%$WM_PROJECT_DIR%% )
         ;;
     esac

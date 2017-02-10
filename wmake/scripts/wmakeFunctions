@@ -160,7 +160,7 @@ findObjectDir()
 
     case "$exPath" in
     ("$wmpdir"/*)
-        local buildPath=$WM_PROJECT_DIR/platforms/${WM_OPTIONS}
+        local buildPath=$WM_PROJECT_DIR/build/${WM_OPTIONS}
         objectsDir=$buildPath$(echo $exPath | sed s%$wmpdir%% )
         ;;
     (*)
@@ -208,8 +208,8 @@ then
     depToSource()
     {
         local sourceFile=${1%.dep}
-        sourceFile="${sourceFile/platforms\/${WM_OPTIONS}\//}"
-        sourceFile="${sourceFile/platforms\/${WM_OPTIONS}${WM_MPLIB}\//}"
+        sourceFile="${sourceFile/build\/${WM_OPTIONS}\//}"
+        sourceFile="${sourceFile/build\/${WM_OPTIONS}${WM_MPLIB}\//}"
         sourceFile="${sourceFile/Make\/${WM_OPTIONS}\//}"
         sourceFile="${sourceFile/Make\/${WM_OPTIONS}${WM_MPLIB}\//}"
 
@@ -218,10 +218,10 @@ then
 else
     depToSource()
     {
-        local sourceFile=$(echo ${1%.dep} |                 \
-            sed -e s%platforms/${WM_OPTIONS}/%%             \
-                -e s%platforms/${WM_OPTIONS}${WM_MPLIB}/%%  \
-                -e s%Make/${WM_OPTIONS}/%%                  \
+        local sourceFile=$(echo ${1%.dep} |             \
+            sed -e s%build/${WM_OPTIONS}/%%             \
+                -e s%build/${WM_OPTIONS}${WM_MPLIB}/%%  \
+                -e s%Make/${WM_OPTIONS}/%%              \
                 -e s%Make/${WM_OPTIONS}${WM_MPLIB}/%% )
 
         echo "$sourceFile"

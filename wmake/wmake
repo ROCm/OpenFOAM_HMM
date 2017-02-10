@@ -340,7 +340,7 @@ then
     [ "$update" = true ] || wmakeLnIncludeAll $parOpt
 
     (
-        export WM_COLLECT_DIR=$WM_PROJECT_DIR/platforms/${WM_OPTIONS}/${PWD////_}
+        export WM_COLLECT_DIR=$WM_PROJECT_DIR/build/${WM_OPTIONS}/${PWD////_}
         export WM_SCHEDULER=wmakeCollect
         trap '$WM_SCHEDULER -kill' TERM INT
         $WM_SCHEDULER -clean                                                   \
@@ -390,7 +390,7 @@ fi
 objectsDir=$MakeDir/$WM_OPTIONS
 case "$PWD" in
 ("$WM_PROJECT_DIR"/*)
-    buildPath=$WM_PROJECT_DIR/platforms/${WM_OPTIONS}
+    buildPath=$WM_PROJECT_DIR/build/${WM_OPTIONS}
     objectsDir=$buildPath$(echo $PWD | sed s%$WM_PROJECT_DIR%% )
     ;;
 esac
