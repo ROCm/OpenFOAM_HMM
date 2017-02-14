@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "HashSet.H"
 #include "surfaceInterpolate.H"
 #include "zeroGradientFvPatchFields.H"
+#include "wallDist.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -68,42 +69,18 @@ Foam::inverseDistanceDiffusivity::~inverseDistanceDiffusivity()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::scalarField> Foam::inverseDistanceDiffusivity::y() const
-{
-    labelHashSet patchSet(mesh().boundaryMesh().patchSet(patchNames_));
-
-    if (patchSet.size())
-    {
-        return tmp<scalarField>
-        (
-            new scalarField(patchWave(mesh(), patchSet, false).distance())
-        );
-    }
-    else
-    {
-        return tmp<scalarField>(new scalarField(mesh().nCells(), 1.0));
-    }
-}
-
-
 void Foam::inverseDistanceDiffusivity::correct()
 {
-    volScalarField y_
-    (
-        IOobject
+    faceDiffusivity_ =
+        1.0
+       /fvc::interpolate
         (
-            "y",
-            mesh().time().timeName(),
-            mesh()
-        ),
-        mesh(),
-        dimless,
-        zeroGradientFvPatchScalarField::typeName
-    );
-    y_.primitiveFieldRef() = y();
-    y_.correctBoundaryConditions();
-
-    faceDiffusivity_ = 1.0/fvc::interpolate(y_);
+            wallDist::New
+            (
+                mesh(),
+                mesh().boundaryMesh().patchSet(patchNames_)
+            ).y()
+        );
 }
 
 
