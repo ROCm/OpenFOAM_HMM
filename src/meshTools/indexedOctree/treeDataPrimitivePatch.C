@@ -532,7 +532,7 @@ bool Foam::treeDataPrimitivePatch<PatchType>::findAllIntersectOp::operator()
     point& intersectionPoint
 ) const
 {
-    if (!shapeMask_.empty() && findIndex(shapeMask_, index) != -1)
+    if (findIndex(shapeMask_, index) != -1)
     {
         return false;
     }
