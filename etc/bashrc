@@ -61,7 +61,7 @@ export FOAM_INST_DIR
 export WM_COMPILER_TYPE=system
 
 #- Compiler:
-#    WM_COMPILER = Gcc | Gcc4[8-9] | Gcc5[1-4] | Gcc6[1-2] | Clang | Icc
+#    WM_COMPILER = Gcc | Gcc4[8-9] | Gcc5[1-4] | Gcc6[1-2] | Clang | Icc | IccKNL
 export WM_COMPILER=Gcc
 unset WM_COMPILER_ARCH WM_COMPILER_LIB_ARCH
 
