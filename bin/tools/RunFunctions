@@ -208,19 +208,32 @@ compileApplication()
     wmake $1
 }
 
+#
+# cloneCase srcDir dstDir
+#
 cloneCase()
 {
-    if [ -d "$2" ]
+    if [ -e "$2" ]
     then
         echo "Case already cloned: remove case directory $2 to clone"
-    else
+    elif [ -d "$1" ]
+    then
         echo "Cloning $2 case from $1"
         mkdir $2
-        cpfiles="0.orig 0 system constant"
-        for f in $cpfiles
+        # These must exist, so do not hide error messages
+        for f in system constant
         do
             \cp -r $1/$f $2
         done
+
+        # Either (or both) may exist, so error messages may be spurious
+        for f in 0 0.orig
+        do
+            \cp -r $1/$f $2 2>/dev/null
+        done
+    else
+        echo "Error: cannot clone from non-existent directory"
+        echo "    $1"
     fi
 }
 
@@ -243,7 +256,7 @@ restore0Dir()
         if [ -d 0.orig ]
         then
             \rm -rf 0
-            \cp -r 0.orig 0 > /dev/null 2>&1
+            \cp -r 0.orig 0 2>/dev/null
         else
             echo "    Warning: no 0.orig/ found"
         fi
