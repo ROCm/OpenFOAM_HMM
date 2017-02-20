@@ -34,7 +34,7 @@
 #
 #     For example, within the user ~/.OpenFOAM/<VER>/prefs.sh:
 #     \code
-#        foamPrefs=`$WM_PROJECT_DIR/bin/foamEtcFile -m go prefs.sh` \
+#        foamPrefs=$($WM_PROJECT_DIR/bin/foamEtcFile -m go prefs.sh) \
 #            && _foamSource $foamPrefs
 #     \endcode
 #

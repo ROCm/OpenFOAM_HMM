@@ -234,8 +234,8 @@ set cleaned=`$foamClean "$LD_LIBRARY_PATH"`
 if ( $status == 0 ) setenv LD_LIBRARY_PATH $cleaned
 
 #- Clean MANPATH (trailing ':' to find system pages)
-set cleaned=`$foamClean "$MANPATH"`:
-if ( $status == 0 ) setenv MANPATH "$cleaned"
+set cleaned=`$foamClean "$MANPATH"`
+if ( $status == 0 ) setenv MANPATH "${cleaned}:"
 
 #- Clean LD_PRELOAD
 if ( $?LD_PRELOAD ) then

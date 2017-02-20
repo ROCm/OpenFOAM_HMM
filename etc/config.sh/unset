@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -143,16 +143,15 @@ unset SCOTCH_ARCH_PATH
 
 if [ -n "$foamClean" ]
 then
-    cleaned=`$foamClean "$PATH" "$foamOldDirs"` && PATH="$cleaned"
-    cleaned=`$foamClean "$LD_LIBRARY_PATH" "$foamOldDirs"` && LD_LIBRARY_PATH="$cleaned"
-    cleaned=`$foamClean "$MANPATH" "$foamOldDirs"` && MANPATH="$cleaned"
+    cleaned=$($foamClean "$PATH" "$foamOldDirs") && PATH="$cleaned"
+    cleaned=$($foamClean "$LD_LIBRARY_PATH" "$foamOldDirs") && LD_LIBRARY_PATH="$cleaned"
+    cleaned=$($foamClean "$MANPATH" "$foamOldDirs") && MANPATH="$cleaned"
 fi
 
 
 [ -n "$LD_LIBRARY_PATH" ] || unset LD_LIBRARY_PATH
 [ -n "$MANPATH" ] || unset MANPATH
 [ -n "$LD_PRELOAD" ] || unset LD_PRELOAD
-
 
 unset cleaned foamClean foamOldDirs
 

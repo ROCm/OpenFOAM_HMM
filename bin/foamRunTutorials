@@ -71,8 +71,8 @@ then
 elif [ -d system ]
 then
     # Run normal case.
-    parentDir=`dirname $PWD`
-    application=`getApplication`
+    parentDir=$(dirname $PWD)
+    application=$(getApplication)
     runApplication blockMesh
     runApplication $application
 else

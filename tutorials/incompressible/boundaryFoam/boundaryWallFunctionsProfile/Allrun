@@ -25,8 +25,8 @@ do
 
     if [ -e logs/yPlus_0 ]
     then
-        yPlus=`awk < logs/yPlus_0 'END{print $2}'`
-        uPlus=`awk < logs/uPlus_0 'END{print $2}'`
+        yPlus=$(awk < logs/yPlus_0 'END{print $2}')
+        uPlus=$(awk < logs/uPlus_0 'END{print $2}')
 
         echo "$yPlus $uPlus" >> yPlus_vs_uPlus
     fi

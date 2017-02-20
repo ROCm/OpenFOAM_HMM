@@ -73,7 +73,7 @@ then
                 then
                     _foamSource "$1"
                 else
-                    _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile -silent "$1"`
+                    _foamSource $($WM_PROJECT_DIR/bin/foamEtcFile -silent "$1")
                 fi
                 ;;
             esac

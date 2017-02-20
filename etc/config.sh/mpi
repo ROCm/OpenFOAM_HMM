@@ -43,7 +43,7 @@ SYSTEMOPENMPI)
         unset OPAL_PREFIX
     fi
 
-    libDir=`mpicc --showme:link | sed -e 's/.*-L\([^ ]*\).*/\1/'`
+    libDir=$(mpicc --showme:link | sed -e 's/.*-L\([^ ]*\).*/\1/')
 
     # Bit of a hack: strip off 'lib' and hope this is the path to openmpi
     # include files and libraries.
@@ -56,7 +56,7 @@ SYSTEMOPENMPI)
 OPENMPI)
     export FOAM_MPI=openmpi-1.10.4
     # Optional configuration tweaks:
-    _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/openmpi`
+    _foamSource $($WM_PROJECT_DIR/bin/foamEtcFile config.sh/openmpi)
 
     export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
@@ -159,7 +159,7 @@ HPMPI)
 
     _foamAddPath $MPI_ARCH_PATH/bin
 
-    case `uname -m` in
+    case $(uname -m) in
     i686)
         _foamAddLib $MPI_ARCH_PATH/lib/linux_ia32
         ;;
@@ -171,7 +171,7 @@ HPMPI)
         _foamAddLib $MPI_ARCH_PATH/lib/linux_ia64
         ;;
     *)
-        echo Unknown processor type `uname -m` 1>&2
+        echo Unknown processor type $(uname -m) 1>&2
         ;;
     esac
     ;;
