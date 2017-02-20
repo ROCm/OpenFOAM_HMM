@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -47,7 +47,7 @@
 #
 #------------------------------------------------------------------------------
 
-adios_version=ADIOS-1.11.0
+adios_version=ADIOS-1.11.1
 export ADIOS_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$adios_version
 
 #------------------------------------------------------------------------------

@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -62,6 +62,9 @@ ThirdParty)
     Gcc62)
         gcc_version=gcc-6.2.0
         ;;
+    Gcc63)
+        gcc_version=gcc-6.3.0
+        ;;
     Clang)
         clang_version=llvm-3.7.0
         # clang_version=llvm-3.8.0
@@ -84,7 +87,7 @@ Clang)
     export WM_CC='clang'
     export WM_CXX='clang++'
     ;;
-Icc)
+Icc*)
     export WM_CC='icc'
     export WM_CXX='icpc'
     ;;
