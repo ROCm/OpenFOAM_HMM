@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,9 +26,9 @@ License
 #include "surfaceFormatsCore.H"
 
 #include "Time.H"
+#include "ListOps.H"
 #include "IFstream.H"
 #include "OFstream.H"
-#include "SortableList.H"
 #include "surfMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -167,18 +167,9 @@ bool Foam::fileFormats::surfaceFormatsCore::checkSupport
     }
     else if (verbose)
     {
-        wordList toc = available.toc();
-        SortableList<word> known(toc.xfer());
-
         Info<<"Unknown file extension for " << functionName
             << " : " << ext << nl
-            <<"Valid types: (";
-        // compact output:
-        forAll(known, i)
-        {
-            Info<<" " << known[i];
-        }
-        Info<<" )" << endl;
+            << "Valid types: " << flatOutput(available.sortedToc()) << endl;
     }
 
     return false;

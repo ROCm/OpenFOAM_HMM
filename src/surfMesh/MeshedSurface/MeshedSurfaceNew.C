@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,7 @@ License
 
 #include "MeshedSurface.H"
 #include "UnsortedMeshedSurface.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -42,25 +43,25 @@ Foam::MeshedSurface<Face>::New(const fileName& name, const word& ext)
 
     if (cstrIter == fileExtensionConstructorTablePtr_->end())
     {
-        // no direct reader, delegate if possible
-        wordHashSet supported = FriendType::readTypes();
-        if (supported.found(ext))
+        // No direct reader, delegate to friend if possible
+        const wordHashSet& delegate = FriendType::readTypes();
+
+        if (delegate.found(ext))
         {
-            // create indirectly
+            // Create indirectly
             autoPtr<MeshedSurface<Face>> surf(new MeshedSurface<Face>);
             surf().transfer(FriendType::New(name, ext)());
 
             return surf;
         }
-
-        // nothing left to try, issue error
-        supported += readTypes();
-
-        FatalErrorInFunction
-            << "Unknown file extension " << ext << nl << nl
-            << "Valid types are :" << nl
-            << supported
-            << exit(FatalError);
+        else
+        {
+            FatalErrorInFunction
+                << "Unknown file extension " << ext << nl << nl
+                << "Valid types:" << nl
+                << flatOutput((delegate | readTypes()).sortedToc()) << nl
+                << exit(FatalError);
+        }
     }
 
     return autoPtr<MeshedSurface<Face>>(cstrIter()(name));

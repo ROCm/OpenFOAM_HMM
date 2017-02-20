@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -129,10 +129,10 @@ void Foam::MeshedSurface<Face>::write
 
     if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
     {
-        // no direct writer, delegate to proxy if possible
-        wordHashSet supported = ProxyType::writeTypes();
+        // No direct writer, delegate to proxy if possible
+        const wordHashSet& delegate = ProxyType::writeTypes();
 
-        if (supported.found(ext))
+        if (delegate.found(ext))
         {
             MeshedSurfaceProxy<Face>(surf).write(name);
         }
@@ -140,8 +140,8 @@ void Foam::MeshedSurface<Face>::write
         {
             FatalErrorInFunction
                 << "Unknown file extension " << ext << nl << nl
-                << "Valid types are :" << endl
-                << (supported | writeTypes())
+                << "Valid types:" << nl
+                << flatOutput((delegate | writeTypes()).sortedToc()) << nl
                 << exit(FatalError);
         }
     }
