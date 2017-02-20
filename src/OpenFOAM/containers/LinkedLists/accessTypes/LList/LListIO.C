@@ -55,10 +55,10 @@ Foam::Istream& Foam::operator>>(Istream& is, LList<LListBase, T>& L)
 
     if (firstToken.isLabel())
     {
-        label s = firstToken.labelToken();
+        const label s = firstToken.labelToken();
 
         // Read beginning of contents
-        char delimiter = is.readBeginList("LList<LListBase, T>");
+        const char delimiter = is.readBeginList("LList<LListBase, T>");
 
         if (s)
         {

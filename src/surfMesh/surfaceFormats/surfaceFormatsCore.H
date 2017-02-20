@@ -62,8 +62,8 @@ class surfaceFormatsCore
 {
 protected:
 
-        //- Return a list with a single entry,
-        //  the size corresponds to that of the container
+        //- Return a surfZone list with a single entry, the size of which
+        //  corresponds to that of the container
         template<class Container>
         static List<surfZone> oneZone
         (
@@ -89,6 +89,7 @@ public:
 
     // Static Member Functions
 
+        //- Helper function when checking if a file extension is supported.
         static bool checkSupport
         (
             const wordHashSet& available,

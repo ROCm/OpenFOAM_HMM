@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
     Info<< "\ntest Istream constructor\n";
 
     list4.printInfo(Info, true);
-    Info<< list4 << " indices: " << list4.used()() <<endl;
+    Info<< list4 << " indices: " << list4.used()() << nl;
 
     Info<< "\nassign from labelList\n";
     list4 = labelList
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
     );
 
     list4.printInfo(Info, true);
-    Info<< list4 << " indices: " << list4.used()() <<endl;
+    Info<< list4 << " indices: " << list4.used()() << nl;
 
     Info<< "\nassign from indices\n";
     list4.read
@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 
 
     list4.printInfo(Info, true);
-    Info<< list4 << " indices: " << list4.used()() <<endl;
+    Info<< list4 << " indices: " << list4.used()() << nl;
 
     List<bool> boolLst(list4.size());
     forAll(list4, i)
@@ -176,8 +176,7 @@ int main(int argc, char *argv[])
         boolLst[i] = list4[i];
     }
 
-    Info<< "List<bool>: " << boolLst <<endl;
-
+    Info<< "List<bool>: " << boolLst << nl;
 
     // check roundabout assignments
     PackedList<2> pl2
@@ -188,7 +187,7 @@ int main(int argc, char *argv[])
         )()
     );
 
-    Info<< "roundabout assignment: " << pl2 << endl;
+    Info<< "roundabout assignment: " << pl2 << nl;
 
     list4.clear();
     forAll(pl2, i)
@@ -196,7 +195,7 @@ int main(int argc, char *argv[])
         list4[i] = pl2[i];
     }
 
-    list4.write(Info, true) << endl;
+    list4.writeList(Info, -1) << nl; // indexed output
 
     list4.writeEntry("PackedBoolList", Info);
 
