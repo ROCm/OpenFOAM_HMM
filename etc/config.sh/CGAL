@@ -48,6 +48,7 @@
 #         - boost_version / cgal_version variables are retained.
 #         - the LD_LIBRARY_PATH is not adjusted.
 #------------------------------------------------------------------------------
+# USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
 boost_version=boost_1_62_0
 cgal_version=CGAL-4.9
@@ -55,6 +56,7 @@ cgal_version=CGAL-4.9
 export BOOST_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost_version
 export CGAL_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cgal_version
 
+# END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
 if [ "$FOAM_VERBOSE" -a "$PS1" ]
 then
