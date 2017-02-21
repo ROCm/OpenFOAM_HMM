@@ -89,7 +89,7 @@ then
     rm -rf platforms/*
 
     echo "Removing lnInclude directories"
-    find . -depth -type d \( -name lnInclude \) | xargs rm -rf
+    find . -depth -name lnInclude -type d -delete
 
     tutorials/Allclean
 else

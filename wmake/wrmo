@@ -103,7 +103,7 @@ fi
 if [ "$#" -eq 0 ]
 then
     echo "removing all .o files ..."
-    find $objectsDir -type f -name '*.o' -print | xargs -t rm 2>/dev/null
+    find $objectsDir -name '*.o' -type f -delete
 else
     echo "removing .o files corresponding to"
     echo "    $@ ..."

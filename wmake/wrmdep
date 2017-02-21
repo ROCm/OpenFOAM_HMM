@@ -152,15 +152,14 @@ files)
     if [ "$#" -eq 0 ]
     then
         echo "removing all .dep files ..."
-        find $objectsDir -type f -name '*.dep' -print | xargs -t rm 2>/dev/null
+        find $objectsDir -name '*.dep' -type f -delete -print
     else
         echo "removing .o files corresponding to"
         echo "    $@ ..."
         for file
         do
-            find $objectsDir -type f -name '*.dep' \
-                -exec grep -q "$file" '{}' \; \
-                -exec rm '{}' \; -print
+            find $objectsDir -name '*.dep' -type f \
+                -exec grep -q "$file" {} \; -delete -print
         done
     fi
     ;;
@@ -183,7 +182,7 @@ oldFolders)
             continue
         fi
 
-        find $objectsDir -type f -name '*.dep' -print | while read depFile
+        find $objectsDir -name '*.dep' -type f -print | while read depFile
         do
             sourceFile=$(depToSource $depFile)
 
@@ -205,7 +204,7 @@ updateMode)
     fi
 
     echo "Removing dep files corresponding to source files that no longer exist..."
-    fileNameList=$(find -L src applications -type l -name '*.[CHL]')
+    fileNameList=$(find -L src applications -name '*.[CHL]' -type l)
 
     for filePathAndName in $fileNameList
     do

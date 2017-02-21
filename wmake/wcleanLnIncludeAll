@@ -58,7 +58,7 @@ do
     if [ -d "$dir" ]
     then
         echo "removing lnInclude directories: $dir"
-        find $dir -depth -type d -name lnInclude -exec rm -rf {} \;
+        find $dir -depth -name lnInclude -type d -delete
     else
         echo "no directory: $dir" 1>&2
     fi

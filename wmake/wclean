@@ -153,10 +153,10 @@ then
 
     # Get sub-directories avoiding particular directories
     for dir in $(find . -mindepth 1 -maxdepth 1 \
-                        -type d \( -name .git -prune -o -print \) )
+                        -name .git -prune -o -type d -print)
     do
         echo "    searching: $dir"
-        find $dir -depth -type d -empty -exec rmdir {} \; -print
+        find $dir -depth -empty -type d -delete -print
     done
 
     # Second pass: clean up object directories with WM_PROJECT_DIR that don't

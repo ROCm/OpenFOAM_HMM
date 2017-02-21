@@ -56,7 +56,7 @@ do
 done >> Make/files
 [ -s Make/files ] && echo >> Make/files
 
-for file in $(find . -type f -name "*.[cCylLfF]" -print)
+for file in $(find . -name "*.[cCylLfF]" -type f -print)
 do
     pathName=$(echo ${file%/*} | $dirToString -strip)
 
