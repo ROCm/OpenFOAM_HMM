@@ -49,6 +49,18 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
+class Istream;
+class Ostream;
+
+// Forward declaration of friend functions and operators
+class eddy;
+bool operator==(const eddy& a, const eddy& b);
+bool operator!=(const eddy& a, const eddy& b);
+Istream& operator>>(Istream& is, eddy& e);
+Ostream& operator<<(Ostream& os, const eddy& e);
+
+
 /*---------------------------------------------------------------------------*\
                             Class eddy Declaration
 \*---------------------------------------------------------------------------*/

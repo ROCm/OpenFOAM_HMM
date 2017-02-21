@@ -100,7 +100,7 @@ Foam::Ostream& Foam::FixedList<T, Size>::writeList
         else if
         (
             Size <= 1 || !shortListLen
-         || (Size <= shortListLen && contiguous<T>())
+         || (Size <= unsigned(shortListLen) && contiguous<T>())
         )
         {
             // Write start delimiter
