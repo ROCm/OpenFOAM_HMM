@@ -231,16 +231,18 @@ then
         exit $?
     fi
 
-    # For all sub-directories containing a 'Make' directory
-    for dir in $(find . -type d -name Make)
+    # For all directories containing a 'Make' directory, or an 'Allwclean' file
+    for dir in $(find . -name Allwclean -o -name Make)
     do
-        dir=${dir%/*} # Parent directory containing the Make directory
-
+        echo ${dir%/*}
+    done | sort | uniq | while read dir
+    do
         # Use Allwclean if it exists, otherwise wclean
         if [ -e "$dir/Allwclean" ]
         then
             $dir/Allwclean
-        else
+        elif [ -d "$dir/Make" ]
+        then
             $0 $dir
         fi
     done
