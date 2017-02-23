@@ -1,44 +1,26 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # Run from this directory
 
-# get SCOTCH_VERSION, SCOTCH_ARCH_PATH
-if settings=`$WM_PROJECT_DIR/bin/foamEtcFile config.sh/scotch`
-then
-    . $settings
-    echo "    using SCOTCH_ARCH_PATH=$SCOTCH_ARCH_PATH"
-else
-    echo
-    echo "    Error: no config.sh/scotch settings"
-    echo
-fi
-
-
-# Define how to clean an mpi-versioned library
+# Clean an mpi-versioned library
 wcleanMpiLib()
 {
-    for libName
-    do
+    case "$WM_MPLIB" in (*MPI*)
     (
         WM_OPTIONS="$WM_OPTIONS$WM_MPLIB"
-        wclean $libName
+        for libName
+        do
+            wclean $libName
+        done
     )
-    done
+    ;;
+    esac
 }
 
-if [ -n "$SCOTCH_ARCH_PATH" ]
-then
-    wclean scotchDecomp
 
-    if [ -d "$FOAM_LIBBIN/$FOAM_MPI" ]
-    then
-        wcleanMpiLib ptscotchDecomp
-    fi
-else
-    echo "    skipping scotchDecomp (ptscotchDecomp)"
-fi
-
+wclean scotchDecomp
 wclean metisDecomp
 wclean decompositionMethods
 wclean decompose
+wcleanMpiLib ptscotchDecomp
 
 #------------------------------------------------------------------------------

@@ -128,8 +128,8 @@ then
         }
     fi
 
-    # Print command
-    echo "$Script $targetType${targetType:+ }${dir:-.}"
+    # Print command, trim off leading './' for readability
+    echo "$Script $targetType${targetType:+ }${dir#./}"
 fi
 
 
@@ -152,19 +152,18 @@ then
     echo "Removing empty directories..."
 
     # Get sub-directories avoiding particular directories
-    for dir in $(find . -mindepth 1 -maxdepth 1 \
-                        -name .git -prune -o -type d -print)
+    for d in $(find . -mindepth 1 -maxdepth 1 \
+                      -name .git -prune -o -type d -print)
     do
-        echo "    searching: $dir"
-        find $dir -depth -empty -type d -delete -print
+        echo "    searching: ${d#./}"
+        find $d -depth -empty -type d -delete -print
     done
 
     # Second pass: clean up object directories with WM_PROJECT_DIR that don't
     # have respective source code folders, along with the respective binaries
-
     if [ "$(expandPath $PWD)" = "$WM_PROJECT_DIR" ]
     then
-        objectsDir=$(findObjectDir $PWD) || exit 1 # Fatal
+        objectsDir=$(findObjectDir $PWD 2>/dev/null) || exit 1 # Fatal
 
         if [ -d "$objectsDir" ]
         then

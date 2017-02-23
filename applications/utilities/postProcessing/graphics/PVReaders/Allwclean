@@ -5,7 +5,4 @@ wclean libso foamPv
 PVblockMeshReader/Allwclean
 PVFoamReader/Allwclean
 
-# remove dummy directory (see Allwmake)
-rmdir Make 2>/dev/null
-
 #------------------------------------------------------------------------------
