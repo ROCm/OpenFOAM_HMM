@@ -15,8 +15,7 @@ runApplication splitMeshRegions -cellZones -overwrite
 
 for i in bottomAir topAir heater leftSolid rightSolid
 do
-    runApplication changeDictionary -region $i
-    mv log.changeDictionary log.changeDictionary.$i 2>&1
+    runApplication -s $i changeDictionary -region $i -subDict dictionaryReplacement
 done
 
 runApplication decomposePar -allRegions
