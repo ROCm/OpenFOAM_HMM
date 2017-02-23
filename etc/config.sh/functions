@@ -43,7 +43,7 @@ then
         do
             [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "Sourcing: $1" 1>&2
             . $1
-          shift
+            shift
         done
     }
 
