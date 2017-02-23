@@ -144,20 +144,23 @@ endif
 # ~~~~~~~~~~~~~~~~~~~~~~
 setenv WM_PROJECT_USER_DIR $HOME/$WM_PROJECT/$LOGNAME-$WM_PROJECT_VERSION
 
-
-# Source files, possibly with some verbosity
-alias _foamSource 'if ($?FOAM_VERBOSE && $?prompt) echo "Sourcing: \!*"; if (\!* != "") source \!*'
+# Source etc files, possibly with some verbosity
+if ($?FOAM_VERBOSE && $?prompt) then
+    alias _foamSourceEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh-verbose \!*`'
+else
+    alias _foamSourceEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh \!*`'
+endif
 
 # Add in preset user or site preferences:
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile prefs.csh`
+_foamSourceEtc prefs.csh
 
-# Evaluate command-line parameters and record settings for later
-# these can be used to set/unset values, or specify alternative pref files
+# Evaluate command-line parameters and record settings for later.
+# These can be used to set/unset values, or specify alternative pref files.
 setenv FOAM_SETTINGS "${*}"
 while ( $#argv > 0 )
     switch ($argv[1])
     case -*:
-        # stray option (not meant for us here) -> get out
+        # Stray option (not meant for us here) -> get out
         break
         breaksw
     case *=:
@@ -171,11 +174,12 @@ while ( $#argv > 0 )
         eval "setenv $argv[1]:s/=/ /"
         breaksw
     default:
-        # filename: source it
+        # Filename: source it
         if ( -f "$1" ) then
-            _foamSource "$1"
+            if ($?FOAM_VERBOSE && $?prompt) echo "Using: $1"
+            source "$1"
         else
-            _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile -silent "$1"`
+            _foamSourceEtc -silent "$1"
         endif
         breaksw
     endsw
@@ -208,19 +212,19 @@ if ( $status == 0 ) setenv MANPATH $cleaned
 
 # Source project setup files
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSource $WM_PROJECT_DIR/etc/config.csh/settings
-_foamSource $WM_PROJECT_DIR/etc/config.csh/aliases
+_foamSourceEtc config.csh/settings
+_foamSourceEtc config.csh/aliases
 
 # Source user setup files for optional packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/mpi`
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/paraview`
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/vtk`
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/ensight`
+_foamSourceEtc config.csh/mpi
+_foamSourceEtc config.csh/paraview
+_foamSourceEtc config.csh/vtk
+_foamSourceEtc config.csh/ensight
 
-##_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/ADIOS`
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/CGAL`
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/FFTW`
+#_foamSourceEtc config.csh/ADIOS
+_foamSourceEtc config.csh/CGAL
+_foamSourceEtc config.csh/FFTW
 
 
 # Clean environment paths again. Only remove duplicates
@@ -247,6 +251,6 @@ endif
 # Cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
 unset cleaned foamClean foamOldDirs
-unalias _foamSource
+unalias _foamSourceEtc
 
 #------------------------------------------------------------------------------

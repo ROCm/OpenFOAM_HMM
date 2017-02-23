@@ -211,7 +211,7 @@ unset GMP_ARCH_PATH MPFR_ARCH_PATH
 
 # Load configured compiler versions, regardless of the compiler type
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSource $($WM_PROJECT_DIR/bin/foamEtcFile config.sh/compiler)
+_foamSourceEtc config.sh/compiler
 
 case "$WM_COMPILER_TYPE" in
 system)
