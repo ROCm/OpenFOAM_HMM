@@ -58,8 +58,12 @@ options:
   -m, -mode MODE    any combination of u(user), g(group), o(other)
   -p, -prefix DIR   specify an alternative installation prefix
   -q, -quiet        suppress all normal output
-  -s, -silent       suppress all stderr output
-  -v, -version VER  specify an alternative OpenFOAM version (eg, 3.0, 1612, ...)
+  -s, -silent       suppress stderr output, except for things that are emitted
+                    by -csh-verbose, -sh-verbose.
+  -v, -version VER  specify alternative OpenFOAM version (eg, 3.0, 1612, ...)
+  -csh | -sh        produce output suitable for a csh or sh 'eval'
+  -csh-verbose,
+  -sh-verbose       with additional verbosity
   -help             print the usage
 
   Locate user/group/shipped file with semantics similar to the
@@ -124,7 +128,7 @@ esac
 
 # Default mode is always 'ugo'
 mode=ugo
-unset optAll optList
+unset optAll optList optShell
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -135,9 +139,15 @@ do
         ;;
     -a | -all)
         optAll=true
+        unset optShell
         ;;
     -l | -list)
         optList=true
+        unset optShell
+        ;;
+    -csh | -sh | -csh-verbose | -sh-verbose)
+        optShell="${1#-}"
+        unset optAll
         ;;
     -mode=[ugo]*)
         mode="${1#-mode=}"
@@ -209,7 +219,6 @@ else
     projectDir="$prefixDir/${WM_PROJECT:-OpenFOAM}-$version"    # standard
 fi
 
-
 # debugging:
 # echo "Installed locations:"
 # for i in projectDir prefixDir projectDirName version versionNum
@@ -256,7 +265,7 @@ then
     [ "$nArgs" -le 1 ] || usage
 
     # a silly combination, but -quiet does have precedence
-    [ "$optQuiet" = true ] && exit 0
+    [ -n "$optQuiet" ] && exit 0
 
     for dir
     do
@@ -280,10 +289,28 @@ else
         if [ -f "$dir/$fileName" ]
         then
             exitCode=0
-            [ "$optQuiet" = true ] && break
+            [ -n "$optQuiet" ] && break
 
-            echo "$dir/$fileName"
-            [ "$optAll" = true ] || break
+            case "$optShell" in
+            (*verbose)
+                echo "Using: $dir/$fileName" 1>&2
+                ;;
+            esac
+
+            case "$optShell" in
+            csh*)
+                echo "source $dir/$fileName"
+                break
+                ;;
+            sh*)
+                echo ". $dir/$fileName"
+                break
+                ;;
+            *)
+                echo "$dir/$fileName"
+                [ -n "$optAll" ] || break
+                ;;
+            esac
         fi
     done
 
