@@ -1,16 +1,16 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # Run from this directory
 
-unset COMPILE_FLAGS LINK_FLAGS
+unset COMP_FLAGS LINK_FLAGS
 
 if [ -f "$CGAL_ARCH_PATH/include/CGAL/version.h" ] || \
    [ "${CGAL_ARCH_PATH##*-}" = system -a -f /usr/include/CGAL/version.h ]
 then
     wmake PolyhedronReader
-    export COMPILE_FLAGS='-IPolyhedronReader'
+    export COMP_FLAGS='-IPolyhedronReader'
     export LINK_FLAGS='${CGAL_LIBS} -lPolyhedronReader'
 else
-    export COMPILE_FLAGS="-DNO_CGAL"
+    export COMP_FLAGS="-DNO_CGAL"
 fi
 
 wmake
