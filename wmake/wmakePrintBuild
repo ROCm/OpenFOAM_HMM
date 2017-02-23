@@ -161,7 +161,7 @@ then
     # Retrieve OPENFOAM_PLUS=<digits> from $WM_DIR/rules/General/general
     version=$(
         sed -ne 's@^.*OPENFOAM_PLUS=\([0-9][0-9]*\).*@\1@p' \
-        $WM_DIR/rules/General/general 2>/dev/null | tail -1
+        $WM_DIR/rules/General/general 2>/dev/null
     )
 
     if [ -n "$version" ]
