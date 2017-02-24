@@ -206,6 +206,9 @@ Foam::vtkPVblockMesh::vtkPVblockMesh
         fullCasePath = cwd();
     }
 
+    // The name of the executable, unless already present in the environment
+    setEnv("FOAM_EXECUTABLE", "paraview", false);
+
     // Set the case as an environment variable - some BCs might use this
     if (fullCasePath.name().find("processor", 0) == 0)
     {
