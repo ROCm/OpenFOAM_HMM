@@ -32,33 +32,38 @@
 #     Delete all the lnInclude directories in the tree.
 #
 #------------------------------------------------------------------------------
-
-if [ "$#" -eq 0 ]
-then
-    # Default is to search the CWD
-    set -- .
-elif [ "$1" = "-h" -o "$1" = "-help" ]
-then
+usage() {
     exec 1>&2
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
+
 Usage: ${0##*/} [dir1 [..dirN]]
 
-* Remove all lnInclude directories found in the tree
+options:
+  -h, -help         Print the usage
+
+Remove all lnInclude directories found in the tree
 
 USAGE
     exit 1
+}
+
+# Simple help
+if [ "$1" = "-h" -o "$1" = "-help" ]
+then
+    usage
 fi
 
 #------------------------------------------------------------------------------
-# Search for all lnInclude directories and delete them
-#------------------------------------------------------------------------------
+# Default is the current directory
+[ "$#" -gt 0 ] || set -- .
 
 for dir
 do
     if [ -d "$dir" ]
     then
         echo "removing lnInclude directories: $dir"
-        find $dir -depth -name lnInclude -type d -delete
+        find $dir -depth -name lnInclude -type d -exec rm -rf {} \;
     else
         echo "no directory: $dir" 1>&2
     fi
