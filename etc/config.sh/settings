@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -31,21 +31,21 @@
 #------------------------------------------------------------------------------
 
 # Set environment variables according to system type
-export WM_ARCH=`uname -s`
+export WM_ARCH=$(uname -s)
 
 case "$WM_ARCH" in
 Linux)
     WM_ARCH=linux
 
     # Compiler specifics
-    case `uname -m` in
-        i686)
-            export WM_ARCH_OPTION=32
-            export WM_CC='gcc'
-            export WM_CXX='g++'
-            export WM_CFLAGS='-fPIC'
-            export WM_CXXFLAGS='-fPIC -std=c++0x'
-            export WM_LDFLAGS=
+    case $(uname -m) in
+    i686)
+        export WM_ARCH_OPTION=32
+        export WM_CC='gcc'
+        export WM_CXX='g++'
+        export WM_CFLAGS='-fPIC'
+        export WM_CXXFLAGS='-fPIC -std=c++0x'
+        export WM_LDFLAGS=
         ;;
 
     x86_64)
@@ -68,8 +68,7 @@ Linux)
             export WM_LDFLAGS='-m64'
             ;;
         *)
-            echo "Unknown WM_ARCH_OPTION '$WM_ARCH_OPTION', should be 32 or 64"\
-                 1>&2
+            echo "Unknown WM_ARCH_OPTION '$WM_ARCH_OPTION', should be 32|64" 1>&2
             ;;
         esac
         ;;
@@ -111,7 +110,7 @@ Linux)
         ;;
 
     *)
-        echo Unknown processor type `uname -m` for Linux 1>&2
+        echo Unknown processor type $(uname -m) for Linux 1>&2
         ;;
     esac
     ;;
@@ -127,11 +126,11 @@ SunOS)
     export WM_LDFLAGS='-mabi=64 -G0'
     ;;
 
-*)    # An unsupported operating system
+*)  # An unsupported operating system
     /bin/cat <<USAGE 1>&2
 
-    Your "$WM_ARCH" operating system is not supported by this release
-    of OpenFOAM. For further assistance, please contact www.OpenFOAM.com
+Your "$WM_ARCH" operating system is unsupported by this OpenFOAM release.
+For further assistance, please contact www.OpenFOAM.com
 
 USAGE
     ;;
@@ -212,7 +211,7 @@ unset GMP_ARCH_PATH MPFR_ARCH_PATH
 
 # Load configured compiler versions, regardless of the compiler type
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/compiler`
+_foamSourceEtc config.sh/compiler
 
 case "$WM_COMPILER_TYPE" in
 system)
@@ -227,7 +226,7 @@ OpenFOAM | ThirdParty)
         mpcDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/${mpc_version:-mpc-system}
 
         # Check that the compiler directory can be found
-        [ -d "$gccDir" ] || cat << GCC_NOT_FOUND 1>&2
+        [ -d "$gccDir" ] || /bin/cat << GCC_NOT_FOUND 1>&2
 ===============================================================================
 Warning in $WM_PROJECT_DIR/etc/config.sh/settings:
 Cannot find '$WM_COMPILER' compiler installation
@@ -272,7 +271,7 @@ GCC_NOT_FOUND
         clangDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$clang_version
 
         # Check that the compiler directory can be found
-        [ -d "$clangDir" ] || cat << CLANG_NOT_FOUND 1>&2
+        [ -d "$clangDir" ] || /bin/cat << CLANG_NOT_FOUND 1>&2
 ===============================================================================
 Warning in $WM_PROJECT_DIR/etc/config.sh/settings:
 Cannot find '$WM_COMPILER' compiler installation

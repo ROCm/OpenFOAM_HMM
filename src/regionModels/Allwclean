@@ -1,11 +1,10 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # Run from this directory
-makeType=${1:-libso}
 
-wclean $makeType regionModel
-wclean $makeType pyrolysisModels
-wclean $makeType surfaceFilmModels
-wclean $makeType thermalBaffleModels
-wclean $makeType regionCoupling
+wclean libso regionModel
+wclean libso pyrolysisModels
+wclean libso surfaceFilmModels
+wclean libso thermalBaffleModels
+wclean libso regionCoupling
 
 #------------------------------------------------------------------------------

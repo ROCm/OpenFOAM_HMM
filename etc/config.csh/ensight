@@ -38,9 +38,7 @@ endif
 if ( -r $CEI_HOME ) then
 
     # Special treatment for 32bit OpenFOAM and 64bit Ensight
-    if ($WM_ARCH == linux && `uname -m` == x86_64) then
-        setenv CEI_ARCH linux_2.6_32
-    endif
+    if ($WM_ARCH-`uname -m` == linux-x86_64) setenv CEI_ARCH linux_2.6_32
 
     # Add to path
     setenv PATH ${CEI_HOME}/bin:${PATH}

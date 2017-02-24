@@ -35,6 +35,7 @@ then
     set -- .
 elif [ "$1" = "-h" -o "$1" = "-help" ]
 then
+    exec 1>&2
     echo "Usage: ${0##*/} [dir1] .. [dirN]"
     echo "    remove all *~ files"
     exit 1
@@ -45,8 +46,8 @@ for i
 do
     if [ -d "$i" ]
     then
-        echo "removing all *~ files: $i"
-        find $i \( -name '*~' -o -name '.*~' \) -print | xargs -t rm 2>/dev/null
+        echo "removing all *~ files: $i" 1>&2
+        find $i \( -name '*~' -o -name '.*~' \) -type f -delete -print
     else
         echo "no directory: $i" 1>&2
     fi

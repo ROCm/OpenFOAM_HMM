@@ -211,7 +211,7 @@ fi
 echo "Modifying the controlDicts to run only one time step" 1>&2
 cd ${TEST_RUN_DIR} || exit 1
 
-for CD in $(find . -type f -name "controlDict*")
+for CD in $(find . -name "controlDict*" -type f)
 do
     mv ${CD} ${CD}.orig
     sed \
@@ -225,7 +225,7 @@ done
 if [ "$DEFAULT_SCHEMES" = true ]
 then
     echo "Modifying the fvSchemes to contain only default schemes" 1>&2
-    for FV_SC in $(find . -type f -name fvSchemes)
+    for FV_SC in $(find . -name fvSchemes -type f)
     do
         for S in $FV_SCHEMES
         do
@@ -253,7 +253,7 @@ do
     do
         rm $SCHEMES_TEMP $SOLVERS_TEMP > /dev/null 2>&1
         echo "  ${ST}" >> $SCHEMES_FILE
-        for LOG in $(find ${APP} -type f -name "log.${APP}")
+        for LOG in $(find ${APP} -name "log.${APP}" -type f)
         do
             for S in $(grep ${ST} ${LOG} | cut -d" " -f4)
             do

@@ -26,67 +26,49 @@
 #     wcleanLnIncludeAll
 #
 # Usage
-#     wcleanLnIncludeAll [dir1] .. [dirN]
+#     wcleanLnIncludeAll [dir1 [..dirN]]
 #
 # Description
 #     Delete all the lnInclude directories in the tree.
 #
-##------------------------------------------------------------------------------
-Script=${0##*/}
-
-# Source the wmake functions
-. ${0%/*}/scripts/wmakeFunctions
-
 #------------------------------------------------------------------------------
-# Parse arguments and options
-#------------------------------------------------------------------------------
+usage() {
+    exec 1>&2
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
 
-# Default to the CWD
-if [ "$#" -eq 0 ]
-then
-    # Add the CWD to the arguments
-    set -- .
-elif [ "$1" = "-h" -o "$1" = "-help" ]
-then
-    echo "Usage: $Script [dir1] .. [dirN]"
-    echo
-    echo "    Delete all the lnInclude directories in the tree"
-    echo
+Usage: ${0##*/} [dir1 [..dirN]]
+
+options:
+  -h, -help         Print the usage
+
+Remove all lnInclude directories found in the tree
+
+USAGE
     exit 1
+}
+
+# Simple help
+if [ "$1" = "-h" -o "$1" = "-help" ]
+then
+    usage
 fi
 
-
 #------------------------------------------------------------------------------
-# Search up the directory tree for the Make sub-directory,
-# check the existance of the 'files' file and clean there if present
-#------------------------------------------------------------------------------
-
-# Need to add an option or special logic to control cdSource
-# MakeDir=Make
-# cdSource
-
-
-#------------------------------------------------------------------------------
-# Search for all lnInclude directories and delete them
-#------------------------------------------------------------------------------
+# Default is the current directory
+[ "$#" -gt 0 ] || set -- .
 
 for dir
 do
     if [ -d "$dir" ]
     then
         echo "removing lnInclude directories: $dir"
-        find $dir -depth -type d -name lnInclude -exec rm -rf {} \;
+        find $dir -depth -name lnInclude -type d -exec rm -rf {} \;
     else
         echo "no directory: $dir" 1>&2
     fi
 done
 
-
-#------------------------------------------------------------------------------
-# Cleanup local variables and functions
-#------------------------------------------------------------------------------
-
-unset Script MakeDir
-
+exit 0 # clean exit
 
 #------------------------------------------------------------------------------

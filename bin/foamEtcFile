@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -34,8 +34,7 @@
 #
 #     For example, within the user ~/.OpenFOAM/<VER>/prefs.sh:
 #     \code
-#        foamPrefs=`$WM_PROJECT_DIR/bin/foamEtcFile -m go prefs.sh` \
-#            && _foamSource $foamPrefs
+#        foamFile=$(foamEtcFile -mode go prefs.sh) && . $foamFile
 #     \endcode
 #
 # Note
@@ -43,6 +42,7 @@
 #     or $FOAM_INST_DIR/openfoam<VERSION>/bin/ (for the debian version)
 #
 #-------------------------------------------------------------------------------
+unset optQuiet optSilent
 usage() {
     [ "${optQuiet:-$optSilent}" = true ] && exit 1
 
@@ -53,21 +53,23 @@ usage() {
 Usage: ${0##*/} [OPTION] fileName
        ${0##*/} [OPTION] -list
 options:
-  -all              return all files (otherwise stop after the first match)
-  -list             list the directories to be searched
-  -mode <mode>      any combination of u(user), g(group), o(other)
-  -prefix <dir>     specify an alternative installation prefix
-  -quiet            suppress all normal output
-  -silent           suppress all stderr output
-  -version <ver>    specify an alternative OpenFOAM version
-                    in the form Maj.Min.Rev (eg, 1.7.0)
+  -a, -all          return all files (otherwise stop after the first match)
+  -l, -list         list the directories to be searched
+  -m, -mode MODE    any combination of u(user), g(group), o(other)
+  -p, -prefix DIR   specify an alternative installation prefix
+  -q, -quiet        suppress all normal output
+  -s, -silent       suppress stderr output, except for things that are emitted
+                    by -csh-verbose, -sh-verbose.
+  -v, -version VER  specify alternative OpenFOAM version (eg, 3.0, 1612, ...)
+  -csh | -sh        produce output suitable for a csh or sh 'eval'
+  -csh-verbose,
+  -sh-verbose       with additional verbosity
   -help             print the usage
 
   Locate user/group/shipped file with semantics similar to the
   ~OpenFOAM/fileName expansion.
 
-  The options can also be specified as a single character
-  (eg, '-q' instead of '-quiet'), but must not be grouped.
+  Many options can be specified as a single character, but must not be grouped.
 
   Exit status
       0  when the file is found. Print resolved path to stdout.
@@ -77,60 +79,56 @@ options:
 USAGE
     exit 1
 }
-
 #-------------------------------------------------------------------------------
 
-# the bin dir:
+# The bin dir:
 binDir="${0%/*}"
 
-# the project dir:
+# The project dir:
 projectDir="${binDir%/bin}"
 
-# the prefix dir (same as $FOAM_INST_DIR):
+# The prefix dir (same as $FOAM_INST_DIR):
 prefixDir="${projectDir%/*}"
 
-# the name used for the project directory
+# The name used for the project directory
 projectDirName="${projectDir##*/}"
 
-# version number used for debian packaging
-unset versionNum
+# versionNum used for debian packaging
+unset version versionNum
 
 #
-# handle standard and debian naming convention
+# Handle standard and debian naming conventions
+# - set version (always) and versionNum (debian only)
 #
 case "$projectDirName" in
-OpenFOAM-*)         # standard naming convention OpenFOAM-<VERSION>
+OpenFOAM-*)         # standard naming: OpenFOAM-<VERSION>
     version="${projectDirName##OpenFOAM-}"
     ;;
 
-openfoam[0-9]* | openfoam-dev)     # debian naming convention 'openfoam<VERSION>'
+openfoam[0-9]* | openfoam-dev)     # debian naming: openfoam<VERSION>
     versionNum="${projectDirName##openfoam}"
-    case "$versionNum" in
-    ??)         # convert 2 digit version number to decimal delineated
-        version=$(echo "$versionNum" | sed -e 's@\(.\)\(.\)@\1.\2@')
+    case "${#versionNum}" in
+    (2|3|4) # Convert digits version number to decimal delineated
+        version=$(echo "$versionNum" | sed -e 's@\([0-9]\)@\1.@g')
+        version="${version%.}"
         ;;
-    ???)        # convert 3 digit version number to decimal delineated
-        version=$(echo "$versionNum" | sed -e 's@\(.\)\(.\)\(.\)@\1.\2.\3@')
-        ;;
-    ????)       # convert 4 digit version number to decimal delineated
-        version=$(echo "$versionNum" | sed -e 's@\(.\)\(.\)\(.\)\(.\)@\1.\2.\3.\4@')
-        ;;
-    *)          # failback - use current environment setting
+
+    (*) # Fallback - use current environment setting
         version="$WM_PROJECT_VERSION"
         ;;
     esac
     ;;
 
 *)
-    echo "Error : unknown/unsupported naming convention"
+    echo "${0##*/} Error : unknown/unsupported naming convention" 1>&2
     exit 1
     ;;
 esac
 
 
-# default mode is 'ugo'
+# Default mode is always 'ugo'
 mode=ugo
-unset optAll optList optQuiet optSilent
+unset optAll optList optShell
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -141,27 +139,46 @@ do
         ;;
     -a | -all)
         optAll=true
+        unset optShell
         ;;
     -l | -list)
         optList=true
+        unset optShell
+        ;;
+    -csh | -sh | -csh-verbose | -sh-verbose)
+        optShell="${1#-}"
+        unset optAll
+        ;;
+    -mode=[ugo]*)
+        mode="${1#-mode=}"
+        ;;
+    -prefix=/*)
+        prefixDir="${1#-prefix=}"
+        prefixDir="${prefixDir%/}"
+        ;;
+    -version=*)
+        version="${1#-version=}"
+        # convert x.y.z -> xyz version (if installation looked like debian)
+        if [ -n "$versionNum" ]
+        then
+            versionNum=$(echo "$version" | sed -e 's@\.@@g')
+        fi
         ;;
     -m | -mode)
-        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         mode="$2"
-
-        # sanity check:
+        # Sanity check. Handles missing argument too.
         case "$mode" in
-        *u* | *g* | *o* )
-           ;;
+        [ugo]*)
+            ;;
         *)
-           usage "'$1' option with invalid mode '$mode'"
-           ;;
+            usage "invalid mode '$mode'"
+            ;;
         esac
         shift
         ;;
     -p | -prefix)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-        prefixDir="$2"
+        prefixDir="${2%/}"
         shift
         ;;
     -q | -quiet)
@@ -185,7 +202,7 @@ do
         break
         ;;
     -*)
-        usage "unknown option: '$*'"
+        usage "unknown option: '$1'"
         ;;
     *)
         break
@@ -194,6 +211,13 @@ do
     shift
 done
 
+# Update projectDir accordingly
+if [ -n "$versionNum" ]
+then
+    projectDir="$prefixDir/openfoam$versionNum"                 # debian
+else
+    projectDir="$prefixDir/${WM_PROJECT:-OpenFOAM}-$version"    # standard
+fi
 
 # debugging:
 # echo "Installed locations:"
@@ -210,30 +234,20 @@ fileName="${1#~OpenFOAM/}"
 
 # Define the various places to be searched:
 unset dirList
-case "$mode" in
-*u*)  # user
-    userDir="$HOME/.${WM_PROJECT:-OpenFOAM}"
-    dirList="$dirList $userDir/$version $userDir"
+case "$mode" in (*u*)   # user
+    dir="$HOME/.${WM_PROJECT:-OpenFOAM}"
+    dirList="$dirList $dir/$version $dir"
     ;;
 esac
 
-case "$mode" in
-*g*)  # group (site)
-    siteDir="${WM_PROJECT_SITE:-$prefixDir/site}"
-    dirList="$dirList $siteDir/$version $siteDir"
+case "$mode" in (*g*)   # group (site)
+    dir="${WM_PROJECT_SITE:-$prefixDir/site}"
+    dirList="$dirList $dir/$version $dir"
     ;;
 esac
 
-case "$mode" in
-*o*)  # other (shipped)
-    if [ -n "$versionNum" ]
-    then
-        # debian packaging
-        dirList="$dirList $prefixDir/openfoam$versionNum/etc"
-    else
-        # standard packaging
-        dirList="$dirList $prefixDir/${WM_PROJECT:-OpenFOAM}-$version/etc"
-    fi
+case "$mode" in (*o*)   # other (shipped)
+    dirList="$dirList $projectDir/etc"
     ;;
 esac
 set -- $dirList
@@ -251,7 +265,7 @@ then
     [ "$nArgs" -le 1 ] || usage
 
     # a silly combination, but -quiet does have precedence
-    [ "$optQuiet" = true ] && exit 0
+    [ -n "$optQuiet" ] && exit 0
 
     for dir
     do
@@ -275,13 +289,28 @@ else
         if [ -f "$dir/$fileName" ]
         then
             exitCode=0
-            if [ "$optQuiet" = true ]
-            then
+            [ -n "$optQuiet" ] && break
+
+            case "$optShell" in
+            (*verbose)
+                echo "Using: $dir/$fileName" 1>&2
+                ;;
+            esac
+
+            case "$optShell" in
+            csh*)
+                echo "source $dir/$fileName"
                 break
-            else
+                ;;
+            sh*)
+                echo ". $dir/$fileName"
+                break
+                ;;
+            *)
                 echo "$dir/$fileName"
-                [ "$optAll" = true ] || break
-            fi
+                [ -n "$optAll" ] || break
+                ;;
+            esac
         fi
     done
 

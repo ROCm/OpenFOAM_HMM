@@ -89,7 +89,7 @@ dirName="$1"
 # Simple check against $PWD
 [ "$PWD" = "$dirName" ] && exit 0
 
-# Check existance of <dir>
+# Check existence of <dir>
 [ -d "$dirName" ] || {
     [ "$quietOpt" = true ] || {
         echo "$Script error: Directory does not exist $dirName"
@@ -108,14 +108,7 @@ target=$(cd $dirName 2>/dev/null && /bin/pwd)
 [ "$quietOpt" = true ] || {
     echo "$Script error: Current directory is not $dirName"
 }
+
 exit 1
-
-
-#------------------------------------------------------------------------------
-# Cleanup local variables and functions
-#------------------------------------------------------------------------------
-
-unset Script usage
-
 
 #------------------------------------------------------------------------------

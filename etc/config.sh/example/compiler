@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -31,9 +31,10 @@
 #------------------------------------------------------------------------------
 
 # First load the standard versions, if necessary
-foamFile=$($WM_PROJECT_DIR/bin/foamEtcFile -mode o config.sh/compiler \
-               2>/dev/null)
-[ $? -eq 0 ] && _foamSource $foamFile
+if foamFile=$($WM_PROJECT_DIR/bin/foamEtcFile -mode o config.sh/compiler)
+then
+    . $foamFile
+fi
 unset foamFile
 
 
@@ -57,7 +58,7 @@ Gcc48u)
     export WM_CC='gcc-4.8'
     export WM_CXX='g++-4.8'
     ;;
-Icc)
+Icc*)
     # Example for ensuring that 3rd software uses the Icc compilers
     export WM_CC='icc'
     export WM_CXX='icpc'

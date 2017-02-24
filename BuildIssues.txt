@@ -22,7 +22,7 @@ VTK
 ---
 
 If using the runTimePostProcessing to create on-the-fly images, you
-can either simply just compile ParaView-5.0.1 and these libraries will
+can simply just compile ParaView-5.0.1 and these libraries will
 be used.
 
 If you elect to use a separate VTK compilation (for example for

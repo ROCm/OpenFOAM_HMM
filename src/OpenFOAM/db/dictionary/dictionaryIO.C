@@ -26,7 +26,6 @@ License
 #include "dictionary.H"
 #include "IFstream.H"
 #include "inputModeEntry.H"
-#include "regExp.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

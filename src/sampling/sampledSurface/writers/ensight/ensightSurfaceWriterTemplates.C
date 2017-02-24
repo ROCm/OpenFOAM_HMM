@@ -31,7 +31,6 @@ License
 #include "ensightSerialOutput.H"
 #include "ensightPTraits.H"
 #include "OStringStream.H"
-#include "regExp.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

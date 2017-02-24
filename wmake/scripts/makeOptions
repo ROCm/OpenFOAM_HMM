@@ -34,7 +34,7 @@
 
 if [ -r Make/options ]
 then
-    echo "Error: Make/options already exists - exiting"
+    echo "Error: Make/options already exists - exiting" 1>&2
     exit 1
 fi
 

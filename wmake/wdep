@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -74,18 +74,23 @@ do
     esac
 done
 
+if [ $# -eq 0 ]
+then
+    echo "$Script: no source file specified" 1>&2
+    exit 1
+fi
+
 # Check environment variables
 checkEnv
 
+sourceFile=$1
 
 #------------------------------------------------------------------------------
-# Check <file> is is the current directory,
+# Check <file> is in the current directory,
 # otherwise search tree for first occurrance
 #------------------------------------------------------------------------------
 
-sourceFile=$1
-
-if [ ! -e $1 ]
+if [ ! -e "$sourceFile" ]
 then
     sourceFile=$(find . -name $sourceFile -print -quit)
     if [ -z "$sourceFile" ]
@@ -95,24 +100,13 @@ then
     fi
 fi
 
-
 #------------------------------------------------------------------------------
 # Search up directories tree for the Make sub-directory containing dep files
 # and echo path for the dep file corresponding to the specified source file
 #------------------------------------------------------------------------------
 
-findObjectDir $sourceFile
+echo "$(findObjectDir $sourceFile)/${sourceFile##*/}.dep"
 
-fileName=${1##*/}
-
-echo $objectsDir/$fileName.dep
-
-
-#------------------------------------------------------------------------------
-# Cleanup local variables and functions
-#------------------------------------------------------------------------------
-
-unset Script usage
-
+exit 0 # clean exit
 
 #------------------------------------------------------------------------------

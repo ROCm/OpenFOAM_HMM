@@ -1,5 +1,5 @@
 #!/bin/sh
-#--------------------------------*- C++ -*------------------------------------#
+#-----------------------------------------------------------------------------#
 # =========                 |                                                 #
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           #
 #  \\    /   O peration     | Version:  plus                                  #
@@ -77,80 +77,80 @@ for xi in $(seq 1 1 $nx); do
 
            # side 1
            side=1
-           x1=`echo $x $tol | awk '{print $1 - $2}'`
-           x2=`echo $x $l $tol | awk '{print $1 + $2 + $3}'`
-           y1=`echo $y $tol | awk '{print $1 - $2}'`
-           y2=`echo $y $l $tol | awk '{print $1 + $2 + $3}'`
-           z1=`echo $z $l $tol | awk '{print $1 + $2 - $3}'`
-           z2=`echo $z $l $tol | awk '{print $1 + $2 + $3}'`
+           x1=$(echo $x $tol | awk '{print $1 - $2}')
+           x2=$(echo $x $l $tol | awk '{print $1 + $2 + $3}')
+           y1=$(echo $y $tol | awk '{print $1 - $2}')
+           y2=$(echo $y $l $tol | awk '{print $1 + $2 + $3}')
+           z1=$(echo $z $l $tol | awk '{print $1 + $2 - $3}')
+           z2=$(echo $z $l $tol | awk '{print $1 + $2 + $3}')
            addToFaceSet cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
 
            #  side 2
            side=2
-           x1=`echo $x $l $tol | awk '{print $1 + $2 - $3}'`
-           x2=`echo $x $l $tol | awk '{print $1 + $2 + $3}'`
-           y1=`echo $y $tol | awk '{print $1 - $2}'`
-           y2=`echo $y $l $tol | awk '{print $1 + $2 + $3}'`
-           z1=`echo $z $tol  | awk '{print $1 - $2}'`
-           z2=`echo $z $l $tol | awk '{print $1 + $2 + $3}'`
+           x1=$(echo $x $l $tol | awk '{print $1 + $2 - $3}')
+           x2=$(echo $x $l $tol | awk '{print $1 + $2 + $3}')
+           y1=$(echo $y $tol | awk '{print $1 - $2}')
+           y2=$(echo $y $l $tol | awk '{print $1 + $2 + $3}')
+           z1=$(echo $z $tol  | awk '{print $1 - $2}')
+           z2=$(echo $z $l $tol | awk '{print $1 + $2 + $3}')
            addToFaceSet cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
 
            # side 3
            side=3
-           x1=`echo $x $tol | awk '{print $1 - $2}'`
-           x2=`echo $x $l $tol | awk '{print $1 + $2 + $3}'`
-           y1=`echo $y $tol | awk '{print $1 - $2}'`
-           y2=`echo $y $l $tol | awk '{print $1 + $2 + $3}'`
-           z1=`echo $z $tol | awk '{print $1 - $2}'`
-           z2=`echo $z $tol | awk '{print $1 + $2}'`
+           x1=$(echo $x $tol | awk '{print $1 - $2}')
+           x2=$(echo $x $l $tol | awk '{print $1 + $2 + $3}')
+           y1=$(echo $y $tol | awk '{print $1 - $2}')
+           y2=$(echo $y $l $tol | awk '{print $1 + $2 + $3}')
+           z1=$(echo $z $tol | awk '{print $1 - $2}')
+           z2=$(echo $z $tol | awk '{print $1 + $2}')
            addToFaceSet cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
 
            # side 4
            side=4
-           x1=`echo $x $tol | awk '{print $1 - $2}'`
-           x2=`echo $x $tol | awk '{print $1 + $2}'`
-           y1=`echo $y $tol | awk '{print $1 - $2}'`
-           y2=`echo $y $l $tol | awk '{print $1 + $2 + $3}'`
-           z1=`echo $z $tol | awk '{print $1 - $2}'`
-           z2=`echo $z $l $tol | awk '{print $1 + $2 + $3}'`
+           x1=$(echo $x $tol | awk '{print $1 - $2}')
+           x2=$(echo $x $tol | awk '{print $1 + $2}')
+           y1=$(echo $y $tol | awk '{print $1 - $2}')
+           y2=$(echo $y $l $tol | awk '{print $1 + $2 + $3}')
+           z1=$(echo $z $tol | awk '{print $1 - $2}')
+           z2=$(echo $z $l $tol | awk '{print $1 + $2 + $3}')
            addToFaceSet cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
 
            # side 5
            side=5
-           x1=`echo $x $tol | awk '{print $1 - $2}'`
-           x2=`echo $x $l $tol | awk '{print $1 + $2 + $3}'`
-           y1=`echo $y $l $tol | awk '{print $1 + $2 - $3}'`
-           y2=`echo $y $l $tol | awk '{print $1 + $2 + $3}'`
-           z1=`echo $z $tol | awk '{print $1 - $2}'`
-           z2=`echo $z $l $tol | awk '{print $1 + $2 + $3}'`
+           x1=$(echo $x $tol | awk '{print $1 - $2}')
+           x2=$(echo $x $l $tol | awk '{print $1 + $2 + $3}')
+           y1=$(echo $y $l $tol | awk '{print $1 + $2 - $3}')
+           y2=$(echo $y $l $tol | awk '{print $1 + $2 + $3}')
+           z1=$(echo $z $tol | awk '{print $1 - $2}')
+           z2=$(echo $z $l $tol | awk '{print $1 + $2 + $3}')
            addToFaceSet cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
 
            # side 6
            side=6
-           x1=`echo $x $tol | awk '{print $1 - $2}'`
-           x2=`echo $x $l $tol | awk '{print $1 + $2 + $3}'`
-           y1=`echo $y $tol | awk '{print $1 - $2}'`
-           y2=`echo $y $tol | awk '{print $1 + $2}'`
-           z1=`echo $z $tol | awk '{print $1 - $2}'`
-           z2=`echo $z $l $tol | awk '{print $1 + $2 + $3}'`
+           x1=$(echo $x $tol | awk '{print $1 - $2}')
+           x2=$(echo $x $l $tol | awk '{print $1 + $2 + $3}')
+           y1=$(echo $y $tol | awk '{print $1 - $2}')
+           y2=$(echo $y $tol | awk '{print $1 + $2}')
+           z1=$(echo $z $tol | awk '{print $1 - $2}')
+           z2=$(echo $z $l $tol | awk '{print $1 + $2 + $3}')
            addToFaceSet cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
 
            n=$((n+1))
 
-           z=`echo $z $offset | awk '{print $1 + $2}'`
+           z=$(echo $z $offset | awk '{print $1 + $2}')
        done
 
-       y=`echo $y $offset | awk '{print $1 + $2}'`
+       y=$(echo $y $offset | awk '{print $1 + $2}')
    done
 
-   x=`echo $x $offset | awk '{print $1 + $2}'`
+   x=$(echo $x $offset | awk '{print $1 + $2}')
 done
 
 echo "cellSet cubeFacesCells new faceToCell cubeFaceSet owner" >> $tmpSetSet
 echo "faceZoneSet cubeFaces new setsToFaceZone cubeFaceSet cubeFacesCells" >> $tmpSetSet
 
 echo "processing floor"
-floorMax=`echo 1 $tol | awk '{print $1 + $2}'`
+floorMax=$(echo 1 $tol | awk '{print $1 + $2}')
 createSetsAndZone Floor -$tol $floorMax -$tol $floorMax -$tol $tol
 echo "cellSet floorCells new faceToCell FloorFaces owner" >> $tmpSetSet
 echo "faceZoneSet floorFaces new setsToFaceZone FloorFaces floorCells" >> $tmpSetSet

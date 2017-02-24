@@ -3,8 +3,8 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+#    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -23,17 +23,17 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     wcleanPlatform
+#     wcleanBuild
 #
 # Usage
-#    wcleanPlatform <platform> [.. <platformN>]
+#    wcleanBuild <platform> [.. <platformN>]
 #
 # Description
-#     Deletes the specified 'platforms/' object files directories from the
-#     the project top-level 'platforms/' directory $WM_PROJECT_DIR.
+#     Deletes the specified 'build/' object files directories from the
+#     the project top-level 'build/' directory $WM_PROJECT_DIR.
 #
 #     special platforms
-#     - 'all' removes all platforms, lnInclude directories and cleans tutorials.
+#     - 'all' removes all platforms.
 #     - 'compiler' corresponds to $WM_ARCH$WM_COMPILER.
 #     - 'current' corresponds to $WM_OPTIONS.
 #
@@ -58,11 +58,11 @@ options:
   -h, -help         Print the usage
 
 
-Deletes the specified platforms/ object file directories from the project
-top-level platforms/ directory $WM_PROJECT_DIR.
+Deletes the specified build/ object file directories from the project
+top-level build/ directory $WM_PROJECT_DIR.
 
 special platforms:
-  all           Remove all platforms, lnInclude and clean tutorials
+  all           Remove all platforms
   compiler      $WM_ARCH$WM_COMPILER  (ie, \$WM_ARCH\$WM_COMPILER)
   current       $WM_OPTIONS  (ie, \$WM_OPTIONS)
 
@@ -112,10 +112,8 @@ do
         name="$WM_OPTIONS"
         ;;
     -a | -all | all)
-        echo "all platforms/ ..."
-        rm -rf platforms
-        wcleanLnIncludeAll .
-        [ -x tutorials/Allclean ] && tutorials/Allclean
+        echo "all build/ ..."
+        rm -rf build
         echo
         break # Can stop now
         ;;
@@ -124,7 +122,7 @@ do
     if [ -n "$name" -d "build/$name" ]
     then
         echo "    '$name'"
-        rm -rf "platforms/$name"*
+        rm -rf "build/$name"*
         echo
     else
         echo "    '$name' - not built"
