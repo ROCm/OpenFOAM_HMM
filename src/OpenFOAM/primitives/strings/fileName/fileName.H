@@ -189,9 +189,6 @@ public:
             //
             word name() const;
 
-            //- Return file name (part beyond last /), subsitute for FOAM_CASE
-            string caseName() const;
-
             //- Return file name, optionally without extension
             word name(const bool noExt) const;
 

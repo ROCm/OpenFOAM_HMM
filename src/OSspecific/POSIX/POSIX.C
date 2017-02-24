@@ -96,13 +96,13 @@ pid_t Foam::pgid()
 }
 
 
-bool Foam::env(const word& envName)
+bool Foam::env(const std::string& envName)
 {
     return ::getenv(envName.c_str()) != nullptr;
 }
 
 
-Foam::string Foam::getEnv(const word& envName)
+Foam::string Foam::getEnv(const std::string& envName)
 {
     char* env = ::getenv(envName.c_str());
 
@@ -126,7 +126,7 @@ bool Foam::setEnv
     const bool overwrite
 )
 {
-    return setenv(envName.c_str(), value.c_str(), overwrite) == 0;
+    return ::setenv(envName.c_str(), value.c_str(), overwrite) == 0;
 }
 
 
@@ -215,7 +215,7 @@ Foam::fileName Foam::home()
 }
 
 
-Foam::fileName Foam::home(const string& userName)
+Foam::fileName Foam::home(const std::string& userName)
 {
     struct passwd* pw;
 
@@ -252,13 +252,13 @@ Foam::fileName Foam::cwd()
     List<char> path(pathLengthLimit);
 
     // Resize path if getcwd fails with an ERANGE error
-    while(pathLengthLimit == path.size())
+    while (pathLengthLimit == path.size())
     {
         if (::getcwd(path.data(), path.size()))
         {
             return path.data();
         }
-        else if(errno == ERANGE)
+        else if (errno == ERANGE)
         {
             // Increment path length upto the pathLengthMax limit
             if
@@ -888,7 +888,7 @@ bool Foam::rm(const fileName& file)
     }
 
     // Try returning plain file name; if not there, try with .gz
-    if (remove(file.c_str()) == 0)
+    if (::remove(file.c_str()) == 0)
     {
         return true;
     }
@@ -998,7 +998,7 @@ void Foam::fdClose(const int fd)
 
 bool Foam::ping
 (
-    const string& destName,
+    const std::string& destName,
     const label destPort,
     const label timeOut
 )
@@ -1074,9 +1074,9 @@ bool Foam::ping
 }
 
 
-bool Foam::ping(const string& hostname, const label timeOut)
+bool Foam::ping(const std::string& host, const label timeOut)
 {
-    return ping(hostname, 222, timeOut) || ping(hostname, 22, timeOut);
+    return ping(host, 222, timeOut) || ping(host, 22, timeOut);
 }
 
 

@@ -228,25 +228,6 @@ Foam::word Foam::fileName::name() const
 }
 
 
-Foam::string Foam::fileName::caseName() const
-{
-    string cName = *this;
-
-    const string caseStr(getEnv("FOAM_CASE"));
-
-    const size_type i = find(caseStr);
-
-    if (i == npos)
-    {
-        return cName;
-    }
-    else
-    {
-        return cName.replace(i, caseStr.size(), string("$FOAM_CASE"));
-    }
-}
-
-
 Foam::word Foam::fileName::name(const bool noExt) const
 {
     if (noExt)
