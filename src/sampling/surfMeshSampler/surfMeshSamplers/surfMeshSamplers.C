@@ -282,6 +282,7 @@ bool Foam::surfMeshSamplers::write()
 
 bool Foam::surfMeshSamplers::read(const dictionary& dict)
 {
+    fieldSelection_.clear();
     derivedNames_.clear();
 
     const bool createOnRead =
