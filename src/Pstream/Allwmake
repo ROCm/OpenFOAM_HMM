@@ -10,16 +10,17 @@ cd ${0%/*} || exit 1    # Run from this directory
 # use sentinel file to handle version changes
 wmakeMpiLib()
 {
+    local objectsDir
     for libName
     do
     (
         WM_OPTIONS="$WM_OPTIONS$WM_MPLIB"
-        libDir="$WM_PROJECT_DIR/platforms/$WM_OPTIONS/src/Pstream/$libName"
-        whichmpi="$libDir/using:$FOAM_MPI"
+        objectsDir="$WM_PROJECT_DIR/build/$WM_OPTIONS/src/Pstream/$libName"
+        whichmpi="$objectsDir/using:$FOAM_MPI"
         [ -e "$whichmpi" ] || wclean $libName
         echo "wmake $targetType $libName"
         wmake $targetType $libName
-        mkdir -p "$libDir"
+        mkdir -p "$objectsDir"
         touch "$whichmpi"
     )
     done

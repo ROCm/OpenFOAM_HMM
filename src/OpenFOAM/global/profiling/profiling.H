@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2009-2016 Bernhard Gschaider
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2107 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -225,6 +225,10 @@ public:
 };
 
 
+// Forward declaration of friend functions and operators
+Ostream& operator<<(Ostream& os, const profiling::Information& info);
+
+
 /*---------------------------------------------------------------------------*\
                    Class profiling::Information Declaration
 \*---------------------------------------------------------------------------*/
@@ -385,7 +389,7 @@ public:
 
     // IOstream Operators
 
-        friend Ostream& operator<<(Ostream&, const Information&);
+        friend Ostream& operator<<(Ostream& os, const Information& info);
 
 };
 

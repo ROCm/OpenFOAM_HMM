@@ -48,12 +48,13 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inewt)
     if (firstToken.isLabel())
     {
         // Read size of list
-        label s = firstToken.labelToken();
+        const label s = firstToken.labelToken();
 
+        // Set list length to that read
         setSize(s);
 
         // Read beginning of contents
-        char delimiter = is.readBeginList("PtrList");
+        const char delimiter = is.readBeginList("PtrList");
 
         if (s)
         {
@@ -81,7 +82,7 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inewt)
                     "reading the single entry"
                 );
 
-                for (label i=1; i<s; i++)
+                for (label i=1; i<s; ++i)
                 {
                     set(i, tPtr->clone());
                 }

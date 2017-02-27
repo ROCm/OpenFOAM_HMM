@@ -24,10 +24,6 @@ case "$major" in
         wmakeLibPv foamPv
         PVblockMeshReader/Allwmake $targetType $*
         PVFoamReader/Allwmake $targetType $*
-
-        # Dummy directory to trigger proper 'wclean all' behaviour
-        # - the Allwclean will otherwise not be used
-        mkdir -p Make
     )
     fi
     ;;

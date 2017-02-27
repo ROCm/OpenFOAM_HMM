@@ -41,7 +41,7 @@ Foam::HashTable<T, Key, Hash>::HashTable(Istream& is, const label size)
     {
         table_ = new hashedEntry*[tableSize_];
 
-        for (label hashIdx = 0; hashIdx < tableSize_; hashIdx++)
+        for (label hashIdx = 0; hashIdx < tableSize_; ++hashIdx)
         {
             table_[hashIdx] = 0;
         }
@@ -116,10 +116,10 @@ Foam::Istream& Foam::operator>>
 
     if (firstToken.isLabel())
     {
-        label s = firstToken.labelToken();
+        const label s = firstToken.labelToken();
 
         // Read beginning of contents
-        char delimiter = is.readBeginList("HashTable<T, Key, Hash>");
+        const char delimiter = is.readBeginList("HashTable<T, Key, Hash>");
 
         if (s)
         {
@@ -130,7 +130,7 @@ Foam::Istream& Foam::operator>>
 
             if (delimiter == token::BEGIN_LIST)
             {
-                for (label i=0; i<s; i++)
+                for (label i=0; i<s; ++i)
                 {
                     Key key;
                     is >> key;

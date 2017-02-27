@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -75,7 +75,7 @@ case Linux:
             breaksw
 
         default:
-            echo "Unknown WM_ARCH_OPTION '$WM_ARCH_OPTION', should be 32 or 64"
+            echo "Unknown WM_ARCH_OPTION '$WM_ARCH_OPTION', should be 32|64"
             breaksw
 
         endsw
@@ -124,11 +124,13 @@ case SunOS:
     setenv WM_LDFLAGS '-mabi=64 -G0'
     breaksw
 
-default:
-    echo
-    echo "Your '$WM_ARCH' operating system is not supported by this release"
-    echo "of OpenFOAM. For further assistance, please contact www.OpenFOAM.com"
-    echo
+default:  # An unsupported operating system
+    /bin/cat <<USAGE
+
+Your "$WM_ARCH" operating system is unsupported by this OpenFOAM release.
+For further assistance, please contact www.OpenFOAM.com
+
+USAGE
     breaksw
 
 endsw
@@ -210,7 +212,7 @@ if ( ! $?WM_COMPILER_TYPE ) setenv WM_COMPILER_TYPE system
 
 # Load configured compiler versions, regardless of the compiler type
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/compiler`
+_foamSourceEtc config.csh/compiler
 
 switch ("$WM_COMPILER_TYPE")
 case system:
@@ -230,7 +232,7 @@ case ThirdParty:
 
         # Check that the compiler directory can be found
         if ( ! -d "$gccDir" ) then
-            cat << GCC_NOT_FOUND
+            /bin/cat << GCC_NOT_FOUND
 ===============================================================================
 Warning in $WM_PROJECT_DIR/etc/config.csh/settings:
 Cannot find '$WM_COMPILER' compiler installation
@@ -272,7 +274,7 @@ GCC_NOT_FOUND
 
         # Check that the compiler directory can be found
         if ( ! -d "$clangDir" ) then
-            cat << CLANG_NOT_FOUND
+            /bin/cat << CLANG_NOT_FOUND
 ===============================================================================
 Warning in $WM_PROJECT_DIR/etc/config.csh/settings:
 Cannot find '$WM_COMPILER' compiler installation

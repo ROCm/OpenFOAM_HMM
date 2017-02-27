@@ -78,6 +78,7 @@ find -H $packDir                                                               \
 | sed                                                                          \
  -e '\@/\.git/@d'                                                              \
  -e '\@/\.tags/@d'                                                             \
+ -e '\@/build/@d'                                                              \
  -e '\@/platforms/@d'                                                          \
  -e '\@/t/@d'                                                                  \
  -e '\@/Make[.A-Za-z]*/[^/]*/@d'                                               \

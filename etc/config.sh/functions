@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -36,20 +36,31 @@ then
     # Temporary environment variable for automatically (un)loading functions
     WM_BASH_FUNCTIONS=loaded
 
-    # Source files, possibly with some verbosity
+    # Source a file, possibly with some verbosity
     _foamSource()
     {
-        while [ $# -ge 1 ]
-        do
-            [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "Sourcing: $1" 1>&2
+        if [ $# -gt 0 -a -f "$1" ]
+        then
+            [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "Using: $1" 1>&2
             . $1
-          shift
-        done
+        fi
+    }
+
+    # Source an etc file, possibly with some verbosity
+    _foamSourceEtc()
+    {
+        local file
+        if [ $# -gt 0 ] && file=$($WM_PROJECT_DIR/bin/foamEtcFile "$@")
+        then
+            [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "Using: $file" 1>&2
+            . $file
+        fi
     }
 
     # Evaluate command-line parameters
     _foamEval()
     {
+        local file
         while [ $# -gt 0 ]
         do
             case "$1" in
@@ -71,9 +82,10 @@ then
                 # Filename: source it
                 if [ -f "$1" ]
                 then
-                    _foamSource "$1"
+                    [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "Using: $1" 1>&2
+                    . "$1"
                 else
-                    _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile -silent "$1"`
+                    _foamSourceEtc -silent "$1"
                 fi
                 ;;
             esac
@@ -84,31 +96,19 @@ then
     # Prefix to PATH
     _foamAddPath()
     {
-        while [ $# -ge 1 ]
-        do
-            export PATH=$1:$PATH
-            shift
-        done
+        [ $# -gt 0 ] && export PATH=$1:$PATH;
     }
 
     # Prefix to LD_LIBRARY_PATH
     _foamAddLib()
     {
-        while [ $# -ge 1 ]
-        do
-            export LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH
-            shift
-        done
+        [ $# -gt 0 ] && export LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH
     }
 
     # Prefix to MANPATH
     _foamAddMan()
     {
-        while [ $# -ge 1 ]
-        do
-            export MANPATH=$1:$MANPATH
-            shift
-        done
+        [ $# -gt 0 ] && export MANPATH=$1:$MANPATH
     }
 
 else
@@ -117,6 +117,9 @@ else
     # ~~~~~~~~~~~~~~~~~~~~
     unset WM_BASH_FUNCTIONS
     unset -f _foamAddPath _foamAddLib _foamAddMan
-    unset -f _foamSource _foamEval
+    unset -f _foamSourceEtc _foamEval
+    unset -f _foamSource
 
 fi
+
+#------------------------------------------------------------------------------

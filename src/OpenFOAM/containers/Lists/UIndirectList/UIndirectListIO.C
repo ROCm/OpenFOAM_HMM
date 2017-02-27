@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,15 +28,17 @@ License
 #include "token.H"
 #include "contiguous.H"
 
-// * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class T>
-Foam::Ostream& Foam::operator<<
+Foam::Ostream& Foam::UIndirectList<T>::writeList
 (
-    Foam::Ostream& os,
-    const Foam::UIndirectList<T>& L
-)
+    Ostream& os,
+    const label shortListLen
+) const
 {
+    const UIndirectList<T>& L = *this;
+
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII || !contiguous<T>())
     {
@@ -65,7 +67,11 @@ Foam::Ostream& Foam::operator<<
             // Write end delimiter
             os << token::END_BLOCK;
         }
-        else if (L.size() <= 1 || (L.size() < 11 && contiguous<T>()))
+        else if
+        (
+            L.size() <= 1 || !shortListLen
+         || (L.size() <= shortListLen && contiguous<T>())
+        )
         {
             // Write size and start delimiter
             os << L.size() << token::BEGIN_LIST;
@@ -83,16 +89,16 @@ Foam::Ostream& Foam::operator<<
         else
         {
             // Write size and start delimiter
-            os << nl << L.size() << nl << token::BEGIN_LIST;
+            os << nl << L.size() << nl << token::BEGIN_LIST << nl;
 
             // Write contents
             forAll(L, i)
             {
-                os << nl << L[i];
+                os << L[i] << nl;
             }
 
             // Write end delimiter
-            os << nl << token::END_LIST << nl;
+            os << token::END_LIST << nl;
         }
     }
     else
@@ -115,9 +121,22 @@ Foam::Ostream& Foam::operator<<
     }
 
     // Check state of IOstream
-    os.check("Ostream& operator<<(Ostream&, const UIndirectList&)");
+    os.check("UIndirectList::writeList(Ostream&)");
 
     return os;
+}
+
+
+// * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
+
+template<class T>
+Foam::Ostream& Foam::operator<<
+(
+    Foam::Ostream& os,
+    const Foam::UIndirectList<T>& L
+)
+{
+    return L.writeList(os, 10);
 }
 
 

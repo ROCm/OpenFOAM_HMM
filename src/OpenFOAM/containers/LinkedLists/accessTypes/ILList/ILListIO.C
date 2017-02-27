@@ -44,10 +44,10 @@ void Foam::ILList<LListBase, T>::read(Istream& is, const INew& iNew)
 
     if (firstToken.isLabel())
     {
-        label s = firstToken.labelToken();
+        const label s = firstToken.labelToken();
 
         // Read beginning of contents
-        char delimiter = is.readBeginList("ILList<LListBase, T>");
+        const char delimiter = is.readBeginList("ILList<LListBase, T>");
 
         if (s)
         {

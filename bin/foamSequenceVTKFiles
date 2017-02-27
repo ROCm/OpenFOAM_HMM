@@ -93,7 +93,7 @@ if [ ! -d $DIR ]; then
     exit 0
 fi
 
-FILES=$(find $DIR -type f -name *vtk)
+FILES=$(find $DIR -name '*.vtk' -type f)
 NAMES=$(for f in $FILES; do basename $f .vtk; done | sort -u)
 
 if [ -d $OUT ]; then

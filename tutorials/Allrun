@@ -138,7 +138,7 @@ do
     [ -d $appDir ] || continue
     echo -n "    $appDir..." 1>&2
 
-    logs=$(find -L $appDir -type f -name 'log.*')
+    logs=$(find -L $appDir -name 'log.*' -type f)
     if [ -n "$logs" ]
     then
         echo 1>&2

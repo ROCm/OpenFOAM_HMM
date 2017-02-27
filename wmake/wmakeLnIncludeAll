@@ -62,12 +62,12 @@ findName=lnInclude
 nCores=0
 
 # Default 'wmakeLnInclude' option
-wmLnOpt=
+unset wmLnOpt
 
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-        -h | -help)   # Provide immediate help
+        -h | -help)
             usage
             ;;
         -u | -update)
@@ -75,16 +75,16 @@ do
             ;;
         # Parallel execution on WM_NCOMPPROCS cores
         -j)
-            nCores=$WM_NCOMPPROCS
+            nCores=${WM_NCOMPPROCS:-0}
             test $# -ge 2 && expr $2 + 1 > /dev/null 2>&1 \
                 && shift && nCores=$1
             ;;
         # Parallel compilation on specified number of cores
-        -j*)
+        -j[1-9]*)
             nCores=${1#-j}
             ;;
         -*)
-            usage "unknown option: '$*'"
+            usage "unknown option: '$1'"
             ;;
         *)
             break
@@ -92,9 +92,6 @@ do
     esac
     shift
 done
-
-
-FAIL=0
 
 if [ "$nCores" -gt 0 ]
 then
@@ -122,7 +119,7 @@ do
         topDir=${MakeDir%/Make}    # trim /Make from the end
         if [ -d "$topDir" ]
         then
-            if grep -e '^ *LIB *=' "$MakeDir/files" >/dev/null 2>&1
+            if grep -qe '^ *LIB *=' "$MakeDir/files" 2>/dev/null
             then
                 # If running in parallel start wmakeLnInclude on nCores
                 # and more as the cores become free
@@ -159,12 +156,6 @@ then
     sleep 2
 fi
 
-
-#------------------------------------------------------------------------------
-# Cleanup local variables and functions
-#------------------------------------------------------------------------------
-
-unset Script usage
-
+exit 0 # clean exit
 
 #------------------------------------------------------------------------------

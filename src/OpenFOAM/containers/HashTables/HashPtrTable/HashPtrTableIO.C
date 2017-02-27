@@ -47,10 +47,10 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
 
     if (firstToken.isLabel())
     {
-        label s = firstToken.labelToken();
+        const label s = firstToken.labelToken();
 
         // Read beginning of contents
-        char delimiter = is.readBeginList("HashPtrTable<T, Key, Hash>");
+        const char delimiter = is.readBeginList("HashPtrTable<T, Key, Hash>");
 
         if (s)
         {

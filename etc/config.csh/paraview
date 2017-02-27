@@ -50,12 +50,13 @@
 #         unsetenv ParaView_VERSION     # avoid using ThirdParty settings
 #
 #------------------------------------------------------------------------------
+# USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
 setenv ParaView_VERSION 5.0.1
 setenv ParaView_MAJOR detect            # Automatically determine major version
-
 set cmake_version=cmake-system
 
+# END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
 
 if ( ! $?ParaView_DIR ) setenv ParaView_DIR

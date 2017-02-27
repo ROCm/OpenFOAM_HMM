@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,7 @@ SourceFiles
 #ifndef ListOps_H
 #define ListOps_H
 
+#include "FlatOutput.H"
 #include "labelList.H"
 #include "ops.H"
 
@@ -51,7 +52,7 @@ extern const labelList emptyLabelList;
 template<class Type>
 static const List<Type>& emptyList()
 {
-    return *reinterpret_cast<const List<Type>* >(&emptyLabelList);
+    return *reinterpret_cast<const List<Type>*>(&emptyLabelList);
 }
 
 //- Renumber the values (not the indices) of a list.
@@ -263,7 +264,7 @@ public:
 };
 
 
-//- Helper class for list to append unique elelements of y onto the end of x
+//- Helper class for list to append unique elements of y onto the end of x
 template<class T>
 class ListUniqueEqOp
 {

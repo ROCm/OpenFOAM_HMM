@@ -82,7 +82,7 @@ do
              break
         elif [ -s $lockFile ]
         then
-             log "found lock file ${lockFile} containing '$(cat $lockFile)' - waiting"
+             log "found lock file ${lockFile} containing '$(< $lockFile)' - waiting"
         else
              log "found lock file ${lockFile} - waiting"
         fi

@@ -34,7 +34,7 @@
 
 if [ -r Make/files ]
 then
-    echo "Error: Make/files already exists - exiting"
+    echo "Error: Make/files already exists - exiting" 1>&2
     exit 1
 fi
 
@@ -43,38 +43,32 @@ dirToString=$WM_DIR/platforms/$WM_ARCH$WM_COMPILER/dirToString
 [ -d Make ] || mkdir Make
 rm -f Make/files
 
-for dir in `find . -type d -print`
+for dir in $(find . -mindepth 1 -type d -print)
 do
     case "$dir" in
     . | ./Make | ./lnInclude )
         # Skip special directories
         ;;
     *)
-        baseDir=`echo $dir | sed 's%^\./%%'`
-        baseDirName=`echo $baseDir | $dirToString`
-
-        echo $baseDirName " = " $baseDir >> Make/files
+        echo "$(echo $dir | $dirToString -strip)  =  ${dir#./}"
         ;;
     esac
-done
+done >> Make/files
+[ -s Make/files ] && echo >> Make/files
 
-echo >> Make/files
-
-for file in `find . -name "*.[cCylLfF]" -type f -print`
+for file in $(find . -name "*.[cCylLfF]" -type f -print)
 do
-    fileName=${file##*/}
-    pathName=`echo ${file%/*} | sed -e 's%^\.%%' -e 's%^/%%' | $dirToString`
+    pathName=$(echo ${file%/*} | $dirToString -strip)
 
     if [ -n "$pathName" ]
     then
-        echo '$('$pathName')/'$fileName >> Make/files
+        echo '$('$pathName')/'"${file##*/}"
     else
-        echo $fileName >> Make/files
+        echo "${file##*/}"
     fi
-done
+done >> Make/files
 
 echo >> Make/files
-
-echo 'EXE = $(FOAM_APPBIN)/'${PWD##*/} >> Make/files
+echo 'EXE = $(FOAM_APPBIN)/'"${PWD##*/}" >> Make/files
 
 #------------------------------------------------------------------------------

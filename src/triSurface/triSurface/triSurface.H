@@ -55,7 +55,7 @@ class surfZone;
 // Forward declaration of friend functions and operators
 
 class triSurface;
-
+Istream& operator>>(Istream&, triSurface&);
 Ostream& operator<<(Ostream&, const triSurface&);
 
 

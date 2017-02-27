@@ -37,21 +37,19 @@ void Foam::blockMeshTools::read
 
     if (firstToken.isLabel())
     {
-        label s = firstToken.labelToken();
+        const label s = firstToken.labelToken();
 
         // Set list length to that read
         L.setSize(s);
 
-        // Read list contents depending on data format
-
         // Read beginning of contents
-        char delimiter = is.readBeginList("List");
+        const char delimiter = is.readBeginList("List");
 
         if (s)
         {
             if (delimiter == token::BEGIN_LIST)
             {
-                for (label i=0; i<s; i++)
+                for (label i=0; i<s; ++i)
                 {
                     read(is, L[i], dict);
                 }
