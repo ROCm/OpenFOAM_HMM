@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,6 +96,59 @@ void Foam::cyclicACMIPolyPatch::resetAMI
 
         AMIPatchToPatchInterpolation& AMI =
             const_cast<AMIPatchToPatchInterpolation&>(this->AMI());
+
+        // Output some stats. AMIInterpolation will have already output the
+        // average weights ("sum(weights) min/max/average = 1, 1, 1")
+        {
+            const scalarField& wghtsSum = AMI.srcWeightsSum();
+
+            label nUncovered = 0;
+            label nCovered = 0;
+            forAll(wghtsSum, facei)
+            {
+                scalar sum = wghtsSum[facei];
+                if (sum < tolerance_)
+                {
+                    nUncovered++;
+                }
+                else if (sum > scalar(1)-tolerance_)
+                {
+                    nCovered++;
+                }
+            }
+            reduce(nUncovered, sumOp<label>());
+            reduce(nCovered, sumOp<label>());
+            label nTotal = returnReduce(wghtsSum.size(), sumOp<label>());
+
+            Info<< "ACMI: Patch source uncovered/blended/covered = "
+                << nUncovered << ", " << nTotal-nUncovered-nCovered
+                << ", " << nCovered << endl;
+        }
+        {
+            const scalarField& wghtsSum = AMI.tgtWeightsSum();
+
+            label nUncovered = 0;
+            label nCovered = 0;
+            forAll(wghtsSum, facei)
+            {
+                scalar sum = wghtsSum[facei];
+                if (sum < tolerance_)
+                {
+                    nUncovered++;
+                }
+                else if (sum > scalar(1)-tolerance_)
+                {
+                    nCovered++;
+                }
+            }
+            reduce(nUncovered, sumOp<label>());
+            reduce(nCovered, sumOp<label>());
+            label nTotal = returnReduce(wghtsSum.size(), sumOp<label>());
+
+            Info<< "ACMI: Patch target uncovered/blended/covered = "
+                << nUncovered << ", " << nTotal-nUncovered-nCovered
+                << ", " << nCovered << endl;
+        }
 
         srcMask_ =
             min(scalar(1) - tolerance_, max(tolerance_, AMI.srcWeightsSum()));
