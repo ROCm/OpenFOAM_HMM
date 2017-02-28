@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,6 +52,7 @@ Description
     2) SunLoadFairWeatherConditions: The solar fluxes are calculated following
        the Fair Weather Conditions Method from the ASHRAE Handbook. The entries
        are:
+            skyCloudCoverFraction: Fraction of sky covered by clouds (0-1)
             A :     Apparent solar irradiation at air mass m = 0
             B :     Atmospheric extinction coefficient
             beta:   Solar altitude (in degrees) above the horizontal. This
@@ -61,7 +62,7 @@ Description
 
             In this model the flux is calculated as:
 
-                directSolarRad = A/exp(B/sin(beta));
+                directSolarRad = skyCloudCoverFraction*A/exp(B/sin(beta));
 
     3) SunLoadTheoreticalMaximum: The entries are:
             Setrn
@@ -157,6 +158,9 @@ private:
         scalar B_;
         scalar beta_;
         scalar tetha_;
+
+        //- Sky cloud cover fraction [0-1]
+        scalar skyCloudCoverFraction_;
 
 
         //- Maximum theoretical direct solar load model parameters
