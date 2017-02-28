@@ -63,7 +63,7 @@ Description
             In this model the flux is calculated as:
 
                 directSolarRad =
-                    (1 - skyCloudCoverFraction^3)*A/exp(B/sin(beta));
+                    (1 - 0.75*skyCloudCoverFraction^3)*A/exp(B/sin(beta));
 
     3) SunLoadTheoreticalMaximum: The entries are:
             Setrn
