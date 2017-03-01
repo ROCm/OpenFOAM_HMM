@@ -353,7 +353,7 @@ Foam::functionObjects::forces::devRhoReff() const
     else if (foundObject<dictionary>("transportProperties"))
     {
         const dictionary& transportProperties =
-             lookupObject<dictionary>("transportProperties");
+            lookupObject<dictionary>("transportProperties");
 
         dimensionedScalar nu(transportProperties.lookup("nu"));
 
