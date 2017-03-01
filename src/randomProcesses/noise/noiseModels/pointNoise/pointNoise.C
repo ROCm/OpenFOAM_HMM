@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -86,7 +86,7 @@ void pointNoise::processData(const Function1Types::CSV<scalar>& data)
     windowModelPtr_->validate(t.size());
     const windowModel& win = windowModelPtr_();
     const scalar deltaf = 1.0/(deltaT*win.nSamples());
-    fileName outDir(fileName("postProcessing")/"noise"/typeName/fNameBase);
+    fileName outDir(baseFileDir()/typeName/fNameBase);
 
     // Create the fft
     noiseFFT nfft(deltaT, p);
@@ -97,13 +97,27 @@ void pointNoise::processData(const Function1Types::CSV<scalar>& data)
 
     // RMS pressure [Pa]
     graph Prmsf(nfft.RMSmeanPf(win));
-    Info<< "    Creating graph for " << Prmsf.title() << endl;
-    Prmsf.write(outDir, graph::wordify(Prmsf.title()), graphFormat_);
+    if (customBounds_)
+    {
+        Prmsf.setXRange(fLower_, fUpper_);
+    }
+    if (writePrmsf_)
+    {
+        Info<< "    Creating graph for " << Prmsf.title() << endl;
+        Prmsf.write(outDir, graph::wordify(Prmsf.title()), graphFormat_);
+    }
 
     // PSD [Pa^2/Hz]
     graph PSDf(nfft.PSDf(win));
-    Info<< "    Creating graph for " << PSDf.title() << endl;
-    PSDf.write(outDir, graph::wordify(PSDf.title()), graphFormat_);
+    if (customBounds_)
+    {
+        PSDf.setXRange(fLower_, fUpper_);
+    }
+    if (writePSDf_)
+    {
+        Info<< "    Creating graph for " << PSDf.title() << endl;
+        PSDf.write(outDir, graph::wordify(PSDf.title()), graphFormat_);
+    }
 
     // PSD [dB/Hz]
     graph PSDg
@@ -114,8 +128,12 @@ void pointNoise::processData(const Function1Types::CSV<scalar>& data)
         Prmsf.x(),
         noiseFFT::PSD(PSDf.y())
     );
-    Info<< "    Creating graph for " << PSDg.title() << endl;
-    PSDg.write(outDir, graph::wordify(PSDg.title()), graphFormat_);
+
+    if (writePSD_)
+    {
+        Info<< "    Creating graph for " << PSDg.title() << endl;
+        PSDg.write(outDir, graph::wordify(PSDg.title()), graphFormat_);
+    }
 
     // SPL [dB]
     graph SPLg
@@ -126,52 +144,59 @@ void pointNoise::processData(const Function1Types::CSV<scalar>& data)
         Prmsf.x(),
         noiseFFT::SPL(PSDf.y()*deltaf)
     );
-    Info<< "    Creating graph for " << SPLg.title() << endl;
-    SPLg.write(outDir, graph::wordify(SPLg.title()), graphFormat_);
 
-    labelList octave13BandIDs;
-    scalarField octave13FreqCentre;
-    noiseFFT::octaveBandInfo
-    (
-        Prmsf.x(),
-        fLower_,
-        fUpper_,
-        3,
-        octave13BandIDs,
-        octave13FreqCentre
-    );
+    if (writeSPL_)
+    {
+        Info<< "    Creating graph for " << SPLg.title() << endl;
+        SPLg.write(outDir, graph::wordify(SPLg.title()), graphFormat_);
+    }
+
+    if (writeOctaves_)
+    {
+        labelList octave13BandIDs;
+        scalarField octave13FreqCentre;
+        noiseFFT::octaveBandInfo
+        (
+            Prmsf.x(),
+            fLower_,
+            fUpper_,
+            3,
+            octave13BandIDs,
+            octave13FreqCentre
+        );
 
 
-    // 1/3 octave data
-    // ---------------
+        // 1/3 octave data
+        // ---------------
 
-    // PSD [Pa^2/Hz]
-    graph PSD13f(nfft.octaves(PSDf, octave13BandIDs, false));
+        // PSD [Pa^2/Hz]
+        graph PSD13f(nfft.octaves(PSDf, octave13BandIDs, false));
 
-    // Integrated PSD = P(rms)^2 [Pa^2]
-    graph Prms13f2(nfft.octaves(PSDf, octave13BandIDs, true));
+        // Integrated PSD = P(rms)^2 [Pa^2]
+        graph Prms13f2(nfft.octaves(PSDf, octave13BandIDs, true));
 
-    graph PSD13g
-    (
-        "PSD13_dB_Hz(fm)",
-        "fm [Hz]",
-        "PSD(fm) [dB_Hz]",
-        octave13FreqCentre,
-        noiseFFT::PSD(PSD13f.y())
-    );
-    Info<< "    Creating graph for " << PSD13g.title() << endl;
-    PSD13g.write(outDir, graph::wordify(PSD13g.title()), graphFormat_);
+        graph PSD13g
+        (
+            "PSD13_dB_Hz(fm)",
+            "fm [Hz]",
+            "PSD(fm) [dB_Hz]",
+            octave13FreqCentre,
+            noiseFFT::PSD(PSD13f.y())
+        );
+        Info<< "    Creating graph for " << PSD13g.title() << endl;
+        PSD13g.write(outDir, graph::wordify(PSD13g.title()), graphFormat_);
 
-    graph SPL13g
-    (
-        "SPL13_dB(fm)",
-        "fm [Hz]",
-        "SPL(fm) [dB]",
-        octave13FreqCentre,
-        noiseFFT::SPL(Prms13f2.y())
-    );
-    Info<< "    Creating graph for " << SPL13g.title() << endl;
-    SPL13g.write(outDir, graph::wordify(SPL13g.title()), graphFormat_);
+        graph SPL13g
+        (
+            "SPL13_dB(fm)",
+            "fm [Hz]",
+            "SPL(fm) [dB]",
+            octave13FreqCentre,
+            noiseFFT::SPL(Prms13f2.y())
+        );
+        Info<< "    Creating graph for " << SPL13g.title() << endl;
+        SPL13g.write(outDir, graph::wordify(SPL13g.title()), graphFormat_);
+    }
 }
 
 
@@ -186,18 +211,15 @@ void pointNoise::calculate()
     }
 
 
-    if (inputFileNames_.size())
+    forAll(inputFileNames_, i)
     {
-        forAll(inputFileNames_, i)
+        fileName fName = inputFileNames_[i];
+        if (!fName.isAbsolute())
         {
-            const fileName fName = inputFileNames_[i].expand();
-            Function1Types::CSV<scalar> data("pressure", dict_, "Data", fName);
-            processData(data);
+            fName = "$FOAM_CASE"/fName;
         }
-    }
-    else
-    {
-        Function1Types::CSV<scalar> data("pressure", dict_, "Data");
+        fName.expand();
+        Function1Types::CSV<scalar> data("pressure", dict_, "Data", fName);
         processData(data);
     }
 }
@@ -226,7 +248,15 @@ bool pointNoise::read(const dictionary& dict)
 {
     if (noiseModel::read(dict))
     {
-        dict.readIfPresent("inputFiles", inputFileNames_);
+        if (!dict.readIfPresent("inputFiles", inputFileNames_))
+        {
+            inputFileNames_.setSize(1);
+
+            // Note: unsafe lookup of file name from pressureData sub-dict!
+            dict.subDict("pressureData").lookup("fileName")
+                >> inputFileNames_[0];
+        }
+
         return true;
     }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -231,15 +231,13 @@ Foam::scalar surfaceNoise::writeSurfaceData
     const word& title,
     const scalar freq,
     const scalarField& data,
-    const labelList& procFaceOffset
+    const labelList& procFaceOffset,
+    const bool writeSurface
 ) const
 {
     Info<< "    processing " << title << " for frequency " << freq << endl;
 
-    fileName outDir
-    (
-        fileName("postProcessing")/"noise"/groupName/Foam::name(freq)
-    );
+    fileName outDir(baseFileDir()/groupName/Foam::name(freq));
 
     if (Pstream::parRun())
     {
@@ -279,20 +277,23 @@ Foam::scalar surfaceNoise::writeSurfaceData
                 }
             }
 
-            // could also have meshedSurface implement meshedSurf
-            fileName outFileName = writerPtr_->write
-            (
-                outDir,
-                fName,
-                meshedSurfRef
+            // Could also have meshedSurface implement meshedSurf
+            if (writeSurface)
+            {
+                fileName outFileName = writerPtr_->write
                 (
-                    surf.points(),
-                    surf.surfFaces()
-                ),
-                title,
-                allData,
-                false
-            );
+                    outDir,
+                    fName,
+                    meshedSurfRef
+                    (
+                        surf.points(),
+                        surf.surfFaces()
+                    ),
+                    title,
+                    allData,
+                    false
+                );
+            }
 
             // TO BE VERIFIED: area-averaged values
             // areaAverage = sum(allData*surf.magSf())/sum(surf.magSf());
@@ -306,20 +307,23 @@ Foam::scalar surfaceNoise::writeSurfaceData
     {
         const meshedSurface& surf = readerPtr_->geometry();
 
-        // could also have meshedSurface implement meshedSurf
-        writerPtr_->write
-        (
-            outDir,
-            fName,
-            meshedSurfRef
+        // Could also have meshedSurface implement meshedSurf
+        if (writeSurface)
+        {
+            writerPtr_->write
             (
-                surf.points(),
-                surf.surfFaces()
-            ),
-            title,
-            data,
-            false
-        );
+                outDir,
+                fName,
+                meshedSurfRef
+                (
+                    surf.points(),
+                    surf.surfFaces()
+                ),
+                title,
+                data,
+                false
+            );
+        }
 
         // TO BE VERIFIED: area-averaged values
         // return sum(data*surf.magSf())/sum(surf.magSf());
@@ -463,6 +467,11 @@ void surfaceNoise::calculate()
     {
         fileName fName = inputFileNames_[i];
 
+        if (!fName.isAbsolute())
+        {
+            fName = "$FOAM_CASE"/fName;
+        }
+
         initialise(fName.expand());
 
         // Container for pressure time history data per face
@@ -575,19 +584,23 @@ void surfaceNoise::calculate()
         const word& fNameBase = fName.name(true);
 
         // Output directory for graphs
-        fileName outDir
-        (
-            fileName("postProcessing")/"noise"/typeName/fNameBase
-        );
+        fileName outDir(baseFileDir()/typeName/fNameBase);
 
         const scalar deltaf = 1.0/(deltaT_*win.nSamples());
         Info<< "Writing fft surface data" << endl;
         {
-            scalarField PrmsfAve(surfPrmsf.size(), 0);
-            scalarField PSDfAve(surfPrmsf.size(), 0);
-            scalarField fOut(surfPrmsf.size(), 0);
+            // Determine frequency range of interest
+            // Note: freqencies have fixed interval, and are in the range
+            //       0 to (n-1)*deltaf
+            label f0 = ceil(fLower_/deltaf);
+            label f1 = floor(fUpper_/deltaf);
+            label nFreq = f1 - f0 + 1;
 
-            forAll(surfPrmsf, i)
+            scalarField PrmsfAve(nFreq, 0);
+            scalarField PSDfAve(nFreq, 0);
+            scalarField fOut(nFreq, 0);
+
+            for (label i = f0; i <= f1; ++i)
             {
                 label freqI = (i + 1)*fftWriteInterval_ - 1;
                 fOut[i] = freq1[freqI];
@@ -599,7 +612,8 @@ void surfaceNoise::calculate()
                     "Prmsf",
                     freq1[freqI],
                     surfPrmsf[i],
-                    procFaceOffset
+                    procFaceOffset,
+                    writePrmsf_
                 );
 
                 PSDfAve[i] = writeSurfaceData
@@ -609,7 +623,8 @@ void surfaceNoise::calculate()
                     "PSDf",
                     freq1[freqI],
                     surfPSDf[i],
-                    procFaceOffset
+                    procFaceOffset,
+                    writePSDf_
                 );
                 writeSurfaceData
                 (
@@ -618,7 +633,8 @@ void surfaceNoise::calculate()
                     "PSD",
                     freq1[freqI],
                     noiseFFT::PSD(surfPSDf[i]),
-                    procFaceOffset
+                    procFaceOffset,
+                    writePSD_
                 );
                 writeSurfaceData
                 (
@@ -627,7 +643,8 @@ void surfaceNoise::calculate()
                     "SPL",
                     freq1[freqI],
                     noiseFFT::SPL(surfPSDf[i]*deltaf),
-                    procFaceOffset
+                    procFaceOffset,
+                    writeSPL_
                 );
             }
 
@@ -688,7 +705,8 @@ void surfaceNoise::calculate()
                     "PSD13f",
                     octave13FreqCentre[i],
                     surfPSD13f[i],
-                    procFaceOffset
+                    procFaceOffset,
+                    writeOctaves_
                 );
                 writeSurfaceData
                 (
@@ -697,7 +715,8 @@ void surfaceNoise::calculate()
                     "PSD13",
                     octave13FreqCentre[i],
                     noiseFFT::PSD(surfPSD13f[i]),
-                    procFaceOffset
+                    procFaceOffset,
+                    writeOctaves_
                 );
                 writeSurfaceData
                 (
@@ -706,7 +725,8 @@ void surfaceNoise::calculate()
                     "SPL13",
                     octave13FreqCentre[i],
                     noiseFFT::SPL(surfPrms13f2[i]),
-                    procFaceOffset
+                    procFaceOffset,
+                    writeOctaves_
                 );
 
                 Prms13f2Ave[i] =

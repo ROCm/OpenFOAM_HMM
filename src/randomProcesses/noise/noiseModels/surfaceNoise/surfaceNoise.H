@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,7 +71,23 @@ Description
         {
             collateTimes true;
         }
+
+        // Write Prmsf; default = yes
+        writePrmsf  no;
+
+        // Write SPL; default = yes
+        writeSPL    yes;
+
+        // Write PSD; default = yes
+        writePSD    yes;
+
+        // Write PSDf; default = yes
+        writePSDf   no;
+
+        // Write writeOctaves; default = yes
+        writeOctaves yes;
     }
+
     \endverbatim
 
 SourceFiles
@@ -172,7 +188,8 @@ protected:
             const word& title,
             const scalar freq,
             const scalarField& data,
-            const labelList& procFaceOffset
+            const labelList& procFaceOffset,
+            const bool writeSurface
         ) const;
 
         //- Calculate the area average value
