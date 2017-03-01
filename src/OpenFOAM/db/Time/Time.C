@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,12 +99,13 @@ void Foam::Time::adjustDeltaT()
 
     if (adjustTime)
     {
-        scalar nSteps = timeToNextWrite/deltaT_ - SMALL;
+        scalar nSteps = timeToNextWrite/deltaT_;
 
         // For tiny deltaT the label can overflow!
         if (nSteps < labelMax)
         {
-            label nStepsToNextWrite = label(nSteps) + 1;
+            // nSteps can be < 1 so make sure at least 1
+            label nStepsToNextWrite = max(1, round(nSteps));
 
             scalar newDeltaT = timeToNextWrite/nStepsToNextWrite;
 
