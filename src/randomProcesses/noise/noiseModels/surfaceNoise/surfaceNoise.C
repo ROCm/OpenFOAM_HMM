@@ -466,6 +466,7 @@ void surfaceNoise::calculate()
     forAll(inputFileNames_, i)
     {
         fileName fName = inputFileNames_[i];
+        fName.expand();
 
         if (!fName.isAbsolute())
         {
