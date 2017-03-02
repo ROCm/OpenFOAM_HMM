@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,6 +87,18 @@ Type Foam::functionObjects::fieldValues::volFieldValue::processValues
             result = gSum(values);
             break;
         }
+        case opWeightedSum:
+        {
+            if (returnReduce(weightField.empty(), andOp<bool>()))
+            {
+                result = gSum(values);
+            }
+            else
+            {
+                result = gSum(weightField*values);
+            }
+            break;
+        }
         case opSumMag:
         {
             result = gSum(cmptMag(values));
@@ -94,39 +106,57 @@ Type Foam::functionObjects::fieldValues::volFieldValue::processValues
         }
         case opAverage:
         {
-            label n = returnReduce(values.size(), sumOp<label>());
+            const label n = returnReduce(values.size(), sumOp<label>());
             result = gSum(values)/(scalar(n) + ROOTVSMALL);
             break;
         }
         case opWeightedAverage:
         {
-            label wSize = returnReduce(weightField.size(), sumOp<label>());
-
-            if (wSize > 0)
+            if (returnReduce(weightField.empty(), andOp<bool>()))
             {
-                result =
-                    gSum(weightField*values)/(gSum(weightField) + ROOTVSMALL);
+                const label n = returnReduce(values.size(), sumOp<label>());
+                result = gSum(values)/(scalar(n) + ROOTVSMALL);
             }
             else
             {
-                label n = returnReduce(values.size(), sumOp<label>());
-                result = gSum(values)/(scalar(n) + ROOTVSMALL);
+                result =
+                    gSum(weightField*values)/(gSum(weightField) + ROOTVSMALL);
             }
             break;
         }
         case opVolAverage:
         {
-            result = gSum(values*V)/(gSum(V) + ROOTVSMALL);
+            result = gSum(values*V)/gSum(V);
             break;
         }
         case opWeightedVolAverage:
         {
-            result = gSum(weightField*V*values)/gSum(weightField*V);
+            if (returnReduce(weightField.empty(), andOp<bool>()))
+            {
+                result = gSum(V*values)/(gSum(V) + ROOTVSMALL);
+            }
+            else
+            {
+                result = gSum(weightField*V*values)
+                    /(gSum(weightField*V) + ROOTVSMALL);
+            }
             break;
         }
         case opVolIntegrate:
         {
             result = gSum(V*values);
+            break;
+        }
+        case opWeightedVolIntegrate:
+        {
+            if (returnReduce(weightField.empty(), andOp<bool>()))
+            {
+                result = gSum(V*values);
+            }
+            else
+            {
+                result = gSum(weightField*V*values);
+            }
             break;
         }
         case opMin:
@@ -145,9 +175,7 @@ Type Foam::functionObjects::fieldValues::volFieldValue::processValues
 
             Type meanValue = gSum(V*values)/sumV;
 
-            const label nComp = pTraits<Type>::nComponents;
-
-            for (direction d=0; d<nComp; ++d)
+            for (direction d=0; d < pTraits<Type>::nComponents; ++d)
             {
                 scalarField vals(values.component(d));
                 scalar mean = component(meanValue, d);
@@ -172,6 +200,7 @@ template<class Type>
 bool Foam::functionObjects::fieldValues::volFieldValue::writeValues
 (
     const word& fieldName,
+    const scalarField& V,
     const scalarField& weightField
 )
 {
@@ -180,7 +209,6 @@ bool Foam::functionObjects::fieldValues::volFieldValue::writeValues
     if (ok)
     {
         Field<Type> values(getFieldValues<Type>(fieldName));
-        scalarField V(filterField(fieldValue::mesh_.V()));
 
         if (writeFields_)
         {

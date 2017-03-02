@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,7 @@ License
 #include "mergePoints.H"
 #include "indirectPrimitivePatch.H"
 #include "PatchTools.H"
+#include "meshedSurfRef.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -52,11 +53,12 @@ template<>
 const char* Foam::NamedEnum
 <
     Foam::functionObjects::fieldValues::surfaceFieldValue::regionTypes,
-    3
+    4
 >::names[] =
 {
     "faceZone",
     "patch",
+    "surface",
     "sampledSurface"
 };
 
@@ -64,12 +66,13 @@ template<>
 const char* Foam::NamedEnum
 <
     Foam::functionObjects::fieldValues::surfaceFieldValue::operationType,
-    16
+    17
 >::names[] =
 {
     "none",
     "sum",
     "sumMag",
+    "weightedSum",
     "sumDirection",
     "sumDirectionBalance",
     "average",
@@ -100,13 +103,13 @@ const char* Foam::NamedEnum
 const Foam::NamedEnum
 <
     Foam::functionObjects::fieldValues::surfaceFieldValue::regionTypes,
-    3
+    4
 > Foam::functionObjects::fieldValues::surfaceFieldValue::regionTypeNames_;
 
 const Foam::NamedEnum
 <
     Foam::functionObjects::fieldValues::surfaceFieldValue::operationType,
-    16
+    17
 > Foam::functionObjects::fieldValues::surfaceFieldValue::operationTypeNames_;
 
 const Foam::NamedEnum
@@ -119,9 +122,23 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::postOperationTypeNames_;
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+const Foam::objectRegistry&
+Foam::functionObjects::fieldValues::surfaceFieldValue::obr() const
+{
+    if (regionType_ == stSurface)
+    {
+        return mesh_.lookupObject<objectRegistry>(regionName_);
+    }
+    else
+    {
+        return mesh_;
+    }
+}
+
+
 void Foam::functionObjects::fieldValues::surfaceFieldValue::setFaceZoneFaces()
 {
-    label zoneId = mesh_.faceZones().findZoneID(regionName_);
+    const label zoneId = mesh_.faceZones().findZoneID(regionName_);
 
     if (zoneId < 0)
     {
@@ -137,11 +154,11 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::setFaceZoneFaces()
 
     DynamicList<label> faceIds(fZone.size());
     DynamicList<label> facePatchIds(fZone.size());
-    DynamicList<label> faceSigns(fZone.size());
+    DynamicList<bool>  faceFlip(fZone.size());
 
     forAll(fZone, i)
     {
-        label facei = fZone[i];
+        const label facei = fZone[i];
 
         label faceId = -1;
         label facePatchId = -1;
@@ -178,22 +195,15 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::setFaceZoneFaces()
 
         if (faceId >= 0)
         {
-            if (fZone.flipMap()[i])
-            {
-                faceSigns.append(-1);
-            }
-            else
-            {
-                faceSigns.append(1);
-            }
             faceIds.append(faceId);
             facePatchIds.append(facePatchId);
+            faceFlip.append(fZone.flipMap()[i] ? true : false);
         }
     }
 
     faceId_.transfer(faceIds);
     facePatchId_.transfer(facePatchIds);
-    faceSign_.transfer(faceSigns);
+    faceFlip_.transfer(faceFlip);
     nFaces_ = returnReduce(faceId_.size(), sumOp<label>());
 
     if (debug)
@@ -229,31 +239,15 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::setPatchFaces()
 
     faceId_.setSize(nFaces);
     facePatchId_.setSize(nFaces);
-    faceSign_.setSize(nFaces);
+    faceFlip_.setSize(nFaces);
     nFaces_ = returnReduce(faceId_.size(), sumOp<label>());
 
     forAll(faceId_, facei)
     {
         faceId_[facei] = facei;
         facePatchId_[facei] = patchid;
-        faceSign_[facei] = 1;
+        faceFlip_[facei] = false;
     }
-}
-
-
-void Foam::functionObjects::fieldValues::surfaceFieldValue::sampledSurfaceFaces
-(
-    const dictionary& dict
-)
-{
-    surfacePtr_ = sampledSurface::New
-    (
-        name(),
-        mesh_,
-        dict.subDict("sampledSurfaceDict")
-    );
-    surfacePtr_().update();
-    nFaces_ = returnReduce(surfacePtr_().faces().size(), sumOp<label>());
 }
 
 
@@ -385,14 +379,44 @@ combineSurfaceGeometry
     pointField& points
 ) const
 {
-    if (surfacePtr_.valid())
+    if (regionType_ == stSurface)
+    {
+        const surfMesh& s = dynamicCast<const surfMesh>(obr());
+
+        if (Pstream::parRun())
+        {
+            // Dimension as fraction of surface
+            const scalar mergeDim = 1e-10*boundBox(s.points(), true).mag();
+
+            labelList pointsMap;
+
+            PatchTools::gatherAndMerge
+            (
+                mergeDim,
+                primitivePatch
+                (
+                    SubList<face>(s.faces(), s.faces().size()),
+                    s.points()
+                ),
+                points,
+                faces,
+                pointsMap
+            );
+        }
+        else
+        {
+            faces = s.faces();
+            points = s.points();
+        }
+    }
+    else if (surfacePtr_.valid())
     {
         const sampledSurface& s = surfacePtr_();
 
         if (Pstream::parRun())
         {
             // Dimension as fraction of mesh bounding box
-            scalar mergeDim = 1e-10*mesh_.bounds().mag();
+            const scalar mergeDim = 1e-10*mesh_.bounds().mag();
 
             labelList pointsMap;
 
@@ -423,7 +447,13 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::totalArea() const
 {
     scalar totalArea;
 
-    if (surfacePtr_.valid())
+    if (regionType_ == stSurface)
+    {
+        const surfMesh& s = dynamicCast<const surfMesh>(obr());
+
+        totalArea = gSum(s.magSf());
+    }
+    else if (surfacePtr_.valid())
     {
         totalArea = gSum(surfacePtr_().magSf());
     }
@@ -438,6 +468,42 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::totalArea() const
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+bool Foam::functionObjects::fieldValues::surfaceFieldValue::needsSf() const
+{
+    // Many operations use the Sf field
+    switch (operation_)
+    {
+        case opNone:
+        case opSum:
+        case opSumMag:
+        case opAverage:
+        case opMin:
+        case opMax:
+            return false;
+
+        default:
+            return true;
+    }
+}
+
+
+bool Foam::functionObjects::fieldValues::surfaceFieldValue::needsWeight() const
+{
+    // Only a few operations use weight field
+    switch (operation_)
+    {
+        case opWeightedSum:
+        case opWeightedAverage:
+        case opWeightedAreaAverage:
+        case opWeightedAreaIntegrate:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+
 void Foam::functionObjects::fieldValues::surfaceFieldValue::initialise
 (
     const dictionary& dict
@@ -450,16 +516,42 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::initialise
         case stFaceZone:
         {
             setFaceZoneFaces();
+            surfacePtr_.clear();
             break;
         }
         case stPatch:
         {
             setPatchFaces();
+            surfacePtr_.clear();
+            break;
+        }
+        case stSurface:
+        {
+            const surfMesh& s = dynamicCast<const surfMesh>(obr());
+            nFaces_ = returnReduce(s.size(), sumOp<label>());
+
+            faceId_.clear();
+            facePatchId_.clear();
+            faceFlip_.clear();
+            surfacePtr_.clear();
             break;
         }
         case stSampledSurface:
         {
-            sampledSurfaceFaces(dict);
+            faceId_.clear();
+            facePatchId_.clear();
+            faceFlip_.clear();
+
+            surfacePtr_ = sampledSurface::New
+            (
+                name(),
+                mesh_,
+                dict.subDict("sampledSurfaceDict")
+            );
+            surfacePtr_().update();
+            nFaces_ =
+                returnReduce(surfacePtr_().faces().size(), sumOp<label>());
+
             break;
         }
         default:
@@ -488,61 +580,93 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::initialise
     totalArea_ = totalArea();
 
     Info<< type() << " " << name() << ":" << nl
-        << "    total faces  = " << nFaces_ << nl
-        << "    total area   = " << totalArea_ << nl;
+        << "    operation     = ";
 
-    if (dict.readIfPresent("weightField", weightFieldName_))
+    if (postOperation_ != postOpNone)
     {
-        Info<< "    weight field = " << weightFieldName_ << nl;
-
-        if (regionType_ == stSampledSurface)
-        {
-            FatalIOErrorInFunction(dict)
-                << "Cannot use weightField for a sampledSurface"
-                << exit(FatalIOError);
-        }
+        Info<< postOperationTypeNames_[postOperation_] << '('
+            << operationTypeNames_[operation_] << ')'  << nl;
     }
-
-    if (dict.found("orientedWeightField"))
+    else
     {
-        if (weightFieldName_ == "none")
+        Info<< operationTypeNames_[operation_] << nl;
+    }
+    Info<< "    total faces   = " << nFaces_ << nl
+        << "    total area    = " << totalArea_ << nl;
+
+
+    weightFieldName_ = "none";
+    orientWeightField_ = false;
+    if (needsWeight())
+    {
+        if (dict.readIfPresent("weightField", weightFieldName_))
         {
-            dict.lookup("orientedWeightField") >>  weightFieldName_;
-            Info<< "    weight field = " << weightFieldName_ << nl;
-            orientWeightField_ = true;
+            if (regionType_ == stSampledSurface)
+            {
+                FatalIOErrorInFunction(dict)
+                    << "Cannot use weightField for sampledSurface"
+                    << exit(FatalIOError);
+            }
+
+            Info<< "    weight field  = " << weightFieldName_ << nl;
         }
-        else
+
+        if (dict.found("orientedWeightField"))
         {
-            FatalIOErrorInFunction(dict)
-                << "Either weightField or orientedWeightField can be supplied, "
-                << "but not both"
-                << exit(FatalIOError);
+            if (regionType_ == stSurface || regionType_ == stSampledSurface)
+            {
+                FatalIOErrorInFunction(dict)
+                    << "Cannot use orientedWeightField "
+                    << "for surface/sampledSurface"
+                    << exit(FatalIOError);
+            }
+
+            if (weightFieldName_ == "none")
+            {
+                dict.lookup("orientedWeightField") >> weightFieldName_;
+                orientWeightField_ = true;
+
+                Info<< "    weight field  = " << weightFieldName_ << nl;
+            }
+            else
+            {
+                FatalIOErrorInFunction(dict)
+                    << "Cannot specify both weightField and orientedWeightField"
+                    << exit(FatalIOError);
+            }
         }
     }
 
     List<word> orientedFields;
+    orientedFieldsStart_ = labelMax;
     if (dict.readIfPresent("orientedFields", orientedFields))
     {
         orientedFieldsStart_ = fields_.size();
         fields_.append(orientedFields);
     }
 
-    Info<< nl << endl;
-
+    surfaceWriterPtr_.clear();
     if (writeFields_)
     {
         const word surfaceFormat(dict.lookup("surfaceFormat"));
 
-        surfaceWriterPtr_.reset
-        (
-            surfaceWriter::New
+        if (surfaceFormat != "none")
+        {
+            surfaceWriterPtr_.reset
             (
-                surfaceFormat,
-                dict.subOrEmptyDict("formatOptions").
-                    subOrEmptyDict(surfaceFormat)
-            ).ptr()
-        );
+                surfaceWriter::New
+                (
+                    surfaceFormat,
+                    dict.subOrEmptyDict("formatOptions").
+                        subOrEmptyDict(surfaceFormat)
+                ).ptr()
+            );
+
+            Info<< "    surfaceFormat = " << surfaceFormat << nl;
+        }
     }
+
+    Info<< nl << endl;
 }
 
 
@@ -583,8 +707,8 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::writeFileHeader
 
 
 template<>
-Foam::scalar Foam::functionObjects::fieldValues::surfaceFieldValue::
-processValues
+Foam::scalar
+Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
 (
     const Field<scalar>& values,
     const vectorField& Sf,
@@ -615,8 +739,8 @@ processValues
 
 
 template<>
-Foam::vector Foam::functionObjects::fieldValues::surfaceFieldValue::
-processValues
+Foam::vector
+Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
 (
     const Field<vector>& values,
     const vectorField& Sf,
@@ -629,33 +753,85 @@ processValues
         {
             vector n(dict_.lookup("direction"));
             n /= mag(n) + ROOTVSMALL;
-            const scalarField nv(n & values);
 
+            const scalarField nv(n & values);
             return gSum(pos(nv)*n*(nv));
         }
         case opSumDirectionBalance:
         {
             vector n(dict_.lookup("direction"));
             n /= mag(n) + ROOTVSMALL;
-            const scalarField nv(n & values);
 
+            const scalarField nv(n & values);
             return gSum(pos(nv)*n*(nv));
         }
         case opAreaNormalAverage:
         {
-            scalar result = gSum(values & Sf)/gSum(mag(Sf));
-            return vector(result, 0.0, 0.0);
+            const scalar val = gSum(values & Sf)/gSum(mag(Sf));
+            return vector(val, 0, 0);
         }
         case opAreaNormalIntegrate:
         {
-            scalar result = gSum(values & Sf);
-            return vector(result, 0.0, 0.0);
+            const scalar val = gSum(values & Sf);
+            return vector(val, 0, 0);
         }
         default:
         {
             // Fall through to other operations
             return processSameTypeValues(values, Sf, weightField);
         }
+    }
+}
+
+
+template<>
+Foam::tmp<Foam::scalarField>
+Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
+(
+    const Field<scalar>& weightField
+)
+{
+    // pass through
+    return weightField;
+}
+
+
+template<>
+Foam::tmp<Foam::scalarField>
+Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
+(
+    const Field<scalar>& weightField,
+    const vectorField& Sf
+)
+{
+    // scalar * Area
+    if (returnReduce(weightField.empty(), andOp<bool>()))
+    {
+        return mag(Sf);
+    }
+    else
+    {
+        return weightField * mag(Sf);
+    }
+}
+
+
+template<>
+Foam::tmp<Foam::scalarField>
+Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
+(
+    const Field<vector>& weightField,
+    const vectorField& Sf
+)
+{
+    // vector (dot) Area
+    if (returnReduce(weightField.empty(), andOp<bool>()))
+    {
+        return mag(Sf);
+    }
+    else
+    {
+        return weightField & Sf;
     }
 }
 
@@ -670,7 +846,6 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
 )
 :
     fieldValue(name, runTime, dict, typeName),
-    surfaceWriterPtr_(nullptr),
     regionType_(regionTypeNames_.read(dict.lookup("regionType"))),
     operation_(operationTypeNames_.read(dict.lookup("operation"))),
     postOperation_
@@ -685,7 +860,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
     nFaces_(0),
     faceId_(),
     facePatchId_(),
-    faceSign_()
+    faceFlip_()
 {
     read(dict);
     writeFileHeader(file());
@@ -700,7 +875,6 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
 )
 :
     fieldValue(name, obr, dict, typeName),
-    surfaceWriterPtr_(nullptr),
     regionType_(regionTypeNames_.read(dict.lookup("regionType"))),
     operation_(operationTypeNames_.read(dict.lookup("operation"))),
     postOperation_
@@ -715,7 +889,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
     nFaces_(0),
     faceId_(),
     facePatchId_(),
-    faceSign_()
+    faceFlip_()
 {
     read(dict);
     writeFileHeader(file());
@@ -744,66 +918,111 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
 
 bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
 {
-    if (operation_ != opNone)
-    {
-        fieldValue::write();
-    }
-
     if (surfacePtr_.valid())
     {
         surfacePtr_().update();
     }
 
-    if (operation_ != opNone && Pstream::master())
+    if (operation_ != opNone)
     {
-        writeTime(file());
+        fieldValue::write();
+
+        if (Pstream::master())
+        {
+            writeTime(file());
+        }
     }
 
     if (writeArea_)
     {
         totalArea_ = totalArea();
+        Log << "    total area = " << totalArea_ << endl;
+
         if (operation_ != opNone && Pstream::master())
         {
             file() << tab << totalArea_;
         }
-        Log << "    total area = " << totalArea_ << endl;
     }
 
-    // Construct weight field. Note: zero size means weight = 1
-    scalarField weightField;
+    // Many operations use the Sf field
+    vectorField Sf;
+    if (needsSf())
+    {
+        if (regionType_ == stSurface)
+        {
+            const surfMesh& s = dynamicCast<const surfMesh>(obr());
+            Sf = s.Sf();
+        }
+        else if (surfacePtr_.valid())
+        {
+            Sf = surfacePtr_().Sf();
+        }
+        else
+        {
+            Sf = filterField(mesh_.Sf(), true); // Oriented Sf
+        }
+    }
+
+    // Faces and points for surface format (if specified)
+    faceList faces;
+    pointField points;
+
+    if (surfaceWriterPtr_.valid())
+    {
+        if (regionType_ == stSurface || surfacePtr_.valid())
+        {
+            combineSurfaceGeometry(faces, points);
+        }
+        else
+        {
+            combineMeshGeometry(faces, points);
+        }
+    }
+
+    meshedSurfRef surfToWrite(points, faces);
+
+    // Only a few weight types (scalar, vector)
     if (weightFieldName_ != "none")
     {
-        weightField =
-            getFieldValues<scalar>
+        if (validField<scalar>(weightFieldName_))
+        {
+            scalarField weightField = getFieldValues<scalar>
             (
                 weightFieldName_,
                 true,
                 orientWeightField_
             );
-    }
 
-
-    // Process the fields
-    forAll(fields_, i)
-    {
-        const word& fieldName = fields_[i];
-        bool ok = false;
-
-        bool orient = i >= orientedFieldsStart_;
-        ok = ok || writeValues<scalar>(fieldName, weightField, orient);
-        ok = ok || writeValues<vector>(fieldName, weightField, orient);
-        ok = ok
-          || writeValues<sphericalTensor>(fieldName, weightField, orient);
-        ok = ok || writeValues<symmTensor>(fieldName, weightField, orient);
-        ok = ok || writeValues<tensor>(fieldName, weightField, orient);
-
-        if (!ok)
-        {
-            WarningInFunction
-                << "Requested field " << fieldName
-                << " not found in database and not processed"
-                << endl;
+            // Process the fields
+            writeAll(Sf, weightField, surfToWrite);
         }
+        else if (validField<vector>(weightFieldName_))
+        {
+            vectorField weightField = getFieldValues<vector>
+            (
+                weightFieldName_,
+                true,
+                orientWeightField_
+            );
+
+            // Process the fields
+            writeAll(Sf, weightField, surfToWrite);
+        }
+        else
+        {
+            FatalErrorInFunction
+                << "weightField " << weightFieldName_
+                << " not found or an unsupported type"
+                << abort(FatalError);
+        }
+    }
+    else
+    {
+        // Default is a zero-size scalar weight field (ie, weight = 1)
+        scalarField weightField;
+
+        // Process the fields
+        writeAll(Sf, weightField, surfToWrite);
     }
 
     if (operation_ != opNone && Pstream::master())

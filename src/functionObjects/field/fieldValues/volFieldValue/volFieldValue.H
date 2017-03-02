@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,12 +82,14 @@ Usage
     \plaintable
        none               | No operation
        sum                | Sum
+       weightedSum        | Weighted sum
        sumMag             | Sum of component magnitudes
        average            | Ensemble average
        weightedAverage    | Weighted average
        volAverage         | Volume weighted average
        weightedVolAverage | Weighted volume average
        volIntegrate       | Volume integral
+       weightedVolIntegrate | Weighted volume integral
        min                | Minimum
        max                | Maximum
        CoV                | Coefficient of variation: standard deviation/mean
@@ -135,21 +137,23 @@ public:
         //- Operation type enumeration
         enum operationType
         {
-            opNone,
-            opSum,
-            opSumMag,
-            opAverage,
-            opWeightedAverage,
-            opVolAverage,
-            opWeightedVolAverage,
-            opVolIntegrate,
-            opMin,
-            opMax,
-            opCoV
+            opNone,                 //!< None
+            opSum,                  //!< Sum
+            opWeightedSum,          //!< Weighted sum
+            opSumMag,               //!< Magnitude of sum
+            opAverage,              //!< Average
+            opWeightedAverage,      //!< Weighted average
+            opVolAverage,           //!< Volume average
+            opWeightedVolAverage,   //!< Weighted volume average
+            opVolIntegrate,         //!< Volume integral
+            opWeightedVolIntegrate, //!< Weighted volume integral
+            opMin,                  //!< Minimum
+            opMax,                  //!< Maximum
+            opCoV                   //!< Coefficient of variation
         };
 
         //- Operation type names
-        static const NamedEnum<operationType, 11> operationTypeNames_;
+        static const NamedEnum<operationType, 13> operationTypeNames_;
 
 
 protected:
@@ -164,6 +168,12 @@ protected:
 
 
     // Protected Member Functions
+
+        //- True if the specified operation needs the cell-volume
+        bool needsVol() const;
+
+        //- True if the specified operation needs a weight-field
+        bool needsWeight() const;
 
         //- Initialise, e.g. cell addressing
         void initialise(const dictionary& dict);
@@ -189,9 +199,29 @@ protected:
             const scalarField& weightField
         ) const;
 
+        //- Helper function to output field values
+        label writeAll
+        (
+            const scalarField& V,
+            const scalarField& weightField
+        );
+
+        //- Templated helper function to output field values
+        template<class Type>
+        bool writeValues
+        (
+            const word& fieldName,
+            const scalarField& V,
+            const scalarField& weightField
+        );
+
+        //- Filter a field according to cellIds
+        template<class Type>
+        tmp<Field<Type>> filterField(const Field<Type>& field) const;
+
+
         //- Output file header information
         virtual void writeFileHeader(Ostream& os) const;
-
 
 public:
 
@@ -224,19 +254,11 @@ public:
 
     // Public Member Functions
 
-        //- Templated helper function to output field values
-        template<class Type>
-        bool writeValues(const word& fieldName, const scalarField& weightField);
-
-        //- Filter a field according to cellIds
-        template<class Type>
-        tmp<Field<Type>> filterField(const Field<Type>& field) const;
-
         //- Read from dictionary
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict) override;
 
         //- Calculate and write
-        virtual bool write();
+        virtual bool write() override;
 };
 
 

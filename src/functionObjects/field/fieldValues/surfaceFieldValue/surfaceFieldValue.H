@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,6 +98,7 @@ Usage
     \plaintable
         faceZone     | requires a 'name' entry to specify the faceZone
         patch        | requires a 'name' entry to specify the patch
+        surface      | requires a 'name' entry to specify the surfMesh
         sampledSurface | requires a 'sampledSurfaceDict' sub-dictionary
     \endplaintable
 
@@ -105,6 +106,7 @@ Usage
     \plaintable
        none          | no operation
        sum           | sum
+       weightedSum   | weighted sum
        sumMag        | sum of component magnitudes
        sumDirection  | sum values which are positive in given direction
        sumDirectionBalance | sum of balance of values in given direction
@@ -130,6 +132,9 @@ Note
       faces
     - the `oriented' entries relate to mesh-oriented fields, such as the
       flux, phi.  These fields will be oriented according to the face normals.
+    - Using \c surface:
+      - The keyword %subRegion should not be used to select surfaces.
+        Specify instead the regionType 'surface' and provide the surface name.
     - using \c sampledSurface:
         - not available for surface fields
         - if interpolate=true they use \c interpolationCellPoint
@@ -155,7 +160,7 @@ SourceFiles
 
 #include "fieldValue.H"
 #include "NamedEnum.H"
-#include "faceList.H"
+#include "meshedSurf.H"
 #include "surfaceMesh.H"
 #include "fvsPatchField.H"
 #include "volFieldsFwd.H"
@@ -182,21 +187,21 @@ class surfaceFieldValue
 :
     public fieldValue
 {
-
 public:
 
     // Public data types
 
-        //- region type enumeration
+        //- Region type enumeration
         enum regionTypes
         {
             stFaceZone,
             stPatch,
+            stSurface,
             stSampledSurface
         };
 
-        //- region type names
-        static const NamedEnum<regionTypes, 3> regionTypeNames_;
+        //- Region type names
+        static const NamedEnum<regionTypes, 4> regionTypeNames_;
 
 
         //- Operation type enumeration
@@ -204,6 +209,7 @@ public:
         {
             opNone,                 //!< None
             opSum,                  //!< Sum
+            opWeightedSum,          //!< Weighted sum
             opSumMag,               //!< Magnitude of sum
             opSumDirection,         //!< Sum in a given direction
             opSumDirectionBalance,  //!< Sum in a given direction for multiple
@@ -221,7 +227,7 @@ public:
         };
 
         //- Operation type names
-        static const NamedEnum<operationType, 16> operationTypeNames_;
+        static const NamedEnum<operationType, 17> operationTypeNames_;
 
 
         //- Post-operation type enumeration
@@ -245,9 +251,6 @@ private:
         //- Set faces to evaluate based on a patch
         void setPatchFaces();
 
-        //- Set faces according to sampledSurface
-        void sampledSurfaceFaces(const dictionary&);
-
         //- Combine mesh faces and points from multiple processors
         void combineMeshGeometry
         (
@@ -270,10 +273,7 @@ protected:
 
     // Protected data
 
-        //- Surface writer
-        autoPtr<surfaceWriter> surfaceWriterPtr_;
-
-        //- region type
+        //- Region type
         regionTypes regionType_;
 
         //- Operation to apply to values
@@ -309,23 +309,42 @@ protected:
             //- Local list of patch ID per face
             labelList facePatchId_;
 
-            //- List of +1/-1 representing face flip map
-            //  (1 use as is, -1 negate)
-            labelList faceSign_;
+            //- List representing the face flip map
+            //  (false: use as-is, true: negate)
+            boolList faceFlip_;
 
 
-        // If operating on sampledSurface
+        //- Underlying sampledSurface (if operating on sampledSurface)
+        autoPtr<sampledSurface> surfacePtr_;
 
-            //- Underlying sampledSurface
-            autoPtr<sampledSurface> surfacePtr_;
+        //- Surface writer
+        autoPtr<surfaceWriter> surfaceWriterPtr_;
 
 
     // Protected Member Functions
 
+        //- The volume mesh or surface registry being used
+        const objectRegistry& obr() const override;
+
+        //- Return the local list of face IDs
+        inline const labelList& faceId() const;
+
+        //- Return the local list of patch ID per face
+        inline const labelList& facePatch() const;
+
+        //- Return the local true/false list representing the face flip map
+        inline const boolList& faceFlip() const;
+
+        //- True if the specified operation needs a surface Sf
+        bool needsSf() const;
+
+        //- True if the specified operation needs a weight-field
+        bool needsWeight() const;
+
         //- Initialise, e.g. face addressing
         void initialise(const dictionary& dict);
 
-        //- Return true if the field name is valid
+        //- Return true if the field name is known and a valid type
         template<class Type>
         bool validField(const word& fieldName) const;
 
@@ -338,25 +357,77 @@ protected:
             const bool applyOrientation = false
         ) const;
 
-        //- Apply the 'operation' to the values. Operation has to
-        //  preserve Type.
-        template<class Type>
+        //- Apply the 'operation' to the values. Operation must preserve Type.
+        template<class Type, class WeightType>
         Type processSameTypeValues
         (
             const Field<Type>& values,
             const vectorField& Sf,
-            const scalarField& weightField
+            const Field<WeightType>& weightField
         ) const;
 
         //- Apply the 'operation' to the values. Wrapper around
         //  processSameTypeValues. See also template specialisation below.
-        template<class Type>
+        template<class Type, class WeightType>
         Type processValues
         (
             const Field<Type>& values,
             const vectorField& Sf,
-            const scalarField& weightField
+            const Field<WeightType>& weightField
         ) const;
+
+        //- Filter a surface field according to faceIds
+        template<class Type>
+        tmp<Field<Type>> filterField
+        (
+            const GeometricField<Type, fvsPatchField, surfaceMesh>& field,
+            const bool applyOrientation
+        ) const;
+
+        //- Filter a volume field according to faceIds
+        template<class Type>
+        tmp<Field<Type>> filterField
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& field,
+            const bool applyOrientation
+        ) const;
+
+        //- Weighting factor
+        template<class WeightType>
+        static tmp<scalarField> weightingFactor
+        (
+            const Field<WeightType>& weightField
+        );
+
+        //- Weighting factor, weight field with the area
+        template<class WeightType>
+        static tmp<scalarField> weightingFactor
+        (
+            const Field<WeightType>& weightField,
+            const vectorField& Sf
+        );
+
+
+        //- Templated helper function to output field values
+        template<class WeightType>
+        label writeAll
+        (
+            const vectorField& Sf,
+            const Field<WeightType>& weightField,
+            const meshedSurf& surfToWrite
+        );
+
+        //- Templated helper function to output field values
+        template<class Type, class WeightType>
+        bool writeValues
+        (
+            const word& fieldName,
+            const vectorField& Sf,
+            const Field<WeightType>& weightField,
+            const bool orient,
+            const meshedSurf& surfToWrite
+        );
+
 
         //- Output file header information
         virtual void writeFileHeader(Ostream& os) const;
@@ -396,52 +467,18 @@ public:
         //- Return the region type
         inline const regionTypes& regionType() const;
 
-        //- Return the local list of face IDs
-        inline const labelList& faceId() const;
-
-        //- Return the local list of patch ID per face
-        inline const labelList& facePatch() const;
-
-        //- Return the list of +1/-1 representing face flip map
-        inline const labelList& faceSign() const;
-
         //- Return the output directory
         inline fileName outputDir() const;
 
-        //- Templated helper function to output field values
-        template<class Type, class WeightType>
-        bool writeValues
-        (
-            const word& fieldName,
-            const Field<WeightType>& weightField,
-            const bool orient
-        );
-
-        //- Filter a surface field according to faceIds
-        template<class Type>
-        tmp<Field<Type>> filterField
-        (
-            const GeometricField<Type, fvsPatchField, surfaceMesh>& field,
-            const bool applyOrientation
-        ) const;
-
-        //- Filter a volume field according to faceIds
-        template<class Type>
-        tmp<Field<Type>> filterField
-        (
-            const GeometricField<Type, fvPatchField, volMesh>& field,
-            const bool applyOrientation
-        ) const;
-
         //- Read from dictionary
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict) override;
 
         //- Calculate and write
-        virtual bool write();
+        virtual bool write() override;
 };
 
 
-//- Specialisation for scalar
+//- Specialisation for scalar fields
 template<>
 scalar surfaceFieldValue::processValues
 (
@@ -451,7 +488,7 @@ scalar surfaceFieldValue::processValues
 ) const;
 
 
-//- Specialisation for vector
+//- Specialisation for vector fields
 template<>
 vector surfaceFieldValue::processValues
 (
@@ -459,6 +496,32 @@ vector surfaceFieldValue::processValues
     const vectorField& Sf,
     const scalarField& weightField
 ) const;
+
+
+//- Specialisation for scalar - pass through
+template<>
+tmp<scalarField> surfaceFieldValue::weightingFactor
+(
+    const Field<scalar>& weightField
+);
+
+
+//- Specialisation for scalar - scalar * Area
+template<>
+tmp<scalarField> surfaceFieldValue::weightingFactor
+(
+    const Field<scalar>& weightField,
+    const vectorField& Sf
+);
+
+
+//- Specialisation for vector - vector (dot) Area
+template<>
+tmp<scalarField> surfaceFieldValue::weightingFactor
+(
+    const Field<vector>& weightField,
+    const vectorField& Sf
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
