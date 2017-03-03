@@ -123,7 +123,7 @@ protected:
         //- Upper frequency limit, default = 10kHz
         scalar fUpper_;
 
-        //- Flagto indicate that custom frequenct bounds are being used
+        //- Flag to indicate that custom frequenct bounds are being used
         bool customBounds_;
 
         //- Start time, default = 0s

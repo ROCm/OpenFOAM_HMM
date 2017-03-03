@@ -159,7 +159,11 @@ bool Foam::noiseModel::read(const dictionary& dict)
     dict.readIfPresent("rhoRef", rhoRef_);
     dict.readIfPresent("N", nSamples_);
     customBounds_ = false;
-    if (dict.readIfPresent("fl", fLower_) || dict.readIfPresent("fu", fUpper_))
+    if (dict.readIfPresent("fl", fLower_))
+    {
+        customBounds_ = true;
+    }
+    if (dict.readIfPresent("fu", fUpper_))
     {
         customBounds_ = true;
     }

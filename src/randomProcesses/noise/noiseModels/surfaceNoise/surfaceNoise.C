@@ -504,10 +504,16 @@ void surfaceNoise::calculate()
 
         Info<< "Creating noise FFTs" << endl;
 
+        const scalarField freq1(noiseFFT::frequencies(nSamples_, deltaT_));
+
+        // Reset desired frequency range if outside actual frequency range
+        fLower_ = min(fLower_, max(freq1));
+        fUpper_ = min(fUpper_, max(freq1));
+
         // Storage for FFT data
         const label nLocalFace = pData.size();
-        const scalarField freq1(noiseFFT::frequencies(nSamples_, deltaT_));
-        const label nFFT = freq1.size()/fftWriteInterval_;
+        const label nFFT = ceil(freq1.size()/scalar(fftWriteInterval_));
+
         List<scalarField> surfPrmsf(nFFT);
         List<scalarField> surfPSDf(nFFT);
         forAll(surfPrmsf, freqI)
@@ -563,7 +569,7 @@ void surfaceNoise::calculate()
             // Store the frequency results in slot for face of surface
             forAll(surfPrmsf, i)
             {
-                label freqI = (i + 1)*fftWriteInterval_ - 1;
+                label freqI = i*fftWriteInterval_;
                 surfPrmsf[i][faceI] = Prmsf.y()[freqI];
                 surfPSDf[i][faceI] = PSDf.y()[freqI];
             }
@@ -588,14 +594,24 @@ void surfaceNoise::calculate()
         fileName outDir(baseFileDir()/typeName/fNameBase);
 
         const scalar deltaf = 1.0/(deltaT_*win.nSamples());
-        Info<< "Writing fft surface data" << endl;
+        Info<< "Writing fft surface data";
+        if (fftWriteInterval_ == 1)
+        {
+            Info<< endl;
+        }
+        else
+        {
+            Info<< " at every " << fftWriteInterval_ << " frequency points"
+                << endl;
+        }
+
         {
             // Determine frequency range of interest
             // Note: freqencies have fixed interval, and are in the range
-            //       0 to (n-1)*deltaf
-            label f0 = ceil(fLower_/deltaf);
-            label f1 = floor(fUpper_/deltaf);
-            label nFreq = f1 - f0 + 1;
+            //       0 to fftWriteInterval_*(n-1)*deltaf
+            label f0 = ceil(fLower_/deltaf/fftWriteInterval_);
+            label f1 = floor(fUpper_/deltaf/fftWriteInterval_);
+            label nFreq = f0 == f1 ? 0 : f1 - f0 + 1;
 
             scalarField PrmsfAve(nFreq, 0);
             scalarField PSDfAve(nFreq, 0);
@@ -603,9 +619,10 @@ void surfaceNoise::calculate()
 
             for (label i = f0; i <= f1; ++i)
             {
-                label freqI = (i + 1)*fftWriteInterval_ - 1;
+                label freqI = i*fftWriteInterval_;
                 fOut[i] = freq1[freqI];
                 const word gName = "fft";
+
                 PrmsfAve[i] = writeSurfaceData
                 (
                     fNameBase,
