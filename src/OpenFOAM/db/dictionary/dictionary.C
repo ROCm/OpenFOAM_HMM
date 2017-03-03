@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,7 +100,7 @@ const Foam::entry* Foam::dictionary::lookupScopedSubEntryPtr
         else
         {
             // Extract the first word
-            word firstWord = keyword.substr(0, dotPos);
+            const word firstWord = keyword.substr(0, dotPos);
 
             const entry* entPtr = lookupScopedSubEntryPtr
             (
@@ -126,7 +126,7 @@ const Foam::entry* Foam::dictionary::lookupScopedSubEntryPtr
                     const entry* subEntPtr = lookupEntryPtr
                     (
                         keyword.substr(0, nextDotPos),
-                        false,  //recursive,
+                        false,
                         patternMatch
                     );
                     if (nextDotPos == string::npos)
@@ -617,9 +617,13 @@ const Foam::entry* Foam::dictionary::lookupScopedEntryPtr
 }
 
 
-bool Foam::dictionary::substituteScopedKeyword(const word& keyword)
+bool Foam::dictionary::substituteScopedKeyword
+(
+    const word& keyword,
+    bool mergeEntry
+)
 {
-    word varName = keyword(1, keyword.size()-1);
+    const word varName = keyword(1, keyword.size()-1);
 
     // Lookup the variable name in the given dictionary
     const entry* ePtr = lookupScopedEntryPtr(varName, true, true);
@@ -631,7 +635,7 @@ bool Foam::dictionary::substituteScopedKeyword(const word& keyword)
 
         forAllConstIter(IDLList<entry>, addDict, iter)
         {
-            add(iter());
+            add(iter(), mergeEntry);
         }
 
         return true;
