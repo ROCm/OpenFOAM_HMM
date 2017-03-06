@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "mappedPatchBase.H"
+#include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,7 +53,8 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     QrName_("undefined-Qr"),
     thicknessLayers_(0),
     kappaLayers_(0),
-    contactRes_(0)
+    contactRes_(0),
+    thermalInertia_(false)
 {
     this->refValue() = 0.0;
     this->refGrad() = 0.0;
@@ -76,7 +78,8 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     QrName_(psf.QrName_),
     thicknessLayers_(psf.thicknessLayers_),
     kappaLayers_(psf.kappaLayers_),
-    contactRes_(psf.contactRes_)
+    contactRes_(psf.contactRes_),
+    thermalInertia_(psf.thermalInertia_)
 {}
 
 
@@ -95,7 +98,8 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     QrName_(dict.lookupOrDefault<word>("Qr", "none")),
     thicknessLayers_(0),
     kappaLayers_(0),
-    contactRes_(0.0)
+    contactRes_(0.0),
+    thermalInertia_(dict.lookupOrDefault<bool>("thermalInertia", false))
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
     {
@@ -156,7 +160,8 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     QrName_(psf.QrName_),
     thicknessLayers_(psf.thicknessLayers_),
     kappaLayers_(psf.kappaLayers_),
-    contactRes_(psf.contactRes_)
+    contactRes_(psf.contactRes_),
+    thermalInertia_(psf.thermalInertia_)
 {}
 
 
@@ -168,6 +173,8 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
     {
         return;
     }
+
+    const polyMesh& mesh = patch().boundaryMesh().mesh();
 
     // Since we're inside initEvaluate/evaluate there might be processor
     // comms underway. Change the tag we use.
@@ -225,9 +232,70 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
         mpp.distribute(QrNbr);
     }
 
+    // inertia therm
+    scalarField mCpDtNbr(Tp.size(), 0.0);
+    scalarField mCpDt(Tp.size(), 0.0);
+    if (thermalInertia_)
+    {
+        const scalar dt = mesh.time().deltaTValue();
+        if
+        (
+            nbrMesh.foundObject<basicThermo>(basicThermo::dictName)
+        )
+        {
+            const basicThermo& thermo =
+                nbrMesh.lookupObject<basicThermo>(basicThermo::dictName);
+
+            const scalarField Cpp =
+                thermo.Cp()().boundaryField()[nbrPatch.index()];
+
+            const scalarField rhop =
+                thermo.rho()().boundaryField()[nbrPatch.index()];
+
+            mCpDtNbr = Cpp*rhop/nbrPatch.deltaCoeffs()/dt;
+            mpp.distribute(mCpDtNbr);
+        }
+
+        // Local inertia therm
+        if
+        (
+            mesh.foundObject<basicThermo>(basicThermo::dictName)
+        )
+        {
+            const basicThermo& thermo =
+                mesh.lookupObject<basicThermo>(basicThermo::dictName);
+
+            const scalarField Cpp =
+                thermo.Cp()().boundaryField()[patch().index()];
+
+            const scalarField rhop =
+                thermo.rho()().boundaryField()[patch().index()];
+
+            mCpDt = Cpp*rhop/patch().deltaCoeffs()/dt;
+        }
+    }
+
+    const volScalarField& T =
+        this->db().lookupObject<volScalarField>
+        (
+            this->internalField().name()
+        );
+
+    const fvPatchField<scalar>& TpOld =
+        T.oldTime().boundaryField()[patch().index()];
+
+    scalarField alpha(KDeltaNbr + mCpDt + mCpDtNbr);
+
+    valueFraction() = alpha/(alpha + KDelta);
+    scalarField c(KDeltaNbr*TcNbr + (mCpDt + mCpDtNbr)*TpOld);
+    refValue() = c/alpha;
+    refGrad() = (Qr + QrNbr)/kappa(Tp);
+
+    /*
     valueFraction() = KDeltaNbr/(KDeltaNbr + KDelta);
     refValue() = TcNbr;
     refGrad() = (Qr + QrNbr)/kappa(Tp);
+    */
 
     mixedFvPatchScalarField::updateCoeffs();
 
@@ -263,6 +331,9 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::write
     os.writeKeyword("Tnbr")<< TnbrName_ << token::END_STATEMENT << nl;
     os.writeKeyword("QrNbr")<< QrNbrName_ << token::END_STATEMENT << nl;
     os.writeKeyword("Qr")<< QrName_ << token::END_STATEMENT << nl;
+    os.writeKeyword("thermalInertia")
+        << thermalInertia_ << token::END_STATEMENT << nl;
+
     thicknessLayers_.writeEntry("thicknessLayers", os);
     kappaLayers_.writeEntry("kappaLayers", os);
 

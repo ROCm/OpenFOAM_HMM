@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +44,7 @@ Usage
         kappaLayers  | list of thermal conductivites per layer [W/m/K] | no |
         kappaMethod  | inherited from temperatureCoupledBase | inherited |
         kappa        | inherited from temperatureCoupledBase | inherited |
+        thermalInertia | Add thermal inertia to wall node | no | false
     \endtable
 
     Example of the boundary condition specification:
@@ -56,6 +57,7 @@ Usage
         Qr              Qr; // or none. Name of Qr field on local region
         thicknessLayers (0.1 0.2 0.3 0.4);
         kappaLayers     (1 2 3 4);
+        thermalInertia  false/true;
         kappaMethod     lookup;
         kappa           kappa;
         value           uniform 300;
@@ -114,6 +116,9 @@ class turbulentTemperatureRadCoupledMixedFvPatchScalarField
 
         //- Total contact resistance
         scalar contactRes_;
+
+        //- Thermal inertia term
+        bool thermalInertia_;
 
 
 public:
