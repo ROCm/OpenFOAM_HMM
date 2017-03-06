@@ -617,53 +617,62 @@ void surfaceNoise::calculate()
             scalarField PSDfAve(nFreq, 0);
             scalarField fOut(nFreq, 0);
 
-            for (label i = f0; i <= f1; ++i)
+            if (nFreq == 0)
             {
-                label freqI = i*fftWriteInterval_;
-                fOut[i] = freq1[freqI];
-                const word gName = "fft";
+                WarningInFunction
+                    << "No surface data available using a fftWriteInterval of "
+                    << fftWriteInterval_ << endl;
+            }
+            else
+            {
+                for (label i = f0; i <= f1; ++i)
+                {
+                    label freqI = i*fftWriteInterval_;
+                    fOut[i] = freq1[freqI];
+                    const word gName = "fft";
 
-                PrmsfAve[i] = writeSurfaceData
-                (
-                    fNameBase,
-                    gName,
-                    "Prmsf",
-                    freq1[freqI],
-                    surfPrmsf[i],
-                    procFaceOffset,
-                    writePrmsf_
-                );
+                    PrmsfAve[i] = writeSurfaceData
+                    (
+                        fNameBase,
+                        gName,
+                        "Prmsf",
+                        freq1[freqI],
+                        surfPrmsf[i],
+                        procFaceOffset,
+                        writePrmsf_
+                    );
 
-                PSDfAve[i] = writeSurfaceData
-                (
-                    fNameBase,
-                    gName,
-                    "PSDf",
-                    freq1[freqI],
-                    surfPSDf[i],
-                    procFaceOffset,
-                    writePSDf_
-                );
-                writeSurfaceData
-                (
-                    fNameBase,
-                    gName,
-                    "PSD",
-                    freq1[freqI],
-                    noiseFFT::PSD(surfPSDf[i]),
-                    procFaceOffset,
-                    writePSD_
-                );
-                writeSurfaceData
-                (
-                    fNameBase,
-                    gName,
-                    "SPL",
-                    freq1[freqI],
-                    noiseFFT::SPL(surfPSDf[i]*deltaf),
-                    procFaceOffset,
-                    writeSPL_
-                );
+                    PSDfAve[i] = writeSurfaceData
+                    (
+                        fNameBase,
+                        gName,
+                        "PSDf",
+                        freq1[freqI],
+                        surfPSDf[i],
+                        procFaceOffset,
+                        writePSDf_
+                    );
+                    writeSurfaceData
+                    (
+                        fNameBase,
+                        gName,
+                        "PSD",
+                        freq1[freqI],
+                        noiseFFT::PSD(surfPSDf[i]),
+                        procFaceOffset,
+                        writePSD_
+                    );
+                    writeSurfaceData
+                    (
+                        fNameBase,
+                        gName,
+                        "SPL",
+                        freq1[freqI],
+                        noiseFFT::SPL(surfPSDf[i]*deltaf),
+                        procFaceOffset,
+                        writeSPL_
+                    );
+                }
             }
 
             graph Prmsfg
