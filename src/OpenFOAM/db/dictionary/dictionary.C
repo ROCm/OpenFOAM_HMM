@@ -60,114 +60,101 @@ const Foam::entry* Foam::dictionary::lookupScopedSubEntryPtr
         // Non-scoped lookup
         return lookupEntryPtr(keyword, recursive, patternMatch);
     }
-    else
+    else if (dotPos == 0)
     {
-        if (dotPos == 0)
+        // Starting with a '.' -> go up for every further '.' found
+        ++dotPos;
+
+        const dictionary* dictPtr = this;
+        for
+        (
+            string::const_iterator it = keyword.begin()+1;
+            it != keyword.end() && *it == '.';
+            ++dotPos, ++it
+        )
         {
-            // Starting with a '.'. Go up for every 2nd '.' found
-
-            const dictionary* dictPtr = this;
-
-            string::size_type begVar = dotPos + 1;
-            string::const_iterator iter = keyword.begin() + begVar;
-            string::size_type endVar = begVar;
-            while (iter != keyword.end() && *iter == '.')
+            // Go to parent
+            if (&dictPtr->parent_ != &dictionary::null)
             {
-                ++iter;
-                ++endVar;
-
-                // Go to parent
-                if (&dictPtr->parent_ == &dictionary::null)
-                {
-                    FatalIOErrorInFunction
-                    (
-                        *this
-                    )   << "No parent of current dictionary"
-                        << " when searching for "
-                        << keyword.substr(begVar, keyword.size()-begVar)
-                        << exit(FatalIOError);
-                }
                 dictPtr = &dictPtr->parent_;
             }
+            else
+            {
+                FatalIOErrorInFunction
+                (
+                    *this
+                )   << "No parent of current dictionary when searching for "
+                    << keyword.substr(1)
+                    << exit(FatalIOError);
 
-            return dictPtr->lookupScopedSubEntryPtr
+                return nullptr;
+            }
+        }
+
+        return dictPtr->lookupScopedSubEntryPtr
+        (
+            keyword.substr(dotPos),
+            false,
+            patternMatch
+        );
+    }
+    else
+    {
+        // The first word
+        const entry* entPtr = lookupScopedSubEntryPtr
+        (
+            keyword.substr(0, dotPos),
+            false,
+            patternMatch
+        );
+
+        if (!entPtr)
+        {
+            // Fall back to finding key with '.' so e.g. if keyword is
+            // a.b.c.d it would try
+            // a.b, a.b.c, a.b.c.d
+
+            while (true)
+            {
+                dotPos = keyword.find('.', dotPos+1);
+
+                entPtr = lookupEntryPtr
+                (
+                    keyword.substr(0, dotPos),
+                    false,
+                    patternMatch
+                );
+
+                if (dotPos == string::npos)
+                {
+                    // Parsed the whole word. Return entry or null.
+                    return entPtr;
+                }
+
+                if (entPtr && entPtr->isDict())
+                {
+                    return entPtr->dict().lookupScopedSubEntryPtr
+                    (
+                        keyword.substr(dotPos),
+                        false,
+                        patternMatch
+                    );
+                }
+            }
+        }
+
+        if (entPtr->isDict())
+        {
+            return entPtr->dict().lookupScopedSubEntryPtr
             (
-                keyword.substr(endVar),
+                keyword.substr(dotPos),
                 false,
                 patternMatch
             );
         }
-        else
-        {
-            // Extract the first word
-            const word firstWord = keyword.substr(0, dotPos);
-
-            const entry* entPtr = lookupScopedSubEntryPtr
-            (
-                firstWord,
-                false,          //recursive
-                patternMatch
-            );
-
-            if (!entPtr)
-            {
-                // Fall back to finding key with '.' so e.g. if keyword is
-                // a.b.c.d it would try
-                // a.b, a.b.c, a.b.c.d
-
-                string::size_type nextDotPos = keyword.find
-                (
-                    '.',
-                    dotPos+1
-                );
-
-                while (true)
-                {
-                    const entry* subEntPtr = lookupEntryPtr
-                    (
-                        keyword.substr(0, nextDotPos),
-                        false,
-                        patternMatch
-                    );
-                    if (nextDotPos == string::npos)
-                    {
-                        // Parsed the whole word. Return entry or null.
-                        return subEntPtr;
-                    }
-
-                    if (subEntPtr && subEntPtr->isDict())
-                    {
-                        return subEntPtr->dict().lookupScopedSubEntryPtr
-                        (
-                            keyword.substr
-                            (
-                                nextDotPos,
-                                keyword.size()-nextDotPos
-                            ),
-                            false,
-                            patternMatch
-                        );
-                    }
-
-                    nextDotPos = keyword.find('.', nextDotPos+1);
-                }
-            }
-
-            if (entPtr->isDict())
-            {
-                return entPtr->dict().lookupScopedSubEntryPtr
-                (
-                    keyword.substr(dotPos, keyword.size()-dotPos),
-                    false,
-                    patternMatch
-                );
-            }
-            else
-            {
-                return nullptr;
-            }
-        }
     }
+
+    return nullptr;
 }
 
 
@@ -597,10 +584,9 @@ const Foam::entry* Foam::dictionary::lookupScopedEntryPtr
             dictPtr = &dictPtr->parent_;
         }
 
-        // At top. Recurse to find entries
         return dictPtr->lookupScopedSubEntryPtr
         (
-            keyword.substr(1, keyword.size()-1),
+            keyword.substr(1),
             false,
             patternMatch
         );
@@ -1038,7 +1024,6 @@ bool Foam::dictionary::changeKeyword
             IDLList<entry>::replace(iter2(), iter());
             delete iter2();
             hashedEntries_.erase(iter2);
-
         }
         else
         {
