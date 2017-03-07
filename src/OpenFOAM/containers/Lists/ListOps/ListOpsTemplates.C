@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,11 +34,8 @@ ListType Foam::renumber
     const ListType& lst
 )
 {
-    // Create copy
     ListType newLst(lst.size());
-
-    // ensure consistent addressable size (eg, DynamicList)
-    newLst.setSize(lst.size());
+    newLst.setSize(lst.size()); // Consistent sizing (eg, DynamicList)
 
     forAll(lst, elemI)
     {
@@ -76,11 +73,8 @@ ListType Foam::reorder
     const ListType& lst
 )
 {
-    // Create copy
     ListType newLst(lst.size());
-
-    // ensure consistent addressable size (eg, DynamicList)
-    newLst.setSize(lst.size());
+    newLst.setSize(lst.size()); // Consistent sizes (eg, DynamicList)
 
     forAll(lst, elemI)
     {
@@ -104,11 +98,8 @@ void Foam::inplaceReorder
     ListType& lst
 )
 {
-    // Create copy
     ListType newLst(lst.size());
-
-    // ensure consistent addressable size (eg, DynamicList)
-    newLst.setSize(lst.size());
+    newLst.setSize(lst.size()); // Consistent sizing (eg, DynamicList)
 
     forAll(lst, elemI)
     {
@@ -303,9 +294,7 @@ ListType Foam::subset
     }
 
     ListType newLst(lst.size());
-
-    // ensure consistent addressable size (eg, DynamicList)
-    newLst.setSize(lst.size());
+    newLst.setSize(lst.size()); // Consistent sizing (eg, DynamicList)
 
     label nElem = 0;
     forAll(lst, elemI)
@@ -366,9 +355,7 @@ ListType Foam::subset
     // eg, when it is a PackedBoolList or a labelHashSet
 
     ListType newLst(lst.size());
-
-    // ensure consistent addressable size (eg, DynamicList)
-    newLst.setSize(lst.size());
+    newLst.setSize(lst.size()); // Consistent sizing (eg, DynamicList)
 
     label nElem = 0;
     forAll(lst, elemI)
@@ -398,6 +385,54 @@ void Foam::inplaceSubset
     forAll(lst, elemI)
     {
         if (select[elemI])
+        {
+            if (nElem != elemI)
+            {
+                lst[nElem] = lst[elemI];
+            }
+            ++nElem;
+        }
+    }
+
+    lst.setSize(nElem);
+}
+
+
+template<class ListType, class UnaryPredicate>
+ListType Foam::subsetList
+(
+    const ListType& lst,
+    UnaryPredicate pred
+)
+{
+    ListType newLst(lst.size());
+    newLst.setSize(lst.size()); // Consistent sizing (eg, DynamicList)
+
+    label nElem = 0;
+    forAll(lst, elemI)
+    {
+        if (pred(lst[elemI]))
+        {
+            newLst[nElem++] = lst[elemI];
+        }
+    }
+    newLst.setSize(nElem);
+
+    return newLst;
+}
+
+
+template<class ListType, class UnaryPredicate>
+void Foam::inplaceSubsetList
+(
+    ListType& lst,
+    UnaryPredicate pred
+)
+{
+    label nElem = 0;
+    forAll(lst, elemI)
+    {
+        if (pred(lst[elemI]))
         {
             if (nElem != elemI)
             {

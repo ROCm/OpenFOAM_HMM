@@ -109,7 +109,21 @@ int main(int argc, char *argv[])
     SubList<label> test5SubList(test5, 4, 3);
     Info<< "List                            : " << test5 << endl;
     inplaceReverseList(test5SubList);
-    Info<< "Reverse Sublist between 3 and 6 : " << test5 << endl;
+    Info<< "Reverse Sublist between 3 and 6 : " << test5 << nl << endl;
+
+    Info<< nl << "Test lambda predicates:" << nl << endl;
+
+    List<label> test6(identity(19));
+    // shift range for general testing
+    std::for_each(test6.begin(), test6.end(), [](label& x){ x -= 10; });
+
+    Info<< "Subset of non-zero, even values: "
+        << subsetList
+           (
+               test6,
+               [](const label& x){ return x && !(x % 2); }
+           ) << nl
+        << endl;
 
     Info<< "\nEnd\n" << endl;
 
