@@ -45,7 +45,7 @@ SourceFiles
 
 namespace Foam
 {
-    // single-string matches:
+    // Single-string matches:
 
     //- Return true if string matches one of the regular expressions
     inline bool findStrings
@@ -57,14 +57,14 @@ namespace Foam
         return matcher.match(str);
     }
 
-    // multi-string matches:
+    // Multi-string matches:
 
     //- Return list indices for matching strings
     template<class Matcher, class StringType>
     labelList findMatchingStrings
     (
-        const Matcher&,
-        const UList<StringType>&,
+        const Matcher& matcher,
+        const UList<StringType>& lst,
         const bool invert=false
     );
 
@@ -92,7 +92,7 @@ namespace Foam
     )
     {
         const regExp re(rePattern);
-        return findStrings(re, lst, invert);
+        return findMatchingStrings(re, lst, invert);
     }
 
     //- Return list indices for strings matching the regular expression

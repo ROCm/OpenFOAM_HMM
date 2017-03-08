@@ -42,24 +42,6 @@ namespace Foam
             dictionary
         );
     }
-
-    //- Plus op for FixedList<scalar>
-    template<class T, unsigned Size>
-    class ListPlusEqOp
-    {
-        public:
-        void operator()
-        (
-            FixedList<T, Size>& x,
-            const FixedList<T, Size>& y
-        ) const
-        {
-            forAll(x, i)
-            {
-                x[i] += y[i];
-            }
-        }
-    };
 }
 
 

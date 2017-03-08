@@ -28,7 +28,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::labelList Foam::emptyLabelList = Foam::labelList(0);
+const Foam::labelList Foam::emptyLabelList;
 
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
@@ -43,7 +43,7 @@ Foam::labelList Foam::invert
 
     forAll(map, i)
     {
-        label newPos = map[i];
+        const label newPos = map[i];
 
         if (newPos >= 0)
         {
@@ -89,7 +89,7 @@ Foam::labelListList Foam::invertOneToMany
 
     forAll(map, i)
     {
-        label newI = map[i];
+        const label newI = map[i];
 
         if (newI >= 0)
         {
@@ -105,10 +105,11 @@ Foam::labelList Foam::identity(const label len)
 {
     labelList map(len);
 
-    forAll(map, i)
+    for (label i = 0; i < len; ++i)
     {
         map[i] = i;
     }
+
     return map;
 }
 
