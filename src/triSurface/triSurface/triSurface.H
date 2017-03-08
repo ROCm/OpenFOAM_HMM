@@ -90,6 +90,9 @@ class triSurface
         //  during reading and writing)
         geometricSurfacePatchList patches_;
 
+        static const wordHashSet readTypes_;
+        static const wordHashSet writeTypes_;
+
 
     // Demand driven private data.
 
@@ -239,6 +242,18 @@ public:
 
         //- Name of triSurface directory to use.
         static fileName triSurfInstance(const Time&);
+
+        //- Can we read this file format?
+        static bool canRead(const fileName& name, const bool verbose=false);
+
+        //- Can we read this file format?
+        static bool canReadType(const word& ext, const bool verbose=false);
+
+        //- Can we write this file format?
+        static bool canWriteType(const word& ext, const bool verbose=false);
+
+        static const wordHashSet& readTypes();
+        static const wordHashSet& writeTypes();
 
 
     // Constructors
