@@ -118,7 +118,7 @@ class turbulentTemperatureRadCoupledMixedFvPatchScalarField
         scalar contactRes_;
 
         //- Thermal inertia term
-        bool thermalInertia_;
+        Switch thermalInertia_;
 
 
 public:

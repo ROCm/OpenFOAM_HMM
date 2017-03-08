@@ -99,7 +99,7 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     thicknessLayers_(0),
     kappaLayers_(0),
     contactRes_(0.0),
-    thermalInertia_(dict.lookupOrDefault<bool>("thermalInertia", false))
+    thermalInertia_(dict.lookupOrDefault<Switch>("thermalInertia", false))
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
     {
@@ -233,69 +233,77 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
     }
 
     // inertia therm
-    scalarField mCpDtNbr(Tp.size(), 0.0);
-    scalarField mCpDt(Tp.size(), 0.0);
     if (thermalInertia_)
     {
         const scalar dt = mesh.time().deltaTValue();
-        if
-        (
-            nbrMesh.foundObject<basicThermo>(basicThermo::dictName)
-        )
+        scalarField mCpDtNbr;
+
         {
-            const basicThermo& thermo =
-                nbrMesh.lookupObject<basicThermo>(basicThermo::dictName);
+            const basicThermo* thermo =
+                nbrMesh.lookupObjectPtr<basicThermo>(basicThermo::dictName);
 
-            const scalarField Cpp =
-                thermo.Cp()().boundaryField()[nbrPatch.index()];
+            if (thermo)
+            {
+                mCpDtNbr =
+                (
+                    thermo->Cp()().boundaryField()[nbrPatch.index()]
+                  * thermo->rho()().boundaryField()[nbrPatch.index()]
+                  / nbrPatch.deltaCoeffs()/dt
+                );
 
-            const scalarField rhop =
-                thermo.rho()().boundaryField()[nbrPatch.index()];
-
-            mCpDtNbr = Cpp*rhop/nbrPatch.deltaCoeffs()/dt;
-            mpp.distribute(mCpDtNbr);
+                mpp.distribute(mCpDtNbr);
+            }
+            else
+            {
+                mCpDtNbr.setSize(Tp.size(), 0.0);
+            }
         }
+
+        scalarField mCpDt;
 
         // Local inertia therm
-        if
-        (
-            mesh.foundObject<basicThermo>(basicThermo::dictName)
-        )
         {
-            const basicThermo& thermo =
-                mesh.lookupObject<basicThermo>(basicThermo::dictName);
+            const basicThermo* thermo =
+                mesh.lookupObjectPtr<basicThermo>(basicThermo::dictName);
 
-            const scalarField Cpp =
-                thermo.Cp()().boundaryField()[patch().index()];
-
-            const scalarField rhop =
-                thermo.rho()().boundaryField()[patch().index()];
-
-            mCpDt = Cpp*rhop/patch().deltaCoeffs()/dt;
+            if (thermo)
+            {
+                mCpDt =
+                (
+                    thermo->rho()().boundaryField()[patch().index()]
+                  * thermo->Cp()().boundaryField()[patch().index()]
+                  / patch().deltaCoeffs()/dt
+                );
+            }
+            else
+            {
+                // Issue warning?
+                mCpDt.setSize(Tp.size(), 0.0);
+            }
         }
+
+        const volScalarField& T =
+            this->db().lookupObject<volScalarField>
+            (
+                this->internalField().name()
+            );
+
+        const fvPatchField<scalar>& TpOld =
+            T.oldTime().boundaryField()[patch().index()];
+
+        scalarField alpha(KDeltaNbr + mCpDt + mCpDtNbr);
+
+        valueFraction() = alpha/(alpha + KDelta);
+        scalarField c(KDeltaNbr*TcNbr + (mCpDt + mCpDtNbr)*TpOld);
+        refValue() = c/alpha;
+        refGrad() = (Qr + QrNbr)/kappa(Tp);
     }
-
-    const volScalarField& T =
-        this->db().lookupObject<volScalarField>
-        (
-            this->internalField().name()
-        );
-
-    const fvPatchField<scalar>& TpOld =
-        T.oldTime().boundaryField()[patch().index()];
-
-    scalarField alpha(KDeltaNbr + mCpDt + mCpDtNbr);
-
-    valueFraction() = alpha/(alpha + KDelta);
-    scalarField c(KDeltaNbr*TcNbr + (mCpDt + mCpDtNbr)*TpOld);
-    refValue() = c/alpha;
-    refGrad() = (Qr + QrNbr)/kappa(Tp);
-
-    /*
-    valueFraction() = KDeltaNbr/(KDeltaNbr + KDelta);
-    refValue() = TcNbr;
-    refGrad() = (Qr + QrNbr)/kappa(Tp);
-    */
+    else
+    {
+        valueFraction() = KDeltaNbr/(KDeltaNbr + KDelta);
+        refValue() = TcNbr;
+        refGrad() = (Qr + QrNbr)/kappa(Tp);
+    }
 
     mixedFvPatchScalarField::updateCoeffs();
 
@@ -331,8 +339,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::write
     os.writeKeyword("Tnbr")<< TnbrName_ << token::END_STATEMENT << nl;
     os.writeKeyword("QrNbr")<< QrNbrName_ << token::END_STATEMENT << nl;
     os.writeKeyword("Qr")<< QrName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("thermalInertia")
-        << thermalInertia_ << token::END_STATEMENT << nl;
+    os.writeEntry("thermalInertia", thermalInertia_);
 
     thicknessLayers_.writeEntry("thicknessLayers", os);
     kappaLayers_.writeEntry("kappaLayers", os);
