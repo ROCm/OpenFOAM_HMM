@@ -227,8 +227,9 @@ void Foam::duplicateOrder
 
     sortedOrder(lst, order, cmp);
 
+    const label last = (order.size()-1);
     label n = 0;
-    for (label i = 0; i < order.size() - 1; ++i)
+    for (label i = 0; i < last; ++i)
     {
         if (lst[order[i]] == lst[order[i+1]])
         {
@@ -262,17 +263,47 @@ void Foam::uniqueOrder
 
     if (order.size() > 1)
     {
+        const label last = (order.size()-1);
         label n = 0;
-        for (label i = 0; i < order.size() - 1; ++i)
+        for (label i = 0; i < last; ++i)
         {
             if (lst[order[i]] != lst[order[i+1]])
             {
                 order[n++] = order[i];
             }
         }
-        order[n++] = order[order.size()-1];
+        order[n++] = order[last];
         order.setSize(n);
     }
+}
+
+
+template<class ListType>
+void Foam::inplaceUniqueSort(ListType& lst)
+{
+    inplaceUniqueSort
+    (
+        lst,
+        typename UList<typename ListType::value_type>::less(lst)
+    );
+}
+
+
+template<class ListType, class Cmp>
+void Foam::inplaceUniqueSort(ListType& lst, const Cmp& cmp)
+{
+    labelList order;
+    uniqueOrder(lst, order, cmp);
+
+    ListType newLst(order.size());
+    newLst.setSize(order.size()); // Consistent sizing (eg, DynamicList)
+
+    forAll(order, elemI)
+    {
+        newLst[elemI] = lst[order[elemI]];
+    }
+
+    lst.transfer(newLst);
 }
 
 

@@ -114,6 +114,17 @@ template<class T, class Cmp>
 void uniqueOrder(const UList<T>& lst, labelList& order, const Cmp& cmp);
 
 
+//- Inplace sorting and removal of duplicates.
+//  Do not use FixedList for the input list, since it doesn't resize.
+template<class ListType>
+void inplaceUniqueSort(ListType& lst);
+
+//- Inplace sorting and removal of duplicates.
+//  Do not use FixedList for the input list, since it doesn't resize.
+template<class ListType, class Cmp>
+void inplaceUniqueSort(ListType& lst, const Cmp& cmp);
+
+
 //- Extract elements of List when select is a certain value.
 //  \deprecated use subsetList instead (deprecated Mar 2017)
 template<class T, class ListType>

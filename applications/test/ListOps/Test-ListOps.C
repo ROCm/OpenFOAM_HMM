@@ -113,9 +113,9 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Test lambda predicates:" << nl << endl;
 
-    List<label> test6(identity(19));
+    List<label> test6(identity(11));
     // shift range for general testing
-    std::for_each(test6.begin(), test6.end(), [](label& x){ x -= 10; });
+    std::for_each(test6.begin(), test6.end(), [](label& x){ x -= 4; });
 
     Info<< "Subset of non-zero, even values: "
         << subsetList
@@ -124,6 +124,16 @@ int main(int argc, char *argv[])
                [](const label& x){ return x && !(x % 2); }
            ) << nl
         << endl;
+
+
+    test6.append(identity(13));
+
+    // Randomize the list
+    std::random_shuffle(test6.begin(), test6.end());
+
+    Info<< "Randomized: " << flatOutput(test6) << endl;
+    inplaceUniqueSort(test6);
+    Info<< "Unique    : " << flatOutput(test6) << endl;
 
     Info<< "\nEnd\n" << endl;
 
