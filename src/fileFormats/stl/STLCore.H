@@ -79,7 +79,7 @@ protected:
 
         //- Check contents to detect if the file is a binary STL.
         //  Return the estimated number of triangles or 0 on error.
-        static int detectBinaryHeader(const fileName&);
+        static int detectBinaryHeader(const fileName& filename);
 
 
         //- Read STL binary file header.
@@ -92,7 +92,7 @@ protected:
         );
 
         //- Write STL binary file and number of triangles to stream
-        static void writeBinaryHeader(ostream&, unsigned int);
+        static void writeBinaryHeader(ostream& os, uint32_t nTris);
 
 
     // Constructors
