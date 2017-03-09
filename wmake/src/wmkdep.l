@@ -42,17 +42,22 @@ Usage
 #define FILE_STACK_SIZE 300
 #define HASH_TABLE_SIZE 500
 
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <dirent.h>
 #include <errno.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/types.h>  // POSIX
+#include <dirent.h>     // POSIX
 
 void nextFile(const char* fileName);
 void importFile(const char* fileName);
 void importDir(const char* dirName);
 
 #undef yywrap        /* sometimes a macro by default */
+
+/* The executable name (for messages), without requiring access to argv[] */
+#define EXENAME  "wmkdep"
+
 
 %}
 
@@ -145,28 +150,23 @@ const char* bufferPaths[FILE_STACK_SIZE];
 int main(int argc, char* argv[])
 {
     char *basePos, *dotPos;
-    int i, silent;
+    int i;
 
     if (argc < 2)
     {
-        fprintf(stderr, "input file not supplied\n");
+        fputs(EXENAME ": input file not supplied\n", stderr);
         return 1;
     }
     else if (!strncmp(argv[1], "-h", 2)) /* -h, -help */
     {
-        fprintf
+        fputs
         (
-            stderr,
-            "\nUsage: %s [-Idir ... -Idir] [-iheader .. -iheader] filename\n\n",
-            "wmkdep"
-        );
-
-        fprintf
-        (
-            stderr,
+            "\nUsage: " EXENAME
+            " [-Idir ... -Idir] [-iheader .. -iheader] filename\n\n"
             "  -Idir     Directories to be searched for headers.\n"
             "  -iheader  Headers to be ignored.\n\n"
-            "Dependency list generator, similar to 'cpp -M'\n\n"
+            "Dependency list generator, similar to 'cpp -M'\n\n",
+            stderr
         );
 
         return 0;
@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
         fprintf
         (
             stderr,
-            "cannot find extension in source file name %s\n",
+            EXENAME ": cannot find extension in source file name '%s'\n",
             sourceFile
         );
         return 1;
@@ -306,8 +306,8 @@ void nextFile(const char* fileName)
         fprintf
         (
             stderr,
-            "depth of file search exceeds stack size %d "
-            "while opening %s for file %s\n",
+            EXENAME ": depth of file search exceeds stack size %d "
+            "while opening '%s' for file '%s'\n",
             FILE_STACK_SIZE, fileName, sourceFile
         );
         exit(1);
@@ -341,7 +341,7 @@ void nextFile(const char* fileName)
     if (!(newyyin = fopen(fileName, "r")))
     {
         int d;
-        for (d=0; d<nDirectories; d++)
+        for (d=0; d<nDirectories; ++d)
         {
             char* pathName = addDirectoryName(directories[d], fileName);
 
@@ -362,24 +362,17 @@ void nextFile(const char* fileName)
             free(pathName);
         }
 
-        if (nDirectories == 0)
+        fprintf
+        (
+            stderr,
+            EXENAME ": could not open file '%s' for source file '%s'",
+            fileName, sourceFile
+        );
+        if (nDirectories)
         {
-            fprintf
-            (
-                stderr,
-                "could not open file %s for source file %s\n",
-                fileName, sourceFile
-            );
+            fprintf(stderr, ": %s", strerror(errno));
         }
-        else
-        {
-            fprintf
-            (
-                stderr,
-                "could not open file %s for source file %s due to %s\n",
-                fileName, sourceFile, strerror(errno)
-            );
-        }
+        fputs("\n", stderr);
 
         fflush(stdout);
         fflush(stderr);
@@ -405,10 +398,10 @@ void nextFile(const char* fileName)
  */
 void dotToSlash(char* fileName)
 {
-    int i, len;
-    len = strlen(fileName);
+    const size_t len = strlen(fileName);
+    size_t i;
 
-    for (i=0; i<len; i++)
+    for (i=0; i<len; ++i)
     {
         if (fileName[i] == '.') fileName[i] = '/';
     }
