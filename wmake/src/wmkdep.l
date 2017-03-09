@@ -46,19 +46,18 @@ Usage
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/types.h>  // POSIX
-#include <dirent.h>     // POSIX
-
-void nextFile(const char* fileName);
-void importFile(const char* fileName);
-void importDir(const char* dirName);
-
-#undef yywrap        /* sometimes a macro by default */
+#include <sys/types.h>  /* POSIX */
+#include <dirent.h>     /* POSIX */
 
 /* The executable name (for messages), without requiring access to argv[] */
 #define EXENAME  "wmkdep"
+#undef yywrap        /* sometimes a macro by default */
+#define YY_NO_INPUT  /* no input(), yyinput() required */
+#pragma GCC diagnostic ignored "-Wunused-function"
 
+void nextFile(const char* fileName);
 
+/*---------------------------------------------------------------------------*/
 %}
 
 %x CMNT CFNAME SCFNAME JFNAME FFNAME
@@ -79,6 +78,8 @@ void importDir(const char* dirName);
 .|\t|\n                   ;
 
 %%
+
+/*---------------------------------------------------------------------------*/
 
 
 /* char* entry in hash table */

@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+#----------------------------*- makefile-gmake -*------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
@@ -57,22 +57,26 @@ include $(GENERAL_RULES)/general
 # Targets
 #------------------------------------------------------------------------------
 
+.PHONY: all clean
+
 all:  $(WMAKE_BIN)/dirToString $(WMAKE_BIN)/wmkdep
+	@echo built wmake-bin for $(WM_ARCH)$(WM_COMPILER)
 
 clean:
-	@E rm -f $(WMAKE_BIN)/* 2>/dev/null
+	@echo clean wmake-bin for $(WM_ARCH)$(WM_COMPILER)
+	@rm -rf $(WMAKE_BIN) 2>/dev/null
+	@rmdir $(shell dirname $(WMAKE_BIN)) 2>/dev/null || true
 
 $(WMAKE_BIN)/dirToString: dirToString.c
 	@mkdir -p $(WMAKE_BIN)
-	$(call QUIET_MESSAGE,compile,$<)
-	$E $(cc) $(cFLAGS) dirToString.c -o $(WMAKE_BIN)/dirToString
+	$(call QUIET_MESSAGE,compile,$(<F))
+	$E $(cc) $(cFLAGS) $(<F) -o $@
 
 $(WMAKE_BIN)/wmkdep: wmkdep.l
 	@mkdir -p $(WMAKE_BIN)
-	$(call QUIET_MESSAGE,lex,$<)
-	$E flex wmkdep.l; \
-	$(cc) $(cFLAGS) lex.yy.c -o $(WMAKE_BIN)/wmkdep
-	@rm -f lex.yy.c 2>/dev/null
+	$(call QUIET_MESSAGE,flex,$(<F))
+	$E flex -o $@.c $(<F) && $(cc) $(cFLAGS) $@.c -o $@
+	@rm -f $@.c 2>/dev/null
 
 
 #------------------------------------------------------------------------------
