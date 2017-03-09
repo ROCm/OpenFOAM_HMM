@@ -431,6 +431,9 @@ public:
             ) const;
 
 
+            //- Transfer stored faces to an Xfer container
+            Xfer<List<labelledTri>> xferFaces();
+
             //- Transfer stored points to an Xfer container
             Xfer<List<point>> xferPoints();
 

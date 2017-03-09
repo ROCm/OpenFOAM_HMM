@@ -918,6 +918,16 @@ void Foam::triSurface::triFaceFaces(List<face>& plainFaces) const
 }
 
 
+Foam::Xfer<Foam::List<Foam::labelledTri>>
+Foam::triSurface::xferFaces()
+{
+    // Topology changed because of transfer
+    clearOut();
+
+    return this->storedFaces().xfer();
+}
+
+
 Foam::Xfer<Foam::List<Foam::point>>
 Foam::triSurface::xferPoints()
 {
