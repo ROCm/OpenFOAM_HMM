@@ -70,7 +70,7 @@ void pointNoise::processData(const Function1Types::CSV<scalar>& data)
 {
     Info<< "Reading data file " << data.fName() << endl;
 
-    const fileName fNameBase = data.fName().name(true);
+    const word fNameBase = data.fName().nameLessExt();
 
     // Time and pressure history data
     scalarField t, p;

@@ -572,7 +572,7 @@ void surfaceNoise::calculate()
             }
         }
 
-        const word& fNameBase = fName.name(true);
+        const word fNameBase = fName.nameLessExt();
 
         // Output directory for graphs
         fileName outDir

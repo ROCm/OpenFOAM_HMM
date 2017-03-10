@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -215,7 +215,7 @@ Foam::fileName Foam::fileName::clean() const
 
 Foam::word Foam::fileName::name() const
 {
-    size_type i = rfind('/');
+    const size_type i = rfind('/');
 
     if (i == npos)
     {
@@ -223,50 +223,44 @@ Foam::word Foam::fileName::name() const
     }
     else
     {
-        return substr(i+1, npos);
+        return substr(i+1);
     }
 }
 
 
-Foam::word Foam::fileName::name(const bool noExt) const
+Foam::word Foam::fileName::nameLessExt() const
 {
-    if (noExt)
+    size_type beg = rfind('/');
+
+    if (beg == npos)
     {
-        size_type beg = rfind('/');
-        if (beg == npos)
-        {
-            beg = 0;
-        }
-        else
-        {
-            ++beg;
-        }
-
-        size_type dot = rfind('.');
-        if (dot != npos && dot <= beg)
-        {
-            dot = npos;
-        }
-
-        if (dot == npos)
-        {
-            return substr(beg, npos);
-        }
-        else
-        {
-            return substr(beg, dot - beg);
-        }
+        beg = 0;
     }
     else
     {
-        return this->name();
+        ++beg;
+    }
+
+    size_type dot = rfind('.');
+    if (dot != npos && dot <= beg)
+    {
+        dot = npos;
+    }
+
+    if (dot == npos)
+    {
+        return substr(beg, npos);
+    }
+    else
+    {
+        return substr(beg, dot - beg);
     }
 }
 
 
 Foam::fileName Foam::fileName::path() const
 {
-    size_type i = rfind('/');
+    const size_type i = rfind('/');
 
     if (i == npos)
     {
@@ -285,7 +279,7 @@ Foam::fileName Foam::fileName::path() const
 
 Foam::fileName Foam::fileName::lessExt() const
 {
-    size_type i = find_ext();
+    const size_type i = find_ext();
 
     if (i == npos)
     {
@@ -300,7 +294,7 @@ Foam::fileName Foam::fileName::lessExt() const
 
 Foam::word Foam::fileName::ext() const
 {
-    size_type i = find_ext();
+    const size_type i = find_ext();
 
     if (i == npos)
     {
@@ -351,7 +345,7 @@ bool Foam::fileName::hasExt(const word& ending) const
 
 bool Foam::fileName::hasExt(const wordRe& ending) const
 {
-    size_type i = find_ext();
+    const size_type i = find_ext();
     if (i == npos)
     {
         return false;

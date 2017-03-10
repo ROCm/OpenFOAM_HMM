@@ -92,7 +92,7 @@ void Foam::dynamicCode::checkSecurity
 
 Foam::word Foam::dynamicCode::libraryBaseName(const fileName& libPath)
 {
-    word libName(libPath.name(true));
+    word libName(libPath.nameLessExt());
     libName.removeStart("lib");  // Remove leading 'lib' from name
     return libName;
 }

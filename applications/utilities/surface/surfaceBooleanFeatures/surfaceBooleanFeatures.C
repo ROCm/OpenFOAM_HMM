@@ -1657,9 +1657,9 @@ int main(int argc, char *argv[])
 
     const fileName sFeatFileName
     (
-        fileName(surf1Name).lessExt().name()
+        fileName(surf1Name).nameLessExt()
       + "_"
-      + fileName(surf2Name).lessExt().name()
+      + fileName(surf2Name).nameLessExt()
       + "_"
       + action
     );
