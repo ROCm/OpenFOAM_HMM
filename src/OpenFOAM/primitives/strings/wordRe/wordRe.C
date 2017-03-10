@@ -110,7 +110,6 @@ Foam::Ostream& Foam::wordRe::info(Ostream& os) const
     {
         os  << "wordRe(plain) \"" << *this << '"';
     }
-    os.flush();
 
     return os;
 }

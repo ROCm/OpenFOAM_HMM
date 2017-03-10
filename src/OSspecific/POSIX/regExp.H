@@ -64,16 +64,16 @@ class regExp
     // Private data
 
         //- Precompiled regular expression
-        mutable regex_t* preg_;
+        regex_t* preg_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        regExp(const regExp&);
+        regExp(const regExp&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const regExp&);
+        void operator=(const regExp&) = delete;
 
         //- Return true if it matches and sets the sub-groups matched.
         //  Templated to support both std::string and Foam::string
@@ -96,7 +96,7 @@ public:
         //  range: '[', ']' \n
         //
         //  Don't bother checking for '{digit}' bounds
-        inline static bool meta(char c)
+        inline static bool meta(const char c)
         {
             return
             (
@@ -113,11 +113,11 @@ public:
         //- Construct null
         regExp();
 
-        //- Construct from character array, optionally ignoring case
-        regExp(const char*, const bool ignoreCase=false);
+        //- Construct from character array, optionally ignore case
+        regExp(const char* pattern, bool ignoreCase=false);
 
-        //- Construct from std::string (or string), optionally ignoring case
-        regExp(const std::string&, const bool ignoreCase=false);
+        //- Construct from string, optionally ignore case
+        regExp(const std::string& pattern, bool ignoreCase=false);
 
 
     //- Destructor
@@ -126,76 +126,73 @@ public:
 
     // Member functions
 
-        // Access
+      // Access
 
-            //- Return true if a precompiled expression does not exist
-            inline bool empty() const
-            {
-                return !preg_;
-            }
+        //- Return true if a precompiled expression does not exist
+        inline bool empty() const
+        {
+            return !preg_;
+        }
 
-            //- Does a precompiled expression exist?
-            inline bool exists() const
-            {
-                return preg_ ? true : false;
-            }
+        //- Does a precompiled expression exist?
+        inline bool exists() const
+        {
+            return preg_ ? true : false;
+        }
 
-            //- Return the number of (groups)
-            inline int ngroups() const
-            {
-                return preg_ ? preg_->re_nsub : 0;
-            }
-
-
-        // Editing
-
-            //- Compile pattern into a regular expression,
-            //  optionally ignoring case
-            void set(const char*, const bool ignoreCase=false) const;
-
-            //- Compile pattern into a regular expression,
-            //  optionally ignoring case
-            void set(const std::string&, const bool ignoreCase=false) const;
-
-            //- Release precompiled expression.
-            //  Returns true if precompiled expression existed before clear
-            bool clear() const;
+        //- The number of capture groups for a non-empty expression
+        inline unsigned ngroups() const
+        {
+            return preg_ ? preg_->re_nsub : 0;
+        }
 
 
-        // Searching
+      // Editing
 
-            //- Find position within string.
-            //  Returns the index where it begins or string::npos if not found
-            std::string::size_type find(const std::string& str) const;
+        //- Compile pattern into a regular expression, optionally ignore case
+        void set(const char* pattern, bool ignoreCase=false);
 
-            //- Return true if it matches the entire string
-            //  The begin-of-line (^) and end-of-line ($) anchors are implicit
-            bool match(const std::string&) const;
+        //- Compile pattern into a regular expression, optionally ignore case
+        void set(const std::string& pattern, bool ignoreCase=false);
 
-            //- Return true if it matches and sets the sub-groups matched
-            //  The begin-of-line (^) and end-of-line ($) anchors are implicit
-            bool match(const std::string&, List<std::string>& groups) const;
+        //- Clear expression, return true if expression had existed.
+        bool clear();
 
-            //- Return true if it matches and sets the sub-groups matched
-            //  The begin-of-line (^) and end-of-line ($) anchors are implicit
-            bool match(const std::string&, List<string>& groups) const;
 
-            //- Return true if the regex was found within string
-            bool search(const std::string& str) const
-            {
-                return std::string::npos != find(str);
-            }
+      // Matching/Searching
+
+        //- Find position within string.
+        //  Returns the index where it begins or string::npos if not found
+        std::string::size_type find(const std::string& text) const;
+
+        //- Return true if it matches the entire string
+        //  The begin-of-line (^) and end-of-line ($) anchors are implicit
+        bool match(const std::string& text) const;
+
+        //- Return true if it matches and sets the sub-groups matched
+        //  The begin-of-line (^) and end-of-line ($) anchors are implicit
+        bool match(const std::string& text, List<std::string>& groups) const;
+
+        //- Return true if it matches and sets the sub-groups matched
+        //  The begin-of-line (^) and end-of-line ($) anchors are implicit
+        bool match(const std::string& text, List<string>& groups) const;
+
+        //- Return true if the regex was found within string
+        bool search(const std::string& text) const
+        {
+            return std::string::npos != find(text);
+        }
 
 
     // Member Operators
 
         //- Assign and compile pattern from a character array
         //  Always case sensitive
-        void operator=(const char*);
+        void operator=(const char* pattern);
 
         //- Assign and compile pattern from string
         //  Always case sensitive
-        void operator=(const std::string&);
+        void operator=(const std::string& pattern);
 };
 
 
