@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -200,6 +200,14 @@ public:
 
         //- Return string with trailing character removed
         string removeTrailing(const char character) const;
+
+        //- Remove the given text from the start of the string.
+        //  Always true if the removal occurred or the given text is empty.
+        bool removeStart(const std::string& text);
+
+        //- Remove the given text from the end of the string.
+        //  Always true if the removal occurred or the given text is empty.
+        bool removeEnd(const std::string& text);
 
         //- True if the string starts with the given text.
         //  Always true if the given text is empty or if the string

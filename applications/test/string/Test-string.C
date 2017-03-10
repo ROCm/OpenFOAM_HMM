@@ -69,6 +69,16 @@ int main(int argc, char *argv[])
     Info<<"trimRight: " << stringOps::trimRight(test) << endl;
     Info<<"trim: " << stringOps::trim(test) << endl;
 
+    {
+        fileName test1("libFooBar.so");
+
+        Info<< nl;
+        Info<< "trim filename: " << test1 << nl;
+
+        test1.removeStart("lib");
+        Info<<"without leading 'lib': " << test1 << nl;
+    }
+
     Info<< nl;
     Info<<"camel-case => " << (word("camel") & "case") << nl;
     for (const auto& s : { " text with \"spaces'", "08/15 value" })
