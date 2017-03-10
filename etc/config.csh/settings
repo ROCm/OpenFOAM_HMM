@@ -54,13 +54,14 @@ case Linux:
         breaksw
 
     case x86_64:
+        if ( ! $?WM_ARCH_OPTION ) setenv WM_ARCH_OPTION 64  # Default to 64-bit
         switch ($WM_ARCH_OPTION)
         case 32:
             setenv WM_COMPILER_ARCH 64
             setenv WM_CC 'gcc'
             setenv WM_CXX 'g++'
             setenv WM_CFLAGS '-m32 -fPIC'
-            setenv WM_CXXFLAGS '-m32 -fPIC -std=c++0x'
+            setenv WM_CXXFLAGS '-m32 -fPIC -std=c++11'
             setenv WM_LDFLAGS '-m32'
             breaksw
 
@@ -70,7 +71,7 @@ case Linux:
             setenv WM_CC 'gcc'
             setenv WM_CXX 'g++'
             setenv WM_CFLAGS '-m64 -fPIC'
-            setenv WM_CXXFLAGS '-m64 -fPIC -std=c++0x'
+            setenv WM_CXXFLAGS '-m64 -fPIC -std=c++11'
             setenv WM_LDFLAGS '-m64'
             breaksw
 
@@ -92,7 +93,7 @@ case Linux:
         setenv WM_CC 'gcc'
         setenv WM_CXX 'g++'
         setenv WM_CFLAGS '-m64 -fPIC'
-        setenv WM_CXXFLAGS '-m64 -fPIC -std=c++0x'
+        setenv WM_CXXFLAGS '-m64 -fPIC -std=c++11'
         setenv WM_LDFLAGS '-m64'
         breaksw
 
@@ -102,7 +103,7 @@ case Linux:
         setenv WM_CC 'gcc'
         setenv WM_CXX 'g++'
         setenv WM_CFLAGS '-m64 -fPIC'
-        setenv WM_CXXFLAGS '-m64 -fPIC -std=c++0x'
+        setenv WM_CXXFLAGS '-m64 -fPIC -std=c++11'
         setenv WM_LDFLAGS '-m64'
         breaksw
 
@@ -120,17 +121,17 @@ case SunOS:
     setenv WM_CC 'gcc'
     setenv WM_CXX 'g++'
     setenv WM_CFLAGS '-mabi=64 -fPIC'
-    setenv WM_CXXFLAGS '-mabi=64 -fPIC -std=c++0x'
+    setenv WM_CXXFLAGS '-mabi=64 -fPIC -std=c++11'
     setenv WM_LDFLAGS '-mabi=64 -G0'
     breaksw
 
-default:  # An unsupported operating system
-    /bin/cat <<USAGE
-
-Your "$WM_ARCH" operating system is unsupported by this OpenFOAM release.
+default:
+    /bin/cat << UNSUPPORTED_OS
+===============================================================================
+Your '$WM_ARCH' operating system is unsupported by this OpenFOAM release.
 For further assistance, please contact www.OpenFOAM.com
-
-USAGE
+===============================================================================
+UNSUPPORTED_OS
     breaksw
 
 endsw
@@ -219,7 +220,6 @@ case system:
     # Use system compiler
     breaksw
 
-case OpenFOAM:
 case ThirdParty:
     if ( $?gcc_version ) then
         if ( ! $?gmp_version  ) set gmp_version=gmp-system
@@ -301,9 +301,15 @@ CLANG_NOT_FOUND
     breaksw
 
 default:
-    echo "Warn: WM_COMPILER_TYPE='$WM_COMPILER_TYPE' is unsupported"
-    echo "   treating as 'system' instead"
+    /bin/cat << UNKNOWN_TYPE
+===============================================================================
+Unknown WM_COMPILER_TYPE="$WM_COMPILER_TYPE" - treating as 'system'
+Please check your settings
+===============================================================================
+UNKNOWN_TYPE
+    setenv WM_COMPILER_TYPE system
     breaksw
+
 endsw
 
 

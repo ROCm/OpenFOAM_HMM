@@ -31,7 +31,7 @@
 #------------------------------------------------------------------------------
 
 case "$WM_COMPILER_TYPE" in
-ThirdParty)
+OpenFOAM | ThirdParty)
     # Default versions of GMP, MPFR and MPC, override as necessary
     gmp_version=gmp-system
     mpfr_version=mpfr-system
@@ -66,23 +66,35 @@ ThirdParty)
         gcc_version=gcc-6.3.0
         ;;
     Clang)
-        clang_version=llvm-3.7.0
-        # clang_version=llvm-3.8.0
+        clang_version=llvm-3.7.1
+        ;;
+    Clang38)
+        clang_version=llvm-3.8.1
+        ;;
+    Clang39)
+        clang_version=llvm-3.9.1
+        ;;
+    Clang40)
+        clang_version=llvm-4.0.0
         ;;
     *)
-        echo 1>&2
-        echo "Warning in $WM_PROJECT_DIR/etc/config.sh/compiler:" 1>&2
-        echo "    Unknown OpenFOAM compiler type '$WM_COMPILER'" 1>&2
-        echo "    Please check your settings" 1>&2
-        echo 1>&2
+        /bin/cat << UNKNOWN_COMPILER 1>&2
+===============================================================================
+Warning in $WM_PROJECT_DIR/etc/config.sh/compiler:
+Unknown ThirdParty compiler type/version - '$WM_COMPILER'
+
+Please check your settings
+===============================================================================
+UNKNOWN_COMPILER
         ;;
     esac
+    WM_COMPILER_TYPE=ThirdParty # Canonical name
     ;;
 esac
 
-# common settings (system or ThirdParty)
+# Common settings (system or ThirdParty)
 case "$WM_COMPILER" in
-Clang)
+Clang*)
     # Using clang - not gcc
     export WM_CC='clang'
     export WM_CXX='clang++'
