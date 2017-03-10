@@ -609,9 +609,9 @@ void surfaceNoise::calculate()
             // Determine frequency range of interest
             // Note: freqencies have fixed interval, and are in the range
             //       0 to fftWriteInterval_*(n-1)*deltaf
-            label f0 = ceil(fLower_/deltaf/fftWriteInterval_);
-            label f1 = floor(fUpper_/deltaf/fftWriteInterval_);
-            label nFreq = f0 == f1 ? 0 : f1 - f0 + 1;
+            label f0 = ceil(fLower_/deltaf/scalar(fftWriteInterval_));
+            label f1 = floor(fUpper_/deltaf/scalar(fftWriteInterval_));
+            label nFreq = f1 - f0;
 
             scalarField PrmsfAve(nFreq, 0);
             scalarField PSDfAve(nFreq, 0);
@@ -625,9 +625,9 @@ void surfaceNoise::calculate()
             }
             else
             {
-                for (label i = f0; i <= f1; ++i)
+                forAll(fOut, i)
                 {
-                    label freqI = i*fftWriteInterval_;
+                    label freqI = (i + f0)*fftWriteInterval_;
                     fOut[i] = freq1[freqI];
                     const word gName = "fft";
 
@@ -637,7 +637,7 @@ void surfaceNoise::calculate()
                         gName,
                         "Prmsf",
                         freq1[freqI],
-                        surfPrmsf[i],
+                        surfPrmsf[i + f0],
                         procFaceOffset,
                         writePrmsf_
                     );
@@ -648,7 +648,7 @@ void surfaceNoise::calculate()
                         gName,
                         "PSDf",
                         freq1[freqI],
-                        surfPSDf[i],
+                        surfPSDf[i + f0],
                         procFaceOffset,
                         writePSDf_
                     );
@@ -658,7 +658,7 @@ void surfaceNoise::calculate()
                         gName,
                         "PSD",
                         freq1[freqI],
-                        noiseFFT::PSD(surfPSDf[i]),
+                        noiseFFT::PSD(surfPSDf[i + f0]),
                         procFaceOffset,
                         writePSD_
                     );
@@ -668,7 +668,7 @@ void surfaceNoise::calculate()
                         gName,
                         "SPL",
                         freq1[freqI],
-                        noiseFFT::SPL(surfPSDf[i]*deltaf),
+                        noiseFFT::SPL(surfPSDf[i + f0]*deltaf),
                         procFaceOffset,
                         writeSPL_
                     );
