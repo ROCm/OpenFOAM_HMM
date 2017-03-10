@@ -75,8 +75,8 @@ int main(int argc, char *argv[])
     wre.info(Info) << " after DETECT" << endl;
     wre.uncompile();
     wre.info(Info) << " uncompiled" << endl;
-    wre.recompile();
-    wre.info(Info) << " recompiled" << endl;
+    wre.compile();
+    wre.info(Info) << " re-compiled" << endl;
 
     wre.set("something .* value", wordRe::LITERAL);
     wre.info(Info) << " set as LITERAL" << endl;

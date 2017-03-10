@@ -39,8 +39,8 @@ Description
 
 Note
     If the string contents are changed - eg, by the operator+=() or by
-    string::replace(), etc - it will be necessary to use compile() or
-    recompile() to synchronize the regular expression.
+    string::replace(), etc - it will be necessary to use compile() to
+    synchronize the regular expression.
 
 SourceFiles
     wordRe.C
@@ -160,9 +160,6 @@ public:
 
             //- Possibly compile the regular expression, with greater control
             inline bool compile(const compOption) const;
-
-            //- Recompile an existing regular expression
-            inline bool recompile() const;
 
             //- Frees precompiled regular expression, making wordRe a literal.
             //  Optionally strips invalid word characters

@@ -165,17 +165,6 @@ inline bool Foam::wordRe::compile() const
 }
 
 
-inline bool Foam::wordRe::recompile() const
-{
-    if (re_.exists())
-    {
-        re_ = *this;
-    }
-
-    return re_.exists();
-}
-
-
 inline void Foam::wordRe::uncompile(const bool doStripInvalid) const
 {
     if (re_.clear())
@@ -264,6 +253,10 @@ inline void Foam::wordRe::operator=(const keyType& str)
     if (str.isPattern())
     {
         compile();
+    }
+    else
+    {
+        re_.clear();
     }
 }
 
