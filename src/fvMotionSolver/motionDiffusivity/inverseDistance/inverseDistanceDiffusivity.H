@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,8 +60,6 @@ class inverseDistanceDiffusivity
 
     // Private Member Functions
 
-        //- Return patch-cell-centre distance field
-        tmp<scalarField> y() const;
 
         //- Disallow default bitwise copy construct
         inverseDistanceDiffusivity(const inverseDistanceDiffusivity&);

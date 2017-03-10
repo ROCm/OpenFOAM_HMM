@@ -277,13 +277,13 @@ bool Foam::functionObjects::scalarTransport::execute()
         const volScalarField& alpha =
             mesh_.lookupObject<volScalarField>(phaseName_);
 
-        const surfaceScalarField& limitedPhiAlpa =
+        const surfaceScalarField& limitedPhiAlpha =
             mesh_.lookupObject<surfaceScalarField>(phasePhiCompressedName_);
 
         D *= pos(alpha - 0.99);
 
-        // Reset D dimensions consistent with limitedPhiAlpa
-        D.dimensions().reset(limitedPhiAlpa.dimensions()/dimLength);
+        // Reset D dimensions consistent with limitedPhiAlpha
+        D.dimensions().reset(limitedPhiAlpha.dimensions()/dimLength);
 
         // Solve
         tmp<surfaceScalarField> tTPhiUD;
@@ -292,7 +292,7 @@ bool Foam::functionObjects::scalarTransport::execute()
             fvScalarMatrix sEqn
             (
                 fvm::ddt(s)
-              + fvm::div(limitedPhiAlpa, s, divScheme)
+              + fvm::div(limitedPhiAlpha, s, divScheme)
               - fvm::laplacian(D, s, laplacianScheme)
               ==
                 alpha*fvOptions_(s)

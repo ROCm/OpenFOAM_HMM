@@ -29,7 +29,7 @@ dynamicRefineFvMeshCoeffs
     // Have slower than 2:1 refinement
     nBufferLayers   1;
     // Refine cells only up to maxRefinement levels
-    maxRefinement   3;
+    maxRefinement   4;
     // Stop refinement if maxCells reached
     maxCells        2000000;
     // Flux field and corresponding velocity field. Fluxes on changed
