@@ -489,7 +489,8 @@ Foam::argList::argList
 
                 argListStr_ += ' ';
                 argListStr_ += args_[argI];
-                options_.insert(optionName, args_[argI]);
+                // Handle duplicates by taking the last -option specified
+                options_.set(optionName, args_[argI]);
             }
             else
             {
@@ -584,8 +585,8 @@ void Foam::argList::parse
 
     if (initialise)
     {
-        string dateString = clock::date();
-        string timeString = clock::clockTime();
+        const string dateString = clock::date();
+        const string timeString = clock::clockTime();
 
         // Print the banner once only for parallel runs
         if (Pstream::master() && bannerEnabled)
@@ -1248,11 +1249,12 @@ bool Foam::argList::check(bool checkArgs, bool checkOpts) const
 
     if (Pstream::master())
     {
-        if (checkArgs && args_.size() - 1 != validArgs.size())
+        const label nargs = args_.size()-1;
+        if (checkArgs && nargs != validArgs.size())
         {
             FatalError
                 << "Wrong number of arguments, expected " << validArgs.size()
-                << " found " << args_.size() - 1 << endl;
+                << " found " << nargs << endl;
             ok = false;
         }
 
@@ -1260,14 +1262,15 @@ bool Foam::argList::check(bool checkArgs, bool checkOpts) const
         {
             forAllConstIter(HashTable<string>, options_, iter)
             {
+                const word& optionName = iter.key();
                 if
                 (
-                    !validOptions.found(iter.key())
-                 && !validParOptions.found(iter.key())
+                    !validOptions.found(optionName)
+                 && !validParOptions.found(optionName)
                 )
                 {
                     FatalError
-                        << "Invalid option: -" << iter.key() << endl;
+                        << "Invalid option: -" << optionName << endl;
                     ok = false;
                 }
             }
@@ -1295,7 +1298,7 @@ bool Foam::argList::checkRootCase() const
         return false;
     }
 
-    if (!isDir(path()) && Pstream::master())
+    if (Pstream::master() && !isDir(path()))
     {
         // Allow slaves on non-existing processor directories, created later
         FatalError
