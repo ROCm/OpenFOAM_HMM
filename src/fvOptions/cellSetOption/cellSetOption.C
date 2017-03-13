@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,6 +89,32 @@ void Foam::fv::cellSetOption::setSelection(const dictionary& dict)
 }
 
 
+void Foam::fv::cellSetOption::setVol()
+{
+    scalar VOld = V_;
+
+    // Set volume information
+    V_ = 0.0;
+    forAll(cells_, i)
+    {
+        V_ += mesh_.V()[cells_[i]];
+    }
+    reduce(V_, sumOp<scalar>());
+
+
+    // Convert both volumes to representation using current writeprecision
+    word VOldName(Time::timeName(VOld, IOstream::defaultPrecision()));
+    word VName(Time::timeName(V_, IOstream::defaultPrecision()));
+
+    if (VName != VOldName)
+    {
+        Info<< indent
+            << "- selected " << returnReduce(cells_.size(), sumOp<label>())
+            << " cell(s) with volume " << V_ << endl;
+    }
+}
+
+
 void Foam::fv::cellSetOption::setCellSet()
 {
     switch (selectionMode_)
@@ -164,18 +190,6 @@ void Foam::fv::cellSetOption::setCellSet()
                 << exit(FatalError);
         }
     }
-
-    // Set volume information
-    V_ = 0.0;
-    forAll(cells_, i)
-    {
-        V_ += mesh_.V()[cells_[i]];
-    }
-    reduce(V_, sumOp<scalar>());
-
-    Info<< indent
-        << "- selected " << returnReduce(cells_.size(), sumOp<label>())
-        << " cell(s) with volume " << V_ << endl;
 }
 
 
@@ -203,6 +217,7 @@ Foam::fv::cellSetOption::cellSetOption
     read(dict);
     setSelection(coeffs_);
     setCellSet();
+    setVol();
     Info<< decrIndent;
 }
 
@@ -222,7 +237,20 @@ bool Foam::fv::cellSetOption::isActive()
         // Update the cell set if the mesh is changing
         if (mesh_.changing())
         {
-            setCellSet();
+            if (mesh_.topoChanging())
+            {
+                setCellSet();
+                // Force printing of new set volume
+                V_ = -GREAT;
+            }
+            else if (selectionMode_ == smPoints)
+            {
+                // This is the only geometric selection mode
+                setCellSet();
+            }
+
+            // Report new volume (if changed)
+            setVol();
         }
 
         return true;
