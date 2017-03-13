@@ -28,7 +28,9 @@ Description
     A class for handling keywords in dictionaries.
 
     A keyType is the keyword of a dictionary.
-    It differs from word in that it accepts patterns (regular expressions).
+    It differs from word in that it also accepts patterns (regular expressions).
+    It is very similar to wordRe, but doesn't store the regular expression
+    separately.
 
 SourceFiles
     keyType.C
@@ -49,13 +51,10 @@ namespace Foam
 class Istream;
 class Ostream;
 
-
 // Forward declaration of friend functions and operators
-
 class keyType;
-
-Istream& operator>>(Istream&, keyType&);
-Ostream& operator<<(Ostream&, const keyType&);
+Istream& operator>>(Istream& is, keyType& kw);
+Ostream& operator<<(Ostream& os, const keyType& kw);
 
 
 /*---------------------------------------------------------------------------*\
@@ -74,7 +73,7 @@ class keyType
     // Private Member Functions
 
         //- Disallow assignments where we cannot determine string/word type
-        void operator=(const std::string&);
+        void operator=(const std::string&) = delete;
 
 public:
 
@@ -89,57 +88,58 @@ public:
         //- Construct null
         inline keyType();
 
-        //- Construct as copy
-        inline keyType(const keyType&);
+        //- Construct as copy, retaining type (literal or regex)
+        inline keyType(const keyType& s);
 
         //- Construct as copy of word. Not treated as a regular expression
-        inline keyType(const word&);
+        inline keyType(const word& s);
 
         //- Construct as copy of string. Treat as regular expression.
-        inline keyType(const string&);
+        inline keyType(const string& s);
 
         //- Construct as copy of character array.
         //  Not treated as a regular expression
-        inline keyType(const char*);
+        inline keyType(const char* s);
 
         //- Construct as copy of std::string with specified treatment
-        inline keyType(const std::string&, const bool isPattern);
+        inline keyType(const std::string& s, const bool isPattern);
 
         //- Construct from Istream
         //  Treat as regular expression if surrounded by quotation marks.
-        keyType(Istream&);
+        keyType(Istream& is);
 
 
     // Member functions
 
-        //- Should be treated as a match rather than a literal string
+        //- Treat as a pattern rather than a literal string?
         inline bool isPattern() const;
 
-        //- Smart match as regular expression or as a string
+        //- Smart match as regular expression or as a string.
         //  Optionally force a literal match only
-        bool match(const std::string&, bool literalMatch=false) const;
+        bool match(const std::string& text, bool literal = false) const;
+
 
     // Member operators
 
         // Assignment
 
-            //- Assignment operator
-            inline void operator=(const keyType&);
+            //- Assignment operator, retaining type (literal or regex)
+            inline void operator=(const keyType& s);
 
-            //- Assign as word, not as non regular expression
-            inline void operator=(const word&);
+            //- Assign as word, not treated as a regular expression.
+            inline void operator=(const word& s);
 
             //- Assign as regular expression
-            inline void operator=(const string&);
+            inline void operator=(const string& s);
 
-            //- Assign as word, not as non regular expression
-            inline void operator=(const char*);
+            //- Assign as word, not treated as a regular expression.
+            inline void operator=(const char* s);
 
 
     // IOstream operators
 
-        friend Istream& operator>>(Istream&, keyType&);
-        friend Ostream& operator<<(Ostream&, const keyType&);
+        friend Istream& operator>>(Istream& is, keyType& kw);
+        friend Ostream& operator<<(Ostream& os, const keyType& kw);
 };
 
 

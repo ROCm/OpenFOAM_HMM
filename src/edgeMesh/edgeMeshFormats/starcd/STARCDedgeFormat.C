@@ -65,7 +65,7 @@ void Foam::fileFormats::STARCDedgeFormat::writeCase
     const label nEdges
 )
 {
-    word caseName = os.name().lessExt().name();
+    const word caseName = os.name().nameLessExt();
 
     os  << "! STAR-CD file written " << clock::dateTime().c_str() << nl
         << "! " << pointLst.size() << " points, " << nEdges << " lines" << nl

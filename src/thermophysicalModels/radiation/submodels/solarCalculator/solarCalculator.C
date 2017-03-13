@@ -206,6 +206,12 @@ void Foam::solarCalculator::init()
         }
         case mSunLoadFairWeatherConditions:
         {
+            dict_.readIfPresent
+            (
+                "skyCloudCoverFraction",
+                skyCloudCoverFraction_
+            );
+
             A_ = readScalar(dict_.lookup("A"));
             B_ = readScalar(dict_.lookup("B"));
 
@@ -218,7 +224,9 @@ void Foam::solarCalculator::init()
                 calculateBetaTetha();
             }
 
-            directSolarRad_ = A_/exp(B_/sin(beta_));
+            directSolarRad_ =
+                (1.0 - 0.75*pow(skyCloudCoverFraction_, 3.0))
+              * A_/exp(B_/sin(beta_));
 
             groundReflectivity_ =
                 readScalar(dict_.lookup("groundReflectivity"));
@@ -257,6 +265,7 @@ Foam::solarCalculator::solarCalculator
     B_(0.0),
     beta_(0.0),
     tetha_(0.0),
+    skyCloudCoverFraction_(0.0),
     Setrn_(0.0),
     SunPrime_(0.0),
     C_(readScalar(dict.lookup("C"))),

@@ -245,7 +245,7 @@ void Foam::fileFormats::OBJedgeFormat::write
 
 
     os  << "# Wavefront OBJ file written " << clock::dateTime().c_str() << nl
-        << "o " << os.name().lessExt().name() << nl
+        << "o " << os.name().nameLessExt() << nl
         << nl
         << "# points : " << pointLst.size() << nl
         << "# lines  : " << edgeLst.size() << nl;

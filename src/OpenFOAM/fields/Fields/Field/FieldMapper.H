@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,12 +32,13 @@ Description
 #ifndef FieldMapper_H
 #define FieldMapper_H
 
+#include "mapDistributeBase.H"
+#include "nullObject.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-class mapDistributeBase;
 
 /*---------------------------------------------------------------------------*\
                            Class FieldMapper Declaration
@@ -76,7 +77,8 @@ public:
             FatalErrorInFunction
                 << "attempt to access null distributeMap"
                 << abort(FatalError);
-            return *static_cast<mapDistributeBase*>(nullptr);
+
+            return NullObjectRef<mapDistributeBase>();
         }
 
         //- Are there unmapped values? I.e. do all size() elements get

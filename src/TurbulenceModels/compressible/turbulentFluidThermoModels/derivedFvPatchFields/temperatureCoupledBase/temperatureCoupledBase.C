@@ -78,7 +78,7 @@ Foam::temperatureCoupledBase::temperatureCoupledBase
     patch_(patch),
     method_(KMethodTypeNames_.read(dict.lookup("kappaMethod"))),
     kappaName_(dict.lookupOrDefault<word>("kappa", "none")),
-    alphaAniName_(dict.lookupOrDefault<word>("alphaAni","Anialpha"))
+    alphaAniName_(dict.lookupOrDefault<word>("alphaAni","none"))
 {}
 
 

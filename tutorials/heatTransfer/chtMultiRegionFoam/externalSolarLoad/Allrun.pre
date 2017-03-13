@@ -21,7 +21,7 @@ done
 
 for i in air solid floor
 do
-    changeDictionary -region $i > log.changeDictionary.$i 2>&1
+    runApplication -s $i changeDictionary -region $i -subDict dictionaryReplacement
 done
 
 # -----------------------------------------------------------------------------

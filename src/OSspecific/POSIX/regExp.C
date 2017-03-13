@@ -32,11 +32,11 @@ License
 template<class StringType>
 bool Foam::regExp::matchGrouping
 (
-    const std::string& str,
+    const std::string& text,
     List<StringType>& groups
 ) const
 {
-    if (preg_ && str.size())
+    if (preg_ && !text.empty())
     {
         size_t nmatch = ngroups() + 1;
         regmatch_t pmatch[nmatch];
@@ -46,8 +46,8 @@ bool Foam::regExp::matchGrouping
         // pmatch[1..] are the (...) sub-groups
         if
         (
-            regexec(preg_, str.c_str(), nmatch, pmatch, 0) == 0
-         && (pmatch[0].rm_so == 0 && pmatch[0].rm_eo == label(str.size()))
+            regexec(preg_, text.c_str(), nmatch, pmatch, 0) == 0
+         && (pmatch[0].rm_so == 0 && pmatch[0].rm_eo == label(text.size()))
         )
         {
             groups.setSize(ngroups());
@@ -57,7 +57,7 @@ bool Foam::regExp::matchGrouping
             {
                 if (pmatch[matchI].rm_so != -1 && pmatch[matchI].rm_eo != -1)
                 {
-                    groups[groupI] = str.substr
+                    groups[groupI] = text.substr
                     (
                         pmatch[matchI].rm_so,
                         pmatch[matchI].rm_eo - pmatch[matchI].rm_so
@@ -83,21 +83,21 @@ bool Foam::regExp::matchGrouping
 
 Foam::regExp::regExp()
 :
-    preg_(0)
+    preg_(nullptr)
 {}
 
 
-Foam::regExp::regExp(const char* pattern, const bool ignoreCase)
+Foam::regExp::regExp(const char* pattern, bool ignoreCase)
 :
-    preg_(0)
+    preg_(nullptr)
 {
     set(pattern, ignoreCase);
 }
 
 
-Foam::regExp::regExp(const std::string& pattern, const bool ignoreCase)
+Foam::regExp::regExp(const std::string& pattern, bool ignoreCase)
 :
-    preg_(0)
+    preg_(nullptr)
 {
     set(pattern.c_str(), ignoreCase);
 }
@@ -113,7 +113,7 @@ Foam::regExp::~regExp()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::regExp::set(const char* pattern, const bool ignoreCase) const
+void Foam::regExp::set(const char* pattern, bool ignoreCase)
 {
     clear();
 
@@ -160,19 +160,19 @@ void Foam::regExp::set(const char* pattern, const bool ignoreCase) const
 }
 
 
-void Foam::regExp::set(const std::string& pattern, const bool ignoreCase) const
+void Foam::regExp::set(const std::string& pattern, bool ignoreCase)
 {
     return set(pattern.c_str(), ignoreCase);
 }
 
 
-bool Foam::regExp::clear() const
+bool Foam::regExp::clear()
 {
     if (preg_)
     {
         regfree(preg_);
         delete preg_;
-        preg_ = 0;
+        preg_ = nullptr;
 
         return true;
     }
@@ -181,14 +181,14 @@ bool Foam::regExp::clear() const
 }
 
 
-std::string::size_type Foam::regExp::find(const std::string& str) const
+std::string::size_type Foam::regExp::find(const std::string& text) const
 {
-    if (preg_ && str.size())
+    if (preg_ && !text.empty())
     {
         size_t nmatch = 1;
         regmatch_t pmatch[1];
 
-        if (regexec(preg_, str.c_str(), nmatch, pmatch, 0) == 0)
+        if (regexec(preg_, text.c_str(), nmatch, pmatch, 0) == 0)
         {
             return pmatch[0].rm_so;
         }
@@ -198,9 +198,9 @@ std::string::size_type Foam::regExp::find(const std::string& str) const
 }
 
 
-bool Foam::regExp::match(const std::string& str) const
+bool Foam::regExp::match(const std::string& text) const
 {
-    if (preg_ && str.size())
+    if (preg_ && !text.empty())
     {
         size_t nmatch = 1;
         regmatch_t pmatch[1];
@@ -209,8 +209,8 @@ bool Foam::regExp::match(const std::string& str) const
         // pmatch[0] is the entire match
         if
         (
-            regexec(preg_, str.c_str(), nmatch, pmatch, 0) == 0
-         && (pmatch[0].rm_so == 0 && pmatch[0].rm_eo == label(str.size()))
+            regexec(preg_, text.c_str(), nmatch, pmatch, 0) == 0
+         && (pmatch[0].rm_so == 0 && pmatch[0].rm_eo == label(text.size()))
         )
         {
             return true;
@@ -223,35 +223,35 @@ bool Foam::regExp::match(const std::string& str) const
 
 bool Foam::regExp::match
 (
-    const std::string& str,
+    const std::string& text,
     List<std::string>& groups
 ) const
 {
-    return matchGrouping(str, groups);
+    return matchGrouping(text, groups);
 }
 
 
 bool Foam::regExp::match
 (
-    const std::string& str,
+    const std::string& text,
     List<Foam::string>& groups
 ) const
 {
-    return matchGrouping(str, groups);
+    return matchGrouping(text, groups);
 }
 
 
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
-void Foam::regExp::operator=(const char* pat)
+void Foam::regExp::operator=(const char* pattern)
 {
-    set(pat);
+    set(pattern);
 }
 
 
-void Foam::regExp::operator=(const std::string& pat)
+void Foam::regExp::operator=(const std::string& pattern)
 {
-    set(pat);
+    set(pattern);
 }
 
 

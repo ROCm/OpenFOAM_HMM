@@ -48,21 +48,17 @@ Foam::keyType::keyType(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::keyType::match
-(
-    const std::string& str,
-    bool literalMatch
-) const
+bool Foam::keyType::match(const std::string& text, bool literal) const
 {
-    if (literalMatch || !isPattern_)
+    if (literal || !isPattern_)
     {
         // check as string
-        return (str == *this);
+        return (text == *this);
     }
     else
     {
         // check as regex
-        return regExp(*this).match(str);
+        return regExp(*this).match(text);
     }
 }
 

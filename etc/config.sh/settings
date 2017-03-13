@@ -44,18 +44,19 @@ Linux)
         export WM_CC='gcc'
         export WM_CXX='g++'
         export WM_CFLAGS='-fPIC'
-        export WM_CXXFLAGS='-fPIC -std=c++0x'
+        export WM_CXXFLAGS='-fPIC -std=c++11'
         export WM_LDFLAGS=
         ;;
 
     x86_64)
+        : ${WM_ARCH_OPTION:=64}; export WM_ARCH_OPTION  # Default to 64-bit
         case "$WM_ARCH_OPTION" in
         32)
             export WM_COMPILER_ARCH=64
             export WM_CC='gcc'
             export WM_CXX='g++'
             export WM_CFLAGS='-m32 -fPIC'
-            export WM_CXXFLAGS='-m32 -fPIC -std=c++0x'
+            export WM_CXXFLAGS='-m32 -fPIC -std=c++11'
             export WM_LDFLAGS='-m32'
             ;;
         64)
@@ -64,7 +65,7 @@ Linux)
             export WM_CC='gcc'
             export WM_CXX='g++'
             export WM_CFLAGS='-m64 -fPIC'
-            export WM_CXXFLAGS='-m64 -fPIC -std=c++0x'
+            export WM_CXXFLAGS='-m64 -fPIC -std=c++11'
             export WM_LDFLAGS='-m64'
             ;;
         *)
@@ -85,7 +86,7 @@ Linux)
         export WM_CC='gcc'
         export WM_CXX='g++'
         export WM_CFLAGS='-fPIC'
-        export WM_CXXFLAGS='-fPIC -std=c++0x'
+        export WM_CXXFLAGS='-fPIC -std=c++11'
         export WM_LDFLAGS=
         ;;
 
@@ -95,7 +96,7 @@ Linux)
         export WM_CC='gcc'
         export WM_CXX='g++'
         export WM_CFLAGS='-m64 -fPIC'
-        export WM_CXXFLAGS='-m64 -fPIC -std=c++0x'
+        export WM_CXXFLAGS='-m64 -fPIC -std=c++11'
         export WM_LDFLAGS='-m64'
         ;;
 
@@ -105,7 +106,7 @@ Linux)
         export WM_CC='gcc'
         export WM_CXX='g++'
         export WM_CFLAGS='-m64 -fPIC'
-        export WM_CXXFLAGS='-m64 -fPIC -std=c++0x'
+        export WM_CXXFLAGS='-m64 -fPIC -std=c++11'
         export WM_LDFLAGS='-m64'
         ;;
 
@@ -122,17 +123,17 @@ SunOS)
     export WM_CC='gcc'
     export WM_CXX='g++'
     export WM_CFLAGS='-mabi=64 -fPIC'
-    export WM_CXXFLAGS='-mabi=64 -fPIC -std=c++0x'
+    export WM_CXXFLAGS='-mabi=64 -fPIC -std=c++11'
     export WM_LDFLAGS='-mabi=64 -G0'
     ;;
 
 *)  # An unsupported operating system
-    /bin/cat <<USAGE 1>&2
-
-Your "$WM_ARCH" operating system is unsupported by this OpenFOAM release.
+    /bin/cat << UNSUPPORTED_OS 1>&2
+===============================================================================
+Your '$WM_ARCH' operating system is unsupported by this OpenFOAM release.
 For further assistance, please contact www.OpenFOAM.com
-
-USAGE
+===============================================================================
+UNSUPPORTED_OS
     ;;
 esac
 
@@ -217,7 +218,8 @@ case "$WM_COMPILER_TYPE" in
 system)
     # Use system compiler
     ;;
-OpenFOAM | ThirdParty)
+
+ThirdParty)
     if [ -n "$gcc_version" ]
     then
         gccDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$gcc_version
@@ -297,9 +299,15 @@ CLANG_NOT_FOUND
     unset clang_version clangDir
     ;;
 *)
-    echo "Warn: WM_COMPILER_TYPE='$WM_COMPILER_TYPE' is unsupported" 1>&2
-    echo "   treating as 'system' instead" 1>&2
+    /bin/cat << UNKNOWN_TYPE 1>&2
+===============================================================================
+Unknown WM_COMPILER_TYPE="$WM_COMPILER_TYPE" - treating as 'system'
+Please check your settings
+===============================================================================
+UNKNOWN_TYPE
+    export WM_COMPILER_TYPE=system
     ;;
+
 esac
 
 #------------------------------------------------------------------------------

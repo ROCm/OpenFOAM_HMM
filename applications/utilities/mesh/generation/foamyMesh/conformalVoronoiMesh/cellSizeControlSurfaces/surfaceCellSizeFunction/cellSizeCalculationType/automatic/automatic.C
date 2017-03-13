@@ -288,7 +288,7 @@ Foam::tmp<Foam::triSurfacePointScalarField> Foam::automatic::load()
         vtkSurfaceWriter().write
         (
             surface_.searchableSurface::time().constant()/"triSurface",
-            surfaceName_.lessExt().name(),
+            surfaceName_.nameLessExt(),
             meshedSurfRef
             (
                 surface_.points(),

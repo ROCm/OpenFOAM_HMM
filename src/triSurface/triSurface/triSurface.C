@@ -32,12 +32,76 @@ License
 #include "SortableList.H"
 #include "PackedBoolList.H"
 #include "surfZoneList.H"
+#include "surfaceFormatsCore.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(triSurface, 0);
+}
+
+
+// Note that these lists are a stop-gap measure until the read/write handling
+// gets properly updated
+const Foam::wordHashSet Foam::triSurface::readTypes_
+{
+    "ftr", "stl", "stlb", "gts", "obj", "off", "tri", "ac", "nas", "vtk"
+};
+
+
+const Foam::wordHashSet Foam::triSurface::writeTypes_
+{
+    "ftr", "stl", "stlb", "gts", "obj", "off", "tri", "ac", "smesh", "vtk"
+};
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+bool Foam::triSurface::canReadType(const word& ext, const bool verbose)
+{
+    return fileFormats::surfaceFormatsCore::checkSupport
+    (
+        readTypes(),
+        ext,
+        verbose,
+        "reading"
+   );
+}
+
+
+bool Foam::triSurface::canWriteType(const word& ext, const bool verbose)
+{
+    return fileFormats::surfaceFormatsCore::checkSupport
+    (
+        writeTypes(),
+        ext,
+        verbose,
+        "writing"
+    );
+}
+
+
+bool Foam::triSurface::canRead(const fileName& name, const bool verbose)
+{
+    word ext = name.ext();
+    if (ext == "gz")
+    {
+        ext = name.lessExt().ext();
+    }
+    return canReadType(ext, verbose);
+}
+
+
+const Foam::wordHashSet& Foam::triSurface::readTypes()
+{
+    return readTypes_;
+}
+
+
+const Foam::wordHashSet& Foam::triSurface::writeTypes()
+{
+    return writeTypes_;
 }
 
 
@@ -851,6 +915,16 @@ void Foam::triSurface::triFaceFaces(List<face>& plainFaces) const
     {
         plainFaces[facei] = operator[](facei).triFaceFace();
     }
+}
+
+
+Foam::Xfer<Foam::List<Foam::labelledTri>>
+Foam::triSurface::xferFaces()
+{
+    // Topology changed because of transfer
+    clearOut();
+
+    return this->storedFaces().xfer();
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,11 +58,11 @@ pid_t ppid();
 pid_t pgid();
 
 //- Return true if environment variable of given name is defined
-bool env(const word&);
+bool env(const std::string& envName);
 
 //- Return environment variable of given name
 //  Return string() if the environment is undefined
-string getEnv(const word&);
+string getEnv(const std::string& envName);
 
 //- Set an environment variable
 bool setEnv(const word& name, const std::string& value, const bool overwrite);
@@ -84,7 +84,7 @@ bool isAdministrator();
 fileName home();
 
 //- Return home directory path name for a particular user
-fileName home(const string& userName);
+fileName home(const std::string& userName);
 
 //- Return current working directory path name
 fileName cwd();
@@ -176,10 +176,10 @@ unsigned int sleep(const unsigned int);
 void fdClose(const int);
 
 //- Check if machine is up by pinging given port
-bool ping(const string&, const label port, const label timeOut);
+bool ping(const std::string& destName, const label port, const label timeOut);
 
 //- Check if machine is up by pinging port 22 (ssh) and 222 (rsh)
-bool ping(const string&, const label timeOut=10);
+bool ping(const std::string& host, const label timeOut=10);
 
 //- Execute the specified command via the shell.
 //  Uses vfork/execl internally.

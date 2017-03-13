@@ -87,7 +87,7 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
     const UList<surfZone>& zoneLst
 )
 {
-    word caseName = os.name().lessExt().name();
+    const word caseName = os.name().nameLessExt();
 
     os  << "! STAR-CD file written " << clock::dateTime().c_str() << nl
         << "! " << pointLst.size() << " points, " << nFaces << " faces" << nl

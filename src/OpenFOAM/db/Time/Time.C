@@ -515,7 +515,9 @@ Foam::Time::Time
         *this,
         argList::validOptions.found("withFunctionObjects")
       ? args.optionFound("withFunctionObjects")
-      : !args.optionFound("noFunctionObjects")
+      : argList::validOptions.found("noFunctionObjects")
+      ? !args.optionFound("noFunctionObjects")
+      : false
     )
 {
     libs_.open(controlDict_, "libs");
@@ -589,7 +591,6 @@ Foam::Time::Time
     functionObjects_(*this, enableFunctionObjects)
 {
     libs_.open(controlDict_, "libs");
-
 
     // Explicitly set read flags on objectRegistry so anything constructed
     // from it reads as well (e.g. fvSolution).

@@ -207,13 +207,11 @@ License
 #include "globalIndex.H"
 #include "SubField.H"
 
-extern "C"
-{
-    #include <stdio.h>
-    #include <mpi.h>
-    #include "ptscotch.h"
-}
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 
+#include <cstdio>
+#include <mpi.h>
+#include "ptscotch.h"
 
 // Hack: scotch generates floating point errors so need to switch of error
 //       trapping!

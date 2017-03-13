@@ -57,6 +57,7 @@ SourceFiles
 #include "globalIndex.H"
 #include "uint.H"
 
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 #include "zoltan.h"
 #include <mpi.h>
 

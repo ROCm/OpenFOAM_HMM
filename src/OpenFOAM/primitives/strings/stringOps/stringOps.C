@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +34,6 @@ License
 
 //! \cond fileScope
 //  Find the type/position of the ":-" or ":+" alternative values
-//
 static inline int findParameterAlternative
 (
     const std::string& s,
@@ -132,7 +131,7 @@ Foam::string& Foam::stringOps::inplaceExpand
                     iter != s.end()
                  &&
                     (
-                        isalnum(*iter)
+                        std::isalnum(*iter)
                      || *iter == '.'
                      || *iter == ':'
                      || *iter == '_'
@@ -285,6 +284,30 @@ Foam::string Foam::stringOps::getVariable
     {
         value = getEnv(name);
 
+        if (value.empty() && !name.empty())
+        {
+            // The type/position of the ":-" or ":+" alternative values
+            string::size_type altPos = 0;
+
+            // check for parameter:-word or parameter:+word
+            int altType = findParameterAlternative(name, altPos, name.size()-1);
+            if (altType)
+            {
+                value = getEnv
+                (
+                    // var-name
+                    word(name.substr(0, altPos), false)
+                );
+
+                // ":-" or ":+" alternative value
+                if (value.empty() ? (altType == '-') : (altType == '+'))
+                {
+                    // alternative
+                    value = name.substr(altPos + 2);
+                }
+            }
+        }
+
         if (value.empty())
         {
             FatalIOErrorInFunction
@@ -391,15 +414,15 @@ Foam::string& Foam::stringOps::inplaceExpand
             else
             {
                 string::iterator iter = s.begin() + begVar + 1;
+                string::size_type endVar = begVar;
 
                 // more generous in accepting keywords than for env variables
-                string::size_type endVar = begVar;
                 while
                 (
                     iter != s.end()
                  &&
                     (
-                        isalnum(*iter)
+                        std::isalnum(*iter)
                      || *iter == '.'
                      || *iter == ':'
                      || *iter == '_'
@@ -536,7 +559,7 @@ Foam::string& Foam::stringOps::inplaceExpand
                     iter != s.end()
                  &&
                     (
-                        isalnum(*iter)
+                        std::isalnum(*iter)
                      || *iter == '.'
                      || *iter == ':'
                      || *iter == '_'
@@ -681,7 +704,7 @@ Foam::string& Foam::stringOps::inplaceExpand
                 while
                 (
                     iter != s.end()
-                 && (isalnum(*iter) || *iter == '_')
+                 && (std::isalnum(*iter) || *iter == '_')
                 )
                 {
                     ++iter;
@@ -843,12 +866,38 @@ Foam::string& Foam::stringOps::inplaceExpand
 }
 
 
+bool Foam::stringOps::inplaceReplaceVar(string& s, const word& varName)
+{
+    if (s.empty() || varName.empty())
+    {
+        return false;
+    }
+
+    const string content(getEnv(varName));
+    if (content.empty())
+    {
+        return false;
+    }
+
+    const std::string::size_type i = s.find(content);
+    if (i == std::string::npos)
+    {
+        return false;
+    }
+    else
+    {
+        s.replace(i, content.size(), string("${" + varName + "}"));
+        return true;
+    }
+}
+
+
 Foam::string Foam::stringOps::trimLeft(const string& s)
 {
     if (!s.empty())
     {
         string::size_type beg = 0;
-        while (beg < s.size() && isspace(s[beg]))
+        while (beg < s.size() && std::isspace(s[beg]))
         {
             ++beg;
         }
@@ -868,7 +917,7 @@ Foam::string& Foam::stringOps::inplaceTrimLeft(string& s)
     if (!s.empty())
     {
         string::size_type beg = 0;
-        while (beg < s.size() && isspace(s[beg]))
+        while (beg < s.size() && std::isspace(s[beg]))
         {
             ++beg;
         }
@@ -888,7 +937,7 @@ Foam::string Foam::stringOps::trimRight(const string& s)
     if (!s.empty())
     {
         string::size_type sz = s.size();
-        while (sz && isspace(s[sz-1]))
+        while (sz && std::isspace(s[sz-1]))
         {
             --sz;
         }
@@ -908,7 +957,7 @@ Foam::string& Foam::stringOps::inplaceTrimRight(string& s)
     if (!s.empty())
     {
         string::size_type sz = s.size();
-        while (sz && isspace(s[sz-1]))
+        while (sz && std::isspace(s[sz-1]))
         {
             --sz;
         }

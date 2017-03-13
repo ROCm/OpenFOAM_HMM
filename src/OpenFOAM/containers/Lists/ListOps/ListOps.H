@@ -55,26 +55,27 @@ static const List<Type>& emptyList()
     return *reinterpret_cast<const List<Type>*>(&emptyLabelList);
 }
 
+
 //- Renumber the values (not the indices) of a list.
 //  Negative ListType elements are left as is.
 template<class ListType>
-ListType renumber(const labelUList& oldToNew, const ListType&);
+ListType renumber(const labelUList& oldToNew, const ListType& lst);
 
 //- Inplace renumber the values of a list.
 //  Negative ListType elements are left as is.
 template<class ListType>
-void inplaceRenumber(const labelUList& oldToNew, ListType&);
+void inplaceRenumber(const labelUList& oldToNew, ListType& lst);
 
 
 //- Reorder the elements (indices, not values) of a list.
 //  Negative ListType elements are left as is.
 template<class ListType>
-ListType reorder(const labelUList& oldToNew, const ListType&);
+ListType reorder(const labelUList& oldToNew, const ListType& lst);
 
 //- Inplace reorder the elements of a list.
 //  Negative ListType elements are left as is.
 template<class ListType>
-void inplaceReorder(const labelUList& oldToNew, ListType&);
+void inplaceReorder(const labelUList& oldToNew, ListType& lst);
 
 
 // Variants to work with iterators and sparse tables.
@@ -82,65 +83,92 @@ void inplaceReorder(const labelUList& oldToNew, ListType&);
 
 //- Map values. Do not map negative values.
 template<class Container>
-void inplaceMapValue(const labelUList& oldToNew, Container&);
+void inplaceMapValue(const labelUList& oldToNew, Container& lst);
 
 //- Recreate with mapped keys. Do not map elements with negative key.
 template<class Container>
-void inplaceMapKey(const labelUList& oldToNew, Container&);
+void inplaceMapKey(const labelUList& oldToNew, Container& lst);
 
 
 //- Generate the (stable) sort order for the list
 template<class T>
-void sortedOrder(const UList<T>&, labelList& order);
+void sortedOrder(const UList<T>& lst, labelList& order);
 
 template<class T, class Cmp>
-void sortedOrder(const UList<T>&, labelList& order, const Cmp& cmp);
+void sortedOrder(const UList<T>& lst, labelList& order, const Cmp& cmp);
+
 
 //- Generate (sorted) indices corresponding to duplicate list values
 template<class T>
-void duplicateOrder(const UList<T>&, labelList& order);
+void duplicateOrder(const UList<T>& lst, labelList& order);
 
 template<class T, class Cmp>
-void duplicateOrder(const UList<T>&, labelList& order, const Cmp& cmp);
+void duplicateOrder(const UList<T>& lst, labelList& order, const Cmp& cmp);
+
 
 //- Generate (sorted) indices corresponding to unique list values
 template<class T>
-void uniqueOrder(const UList<T>&, labelList& order);
+void uniqueOrder(const UList<T>& lst, labelList& order);
 
 template<class T, class Cmp>
-void uniqueOrder(const UList<T>&, labelList& order, const Cmp& cmp);
+void uniqueOrder(const UList<T>& lst, labelList& order, const Cmp& cmp);
+
+
+//- Inplace sorting and removal of duplicates.
+//  Do not use FixedList for the input list, since it doesn't resize.
+template<class ListType>
+void inplaceUniqueSort(ListType& lst);
+
+//- Inplace sorting and removal of duplicates.
+//  Do not use FixedList for the input list, since it doesn't resize.
+template<class ListType, class Cmp>
+void inplaceUniqueSort(ListType& lst, const Cmp& cmp);
+
 
 //- Extract elements of List when select is a certain value.
-//  eg, to extract all selected elements:
-//    subset<bool, labelList>(selectedElems, true, lst);
+//  \deprecated use subsetList instead (deprecated Mar 2017)
 template<class T, class ListType>
 ListType subset(const UList<T>& select, const T& value, const ListType&);
 
 //- Inplace extract elements of List when select is a certain value.
-//  eg, to extract all selected elements:
-//    inplaceSubset<bool, labelList>(selectedElems, true, lst);
+//  \deprecated use inplaceSubsetList instead (deprecated Mar 2017)
 template<class T, class ListType>
 void inplaceSubset(const UList<T>& select, const T& value, ListType&);
+
 
 //- Extract elements of List when select is true
 //  eg, to extract all selected elements:
 //    subset<boolList, labelList>(selectedElems, lst);
-//  Note a labelHashSet could also be used for the bool-list
+//  Note a labelHashSet can also be used as the bool-list.
+//  Do not use FixedList for the input list, since it doesn't resize.
 template<class BoolListType, class ListType>
-ListType subset(const BoolListType& select, const ListType&);
+ListType subset(const BoolListType& select, const ListType& lst);
 
 //- Inplace extract elements of List when select is true
 //  eg, to extract all selected elements:
 //    inplaceSubset<boolList, labelList>(selectedElems, lst);
-//  Note a labelHashSet could also be used for the bool-list
+//  Note a labelHashSet can also be used as the bool-list.
+//  Do not use FixedList for the input list, since it doesn't resize.
 template<class BoolListType, class ListType>
-void inplaceSubset(const BoolListType& select, ListType&);
+void inplaceSubset(const BoolListType& select, ListType& lst);
+
+
+//- Copy a subset of the input list when predicate is true.
+//  Do not use FixedList for the input list, since it doesn't resize.
+template<class ListType, class UnaryPredicate>
+ListType subsetList(const ListType& input, UnaryPredicate pred);
+
+//- Inplace subset of the list when predicate is true.
+//  Do not use FixedList for the input list, since it doesn't resize.
+template<class ListType, class UnaryPredicate>
+void inplaceSubsetList(ListType& input, UnaryPredicate pred);
+
 
 //- Invert one-to-one map. Unmapped elements will be -1.
-labelList invert(const label len, const labelUList&);
+labelList invert(const label len, const labelUList& map);
 
 //- Invert one-to-many map. Unmapped elements will be size 0.
-labelListList invertOneToMany(const label len, const labelUList&);
+labelListList invertOneToMany(const label len, const labelUList& map);
 
 //- Invert many-to-many.
 //  Input and output types need to be inherited from List.
@@ -156,7 +184,7 @@ List<OutList> invertManyToMany(const label len, const UList<InList>& in)
     return out;
 }
 
-//- Create identity map (map[i] == i) of given length
+//- Create identity map of the given length with (map[i] == i)
 labelList identity(const label len);
 
 //- Find first occurence of given element and return index,
@@ -173,8 +201,8 @@ label findIndex
 template<class ListType>
 labelList findIndices
 (
-    const ListType&,
-    typename ListType::const_reference,
+    const ListType& l,
+    typename ListType::const_reference t,
     const label start=0
 );
 
@@ -182,9 +210,9 @@ labelList findIndices
 template<class ListType>
 void setValues
 (
-    ListType&,
+    ListType& l,
     const labelUList& indices,
-    typename ListType::const_reference
+    typename ListType::const_reference t
 );
 
 //- Opposite of findIndices: set values at indices to given value
@@ -200,13 +228,13 @@ ListType createWithValues
 //- Find index of max element (and larger than given element).
 //  return -1 if not found. Linear search.
 template<class ListType>
-label findMax(const ListType&, const label start=0);
+label findMax(const ListType& l, const label start=0);
 
 
 //- Find index of min element (and less than given element).
 //  return -1 if not found. Linear search.
 template<class ListType>
-label findMin(const ListType&, const label start=0);
+label findMin(const ListType& l, const label start=0);
 
 
 //- Find first occurrence of given element in sorted list and return index,
@@ -214,8 +242,8 @@ label findMin(const ListType&, const label start=0);
 template<class ListType>
 label findSortedIndex
 (
-    const ListType&,
-    typename ListType::const_reference,
+    const ListType& l,
+    typename ListType::const_reference t,
     const label start=0
 );
 
@@ -225,8 +253,8 @@ label findSortedIndex
 template<class ListType, class BinaryOp>
 label findLower
 (
-    const ListType&,
-    typename ListType::const_reference,
+    const ListType& l,
+    typename ListType::const_reference t,
     const label start,
     const BinaryOp& bop
 );
@@ -237,20 +265,24 @@ label findLower
 template<class ListType>
 label findLower
 (
-    const ListType&,
-    typename ListType::const_reference,
+    const ListType& l,
+    typename ListType::const_reference t,
     const label start=0
 );
 
 
 //- To construct a List from a C array. Has extra Container type
 //  to initialise e.g. wordList from arrays of char*.
+//
+//  \deprecated can often use initializer_list instead (deprecated Mar 2017)
 template<class Container, class T, int mRows>
 List<Container> initList(const T[mRows]);
 
 
 //- To construct a (square) ListList from a C array. Has extra Container type
 //  to initialise e.g. faceList from arrays of labels.
+//
+//  \deprecated can often use initializer_list instead (deprecated Mar 2017)
 template<class Container, class T, int mRows, int nColumns>
 List<Container> initListList(const T[mRows][nColumns]);
 

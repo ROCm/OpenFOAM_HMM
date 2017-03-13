@@ -193,12 +193,9 @@ void writeRays
     }
     str.flush();
 
-    DynamicList<string> cmd(3);
-    cmd.append("objToVTK");
-    cmd.append(fName);
-    cmd.append(fName.lessExt() + ".vtk");
-
     Pout<< "cmd: objToVTK " << fName.c_str() << endl;
+
+    stringList cmd{"objToVTK", fName, fName.lessExt().ext("vtk")};
     Foam::system(cmd);
 }
 
