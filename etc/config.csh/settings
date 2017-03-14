@@ -213,7 +213,7 @@ if ( ! $?WM_COMPILER_TYPE ) setenv WM_COMPILER_TYPE system
 
 # Load configured compiler versions, regardless of the compiler type
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSourceEtc config.csh/compiler
+_foamEtc config.csh/compiler
 
 switch ("$WM_COMPILER_TYPE")
 case system:

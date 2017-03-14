@@ -147,13 +147,13 @@ setenv WM_PROJECT_USER_DIR $HOME/$WM_PROJECT/$LOGNAME-$WM_PROJECT_VERSION
 
 # Source etc files, possibly with some verbosity
 if ($?FOAM_VERBOSE && $?prompt) then
-    alias _foamSourceEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh-verbose \!*`'
+    alias _foamEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh-verbose \!*`'
 else
-    alias _foamSourceEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh \!*`'
+    alias _foamEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh \!*`'
 endif
 
 # Add in preset user or site preferences:
-_foamSourceEtc prefs.csh
+_foamEtc prefs.csh
 
 # Evaluate command-line parameters and record settings for later.
 # These can be used to set/unset values, or specify alternative pref files.
@@ -180,7 +180,7 @@ while ( $#argv > 0 )
             if ($?FOAM_VERBOSE && $?prompt) echo "Using: $1"
             source "$1"
         else
-            _foamSourceEtc -silent "$1"
+            _foamEtc -silent "$1"
         endif
         breaksw
     endsw
@@ -213,19 +213,19 @@ if ( $status == 0 ) setenv MANPATH $cleaned
 
 # Source project setup files
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSourceEtc config.csh/settings
-_foamSourceEtc config.csh/aliases
+_foamEtc config.csh/settings
+_foamEtc config.csh/aliases
 
 # Source user setup files for optional packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSourceEtc config.csh/mpi
-_foamSourceEtc config.csh/paraview
-_foamSourceEtc config.csh/vtk
-_foamSourceEtc config.csh/ensight
+_foamEtc config.csh/mpi
+_foamEtc config.csh/paraview
+_foamEtc config.csh/vtk
+_foamEtc config.csh/ensight
 
-#_foamSourceEtc config.csh/ADIOS
-_foamSourceEtc config.csh/CGAL
-_foamSourceEtc config.csh/FFTW
+#_foamEtc config.csh/ADIOS
+_foamEtc config.csh/CGAL
+_foamEtc config.csh/FFTW
 
 
 # Clean environment paths again. Only remove duplicates
@@ -252,6 +252,6 @@ endif
 # Cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
 unset cleaned foamClean foamOldDirs
-unalias _foamSourceEtc
+unalias _foamEtc
 
 #------------------------------------------------------------------------------

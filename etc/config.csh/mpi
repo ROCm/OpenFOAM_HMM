@@ -49,7 +49,7 @@ case SYSTEMOPENMPI:
 case OPENMPI:
     setenv FOAM_MPI openmpi-2.0.2
     # Optional configuration tweaks:
-    _foamSourceEtc config.csh/openmpi
+    _foamEtc config.csh/openmpi
 
     setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 

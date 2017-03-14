@@ -132,12 +132,12 @@ fi
 # ~~~~~~~~~~~~~~~~~~~~~~
 export WM_PROJECT_USER_DIR=$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION
 
-# Source initialization functions
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Load helper functions
+# ~~~~~~~~~~~~~~~~~~~~~
 . $WM_PROJECT_DIR/etc/config.sh/functions
 
 # Add in preset user or site preferences:
-_foamSourceEtc prefs.sh
+_foamEtc prefs.sh
 
 # Evaluate command-line parameters and record settings for later.
 # These can be used to set/unset values, or specify alternative pref files.
@@ -163,22 +163,22 @@ export PATH LD_LIBRARY_PATH MANPATH
 
 # Source project setup files
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSourceEtc config.sh/settings
-_foamSourceEtc config.sh/aliases
+_foamEtc config.sh/settings
+_foamEtc config.sh/aliases
 
 
 # Source user setup files for optional packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSourceEtc config.sh/mpi
-_foamSourceEtc config.sh/paraview
-_foamSourceEtc config.sh/vtk
-_foamSourceEtc config.sh/ensight
-_foamSourceEtc config.sh/gperftools
+_foamEtc config.sh/mpi
+_foamEtc config.sh/paraview
+_foamEtc config.sh/vtk
+_foamEtc config.sh/ensight
+_foamEtc config.sh/gperftools
 
-#_foamSourceEtc config.sh/ADIOS
-_foamSourceEtc config.sh/CGAL
-_foamSourceEtc config.sh/scotch
-_foamSourceEtc config.sh/FFTW
+#_foamEtc config.sh/ADIOS
+_foamEtc config.sh/CGAL
+_foamEtc config.sh/scotch
+_foamEtc config.sh/FFTW
 
 
 # Clean environment paths again. Only remove duplicates
@@ -202,13 +202,13 @@ then
 fi
 
 
-# Cleanup environment:
-# ~~~~~~~~~~~~~~~~~~~~
+# Cleanup environment
+# ~~~~~~~~~~~~~~~~~~~
 unset cleaned foamClean foamOldDirs
 
 
-# Unload initialization functions:
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Unload helper functions
+# ~~~~~~~~~~~~~~~~~~~~~~~
 . $WM_PROJECT_DIR/etc/config.sh/functions
 
 #------------------------------------------------------------------------------
