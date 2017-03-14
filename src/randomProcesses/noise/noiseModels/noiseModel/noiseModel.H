@@ -36,6 +36,8 @@ Description
     fu              25;
     startTime       0;
 
+    outputPrefix    "test1";
+
     // Optional write options dictionary
     writeOptions
     {
@@ -49,18 +51,19 @@ Description
 
     where
     \table
-        Property    | Description                   | Required  | Default value
-        rhoRef      | Reference density             | no        | 1
-        N           | Number of samples in sampling window | no | 65536 (2^16)
-        fl          | Lower frequency bounds        | no        | 25
-        fu          | Upper frequency bounds        | no        | 10000
-        startTime   | Start time                    | no        | 0
-        graphFormat | Graph format                  | no        | raw
-        writePrmsf  | Write Prmsf data              | no        | yes
-        writeSPL    | Write SPL data                | no        | yes
-        writePSD    | Write PSD data                | no        | yes
-        writePSDf   | Write PSDf data               | no        | yes
-        writeOctaves| Write octaves data            | no        | yes
+        Property     | Description                   | Required  | Default value
+        rhoRef       | Reference density             | no        | 1
+        N            | Number of samples in sampling window | no | 65536 (2^16)
+        fl           | Lower frequency bounds        | no        | 25
+        fu           | Upper frequency bounds        | no        | 10000
+        startTime    | Start time                    | no        | 0
+        outputPrefix | Prefix applied to output files| no        | ''
+        graphFormat  | Graph format                  | no        | raw
+        writePrmsf   | Write Prmsf data              | no        | yes
+        writeSPL     | Write SPL data                | no        | yes
+        writePSD     | Write PSD data                | no        | yes
+        writePSDf    | Write PSDf data               | no        | yes
+        writeOctaves | Write octaves data            | no        | yes
     \endtable
 
 Note
@@ -138,6 +141,9 @@ protected:
 
         // Write options
 
+            //- Output  file prefix, default = ''
+            fileName outputPrefix_;
+
             //- Write Prmsf; default = yes
             bool writePrmsf_;
 
@@ -178,7 +184,7 @@ protected:
         ) const;
 
         //- Return the base output directory
-        fileName baseFileDir() const;
+        fileName baseFileDir(const label dataseti) const;
 
 
 public:

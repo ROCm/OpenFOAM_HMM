@@ -112,10 +112,18 @@ Foam::label Foam::noiseModel::findStartTimeIndex
 }
 
 
-Foam::fileName Foam::noiseModel::baseFileDir() const
+Foam::fileName Foam::noiseModel::baseFileDir(const label dataseti) const
 {
     fileName baseDir("$FOAM_CASE");
-    baseDir = baseDir.expand()/"postProcessing"/"noise";
+    word datasetName("input" + Foam::name(dataseti));
+    baseDir =
+        baseDir.expand()
+       /"postProcessing"
+       /"noise"
+       /outputPrefix_
+       /type()
+       /datasetName;
+
     return baseDir;
 }
 
@@ -133,6 +141,7 @@ Foam::noiseModel::noiseModel(const dictionary& dict, const bool readFields)
     startTime_(0),
     windowModelPtr_(),
     graphFormat_("raw"),
+    outputPrefix_(),
     writePrmsf_(true),
     writeSPL_(true),
     writePSD_(true),
@@ -169,6 +178,7 @@ bool Foam::noiseModel::read(const dictionary& dict)
     }
     dict.readIfPresent("startTime", startTime_);
     dict.readIfPresent("graphFormat", graphFormat_);
+    dict.readIfPresent("outputPrefix", outputPrefix_);
 
     // Check number of samples  - must be a power of 2 for our FFT
     bool powerOf2 = ((nSamples_ != 0) && !(nSamples_ & (nSamples_ - 1)));

@@ -226,8 +226,8 @@ void surfaceNoise::readSurfaceData
 
 Foam::scalar surfaceNoise::writeSurfaceData
 (
+    const fileName& outDirBase,
     const word& fName,
-    const word& groupName,
     const word& title,
     const scalar freq,
     const scalarField& data,
@@ -237,7 +237,7 @@ Foam::scalar surfaceNoise::writeSurfaceData
 {
     Info<< "    processing " << title << " for frequency " << freq << endl;
 
-    fileName outDir(baseFileDir()/groupName/Foam::name(freq));
+    const fileName outDir(outDirBase/Foam::name(freq));
 
     if (Pstream::parRun())
     {
@@ -463,9 +463,9 @@ bool surfaceNoise::read(const dictionary& dict)
 
 void surfaceNoise::calculate()
 {
-    forAll(inputFileNames_, i)
+    forAll(inputFileNames_, filei)
     {
-        fileName fName = inputFileNames_[i];
+        fileName fName = inputFileNames_[filei];
         fName.expand();
 
         if (!fName.isAbsolute())
@@ -591,7 +591,7 @@ void surfaceNoise::calculate()
         const word& fNameBase = fName.name(true);
 
         // Output directory for graphs
-        fileName outDir(baseFileDir()/typeName/fNameBase);
+        fileName outDirBase(baseFileDir(filei)/fNameBase);
 
         const scalar deltaf = 1.0/(deltaT_*win.nSamples());
         Info<< "Writing fft surface data";
@@ -606,6 +606,8 @@ void surfaceNoise::calculate()
         }
 
         {
+            fileName outDir(outDirBase/"fft");
+
             // Determine frequency range of interest
             // Note: freqencies have fixed interval, and are in the range
             //       0 to fftWriteInterval_*(n-1)*deltaf
@@ -629,12 +631,12 @@ void surfaceNoise::calculate()
                 {
                     label freqI = (i + f0)*fftWriteInterval_;
                     fOut[i] = freq1[freqI];
-                    const word gName = "fft";
+
 
                     PrmsfAve[i] = writeSurfaceData
                     (
+                        outDir,
                         fNameBase,
-                        gName,
                         "Prmsf",
                         freq1[freqI],
                         surfPrmsf[i + f0],
@@ -644,8 +646,8 @@ void surfaceNoise::calculate()
 
                     PSDfAve[i] = writeSurfaceData
                     (
+                        outDir,
                         fNameBase,
-                        gName,
                         "PSDf",
                         freq1[freqI],
                         surfPSDf[i + f0],
@@ -654,8 +656,8 @@ void surfaceNoise::calculate()
                     );
                     writeSurfaceData
                     (
+                        outDir,
                         fNameBase,
-                        gName,
                         "PSD",
                         freq1[freqI],
                         noiseFFT::PSD(surfPSDf[i + f0]),
@@ -664,8 +666,8 @@ void surfaceNoise::calculate()
                     );
                     writeSurfaceData
                     (
+                        outDir,
                         fNameBase,
-                        gName,
                         "SPL",
                         freq1[freqI],
                         noiseFFT::SPL(surfPSDf[i + f0]*deltaf),
@@ -719,16 +721,17 @@ void surfaceNoise::calculate()
 
         Info<< "Writing one-third octave surface data" << endl;
         {
+            fileName outDir(outDirBase/"oneThirdOctave");
+
             scalarField PSDfAve(surfPSD13f.size(), 0);
             scalarField Prms13f2Ave(surfPSD13f.size(), 0);
 
             forAll(surfPSD13f, i)
             {
-                const word gName = "oneThirdOctave";
                 PSDfAve[i] = writeSurfaceData
                 (
+                    outDir,
                     fNameBase,
-                    gName,
                     "PSD13f",
                     octave13FreqCentre[i],
                     surfPSD13f[i],
@@ -737,8 +740,8 @@ void surfaceNoise::calculate()
                 );
                 writeSurfaceData
                 (
+                    outDir,
                     fNameBase,
-                    gName,
                     "PSD13",
                     octave13FreqCentre[i],
                     noiseFFT::PSD(surfPSD13f[i]),
@@ -747,8 +750,8 @@ void surfaceNoise::calculate()
                 );
                 writeSurfaceData
                 (
+                    outDir,
                     fNameBase,
-                    gName,
                     "SPL13",
                     octave13FreqCentre[i],
                     noiseFFT::SPL(surfPrms13f2[i]),

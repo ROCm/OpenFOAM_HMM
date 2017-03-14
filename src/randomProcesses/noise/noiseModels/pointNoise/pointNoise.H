@@ -117,7 +117,11 @@ protected:
         ) const;
 
         //- Process the CSV data
-        void processData(const Function1Types::CSV<scalar>& data);
+        void processData
+        (
+            const label dataseti,
+            const Function1Types::CSV<scalar>& data
+        );
 
 
 public:

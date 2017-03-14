@@ -183,8 +183,8 @@ protected:
         //  Returns the area average value
         scalar writeSurfaceData
         (
+            const fileName& outDirBase,
             const word& fName,
-            const word& groupName,
             const word& title,
             const scalar freq,
             const scalarField& data,

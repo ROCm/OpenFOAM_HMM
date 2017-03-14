@@ -66,7 +66,11 @@ void pointNoise::filterTimeData
 }
 
 
-void pointNoise::processData(const Function1Types::CSV<scalar>& data)
+void pointNoise::processData
+(
+    const label dataseti,
+    const Function1Types::CSV<scalar>& data
+)
 {
     Info<< "Reading data file " << data.fName() << endl;
 
@@ -86,7 +90,7 @@ void pointNoise::processData(const Function1Types::CSV<scalar>& data)
     windowModelPtr_->validate(t.size());
     const windowModel& win = windowModelPtr_();
     const scalar deltaf = 1.0/(deltaT*win.nSamples());
-    fileName outDir(baseFileDir()/typeName/fNameBase);
+    fileName outDir(baseFileDir(dataseti)/fNameBase);
 
     // Create the fft
     noiseFFT nfft(deltaT, p);
@@ -200,32 +204,6 @@ void pointNoise::processData(const Function1Types::CSV<scalar>& data)
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void pointNoise::calculate()
-{
-    // Point data only handled by master
-    if (!Pstream::master())
-    {
-        return;
-    }
-
-
-    forAll(inputFileNames_, i)
-    {
-        fileName fName = inputFileNames_[i];
-        fName.expand();
-        if (!fName.isAbsolute())
-        {
-            fName = "$FOAM_CASE"/fName;
-        }
-        fName.expand();
-        Function1Types::CSV<scalar> data("pressure", dict_, "Data", fName);
-        processData(data);
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 pointNoise::pointNoise(const dictionary& dict, const bool readFields)
@@ -243,6 +221,32 @@ pointNoise::pointNoise(const dictionary& dict, const bool readFields)
 
 pointNoise::~pointNoise()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void pointNoise::calculate()
+{
+    // Point data only handled by master
+    if (!Pstream::master())
+    {
+        return;
+    }
+
+
+    forAll(inputFileNames_, filei)
+    {
+        fileName fName = inputFileNames_[filei];
+        fName.expand();
+        if (!fName.isAbsolute())
+        {
+            fName = "$FOAM_CASE"/fName;
+        }
+        fName.expand();
+        Function1Types::CSV<scalar> data("pressure", dict_, "Data", fName);
+        processData(filei, data);
+    }
+}
 
 
 bool pointNoise::read(const dictionary& dict)
