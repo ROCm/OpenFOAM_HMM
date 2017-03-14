@@ -36,7 +36,7 @@
 #         - the vtk_version, mesa_version variables are retained.
 #           (for future integration into ThirdParty build)
 #
-# It is recommended to use the VTK sources from ParaView 5.0.1.
+# It is recommended to use the VTK sources from ParaView 5.0.1 or later
 #
 # See the BuildIssues.txt about problems that can be encountered when using
 # the 'plain' VTK sources.
