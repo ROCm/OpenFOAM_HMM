@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 #include "nearestToCell.H"
 #include "polyMesh.H"
 #include "addToRunTimeSelectionTable.H"
+#include "mappedPatchBase.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -53,9 +54,30 @@ Foam::topoSetSource::addToUsageTable Foam::nearestToCell::usage_
 
 void Foam::nearestToCell::combine(topoSet& set, const bool add) const
 {
+    // All the info for nearest. Construct to miss
+    List<mappedPatchBase::nearInfo> nearest(points_.size());
+
     forAll(points_, pointi)
     {
-        addOrDelete(set, mesh_.findNearestCell(points_[pointi]), add);
+        label celli = mesh_.findNearestCell(points_[pointi]);
+        const point& cc = mesh_.cellCentres()[celli];
+        nearest[pointi].first() = pointIndexHit(true, cc, celli);
+        nearest[pointi].second() = Tuple2<scalar, label>
+        (
+            magSqr(cc-points_[pointi]),
+            Pstream::myProcNo()
+        );
+    }
+
+    Pstream::listCombineGather(nearest, mappedPatchBase::nearestEqOp());
+    Pstream::listCombineScatter(nearest);
+
+    forAll(nearest, pointi)
+    {
+        if (nearest[pointi].second().second() == Pstream::myProcNo())
+        {
+            addOrDelete(set, nearest[pointi].first().index(), add);
+        }
     }
 }
 
