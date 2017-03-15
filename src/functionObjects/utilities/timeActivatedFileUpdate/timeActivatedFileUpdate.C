@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,13 +48,16 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::functionObjects::timeActivatedFileUpdate::updateFile()
+void Foam::functionObjects::timeActivatedFileUpdate::updateFile
+(
+    const bool checkFiles
+)
 {
     label i = lastIndex_;
     while
     (
         i < timeVsFile_.size()-1
-     && timeVsFile_[i+1].first() < time_.value()
+     && timeVsFile_[i+1].first() < time_.value()+0.5*time_.deltaTValue()
     )
     {
         i++;
@@ -69,6 +72,15 @@ void Foam::functionObjects::timeActivatedFileUpdate::updateFile()
         cp(timeVsFile_[i].second(), destFile);
         mv(destFile, fileToUpdate_);
         lastIndex_ = i;
+
+        if (checkFiles)
+        {
+            // Do an early check to avoid an additional iteration before
+            // any changes are picked up (see Time::run : does readModified
+            // before executing FOs). Note we have to protect the read
+            // constructor of *this from triggering this behaviour.
+            const_cast<Time&>(time_).Time::readModifiedObjects();
+        }
     }
 }
 
@@ -130,7 +142,8 @@ bool Foam::functionObjects::timeActivatedFileUpdate::read
             << timeVsFile_[i].second() << endl;
     }
 
-    updateFile();
+    // Copy starting files. Avoid recursion by not checking for modified files.
+    updateFile(false);
 
     return true;
 }
@@ -138,7 +151,7 @@ bool Foam::functionObjects::timeActivatedFileUpdate::read
 
 bool Foam::functionObjects::timeActivatedFileUpdate::execute()
 {
-    updateFile();
+    updateFile(true);
 
     return true;
 }
