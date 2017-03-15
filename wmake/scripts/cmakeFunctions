@@ -72,6 +72,19 @@ sameDependency()
 }
 
 
+# CMake with output suppressed according to WM_QUIET
+_cmake()
+{
+    echo "cmake..."
+    if [ -n "$WM_QUIET" ]
+    then
+        cmake -DCMAKE_RULE_MESSAGES=OFF $@ >/dev/null
+    else
+        cmake $@
+    fi
+}
+
+
 # CMake into objectsDir with external dependency
 # - use sentinel file(s) to handle paraview/vtk version changes
 cmakeVersioned()
@@ -89,7 +102,7 @@ cmakeVersioned()
 
     mkdir -p $objectsDir && \
     (
-        cd $objectsDir && cmake $sourceDir && make \
+        cd $objectsDir && _cmake $sourceDir && make \
      && echo "$depend" > ${sentinel:-/dev/null}
     )
 }

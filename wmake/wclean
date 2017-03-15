@@ -105,7 +105,7 @@ if [ $# -ge 1 ]
 then
     if [ -d "$1" ]
     then
-        dir=$1
+        dir="${1%/}"
     elif [ -f "$1" ]
     then
         dir="${1%/*}"
@@ -115,10 +115,10 @@ then
     fi
 
     # Specified directory name:
-    [ $# -ge 2 ] && dir=$2
+    [ $# -ge 2 ] && dir="${2%/}"
 
     # Specified alternative name for the Make sub-directory:
-    [ $# -ge 3 ] && MakeDir=$3
+    [ $# -ge 3 ] && MakeDir="${3%/}"
 
     if [ -n "$dir" ]
     then

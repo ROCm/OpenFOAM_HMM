@@ -26,18 +26,26 @@ Application
     wmkdep
 
 Description
-    A fast dependency list generator that emulates the behaviour and the
-    output of cpp -M. However, the output contains no duplicates and
-    is approx. 40% faster than cpp.
+    A fast dependency list generator that emulates the behaviour and output
+    of cpp -M. However, the output contains no duplicates and is thus
+    approx. 40% faster than cpp.
+    It also handles missing files somewhat more gracefully.
 
-    The algorithm uses flex to scan for includes and searches the files
-    found.  Each file is entered into a hash table so that files are scanned
-    only once.  This is why this program is faster than cpp.
+    The algorithm uses flex to scan for includes and searches the files found.
+    The files are only visited once (the names of the files visited are hashed),
+    which makes this faster than cpp.
 
 Usage
-    wmkdep [ -Idir ... -Idir ] [ -iheader .. -iheader ] filename
+    wmkdep [-Idir..] [-iheader...] [-eENV...] [-ofile] filename
 
 \*---------------------------------------------------------------------------*/
+/* With cpp:
+ *
+ * cpp -x c++ -std=c++11 -nostdinc -nostdinc++
+ *     -M -DWM_$(WM_PRECISION_OPTION) -DWM_LABEL_SIZE=$(WM_LABEL_SIZE) |
+ * sed -e 's,^$(WM_PROJECT_DIR)/,$$(WM_PROJECT_DIR)/,' \
+ *     -e 's,^$(WM_THIRD_PARTY_DIR)/,$$(WM_THIRD_PARTY_DIR)/,'
+ */
 
 #define FILE_STACK_SIZE 300
 #define HASH_TABLE_SIZE 500
@@ -51,8 +59,7 @@ Usage
 
 /* The executable name (for messages), without requiring access to argv[] */
 #define EXENAME  "wmkdep"
-#undef yywrap        /* sometimes a macro by default */
-#define YY_NO_INPUT  /* no input(), yyinput() required */
+#undef yywrap           /* sometimes a macro by default */
 #pragma GCC diagnostic ignored "-Wunused-function"
 
 void nextFile(const char* fileName);
@@ -60,29 +67,31 @@ void nextFile(const char* fileName);
 /*---------------------------------------------------------------------------*/
 %}
 
-%x CMNT CFNAME SCFNAME JFNAME FFNAME
+%x CMNT CFNAME FFNAME
 %%
 
-"//".*\n                  ;            /* remove c++ style one line comments */
+"//".*\n            ;               /* Remove C++-style comment */
 
-"/*"                      BEGIN(CMNT);    /* start removing c style comment */
-<CMNT>.|\n                ;
-<CMNT>"*/"                BEGIN(INITIAL); /* end removing c style comment */
+"/*"                BEGIN(CMNT);    /* Begin removing C-style comment */
+<CMNT>.|\n          ;
+<CMNT>"*/"          BEGIN(INITIAL); /* End removing C-style comment */
 
-^[ \t]*#[ \t]*include[ \t]+\"   BEGIN(CFNAME);  /* c-file name */
-<CFNAME>[^"\n ]*        { BEGIN(INITIAL); nextFile(yytext); } /*"*/
+^[ \t]*#[ \t]*include[ \t]+\"   BEGIN(CFNAME);  /* C-file name */
+<CFNAME>[^"\n ]*    { BEGIN(INITIAL); nextFile(yytext); } /* "-quoted */
 
-"      "include[ \t]+\'   BEGIN(FFNAME);  /* FORTRAN-file name */
-<FFNAME>[^']*           { BEGIN(INITIAL); nextFile(yytext); } /*'*/
+"      "include[ \t]+\'   BEGIN(FFNAME);        /* FORTRAN-file name */
+<FFNAME>[^']*       { BEGIN(INITIAL); nextFile(yytext); } /* '-quoted */
 
-.|\t|\n                   ;
+.|\t|\n             ;
 
 %%
 
 /*---------------------------------------------------------------------------*/
 
 
-/* char* entry in hash table */
+/*
+ * A char* entry in hash table
+ */
 struct HashEntry
 {
     char* name;
@@ -91,49 +100,173 @@ struct HashEntry
 
 
 /*
- * lookup name in hash table.
+ * Lookup name in hashTable.
  * if found - return 1
- * if not found - insert in table and return 0
+ * if not found - insert in hashTable and return 0
  */
-int lookUp(struct HashEntry** hashTable, const char* p)
+static int lookUp(struct HashEntry* hashTable[HASH_TABLE_SIZE], const char* str)
 {
-    int ii = 0;
-    struct HashEntry* n;
-    struct HashEntry* nn;
-
-    /* hash */
-    const char* pp = p;
-    while (*pp) ii = ii<<1 ^ *pp++;
-    if (ii < 0) ii = -ii;
-    ii %= HASH_TABLE_SIZE;
-
-    /* search */
-    for (n=hashTable[ii]; n; n=n->next)
+    unsigned idx = 0; /* Hash index */
     {
-        if (strcmp(p, n->name) == 0)
+        const char* pp = str;
+        while (*pp) idx = idx << 1 ^ *pp++;
+        idx %= HASH_TABLE_SIZE;
+    }
+
+    /* Search for entry */
+    struct HashEntry* entry;
+    for (entry = hashTable[idx]; entry; entry = entry->next)
+    {
+        if (!strcmp(str, entry->name))
         {
-            /* entry found so return true */
-            return 1;
+            return 1; /* True: entry found */
         }
     }
 
-    /* insert */
-    nn = (struct HashEntry*)malloc(sizeof(struct HashEntry));
-    nn->name = strdup(p);
-    nn->next = hashTable[ii];
-    hashTable[ii] = nn;
+    /* Entry not found - insert a new entry */
+    entry = (struct HashEntry*)malloc(sizeof(struct HashEntry));
+    entry->name = strdup(str);
+    entry->next = hashTable[idx];
+    hashTable[idx] = entry;
 
-    /* entry not found, and therefore added. return false */
-    return 0;
+    return 0;   /* False: entry did not previously exist */
+}
+
+
+/*
+ * Free allocated memory in hashTable.
+ */
+static void free_hashTable(struct HashEntry* hashTable[HASH_TABLE_SIZE])
+{
+    int idx;
+    for (idx = 0; idx < HASH_TABLE_SIZE; ++idx)
+    {
+        struct HashEntry* entry = hashTable[idx];
+        hashTable[idx] = NULL;
+
+        while (entry)
+        {
+            struct HashEntry* next = entry->next;
+            free(entry->name);
+            free(entry);
+
+            entry = next;
+        }
+    }
+}
+
+
+/*
+ * Environment entry - as a linked-list
+ */
+struct KeyValue
+{
+    char* name;
+    char* value;
+    size_t len;
+    struct KeyValue* next;
+};
+
+
+/* List of environ variables to substitute */
+struct KeyValue* envTable = NULL;
+
+/*
+ * Add envTable replacements:
+ *
+ * Eg,
+ *     /openfoam/project/path/directory/xyz
+ *  -> $(WM_PROJECT_DIR)/directory/xyz
+ */
+static void add_env(const char* key)
+{
+    const char *val = getenv(key);
+
+    if (val && *val)
+    {
+        const size_t keyLen = strlen(key);
+        const size_t valLen = strlen(val);
+
+        /* "$(ENV)/" */
+        char *replace = (char*)malloc(keyLen + 5);
+        strcpy(replace, "$(");
+        strcat(replace, key);
+        strcat(replace, ")/");
+
+        /* "/env/value/" */
+        char *orig = (char*)malloc(valLen + 2);
+        strcpy(orig, val);
+        if (val[valLen-1] != '/')
+        {
+            strcat(orig, "/");
+        }
+
+        struct KeyValue* entry =
+            (struct KeyValue*)malloc(sizeof(struct KeyValue));
+
+        entry->name  = replace;
+        entry->value = orig;
+        entry->len   = strlen(orig);
+        entry->next  = envTable;
+        envTable = entry;
+    }
+}
+
+
+/*
+ * Free allocated memory in envTable.
+ */
+static void free_envTable()
+{
+    struct KeyValue* entry = envTable;
+
+    while (entry)
+    {
+        struct KeyValue* next = entry->next;
+        free(entry->name);
+        free(entry->value);
+        free(entry);
+
+        entry = next;
+    }
+}
+
+
+/*
+ * Print fileName to stdout,
+ * with envTable substitutions at the beginning of the path
+ *
+ * Eg,
+ *     /openfoam/project/path/directory/xyz
+ *  -> $(WM_PROJECT_DIR)/directory/xyz
+ */
+static void print_fileName(const char* fileName)
+{
+    const size_t len = strlen(fileName);
+    const char *substr = fileName;
+
+    struct KeyValue* entry = envTable;
+    while (entry)
+    {
+        if (len > entry->len && !strncmp(fileName, entry->value, entry->len))
+        {
+            substr = (fileName + entry->len);
+            fputs(entry->name, stdout);
+            break;
+        }
+        entry = entry->next;
+    }
+
+    fputs(substr, stdout);
+    fputs(" \\\n", stdout);
 }
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 int nDirectories = 0;
-char** directories;
+char** directories = NULL;
 char* sourceFile = NULL;
-char* depFile = NULL;
 
 /* Set of files already visited */
 struct HashEntry* visitedFiles[HASH_TABLE_SIZE];
@@ -150,7 +283,6 @@ const char* bufferPaths[FILE_STACK_SIZE];
 
 int main(int argc, char* argv[])
 {
-    char *basePos, *dotPos;
     int i;
 
     if (argc < 2)
@@ -158,148 +290,211 @@ int main(int argc, char* argv[])
         fputs(EXENAME ": input file not supplied\n", stderr);
         return 1;
     }
-    else if (!strncmp(argv[1], "-h", 2)) /* -h, -help */
-    {
-        fputs
-        (
-            "\nUsage: " EXENAME
-            " [-Idir ... -Idir] [-iheader .. -iheader] filename\n\n"
-            "  -Idir     Directories to be searched for headers.\n"
-            "  -iheader  Headers to be ignored.\n\n"
-            "Dependency list generator, similar to 'cpp -M'\n\n",
-            stderr
-        );
 
-        return 0;
+#if 0
+    for (i = 0; i < argc; ++i)
+    {
+        if (i) fputs(" ", stderr);
+        fputs(argv[i], stderr);
+    }
+#endif
+
+    /* Prechecks:
+     * - help
+     * - count number of -I directories
+     */
+    nDirectories = 0;
+    for (i = 1; i < argc; ++i)
+    {
+        if (argv[i][0] != '-') continue;
+
+        switch (argv[i][1])
+        {
+            case 'h':           /* Option: -h, -help */
+                fputs
+                (
+                    "\nUsage: " EXENAME
+                    " [-Idir...] [-iheader...] [-eENV...]"
+                    " [-ofile] filename\n\n"
+                    "  -Idir     Directories to be searched for headers.\n"
+                    "  -iheader  Headers to be ignored.\n"
+                    "  -eENV     Environment variable path substitutions.\n"
+                    "  -ofile    Write output to file.\n"
+                    "\nDependency list generator, similar to 'cpp -M'\n\n",
+                    stderr
+                );
+                return 0;
+                break;
+
+            case 'I':           /* Option: -Idir */
+                ++nDirectories;
+                break;
+
+            /* Could check other options, warn about unknown options... */
+        }
     }
 
     sourceFile = strdup(argv[argc-1]);
 
-    if ((basePos = strrchr(sourceFile, '/')) == NULL)
+    /* Verify that it has an extension */
     {
-        basePos = sourceFile;
-    }
-    else
-    {
-        ++basePos;
-    }
-
-    if
-    (
-        (dotPos = strrchr(sourceFile, '.')) == NULL
-     || (dotPos < basePos)
-    )
-    {
-        fprintf
-        (
-            stderr,
-            EXENAME ": cannot find extension in source file name '%s'\n",
-            sourceFile
-        );
-        return 1;
-    }
-
-    /* count number of -I directories */
-    nDirectories = 0;
-    for (i = 1; i < argc; ++i)
-    {
-        if (strncmp(argv[i], "-I", 2) == 0)
+        char *base = strrchr(sourceFile, '/');
+        if (!base)
         {
-            if (strlen(argv[i]) > 2)
-            {
-                ++nDirectories;
-            }
+            base = sourceFile;
+        }
+        if (!strrchr(base, '.'))
+        {
+            fprintf
+            (
+                stderr,
+                EXENAME ": cannot find extension in source file name '%s'\n",
+                sourceFile
+            );
+            exit(1);
         }
     }
 
-    directories = (char**)malloc(sizeof(char*)*nDirectories);
+    const char *outputFile = NULL;
 
-    /* build list of -I directories and add -i ignores */
+    /* Build list of -I directories and add -i ignores */
+    directories = (char**)malloc(sizeof(char*)*nDirectories);
     nDirectories = 0;
     for (i = 1; i < argc; ++i)
     {
-        if (strncmp(argv[i], "-I", 2) == 0)
+        const size_t optLen = strlen(argv[i]);
+
+        if (!strncmp(argv[i], "-I", 2))
         {
-            if (strlen(argv[i]) > 2)
+            /* Option: -Idir */
+            if (optLen > 2)
             {
                 directories[nDirectories++] = strdup(argv[i] + 2);
             }
         }
-        else if (strncmp(argv[i], "-i", 2) == 0)
+        else if (!strncmp(argv[i], "-i", 2))
         {
-            if (strlen(argv[i]) > 2)
+            /* Option: -iheader */
+            if (optLen > 2)
             {
                 lookUp(visitedFiles, (argv[i] + 2));
             }
         }
+        else if (!strncmp(argv[i], "-e", 2))
+        {
+            /* Option: -eENV */
+            if (optLen > 2)
+            {
+                add_env(argv[i] + 2);
+            }
+        }
+        else if (!strncmp(argv[i], "-o", 2))
+        {
+            /* Option: -ofile */
+            if (optLen > 2)
+            {
+                outputFile = (argv[i] + 2);
+            }
+        }
     }
 
-    /*
-     * initialise depFile to zero and use strncat rather than strncpy
-     * because there is a bug in the SGI strncat that if 0 preceeds the '.'
-     * it inserts a space
-     */
-    depFile = (char*)malloc(strlen(sourceFile) + 20);
-    depFile[0] = 0;
-    strcat(depFile, "$(OBJECTS_DIR)/");
-    strcat(depFile, sourceFile);
-    strcat(depFile, ".dep");
-
-    char *objectFile = strdup(basePos);
-    objectFile[(dotPos - basePos)/sizeof(char)] = 0;
-
-    /* printf("$(OBJECTS_DIR)/%s.o: %s\n", objectFile, depFile); */
-    printf("%s: \\\n", depFile);
-    free(objectFile);
-
     /* Initialize buffer path for currentBuffer */
+    currentBuffer = 0;
     bufferPaths[currentBuffer] = NULL;
+
+    /* Start of output */
+    if (outputFile)
+    {
+        FILE *reopened = freopen(outputFile, "w", stdout);
+        if (!reopened)
+        {
+            fprintf
+            (
+                stderr,
+                EXENAME ": could not open file '%s' for output: %s\n",
+                outputFile, strerror(errno)
+            );
+
+            return 1;
+        }
+    }
+
+    fputs("$(OBJECTS_DIR)/", stdout);
+    fputs(sourceFile, stdout);
+    fputs(".dep: \\\n", stdout);
 
     nextFile(sourceFile);
     yylex();
 
-    puts("\n");
+    fputs("\n\n", stdout);
 
-    for (i = 0; i < nDirectories; ++i)
+    for (i = nDirectories-1; i >= 0; --i)
     {
         free(directories[i]);
     }
     free(directories);
-
     free(sourceFile);
-    free(depFile);
+
+    free_hashTable(visitedFiles);
+    free_envTable();
+
+    fflush(stdout);
+    fflush(stderr);
 
     return 0;
 }
 
 
 /*
- * Add a directory name to the file name
+ * Open a file for reading and print its qualified name
  */
-char* addDirectoryName(const char* dirName, const char* fileName)
+static FILE* fopen_file(const char* dirName, const char* fileName)
 {
-    char* pathName = (char*)malloc(strlen(dirName) + strlen(fileName) + 2);
-    strcpy(pathName, dirName);
+    FILE *file;
 
-    if (dirName[strlen(dirName)-1] != '/')
+    if (dirName && *dirName)
     {
-        strcat(pathName, "/");
+        const size_t dirLen = strlen(dirName);
+        char* fullName = (char*)malloc(dirLen + strlen(fileName) + 2);
+
+        strcpy(fullName, dirName);
+        if (dirName[dirLen-1] != '/')
+        {
+            strcat(fullName, "/");
+        }
+        strcat(fullName, fileName);
+
+        file = fopen(fullName, "r");
+
+        if (file)
+        {
+            print_fileName(fullName);
+        }
+
+        free(fullName);
+    }
+    else
+    {
+        file = fopen(fileName, "r");
+
+        if (file)
+        {
+            print_fileName(fileName);
+        }
     }
 
-    strcat(pathName, fileName);
-
-    return pathName;
+    return file;
 }
 
 
 /*
- * open a file and create buffer and put on stack
+ * Open a file and create buffer and put on stack
  */
 void nextFile(const char* fileName)
 {
     if (lookUp(visitedFiles, fileName))
     {
-        return;   /* already existed (did not insert) */
+        return;   /* Already existed (did not insert) */
     }
 
     if (currentBuffer >= FILE_STACK_SIZE)
@@ -311,6 +506,9 @@ void nextFile(const char* fileName)
             "while opening '%s' for file '%s'\n",
             FILE_STACK_SIZE, fileName, sourceFile
         );
+
+        fflush(stdout);
+        fflush(stderr);
         exit(1);
     }
 
@@ -320,47 +518,39 @@ void nextFile(const char* fileName)
     /* Check if the file has same path as the file in the current buffer */
     if (bufferPaths[currentBuffer] != NULL)
     {
-        char* pathName = addDirectoryName(bufferPaths[currentBuffer], fileName);
-
-        if ((newyyin = fopen(pathName, "r")))
+        newyyin = fopen_file(bufferPaths[currentBuffer], fileName);
+        if (newyyin)
         {
-            printf("%s \\\n", pathName);
-
             buffers[currentBuffer++] = YY_CURRENT_BUFFER;
             bufferPaths[currentBuffer] = bufferPaths[currentBuffer-1];
 
             yy_switch_to_buffer(yy_create_buffer(newyyin, YY_BUF_SIZE));
-
-            free(pathName);
-
             return;
         }
-
-        free(pathName);
     }
 
-    if (!(newyyin = fopen(fileName, "r")))
+    newyyin = fopen_file(NULL, fileName);
+    if (newyyin)
+    {
+        buffers[currentBuffer++] = YY_CURRENT_BUFFER;
+        bufferPaths[currentBuffer] = NULL;
+
+        yy_switch_to_buffer(yy_create_buffer(newyyin, YY_BUF_SIZE));
+    }
+    else
     {
         int d;
         for (d=0; d<nDirectories; ++d)
         {
-            char* pathName = addDirectoryName(directories[d], fileName);
-
-            if ((newyyin = fopen(pathName, "r")))
+            newyyin = fopen_file(directories[d], fileName);
+            if (newyyin)
             {
-                printf("%s \\\n", pathName);
-
                 buffers[currentBuffer++] = YY_CURRENT_BUFFER;
                 bufferPaths[currentBuffer] = directories[d];
 
                 yy_switch_to_buffer(yy_create_buffer(newyyin, YY_BUF_SIZE));
-
-                free(pathName);
-
                 return;
             }
-
-            free(pathName);
         }
 
         fprintf
@@ -378,33 +568,8 @@ void nextFile(const char* fileName)
         fflush(stdout);
         fflush(stderr);
 
-        /* only report the first occurance */
+        /* Only report the first occurrence */
         lookUp(visitedFiles, fileName);
-    }
-    else
-    {
-        printf("%s \\\n", fileName);
-        fflush(stdout);
-
-        buffers[currentBuffer++] = YY_CURRENT_BUFFER;
-        bufferPaths[currentBuffer] = NULL;
-
-        yy_switch_to_buffer(yy_create_buffer(newyyin, YY_BUF_SIZE));
-    }
-}
-
-
-/*
- * Replace all '.' with '/'
- */
-void dotToSlash(char* fileName)
-{
-    const size_t len = strlen(fileName);
-    size_t i;
-
-    for (i=0; i<len; ++i)
-    {
-        if (fileName[i] == '.') fileName[i] = '/';
     }
 }
 
@@ -415,9 +580,9 @@ void dotToSlash(char* fileName)
 int yywrap()
 {
     /* Close the file for the buffer which has just reached EOF */
-    /* This causes strange problems on some systems
+    /* This causes strange problems on several systems:
     fclose(yyin);
-    yyin = 0;
+    yyin = NULL;
     */
 
     /* Delete the buffer */
@@ -426,22 +591,24 @@ int yywrap()
     /* Set buffer counter to previous buffer */
     currentBuffer--;
 
-    if (currentBuffer >= 0) /* if buffer counter refers to a valid file */
+    if (currentBuffer >= 0)
     {
-        /* reset input buffer to the previous buffer on the stack */
+        /* Buffer counter refers to a valid file */
+
+        /* Reset input buffer to the previous buffer on the stack */
         yy_switch_to_buffer(buffers[currentBuffer]);
 
         /* Return to the normal state for the previous buffer on the stack */
         BEGIN(INITIAL);
 
-        /* return 0 to inform lex to continue reading */
+        /* Return 0 to inform lex to continue reading */
         return 0;
     }
-    else                 /* else there are no more buffers on the stack */
-    {
-        /* return 1 to inform lex finish now that all buffers have been read */
-        return 1;
-    }
+
+    /* No more buffers on the stack:
+     * Return 1 to inform lex to finish now that all buffers have been read
+     */
+    return 1;
 }
 
 

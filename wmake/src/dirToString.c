@@ -25,8 +25,8 @@ Application
     dirToString
 
 Description
-    converts a directory path into a string with appropriate capitalisation
-    e.g. dir1/dir2 becomes dir1Dir2
+    Converts a directory path into a camelCase string.
+    e.g. dir1/dir2/dir3 becomes dir1Dir2Dir3
 
 Usage
     echo dirName | dirToString
@@ -45,34 +45,34 @@ Usage
 #include <string.h>
 #include <ctype.h>
 
+/* The executable name (for messages), without requiring access to argv[] */
+#define EXENAME  "dirToString"
+
 int main(int argc, char* argv[])
 {
     int c;
-    int nextupper = 0;
 
     if (argc > 1)
     {
-        if (!strncmp(argv[1], "-h", 2))  /* -h, -help */
+        if (!strncmp(argv[1], "-h", 2))
         {
-            fprintf
-            (
-                stderr,
-                "\nUsage: %s [-strip]\n\n",
-                "dirToString"
-            );
+            /* Option: -h, -help */
 
-            fprintf
+            fputs
             (
-                stderr,
+                "\nUsage: " EXENAME
+                " [-strip]\n\n"
                 "  -strip    ignore leading [./] characters.\n\n"
-                "Transform dir1/dir2 to camel-case dir1Dir2\n\n"
+                "Converts a directory path into a camelCase string\n\n",
+                stderr
             );
-
             return 0;
         }
 
-        if (!strcmp(argv[1], "-s") || !strcmp(argv[1], "-strip"))  /* -s, -strip */
+        if (!strcmp(argv[1], "-s") || !strcmp(argv[1], "-strip"))
         {
+            /* Option: -s, -strip */
+
             while ((c=getchar()) != EOF && (c == '.' || c == '/'))
             {
                 /* nop */
@@ -88,23 +88,21 @@ int main(int argc, char* argv[])
     }
 
 
-    while ((c=getchar()) != EOF)
+    int nextUpper = 0;
+    while ((c = getchar()) != EOF)
     {
         if (c == '/')
         {
-            nextupper = 1;
+            nextUpper = 1;
+        }
+        else if (nextUpper)
+        {
+            putchar(toupper(c));
+            nextUpper = 0;
         }
         else
         {
-            if (nextupper)
-            {
-                putchar(toupper(c));
-                nextupper = 0;
-            }
-            else
-            {
-                putchar(c);
-            }
+            putchar(c);
         }
     }
 

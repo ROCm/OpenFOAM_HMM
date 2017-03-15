@@ -31,6 +31,7 @@
 #     Usage : makeFiles
 #
 #------------------------------------------------------------------------------
+dirToString=$WM_DIR/platforms/$WM_ARCH$WM_COMPILER/dirToString
 
 if [ -r Make/files ]
 then
@@ -38,10 +39,15 @@ then
     exit 1
 fi
 
-dirToString=$WM_DIR/platforms/$WM_ARCH$WM_COMPILER/dirToString
+[ -x "$dirToString" ] || {
+    echo "Error: no command $dirToString" 1>&2
+    exit 1
+}
 
 [ -d Make ] || mkdir Make
 rm -f Make/files
+#------------------------------------------------------------------------------
+echo "Creating Make/files"
 
 for dir in $(find . -mindepth 1 -type d -print)
 do
@@ -53,7 +59,7 @@ do
         echo "$(echo $dir | $dirToString -strip)  =  ${dir#./}"
         ;;
     esac
-done >> Make/files
+done > Make/files
 [ -s Make/files ] && echo >> Make/files
 
 for file in $(find . -name "*.[cCylLfF]" -type f -print)

@@ -28,7 +28,7 @@
 # Description
 #     Makes a directory hierarchy for the given target file
 #
-#     Usage: makeTargetDir <directory>
+#     Usage: makeTargetDir <file>
 #
 #------------------------------------------------------------------------------
 

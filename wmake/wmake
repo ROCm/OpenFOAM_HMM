@@ -243,14 +243,15 @@ fi
 # The variables 'targetType' and 'MakeDir' are considered global
 #------------------------------------------------------------------------------
 
-unset dir targetType
+unset targetType
 MakeDir=Make
 
 if [ $# -ge 1 ]
 then
+    unset dir
     if [ -d "$1" ]
     then
-        dir="$1"
+        dir="${1%/}"
     elif [ -f "$1" ]
     then
         dir="${1%/*}"
@@ -260,10 +261,10 @@ then
     fi
 
     # Specified directory name:
-    [ $# -ge 2 ] && dir=$2
+    [ $# -ge 2 ] && dir="${2%/}"
 
     # Specified alternative name for the Make sub-directory:
-    [ $# -ge 3 ] && MakeDir=$3
+    [ $# -ge 3 ] && MakeDir="${3%/}"
 
     if [ -n "$dir" ]
     then
@@ -271,10 +272,14 @@ then
             echo "$Script error: could not change to directory '$dir'" 1>&2
             exit 1
         }
+    elif [ -f "$MakeDir/files" ]
+    then
+        dir="(${PWD##*/})"  # Implicit directory information
     fi
 
     # Print command
-    echo "$Script $targetType${targetType:+ }${dir:-.}"
+    echo "$Script $targetType${targetType:+ }$dir"
+    unset dir
 fi
 
 
