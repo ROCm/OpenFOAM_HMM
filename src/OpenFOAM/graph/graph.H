@@ -178,6 +178,9 @@ public:
 
             scalarField& y();
 
+            // Limit the data for all axes based on x-limits
+            void setXRange(const scalar x0, const scalar x1);
+
 
         // Write
 
