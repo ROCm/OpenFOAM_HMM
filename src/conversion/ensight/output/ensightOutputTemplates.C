@@ -254,7 +254,7 @@ bool Foam::ensightOutput::writeField
     forAll(patchIds, listi)
     {
         const label patchId   = patchIds[listi];
-        const word& patchName = patchLookup[listi];
+        const word& patchName = patchLookup[patchId];
         const ensightFaces& ensFaces = patchFaces[patchName];
 
         writeFaceField
