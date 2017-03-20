@@ -85,7 +85,7 @@ expandPath()
 # - WM_PROJECT_DIR, HOME
 findTarget()
 {
-    local wmpdir=$(expandPath $WM_PROJECT_DIR)
+    local project=$(expandPath $WM_PROJECT_DIR)
     local home=$(expandPath $HOME)
     local reldir="${1:-.}"
     local absdir=$(expandPath $reldir)
@@ -93,7 +93,7 @@ findTarget()
     while [ -n "$absdir" ]
     do
         case "$absdir" in
-        ($wmpdir | $home | /)
+        ($project | $home | /)
             break
             ;;
         esac
@@ -154,21 +154,21 @@ cdSource()
 # - WM_PROJECT_DIR, WM_OPTIONS
 findObjectDir()
 {
-    local wmpdir=$(expandPath $WM_PROJECT_DIR)
-    local exPath=$(expandPath ${1:-.})
+    local project=$(expandPath $WM_PROJECT_DIR)
+    local absdir=$(expandPath ${1:-.})
     local objectsDir
 
-    case "$exPath" in
-    ("$wmpdir"/*)
+    case "$absdir" in
+    ("$project"/*)
         local buildPath=$WM_PROJECT_DIR/build/${WM_OPTIONS}
-        objectsDir=$buildPath$(echo $exPath | sed s%$wmpdir%% )
+        objectsDir=$buildPath$(echo $absdir | sed s%$project%% )
         ;;
     (*)
-        local path=$exPath
+        local path=$absdir
         local appDir=.
         [ -d Make ] || appDir=$(findTarget .) || exit 1 # Fatal
-        exPath=$(expandPath $appDir/.)
-        objectsDir=$appDir/Make/${WM_OPTIONS}$(echo $path | sed s%$exPath%% )
+        absdir=$(expandPath $appDir/.)
+        objectsDir=$appDir/Make/${WM_OPTIONS}$(echo $path | sed s%$absdir%% )
     ;;
     esac
 

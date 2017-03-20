@@ -59,7 +59,7 @@ set cmake_version=cmake-system
 # END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
 
-if ( ! $?ParaView_DIR ) setenv ParaView_DIR
+if (! $?ParaView_DIR ) setenv ParaView_DIR
 
 # Clean PATH and LD_LIBRARY_PATH
 set cleaned=`$WM_PROJECT_DIR/bin/foamCleanPath "$PATH" "$ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/cmake- $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/ParaView-"`

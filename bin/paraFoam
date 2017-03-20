@@ -129,7 +129,7 @@ done
 ERROR: ParaView reader module library ($plugin) does not exist
 Please build the reader module before continuing:
 
-    cd \$FOAM_UTILITIES/postProcessing/graphics/PVReaders
+    cd \$WM_PROJECT_DIR/applications/utilities/postProcessing/graphics/PVReaders
     ./Allwclean
     ./Allwmake
 

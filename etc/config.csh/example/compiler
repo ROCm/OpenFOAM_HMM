@@ -30,21 +30,13 @@
 #
 #------------------------------------------------------------------------------
 
-# Modified compiler settings
+# Modify/override compiler settings
 switch ("$WM_COMPILER")
-case Gcc46:
-case Gcc46++0x:
-    set gcc_version=gcc-4.6.0
-    set gmp_version=gmp-5.0.1
-    set mpfr_version=mpfr-2.4.2
-    set mpc_version=mpc-0.8.1
-    breaksw
-case Gcc45:
-case Gcc45++0x:
-    set gcc_version=gcc-4.5.2
-    set gmp_version=gmp-5.0.1
-    set mpfr_version=mpfr-2.4.2
-    set mpc_version=mpc-0.8.1
+case Gcc70:
+    set gcc_version=gcc-7.0.0
+    set gmp_version=gmp-6.1.2
+    set mpfr_version=mpfr-3.1.5
+    set mpc_version=mpc-1.0.3
     breaksw
 endsw
 

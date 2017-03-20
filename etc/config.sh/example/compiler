@@ -30,38 +30,22 @@
 #
 #------------------------------------------------------------------------------
 
-# First load the standard versions, if necessary
-if foamFile=$($WM_PROJECT_DIR/bin/foamEtcFile -mode o config.sh/compiler)
-then
-    . $foamFile
-fi
-unset foamFile
+# Load the standard versions...
+eval $($WM_PROJECT_DIR/bin/foamEtcFile -sh -mode=o config.sh/compiler)
 
-
-# Override compiler settings
+# Modify/override compiler settings
 case "$WM_COMPILER" in
-Gcc46 | Gcc46++0x)
-    gcc_version=gcc-4.6.0
-    gmp_version=gmp-5.0.1
-    mpfr_version=mpfr-2.4.2
-    mpc_version=mpc-0.8.1
-    ;;
-Gcc45 | Gcc45++0x)
-    gcc_version=gcc-4.5.2
-    gmp_version=gmp-5.0.1
-    mpfr_version=mpfr-2.4.2
-    mpc_version=mpc-0.8.1
+Gcc70)
+    gcc_version=gcc-7.0.0
+    gmp_version=gmp-6.1.2
+    mpfr_version=mpfr-3.1.5
+    mpc_version=mpc-1.0.3
     ;;
 Gcc48u)
     # Example of using the system GCC 4.8 in Ubuntu 15.10. Keep in mind you
-    # will also need to create respective directory in "wmake/rules"
+    # will also need to create the respective directory in "wmake/rules"
     export WM_CC='gcc-4.8'
     export WM_CXX='g++-4.8'
-    ;;
-Icc*)
-    # Example for ensuring that 3rd software uses the Icc compilers
-    export WM_CC='icc'
-    export WM_CXX='icpc'
     ;;
 esac
 

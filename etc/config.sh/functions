@@ -30,12 +30,12 @@
 #
 #------------------------------------------------------------------------------
 
-if [ -z "$WM_BASH_FUNCTIONS" ]
+if [ -z "$WM_SHELL_FUNCTIONS" ]
 then
     # Not previously loaded/defined - define now
 
     # Temporary environment variable to track loading/unloading of functions
-    WM_BASH_FUNCTIONS=loaded
+    WM_SHELL_FUNCTIONS=loaded
 
     # Prefix to PATH
     _foamAddPath()
@@ -69,7 +69,6 @@ then
     # Evaluate command-line parameters
     _foamEval()
     {
-        local file
         while [ $# -gt 0 ]
         do
             case "$1" in
@@ -105,7 +104,7 @@ then
 else
     # Was previously loaded/defined - now unset
 
-    unset WM_BASH_FUNCTIONS
+    unset WM_SHELL_FUNCTIONS
     unset -f _foamAddPath _foamAddLib _foamAddMan
     unset -f _foamEtc _foamEval
 

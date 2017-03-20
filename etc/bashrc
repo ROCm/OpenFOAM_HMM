@@ -27,7 +27,7 @@
 # Description
 #     Startup file for OpenFOAM
 #     Sourced from ~/.profile or ~/.bashrc
-#     Should be usable by any POSIX-compliant shell (eg, ksh)
+#     Should be usable by any POSIX-compliant shell (eg, dash, ksh)
 #
 #------------------------------------------------------------------------------
 
@@ -37,20 +37,23 @@ export WM_PROJECT_VERSION=plus
 ################################################################################
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 #
-# FOAM_INST_DIR is the location of the OpenFOAM installation which defaults to
-# the directory containing this file if sourced by a bash shell.
+# FOAM_INST_DIR = the parent directory containing the OpenFOAM installation(s).
+# - If the OpenFOAM installation has this OpenFOAM-<VERSION>/etc/bashrc, the
+#   next lines should work when sourced by a BASH or ZSH shell.
+# - If this does not produce the desired result, please set one of the fallback
+#   values to an appropriate path.
 #
-# Please set to the appropriate path if the default is not correct.
-#
-[ $BASH_SOURCE ] && FOAM_INST_DIR=$(\cd ${BASH_SOURCE%/*/*/*} && \pwd -P) || \
+rc="${BASH_SOURCE:-${ZSH_NAME:+$0}}"
+[ -n "$rc" ] && FOAM_INST_DIR=$(\cd $(dirname $rc)/../.. && \pwd -L) || \
 FOAM_INST_DIR=$HOME/$WM_PROJECT
-# FOAM_INST_DIR=~$WM_PROJECT
 # FOAM_INST_DIR=/opt/$WM_PROJECT
 # FOAM_INST_DIR=/usr/local/$WM_PROJECT
 #
 # END OF (NORMAL) USER EDITABLE PART
 ################################################################################
+: # Extra safety - if the user commented out all fallback values
 export FOAM_INST_DIR
+unset rc
 
 # The default environment variables below can be overridden in a prefs.sh file
 # located in ~/.OpenFOAM/$WM_PROJECT_VERSION, ~/.OpenFOAM,
@@ -90,8 +93,8 @@ export WM_COMPILE_OPTION=Opt
 export WM_MPLIB=SYSTEMOPENMPI
 
 #- Operating System:
-#    WM_OSTYPE = POSIX | ???
-export WM_OSTYPE=POSIX
+#    WM_OSTYPE = POSIX
+#export WM_OSTYPE=POSIX
 
 #- Floating-point signal handling:
 #    set or unset
@@ -132,8 +135,8 @@ fi
 # ~~~~~~~~~~~~~~~~~~~~~~
 export WM_PROJECT_USER_DIR=$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION
 
-# Load helper functions
-# ~~~~~~~~~~~~~~~~~~~~~
+# Load shell functions
+# ~~~~~~~~~~~~~~~~~~~~
 . $WM_PROJECT_DIR/etc/config.sh/functions
 
 # Add in preset user or site preferences:
@@ -206,9 +209,8 @@ fi
 # ~~~~~~~~~~~~~~~~~~~
 unset cleaned foamClean foamOldDirs
 
-
-# Unload helper functions
-# ~~~~~~~~~~~~~~~~~~~~~~~
+# Unload functions
+# ~~~~~~~~~~~~~~~~
 . $WM_PROJECT_DIR/etc/config.sh/functions
 
 #------------------------------------------------------------------------------

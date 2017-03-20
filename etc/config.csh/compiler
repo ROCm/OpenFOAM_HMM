@@ -31,7 +31,6 @@
 #------------------------------------------------------------------------------
 
 switch ("$WM_COMPILER_TYPE")
-case OpenFOAM:
 case ThirdParty:
     # Default versions of GMP, MPFR and MPC, override as necessary
     set gmp_version=gmp-system
@@ -90,21 +89,6 @@ Please check your settings
 UNKNOWN_COMPILER
         breaksw
     endsw
-
-    setenv WM_COMPILER_TYPE ThirdParty  # Canonical name
-    breaksw
-endsw
-
-# Common settings (system or ThirdParty)
-switch ("$WM_COMPILER")
-case Clang*:
-    # Using clang - not gcc
-    setenv WM_CC 'clang'
-    setenv WM_CXX 'clang++'
-    breaksw
-case Icc*:
-    setenv WM_CC 'icc'
-    setenv WM_CXX 'icpc'
     breaksw
 endsw
 

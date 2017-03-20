@@ -28,6 +28,12 @@
 #     Miscellaneous functions for running tutorial cases
 #------------------------------------------------------------------------------
 
+# The normal locations
+[ -n "$FOAM_TUTORIALS" ] || export FOAM_TUTORIALS=$WM_PROJECT_DIR/tutorials
+
+
+#------------------------------------------------------------------------------
+
 #
 # Look for '-parallel' in the argument list.
 #

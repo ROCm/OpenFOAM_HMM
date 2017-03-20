@@ -35,10 +35,11 @@
 #------------------------------------------------------------------------------
 
 #
-# Use other (shipped) paraview with a different ParaView_VERSION
+# Use the shipped paraview config file (-mode=o)
+# with a different ParaView_VERSION
 #
 
-foamFile=$($WM_PROJECT_DIR/bin/foamEtcFile -mode o config.sh/paraview 2>/dev/null)
+foamFile=$($WM_PROJECT_DIR/bin/foamEtcFile -mode=o config.sh/paraview 2>/dev/null)
 [ $? -eq 0 ] && . $foamFile ParaView_VERSION=5.0.1
 
 unset foamFile

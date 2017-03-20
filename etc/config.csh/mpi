@@ -259,8 +259,8 @@ else
     setenv MPI_BUFFER_SIZE $minBufferSize
 endif
 
-# Cleanup environment:
-# ~~~~~~~~~~~~~~~~~~~~
+# Cleanup environment
+# ~~~~~~~~~~~~~~~~~~~
 unset minBufferSize
 
 #------------------------------------------------------------------------------

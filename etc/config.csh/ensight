@@ -31,7 +31,7 @@
 #------------------------------------------------------------------------------
 
 # Fallback value
-if (! $?CEI_HOME) then
+if (! $?CEI_HOME ) then
     setenv CEI_HOME /usr/local/ensight/CEI
 endif
 
