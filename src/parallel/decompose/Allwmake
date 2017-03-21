@@ -36,6 +36,7 @@ hasMetis()
 
     # Library
     [ -r $FOAM_EXT_LIBBIN/libmetis.so ] || \
+    [ -r $METIS_ARCH_PATH/lib/libmetis.so ] || \
     [ -r $METIS_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/libmetis.so ] || \
     [ "${METIS_ARCH_PATH##*-}" = system ] || {
         echo "$warning (missing library)"
@@ -90,6 +91,7 @@ hasScotch()
 
     # Library
     [ -r $FOAM_EXT_LIBBIN/libscotch.so ] || \
+    [ -r $SCOTCH_ARCH_PATH/lib/libscotch.so ] || \
     [ -r $SCOTCH_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/libscotch.so ] || \
     [ "${SCOTCH_ARCH_PATH##*-}" = system ] || {
         echo "$warning (missing library)"
