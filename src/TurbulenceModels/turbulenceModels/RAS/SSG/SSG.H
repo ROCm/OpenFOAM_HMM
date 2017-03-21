@@ -34,7 +34,7 @@ Description
     Reference:
     \verbatim
         Speziale, C. G., Sarkar, S., & Gatski, T. B. (1991).
-        Modelling the pressure–strain correlation of turbulence:
+        Modelling the pressure-strain correlation of turbulence:
         an invariant dynamical systems approach.
         Journal of Fluid Mechanics, 227, 245-272.
     \endverbatim

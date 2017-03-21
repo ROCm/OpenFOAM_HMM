@@ -91,6 +91,7 @@ Description
             // coreBlockageRatio 0;
         }
     }
+    \endverbatim
 
 SourceFiles
     tabulatedNTUHeatTransfer.C

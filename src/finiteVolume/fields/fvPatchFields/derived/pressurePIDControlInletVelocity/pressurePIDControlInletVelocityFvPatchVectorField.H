@@ -85,6 +85,7 @@ Description
         D               0.1;
         value           uniform (0 0 0);
     }
+    \endverbatim
 
 SeeAlso
     Foam::fixedValueFvPatchField

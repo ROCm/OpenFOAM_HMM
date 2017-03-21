@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Namespace
-    ensightOutput
+    Foam::ensightOutput
 
 Description
     A collection of global functions for writing ensight file content.

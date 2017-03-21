@@ -55,10 +55,10 @@ Usage
         the resulting dictionary to standard output.
 
       - \par -includes
-        List the \c #include and \c #includeIfPresent files to standard output
+        List the \c \#include and \c \#includeIfPresent files to standard output
 
       - \par -disableFunctionEntries
-        Do not expand macros or directives (#include etc)
+        Do not expand macros or directives (\#include etc)
 
     Example usage:
       - Change simulation to run for one timestep only:

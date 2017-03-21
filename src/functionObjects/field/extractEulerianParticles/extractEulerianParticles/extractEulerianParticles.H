@@ -30,6 +30,7 @@ Description
     Generates particle size information from Eulerian calculations, e.g. VoF.
 
 Usage
+    \verbatim
     extractEulerianParticles1
     {
         type            extractEulerianParticles;

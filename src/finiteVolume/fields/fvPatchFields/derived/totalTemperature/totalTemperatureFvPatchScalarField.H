@@ -37,7 +37,7 @@ Usage
         phi          | Flux field name         | no          | phi
         psi          | Compressibility field name | no       | thermo:psi
         gamma        | ratio of specific heats (Cp/Cv) | yes |
-        T0           | reference temperature   | yes         |
+        T0           | total temperature       | yes         |
     \endtable
 
     Example of the boundary condition specification:
@@ -45,7 +45,8 @@ Usage
     <patchName>
     {
         type            totalTemperature;
-        T0              uniform 300;
+        gamma           1.4;
+        T0              uniform 800;
     }
     \endverbatim
 
@@ -89,7 +90,7 @@ class totalTemperatureFvPatchScalarField
         //- Heat capacity ratio
         scalar gamma_;
 
-        //- Total pressure
+        //- Total temperature
         scalarField T0_;
 
 

@@ -95,8 +95,7 @@ public:
         return ccmIndex != rhs.ccmIndex;
     }
 
-   // IOstream Operators
-
+    //- Ostream Operator
     friend Ostream& operator<<(Ostream& os, const ccmBoundaryInfo& entry)
     {
         os  << "BoundaryFaces-" << entry.ccmIndex;
@@ -107,7 +106,6 @@ public:
 
         return os;
     }
-
 };
 
 
