@@ -93,6 +93,24 @@ Foam::functionObjects::timeControl::timeControl
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+bool Foam::functionObjects::timeControl::entriesPresent(const dictionary& dict)
+{
+    if
+    (
+        Foam::timeControl::entriesPresent(dict, "write")
+     || Foam::timeControl::entriesPresent(dict, "output") // backwards compat
+     || Foam::timeControl::entriesPresent(dict, "execute")
+     || dict.found("timeStart")
+     || dict.found("timeEnd")
+    )
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
 bool Foam::functionObjects::timeControl::execute()
 {
     if (active() && (postProcess || executeControl_.execute()))

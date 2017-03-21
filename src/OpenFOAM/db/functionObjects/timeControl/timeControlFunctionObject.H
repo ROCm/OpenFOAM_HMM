@@ -157,6 +157,10 @@ public:
 
         // Function object control
 
+            //- Helper function to identify if a timeControl object is present
+            //  in the dictionary
+            static bool entriesPresent(const dictionary& dict);
+
             //- Called at each ++ or += of the time-loop.
             //  postProcess overrides the usual executeControl behaviour and
             //  forces execution (used in post-processing mode)

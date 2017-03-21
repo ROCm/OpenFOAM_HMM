@@ -121,6 +121,10 @@ public:
 
     // Member Functions
 
+        //- Helper function to identify if a timeControl object is present
+        //  in the dictionary
+        static bool entriesPresent(const dictionary& dict, const word& prefix);
+
         //- Read from dictionary
         void read(const dictionary&);
 

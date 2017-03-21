@@ -755,11 +755,7 @@ bool Foam::functionObjectList::read()
                         fo2,
                         "functionObject::" + key + "::new"
                     );
-                    if
-                    (
-                        dict.found("writeControl")
-                     || dict.found("outputControl")
-                    )
+                    if (functionObjects::timeControl::entriesPresent(dict))
                     {
                         foPtr.set
                         (
