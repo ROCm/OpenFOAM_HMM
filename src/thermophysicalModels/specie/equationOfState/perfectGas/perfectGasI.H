@@ -24,6 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "perfectGas.H"
+#include "thermodynamicConstants.H"
+
+using namespace Foam::constant::thermodynamic;
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
