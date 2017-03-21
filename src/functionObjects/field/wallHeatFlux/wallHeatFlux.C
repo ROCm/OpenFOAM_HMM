@@ -122,6 +122,8 @@ Foam::functionObjects::wallHeatFlux::wallHeatFlux
     mesh_.objectRegistry::store(wallHeatFluxPtr);
 
     read(dict);
+
+    writeFileHeader(file());
 }
 
 
