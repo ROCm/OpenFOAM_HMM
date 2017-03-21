@@ -560,6 +560,11 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::writeFileHeader
         writeHeaderValue(os, "Area", totalArea_);
         writeHeaderValue(os, "Scale factor", scaleFactor_);
 
+        if (weightFieldName_ != "none")
+        {
+            writeHeaderValue(os, "Weight field", weightFieldName_);
+        }
+
         writeCommented(os, "Time");
         if (writeArea_)
         {

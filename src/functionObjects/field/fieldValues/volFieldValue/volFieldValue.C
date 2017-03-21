@@ -93,6 +93,10 @@ void Foam::functionObjects::fieldValues::volFieldValue::writeFileHeader
 ) const
 {
     volRegion::writeFileHeader(*this, os);
+    if (weightFieldName_ != "none")
+    {
+        writeHeaderValue(os, "Weight field", weightFieldName_);
+    }
 
     writeCommented(os, "Time");
 
