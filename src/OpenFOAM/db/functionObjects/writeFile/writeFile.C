@@ -92,7 +92,7 @@ Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::createFile
 
     if (Pstream::master() && writeToFile_)
     {
-        const scalar timeNow = fileObr_.time().timeOutputValue()
+        const scalar timeNow = fileObr_.time().timeOutputValue();
         const word startTimeName = Time::timeName(timeNow);
 
         fileName outputDir(baseFileDir()/prefix_/startTimeName);
@@ -258,7 +258,7 @@ void Foam::functionObjects::writeFile::writeHeader
 
 void Foam::functionObjects::writeFile::writeTime(Ostream& os) const
 {
-    const scalar timeNow = fileObr_.time().timeOutputValue()
+    const scalar timeNow = fileObr_.time().timeOutputValue();
     os  << setw(charWidth()) << Time::timeName(timeNow);
 }
 
