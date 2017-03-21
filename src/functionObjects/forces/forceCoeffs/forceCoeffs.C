@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -249,6 +249,14 @@ bool Foam::functionObjects::forceCoeffs::read(const dictionary& dict)
 
     // Free stream velocity magnitude
     dict.lookup("magUInf") >> magUInf_;
+
+    // If case is compressible we must read rhoInf (store in rhoRef_) to
+    // calculate the reference dynamic pressure
+    // - note: for incompressible, rhoRef_ is already initialised
+    if (rhoName_ != "rhoInf")
+    {
+        dict.lookup("rhoInf") >> rhoRef_;
+    }
 
     // Reference length and area scales
     dict.lookup("lRef") >> lRef_;
