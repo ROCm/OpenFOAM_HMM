@@ -43,8 +43,15 @@ namespace functionObjects
 
 void Foam::functionObjects::timeControl::readControls()
 {
-    dict_.readIfPresent("timeStart", timeStart_);
-    dict_.readIfPresent("timeEnd", timeEnd_);
+    if (dict_.readIfPresent("timeStart", timeStart_))
+    {
+        timeStart_ = time_.userTimeToTime(timeStart_);
+    }
+    if (dict_.readIfPresent("timeEnd", timeEnd_))
+    {
+        timeEnd_ = time_.userTimeToTime(timeEnd_);
+    }
+
     dict_.readIfPresent("nStepsToStartTimeChange", nStepsToStartTimeChange_);
 }
 

@@ -249,7 +249,9 @@ bool Foam::functionObjects::wallShearStress::write()
 
         if (Pstream::master())
         {
-            file() << mesh_.time().value()
+            writeTime(file());
+
+            file()
                 << token::TAB << pp.name()
                 << token::TAB << minSsp
                 << token::TAB << maxSsp

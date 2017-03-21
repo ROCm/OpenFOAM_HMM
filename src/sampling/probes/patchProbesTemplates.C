@@ -45,7 +45,7 @@ void Foam::patchProbes::sampleAndWrite
 
         probeStream
             << setw(w)
-            << vField.time().timeToUserTime(vField.time().value());
+            << vField.time().timeOutputValue();
 
         forAll(values, probei)
         {
@@ -71,7 +71,7 @@ void Foam::patchProbes::sampleAndWrite
 
         probeStream
             << setw(w)
-            << sField.time().timeToUserTime(sField.time().value());
+            << sField.time().timeOutputValue();
 
         forAll(values, probei)
         {

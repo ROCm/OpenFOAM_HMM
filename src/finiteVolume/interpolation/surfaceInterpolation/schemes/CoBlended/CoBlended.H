@@ -44,6 +44,7 @@ Description
 
     The weight applies to the first scheme and 1-weight to the second scheme.
 
+Usage
     Example of the CoBlended scheme specification using LUST for Courant numbers
     less than 1 and linearUpwind for Courant numbers greater than 10:
     \verbatim
