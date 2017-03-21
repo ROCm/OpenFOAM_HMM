@@ -92,7 +92,11 @@ equationInitialResidualCondition
     timeStart_(dict.lookupOrDefault("timeStart", -GREAT)),
     mode_(operatingModeNames.read(dict.lookup("mode")))
 {
-    if (!fieldNames_.size())
+    if (fieldNames_.size())
+    {
+        timeStart_ = obr.time().userTimeToTime(timeStart_);
+    }
+    else
     {
         WarningInFunction
             << "No fields supplied: deactivating" << endl;
