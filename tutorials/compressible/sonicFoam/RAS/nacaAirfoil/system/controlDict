@@ -51,16 +51,15 @@ functions
     {
         type            forceCoeffs;
         libs            ("libforces.so");
-        writeControl    timeStep;
-        writeInterval   1;
+        writeControl    writeTime;
 
         patches
         (
-            WALL10
+            wall_4
         );
 
-        log         true;
         rhoInf      1;
+
         CofR        (0 0 0);
         liftDir     (-0.239733 0.970839 0);
         dragDir     (0.970839 0.239733 0);
