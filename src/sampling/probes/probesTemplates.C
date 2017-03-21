@@ -76,7 +76,7 @@ void Foam::probes::sampleAndWrite
         unsigned int w = IOstream::defaultPrecision() + 7;
         OFstream& os = *probeFilePtrs_[vField.name()];
 
-        os  << setw(w) << vField.time().timeToUserTime(vField.time().value());
+        os  << setw(w) << vField.time().timeOutputValue();
 
         forAll(values, probei)
         {
@@ -100,7 +100,7 @@ void Foam::probes::sampleAndWrite
         unsigned int w = IOstream::defaultPrecision() + 7;
         OFstream& os = *probeFilePtrs_[sField.name()];
 
-        os  << setw(w) << sField.time().timeToUserTime(sField.time().value());
+        os  << setw(w) << sField.time().timeOutputValue();
 
         forAll(values, probei)
         {

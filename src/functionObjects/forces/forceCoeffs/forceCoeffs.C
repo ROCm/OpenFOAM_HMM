@@ -186,7 +186,7 @@ void Foam::functionObjects::forceCoeffs::writeBinData
     Ostream& os
 ) const
 {
-    os  << obr_.time().value();
+    writeTime(os);
 
     for (label bini = 0; bini < nBin_; bini++)
     {

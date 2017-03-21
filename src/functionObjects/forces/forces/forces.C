@@ -593,8 +593,9 @@ void Foam::functionObjects::forces::writeIntegratedForceMoment
     {
         Ostream& os = osPtr();
 
-        os  << obr_.time().value()
-            << tab << total
+        writeTime(os);
+
+        os  << tab << total
             << tab << pressure
             << tab << viscous;
 

@@ -38,7 +38,7 @@ void Foam::functionObjects::thermoCoupleProbes::sampleAndWrite
 
         probeStream
             << setw(w)
-            << vField.time().timeToUserTime(vField.time().value());
+            << vField.time().timeOutputValue();
 
         forAll(*this, probeI)
         {

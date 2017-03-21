@@ -269,8 +269,9 @@ bool Foam::functionObjects::wallHeatFlux::write()
 
         if (Pstream::master())
         {
+            writeTime(file());
+
             file()
-                << mesh_.time().value()
                 << token::TAB << pp.name()
                 << token::TAB << minHfp
                 << token::TAB << maxHfp
