@@ -50,8 +50,8 @@ usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-Usage: ${0##*/} [OPTION] fileName
-       ${0##*/} [OPTION] -list
+Usage: foamEtcFile [OPTION] fileName
+       foamEtcFile [OPTION] -list
 options:
   -a, -all          return all files (otherwise stop after the first match)
   -l, -list         list the directories to be searched
@@ -93,20 +93,24 @@ prefixDir="${projectDir%/*}"
 # The name used for the project directory
 projectDirName="${projectDir##*/}"
 
-# versionNum used for debian packaging
-unset version versionNum
+# The versionNum is used for debian packaging
+unset versionNum
 
 #
-# Handle standard and debian naming conventions
-# - set version (always) and versionNum (debian only)
+# Handle standard and debian naming conventions.
+# - projectDirBase: projectDirName without the version
+# - version
+# - versionNum (debian only)
 #
 case "$projectDirName" in
-OpenFOAM-*)         # standard naming: OpenFOAM-<VERSION>
-    version="${projectDirName##OpenFOAM-}"
+OpenFOAM-* | openfoam-*)        # OpenFOAM-<VERSION> or openfoam-<VERSION>
+    projectDirBase="${projectDirName%%-*}-"
+    version="${projectDirName#*-}"
     ;;
 
-openfoam[0-9]* | openfoam-dev)     # debian naming: openfoam<VERSION>
-    versionNum="${projectDirName##openfoam}"
+openfoam[0-9]*)                 # Debian: openfoam<VERSION>
+    projectDirBase="openfoam"
+    versionNum="${projectDirName#openfoam}"
     case "${#versionNum}" in
     (2|3|4) # Convert digits version number to decimal delineated
         version=$(echo "$versionNum" | sed -e 's@\([0-9]\)@\1.@g')
@@ -120,10 +124,22 @@ openfoam[0-9]* | openfoam-dev)     # debian naming: openfoam<VERSION>
     ;;
 
 *)
-    echo "${0##*/} Error : unknown/unsupported naming convention" 1>&2
+    echo "foamEtcFile error: unknown/unsupported naming convention" 1>&2
     exit 1
     ;;
 esac
+
+
+# Set version and update versionNum, projectDirName accordingly
+setVersion()
+{
+    version="$1"
+
+    # Convert x.y.z -> xyz version (if installation looked like debian)
+    [ -n "$versionNum" ] && versionNum=$(echo "$version" | sed -e 's@\.@@g')
+
+    projectDirName="$projectDirBase${versionNum:-${version}}"
+}
 
 
 # Default mode is always 'ugo'
@@ -150,19 +166,14 @@ do
         unset optAll
         ;;
     -mode=[ugo]*)
-        mode="${1#-mode=}"
+        mode="${1#*=}"
         ;;
     -prefix=/*)
-        prefixDir="${1#-prefix=}"
+        prefixDir="${1#*=}"
         prefixDir="${prefixDir%/}"
         ;;
     -version=*)
-        version="${1#-version=}"
-        # convert x.y.z -> xyz version (if installation looked like debian)
-        if [ -n "$versionNum" ]
-        then
-            versionNum=$(echo "$version" | sed -e 's@\.@@g')
-        fi
+        setVersion "${1#*=}"
         ;;
     -m | -mode)
         mode="$2"
@@ -189,12 +200,7 @@ do
         ;;
     -v | -version)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-        version="$2"
-        # convert x.y.z -> xyz version (if installation looked like debian)
-        if [ -n "$versionNum" ]
-        then
-            versionNum=$(echo "$version" | sed -e 's@\.@@g')
-        fi
+        setVersion "$2"
         shift
         ;;
     --)
@@ -212,18 +218,13 @@ do
 done
 
 # Update projectDir accordingly
-if [ -n "$versionNum" ]
-then
-    projectDir="$prefixDir/openfoam$versionNum"                 # debian
-else
-    projectDir="$prefixDir/${WM_PROJECT:-OpenFOAM}-$version"    # standard
-fi
+projectDir="$prefixDir/$projectDirName"
 
-# debugging:
-# echo "Installed locations:"
+# Debugging:
+# echo "Installed locations:" 1>&2
 # for i in projectDir prefixDir projectDirName version versionNum
 # do
-#     eval echo "$i=\$$i"
+#     eval echo "$i=\$$i" 1>&2
 # done
 
 
@@ -234,19 +235,19 @@ fileName="${1#~OpenFOAM/}"
 
 # Define the various places to be searched:
 unset dirList
-case "$mode" in (*u*)   # user
+case "$mode" in (*u*)   # (U)ser
     dir="$HOME/.${WM_PROJECT:-OpenFOAM}"
     dirList="$dirList $dir/$version $dir"
     ;;
 esac
 
-case "$mode" in (*g*)   # group (site)
+case "$mode" in (*g*)   # (G)roup == site
     dir="${WM_PROJECT_SITE:-$prefixDir/site}"
     dirList="$dirList $dir/$version $dir"
     ;;
 esac
 
-case "$mode" in (*o*)   # other (shipped)
+case "$mode" in (*o*)   # (O)ther == shipped
     dirList="$dirList $projectDir/etc"
     ;;
 esac
@@ -261,10 +262,10 @@ exitCode=0
 if [ "$optList" = true ]
 then
 
-    # list directories, or potential file locations
+    # List directories, or potential file locations
     [ "$nArgs" -le 1 ] || usage
 
-    # a silly combination, but -quiet does have precedence
+    # A silly combination, but -quiet does have precedence
     [ -n "$optQuiet" ] && exit 0
 
     for dir
@@ -281,8 +282,7 @@ else
 
     [ "$nArgs" -eq 1 ] || usage
 
-    # general error, eg file not found
-    exitCode=2
+    exitCode=2  # Fallback to a general error, eg file not found
 
     for dir
     do
