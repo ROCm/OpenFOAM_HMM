@@ -139,11 +139,13 @@ export WM_PROJECT_USER_DIR=$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION
 # ~~~~~~~~~~~~~~~~~~~~
 . $WM_PROJECT_DIR/etc/config.sh/functions
 
-# Add in preset user or site preferences:
-_foamEtc prefs.sh
+# Override definitions via prefs, with 'other' first so the sys-admin
+# can provide base values independent of WM_PROJECT_SITE
+_foamEtc -mode=o  prefs.sh
+_foamEtc -mode=ug prefs.sh
 
 # Evaluate command-line parameters and record settings for later.
-# These can be used to set/unset values, or specify alternative pref files.
+# These can be used to set/unset values, specify additional files etc.
 export FOAM_SETTINGS="$@"
 _foamEval $@
 

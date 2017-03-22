@@ -152,11 +152,13 @@ else
     alias _foamEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh \!*`'
 endif
 
-# Add in preset user or site preferences:
-_foamEtc prefs.csh
+# Override definitions via prefs, with 'other' first so the sys-admin
+# can provide base values independent of WM_PROJECT_SITE
+_foamEtc -mode=o  prefs.csh
+_foamEtc -mode=ug prefs.csh
 
 # Evaluate command-line parameters and record settings for later.
-# These can be used to set/unset values, or specify alternative pref files.
+# These can be used to set/unset values, specify additional files etc.
 setenv FOAM_SETTINGS "${*}"
 while ( $#argv > 0 )
     switch ($argv[1])
