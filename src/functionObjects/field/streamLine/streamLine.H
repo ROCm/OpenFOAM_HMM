@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -42,17 +42,21 @@ Usage
         writeControl    writeTime;
 
         setFormat       vtk;
+        U               U;
         trackForward    yes;
+
         fields
         (
             U
             p
         );
+
         lifeTime        10000;
         trackLength     1e-3;
         nSubCycle       5;
         bounds          (0.2 -10 -10)(0.22 10 10);
         cloudName       particleTracks;
+
         seedSampleSet   uniform;
         uniformCoeffs
         {

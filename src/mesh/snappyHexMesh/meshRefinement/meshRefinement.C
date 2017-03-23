@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -72,7 +72,6 @@ namespace Foam
     >::names[] =
     {
         "mesh",
-        //"scalarLevels",
         "intersections",
         "featureSeeds",
         "attraction",
@@ -93,10 +92,11 @@ namespace Foam
     const char* Foam::NamedEnum
     <
         Foam::meshRefinement::IOwriteType,
-        4
+        5
     >::names[] =
     {
         "mesh",
+        "noRefinement",
         "scalarLevels",
         "layerSets",
         "layerFields"
@@ -110,7 +110,7 @@ Foam::meshRefinement::IOdebugTypeNames;
 const Foam::NamedEnum<Foam::meshRefinement::IOoutputType, 1>
 Foam::meshRefinement::IOoutputTypeNames;
 
-const Foam::NamedEnum<Foam::meshRefinement::IOwriteType, 4>
+const Foam::NamedEnum<Foam::meshRefinement::IOwriteType, 5>
 Foam::meshRefinement::IOwriteTypeNames;
 
 
@@ -143,26 +143,26 @@ void Foam::meshRefinement::calcNeighbourData
 
     labelHashSet addedPatchIDSet(meshedPatches());
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        const polyPatch& pp = patches[patchI];
+        const polyPatch& pp = patches[patchi];
 
         const labelUList& faceCells = pp.faceCells();
         const vectorField::subField faceCentres = pp.faceCentres();
         const vectorField::subField faceAreas = pp.faceAreas();
 
-        label bFaceI = pp.start()-mesh_.nInternalFaces();
+        label bFacei = pp.start()-mesh_.nInternalFaces();
 
         if (pp.coupled())
         {
             forAll(faceCells, i)
             {
-                neiLevel[bFaceI] = cellLevel[faceCells[i]];
-                neiCc[bFaceI] = cellCentres[faceCells[i]];
-                bFaceI++;
+                neiLevel[bFacei] = cellLevel[faceCells[i]];
+                neiCc[bFacei] = cellCentres[faceCells[i]];
+                bFacei++;
             }
         }
-        else if (addedPatchIDSet.found(patchI))
+        else if (addedPatchIDSet.found(patchi))
         {
             // Face was introduced from cell-cell intersection. Try to
             // reconstruct other side cell(centre). Three possibilities:
@@ -192,19 +192,19 @@ void Foam::meshRefinement::calcNeighbourData
                     // Other cell more refined. Adjust normal distance
                     d *= 0.5;
                 }
-                neiLevel[bFaceI] = faceLevel;
+                neiLevel[bFacei] = faceLevel;
                 // Calculate other cell centre by extrapolation
-                neiCc[bFaceI] = faceCentres[i] + d*fn;
-                bFaceI++;
+                neiCc[bFacei] = faceCentres[i] + d*fn;
+                bFacei++;
             }
         }
         else
         {
             forAll(faceCells, i)
             {
-                neiLevel[bFaceI] = cellLevel[faceCells[i]];
-                neiCc[bFaceI] = faceCentres[i];
-                bFaceI++;
+                neiLevel[bFacei] = cellLevel[faceCells[i]];
+                neiCc[bFacei] = faceCentres[i];
+                bFacei++;
             }
         }
     }
@@ -234,12 +234,12 @@ void Foam::meshRefinement::calcCellCellRays
 
     forAll(testFaces, i)
     {
-        label faceI = testFaces[i];
-        label own = mesh_.faceOwner()[faceI];
+        label facei = testFaces[i];
+        label own = mesh_.faceOwner()[facei];
 
-        if (mesh_.isInternalFace(faceI))
+        if (mesh_.isInternalFace(facei))
         {
-            label nei = mesh_.faceNeighbour()[faceI];
+            label nei = mesh_.faceNeighbour()[facei];
 
             start[i] = cellCentres[own];
             end[i] = cellCentres[nei];
@@ -247,11 +247,11 @@ void Foam::meshRefinement::calcCellCellRays
         }
         else
         {
-            label bFaceI = faceI - mesh_.nInternalFaces();
+            label bFacei = facei - mesh_.nInternalFaces();
 
             start[i] = cellCentres[own];
-            end[i] = neiCc[bFaceI];
-            minLevel[i] = min(cellLevel[own], neiLevel[bFaceI]);
+            end[i] = neiCc[bFacei];
+            minLevel[i] = min(cellLevel[own], neiLevel[bFacei]);
         }
     }
 
@@ -264,8 +264,6 @@ void Foam::meshRefinement::calcCellCellRays
 }
 
 
-// Find intersections of edges (given by their two endpoints) with surfaces.
-// Returns first intersection if there are more than one.
 void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
 {
     // Stats on edges to test. Count proc faces only once.
@@ -273,9 +271,9 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
 
     {
         label nMasterFaces = 0;
-        forAll(isMasterFace, faceI)
+        forAll(isMasterFace, facei)
         {
-            if (isMasterFace.get(faceI) == 1)
+            if (isMasterFace.get(facei) == 1)
             {
                 nMasterFaces++;
             }
@@ -388,13 +386,13 @@ void Foam::meshRefinement::testSyncPointList
         maxEqOp<scalar>(),
         -GREAT
     );
-    forAll(minFld, pointI)
+    forAll(minFld, pointi)
     {
-        const scalar& minVal = minFld[pointI];
-        const scalar& maxVal = maxFld[pointI];
+        const scalar& minVal = minFld[pointi];
+        const scalar& maxVal = maxFld[pointi];
         if (mag(minVal-maxVal) > SMALL)
         {
-            Pout<< msg << " at:" << mesh.points()[pointI] << nl
+            Pout<< msg << " at:" << mesh.points()[pointi] << nl
                 << "    minFld:" << minVal << nl
                 << "    maxFld:" << maxVal << nl
                 << endl;
@@ -435,13 +433,13 @@ void Foam::meshRefinement::testSyncPointList
         maxMagSqrEqOp<point>(),
         vector::zero
     );
-    forAll(minFld, pointI)
+    forAll(minFld, pointi)
     {
-        const point& minVal = minFld[pointI];
-        const point& maxVal = maxFld[pointI];
+        const point& minVal = minFld[pointi];
+        const point& maxVal = maxFld[pointi];
         if (mag(minVal-maxVal) > SMALL)
         {
-            Pout<< msg << " at:" << mesh.points()[pointI] << nl
+            Pout<< msg << " at:" << mesh.points()[pointi] << nl
                 << "    minFld:" << minVal << nl
                 << "    maxFld:" << maxVal << nl
                 << endl;
@@ -505,17 +503,17 @@ void Foam::meshRefinement::checkData()
         pointField start(mesh_.nFaces());
         pointField end(mesh_.nFaces());
 
-        forAll(start, faceI)
+        forAll(start, facei)
         {
-            start[faceI] = mesh_.cellCentres()[mesh_.faceOwner()[faceI]];
+            start[facei] = mesh_.cellCentres()[mesh_.faceOwner()[facei]];
 
-            if (mesh_.isInternalFace(faceI))
+            if (mesh_.isInternalFace(facei))
             {
-                end[faceI] = mesh_.cellCentres()[mesh_.faceNeighbour()[faceI]];
+                end[facei] = mesh_.cellCentres()[mesh_.faceNeighbour()[facei]];
             }
             else
             {
-                end[faceI] = neiCc[faceI-mesh_.nInternalFaces()];
+                end[facei] = neiCc[facei-mesh_.nInternalFaces()];
             }
         }
 
@@ -554,43 +552,43 @@ void Foam::meshRefinement::checkData()
         syncTools::swapBoundaryFaceList(mesh_, neiHit);
 
         // Check
-        forAll(surfaceHit, faceI)
+        forAll(surfaceHit, facei)
         {
-            if (surfaceIndex_[faceI] != surfaceHit[faceI])
+            if (surfaceIndex_[facei] != surfaceHit[facei])
             {
-                if (mesh_.isInternalFace(faceI))
+                if (mesh_.isInternalFace(facei))
                 {
                     WarningInFunction
-                        << "Internal face:" << faceI
-                        << " fc:" << mesh_.faceCentres()[faceI]
-                        << " cached surfaceIndex_:" << surfaceIndex_[faceI]
-                        << " current:" << surfaceHit[faceI]
+                        << "Internal face:" << facei
+                        << " fc:" << mesh_.faceCentres()[facei]
+                        << " cached surfaceIndex_:" << surfaceIndex_[facei]
+                        << " current:" << surfaceHit[facei]
                         << " ownCc:"
-                        << mesh_.cellCentres()[mesh_.faceOwner()[faceI]]
+                        << mesh_.cellCentres()[mesh_.faceOwner()[facei]]
                         << " neiCc:"
-                        << mesh_.cellCentres()[mesh_.faceNeighbour()[faceI]]
+                        << mesh_.cellCentres()[mesh_.faceNeighbour()[facei]]
                         << endl;
                 }
                 else if
                 (
-                    surfaceIndex_[faceI]
-                 != neiHit[faceI-mesh_.nInternalFaces()]
+                    surfaceIndex_[facei]
+                 != neiHit[facei-mesh_.nInternalFaces()]
                 )
                 {
                     WarningInFunction
-                        << "Boundary face:" << faceI
-                        << " fc:" << mesh_.faceCentres()[faceI]
-                        << " cached surfaceIndex_:" << surfaceIndex_[faceI]
-                        << " current:" << surfaceHit[faceI]
+                        << "Boundary face:" << facei
+                        << " fc:" << mesh_.faceCentres()[facei]
+                        << " cached surfaceIndex_:" << surfaceIndex_[facei]
+                        << " current:" << surfaceHit[facei]
                         << " ownCc:"
-                        << mesh_.cellCentres()[mesh_.faceOwner()[faceI]]
+                        << mesh_.cellCentres()[mesh_.faceOwner()[facei]]
                         << " neiCc:"
-                        << neiCc[faceI-mesh_.nInternalFaces()]
-                        << " end:" << end[faceI]
+                        << neiCc[facei-mesh_.nInternalFaces()]
+                        << " end:" << end[facei]
                         << " ownLevel:"
-                        << meshCutter_.cellLevel()[mesh_.faceOwner()[faceI]]
+                        << meshCutter_.cellLevel()[mesh_.faceOwner()[facei]]
                         << " faceLevel:"
-                        << meshCutter_.faceLevel(faceI)
+                        << meshCutter_.faceLevel(facei)
                         << endl;
                 }
             }
@@ -661,8 +659,6 @@ void Foam::meshRefinement::setInstance(const fileName& inst)
 }
 
 
-// Remove cells. Put exposedFaces (output of getExposedFaces(cellsToRemove))
-// into exposedPatchIDs.
 Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemoveCells
 (
     const labelList& cellsToRemove,
@@ -722,7 +718,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemoveCells
 }
 
 
-// Split faces
 void Foam::meshRefinement::doSplitFaces
 (
     const labelList& splitFaces,
@@ -733,8 +728,8 @@ void Foam::meshRefinement::doSplitFaces
 {
     forAll(splitFaces, i)
     {
-        label faceI = splitFaces[i];
-        const face& f = mesh_.faces()[faceI];
+        label facei = splitFaces[i];
+        const face& f = mesh_.faces()[facei];
 
         // Split as start and end index in face
         const labelPair& split = splits[i];
@@ -767,43 +762,47 @@ void Foam::meshRefinement::doSplitFaces
 
 
         // Determine face properties
-        label own = mesh_.faceOwner()[faceI];
+        label own = mesh_.faceOwner()[facei];
         label nei = -1;
-        label patchI = -1;
-        if (faceI >= mesh_.nInternalFaces())
+        label patchi = -1;
+        if (facei >= mesh_.nInternalFaces())
         {
-            patchI = mesh_.boundaryMesh().whichPatch(faceI);
+            patchi = mesh_.boundaryMesh().whichPatch(facei);
         }
         else
         {
-            nei = mesh_.faceNeighbour()[faceI];
+            nei = mesh_.faceNeighbour()[facei];
         }
 
-        label zoneI = mesh_.faceZones().whichZone(faceI);
+        label zonei = mesh_.faceZones().whichZone(facei);
         bool zoneFlip = false;
-        if (zoneI != -1)
+        if (zonei != -1)
         {
-            const faceZone& fz = mesh_.faceZones()[zoneI];
-            zoneFlip = fz.flipMap()[fz.whichFace(faceI)];
+            const faceZone& fz = mesh_.faceZones()[zonei];
+            zoneFlip = fz.flipMap()[fz.whichFace(facei)];
         }
 
 
-        //Pout<< "face:" << faceI << " verts:" << f
-        //    << " split into f0:" << f0
-        //    << " f1:" << f1 << endl;
+        if (debug)
+        {
+            Pout<< "face:" << facei << " verts:" << f
+                << " split into f0:" << f0
+                << " f1:" << f1 << endl;
+        }
 
         // Change/add faces
         meshMod.modifyFace
         (
             f0,                         // modified face
-            faceI,                      // label of face
+            facei,                      // label of face
             own,                        // owner
             nei,                        // neighbour
             false,                      // face flip
-            patchI,                     // patch for face
-            zoneI,                      // zone for face
+            patchi,                     // patch for face
+            zonei,                      // zone for face
             zoneFlip                    // face flip in zone
         );
+
         meshMod.addFace
         (
             f1,                         // modified face
@@ -811,10 +810,10 @@ void Foam::meshRefinement::doSplitFaces
             nei,                        // neighbour
             -1,                         // master point
             -1,                         // master edge
-            faceI,                      // master face
+            facei,                      // master face
             false,                      // face flip
-            patchI,                     // patch for face
-            zoneI,                      // zone for face
+            patchi,                     // patch for face
+            zonei,                      // zone for face
             zoneFlip                    // face flip in zone
         );
 
@@ -902,23 +901,23 @@ Foam::label Foam::meshRefinement::splitFacesUndo
                 splitFaceToIndex.insert(splitFaces[i], i);
             }
 
-            forAll(map().faceMap(), faceI)
+            forAll(map().faceMap(), facei)
             {
-                label oldFaceI = map().faceMap()[faceI];
+                label oldFacei = map().faceMap()[facei];
                 Map<label>::iterator oldFaceFnd = splitFaceToIndex.find
                 (
-                    oldFaceI
+                    oldFacei
                 );
                 if (oldFaceFnd != splitFaceToIndex.end())
                 {
                     labelPair& twoFaces = facePairs[oldFaceFnd()];
                     if (twoFaces[0] == -1)
                     {
-                        twoFaces[0] = faceI;
+                        twoFaces[0] = facei;
                     }
                     else if (twoFaces[1] == -1)
                     {
-                        twoFaces[1] = faceI;
+                        twoFaces[1] = facei;
                     }
                     else
                     {
@@ -1045,21 +1044,21 @@ Foam::label Foam::meshRefinement::splitFacesUndo
                 // Determine face properties
                 label own = mesh_.faceOwner()[twoFaces[0]];
                 label nei = -1;
-                label patchI = -1;
+                label patchi = -1;
                 if (twoFaces[0] >= mesh_.nInternalFaces())
                 {
-                    patchI = mesh_.boundaryMesh().whichPatch(twoFaces[0]);
+                    patchi = mesh_.boundaryMesh().whichPatch(twoFaces[0]);
                 }
                 else
                 {
                     nei = mesh_.faceNeighbour()[twoFaces[0]];
                 }
 
-                label zoneI = mesh_.faceZones().whichZone(twoFaces[0]);
+                label zonei = mesh_.faceZones().whichZone(twoFaces[0]);
                 bool zoneFlip = false;
-                if (zoneI != -1)
+                if (zonei != -1)
                 {
-                    const faceZone& fz = mesh_.faceZones()[zoneI];
+                    const faceZone& fz = mesh_.faceZones()[zonei];
                     zoneFlip = fz.flipMap()[fz.whichFace(twoFaces[0])];
                 }
 
@@ -1071,8 +1070,8 @@ Foam::label Foam::meshRefinement::splitFacesUndo
                     own,                        // owner
                     nei,                        // neighbour
                     false,                      // face flip
-                    patchI,                     // patch for face
-                    zoneI,                      // zone for face
+                    patchi,                     // patch for face
+                    zonei,                      // zone for face
                     zoneFlip                    // face flip in zone
                 );
                 // Merge second face into first
@@ -1209,7 +1208,6 @@ Foam::label Foam::meshRefinement::splitFacesUndo
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::meshRefinement::meshRefinement
 (
     fvMesh& mesh,
@@ -1264,9 +1262,9 @@ Foam::label Foam::meshRefinement::countHits() const
 
     label nHits = 0;
 
-    forAll(surfaceIndex_, faceI)
+    forAll(surfaceIndex_, facei)
     {
-        if (surfaceIndex_[faceI] >= 0 && isMasterFace.get(faceI) == 1)
+        if (surfaceIndex_[facei] >= 0 && isMasterFace.get(facei) == 1)
         {
             nHits++;
         }
@@ -1288,11 +1286,6 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 
     if (Pstream::parRun())
     {
-        //if (debug_)
-        //{
-        //    const_cast<Time&>(mesh_.time())++;
-        //}
-
         // Wanted distribution
         labelList distribution;
 
@@ -1338,22 +1331,22 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
                 // Get faces whose owner and neighbour should stay together,
                 // i.e. they are not 'blocked'.
 
-                forAll(fZones, zoneI)
+                forAll(fZones, zonei)
                 {
-                    const faceZone& fZone = fZones[zoneI];
+                    const faceZone& fZone = fZones[zonei];
 
                     forAll(fZone, i)
                     {
-                        label faceI = fZone[i];
-                        if (blockedFace[faceI])
+                        label facei = fZone[i];
+                        if (blockedFace[facei])
                         {
                             if
                             (
-                                mesh_.isInternalFace(faceI)
-                             || pbm[pbm.whichPatch(faceI)].coupled()
+                                mesh_.isInternalFace(facei)
+                             || pbm[pbm.whichPatch(facei)].coupled()
                             )
                             {
-                                blockedFace[faceI] = false;
+                                blockedFace[facei] = false;
                                 nUnblocked++;
                             }
                         }
@@ -1386,13 +1379,13 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
                 selectSeparatedCoupledFaces(separatedCoupledFace);
 
                 label nSeparated = 0;
-                forAll(separatedCoupledFace, faceI)
+                forAll(separatedCoupledFace, facei)
                 {
-                    if (separatedCoupledFace[faceI])
+                    if (separatedCoupledFace[facei])
                     {
-                        if (blockedFace[faceI])
+                        if (blockedFace[facei])
                         {
-                            blockedFace[faceI] = false;
+                            blockedFace[facei] = false;
                             nSeparated++;
                         }
                     }
@@ -1435,11 +1428,11 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 
                 couples.setSize(nBnd);
                 label nCpl = 0;
-                forAll(coupledFace, faceI)
+                forAll(coupledFace, facei)
                 {
-                    if (coupledFace[faceI] != -1 && faceI < coupledFace[faceI])
+                    if (coupledFace[facei] != -1 && facei < coupledFace[facei])
                     {
-                        couples[nCpl++] = labelPair(faceI, coupledFace[faceI]);
+                        couples[nCpl++] = labelPair(facei, coupledFace[facei]);
                     }
                 }
                 couples.setSize(nCpl);
@@ -1481,9 +1474,9 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
             Pstream::listCombineScatter(nProcCells);
 
             Pout<< "Wanted resulting decomposition:" << endl;
-            forAll(nProcCells, procI)
+            forAll(nProcCells, proci)
             {
-                Pout<< "    " << procI << '\t' << nProcCells[procI] << endl;
+                Pout<< "    " << proci << '\t' << nProcCells[proci] << endl;
             }
             Pout<< endl;
         }
@@ -1506,21 +1499,21 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
             const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 
             // Check that faceZone faces are indeed internal
-            forAll(fZones, zoneI)
+            forAll(fZones, zonei)
             {
-                const faceZone& fZone = fZones[zoneI];
+                const faceZone& fZone = fZones[zonei];
 
                 forAll(fZone, i)
                 {
-                    label faceI = fZone[i];
-                    label patchI = pbm.whichPatch(faceI);
+                    label facei = fZone[i];
+                    label patchi = pbm.whichPatch(facei);
 
-                    if (patchI >= 0 && pbm[patchI].coupled())
+                    if (patchi >= 0 && pbm[patchi].coupled())
                     {
                         WarningInFunction
-                            << "Face at " << mesh_.faceCentres()[faceI]
+                            << "Face at " << mesh_.faceCentres()[facei]
                             << " on zone " << fZone.name()
-                            << " is on coupled patch " << pbm[patchI].name()
+                            << " is on coupled patch " << pbm[patchi].name()
                             << endl;
                     }
                 }
@@ -1532,14 +1525,13 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 }
 
 
-// Helper function to get intersected faces
 Foam::labelList Foam::meshRefinement::intersectedFaces() const
 {
     label nBoundaryFaces = 0;
 
-    forAll(surfaceIndex_, faceI)
+    forAll(surfaceIndex_, facei)
     {
-        if (surfaceIndex_[faceI] != -1)
+        if (surfaceIndex_[facei] != -1)
         {
             nBoundaryFaces++;
         }
@@ -1548,18 +1540,17 @@ Foam::labelList Foam::meshRefinement::intersectedFaces() const
     labelList surfaceFaces(nBoundaryFaces);
     nBoundaryFaces = 0;
 
-    forAll(surfaceIndex_, faceI)
+    forAll(surfaceIndex_, facei)
     {
-        if (surfaceIndex_[faceI] != -1)
+        if (surfaceIndex_[facei] != -1)
         {
-            surfaceFaces[nBoundaryFaces++] = faceI;
+            surfaceFaces[nBoundaryFaces++] = facei;
         }
     }
     return surfaceFaces;
 }
 
 
-// Helper function to get points used by faces
 Foam::labelList Foam::meshRefinement::intersectedPoints() const
 {
     const faceList& faces = mesh_.faces();
@@ -1568,11 +1559,11 @@ Foam::labelList Foam::meshRefinement::intersectedPoints() const
     PackedBoolList isBoundaryPoint(mesh_.nPoints());
     label nBoundaryPoints = 0;
 
-    forAll(surfaceIndex_, faceI)
+    forAll(surfaceIndex_, facei)
     {
-        if (surfaceIndex_[faceI] != -1)
+        if (surfaceIndex_[facei] != -1)
         {
-            const face& f = faces[faceI];
+            const face& f = faces[facei];
 
             forAll(f, fp)
             {
@@ -1588,17 +1579,17 @@ Foam::labelList Foam::meshRefinement::intersectedPoints() const
     //labelList adaptPatchIDs(meshedPatches());
     //forAll(adaptPatchIDs, i)
     //{
-    //    label patchI = adaptPatchIDs[i];
+    //    label patchi = adaptPatchIDs[i];
     //
-    //    if (patchI != -1)
+    //    if (patchi != -1)
     //    {
-    //        const polyPatch& pp = mesh_.boundaryMesh()[patchI];
+    //        const polyPatch& pp = mesh_.boundaryMesh()[patchi];
     //
-    //        label faceI = pp.start();
+    //        label facei = pp.start();
     //
     //        forAll(pp, i)
     //        {
-    //            const face& f = faces[faceI];
+    //            const face& f = faces[facei];
     //
     //            forAll(f, fp)
     //            {
@@ -1606,7 +1597,7 @@ Foam::labelList Foam::meshRefinement::intersectedPoints() const
     //                    nBoundaryPoints++;
     //                }
     //            }
-    //            faceI++;
+    //            facei++;
     //        }
     //    }
     //}
@@ -1615,11 +1606,11 @@ Foam::labelList Foam::meshRefinement::intersectedPoints() const
     // Pack
     labelList boundaryPoints(nBoundaryPoints);
     nBoundaryPoints = 0;
-    forAll(isBoundaryPoint, pointI)
+    forAll(isBoundaryPoint, pointi)
     {
-        if (isBoundaryPoint.get(pointI) == 1u)
+        if (isBoundaryPoint.get(pointi) == 1u)
         {
-            boundaryPoints[nBoundaryPoints++] = pointI;
+            boundaryPoints[nBoundaryPoints++] = pointi;
         }
     }
 
@@ -1654,11 +1645,11 @@ Foam::autoPtr<Foam::indirectPrimitivePatch> Foam::meshRefinement::makePatch
     {
         const polyPatch& pp = patches[patchIDs[i]];
 
-        label meshFaceI = pp.start();
+        label meshFacei = pp.start();
 
         forAll(pp, i)
         {
-            addressing[nFaces++] = meshFaceI++;
+            addressing[nFaces++] = meshFacei++;
         }
     }
 
@@ -1673,7 +1664,6 @@ Foam::autoPtr<Foam::indirectPrimitivePatch> Foam::meshRefinement::makePatch
 }
 
 
-// Construct pointVectorField with correct boundary conditions
 Foam::tmp<Foam::pointVectorField> Foam::meshRefinement::makeDisplacementField
 (
     const pointMesh& pMesh,
@@ -1697,15 +1687,15 @@ Foam::tmp<Foam::pointVectorField> Foam::meshRefinement::makeDisplacementField
             fixedValuePointPatchVectorField::typeName;
     }
 
-    forAll(pointPatches, patchI)
+    forAll(pointPatches, patchi)
     {
-        if (isA<processorPointPatch>(pointPatches[patchI]))
+        if (isA<processorPointPatch>(pointPatches[patchi]))
         {
-            patchFieldTypes[patchI] = calculatedPointPatchVectorField::typeName;
+            patchFieldTypes[patchi] = calculatedPointPatchVectorField::typeName;
         }
-        else if (isA<cyclicPointPatch>(pointPatches[patchI]))
+        else if (isA<cyclicPointPatch>(pointPatches[patchi]))
         {
-            patchFieldTypes[patchI] = cyclicSlipPointPatchVectorField::typeName;
+            patchFieldTypes[patchi] = cyclicSlipPointPatchVectorField::typeName;
         }
     }
 
@@ -1744,16 +1734,16 @@ void Foam::meshRefinement::checkCoupledFaceZones(const polyMesh& mesh)
         Pstream::gatherList(zoneNames);
         Pstream::scatterList(zoneNames);
         // All have same data now. Check.
-        forAll(zoneNames, procI)
+        forAll(zoneNames, proci)
         {
-            if (procI != Pstream::myProcNo())
+            if (proci != Pstream::myProcNo())
             {
-                if (zoneNames[procI] != zoneNames[Pstream::myProcNo()])
+                if (zoneNames[proci] != zoneNames[Pstream::myProcNo()])
                 {
                     FatalErrorInFunction
                         << "faceZones are not synchronised on processors." << nl
-                        << "Processor " << procI << " has faceZones "
-                        << zoneNames[procI] << nl
+                        << "Processor " << proci << " has faceZones "
+                        << zoneNames[proci] << nl
                         << "Processor " << Pstream::myProcNo()
                         << " has faceZones "
                         << zoneNames[Pstream::myProcNo()] << nl
@@ -1767,21 +1757,21 @@ void Foam::meshRefinement::checkCoupledFaceZones(const polyMesh& mesh)
 
     labelList faceToZone(mesh.nFaces()-mesh.nInternalFaces(), -1);
 
-    forAll(fZones, zoneI)
+    forAll(fZones, zonei)
     {
-        const faceZone& fZone = fZones[zoneI];
+        const faceZone& fZone = fZones[zonei];
 
         forAll(fZone, i)
         {
-            label bFaceI = fZone[i]-mesh.nInternalFaces();
+            label bFacei = fZone[i]-mesh.nInternalFaces();
 
-            if (bFaceI >= 0)
+            if (bFacei >= 0)
             {
-                if (faceToZone[bFaceI] == -1)
+                if (faceToZone[bFacei] == -1)
                 {
-                    faceToZone[bFaceI] = zoneI;
+                    faceToZone[bFacei] = zonei;
                 }
-                else if (faceToZone[bFaceI] == zoneI)
+                else if (faceToZone[bFacei] == zonei)
                 {
                     FatalErrorInFunction
                         << "Face " << fZone[i] << " in zone "
@@ -1795,7 +1785,7 @@ void Foam::meshRefinement::checkCoupledFaceZones(const polyMesh& mesh)
                         << "Face " << fZone[i] << " in zone "
                         << fZone.name()
                         << " is also in zone "
-                        << fZones[faceToZone[bFaceI]].name()
+                        << fZones[faceToZone[bFacei]].name()
                         << abort(FatalError);
                 }
             }
@@ -1835,9 +1825,9 @@ void Foam::meshRefinement::calculateEdgeWeights
     edgeWeights.setSize(isMasterEdge.size());
     invSumWeight.setSize(meshPoints.size());
 
-    forAll(edges, edgeI)
+    forAll(edges, edgei)
     {
-        const edge& e = edges[edgeI];
+        const edge& e = edges[edgei];
         scalar eMag = max
         (
             SMALL,
@@ -1847,7 +1837,7 @@ void Foam::meshRefinement::calculateEdgeWeights
               - pts[meshPoints[e[0]]]
             )
         );
-        edgeWeights[edgeI] = 1.0/eMag;
+        edgeWeights[edgei] = 1.0/eMag;
     }
 
     // Sum per point all edge weights
@@ -1863,13 +1853,13 @@ void Foam::meshRefinement::calculateEdgeWeights
     );
 
     // Inplace invert
-    forAll(invSumWeight, pointI)
+    forAll(invSumWeight, pointi)
     {
-        scalar w = invSumWeight[pointI];
+        scalar w = invSumWeight[pointi];
 
         if (w > 0.0)
         {
-            invSumWeight[pointI] = 1.0/w;
+            invSumWeight[pointi] = 1.0/w;
         }
     }
 }
@@ -1878,7 +1868,7 @@ void Foam::meshRefinement::calculateEdgeWeights
 Foam::label Foam::meshRefinement::appendPatch
 (
     fvMesh& mesh,
-    const label insertPatchI,
+    const label insertPatchi,
     const word& patchName,
     const dictionary& patchDict
 )
@@ -1890,28 +1880,28 @@ Foam::label Foam::meshRefinement::appendPatch
         const_cast<polyBoundaryMesh&>(mesh.boundaryMesh());
     fvBoundaryMesh& fvPatches = const_cast<fvBoundaryMesh&>(mesh.boundary());
 
-    label patchI = polyPatches.size();
+    label patchi = polyPatches.size();
 
     // Add polyPatch at the end
-    polyPatches.setSize(patchI+1);
+    polyPatches.setSize(patchi+1);
     polyPatches.set
     (
-        patchI,
+        patchi,
         polyPatch::New
         (
             patchName,
             patchDict,
-            insertPatchI,
+            insertPatchi,
             polyPatches
         )
     );
-    fvPatches.setSize(patchI+1);
+    fvPatches.setSize(patchi+1);
     fvPatches.set
     (
-        patchI,
+        patchi,
         fvPatch::New
         (
-            polyPatches[patchI],  // point to newly added polyPatch
+            polyPatches[patchi],  // point to newly added polyPatch
             mesh.boundary()
         )
     );
@@ -1969,11 +1959,10 @@ Foam::label Foam::meshRefinement::appendPatch
         mesh,
         calculatedFvPatchField<tensor>::typeName
     );
-    return patchI;
+    return patchi;
 }
 
 
-// Adds patch if not yet there. Returns patchID.
 Foam::label Foam::meshRefinement::addPatch
 (
     fvMesh& mesh,
@@ -1985,53 +1974,53 @@ Foam::label Foam::meshRefinement::addPatch
         const_cast<polyBoundaryMesh&>(mesh.boundaryMesh());
     fvBoundaryMesh& fvPatches = const_cast<fvBoundaryMesh&>(mesh.boundary());
 
-    const label patchI = polyPatches.findPatchID(patchName);
-    if (patchI != -1)
+    const label patchi = polyPatches.findPatchID(patchName);
+    if (patchi != -1)
     {
         // Already there
-        return patchI;
+        return patchi;
     }
 
 
-    label insertPatchI = polyPatches.size();
-    label startFaceI = mesh.nFaces();
+    label insertPatchi = polyPatches.size();
+    label startFacei = mesh.nFaces();
 
-    forAll(polyPatches, patchI)
+    forAll(polyPatches, patchi)
     {
-        const polyPatch& pp = polyPatches[patchI];
+        const polyPatch& pp = polyPatches[patchi];
 
         if (isA<processorPolyPatch>(pp))
         {
-            insertPatchI = patchI;
-            startFaceI = pp.start();
+            insertPatchi = patchi;
+            startFacei = pp.start();
             break;
         }
     }
 
     dictionary patchDict(patchInfo);
     patchDict.set("nFaces", 0);
-    patchDict.set("startFace", startFaceI);
+    patchDict.set("startFace", startFacei);
 
     // Below is all quite a hack. Feel free to change once there is a better
     // mechanism to insert and reorder patches.
 
-    label addedPatchI = appendPatch(mesh, insertPatchI, patchName, patchDict);
+    label addedPatchi = appendPatch(mesh, insertPatchi, patchName, patchDict);
 
 
     // Create reordering list
     // patches before insert position stay as is
-    labelList oldToNew(addedPatchI+1);
-    for (label i = 0; i < insertPatchI; i++)
+    labelList oldToNew(addedPatchi+1);
+    for (label i = 0; i < insertPatchi; i++)
     {
         oldToNew[i] = i;
     }
     // patches after insert position move one up
-    for (label i = insertPatchI; i < addedPatchI; i++)
+    for (label i = insertPatchi; i < addedPatchi; i++)
     {
         oldToNew[i] = i+1;
     }
     // appended patch gets moved to insert position
-    oldToNew[addedPatchI] = insertPatchI;
+    oldToNew[addedPatchi] = insertPatchi;
 
     // Shuffle into place
     polyPatches.reorder(oldToNew, true);
@@ -2048,7 +2037,7 @@ Foam::label Foam::meshRefinement::addPatch
     reorderPatchFields<surfaceSymmTensorField>(mesh, oldToNew);
     reorderPatchFields<surfaceTensorField>(mesh, oldToNew);
 
-    return insertPatchI;
+    return insertPatchi;
 }
 
 
@@ -2058,9 +2047,9 @@ Foam::label Foam::meshRefinement::addMeshedPatch
     const dictionary& patchInfo
 )
 {
-    label meshedI = findIndex(meshedPatches_, name);
+    label meshedi = findIndex(meshedPatches_, name);
 
-    if (meshedI != -1)
+    if (meshedi != -1)
     {
         // Already there. Get corresponding polypatch
         return mesh_.boundaryMesh().findPatchID(name);
@@ -2068,7 +2057,7 @@ Foam::label Foam::meshRefinement::addMeshedPatch
     else
     {
         // Add patch
-        label patchI = addPatch(mesh_, name, patchInfo);
+        label patchi = addPatch(mesh_, name, patchInfo);
 
 //        dictionary patchDict(patchInfo);
 //        patchDict.set("nFaces", 0);
@@ -2083,7 +2072,7 @@ Foam::label Foam::meshRefinement::addMeshedPatch
 //                mesh_.boundaryMesh()
 //            )
 //        );
-//        label patchI = fvMeshTools::addPatch
+//        label patchi = fvMeshTools::addPatch
 //        (
 //            mesh_,
 //            ppPtr(),
@@ -2098,7 +2087,7 @@ Foam::label Foam::meshRefinement::addMeshedPatch
         // Clear patch based addressing
         faceToCoupledPatch_.clear();
 
-        return patchI;
+        return patchi;
     }
 }
 
@@ -2110,18 +2099,18 @@ Foam::labelList Foam::meshRefinement::meshedPatches() const
     DynamicList<label> patchIDs(meshedPatches_.size());
     forAll(meshedPatches_, i)
     {
-        label patchI = patches.findPatchID(meshedPatches_[i]);
+        label patchi = patches.findPatchID(meshedPatches_[i]);
 
-        if (patchI == -1)
+        if (patchi == -1)
         {
             WarningInFunction
                 << "Problem : did not find patch " << meshedPatches_[i]
                 << endl << "Valid patches are " << patches.names()
                 << endl;    //abort(FatalError);
         }
-        else if (!polyPatch::constraintType(patches[patchI].type()))
+        else if (!polyPatch::constraintType(patches[patchi].type()))
         {
-            patchIDs.append(patchI);
+            patchIDs.append(patchi);
         }
     }
 
@@ -2137,7 +2126,7 @@ Foam::label Foam::meshRefinement::addFaceZone
     const surfaceZonesInfo::faceZoneType& fzType
 )
 {
-    label zoneI = surfaceZonesInfo::addFaceZone
+    label zonei = surfaceZonesInfo::addFaceZone
     (
         fzName,   //name
         labelList(0),   //addressing
@@ -2149,7 +2138,7 @@ Foam::label Foam::meshRefinement::addFaceZone
     faceZoneToSlavePatch_.insert(fzName, slavePatch);
     faceZoneToType_.insert(fzName, fzType);
 
-    return zoneI;
+    return zonei;
 }
 
 
@@ -2186,14 +2175,14 @@ void Foam::meshRefinement::selectSeparatedCoupledFaces(boolList& selected) const
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    forAll(patches, patchI)
+    forAll(patches, patchi)
     {
-        // Check all coupled. Avoid using .coupled() so we also pick up AMI.
-        if (isA<coupledPolyPatch>(patches[patchI]))
+        // Check all coupled. Avoid using .coupled() so we also pick up AMi.
+        if (isA<coupledPolyPatch>(patches[patchi]))
         {
             const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
             (
-                patches[patchI]
+                patches[patchi]
             );
 
             if (cpp.separated() || !cpp.parallel())
@@ -2216,40 +2205,40 @@ Foam::label Foam::meshRefinement::findRegion
     const point& p
 )
 {
-    label regionI = -1;
+    label regioni = -1;
 
     // Force calculation of base points (needs to be synchronised)
     (void)mesh.tetBasePtIs();
 
-    label cellI = mesh.findCell(p);
-    //if (cellI != -1)
+    label celli = mesh.findCell(p);
+    //if (celli != -1)
     //{
-    //    Pout<< "findRegion : Found point:" << p << " in cell " << cellI
-    //        << " at:" << mesh.cellCentres()[cellI] << endl;
+    //    Pout<< "findRegion : Found point:" << p << " in cell " << celli
+    //        << " at:" << mesh.cellCentres()[celli] << endl;
     //}
     //else
     //{
-    //    Pout<< "findRegion : Found point:" << p << " in cell " << cellI
+    //    Pout<< "findRegion : Found point:" << p << " in cell " << celli
     //        << endl;
     //}
 
-    if (cellI != -1)
+    if (celli != -1)
     {
-        regionI = cellToRegion[cellI];
+        regioni = cellToRegion[celli];
     }
-    reduce(regionI, maxOp<label>());
+    reduce(regioni, maxOp<label>());
 
-    if (regionI == -1)
+    if (regioni == -1)
     {
         // See if we can perturb a bit
-        cellI = mesh.findCell(p+perturbVec);
-        if (cellI != -1)
+        celli = mesh.findCell(p+perturbVec);
+        if (celli != -1)
         {
-            regionI = cellToRegion[cellI];
+            regioni = cellToRegion[celli];
         }
-        reduce(regionI, maxOp<label>());
+        reduce(regioni, maxOp<label>());
     }
-    return regionI;
+    return regioni;
 }
 //XXXXXXXX
 //Foam::labelList Foam::meshRefinement::findRegion
@@ -2264,20 +2253,20 @@ Foam::label Foam::meshRefinement::findRegion
 //
 //    forAll(pts, i)
 //    {
-//        label cellI = mesh.findCell(pts[i]);
-//        if (cellI != -1)
+//        label celli = mesh.findCell(pts[i]);
+//        if (celli != -1)
 //        {
-//            regions[i] = cellToRegion[cellI];
+//            regions[i] = cellToRegion[celli];
 //        }
 //        reduce(regions[i], maxOp<label>());
 //
 //        if (regions[i] == -1)
 //        {
 //            // See if we can perturb a bit
-//            cellI = mesh.findCell(pts[i]+perturbVec);
-//            if (cellI != -1)
+//            celli = mesh.findCell(pts[i]+perturbVec);
+//            if (celli != -1)
 //            {
-//                regions[i] = cellToRegion[cellI];
+//                regions[i] = cellToRegion[celli];
 //            }
 //            reduce(regions[i], maxOp<label>());
 //        }
@@ -2323,7 +2312,7 @@ void Foam::meshRefinement::findRegions
     forAll(insideRegions, i)
     {
         // Find the region containing the point
-        label regionI = findRegion
+        label regioni = findRegion
         (
             mesh,
             cellRegion,
@@ -2331,14 +2320,14 @@ void Foam::meshRefinement::findRegions
             locationsInMesh[i]
         );
 
-        insideRegions[i] = regionI;
+        insideRegions[i] = regioni;
 
         // Mark all cells in the region as being inside
-        forAll(cellRegion, cellI)
+        forAll(cellRegion, celli)
         {
-            if (cellRegion[cellI] == regionI)
+            if (cellRegion[celli] == regioni)
             {
-                insideCell[cellI] = true;
+                insideCell[celli] = true;
             }
         }
     }
@@ -2350,7 +2339,7 @@ void Foam::meshRefinement::findRegions
     forAll(locationsOutsideMesh, i)
     {
         // Find the region containing the point
-        label regionI = findRegion
+        label regioni = findRegion
         (
             mesh,
             cellRegion,
@@ -2358,16 +2347,16 @@ void Foam::meshRefinement::findRegions
             locationsOutsideMesh[i]
         );
 
-        if (regionI != -1)
+        if (regioni != -1)
         {
             // Do a quick check for locationsOutsideMesh overlapping with
             // inside ones.
-            label index = findIndex(insideRegions, regionI);
+            label index = findIndex(insideRegions, regioni);
             if (index != -1)
             {
                 FatalErrorInFunction
                     << "Location in mesh " << locationsInMesh[index]
-                    << " is inside same mesh region " << regionI
+                    << " is inside same mesh region " << regioni
                     << " as location outside mesh "
                     << locationsOutsideMesh[i]
                     << exit(FatalError);
@@ -2377,11 +2366,11 @@ void Foam::meshRefinement::findRegions
 
 
     // Now update cellRegion to -1 for unreachable cells
-    forAll(insideCell, cellI)
+    forAll(insideCell, celli)
     {
-        if (!insideCell[cellI])
+        if (!insideCell[celli])
         {
-            cellRegion[cellI] = -1;
+            cellRegion[celli] = -1;
         }
     }
 }
@@ -2421,11 +2410,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
 
     // Get cells to remove
     DynamicList<label> cellsToRemove(mesh_.nCells());
-    forAll(cellRegion, cellI)
+    forAll(cellRegion, celli)
     {
-        if (cellRegion[cellI] == -1)
+        if (cellRegion[celli] == -1)
         {
-            cellsToRemove.append(cellI);
+            cellsToRemove.append(celli);
         }
     }
     cellsToRemove.shrink();
@@ -2551,7 +2540,6 @@ void Foam::meshRefinement::distribute(const mapDistributePolyMesh& map)
 }
 
 
-// Update local data for a mesh change
 void Foam::meshRefinement::updateMesh
 (
     const mapPolyMesh& map,
@@ -2609,11 +2597,11 @@ void Foam::meshRefinement::updateMesh
         Map<label> newFaceToPatch(faceToCoupledPatch_.size());
         forAllConstIter(Map<label>, faceToCoupledPatch_, iter)
         {
-            label newFaceI = map.reverseFaceMap()[iter.key()];
+            label newFacei = map.reverseFaceMap()[iter.key()];
 
-            if (newFaceI >= 0)
+            if (newFacei >= 0)
             {
-                newFaceToPatch.insert(newFaceI, iter());
+                newFaceToPatch.insert(newFacei, iter());
             }
         }
         faceToCoupledPatch_.transfer(newFaceToPatch);
@@ -2638,13 +2626,13 @@ void Foam::meshRefinement::updateMesh
             // keep master only
             labelList newFaceData(map.faceMap().size(), -1);
 
-            forAll(newFaceData, faceI)
+            forAll(newFaceData, facei)
             {
-                label oldFaceI = map.faceMap()[faceI];
+                label oldFacei = map.faceMap()[facei];
 
-                if (oldFaceI >= 0 && map.reverseFaceMap()[oldFaceI] == faceI)
+                if (oldFacei >= 0 && map.reverseFaceMap()[oldFacei] == facei)
                 {
-                    newFaceData[faceI] = data[oldFaceI];
+                    newFaceData[facei] = data[oldFacei];
                 }
             }
             data.transfer(newFaceData);
@@ -2658,31 +2646,31 @@ void Foam::meshRefinement::updateMesh
             // These get marked with -1 in reverseFaceMap
             labelList reverseFaceMap(map.reverseFaceMap());
 
-            forAll(map.faceMap(), faceI)
+            forAll(map.faceMap(), facei)
             {
-                label oldFaceI = map.faceMap()[faceI];
+                label oldFacei = map.faceMap()[facei];
 
-                if (oldFaceI >= 0)
+                if (oldFacei >= 0)
                 {
-                    if (reverseFaceMap[oldFaceI] != faceI)
+                    if (reverseFaceMap[oldFacei] != facei)
                     {
-                        // faceI is slave face. Mark old face.
-                        reverseFaceMap[oldFaceI] = -1;
+                        // facei is slave face. Mark old face.
+                        reverseFaceMap[oldFacei] = -1;
                     }
                 }
             }
 
             // 2. Map only faces with intact reverseFaceMap
             labelList newFaceData(map.faceMap().size(), -1);
-            forAll(newFaceData, faceI)
+            forAll(newFaceData, facei)
             {
-                label oldFaceI = map.faceMap()[faceI];
+                label oldFacei = map.faceMap()[facei];
 
-                if (oldFaceI >= 0)
+                if (oldFacei >= 0)
                 {
-                    if (reverseFaceMap[oldFaceI] == faceI)
+                    if (reverseFaceMap[oldFacei] == facei)
                     {
-                        newFaceData[faceI] = data[oldFaceI];
+                        newFaceData[facei] = data[oldFacei];
                     }
                 }
             }
@@ -2694,11 +2682,7 @@ void Foam::meshRefinement::updateMesh
 
 bool Foam::meshRefinement::write() const
 {
-    bool writeOk =
-        mesh_.write()
-     && meshCutter_.write()
-     && surfaceIndex_.write();
-
+    bool writeOk = mesh_.write();
 
     // Make sure that any distributed surfaces (so ones which probably have
     // been changed) get written as well.
@@ -2740,9 +2724,9 @@ Foam::PackedBoolList Foam::meshRefinement::getMasterPoints
     const globalIndex globalPoints(meshPoints.size());
 
     labelList myPoints(meshPoints.size());
-    forAll(meshPoints, pointI)
+    forAll(meshPoints, pointi)
     {
-        myPoints[pointI] = globalPoints.toGlobal(pointI);
+        myPoints[pointi] = globalPoints.toGlobal(pointi);
     }
 
     syncTools::syncPointList
@@ -2756,11 +2740,11 @@ Foam::PackedBoolList Foam::meshRefinement::getMasterPoints
 
 
     PackedBoolList isPatchMasterPoint(meshPoints.size());
-    forAll(meshPoints, pointI)
+    forAll(meshPoints, pointi)
     {
-        if (myPoints[pointI] == globalPoints.toGlobal(pointI))
+        if (myPoints[pointi] == globalPoints.toGlobal(pointi))
         {
-            isPatchMasterPoint[pointI] = true;
+            isPatchMasterPoint[pointi] = true;
         }
     }
 
@@ -2777,9 +2761,9 @@ Foam::PackedBoolList Foam::meshRefinement::getMasterEdges
     const globalIndex globalEdges(meshEdges.size());
 
     labelList myEdges(meshEdges.size());
-    forAll(meshEdges, edgeI)
+    forAll(meshEdges, edgei)
     {
-        myEdges[edgeI] = globalEdges.toGlobal(edgeI);
+        myEdges[edgei] = globalEdges.toGlobal(edgei);
     }
 
     syncTools::syncEdgeList
@@ -2793,11 +2777,11 @@ Foam::PackedBoolList Foam::meshRefinement::getMasterEdges
 
 
     PackedBoolList isMasterEdge(meshEdges.size());
-    forAll(meshEdges, edgeI)
+    forAll(meshEdges, edgei)
     {
-        if (myEdges[edgeI] == globalEdges.toGlobal(edgeI))
+        if (myEdges[edgei] == globalEdges.toGlobal(edgei))
         {
-            isMasterEdge[edgeI] = true;
+            isMasterEdge[edgei] = true;
         }
     }
 
@@ -2854,18 +2838,18 @@ const
 
         labelList nCells(gMax(cellLevel)+1, 0);
 
-        forAll(cellLevel, cellI)
+        forAll(cellLevel, celli)
         {
-            nCells[cellLevel[cellI]]++;
+            nCells[cellLevel[celli]]++;
         }
 
         Pstream::listCombineGather(nCells, plusEqOp<label>());
         Pstream::listCombineScatter(nCells);
 
         Info<< "Cells per refinement level:" << endl;
-        forAll(nCells, levelI)
+        forAll(nCells, leveli)
         {
-            Info<< "    " << levelI << '\t' << nCells[levelI]
+            Info<< "    " << leveli << '\t' << nCells[leveli]
                 << endl;
         }
     }
@@ -2909,9 +2893,9 @@ void Foam::meshRefinement::dumpRefinementLevel() const
 
         const labelList& cellLevel = meshCutter_.cellLevel();
 
-        forAll(volRefLevel, cellI)
+        forAll(volRefLevel, celli)
         {
-            volRefLevel[cellI] = cellLevel[cellI];
+            volRefLevel[celli] = cellLevel[celli];
         }
 
         volRefLevel.write();
@@ -2938,9 +2922,9 @@ void Foam::meshRefinement::dumpRefinementLevel() const
 
         const labelList& pointLevel = meshCutter_.pointLevel();
 
-        forAll(pointRefLevel, pointI)
+        forAll(pointRefLevel, pointi)
         {
-            pointRefLevel[pointI] = pointLevel[pointI];
+            pointRefLevel[pointi] = pointLevel[pointi];
         }
 
         pointRefLevel.write();
@@ -2952,7 +2936,7 @@ void Foam::meshRefinement::dumpIntersections(const fileName& prefix) const
 {
     {
         OFstream str(prefix + "_edges.obj");
-        label vertI = 0;
+        label verti = 0;
         Pout<< "meshRefinement::dumpIntersections :"
             << " Writing cellcentre-cellcentre intersections to file "
             << str.name() << endl;
@@ -3001,13 +2985,13 @@ void Foam::meshRefinement::dumpIntersections(const fileName& prefix) const
             if (surfaceHit[i] != -1)
             {
                 meshTools::writeOBJ(str, start[i]);
-                vertI++;
+                verti++;
                 meshTools::writeOBJ(str, surfaceHitInfo[i].hitPoint());
-                vertI++;
+                verti++;
                 meshTools::writeOBJ(str, end[i]);
-                vertI++;
-                str << "l " << vertI-2 << ' ' << vertI-1 << nl
-                    << "l " << vertI-1 << ' ' << vertI << nl;
+                verti++;
+                str << "l " << verti-2 << ' ' << verti-1 << nl
+                    << "l " << verti-1 << ' ' << verti << nl;
             }
         }
     }
@@ -3027,10 +3011,18 @@ void Foam::meshRefinement::write
     {
         write();
     }
+
+    if (writeFlags && !(writeFlags & NOWRITEREFINEMENT))
+    {
+        meshCutter_.write();
+        surfaceIndex_.write();
+    }
+
     if (writeFlags & WRITELEVELS)
     {
         dumpRefinementLevel();
     }
+
     if (debugFlags & OBJINTERSECTIONS && prefix.size())
     {
         dumpIntersections(prefix);
