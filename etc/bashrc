@@ -209,10 +209,11 @@ fi
 
 # Cleanup environment
 # ~~~~~~~~~~~~~~~~~~~
-unset cleaned foamClean foamOldDirs
 
-# Unload functions
-# ~~~~~~~~~~~~~~~~
+#- Functions
 . $WM_PROJECT_DIR/etc/config.sh/functions
+
+#- Variables (do as last for a clean exit code)
+unset cleaned foamClean foamOldDirs
 
 #------------------------------------------------------------------------------

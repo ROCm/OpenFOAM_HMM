@@ -157,29 +157,29 @@ unset cleaned foamClean foamOldDirs
 
 
 #------------------------------------------------------------------------------
-# Cleanup aliases
+# Cleanup aliases and functions
 
-unalias wmSet
-unalias wmInt32
-unalias wmInt64
-unalias wmSP
-unalias wmDP
+unalias wmSet       2>/dev/null
+unalias wmInt32     2>/dev/null
+unalias wmInt64     2>/dev/null
+unalias wmSP        2>/dev/null
+unalias wmDP        2>/dev/null
 
-unalias wmUnset
+unalias wmUnset     2>/dev/null
 
-unalias wmSchedOn
-unalias wmSchedOff
+unalias wmSchedOn   2>/dev/null
+unalias wmSchedOff  2>/dev/null
 
-unalias foam
-unalias foamSite
+unalias foam        2>/dev/null
+unalias foamSite    2>/dev/null
 
-unalias src
-unalias lib
-unalias app
-unalias sol
-unalias util
-unalias tut
-unalias run
+unalias src         2>/dev/null
+unalias lib         2>/dev/null
+unalias app         2>/dev/null
+unalias sol         2>/dev/null
+unalias util        2>/dev/null
+unalias tut         2>/dev/null
+unalias run         2>/dev/null
 
 unset -f wmRefresh
 unset -f foamVersion
