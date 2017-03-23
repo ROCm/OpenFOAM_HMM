@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,7 +93,8 @@ void liquidFilmThermo::initLiquid(const dictionary& dict)
         // new liquid create
         ownLiquid_ = true;
 
-        liquidPtr_ = new liquidProperties(dict.subDict(name_ + "Coeffs"));
+        liquidPtr_ =
+            liquidProperties::New(dict.subDict(name_ + "Coeffs")).ptr();
     }
 }
 
@@ -189,7 +190,7 @@ scalar liquidFilmThermo::kappa
     const scalar T
 ) const
 {
-    return liquidPtr_->K(p, T);
+    return liquidPtr_->kappa(p, T);
 }
 
 

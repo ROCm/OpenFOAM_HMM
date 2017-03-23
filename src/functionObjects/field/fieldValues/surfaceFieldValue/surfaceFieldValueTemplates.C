@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -148,6 +148,17 @@ processSameTypeValues
         }
         case opWeightedSum:
         {
+            if (weightField.size())
+            {
+                result = sum(weightField*values);
+            }
+            else
+            {
+                result = sum(values);
+            }
+            break;
+        }
+        {
             if (returnReduce(weightField.empty(), andOp<bool>()))
             {
                 result = gSum(values);
@@ -223,6 +234,20 @@ processSameTypeValues
             const scalarField factor = weightingFactor(weightField, Sf);
 
             result = gSum(factor*values);
+            break;
+        }
+        case opWeightedAreaIntegrate:
+        {
+            const scalarField magSf(mag(Sf));
+
+            if (weightField.size())
+            {
+                result = sum(weightField*magSf*values);
+            }
+            else
+            {
+                result = sum(magSf*values);
+            }
             break;
         }
         case opMin:

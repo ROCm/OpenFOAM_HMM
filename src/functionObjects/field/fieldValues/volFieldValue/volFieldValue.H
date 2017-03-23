@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -80,19 +80,19 @@ Usage
 
     The \c operation is one of:
     \plaintable
-       none               | No operation
-       sum                | Sum
-       weightedSum        | Weighted sum
-       sumMag             | Sum of component magnitudes
-       average            | Ensemble average
-       weightedAverage    | Weighted average
-       volAverage         | Volume weighted average
-       weightedVolAverage | Weighted volume average
-       volIntegrate       | Volume integral
+       none                 | No operation
+       sum                  | Sum
+       weightedSum          | Weighted sum
+       sumMag               | Sum of component magnitudes
+       average              | Ensemble average
+       weightedAverage      | Weighted average
+       volAverage           | Volume weighted average
+       weightedVolAverage   | Weighted volume average
+       volIntegrate         | Volume integral
        weightedVolIntegrate | Weighted volume integral
-       min                | Minimum
-       max                | Maximum
-       CoV                | Coefficient of variation: standard deviation/mean
+       min                  | Minimum
+       max                  | Maximum
+       CoV                  | Coefficient of variation: standard deviation/mean
     \endplaintable
 
 See also
@@ -163,7 +163,7 @@ protected:
         //- Operation to apply to values
         operationType operation_;
 
-        //- Weight field name - only used for opWeightedAverage mode
+        //- Weight field name - only used for weighted modes
         word weightFieldName_;
 
 

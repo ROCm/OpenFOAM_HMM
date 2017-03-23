@@ -195,6 +195,11 @@ void Foam::MULES::limiter
         MULEScontrols.lookupOrDefault<scalar>("smoothLimiter", 0)
     );
 
+    const scalar extremaCoeff
+    (
+        MULEScontrols.lookupOrDefault<scalar>("extremaCoeff", 0)
+    );
+
     const scalarField& psi0 = psi.oldTime();
 
     const labelUList& owner = mesh.owner();
@@ -286,7 +291,7 @@ void Foam::MULES::limiter
                 psiMinn[pfCelli] = min(psiMinn[pfCelli], psiPNf[pFacei]);
             }
         }
-        else
+        else if (psiPf.fixesValue())
         {
             forAll(phiCorrPf, pFacei)
             {
@@ -294,6 +299,16 @@ void Foam::MULES::limiter
 
                 psiMaxn[pfCelli] = max(psiMaxn[pfCelli], psiPf[pFacei]);
                 psiMinn[pfCelli] = min(psiMinn[pfCelli], psiPf[pFacei]);
+            }
+        }
+        else
+        {
+            forAll(phiCorrPf, pFacei)
+            {
+                const label pfCelli = pFaceCells[pFacei];
+
+                psiMaxn[pfCelli] = max(psiMaxn[pfCelli], psiMax);
+                psiMinn[pfCelli] = min(psiMinn[pfCelli], psiMin);
             }
         }
 
@@ -316,8 +331,8 @@ void Foam::MULES::limiter
         }
     }
 
-    psiMaxn = min(psiMaxn, psiMax);
-    psiMinn = max(psiMinn, psiMin);
+    psiMaxn = min(psiMaxn + extremaCoeff*(psiMax - psiMin), psiMax);
+    psiMinn = max(psiMinn - extremaCoeff*(psiMax - psiMin), psiMin);
 
     if (smoothLimiter > SMALL)
     {

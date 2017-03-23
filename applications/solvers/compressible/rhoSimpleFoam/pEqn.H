@@ -10,20 +10,23 @@
 
     if (simple.transonic())
     {
+        surfaceScalarField phiHbyA("phiHbyA", fvc::flux(rho*HbyA));
+        surfaceScalarField rhof(fvc::interpolate(rho));
+        MRF.makeRelative(rhof, phiHbyA);
+
         surfaceScalarField phid
         (
             "phid",
-            fvc::interpolate(psi)
-           *fvc::flux(HbyA)
+            (fvc::interpolate(psi)/rhof)*phiHbyA
         );
-
-        MRF.makeRelative(fvc::interpolate(psi), phid);
+        phiHbyA -= fvc::interpolate(p)*phid;
 
         while (simple.correctNonOrthogonal())
         {
             fvScalarMatrix pEqn
             (
-                fvm::div(phid, p)
+                fvc::div(phiHbyA)
+              + fvm::div(phid, p)
               - fvm::laplacian(rhorAUf, p)
               ==
                 fvOptions(psi, p, rho.name())
@@ -32,13 +35,17 @@
             // Relax the pressure equation to ensure diagonal-dominance
             pEqn.relax();
 
-            pEqn.setReference(pRefCell, pRefValue);
+            pEqn.setReference
+            (
+                pressureControl.refCell(),
+                pressureControl.refValue()
+            );
 
             pEqn.solve();
 
             if (simple.finalNonOrthogonalIter())
             {
-                phi == pEqn.flux();
+                phi = phiHbyA + pEqn.flux();
             }
         }
     }
@@ -62,7 +69,11 @@
                 fvOptions(psi, p, rho.name())
             );
 
-            pEqn.setReference(pRefCell, pRefValue);
+            pEqn.setReference
+            (
+                pressureControl.refCell(),
+                pressureControl.refValue()
+            );
 
             pEqn.solve();
 
@@ -83,6 +94,8 @@
     U.correctBoundaryConditions();
     fvOptions.correct(U);
 
+    pressureControl.limit(p);
+
     // For closed-volume cases adjust the pressure and density levels
     // to obey overall mass continuity
     if (closedVolume)
@@ -91,9 +104,9 @@
             /fvc::domainIntegrate(psi);
     }
 
+    p.correctBoundaryConditions();
+
     rho = thermo.rho();
-    rho = max(rho, rhoMin);
-    rho = min(rho, rhoMax);
 
     thermo.rho() = max(thermo.rho(), rhoMin);
     thermo.rho() = min(thermo.rho(), rhoMax);
@@ -102,8 +115,4 @@
     {
         rho.relax();
     }
-
-    Info<< "rho max/min : "
-        << max(rho).value() << " "
-        << min(rho).value() << endl;
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,23 +94,9 @@ inline polynomialTransport<Thermo, PolySize> operator+
 );
 
 template<class Thermo, int PolySize>
-inline polynomialTransport<Thermo, PolySize> operator-
-(
-    const polynomialTransport<Thermo, PolySize>&,
-    const polynomialTransport<Thermo, PolySize>&
-);
-
-template<class Thermo, int PolySize>
 inline polynomialTransport<Thermo, PolySize> operator*
 (
     const scalar,
-    const polynomialTransport<Thermo, PolySize>&
-);
-
-template<class Thermo, int PolySize>
-inline polynomialTransport<Thermo, PolySize> operator==
-(
-    const polynomialTransport<Thermo, PolySize>&,
     const polynomialTransport<Thermo, PolySize>&
 );
 
@@ -155,23 +141,14 @@ public:
 
     // Constructors
 
-        //- Construct copy
-        inline polynomialTransport(const polynomialTransport&);
-
         //- Construct as named copy
         inline polynomialTransport(const word&, const polynomialTransport&);
-
-        //- Construct from Istream
-        polynomialTransport(Istream& is);
 
         //- Construct from dictionary
         polynomialTransport(const dictionary& dict);
 
         //- Construct and return a clone
         inline autoPtr<polynomialTransport> clone() const;
-
-        // Selector from Istream
-        inline static autoPtr<polynomialTransport> New(Istream& is);
 
         // Selector from dictionary
         inline static autoPtr<polynomialTransport> New(const dictionary& dict);
@@ -204,8 +181,9 @@ public:
     // Member operators
 
         inline void operator=(const polynomialTransport&);
+
         inline void operator+=(const polynomialTransport&);
-        inline void operator-=(const polynomialTransport&);
+
         inline void operator*=(const scalar);
 
 
@@ -217,21 +195,9 @@ public:
             const polynomialTransport&
         );
 
-        friend polynomialTransport operator- <Thermo, PolySize>
-        (
-            const polynomialTransport&,
-            const polynomialTransport&
-        );
-
         friend polynomialTransport operator* <Thermo, PolySize>
         (
             const scalar,
-            const polynomialTransport&
-        );
-
-        friend polynomialTransport operator== <Thermo, PolySize>
-        (
-            const polynomialTransport&,
             const polynomialTransport&
         );
 

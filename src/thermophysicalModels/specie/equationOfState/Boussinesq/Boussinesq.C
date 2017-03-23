@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,22 +27,6 @@ License
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Specie>
-Foam::Boussinesq<Specie>::Boussinesq(Istream& is)
-:
-    Specie(is),
-    rho0_(readScalar(is)),
-    T0_(readScalar(is)),
-    beta_(readScalar(is))
-{
-    is.check
-    (
-        "Boussinesq<Specie>::"
-        "Boussinesq(Istream& is)"
-    );
-}
-
 
 template<class Specie>
 Foam::Boussinesq<Specie>::Boussinesq
@@ -81,16 +65,7 @@ Foam::Ostream& Foam::operator<<
     const Boussinesq<Specie>& b
 )
 {
-    os  << static_cast<const Specie&>(b)
-        << token::SPACE << b.rho0_
-        << token::SPACE << b.T0_
-        << token::SPACE << b.beta_;
-
-    os.check
-    (
-        "Ostream& operator<<"
-        "(Ostream& os, const Boussinesq<Specie>& st)"
-    );
+    b.write(os);
     return os;
 }
 

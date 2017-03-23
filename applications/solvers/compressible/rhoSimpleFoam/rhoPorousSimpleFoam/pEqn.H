@@ -48,7 +48,11 @@
 
         fvScalarMatrix& pEqn = tpEqn.ref();
 
-        pEqn.setReference(pRefCell, pRefValue);
+        pEqn.setReference
+        (
+            pressureControl.refCell(),
+            pressureControl.refValue()
+        );
 
         pEqn.solve();
 
@@ -75,6 +79,8 @@
     U.correctBoundaryConditions();
     fvOptions.correct(U);
 
+    pressureControl.limit(p);
+
     // For closed-volume cases adjust the pressure and density levels
     // to obey overall mass continuity
     if (closedVolume)
@@ -84,14 +90,9 @@
     }
 
     rho = thermo.rho();
-    rho = max(rho, rhoMin);
-    rho = min(rho, rhoMax);
 
     thermo.rho() = max(thermo.rho(), rhoMin);
     thermo.rho() = min(thermo.rho(), rhoMax);
 
     rho.relax();
-    Info<< "rho max/min : "
-        << max(rho).value() << " "
-        << min(rho).value() << endl;
 }

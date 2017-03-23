@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -46,13 +46,16 @@ Usage
             UMean
             UPrime2Mean
         );
-        origin      (0.001 0 0);
 
-        coordinateRotation
+        coordinateSystem
         {
-            type    axesRotation;
-            e1      (1      0.15    0);
-            e3      (0      0      -1);
+            origin      (0.001 0 0);
+            coordinateRotation
+            {
+                type        axesRotation;
+                e1          (1      0.15    0);
+                e3          (0      0      -1);
+            }
         }
     }
     \endverbatim
@@ -62,9 +65,7 @@ Usage
         Property     | Description             | Required    | Default value
         type         | type name: fieldCoordinateSystemTransform | yes |
         fields       | list of fields to be transformed |yes |
-        origin       | origin of local co-ordinate system | yes    |
-        coordinateRotation | orientation of local co-ordinate system | yes    |
-        log          | Log to standard output  | no          | yes
+        coordinateSystem | local co-ordinate system | yes    |
     \endtable
 
 See also
@@ -107,9 +108,6 @@ protected:
 
         //- Co-ordinate system to transform to
         coordinateSystem coordSys_;
-
-        //- Switch to send output to Info as well as to file
-        Switch log_;
 
 
     // Protected Member Functions

@@ -1,9 +1,10 @@
 Info<< "Reading thermophysical properties\n" << endl;
 autoPtr<rhoThermo> pThermo
+autoPtr<fluidThermo> pThermo
 (
-    rhoThermo::New(mesh)
+    fluidThermo::New(mesh)
 );
-rhoThermo& thermo = pThermo();
+fluidThermo& thermo = pThermo();
 thermo.validate(args.executable(), "h", "e");
 
 volScalarField rho
@@ -37,6 +38,7 @@ volVectorField U
 
 #include "compressibleCreatePhi.H"
 
+pressureControl pressureControl(p, rho, simple.dict());
 
 label pRefCell = 0;
 scalar pRefValue = 0.0;

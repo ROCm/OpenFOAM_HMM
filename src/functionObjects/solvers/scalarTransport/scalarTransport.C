@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -139,7 +139,11 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::scalarTransport::D
 
         return tmp<volScalarField>
         (
-             new volScalarField(Dname, model.nuEff())
+             new volScalarField
+             (
+                 Dname,
+                 alphaD_*model.nu() + alphaDt_*model.nut()
+             )
         );
     }
     else if (foundObject<cmpModel>(turbulenceModel::propertiesName))
@@ -151,7 +155,11 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::scalarTransport::D
 
         return tmp<volScalarField>
         (
-             new volScalarField(Dname, model.muEff())
+             new volScalarField
+             (
+                 Dname,
+                 alphaD_*model.mu() + alphaDt_*model.mut()
+             )
         );
     }
     else
@@ -236,6 +244,8 @@ bool Foam::functionObjects::scalarTransport::read(const dictionary& dict)
 
     schemesField_ = dict.lookupOrDefault("schemesField", fieldName_);
     constantD_ = dict.readIfPresent("D", D_);
+    alphaD_ = dict.lookupOrDefault("alphaD", 1.0);
+    alphaDt_ = dict.lookupOrDefault("alphaDt", 1.0);
 
     dict.readIfPresent("nCorr", nCorr_);
     dict.readIfPresent("resetOnStartUp", resetOnStartUp_);
@@ -358,7 +368,7 @@ bool Foam::functionObjects::scalarTransport::execute()
         FatalErrorInFunction
             << "Incompatible dimensions for phi: " << phi.dimensions() << nl
             << "Dimensions should be " << dimMass/dimTime << " or "
-            << dimVolume/dimTime << endl;
+            << dimVolume/dimTime << exit(FatalError);
     }
 
     Log << endl;

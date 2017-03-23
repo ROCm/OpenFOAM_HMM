@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,23 +64,9 @@ inline sutherlandTransport<Thermo> operator+
 );
 
 template<class Thermo>
-inline sutherlandTransport<Thermo> operator-
-(
-    const sutherlandTransport<Thermo>&,
-    const sutherlandTransport<Thermo>&
-);
-
-template<class Thermo>
 inline sutherlandTransport<Thermo> operator*
 (
     const scalar,
-    const sutherlandTransport<Thermo>&
-);
-
-template<class Thermo>
-inline sutherlandTransport<Thermo> operator==
-(
-    const sutherlandTransport<Thermo>&,
     const sutherlandTransport<Thermo>&
 );
 
@@ -144,9 +130,6 @@ public:
         //- Construct as named copy
         inline sutherlandTransport(const word&, const sutherlandTransport&);
 
-        //- Construct from Istream
-        sutherlandTransport(Istream&);
-
         //- Construct from dictionary
         sutherlandTransport(const dictionary& dict);
 
@@ -155,9 +138,6 @@ public:
 
         //- Construct and return a clone
         inline autoPtr<sutherlandTransport> clone() const;
-
-        // Selector from Istream
-        inline static autoPtr<sutherlandTransport> New(Istream& is);
 
         // Selector from dictionary
         inline static autoPtr<sutherlandTransport> New(const dictionary& dict);
@@ -193,8 +173,6 @@ public:
 
         inline void operator+=(const sutherlandTransport&);
 
-        inline void operator-=(const sutherlandTransport&);
-
         inline void operator*=(const scalar);
 
 
@@ -206,21 +184,9 @@ public:
             const sutherlandTransport&
         );
 
-        friend sutherlandTransport operator- <Thermo>
-        (
-            const sutherlandTransport&,
-            const sutherlandTransport&
-        );
-
         friend sutherlandTransport operator* <Thermo>
         (
             const scalar,
-            const sutherlandTransport&
-        );
-
-        friend sutherlandTransport operator== <Thermo>
-        (
-            const sutherlandTransport&,
             const sutherlandTransport&
         );
 

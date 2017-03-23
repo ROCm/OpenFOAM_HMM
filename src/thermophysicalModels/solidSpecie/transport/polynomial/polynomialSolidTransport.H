@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,23 +83,9 @@ inline polynomialSolidTransport<Thermo, PolySize> operator+
 );
 
 template<class Thermo, int PolySize>
-inline polynomialSolidTransport<Thermo, PolySize> operator-
-(
-    const polynomialSolidTransport<Thermo, PolySize>&,
-    const polynomialSolidTransport<Thermo, PolySize>&
-);
-
-template<class Thermo, int PolySize>
 inline polynomialSolidTransport<Thermo, PolySize> operator*
 (
     const scalar,
-    const polynomialSolidTransport<Thermo, PolySize>&
-);
-
-template<class Thermo, int PolySize>
-inline polynomialSolidTransport<Thermo, PolySize> operator==
-(
-    const polynomialSolidTransport<Thermo, PolySize>&,
     const polynomialSolidTransport<Thermo, PolySize>&
 );
 
@@ -141,9 +127,6 @@ public:
 
     // Constructors
 
-        //- Construct copy
-        inline polynomialSolidTransport(const polynomialSolidTransport&);
-
         //- Construct as named copy
         inline polynomialSolidTransport
         (
@@ -151,17 +134,11 @@ public:
             const polynomialSolidTransport&
         );
 
-        //- Construct from Istream
-        polynomialSolidTransport(Istream& is);
-
         //- Construct from dictionary
         polynomialSolidTransport(const dictionary& dict);
 
         //- Construct and return a clone
         inline autoPtr<polynomialSolidTransport> clone() const;
-
-        // Selector from Istream
-        inline static autoPtr<polynomialSolidTransport> New(Istream& is);
 
         // Selector from dictionary
         inline static autoPtr<polynomialSolidTransport> New
@@ -202,7 +179,6 @@ public:
 
         inline void operator=(const polynomialSolidTransport&);
         inline void operator+=(const polynomialSolidTransport&);
-        inline void operator-=(const polynomialSolidTransport&);
         inline void operator*=(const scalar);
 
 
@@ -214,21 +190,9 @@ public:
             const polynomialSolidTransport&
         );
 
-        friend polynomialSolidTransport operator- <Thermo, PolySize>
-        (
-            const polynomialSolidTransport&,
-            const polynomialSolidTransport&
-        );
-
         friend polynomialSolidTransport operator* <Thermo, PolySize>
         (
             const scalar,
-            const polynomialSolidTransport&
-        );
-
-        friend polynomialSolidTransport operator== <Thermo, PolySize>
-        (
-            const polynomialSolidTransport&,
             const polynomialSolidTransport&
         );
 
