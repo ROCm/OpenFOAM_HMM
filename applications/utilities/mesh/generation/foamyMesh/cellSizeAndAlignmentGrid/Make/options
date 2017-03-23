@@ -29,7 +29,7 @@ EXE_LIBS =  \
     -lfiniteVolume    \
     -lmeshTools \
     -ldecompositionMethods \
-    -L$(FOAM_LIBBIN)/dummy -lptscotchDecomp \
+    -L$(FOAM_LIBBIN)/dummy -lscotchDecomp -lptscotchDecomp \
     -ledgeMesh \
     -ltriSurface \
     -ldynamicMesh \

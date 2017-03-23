@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -35,83 +35,59 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(triSurfaceMesh, 0);
-addToRunTimeSelectionTable(searchableSurface, triSurfaceMesh, dict);
-
-word triSurfaceMesh::meshSubDir = "triSurface";
-
+    defineTypeNameAndDebug(triSurfaceMesh, 0);
+    addToRunTimeSelectionTable(searchableSurface, triSurfaceMesh, dict);
+    word triSurfaceMesh::meshSubDir = "triSurface";
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-//// Special version of Time::findInstance that does not check headerOk
-//// to search for instances of raw files
-//Foam::word Foam::triSurfaceMesh::findRawInstance
-//(
-//    const Time& runTime,
-//    const fileName& dir,
-//    const word& name
-//)
-//{
-//    // Check current time first
-//    if (isFile(runTime.path()/runTime.timeName()/dir/name))
-//    {
-//        return runTime.timeName();
-//    }
-//    instantList ts = runTime.times();
-//    label instanceI;
-//
-//    for (instanceI = ts.size()-1; instanceI >= 0; --instanceI)
-//    {
-//        if (ts[instanceI].value() <= runTime.timeOutputValue())
-//        {
-//            break;
-//        }
-//    }
-//
-//    // continue searching from here
-//    for (; instanceI >= 0; --instanceI)
-//    {
-//        if (isFile(runTime.path()/ts[instanceI].name()/dir/name))
-//        {
-//            return ts[instanceI].name();
-//        }
-//    }
-//
-//
-//    // not in any of the time directories, try constant
-//
-//    // Note. This needs to be a hard-coded constant, rather than the
-//    // constant function of the time, because the latter points to
-//    // the case constant directory in parallel cases
-//
-//    if (isFile(runTime.path()/runTime.constant()/dir/name))
-//    {
-//        return runTime.constant();
-//    }
-//
-//    FatalErrorInFunction
-//        << "Cannot find file \"" << name << "\" in directory "
-//        << runTime.constant()/dir
-//        << exit(FatalError);
-//
-//    return runTime.constant();
-//}
-
-
-const Foam::fileName& Foam::triSurfaceMesh::checkFile
-(
-    const fileName& fName,
-    const fileName& objectName
-)
+Foam::fileName Foam::triSurfaceMesh::checkFile(const IOobject& io)
 {
+    const fileName fName(io.filePath());
     if (fName.empty())
     {
         FatalErrorInFunction
             << "Cannot find triSurfaceMesh starting from "
-            << objectName << exit(FatalError);
+            << io.objectPath() << exit(FatalError);
     }
+
+    return fName;
+}
+
+
+Foam::fileName Foam::triSurfaceMesh::checkFile
+(
+    const IOobject& io,
+    const dictionary& dict
+)
+{
+    fileName fName;
+    if (dict.readIfPresent("file", fName, false, false))
+    {
+        fName.expand();
+        if (!fName.isAbsolute())
+        {
+            fName = io.objectPath().path()/fName;
+        }
+        if (!exists(fName))
+        {
+            FatalErrorInFunction
+                << "Cannot find triSurfaceMesh at " << fName
+                << exit(FatalError);
+        }
+    }
+    else
+    {
+        fName = io.filePath();
+        if (!exists(fName))
+        {
+            FatalErrorInFunction
+                << "Cannot find triSurfaceMesh starting from "
+                << io.objectPath() << exit(FatalError);
+        }
+    }
+
     return fName;
 }
 
@@ -227,7 +203,7 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const triSurface& s)
         (
             io.name(),
             io.instance(),
-            io.local(),  //"triSurfaceFields",
+            io.local(),
             io.db(),
             io.readOpt(),
             io.writeOpt(),
@@ -235,7 +211,7 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const triSurface& s)
         )
     ),
     triSurface(s),
-    triSurfaceRegionSearch(static_cast<const triSurface&>(*this)),
+    triSurfaceRegionSearch(s),
     minQuality_(-1),
     surfaceClosed_(-1),
     outsideVolType_(volumeType::UNKNOWN)
@@ -250,43 +226,21 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
 :
     // Find instance for triSurfaceMesh
     searchableSurface(io),
-    //(
-    //    IOobject
-    //    (
-    //        io.name(),
-    //        io.time().findInstance(io.local(), word::null),
-    //        io.local(),
-    //        io.db(),
-    //        io.readOpt(),
-    //        io.writeOpt(),
-    //        io.registerObject()
-    //    )
-    //),
     // Reused found instance in objectRegistry
     objectRegistry
     (
         IOobject
         (
             io.name(),
-            static_cast<const searchableSurface&>(*this).instance(),
-            io.local(), //"triSurfaceFields",
+            searchableSurface::instance(),
+            io.local(),
             io.db(),
             io.readOpt(),
             io.writeOpt(),
             false       // searchableSurface already registered under name
         )
     ),
-    triSurface
-    (
-        checkFile
-        (
-            typeFilePath<searchableSurface>
-            (
-                static_cast<const searchableSurface&>(*this)
-            ),
-            searchableSurface::objectPath()
-        )
-    ),
+    triSurface(checkFile(static_cast<const searchableSurface&>(*this))),
     triSurfaceRegionSearch(static_cast<const triSurface&>(*this)),
     minQuality_(-1),
     surfaceClosed_(-1),
@@ -305,51 +259,32 @@ Foam::triSurfaceMesh::triSurfaceMesh
 )
 :
     searchableSurface(io),
-    //(
-    //    IOobject
-    //    (
-    //        io.name(),
-    //        io.time().findInstance(io.local(), word::null),
-    //        io.local(),
-    //        io.db(),
-    //        io.readOpt(),
-    //        io.writeOpt(),
-    //        io.registerObject()
-    //    )
-    //),
     // Reused found instance in objectRegistry
     objectRegistry
     (
         IOobject
         (
             io.name(),
-            static_cast<const searchableSurface&>(*this).instance(),
-            io.local(), //"triSurfaceFields",
+            searchableSurface::instance(),
+            io.local(),
             io.db(),
             io.readOpt(),
             io.writeOpt(),
             false       // searchableSurface already registered under name
         )
     ),
-    triSurface
-    (
-        checkFile
-        (
-            typeFilePath<searchableSurface>
-            (
-                static_cast<const searchableSurface&>(*this)
-            ),
-            searchableSurface::objectPath()
-        )
-    ),
+    triSurface(checkFile(static_cast<const searchableSurface&>(*this), dict)),
     triSurfaceRegionSearch(static_cast<const triSurface&>(*this), dict),
     minQuality_(-1),
     surfaceClosed_(-1),
     outsideVolType_(volumeType::UNKNOWN)
 {
+    // Reading from supplied file name instead of objectPath/filePath
+    dict.readIfPresent("file", fName_, false, false);
+
     scalar scaleFactor = 0;
 
-    // allow rescaling of the surface points
+    // Allow rescaling of the surface points
     // eg, CAD geometries are often done in millimeters
     if (dict.readIfPresent("scale", scaleFactor) && scaleFactor > 0)
     {
@@ -495,7 +430,7 @@ Foam::triSurfaceMesh::edgeTree() const
             label nPoints;
             PatchTools::calcBounds
             (
-                static_cast<const triSurface&>(*this),
+                *this,
                 bb,
                 nPoints
             );
@@ -526,7 +461,7 @@ Foam::triSurfaceMesh::edgeTree() const
                     bEdges          // selected edges
                 ),
                 bb,                 // bb
-                maxTreeDepth(),      // maxLevel
+                maxTreeDepth(),     // maxLevel
                 10,                 // leafsize
                 3.0                 // duplicity
             )
@@ -552,7 +487,6 @@ const Foam::wordList& Foam::triSurfaceMesh::regions() const
 }
 
 
-// Find out if surface is closed.
 bool Foam::triSurfaceMesh::hasVolumeType() const
 {
     if (surfaceClosed_ == -1)
@@ -660,7 +594,7 @@ void Foam::triSurfaceMesh::getNormal
     vectorField& normal
 ) const
 {
-    const triSurface& s = static_cast<const triSurface&>(*this);
+    const triSurface& s = *this;
     const pointField& pts = s.points();
 
     normal.setSize(info.size());
@@ -865,7 +799,24 @@ bool Foam::triSurfaceMesh::writeObject
             runTime.timeName();
     }
 
-    fileName fullPath(searchableSurface::objectPath());
+    fileName fullPath;
+    if (fName_.size())
+    {
+        // Override file name
+
+        fullPath = fName_;
+
+        fullPath.expand();
+        if (!fullPath.isAbsolute())
+        {
+            // Add directory from regIOobject
+            fullPath = searchableSurface::objectPath().path()/fullPath;
+        }
+    }
+    else
+    {
+        fullPath = searchableSurface::objectPath();
+    }
 
     if (!mkDir(fullPath.path()))
     {

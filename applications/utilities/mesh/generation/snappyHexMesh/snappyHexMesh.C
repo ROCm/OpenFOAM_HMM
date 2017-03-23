@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -710,7 +710,7 @@ int main(int argc, char *argv[])
     Foam::argList::addOption
     (
         "outFile",
-        "fileName",
+        "file",
         "name of the file to save the simplified surface to"
     );
     #include "addProfilingOption.H"
