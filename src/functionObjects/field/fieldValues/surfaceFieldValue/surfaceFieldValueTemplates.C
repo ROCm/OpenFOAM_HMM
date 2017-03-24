@@ -191,7 +191,7 @@ processSameTypeValues
             }
             else
             {
-                const scalarField factor = weightingFactor(weightField);
+                const scalarField factor(weightingFactor(weightField));
 
                 result = gSum(factor*values)/(gSum(factor) + ROOTVSMALL);
             }
@@ -206,7 +206,7 @@ processSameTypeValues
         }
         case opWeightedAreaAverage:
         {
-            const scalarField factor = weightingFactor(weightField, Sf);
+            const scalarField factor(weightingFactor(weightField, Sf));
 
             result = gSum(factor*values)/gSum(factor + ROOTVSMALL);
             break;
@@ -220,7 +220,7 @@ processSameTypeValues
         }
         case opWeightedAreaIntegrate:
         {
-            const scalarField factor = weightingFactor(weightField, Sf);
+            const scalarField factor(weightingFactor(weightField, Sf));
 
             result = gSum(factor*values);
             break;

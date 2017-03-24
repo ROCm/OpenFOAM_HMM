@@ -986,11 +986,14 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
     {
         if (validField<scalar>(weightFieldName_))
         {
-            scalarField weightField = getFieldValues<scalar>
+            scalarField weightField
             (
-                weightFieldName_,
-                true,
-                orientWeightField_
+                getFieldValues<scalar>
+                (
+                    weightFieldName_,
+                    true,
+                    orientWeightField_
+                )
             );
 
             // Process the fields
@@ -998,11 +1001,14 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
         }
         else if (validField<vector>(weightFieldName_))
         {
-            vectorField weightField = getFieldValues<vector>
+            vectorField weightField
             (
-                weightFieldName_,
-                true,
-                orientWeightField_
+                getFieldValues<vector>
+                (
+                    weightFieldName_,
+                    true,
+                    orientWeightField_
+                )
             );
 
             // Process the fields
