@@ -196,10 +196,12 @@ void Foam::functionObjects::fieldMinMax::calcMinMaxFields
 
                 label mini = findMin(minVs);
                 scalar minValue = minVs[mini];
+                const label minCell = minCells[mini];
                 const vector& minC = minCs[mini];
 
                 label maxi = findMax(maxVs);
                 scalar maxValue = maxVs[maxi];
+                const label maxCell = minCells[maxi];
                 const vector& maxC = maxCs[maxi];
 
                 output

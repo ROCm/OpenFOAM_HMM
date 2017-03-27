@@ -93,10 +93,15 @@ class triSurfaceMesh
     // Private Member Functions
 
         //- Return fileName to load IOobject from
-        static fileName checkFile(const IOobject& io);
+        static fileName checkFile(const IOobject& io, const bool isGlobal);
 
         //- Return fileName to load IOobject from. Optional override of fileName
-        static fileName checkFile(const IOobject&, const dictionary&);
+        static fileName checkFile
+        (
+            const IOobject&,
+            const dictionary&,
+            const bool isGlobal
+        );
 
         //- Helper function for isSurfaceClosed
         static bool addFaceToEdge
@@ -141,7 +146,7 @@ public:
         //- Construct from triSurface
         triSurfaceMesh(const IOobject&, const triSurface&);
 
-        //- Construct read.
+        //- Construct read
         triSurfaceMesh(const IOobject& io);
 
         //- Construct from IO and dictionary (used by searchableSurface).
@@ -151,6 +156,19 @@ public:
             const IOobject& io,
             const dictionary& dict
         );
+
+
+        // Special constructors for use by distributedTriSurface. File search
+        // status (local/global) supplied.
+
+            triSurfaceMesh(const IOobject& io, const bool isGlobal);
+
+            triSurfaceMesh
+            (
+                const IOobject& io,
+                const dictionary& dict,
+                const bool isGlobal
+            );
 
 
     //- Destructor
@@ -285,7 +303,28 @@ public:
                 IOstream::versionNumber ver,
                 IOstream::compressionType cmp
             ) const;
+
+            //- Is object global
+            virtual bool global() const
+            {
+                return true;
+            }
+
+            //- Return complete path + object name if the file exists
+            //  either in the case/processor or case otherwise null
+            virtual fileName filePath() const
+            {
+                return searchableSurface::globalFilePath();
+            }
 };
+
+
+//- Template function for obtaining global status
+template<>
+inline bool typeGlobal<triSurfaceMesh>()
+{
+    return true;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

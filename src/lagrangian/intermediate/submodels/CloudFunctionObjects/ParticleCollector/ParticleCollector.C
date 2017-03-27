@@ -379,6 +379,7 @@ void Foam::ParticleCollector<CloudType>::collectParcelConcentricCircles
                     scalar(nSector_)*theta/constant::mathematical::twoPi
                 );
         }
+    }
 
     if (secI != -1)
     {

@@ -42,9 +42,18 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::fileName Foam::triSurfaceMesh::checkFile(const IOobject& io)
+Foam::fileName Foam::triSurfaceMesh::checkFile
+(
+    const IOobject& io,
+    const bool isGlobal
+)
 {
-    const fileName fName(io.filePath());
+    const fileName fName
+    (
+        isGlobal
+      ? io.globalFilePath()
+      : io.localFilePath()
+    );
     if (fName.empty())
     {
         FatalErrorInFunction
@@ -59,7 +68,8 @@ Foam::fileName Foam::triSurfaceMesh::checkFile(const IOobject& io)
 Foam::fileName Foam::triSurfaceMesh::checkFile
 (
     const IOobject& io,
-    const dictionary& dict
+    const dictionary& dict,
+    const bool isGlobal
 )
 {
     fileName fName;
@@ -79,7 +89,8 @@ Foam::fileName Foam::triSurfaceMesh::checkFile
     }
     else
     {
-        fName = io.filePath();
+        fName = (isGlobal ? io.globalFilePath() : io.localFilePath());
+
         if (!exists(fName))
         {
             FatalErrorInFunction
@@ -240,7 +251,7 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
             false       // searchableSurface already registered under name
         )
     ),
-    triSurface(checkFile(static_cast<const searchableSurface&>(*this))),
+    triSurface(checkFile(static_cast<const searchableSurface&>(*this), true)),
     triSurfaceRegionSearch(static_cast<const triSurface&>(*this)),
     minQuality_(-1),
     surfaceClosed_(-1),
@@ -273,7 +284,10 @@ Foam::triSurfaceMesh::triSurfaceMesh
             false       // searchableSurface already registered under name
         )
     ),
-    triSurface(checkFile(static_cast<const searchableSurface&>(*this), dict)),
+    triSurface
+    (
+        checkFile(static_cast<const searchableSurface&>(*this), dict, true)
+    ),
     triSurfaceRegionSearch(static_cast<const triSurface&>(*this), dict),
     minQuality_(-1),
     surfaceClosed_(-1),
@@ -306,6 +320,97 @@ Foam::triSurfaceMesh::triSurfaceMesh
     }
 }
 
+
+Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const bool isGlobal)
+:
+    // Find instance for triSurfaceMesh
+    searchableSurface(io),
+    // Reused found instance in objectRegistry
+    objectRegistry
+    (
+        IOobject
+        (
+            io.name(),
+            searchableSurface::instance(),
+            io.local(),
+            io.db(),
+            io.readOpt(),
+            io.writeOpt(),
+            false       // searchableSurface already registered under name
+        )
+    ),
+    triSurface
+    (
+        checkFile(static_cast<const searchableSurface&>(*this), isGlobal)
+    ),
+    triSurfaceRegionSearch(static_cast<const triSurface&>(*this)),
+    minQuality_(-1),
+    surfaceClosed_(-1),
+    outsideVolType_(volumeType::UNKNOWN)
+{
+    const pointField& pts = triSurface::points();
+
+    bounds() = boundBox(pts, isGlobal);
+}
+
+
+Foam::triSurfaceMesh::triSurfaceMesh
+(
+    const IOobject& io,
+    const dictionary& dict,
+    const bool isGlobal
+)
+:
+    searchableSurface(io),
+    // Reused found instance in objectRegistry
+    objectRegistry
+    (
+        IOobject
+        (
+            io.name(),
+            searchableSurface::instance(),
+            io.local(),
+            io.db(),
+            io.readOpt(),
+            io.writeOpt(),
+            false       // searchableSurface already registered under name
+        )
+    ),
+    triSurface
+    (
+        checkFile(static_cast<const searchableSurface&>(*this), dict, isGlobal)
+    ),
+    triSurfaceRegionSearch(static_cast<const triSurface&>(*this), dict),
+    minQuality_(-1),
+    surfaceClosed_(-1),
+    outsideVolType_(volumeType::UNKNOWN)
+{
+    // Reading from supplied file name instead of objectPath/filePath
+    dict.readIfPresent("file", fName_, false, false);
+
+    scalar scaleFactor = 0;
+
+    // Allow rescaling of the surface points
+    // eg, CAD geometries are often done in millimeters
+    if (dict.readIfPresent("scale", scaleFactor) && scaleFactor > 0)
+    {
+        Info<< searchableSurface::name() << " : using scale " << scaleFactor
+            << endl;
+        triSurface::scalePoints(scaleFactor);
+    }
+
+    const pointField& pts = triSurface::points();
+
+    bounds() = boundBox(pts, isGlobal);
+
+    // Have optional minimum quality for normal calculation
+    if (dict.readIfPresent("minQuality", minQuality_) && minQuality_ > 0)
+    {
+        Info<< searchableSurface::name()
+            << " : ignoring triangles with quality < "
+            << minQuality_ << " for normals calculation." << endl;
+    }
+}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 

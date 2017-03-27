@@ -81,6 +81,7 @@ wmake $targetType rigidBodyDynamics
 wmake $targetType rigidBodyMeshMotion
 
 # Needs access to Turbulence
-wmake $targetType thermophysicalModels/properties/liquidPropertiesFvPatchFields
+
+wmake $targetType thermophysicalModels/thermophysicalPropertiesFvPatchFields/liquidProperties
 
 #------------------------------------------------------------------------------
