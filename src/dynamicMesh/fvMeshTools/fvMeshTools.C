@@ -477,14 +477,14 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
             slave++
         )
         {
-            OPstream toSlave(Pstream::scheduled, slave);
+            OPstream toSlave(Pstream::commsTypes::scheduled, slave);
             toSlave << patchEntries;
         }
     }
     else
     {
         // Receive patches
-        IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
+        IPstream fromMaster(Pstream::commsTypes::scheduled, Pstream::masterNo());
         fromMaster >> patchEntries;
     }
 

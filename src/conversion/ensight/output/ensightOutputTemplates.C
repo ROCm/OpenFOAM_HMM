@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +63,7 @@ void Foam::ensightOutput::writeFieldContent
 
                 for (int slave=1; slave<Pstream::nProcs(); ++slave)
                 {
-                    IPstream fromSlave(Pstream::scheduled, slave);
+                    IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
                     scalarField received(fromSlave);
                     os.writeList(received);
                 }
@@ -75,7 +75,12 @@ void Foam::ensightOutput::writeFieldContent
             {
                 const label cmpt = ensightPTraits<Type>::componentOrder[d];
 
-                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
+                OPstream toMaster
+                (
+                    Pstream::commsTypes::scheduled,
+                    Pstream::masterNo()
+                );
+
                 toMaster
                     << fld.component(cmpt);
             }

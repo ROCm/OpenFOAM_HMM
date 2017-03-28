@@ -580,17 +580,17 @@ int main(int argc, char *argv[])
                 // Construct the dimensioned fields
                 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 PtrList<DimensionedField<scalar, volMesh>> dimScalarFields;
-                readFields(mesh, objects, dimScalarFields, false);
+                readFields(mesh, objects, dimScalarFields);
                 PtrList<DimensionedField<vector, volMesh>> dimVectorFields;
-                readFields(mesh, objects, dimVectorFields, false);
+                readFields(mesh, objects, dimVectorFields);
                 PtrList<DimensionedField<sphericalTensor, volMesh>>
                     dimSphericalTensorFields;
-                readFields(mesh, objects, dimSphericalTensorFields, false);
+                readFields(mesh, objects, dimSphericalTensorFields);
                 PtrList<DimensionedField<symmTensor, volMesh>>
                     dimSymmTensorFields;
-                readFields(mesh, objects, dimSymmTensorFields, false);
+                readFields(mesh, objects, dimSymmTensorFields);
                 PtrList<DimensionedField<tensor, volMesh>> dimTensorFields;
-                readFields(mesh, objects, dimTensorFields, false);
+                readFields(mesh, objects, dimTensorFields);
 
 
                 // Construct the surface fields

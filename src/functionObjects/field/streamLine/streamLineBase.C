@@ -644,7 +644,7 @@ bool Foam::functionObjects::streamLineBase::write()
         allTracks_.shrink();
         mapDistributeBase::distribute
         (
-            Pstream::scheduled,
+            Pstream::commsTypes::scheduled,
             distMap.schedule(),
             distMap.constructSize(),
             distMap.subMap(),
@@ -662,7 +662,7 @@ bool Foam::functionObjects::streamLineBase::write()
             allScalars_[scalari].shrink();
             mapDistributeBase::distribute
             (
-                Pstream::scheduled,
+                Pstream::commsTypes::scheduled,
                 distMap.schedule(),
                 distMap.constructSize(),
                 distMap.subMap(),
@@ -680,7 +680,7 @@ bool Foam::functionObjects::streamLineBase::write()
             allVectors_[vectori].shrink();
             mapDistributeBase::distribute
             (
-                Pstream::scheduled,
+                Pstream::commsTypes::scheduled,
                 distMap.schedule(),
                 distMap.constructSize(),
                 distMap.subMap(),

@@ -90,9 +90,5 @@
     }
 
     rho = thermo.rho();
-
-    thermo.rho() = max(thermo.rho(), rhoMin);
-    thermo.rho() = min(thermo.rho(), rhoMax);
-
     rho.relax();
 }

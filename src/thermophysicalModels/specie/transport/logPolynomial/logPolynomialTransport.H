@@ -24,6 +24,9 @@ License
 Class
     Foam::logPolynomialTransport
 
+Group
+    grpSpecieTransport
+
 Description
     Transport package using polynomial functions of \c ln(T) for \c mu and
     \c kappa:
