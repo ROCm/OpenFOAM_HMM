@@ -4,10 +4,13 @@ sinclude $(RULES)/mplib$(WM_MPLIB)
 EXE_INC = \
     /* -DFULLDEBUG -g -O0 */ \
     $(PFLAGS) $(PINC) \
+    ${c++LESSWARN} \
     -I$(FOAM_SRC)/renumber/renumberMethods/lnInclude \
     -I$(ZOLTAN_ARCH_PATH)/include/ \
     -I$(LIB_SRC)/meshTools/lnInclude
 
 LIB_LIBS = \
-    /* -L$(ZOLTAN_ARCH_PATH)/lib -lzoltan */ \
+    -L$(ZOLTAN_ARCH_PATH)/lib \
+    -L$(ZOLTAN_ARCH_PATH)/lib$(WM_COMPILER_LIB_ARCH) \
+    -lzoltan \
     -lmeshTools
