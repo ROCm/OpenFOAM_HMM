@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
     #include "createControl.H"
     #include "createTimeControls.H"
     #include "createFields.H"
+    #include "createAlphaFluxes.H"
     #include "createFvOptions.H"
 
     volScalarField& p = mixture.p();
@@ -112,7 +113,6 @@ int main(int argc, char *argv[])
             solve(fvm::ddt(rho) + fvc::div(rhoPhi));
 
             #include "UEqn.H"
-            volScalarField divU(fvc::div(fvc::absolute(phi, U)));
             #include "TEqn.H"
 
             // --- Pressure corrector loop

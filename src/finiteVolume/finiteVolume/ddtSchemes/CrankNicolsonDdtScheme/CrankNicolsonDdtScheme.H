@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -201,7 +201,14 @@ public:
         :
             ddtScheme<Type>(mesh),
             ocCoeff_(1.0)
-        {}
+        {
+            // Ensure the old-old-time cell volumes are available
+            // for moving meshes
+            if (mesh.moving())
+            {
+                mesh.V00();
+            }
+        }
 
         //- Construct from mesh and Istream
         CrankNicolsonDdtScheme(const fvMesh& mesh, Istream& is)
@@ -217,6 +224,13 @@ public:
                 )   << "Off-centreing coefficient = " << ocCoeff_
                     << " should be >= 0 and <= 1"
                     << exit(FatalIOError);
+            }
+
+            // Ensure the old-old-time cell volumes are available
+            // for moving meshes
+            if (mesh.moving())
+            {
+                mesh.V00();
             }
         }
 

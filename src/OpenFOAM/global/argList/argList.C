@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -764,7 +764,7 @@ void Foam::argList::parse
                 {
                     options_.set("case", roots[slave-1]/globalCase_);
 
-                    OPstream toSlave(Pstream::scheduled, slave);
+                    OPstream toSlave(Pstream::commsTypes::scheduled, slave);
                     toSlave << args_ << options_;
                 }
                 options_.erase("case");
@@ -811,7 +811,7 @@ void Foam::argList::parse
                     slave++
                 )
                 {
-                    OPstream toSlave(Pstream::scheduled, slave);
+                    OPstream toSlave(Pstream::commsTypes::scheduled, slave);
                     toSlave << args_ << options_;
                 }
             }
@@ -819,7 +819,11 @@ void Foam::argList::parse
         else
         {
             // Collect the master's argument list
-            IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
+            IPstream fromMaster
+            (
+                Pstream::commsTypes::scheduled,
+                Pstream::masterNo()
+            );
             fromMaster >> args_ >> options_;
 
             // Establish rootPath_/globalCase_/case_ for slave
@@ -853,7 +857,7 @@ void Foam::argList::parse
                 slave++
             )
             {
-                IPstream fromSlave(Pstream::scheduled, slave);
+                IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
 
                 string slaveBuild;
                 string slaveMachine;
@@ -876,7 +880,11 @@ void Foam::argList::parse
         }
         else
         {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
+            OPstream toMaster
+            (
+                Pstream::commsTypes::scheduled,
+                Pstream::masterNo()
+            );
             toMaster << string(Foam::FOAMbuild) << hostName() << pid();
         }
     }

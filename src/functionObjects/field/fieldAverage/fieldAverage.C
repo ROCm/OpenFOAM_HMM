@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -67,6 +67,16 @@ void Foam::functionObjects::fieldAverage::resetFields()
 
 void Foam::functionObjects::fieldAverage::initialize()
 {
+    if (!totalIter_.size())
+    {
+        totalIter_.setSize(faItems_.size(), 1);
+    }
+
+    if (!totalTime_.size())
+    {
+        totalTime_.setSize(faItems_.size(), obr_.time().deltaTValue());
+    }
+
     resetFields();
 
     Log << type() << " " << name() << ":" << nl;
@@ -113,10 +123,7 @@ void Foam::functionObjects::fieldAverage::restart()
         << nl << endl;
 
     totalIter_.clear();
-    totalIter_.setSize(faItems_.size(), 1);
-
     totalTime_.clear();
-    totalTime_.setSize(faItems_.size(), obr().time().deltaTValue());
 
     initialize();
 }

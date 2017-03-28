@@ -171,7 +171,7 @@ void Foam::meshRefinement::collectAndPrint
         points,
         allPoints,
         UPstream::msgType(),
-        Pstream::blocking
+        Pstream::commsTypes::blocking
     );
 
     List<T> allData;
@@ -182,7 +182,7 @@ void Foam::meshRefinement::collectAndPrint
         data,
         allData,
         UPstream::msgType(),
-        Pstream::blocking
+        Pstream::commsTypes::blocking
     );
 
 

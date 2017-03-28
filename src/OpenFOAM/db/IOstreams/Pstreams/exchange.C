@@ -54,7 +54,7 @@ void Foam::Pstream::exchangeContainer
         {
             UIPstream::read
             (
-                UPstream::nonBlocking,
+                UPstream::commsTypes::nonBlocking,
                 proci,
                 reinterpret_cast<char*>(recvBufs[proci].begin()),
                 recvSizes[proci]*sizeof(T),
@@ -76,7 +76,7 @@ void Foam::Pstream::exchangeContainer
             (
                !UOPstream::write
                 (
-                    UPstream::nonBlocking,
+                    UPstream::commsTypes::nonBlocking,
                     proci,
                     reinterpret_cast<const char*>(sendBufs[proci].begin()),
                     sendBufs[proci].size()*sizeof(T),
@@ -128,7 +128,7 @@ void Foam::Pstream::exchangeBuf
         {
             UIPstream::read
             (
-                UPstream::nonBlocking,
+                UPstream::commsTypes::nonBlocking,
                 proci,
                 recvBufs[proci],
                 recvSizes[proci]*sizeof(T),
@@ -150,7 +150,7 @@ void Foam::Pstream::exchangeBuf
             (
                !UOPstream::write
                 (
-                    UPstream::nonBlocking,
+                    UPstream::commsTypes::nonBlocking,
                     proci,
                     sendBufs[proci],
                     sendSizes[proci]*sizeof(T),
