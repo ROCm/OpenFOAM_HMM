@@ -62,6 +62,7 @@ doc/Doxygen/DTAGS
 /etc/prefs.sh
 /etc/config.csh/prefs.csh
 /etc/config.sh/prefs.sh
+/wmake/rules/General/mplibUSER*
 
 # Source packages - anywhere
 *.tar.bz2

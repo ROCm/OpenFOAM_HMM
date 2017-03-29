@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -25,11 +25,13 @@
 #     etc/config.csh/mpi
 #
 # Description
-#     Startup file for communications library (MPI) for OpenFOAM
+#     Setup file for communications library (MPI) for OpenFOAM
 #     Sourced from OpenFOAM-<VERSION>/etc/cshrc
 #
+#     For USERMPI, the user is responsible for supplying an appropriate
+#     wmake/rules/General/mplibUSERMPI file and managing all settings
+#
 #------------------------------------------------------------------------------
-
 unsetenv MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
 
 switch ("$WM_MPLIB")
@@ -48,8 +50,7 @@ case SYSTEMOPENMPI:
 
 case OPENMPI:
     setenv FOAM_MPI openmpi-2.0.2
-    # Optional configuration tweaks:
-    _foamEtc config.csh/openmpi
+    _foamEtc config.csh/openmpi                 # <- Adjustments (optional)
 
     setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
@@ -67,8 +68,15 @@ case OPENMPI:
     _foamAddMan     $MPI_ARCH_PATH/share/man
     breaksw
 
+case USERMPI:
+    # Use an arbitrary, user-specified mpi implementation
+    setenv FOAM_MPI mpi-user
+    _foamEtc config.csh/mpi-user                # <- Adjustments
+    breaksw
+
 case SYSTEMMPI:
     setenv FOAM_MPI mpi-system
+    _foamEtc config.csh/mpi-system              # <- Adjustments (optional)
 
     if ( ! $?MPI_ROOT ) then
         echo

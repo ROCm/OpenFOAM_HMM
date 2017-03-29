@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -25,11 +25,13 @@
 #     etc/config.sh/mpi
 #
 # Description
-#     Startup file for communications library (MPI) for OpenFOAM
+#     Setup file for communications library (MPI) for OpenFOAM
 #     Sourced from OpenFOAM-<VERSION>/etc/bashrc
 #
+#     For USERMPI, the user is responsible for supplying an appropriate
+#     wmake/rules/General/mplibUSERMPI file and managing all settings
+#
 #------------------------------------------------------------------------------
-
 unset MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
 
 case "$WM_MPLIB" in
@@ -54,8 +56,7 @@ SYSTEMOPENMPI)
 
 OPENMPI)
     export FOAM_MPI=openmpi-2.0.2
-    # Optional configuration tweaks:
-    _foamEtc config.sh/openmpi
+    _foamEtc config.sh/openmpi                  # <- Adjustments (optional)
 
     export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
@@ -78,8 +79,15 @@ OPENMPI)
     fi
     ;;
 
+USERMPI)
+    # Use an arbitrary, user-specified mpi implementation
+    export FOAM_MPI=mpi-user
+    _foamEtc config.sh/mpi-user                 # <- Adjustments
+    ;;
+
 SYSTEMMPI)
     export FOAM_MPI=mpi-system
+    _foamEtc config.sh/mpi-system               # <- Adjustments (optional)
 
     if [ -z "$MPI_ROOT" ]
     then
