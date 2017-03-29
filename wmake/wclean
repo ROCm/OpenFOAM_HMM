@@ -161,7 +161,7 @@ then
 
     # Second pass: clean up object directories with WM_PROJECT_DIR that don't
     # have respective source code folders, along with the respective binaries
-    if [ "$(expandPath $PWD)" = "$WM_PROJECT_DIR" ]
+    if [ "$(expandPath $PWD)" = "$(expandPath $WM_PROJECT_DIR)" ]
     then
         objectsDir=$(findObjectDir $PWD 2>/dev/null) || exit 1 # Fatal
 

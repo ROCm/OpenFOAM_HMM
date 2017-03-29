@@ -22,8 +22,8 @@ echo "  $WM_COMPILER $WM_COMPILER_TYPE compiler"
 echo "  ${WM_OPTIONS}, with ${WM_MPLIB} ${FOAM_MPI}"
 echo
 
-# Compile wmake support applications
-(cd wmake/src && make)
+# Compile wmake tools
+(cd "${WM_DIR:-wmake}/src" && make)
 
 # Compile ThirdParty libraries and applications
 if [ -d "$WM_THIRD_PARTY_DIR" ]
