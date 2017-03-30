@@ -111,6 +111,9 @@ void Foam::waveModel::initialiseGeometry()
         }
     }
 
+    // Set minimum z reference level
+    zMin0_ = gMin(zMin_);
+
     // Local paddle-to-face addressing
     faceToPaddle_.setSize(patch_.size(), -1);
     forAll(faceToPaddle_, facei)
@@ -162,18 +165,21 @@ void Foam::waveModel::setAlpha(const scalarField& level)
         const label paddlei = faceToPaddle_[facei];
         const scalar paddleCalc = level[paddlei];
 
-    	if (zMax_[facei] < paddleCalc)
+        const scalar zMin0 = zMin_[facei] - zMin0_;
+        const scalar zMax0 = zMax_[facei] - zMin0_;
+
+    	if (zMax0 < paddleCalc)
     	{
     	    alpha_[facei] = 1.0;
     	}
-    	else if (zMin_[facei] > paddleCalc)
+    	else if (zMin0 > paddleCalc)
     	{
     	    alpha_[facei] = 0.0;
     	}
     	else
     	{
-    	    scalar dz = paddleCalc - zMin_[facei];
-    	    alpha_[facei] = dz/zSpan_;
+    	    scalar dz = paddleCalc - zMin0;
+    	    alpha_[facei] = dz/(zMax0 - zMin0);
     	}
     }
 }
@@ -190,15 +196,15 @@ void Foam::waveModel::setPaddlePropeties
     const label paddlei = faceToPaddle_[facei];
     const scalar paddleCalc = level[paddlei];
     const scalar paddleHeight = min(paddleCalc, waterDepthRef_);
-    const scalar zMin = zMin_[facei];
-    const scalar zMax = zMax_[facei];
+    const scalar zMin = zMin_[facei] - zMin0_;
+    const scalar zMax = zMax_[facei] - zMin0_;
 
     fraction = 1;
     z = 0;
 
     if (zMax < paddleHeight)
     {
-        z = z_[facei];
+        z = z_[facei] - zMin0_;
     }
     else if (zMin > paddleCalc)
     {
@@ -211,8 +217,8 @@ void Foam::waveModel::setPaddlePropeties
             if ((zMax > paddleCalc) && (zMin < paddleCalc))
             {
                 scalar dz = paddleCalc - zMin;
-	            fraction = dz/zSpan_;
-                z = z_[facei];
+	            fraction = dz/(zMax - zMin);
+                z = z_[facei] - zMin0_;
             }
         }
 	    else
@@ -224,7 +230,7 @@ void Foam::waveModel::setPaddlePropeties
             else if ((zMax > paddleCalc) && (zMin < paddleCalc))
             {
                 scalar dz = paddleCalc - zMin;
-	            fraction = dz/zSpan_;
+	            fraction = dz/(zMax - zMin);
                 z = waterDepthRef_;
             }
         }
@@ -382,7 +388,7 @@ void Foam::waveModel::correct(const scalar t)
             {
                 const label paddlei = faceToPaddle_[facei];
 
-                if (zMin_[facei] < activeLevel[paddlei])
+                if (zMin_[facei] - zMin0_ < activeLevel[paddlei])
                 {
                     scalar UCorr =
                         (calculatedLevel[paddlei] - activeLevel[paddlei])
