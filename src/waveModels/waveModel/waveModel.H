@@ -106,6 +106,9 @@ protected:
         //- Maximum z (point) height per patch face / [m]
         scalarField zMax_;
 
+        //- Minimum z reference level / [m]
+        scalar zMin0_;
+
         //- Reference water depth / [m]
         scalar waterDepthRef_;
 
