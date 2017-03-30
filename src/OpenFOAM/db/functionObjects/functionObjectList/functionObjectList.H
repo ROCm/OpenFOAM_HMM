@@ -221,7 +221,7 @@ public:
         //    - $WM_PROJECT_DIR/etc/caseDicts/postProcessing
         //
         //  \return The path of the functionObject dictionary file if found
-        //  otherwise null
+        //  otherwise an empty path
         static fileName findDict(const word& funcName);
 
         //- Read the specified functionObject configuration dictionary parsing

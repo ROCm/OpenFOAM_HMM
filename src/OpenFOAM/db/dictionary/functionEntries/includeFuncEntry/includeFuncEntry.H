@@ -40,7 +40,7 @@ Description
     - \b group (site) settings (when $WM_PROJECT_SITE is not set):
       - $WM_PROJECT_INST_DIR/site/\<VERSION\>/caseDicts/postProcessing
       - $WM_PROJECT_INST_DIR/site/caseDicts/postProcessing
-    - \b other (shipped) settings:
+    - \b other (project) settings:
       - $WM_PROJECT_DIR/etc/caseDicts/postProcessing
 
     The optional field arguments included in the name are inserted in 'field' or
