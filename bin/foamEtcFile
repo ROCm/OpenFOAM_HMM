@@ -120,9 +120,8 @@ then
 fi
 projectDirName="${projectDir##*/}"      # The project directory name
 
-projectName="${WM_PROJECT:-OpenFOAM}"   # The project name
 projectVersion="$WM_PROJECT_VERSION"    # Empty? - will be treated later
-
+userDir="$HOME/.OpenFOAM"               # Hard-coded as per foamVersion.H
 
 #-------------------------------------------------------------------------------
 
@@ -290,9 +289,9 @@ fi
 
 # Updates:
 # - projectDir  for changes via -prefix or -version
-# - projectSite for changes via -prefix
+# - groupDir    for changes via -prefix
 projectDir="$prefixDir/$projectDirName"
-projectSite="${WM_PROJECT_SITE:-$prefixDir/site}"
+groupDir="${WM_PROJECT_SITE:-$prefixDir/site}"
 
 
 # Debugging:
@@ -311,12 +310,12 @@ fileName="${1#~OpenFOAM/}"
 # Define the various places to be searched:
 unset dirList
 case "$optMode" in (*u*) # (U)ser
-    dirList="$dirList $HOME/.$projectName/$projectVersion $HOME/.$projectName"
+    dirList="$dirList $userDir/$projectVersion $userDir"
     ;;
 esac
 
 case "$optMode" in (*g*) # (G)roup == site
-    dirList="$dirList $projectSite/$projectVersion $projectSite"
+    dirList="$dirList $groupDir/$projectVersion $groupDir"
     ;;
 esac
 
