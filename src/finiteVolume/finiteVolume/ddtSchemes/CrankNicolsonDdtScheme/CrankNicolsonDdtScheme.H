@@ -35,11 +35,26 @@ Description
     geometries and it is necessary to "off-centre" the scheme to stabilize it
     while retaining greater temporal accuracy than the first-order
     Euler-implicit scheme.  Off-centering is specified via the mandatory
-    coefficient in the range [0,1] following the scheme name e.g.
+    coefficient \c ocCoeff in the range [0,1] following the scheme name e.g.
     \verbatim
     ddtSchemes
     {
         default         CrankNicolson 0.9;
+    }
+    \endverbatim
+    or with an optional "ramp" function to transition from the Euler scheme to
+    Crank-Nicolson over a initial period to avoid start-up problems, e.g.
+    \verbatim
+    ddtSchemes
+    {
+        default         CrankNicolson
+        ocCoeff
+        {
+            type scale;
+            scale linearRamp;
+            duration 0.01;
+            value 0.9;
+        };
     }
     \endverbatim
     With a coefficient of 1 the scheme is fully centred and second-order,
@@ -79,6 +94,7 @@ SourceFiles
 #define CrankNicolsonDdtScheme_H
 
 #include "ddtScheme.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -140,8 +156,9 @@ class CrankNicolsonDdtScheme
         };
 
 
-        //- Off-centering coefficient, 1 -> CN, less than one blends with EI
-        scalar ocCoeff_;
+        //- Off-centering coefficient function
+        //  1 -> CN, less than one blends with EI
+        autoPtr<Function1<scalar>> ocCoeff_;
 
 
     // Private Member Functions
@@ -197,42 +214,10 @@ public:
     // Constructors
 
         //- Construct from mesh
-        CrankNicolsonDdtScheme(const fvMesh& mesh)
-        :
-            ddtScheme<Type>(mesh),
-            ocCoeff_(1.0)
-        {
-            // Ensure the old-old-time cell volumes are available
-            // for moving meshes
-            if (mesh.moving())
-            {
-                mesh.V00();
-            }
-        }
+        CrankNicolsonDdtScheme(const fvMesh& mesh);
 
         //- Construct from mesh and Istream
-        CrankNicolsonDdtScheme(const fvMesh& mesh, Istream& is)
-        :
-            ddtScheme<Type>(mesh, is),
-            ocCoeff_(readScalar(is))
-        {
-            if (ocCoeff_ < 0 || ocCoeff_ > 1)
-            {
-                FatalIOErrorInFunction
-                (
-                    is
-                )   << "Off-centreing coefficient = " << ocCoeff_
-                    << " should be >= 0 and <= 1"
-                    << exit(FatalIOError);
-            }
-
-            // Ensure the old-old-time cell volumes are available
-            // for moving meshes
-            if (mesh.moving())
-            {
-                mesh.V00();
-            }
-        }
+        CrankNicolsonDdtScheme(const fvMesh& mesh, Istream& is);
 
 
     // Member Functions
@@ -243,10 +228,10 @@ public:
             return fv::ddtScheme<Type>::mesh();
         }
 
-        //- Return the off-centreing coefficient
+        //- Return the current off-centreing coefficient
         scalar ocCoeff() const
         {
-            return ocCoeff_;
+            return ocCoeff_->value(mesh().time().value());
         }
 
         tmp<GeometricField<Type, fvPatchField, volMesh>> fvcDdt

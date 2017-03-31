@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "tensor.H"
+#include "cubicEqn.H"
 #include "mathematicalConstants.H"
 
 using namespace Foam::constant::mathematical;
@@ -70,125 +71,65 @@ const Foam::tensor Foam::tensor::I
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::vector Foam::eigenValues(const tensor& T)
+Foam::vector Foam::eigenValues(const tensor& t)
 {
-    // The eigenvalues
-    scalar i, ii, iii;
+    // Coefficients of the characteristic cubic polynomial (a = 1)
+    const scalar b =
+      - t.xx() - t.yy() - t.zz();
+    const scalar c =
+        t.xx()*t.yy() + t.xx()*t.zz() + t.yy()*t.zz()
+      - t.xy()*t.yx() - t.yz()*t.zy() - t.zx()*t.xz();
+    const scalar d =
+      - t.xx()*t.yy()*t.zz()
+      - t.xy()*t.yz()*t.zx() - t.xz()*t.zy()*t.yx()
+      + t.xx()*t.yz()*t.zy() + t.yy()*t.zx()*t.xz() + t.zz()*t.xy()*t.yx();
 
-    // diagonal matrix
-    const scalar onDiagMagSum =
-        (
-            mag(T.xx()) + mag(T.yy()) + mag(T.zz())
-        );
+    // Solve
+    Roots<3> roots = cubicEqn(1, b, c, d).roots();
 
-    const scalar offDiagMagSum =
-        (
-            mag(T.xy()) + mag(T.xz()) + mag(T.yx())
-          + mag(T.yz()) + mag(T.zx()) + mag(T.zy())
-        );
-
-    const scalar magSum = onDiagMagSum + offDiagMagSum;
-
-    if (offDiagMagSum < max(VSMALL, SMALL*magSum))
+    // Check the root types
+    vector lambda = vector::zero;
+    forAll(roots, i)
     {
-        i = T.xx();
-        ii = T.yy();
-        iii = T.zz();
-    }
-
-    // non-diagonal matrix
-    else
-    {
-        // Coefficients of the characteristic polynmial
-        // x^3 + a*x^2 + b*x + c = 0
-        scalar a =
-           - T.xx() - T.yy() - T.zz();
-
-        scalar b =
-            T.xx()*T.yy() + T.xx()*T.zz() + T.yy()*T.zz()
-          - T.xy()*T.yx() - T.yz()*T.zy() - T.zx()*T.xz();
-
-        scalar c =
-          - T.xx()*T.yy()*T.zz()
-          - T.xy()*T.yz()*T.zx() - T.xz()*T.zy()*T.yx()
-          + T.xx()*T.yz()*T.zy() + T.yy()*T.zx()*T.xz() + T.zz()*T.xy()*T.yx();
-
-        // Auxillary variables
-        scalar aBy3 = a/3;
-
-        scalar P = (a*a - 3*b)/9; // == -p_wikipedia/3
-        scalar PPP = P*P*P;
-
-        scalar Q = (2*a*a*a - 9*a*b + 27*c)/54; // == q_wikipedia/2
-        scalar QQ = Q*Q;
-
-        // Three identical roots
-        if (mag(P) < SMALL*sqr(magSum) && mag(Q) < SMALL*pow3(magSum))
+        switch (roots.type(i))
         {
-            return vector(- aBy3, - aBy3, - aBy3);
-        }
-
-        // Two identical roots and one distinct root
-        else if (mag(PPP - QQ) < SMALL*pow6(magSum))
-        {
-            scalar sqrtP = sqrt(P);
-            scalar signQ = sign(Q);
-
-            i = ii = signQ*sqrtP - aBy3;
-            iii = - 2*signQ*sqrtP - aBy3;
-        }
-
-        // Three distinct roots
-        else if (PPP > QQ)
-        {
-            scalar sqrtP = sqrt(P);
-            scalar value = cos(acos(Q/sqrt(PPP))/3);
-            scalar delta = sqrt(3 - 3*value*value);
-
-            i = - 2*sqrtP*value - aBy3;
-            ii = sqrtP*(value + delta) - aBy3;
-            iii = sqrtP*(value - delta) - aBy3;
-        }
-
-        // One real root, two imaginary roots
-        // based on the above logic, PPP must be less than QQ
-        else
-        {
-            WarningInFunction
-                << "complex eigenvalues detected for tensor: " << T
-                << endl;
-
-            if (mag(P) < SMALL*sqr(magSum))
-            {
-                i = cbrt(QQ/2);
-            }
-            else
-            {
-                scalar w = cbrt(- Q - sqrt(QQ - PPP));
-                i = w + P/w - aBy3;
-            }
-
-            return vector(-VGREAT, i, VGREAT);
+            case roots::real:
+                lambda[i] = roots[i];
+                break;
+            case roots::complex:
+                WarningInFunction
+                    << "Complex eigenvalues detected for tensor: " << t
+                    << endl;
+                lambda[i] = 0;
+                break;
+            case roots::posInf:
+                lambda[i] = VGREAT;
+                break;
+            case roots::negInf:
+                lambda[i] = - VGREAT;
+                break;
+            case roots::nan:
+                FatalErrorInFunction
+                    << "Eigenvalue calculation failed for tensor: " << t
+                    << exit(FatalError);
         }
     }
 
     // Sort the eigenvalues into ascending order
-    if (i > ii)
+    if (lambda.x() > lambda.y())
     {
-        Swap(i, ii);
+        Swap(lambda.x(), lambda.y());
+    }
+    if (lambda.y() > lambda.z())
+    {
+        Swap(lambda.y(), lambda.z());
+    }
+    if (lambda.x() > lambda.y())
+    {
+        Swap(lambda.x(), lambda.y());
     }
 
-    if (ii > iii)
-    {
-        Swap(ii, iii);
-    }
-
-    if (i > ii)
-    {
-        Swap(i, ii);
-    }
-
-    return vector(i, ii, iii);
+    return lambda;
 }
 
 

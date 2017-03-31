@@ -76,6 +76,17 @@ void Foam::functionObjects::fieldAverage::initialize()
     {
         totalTime_.setSize(faItems_.size(), obr_.time().deltaTValue());
     }
+    else
+    {
+        // Check if totalTime_ has been set otherwise initialize
+        forAll(totalTime_, fieldi)
+        {
+            if (totalTime_[fieldi] < 0)
+            {
+                totalTime_[fieldi] = obr_.time().deltaTValue();
+            }
+        }
+    }
 
     resetFields();
 
@@ -224,8 +235,10 @@ void Foam::functionObjects::fieldAverage::readAveragingProperties()
     totalIter_.clear();
     totalIter_.setSize(faItems_.size(), 1);
 
+    // Initialize totalTime with negative values
+    // to indicate that it has not been set
     totalTime_.clear();
-    totalTime_.setSize(faItems_.size(), obr().time().deltaTValue());
+    totalTime_.setSize(faItems_.size(), -1);
 
     if (restartOnRestart_ || restartOnOutput_)
     {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,13 @@ namespace Foam
 typedef Tensor2D<scalar> tensor2D;
 
 vector2D eigenValues(const tensor2D& t);
-vector2D eigenVector(const tensor2D& t, const scalar lambda);
+vector2D eigenVector
+(
+    const tensor2D& t,
+    const scalar lambda,
+    const vector2D& direction1
+);
+tensor2D eigenVectors(const tensor2D& t, const vector2D& lambdas);
 tensor2D eigenVectors(const tensor2D& t);
 
 //- Data associated with tensor2D type are contiguous

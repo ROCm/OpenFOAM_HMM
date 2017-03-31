@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,106 +22,107 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::contactAngleForce
+    Foam::Roots
 
 Description
-    Film contact angle force
-
-    The effect of the contact angle force can be ignored over a specified
-    distance from patches.
+    Templated storage for the roots of polynomial equations, plus flags to
+    indicate the nature of the roots.
 
 SourceFiles
-    contactAngleForce.C
+    RootsI.H
+    Roots.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef contactAngleForce_H
-#define contactAngleForce_H
+#ifndef Roots_H
+#define Roots_H
 
-#include "force.H"
-#include "distributionModel.H"
-#include "cachedRandom.H"
+#include "VectorSpace.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace regionModels
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace roots
 {
-namespace surfaceFilmModels
+
+//- Types of root
+enum type
 {
+    real = 0,
+    complex,
+    posInf,
+    negInf,
+    nan
+};
+
+}
 
 /*---------------------------------------------------------------------------*\
-                      Class contactAngleForce Declaration
+                         Class Roots Declaration
 \*---------------------------------------------------------------------------*/
 
-class contactAngleForce
+template<direction N>
+class Roots
 :
-    public force
+    public VectorSpace<Roots<N>, scalar, N>
 {
-private:
+    // Private data
 
-    // Private Data
-
-        //- Coefficient applied to the contact angle force
-        scalar Ccf_;
-
-        //- Random number generator
-        cachedRandom rndGen_;
-
-        //- Parcel size PDF model
-        const autoPtr<distributionModels::distributionModel> distribution_;
-
-        //- Mask over which force is applied
-        volScalarField mask_;
-
-
-    // Private member functions
-
-        //- Initialise
-        void initialise();
-
-        //- Disallow default bitwise copy construct
-        contactAngleForce(const contactAngleForce&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const contactAngleForce&);
-
+        //- Root types, encoded into a single integer
+        label types_;
 
 public:
 
-    //- Runtime type information
-    TypeName("contactAngle");
-
-
     // Constructors
 
-        //- Construct from surface film model
-        contactAngleForce
+        //- Construct null
+        inline Roots();
+
+        //- Construct with a uniform value
+        inline Roots(const roots::type t, const scalar x);
+
+        //- Construct by concatenation
+        inline Roots
         (
-            surfaceFilmModel& owner,
-            const dictionary& dict
+            const roots::type t,
+            const scalar x,
+            const Roots<N - 1>& xs
         );
 
+        //- Construct by concatenation
+        inline Roots
+        (
+            const Roots<N - 1>& xs,
+            const roots::type t,
+            const scalar x
+        );
 
-    //- Destructor
-    virtual ~contactAngleForce();
+        //- Construct by concatenation
+        template <direction M>
+        inline Roots(const Roots<M>& xs, const Roots<N - M>& ys);
 
 
     // Member Functions
 
-        // Evolution
+        //- Set the type of the i-th root
+        inline void type(const direction i, const roots::type t);
 
-            //- Correct
-            virtual tmp<fvVectorMatrix> correct(volVectorField& U);
+        //- Return the type of the i-th root
+        inline roots::type type(const direction i) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace surfaceFilmModels
-} // End namespace regionModels
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "RootsI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

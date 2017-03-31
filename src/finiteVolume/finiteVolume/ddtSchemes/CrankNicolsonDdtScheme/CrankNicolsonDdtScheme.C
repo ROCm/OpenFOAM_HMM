@@ -27,6 +27,7 @@ License
 #include "surfaceInterpolate.H"
 #include "fvcDiv.H"
 #include "fvMatrices.H"
+#include "Constant.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -200,7 +201,7 @@ scalar CrankNicolsonDdtScheme<Type>::coef_
 {
     if (mesh().time().timeIndex() > ddt0.startTimeIndex())
     {
-        return 1 + ocCoeff_;
+        return 1 + ocCoeff();
     }
     else
     {
@@ -218,7 +219,7 @@ scalar CrankNicolsonDdtScheme<Type>::coef0_
 {
     if (mesh().time().timeIndex() > ddt0.startTimeIndex() + 1)
     {
-        return 1 + ocCoeff_;
+        return 1 + ocCoeff();
     }
     else
     {
@@ -256,9 +257,9 @@ tmp<GeoField> CrankNicolsonDdtScheme<Type>::offCentre_
     const GeoField& ddt0
 ) const
 {
-    if (ocCoeff_ < 1)
+    if (ocCoeff() < 1)
     {
-        return ocCoeff_*ddt0;
+        return ocCoeff()*ddt0;
     }
     else
     {
@@ -277,7 +278,70 @@ const FieldField<fvPatchField, Type>& ff
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class Type>
+CrankNicolsonDdtScheme<Type>::CrankNicolsonDdtScheme(const fvMesh& mesh)
+:
+    ddtScheme<Type>(mesh),
+    ocCoeff_(new Function1Types::Constant<scalar>("ocCoeff", 1))
+{
+    // Ensure the old-old-time cell volumes are available
+    // for moving meshes
+    if (mesh.moving())
+    {
+        mesh.V00();
+    }
+}
+
+
+template<class Type>
+CrankNicolsonDdtScheme<Type>::CrankNicolsonDdtScheme
+(
+    const fvMesh& mesh,
+    Istream& is
+)
+:
+    ddtScheme<Type>(mesh, is)
+{
+    token firstToken(is);
+
+    if (firstToken.isNumber())
+    {
+        const scalar ocCoeff = firstToken.scalarToken();
+        if (ocCoeff < 0 || ocCoeff > 1)
+        {
+            FatalIOErrorInFunction
+            (
+                is
+            )   << "Off-centreing coefficient = " << ocCoeff
+                << " should be >= 0 and <= 1"
+                << exit(FatalIOError);
+        }
+
+        ocCoeff_ = new Function1Types::Constant<scalar>
+        (
+            "ocCoeff",
+            ocCoeff
+        );
+    }
+    else
+    {
+        is.putBack(firstToken);
+        dictionary dict(is);
+        ocCoeff_ = Function1<scalar>::New("ocCoeff", dict);
+    }
+
+    // Ensure the old-old-time cell volumes are available
+    // for moving meshes
+    if (mesh.moving())
+    {
+        mesh.V00();
+    }
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 tmp<GeometricField<Type, fvPatchField, volMesh>>
