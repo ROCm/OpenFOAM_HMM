@@ -241,9 +241,9 @@ void pointNoise::calculate()
         if (!fName.isAbsolute())
         {
             fName = "$FOAM_CASE"/fName;
+            fName.expand();
         }
-        fName.expand();
-        Function1Types::CSV<scalar> data("pressure", dict_, "Data", fName);
+        Function1Types::CSV<scalar> data("pressure", dict_, fName);
         processData(filei, data);
     }
 }
@@ -253,13 +253,12 @@ bool pointNoise::read(const dictionary& dict)
 {
     if (noiseModel::read(dict))
     {
-        if (!dict.readIfPresent("inputFiles", inputFileNames_))
+        if (!dict.readIfPresent("files", inputFileNames_))
         {
             inputFileNames_.setSize(1);
 
-            // Note: unsafe lookup of file name from pressureData sub-dict!
-            dict.subDict("pressureData").lookup("fileName")
-                >> inputFileNames_[0];
+            // Note: lookup uses same keyword as used by the CSV constructor
+            dict.lookup("file") >> inputFileNames_[0];
         }
 
         return true;
