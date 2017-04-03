@@ -42,7 +42,7 @@ setenv WM_PROJECT_VERSION plus
 # - If this does not produce the desired result, please set one of the fallback
 #   values to an appropriate path.
 #
-setenv FOAM_INST_DIR `/usr/bin/lsof +p $$ |& \
+setenv FOAM_INST_DIR `lsof +p $$ |& \
     sed -n -e 's@[^/]*@@' -e 's@/'$WM_PROJECT'[^/]*/etc/cshrc@@p'`
 # setenv FOAM_INST_DIR  $HOME/$WM_PROJECT
 # setenv FOAM_INST_DIR  /opt/$WM_PROJECT
