@@ -25,7 +25,7 @@
 #     etc/config.sh/settings
 #
 # Description
-#     Startup file for OpenFOAM
+#     Setup file for OpenFOAM
 #     Sourced from OpenFOAM-<VERSION>/etc/bashrc
 #
 #------------------------------------------------------------------------------
@@ -140,8 +140,8 @@ esac
 
 #------------------------------------------------------------------------------
 
-# Location of the jobControl directory
-export FOAM_JOB_DIR=$WM_PROJECT_INST_DIR/jobControl
+# Optional jobControl directory: unset is equivalent to ~/.OpenFOAM/jobControl
+# export FOAM_JOB_DIR="$HOME/.OpenFOAM/jobControl"
 
 # wmake configuration
 export WM_DIR=$WM_PROJECT_DIR/wmake

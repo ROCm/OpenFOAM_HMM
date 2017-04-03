@@ -59,6 +59,7 @@ int main(int argc, char *argv[])
     timeSelector::addOptions(true, true);
     argList::noBanner();
     argList::noParallel();
+    argList::noJobInfo();
     argList::addBoolOption
     (
         "processor",

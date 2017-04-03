@@ -25,8 +25,8 @@
 #     etc/cshrc
 #
 # Description
-#     Startup file for OpenFOAM
-#     Sourced from ~/.login or ~/.cshrc
+#     Set the environment for OpenFOAM when using a cshell.
+#     To be sourced manually or from the ~/.login or ~/.cshrc files.
 #
 #------------------------------------------------------------------------------
 

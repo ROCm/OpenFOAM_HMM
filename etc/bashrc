@@ -25,8 +25,8 @@
 #     etc/bashrc
 #
 # Description
-#     Startup file for OpenFOAM
-#     Sourced from ~/.profile or ~/.bashrc
+#     Set the environment for OpenFOAM when using a POSIX shell.
+#     To be sourced manually or from the ~/.profile or ~/.bashrc files.
 #     Should be usable by any POSIX-compliant shell (eg, dash, ksh)
 #
 #------------------------------------------------------------------------------
