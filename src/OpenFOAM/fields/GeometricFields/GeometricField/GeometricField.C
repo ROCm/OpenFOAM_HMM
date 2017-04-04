@@ -835,6 +835,17 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::oldTime() const
             ),
             *this
         );
+
+        if (debug)
+        {
+            InfoInFunction
+                << "created old time field " << field0Ptr_->info() << endl;
+
+            if (debug&2)
+            {
+                error::printStack(Info);
+            }
+        }
     }
     else
     {
