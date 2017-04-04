@@ -5,8 +5,8 @@ cd ${0%/*} && wmakeCheckPwd "$WM_PROJECT_DIR/src" 2>/dev/null || {
     echo "    Check your OpenFOAM environment and installation"
     exit 1
 }
-[ -n "$FOAM_EXT_LIBBIN" ] || {
-    echo "Error (${0##*/}) : FOAM_EXT_LIBBIN not set"
+[ -d "$WM_PROJECT_DIR" -a -f "$WM_PROJECT_DIR/etc/bashrc" ] || {
+    echo "Error (${0##*/}) : WM_PROJECT_DIR appears to be incorrect"
     echo "    Check your OpenFOAM environment and installation"
     exit 1
 }

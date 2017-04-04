@@ -4,6 +4,9 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Parse arguments for library compilation
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
+: ${FOAM_EXT_LIBBIN:=/usr/lib$WM_COMPILER_LIB_ARCH}  # Extra safety
+export FOAM_EXT_LIBBIN
+
 export ParMGridGen=$WM_THIRD_PARTY_DIR/ParMGridGen-1.0
 
 if [ -e "$FOAM_LIBBIN/libMGridGen.so" ]

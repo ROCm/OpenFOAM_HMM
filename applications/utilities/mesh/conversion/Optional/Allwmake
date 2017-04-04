@@ -22,6 +22,9 @@ fi
 # Build libccmio (.a|.so) - use static linkage for fewer issues
 $WM_THIRD_PARTY_DIR/makeCCMIO lib
 
+: ${FOAM_EXT_LIBBIN:=/usr/lib$WM_COMPILER_LIB_ARCH}  # Extra safety
+export FOAM_EXT_LIBBIN
+
 if [ -e $CCMIO_ARCH_PATH/include/libccmio/ccmio.h \
   -a \( -e $CCMIO_ARCH_PATH/lib/libccmio.a -o -e $FOAM_EXT_LIBBIN/libccmio.so \) ]
 then
