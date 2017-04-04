@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,11 +52,16 @@ heBoundaryCorrection(volScalarField& h)
 
 
 template<class BasicThermo, class MixtureType>
-void Foam::heThermo<BasicThermo, MixtureType>::init()
+void Foam::heThermo<BasicThermo, MixtureType>::init
+(
+    const volScalarField& p,
+    const volScalarField& T,
+    volScalarField& he
+)
 {
-    scalarField& heCells = he_.primitiveFieldRef();
-    const scalarField& pCells = this->p_;
-    const scalarField& TCells = this->T_;
+    scalarField& heCells = he.primitiveFieldRef();
+    const scalarField& pCells = p.primitiveField();
+    const scalarField& TCells = T.primitiveField();
 
     forAll(heCells, celli)
     {
@@ -64,19 +69,25 @@ void Foam::heThermo<BasicThermo, MixtureType>::init()
             this->cellMixture(celli).HE(pCells[celli], TCells[celli]);
     }
 
-    volScalarField::Boundary& heBf = he_.boundaryFieldRef();
+    volScalarField::Boundary& heBf = he.boundaryFieldRef();
 
     forAll(heBf, patchi)
     {
-        heBf[patchi] == he
+        heBf[patchi] == this->he
         (
-            this->p_.boundaryField()[patchi],
-            this->T_.boundaryField()[patchi],
+            p.boundaryField()[patchi],
+            T.boundaryField()[patchi],
             patchi
         );
     }
 
-    this->heBoundaryCorrection(he_);
+    this->heBoundaryCorrection(he);
+
+    // Note: T does not have oldTime
+    if (p.nOldTimes() > 0)
+    {
+        init(p.oldTime(), T.oldTime(), he.oldTime());
+    }
 }
 
 
@@ -112,7 +123,7 @@ Foam::heThermo<BasicThermo, MixtureType>::heThermo
         this->heBoundaryBaseTypes()
     )
 {
-    init();
+    init(this->p_, this->T_, he_);
 }
 
 
@@ -146,7 +157,7 @@ Foam::heThermo<BasicThermo, MixtureType>::heThermo
         this->heBoundaryBaseTypes()
     )
 {
-    init();
+    init(this->p_, this->T_, he_);
 }
 
 
