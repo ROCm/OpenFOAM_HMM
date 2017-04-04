@@ -69,8 +69,7 @@ volScalarField dpdt
     dimensionedScalar("dpdt", p.dimensions()/dimTime, 0)
 );
 
-Info<< "Creating field kinetic energy K\n" << endl;
-volScalarField K("K", 0.5*magSqr(U));
+#include "createK.H"
 
 #include "createMRF.H"
 
