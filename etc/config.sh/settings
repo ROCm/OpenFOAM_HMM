@@ -198,8 +198,12 @@ fi
 unset siteDir
 
 _foamAddPath $FOAM_USER_APPBIN:$FOAM_SITE_APPBIN:$FOAM_APPBIN
-# Make sure to pick up dummy versions of external libraries last
-_foamAddLib  $FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN:$FOAM_EXT_LIBBIN:$FOAM_LIBBIN/dummy
+_foamAddLib  $FOAM_LIBBIN/dummy     # Dummy versions of external libraries last
+if [ -n "$FOAM_EXT_LIBBIN" ]        # External libraries (allowed to be unset)
+then
+    _foamAddLib $FOAM_EXT_LIBBIN
+fi
+_foamAddLib  $FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN
 
 #------------------------------------------------------------------------------
 

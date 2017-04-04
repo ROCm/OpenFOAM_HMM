@@ -32,7 +32,7 @@
 #     wmake/rules/General/mplibUSERMPI file and managing all settings
 #
 #------------------------------------------------------------------------------
-unsetenv MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
+unsetenv MPI_ARCH_PATH MPI_HOME
 
 switch ("$WM_MPLIB")
 case SYSTEMOPENMPI:
@@ -249,16 +249,17 @@ endsw
 
 
 # Add (non-dummy) MPI implementation
-# Dummy MPI already added to LD_LIBRARY_PATH and has no external libraries
+# - dummy MPI already added to LD_LIBRARY_PATH and has no external libraries
 if ( "$FOAM_MPI" != dummy ) then
-    _foamAddLib ${FOAM_LIBBIN}/${FOAM_MPI}:${FOAM_EXT_LIBBIN}/${FOAM_MPI}
+    if ( $?FOAM_EXT_LIBBIN ) then   # External libraries (allowed to be unset)
+        _foamAddLib ${FOAM_EXT_LIBBIN}/${FOAM_MPI}
+    endif
+    _foamAddLib ${FOAM_LIBBIN}/${FOAM_MPI}
 endif
 
 
-# Set the minimum MPI buffer size (used by all platforms except SGI MPI)
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Minimum MPI buffer size (used by all except SGI MPI)
 if ( ! $?minBufferSize ) set minBufferSize=20000000
-
 if ( $?MPI_BUFFER_SIZE ) then
     if ( $MPI_BUFFER_SIZE < $minBufferSize ) then
         setenv MPI_BUFFER_SIZE $minBufferSize
