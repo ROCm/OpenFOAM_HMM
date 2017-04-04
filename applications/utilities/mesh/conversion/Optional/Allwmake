@@ -23,7 +23,7 @@ fi
 $WM_THIRD_PARTY_DIR/makeCCMIO lib
 
 if [ -e $CCMIO_ARCH_PATH/include/libccmio/ccmio.h \
-  -a \( -e $CCMIO_ARCH_PATH/lib/libccmio.a -o $FOAM_EXT_LIBBIN/libccmio.so \) ]
+  -a \( -e $CCMIO_ARCH_PATH/lib/libccmio.a -o -e $FOAM_EXT_LIBBIN/libccmio.so \) ]
 then
     wmake $targetType ccm26ToFoam
 else
