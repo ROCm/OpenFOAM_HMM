@@ -21,7 +21,6 @@ include_directories(
 
 link_directories(
     $ENV{FOAM_LIBBIN}
-    $ENV{FOAM_EXT_LIBBIN}
 )
 
 add_definitions(

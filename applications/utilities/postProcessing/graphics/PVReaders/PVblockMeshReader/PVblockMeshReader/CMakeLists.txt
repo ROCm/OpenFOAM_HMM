@@ -7,7 +7,6 @@ include(${PARAVIEW_USE_FILE})
 
 link_directories(
     $ENV{FOAM_LIBBIN}
-    $ENV{FOAM_EXT_LIBBIN}
 )
 
 include_directories(
