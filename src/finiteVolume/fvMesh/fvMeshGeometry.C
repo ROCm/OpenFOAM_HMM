@@ -258,9 +258,9 @@ const Foam::volScalarField::Internal& Foam::fvMesh::V00() const
                 "V00",
                 time().timeName(),
                 *this,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
+                IOobject::READ_IF_PRESENT,//NO_READ,
+                IOobject::AUTO_WRITE,
+                true
             ),
             V0()
         );
