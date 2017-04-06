@@ -468,6 +468,7 @@ Foam::Time::Time
     (
         args.parRunControl().parRun(),
         args.rootPath(),
+        args.distributed(),
         args.globalCaseName(),
         args.caseName(),
         systemName,

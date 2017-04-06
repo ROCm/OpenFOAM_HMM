@@ -429,7 +429,8 @@ Foam::argList::argList
 )
 :
     args_(argc),
-    options_(argc)
+    options_(argc),
+    distributed_(false)
 {
     // Check if this run is a parallel run by searching for any parallel option
     // If found call runPar which might filter argv
@@ -669,6 +670,7 @@ void Foam::argList::parse
             label dictNProcs = -1;
             if (options_.found("roots"))
             {
+                distributed_ = true;
                 source = "-roots";
                 IStringStream is(options_["roots"]);
                 roots = readList<fileName>(is);
@@ -700,7 +702,7 @@ void Foam::argList::parse
                     decompDict.lookup("numberOfSubdomains")
                 );
 
-                if (decompDict.lookupOrDefault("distributed", false))
+                if (decompDict.lookupOrDefault("distributed", distributed_))
                 {
                     decompDict.lookup("roots") >> roots;
                 }
@@ -771,7 +773,7 @@ void Foam::argList::parse
                     options_.set("case", roots[slave-1]/globalCase_);
 
                     OPstream toSlave(Pstream::scheduled, slave);
-                    toSlave << args_ << options_;
+                    toSlave << args_ << options_ << roots.size();
                 }
                 options_.erase("case");
 
@@ -818,7 +820,7 @@ void Foam::argList::parse
                 )
                 {
                     OPstream toSlave(Pstream::scheduled, slave);
-                    toSlave << args_ << options_;
+                    toSlave << args_ << options_ << roots.size();
                 }
             }
         }
@@ -826,7 +828,7 @@ void Foam::argList::parse
         {
             // Collect the master's argument list
             IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
-            fromMaster >> args_ >> options_;
+            fromMaster >> args_ >> options_ >> distributed_;
 
             // Establish rootPath_/globalCase_/case_ for slave
             getRootCase();

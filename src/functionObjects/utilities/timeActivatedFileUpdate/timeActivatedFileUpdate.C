@@ -67,11 +67,14 @@ void Foam::functionObjects::timeActivatedFileUpdate::updateFile()
         Log << nl << type() << ": copying file" << nl << timeVsFile_[i].second()
             << nl << "to:" << nl << fileToUpdate_ << nl << endl;
 
-        fileName destFile(fileToUpdate_ + Foam::name(pid()));
-        cp(timeVsFile_[i].second(), destFile);
-        mv(destFile, fileToUpdate_);
+        if (Pstream::master() || time_.distributed())
+        {
+            // Slaves do not copy if running non-distributed
+            fileName destFile(fileToUpdate_ + Foam::name(pid()));
+            cp(timeVsFile_[i].second(), destFile);
+            mv(destFile, fileToUpdate_);
+        }
         lastIndex_ = i;
-
         modified_ = true;
     }
 }
