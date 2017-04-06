@@ -13,8 +13,8 @@ EXE_INC = \
     ${CGAL_INC} \
     ${c++CGALWARN} \
     -I.. \
-    -I$(FOAM_SRC)/surfMesh/lnInclude \
-    -I$(FOAM_SRC)/triSurface/lnInclude \
+    -I$(LIB_SRC)/surfMesh/lnInclude \
+    -I$(LIB_SRC)/triSurface/lnInclude \
     -I$(LIB_SRC)/edgeMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I/usr/include/Qt

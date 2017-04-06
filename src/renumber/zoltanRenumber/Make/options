@@ -5,9 +5,9 @@ EXE_INC = \
     /* -DFULLDEBUG -g -O0 */ \
     $(PFLAGS) $(PINC) \
     ${c++LESSWARN} \
-    -I$(FOAM_SRC)/renumber/renumberMethods/lnInclude \
-    -I$(ZOLTAN_ARCH_PATH)/include/ \
-    -I$(LIB_SRC)/meshTools/lnInclude
+    -I$(LIB_SRC)/renumber/renumberMethods/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(ZOLTAN_ARCH_PATH)/include
 
 LIB_LIBS = \
     -L$(ZOLTAN_ARCH_PATH)/lib \
