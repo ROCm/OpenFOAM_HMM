@@ -943,6 +943,17 @@ bool Foam::Time::run() const
                 addProfiling(functionObjects, "functionObjects.execute()");
                 functionObjects_.execute();
             }
+
+            // Check if the execution of functionObjects require re-reading
+            // any files. This moves effect of e.g. 'timeActivatedFileUpdate'
+            // one time step forward. Note that we cannot call
+            // readModifiedObjects from within timeActivatedFileUpdate since
+            // it might re-read the functionObjects themselves (and delete
+            // the timeActivatedFileUpdate one)
+            if (functionObjects_.filesModified())
+            {
+                const_cast<Time&>(*this).readModifiedObjects();
+            }
         }
 
         // Update the "running" status following the

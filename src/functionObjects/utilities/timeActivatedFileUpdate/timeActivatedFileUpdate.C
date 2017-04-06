@@ -48,11 +48,10 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::functionObjects::timeActivatedFileUpdate::updateFile
-(
-    const bool checkFiles
-)
+void Foam::functionObjects::timeActivatedFileUpdate::updateFile()
 {
+    modified_ = false;
+
     label i = lastIndex_;
     while
     (
@@ -73,14 +72,7 @@ void Foam::functionObjects::timeActivatedFileUpdate::updateFile
         mv(destFile, fileToUpdate_);
         lastIndex_ = i;
 
-        if (checkFiles)
-        {
-            // Do an early check to avoid an additional iteration before
-            // any changes are picked up (see Time::run : does readModified
-            // before executing FOs). Note we have to protect the read
-            // constructor of *this from triggering this behaviour.
-            const_cast<Time&>(time_).Time::readModifiedObjects();
-        }
+        modified_ = true;
     }
 }
 
@@ -98,7 +90,8 @@ Foam::functionObjects::timeActivatedFileUpdate::timeActivatedFileUpdate
     time_(runTime),
     fileToUpdate_("unknown-fileToUpdate"),
     timeVsFile_(),
-    lastIndex_(-1)
+    lastIndex_(-1),
+    modified_(false)
 {
     read(dict);
 }
@@ -142,8 +135,8 @@ bool Foam::functionObjects::timeActivatedFileUpdate::read
             << timeVsFile_[i].second() << endl;
     }
 
-    // Copy starting files. Avoid recursion by not checking for modified files.
-    updateFile(false);
+    // Copy starting files
+    updateFile();
 
     return true;
 }
@@ -151,7 +144,7 @@ bool Foam::functionObjects::timeActivatedFileUpdate::read
 
 bool Foam::functionObjects::timeActivatedFileUpdate::execute()
 {
-    updateFile(true);
+    updateFile();
 
     return true;
 }
@@ -160,6 +153,12 @@ bool Foam::functionObjects::timeActivatedFileUpdate::execute()
 bool Foam::functionObjects::timeActivatedFileUpdate::write()
 {
     return true;
+}
+
+
+bool Foam::functionObjects::timeActivatedFileUpdate::filesModified() const
+{
+    return modified_;
 }
 
 

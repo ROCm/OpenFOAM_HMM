@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -176,6 +176,9 @@ public:
 
             //- Called at the end of Time::adjustDeltaT() if adjustTime is true
             virtual bool adjustTimeStep();
+
+            //- Did any file get changed during execution?
+            virtual bool filesModified() const;
 
             //- Read and set the function object if its data have changed
             virtual bool read(const dictionary&);
