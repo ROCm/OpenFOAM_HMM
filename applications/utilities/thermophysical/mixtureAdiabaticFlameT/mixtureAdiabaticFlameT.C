@@ -55,6 +55,13 @@ typedef species::thermo<janafThermo<perfectGas<specie>>, absoluteEnthalpy>
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Calculates the adiabatic flame temperature for a given mixture\n"
+        "at a given temperature."
+    );
+    argList::noParallel();
+    argList::noFunctionObjects();
     argList::validArgs.append("controlFile");
     argList args(argc, argv);
 

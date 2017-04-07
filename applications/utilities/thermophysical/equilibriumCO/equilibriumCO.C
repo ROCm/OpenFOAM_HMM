@@ -56,6 +56,13 @@ typedef species::thermo<janafThermo<perfectGas<specie>>, absoluteEnthalpy>
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Calculates the equilibrium level of carbon monoxide."
+    );
+    argList::noParallel();
+    argList::noFunctionObjects();
+
     #include "setRootCase.H"
     #include "createTime.H"
 

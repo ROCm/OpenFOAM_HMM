@@ -45,6 +45,13 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Converts CHEMKINIII thermodynamics and reaction data files into\n"
+        "OpenFOAM format."
+    );
+    argList::noParallel();
+    argList::noFunctionObjects();
     argList::validArgs.append("CHEMKINFile");
     argList::validArgs.append("CHEMKINThermodynamicsFile");
     argList::validArgs.append("CHEMKINTransport");
@@ -59,7 +66,7 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
-    bool newFormat = args.optionFound("newFormat");
+    const bool newFormat = args.optionFound("newFormat");
 
     speciesTable species;
 
