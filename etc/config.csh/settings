@@ -178,8 +178,8 @@ setenv FOAM_ETC $WM_PROJECT_DIR/etc
 setenv FOAM_APP $WM_PROJECT_DIR/applications
 setenv FOAM_SRC $WM_PROJECT_DIR/src
 setenv FOAM_TUTORIALS $WM_PROJECT_DIR/tutorials
-setenv FOAM_UTILITIES $FOAM_APP/utilities
-setenv FOAM_SOLVERS $FOAM_APP/solvers
+setenv FOAM_UTILITIES $WM_PROJECT_DIR/applications/utilities
+setenv FOAM_SOLVERS $WM_PROJECT_DIR/applications/solvers
 setenv FOAM_RUN $WM_PROJECT_USER_DIR/run
 
 # Add wmake to the path - not required for runtime-only environment
