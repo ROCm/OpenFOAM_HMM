@@ -468,7 +468,7 @@ public:
 //  \sa addProfiling
 //  \sa endProfiling
 #define addProfiling0(name)                                                    \
-    ::Foam::Profiling::Trigger  profilingTriggerFor##name(#name)
+    ::Foam::profiling::Trigger  profilingTriggerFor##name(#name)
 
 //- Define profiling with specified name and description correspond to the
 //  compiler-defined function name string:
