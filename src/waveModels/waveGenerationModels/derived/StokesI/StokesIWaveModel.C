@@ -128,7 +128,7 @@ void Foam::waveModels::StokesI::setLevel
     {
         const scalar eta =
             this->eta
-	        (
+            (
                 waveHeight_,
                 waveKx,
                 xPaddle_[paddlei],
@@ -171,7 +171,7 @@ void Foam::waveModels::StokesI::setVelocity
             const label paddlei = faceToPaddle_[facei];
 
             const vector Uf = UfBase
-	        (
+            (
                 waveHeight_,
                 waterDepthRef_,
                 waveKx,
@@ -221,7 +221,7 @@ bool Foam::waveModels::StokesI::readDict(const dictionary& overrideDict)
 {
     if (regularWaveModel::readDict(overrideDict))
     {
-		waveLength_ = waveLength(waterDepthRef_, wavePeriod_);
+        waveLength_ = waveLength(waterDepthRef_, wavePeriod_);
 
         return true;
     }

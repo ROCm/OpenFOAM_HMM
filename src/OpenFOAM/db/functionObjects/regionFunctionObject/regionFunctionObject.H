@@ -114,7 +114,7 @@ protected:
         template<class ObjectType>
         ObjectType* lookupObjectRefPtr(const word& fieldName) const;
 
-        //- Store the given field in the (sub) objectRegistry under the given name
+        //- Store the field in the (sub) objectRegistry under the given name
         //  Note: sets the fieldName to tfield().name() if not already set
         template<class ObjectType>
         bool store

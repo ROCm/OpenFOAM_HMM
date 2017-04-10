@@ -168,19 +168,19 @@ void Foam::waveModel::setAlpha(const scalarField& level)
         const scalar zMin0 = zMin_[facei] - zMin0_;
         const scalar zMax0 = zMax_[facei] - zMin0_;
 
-    	if (zMax0 < paddleCalc)
-    	{
-    	    alpha_[facei] = 1.0;
-    	}
-    	else if (zMin0 > paddleCalc)
-    	{
-    	    alpha_[facei] = 0.0;
-    	}
-    	else
-    	{
-    	    scalar dz = paddleCalc - zMin0;
-    	    alpha_[facei] = dz/(zMax0 - zMin0);
-    	}
+        if (zMax0 < paddleCalc)
+        {
+            alpha_[facei] = 1.0;
+        }
+        else if (zMin0 > paddleCalc)
+        {
+            alpha_[facei] = 0.0;
+        }
+        else
+        {
+            scalar dz = paddleCalc - zMin0;
+            alpha_[facei] = dz/(zMax0 - zMin0);
+        }
     }
 }
 
@@ -217,11 +217,11 @@ void Foam::waveModel::setPaddlePropeties
             if ((zMax > paddleCalc) && (zMin < paddleCalc))
             {
                 scalar dz = paddleCalc - zMin;
-	            fraction = dz/(zMax - zMin);
+                fraction = dz/(zMax - zMin);
                 z = z_[facei] - zMin0_;
             }
         }
-	    else
+        else
         {
             if (zMax < paddleCalc)
             {
@@ -230,7 +230,7 @@ void Foam::waveModel::setPaddlePropeties
             else if ((zMax > paddleCalc) && (zMin < paddleCalc))
             {
                 scalar dz = paddleCalc - zMin;
-	            fraction = dz/(zMax - zMin);
+                fraction = dz/(zMax - zMin);
                 z = waterDepthRef_;
             }
         }
