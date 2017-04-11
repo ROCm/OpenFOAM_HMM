@@ -177,12 +177,12 @@ public:
     // Constructors
 
         //- Construct from surface
-        surfaceFeatures(const triSurface&);
+        surfaceFeatures(const triSurface& surf);
 
         //- Construct from components
         surfaceFeatures
         (
-            const triSurface&,
+            const triSurface& surf,
             const labelList& featurePoints,
             const labelList& featureEdges,
             const label externalStart,
@@ -195,7 +195,7 @@ public:
         //  geometric criteria
         surfaceFeatures
         (
-            const triSurface&,
+            const triSurface& surf,
             const scalar includedAngle,
             const scalar minLen = 0,
             const label minElems = 0,
@@ -203,15 +203,15 @@ public:
         );
 
         //- Construct from dictionary
-        surfaceFeatures(const triSurface&, const dictionary& dict);
+        surfaceFeatures(const triSurface& surf, const dictionary& dict);
 
         //- Construct from file
-        surfaceFeatures(const triSurface&, const fileName& fName);
+        surfaceFeatures(const triSurface& surf, const fileName& fName);
 
         //- Construct from pointField and edgeList (edgeMesh)
         surfaceFeatures
         (
-            const triSurface&,
+            const triSurface& surf,
             const pointField& points,
             const edgeList& edges,
             const scalar mergeTol = 1e-6,
@@ -219,7 +219,7 @@ public:
         );
 
         //- Construct as copy
-        surfaceFeatures(const surfaceFeatures&);
+        surfaceFeatures(const surfaceFeatures& sf);
 
 
     // Member Functions
@@ -405,7 +405,7 @@ public:
         // Write
 
             //- Write as dictionary
-            void writeDict(Ostream&) const;
+            void writeDict(Ostream& os) const;
 
             //- Write as dictionary to file
             void write(const fileName& fName) const;
@@ -418,7 +418,7 @@ public:
 
     // Member Operators
 
-        void operator=(const surfaceFeatures&);
+        void operator=(const surfaceFeatures& rhs);
 
 
 };

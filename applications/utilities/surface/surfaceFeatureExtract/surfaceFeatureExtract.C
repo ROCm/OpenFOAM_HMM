@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +41,8 @@ Description
 #include "argList.H"
 #include "Time.H"
 #include "triSurface.H"
-#include "surfaceFeatures.H"
+#include "surfaceFeaturesExtraction.H"
+#include "surfaceIntersection.H"
 #include "featureEdgeMesh.H"
 #include "extendedFeatureEdgeMesh.H"
 #include "treeBoundBox.H"
@@ -865,6 +866,61 @@ void writeStats(const extendedFeatureEdgeMesh& fem, Ostream& os)
 }
 
 
+// Read and combine all surfaces into a single one
+
+autoPtr<triSurface> loadSurfaces(Time& runTime, const wordList& surfNames)
+{
+    List<labelledTri> faces;
+    pointField points;
+    label regoff = 0; // region offset
+
+    forAll(surfNames, surfi)
+    {
+        const word& surfName = surfNames[surfi];
+
+        triSurface addsurf(runTime.constantPath()/"triSurface"/surfName);
+
+        List<labelledTri> addfaces(addsurf.xferFaces());
+        List<point> addpoints(addsurf.xferPoints());
+
+        if (surfi)
+        {
+            const label ptoff = points.size(); // point offset
+
+            forAll(addfaces, facei)
+            {
+                labelledTri& f = addfaces[facei];
+                forAll(f, fi)
+                {
+                    f[fi] += ptoff;
+                }
+                f.region() += regoff;
+            }
+
+            faces.append(addfaces);
+            points.append(addpoints);
+        }
+        else
+        {
+            faces.transfer(addfaces);
+            points.transfer(addpoints);
+        }
+
+        regoff += addsurf.patches().size();
+    }
+
+    return autoPtr<triSurface>
+    (
+        new triSurface
+        (
+            faces,
+            geometricSurfacePatchList(),
+            points,
+            true
+        )
+    );
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -873,6 +929,7 @@ int main(int argc, char *argv[])
         "extract and write surface features to file"
     );
     argList::noParallel();
+    argList::noFunctionObjects();
 
     #include "addDictOption.H"
 
@@ -881,6 +938,21 @@ int main(int argc, char *argv[])
 
     const word dictName("surfaceFeatureExtractDict");
     #include "setSystemRunTimeDictionaryIO.H"
+
+    // Will be using triSurface, so filter according to what is supported
+    fileNameList validSurfaceFiles = readDir
+    (
+        runTime.path()/runTime.constant()/"triSurface",
+        fileName::FILE
+    );
+    inplaceSubsetList
+    (
+        validSurfaceFiles,
+        [](const fileName& f){ return triSurface::canRead(f); }
+    );
+
+    // sort and eliminate duplicates (eg, files with/without .gz)
+    inplaceUniqueSort(validSurfaceFiles);
 
     Info<< "Reading " << dictName << nl << endl;
 
@@ -900,132 +972,132 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        const word extractionMethod = surfaceDict.lookup("extractionMethod");
+        autoPtr<surfaceFeaturesExtraction::method> extractPtr =
+            surfaceFeaturesExtraction::method::New
+            (
+                surfaceDict
+            );
 
-        const fileName surfFileName = iter().keyword();
-        const fileName sFeatFileName = surfFileName.lessExt().name();
+        const surfaceFeaturesExtraction::method& extract = extractPtr();
 
-        Info<< "Surface            : " << surfFileName << nl << endl;
+        // Output name, cleansed of extensions
+        const word sFeatFileName =
+            fileName
+            (
+                surfaceDict.lookupOrDefault<word>("output", iter().keyword())
+            ).lessExt();
 
-        const Switch writeVTK =
-            surfaceDict.lookupOrDefault<Switch>("writeVTK", "off");
-        const Switch writeObj =
-            surfaceDict.lookupOrDefault<Switch>("writeObj", "off");
+        wordList surfFileNames;
 
-        const Switch curvature =
-            surfaceDict.lookupOrDefault<Switch>("curvature", "off");
-        const Switch featureProximity =
-            surfaceDict.lookupOrDefault<Switch>("featureProximity", "off");
-        const Switch closeness =
-            surfaceDict.lookupOrDefault<Switch>("closeness", "off");
+        if
+        (
+            iter().keyword() == "surfaces"   // mandatory
+         || surfaceDict.found("surfaces")    // or optional
+        )
+        {
+            wordReList regexs(surfaceDict.lookup("surfaces"));
 
+            labelList selected = findStrings(regexs, validSurfaceFiles);
+            surfFileNames.setSize(selected.size());
+            forAll(selected, i)
+            {
+                surfFileNames[i] = validSurfaceFiles[selected[i]].name();
+            }
+
+            if (surfFileNames.empty())
+            {
+                FatalErrorInFunction
+                    << "No surfaces specified/found for entry: "
+                    << iter().keyword()
+                    << exit(FatalError);
+            }
+        }
+        else
+        {
+            surfFileNames.setSize(1);
+            surfFileNames[0] = iter().keyword();
+
+            const fileName file
+            (
+                runTime.constantPath()/"triSurface"/surfFileNames[0]
+            );
+
+            if (!isFile(file))
+            {
+                FatalErrorInFunction
+                    << "No surface: " << file.name()
+                    << exit(FatalError);
+            }
+        }
+
+        // DebugVar(surfFileNames);
+        // DebugVar(sFeatFileName);
+
+        Info<< "Surfaces           : ";
+        if (surfFileNames.size() == 1)
+        {
+            Info<< surfFileNames[0] << nl;
+        }
+        else
+        {
+            Info<< flatOutput(surfFileNames) << nl;
+        }
+
+        Info<< "Output             : " << sFeatFileName << nl;
+
+        const Switch writeVTK = surfaceDict.lookupOrDefault<Switch>
+        (
+            "writeVTK", Switch::OFF
+        );
+        const Switch writeObj = surfaceDict.lookupOrDefault<Switch>
+        (
+            "writeObj", Switch::OFF
+        );
+
+        const Switch curvature = surfaceDict.lookupOrDefault<Switch>
+        (
+            "curvature", Switch::OFF
+        );
+        const Switch featureProximity = surfaceDict.lookupOrDefault<Switch>
+        (
+            "featureProximity", Switch::OFF
+        );
+        const Switch closeness = surfaceDict.lookupOrDefault<Switch>
+        (
+            "closeness", Switch::OFF
+        );
+
+        Info<< "write VTK: " <<  writeVTK << nl;
 
         Info<< nl << "Feature line extraction is only valid on closed manifold "
             << "surfaces." << endl;
 
-        // Read
-        // ~~~~
 
-        triSurface surf(runTime.constantPath()/"triSurface"/surfFileName);
+        // Read and combine all surfaces into a single one
+
+        autoPtr<triSurface> surfPtr = loadSurfaces(runTime, surfFileNames);
+        triSurface surf = surfPtr();
 
         Info<< "Statistics:" << endl;
         surf.writeStats(Info);
         Info<< endl;
 
-        faceList faces(surf.size());
-
-        forAll(surf, fI)
+        // need plain faces if outputting VTK format
+        faceList faces;
+        if (writeVTK)
         {
-            faces[fI] = surf[fI].triFaceFace();
+            faces.setSize(surf.size());
+            forAll(surf, fi)
+            {
+                faces[fi] = surf[fi].triFaceFace();
+            }
         }
 
 
         // Either construct features from surface & featureAngle or read set.
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        autoPtr<surfaceFeatures> set;
-
-        scalar includedAngle = 0.0;
-
-        if (extractionMethod == "extractFromFile")
-        {
-            const dictionary& extractFromFileDict =
-                surfaceDict.subDict("extractFromFileCoeffs");
-
-            const fileName featureEdgeFile =
-                extractFromFileDict.lookup("featureEdgeFile");
-
-            const Switch geometricTestOnly =
-                extractFromFileDict.lookupOrDefault<Switch>
-                (
-                    "geometricTestOnly",
-                    "no"
-                );
-
-            edgeMesh eMesh(featureEdgeFile);
-
-            // Sometimes duplicate edges are present. Remove them.
-            eMesh.mergeEdges();
-
-            Info<< nl << "Reading existing feature edges from file "
-                << featureEdgeFile << nl
-                << "Selecting edges purely based on geometric tests: "
-                << geometricTestOnly.asText() << endl;
-
-            set.set
-            (
-                new surfaceFeatures
-                (
-                    surf,
-                    eMesh.points(),
-                    eMesh.edges(),
-                    1e-6,
-                    geometricTestOnly
-                )
-            );
-        }
-        else if (extractionMethod == "extractFromSurface")
-        {
-            const dictionary& extractFromSurfaceDict =
-                surfaceDict.subDict("extractFromSurfaceCoeffs");
-
-            includedAngle =
-                readScalar(extractFromSurfaceDict.lookup("includedAngle"));
-
-            const Switch geometricTestOnly =
-                extractFromSurfaceDict.lookupOrDefault<Switch>
-                (
-                    "geometricTestOnly",
-                    "no"
-                );
-
-            Info<< nl
-                << "Constructing feature set from included angle "
-                << includedAngle << nl
-                << "Selecting edges purely based on geometric tests: "
-                << geometricTestOnly.asText() << endl;
-
-            set.set
-            (
-                new surfaceFeatures
-                (
-                    surf,
-                    includedAngle,
-                    0,
-                    0,
-                    geometricTestOnly
-                )
-            );
-        }
-        else
-        {
-            FatalErrorInFunction
-                << "No initial feature set. Provide either one"
-                << " of extractFromFile (to read existing set)" << nl
-                << " or extractFromSurface (to construct new set from angle)"
-                << exit(FatalError);
-        }
-
+        autoPtr<surfaceFeatures> set = extract.features(surf);
 
         // Trim set
         // ~~~~~~~~
@@ -1033,21 +1105,27 @@ int main(int argc, char *argv[])
         if (surfaceDict.isDict("trimFeatures"))
         {
             dictionary trimDict = surfaceDict.subDict("trimFeatures");
-
-            scalar minLen =
+            const scalar minLen =
                 trimDict.lookupOrAddDefault<scalar>("minLen", -GREAT);
 
-            label minElem = trimDict.lookupOrAddDefault<label>("minElem", 0);
+            const label minElem =
+                trimDict.lookupOrAddDefault<label>("minElem", 0);
 
             // Trim away small groups of features
-            if (minElem > 0 || minLen > 0)
+            if (minLen > 0 || minElem > 0)
             {
-                Info<< "Removing features of length < "
-                    << minLen << endl;
-                Info<< "Removing features with number of edges < "
-                    << minElem << endl;
+                if (minLen > 0)
+                {
+                    Info<< "Removing features of length < "
+                        << minLen << endl;
+                }
+                if (minElem > 0)
+                {
+                    Info<< "Removing features with number of edges < "
+                        << minElem << endl;
+                }
 
-                set().trimFeatures(minLen, minElem, includedAngle);
+                set().trimFeatures(minLen, minElem, extract.includedAngle());
             }
         }
 
@@ -1108,7 +1186,7 @@ int main(int argc, char *argv[])
                         (
                             surf,
                             1e-5,   //tol,
-                            includedAngle,
+                            extract.includedAngle(),
                             edgeI
                         );
                     }
@@ -1147,7 +1225,7 @@ int main(int argc, char *argv[])
 
 
         surfaceFeatures newSet(surf);
-        newSet.setFromStatus(edgeStat, includedAngle);
+        newSet.setFromStatus(edgeStat, extract.includedAngle());
 
         Info<< nl
             << "Initial feature set:" << nl
@@ -1215,6 +1293,39 @@ int main(int argc, char *argv[])
         }
 
 
+        if (surfaceDict.lookupOrDefault<bool>("selfIntersection", false))
+        {
+            // TODO: perturb tolerance
+
+            triSurfaceSearch query(surf);
+            surfaceIntersection intersect
+            (
+                query,
+                surfaceDict.lookupOrDefault<scalar>
+                (
+                    "planarTolerance",
+                    surfaceIntersection::defaultTolerance
+                )
+            );
+
+            // surf.write("selfIntersection-input.obj");
+
+            Info<<"self-intersection "
+                << intersect.cutEdges().size() << " edges "
+                << intersect.cutPoints().size() << " points" << nl;
+
+            if (intersect.cutEdges().size())
+            {
+                extendedEdgeMesh addMesh
+                (
+                    xferCopy<pointField>(intersect.cutPoints()),
+                    xferCopy<edgeList>(intersect.cutEdges())
+                );
+
+                feMesh.add(addMesh);
+            }
+        }
+
         Info<< nl
             << "Final feature set:" << nl;
         writeStats(feMesh, Info);
@@ -1226,7 +1337,7 @@ int main(int argc, char *argv[])
 
         if (writeObj)
         {
-            feMesh.writeObj(feMesh.path()/surfFileName.lessExt().name());
+            feMesh.writeObj(feMesh.path()/sFeatFileName);
         }
 
         feMesh.write();
@@ -1236,10 +1347,10 @@ int main(int argc, char *argv[])
         (
             IOobject
             (
-                surfFileName.lessExt().name() + ".eMesh",   // name
-                runTime.constant(),                         // instance
+                sFeatFileName + ".eMesh",   // name
+                runTime.constant(),         // instance
                 "triSurface",
-                runTime,                                    // registry
+                runTime,                    // registry
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE,
                 false

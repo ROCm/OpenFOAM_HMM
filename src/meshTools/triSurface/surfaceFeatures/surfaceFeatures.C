@@ -829,7 +829,7 @@ Foam::labelList Foam::surfaceFeatures::trimFeatures
 }
 
 
-void Foam::surfaceFeatures::writeDict(Ostream& writeFile) const
+void Foam::surfaceFeatures::writeDict(Ostream& os) const
 {
 
     dictionary featInfoDict;
@@ -838,15 +838,14 @@ void Foam::surfaceFeatures::writeDict(Ostream& writeFile) const
     featInfoDict.add("featureEdges", featureEdges_);
     featInfoDict.add("featurePoints", featurePoints_);
 
-    featInfoDict.write(writeFile);
+    featInfoDict.write(os);
 }
 
 
 void Foam::surfaceFeatures::write(const fileName& fName) const
 {
-    OFstream str(fName);
-
-    writeDict(str);
+    OFstream os(fName);
+    writeDict(os);
 }
 
 

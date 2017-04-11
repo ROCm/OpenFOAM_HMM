@@ -114,4 +114,41 @@ surface2.nas
 }
 
 
+// Handle multiple surfaces
+//
+// - If the dictionary is named 'surfaces', it must also contain a 'surfaces'
+//   entry (wordRe list).
+//
+// - If other dictionaries may contain a 'surfaces' entry, it will be taken
+//   for the input.
+//
+surfaces
+{
+    extractionMethod    extractFromSurface;
+
+    surfaces            (surface1.stl surface2.nas);
+
+    // Base output name (optional)
+    // output              surfaces;
+
+    // Generate features from self-intersect
+    selfIntersection    true;
+
+    // Tolerance for self-intersect
+    planarTolerance     1e-3;
+
+    extractFromSurfaceCoeffs
+    {
+        includedAngle   120;
+
+        // Do not mark region edges
+        geometricTestOnly       yes;
+    }
+
+    // Write options
+
+        // Write features to obj format for postprocessing
+        writeObj                yes;
+}
+
 // ************************************************************************* //
