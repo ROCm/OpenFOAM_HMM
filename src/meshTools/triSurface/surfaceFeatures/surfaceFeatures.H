@@ -70,6 +70,7 @@ class surfaceFeatures
 {
 public:
 
+        //- Edge status
         enum edgeStatus
         {
             NONE,

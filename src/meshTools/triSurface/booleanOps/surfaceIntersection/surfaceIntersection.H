@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,6 +82,17 @@ class surfaceIntersection
 {
     // Private data
 
+        //- Surface intersection types for classify, doCutEdges
+        enum originatingType
+        {
+            FIRST,      //!< First surface
+            SECOND,     //!< Second surface
+            SELF        //!< Self-intersection
+        };
+
+        //- Tolerance for intersections
+        scalar planarTol_;
+
         //- Newly introduced points.
         pointField cutPoints_;
 
@@ -90,7 +101,7 @@ class surfaceIntersection
         edgeList cutEdges_;
 
         //- From face on surf1 and face on surf2 to intersection point
-        // (label in cutPoints)
+        //  (label in cutPoints)
         labelPairLookup facePairToVertex_;
 
         //- From face on surf1 and face on surf2 to intersection edge
@@ -195,7 +206,7 @@ class surfaceIntersection
         //  (first occurrence of face pair) and facePairToEdge_ (second occ.)
         void storeIntersection
         (
-            const bool isFirstSurf,
+            const enum originatingType cutFrom,
             const labelList& facesA,
             const label faceB,
             DynamicList<edge>&,
@@ -209,9 +220,8 @@ class surfaceIntersection
             const triSurface& surf1,
             const scalarField& surf1PointTol,
             const triSurface& surf2,
-            const bool isFirstSurf,
+            const enum originatingType cutFrom,
             const label edgeI,
-            const scalar tolDim,
             const pointIndexHit& pHit,
 
             DynamicList<edge>& allCutEdges,
@@ -224,8 +234,7 @@ class surfaceIntersection
         (
             const triSurface& surf1,
             const triSurfaceSearch& querySurf2,
-            const bool isFirstSurf,
-            const bool isSelfIntersection,
+            const enum originatingType cutFrom,
 
             DynamicList<edge>& allCutEdges,
             DynamicList<point>& allCutPoints,
@@ -235,6 +244,11 @@ class surfaceIntersection
 
 public:
 
+    // Public Data, Declarations
+
+    //- The default planarTol for intersections.
+    static const scalar defaultTolerance;
+
     ClassName("surfaceIntersection");
 
 
@@ -242,6 +256,23 @@ public:
 
         //- Construct null
         surfaceIntersection();
+
+        //- Construct from two surfaces.
+        //  Does its own cutting. Has problems with degenerate cuts
+        surfaceIntersection
+        (
+            const triSurfaceSearch& querySurf1,
+            const triSurfaceSearch& querySurf2,
+            const scalar planarTol = surfaceIntersection::defaultTolerance
+        );
+
+        //- Construct from self-intersections.
+        //  Does its own cutting, but has problems with degenerate cuts
+        surfaceIntersection
+        (
+            const triSurfaceSearch& querySurf1,
+            const scalar planarTol = surfaceIntersection::defaultTolerance
+        );
 
         //- Construct from precalculated intersection information.
         //  Advantage: intersection information is guaranteed to have no
@@ -253,18 +284,6 @@ public:
             const triSurface& surf2,
             const edgeIntersections& intersections2
         );
-
-        //- Construct from two surfaces. Does all its own cutting.
-        //  Has problems with degenerate cuts
-        surfaceIntersection
-        (
-            const triSurfaceSearch& querySurf1,
-            const triSurfaceSearch& querySurf2
-        );
-
-        //- Special: intersect surface with itself. Used to check for
-        //  self-intersection.
-        surfaceIntersection(const triSurfaceSearch& querySurf1);
 
 
     // Member Functions
@@ -279,7 +298,7 @@ public:
 
         //- Access either surf1EdgeCuts (isFirstSurface = true) or
         //  surf2EdgeCuts
-        const labelListList& edgeCuts(const bool) const;
+        const labelListList& edgeCuts(const bool isFirstSurf) const;
 
         const labelListList& surf1EdgeCuts() const;
 
