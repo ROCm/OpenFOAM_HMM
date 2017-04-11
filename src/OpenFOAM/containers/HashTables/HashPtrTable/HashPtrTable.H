@@ -51,10 +51,10 @@ class Ostream;
 template<class T, class Key, class Hash> class HashPtrTable;
 
 template<class T, class Key, class Hash>
-Istream& operator>>(Istream&, HashPtrTable<T, Key, Hash>&);
+Istream& operator>>(Istream& is, HashPtrTable<T, Key, Hash>& L);
 
 template<class T, class Key, class Hash>
-Ostream& operator<<(Ostream&, const HashPtrTable<T, Key, Hash>&);
+Ostream& operator<<(Ostream& os, const HashPtrTable<T, Key, Hash>& L);
 
 
 /*---------------------------------------------------------------------------*\
@@ -96,8 +96,7 @@ public:
         //- Construct from Istream using default Istream constructor class
         HashPtrTable(Istream& is);
 
-        //- Construct from dictionary using default dictionary constructor
-        //  class
+        //- Construct from dictionary with default dictionary constructor class
         HashPtrTable(const dictionary& dict);
 
         //- Construct as copy
@@ -135,14 +134,14 @@ public:
 
         friend Istream& operator>> <T, Key, Hash>
         (
-            Istream&,
-            HashPtrTable<T, Key, Hash>&
+            Istream& is,
+            HashPtrTable<T, Key, Hash>& L
         );
 
         friend Ostream& operator<< <T, Key, Hash>
         (
-            Ostream&,
-            const HashPtrTable<T, Key, Hash>&
+            Ostream& os,
+            const HashPtrTable<T, Key, Hash>& L
         );
 };
 

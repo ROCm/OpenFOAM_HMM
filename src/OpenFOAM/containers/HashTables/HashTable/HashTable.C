@@ -397,7 +397,7 @@ Foam::label Foam::HashTable<T, Key, Hash>::erase(const UList<Key>& keys)
     {
         if (erase(keys[keyI]))
         {
-            count++;
+            ++count;
         }
     }
 
@@ -420,7 +420,7 @@ Foam::label Foam::HashTable<T, Key, Hash>::erase
     {
         if (rhs.found(iter.key()) && erase(iter))
         {
-            count++;
+            ++count;
         }
     }
 

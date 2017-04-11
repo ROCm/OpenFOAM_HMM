@@ -83,7 +83,7 @@ public:
         {}
 
         //- Construct from UList of Key
-        HashSet(const UList<Key>&);
+        HashSet(const UList<Key>& lst);
 
         //- Construct from an initializer list of Key
         HashSet(std::initializer_list<Key>);
@@ -109,7 +109,7 @@ public:
         //- Construct from the keys of another HashTable,
         //  the type of values held is arbitrary.
         template<class AnyType, class AnyHash>
-        HashSet(const HashTable<AnyType, Key, AnyHash>&);
+        HashSet(const HashTable<AnyType, Key, AnyHash>& h);
 
 
     // Member Functions
@@ -158,24 +158,24 @@ public:
     // Member Operators
 
         //- Return true if the entry exists, same as found()
-        inline bool operator[](const Key&) const;
+        inline bool operator[](const Key& key) const;
 
-        //- Equality. Two hashtables are equal when their contents are equal.
+        //- Equality. Two hashset are equal when they have the same keys.
         //  Independent of table size or order.
-        bool operator==(const HashSet<Key, Hash>&) const;
+        bool operator==(const HashSet<Key, Hash>& rhs) const;
 
         //- The opposite of the equality operation.
-        bool operator!=(const HashSet<Key, Hash>&) const;
+        bool operator!=(const HashSet<Key, Hash>& rhs) const;
 
 
         //- Combine entries from HashSets
-        void operator|=(const HashSet<Key, Hash>&);
+        void operator|=(const HashSet<Key, Hash>& rhs);
 
         //- Only retain entries found in both HashSets
-        void operator&=(const HashSet<Key, Hash>&);
+        void operator&=(const HashSet<Key, Hash>& rhs);
 
         //- Only retain unique entries (xor)
-        void operator^=(const HashSet<Key, Hash>&);
+        void operator^=(const HashSet<Key, Hash>& rhs);
 
         //- Add entries listed in the given HashSet to this HashSet
         inline void operator+=(const HashSet<Key, Hash>& rhs)
@@ -184,7 +184,7 @@ public:
         }
 
         //- Remove entries listed in the given HashSet from this HashSet
-        void operator-=(const HashSet<Key, Hash>&);
+        void operator-=(const HashSet<Key, Hash>& rhs);
 };
 
 
