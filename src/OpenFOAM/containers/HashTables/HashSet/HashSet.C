@@ -121,16 +121,12 @@ inline bool Foam::HashSet<Key, Hash>::operator[](const Key& key) const
 template<class Key, class Hash>
 bool Foam::HashSet<Key, Hash>::operator==(const HashSet<Key, Hash>& rhs) const
 {
-    // Are all lhs elements in rhs?
-    for (const_iterator iter = this->cbegin(); iter != this->cend(); ++iter)
+    // Sizes (number of keys) must match
+    if (this->size() != rhs.size())
     {
-        if (!rhs.found(iter.key()))
-        {
-            return false;
-        }
+        return false;
     }
 
-    // Are all rhs elements in lhs?
     for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
         if (!this->found(iter.key()))
