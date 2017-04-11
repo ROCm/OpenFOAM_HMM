@@ -403,6 +403,10 @@ public:
 
               // Access
 
+                //- True if iterator points to a hashedEntry.
+                //  This can be used instead of a comparison to end()
+                inline bool found() const;
+
                 //- Return the Key corresponding to the iterator
                 inline const Key& key() const;
 

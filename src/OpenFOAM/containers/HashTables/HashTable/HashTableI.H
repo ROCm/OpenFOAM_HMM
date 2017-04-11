@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -254,6 +254,14 @@ Foam::HashTable<T, Key, Hash>::iteratorBase::increment()
         entryPtr_ = 0;
         hashIndex_ = 0;
     }
+}
+
+
+template<class T, class Key, class Hash>
+inline bool
+Foam::HashTable<T, Key, Hash>::iteratorBase::found() const
+{
+    return entryPtr_;
 }
 
 
