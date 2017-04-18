@@ -32,7 +32,7 @@ boundaryField
         type            waveTransmissive;
         field           p;
         psi             thermo:psi;
-        gamma           1.3;
+        gamma           1.4;
         fieldInf        $pressure;
         lInf            1;
         value           $internalField;
