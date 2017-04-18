@@ -324,6 +324,11 @@ void Foam::Time::setControls()
 void Foam::Time::setMonitoring(const bool forceProfiling)
 {
     const dictionary* profilingDict = controlDict_.subDictPtr("profiling");
+    if (!profilingDict)
+    {
+        // ... or from etc/controlDict
+        profilingDict = debug::controlDict().subDictPtr("profiling");
+    }
 
     // initialize profiling on request
     // otherwise rely on profiling entry within controlDict

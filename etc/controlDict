@@ -78,6 +78,15 @@ OptimisationSwitches
     stopAtWriteNowSignal        -1;
 }
 
+/* Can specify fallback profiling settings
+profiling
+{
+    active      true;
+    cpuInfo     true;
+    memInfo     false;
+    sysInfo     true;
+}
+*/
 
 DebugSwitches
 {
