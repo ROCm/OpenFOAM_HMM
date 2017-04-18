@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2009-2016 Bernhard Gschaider
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,64 +23,52 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "profilingSysInfo.H"
-#include "foamVersion.H"
-#include "clock.H"
-#include "Ostream.H"
-#include "OSspecific.H"
-
-
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-// file-scope function
-inline static void printEnv
-(
-    Foam::Ostream& os,
-    const Foam::word& key,
-    const std::string& envName
-)
-{
-    const std::string value = Foam::getEnv(envName);
-    if (!value.empty())
-    {
-        os.writeEntry(key, value);
-    }
-}
+#include "profiling.H"
+#include "profilingInformation.H"
+#include "profilingTrigger.H"
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::profilingSysInfo::profilingSysInfo()
+Foam::profilingTrigger::profilingTrigger(const char* name)
+:
+    clock_(),
+    ptr_(profiling::New(name, clock_))
+{}
+
+
+Foam::profilingTrigger::profilingTrigger(const string& name)
+:
+    clock_(),
+    ptr_(profiling::New(name, clock_))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::profilingSysInfo::~profilingSysInfo()
-{}
+Foam::profilingTrigger::~profilingTrigger()
+{
+    stop();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::profilingSysInfo::write
-(
-    Ostream& os
-) const
+bool Foam::profilingTrigger::running() const
 {
-    os.writeEntry("host",       Foam::hostName(false)); // short name
-    os.writeEntry("date",       Foam::clock::dateTime());
+    return ptr_;
+}
 
-    // compile-time information
-    os.writeEntry("version",    std::string(FOAMversion));
-    os.writeEntry("build",      std::string(FOAMbuild));
 
-    printEnv(os, "arch",         "WM_ARCH");
-    printEnv(os, "compilerType", "WM_COMPILER_TYPE");
-    printEnv(os, "compiler",     "WM_COMPILER");
-    printEnv(os, "mplib",        "WM_MPLIB");
-    printEnv(os, "options",      "WM_OPTIONS");
-
-    return os;
+void Foam::profilingTrigger::stop()
+{
+    if (ptr_)
+    {
+        ptr_->update(clock_.elapsedTime());
+        profiling::unstack(ptr_);
+        // pointer is managed by pool storage -> thus no delete here
+    }
+    ptr_ = 0;
 }
 
 
