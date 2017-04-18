@@ -35,7 +35,8 @@ volVectorField U
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh
+    mesh,
+    true
 );
 
 #include "compressibleCreatePhi.H"
@@ -63,7 +64,9 @@ volScalarField dpdt
     (
         "dpdt",
         runTime.timeName(),
-        mesh
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
     ),
     mesh,
     dimensionedScalar("dpdt", p.dimensions()/dimTime, 0)

@@ -197,7 +197,7 @@ void Foam::fvMesh::storeOldVol(const scalarField& V)
                     "V0",
                     time().timeName(),
                     *this,
-                    IOobject::READ_IF_PRESENT,//NO_READ,
+                    IOobject::NO_READ,
                     IOobject::AUTO_WRITE,
                     true
                 ),
@@ -281,8 +281,8 @@ Foam::fvMesh::fvMesh(const IOobject& io)
                 time().timeName(),
                 *this,
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false
+                IOobject::AUTO_WRITE,
+                true
             ),
             *this
         );

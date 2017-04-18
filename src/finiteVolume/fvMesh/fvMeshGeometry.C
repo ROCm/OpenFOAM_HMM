@@ -258,12 +258,13 @@ const Foam::volScalarField::Internal& Foam::fvMesh::V00() const
                 "V00",
                 time().timeName(),
                 *this,
-                IOobject::READ_IF_PRESENT,//NO_READ,
-                IOobject::AUTO_WRITE,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
                 true
             ),
             V0()
         );
+
 
         // If V00 is used then V0 should be stored for restart
         V0Ptr_->writeOpt() = IOobject::AUTO_WRITE;

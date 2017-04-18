@@ -770,10 +770,11 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::storeOldTimes() const
     )
     {
         storeOldTime();
+        timeIndex_ = this->time().timeIndex();
     }
 
     // Correct time index
-    timeIndex_ = this->time().timeIndex();
+    //timeIndex_ = this->time().timeIndex();
 }
 
 
