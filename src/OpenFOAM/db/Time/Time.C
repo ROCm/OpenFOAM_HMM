@@ -321,7 +321,7 @@ void Foam::Time::setControls()
 }
 
 
-void Foam::Time::setMonitoring(bool forceProfiling)
+void Foam::Time::setMonitoring(const bool forceProfiling)
 {
     const dictionary* profilingDict = controlDict_.subDictPtr("profiling");
 
@@ -750,18 +750,15 @@ const Foam::fileName& Foam::Time::getFile(const label watchIndex) const
 }
 
 
-Foam::fileMonitor::fileState Foam::Time::getState
-(
-    const label watchFd
-) const
+Foam::fileMonitor::fileState Foam::Time::getState(const label watchIndex) const
 {
-    return monitorPtr_().getState(watchFd);
+    return monitorPtr_().getState(watchIndex);
 }
 
 
-void Foam::Time::setUnmodified(const label watchFd) const
+void Foam::Time::setUnmodified(const label watchIndex) const
 {
-    monitorPtr_().setUnmodified(watchFd);
+    monitorPtr_().setUnmodified(watchIndex);
 }
 
 
@@ -908,13 +905,13 @@ Foam::dimensionedScalar Foam::Time::endTime() const
 
 bool Foam::Time::run() const
 {
-    bool running = value() < (endTime_ - 0.5*deltaT_);
+    bool isRunning = value() < (endTime_ - 0.5*deltaT_);
 
     if (!subCycling_)
     {
         // Only execute when the condition is no longer true
         // ie, when exiting the control loop
-        if (!running && timeIndex_ != startTimeIndex_)
+        if (!isRunning && timeIndex_ != startTimeIndex_)
         {
             // Ensure functionObjects execute on last time step
             // (and hence write uptodate functionObjectProperties)
@@ -928,7 +925,7 @@ bool Foam::Time::run() const
         }
     }
 
-    if (running)
+    if (isRunning)
     {
         if (!subCycling_)
         {
@@ -957,25 +954,25 @@ bool Foam::Time::run() const
             }
         }
 
-        // Update the "running" status following the
+        // Update the "is-running" status following the
         // possible side-effects from functionObjects
-        running = value() < (endTime_ - 0.5*deltaT_);
+        isRunning = value() < (endTime_ - 0.5*deltaT_);
     }
 
-    return running;
+    return isRunning;
 }
 
 
 bool Foam::Time::loop()
 {
-    bool running = run();
+    const bool isRunning = run();
 
-    if (running)
+    if (isRunning)
     {
         operator++();
     }
 
-    return running;
+    return isRunning;
 }
 
 
@@ -1066,19 +1063,19 @@ void Foam::Time::setEndTime(const scalar endTime)
 void Foam::Time::setDeltaT
 (
     const dimensionedScalar& deltaT,
-    const bool bAdjustDeltaT
+    const bool adjust
 )
 {
-    setDeltaT(deltaT.value(), bAdjustDeltaT);
+    setDeltaT(deltaT.value(), adjust);
 }
 
 
-void Foam::Time::setDeltaT(const scalar deltaT, const bool bAdjustDeltaT)
+void Foam::Time::setDeltaT(const scalar deltaT, const bool adjust)
 {
     deltaT_ = deltaT;
     deltaTchanged_ = true;
 
-    if (bAdjustDeltaT)
+    if (adjust)
     {
         adjustDeltaT();
     }
