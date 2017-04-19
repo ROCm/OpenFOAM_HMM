@@ -78,6 +78,11 @@ do
             nCores=${WM_NCOMPPROCS:-0}
             test $# -ge 2 && expr $2 + 1 > /dev/null 2>&1 \
                 && shift && nCores=$1
+
+            if [ "$nCores" = 0 ]
+            then
+                nCores=1
+            fi
             ;;
         # Parallel compilation on specified number of cores
         -j[1-9]*)
