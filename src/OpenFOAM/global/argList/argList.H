@@ -109,6 +109,7 @@ class argList
 
         word executable_;
         fileName rootPath_;
+        bool distributed_;
         fileName globalCase_;
         fileName case_;
         string argListStr_;
@@ -220,6 +221,10 @@ public:
 
             //- Return root path
             inline const fileName& rootPath() const;
+
+            //- Return distributed flag (i.e. are rootPaths different on
+            //  different machines)
+            inline bool distributed() const;
 
             //- Return case name (parallel run) or global case (serial run)
             inline const fileName& caseName() const;

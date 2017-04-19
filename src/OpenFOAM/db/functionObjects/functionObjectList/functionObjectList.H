@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -263,6 +263,9 @@ public:
 
         //- Called at the end of Time::adjustDeltaT() if adjustTime is true
         bool adjustTimeStep();
+
+        //- Did any file get changed during execution?
+        bool filesModified() const;
 
         //- Update for changes of mesh
         void updateMesh(const mapPolyMesh& mpm);

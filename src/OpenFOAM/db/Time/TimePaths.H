@@ -53,6 +53,7 @@ class TimePaths
 
         bool processorCase_;
         const fileName rootPath_;
+        bool distributed_;
         fileName globalCaseName_;
         fileName case_;
         const word system_;
@@ -84,6 +85,7 @@ public:
         (
             const bool processorCase,
             const fileName& rootPath,
+            const bool distributed,
             const fileName& globalCaseName,
             const fileName& caseName,
             const word& systemName,
@@ -137,6 +139,13 @@ public:
             const word& constant() const
             {
                 return constant_;
+            }
+
+            //- Is case running with parallel distributed directories
+            //  (i.e. not NFS mounted)
+            bool distributed() const
+            {
+                return distributed_;
             }
 
             //- Return constant name for the case
