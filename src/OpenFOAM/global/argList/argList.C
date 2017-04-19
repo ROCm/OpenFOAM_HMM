@@ -702,8 +702,9 @@ void Foam::argList::parse
                     decompDict.lookup("numberOfSubdomains")
                 );
 
-                if (decompDict.lookupOrDefault("distributed", distributed_))
+                if (decompDict.lookupOrDefault("distributed", false))
                 {
+                    distributed_ = true;
                     decompDict.lookup("roots") >> roots;
                 }
             }
