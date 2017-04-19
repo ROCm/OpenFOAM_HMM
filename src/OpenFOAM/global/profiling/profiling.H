@@ -87,10 +87,35 @@ public:
 
 private:
 
-    // Private typedefs
+    // Private classes, typedefs
 
         typedef profilingSysInfo sysInfo;
-        typedef HashPtrTable<Information, string> StorageContainer;
+
+        //- Profile information lookup is qualified by parent id
+        typedef Tuple2<string, label> Key;
+
+        //- Hashing for information lookup
+        class HashKey
+        :
+            public Hash<Key>
+        {
+        public:
+
+            HashKey()
+            {}
+
+            //- Hash qualified by the parent id to avoid collisions
+            unsigned operator()(const Key& key) const
+            {
+                return
+                (
+                    Hash<string>()(key.first())
+                  + Hash<label>()(key.second())
+                );
+            }
+        };
+
+        typedef HashPtrTable<Information, Key, HashKey> StorageContainer;
         typedef LIFOStack<Information*> StackContainer;
 
 
@@ -164,8 +189,9 @@ protected:
 
     // Protected Member Functions
 
-        //- Find named profiling information element or null on failure
-        profilingInformation* find(const string& name);
+        //- Find named profiling information element with specified parent.
+        //  Return nullptr on failure.
+        profilingInformation* find(const string& descr, const label parentId);
 
         //- Add to hashed storage,
         //  returns pointer to newly stored element for chaining

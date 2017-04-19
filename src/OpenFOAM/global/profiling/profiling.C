@@ -37,16 +37,21 @@ Foam::profiling* Foam::profiling::pool_(0);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-Foam::profilingInformation* Foam::profiling::find(const string& name)
+Foam::profilingInformation* Foam::profiling::find
+(
+    const string& descr,
+    const label parentId
+)
 {
-    StorageContainer::iterator iter = hash_.find(name);
-    return (iter != hash_.end() ? iter() : 0);
+    StorageContainer::iterator iter = hash_.find(Key(descr, parentId));
+    return (iter.found() ? iter() : 0);
 }
 
 
 Foam::profilingInformation* Foam::profiling::store(profilingInformation *info)
 {
-    hash_.insert(info->description(), info);
+    // Profile information lookup is qualified by parent id
+    hash_.insert(Key(info->description(), info->parent().id()), info);
     return info;
 }
 
@@ -174,7 +179,7 @@ Foam::profilingInformation* Foam::profiling::New
     {
         profilingInformation *parent = pool_->stack_.top();
 
-        info = pool_->find(descr);
+        info = pool_->find(descr, parent->id());
         if (!info)
         {
             info = pool_->store(new profilingInformation(descr, parent));
