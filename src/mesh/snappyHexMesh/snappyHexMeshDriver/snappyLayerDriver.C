@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -269,6 +269,267 @@ bool Foam::snappyLayerDriver::unmarkExtrusion
         }
     }
     return unextruded;
+}
+
+
+Foam::label Foam::snappyLayerDriver::constrainFp(const label sz, const label fp)
+{
+    if (fp >= sz)
+    {
+        return 0;
+    }
+    else if (fp < 0)
+    {
+        return sz-1;
+    }
+    else
+    {
+        return fp;
+    }
+}
+
+
+void Foam::snappyLayerDriver::countCommonPoints
+(
+    const indirectPrimitivePatch& pp,
+    const label facei,
+
+    Map<label>& nCommonPoints
+) const
+{
+    const faceList& localFaces = pp.localFaces();
+    const labelListList& pointFaces = pp.pointFaces();
+
+    const face& f = localFaces[facei];
+
+    nCommonPoints.clear();
+
+    forAll(f, fp)
+    {
+        label pointi = f[fp];
+        const labelList& pFaces = pointFaces[pointi];
+
+        forAll(pFaces, pFacei)
+        {
+            label nbFacei = pFaces[pFacei];
+
+            if (facei < nbFacei)
+            {
+                // Only check once for each combination of two faces.
+
+                Map<label>::iterator fnd = nCommonPoints.find(nbFacei);
+
+                if (fnd == nCommonPoints.end())
+                {
+                    // First common vertex found.
+                    nCommonPoints.insert(nbFacei, 1);
+                }
+                else
+                {
+                    fnd()++;
+                }
+            }
+        }
+    }
+}
+
+
+bool Foam::snappyLayerDriver::checkCommonOrder
+(
+    const label nCommon,
+    const face& curFace,
+    const face& nbFace
+) const
+{
+    forAll(curFace, fp)
+    {
+        // Get the index in the neighbouring face shared with curFace
+        const label nb = findIndex(nbFace, curFace[fp]);
+
+        if (nb != -1)
+        {
+
+            // Check the whole face from nb onwards for shared vertices
+            // with neighbouring face. Rule is that any shared vertices
+            // should be consecutive on both faces i.e. if they are
+            // vertices fp,fp+1,fp+2 on one face they should be
+            // vertices nb, nb+1, nb+2 (or nb+2, nb+1, nb) on the
+            // other face.
+
+
+            // Vertices before and after on curFace
+            label fpPlus1 = curFace.fcIndex(fp);
+            label fpMin1  = curFace.rcIndex(fp);
+
+            // Vertices before and after on nbFace
+            label nbPlus1 = nbFace.fcIndex(nb);
+            label nbMin1  = nbFace.rcIndex(nb);
+
+            // Find order of walking by comparing next points on both
+            // faces.
+            label curInc = labelMax;
+            label nbInc = labelMax;
+
+            if (nbFace[nbPlus1] == curFace[fpPlus1])
+            {
+                curInc = 1;
+                nbInc = 1;
+            }
+            else if (nbFace[nbPlus1] == curFace[fpMin1])
+            {
+                curInc = -1;
+                nbInc = 1;
+            }
+            else if (nbFace[nbMin1] == curFace[fpMin1])
+            {
+                curInc = -1;
+                nbInc = -1;
+            }
+            else
+            {
+                curInc = 1;
+                nbInc = -1;
+            }
+
+
+            // Pass1: loop until start of common vertices found.
+            label curNb = nb;
+            label curFp = fp;
+
+            do
+            {
+                curFp = constrainFp(curFace.size(), curFp+curInc);
+                curNb = constrainFp(nbFace.size(), curNb+nbInc);
+            } while (curFace[curFp] == nbFace[curNb]);
+
+            // Pass2: check equality walking from curFp, curNb
+            // in opposite order.
+
+            curInc = -curInc;
+            nbInc = -nbInc;
+
+            for (label commonI = 0; commonI < nCommon; commonI++)
+            {
+                curFp = constrainFp(curFace.size(), curFp+curInc);
+                curNb = constrainFp(nbFace.size(), curNb+nbInc);
+
+                if (curFace[curFp] != nbFace[curNb])
+                {
+                    // Error: gap in string of connected vertices
+                    return false;
+                }
+            }
+
+            // Done the curFace - nbFace combination.
+            break;
+        }
+    }
+
+    return true;
+}
+
+
+void Foam::snappyLayerDriver::checkCommonOrder
+(
+    const indirectPrimitivePatch& pp,
+    const label facei,
+    const Map<label>& nCommonPoints,
+    pointField& patchDisp,
+    labelList& patchNLayers,
+    List<extrudeMode>& extrudeStatus
+) const
+{
+    forAllConstIter(Map<label>, nCommonPoints, iter)
+    {
+        label nbFacei = iter.key();
+        label nCommon = iter();
+
+        const face& curFace = pp[facei];
+        const face& nbFace = pp[nbFacei];
+
+        if
+        (
+            nCommon >= 2
+         && nCommon != nbFace.size()
+         && nCommon != curFace.size()
+        )
+        {
+            bool stringOk = checkCommonOrder(nCommon, curFace, nbFace);
+
+            if (!stringOk)
+            {
+                // Note: unmark whole face or just the common points?
+                // For now unmark the whole face
+                unmarkExtrusion
+                (
+                    pp.localFaces()[facei],
+                    patchDisp,
+                    patchNLayers,
+                    extrudeStatus
+                );
+                unmarkExtrusion
+                (
+                    pp.localFaces()[nbFacei],
+                    patchDisp,
+                    patchNLayers,
+                    extrudeStatus
+                );
+            }
+        }
+    }
+}
+
+
+void Foam::snappyLayerDriver::handleNonStringConnected
+(
+    const indirectPrimitivePatch& pp,
+    pointField& patchDisp,
+    labelList& patchNLayers,
+    List<extrudeMode>& extrudeStatus
+) const
+{
+    // Detect faces which are connected on non-consecutive vertices.
+    // This is the "<<Number of faces with non-consecutive shared points"
+    // warning from checkMesh. These faces cannot be extruded so
+    // there is no need to even attempt it.
+
+List<extrudeMode> oldExtrudeStatus(extrudeStatus);
+OBJstream str(meshRefiner_.mesh().time().path()/"nonStringConnected.obj");
+Pout<< "Dumping string edges to " << str.name();
+
+    // 1) Local
+    Map<label> nCommonPoints(100);
+
+    forAll(pp, facei)
+    {
+        countCommonPoints(pp, facei, nCommonPoints);
+
+        // Faces share pointi. Find any more shared points
+        // and if not in single string unmark all. See
+        // primitiveMesh::checkCommonOrder
+        checkCommonOrder
+        (
+            pp,
+            facei,
+            nCommonPoints,
+
+            patchDisp,
+            patchNLayers,
+            extrudeStatus
+        );
+    }
+
+    // 2) TDB. Other face remote
+
+forAll(extrudeStatus, pointi)
+{
+    if (extrudeStatus[pointi] != oldExtrudeStatus[pointi])
+    {
+        str.write(meshRefiner_.mesh().points()[pp.meshPoints()[pointi]]);
+    }
+}
+
+
 }
 
 
@@ -3332,6 +3593,19 @@ void Foam::snappyLayerDriver::addLayers
 
         // Precalculate mesh edge labels for patch edges
         labelList meshEdges(pp().meshEdges(mesh.edges(), mesh.pointEdges()));
+
+
+        // Disable extrusion on split strings of common points
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        handleNonStringConnected
+        (
+            pp,
+            patchDisp,
+            patchNLayers,
+            extrudeStatus
+        );
+
 
         // Disable extrusion on non-manifold points
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
