@@ -62,6 +62,7 @@ namespace Foam
 
 // Forward declaration of classes
 class argList;
+class profilingTrigger;
 
 /*---------------------------------------------------------------------------*\
                              Class Time Declaration
@@ -79,6 +80,9 @@ class Time
 
         //- file-change monitor for all registered files
         mutable autoPtr<fileMonitor> monitorPtr_;
+
+        //- Profiling trigger for time-loop (for run, loop)
+        mutable profilingTrigger* loopProfiling_;
 
         //- Any loaded dynamic libraries. Make sure to construct before
         //  reading controlDict.

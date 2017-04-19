@@ -28,6 +28,7 @@ License
 #include "argList.H"
 #include "HashSet.H"
 #include "profiling.H"
+#include "demandDrivenData.H"
 
 #include <sstream>
 
@@ -414,6 +415,7 @@ Foam::Time::Time
 
     objectRegistry(*this),
 
+    loopProfiling_(nullptr),
     libs_(),
 
     controlDict_
@@ -482,6 +484,7 @@ Foam::Time::Time
 
     objectRegistry(*this),
 
+    loopProfiling_(nullptr),
     libs_(),
 
     controlDict_
@@ -559,6 +562,7 @@ Foam::Time::Time
 
     objectRegistry(*this),
 
+    loopProfiling_(nullptr),
     libs_(),
 
     controlDict_
@@ -629,6 +633,7 @@ Foam::Time::Time
 
     objectRegistry(*this),
 
+    loopProfiling_(nullptr),
     libs_(),
 
     controlDict_
@@ -672,6 +677,8 @@ Foam::Time::Time
 
 Foam::Time::~Time()
 {
+    deleteDemandDrivenData(loopProfiling_);
+
     forAllReverse(controlDict_.watchIndices(), i)
     {
         removeWatch(controlDict_.watchIndices()[i]);
@@ -910,6 +917,8 @@ Foam::dimensionedScalar Foam::Time::endTime() const
 
 bool Foam::Time::run() const
 {
+    deleteDemandDrivenData(loopProfiling_);
+
     bool isRunning = value() < (endTime_ - 0.5*deltaT_);
 
     if (!subCycling_)
@@ -962,6 +971,13 @@ bool Foam::Time::run() const
         // Update the "is-running" status following the
         // possible side-effects from functionObjects
         isRunning = value() < (endTime_ - 0.5*deltaT_);
+
+        // (re)trigger profiling
+        if (profiling::active())
+        {
+            loopProfiling_ =
+                new profilingTrigger("time.run() " + objectRegistry::name());
+        }
     }
 
     return isRunning;
