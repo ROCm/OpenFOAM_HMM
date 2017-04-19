@@ -112,6 +112,7 @@ Usage
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "profiling.H"
 #include "Time.H"
 #include "IFstream.H"
 #include "OFstream.H"
@@ -289,6 +290,7 @@ int main(int argc, char *argv[])
         "disableFunctionEntries",
         "Disable expansion of dictionary directives - #include, #codeStream etc"
     );
+    profiling::disable(); // Disable profiling (and its output)
 
     argList args(argc, argv);
 

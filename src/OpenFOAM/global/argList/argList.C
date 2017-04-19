@@ -42,7 +42,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-bool Foam::argList::bannerEnabled = true;
+bool Foam::argList::bannerEnabled_ = true;
 Foam::SLList<Foam::string>    Foam::argList::validArgs;
 Foam::HashTable<Foam::string> Foam::argList::validOptions;
 Foam::HashTable<Foam::string> Foam::argList::validParOptions;
@@ -154,7 +154,13 @@ void Foam::argList::removeOption(const word& opt)
 
 void Foam::argList::noBanner()
 {
-    bannerEnabled = false;
+    bannerEnabled_ = false;
+}
+
+
+bool Foam::argList::bannerEnabled()
+{
+    return bannerEnabled_;
 }
 
 
@@ -596,7 +602,7 @@ void Foam::argList::parse
         const string timeString = clock::clockTime();
 
         // Print the banner once only for parallel runs
-        if (Pstream::master() && bannerEnabled)
+        if (Pstream::master() && bannerEnabled_)
         {
             IOobject::writeBanner(Info, true)
                 << "Build  : " << Foam::FOAMbuild << nl
@@ -891,7 +897,7 @@ void Foam::argList::parse
     }
 
 
-    if (Pstream::master() && bannerEnabled)
+    if (Pstream::master() && bannerEnabled_)
     {
         Info<< "Case   : " << (rootPath_/globalCase_).c_str() << nl
             << "nProcs : " << nProcs << endl;
@@ -930,12 +936,12 @@ void Foam::argList::parse
 
         // Switch on signal trapping. We have to wait until after Pstream::init
         // since this sets up its own ones.
-        sigFpe::set(bannerEnabled);
-        sigInt::set(bannerEnabled);
-        sigQuit::set(bannerEnabled);
-        sigSegv::set(bannerEnabled);
+        sigFpe::set(bannerEnabled_);
+        sigInt::set(bannerEnabled_);
+        sigQuit::set(bannerEnabled_);
+        sigSegv::set(bannerEnabled_);
 
-        if (bannerEnabled)
+        if (Pstream::master() && bannerEnabled_)
         {
             Info<< "fileModificationChecking : "
                 << "Monitoring run-time modified files using "
@@ -958,23 +964,19 @@ void Foam::argList::parse
                 Info<< " (fileModificationSkew "
                     << regIOobject::fileModificationSkew << ")";
             }
-            Info<< endl;
+            Info<< nl;
 
             Info<< "allowSystemOperations : ";
             if (dynamicCode::allowSystemOperations)
             {
-                Info<< "Allowing user-supplied system call operations" << endl;
+                Info<< "Allowing";
             }
             else
             {
-                Info<< "Disallowing user-supplied system call operations"
-                    << endl;
+                Info<< "Disallowing";
             }
-        }
-
-        if (Pstream::master() && bannerEnabled)
-        {
-            Info<< endl;
+            Info<< " user-supplied system call operations" << nl
+                << endl;
             IOobject::writeDivider(Info);
         }
     }

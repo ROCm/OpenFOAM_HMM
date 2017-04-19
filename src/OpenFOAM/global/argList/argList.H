@@ -98,7 +98,9 @@ namespace Foam
 class argList
 {
     // Private data
-        static bool bannerEnabled;
+
+        //- Track enabled/disabled banner state
+        static bool bannerEnabled_;
 
         //- Switch on/off parallel mode. Has to be first to be constructed
         //  so destructor is done last.
@@ -352,6 +354,9 @@ public:
 
             //- Disable emitting the banner information
             static void noBanner();
+
+            //- Banner status (enabled/disabled)
+            static bool bannerEnabled();
 
             //- Remove the 'noFunctionObjects' option,
             //  optionally adding a 'withFunctionObjects' option instead

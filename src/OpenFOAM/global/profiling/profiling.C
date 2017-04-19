@@ -23,6 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "argList.H"
 #include "profiling.H"
 #include "profilingInformation.H"
 #include "profilingSysInfo.H"
@@ -32,8 +33,12 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::profiling* Foam::profiling::pool_(0);
+int Foam::profiling::allowed
+(
+    Foam::debug::infoSwitch("allowProfiling", 1)
+);
 
+Foam::profiling* Foam::profiling::pool_(0);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -78,13 +83,19 @@ Foam::profilingInformation* Foam::profiling::pop()
 
 bool Foam::profiling::active()
 {
-    return pool_;
+    return allowed && pool_;
+}
+
+
+void Foam::profiling::disable()
+{
+    allowed = 0;
 }
 
 
 bool Foam::profiling::print(Ostream& os)
 {
-    if (pool_)
+    if (active())
     {
         return pool_->writeData(os);
     }
@@ -97,7 +108,7 @@ bool Foam::profiling::print(Ostream& os)
 
 bool Foam::profiling::writeNow()
 {
-    if (pool_)
+    if (active())
     {
         return pool_->write();
     }
@@ -114,7 +125,7 @@ void Foam::profiling::initialize
     const Time& owner
 )
 {
-    if (!pool_)
+    if (allowed && !pool_)
     {
         pool_ = new profiling(ioObj, owner);
 
@@ -124,7 +135,10 @@ void Foam::profiling::initialize
         );
 
         pool_->push(info, pool_->clockTime_);
-        Info<< "profiling initialized" << nl;
+        if (argList::bannerEnabled())
+        {
+            Info<< "profiling initialized" << nl;
+        }
     }
 
     // silently ignore multiple initializations
@@ -139,7 +153,7 @@ void Foam::profiling::initialize
     const Time& owner
 )
 {
-    if (!pool_)
+    if (allowed && !pool_)
     {
         pool_ = new profiling(dict, ioObj, owner);
 
@@ -149,7 +163,10 @@ void Foam::profiling::initialize
         );
 
         pool_->push(info, pool_->clockTime_);
-        Info<< "profiling initialized" << nl;
+        if (argList::bannerEnabled())
+        {
+            Info<< "profiling initialized" << nl;
+        }
     }
 
     // silently ignore multiple initializations
@@ -175,7 +192,7 @@ Foam::profilingInformation* Foam::profiling::New
 {
     profilingInformation *info = 0;
 
-    if (pool_)
+    if (active())
     {
         profilingInformation *parent = pool_->stack_.top();
 
@@ -203,7 +220,7 @@ Foam::profilingInformation* Foam::profiling::New
 
 void Foam::profiling::unstack(const profilingInformation *info)
 {
-    if (pool_ && info)
+    if (active() && info)
     {
         profilingInformation *top = pool_->pop();
 

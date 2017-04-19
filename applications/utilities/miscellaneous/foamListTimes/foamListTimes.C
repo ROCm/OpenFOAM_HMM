@@ -45,6 +45,7 @@ Usage
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "profiling.H"
 #include "timeSelector.H"
 #include "Time.H"
 
@@ -70,6 +71,8 @@ int main(int argc, char *argv[])
         "rm",
         "remove selected time directories"
     );
+    profiling::disable(); // Disable profiling (and its output)
+
     #include "setRootCase.H"
 
     label nProcs = 0;

@@ -85,6 +85,11 @@ public:
         typedef profilingInformation Information;
         typedef profilingTrigger Trigger;
 
+    // Static data members
+
+        //- Flag if profiling is allowed
+        static int allowed;
+
 private:
 
     // Private classes, typedefs
@@ -240,8 +245,11 @@ public:
 
     // Static Member Functions
 
-        //- True if profiling is active
+        //- True if profiling is allowed and is active
         static bool active();
+
+        //- Disallow profiling by forcing the InfoSwitch off.
+        static void disable();
 
         //- Print profiling information to specified output
         //  Forwards to writeData member of top-level object
