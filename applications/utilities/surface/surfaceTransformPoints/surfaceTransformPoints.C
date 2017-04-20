@@ -61,8 +61,10 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Transform (scale/rotate) a surface. "
-        "Like transformPoints but for surfaces."
+        "Transform (translate/rotate/scale) a surface. "
+        "Like transformPoints but for surfaces.\n"
+        "Note: roll=rotation about x, pitch=rotation about y, "
+        "yaw=rotation about z"
     );
     argList::noParallel();
     argList::validArgs.append("surfaceFile");
@@ -91,13 +93,13 @@ int main(int argc, char *argv[])
     (
         "rollPitchYaw",
         "vector",
-        "transform in terms of '( roll pitch yaw )' in degrees"
+        "rotate by '(roll pitch yaw)' in degrees"
     );
     argList::addOption
     (
         "yawPitchRoll",
         "vector",
-        "transform in terms of '( yaw pitch roll )' in degrees"
+        "rotate by '(yaw pitch roll)' in degrees"
     );
     argList args(argc, argv);
 
