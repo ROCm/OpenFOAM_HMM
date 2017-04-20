@@ -145,7 +145,7 @@ endif
 # ~~~~~~~~~~~~~~~~~~~~~~
 setenv WM_PROJECT_USER_DIR $HOME/$WM_PROJECT/$LOGNAME-$WM_PROJECT_VERSION
 
-# Source etc files, possibly with some verbosity
+# Source an etc file, possibly with some verbosity
 if ($?FOAM_VERBOSE && $?prompt) then
     alias _foamEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh-verbose \!*`'
 else

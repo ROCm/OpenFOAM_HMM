@@ -167,8 +167,6 @@ if ( $?foamClean ) then
 endif
 
 
-unset cleaned foamClean foamOldDirs
-
 #------------------------------------------------------------------------------
 # Cleanup aliases
 
@@ -198,5 +196,9 @@ unalias wmRefresh
 unalias foamVersion
 unalias foamPV
 
+#------------------------------------------------------------------------------
+# Intermediate variables (do as last for a clean exit code)
+
+unset cleaned foamClean foamOldDirs
 
 #------------------------------------------------------------------------------

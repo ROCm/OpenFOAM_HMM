@@ -69,7 +69,7 @@ alias run='cd $FOAM_RUN'
 
 # Refresh the environment
 # ~~~~~~~~~~~~~~~~~~~~~~~
-unset -f wmRefresh
+unset -f wmRefresh 2>/dev/null
 wmRefresh()
 {
     wmProjectDir=$WM_PROJECT_DIR
@@ -81,7 +81,7 @@ wmRefresh()
 
 # Change OpenFOAM version
 # ~~~~~~~~~~~~~~~~~~~~~~~
-unset -f foamVersion
+unset -f foamVersion 2>/dev/null
 foamVersion()
 {
     if [ "$1" ]; then
@@ -98,7 +98,7 @@ foamVersion()
 
 # Change ParaView version
 # ~~~~~~~~~~~~~~~~~~~~~~~
-unset -f foamPV
+unset -f foamPV 2>/dev/null
 foamPV()
 {
     . $WM_PROJECT_DIR/etc/config.sh/paraview "${@+ParaView_VERSION=$1}"

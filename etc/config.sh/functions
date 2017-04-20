@@ -56,15 +56,13 @@ then
     }
 
     # Source an etc file, possibly with some verbosity
-    _foamEtc()
-    {
-        local file
-        if [ $# -gt 0 ] && file=$($WM_PROJECT_DIR/bin/foamEtcFile "$@")
-        then
-            [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "Using: $file" 1>&2
-            . $file
-        fi
-    }
+    # - use eval to avoid intermediate variables (ksh doesn't have 'local')
+    if [ "$FOAM_VERBOSE" -a "$PS1" ]
+    then
+        _foamEtc(){ eval "$($WM_PROJECT_DIR/bin/foamEtcFile -sh-verbose $@)"; }
+    else
+        _foamEtc(){ eval "$($WM_PROJECT_DIR/bin/foamEtcFile -sh $@)"; }
+    fi
 
     # Evaluate command-line parameters
     _foamEval()
@@ -104,9 +102,9 @@ then
 else
     # Was previously loaded/defined - now unset
 
+    unset -f _foamAddPath _foamAddLib _foamAddMan 2>/dev/null
+    unset -f _foamEtc _foamEval 2>/dev/null
     unset WM_SHELL_FUNCTIONS
-    unset -f _foamAddPath _foamAddLib _foamAddMan
-    unset -f _foamEtc _foamEval
 
 fi
 
