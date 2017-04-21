@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "addToMemberFunctionSelectionTable.H"
 #include "ListOps.H"
 #include "EdgeMap.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -286,16 +287,12 @@ void Foam::edgeMesh::scalePoints(const scalar scaleFactor)
 }
 
 
-void Foam::edgeMesh::mergePoints
-(
-    const scalar mergeDist,
-    labelList& reversePointMap
-)
+void Foam::edgeMesh::mergePoints(const scalar mergeDist)
 {
     pointField newPoints;
     labelList pointMap;
 
-    bool hasMerged = Foam::mergePoints
+    const bool hasMerged = Foam::mergePoints
     (
         points_,
         mergeDist,
@@ -307,92 +304,107 @@ void Foam::edgeMesh::mergePoints
 
     if (hasMerged)
     {
-        pointEdgesPtr_.clear();
+        pointEdgesPtr_.clear();   // connectivity change
 
         points_.transfer(newPoints);
 
-        // connectivity changed
-        pointEdgesPtr_.clear();
-
-        // Renumber and make sure e[0] < e[1] (not really necessary)
         forAll(edges_, edgeI)
         {
             edge& e = edges_[edgeI];
 
-            label p0 = pointMap[e[0]];
-            label p1 = pointMap[e[1]];
-
-            if (p0 < p1)
-            {
-                e[0] = p0;
-                e[1] = p1;
-            }
-            else
-            {
-                e[0] = p1;
-                e[1] = p0;
-            }
-        }
-
-        // Compact using a hashtable and commutative hash of edge.
-        EdgeMap<label> edgeToLabel(2*edges_.size());
-
-        label newEdgeI = 0;
-
-        forAll(edges_, edgeI)
-        {
-            const edge& e = edges_[edgeI];
-
-            if (e[0] != e[1])
-            {
-                if (edgeToLabel.insert(e, newEdgeI))
-                {
-                    newEdgeI++;
-                }
-            }
-        }
-
-        edges_.setSize(newEdgeI);
-
-        forAllConstIter(EdgeMap<label>, edgeToLabel, iter)
-        {
-            edges_[iter()] = iter.key();
+            e[0] = pointMap[e[0]];
+            e[1] = pointMap[e[1]];
         }
     }
+
+    this->mergeEdges();
 }
 
 
 void Foam::edgeMesh::mergeEdges()
 {
-    EdgeMap<label> existingEdges(2*edges_.size());
+    HashSet<edge, Hash<edge>> uniqEdges(2*edges_.size());
+    PackedBoolList pointIsUsed(points_.size());
 
-    label curEdgeI = 0;
+    label nUniqEdges = 0;
+    label nUniqPoints = 0;
     forAll(edges_, edgeI)
     {
         const edge& e = edges_[edgeI];
 
-        if (existingEdges.insert(e, curEdgeI))
+        // Remove degenerate and repeated edges
+        // - reordering (e[0] < e[1]) is not really necessary
+        if (e[0] != e[1] && uniqEdges.insert(e))
         {
-            curEdgeI++;
+            if (nUniqEdges != edgeI)
+            {
+                edges_[nUniqEdges] = e;
+            }
+            edges_[nUniqEdges].sort();
+            ++nUniqEdges;
+
+            if (pointIsUsed.set(e[0], 1))
+            {
+                ++nUniqPoints;
+            }
+            if (pointIsUsed.set(e[1], 1))
+            {
+                ++nUniqPoints;
+            }
         }
     }
 
     if (debug)
     {
         Info<< "Merging duplicate edges: "
-            << edges_.size() - existingEdges.size()
-            << " edges will be deleted." << endl;
+            << (edges_.size() - nUniqEdges)
+            << " edges will be deleted, "
+            << (points_.size() - nUniqPoints)
+            << " unused points will be removed." << endl;
     }
 
-    edges_.setSize(existingEdges.size());
-
-    forAllConstIter(EdgeMap<label>, existingEdges, iter)
+    if (nUniqEdges < edges_.size())
     {
-        edges_[iter()] = iter.key();
+        pointEdgesPtr_.clear(); // connectivity change
+        edges_.setSize(nUniqEdges);  // truncate
     }
 
-    // connectivity changed
-    pointEdgesPtr_.clear();
+    if (nUniqPoints < points_.size())
+    {
+        pointEdgesPtr_.clear(); // connectivity change
+
+        // build a oldToNew point-map and rewrite the points.
+        // We can do this simultaneously since the point order is unchanged
+        // and we are only effectively eliminating some entries.
+        labelList pointMap(points_.size(), -1);
+
+        label newId = 0;
+        forAll(pointMap, pointi)
+        {
+            if (pointIsUsed[pointi])
+            {
+                pointMap[pointi] = newId;
+
+                if (newId < pointi)
+                {
+                    // copy down
+                    points_[newId] = points_[pointi];
+                }
+                ++newId;
+            }
+        }
+        points_.setSize(newId);
+
+        // Renumber edges - already sorted (above)
+        forAll(edges_, edgeI)
+        {
+            edge& e = edges_[edgeI];
+
+            e[0] = pointMap[e[0]];
+            e[1] = pointMap[e[1]];
+        }
+    }
+
 }
 
 

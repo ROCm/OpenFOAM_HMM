@@ -250,7 +250,7 @@ public:
         static label nEdgeTypes;
 
         //- Can we read this file format?
-        static bool canRead(const fileName&, const bool verbose=false);
+        static bool canRead(const fileName& name, const bool verbose=false);
 
         //- Can we read this file format?
         static bool canReadType(const word& ext, const bool verbose=false);
@@ -268,7 +268,7 @@ public:
         extendedEdgeMesh();
 
         //- Construct as copy
-        explicit extendedEdgeMesh(const extendedEdgeMesh&);
+        explicit extendedEdgeMesh(const extendedEdgeMesh& fem);
 
         //- Construct from file name (uses extension to determine type)
         extendedEdgeMesh(const fileName&);
@@ -277,13 +277,16 @@ public:
         extendedEdgeMesh(const fileName&, const word& ext);
 
         //- Construct from Istream
-        extendedEdgeMesh(Istream&);
+        extendedEdgeMesh(Istream& is);
+
+        //- Construct from components
+        extendedEdgeMesh(const pointField& points, const edgeList& edges);
 
         //- Construct by transferring components (points, edges)
         extendedEdgeMesh
         (
-            const Xfer<pointField>&,
-            const Xfer<edgeList>&
+            const Xfer<pointField>& pointLst,
+            const Xfer<edgeList>& edgeLst
         );
 
         //- Construct given a surface with selected edges,points
@@ -346,12 +349,12 @@ public:
         //- Select constructed from filename (explicit extension)
         static autoPtr<extendedEdgeMesh> New
         (
-            const fileName&,
+            const fileName& name,
             const word& ext
         );
 
         //- Select constructed from filename (implicit extension)
-        static autoPtr<extendedEdgeMesh> New(const fileName&);
+        static autoPtr<extendedEdgeMesh> New(const fileName& name);
 
 
     //- Destructor
@@ -509,16 +512,16 @@ public:
         // Edit
 
             //- Transfer the contents of the argument and annul the argument
-            void transfer(extendedEdgeMesh&);
+            void transfer(extendedEdgeMesh& mesh);
 
             //- Transfer contents to the Xfer container
-            Xfer<extendedEdgeMesh > xfer();
+            Xfer<extendedEdgeMesh> xfer();
 
             //- Clear all storage
             virtual void clear();
 
             //- Add extendedEdgeMesh. No filtering of duplicates.
-            void add(const extendedEdgeMesh&);
+            void add(const extendedEdgeMesh& fem);
 
             //- Flip normals. All concave become convex, all internal external
             //  etc.
@@ -527,8 +530,8 @@ public:
             //- Update with derived geometry
             void autoMap
             (
-                const pointField&,
-                const edgeList&,
+                const pointField& subPoints,
+                const edgeList& subEdges,
                 const labelList& pointMap,
                 const labelList& edgeMap
             );
@@ -565,10 +568,10 @@ public:
         // Read
 
             //- Read from file. Chooses reader based on explicit extension
-            bool read(const fileName&, const word& ext);
+            bool read(const fileName& name, const word& ext);
 
             //- Read from file. Chooses reader based on detected extension
-            virtual bool read(const fileName&);
+            virtual bool read(const fileName& name);
 
 
         // Write
