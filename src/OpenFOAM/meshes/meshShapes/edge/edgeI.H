@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,11 +28,6 @@ License
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-
-// return
-//  -  0: different
-//  - +1: identical
-//  - -1: same edge, but different orientation
 inline int Foam::edge::compare(const edge& a, const edge& b)
 {
     if (a[0] == b[0] && a[1] == b[1])
@@ -53,20 +48,52 @@ inline int Foam::edge::compare(const edge& a, const edge& b)
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::edge::edge()
+:
+    FixedList<label, 2>(-1)
 {}
 
 
-inline Foam::edge::edge(const label a, const label b)
+inline Foam::edge::edge(const label from, const label to)
 {
-    start() = a;
-    end() = b;
+    start() = from;
+    end()   = to;
 }
 
 
-inline Foam::edge::edge(const FixedList<label, 2>& a)
+inline Foam::edge::edge(const label from, const label to, const bool doSort)
 {
-    start() = a[0];
-    end() = a[1];
+    if (doSort && from > to)
+    {
+        start() = to;
+        end()   = from;
+    }
+    else
+    {
+        start() = from;
+        end()   = to;
+    }
+}
+
+
+inline Foam::edge::edge(const FixedList<label, 2>& lst)
+{
+    start() = lst[0];
+    end()   = lst[1];
+}
+
+
+inline Foam::edge::edge(const FixedList<label, 2>& lst, const bool doSort)
+{
+    if (doSort && lst[0] > lst[1])
+    {
+        start() = lst[1];
+        end()   = lst[0];
+    }
+    else
+    {
+        start() = lst[0];
+        end()   = lst[1];
+    }
 }
 
 
@@ -100,13 +127,43 @@ inline Foam::label& Foam::edge::end()
 }
 
 
-inline Foam::label Foam::edge::otherVertex(const label a) const
+inline bool Foam::edge::found(const label index) const
 {
-    if (a == start())
+    return (index == start() || index == end());
+}
+
+
+inline bool Foam::edge::connects(const edge& other) const
+{
+    return (other.found(this->start()) || other.found(this->end()));
+}
+
+
+inline Foam::label Foam::edge::commonVertex(const edge& other) const
+{
+    if (other.found(this->start()))
+    {
+        return this->start();
+    }
+    else if (other.found(this->end()))
+    {
+        return this->end();
+    }
+    else
+    {
+        // No shared vertex.
+        return -1;
+    }
+}
+
+
+inline Foam::label Foam::edge::otherVertex(const label index) const
+{
+    if (index == start())
     {
         return end();
     }
-    else if (a == end())
+    else if (index == end())
     {
         return start();
     }
@@ -118,20 +175,112 @@ inline Foam::label Foam::edge::otherVertex(const label a) const
 }
 
 
-inline Foam::label Foam::edge::commonVertex(const edge& a) const
+inline Foam::label Foam::edge::collapse()
 {
-    if (start() == a.start() || start() == a.end())
+    // Cannot resize FixedList, so mark duplicates with '-1'
+    // (the lower vertex is retained)
+    // catch any '-1' (eg, if called multiple times)
+
+    label n = 2;
+    if (start() == end() || end() == -1)
     {
-        return start();
+        end() = -1;
+        --n;
     }
-    else if (end() == a.start() || end() == a.end())
+    if (start() == -1)
     {
-        return end();
+        --n;
     }
-    else
+
+    return n;
+}
+
+
+inline Foam::label Foam::edge::count() const
+{
+    label n = 2;
+    if (start() == end() || end() == -1)
     {
-        // No shared vertex.
-        return -1;
+        --n;
+    }
+
+    if (start() == -1)
+    {
+        --n;
+    }
+
+    return n;
+}
+
+
+inline bool Foam::edge::insert(const label index)
+{
+    if (index < 0)
+    {
+        // Can never insert invalid point labels.
+        // Use direct assignment for that.
+        return false;
+    }
+    else if (start() == -1)
+    {
+        // Store at [0], if not duplicate of [1]
+        if (index != end())
+        {
+            start() = index;
+            return true;
+        }
+    }
+    else if (end() == -1)
+    {
+        // Store at [1], if not duplicate of [0]
+        if (index != start())
+        {
+            end() = index;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+inline bool Foam::edge::erase(const label index)
+{
+    if (index < 0)
+    {
+        // Can never remove invalid point labels!
+        return false;
+    }
+
+    int n = 0;
+    if (index == start())
+    {
+        start() = -1;
+        ++n;
+    }
+
+    // Automatically handle duplicates, should not have been there anyhow
+    if (index == end())
+    {
+        end() = -1;
+        ++n;
+    }
+
+    return n;
+}
+
+
+inline bool Foam::edge::sorted() const
+{
+    return (start() < end());
+}
+
+
+inline void Foam::edge::sort()
+{
+    if (start() > end())
+    {
+        flip();
     }
 }
 
@@ -148,27 +297,36 @@ inline Foam::edge Foam::edge::reverseEdge() const
 }
 
 
-inline Foam::point Foam::edge::centre(const pointField& p) const
+inline Foam::point Foam::edge::centre(const UList<point>& pts) const
 {
-    return 0.5*(p[start()] + p[end()]);
+    return 0.5*(pts[start()] + pts[end()]);
 }
 
 
-inline Foam::vector Foam::edge::vec(const pointField& p) const
+inline Foam::vector Foam::edge::vec(const UList<point>& pts) const
 {
-    return p[end()] - p[start()];
+    return pts[end()] - pts[start()];
 }
 
 
-inline Foam::scalar Foam::edge::mag(const pointField& p) const
+inline Foam::vector Foam::edge::unitVec(const UList<point>& pts) const
 {
-    return ::Foam::mag(vec(p));
+    Foam::vector v = pts[end()] - pts[start()];
+    v /= ::Foam::mag(v) + VSMALL;
+
+    return v;
 }
 
 
-inline Foam::linePointRef Foam::edge::line(const pointField& p) const
+inline Foam::scalar Foam::edge::mag(const UList<point>& pts) const
 {
-    return linePointRef(p[start()], p[end()]);
+    return ::Foam::mag(vec(pts));
+}
+
+
+inline Foam::linePointRef Foam::edge::line(const UList<point>& pts) const
+{
+    return linePointRef(pts[start()], pts[end()]);
 }
 
 

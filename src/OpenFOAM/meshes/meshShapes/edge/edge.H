@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,17 +70,23 @@ public:
 
     // Constructors
 
-        //- Null constructor for lists
+        //- Construct null with invalid point labels (-1)
         inline edge();
 
         //- Construct from components
-        inline edge(const label a, const label b);
+        inline edge(const label from, const label to);
+
+        //- Construct, optionally sorted with start less-than end
+        inline edge(const label from, const label to, const bool doSort);
 
         //- Construct from FixedList
-        inline edge(const FixedList<label, 2>&);
+        inline edge(const FixedList<label, 2>& lst);
+
+        //- Construct, optionally sorted with start less-than end
+        inline edge(const FixedList<label, 2>& lst, const bool doSort);
 
         //- Construct from Istream
-        inline edge(Istream&);
+        inline edge(Istream& is);
 
 
     // Member Functions
@@ -97,11 +103,45 @@ public:
         //- Return end vertex label
         inline label& end();
 
-        //- Given one vertex, return the other
-        inline label otherVertex(const label a) const;
+        //- Do the edges share a common vertex index?
+        inline bool connects(const edge& other) const;
 
-        //- Return common vertex
-        inline label commonVertex(const edge& a) const;
+        //- Return vertex common with otherEdge or -1 on failure
+        inline label commonVertex(const edge& other) const;
+
+        //- Given one vertex index, return the other one.
+        inline label otherVertex(const label index) const;
+
+        //- 'Collapse' edge by marking duplicate point labels.
+        //  Duplicates point labels are marked with '-1'.
+        //  (the lower vertex is retained).
+        //  Return the collapsed size.
+        inline label collapse();
+
+        //- Return true if point label is found in edge
+        //  No special treatment for '-1'.
+        inline bool found(const label index) const;
+
+        //- Return the number of unique, valid (non -1) point labels.
+        //  Similar to a HashTable::size().
+        inline label count() const;
+
+        //- Insert the index if it did not previously exist on the edge.
+        //  Returns true on success. A negative label never inserts.
+        //  Similar to a HashTable::insert().
+        inline bool insert(const label index);
+
+        //- Remove an existing index from the edge and set its location to '-1'.
+        //  Returns true on success. A negative label never removes.
+        //  Similar to a HashTable::erase().
+        inline bool erase(const label index);
+
+
+        //- True if the edge is sorted such that start is less-than end
+        inline bool sorted() const;
+
+        //- Sort start/end that start is less-than end
+        inline void sort();
 
         //- Flip the edge in-place.
         inline void flip();
@@ -110,23 +150,26 @@ public:
         inline edge reverseEdge() const;
 
         //- Return centre (centroid)
-        inline point centre(const pointField&) const;
+        inline point centre(const UList<point>& pts) const;
 
         //- Return the vector (end - start)
-        inline vector vec(const pointField&) const;
+        inline vector vec(const UList<point>& pts) const;
+
+        //- Return the unit vector (end - start)
+        inline vector unitVec(const UList<point>& pts) const;
 
         //- Return scalar magnitude
-        inline scalar mag(const pointField&) const;
+        inline scalar mag(const UList<point>& pts) const;
 
         //- Return edge line
-        inline linePointRef line(const pointField&) const;
+        inline linePointRef line(const UList<point>& pts) const;
 
         //- Compare edges
         //  Returns:
         //  -  0: different
         //  - +1: identical
         //  - -1: same edge, but different orientation
-        static inline int compare(const edge&, const edge&);
+        static inline int compare(const edge& a, const edge& b);
 
 
     // Friend Operators
