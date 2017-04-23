@@ -78,10 +78,10 @@ public:
         );
 
         //- Construct from FixedList
-        inline tetCell(const FixedList<label, 4>&);
+        inline tetCell(const FixedList<label, 4>& lst);
 
         //- Construct from Istream
-        inline tetCell(Istream&);
+        inline tetCell(Istream& is);
 
 
     // Member Functions
@@ -111,7 +111,7 @@ public:
             cellShape tetCellShape() const;
 
             //- Return the tetrahedron
-            inline tetPointRef tet(const pointField&) const;
+            inline tetPointRef tet(const UList<point>& points) const;
 };
 
 

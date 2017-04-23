@@ -31,7 +31,7 @@ License
 template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 Foam::label Foam::face::triangles
 (
-    const pointField& points,
+    const UList<point>& points,
     DynamicList<face, SizeInc, SizeMult, SizeDiv>& triFaces
 ) const
 {
@@ -49,7 +49,7 @@ Foam::label Foam::face::triangles
 template<class Type>
 Type Foam::face::average
 (
-    const pointField& meshPoints,
+    const UList<point>& meshPoints,
     const Field<Type>& fld
 ) const
 {

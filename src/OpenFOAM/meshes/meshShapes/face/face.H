@@ -67,7 +67,7 @@ class DynamicList;
 
 inline bool operator==(const face& a, const face& b);
 inline bool operator!=(const face& a, const face& b);
-inline Istream& operator>>(Istream&, face&);
+inline Istream& operator>>(Istream& is, face& f);
 
 /*---------------------------------------------------------------------------*\
                            Class face Declaration
@@ -88,7 +88,7 @@ class face
         //- Construct list of edge vectors for face
         tmp<vectorField> calcEdges
         (
-            const pointField& points
+            const UList<point>& points
         ) const;
 
         //- Cos between neighbouring edges
@@ -101,7 +101,7 @@ class face
         //- Find index of largest internal angle on face
         label mostConcaveAngle
         (
-            const pointField& points,
+            const UList<point>& points,
             const vectorField& edges,
             scalar& edgeCos
         ) const;
@@ -121,7 +121,7 @@ class face
         label split
         (
             const splitMode mode,
-            const pointField& points,
+            const UList<point>& points,
             label& triI,
             label& quadI,
             faceList& triFaces,
@@ -149,23 +149,23 @@ public:
         //- Construct null
         inline face();
 
-        //- Construct given size
-        explicit inline face(label);
+        //- Construct given size, with invalid point labels (-1)
+        explicit inline face(const label sz);
 
         //- Construct from list of labels
-        explicit inline face(const labelUList&);
+        explicit inline face(const labelUList& lst);
 
         //- Construct from an initializer list of labels
-        explicit inline face(std::initializer_list<label>);
+        explicit inline face(std::initializer_list<label> lst);
 
         //- Construct by transferring the parameter contents
-        explicit inline face(const Xfer<labelList>&);
+        explicit inline face(const Xfer<labelList>& lst);
 
         //- Copy construct from triFace
-        face(const triFace&);
+        face(const triFace& f);
 
         //- Construct from Istream
-        inline face(Istream&);
+        inline face(Istream& is);
 
 
     // Member Functions
@@ -179,20 +179,24 @@ public:
         void flip();
 
         //- Return the points corresponding to this face
-        inline pointField points(const pointField&) const;
+        inline pointField points(const UList<point>& points) const;
 
         //- Centre point of face
-        point centre(const pointField&) const;
+        point centre(const UList<point>& points) const;
 
         //- Calculate average value at centroid of face
         template<class Type>
-        Type average(const pointField&, const Field<Type>&) const;
+        Type average
+        (
+            const UList<point>& meshPoints,
+            const Field<Type>& fld
+        ) const;
 
         //- Magnitude of face area
-        inline scalar mag(const pointField&) const;
+        inline scalar mag(const UList<point>& p) const;
 
         //- Vector normal; magnitude is equal to area of face
-        vector normal(const pointField&) const;
+        vector normal(const UList<point>& p) const;
 
         //- Return face with reverse direction
         //  The starting points of the original and reverse face are identical.
@@ -214,15 +218,15 @@ public:
         //- Return the volume swept out by the face when its points move
         scalar sweptVol
         (
-            const pointField& oldPoints,
-            const pointField& newPoints
+            const UList<point>& oldPoints,
+            const UList<point>& newPoints
         ) const;
 
         //- Return the inertia tensor, with optional reference
         //  point and density specification
         tensor inertia
         (
-            const pointField&,
+            const UList<point>& p,
             const point& refPt = vector::zero,
             scalar density = 1.0
         ) const;
@@ -243,7 +247,7 @@ public:
         (
             const point& p,
             const vector& n,
-            const pointField&,
+            const UList<point>& meshPoints,
             const intersection::algorithm alg = intersection::FULL_RAY,
             const intersection::direction dir = intersection::VECTOR
         ) const;
@@ -256,7 +260,7 @@ public:
             const point& p,
             const vector& q,
             const point& ctr,
-            const pointField&,
+            const UList<point>& meshPoints,
             const intersection::algorithm alg,
             const scalar tol = 0.0
         ) const;
@@ -265,7 +269,7 @@ public:
         pointHit nearestPoint
         (
             const point& p,
-            const pointField&
+            const UList<point>& meshPoints
         ) const;
 
         //- Return nearest point to face and classify it:
@@ -277,7 +281,7 @@ public:
         pointHit nearestPointClassify
         (
             const point& p,
-            const pointField&,
+            const UList<point>& meshPoints,
             label& nearType,
             label& nearLabel
         ) const;
@@ -287,13 +291,13 @@ public:
         (
             const point& p,
             const vector& n,
-            const pointField&
+            const UList<point>& meshPoints
         ) const;
 
         //- Return area in contact, given the displacement in vertices
         scalar areaInContact
         (
-            const pointField&,
+            const UList<point>& meshPoints,
             const scalarField& v
         ) const;
 
@@ -312,7 +316,10 @@ public:
         //  -  0: edge not found on the face
         //  - +1: forward (counter-clockwise) on the face
         //  - -1: reverse (clockwise) on the face
-        int edgeDirection(const edge&) const;
+        int edgeDirection(const edge& e) const;
+
+        //- Find the longest edge on a face.
+        label longestEdge(const UList<point>& pts) const;
 
         // Face splitting utilities
 
@@ -320,7 +327,7 @@ public:
             inline label nTriangles() const;
 
             //- Number of triangles after splitting
-            label nTriangles(const pointField& points) const;
+            label nTriangles(const UList<point>& unused) const;
 
             //- Split into triangles using existing points.
             //  Result in triFaces[triI..triI+nTri].
@@ -328,7 +335,7 @@ public:
             //  Returns number of faces created.
             label triangles
             (
-                const pointField& points,
+                const UList<point>& points,
                 label& triI,
                 faceList& triFaces
             ) const;
@@ -339,7 +346,7 @@ public:
             template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
             label triangles
             (
-                const pointField& points,
+                const UList<point>& points,
                 DynamicList<face, SizeInc, SizeMult, SizeDiv>& triFaces
             ) const;
 
@@ -347,7 +354,7 @@ public:
             //  Returns the sum of both
             label nTrianglesQuads
             (
-                const pointField& points,
+                const UList<point>& points,
                 label& nTris,
                 label& nQuads
             ) const;
@@ -358,7 +365,7 @@ public:
             //  Returns number of new faces created.
             label trianglesQuads
             (
-                const pointField& points,
+                const UList<point>& points,
                 label& triI,
                 label& quadI,
                 faceList& triFaces,
@@ -369,10 +376,10 @@ public:
         //   0: different
         //  +1: identical
         //  -1: same face, but different orientation
-        static int compare(const face&, const face&);
+        static int compare(const face& a, const face& b);
 
         //- Return true if the faces have the same vertices
-        static bool sameVertices(const face&, const face&);
+        static bool sameVertices(const face& a, const face& b);
 
 
     // Friend Operators
@@ -383,7 +390,7 @@ public:
 
     // Istream Operator
 
-        friend Istream& operator>>(Istream&, face&);
+        friend Istream& operator>>(Istream& is, face& f);
 };
 
 
@@ -414,7 +421,8 @@ public:
 // Global functions
 
 //- Find the longest edge on a face. Face point labels index into pts.
-label longestEdge(const face& f, const pointField& pts);
+//  \deprecated use class method instead (APR-2017)
+label longestEdge(const face& f, const UList<point>& pts);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,8 @@ Description
 
 SourceFiles
     cellI.H
+    cell.C
+    oppositeCellFace.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,8 +48,8 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class cell;
-bool operator==(const cell&, const cell&);
-inline bool operator!=(const cell&, const cell&);
+bool operator==(const cell& a, const cell& b);
+inline bool operator!=(const cell& a, const cell& b);
 
 
 /*---------------------------------------------------------------------------*\
@@ -72,16 +74,16 @@ public:
         inline cell();
 
         //- Construct given size
-        explicit inline cell(label);
+        explicit inline cell(const label sz);
 
         //- Construct from list of labels
-        explicit inline cell(const labelUList&);
+        explicit inline cell(const labelUList& lst);
 
-        //- Construct by transferring the parameter contents
-        explicit inline cell(const Xfer<labelList>&);
+        //- Construct by transferring list of labels
+        explicit inline cell(const Xfer<labelList>& lst);
 
         //- Construct from Istream
-        inline cell(Istream&);
+        inline cell(Istream& is);
 
 
     // Member Functions
@@ -89,14 +91,18 @@ public:
         //- Return number of faces
         inline label nFaces() const;
 
-        //- Return labels of cell vertices
-        labelList labels(const faceUList&) const;
+        //- Return unordered list of cell vertices given the list of faces
+        labelList labels(const faceUList& f) const;
 
-        //- Return the cell vertices
-        pointField points(const faceUList&, const pointField&) const;
+        //- Return the cell vertices given the list of faces and mesh points
+        pointField points
+        (
+            const faceUList& f,
+            const UList<point>& meshPoints
+        ) const;
 
         //- Return cell edges
-        edgeList edges(const faceUList&) const;
+        edgeList edges(const faceUList& f) const;
 
         //- Return index of opposite face
         label opposingFaceLabel
@@ -122,16 +128,16 @@ public:
         // future.
 
         //- Returns cell centre
-        point centre(const pointField&, const faceUList&) const;
+        point centre(const UList<point>& p, const faceUList& f) const;
 
         //- Returns cell volume
-        scalar mag(const pointField&, const faceUList&) const;
+        scalar mag(const UList<point>& p, const faceUList& f) const;
 
 
     // Friend Operators
 
-        friend bool operator==(const cell&, const cell&);
-        friend bool operator!=(const cell&, const cell&);
+        friend bool operator==(const cell& a, const cell& b);
+        friend bool operator!=(const cell& a, const cell& b);
 };
 
 

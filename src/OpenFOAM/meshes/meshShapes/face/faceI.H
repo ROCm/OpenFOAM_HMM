@@ -45,9 +45,9 @@ inline Foam::face::face()
 {}
 
 
-inline Foam::face::face(label s)
+inline Foam::face::face(const label sz)
 :
-    labelList(s, -1)
+    labelList(sz, -1)
 {}
 
 
@@ -77,7 +77,10 @@ inline Foam::face::face(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::pointField Foam::face::points(const pointField& meshPoints) const
+inline Foam::pointField Foam::face::points
+(
+    const UList<point>& meshPoints
+) const
 {
     // There are as many points as there are labels for them
     pointField p(size());
@@ -94,7 +97,7 @@ inline Foam::pointField Foam::face::points(const pointField& meshPoints) const
 }
 
 
-inline Foam::scalar Foam::face::mag(const pointField& p) const
+inline Foam::scalar Foam::face::mag(const UList<point>& p) const
 {
     return ::Foam::mag(normal(p));
 }

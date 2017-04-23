@@ -21,25 +21,20 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct null
 inline Foam::cell::cell()
 {}
 
 
-// Construct given size
-inline Foam::cell::cell(label s)
+inline Foam::cell::cell(const label sz)
 :
-    labelList(s, -1)
+    labelList(sz, -1)
 {}
 
 
-// Construct from components
 inline Foam::cell::cell(const labelUList& lst)
 :
     labelList(lst)
@@ -52,7 +47,6 @@ inline Foam::cell::cell(const Xfer<labelList>& lst)
 {}
 
 
-// Construct from Istream
 inline Foam::cell::cell(Istream& is)
 :
     labelList(is)
@@ -61,7 +55,6 @@ inline Foam::cell::cell(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Number of faces
 inline Foam::label Foam::cell::nFaces() const
 {
     return size();
@@ -72,5 +65,6 @@ inline bool Foam::operator!=(const cell& a, const cell& b)
 {
     return (!(a == b));
 }
+
 
 // ************************************************************************* //

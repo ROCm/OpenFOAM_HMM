@@ -92,7 +92,7 @@ Foam::Istream& Foam::operator>>(Istream& is, cellShape& s)
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const cellShape & s)
+Foam::Ostream& Foam::operator<<(Ostream& os, const cellShape& s)
 {
     // Write beginning of record
     os << token::BEGIN_LIST;

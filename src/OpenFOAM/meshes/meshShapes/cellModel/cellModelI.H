@@ -86,11 +86,11 @@ inline edgeList cellModel::edges(const labelList& pointLabels) const
 }
 
 
-// Return a raw list of model faces
 inline const faceList& cellModel::modelFaces() const
 {
     return faces_;
 }
+
 
 //  Return the faces of a cellModel by untangling the geometry
 //  supplied in terms of the face labels

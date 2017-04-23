@@ -53,9 +53,9 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class cellModel;
-inline bool operator==(const cellModel&, const cellModel&);
-inline bool operator!=(const cellModel&, const cellModel&);
-Ostream& operator<<(Ostream&, const cellModel&);
+inline bool operator==(const cellModel& m1, const cellModel& m2);
+inline bool operator!=(const cellModel& m1, const cellModel& m2);
+Ostream& operator<<(Ostream& os, const cellModel& c);
 
 
 /*---------------------------------------------------------------------------*\
@@ -87,7 +87,7 @@ public:
     // Constructors
 
         //- Construct from Istream
-        cellModel(Istream&);
+        cellModel(Istream& is);
 
         //- Return a new cellModel on free-store created from Istream
         static autoPtr<cellModel> New(Istream& is)
@@ -135,14 +135,14 @@ public:
         vector centre
         (
             const labelList& pointLabels,
-            const pointField& points
+            const UList<point>& points
         ) const;
 
         //- Cell volume
         scalar mag
         (
             const labelList& pointLabels,
-            const pointField& points
+            const UList<point>& points
         ) const;
 
         //- Return info proxy.
@@ -163,15 +163,15 @@ public:
     // Friend operators
 
         //- Equality operator: true => ptr to models are equal !
-        friend bool operator==(const cellModel&, const cellModel&);
+        friend bool operator==(const cellModel& m1, const cellModel& m2);
 
         //- Inequality operator: true => ptr to models are not equal !
-        friend bool operator!=(const cellModel&, const cellModel&);
+        friend bool operator!=(const cellModel& m1, const cellModel& m2);
 
 
     // Ostream operator
 
-        friend Ostream& operator<<(Ostream&, const cellModel&);
+        friend Ostream& operator<<(Ostream& os, const cellModel& c);
 };
 
 
