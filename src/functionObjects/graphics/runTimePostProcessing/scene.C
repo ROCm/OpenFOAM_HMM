@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,6 +131,21 @@ void Foam::functionObjects::runTimePostPro::scene::readColours
 }
 
 
+void Foam::functionObjects::runTimePostPro::scene::setActorVisibility
+(
+    vtkRenderer* renderer,
+    const bool visible
+) const
+{
+    vtkActorCollection *actors = renderer->GetActors();
+    for (int i = 0; i < actors->GetNumberOfItems(); ++i)
+    {
+        vtkActor *actor = vtkActor::SafeDownCast(actors->GetItemAsObject(i));
+        actor->SetVisibility(visible);
+    }
+}
+
+
 void Foam::functionObjects::runTimePostPro::scene::initialise
 (
     vtkRenderer* renderer,
@@ -239,9 +254,13 @@ void Foam::functionObjects::runTimePostPro::scene::setCamera
     //       to be done once on initialisation
     if (clipBox_ != boundBox::greatBox)
     {
-        // Call ResetCamera() to fit clip box in view
+        setActorVisibility(renderer, false);
         clipBoxActor_->VisibilityOn();
+
+        // Call ResetCamera() to fit clip box in view
         renderer->ResetCamera();
+
+        setActorVisibility(renderer, true);
         clipBoxActor_->VisibilityOff();
     }
 

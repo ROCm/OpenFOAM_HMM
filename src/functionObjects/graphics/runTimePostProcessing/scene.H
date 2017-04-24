@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,6 +104,13 @@ class scene
 
         //- Read colour properties
         void readColours(const dictionary& dict);
+
+        //- Set visibility of all actors on/off
+        void setActorVisibility
+        (
+            vtkRenderer* renderer,
+            const bool visible
+        ) const;
 
         //- Disallow default bitwise copy construct
         scene(const scene&);
