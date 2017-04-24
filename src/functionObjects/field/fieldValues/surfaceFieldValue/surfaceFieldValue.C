@@ -154,7 +154,7 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::setFaceZoneFaces()
 
     DynamicList<label> faceIds(fZone.size());
     DynamicList<label> facePatchIds(fZone.size());
-    DynamicList<bool>  faceFlip(fZone.size());
+    DynamicList<bool> faceFlip(fZone.size());
 
     forAll(fZone, i)
     {
@@ -459,7 +459,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::totalArea() const
     }
     else
     {
-        totalArea = gSum(filterField(mesh_.magSf(), false));
+        totalArea = gSum(filterField(mesh_.magSf()));
     }
 
     return totalArea;
@@ -479,10 +479,13 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::needsSf() const
         case opAverage:
         case opMin:
         case opMax:
+        {
             return false;
-
+        }
         default:
+        {
             return true;
+        }
     }
 }
 
@@ -496,10 +499,13 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::needsWeight() const
         case opWeightedAverage:
         case opWeightedAreaAverage:
         case opWeightedAreaIntegrate:
+        {
             return true;
-
+        }
         default:
+        {
             return false;
+        }
     }
 }
 
@@ -596,7 +602,6 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::initialise
 
 
     weightFieldName_ = "none";
-    orientWeightField_ = false;
     if (needsWeight())
     {
         if (dict.readIfPresent("weightField", weightFieldName_))
@@ -610,40 +615,20 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::initialise
 
             Info<< "    weight field  = " << weightFieldName_ << nl;
         }
-
-        if (dict.found("orientedWeightField"))
-        {
-            if (regionType_ == stSurface || regionType_ == stSampledSurface)
-            {
-                FatalIOErrorInFunction(dict)
-                    << "Cannot use orientedWeightField "
-                    << "for surface/sampledSurface"
-                    << exit(FatalIOError);
-            }
-
-            if (weightFieldName_ == "none")
-            {
-                dict.lookup("orientedWeightField") >> weightFieldName_;
-                orientWeightField_ = true;
-
-                Info<< "    weight field  = " << weightFieldName_ << nl;
-            }
-            else
-            {
-                FatalIOErrorInFunction(dict)
-                    << "Cannot specify both weightField and orientedWeightField"
-                    << exit(FatalIOError);
-            }
-        }
     }
 
+    // Backwards compatibility for v1612+ and older
     List<word> orientedFields;
-    orientedFieldsStart_ = labelMax;
     if (dict.readIfPresent("orientedFields", orientedFields))
     {
-        orientedFieldsStart_ = fields_.size();
+        WarningInFunction
+            << "The 'orientedFields' option is deprecated.  These fields can "
+            << "and have been added to the standard 'fields' list."
+            << endl;
+
         fields_.append(orientedFields);
     }
+
 
     surfaceWriterPtr_.clear();
     if (writeFields_)
@@ -854,8 +839,6 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
         [dict.lookupOrDefault<word>("postOperation", "none")]
     ),
     weightFieldName_("none"),
-    orientWeightField_(false),
-    orientedFieldsStart_(labelMax),
     writeArea_(dict.lookupOrDefault("writeArea", false)),
     nFaces_(0),
     faceId_(),
@@ -883,8 +866,6 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
         [dict.lookupOrDefault<word>("postOperation", "none")]
     ),
     weightFieldName_("none"),
-    orientWeightField_(false),
-    orientedFieldsStart_(labelMax),
     writeArea_(dict.lookupOrDefault("writeArea", false)),
     nFaces_(0),
     faceId_(),
@@ -959,7 +940,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
         }
         else
         {
-            Sf = filterField(mesh_.Sf(), true); // Oriented Sf
+            Sf = filterField(mesh_.Sf());
         }
     }
 
@@ -988,12 +969,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
         {
             scalarField weightField
             (
-                getFieldValues<scalar>
-                (
-                    weightFieldName_,
-                    true,
-                    orientWeightField_
-                )
+                getFieldValues<scalar>(weightFieldName_, true)
             );
 
             // Process the fields
@@ -1003,12 +979,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
         {
             vectorField weightField
             (
-                getFieldValues<vector>
-                (
-                    weightFieldName_,
-                    true,
-                    orientWeightField_
-                )
+                getFieldValues<vector>(weightFieldName_, true)
             );
 
             // Process the fields

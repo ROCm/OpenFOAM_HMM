@@ -57,8 +57,7 @@ Foam::tmp<Foam::Field<Type>>
 Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
 (
     const word& fieldName,
-    const bool mustGet,
-    const bool applyOrientation
+    const bool mustGet
 ) const
 {
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> sf;
@@ -71,7 +70,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
     }
     else if (regionType_ != stSampledSurface && foundObject<sf>(fieldName))
     {
-        return filterField(lookupObject<sf>(fieldName), applyOrientation);
+        return filterField(lookupObject<sf>(fieldName));
     }
     else if (foundObject<vf>(fieldName))
     {
@@ -112,7 +111,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
         }
         else
         {
-            return filterField(fld, applyOrientation);
+            return filterField(fld);
         }
     }
 
@@ -140,7 +139,9 @@ processSameTypeValues
     switch (operation_)
     {
         case opNone:
+        {
             break;
+        }
         case opSum:
         {
             result = gSum(values);
@@ -258,8 +259,10 @@ processSameTypeValues
 
         case opAreaNormalAverage:
         case opAreaNormalIntegrate:
-            // handled in specializations only
+        {
+            // Handled in specializations only
             break;
+        }
     }
 
     return result;
@@ -302,30 +305,17 @@ Foam::label Foam::functionObjects::fieldValues::surfaceFieldValue::writeAll
     forAll(fields_, i)
     {
         const word& fieldName = fields_[i];
-        const bool orient = (i >= orientedFieldsStart_);
 
         if
         (
-            writeValues<scalar>
-            (
-                fieldName, Sf, weightField, orient, surfToWrite
-            )
-         || writeValues<vector>
-            (
-                fieldName, Sf, weightField, orient, surfToWrite
-            )
+            writeValues<scalar>(fieldName, Sf, weightField, surfToWrite)
+         || writeValues<vector>(fieldName, Sf, weightField, surfToWrite)
          || writeValues<sphericalTensor>
             (
-                fieldName, Sf, weightField, orient, surfToWrite
+                fieldName, Sf, weightField, surfToWrite
             )
-         || writeValues<symmTensor>
-            (
-                fieldName, Sf, weightField, orient, surfToWrite
-            )
-         || writeValues<tensor>
-            (
-                fieldName, Sf, weightField, orient, surfToWrite
-            )
+         || writeValues<symmTensor>(fieldName, Sf, weightField, surfToWrite)
+         || writeValues<tensor>(fieldName, Sf, weightField, surfToWrite)
         )
         {
             ++nProcessed;
@@ -349,7 +339,6 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
     const word& fieldName,
     const vectorField& Sf,
     const Field<WeightType>& weightField,
-    const bool orient,
     const meshedSurf& surfToWrite
 )
 {
@@ -357,7 +346,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
 
     if (ok)
     {
-        Field<Type> values(getFieldValues<Type>(fieldName, true, orient));
+        Field<Type> values(getFieldValues<Type>(fieldName, true));
 
         // Write raw values on surface if specified
         if (surfaceWriterPtr_.valid())
@@ -389,7 +378,9 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
             switch (postOperation_)
             {
                 case postOpNone:
+                {
                     break;
+                }
                 case postOpSqrt:
                 {
                     // sqrt: component-wise - doesn't change the type
@@ -438,8 +429,7 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::functionObjects::fieldValues::surfaceFieldValue::filterField
 (
-    const GeometricField<Type, fvPatchField, volMesh>& field,
-    const bool applyOrientation
+    const GeometricField<Type, fvPatchField, volMesh>& field
 ) const
 {
     tmp<Field<Type>> tvalues(new Field<Type>(faceId_.size()));
@@ -464,16 +454,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::filterField
         }
     }
 
-    if (applyOrientation)
-    {
-        forAll(values, i)
-        {
-            if (faceFlip_[i])
-            {
-                values[i] *= -1;
-            }
-        }
-    }
+    // No need to flip values - all boundary faces point outwards
 
     return tvalues;
 }
@@ -483,8 +464,7 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::functionObjects::fieldValues::surfaceFieldValue::filterField
 (
-    const GeometricField<Type, fvsPatchField, surfaceMesh>& field,
-    const bool applyOrientation
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& field
 ) const
 {
     tmp<Field<Type>> tvalues(new Field<Type>(faceId_.size()));
@@ -504,7 +484,13 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::filterField
         }
     }
 
-    if (applyOrientation)
+    if (debug)
+    {
+        Pout<< "field " << field.name() << " oriented: "
+            << field.oriented()() << endl;
+    }
+
+    if (field.oriented()())
     {
         forAll(values, i)
         {
