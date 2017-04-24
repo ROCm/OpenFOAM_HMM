@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +41,7 @@ SourceFiles
 #include "regIOobject.H"
 #include "Field.H"
 #include "dimensionedType.H"
+#include "orientedType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,7 +66,7 @@ template<class Type, class GeoMesh> Ostream& operator<<
 
 
 /*---------------------------------------------------------------------------*\
-                           Class DimensionedField Declaration
+                      Class DimensionedField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type, class GeoMesh>
@@ -98,6 +99,9 @@ private:
 
         //- Dimension set for this field
         dimensionSet dimensions_;
+
+        //- Oriented flag
+        orientedType oriented_;
 
 
     // Private Member Functions
@@ -261,6 +265,12 @@ public:
 
         //- Return non-const access to dimensions
         inline dimensionSet& dimensions();
+
+        //- Return oriented flag
+        inline const orientedType& oriented() const;
+
+        //- Return non-const access to the oriented flag
+        inline orientedType& oriented();
 
         inline const Field<Type>& field() const;
 

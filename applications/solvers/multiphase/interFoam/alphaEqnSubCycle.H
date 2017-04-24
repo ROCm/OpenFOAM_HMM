@@ -13,6 +13,8 @@ if (nAlphaSubCycles > 1)
         dimensionedScalar("0", rhoPhi.dimensions(), 0)
     );
 
+    rhoPhiSum.oriented().oriented() = true;
+
     tmp<volScalarField> trSubDeltaT;
 
     if (LTS)

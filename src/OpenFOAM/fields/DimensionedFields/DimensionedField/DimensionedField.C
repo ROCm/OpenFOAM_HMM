@@ -59,7 +59,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(io),
     Field<Type>(field),
     mesh_(mesh),
-    dimensions_(dims)
+    dimensions_(dims),
+    oriented_(false)
 {
     if (field.size() && field.size() != GeoMesh::size(mesh))
     {
@@ -84,7 +85,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(io),
     Field<Type>(GeoMesh::size(mesh)),
     mesh_(mesh),
-    dimensions_(dims)
+    dimensions_(dims),
+    oriented_(false)
 {
     if (checkIOFlags)
     {
@@ -105,7 +107,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(io),
     Field<Type>(GeoMesh::size(mesh), dt.value()),
     mesh_(mesh),
-    dimensions_(dt.dimensions())
+    dimensions_(dt.dimensions()),
+    oriented_(false)
 {
     if (checkIOFlags)
     {
@@ -123,7 +126,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(df),
     Field<Type>(df),
     mesh_(df.mesh_),
-    dimensions_(df.dimensions_)
+    dimensions_(df.dimensions_),
+    oriented_(df.oriented_)
 {}
 
 
@@ -137,7 +141,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(df, reuse),
     Field<Type>(df, reuse),
     mesh_(df.mesh_),
-    dimensions_(df.dimensions_)
+    dimensions_(df.dimensions_),
+    oriented_(df.oriented_)
 {}
 
 
@@ -150,7 +155,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(df(), true),
     Field<Type>(df),
     mesh_(df->mesh_),
-    dimensions_(df->dimensions_)
+    dimensions_(df->dimensions_),
+    oriented_(df->oriented_)
 {}
 
 
@@ -168,7 +174,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
         tdf.isTmp()
     ),
     mesh_(tdf().mesh_),
-    dimensions_(tdf().dimensions_)
+    dimensions_(tdf().dimensions_),
+    oriented_(tdf().oriented_)
 {
     tdf.clear();
 }
@@ -185,7 +192,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(io),
     Field<Type>(df),
     mesh_(df.mesh_),
-    dimensions_(df.dimensions_)
+    dimensions_(df.dimensions_),
+    oriented_(df.oriented_)
 {}
 
 
@@ -200,7 +208,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(io, df),
     Field<Type>(df, reuse),
     mesh_(df.mesh_),
-    dimensions_(df.dimensions_)
+    dimensions_(df.dimensions_),
+    oriented_(df.oriented_)
 {}
 
 
@@ -214,7 +223,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(newName, df, newName == df.name()),
     Field<Type>(df),
     mesh_(df.mesh_),
-    dimensions_(df.dimensions_)
+    dimensions_(df.dimensions_),
+    oriented_(df.oriented_)
 {}
 
 
@@ -229,7 +239,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(newName, df, true),
     Field<Type>(df, reuse),
     mesh_(df.mesh_),
-    dimensions_(df.dimensions_)
+    dimensions_(df.dimensions_),
+    oriented_(df.oriented_)
 {}
 
 
@@ -243,7 +254,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(newName, df, true),
     Field<Type>(df),
     mesh_(df->mesh_),
-    dimensions_(df->dimensions_)
+    dimensions_(df->dimensions_),
+    oriented_(df->oriented_)
 {}
 
 
@@ -262,7 +274,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
         tdf.isTmp()
     ),
     mesh_(tdf().mesh_),
-    dimensions_(tdf().dimensions_)
+    dimensions_(tdf().dimensions_),
+    oriented_(tdf().oriented_)
 {
     tdf.clear();
 }
@@ -437,6 +450,7 @@ void DimensionedField<Type, GeoMesh>::operator=
     checkField(*this, df, "=");
 
     dimensions_ = df.dimensions();
+    oriented_ = df.oriented();
     Field<Type>::operator=(df);
 }
 
@@ -460,6 +474,7 @@ void DimensionedField<Type, GeoMesh>::operator=
     checkField(*this, df, "=");
 
     dimensions_ = df.dimensions();
+    oriented_ = df.oriented();
     this->transfer(const_cast<DimensionedField<Type, GeoMesh>&>(df));
     tdf.clear();
 }
@@ -487,6 +502,7 @@ void DimensionedField<Type, GeoMesh>::operator op                              \
     checkField(*this, df, #op);                                                \
                                                                                \
     dimensions_ op df.dimensions();                                            \
+    oriented_ op df.oriented();                                                \
     Field<Type>::operator op(df);                                              \
 }                                                                              \
                                                                                \

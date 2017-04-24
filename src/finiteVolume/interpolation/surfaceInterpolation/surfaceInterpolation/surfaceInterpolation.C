@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,8 +73,7 @@ Foam::surfaceInterpolation::~surfaceInterpolation()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::surfaceScalarField&
-Foam::surfaceInterpolation::weights() const
+const Foam::surfaceScalarField& Foam::surfaceInterpolation::weights() const
 {
     if (!weights_)
     {
@@ -85,8 +84,7 @@ Foam::surfaceInterpolation::weights() const
 }
 
 
-const Foam::surfaceScalarField&
-Foam::surfaceInterpolation::deltaCoeffs() const
+const Foam::surfaceScalarField& Foam::surfaceInterpolation::deltaCoeffs() const
 {
     if (!deltaCoeffs_)
     {
@@ -156,11 +154,12 @@ void Foam::surfaceInterpolation::makeWeights() const
         dimless
     );
     surfaceScalarField& weights = *weights_;
+    weights.oriented().oriented() = true;
 
     // Set local references to mesh data
-    // (note that we should not use fvMesh sliced fields at this point yet
-    //  since this causes a loop when generating weighting factors in
-    //  coupledFvPatchField evaluation phase)
+    // Note that we should not use fvMesh sliced fields at this point yet
+    // since this causes a loop when generating weighting factors in
+    // coupledFvPatchField evaluation phase
     const labelUList& owner = mesh_.owner();
     const labelUList& neighbour = mesh_.neighbour();
 
@@ -174,7 +173,7 @@ void Foam::surfaceInterpolation::makeWeights() const
     forAll(owner, facei)
     {
         // Note: mag in the dot-product.
-        // For all valid meshes, the non-orthogonality will be less that
+        // For all valid meshes, the non-orthogonality will be less than
         // 90 deg and the dot-product will be positive.  For invalid
         // meshes (d & s <= 0), this will stabilise the calculation
         // but the result will be poor.
@@ -183,8 +182,7 @@ void Foam::surfaceInterpolation::makeWeights() const
         w[facei] = SfdNei/(SfdOwn + SfdNei);
     }
 
-    surfaceScalarField::Boundary& wBf =
-        weights.boundaryFieldRef();
+    surfaceScalarField::Boundary& wBf = weights.boundaryFieldRef();
 
     forAll(mesh_.boundary(), patchi)
     {
@@ -228,6 +226,7 @@ void Foam::surfaceInterpolation::makeDeltaCoeffs() const
         dimless/dimLength
     );
     surfaceScalarField& deltaCoeffs = *deltaCoeffs_;
+    deltaCoeffs.oriented().oriented() = true;
 
 
     // Set local references to mesh data
@@ -278,6 +277,7 @@ void Foam::surfaceInterpolation::makeNonOrthDeltaCoeffs() const
         dimless/dimLength
     );
     surfaceScalarField& nonOrthDeltaCoeffs = *nonOrthDeltaCoeffs_;
+    nonOrthDeltaCoeffs.oriented().oriented() = true;
 
 
     // Set local references to mesh data
@@ -342,6 +342,7 @@ void Foam::surfaceInterpolation::makeNonOrthCorrectionVectors() const
         dimless
     );
     surfaceVectorField& corrVecs = *nonOrthCorrectionVectors_;
+    corrVecs.oriented().oriented() = true;
 
     // Set local references to mesh data
     const volVectorField& C = mesh_.C();

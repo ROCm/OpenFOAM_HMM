@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,11 +48,26 @@ Foam::DimensionedField<Type, GeoMesh>::dimensions() const
     return dimensions_;
 }
 
+
 template<class Type, class GeoMesh>
-inline Foam::dimensionSet&
-Foam::DimensionedField<Type, GeoMesh>::dimensions()
+inline Foam::dimensionSet& Foam::DimensionedField<Type, GeoMesh>::dimensions()
 {
     return dimensions_;
+}
+
+
+template<class Type, class GeoMesh>
+inline const Foam::orientedType&
+Foam::DimensionedField<Type, GeoMesh>::oriented() const
+{
+    return oriented_;
+}
+
+
+template<class Type, class GeoMesh>
+inline Foam::orientedType& Foam::DimensionedField<Type, GeoMesh>::oriented()
+{
+    return oriented_;
 }
 
 
@@ -62,6 +77,7 @@ Foam::DimensionedField<Type, GeoMesh>::field() const
 {
     return *this;
 }
+
 
 template<class Type, class GeoMesh>
 inline Foam::Field<Type>&

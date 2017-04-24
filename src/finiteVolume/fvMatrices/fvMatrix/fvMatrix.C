@@ -892,6 +892,8 @@ flux() const
     GeometricField<Type, fvsPatchField, surfaceMesh>& fieldFlux =
         tfieldFlux.ref();
 
+    fieldFlux.oriented().oriented() = true;
+
     for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
     {
         fieldFlux.primitiveFieldRef().replace

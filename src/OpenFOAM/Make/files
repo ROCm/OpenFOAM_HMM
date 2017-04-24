@@ -265,6 +265,8 @@ dimensionedTypes/dimensionedSphericalTensor/dimensionedSphericalTensor.C
 dimensionedTypes/dimensionedSymmTensor/dimensionedSymmTensor.C
 dimensionedTypes/dimensionedTensor/dimensionedTensor.C
 
+orientedType/orientedType.C
+
 matrices/solution/solution.C
 
 scalarMatrices = matrices/scalarMatrices
