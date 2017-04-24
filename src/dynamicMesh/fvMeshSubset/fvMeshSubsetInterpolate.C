@@ -180,10 +180,11 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
     const fvMesh& sMesh,
     const labelList& patchMap,
     const labelList& cellMap,
-    const labelList& faceMap,
-    const bool negateIfFlipped
+    const labelList& faceMap
 )
 {
+    const bool negateIfFlipped = vf.oriented()();
+
     // 1. Create the complete field with dummy patch fields
     PtrList<fvsPatchField<Type>> patchFields(patchMap.size());
 
@@ -342,8 +343,7 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
 template<class Type>
 tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
 (
-    const GeometricField<Type, fvsPatchField, surfaceMesh>& sf,
-    const bool negateIfFlipped
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& sf
 ) const
 {
     return interpolate
@@ -352,8 +352,7 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
         subMesh(),
         patchMap(),
         cellMap(),
-        faceMap(),
-        negateIfFlipped
+        faceMap()
     );
 }
 
