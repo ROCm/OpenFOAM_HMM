@@ -28,7 +28,7 @@ void Foam::meshTools::writeOBJ
 (
     Ostream& os,
     const UList<FaceType>& faces,
-    const pointField& points,
+    const UList<point>& points,
     const labelList& faceLabels
 )
 {
@@ -64,7 +64,7 @@ void Foam::meshTools::writeOBJ
 (
     Ostream& os,
     const UList<FaceType>& faces,
-    const pointField& points
+    const UList<point>& points
 )
 {
     labelList allFaces(faces.size());

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 #include "meshTools.H"
 #include "polyMesh.H"
 #include "hexMatcher.H"
+#include "treeBoundBox.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -212,13 +213,28 @@ void Foam::meshTools::writeOBJ
 void Foam::meshTools::writeOBJ
 (
     Ostream& os,
+    const UList<point>& pts
+)
+{
+    forAll(pts, i)
+    {
+        const point& pt = pts[i];
+        os << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
+    }
+
+}
+
+
+void Foam::meshTools::writeOBJ
+(
+    Ostream& os,
     const triad& t,
-    const point& pt
+    const point& origin
 )
 {
     forAll(t, dirI)
     {
-        writeOBJ(os, pt, pt + t[dirI]);
+        writeOBJ(os, origin, origin + t[dirI]);
     }
 }
 
@@ -231,10 +247,9 @@ void Foam::meshTools::writeOBJ
     label& count
 )
 {
-    os << "v" << ' ' << p1.x() << ' ' << p1.y() << ' ' << p1.z() << endl;
-    os << "v" << ' ' << p2.x() << ' ' << p2.y() << ' ' << p2.z() << endl;
-
-    os << "l" << " " << (count + 1) << " " << (count + 2) << endl;
+    os << "v " << p1.x() << ' ' << p1.y() << ' ' << p1.z() << nl;
+    os << "v " << p2.x() << ' ' << p2.y() << ' ' << p2.z() << nl;
+    os << "l " << (count + 1) << " " << (count + 2) << endl;
 
     count += 2;
 }
@@ -247,12 +262,28 @@ void Foam::meshTools::writeOBJ
     const point& p2
 )
 {
-    os << "v" << ' ' << p1.x() << ' ' << p1.y() << ' ' << p1.z() << endl;
+    os  << "v " << p1.x() << ' ' << p1.y() << ' ' << p1.z() << nl;
+    os  << "vn "
+        << (p2.x() - p1.x()) << ' '
+        << (p2.y() - p1.y()) << ' '
+        << (p2.z() - p1.z()) << endl;
+}
 
-    os << "vn"
-        << ' ' << p2.x() - p1.x()
-        << ' ' << p2.y() - p1.y()
-        << ' ' << p2.z() - p1.z() << endl;
+
+void Foam::meshTools::writeOBJ
+(
+    Ostream& os,
+    const treeBoundBox& bb
+)
+{
+    writeOBJ(os, bb.points());
+
+    forAll(treeBoundBox::edges, edgei)
+    {
+        const edge& e = treeBoundBox::edges[edgei];
+
+        os << "l " << (e[0] + 1) <<  ' ' << (e[1] + 1) << nl;
+    }
 }
 
 
@@ -261,7 +292,7 @@ void Foam::meshTools::writeOBJ
     Ostream& os,
     const cellList& cells,
     const faceList& faces,
-    const pointField& points,
+    const UList<point>& points,
     const labelList& cellLabels
 )
 {
@@ -342,7 +373,7 @@ Foam::label Foam::meshTools::findEdge
 {
     forAll(candidates, i)
     {
-        label edgeI = candidates[i];
+        const label edgeI = candidates[i];
 
         const edge& e = edges[edgeI];
 
