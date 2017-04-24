@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -424,6 +424,34 @@ Foam::point Foam::plane::planePlaneIntersect
 }
 
 
+Foam::point Foam::plane::somePointInPlane(const scalar dist) const
+{
+    // ax + by + cz + d = 0
+    const FixedList<scalar, 4> coeff(planeCoeffs());
+
+    // Perturb the base-point
+    point p = refPoint() + point::uniform(dist);
+
+    if (Foam::mag(coeff[2]) < SMALL)
+    {
+        if (Foam::mag(coeff[1]) < SMALL)
+        {
+            p[0] = -1.0*(coeff[1]*p[1] + coeff[2]*p[2] + coeff[3])/coeff[0];
+        }
+        else
+        {
+            p[1] = -1.0*(coeff[0]*p[0] + coeff[2]*p[2] + coeff[3])/coeff[1];
+        }
+    }
+    else
+    {
+        p[2] = -1.0*(coeff[0]*p[0] + coeff[1]*p[1] + coeff[3])/coeff[2];
+    }
+
+    return p;
+}
+
+
 Foam::plane::side Foam::plane::sideOfPlane(const point& p) const
 {
     const scalar angle((p - point_) & normal_);
@@ -464,14 +492,7 @@ void Foam::plane::writeDict(Ostream& os) const
 
 bool Foam::operator==(const plane& a, const plane& b)
 {
-    if (a.point_ == b.point_ && a.normal_ == b.normal_)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return (a.point_ == b.point_ && a.normal_ == b.normal_);
 }
 
 bool Foam::operator!=(const plane& a, const plane& b)
@@ -482,9 +503,9 @@ bool Foam::operator!=(const plane& a, const plane& b)
 
 // * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const plane& a)
+Foam::Ostream& Foam::operator<<(Ostream& os, const plane& pln)
 {
-    os  << a.normal_ << token::SPACE << a.point_;
+    os  << pln.normal_ << token::SPACE << pln.point_;
 
     return os;
 }

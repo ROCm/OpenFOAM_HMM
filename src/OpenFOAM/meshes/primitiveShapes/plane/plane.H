@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::plane
 
 Description
-    Geometric class that creates a 2D plane and can return the intersection
+    Geometric class that creates a 3D plane and can return the intersection
     point between a line and the plane.
 
 SourceFiles
@@ -49,13 +49,13 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class plane;
-bool operator==(const plane&, const plane&);
-bool operator!=(const plane&, const plane&);
-Ostream& operator<<(Ostream&, const plane&);
+bool operator==(const plane& a, const plane& b);
+bool operator!=(const plane& a, const plane& b);
+Ostream& operator<<(Ostream& os, const plane& pln);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class plane Declaration
+                            Class plane Declaration
 \*---------------------------------------------------------------------------*/
 
 class plane
@@ -160,7 +160,7 @@ public:
         //- Return plane normal
         const vector& normal() const;
 
-        //- Return or return plane base point
+        //- Return plane base point
         const point& refPoint() const;
 
         //- Return coefficients for the
@@ -196,7 +196,15 @@ public:
         ray planeIntersect(const plane&) const;
 
         //- Return the cutting point between this plane and two other planes
-        point planePlaneIntersect(const plane&, const plane&) const;
+        point planePlaneIntersect
+        (
+            const plane& plane2,
+            const plane& plane3
+        )
+        const;
+
+        //- Return a point somewhere on the plane, a distance from the base
+        point somePointInPlane(const scalar dist = 1e-3) const;
 
         //- Return the side of the plane that the point is on.
         //  If the point is on the plane, then returns NORMAL.
@@ -206,19 +214,20 @@ public:
         point mirror(const point& p) const;
 
         //- Write to dictionary
-        void writeDict(Ostream&) const;
+        void writeDict(Ostream& os) const;
 
 
     // friend Operators
 
-        friend bool operator==(const plane&, const plane&);
-        friend bool operator!=(const plane&, const plane&);
+        friend bool operator==(const plane& a, const plane& b);
+        friend bool operator!=(const plane& a, const plane& b);
 
 
     // IOstream Operators
 
         //- Write plane properties
-        friend Ostream& operator<<(Ostream&, const plane&);
+        friend Ostream& operator<<(Ostream& os, const plane& pln);
+
 };
 
 
