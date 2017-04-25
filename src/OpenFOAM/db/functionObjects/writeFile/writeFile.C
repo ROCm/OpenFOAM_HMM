@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,8 +92,9 @@ Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::createFile
 
     if (Pstream::master() && writeToFile_)
     {
-        const scalar timeNow = fileObr_.time().timeOutputValue();
-        const word startTimeName = Time::timeName(timeNow);
+        const scalar startTime = fileObr_.time().startTime().value();
+        const scalar userStartTime = fileObr_.time().timeToUserTime(startTime);
+        const word startTimeName = Time::timeName(userStartTime);
 
         fileName outputDir(baseFileDir()/prefix_/startTimeName);
 
