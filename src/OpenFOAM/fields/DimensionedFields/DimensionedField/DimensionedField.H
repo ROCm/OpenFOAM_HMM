@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,14 +53,14 @@ template<class Type, class GeoMesh> class DimensionedField;
 
 template<class Type, class GeoMesh> Ostream& operator<<
 (
-    Ostream&,
-    const DimensionedField<Type, GeoMesh>&
+    Ostream& os,
+    const DimensionedField<Type, GeoMesh>& df
 );
 
 template<class Type, class GeoMesh> Ostream& operator<<
 (
-    Ostream&,
-    const tmp<DimensionedField<Type, GeoMesh>>&
+    Ostream& os,
+    const tmp<DimensionedField<Type, GeoMesh>>& tdf
 );
 
 
@@ -102,6 +102,9 @@ private:
 
     // Private Member Functions
 
+        //- Assert that non-zero field size == mesh size
+        void checkFieldSize() const;
+
         void readIfPresent(const word& fieldDictEntry = "value");
 
 
@@ -122,87 +125,105 @@ public:
         //- Construct from components
         DimensionedField
         (
-            const IOobject&,
+            const IOobject& io,
             const Mesh& mesh,
-            const dimensionSet&,
-            const Field<Type>&
+            const dimensionSet& dims,
+            const Field<Type>& field
+        );
+
+        //- Construct from components, transferring the initial field content
+        DimensionedField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensionSet& dims,
+            const Xfer<Field<Type>>& field
+        );
+
+        //- Construct from components, transferring the initial field content
+        DimensionedField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensionSet& dims,
+            const Xfer<List<Type>>& field
         );
 
         //- Construct from components
         //  Used for temporary fields which are initialised after construction
         DimensionedField
         (
-            const IOobject&,
+            const IOobject& io,
             const Mesh& mesh,
-            const dimensionSet&,
+            const dimensionSet& dims,
             const bool checkIOFlags = true
         );
 
         //- Construct from components
         DimensionedField
         (
-            const IOobject&,
+            const IOobject& io,
             const Mesh& mesh,
-            const dimensioned<Type>&,
+            const dimensioned<Type>& dt,
             const bool checkIOFlags = true
         );
 
         //- Construct from Istream
         DimensionedField
         (
-            const IOobject&,
+            const IOobject& io,
             const Mesh& mesh,
-            const word& fieldDictEntry="value"
+            const word& fieldDictEntry = "value"
         );
 
         //- Construct from dictionary
         DimensionedField
         (
-            const IOobject&,
+            const IOobject& io,
             const Mesh& mesh,
             const dictionary& fieldDict,
-            const word& fieldDictEntry="value"
+            const word& fieldDictEntry = "value"
         );
 
         //- Construct as copy
         DimensionedField
         (
-            const DimensionedField<Type, GeoMesh>&
+            const DimensionedField<Type, GeoMesh>& df
         );
 
         //- Construct as copy or re-use as specified.
         DimensionedField
         (
-            DimensionedField<Type, GeoMesh>&,
+            DimensionedField<Type, GeoMesh>& df,
             bool reuse
         );
 
         //- Construct by transferring the DimensionedField
         DimensionedField
         (
-            const Xfer<DimensionedField<Type, GeoMesh>>&
+            const Xfer<DimensionedField<Type, GeoMesh>>& df
         );
 
         //- Construct as copy of tmp<DimensionedField> deleting argument
         #ifndef NoConstructFromTmp
         DimensionedField
         (
-            const tmp<DimensionedField<Type, GeoMesh>>&
+            const tmp<DimensionedField<Type, GeoMesh>>& tdf
         );
         #endif
 
         //- Construct as copy resetting IO parameters
         DimensionedField
         (
-            const IOobject&,
-            const DimensionedField<Type, GeoMesh>&
+            const IOobject& io,
+            const DimensionedField<Type, GeoMesh>& df
         );
 
         //- Construct as copy resetting IO parameters and re-use as specified.
         DimensionedField
         (
-            const IOobject&,
-            DimensionedField<Type, GeoMesh>&,
+            const IOobject& io,
+            DimensionedField<Type, GeoMesh>& df,
             bool reuse
         );
 
@@ -210,14 +231,14 @@ public:
         DimensionedField
         (
             const word& newName,
-            const DimensionedField<Type, GeoMesh>&
+            const DimensionedField<Type, GeoMesh>& df
         );
 
         //- Construct as copy resetting name and re-use as specified.
         DimensionedField
         (
             const word& newName,
-            DimensionedField<Type, GeoMesh>&,
+            DimensionedField<Type, GeoMesh>& df,
             bool reuse
         );
 
@@ -225,7 +246,7 @@ public:
         DimensionedField
         (
             const word& newName,
-            const Xfer<DimensionedField<Type, GeoMesh>>&
+            const Xfer<DimensionedField<Type, GeoMesh>>& df
         );
 
         //- Construct as copy resetting name
@@ -233,7 +254,7 @@ public:
         DimensionedField
         (
             const word& newName,
-            const tmp<DimensionedField<Type, GeoMesh>>&
+            const tmp<DimensionedField<Type, GeoMesh>>& tdf
         );
         #endif
 
@@ -262,28 +283,30 @@ public:
         //- Return non-const access to dimensions
         inline dimensionSet& dimensions();
 
+        //- Return field
         inline const Field<Type>& field() const;
 
+        //- Return field
         inline Field<Type>& field();
 
         //- Return a component field of the field
         tmp<DimensionedField<cmptType, GeoMesh>> component
         (
-            const direction
+            const direction d
         ) const;
 
         //- Replace a component field of the field
         void replace
         (
-            const direction,
-            const DimensionedField<cmptType, GeoMesh>&
+            const direction d,
+            const DimensionedField<cmptType, GeoMesh>& df
         );
 
         //- Replace a component field of the field
         void replace
         (
-            const direction,
-            const tmp<DimensionedField<cmptType, GeoMesh>>&
+            const direction d,
+            const tmp<DimensionedField<cmptType, GeoMesh>>& tdf
         );
 
         //- Return the field transpose (only defined for second rank tensors)
@@ -295,60 +318,60 @@ public:
         //- Calculate and return weighted average
         dimensioned<Type> weightedAverage
         (
-            const DimensionedField<scalar, GeoMesh>&
+            const DimensionedField<scalar, GeoMesh>& weightField
         ) const;
 
         //- Calculate and return weighted average
         dimensioned<Type> weightedAverage
         (
-            const tmp<DimensionedField<scalar, GeoMesh>>&
+            const tmp<DimensionedField<scalar, GeoMesh>>& tweightField
         ) const;
 
 
         // Write
 
-            bool writeData(Ostream&, const word& fieldDictEntry) const;
+            bool writeData(Ostream& os, const word& fieldDictEntry) const;
 
-            bool writeData(Ostream&) const;
+            bool writeData(Ostream& os) const;
 
 
     // Member Operators
 
-        void operator=(const DimensionedField<Type, GeoMesh>&);
-        void operator=(const tmp<DimensionedField<Type, GeoMesh>>&);
-        void operator=(const dimensioned<Type>&);
+        void operator=(const DimensionedField<Type, GeoMesh>& df);
+        void operator=(const tmp<DimensionedField<Type, GeoMesh>>& tdf);
+        void operator=(const dimensioned<Type>& dt);
 
-        void operator+=(const DimensionedField<Type, GeoMesh>&);
-        void operator+=(const tmp<DimensionedField<Type, GeoMesh>>&);
+        void operator+=(const DimensionedField<Type, GeoMesh>& df);
+        void operator+=(const tmp<DimensionedField<Type, GeoMesh>>& tdf);
 
-        void operator-=(const DimensionedField<Type, GeoMesh>&);
-        void operator-=(const tmp<DimensionedField<Type, GeoMesh>>&);
+        void operator-=(const DimensionedField<Type, GeoMesh>& df);
+        void operator-=(const tmp<DimensionedField<Type, GeoMesh>>& tdf);
 
-        void operator*=(const DimensionedField<scalar, GeoMesh>&);
-        void operator*=(const tmp<DimensionedField<scalar, GeoMesh>>&);
+        void operator*=(const DimensionedField<scalar, GeoMesh>& df);
+        void operator*=(const tmp<DimensionedField<scalar, GeoMesh>>& tdf);
 
-        void operator/=(const DimensionedField<scalar, GeoMesh>&);
-        void operator/=(const tmp<DimensionedField<scalar, GeoMesh>>&);
+        void operator/=(const DimensionedField<scalar, GeoMesh>& df);
+        void operator/=(const tmp<DimensionedField<scalar, GeoMesh>>& tdf);
 
-        void operator+=(const dimensioned<Type>&);
-        void operator-=(const dimensioned<Type>&);
+        void operator+=(const dimensioned<Type>& dt);
+        void operator-=(const dimensioned<Type>& dt);
 
-        void operator*=(const dimensioned<scalar>&);
-        void operator/=(const dimensioned<scalar>&);
+        void operator*=(const dimensioned<scalar>& dt);
+        void operator/=(const dimensioned<scalar>& dt);
 
 
     // Ostream Operators
 
         friend Ostream& operator<< <Type, GeoMesh>
         (
-            Ostream&,
-            const DimensionedField<Type, GeoMesh>&
+            Ostream& os,
+            const DimensionedField<Type, GeoMesh>& df
         );
 
         friend Ostream& operator<< <Type, GeoMesh>
         (
-            Ostream&,
-            const tmp<DimensionedField<Type, GeoMesh>>&
+            Ostream& os,
+            const tmp<DimensionedField<Type, GeoMesh>>& tdf
         );
 };
 
