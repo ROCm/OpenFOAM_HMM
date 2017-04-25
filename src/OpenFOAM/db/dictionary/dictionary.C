@@ -575,7 +575,7 @@ const Foam::entry* Foam::dictionary::lookupScopedEntryPtr
     bool patternMatch
 ) const
 {
-    if (keyword[0] == ':')
+    if (keyword[0] == ':' || keyword[0] == '^')
     {
         // Go up to top level
         const dictionary* dictPtr = this;

@@ -43,7 +43,7 @@ Note
     Within dictionaries, entries can be referenced by using the '$' syntax
     familiar from shell programming. A '.' separator is used when referencing
     sub-dictionary entries. Leading '.' prefixes can be used to specify
-    an entry from a parent directory. A leading ':' prefix specifies
+    an entry from a parent directory. A leading ':' or '^' prefix specifies
     starting from the top-level entry. For example,
 
     \verbatim
@@ -62,7 +62,7 @@ Note
         }
     }
 
-    key4        $:subdict1.subdict2.key3;
+    key4        $^subdict1.subdict2.key3;  // lookup with absolute scoping
     \endverbatim
 
     It is also possible to use the '${}' syntax for clarity.

@@ -34,15 +34,16 @@ update
         key2 $key1;
         key3 val3;
         key2b ${..key2};
-        key3b ${:key1};
+        key3b $^key1;
     }
 }
 
 
 $update
 
-key3 ${:subdict.key1};
-key3 ${:update.subdict.key3};
+// Can a leading '^' or  ':' as anchor for scoping
+key3 $^subdict.key1;
+key3 ${^update.subdict.key3};
 key4 ${:update.subdict...subdict.key1};
 
 // This is currently not working
