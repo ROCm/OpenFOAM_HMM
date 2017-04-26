@@ -196,14 +196,8 @@ bool Foam::UList<T>::operator<(const UList<T>& a) const
         }
     }
 
-    if (this->size_ < a.size_)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    // Contents look to be identical, or lists have different sizes
+    return (this->size_ < a.size_);
 }
 
 

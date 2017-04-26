@@ -33,7 +33,6 @@ See also
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "IOstreams.H"
 #include "FixedList.H"
 #include "IFstream.H"
 #include "OFstream.H"
@@ -63,6 +62,15 @@ int main(int argc, char *argv[])
 
     Info<< "list2:" << list2
         << " hash:" << FixedList<label, 4>::Hash<>()(list2) << endl;
+
+    // Using FixedList for content too
+    {
+        List<FixedList<label, 4>> twolists{list, list2};
+        Info<<"List of FixedList: " << flatOutput(twolists) << endl;
+        sort(twolists);
+        // outer-sort only
+        Info<<"sorted FixedList : " << flatOutput(twolists) << endl;
+    }
 
     Info<< "list: " << list << nl
         << "list2: " << list2 << endl;
