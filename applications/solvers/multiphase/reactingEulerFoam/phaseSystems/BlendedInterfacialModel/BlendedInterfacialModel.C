@@ -456,6 +456,8 @@ Foam::BlendedInterfacialModel<ModelType>::Ff() const
         )
     );
 
+    x.ref().oriented().oriented() = true;
+
     if (model_.valid())
     {
         x.ref() += model_->Ff()*(scalar(1) - f1() - f2());

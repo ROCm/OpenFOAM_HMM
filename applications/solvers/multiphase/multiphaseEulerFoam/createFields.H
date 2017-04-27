@@ -39,6 +39,7 @@ surfaceScalarField phi
     mesh,
     dimensionedScalar("phi", dimArea*dimVelocity, 0)
 );
+phi.oriented().oriented() = true;
 
 multiphaseSystem fluid(U, phi);
 

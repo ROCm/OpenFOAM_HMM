@@ -57,6 +57,7 @@
         mesh,
         dimensionedScalar("phiHbyA", dimArea*dimVelocity, 0)
     );
+    phiHbyA.oriented().oriented() = true;
 
     volScalarField rho("rho", fluid.rho());
     surfaceScalarField ghSnGradRho(ghf*fvc::snGrad(rho)*mesh.magSf());

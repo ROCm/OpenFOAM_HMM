@@ -347,7 +347,7 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::Ff
     }
     else
     {
-        return tmp<surfaceScalarField>
+        tmp<surfaceScalarField> tFf
         (
             new surfaceScalarField
             (
@@ -364,6 +364,10 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::Ff
                 dimensionedScalar("zero", liftModel::dimF*dimArea, 0)
             )
         );
+
+        tFf.ref().oriented().oriented() = true;
+
+        return tFf;
     }
 }
 
@@ -621,6 +625,8 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::setPhiD
                 )
             )
         );
+
+        phiDs[phasei].oriented().oriented() = true;
     }
 
     return phiDs[phasei];

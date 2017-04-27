@@ -1195,6 +1195,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdtPhiCorr
             "ddt0(" + phi.name() + ')',
             phi.dimensions()
         );
+    dphidt0.oriented().oriented() = true;
 
     dimensionedScalar rDtCoef = rDtCoef_(ddt0);
 
@@ -1438,6 +1439,8 @@ tmp<surfaceScalarField> CrankNicolsonDdtScheme<Type>::meshPhi
         "meshPhiCN_0",
         dimVolume
     );
+
+    meshPhi0.oriented().oriented() = true;
 
     if (evaluate(meshPhi0))
     {

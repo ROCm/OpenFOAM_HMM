@@ -169,6 +169,8 @@ while (pimple.correct())
         dimensionedScalar("phiHbyA", dimArea*dimVelocity, 0)
     );
 
+    phiHbyA.oriented().oriented() = true;
+
     forAll(phases, phasei)
     {
         phaseModel& phase = phases[phasei];

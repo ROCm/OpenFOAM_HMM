@@ -100,6 +100,8 @@ int main(int argc, char *argv[])
                 mesh,
                 dimensionedScalar("0", dimMass/dimTime, 0)
             );
+            rhoPhi.oriented().oriented() = true;
+
 
             mixture->correct();
 

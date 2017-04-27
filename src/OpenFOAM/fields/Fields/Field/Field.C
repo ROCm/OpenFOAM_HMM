@@ -28,7 +28,6 @@ License
 #include "dictionary.H"
 #include "contiguous.H"
 #include "mapDistributeBase.H"
-#include "flipOp.H"
 
 // * * * * * * * * * * * * * * * Static Members  * * * * * * * * * * * * * * //
 
