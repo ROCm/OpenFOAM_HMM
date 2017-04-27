@@ -74,8 +74,7 @@ CrankNicolsonDdtScheme<Type>::DDt0Field<GeoField>::DDt0Field
 
 template<class Type>
 template<class GeoField>
-label CrankNicolsonDdtScheme<Type>::DDt0Field<GeoField>::
-startTimeIndex() const
+label CrankNicolsonDdtScheme<Type>::DDt0Field<GeoField>::startTimeIndex() const
 {
     return startTimeIndex_;
 }
@@ -83,8 +82,7 @@ startTimeIndex() const
 
 template<class Type>
 template<class GeoField>
-GeoField& CrankNicolsonDdtScheme<Type>::DDt0Field<GeoField>::
-operator()()
+GeoField& CrankNicolsonDdtScheme<Type>::DDt0Field<GeoField>::operator()()
 {
     return *this;
 }
@@ -92,8 +90,10 @@ operator()()
 
 template<class Type>
 template<class GeoField>
-void CrankNicolsonDdtScheme<Type>::DDt0Field<GeoField>::
-operator=(const GeoField& gf)
+void CrankNicolsonDdtScheme<Type>::DDt0Field<GeoField>::operator=
+(
+    const GeoField& gf
+)
 {
     GeoField::operator=(gf);
 }

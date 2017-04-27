@@ -273,8 +273,7 @@ const Foam::volScalarField::Internal& Foam::fvMesh::V00() const
 }
 
 
-Foam::tmp<Foam::volScalarField::Internal>
-Foam::fvMesh::Vsc() const
+Foam::tmp<Foam::volScalarField::Internal> Foam::fvMesh::Vsc() const
 {
     if (moving() && time().subCycling())
     {
@@ -302,8 +301,7 @@ Foam::fvMesh::Vsc() const
 }
 
 
-Foam::tmp<Foam::volScalarField::Internal>
-Foam::fvMesh::Vsc0() const
+Foam::tmp<Foam::volScalarField::Internal> Foam::fvMesh::Vsc0() const
 {
     if (moving() && time().subCycling())
     {
@@ -413,8 +411,7 @@ Foam::tmp<Foam::surfaceVectorField> Foam::fvMesh::delta() const
         delta[facei] = C[neighbour[facei]] - C[owner[facei]];
     }
 
-    surfaceVectorField::Boundary& deltabf =
-        delta.boundaryFieldRef();
+    surfaceVectorField::Boundary& deltabf =  delta.boundaryFieldRef();
 
     forAll(deltabf, patchi)
     {
