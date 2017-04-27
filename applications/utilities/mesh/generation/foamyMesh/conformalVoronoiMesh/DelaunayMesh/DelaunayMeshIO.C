@@ -337,7 +337,7 @@ Foam::autoPtr<Foam::polyMesh>
 Foam::DelaunayMesh<Triangulation>::createMesh
 (
     const fileName& name,
-    labelTolabelPairHashTable& vertexMap,
+    labelPairLookup& vertexMap,
     labelList& cellMap,
     const bool writeDelaunayData
 ) const

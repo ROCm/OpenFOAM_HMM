@@ -37,9 +37,7 @@ SourceFiles
 #ifndef DelaunayMesh_H
 #define DelaunayMesh_H
 
-#include "Pair.H"
-#include "HashSet.H"
-#include "FixedList.H"
+#include "labelPairHashes.H"
 #include "boundBox.H"
 #include "indexedVertex.H"
 #include "CGALTriangulation3Ddefs.H"
@@ -76,20 +74,6 @@ public:
             Finite_cells_iterator;
         typedef typename Triangulation::Finite_facets_iterator
             Finite_facets_iterator;
-
-        typedef HashSet
-        <
-           Pair<label>,
-           FixedList<label, 2>::Hash<>
-        > labelPairHashSet;
-
-        typedef HashTable
-        <
-            label,
-            labelPair,
-            FixedList<label, 2>::Hash<>
-        > labelTolabelPairHashTable;
-
 
 private:
 
@@ -263,7 +247,7 @@ public:
             autoPtr<polyMesh> createMesh
             (
                 const fileName& name,
-                labelTolabelPairHashTable& vertexMap,
+                labelPairLookup& vertexMap,
                 labelList& cellMap,
                 const bool writeDelaunayData = true
             ) const;

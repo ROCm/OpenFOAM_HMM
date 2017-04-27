@@ -31,9 +31,6 @@ License
 #include "indexedVertexEnum.H"
 #include "IOmanip.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
 template<class Triangulation>
@@ -541,8 +538,7 @@ Foam::label Foam::DistributedDelaunayMesh<Triangulation>::referVertices
     {
         for
         (
-            typename labelPairHashSet::const_iterator iter
-                = pointsNotInserted.begin();
+            labelPairHashSet::const_iterator iter = pointsNotInserted.begin();
             iter != pointsNotInserted.end();
             ++iter
         )
@@ -863,7 +859,7 @@ void Foam::DistributedDelaunayMesh<Triangulation>::sync(const boundBox& bb)
 
 template<class Triangulation>
 template<class PointIterator>
-typename Foam::DistributedDelaunayMesh<Triangulation>::labelPairHashSet
+Foam::labelPairHashSet
 Foam::DistributedDelaunayMesh<Triangulation>::rangeInsertReferredWithInfo
 (
     PointIterator begin,
