@@ -59,7 +59,6 @@ Description
 #include <link.h>
 
 #include <netinet/in.h>
-
 #ifdef USE_RANDOM
     #include <climits>
     #if INT_MAX    != 2147483647
@@ -1430,6 +1429,15 @@ Foam::fileNameList Foam::dlLoaded()
     return libs;
 }
 
+Foam::label Foam::osRandomBufferSize()
+{
+    #ifdef USE_RANDOM
+    return sizeof(random_data);
+    #else
+    return sizeof(drand48_data);
+    #endif
+}
+
 
 void Foam::osRandomSeed(const label seed)
 {
@@ -1457,6 +1465,44 @@ Foam::scalar Foam::osRandomDouble()
     return (scalar)random()/INT_MAX;
     #else
     return drand48();
+    #endif
+}
+
+
+void Foam::osRandomSeed(const label seed, List<char>& buffer)
+{
+    #ifdef USE_RANDOM
+    srandom_r((unsigned int)seed, reinterpret_cast<random_data*>(buffer.begin()));
+    #else
+    srand48_r(seed, reinterpret_cast<drand48_data*>(buffer.begin()));
+    #endif
+}
+
+
+Foam::label Foam::osRandomInteger(List<char>& buffer)
+{
+    #ifdef USE_RANDOM
+    int32_t result;
+    random_r(reinterpret_cast<random_data*>(buffer.begin()), &result);
+    return result;
+    #else
+    long result;
+    lrand48_r(reinterpret_cast<drand48_data*>(buffer.begin()), &result);
+    return result;
+    #endif
+}
+
+
+Foam::scalar Foam::osRandomDouble(List<char>& buffer)
+{
+    #ifdef USE_RANDOM
+    int32_t result;
+    random_r(reinterpret_cast<random_data*>(buffer.begin()), &result);
+    return (scalar)result/INT_MAX;
+    #else
+    double result;
+    drand48_r(reinterpret_cast<drand48_data*>(buffer.begin()), &result);
+    return result;
     #endif
 }
 
