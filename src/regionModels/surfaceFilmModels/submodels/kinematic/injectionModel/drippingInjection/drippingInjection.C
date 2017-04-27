@@ -57,7 +57,7 @@ drippingInjection::drippingInjection
     injectionModel(type(), owner, dict),
     deltaStable_(readScalar(coeffDict_.lookup("deltaStable"))),
     particlesPerParcel_(readScalar(coeffDict_.lookup("particlesPerParcel"))),
-    rndGen_(label(0), -1),
+    rndGen_(),
     parcelDistribution_
     (
         distributionModels::distributionModel::New
