@@ -53,7 +53,8 @@ bool Foam::FixedList<T, Size>::operator==(const FixedList<T, Size>& a) const
     List_CONST_ACCESS(T, (a), ap);
 
     List_FOR_ALL((*this), i)
-        equal = equal && (List_ELEM((*this), vp, i) == List_ELEM((a), ap, i));
+        equal = (List_ELEM((*this), vp, i) == List_ELEM((a), ap, i));
+        if (!equal) break;
     List_END_FOR_ALL
 
     return equal;

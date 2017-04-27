@@ -151,18 +151,18 @@ void Foam::shuffle(UList<T>& a)
 template<class T>
 bool Foam::UList<T>::operator==(const UList<T>& a) const
 {
-    if (this->size_ != a.size_)
+    bool equal = (this->size_ == a.size_);
+    if (!equal)
     {
         return false;
     }
-
-    bool equal = true;
 
     List_CONST_ACCESS(T, (*this), vp);
     List_CONST_ACCESS(T, (a), ap);
 
     List_FOR_ALL((*this), i)
-        equal = equal && (List_ELEM((*this), vp, i) == List_ELEM((a), ap, i));
+        equal = (List_ELEM((*this), vp, i) == List_ELEM((a), ap, i));
+        if (!equal) break;
     List_END_FOR_ALL
 
     return equal;
