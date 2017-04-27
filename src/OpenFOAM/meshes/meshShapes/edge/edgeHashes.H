@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,47 +21,34 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::EdgeMap
+Typedef
+    Foam::edgeHashSet
 
 Description
-    Map from edge (expressed as its endpoints) to value.
-    For easier forward declaration it is currently implemented as a
-    separate class rather than a template alias.
+    A HashSet for an edge.
+    The hashing on an edge is commutative.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef EdgeMap_H
-#define EdgeMap_H
+#ifndef edgeHashes_H
+#define edgeHashes_H
 
-#include "HashTable.H"
+#include "HashSet.H"
 #include "edge.H"
+#include "EdgeMap.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    // Alternative:
+    // template<class T>
+    // using EdgeMap = HashTable<T, edge, Hash<edge>>;
 
-/*---------------------------------------------------------------------------*\
-                           Class EdgeMap Declaration
-\*---------------------------------------------------------------------------*/
+    //- A HashSet with edge for its key.
+    typedef HashSet<edge, Hash<edge>> edgeHashSet;
 
-template<class T>
-class EdgeMap
-:
-    public HashTable<T, edge, Hash<edge>>
-{
-public:
-
-    //- Inherit constructors from HashTable
-    using HashTable<T, edge, Hash<edge>>::HashTable;
-
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
