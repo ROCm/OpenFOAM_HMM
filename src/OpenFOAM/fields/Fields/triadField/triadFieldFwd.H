@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,23 +25,31 @@ Typedef
     Foam::triadField
 
 Description
-    Specialisation of Field\<T\> for triad.
+    Forward declarations of the specialisation of Field\<T\> for triad.
 
 SourceFiles
     triadField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef triadField_H
-#define triadField_H
+#ifndef triadFieldFwd_H
+#define triadFieldFwd_H
 
-#include "triadFieldFwd.H"
-#include "Field.H"
+#include "triad.H"
 
-#define TEMPLATE
-#include "FieldFunctionsM.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "undefFieldFunctionsM.H"
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type> class Field;
+typedef Field<triad> triadField;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
