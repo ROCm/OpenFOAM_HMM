@@ -33,22 +33,4 @@ inline Foam::label Foam::cachedRandom::seed() const
 }
 
 
-inline const Foam::scalarList& Foam::cachedRandom::samples() const
-{
-    return samples_;
-}
-
-
-inline Foam::label Foam::cachedRandom::sampleI() const
-{
-    return sampleI_;
-}
-
-
-inline Foam::label& Foam::cachedRandom::sampleI()
-{
-    return sampleI_;
-}
-
-
 // ************************************************************************* //

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,88 +31,38 @@ License
 
 Foam::scalar Foam::cachedRandom::scalar01()
 {
-    if (sampleI_ < 0)
-    {
-        return osRandomDouble();
-    }
-
-    if (sampleI_ == samples_.size() - 1)
-    {
-        scalar s = samples_[sampleI_];
-        sampleI_ = 0;
-        return s;
-    }
-    else
-    {
-        scalar s = samples_[sampleI_];
-        sampleI_++;
-        return s;
-    }
+    return osRandomDouble(buffer_);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::cachedRandom::cachedRandom(const label seed, const label count)
+Foam::cachedRandom::cachedRandom(const label seed)
 :
-    seed_(1),
-    samples_(0),
-    sampleI_(-1),
+    buffer_(osRandomBufferSize()),
+    seed_(seed),
     hasGaussSample_(false),
     gaussSample_(0)
 {
-    if (seed > 1)
-    {
-        seed_ = seed;
-    }
-
-    // Initialise samples
-    osRandomSeed(seed_);
-
-    // Samples will be cached if count > 0
-    if (count > 0)
-    {
-        samples_.setSize(count);
-        forAll(samples_, i)
-        {
-            samples_[i] = osRandomDouble();
-        }
-
-        sampleI_ = 0;
-    }
+    // Initialise the random number generator
+    osRandomSeed(seed_, buffer_);
 }
 
 
 Foam::cachedRandom::cachedRandom(const cachedRandom& cr, const bool reset)
 :
+    buffer_(cr.buffer_),
     seed_(cr.seed_),
-    samples_(cr.samples_),
-    sampleI_(cr.sampleI_),
     hasGaussSample_(cr.hasGaussSample_),
     gaussSample_(cr.gaussSample_)
 {
-    //if (sampleI_ == -1)
-    //{
-    //    WarningInFunction
-    //        << "Copy constructor called, but samples not being cached. "
-    //        << "This may lead to non-repeatable behaviour" << endl;
-    //
-    //}
-
     if (reset)
     {
         hasGaussSample_ = false;
         gaussSample_ = 0;
 
-        if (samples_.size())
-        {
-            sampleI_ = 0;
-        }
-        else
-        {
-            // Re-initialise the samples
-            osRandomSeed(seed_);
-        }
+        // Re-initialise the samples
+        osRandomSeed(seed_, buffer_);
     }
 }
 
@@ -124,6 +74,13 @@ Foam::cachedRandom::~cachedRandom()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::cachedRandom::reset(const label seed)
+{
+    seed_ = seed;
+    osRandomSeed(seed_, buffer_);
+}
+
 
 template<>
 Foam::scalar Foam::cachedRandom::sample01()

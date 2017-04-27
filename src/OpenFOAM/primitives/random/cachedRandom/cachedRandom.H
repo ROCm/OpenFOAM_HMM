@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,15 +27,6 @@ Class
 Description
     Random number generator.
 
-    Pre-computes and caches samples on construction, so that when sample01()
-    is called, the function simply returns the next (pre-computed) sample. On
-    reaching the last sample, the sample sequence is repeated.
-
-    Constructed using a seed and sample count. If the supplied count is
-    negative, no caching is performed, and a new sample is generated on each
-    call to sample01().
-
-    Note: the copy constructor cannot be used if count = -1.
 
 SourceFiles
     cachedRandomI.H
@@ -65,14 +56,11 @@ class cachedRandom
 {
     // Private data
 
+        //- Buffer used by re-entrant random number generator
+        List<char> buffer_;
+
         //- Initial random number seed
         label seed_;
-
-        //- List of scalar samples
-        scalarList samples_;
-
-        //- Current sample marker
-        label sampleI_;
 
         //- Indicator, which tells if there is a stored gaussian sample
         bool hasGaussSample_;
@@ -92,7 +80,7 @@ public:
     // Constructors
 
         //- Construct given seed and sample count
-        cachedRandom(const label seed, const label count);
+        cachedRandom(const label seed = 123456);
 
         //- Copy constructor with optional reset of sampleI
         cachedRandom(const cachedRandom& cr, const bool reset = false);
@@ -109,18 +97,7 @@ public:
             //- Return const access to the initial random number seed
             inline label seed() const;
 
-            //- Return const access to the list of samples
-            inline const scalarList& samples() const;
-
-            //- Return the current sample marker
-            inline label sampleI() const;
-
-
-        // Manipulation
-
-            //- Return non-const access to the sample marker
-            inline label& sampleI();
-
+            void reset(const label seed);
 
         // Evaluation
 
