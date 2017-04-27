@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,35 +21,47 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Alias
+    Foam::LabelPairMap
+
+Description
+    A HashTable to objects of type \<T\> with a labelPair key.
+    The hashing is based on labelPair (FixedList) and is thus non-commutative.
+    For commutative hashing, an EdgeMap can be used.
+
+Typedef
+    Foam::labelPairHashSet
+
+Description
+    A HashSet for a labelPair.
+    The hashing is based on labelPair (FixedList) and is thus non-commutative.
+
 Typedef
     Foam::labelPairLookup
 
 Description
-    A HashTable for two labels to another label.
+    This is a Map of a labelPair to a label.
     Used for e.g. for face1, face2 to shared edge.
-
-Note
-    The hash table is based on a FixedList and not edge, since an edge
-    hashes commutatively!
+    The hashing is based on labelPair (FixedList) and is thus non-commutative.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelPairLookup_H
-#define labelPairLookup_H
+#ifndef labelPairHashes_H
+#define labelPairHashes_H
 
-#include "FixedList.H"
-#include "HashTable.H"
+#include "HashSet.H"
+#include "labelPair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef HashTable
-    <
-       label,
-       FixedList<label, 2>,
-       FixedList<label, 2>::Hash<>
-    > labelPairLookup;
+    template<class T>
+    using LabelPairMap = HashTable<T, labelPair, labelPair::Hash<>>;
+
+    typedef HashSet<labelPair, labelPair::Hash<>> labelPairHashSet;
+
+    typedef HashTable<label, labelPair, labelPair::Hash<>> labelPairLookup;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

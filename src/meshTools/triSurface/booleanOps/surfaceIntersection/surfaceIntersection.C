@@ -25,7 +25,6 @@ License
 
 #include "surfaceIntersection.H"
 #include "triSurfaceSearch.H"
-#include "labelPairLookup.H"
 #include "OFstream.H"
 #include "HashSet.H"
 #include "triSurface.H"
