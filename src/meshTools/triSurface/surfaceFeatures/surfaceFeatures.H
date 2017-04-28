@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,9 @@ namespace Foam
 {
 
 // Forward declaration of classes
+class plane;
 class triSurface;
+class treeBoundBox;
 
 /*---------------------------------------------------------------------------*\
                            Class surfaceFeatures Declaration
@@ -73,10 +75,10 @@ public:
         //- Edge status
         enum edgeStatus
         {
-            NONE,
-            REGION,
-            EXTERNAL,
-            INTERNAL
+            NONE,       //!< Not a classified feature edge
+            REGION,     //
+            EXTERNAL,   //!< "Convex" edge
+            INTERNAL    //!< "Concave" edge
         };
 
 
@@ -169,6 +171,17 @@ private:
             const label currentFeatI,
             labelList& featVisited
         );
+
+        //- Divide into multiple normal bins
+        //  - set REGION if != 2 normals
+        //  - set REGION if 2 normals that make feature angle
+        //  - otherwise set NONE and set normals,bins
+        edgeStatus checkFlatRegionEdge
+        (
+            const scalar tol,
+            const scalar includedAngle,
+            const label edgeI
+        ) const;
 
 public:
 
@@ -300,6 +313,50 @@ public:
                 const scalar includedAngle
             );
 
+            //- Mark edge status inside box as 'NONE'
+            void excludeBox
+            (
+                List<edgeStatus>& edgeStat,
+                const treeBoundBox& bb
+            ) const;
+
+            //- Mark edge status outside box as 'NONE'
+            void subsetBox
+            (
+                List<edgeStatus>& edgeStat,
+                const treeBoundBox& bb
+            ) const;
+
+            //- Mark edge status as 'NONE' for edges inside/outside box.
+            void deleteBox
+            (
+                List<edgeStatus>& edgeStat,
+                const treeBoundBox& bb,
+                const bool removeInside
+            ) const;
+
+            //- If edge does not intersect the plane, mark as 'NONE'
+            void subsetPlane
+            (
+                List<edgeStatus>& edgeStat,
+                const plane& cutPlane
+            ) const;
+
+            //- Mark edges with a single connected face as 'NONE'
+            void excludeOpen(List<edgeStatus>& edgeStat) const;
+
+            //- Divide into multiple normal bins
+            //  - set REGION if != 2 normals
+            //  - set REGION if 2 normals that make feature angle
+            //  - otherwise set NONE and set normals,bins
+            void checkFlatRegionEdge
+            (
+                List<edgeStatus>& edgeStat,
+                const scalar tol,
+                const scalar includedAngle
+            ) const;
+
+
             //- From member feature edges to status per edge.
             List<edgeStatus> toStatus() const;
 
@@ -413,6 +470,9 @@ public:
             //- Write to separate OBJ files (region, external, internal edges,
             //  feature points) for visualization
             void writeObj(const fileName& prefix) const;
+
+            //- Write some information
+            void writeStats(Ostream& os) const;
 
 
 

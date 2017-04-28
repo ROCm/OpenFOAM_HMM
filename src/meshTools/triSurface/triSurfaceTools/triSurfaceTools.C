@@ -33,7 +33,6 @@ License
 #include "plane.H"
 #include "geompack.H"
 
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const Foam::label Foam::triSurfaceTools::ANYEDGE = -1;
@@ -1376,54 +1375,6 @@ Foam::labelList Foam::triSurfaceTools::getVertexVertices
 }
 
 
-//// Order vertices consistent with face
-//void Foam::triSurfaceTools::orderVertices
-//(
-//    const labelledTri& f,
-//    const label v1,
-//    const label v2,
-//    label& vA,
-//    label& vB
-//)
-//{
-//    // Order v1, v2 in anticlockwise order.
-//    bool reverse = false;
-//
-//    if (f[0] == v1)
-//    {
-//        if (f[1] != v2)
-//        {
-//            reverse = true;
-//        }
-//    }
-//    else if (f[1] == v1)
-//    {
-//        if (f[2] != v2)
-//        {
-//            reverse = true;
-//        }
-//    }
-//    else
-//    {
-//        if (f[0] != v2)
-//        {
-//            reverse = true;
-//        }
-//    }
-//
-//    if (reverse)
-//    {
-//        vA = v2;
-//        vB = v1;
-//    }
-//    else
-//    {
-//        vA = v1;
-//        vB = v2;
-//    }
-//}
-
-
 // Get the other face using edgeI
 Foam::label Foam::triSurfaceTools::otherFace
 (
@@ -2632,7 +2583,6 @@ void Foam::triSurfaceTools::calcInterpolationWeights
     forAll(samplePts, i)
     {
         const point& samplePt = samplePts[i];
-
 
         FixedList<label, 3>& verts = allVerts[i];
         FixedList<scalar, 3>& weights = allWeights[i];

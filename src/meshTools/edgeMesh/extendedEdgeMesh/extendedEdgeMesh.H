@@ -94,23 +94,22 @@ public:
 
     enum pointStatus
     {
-        CONVEX,     // Fully convex point (w.r.t normals)
-        CONCAVE,    // Fully concave point
-        MIXED,      // A point surrounded by both convex and concave edges
-        NONFEATURE  // Not a feature point
+        CONVEX,     //!< Fully convex point (w.r.t normals)
+        CONCAVE,    //!< Fully concave point
+        MIXED,      //!< A point surrounded by both convex and concave edges
+        NONFEATURE  //!< Not a feature point
     };
 
     static const Foam::NamedEnum<pointStatus, 4> pointStatusNames_;
 
     enum edgeStatus
     {
-        EXTERNAL,   // "Convex" edge
-        INTERNAL,   // "Concave" edge
-        FLAT,       // Neither concave or convex, on a flat surface
-        OPEN,       // i.e. only connected to one face
-        MULTIPLE,   // Multiply connected (connected to more than two faces)
-        NONE        // Not a classified feature edge (consistency with
-                    // surfaceFeatures)
+        EXTERNAL,   //!< "Convex" edge
+        INTERNAL,   //!< "Concave" edge
+        FLAT,       //!< Neither concave or convex, on a flat surface
+        OPEN,       //!< Only connected to a single face
+        MULTIPLE,   //!< Multiply connected (connected to more than two faces)
+        NONE        //!< Unclassified (consistency with surfaceFeatures)
     };
 
     static const Foam::NamedEnum<edgeStatus, 6> edgeStatusNames_;
@@ -118,10 +117,10 @@ public:
     //- Normals point to the outside
     enum sideVolumeType
     {
-        INSIDE  = 0,  // mesh inside
-        OUTSIDE = 1,  // mesh outside
-        BOTH    = 2,  // e.g. a baffle
-        NEITHER = 3   // not sure when this may be used
+        INSIDE  = 0,  //!< mesh inside
+        OUTSIDE = 1,  //!< mesh outside
+        BOTH    = 2,  //!< e.g. a baffle
+        NEITHER = 3   //!< not sure when this may be used
     };
 
     static const Foam::NamedEnum<sideVolumeType, 4> sideVolumeTypeNames_;
