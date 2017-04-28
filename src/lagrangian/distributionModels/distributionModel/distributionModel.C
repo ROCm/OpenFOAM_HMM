@@ -66,7 +66,7 @@ Foam::distributionModels::distributionModel::distributionModel
 (
     const word& name,
     const dictionary& dict,
-    cachedRandom& rndGen
+    Random& rndGen
 )
 :
     distributionModelDict_(dict),

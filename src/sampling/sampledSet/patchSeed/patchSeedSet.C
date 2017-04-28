@@ -227,7 +227,7 @@ void Foam::patchSeedSet::calcSamples
         {
             forAll(subset, i)
             {
-                label j = rndGen.integer(0, subset.size()-1);
+                label j = rndGen.position<label>(0, subset.size()-1);
                 Swap(subset[i], subset[j]);
             }
         }

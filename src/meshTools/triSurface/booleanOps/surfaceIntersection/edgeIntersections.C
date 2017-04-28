@@ -260,7 +260,7 @@ bool Foam::edgeIntersections::inlinePerturb
             if (perturbStart)
             {
                 // Perturb with something (hopefully) larger than tolerance.
-                scalar t = 4.0*(rndGen.scalar01() - 0.5);
+                scalar t = 4.0*(rndGen.sample01<scalar>() - 0.5);
                 points1[v0] += t*surf1PointTol[e[0]]*n;
 
                 const labelList& pEdges = surf1.pointEdges()[e[0]];
@@ -273,7 +273,7 @@ bool Foam::edgeIntersections::inlinePerturb
             if (perturbEnd)
             {
                 // Perturb with something larger than tolerance.
-                scalar t = 4.0*(rndGen.scalar01() - 0.5);
+                scalar t = 4.0*(rndGen.sample01<scalar>() - 0.5);
                 points1[v1] += t*surf1PointTol[e[1]]*n;
 
                 const labelList& pEdges = surf1.pointEdges()[e[1]];
@@ -320,7 +320,7 @@ bool Foam::edgeIntersections::rotatePerturb
             //label pointi = e[0];
 
             // Generate random vector slightly larger than tolerance.
-            vector rndVec = rndGen.vector01() - vector(0.5, 0.5, 0.5);
+            vector rndVec = rndGen.sample01<vector>() - vector(0.5, 0.5, 0.5);
 
             // Make sure rndVec only perp to edge
             vector n(points1[meshPoints[e[1]]] - points1[meshPoints[e[0]]]);
@@ -405,7 +405,8 @@ bool Foam::edgeIntersections::offsetPerturb
         if (nearType == triPointRef::POINT || nearType == triPointRef::EDGE)
         {
             // Shift edge towards tri centre
-            vector offset = 0.01*rndGen.scalar01()*(ctr - pHit.hitPoint());
+            vector offset =
+                0.01*rndGen.sample01<scalar>()*(ctr - pHit.hitPoint());
 
             // shift e[0]
             points1[meshPoints[e[0]]] += offset;

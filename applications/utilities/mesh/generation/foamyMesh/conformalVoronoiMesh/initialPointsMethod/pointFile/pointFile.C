@@ -198,9 +198,15 @@ List<Vb::Point> pointFile::initialPoints() const
 
             if (randomiseInitialGrid_)
             {
-                p.x() += randomPerturbationCoeff_*(rndGen().scalar01() - 0.5);
-                p.y() += randomPerturbationCoeff_*(rndGen().scalar01() - 0.5);
-                p.z() += randomPerturbationCoeff_*(rndGen().scalar01() - 0.5);
+                p.x() +=
+                    randomPerturbationCoeff_
+                   *(rndGen().sample01<scalar>() - 0.5);
+                p.y() +=
+                    randomPerturbationCoeff_
+                   *(rndGen().sample01<scalar>() - 0.5);
+                p.z() +=
+                    randomPerturbationCoeff_
+                   *(rndGen().sample01<scalar>() - 0.5);
             }
 
             initialPoints.append(Vb::Point(p.x(), p.y(), p.z()));

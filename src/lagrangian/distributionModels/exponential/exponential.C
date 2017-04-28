@@ -42,7 +42,7 @@ namespace distributionModels
 Foam::distributionModels::exponential::exponential
 (
     const dictionary& dict,
-    cachedRandom& rndGen
+    Random& rndGen
 )
 :
     distributionModel(typeName, dict, rndGen),

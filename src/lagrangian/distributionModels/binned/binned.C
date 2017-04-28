@@ -78,7 +78,7 @@ void Foam::distributionModels::binned::initialise()
 Foam::distributionModels::binned::binned
 (
     const dictionary& dict,
-    cachedRandom& rndGen
+    Random& rndGen
 )
 :
     distributionModel(typeName, dict, rndGen),
@@ -102,7 +102,7 @@ Foam::distributionModels::binned::binned
 (
     const UList<scalar>& sampleData,
     const scalar binWidth,
-    cachedRandom& rndGen
+    Random& rndGen
 )
 :
     distributionModel(typeName, dictionary::null, rndGen),

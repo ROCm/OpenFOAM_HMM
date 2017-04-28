@@ -121,7 +121,7 @@ void Foam::VariableHardSphere<CloudType>::collide
     vector& UP = pP.U();
     vector& UQ = pQ.U();
 
-    Random& rndGen(cloud.rndGen());
+    Random& rndGen = cloud.rndGen();
 
     scalar mP = cloud.constProps(typeIdP).mass();
 
@@ -131,11 +131,11 @@ void Foam::VariableHardSphere<CloudType>::collide
 
     scalar cR = mag(UP - UQ);
 
-    scalar cosTheta = 2.0*rndGen.scalar01() - 1.0;
+    scalar cosTheta = 2.0*rndGen.sample01<scalar>() - 1.0;
 
     scalar sinTheta = sqrt(1.0 - cosTheta*cosTheta);
 
-    scalar phi = twoPi*rndGen.scalar01();
+    scalar phi = twoPi*rndGen.sample01<scalar>();
 
     vector postCollisionRelU =
         cR

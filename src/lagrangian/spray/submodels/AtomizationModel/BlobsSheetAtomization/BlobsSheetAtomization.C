@@ -92,7 +92,7 @@ void Foam::BlobsSheetAtomization<CloudType>::update
     const vector& injectionPos,
     const scalar pAmbient,
     const scalar chi,
-    cachedRandom& rndGen
+    Random& rndGen
 ) const
 {
     scalar lBU =

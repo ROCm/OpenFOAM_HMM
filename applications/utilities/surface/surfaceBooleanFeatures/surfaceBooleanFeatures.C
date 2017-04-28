@@ -783,7 +783,7 @@ labelPair edgeIntersectionsAndShuffleCGAL
                     const edge& e = edges[edgeI];
                     forAll(e, eI)
                     {
-                        vector d = rndGen.vector01()-p05;
+                        vector d = rndGen.sample01<vector>() - p05;
                         surf1Points[mp[e[eI]]] += surf1PointTol[e[eI]]*d;
                     }
                 }

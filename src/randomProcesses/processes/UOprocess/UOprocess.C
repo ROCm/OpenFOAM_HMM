@@ -40,9 +40,9 @@ complexVector UOprocess::WeinerProcess()
 {
     return RootDeltaT*complexVector
     (
-        complex(GaussGen.GaussNormal(), GaussGen.GaussNormal()),
-        complex(GaussGen.GaussNormal(), GaussGen.GaussNormal()),
-        complex(GaussGen.GaussNormal(), GaussGen.GaussNormal())
+        complex(GaussGen.GaussNormal<scalar>(), GaussGen.GaussNormal<scalar>()),
+        complex(GaussGen.GaussNormal<scalar>(), GaussGen.GaussNormal<scalar>()),
+        complex(GaussGen.GaussNormal<scalar>(), GaussGen.GaussNormal<scalar>())
     );
 }
 
@@ -57,7 +57,7 @@ UOprocess::UOprocess
     const dictionary& UOdict
 )
 :
-    GaussGen(label(0)),
+    GaussGen(),
     Mesh(kmesh),
     DeltaT(deltaT),
     RootDeltaT(sqrt(DeltaT)),

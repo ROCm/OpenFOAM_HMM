@@ -316,7 +316,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     (
         particleProperties_.subOrEmptyDict("subModels", solution_.active())
     ),
-    rndGen_(),
+    rndGen_(Pstream::myProcNo()),
     cellOccupancyPtr_(),
     cellLengthScale_(cbrt(mesh_.V())),
     rho_(rho),

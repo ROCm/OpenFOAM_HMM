@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     scalarField samples(10000000);
     forAll(samples, i)
     {
-        samples[i] = rndGen.scalar01();
+        samples[i] = rndGen.sample01<scalar>();
     }
 
     const scalar min = 0;

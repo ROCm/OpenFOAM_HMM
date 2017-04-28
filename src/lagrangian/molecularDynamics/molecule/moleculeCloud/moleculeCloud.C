@@ -1041,11 +1041,11 @@ void Foam::moleculeCloud::createMolecule
     {
         pi = equipartitionAngularMomentum(temperature, cP);
 
-        scalar phi(rndGen_.scalar01()*twoPi);
+        scalar phi(rndGen_.sample01<scalar>()*twoPi);
 
-        scalar theta(rndGen_.scalar01()*twoPi);
+        scalar theta(rndGen_.sample01<scalar>()*twoPi);
 
-        scalar psi(rndGen_.scalar01()*twoPi);
+        scalar psi(rndGen_.sample01<scalar>()*twoPi);
 
         Q = tensor
         (
