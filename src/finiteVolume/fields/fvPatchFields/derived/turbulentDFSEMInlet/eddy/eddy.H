@@ -41,7 +41,7 @@ SourceFiles
 #include "vector.H"
 #include "point.H"
 #include "tensor.H"
-#include "cachedRandom.H"
+#include "Random.H"
 #include "coordinateSystem.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -112,7 +112,7 @@ class eddy
         ) const;
 
         //- Return a number with zero mean and unit variance
-        inline scalar epsi(cachedRandom& rndGen) const;
+        inline scalar epsi(Random& rndGen) const;
 
 
 public:
@@ -133,7 +133,7 @@ public:
             const scalar x,             // distance from reference position
             const scalar sigmaX,        // length scale
             const symmTensor& R,        // Stress tensor
-            cachedRandom& rndGen
+            Random& rndGen
         );
 
         //- Construct copy
@@ -175,7 +175,7 @@ public:
             inline label dir1() const;
 
             //- Return random vector of -1 and 1's
-            inline vector epsilon(cachedRandom& rndGen) const;
+            inline vector epsilon(Random& rndGen) const;
 
 
         // Helper functions

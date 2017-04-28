@@ -99,7 +99,7 @@ contactAngleForce::contactAngleForce
 :
     force(typeName, owner, dict),
     Ccf_(readScalar(coeffDict_.lookup("Ccf"))),
-    rndGen_(label(0), -1),
+    rndGen_(),
     distribution_
     (
         distributionModels::distributionModel::New

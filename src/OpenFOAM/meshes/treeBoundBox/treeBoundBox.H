@@ -335,7 +335,7 @@ public:
             label distanceCmp(const point& pt, const treeBoundBox& other) const;
 
             //- Return slightly wider bounding box
-            //  Extends all dimensions with s*span*Random::scalar01()
+            //  Extends all dimensions with s*span*Random::sample01<scalar>()
             //  and guarantees in any direction s*mag(span) minimum width
             inline treeBoundBox extend(Random& rndGen, const scalar s) const;
 

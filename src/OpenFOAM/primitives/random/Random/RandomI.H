@@ -23,31 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "cachedRandom.H"
+#include "Random.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline Foam::label Foam::cachedRandom::seed() const
+inline Foam::label Foam::Random::seed() const
 {
     return seed_;
-}
-
-
-inline const Foam::scalarList& Foam::cachedRandom::samples() const
-{
-    return samples_;
-}
-
-
-inline Foam::label Foam::cachedRandom::sampleI() const
-{
-    return sampleI_;
-}
-
-
-inline Foam::label& Foam::cachedRandom::sampleI()
-{
-    return sampleI_;
 }
 
 

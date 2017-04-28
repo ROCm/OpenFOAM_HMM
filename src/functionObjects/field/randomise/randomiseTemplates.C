@@ -47,7 +47,7 @@ bool Foam::functionObjects::randomise::calcRandomised()
         forAll(field, celli)
         {
             Type rndPert;
-            rand.randomise(rndPert);
+            rand.randomise01(rndPert);
             rndPert = 2.0*rndPert - pTraits<Type>::one;
             rndPert /= mag(rndPert);
             rfield[celli] += magPerturbation_*rndPert;

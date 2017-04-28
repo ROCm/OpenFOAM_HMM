@@ -129,9 +129,9 @@ List<Vb::Point> bodyCentredCubic::initialPoints() const
 
                 if (randomiseInitialGrid_)
                 {
-                    pA.x() += pert*(rndGen().scalar01() - 0.5);
-                    pA.y() += pert*(rndGen().scalar01() - 0.5);
-                    pA.z() += pert*(rndGen().scalar01() - 0.5);
+                    pA.x() += pert*(rndGen().sample01<scalar>() - 0.5);
+                    pA.y() += pert*(rndGen().sample01<scalar>() - 0.5);
+                    pA.z() += pert*(rndGen().sample01<scalar>() - 0.5);
                 }
 
                 if (Pstream::parRun())
@@ -150,9 +150,9 @@ List<Vb::Point> bodyCentredCubic::initialPoints() const
 
                 if (randomiseInitialGrid_)
                 {
-                    pB.x() += pert*(rndGen().scalar01() - 0.5);
-                    pB.y() += pert*(rndGen().scalar01() - 0.5);
-                    pB.z() += pert*(rndGen().scalar01() - 0.5);
+                    pB.x() += pert*(rndGen().sample01<scalar>() - 0.5);
+                    pB.y() += pert*(rndGen().sample01<scalar>() - 0.5);
+                    pB.z() += pert*(rndGen().sample01<scalar>() - 0.5);
                 }
 
                 if (Pstream::parRun())

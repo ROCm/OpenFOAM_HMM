@@ -23,13 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "cachedRandom.H"
+#include "Random.H"
 #include "Pstream.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Type Foam::cachedRandom::sample01()
+Type Foam::Random::sample01()
 {
     Type value;
     for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
@@ -42,7 +42,7 @@ Type Foam::cachedRandom::sample01()
 
 
 template<class Type>
-Type Foam::cachedRandom::GaussNormal()
+Type Foam::Random::GaussNormal()
 {
     Type value;
     for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
@@ -55,7 +55,7 @@ Type Foam::cachedRandom::GaussNormal()
 
 
 template<class Type>
-Type Foam::cachedRandom::position(const Type& start, const Type& end)
+Type Foam::Random::position(const Type& start, const Type& end)
 {
     Type value(start);
     for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
@@ -69,14 +69,14 @@ Type Foam::cachedRandom::position(const Type& start, const Type& end)
 
 
 template<class Type>
-void Foam::cachedRandom::randomise01(Type& value)
+void Foam::Random::randomise01(Type& value)
 {
     value = sample01<Type>();
 }
 
 
 template<class Type>
-void Foam::cachedRandom::shuffle(UList<Type>& values)
+void Foam::Random::shuffle(UList<Type>& values)
 {
     const label nSample = values.size();
     label posI = nSample - 1;
@@ -93,7 +93,7 @@ void Foam::cachedRandom::shuffle(UList<Type>& values)
 
 
 template<class Type>
-Type Foam::cachedRandom::globalSample01()
+Type Foam::Random::globalSample01()
 {
     Type value = -GREAT*pTraits<Type>::one;
 
@@ -109,7 +109,7 @@ Type Foam::cachedRandom::globalSample01()
 
 
 template<class Type>
-Type Foam::cachedRandom::globalGaussNormal()
+Type Foam::Random::globalGaussNormal()
 {
     Type value = -GREAT*pTraits<Type>::one;
 
@@ -125,7 +125,7 @@ Type Foam::cachedRandom::globalGaussNormal()
 
 
 template<class Type>
-Type Foam::cachedRandom::globalPosition(const Type& start, const Type& end)
+Type Foam::Random::globalPosition(const Type& start, const Type& end)
 {
     Type value = -GREAT*pTraits<Type>::one;
 
@@ -141,7 +141,7 @@ Type Foam::cachedRandom::globalPosition(const Type& start, const Type& end)
 
 
 template<class Type>
-void Foam::cachedRandom::globalRandomise01(Type& value)
+void Foam::Random::globalRandomise01(Type& value)
 {
     value = -GREAT*pTraits<Type>::one;
 

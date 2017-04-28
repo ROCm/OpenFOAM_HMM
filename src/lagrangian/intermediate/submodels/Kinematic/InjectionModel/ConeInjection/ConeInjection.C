@@ -110,7 +110,7 @@ Foam::ConeInjection<CloudType>::ConeInjection
         vector tangent = Zero;
         scalar magTangent = 0.0;
 
-        cachedRandom& rnd = this->owner().rndGen();
+        Random& rnd = this->owner().rndGen();
         while (magTangent < SMALL)
         {
             vector v = rnd.sample01<vector>();
@@ -260,7 +260,7 @@ void Foam::ConeInjection<CloudType>::setProperties
     typename CloudType::parcelType& parcel
 )
 {
-    cachedRandom& rnd = this->owner().rndGen();
+    Random& rnd = this->owner().rndGen();
 
     // Set particle velocity
     const label i = parcelI % positionAxis_.size();

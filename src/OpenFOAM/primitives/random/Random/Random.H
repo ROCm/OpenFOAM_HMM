@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,23 +25,28 @@ Class
     Foam::Random
 
 Description
-    Simple random number generator.
+    Random number generator.
+
 
 SourceFiles
+    RandomI.H
     Random.C
+    RandomTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef Random_H
 #define Random_H
 
-#include "vector.H"
-#include "tensor.H"
+#include "List.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward declaration of classes
+class Random;
 
 /*---------------------------------------------------------------------------*\
                            Class Random Declaration
@@ -51,57 +56,162 @@ class Random
 {
     // Private data
 
-        label Seed;
+        //- Buffer used by re-entrant random number generator
+        List<char> buffer_;
+
+        //- Initial random number seed
+        label seed_;
+
+        //- Indicator, which tells if there is a stored gaussian sample
+        bool hasGaussSample_;
+
+        //- Stored sample value
+        scalar gaussSample_;
+
+
+    // Private Member Functions
+
+        //- Returns the current sample
+        scalar scalar01();
 
 
 public:
 
-
     // Constructors
 
-        //- Construct given seed
-        Random(const label);
+        //- Construct given seed and sample count
+        Random(const label seed = 123456);
+
+        //- Copy constructor with optional reset of sampleI
+        Random(const Random& r, const bool reset = false);
+
+
+    // Destructor
+    ~Random();
 
 
     // Member functions
 
-        int bit();
+        // Access
 
-        //- Scalar [0..1] (so including 0,1)
-        scalar scalar01();
+            //- Return const access to the initial random number seed
+            inline label seed() const;
 
-        //- Vector with every component scalar01
-        vector vector01();
+            //- Reset the random number generator seed
+            void reset(const label seed);
 
-        //- sphericalTensor with every component scalar01
-        sphericalTensor sphericalTensor01();
 
-        //- symmTensor with every component scalar01
-        symmTensor symmTensor01();
+        // Evaluation
 
-        //- Tensor with every component scalar01
-        tensor tensor01();
+            // Random numbers
 
-        //- Label [lower..upper]
-        label integer(const label lower, const label upper);
+                //- Return a random bit
+                int bit();
 
-        vector position(const vector&, const vector&);
+                //- Return a sample whose components lie in the range 0-1
+                template<class Type>
+                Type sample01();
 
-        void randomise(scalar&);
-        void randomise(vector&);
-        void randomise(sphericalTensor&);
-        void randomise(symmTensor&);
-        void randomise(tensor&);
+                //- Return a sample whose components are normally distributed
+                //  with zero mean and unity variance N(0, 1)
+                template<class Type>
+                Type GaussNormal();
 
-        //- Return a normal Gaussian randon number
-        //  with zero mean and unity variance N(0, 1)
-        scalar GaussNormal();
+                //- Return a sample between start and end
+                template<class Type>
+                Type position(const Type& start, const Type& end);
+
+                //- Randomise value in the range 0-1
+                template<class Type>
+                void randomise01(Type& value);
+
+                //- Shuffle the values in the list
+                template<class Type>
+                void shuffle(UList<Type>& values);
+
+
+            // Global random numbers - consistent across all processors
+
+                //- Return a sample whose components lie in the range 0-1
+                template<class Type>
+                Type globalSample01();
+
+                //- Return a sample whose components are normally distributed
+                //  with zero mean and unity variance N(0, 1)
+                template<class Type>
+                Type globalGaussNormal();
+
+                //- Return a sample between start and end
+                template<class Type>
+                Type globalPosition(const Type& start, const Type& end);
+
+                //- Randomise value in the range 0-1
+                template<class Type>
+                void globalRandomise01(Type& value);
 };
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Template specialisations
+
+template<>
+scalar Random::sample01<scalar>();
+
+template<>
+label Random::sample01<label>();
+
+template<>
+scalar Random::GaussNormal<scalar>();
+
+template<>
+label Random::GaussNormal<label>();
+
+template<>
+scalar Random::position<scalar>
+(
+    const scalar& start,
+    const scalar& end
+);
+
+template<>
+label Random::position<label>(const label& start, const label& end);
+
+template<>
+scalar Random::globalSample01<scalar>();
+
+template<>
+label Random::globalSample01<label>();
+
+template<>
+scalar Random::globalGaussNormal<scalar>();
+
+template<>
+label Random::globalGaussNormal<label>();
+
+template<>
+scalar Random::globalPosition<scalar>
+(
+    const scalar& start,
+    const scalar& end
+);
+
+template<>
+label Random::globalPosition<label>(const label& start, const label& end);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "RandomI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "RandomTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
