@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::surfaceFeaturesExtraction::extractFromSurface
+    Foam::surfaceFeaturesExtraction::extractFromNone
 
 Description
     Run-time selectable surface feature extraction.
@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceFeaturesExtraction_extractFromSurface_H
-#define surfaceFeaturesExtraction_extractFromSurface_H
+#ifndef surfaceFeaturesExtraction_extractFromNone_H
+#define surfaceFeaturesExtraction_extractFromNone_H
 
 #include "surfaceFeaturesExtraction.H"
 #include "dictionary.H"
@@ -49,26 +49,27 @@ namespace surfaceFeaturesExtraction
 {
 
 /*---------------------------------------------------------------------------*\
-         Class surfaceFeaturesExtraction::extractFromSurface Declaration
+         Class surfaceFeaturesExtraction::extractFromNone Declaration
 \*---------------------------------------------------------------------------*/
 
-class extractFromSurface
+class extractFromNone
 :
     public method
 {
+
 public:
 
     // Constructors
 
         //- Construct from dictionary
-        extractFromSurface(const dictionary& dict);
+        extractFromNone(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~extractFromSurface();
+    virtual ~extractFromNone();
 
 
-    //- Extracted features from surface
+    //- Extracted features from surface (no-op)
     virtual autoPtr<surfaceFeatures> features
     (
         const triSurface& surf

@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "extractFromSurface.H"
+#include "extractFromNone.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -35,9 +35,9 @@ namespace surfaceFeaturesExtraction
     addNamedToRunTimeSelectionTable
     (
         method,
-        extractFromSurface,
+        extractFromNone,
         dictionary,
-        extractFromSurface
+        none
     );
 }
 }
@@ -45,23 +45,23 @@ namespace surfaceFeaturesExtraction
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfaceFeaturesExtraction::extractFromSurface::extractFromSurface
+Foam::surfaceFeaturesExtraction::extractFromNone::extractFromNone
 (
     const dictionary& dict
 )
 :
     method()
 {
-    const dictionary& coeffDict = dict.subDict("extractFromSurfaceCoeffs");
+    const dictionary& coeffDict = dict.subOrEmptyDict("extractFromNoneCoeffs");
 
-    coeffDict.lookup("includedAngle") >> includedAngle_;
+    coeffDict.readIfPresent("includedAngle", includedAngle_);
     coeffDict.readIfPresent("geometricTestOnly", geometricTestOnly_);
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
 
-Foam::surfaceFeaturesExtraction::extractFromSurface::~extractFromSurface()
+Foam::surfaceFeaturesExtraction::extractFromNone::~extractFromNone()
 {}
 
 
@@ -69,27 +69,12 @@ Foam::surfaceFeaturesExtraction::extractFromSurface::~extractFromSurface()
 
 
 Foam::autoPtr<Foam::surfaceFeatures>
-Foam::surfaceFeaturesExtraction::extractFromSurface::features
+Foam::surfaceFeaturesExtraction::extractFromNone::features
 (
     const triSurface& surf
 ) const
 {
-    Info<< nl << "Constructing feature set from included angle "
-        << includedAngle() << nl
-        << "Selecting edges based purely on geometric tests: "
-        << geometricTestOnly().asText() << endl;
-
-    return autoPtr<surfaceFeatures>
-    (
-        new surfaceFeatures
-        (
-            surf,
-            includedAngle(),
-            0,  // minLen
-            0,  // minElems
-            geometricTestOnly()
-        )
-    );
+    return autoPtr<surfaceFeatures>(new surfaceFeatures(surf));
 }
 
 

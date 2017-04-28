@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "extractFromFile.H"
-#include "ListOps.H"
 #include "edgeMesh.H"
 #include "addToRunTimeSelectionTable.H"
 

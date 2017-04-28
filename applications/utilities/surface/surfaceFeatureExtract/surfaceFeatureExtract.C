@@ -29,12 +29,17 @@ Group
 
 Description
     Extracts and writes surface features to file. All but the basic feature
-    extraction is WIP.
+    extraction is a work-in-progress.
 
-    Curvature calculation is an implementation of the algorithm from:
-
-      "Estimating Curvatures and their Derivatives on Triangle Meshes"
-      by S. Rusinkiewicz
+    The curvature calculation is an implementation of the algorithm from:
+    \verbatim
+        "Estimating Curvatures and their Derivatives on Triangle Meshes"
+        by S. Rusinkiewicz
+        3DPVT'04 Proceedings of the 3D Data Processing,
+        Visualization, and Transmission, 2nd International Symposium
+        Pages 486-493
+        http://gfx.cs.princeton.edu/pubs/_2004_ECA/curvpaper.pdf
+    \endverbatim
 
 \*---------------------------------------------------------------------------*/
 
@@ -60,6 +65,7 @@ Description
 #include "point.H"
 #include "triadField.H"
 #include "transform.H"
+#include "triSurfaceLoader.H"
 
 using namespace Foam;
 
@@ -367,23 +373,6 @@ triSurfacePointScalarField calcCurvature
 }
 
 
-bool edgesConnected(const edge& e1, const edge& e2)
-{
-    if
-    (
-        e1.start() == e2.start()
-     || e1.start() == e2.end()
-     || e1.end() == e2.start()
-     || e1.end() == e2.end()
-    )
-    {
-        return true;
-    }
-
-    return false;
-}
-
-
 scalar calcProximityOfFeaturePoints
 (
     const List<pointIndexHit>& hitList,
@@ -462,7 +451,7 @@ scalar calcProximityOfFeatureEdges
                     const edge& e2 = efem.edges()[pHit2.index()];
 
                     // Don't refine if the edges are connected to each other
-                    if (!edgesConnected(e1, e2))
+                    if (!e1.connects(e2))
                     {
                         scalar curDist =
                             mag(pHit1.hitPoint() - pHit2.hitPoint());
@@ -480,25 +469,12 @@ scalar calcProximityOfFeatureEdges
 
 void dumpBox(const treeBoundBox& bb, const fileName& fName)
 {
-    OFstream str(fName);
+    OFstream os(fName);
 
     Info<< "Dumping bounding box " << bb << " as lines to obj file "
-        << str.name() << endl;
+        << os.name() << endl;
 
-
-    pointField boxPoints(bb.points());
-
-    forAll(boxPoints, i)
-    {
-        meshTools::writeOBJ(str, boxPoints[i]);
-    }
-
-    forAll(treeBoundBox::edges, i)
-    {
-        const edge& e = treeBoundBox::edges[i];
-
-        str<< "l " << e[0]+1 <<  ' ' << e[1]+1 << nl;
-    }
+    meshTools::writeOBJ(os, bb);
 }
 
 
@@ -866,62 +842,6 @@ void writeStats(const extendedFeatureEdgeMesh& fem, Ostream& os)
 }
 
 
-// Read and combine all surfaces into a single one
-
-autoPtr<triSurface> loadSurfaces(Time& runTime, const wordList& surfNames)
-{
-    List<labelledTri> faces;
-    pointField points;
-    label regoff = 0; // region offset
-
-    forAll(surfNames, surfi)
-    {
-        const word& surfName = surfNames[surfi];
-
-        triSurface addsurf(runTime.constantPath()/"triSurface"/surfName);
-
-        List<labelledTri> addfaces(addsurf.xferFaces());
-        List<point> addpoints(addsurf.xferPoints());
-
-        if (surfi)
-        {
-            const label ptoff = points.size(); // point offset
-
-            forAll(addfaces, facei)
-            {
-                labelledTri& f = addfaces[facei];
-                forAll(f, fi)
-                {
-                    f[fi] += ptoff;
-                }
-                f.region() += regoff;
-            }
-
-            faces.append(addfaces);
-            points.append(addpoints);
-        }
-        else
-        {
-            faces.transfer(addfaces);
-            points.transfer(addpoints);
-        }
-
-        regoff += addsurf.patches().size();
-    }
-
-    return autoPtr<triSurface>
-    (
-        new triSurface
-        (
-            faces,
-            geometricSurfacePatchList(),
-            points,
-            true
-        )
-    );
-}
-
-
 int main(int argc, char *argv[])
 {
     argList::addNote
@@ -939,24 +859,14 @@ int main(int argc, char *argv[])
     const word dictName("surfaceFeatureExtractDict");
     #include "setSystemRunTimeDictionaryIO.H"
 
-    // Will be using triSurface, so filter according to what is supported
-    fileNameList validSurfaceFiles = readDir
-    (
-        runTime.path()/runTime.constant()/"triSurface",
-        fileName::FILE
-    );
-    inplaceSubsetList
-    (
-        validSurfaceFiles,
-        [](const fileName& f){ return triSurface::canRead(f); }
-    );
-
-    // sort and eliminate duplicates (eg, files with/without .gz)
-    inplaceUniqueSort(validSurfaceFiles);
-
     Info<< "Reading " << dictName << nl << endl;
-
     const IOdictionary dict(dictIO);
+
+    // Loader for available triSurface surface files
+    triSurfaceLoader loader(runTime);
+
+    // Where to write VTK output files
+    const fileName vtkOutputDir = runTime.constantPath()/"triSurface";
 
     forAllConstIter(dictionary, dict, iter)
     {
@@ -972,115 +882,88 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        autoPtr<surfaceFeaturesExtraction::method> extractPtr =
+        autoPtr<surfaceFeaturesExtraction::method> extractor =
             surfaceFeaturesExtraction::method::New
             (
                 surfaceDict
             );
 
-        const surfaceFeaturesExtraction::method& extract = extractPtr();
-
-        // Output name, cleansed of extensions
-        const word sFeatFileName =
+        // The output name, cleansed of extensions
+        // Optional "output" entry, or the dictionary name.
+        const word outputName =
             fileName
             (
                 surfaceDict.lookupOrDefault<word>("output", iter().keyword())
             ).lessExt();
 
-        wordList surfFileNames;
-
+        // The "surfaces" entry is normally optional, but if the sub-dictionary
+        // is itself called "surfaces", then this becomes mandatory.
+        // This provides a simple means of handling both situations without an
+        // additional switch.
         if
         (
-            iter().keyword() == "surfaces"   // mandatory
-         || surfaceDict.found("surfaces")    // or optional
+            iter().keyword() == "surfaces"  // mandatory
+         || surfaceDict.found("surfaces")   // or optional
         )
         {
-            wordReList regexs(surfaceDict.lookup("surfaces"));
-
-            labelList selected = findStrings(regexs, validSurfaceFiles);
-            surfFileNames.setSize(selected.size());
-            forAll(selected, i)
-            {
-                surfFileNames[i] = validSurfaceFiles[selected[i]].name();
-            }
-
-            if (surfFileNames.empty())
-            {
-                FatalErrorInFunction
-                    << "No surfaces specified/found for entry: "
-                    << iter().keyword()
-                    << exit(FatalError);
-            }
+            loader.select(wordReList(surfaceDict.lookup("surfaces")));
         }
         else
         {
-            surfFileNames.setSize(1);
-            surfFileNames[0] = iter().keyword();
-
-            const fileName file
-            (
-                runTime.constantPath()/"triSurface"/surfFileNames[0]
-            );
-
-            if (!isFile(file))
-            {
-                FatalErrorInFunction
-                    << "No surface: " << file.name()
-                    << exit(FatalError);
-            }
+            loader.select(iter().keyword());
         }
 
-        // DebugVar(surfFileNames);
-        // DebugVar(sFeatFileName);
+        if (loader.selected().empty())
+        {
+            FatalErrorInFunction
+                << "No surfaces specified/found for entry: "
+                << iter().keyword() << exit(FatalError);
+        }
+        // DebugVar(loader.available());
+        // DebugVar(outputName);
+
 
         Info<< "Surfaces           : ";
-        if (surfFileNames.size() == 1)
+        if (loader.selected().size() == 1)
         {
-            Info<< surfFileNames[0] << nl;
+            Info<< loader.selected()[0] << nl;
         }
         else
         {
-            Info<< flatOutput(surfFileNames) << nl;
+            Info<< flatOutput(loader.selected()) << nl;
+        }
+        Info<< "Output             : " << outputName << nl;
+
+        // Load a single file, or load and combine multiple selected files
+        autoPtr<triSurface> surfPtr = loader.load();
+        if (!surfPtr.valid() || surfPtr().empty())
+        {
+            FatalErrorInFunction
+                << "Problem loading surface(s) for entry: "
+                << iter().keyword() << exit(FatalError);
         }
 
-        Info<< "Output             : " << sFeatFileName << nl;
+        triSurface surf = surfPtr();
 
         const Switch writeVTK = surfaceDict.lookupOrDefault<Switch>
         (
-            "writeVTK", Switch::OFF
+            "writeVTK",
+            Switch::OFF
         );
         const Switch writeObj = surfaceDict.lookupOrDefault<Switch>
         (
-            "writeObj", Switch::OFF
-        );
-
-        const Switch curvature = surfaceDict.lookupOrDefault<Switch>
-        (
-            "curvature", Switch::OFF
-        );
-        const Switch featureProximity = surfaceDict.lookupOrDefault<Switch>
-        (
-            "featureProximity", Switch::OFF
-        );
-        const Switch closeness = surfaceDict.lookupOrDefault<Switch>
-        (
-            "closeness", Switch::OFF
+            "writeObj",
+            Switch::OFF
         );
 
         Info<< "write VTK: " <<  writeVTK << nl;
 
-        Info<< nl << "Feature line extraction is only valid on closed manifold "
-            << "surfaces." << endl;
+        Info<< "Feature line extraction is only valid on closed manifold "
+            << "surfaces." << nl;
 
-
-        // Read and combine all surfaces into a single one
-
-        autoPtr<triSurface> surfPtr = loadSurfaces(runTime, surfFileNames);
-        triSurface surf = surfPtr();
-
-        Info<< "Statistics:" << endl;
+        Info<< nl << "Statistics:" << nl;
         surf.writeStats(Info);
-        Info<< endl;
+        Info<< nl;
 
         // need plain faces if outputting VTK format
         faceList faces;
@@ -1097,19 +980,19 @@ int main(int argc, char *argv[])
         // Either construct features from surface & featureAngle or read set.
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        autoPtr<surfaceFeatures> set = extract.features(surf);
+        autoPtr<surfaceFeatures> features = extractor().features(surf);
 
         // Trim set
         // ~~~~~~~~
 
         if (surfaceDict.isDict("trimFeatures"))
         {
-            dictionary trimDict = surfaceDict.subDict("trimFeatures");
-            const scalar minLen =
-                trimDict.lookupOrAddDefault<scalar>("minLen", -GREAT);
+            const dictionary& trimDict = surfaceDict.subDict("trimFeatures");
 
+            const scalar minLen =
+                trimDict.lookupOrDefault<scalar>("minLen", 0);
             const label minElem =
-                trimDict.lookupOrAddDefault<label>("minElem", 0);
+                trimDict.lookupOrDefault<label>("minElem", 0);
 
             // Trim away small groups of features
             if (minLen > 0 || minElem > 0)
@@ -1125,7 +1008,10 @@ int main(int argc, char *argv[])
                         << minElem << endl;
                 }
 
-                set().trimFeatures(minLen, minElem, extract.includedAngle());
+                features().trimFeatures
+                (
+                    minLen, minElem, extractor().includedAngle()
+                );
             }
         }
 
@@ -1134,8 +1020,9 @@ int main(int argc, char *argv[])
         // ~~~~~~
 
         // Convert to marked edges, points
-        List<surfaceFeatures::edgeStatus> edgeStat(set().toStatus());
+        List<surfaceFeatures::edgeStatus> edgeStat(features().toStatus());
 
+        // Option: "subsetFeatures" (dictionary)
         if (surfaceDict.isDict("subsetFeatures"))
         {
             const dictionary& subsetDict = surfaceDict.subDict
@@ -1143,6 +1030,7 @@ int main(int argc, char *argv[])
                 "subsetFeatures"
             );
 
+            // Suboption: "insideBox"
             if (subsetDict.found("insideBox"))
             {
                 treeBoundBox bb(subsetDict.lookup("insideBox")());
@@ -1152,6 +1040,7 @@ int main(int argc, char *argv[])
 
                 deleteBox(surf, bb, false, edgeStat);
             }
+            // Suboption: "outsideBox"
             else if (subsetDict.found("outsideBox"))
             {
                 treeBoundBox bb(subsetDict.lookup("outsideBox")());
@@ -1186,17 +1075,15 @@ int main(int argc, char *argv[])
                         (
                             surf,
                             1e-5,   //tol,
-                            extract.includedAngle(),
+                            extractor().includedAngle(),
                             edgeI
                         );
                     }
                 }
             }
 
-            const Switch openEdges =
-                subsetDict.lookupOrDefault<Switch>("openEdges", "yes");
-
-            if (!openEdges)
+            // Suboption: "openEdges" (false: remove open edges)
+            if (!subsetDict.lookupOrDefault<bool>("openEdges", true))
             {
                 Info<< "Removing all open edges"
                     << " (edges with 1 connected face)" << endl;
@@ -1210,6 +1097,7 @@ int main(int argc, char *argv[])
                 }
             }
 
+            // Suboption: "plane"
             if (subsetDict.found("plane"))
             {
                 plane cutPlane(subsetDict.lookup("plane")());
@@ -1225,7 +1113,7 @@ int main(int argc, char *argv[])
 
 
         surfaceFeatures newSet(surf);
-        newSet.setFromStatus(edgeStat, extract.includedAngle());
+        newSet.setFromStatus(edgeStat, extractor().includedAngle());
 
         Info<< nl
             << "Initial feature set:" << nl
@@ -1263,7 +1151,7 @@ int main(int argc, char *argv[])
         (
             newSet,
             runTime,
-            sFeatFileName + ".extendedFeatureEdgeMesh",
+            outputName + ".extendedFeatureEdgeMesh",
             surfBaffleRegions
         );
 
@@ -1292,39 +1180,40 @@ int main(int argc, char *argv[])
             feMesh.add(addFeMesh);
         }
 
-
         if (surfaceDict.lookupOrDefault<bool>("selfIntersection", false))
         {
-            // TODO: perturb tolerance
+            // TODO: perturbance tolerance?
 
             triSurfaceSearch query(surf);
-            surfaceIntersection intersect
+            surfaceIntersection intersect(query, surfaceDict);
+
+            intersect.mergePoints(5*SMALL);
+
+            labelPair sizeInfo
             (
-                query,
-                surfaceDict.lookupOrDefault<scalar>
-                (
-                    "planarTolerance",
-                    surfaceIntersection::defaultTolerance
-                )
+                intersect.cutPoints().size(),
+                intersect.cutEdges().size()
             );
-
-            // surf.write("selfIntersection-input.obj");
-
-            Info<<"self-intersection "
-                << intersect.cutEdges().size() << " edges "
-                << intersect.cutPoints().size() << " points" << nl;
 
             if (intersect.cutEdges().size())
             {
                 extendedEdgeMesh addMesh
                 (
-                    xferCopy<pointField>(intersect.cutPoints()),
-                    xferCopy<edgeList>(intersect.cutEdges())
+                    intersect.cutPoints(),
+                    intersect.cutEdges()
                 );
 
+                addMesh.mergePoints(5*SMALL);
                 feMesh.add(addMesh);
+
+                sizeInfo[0] = addMesh.points().size();
+                sizeInfo[1] = addMesh.edges().size();
             }
+            Info<< "Self intersection:" << nl
+                    << "    points : " << sizeInfo[0] << nl
+                    << "    edges  : " << sizeInfo[1] << nl;
         }
+
 
         Info<< nl
             << "Final feature set:" << nl;
@@ -1337,111 +1226,47 @@ int main(int argc, char *argv[])
 
         if (writeObj)
         {
-            feMesh.writeObj(feMesh.path()/sFeatFileName);
+            feMesh.writeObj(feMesh.path()/outputName);
         }
 
         feMesh.write();
 
         // Write a featureEdgeMesh for backwards compatibility
-        featureEdgeMesh bfeMesh
-        (
-            IOobject
+        if (true)
+        {
+            featureEdgeMesh bfeMesh
             (
-                sFeatFileName + ".eMesh",   // name
-                runTime.constant(),         // instance
-                "triSurface",
-                runTime,                    // registry
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
-            ),
-            feMesh.points(),
-            feMesh.edges()
-        );
+                IOobject
+                (
+                    outputName + ".eMesh",      // name
+                    runTime.constant(),         // instance
+                    "triSurface",
+                    runTime,                    // registry
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE,
+                    false
+                ),
+                feMesh.points(),
+                feMesh.edges()
+            );
 
-        Info<< nl << "Writing featureEdgeMesh to "
-            << bfeMesh.objectPath() << endl;
+            Info<< nl << "Writing featureEdgeMesh to "
+                << bfeMesh.objectPath() << endl;
 
-        bfeMesh.regIOobject::write();
+            bfeMesh.regIOobject::write();
+        }
 
-    // Find close features
-
-    // // Dummy trim operation to mark features
-    // labelList featureEdgeIndexing = newSet.trimFeatures(-GREAT, 0);
-
-    // scalarField surfacePtFeatureIndex(surf.points().size(), -1);
-
-    // forAll(newSet.featureEdges(), eI)
-    // {
-    //     const edge& e = surf.edges()[newSet.featureEdges()[eI]];
-
-    //     surfacePtFeatureIndex[surf.meshPoints()[e.start()]] =
-    //     featureEdgeIndexing[newSet.featureEdges()[eI]];
-
-    //     surfacePtFeatureIndex[surf.meshPoints()[e.end()]] =
-    //     featureEdgeIndexing[newSet.featureEdges()[eI]];
-    // }
-
-    // if (writeVTK)
-    // {
-    //     vtkSurfaceWriter().write
-    //     (
-    //         runTime.constant()/"triSurface",    // outputDir
-    //         sFeatFileName,                      // surfaceName
-    //         surf.points(),
-    //         faces,
-    //         "surfacePtFeatureIndex",            // fieldName
-    //         surfacePtFeatureIndex,
-    //         true,                               // isNodeValues
-    //         true                                // verbose
-    //     );
-    // }
-
-    // Random rndGen(343267);
-
-    // treeBoundBox surfBB
-    // (
-    //     treeBoundBox(searchSurf.bounds()).extend(rndGen, 1e-4)
-    // );
-
-    // surfBB.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-    // surfBB.max() += Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-
-    // indexedOctree<treeDataEdge> ftEdTree
-    // (
-    //     treeDataEdge
-    //     (
-    //         false,
-    //         surf.edges(),
-    //         surf.localPoints(),
-    //         newSet.featureEdges()
-    //     ),
-    //     surfBB,
-    //     8,      // maxLevel
-    //     10,     // leafsize
-    //     3.0     // duplicity
-    // );
-
-    // labelList nearPoints = ftEdTree.findBox
-    // (
-    //     treeBoundBox
-    //     (
-    //         sPt - featureSearchSpan*Foam::vector::one,
-    //         sPt + featureSearchSpan*Foam::vector::one
-    //     )
-    // );
-
-        if (closeness)
+        // Option: "closeness"
+        if (surfaceDict.lookupOrDefault<bool>("closeness", false))
         {
             Info<< nl << "Extracting internal and external closeness of "
                 << "surface." << endl;
-
 
             triSurfaceMesh searchSurf
             (
                 IOobject
                 (
-                    sFeatFileName + ".closeness",
+                    outputName + ".closeness",
                     runTime.constant(),
                     "triSurface",
                     runTime,
@@ -1481,8 +1306,8 @@ int main(int argc, char *argv[])
 
             // Info<< "span " << span << endl;
 
-            pointField start(searchSurf.faceCentres() - span*normals);
-            pointField end(searchSurf.faceCentres() + span*normals);
+            const pointField start(searchSurf.faceCentres() - span*normals);
+            const pointField end(searchSurf.faceCentres() + span*normals);
             const pointField& faceCentres = searchSurf.faceCentres();
 
             List<List<pointIndexHit>> allHitInfo;
@@ -1649,7 +1474,7 @@ int main(int argc, char *argv[])
             (
                 IOobject
                 (
-                    sFeatFileName + ".internalCloseness",
+                    outputName + ".internalCloseness",
                     runTime.constant(),
                     "triSurface",
                     runTime,
@@ -1667,7 +1492,7 @@ int main(int argc, char *argv[])
             (
                 IOobject
                 (
-                    sFeatFileName + ".externalCloseness",
+                    outputName + ".externalCloseness",
                     runTime.constant(),
                     "triSurface",
                     runTime,
@@ -1685,8 +1510,8 @@ int main(int argc, char *argv[])
             {
                 vtkSurfaceWriter().write
                 (
-                    runTime.constantPath()/"triSurface",// outputDir
-                    sFeatFileName,                      // surfaceName
+                    vtkOutputDir,
+                    outputName,
                     meshedSurfRef
                     (
                         surf.points(),
@@ -1700,8 +1525,8 @@ int main(int argc, char *argv[])
 
                 vtkSurfaceWriter().write
                 (
-                    runTime.constantPath()/"triSurface",// outputDir
-                    sFeatFileName,                      // surfaceName
+                    vtkOutputDir,
+                    outputName,
                     meshedSurfRef
                     (
                         surf.points(),
@@ -1715,8 +1540,8 @@ int main(int argc, char *argv[])
             }
         }
 
-
-        if (curvature)
+        // Option: "curvature"
+        if (surfaceDict.lookupOrDefault<bool>("curvature", false))
         {
             Info<< nl << "Extracting curvature of surface at the points."
                 << endl;
@@ -1726,7 +1551,7 @@ int main(int argc, char *argv[])
 
             triSurfacePointScalarField k = calcCurvature
             (
-                sFeatFileName,
+                outputName,
                 runTime,
                 surf,
                 pointNormals,
@@ -1739,8 +1564,8 @@ int main(int argc, char *argv[])
             {
                 vtkSurfaceWriter().write
                 (
-                    runTime.constantPath()/"triSurface",// outputDir
-                    sFeatFileName,                      // surfaceName
+                    vtkOutputDir,
+                    outputName,
                     meshedSurfRef
                     (
                         surf.points(),
@@ -1754,8 +1579,8 @@ int main(int argc, char *argv[])
             }
         }
 
-
-        if (featureProximity)
+        // Option: "featureProximity"
+        if (surfaceDict.lookupOrDefault<bool>("featureProximity", false))
         {
             Info<< nl << "Extracting proximity of close feature points and "
                 << "edges to the surface" << endl;
@@ -1802,7 +1627,7 @@ int main(int argc, char *argv[])
             (
                 IOobject
                 (
-                    sFeatFileName + ".featureProximity",
+                    outputName + ".featureProximity",
                     runTime.constant(),
                     "triSurface",
                     runTime,
@@ -1820,8 +1645,8 @@ int main(int argc, char *argv[])
             {
                 vtkSurfaceWriter().write
                 (
-                    runTime.constantPath()/"triSurface",// outputDir
-                    sFeatFileName,                      // surfaceName
+                    vtkOutputDir,
+                    outputName,
                     meshedSurfRef
                     (
                         surf.points(),

@@ -16,7 +16,7 @@ FoamFile
 
 surface1.stl
 {
-    // How to obtain raw features (extractFromFile || extractFromSurface)
+    // How to obtain raw features (extractFromFile | extractFromSurface | none)
     extractionMethod    extractFromSurface;
 
     extractFromSurfaceCoeffs
@@ -28,19 +28,25 @@ surface1.stl
         includedAngle   120;
 
         // Do not mark region edges
-        geometricTestOnly       yes;
+        geometricTestOnly  yes;
     }
+
+    // Generate additional features from self-intersect
+    selfIntersection    false;
+
+    // Tolerance for surface intersections
+    tolerance           1e-3;
 
     // Write options
 
         // Write features to obj format for postprocessing
-        writeObj                yes;
+        writeObj        yes;
 }
 
 
 surface2.nas
 {
-    // How to obtain raw features (extractFromFile || extractFromSurface)
+    // How to obtain raw features (extractFromFile | extractFromSurface | none)
     extractionMethod    extractFromFile;
 
     extractFromFileCoeffs
@@ -91,36 +97,42 @@ surface2.nas
     }
 
     // Output the curvature of the surface
-    curvature               no;
+    curvature           no;
 
     // Output the proximity of feature points and edges to each other
-    featureProximity        no;
+    featureProximity    no;
 
     // The maximum search distance to use when looking for other feature
     // points and edges
-    maxFeatureProximity     1;
+    maxFeatureProximity 1;
 
     // Out put the closeness of surface elements to other surface elements.
-    closeness               no;
+    closeness           no;
+
+    // Generate additional features from self-intersect
+    selfIntersection    false;
+
+    // Tolerance for surface intersections
+    tolerance           1e-3;
 
     // Write options
 
         // Write features to obj format for postprocessing
-        writeObj                yes;
+        writeObj        yes;
 
         // Write surface proximity and curvature fields to vtk format
         // for postprocessing
-        writeVTK                no;
+        writeVTK        no;
 }
 
 
-// Handle multiple surfaces
+// Handle single or multiple surfaces
 //
 // - If the dictionary is named 'surfaces', it must also contain a 'surfaces'
 //   entry (wordRe list).
 //
-// - If other dictionaries may contain a 'surfaces' entry, it will be taken
-//   for the input.
+// - If other dictionaries contain a 'surfaces' entry,
+//   it will be taken for the input.
 //
 surfaces
 {
@@ -131,24 +143,30 @@ surfaces
     // Base output name (optional)
     // output              surfaces;
 
-    // Generate features from self-intersect
+    // Generate additional features from self-intersect
     selfIntersection    true;
 
-    // Tolerance for self-intersect
-    planarTolerance     1e-3;
+    // Tolerance for surface intersections
+    tolerance           1e-3;
 
     extractFromSurfaceCoeffs
     {
         includedAngle   120;
 
         // Do not mark region edges
-        geometricTestOnly       yes;
+        geometricTestOnly  yes;
+    }
+
+    extractFromNoneCoeffs
+    {
+        includedAngle   120;
+
     }
 
     // Write options
 
         // Write features to obj format for postprocessing
-        writeObj                yes;
+        writeObj        yes;
 }
 
 // ************************************************************************* //
