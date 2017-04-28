@@ -746,7 +746,7 @@ turbulentDFSEMInletFvPatchVectorField
     nCellPerEddy_(5),
     patchNormal_(vector::zero),
     v0_(0),
-    rndGen_(),
+    rndGen_(Pstream::myProcNo()),
     sigmax_(size(), 0),
     maxSigmaX_(0),
     nEddy_(0),
