@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -350,18 +350,7 @@ void Foam::meshRefinement::markFeatureCellLevel
     {
         const point& keepPoint = keepPoints[i];
 
-        label cellI = -1;
-        label tetFaceI = -1;
-        label tetPtI = -1;
-
-
-        // Force construction of search tree even if processor holds no
-        // cells
-        (void)mesh_.cellTree();
-        if (mesh_.nCells())
-        {
-            mesh_.findCellFacePt(keepPoint, cellI, tetFaceI, tetPtI);
-        }
+        const label celli = mesh_.cellTree().findInside(keepPoint);
 
         if (cellI != -1)
         {
@@ -404,10 +393,15 @@ void Foam::meshRefinement::markFeatureCellLevel
                             (
                                 mesh_,
                                 keepPoint,
+<<<<<<< HEAD
                                 cellI,
                                 tetFaceI,
                                 tetPtI,
                                 featureMesh.points()[pointI],   // endpos
+=======
+                                celli,
+                                featureMesh.points()[pointi],   // endpos
+>>>>>>> 371762757... Lagrangian: Rewrite of the particle tracking algorithm to function in
                                 featureLevel,                   // level
                                 featI,                          // featureMesh
                                 pointI,                         // end point
@@ -449,10 +443,15 @@ void Foam::meshRefinement::markFeatureCellLevel
                             (
                                 mesh_,
                                 keepPoint,
+<<<<<<< HEAD
                                 cellI,
                                 tetFaceI,
                                 tetPtI,
                                 featureMesh.points()[pointI],   // endpos
+=======
+                                celli,
+                                featureMesh.points()[pointi],   // endpos
+>>>>>>> 371762757... Lagrangian: Rewrite of the particle tracking algorithm to function in
                                 featureLevel,                   // level
                                 featI,                          // featureMesh
                                 pointI,                         // end point
@@ -545,8 +544,14 @@ void Foam::meshRefinement::markFeatureCellLevel
                 label otherPointI = e.otherVertex(pointI);
 
                 trackedParticle* tp(new trackedParticle(startTp));
+<<<<<<< HEAD
                 tp->end() = featureMesh.points()[otherPointI];
                 tp->j() = otherPointI;
+=======
+                tp->start() = tp->position();
+                tp->end() = featureMesh.points()[otherPointi];
+                tp->j() = otherPointi;
+>>>>>>> 371762757... Lagrangian: Rewrite of the particle tracking algorithm to function in
                 tp->k() = edgeI;
 
                 if (debug&meshRefinement::FEATURESEEDS)
@@ -605,8 +610,14 @@ void Foam::meshRefinement::markFeatureCellLevel
                     const edge& e = featureMesh.edges()[edgeI];
                     label otherPointI = e.otherVertex(pointI);
 
+<<<<<<< HEAD
                     tp.end() = featureMesh.points()[otherPointI];
                     tp.j() = otherPointI;
+=======
+                    tp.start() = tp.position();
+                    tp.end() = featureMesh.points()[otherPointi];
+                    tp.j() = otherPointi;
+>>>>>>> 371762757... Lagrangian: Rewrite of the particle tracking algorithm to function in
                     tp.k() = edgeI;
                     keepParticle = true;
                     break;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -485,8 +485,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                     meshTools::constrainToMeshCentre(mesh, pos);
 
                     // Create a new parcel
-                    parcelType* pPtr =
-                        new parcelType(mesh, pos, celli, tetFacei, tetPti);
+                    parcelType* pPtr = new parcelType(mesh, pos, celli);
 
                     // Check/set new parcel thermo properties
                     cloud.setParcelThermoProperties(*pPtr, dt);
@@ -610,8 +609,7 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
             meshTools::constrainToMeshCentre(mesh, pos);
 
             // Create a new parcel
-            parcelType* pPtr =
-                new parcelType(mesh, pos, celli, tetFacei, tetPti);
+            parcelType* pPtr = new parcelType(mesh, pos, celli);
 
             // Check/set new parcel thermo properties
             cloud.setParcelThermoProperties(*pPtr, 0.0);

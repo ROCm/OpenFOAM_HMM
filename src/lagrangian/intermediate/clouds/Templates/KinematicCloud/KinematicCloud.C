@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -318,7 +318,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     ),
     rndGen_(Pstream::myProcNo()),
     cellOccupancyPtr_(),
-    cellLengthScale_(cbrt(mesh_.V())),
+    cellLengthScale_(mag(cbrt(mesh_.V()))),
     rho_(rho),
     U_(U),
     mu_(mu),
@@ -845,18 +845,14 @@ void Foam::KinematicCloud<CloudType>::updateMesh()
 {
     updateCellOccupancy();
     injectors_.updateMesh();
-    cellLengthScale_ = cbrt(mesh_.V());
+    cellLengthScale_ = mag(cbrt(mesh_.V()));
 }
 
 
 template<class CloudType>
 void Foam::KinematicCloud<CloudType>::autoMap(const mapPolyMesh& mapper)
 {
-    typedef typename particle::TrackingData<KinematicCloud<CloudType>> tdType;
-
-    tdType td(*this);
-
-    Cloud<parcelType>::template autoMap<tdType>(td, mapper);
+    Cloud<parcelType>::autoMap(mapper);
 
     updateMesh();
 }
