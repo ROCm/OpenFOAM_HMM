@@ -23,11 +23,11 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "cachedRandom.H"
+#include "Random.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline Foam::label Foam::cachedRandom::seed() const
+inline Foam::label Foam::Random::seed() const
 {
     return seed_;
 }
