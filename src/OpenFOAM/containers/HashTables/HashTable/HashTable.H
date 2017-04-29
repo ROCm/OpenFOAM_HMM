@@ -60,6 +60,7 @@ namespace Foam
 
 template<class T> class List;
 template<class T> class UList;
+template<class T, unsigned Size> class FixedList;
 template<class T, class Key, class Hash> class HashTable;
 template<class T, class Key, class Hash> class HashPtrTable;
 
@@ -174,6 +175,18 @@ class HashTable
         bool set(const Key& key, const T& newEntry, const bool protect);
 
 
+protected:
+
+    // Protected Member Functions
+
+        //- Remove using begin/end iterators of listed keys
+        template<class InputIter>
+        inline label eraseMultiple
+        (
+            const InputIter begIter,
+            const InputIter endIter
+        );
+
 public:
 
     // Forward declaration of iterators
@@ -273,6 +286,15 @@ public:
             //- Remove entries given by the listed keys from this HashTable
             //  Return the number of elements removed
             label erase(const UList<Key>& keys);
+
+            //- Remove entries given by the listed keys from this HashTable
+            //  Return the number of elements removed
+            template<unsigned Size>
+            label erase(const FixedList<Key, Size>& keys);
+
+            //- Remove entries given by the listed keys from this HashTable
+            //  Return the number of elements removed
+            label erase(std::initializer_list<Key> keys);
 
             //- Remove entries given by the given keys from this HashTable
             //  Return the number of elements removed.

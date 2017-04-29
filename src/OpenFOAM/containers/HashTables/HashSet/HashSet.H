@@ -64,8 +64,8 @@ class HashSet
 
 public:
 
-    typedef typename HashTable<nil, Key, Hash>::iterator iterator;
-    typedef typename HashTable<nil, Key, Hash>::const_iterator const_iterator;
+    using iterator = typename HashTable<nil, Key, Hash>::iterator;
+    using const_iterator = typename HashTable<nil, Key, Hash>::const_iterator;
 
 
     // Constructors
@@ -152,6 +152,25 @@ public:
         bool unset(const Key& key)
         {
             return HashTable<nil, Key, Hash>::erase(key);
+        }
+
+        //- Unset the listed keys - same as erase
+        label unset(const UList<Key>& lst)
+        {
+            return HashTable<nil, Key, Hash>::erase(lst);
+        }
+
+        //- Unset the listed keys - same as erase
+        template<unsigned Size>
+        label unset(const FixedList<Key, Size>& lst)
+        {
+            return HashTable<nil, Key, Hash>::erase(lst);
+        }
+
+        //- Unset the listed keys - same as erase
+        label unset(std::initializer_list<Key> lst)
+        {
+            return HashTable<nil, Key, Hash>::erase(lst);
         }
 
 

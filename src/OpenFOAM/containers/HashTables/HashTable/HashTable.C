@@ -28,7 +28,33 @@ License
 
 #include "HashTable.H"
 #include "List.H"
+#include "FixedList.H"
 #include "Tuple2.H"
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class T, class Key, class Hash>
+template<class InputIter>
+Foam::label Foam::HashTable<T, Key, Hash>::eraseMultiple
+(
+    const InputIter begIter,
+    const InputIter endIter
+)
+{
+    const label nTotal = this->size();
+    label changed = 0;
+
+    // Terminates early if possible
+    for (InputIter iter = begIter; changed < nTotal && iter != endIter; ++iter)
+    {
+        if (this->erase(*iter))
+        {
+            ++changed;
+        }
+    }
+    return changed;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -389,19 +415,28 @@ bool Foam::HashTable<T, Key, Hash>::erase(const Key& key)
 template<class T, class Key, class Hash>
 Foam::label Foam::HashTable<T, Key, Hash>::erase(const UList<Key>& keys)
 {
-    const label nTotal = nElmts_;
-    label count = 0;
+    return eraseMultiple(keys.begin(), keys.end());
+}
 
-    // Remove listed keys from this table - terminates early if possible
-    for (label keyI = 0; count < nTotal && keyI < keys.size(); ++keyI)
-    {
-        if (erase(keys[keyI]))
-        {
-            ++count;
-        }
-    }
 
-    return count;
+template<class T, class Key, class Hash>
+template<unsigned Size>
+Foam::label Foam::HashTable<T, Key, Hash>::erase
+(
+    const FixedList<Key, Size>& keys
+)
+{
+    return eraseMultiple(keys.begin(), keys.end());
+}
+
+
+template<class T, class Key, class Hash>
+Foam::label Foam::HashTable<T, Key, Hash>::erase
+(
+    std::initializer_list<Key> keys
+)
+{
+    return eraseMultiple(keys.begin(), keys.end());
 }
 
 
@@ -412,19 +447,21 @@ Foam::label Foam::HashTable<T, Key, Hash>::erase
     const HashTable<AnyType, Key, AnyHash>& rhs
 )
 {
-    label count = 0;
+    const label nTotal = this->size();
+    label changed = 0;
 
     // Remove rhs keys from this table - terminates early if possible
     // Could optimize depending on which hash is smaller ...
-    for (iterator iter = begin(); iter != end(); ++iter)
+
+    // Terminates early if possible
+    for (iterator iter = begin(); changed < nTotal && iter != end(); ++iter)
     {
         if (rhs.found(iter.key()) && erase(iter))
         {
-            ++count;
+            ++changed;
         }
     }
-
-    return count;
+    return changed;
 }
 
 
