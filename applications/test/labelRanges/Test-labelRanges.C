@@ -28,10 +28,6 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "IOobject.H"
-#include "IOstreams.H"
-#include "IFstream.H"
-#include "IStringStream.H"
 #include "labelRanges.H"
 
 using namespace Foam;
@@ -42,6 +38,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
+    argList::noFunctionObjects();
     argList::validArgs.insert("start size .. startN sizeN");
     argList::addOption("verbose");
     argList::addNote
@@ -76,12 +73,9 @@ int main(int argc, char *argv[])
         }
 
         {
-            label start = 0;
-            label size  = 0;
-
-            IStringStream(args[argI])() >> start;
+            label start = args.argRead<label>(argI);
+            label size  = args.argRead<label>(argI+1);
             ++argI;
-            IStringStream(args[argI])() >> size;
 
             range.reset(start, size);
         }
@@ -90,9 +84,9 @@ int main(int argc, char *argv[])
         if (removeMode)
         {
             Info<< "del " << range << " :";
-            forAllConstIter(labelRange, range, iter)
+            for (auto i : range)
             {
-                Info<< " " << iter();
+                Info<< " " << i;
             }
             Info<< nl;
 
@@ -101,9 +95,9 @@ int main(int argc, char *argv[])
         else
         {
             Info<< "add " << range  << " :";
-            forAllConstIter(labelRange, range, iter)
+            for (auto i : range)
             {
-                Info<< " " << iter();
+                Info<< " " << i;
             }
             Info<< nl;
 

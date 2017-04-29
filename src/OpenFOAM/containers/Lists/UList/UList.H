@@ -47,6 +47,7 @@ SourceFiles
 #include "uLabel.H"
 #include "nullObject.H"
 #include "zero.H"
+#include "stdFoam.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -426,69 +427,6 @@ inline void reverse(UList<T>& ul);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "UListI.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//- Loop across all elements in \a list
-// \par Usage
-// \code
-// forAll(anyList, i)
-// {
-//      statements;
-// }
-// \endcode
-// \sa forAllReverse
-#define forAll(list, i) \
-    for (Foam::label i=0; i<(list).size(); ++i)
-
-//- Reverse loop across all elements in \a list
-//  \par Usage
-//  \code
-//  forAllReverse(anyList, i)
-//  {
-//       statements;
-//  }
-//  \endcode
-//  \sa forAll
-#define forAllReverse(list, i) \
-    for (Foam::label i=(list).size()-1; i>=0; --i)
-
-//- Iterate across all elements in the \a container object of type
-//  \a Container.
-//  \par Usage
-//  \code
-//  forAll(ContainerType, container, iter)
-//  {
-//      statements;
-//  }
-//  \endcode
-//  \sa forAllConstIter
-#define forAllIter(Container,container,iter)                                   \
-    for                                                                        \
-    (                                                                          \
-        Container::iterator iter = (container).begin();                        \
-        iter != (container).end();                                             \
-        ++iter                                                                 \
-    )
-
-//- Iterate across all elements in the \a container object of type
-//  \a Container with const access.
-//  \par Usage
-//  \code
-//  forAllConstIter(ContainerType, container, iter)
-//  {
-//      statements;
-//  }
-//  \endcode
-//  \sa forAllIter
-#define forAllConstIter(Container,container,iter)                              \
-    for                                                                        \
-    (                                                                          \
-        Container::const_iterator iter = (container).cbegin();                 \
-        iter != (container).cend();                                            \
-        ++iter                                                                 \
-    )
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -62,7 +62,7 @@ int main()
     Info<< "\ntable1 sortedToc: " << table1.sortedToc() << endl;
     table1.printInfo(Info)
         << "table1 [" << table1.size() << "] " << endl;
-    forAllConstIter(HashTable<scalar>, table1, iter)
+    forAllConstIters(table1, iter)
     {
         Info<< iter.key() << " => " << iter() << nl;
     }
@@ -106,7 +106,7 @@ int main()
         << "\ntable3" << table3 << nl;
 
     Info<< "\nerase table2 by iterator" << nl;
-    forAllIter(HashTable<scalar>, table2, iter)
+    forAllIters(table2, iter)
     {
         Info<< "erasing " << iter.key() << " => " << iter.object() << " ... ";
         table2.erase(iter);

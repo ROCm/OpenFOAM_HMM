@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 
     Info<< nl << "And again using STL iterator: " << nl << endl;
 
-    forAllIter(SLList<scalar>, myList, iter)
+    forAllIters(myList, iter)
     {
         Info<< "element:" << *iter << endl;
     }
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 
     const ISLList<Scalar>& const_myList = myList;
 
-    forAllConstIter(SLList<scalar>, const_myList, iter)
+    forAllConstIters(const_myList, iter)
     {
         Info<< "element:" << *iter << endl;
     }
