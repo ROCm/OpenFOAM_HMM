@@ -126,7 +126,7 @@ class HashTable
 {
     // Private data type for table entries
 
-        //- Structure to hold a hashed entry with SLList for collisions
+        //- Structure to hold a hashed entry, with a SLList for collisions
         struct hashedEntry
         {
             //- The lookup key
@@ -139,7 +139,7 @@ class HashTable
             T obj_;
 
             //- Construct from key, next pointer and object
-            inline hashedEntry(const Key&, hashedEntry* next, const T&);
+            inline hashedEntry(const Key& key, hashedEntry* next, const T& obj);
 
 
         private:
@@ -169,7 +169,8 @@ class HashTable
         //  No checks for zero-sized tables.
         inline label hashKeyIndex(const Key& key) const;
 
-        //- Assign a new hashedEntry to a possibly already existing key
+        //- Assign a new hashedEntry to a possibly already existing key.
+        //  Return true if the new entry was set.
         bool set(const Key& key, const T& newEntry, const bool protect);
 
 
@@ -201,7 +202,7 @@ public:
         HashTable(const label size = 128);
 
         //- Construct from Istream
-        HashTable(Istream&, const label size = 128);
+        HashTable(Istream& is, const label size = 128);
 
         //- Construct as copy
         HashTable(const HashTable<T, Key, Hash>& ht);
@@ -254,9 +255,12 @@ public:
         // Edit
 
             //- Insert a new hashedEntry
+            //  Return true if the entry inserted, which means that it did
+            //  not previously exist in the table.
             inline bool insert(const Key& key, const T& newEntry);
 
-            //- Assign a new hashedEntry, overwriting existing entries
+            //- Assign a new hashedEntry, overwriting existing entries.
+            //  Returns true.
             inline bool set(const Key& key, const T& newEntry);
 
             //- Erase a hashedEntry specified by given iterator
@@ -306,13 +310,15 @@ public:
         //- Find and return a hashedEntry
         inline const T& operator[](const Key& key) const;
 
-        //- Find and return a hashedEntry, create it null if not present
+        //- Return existing entry or create a new entry.
+        //  A newly created entry is created as a nameless T() and is thus
+        //  value-initialized. For primitives, this will be zero.
         inline T& operator()(const Key& key);
 
         //- Assignment
         void operator=(const HashTable<T, Key, Hash>& rhs);
 
-        //- Assignment to an initializer list
+        //- Assignment from an initializer list
         void operator=(std::initializer_list<Tuple2<Key, T>> lst);
 
         //- Equality. Hash tables are equal if the keys and values are equal.

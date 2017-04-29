@@ -86,7 +86,7 @@ public:
         HashSet(const UList<Key>& lst);
 
         //- Construct from an initializer list of Key
-        HashSet(std::initializer_list<Key>);
+        HashSet(std::initializer_list<Key> lst);
 
         //- Construct as copy
         HashSet(const HashSet<Key, Hash>& hs)
@@ -122,7 +122,7 @@ public:
             return HashTable<nil, Key, Hash>::insert(key, nil());
         }
 
-        //- Insert keys from a UList of Key
+        //- Insert keys from the list of Key
         //  Return the number of new elements inserted
         label insert(const UList<Key>& lst);
 

@@ -51,6 +51,9 @@ void printTraits(const pTraits<T>& p)
 }
 
 
+#pragma GCC diagnostic warning "-Wmaybe-uninitialized"
+#pragma GCC diagnostic warning "-Wuninitialized"
+
 int main()
 {
     printTraits<bool>();
@@ -70,6 +73,12 @@ int main()
     }
 
     printTraits(pTraits<scalar>(3.14159));
+
+    label abc;
+    Info<< "unintialized primitive:"<< abc << endl;
+
+    label def = label();
+    Info<< "intialized primitive:"<< def << endl;
 
     Info<< "End\n" << endl;
 

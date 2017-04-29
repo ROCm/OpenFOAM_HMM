@@ -431,7 +431,7 @@ Foam::label Foam::HashTable<T, Key, Hash>::erase
 template<class T, class Key, class Hash>
 void Foam::HashTable<T, Key, Hash>::resize(const label sz)
 {
-    label newSize = HashTableCore::canonicalSize(sz);
+    const label newSize = HashTableCore::canonicalSize(sz);
 
     if (newSize == tableSize_)
     {
@@ -452,7 +452,7 @@ void Foam::HashTable<T, Key, Hash>::resize(const label sz)
         tmpTable->insert(iter.key(), *iter);
     }
 
-    label oldSize = tableSize_;
+    const label oldSize = tableSize_;
     tableSize_ = tmpTable->tableSize_;
     tmpTable->tableSize_ = oldSize;
 

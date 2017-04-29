@@ -28,6 +28,7 @@ Description
 #include "hashedWordList.H"
 #include "HashSet.H"
 #include "Map.H"
+#include "labelPairHashes.H"
 
 using namespace Foam;
 
@@ -122,13 +123,19 @@ int main(int argc, char *argv[])
         << (wordHashSet(setA) | wordHashSet(tableA) | wordHashSet(tableB))
         << nl;
 
-
     labelHashSet setB
     {
         1, 11, 42
     };
 
     Info<< "setB : " << setB << endl;
+
+    labelPair pair(12, 15);
+    setB.set(pair);
+
+    Info<< "setB : " << setB << endl;
+    setB.unset(pair);
+
 
     labelHashSet setC(1);
     setC.insert(2008);
