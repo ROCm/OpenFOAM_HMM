@@ -31,6 +31,7 @@ Description
 
 #include "argList.H"
 #include "edgeList.H"
+#include "edgeHashes.H"
 
 using namespace Foam;
 
@@ -78,6 +79,28 @@ int main(int argc, char *argv[])
         Info<< "insert(" << i << ") = " << ok << " resulting ";
         printInfo(e4);
     }
+
+    e4.start() = e4.end() = -1;
+    Info<< "insert from list\n";
+    labelHashSet newIndices({2, -1, 2, 1, 4, 1, 2, 3});
+    e4.insert(newIndices.toc());
+    printInfo(e4);
+
+    e4.start() = e4.end() = -1;
+    Info<< "insert from list\n";
+    e4.insert({0, 5, 2, -1, 2, 1, 4, 1, 2, 3});
+    printInfo(e4);
+
+    FixedList<label, 8> otherIndices{12, 2, -1, 1, 4, 1, 2, 3};
+    e4.start() = e4.end() = -1;
+    Info<< "insert from list: " << otherIndices << nl;
+    e4.insert(otherIndices);
+    printInfo(e4);
+
+    e4.start() = e4.end();
+    Info<< "erase from list: " << otherIndices << nl;
+    Info<< "removed " << e4.erase(otherIndices) << " values" << nl;
+    printInfo(e4);
 
     for (label i : {-1, 0, 1, 3})
     {

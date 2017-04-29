@@ -329,7 +329,7 @@ public:
         //- Return size of the largest possible FixedList
         inline label max_size() const;
 
-        //- Return true if the FixedList is empty (ie, size() is zero)
+        //- Always false since zero-sized FixedList is compile-time disabled.
         inline bool empty() const;
 
         //- Swap two FixedLists of the same type in constant time
