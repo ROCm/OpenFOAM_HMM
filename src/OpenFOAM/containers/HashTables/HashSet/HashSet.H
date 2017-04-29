@@ -61,6 +61,25 @@ class HashSet
 :
     public HashTable<nil, Key, Hash>
 {
+    // Private Member Functions
+
+        //- Insert values, using begin/end iterators.
+        template<class InputIter>
+        inline label insertMultiple
+        (
+            const InputIter begIter,
+            const InputIter endIter
+        );
+
+        //- Assign using begin/end iterators.
+        template<class InputIter>
+        inline label assignMultiple
+        (
+            const InputIter begIter,
+            const InputIter endIter,
+            const label sz
+        );
+
 
 public:
 
@@ -83,7 +102,11 @@ public:
         {}
 
         //- Construct from UList of Key
-        HashSet(const UList<Key>& lst);
+        explicit HashSet(const UList<Key>& lst);
+
+        //- Construct from FixedList of Key
+        template<unsigned Size>
+        explicit HashSet(const FixedList<Key, Size>& lst);
 
         //- Construct from an initializer list of Key
         HashSet(std::initializer_list<Key> lst);
@@ -109,7 +132,7 @@ public:
         //- Construct from the keys of another HashTable,
         //  the type of values held is arbitrary.
         template<class AnyType, class AnyHash>
-        HashSet(const HashTable<AnyType, Key, AnyHash>& h);
+        explicit HashSet(const HashTable<AnyType, Key, AnyHash>& h);
 
 
     // Member Functions
@@ -126,6 +149,11 @@ public:
         //  Return the number of new elements inserted
         label insert(const UList<Key>& lst);
 
+        //- Insert keys from the list of Key
+        //  Return the number of new elements inserted
+        template<unsigned Size>
+        label insert(const FixedList<Key, Size>& lst);
+
         //- Insert keys from a initializer list of Key
         //  Return the number of new elements inserted
         label insert(std::initializer_list<Key> lst);
@@ -138,6 +166,13 @@ public:
 
         //- Same as insert (cannot overwrite nil content)
         label set(const UList<Key>& lst)
+        {
+            return insert(lst);
+        }
+
+        //- Same as insert (cannot overwrite nil content)
+        template<unsigned Size>
+        label set(const FixedList<Key, Size>& lst)
         {
             return insert(lst);
         }
@@ -185,6 +220,17 @@ public:
 
         //- The opposite of the equality operation.
         bool operator!=(const HashSet<Key, Hash>& rhs) const;
+
+
+        //- Assignment from a UList of keys
+        void operator=(const UList<Key>& lst);
+
+        //- Assignment from a FixedList of keys
+        template<unsigned Size>
+        void operator=(const FixedList<Key, Size>& lst);
+
+        //- Assignment from an initializer list of keys
+        void operator=(std::initializer_list<Key> lst);
 
 
         //- Combine entries from HashSets

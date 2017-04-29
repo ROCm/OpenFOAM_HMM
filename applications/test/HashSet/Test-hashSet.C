@@ -128,6 +128,9 @@ int main(int argc, char *argv[])
         1, 11, 42
     };
 
+    setB = FixedList<label, 4>({1, 2, 3, 4});
+    setB = {1, 2, 4};
+    setB = List<label>({1, 2, 4});
     Info<< "setB : " << setB << endl;
 
     labelPair pair(12, 15);

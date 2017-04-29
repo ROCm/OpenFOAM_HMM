@@ -31,29 +31,26 @@ License
 
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 defineTypeNameAndDebug(faceSet, 0);
 
 addToRunTimeSelectionTable(topoSet, faceSet, word);
 addToRunTimeSelectionTable(topoSet, faceSet, size);
 addToRunTimeSelectionTable(topoSet, faceSet, set);
+}
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-faceSet::faceSet(const IOobject& obj)
+Foam::faceSet::faceSet(const IOobject& obj)
 :
     topoSet(obj, typeName)
 {}
 
 
-faceSet::faceSet
+Foam::faceSet::faceSet
 (
     const polyMesh& mesh,
     const word& name,
@@ -67,7 +64,7 @@ faceSet::faceSet
 }
 
 
-faceSet::faceSet
+Foam::faceSet::faceSet
 (
     const polyMesh& mesh,
     const word& name,
@@ -79,7 +76,7 @@ faceSet::faceSet
 {}
 
 
-faceSet::faceSet
+Foam::faceSet::faceSet
 (
     const polyMesh& mesh,
     const word& name,
@@ -91,7 +88,7 @@ faceSet::faceSet
 {}
 
 
-faceSet::faceSet
+Foam::faceSet::faceSet
 (
     const polyMesh& mesh,
     const word& name,
@@ -103,15 +100,27 @@ faceSet::faceSet
 {}
 
 
+Foam::faceSet::faceSet
+(
+    const polyMesh& mesh,
+    const word& name,
+    const UList<label>& set,
+    writeOption w
+)
+:
+    topoSet(mesh, name, set, w)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-faceSet::~faceSet()
+Foam::faceSet::~faceSet()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void faceSet::sync(const polyMesh& mesh)
+void Foam::faceSet::sync(const polyMesh& mesh)
 {
     boolList set(mesh.nFaces(), false);
 
@@ -150,19 +159,19 @@ void faceSet::sync(const polyMesh& mesh)
 }
 
 
-label faceSet::maxSize(const polyMesh& mesh) const
+Foam::label Foam::faceSet::maxSize(const polyMesh& mesh) const
 {
     return mesh.nFaces();
 }
 
 
-void faceSet::updateMesh(const mapPolyMesh& morphMap)
+void Foam::faceSet::updateMesh(const mapPolyMesh& morphMap)
 {
     updateLabels(morphMap.reverseFaceMap());
 }
 
 
-void faceSet::distribute(const mapDistributePolyMesh& map)
+void Foam::faceSet::distribute(const mapDistributePolyMesh& map)
 {
     boolList inSet(map.nOldFaces());
     forAllConstIter(faceSet, *this, iter)
@@ -193,7 +202,7 @@ void faceSet::distribute(const mapDistributePolyMesh& map)
 }
 
 
-void faceSet::writeDebug
+void Foam::faceSet::writeDebug
 (
     Ostream& os,
     const primitiveMesh& mesh,
@@ -203,9 +212,5 @@ void faceSet::writeDebug
     topoSet::writeDebug(os, mesh.faceCentres(), maxLen);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -51,7 +51,6 @@ class faceSet
     public topoSet
 {
 
-
 public:
 
     //- Runtime type information
@@ -78,7 +77,7 @@ public:
         (
             const polyMesh& mesh,
             const word& name,
-            const label,
+            const label size,
             writeOption w=NO_WRITE
         );
 
@@ -87,7 +86,7 @@ public:
         (
             const polyMesh& mesh,
             const word& name,
-            const topoSet&,
+            const topoSet& set,
             writeOption w=NO_WRITE
         );
 
@@ -96,7 +95,16 @@ public:
         (
             const polyMesh& mesh,
             const word& name,
-            const labelHashSet&,
+            const labelHashSet& set,
+            writeOption w=NO_WRITE
+        );
+
+        //- Construct from additional list of labels for the labelHashSet
+        faceSet
+        (
+            const polyMesh& mesh,
+            const word& name,
+            const UList<label>& set,
             writeOption w=NO_WRITE
         );
 
