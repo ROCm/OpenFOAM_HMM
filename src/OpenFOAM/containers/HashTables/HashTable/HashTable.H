@@ -301,7 +301,7 @@ public:
             //  The parameter HashTable needs the same type of key, but the
             //  type of values held and the hashing function are arbitrary.
             template<class AnyType, class AnyHash>
-            label erase(const HashTable<AnyType, Key, AnyHash>& rhs);
+            label erase(const HashTable<AnyType, Key, AnyHash>& other);
 
             //- Resize the hash table for efficiency
             void resize(const label sz);

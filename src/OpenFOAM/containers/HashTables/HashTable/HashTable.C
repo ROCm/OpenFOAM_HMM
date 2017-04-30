@@ -44,8 +44,12 @@ Foam::label Foam::HashTable<T, Key, Hash>::eraseMultiple
     const label nTotal = this->size();
     label changed = 0;
 
-    // Terminates early if possible
-    for (InputIter iter = begIter; changed < nTotal && iter != endIter; ++iter)
+    for
+    (
+        InputIter iter = begIter;
+        changed < nTotal && iter != endIter; // terminate early
+        ++iter
+    )
     {
         if (this->erase(*iter))
         {
@@ -444,23 +448,49 @@ template<class T, class Key, class Hash>
 template<class AnyType, class AnyHash>
 Foam::label Foam::HashTable<T, Key, Hash>::erase
 (
-    const HashTable<AnyType, Key, AnyHash>& rhs
+    const HashTable<AnyType, Key, AnyHash>& other
 )
 {
+    // Remove other keys from this table
     const label nTotal = this->size();
     label changed = 0;
 
-    // Remove rhs keys from this table - terminates early if possible
-    // Could optimize depending on which hash is smaller ...
-
-    // Terminates early if possible
-    for (iterator iter = begin(); changed < nTotal && iter != end(); ++iter)
+    if (other.size() < nTotal)
     {
-        if (rhs.found(iter.key()) && erase(iter))
+        // other is smaller, use its keys for removal
+        using other_iter =
+            typename HashTable<AnyType, Key, AnyHash>::const_iterator;
+
+        for
+        (
+            other_iter iter = other.begin();
+            changed < nTotal && iter != other.end(); // terminate early
+            ++iter
+        )
         {
-            ++changed;
+            if (erase(iter.key()))
+            {
+                ++changed;
+            }
         }
     }
+    else
+    {
+        // other is same/larger: iterate ourselves and check for key in other
+        for
+        (
+            iterator iter = begin();
+            changed < nTotal && iter != end(); // terminate early
+            ++iter
+        )
+        {
+            if (other.found(iter.key()) && erase(iter))
+            {
+                ++changed;
+            }
+        }
+    }
+
     return changed;
 }
 
