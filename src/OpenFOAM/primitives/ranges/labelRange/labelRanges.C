@@ -139,7 +139,7 @@ bool Foam::labelRanges::add(const labelRange& range)
         if (currRange.overlaps(range, true))
         {
             // absorb into the existing (adjacent/overlapping) range
-            currRange += range;
+            currRange.join(range);
 
             // might connect with the next following range(s)
             for (; elemI < this->size()-1; ++elemI)
@@ -147,7 +147,7 @@ bool Foam::labelRanges::add(const labelRange& range)
                 labelRange& nextRange = ParentType::operator[](elemI+1);
                 if (currRange.overlaps(nextRange, true))
                 {
-                    currRange += nextRange;
+                    currRange.join(nextRange);
                     nextRange.clear();
                 }
                 else

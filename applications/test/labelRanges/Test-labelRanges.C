@@ -54,6 +54,34 @@ int main(int argc, char *argv[])
         labelRange::debug = 1;
     }
 
+    {
+        Info<<"test sorting" << endl;
+        DynamicList<labelRange> list1(10);
+        list1.append(labelRange(25, 8));
+        list1.append(labelRange(0, 10));
+        list1.append(labelRange(15, 5));
+        list1.append(labelRange(50, -10));
+
+        sort(list1);
+        Info<<"sorted" << list1 << endl;
+    }
+
+    {
+        Info<<"test intersections" << endl;
+        labelRange range1(-15, 25);
+        labelRange range2(7, 8);
+        labelRange range3(-20, 8);
+        labelRange range4(50, 8);
+
+        Info<<range1 << " & " << range2
+            << " = " << range1.subset(range2) << nl;
+
+        Info<< range1 << " & " << range3
+            << " = " << range1.subset(range3) << nl;
+
+        Info<< range2 << " & " << range4
+            << " = " << range2.subset(range4) << nl;
+    }
 
     labelRange range;
     labelRanges ranges;

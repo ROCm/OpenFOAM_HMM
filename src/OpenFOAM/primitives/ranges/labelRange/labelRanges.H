@@ -99,8 +99,8 @@ public:
         //- Return true if the list is empty
         using DynamicList<labelRange>::empty;
 
-        //- Return true if the value is within any of the ranges
-        inline bool contains(const label value) const;
+        //- Return true if the value is found any of the sub-ranges
+        inline bool found(const label value) const;
 
         //- Add the range to the list
         bool add(const labelRange& range);
@@ -116,38 +116,35 @@ public:
         {
             friend class labelRanges;
 
-            // Private data
+          // Private data
 
-                //- Reference to the list for which this is an iterator
-                const labelRanges& list_;
+            //- Reference to the list for which this is an iterator
+            const labelRanges* list_;
 
-                //- Current list index
-                label index_;
+            //- Current list-index
+            label index_;
 
-                //- Index of current element at listIndex
-                label subIndex_;
+            //- Index of current element at list-index
+            label subIndex_;
 
-            // Constructors
+          // Constructors
 
-                //- Construct from ranges at 'begin' or 'end' position
-                inline const_iterator
-                (
-                    const labelRanges& lst,
-                    const bool endIter = false
-                );
+            //- Construct from ranges at given index.
+            //  A negative index signals the 'end' position
+            inline const_iterator(const labelRanges* lst, const label i);
 
         public:
 
-            // Member operators
+          // Member operators
 
-                inline bool operator==(const const_iterator& iter) const;
-                inline bool operator!=(const const_iterator& iter) const;
+            inline bool operator==(const const_iterator& iter) const;
+            inline bool operator!=(const const_iterator& iter) const;
 
-                inline label operator*();
-                inline label operator()();
+            //- Return the current label
+            inline label operator*();
 
-                inline const_iterator& operator++();
-                inline const_iterator operator++(int);
+            inline const_iterator& operator++();
+            inline const_iterator operator++(int);
         };
 
 

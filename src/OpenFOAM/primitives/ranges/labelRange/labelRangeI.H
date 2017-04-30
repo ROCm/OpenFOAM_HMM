@@ -60,12 +60,12 @@ inline Foam::labelRange::labelRange
 
 inline Foam::labelRange::const_iterator::const_iterator
 (
-    const labelRange& range,
-    const bool endIter
+    const labelRange* range,
+    const label i
 )
 :
-   range_(range),
-   index_(endIter ? range_.size() : 0)
+    range_(range),
+    index_(i < 0 ? range->size() : i)
 {}
 
 
@@ -89,13 +89,7 @@ inline bool Foam::labelRange::const_iterator::operator!=
 
 inline Foam::label Foam::labelRange::const_iterator::operator*() const
 {
-    return range_[index_];
-}
-
-
-inline Foam::label Foam::labelRange::const_iterator::operator()() const
-{
-    return range_[index_];
+    return range_->start_ + index_;
 }
 
 
@@ -118,25 +112,25 @@ Foam::labelRange::const_iterator::operator++(int)
 
 inline Foam::labelRange::const_iterator Foam::labelRange::cbegin() const
 {
-    return const_iterator(*this);
+    return const_iterator(this, 0);
 }
 
 
 inline const Foam::labelRange::const_iterator Foam::labelRange::cend() const
 {
-    return const_iterator(*this, true);
+    return const_iterator(this, -1);
 }
 
 
 inline Foam::labelRange::const_iterator Foam::labelRange::begin() const
 {
-    return const_iterator(*this);
+    return const_iterator(this, 0);
 }
 
 
 inline const Foam::labelRange::const_iterator Foam::labelRange::end() const
 {
-    return const_iterator(*this, true);
+    return const_iterator(this, -1);
 }
 
 
@@ -183,6 +177,12 @@ inline Foam::label Foam::labelRange::size() const
 }
 
 
+inline Foam::label Foam::labelRange::start() const
+{
+    return start_;
+}
+
+
 inline Foam::label Foam::labelRange::first() const
 {
     return start_;
@@ -220,39 +220,17 @@ inline bool Foam::labelRange::reset
 }
 
 
-inline bool Foam::labelRange::contains(const label value) const
+inline bool Foam::labelRange::found(const label value) const
 {
-    return value >= this->first() && value <= this->last();
+    return (value >= this->first() && value <= this->last());
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline Foam::label Foam::labelRange::operator[](const label i) const
+inline Foam::label Foam::labelRange::operator[](const label localIndex) const
 {
-    return start_ + i;
-}
-
-
-inline bool Foam::labelRange::operator<(const labelRange& rhs) const
-{
-    return
-    (
-        this->first() < rhs.first()
-     || (this->first() == rhs.first() && this->size() < rhs.size())
-    );
-}
-
-
-inline bool Foam::labelRange::operator==(const labelRange& rhs) const
-{
-    return start_ == rhs.start_ && size_ == rhs.size_;
-}
-
-
-inline bool Foam::labelRange::operator!=(const labelRange& rhs) const
-{
-    return !(operator==(rhs));
+    return start_ + localIndex;
 }
 
 
