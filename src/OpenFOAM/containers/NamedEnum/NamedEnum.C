@@ -64,14 +64,14 @@ Enum Foam::NamedEnum<Enum, nEnum>::read(Istream& is) const
 
     HashTable<int>::const_iterator iter = find(name);
 
-    if (iter == HashTable<int>::end())
+    if (!iter.found())
     {
         FatalIOErrorInFunction(is)
             << name << " is not in enumeration: "
             << sortedToc() << exit(FatalIOError);
     }
 
-    return Enum(iter());
+    return Enum(*iter);
 }
 
 
