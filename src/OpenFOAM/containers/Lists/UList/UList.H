@@ -48,13 +48,15 @@ SourceFiles
 #include "nullObject.H"
 #include "zero.H"
 #include "stdFoam.H"
+#include <initializer_list>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of friend classes
+// Forward declarations
+class labelRange;
 template<class T> class List;
 template<class T> class SubList;
 
@@ -101,6 +103,16 @@ protected:
         //- Write the UList with its compound type
         void writeEntry(Ostream& os) const;
 
+        //- Return a validated (start,size) subset range, which means that it
+        //  always addresses a valid section of the list.
+        labelRange validateRange(const labelRange& range) const;
+
+        //- Return a validated (start,size) subset range, which means that it
+        //  always addresses a valid section of the list.
+        labelRange validateRange
+        (
+            std::initializer_list<label> start_size_pair
+        ) const;
 
 public:
 
@@ -238,6 +250,29 @@ public:
         //  Note that the bool specialization adds lazy evaluation so reading
         //  an out-of-range element returns false without any ill-effects
         inline const T& operator[](const label i) const;
+
+        //- Return (start,size) subset from UList with non-const access.
+        //  The range is subsetted with the list size itself to ensure that the
+        //  result always addresses a valid section of the list.
+        UList<T> operator[](const labelRange& range);
+
+        //- Return (start,size) subset from UList with const access.
+        //  The range is subsetted with the list size itself to ensure that the
+        //  result always addresses a valid section of the list.
+        const UList<T> operator[](const labelRange& range) const;
+
+        //- Return (start,size) subset from UList with non-const access.
+        //  The range is subsetted with the list size itself to ensure that the
+        //  result always addresses a valid section of the list.
+        UList<T> operator[](std::initializer_list<label> start_size_range);
+
+        //- Return (start,size) subset from UList with const access.
+        //  The range is subsetted with the list size itself to ensure that the
+        //  result always addresses a valid section of the list.
+        const UList<T> operator[]
+        (
+            std::initializer_list<label> start_size_range
+        ) const;
 
         //- Allow cast to a const List<T>&
         inline operator const Foam::List<T>&() const;

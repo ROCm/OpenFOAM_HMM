@@ -76,7 +76,6 @@ int main(int argc, char *argv[])
         Info<<"is >>: " << intlist << endl;
     }
 
-
     List<vector> list1(IStringStream("1 ((0 1 2))")());
     Info<< "list1: " << list1 << endl;
 
@@ -150,7 +149,6 @@ int main(int argc, char *argv[])
         Info<< "normal: " << longLabelList << nl;
         Info<< "flatOutput: " << flatOutput(longLabelList) << nl;
         // Info<< "flatOutput(14): " << flatOutput(longLabelList, 14) << nl;
-        // Info<< "flatOutput(15): " << flatOutput(longLabelList, 15) << nl;
 
         stringList longStringList(12);
         forAll(longStringList, i)
@@ -163,6 +161,66 @@ int main(int argc, char *argv[])
         Info<< "normal: " << longStringList << nl;
         Info<< "flatOutput: " << flatOutput(longStringList) << nl;
         // contiguous longStringList[i].resize(3, 'a' + i);
+    }
+
+    // test SubList and labelRange
+    {
+        Info<< nl;
+        labelList longLabelList = identity(25);
+        reverse(longLabelList);
+
+        FixedList<label, 6> fixedLabelList{0,1,2,3,4,5};
+        const labelList constLabelList = identity(25);
+
+        Info<< "full-list: " << flatOutput(longLabelList) << nl;
+
+        labelRange range1(-15, 25);
+        Info<<"sub range:" << range1 << "=";
+        Info<< SubList<label>(longLabelList, range1) << nl;
+
+        labelRange range2(7, 8);
+        Info<<"sub range:" << range2 << "=";
+        Info<< SubList<label>(longLabelList, range2) << nl;
+
+        // labelRange range2(7, 8);
+        Info<<"use range " << range2 << " to set value";
+        SubList<label>(longLabelList, range2) = -15;
+        Info<< "=> " << flatOutput(longLabelList) << nl;
+
+        // This syntax looks even nicer:
+
+        // GOOD: does not compile
+        // > constLabelList[labelRange(23,5)] = 5;
+
+        // Check correct overlaps
+        longLabelList[labelRange(-10, 12)] = 200;
+        longLabelList[{18,3}] = 100;
+        longLabelList[{23,3}] = 400;
+        // and complete misses
+        longLabelList[{500,50}] = 100;
+
+        // labelRange automatically suppresses -ve size -> nop
+        longLabelList[{5,-5}] = 42;
+        longLabelList[{21,100}] = 42;
+
+        //Good: does not compile
+        //> longLabelList[labelRange(20,50)] = constLabelList;
+
+        //Good: does not compile
+        // longLabelList[labelRange(20,50)] = fixedLabelList;
+
+        Info<< "updated: " << constLabelList[labelRange(23,5)] << nl;
+        Info<< "updated: " << flatOutput(longLabelList) << nl;
+
+        //Nope: sort(longLabelList[labelRange(18,5)]);
+        {
+            // Instead
+            UList<label> sub = longLabelList[labelRange(0, 8)];
+            sort(sub);
+        }
+        Info<< "sub-sorted: " << flatOutput(longLabelList) << nl;
+
+        // Info<<"Slice=" << longLabelList[labelRange(23,5)] << nl;
     }
 
     wordReList reLst;

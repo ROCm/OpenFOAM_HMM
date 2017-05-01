@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,8 +26,48 @@ License
 #include "UList.H"
 #include "ListLoopM.H"
 #include "contiguous.H"
+#include "labelRange.H"
 
 #include <algorithm>
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class T>
+Foam::labelRange Foam::UList<T>::validateRange(const labelRange& range) const
+{
+    const labelRange slice = range.subset(0, this->size());
+
+    #ifdef FULLDEBUG
+    this->checkStart(slice.start());
+    this->checkSize(slice.start() + slice.size());
+    #endif
+
+    return slice;
+}
+
+
+template<class T>
+Foam::labelRange Foam::UList<T>::validateRange
+(
+    std::initializer_list<label> start_size_pair
+) const
+{
+    if (start_size_pair.size() != 2)
+    {
+        FatalErrorInFunction
+            << "range specified with " << start_size_pair.size()
+            << " elements instead of 2"
+            << abort(FatalError);
+    }
+
+    auto iter = start_size_pair.begin();
+
+    const label beg = *(iter++);
+    const label sz  = *iter;
+
+    return this->validateRange(labelRange(beg, sz));
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -63,6 +103,47 @@ void Foam::UList<T>::deepCopy(const UList<T>& a)
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template<class T>
+Foam::UList<T> Foam::UList<T>::operator[](const labelRange& range)
+{
+    const labelRange slice = validateRange(range);
+
+    return UList<T>(&(this->v_[slice.start()]), slice.size()); // SubList
+}
+
+template<class T>
+const Foam::UList<T> Foam::UList<T>::operator[](const labelRange& range) const
+{
+    const labelRange slice = validateRange(range);
+
+    return UList<T>(&(this->v_[slice.start()]), slice.size()); // SubList
+}
+
+
+template<class T>
+Foam::UList<T> Foam::UList<T>::operator[]
+(
+    std::initializer_list<label> start_size_pair
+)
+{
+    const labelRange slice = validateRange(start_size_pair);
+
+    return UList<T>(&(this->v_[slice.start()]), slice.size()); // SubList
+}
+
+template<class T>
+const Foam::UList<T> Foam::UList<T>::operator[]
+(
+    std::initializer_list<label> start_size_range
+) const
+{
+    // Restricted range
+    const labelRange slice = validateRange(start_size_range);
+
+    return UList<T>(&(this->v_[slice.start()]), slice.size()); // SubList
+}
+
 
 template<class T>
 void Foam::UList<T>::operator=(const T& t)

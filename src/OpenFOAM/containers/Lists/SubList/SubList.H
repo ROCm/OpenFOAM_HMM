@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +40,7 @@ SourceFiles
 #define SubList_H
 
 #include "List.H"
+#include "labelRange.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +56,6 @@ class SubList
 :
     public UList<T>
 {
-
 public:
 
     // Static Member Functions
@@ -81,6 +81,23 @@ public:
             const label startIndex
         );
 
+        //- Construct from UList and a (start,size) range.
+        //  The range is subsetted with the list size itself to ensure that the
+        //  result always addresses a valid section of the list.
+        inline SubList
+        (
+            const UList<T>& list,
+            const labelRange& range
+        );
+
+        //- Construct from UList and a (start,size) range, but bypassing
+        //  run-time range checking.
+        inline SubList
+        (
+            const labelRange& range,
+            const UList<T>& list
+        );
+
 
     // Member operators
 
@@ -88,13 +105,13 @@ public:
         inline operator const Foam::List<T>&() const;
 
         //- Assignment of all entries to the given sub-list
-        inline void operator=(const SubList<T>&);
+        inline void operator=(const SubList<T>& list);
 
         //- Assignment of all entries to the given list
-        inline void operator=(const UList<T>&);
+        inline void operator=(const UList<T>& list);
 
         //- Assignment of all entries to the given value
-        inline void operator=(const T&);
+        inline void operator=(const T& t);
 };
 
 
