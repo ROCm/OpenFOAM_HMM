@@ -54,7 +54,7 @@ template<class T, class Key, class Hash>
 Istream& operator>>(Istream& is, HashPtrTable<T, Key, Hash>& L);
 
 template<class T, class Key, class Hash>
-Ostream& operator<<(Ostream& os, const HashPtrTable<T, Key, Hash>& L);
+Ostream& operator<<(Ostream& os, const HashPtrTable<T, Key, Hash>& tbl);
 
 
 /*---------------------------------------------------------------------------*\
@@ -80,8 +80,8 @@ class HashPtrTable
 
 public:
 
-    typedef typename HashTable<T*, Key, Hash>::iterator iterator;
-    typedef typename HashTable<T*, Key, Hash>::const_iterator const_iterator;
+    using iterator = typename HashTable<T*, Key, Hash>::iterator;
+    using const_iterator = typename HashTable<T*, Key, Hash>::const_iterator;
 
 
     // Constructors
@@ -141,7 +141,7 @@ public:
         friend Ostream& operator<< <T, Key, Hash>
         (
             Ostream& os,
-            const HashPtrTable<T, Key, Hash>& L
+            const HashPtrTable<T, Key, Hash>& tbl
         );
 };
 

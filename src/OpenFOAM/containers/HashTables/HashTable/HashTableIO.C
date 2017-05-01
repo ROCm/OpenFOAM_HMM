@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ Foam::HashTable<T, Key, Hash>::HashTable(Istream& is, const label size)
 
         for (label hashIdx = 0; hashIdx < tableSize_; ++hashIdx)
         {
-            table_[hashIdx] = 0;
+            table_[hashIdx] = nullptr;
         }
     }
 
@@ -215,21 +215,18 @@ template<class T, class Key, class Hash>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const HashTable<T, Key, Hash>& L
+    const HashTable<T, Key, Hash>& tbl
 )
 {
+    using const_iterator = typename HashTable<T, Key, Hash>::const_iterator;
+
     // Write size and start delimiter
-    os << nl << L.size() << nl << token::BEGIN_LIST << nl;
+    os << nl << tbl.size() << nl << token::BEGIN_LIST << nl;
 
     // Write contents
-    for
-    (
-        typename HashTable<T, Key, Hash>::const_iterator iter = L.cbegin();
-        iter != L.cend();
-        ++iter
-    )
+    for (const_iterator iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
     {
-        os << iter.key() << token::SPACE << iter() << nl;
+        os << iter.key() << token::SPACE << iter.object() << nl;
     }
 
     // Write end delimiter

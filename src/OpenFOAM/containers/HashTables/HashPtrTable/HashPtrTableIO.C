@@ -157,16 +157,9 @@ void Foam::HashPtrTable<T, Key, Hash>::read
 template<class T, class Key, class Hash>
 void Foam::HashPtrTable<T, Key, Hash>::write(Ostream& os) const
 {
-
-    for
-    (
-        typename HashPtrTable<T, Key, Hash>::const_iterator
-        iter = this->begin();
-        iter != this->end();
-        ++iter
-    )
+    for (const_iterator iter = this->begin(); iter != this->end(); ++iter)
     {
-        const T* ptr = *iter;
+        const T* ptr = iter.object();
         if (ptr)
         {
             ptr->write(os);
@@ -215,21 +208,18 @@ template<class T, class Key, class Hash>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const HashPtrTable<T, Key, Hash>& L
+    const HashPtrTable<T, Key, Hash>& tbl
 )
 {
+    using const_iterator = typename HashPtrTable<T, Key, Hash>::const_iterator;
+
     // Write size and start delimiter
-    os << nl << L.size() << nl << token::BEGIN_LIST << nl;
+    os << nl << tbl.size() << nl << token::BEGIN_LIST << nl;
 
     // Write contents
-    for
-    (
-        typename HashPtrTable<T, Key, Hash>::const_iterator iter = L.begin();
-        iter != L.end();
-        ++iter
-    )
+    for (const_iterator iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
     {
-        const T* ptr = *iter;
+        const T* ptr = iter.object();
 
         os << iter.key();
         if (ptr)

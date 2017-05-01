@@ -76,7 +76,7 @@ Foam::HashTable<T, Key, Hash>::HashTable(const label size)
 
         for (label hashIdx = 0; hashIdx < tableSize_; hashIdx++)
         {
-            table_[hashIdx] = 0;
+            table_[hashIdx] = nullptr;
         }
     }
 }
@@ -89,7 +89,7 @@ Foam::HashTable<T, Key, Hash>::HashTable(const HashTable<T, Key, Hash>& ht)
 {
     for (const_iterator iter = ht.cbegin(); iter != ht.cend(); ++iter)
     {
-        insert(iter.key(), *iter);
+        insert(iter.key(), iter.object());
     }
 }
 
@@ -268,8 +268,8 @@ bool Foam::HashTable<T, Key, Hash>::set
 
     const label hashIdx = hashKeyIndex(key);
 
-    hashedEntry* existing = 0;
-    hashedEntry* prev = 0;
+    hashedEntry* existing = nullptr;
+    hashedEntry* prev = nullptr;
 
     for (hashedEntry* ep = table_[hashIdx]; ep; ep = ep->next_)
     {
@@ -281,10 +281,10 @@ bool Foam::HashTable<T, Key, Hash>::set
         prev = ep;
     }
 
-    // Not found, insert it at the head
     if (!existing)
     {
-        table_[hashIdx] = new hashedEntry(key, table_[hashIdx], newEntry);
+        // Not found, insert it at the head
+        table_[hashIdx] = new hashedEntry(key, newEntry, table_[hashIdx]);
         nElmts_++;
 
         if (double(nElmts_)/tableSize_ > 0.8 && tableSize_ < maxTableSize)
@@ -316,7 +316,7 @@ bool Foam::HashTable<T, Key, Hash>::set
     {
         // Found - overwrite existing entry
         // this corresponds to the Perl convention
-        hashedEntry* ep = new hashedEntry(key, existing->next_, newEntry);
+        hashedEntry* ep = new hashedEntry(key, newEntry, existing->next_);
 
         // Replace existing element - within list or insert at the head
         if (prev)
@@ -342,11 +342,11 @@ bool Foam::HashTable<T, Key, Hash>::iteratorBase::erase()
     if (entryPtr_)
     {
         // Search element before entryPtr_
-        hashedEntry* prev = 0;
+        entry_type* prev = nullptr;
 
         for
         (
-            hashedEntry* ep = hashTable_->table_[hashIndex_];
+            entry_type* ep = hashTable_->table_[hashIndex_];
             ep;
             ep = ep->next_
         )
@@ -371,8 +371,7 @@ bool Foam::HashTable<T, Key, Hash>::iteratorBase::erase()
             hashTable_->table_[hashIndex_] = entryPtr_->next_;
             delete entryPtr_;
 
-            // Assign any non-nullptr value so it doesn't look
-            // like end()/cend()
+            // Assign any non-nullptr value so it doesn't look like end()
             entryPtr_ = reinterpret_cast<hashedEntry*>(this);
 
             // Mark with special hashIndex value to signal it has been rewound.
@@ -547,7 +546,7 @@ void Foam::HashTable<T, Key, Hash>::clear()
                     ep = next;
                 }
                 delete ep;
-                table_[hashIdx] = 0;
+                table_[hashIdx] = nullptr;
             }
         }
         nElmts_ = 0;
@@ -625,7 +624,7 @@ void Foam::HashTable<T, Key, Hash>::operator=
 
     for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
-        insert(iter.key(), *iter);
+        insert(iter.key(), iter.object());
     }
 }
 
@@ -667,9 +666,9 @@ bool Foam::HashTable<T, Key, Hash>::operator==
 
     for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
-        const_iterator fnd = find(iter.key());
+        const_iterator other = find(iter.key());
 
-        if (fnd == cend() || fnd() != iter())
+        if (!other.found() || other.object() != iter.object())
         {
             return false;
         }

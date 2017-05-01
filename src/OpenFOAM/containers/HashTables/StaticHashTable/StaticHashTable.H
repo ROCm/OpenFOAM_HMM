@@ -119,9 +119,6 @@ class StaticHashTable
         //- The current number of elements in table
         label nElmts_;
 
-        //- Return a canonical (power-of-two) size
-        static label canonicalSize(const label);
-
         //- Return the hash index of the Key within the current table size.
         //  No checks for zero-sized tables.
         inline label hashKeyIndex(const Key&) const;
@@ -397,7 +394,7 @@ private:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    #include "StaticHashTableI.H"
+#include "StaticHashTableI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

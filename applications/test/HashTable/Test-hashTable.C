@@ -177,6 +177,12 @@ int main()
 
     Info<< "\ntable1" << table1 << nl;
 
+    Info<< "\nrange-for(table1)" << nl;
+    for (auto const& it : table1)
+    {
+        Info<< " " << it << nl;
+    }
+
     Info<< "\nDone\n";
 
     return 0;

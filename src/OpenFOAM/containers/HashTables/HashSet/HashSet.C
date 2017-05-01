@@ -117,20 +117,17 @@ template<class Key, class Hash>
 template<class AnyType, class AnyHash>
 Foam::HashSet<Key, Hash>::HashSet
 (
-    const HashTable<AnyType, Key, AnyHash>& h
+    const HashTable<AnyType, Key, AnyHash>& tbl
 )
 :
-    HashTable<nil, Key, Hash>(h.size())
+    HashTable<nil, Key, Hash>(tbl.size())
 {
-    for
-    (
-        typename HashTable<AnyType, Key, AnyHash>::const_iterator
-        cit = h.cbegin();
-        cit != h.cend();
-        ++cit
-    )
+    using other_iter =
+        typename HashTable<AnyType, Key, AnyHash>::const_iterator;
+
+    for (other_iter iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
     {
-        this->insert(cit.key());
+        this->insert(iter.key());
     }
 }
 

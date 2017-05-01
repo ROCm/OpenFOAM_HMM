@@ -132,12 +132,12 @@ public:
         //- Construct from the keys of another HashTable,
         //  the type of values held is arbitrary.
         template<class AnyType, class AnyHash>
-        explicit HashSet(const HashTable<AnyType, Key, AnyHash>& h);
+        explicit HashSet(const HashTable<AnyType, Key, AnyHash>& tbl);
 
 
     // Member Functions
 
-        // Edit
+      // Edit
 
         //- Insert a new entry
         bool insert(const Key& key)

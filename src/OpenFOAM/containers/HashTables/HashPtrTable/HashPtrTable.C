@@ -45,7 +45,7 @@ Foam::HashPtrTable<T, Key, Hash>::HashPtrTable
 {
     for (const_iterator iter = ht.begin(); iter != ht.end(); ++iter)
     {
-        const T* ptr = *iter;
+        const T* ptr = iter.object();
         if (ptr)
         {
             this->insert(iter.key(), new T(*ptr));
@@ -72,7 +72,7 @@ Foam::HashPtrTable<T, Key, Hash>::~HashPtrTable()
 template<class T, class Key, class Hash>
 T* Foam::HashPtrTable<T, Key, Hash>::remove(iterator& iter)
 {
-    T* ptr = *iter;
+    T* ptr = iter.object();
     HashTable<T*, Key, Hash>::erase(iter);
     return ptr;
 }
@@ -81,7 +81,7 @@ T* Foam::HashPtrTable<T, Key, Hash>::remove(iterator& iter)
 template<class T, class Key, class Hash>
 bool Foam::HashPtrTable<T, Key, Hash>::erase(iterator& iter)
 {
-    T* ptr = *iter;
+    T* ptr = iter.object();
 
     if (HashTable<T*, Key, Hash>::erase(iter))
     {
@@ -102,14 +102,9 @@ bool Foam::HashPtrTable<T, Key, Hash>::erase(iterator& iter)
 template<class T, class Key, class Hash>
 void Foam::HashPtrTable<T, Key, Hash>::clear()
 {
-    for
-    (
-        iterator iter = this->begin();
-        iter != this->end();
-        ++iter
-    )
+    for (iterator iter = this->begin(); iter != this->end(); ++iter)
     {
-        delete *iter;
+        delete iter.object();
     }
 
     HashTable<T*, Key, Hash>::clear();
@@ -136,7 +131,7 @@ void Foam::HashPtrTable<T, Key, Hash>::operator=
 
     for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
     {
-        const T* ptr = *iter;
+        const T* ptr = iter.object();
         if (ptr)
         {
             this->insert(iter.key(), new T(*ptr));
