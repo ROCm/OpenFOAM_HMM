@@ -54,8 +54,7 @@ Foam::HashTable<T, Key, Hash>::HashTable(Istream& is, const label size)
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
-Foam::Ostream&
-Foam::HashTable<T, Key, Hash>::printInfo(Ostream& os) const
+Foam::Ostream& Foam::HashTable<T, Key, Hash>::printInfo(Ostream& os) const
 {
     label used = 0;
     label maxChain = 0;
@@ -85,6 +84,53 @@ Foam::HashTable<T, Key, Hash>::printInfo(Ostream& os) const
         << " elements:" << size() << " slots:" << used << "/" << tableSize_
         << " chaining(avg/max):" << (used ? (float(avgChain)/used) : 0)
         << "/" << maxChain << endl;
+
+    return os;
+}
+
+
+template<class T, class Key, class Hash>
+Foam::Ostream& Foam::HashTable<T, Key, Hash>::writeKeys
+(
+    Ostream& os,
+    const label shortListLen
+) const
+{
+    // Similar to UList::writeList version except the following:
+    // - the keys can never be uniform
+    // - never write in binary
+
+    label i = this->size();
+
+    if (i <= 1 || !shortListLen || (i <= shortListLen))
+    {
+        // Write size and start delimiter
+        os << i << token::BEGIN_LIST;
+
+        i = 0;
+        for (const_iterator iter = this->cbegin(); iter != this->cend(); ++iter)
+        {
+            if (i++) os << token::SPACE;
+            os << iter.key();
+        }
+
+        os << token::END_LIST;  // End delimiter
+    }
+    else
+    {
+        // Write size and start delimiter
+        os << nl << i << nl << token::BEGIN_LIST << nl;
+
+        for (const_iterator iter = this->cbegin(); iter != this->cend(); ++iter)
+        {
+            os << iter.key() << nl;
+        }
+
+        os << token::END_LIST << nl;  // End delimiter
+    }
+
+    // Check state of IOstream
+    os.check("HashSet<Key>::writeList(Ostream&)");
 
     return os;
 }

@@ -267,6 +267,15 @@ void Foam::HashSet<Key, Hash>::operator-=(const HashSet<Key, Hash>& rhs)
 }
 
 
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+template<class Key, class Hash>
+Foam::Ostream& Foam::operator<<(Ostream& os, const HashSet<Key, Hash>& tbl)
+{
+    return tbl.writeList(os, 10);  // 10=consistent with UList
+}
+
+
 /* * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * */
 
 template<class Key, class Hash>

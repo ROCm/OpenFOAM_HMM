@@ -261,9 +261,6 @@ public:
             //- Return the table of contents as a sorted list
             List<Key> sortedToc() const;
 
-            //- Print information
-            Ostream& printInfo(Ostream& os) const;
-
 
         // Edit
 
@@ -571,6 +568,15 @@ public:
             inline const_iterator operator++(int);
         };
 
+
+    // Writing
+
+        //- Print information
+        Ostream& printInfo(Ostream& os) const;
+
+        //- Write the unordered keys as a list, with line-breaks if list length
+        //  exceeds shortListLen. Using '0' suppresses line-breaks entirely.
+        Ostream& writeKeys(Ostream& os, const label shortListLen=0) const;
 
 
     // IOstream Operator

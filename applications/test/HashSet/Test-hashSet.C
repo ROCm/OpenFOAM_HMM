@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ Description
 #include "HashSet.H"
 #include "Map.H"
 #include "labelPairHashes.H"
+#include "FlatOutput.H"
 
 using namespace Foam;
 
@@ -65,6 +66,8 @@ int main(int argc, char *argv[])
     tableB.insert("value4", nil());
     tableB.insert("value5", nil());
     tableB.insert("value6", nil());
+
+    Info<< "tableA keys: "; tableA.writeKeys(Info) << endl;
 
     Map<label> mapA
     {
@@ -149,7 +152,7 @@ int main(int argc, char *argv[])
     labelHashSet setD(1);
     setD.insert({11, 100, 49, 36, 2008});
 
-    Info<< "setD : " << setD << endl;
+    Info<< "setD : " << flatOutput(setD) << endl;
 
     Info<< "setB == setC: " << (setB == setC) << endl;
     Info<< "setC != setD: " << (setC != setD) << endl;
@@ -188,7 +191,7 @@ int main(int argc, char *argv[])
         Info<< "setD has no 11" << endl;
     }
 
-    Info<< "setD : " << setD << endl;
+    Info<< "setD : " << flatOutput(setD) << endl;
 
     // this doesn't work (yet?)
     // setD[12] = true;
@@ -201,7 +204,7 @@ int main(int argc, char *argv[])
 
     label added = setD.set(someLst);
     Info<< "added " << added << " from " << someLst.size() << endl;
-    Info<< "setD : " << setD << endl;
+    Info<< "setD : " << flatOutput(setD) << endl;
 
 
     return 0;
