@@ -206,6 +206,12 @@ int main(int argc, char *argv[])
     Info<< "added " << added << " from " << someLst.size() << endl;
     Info<< "setD : " << flatOutput(setD) << endl;
 
+    Info<< "setD for-range()" << nl;
+
+    for (auto i : setD)
+    {
+        Info << i << endl;
+    }
 
     return 0;
 }

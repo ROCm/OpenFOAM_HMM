@@ -64,11 +64,8 @@ namespace Foam
 template<class T> class List;
 template<class T> class UList;
 template<class T, unsigned Size> class FixedList;
+template<class T1, class T2> class Tuple2;
 template<class T, class Key, class Hash> class HashTable;
-template<class T, class Key, class Hash> class HashPtrTable;
-
-template<class Type1, class Type2>
-class Tuple2;
 
 template<class T, class Key, class Hash>
 Istream& operator>>(Istream& is, HashTable<T, Key, Hash>& L);

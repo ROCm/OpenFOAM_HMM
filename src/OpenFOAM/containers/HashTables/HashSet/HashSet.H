@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,6 +52,13 @@ Description
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+template<class Key, class Hash> class HashSet;
+
+template<class Key, class Hash>
+Ostream& operator<<(Ostream& os, const HashSet<Key, Hash>& tbl);
+
+
 /*---------------------------------------------------------------------------*\
                            Class HashSet Declaration
 \*---------------------------------------------------------------------------*/
@@ -61,6 +68,8 @@ class HashSet
 :
     public HashTable<nil, Key, Hash>
 {
+    typedef HashTable<nil, Key, Hash> ParentClass;
+
     // Private Member Functions
 
         //- Insert values, using begin/end iterators.
@@ -83,22 +92,18 @@ class HashSet
 
 public:
 
-    using iterator = typename HashTable<nil, Key, Hash>::iterator;
-    using const_iterator = typename HashTable<nil, Key, Hash>::const_iterator;
-
-
     // Constructors
 
         //- Construct given initial size
         HashSet(const label size = 128)
         :
-            HashTable<nil, Key, Hash>(size)
+            ParentClass(size)
         {}
 
         //- Construct from Istream
         HashSet(Istream& is)
         :
-            HashTable<nil, Key, Hash>(is)
+            ParentClass(is)
         {}
 
         //- Construct from UList of Key
@@ -114,13 +119,13 @@ public:
         //- Construct as copy
         HashSet(const HashSet<Key, Hash>& hs)
         :
-            HashTable<nil, Key, Hash>(hs)
+            ParentClass(hs)
         {}
 
         //- Construct by transferring the parameter contents
         HashSet(const Xfer<HashSet<Key, Hash>>& hs)
         :
-            HashTable<nil, Key, Hash>(hs)
+            ParentClass(hs)
         {}
 
         //- Construct by transferring the parameter contents
@@ -142,7 +147,7 @@ public:
         //- Insert a new entry
         bool insert(const Key& key)
         {
-            return HashTable<nil, Key, Hash>::insert(key, nil());
+            return this->ParentClass::insert(key, nil());
         }
 
         //- Insert keys from the list of Key
@@ -186,27 +191,77 @@ public:
         //- Unset the specified key - same as erase
         bool unset(const Key& key)
         {
-            return HashTable<nil, Key, Hash>::erase(key);
+            return this->ParentClass::erase(key);
         }
 
         //- Unset the listed keys - same as erase
         label unset(const UList<Key>& lst)
         {
-            return HashTable<nil, Key, Hash>::erase(lst);
+            return this->ParentClass::erase(lst);
         }
 
         //- Unset the listed keys - same as erase
         template<unsigned Size>
         label unset(const FixedList<Key, Size>& lst)
         {
-            return HashTable<nil, Key, Hash>::erase(lst);
+            return this->ParentClass::erase(lst);
         }
 
         //- Unset the listed keys - same as erase
         label unset(std::initializer_list<Key> lst)
         {
-            return HashTable<nil, Key, Hash>::erase(lst);
+            return this->ParentClass::erase(lst);
         }
+
+
+    // STL iterator
+
+        //- An STL-conforming iterator
+        struct iterator
+        :
+            public ParentClass::iterator
+        {
+            using parent = typename ParentClass::iterator;
+
+            //- Implicit conversion
+            iterator(const parent& iter)
+            :
+                parent(iter)
+            {}
+
+            //- Return the key
+            auto operator*() const -> const Key&
+            {
+                return this->key();
+            }
+        };
+
+        //- An STL-conforming const_iterator
+        struct const_iterator
+        :
+            public ParentClass::const_iterator
+        {
+            using parent = typename ParentClass::const_iterator;
+
+            //- Implicit conversion
+            const_iterator(const parent& iter)
+            :
+                parent(iter)
+            {}
+
+            //- Return the key
+            auto operator*() const -> const Key&
+            {
+                return this->key();
+            }
+        };
+
+        auto begin() -> iterator;
+        auto begin() const -> const_iterator;
+        auto cbegin() const -> const_iterator;
+        auto end() -> const iterator&;
+        auto end() const -> const const_iterator&;
+        auto cend() const -> const const_iterator&;
 
 
     // Writing
@@ -260,6 +315,16 @@ public:
 
         //- Remove entries listed in the given HashSet from this HashSet
         void operator-=(const HashSet<Key, Hash>& rhs);
+
+
+    // IOstream Operator
+
+        friend Ostream& operator<< <Key, Hash>
+        (
+            Ostream& os,
+            const HashSet<Key, Hash>& tbl
+        );
+
 };
 
 
