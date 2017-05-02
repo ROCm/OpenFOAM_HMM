@@ -536,12 +536,7 @@ Foam::label Foam::DistributedDelaunayMesh<Triangulation>::referVertices
 
     if (!pointsNotInserted.empty())
     {
-        for
-        (
-            labelPairHashSet::const_iterator iter = pointsNotInserted.begin();
-            iter != pointsNotInserted.end();
-            ++iter
-        )
+        forAllConstIters(pointsNotInserted, iter)
         {
             if (receivedVertices.found(iter.key()))
             {
