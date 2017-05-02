@@ -63,9 +63,6 @@ class searchableSurfaces
         //- Region names per surface
         List<wordList> regionNames_;
 
-        ////- From global region name to surface and region on surface
-        //HashTable<labelPair> regionNames_;
-
         //- Indices of all surfaces. Precalculated and stored.
         labelList allSurfaces_;
 

@@ -26,7 +26,6 @@ License
 #include "edgeIntersections.H"
 #include "triSurfaceSearch.H"
 #include "OFstream.H"
-#include "HashSet.H"
 #include "triSurface.H"
 #include "pointIndexHit.H"
 #include "treeDataTriSurface.H"
