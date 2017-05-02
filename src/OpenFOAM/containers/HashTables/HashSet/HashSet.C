@@ -120,7 +120,7 @@ Foam::HashSet<Key, Hash>::HashSet
     const HashTable<AnyType, Key, AnyHash>& tbl
 )
 :
-    HashTable<nil, Key, Hash>(tbl.size())
+    HashTable<nil, Key, Hash>(tbl.capacity())
 {
     using other_iter =
         typename HashTable<AnyType, Key, AnyHash>::const_iterator;
@@ -159,7 +159,7 @@ Foam::label Foam::HashSet<Key, Hash>::insert(std::initializer_list<Key> lst)
 template<class Key, class Hash>
 void Foam::HashSet<Key, Hash>::operator=(const UList<Key>& lst)
 {
-    assignMultiple(lst.begin(), lst.end(), lst.size());
+    assignMultiple(lst.begin(), lst.end(), 2*lst.size());
 }
 
 
@@ -167,14 +167,14 @@ template<class Key, class Hash>
 template<unsigned Size>
 void Foam::HashSet<Key, Hash>::operator=(const FixedList<Key, Size>& lst)
 {
-    assignMultiple(lst.begin(), lst.end(), lst.size());
+    assignMultiple(lst.begin(), lst.end(), 2*lst.size());
 }
 
 
 template<class Key, class Hash>
 void Foam::HashSet<Key, Hash>::operator=(std::initializer_list<Key> lst)
 {
-    assignMultiple(lst.begin(), lst.end(), lst.size());
+    assignMultiple(lst.begin(), lst.end(), 2*lst.size());
 }
 
 

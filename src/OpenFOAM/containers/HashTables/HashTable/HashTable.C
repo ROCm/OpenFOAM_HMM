@@ -115,7 +115,7 @@ Foam::HashTable<T, Key, Hash>::HashTable
     std::initializer_list<Tuple2<Key, T>> lst
 )
 :
-    HashTable<T, Key, Hash>(lst.size())
+    HashTable<T, Key, Hash>(2*lst.size())
 {
     for (const Tuple2<Key, T>& pair : lst)
     {
@@ -638,7 +638,7 @@ void Foam::HashTable<T, Key, Hash>::operator=
     // Could be zero-sized from a previous transfer()
     if (!tableSize_)
     {
-        resize(lst.size());
+        resize(2*lst.size());
     }
     else
     {
