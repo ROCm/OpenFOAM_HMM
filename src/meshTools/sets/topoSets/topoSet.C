@@ -289,6 +289,63 @@ void Foam::topoSet::writeDebug
 }
 
 
+Foam::IOobject Foam::topoSet::findIOobject
+(
+    const polyMesh& mesh,
+    const word& name,
+    readOption r,
+    writeOption w
+)
+{
+    return IOobject
+    (
+        name,
+        mesh.time().findInstance
+        (
+            mesh.dbDir()/polyMesh::meshSubDir/"sets",
+            word::null,
+            r,
+            mesh.facesInstance()
+        ),
+        polyMesh::meshSubDir/"sets",
+        mesh,
+        r,
+        w
+    );
+}
+
+
+Foam::IOobject Foam::topoSet::findIOobject
+(
+    const Time& runTime,
+    const word& name,
+    readOption r,
+    writeOption w
+)
+{
+    return IOobject
+    (
+        name,
+        runTime.findInstance
+        (
+            polyMesh::meshSubDir/"sets",
+            word::null,
+            IOobject::MUST_READ,
+            runTime.findInstance
+            (
+                polyMesh::meshSubDir,
+                "faces",
+                IOobject::READ_IF_PRESENT
+            )
+        ),
+        polyMesh::meshSubDir/"sets",
+        runTime,
+        r,
+        w
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::topoSet::topoSet(const IOobject& obj, const word& wantedType)
@@ -324,24 +381,7 @@ Foam::topoSet::topoSet
     writeOption w
 )
 :
-    regIOobject
-    (
-        IOobject
-        (
-            name,
-            mesh.time().findInstance
-            (
-                mesh.dbDir()/polyMesh::meshSubDir/"sets",
-                word::null,
-                r,  //IOobject::MUST_READ,
-                mesh.facesInstance()
-            ),
-            polyMesh::meshSubDir/"sets",
-            mesh,
-            r,
-            w
-        )
-    )
+    regIOobject(findIOobject(mesh, name, r, w))
 {
     if
     (
@@ -371,24 +411,7 @@ Foam::topoSet::topoSet
     writeOption w
 )
 :
-    regIOobject
-    (
-        IOobject
-        (
-            name,
-            mesh.time().findInstance
-            (
-                mesh.dbDir()/polyMesh::meshSubDir/"sets",
-                word::null,
-                IOobject::NO_READ,
-                mesh.facesInstance()
-            ),
-            polyMesh::meshSubDir/"sets",
-            mesh,
-            IOobject::NO_READ,
-            w
-        )
-    ),
+    regIOobject(findIOobject(mesh, name, IOobject::NO_READ, w)),
     labelHashSet(size)
 {}
 
@@ -401,24 +424,20 @@ Foam::topoSet::topoSet
     writeOption w
 )
 :
-    regIOobject
-    (
-        IOobject
-        (
-            name,
-            mesh.time().findInstance
-            (
-                mesh.dbDir()/polyMesh::meshSubDir/"sets",
-                word::null,
-                IOobject::NO_READ,
-                mesh.facesInstance()
-            ),
-            polyMesh::meshSubDir/"sets",
-            mesh,
-            IOobject::NO_READ,
-            w
-        )
-    ),
+    regIOobject(findIOobject(mesh, name, IOobject::NO_READ, w)),
+    labelHashSet(set)
+{}
+
+
+Foam::topoSet::topoSet
+(
+    const polyMesh& mesh,
+    const word& name,
+    const UList<label>& set,
+    writeOption w
+)
+:
+    regIOobject(findIOobject(mesh, name, IOobject::NO_READ, w)),
     labelHashSet(set)
 {}
 

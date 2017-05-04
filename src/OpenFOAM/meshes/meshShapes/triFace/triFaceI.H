@@ -377,7 +377,7 @@ inline int Foam::triFace::edgeDirection(const edge& e) const
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 inline bool Foam::operator==(const triFace& a, const triFace& b)
 {

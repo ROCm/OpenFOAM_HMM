@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "HashTable.H"
+#include "List.H"
 #include "IOstreams.H"
 #include "IStringStream.H"
 #include "OStringStream.H"
@@ -62,7 +63,7 @@ int main()
     Info<< "\ntable1 sortedToc: " << table1.sortedToc() << endl;
     table1.printInfo(Info)
         << "table1 [" << table1.size() << "] " << endl;
-    forAllConstIter(HashTable<scalar>, table1, iter)
+    forAllConstIters(table1, iter)
     {
         Info<< iter.key() << " => " << iter() << nl;
     }
@@ -106,7 +107,7 @@ int main()
         << "\ntable3" << table3 << nl;
 
     Info<< "\nerase table2 by iterator" << nl;
-    forAllIter(HashTable<scalar>, table2, iter)
+    forAllIters(table2, iter)
     {
         Info<< "erasing " << iter.key() << " => " << iter.object() << " ... ";
         table2.erase(iter);
@@ -176,6 +177,23 @@ int main()
     };
 
     Info<< "\ntable1" << table1 << nl;
+
+    Info<< "\nrange-for(table1) - returns values" << nl;
+    for (const auto& it : table1)
+    {
+        Info<< "val:" << it << nl;
+    }
+
+    Info<< "\nrange-for(table1.keys()) - returns keys" << nl;
+    for (const auto& k : table1.keys())
+    {
+        Info<< "key:" << k << nl;
+    }
+
+    // These do not yet work. Issues resolving the distance.
+    //
+    //  List<scalar> table1vals(table1.begin(), table1.end());
+    //  wordList table1keys(table1.begin(), table1.end());
 
     Info<< "\nDone\n";
 

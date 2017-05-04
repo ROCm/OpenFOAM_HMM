@@ -63,9 +63,9 @@ class Ostream;
 
 // Forward declaration of friend functions and operators
 class string;
-Istream& operator>>(Istream&, string&);
-Ostream& operator<<(Ostream&, const string&);
-Ostream& operator<<(Ostream&, const std::string&);
+Istream& operator>>(Istream& is, string& s);
+Ostream& operator<<(Ostream& os, const string& s);
+Ostream& operator<<(Ostream& os, const std::string& s);
 
 
 /*---------------------------------------------------------------------------*\
@@ -124,33 +124,33 @@ public:
         //- Count and return the number of a given character in the string
         size_type count(const char c) const;
 
-        //- Is this string type valid?
+        //- Does the string contain valid characters only?
         template<class String>
-        static inline bool valid(const string& str);
+        static inline bool valid(const std::string& str);
 
-        //- Does this string have particular meta-characters?
+        //- Does this string contain meta-characters?
         //  The meta characters can be optionally quoted.
         template<class String>
-        static inline bool meta(const string& str, const char quote = '\\');
+        static inline bool meta(const std::string& str, const char quote='\\');
 
         //- Strip invalid characters from the given string
         template<class String>
-        static inline bool stripInvalid(string& str);
+        static inline bool stripInvalid(std::string& str);
 
         //- Return a valid String from the given string
         template<class String>
-        static inline String validate(const string& str);
+        static inline String validate(const std::string& str);
 
         //- Return a String with quoted meta-characters from the given string
         template<class String>
         static inline string quotemeta
         (
-            const string& str,
+            const std::string& str,
             const char quote = '\\'
         );
 
         //- True when strings match literally
-        inline bool match(const std::string& str) const;
+        inline bool match(const std::string& text) const;
 
         //- Avoid masking the normal std::string replace
         using std::string::replace;

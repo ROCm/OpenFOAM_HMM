@@ -135,13 +135,13 @@ inline Foam::label Foam::face::nTriangles() const
     return size() - 2;
 }
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * * Global Operators   * * * * * * * * * * * * * //
 
 inline bool Foam::operator==(const face& a, const face& b)
 {
     return face::compare(a,b) != 0;
 }
-
 
 inline bool Foam::operator!=(const face& a, const face& b)
 {

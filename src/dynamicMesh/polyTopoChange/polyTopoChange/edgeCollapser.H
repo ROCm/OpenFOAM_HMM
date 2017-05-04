@@ -263,7 +263,7 @@ public:
         // Check
 
             //- Calls motionSmoother::checkMesh and returns a set of bad faces
-            static HashSet<label> checkBadFaces
+            static labelHashSet checkBadFaces
             (
                 const polyMesh& mesh,
                 const dictionary& meshQualityDict

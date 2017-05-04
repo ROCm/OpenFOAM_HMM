@@ -487,13 +487,13 @@ void Foam::plane::writeDict(Ostream& os) const
     os.endBlock() << flush;
 }
 
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 bool Foam::operator==(const plane& a, const plane& b)
 {
-    return (a.point_ == b.point_ && a.normal_ == b.normal_);
+    return (a.refPoint() == b.refPoint() && a.normal() == b.normal());
 }
+
 
 bool Foam::operator!=(const plane& a, const plane& b)
 {

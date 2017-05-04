@@ -77,24 +77,12 @@ int main(int argc, char *argv[])
             << "] = '" << namedEnumTest::namedEnum[opt] << "'" << nl;
     }
 
-#if __cplusplus > 201100L
-    // C++11
     Info<< "loop over enums (C++11 for range):" << nl;
-    for (auto const& opt : options)
+    for (const auto& opt : options)
     {
         Info<< "option[" << opt
             << "] = '" << namedEnumTest::namedEnum[opt] << "'" << nl;
     }
-#else
-    Info<< "loop over enums (via iterator):" << nl;
-    forAllConstIter(List<namedEnumTest::option>, options, iter)
-    {
-        const namedEnumTest::option& opt = *iter;
-
-        Info<< "option[" << opt
-            << "] = '" << namedEnumTest::namedEnum[opt] << "'" << nl;
-    }
-#endif
 
     Info<< nl
         << namedEnumTest::namedEnum["a"] << nl

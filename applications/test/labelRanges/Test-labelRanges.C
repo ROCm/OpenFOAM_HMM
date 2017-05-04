@@ -28,10 +28,6 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "IOobject.H"
-#include "IOstreams.H"
-#include "IFstream.H"
-#include "IStringStream.H"
 #include "labelRanges.H"
 
 using namespace Foam;
@@ -42,6 +38,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
+    argList::noFunctionObjects();
     argList::validArgs.insert("start size .. startN sizeN");
     argList::addOption("verbose");
     argList::addNote
@@ -57,6 +54,34 @@ int main(int argc, char *argv[])
         labelRange::debug = 1;
     }
 
+    {
+        Info<<"test sorting" << endl;
+        DynamicList<labelRange> list1(10);
+        list1.append(labelRange(25, 8));
+        list1.append(labelRange(0, 10));
+        list1.append(labelRange(15, 5));
+        list1.append(labelRange(50, -10));
+
+        sort(list1);
+        Info<<"sorted" << list1 << endl;
+    }
+
+    {
+        Info<<"test intersections" << endl;
+        labelRange range1(-15, 25);
+        labelRange range2(7, 8);
+        labelRange range3(-20, 8);
+        labelRange range4(50, 8);
+
+        Info<<range1 << " & " << range2
+            << " = " << range1.subset(range2) << nl;
+
+        Info<< range1 << " & " << range3
+            << " = " << range1.subset(range3) << nl;
+
+        Info<< range2 << " & " << range4
+            << " = " << range2.subset(range4) << nl;
+    }
 
     labelRange range;
     labelRanges ranges;
@@ -76,12 +101,9 @@ int main(int argc, char *argv[])
         }
 
         {
-            label start = 0;
-            label size  = 0;
-
-            IStringStream(args[argI])() >> start;
+            label start = args.argRead<label>(argI);
+            label size  = args.argRead<label>(argI+1);
             ++argI;
-            IStringStream(args[argI])() >> size;
 
             range.reset(start, size);
         }
@@ -90,9 +112,9 @@ int main(int argc, char *argv[])
         if (removeMode)
         {
             Info<< "del " << range << " :";
-            forAllConstIter(labelRange, range, iter)
+            for (auto i : range)
             {
-                Info<< " " << iter();
+                Info<< " " << i;
             }
             Info<< nl;
 
@@ -101,9 +123,9 @@ int main(int argc, char *argv[])
         else
         {
             Info<< "add " << range  << " :";
-            forAllConstIter(labelRange, range, iter)
+            for (auto i : range)
             {
-                Info<< " " << iter();
+                Info<< " " << i;
             }
             Info<< nl;
 

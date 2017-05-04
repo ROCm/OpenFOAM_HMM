@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,6 +116,14 @@ public:
             const dictionary& dict,
             const fvMesh& mesh,
             const labelHashSet& patchIDs
+        );
+
+        static autoPtr<patchDistMethod> New
+        (
+            const dictionary& dict,
+            const fvMesh& mesh,
+            const labelHashSet& patchIDs,
+            const word& defaultPatchDistMethod
         );
 
 

@@ -178,7 +178,7 @@ bool Foam::functionObjects::ddt2::execute()
 {
     results_.clear();
 
-    wordHashSet candidates = subsetStrings(selectFields_, mesh_.names());
+    wordHashSet candidates(subsetStrings(selectFields_, mesh_.names()));
     DynamicList<word> missing(selectFields_.size());
     DynamicList<word> ignored(selectFields_.size());
 

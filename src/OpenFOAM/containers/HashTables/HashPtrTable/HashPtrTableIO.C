@@ -35,7 +35,7 @@ template<class T, class Key, class Hash>
 template<class INew>
 void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
 {
-    is.fatalCheck("HashPtrTable<T, Key, Hash>::read(Istream&, const INew&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     token firstToken(is);
 
@@ -131,7 +131,7 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
             << exit(FatalIOError);
     }
 
-    is.fatalCheck("HashPtrTable<T, Key, Hash>::read(Istream&, const INew&)");
+    is.fatalCheck(FUNCTION_NAME);
 }
 
 
@@ -145,11 +145,9 @@ void Foam::HashPtrTable<T, Key, Hash>::read
 {
     forAllConstIter(dictionary, dict, iter)
     {
-        this->insert
-        (
-            iter().keyword(),
-            inewt(dict.subDict(iter().keyword())).ptr()
-        );
+        const word& k = iter().keyword();
+
+        this->insert(k, inewt(dict.subDict(k)).ptr());
     }
 }
 
@@ -157,16 +155,9 @@ void Foam::HashPtrTable<T, Key, Hash>::read
 template<class T, class Key, class Hash>
 void Foam::HashPtrTable<T, Key, Hash>::write(Ostream& os) const
 {
-
-    for
-    (
-        typename HashPtrTable<T, Key, Hash>::const_iterator
-        iter = this->begin();
-        iter != this->end();
-        ++iter
-    )
+    for (const_iterator iter = this->begin(); iter != this->end(); ++iter)
     {
-        const T* ptr = *iter;
+        const T* ptr = iter.object();
         if (ptr)
         {
             ptr->write(os);
@@ -202,10 +193,10 @@ Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(const dictionary& dict)
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
-Foam::Istream& Foam::operator>>(Istream& is, HashPtrTable<T, Key, Hash>& L)
+Foam::Istream& Foam::operator>>(Istream& is, HashPtrTable<T, Key, Hash>& tbl)
 {
-    L.clear();
-    L.read(is, INew<T>());
+    tbl.clear();
+    tbl.read(is, INew<T>());
 
     return is;
 }
@@ -215,21 +206,18 @@ template<class T, class Key, class Hash>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const HashPtrTable<T, Key, Hash>& L
+    const HashPtrTable<T, Key, Hash>& tbl
 )
 {
+    using const_iterator = typename HashPtrTable<T, Key, Hash>::const_iterator;
+
     // Write size and start delimiter
-    os << nl << L.size() << nl << token::BEGIN_LIST << nl;
+    os << nl << tbl.size() << nl << token::BEGIN_LIST << nl;
 
     // Write contents
-    for
-    (
-        typename HashPtrTable<T, Key, Hash>::const_iterator iter = L.begin();
-        iter != L.end();
-        ++iter
-    )
+    for (const_iterator iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
     {
-        const T* ptr = *iter;
+        const T* ptr = iter.object();
 
         os << iter.key();
         if (ptr)
@@ -242,8 +230,7 @@ Foam::Ostream& Foam::operator<<
     // Write end delimiter
     os << token::END_LIST;
 
-    // Check state of IOstream
-    os.check("Ostream& operator<<(Ostream&, const HashPtrTable&)");
+    os.check(FUNCTION_NAME);
 
     return os;
 }

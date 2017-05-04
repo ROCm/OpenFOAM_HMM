@@ -30,32 +30,6 @@ License
 #include "List.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-Foam::label Foam::StaticHashTableCore::canonicalSize(const label size)
-{
-    if (size < 1)
-    {
-        return 0;
-    }
-
-    // Enforce power of two
-    unsigned int goodSize = size;
-
-    if (goodSize & (goodSize - 1))
-    {
-        // Brute-force is fast enough
-        goodSize = 1;
-        while (goodSize < unsigned(size))
-        {
-            goodSize <<= 1;
-        }
-    }
-
-    return goodSize;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>

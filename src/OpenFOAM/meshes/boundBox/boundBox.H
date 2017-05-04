@@ -50,11 +50,8 @@ namespace Foam
 class boundBox;
 template<class T> class tmp;
 
-bool operator==(const boundBox&, const boundBox&);
-bool operator!=(const boundBox&, const boundBox&);
-
-Istream& operator>>(Istream&, boundBox&);
-Ostream& operator<<(Ostream&, const boundBox&);
+Istream& operator>>(Istream& is, boundBox& bb);
+Ostream& operator<<(Ostream& os, const boundBox& bb);
 
 
 /*---------------------------------------------------------------------------*\
@@ -289,12 +286,6 @@ public:
         inline void operator+=(const boundBox& bb);
 
 
-    // Friend Operators
-
-        inline friend bool operator==(const boundBox& a, const boundBox& b);
-        inline friend bool operator!=(const boundBox& a, const boundBox& b);
-
-
     // IOstream operator
 
         friend Istream& operator>>(Istream& is, boundBox& bb);
@@ -305,6 +296,11 @@ public:
 //- Data associated with boundBox type are contiguous
 template<>
 inline bool contiguous<boundBox>() {return contiguous<point>();}
+
+// Global Operators
+
+inline bool operator==(const boundBox& a, const boundBox& b);
+inline bool operator!=(const boundBox& a, const boundBox& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

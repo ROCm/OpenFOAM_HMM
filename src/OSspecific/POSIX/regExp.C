@@ -24,16 +24,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "regExp.H"
-#include "string.H"
 #include "List.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class StringType>
 bool Foam::regExp::matchGrouping
 (
     const std::string& text,
-    List<StringType>& groups
+    List<std::string>& groups
 ) const
 {
     if (preg_ && !text.empty())
@@ -194,7 +192,7 @@ std::string::size_type Foam::regExp::find(const std::string& text) const
         }
     }
 
-    return string::npos;
+    return std::string::npos;
 }
 
 
@@ -228,30 +226,6 @@ bool Foam::regExp::match
 ) const
 {
     return matchGrouping(text, groups);
-}
-
-
-bool Foam::regExp::match
-(
-    const std::string& text,
-    List<Foam::string>& groups
-) const
-{
-    return matchGrouping(text, groups);
-}
-
-
-// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
-
-void Foam::regExp::operator=(const char* pattern)
-{
-    set(pattern);
-}
-
-
-void Foam::regExp::operator=(const std::string& pattern)
-{
-    set(pattern);
 }
 
 

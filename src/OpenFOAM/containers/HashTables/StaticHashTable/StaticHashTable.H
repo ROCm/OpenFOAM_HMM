@@ -78,8 +78,8 @@ template<class T, class Key, class Hash> Ostream& operator<<
 //- Template-invariant bits for StaticHashTable
 struct StaticHashTableCore
 {
-    //- Return a canonical (power-of-two) size
-    static label canonicalSize(const label);
+    //- Return a canonical (power-of-two) of the requested size.
+    static label canonicalSize(const label requested_size);
 
     //- Construct null
     StaticHashTableCore()
@@ -118,9 +118,6 @@ class StaticHashTable
 
         //- The current number of elements in table
         label nElmts_;
-
-        //- Return a canonical (power-of-two) size
-        static label canonicalSize(const label);
 
         //- Return the hash index of the Key within the current table size.
         //  No checks for zero-sized tables.
@@ -397,7 +394,7 @@ private:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    #include "StaticHashTableI.H"
+#include "StaticHashTableI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

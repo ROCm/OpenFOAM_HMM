@@ -25,7 +25,7 @@ Class
     Foam::labelRange
 
 Description
-    A range of labels.
+    A range of labels defined by a start and a size.
 
 SourceFiles
     labelRange.C
@@ -65,29 +65,25 @@ public:
 
     static int debug;
 
+    // STL type definitions similar to what UList has
 
-    // Public classes
+        //- Type of values the range contains
+        typedef label value_type;
 
-        //- Less function class for sorting labelRange
-        class less
-        {
-        public:
+        //- The type that can represent the difference between two iterators
+        typedef label difference_type;
 
-            bool operator()(const labelRange& a, const labelRange& b)
-            {
-                return a.operator<(b);
-            }
-        };
+        //- The type that can represent the size of the range
+        typedef label size_type;
 
 
     // Constructors
 
-        //- Construct an empty range with zero as start and size.
+        //- An empty range with zero for start/size.
         inline labelRange();
 
-        //- Construct a range from start and size.
+        //- Construct a range from start and size, enforcing non-negative size.
         //  Optionally adjust the start to avoid any negative indices.
-        //  Always reduce a negative size to zero.
         inline labelRange
         (
             const label start,
@@ -101,11 +97,20 @@ public:
 
     // Member Functions
 
-        //- Alias for setSize(const label)
-        inline void resize(const label n);
+        //- Adjust start position
+        inline void setStart(const label i);
 
         //- Adjust size
         inline void setSize(const label n);
+
+        //- Alias for setSize()
+        inline void resize(const label n);
+
+        //- Decrease the size by 1, but never below 0.
+        inline void decrement();
+
+        //- Increase the size by 1.
+        inline void increment();
 
         //- Reset to zero start and zero size
         inline void clear();
@@ -116,21 +121,29 @@ public:
         //- Adjust the start to avoid any negative indices
         void adjust();
 
-        //- Is the range valid (non-empty)?
+        //- Is the range non-empty?
         inline bool valid() const;
 
-        //- Return the effective size of the range
+        //- The (inclusive) lower value of the range
+        inline label start() const;
+
+        //- The effective size of the range
         inline label size() const;
 
-        //- The (inclusive) lower value of the range
+        //- The (inclusive) lower value of the range - same as start
         inline label first() const;
 
         //- The (inclusive) upper value of the range
         inline label last() const;
 
-        //- Reset start and size.
+        //- The value before the start of the range
+        inline label before() const;
+
+        //- The value after the last element in the range
+        inline label after() const;
+
+        //- Reset start and size, enforcing non-negative size.
         //  Optionally adjust the start to avoid any negative indices.
-        //  Always reduce a negative size to zero.
         //  Return true if the updated range valid (non-empty).
         inline bool reset
         (
@@ -139,8 +152,8 @@ public:
             const bool adjustStart = false
         );
 
-        //- Return true if the value is within the range
-        inline bool contains(const label value) const;
+        //- Return true if the value is located the range
+        inline bool found(const label value) const;
 
         //- Return true if the ranges overlap.
         //  Optional test for ranges that also just touch each other
@@ -150,72 +163,75 @@ public:
         //  A prior overlaps() check can be used to avoid squashing gaps.
         labelRange join(const labelRange& range) const;
 
+        //- Calculate the intersection of the range with another.
+        //  If there is no intersection, it returns an empty range with zero
+        //  for start/size.
+        labelRange subset(const labelRange& range) const;
+
+        //- Calculate the intersection with the given start/size range.
+        //  If there is no intersection, it returns an empty range with zero
+        //  for start/size.
+        labelRange subset(const label start, const label size) const;
+
+        //- Calculate the intersection with the given 0/size range.
+        //  If there is no intersection, it returns an empty range with zero
+        //  for start/size.
+        labelRange subset0(const label size) const;
+
 
     // Member Operators
 
-        //- Return element in range, no bounds checking
-        inline label operator[](const label i) const;
+        //- Return element in the range, no bounds checking
+        inline label operator[](const label localIndex) const;
 
-        //- Comparison function for sorting, compares the start.
-        //  If the start values are equal, also compares the size.
-        inline bool operator<(const labelRange& rhs) const;
+        //- Increase the size by 1.
+        inline label operator++();
+        inline label operator++(int);
 
-        //- Join ranges, squashing any gaps in between
-        //  A prior overlaps() check can be used to avoid squashing gaps.
-        void operator+=(const labelRange& rhs);
-
-        inline bool operator==(const labelRange& rhs) const;
-        inline bool operator!=(const labelRange& rhs) const;
+        //- Decrease the size by 1, but never below 0.
+        inline label operator--();
+        inline label operator--(int);
 
 
     // STL iterator
 
-        //- An STL const_iterator
+        //- Forward iterator with const access
         class const_iterator
         {
-            friend class labelRange;
-
-            // Private data
-
-                //- Reference to the range for which this is an iterator
-                const labelRange& range_;
-
-                //- Current index
-                label index_;
-
-
-            // Constructors
-
-                //- Construct from range at 'begin' or 'end' position
-                inline const_iterator
-                (
-                    const labelRange& range,
-                    const bool endIter = false
-                );
+            //- The current label (not the local index)
+            label index_;
 
         public:
 
-            // Member operators
+          // Constructors
 
-                inline bool operator==(const const_iterator& iter) const;
-                inline bool operator!=(const const_iterator& iter) const;
+            //- Construct from range at given local index.
+            //  A negative index signals the 'end' position
+            inline const_iterator(const labelRange* range, const label i = 0);
 
-                inline label operator*() const;
-                inline label operator()() const;
+          // Member operators
 
-                inline const_iterator& operator++();
-                inline const_iterator operator++(int);
+            //- Return the current label
+            inline label operator*() const;
+
+            inline const_iterator& operator++();
+            inline const_iterator operator++(int);
+
+            inline bool operator==(const const_iterator& iter) const;
+            inline bool operator!=(const const_iterator& iter) const;
         };
 
 
         //- A const_iterator set to the beginning of the range
+        //  The value returned is guaranteed to be the same as start()
+        inline const_iterator begin() const;
+
+        //- A const_iterator set to the beginning of the range
+        //  The value returned is guaranteed to be the same as start()
         inline const_iterator cbegin() const;
 
         //- A const_iterator set to beyond the end of the range
         inline const const_iterator cend() const;
-
-        //- A const_iterator set to the beginning of the range
-        inline const_iterator begin() const;
 
         //- A const_iterator set to beyond the end of the range
         inline const const_iterator end() const;
@@ -227,6 +243,51 @@ public:
         friend Ostream& operator<<(Ostream& os, const labelRange& range);
 
 };
+
+
+// Global Operators
+
+inline bool operator==(const labelRange& a, const labelRange& b)
+{
+    return (a.first() == b.first() && a.size() == b.size());
+}
+
+inline bool operator!=(const labelRange& a, const labelRange& b)
+{
+    return !(a == b);
+}
+
+
+//- Comparison function for sorting, compares the start.
+//  If the start values are equal, also compares the size.
+inline bool operator<(const labelRange& a, const labelRange& b)
+{
+    return
+    (
+        a.first() < b.first()
+     ||
+        (
+            !(b.first() < a.first())
+         && a.size() < b.size()
+        )
+    );
+}
+
+inline bool operator<=(const labelRange& a, const labelRange& b)
+{
+    return !(b < a);
+}
+
+
+inline bool operator>(const labelRange& a, const labelRange& b)
+{
+    return (b < a);
+}
+
+inline bool operator>=(const labelRange& a, const labelRange& b)
+{
+    return !(a < b);
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -25,7 +25,9 @@ Class
     Foam::Tuple2
 
 Description
-    A 2-tuple for storing two objects of different types.
+    A 2-tuple for storing two objects of dissimilar types.
+    The container is similar in purpose to std::pair, but does not expose
+    its members directly.
 
 See also
     Foam::Pair for storing two objects of identical types.
@@ -48,10 +50,10 @@ template<class Type1, class Type2>
 class Tuple2;
 
 template<class Type1, class Type2>
-inline Istream& operator>>(Istream&, Tuple2<Type1, Type2>&);
+inline Istream& operator>>(Istream& is, Tuple2<Type1, Type2>& t2);
 
 template<class Type1, class Type2>
-inline Ostream& operator<<(Ostream&, const Tuple2<Type1, Type2>&);
+inline Ostream& operator<<(Ostream& os, const Tuple2<Type1, Type2>& t2);
 
 
 /*---------------------------------------------------------------------------*\
@@ -66,12 +68,20 @@ class Tuple2
         Type1 f_;
         Type2 s_;
 
-
 public:
+
+    // Typedefs (cf. std::pair)
+
+        //- Type of member first, the first template parameter (Type1)
+        typedef Type1 first_type;
+
+        //- Type of member second, the second template parameter (Type2)
+        typedef Type2 second_type;
+
 
     // Constructors
 
-        //- Null constructor for lists
+        //- Null constructor for lists and hashes
         inline Tuple2()
         {}
 
@@ -161,6 +171,59 @@ inline bool operator!=
 )
 {
     return !(a == b);
+}
+
+
+template<class Type1, class Type2>
+inline bool operator<
+(
+    const Tuple2<Type1, Type2>& a,
+    const Tuple2<Type1, Type2>& b
+)
+{
+    return
+    (
+        a.first() < b.first()
+     ||
+        (
+            !(b.first() < a.first())
+         && a.second() < b.second()
+        )
+    );
+}
+
+
+
+template<class Type1, class Type2>
+inline bool operator<=
+(
+    const Tuple2<Type1, Type2>& a,
+    const Tuple2<Type1, Type2>& b
+)
+{
+    return !(b < a);
+}
+
+
+template<class Type1, class Type2>
+inline bool operator>
+(
+    const Tuple2<Type1, Type2>& a,
+    const Tuple2<Type1, Type2>& b
+)
+{
+    return (b < a);
+}
+
+
+template<class Type1, class Type2>
+inline bool operator>=
+(
+    const Tuple2<Type1, Type2>& a,
+    const Tuple2<Type1, Type2>& b
+)
+{
+    return !(a < b);
 }
 
 

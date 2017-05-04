@@ -183,7 +183,7 @@ Foam::string& Foam::stringOps::inplaceExpand
                 HashTable<string, word, string::hash>::const_iterator fnd =
                     mapping.find(varName);
 
-                if (fnd != HashTable<string, word, string::hash>::end())
+                if (fnd.found())
                 {
                     if (altPos != string::npos && altType == '+')
                     {
