@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,17 +68,28 @@ void Foam::wallDist::constructn() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::wallDist::wallDist(const fvMesh& mesh, const word& patchTypeName)
+Foam::wallDist::wallDist
+(
+    const fvMesh& mesh,
+    const labelHashSet& patchIDs,
+    const word& patchTypeName
+)
 :
     MeshObject<fvMesh, Foam::UpdateableMeshObject, wallDist>(mesh),
-    patchIDs_(mesh.boundaryMesh().findPatchIDs<wallPolyPatch>()),
+    patchIDs_(patchIDs),
     patchTypeName_(patchTypeName),
+    dict_
+    (
+        static_cast<const fvSchemes&>(mesh).subOrEmptyDict
+        (
+            patchTypeName_ & "Dist"
+        )
+    ),
     pdm_
     (
         patchDistMethod::New
         (
-            static_cast<const fvSchemes&>(mesh)
-           .subDict(patchTypeName_ & "Dist"),
+            dict_,
             mesh,
             patchIDs_
         )
@@ -95,17 +106,9 @@ Foam::wallDist::wallDist(const fvMesh& mesh, const word& patchTypeName)
         dimensionedScalar("y" & patchTypeName_, dimLength, SMALL),
         patchDistMethod::patchTypes<scalar>(mesh, patchIDs_)
     ),
-    nRequired_
-    (
-        static_cast<const fvSchemes&>(mesh).subDict(patchTypeName_ & "Dist")
-       .lookupOrDefault<Switch>("nRequired", false)
-    ),
+    nRequired_(dict_.lookupOrDefault<Switch>("nRequired", false)),
     n_(volVectorField::null()),
-    updateInterval_
-    (
-        static_cast<const fvSchemes&>(mesh).subDict(patchTypeName_ & "Dist")
-       .lookupOrDefault<label>("updateInterval", 1)
-    ),
+    updateInterval_(dict_.lookupOrDefault<label>("updateInterval", 1)),
     requireUpdate_(true)
 {
     if (nRequired_)
@@ -120,6 +123,7 @@ Foam::wallDist::wallDist(const fvMesh& mesh, const word& patchTypeName)
 Foam::wallDist::wallDist
 (
     const fvMesh& mesh,
+    const word& defaultPatchDistMethod,
     const labelHashSet& patchIDs,
     const word& patchTypeName
 )
@@ -127,14 +131,21 @@ Foam::wallDist::wallDist
     MeshObject<fvMesh, Foam::UpdateableMeshObject, wallDist>(mesh),
     patchIDs_(patchIDs),
     patchTypeName_(patchTypeName),
+    dict_
+    (
+        static_cast<const fvSchemes&>(mesh).subOrEmptyDict
+        (
+            patchTypeName_ & "Dist"
+        )
+    ),
     pdm_
     (
         patchDistMethod::New
         (
-            static_cast<const fvSchemes&>(mesh)
-           .subDict(patchTypeName_ & "Dist"),
+            dict_,
             mesh,
-            patchIDs_
+            patchIDs_,
+            defaultPatchDistMethod
         )
     ),
     y_
@@ -149,17 +160,9 @@ Foam::wallDist::wallDist
         dimensionedScalar("y" & patchTypeName_, dimLength, SMALL),
         patchDistMethod::patchTypes<scalar>(mesh, patchIDs_)
     ),
-    nRequired_
-    (
-        static_cast<const fvSchemes&>(mesh).subDict(patchTypeName_ & "Dist")
-       .lookupOrDefault<Switch>("nRequired", false)
-    ),
+    nRequired_(dict_.lookupOrDefault<Switch>("nRequired", false)),
     n_(volVectorField::null()),
-    updateInterval_
-    (
-        static_cast<const fvSchemes&>(mesh).subDict(patchTypeName_ & "Dist")
-       .lookupOrDefault<label>("updateInterval", 1)
-    ),
+    updateInterval_(dict_.lookupOrDefault<label>("updateInterval", 1)),
     requireUpdate_(true)
 {
     if (nRequired_)
@@ -169,6 +172,17 @@ Foam::wallDist::wallDist
 
     movePoints();
 }
+
+
+Foam::wallDist::wallDist(const fvMesh& mesh, const word& patchTypeName)
+:
+    wallDist
+    (
+        mesh,
+        mesh.boundaryMesh().findPatchIDs<wallPolyPatch>(),
+        patchTypeName
+    )
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

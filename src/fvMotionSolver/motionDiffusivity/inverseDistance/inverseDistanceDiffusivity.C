@@ -30,6 +30,7 @@ License
 #include "surfaceInterpolate.H"
 #include "zeroGradientFvPatchFields.H"
 #include "wallDist.H"
+#include "meshWavePatchDistMethod.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -72,12 +73,13 @@ Foam::inverseDistanceDiffusivity::~inverseDistanceDiffusivity()
 void Foam::inverseDistanceDiffusivity::correct()
 {
     faceDiffusivity_ =
-        1.0
+        dimensionedScalar("one", dimLength, 1)
        /fvc::interpolate
         (
             wallDist::New
             (
                 mesh(),
+                patchDistMethods::meshWave::typeName,
                 mesh().boundaryMesh().patchSet(patchNames_)
             ).y()
         );
