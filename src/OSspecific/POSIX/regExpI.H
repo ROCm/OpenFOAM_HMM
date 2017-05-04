@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,54 +24,57 @@ License
 \*---------------------------------------------------------------------------*/
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-inline Foam::wordReListMatcher::wordReListMatcher
-(
-    const UList<wordRe>& lst
-)
-:
-    reList_(lst)
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline Foam::label Foam::wordReListMatcher::size() const
+inline bool Foam::regExp::meta(const char c)
 {
-    return reList_.size();
+    return
+    (
+        (c == '.')                           // any character
+     || (c == '*' || c == '+' || c == '?')   // quantifiers
+     || (c == '(' || c == ')' || c == '|')   // grouping/branching
+     || (c == '[' || c == ']')               // range
+    );
 }
 
 
-inline bool Foam::wordReListMatcher::empty() const
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+inline bool Foam::regExp::empty() const
 {
-    return reList_.empty();
+    return !preg_;
 }
 
 
-inline const Foam::UList<Foam::wordRe>&
-Foam::wordReListMatcher::operator()() const
+inline bool Foam::regExp::exists() const
 {
-    return reList_;
+    return preg_ ? true : false;
 }
 
 
-inline bool Foam::wordReListMatcher::match
-(
-    const std::string& text,
-    bool literalMatch
-) const
+inline unsigned Foam::regExp::ngroups() const
 {
-    const label n = reList_.size();
-    for (label i = 0; i < n; ++i)
-    {
-        if (reList_[i].match(text, literalMatch))
-        {
-            return true;
-        }
-    }
+    return preg_ ? preg_->re_nsub : 0;
+}
 
-    return false;
+
+inline bool Foam::regExp::search(const std::string& text) const
+{
+    return std::string::npos != find(text);
+}
+
+
+// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
+
+inline void Foam::regExp::operator=(const char* pattern)
+{
+    set(pattern);
+}
+
+
+inline void Foam::regExp::operator=(const std::string& pattern)
+{
+    set(pattern);
 }
 
 
