@@ -67,6 +67,17 @@ int main(int argc, char *argv[])
 
     Info<< e3 << " connects " << e2 << " => " << e2.connects(e3) << endl;
 
+    labelPair labels(e3);
+
+    Info<< "as labelPair: " << labels << endl;
+
+    edge e5;
+    // Good: this fails (explicit constructor):   printInfo(labels);
+    // Good: this also fails (no assignment operator): e5 = labels;
+
+    // OK: explicit
+    edge e6(labels);
+
     Info<< nl << "hash-like functionality" << nl;
 
     // doesn't work e4 = -1;

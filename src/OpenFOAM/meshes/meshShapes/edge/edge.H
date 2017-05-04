@@ -45,6 +45,7 @@ SourceFiles
 #define edge_H
 
 #include "FixedList.H"
+#include "labelPair.H"
 #include "pointField.H"
 #include "linePointRef.H"
 
@@ -65,7 +66,7 @@ class edge
 
         //- Insert values, using begin/end iterators.
         template<class InputIter>
-        inline int insertMultiple
+        inline label insertMultiple
         (
             const InputIter begIter,
             const InputIter endIter
@@ -73,7 +74,7 @@ class edge
 
         //- Remove values, using begin/end iterators.
         template<class InputIter>
-        inline int eraseMultiple
+        inline label eraseMultiple
         (
             const InputIter begIter,
             const InputIter endIter
@@ -97,6 +98,9 @@ public:
 
         //- Construct, optionally sorted with start less-than end
         inline edge(const label from, const label to, const bool doSort);
+
+        //- Construct from two labels
+        inline edge(const labelPair& pair);
 
         //- Construct from FixedList
         inline edge(const FixedList<label, 2>& lst);
@@ -165,7 +169,7 @@ public:
         //- 'Collapse' edge by marking duplicate point labels as '-1',
         //  the lower vertex is retained.
         //  Return the effective size after collapsing.
-        inline int collapse();
+        inline label collapse();
 
         //- Flip the edge in-place.
         //  No special handling of negative point labels.
@@ -180,7 +184,7 @@ public:
 
         //- Return the number of unique, valid (non -1) point labels.
         //  Similar to a HashTable::size().
-        inline int count() const;
+        inline label count() const;
 
         //- Return true if edge has no valid point labels.
         inline bool empty() const;
@@ -194,41 +198,41 @@ public:
         inline bool insert(const label index);
 
         //- Fill open slots with the indices if they did not previously exist.
-        //  Returns true on success. Negative labels never inserts.
+        //  Returns true on success. Negative labels never insert.
         //  Return the number of slots filled.
         //  Similar to a HashTable::insert().
-        inline int insert(const UList<label>& lst);
+        inline label insert(const UList<label>& lst);
 
         //- Fill open slots with the indices if they did not previously exist.
-        //  Returns true on success. Negative labels never inserts.
+        //  Returns true on success. Negative labels never insert.
         //  Return the number of slots filled.
         //  Similar to a HashTable::insert().
         template<unsigned AnySize>
-        inline int insert(const FixedList<label, AnySize>& lst);
+        inline label insert(const FixedList<label, AnySize>& lst);
 
         //- Fill open slots with the indices if they did not previously exist.
-        //  Returns true on success. Negative labels never inserts.
+        //  Returns true on success. Negative labels never insert.
         //  Return the number of slots filled.
         //  Similar to a HashTable::insert().
-        inline int insert(std::initializer_list<label> lst);
+        inline label insert(std::initializer_list<label> lst);
 
         //- Remove an existing index from the edge and set its location to '-1'.
         //  Returns the number of changes. A negative label never removes.
         //  Similar to a HashTable::erase().
-        inline int erase(const label index);
+        inline label erase(const label index);
 
         //- Remove existing indices from the edge and set locations to '-1'.
         //  Returns the number of changes.
-        inline int erase(const UList<label>& lst);
+        inline label erase(const UList<label>& lst);
 
         //- Remove existing indices from the edge and set locations to '-1'.
         //  Returns the number of changes.
         template<unsigned AnySize>
-        inline int erase(const FixedList<label, AnySize>& lst);
+        inline label erase(const FixedList<label, AnySize>& lst);
 
         //- Remove existing indices from the edge and set locations to '-1'.
         //  Returns the number of changes.
-        inline int erase(std::initializer_list<label> lst);
+        inline label erase(std::initializer_list<label> lst);
 
 
      // Geometric functions

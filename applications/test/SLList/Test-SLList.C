@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
     Info<< nl << "And again using STL iterator: " << nl << endl;
 
-    for (auto const& val : myList)
+    for (const auto& val : myList)
     {
         Info<< "element:" << val << endl;
     }
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
         myList.remove(iter);
     }
 
-    for (auto const& val : const_myList)
+    for (const auto& val : const_myList)
     {
         Info<< "element:" << val << endl;
     }
