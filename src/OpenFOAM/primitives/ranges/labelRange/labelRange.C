@@ -52,11 +52,17 @@ void Foam::labelRange::adjust()
 {
     if (start_ < 0)
     {
-        size_ += start_;
+        if (size_ <= 0)
+        {
+            size_ = 0;
+        }
+        else
+        {
+            size_ += start_;
+        }
         start_ = 0;
     }
-
-    if (size_ < 0)
+    else if (size_ < 0)
     {
         size_ = 0;
     }
@@ -65,7 +71,7 @@ void Foam::labelRange::adjust()
 
 bool Foam::labelRange::overlaps(const labelRange& range, bool touches) const
 {
-    const label final = touches ? 1 : 0;
+    const label extra = touches ? 1 : 0;
 
     return
     (
@@ -74,12 +80,12 @@ bool Foam::labelRange::overlaps(const labelRange& range, bool touches) const
         (
             (
                 range.first() >= this->first()
-             && range.first() <= this->last() + final
+             && range.first() <= this->last() + extra
             )
          ||
             (
                 this->first() >= range.first()
-             && this->first() <= range.last() + final
+             && this->first() <= range.last() + extra
             )
         )
     );
@@ -134,7 +140,26 @@ Foam::labelRange Foam::labelRange::subset
 ) const
 {
     const label lower = Foam::max(this->start(), start);
-    const label upper = Foam::min(this->last(),  start+Foam::max(0,size)-1);
+    const label upper = Foam::min(this->last(),  start+Foam::max(0,size-1));
+    const label total = upper+1 - lower;
+    // last = start+size-1
+    // size = last+1-start
+
+    if (total > 0)
+    {
+        return labelRange(lower, total);
+    }
+    else
+    {
+        return labelRange();
+    }
+}
+
+
+Foam::labelRange Foam::labelRange::subset0(const label size) const
+{
+    const label lower = Foam::max(this->start(), 0);
+    const label upper = Foam::min(this->last(),  Foam::max(0,size-1));
     const label total = upper+1 - lower;
     // last = start+size-1
     // size = last+1-start

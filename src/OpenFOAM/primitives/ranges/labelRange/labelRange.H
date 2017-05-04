@@ -65,6 +65,17 @@ public:
 
     static int debug;
 
+    // STL type definitions similar to what UList has
+
+        //- Type of values the range contains
+        typedef label value_type;
+
+        //- The type that can represent the difference between two iterators
+        typedef label difference_type;
+
+        //- The type that can represent the size of the range
+        typedef label size_type;
+
 
     // Constructors
 
@@ -86,11 +97,20 @@ public:
 
     // Member Functions
 
-        //- Alias for setSize(const label)
-        inline void resize(const label n);
+        //- Adjust start position
+        inline void setStart(const label i);
 
         //- Adjust size
         inline void setSize(const label n);
+
+        //- Alias for setSize()
+        inline void resize(const label n);
+
+        //- Decrease the size by 1, but never below 0.
+        inline void decrement();
+
+        //- Increase the size by 1.
+        inline void increment();
 
         //- Reset to zero start and zero size
         inline void clear();
@@ -115,6 +135,12 @@ public:
 
         //- The (inclusive) upper value of the range
         inline label last() const;
+
+        //- The value before the start of the range
+        inline label before() const;
+
+        //- The value after the last element in the range
+        inline label after() const;
 
         //- Reset start and size, enforcing non-negative size.
         //  Optionally adjust the start to avoid any negative indices.
@@ -142,10 +168,15 @@ public:
         //  for start/size.
         labelRange subset(const labelRange& range) const;
 
-        //- Calculate the intersection of the range with another.
+        //- Calculate the intersection with the given start/size range.
         //  If there is no intersection, it returns an empty range with zero
         //  for start/size.
         labelRange subset(const label start, const label size) const;
+
+        //- Calculate the intersection with the given 0/size range.
+        //  If there is no intersection, it returns an empty range with zero
+        //  for start/size.
+        labelRange subset0(const label size) const;
 
 
     // Member Operators
@@ -153,51 +184,54 @@ public:
         //- Return element in the range, no bounds checking
         inline label operator[](const label localIndex) const;
 
+        //- Increase the size by 1.
+        inline label operator++();
+        inline label operator++(int);
+
+        //- Decrease the size by 1, but never below 0.
+        inline label operator--();
+        inline label operator--(int);
+
 
     // STL iterator
 
-        //- An STL const_iterator
+        //- Forward iterator with const access
         class const_iterator
         {
-            friend class labelRange;
-
-          // Private data
-
-            //- Reference to the range for which this is an iterator
-            const labelRange* range_;
-
-            //- Current index, relative to the start
+            //- The current label (not the local index)
             label index_;
-
-          // Constructors
-
-            //- Construct from range at given index.
-            //  A negative index signals the 'end' position
-            inline const_iterator(const labelRange* range, const label i);
 
         public:
 
-          // Member operators
+          // Constructors
 
-            inline bool operator==(const const_iterator& iter) const;
-            inline bool operator!=(const const_iterator& iter) const;
+            //- Construct from range at given local index.
+            //  A negative index signals the 'end' position
+            inline const_iterator(const labelRange* range, const label i = 0);
+
+          // Member operators
 
             //- Return the current label
             inline label operator*() const;
 
             inline const_iterator& operator++();
             inline const_iterator operator++(int);
+
+            inline bool operator==(const const_iterator& iter) const;
+            inline bool operator!=(const const_iterator& iter) const;
         };
 
 
         //- A const_iterator set to the beginning of the range
+        //  The value returned is guaranteed to be the same as start()
+        inline const_iterator begin() const;
+
+        //- A const_iterator set to the beginning of the range
+        //  The value returned is guaranteed to be the same as start()
         inline const_iterator cbegin() const;
 
         //- A const_iterator set to beyond the end of the range
         inline const const_iterator cend() const;
-
-        //- A const_iterator set to the beginning of the range
-        inline const_iterator begin() const;
 
         //- A const_iterator set to beyond the end of the range
         inline const const_iterator end() const;

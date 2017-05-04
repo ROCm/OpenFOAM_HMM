@@ -64,32 +64,17 @@ inline Foam::labelRange::const_iterator::const_iterator
     const label i
 )
 :
-    range_(range),
-    index_(i < 0 ? range->size() : i)
+    index_
+    (
+        range->start()
+      + ((i < 0 || i > range->size()) ? range->size() : i)
+    )
 {}
-
-
-inline bool Foam::labelRange::const_iterator::operator==
-(
-    const const_iterator& iter
-) const
-{
-    return (this->index_ == iter.index_);
-}
-
-
-inline bool Foam::labelRange::const_iterator::operator!=
-(
-    const const_iterator& iter
-) const
-{
-    return (this->index_ != iter.index_);
-}
 
 
 inline Foam::label Foam::labelRange::const_iterator::operator*() const
 {
-    return range_->start_ + index_;
+    return index_;
 }
 
 
@@ -110,19 +95,31 @@ Foam::labelRange::const_iterator::operator++(int)
 }
 
 
-inline Foam::labelRange::const_iterator Foam::labelRange::cbegin() const
+inline bool Foam::labelRange::const_iterator::operator==
+(
+    const const_iterator& iter
+) const
+{
+    return (this->index_ == iter.index_);
+}
+
+
+inline bool Foam::labelRange::const_iterator::operator!=
+(
+    const const_iterator& iter
+) const
+{
+    return (this->index_ != iter.index_);
+}
+
+
+inline Foam::labelRange::const_iterator Foam::labelRange::begin() const
 {
     return const_iterator(this, 0);
 }
 
 
-inline const Foam::labelRange::const_iterator Foam::labelRange::cend() const
-{
-    return const_iterator(this, -1);
-}
-
-
-inline Foam::labelRange::const_iterator Foam::labelRange::begin() const
+inline Foam::labelRange::const_iterator Foam::labelRange::cbegin() const
 {
     return const_iterator(this, 0);
 }
@@ -134,7 +131,26 @@ inline const Foam::labelRange::const_iterator Foam::labelRange::end() const
 }
 
 
+inline const Foam::labelRange::const_iterator Foam::labelRange::cend() const
+{
+    return const_iterator(this, -1);
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline void Foam::labelRange::setStart(const label i)
+{
+    start_ = i;
+}
+
+
+inline void Foam::labelRange::setSize(const label n)
+{
+    size_ = n;
+    if (size_ < 0) size_ = 0;
+}
+
 
 inline void Foam::labelRange::resize(const label n)
 {
@@ -142,14 +158,16 @@ inline void Foam::labelRange::resize(const label n)
 }
 
 
-inline void Foam::labelRange::setSize(const label n)
+inline void Foam::labelRange::decrement()
 {
-    size_ = n;
+    --size_;
+    if (size_ < 0) size_ = 0;
+}
 
-    if (size_ < 0)
-    {
-        size_ = 0;
-    }
+
+inline void Foam::labelRange::increment()
+{
+    ++size_;
 }
 
 
@@ -195,6 +213,18 @@ inline Foam::label Foam::labelRange::last() const
 }
 
 
+inline Foam::label Foam::labelRange::before() const
+{
+    return start_ - 1;
+}
+
+
+inline Foam::label Foam::labelRange::after() const
+{
+    return start_ + size_;
+}
+
+
 inline bool Foam::labelRange::reset
 (
     const label start,
@@ -231,6 +261,33 @@ inline bool Foam::labelRange::found(const label value) const
 inline Foam::label Foam::labelRange::operator[](const label localIndex) const
 {
     return start_ + localIndex;
+}
+
+
+inline Foam::label Foam::labelRange::operator++()
+{
+    return ++size_;
+}
+
+
+inline Foam::label Foam::labelRange::operator++(int)
+{
+    return size_++;
+}
+
+
+inline Foam::label Foam::labelRange::operator--()
+{
+    decrement();
+    return size_;
+}
+
+
+inline Foam::label Foam::labelRange::operator--(int)
+{
+    const label old = size_;
+    decrement();
+    return old;
 }
 
 

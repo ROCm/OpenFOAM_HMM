@@ -35,7 +35,7 @@ License
 template<class T>
 Foam::labelRange Foam::UList<T>::validateRange(const labelRange& range) const
 {
-    const labelRange slice = range.subset(0, this->size());
+    const labelRange slice = range.subset0(this->size());
 
     #ifdef FULLDEBUG
     this->checkStart(slice.start());

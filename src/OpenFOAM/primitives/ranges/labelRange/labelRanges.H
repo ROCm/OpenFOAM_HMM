@@ -62,7 +62,7 @@ class labelRanges
 {
     // Private typedefs for convenience
 
-        typedef DynamicList<labelRange> ParentType;
+        typedef DynamicList<labelRange> StorageContainer;
 
 
     // Private Member Functions

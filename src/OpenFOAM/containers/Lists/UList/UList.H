@@ -289,12 +289,10 @@ public:
         //- Type of values the UList contains
         typedef T value_type;
 
-        //- Type that can be used for storing into
-        //  UList::value_type objects
+        //- The type used for storing into value_type objects
         typedef T& reference;
 
-        //- Type that can be used for storing into
-        //  constant UList::value_type objects
+        //- The type used for reading from constant value_type objects.
         typedef const T& const_reference;
 
         //- The type that can represent the difference between any two

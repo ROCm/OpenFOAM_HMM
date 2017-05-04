@@ -28,13 +28,13 @@ License
 
 inline Foam::labelRanges::labelRanges()
 :
-    ParentType()
+    StorageContainer()
 {}
 
 
 inline Foam::labelRanges::labelRanges(const label nElem)
 :
-    ParentType(nElem)
+    StorageContainer(nElem)
 {}
 
 
@@ -133,7 +133,7 @@ inline bool Foam::labelRanges::found(const label value) const
 {
     forAll(*this, i)
     {
-        if (ParentType::operator[](i).found(value))
+        if (StorageContainer::operator[](i).found(value))
         {
             return true;
         }
