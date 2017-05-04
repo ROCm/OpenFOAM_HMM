@@ -53,7 +53,7 @@ class cellSet
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        cellSet(const cellSet&);
+        cellSet(const cellSet&) = delete;
 
 
 public:
@@ -81,7 +81,7 @@ public:
         (
             const polyMesh& mesh,
             const word& name,
-            const label sizes,
+            const label size,
             writeOption w=NO_WRITE
         );
 
@@ -90,7 +90,7 @@ public:
         (
             const polyMesh& mesh,
             const word& name,
-            const topoSet&,
+            const topoSet& set,
             writeOption w=NO_WRITE
         );
 
@@ -99,7 +99,16 @@ public:
         (
             const polyMesh& mesh,
             const word& name,
-            const labelHashSet&,
+            const labelHashSet& set,
+            writeOption w=NO_WRITE
+        );
+
+        //- Construct from additional list of labels for the labelHashSet
+        cellSet
+        (
+            const polyMesh& mesh,
+            const word& name,
+            const UList<label>& set,
             writeOption w=NO_WRITE
         );
 

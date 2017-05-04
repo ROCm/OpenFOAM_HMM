@@ -246,7 +246,7 @@ bool Foam::functionObjects::ensightWrite::write()
         ensCase().setTime(t.value(), t.timeIndex());
     }
 
-    wordHashSet candidates = subsetStrings(selectFields_, mesh_.names());
+    wordHashSet candidates(subsetStrings(selectFields_, mesh_.names()));
     DynamicList<word> missing(selectFields_.size());
     DynamicList<word> ignored(selectFields_.size());
 

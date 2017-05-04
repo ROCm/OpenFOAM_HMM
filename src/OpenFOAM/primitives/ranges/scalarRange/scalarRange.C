@@ -28,7 +28,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-int Foam::scalarRange::debug(::Foam::debug::debugSwitch("scalarRange", 0));
+namespace Foam
+{
+int scalarRange::debug(debug::debugSwitch("scalarRange", 0));
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -47,11 +50,9 @@ Foam::scalarRange::scalarRange(const scalar lower, const scalar upper)
     value_(lower),
     value2_(upper)
 {
-    // mark invalid range as empty
     if (lower > upper)
     {
-        type_ = EMPTY;
-        value_ = value2_ = 0;
+        clear();  // Mark invalid range as empty
     }
 }
 
@@ -72,6 +73,14 @@ Foam::scalarRange::scalarRange(Istream& is)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::scalarRange::clear()
+{
+    type_   = scalarRange::EMPTY;
+    value_  = 0;
+    value2_ = 0;
+}
+
 
 bool Foam::scalarRange::empty() const
 {
@@ -210,15 +219,14 @@ Foam::Istream& Foam::operator>>(Istream& is, scalarRange& range)
     // a number is now required
     if (!toks[nTok-1].isNumber())
     {
-        is.setBad();
-        range.type_ = scalarRange::EMPTY;
-        range.value_ = range.value2_ = 0;
+        range.clear();  // Mark invalid range as empty
         Info<< "rejected ill-formed or empty range:";
         for (label i=0; i<nTok; ++i)
         {
             Info<< " " << toks[i];
         }
         Info<< endl;
+        is.setBad();
         return is;
     }
 
@@ -245,15 +253,14 @@ Foam::Istream& Foam::operator>>(Istream& is, scalarRange& range)
     {
         if (range.type_ == scalarRange::UPPER)
         {
-            is.setBad();
-            range.type_ = scalarRange::EMPTY;
-            range.value_ = range.value2_ = 0;
+            range.clear();  // Mark invalid range as empty
             Info<< "rejected ill-formed range:";
             for (label i=0; i<nTok; ++i)
             {
                 Info<< " " << toks[i];
             }
             Info<< endl;
+            is.setBad();
             return is;
         }
 
@@ -308,16 +315,15 @@ Foam::Istream& Foam::operator>>(Istream& is, scalarRange& range)
         )
     )
     {
-        is.setBad();
-        range.type_ = scalarRange::EMPTY;
-        range.value_ = range.value2_ = 0;
-
+        range.clear();  // Mark invalid range as empty
         Info<< "rejected ill-formed range:";
         for (label i=0; i<nTok; ++i)
         {
             Info<< " " << toks[i];
         }
         Info<< endl;
+        is.setBad();
+        return is;
     }
 
     return is;

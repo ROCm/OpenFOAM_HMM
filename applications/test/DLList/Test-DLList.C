@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +41,8 @@ int main(int argc, char *argv[])
 {
     DLList<scalar> myList;
 
+    Info<< "DLList<scalar>" << nl;
+
     for (int i = 0; i<10; i++)
     {
         myList.append(1.3*i);
@@ -49,9 +51,7 @@ int main(int argc, char *argv[])
     myList.append(100.3);
     myList.append(500.3);
 
-    Info<< nl << "And again using STL iterator: " << nl << endl;
-
-    forAllIter(DLList<scalar>, myList, iter)
+    forAllConstIters(myList, iter)
     {
         Info<< "element:" << *iter << endl;
     }
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 
     Info<< nl << "And again using the same STL iterator: " << nl << endl;
 
-    forAllIter(DLList<scalar>, myList, iter)
+    forAllIters(myList, iter)
     {
         Info<< "Removing " << myList.remove(iter) << endl;
     }
@@ -68,13 +68,10 @@ int main(int argc, char *argv[])
     myList.append(200.3);
     myList.append(100.3);
 
-
-    Info<< nl << "And again using STL const_iterator: " << nl << endl;
-
-
-    forAllConstIter(DLList<scalar>, myList, iter)
+    Info<< nl << "Using range-based for: " << nl << endl;
+    for (auto val : myList)
     {
-        Info<< "element:" << *iter << endl;
+        Info<< "element:" << val << endl;
     }
 
     Info<< nl << "Testing swapUp and swapDown: " << endl;
@@ -84,9 +81,9 @@ int main(int argc, char *argv[])
     myList.swapUp(myList.DLListBase::first());
     myList.swapUp(myList.DLListBase::last());
 
-    forAllIter(DLList<scalar>, myList, iter)
+    for (auto val : myList)
     {
-        Info<< "element:" << *iter << endl;
+        Info<< "element:" << val << endl;
     }
 
     Info<< nl << "swapDown" << endl;
@@ -94,11 +91,10 @@ int main(int argc, char *argv[])
     myList.swapDown(myList.DLListBase::first());
     myList.swapDown(myList.DLListBase::last());
 
-    forAllIter(DLList<scalar>, myList, iter)
+    for (auto val : myList)
     {
-        Info<< "element:" << *iter << endl;
+        Info<< "element:" << val << endl;
     }
-
 
     Info<< nl << "Testing transfer: " << nl << nl
         << "original: " << myList << endl;

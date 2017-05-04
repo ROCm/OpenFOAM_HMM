@@ -42,7 +42,7 @@ defineTypeNameAndDebug(edgeCollapser, 0);
 }
 
 
-Foam::HashSet<Foam::label> Foam::edgeCollapser::checkBadFaces
+Foam::labelHashSet Foam::edgeCollapser::checkBadFaces
 (
     const polyMesh& mesh,
     const dictionary& meshQualityDict

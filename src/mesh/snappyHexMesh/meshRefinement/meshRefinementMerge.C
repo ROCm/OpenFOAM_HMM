@@ -790,6 +790,62 @@ Foam::labelList Foam::meshRefinement::collectFaces
 }
 
 
+namespace Foam
+{
+    // Pick up faces of cells of faces in set.
+    // file-scope
+    static inline void markGrowFaceCellFace
+    (
+        const polyMesh& pMesh,
+        const label faceI,
+        boolList& selected
+    )
+    {
+        const label own = pMesh.faceOwner()[faceI];
+
+        const cell& ownFaces = pMesh.cells()[own];
+        forAll(ownFaces, ownFaceI)
+        {
+            selected[ownFaces[ownFaceI]] = true;
+        }
+
+        if (pMesh.isInternalFace(faceI))
+        {
+            const label nbr = pMesh.faceNeighbour()[faceI];
+
+            const cell& nbrFaces = pMesh.cells()[nbr];
+            forAll(nbrFaces, nbrFaceI)
+            {
+                selected[nbrFaces[nbrFaceI]] = true;
+            }
+        }
+    }
+}
+
+
+// Pick up faces of cells of faces in set.
+Foam::labelList Foam::meshRefinement::growFaceCellFace
+(
+    const UList<label>& set
+) const
+{
+    boolList selected(mesh_.nFaces(), false);
+
+    for (auto faceI : set)
+    {
+        markGrowFaceCellFace(mesh_, faceI, selected);
+    }
+
+    syncTools::syncFaceList
+    (
+        mesh_,
+        selected,
+        orEqOp<bool>()      // combine operator
+    );
+    return findIndices(selected, true);
+}
+
+
 // Pick up faces of cells of faces in set.
 Foam::labelList Foam::meshRefinement::growFaceCellFace
 (
@@ -798,29 +854,12 @@ Foam::labelList Foam::meshRefinement::growFaceCellFace
 {
     boolList selected(mesh_.nFaces(), false);
 
-    forAllConstIter(faceSet, set, iter)
+    forAllConstIter(labelHashSet, set, iter)
     {
-        label faceI = iter.key();
-
-        label own = mesh_.faceOwner()[faceI];
-
-        const cell& ownFaces = mesh_.cells()[own];
-        forAll(ownFaces, ownFaceI)
-        {
-            selected[ownFaces[ownFaceI]] = true;
-        }
-
-        if (mesh_.isInternalFace(faceI))
-        {
-            label nbr = mesh_.faceNeighbour()[faceI];
-
-            const cell& nbrFaces = mesh_.cells()[nbr];
-            forAll(nbrFaces, nbrFaceI)
-            {
-                selected[nbrFaces[nbrFaceI]] = true;
-            }
-        }
+        const label faceI = iter.key();
+        markGrowFaceCellFace(mesh_, faceI, selected);
     }
+
     syncTools::syncFaceList
     (
         mesh_,

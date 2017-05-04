@@ -72,7 +72,7 @@ bool Foam::scalarRanges::selected(const scalar value) const
 
 Foam::List<bool> Foam::scalarRanges::selected
 (
-    const List<scalar>& values
+    const UList<scalar>& values
 ) const
 {
     List<bool> lst(values.size(), false);

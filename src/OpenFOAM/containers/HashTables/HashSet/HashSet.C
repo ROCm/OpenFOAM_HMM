@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,52 @@ License
 #define HashSet_C
 
 #include "HashSet.H"
+#include "FixedList.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class Key, class Hash>
+template<class InputIter>
+inline Foam::label Foam::HashSet<Key, Hash>::insertMultiple
+(
+    const InputIter begIter,
+    const InputIter endIter
+)
+{
+    label changed = 0;
+    for (InputIter iter = begIter; iter != endIter; ++iter)
+    {
+        if (insert(*iter))
+        {
+            ++changed;
+        }
+    }
+    return changed;
+}
+
+
+template<class Key, class Hash>
+template<class InputIter>
+inline Foam::label Foam::HashSet<Key, Hash>::assignMultiple
+(
+    const InputIter begIter,
+    const InputIter endIter,
+    const label sz
+)
+{
+    if (!this->capacity())
+    {
+        // Could be zero-sized from a previous transfer()?
+        this->resize(sz);
+    }
+    else
+    {
+        this->clear();
+    }
+
+    return insertMultiple(begIter, endIter);
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -35,9 +81,22 @@ Foam::HashSet<Key, Hash>::HashSet(const UList<Key>& lst)
 :
     HashTable<nil, Key, Hash>(2*lst.size())
 {
-    forAll(lst, elemI)
+    for (const auto& k : lst)
     {
-        this->insert(lst[elemI]);
+        this->insert(k);
+    }
+}
+
+
+template<class Key, class Hash>
+template<unsigned Size>
+Foam::HashSet<Key, Hash>::HashSet(const FixedList<Key, Size>& lst)
+:
+    HashTable<nil, Key, Hash>(2*lst.size())
+{
+    for (const auto& k : lst)
+    {
+        this->insert(k);
     }
 }
 
@@ -47,7 +106,7 @@ Foam::HashSet<Key, Hash>::HashSet(std::initializer_list<Key> lst)
 :
     HashTable<nil, Key, Hash>(2*lst.size())
 {
-    for (const Key& k : lst)
+    for (const auto& k : lst)
     {
         this->insert(k);
     }
@@ -58,20 +117,17 @@ template<class Key, class Hash>
 template<class AnyType, class AnyHash>
 Foam::HashSet<Key, Hash>::HashSet
 (
-    const HashTable<AnyType, Key, AnyHash>& h
+    const HashTable<AnyType, Key, AnyHash>& tbl
 )
 :
-    HashTable<nil, Key, Hash>(h.size())
+    HashTable<nil, Key, Hash>(tbl.capacity())
 {
-    for
-    (
-        typename HashTable<AnyType, Key, AnyHash>::const_iterator
-        cit = h.cbegin();
-        cit != h.cend();
-        ++cit
-    )
+    using other_iter =
+        typename HashTable<AnyType, Key, AnyHash>::const_iterator;
+
+    for (other_iter iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
     {
-        this->insert(cit.key());
+        this->insert(iter.key());
     }
 }
 
@@ -81,35 +137,48 @@ Foam::HashSet<Key, Hash>::HashSet
 template<class Key, class Hash>
 Foam::label Foam::HashSet<Key, Hash>::insert(const UList<Key>& lst)
 {
-    label count = 0;
-    forAll(lst, elemI)
-    {
-        if (this->insert(lst[elemI]))
-        {
-            ++count;
-        }
-    }
-
-    return count;
+    return insertMultiple(lst.begin(), lst.end());
 }
+
+
+template<class Key, class Hash>
+template<unsigned Size>
+Foam::label Foam::HashSet<Key, Hash>::insert(const FixedList<Key, Size>& lst)
+{
+    return insertMultiple(lst.begin(), lst.end());
+}
+
 
 template<class Key, class Hash>
 Foam::label Foam::HashSet<Key, Hash>::insert(std::initializer_list<Key> lst)
 {
-    label count = 0;
-    for (const Key& k : lst)
-    {
-        if (this->insert(k))
-        {
-            ++count;
-        }
-    }
-
-    return count;
+    return insertMultiple(lst.begin(), lst.end());
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template<class Key, class Hash>
+void Foam::HashSet<Key, Hash>::operator=(const UList<Key>& lst)
+{
+    assignMultiple(lst.begin(), lst.end(), 2*lst.size());
+}
+
+
+template<class Key, class Hash>
+template<unsigned Size>
+void Foam::HashSet<Key, Hash>::operator=(const FixedList<Key, Size>& lst)
+{
+    assignMultiple(lst.begin(), lst.end(), 2*lst.size());
+}
+
+
+template<class Key, class Hash>
+void Foam::HashSet<Key, Hash>::operator=(std::initializer_list<Key> lst)
+{
+    assignMultiple(lst.begin(), lst.end(), 2*lst.size());
+}
+
 
 template<class Key, class Hash>
 inline bool Foam::HashSet<Key, Hash>::operator[](const Key& key) const
@@ -142,7 +211,7 @@ bool Foam::HashSet<Key, Hash>::operator==(const HashSet<Key, Hash>& rhs) const
 template<class Key, class Hash>
 bool Foam::HashSet<Key, Hash>::operator!=(const HashSet<Key, Hash>& rhs) const
 {
-    return !(operator==(rhs));
+    return !operator==(rhs);
 }
 
 
@@ -200,6 +269,15 @@ void Foam::HashSet<Key, Hash>::operator-=(const HashSet<Key, Hash>& rhs)
 }
 
 
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+template<class Key, class Hash>
+Foam::Ostream& Foam::operator<<(Ostream& os, const HashSet<Key, Hash>& tbl)
+{
+    return tbl.writeList(os, 10);  // 10=consistent with UList
+}
+
+
 /* * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * */
 
 template<class Key, class Hash>
@@ -242,6 +320,66 @@ Foam::operator^
     out ^= hash2;
     return out;
 }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Key, class Hash>
+inline typename Foam::HashSet<Key, Hash>::iterator
+Foam::HashSet<Key, Hash>::begin()
+{
+    return HashTableCore::iterator_begin<iterator>
+    (
+        static_cast<parent_type&>(*this)
+    );
+}
+
+
+template<class Key, class Hash>
+inline typename Foam::HashSet<Key, Hash>::const_iterator
+Foam::HashSet<Key, Hash>::begin() const
+{
+    return HashTableCore::iterator_begin<const_iterator>
+    (
+        static_cast<const parent_type&>(*this)
+    );
+}
+
+
+template<class Key, class Hash>
+inline typename Foam::HashSet<Key, Hash>::const_iterator
+Foam::HashSet<Key, Hash>::cbegin() const
+{
+    return HashTableCore::iterator_begin<const_iterator>
+    (
+        static_cast<const parent_type&>(*this)
+    );
+}
+
+
+template<class Key, class Hash>
+inline const typename Foam::HashSet<Key, Hash>::iterator&
+Foam::HashSet<Key, Hash>::end()
+{
+    return HashTableCore::iterator_end<iterator>();
+}
+
+
+template<class Key, class Hash>
+inline const typename Foam::HashSet<Key, Hash>::const_iterator&
+Foam::HashSet<Key, Hash>::end() const
+{
+    return HashTableCore::iterator_end<const_iterator>();
+}
+
+
+template<class Key, class Hash>
+inline const typename Foam::HashSet<Key, Hash>::const_iterator&
+Foam::HashSet<Key, Hash>::cend() const
+{
+    return HashTableCore::iterator_cend<const_iterator>();
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

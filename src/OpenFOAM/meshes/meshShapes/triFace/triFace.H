@@ -229,11 +229,14 @@ public:
         //  - -1: same face, but different orientation
         static inline int compare(const triFace& a, const triFace& b);
 
-    // Friend Operators
-
-        inline friend bool operator==(const triFace& a, const triFace& b);
-        inline friend bool operator!=(const triFace& a, const triFace& b);
 };
+
+
+template<>
+inline bool contiguous<triFace>()  {return true;}
+
+inline bool operator==(const triFace& a, const triFace& b);
+inline bool operator!=(const triFace& a, const triFace& b);
 
 
 //- Hash specialization for hashing triFace - a commutative hash value.
@@ -258,10 +261,6 @@ inline unsigned Hash<triFace>::operator()(const triFace& t) const
 {
     return Hash<triFace>::operator()(t, 0);
 }
-
-
-template<>
-inline bool contiguous<triFace>()  {return true;}
 
 
 //- Hash specialization to offset faces in ListListOps::combineOffset

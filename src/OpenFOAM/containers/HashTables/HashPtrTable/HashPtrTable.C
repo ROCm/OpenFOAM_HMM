@@ -31,7 +31,7 @@ License
 template<class T, class Key, class Hash>
 Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(const label size)
 :
-    HashTable<T*, Key, Hash>(size)
+    parent_type(size)
 {}
 
 
@@ -41,11 +41,11 @@ Foam::HashPtrTable<T, Key, Hash>::HashPtrTable
     const HashPtrTable<T, Key, Hash>& ht
 )
 :
-    HashTable<T*, Key, Hash>()
+    parent_type(ht.capacity())
 {
     for (const_iterator iter = ht.begin(); iter != ht.end(); ++iter)
     {
-        const T* ptr = *iter;
+        const T* ptr = iter.object();
         if (ptr)
         {
             this->insert(iter.key(), new T(*ptr));
@@ -72,8 +72,8 @@ Foam::HashPtrTable<T, Key, Hash>::~HashPtrTable()
 template<class T, class Key, class Hash>
 T* Foam::HashPtrTable<T, Key, Hash>::remove(iterator& iter)
 {
-    T* ptr = *iter;
-    HashTable<T*, Key, Hash>::erase(iter);
+    T* ptr = iter.object();
+    this->parent_type::erase(iter);
     return ptr;
 }
 
@@ -81,9 +81,9 @@ T* Foam::HashPtrTable<T, Key, Hash>::remove(iterator& iter)
 template<class T, class Key, class Hash>
 bool Foam::HashPtrTable<T, Key, Hash>::erase(iterator& iter)
 {
-    T* ptr = *iter;
+    T* ptr = iter.object();
 
-    if (HashTable<T*, Key, Hash>::erase(iter))
+    if (this->parent_type::erase(iter))
     {
         if (ptr)
         {
@@ -102,17 +102,12 @@ bool Foam::HashPtrTable<T, Key, Hash>::erase(iterator& iter)
 template<class T, class Key, class Hash>
 void Foam::HashPtrTable<T, Key, Hash>::clear()
 {
-    for
-    (
-        iterator iter = this->begin();
-        iter != this->end();
-        ++iter
-    )
+    for (iterator iter = this->begin(); iter != this->end(); ++iter)
     {
-        delete *iter;
+        delete iter.object();
     }
 
-    HashTable<T*, Key, Hash>::clear();
+    this->parent_type::clear();
 }
 
 
@@ -136,7 +131,7 @@ void Foam::HashPtrTable<T, Key, Hash>::operator=
 
     for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
     {
-        const T* ptr = *iter;
+        const T* ptr = iter.object();
         if (ptr)
         {
             this->insert(iter.key(), new T(*ptr));

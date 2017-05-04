@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,8 @@ Description
 #include "hashedWordList.H"
 #include "HashSet.H"
 #include "Map.H"
+#include "labelPairHashes.H"
+#include "FlatOutput.H"
 
 using namespace Foam;
 
@@ -64,6 +66,14 @@ int main(int argc, char *argv[])
     tableB.insert("value4", nil());
     tableB.insert("value5", nil());
     tableB.insert("value6", nil());
+
+    Info<< "tableA keys: "; tableA.writeKeys(Info) << endl;
+
+    auto keyIterPair = tableA.keys();
+    for (const auto& i : keyIterPair)
+    {
+        Info<<" keys: " << i << endl;
+    }
 
     Map<label> mapA
     {
@@ -122,13 +132,22 @@ int main(int argc, char *argv[])
         << (wordHashSet(setA) | wordHashSet(tableA) | wordHashSet(tableB))
         << nl;
 
-
     labelHashSet setB
     {
         1, 11, 42
     };
 
+    setB = FixedList<label, 4>({1, 2, 3, 4});
+    setB = {1, 2, 4};
+    setB = List<label>({1, 2, 4});
     Info<< "setB : " << setB << endl;
+
+    labelPair pair(12, 15);
+    setB.set(pair);
+
+    Info<< "setB : " << setB << endl;
+    setB.unset(pair);
+
 
     labelHashSet setC(1);
     setC.insert(2008);
@@ -139,7 +158,7 @@ int main(int argc, char *argv[])
     labelHashSet setD(1);
     setD.insert({11, 100, 49, 36, 2008});
 
-    Info<< "setD : " << setD << endl;
+    Info<< "setD : " << flatOutput(setD) << endl;
 
     Info<< "setB == setC: " << (setB == setC) << endl;
     Info<< "setC != setD: " << (setC != setD) << endl;
@@ -178,9 +197,9 @@ int main(int argc, char *argv[])
         Info<< "setD has no 11" << endl;
     }
 
-    Info<< "setD : " << setD << endl;
+    Info<< "setD : " << flatOutput(setD) << endl;
 
-    // this doesn't work (yet?)
+    // This should not work (yet?)
     // setD[12] = true;
 
     List<label> someLst(10);
@@ -191,8 +210,14 @@ int main(int argc, char *argv[])
 
     label added = setD.set(someLst);
     Info<< "added " << added << " from " << someLst.size() << endl;
-    Info<< "setD : " << setD << endl;
+    Info<< "setD : " << flatOutput(setD) << endl;
 
+    Info<< "setD for-range()" << nl;
+
+    for (auto i : setD)
+    {
+        Info << i << endl;
+    }
 
     return 0;
 }

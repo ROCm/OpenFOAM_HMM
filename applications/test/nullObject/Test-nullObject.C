@@ -21,6 +21,17 @@ int main()
     SimpleClass* ptrToClass = new SimpleClass;
     SimpleClass& refToClass(*ptrToClass);
 
+    typedef unsigned long ptrval;
+
+    Info<<"nullObject address=" << ptrval(&(nullObjectPtr)) << endl;
+    Info<<"sizeof(nullObject)" << " == "
+        << sizeof(NullObject::nullObject)
+        << " vs. sizeof(void*)" << " == " << sizeof(void*)
+        << endl;
+
+    Info<<"nullObject pointer:" << ptrval(nullObjectPtr->pointer()) << endl;
+    Info<<"nullObject value:"   << nullObjectPtr->value() << endl;
+
     if (notNull(ptrToClass))
     {
         Info<< "Pass: ptrToClass is not null" << endl;

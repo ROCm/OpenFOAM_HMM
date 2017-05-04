@@ -59,7 +59,7 @@ Ostream& operator<<(Ostream& os, const cellModel& c);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class cellModel Declaration
+                          Class cellModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class cellModel
@@ -122,13 +122,13 @@ public:
             inline label nFaces() const;
 
             //- Return list of edges
-            inline edgeList edges(const labelList& pointLabels) const;
+            inline edgeList edges(const UList<label>& pointLabels) const;
 
             //- Return a raw list of model faces
             inline const faceList& modelFaces() const;
 
             //- Return list of faces
-            inline faceList faces(const labelList& pointLabels) const;
+            inline faceList faces(const UList<label>& pointLabels) const;
 
 
         //- Vector centroid

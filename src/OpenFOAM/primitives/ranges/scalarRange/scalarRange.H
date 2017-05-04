@@ -52,8 +52,8 @@ class Ostream;
 
 // Forward declaration of friend functions and operators
 class scalarRange;
-Istream& operator>>(Istream&, scalarRange&);
-Ostream& operator<<(Ostream&, const scalarRange&);
+Istream& operator>>(Istream& is, scalarRange& range);
+Ostream& operator<<(Ostream& os, const scalarRange& range);
 
 
 /*---------------------------------------------------------------------------*\
@@ -73,7 +73,7 @@ class scalarRange
     };
 
 
-    // Private data
+    // Private Member Data
 
         enum rangeType type_;
         scalar value_;
@@ -96,10 +96,13 @@ public:
         //- Construct from Istream.
         //  Since commas can be used as list delimiters,
         //  leading and trailing commas are ignored.
-        scalarRange(Istream&);
+        scalarRange(Istream& is);
 
 
     // Member Functions
+
+        //- Reset to an empty range.
+        void clear();
 
         //- Is the range empty?
         bool empty() const;
@@ -121,19 +124,19 @@ public:
         scalar upper() const;
 
         //- Return true if the value is within the range
-        bool selected(const scalar) const;
+        bool selected(const scalar value) const;
 
 
     // Member Operators
 
-        bool operator==(const scalarRange&) const;
-        bool operator!=(const scalarRange&) const;
+        bool operator==(const scalarRange& range) const;
+        bool operator!=(const scalarRange& range) const;
 
 
     // IOstream Operators
 
-        friend Istream& operator>>(Istream&, scalarRange&);
-        friend Ostream& operator<<(Ostream&, const scalarRange&);
+        friend Istream& operator>>(Istream& is, scalarRange& range);
+        friend Ostream& operator<<(Ostream& os, const scalarRange& range);
 };
 
 
