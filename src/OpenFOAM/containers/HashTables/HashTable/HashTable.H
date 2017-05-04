@@ -373,9 +373,6 @@ public:
         //  Equivalent to clear() followed by resize(0)
         void clearStorage();
 
-        //- Shrink the allocated table to approx. twice number of elements
-        void shrink();
-
         //- Transfer the contents of the argument table into this table
         //  and annul the argument table.
         void transfer(HashTable<T, Key, Hash>& ht);
