@@ -25,7 +25,7 @@ Class
     Foam::HashPtrTable
 
 Description
-    A HashTable specialization for hashing pointers.
+    A HashTable of pointers to objects of type \<T\>.
 
 SourceFiles
     HashPtrTable.C
@@ -51,7 +51,7 @@ class Ostream;
 template<class T, class Key, class Hash> class HashPtrTable;
 
 template<class T, class Key, class Hash>
-Istream& operator>>(Istream& is, HashPtrTable<T, Key, Hash>& L);
+Istream& operator>>(Istream& is, HashPtrTable<T, Key, Hash>& tbl);
 
 template<class T, class Key, class Hash>
 Ostream& operator<<(Ostream& os, const HashPtrTable<T, Key, Hash>& tbl);
@@ -77,11 +77,16 @@ class HashPtrTable
         void read(const dictionary& dict, const INew& inewt);
 
 
-
 public:
 
-    using iterator = typename HashTable<T*, Key, Hash>::iterator;
-    using const_iterator = typename HashTable<T*, Key, Hash>::const_iterator;
+    //- The template instance used for this table
+    typedef HashPtrTable<T, Key, Hash> this_type;
+
+    //- The template instance used for the parent HashTable
+    typedef HashTable<T*, Key, Hash> parent_type;
+
+    using iterator = typename parent_type::iterator;
+    using const_iterator = typename parent_type::const_iterator;
 
 
     // Constructors
@@ -100,7 +105,7 @@ public:
         HashPtrTable(const dictionary& dict);
 
         //- Construct as copy
-        HashPtrTable(const HashPtrTable<T, Key, Hash>& ht);
+        HashPtrTable(const this_type& ht);
 
 
     //- Destructor
@@ -109,25 +114,25 @@ public:
 
     // Member Functions
 
-        // Edit
+      // Edit
 
-            //- Remove and return the pointer specified by given iterator
-            T* remove(iterator& iter);
+        //- Remove and return the pointer specified by given iterator
+        T* remove(iterator& iter);
 
-            //- Erase an hashedEntry specified by given iterator
-            bool erase(iterator& iter);
+        //- Erase an hashedEntry specified by given iterator
+        bool erase(iterator& iter);
 
-            //- Clear all entries from table
-            void clear();
+        //- Clear all entries from table
+        void clear();
 
-            //- Write
-            void write(Ostream& os) const;
+        //- Write
+        void write(Ostream& os) const;
 
 
     // Member Operators
 
         //- Copy assignment
-        void operator=(const HashPtrTable<T, Key, Hash>& rhs);
+        void operator=(const this_type& rhs);
 
 
     // IOstream Operators
@@ -135,7 +140,7 @@ public:
         friend Istream& operator>> <T, Key, Hash>
         (
             Istream& is,
-            HashPtrTable<T, Key, Hash>& L
+            HashPtrTable<T, Key, Hash>& tbl
         );
 
         friend Ostream& operator<< <T, Key, Hash>

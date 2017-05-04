@@ -24,12 +24,50 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "StaticHashTable.H"
+#include "uLabel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 defineTypeNameAndDebug(StaticHashTableCore, 0);
+}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+Foam::label Foam::StaticHashTableCore::canonicalSize(const label size)
+{
+    if (size < 1)
+    {
+        return 0;
+    }
+
+    // Enforce power of two - makes for a vey fast modulus etc.
+    // The value '8' is some arbitrary lower limit.
+    // If the hash table is too small, there will be many table collisions!
+
+    const uLabel unsigned_size = size;
+    uLabel powerOfTwo = 8;
+
+    if (size < powerOfTwo)
+    {
+        return powerOfTwo;
+    }
+    else if (unsigned_size & (unsigned_size-1))  // <- Modulus of i^2
+    {
+        // Determine power-of-two. Brute-force is fast enough.
+        while (powerOfTwo < unsigned_size)
+        {
+            powerOfTwo <<= 1;
+        }
+
+        return powerOfTwo;
+    }
+    else
+    {
+        return unsigned_size;
+    }
 }
 
 

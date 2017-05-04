@@ -79,7 +79,7 @@ template<class T, class Key, class Hash> Ostream& operator<<
 struct StaticHashTableCore
 {
     //- Return a canonical (power-of-two) size
-    static label canonicalSize(const label);
+    static label canonicalSize(const label size);
 
     //- Construct null
     StaticHashTableCore()

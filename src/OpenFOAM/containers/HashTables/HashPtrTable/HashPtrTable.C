@@ -31,7 +31,7 @@ License
 template<class T, class Key, class Hash>
 Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(const label size)
 :
-    HashTable<T*, Key, Hash>(size)
+    parent_type(size)
 {}
 
 
@@ -41,7 +41,7 @@ Foam::HashPtrTable<T, Key, Hash>::HashPtrTable
     const HashPtrTable<T, Key, Hash>& ht
 )
 :
-    HashTable<T*, Key, Hash>()
+    parent_type(ht.capacity())
 {
     for (const_iterator iter = ht.begin(); iter != ht.end(); ++iter)
     {
@@ -73,7 +73,7 @@ template<class T, class Key, class Hash>
 T* Foam::HashPtrTable<T, Key, Hash>::remove(iterator& iter)
 {
     T* ptr = iter.object();
-    HashTable<T*, Key, Hash>::erase(iter);
+    this->parent_type::erase(iter);
     return ptr;
 }
 
@@ -83,7 +83,7 @@ bool Foam::HashPtrTable<T, Key, Hash>::erase(iterator& iter)
 {
     T* ptr = iter.object();
 
-    if (HashTable<T*, Key, Hash>::erase(iter))
+    if (this->parent_type::erase(iter))
     {
         if (ptr)
         {
@@ -107,7 +107,7 @@ void Foam::HashPtrTable<T, Key, Hash>::clear()
         delete iter.object();
     }
 
-    HashTable<T*, Key, Hash>::clear();
+    this->parent_type::clear();
 }
 
 
