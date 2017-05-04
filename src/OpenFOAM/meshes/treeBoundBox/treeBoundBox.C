@@ -555,24 +555,6 @@ Foam::label Foam::treeBoundBox::distanceCmp
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-bool Foam::operator==(const treeBoundBox& a, const treeBoundBox& b)
-{
-    return operator==
-    (
-        static_cast<const boundBox&>(a),
-        static_cast<const boundBox&>(b)
-    );
-}
-
-
-bool Foam::operator!=(const treeBoundBox& a, const treeBoundBox& b)
-{
-    return !(a == b);
-}
-
-
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const treeBoundBox& bb)

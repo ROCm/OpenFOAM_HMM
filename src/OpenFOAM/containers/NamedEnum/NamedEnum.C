@@ -71,7 +71,7 @@ Enum Foam::NamedEnum<Enum, nEnum>::read(Istream& is) const
             << sortedToc() << exit(FatalIOError);
     }
 
-    return Enum(*iter);
+    return Enum(iter.object());
 }
 
 

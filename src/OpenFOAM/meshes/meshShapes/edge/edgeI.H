@@ -451,7 +451,7 @@ inline Foam::linePointRef Foam::edge::line(const UList<point>& pts) const
 }
 
 
-// * * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //
 
 inline bool Foam::operator==(const edge& a, const edge& b)
 {

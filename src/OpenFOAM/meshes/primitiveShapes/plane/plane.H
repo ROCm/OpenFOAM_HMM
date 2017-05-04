@@ -49,8 +49,6 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class plane;
-bool operator==(const plane& a, const plane& b);
-bool operator!=(const plane& a, const plane& b);
 Ostream& operator<<(Ostream& os, const plane& pln);
 
 
@@ -193,7 +191,7 @@ public:
 
         //- Return the cutting line between this plane and another.
         //  Returned as direction vector and point line goes through.
-        ray planeIntersect(const plane&) const;
+        ray planeIntersect(const plane& plane2) const;
 
         //- Return the cutting point between this plane and two other planes
         point planePlaneIntersect
@@ -217,18 +215,18 @@ public:
         void writeDict(Ostream& os) const;
 
 
-    // friend Operators
-
-        friend bool operator==(const plane& a, const plane& b);
-        friend bool operator!=(const plane& a, const plane& b);
-
-
     // IOstream Operators
 
         //- Write plane properties
         friend Ostream& operator<<(Ostream& os, const plane& pln);
 
 };
+
+
+// Global Operators
+
+bool operator==(const plane& a, const plane& b);
+bool operator!=(const plane& a, const plane& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

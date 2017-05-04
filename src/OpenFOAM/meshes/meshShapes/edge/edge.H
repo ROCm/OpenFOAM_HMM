@@ -34,7 +34,7 @@ Description
     Valid point labels are always non-negative (since they correspond to
     addressing within the mesh). The value '-1' is used to tag invalid
     point labels that correspond conceptually to open 'slots', which
-    can be filled with the HashSet-like functionality.
+    can be filled with a HashSet-like functionality.
 
 SourceFiles
     edgeI.H
@@ -53,15 +53,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
-class edge;
-inline bool operator==(const edge& a, const edge& b);
-inline bool operator!=(const edge& a, const edge& b);
-
-
 /*---------------------------------------------------------------------------*\
-                           Class edge Declaration
+                            Class edge Declaration
 \*---------------------------------------------------------------------------*/
 
 class edge
@@ -266,16 +259,20 @@ public:
         //- Compare edges
         //  Returns:
         //  -  0: different
-        //  - +1: identical
-        //  - -1: same edge, but different orientation
+        //  - +1: identical values and order used
+        //  - -1: identical values, but in different order
         static inline int compare(const edge& a, const edge& b);
 
-
-    // Friend Operators
-
-        friend bool operator==(const edge& a, const edge& b);
-        friend bool operator!=(const edge& a, const edge& b);
 };
+
+
+// Global Operators
+
+//- Compare edges for equal content, ignoring orientation
+inline bool operator==(const edge& a, const edge& b);
+
+//- Compare edges for non-equal content, ignoring orientation
+inline bool operator!=(const edge& a, const edge& b);
 
 
 //- Hash specialization for hashing edges - a commutative hash value.

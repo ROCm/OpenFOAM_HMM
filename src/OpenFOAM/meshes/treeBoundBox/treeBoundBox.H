@@ -77,10 +77,6 @@ class Random;
 // Forward declaration of friend functions and operators
 
 class treeBoundBox;
-
-bool operator==(const treeBoundBox& a, const treeBoundBox& b);
-bool operator!=(const treeBoundBox& a, const treeBoundBox& b);
-
 Istream& operator>>(Istream& is, treeBoundBox& bb);
 Ostream& operator<<(Ostream& os, const treeBoundBox& bb);
 
@@ -340,12 +336,6 @@ public:
             inline treeBoundBox extend(Random& rndGen, const scalar s) const;
 
 
-    // Friend Operators
-
-        friend bool operator==(const treeBoundBox& a, const treeBoundBox& b);
-        friend bool operator!=(const treeBoundBox& a, const treeBoundBox& b);
-
-
     // IOstream operator
 
         friend Istream& operator>>(Istream& is, treeBoundBox& bb);
@@ -356,6 +346,12 @@ public:
 //- Data associated with treeBoundBox type are contiguous
 template<>
 inline bool contiguous<treeBoundBox>() {return contiguous<boundBox>();}
+
+
+// Global Operators
+
+inline bool operator==(const treeBoundBox& a, const treeBoundBox& b);
+inline bool operator!=(const treeBoundBox& a, const treeBoundBox& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

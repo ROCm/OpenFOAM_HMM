@@ -65,8 +65,6 @@ class triFace;
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 class DynamicList;
 
-inline bool operator==(const face& a, const face& b);
-inline bool operator!=(const face& a, const face& b);
 inline Istream& operator>>(Istream& is, face& f);
 
 /*---------------------------------------------------------------------------*\
@@ -382,12 +380,6 @@ public:
         static bool sameVertices(const face& a, const face& b);
 
 
-    // Friend Operators
-
-        friend bool operator==(const face& a, const face& b);
-        friend bool operator!=(const face& a, const face& b);
-
-
     // Istream Operator
 
         friend Istream& operator>>(Istream& is, face& f);
@@ -416,6 +408,11 @@ public:
         return result;
     }
 };
+
+
+// Global operators
+inline bool operator==(const face& a, const face& b);
+inline bool operator!=(const face& a, const face& b);
 
 
 // Global functions

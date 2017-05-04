@@ -63,7 +63,7 @@ inline Foam::label Foam::cell::nFaces() const
 
 inline bool Foam::operator!=(const cell& a, const cell& b)
 {
-    return (!(a == b));
+    return !(a == b);
 }
 
 
