@@ -34,30 +34,42 @@ defineTypeNameAndDebug(StaticHashTableCore, 0);
 }
 
 
+// Approximately labelMax/4
+static const Foam::label maxTableSize(1 << (sizeof(Foam::label)*8-3));
+
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::label Foam::StaticHashTableCore::canonicalSize(const label size)
+Foam::label Foam::StaticHashTableCore::canonicalSize(const label requested_size)
 {
-    if (size < 1)
+    if (requested_size < 1)
     {
         return 0;
     }
 
     // Enforce power of two - makes for a vey fast modulus etc.
-    // The value '8' is some arbitrary lower limit.
-    // If the hash table is too small, there will be many table collisions!
+    // Use unsigned for these calculations.
+    //
+    // - The lower limit (8) is somewhat arbitrary, but if the hash table
+    //   is too small, there will be many direct table collisions.
+    // - The uper limit (approx. labelMax/4) must be a power of two,
+    //   need not be extremely large for hashing.
 
-    const uLabel unsigned_size = size;
-    uLabel powerOfTwo = 8;
+    uLabel powerOfTwo = 8; // lower-limit
 
+    const uLabel size = requested_size;
     if (size < powerOfTwo)
     {
         return powerOfTwo;
     }
-    else if (unsigned_size & (unsigned_size-1))  // <- Modulus of i^2
+    else if (requested_size >= maxTableSize)
+    {
+        return maxTableSize;
+    }
+    else if (size & (size-1))  // <- Modulus of i^2
     {
         // Determine power-of-two. Brute-force is fast enough.
-        while (powerOfTwo < unsigned_size)
+        while (powerOfTwo < size)
         {
             powerOfTwo <<= 1;
         }
@@ -66,7 +78,7 @@ Foam::label Foam::StaticHashTableCore::canonicalSize(const label size)
     }
     else
     {
-        return unsigned_size;
+        return size;
     }
 }
 

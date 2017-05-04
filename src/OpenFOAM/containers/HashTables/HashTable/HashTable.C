@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -336,7 +336,7 @@ bool Foam::HashTable<T, Key, Hash>::set
 
 
 template<class T, class Key, class Hash>
-bool Foam::HashTable<T, Key, Hash>::iteratorBase::erase()
+bool Foam::HashTable<T, Key, Hash>::iterator_base::erase()
 {
     // Note: entryPtr_ is nullptr for end(), so this catches that too
     if (entryPtr_)
@@ -515,7 +515,7 @@ void Foam::HashTable<T, Key, Hash>::resize(const label sz)
 
     for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
-        tmpTable->insert(iter.key(), *iter);
+        tmpTable->insert(iter.key(), iter.object());
     }
 
     const label oldSize = tableSize_;
@@ -645,7 +645,7 @@ void Foam::HashTable<T, Key, Hash>::operator=
         clear();
     }
 
-    for (const Tuple2<Key, T>& pair : lst)
+    for (const auto& pair : lst)
     {
         insert(pair.first(), pair.second());
     }
@@ -684,7 +684,7 @@ bool Foam::HashTable<T, Key, Hash>::operator!=
     const HashTable<T, Key, Hash>& rhs
 ) const
 {
-    return !(operator==(rhs));
+    return !operator==(rhs);
 }
 
 

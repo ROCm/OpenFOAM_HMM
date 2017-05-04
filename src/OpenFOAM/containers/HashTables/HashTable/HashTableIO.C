@@ -130,7 +130,7 @@ Foam::Ostream& Foam::HashTable<T, Key, Hash>::writeKeys
     }
 
     // Check state of IOstream
-    os.check("HashSet<Key>::writeList(Ostream&)");
+    os.check(FUNCTION_NAME);
 
     return os;
 }
@@ -279,7 +279,7 @@ Foam::Ostream& Foam::operator<<
     os << token::END_LIST;
 
     // Check state of IOstream
-    os.check("Ostream& operator<<(Ostream&, const HashTable&)");
+    os.check(FUNCTION_NAME);
 
     return os;
 }

@@ -140,12 +140,14 @@ Foam::label Foam::HashSet<Key, Hash>::insert(const UList<Key>& lst)
     return insertMultiple(lst.begin(), lst.end());
 }
 
+
 template<class Key, class Hash>
 template<unsigned Size>
 Foam::label Foam::HashSet<Key, Hash>::insert(const FixedList<Key, Size>& lst)
 {
     return insertMultiple(lst.begin(), lst.end());
 }
+
 
 template<class Key, class Hash>
 Foam::label Foam::HashSet<Key, Hash>::insert(std::initializer_list<Key> lst)
@@ -209,7 +211,7 @@ bool Foam::HashSet<Key, Hash>::operator==(const HashSet<Key, Hash>& rhs) const
 template<class Key, class Hash>
 bool Foam::HashSet<Key, Hash>::operator!=(const HashSet<Key, Hash>& rhs) const
 {
-    return !(operator==(rhs));
+    return !operator==(rhs);
 }
 
 
@@ -319,51 +321,63 @@ Foam::operator^
     return out;
 }
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Key, class Hash>
 inline typename Foam::HashSet<Key, Hash>::iterator
 Foam::HashSet<Key, Hash>::begin()
 {
-    return iterator(this->ParentClass::begin());
+    return HashTableCore::iterator_begin<iterator>
+    (
+        static_cast<parent_type&>(*this)
+    );
 }
+
 
 template<class Key, class Hash>
 inline typename Foam::HashSet<Key, Hash>::const_iterator
 Foam::HashSet<Key, Hash>::begin() const
 {
-    return const_iterator(this->ParentClass::cbegin());
+    return HashTableCore::iterator_begin<const_iterator>
+    (
+        static_cast<const parent_type&>(*this)
+    );
 }
+
 
 template<class Key, class Hash>
 inline typename Foam::HashSet<Key, Hash>::const_iterator
 Foam::HashSet<Key, Hash>::cbegin() const
 {
-    return this->begin();
+    return HashTableCore::iterator_begin<const_iterator>
+    (
+        static_cast<const parent_type&>(*this)
+    );
 }
+
 
 template<class Key, class Hash>
 inline const typename Foam::HashSet<Key, Hash>::iterator&
 Foam::HashSet<Key, Hash>::end()
 {
-    using iter_type = typename HashSet<Key, Hash>::iterator;
-    return HashTableCore::endIteratorRef<iter_type>();
+    return HashTableCore::iterator_end<iterator>();
 }
+
 
 template<class Key, class Hash>
 inline const typename Foam::HashSet<Key, Hash>::const_iterator&
 Foam::HashSet<Key, Hash>::end() const
 {
-    using iter_type = typename HashSet<Key, Hash>::const_iterator;
-    return HashTableCore::endIteratorRef<iter_type>();
+    return HashTableCore::iterator_end<const_iterator>();
 }
+
 
 template<class Key, class Hash>
 inline const typename Foam::HashSet<Key, Hash>::const_iterator&
 Foam::HashSet<Key, Hash>::cend() const
 {
-    using iter_type = typename HashSet<Key, Hash>::const_iterator;
-    return HashTableCore::endIteratorRef<iter_type>();
+    return HashTableCore::iterator_cend<const_iterator>();
 }
 
 

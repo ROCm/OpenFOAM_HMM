@@ -68,8 +68,6 @@ class HashSet
 :
     public HashTable<nil, Key, Hash>
 {
-    typedef HashTable<nil, Key, Hash> ParentClass;
-
     // Private Member Functions
 
         //- Insert values, using begin/end iterators.
@@ -92,18 +90,31 @@ class HashSet
 
 public:
 
+    //- The template instance used for this HashSet
+    typedef HashSet<Key, Hash> this_type;
+
+    //- The template instance used for the parent HashTable
+    typedef HashTable<nil, Key, Hash> parent_type;
+
+    //- An iterator, returning reference to the key
+    using iterator = typename parent_type::key_iterator;
+
+    //- A const_iterator, returning reference to the key
+    using const_iterator = typename parent_type::const_key_iterator;
+
+
     // Constructors
 
         //- Construct given initial size
         HashSet(const label size = 128)
         :
-            ParentClass(size)
+            parent_type(size)
         {}
 
         //- Construct from Istream
         HashSet(Istream& is)
         :
-            ParentClass(is)
+            parent_type(is)
         {}
 
         //- Construct from UList of Key
@@ -119,19 +130,19 @@ public:
         //- Construct as copy
         HashSet(const HashSet<Key, Hash>& hs)
         :
-            ParentClass(hs)
+            parent_type(hs)
         {}
 
         //- Construct by transferring the parameter contents
         HashSet(const Xfer<HashSet<Key, Hash>>& hs)
         :
-            ParentClass(hs)
+            parent_type(hs)
         {}
 
         //- Construct by transferring the parameter contents
         HashSet(const Xfer<HashTable<nil, Key, Hash>>& hs)
         :
-            HashTable<nil, Key, Hash>(hs)
+            parent_type(hs)
         {}
 
         //- Construct from the keys of another HashTable,
@@ -147,7 +158,7 @@ public:
         //- Insert a new entry
         bool insert(const Key& key)
         {
-            return this->ParentClass::insert(key, nil());
+            return this->parent_type::insert(key, nil());
         }
 
         //- Insert keys from the list of Key
@@ -191,77 +202,38 @@ public:
         //- Unset the specified key - same as erase
         bool unset(const Key& key)
         {
-            return this->ParentClass::erase(key);
+            return this->parent_type::erase(key);
         }
 
         //- Unset the listed keys - same as erase
         label unset(const UList<Key>& lst)
         {
-            return this->ParentClass::erase(lst);
+            return this->parent_type::erase(lst);
         }
 
         //- Unset the listed keys - same as erase
         template<unsigned Size>
         label unset(const FixedList<Key, Size>& lst)
         {
-            return this->ParentClass::erase(lst);
+            return this->parent_type::erase(lst);
         }
 
         //- Unset the listed keys - same as erase
         label unset(std::initializer_list<Key> lst)
         {
-            return this->ParentClass::erase(lst);
+            return this->parent_type::erase(lst);
         }
 
 
-    // STL iterator
+    // STL iterators
 
-        //- An STL-conforming iterator
-        struct iterator
-        :
-            public ParentClass::iterator
-        {
-            using parent = typename ParentClass::iterator;
+        iterator begin();
+        const_iterator begin() const;
+        const_iterator cbegin() const;
 
-            //- Implicit conversion
-            iterator(const parent& iter)
-            :
-                parent(iter)
-            {}
-
-            //- Return the key
-            auto operator*() const -> const Key&
-            {
-                return this->key();
-            }
-        };
-
-        //- An STL-conforming const_iterator
-        struct const_iterator
-        :
-            public ParentClass::const_iterator
-        {
-            using parent = typename ParentClass::const_iterator;
-
-            //- Implicit conversion
-            const_iterator(const parent& iter)
-            :
-                parent(iter)
-            {}
-
-            //- Return the key
-            auto operator*() const -> const Key&
-            {
-                return this->key();
-            }
-        };
-
-        auto begin() -> iterator;
-        auto begin() const -> const_iterator;
-        auto cbegin() const -> const_iterator;
-        auto end() -> const iterator&;
-        auto end() const -> const const_iterator&;
-        auto cend() const -> const const_iterator&;
+        const iterator& end();
+        const const_iterator& end() const;
+        const const_iterator& cend() const;
 
 
     // Writing
@@ -276,15 +248,18 @@ public:
 
     // Member Operators
 
+        //- This operation doesn't make much sense for a hash-set
+        void operator()(const Key& key) = delete;
+
         //- Return true if the entry exists, same as found()
         inline bool operator[](const Key& key) const;
 
         //- Equality. Two hashset are equal when they have the same keys.
         //  Independent of table size or order.
-        bool operator==(const HashSet<Key, Hash>& rhs) const;
+        bool operator==(const this_type& rhs) const;
 
         //- The opposite of the equality operation.
-        bool operator!=(const HashSet<Key, Hash>& rhs) const;
+        bool operator!=(const this_type& rhs) const;
 
 
         //- Assignment from a UList of keys

@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "HashTable.H"
+#include "List.H"
 #include "IOstreams.H"
 #include "IStringStream.H"
 #include "OStringStream.H"
@@ -177,11 +178,22 @@ int main()
 
     Info<< "\ntable1" << table1 << nl;
 
-    Info<< "\nrange-for(table1)" << nl;
-    for (auto const& it : table1)
+    Info<< "\nrange-for(table1) - returns values" << nl;
+    for (const auto& it : table1)
     {
-        Info<< " " << it << nl;
+        Info<< "val:" << it << nl;
     }
+
+    Info<< "\nrange-for(table1.keys()) - returns keys" << nl;
+    for (const auto& k : table1.keys())
+    {
+        Info<< "key:" << k << nl;
+    }
+
+    // These do not yet work. Issues resolving the distance.
+    //
+    //  List<scalar> table1vals(table1.begin(), table1.end());
+    //  wordList table1keys(table1.begin(), table1.end());
 
     Info<< "\nDone\n";
 

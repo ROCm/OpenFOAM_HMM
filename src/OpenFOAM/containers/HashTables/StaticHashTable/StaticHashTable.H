@@ -78,8 +78,8 @@ template<class T, class Key, class Hash> Ostream& operator<<
 //- Template-invariant bits for StaticHashTable
 struct StaticHashTableCore
 {
-    //- Return a canonical (power-of-two) size
-    static label canonicalSize(const label size);
+    //- Return a canonical (power-of-two) of the requested size.
+    static label canonicalSize(const label requested_size);
 
     //- Construct null
     StaticHashTableCore()

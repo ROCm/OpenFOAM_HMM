@@ -69,6 +69,12 @@ int main(int argc, char *argv[])
 
     Info<< "tableA keys: "; tableA.writeKeys(Info) << endl;
 
+    auto keyIterPair = tableA.keys();
+    for (const auto& i : keyIterPair)
+    {
+        Info<<" keys: " << i << endl;
+    }
+
     Map<label> mapA
     {
         { 1, 1 },
@@ -193,7 +199,7 @@ int main(int argc, char *argv[])
 
     Info<< "setD : " << flatOutput(setD) << endl;
 
-    // this doesn't work (yet?)
+    // This should not work (yet?)
     // setD[12] = true;
 
     List<label> someLst(10);

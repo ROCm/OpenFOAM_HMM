@@ -34,6 +34,13 @@ Note
     often result in a different hash order. Use a sorted table-of-contents
     when the hash order is important.
 
+    The end iterator of all hash-tables has a nullptr to the hash entry.
+    Thus avoid separate allocation for each table and use a single one with
+    a nullptr. The hash-table iterators always have an entry-pointer as the
+    first member data, which allows reinterpret_cast from anything else with
+    a nullptr as its first data member.
+    The nullObject is such an item (with a nullptr data member).
+
 SourceFiles
     HashTableI.H
     HashTable.C
@@ -78,24 +85,14 @@ Ostream& operator<<(Ostream& os, const HashTable<T, Key, Hash>& tbl);
                         Class HashTableCore Declaration
 \*---------------------------------------------------------------------------*/
 
-//- Template-invariant bits for HashTable.
-//  This also includes a global end-iterator.
-//
-// The end iterator of all hash-tables has a nullptr to the hash entry.
-// Thus avoid separate allocation for each table and use a single one with
-// a nullptr.
-// The hash-table iterators always have this as its first member data,
-// so we can reinterpret_cast from anything else that has a nullptr for its
-// first data member. This is now also the case for the NullObject.
-class HashTableCore
+//- Bits that are independent of the HashTable template parameters.
+struct HashTableCore
 {
-public:
-
-    //- Return a canonical (power-of-two) size
-    static label canonicalSize(const label size);
-
-    //- Maximum allowable table size
+    //- Maximum allowable internal table size. Approximately labelMax/4
     static const label maxTableSize;
+
+    //- Return a canonical (power-of-two) of the requested size.
+    static label canonicalSize(const label requested_size);
 
     //- Construct null
     HashTableCore()
@@ -104,21 +101,57 @@ public:
     //- Define template name and debug
     ClassName("HashTable");
 
-
-protected:
-
     static_assert
     (
         sizeof(NullObject) >= sizeof(void*),
         "NullObject is too small to reinterpret_cast as HashTable::iterator"
     );
 
-    //- Reinterpret a NullObject as a hash-table iterator.
-    template<class Iterator>
-    inline static const Iterator& endIteratorRef()
+
+    //- Factory method to create a non-const iterator begin
+    template<class IteratorType, class TableType>
+    inline static IteratorType iterator_begin(TableType& table);
+
+    //- Factory method to create a const iterator begin
+    template<class IteratorType, class TableType>
+    inline static IteratorType iterator_begin(const TableType& table);
+
+    //- Factory method to create a const iterator begin
+    template<class IteratorType, class TableType>
+    inline static IteratorType iterator_cbegin(const TableType& table);
+
+    //- Factory method to create a non-const iterator end
+    //  Simply reinterprets a NullObject as a hash-table iterator.
+    template<class IteratorType>
+    inline static const IteratorType& iterator_end();
+
+    //- Factory method to create a const iterator cend
+    //  Simply reinterprets a NullObject as a hash-table iterator.
+    template<class IteratorType>
+    inline static const IteratorType& iterator_cend();
+
+
+    //- Factory class for creating a begin/end pair for any const iterator.
+    template<class IteratorType, class TableType>
+    class const_iterator_pair
     {
-        return *reinterpret_cast<const Iterator*>(nullObjectPtr);
-    }
+        label size_;
+        IteratorType iter_;
+
+    public:
+
+        inline const_iterator_pair(const TableType& tbl);
+
+        inline label size() const;
+        inline bool empty() const;
+
+        inline IteratorType begin() const;
+        inline IteratorType cbegin() const;
+
+        inline const IteratorType& end() const;
+        inline const IteratorType& cend() const;
+    };
+
 };
 
 
@@ -131,6 +164,43 @@ class HashTable
 :
     public HashTableCore
 {
+public:
+
+    //- The template instance used for this HashTable
+    typedef HashTable<T, Key, Hash> this_type;
+
+
+    // STL type definitions
+
+        //- Type of keys that the HashTable uses.
+        typedef Key key_type;
+
+        //- Type of values that the HashTable contains.
+        typedef T value_type;
+
+        //- The type used for storing into value_type objects.
+        //  This type is usually value_type&.
+        typedef T& reference;
+
+        //- The type used for reading from constant value_type objects.
+        typedef const T& const_reference;
+
+        //- The type to represent the difference between two iterators
+        typedef label difference_type;
+
+        //- The type that can represent the size of a HashTable.
+        typedef label size_type;
+
+
+        //- Forward iterator with non-const access
+        class iterator;
+
+        //- Forward iterator with const access
+        class const_iterator;
+
+
+private:
+
     // Private data type for table entries
 
         //- Structure to hold a hashed entry, with a SLList for collisions
@@ -147,7 +217,6 @@ class HashTable
 
             //- Construct from key, next pointer and object
             inline hashedEntry(const Key& key, const T& obj, hashedEntry* next);
-
 
         private:
             //- Disallow default bitwise copy construct
@@ -183,6 +252,13 @@ class HashTable
 
 protected:
 
+        //- Internally used base for iterator and const_iterator
+        class iterator_base;
+
+        //- Friendship with the iterator_base is required.
+        friend class iterator_base;
+
+
     // Protected Member Functions
 
         //- Remove using begin/end iterators of listed keys
@@ -195,16 +271,6 @@ protected:
 
 
 public:
-
-    // Forward declaration of iterators
-
-        class iteratorBase;
-        class iterator;
-        class const_iterator;
-
-        //- Declare friendship with the iteratorBase
-        friend class iteratorBase;
-
 
     // Constructors
 
@@ -230,92 +296,92 @@ public:
 
     // Member Functions
 
-        // Access
+      // Access
 
-            //- The size of the underlying table
-            inline label capacity() const;
+        //- The size of the underlying table
+        inline label capacity() const;
 
-            //- Return number of elements in table
-            inline label size() const;
+        //- Return number of elements in table
+        inline label size() const;
 
-            //- Return true if the hash table is empty
-            inline bool empty() const;
+        //- Return true if the hash table is empty
+        inline bool empty() const;
 
-            //- Return true if hashedEntry is found in table
-            bool found(const Key& key) const;
+        //- Return true if hashedEntry is found in table
+        bool found(const Key& key) const;
 
-            //- Find and return an iterator set at the hashedEntry
-            //  If not found iterator = end()
-            iterator find(const Key& key);
+        //- Find and return an iterator set at the hashedEntry
+        //  If not found iterator = end()
+        iterator find(const Key& key);
 
-            //- Find and return an const_iterator set at the hashedEntry
-            //  If not found iterator = end()
-            const_iterator find(const Key& key) const;
+        //- Find and return an const_iterator set at the hashedEntry
+        //  If not found iterator = end()
+        const_iterator find(const Key& key) const;
 
-            //- Return the table of contents
-            List<Key> toc() const;
+        //- Return the table of contents
+        List<Key> toc() const;
 
-            //- Return the table of contents as a sorted list
-            List<Key> sortedToc() const;
+        //- Return the table of contents as a sorted list
+        List<Key> sortedToc() const;
 
 
-        // Edit
+      // Edit
 
-            //- Insert a new hashedEntry
-            //  Return true if the entry inserted, which means that it did
-            //  not previously exist in the table.
-            inline bool insert(const Key& key, const T& newEntry);
+        //- Insert a new hashedEntry
+        //  Return true if the entry inserted, which means that it did
+        //  not previously exist in the table.
+        inline bool insert(const Key& key, const T& newEntry);
 
-            //- Assign a new hashedEntry, overwriting existing entries.
-            //  Returns true.
-            inline bool set(const Key& key, const T& newEntry);
+        //- Assign a new hashedEntry, overwriting existing entries.
+        //  Returns true.
+        inline bool set(const Key& key, const T& newEntry);
 
-            //- Erase a hashedEntry specified by given iterator
-            //  This invalidates the iterator until the next operator++
-            bool erase(const iterator& iter);
+        //- Erase a hashedEntry specified by given iterator
+        //  This invalidates the iterator until the next ++ operation
+        bool erase(const iterator& iter);
 
-            //- Erase a hashedEntry specified by the given key
-            bool erase(const Key& key);
+        //- Erase a hashedEntry specified by the given key
+        bool erase(const Key& key);
 
-            //- Remove entries given by the listed keys from this HashTable
-            //  Return the number of elements removed
-            label erase(const UList<Key>& keys);
+        //- Remove entries given by the listed keys from this HashTable
+        //  Return the number of elements removed
+        label erase(const UList<Key>& keys);
 
-            //- Remove entries given by the listed keys from this HashTable
-            //  Return the number of elements removed
-            template<unsigned Size>
-            label erase(const FixedList<Key, Size>& keys);
+        //- Remove entries given by the listed keys from this HashTable
+        //  Return the number of elements removed
+        template<unsigned Size>
+        label erase(const FixedList<Key, Size>& keys);
 
-            //- Remove entries given by the listed keys from this HashTable
-            //  Return the number of elements removed
-            label erase(std::initializer_list<Key> keys);
+        //- Remove entries given by the listed keys from this HashTable
+        //  Return the number of elements removed
+        label erase(std::initializer_list<Key> keys);
 
-            //- Remove entries given by the given keys from this HashTable
-            //  Return the number of elements removed.
-            //  The parameter HashTable needs the same type of key, but the
-            //  type of values held and the hashing function are arbitrary.
-            template<class AnyType, class AnyHash>
-            label erase(const HashTable<AnyType, Key, AnyHash>& other);
+        //- Remove entries given by the given keys from this HashTable
+        //  Return the number of elements removed.
+        //  The parameter HashTable needs the same type of key, but the
+        //  type of values held and the hashing function are arbitrary.
+        template<class AnyType, class AnyHash>
+        label erase(const HashTable<AnyType, Key, AnyHash>& other);
 
-            //- Resize the hash table for efficiency
-            void resize(const label sz);
+        //- Resize the hash table for efficiency
+        void resize(const label sz);
 
-            //- Clear all entries from table
-            void clear();
+        //- Clear all entries from table
+        void clear();
 
-            //- Clear the table entries and the table itself.
-            //  Equivalent to clear() followed by resize(0)
-            void clearStorage();
+        //- Clear the table entries and the table itself.
+        //  Equivalent to clear() followed by resize(0)
+        void clearStorage();
 
-            //- Shrink the allocated table to approx. twice number of elements
-            void shrink();
+        //- Shrink the allocated table to approx. twice number of elements
+        void shrink();
 
-            //- Transfer the contents of the argument table into this table
-            //  and annul the argument table.
-            void transfer(HashTable<T, Key, Hash>& ht);
+        //- Transfer the contents of the argument table into this table
+        //  and annul the argument table.
+        void transfer(HashTable<T, Key, Hash>& ht);
 
-            //- Transfer contents to the Xfer container
-            inline Xfer<HashTable<T, Key, Hash>> xfer();
+        //- Transfer contents to the Xfer container
+        inline Xfer<HashTable<T, Key, Hash>> xfer();
 
 
     // Member Operators
@@ -345,65 +411,25 @@ public:
         bool operator!=(const HashTable<T, Key, Hash>& rhs) const;
 
 
-    // STL type definitions
-
-        //- Type of keys that the HashTable uses.
-        typedef Key key_type;
-
-        //- Type of values that the HashTable contains.
-        typedef T value_type;
-
-        //- Type that can be used for storing into HashTable::value_type
-        //  objects.  This type is usually List::value_type&.
-        typedef T& reference;
-
-        //- Type that can be used for storing into constant
-        //  HashTable::value_type objects.  This type is usually const
-        //  HashTable::value_type&.
-        typedef const T& const_reference;
-
-        //- The type that can represent the size of a HashTable.
-        typedef label size_type;
-
-
-    // Iterator access
-
-        //- Iterator set to the beginning of the HashTable
-        inline iterator begin();
-
-        //- const_iterator set to the beginning of the HashTable
-        inline const_iterator begin() const;
-
-        //- const_iterator set to the beginning of the HashTable
-        inline const_iterator cbegin() const;
-
-        //- iterator to signal the end for any HashTable
-        inline const iterator& end();
-
-        //- const_iterator to signal the end for any HashTable
-        inline const const_iterator& end() const;
-
-        //- const_iterator to signal the end for any HashTable
-        inline const const_iterator& cend() const;
-
+protected:
 
     // Iterators and helpers
 
-        //- The iterator base for HashTable
+        //- The iterator base for HashTable (internal use only).
         //  Note: data and functions are protected, to allow reuse by iterator
         //  and prevent most external usage.
         //  iterator and const_iterator have the same size, allowing
         //  us to reinterpret_cast between them (if desired)
-        class iteratorBase
+        class iterator_base
         {
-            using entry_type = hashedEntry;
-
         public:
             // Public typedefs
-            using table_type = HashTable<T, Key, Hash>;
-            using key_type   = HashTable<T, Key, Hash>::key_type;
+            using table_type = this_type;
+            using key_type   = this_type::key_type;
+            using difference_type  = this_type::difference_type;
 
         private:
+            using entry_type = hashedEntry;
 
           // Private Data
 
@@ -428,11 +454,11 @@ public:
             //- Increment to the next position
             inline void increment();
 
-            //- Erase the entry at the current position
-            bool erase();
-
             //- The referenced object/value element
             inline T& element() const;
+
+            //- Erase the entry at the current position
+            bool erase();
 
 
         public:
@@ -440,13 +466,13 @@ public:
           // Constructors
 
             //- Construct null (end iterator)
-            inline iteratorBase();
+            inline iterator_base();
 
             //- Construct from begin of hash-table
-            inline explicit iteratorBase(const table_type* hashTbl);
+            inline explicit iterator_base(const table_type* hashTbl);
 
             //- Construct from hash table, element and hash index
-            inline iteratorBase
+            inline iterator_base
             (
                 const table_type* hashTbl,
                 const entry_type* elmt,
@@ -463,27 +489,49 @@ public:
             inline const Key& key() const;
 
             //- Compare hash-entry element pointers
-            inline bool operator==(const iteratorBase& iter) const;
-            inline bool operator!=(const iteratorBase& iter) const;
+            inline bool operator==(const iterator_base& iter) const;
+            inline bool operator!=(const iterator_base& iter) const;
         };
+
+
+public:
+
+        //- An iterator wrapper for returning a reference to the key
+        template<class WrappedIterator>
+        class key_iterator_base
+        :
+            public WrappedIterator
+        {
+        public:
+            using reference  = const Key&;
+            using difference_type = typename WrappedIterator::difference_type;
+
+            //- Implicit conversion
+            inline key_iterator_base(const WrappedIterator& iter);
+
+            //- Return the key
+            inline reference operator*() const;
+        };
+
 
 
     // STL iterator
 
-        //- An STL-conforming iterator
+        //- Forward iterator with non-const access
         class iterator
         :
-            public iteratorBase
+            public iterator_base
         {
-            friend class HashTable;  // uses iterator::erase() method
+            friend class HashTable;  // Uses iterator::erase() method
             using entry_type = hashedEntry;
 
         public:
 
           // Public typedefs
-            using table_type = HashTable<T, Key, Hash>;
-            using key_type   = HashTable<T, Key, Hash>::key_type;
-            using reference  = HashTable<T, Key, Hash>::reference;
+            using table_type = this_type;
+            using key_type   = this_type::key_type;
+            using reference  = this_type::reference;
+            using difference_type = typename iterator_base::difference_type;
 
           // Constructors
 
@@ -518,19 +566,20 @@ public:
 
     // STL const_iterator
 
-        //- An STL-conforming const_iterator
+        //- Forward iterator with const access
         class const_iterator
         :
-            public iteratorBase
+            public iterator_base
         {
             using entry_type = const hashedEntry;
 
         public:
 
           // Public typedefs
-            using table_type = const HashTable<T, Key, Hash>;
-            using key_type   = HashTable<T, Key, Hash>::key_type;
-            using reference  = HashTable<T, Key, Hash>::const_reference;
+            using table_type = const this_type;
+            using key_type   = this_type::key_type;
+            using reference  = this_type::const_reference;
+            using difference_type = typename iterator_base::difference_type;
 
           // Constructors
 
@@ -566,6 +615,43 @@ public:
         };
 
 
+    //- Iterating over keys only
+
+        //- Forward iterator returning the key
+        using key_iterator = key_iterator_base<iterator>;
+
+        //- Forward const iterator returning the key
+        using const_key_iterator = key_iterator_base<const_iterator>;
+
+        //- A const iterator begin/end pair for iterating over keys
+        const_iterator_pair<const_key_iterator, this_type> keys() const
+        {
+            return
+                const_iterator_pair<const_key_iterator,this_type>(*this);
+        }
+
+
+    // Iterator access
+
+        //- Iterator set to the beginning of the HashTable
+        inline iterator begin();
+
+        //- const_iterator set to the beginning of the HashTable
+        inline const_iterator begin() const;
+
+        //- const_iterator set to the beginning of the HashTable
+        inline const_iterator cbegin() const;
+
+        //- iterator to signal the end for any HashTable
+        inline const iterator& end();
+
+        //- const_iterator to signal the end for any HashTable
+        inline const const_iterator& end() const;
+
+        //- const_iterator to signal the end for any HashTable
+        inline const const_iterator& cend() const;
+
+
     // Writing
 
         //- Print information
@@ -598,6 +684,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "HashTableCoreI.H"
 #include "HashTableI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
