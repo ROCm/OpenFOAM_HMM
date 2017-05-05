@@ -25,6 +25,14 @@ canBuildPlugin()
         return 1
     }
 
+    [ -d "$ParaView_INCLUDE_DIR" ] && \
+    [ -f "$ParaView_INCLUDE_DIR/pqServerManagerModel.h" ] || {
+        echo "==> cannot build ParaView plugins without an include directory"
+        echo "    ... or without GUI support"
+        echo "    ParaView_INCLUDE_DIR=$ParaView_INCLUDE_DIR"
+        return 1
+    }
+
     type cmake > /dev/null 2>&1 || {
         echo "==> cannot build ParaView plugins without cmake"
         return 1
