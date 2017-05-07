@@ -38,10 +38,9 @@ Foam::MeshedSurface<Face>::New(const fileName& name, const word& ext)
         InfoInFunction << "Constructing MeshedSurface" << endl;
     }
 
-    typename fileExtensionConstructorTable::iterator cstrIter =
-        fileExtensionConstructorTablePtr_->find(ext);
+    auto cstrIter = fileExtensionConstructorTablePtr_->find(ext);
 
-    if (cstrIter == fileExtensionConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         // No direct reader, delegate to friend if possible
         const wordHashSet& delegate = FriendType::readTypes();

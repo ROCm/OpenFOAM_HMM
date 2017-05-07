@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,8 @@ License
 #include "clock.H"
 #include "IFstream.H"
 #include "IStringStream.H"
-#include "Ostream.H"
 #include "OFstream.H"
+#include "faceTraits.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -187,7 +187,7 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
                 << exit(FatalError);
         }
 
-        faceLst[facei] = triFace(e0Far, common01, e1Far);
+        faceLst[facei] = Face{e0Far, common01, e1Far};
         zoneIds[facei] = zoneI;
     }
 
@@ -229,7 +229,7 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
     // check if output triangulation would be required
     // It is too annoying to triangulate on-the-fly
     // just issue a warning and get out
-    if (!MeshedSurface<Face>::isTri())
+    if (!faceTraits<Face>::isTri())
     {
         label nNonTris = 0;
         forAll(faceLst, facei)
@@ -248,7 +248,6 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
             return;
         }
     }
-
 
     OFstream os(filename);
     if (!os.good())
@@ -331,7 +330,7 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
     // check if output triangulation would be required
     // It is too annoying to triangulate on-the-fly
     // just issue a warning and get out
-    if (!MeshedSurface<Face>::isTri())
+    if (!faceTraits<Face>::isTri())
     {
         label nNonTris = 0;
         forAll(faceLst, facei)
@@ -350,7 +349,6 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
             return;
         }
     }
-
 
     OFstream os(filename);
     if (!os.good())
