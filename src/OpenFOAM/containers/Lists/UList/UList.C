@@ -112,6 +112,7 @@ Foam::UList<T> Foam::UList<T>::operator[](const labelRange& range)
     return UList<T>(&(this->v_[slice.start()]), slice.size()); // SubList
 }
 
+
 template<class T>
 const Foam::UList<T> Foam::UList<T>::operator[](const labelRange& range) const
 {
@@ -131,6 +132,7 @@ Foam::UList<T> Foam::UList<T>::operator[]
 
     return UList<T>(&(this->v_[slice.start()]), slice.size()); // SubList
 }
+
 
 template<class T>
 const Foam::UList<T> Foam::UList<T>::operator[]

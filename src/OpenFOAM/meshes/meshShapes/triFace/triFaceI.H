@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -206,6 +206,21 @@ inline Foam::triFace Foam::triFace::reverseFace() const
 {
     // The starting points of the original and reverse face are identical.
     return triFace(operator[](0), operator[](2), operator[](1));
+}
+
+
+inline bool Foam::triFace::found(const label globalIndex) const
+{
+    return which(globalIndex) != -1;
+}
+
+
+inline Foam::label Foam::triFace::which(const label globalIndex) const
+{
+    if (operator[](0) == globalIndex) return 0;
+    if (operator[](1) == globalIndex) return 1;
+    if (operator[](2) == globalIndex) return 2;
+    return -1;
 }
 
 

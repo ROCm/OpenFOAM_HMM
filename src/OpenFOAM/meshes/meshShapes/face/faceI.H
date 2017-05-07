@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,20 +116,24 @@ inline Foam::edge Foam::face::faceEdge(const label n) const
 }
 
 
-// Next vertex on face
+inline bool Foam::face::found(const label globalIndex) const
+{
+    return which(globalIndex) != -1;
+}
+
+
 inline Foam::label Foam::face::nextLabel(const label i) const
 {
     return operator[](fcIndex(i));
 }
 
 
-// Previous vertex on face
 inline Foam::label Foam::face::prevLabel(const label i) const
 {
     return operator[](rcIndex(i));
 }
 
-// Number of triangles directly known from number of vertices
+
 inline Foam::label Foam::face::nTriangles() const
 {
     return size() - 2;
