@@ -91,6 +91,16 @@ inline Point Foam::line<Point, PointRef>::vec() const
 
 
 template<class Point, class PointRef>
+inline Point Foam::line<Point, PointRef>::unitVec() const
+{
+    Point v = b_ - a_;
+    v /= ::Foam::mag(v) + VSMALL;
+
+    return v;
+}
+
+
+template<class Point, class PointRef>
 Foam::PointHit<Point> Foam::line<Point, PointRef>::nearestDist
 (
     const Point& p

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,7 @@ License
 
 #include "STARCDsurfaceFormat.H"
 #include "ListOps.H"
+#include "faceTraits.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -193,7 +194,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
             }
 
             SubList<label> vertices(vertexLabels, vertexLabels.size());
-            if (MeshedSurface<Face>::isTri() && nLabels > 3)
+            if (faceTraits<Face>::isTri() && nLabels > 3)
             {
                 // face needs triangulation
                 face f(vertices);
