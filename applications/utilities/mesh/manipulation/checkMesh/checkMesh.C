@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "writeFields",
-        "wordList"
+        "wordList",
         "write volFields with selected mesh quality parameters"
     );
     argList::addBoolOption
