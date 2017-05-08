@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,24 +27,13 @@ License
 #include "error.H"
 #include "polyMesh.H"
 #include "cellModeller.H"
-#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const Foam::label Foam::ensightCells::nTypes = 5;
 
-namespace Foam
-{
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::ensightCells::elemType,
-        5
-    >::names[] = { "tetra4", "pyramid5", "penta6", "hexa8", "nfaced" };
-}
-
-const Foam::NamedEnum<Foam::ensightCells::elemType, 5>
-    Foam::ensightCells::elemEnum;
+const char* Foam::ensightCells::elemNames[5] =
+    { "tetra4", "pyramid5", "penta6", "hexa8", "nfaced" };
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -63,9 +52,8 @@ void Foam::ensightCells::resizeAll()
     n = 0;
     forAll(sizes_, typei)
     {
-        deleteDemandDrivenData(lists_[typei]);
-
-        lists_[typei] = new SubList<label>(address_, sizes_[typei], n);
+        slices_[typei].setStart(n);
+        slices_[typei].setSize(sizes_[typei]);
 
         n += sizes_[typei];
     }
@@ -78,16 +66,10 @@ Foam::ensightCells::ensightCells(const label partIndex)
 :
     index_(partIndex),
     address_(),
-    sizes_(Zero),
-    lists_()
+    slices_(),
+    sizes_(Zero)
 {
-    // Ensure sub-lists are properly initialized to nullptr
-    forAll(lists_, typei)
-    {
-        lists_[typei] = nullptr;
-    }
-
-    resizeAll(); // adjust allocation
+    resizeAll(); // adjust allocation/sizing
 }
 
 
@@ -95,22 +77,16 @@ Foam::ensightCells::ensightCells(const ensightCells& obj)
 :
     index_(obj.index_),
     address_(obj.address_),
-    sizes_(),
-    lists_()
+    slices_(),
+    sizes_()
 {
-    // Ensure sub-lists are properly initialized to nullptr
-    forAll(lists_, typei)
-    {
-        lists_[typei] = nullptr;
-    }
-
-    // Total (reduced) sizes
+    // Save the total (reduced) sizes
     FixedList<label, 5> totSizes = obj.sizes_;
 
-    // Local sizes
+    // Need local sizes for the resize operation
     this->sizes_ = obj.sizes();
 
-    resizeAll(); // adjust allocation
+    resizeAll(); // adjust allocation/sizing
 
     // Restore total (reduced) sizes
     this->sizes_ = totSizes;
@@ -120,13 +96,7 @@ Foam::ensightCells::ensightCells(const ensightCells& obj)
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::ensightCells::~ensightCells()
-{
-    forAll(lists_, typei)
-    {
-        deleteDemandDrivenData(lists_[typei]);
-    }
-    address_.clear();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -134,24 +104,12 @@ Foam::ensightCells::~ensightCells()
 Foam::FixedList<Foam::label, 5> Foam::ensightCells::sizes() const
 {
     FixedList<label, 5> count;
-    forAll(lists_, typei)
+    forAll(slices_, typei)
     {
-        count[typei] = lists_[typei]->size();
+        count[typei] = slices_[typei].size();
     }
 
     return count;
-}
-
-
-Foam::label Foam::ensightCells::offset(const enum elemType what) const
-{
-    label n = 0;
-    for (label typei = 0; typei < label(what); ++typei)
-    {
-        n += lists_[typei]->size();
-    }
-
-    return n;
 }
 
 
@@ -175,9 +133,10 @@ void Foam::ensightCells::clear()
 
 void Foam::ensightCells::reduce()
 {
+    // No listCombineGather, listCombineScatter for FixedList
     forAll(sizes_, typei)
     {
-        sizes_[typei] = lists_[typei]->size();
+        sizes_[typei] = slices_[typei].size();
         Foam::reduce(sizes_[typei], sumOp<label>());
     }
 }
@@ -185,9 +144,13 @@ void Foam::ensightCells::reduce()
 
 void Foam::ensightCells::sort()
 {
-    forAll(lists_, typei)
+    forAll(slices_, typei)
     {
-        Foam::sort(*(lists_[typei]));
+        if (slices_[typei].size())
+        {
+            SubList<label> idLst(address_, slices_[typei]);
+            Foam::sort(idLst);
+        }
     }
 }
 
@@ -240,7 +203,7 @@ void Foam::ensightCells::classify
     }
 
     resizeAll();    // adjust allocation
-    sizes_ = Zero;  // reset sizes
+    sizes_ = Zero;  // reset sizes - use for local indexing here
 
     // Assign cell-id per shape type
     for (label listi = 0; listi < sz; ++listi)
@@ -267,7 +230,10 @@ void Foam::ensightCells::classify
         }
 
         // eg, the processor local cellId
-        lists_[what]->operator[](sizes_[what]++) = id;
+        UList<label> slice = address_[slices_[what]];
+
+        slice[sizes_[what]] = id;
+        sizes_[what]++;
     }
 }
 
