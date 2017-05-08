@@ -99,7 +99,7 @@ typedef CGAL::AABB_face_graph_triangle_primitive
 typedef CGAL::AABB_traits<K, Primitive> Traits;
 typedef CGAL::AABB_tree<Traits> Tree;
 
-typedef boost::optional<Tree::Intersection_and_primitive_id<Segment>::Type >
+typedef boost::optional<Tree::Intersection_and_primitive_id<Segment>::Type>
 Segment_intersection;
 
 #endif // NO_CGAL
@@ -476,7 +476,6 @@ label dupNonManifoldPoints(triSurface& s, labelList& pointMap)
     DynamicList<label> newPointMap(identity(newPoints.size()));
     List<labelledTri> newFaces(s);
     label nNonManifold = 0;
-
 
     forAll(pf, pointI)
     {
@@ -1257,10 +1256,10 @@ autoPtr<extendedFeatureEdgeMesh> createEdgeMesh
     const triSurface& s1 = surf1;
     const triSurface& s2 = surf2;
 
-    forAllConstIter(labelPairLookup, inter.facePairToEdge(), iter)
+    forAllConstIters(inter.facePairToEdgeId(), iter)
     {
-        const label& cutEdgeI = iter();
         const labelPair& facePair = iter.key();
+        const label cutEdgeI = iter.object();
 
         const edge& fE = inter.cutEdges()[cutEdgeI];
 

@@ -34,7 +34,7 @@ Description
 #include "triSurface.H"
 #include "triSurfaceMesh.H"
 #include "surfaceIntersection.H"
-#include "OFstream.H"
+#include "OBJstream.H"
 
 using namespace Foam;
 
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
     {
         Info<< "surf1-cuts: " << cuts.surf1EdgeCuts() << nl
             << "surf2-cuts: " << cuts.surf2EdgeCuts() << nl
-            << "face-pairs: " << cuts.facePairToEdge() << nl
+            << "face-pairs: " << cuts.facePairToEdgeId() << nl
             << "edges: " << cuts.cutEdges() << nl;
     }
 
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
         {
             Info<< "surf1-cuts: " << cuts.surf1EdgeCuts() << nl
                 << "surf2-cuts: " << cuts.surf2EdgeCuts() << nl
-                << "face-pairs: " << cuts.facePairToEdge() << nl
+                << "face-pairs: " << cuts.facePairToEdgeId() << nl
                 << "edges: " << cuts.cutEdges() << nl;
         }
     }
@@ -209,20 +209,7 @@ int main(int argc, char *argv[])
     if (points.size() || edges.size())
     {
         Info<<"write to " << outputFile << nl;
-
-        OFstream os(outputFile);
-
-        forAll(points, pointi)
-        {
-            const point& pt = points[pointi];
-            os << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
-        }
-
-        forAll(edges, edgei)
-        {
-            const edge& e = edges[edgei];
-            os << "l " << e.start()+1 << ' ' << e.end()+1 << nl;
-        }
+        OBJstream(outputFile).write(edges, points);
     }
 
     Info<< "End\n" << endl;

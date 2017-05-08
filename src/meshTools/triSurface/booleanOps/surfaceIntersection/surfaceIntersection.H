@@ -50,7 +50,7 @@ Description
         Property       | Description                    | Type   | Default value
         tolerance      | Edge-length tolerance          | scalar | 1e-3
         allowEdgeHits  | Edge-end cuts another edge     | bool   | true
-        avoidDuplicates | Reduce the number of duplicate points    | bool | true
+        snap           | Snap near end-points           | bool   | true
         warnDegenerate | Number of warnings about degenerate edges | label | 0
     \endtable
 
@@ -66,11 +66,11 @@ SourceFiles
 
 #include "DynamicList.H"
 #include "point.H"
-#include "edge.H"
-#include "labelPairHashes.H"
-#include "typeInfo.H"
+#include "edgeHashes.H"
 #include "edgeList.H"
+#include "labelPairHashes.H"
 #include "pointIndexHit.H"
+#include "typeInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,6 +81,14 @@ namespace Foam
 class triSurfaceSearch;
 class triSurface;
 class edgeIntersections;
+
+
+//- Key is non-commutative pair of labels. Value is commutative pair of labels
+typedef LabelPairMap<edge> labelPairEdgeLookup;
+
+//- Map from edge back to all parents (pairs of faces)
+typedef EdgeMap<labelPairHashSet> edgelabelPairHashLookup;
+
 
 /*---------------------------------------------------------------------------*\
                      Class surfaceIntersection Declaration
@@ -104,8 +112,8 @@ class surfaceIntersection
         //- Allow edge-ends to cut another edge.
         bool allowEdgeHits_;
 
-        //- Avoid creating duplicate cuts near edge ends
-        bool avoidDuplicates_;
+        //- Snap cut points near edge ends (default: true)
+        bool snapToEnd_;
 
         //- Maximum number of warnings about degenerate edges
         label warnDegenerate_;
@@ -117,44 +125,35 @@ class surfaceIntersection
         //  Reference into cutPoints.
         edgeList cutEdges_;
 
-        //- From face on surf1 and face on surf2 to intersection point
-        //  (label in cutPoints)
-        labelPairLookup facePairToVertex_;
-
         //- From face on surf1 and face on surf2 to intersection edge
-        //  (label in cutEdges)
-        labelPairLookup facePairToEdge_;
+        labelPairEdgeLookup facePairToEdge_;
 
-        //- Edges on surf1 that are cut. From edge on surf1 to label in cutPoint
-        //  If multiple cuts:sorted from edge.start to edge.end
+        //- From face on surf1 and face on surf2 to intersection edgeId
+        //  (label in cutEdges)
+        labelPairLookup facePairToEdgeId_;
+
+        //- Edges on surf1 that are cut.
+        //  From edgeId on surf1 to location in cutPoint
         labelListList surf1EdgeCuts_;
 
-        //- Edges on surf2 that are cut. From edge on surf2 to label in cutPoint
-        //  If multiple cuts:sorted from edge.start to edge.end
+        //- Edges on surf2 that are cut.
+        //  From edgeId on surf2 to location in cutPoint
         labelListList surf2EdgeCuts_;
 
         //- Temporary storage to manage edge-edge self-intersections.
-        HashSet<edge, Hash<edge>> edgeEdgeIntersection_;
+        edgeHashSet edgeEdgeIntersection_;
 
         //- Temporary storage to manage cuts/intersections from the edge ends
-        Map<label> edgeEndAsCut_;
+        Map<label> snappedEnds_;
+
+        //- Temporary storage
+        EdgeMap<label> edgeToId_;
 
 
     // Private Member Functions
 
         //- Adjust intersection options according to the dictionary entries
         void setOptions(const dictionary& dict);
-
-        //- Write points in obj format
-        static void writeOBJ(const List<point>& pts, Ostream& os);
-
-        //- Write points and edges in obj format
-        static void writeOBJ
-        (
-            const List<point>& pts,
-            const List<edge>& edges,
-            Ostream& os
-        );
 
         //- Transfer contents of List<DynamicList<..>> to List<List<..>>
         template<class T>
@@ -201,8 +200,8 @@ class surfaceIntersection
             const UList<point>& points
         );
 
-        //- Update reference between faceA and faceB. Updates facePairToVertex_
-        //  (first occurrence of face pair) and facePairToEdge_ (second occ.)
+        //- Update reference between faceA and faceB.
+        //  Updates facePairToEdge_ and facePairToEdgeId_ (on the second hit)
         void storeIntersection
         (
             const enum originatingType cutFrom,
@@ -240,6 +239,9 @@ class surfaceIntersection
             DynamicList<edge>& allCutEdges,
             List<DynamicList<label>>& surfEdgeCuts
         );
+
+        //- Join disconnected intersection points
+        void joinDisconnected(DynamicList<edge>& allCutEdges);
 
 
 public:
@@ -292,7 +294,7 @@ public:
         const edgeList& cutEdges() const;
 
         //- Lookup of pairs of faces to created edges
-        const labelPairLookup& facePairToEdge() const;
+        const labelPairLookup& facePairToEdgeId() const;
 
         //- Access either surf1EdgeCuts (isFirstSurface = true) or
         //  surf2EdgeCuts

@@ -25,7 +25,7 @@ License
 
 #include "surfaceIntersection.H"
 #include "triSurfaceSearch.H"
-#include "OFstream.H"
+#include "OBJstream.H"
 #include "labelPairHashes.H"
 #include "triSurface.H"
 #include "pointIndexHit.H"
@@ -47,7 +47,7 @@ void Foam::surfaceIntersection::setOptions(const dictionary& dict)
 {
     dict.readIfPresent("tolerance",       tolerance_);
     dict.readIfPresent("allowEdgeHits",   allowEdgeHits_);
-    dict.readIfPresent("avoidDuplicates", avoidDuplicates_);
+    dict.readIfPresent("snap",            snapToEnd_);
     dict.readIfPresent("warnDegenerate",  warnDegenerate_);
 }
 
@@ -101,42 +101,64 @@ void Foam::surfaceIntersection::storeIntersection
             }
         }
 
-        labelPairLookup::const_iterator iter = facePairToVertex_.find(twoFaces);
 
-        if (iter == facePairToVertex_.end())
+        // Get existing edge, or create a null edge (with -1)
+        edge& thisEdge = facePairToEdge_(twoFaces);
+        const label pointCount = thisEdge.count();
+
+        if (pointCount == 0)
         {
-            // New intersection. Store face-face intersection.
+            // First intersection of the faces - record it.
+            thisEdge.insert(cutPointId);
+
             if (debug & 4)
             {
                 Pout<< "intersect faces " << twoFaces
                     << " point-1: " << cutPointId << " = "
                     << allCutPoints[cutPointId] << endl;
             }
-
-            facePairToVertex_.insert(twoFaces, cutPointId);
+            continue;
         }
-        else if (*iter == cutPointId)
+        else if (pointCount == 2)
         {
-            // Avoid creating an edge if cutPointId had already been used
-
+            // This occurs for ugly surfaces with shards that result in multiple
+            // cuts very near a snapped end point.
             if (debug & 4)
             {
-                Pout<< "intersect faces " << twoFaces
-                    << " dup-point: " << cutPointId << endl;
+                Pout<< "suppressed double intersection " << twoFaces
+                    << thisEdge << endl;
             }
+            continue;
         }
-        else
+
+        if (thisEdge.insert(cutPointId))
         {
-            const label nextEdgeId = allCutEdges.size();
-            const edge nextEdge(*iter, cutPointId, true);
+            // Second intersection of the faces - this is an edge,
+            // with special treatment:
+            // - avoid duplicate points: addressed by the insert() above
+            // - avoid degenerate lengths
+            // - avoid duplicate edges - can occur with really dirty geometry
 
-            // Second occurrence of surf1-surf2 intersection.
-            // Or rather the face on surf1 intersects a face on
-            // surface2 twice -> we found edge.
-
-            // Check whether perhaps degenerate
-            if (nextEdge.mag(allCutPoints) < SMALL)
+            if (edgeToId_.found(thisEdge))
             {
+                // Already have this edgeId, but not for this intersection.
+                thisEdge.sort();
+                if (facePairToEdge_.insert(twoFaces, thisEdge))
+                {
+                    if (debug & 4)
+                    {
+                        Pout<< "reuse edge - faces " << twoFaces << " edge#"
+                            << edgeToId_[thisEdge] << " edge " << thisEdge
+                            << " = " << thisEdge.line(allCutPoints)
+                            << endl;
+                    }
+                }
+            }
+            else if (thisEdge.mag(allCutPoints) < SMALL)
+            {
+                // Degenerate length
+                // - eg, end snapping was disabled or somehow failed.
+
                 // Don't normally emit warnings, since these also arise for
                 // manifold connections. For example,
                 //
@@ -147,10 +169,6 @@ void Foam::surfaceIntersection::storeIntersection
                 //
                 // The plane is correctly pierced at the '.' by both edge-1
                 // and edge-2, which belong to the same originating face.
-                //
-                // Unfortunately cannot suppress the second hit either, since
-                // it might already have been used for another face-pair
-                // intersection.
 
                 // Filter/merge away the extraneous points later.
                 if (warnDegenerate_ > 0)
@@ -159,30 +177,54 @@ void Foam::surfaceIntersection::storeIntersection
                     WarningInFunction
                         << "Degenerate edge between faces " << twoFaces
                         << " on 1st/2nd surface with points "
-                        << nextEdge.line(allCutPoints)
+                        << thisEdge.line(allCutPoints)
                         << endl;
                 }
                 else if (debug & 4)
                 {
                     Pout<< "degenerate edge face-pair " << twoFaces << " "
-                        << *iter << " point " << allCutPoints[*iter]
+                        << thisEdge[0] << " point " << allCutPoints[thisEdge[0]]
                         << endl;
                 }
+
+                // This is a failed edge - undo this second interaction
+                thisEdge.erase(cutPointId);
             }
-            else if (facePairToEdge_.insert(twoFaces, nextEdgeId))
+            else
             {
-                // Record complete (line) intersection of two faces
+                // This is a new edge.
+                const label edgeId = allCutEdges.size();
 
-                allCutEdges.append(nextEdge);
-
-                if (debug & 4)
+                if (facePairToEdgeId_.insert(twoFaces, edgeId))
                 {
-                    Pout<< "create edge - faces " << twoFaces << " edge#"
-                        << nextEdgeId << " edge " << nextEdge
-                        << " = " << nextEdge.line(allCutPoints)
-                        << endl;
+                    // Record complete (line) intersection of two faces
+                    thisEdge.sort();
+                    edgeToId_.insert(thisEdge, edgeId);
+                    allCutEdges.append(thisEdge);
+
+                    if (debug & 4)
+                    {
+                        Pout<< "create edge - faces " << twoFaces << " edge#"
+                            << edgeId << " edge " << thisEdge
+                            << " = " << thisEdge.line(allCutPoints)
+                            << endl;
+                    }
+                }
+                else
+                {
+                    // Faces already had an intersection
+                    // This should not fail, but for safety.
+                    Info<<"WARN " << twoFaces
+                        << " already intersected= " << thisEdge << endl;
+                    thisEdge.erase(cutPointId);
                 }
             }
+        }
+        else
+        {
+            // Duplicate point - usually zero-length edge from snapping
+            // - can discard this face/face interaction entirely
+            facePairToEdge_.erase(twoFaces);
         }
     }
 }
@@ -212,7 +254,7 @@ void Foam::surfaceIntersection::classifyHit
     List<DynamicList<label>>& surfEdgeCuts
 )
 {
-    const edge& e = surf1.edges()[edgeI];
+    const edge& e1 = surf1.edges()[edgeI];
 
     const labelList& facesA = surf1.edgeFaces()[edgeI];
 
@@ -233,10 +275,10 @@ void Foam::surfaceIntersection::classifyHit
     const label edgeEnd =
         classify
         (
-            surf1PointTol[e.start()],
-            surf1PointTol[e.end()],
+            surf1PointTol[e1.start()],
+            surf1PointTol[e1.end()],
             pHit.hitPoint(),
-            e,
+            e1,
             surf1Pts
         );
 
@@ -248,8 +290,8 @@ void Foam::surfaceIntersection::classifyHit
             if (debug & 2)
             {
                 Pout<< "hit-type[1] " << pHit.hitPoint() << " is surf1:"
-                    << " end point of edge[" << edgeI << "] " << e
-                    << "==" << e.line(surf1Pts)
+                    << " end point of edge[" << edgeI << "] " << e1
+                    << "==" << e1.line(surf1Pts)
                     << " surf2: vertex " << f2[nearLabel]
                     << " coord:" << surf2Pts[f2[nearLabel]]
                     << " - suppressed" << endl;
@@ -258,7 +300,6 @@ void Foam::surfaceIntersection::classifyHit
         else
         {
             // 2. Edge hits point. Cut edge with new point.
-            bool cached = false;
             label cutPointId = -1;
             const label nearVert = f2[nearLabel];
 
@@ -269,22 +310,25 @@ void Foam::surfaceIntersection::classifyHit
             {
                 const point& nearPt = surf1Pts[nearVert];
 
-                if (mag(pHit.hitPoint() - nearPt) < surf1PointTol[nearVert])
+                if
+                (
+                    mag(pHit.hitPoint() - nearPt)
+                  < surf1PointTol[nearVert]
+                )
                 {
                     cutPointId = allCutPoints.size();
 
-                    if (avoidDuplicates_)
+                    if (snapToEnd_)
                     {
-                        if (edgeEndAsCut_.insert(nearVert, cutPointId))
+                        if (snappedEnds_.insert(nearVert, cutPointId))
                         {
-                            // First time with this end-point
+                            // Initial snap
                             allCutPoints.append(nearPt);
                         }
                         else
                         {
-                            // Already seen this end point
-                            cutPointId = edgeEndAsCut_[nearVert];
-                            cached = true;
+                            // Already snapped this point.
+                            cutPointId = snappedEnds_[nearVert];
                         }
                     }
                     else
@@ -297,11 +341,11 @@ void Foam::surfaceIntersection::classifyHit
             if (debug & 2)
             {
                 Pout<< "hit-type[2] " << pHit.hitPoint() << " is surf1:"
-                    << " from edge[" << edgeI << "] " << e
+                    << " from edge[" << edgeI << "] " << e1
                     << " surf2: vertex " << f2[nearLabel]
                     << " coord:" << surf2Pts[f2[nearLabel]]
                     << " - "
-                    << (cached ? "cached" : "stored") << endl;
+                    << (cutPointId >= 0 ? "snapped" : "stored") << endl;
             }
 
             if (cutPointId == -1)
@@ -339,7 +383,7 @@ void Foam::surfaceIntersection::classifyHit
 
             const label edge2I = getEdge(surf2, surf2Facei, nearLabel);
             const edge& e2 = surf2.edges()[edge2I];
-            const label nearVert  = (edgeEnd == 0 ? e.start() : e.end());
+            const label nearVert = e1[edgeEnd];
 
             label cutPointId = -1;
 
@@ -367,22 +411,23 @@ void Foam::surfaceIntersection::classifyHit
 
                     if
                     (
-                        mag(pHit.hitPoint() - nearPt) < surf1PointTol[nearVert]
+                        mag(pHit.hitPoint() - nearPt)
+                      < surf1PointTol[nearVert]
                     )
                     {
                         cutPointId = allCutPoints.size();
 
-                        if (avoidDuplicates_)
+                        if (snapToEnd_)
                         {
-                            if (edgeEndAsCut_.insert(nearVert, cutPointId))
+                            if (snappedEnds_.insert(nearVert, cutPointId))
                             {
-                                // First time with this end-point
+                                // Initial snap
                                 allCutPoints.append(nearPt);
                             }
                             else
                             {
-                                // Already seen this end point
-                                cutPointId = edgeEndAsCut_[nearVert];
+                                // Already snapped this point.
+                                cutPointId = snappedEnds_[nearVert];
                                 handling = 2;  // cached
                             }
                         }
@@ -401,8 +446,8 @@ void Foam::surfaceIntersection::classifyHit
             if (debug & 2)
             {
                 Pout<< "hit-type[3] " << pHit.hitPoint() << " is surf1:"
-                    << " end point of edge[" << edgeI << "] " << e
-                    << "==" << e.line(surf1Pts)
+                    << " end point of edge[" << edgeI << "] " << e1
+                    << "==" << e1.line(surf1Pts)
                     << " surf2: edge[" << edge2I << "] " << e2
                     << " coords:" << e2.line(surf2Pts)
                     << " - "
@@ -482,9 +527,9 @@ void Foam::surfaceIntersection::classifyHit
                     if (edgeEdgeIntersection_.insert(intersect))
                     {
                         handling = 1;
-                        forAll(e, edgepti)
+                        forAll(e1, edgepti)
                         {
-                            const label endId = e[edgepti];
+                            const label endId = e1[edgepti];
                             const point& nearPt = surf1Pts[endId];
 
                             if
@@ -495,9 +540,9 @@ void Foam::surfaceIntersection::classifyHit
                             {
                                 cutPointId = allCutPoints.size();
 
-                                if (avoidDuplicates_)
+                                if (snapToEnd_)
                                 {
-                                    if (edgeEndAsCut_.insert(endId, cutPointId))
+                                    if (snappedEnds_.insert(endId, cutPointId))
                                     {
                                         // First time with this end-point
                                         allCutPoints.append(nearPt);
@@ -505,7 +550,7 @@ void Foam::surfaceIntersection::classifyHit
                                     else
                                     {
                                         // Already seen this end point
-                                        cutPointId = edgeEndAsCut_[endId];
+                                        cutPointId = snappedEnds_[endId];
                                         handling = 2;  // cached
                                     }
                                 }
@@ -524,8 +569,8 @@ void Foam::surfaceIntersection::classifyHit
             if (debug & 2)
             {
                 Pout<< "hit-type[4] " << pHit.hitPoint() << " is surf1:"
-                    << " from edge[" << edgeI << "] " << e
-                    << "==" << e.line(surf1Pts)
+                    << " from edge[" << edgeI << "] " << e1
+                    << "==" << e1.line(surf1Pts)
                     << " surf2: edge[" << edge2I << "] " << e2
                     << " coords:" << e2.line(surf2Pts)
                     << " - "
@@ -549,18 +594,28 @@ void Foam::surfaceIntersection::classifyHit
 
             if (handling)
             {
+                const vector eVec = e1.unitVec(surf1Pts);
+
                 const labelList& facesB = surf2.edgeFaces()[edge2I];
                 forAll(facesB, faceBI)
                 {
-                    storeIntersection
+                    // Intersecting edge should be non-coplanar with face
+                    if
                     (
-                        cutFrom,
-                        facesA,
-                        facesB[faceBI],
-                        allCutPoints,
-                        cutPointId,
-                        allCutEdges
-                    );
+                        mag((surf2.faceNormals()[facesB[faceBI]] & eVec))
+                      > 0.01
+                    )
+                    {
+                        storeIntersection
+                        (
+                            cutFrom,
+                            facesA,
+                            facesB[faceBI],
+                            allCutPoints,
+                            cutPointId,
+                            allCutEdges
+                        );
+                    }
                 }
             }
         }
@@ -577,8 +632,8 @@ void Foam::surfaceIntersection::classifyHit
 
             // Vertex on/near surf2; vertex away from surf2
             // otherVert on outside of surf2
-            const label nearVert  = (edgeEnd == 0 ? e.start() : e.end());
-            const label otherVert = (edgeEnd == 0 ? e.end() : e.start());
+            const label nearVert  = (edgeEnd == 0 ? e1.start() : e1.end());
+            const label otherVert = (edgeEnd == 0 ? e1.end() : e1.start());
 
             const point& nearPt  = surf1Pts[nearVert];
             const point& otherPt = surf1Pts[otherVert];
@@ -592,9 +647,9 @@ void Foam::surfaceIntersection::classifyHit
                 bool cached = false;
 
                 label cutPointId = allCutPoints.size();
-                if (avoidDuplicates_)
+                if (snapToEnd_)
                 {
-                    if (edgeEndAsCut_.insert(nearVert, cutPointId))
+                    if (snappedEnds_.insert(nearVert, cutPointId))
                     {
                         // First time with this end-point
                         allCutPoints.append(nearPt);
@@ -602,7 +657,7 @@ void Foam::surfaceIntersection::classifyHit
                     else
                     {
                         // Already seen this end point
-                        cutPointId = edgeEndAsCut_[nearVert];
+                        cutPointId = snappedEnds_[nearVert];
                         cached = true;
                     }
                 }
@@ -617,8 +672,8 @@ void Foam::surfaceIntersection::classifyHit
                 {
                     Pout<< "hit-type[5] " << pHit.hitPoint()
                         << " shifted to " << nearPt
-                        << " from edge[" << edgeI << "] " << e
-                        << "==" << e.line(surf1Pts)
+                        << " from edge[" << edgeI << "] " << e1
+                        << "==" << e1.line(surf1Pts)
                         << " hits surf2 face[" << surf2Facei << "]"
                         << " - "
                         << (cached ? "cached" : "stored") << endl;
@@ -640,7 +695,7 @@ void Foam::surfaceIntersection::classifyHit
                 if (debug & 2)
                 {
                     Pout<< "hit-type[5] " << pHit.hitPoint()
-                        << " from edge[" << edgeI << "] " << e
+                        << " from edge[" << edgeI << "] " << e1
                         << " hits inside of surf2 face[" << surf2Facei << "]"
                         << " - discarded" << endl;
                 }
@@ -652,8 +707,8 @@ void Foam::surfaceIntersection::classifyHit
             if (debug & 2)
             {
                 Pout<< "hit-type[6] " << pHit.hitPoint()
-                    << " from edge[" << edgeI << "] " << e
-                    << "==" << e.line(surf1Pts)
+                    << " from edge[" << edgeI << "] " << e1
+                    << "==" << e1.line(surf1Pts)
                     << " hits surf2 face[" << surf2Facei << "]"
                     << " - stored" << endl;
             }
@@ -680,8 +735,8 @@ void Foam::surfaceIntersection::classifyHit
 // Cut all edges of surf1 with surf2. Sets
 // - cutPoints          : coordinates of cutPoints
 // - cutEdges           : newly created edges between cutPoints
-// - facePairToVertex   : hash from face1I and face2I to (first) cutPoint
-// - facePairToEdge     : hash from face1I and face2I to cutEdge
+// - facePairToVertex   : hash from face1I and face2I to edge
+// - facePairToEdgeId   : hash from face1I and face2I to index in cutEdge
 // - surfEdgeCuts       : gives for each edge the cutPoints
 //                        (in order from start to end)
 //
@@ -716,7 +771,7 @@ void Foam::surfaceIntersection::doCutEdges
         // An edge may intersect multiple faces
         // - mask out faces that have already been hit before trying again
         // - never intersect with faces attached to the edge itself
-        DynamicList<label> maskFaces(8);
+        DynamicList<label> maskFaces(32);
 
         treeDataTriSurface::findAllIntersectOp
             allIntersectOp(searchTree, maskFaces);
@@ -732,8 +787,12 @@ void Foam::surfaceIntersection::doCutEdges
             const point ptEnd =
                 surf1Pts[e.end()]   + 0.5*surf1PointTol[e.end()]*edgeVec;
 
-            // Never intersect with faces attached to the edge itself
-            maskFaces = surf1.edgeFaces()[edgeI];
+            // Never intersect with faces attached directly to the edge itself,
+            // nor with faces attached to its end points. This mask contains
+            // some duplicates, but filtering them out is less efficient.
+            maskFaces = surf1.pointFaces()[e.start()];
+            maskFaces.append(surf1.pointFaces()[e.end()]);
+
             while (true)
             {
                 pointIndexHit pHit = searchTree.findLine
@@ -833,9 +892,95 @@ void Foam::surfaceIntersection::doCutEdges
 
     // These temporaries are now unneeded:
     edgeEdgeIntersection_.clear();
-    edgeEndAsCut_.clear();
+    snappedEnds_.clear();
 
     intersection::setPlanarTol(oldTol);
+}
+
+
+void Foam::surfaceIntersection::joinDisconnected
+(
+    DynamicList<edge>& allCutEdges
+)
+{
+    // This simple heuristic seems to work just as well (or better) than
+    // more complicated schemes
+    //
+    // For any face/face intersection that only appears once,
+    // consider which other faces/points are involved and connect between
+    // those points.
+    // Just do a simple connect-the-dots?
+
+    Pair<Map<labelPairHashSet>> missedFacePoint;
+
+    // Stage 1:
+    // - Extract "faceId -> (faceId, pointId)"
+    //   for all face/face pairs that only have one interaction
+    forAllConstIters(facePairToEdge_, iter)
+    {
+        const labelPair& twoFaces = iter.key();
+        const edge& e = iter.object();
+
+        if (e.count() == 1)
+        {
+            // minVertex = -1 (unused), maxVertex = pointId
+            const label pointId = e.maxVertex();
+
+            missedFacePoint[0](twoFaces[0]).insert
+            (
+                labelPair(twoFaces[1], pointId)
+            );
+
+            missedFacePoint[1](twoFaces[1]).insert
+            (
+                labelPair(twoFaces[0], pointId)
+            );
+        }
+    }
+
+
+    // Stage 2:
+    // - anything with two cross-interactions could cause a new edge:
+
+    edgeHashSet newEdges;
+    forAll(missedFacePoint, sidei)
+    {
+        const auto& mapping = missedFacePoint[sidei];
+
+        forAllConstIters(mapping, iter)
+        {
+            const auto& connect = iter.object();
+
+            if (connect.size() == 2)
+            {
+                // exactly two face/face cross-interactions
+
+                edge e;
+                for (const auto& facePoint : connect)
+                {
+                    e.insert(facePoint.second());
+                }
+                e.sort();
+
+                // Only consider edges with two unique ends,
+                // and do not introduce duplicates
+                if (e.count() == 2 && !edgeToId_.found(e))
+                {
+                    newEdges.insert(e);
+                }
+            }
+        }
+    }
+
+    label edgeId = allCutEdges.size();
+    edgeList newEdgesLst = newEdges.sortedToc();
+    for (const auto& e : newEdgesLst)
+    {
+        // Record complete (line) intersection of two faces
+        allCutEdges.append(e);
+        edgeToId_.insert(e, edgeId);
+        ++edgeId;
+    }
 }
 
 
@@ -845,12 +990,12 @@ Foam::surfaceIntersection::surfaceIntersection()
 :
     tolerance_(1e-3),
     allowEdgeHits_(true),
-    avoidDuplicates_(true),
+    snapToEnd_(true),
     warnDegenerate_(0),
     cutPoints_(0),
     cutEdges_(0),
-    facePairToVertex_(0),
     facePairToEdge_(0),
+    facePairToEdgeId_(0),
     surf1EdgeCuts_(0),
     surf2EdgeCuts_(0)
 {}
@@ -865,12 +1010,12 @@ Foam::surfaceIntersection::surfaceIntersection
 :
     tolerance_(1e-3),
     allowEdgeHits_(true),
-    avoidDuplicates_(true),
+    snapToEnd_(true),
     warnDegenerate_(0),
     cutPoints_(0),
     cutEdges_(0),
-    facePairToVertex_(2*max(query1.surface().size(), query2.surface().size())),
     facePairToEdge_(2*max(query1.surface().size(), query2.surface().size())),
+    facePairToEdgeId_(2*max(query1.surface().size(), query2.surface().size())),
     surf1EdgeCuts_(0),
     surf2EdgeCuts_(0)
 {
@@ -931,6 +1076,9 @@ Foam::surfaceIntersection::surfaceIntersection
         edgeCuts2
     );
 
+    // join disconnected intersection points
+    joinDisconnected(allCutEdges);
+
     // Transfer to straight label(List)List
     transfer(edgeCuts2, surf2EdgeCuts_);
     cutEdges_.transfer(allCutEdges);
@@ -946,8 +1094,7 @@ Foam::surfaceIntersection::surfaceIntersection
         Pout<< "surfaceIntersection : Writing intersection to intEdges.obj"
             << endl;
 
-        OFstream intStream("intEdges.obj");
-        writeOBJ(cutPoints_, cutEdges_, intStream);
+        OBJstream("intEdges.obj").write(cutEdges_, cutPoints_);
 
         // Dump all cut edges to files
         Pout<< "Dumping cut edges of surface1 to surf1EdgeCuts.obj" << endl;
@@ -960,9 +1107,9 @@ Foam::surfaceIntersection::surfaceIntersection
     }
 
     // Temporaries
-    facePairToVertex_.clear();
+    facePairToEdge_.clear();
 
-    // // Cleanup any duplicate cuts?
+    // Cleanup any duplicate cuts?
     // mergeEdges();
 }
 
@@ -975,12 +1122,12 @@ Foam::surfaceIntersection::surfaceIntersection
 :
     tolerance_(1e-3),
     allowEdgeHits_(true),
-    avoidDuplicates_(true),
+    snapToEnd_(true),
     warnDegenerate_(0),
     cutPoints_(0),
     cutEdges_(0),
-    facePairToVertex_(2*query1.surface().size()),
     facePairToEdge_(2*query1.surface().size()),
+    facePairToEdgeId_(2*query1.surface().size()),
     surf1EdgeCuts_(0),
     surf2EdgeCuts_(0)
 {
@@ -1013,6 +1160,9 @@ Foam::surfaceIntersection::surfaceIntersection
         edgeCuts1
     );
 
+    // join disconnected intersection points
+    joinDisconnected(allCutEdges);
+
     // Transfer to straight label(List)List
     transfer(edgeCuts1, surf1EdgeCuts_);
     cutEdges_.transfer(allCutEdges);
@@ -1039,8 +1189,7 @@ Foam::surfaceIntersection::surfaceIntersection
         Pout<< "surfaceIntersection : Writing intersection to intEdges.obj"
             << endl;
 
-        OFstream intStream("intEdges.obj");
-        writeOBJ(cutPoints_, cutEdges_, intStream);
+        OBJstream("intEdges.obj").write(cutEdges_, cutPoints_);
 
         // Dump all cut edges to files
         Pout<< "Dumping cut edges of surface1 to surf1EdgeCuts.obj" << endl;
@@ -1049,7 +1198,7 @@ Foam::surfaceIntersection::surfaceIntersection
     }
 
     // Temporaries
-    facePairToVertex_.clear();
+    facePairToEdge_.clear();
 
     // // Cleanup any duplicate cuts?
     // mergeEdges();
@@ -1066,12 +1215,12 @@ Foam::surfaceIntersection::surfaceIntersection
 :
     tolerance_(1e-3),
     allowEdgeHits_(true),
-    avoidDuplicates_(true),
+    snapToEnd_(true),
     warnDegenerate_(0),
     cutPoints_(0),
     cutEdges_(0),
-    facePairToVertex_(2*max(surf1.size(), surf2.size())),
     facePairToEdge_(2*max(surf1.size(), surf2.size())),
+    facePairToEdgeId_(2*max(surf1.size(), surf2.size())),
     surf1EdgeCuts_(0),
     surf2EdgeCuts_(0)
 {
@@ -1180,8 +1329,7 @@ Foam::surfaceIntersection::surfaceIntersection
         Pout<< "surfaceIntersection : Writing intersection to intEdges.obj"
             << endl;
 
-        OFstream intStream("intEdges.obj");
-        writeOBJ(cutPoints_, cutEdges_, intStream);
+        OBJstream("intEdges.obj").write(cutEdges_, cutPoints_);
 
         // Dump all cut edges to files
         Pout<< "Dumping cut edges of surface1 to surf1EdgeCuts.obj" << endl;
@@ -1193,37 +1341,8 @@ Foam::surfaceIntersection::surfaceIntersection
         writeIntersectedEdges(surf2, surf2EdgeCuts_, edge2Stream);
     }
 
-
-    // Debugging stuff
-    {
-        // Check all facePairToVertex is used.
-        labelHashSet usedPoints;
-
-        forAllConstIter(labelPairLookup, facePairToEdge_, iter)
-        {
-            const label edgeI = iter();
-            const edge& e = cutEdges_[edgeI];
-
-            usedPoints.insert(e[0]);
-            usedPoints.insert(e[1]);
-        }
-
-        forAllConstIter(labelPairLookup, facePairToVertex_, iter)
-        {
-            const label pointi = iter();
-
-            if (!usedPoints.found(pointi))
-            {
-                WarningInFunction
-                    << "Problem: cut point:" << pointi
-                    << " coord:" << cutPoints_[pointi]
-                    << " not used by any edge" << endl;
-            }
-        }
-    }
-
     // Temporaries
-    facePairToVertex_.clear();
+    facePairToEdge_.clear();
 
     // // Cleanup any duplicate cuts?
     // mergeEdges();
@@ -1244,9 +1363,9 @@ const Foam::edgeList& Foam::surfaceIntersection::cutEdges() const
 }
 
 
-const Foam::labelPairLookup& Foam::surfaceIntersection::facePairToEdge() const
+const Foam::labelPairLookup& Foam::surfaceIntersection::facePairToEdgeId() const
 {
-    return facePairToEdge_;
+    return facePairToEdgeId_;
 }
 
 
@@ -1349,9 +1468,9 @@ void Foam::surfaceIntersection::mergeEdges()
     // if (nUniqEdges < cutEdges_.size())
     // {
     //     // Additional safety, in case the edge was replaced?
-    //     forAllIter(labelPairLookup, facePairToEdge_, iter)
+    //     forAllIters(facePairToEdge_, iter)
     //     {
-    //         iter() = edgeNumbering[iter()];
+    //         iter.object() = edgeNumbering[iter.object()];
     //     }
     // }
 

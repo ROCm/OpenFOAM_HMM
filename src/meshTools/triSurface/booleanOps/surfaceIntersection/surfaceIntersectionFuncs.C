@@ -29,13 +29,14 @@ License
 #include "labelPairHashes.H"
 #include "OFstream.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-void Foam::surfaceIntersection::writeOBJ
-(
-    const List<point>& pts,
-    Ostream& os
-)
+namespace Foam
+{
+
+// file-scope
+// Write points in obj format
+static void writeObjPoints(const UList<point>& pts, Ostream& os)
 {
     forAll(pts, i)
     {
@@ -44,23 +45,10 @@ void Foam::surfaceIntersection::writeOBJ
     }
 }
 
+} // End namespace Foam
 
-void Foam::surfaceIntersection::writeOBJ
-(
-    const List<point>& pts,
-    const List<edge>& edges,
-    Ostream& os
-)
-{
-    writeOBJ(pts, os);
 
-    forAll(edges, i)
-    {
-        const edge& e = edges[i];
-
-        os << "l " << e.start()+1 << ' ' << e.end()+1 << nl;
-    }
-}
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 
 // Get minimum length of all edges connected to point
@@ -254,8 +242,8 @@ void Foam::surfaceIntersection::writeIntersectedEdges
     // Dump all points (surface followed by cutPoints)
     const pointField& pts = surf.localPoints();
 
-    writeOBJ(pts, os);
-    writeOBJ(cutPoints(), os);
+    writeObjPoints(pts, os);
+    writeObjPoints(cutPoints(), os);
 
     forAll(edgeCutVerts, edgeI)
     {

@@ -134,7 +134,7 @@ surface2.nas
 // - If other dictionaries contain a 'surfaces' entry,
 //   it will be taken for the input.
 //
-surfaces
+dummyName
 {
     extractionMethod    extractFromSurface;
 
@@ -167,6 +167,41 @@ surfaces
 
         // Write features to obj format for postprocessing
         writeObj        yes;
+}
+
+
+// Handle single or multiple surfaces
+//
+// - If the dictionary is named 'surfaces', it must also contain a 'surfaces'
+//   entry (wordRe list).
+//
+// - If other dictionaries contain a 'surfaces' entry,
+//   it will be taken for the input.
+//
+surfaces
+{
+    extractionMethod    extractFromNone;
+
+    surfaces            (surface1.stl surface2.nas);
+
+    // Base output name (optional)
+    // output              surfaces;
+
+    // Generate additional features from self-intersect
+    selfIntersection    true;
+
+    // Tolerance for surface intersections
+    tolerance           1e-3;
+
+    extractFromNoneCoeffs
+    {
+        includedAngle   0;
+    }
+
+    // Write options
+
+    // Write features to obj format for postprocessing
+    writeObj        yes;
 }
 
 // ************************************************************************* //

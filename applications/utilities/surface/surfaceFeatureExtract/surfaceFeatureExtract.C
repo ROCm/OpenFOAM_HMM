@@ -84,6 +84,8 @@ int main(int argc, char *argv[])
 
     forAllConstIter(dictionary, dict, iter)
     {
+        const word& dictName = iter().keyword();
+
         if (!iter().isDict())
         {
             continue;
@@ -106,7 +108,7 @@ int main(int argc, char *argv[])
         const word outputName =
             fileName
             (
-                surfaceDict.lookupOrDefault<word>("output", iter().keyword())
+                surfaceDict.lookupOrDefault<word>("output", dictName)
             ).lessExt();
 
         // The "surfaces" entry is normally optional, but if the sub-dictionary
@@ -115,7 +117,7 @@ int main(int argc, char *argv[])
         // additional switch.
         if
         (
-            iter().keyword() == "surfaces"  // mandatory
+            dictName == "surfaces"  // mandatory
          || surfaceDict.found("surfaces")   // or optional
         )
         {
@@ -123,14 +125,14 @@ int main(int argc, char *argv[])
         }
         else
         {
-            loader.select(iter().keyword());
+            loader.select(dictName);
         }
 
         if (loader.selected().empty())
         {
             FatalErrorInFunction
                 << "No surfaces specified/found for entry: "
-                << iter().keyword() << exit(FatalError);
+                << dictName << exit(FatalError);
         }
         // DebugVar(loader.available());
         // DebugVar(outputName);
@@ -153,7 +155,7 @@ int main(int argc, char *argv[])
         {
             FatalErrorInFunction
                 << "Problem loading surface(s) for entry: "
-                << iter().keyword() << exit(FatalError);
+                << dictName << exit(FatalError);
         }
 
         triSurface surf = surfPtr();
