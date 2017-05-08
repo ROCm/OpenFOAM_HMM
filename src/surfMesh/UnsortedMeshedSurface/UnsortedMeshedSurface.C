@@ -113,17 +113,16 @@ void Foam::UnsortedMeshedSurface<Face>::write
 
     const word ext = name.ext();
 
-    typename writefileExtensionMemberFunctionTable::iterator mfIter =
-        writefileExtensionMemberFunctionTablePtr_->find(ext);
+    auto mfIter = writefileExtensionMemberFunctionTablePtr_->find(ext);
 
-    if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
+    if (!mfIter.found())
     {
         // No direct writer, delegate to proxy if possible
         const wordHashSet& delegate = ProxyType::writeTypes();
 
         if (delegate.found(ext))
         {
-            MeshedSurfaceProxy<Face>(surf).write(name);
+            MeshedSurfaceProxy<Face>(surf).write(name, ext);
         }
         else
         {

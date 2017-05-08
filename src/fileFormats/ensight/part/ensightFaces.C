@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,24 +27,13 @@ License
 #include "error.H"
 #include "polyMesh.H"
 #include "ListOps.H"
-#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const Foam::label Foam::ensightFaces::nTypes = 3;
 
-namespace Foam
-{
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::ensightFaces::elemType,
-        3
-    >::names[] = { "tria3", "quad4", "nsided" };
-}
-
-const Foam::NamedEnum<Foam::ensightFaces::elemType, 3>
-    Foam::ensightFaces::elemEnum;
+const char* Foam::ensightFaces::elemNames[3] =
+    { "tria3", "quad4", "nsided" };
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -99,9 +88,8 @@ void Foam::ensightFaces::resizeAll()
     n = 0;
     forAll(sizes_, typei)
     {
-        deleteDemandDrivenData(lists_[typei]);
-
-        lists_[typei] = new SubList<label>(address_, sizes_[typei], n);
+        slices_[typei].setStart(n);
+        slices_[typei].setSize(sizes_[typei]);
 
         n += sizes_[typei];
     }
@@ -118,16 +106,10 @@ Foam::ensightFaces::ensightFaces(label partIndex)
     index_(partIndex),
     address_(),
     flipMap_(),
-    sizes_(Zero),
-    lists_()
+    slices_(),
+    sizes_(Zero)
 {
-    // Ensure sub-lists are properly initialized to nullptr
-    forAll(lists_, typei)
-    {
-        lists_[typei] = nullptr;
-    }
-
-    resizeAll(); // adjust allocation
+    resizeAll(); // adjust allocation/sizing
 }
 
 
@@ -136,22 +118,16 @@ Foam::ensightFaces::ensightFaces(const ensightFaces& obj)
     index_(obj.index_),
     address_(obj.address_),
     flipMap_(obj.flipMap_),
-    sizes_(),
-    lists_()
+    slices_(),
+    sizes_()
 {
-    // Ensure sub-lists are properly initialized to nullptr
-    forAll(lists_, typei)
-    {
-        lists_[typei] = nullptr;
-    }
-
-    // Total (reduced) sizes
+    // Save the total (reduced) sizes
     FixedList<label, 3> totSizes = obj.sizes_;
 
-    // Local sizes
+    // Need local sizes for the resize operation
     this->sizes_ = obj.sizes();
 
-    resizeAll(); // adjust allocation
+    resizeAll(); // adjust allocation/sizing
 
     // Restore total (reduced) sizes
     this->sizes_ = totSizes;
@@ -161,14 +137,7 @@ Foam::ensightFaces::ensightFaces(const ensightFaces& obj)
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::ensightFaces::~ensightFaces()
-{
-    forAll(lists_, typei)
-    {
-        deleteDemandDrivenData(lists_[typei]);
-    }
-    address_.clear();
-    flipMap_.clear();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -176,24 +145,12 @@ Foam::ensightFaces::~ensightFaces()
 Foam::FixedList<Foam::label, 3> Foam::ensightFaces::sizes() const
 {
     FixedList<label, 3> count;
-    forAll(lists_, typei)
+    forAll(slices_, typei)
     {
-        count[typei] = lists_[typei]->size();
+        count[typei] = slices_[typei].size();
     }
 
     return count;
-}
-
-
-Foam::label Foam::ensightFaces::offset(const enum elemType what) const
-{
-    label n = 0;
-    for (label typei = 0; typei < label(what); ++typei)
-    {
-        n += lists_[typei]->size();
-    }
-
-    return n;
 }
 
 
@@ -217,9 +174,10 @@ void Foam::ensightFaces::clear()
 
 void Foam::ensightFaces::reduce()
 {
+    // No listCombineGather, listCombineScatter for FixedList
     forAll(sizes_, typei)
     {
-        sizes_[typei] = lists_[typei]->size();
+        sizes_[typei] = slices_[typei].size();
         Foam::reduce(sizes_[typei], sumOp<label>());
     }
 }
@@ -229,20 +187,15 @@ void Foam::ensightFaces::sort()
 {
     if (flipMap_.size() == address_.size())
     {
-        // sort flip map too
-
+        // Must sort flip map as well
         labelList order;
-        label start = 0;
 
-        forAll(lists_, typei)
+        forAll(slices_, typei)
         {
-            SubList<label>& idLst = *(lists_[typei]);
-            const label sz = idLst.size();
-
-            if (sz)
+            if (slices_[typei].size())
             {
-                SubList<bool> flip(flipMap_, sz, start);
-                start += sz; // for next sub-list
+                SubList<label> idLst(address_, slices_[typei]);
+                SubList<bool>  flip(flipMap_, slices_[typei]);
 
                 Foam::sortedOrder(idLst, order);
 
@@ -254,11 +207,16 @@ void Foam::ensightFaces::sort()
     else
     {
         // no flip-maps, simpler to sort
-        forAll(lists_, typei)
+        forAll(slices_, typei)
         {
-            Foam::sort(*(lists_[typei]));
+            if (slices_[typei].size())
+            {
+                SubList<label> idLst(address_, slices_[typei]);
+                Foam::sort(idLst);
+            }
         }
-        flipMap_.clear();  // for safety
+
+        flipMap_.clear();  // for extra safety
     }
 }
 
@@ -278,7 +236,7 @@ void Foam::ensightFaces::classify(const faceList& faces)
     }
 
     resizeAll();    // adjust allocation
-    sizes_ = Zero;  // reset sizes
+    sizes_ = Zero;  // reset sizes - use for local indexing here
 
     // Assign face-id per shape type
     for (label listi = 0; listi < sz; ++listi)
@@ -318,7 +276,7 @@ void Foam::ensightFaces::classify
     }
 
     resizeAll();    // adjust allocation
-    sizes_ = Zero;  // reset sizes
+    sizes_ = Zero;  // reset sizes - use for local indexing here
 
     if (useFlip)
     {
@@ -330,11 +288,11 @@ void Foam::ensightFaces::classify
     for (label listi = 0; listi < sz; ++listi)
     {
         const label faceId = addressing[listi];
-        const bool flip = useFlip && flipMap[listi];
+        const bool  doFlip = useFlip && flipMap[listi];
 
         if (!exclude[faceId])
         {
-            add(faces[faceId], faceId, flip);
+            add(faces[faceId], faceId, doFlip);
         }
     }
 }

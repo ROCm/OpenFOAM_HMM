@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -202,7 +202,10 @@ public:
 
         //- Navigation through face vertices
 
-            //- Which vertex on face (face index given a global index)
+            //- Return true if the global point label is found in face.
+            inline bool found(const label globalIndex) const;
+
+            //- Which local vertex on face given a global index.
             //  returns -1 if not found
             label which(const label globalIndex) const;
 

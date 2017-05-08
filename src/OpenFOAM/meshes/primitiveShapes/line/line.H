@@ -98,10 +98,10 @@ public:
 
         // Access
 
-            //- Return first vertex
+            //- Return first point
             inline PointRef start() const;
 
-            //- Return second vertex
+            //- Return second point
             inline PointRef end() const;
 
 
@@ -113,8 +113,11 @@ public:
             //- Return scalar magnitude
             inline scalar mag() const;
 
-            //- Return start-end vector
+            //- Return start-to-end vector
             inline Point vec() const;
+
+            //- Return the unit vector (start-to-end)
+            inline Point unitVec() const;
 
             //- Return nearest distance to line from a given point
             //  If the nearest point is on the line, return a hit

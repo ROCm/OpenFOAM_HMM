@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,83 +21,53 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::faceTraits
+
+Description
+    Traits class for faces
+
 \*---------------------------------------------------------------------------*/
+
+#ifndef faceTraits_H
+#define faceTraits_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// A triFace surface only handles triangulated faces
-template<>
-inline bool MeshedSurface<triFace>::isTri()
+// Forward declarations
+class triFace;
+class labelledTri;
+
+/*---------------------------------------------------------------------------*\
+                         Class faceTraits Declaration
+\*---------------------------------------------------------------------------*/
+
+template<class FaceType>
+class faceTraits
 {
-    return true;
-}
+public:
+
+    //- Face-type only handles triangles. Not true in general.
+    inline static bool isTri()  { return false; }
+};
 
 
-// A labelledTri surface only handles triangulated faces
 template<>
-inline bool MeshedSurface<labelledTri>::isTri()
-{
-    return true;
-}
+inline bool faceTraits<triFace>::isTri()        { return true; }
 
-
-// Number of triangles for a triFace surface
 template<>
-inline label MeshedSurface<triFace>::nTriangles() const
-{
-    return ParentType::size();
-}
-
-// Number of triangles for a labelledTri surface
-template<>
-inline label MeshedSurface<labelledTri>::nTriangles() const
-{
-    return ParentType::size();
-}
-
-
-// Inplace triangulation of triFace surface = no-op
-template<>
-inline label MeshedSurface<triFace>::triangulate()
-{
-    return 0;
-}
-
-// Inplace triangulation of labelledTri surface = no-op
-template<>
-inline label MeshedSurface<labelledTri>::triangulate()
-{
-    return 0;
-}
-
-// Inplace triangulation of triFace surface (with face map) = no-op
-template<>
-inline label MeshedSurface<triFace>::triangulate(List<label>& faceMap)
-{
-    if (notNull(faceMap))
-    {
-        faceMap.clear();
-    }
-    return 0;
-}
-
-// Inplace triangulation of labelledTri surface (with face map) = no-op
-template<>
-inline label MeshedSurface<labelledTri>::triangulate(List<label>& faceMap)
-{
-    if (notNull(faceMap))
-    {
-        faceMap.clear();
-    }
-    return 0;
-}
+inline bool faceTraits<labelledTri>::isTri()    { return true; }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

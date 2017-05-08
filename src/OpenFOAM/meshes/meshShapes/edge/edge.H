@@ -149,7 +149,11 @@ public:
 
         //- Return true if point label is found in edge.
         //  Always false for a negative label.
-        inline bool found(const label index) const;
+        inline bool found(const label pointLabel) const;
+
+        //- Return local index (0,1) of point label in edge -1 on failure
+        //  Always return -1 for a negative label.
+        inline label which(const label pointLabel) const;
 
         //- Do the edges share a common vertex index?
         //  Negative point labels never connect.

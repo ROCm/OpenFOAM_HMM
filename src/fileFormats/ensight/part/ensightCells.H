@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,8 +35,6 @@ Description
 
 #include "labelList.H"
 #include "FixedList.H"
-#include "SubList.H"
-#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,18 +56,18 @@ public:
         //- Addressable ensight element types
         enum elemType
         {
-            TETRA4,
-            PYRAMID5,
-            PENTA6,
-            HEXA8,
-            NFACED
+            TETRA4,     //!< "tetra4"
+            PYRAMID5,   //!< "pyramid5"
+            PENTA6,     //!< "penta6"
+            HEXA8,      //!< "hexa8"
+            NFACED      //!< "nfaced"
         };
 
         //- Number of element types (5)
         static const label nTypes;
 
-        //- The Ensight names for each element type
-        static const NamedEnum<elemType, 5> elemEnum;
+        //- The ensight element type names
+        static const char* elemNames[5];
 
 
     // Static Member Functions
@@ -86,16 +84,15 @@ private:
         //  The ensight part number is typically this value +1.
         label index_;
 
-        //- Linear list of ids, sub-sectioned per element type via SubLists
+        //- Linear list of ids, sub-sectioned per element type by sub-lists
         labelList address_;
+
+        //- Slices (sub-lists) of the address ids for each element type.
+        FixedList<labelRange, 5> slices_;
 
         //- List of global sizes for each element type.
         //  Used temporarily for local sizes when building the element lists.
         FixedList<label, 5> sizes_;
-
-        //- List of ids for each element type.
-        //  Managed via pointers, since a SubList cannot be relocated/resized.
-        FixedList<SubList<label>*, 5> lists_;
 
 
     // Private Member Functions
@@ -115,7 +112,7 @@ public:
         ensightCells(label partIndex = 0);
 
         //- Copy constructor. Needed for lists etc.
-        ensightCells(const ensightCells&);
+        ensightCells(const ensightCells& obj);
 
 
     //- Destructor
@@ -135,6 +132,9 @@ public:
         //- The processor local size of all elements.
         inline label size() const;
 
+        //- The processor local size of the specified element type.
+        inline label size(const enum elemType) const;
+
         //- The global number of the specified element type.
         //  This value is only meaningful after a reduce operation.
         inline label total(const enum elemType) const;
@@ -151,23 +151,23 @@ public:
         FixedList<label, 5> sizes() const;
 
         //- Processor local starting offset of element type.
-        label offset(const enum elemType what) const;
+        inline label offset(const enum elemType what) const;
 
         //- Return the (local) cell ids of the specified element type
-        inline const labelUList& cellIds(const enum elemType) const;
+        inline const labelUList cellIds(const enum elemType) const;
 
         //- Return the cell ids of all elements
         inline const labelUList& cellIds() const;
 
 
-    // Edit
+      // Edit
 
         //- Classify cell types and set the element lists.
         //  The optional indirect addressing can be used when classifying
         //  groups of cells (eg, from a cellZone etc).
         void classify
         (
-            const polyMesh&,
+            const polyMesh& mesh,
             const labelUList& addressing = labelUList::null()
         );
 

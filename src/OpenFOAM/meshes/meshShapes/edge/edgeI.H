@@ -206,10 +206,28 @@ inline Foam::label Foam::edge::maxVertex() const
 }
 
 
-inline bool Foam::edge::found(const label index) const
+inline bool Foam::edge::found(const label pointLabel) const
 {
     // -1: always false
-    return (index >= 0 && (index == start() || index == end()));
+    return (pointLabel >= 0 && (pointLabel == start() || pointLabel == end()));
+}
+
+
+inline Foam::label Foam::edge::which(const label pointLabel) const
+{
+    // -1: always false
+    if (pointLabel >= 0)
+    {
+        if (pointLabel == start())
+        {
+            return 0;
+        }
+        if (pointLabel == end())
+        {
+            return 1;
+        }
+    }
+    return -1;
 }
 
 

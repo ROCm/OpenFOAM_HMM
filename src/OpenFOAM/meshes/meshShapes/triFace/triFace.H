@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,6 +136,13 @@ public:
         //- Return face with reverse direction
         //  The starting points of the original and reverse face are identical.
         inline triFace reverseFace() const;
+
+        //- Return true if the global point label is found in face.
+        bool found(const label globalIndex) const;
+
+        //- Which local index (0,1,2) on face given a global index.
+        //  returns -1 if not found
+        label which(const label globalIndex) const;
 
         //- Return swept-volume from old-points to new-points
         inline scalar sweptVol
