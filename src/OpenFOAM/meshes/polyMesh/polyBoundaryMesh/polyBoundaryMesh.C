@@ -32,6 +32,7 @@ License
 #include "lduSchedule.H"
 #include "globalMeshData.H"
 #include "stringListOps.H"
+#include "EdgeMap.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -287,7 +288,7 @@ Foam::polyBoundaryMesh::neighbourEdges() const
 
         // From mesh edge (expressed as a point pair so as not to construct
         // point addressing) to patch + relative edge index.
-        HashTable<labelPair, edge, Hash<edge>> pointsToEdge(nEdgePairs);
+        EdgeMap<labelPair> pointsToEdge(nEdgePairs);
 
         forAll(*this, patchi)
         {
@@ -308,10 +309,9 @@ Foam::polyBoundaryMesh::neighbourEdges() const
                 // Edge in mesh points.
                 edge meshEdge(pp.meshPoints()[e[0]], pp.meshPoints()[e[1]]);
 
-                HashTable<labelPair, edge, Hash<edge>>::iterator fnd =
-                    pointsToEdge.find(meshEdge);
+                EdgeMap<labelPair>::iterator fnd = pointsToEdge.find(meshEdge);
 
-                if (fnd == pointsToEdge.end())
+                if (!fnd.found())
                 {
                     // First occurrence of mesh edge. Store patch and my
                     // local index.
@@ -328,7 +328,7 @@ Foam::polyBoundaryMesh::neighbourEdges() const
                 else
                 {
                     // Second occurrence. Store.
-                    const labelPair& edgeInfo = fnd();
+                    const labelPair& edgeInfo = fnd.object();
 
                     neighbourEdges[patchi][edgei - pp.nInternalEdges()] =
                         edgeInfo;
@@ -413,13 +413,13 @@ const Foam::labelList& Foam::polyBoundaryMesh::patchID() const
 }
 
 
-const Foam::HashTable<Foam::labelList, Foam::word>&
+const Foam::HashTable<Foam::labelList>&
 Foam::polyBoundaryMesh::groupPatchIDs() const
 {
     if (!groupPatchIDsPtr_.valid())
     {
-        groupPatchIDsPtr_.reset(new HashTable<labelList, word>(10));
-        HashTable<labelList, word>& groupPatchIDs = groupPatchIDsPtr_();
+        groupPatchIDsPtr_.reset(new HashTable<labelList>(10));
+        HashTable<labelList>& groupPatchIDs = groupPatchIDsPtr_();
 
         const polyBoundaryMesh& bm = *this;
 
@@ -431,7 +431,7 @@ Foam::polyBoundaryMesh::groupPatchIDs() const
             {
                 const word& name = groups[i];
 
-                HashTable<labelList, word>::iterator iter = groupPatchIDs.find
+                HashTable<labelList>::iterator iter = groupPatchIDs.find
                 (
                     name
                 );
@@ -612,10 +612,10 @@ Foam::labelList Foam::polyBoundaryMesh::findIndices
 
             if (usePatchGroups && groupPatchIDs().size())
             {
-                const HashTable<labelList, word>::const_iterator iter =
+                const HashTable<labelList>::const_iterator iter =
                     groupPatchIDs().find(key);
 
-                if (iter != groupPatchIDs().end())
+                if (iter.found())
                 {
                     labelHashSet indexSet(indices);
 
@@ -815,14 +815,8 @@ void Foam::polyBoundaryMesh::matchGroups
     // Current set of unmatched patches
     nonGroupPatches = labelHashSet(patchIDs);
 
-    const HashTable<labelList, word>& groupPatchIDs = this->groupPatchIDs();
-    for
-    (
-        HashTable<labelList,word>::const_iterator iter =
-            groupPatchIDs.begin();
-        iter != groupPatchIDs.end();
-        ++iter
-    )
+    const HashTable<labelList>& groupPatchIDs = this->groupPatchIDs();
+    forAllConstIters(groupPatchIDs, iter)
     {
         // Store currently unmatched patches so we can restore
         labelHashSet oldNonGroupPatches(nonGroupPatches);

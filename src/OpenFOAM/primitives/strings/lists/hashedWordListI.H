@@ -134,7 +134,7 @@ inline void Foam::hashedWordList::append
 }
 
 
-inline const Foam::HashTable<Foam::label,Foam::word>&
+inline const Foam::HashTable<Foam::label>&
 Foam::hashedWordList::lookup() const
 {
     return indices_;
