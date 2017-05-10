@@ -743,6 +743,24 @@ Foam::dictionary Foam::dictionary::subOrEmptyDict
 }
 
 
+const Foam::dictionary& Foam::dictionary::optionalSubDict
+(
+    const word& keyword
+) const
+{
+    const entry* entryPtr = lookupEntryPtr(keyword, false, true);
+
+    if (entryPtr)
+    {
+        return entryPtr->dict();
+    }
+    else
+    {
+        return *this;
+    }
+}
+
+
 Foam::wordList Foam::dictionary::toc() const
 {
     wordList keys(size());
