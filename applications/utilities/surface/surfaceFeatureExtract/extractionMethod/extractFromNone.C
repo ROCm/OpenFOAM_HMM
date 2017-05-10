@@ -52,7 +52,7 @@ Foam::surfaceFeaturesExtraction::extractFromNone::extractFromNone
 :
     method()
 {
-    const dictionary& coeffDict = dict.subOrEmptyDict("extractFromNoneCoeffs");
+    const dictionary& coeffDict = dict.optionalSubDict("noneCoeffs");
 
     coeffDict.readIfPresent("includedAngle", includedAngle_);
     coeffDict.readIfPresent("geometricTestOnly", geometricTestOnly_);

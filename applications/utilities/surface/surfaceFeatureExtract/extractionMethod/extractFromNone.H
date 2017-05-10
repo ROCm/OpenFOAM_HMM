@@ -25,10 +25,13 @@ Class
     Foam::surfaceFeaturesExtraction::extractFromNone
 
 Description
-    Run-time selectable surface feature extraction.
+    Run-time selectable surface feature extraction - no extraction.
+    Primarily useful with self-intersection methods.
+
+    Optional dictionary entries: "includedAngle", "geometricTestOnly".
 
 SourceFiles
-    extractionMethod.C
+    extractFromNone.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -36,10 +39,6 @@ SourceFiles
 #define surfaceFeaturesExtraction_extractFromNone_H
 
 #include "surfaceFeaturesExtraction.H"
-#include "dictionary.H"
-#include "Switch.H"
-#include "triSurface.H"
-#include "edgeIntersections.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

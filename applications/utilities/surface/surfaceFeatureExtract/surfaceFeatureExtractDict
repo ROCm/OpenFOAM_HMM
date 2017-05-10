@@ -19,17 +19,22 @@ surface1.stl
     // How to obtain raw features (extractFromFile | extractFromSurface | none)
     extractionMethod    extractFromSurface;
 
+    // Mark edges whose adjacent surface normals are at an angle less
+    // than includedAngle as features
+    // - 0  : selects no edges
+    // - 180: selects all edges
+    includedAngle       120;
+
+    // Do not mark region edges
+    geometricTestOnly   yes;
+
+    /* alternative specification as coeff dictionary
     extractFromSurfaceCoeffs
     {
-        // Mark edges whose adjacent surface normals are at an angle less
-        // than includedAngle as features
-        // - 0  : selects no edges
-        // - 180: selects all edges
         includedAngle   120;
 
-        // Do not mark region edges
         geometricTestOnly  yes;
-    }
+    } */
 
     // Generate additional features from self-intersect
     selfIntersection    false;
@@ -69,27 +74,27 @@ surface2.nas
         // Use a plane to select feature edges
         // (normal)(basePoint)
         // Keep only edges that intersect the plane will be included
-        plane               (1 0 0)(0 0 0);
+        plane           (1 0 0)(0 0 0);
 
         // Select feature edges using a box
         // (minPt)(maxPt)
         // Keep edges inside the box:
-        insideBox           (0 0 0)(1 1 1);
+        insideBox       (0 0 0)(1 1 1);
         // Keep edges outside the box:
-        outsideBox          (0 0 0)(1 1 1);
+        outsideBox      (0 0 0)(1 1 1);
 
         // Keep nonManifold edges (edges with >2 connected faces where
         // the faces form more than two different normal planes)
-        nonManifoldEdges    yes;
+        nonManifoldEdges yes;
 
         // Keep open edges (edges with 1 connected face)
-        openEdges           yes;
+        openEdges       yes;
     }
 
     addFeatures
     {
         // Add (without merging) another extendedFeatureEdgeMesh
-        name                axZ.extendedFeatureEdgeMesh;
+        name            axZ.extendedFeatureEdgeMesh;
 
         // Optionally flip features (invert all normals, making
         // convex<->concave etc)
@@ -149,19 +154,10 @@ dummyName
     // Tolerance for surface intersections
     tolerance           1e-3;
 
-    extractFromSurfaceCoeffs
-    {
-        includedAngle   120;
+    includedAngle       120;
 
-        // Do not mark region edges
-        geometricTestOnly  yes;
-    }
-
-    extractFromNoneCoeffs
-    {
-        includedAngle   120;
-
-    }
+    // Do not mark region edges
+    geometricTestOnly   yes;
 
     // Write options
 
@@ -180,7 +176,7 @@ dummyName
 //
 surfaces
 {
-    extractionMethod    extractFromNone;
+    extractionMethod    none;
 
     surfaces            (surface1.stl surface2.nas);
 
@@ -193,10 +189,12 @@ surfaces
     // Tolerance for surface intersections
     tolerance           1e-3;
 
-    extractFromNoneCoeffs
+    /* alternative specification as coeff dictionary
+    noneCoeffs
     {
         includedAngle   0;
     }
+    */
 
     // Write options
 

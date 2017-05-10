@@ -27,8 +27,11 @@ Class
 Description
     Run-time selectable surface feature extraction.
 
+    Mandatory dictionary entries: "featureEdgeFile".
+    Optional dictionary entries: "geometricTestOnly".
+
 SourceFiles
-    extractionMethod.C
+    extractFromFile.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -36,8 +39,6 @@ SourceFiles
 #define surfaceFeaturesExtraction_extractFromFile_H
 
 #include "surfaceFeaturesExtraction.H"
-#include "dictionary.H"
-#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

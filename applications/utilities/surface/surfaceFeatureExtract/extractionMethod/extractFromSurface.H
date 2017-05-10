@@ -25,10 +25,13 @@ Class
     Foam::surfaceFeaturesExtraction::extractFromSurface
 
 Description
-    Run-time selectable surface feature extraction.
+    Run-time selectable surface feature extraction - extract from surface.
+
+    Mandatory dictionary entries: "includedAngle".
+    Optional dictionary entries: "geometricTestOnly".
 
 SourceFiles
-    extractionMethod.C
+    extractFromSurface.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -36,10 +39,6 @@ SourceFiles
 #define surfaceFeaturesExtraction_extractFromSurface_H
 
 #include "surfaceFeaturesExtraction.H"
-#include "dictionary.H"
-#include "Switch.H"
-#include "triSurface.H"
-#include "edgeIntersections.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
