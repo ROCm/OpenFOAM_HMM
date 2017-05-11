@@ -25,6 +25,7 @@ License
 
 #include "HashTable.H"
 #include "List.H"
+#include "FlatOutput.H"
 #include "IOstreams.H"
 #include "IStringStream.H"
 #include "OStringStream.H"
@@ -163,15 +164,15 @@ int main()
         << "\ntable2" << table2 << nl;
 
 
-    Info<< "\ntable3" << table3
-        << "\nclearStorage table3 ... ";
-    table3.clearStorage();
-    Info<< table3 << nl;
+    Info<< "\ntable3" << table2
+        << "\nclearStorage table2 ... ";
+    table2.clearStorage();
+    Info<< table2 << nl;
 
     table1 =
     {
-        {"aca", 3.0},
-        {"aaw", 6.0},
+        {"abc", 3.0},
+        {"def", 6.0},
         {"acr", 8.0},
         {"aec", 10.0}
     };
@@ -194,6 +195,25 @@ int main()
     //
     //  List<scalar> table1vals(table1.begin(), table1.end());
     //  wordList table1keys(table1.begin(), table1.end());
+
+    Info<< "\nFrom table1: " << flatOutput(table1.sortedToc()) << nl
+        << "retain keys: " << flatOutput(table3.sortedToc()) << nl;
+
+    table1.retain(table3);
+    Info<< "-> " << flatOutput(table1.sortedToc()) << nl;
+
+    Info<< "Lookup non-existent" << nl;
+
+    Info<< table1.lookup("missing-const", 1.2345e+6)
+        << "  // const-access" << nl;
+
+    Info<< table1("missing-inadvertent", 3.14159)
+        << "  // (inadvertent?) non-const access"  << nl;
+
+    Info<< table1("missing-autovivify")
+        << "  // Known auto-vivification (non-const access)" << nl;
+
+    Info<<"\ntable1: " << table1 << endl;
 
     Info<< "\nDone\n";
 
