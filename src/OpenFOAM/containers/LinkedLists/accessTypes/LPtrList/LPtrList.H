@@ -196,12 +196,12 @@ public:
 
             // Member operators
 
-                T& operator*()
+                T& operator*() const
                 {
                     return *(LList<LListBase, T*>::iterator::operator*());
                 }
 
-                T& operator()()
+                T& operator()() const
                 {
                     return operator*();
                 }
@@ -235,12 +235,12 @@ public:
 
             // Member operators
 
-                const T& operator*()
+                const T& operator*() const
                 {
                     return *(LList<LListBase, T*>::const_iterator::operator*());
                 }
 
-                const T& operator()()
+                const T& operator()() const
                 {
                     return operator*();
                 }
