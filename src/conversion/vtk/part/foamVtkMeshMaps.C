@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,81 +23,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkCells.H"
+#include "foamVtkMeshMaps.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
-inline enum Foam::foamVtkCells::contentType Foam::foamVtkCells::content() const
+void Foam::foamVtkMeshMaps::renumberCells(const UList<label>& mapping)
 {
-    return output_;
+    inplaceRenumber(mapping, cellMap_);
+    inplaceRenumber(mapping, additionalIds_);
 }
 
 
-inline bool Foam::foamVtkCells::decomposeRequested() const
+void Foam::foamVtkMeshMaps::renumberPoints(const UList<label>& mapping)
 {
-    return decomposeRequest_;
-}
-
-
-inline bool Foam::foamVtkCells::empty() const
-{
-    return cellTypes_.empty();
-}
-
-
-inline Foam::label Foam::foamVtkCells::size() const
-{
-    return cellTypes_.size();
-}
-
-
-inline const Foam::List<uint8_t>&
-Foam::foamVtkCells::cellTypes() const
-{
-    return cellTypes_;
-}
-
-
-inline const Foam::labelList&
-Foam::foamVtkCells::vertLabels() const
-{
-    return vertLabels_;
-}
-
-
-inline const Foam::labelList&
-Foam::foamVtkCells::vertOffsets() const
-{
-    return vertOffset_;
-}
-
-
-inline const Foam::labelList&
-Foam::foamVtkCells::faceLabels() const
-{
-    return faceLabels_;
-}
-
-
-inline const Foam::labelList&
-Foam::foamVtkCells::faceOffsets() const
-{
-    return faceOffset_;
-}
-
-
-inline const Foam::labelList&
-Foam::foamVtkCells::addPointCellLabels() const
-{
-    return maps_.additionalIds();
-}
-
-
-inline const Foam::labelList&
-Foam::foamVtkCells::cellMap() const
-{
-    return maps_.cellMap();
+    inplaceRenumber(mapping, pointMap_);
 }
 
 

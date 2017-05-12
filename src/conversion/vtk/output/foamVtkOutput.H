@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2107 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -80,7 +80,7 @@ public:
 
         //- Write a value component-wise.
         template<class Type>
-        inline static void write(foamVtkFormatter&, const Type&);
+        inline static void write(foamVtkFormatter& fmt, const Type& val);
 
 
         //- Write a list of values.
@@ -88,8 +88,8 @@ public:
         template<class Type>
         static void writeList
         (
-            foamVtkFormatter&,
-            const UList<Type>&
+            foamVtkFormatter& fmt,
+            const UList<Type>& lst
         );
 
 
@@ -98,20 +98,29 @@ public:
         template<class Type>
         static void writeList
         (
-            foamVtkFormatter&,
-            const UList<Type>&,
+            foamVtkFormatter& fmt,
+            const UList<Type>& lst,
             const UList<label>& addressing
         );
 
 
-        //- Write volField with cell values (including decomposed cells).
+        //- Write internalField for mesh
         //  The output includes the payload size and flush.
         template<class Type>
         static void writeField
         (
-            foamVtkFormatter&,
-            const GeometricField<Type, fvPatchField, volMesh>&,
-            const UList<label>& superCells
+            foamVtkFormatter& fmt,
+            const GeometricField<Type, fvPatchField, volMesh>& vf
+        );
+
+        //- Write internalField based on the cellMap
+        //  The output includes the payload size and flush.
+        template<class Type>
+        static void writeField
+        (
+            foamVtkFormatter& fmt,
+            const GeometricField<Type, fvPatchField, volMesh>& vf,
+            const UList<label>& cellMap
         );
 
 };

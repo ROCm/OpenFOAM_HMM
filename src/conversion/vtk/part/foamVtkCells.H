@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,53 +25,32 @@ Class
     Foam::foamVtkCells
 
 Description
-    The deep-copy description of an OpenFOAM volume mesh in data structures
-    corresponding to an VTK UnstructuredGrid, including the possiblity of
+    A deep-copy description of an OpenFOAM volume mesh in data structures
+    suitable for VTK UnstructuredGrid, including the possibility of
     decomposing polyhedral cells into primitive cell types.
 
     Knowledge of the vtkUnstructuredGrid and the corresponding \c .vtu
     xml file-format aids in understanding this class.
-    For flexibilty, support for the legacy vtk file-format is also provided.
+    The class can be used for the VTK xml format, legacy format, as well as a
+    VTK internal representation. The internal representation is somewhat
+    related to the xml format, but not entirely.
 
-    Primitive cell types are straighforward, polyhedral cells are represented
-    by a face stream:
-    \verbatim
-        [nFaces, nFace0Pts, id1, id2, ..., nFace1Pts, id1, id2, ...]
-    \endverbatim
-
-    For the legacy format, the face stream is simply passed as vertex labels
-    (connectivity).
-
-    For the xml format, the face stream is saved separately:
-    \verbatim
-        "connectivity"
-        == the unique vertex labels used by the cell (optionally sorted).
-
-        "offsets":
-        == offset + sizeof(connectivity)
-
-        "faces":
-        [nFaces, nFace0Pts, id1, id2, ..., nFace1Pts, id1, id2, ...]
-
-        "faceoffsets":
-        == faceoffsets + sizeof(faces)
-    \endverbatim
-
-    The storage of "connectivity" and "offsets" strongly resembles a
-    CompactListList, but the "offsets" point to the end of the respective
-    sub-lists.
+SeeAlso
+    Foam::foamVtuSizing
 
 SourceFiles
     foamVtkCells.C
+    foamVtkCellsI.H
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef foamVtkCells_H
 #define foamVtkCells_H
 
+#include "foamVtkMeshMaps.H"
+#include "foamVtuSizing.H"
 #include "foamVtkCore.H"
 #include "DynamicList.H"
-#include "SubList.H"
 #include "labelList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -83,118 +62,47 @@ namespace Foam
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
-                      Class foamVtkCells Declaration
+                        Class foamVtkCells Declaration
 \*---------------------------------------------------------------------------*/
 
 class foamVtkCells
 :
-    public fileFormats::foamVtkCore
+    public fileFormats::foamVtkCore,
+    public foamVtuSizing
 {
-public:
-
-    //- Bookkeeping for polyhedral cell decomposition
-    class decomp
-    {
-    private:
-        friend foamVtkCells;
-
-        // Private data
-
-            //- Cell-centre labels for additional points of decomposed cells
-            DynamicList<label> addPointCellLabels_;
-
-            //- Label of original cell for decomposed cells
-            DynamicList<label> superCells_;
-
-            //- Point labels for subsetted meshes
-            DynamicList<label> pointMap_;
-
-            //- Track if decomposition was requested
-            const bool requested_;
-
-
-        // Private Member Functions
-
-            //- Disallow default bitwise copy construct
-            decomp(const decomp&) = delete;
-
-            //- Disallow default bitwise assignment
-            void operator=(const decomp&) = delete;
-
-    public:
-
-        // Constructors
-
-            //- Construct null
-            decomp(const bool decomposePoly = false);
-
-
-        //- Destructor
-        ~decomp();
-
-
-        // Member Functions
-
-        // Access
-
-            //- Polyhedral decomposition requested
-            inline bool requested() const;
-
-            //- Polyhedral decomposition used
-            inline bool used() const;
-
-            //- Label of original cell for decomposed cells
-            inline const labelList& superCells() const;
-
-            //- Cell-centre labels for additional points of decomposed cells
-            inline const labelList& addPointCellLabels() const;
-
-            //- Point labels for subsetted meshes
-            inline const labelList& pointMap() const;
-
-
-        // Edit
-
-            //- Clear
-            void clear();
-    };
-
-
-private:
-
     // Private data
 
-        //- Reference to underlying mesh or mesh sub-set
-        const polyMesh& mesh_;
+      // Requested output types
+
+        //- Output content type
+        contentType output_;
+
+        //- Bookkeeping for polyhedral cell decomposition
+        bool decomposeRequest_;
+
+      // Storage of output
 
         //- Cell types (including added cells) in vtk numbering
         //  Range is 1-255
         List<uint8_t> cellTypes_;
 
         //- Vertices per cell (including added cells) in vtk ordering
-        DynamicList<label> vertLabels_;
+        List<label> vertLabels_;
 
-        //- Vertices per cell (including added cells) in vtk ordering
-        DynamicList<label> vertOffset_;
+        //- Connectivity (vertices) offset for the end of each cell
+        List<label> vertOffset_;
 
         //- Face lists per polyhedral cell
-        DynamicList<label> faceLabels_;
+        List<label> faceLabels_;
 
         //- Face label offsets
-        DynamicList<label> faceOffset_;
+        List<label> faceOffset_;
 
         //- Bookkeeping for polyhedral cell decomposition
-        decomp decompose_;
-
-        //- Needs update
-        bool needsUpdate_;
-
+        foamVtkMeshMaps maps_;
 
 
     // Private Member Functions
-
-        //- Create the geometry
-        void correct();
 
         //- Disallow default bitwise copy construct
         foamVtkCells(const foamVtkCells&) = delete;
@@ -208,13 +116,20 @@ public:
     // Constructors
 
         //- Construct from components.
-        //  Optionally with polyhedral decomposition and/or lazy evaluation.
-        //  A 'lazy' evaluation avoids fully creation within the constructor.
+        //  Optionally with polyhedral decomposition.
         foamVtkCells
         (
-            const polyMesh&,
-            const bool decomposePoly = false,
-            const bool lazy = false
+            const enum contentType output = contentType::XML,
+            const bool decompose = false
+        );
+
+        //- Construct from components and create the output information
+        //  immediately
+        foamVtkCells
+        (
+            const polyMesh& mesh,
+            const enum contentType output = contentType::XML,
+            const bool decompose = false
         );
 
 
@@ -224,113 +139,68 @@ public:
 
     // Member Functions
 
-        // Access
+      // Access
 
-            //- Query the poly decompose flag.
-            inline bool decomposeRequested() const;
+        //- The output content type
+        inline enum contentType content() const;
 
-            //- Values for "connectivity" (XML) or basis for "CELLS" (legacy)
-            //  In the legacy format, the size (offset) must be prefixed.
-            inline const labelList& vertLabels() const;
+        //- Query the polyhedral decompose requested flag.
+        inline bool decomposeRequested() const;
 
-            //- Values for "offsets" (XML)
-            //  or sizes to prefix for for "CELLS" (legacy)
-            inline const labelList& vertOffsets() const;
+        //- True if no cellTypes are populated.
+        inline bool empty() const;
 
-            //- Values for "types" (XML) and "CELL_TYPES" (legacy)
-            inline const List<uint8_t>& cellTypes() const;
-
-            //- Values for "faces" (XML)
-            inline const labelList& faceLabels() const;
-
-            //- Values for "faceoffsets" (XML)
-            inline const labelList& faceOffsets() const;
-
-            //- Additional point addressing (from added point to original cell)
-            inline const labelList& addPointCellLabels() const;
-
-            //- Additional cells mapping (from added cell to original cell)
-            inline const labelList& superCells() const;
+        //- The size of populated cellTypes.
+        inline label size() const;
 
 
-            //- Number of field cells
-            inline label nFieldCells() const;
+      // Edit
 
-            //- Number of field points
-            label nFieldPoints() const;
+        //- Reset all sizes to zero.
+        void clear();
 
-            //- The field size for legacy "CELLS".
-            //  In the legacy format, the size (offset) must be prefixed.
-            label legacyCellPayLoad() const;
+        //- Create the geometry using the previously requested output and
+        //  decomposition types.
+        void reset(const polyMesh& mesh);
 
+        //- Respecify requested output and decomposition type prior to
+        //  creating the geometry
+        void reset
+        (
+            const polyMesh& mesh,
+            const enum contentType output,
+            const bool decompose
+        );
 
-        //- Does the mapping need an update?
-        bool needsUpdate() const;
+        //- Renumber cell ids to account for subset meshes
+        void renumberCells(const UList<label>& mapping);
 
-        //- Mark as needing an update.
-        //  May also free up unneeded data.
-        //  Return false if it was already marked as expired.
-        bool expire();
-
-        //- Update the description (and decomposition) as required.
-        //  Do nothing (and return false) if no update was required
-        bool update();
-
-
-        //- The const_iterator for foamVtkCells
-        class const_iterator
-        {
-            friend class foamVtkCells;
-
-        protected:
-
-            // Protected Data
-
-                //- Reference to parent list
-                const foamVtkCells& parent_;
-
-                //- Element index
-                label index_;
-
-                //- Begin of connectivity sub-list
-                mutable label begVert_;
-
-                //- Begin of faces sub-list
-                mutable label begFace_;
-
-                //- On-demand legacy pointer
-                mutable autoPtr<SubList<label>> legacy_;
+        //- Renumber point ids to account for subset meshes
+        void renumberPoints(const UList<label>& mapping);
 
 
-            // Constructors
+      // Storage Access
 
-                //- Construct begin/end iterator
-                inline const_iterator
-                (
-                    const foamVtkCells&,
-                    bool isEnd = false
-                );
+        //- Values for "types" (XML) and "CELL_TYPES" (legacy)
+        inline const List<uint8_t>& cellTypes() const;
 
-        public:
+        //- Values for "connectivity" (XML) or "CELLS" (legacy)
+        inline const labelList& vertLabels() const;
 
-            // Member operators
+        //- Values for "offsets" (XML only)
+        inline const labelList& vertOffsets() const;
 
-                //- On-demand legacy cell labels (primitive or faces)
-                inline const labelUList& legacyCell() const;
+        //- Values for "faces" (XML only)
+        inline const labelList& faceLabels() const;
 
-                //- Compare position
-                inline bool operator!=(const const_iterator&) const;
+        //- Values for "faceoffset" (XML only)
+        inline const labelList& faceOffsets() const;
 
-                //- Pre-increment iterator
-                inline const_iterator& operator++();
-        };
+        //- Additional point addressing (from added point to original cell)
+        inline const labelList& addPointCellLabels() const;
 
-
-        //- const_iterator set to the beginning
-        inline const_iterator begin() const;
-
-        //- const_iterator set to beyond the end
-        inline const_iterator end() const;
+        //- Original cell ids for all cells (regular and decomposed).
+        inline const labelList& cellMap() const;
 
 };
 

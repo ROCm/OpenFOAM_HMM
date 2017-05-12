@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2107 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,19 +73,36 @@ template<class Type>
 void Foam::foamVtkOutput::writeField
 (
     foamVtkFormatter& fmt,
-    const GeometricField<Type, fvPatchField, volMesh>& vf,
-    const UList<label>& superCells
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     const uint64_t payLoad =
     (
-        (vf.size() + superCells.size())
-      * pTraits<Type>::nComponents * sizeof(float)
+        vf.size() * pTraits<Type>::nComponents * sizeof(float)
     );
 
     fmt.writeSize(payLoad);
     writeList(fmt, vf.internalField());
-    writeList(fmt, vf, superCells);
+
+    fmt.flush();
+}
+
+
+template<class Type>
+void Foam::foamVtkOutput::writeField
+(
+    foamVtkFormatter& fmt,
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
+    const UList<label>& cellMap
+)
+{
+    const uint64_t payLoad =
+    (
+        cellMap.size() * pTraits<Type>::nComponents * sizeof(float)
+    );
+
+    fmt.writeSize(payLoad);
+    writeList(fmt, vf.internalField(), cellMap);
 
     fmt.flush();
 }

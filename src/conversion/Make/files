@@ -25,6 +25,8 @@ starcd/STARCDMeshWriter.C
 polyDualMesh/polyDualMesh.C
 
 vtk/part/foamVtkCells.C
+vtk/part/foamVtkMeshMaps.C
+vtk/part/foamVtuSizing.C
 vtk/output/foamVtkOutput.C
 
 LIB = $(FOAM_LIBBIN)/libconversion

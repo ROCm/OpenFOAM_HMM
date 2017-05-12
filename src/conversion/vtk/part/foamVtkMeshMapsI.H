@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,81 +23,73 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkCells.H"
+#include "foamVtkMeshMaps.H"
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+inline Foam::foamVtkMeshMaps::foamVtkMeshMaps(const label size)
+:
+    cellMap_(size),
+    pointMap_(size),
+    additionalIds_(size)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+inline Foam::foamVtkMeshMaps::~foamVtkMeshMaps()
+{}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
-inline enum Foam::foamVtkCells::contentType Foam::foamVtkCells::content() const
+inline void Foam::foamVtkMeshMaps::clear()
 {
-    return output_;
-}
-
-
-inline bool Foam::foamVtkCells::decomposeRequested() const
-{
-    return decomposeRequest_;
-}
-
-
-inline bool Foam::foamVtkCells::empty() const
-{
-    return cellTypes_.empty();
-}
-
-
-inline Foam::label Foam::foamVtkCells::size() const
-{
-    return cellTypes_.size();
-}
-
-
-inline const Foam::List<uint8_t>&
-Foam::foamVtkCells::cellTypes() const
-{
-    return cellTypes_;
+    cellMap_.clear();
+    pointMap_.clear();
+    additionalIds_.clear();
 }
 
 
 inline const Foam::labelList&
-Foam::foamVtkCells::vertLabels() const
+Foam::foamVtkMeshMaps::cellMap() const
 {
-    return vertLabels_;
+    return cellMap_;
+}
+
+
+inline Foam::DynamicList<Foam::label>&
+Foam::foamVtkMeshMaps::cellMap()
+{
+    return cellMap_;
 }
 
 
 inline const Foam::labelList&
-Foam::foamVtkCells::vertOffsets() const
+Foam::foamVtkMeshMaps::pointMap() const
 {
-    return vertOffset_;
+    return pointMap_;
+}
+
+
+inline Foam::DynamicList<Foam::label>&
+Foam::foamVtkMeshMaps::pointMap()
+{
+    return pointMap_;
 }
 
 
 inline const Foam::labelList&
-Foam::foamVtkCells::faceLabels() const
+Foam::foamVtkMeshMaps::additionalIds() const
 {
-    return faceLabels_;
+    return additionalIds_;
 }
 
 
-inline const Foam::labelList&
-Foam::foamVtkCells::faceOffsets() const
+inline Foam::DynamicList<Foam::label>&
+Foam::foamVtkMeshMaps::additionalIds()
 {
-    return faceOffset_;
-}
-
-
-inline const Foam::labelList&
-Foam::foamVtkCells::addPointCellLabels() const
-{
-    return maps_.additionalIds();
-}
-
-
-inline const Foam::labelList&
-Foam::foamVtkCells::cellMap() const
-{
-    return maps_.cellMap();
+    return additionalIds_;
 }
 
 
