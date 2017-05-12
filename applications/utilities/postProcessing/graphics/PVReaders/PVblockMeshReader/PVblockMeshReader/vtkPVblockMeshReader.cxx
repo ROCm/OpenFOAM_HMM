@@ -106,7 +106,7 @@ vtkPVblockMeshReader::~vtkPVblockMeshReader()
 
     if (FileName)
     {
-        delete [] FileName;
+        delete[] FileName;
     }
 
     BlockSelection->RemoveAllObservers();
@@ -263,12 +263,11 @@ void vtkPVblockMeshReader::updatePatchNamesView(const bool show)
     }
 
     // Get all the pqRenderView instances
-    QList<pqRenderView*> renderViews = smModel->findItems<pqRenderView*>();
-    for (int viewI=0; viewI<renderViews.size(); ++viewI)
+    for (auto view : smModel->findItems<pqRenderView*>())
     {
         backend_->renderPatchNames
         (
-            renderViews[viewI]->getRenderViewProxy()->GetRenderer(),
+            view->getRenderViewProxy()->GetRenderer(),
             show
         );
     }
@@ -295,12 +294,11 @@ void vtkPVblockMeshReader::updatePointNumbersView(const bool show)
     }
 
     // Get all the pqRenderView instances
-    QList<pqRenderView*> renderViews = smModel->findItems<pqRenderView*>();
-    for (int viewI=0; viewI<renderViews.size(); ++viewI)
+    for (auto view : smModel->findItems<pqRenderView*>())
     {
         backend_->renderPointNumbers
         (
-            renderViews[viewI]->getRenderViewProxy()->GetRenderer(),
+            view->getRenderViewProxy()->GetRenderer(),
             show
         );
     }

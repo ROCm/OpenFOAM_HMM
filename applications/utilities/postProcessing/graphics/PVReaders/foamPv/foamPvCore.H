@@ -40,6 +40,7 @@ SourceFiles
 #include "wordList.H"
 #include "Hash.H"
 #include "hashedWordList.H"
+#include "labelRange.H"
 
 #include "vtkPoints.h"
 
@@ -69,21 +70,20 @@ public:
     //- Bookkeeping for GUI checklists and multi-block organization
     //  Works like a SubList selection.
     class arrayRange
+    :
+        public labelRange
     {
         const char *name_;
         int block_;
-        int start_;
-        int size_;
 
     public:
 
         //- Construct with given name for the specified block
-        arrayRange(const char *name, const int blockNo=0)
+        arrayRange(const char *name, int blockNo=0)
         :
+            labelRange(),
             name_(name),
-            block_(blockNo),
-            start_(0),
-            size_(0)
+            block_(blockNo)
         {}
 
         //- Return the block holding these datasets
@@ -106,47 +106,21 @@ public:
             return name_;
         }
 
-        //- The array start index
-        int start() const
-        {
-            return start_;
-        }
-
-        //- The array end index
-        int end() const
-        {
-            return start_ + size_;
-        }
-
-        //- The sub-list size
-        int size() const
-        {
-            return size_;
-        }
-
-        //- True if the sub-list is empty
-        bool empty() const
-        {
-            return !size_;
-        }
+        //- Reset the start/size directly
+        using labelRange::reset;
 
         //- Reset the size to zero and optionally assign a new start
-        void reset(const int startAt = 0)
+        void reset(label startAt = 0)
         {
-            start_ = startAt;
-            size_  = 0;
+            clear();
+            setStart(startAt);
         }
 
-        //- Assign new start and reset the size
-        void operator=(const int i)
-        {
-            reset(i);
-        }
 
         //- Increment the size
-        void operator+=(const int n)
+        void operator+=(label n)
         {
-            size_ += n;
+            setSize(size() + n);
         }
 
     }; // End class arrayRange
@@ -206,7 +180,7 @@ public:
     (
         vtkDataArraySelection* select,
         const IOobjectList& objects,
-        const string& suffix = string::null
+        const std::string& suffix = string::null
     );
 
 

@@ -83,7 +83,7 @@ void Foam::vtkPVFoam::convertVolField
         fld,
         ptfPtr,
         output,
-        arrayRangeVolume_,
+        rangeVolume_,
         regionPolyDecomp_
     );
 
@@ -93,7 +93,7 @@ void Foam::vtkPVFoam::convertVolField
         fld,
         ptfPtr,
         output,
-        arrayRangeCellZones_,
+        rangeCellZones_,
         zonePolyDecomp_
     );
 
@@ -103,7 +103,7 @@ void Foam::vtkPVFoam::convertVolField
         fld,
         ptfPtr,
         output,
-        arrayRangeCellSets_,
+        rangeCellSets_,
         csetPolyDecomp_
     );
 
@@ -111,12 +111,7 @@ void Foam::vtkPVFoam::convertVolField
     //
     // Convert patches - if activated
     //
-    for
-    (
-        int partId = arrayRangePatches_.start();
-        partId < arrayRangePatches_.end();
-        ++partId
-    )
+    for (auto partId : rangePatches_)
     {
         const word patchName = getPartName(partId);
         const label datasetNo = partDataset_[partId];
@@ -129,7 +124,7 @@ void Foam::vtkPVFoam::convertVolField
 
         vtkPolyData* vtkmesh = getDataFromBlock<vtkPolyData>
         (
-            output, arrayRangePatches_, datasetNo
+            output, rangePatches_, datasetNo
         );
 
         if (!vtkmesh)
@@ -195,12 +190,7 @@ void Foam::vtkPVFoam::convertVolField
     //
     // Convert face zones - if activated
     //
-    for
-    (
-        int partId = arrayRangeFaceZones_.start();
-        partId < arrayRangeFaceZones_.end();
-        ++partId
-    )
+    for (auto partId : rangeFaceZones_)
     {
         const word zoneName = getPartName(partId);
         const label datasetNo = partDataset_[partId];
@@ -220,7 +210,7 @@ void Foam::vtkPVFoam::convertVolField
 
         vtkPolyData* vtkmesh = getDataFromBlock<vtkPolyData>
         (
-            output, arrayRangeFaceZones_, datasetNo
+            output, rangeFaceZones_, datasetNo
         );
 
         if (vtkmesh)
@@ -241,12 +231,7 @@ void Foam::vtkPVFoam::convertVolField
     //
     // Convert face sets - if activated
     //
-    for
-    (
-        int partId = arrayRangeFaceSets_.start();
-        partId < arrayRangeFaceSets_.end();
-        ++partId
-    )
+    for (auto partId : rangeFaceSets_)
     {
         const word selectName = getPartName(partId);
         const label datasetNo = partDataset_[partId];
@@ -258,7 +243,7 @@ void Foam::vtkPVFoam::convertVolField
 
         vtkPolyData* vtkmesh = getDataFromBlock<vtkPolyData>
         (
-            output, arrayRangeFaceSets_, datasetNo
+            output, rangeFaceSets_, datasetNo
         );
 
         if (!vtkmesh)
@@ -291,7 +276,7 @@ void Foam::vtkPVFoam::convertVolFields
     vtkMultiBlockDataSet* output
 )
 {
-    forAllConstIter(IOobjectList, objects, iter)
+    forAllConstIters(objects, iter)
     {
         // restrict to GeometricField<Type, ...>
         if
@@ -327,7 +312,7 @@ void Foam::vtkPVFoam::convertDimFields
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
-    forAllConstIter(IOobjectList, objects, iter)
+    forAllConstIters(objects, iter)
     {
         // restrict to DimensionedField<Type, ...>
         if
@@ -387,7 +372,7 @@ void Foam::vtkPVFoam::convertVolFieldBlock
     const List<polyDecomp>& decompLst
 )
 {
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
         const label datasetNo = partDataset_[partId];
 
@@ -437,7 +422,7 @@ void Foam::vtkPVFoam::convertPointFields
     const polyMesh& mesh = pMesh.mesh();
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    forAllConstIter(IOobjectList, objects, iter)
+    forAllConstIters(objects, iter)
     {
         const word& fieldName = iter()->name();
         // restrict to this GeometricField<Type, ...>
@@ -463,7 +448,7 @@ void Foam::vtkPVFoam::convertPointFields
         (
             pfld,
             output,
-            arrayRangeVolume_,
+            rangeVolume_,
             regionPolyDecomp_
         );
 
@@ -472,7 +457,7 @@ void Foam::vtkPVFoam::convertPointFields
         (
             pfld,
             output,
-            arrayRangeCellZones_,
+            rangeCellZones_,
             zonePolyDecomp_
         );
 
@@ -481,7 +466,7 @@ void Foam::vtkPVFoam::convertPointFields
         (
             pfld,
             output,
-            arrayRangeCellSets_,
+            rangeCellSets_,
             csetPolyDecomp_
         );
 
@@ -489,12 +474,7 @@ void Foam::vtkPVFoam::convertPointFields
         //
         // Convert patches - if activated
         //
-        for
-        (
-            int partId = arrayRangePatches_.start();
-            partId < arrayRangePatches_.end();
-            ++partId
-        )
+        for (auto partId : rangePatches_)
         {
             const word patchName = getPartName(partId);
             const label datasetNo = partDataset_[partId];
@@ -507,7 +487,7 @@ void Foam::vtkPVFoam::convertPointFields
 
             vtkPolyData* vtkmesh = getDataFromBlock<vtkPolyData>
             (
-                output, arrayRangePatches_, datasetNo
+                output, rangePatches_, datasetNo
             );
 
             if (vtkmesh)
@@ -526,12 +506,7 @@ void Foam::vtkPVFoam::convertPointFields
         //
         // Convert faceZones - if activated
         //
-        for
-        (
-            int partId = arrayRangeFaceZones_.start();
-            partId < arrayRangeFaceZones_.end();
-            ++partId
-        )
+        for (auto partId : rangeFaceZones_)
         {
             const word zoneName = getPartName(partId);
             const label datasetNo = partDataset_[partId];
@@ -544,7 +519,7 @@ void Foam::vtkPVFoam::convertPointFields
 
             vtkPolyData* vtkmesh = getDataFromBlock<vtkPolyData>
             (
-                output, arrayRangeFaceZones_, datasetNo
+                output, rangeFaceZones_, datasetNo
             );
 
             if (vtkmesh)
@@ -575,31 +550,31 @@ void Foam::vtkPVFoam::convertPointFieldBlock
     const List<polyDecomp>& decompLst
 )
 {
-   for (int partId = range.start(); partId < range.end(); ++partId)
-   {
-       const label datasetNo = partDataset_[partId];
+    for (auto partId : range)
+    {
+        const label datasetNo = partDataset_[partId];
 
-       if (!partStatus_[partId])
-       {
-           continue;
-       }
+        if (!partStatus_[partId])
+        {
+            continue;
+        }
 
-       vtkUnstructuredGrid* vtkmesh = getDataFromBlock<vtkUnstructuredGrid>
-       (
-           output, range, datasetNo
-       );
+        vtkUnstructuredGrid* vtkmesh = getDataFromBlock<vtkUnstructuredGrid>
+        (
+            output, range, datasetNo
+        );
 
-       if (vtkmesh)
-       {
-           convertPointField
-           (
-               vtkmesh,
-               pfld,
-               GeometricField<Type, fvPatchField, volMesh>::null(),
-               decompLst[datasetNo]
-           );
-       }
-   }
+        if (vtkmesh)
+        {
+            convertPointField
+            (
+                vtkmesh,
+                pfld,
+                GeometricField<Type, fvPatchField, volMesh>::null(),
+                decompLst[datasetNo]
+            );
+        }
+    }
 }
 
 
@@ -731,9 +706,9 @@ void Foam::vtkPVFoam::convertLagrangianFields
     const label datasetNo
 )
 {
-    const arrayRange& range = arrayRangeLagrangian_;
+    const arrayRange& range = rangeLagrangian_;
 
-    forAllConstIter(IOobjectList, objects, iter)
+    forAllConstIters(objects, iter)
     {
         // restrict to this IOField<Type>
         if (iter()->headerClassName() == IOField<Type>::typeName)

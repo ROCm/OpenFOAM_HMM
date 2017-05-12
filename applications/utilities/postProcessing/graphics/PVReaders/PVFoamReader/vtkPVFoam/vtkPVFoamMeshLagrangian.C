@@ -80,7 +80,7 @@ vtkPolyData* Foam::vtkPVFoam::lagrangianVTKMesh
         vtkcells->Allocate(parcels.size());
 
         vtkIdType particleId = 0;
-        forAllConstIter(Cloud<passiveParticle>, parcels, iter)
+        forAllConstIters(parcels, iter)
         {
             vtkpoints->InsertNextPoint(iter().position().v_);
 

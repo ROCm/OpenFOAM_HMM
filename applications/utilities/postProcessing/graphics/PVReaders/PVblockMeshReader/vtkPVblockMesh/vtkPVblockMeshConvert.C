@@ -68,7 +68,7 @@ void Foam::vtkPVblockMesh::convertMeshBlocks
 )
 {
     vtkDataArraySelection* selection = reader_->GetBlockSelection();
-    arrayRange& range = arrayRangeBlocks_;
+    arrayRange& range = rangeBlocks_;
     range.block(blockNo);   // set output block
     label datasetNo = 0;    // restart at dataset 0
 
@@ -85,11 +85,12 @@ void Foam::vtkPVblockMesh::convertMeshBlocks
 
     for
     (
-        int partId = range.start();
-        partId < range.end();
-        ++partId, ++blockI
+        auto iter = range.cbegin();
+        iter != range.cend();
+        ++iter, ++blockI
     )
     {
+        const auto partId = *iter;
         if (!blockStatus_[partId])
         {
             continue;
@@ -135,7 +136,7 @@ void Foam::vtkPVblockMesh::convertMeshBlocks
         );
 
         vtkmesh->Delete();
-        datasetNo++;
+        ++datasetNo;
     }
 
 
@@ -159,7 +160,7 @@ void Foam::vtkPVblockMesh::convertMeshEdges
 )
 {
     vtkDataArraySelection* selection = reader_->GetCurvedEdgesSelection();
-    arrayRange& range = arrayRangeEdges_;
+    arrayRange& range = rangeEdges_;
 
     range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
@@ -172,11 +173,12 @@ void Foam::vtkPVblockMesh::convertMeshEdges
 
     for
     (
-        int partId = range.start();
-        partId < range.end();
-        ++partId, ++edgeI
+        auto iter = range.cbegin();
+        iter != range.cend();
+        ++iter, ++edgeI
     )
     {
+        const auto partId = *iter;
         if (!edgeStatus_[partId])
         {
             continue;
@@ -271,7 +273,7 @@ void Foam::vtkPVblockMesh::convertMeshCorners
     int& blockNo
 )
 {
-    arrayRange& range = arrayRangeCorners_;
+    arrayRange& range = rangeCorners_;
     range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
 
@@ -315,12 +317,7 @@ void Foam::vtkPVblockMesh::convertMeshCorners
         addToBlock(output, vtkmesh, range, datasetNo, range.name());
         vtkmesh->Delete();
 
-        datasetNo++;
-    }
-
-    // anything added?
-    if (datasetNo)
-    {
+        ++datasetNo;
         ++blockNo;
     }
 

@@ -50,7 +50,7 @@ namespace Foam
 
 vtkTextActor* Foam::vtkPVFoam::createTextActor
 (
-    const string& s,
+    const std::string& s,
     const point& pt
 )
 {
@@ -79,15 +79,15 @@ vtkTextActor* Foam::vtkPVFoam::createTextActor
 void Foam::vtkPVFoam::resetCounters()
 {
     // Reset array range information (ids and sizes)
-    arrayRangeVolume_.reset();
-    arrayRangePatches_.reset();
-    arrayRangeLagrangian_.reset();
-    arrayRangeCellZones_.reset();
-    arrayRangeFaceZones_.reset();
-    arrayRangePointZones_.reset();
-    arrayRangeCellSets_.reset();
-    arrayRangeFaceSets_.reset();
-    arrayRangePointSets_.reset();
+    rangeVolume_.reset();
+    rangePatches_.reset();
+    rangeLagrangian_.reset();
+    rangeCellZones_.reset();
+    rangeFaceZones_.reset();
+    rangePointZones_.reset();
+    rangeCellSets_.reset();
+    rangeFaceSets_.reset();
+    rangePointSets_.reset();
 }
 
 
@@ -260,15 +260,15 @@ Foam::vtkPVFoam::vtkPVFoam
     timeIndex_(-1),
     meshChanged_(true),
     fieldsChanged_(true),
-    arrayRangeVolume_("unzoned"),
-    arrayRangePatches_("patches"),
-    arrayRangeLagrangian_("lagrangian"),
-    arrayRangeCellZones_("cellZone"),
-    arrayRangeFaceZones_("faceZone"),
-    arrayRangePointZones_("pointZone"),
-    arrayRangeCellSets_("cellSet"),
-    arrayRangeFaceSets_("faceSet"),
-    arrayRangePointSets_("pointSet")
+    rangeVolume_("unzoned"),
+    rangePatches_("patches"),
+    rangeLagrangian_("lagrangian"),
+    rangeCellZones_("cellZone"),
+    rangeFaceZones_("faceZone"),
+    rangePointZones_("pointZone"),
+    rangeCellSets_("cellSet"),
+    rangeFaceSets_("faceSet"),
+    rangePointSets_("pointSet")
 {
     if (debug)
     {
@@ -653,7 +653,7 @@ void Foam::vtkPVFoam::renderPatchNames
         hashedWordList selectedPatches = getSelected
         (
             reader_->GetPartSelection(),
-            arrayRangePatches_
+            rangePatches_
         );
 
         if (selectedPatches.empty())

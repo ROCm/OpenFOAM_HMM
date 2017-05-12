@@ -89,11 +89,11 @@ Foam::wordList Foam::vtkPVFoam::getZoneNames
     wordList names(zmesh.size());
     label nZone = 0;
 
-    forAll(zmesh, zoneI)
+    forAll(zmesh, zonei)
     {
-        if (!zmesh[zoneI].empty())
+        if (!zmesh[zonei].empty())
         {
-            names[nZone++] = zmesh[zoneI].name();
+            names[nZone++] = zmesh[zonei].name();
         }
     }
     names.setSize(nZone);
@@ -128,9 +128,9 @@ Foam::wordList Foam::vtkPVFoam::getZoneNames(const word& zoneType) const
         zonesEntries zones(ioObj);
 
         names.setSize(zones.size());
-        forAll(zones, zoneI)
+        forAll(zones, zonei)
         {
-            names[zoneI] = zones[zoneI].keyword();
+            names[zonei] = zones[zonei].keyword();
         }
     }
 
@@ -150,12 +150,8 @@ void Foam::vtkPVFoam::updateInfoInternalMesh
 
     // Determine mesh parts (internalMesh, patches...)
     //- Add internal mesh as first entry
-    arrayRangeVolume_.reset(arraySelection->GetNumberOfArrays());
-    arraySelection->AddArray
-    (
-        "internalMesh"
-    );
-    arrayRangeVolume_ += 1;
+    rangeVolume_.reset(arraySelection->GetNumberOfArrays(), 1);
+    arraySelection->AddArray("internalMesh");
 
     if (debug)
     {
@@ -190,20 +186,16 @@ void Foam::vtkPVFoam::updateInfoLagrangian
         readDir(dbPtr_->timePath()/lagrangianPrefix, fileName::DIRECTORY)
     );
 
-    arrayRangeLagrangian_.reset(arraySelection->GetNumberOfArrays());
-
-    int nClouds = 0;
-    forAll(cloudDirs, cloudI)
+    rangeLagrangian_.reset(arraySelection->GetNumberOfArrays());
+    forAll(cloudDirs, cloudi)
     {
         // Add cloud to GUI list
         arraySelection->AddArray
         (
-            (cloudDirs[cloudI] + " - lagrangian").c_str()
+            (cloudDirs[cloudi] + " - lagrangian").c_str()
         );
-
-        ++nClouds;
+        ++rangeLagrangian_;
     }
-    arrayRangeLagrangian_ += nClouds;
 
     if (debug)
     {
@@ -224,53 +216,54 @@ void Foam::vtkPVFoam::updateInfoPatches
             << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
     }
 
-
     HashSet<string> enabledEntriesSet(enabledEntries);
 
-    arrayRangePatches_.reset(arraySelection->GetNumberOfArrays());
+    rangePatches_.reset(arraySelection->GetNumberOfArrays());
 
-    int nPatches = 0;
     if (meshPtr_)
     {
         const polyBoundaryMesh& patches = meshPtr_->boundaryMesh();
         const HashTable<labelList>& groups = patches.groupPatchIDs();
-        const wordList allPatchNames = patches.names();
 
-        // Add patch groups
-        // ~~~~~~~~~~~~~~~~
+        // Add (non-zero) patch groups to the list of mesh parts
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         forAllConstIters(groups, iter)
         {
-            const word& groupName = iter.key();
-            const labelList& patchIDs = iter.object();
+            const auto& groupName = iter.key();
+            const auto& patchIDs  = iter.object();
 
             label nFaces = 0;
-            forAll(patchIDs, i)
+            for (auto patchId : patchIDs)
             {
-                nFaces += patches[patchIDs[i]].size();
+                nFaces += patches[patchId].size();
+            }
+
+            if (!nFaces)
+            {
+                // Skip if group has no faces
+                continue;
             }
 
             // Valid patch if nFace > 0 - add patch to GUI list
-            if (nFaces)
+            const string dpyName = groupName + " - group";
+            arraySelection->AddArray(dpyName.c_str());
+            ++rangePatches_;
+
+            if (enabledEntriesSet.found(dpyName))
             {
-                string vtkGrpName = groupName + " - group";
-                arraySelection->AddArray(vtkGrpName.c_str());
-
-                ++nPatches;
-
-                if (enabledEntriesSet.found(vtkGrpName))
+                if (!reader_->GetShowGroupsOnly())
                 {
-                    if (!reader_->GetShowGroupsOnly())
+                    enabledEntriesSet.erase(dpyName);
+                    for (auto patchId : patchIDs)
                     {
-                        enabledEntriesSet.erase(vtkGrpName);
-                        forAll(patchIDs, i)
+                        const polyPatch& pp = patches[patchId];
+                        if (pp.size())
                         {
-                            const polyPatch& pp = patches[patchIDs[i]];
-                            if (pp.size())
-                            {
-                                string vtkPatchName = pp.name() + " - patch";
-                                enabledEntriesSet.insert(vtkPatchName);
-                            }
+                            enabledEntriesSet.insert
+                            (
+                                pp.name() + " - patch"
+                            );
                         }
                     }
                 }
@@ -278,8 +271,8 @@ void Foam::vtkPVFoam::updateInfoPatches
         }
 
 
-        // Add patches
-        // ~~~~~~~~~~~
+        // Add (non-zero) patches to the list of mesh parts
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         if (!reader_->GetShowGroupsOnly())
         {
@@ -294,8 +287,7 @@ void Foam::vtkPVFoam::updateInfoPatches
                     (
                         (pp.name() + " - patch").c_str()
                     );
-
-                    ++nPatches;
+                    ++rangePatches_;
                 }
             }
         }
@@ -325,7 +317,6 @@ void Foam::vtkPVFoam::updateInfoPatches
         {
             polyBoundaryMeshEntries patchEntries(ioObj);
 
-
             // Read patches and determine sizes
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -344,66 +335,49 @@ void Foam::vtkPVFoam::updateInfoPatches
             // Add (non-zero) patch groups to the list of mesh parts
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-            HashTable<labelList> groups(patchEntries.size());
+            HashTable<labelHashSet> groups(patchEntries.size());
 
             forAll(patchEntries, patchi)
             {
                 const dictionary& patchDict = patchEntries[patchi].dict();
-
                 wordList groupNames;
-                patchDict.readIfPresent("inGroups", groupNames);
 
-                forAll(groupNames, groupI)
+                if
+                (
+                    sizes[patchi]  // Valid patch if nFace > 0
+                 && patchDict.readIfPresent("inGroups", groupNames)
+                )
                 {
-                    HashTable<labelList>::iterator iter = groups.find
-                    (
-                        groupNames[groupI]
-                    );
-                    if (iter != groups.end())
+                    forAll(groupNames, groupI)
                     {
-                        iter().append(patchi);
-                    }
-                    else
-                    {
-                        groups.insert(groupNames[groupI], labelList{patchi});
+                        groups(groupNames[groupI]).insert(patchi);
                     }
                 }
             }
 
             forAllConstIters(groups, iter)
             {
-                const word& groupName = iter.key();
-                const labelList& patchIDs = iter.object();
+                const auto& groupName = iter.key();
+                const auto& patchIDs  = iter.object();
 
-                label nFaces = 0;
-                forAll(patchIDs, i)
+                const string dpyName = groupName + " - group";
+                arraySelection->AddArray(dpyName.c_str());
+                ++rangePatches_;
+
+                // Optionally replace with patch name selection
+                if
+                (
+                    enabledEntriesSet.found(dpyName)
+                 && !reader_->GetShowGroupsOnly()
+                )
                 {
-                    nFaces += sizes[patchIDs[i]];
-                }
-
-                // Valid patch if nFace > 0 - add patch to GUI list
-                if (nFaces)
-                {
-                    string vtkGrpName = groupName + " - group";
-                    arraySelection->AddArray(vtkGrpName.c_str());
-
-                    ++nPatches;
-
-                    if (enabledEntriesSet.found(vtkGrpName))
+                    enabledEntriesSet.erase(dpyName);
+                    for (auto patchId : patchIDs)
                     {
-                        if (!reader_->GetShowGroupsOnly())
-                        {
-                            enabledEntriesSet.erase(vtkGrpName);
-                            forAll(patchIDs, i)
-                            {
-                                if (sizes[patchIDs[i]])
-                                {
-                                    string vtkPatchName =
-                                        names[patchIDs[i]] + " - patch";
-                                    enabledEntriesSet.insert(vtkPatchName);
-                                }
-                            }
-                        }
+                        enabledEntriesSet.insert
+                        (
+                            names[patchId] + " - patch";
+                        );
                     }
                 }
             }
@@ -423,14 +397,12 @@ void Foam::vtkPVFoam::updateInfoPatches
                         (
                             (names[patchi] + " - patch").c_str()
                         );
-
-                        ++nPatches;
+                        ++rangePatches_;
                     }
                 }
             }
         }
     }
-    arrayRangePatches_ += nPatches;
 
     // Update enabled entries in case of group selection
     enabledEntries = enabledEntriesSet.toc();
@@ -472,15 +444,15 @@ void Foam::vtkPVFoam::updateInfoZones
         namesLst = getZoneNames("cellZones");
     }
 
-    arrayRangeCellZones_.reset(arraySelection->GetNumberOfArrays());
+    rangeCellZones_.reset(arraySelection->GetNumberOfArrays());
     forAll(namesLst, elemI)
     {
         arraySelection->AddArray
         (
             (namesLst[elemI] + " - cellZone").c_str()
         );
+        ++rangeCellZones_;
     }
-    arrayRangeCellZones_ += namesLst.size();
 
 
     //
@@ -495,15 +467,15 @@ void Foam::vtkPVFoam::updateInfoZones
         namesLst = getZoneNames("faceZones");
     }
 
-    arrayRangeFaceZones_.reset(arraySelection->GetNumberOfArrays());
+    rangeFaceZones_.reset(arraySelection->GetNumberOfArrays());
     forAll(namesLst, elemI)
     {
         arraySelection->AddArray
         (
             (namesLst[elemI] + " - faceZone").c_str()
         );
+        ++rangeFaceZones_;
     }
-    arrayRangeFaceZones_ += namesLst.size();
 
 
     //
@@ -518,15 +490,15 @@ void Foam::vtkPVFoam::updateInfoZones
         namesLst = getZoneNames("pointZones");
     }
 
-    arrayRangePointZones_.reset(arraySelection->GetNumberOfArrays());
+    rangePointZones_.reset(arraySelection->GetNumberOfArrays());
     forAll(namesLst, elemI)
     {
         arraySelection->AddArray
         (
             (namesLst[elemI] + " - pointZone").c_str()
         );
+        ++rangePointZones_;
     }
-    arrayRangePointZones_ += namesLst.size();
 
     if (debug)
     {
@@ -577,24 +549,24 @@ void Foam::vtkPVFoam::updateInfoSets
     }
 
 
-    arrayRangeCellSets_.reset(arraySelection->GetNumberOfArrays());
-    arrayRangeCellSets_ += addToSelection<cellSet>
+    rangeCellSets_.reset(arraySelection->GetNumberOfArrays());
+    rangeCellSets_ += addToSelection<cellSet>
     (
         arraySelection,
         objects,
         " - cellSet"
     );
 
-    arrayRangeFaceSets_.reset(arraySelection->GetNumberOfArrays());
-    arrayRangeFaceSets_ += addToSelection<faceSet>
+    rangeFaceSets_.reset(arraySelection->GetNumberOfArrays());
+    rangeFaceSets_ += addToSelection<faceSet>
     (
         arraySelection,
         objects,
         " - faceSet"
     );
 
-    arrayRangePointSets_.reset(arraySelection->GetNumberOfArrays());
-    arrayRangePointSets_ += addToSelection<pointSet>
+    rangePointSets_.reset(arraySelection->GetNumberOfArrays());
+    rangePointSets_ += addToSelection<pointSet>
     (
         arraySelection,
         objects,
@@ -643,7 +615,7 @@ void Foam::vtkPVFoam::updateInfoLagrangianFields
     // have to decide if the second set of fields get mixed in
     // or dealt with separately
 
-    const arrayRange& range = arrayRangeLagrangian_;
+    const arrayRange& range = rangeLagrangian_;
     if (range.empty())
     {
         return;

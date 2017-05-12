@@ -181,7 +181,7 @@ Foam::hashedWordList Foam::foamPvCore::getSelected
     const int n = select->GetNumberOfArrays();
     DynamicList<word> selected(n);
 
-    for (int i = selector.start(); i < selector.end(); ++i)
+    for (auto i : selector)
     {
         if (select->GetArraySetting(i))
         {
@@ -240,7 +240,7 @@ Foam::stringList Foam::foamPvCore::getSelectedArrayEntries
     stringList selections(selector.size());
     label nElem = 0;
 
-    for (int i = selector.start(); i < selector.end(); ++i)
+    for (auto i : selector)
     {
         if (select->GetArraySetting(i))
         {
@@ -252,7 +252,7 @@ Foam::stringList Foam::foamPvCore::getSelectedArrayEntries
     if (debug > 1)
     {
         Info<< "available(";
-        for (int i = selector.start(); i < selector.end(); ++i)
+        for (auto i : selector)
         {
             Info<< " \"" << select->GetArrayName(i) << "\"";
         }
@@ -323,5 +323,6 @@ void Foam::foamPvCore::printMemory()
         Info<< "mem peak/size/rss: " << mem << endl;
     }
 }
+
 
 // ************************************************************************* //

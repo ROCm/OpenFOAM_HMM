@@ -60,7 +60,7 @@ Foam::label Foam::foamPvCore::addToSelection
 (
     vtkDataArraySelection *select,
     const IOobjectList& objects,
-    const string& suffix
+    const std::string& suffix
 )
 {
     const wordList names = objects.sortedNames(Type::typeName);

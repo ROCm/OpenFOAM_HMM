@@ -101,13 +101,13 @@ class vtkPVblockMesh
 
         //- First instance and size of bleckMesh blocks
         //  used to index into blockStatus_
-        arrayRange arrayRangeBlocks_;
+        arrayRange rangeBlocks_;
 
         //- First instance and size of CurvedEdges (only partially used)
-        arrayRange arrayRangeEdges_;
+        arrayRange rangeEdges_;
 
         //- First instance and size of block corners (only partially used)
-        arrayRange arrayRangeCorners_;
+        arrayRange rangeCorners_;
 
         //- List of patch names for rendering to window
         List<vtkTextActor*> patchTextActorsPtrs_;
@@ -119,7 +119,11 @@ class vtkPVblockMesh
     // Private Member Functions
 
         //- Create a text actor
-        static vtkTextActor* createTextActor(const string& s, const point& pt);
+        static vtkTextActor* createTextActor
+        (
+            const std::string& s,
+            const point& pt
+        );
 
         //- Reset data counters
         void resetCounters();

@@ -47,7 +47,7 @@ void Foam::vtkPVFoam::convertMeshVolume
     int& blockNo
 )
 {
-    arrayRange& range = arrayRangeVolume_;
+    arrayRange& range = rangeVolume_;
     range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
@@ -63,7 +63,7 @@ void Foam::vtkPVFoam::convertMeshVolume
 
     // Convert the internalMesh
     // this looks like more than one part, but it isn't
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
         const word partName = "internalMesh";
 
@@ -107,7 +107,7 @@ void Foam::vtkPVFoam::convertMeshLagrangian
     int& blockNo
 )
 {
-    arrayRange& range = arrayRangeLagrangian_;
+    arrayRange& range = rangeLagrangian_;
     range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
@@ -118,7 +118,7 @@ void Foam::vtkPVFoam::convertMeshLagrangian
         printMemory();
     }
 
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
         const word cloudName = getPartName(partId);
 
@@ -158,7 +158,7 @@ void Foam::vtkPVFoam::convertMeshPatches
     int& blockNo
 )
 {
-    arrayRange& range = arrayRangePatches_;
+    arrayRange& range = rangePatches_;
     range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
@@ -170,7 +170,7 @@ void Foam::vtkPVFoam::convertMeshPatches
         printMemory();
     }
 
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
         if (!partStatus_[partId])
         {
@@ -197,15 +197,15 @@ void Foam::vtkPVFoam::convertMeshPatches
         {
             // Patch group. Collect patch faces.
             label sz = 0;
-            forAllConstIter(labelHashSet, patchIds, iter)
+            for (auto id : patchIds)
             {
-                sz += patches[iter.key()].size();
+                sz += patches[id].size();
             }
             labelList faceLabels(sz);
             sz = 0;
-            forAllConstIter(labelHashSet, patchIds, iter)
+            for (auto id : patchIds)
             {
-                const polyPatch& pp = patches[iter.key()];
+                const auto& pp = patches[id];
                 forAll(pp, i)
                 {
                     faceLabels[sz++] = pp.start()+i;
@@ -254,7 +254,7 @@ void Foam::vtkPVFoam::convertMeshCellZones
     int& blockNo
 )
 {
-    arrayRange& range = arrayRangeCellZones_;
+    arrayRange& range = rangeCellZones_;
     range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
@@ -274,7 +274,7 @@ void Foam::vtkPVFoam::convertMeshCellZones
     }
 
     const cellZoneMesh& zMesh = mesh.cellZones();
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
         const word zoneName = getPartName(partId);
         const label  zoneId = zMesh.findZoneID(zoneName);
@@ -343,7 +343,7 @@ void Foam::vtkPVFoam::convertMeshCellSets
     int& blockNo
 )
 {
-    arrayRange& range = arrayRangeCellSets_;
+    arrayRange& range = rangeCellSets_;
     range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
@@ -357,7 +357,7 @@ void Foam::vtkPVFoam::convertMeshCellSets
         printMemory();
     }
 
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
         const word partName = getPartName(partId);
 
@@ -425,7 +425,7 @@ void Foam::vtkPVFoam::convertMeshFaceZones
     int& blockNo
 )
 {
-    arrayRange& range = arrayRangeFaceZones_;
+    arrayRange& range = rangeFaceZones_;
     range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
@@ -442,7 +442,7 @@ void Foam::vtkPVFoam::convertMeshFaceZones
     }
 
     const faceZoneMesh& zMesh = mesh.faceZones();
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
         const word zoneName = getPartName(partId);
         const label  zoneId = zMesh.findZoneID(zoneName);
@@ -489,7 +489,7 @@ void Foam::vtkPVFoam::convertMeshFaceSets
     int& blockNo
 )
 {
-    arrayRange& range = arrayRangeFaceSets_;
+    arrayRange& range = rangeFaceSets_;
     range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
@@ -500,7 +500,7 @@ void Foam::vtkPVFoam::convertMeshFaceSets
         printMemory();
     }
 
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
         const word partName = getPartName(partId);
 
@@ -560,7 +560,7 @@ void Foam::vtkPVFoam::convertMeshPointZones
     int& blockNo
 )
 {
-    arrayRange& range = arrayRangePointZones_;
+    arrayRange& range = rangePointZones_;
     range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
@@ -574,10 +574,10 @@ void Foam::vtkPVFoam::convertMeshPointZones
     if (range.size())
     {
         const pointZoneMesh& zMesh = mesh.pointZones();
-        for (int partId = range.start(); partId < range.end(); ++partId)
+        for (auto partId : range)
         {
-            word zoneName = getPartName(partId);
-            label zoneId = zMesh.findZoneID(zoneName);
+            const word zoneName = getPartName(partId);
+            const label zoneId = zMesh.findZoneID(zoneName);
 
             if (!partStatus_[partId] || zoneId < 0)
             {
@@ -630,7 +630,7 @@ void Foam::vtkPVFoam::convertMeshPointSets
     int& blockNo
 )
 {
-    arrayRange& range = arrayRangePointSets_;
+    arrayRange& range = rangePointSets_;
     range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
@@ -641,9 +641,9 @@ void Foam::vtkPVFoam::convertMeshPointSets
         printMemory();
     }
 
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
-        word partName = getPartName(partId);
+        const word partName = getPartName(partId);
 
         if (!partStatus_[partId])
         {
@@ -661,7 +661,7 @@ void Foam::vtkPVFoam::convertMeshPointSets
         vtkpoints->Allocate(pSet.size());
 
         const pointField& meshPoints = mesh.points();
-        forAllConstIter(pointSet, pSet, iter)
+        forAllConstIters(pSet, iter)
         {
             vtkpoints->InsertNextPoint(meshPoints[iter.key()].v_);
         }

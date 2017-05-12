@@ -52,7 +52,7 @@ void Foam::vtkPVFoam::pruneObjectList
     }
 
     // only retain specified fields
-    forAllIter(IOobjectList, objects, iter)
+    forAllIters(objects, iter)
     {
         if (!retain.found(iter()->name()))
         {
@@ -93,7 +93,7 @@ void Foam::vtkPVFoam::convertVolFields
     if (debug)
     {
         Info<< "<beg> convert volume fields" << endl;
-        forAllConstIter(IOobjectList, objects, iter)
+        forAllConstIters(objects, iter)
         {
             Info<< "  " << iter()->name()
                 << " == " << iter()->objectPath() << endl;
@@ -175,7 +175,7 @@ void Foam::vtkPVFoam::convertPointFields
     if (debug)
     {
         Info<< "<beg> convert volume -> point fields" << endl;
-        forAllConstIter(IOobjectList, objects, iter)
+        forAllConstIters(objects, iter)
         {
             Info<< "  " << iter()->name()
                 << " == " << iter()->objectPath() << endl;
@@ -205,7 +205,7 @@ void Foam::vtkPVFoam::convertLagrangianFields
     vtkMultiBlockDataSet* output
 )
 {
-    arrayRange& range = arrayRangeLagrangian_;
+    arrayRange& range = rangeLagrangian_;
     const fvMesh& mesh = *meshPtr_;
 
     hashedWordList selectedFields = getSelected
@@ -224,7 +224,7 @@ void Foam::vtkPVFoam::convertLagrangianFields
         printMemory();
     }
 
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
         const word  cloudName = getPartName(partId);
         const label datasetNo = partDataset_[partId];
@@ -253,7 +253,7 @@ void Foam::vtkPVFoam::convertLagrangianFields
         if (debug)
         {
             Info<< "converting OpenFOAM lagrangian fields" << endl;
-            forAllConstIter(IOobjectList, objects, iter)
+            forAllConstIters(objects, iter)
             {
                 Info<< "  " << iter()->name()
                     << " == " << iter()->objectPath() << endl;

@@ -146,7 +146,7 @@ vtkPVFoamReader::~vtkPVFoamReader()
 
     if (FileName)
     {
-        delete [] FileName;
+        delete[] FileName;
     }
 
     if (output0_)
@@ -525,13 +525,11 @@ void vtkPVFoamReader::updatePatchNamesView(const bool show)
     }
 
     // Get all the pqRenderView instances
-    QList<pqRenderView*> renderViews = smModel->findItems<pqRenderView*>();
-
-    for (int viewI=0; viewI < renderViews.size(); ++viewI)
+    for (auto view : smModel->findItems<pqRenderView*>())
     {
         backend_->renderPatchNames
         (
-            renderViews[viewI]->getRenderViewProxy()->GetRenderer(),
+            view->getRenderViewProxy()->GetRenderer(),
             show
         );
     }

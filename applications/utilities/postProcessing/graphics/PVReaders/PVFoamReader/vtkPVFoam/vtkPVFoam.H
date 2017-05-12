@@ -35,7 +35,6 @@ SourceFiles
     vtkPVFoamMeshVolume.C
     vtkPVFoamTemplates.C
     vtkPVFoamUpdateInfo.C
-    vtkPVFoamUtils.C
     vtkPVFoamFieldTemplates.C
     vtkPVFoamUpdateTemplates.C
 
@@ -197,15 +196,15 @@ class vtkPVFoam
 
         //- First instance and size of various mesh parts
         //  used to index into partStatus_ and partDataset_
-        arrayRange arrayRangeVolume_;
-        arrayRange arrayRangePatches_;
-        arrayRange arrayRangeLagrangian_;
-        arrayRange arrayRangeCellZones_;
-        arrayRange arrayRangeFaceZones_;
-        arrayRange arrayRangePointZones_;
-        arrayRange arrayRangeCellSets_;
-        arrayRange arrayRangeFaceSets_;
-        arrayRange arrayRangePointSets_;
+        arrayRange rangeVolume_;
+        arrayRange rangePatches_;
+        arrayRange rangeLagrangian_;
+        arrayRange rangeCellZones_;
+        arrayRange rangeFaceZones_;
+        arrayRange rangePointZones_;
+        arrayRange rangeCellSets_;
+        arrayRange rangeFaceSets_;
+        arrayRange rangePointSets_;
 
         //- Decomposed cells information (mesh regions)
         //  TODO: regions
@@ -224,7 +223,11 @@ class vtkPVFoam
     // Private Member Functions
 
         //- Create a text actor
-        static vtkTextActor* createTextActor(const string& s, const point& pt);
+        static vtkTextActor* createTextActor
+        (
+            const std::string& s,
+            const point& pt
+        );
 
         //- Reset data counters
         void resetCounters();

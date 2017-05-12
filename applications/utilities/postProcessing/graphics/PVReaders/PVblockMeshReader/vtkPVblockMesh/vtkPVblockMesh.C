@@ -52,7 +52,7 @@ namespace Foam
 
 vtkTextActor* Foam::vtkPVblockMesh::createTextActor
 (
-    const string& s,
+    const std::string& s,
     const point& pt
 )
 {
@@ -81,9 +81,9 @@ vtkTextActor* Foam::vtkPVblockMesh::createTextActor
 void Foam::vtkPVblockMesh::resetCounters()
 {
     // Reset mesh part ids and sizes
-    arrayRangeBlocks_.reset();
-    arrayRangeEdges_.reset();
-    arrayRangeCorners_.reset();
+    rangeBlocks_.reset();
+    rangeEdges_.reset();
+    rangeCorners_.reset();
 }
 
 
@@ -92,15 +92,13 @@ void Foam::vtkPVblockMesh::updateInfoBlocks
     vtkDataArraySelection* select
 )
 {
-    arrayRange& range = arrayRangeBlocks_;
-
     if (debug)
     {
         Info<< "<beg> updateInfoBlocks"
             << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
     }
 
-    range.reset(select->GetNumberOfArrays());
+    rangeBlocks_.reset(select->GetNumberOfArrays());
 
     const blockMesh& blkMesh = *meshPtr_;
 
@@ -122,9 +120,8 @@ void Foam::vtkPVblockMesh::updateInfoBlocks
 
         // Add "blockId" or "blockId - zoneName" to GUI list
         select->AddArray(ostr.str().c_str());
+        ++rangeBlocks_;
     }
-
-    range += nBlocks;
 
     if (debug)
     {
@@ -138,15 +135,13 @@ void Foam::vtkPVblockMesh::updateInfoEdges
     vtkDataArraySelection* select
 )
 {
-    arrayRange& range = arrayRangeEdges_;
-
     if (debug)
     {
         Info<< "<beg> updateInfoEdges"
             << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
     }
 
-    range.reset(select->GetNumberOfArrays());
+    rangeEdges_.reset(select->GetNumberOfArrays());
 
     const blockMesh& blkMesh = *meshPtr_;
     const blockEdgeList& edges = blkMesh.edges();
@@ -161,9 +156,8 @@ void Foam::vtkPVblockMesh::updateInfoEdges
 
         // Add "beg:end - type" to GUI list
         select->AddArray(ostr.str().c_str());
+        ++rangeEdges_;
     }
-
-    range += edges.size();
 
     if (debug)
     {
@@ -185,9 +179,9 @@ Foam::vtkPVblockMesh::vtkPVblockMesh
     meshPtr_(nullptr),
     meshRegion_(polyMesh::defaultRegion),
     meshDir_(polyMesh::meshSubDir),
-    arrayRangeBlocks_("block"),
-    arrayRangeEdges_("edges"),
-    arrayRangeCorners_("corners")
+    rangeBlocks_("block"),
+    rangeEdges_("edges"),
+    rangeCorners_("corners")
 {
     if (debug)
     {
