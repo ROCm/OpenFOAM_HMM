@@ -164,7 +164,7 @@ Foam::hashedWordList Foam::foamPvCore::getSelected
     {
         if (select->GetArraySetting(i))
         {
-            selected.append(getFirstWord(select->GetArrayName(i)));
+            selected.append(getFoamName(select->GetArrayName(i)));
         }
     }
 
@@ -185,7 +185,7 @@ Foam::hashedWordList Foam::foamPvCore::getSelected
     {
         if (select->GetArraySetting(i))
         {
-            selected.append(getFirstWord(select->GetArrayName(i)));
+            selected.append(getFoamName(select->GetArrayName(i)));
         }
     }
 
@@ -295,17 +295,29 @@ void Foam::foamPvCore::setSelectedArrayEntries
 }
 
 
-Foam::word Foam::foamPvCore::getFirstWord(const char* str)
+Foam::word Foam::foamPvCore::getFoamName(const std::string& str)
 {
-    if (str)
+    if (str.size())
     {
-        label n = 0;
-        while (str[n] && word::valid(str[n]))
+        std::string::size_type beg = str.rfind('/');
+        if (beg == std::string::npos)
         {
-            ++n;
+            beg = 0;
         }
-        // don't need to re-check for invalid chars
-        return word(str, n, false);
+        else
+        {
+            ++beg;
+        }
+
+        std::string::size_type end = beg;
+
+        while (str[end] && word::valid(str[end]))
+        {
+            ++end;
+        }
+
+        // Already checked for valid/invalid chars
+        return word(str.substr(beg, beg+end), false);
     }
     else
     {

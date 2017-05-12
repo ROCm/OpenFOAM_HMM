@@ -180,7 +180,7 @@ public:
     (
         vtkDataArraySelection* select,
         const IOobjectList& objects,
-        const std::string& suffix = string::null
+        const std::string& prefix = string::null
     );
 
 
@@ -191,14 +191,16 @@ public:
         vtkDataArraySelection* select
     );
 
-    //- Retrieve the current selections as a wordHashSet
+    //- Retrieve the current selections as a hashedWordList,
+    //  while stripping off any prefix or suffix
     static hashedWordList getSelected
     (
         vtkDataArraySelection* select
     );
 
 
-    //- Retrieve a sub-list of the current selections
+    //- Retrieve a sub-list of the current selections as a hashedWordList,
+    //  while stripping off any prefix or suffix
     static hashedWordList getSelected
     (
         vtkDataArraySelection* select,
@@ -228,8 +230,9 @@ public:
     );
 
 
-    //- Extract up to the first non-word characters
-    static word getFirstWord(const char* str);
+    //- Extract the first word characters after a slash
+    static word getFoamName(const std::string& str);
+
 
     //- Simple memory used debugging information
     static void printMemory();

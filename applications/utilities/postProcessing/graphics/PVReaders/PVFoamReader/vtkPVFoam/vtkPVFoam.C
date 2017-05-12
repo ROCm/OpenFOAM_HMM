@@ -240,7 +240,7 @@ void Foam::vtkPVFoam::updateMeshPartsStatus()
 
 Foam::word Foam::vtkPVFoam::getPartName(const int partId)
 {
-    return getFirstWord(reader_->GetPartArrayName(partId));
+    return getFoamName(reader_->GetPartArrayName(partId));
 }
 
 
@@ -649,7 +649,7 @@ void Foam::vtkPVFoam::renderPatchNames
 
     if (show && meshPtr_)
     {
-        // get the display patches, strip off any suffix
+        // get the display patches, strip off any prefix/suffix
         hashedWordList selectedPatches = getSelected
         (
             reader_->GetPartSelection(),

@@ -60,20 +60,20 @@ Foam::label Foam::foamPvCore::addToSelection
 (
     vtkDataArraySelection *select,
     const IOobjectList& objects,
-    const std::string& suffix
+    const std::string& prefix
 )
 {
     const wordList names = objects.sortedNames(Type::typeName);
 
     forAll(names, i)
     {
-        if (suffix.empty())
+        if (prefix.empty())
         {
             select->AddArray(names[i].c_str());
         }
         else
         {
-            select->AddArray((names[i] + suffix).c_str());
+            select->AddArray((prefix + names[i]).c_str());
         }
     }
 

@@ -192,7 +192,7 @@ void Foam::vtkPVFoam::updateInfoLagrangian
         // Add cloud to GUI list
         arraySelection->AddArray
         (
-            (cloudDirs[cloudi] + " - lagrangian").c_str()
+            ("lagrangian/" + cloudDirs[cloudi]).c_str()
         );
         ++rangeLagrangian_;
     }
@@ -246,7 +246,7 @@ void Foam::vtkPVFoam::updateInfoPatches
             }
 
             // Valid patch if nFace > 0 - add patch to GUI list
-            const string dpyName = groupName + " - group";
+            const string dpyName = "group/" + groupName;
             arraySelection->AddArray(dpyName.c_str());
             ++rangePatches_;
 
@@ -262,7 +262,7 @@ void Foam::vtkPVFoam::updateInfoPatches
                         {
                             enabledEntriesSet.insert
                             (
-                                pp.name() + " - patch"
+                                "patch/" + pp.name()
                             );
                         }
                     }
@@ -285,7 +285,7 @@ void Foam::vtkPVFoam::updateInfoPatches
                     // Add patch to GUI list
                     arraySelection->AddArray
                     (
-                        (pp.name() + " - patch").c_str()
+                        ("patch/" + pp.name()).c_str()
                     );
                     ++rangePatches_;
                 }
@@ -360,7 +360,7 @@ void Foam::vtkPVFoam::updateInfoPatches
                 const auto& groupName = iter.key();
                 const auto& patchIDs  = iter.object();
 
-                const string dpyName = groupName + " - group";
+                const string dpyName = "group/" + groupName;
                 arraySelection->AddArray(dpyName.c_str());
                 ++rangePatches_;
 
@@ -376,7 +376,7 @@ void Foam::vtkPVFoam::updateInfoPatches
                     {
                         enabledEntriesSet.insert
                         (
-                            names[patchId] + " - patch";
+                            "patch/" + names[patchId]
                         );
                     }
                 }
@@ -395,7 +395,7 @@ void Foam::vtkPVFoam::updateInfoPatches
                     {
                         arraySelection->AddArray
                         (
-                            (names[patchi] + " - patch").c_str()
+                            ("patch/" + names[patchi]).c_str()
                         );
                         ++rangePatches_;
                     }
@@ -449,7 +449,7 @@ void Foam::vtkPVFoam::updateInfoZones
     {
         arraySelection->AddArray
         (
-            (namesLst[elemI] + " - cellZone").c_str()
+            ("cellZone/" + namesLst[elemI]).c_str()
         );
         ++rangeCellZones_;
     }
@@ -472,7 +472,7 @@ void Foam::vtkPVFoam::updateInfoZones
     {
         arraySelection->AddArray
         (
-            (namesLst[elemI] + " - faceZone").c_str()
+            ("faceZone/" + namesLst[elemI]).c_str()
         );
         ++rangeFaceZones_;
     }
@@ -495,7 +495,7 @@ void Foam::vtkPVFoam::updateInfoZones
     {
         arraySelection->AddArray
         (
-            (namesLst[elemI] + " - pointZone").c_str()
+            ("pointZone/" + namesLst[elemI]).c_str()
         );
         ++rangePointZones_;
     }
@@ -554,7 +554,7 @@ void Foam::vtkPVFoam::updateInfoSets
     (
         arraySelection,
         objects,
-        " - cellSet"
+        "cellSet/"
     );
 
     rangeFaceSets_.reset(arraySelection->GetNumberOfArrays());
@@ -562,7 +562,7 @@ void Foam::vtkPVFoam::updateInfoSets
     (
         arraySelection,
         objects,
-        " - faceSet"
+        "faceSet/"
     );
 
     rangePointSets_.reset(arraySelection->GetNumberOfArrays());
@@ -570,7 +570,7 @@ void Foam::vtkPVFoam::updateInfoSets
     (
         arraySelection,
         objects,
-        " - pointSet"
+        "pointSet/"
     );
 
     if (debug)
