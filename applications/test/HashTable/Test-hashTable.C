@@ -25,6 +25,8 @@ License
 
 #include "HashTable.H"
 #include "List.H"
+#include "SortableList.H"
+#include "DynamicList.H"
 #include "FlatOutput.H"
 #include "IOstreams.H"
 #include "IStringStream.H"
@@ -194,7 +196,24 @@ int main()
     // These do not yet work. Issues resolving the distance.
     //
     //  List<scalar> table1vals(table1.begin(), table1.end());
-    //  wordList table1keys(table1.begin(), table1.end());
+
+    {
+        Info<<"distance/size: "
+            << std::distance(table1.begin(), table1.end())
+            << "/" << table1.size()
+            << " and "
+            << std::distance(table1.keys().begin(), table1.keys().end())
+            << "/" << table1.keys().size()
+            << nl;
+
+        SortableList<word> sortKeys
+        // DynamicList<word> sortKeys
+        (
+            table1.keys().begin(),
+            table1.keys().end()
+        );
+        Info<<"sortKeys: " << flatOutput(sortKeys) << nl;
+    }
 
     Info<< "\nFrom table1: " << flatOutput(table1.sortedToc()) << nl
         << "retain keys: " << flatOutput(table3.sortedToc()) << nl;

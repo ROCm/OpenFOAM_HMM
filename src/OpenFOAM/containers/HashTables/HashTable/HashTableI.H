@@ -363,6 +363,39 @@ Foam::HashTable<T, Key, Hash>::key_iterator_base<WrappedIterator>
 }
 
 
+template<class T, class Key, class Hash>
+template<class WrappedIterator>
+inline const Key&
+Foam::HashTable<T, Key, Hash>::key_iterator_base<WrappedIterator>
+::operator()() const
+{
+    return this->key();
+}
+
+
+template<class T, class Key, class Hash>
+template<class WrappedIterator>
+inline Foam::HashTable<T, Key, Hash>::key_iterator_base<WrappedIterator>&
+Foam::HashTable<T, Key, Hash>::key_iterator_base<WrappedIterator>
+::operator++()
+{
+    this->increment();
+    return *this;
+}
+
+
+template<class T, class Key, class Hash>
+template<class WrappedIterator>
+inline Foam::HashTable<T, Key, Hash>::key_iterator_base<WrappedIterator>
+Foam::HashTable<T, Key, Hash>::key_iterator_base<WrappedIterator>
+::operator++(int)
+{
+    key_iterator_base old = *this;
+    this->increment();
+    return old;
+}
+
+
 // * * * * * * * * * * * * * * * * STL iterator  * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>

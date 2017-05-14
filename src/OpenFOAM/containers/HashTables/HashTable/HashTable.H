@@ -61,6 +61,7 @@ SourceFiles
 #include "nullObject.H"
 
 #include <initializer_list>
+#include <iterator>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -181,7 +182,14 @@ public:
 
         //- The type used for storing into value_type objects.
         //  This type is usually value_type&.
+        typedef T* pointer;
+
+        //- The type used for storing into value_type objects.
+        //  This type is usually value_type&.
         typedef T& reference;
+
+        //- The type used for reading from constant value_type objects.
+        typedef const T* const_pointer;
 
         //- The type used for reading from constant value_type objects.
         typedef const T& const_reference;
@@ -441,6 +449,7 @@ protected:
             // Public typedefs
             using table_type = this_type;
             using key_type   = this_type::key_type;
+            using iterator_category = std::forward_iterator_tag;
             using difference_type  = this_type::difference_type;
 
         private:
@@ -518,16 +527,20 @@ public:
             public WrappedIterator
         {
         public:
+            using value_type = this_type::key_type;
+            using pointer    = const Key*;
             using reference  = const Key&;
-            using difference_type = typename WrappedIterator::difference_type;
 
             //- Implicit conversion
             inline key_iterator_base(const WrappedIterator& iter);
 
             //- Return the key
             inline reference operator*() const;
-        };
+            inline reference operator()() const;
 
+            inline key_iterator_base& operator++();
+            inline key_iterator_base operator++(int);
+        };
 
 
     // STL iterator
@@ -544,9 +557,9 @@ public:
 
           // Public typedefs
             using table_type = this_type;
-            using key_type   = this_type::key_type;
+            using value_type = this_type::value_type;
+            using pointer    = this_type::pointer;
             using reference  = this_type::reference;
-            using difference_type = typename iterator_base::difference_type;
 
           // Constructors
 
@@ -592,9 +605,9 @@ public:
 
           // Public typedefs
             using table_type = const this_type;
-            using key_type   = this_type::key_type;
+            using value_type = const this_type::value_type;
+            using pointer    = this_type::const_pointer;
             using reference  = this_type::const_reference;
-            using difference_type = typename iterator_base::difference_type;
 
           // Constructors
 
