@@ -71,6 +71,8 @@ class vtkPolyData;
 class vtkUnstructuredGrid;
 class vtkIndent;
 
+template<class T> class vtkSmartPointer;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -105,9 +107,9 @@ class vtkPVFoam
         //  hide in extra pointMap (cellSet/cellZone) for now
         class polyDecomp
         {
-            labelList superCells_;
-            labelList addPointCellLabels_;
+            labelList cellMap_;
             labelList pointMap_;
+            labelList additionalIds_;
 
         public:
 
@@ -115,27 +117,15 @@ class vtkPVFoam
             {}
 
             //- Label of original cell for decomposed cells
-            labelList& superCells()
+            labelList& cellMap()
             {
-                return superCells_;
+                return cellMap_;
             }
 
             //- Label of original cell for decomposed cells
-            const labelList& superCells() const
+            const labelList& cellMap() const
             {
-                return superCells_;
-            }
-
-            //- Cell-centre labels for additional points of decomposed cells
-            labelList& addPointCellLabels()
-            {
-                return addPointCellLabels_;
-            }
-
-            //- Cell-centre labels for additional points of decomposed cells
-            const labelList& addPointCellLabels() const
-            {
-                return addPointCellLabels_;
+                return cellMap_;
             }
 
             //- Point labels for subsetted meshes
@@ -151,14 +141,28 @@ class vtkPVFoam
             }
 
 
+            //- Cell-centre labels for additional points of decomposed cells
+            labelList& additionalIds()
+            {
+                return additionalIds_;
+            }
+
+            //- Cell-centre labels for additional points of decomposed cells
+            const labelList& additionalIds() const
+            {
+                return additionalIds_;
+            }
+
             //- Clear
             void clear()
             {
-                superCells_.clear();
-                addPointCellLabels_.clear();
+                cellMap_.clear();
                 pointMap_.clear();
+                additionalIds_.clear();
             }
         };
+
+    typedef polyDecomp foamVtuData;
 
 
     // Private Data
@@ -208,26 +212,19 @@ class vtkPVFoam
 
         //- Decomposed cells information (mesh regions)
         //  TODO: regions
-        List<polyDecomp> regionPolyDecomp_;
+        List<foamVtuData> regionVtus_;
 
         //- Decomposed cells information (cellZone meshes)
-        List<polyDecomp> zonePolyDecomp_;
+        List<foamVtuData> zoneVtus_;
 
         //- Decomposed cells information (cellSet meshes)
-        List<polyDecomp> csetPolyDecomp_;
+        List<foamVtuData> csetVtus_;
 
         //- List of patch names for rendering to window
-        List<vtkTextActor*> patchTextActorsPtrs_;
+        List<vtkSmartPointer<vtkTextActor>> patchTextActors_;
 
 
     // Private Member Functions
-
-        //- Create a text actor
-        static vtkTextActor* createTextActor
-        (
-            const std::string& s,
-            const point& pt
-        );
 
         //- Reset data counters
         void resetCounters();
@@ -318,14 +315,14 @@ class vtkPVFoam
       // Add mesh functions
 
         //- Volume meshes as vtkUnstructuredGrid
-        vtkUnstructuredGrid* volumeVTKMesh
+        vtkSmartPointer<vtkUnstructuredGrid> volumeVTKMesh
         (
             const fvMesh& mesh,
-            polyDecomp& decompInfo
+            foamVtuData& vtuData
         );
 
         //- Lagrangian positions as vtkPolyData
-        vtkPolyData* lagrangianVTKMesh
+        vtkSmartPointer<vtkPolyData> lagrangianVTKMesh
         (
             const polyMesh& mesh,
             const word& cloudName
@@ -333,7 +330,7 @@ class vtkPVFoam
 
         //- Patches (mesh or primitive) as vtkPolyData
         template<class PatchType>
-        vtkPolyData* patchVTKMesh
+        vtkSmartPointer<vtkPolyData> patchVTKMesh
         (
             const word& name,
             const PatchType& p
@@ -344,7 +341,7 @@ class vtkPVFoam
 
         //- Convert Field to VTK field
         template<class Type>
-        vtkFloatArray* convertFieldToVTK
+        vtkSmartPointer<vtkFloatArray> convertFieldToVTK
         (
             const word& name,
             const Field<Type>& fld
@@ -352,7 +349,7 @@ class vtkPVFoam
 
         //- Face set/zone field
         template<class Type>
-        vtkFloatArray* convertFaceFieldToVTK
+        vtkSmartPointer<vtkFloatArray> convertFaceFieldToVTK
         (
             const GeometricField<Type, fvPatchField, volMesh>& fld,
             const labelUList& faceLabels
@@ -360,10 +357,10 @@ class vtkPVFoam
 
         //- Volume field
         template<class Type>
-        vtkFloatArray* convertVolFieldToVTK
+        vtkSmartPointer<vtkFloatArray> convertVolFieldToVTK
         (
             const GeometricField<Type, fvPatchField, volMesh>& fld,
-            const polyDecomp& decompInfo
+            const foamVtuData& vtuData
         );
 
 
@@ -416,7 +413,7 @@ class vtkPVFoam
             autoPtr<GeometricField<Type, pointPatchField, pointMesh>>& ptfPtr,
             vtkMultiBlockDataSet* output,
             const arrayRange& range,
-            const List<polyDecomp>& decompLst
+            const List<foamVtuData>& vtuDataList
         );
 
         //- Lagrangian fields - all types
@@ -444,7 +441,7 @@ class vtkPVFoam
             const GeometricField<Type, pointPatchField, pointMesh>& pfld,
             vtkMultiBlockDataSet* output,
             const arrayRange& range,
-            const List<polyDecomp>& decompLst
+            const List<foamVtuData>& vtuDataList
         );
 
         //- Point field
@@ -454,7 +451,7 @@ class vtkPVFoam
             vtkUnstructuredGrid* vtkmesh,
             const GeometricField<Type, pointPatchField, pointMesh>& pfld,
             const GeometricField<Type, fvPatchField, volMesh>& vfld,
-            const polyDecomp& decomp
+            const foamVtuData& vtuData
         );
 
 

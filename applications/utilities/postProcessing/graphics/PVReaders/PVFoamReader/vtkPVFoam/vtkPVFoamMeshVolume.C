@@ -34,13 +34,14 @@ License
 #include "vtkCellArray.h"
 #include "vtkIdTypeArray.h"
 #include "vtkUnstructuredGrid.h"
+#include "vtkSmartPointer.h"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-vtkUnstructuredGrid* Foam::vtkPVFoam::volumeVTKMesh
+vtkSmartPointer<vtkUnstructuredGrid> Foam::vtkPVFoam::volumeVTKMesh
 (
     const fvMesh& mesh,
-    polyDecomp& decompInfo
+    foamVtuData& vtuData
 )
 {
     const cellModel& tet = *(cellModeller::lookup("tet"));
@@ -50,7 +51,8 @@ vtkUnstructuredGrid* Foam::vtkPVFoam::volumeVTKMesh
     const cellModel& tetWedge = *(cellModeller::lookup("tetWedge"));
     const cellModel& hex = *(cellModeller::lookup("hex"));
 
-    vtkUnstructuredGrid* vtkmesh = vtkUnstructuredGrid::New();
+    vtkSmartPointer<vtkUnstructuredGrid> vtkmesh =
+        vtkSmartPointer<vtkUnstructuredGrid>::New();
 
     if (debug)
     {
@@ -69,8 +71,8 @@ vtkUnstructuredGrid* Foam::vtkPVFoam::volumeVTKMesh
     // face owner is needed to determine the face orientation
     const labelList& owner = mesh.faceOwner();
 
-    labelList& superCells = decompInfo.superCells();
-    labelList& addPointCellLabels = decompInfo.addPointCellLabels();
+    labelList& cellMap = vtuData.cellMap();
+    labelList& addPointCellLabels = vtuData.additionalIds();
 
     // Scan for cells which need to be decomposed and count additional points
     // and cells
@@ -116,10 +118,11 @@ vtkUnstructuredGrid* Foam::vtkPVFoam::volumeVTKMesh
     // Set size of additional cells mapping array
     // (from added cell to original cell)
 
-    superCells.setSize(mesh.nCells() + nAddCells);
+    cellMap.setSize(mesh.nCells() + nAddCells);
 
     // Convert OpenFOAM mesh vertices to VTK
-    vtkPoints* vtkpoints = vtkPoints::New();
+    vtkSmartPointer<vtkPoints> vtkpoints = vtkSmartPointer<vtkPoints>::New();
+
     vtkpoints->Allocate(mesh.nPoints() + nAddPoints);
 
     const Foam::pointField& points = mesh.points();
@@ -147,7 +150,7 @@ vtkUnstructuredGrid* Foam::vtkPVFoam::volumeVTKMesh
         const cellShape& cellShape = cellShapes[celli];
         const cellModel& cellModel = cellShape.model();
 
-        superCells[addCelli++] = celli;
+        cellMap[addCelli++] = celli;
 
         if (cellModel == tet)
         {
@@ -334,7 +337,7 @@ vtkUnstructuredGrid* Foam::vtkPVFoam::volumeVTKMesh
                     }
                     else
                     {
-                        superCells[addCelli++] = celli;
+                        cellMap[addCelli++] = celli;
                     }
 
                     const face& quad = quadFcs[quadI];
@@ -377,7 +380,7 @@ vtkUnstructuredGrid* Foam::vtkPVFoam::volumeVTKMesh
                     }
                     else
                     {
-                        superCells[addCelli++] = celli;
+                        cellMap[addCelli++] = celli;
                     }
 
                     const face& tri = triFcs[triI];
@@ -411,7 +414,6 @@ vtkUnstructuredGrid* Foam::vtkPVFoam::volumeVTKMesh
     }
 
     vtkmesh->SetPoints(vtkpoints);
-    vtkpoints->Delete();
 
     if (debug)
     {

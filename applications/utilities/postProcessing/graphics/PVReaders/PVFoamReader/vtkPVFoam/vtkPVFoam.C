@@ -37,6 +37,7 @@ License
 #include "vtkRenderer.h"
 #include "vtkTextActor.h"
 #include "vtkTextProperty.h"
+#include "vtkSmartPointer.h"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -48,29 +49,37 @@ namespace Foam
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-vtkTextActor* Foam::vtkPVFoam::createTextActor
-(
-    const std::string& s,
-    const point& pt
-)
+namespace Foam
 {
-    vtkTextActor* txt = vtkTextActor::New();
-    txt->SetInput(s.c_str());
+    // file-scope
 
-    // Set text properties
-    vtkTextProperty* tprop = txt->GetTextProperty();
-    tprop->SetFontFamilyToArial();
-    tprop->BoldOn();
-    tprop->ShadowOff();
-    tprop->SetLineSpacing(1.0);
-    tprop->SetFontSize(14);
-    tprop->SetColor(1.0, 0.0, 1.0);
-    tprop->SetJustificationToCentered();
+    //- Create a text actor
+    vtkSmartPointer<vtkTextActor> createTextActor
+    (
+        const std::string& s,
+        const Foam::point& pt
+    )
+    {
+        vtkSmartPointer<vtkTextActor> txt =
+            vtkSmartPointer<vtkTextActor>::New();
 
-    txt->GetPositionCoordinate()->SetCoordinateSystemToWorld();
-    txt->GetPositionCoordinate()->SetValue(pt.x(), pt.y(), pt.z());
+        txt->SetInput(s.c_str());
 
-    return txt;
+        // Set text properties
+        vtkTextProperty* tprop = txt->GetTextProperty();
+        tprop->SetFontFamilyToArial();
+        tprop->BoldOn();
+        tprop->ShadowOff();
+        tprop->SetLineSpacing(1.0);
+        tprop->SetFontSize(14);
+        tprop->SetColor(1.0, 0.0, 1.0);
+        tprop->SetJustificationToCentered();
+
+        txt->GetPositionCoordinate()->SetCoordinateSystemToWorld();
+        txt->GetPositionCoordinate()->SetValue(pt.x(), pt.y(), pt.z());
+
+        return txt;
+    }
 }
 
 
@@ -93,19 +102,19 @@ void Foam::vtkPVFoam::resetCounters()
 
 void Foam::vtkPVFoam::reduceMemory()
 {
-    forAll(regionPolyDecomp_, i)
+    forAll(regionVtus_, i)
     {
-        regionPolyDecomp_[i].clear();
+        regionVtus_[i].clear();
     }
 
-    forAll(zonePolyDecomp_, i)
+    forAll(zoneVtus_, i)
     {
-        zonePolyDecomp_[i].clear();
+        zoneVtus_[i].clear();
     }
 
-    forAll(csetPolyDecomp_, i)
+    forAll(csetVtus_, i)
     {
-        csetPolyDecomp_[i].clear();
+        csetVtus_[i].clear();
     }
 
     if (!reader_->GetCacheMesh())
@@ -640,12 +649,11 @@ void Foam::vtkPVFoam::renderPatchNames
 {
     // always remove old actors first
 
-    forAll(patchTextActorsPtrs_, patchi)
+    forAll(patchTextActors_, patchi)
     {
-        renderer->RemoveViewProp(patchTextActorsPtrs_[patchi]);
-        patchTextActorsPtrs_[patchi]->Delete();
+        renderer->RemoveViewProp(patchTextActors_[patchi]);
     }
-    patchTextActorsPtrs_.clear();
+    patchTextActors_.clear();
 
     if (show && meshPtr_)
     {
@@ -750,7 +758,7 @@ void Foam::vtkPVFoam::renderPatchNames
         }
 
         // Set the size of the patch labels to max number of zones
-        patchTextActorsPtrs_.setSize(displayZoneI);
+        patchTextActors_.setSize(displayZoneI);
 
         if (debug)
         {
@@ -783,7 +791,7 @@ void Foam::vtkPVFoam::renderPatchNames
                 }
 
                 // Into a list for later removal
-                patchTextActorsPtrs_[displayZoneI++] = createTextActor
+                patchTextActors_[displayZoneI++] = createTextActor
                 (
                     pp.name(),
                     zoneCentre[patchi][globalZoneI]
@@ -792,13 +800,13 @@ void Foam::vtkPVFoam::renderPatchNames
         }
 
         // Resize the patch names list to the actual number of patch names added
-        patchTextActorsPtrs_.setSize(displayZoneI);
+        patchTextActors_.setSize(displayZoneI);
     }
 
     // Add text to each renderer
-    forAll(patchTextActorsPtrs_, actori)
+    forAll(patchTextActors_, actori)
     {
-        renderer->AddViewProp(patchTextActorsPtrs_[actori]);
+        renderer->AddViewProp(patchTextActors_[actori]);
     }
 }
 

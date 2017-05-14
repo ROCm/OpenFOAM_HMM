@@ -35,16 +35,17 @@ License
 #include "vtkCellArray.h"
 #include "vtkPoints.h"
 #include "vtkPolyData.h"
+#include "vtkSmartPointer.h"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-vtkPolyData* Foam::vtkPVFoam::lagrangianVTKMesh
+vtkSmartPointer<vtkPolyData> Foam::vtkPVFoam::lagrangianVTKMesh
 (
     const polyMesh& mesh,
     const word& cloudName
 )
 {
-    vtkPolyData* vtkmesh = nullptr;
+    vtkSmartPointer<vtkPolyData> vtkmesh;
 
     if (debug)
     {
@@ -72,9 +73,13 @@ vtkPolyData* Foam::vtkPVFoam::lagrangianVTKMesh
             Info<< "cloud with " << parcels.size() << " parcels" << endl;
         }
 
-        vtkmesh = vtkPolyData::New();
-        vtkPoints* vtkpoints = vtkPoints::New();
-        vtkCellArray* vtkcells = vtkCellArray::New();
+        vtkmesh = vtkSmartPointer<vtkPolyData>::New();
+
+        vtkSmartPointer<vtkPoints> vtkpoints =
+            vtkSmartPointer<vtkPoints>::New();
+
+        vtkSmartPointer<vtkCellArray> vtkcells =
+            vtkSmartPointer<vtkCellArray>::New();
 
         vtkpoints->Allocate(parcels.size());
         vtkcells->Allocate(parcels.size());
@@ -89,10 +94,7 @@ vtkPolyData* Foam::vtkPVFoam::lagrangianVTKMesh
         }
 
         vtkmesh->SetPoints(vtkpoints);
-        vtkpoints->Delete();
-
         vtkmesh->SetVerts(vtkcells);
-        vtkcells->Delete();
     }
 
     if (debug)

@@ -39,6 +39,7 @@ License
 #include "vtkRenderer.h"
 #include "vtkTextActor.h"
 #include "vtkTextProperty.h"
+#include "vtkSmartPointer.h"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -47,32 +48,38 @@ namespace Foam
     defineTypeNameAndDebug(vtkPVblockMesh, 0);
 }
 
-
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-vtkTextActor* Foam::vtkPVblockMesh::createTextActor
-(
-    const std::string& s,
-    const point& pt
-)
+namespace Foam
 {
-    vtkTextActor* txt = vtkTextActor::New();
-    txt->SetInput(s.c_str());
+    // file-scope
+    //- Create a text actor
+    static vtkSmartPointer<vtkTextActor> createTextActor
+    (
+        const std::string& s,
+        const Foam::point& pt
+    )
+    {
+        vtkSmartPointer<vtkTextActor> txt =
+            vtkSmartPointer<vtkTextActor>::New();
 
-    // Set text properties
-    vtkTextProperty* tprop = txt->GetTextProperty();
-    tprop->SetFontFamilyToArial();
-    tprop->BoldOn();
-    tprop->ShadowOff();
-    tprop->SetLineSpacing(1.0);
-    tprop->SetFontSize(14);
-    tprop->SetColor(1.0, 0.0, 1.0);
-    tprop->SetJustificationToCentered();
+        txt->SetInput(s.c_str());
 
-    txt->GetPositionCoordinate()->SetCoordinateSystemToWorld();
-    txt->GetPositionCoordinate()->SetValue(pt.x(), pt.y(), pt.z());
+        // Set text properties
+        vtkTextProperty* tprop = txt->GetTextProperty();
+        tprop->SetFontFamilyToArial();
+        tprop->BoldOn();
+        tprop->ShadowOff();
+        tprop->SetLineSpacing(1.0);
+        tprop->SetFontSize(14);
+        tprop->SetColor(1.0, 0.0, 1.0);
+        tprop->SetJustificationToCentered();
 
-    return txt;
+        txt->GetPositionCoordinate()->SetCoordinateSystemToWorld();
+        txt->GetPositionCoordinate()->SetValue(pt.x(), pt.y(), pt.z());
+
+        return txt;
+    }
 }
 
 
@@ -436,12 +443,11 @@ void Foam::vtkPVblockMesh::renderPatchNames
 )
 {
     // always remove old actors first
-    forAll(patchTextActorsPtrs_, actori)
+    forAll(patchTextActors_, actori)
     {
-        renderer->RemoveViewProp(patchTextActorsPtrs_[actori]);
-        patchTextActorsPtrs_[actori]->Delete();
+        renderer->RemoveViewProp(patchTextActors_[actori]);
     }
-    patchTextActorsPtrs_.clear();
+    patchTextActors_.clear();
 
     // the number of text actors
     label nActors = 0;
@@ -459,7 +465,7 @@ void Foam::vtkPVblockMesh::renderPatchNames
         }
 
         // 8 sides per block is plenty
-        patchTextActorsPtrs_.setSize(8*blkMesh.size());
+        patchTextActors_.setSize(8*blkMesh.size());
 
         // Collect all variables
         dictionary varDict(meshDescription.subOrEmptyDict("namedVertices"));
@@ -495,33 +501,33 @@ void Foam::vtkPVblockMesh::renderPatchNames
                 const face& f = patchFaces[facei];
 
                 // Into a list for later removal
-                patchTextActorsPtrs_[nActors++] = createTextActor
+                patchTextActors_[nActors++] = createTextActor
                 (
                     patchName,
                     f.centre(cornerPts) * scaleFactor
                 );
 
-                if (nActors == patchTextActorsPtrs_.size())
+                if (nActors == patchTextActors_.size())
                 {
                     // hit max allocated space - bail out
                     break;
                 }
             }
 
-            if (nActors == patchTextActorsPtrs_.size())
+            if (nActors == patchTextActors_.size())
             {
                 // hit max allocated space - bail out
                 break;
             }
         }
 
-        patchTextActorsPtrs_.setSize(nActors);
+        patchTextActors_.setSize(nActors);
     }
 
     // Add text to each renderer
-    forAll(patchTextActorsPtrs_, actori)
+    forAll(patchTextActors_, actori)
     {
-        renderer->AddViewProp(patchTextActorsPtrs_[actori]);
+        renderer->AddViewProp(patchTextActors_[actori]);
     }
 }
 
@@ -534,12 +540,11 @@ void Foam::vtkPVblockMesh::renderPointNumbers
 {
     // always remove old actors first
 
-    forAll(pointTextActorsPtrs_, actori)
+    forAll(pointTextActors_, actori)
     {
-        renderer->RemoveViewProp(pointTextActorsPtrs_[actori]);
-        pointTextActorsPtrs_[actori]->Delete();
+        renderer->RemoveViewProp(pointTextActors_[actori]);
     }
-    pointTextActorsPtrs_.clear();
+    pointTextActors_.clear();
 
     if (show && meshPtr_)
     {
@@ -547,7 +552,7 @@ void Foam::vtkPVblockMesh::renderPointNumbers
         const pointField& cornerPts = blkMesh.vertices();
         const scalar scaleFactor = blkMesh.scaleFactor();
 
-        pointTextActorsPtrs_.setSize(cornerPts.size());
+        pointTextActors_.setSize(cornerPts.size());
         forAll(cornerPts, pointi)
         {
             // Display either pointi as a number or with its name
@@ -556,7 +561,7 @@ void Foam::vtkPVblockMesh::renderPointNumbers
             blockVertex::write(os, pointi, blkMesh.meshDict());
 
             // Into a list for later removal
-            pointTextActorsPtrs_[pointi] = createTextActor
+            pointTextActors_[pointi] = createTextActor
             (
                 os.str(),
                 cornerPts[pointi]*scaleFactor
@@ -565,9 +570,9 @@ void Foam::vtkPVblockMesh::renderPointNumbers
     }
 
     // Add text to each renderer
-    forAll(pointTextActorsPtrs_, actori)
+    forAll(pointTextActors_, actori)
     {
-        renderer->AddViewProp(pointTextActorsPtrs_[actori]);
+        renderer->AddViewProp(pointTextActors_[actori]);
     }
 }
 

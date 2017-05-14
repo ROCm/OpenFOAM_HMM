@@ -39,6 +39,7 @@ License
 #include "vtkSMRenderViewProxy.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStringArray.h"
+#include "vtkSmartPointer.h"
 
 // OpenFOAM includes
 #include "vtkPVFoam.H"
@@ -69,11 +70,13 @@ vtkPVFoamReader::vtkPVFoamReader()
 #ifdef VTKPVFOAM_DUALPORT
     // Add second output for the Lagrangian
     this->SetNumberOfOutputPorts(2);
-    vtkMultiBlockDataSet *lagrangian = vtkMultiBlockDataSet::New();
+
+    vtkSmartPointer<vtkMultiBlockDataSet> lagrangian =
+        vtkSmartPointer<vtkMultiBlockDataSet>::New();
+
     lagrangian->ReleaseData();
 
     this->GetExecutive()->SetOutputData(1, lagrangian);
-    lagrangian->Delete();
 #endif
 
     TimeStepRange[0] = 0;
@@ -218,7 +221,7 @@ int vtkPVFoamReader::RequestInformation
     {
         vtkErrorMacro("could not find valid OpenFOAM mesh");
 
-        // delete foamData and flag it as fatal error
+        // delete backend handler and flag it as fatal error
         delete backend_;
         backend_ = nullptr;
         return 0;
@@ -326,7 +329,8 @@ int vtkPVFoamReader::RequestData
     {
         vtkInformation *outInfo = outputVector->GetInformationObject(infoI);
 
-        int nsteps = outInfo->Length(vtkStreamingDemandDrivenPipeline::TIME_STEPS());
+        const int nsteps =
+            outInfo->Length(vtkStreamingDemandDrivenPipeline::TIME_STEPS());
 
         if
         (
@@ -419,7 +423,7 @@ int vtkPVFoamReader::RequestData
             (
                 vtkMultiBlockDataSet::DATA_OBJECT()
             )
-        );
+        )
     );
 #else
     backend_->Update(output, output);

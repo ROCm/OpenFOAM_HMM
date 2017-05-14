@@ -32,6 +32,7 @@ License
 #include "vtkDataSet.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkInformation.h"
+#include "vtkSmartPointer.h"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -54,7 +55,8 @@ void Foam::foamPvCore::addToBlock
     const int blockNo = selector.block();
 
     vtkDataObject* dataObj = output->GetBlock(blockNo);
-    vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast(dataObj);
+    vtkSmartPointer<vtkMultiBlockDataSet> block =
+        vtkMultiBlockDataSet::SafeDownCast(dataObj);
 
     if (!block)
     {
@@ -66,9 +68,8 @@ void Foam::foamPvCore::addToBlock
             return;
         }
 
-        block = vtkMultiBlockDataSet::New();
+        block = vtkSmartPointer<vtkMultiBlockDataSet>::New();
         output->SetBlock(blockNo, block);
-        block->Delete();
     }
 
     if (debug)

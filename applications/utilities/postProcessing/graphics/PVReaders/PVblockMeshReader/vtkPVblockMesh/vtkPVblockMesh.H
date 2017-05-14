@@ -56,6 +56,8 @@ class vtkPolyData;
 class vtkUnstructuredGrid;
 class vtkIndent;
 
+template<class T> class vtkSmartPointer;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -110,20 +112,13 @@ class vtkPVblockMesh
         arrayRange rangeCorners_;
 
         //- List of patch names for rendering to window
-        List<vtkTextActor*> patchTextActorsPtrs_;
+        List<vtkSmartPointer<vtkTextActor>> patchTextActors_;
 
         //- List of point numbers for rendering to window
-        List<vtkTextActor*> pointTextActorsPtrs_;
+        List<vtkSmartPointer<vtkTextActor>> pointTextActors_;
 
 
     // Private Member Functions
-
-        //- Create a text actor
-        static vtkTextActor* createTextActor
-        (
-            const std::string& s,
-            const point& pt
-        );
 
         //- Reset data counters
         void resetCounters();

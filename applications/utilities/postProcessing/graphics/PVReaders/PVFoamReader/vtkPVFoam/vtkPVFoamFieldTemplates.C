@@ -42,6 +42,7 @@ InClass
 #include "vtkFloatArray.h"
 #include "vtkCellData.h"
 #include "vtkPointData.h"
+#include "vtkSmartPointer.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //
@@ -84,7 +85,7 @@ void Foam::vtkPVFoam::convertVolField
         ptfPtr,
         output,
         rangeVolume_,
-        regionPolyDecomp_
+        regionVtus_
     );
 
     // Convert activated cellZones
@@ -94,7 +95,7 @@ void Foam::vtkPVFoam::convertVolField
         ptfPtr,
         output,
         rangeCellZones_,
-        zonePolyDecomp_
+        zoneVtus_
     );
 
     // Convert activated cellSets
@@ -104,7 +105,7 @@ void Foam::vtkPVFoam::convertVolField
         ptfPtr,
         output,
         rangeCellSets_,
-        csetPolyDecomp_
+        csetVtus_
     );
 
 
@@ -151,38 +152,44 @@ void Foam::vtkPVFoam::convertVolField
                 fvPatchField<Type>(p, fld).patchInternalField()
             );
 
-            vtkFloatArray* cdata = convertFieldToVTK(fld.name(), tpptf());
+            vtkSmartPointer<vtkFloatArray> cdata =
+                convertFieldToVTK
+                (
+                    fld.name(),
+                    tpptf()
+                );
             vtkmesh->GetCellData()->AddArray(cdata);
-            cdata->Delete();
 
             if (patchId < patchInterpList.size())
             {
-                vtkFloatArray* pdata = convertFieldToVTK
+                vtkSmartPointer<vtkFloatArray> pdata = convertFieldToVTK
                 (
                     fld.name(),
                     patchInterpList[patchId].faceToPointInterpolate(tpptf)()
                 );
 
                 vtkmesh->GetPointData()->AddArray(pdata);
-                pdata->Delete();
             }
         }
         else
         {
-            vtkFloatArray* cdata = convertFieldToVTK(fld.name(), ptf);
+            vtkSmartPointer<vtkFloatArray> cdata =
+                convertFieldToVTK
+                (
+                    fld.name(),
+                    ptf
+                );
             vtkmesh->GetCellData()->AddArray(cdata);
-            cdata->Delete();
 
             if (patchId < patchInterpList.size())
             {
-                vtkFloatArray* pdata = convertFieldToVTK
+                vtkSmartPointer<vtkFloatArray> pdata = convertFieldToVTK
                 (
                     fld.name(),
                     patchInterpList[patchId].faceToPointInterpolate(ptf)()
                 );
 
                 vtkmesh->GetPointData()->AddArray(pdata);
-                pdata->Delete();
             }
         }
     }
@@ -215,14 +222,13 @@ void Foam::vtkPVFoam::convertVolField
 
         if (vtkmesh)
         {
-            vtkFloatArray* cdata = convertFaceFieldToVTK
+            vtkSmartPointer<vtkFloatArray> cdata = convertFaceFieldToVTK
             (
                 fld,
                 zMesh[zoneId]
             );
 
             vtkmesh->GetCellData()->AddArray(cdata);
-            cdata->Delete();
         }
 
         // TODO: points
@@ -253,14 +259,13 @@ void Foam::vtkPVFoam::convertVolField
 
         const faceSet fSet(mesh, selectName);
 
-        vtkFloatArray* cdata = convertFaceFieldToVTK
+        vtkSmartPointer<vtkFloatArray> cdata = convertFaceFieldToVTK
         (
             fld,
             fSet.sortedToc()
         );
 
         vtkmesh->GetCellData()->AddArray(cdata);
-        cdata->Delete();
 
         // TODO: points
     }
@@ -369,7 +374,7 @@ void Foam::vtkPVFoam::convertVolFieldBlock
     autoPtr<GeometricField<Type, pointPatchField, pointMesh>>& ptfPtr,
     vtkMultiBlockDataSet* output,
     const arrayRange& range,
-    const List<polyDecomp>& decompLst
+    const List<foamVtuData>& vtuDataList
 )
 {
     for (auto partId : range)
@@ -389,18 +394,16 @@ void Foam::vtkPVFoam::convertVolFieldBlock
             continue;
         }
 
-        vtkFloatArray* cdata = convertVolFieldToVTK
+        vtkSmartPointer<vtkFloatArray> cdata = convertVolFieldToVTK
         (
             fld,
-            decompLst[datasetNo]
+            vtuDataList[datasetNo]
         );
-
         vtkmesh->GetCellData()->AddArray(cdata);
-        cdata->Delete();
 
         if (ptfPtr.valid())
         {
-            convertPointField(vtkmesh, ptfPtr(), fld, decompLst[datasetNo]);
+            convertPointField(vtkmesh, ptfPtr(), fld, vtuDataList[datasetNo]);
         }
     }
 }
@@ -449,7 +452,7 @@ void Foam::vtkPVFoam::convertPointFields
             pfld,
             output,
             rangeVolume_,
-            regionPolyDecomp_
+            regionVtus_
         );
 
         // Convert activated cellZones
@@ -458,7 +461,7 @@ void Foam::vtkPVFoam::convertPointFields
             pfld,
             output,
             rangeCellZones_,
-            zonePolyDecomp_
+            zoneVtus_
         );
 
         // Convert activated cellSets
@@ -467,7 +470,7 @@ void Foam::vtkPVFoam::convertPointFields
             pfld,
             output,
             rangeCellSets_,
-            csetPolyDecomp_
+            csetVtus_
         );
 
 
@@ -492,14 +495,13 @@ void Foam::vtkPVFoam::convertPointFields
 
             if (vtkmesh)
             {
-                vtkFloatArray* pdata = convertFieldToVTK
+                vtkSmartPointer<vtkFloatArray> pdata = convertFieldToVTK
                 (
                     fieldName,
                     pfld.boundaryField()[patchId].patchInternalField()()
                 );
 
                 vtkmesh->GetPointData()->AddArray(pdata);
-                pdata->Delete();
             }
         }
 
@@ -531,10 +533,14 @@ void Foam::vtkPVFoam::convertPointFields
                     mesh.faceZones()[zoneId]().meshPoints()
                 );
 
-                vtkFloatArray* pdata = convertFieldToVTK(fieldName, znfld);
+                vtkSmartPointer<vtkFloatArray> pdata =
+                    convertFieldToVTK
+                    (
+                        fieldName,
+                        znfld
+                    );
 
                 vtkmesh->GetPointData()->AddArray(pdata);
-                pdata->Delete();
             }
         }
     }
@@ -547,7 +553,7 @@ void Foam::vtkPVFoam::convertPointFieldBlock
     const GeometricField<Type, pointPatchField, pointMesh>& pfld,
     vtkMultiBlockDataSet* output,
     const arrayRange& range,
-    const List<polyDecomp>& decompLst
+    const List<foamVtuData>& vtuDataList
 )
 {
     for (auto partId : range)
@@ -571,7 +577,7 @@ void Foam::vtkPVFoam::convertPointFieldBlock
                 vtkmesh,
                 pfld,
                 GeometricField<Type, fvPatchField, volMesh>::null(),
-                decompLst[datasetNo]
+                vtuDataList[datasetNo]
             );
         }
     }
@@ -584,7 +590,7 @@ void Foam::vtkPVFoam::convertPointField
     vtkUnstructuredGrid* vtkmesh,
     const GeometricField<Type, pointPatchField, pointMesh>& pfld,
     const GeometricField<Type, fvPatchField, volMesh>& vfld,
-    const polyDecomp& decomp
+    const foamVtuData& vtuData
 )
 {
     if (!vtkmesh)
@@ -593,13 +599,15 @@ void Foam::vtkPVFoam::convertPointField
     }
 
     const label nComp = pTraits<Type>::nComponents;
-    const labelUList& addPointCellLabels = decomp.addPointCellLabels();
-    const labelUList& pointMap = decomp.pointMap();
+    const labelUList& addPointCellLabels = vtuData.additionalIds();
+    const labelUList& pointMap = vtuData.pointMap();
 
     // use a pointMap or address directly into mesh
     const label nPoints = (pointMap.size() ? pointMap.size() : pfld.size());
 
-    vtkFloatArray* fldData = vtkFloatArray::New();
+    vtkSmartPointer<vtkFloatArray> fldData =
+        vtkSmartPointer<vtkFloatArray>::New();
+
     fldData->SetNumberOfTuples(nPoints + addPointCellLabels.size());
     fldData->SetNumberOfComponents(nComp);
     fldData->Allocate(nComp*(nPoints + addPointCellLabels.size()));
@@ -689,7 +697,6 @@ void Foam::vtkPVFoam::convertPointField
     }
 
     vtkmesh->GetPointData()->AddArray(fldData);
-    fldData->Delete();
 }
 
 
@@ -720,9 +727,13 @@ void Foam::vtkPVFoam::convertLagrangianFields
             {
                 IOField<Type> fld(*iter());
 
-                vtkFloatArray* fldData = convertFieldToVTK(fld.name(), fld);
+                vtkSmartPointer<vtkFloatArray> fldData =
+                    convertFieldToVTK
+                    (
+                        fld.name(),
+                        fld
+                    );
                 vtkmesh->GetPointData()->AddArray(fldData);
-                fldData->Delete();
             }
         }
     }
@@ -735,7 +746,8 @@ void Foam::vtkPVFoam::convertLagrangianFields
 //
 
 template<class Type>
-vtkFloatArray* Foam::vtkPVFoam::convertFieldToVTK
+vtkSmartPointer<vtkFloatArray>
+Foam::vtkPVFoam::convertFieldToVTK
 (
     const word& name,
     const Field<Type>& fld
@@ -751,7 +763,9 @@ vtkFloatArray* Foam::vtkPVFoam::convertFieldToVTK
 
     const label nComp = pTraits<Type>::nComponents;
 
-    vtkFloatArray* fldData = vtkFloatArray::New();
+    vtkSmartPointer<vtkFloatArray> fldData =
+        vtkSmartPointer<vtkFloatArray>::New();
+
     fldData->SetNumberOfTuples(fld.size());
     fldData->SetNumberOfComponents(nComp);
     fldData->Allocate(nComp*fld.size());
@@ -775,7 +789,8 @@ vtkFloatArray* Foam::vtkPVFoam::convertFieldToVTK
 
 
 template<class Type>
-vtkFloatArray* Foam::vtkPVFoam::convertFaceFieldToVTK
+vtkSmartPointer<vtkFloatArray>
+Foam::vtkPVFoam::convertFaceFieldToVTK
 (
     const GeometricField<Type, fvPatchField, volMesh>& fld,
     const labelUList& faceLabels
@@ -796,7 +811,9 @@ vtkFloatArray* Foam::vtkPVFoam::convertFaceFieldToVTK
     const labelList& faceOwner = mesh.faceOwner();
     const labelList& faceNeigh = mesh.faceNeighbour();
 
-    vtkFloatArray* fldData = vtkFloatArray::New();
+    vtkSmartPointer<vtkFloatArray> fldData =
+        vtkSmartPointer<vtkFloatArray>::New();
+
     fldData->SetNumberOfTuples(faceLabels.size());
     fldData->SetNumberOfComponents(nComp);
     fldData->Allocate(nComp*faceLabels.size());
@@ -836,35 +853,38 @@ vtkFloatArray* Foam::vtkPVFoam::convertFaceFieldToVTK
 
 
 template<class Type>
-vtkFloatArray* Foam::vtkPVFoam::convertVolFieldToVTK
+vtkSmartPointer<vtkFloatArray>
+Foam::vtkPVFoam::convertVolFieldToVTK
 (
     const GeometricField<Type, fvPatchField, volMesh>& fld,
-    const polyDecomp& decompInfo
+    const foamVtuData& vtuData
 )
 {
     const label nComp = pTraits<Type>::nComponents;
-    const labelList& superCells = decompInfo.superCells();
+    const labelList& cellMap = vtuData.cellMap();
 
-    vtkFloatArray* fldData = vtkFloatArray::New();
-    fldData->SetNumberOfTuples(superCells.size());
+    vtkSmartPointer<vtkFloatArray> fldData =
+        vtkSmartPointer<vtkFloatArray>::New();
+
+    fldData->SetNumberOfTuples(cellMap.size());
     fldData->SetNumberOfComponents(nComp);
-    fldData->Allocate(nComp*superCells.size());
+    fldData->Allocate(nComp*cellMap.size());
     fldData->SetName(fld.name().c_str());
 
     if (debug)
     {
         Info<< "convert volField: "
             << fld.name()
-            << " size=" << superCells.size()
+            << " size=" << cellMap.size()
             << " (" << fld.size() << " + "
-            << (superCells.size() - fld.size())
+            << (cellMap.size() - fld.size())
             << ") nComp=" << nComp << endl;
     }
 
     float vec[nComp];
-    forAll(superCells, i)
+    forAll(cellMap, i)
     {
-        const Type& t = fld[superCells[i]];
+        const Type& t = fld[cellMap[i]];
         for (direction d=0; d<nComp; ++d)
         {
             vec[d] = component(t, d);

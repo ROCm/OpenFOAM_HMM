@@ -38,6 +38,7 @@ License
 #include "vtkMultiBlockDataSet.h"
 #include "vtkPolyData.h"
 #include "vtkUnstructuredGrid.h"
+#include "vtkSmartPointer.h"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -53,7 +54,7 @@ void Foam::vtkPVFoam::convertMeshVolume
     const fvMesh& mesh = *meshPtr_;
 
     // resize for decomposed polyhedra
-    regionPolyDecomp_.setSize(range.size());
+    regionVtus_.setSize(range.size());
 
     if (debug)
     {
@@ -72,17 +73,15 @@ void Foam::vtkPVFoam::convertMeshVolume
             continue;
         }
 
-        vtkUnstructuredGrid* vtkmesh = volumeVTKMesh
+        vtkSmartPointer<vtkUnstructuredGrid> vtkmesh = volumeVTKMesh
         (
             mesh,
-            regionPolyDecomp_[datasetNo]
+            regionVtus_[datasetNo]
         );
 
         if (vtkmesh)
         {
             addToBlock(output, vtkmesh, range, datasetNo, partName);
-            vtkmesh->Delete();
-
             partDataset_[partId] = datasetNo++;
         }
     }
@@ -127,13 +126,12 @@ void Foam::vtkPVFoam::convertMeshLagrangian
             continue;
         }
 
-        vtkPolyData* vtkmesh = lagrangianVTKMesh(mesh, cloudName);
+        vtkSmartPointer<vtkPolyData> vtkmesh =
+            lagrangianVTKMesh(mesh, cloudName);
 
         if (vtkmesh)
         {
             addToBlock(output, vtkmesh, range, datasetNo, cloudName);
-            vtkmesh->Delete();
-
             partDataset_[partId] = datasetNo++;
         }
     }
@@ -188,7 +186,7 @@ void Foam::vtkPVFoam::convertMeshPatches
                 << patchName << endl;
         }
 
-        vtkPolyData* vtkmesh = nullptr;
+        vtkSmartPointer<vtkPolyData> vtkmesh;
         if (patchIds.size() == 1)
         {
             vtkmesh = patchVTKMesh(patchName, patches[patchIds.begin().key()]);
@@ -228,8 +226,6 @@ void Foam::vtkPVFoam::convertMeshPatches
         if (vtkmesh)
         {
             addToBlock(output, vtkmesh, range, datasetNo, patchName);
-            vtkmesh->Delete();
-
             partDataset_[partId] = datasetNo++;
         }
     }
@@ -260,7 +256,7 @@ void Foam::vtkPVFoam::convertMeshCellZones
     const fvMesh& mesh = *meshPtr_;
 
     // resize for decomposed polyhedra
-    zonePolyDecomp_.setSize(range.size());
+    zoneVtus_.setSize(range.size());
 
     if (range.empty())
     {
@@ -293,32 +289,30 @@ void Foam::vtkPVFoam::convertMeshCellZones
         fvMeshSubset subsetter(mesh);
         subsetter.setLargeCellSubset(zMesh[zoneId]);
 
-        vtkUnstructuredGrid* vtkmesh = volumeVTKMesh
+        vtkSmartPointer<vtkUnstructuredGrid> vtkmesh = volumeVTKMesh
         (
             subsetter.subMesh(),
-            zonePolyDecomp_[datasetNo]
+            zoneVtus_[datasetNo]
         );
 
         if (vtkmesh)
         {
-            // superCells + addPointCellLabels must contain global cell ids
+            // cellMap + addPointCellLabels must contain global cell ids
             inplaceRenumber
             (
                 subsetter.cellMap(),
-                zonePolyDecomp_[datasetNo].superCells()
+                zoneVtus_[datasetNo].cellMap()
             );
             inplaceRenumber
             (
                 subsetter.cellMap(),
-                zonePolyDecomp_[datasetNo].addPointCellLabels()
+                zoneVtus_[datasetNo].additionalIds()
             );
 
             // copy pointMap as well, otherwise pointFields fail
-            zonePolyDecomp_[datasetNo].pointMap() = subsetter.pointMap();
+            zoneVtus_[datasetNo].pointMap() = subsetter.pointMap();
 
             addToBlock(output, vtkmesh, range, datasetNo, zoneName);
-            vtkmesh->Delete();
-
             partDataset_[partId] = datasetNo++;
         }
     }
@@ -349,7 +343,7 @@ void Foam::vtkPVFoam::convertMeshCellSets
     const fvMesh& mesh = *meshPtr_;
 
     // resize for decomposed polyhedra
-    csetPolyDecomp_.setSize(range.size());
+    csetVtus_.setSize(range.size());
 
     if (debug)
     {
@@ -375,32 +369,30 @@ void Foam::vtkPVFoam::convertMeshCellSets
         fvMeshSubset subsetter(mesh);
         subsetter.setLargeCellSubset(cSet);
 
-        vtkUnstructuredGrid* vtkmesh = volumeVTKMesh
+        vtkSmartPointer<vtkUnstructuredGrid> vtkmesh = volumeVTKMesh
         (
             subsetter.subMesh(),
-            csetPolyDecomp_[datasetNo]
+            csetVtus_[datasetNo]
         );
 
         if (vtkmesh)
         {
-            // superCells + addPointCellLabels must contain global cell ids
+            // cellMap + addPointCellLabels must contain global cell ids
             inplaceRenumber
             (
                 subsetter.cellMap(),
-                csetPolyDecomp_[datasetNo].superCells()
+                csetVtus_[datasetNo].cellMap()
             );
             inplaceRenumber
             (
                 subsetter.cellMap(),
-                csetPolyDecomp_[datasetNo].addPointCellLabels()
+                csetVtus_[datasetNo].additionalIds()
             );
 
             // copy pointMap as well, otherwise pointFields fail
-            csetPolyDecomp_[datasetNo].pointMap() = subsetter.pointMap();
+            csetVtus_[datasetNo].pointMap() = subsetter.pointMap();
 
             addToBlock(output, vtkmesh, range, datasetNo, partName);
-            vtkmesh->Delete();
-
             partDataset_[partId] = datasetNo++;
         }
     }
@@ -458,13 +450,12 @@ void Foam::vtkPVFoam::convertMeshFaceZones
                 << zoneName << endl;
         }
 
-        vtkPolyData* vtkmesh = patchVTKMesh(zoneName, zMesh[zoneId]());
+        vtkSmartPointer<vtkPolyData> vtkmesh =
+            patchVTKMesh(zoneName, zMesh[zoneId]());
 
         if (vtkmesh)
         {
             addToBlock(output, vtkmesh, range, datasetNo, zoneName);
-            vtkmesh->Delete();
-
             partDataset_[partId] = datasetNo++;
         }
     }
@@ -530,12 +521,12 @@ void Foam::vtkPVFoam::convertMeshFaceSets
             continue;
         }
 
-        vtkPolyData* vtkmesh = patchVTKMesh("faceSet:" + partName, p);
+        vtkSmartPointer<vtkPolyData> vtkmesh =
+            patchVTKMesh("faceSet:" + partName, p);
+
         if (vtkmesh)
         {
             addToBlock(output, vtkmesh, range, datasetNo, partName);
-            vtkmesh->Delete();
-
             partDataset_[partId] = datasetNo++;
         }
     }
@@ -586,7 +577,9 @@ void Foam::vtkPVFoam::convertMeshPointZones
 
             const labelUList& pointLabels = zMesh[zoneId];
 
-            vtkPoints* vtkpoints = vtkPoints::New();
+            vtkSmartPointer<vtkPoints> vtkpoints =
+                vtkSmartPointer<vtkPoints>::New();
+
             vtkpoints->Allocate(pointLabels.size());
 
             const pointField& meshPoints = mesh.points();
@@ -595,15 +588,14 @@ void Foam::vtkPVFoam::convertMeshPointZones
                 vtkpoints->InsertNextPoint(meshPoints[pointLabels[pointi]].v_);
             }
 
-            vtkPolyData* vtkmesh = vtkPolyData::New();
+            vtkSmartPointer<vtkPolyData> vtkmesh =
+                vtkSmartPointer<vtkPolyData>::New();
+
             vtkmesh->SetPoints(vtkpoints);
-            vtkpoints->Delete();
 
             if (vtkmesh)
             {
                 addToBlock(output, vtkmesh, range, datasetNo, zoneName);
-                vtkmesh->Delete();
-
                 partDataset_[partId] = datasetNo++;
             }
         }
@@ -657,7 +649,9 @@ void Foam::vtkPVFoam::convertMeshPointSets
 
         const pointSet pSet(mesh, partName);
 
-        vtkPoints* vtkpoints = vtkPoints::New();
+        vtkSmartPointer<vtkPoints> vtkpoints =
+            vtkSmartPointer<vtkPoints>::New();
+
         vtkpoints->Allocate(pSet.size());
 
         const pointField& meshPoints = mesh.points();
@@ -666,15 +660,14 @@ void Foam::vtkPVFoam::convertMeshPointSets
             vtkpoints->InsertNextPoint(meshPoints[iter.key()].v_);
         }
 
-        vtkPolyData* vtkmesh = vtkPolyData::New();
+        vtkSmartPointer<vtkPolyData> vtkmesh =
+            vtkSmartPointer<vtkPolyData>::New();
+
         vtkmesh->SetPoints(vtkpoints);
-        vtkpoints->Delete();
 
         if (vtkmesh)
         {
             addToBlock(output, vtkmesh, range, datasetNo, partName);
-            vtkmesh->Delete();
-
             partDataset_[partId] = datasetNo++;
         }
     }

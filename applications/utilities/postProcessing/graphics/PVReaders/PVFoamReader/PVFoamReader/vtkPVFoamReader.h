@@ -46,6 +46,7 @@ SourceFiles
 // VTK forward declarations
 class vtkDataArraySelection;
 class vtkCallbackCommand;
+template<class T> class vtkSmartPointer;
 
 // OpenFOAM forward declarations
 namespace Foam
