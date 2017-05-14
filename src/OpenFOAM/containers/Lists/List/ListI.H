@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,8 +77,8 @@ template<class T>
 template<class InputIterator>
 inline Foam::List<T>::List
 (
-    InputIterator first,
-    InputIterator last,
+    InputIterator begIter,
+    InputIterator endIter,
     const label s
 )
 :
@@ -88,10 +88,11 @@ inline Foam::List<T>::List
     {
         alloc();
 
-        InputIterator iter = first;
+        InputIterator iter = begIter;
         forAll(*this, i)
         {
-            this->operator[](i) = *iter++;
+            this->operator[](i) = *iter;
+            ++iter;
         }
     }
 }
@@ -126,7 +127,7 @@ inline void Foam::List<T>::clear()
     if (this->v_)
     {
         delete[] this->v_;
-        this->v_ = 0;
+        this->v_ = nullptr;
     }
 
     this->size_ = 0;
