@@ -165,20 +165,19 @@ int vtkPVblockMeshReader::RequestData
 
     if (!FileName)
     {
-        vtkErrorMacro("FileName has to be specified!");
+        vtkErrorMacro("FileName must be specified!");
         return 0;
     }
-
-    // Catch previous error
     if (!backend_)
     {
-        vtkErrorMacro("Reader failed - perhaps no mesh?");
+        // Catch some previous error
+        vtkErrorMacro("Reader failed - perhaps no blockMesh?");
         return 0;
     }
 
     if (Foam::vtkPVblockMesh::debug)
     {
-        cout<<"REQUEST_DATA:\n";
+        cout<<"RequestData:\n";
         outputVector->GetInformationObject(0)->Print(cout);
     }
 
@@ -190,19 +189,12 @@ int vtkPVblockMeshReader::RequestData
         )
     );
 
-    if (Foam::vtkPVblockMesh::debug)
-    {
-        cout<< "update output with "
-            << output->GetNumberOfBlocks() << " blocks\n";
-    }
-
     backend_->Update(output);
 
     updatePatchNamesView(ShowPatchNames);
     updatePointNumbersView(ShowPointNumbers);
 
-    // Do any cleanup on the OpenFOAM side
-    backend_->CleanUp();
+    backend_->UpdateFinalize();
 
     return 1;
 }

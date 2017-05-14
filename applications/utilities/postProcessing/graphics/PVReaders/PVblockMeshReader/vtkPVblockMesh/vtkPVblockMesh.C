@@ -430,7 +430,7 @@ void Foam::vtkPVblockMesh::Update
 }
 
 
-void Foam::vtkPVblockMesh::CleanUp()
+void Foam::vtkPVblockMesh::UpdateFinalize()
 {
     reader_->UpdateProgress(1.0);
 }

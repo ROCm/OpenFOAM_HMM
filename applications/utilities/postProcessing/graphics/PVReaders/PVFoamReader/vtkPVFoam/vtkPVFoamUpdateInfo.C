@@ -39,10 +39,6 @@ License
 // VTK includes
 #include "vtkDataArraySelection.h"
 
-// Templates (only needed here)
-#include "vtkPVFoamUpdateTemplates.C"
-
-
 // * * * * * * * * * * * * * * * Private Classes * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -577,23 +573,6 @@ void Foam::vtkPVFoam::updateInfoSets
     {
         Info<< "<end> updateInfoSets" << endl;
     }
-}
-
-
-void Foam::vtkPVFoam::updateInfoFields()
-{
-    updateInfoFields<fvPatchField, volMesh>
-    (
-        reader_->GetVolFieldSelection()
-    );
-    updateInfoFields<pointPatchField, pointMesh>
-    (
-        reader_->GetPointFieldSelection()
-    );
-    updateInfoLagrangianFields
-    (
-        reader_->GetLagrangianFieldSelection()
-    );
 }
 
 

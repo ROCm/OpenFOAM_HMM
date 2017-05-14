@@ -251,9 +251,6 @@ private:
     vtkDataArraySelection* PointFieldSelection;
     vtkDataArraySelection* LagrangianFieldSelection;
 
-    //- Cached data for output port0 (experimental!)
-    vtkMultiBlockDataSet* output0_;
-
     //- Backend portion of the reader
     Foam::vtkPVFoam* backend_;
 };

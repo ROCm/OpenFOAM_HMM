@@ -55,8 +55,6 @@ SourceFiles
 #include "volPointInterpolation.H"
 #include "foamPvCore.H"
 
-#undef VTKPVFOAM_DUALPORT
-
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
 
 class vtkDataArraySelection;
@@ -231,9 +229,6 @@ class vtkPVFoam
 
       // Update information helper functions
 
-        //- Update the mesh parts selected in the GUI
-        void updateMeshPartsStatus();
-
         //- Internal mesh info
         void updateInfoInternalMesh(vtkDataArraySelection*);
 
@@ -259,9 +254,6 @@ class vtkPVFoam
             const ZoneMesh<ZoneType, polyMesh>& zmesh
         );
 
-        //- Field (volume, point, lagrangian) info
-        void updateInfoFields();
-
         //- Field info
         template<template<class> class patchType, class meshType>
         void updateInfoFields
@@ -271,15 +263,6 @@ class vtkPVFoam
 
         //- Lagrangian field info
         void updateInfoLagrangianFields(vtkDataArraySelection* select);
-
-
-      // Update helper functions
-
-        //- OpenFOAM mesh
-        void updateFoamMesh();
-
-        //- Reduce memory footprint after conversion
-        void reduceMemory();
 
 
       // Mesh conversion functions
@@ -506,18 +489,18 @@ public:
         void Update
         (
             vtkMultiBlockDataSet* output,
-            vtkMultiBlockDataSet* lagrangianOutput
+            vtkMultiBlockDataSet* outputLagrangian
         );
 
-        //- Clean any storage
-        void CleanUp();
+        //- Final part of Update(), after any last minute rendering.
+        void UpdateFinalize();
+
+        //- Add/remove patch names to/from the view
+        void renderPatchNames(vtkRenderer* renderer, const bool show);
 
         //- Return a list of selected times.
         //  Use STL container since these values are used by the plugin
         std::vector<double> findTimes(const bool skipZero = false) const;
-
-        //- Add/remove patch names to/from the view
-        void renderPatchNames(vtkRenderer*, const bool show);
 
         //- Set the runTime to the first plausible request time,
         //  returns the timeIndex

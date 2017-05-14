@@ -47,7 +47,7 @@ License
 // STL includes
 #include <vector>
 
-#undef EXPERIMENTAL_TIME_CACHING
+#undef VTKPVFOAM_DUALPORT
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -62,10 +62,8 @@ vtkPVFoamReader::vtkPVFoamReader()
     vtkDebugMacro(<<"Constructor");
 
     SetNumberOfInputPorts(0);
-
     FileName = nullptr;
     backend_ = nullptr;
-    output0_ = nullptr;
 
 #ifdef VTKPVFOAM_DUALPORT
     // Add second output for the Lagrangian
@@ -84,7 +82,7 @@ vtkPVFoamReader::vtkPVFoamReader()
 
     CacheMesh = true;
 
-    SkipZeroTime = false;
+    SkipZeroTime = true;
     ExtrapolatePatches = false;
     UseVTKPolyhedron = false;
     IncludeSets = false;
@@ -151,12 +149,6 @@ vtkPVFoamReader::~vtkPVFoamReader()
     {
         delete[] FileName;
     }
-
-    if (output0_)
-    {
-        output0_->Delete();
-    }
-
 
     PartSelection->RemoveAllObservers();
     VolFieldSelection->RemoveAllObservers();
@@ -258,7 +250,7 @@ int vtkPVFoamReader::RequestInformation
                 <<"time-range " << times.front() << ':' << times.back() << "\n"
                 <<"times " << times.size() << "(";
 
-            for (const double& val : times)
+            for (auto val : times)
             {
                 cout<< ' ' << val;
             }
@@ -294,12 +286,12 @@ int vtkPVFoamReader::RequestData
 
     if (!FileName)
     {
-        vtkErrorMacro("FileName has to be specified!");
+        vtkErrorMacro("FileName must be specified!");
         return 0;
     }
     if (!backend_)
     {
-        // catch some previous error
+        // Catch some previous error
         vtkErrorMacro("Reader failed - perhaps no mesh?");
         return 0;
     }
@@ -365,76 +357,23 @@ int vtkPVFoamReader::RequestData
         )
     );
 
-    if (Foam::vtkPVFoam::debug)
-    {
-        cout<< "update output with "
-            << output->GetNumberOfBlocks() << " blocks\n";
-    }
-
-
-#ifdef EXPERIMENTAL_TIME_CACHING
-    bool needsUpdate = false;
-
-    if (!output0_)
-    {
-        output0_ = vtkMultiBlockDataSet::New();
-        needsUpdate = true;
-    }
-
-    // This experimental bit of code seems to work for the geometry,
-    // but trashes the fields and still triggers the GeometryFilter
-    if (needsUpdate)
-    {
-        backend_->Update(output);
-        output0_->ShallowCopy(output);
-    }
-    else
-    {
-        output->ShallowCopy(output0_);
-    }
-
-    if (Foam::vtkPVFoam::debug)
-    {
-        if (needsUpdate)
-        {
-            cout<< "full UPDATE ---------\n";
-        }
-        else
-        {
-            cout<< "cached UPDATE ---------\n";
-        }
-
-        cout<< "UPDATED output: ";
-        output->Print(cout);
-
-        cout<< "UPDATED output0_: ";
-        output0_->Print(cout);
-    }
-
-#else
-
 #ifdef VTKPVFOAM_DUALPORT
-    backend_->Update
+    vtkMultiBlockDataSet* output1 = vtkMultiBlockDataSet::SafeDownCast
     (
-        output,
-        vtkMultiBlockDataSet::SafeDownCast
+        outputVector->GetInformationObject(1)->Get
         (
-            outputVector->GetInformationObject(1)->Get
-            (
-                vtkMultiBlockDataSet::DATA_OBJECT()
-            )
+            vtkMultiBlockDataSet::DATA_OBJECT()
         )
     );
+
+    backend_->Update(output, output1);
 #else
-    backend_->Update(output, output);
+    backend_->Update(output, nullptr);
 #endif
 
     updatePatchNamesView(ShowPatchNames);
 
-#endif
-
-    // Do any cleanup on the OpenFOAM side
-    backend_->CleanUp();
+    backend_->UpdateFinalize();
 
     return 1;
 }

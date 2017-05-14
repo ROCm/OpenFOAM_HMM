@@ -39,6 +39,9 @@ License
 #include "vtkTextProperty.h"
 #include "vtkSmartPointer.h"
 
+// Templates (only needed here)
+#include "vtkPVFoamUpdateTemplates.C"
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -97,31 +100,6 @@ void Foam::vtkPVFoam::resetCounters()
     rangeCellSets_.reset();
     rangeFaceSets_.reset();
     rangePointSets_.reset();
-}
-
-
-void Foam::vtkPVFoam::reduceMemory()
-{
-    forAll(regionVtus_, i)
-    {
-        regionVtus_[i].clear();
-    }
-
-    forAll(zoneVtus_, i)
-    {
-        zoneVtus_[i].clear();
-    }
-
-    forAll(csetVtus_, i)
-    {
-        csetVtus_[i].clear();
-    }
-
-    if (!reader_->GetCacheMesh())
-    {
-        delete meshPtr_;
-        meshPtr_ = nullptr;
-    }
 }
 
 
@@ -201,52 +179,6 @@ int Foam::vtkPVFoam::setTime(int nRequest, const double requestTimes[])
 }
 
 
-void Foam::vtkPVFoam::updateMeshPartsStatus()
-{
-    if (debug)
-    {
-        Info<< "<beg> updateMeshPartsStatus" << endl;
-    }
-
-    vtkDataArraySelection* selection = reader_->GetPartSelection();
-    label nElem = selection->GetNumberOfArrays();
-
-    if (partStatus_.size() != nElem)
-    {
-        partStatus_.setSize(nElem);
-        partStatus_ = false;
-        meshChanged_ = true;
-    }
-
-    // this needs fixing if we wish to re-use the datasets
-    partDataset_.setSize(nElem);
-    partDataset_ = -1;
-
-    // Read the selected mesh parts (zones, patches ...) and add to list
-    forAll(partStatus_, partId)
-    {
-        const int setting = selection->GetArraySetting(partId);
-
-        if (partStatus_[partId] != setting)
-        {
-            partStatus_[partId] = setting;
-            meshChanged_ = true;
-        }
-
-        if (debug > 1)
-        {
-            Info<< "  part[" << partId << "] = "
-                << partStatus_[partId]
-                << " : " << selection->GetArrayName(partId) << endl;
-        }
-    }
-    if (debug)
-    {
-        Info<< "<end> updateMeshPartsStatus" << endl;
-    }
-}
-
-
 Foam::word Foam::vtkPVFoam::getPartName(const int partId)
 {
     return getFoamName(reader_->GetPartArrayName(partId));
@@ -270,7 +202,7 @@ Foam::vtkPVFoam::vtkPVFoam
     meshChanged_(true),
     fieldsChanged_(true),
     rangeVolume_("unzoned"),
-    rangePatches_("patches"),
+    rangePatches_("patch"),
     rangeLagrangian_("lagrangian"),
     rangeCellZones_("cellZone"),
     rangeFaceZones_("faceZone"),
@@ -433,7 +365,18 @@ void Foam::vtkPVFoam::updateInfo()
     }
 
     // Update volume, point and lagrangian fields
-    updateInfoFields();
+    updateInfoFields<fvPatchField, volMesh>
+    (
+        reader_->GetVolFieldSelection()
+    );
+    updateInfoFields<pointPatchField, pointMesh>
+    (
+        reader_->GetPointFieldSelection()
+    );
+    updateInfoLagrangianFields
+    (
+        reader_->GetLagrangianFieldSelection()
+    );
 
     if (debug)
     {
@@ -442,84 +385,121 @@ void Foam::vtkPVFoam::updateInfo()
 }
 
 
-void Foam::vtkPVFoam::updateFoamMesh()
-{
-    if (debug)
-    {
-        Info<< "<beg> updateFoamMesh" << endl;
-        printMemory();
-    }
-
-    if (!reader_->GetCacheMesh())
-    {
-        delete meshPtr_;
-        meshPtr_ = nullptr;
-    }
-
-    // Check to see if the OpenFOAM mesh has been created
-    if (!meshPtr_)
-    {
-        if (debug)
-        {
-            Info<< "Creating OpenFOAM mesh for region " << meshRegion_
-                << " at time=" << dbPtr_().timeName()
-                << endl;
-
-        }
-
-        meshPtr_ = new fvMesh
-        (
-            IOobject
-            (
-                meshRegion_,
-                dbPtr_().timeName(),
-                dbPtr_(),
-                IOobject::MUST_READ
-            )
-        );
-
-        meshChanged_ = true;
-    }
-    else
-    {
-        if (debug)
-        {
-            Info<< "Using existing OpenFOAM mesh" << endl;
-        }
-    }
-
-    if (debug)
-    {
-        Info<< "<end> updateFoamMesh" << endl;
-        printMemory();
-    }
-}
-
-
 void Foam::vtkPVFoam::Update
 (
     vtkMultiBlockDataSet* output,
-    vtkMultiBlockDataSet* lagrangianOutput
+    vtkMultiBlockDataSet* outputLagrangian
 )
 {
     if (debug)
     {
-        cout<< "<beg> Foam::vtkPVFoam::Update - output with "
-            << output->GetNumberOfBlocks() << " and "
-            << lagrangianOutput->GetNumberOfBlocks() << " blocks\n";
+        cout<< "<beg> Foam::vtkPVFoam::Update\n";
         output->Print(cout);
-        lagrangianOutput->Print(cout);
+        if (outputLagrangian) outputLagrangian->Print(cout);
         printMemory();
     }
     reader_->UpdateProgress(0.1);
 
     // Set up mesh parts selection(s)
-    updateMeshPartsStatus();
+    {
+        if (debug)
+        {
+            Info<< "<beg> updateMeshPartsStatus" << endl;
+        }
+
+        vtkDataArraySelection* selection = reader_->GetPartSelection();
+        label nElem = selection->GetNumberOfArrays();
+
+        if (partStatus_.size() != nElem)
+        {
+            partStatus_.setSize(nElem);
+            partStatus_ = false;
+            meshChanged_ = true;
+        }
+
+        // this needs fixing if we wish to re-use the datasets
+        partDataset_.setSize(nElem);
+        partDataset_ = -1;
+
+        // Read the selected mesh parts (zones, patches ...) and add to list
+        forAll(partStatus_, partId)
+        {
+            const int setting = selection->GetArraySetting(partId);
+
+            if (partStatus_[partId] != setting)
+            {
+                partStatus_[partId] = setting;
+                meshChanged_ = true;
+            }
+
+            if (debug > 1)
+            {
+                Info<< "  part[" << partId << "] = "
+                    << partStatus_[partId]
+                    << " : " << selection->GetArrayName(partId) << endl;
+            }
+        }
+        if (debug)
+        {
+            Info<< "<end> updateMeshPartsStatus" << endl;
+        }
+    }
 
     reader_->UpdateProgress(0.15);
 
     // Update the OpenFOAM mesh
-    updateFoamMesh();
+    {
+        if (debug)
+        {
+            Info<< "<beg> updateFoamMesh" << endl;
+            printMemory();
+        }
+
+        if (!reader_->GetCacheMesh())
+        {
+            delete meshPtr_;
+            meshPtr_ = nullptr;
+        }
+
+        // Check to see if the OpenFOAM mesh has been created
+        if (!meshPtr_)
+        {
+            if (debug)
+            {
+                Info<< "Creating OpenFOAM mesh for region " << meshRegion_
+                    << " at time=" << dbPtr_().timeName()
+                        << endl;
+
+            }
+
+            meshPtr_ = new fvMesh
+            (
+                IOobject
+                (
+                    meshRegion_,
+                    dbPtr_().timeName(),
+                    dbPtr_(),
+                    IOobject::MUST_READ
+                )
+            );
+
+            meshChanged_ = true;
+        }
+        else
+        {
+            if (debug)
+            {
+                Info<< "Using existing OpenFOAM mesh" << endl;
+            }
+        }
+
+        if (debug)
+        {
+            Info<< "<end> updateFoamMesh" << endl;
+            printMemory();
+        }
+    }
+
     reader_->UpdateProgress(0.4);
 
     // Convert meshes - start port0 at block=0
@@ -545,18 +525,24 @@ void Foam::vtkPVFoam::Update
         reader_->UpdateProgress(0.7);
     }
 
-#ifdef VTKPVFOAM_DUALPORT
-    // restart port1 at block=0
-    blockNo = 0;
-#endif
-    convertMeshLagrangian(lagrangianOutput, blockNo);
+    if (outputLagrangian)
+    {
+        // Lagrangian dual port - restart port1 at block=0
+        blockNo = 0;
+        convertMeshLagrangian(outputLagrangian, blockNo);
+    }
+    else
+    {
+        convertMeshLagrangian(output, blockNo);
+    }
 
     reader_->UpdateProgress(0.8);
 
     // Update fields
     convertVolFields(output);
     convertPointFields(output);
-    convertLagrangianFields(lagrangianOutput);
+    convertLagrangianFields(outputLagrangian ? outputLagrangian : output);
+
     if (debug)
     {
         Info<< "done reader part" << nl << endl;
@@ -564,13 +550,31 @@ void Foam::vtkPVFoam::Update
     reader_->UpdateProgress(0.95);
 
     meshChanged_ = fieldsChanged_ = false;
+
+    // Standard memory cleanup
+    forAll(regionVtus_, i)
+    {
+        regionVtus_[i].clear();
+    }
+    forAll(zoneVtus_, i)
+    {
+        zoneVtus_[i].clear();
+    }
+    forAll(csetVtus_, i)
+    {
+        csetVtus_[i].clear();
+    }
 }
 
 
-void Foam::vtkPVFoam::CleanUp()
+void Foam::vtkPVFoam::UpdateFinalize()
 {
-    // reclaim some memory
-    reduceMemory();
+    if (!reader_->GetCacheMesh())
+    {
+        delete meshPtr_;
+        meshPtr_ = nullptr;
+    }
+
     reader_->UpdateProgress(1.0);
 }
 

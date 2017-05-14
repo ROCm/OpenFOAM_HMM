@@ -177,14 +177,15 @@ public:
 
         void Update(vtkMultiBlockDataSet* output);
 
-        //- Clean any storage
-        void CleanUp();
+        //- Final part of Update(), after any last minute rendering.
+        void UpdateFinalize();
 
         //- Add/remove patch names to/from the view
-        void renderPatchNames(vtkRenderer*, const bool show);
+        void renderPatchNames(vtkRenderer* renderer, const bool show);
 
         //- Add/remove point numbers to/from the view
-        void renderPointNumbers(vtkRenderer*, const bool show);
+        void renderPointNumbers(vtkRenderer* renderer, const bool show);
+
 
      // Access
 
