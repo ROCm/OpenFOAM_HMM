@@ -39,6 +39,7 @@ SourceFiles
 #include "pointList.H"
 #include "wordList.H"
 #include "Hash.H"
+#include "HashSet.H"
 #include "hashedWordList.H"
 #include "labelRange.H"
 
@@ -208,25 +209,25 @@ public:
     );
 
 
-    //- Retrieve the current selections
-    static stringList getSelectedArrayEntries
+    //- Retrieve the currently enabled selections
+    static HashSet<string> getSelectedArrayEntries
     (
         vtkDataArraySelection* select
     );
 
-    //- Retrieve a sub-list of the current selections
-    static stringList getSelectedArrayEntries
+    //- Retrieve a sub-list of the currently enabled selections
+    static HashSet<string> getSelectedArrayEntries
     (
         vtkDataArraySelection* select,
-        const arrayRange& selector
+        const arrayRange& slice
     );
 
 
-    //- Set selection(s)
+    //- Enable the selection(s)
     static void setSelectedArrayEntries
     (
         vtkDataArraySelection* select,
-        const stringList& selections
+        const HashSet<string>& enabled
     );
 
 

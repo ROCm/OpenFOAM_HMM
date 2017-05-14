@@ -194,22 +194,22 @@ Foam::hashedWordList Foam::foamPvCore::getSelected
 }
 
 
-Foam::stringList Foam::foamPvCore::getSelectedArrayEntries
+Foam::HashSet<Foam::string>
+Foam::foamPvCore::getSelectedArrayEntries
 (
     vtkDataArraySelection* select
 )
 {
-    stringList selections(select->GetNumberOfArrays());
-    label nElem = 0;
+    const int n = select->GetNumberOfArrays();
+    HashSet<string> selections(2*n);
 
-    forAll(selections, elemI)
+    for (int i=0; i < n; ++i)
     {
-        if (select->GetArraySetting(elemI))
+        if (select->GetArraySetting(i))
         {
-            selections[nElem++] = select->GetArrayName(elemI);
+            selections.insert(select->GetArrayName(i));
         }
     }
-    selections.setSize(nElem);
 
     if (debug > 1)
     {
@@ -221,9 +221,9 @@ Foam::stringList Foam::foamPvCore::getSelectedArrayEntries
         }
         Info<< " )\nselected(";
 
-        forAll(selections, elemI)
+        for (auto k : selections)
         {
-            Info<< " " << selections[elemI];
+            Info<< " " << k;
         }
         Info<< " )\n";
     }
@@ -232,65 +232,61 @@ Foam::stringList Foam::foamPvCore::getSelectedArrayEntries
 }
 
 
-Foam::stringList Foam::foamPvCore::getSelectedArrayEntries
+Foam::HashSet<Foam::string>
+Foam::foamPvCore::getSelectedArrayEntries
 (
     vtkDataArraySelection* select,
-    const arrayRange& selector
+    const arrayRange& slice
 )
 {
-    stringList selections(selector.size());
-    label nElem = 0;
+    const int n = select->GetNumberOfArrays();
+    HashSet<string> enabled(2*n);
 
-    for (auto i : selector)
+    for (auto i : slice)
     {
         if (select->GetArraySetting(i))
         {
-            selections[nElem++] = select->GetArrayName(i);
+            enabled.insert(select->GetArrayName(i));
         }
     }
-    selections.setSize(nElem);
 
     if (debug > 1)
     {
         Info<< "available(";
-        for (auto i : selector)
+        for (auto i : slice)
         {
             Info<< " \"" << select->GetArrayName(i) << "\"";
         }
         Info<< " )\nselected(";
 
-        forAll(selections, elemI)
+        for (auto k : enabled)
         {
-            Info<< " " << selections[elemI];
+            Info<< " " << k;
         }
         Info<< " )\n";
     }
 
-    return selections;
+    return enabled;
 }
 
 
 void Foam::foamPvCore::setSelectedArrayEntries
 (
     vtkDataArraySelection* select,
-    const stringList& selections
+    const HashSet<string>& enabled
 )
 {
     const int n = select->GetNumberOfArrays();
+    // disable everything not explicitly enabled
     select->DisableAllArrays();
 
-    // Loop through entries, setting values from selectedEntries
+    // Loop through entries, enabling as required
     for (int i=0; i < n; ++i)
     {
-        const string arrayName(select->GetArrayName(i));
-
-        forAll(selections, elemI)
+        const char* arrayName = select->GetArrayName(i);
+        if (enabled.found(arrayName))
         {
-            if (selections[elemI] == arrayName)
-            {
-                select->EnableArray(arrayName.c_str());
-                break;
-            }
+            select->EnableArray(arrayName);
         }
     }
 }

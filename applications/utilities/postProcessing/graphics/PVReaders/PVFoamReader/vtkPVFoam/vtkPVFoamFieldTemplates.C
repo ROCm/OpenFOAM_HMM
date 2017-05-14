@@ -84,8 +84,7 @@ void Foam::vtkPVFoam::convertVolField
         fld,
         ptfPtr,
         output,
-        rangeVolume_,
-        regionVtus_
+        rangeVolume_
     );
 
     // Convert activated cellZones
@@ -94,8 +93,7 @@ void Foam::vtkPVFoam::convertVolField
         fld,
         ptfPtr,
         output,
-        rangeCellZones_,
-        zoneVtus_
+        rangeCellZones_
     );
 
     // Convert activated cellSets
@@ -104,21 +102,30 @@ void Foam::vtkPVFoam::convertVolField
         fld,
         ptfPtr,
         output,
-        rangeCellSets_,
-        csetVtus_
+        rangeCellSets_
     );
 
 
     //
     // Convert patches - if activated
+    // - skip field conversion for groups
     //
     for (auto partId : rangePatches_)
     {
+        if
+        (
+            !selectedPartIds_.found(partId)
+         || selectedPartIds_[partId].startsWith("group/")
+        )
+        {
+            continue;
+        }
+
         const word patchName = getPartName(partId);
-        const label datasetNo = partDataset_[partId];
+        const label datasetNo = partDataset_.lookup(partId, -1);
         const label patchId = patches.findPatchID(patchName);
 
-        if (!partStatus_[partId] || patchId < 0)
+        if (patchId < 0)
         {
             continue;
         }
@@ -199,10 +206,15 @@ void Foam::vtkPVFoam::convertVolField
     //
     for (auto partId : rangeFaceZones_)
     {
-        const word zoneName = getPartName(partId);
-        const label datasetNo = partDataset_[partId];
+        if (!selectedPartIds_.found(partId))
+        {
+            continue;
+        }
 
-        if (!partStatus_[partId] || datasetNo < 0)
+        const word zoneName = getPartName(partId);
+        const label datasetNo = partDataset_.lookup(partId, -1);
+
+        if (datasetNo < 0)
         {
             continue;
         }
@@ -239,13 +251,13 @@ void Foam::vtkPVFoam::convertVolField
     //
     for (auto partId : rangeFaceSets_)
     {
-        const word selectName = getPartName(partId);
-        const label datasetNo = partDataset_[partId];
-
-        if (!partStatus_[partId])
+        if (!selectedPartIds_.found(partId))
         {
             continue;
         }
+
+        const word selectName = getPartName(partId);
+        const label datasetNo = partDataset_.lookup(partId, -1);
 
         vtkPolyData* vtkmesh = getDataFromBlock<vtkPolyData>
         (
@@ -373,23 +385,23 @@ void Foam::vtkPVFoam::convertVolFieldBlock
     const GeometricField<Type, fvPatchField, volMesh>& fld,
     autoPtr<GeometricField<Type, pointPatchField, pointMesh>>& ptfPtr,
     vtkMultiBlockDataSet* output,
-    const arrayRange& range,
-    const List<foamVtuData>& vtuDataList
+    const arrayRange& range
 )
 {
     for (auto partId : range)
     {
-        const label datasetNo = partDataset_[partId];
-
-        if (!partStatus_[partId])
+        if (!selectedPartIds_.found(partId))
         {
             continue;
         }
 
+        const auto& longName = selectedPartIds_[partId];
+        const label datasetNo = partDataset_.lookup(partId, -1);
+
         vtkUnstructuredGrid* vtkmesh =
             getDataFromBlock<vtkUnstructuredGrid>(output, range, datasetNo);
 
-        if (!vtkmesh)
+        if (!vtkmesh || !cachedVtu_.found(longName))
         {
             continue;
         }
@@ -397,13 +409,17 @@ void Foam::vtkPVFoam::convertVolFieldBlock
         vtkSmartPointer<vtkFloatArray> cdata = convertVolFieldToVTK
         (
             fld,
-            vtuDataList[datasetNo]
+            cachedVtu_[longName]
         );
         vtkmesh->GetCellData()->AddArray(cdata);
 
         if (ptfPtr.valid())
         {
-            convertPointField(vtkmesh, ptfPtr(), fld, vtuDataList[datasetNo]);
+            convertPointField
+            (
+                vtkmesh, ptfPtr(), fld,
+                cachedVtu_[longName]
+            );
         }
     }
 }
@@ -446,44 +462,53 @@ void Foam::vtkPVFoam::convertPointFields
         GeometricField<Type, pointPatchField, pointMesh> pfld(*iter(), pMesh);
 
 
-        // Convert activated internalMesh regions
+        // Convert internalMesh (if selected)
         convertPointFieldBlock
         (
             pfld,
             output,
-            rangeVolume_,
-            regionVtus_
+            rangeVolume_
         );
 
-        // Convert activated cellZones
+        // Convert (selected) cellZones
         convertPointFieldBlock
         (
             pfld,
             output,
-            rangeCellZones_,
-            zoneVtus_
+            rangeCellZones_
         );
 
-        // Convert activated cellSets
+        // Convert (selected) cellSets
         convertPointFieldBlock
         (
             pfld,
             output,
-            rangeCellSets_,
-            csetVtus_
+            rangeCellSets_
         );
 
 
         //
-        // Convert patches - if activated
+        // Convert patches (if selected)
         //
         for (auto partId : rangePatches_)
         {
+            if (!selectedPartIds_.found(partId))
+            {
+                continue;
+            }
+            const auto& longName = selectedPartIds_[partId];
+
+            if (longName.startsWith("group/"))
+            {
+                // Skip patch-groups
+                continue;
+            }
+
             const word patchName = getPartName(partId);
-            const label datasetNo = partDataset_[partId];
+            const label datasetNo = partDataset_.lookup(partId, -1);
             const label patchId = patches.findPatchID(patchName);
 
-            if (!partStatus_[partId] || patchId < 0)
+            if (patchId < 0)
             {
                 continue;
             }
@@ -506,15 +531,20 @@ void Foam::vtkPVFoam::convertPointFields
         }
 
         //
-        // Convert faceZones - if activated
+        // Convert (selected) faceZones
         //
         for (auto partId : rangeFaceZones_)
         {
+            if (!selectedPartIds_.found(partId))
+            {
+                continue;
+            }
+
             const word zoneName = getPartName(partId);
-            const label datasetNo = partDataset_[partId];
+            const label datasetNo = partDataset_.lookup(partId, -1);
             const label zoneId = mesh.faceZones().findZoneID(zoneName);
 
-            if (!partStatus_[partId] || zoneId < 0)
+            if (zoneId < 0)
             {
                 continue;
             }
@@ -552,34 +582,35 @@ void Foam::vtkPVFoam::convertPointFieldBlock
 (
     const GeometricField<Type, pointPatchField, pointMesh>& pfld,
     vtkMultiBlockDataSet* output,
-    const arrayRange& range,
-    const List<foamVtuData>& vtuDataList
+    const arrayRange& range
 )
 {
     for (auto partId : range)
     {
-        const label datasetNo = partDataset_[partId];
-
-        if (!partStatus_[partId])
+        if (!selectedPartIds_.found(partId))
         {
             continue;
         }
+
+        const auto& longName = selectedPartIds_[partId];
+        const label datasetNo = partDataset_.lookup(partId, -1);
 
         vtkUnstructuredGrid* vtkmesh = getDataFromBlock<vtkUnstructuredGrid>
         (
             output, range, datasetNo
         );
 
-        if (vtkmesh)
+        if (!vtkmesh || !cachedVtu_.found(longName))
         {
             convertPointField
             (
                 vtkmesh,
                 pfld,
                 GeometricField<Type, fvPatchField, volMesh>::null(),
-                vtuDataList[datasetNo]
+                cachedVtu_[longName]
             );
         }
+
     }
 }
 
@@ -878,16 +909,16 @@ Foam::vtkPVFoam::convertVolFieldToVTK
     }
 
     float vec[nComp];
-    forAll(cellMap, i)
+    forAll(cellMap, idx)
     {
-        const Type& t = fld[cellMap[i]];
+        const Type& t = fld[cellMap[idx]];
         for (direction d=0; d<nComp; ++d)
         {
             vec[d] = component(t, d);
         }
         foamPvFields::remapTuple<Type>(vec);
 
-        fldData->SetTuple(i, vec);
+        fldData->SetTuple(idx, vec);
     }
 
     return fldData;

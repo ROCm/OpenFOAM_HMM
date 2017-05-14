@@ -45,7 +45,7 @@ void Foam::vtkPVFoam::updateInfoFields
             << endl;
     }
 
-    stringList enabledEntries;
+    HashSet<string> enabledEntries;
     if (!select->GetNumberOfArrays() && !meshPtr_)
     {
         // enable 'p' and 'U' only on the first call
@@ -126,7 +126,7 @@ void Foam::vtkPVFoam::updateInfoFields
     );
 
 
-    // restore the enabled selections
+    // Restore the enabled selections
     setSelectedArrayEntries(select, enabledEntries);
 
     if (debug)

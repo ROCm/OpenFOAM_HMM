@@ -53,9 +53,6 @@ void Foam::vtkPVFoam::convertMeshVolume
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
 
-    // resize for decomposed polyhedra
-    regionVtus_.setSize(range.size());
-
     if (debug)
     {
         Info<< "<beg> convertMeshVolume" << endl;
@@ -66,23 +63,24 @@ void Foam::vtkPVFoam::convertMeshVolume
     // this looks like more than one part, but it isn't
     for (auto partId : range)
     {
-        const word partName = "internalMesh";
-
-        if (!partStatus_[partId])
+        if (!selectedPartIds_.found(partId))
         {
             continue;
         }
 
+        const auto& longName = selectedPartIds_[partId];
+        const word partName = getPartName(partId);
+
         vtkSmartPointer<vtkUnstructuredGrid> vtkmesh = volumeVTKMesh
         (
             mesh,
-            regionVtus_[datasetNo]
+            cachedVtu_(longName)
         );
 
         if (vtkmesh)
         {
             addToBlock(output, vtkmesh, range, datasetNo, partName);
-            partDataset_[partId] = datasetNo++;
+            partDataset_.set(partId, datasetNo++);
         }
     }
 
@@ -119,12 +117,12 @@ void Foam::vtkPVFoam::convertMeshLagrangian
 
     for (auto partId : range)
     {
-        const word cloudName = getPartName(partId);
-
-        if (!partStatus_[partId])
+        if (!selectedPartIds_.found(partId))
         {
             continue;
         }
+
+        const word cloudName = getPartName(partId);
 
         vtkSmartPointer<vtkPolyData> vtkmesh =
             lagrangianVTKMesh(mesh, cloudName);
@@ -132,7 +130,7 @@ void Foam::vtkPVFoam::convertMeshLagrangian
         if (vtkmesh)
         {
             addToBlock(output, vtkmesh, range, datasetNo, cloudName);
-            partDataset_[partId] = datasetNo++;
+            partDataset_.set(partId, datasetNo++);
         }
     }
 
@@ -170,30 +168,28 @@ void Foam::vtkPVFoam::convertMeshPatches
 
     for (auto partId : range)
     {
-        if (!partStatus_[partId])
+        if (!selectedPartIds_.found(partId))
         {
             continue;
         }
-
-        const word patchName = getPartName(partId);
-
-        labelHashSet
-            patchIds(patches.patchSet(List<wordRe>(1, wordRe(patchName))));
-
-        if (debug)
-        {
-            Info<< "Creating VTK mesh for patches [" << patchIds <<"] "
-                << patchName << endl;
-        }
+        const auto& longName = selectedPartIds_[partId];
+        const word partName = getPartName(partId);
 
         vtkSmartPointer<vtkPolyData> vtkmesh;
-        if (patchIds.size() == 1)
-        {
-            vtkmesh = patchVTKMesh(patchName, patches[patchIds.begin().key()]);
-        }
-        else
+
+        if (longName.startsWith("group/"))
         {
             // Patch group. Collect patch faces.
+
+            const labelList& patchIds =
+                patches.groupPatchIDs().lookup(partName, labelList());
+
+            if (debug)
+            {
+                Info<< "Creating VTK mesh for patches [" << patchIds <<"] "
+                    << longName << endl;
+            }
+
             label sz = 0;
             for (auto id : patchIds)
             {
@@ -210,23 +206,37 @@ void Foam::vtkPVFoam::convertMeshPatches
                 }
             }
 
-            uindirectPrimitivePatch pp
-            (
-                UIndirectList<face>
+            if (faceLabels.size())
+            {
+                uindirectPrimitivePatch pp
                 (
-                    mesh.faces(),
-                    faceLabels
-                ),
-                mesh.points()
-            );
+                    UIndirectList<face>(mesh.faces(), faceLabels),
+                    mesh.points()
+                );
 
-            vtkmesh = patchVTKMesh(patchName, pp);
+                vtkmesh = patchVTKMesh(partName, pp);
+            }
+        }
+        else
+        {
+            const label patchId = patches.findPatchID(partName);
+
+            if (debug)
+            {
+                Info<< "Creating VTK mesh for patch [" << patchId <<"] "
+                    << partName << endl;
+            }
+
+            if (patchId >= 0)
+            {
+                vtkmesh = patchVTKMesh(partName, patches[patchId]);
+            }
         }
 
         if (vtkmesh)
         {
-            addToBlock(output, vtkmesh, range, datasetNo, patchName);
-            partDataset_[partId] = datasetNo++;
+            addToBlock(output, vtkmesh, range, datasetNo, partName);
+            partDataset_.set(partId, datasetNo++);
         }
     }
 
@@ -255,9 +265,6 @@ void Foam::vtkPVFoam::convertMeshCellZones
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
 
-    // resize for decomposed polyhedra
-    zoneVtus_.setSize(range.size());
-
     if (range.empty())
     {
         return;
@@ -272,10 +279,16 @@ void Foam::vtkPVFoam::convertMeshCellZones
     const cellZoneMesh& zMesh = mesh.cellZones();
     for (auto partId : range)
     {
+        if (!selectedPartIds_.found(partId))
+        {
+            continue;
+        }
+
+        const auto& longName = selectedPartIds_[partId];
         const word zoneName = getPartName(partId);
         const label  zoneId = zMesh.findZoneID(zoneName);
 
-        if (!partStatus_[partId] || zoneId < 0)
+        if (zoneId < 0)
         {
             continue;
         }
@@ -292,28 +305,28 @@ void Foam::vtkPVFoam::convertMeshCellZones
         vtkSmartPointer<vtkUnstructuredGrid> vtkmesh = volumeVTKMesh
         (
             subsetter.subMesh(),
-            zoneVtus_[datasetNo]
+            cachedVtu_(longName)
         );
 
         if (vtkmesh)
         {
-            // cellMap + addPointCellLabels must contain global cell ids
+            // Convert cellMap, addPointCellLabels to global cell ids
             inplaceRenumber
             (
                 subsetter.cellMap(),
-                zoneVtus_[datasetNo].cellMap()
+                cachedVtu_[longName].cellMap()
             );
             inplaceRenumber
             (
                 subsetter.cellMap(),
-                zoneVtus_[datasetNo].additionalIds()
+                cachedVtu_[longName].additionalIds()
             );
 
             // copy pointMap as well, otherwise pointFields fail
-            zoneVtus_[datasetNo].pointMap() = subsetter.pointMap();
+            cachedVtu_[longName].pointMap() = subsetter.pointMap();
 
             addToBlock(output, vtkmesh, range, datasetNo, zoneName);
-            partDataset_[partId] = datasetNo++;
+            partDataset_.set(partId, datasetNo++);
         }
     }
 
@@ -342,9 +355,6 @@ void Foam::vtkPVFoam::convertMeshCellSets
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
 
-    // resize for decomposed polyhedra
-    csetVtus_.setSize(range.size());
-
     if (debug)
     {
         Info<< "<beg> convertMeshCellSets" << endl;
@@ -353,12 +363,13 @@ void Foam::vtkPVFoam::convertMeshCellSets
 
     for (auto partId : range)
     {
-        const word partName = getPartName(partId);
-
-        if (!partStatus_[partId])
+        if (!selectedPartIds_.found(partId))
         {
             continue;
         }
+
+        const auto& longName = selectedPartIds_[partId];
+        const word partName = getPartName(partId);
 
         if (debug)
         {
@@ -372,28 +383,28 @@ void Foam::vtkPVFoam::convertMeshCellSets
         vtkSmartPointer<vtkUnstructuredGrid> vtkmesh = volumeVTKMesh
         (
             subsetter.subMesh(),
-            csetVtus_[datasetNo]
+            cachedVtu_(longName)
         );
 
         if (vtkmesh)
         {
-            // cellMap + addPointCellLabels must contain global cell ids
+            // Convert cellMap, addPointCellLabels to global cell ids
             inplaceRenumber
             (
                 subsetter.cellMap(),
-                csetVtus_[datasetNo].cellMap()
+                cachedVtu_[longName].cellMap()
             );
             inplaceRenumber
             (
                 subsetter.cellMap(),
-                csetVtus_[datasetNo].additionalIds()
+                cachedVtu_[longName].additionalIds()
             );
 
             // copy pointMap as well, otherwise pointFields fail
-            csetVtus_[datasetNo].pointMap() = subsetter.pointMap();
+            cachedVtu_[longName].pointMap() = subsetter.pointMap();
 
             addToBlock(output, vtkmesh, range, datasetNo, partName);
-            partDataset_[partId] = datasetNo++;
+            partDataset_.set(partId, datasetNo++);
         }
     }
 
@@ -436,10 +447,15 @@ void Foam::vtkPVFoam::convertMeshFaceZones
     const faceZoneMesh& zMesh = mesh.faceZones();
     for (auto partId : range)
     {
+        if (!selectedPartIds_.found(partId))
+        {
+            continue;
+        }
+
         const word zoneName = getPartName(partId);
         const label  zoneId = zMesh.findZoneID(zoneName);
 
-        if (!partStatus_[partId] || zoneId < 0)
+        if (zoneId < 0)
         {
             continue;
         }
@@ -456,7 +472,7 @@ void Foam::vtkPVFoam::convertMeshFaceZones
         if (vtkmesh)
         {
             addToBlock(output, vtkmesh, range, datasetNo, zoneName);
-            partDataset_[partId] = datasetNo++;
+            partDataset_.set(partId, datasetNo++);
         }
     }
 
@@ -493,12 +509,12 @@ void Foam::vtkPVFoam::convertMeshFaceSets
 
     for (auto partId : range)
     {
-        const word partName = getPartName(partId);
-
-        if (!partStatus_[partId])
+        if (!selectedPartIds_.found(partId))
         {
             continue;
         }
+
+        const word partName = getPartName(partId);
 
         if (debug)
         {
@@ -506,13 +522,11 @@ void Foam::vtkPVFoam::convertMeshFaceSets
         }
 
         // faces in sorted order for more reliability
+        const labelList faceLabels = faceSet(mesh, partName).sortedToc();
+
         uindirectPrimitivePatch p
         (
-            UIndirectList<face>
-            (
-                mesh.faces(),
-                faceSet(mesh, partName).sortedToc()
-            ),
+            UIndirectList<face>(mesh.faces(), faceLabels),
             mesh.points()
         );
 
@@ -527,7 +541,7 @@ void Foam::vtkPVFoam::convertMeshFaceSets
         if (vtkmesh)
         {
             addToBlock(output, vtkmesh, range, datasetNo, partName);
-            partDataset_[partId] = datasetNo++;
+            partDataset_.set(partId, datasetNo++);
         }
     }
 
@@ -567,10 +581,15 @@ void Foam::vtkPVFoam::convertMeshPointZones
         const pointZoneMesh& zMesh = mesh.pointZones();
         for (auto partId : range)
         {
+            if (!selectedPartIds_.found(partId))
+            {
+                continue;
+            }
+
             const word zoneName = getPartName(partId);
             const label zoneId = zMesh.findZoneID(zoneName);
 
-            if (!partStatus_[partId] || zoneId < 0)
+            if (zoneId < 0)
             {
                 continue;
             }
@@ -600,7 +619,7 @@ void Foam::vtkPVFoam::convertMeshPointZones
             if (vtkmesh)
             {
                 addToBlock(output, vtkmesh, range, datasetNo, zoneName);
-                partDataset_[partId] = datasetNo++;
+                partDataset_.set(partId, datasetNo++);
             }
         }
     }
@@ -617,7 +636,6 @@ void Foam::vtkPVFoam::convertMeshPointZones
         printMemory();
     }
 }
-
 
 
 void Foam::vtkPVFoam::convertMeshPointSets
@@ -639,12 +657,12 @@ void Foam::vtkPVFoam::convertMeshPointSets
 
     for (auto partId : range)
     {
-        const word partName = getPartName(partId);
-
-        if (!partStatus_[partId])
+        if (!selectedPartIds_.found(partId))
         {
             continue;
         }
+
+        const word partName = getPartName(partId);
 
         if (debug)
         {
@@ -676,7 +694,7 @@ void Foam::vtkPVFoam::convertMeshPointSets
         if (vtkmesh)
         {
             addToBlock(output, vtkmesh, range, datasetNo, partName);
-            partDataset_[partId] = datasetNo++;
+            partDataset_.set(partId, datasetNo++);
         }
     }
 

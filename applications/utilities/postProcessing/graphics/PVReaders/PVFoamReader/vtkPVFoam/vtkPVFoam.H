@@ -160,7 +160,17 @@ class vtkPVFoam
             }
         };
 
-    typedef polyDecomp foamVtuData;
+        //- Bookkeeping for vtkPolyData
+        class foamVtpData
+        {
+        };
+
+        //- Bookkeeping for vtkUnstructuredGrid
+        class foamVtuData
+        :
+            public polyDecomp
+        {
+        };
 
 
     // Private Data
@@ -184,20 +194,26 @@ class vtkPVFoam
         int timeIndex_;
 
         //- Track changes in mesh geometry
-        bool meshChanged_;
+        enum polyMesh::readUpdateState meshState_;
 
         //- Track changes in fields
         bool fieldsChanged_;
 
-        //- Selected geometrical parts (internalMesh, patches, ...)
-        boolList partStatus_;
+        //- The index of selected parts mapped to their names
+        Map<string> selectedPartIds_;
 
         //- Datasets corresponding to selected geometrical pieces
-        //  a negative number indicates that no vtkmesh exists for this piece
-        labelList partDataset_;
+        Map<label> partDataset_;
+
+        //- Any information for 2D (VTP) geometries
+        HashTable<foamVtpData, string> cachedVtp_;
+
+        //- Cell maps and other information for 3D (VTU) geometries
+        HashTable<foamVtuData, string> cachedVtu_;
 
         //- First instance and size of various mesh parts
-        //  used to index into partStatus_ and partDataset_
+        //  used to index into selectedPartIds and thus indirectly into
+        //  cachedVtp, cachedVtu and partDataset
         arrayRange rangeVolume_;
         arrayRange rangePatches_;
         arrayRange rangeLagrangian_;
@@ -207,16 +223,6 @@ class vtkPVFoam
         arrayRange rangeCellSets_;
         arrayRange rangeFaceSets_;
         arrayRange rangePointSets_;
-
-        //- Decomposed cells information (mesh regions)
-        //  TODO: regions
-        List<foamVtuData> regionVtus_;
-
-        //- Decomposed cells information (cellZone meshes)
-        List<foamVtuData> zoneVtus_;
-
-        //- Decomposed cells information (cellSet meshes)
-        List<foamVtuData> csetVtus_;
 
         //- List of patch names for rendering to window
         List<vtkSmartPointer<vtkTextActor>> patchTextActors_;
@@ -230,19 +236,24 @@ class vtkPVFoam
       // Update information helper functions
 
         //- Internal mesh info
-        void updateInfoInternalMesh(vtkDataArraySelection*);
+        void updateInfoInternalMesh(vtkDataArraySelection* select);
 
         //- Lagrangian info
-        void updateInfoLagrangian(vtkDataArraySelection*);
+        void updateInfoLagrangian(vtkDataArraySelection* select);
 
-        //- Patch info
-        void updateInfoPatches(vtkDataArraySelection*, stringList&);
+        //- Patch info, modifies enabledEntries
+        void updateInfoPatches
+        (
+            vtkDataArraySelection* select,
+            HashSet<string>& enabledEntries
+        );
 
         //- Set info
-        void updateInfoSets(vtkDataArraySelection*);
+        void updateInfoSets(vtkDataArraySelection* select);
 
         //- Zone info
-        void updateInfoZones(vtkDataArraySelection*);
+        void updateInfoZones(vtkDataArraySelection* select);
+
 
         //- Get non-empty zone names for zoneType from file
         wordList getZoneNames(const word& zoneType) const;
@@ -395,8 +406,7 @@ class vtkPVFoam
             const GeometricField<Type, fvPatchField, volMesh>& fld,
             autoPtr<GeometricField<Type, pointPatchField, pointMesh>>& ptfPtr,
             vtkMultiBlockDataSet* output,
-            const arrayRange& range,
-            const List<foamVtuData>& vtuDataList
+            const arrayRange& range
         );
 
         //- Lagrangian fields - all types
@@ -423,8 +433,7 @@ class vtkPVFoam
         (
             const GeometricField<Type, pointPatchField, pointMesh>& pfld,
             vtkMultiBlockDataSet* output,
-            const arrayRange& range,
-            const List<foamVtuData>& vtuDataList
+            const arrayRange& range
         );
 
         //- Point field
@@ -447,8 +456,12 @@ class vtkPVFoam
             const hashedWordList& retain
         );
 
+
+        //- Get the first word from selectedPartIds_
+        word getPartName(const int partId) const;
+
         //- Get the first word from the reader 'parts' selection
-        word getPartName(const int partId);
+        word getReaderPartName(const int partId) const;
 
 
     // Constructors

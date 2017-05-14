@@ -136,7 +136,7 @@ Foam::wordList Foam::vtkPVFoam::getZoneNames(const word& zoneType) const
 
 void Foam::vtkPVFoam::updateInfoInternalMesh
 (
-    vtkDataArraySelection* arraySelection
+    vtkDataArraySelection* select
 )
 {
     if (debug)
@@ -146,8 +146,8 @@ void Foam::vtkPVFoam::updateInfoInternalMesh
 
     // Determine mesh parts (internalMesh, patches...)
     //- Add internal mesh as first entry
-    rangeVolume_.reset(arraySelection->GetNumberOfArrays(), 1);
-    arraySelection->AddArray("internalMesh");
+    rangeVolume_.reset(select->GetNumberOfArrays(), 1);
+    select->AddArray("internalMesh");
 
     if (debug)
     {
@@ -158,7 +158,7 @@ void Foam::vtkPVFoam::updateInfoInternalMesh
 
 void Foam::vtkPVFoam::updateInfoLagrangian
 (
-    vtkDataArraySelection* arraySelection
+    vtkDataArraySelection* select
 )
 {
     if (debug)
@@ -166,7 +166,6 @@ void Foam::vtkPVFoam::updateInfoLagrangian
         Info<< "<beg> updateInfoLagrangian" << nl
             << "    " << dbPtr_->timePath()/cloud::prefix << endl;
     }
-
 
     // use the db directly since this might be called without a mesh,
     // but the region must get added back in
@@ -182,11 +181,11 @@ void Foam::vtkPVFoam::updateInfoLagrangian
         readDir(dbPtr_->timePath()/lagrangianPrefix, fileName::DIRECTORY)
     );
 
-    rangeLagrangian_.reset(arraySelection->GetNumberOfArrays());
+    rangeLagrangian_.reset(select->GetNumberOfArrays());
     forAll(cloudDirs, cloudi)
     {
         // Add cloud to GUI list
-        arraySelection->AddArray
+        select->AddArray
         (
             ("lagrangian/" + cloudDirs[cloudi]).c_str()
         );
@@ -202,8 +201,8 @@ void Foam::vtkPVFoam::updateInfoLagrangian
 
 void Foam::vtkPVFoam::updateInfoPatches
 (
-    vtkDataArraySelection* arraySelection,
-    stringList& enabledEntries
+    vtkDataArraySelection* select,
+    HashSet<string>& enabledEntries
 )
 {
     if (debug)
@@ -212,14 +211,13 @@ void Foam::vtkPVFoam::updateInfoPatches
             << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
     }
 
-    HashSet<string> enabledEntriesSet(enabledEntries);
-
-    rangePatches_.reset(arraySelection->GetNumberOfArrays());
+    rangePatches_.reset(select->GetNumberOfArrays());
 
     if (meshPtr_)
     {
         const polyBoundaryMesh& patches = meshPtr_->boundaryMesh();
         const HashTable<labelList>& groups = patches.groupPatchIDs();
+        DynamicList<string> displayNames(groups.size());
 
         // Add (non-zero) patch groups to the list of mesh parts
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -243,29 +241,38 @@ void Foam::vtkPVFoam::updateInfoPatches
 
             // Valid patch if nFace > 0 - add patch to GUI list
             const string dpyName = "group/" + groupName;
-            arraySelection->AddArray(dpyName.c_str());
-            ++rangePatches_;
+            displayNames.append(dpyName);
 
-            if (enabledEntriesSet.found(dpyName))
+            // Optionally replace group with patch name selections
+            // - must remove the group from the select itself, otherwise
+            //   it can toggle on, but not toggle off very well
+            if
+            (
+                !reader_->GetShowGroupsOnly()
+             && enabledEntries.erase(dpyName)
+            )
             {
-                if (!reader_->GetShowGroupsOnly())
+                for (auto patchId : patchIDs)
                 {
-                    enabledEntriesSet.erase(dpyName);
-                    for (auto patchId : patchIDs)
+                    const polyPatch& pp = patches[patchId];
+                    if (pp.size())
                     {
-                        const polyPatch& pp = patches[patchId];
-                        if (pp.size())
-                        {
-                            enabledEntriesSet.insert
-                            (
-                                "patch/" + pp.name()
-                            );
-                        }
+                        enabledEntries.insert
+                        (
+                            "patch/" + pp.name()
+                        );
                     }
                 }
             }
         }
 
+        // Sort group names
+        Foam::sort(displayNames);
+        for (const auto& name : displayNames)
+        {
+            select->AddArray(name.c_str());
+            ++rangePatches_;
+        }
 
         // Add (non-zero) patches to the list of mesh parts
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -279,7 +286,7 @@ void Foam::vtkPVFoam::updateInfoPatches
                 if (pp.size())
                 {
                     // Add patch to GUI list
-                    arraySelection->AddArray
+                    select->AddArray
                     (
                         ("patch/" + pp.name()).c_str()
                     );
@@ -308,35 +315,23 @@ void Foam::vtkPVFoam::updateInfoPatches
             false
         );
 
-        // this should only ever fail if the mesh region doesn't exist
+        // This should only ever fail if the mesh region doesn't exist
         if (ioObj.typeHeaderOk<polyBoundaryMesh>(true, false))
         {
             polyBoundaryMeshEntries patchEntries(ioObj);
 
-            // Read patches and determine sizes
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+            // Read patches, determine sizes and patch groups
             wordList names(patchEntries.size());
             labelList sizes(patchEntries.size());
-
-            forAll(patchEntries, patchi)
-            {
-                const dictionary& patchDict = patchEntries[patchi].dict();
-
-                sizes[patchi] = readLabel(patchDict.lookup("nFaces"));
-                names[patchi] = patchEntries[patchi].keyword();
-            }
-
-
-            // Add (non-zero) patch groups to the list of mesh parts
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-            HashTable<labelHashSet> groups(patchEntries.size());
+            HashTable<labelHashSet> groups(2*patchEntries.size());
 
             forAll(patchEntries, patchi)
             {
                 const dictionary& patchDict = patchEntries[patchi].dict();
                 wordList groupNames;
+
+                sizes[patchi] = readLabel(patchDict.lookup("nFaces"));
+                names[patchi] = patchEntries[patchi].keyword();
 
                 if
                 (
@@ -351,26 +346,31 @@ void Foam::vtkPVFoam::updateInfoPatches
                 }
             }
 
+
+            // Add (non-zero) patch groups to the list of mesh parts
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            DynamicList<string> displayNames(groups.size());
+
             forAllConstIters(groups, iter)
             {
                 const auto& groupName = iter.key();
                 const auto& patchIDs  = iter.object();
 
                 const string dpyName = "group/" + groupName;
-                arraySelection->AddArray(dpyName.c_str());
-                ++rangePatches_;
+                displayNames.append(dpyName);
 
-                // Optionally replace with patch name selection
+                // Optionally replace group with patch name selections
+                // - must remove the group from the select itself, otherwise
+                //   it can toggle on, but not toggle off very well
                 if
                 (
-                    enabledEntriesSet.found(dpyName)
-                 && !reader_->GetShowGroupsOnly()
+                    !reader_->GetShowGroupsOnly()
+                 && enabledEntries.erase(dpyName)
                 )
                 {
-                    enabledEntriesSet.erase(dpyName);
                     for (auto patchId : patchIDs)
                     {
-                        enabledEntriesSet.insert
+                        enabledEntries.insert
                         (
                             "patch/" + names[patchId]
                         );
@@ -378,6 +378,13 @@ void Foam::vtkPVFoam::updateInfoPatches
                 }
             }
 
+            // Sort group names
+            Foam::sort(displayNames);
+            for (const auto& name : displayNames)
+            {
+                select->AddArray(name.c_str());
+                ++rangePatches_;
+            }
 
             // Add (non-zero) patches to the list of mesh parts
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -389,7 +396,7 @@ void Foam::vtkPVFoam::updateInfoPatches
                     // Valid patch if nFace > 0 - add patch to GUI list
                     if (sizes[patchi])
                     {
-                        arraySelection->AddArray
+                        select->AddArray
                         (
                             ("patch/" + names[patchi]).c_str()
                         );
@@ -400,9 +407,6 @@ void Foam::vtkPVFoam::updateInfoPatches
         }
     }
 
-    // Update enabled entries in case of group selection
-    enabledEntries = enabledEntriesSet.toc();
-
     if (debug)
     {
         Info<< "<end> updateInfoPatches" << endl;
@@ -412,7 +416,7 @@ void Foam::vtkPVFoam::updateInfoPatches
 
 void Foam::vtkPVFoam::updateInfoZones
 (
-    vtkDataArraySelection* arraySelection
+    vtkDataArraySelection* select
 )
 {
     if (!reader_->GetIncludeZones())
@@ -440,10 +444,10 @@ void Foam::vtkPVFoam::updateInfoZones
         namesLst = getZoneNames("cellZones");
     }
 
-    rangeCellZones_.reset(arraySelection->GetNumberOfArrays());
+    rangeCellZones_.reset(select->GetNumberOfArrays());
     forAll(namesLst, elemI)
     {
-        arraySelection->AddArray
+        select->AddArray
         (
             ("cellZone/" + namesLst[elemI]).c_str()
         );
@@ -463,10 +467,10 @@ void Foam::vtkPVFoam::updateInfoZones
         namesLst = getZoneNames("faceZones");
     }
 
-    rangeFaceZones_.reset(arraySelection->GetNumberOfArrays());
+    rangeFaceZones_.reset(select->GetNumberOfArrays());
     forAll(namesLst, elemI)
     {
-        arraySelection->AddArray
+        select->AddArray
         (
             ("faceZone/" + namesLst[elemI]).c_str()
         );
@@ -486,10 +490,10 @@ void Foam::vtkPVFoam::updateInfoZones
         namesLst = getZoneNames("pointZones");
     }
 
-    rangePointZones_.reset(arraySelection->GetNumberOfArrays());
+    rangePointZones_.reset(select->GetNumberOfArrays());
     forAll(namesLst, elemI)
     {
-        arraySelection->AddArray
+        select->AddArray
         (
             ("pointZone/" + namesLst[elemI]).c_str()
         );
@@ -505,7 +509,7 @@ void Foam::vtkPVFoam::updateInfoZones
 
 void Foam::vtkPVFoam::updateInfoSets
 (
-    vtkDataArraySelection* arraySelection
+    vtkDataArraySelection* select
 )
 {
     if (!reader_->GetIncludeSets())
@@ -545,26 +549,26 @@ void Foam::vtkPVFoam::updateInfoSets
     }
 
 
-    rangeCellSets_.reset(arraySelection->GetNumberOfArrays());
+    rangeCellSets_.reset(select->GetNumberOfArrays());
     rangeCellSets_ += addToSelection<cellSet>
     (
-        arraySelection,
+        select,
         objects,
         "cellSet/"
     );
 
-    rangeFaceSets_.reset(arraySelection->GetNumberOfArrays());
+    rangeFaceSets_.reset(select->GetNumberOfArrays());
     rangeFaceSets_ += addToSelection<faceSet>
     (
-        arraySelection,
+        select,
         objects,
         "faceSet/"
     );
 
-    rangePointSets_.reset(arraySelection->GetNumberOfArrays());
+    rangePointSets_.reset(select->GetNumberOfArrays());
     rangePointSets_ += addToSelection<pointSet>
     (
-        arraySelection,
+        select,
         objects,
         "pointSet/"
     );
@@ -586,8 +590,8 @@ void Foam::vtkPVFoam::updateInfoLagrangianFields
         Info<< "<beg> updateInfoLagrangianFields" << endl;
     }
 
-    // preserve the enabled selections
-    stringList enabledEntries = getSelectedArrayEntries(select);
+    // Preserve the enabled selections
+    HashSet<string> enabledEntries = getSelectedArrayEntries(select);
     select->RemoveAllArrays();
 
     // TODO - currently only get fields from ONE cloud
@@ -600,8 +604,9 @@ void Foam::vtkPVFoam::updateInfoLagrangianFields
         return;
     }
 
-    int partId = range.start();
-    word cloudName = getPartName(partId);
+    // Add Lagrangian fields even if particles are not enabled?
+    const int partId = range.start();
+    const word cloudName = getReaderPartName(partId);
 
     // use the db directly since this might be called without a mesh,
     // but the region must get added back in
@@ -625,7 +630,7 @@ void Foam::vtkPVFoam::updateInfoLagrangianFields
     addToSelection<IOField<symmTensor>>(select, objects);
     addToSelection<IOField<tensor>>(select, objects);
 
-    // restore the enabled selections
+    // Restore the enabled selections
     setSelectedArrayEntries(select, enabledEntries);
 
     if (debug > 1)

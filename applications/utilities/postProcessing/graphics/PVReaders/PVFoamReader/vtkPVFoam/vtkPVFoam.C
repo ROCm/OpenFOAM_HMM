@@ -47,6 +47,20 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(vtkPVFoam, 0);
+
+    // file-scope
+    static word updateStateName(polyMesh::readUpdateState state)
+    {
+        switch (state)
+        {
+            case polyMesh::UNCHANGED:      return "UNCHANGED";
+            case polyMesh::POINTS_MOVED:   return "POINTS_MOVED";
+            case polyMesh::TOPO_CHANGE:    return "TOPO_CHANGE";
+            case polyMesh::TOPO_PATCH_CHANGE: return "TOPO_PATCH_CHANGE";
+        };
+
+        return "UNKNOWN";
+    }
 }
 
 
@@ -138,27 +152,15 @@ int Foam::vtkPVFoam::setTime(int nRequest, const double requestTimes[])
             << ", nearestIndex = " << nearestIndex << endl;
     }
 
-
-    // see what has changed
+    // See what has changed
     if (timeIndex_ != nearestIndex)
     {
         timeIndex_ = nearestIndex;
         runTime.setTime(Times[nearestIndex], nearestIndex);
 
-        // the fields change each time
+        // When the changes, so do the fields
         fieldsChanged_ = true;
-
-        if (meshPtr_)
-        {
-            if (meshPtr_->readUpdate() != polyMesh::UNCHANGED)
-            {
-                meshChanged_ = true;
-            }
-        }
-        else
-        {
-            meshChanged_ = true;
-        }
+        meshState_ = meshPtr_ ? meshPtr_->readUpdate() : polyMesh::TOPO_CHANGE;
 
         reader_->UpdateProgress(0.05);
 
@@ -171,7 +173,7 @@ int Foam::vtkPVFoam::setTime(int nRequest, const double requestTimes[])
         Info<< "<end> setTime() - selectedTime="
             << Times[nearestIndex].name() << " index=" << timeIndex_
             << "/" << Times.size()
-            << " meshChanged=" << Switch(meshChanged_)
+            << " meshUpdateState=" << updateStateName(meshState_)
             << " fieldsChanged=" << Switch(fieldsChanged_) << endl;
     }
 
@@ -179,7 +181,20 @@ int Foam::vtkPVFoam::setTime(int nRequest, const double requestTimes[])
 }
 
 
-Foam::word Foam::vtkPVFoam::getPartName(const int partId)
+Foam::word Foam::vtkPVFoam::getPartName(const int partId) const
+{
+    if (selectedPartIds_.found(partId))
+    {
+        return getFoamName(selectedPartIds_[partId]);
+    }
+    else
+    {
+        return word::null;
+    }
+}
+
+
+Foam::word Foam::vtkPVFoam::getReaderPartName(const int partId) const
 {
     return getFoamName(reader_->GetPartArrayName(partId));
 }
@@ -199,7 +214,7 @@ Foam::vtkPVFoam::vtkPVFoam
     meshRegion_(polyMesh::defaultRegion),
     meshDir_(polyMesh::meshSubDir),
     timeIndex_(-1),
-    meshChanged_(true),
+    meshState_(polyMesh::TOPO_CHANGE),
     fieldsChanged_(true),
     rangeVolume_("unzoned"),
     rangePatches_("patch"),
@@ -334,7 +349,7 @@ void Foam::vtkPVFoam::updateInfo()
     // time of the vtkDataArraySelection, but the qt/paraview proxy
     // layer doesn't care about that anyhow.
 
-    stringList enabledEntries;
+    HashSet<string> enabledEntries;
     if (!partSelection->GetNumberOfArrays() && !meshPtr_)
     {
         // enable 'internalMesh' on the first call
@@ -356,10 +371,10 @@ void Foam::vtkPVFoam::updateInfo()
     updateInfoZones(partSelection);
     updateInfoLagrangian(partSelection);
 
-    // restore the enabled selections
+    // Adjust/restore the enabled selections
     setSelectedArrayEntries(partSelection, enabledEntries);
 
-    if (meshChanged_)
+    if (meshState_ != polyMesh::UNCHANGED)
     {
         fieldsChanged_ = true;
     }
@@ -408,37 +423,48 @@ void Foam::vtkPVFoam::Update
         }
 
         vtkDataArraySelection* selection = reader_->GetPartSelection();
-        label nElem = selection->GetNumberOfArrays();
+        const int n = selection->GetNumberOfArrays();
 
-        if (partStatus_.size() != nElem)
+        // All previously selected (enabled) names
+        HashSet<string> original;
+        forAllConstIters(selectedPartIds_, iter)
         {
-            partStatus_.setSize(nElem);
-            partStatus_ = false;
-            meshChanged_ = true;
+            original.insert(iter.object());
         }
 
-        // this needs fixing if we wish to re-use the datasets
-        partDataset_.setSize(nElem);
-        partDataset_ = -1;
+        selectedPartIds_.clear();
 
-        // Read the selected mesh parts (zones, patches ...) and add to list
-        forAll(partStatus_, partId)
+        for (int id=0; id < n; ++id)
         {
-            const int setting = selection->GetArraySetting(partId);
+            string str(selection->GetArrayName(id));
+            bool status = selection->GetArraySetting(id);
 
-            if (partStatus_[partId] != setting)
+            if (status)
             {
-                partStatus_[partId] = setting;
-                meshChanged_ = true;
+                selectedPartIds_.set(id, str); // id -> name
+
+                if (!original.erase(str))
+                {
+                    // New part, or newly enabled
+                    //? meshChanged_ = true;
+                }
+            }
+            else
+            {
+                if (original.erase(str))
+                {
+                    // Part disappeared, or newly disabled
+                    //? meshChanged_ = true;
+                }
             }
 
             if (debug > 1)
             {
-                Info<< "  part[" << partId << "] = "
-                    << partStatus_[partId]
-                    << " : " << selection->GetArrayName(partId) << endl;
+                Info<< "  part[" << id << "] = " << status
+                    << " : " << str << nl;
             }
         }
+
         if (debug)
         {
             Info<< "<end> updateMeshPartsStatus" << endl;
@@ -467,8 +493,7 @@ void Foam::vtkPVFoam::Update
             if (debug)
             {
                 Info<< "Creating OpenFOAM mesh for region " << meshRegion_
-                    << " at time=" << dbPtr_().timeName()
-                        << endl;
+                    << " at time=" << dbPtr_().timeName() << endl;
 
             }
 
@@ -483,7 +508,7 @@ void Foam::vtkPVFoam::Update
                 )
             );
 
-            meshChanged_ = true;
+            meshState_ = polyMesh::TOPO_CHANGE; // New mesh
         }
         else
         {
@@ -501,6 +526,20 @@ void Foam::vtkPVFoam::Update
     }
 
     reader_->UpdateProgress(0.4);
+
+    // Update cached, saved, unneed values:
+    HashSet<string> nowActive;
+    forAllConstIters(selectedPartIds_, iter)
+    {
+        nowActive.insert(iter.object());
+    }
+
+    // Dispose of unneeded components
+    cachedVtp_.retain(nowActive);
+    cachedVtu_.retain(nowActive);
+
+    // Reset (expire) dataset ids
+    partDataset_.clear();
 
     // Convert meshes - start port0 at block=0
     int blockNo = 0;
@@ -549,21 +588,12 @@ void Foam::vtkPVFoam::Update
     }
     reader_->UpdateProgress(0.95);
 
-    meshChanged_ = fieldsChanged_ = false;
+    fieldsChanged_ = false;
+    meshState_ = polyMesh::UNCHANGED;
 
     // Standard memory cleanup
-    forAll(regionVtus_, i)
-    {
-        regionVtus_[i].clear();
-    }
-    forAll(zoneVtus_, i)
-    {
-        zoneVtus_[i].clear();
-    }
-    forAll(csetVtus_, i)
-    {
-        csetVtus_[i].clear();
-    }
+    cachedVtp_.clear();
+    cachedVtu_.clear();
 }
 
 

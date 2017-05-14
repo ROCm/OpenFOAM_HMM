@@ -226,10 +226,15 @@ void Foam::vtkPVFoam::convertLagrangianFields
 
     for (auto partId : range)
     {
-        const word  cloudName = getPartName(partId);
-        const label datasetNo = partDataset_[partId];
+        if (!selectedPartIds_.found(partId))
+        {
+            continue;
+        }
 
-        if (!partStatus_[partId] || datasetNo < 0)
+        const word  cloudName = getPartName(partId);
+        const label datasetNo = partDataset_.lookup(partId, -1);
+
+        if (datasetNo < 0)
         {
             continue;
         }

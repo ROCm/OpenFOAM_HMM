@@ -303,10 +303,11 @@ void Foam::vtkPVblockMesh::updateInfo()
     vtkDataArraySelection* blockSelection = reader_->GetBlockSelection();
     vtkDataArraySelection* edgeSelection  = reader_->GetCurvedEdgesSelection();
 
-    // preserve the enabled selections if possible
-    stringList enabledParts;
-    stringList enabledEdges;
     const bool firstTime = (!blockSelection->GetNumberOfArrays() && !meshPtr_);
+
+    // Preserve the enabled selections if possible
+    HashSet<string> enabledParts;
+    HashSet<string> enabledEdges;
     if (!firstTime)
     {
         enabledParts = getSelectedArrayEntries(blockSelection);
@@ -326,7 +327,7 @@ void Foam::vtkPVblockMesh::updateInfo()
     // Update curved edges list
     updateInfoEdges(edgeSelection);
 
-    // restore the enabled selections
+    // Restore the enabled selections
     if (!firstTime)
     {
         setSelectedArrayEntries(blockSelection, enabledParts);
