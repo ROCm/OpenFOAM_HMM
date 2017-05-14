@@ -34,6 +34,8 @@ namespace Foam
 int labelRange::debug(debug::debugSwitch("labelRange", 0));
 }
 
+const Foam::labelRange Foam::labelRange::null;
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

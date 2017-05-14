@@ -35,6 +35,7 @@ SourceFiles
 #define labelRange_H
 
 #include "label.H"
+#include <iterator>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,18 +64,24 @@ class labelRange
 
 public:
 
-    static int debug;
+    // Static Data Members
+
+        static int debug;
+
+        //- An empty range with start=0, size=0.
+        static const labelRange null;
+
 
     // STL type definitions similar to what UList has
 
         //- Type of values the range contains
         typedef label value_type;
 
-        //- The type that can represent the difference between two iterators
-        typedef label difference_type;
-
         //- The type that can represent the size of the range
         typedef label size_type;
+
+        // Forward declaration
+        class const_iterator;
 
 
     // Constructors
@@ -82,7 +89,7 @@ public:
         //- An empty range with zero for start/size.
         inline labelRange();
 
-        //- Construct a range from start and size, enforcing non-negative size.
+        //- Construct a range from start/size, enforcing non-negative size.
         //  Optionally adjust the start to avoid any negative indices.
         inline labelRange
         (
@@ -93,6 +100,12 @@ public:
 
         //- Construct from Istream.
         labelRange(Istream& is);
+
+
+    // Static Member Functions
+
+        //- An identity range with range[i] == i.
+        inline static labelRange identity(const label len);
 
 
     // Member Functions
@@ -184,6 +197,9 @@ public:
         //- Return element in the range, no bounds checking
         inline label operator[](const label localIndex) const;
 
+        //- Return const_iterator to element in the range
+        inline const_iterator operator()(const label localIndex) const;
+
         //- Increase the size by 1.
         inline label operator++();
         inline label operator++(int);
@@ -197,21 +213,30 @@ public:
 
         //- Forward iterator with const access
         class const_iterator
+        :
+            public std::iterator
+            <
+                std::input_iterator_tag,
+                label,
+                label,
+                const label*,
+                const label&
+            >
         {
-            //- The current label (not the local index)
-            label index_;
+            //- The current (global) value
+            label value_;
 
         public:
 
           // Constructors
 
             //- Construct from range at given local index.
-            //  A negative index signals the 'end' position
-            inline const_iterator(const labelRange* range, const label i = 0);
+            //  A negative index is invalid and corresponds to the 'end'
+            inline const_iterator(const labelRange* range, const label i=0);
 
           // Member operators
 
-            //- Return the current label
+            //- Return the current (global) value
             inline label operator*() const;
 
             inline const_iterator& operator++();
