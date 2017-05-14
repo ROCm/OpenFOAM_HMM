@@ -40,7 +40,7 @@ License
 template<class PatchType>
 vtkSmartPointer<vtkPolyData> Foam::vtkPVFoam::patchVTKMesh
 (
-    const word& name,
+    const string& name,
     const PatchType& p
 )
 {
@@ -59,20 +59,29 @@ vtkSmartPointer<vtkPolyData> Foam::vtkPVFoam::patchVTKMesh
     vtkSmartPointer<vtkPoints> vtkpoints =
         vtkSmartPointer<vtkPoints>::New();
 
-    vtkpoints->Allocate(points.size());
+    vtkpoints->SetNumberOfPoints(points.size());
     forAll(points, i)
     {
-        vtkpoints->InsertNextPoint(points[i].v_);
+        vtkpoints->SetPoint(i, points[i].v_);
     }
     vtkmesh->SetPoints(vtkpoints);
 
     // Add faces as polygons
     const faceList& faces = p.localFaces();
 
+    label nAlloc = faces.size();
+    forAll(faces, facei)
+    {
+        nAlloc += faces[facei].size();
+    }
+
     vtkSmartPointer<vtkCellArray> vtkcells =
         vtkSmartPointer<vtkCellArray>::New();
 
-    vtkcells->Allocate(faces.size());
+    vtkcells->Allocate(nAlloc);
+    // If reusing memory, ensure insert always starts from 0
+    vtkcells->Reset();
+
     forAll(faces, facei)
     {
         const face& f = faces[facei];

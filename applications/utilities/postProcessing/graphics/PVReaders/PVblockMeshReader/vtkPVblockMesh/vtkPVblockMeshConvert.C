@@ -40,26 +40,6 @@ License
 #include "vtkSmartPointer.h"
 
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-//! \cond fileScope
-inline static void insertNextPoint
-(
-    vtkPoints *points,
-    const Foam::point& p,
-    const Foam::scalar scaleFactor
-)
-{
-    points->InsertNextPoint
-    (
-        p.x()*scaleFactor,
-        p.y()*scaleFactor,
-        p.z()*scaleFactor
-    );
-}
-
-//! \endcond
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::vtkPVblockMesh::convertMeshBlocks
@@ -68,22 +48,20 @@ void Foam::vtkPVblockMesh::convertMeshBlocks
     int& blockNo
 )
 {
+    if (debug)
+    {
+        Info<< "<beg> convertMeshBlocks" << endl;
+    }
+
     vtkDataArraySelection* selection = reader_->GetBlockSelection();
     arrayRange& range = rangeBlocks_;
     range.block(blockNo);   // set output block
     label datasetNo = 0;    // restart at dataset 0
 
     const blockMesh& blkMesh = *meshPtr_;
-    const Foam::pointField& blockPoints = blkMesh.vertices();
-
-    if (debug)
-    {
-        Info<< "<beg> convertMeshBlocks" << endl;
-    }
+    const pointField blkPoints(blkMesh.vertices() * blkMesh.scaleFactor());
 
     int blockI = 0;
-    const scalar scaleFactor = blkMesh.scaleFactor();
-
     for
     (
         auto iter = range.cbegin();
@@ -98,26 +76,22 @@ void Foam::vtkPVblockMesh::convertMeshBlocks
         }
 
         const blockDescriptor& blockDef = blkMesh[blockI];
+        const labelList& blockLabels = blockDef.blockShape();
 
-        // Convert OpenFOAM mesh vertices to VTK
         vtkSmartPointer<vtkPoints> vtkpoints =
             vtkSmartPointer<vtkPoints>::New();
 
-        vtkpoints->Allocate(blockDef.nPoints());
-        const labelList& blockLabels = blockDef.blockShape();
+        vtkpoints->SetNumberOfPoints(blockLabels.size());
 
         vtkIdType nodeIds[8];
-
-        forAll(blockLabels, ptI)
+        forAll(blockLabels, pointi)
         {
-            insertNextPoint
+            vtkpoints->SetPoint
             (
-                vtkpoints,
-                blockPoints[blockLabels[ptI]],
-                scaleFactor
+                pointi,
+                blkPoints[blockLabels[pointi]].v_
             );
-
-            nodeIds[ptI] = ptI;
+            nodeIds[pointi] = pointi;
         }
 
         vtkSmartPointer<vtkUnstructuredGrid> vtkmesh =
@@ -138,7 +112,6 @@ void Foam::vtkPVblockMesh::convertMeshBlocks
             output, vtkmesh, range, datasetNo,
             selection->GetArrayName(partId)
         );
-
         ++datasetNo;
     }
 
@@ -170,10 +143,9 @@ void Foam::vtkPVblockMesh::convertMeshEdges
 
     const blockMesh& blkMesh = *meshPtr_;
     const blockEdgeList& edges = blkMesh.edges();
-
-    int edgeI = 0;
     const scalar scaleFactor = blkMesh.scaleFactor();
 
+    int edgeI = 0;
     for
     (
         auto iter = range.cbegin();
@@ -214,27 +186,24 @@ void Foam::vtkPVblockMesh::convertMeshEdges
             {
                 const List<point>& edgePoints = edgesPoints[foundEdgeI];
 
-                vtkSmartPointer<vtkPolyData> vtkmesh =
-                    vtkSmartPointer<vtkPolyData>::New();
-
                 vtkSmartPointer<vtkPoints> vtkpoints =
                     vtkSmartPointer<vtkPoints>::New();
 
-                vtkpoints->Allocate( edgePoints.size() );
-                vtkmesh->Allocate(1);
+                vtkpoints->SetNumberOfPoints(edgePoints.size());
 
                 vtkIdType pointIds[edgePoints.size()];
-                forAll(edgePoints, ptI)
+                forAll(edgePoints, pointi)
                 {
-                    insertNextPoint
-                    (
-                        vtkpoints,
-                        edgePoints[ptI],
-                        scaleFactor
-                    );
-                    pointIds[ptI] = ptI;
+                    const point p = edgePoints[pointi] * scaleFactor;
+
+                    vtkpoints->SetPoint(pointi, p.v_);
+                    pointIds[pointi] = pointi;
                 }
 
+                vtkSmartPointer<vtkPolyData> vtkmesh =
+                    vtkSmartPointer<vtkPolyData>::New();
+
+                vtkmesh->Allocate(1);
                 vtkmesh->InsertNextCell
                 (
                     VTK_POLY_LINE,
@@ -249,8 +218,7 @@ void Foam::vtkPVblockMesh::convertMeshEdges
                     output, vtkmesh, range, datasetNo,
                     selection->GetArrayName(partId)
                 );
-
-                datasetNo++;
+                ++datasetNo;
 
                 break;
             }
@@ -281,8 +249,7 @@ void Foam::vtkPVblockMesh::convertMeshCorners
     range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
 
-    const pointField& blockPoints = meshPtr_->vertices();
-    const scalar& scaleFactor = meshPtr_->scaleFactor();
+    const pointField blkPoints(meshPtr_->vertices() * meshPtr_->scaleFactor());
 
     if (debug)
     {
@@ -300,20 +267,16 @@ void Foam::vtkPVblockMesh::convertMeshCorners
         vtkSmartPointer<vtkCellArray> vtkcells =
             vtkSmartPointer<vtkCellArray>::New();
 
-        vtkpoints->Allocate( blockPoints.size() );
-        vtkcells->Allocate( blockPoints.size() );
+        vtkpoints->SetNumberOfPoints(blkPoints.size());
+        vtkcells->Allocate(2*blkPoints.size());
+        // If reusing memory, ensure insert always starts from 0
+        vtkcells->Reset();
 
         vtkIdType pointId = 0;
-        forAll(blockPoints, ptI)
+        forAll(blkPoints, pointi)
         {
-            insertNextPoint
-            (
-                vtkpoints,
-                blockPoints[ptI],
-                scaleFactor
-            );
-
-            vtkcells->InsertNextCell(1, &pointId); // VTK_VERTEX
+            vtkpoints->SetPoint(pointi, blkPoints[pointi].v_);
+            vtkcells->InsertNextCell(1, &pointId);  // VTK_VERTEX
             pointId++;
         }
 

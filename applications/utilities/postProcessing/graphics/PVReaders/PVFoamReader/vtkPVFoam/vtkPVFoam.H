@@ -332,7 +332,7 @@ class vtkPVFoam
         template<class PatchType>
         vtkSmartPointer<vtkPolyData> patchVTKMesh
         (
-            const word& name,
+            const string& name,
             const PatchType& p
         );
 

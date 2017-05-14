@@ -81,15 +81,16 @@ vtkSmartPointer<vtkPolyData> Foam::vtkPVFoam::lagrangianVTKMesh
         vtkSmartPointer<vtkCellArray> vtkcells =
             vtkSmartPointer<vtkCellArray>::New();
 
-        vtkpoints->Allocate(parcels.size());
-        vtkcells->Allocate(parcels.size());
+        vtkpoints->SetNumberOfPoints(parcels.size());
+        vtkcells->Allocate(2*parcels.size());
+        // If reusing memory, ensure insert always starts from 0
+        vtkcells->Reset();
 
         vtkIdType particleId = 0;
         forAllConstIters(parcels, iter)
         {
-            vtkpoints->InsertNextPoint(iter().position().v_);
-
-            vtkcells->InsertNextCell(1, &particleId);
+            vtkpoints->SetPoint(particleId, iter().position().v_);
+            vtkcells->InsertNextCell(1, &particleId);  // VTK_VERTEX
             particleId++;
         }
 

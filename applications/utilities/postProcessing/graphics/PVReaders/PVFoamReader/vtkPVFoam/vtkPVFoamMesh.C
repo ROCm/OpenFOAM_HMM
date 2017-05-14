@@ -575,17 +575,21 @@ void Foam::vtkPVFoam::convertMeshPointZones
                 continue;
             }
 
+            const pointField& meshPoints = mesh.points();
             const labelUList& pointLabels = zMesh[zoneId];
 
             vtkSmartPointer<vtkPoints> vtkpoints =
                 vtkSmartPointer<vtkPoints>::New();
 
-            vtkpoints->Allocate(pointLabels.size());
+            vtkpoints->SetNumberOfPoints(pointLabels.size());
 
-            const pointField& meshPoints = mesh.points();
             forAll(pointLabels, pointi)
             {
-                vtkpoints->InsertNextPoint(meshPoints[pointLabels[pointi]].v_);
+                vtkpoints->SetPoint
+                (
+                    pointi,
+                    meshPoints[pointLabels[pointi]].v_
+                );
             }
 
             vtkSmartPointer<vtkPolyData> vtkmesh =
@@ -647,17 +651,21 @@ void Foam::vtkPVFoam::convertMeshPointSets
             Info<< "Creating VTK mesh for pointSet=" << partName << endl;
         }
 
-        const pointSet pSet(mesh, partName);
+        const pointField& meshPoints = mesh.points();
+        const labelList pointLabels = pointSet(mesh, partName).sortedToc();
 
         vtkSmartPointer<vtkPoints> vtkpoints =
             vtkSmartPointer<vtkPoints>::New();
 
-        vtkpoints->Allocate(pSet.size());
+        vtkpoints->SetNumberOfPoints(pointLabels.size());
 
-        const pointField& meshPoints = mesh.points();
-        forAllConstIters(pSet, iter)
+        forAll(pointLabels, pointi)
         {
-            vtkpoints->InsertNextPoint(meshPoints[iter.key()].v_);
+            vtkpoints->SetPoint
+            (
+                pointi,
+                meshPoints[pointLabels[pointi]].v_
+            );
         }
 
         vtkSmartPointer<vtkPolyData> vtkmesh =
