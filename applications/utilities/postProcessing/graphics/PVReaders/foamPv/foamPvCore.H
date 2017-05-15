@@ -158,23 +158,6 @@ public:
         const std::string& datasetName
     );
 
-    //- Convenience method for the VTK multiblock API
-    //  Always returns a nullptr if datasetNo is negative
-    template<class Type=vtkDataSet>
-    static Type* getDataFromBlock
-    (
-        vtkMultiBlockDataSet* output,
-        const arrayRange& selector,
-        const label datasetNo
-    );
-
-    //- Convenience method for the VTK multiblock API
-    static int getNumberOfDataSets
-    (
-        vtkMultiBlockDataSet* output,
-        const arrayRange& selector
-    );
-
     //- Add objects of Type to array selection
     template<class Type>
     static label addToSelection

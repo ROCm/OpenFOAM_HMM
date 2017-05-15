@@ -42,20 +42,14 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::vtkPVFoam::convertMeshVolume
-(
-    vtkMultiBlockDataSet* output,
-    int& blockNo
-)
+void Foam::vtkPVFoam::convertMeshVolume()
 {
     arrayRange& range = rangeVolume_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
 
     if (debug)
     {
-        Info<< "<beg> convertMeshVolume" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
@@ -63,106 +57,75 @@ void Foam::vtkPVFoam::convertMeshVolume
     // this looks like more than one part, but it isn't
     for (auto partId : range)
     {
-        if (!selectedPartIds_.found(partId))
+        if (selectedPartIds_.found(partId))
         {
-            continue;
+            const auto& longName = selectedPartIds_[partId];
+
+            vtkSmartPointer<vtkUnstructuredGrid> vtkmesh =
+                volumeVTKMesh
+                (
+                    mesh,
+                    cachedVtu_(longName)
+                );
+
+            cachedVtu_[longName].vtkmesh = vtkmesh;
         }
-
-        const auto& longName = selectedPartIds_[partId];
-        const word partName = getPartName(partId);
-
-        vtkSmartPointer<vtkUnstructuredGrid> vtkmesh = volumeVTKMesh
-        (
-            mesh,
-            cachedVtu_(longName)
-        );
-
-        if (vtkmesh)
-        {
-            addToBlock(output, vtkmesh, range, datasetNo, partName);
-            partDataset_.set(partId, datasetNo++);
-        }
-    }
-
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshVolume" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }
 
 
-void Foam::vtkPVFoam::convertMeshLagrangian
-(
-    vtkMultiBlockDataSet* output,
-    int& blockNo
-)
+void Foam::vtkPVFoam::convertMeshLagrangian()
 {
     arrayRange& range = rangeLagrangian_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
 
     if (debug)
     {
-        Info<< "<beg> convertMeshLagrangian" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
     for (auto partId : range)
     {
-        if (!selectedPartIds_.found(partId))
+        if (selectedPartIds_.found(partId))
         {
-            continue;
+            const auto& longName = selectedPartIds_[partId];
+            const word cloudName = getPartName(partId);
+
+            vtkSmartPointer<vtkPolyData> vtkmesh =
+                lagrangianVTKMesh
+                (
+                    mesh,
+                    cloudName
+                );
+
+            cachedVtp_(longName).vtkmesh = vtkmesh;
         }
-
-        const word cloudName = getPartName(partId);
-
-        vtkSmartPointer<vtkPolyData> vtkmesh =
-            lagrangianVTKMesh(mesh, cloudName);
-
-        if (vtkmesh)
-        {
-            addToBlock(output, vtkmesh, range, datasetNo, cloudName);
-            partDataset_.set(partId, datasetNo++);
-        }
-    }
-
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshLagrangian" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }
 
 
-void Foam::vtkPVFoam::convertMeshPatches
-(
-    vtkMultiBlockDataSet* output,
-    int& blockNo
-)
+void Foam::vtkPVFoam::convertMeshPatches()
 {
     arrayRange& range = rangePatches_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     if (debug)
     {
-        Info<< "<beg> convertMeshPatches" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
@@ -235,34 +198,51 @@ void Foam::vtkPVFoam::convertMeshPatches
 
         if (vtkmesh)
         {
-            addToBlock(output, vtkmesh, range, datasetNo, partName);
-            partDataset_.set(partId, datasetNo++);
+            cachedVtp_(longName).vtkmesh = vtkmesh;
         }
-    }
-
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshPatches" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }
 
 
-void Foam::vtkPVFoam::convertMeshCellZones
+void Foam::vtkPVFoam::convertMeshSubset
 (
-    vtkMultiBlockDataSet* output,
-    int& blockNo
+    const fvMeshSubset& subsetter,
+    const string& longName
 )
 {
-    arrayRange& range = rangeCellZones_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
+    vtkSmartPointer<vtkUnstructuredGrid> vtkmesh = volumeVTKMesh
+    (
+        subsetter.subMesh(),
+        cachedVtu_(longName)
+    );
+
+    // Convert cellMap, addPointCellLabels to global cell ids
+    inplaceRenumber
+    (
+        subsetter.cellMap(),
+        cachedVtu_[longName].cellMap()
+    );
+    inplaceRenumber
+    (
+        subsetter.cellMap(),
+        cachedVtu_[longName].additionalIds()
+    );
+
+    // copy pointMap as well, otherwise pointFields fail
+    cachedVtu_[longName].pointMap() = subsetter.pointMap();
+    cachedVtu_[longName].vtkmesh = vtkmesh;
+}
+
+
+void Foam::vtkPVFoam::convertMeshCellZones()
+{
+    const arrayRange& range = rangeCellZones_;
     const fvMesh& mesh = *meshPtr_;
 
     if (range.empty())
@@ -272,7 +252,7 @@ void Foam::vtkPVFoam::convertMeshCellZones
 
     if (debug)
     {
-        Info<< "<beg> convertMeshCellZones" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
@@ -302,62 +282,25 @@ void Foam::vtkPVFoam::convertMeshCellZones
         fvMeshSubset subsetter(mesh);
         subsetter.setLargeCellSubset(zMesh[zoneId]);
 
-        vtkSmartPointer<vtkUnstructuredGrid> vtkmesh = volumeVTKMesh
-        (
-            subsetter.subMesh(),
-            cachedVtu_(longName)
-        );
-
-        if (vtkmesh)
-        {
-            // Convert cellMap, addPointCellLabels to global cell ids
-            inplaceRenumber
-            (
-                subsetter.cellMap(),
-                cachedVtu_[longName].cellMap()
-            );
-            inplaceRenumber
-            (
-                subsetter.cellMap(),
-                cachedVtu_[longName].additionalIds()
-            );
-
-            // copy pointMap as well, otherwise pointFields fail
-            cachedVtu_[longName].pointMap() = subsetter.pointMap();
-
-            addToBlock(output, vtkmesh, range, datasetNo, zoneName);
-            partDataset_.set(partId, datasetNo++);
-        }
-    }
-
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
+        convertMeshSubset(subsetter, longName);
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshCellZones" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }
 
 
-void Foam::vtkPVFoam::convertMeshCellSets
-(
-    vtkMultiBlockDataSet* output,
-    int& blockNo
-)
+void Foam::vtkPVFoam::convertMeshCellSets()
 {
-    arrayRange& range = rangeCellSets_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
+    const arrayRange& range = rangeCellSets_;
     const fvMesh& mesh = *meshPtr_;
 
     if (debug)
     {
-        Info<< "<beg> convertMeshCellSets" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
@@ -380,57 +323,20 @@ void Foam::vtkPVFoam::convertMeshCellSets
         fvMeshSubset subsetter(mesh);
         subsetter.setLargeCellSubset(cSet);
 
-        vtkSmartPointer<vtkUnstructuredGrid> vtkmesh = volumeVTKMesh
-        (
-            subsetter.subMesh(),
-            cachedVtu_(longName)
-        );
-
-        if (vtkmesh)
-        {
-            // Convert cellMap, addPointCellLabels to global cell ids
-            inplaceRenumber
-            (
-                subsetter.cellMap(),
-                cachedVtu_[longName].cellMap()
-            );
-            inplaceRenumber
-            (
-                subsetter.cellMap(),
-                cachedVtu_[longName].additionalIds()
-            );
-
-            // copy pointMap as well, otherwise pointFields fail
-            cachedVtu_[longName].pointMap() = subsetter.pointMap();
-
-            addToBlock(output, vtkmesh, range, datasetNo, partName);
-            partDataset_.set(partId, datasetNo++);
-        }
-    }
-
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
+        convertMeshSubset(subsetter, longName);
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshCellSets" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }
 
 
-void Foam::vtkPVFoam::convertMeshFaceZones
-(
-    vtkMultiBlockDataSet* output,
-    int& blockNo
-)
+void Foam::vtkPVFoam::convertMeshFaceZones()
 {
     arrayRange& range = rangeFaceZones_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
 
     if (range.empty())
@@ -440,7 +346,7 @@ void Foam::vtkPVFoam::convertMeshFaceZones
 
     if (debug)
     {
-        Info<< "<beg> convertMeshFaceZones" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
@@ -452,6 +358,7 @@ void Foam::vtkPVFoam::convertMeshFaceZones
             continue;
         }
 
+        const auto& longName = selectedPartIds_[partId];
         const word zoneName = getPartName(partId);
         const label  zoneId = zMesh.findZoneID(zoneName);
 
@@ -467,43 +374,31 @@ void Foam::vtkPVFoam::convertMeshFaceZones
         }
 
         vtkSmartPointer<vtkPolyData> vtkmesh =
-            patchVTKMesh(zoneName, zMesh[zoneId]());
+            patchVTKMesh
+            (
+                zoneName,
+                zMesh[zoneId]()
+            );
 
-        if (vtkmesh)
-        {
-            addToBlock(output, vtkmesh, range, datasetNo, zoneName);
-            partDataset_.set(partId, datasetNo++);
-        }
-    }
-
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
+        cachedVtp_(longName).vtkmesh = vtkmesh;
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshFaceZones" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }
 
 
-void Foam::vtkPVFoam::convertMeshFaceSets
-(
-    vtkMultiBlockDataSet* output,
-    int& blockNo
-)
+void Foam::vtkPVFoam::convertMeshFaceSets()
 {
     arrayRange& range = rangeFaceSets_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
 
     if (debug)
     {
-        Info<< "<beg> convertMeshFaceSets" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
@@ -514,6 +409,7 @@ void Foam::vtkPVFoam::convertMeshFaceSets
             continue;
         }
 
+        const auto& longName = selectedPartIds_[partId];
         const word partName = getPartName(partId);
 
         if (debug)
@@ -536,43 +432,31 @@ void Foam::vtkPVFoam::convertMeshFaceSets
         }
 
         vtkSmartPointer<vtkPolyData> vtkmesh =
-            patchVTKMesh("faceSet:" + partName, p);
+            patchVTKMesh
+            (
+                "faceSet:" + partName,
+                p
+            );
 
-        if (vtkmesh)
-        {
-            addToBlock(output, vtkmesh, range, datasetNo, partName);
-            partDataset_.set(partId, datasetNo++);
-        }
-    }
-
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
+        cachedVtp_(longName).vtkmesh = vtkmesh;
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshFaceSets" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }
 
 
-void Foam::vtkPVFoam::convertMeshPointZones
-(
-    vtkMultiBlockDataSet* output,
-    int& blockNo
-)
+void Foam::vtkPVFoam::convertMeshPointZones()
 {
     arrayRange& range = rangePointZones_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
 
     if (debug)
     {
-        Info<< "<beg> convertMeshPointZones" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
@@ -586,6 +470,7 @@ void Foam::vtkPVFoam::convertMeshPointZones
                 continue;
             }
 
+            const auto& longName = selectedPartIds_[partId];
             const word zoneName = getPartName(partId);
             const label zoneId = zMesh.findZoneID(zoneName);
 
@@ -616,42 +501,26 @@ void Foam::vtkPVFoam::convertMeshPointZones
 
             vtkmesh->SetPoints(vtkpoints);
 
-            if (vtkmesh)
-            {
-                addToBlock(output, vtkmesh, range, datasetNo, zoneName);
-                partDataset_.set(partId, datasetNo++);
-            }
+            cachedVtp_(longName).vtkmesh = vtkmesh;
         }
-    }
-
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshPointZones" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }
 
 
-void Foam::vtkPVFoam::convertMeshPointSets
-(
-    vtkMultiBlockDataSet* output,
-    int& blockNo
-)
+void Foam::vtkPVFoam::convertMeshPointSets()
 {
     arrayRange& range = rangePointSets_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
 
     if (debug)
     {
-        Info<< "<beg> convertMeshPointSets" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
@@ -662,6 +531,7 @@ void Foam::vtkPVFoam::convertMeshPointSets
             continue;
         }
 
+        const auto& longName = selectedPartIds_[partId];
         const word partName = getPartName(partId);
 
         if (debug)
@@ -691,22 +561,12 @@ void Foam::vtkPVFoam::convertMeshPointSets
 
         vtkmesh->SetPoints(vtkpoints);
 
-        if (vtkmesh)
-        {
-            addToBlock(output, vtkmesh, range, datasetNo, partName);
-            partDataset_.set(partId, datasetNo++);
-        }
-    }
-
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
+        cachedVtp_(longName).vtkmesh = vtkmesh;
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshPointSets" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }

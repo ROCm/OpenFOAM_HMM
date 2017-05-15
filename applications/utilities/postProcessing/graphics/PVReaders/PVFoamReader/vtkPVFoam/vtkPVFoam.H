@@ -55,6 +55,10 @@ SourceFiles
 #include "volPointInterpolation.H"
 #include "foamPvCore.H"
 
+#include "vtkSmartPointer.h"
+#include "vtkPolyData.h"
+#include "vtkUnstructuredGrid.h"
+
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
 
 class vtkDataArraySelection;
@@ -65,11 +69,8 @@ class vtkPVFoamReader;
 class vtkRenderer;
 class vtkTextActor;
 class vtkMultiBlockDataSet;
-class vtkPolyData;
-class vtkUnstructuredGrid;
 class vtkIndent;
 
-template<class T> class vtkSmartPointer;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,6 +83,7 @@ class Time;
 class fvMesh;
 class IOobjectList;
 class polyPatch;
+class fvMeshSubset;
 
 template<class Type> class IOField;
 template<class Type> class Field;
@@ -160,16 +162,19 @@ class vtkPVFoam
             }
         };
 
+
         //- Bookkeeping for vtkPolyData
         class foamVtpData
         {
+        public:
+            vtkSmartPointer<vtkPolyData> vtkmesh;
         };
 
         //- Bookkeeping for vtkUnstructuredGrid
-        class foamVtuData
-        :
-            public polyDecomp
+        class foamVtuData : public polyDecomp
         {
+        public:
+            vtkSmartPointer<vtkUnstructuredGrid> vtkmesh;
         };
 
 
@@ -202,9 +207,6 @@ class vtkPVFoam
         //- The index of selected parts mapped to their names
         Map<string> selectedPartIds_;
 
-        //- Datasets corresponding to selected geometrical pieces
-        Map<label> partDataset_;
-
         //- Any information for 2D (VTP) geometries
         HashTable<foamVtpData, string> cachedVtp_;
 
@@ -213,7 +215,7 @@ class vtkPVFoam
 
         //- First instance and size of various mesh parts
         //  used to index into selectedPartIds and thus indirectly into
-        //  cachedVtp, cachedVtu and partDataset
+        //  cachedVtp, cachedVtu
         arrayRange rangeVolume_;
         arrayRange rangePatches_;
         arrayRange rangeLagrangian_;
@@ -229,6 +231,16 @@ class vtkPVFoam
 
 
     // Private Member Functions
+
+        template<class Container>
+        bool addOutputBlock
+        (
+            vtkMultiBlockDataSet* output,
+            const HashTable<Container, string>& cache,
+            const arrayRange& selector,
+            const bool singleDataset = false
+        ) const;
+
 
         //- Reset data counters
         void resetCounters();
@@ -279,31 +291,38 @@ class vtkPVFoam
       // Mesh conversion functions
 
         //- Convert volume mesh
-        void convertMeshVolume(vtkMultiBlockDataSet* output, int& blockNo);
+        void convertMeshVolume();
 
         //- Convert Lagrangian points
-        void convertMeshLagrangian(vtkMultiBlockDataSet* output, int& blockNo);
+        void convertMeshLagrangian();
 
         //- Convert mesh patches
-        void convertMeshPatches(vtkMultiBlockDataSet* output, int& blockNo);
+        void convertMeshPatches();
+
+        //- Convert subsetted mesh
+        void convertMeshSubset
+        (
+            const fvMeshSubset& subsetter,
+            const string& longName
+        );
 
         //- Convert cell zones
-        void convertMeshCellZones(vtkMultiBlockDataSet* output, int& blockNo);
+        void convertMeshCellZones();
 
         //- Convert face zones
-        void convertMeshFaceZones(vtkMultiBlockDataSet* output, int& blockNo);
+        void convertMeshFaceZones();
 
         //- Convert point zones
-        void convertMeshPointZones(vtkMultiBlockDataSet* output, int& blockNo);
+        void convertMeshPointZones();
 
         //- Convert cell sets
-        void convertMeshCellSets(vtkMultiBlockDataSet* output, int& blockNo);
+        void convertMeshCellSets();
 
         //- Convert face sets
-        void convertMeshFaceSets(vtkMultiBlockDataSet* output, int& blockNo);
+        void convertMeshFaceSets();
 
         //- Convert point sets
-        void convertMeshPointSets(vtkMultiBlockDataSet* output, int& blockNo);
+        void convertMeshPointSets();
 
 
       // Add mesh functions
@@ -359,13 +378,13 @@ class vtkPVFoam
 
 
         //- Convert volume fields
-        void convertVolFields(vtkMultiBlockDataSet* output);
+        void convertVolFields();
 
         //- Convert point fields
-        void convertPointFields(vtkMultiBlockDataSet* output);
+        void convertPointFields();
 
         //- Convert Lagrangian fields
-        void convertLagrangianFields(vtkMultiBlockDataSet* output);
+        void convertLagrangianFields();
 
 
       // Convert OpenFOAM fields
@@ -375,8 +394,7 @@ class vtkPVFoam
         void convertVolField
         (
             const PtrList<patchInterpolator>& patchInterpList,
-            const GeometricField<Type, fvPatchField, volMesh>& fld,
-            vtkMultiBlockDataSet* output
+            const GeometricField<Type, fvPatchField, volMesh>& fld
         );
 
         //- Volume fields - all types
@@ -385,8 +403,7 @@ class vtkPVFoam
         (
             const fvMesh& mesh,
             const PtrList<patchInterpolator>& patchInterpList,
-            const IOobjectList& objects,
-            vtkMultiBlockDataSet* output
+            const IOobjectList& objects
         );
 
         //- Volume internal fields (DimensionedField)- all types
@@ -395,8 +412,7 @@ class vtkPVFoam
         (
             const fvMesh& mesh,
             const PtrList<patchInterpolator>& patchInterpList,
-            const IOobjectList& objects,
-            vtkMultiBlockDataSet* output
+            const IOobjectList& objects
         );
 
         //- Volume field - all selected parts
@@ -405,7 +421,6 @@ class vtkPVFoam
         (
             const GeometricField<Type, fvPatchField, volMesh>& fld,
             autoPtr<GeometricField<Type, pointPatchField, pointMesh>>& ptfPtr,
-            vtkMultiBlockDataSet* output,
             const arrayRange& range
         );
 
@@ -414,8 +429,7 @@ class vtkPVFoam
         void convertLagrangianFields
         (
             const IOobjectList& objects,
-            vtkMultiBlockDataSet* output,
-            const label datasetNo
+            vtkPolyData* vtkmesh
         );
 
         //- Point fields - all types
@@ -423,8 +437,7 @@ class vtkPVFoam
         void convertPointFields
         (
             const pointMesh& pMesh,
-            const IOobjectList& objects,
-            vtkMultiBlockDataSet* output
+            const IOobjectList& objectst
         );
 
         //- Point field - all selected parts
@@ -432,7 +445,6 @@ class vtkPVFoam
         void convertPointFieldBlock
         (
             const GeometricField<Type, pointPatchField, pointMesh>& pfld,
-            vtkMultiBlockDataSet* output,
             const arrayRange& range
         );
 

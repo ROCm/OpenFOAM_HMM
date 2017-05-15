@@ -103,28 +103,6 @@ void Foam::foamPvCore::addToBlock
 }
 
 
-int Foam::foamPvCore::getNumberOfDataSets
-(
-    vtkMultiBlockDataSet* output,
-    const arrayRange& selector
-)
-{
-    const int blockNo = selector.block();
-
-    vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast
-    (
-        output->GetBlock(blockNo)
-    );
-
-    if (block)
-    {
-        return block->GetNumberOfBlocks();
-    }
-
-    return 0;
-}
-
-
 int Foam::foamPvCore::getSelected
 (
     boolList& status,

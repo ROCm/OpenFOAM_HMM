@@ -38,6 +38,7 @@ License
 #include "vtkTextActor.h"
 #include "vtkTextProperty.h"
 #include "vtkSmartPointer.h"
+#include "vtkInformation.h"
 
 // Templates (only needed here)
 #include "vtkPVFoamUpdateTemplates.C"
@@ -114,6 +115,70 @@ void Foam::vtkPVFoam::resetCounters()
     rangeCellSets_.reset();
     rangeFaceSets_.reset();
     rangePointSets_.reset();
+}
+
+
+template<class Container>
+bool Foam::vtkPVFoam::addOutputBlock
+(
+    vtkMultiBlockDataSet* output,
+    const HashTable<Container, string>& cache,
+    const arrayRange& selector,
+    const bool singleDataset
+) const
+{
+    const auto blockNo = output->GetNumberOfBlocks();
+    vtkSmartPointer<vtkMultiBlockDataSet> block;
+    int datasetNo = 0;
+
+    for (auto partId : selector)
+    {
+        if (selectedPartIds_.found(partId))
+        {
+            const auto& longName = selectedPartIds_[partId];
+            const word shortName = getPartName(partId);
+
+            auto iter = cache.find(longName);
+            if (iter.found() && (*iter).vtkmesh)
+            {
+                auto dataset = (*iter).vtkmesh;
+
+                if (singleDataset)
+                {
+                    output->SetBlock(blockNo, dataset);
+                    output->GetMetaData(blockNo)->Set
+                    (
+                        vtkCompositeDataSet::NAME(),
+                        shortName.c_str()
+                    );
+
+                    ++datasetNo;
+                    break;
+                }
+                else if (datasetNo == 0)
+                {
+                    block = vtkSmartPointer<vtkMultiBlockDataSet>::New();
+                    output->SetBlock(blockNo, block);
+                    output->GetMetaData(blockNo)->Set
+                    (
+                        vtkCompositeDataSet::NAME(),
+                        selector.name()
+                    );
+                }
+
+                block->SetBlock(datasetNo, dataset);
+                block->GetMetaData(datasetNo)->Set
+                (
+                    vtkCompositeDataSet::NAME(),
+                    shortName.c_str()
+                );
+
+                ++datasetNo;
+            }
+        }
+    }
+
+    return datasetNo;
 }
 
 
@@ -417,11 +482,6 @@ void Foam::vtkPVFoam::Update
 
     // Set up mesh parts selection(s)
     {
-        if (debug)
-        {
-            Info<< "<beg> updateMeshPartsStatus" << endl;
-        }
-
         vtkDataArraySelection* selection = reader_->GetPartSelection();
         const int n = selection->GetNumberOfArrays();
 
@@ -463,11 +523,6 @@ void Foam::vtkPVFoam::Update
                 Info<< "  part[" << id << "] = " << status
                     << " : " << str << nl;
             }
-        }
-
-        if (debug)
-        {
-            Info<< "<end> updateMeshPartsStatus" << endl;
         }
     }
 
@@ -538,49 +593,51 @@ void Foam::vtkPVFoam::Update
     cachedVtp_.retain(nowActive);
     cachedVtu_.retain(nowActive);
 
-    // Reset (expire) dataset ids
-    partDataset_.clear();
-
-    // Convert meshes - start port0 at block=0
-    int blockNo = 0;
-
-    convertMeshVolume(output, blockNo);
-    convertMeshPatches(output, blockNo);
+    convertMeshVolume();
+    convertMeshPatches();
     reader_->UpdateProgress(0.6);
 
     if (reader_->GetIncludeZones())
     {
-        convertMeshCellZones(output, blockNo);
-        convertMeshFaceZones(output, blockNo);
-        convertMeshPointZones(output, blockNo);
+        convertMeshCellZones();
+        convertMeshFaceZones();
+        convertMeshPointZones();
         reader_->UpdateProgress(0.65);
     }
 
     if (reader_->GetIncludeSets())
     {
-        convertMeshCellSets(output, blockNo);
-        convertMeshFaceSets(output, blockNo);
-        convertMeshPointSets(output, blockNo);
+        convertMeshCellSets();
+        convertMeshFaceSets();
+        convertMeshPointSets();
         reader_->UpdateProgress(0.7);
     }
 
-    if (outputLagrangian)
-    {
-        // Lagrangian dual port - restart port1 at block=0
-        blockNo = 0;
-        convertMeshLagrangian(outputLagrangian, blockNo);
-    }
-    else
-    {
-        convertMeshLagrangian(output, blockNo);
-    }
+    convertMeshLagrangian();
 
     reader_->UpdateProgress(0.8);
 
     // Update fields
-    convertVolFields(output);
-    convertPointFields(output);
-    convertLagrangianFields(outputLagrangian ? outputLagrangian : output);
+    convertVolFields();
+    convertPointFields();
+    convertLagrangianFields();
+
+
+    // Assemble multiblock output
+    addOutputBlock(output, cachedVtu_, rangeVolume_, true); // One dataset
+    addOutputBlock(output, cachedVtp_, rangePatches_);
+    addOutputBlock(output, cachedVtu_, rangeCellZones_);
+    addOutputBlock(output, cachedVtp_, rangeFaceZones_);
+    addOutputBlock(output, cachedVtp_, rangePointZones_);
+    addOutputBlock(output, cachedVtu_, rangeCellSets_);
+    addOutputBlock(output, cachedVtp_, rangeFaceSets_);
+    addOutputBlock(output, cachedVtp_, rangePointSets_);
+    addOutputBlock
+    (
+        (outputLagrangian ? outputLagrangian : output),
+        cachedVtp_,
+        rangeLagrangian_
+    );
 
     if (debug)
     {

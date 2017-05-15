@@ -25,35 +25,8 @@ License
 
 #include "IOobjectList.H"
 #include "vtkDataArraySelection.h"
-#include "vtkMultiBlockDataSet.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-Type* Foam::foamPvCore::getDataFromBlock
-(
-    vtkMultiBlockDataSet* output,
-    const arrayRange& selector,
-    const label datasetNo
-)
-{
-    const int blockNo = selector.block();
-
-    vtkMultiBlockDataSet* block =
-    (
-        datasetNo < 0
-      ? nullptr
-      : vtkMultiBlockDataSet::SafeDownCast(output->GetBlock(blockNo))
-    );
-
-    if (block)
-    {
-        return Type::SafeDownCast(block->GetBlock(datasetNo));
-    }
-
-    return nullptr;
-}
-
 
 template<class Type>
 Foam::label Foam::foamPvCore::addToSelection

@@ -62,10 +62,7 @@ void Foam::vtkPVFoam::pruneObjectList
 }
 
 
-void Foam::vtkPVFoam::convertVolFields
-(
-    vtkMultiBlockDataSet* output
-)
+void Foam::vtkPVFoam::convertVolFields()
 {
     const fvMesh& mesh = *meshPtr_;
 
@@ -121,17 +118,17 @@ void Foam::vtkPVFoam::convertVolFields
         }
     }
 
-    convertVolFields<scalar>(mesh, interpLst, objects, output);
-    convertVolFields<vector>(mesh, interpLst, objects, output);
-    convertVolFields<sphericalTensor>(mesh, interpLst, objects, output);
-    convertVolFields<symmTensor>(mesh, interpLst, objects, output);
-    convertVolFields<tensor>(mesh, interpLst, objects, output);
+    convertVolFields<scalar>(mesh, interpLst, objects);
+    convertVolFields<vector>(mesh, interpLst, objects);
+    convertVolFields<sphericalTensor>(mesh, interpLst, objects);
+    convertVolFields<symmTensor>(mesh, interpLst, objects);
+    convertVolFields<tensor>(mesh, interpLst, objects);
 
-    convertDimFields<scalar>(mesh, interpLst, objects, output);
-    convertDimFields<vector>(mesh, interpLst, objects, output);
-    convertDimFields<sphericalTensor>(mesh, interpLst, objects, output);
-    convertDimFields<symmTensor>(mesh, interpLst, objects, output);
-    convertDimFields<tensor>(mesh, interpLst, objects, output);
+    convertDimFields<scalar>(mesh, interpLst, objects);
+    convertDimFields<vector>(mesh, interpLst, objects);
+    convertDimFields<sphericalTensor>(mesh, interpLst, objects);
+    convertDimFields<symmTensor>(mesh, interpLst, objects);
+    convertDimFields<tensor>(mesh, interpLst, objects);
 
     if (debug)
     {
@@ -141,10 +138,7 @@ void Foam::vtkPVFoam::convertVolFields
 }
 
 
-void Foam::vtkPVFoam::convertPointFields
-(
-    vtkMultiBlockDataSet* output
-)
+void Foam::vtkPVFoam::convertPointFields()
 {
     const fvMesh& mesh = *meshPtr_;
 
@@ -186,11 +180,11 @@ void Foam::vtkPVFoam::convertPointFields
     // Construct interpolation on the raw mesh
     const pointMesh& pMesh = pointMesh::New(mesh);
 
-    convertPointFields<scalar>(pMesh, objects, output);
-    convertPointFields<vector>(pMesh, objects, output);
-    convertPointFields<sphericalTensor>(pMesh, objects, output);
-    convertPointFields<symmTensor>(pMesh, objects, output);
-    convertPointFields<tensor>(pMesh, objects, output);
+    convertPointFields<scalar>(pMesh, objects);
+    convertPointFields<vector>(pMesh, objects);
+    convertPointFields<sphericalTensor>(pMesh, objects);
+    convertPointFields<symmTensor>(pMesh, objects);
+    convertPointFields<tensor>(pMesh, objects);
 
     if (debug)
     {
@@ -200,10 +194,7 @@ void Foam::vtkPVFoam::convertPointFields
 }
 
 
-void Foam::vtkPVFoam::convertLagrangianFields
-(
-    vtkMultiBlockDataSet* output
-)
+void Foam::vtkPVFoam::convertLagrangianFields()
 {
     arrayRange& range = rangeLagrangian_;
     const fvMesh& mesh = *meshPtr_;
@@ -231,13 +222,14 @@ void Foam::vtkPVFoam::convertLagrangianFields
             continue;
         }
 
-        const word  cloudName = getPartName(partId);
-        const label datasetNo = partDataset_.lookup(partId, -1);
+        const word cloudName = getPartName(partId);
+        auto iter = cachedVtp_.find(selectedPartIds_[partId]);
 
-        if (datasetNo < 0)
+        if (!iter.found() || !(*iter).vtkmesh)
         {
             continue;
         }
+        auto vtkmesh = (*iter).vtkmesh;
 
         // Get the Lagrangian fields for this time and this cloud
         // but only keep selected fields
@@ -265,12 +257,12 @@ void Foam::vtkPVFoam::convertLagrangianFields
             }
         }
 
-        convertLagrangianFields<label>(objects, output, datasetNo);
-        convertLagrangianFields<scalar>(objects, output, datasetNo);
-        convertLagrangianFields<vector>(objects, output, datasetNo);
-        convertLagrangianFields<sphericalTensor>(objects, output, datasetNo);
-        convertLagrangianFields<symmTensor>(objects, output, datasetNo);
-        convertLagrangianFields<tensor>(objects, output, datasetNo);
+        convertLagrangianFields<label>(objects, vtkmesh);
+        convertLagrangianFields<scalar>(objects, vtkmesh);
+        convertLagrangianFields<vector>(objects, vtkmesh);
+        convertLagrangianFields<sphericalTensor>(objects, vtkmesh);
+        convertLagrangianFields<symmTensor>(objects, vtkmesh);
+        convertLagrangianFields<tensor>(objects, vtkmesh);
     }
 
     if (debug)
