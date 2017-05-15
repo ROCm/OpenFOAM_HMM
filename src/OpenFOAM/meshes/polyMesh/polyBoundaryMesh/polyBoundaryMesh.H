@@ -70,7 +70,7 @@ class polyBoundaryMesh
 
         mutable autoPtr<labelList> patchIDPtr_;
 
-        mutable autoPtr<HashTable<labelList, word>> groupPatchIDsPtr_;
+        mutable autoPtr<HashTable<labelList>> groupPatchIDsPtr_;
 
         //- Edges of neighbouring patches
         mutable autoPtr<List<labelPairList>> neighbourEdgesPtr_;
@@ -183,8 +183,8 @@ public:
         //- Per boundary face label the patch index
         const labelList& patchID() const;
 
-        //- Per patch group the patch indices
-        const HashTable<labelList, word>& groupPatchIDs() const;
+        //- The patch indices per patch group
+        const HashTable<labelList>& groupPatchIDs() const;
 
         //- Set/add group with patches
         void setGroup(const word& groupName, const labelList& patchIDs);

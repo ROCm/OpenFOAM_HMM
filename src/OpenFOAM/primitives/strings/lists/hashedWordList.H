@@ -62,7 +62,7 @@ class hashedWordList
     // Private data
 
         //- Hash of words/indices
-        mutable HashTable<label,word> indices_;
+        mutable HashTable<label> indices_;
 
 
     // Private Member Functions
@@ -141,7 +141,7 @@ public:
         inline bool contains(const word& name) const;
 
         //- Return the hash of words/indices for inspection
-        inline const HashTable<label,word>& lookup() const;
+        inline const HashTable<label>& lookup() const;
 
         //- Transfer the contents of the argument List into this list
         //  and annul the argument list,

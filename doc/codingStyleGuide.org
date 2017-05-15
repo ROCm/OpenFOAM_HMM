@@ -22,7 +22,7 @@
     + Stream output
       + =<<= is always four characters after the start of the stream,
         so that the =<<= symbols align, i.e.
-        #+begin_src c++
+        #+begin_src C++
         Info<< ...
         os  << ...
         #+end_src
@@ -215,7 +215,7 @@
 
 *** =for= and =while= Loops
     #+begin_src C++
-    for (i = 0; i < maxI; i++)
+    for (i = 0; i < maxI; ++i)
     {
         code;
     }
@@ -226,7 +226,7 @@
     (
         i = 0;
         i < maxI;
-        i++
+        ++i
     )
     {
         code;
@@ -234,15 +234,22 @@
     #+end_src
     *not* this (no space between =for= and =(= used)
     #+begin_src C++
-    for(i = 0; i < maxI; i++)
+    for(i = 0; i < maxI; ++i)
     {
         code;
     }
     #+end_src
-    Note that when indexing through iterators, it is often slightly more
-    efficient to use the pre-increment form. Eg, =++iter= instead of =iter++=
+    Range-base for should have a space surrounding the ':'
+    #+begin_src C++
+    for (auto i : range)
+    {
+        code;
+    }
+    #+end_src
+    Note that when indexing through iterators, it is often more efficient
+    to use the pre-increment form. Eg, =++iter= instead of =iter++=
 
-*** =forAll=, =forAllIter=, =forAllConstIter=, /etc./ loops
+*** =forAll=, =forAllIters=, =forAllConstIters=, /etc./ loops
     Like =for= loops, but
     #+begin_src C++
     forAll(
@@ -251,15 +258,22 @@
     #+begin_src C++
     forAll (
     #+end_src
-    Using the =forAllIter= and =forAllConstIter= macros is generally
-    advantageous - less typing, easier to find later.  However, since
-    they are macros, they will fail if the iterated object contains
-    any commas /e.g./ following will FAIL!:
+    In many cases, the new =forAllIters= and =forAllConstIters= macros
+    provide a good means of cycling through iterators (when a range-base
+    for doesn't apply). These use the C++11 decltype and work without
+    explicitly specifying the container class:
     #+begin_src C++
-    forAllIter(HashTable<labelPair, edge, Hash<edge>>, foo, iter)
+    forAllIters(myEdgeHash, iter)
+    #+end_src
+    Using the older =forAllIter= and =forAllConstIter= macros will
+    still be seen.  However, since they are macros, they will fail if
+    the iterated object contains any commas /e.g./ following will FAIL!:
+    #+begin_src C++
+    forAllIter(HashTable<labelPair, edge, Hash<edge>>, myEdgeHash, iter)
     #+end_src
     These convenience macros are also generally avoided in other
     container classes and OpenFOAM primitive classes.
+    In certain cases, the range-based for can also be used.
 
 *** Splitting Over Multiple Lines
 ***** Splitting return type and function name
