@@ -227,16 +227,9 @@ void Foam::HashSet<Key, Hash>::operator|=(const HashSet<Key, Hash>& rhs)
 
 
 template<class Key, class Hash>
-void Foam::HashSet<Key, Hash>::operator&=(const HashSet<Key, Hash>& rhs)
+inline void Foam::HashSet<Key, Hash>::operator&=(const HashSet<Key, Hash>& rhs)
 {
-    // Remove elements not also found in rhs
-    for (iterator iter = this->begin(); iter != this->end(); ++iter)
-    {
-        if (!rhs.found(iter.key()))
-        {
-            this->erase(iter);
-        }
-    }
+    this->parent_type::retain(rhs);
 }
 
 
@@ -259,13 +252,9 @@ void Foam::HashSet<Key, Hash>::operator^=(const HashSet<Key, Hash>& rhs)
 
 
 template<class Key, class Hash>
-void Foam::HashSet<Key, Hash>::operator-=(const HashSet<Key, Hash>& rhs)
+inline void Foam::HashSet<Key, Hash>::operator-=(const HashSet<Key, Hash>& rhs)
 {
-    // Remove rhs elements from lhs
-    for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
-    {
-        this->erase(iter.key());
-    }
+    this->parent_type::erase(rhs);
 }
 
 

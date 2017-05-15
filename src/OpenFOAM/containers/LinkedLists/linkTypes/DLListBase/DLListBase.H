@@ -25,9 +25,10 @@ Class
     Foam::DLListBase
 
 Description
-    Base doubly-linked list.
+    Base for doubly-linked lists.
 
 SourceFiles
+    DLListBaseI.H
     DLListBase.C
 
 \*---------------------------------------------------------------------------*/
@@ -84,10 +85,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        DLListBase(const DLListBase&);
+        DLListBase(const DLListBase&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const DLListBase&);
+        void operator=(const DLListBase&) = delete;
 
 
 public:
@@ -184,18 +185,14 @@ public:
             friend class DLListBase;
             friend class const_iterator;
 
-            // Private data
+            //- Reference to the list this is an iterator for
+            DLListBase& curList_;
 
-                //- Reference to the list this is an iterator for
-                DLListBase& curList_;
+            //- Current element
+            link* curElmt_;
 
-                //- Current element
-                link* curElmt_;
-
-                //- Copy of the link
-                link curLink_;
-
-            // Private Member Functions
+            //- Copy of the link
+            link curLink_;
 
             //- Construct for a given SLListBase with nullptr element and link.
             //  Only used to create endIter
@@ -206,17 +203,18 @@ public:
             //- Construct for a given DLListBase and link
             inline iterator(DLListBase&, link*);
 
-            // Member operators
+            //- Currently pointing at a valid entry
+            inline bool found() const;
 
-                inline void operator=(const iterator&);
+            inline void operator=(const iterator& iter);
 
-                inline bool operator==(const iterator&) const;
-                inline bool operator!=(const iterator&) const;
+            inline bool operator==(const iterator& iter) const;
+            inline bool operator!=(const iterator& iter) const;
 
-                inline link& operator*();
+            inline link& operator*() const;
 
-                inline iterator& operator++();
-                inline iterator operator++(int);
+            inline iterator& operator++();
+            inline iterator operator++(int);
         };
 
         inline iterator begin();
@@ -228,13 +226,11 @@ public:
         //- An STL-conforming const_iterator
         class const_iterator
         {
-            // Private data
+            //- Reference to the list this is an iterator for
+            const DLListBase& curList_;
 
-                //- Reference to the list this is an iterator for
-                const DLListBase& curList_;
-
-                //- Current element
-                const link* curElmt_;
+            //- Current element
+            const link* curElmt_;
 
         public:
 
@@ -242,19 +238,20 @@ public:
             inline const_iterator(const DLListBase&, const link*);
 
             //- Construct from a non-const iterator
-            inline const_iterator(const iterator&);
+            inline const_iterator(const DLListBase::iterator& iter);
 
-            // Member operators
+            //- Currently pointing at a valid entry
+            inline bool found() const;
 
-                inline void operator=(const const_iterator&);
+            inline void operator=(const const_iterator& iter);
 
-                inline bool operator==(const const_iterator&) const;
-                inline bool operator!=(const const_iterator&) const;
+            inline bool operator==(const const_iterator& iter) const;
+            inline bool operator!=(const const_iterator& iter) const;
 
-                inline const link& operator*();
+            inline const link& operator*() const;
 
-                inline const_iterator& operator++();
-                inline const_iterator operator++(int);
+            inline const_iterator& operator++();
+            inline const_iterator operator++(int);
         };
 
         inline const_iterator cbegin() const;
@@ -269,30 +266,29 @@ public:
         //- An STL-conforming const_reverse_iterator
         class const_reverse_iterator
         {
-            // Private data
+            //- Reference to the list this is an reverse_iterator for
+            const DLListBase& curList_;
 
-                //- Reference to the list this is an reverse_iterator for
-                const DLListBase& curList_;
-
-                //- Current element
-                const link* curElmt_;
+            //- Current element
+            const link* curElmt_;
 
         public:
 
             //- Construct for a given DLListBase and link
-            inline const_reverse_iterator(const DLListBase&, const link*);
+            inline const_reverse_iterator(const DLListBase& lst, const link*);
 
-            // Member operators
+            //- Currently pointing at a valid entry
+            inline bool found() const;
 
-                inline void operator=(const const_reverse_iterator&);
+            inline void operator=(const const_reverse_iterator& iter);
 
-                inline bool operator==(const const_reverse_iterator&) const;
-                inline bool operator!=(const const_reverse_iterator&) const;
+            inline bool operator==(const const_reverse_iterator& iter) const;
+            inline bool operator!=(const const_reverse_iterator& iter) const;
 
-                inline const link& operator*();
+            inline const link& operator*() const;
 
-                inline const_reverse_iterator& operator++();
-                inline const_reverse_iterator operator++(int);
+            inline const_reverse_iterator& operator++();
+            inline const_reverse_iterator operator++(int);
         };
 
         inline const_reverse_iterator crbegin() const;

@@ -106,7 +106,7 @@ bool Foam::entry::getKeyword(keyType& keyword, Istream& is)
 
 bool Foam::entry::New(dictionary& parentDict, Istream& is)
 {
-    is.fatalCheck("entry::New(const dictionary& parentDict, Istream&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     keyType keyword;
     token keyToken;
@@ -324,7 +324,7 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
 
 Foam::autoPtr<Foam::entry> Foam::entry::New(Istream& is)
 {
-    is.fatalCheck("entry::New(Istream&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     keyType keyword;
 

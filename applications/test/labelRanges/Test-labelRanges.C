@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
         Info<<"test sorting" << endl;
         DynamicList<labelRange> list1(10);
         list1.append(labelRange(25, 8));
-        list1.append(labelRange(0, 10));
+        list1.append(labelRange::identity(8));
         list1.append(labelRange(15, 5));
         list1.append(labelRange(50, -10));
 

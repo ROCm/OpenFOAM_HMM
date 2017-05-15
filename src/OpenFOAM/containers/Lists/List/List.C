@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -160,7 +160,7 @@ Foam::List<T>::List(List<T>& a, bool reuse)
     if (reuse)
     {
         this->v_ = a.v_;
-        a.v_ = 0;
+        a.v_ = nullptr;
         a.size_ = 0;
     }
     else if (this->size_)
@@ -186,19 +186,19 @@ Foam::List<T>::List(List<T>& a, bool reuse)
 
 
 template<class T>
-Foam::List<T>::List(const UList<T>& a, const labelUList& map)
+Foam::List<T>::List(const UList<T>& a, const labelUList& mapAddressing)
 :
-    UList<T>(nullptr, map.size())
+    UList<T>(nullptr, mapAddressing.size())
 {
     if (this->size_)
     {
-        // Note:cannot use List_ELEM since third argument has to be index.
+        // Note: cannot use List_ELEM since third argument has to be index.
 
         alloc();
 
         forAll(*this, i)
         {
-            this->operator[](i) = a[map[i]];
+            this->operator[](i) = a[mapAddressing[i]];
         }
     }
 }
@@ -206,9 +206,9 @@ Foam::List<T>::List(const UList<T>& a, const labelUList& map)
 
 template<class T>
 template<class InputIterator>
-Foam::List<T>::List(InputIterator first, InputIterator last)
+Foam::List<T>::List(InputIterator begIter, InputIterator endIter)
 :
-    List<T>(first, last, std::distance(first, last))
+    List<T>(begIter, endIter, std::distance(begIter, endIter))
 {}
 
 
@@ -231,6 +231,8 @@ Foam::List<T>::List(const PtrList<T>& lst)
 }
 
 
+// Note: using first/last is not entirely accurate.
+// But since the list size is correct, last() is actually ignored.
 template<class T>
 Foam::List<T>::List(const SLList<T>& lst)
 :
@@ -259,7 +261,7 @@ Foam::List<T>::List(const BiIndirectList<T>& lst)
 template<class T>
 Foam::List<T>::List(std::initializer_list<T> lst)
 :
-    List<T>(lst.begin(), lst.end())
+    List<T>(lst.begin(), lst.end(), lst.size())
 {}
 
 
@@ -326,7 +328,7 @@ void Foam::List<T>::setSize(const label newSize)
 template<class T>
 void Foam::List<T>::setSize(const label newSize, const T& a)
 {
-    label oldSize = label(this->size_);
+    const label oldSize = label(this->size_);
     this->setSize(newSize);
 
     if (newSize > oldSize)
@@ -346,7 +348,7 @@ void Foam::List<T>::transfer(List<T>& a)
     this->v_ = a.v_;
 
     a.size_ = 0;
-    a.v_ = 0;
+    a.v_ = nullptr;
 }
 
 
@@ -419,14 +421,9 @@ void Foam::List<T>::operator=(const SLList<T>& lst)
     if (this->size_)
     {
         label i = 0;
-        for
-        (
-            typename SLList<T>::const_iterator iter = lst.begin();
-            iter != lst.end();
-            ++iter
-        )
+        for (auto iter = lst.cbegin(); iter != lst.cend(); ++iter)
         {
-            this->operator[](i++) = iter();
+            this->operator[](i++) = *iter;
         }
     }
 }
@@ -453,10 +450,11 @@ void Foam::List<T>::operator=(std::initializer_list<T> lst)
 {
     reAlloc(lst.size());
 
-    typename std::initializer_list<T>::iterator iter = lst.begin();
+    auto iter = lst.begin();
     forAll(*this, i)
     {
-        this->operator[](i) = *iter++;
+        this->operator[](i) = *iter;
+        ++iter;
     }
 }
 
