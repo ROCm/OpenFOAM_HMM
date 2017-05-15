@@ -12,6 +12,7 @@ link_directories(
 include_directories(
     $ENV{WM_PROJECT_DIR}/src/OpenFOAM/lnInclude
     $ENV{WM_PROJECT_DIR}/src/OSspecific/$ENV{WM_OSTYPE}/lnInclude
+    $ENV{WM_PROJECT_DIR}/src/conversion/lnInclude
     $ENV{WM_PROJECT_DIR}/src/finiteVolume/lnInclude
     ${PROJECT_SOURCE_DIR}/../vtkPVFoam
     ${PROJECT_SOURCE_DIR}/../../foamPv/lnInclude
@@ -64,6 +65,7 @@ target_link_libraries(
     LINK_PUBLIC
     vtkPVFoam-pv${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}
     foamPv-pv${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}
+    conversion
     finiteVolume
     OpenFOAM
 )

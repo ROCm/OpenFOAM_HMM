@@ -54,6 +54,7 @@ SourceFiles
 #include "PrimitivePatchInterpolation.H"
 #include "volPointInterpolation.H"
 #include "foamPvCore.H"
+#include "foamVtkMeshMaps.H"
 
 #include "vtkSmartPointer.h"
 #include "vtkPolyData.h"
@@ -103,66 +104,6 @@ class vtkPVFoam
 
     // Private classes
 
-        //- Bookkeeping for polyhedral cell decomposition
-        //  hide in extra pointMap (cellSet/cellZone) for now
-        class polyDecomp
-        {
-            labelList cellMap_;
-            labelList pointMap_;
-            labelList additionalIds_;
-
-        public:
-
-            polyDecomp()
-            {}
-
-            //- Label of original cell for decomposed cells
-            labelList& cellMap()
-            {
-                return cellMap_;
-            }
-
-            //- Label of original cell for decomposed cells
-            const labelList& cellMap() const
-            {
-                return cellMap_;
-            }
-
-            //- Point labels for subsetted meshes
-            labelList& pointMap()
-            {
-                return pointMap_;
-            }
-
-            //- Point labels for subsetted meshes
-            const labelList& pointMap() const
-            {
-                return pointMap_;
-            }
-
-
-            //- Cell-centre labels for additional points of decomposed cells
-            labelList& additionalIds()
-            {
-                return additionalIds_;
-            }
-
-            //- Cell-centre labels for additional points of decomposed cells
-            const labelList& additionalIds() const
-            {
-                return additionalIds_;
-            }
-
-            //- Clear
-            void clear()
-            {
-                cellMap_.clear();
-                pointMap_.clear();
-                additionalIds_.clear();
-            }
-        };
-
-
         //- Bookkeeping for vtkPolyData
         class foamVtpData
         {
@@ -170,8 +111,9 @@ class vtkPVFoam
             vtkSmartPointer<vtkPolyData> vtkmesh;
         };
 
+
         //- Bookkeeping for vtkUnstructuredGrid
-        class foamVtuData : public polyDecomp
+        class foamVtuData : public foamVtkMeshMaps
         {
         public:
             vtkSmartPointer<vtkUnstructuredGrid> vtkmesh;
