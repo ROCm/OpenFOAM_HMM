@@ -349,7 +349,15 @@ public:
         inline bool set(const Key& key, const T& obj);
 
         //- Erase an entry specified by given iterator
-        //  This invalidates the iterator until the next ++ operation
+        //  This invalidates the iterator until the next ++ operation.
+        //
+        //  Includes a safeguard against the end-iterator such that the
+        //  following is safe:
+        //  \code
+        //      auto iter = table.find(unknownKey);
+        //      table.erase(iter);
+        //  \endcode
+        //  which is what \code table.erase(unknownKey) \endcode does anyhow
         bool erase(const iterator& iter);
 
         //- Erase an entry specified by the given key
