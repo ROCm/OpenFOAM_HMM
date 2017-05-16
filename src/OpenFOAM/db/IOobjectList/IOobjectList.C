@@ -169,7 +169,7 @@ Foam::IOobjectList Foam::IOobjectList::lookup(const wordRe& matcher) const
 
 Foam::IOobjectList Foam::IOobjectList::lookup(const wordReList& matcher) const
 {
-    wordReListMatcher mat(matcher);
+    wordRes mat(matcher);
 
     IOobjectList results(size());
 

@@ -31,7 +31,7 @@ License
 #include "volPointInterpolation.H"
 #include "PatchTools.H"
 #include "mapPolyMesh.H"
-#include "wordReListMatcher.H"
+#include "wordRes.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -268,7 +268,7 @@ bool Foam::surfMeshSamplers::write()
     }
 
     // avoid duplicate entries
-    select = wordReListMatcher::uniq(select);
+    select = wordRes::uniq(select);
 
     forAll(*this, surfI)
     {
@@ -290,7 +290,7 @@ bool Foam::surfMeshSamplers::read(const dictionary& dict)
 
     if (dict.found("surfaces"))
     {
-        fieldSelection_ = wordReListMatcher::uniq
+        fieldSelection_ = wordRes::uniq
         (
             wordReList(dict.lookup("fields"))
         );

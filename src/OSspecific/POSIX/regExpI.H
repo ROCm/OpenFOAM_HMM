@@ -66,6 +66,12 @@ inline bool Foam::regExp::search(const std::string& text) const
 
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
+inline bool Foam::regExp::operator()(const std::string& text) const
+{
+    return match(text);
+}
+
+
 inline void Foam::regExp::operator=(const char* pattern)
 {
     set(pattern);

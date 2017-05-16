@@ -27,7 +27,7 @@ License
 
 #include "volFields.H"
 #include "dictionary.H"
-#include "wordReListMatcher.H"
+#include "wordRes.H"
 #include "steadyStateDdtScheme.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -142,7 +142,7 @@ bool Foam::functionObjects::ddt2::read(const dictionary& dict)
         return false;
     }
 
-    selectFields_ = wordReListMatcher::uniq
+    selectFields_ = wordRes::uniq
     (
         wordReList(dict.lookup("fields"))
     );

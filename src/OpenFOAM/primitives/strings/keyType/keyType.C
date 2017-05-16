@@ -52,13 +52,11 @@ bool Foam::keyType::match(const std::string& text, bool literal) const
 {
     if (literal || !isPattern_)
     {
-        // check as string
-        return (text == *this);
+        return !compare(text);  // Compare as literal string
     }
     else
     {
-        // check as regex
-        return regExp(*this).match(text);
+        return regExp(*this).match(text);  // Match as regex
     }
 }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,9 @@ Description
 #include "IFstream.H"
 #include "List.H"
 #include "Tuple2.H"
+#include "keyType.H"
 #include "wordRe.H"
+#include "wordRes.H"
 
 using namespace Foam;
 
@@ -44,12 +46,36 @@ int main(int argc, char *argv[])
     Foam::string s2("this .* file");
     const char * s3 = "this .* file";
 
+    keyType keyre("x.*", true);
+
+    wordReList wordrelist
+    {
+        {"this", wordRe::LITERAL},
+        {"x.*", wordRe::REGEX},
+        {"file[a-b]", wordRe::REGEX},
+    };
+
+    wordRes wrelist(wordrelist);
+
+    Info<< "re-list:" << wrelist() << endl;
+    Info<< "match this: " << wrelist("this") << endl;
+    Info<< "match xyz: "  << wrelist("xyz") << endl;
+    Info<< "match zyx: "  << wrelist("zyx") << endl;
+    Info<< "match xyz: "  << wrelist.match("xyz") << endl;
+    Info<< "keyre match: "  << keyre("xyz") << endl;
+    Info<< "string match: "  << string("this").match("xyz") << endl;
+    Info<< "string match: "  << string("x.*")("xyz") << endl;
+    Info<< "string match: "  << string("x.*")(keyre) << endl;
+
     wordRe(s1, wordRe::DETECT).info(Info) << endl;
     wordRe(s2).info(Info) << endl;
     wordRe(s2, wordRe::DETECT).info(Info) << endl;
-    wordRe(s3, wordRe::REGEXP).info(Info) << endl;
+    wordRe(s3, wordRe::REGEX).info(Info) << endl;
 
     wre = "this .* file";
+
+    Info<<"substring: " << wre(4) << endl;
+
     wre.info(Info) << endl;
     wre = s1;
     wre.info(Info) << endl;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,23 +22,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::wordReListMatcher
+    Foam::wordRes
 
 Description
-    A wrapper for matching a List of wordRe.
+    A wrapper for matching a std::string against a wordRe list.
 
 Note
     The constructor should remain non-explicit. This allows automatic
-    conversion from UList\<wordRe\> to wordReListMatcher in search
-    functions.
+    conversion from UList\<wordRe\> to wordRes in search functions.
 
 SourceFiles
-    wordReListMatcherI.H
+    wordResI.H
+    wordRes.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wordReListMatcher_H
-#define wordReListMatcher_H
+#ifndef wordRes_H
+#define wordRes_H
 
 #include "wordReList.H"
 
@@ -48,48 +48,70 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class wordReListMatcher Declaration
+                           Class wordRes Declaration
 \*---------------------------------------------------------------------------*/
 
-class wordReListMatcher
+class wordRes
 {
     // Private data
 
         //- Reference to underlying list
-        const UList<wordRe>& reList_;
+        const UList<wordRe>& list_;
 
 public:
 
+    // STL type definitions
+
+        //- Type of values the list contains
+        typedef wordRe value_type;
+
+
     // Constructors
 
-        //- Construct from a List of wordRe
-        inline wordReListMatcher(const UList<wordRe>&);
+        //- Construct from a list of wordRe
+        inline wordRes(const UList<wordRe>& lst);
+
+
+    // Static Constructors, Helpers
+
+        //- Return a wordReList with duplicate words filtered out.
+        //  No filtering is done on regular expressions.
+        static wordReList uniq(const UList<wordRe>& input);
 
 
     // Member Functions
 
       // Access
 
+        //- The number of elements in the list
         inline label size() const;
-        inline bool  empty() const;
+
+        //- True if the list is empty
+        inline bool empty() const;
+
+
+      // Searching
+
+        //- Return true if string matches any of the regular expressions
+        //  Smart match as regular expression or as a string.
+        //  Optionally specify a literal match only.
+        inline bool match
+        (
+            const std::string& text,
+            const bool literal = false
+        ) const;
+
+
+    // Member operators
 
         //- Return underlying list of wordRe
         inline const UList<wordRe>& operator()() const;
 
+        //- Perform smart match on text, as per match()
+        inline bool operator()(const std::string& text) const;
 
-     // Searching
-
-       //- Return true if string matches any of the regular expressions
-       //  Smart match as regular expression or as a string.
-       //  Optionally specify a literal match only.
-       inline bool match(const std::string&, bool literalMatch=false) const;
-
-
-     // Helpers
-
-       //- Return a wordReList with duplicate words filtered out.
-       //  No filtering is done on regular expressions.
-       static wordReList uniq(const UList<wordRe>& input);
+        //- Return element of constant list
+        inline const wordRe& operator[](const label i) const;
 
 };
 
@@ -100,7 +122,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "wordReListMatcherI.H"
+#include "wordResI.H"
 
 #endif
 
