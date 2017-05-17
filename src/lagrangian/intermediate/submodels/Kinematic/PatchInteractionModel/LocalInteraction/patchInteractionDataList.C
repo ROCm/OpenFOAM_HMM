@@ -26,7 +26,6 @@ License
 #include "patchInteractionDataList.H"
 #include "stringListOps.H"
 #include "emptyPolyPatch.H"
-#include "cyclicAMIPolyPatch.H"
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 

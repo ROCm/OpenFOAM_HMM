@@ -402,16 +402,16 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
         td.keepParticle
     );
 
-    // Invoke surface film model
-    if (td.cloud().surfaceFilm().transferParcel(p, pp, td.keepParticle))
+    if (isA<processorPolyPatch>(pp))
     {
-        // All interactions done
-        return true;
-    }
-    else if (pp.coupled())
-    {
-        // Don't apply the patchInteraction models to coupled boundaries
+        // Skip processor patches
         return false;
+    }
+    else if (td.cloud().surfaceFilm().transferParcel(p, pp, td.keepParticle))
+    {
+        // Surface film model consumes the interaction, i.e. all
+        // interactions done
+        return true;
     }
     else
     {
