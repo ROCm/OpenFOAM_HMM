@@ -69,7 +69,7 @@ public:
     // Constructors
 
         //- Construct from a list of wordRe
-        inline wordRes(const UList<wordRe>& lst);
+        inline wordRes(const UList<wordRe>& list);
 
 
     // Static Constructors, Helpers
