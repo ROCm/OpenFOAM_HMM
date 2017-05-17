@@ -122,6 +122,8 @@ int main(int argc, char *argv[])
             }
         }
 
+        rho = thermo.rho();
+
         runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
