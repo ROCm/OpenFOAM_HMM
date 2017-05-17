@@ -121,10 +121,10 @@ class StaticHashTable
 
         //- Return the hash index of the Key within the current table size.
         //  No checks for zero-sized tables.
-        inline label hashKeyIndex(const Key&) const;
+        inline label hashKeyIndex(const Key& key) const;
 
         //- Assign a new hashed entry to a possibly already existing key
-        bool set(const Key&, const T& newElmt, bool protect);
+        bool set(const Key& key, const T& obj, bool protect);
 
 
 public:

@@ -203,7 +203,7 @@ template<class T, class Key, class Hash>
 bool Foam::StaticHashTable<T, Key, Hash>::set
 (
     const Key& key,
-    const T& newEntry,
+    const T& obj,
     const bool protect
 )
 {
@@ -229,7 +229,7 @@ bool Foam::StaticHashTable<T, Key, Hash>::set
         localObjects.setSize(existing+1);
 
         localKeys[existing] = key;
-        localObjects[existing] = newEntry;
+        localObjects[existing] = obj;
 
         nElmts_++;
     }
@@ -250,7 +250,7 @@ bool Foam::StaticHashTable<T, Key, Hash>::set
     {
         // Found - overwrite existing entry
         // this corresponds to the Perl convention
-        objects_[hashIdx][existing] = newEntry;
+        objects_[hashIdx][existing] = obj;
     }
 
     return true;

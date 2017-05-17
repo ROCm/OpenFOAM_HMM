@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,14 +59,14 @@ class DynamicList;
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 Ostream& operator<<
 (
-    Ostream&,
-    const DynamicList<T, SizeInc, SizeMult, SizeDiv>&
+    Ostream& os,
+    const DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
 );
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 Istream& operator>>
 (
-    Istream&,
-    DynamicList<T, SizeInc, SizeMult, SizeDiv>&
+    Istream& is,
+    DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
 );
 
 
@@ -105,29 +105,37 @@ public:
         inline DynamicList();
 
         //- Construct given size.
-        explicit inline DynamicList(const label);
+        explicit inline DynamicList(const label nElem);
 
         //- Construct with given size and value for all elements.
-        inline DynamicList(const label, const T&);
+        inline DynamicList(const label nElem, const T& a);
 
         //- Construct copy.
-        inline DynamicList(const DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
+        inline DynamicList
+        (
+            const DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
+        );
 
         //- Construct from UList. Size set to UList size.
         //  Also constructs from DynamicList with different sizing parameters.
-        explicit inline DynamicList(const UList<T>&);
+        explicit inline DynamicList(const UList<T>& lst);
+
+        //- Construct given begin/end iterators.
+        //  Uses std::distance to determine the size.
+        template<class InputIterator>
+        inline DynamicList(InputIterator begIter, InputIterator endIter);
 
         //- Construct from an initializer list. Size set to list size.
-        explicit inline DynamicList(std::initializer_list<T>);
+        explicit inline DynamicList(std::initializer_list<T> lst);
 
         //- Construct from UIndirectList. Size set to UIndirectList size.
-        explicit inline DynamicList(const UIndirectList<T>&);
+        explicit inline DynamicList(const UIndirectList<T>& lst);
 
         //- Construct by transferring the parameter contents
-        explicit inline DynamicList(const Xfer<List<T>>&);
+        explicit inline DynamicList(const Xfer<List<T>>& lst);
 
         //- Construct from Istream. Size set to size of list read.
-        explicit DynamicList(Istream&);
+        explicit DynamicList(Istream& is);
 
 
     // Member Functions
@@ -143,31 +151,31 @@ public:
             //  The addressed size will be truncated if needed to fit, but will
             //  remain otherwise untouched.
             //  Use this or reserve() in combination with append().
-            inline void setCapacity(const label);
+            inline void setCapacity(const label nElem);
 
             //- Alter the addressed list size.
             //  New space will be allocated if required.
             //  Use this to resize the list prior to using the operator[] for
             //  setting values (as per List usage).
-            inline void setSize(const label);
+            inline void setSize(const label nElem);
 
             //- Alter the addressed list size and fill new space with a
             //  constant.
-            inline void setSize(const label, const T&);
+            inline void setSize(const label nElem, const T& t);
 
             //- Alter the addressed list size.
             //  New space will be allocated if required.
             //  Use this to resize the list prior to using the operator[] for
             //  setting values (as per List usage).
-            inline void resize(const label);
+            inline void resize(const label nElem);
 
             //- Alter the addressed list size and fill new space with a
             //  constant.
-            inline void resize(const label, const T&);
+            inline void resize(const label nElem, const T& t);
 
             //- Reserve allocation space for at least this size.
             //  Never shrinks the allocated size, use setCapacity() for that.
-            inline void reserve(const label);
+            inline void reserve(const label nElem);
 
             //- Clear the addressed list, i.e. set the size to zero.
             //  Allocated size does not change
@@ -181,10 +189,13 @@ public:
             inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& shrink();
 
             //- Transfer contents of the argument List into this.
-            inline void transfer(List<T>&);
+            inline void transfer(List<T>& lst);
 
             //- Transfer contents of the argument DynamicList into this.
-            inline void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
+            inline void transfer
+            (
+                DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
+            );
 
             //- Transfer contents to the Xfer container as a plain List
             inline Xfer<List<T>> xfer();
@@ -195,25 +206,25 @@ public:
             //- Append an element at the end of the list
             inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& append
             (
-                const T&
+                const T& t
             );
 
             //- Append a List at the end of this list
             inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& append
             (
-                const UList<T>&
+                const UList<T>& lst
             );
 
             //- Append an initializer list at the end of this list.
             inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& append
             (
-                std::initializer_list<T>
+                std::initializer_list<T> lst
             );
 
             //- Append a UIndirectList at the end of this list
             inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& append
             (
-                const UIndirectList<T>&
+                const UIndirectList<T>& lst
             );
 
             //- Remove and return the top element
@@ -221,32 +232,35 @@ public:
 
             //- Return non-const access to an element, resizing list if
             //  necessary
-            inline T& operator()(const label);
+            inline T& operator()(const label elemI);
 
             //- Assignment of all addressed entries to the given value
-            inline void operator=(const T&);
+            inline void operator=(const T& t);
 
             //- Assignment to DynamicList
             inline void operator=
             (
-                const DynamicList<T, SizeInc, SizeMult, SizeDiv>&
+                const DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
             );
 
             //- Assignment to UList
-            inline void operator=(const UList<T>&);
+            inline void operator=(const UList<T>& lst);
 
             //- Assignment from initializer list
-            inline void operator=(std::initializer_list<T>);
+            inline void operator=(std::initializer_list<T> lst);
 
             //- Assignment to UIndirectList
-            inline void operator=(const UIndirectList<T>&);
+            inline void operator=(const UIndirectList<T>& lst);
 
 
         // STL member functions
 
             //- Erase an element, move the remaining elements to fill the gap
             //  and resize the List
-            typename UList<T>::iterator erase(typename UList<T>::iterator);
+            typename UList<T>::iterator erase
+            (
+                typename UList<T>::iterator curIter
+            );
 
 
         // IOstream operators
@@ -254,15 +268,15 @@ public:
             // Write DynamicList to Ostream.
             friend Ostream& operator<< <T, SizeInc, SizeMult, SizeDiv>
             (
-                Ostream&,
-                const DynamicList<T, SizeInc, SizeMult, SizeDiv>&
+                Ostream& os,
+                const DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
             );
 
             //- Read from Istream, discarding contents of existing DynamicList.
             friend Istream& operator>> <T, SizeInc, SizeMult, SizeDiv>
             (
-                Istream&,
-                DynamicList<T, SizeInc, SizeMult, SizeDiv>&
+                Istream& is,
+                DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
             );
 };
 

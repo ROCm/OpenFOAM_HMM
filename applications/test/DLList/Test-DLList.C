@@ -56,7 +56,6 @@ int main(int argc, char *argv[])
         Info<< "element:" << *iter << endl;
     }
 
-
     Info<< nl << "And again using the same STL iterator: " << nl << endl;
 
     forAllIters(myList, iter)

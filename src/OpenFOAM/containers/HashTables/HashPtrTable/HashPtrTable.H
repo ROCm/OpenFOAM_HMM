@@ -116,11 +116,16 @@ public:
 
       // Edit
 
-        //- Remove and return the pointer specified by given iterator
+        //- Remove and return the pointer specified by given iterator.
+        //  Includes a safeguard against the end-iterator.
         T* remove(iterator& iter);
 
-        //- Erase an hashedEntry specified by given iterator
+        //- Erase an entry specified by given iterator
+        //  Includes a safeguard against the end-iterator.
         bool erase(iterator& iter);
+
+        //- Erase an entry specified by the given key
+        bool erase(const Key& key);
 
         //- Clear all entries from table
         void clear();
