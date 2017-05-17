@@ -43,22 +43,6 @@ void Foam::writeFuns::insert
 }
 
 
-//// Store List (indexed through map) in dest
-//template<class Type>
-//void Foam::writeFuns::insert
-//(
-//    const labelList& map,
-//    const List<Type>& source,
-//    DynamicList<floatScalar>& dest
-//)
-//{
-//    forAll(map, i)
-//    {
-//        insert(source[map[i]], dest);
-//    }
-//}
-
-
 template<class Type>
 void Foam::writeFuns::write
 (
@@ -156,55 +140,6 @@ void Foam::writeFuns::write
         insert(vvf[origCelli], fField);
     }
     write(os, binary, fField);
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::writeFuns::write
-(
-    std::ostream& os,
-    const bool binary,
-    const PtrList<GeometricField<Type, PatchField, GeoMesh>>& flds,
-    const vtkMesh& vMesh
-)
-{
-    forAll(flds, i)
-    {
-        write(os, binary, flds[i].dimensionedInternalField(), vMesh);
-    }
-}
-
-
-template<class Type>
-void Foam::writeFuns::write
-(
-    std::ostream& os,
-    const bool binary,
-    const PtrList<DimensionedField<Type, volMesh>>& flds,
-    const vtkMesh& vMesh
-)
-{
-    forAll(flds, i)
-    {
-        write(os, binary, flds[i], vMesh);
-    }
-}
-
-
-template<class Type>
-void Foam::writeFuns::write
-(
-    std::ostream& os,
-    const bool binary,
-    const volPointInterpolation& pInterp,
-    const PtrList<GeometricField<Type, fvPatchField, volMesh>>& flds,
-    const vtkMesh& vMesh
-)
-{
-    forAll(flds, i)
-    {
-        write(os, binary, flds[i], pInterp.interpolate(flds[i])(), vMesh);
-    }
 }
 
 
