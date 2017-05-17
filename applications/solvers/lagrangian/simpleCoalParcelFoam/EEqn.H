@@ -14,7 +14,7 @@
         rho*(U&g)
       + Qdot
       + parcels.Sh(he)
-      + radiation->Sh(thermo)
+      + radiation->Sh(thermo, he)
       + fvOptions(rho, he)
     );
 
