@@ -33,6 +33,7 @@ Description
 #include "keyType.H"
 #include "wordRe.H"
 #include "wordRes.H"
+#include "predicates.H"
 
 using namespace Foam;
 
@@ -62,6 +63,7 @@ int main(int argc, char *argv[])
     Info<< "match xyz: "  << wrelist("xyz") << endl;
     Info<< "match zyx: "  << wrelist("zyx") << endl;
     Info<< "match xyz: "  << wrelist.match("xyz") << endl;
+    Info<< "match any: "  << predicates::always()("any junk") << endl;
     Info<< "keyre match: "  << keyre("xyz") << endl;
     Info<< "string match: "  << string("this").match("xyz") << endl;
     Info<< "string match: "  << string("x.*")("xyz") << endl;
