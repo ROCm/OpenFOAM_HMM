@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ Usage
         type         | type name: histogram    | yes         |
         field        | Field to analyse        | yes         |
         nBins        | Number of bins for the histogram | yes|
-        max          | Maximum value sampled   | yes         |
+        max          | Maximum value sampled   | no          | field max
         min          | minimum value sampled   | no          | 0
         setFormat    | Output format           | yes         |
     \endtable
@@ -115,7 +115,8 @@ class histogram
         (
             const coordSet& coords,
             const word& valueName,
-            const scalarField& values
+            const scalarField& normalizedValues,
+            const scalarField& absoluteValues
         ) const;
 
         //- Disallow default bitwise copy construct
