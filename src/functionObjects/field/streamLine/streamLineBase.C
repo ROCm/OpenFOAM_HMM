@@ -561,18 +561,15 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
     //Info<< "    using interpolation " << interpolationScheme_ << endl;
 
     cloudName_ = dict.lookupOrDefault<word>("cloud", type());
-    dict.lookup("seedSampleSet") >> seedSet_;
-
-    const dictionary& coeffsDict = dict.subDict(seedSet_ + "Coeffs");
 
     sampledSetPtr_ = sampledSet::New
     (
-        seedSet_,
+        "seedSampleSet",
         mesh_,
         meshSearchMeshObject::New(mesh_),
-        coeffsDict
+        dict.subDict("seedSampleSet")
     );
-    coeffsDict.lookup("axis") >> sampledSetAxis_;
+    sampledSetAxis_ = sampledSetPtr_->axis();
 
     scalarFormatterPtr_ = writer<scalar>::New(dict.lookup("setFormat"));
     vectorFormatterPtr_ = writer<vector>::New(dict.lookup("setFormat"));

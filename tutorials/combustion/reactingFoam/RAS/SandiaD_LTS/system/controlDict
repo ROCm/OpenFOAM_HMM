@@ -13,6 +13,7 @@ FoamFile
     location        "system";
     object          controlDict;
 }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 application     reactingFoam;
 
@@ -22,7 +23,7 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         5000;
+endTime         7000;
 
 deltaT          1;
 

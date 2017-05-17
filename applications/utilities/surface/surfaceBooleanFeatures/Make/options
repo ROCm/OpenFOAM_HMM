@@ -17,12 +17,10 @@ EXE_INC = \
     $(COMP_FLAGS) \
     -I$(FOAM_SRC)/surfMesh/lnInclude \
     -I$(FOAM_SRC)/triSurface/lnInclude \
-    -I$(LIB_SRC)/edgeMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude
 
 EXE_LIBS = \
     -lsurfMesh \
     -ltriSurface \
-    -ledgeMesh \
     -lmeshTools \
     $(LINK_FLAGS)

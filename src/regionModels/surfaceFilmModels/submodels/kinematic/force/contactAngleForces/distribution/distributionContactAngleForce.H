@@ -29,7 +29,7 @@ Description
 
 See also
     Foam::regionModels::surfaceFilmModels::contactAngleForce
-    Foam::distributionModels::distributionModel
+    Foam::distributionModel
 
 SourceFiles
     distributionContactAngleForce.C
@@ -53,7 +53,7 @@ namespace surfaceFilmModels
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class distributionContactAngleForce Declaration
+                Class distributionContactAngleForce Declaration
 \*---------------------------------------------------------------------------*/
 
 class distributionContactAngleForce
@@ -66,7 +66,7 @@ class distributionContactAngleForce
         cachedRandom rndGen_;
 
         //- Parcel size PDF model
-        const autoPtr<distributionModels::distributionModel> distribution_;
+        const autoPtr<distributionModel> distribution_;
 
 
     // Private member functions
@@ -95,7 +95,7 @@ public:
         //- Construct from surface film model
         distributionContactAngleForce
         (
-            surfaceFilmModel& owner,
+            surfaceFilmModel& film,
             const dictionary& dict
         );
 

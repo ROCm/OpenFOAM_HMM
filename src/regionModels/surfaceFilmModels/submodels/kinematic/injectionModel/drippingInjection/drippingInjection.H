@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -87,7 +87,7 @@ protected:
         cachedRandom rndGen_;
 
         //- Parcel size PDF model
-        const autoPtr<distributionModels::distributionModel>
+        const autoPtr<distributionModel>
             parcelDistribution_;
 
         //- Diameters of particles to inject into the dripping
@@ -105,7 +105,7 @@ public:
         //- Construct from surface film model
         drippingInjection
         (
-            surfaceFilmModel& owner,
+            surfaceFilmModel& film,
             const dictionary& dict
         );
 
