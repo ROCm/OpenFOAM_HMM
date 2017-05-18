@@ -197,7 +197,11 @@ int main(int argc, char *argv[])
         Info<< "setD has no 11" << endl;
     }
 
+    Info<< "setB : " << flatOutput(setB) << endl;
     Info<< "setD : " << flatOutput(setD) << endl;
+
+    setD -= setB;
+    Info<< "setD -= setB : " << flatOutput(setD) << endl;
 
     // This should not work (yet?)
     // setD[12] = true;

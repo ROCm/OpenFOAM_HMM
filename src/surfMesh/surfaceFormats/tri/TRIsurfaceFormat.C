@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,7 +97,7 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
         forAll(faceLst, facei)
         {
             const label startPt = 3*facei;
-            faceLst[facei] = triFace(startPt, startPt+1, startPt+2);
+            faceLst[facei] = Face{startPt, startPt+1, startPt+2};
         }
     }
     else
@@ -111,7 +111,7 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
         forAll(faceMap, facei)
         {
             const label startPt = 3*faceMap[facei];
-            faceLst[facei] = triFace(startPt, startPt+1, startPt+2);
+            faceLst[facei] = Face{startPt, startPt+1, startPt+2};
         }
     }
     zoneIds.clear();

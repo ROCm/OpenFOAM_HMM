@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ License
 
 inline const char* Foam::ensightFaces::key(const enum elemType what)
 {
-    return elemEnum[what];
+    return elemNames[what];
 }
 
 
@@ -63,20 +63,24 @@ inline Foam::label Foam::ensightFaces::total(const enum elemType what) const
 }
 
 
-inline const Foam::labelUList& Foam::ensightFaces::faceIds
+inline Foam::label Foam::ensightFaces::size(const enum elemType what) const
+{
+    return slices_[what].size();
+}
+
+
+inline Foam::label Foam::ensightFaces::offset(const enum elemType what) const
+{
+    return slices_[what].start();
+}
+
+
+inline const Foam::labelUList Foam::ensightFaces::faceIds
 (
     const enum elemType what
 ) const
 {
-    if (!lists_[what])
-    {
-        FatalErrorInFunction
-            << "Accessing unallocated sublist for elem-type: "
-            << elemEnum[what]
-            << exit(FatalError);
-    }
-
-    return *(lists_[what]);
+    return address_[slices_[what]];
 }
 
 

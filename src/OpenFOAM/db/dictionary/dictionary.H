@@ -204,7 +204,7 @@ class dictionary
         bool findInPatterns
         (
             const bool patternMatch,
-            const word& Keyword,
+            const word& keyword,
             DLList<entry*>::const_iterator& wcLink,
             DLList<autoPtr<regExp>>::const_iterator& reLink
         ) const;
@@ -213,7 +213,7 @@ class dictionary
         bool findInPatterns
         (
             const bool patternMatch,
-            const word& Keyword,
+            const word& keyword,
             DLList<entry*>::iterator& wcLink,
             DLList<autoPtr<regExp>>::iterator& reLink
         );
@@ -436,6 +436,10 @@ public:
                 const bool mustRead = false
             ) const;
 
+            //- Find and return a sub-dictionary if found
+            //  otherwise return this dictionary
+            const dictionary& optionalSubDict(const word& keyword) const;
+
             //- Return the table of contents
             wordList toc() const;
 
@@ -514,7 +518,7 @@ public:
             void set(const keyType& k, const T& t);
 
             //- Remove an entry specified by keyword
-            bool remove(const word& Keyword);
+            bool remove(const word& keyword);
 
             //- Change the keyword for an entry,
             //  optionally forcing overwrite of an existing entry

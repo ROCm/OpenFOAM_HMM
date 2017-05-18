@@ -79,10 +79,10 @@ template<class T, class Key, class Hash>
 inline bool Foam::HashTable<T, Key, Hash>::insert
 (
     const Key& key,
-    const T& newEntry
+    const T& obj
 )
 {
-    return this->set(key, newEntry, true);
+    return this->set(key, obj, true);
 }
 
 
@@ -90,10 +90,10 @@ template<class T, class Key, class Hash>
 inline bool Foam::HashTable<T, Key, Hash>::set
 (
     const Key& key,
-    const T& newEntry
+    const T& obj
 )
 {
-    return this->set(key, newEntry, false);
+    return this->set(key, obj, false);
 }
 
 
@@ -102,6 +102,18 @@ inline Foam::Xfer<Foam::HashTable<T, Key, Hash>>
 Foam::HashTable<T, Key, Hash>::xfer()
 {
     return xferMove(*this);
+}
+
+
+template<class T, class Key, class Hash>
+inline const T& Foam::HashTable<T, Key, Hash>::lookup
+(
+    const Key& key,
+    const T& deflt
+) const
+{
+    const_iterator iter = this->find(key);
+    return iter.found() ? iter.object() : deflt;
 }
 
 
@@ -153,6 +165,36 @@ inline T& Foam::HashTable<T, Key, Hash>::operator()(const Key& key)
 
     this->insert(key, T());
     return find(key).object();
+}
+
+
+template<class T, class Key, class Hash>
+inline T& Foam::HashTable<T, Key, Hash>::operator()
+(
+    const Key& key,
+    const T& deflt
+)
+{
+    iterator iter = this->find(key);
+
+    if (iter.found())
+    {
+        return iter.object();
+    }
+
+    this->insert(key, deflt);
+    return find(key).object();
+}
+
+
+template<class T, class Key, class Hash>
+inline const T& Foam::HashTable<T, Key, Hash>::operator()
+(
+    const Key& key,
+    const T& deflt
+) const
+{
+    return this->lookup(key, deflt);
 }
 
 
@@ -318,6 +360,39 @@ Foam::HashTable<T, Key, Hash>::key_iterator_base<WrappedIterator>
 ::operator*() const
 {
     return this->key();
+}
+
+
+template<class T, class Key, class Hash>
+template<class WrappedIterator>
+inline const Key&
+Foam::HashTable<T, Key, Hash>::key_iterator_base<WrappedIterator>
+::operator()() const
+{
+    return this->key();
+}
+
+
+template<class T, class Key, class Hash>
+template<class WrappedIterator>
+inline Foam::HashTable<T, Key, Hash>::key_iterator_base<WrappedIterator>&
+Foam::HashTable<T, Key, Hash>::key_iterator_base<WrappedIterator>
+::operator++()
+{
+    this->increment();
+    return *this;
+}
+
+
+template<class T, class Key, class Hash>
+template<class WrappedIterator>
+inline Foam::HashTable<T, Key, Hash>::key_iterator_base<WrappedIterator>
+Foam::HashTable<T, Key, Hash>::key_iterator_base<WrappedIterator>
+::operator++(int)
+{
+    key_iterator_base old = *this;
+    this->increment();
+    return old;
 }
 
 

@@ -277,7 +277,7 @@ public:
         void operator|=(const HashSet<Key, Hash>& rhs);
 
         //- Only retain entries found in both HashSets
-        void operator&=(const HashSet<Key, Hash>& rhs);
+        inline void operator&=(const HashSet<Key, Hash>& rhs);
 
         //- Only retain unique entries (xor)
         void operator^=(const HashSet<Key, Hash>& rhs);
@@ -289,7 +289,7 @@ public:
         }
 
         //- Remove entries listed in the given HashSet from this HashSet
-        void operator-=(const HashSet<Key, Hash>& rhs);
+        inline void operator-=(const HashSet<Key, Hash>& rhs);
 
 
     // IOstream Operator

@@ -257,7 +257,7 @@ template<class T, class Key, class Hash>
 bool Foam::HashTable<T, Key, Hash>::set
 (
     const Key& key,
-    const T& newEntry,
+    const T& obj,
     const bool protect
 )
 {
@@ -284,7 +284,7 @@ bool Foam::HashTable<T, Key, Hash>::set
     if (!existing)
     {
         // Not found, insert it at the head
-        table_[hashIdx] = new hashedEntry(key, newEntry, table_[hashIdx]);
+        table_[hashIdx] = new hashedEntry(key, obj, table_[hashIdx]);
         nElmts_++;
 
         if (double(nElmts_)/tableSize_ > 0.8 && tableSize_ < maxTableSize)
@@ -316,7 +316,7 @@ bool Foam::HashTable<T, Key, Hash>::set
     {
         // Found - overwrite existing entry
         // this corresponds to the Perl convention
-        hashedEntry* ep = new hashedEntry(key, newEntry, existing->next_);
+        hashedEntry* ep = new hashedEntry(key, obj, existing->next_);
 
         // Replace existing element - within list or insert at the head
         if (prev)
@@ -411,7 +411,8 @@ bool Foam::HashTable<T, Key, Hash>::erase(const iterator& iter)
 template<class T, class Key, class Hash>
 bool Foam::HashTable<T, Key, Hash>::erase(const Key& key)
 {
-    return erase(find(key));
+    auto iter = find(key);
+    return erase(iter);
 }
 
 
@@ -450,15 +451,15 @@ Foam::label Foam::HashTable<T, Key, Hash>::erase
     const HashTable<AnyType, Key, AnyHash>& other
 )
 {
-    // Remove other keys from this table
     const label nTotal = this->size();
     label changed = 0;
 
-    if (other.size() < nTotal)
+    using other_iter =
+        typename HashTable<AnyType, Key, AnyHash>::const_iterator;
+
+    if (other.size() <= nTotal)
     {
-        // other is smaller, use its keys for removal
-        using other_iter =
-            typename HashTable<AnyType, Key, AnyHash>::const_iterator;
+        // The other is smaller/same-size, use its keys for removal
 
         for
         (
@@ -475,7 +476,7 @@ Foam::label Foam::HashTable<T, Key, Hash>::erase
     }
     else
     {
-        // other is same/larger: iterate ourselves and check for key in other
+        // We are smaller: remove if found in the other hash
         for
         (
             iterator iter = begin();
@@ -484,6 +485,39 @@ Foam::label Foam::HashTable<T, Key, Hash>::erase
         )
         {
             if (other.found(iter.key()) && erase(iter))
+            {
+                ++changed;
+            }
+        }
+    }
+
+    return changed;
+}
+
+
+template<class T, class Key, class Hash>
+template<class AnyType, class AnyHash>
+Foam::label Foam::HashTable<T, Key, Hash>::retain
+(
+    const HashTable<AnyType, Key, AnyHash>& other
+)
+{
+    const label nTotal = this->size();
+    label changed = 0;
+
+    if (other.empty())
+    {
+        // Trivial case
+        changed = nTotal;
+        this->clear();
+    }
+    else
+    {
+        // Inverted logic: remove if *not* found in the other hash
+
+        for (iterator iter = begin(); iter != end(); ++iter)
+        {
+            if (!other.found(iter.key()) && erase(iter))
             {
                 ++changed;
             }

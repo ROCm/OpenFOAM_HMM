@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2107 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 #include "VTKsurfaceFormat.H"
 #include "vtkUnstructuredReader.H"
 #include "scalarIOField.H"
+#include "faceTraits.H"
 #include "OFstream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -150,7 +151,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
 
     // Check if it needs triangulation
     label nTri = 0;
-    if (MeshedSurface<Face>::isTri())
+    if (faceTraits<Face>::isTri())
     {
         forAll(faces, facei)
         {
@@ -172,7 +173,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
             {
                 label fp2 = f.fcIndex(fp1);
 
-                dynFaces.append(triFace(f[0], f[fp1], f[fp2]));
+                dynFaces.append(Face{f[0], f[fp1], f[fp2]});
                 dynZones.append(zones[facei]);
             }
         }

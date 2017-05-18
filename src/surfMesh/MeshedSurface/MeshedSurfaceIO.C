@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,7 @@ License
 
 #include "MeshedSurface.H"
 #include "boundBox.H"
+#include "faceTraits.H"
 #include "Istream.H"
 #include "Ostream.H"
 
@@ -58,7 +59,7 @@ template<class Face>
 void Foam::MeshedSurface<Face>::writeStats(Ostream& os) const
 {
     os  << "points      : " << this->points().size() << nl;
-    if (MeshedSurface<Face>::isTri())
+    if (faceTraits<Face>::isTri())
     {
         os << "triangles   : " << this->size() << nl;
     }
@@ -82,7 +83,7 @@ void Foam::MeshedSurface<Face>::writeStats(Ostream& os) const
 
         os  << "faces       : " << this->size()
             << "  (tri:" << nTri << " quad:" << nQuad
-            << " poly:" << (this->size() - nTri - nQuad ) << ")" << nl;
+            << " poly:" << (this->size() - nTri - nQuad) << ")" << nl;
     }
 
     os  << "boundingBox : " << boundBox(this->points()) << endl;

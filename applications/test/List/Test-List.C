@@ -42,6 +42,7 @@ See also
 #include "vector.H"
 
 #include "labelRange.H"
+#include "scalarList.H"
 #include "ListOps.H"
 #include "SubList.H"
 
@@ -144,6 +145,18 @@ int main(int argc, char *argv[])
 
         labelList longLabelList = identity(15);
 
+        // This does not work:
+        // scalarList slist = identity(15);
+        //
+        // More writing, but does work:
+        scalarList slist
+        (
+            labelRange::null.begin(),
+            labelRange::identity(15).end()
+        );
+
+        Info<<"scalar identity:" << flatOutput(slist) << endl;
+
         Info<< "labels (contiguous=" << contiguous<label>() << ")" << nl;
 
         Info<< "normal: " << longLabelList << nl;
@@ -220,7 +233,32 @@ int main(int argc, char *argv[])
         }
         Info<< "sub-sorted: " << flatOutput(longLabelList) << nl;
 
-        // Info<<"Slice=" << longLabelList[labelRange(23,5)] << nl;
+        // construct from a label-range
+        labelRange range(25,15);
+
+        labelList ident(range.begin(), range.end());
+        Info<<"range-list (label)=" << ident << nl;
+
+        List<scalar> sident(range.begin(), range.end());
+        Info<<"range-list (scalar)=" << sident << nl;
+
+        // Sub-ranges also work
+        List<scalar> sident2(range(3), range(10));
+        Info<<"range-list (scalar)=" << sident2 << nl;
+
+        // VERY BAD IDEA: List<scalar> sident3(range(10), range(3));
+
+        // This doesn't work, and don't know what it should do anyhow
+        // List<vector> vident(range.begin(), range.end());
+        // Info<<"range-list (vector)=" << vident << nl;
+
+        // Even weird things like this
+        List<scalar> sident4
+        (
+            labelRange().begin(),
+            labelRange::identity(8).end()
+        );
+        Info<<"range-list (scalar)=" << sident4 << nl;
     }
 
     wordReList reLst;

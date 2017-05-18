@@ -186,9 +186,6 @@ public:
 
     // Static
 
-        //- Face storage only handles triangulated faces
-        inline static bool isTri();
-
         //- Can we read this file format?
         static bool canRead(const fileName&, const bool verbose=false);
 
@@ -210,36 +207,36 @@ public:
         //- Construct by transferring components (points, faces, zones).
         MeshedSurface
         (
-            const Xfer<pointField>&,
-            const Xfer<List<Face>>&,
-            const Xfer<surfZoneList>&
+            const Xfer<pointField>& pointLst,
+            const Xfer<List<Face>>& faceLst,
+            const Xfer<surfZoneList>& zoneLst
         );
 
         //- Construct by transferring components (points, faces).
         //  Use zone information if available
         MeshedSurface
         (
-            const Xfer<pointField>&,
-            const Xfer<List<Face>>&,
+            const Xfer<pointField>& pointLst,
+            const Xfer<List<Face>>& faceLst,
             const labelUList& zoneSizes = labelUList(),
             const UList<word>& zoneNames = UList<word>()
         );
 
         //- Construct as copy
-        MeshedSurface(const MeshedSurface&);
+        MeshedSurface(const MeshedSurface& surf);
 
         //- Construct from a UnsortedMeshedSurface
-        MeshedSurface(const UnsortedMeshedSurface<Face>&);
+        MeshedSurface(const UnsortedMeshedSurface<Face>& surf);
 
         //- Construct from a boundary mesh with local points/faces
         MeshedSurface
         (
-            const polyBoundaryMesh&,
+            const polyBoundaryMesh& bMesh,
             const bool globalPoints=false
         );
 
         //- Construct from a surfMesh
-        MeshedSurface(const surfMesh&);
+        MeshedSurface(const surfMesh& mesh);
 
         //- Construct by transferring the contents from a UnsortedMeshedSurface
         MeshedSurface(const Xfer<UnsortedMeshedSurface<Face>>&);
@@ -248,18 +245,18 @@ public:
         MeshedSurface(const Xfer<MeshedSurface<Face>>&);
 
         //- Construct from file name (uses extension to determine type)
-        MeshedSurface(const fileName&);
+        MeshedSurface(const fileName& name);
 
         //- Construct from file name (uses extension to determine type)
-        MeshedSurface(const fileName&, const word& ext);
+        MeshedSurface(const fileName& name, const word& ext);
 
         //- Construct from Istream
-        MeshedSurface(Istream&);
+        MeshedSurface(Istream& is);
 
         //- Construct from database
         MeshedSurface
         (
-            const Time&,
+            const Time& t,
             const word& surfName = word::null
         );
 
@@ -283,7 +280,7 @@ public:
         //- Select constructed from filename (explicit extension)
         static autoPtr<MeshedSurface> New
         (
-            const fileName&,
+            const fileName& name,
             const word& ext
         );
 
@@ -310,11 +307,19 @@ public:
             (name, surf)
         );
 
-        //- Write to file
+        //- Write to file, selecting writer based on its extension
         static void write
         (
-            const fileName&,
-            const MeshedSurface<Face>&
+            const fileName& name,
+            const MeshedSurface<Face>& surf
+        );
+
+        //- Write to file, selecting writer based on the given extension
+        static void write
+        (
+            const fileName& name,
+            const word& ext,
+            const MeshedSurface<Face>& surf
         );
 
 
@@ -562,8 +567,6 @@ bool MeshedSurface<labelledTri>::addZonesToFaces();
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "MeshedSurfaceI.H"
 
 #ifdef NoRepository
     #include "MeshedSurface.C"

@@ -28,7 +28,7 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-Foam::SortableList<T>::SortableList()
+inline Foam::SortableList<T>::SortableList()
 {}
 
 
@@ -51,14 +51,14 @@ Foam::SortableList<T>::SortableList(const Xfer<List<T>>& values)
 
 
 template<class T>
-Foam::SortableList<T>::SortableList(const label size)
+inline Foam::SortableList<T>::SortableList(const label size)
 :
     List<T>(size)
 {}
 
 
 template<class T>
-Foam::SortableList<T>::SortableList(const label size, const T& val)
+inline Foam::SortableList<T>::SortableList(const label size, const T& val)
 :
     List<T>(size, val)
 {}
@@ -70,6 +70,20 @@ Foam::SortableList<T>::SortableList(const SortableList<T>& lst)
     List<T>(lst),
     indices_(lst.indices())
 {}
+
+
+template<class T>
+template<class InputIterator>
+inline Foam::SortableList<T>::SortableList
+(
+    InputIterator begIter,
+    InputIterator endIter
+)
+:
+    List<T>(begIter, endIter)
+{
+    sort();
+}
 
 
 template<class T>
@@ -140,9 +154,9 @@ Foam::Xfer<Foam::List<T>> Foam::SortableList<T>::xfer()
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-inline void Foam::SortableList<T>::operator=(const T& t)
+inline void Foam::SortableList<T>::operator=(const T& val)
 {
-    UList<T>::operator=(t);
+    UList<T>::operator=(val);
 }
 
 

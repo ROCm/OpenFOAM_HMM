@@ -44,6 +44,7 @@ Note
 SourceFiles
     HashTableI.H
     HashTable.C
+    HashTableCoreI.H
     HashTableCore.C
     HashTableIO.C
 
@@ -60,6 +61,7 @@ SourceFiles
 #include "nullObject.H"
 
 #include <initializer_list>
+#include <iterator>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -180,7 +182,14 @@ public:
 
         //- The type used for storing into value_type objects.
         //  This type is usually value_type&.
+        typedef T* pointer;
+
+        //- The type used for storing into value_type objects.
+        //  This type is usually value_type&.
         typedef T& reference;
+
+        //- The type used for reading from constant value_type objects.
+        typedef const T* const_pointer;
 
         //- The type used for reading from constant value_type objects.
         typedef const T& const_reference;
@@ -247,7 +256,7 @@ private:
 
         //- Assign a new hash-entry to a possibly already existing key.
         //  Return true if the new entry was set.
-        bool set(const Key& key, const T& newEntry, const bool protect);
+        bool set(const Key& key, const T& obj, const bool protect);
 
 
 protected:
@@ -307,16 +316,19 @@ public:
         //- Return true if the hash table is empty
         inline bool empty() const;
 
-        //- Return true if hashedEntry is found in table
+        //- Return true if hashed entry is found in table
         bool found(const Key& key) const;
 
-        //- Find and return an iterator set at the hashedEntry
+        //- Find and return an iterator set at the hashed entry
         //  If not found iterator = end()
         iterator find(const Key& key);
 
-        //- Find and return an const_iterator set at the hashedEntry
+        //- Find and return an const_iterator set at the hashed entry
         //  If not found iterator = end()
         const_iterator find(const Key& key) const;
+
+        //- Return hashed entry if it exists, or return the given default
+        inline const T& lookup(const Key& key, const T& deflt) const;
 
         //- Return the table of contents
         List<Key> toc() const;
@@ -327,41 +339,57 @@ public:
 
       // Edit
 
-        //- Insert a new hashedEntry
+        //- Insert a new entry
         //  Return true if the entry inserted, which means that it did
         //  not previously exist in the table.
-        inline bool insert(const Key& key, const T& newEntry);
+        inline bool insert(const Key& key, const T& obj);
 
-        //- Assign a new hashedEntry, overwriting existing entries.
+        //- Assign a new entry, overwriting existing entries.
         //  Returns true.
-        inline bool set(const Key& key, const T& newEntry);
+        inline bool set(const Key& key, const T& obj);
 
-        //- Erase a hashedEntry specified by given iterator
-        //  This invalidates the iterator until the next ++ operation
+        //- Erase an entry specified by given iterator
+        //  This invalidates the iterator until the next ++ operation.
+        //
+        //  Includes a safeguard against the end-iterator such that the
+        //  following is safe:
+        //  \code
+        //      auto iter = table.find(unknownKey);
+        //      table.erase(iter);
+        //  \endcode
+        //  which is what \code table.erase(unknownKey) \endcode does anyhow
         bool erase(const iterator& iter);
 
-        //- Erase a hashedEntry specified by the given key
+        //- Erase an entry specified by the given key
         bool erase(const Key& key);
 
-        //- Remove entries given by the listed keys from this HashTable
+        //- Remove table entries given by the listed keys
         //  Return the number of elements removed
         label erase(const UList<Key>& keys);
 
-        //- Remove entries given by the listed keys from this HashTable
+        //- Remove table entries given by the listed keys
         //  Return the number of elements removed
         template<unsigned Size>
         label erase(const FixedList<Key, Size>& keys);
 
-        //- Remove entries given by the listed keys from this HashTable
+        //- Remove table entries given by the listed keys
         //  Return the number of elements removed
         label erase(std::initializer_list<Key> keys);
 
-        //- Remove entries given by the given keys from this HashTable
+        //- Remove table entries given by keys of the other hash-table.
         //  Return the number of elements removed.
-        //  The parameter HashTable needs the same type of key, but the
+        //
+        //  The other hash-table must have the same type of key, but the
         //  type of values held and the hashing function are arbitrary.
         template<class AnyType, class AnyHash>
         label erase(const HashTable<AnyType, Key, AnyHash>& other);
+
+        //- Retain table entries given by keys of the other hash-table.
+        //
+        //  The other hash-table must have the same type of key, but the
+        //  type of values held and the hashing function are arbitrary.
+        template<class AnyType, class AnyHash>
+        label retain(const HashTable<AnyType, Key, AnyHash>& other);
 
         //- Resize the hash table for efficiency
         void resize(const label sz);
@@ -383,16 +411,22 @@ public:
 
     // Member Operators
 
-        //- Find and return a hashedEntry
+        //- Find and return a hashed entry. FatalError if it does not exist.
         inline T& operator[](const Key& key);
 
-        //- Find and return a hashedEntry
+        //- Find and return a hashed entry. FatalError if it does not exist.
         inline const T& operator[](const Key& key) const;
 
         //- Return existing entry or create a new entry.
         //  A newly created entry is created as a nameless T() and is thus
         //  value-initialized. For primitives, this will be zero.
         inline T& operator()(const Key& key);
+
+        //- Return existing entry or insert a new entry.
+        inline T& operator()(const Key& key, const T& deflt);
+
+        //- Return hashed entry if it exists, or return the given default
+        inline const T& operator()(const Key& key, const T& deflt) const;
 
         //- Assignment
         void operator=(const HashTable<T, Key, Hash>& rhs);
@@ -423,6 +457,7 @@ protected:
             // Public typedefs
             using table_type = this_type;
             using key_type   = this_type::key_type;
+            using iterator_category = std::forward_iterator_tag;
             using difference_type  = this_type::difference_type;
 
         private:
@@ -500,16 +535,20 @@ public:
             public WrappedIterator
         {
         public:
+            using value_type = this_type::key_type;
+            using pointer    = const Key*;
             using reference  = const Key&;
-            using difference_type = typename WrappedIterator::difference_type;
 
             //- Implicit conversion
             inline key_iterator_base(const WrappedIterator& iter);
 
             //- Return the key
             inline reference operator*() const;
-        };
+            inline reference operator()() const;
 
+            inline key_iterator_base& operator++();
+            inline key_iterator_base operator++(int);
+        };
 
 
     // STL iterator
@@ -526,9 +565,9 @@ public:
 
           // Public typedefs
             using table_type = this_type;
-            using key_type   = this_type::key_type;
+            using value_type = this_type::value_type;
+            using pointer    = this_type::pointer;
             using reference  = this_type::reference;
-            using difference_type = typename iterator_base::difference_type;
 
           // Constructors
 
@@ -574,9 +613,9 @@ public:
 
           // Public typedefs
             using table_type = const this_type;
-            using key_type   = this_type::key_type;
+            using value_type = const this_type::value_type;
+            using pointer    = this_type::const_pointer;
             using reference  = this_type::const_reference;
-            using difference_type = typename iterator_base::difference_type;
 
           // Constructors
 

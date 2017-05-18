@@ -36,14 +36,9 @@ void printTable(const HashPtrTable<T>& table)
 {
     Info<< table.size() << nl << "(" << nl;
 
-    for
-    (
-        typename HashPtrTable<T>::const_iterator iter = table.cbegin();
-        iter != table.cend();
-        ++iter
-    )
+    forAllConstIters(table, iter)
     {
-        const T* ptr = *iter;
+        const T* ptr = iter.object();
         Info<< iter.key() << " = ";
         if (ptr)
         {
@@ -57,6 +52,22 @@ void printTable(const HashPtrTable<T>& table)
     }
 
     Info<< ")" << endl;
+
+    // Values only, with for-range
+    Info<< "values (";
+    for (auto val : table)
+    {
+        Info<< ' ';
+        if (val)
+        {
+            Info<< *val;
+        }
+        else
+        {
+            Info<< "nullptr";
+        }
+    }
+    Info<< " )" << nl;
 }
 
 
@@ -68,7 +79,9 @@ int main()
     HashPtrTable<double> myTable;
     myTable.insert("abc", new double(42.1));
     myTable.insert("def", nullptr);
-    myTable.insert("ghi", new double(3.14159));
+    myTable.insert("pi", new double(3.14159));
+    myTable.insert("natlog", new double(2.718282));
+    myTable.insert("sqrt2", new double(1.414214));
 
     // Info<< myTable << endl;
     printTable(myTable);
@@ -79,8 +92,20 @@ int main()
     printTable(copy);
     Info<< copy << endl;
 
+    Info<<"\nerase some existing and non-existing entries" << nl;
+
+    auto iter = myTable.find("pi");
+    myTable.erase(iter);
+
+    iter = myTable.find("unknownKey");
+    myTable.erase(iter);
+
+    myTable.erase("abc");
+    myTable.erase("unknownKey");
+
+    printTable(myTable);
+
     return 0;
 }
-
 
 // ************************************************************************* //

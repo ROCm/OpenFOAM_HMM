@@ -161,7 +161,7 @@ const Foam::entry* Foam::dictionary::lookupScopedSubEntryPtr
 bool Foam::dictionary::findInPatterns
 (
     const bool patternMatch,
-    const word& Keyword,
+    const word& keyword,
     DLList<entry*>::const_iterator& wcLink,
     DLList<autoPtr<regExp>>::const_iterator& reLink
 ) const
@@ -173,8 +173,8 @@ bool Foam::dictionary::findInPatterns
             if
             (
                 patternMatch
-              ? reLink()->match(Keyword)
-              : wcLink()->keyword() == Keyword
+              ? reLink()->match(keyword)
+              : wcLink()->keyword() == keyword
             )
             {
                 return true;
@@ -192,7 +192,7 @@ bool Foam::dictionary::findInPatterns
 bool Foam::dictionary::findInPatterns
 (
     const bool patternMatch,
-    const word& Keyword,
+    const word& keyword,
     DLList<entry*>::iterator& wcLink,
     DLList<autoPtr<regExp>>::iterator& reLink
 )
@@ -204,8 +204,8 @@ bool Foam::dictionary::findInPatterns
             if
             (
                 patternMatch
-              ? reLink()->match(Keyword)
-              : wcLink()->keyword() == Keyword
+              ? reLink()->match(keyword)
+              : wcLink()->keyword() == keyword
             )
             {
                 return true;
@@ -743,6 +743,24 @@ Foam::dictionary Foam::dictionary::subOrEmptyDict
 }
 
 
+const Foam::dictionary& Foam::dictionary::optionalSubDict
+(
+    const word& keyword
+) const
+{
+    const entry* entryPtr = lookupEntryPtr(keyword, false, true);
+
+    if (entryPtr)
+    {
+        return entryPtr->dict();
+    }
+    else
+    {
+        return *this;
+    }
+}
+
+
 Foam::wordList Foam::dictionary::toc() const
 {
     wordList keys(size());
@@ -933,11 +951,11 @@ void Foam::dictionary::set(const keyType& k, const dictionary& d)
 }
 
 
-bool Foam::dictionary::remove(const word& Keyword)
+bool Foam::dictionary::remove(const word& keyword)
 {
-    HashTable<entry*>::iterator iter = hashedEntries_.find(Keyword);
+    HashTable<entry*>::iterator iter = hashedEntries_.find(keyword);
 
-    if (iter != hashedEntries_.end())
+    if (iter.found())
     {
         // Delete from patterns first
         DLList<entry*>::iterator wcLink =
@@ -946,7 +964,7 @@ bool Foam::dictionary::remove(const word& Keyword)
             patternRegexps_.begin();
 
         // Find in pattern using exact match only
-        if (findInPatterns(false, Keyword, wcLink, reLink))
+        if (findInPatterns(false, keyword, wcLink, reLink))
         {
             patternEntries_.remove(wcLink);
             patternRegexps_.remove(reLink);

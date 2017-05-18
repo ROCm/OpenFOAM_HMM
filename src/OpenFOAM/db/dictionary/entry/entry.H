@@ -57,7 +57,7 @@ class dictionary;
 // Forward declaration of friend functions and operators
 
 class entry;
-Ostream& operator<<(Ostream&, const entry&);
+Ostream& operator<<(Ostream& os, const entry& e);
 
 /*---------------------------------------------------------------------------*\
                            Class entry Declaration
@@ -75,11 +75,16 @@ class entry
 
     // Private Member Functions
 
-        //- Get the next valid keyword. Return true if is valid keyType.
-        static bool getKeyword(keyType&, token&, Istream&);
+        //- Get the next valid keyword. Return true if a valid keyType.
+        static bool getKeyword
+        (
+            keyType& keyword,
+            token& keywordToken,
+            Istream& is
+        );
 
         //- Get the next valid keyword otherwise return false
-        static bool getKeyword(keyType&, Istream&);
+        static bool getKeyword(keyType& keyword, Istream& is);
 
 
 public:
@@ -90,10 +95,10 @@ public:
     // Constructors
 
         //- Construct from keyword
-        entry(const keyType&);
+        entry(const keyType& keyword);
 
         //- Construct as copy
-        entry(const entry&);
+        entry(const entry& e);
 
         //- Construct on freestore as copy with reference to the
         //  dictionary the copy belongs to
@@ -107,7 +112,7 @@ public:
         virtual autoPtr<entry> clone() const;
 
         //- Construct from Istream and insert into dictionary
-        static bool New(dictionary& parentDict, Istream&);
+        static bool New(dictionary& parentDict, Istream& is);
 
         //- Construct on freestore from Istream and return
         static autoPtr<entry> New(Istream& is);
@@ -179,7 +184,7 @@ public:
 
     // Ostream operator
 
-        friend Ostream& operator<<(Ostream&, const entry&);
+        friend Ostream& operator<<(Ostream& os, const entry& e);
 };
 
 
