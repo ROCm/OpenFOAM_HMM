@@ -184,7 +184,33 @@ externalWallHeatFluxTemperatureFvPatchScalarField
     qrName_(ptf.qrName_),
     thicknessLayers_(ptf.thicknessLayers_),
     kappaLayers_(ptf.kappaLayers_)
-{}
+{
+    switch (mode_)
+    {
+        case fixedPower:
+        {
+            break;
+        }
+        case fixedHeatFlux:
+        {
+            q_.map(ptf.q_, mapper);
+
+            break;
+        }
+        case fixedHeatTransferCoeff:
+        {
+            h_.map(ptf.h_, mapper);
+            Ta_.map(ptf.Ta_, mapper);
+
+            break;
+        }
+    }
+
+    if (qrName_ != "none")
+    {
+        qrPrevious_.map(ptf.qrPrevious_, mapper);
+    }
+}
 
 
 Foam::externalWallHeatFluxTemperatureFvPatchScalarField::
