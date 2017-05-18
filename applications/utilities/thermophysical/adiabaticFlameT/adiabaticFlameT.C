@@ -55,7 +55,15 @@ typedef species::thermo<janafThermo<perfectGas<specie>>, absoluteEnthalpy>
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Calculates the adiabatic flame temperature for a given fuel\n"
+        "over a range of unburnt temperatures and equivalence ratios."
+    );
+    argList::noParallel();
+    argList::noFunctionObjects();
     argList::validArgs.append("controlFile");
+
     argList args(argc, argv);
 
     const fileName controlFileName = args[1];

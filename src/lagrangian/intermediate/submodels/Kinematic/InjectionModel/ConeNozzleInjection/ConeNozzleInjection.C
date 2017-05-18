@@ -175,7 +175,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
 
     setFlowType();
 
-    cachedRandom& rndGen = this->owner().rndGen();
+    Random& rndGen = this->owner().rndGen();
 
     // Normalise direction vector
     direction_ /= mag(direction_);
@@ -321,7 +321,7 @@ void Foam::ConeNozzleInjection<CloudType>::setPositionAndCell
     label& tetPti
 )
 {
-    cachedRandom& rndGen = this->owner().rndGen();
+    Random& rndGen = this->owner().rndGen();
 
     scalar beta = mathematical::twoPi*rndGen.sample01<scalar>();
     normal_ = tanVec1_*cos(beta) + tanVec2_*sin(beta);
@@ -373,7 +373,7 @@ void Foam::ConeNozzleInjection<CloudType>::setProperties
     typename CloudType::parcelType& parcel
 )
 {
-    cachedRandom& rndGen = this->owner().rndGen();
+    Random& rndGen = this->owner().rndGen();
 
     // Set particle velocity
     const scalar deg2Rad = mathematical::pi/180.0;

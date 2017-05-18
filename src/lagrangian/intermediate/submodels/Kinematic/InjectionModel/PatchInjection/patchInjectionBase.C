@@ -26,7 +26,7 @@ License
 #include "patchInjectionBase.H"
 #include "polyMesh.H"
 #include "SubField.H"
-#include "cachedRandom.H"
+#include "Random.H"
 #include "triPointRef.H"
 #include "volFields.H"
 #include "polyMeshTetDecomposition.H"
@@ -151,7 +151,7 @@ void Foam::patchInjectionBase::updateMesh(const polyMesh& mesh)
 void Foam::patchInjectionBase::setPositionAndCell
 (
     const fvMesh& mesh,
-    cachedRandom& rnd,
+    Random& rnd,
     vector& position,
     label& cellOwner,
     label& tetFacei,

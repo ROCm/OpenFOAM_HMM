@@ -58,14 +58,14 @@ Foam::wordReListMatcher::operator()() const
 
 inline bool Foam::wordReListMatcher::match
 (
-    const string& str,
+    const std::string& text,
     bool literalMatch
 ) const
 {
-    const label nElem = reList_.size();
-    for (label elemI = 0; elemI < nElem; ++elemI)
+    const label n = reList_.size();
+    for (label i = 0; i < n; ++i)
     {
-        if (reList_[elemI].match(str, literalMatch))
+        if (reList_[i].match(text, literalMatch))
         {
             return true;
         }

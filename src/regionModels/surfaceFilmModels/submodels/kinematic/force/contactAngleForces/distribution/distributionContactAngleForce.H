@@ -41,7 +41,7 @@ SourceFiles
 
 #include "contactAngleForce.H"
 #include "distributionModel.H"
-#include "cachedRandom.H"
+#include "Random.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,7 +63,7 @@ class distributionContactAngleForce
     // Private Data
 
         //- Random number generator
-        cachedRandom rndGen_;
+        Random rndGen_;
 
         //- Parcel size PDF model
         const autoPtr<distributionModel> distribution_;

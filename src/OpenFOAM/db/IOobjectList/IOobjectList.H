@@ -77,7 +77,7 @@ public:
         );
 
         //- Construct as copy
-        IOobjectList(const IOobjectList&);
+        IOobjectList(const IOobjectList& iolist);
 
 
     //- Destructor
@@ -87,52 +87,56 @@ public:
     // Member functions
 
         //- Add an IOobject to the list
-        bool add(IOobject&);
+        bool add(IOobject& io);
 
         //- Remove an IOobject from the list
-        bool remove(IOobject&);
+        bool remove(IOobject& io);
 
         //- Lookup a given name and return IOobject ptr if found else nullptr
         IOobject* lookup(const word& name) const;
 
-        //- Return the list for all IOobects whose name matches name
-        IOobjectList lookup(const wordRe& name) const;
+        //- The list of all IOobects with matching names
+        IOobjectList lookup(const wordRe& matcher) const;
 
-        //- Return the list for all IOobects whose name matches name
-        IOobjectList lookup(const wordReList& patterns) const;
+        //- The list of all IOobjects with matching names
+        IOobjectList lookup(const wordReList& matcher) const;
 
-        //- Return the list for all IOobjects of a given class
-        IOobjectList lookupClass(const word& className) const;
+        //- The list of all IOobjects with the given class name
+        IOobjectList lookupClass(const word& clsName) const;
 
 
         //- A list of names of the IOobjects
         wordList names() const;
 
-        //- A list of names of IOobjects of the given class
-        wordList names(const word& className) const;
+        //- The names of IOobjects with the given class name
+        wordList names(const word& clsName) const;
 
-        //- A list of names of IOobjects of the given class,
-        //  and that also satisfy the input matcher
-        wordList names(const word& className, const wordRe&) const;
+        //- The names of IOobjects with the given class name that also
+        //  have a name satisfying the input matcher
+        wordList names(const word& clsName, const wordRe& matcher) const;
 
-        //- A list of names of IOobjects of the given class,
-        //  and that also satisfy the input matchers
-        wordList names(const word& className, const wordReList&) const;
+        //- The names of IOobjects with the given class name that also
+        //  have a name satisfying the input matcher
+        wordList names(const word& clsName, const wordReList& matcher) const;
 
 
         //- A sorted list of names of the IOobjects
         wordList sortedNames() const;
 
-        //- A sorted list of names of IOobjects of given class
-        wordList sortedNames(const word& className) const;
+        //- The sorted names of IOobjects with the given class name
+        wordList sortedNames(const word& clsName) const;
 
-        //- A sorted list of names of IOobjects of the given class,
-        //  and that also satisfy the input matcher
-        wordList sortedNames(const word& className, const wordRe&) const;
+        //- The sorted names of IOobjects with the given class name that also
+        //  have a name satisfying the input matcher
+        wordList sortedNames(const word& clsName, const wordRe& matcher) const;
 
-        //- A sorted list of names of IOobjects of the given class,
-        //  and that also satisfy the input matchers
-        wordList sortedNames(const word& className, const wordReList&) const;
+        //- The sorted names of IOobjects with the given class name that also
+        //  have a name satisfying the input matcher
+        wordList sortedNames
+        (
+            const word& clsName,
+            const wordReList& matcher
+        ) const;
 };
 
 

@@ -64,7 +64,7 @@ then
     echo "Using CGAL ($cgal_version)  ->  $CGAL_ARCH_PATH" 1>&2
 fi
 
-if type _foamAddLib > /dev/null 2>&1    # normal sourcing
+if command -v _foamAddLib > /dev/null 2>&1  # normal sourcing
 then
 
     # If BOOST_ARCH_PATH, CGAL_ARCH_PATH do not end with '-system' or '-none',

@@ -8,7 +8,7 @@ EXE_INC = \
     ${EXE_NDEBUG} \
     ${CGAL_INC} \
     ${c++LESSWARN} \
-    -I$(FOAM_APP)/utilities/mesh/generation/extrude2DMesh/extrude2DMesh/lnInclude \
+    -I$(FOAM_UTILITIES)/mesh/generation/extrude2DMesh/extrude2DMesh/lnInclude \
     -I../conformalVoronoi2DMesh/lnInclude \
     -I../conformalVoronoiMesh/lnInclude \
     -I$(LIB_SRC)/parallel/decompose/decompositionMethods/lnInclude \

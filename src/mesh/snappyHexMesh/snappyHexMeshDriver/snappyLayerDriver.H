@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -158,6 +158,48 @@ private:
                     labelList& patchNLayers,
                     List<extrudeMode>& extrudeStatus
                 );
+
+                //- Truncate index in face
+                static label constrainFp(const label sz, const label fp);
+
+                //- Count common points between face and its neighbours
+                void countCommonPoints
+                (
+                    const indirectPrimitivePatch&,
+                    const label facei,
+                    Map<label>&
+                ) const;
+
+                //- Check if any common points form single string. Return
+                //  false if not.
+                bool checkCommonOrder
+                (
+                    const label nCommon,
+                    const face& curFace,
+                    const face& nbFace
+                ) const;
+
+                //- Check if any common points form single string; unmark
+                //  points on face if not
+                void checkCommonOrder
+                (
+                    const indirectPrimitivePatch& pp,
+                    const label facei,
+                    const Map<label>& nCommonPoints,
+                    pointField& patchDisp,
+                    labelList& patchNLayers,
+                    List<extrudeMode>& extrudeStatus
+                ) const;
+
+                //- Check if any common points form single string; unmark
+                //  points on face if not
+                void handleNonStringConnected
+                (
+                    const indirectPrimitivePatch& pp,
+                    pointField& patchDisp,
+                    labelList& patchNLayers,
+                    List<extrudeMode>& extrudeStatus
+                ) const;
 
                 //- No extrusion at non-manifold points.
                 void handleNonManifolds

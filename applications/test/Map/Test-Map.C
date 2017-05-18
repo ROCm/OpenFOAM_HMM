@@ -22,10 +22,9 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    testMapIterators
+    Test-Map
 
 Description
-    For each time calculate the magnitude of velocity.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,9 +38,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    Map<bool> banana;
-
-    banana.insert(5, true);
+    Map<bool> banana{{5, true}};
 
     // Taking a const iterator from find does not work!
     // Also, fails later on op==
@@ -50,7 +47,7 @@ int main(int argc, char *argv[])
     // This works but now I can change the value.
     //Map<bool>::iterator bananaIter = banana.find(5);
 
-    if (bananaIter == banana.end())
+    if (!bananaIter.found()) // same as  (bananaIter == banana.end())
     {
         Info<< "not found" << endl;
     }
@@ -62,8 +59,7 @@ int main(int argc, char *argv[])
     // Same with STL
     Info<< "Same with STL" << endl;
 
-    std::map<label, bool> STLbanana;
-    STLbanana[5] = true;
+    std::map<label, bool> STLbanana{{5, true}};
     std::map<label, bool>::const_iterator STLbananaIter = STLbanana.find(5);
 
     if (STLbananaIter == STLbanana.end())

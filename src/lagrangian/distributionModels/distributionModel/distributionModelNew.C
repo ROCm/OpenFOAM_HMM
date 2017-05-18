@@ -30,7 +30,7 @@ License
 Foam::autoPtr<Foam::distributionModel> Foam::distributionModel::New
 (
     const dictionary& dict,
-    cachedRandom& rndGen
+    Random& rndGen
 )
 {
     const word modelType(dict.lookup("type"));

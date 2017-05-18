@@ -172,14 +172,12 @@ fvControls="system"
 
 if [ -n "$regionName" ]
 then
-    if [ ! -d constant/$regionName ]
-    then
+    [ -d constant/$regionName ] || {
         echo "FATAL ERROR: Region $regionName does not exist" 1>&2
         exit 1
-    else
-        caseFile="$caseName{$regionName}.$extension"
-        fvControls="$fvControls/$regionName"
-    fi
+    }
+    caseFile="$caseName{$regionName}.$extension"
+    fvControls="$fvControls/$regionName"
 fi
 
 case "${optTouch:-false}" in
@@ -212,11 +210,42 @@ true)
 esac
 
 
-# Parent directory for normal or parallel results
-case "$caseName" in
-    processor*) parentDir=".." ;;
-    *)          parentDir="."  ;;
-esac
+# Check existence of some essential OpenFOAM files.
+# If caseName appears to be a processor directory, check parent as fallback
+hasFiles() {
+    local warn="Cannot locate OpenFOAM-format case files:"
+    local parent
+    case "$caseName" in (processor*) parent="../" ;; esac
+
+    for file
+    do
+        if [ -s "$file" ]
+        then
+            continue
+        elif [ -n "$parent" -a -s "$parent$file" ]
+        then
+            continue
+        else
+            # Not found
+            [ -n "$warn" ] && echo "$warn" 1>&2
+            unset warn
+            if [ -n "$parent" ]
+            then
+                echo "    $file, or $parent$file" 1>&2
+            else
+                echo "    $file" 1>&2
+            fi
+        fi
+    done
+
+    if [ -n "$warn" ]
+    then
+        return 0        # No warnings were triggered
+    else
+        echo 1>&2       # Emit an additional separator line
+        return 1
+    fi
+}
 
 
 if [ "${hasData:-false}" = true ]
@@ -228,7 +257,7 @@ then
 else
 
     # Check existence of essential files
-    warn="WARN file does not exist:"
+    warn=false
     case $extension in
         blockMesh)
             blockMeshDict=system/blockMeshDict
@@ -236,40 +265,22 @@ else
             then
                 blockMeshDict=constant/polyMesh/blockMeshDict
             fi
-            for check in \
-                system/controlDict \
-                    $blockMeshDict \
-                ;
-            do
-                [ -s "$parentDir/$check" ] || {
-                    [ -n "$warn" ] && echo "$warn" 1>&2
-                    echo "    $parentDir/$check" 1>&2
-                    unset warn
-                }
-            done
+
+            hasFiles system/controlDict $blockMeshDict || warn=true
             ;;
 
         OpenFOAM)
-            for check in \
+            hasFiles \
                 system/controlDict \
-                    $fvControls/fvSchemes \
-                    $fvControls/fvSolution \
-                ;
-            do
-                [ -s "$parentDir/$check" ] || {
-                    [ -n "$warn" ] && echo "$warn" 1>&2
-                    echo "    $parentDir/$check" 1>&2
-                    unset warn
-                }
-            done
+                $fvControls/fvSchemes \
+                $fvControls/fvSolution || warn=true
             ;;
     esac
 
-    [ -n "$warn" ] || {
-        echo "Cannot locate OpenFOAM-format case files"
-        echo -n "Would you like to open ParaView anyway <Y|n>:"
+    [ "${warn:-false}" = false ] || {
+        echo -n "Would you like to open paraview anyway <Y|n>: "
         read open
-        [ "$open" = "" ] || echo $open | grep -iqE "^y" && paraview
+        case "${open:-y}" in ([Yy]*) paraview ;; esac
         exit
     }
 

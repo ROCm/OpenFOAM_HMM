@@ -173,7 +173,7 @@ unset -f _foamParaviewEval
 unset cleaned cmake cmake_version pvName pvMajor pvLibDir pvPython
 unset ParaView_MAJOR
 
-if type _foamAddLib > /dev/null 2>&1    # normal sourcing
+if command -v _foamAddLib > /dev/null 2>&1  # normal sourcing
 then
     unset ParaView_VERSION
 fi

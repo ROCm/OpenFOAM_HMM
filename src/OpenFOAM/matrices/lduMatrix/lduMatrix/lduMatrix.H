@@ -59,7 +59,7 @@ SourceFiles
 #include "runTimeSelectionTables.H"
 #include "solverPerformance.H"
 #include "InfoProxy.H"
-#include "profiling.H"
+#include "profilingTrigger.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -122,7 +122,7 @@ public:
             //- Convergence tolerance relative to the initial
             scalar relTol_;
 
-            profiling::Trigger profiling_;
+            profilingTrigger profiling_;
 
         // Protected Member Functions
 

@@ -60,7 +60,12 @@ Foam::fvMatrix<Foam::scalar>::solver
     const dictionary& solverControls
 )
 {
-    addProfiling(solve, "fvMatrix::solve." + psi_.name());
+    word regionName;
+    if (psi_.mesh().name() != polyMesh::defaultRegion)
+    {
+        regionName = psi_.mesh().name() + "::";
+    }
+    addProfiling(solve, "fvMatrix::solve." + regionName + psi_.name());
 
     if (debug)
     {

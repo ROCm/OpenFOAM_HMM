@@ -81,7 +81,7 @@ SourceFiles
 #define turbulentDFSEMInletFvPatchVectorField_H
 
 #include "fixedValueFvPatchFields.H"
-#include "cachedRandom.H"
+#include "Random.H"
 #include "eddy.H"
 #include "pointIndexHit.H"
 #include "instantList.H"
@@ -184,7 +184,7 @@ class turbulentDFSEMInletFvPatchVectorField
         scalar v0_;
 
         //- Random number generator
-        cachedRandom rndGen_;
+        Random rndGen_;
 
         //- Length scale per patch face
         scalarField sigmax_;

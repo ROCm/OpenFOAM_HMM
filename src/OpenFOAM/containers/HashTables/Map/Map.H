@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,50 +51,54 @@ class Map
 :
     public HashTable<T, label, Hash<label>>
 {
-
 public:
 
-    typedef typename HashTable<T, label, Hash<label>>::iterator iterator;
+    //- The template instance used for this Map
+    typedef Map<T> this_type;
 
-    typedef typename HashTable<T, label, Hash<label>>::const_iterator
-        const_iterator;
+    //- The template instance used for the parent HashTable
+    typedef HashTable<T, label, Hash<label>> parent_type;
+
+    using iterator = typename parent_type::iterator;
+    using const_iterator = typename parent_type::const_iterator;
+
 
     // Constructors
 
         //- Construct given initial size
         Map(const label size = 128)
         :
-            HashTable<T, label, Hash<label>>(size)
+            parent_type(size)
         {}
 
         //- Construct from Istream
         Map(Istream& is)
         :
-            HashTable<T, label, Hash<label>>(is)
+            parent_type(is)
         {}
 
         //- Construct as copy
         Map(const Map<T>& map)
         :
-            HashTable<T, label, Hash<label>>(map)
+            parent_type(map)
         {}
 
         //- Construct by transferring the parameter contents
         Map(const Xfer<Map<T>>& map)
         :
-            HashTable<T, label, Hash<label>>(map)
+            parent_type(map)
         {}
 
         //- Construct by transferring the parameter contents
         Map(const Xfer<HashTable<T, label, Hash<label>>>& map)
         :
-            HashTable<T, label, Hash<label>>(map)
+            parent_type(map)
         {}
 
         //- Construct from an initializer list
         Map(std::initializer_list<Tuple2<label, T>> map)
         :
-            HashTable<T, label, Hash<label>>(map)
+            parent_type(map)
         {}
 };
 

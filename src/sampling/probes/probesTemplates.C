@@ -141,7 +141,7 @@ void Foam::probes::sampleAndWrite(const fieldGroup<Type>& fields)
 
             if
             (
-                iter != objectRegistry::end()
+                iter.found()
              && iter()->type()
              == GeometricField<Type, fvPatchField, volMesh>::typeName
             )
@@ -190,7 +190,7 @@ void Foam::probes::sampleAndWriteSurfaceFields(const fieldGroup<Type>& fields)
 
             if
             (
-                iter != objectRegistry::end()
+                iter.found()
              && iter()->type()
              == GeometricField<Type, fvsPatchField, surfaceMesh>::typeName
             )

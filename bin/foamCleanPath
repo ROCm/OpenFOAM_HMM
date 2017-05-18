@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -29,128 +29,134 @@
 #     Usage: foamCleanPath [-strip] path [wildcard] .. [wildcard]
 #
 #     Prints its argument (which should be a ':' separated path)
-#     without all
+#     without the following:
 #         - duplicate elements
 #         - elements whose start matches a wildcard
-#         - inaccessible directories (with the -strip (at your option)
+#         - inaccessible directories (with the -strip option)
 #
 # Note
 #     - this routine will fail when directories have embedded spaces
 #     - false matches possible if a wildcard contains '.' (sed regex)
-#     - the wildcards can themselves can be written together and separated
+#     - the wildcards themselves can be written together and separated
 #       by colons or whitespace
 #------------------------------------------------------------------------------
 usage() {
     cat <<USAGE 1>&2
 Usage: ${0##*/} [OPTION] path [wildcard1] .. [wildcardN]
 options:
+  -debug            print debug information to stderr
   -strip            remove inaccessible directories
   -help             print the usage
 
-  Prints its argument (which should be a ':' separated list) cleansed from
-    - duplicate elements
-    - elements whose start matches one of the wildcard(s)
-    - inaccessible directories (with the -strip option)
+Prints its argument (which should be a ':' separated list) cleansed from
+  - duplicate elements
+  - elements whose start matches one of the wildcard(s)
+  - inaccessible directories (with the -strip option)
 
-  Exit status
-      0  on success
-      1  for miscellaneous errors.
-      2  initial value of 'path' is empty
+Exit status
+    0  on success
+    1  for miscellaneous errors.
+    2  initial value of 'path' is empty
 
 USAGE
     exit 1
 }
 
 
-unset strip
-# parse options
+# Parse options
+unset optDebug optStrip
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h | -help)
         usage
         ;;
+    -debug)
+        optDebug=true
+        ;;
     -strip)
-        strip=true
-        shift
+        optStrip=true
         ;;
     *)
         break
         ;;
     esac
+    shift
 done
 
-
+# Basic checks, setup
 [ "$#" -ge 1 ] || usage
 
 dirList="$1"
 shift
 
-[ -n "$dirList" ] || exit 2    # quick exit on empty 'dirList'
+[ -n "$dirList" ] || exit 2     # Quick exit on empty 'dirList'
 
+#-------------------------------------------------------------------------------
 
-##DEBUG echo "input>$dirList<" 1>&2
+# Debugging (optional)
+if [ -n "$optDebug" ]
+then
+    printDebug() { while [ "$#" -ge 1 ]; do echo "$1" 1>&2; shift; done; }
+else
+    printDebug() { true; }      # No-op
+fi
 
-# preserve current IFS and split on colon or whitespace
-oldIFS="$IFS"
-IFS=': '
+# Check directory existence (optional)
+if [ -n "$optStrip" ]
+then
+    isDir() { test -d "$1"; }   # Check for directory
+else
+    isDir() { true; }           # No check (always true)
+fi
 
-# "wildcard1 ... wildcardN" may have been passed as a single parameter
+# The "wildcard1 ... wildcardN" may have been passed as a single parameter
 # or may contain ':' separators
+
+oldIFS="$IFS"   # Preserve initial IFS
+IFS=': '        # Split on colon, whitespace
 set -- $*
+
+printDebug "input>$dirList<"
 
 # Strip out wildcards via sed. Path and wildcard cannot contain '?'.
 while [ "$#" -ge 1 ]
 do
-    wildcard=$1
+    wildcard="$1"
     shift
-    ##DEBUG echo "remove>$wildcard<" 1>&2
     if [ -n "$wildcard" ]
     then
+        printDebug "remove>$wildcard<"
         dirList=$(echo "$dirList:" | sed -e "s?${wildcard}[^:]*:??g")
     fi
 done
+printDebug "intermediate>$dirList<"
 
-# split on ':' (and on space as well to avoid any surprises)
-IFS=': '
+IFS=': '        # Split on colon, whitespace (to avoid surprises)
 set -- $dirList
 
-##DEBUG echo "intermediate>$dirList<" 1>&2
+IFS="$oldIFS"   # Restore initial IFS
 
-# rebuild the list from scratch
+# Rebuild the list
 unset dirList
 for dir
 do
-    ##DEBUG echo "check>$dir<" 1>&2
-    #- dirs must exist
-    if [ -e "$dir" ]
+    printDebug "check>$dir< in $dirList"
+    if isDir "$dir"
     then
-        #- no duplicate dirs
-        duplicate=$(echo " $dirList " | sed -ne "s: $dir :DUP:p")
+        # Detect duplicates (ie, dir already in the list)
+        duplicate=$(echo ":$dirList:" | sed -ne '\?:'"$dir"':?p')
 
-        if [ ! "$duplicate" ]
+        if [ -n "$duplicate" ]
         then
-            dirList="$dirList $dir"
+            printDebug "duplicate>$dir<"
+        else
+            dirList="${dirList}${dirList:+:}$dir"
         fi
-    elif [ "$strip" != true ]
-    then
-        # Print non-existing directories if not in 'strip' mode.
-        dirList="$dirList $dir"
     fi
 done
 
-# split on whitespace
-IFS=' '
-set -- $dirList
-
-# rejoin on ':'
-IFS=':'
-dirList="$*"
-
-# restore IFS
-IFS="$oldIFS"
-
-##DEBUG echo "output>$dirList<" 1>&2
+printDebug "output>$dirList<"
 echo "$dirList"
 
 #------------------------------------------------------------------------------

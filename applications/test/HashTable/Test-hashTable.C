@@ -24,6 +24,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "HashTable.H"
+#include "List.H"
+#include "SortableList.H"
+#include "DynamicList.H"
+#include "FlatOutput.H"
 #include "IOstreams.H"
 #include "IStringStream.H"
 #include "OStringStream.H"
@@ -62,7 +66,7 @@ int main()
     Info<< "\ntable1 sortedToc: " << table1.sortedToc() << endl;
     table1.printInfo(Info)
         << "table1 [" << table1.size() << "] " << endl;
-    forAllConstIter(HashTable<scalar>, table1, iter)
+    forAllConstIters(table1, iter)
     {
         Info<< iter.key() << " => " << iter() << nl;
     }
@@ -106,7 +110,7 @@ int main()
         << "\ntable3" << table3 << nl;
 
     Info<< "\nerase table2 by iterator" << nl;
-    forAllIter(HashTable<scalar>, table2, iter)
+    forAllIters(table2, iter)
     {
         Info<< "erasing " << iter.key() << " => " << iter.object() << " ... ";
         table2.erase(iter);
@@ -162,20 +166,73 @@ int main()
         << "\ntable2" << table2 << nl;
 
 
-    Info<< "\ntable3" << table3
-        << "\nclearStorage table3 ... ";
-    table3.clearStorage();
-    Info<< table3 << nl;
+    Info<< "\ntable3" << table2
+        << "\nclearStorage table2 ... ";
+    table2.clearStorage();
+    Info<< table2 << nl;
 
     table1 =
     {
-        {"aca", 3.0},
-        {"aaw", 6.0},
+        {"abc", 3.0},
+        {"def", 6.0},
         {"acr", 8.0},
         {"aec", 10.0}
     };
 
     Info<< "\ntable1" << table1 << nl;
+
+    Info<< "\nrange-for(table1) - returns values" << nl;
+    for (const auto& it : table1)
+    {
+        Info<< "val:" << it << nl;
+    }
+
+    Info<< "\nrange-for(table1.keys()) - returns keys" << nl;
+    for (const auto& k : table1.keys())
+    {
+        Info<< "key:" << k << nl;
+    }
+
+    // These do not yet work. Issues resolving the distance.
+    //
+    //  List<scalar> table1vals(table1.begin(), table1.end());
+
+    {
+        Info<<"distance/size: "
+            << std::distance(table1.begin(), table1.end())
+            << "/" << table1.size()
+            << " and "
+            << std::distance(table1.keys().begin(), table1.keys().end())
+            << "/" << table1.keys().size()
+            << nl;
+
+        SortableList<word> sortKeys
+        // DynamicList<word> sortKeys
+        (
+            table1.keys().begin(),
+            table1.keys().end()
+        );
+        Info<<"sortKeys: " << flatOutput(sortKeys) << nl;
+    }
+
+    Info<< "\nFrom table1: " << flatOutput(table1.sortedToc()) << nl
+        << "retain keys: " << flatOutput(table3.sortedToc()) << nl;
+
+    table1.retain(table3);
+    Info<< "-> " << flatOutput(table1.sortedToc()) << nl;
+
+    Info<< "Lookup non-existent" << nl;
+
+    Info<< table1.lookup("missing-const", 1.2345e+6)
+        << "  // const-access" << nl;
+
+    Info<< table1("missing-inadvertent", 3.14159)
+        << "  // (inadvertent?) non-const access"  << nl;
+
+    Info<< table1("missing-autovivify")
+        << "  // Known auto-vivification (non-const access)" << nl;
+
+    Info<<"\ntable1: " << table1 << endl;
 
     Info<< "\nDone\n";
 

@@ -162,8 +162,7 @@ inline Foam::Ostream& Foam::operator<<(Ostream& os, const labelledTri& t)
     }
 
     // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const labelledTri&)");
-
+    os.check(FUNCTION_NAME);
 
     return os;
 }

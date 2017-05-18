@@ -91,9 +91,9 @@ Foam::IOobjectList::IOobjectList
 }
 
 
-Foam::IOobjectList::IOobjectList(const IOobjectList& ioOL)
+Foam::IOobjectList::IOobjectList(const IOobjectList& iolist)
 :
-    HashPtrTable<IOobject>(ioOL)
+    HashPtrTable<IOobject>(iolist)
 {}
 
 
@@ -113,17 +113,7 @@ bool Foam::IOobjectList::add(IOobject& io)
 
 bool Foam::IOobjectList::remove(IOobject& io)
 {
-    HashPtrTable<IOobject>::iterator iter =
-        HashPtrTable<IOobject>::find(io.name());
-
-    if (iter != end())
-    {
-        return erase(iter);
-    }
-    else
-    {
-        return false;
-    }
+    return erase(io.name());
 }
 
 
@@ -131,7 +121,7 @@ Foam::IOobject* Foam::IOobjectList::lookup(const word& name) const
 {
     HashPtrTable<IOobject>::const_iterator iter = find(name);
 
-    if (iter != end())
+    if (iter.found())
     {
         if (IOobject::debug)
         {
@@ -152,68 +142,80 @@ Foam::IOobject* Foam::IOobjectList::lookup(const word& name) const
 }
 
 
-Foam::IOobjectList Foam::IOobjectList::lookup(const wordRe& name) const
+Foam::IOobjectList Foam::IOobjectList::lookup(const wordRe& matcher) const
 {
-    IOobjectList objectsOfName(size());
+    IOobjectList results(size());
 
-    forAllConstIter(HashPtrTable<IOobject>, *this, iter)
+    forAllConstIters(*this, iter)
     {
-        if (name.match(iter()->name()))
+        if (matcher.match(iter.key()))
         {
             if (IOobject::debug)
             {
                 InfoInFunction << "Found " << iter.key() << endl;
             }
 
-            objectsOfName.insert(iter.key(), new IOobject(*iter()));
+            results.insert
+            (
+                iter.key(),
+                new IOobject(*(iter.object()))
+            );
         }
     }
 
-    return objectsOfName;
+    return results;
 }
 
 
-Foam::IOobjectList Foam::IOobjectList::lookup(const wordReList& patterns) const
+Foam::IOobjectList Foam::IOobjectList::lookup(const wordReList& matcher) const
 {
-    wordReListMatcher names(patterns);
+    wordReListMatcher mat(matcher);
 
-    IOobjectList objectsOfName(size());
+    IOobjectList results(size());
 
-    forAllConstIter(HashPtrTable<IOobject>, *this, iter)
+    forAllConstIters(*this, iter)
     {
-        if (names.match(iter()->name()))
+        if (mat.match(iter.key()))
         {
             if (IOobject::debug)
             {
                 InfoInFunction << "Found " << iter.key() << endl;
             }
 
-            objectsOfName.insert(iter.key(), new IOobject(*iter()));
+            results.insert
+            (
+                iter.key(),
+                new IOobject(*(iter.object()))
+            );
         }
     }
 
-    return objectsOfName;
+    return results;
 }
 
 
-Foam::IOobjectList Foam::IOobjectList::lookupClass(const word& ClassName) const
+Foam::IOobjectList Foam::IOobjectList::lookupClass(const word& clsName) const
 {
-    IOobjectList objectsOfClass(size());
+    IOobjectList results(size());
 
-    forAllConstIter(HashPtrTable<IOobject>, *this, iter)
+    forAllConstIters(*this, iter)
     {
-        if (iter()->headerClassName() == ClassName)
+        if (iter()->headerClassName() == clsName)
         {
             if (IOobject::debug)
             {
                 InfoInFunction << "Found " << iter.key() << endl;
             }
 
-            objectsOfClass.insert(iter.key(), new IOobject(*iter()));
+            results.insert
+            (
+                iter.key(),
+                new IOobject(*(iter.object()))
+            );
         }
     }
 
-    return objectsOfClass;
+    return results;
 }
 
 
@@ -231,33 +233,33 @@ Foam::wordList Foam::IOobjectList::sortedNames() const
 
 Foam::wordList Foam::IOobjectList::names
 (
-    const word& ClassName
+    const word& clsName
 ) const
 {
-    wordList objectNames(size());
+    wordList objNames(size());
 
     label count = 0;
-    forAllConstIter(HashPtrTable<IOobject>, *this, iter)
+    forAllConstIters(*this, iter)
     {
-        if (iter()->headerClassName() == ClassName)
+        if (iter()->headerClassName() == clsName)
         {
-            objectNames[count++] = iter.key();
+            objNames[count++] = iter.key();
         }
     }
 
-    objectNames.setSize(count);
+    objNames.setSize(count);
 
-    return objectNames;
+    return objNames;
 }
 
 
 Foam::wordList Foam::IOobjectList::names
 (
-    const word& ClassName,
+    const word& clsName,
     const wordRe& matcher
 ) const
 {
-    wordList objNames = names(ClassName);
+    wordList objNames = names(clsName);
 
     return wordList(objNames, findStrings(matcher, objNames));
 }
@@ -265,11 +267,11 @@ Foam::wordList Foam::IOobjectList::names
 
 Foam::wordList Foam::IOobjectList::names
 (
-    const word& ClassName,
+    const word& clsName,
     const wordReList& matcher
 ) const
 {
-    wordList objNames = names(ClassName);
+    wordList objNames = names(clsName);
 
     return wordList(objNames, findStrings(matcher, objNames));
 }
@@ -277,10 +279,10 @@ Foam::wordList Foam::IOobjectList::names
 
 Foam::wordList Foam::IOobjectList::sortedNames
 (
-    const word& ClassName
+    const word& clsName
 ) const
 {
-    wordList sortedLst = names(ClassName);
+    wordList sortedLst = names(clsName);
     sort(sortedLst);
 
     return sortedLst;
@@ -289,11 +291,11 @@ Foam::wordList Foam::IOobjectList::sortedNames
 
 Foam::wordList Foam::IOobjectList::sortedNames
 (
-    const word& ClassName,
+    const word& clsName,
     const wordRe& matcher
 ) const
 {
-    wordList sortedLst = names(ClassName, matcher);
+    wordList sortedLst = names(clsName, matcher);
     sort(sortedLst);
 
     return sortedLst;
@@ -302,11 +304,11 @@ Foam::wordList Foam::IOobjectList::sortedNames
 
 Foam::wordList Foam::IOobjectList::sortedNames
 (
-    const word& ClassName,
+    const word& clsName,
     const wordReList& matcher
 ) const
 {
-    wordList sortedLst = names(ClassName, matcher);
+    wordList sortedLst = names(clsName, matcher);
     sort(sortedLst);
 
     return sortedLst;

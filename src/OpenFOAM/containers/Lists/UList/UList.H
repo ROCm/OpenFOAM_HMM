@@ -47,13 +47,16 @@ SourceFiles
 #include "uLabel.H"
 #include "nullObject.H"
 #include "zero.H"
+#include "stdFoam.H"
+#include <initializer_list>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of friend classes
+// Forward declarations
+class labelRange;
 template<class T> class List;
 template<class T> class SubList;
 
@@ -100,6 +103,16 @@ protected:
         //- Write the UList with its compound type
         void writeEntry(Ostream& os) const;
 
+        //- Return a validated (start,size) subset range, which means that it
+        //  always addresses a valid section of the list.
+        labelRange validateRange(const labelRange& range) const;
+
+        //- Return a validated (start,size) subset range, which means that it
+        //  always addresses a valid section of the list.
+        labelRange validateRange
+        (
+            std::initializer_list<label> start_size_pair
+        ) const;
 
 public:
 
@@ -238,6 +251,29 @@ public:
         //  an out-of-range element returns false without any ill-effects
         inline const T& operator[](const label i) const;
 
+        //- Return (start,size) subset from UList with non-const access.
+        //  The range is subsetted with the list size itself to ensure that the
+        //  result always addresses a valid section of the list.
+        UList<T> operator[](const labelRange& range);
+
+        //- Return (start,size) subset from UList with const access.
+        //  The range is subsetted with the list size itself to ensure that the
+        //  result always addresses a valid section of the list.
+        const UList<T> operator[](const labelRange& range) const;
+
+        //- Return (start,size) subset from UList with non-const access.
+        //  The range is subsetted with the list size itself to ensure that the
+        //  result always addresses a valid section of the list.
+        UList<T> operator[](std::initializer_list<label> start_size_range);
+
+        //- Return (start,size) subset from UList with const access.
+        //  The range is subsetted with the list size itself to ensure that the
+        //  result always addresses a valid section of the list.
+        const UList<T> operator[]
+        (
+            std::initializer_list<label> start_size_range
+        ) const;
+
         //- Allow cast to a const List<T>&
         inline operator const Foam::List<T>&() const;
 
@@ -253,12 +289,10 @@ public:
         //- Type of values the UList contains
         typedef T value_type;
 
-        //- Type that can be used for storing into
-        //  UList::value_type objects
+        //- The type used for storing into value_type objects
         typedef T& reference;
 
-        //- Type that can be used for storing into
-        //  constant UList::value_type objects
+        //- The type used for reading from constant value_type objects.
         typedef const T& const_reference;
 
         //- The type that can represent the difference between any two
@@ -426,69 +460,6 @@ inline void reverse(UList<T>& ul);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "UListI.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//- Loop across all elements in \a list
-// \par Usage
-// \code
-// forAll(anyList, i)
-// {
-//      statements;
-// }
-// \endcode
-// \sa forAllReverse
-#define forAll(list, i) \
-    for (Foam::label i=0; i<(list).size(); ++i)
-
-//- Reverse loop across all elements in \a list
-//  \par Usage
-//  \code
-//  forAllReverse(anyList, i)
-//  {
-//       statements;
-//  }
-//  \endcode
-//  \sa forAll
-#define forAllReverse(list, i) \
-    for (Foam::label i=(list).size()-1; i>=0; --i)
-
-//- Iterate across all elements in the \a container object of type
-//  \a Container.
-//  \par Usage
-//  \code
-//  forAll(ContainerType, container, iter)
-//  {
-//      statements;
-//  }
-//  \endcode
-//  \sa forAllConstIter
-#define forAllIter(Container,container,iter)                                   \
-    for                                                                        \
-    (                                                                          \
-        Container::iterator iter = (container).begin();                        \
-        iter != (container).end();                                             \
-        ++iter                                                                 \
-    )
-
-//- Iterate across all elements in the \a container object of type
-//  \a Container with const access.
-//  \par Usage
-//  \code
-//  forAllConstIter(ContainerType, container, iter)
-//  {
-//      statements;
-//  }
-//  \endcode
-//  \sa forAllIter
-#define forAllConstIter(Container,container,iter)                              \
-    for                                                                        \
-    (                                                                          \
-        Container::const_iterator iter = (container).cbegin();                 \
-        iter != (container).cend();                                            \
-        ++iter                                                                 \
-    )
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -102,9 +102,9 @@ inline Foam::triFace::triFace(Istream& is)
 
 inline Foam::label Foam::triFace::collapse()
 {
-    // we cannot resize a FixedList, so mark duplicates with '-1'
+    // Cannot resize FixedList, so mark duplicates with '-1'
     // (the lower vertex is retained)
-    // catch any '-1' (eg, if called twice)
+    // catch any '-1' (eg, if called multiple times)
 
     label n = 3;
     if (operator[](0) == operator[](1) || operator[](1) == -1)
@@ -133,7 +133,7 @@ inline void Foam::triFace::flip()
 }
 
 
-inline Foam::pointField Foam::triFace::points(const pointField& points) const
+inline Foam::pointField Foam::triFace::points(const UList<point>& points) const
 {
     pointField p(3);
 
@@ -157,7 +157,7 @@ inline Foam::face Foam::triFace::triFaceFace() const
 }
 
 
-inline Foam::triPointRef Foam::triFace::tri(const pointField& points) const
+inline Foam::triPointRef Foam::triFace::tri(const UList<point>& points) const
 {
     return triPointRef
     (
@@ -168,7 +168,7 @@ inline Foam::triPointRef Foam::triFace::tri(const pointField& points) const
 }
 
 
-inline Foam::point Foam::triFace::centre(const pointField& points) const
+inline Foam::point Foam::triFace::centre(const UList<point>& points) const
 {
     return (1.0/3.0)*
     (
@@ -179,14 +179,14 @@ inline Foam::point Foam::triFace::centre(const pointField& points) const
 }
 
 
-inline Foam::scalar Foam::triFace::mag(const pointField& points) const
+inline Foam::scalar Foam::triFace::mag(const UList<point>& points) const
 {
     return ::Foam::mag(normal(points));
 }
 
 
 // could also delegate to triPointRef(...).normal()
-inline Foam::vector Foam::triFace::normal(const pointField& points) const
+inline Foam::vector Foam::triFace::normal(const UList<point>& points) const
 {
     return 0.5*
     (
@@ -209,10 +209,25 @@ inline Foam::triFace Foam::triFace::reverseFace() const
 }
 
 
+inline bool Foam::triFace::found(const label globalIndex) const
+{
+    return which(globalIndex) != -1;
+}
+
+
+inline Foam::label Foam::triFace::which(const label globalIndex) const
+{
+    if (operator[](0) == globalIndex) return 0;
+    if (operator[](1) == globalIndex) return 1;
+    if (operator[](2) == globalIndex) return 2;
+    return -1;
+}
+
+
 inline Foam::scalar Foam::triFace::sweptVol
 (
-    const pointField& opts,
-    const pointField& npts
+    const UList<point>& opts,
+    const UList<point>& npts
 ) const
 {
     return (1.0/6.0)*
@@ -244,7 +259,7 @@ inline Foam::scalar Foam::triFace::sweptVol
 
 Foam::tensor Foam::triFace::inertia
 (
-    const pointField& points,
+    const UList<point>& points,
     const point& refPt,
     scalar density
 ) const
@@ -258,7 +273,7 @@ inline Foam::pointHit Foam::triFace::ray
 (
     const point& p,
     const vector& q,
-    const pointField& points,
+    const UList<point>& points,
     const intersection::algorithm alg,
     const intersection::direction dir
 ) const
@@ -272,7 +287,7 @@ inline Foam::pointHit Foam::triFace::intersection
 (
     const point& p,
     const vector& q,
-    const pointField& points,
+    const UList<point>& points,
     const intersection::algorithm alg,
     const scalar tol
 ) const
@@ -286,7 +301,7 @@ inline Foam::pointHit Foam::triFace::intersection
     const point& p,
     const vector& q,
     const point& ctr,
-    const pointField& points,
+    const UList<point>& points,
     const intersection::algorithm alg,
     const scalar tol
 ) const
@@ -298,7 +313,7 @@ inline Foam::pointHit Foam::triFace::intersection
 inline Foam::pointHit Foam::triFace::nearestPoint
 (
     const point& p,
-    const pointField& points
+    const UList<point>& points
 ) const
 {
     return this->tri(points).nearestPoint(p);
@@ -308,7 +323,7 @@ inline Foam::pointHit Foam::triFace::nearestPoint
 inline Foam::pointHit Foam::triFace::nearestPointClassify
 (
     const point& p,
-    const pointField& points,
+    const UList<point>& points,
     label& nearType,
     label& nearLabel
 ) const
@@ -377,7 +392,7 @@ inline int Foam::triFace::edgeDirection(const edge& e) const
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 inline bool Foam::operator==(const triFace& a, const triFace& b)
 {

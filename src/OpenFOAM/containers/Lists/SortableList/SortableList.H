@@ -65,27 +65,32 @@ public:
     // Constructors
 
         //- Null constructor, sort later (eg, after assignment or transfer)
-        SortableList();
+        inline SortableList();
 
         //- Construct from UList, sorting immediately
-        explicit SortableList(const UList<T>&);
+        explicit SortableList(const UList<T>& values);
 
         //- Construct from transferred List, sorting immediately
-        explicit SortableList(const Xfer<List<T>>&);
+        explicit SortableList(const Xfer<List<T>>& values);
 
         //- Construct given size. Sort later on
         //  The indices remain empty until the list is sorted
-        explicit SortableList(const label size);
+        explicit inline SortableList(const label size);
 
         //- Construct given size and initial value. Sort later on
         //  The indices remain empty until the list is sorted
-        SortableList(const label size, const T&);
+        inline SortableList(const label size, const T& val);
+
+        //- Construct given begin/end iterators.
+        //  Uses std::distance to determine the size.
+        template<class InputIterator>
+        inline SortableList(InputIterator begIter, InputIterator endIter);
 
         //- Construct as copy
-        SortableList(const SortableList<T>&);
+        inline SortableList(const SortableList<T>& lst);
 
         //- Construct from an initializer list, sorting immediately
-        SortableList(std::initializer_list<T>);
+        SortableList(std::initializer_list<T> values);
 
 
     // Member Functions
@@ -122,16 +127,16 @@ public:
     // Member Operators
 
         //- Assignment of all entries to the given value
-        inline void operator=(const T&);
+        inline void operator=(const T& val);
 
         //- Assignment to UList operator. Takes linear time
-        inline void operator=(const UList<T>&);
+        inline void operator=(const UList<T>& lst);
 
         //- Assignment operator. Takes linear time
-        inline void operator=(const SortableList<T>&);
+        inline void operator=(const SortableList<T>& lst);
 
         //- Assignment to an initializer list
-        void operator=(std::initializer_list<T>);
+        void operator=(std::initializer_list<T> lst);
 };
 
 

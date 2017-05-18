@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2009-2016 Bernhard Gschaider
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,48 +23,79 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "argList.H"
 #include "profiling.H"
+#include "profilingInformation.H"
 #include "profilingSysInfo.H"
 #include "cpuInfo.H"
 #include "memInfo.H"
-#include "OSspecific.H"
-#include "IOstreams.H"
-#include "dictionary.H"
 #include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+int Foam::profiling::allowed
+(
+    Foam::debug::infoSwitch("allowProfiling", 1)
+);
+
 Foam::profiling* Foam::profiling::pool_(0);
 
-Foam::label Foam::profiling::Information::nextId_(0);
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+Foam::profilingInformation* Foam::profiling::find
+(
+    const string& descr,
+    const label parentId
+)
+{
+    StorageContainer::iterator iter = hash_.find(Key(descr, parentId));
+    return (iter.found() ? iter() : 0);
+}
+
+
+Foam::profilingInformation* Foam::profiling::store(profilingInformation *info)
+{
+    // Profile information lookup is qualified by parent id
+    hash_.insert(Key(info->description(), info->parent().id()), info);
+    return info;
+}
+
+
+void Foam::profiling::push(profilingInformation *info, clockTime& timer)
+{
+    stack_.push(info);
+    timers_.set(info->id(), &timer);
+    info->push();                       // mark as on stack
+}
+
+
+Foam::profilingInformation* Foam::profiling::pop()
+{
+    profilingInformation *info = stack_.pop();
+    timers_.erase(info->id());
+    info->pop();                        // mark as off stack
+
+    return info;
+}
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::label Foam::profiling::Information::getNextId()
-{
-    return nextId_++;
-}
-
-
-void Foam::profiling::Information::raiseID(label maxVal)
-{
-    if (nextId_ < maxVal)
-    {
-        nextId_ = maxVal;
-    }
-}
-
-
 bool Foam::profiling::active()
 {
-    return pool_;
+    return allowed && pool_;
+}
+
+
+void Foam::profiling::disable()
+{
+    allowed = 0;
 }
 
 
 bool Foam::profiling::print(Ostream& os)
 {
-    if (pool_)
+    if (active())
     {
         return pool_->writeData(os);
     }
@@ -77,7 +108,7 @@ bool Foam::profiling::print(Ostream& os)
 
 bool Foam::profiling::writeNow()
 {
-    if (pool_)
+    if (active())
     {
         return pool_->write();
     }
@@ -94,21 +125,24 @@ void Foam::profiling::initialize
     const Time& owner
 )
 {
-    if (!pool_)
+    if (allowed && !pool_)
     {
         pool_ = new profiling(ioObj, owner);
 
-        Information *info = pool_->store
+        profilingInformation *info = pool_->store
         (
-            new Information()
+            new profilingInformation()
         );
 
         pool_->push(info, pool_->clockTime_);
-        Info<< "profiling initialized" << nl;
+        if (argList::bannerEnabled())
+        {
+            Info<< "profiling initialized" << nl;
+        }
     }
 
-    // silently ignore multiple initialization
-    // eg, decomposePar use multiple simultaneous Times
+    // silently ignore multiple initializations
+    // eg, decomposePar uses multiple simultaneous Times
 }
 
 
@@ -119,21 +153,24 @@ void Foam::profiling::initialize
     const Time& owner
 )
 {
-    if (!pool_)
+    if (allowed && !pool_)
     {
         pool_ = new profiling(dict, ioObj, owner);
 
-        Information *info = pool_->store
+        profilingInformation *info = pool_->store
         (
-            new Information()
+            new profilingInformation()
         );
 
         pool_->push(info, pool_->clockTime_);
-        Info<< "profiling initialized" << nl;
+        if (argList::bannerEnabled())
+        {
+            Info<< "profiling initialized" << nl;
+        }
     }
 
-    // silently ignore multiple initialization
-    // eg, decomposePar use multiple simultaneous Times
+    // silently ignore multiple initializations
+    // eg, decomposePar uses multiple simultaneous Times
 }
 
 
@@ -147,23 +184,22 @@ void Foam::profiling::stop(const Time& owner)
 }
 
 
-Foam::profiling::Information* Foam::profiling::New
+Foam::profilingInformation* Foam::profiling::New
 (
-    const string& name,
+    const string& descr,
     clockTime& timer
 )
 {
-    Information *info = 0;
+    profilingInformation *info = 0;
 
-    if (pool_)
+    if (active())
     {
-        info = pool_->find(name);
+        profilingInformation *parent = pool_->stack_.top();
+
+        info = pool_->find(descr, parent->id());
         if (!info)
         {
-            info = pool_->store
-            (
-                new Information(pool_->stack_.top(), name)
-            );
+            info = pool_->store(new profilingInformation(descr, parent));
         }
 
         pool_->push(info, timer);
@@ -182,11 +218,11 @@ Foam::profiling::Information* Foam::profiling::New
 }
 
 
-void Foam::profiling::unstack(const Information *info)
+void Foam::profiling::unstack(const profilingInformation *info)
 {
-    if (pool_ && info)
+    if (active() && info)
     {
-        Information *top = pool_->pop();
+        profilingInformation *top = pool_->pop();
 
         if (info->id() != top->id())
         {
@@ -217,7 +253,7 @@ Foam::profiling::profiling
     hash_(),
     stack_(),
     timers_(),
-    sysInfo_(new sysInfo()),
+    sysInfo_(new profilingSysInfo()),
     cpuInfo_(new cpuInfo()),
     memInfo_(new memInfo())
 {}
@@ -239,7 +275,7 @@ Foam::profiling::profiling
     sysInfo_
     (
         dict.lookupOrDefault<Switch>("sysInfo", true)
-      ? new sysInfo() : 0
+      ? new profilingSysInfo() : 0
     ),
     cpuInfo_
     (
@@ -254,50 +290,6 @@ Foam::profiling::profiling
 {}
 
 
-Foam::profiling::Information::Information()
-:
-    id_(getNextId()),
-    description_("application::main"),
-    parent_(this),
-    calls_(0),
-    totalTime_(0),
-    childTime_(0),
-    maxMem_(0),
-    onStack_(false)
-{}
-
-
-Foam::profiling::Information::Information
-(
-    Information *parent,
-    const string& descr
-)
-:
-    id_(getNextId()),
-    description_(descr),
-    parent_(parent),
-    calls_(0),
-    totalTime_(0),
-    childTime_(0),
-    maxMem_(0),
-    onStack_(false)
-{}
-
-
-Foam::profiling::Trigger::Trigger(const char* name)
-:
-    clock_(),
-    ptr_(profiling::New(name, clock_))
-{}
-
-
-Foam::profiling::Trigger::Trigger(const string& name)
-:
-    clock_(),
-    ptr_(profiling::New(name, clock_))
-{}
-
-
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::profiling::~profiling()
@@ -309,18 +301,8 @@ Foam::profiling::~profiling()
     if (pool_ == this)
     {
         pool_ = 0;
-        Information::nextId_ = 0;
+        profilingInformation::nextId_ = 0;
     }
-}
-
-
-Foam::profiling::Information::~Information()
-{}
-
-
-Foam::profiling::Trigger::~Trigger()
-{
-    stop();
 }
 
 
@@ -334,25 +316,6 @@ const Foam::Time& Foam::profiling::owner() const
 Foam::label Foam::profiling::size() const
 {
     return stack_.size();
-}
-
-
-Foam::profiling::Information* Foam::profiling::find(const string& name)
-{
-    StorageContainer::iterator iter = hash_.find(name);
-    return (iter != hash_.end() ? iter() : 0);
-}
-
-
-void Foam::profiling::Information::update(const scalar& elapsed)
-{
-    ++calls_;
-    totalTime_ += elapsed;
-
-    if (id_ != parent().id())
-    {
-        parent().childTime_ += elapsed;
-    }
 }
 
 
@@ -370,7 +333,7 @@ bool Foam::profiling::writeData(Ostream& os) const
         scalar oldElapsed = 0;
         forAllConstIter(StackContainer, stack_, iter)
         {
-            const Information *info = *iter;
+            const profilingInformation *info = *iter;
             scalar elapsed = timers_[info->id()]->elapsedTime();
 
             if (nTrigger++)
@@ -391,7 +354,7 @@ bool Foam::profiling::writeData(Ostream& os) const
 
         forAllConstIter(StorageContainer, hash_, iter)
         {
-            const Information *info = iter();
+            const profilingInformation *info = iter();
 
             if (!info->onStack())
             {
@@ -455,108 +418,6 @@ bool Foam::profiling::writeObject
         ver,
         IOstream::UNCOMPRESSED
     );
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::profiling::Information* Foam::profiling::store(Information *info)
-{
-    hash_.insert(info->description(), info);
-    return info;
-}
-
-
-void Foam::profiling::push(Information *info, clockTime& timer)
-{
-    stack_.push(info);
-    timers_.set(info->id(), &timer);
-    info->push();                       // mark as on stack
-}
-
-
-Foam::profiling::Information* Foam::profiling::pop()
-{
-    Information *info = stack_.pop();
-    timers_.erase(info->id());
-    info->pop();                        // mark as off stack
-
-    return info;
-}
-
-
-bool Foam::profiling::Trigger::running() const
-{
-    return ptr_;
-}
-
-
-void Foam::profiling::Trigger::stop()
-{
-    if (ptr_)
-    {
-        ptr_->update(clock_.elapsedTime());
-        profiling::unstack(ptr_);
-        // pointer is managed by pool storage -> thus no delete here
-    }
-    ptr_ = 0;
-}
-
-
-void Foam::profiling::Information::push() const
-{
-    onStack_ = true;
-}
-
-
-void Foam::profiling::Information::pop() const
-{
-    onStack_ = false;
-}
-
-
-Foam::Ostream& Foam::profiling::Information::write
-(
-    Ostream& os,
-    const bool offset,
-    const scalar& elapsedTime,
-    const scalar& childTimes
-) const
-{
-    // write in dictionary format
-
-    os.beginBlock(word("trigger" + Foam::name(id_)));
-
-    os.writeEntry("id",             id_);
-    if (id_ != parent().id())
-    {
-        os.writeEntry("parentId",   parent().id());
-    }
-    os.writeEntry("description",    description());
-    os.writeEntry("calls",          calls()     + (offset ? 1 : 0));
-    os.writeEntry("totalTime",      totalTime() + elapsedTime);
-    os.writeEntry("childTime",      childTime() + childTimes);
-    if (maxMem_)
-    {
-        os.writeEntry("maxMem",     maxMem_);
-    }
-    os.writeEntry("onStack",        Switch(onStack()));
-
-    os.endBlock();
-
-    return os;
-}
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-Foam::Ostream& Foam::operator<<
-(
-    Ostream& os,
-    const profiling::Information& info
-)
-{
-    return info.write(os);
 }
 
 

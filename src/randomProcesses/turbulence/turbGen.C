@@ -51,8 +51,8 @@ Foam::vectorField Foam::turbGen::U()
 
     forAll(K, i)
     {
-        s[i] = RanGen.vector01();
-        rndPhases[i] = RanGen.scalar01();
+        s[i] = RanGen.sample01<vector>();
+        rndPhases[i] = RanGen.sample01<scalar>();
     }
 
     s = K ^ s;

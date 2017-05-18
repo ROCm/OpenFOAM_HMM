@@ -29,7 +29,7 @@ License
 
 inline const char* Foam::ensightCells::key(const enum elemType what)
 {
-    return elemEnum[what];
+    return elemNames[what];
 }
 
 
@@ -63,20 +63,24 @@ inline Foam::label Foam::ensightCells::total(const enum elemType what) const
 }
 
 
-inline const Foam::labelUList& Foam::ensightCells::cellIds
+inline Foam::label Foam::ensightCells::size(const enum elemType what) const
+{
+    return slices_[what].size();
+}
+
+
+inline Foam::label Foam::ensightCells::offset(const enum elemType what) const
+{
+    return slices_[what].start();
+}
+
+
+inline const Foam::labelUList Foam::ensightCells::cellIds
 (
     const enum elemType what
 ) const
 {
-    if (!lists_[what])
-    {
-        FatalErrorInFunction
-            << "Accessing unallocated sublist for elem-type: "
-            << elemEnum[what]
-            << exit(FatalError);
-    }
-
-    return *(lists_[what]);
+    return address_[slices_[what]];
 }
 
 

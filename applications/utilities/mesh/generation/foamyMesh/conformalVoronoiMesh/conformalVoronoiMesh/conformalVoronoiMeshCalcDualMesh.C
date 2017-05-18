@@ -673,7 +673,7 @@ void Foam::conformalVoronoiMesh::deferredCollapseFaceSet
 (
     labelList& owner,
     labelList& neighbour,
-    const HashSet<labelPair, labelPair::Hash<>>& deferredCollapseFaces
+    const labelPairHashSet& deferredCollapseFaces
 ) const
 {
     DynamicList<label> faceLabels;
@@ -2131,14 +2131,14 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                             // Use this processor's vertex index as the master
                             // for sorting
 
-                            DynamicList<Pair<labelPair>>& sortingIndex =
+                            DynamicList<labelPairPair>& sortingIndex =
                                 procPatchSortingIndex[patchIndex];
 
                             if (vB->internalOrBoundaryPoint() && vB->referred())
                             {
                                 sortingIndex.append
                                 (
-                                    Pair<labelPair>
+                                    labelPairPair
                                     (
                                         labelPair(vA->index(), vA->procIndex()),
                                         labelPair(vB->index(), vB->procIndex())
@@ -2149,7 +2149,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                             {
                                 sortingIndex.append
                                 (
-                                    Pair<labelPair>
+                                    labelPairPair
                                     (
                                         labelPair(vB->index(), vB->procIndex()),
                                         labelPair(vA->index(), vA->procIndex())
@@ -2162,14 +2162,14 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                             // Use the other processor's vertex index as the
                             // master for sorting
 
-                            DynamicList<Pair<labelPair>>& sortingIndex =
+                            DynamicList<labelPairPair>& sortingIndex =
                                 procPatchSortingIndex[patchIndex];
 
                             if (vA->internalOrBoundaryPoint() && vA->referred())
                             {
                                 sortingIndex.append
                                 (
-                                    Pair<labelPair>
+                                    labelPairPair
                                     (
                                         labelPair(vA->index(), vA->procIndex()),
                                         labelPair(vB->index(), vB->procIndex())
@@ -2180,7 +2180,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                             {
                                 sortingIndex.append
                                 (
-                                    Pair<labelPair>
+                                    labelPairPair
                                     (
                                         labelPair(vB->index(), vB->procIndex()),
                                         labelPair(vA->index(), vA->procIndex())
@@ -2463,7 +2463,7 @@ void Foam::conformalVoronoiMesh::sortProcPatches
         faceList& faces = patchFaces[patchi];
         labelList& owner = patchOwners[patchi];
         DynamicList<label>& slaves = patchPointPairSlaves[patchi];
-        DynamicList<Pair<labelPair>>& sortingIndices
+        DynamicList<labelPairPair>& sortingIndices
             = patchSortingIndices[patchi];
 
         if (!sortingIndices.empty())

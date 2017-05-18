@@ -101,10 +101,10 @@ Foam::labelList Foam::cell::labels(const faceUList& f) const
 Foam::pointField Foam::cell::points
 (
     const faceUList& f,
-    const pointField& meshPoints
+    const UList<point>& meshPoints
 ) const
 {
-    labelList pointLabels = labels(f);
+    const labelList pointLabels = labels(f);
 
     pointField p(pointLabels.size());
 
@@ -171,7 +171,7 @@ Foam::edgeList Foam::cell::edges(const faceUList& f) const
 
 Foam::point Foam::cell::centre
 (
-    const pointField& p,
+    const UList<point>& p,
     const faceUList& f
 ) const
 {
@@ -237,7 +237,7 @@ Foam::point Foam::cell::centre
 
 Foam::scalar Foam::cell::mag
 (
-    const pointField& p,
+    const UList<point>& p,
     const faceUList& f
 ) const
 {
@@ -290,7 +290,7 @@ bool Foam::operator==(const cell& a, const cell& b)
 
     forAll(b, bI)
     {
-        label curLabel = b[bI];
+        const label curLabel = b[bI];
 
         bool found = false;
 
@@ -310,15 +310,16 @@ bool Foam::operator==(const cell& a, const cell& b)
         }
     }
 
-    // check if all faces on a were marked
-    bool result = true;
-
+    // Any faces missed?
     forAll(fnd, aI)
     {
-        result = (result && fnd[aI]);
+        if (!fnd[aI])
+        {
+            return false;
+        }
     }
 
-    return result;
+    return true;
 }
 
 

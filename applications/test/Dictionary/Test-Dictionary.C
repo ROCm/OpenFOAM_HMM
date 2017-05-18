@@ -168,8 +168,23 @@ int main(int argc, char *argv[])
     Info<< nl << "scalarDict2: " << endl;
     forAllConstIter(PtrDictionary<Scalar>, scalarDict2, iter)
     {
+        std::cout<< "iter: " << typeid(*iter).name() << '\n';
+
         Info<< "elem = " << *iter << endl;
     }
+
+    // FIXME: the deduction seems to be different here.
+    // - returns pointer (as perhaps actually expected) not the
+    //  underlying value.
+    forAllConstIters(scalarDict2, iter)
+    {
+        std::cout<< "iter: " << typeid(*iter).name() << '\n';
+
+        Info<< "elem = " << *(*iter) << endl;
+    }
+
+    std::cout<< "iter type: "
+        << typeid(stdFoam::begin(scalarDict2)).name() << '\n';
 
     scalarDict.transfer(scalarDict2);
 

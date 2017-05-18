@@ -25,7 +25,7 @@ License
 
 #include "mapDistributeBase.H"
 #include "commSchedule.H"
-#include "HashSet.H"
+#include "labelPairHashes.H"
 #include "globalIndex.H"
 #include "ListOps.H"
 
@@ -50,7 +50,7 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
     List<labelPair> allComms;
 
     {
-        HashSet<labelPair, labelPair::Hash<>> commsSet(Pstream::nProcs());
+        labelPairHashSet commsSet(Pstream::nProcs());
 
         // Find what communication is required
         forAll(subMap, proci)

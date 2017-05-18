@@ -86,9 +86,9 @@ void rayShooting::splitLine
         {
             Foam::point newPt
             (
-                midPoint.x() + pert*(rndGen().scalar01() - 0.5),
-                midPoint.y() + pert*(rndGen().scalar01() - 0.5),
-                midPoint.z() + pert*(rndGen().scalar01() - 0.5)
+                midPoint.x() + pert*(rndGen().sample01<scalar>() - 0.5),
+                midPoint.y() + pert*(rndGen().sample01<scalar>() - 0.5),
+                midPoint.z() + pert*(rndGen().sample01<scalar>() - 0.5)
             );
 
             if

@@ -199,7 +199,7 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
 
         Info<< nl << "Writing " << "tetDualMesh" << endl;
 
-        DistributedDelaunayMesh<Delaunay>::labelTolabelPairHashTable vertexMap;
+        labelPairLookup vertexMap;
         labelList cellMap;
         autoPtr<polyMesh> tetMesh =
             createMesh("tetDualMesh", vertexMap, cellMap);

@@ -115,7 +115,7 @@ void Foam::patchProbes::sampleAndWrite
 
             if
             (
-                iter != objectRegistry::end()
+                iter.found()
              && iter()->type()
              == GeometricField<Type, fvPatchField, volMesh>::typeName
             )
@@ -167,7 +167,7 @@ void Foam::patchProbes::sampleAndWriteSurfaceFields
 
             if
             (
-                iter != objectRegistry::end()
+                iter.found()
              && iter()->type()
              == GeometricField<Type, fvsPatchField, surfaceMesh>::typeName
             )

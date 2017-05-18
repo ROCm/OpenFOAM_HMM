@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-bool Foam::argList::bannerEnabled = true;
+bool Foam::argList::bannerEnabled_ = true;
 Foam::SLList<Foam::string>    Foam::argList::validArgs;
 Foam::HashTable<Foam::string> Foam::argList::validOptions;
 Foam::HashTable<Foam::string> Foam::argList::validParOptions;
@@ -154,7 +154,13 @@ void Foam::argList::removeOption(const word& opt)
 
 void Foam::argList::noBanner()
 {
-    bannerEnabled = false;
+    bannerEnabled_ = false;
+}
+
+
+bool Foam::argList::bannerEnabled()
+{
+    return bannerEnabled_;
 }
 
 
@@ -170,6 +176,12 @@ void Foam::argList::noFunctionObjects(bool addWithOption)
             "execute functionObjects"
         );
     }
+}
+
+
+void Foam::argList::noJobInfo()
+{
+    JobInfo::writeJobInfo = false;
 }
 
 
@@ -298,17 +310,17 @@ bool Foam::argList::postProcess(int argc, char *argv[])
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Convert argv -> args_
-// Transform sequences with "(" ... ")" into string lists in the process
 bool Foam::argList::regroupArgv(int& argc, char**& argv)
 {
-    int nArgs = 0;
-    int listDepth = 0;
+    int nArgs = 1;
+    unsigned listDepth = 0;
     string tmpString;
 
-    // Note: we also re-write directly into args_
+    // Note: we rewrite directly into args_
     // and use a second pass to sort out args/options
-    for (int argI = 0; argI < argc; ++argI)
+
+    args_[0] = fileName(argv[0]);
+    for (int argI = 1; argI < argc; ++argI)
     {
         if (strcmp(argv[argI], "(") == 0)
         {
@@ -321,7 +333,7 @@ bool Foam::argList::regroupArgv(int& argc, char**& argv)
             {
                 --listDepth;
                 tmpString += ")";
-                if (listDepth == 0)
+                if (!listDepth)
                 {
                     args_[nArgs++] = tmpString;
                     tmpString.clear();
@@ -347,10 +359,20 @@ bool Foam::argList::regroupArgv(int& argc, char**& argv)
 
     if (tmpString.size())
     {
+        // Group(s) not closed, but flush anything still pending
         args_[nArgs++] = tmpString;
     }
 
     args_.setSize(nArgs);
+
+    std::string::size_type len = (nArgs-1); // Spaces between args
+    forAll(args_, argi)
+    {
+        len += args_[argi].size();
+    }
+
+    // Length needed for regrouped command-line
+    argListStr_.reserve(len);
 
     return nArgs < argc;
 }
@@ -391,6 +413,8 @@ void Foam::argList::getRootCase()
     globalCase_ = casePath.name();
     case_       = globalCase_;
 
+    // The name of the executable, unless already present in the environment
+    setEnv("FOAM_EXECUTABLE", executable_, false);
 
     // Set the case and case-name as an environment variable
     if (rootPath_.isAbsolute())
@@ -423,11 +447,12 @@ Foam::argList::argList
 )
 :
     args_(argc),
-    options_(argc)
+    options_(argc),
+    distributed_(false)
 {
     // Check if this run is a parallel run by searching for any parallel option
     // If found call runPar which might filter argv
-    for (int argI = 0; argI < argc; ++argI)
+    for (int argI = 1; argI < argc; ++argI)
     {
         if (argv[argI][0] == '-')
         {
@@ -442,17 +467,11 @@ Foam::argList::argList
     }
 
     // Convert argv -> args_ and capture ( ... ) lists
-    // for normal arguments and for options
     regroupArgv(argc, argv);
+    argListStr_ += args_[0];
 
-    // Get executable name
-    args_[0]    = fileName(argv[0]);
-    executable_ = fileName(argv[0]).name();
-
-    // Check arguments and options, we already have argv[0]
+    // Check arguments and options, argv[0] was already handled
     int nArgs = 1;
-    argListStr_ = args_[0];
-
     for (int argI = 1; argI < args_.size(); ++argI)
     {
         argListStr_ += ' ';
@@ -511,6 +530,9 @@ Foam::argList::argList
     }
 
     args_.setSize(nArgs);
+
+    // Set executable name
+    executable_ = fileName(args_[0]).name();
 
     parse(checkArgs, checkOpts, initialise);
 }
@@ -589,7 +611,7 @@ void Foam::argList::parse
         const string timeString = clock::clockTime();
 
         // Print the banner once only for parallel runs
-        if (Pstream::master() && bannerEnabled)
+        if (Pstream::master() && bannerEnabled_)
         {
             IOobject::writeBanner(Info, true)
                 << "Build  : " << Foam::FOAMbuild << nl
@@ -663,6 +685,7 @@ void Foam::argList::parse
             label dictNProcs = -1;
             if (options_.found("roots"))
             {
+                distributed_ = true;
                 source = "-roots";
                 IStringStream is(options_["roots"]);
                 roots = readList<fileName>(is);
@@ -696,6 +719,7 @@ void Foam::argList::parse
 
                 if (decompDict.lookupOrDefault("distributed", false))
                 {
+                    distributed_ = true;
                     decompDict.lookup("roots") >> roots;
                 }
             }
@@ -754,7 +778,7 @@ void Foam::argList::parse
                 }
 
                 // Distribute the master's argument list (with new root)
-                bool hadCaseOpt = options_.found("case");
+                const bool hadCaseOpt = options_.found("case");
                 for
                 (
                     int slave = Pstream::firstSlave();
@@ -765,7 +789,7 @@ void Foam::argList::parse
                     options_.set("case", roots[slave-1]/globalCase_);
 
                     OPstream toSlave(Pstream::commsTypes::scheduled, slave);
-                    toSlave << args_ << options_;
+                    toSlave << args_ << options_ << roots.size();
                 }
                 options_.erase("case");
 
@@ -812,7 +836,7 @@ void Foam::argList::parse
                 )
                 {
                     OPstream toSlave(Pstream::commsTypes::scheduled, slave);
-                    toSlave << args_ << options_;
+                    toSlave << args_ << options_ << roots.size();
                 }
             }
         }
@@ -824,7 +848,7 @@ void Foam::argList::parse
                 Pstream::commsTypes::scheduled,
                 Pstream::masterNo()
             );
-            fromMaster >> args_ >> options_;
+            fromMaster >> args_ >> options_ >> distributed_;
 
             // Establish rootPath_/globalCase_/case_ for slave
             getRootCase();
@@ -890,7 +914,7 @@ void Foam::argList::parse
     }
 
 
-    if (Pstream::master() && bannerEnabled)
+    if (Pstream::master() && bannerEnabled_)
     {
         Info<< "Case   : " << (rootPath_/globalCase_).c_str() << nl
             << "nProcs : " << nProcs << endl;
@@ -929,12 +953,12 @@ void Foam::argList::parse
 
         // Switch on signal trapping. We have to wait until after Pstream::init
         // since this sets up its own ones.
-        sigFpe::set(bannerEnabled);
-        sigInt::set(bannerEnabled);
-        sigQuit::set(bannerEnabled);
-        sigSegv::set(bannerEnabled);
+        sigFpe::set(bannerEnabled_);
+        sigInt::set(bannerEnabled_);
+        sigQuit::set(bannerEnabled_);
+        sigSegv::set(bannerEnabled_);
 
-        if (bannerEnabled)
+        if (Pstream::master() && bannerEnabled_)
         {
             Info<< "fileModificationChecking : "
                 << "Monitoring run-time modified files using "
@@ -957,23 +981,19 @@ void Foam::argList::parse
                 Info<< " (fileModificationSkew "
                     << regIOobject::fileModificationSkew << ")";
             }
-            Info<< endl;
+            Info<< nl;
 
             Info<< "allowSystemOperations : ";
             if (dynamicCode::allowSystemOperations)
             {
-                Info<< "Allowing user-supplied system call operations" << endl;
+                Info<< "Allowing";
             }
             else
             {
-                Info<< "Disallowing user-supplied system call operations"
-                    << endl;
+                Info<< "Disallowing";
             }
-        }
-
-        if (Pstream::master() && bannerEnabled)
-        {
-            Info<< endl;
+            Info<< " user-supplied system call operations" << nl
+                << endl;
             IOobject::writeDivider(Info);
         }
     }

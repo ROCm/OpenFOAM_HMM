@@ -50,7 +50,7 @@ distributionContactAngleForce::distributionContactAngleForce
 )
 :
     contactAngleForce(typeName, film, dict),
-    rndGen_(label(0), -1),
+    rndGen_(),
     distribution_
     (
         distributionModel::New

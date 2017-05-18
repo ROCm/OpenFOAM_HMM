@@ -189,7 +189,7 @@ void Foam::waveModels::Boussinesq::setVelocity
             const label paddlei = faceToPaddle_[facei];
 
             const vector Uf = this->Uf
-	        (
+            (
                 waveHeight_,
                 waterDepthRef_,
                 xPaddle_[paddlei],

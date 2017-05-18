@@ -162,7 +162,7 @@ Foam::label Foam::PatchFlowRateInjection<CloudType>::parcelsToInject
 
         scalar nParcels = parcelConcentration_*c*flowRate()*dt;
 
-        cachedRandom& rnd = this->owner().rndGen();
+        Random& rnd = this->owner().rndGen();
 
         label nParcelsToInject = floor(nParcels);
 

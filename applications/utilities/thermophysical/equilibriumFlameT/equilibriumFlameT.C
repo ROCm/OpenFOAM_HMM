@@ -30,7 +30,7 @@ Group
 Description
     Calculates the equilibrium flame temperature for a given fuel and
     pressure for a range of unburnt gas temperatures and equivalence
-    ratios; the effects of dissociation on O2, H2O and CO2 are included.
+    ratios; includes the effects of dissociation on O2, H2O and CO2.
 
 \*---------------------------------------------------------------------------*/
 
@@ -57,7 +57,16 @@ typedef species::thermo<janafThermo<perfectGas<specie>>, absoluteEnthalpy>
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Calculates the equilibrium flame temperature for a given fuel\n"
+        "and pressure for a range of unburnt gas temperatures and equivalence\n"
+        "ratios; includes the effects of dissociation on O2, H2O and CO2."
+    );
+    argList::noParallel();
+    argList::noFunctionObjects();
     argList::validArgs.append("controlFile");
+
     argList args(argc, argv);
 
     const fileName controlFileName = args[1];

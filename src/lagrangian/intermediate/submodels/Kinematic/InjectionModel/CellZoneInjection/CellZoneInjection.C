@@ -40,7 +40,7 @@ void Foam::CellZoneInjection<CloudType>::setPositions
     const fvMesh& mesh = this->owner().mesh();
     const scalarField& V = mesh.V();
     const label nCells = cellZoneCells.size();
-    cachedRandom& rnd = this->owner().rndGen();
+    Random& rnd = this->owner().rndGen();
 
     DynamicList<vector> positions(nCells);          // initial size only
     DynamicList<label> injectorCells(nCells);       // initial size only

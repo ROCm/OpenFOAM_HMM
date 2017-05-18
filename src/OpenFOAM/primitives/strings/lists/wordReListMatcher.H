@@ -68,28 +68,28 @@ public:
 
     // Member Functions
 
-        // Access
+      // Access
 
-            inline label size() const;
-            inline bool  empty() const;
+        inline label size() const;
+        inline bool  empty() const;
 
-            //- Return underlying list of wordRe
-            inline const UList<wordRe>& operator()() const;
-
-
-        // Searching
-
-            //- Return true if string matches any of the regular expressions
-            //  Smart match as regular expression or as a string.
-            //  Optionally specify a literal match only.
-            inline bool match(const string&, bool literalMatch=false) const;
+        //- Return underlying list of wordRe
+        inline const UList<wordRe>& operator()() const;
 
 
-        // Helpers
+     // Searching
 
-            //- Return a wordReList with duplicate words filtered out.
-            //  No filtering is done on regular expressions.
-            static wordReList uniq(const UList<wordRe>& input);
+       //- Return true if string matches any of the regular expressions
+       //  Smart match as regular expression or as a string.
+       //  Optionally specify a literal match only.
+       inline bool match(const std::string&, bool literalMatch=false) const;
+
+
+     // Helpers
+
+       //- Return a wordReList with duplicate words filtered out.
+       //  No filtering is done on regular expressions.
+       static wordReList uniq(const UList<wordRe>& input);
 
 };
 

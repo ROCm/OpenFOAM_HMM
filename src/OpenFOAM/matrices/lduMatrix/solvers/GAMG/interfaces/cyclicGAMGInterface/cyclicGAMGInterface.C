@@ -25,8 +25,7 @@ License
 
 #include "cyclicGAMGInterface.H"
 #include "addToRunTimeSelectionTable.H"
-#include "labelPair.H"
-#include "HashTable.H"
+#include "labelPairHashes.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -96,10 +95,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
     );
 
     // From coarse cell pair to coarse face
-    HashTable<label, labelPair, labelPair::Hash<>> cellsToCoarseFace
-    (
-        2*localRestrictAddressing.size()
-    );
+    labelPairLookup cellsToCoarseFace(2*localRestrictAddressing.size());
 
     forAll(localRestrictAddressing, ffi)
     {
@@ -126,8 +122,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
             );
         }
 
-        HashTable<label, labelPair, labelPair::Hash<>>::const_iterator fnd =
-            cellsToCoarseFace.find(cellPair);
+        labelPairLookup::const_iterator fnd = cellsToCoarseFace.find(cellPair);
 
         if (fnd == cellsToCoarseFace.end())
         {

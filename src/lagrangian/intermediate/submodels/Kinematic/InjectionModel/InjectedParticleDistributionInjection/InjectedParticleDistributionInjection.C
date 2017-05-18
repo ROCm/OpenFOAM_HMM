@@ -148,7 +148,7 @@ void Foam::InjectedParticleDistributionInjection<CloudType>::initialise()
     scalar minTime = GREAT;
 
     // Populate injector properties, filtering out invalid entries
-    cachedRandom& rnd = this->owner().rndGen();
+    Random& rnd = this->owner().rndGen();
     label injectori = 0;
     forAll(injDiameter, i)
     {
@@ -448,7 +448,7 @@ void Foam::InjectedParticleDistributionInjection<CloudType>::setPositionAndCell
     label& tetPtI
 )
 {
-    cachedRandom& rnd = this->owner().rndGen();
+    Random& rnd = this->owner().rndGen();
     currentInjectori_ = rnd.globalPosition<label>(0, position_.size() - 1);
     currentSamplei_ = rnd.globalPosition<label>(0, resampleSize_ - 1);
 

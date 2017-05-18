@@ -108,6 +108,11 @@
             );
         }
 
+        alphaPhi1 = alphaPhi1BD + lambda*alphaPhi1;
+
+        // Reset allLambda to 1.0
+        allLambda = 1.0;
+
         // Create the complete flux for alpha2
         surfaceScalarField alphaPhi2
         (
@@ -172,7 +177,6 @@
         }
 
         // Construct the limited fluxes
-        alphaPhi1 = alphaPhi1BD + lambda*alphaPhi1;
         alphaPhi2 = alphaPhi2BD + lambda*alphaPhi2;
 
         // Solve for alpha1

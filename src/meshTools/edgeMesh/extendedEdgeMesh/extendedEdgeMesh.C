@@ -456,6 +456,34 @@ Foam::extendedEdgeMesh::extendedEdgeMesh(Istream& is)
 
 Foam::extendedEdgeMesh::extendedEdgeMesh
 (
+    const pointField& points,
+    const edgeList& edges
+)
+:
+    edgeMesh(points, edges),
+    concaveStart_(0),
+    mixedStart_(0),
+    nonFeatureStart_(0),
+    internalStart_(0),
+    flatStart_(0),
+    openStart_(0),
+    multipleStart_(0),
+    normals_(0),
+    normalVolumeTypes_(0),
+    edgeDirections_(0),
+    normalDirections_(0),
+    edgeNormals_(0),
+    featurePointNormals_(0),
+    featurePointEdges_(0),
+    regionEdges_(0),
+    pointTree_(),
+    edgeTree_(),
+    edgeTreesByType_()
+{}
+
+
+Foam::extendedEdgeMesh::extendedEdgeMesh
+(
     const Xfer<pointField>& pointLst,
     const Xfer<edgeList>& edgeLst
 )
@@ -1260,20 +1288,36 @@ void Foam::extendedEdgeMesh::add(const extendedEdgeMesh& fem)
     // ~~~~~~~
 
     // Combine normals
-    DynamicField<point> newNormals(normals().size()+fem.normals().size());
+    DynamicField<point> newNormals
+    (
+        normals().size()
+      + fem.normals().size()
+    );
     newNormals.append(normals());
     newNormals.append(fem.normals());
 
 
     // Combine and re-index into newNormals
-    labelListList newEdgeNormals(edgeNormals().size()+fem.edgeNormals().size());
-    UIndirectList<labelList>(newEdgeNormals, reverseEdgeMap) =
-        edgeNormals();
-    UIndirectList<labelList>(newEdgeNormals, reverseFemEdgeMap) =
-        fem.edgeNormals();
-    forAll(reverseFemEdgeMap, i)
+    labelListList newEdgeNormals
+    (
+        edgeNormals().size()
+      + fem.edgeNormals().size()
+    );
+
+    UIndirectList<labelList>
+    (
+        newEdgeNormals,
+        SubList<label>(reverseEdgeMap, edgeNormals().size())
+    ) = edgeNormals();
+    UIndirectList<labelList>
+    (
+        newEdgeNormals,
+        SubList<label>(reverseFemEdgeMap, fem.edgeNormals().size())
+    ) = fem.edgeNormals();
+
+    forAll(fem.edgeNormals(), i)
     {
-        label mapI = reverseFemEdgeMap[i];
+        const label mapI = reverseFemEdgeMap[i];
         labelList& en = newEdgeNormals[mapI];
         forAll(en, j)
         {
@@ -1300,9 +1344,10 @@ void Foam::extendedEdgeMesh::add(const extendedEdgeMesh& fem)
         newFeaturePointNormals,
         SubList<label>(reverseFemPointMap, fem.featurePointNormals().size())
     ) = fem.featurePointNormals();
+
     forAll(fem.featurePointNormals(), i)
     {
-        label mapI = reverseFemPointMap[i];
+        const label mapI = reverseFemPointMap[i];
         labelList& fn = newFeaturePointNormals[mapI];
         forAll(fn, j)
         {

@@ -2,8 +2,8 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -25,12 +25,14 @@
 #     etc/config.csh/mpi
 #
 # Description
-#     Startup file for communications library (MPI) for OpenFOAM
+#     Setup file for communications library (MPI) for OpenFOAM
 #     Sourced from OpenFOAM-<VERSION>/etc/cshrc
 #
+#     For USERMPI, the user is responsible for supplying an appropriate
+#     wmake/rules/General/mplibUSERMPI file and managing all settings
+#
 #------------------------------------------------------------------------------
-
-unsetenv MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
+unsetenv MPI_ARCH_PATH MPI_HOME
 
 switch ("$WM_MPLIB")
 case SYSTEMOPENMPI:
@@ -48,8 +50,7 @@ case SYSTEMOPENMPI:
 
 case OPENMPI:
     setenv FOAM_MPI openmpi-2.0.2
-    # Optional configuration tweaks:
-    _foamEtc config.csh/openmpi
+    _foamEtc config.csh/openmpi                 # <- Adjustments (optional)
 
     setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
@@ -67,8 +68,15 @@ case OPENMPI:
     _foamAddMan     $MPI_ARCH_PATH/share/man
     breaksw
 
+case USERMPI:
+    # Use an arbitrary, user-specified mpi implementation
+    setenv FOAM_MPI mpi-user
+    _foamEtc config.csh/mpi-user                # <- Adjustments
+    breaksw
+
 case SYSTEMMPI:
     setenv FOAM_MPI mpi-system
+    _foamEtc config.csh/mpi-system              # <- Adjustments (optional)
 
     if ( ! $?MPI_ROOT ) then
         echo
@@ -241,16 +249,17 @@ endsw
 
 
 # Add (non-dummy) MPI implementation
-# Dummy MPI already added to LD_LIBRARY_PATH and has no external libraries
+# - dummy MPI already added to LD_LIBRARY_PATH and has no external libraries
 if ( "$FOAM_MPI" != dummy ) then
-    _foamAddLib ${FOAM_LIBBIN}/${FOAM_MPI}:${FOAM_EXT_LIBBIN}/${FOAM_MPI}
+    if ( $?FOAM_EXT_LIBBIN ) then   # External libraries (allowed to be unset)
+        _foamAddLib ${FOAM_EXT_LIBBIN}/${FOAM_MPI}
+    endif
+    _foamAddLib ${FOAM_LIBBIN}/${FOAM_MPI}
 endif
 
 
-# Set the minimum MPI buffer size (used by all platforms except SGI MPI)
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Minimum MPI buffer size (used by all except SGI MPI)
 if ( ! $?minBufferSize ) set minBufferSize=20000000
-
 if ( $?MPI_BUFFER_SIZE ) then
     if ( $MPI_BUFFER_SIZE < $minBufferSize ) then
         setenv MPI_BUFFER_SIZE $minBufferSize

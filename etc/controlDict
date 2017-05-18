@@ -40,6 +40,9 @@ InfoSwitches
     writeDictionaries 0;
     writeOptionalEntries 0;
 
+    // Allow profiling
+    allowProfiling  1;
+
     // Allow case-supplied C++ code (#codeStream, codedFixedValue)
     allowSystemOperations   1;
 }
@@ -78,6 +81,15 @@ OptimisationSwitches
     stopAtWriteNowSignal        -1;
 }
 
+/* Can specify fallback profiling settings
+profiling
+{
+    active      true;
+    cpuInfo     true;
+    memInfo     false;
+    sysInfo     true;
+}
+*/
 
 DebugSwitches
 {

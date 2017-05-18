@@ -59,7 +59,7 @@ SourceFiles
 #include "DynamicList.H"
 #include "point.H"
 #include "edge.H"
-#include "labelPairLookup.H"
+#include "labelPairHashes.H"
 #include "typeInfo.H"
 #include "edgeList.H"
 #include "pointIndexHit.H"

@@ -25,7 +25,7 @@
 #     etc/config.sh/compiler
 #
 # Description
-#     Startup file for custom compiler versions for OpenFOAM
+#     Setup file for custom compiler versions for OpenFOAM
 #     Sourced from OpenFOAM-<VERSION>/etc/config.sh/settings
 #
 #------------------------------------------------------------------------------

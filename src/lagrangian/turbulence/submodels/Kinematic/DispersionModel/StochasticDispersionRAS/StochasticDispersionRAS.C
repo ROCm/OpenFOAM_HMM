@@ -71,7 +71,7 @@ Foam::vector Foam::StochasticDispersionRAS<CloudType>::update
     scalar& tTurb
 )
 {
-    cachedRandom& rnd = this->owner().rndGen();
+    Random& rnd = this->owner().rndGen();
 
     const scalar cps = 0.16432;
 

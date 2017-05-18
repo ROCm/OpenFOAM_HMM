@@ -152,7 +152,7 @@ void Foam::DSMCCloud<ParcelType>::initialise
                 if
                 (
                     (particlesRequired - nParticlesToInsert)
-                  > rndGen_.scalar01()
+                  > rndGen_.sample01<scalar>()
                 )
                 {
                     nParticlesToInsert++;
@@ -282,7 +282,7 @@ void Foam::DSMCCloud<ParcelType>::collisions()
                 // subCell candidate selection procedure
 
                 // Select the first collision candidate
-                label candidateP = rndGen_.integer(0, nC - 1);
+                label candidateP = rndGen_.position<label>(0, nC - 1);
 
                 // Declare the second collision candidate
                 label candidateQ = -1;
@@ -298,7 +298,8 @@ void Foam::DSMCCloud<ParcelType>::collisions()
 
                     do
                     {
-                        candidateQ = subCellPs[rndGen_.integer(0, nSC - 1)];
+                        label i = rndGen_.position<label>(0, nSC - 1);
+                        candidateQ = subCellPs[i];
                     } while (candidateP == candidateQ);
                 }
                 else
@@ -309,7 +310,7 @@ void Foam::DSMCCloud<ParcelType>::collisions()
 
                     do
                     {
-                        candidateQ = rndGen_.integer(0, nC - 1);
+                        candidateQ = rndGen_.position<label>(0, nC - 1);
                     } while (candidateP == candidateQ);
                 }
 
@@ -317,15 +318,15 @@ void Foam::DSMCCloud<ParcelType>::collisions()
                 // uniform candidate selection procedure
 
                 // // Select the first collision candidate
-                // label candidateP = rndGen_.integer(0, nC-1);
+                // label candidateP = rndGen_.position<label>(0, nC-1);
 
                 // // Select a possible second collision candidate
-                // label candidateQ = rndGen_.integer(0, nC-1);
+                // label candidateQ = rndGen_.position<label>(0, nC-1);
 
                 // // If the same candidate is chosen, choose again
                 // while (candidateP == candidateQ)
                 // {
-                //     candidateQ = rndGen_.integer(0, nC-1);
+                //     candidateQ = rndGen_.position<label>(0, nC-1);
                 // }
 
                 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -348,7 +349,7 @@ void Foam::DSMCCloud<ParcelType>::collisions()
                     sigmaTcRMax_[celli] = sigmaTcR;
                 }
 
-                if ((sigmaTcR/sigmaTcRMax) > rndGen_.scalar01())
+                if ((sigmaTcR/sigmaTcRMax) > rndGen_.sample01<scalar>())
                 {
                     binaryCollision().collide
                     (
@@ -648,7 +649,7 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
         mesh_
     ),
     constProps_(),
-    rndGen_(label(149382906) + 7183*Pstream::myProcNo()),
+    rndGen_(Pstream::myProcNo()),
     boundaryT_
     (
         volScalarField
@@ -711,7 +712,7 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
     // and 1.
     forAll(collisionSelectionRemainder_, i)
     {
-        collisionSelectionRemainder_[i] = rndGen_.scalar01();
+        collisionSelectionRemainder_[i] = rndGen_.sample01<scalar>();
     }
 
     if (readFields)
@@ -900,7 +901,7 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
         )
     ),
     constProps_(),
-    rndGen_(label(971501) + 1526*Pstream::myProcNo()),
+    rndGen_(Pstream::myProcNo()),
     boundaryT_
     (
         volScalarField
@@ -1039,12 +1040,7 @@ Foam::vector Foam::DSMCCloud<ParcelType>::equipartitionLinearVelocity
 {
     return
         sqrt(physicoChemical::k.value()*temperature/mass)
-       *vector
-        (
-            rndGen_.GaussNormal(),
-            rndGen_.GaussNormal(),
-            rndGen_.GaussNormal()
-        );
+       *rndGen_.GaussNormal<vector>();
 }
 
 
@@ -1064,7 +1060,9 @@ Foam::scalar Foam::DSMCCloud<ParcelType>::equipartitionInternalEnergy
     else if (iDof < 2.0 + SMALL && iDof > 2.0 - SMALL)
     {
         // Special case for iDof = 2, i.e. diatomics;
-        Ei = -log(rndGen_.scalar01())*physicoChemical::k.value()*temperature;
+        Ei =
+           -log(rndGen_.sample01<scalar>())
+           *physicoChemical::k.value()*temperature;
     }
     else
     {
@@ -1074,9 +1072,9 @@ Foam::scalar Foam::DSMCCloud<ParcelType>::equipartitionInternalEnergy
 
         do
         {
-            energyRatio = 10*rndGen_.scalar01();
+            energyRatio = 10*rndGen_.sample01<scalar>();
             P = pow((energyRatio/a), a)*exp(a - energyRatio);
-        } while (P < rndGen_.scalar01());
+        } while (P < rndGen_.sample01<scalar>());
 
         Ei = energyRatio*physicoChemical::k.value()*temperature;
     }

@@ -46,7 +46,7 @@ SourceFiles
 #define BrownianMotionForce_H
 
 #include "ParticleForce.H"
-#include "cachedRandom.H"
+#include "Random.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,7 +65,7 @@ class BrownianMotionForce
     // Private data
 
         //- Reference to the cloud random number generator
-        cachedRandom& rndGen_;
+        Random& rndGen_;
 
         //- Molecular free path length [m]
         const scalar lambda_;

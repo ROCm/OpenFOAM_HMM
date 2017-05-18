@@ -85,7 +85,7 @@ inline Foam::autoPtr<Foam::cellShape> Foam::cellShape::clone() const
 
 inline Foam::pointField Foam::cellShape::points
 (
-    const pointField& meshPoints
+    const UList<point>& meshPoints
 ) const
 {
     // There are as many points as there labels for them
@@ -256,13 +256,13 @@ inline Foam::label Foam::cellShape::nPoints() const
 }
 
 
-inline Foam::point Foam::cellShape::centre(const pointField& points) const
+inline Foam::point Foam::cellShape::centre(const UList<point>& points) const
 {
     return m->centre(*this, points);
 }
 
 
-inline Foam::scalar Foam::cellShape::mag(const pointField& points) const
+inline Foam::scalar Foam::cellShape::mag(const UList<point>& points) const
 {
     return m->mag(*this, points);
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,34 +22,32 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
-    Foam::labelPairLookup
+    Foam::edgeHashSet
 
 Description
-    A HashTable for two labels to another label.
-    Used for e.g. for face1, face2 to shared edge.
-
-Note
-    The hash table is based on a FixedList and not edge, since an edge
-    hashes commutatively!
+    A HashSet for an edge.
+    The hashing on an edge is commutative.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelPairLookup_H
-#define labelPairLookup_H
+#ifndef edgeHashes_H
+#define edgeHashes_H
 
-#include "FixedList.H"
-#include "HashTable.H"
+#include "HashSet.H"
+#include "edge.H"
+#include "EdgeMap.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef HashTable
-    <
-       label,
-       FixedList<label, 2>,
-       FixedList<label, 2>::Hash<>
-    > labelPairLookup;
+    // Alternative:
+    // template<class T>
+    // using EdgeMap = HashTable<T, edge, Hash<edge>>;
+
+    //- A HashSet with edge for its key.
+    typedef HashSet<edge, Hash<edge>> edgeHashSet;
+
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

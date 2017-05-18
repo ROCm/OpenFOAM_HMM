@@ -34,6 +34,8 @@ Script=${0##*/}
 JOBSTRING='%4s %8s %20s %10s %8s %4s %12s %12s %20s\n'
 DEFSTATEFILE=$HOME/.OpenFOAM/foamCheckJobs.out
 
+# The default is "~/.OpenFOAM/jobControl"
+: ${FOAM_JOB_DIR:=$HOME/.OpenFOAM/jobControl}
 
 #-------------------------------------------------------------------------------
 #
@@ -120,12 +122,6 @@ fi
 
 #- Check a few things
 
-if [ ! "$FOAM_JOB_DIR" ]
-then
-    echo "$Script : FOAM_JOB_DIR environment variable not set."
-    echo
-    exit 1
-fi
 if [ ! -d "$FOAM_JOB_DIR" ]
 then
     echo "$Script : directory does not exist."

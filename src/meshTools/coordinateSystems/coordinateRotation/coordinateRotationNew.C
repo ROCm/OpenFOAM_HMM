@@ -30,30 +30,31 @@ License
 
 Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
 (
-    const dictionary& dict, const objectRegistry& obr
+    const dictionary& dict,
+    const objectRegistry& obr
 )
 {
     if (debug)
     {
-        Pout<< "coordinateRotation::New(const dictionary&) : "
+        Pout<< "coordinateRotation::New"
+            "(const dictionary&, const objectRegistry&) : "
             << "constructing coordinateRotation"
             << endl;
     }
 
-    word rotType = dict.lookup("type");
+    const word rotType = dict.lookup("type");
 
     objectRegistryConstructorTable::iterator cstrIter =
         objectRegistryConstructorTablePtr_->find(rotType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Unknown coordinateRotation type "
+        FatalIOErrorInFunction(dict)
+            << "Unknown coordinateRotation type "
             << rotType << nl << nl
             << "Valid coordinateRotation types are :" <<  nl
-            << dictionaryConstructorTablePtr_->sortedToc()
+            << "[default: axes ]"
+            << objectRegistryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
@@ -73,17 +74,15 @@ Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
             << endl;
     }
 
-    word rotType = dict.lookup("type");
+    const word rotType = dict.lookup("type");
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(rotType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Unknown coordinateRotation type "
+        FatalIOErrorInFunction(dict)
+            << "Unknown coordinateRotation type "
             << rotType << nl << nl
             << "Valid coordinateRotation types are :" <<  nl
             << dictionaryConstructorTablePtr_->sortedToc()
@@ -92,5 +91,6 @@ Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
 
     return autoPtr<coordinateRotation>(cstrIter()(dict));
 }
+
 
 // ************************************************************************* //

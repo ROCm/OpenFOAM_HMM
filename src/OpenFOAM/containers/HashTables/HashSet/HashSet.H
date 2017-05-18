@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,6 +52,13 @@ Description
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+template<class Key, class Hash> class HashSet;
+
+template<class Key, class Hash>
+Ostream& operator<<(Ostream& os, const HashSet<Key, Hash>& tbl);
+
+
 /*---------------------------------------------------------------------------*\
                            Class HashSet Declaration
 \*---------------------------------------------------------------------------*/
@@ -61,11 +68,39 @@ class HashSet
 :
     public HashTable<nil, Key, Hash>
 {
+    // Private Member Functions
+
+        //- Insert values, using begin/end iterators.
+        template<class InputIter>
+        inline label insertMultiple
+        (
+            const InputIter begIter,
+            const InputIter endIter
+        );
+
+        //- Assign using begin/end iterators.
+        template<class InputIter>
+        inline label assignMultiple
+        (
+            const InputIter begIter,
+            const InputIter endIter,
+            const label sz
+        );
+
 
 public:
 
-    typedef typename HashTable<nil, Key, Hash>::iterator iterator;
-    typedef typename HashTable<nil, Key, Hash>::const_iterator const_iterator;
+    //- The template instance used for this HashSet
+    typedef HashSet<Key, Hash> this_type;
+
+    //- The template instance used for the parent HashTable
+    typedef HashTable<nil, Key, Hash> parent_type;
+
+    //- An iterator, returning reference to the key
+    using iterator = typename parent_type::key_iterator;
+
+    //- A const_iterator, returning reference to the key
+    using const_iterator = typename parent_type::const_key_iterator;
 
 
     // Constructors
@@ -73,58 +108,67 @@ public:
         //- Construct given initial size
         HashSet(const label size = 128)
         :
-            HashTable<nil, Key, Hash>(size)
+            parent_type(size)
         {}
 
         //- Construct from Istream
         HashSet(Istream& is)
         :
-            HashTable<nil, Key, Hash>(is)
+            parent_type(is)
         {}
 
         //- Construct from UList of Key
-        HashSet(const UList<Key>&);
+        explicit HashSet(const UList<Key>& lst);
+
+        //- Construct from FixedList of Key
+        template<unsigned Size>
+        explicit HashSet(const FixedList<Key, Size>& lst);
 
         //- Construct from an initializer list of Key
-        HashSet(std::initializer_list<Key>);
+        HashSet(std::initializer_list<Key> lst);
 
         //- Construct as copy
         HashSet(const HashSet<Key, Hash>& hs)
         :
-            HashTable<nil, Key, Hash>(hs)
+            parent_type(hs)
         {}
 
         //- Construct by transferring the parameter contents
         HashSet(const Xfer<HashSet<Key, Hash>>& hs)
         :
-            HashTable<nil, Key, Hash>(hs)
+            parent_type(hs)
         {}
 
         //- Construct by transferring the parameter contents
         HashSet(const Xfer<HashTable<nil, Key, Hash>>& hs)
         :
-            HashTable<nil, Key, Hash>(hs)
+            parent_type(hs)
         {}
 
         //- Construct from the keys of another HashTable,
         //  the type of values held is arbitrary.
         template<class AnyType, class AnyHash>
-        HashSet(const HashTable<AnyType, Key, AnyHash>&);
+        explicit HashSet(const HashTable<AnyType, Key, AnyHash>& tbl);
 
 
     // Member Functions
 
-        // Edit
+      // Edit
 
         //- Insert a new entry
         bool insert(const Key& key)
         {
-            return HashTable<nil, Key, Hash>::insert(key, nil());
+            return this->parent_type::insert(key, nil());
         }
 
-        //- Insert keys from a UList of Key
+        //- Insert keys from the list of Key
         //  Return the number of new elements inserted
         label insert(const UList<Key>& lst);
+
+        //- Insert keys from the list of Key
+        //  Return the number of new elements inserted
+        template<unsigned Size>
+        label insert(const FixedList<Key, Size>& lst);
 
         //- Insert keys from a initializer list of Key
         //  Return the number of new elements inserted
@@ -143,6 +187,13 @@ public:
         }
 
         //- Same as insert (cannot overwrite nil content)
+        template<unsigned Size>
+        label set(const FixedList<Key, Size>& lst)
+        {
+            return insert(lst);
+        }
+
+        //- Same as insert (cannot overwrite nil content)
         label set(std::initializer_list<Key> lst)
         {
             return insert(lst);
@@ -151,31 +202,85 @@ public:
         //- Unset the specified key - same as erase
         bool unset(const Key& key)
         {
-            return HashTable<nil, Key, Hash>::erase(key);
+            return this->parent_type::erase(key);
+        }
+
+        //- Unset the listed keys - same as erase
+        label unset(const UList<Key>& lst)
+        {
+            return this->parent_type::erase(lst);
+        }
+
+        //- Unset the listed keys - same as erase
+        template<unsigned Size>
+        label unset(const FixedList<Key, Size>& lst)
+        {
+            return this->parent_type::erase(lst);
+        }
+
+        //- Unset the listed keys - same as erase
+        label unset(std::initializer_list<Key> lst)
+        {
+            return this->parent_type::erase(lst);
+        }
+
+
+    // STL iterators
+
+        iterator begin();
+        const_iterator begin() const;
+        const_iterator cbegin() const;
+
+        const iterator& end();
+        const const_iterator& end() const;
+        const const_iterator& cend() const;
+
+
+    // Writing
+
+        //- Write the unordered keys as a list, with line-breaks if list length
+        //  exceeds shortListLen. Using '0' suppresses line-breaks entirely.
+        Ostream& writeList(Ostream& os, const label shortListLen=0) const
+        {
+            return this->writeKeys(os, shortListLen);
         }
 
 
     // Member Operators
 
-        //- Return true if the entry exists, same as found()
-        inline bool operator[](const Key&) const;
+        //- This operation doesn't make much sense for a hash-set
+        void operator()(const Key& key) = delete;
 
-        //- Equality. Two hashtables are equal when their contents are equal.
+        //- Return true if the entry exists, same as found()
+        inline bool operator[](const Key& key) const;
+
+        //- Equality. Two hashset are equal when they have the same keys.
         //  Independent of table size or order.
-        bool operator==(const HashSet<Key, Hash>&) const;
+        bool operator==(const this_type& rhs) const;
 
         //- The opposite of the equality operation.
-        bool operator!=(const HashSet<Key, Hash>&) const;
+        bool operator!=(const this_type& rhs) const;
+
+
+        //- Assignment from a UList of keys
+        void operator=(const UList<Key>& lst);
+
+        //- Assignment from a FixedList of keys
+        template<unsigned Size>
+        void operator=(const FixedList<Key, Size>& lst);
+
+        //- Assignment from an initializer list of keys
+        void operator=(std::initializer_list<Key> lst);
 
 
         //- Combine entries from HashSets
-        void operator|=(const HashSet<Key, Hash>&);
+        void operator|=(const HashSet<Key, Hash>& rhs);
 
         //- Only retain entries found in both HashSets
-        void operator&=(const HashSet<Key, Hash>&);
+        inline void operator&=(const HashSet<Key, Hash>& rhs);
 
         //- Only retain unique entries (xor)
-        void operator^=(const HashSet<Key, Hash>&);
+        void operator^=(const HashSet<Key, Hash>& rhs);
 
         //- Add entries listed in the given HashSet to this HashSet
         inline void operator+=(const HashSet<Key, Hash>& rhs)
@@ -184,7 +289,17 @@ public:
         }
 
         //- Remove entries listed in the given HashSet from this HashSet
-        void operator-=(const HashSet<Key, Hash>&);
+        inline void operator-=(const HashSet<Key, Hash>& rhs);
+
+
+    // IOstream Operator
+
+        friend Ostream& operator<< <Key, Hash>
+        (
+            Ostream& os,
+            const HashSet<Key, Hash>& tbl
+        );
+
 };
 
 

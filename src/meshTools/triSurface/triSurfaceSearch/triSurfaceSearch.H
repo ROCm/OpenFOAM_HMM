@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,10 +85,10 @@ class triSurfaceSearch
         ) const;
 
         //- Disallow default bitwise copy construct
-        triSurfaceSearch(const triSurfaceSearch&);
+        triSurfaceSearch(const triSurfaceSearch&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const triSurfaceSearch&);
+        void operator=(const triSurfaceSearch&) = delete;
 
 
 public:
@@ -96,17 +96,18 @@ public:
     // Constructors
 
         //- Construct from surface. Holds reference to surface!
-        explicit triSurfaceSearch(const triSurface&);
+        explicit triSurfaceSearch(const triSurface& surface);
 
         //- Construct from surface and dictionary.
-        triSurfaceSearch(const triSurface&, const dictionary& dict);
+        triSurfaceSearch(const triSurface& surface, const dictionary& dict);
 
-        //- Construct from components
+        //- Construct from components.
+        //  A invalid (negative) tolerance uses the default tolerance.
         triSurfaceSearch
         (
             const triSurface& surface,
             const scalar tolerance,
-            const label maxTreeDepth
+            const label maxTreeDepth = 10
         );
 
 
@@ -155,7 +156,7 @@ public:
         //  - hit()      : whether nearest point found within bounding box
         //  - hitPoint() : coordinate of nearest point
         //  - index()    : surface triangle label
-        pointIndexHit nearest(const point&, const vector& span) const;
+        pointIndexHit nearest(const point& pt, const vector& span) const;
 
         void findLine
         (

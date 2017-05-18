@@ -416,7 +416,8 @@ void Foam::timeVaryingMappedFixedValueFvPatchField<Type>::checkTable()
             // Reread values and interpolate
             fileName valsFile
             (
-                this->db().time().caseConstant()
+                this->db().time().path()
+               /this->db().time().caseConstant()
                /"boundaryData"
                /this->patch().name()
                /sampleTimes_[endSampleTime_].name()

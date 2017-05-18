@@ -254,14 +254,14 @@ public:
 
             // Member operators
 
-                T& operator*()
+                T& operator*() const
                 {
                     return
                         static_cast<link&>
                         (LListBase_iterator::operator*()).obj_;
                 }
 
-                T& operator()()
+                T& operator()() const
                 {
                     return operator*();
                 }
@@ -312,14 +312,14 @@ public:
 
             // Member operators
 
-                const T& operator*()
+                const T& operator*() const
                 {
                     return
                         static_cast<const link&>
                         (LListBase_const_iterator::operator*()).obj_;
                 }
 
-                const T& operator()()
+                const T& operator()() const
                 {
                     return operator*();
                 }

@@ -125,9 +125,9 @@ int main(int argc, char *argv[])
             << "No eigenValues found, shape may have symmetry, "
             << "perturbing inertia tensor diagonal" << endl;
 
-        J.xx() *= 1.0 + SMALL*rand.scalar01();
-        J.yy() *= 1.0 + SMALL*rand.scalar01();
-        J.zz() *= 1.0 + SMALL*rand.scalar01();
+        J.xx() *= 1.0 + SMALL*rand.sample01<scalar>();
+        J.yy() *= 1.0 + SMALL*rand.sample01<scalar>();
+        J.zz() *= 1.0 + SMALL*rand.sample01<scalar>();
 
         eVal = eigenValues(J);
 

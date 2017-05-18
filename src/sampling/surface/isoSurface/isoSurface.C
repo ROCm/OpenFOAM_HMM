@@ -24,21 +24,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "isoSurface.H"
-#include "fvMesh.H"
 #include "mergePoints.H"
-#include "addToRunTimeSelectionTable.H"
 #include "slicedVolFields.H"
 #include "volFields.H"
-#include "surfaceFields.H"
-#include "OFstream.H"
-#include "meshTools.H"
-#include "triSurfaceSearch.H"
 #include "triSurfaceTools.H"
-#include "surfaceIntersection.H"
-#include "intersectedSurface.H"
-#include "searchableBox.H"
 #include "triSurface.H"
-#include "triSurfaceMesh.H"
 #include "triPoints.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

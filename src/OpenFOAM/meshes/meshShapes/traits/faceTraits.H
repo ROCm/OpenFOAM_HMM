@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,34 +21,53 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::faceTraits
+
+Description
+    Traits class for faces
+
 \*---------------------------------------------------------------------------*/
 
-#include "cachedRandom.H"
+#ifndef faceTraits_H
+#define faceTraits_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline Foam::label Foam::cachedRandom::seed() const
+namespace Foam
 {
-    return seed_;
-}
 
+// Forward declarations
+class triFace;
+class labelledTri;
 
-inline const Foam::scalarList& Foam::cachedRandom::samples() const
+/*---------------------------------------------------------------------------*\
+                         Class faceTraits Declaration
+\*---------------------------------------------------------------------------*/
+
+template<class FaceType>
+class faceTraits
 {
-    return samples_;
-}
+public:
+
+    //- Face-type only handles triangles. Not true in general.
+    inline static bool isTri()  { return false; }
+};
 
 
-inline Foam::label Foam::cachedRandom::sampleI() const
-{
-    return sampleI_;
-}
+template<>
+inline bool faceTraits<triFace>::isTri()        { return true; }
+
+template<>
+inline bool faceTraits<labelledTri>::isTri()    { return true; }
 
 
-inline Foam::label& Foam::cachedRandom::sampleI()
-{
-    return sampleI_;
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

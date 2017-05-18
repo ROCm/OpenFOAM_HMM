@@ -25,9 +25,9 @@
 #     etc/bashrc
 #
 # Description
-#     Startup file for OpenFOAM
-#     Sourced from ~/.profile or ~/.bashrc
-#     Should be usable by any POSIX-compliant shell (eg, dash, ksh)
+#     Set the environment for OpenFOAM when using a POSIX shell.
+#     To be sourced manually or from the ~/.profile or ~/.bashrc files.
+#     Should be usable by any POSIX-compliant shell (eg, bash,dash,zsh,...)
 #
 #------------------------------------------------------------------------------
 
@@ -65,7 +65,7 @@ export WM_COMPILER_TYPE=system
 
 #- Compiler:
 #    WM_COMPILER = Gcc | Gcc4[8-9] | Gcc5[1-4] | Gcc6[1-3] | GccKNL
-#                  | Clang | Clang3[8-9] | Icc | IccKNL
+#                  | Clang | Clang3[8-9] | Clang40 | Icc | IccKNL
 export WM_COMPILER=Gcc
 unset WM_COMPILER_ARCH WM_COMPILER_LIB_ARCH
 
@@ -89,7 +89,7 @@ export WM_COMPILE_OPTION=Opt
 
 #- MPI implementation:
 #    WM_MPLIB = SYSTEMOPENMPI | OPENMPI | SYSTEMMPI | MPICH | MPICH-GM | HPMPI
-#               | MPI | FJMPI | QSMPI | SGIMPI | INTELMPI
+#               | MPI | FJMPI | QSMPI | SGIMPI | INTELMPI | USERMPI
 export WM_MPLIB=SYSTEMOPENMPI
 
 #- Operating System:
@@ -209,10 +209,11 @@ fi
 
 # Cleanup environment
 # ~~~~~~~~~~~~~~~~~~~
-unset cleaned foamClean foamOldDirs
 
-# Unload functions
-# ~~~~~~~~~~~~~~~~
+#- Functions
 . $WM_PROJECT_DIR/etc/config.sh/functions
+
+#- Variables (do as last for a clean exit code)
+unset cleaned foamClean foamOldDirs
 
 #------------------------------------------------------------------------------

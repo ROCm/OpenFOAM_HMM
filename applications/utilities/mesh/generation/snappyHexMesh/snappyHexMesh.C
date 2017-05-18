@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -660,7 +660,7 @@ void writeMesh
     Info<< "Writing mesh to time " << meshRefiner.timeName() << endl;
 
     processorMeshes::removeFiles(mesh);
-    if (!debugLevel)
+    if (!debugLevel && !(writeLevel&meshRefinement::WRITELAYERSETS))
     {
         topoSet::removeFiles(mesh);
     }

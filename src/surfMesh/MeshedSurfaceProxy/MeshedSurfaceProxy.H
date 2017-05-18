@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,9 +100,9 @@ public:
         //- Construct from component references
         MeshedSurfaceProxy
         (
-            const pointField&,
-            const List<Face>&,
-            const List<surfZone>& = List<surfZone>(),
+            const pointField& pointLst,
+            const List<Face>& faceLst,
+            const List<surfZone>& zoneLst = List<surfZone>(),
             const List<label>& faceMap = List<label>()
         );
 
@@ -126,11 +126,19 @@ public:
             (name, surf)
         );
 
-        //- Write to file
+        //- Write to file, selected based on its extension
         static void write
         (
-            const fileName&,
-            const MeshedSurfaceProxy<Face>&
+            const fileName& name,
+            const MeshedSurfaceProxy& surf
+        );
+
+        //- Write to file, selected based on given extension
+        static void write
+        (
+            const fileName& name,
+            const word& ext,
+            const MeshedSurfaceProxy& surf
         );
 
 
@@ -188,10 +196,16 @@ public:
                 write(name, *this);
             }
 
+            //- Generic write routine. Chooses writer based on extension.
+            virtual void write(const fileName& name, const word& ext) const
+            {
+                write(name, ext, *this);
+            }
+
             //- Write to database
             virtual void write
             (
-                const Time&,
+                const Time& t,
                 const word& surfName = word::null
             ) const;
 };

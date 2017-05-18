@@ -106,11 +106,14 @@ class timeActivatedFileUpdate
         //- Index of last file copied
         label lastIndex_;
 
+        //- Has anything been copied?
+        bool modified_;
+
 
     // Private Member Functions
 
         //- Update file
-        void updateFile(const bool checkFiles);
+        void updateFile();
 
         //- Disallow default bitwise copy construct
         timeActivatedFileUpdate(const timeActivatedFileUpdate&);
@@ -150,6 +153,9 @@ public:
 
         //- Do nothing
         virtual bool write();
+
+        //- Did any file get changed during execution?
+        virtual bool filesModified() const;
 };
 
 

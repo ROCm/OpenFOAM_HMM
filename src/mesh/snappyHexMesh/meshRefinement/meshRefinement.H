@@ -47,7 +47,7 @@ SourceFiles
 #include "hexRef8.H"
 #include "mapPolyMesh.H"
 #include "autoPtr.H"
-#include "labelPair.H"
+#include "labelPairHashes.H"
 #include "indirectPrimitivePatch.H"
 #include "pointFieldsFwd.H"
 #include "Tuple2.H"
@@ -735,7 +735,7 @@ private:
                 const label ownZone,
                 const label neiZone,
                 wordPairHashTable& zonesToFaceZone,
-                HashTable<word, labelPair, labelPair::Hash<>>&
+                LabelPairMap<word>& zoneIDsToFaceZone
             ) const;
 
             //- Remove any loose standing cells
@@ -1353,6 +1353,12 @@ public:
                 (
                     const labelList& candidateFaces,
                     const labelHashSet& set
+                ) const;
+
+                // Pick up faces of cells of faces in set.
+                labelList growFaceCellFace
+                (
+                    const UList<label>& set
                 ) const;
 
                 // Pick up faces of cells of faces in set.

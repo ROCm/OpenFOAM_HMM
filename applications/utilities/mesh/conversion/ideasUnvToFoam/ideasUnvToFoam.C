@@ -925,8 +925,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    HashTable<labelList,word> cellZones;
-    HashTable<labelList,word> faceZones;
+    HashTable<labelList> cellZones;
+    HashTable<labelList> faceZones;
     List<bool> isAPatch(patchNames.size(),true);
 
     if (dofVertIndices.size())

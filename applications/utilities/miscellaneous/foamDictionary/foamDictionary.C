@@ -112,6 +112,7 @@ Usage
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "profiling.H"
 #include "Time.H"
 #include "IFstream.H"
 #include "OFstream.H"
@@ -241,6 +242,7 @@ int main(int argc, char *argv[])
     argList::addNote("manipulates dictionaries");
 
     argList::noBanner();
+    argList::noJobInfo();
     argList::validArgs.append("dictionary");
     argList::addBoolOption("keywords", "list keywords");
     argList::addOption("entry", "name", "report/select the named entry");
@@ -288,6 +290,7 @@ int main(int argc, char *argv[])
         "disableFunctionEntries",
         "Disable expansion of dictionary directives - #include, #codeStream etc"
     );
+    profiling::disable(); // Disable profiling (and its output)
 
     argList args(argc, argv);
 

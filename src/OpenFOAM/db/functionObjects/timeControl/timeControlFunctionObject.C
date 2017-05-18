@@ -220,6 +220,17 @@ bool Foam::functionObjects::timeControl::read
 }
 
 
+bool Foam::functionObjects::timeControl::filesModified() const
+{
+    bool mod = false;
+    if (active())
+    {
+        mod = foPtr_->filesModified();
+    }
+    return mod;
+}
+
+
 void Foam::functionObjects::timeControl::updateMesh
 (
     const mapPolyMesh& mpm

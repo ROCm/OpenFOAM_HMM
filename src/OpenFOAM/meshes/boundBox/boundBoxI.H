@@ -268,11 +268,11 @@ inline void Foam::boundBox::operator+=(const boundBox& bb)
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //
 
 inline bool Foam::operator==(const boundBox& a, const boundBox& b)
 {
-    return (a.min_ == b.min_) && (a.max_ == b.max_);
+    return (a.min() == b.min()) && (a.max() == b.max());
 }
 
 

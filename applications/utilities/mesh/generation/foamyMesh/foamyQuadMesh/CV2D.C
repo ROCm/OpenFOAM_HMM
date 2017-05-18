@@ -264,8 +264,8 @@ void Foam::CV2D::insertGrid()
 
             if (meshControls().randomiseInitialGrid())
             {
-                p.x() += pert*(rndGen.scalar01() - 0.5);
-                p.y() += pert*(rndGen.scalar01() - 0.5);
+                p.x() += pert*(rndGen.sample01<scalar>() - 0.5);
+                p.y() += pert*(rndGen.sample01<scalar>() - 0.5);
             }
 
             if (qSurf_.wellInside(p, 0.5*meshControls().minCellSize2()))

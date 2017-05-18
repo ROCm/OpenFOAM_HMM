@@ -51,7 +51,6 @@ namespace Foam
 {
 
 // Forward declaration of classes
-class string;
 template<class T> class List;
 
 
@@ -76,12 +75,10 @@ class regExp
         void operator=(const regExp&) = delete;
 
         //- Return true if it matches and sets the sub-groups matched.
-        //  Templated to support both std::string and Foam::string
-        template<class StringType>
         bool matchGrouping
         (
             const std::string&,
-            List<StringType>& groups
+            List<std::string>& groups
         ) const;
 
 
@@ -96,16 +93,7 @@ public:
         //  range: '[', ']' \n
         //
         //  Don't bother checking for '{digit}' bounds
-        inline static bool meta(const char c)
-        {
-            return
-            (
-                (c == '.')                           // any character
-             || (c == '*' || c == '+' || c == '?')   // quantifiers
-             || (c == '(' || c == ')' || c == '|')   // grouping/branching
-             || (c == '[' || c == ']')               // range
-            );
-        }
+        inline static bool meta(const char c);
 
 
     // Constructors
@@ -129,22 +117,13 @@ public:
       // Access
 
         //- Return true if a precompiled expression does not exist
-        inline bool empty() const
-        {
-            return !preg_;
-        }
+        inline bool empty() const;
 
         //- Does a precompiled expression exist?
-        inline bool exists() const
-        {
-            return preg_ ? true : false;
-        }
+        inline bool exists() const;
 
         //- The number of capture groups for a non-empty expression
-        inline unsigned ngroups() const
-        {
-            return preg_ ? preg_->re_nsub : 0;
-        }
+        inline unsigned ngroups() const;
 
 
       // Editing
@@ -173,26 +152,19 @@ public:
         //  The begin-of-line (^) and end-of-line ($) anchors are implicit
         bool match(const std::string& text, List<std::string>& groups) const;
 
-        //- Return true if it matches and sets the sub-groups matched
-        //  The begin-of-line (^) and end-of-line ($) anchors are implicit
-        bool match(const std::string& text, List<string>& groups) const;
-
         //- Return true if the regex was found within string
-        bool search(const std::string& text) const
-        {
-            return std::string::npos != find(text);
-        }
+        bool search(const std::string& text) const;
 
 
     // Member Operators
 
         //- Assign and compile pattern from a character array
         //  Always case sensitive
-        void operator=(const char* pattern);
+        inline void operator=(const char* pattern);
 
         //- Assign and compile pattern from string
         //  Always case sensitive
-        void operator=(const std::string& pattern);
+        inline void operator=(const std::string& pattern);
 };
 
 
@@ -201,6 +173,8 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "regExpI.H"
 
 #endif
 

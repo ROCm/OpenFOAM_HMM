@@ -51,7 +51,7 @@ SourceFiles
 #include "contactAngleForce.H"
 #include "Function1.H"
 #include "distributionModel.H"
-#include "cachedRandom.H"
+#include "Random.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,7 +76,7 @@ class perturbedTemperatureDependentContactAngleForce
         autoPtr<Function1<scalar>> thetaPtr_;
 
         //- Random number generator
-        cachedRandom rndGen_;
+        Random rndGen_;
 
         //- Parcel size PDF model
         const autoPtr<distributionModel> distribution_;

@@ -316,13 +316,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     (
         particleProperties_.subOrEmptyDict("subModels", solution_.active())
     ),
-    rndGen_
-    (
-        label(0),
-        solution_.steadyState() ?
-        particleProperties_.lookupOrDefault<label>("randomSampleSize", 100000)
-      : -1
-    ),
+    rndGen_(Pstream::myProcNo()),
     cellOccupancyPtr_(),
     cellLengthScale_(cbrt(mesh_.V())),
     rho_(rho),
@@ -515,7 +509,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     solution_(mesh),
     constProps_(),
     subModelProperties_(dictionary::null),
-    rndGen_(0, 0),
+    rndGen_(),
     cellOccupancyPtr_(nullptr),
     cellLengthScale_(c.cellLengthScale_),
     rho_(c.rho_),

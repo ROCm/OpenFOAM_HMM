@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,25 +25,56 @@ Class
     Foam::dictionary
 
 Description
-    A list of keyword definitions, which are a keyword followed by any number
-    of values (e.g. words and numbers). The keywords can represent patterns
-    which are matched using Posix regular expressions. The general order for
-    searching is as follows:
-    - exact match
-    - pattern match (in reverse order)
-    - optional recursion into the enclosing (parent) dictionaries
+    A list of keyword definitions, which are a keyword followed by a number
+    of values (eg, words and numbers) or by a sub-dictionary.
+    Since the dictionary format is used extensively throughout OpenFOAM for
+    input/output files, there are many examples of its use.
 
-    The dictionary class is the base class for IOdictionary.
-    It also serves as a bootstrap dictionary for the objectRegistry data
-    dictionaries since, unlike the IOdictionary class, it does not use an
-    objectRegistry itself to work.
+    Dictionary keywords are a plain word or a pattern (regular expression).
+    The general order for searching is as follows:
+      - exact match
+      - pattern match (in reverse order)
+      - optional recursion into the enclosing (parent) dictionaries
 
-    To add - a merge() member function with a non-const dictionary parameter?
-    This would avoid unnecessary cloning in the add(entry*, bool) method.
+    The dictionary class is the base class for IOdictionary and also serves
+    as a bootstrap dictionary for the objectRegistry data dictionaries.
+
+Note
+    Within dictionaries, entries can be referenced by using the '$' syntax
+    familiar from shell programming. A '.' separator is used when referencing
+    sub-dictionary entries. Leading '.' prefixes can be used to specify
+    an entry from a parent directory. A leading ':' or '^' prefix specifies
+    starting from the top-level entry. For example,
+
+    \verbatim
+    key1        val1;
+    key2        $key1;   // use key1 value from current scope
+    key3        $.key1;  // use key1 value from current scope
+
+    subdict1
+    {
+        key1        val1b;
+        key2        $..key1; // use key1 value from parent
+        subdict2
+        {
+            key2        val2;
+            key3        $...key1; // use key1 value from grandparent
+        }
+    }
+
+    key4        $^subdict1.subdict2.key3;  // lookup with absolute scoping
+    \endverbatim
+
+    It is also possible to use the '${}' syntax for clarity.
 
 SourceFiles
     dictionary.C
     dictionaryIO.C
+
+SeeAlso
+    - Foam::entry
+    - Foam::dictionaryEntry
+    - Foam::primitiveEntry
 
 \*---------------------------------------------------------------------------*/
 
@@ -76,6 +107,7 @@ Ostream& operator<<(Ostream&, const dictionary&);
                         Class dictionaryName Declaration
 \*---------------------------------------------------------------------------*/
 
+//- Holds name for a dictionary
 class dictionaryName
 {
     // Private data
@@ -87,11 +119,11 @@ public:
 
     // Constructors
 
-        //- Construct dictionaryName null
+        //- Construct null
         dictionaryName()
         {}
 
-        //- Construct dictionaryName as copy of the given fileName
+        //- Construct as copy of the given fileName
         dictionaryName(const fileName& name)
         :
             name_(name)
@@ -116,16 +148,15 @@ public:
         const word dictName() const
         {
             const word scopedName = name_.name();
+            const std::string::size_type i = scopedName.rfind('.');
 
-            string::size_type i = scopedName.rfind('.');
-
-            if (i == scopedName.npos)
+            if (i == std::string::npos)
             {
                 return scopedName;
             }
             else
             {
-                return scopedName.substr(i + 1, scopedName.npos);
+                return scopedName.substr(i+1);
             }
         }
 };
@@ -142,8 +173,7 @@ class dictionary
 {
     // Private data
 
-        //- If true write optional keywords and values
-        //  if not present in dictionary
+        //- Report optional keywords and values if not present in dictionary
         static bool writeOptionalEntries;
 
         //- HashTable of the entries held on the DL-list for quick lookup
@@ -165,7 +195,7 @@ class dictionary
         //  otherwise return nullptr. Allows scoping using '.'
         const entry* lookupScopedSubEntryPtr
         (
-            const word&,
+            const word& keyword,
             bool recursive,
             bool patternMatch
         ) const;
@@ -217,38 +247,38 @@ public:
         (
             const fileName& name,
             const dictionary& parentDict,
-            Istream&
+            Istream& is
         );
 
         //- Construct top-level dictionary from Istream,
         //  reading entries until EOF
-        dictionary(Istream&);
+        dictionary(Istream& is);
 
         //- Construct top-level dictionary from Istream,
         //  reading entries until EOF, optionally keeping the header
-        dictionary(Istream&, const bool keepHeader);
+        dictionary(Istream& is, const bool keepHeader);
 
         //- Construct as copy given the parent dictionary
         dictionary(const dictionary& parentDict, const dictionary&);
 
         //- Construct top-level dictionary as copy
-        dictionary(const dictionary&);
+        dictionary(const dictionary& dict);
 
         //- Construct top-level dictionary as copy from pointer to dictionary.
         //  A null pointer is treated like an empty dictionary.
-        dictionary(const dictionary*);
+        dictionary(const dictionary* dictPtr);
 
         //- Construct by transferring parameter contents given parent dictionary
-        dictionary(const dictionary& parentDict, const Xfer<dictionary>&);
+        dictionary(const dictionary& parentDict, const Xfer<dictionary>& dict);
 
         //- Construct top-level dictionary by transferring parameter contents
-        dictionary(const Xfer<dictionary>&);
+        dictionary(const Xfer<dictionary>& dict);
 
         //- Construct and return clone
         autoPtr<dictionary> clone() const;
 
         //- Construct top-level dictionary on freestore from Istream
-        static autoPtr<dictionary> New(Istream&);
+        static autoPtr<dictionary> New(Istream& is);
 
 
     //- Destructor
@@ -286,8 +316,8 @@ public:
             //  If patternMatch, use regular expressions
             bool found
             (
-                const word&,
-                bool recursive=false,
+                const word& keyword,
+                bool recursive = false,
                 bool patternMatch = true
             ) const;
 
@@ -297,7 +327,7 @@ public:
             //  If patternMatch, use regular expressions
             const entry* lookupEntryPtr
             (
-                const word&,
+                const word& keyword,
                 bool recursive,
                 bool patternMatch
             ) const;
@@ -308,7 +338,7 @@ public:
             //  If patternMatch, use regular expressions.
             entry* lookupEntryPtr
             (
-                const word&,
+                const word& keyword,
                 bool recursive,
                 bool patternMatch
             );
@@ -318,7 +348,7 @@ public:
             //  If patternMatch, use regular expressions.
             const entry& lookupEntry
             (
-                const word&,
+                const word& keyword,
                 bool recursive,
                 bool patternMatch
             ) const;
@@ -328,9 +358,9 @@ public:
             //  If patternMatch, use regular expressions.
             ITstream& lookup
             (
-                const word&,
-                bool recursive=false,
-                bool patternMatch=true
+                const word& keyword,
+                bool recursive = false,
+                bool patternMatch = true
             ) const;
 
             //- Find and return a T,
@@ -345,17 +375,16 @@ public:
                 bool patternMatch=true
             ) const;
 
-            //- Find and return a T,
-            //  if not found return the given default value.
+            //- Find and return a T, or return the given default value
             //  If recursive, search parent dictionaries.
             //  If patternMatch, use regular expressions.
             template<class T>
             T lookupOrDefault
             (
-                const word&,
-                const T&,
-                bool recursive=false,
-                bool patternMatch=true
+                const word& keyword,
+                const T& deflt,
+                bool recursive = false,
+                bool patternMatch = true
             ) const;
 
             //- Find and return a T, if not found return the given
@@ -365,10 +394,10 @@ public:
             template<class T>
             T lookupOrAddDefault
             (
-                const word&,
-                const T&,
-                bool recursive=false,
-                bool patternMatch=true
+                const word& keyword,
+                const T& deflt,
+                bool recursive = false,
+                bool patternMatch = true
             );
 
             //- Find an entry if present, and assign to T
@@ -378,10 +407,10 @@ public:
             template<class T>
             bool readIfPresent
             (
-                const word&,
-                T&,
-                bool recursive=false,
-                bool patternMatch=true
+                const word& keyword,
+                T& val,
+                bool recursive = false,
+                bool patternMatch = true
             ) const;
 
             //- Find and return an entry data stream pointer if present
@@ -389,33 +418,33 @@ public:
             //  Special handling for ':' at start of keyword and '..'.
             const entry* lookupScopedEntryPtr
             (
-                const word&,
+                const word& keyword,
                 bool recursive,
                 bool patternMatch
             ) const;
 
             //- Check if entry is a sub-dictionary
-            bool isDict(const word&) const;
+            bool isDict(const word& keyword) const;
 
             //- Find and return a sub-dictionary pointer if present
             //  otherwise return nullptr.
-            const dictionary* subDictPtr(const word&) const;
+            const dictionary* subDictPtr(const word& keyword) const;
 
             //- Find and return a sub-dictionary pointer if present
             //  otherwise return nullptr.
-            dictionary* subDictPtr(const word&);
+            dictionary* subDictPtr(const word& keyword);
 
             //- Find and return a sub-dictionary
-            const dictionary& subDict(const word&) const;
+            const dictionary& subDict(const word& keyword) const;
 
             //- Find and return a sub-dictionary for manipulation
-            dictionary& subDict(const word&);
+            dictionary& subDict(const word& keyword);
 
             //- Find and return a sub-dictionary as a copy, or
             //  return an empty dictionary if the sub-dictionary does not exist
             dictionary subOrEmptyDict
             (
-                const word&,
+                const word& keyword,
                 const bool mustRead = false
             ) const;
 
@@ -430,74 +459,78 @@ public:
             wordList sortedToc() const;
 
             //- Return the list of available keys or patterns
-            List<keyType> keys(bool patterns=false) const;
+            List<keyType> keys(bool patterns = false) const;
 
 
         // Editing
 
             //- Substitute the given keyword prepended by '$' with the
             //  corresponding sub-dictionary entries
-            bool substituteKeyword(const word& keyword);
+            bool substituteKeyword(const word& keyword, bool mergeEntry=false);
 
             //- Substitute the given scoped keyword prepended by '$' with the
             //  corresponding sub-dictionary entries
-            bool substituteScopedKeyword(const word& keyword);
+            bool substituteScopedKeyword
+            (
+                const word& keyword,
+                bool mergeEntry=false
+            );
 
             //- Add a new entry
             //  With the merge option, dictionaries are interwoven and
             //  primitive entries are overwritten
-            bool add(entry*, bool mergeEntry=false);
+            bool add(entry* entryPtr, bool mergeEntry=false);
 
             //- Add an entry
             //  With the merge option, dictionaries are interwoven and
             //  primitive entries are overwritten
-            void add(const entry&, bool mergeEntry=false);
+            void add(const entry& e, bool mergeEntry=false);
 
             //- Add a word entry
             //  optionally overwrite an existing entry
-            void add(const keyType&, const word&, bool overwrite=false);
+            void add(const keyType& k, const word& w, bool overwrite=false);
 
             //- Add a string entry
             //  optionally overwrite an existing entry
-            void add(const keyType&, const string&, bool overwrite=false);
+            void add(const keyType& k, const string& s, bool overwrite=false);
 
             //- Add a label entry
             //  optionally overwrite an existing entry
-            void add(const keyType&, const label, bool overwrite=false);
+            void add(const keyType&, const label l, bool overwrite=false);
 
             //- Add a scalar entry
             //  optionally overwrite an existing entry
-            void add(const keyType&, const scalar, bool overwrite=false);
+            void add(const keyType&, const scalar s, bool overwrite=false);
 
             //- Add a dictionary entry
             //  optionally merge with an existing sub-dictionary
             void add
             (
-                const keyType&,
-                const dictionary&,
-                bool mergeEntry=false
+                const keyType& k,
+                const dictionary& d,
+                bool mergeEntry = false
             );
 
             //- Add a T entry
             //  optionally overwrite an existing entry
             template<class T>
-            void add(const keyType&, const T&, bool overwrite=false);
+            void add(const keyType& k, const T& t, bool overwrite=false);
 
             //- Assign a new entry, overwrite any existing entry
-            void set(entry*);
+            void set(entry* entryPtr);
 
             //- Assign a new entry, overwrite any existing entry
-            void set(const entry&);
+            void set(const entry& e);
 
             //- Assign a dictionary entry, overwrite any existing entry
-            void set(const keyType&, const dictionary&);
+            void set(const keyType& k, const dictionary& d);
 
             //- Assign a T entry, overwrite any existing entry
             template<class T>
-            void set(const keyType&, const T&);
+            void set(const keyType& k, const T& t);
 
             //- Remove an entry specified by keyword
-            bool remove(const word&);
+            bool remove(const word& Keyword);
 
             //- Change the keyword for an entry,
             //  optionally forcing overwrite of an existing entry
@@ -510,13 +543,13 @@ public:
 
             //- Merge entries from the given dictionary.
             //  Also merge sub-dictionaries as required.
-            bool merge(const dictionary&);
+            bool merge(const dictionary& dict);
 
             //- Clear the dictionary
             void clear();
 
             //- Transfer the contents of the argument and annul the argument.
-            void transfer(dictionary&);
+            void transfer(dictionary& dict);
 
             //- Transfer contents to the Xfer container
             Xfer<dictionary> xfer();
@@ -525,53 +558,53 @@ public:
         // Read
 
             //- Read dictionary from Istream
-            bool read(Istream&);
+            bool read(Istream& is);
 
             //- Read dictionary from Istream, optionally keeping the header
-            bool read(Istream&, const bool keepHeader);
+            bool read(Istream& is, const bool keepHeader);
 
 
         // Write
 
             //- Write sub-dictionary with the keyword as its header
-            void writeEntry(const keyType& keyword, Ostream&) const;
+            void writeEntry(const keyType& keyword, Ostream& os) const;
 
             //- Write dictionary entries.
             //  Optionally with extra new line between entries for
             //  "top-level" dictionaries
-            void writeEntries(Ostream&, const bool extraNewLine=false) const;
+            void writeEntries(Ostream& os, const bool extraNewLine=false) const;
 
             //- Write dictionary, normally with sub-dictionary formatting
-            void write(Ostream&, const bool subDict=true) const;
+            void write(Ostream& os, const bool subDict=true) const;
 
 
     // Member Operators
 
         //- Find and return entry
-        ITstream& operator[](const word&) const;
+        ITstream& operator[](const word& keyword) const;
 
-        void operator=(const dictionary&);
+        void operator=(const dictionary& rhs);
 
         //- Include entries from the given dictionary.
         //  Warn, but do not overwrite existing entries.
-        void operator+=(const dictionary&);
+        void operator+=(const dictionary& rhs);
 
         //- Conditionally include entries from the given dictionary.
         //  Do not overwrite existing entries.
-        void operator|=(const dictionary&);
+        void operator|=(const dictionary& rhs);
 
         //- Unconditionally include entries from the given dictionary.
         //  Overwrite existing entries.
-        void operator<<=(const dictionary&);
+        void operator<<=(const dictionary& rhs);
 
 
     // IOstream operators
 
         //- Read dictionary from Istream
-        friend Istream& operator>>(Istream&, dictionary&);
+        friend Istream& operator>>(Istream& is, dictionary& dict);
 
         //- Write dictionary to Ostream
-        friend Ostream& operator<<(Ostream&, const dictionary&);
+        friend Ostream& operator<<(Ostream& os, const dictionary& dict);
 };
 
 

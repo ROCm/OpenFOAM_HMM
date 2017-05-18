@@ -4,7 +4,9 @@ global/global.Cver
 global/argList/argList.C
 global/clock/clock.C
 global/profiling/profiling.C
+global/profiling/profilingInformation.C
 global/profiling/profilingSysInfo.C
+global/profiling/profilingTrigger.C
 global/etcFiles/etcFiles.C
 
 bools = primitives/bools
@@ -115,7 +117,6 @@ $(sha1)/SHA1.C
 $(sha1)/SHA1Digest.C
 
 primitives/random/Random/Random.C
-primitives/random/cachedRandom/cachedRandom.C
 
 ranges = primitives/ranges
 $(ranges)/labelRange/labelRange.C

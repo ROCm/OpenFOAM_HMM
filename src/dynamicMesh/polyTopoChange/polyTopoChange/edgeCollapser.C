@@ -42,7 +42,7 @@ defineTypeNameAndDebug(edgeCollapser, 0);
 }
 
 
-Foam::HashSet<Foam::label> Foam::edgeCollapser::checkBadFaces
+Foam::labelHashSet Foam::edgeCollapser::checkBadFaces
 (
     const polyMesh& mesh,
     const dictionary& meshQualityDict
@@ -423,7 +423,7 @@ void Foam::edgeCollapser::faceCollapseAxisAndAspectRatio
 
     if (detJ < 1e-5)
     {
-        collapseAxis = f.edges()[longestEdge(f, pts)].vec(pts);
+        collapseAxis = f.edges()[f.longestEdge(pts)].vec(pts);
 
         // It is possible that all the points of a face are the same
         if (magSqr(collapseAxis) > VSMALL)
@@ -446,7 +446,7 @@ void Foam::edgeCollapser::faceCollapseAxisAndAspectRatio
             // Cannot necessarily determine linearly independent
             // eigenvectors, or any at all, use longest edge direction.
 
-            collapseAxis = f.edges()[longestEdge(f, pts)].vec(pts);
+            collapseAxis = f.edges()[f.longestEdge(pts)].vec(pts);
 
             collapseAxis /= mag(collapseAxis);
 

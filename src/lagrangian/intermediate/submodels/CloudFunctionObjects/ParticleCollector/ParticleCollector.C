@@ -177,10 +177,10 @@ void Foam::ParticleCollector<CloudType>::initConcentricCircles()
         vector tangent = Zero;
         scalar magTangent = 0.0;
 
-        Random rnd(1234);
+        Random& rnd = this->owner().rndGen();
         while (magTangent < SMALL)
         {
-            vector v = rnd.vector01();
+            vector v = rnd.sample01<vector>();
 
             tangent = v - (v & normal_[0])*normal_[0];
             magTangent = mag(tangent);

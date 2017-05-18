@@ -43,7 +43,7 @@ namespace distributionModels
 Foam::distributionModels::normal::normal
 (
     const dictionary& dict,
-    cachedRandom& rndGen
+    Random& rndGen
 )
 :
     distributionModel(typeName, dict, rndGen),
