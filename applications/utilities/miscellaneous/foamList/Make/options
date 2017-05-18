@@ -89,7 +89,6 @@ EXE_LIBS = \
     -lsurfMesh \
     -lthermalBaffleModels \
     -ltopoChangerFvMesh \
-    -ltriSurface \
     -lturbulenceModels \
     -ltwoPhaseMixture \
     -ltwoPhaseMixtureThermo \
