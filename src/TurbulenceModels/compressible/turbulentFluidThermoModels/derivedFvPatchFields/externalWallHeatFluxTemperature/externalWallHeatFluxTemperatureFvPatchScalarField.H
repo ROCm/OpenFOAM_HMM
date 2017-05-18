@@ -122,8 +122,8 @@ public:
         //- Operation mode enumeration
         enum operationMode
         {
-            fixedPower,                 //!< Fixed heat flux
-            fixedHeatFlux,              //!< Fixed heat flux
+            fixedPower,                 //!< Fixed heat power [W]
+            fixedHeatFlux,              //!< Fixed heat flux [W/m2]
             fixedHeatTransferCoeff,     //!< Fixed heat transfer coefficient
         };
 
