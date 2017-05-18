@@ -156,11 +156,7 @@ protected:
 
     // Protected Member Functions
 
-        virtual void correctNut
-        (
-            const volScalarField& S2,
-            const volScalarField& F2
-        );
+        virtual void correctNut(const volScalarField& S2);
 
 
 public:
