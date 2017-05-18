@@ -159,14 +159,17 @@ inline specie operator==(const specie& st1, const specie& st2)
         diffY = SMALL;
     }
 
-    const scalar diffRW =
-        st2.Y_/st2.molWeight_ - st1.Y_/st1.molWeight_;
+    const scalar diffRW = st2.Y_/st2.molWeight_ - st1.Y_/st1.molWeight_;
 
-    scalar molWeight = GREAT;
-    if (mag(diffRW) > SMALL)
-    {
-        molWeight = diffY/diffRW;
-    }
+    // if (mag(diffRW) > SMALL)
+    // {
+    //     molWeight = diffY/diffRW;
+    // }
+
+    // Using intermediate volatile bool to prevent compiler optimising out the
+    // if block (above) - CLANG 3.7.1
+    volatile const bool valid = (mag(diffRW) > SMALL);
+    const scalar molWeight = valid ? diffY/diffRW : GREAT;
 
     return specie(diffY, molWeight);
 }
