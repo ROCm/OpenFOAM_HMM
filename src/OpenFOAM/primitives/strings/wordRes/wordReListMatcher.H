@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,43 +21,30 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Primitive
-    direction
+Typedef
+    Foam::wordReListMatcher
 
 Description
-    Direction is an 8-bit unsigned integer type used to represent the Cartesian
-    directions etc.
+    The older name for Foam::wordRes, which is a wrapper for matching
+    a std::string against wordRe list.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef direction_H
-#define direction_H
+#ifndef wordReListMatcher_H
+#define wordReListMatcher_H
 
-#include <cstdint>
-#include <iostream>
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class Istream;
-class Ostream;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef uint8_t direction;
-
-direction readDirection(Istream& is);
-Istream& operator>>(Istream& is, direction& d);
-Ostream& operator<<(Ostream& os, const direction d);
-std::ostream& operator<<(std::ostream& os, const direction d);
+     typedef wordRes wordReListMatcher;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

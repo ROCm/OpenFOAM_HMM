@@ -50,8 +50,8 @@ namespace Foam
 class Switch;
 class dictionary;
 
-Istream& operator>>(Istream&, Switch&);
-Ostream& operator<<(Ostream&, const Switch&);
+Istream& operator>>(Istream& is, Switch& s);
+Ostream& operator<<(Ostream& is, const Switch& s);
 
 
 /*---------------------------------------------------------------------------*\
@@ -108,8 +108,12 @@ private:
 
     // Static Member Functions
 
-        //- Return a switchType representation of a word
-        static switchType asEnum(const std::string&, const bool allowInvalid);
+        //- Return a switchType representation of an input string
+        static switchType asEnum
+        (
+            const std::string& str,
+            const bool allowInvalid
+        );
 
 
 public:
@@ -161,8 +165,8 @@ public:
         //  value is not found, it is added into the dictionary.
         static Switch lookupOrAddToDict
         (
-            const word&,
-            dictionary&,
+            const word& name,
+            dictionary& dict,
             const Switch& defaultValue = false
         );
 
@@ -176,7 +180,7 @@ public:
         const char* asText() const;
 
         //- Update the value of the Switch if it is found in the dictionary
-        bool readIfPresent(const word&, const dictionary&);
+        bool readIfPresent(const word& name, const dictionary& dict);
 
 
     // Member Operators
@@ -202,8 +206,8 @@ public:
 
     // IOstream Operators
 
-        friend Istream& operator>>(Istream&, Switch&);
-        friend Ostream& operator<<(Ostream&, const Switch&);
+        friend Istream& operator>>(Istream& is, Switch& s);
+        friend Ostream& operator<<(Ostream& os, const Switch& s);
 };
 
 

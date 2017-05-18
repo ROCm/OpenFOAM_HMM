@@ -231,25 +231,169 @@ Foam::HashTable<T, Key, Hash>::find
 template<class T, class Key, class Hash>
 Foam::List<Key> Foam::HashTable<T, Key, Hash>::toc() const
 {
-    List<Key> keys(nElmts_);
-    label keyI = 0;
+    List<Key> keyLst(nElmts_);
+    label count = 0;
 
     for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
-        keys[keyI++] = iter.key();
+        keyLst[count++] = iter.key();
     }
 
-    return keys;
+    return keyLst;
 }
 
 
 template<class T, class Key, class Hash>
 Foam::List<Key> Foam::HashTable<T, Key, Hash>::sortedToc() const
 {
-    List<Key> sortedLst = this->toc();
-    sort(sortedLst);
+    List<Key> keyLst = this->toc();
+    Foam::sort(keyLst);
 
-    return sortedLst;
+    return keyLst;
+}
+
+
+template<class T, class Key, class Hash>
+template<class UnaryPredicate>
+Foam::List<Key> Foam::HashTable<T, Key, Hash>::tocKeys
+(
+    const UnaryPredicate& pred,
+    const bool invert
+) const
+{
+    List<Key> keyLst(nElmts_);
+    label count = 0;
+
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
+    {
+        if ((pred(iter.key()) ? !invert : invert))
+        {
+            keyLst[count++] = iter.key();
+        }
+    }
+
+    keyLst.setSize(count);
+    Foam::sort(keyLst);
+
+    return keyLst;
+}
+
+
+template<class T, class Key, class Hash>
+template<class UnaryPredicate>
+Foam::List<Key> Foam::HashTable<T, Key, Hash>::tocValues
+(
+    const UnaryPredicate& pred,
+    const bool invert
+) const
+{
+    List<Key> keyLst(nElmts_);
+    label count = 0;
+
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
+    {
+        if ((pred(iter.object()) ? !invert : invert))
+        {
+            keyLst[count++] = iter.key();
+        }
+    }
+
+    keyLst.setSize(count);
+    Foam::sort(keyLst);
+
+    return keyLst;
+}
+
+
+template<class T, class Key, class Hash>
+template<class BinaryPredicate>
+Foam::List<Key> Foam::HashTable<T, Key, Hash>::tocEntries
+(
+    const BinaryPredicate& pred,
+    const bool invert
+) const
+{
+    List<Key> keyLst(nElmts_);
+    label count = 0;
+
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
+    {
+        if ((pred(iter.key(), iter.object()) ? !invert : invert))
+        {
+            keyLst[count++] = iter.key();
+        }
+    }
+
+    keyLst.setSize(count);
+    Foam::sort(keyLst);
+
+    return keyLst;
+}
+
+
+template<class T, class Key, class Hash>
+template<class UnaryPredicate>
+Foam::label Foam::HashTable<T, Key, Hash>::countKeys
+(
+    const UnaryPredicate& pred,
+    const bool invert
+) const
+{
+    label count = 0;
+
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
+    {
+        if ((pred(iter.key()) ? !invert : invert))
+        {
+            ++count;
+        }
+    }
+
+    return count;
+}
+
+
+template<class T, class Key, class Hash>
+template<class UnaryPredicate>
+Foam::label Foam::HashTable<T, Key, Hash>::countValues
+(
+    const UnaryPredicate& pred,
+    const bool invert
+) const
+{
+    label count = 0;
+
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
+    {
+        if ((pred(iter.object()) ? !invert : invert))
+        {
+            ++count;
+        }
+    }
+
+    return count;
+}
+
+
+template<class T, class Key, class Hash>
+template<class BinaryPredicate>
+Foam::label Foam::HashTable<T, Key, Hash>::countEntries
+(
+    const BinaryPredicate& pred,
+    const bool invert
+) const
+{
+    label count = 0;
+
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
+    {
+        if ((pred(iter.key(), iter.object()) ? !invert : invert))
+        {
+            ++count;
+        }
+    }
+
+    return count;
 }
 
 
@@ -614,6 +758,87 @@ void Foam::HashTable<T, Key, Hash>::transfer(HashTable<T, Key, Hash>& ht)
 
     nElmts_ = ht.nElmts_;
     ht.nElmts_ = 0;
+}
+
+
+template<class T, class Key, class Hash>
+template<class UnaryPredicate>
+Foam::label Foam::HashTable<T, Key, Hash>::filterKeys
+(
+    const UnaryPredicate& pred,
+    const bool pruning
+)
+{
+    label changed = 0;
+
+    for (iterator iter = begin(); iter != end(); ++iter)
+    {
+        // Matches? either prune (pruning) or keep (!pruning)
+        if
+        (
+            (pred(iter.key()) ? pruning : !pruning)
+         && erase(iter)
+        )
+        {
+            ++changed;
+        }
+    }
+
+    return changed;
+}
+
+
+template<class T, class Key, class Hash>
+template<class UnaryPredicate>
+Foam::label Foam::HashTable<T, Key, Hash>::filterValues
+(
+    const UnaryPredicate& pred,
+    const bool pruning
+)
+{
+    label changed = 0;
+
+    for (iterator iter = begin(); iter != end(); ++iter)
+    {
+        // Matches? either prune (pruning) or keep (!pruning)
+        if
+        (
+            (pred(iter.object()) ? pruning : !pruning)
+         && erase(iter)
+        )
+        {
+            ++changed;
+        }
+    }
+
+    return changed;
+}
+
+
+template<class T, class Key, class Hash>
+template<class BinaryPredicate>
+Foam::label Foam::HashTable<T, Key, Hash>::filterEntries
+(
+    const BinaryPredicate& pred,
+    const bool pruning
+)
+{
+    label changed = 0;
+
+    for (iterator iter = begin(); iter != end(); ++iter)
+    {
+        // Matches? either prune (pruning) or keep (!pruning)
+        if
+        (
+            (pred(iter.key(), iter.object()) ? pruning : !pruning)
+         && erase(iter)
+        )
+        {
+            ++changed;
+        }
+    }
+
+    return changed;
 }
 
 

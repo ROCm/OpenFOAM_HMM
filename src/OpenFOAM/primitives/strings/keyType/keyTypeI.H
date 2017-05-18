@@ -81,6 +81,12 @@ inline bool Foam::keyType::isPattern() const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
+inline bool Foam::keyType::operator()(const std::string& text) const
+{
+    return match(text);  // Use smart match
+}
+
+
 inline void Foam::keyType::operator=(const keyType& s)
 {
     string::operator=(s); // Bypass checking

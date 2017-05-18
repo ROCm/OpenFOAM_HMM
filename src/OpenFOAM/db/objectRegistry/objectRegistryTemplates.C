@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,95 +25,115 @@ License
 
 #include "objectRegistry.H"
 #include "stringListOps.H"
+#include "predicates.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+// Templated implementation for classes()
+template<class UnaryMatchPredicate>
+Foam::HashTable<Foam::wordHashSet> Foam::objectRegistry::classesImpl
+(
+    const objectRegistry& list,
+    const UnaryMatchPredicate& matcher
+)
+{
+    HashTable<wordHashSet> summary(2*list.size());
+
+    // Summary (key,val) = (class-name, object-names)
+    forAllConstIters(list, iter)
+    {
+        if (matcher(iter.key()))
+        {
+            // Create entry (if needed) and insert
+            summary(iter.object()->type()).insert(iter.key());
+        }
+    }
+
+    return summary;
+}
+
+
+// Templated implementation for names()
+template<class Type, class UnaryMatchPredicate>
+Foam::wordList Foam::objectRegistry::namesImpl
+(
+    const objectRegistry& list,
+    const UnaryMatchPredicate& matcher,
+    const bool doSort
+)
+{
+    wordList objNames(list.size());
+
+    label count = 0;
+    forAllConstIters(list, iter)
+    {
+        if (isA<Type>(*iter()) && matcher(iter()->name()))
+        {
+            objNames[count++] = iter()->name();
+        }
+    }
+
+    objNames.setSize(count);
+
+    if (doSort)
+    {
+        Foam::sort(objNames);
+    }
+
+    return objNames;
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::wordList Foam::objectRegistry::names() const
 {
-    wordList objectNames(size());
-
-    label count=0;
-    forAllConstIter(HashTable<regIOobject*>, *this, iter)
-    {
-        if (isA<Type>(*iter()))
-        {
-            objectNames[count++] = iter()->name();
-        }
-    }
-
-    objectNames.setSize(count);
-
-    return objectNames;
+    return namesImpl<Type>(*this, predicates::always(), false);
 }
 
 
 template<class Type>
 Foam::wordList Foam::objectRegistry::names(const wordRe& matcher) const
 {
-    wordList objectNames(size());
-
-    label count = 0;
-    forAllConstIter(HashTable<regIOobject*>, *this, iter)
-    {
-        if (isA<Type>(*iter()))
-        {
-            const word& objectName = iter()->name();
-
-            if (matcher.match(objectName))
-            {
-                objectNames[count++] = objectName;
-            }
-        }
-    }
-
-    objectNames.setSize(count);
-
-    return objectNames;
+    return namesImpl<Type>(*this, matcher, false);
 }
 
 
 template<class Type>
-Foam::wordList Foam::objectRegistry::names(const wordReList& matcher) const
+Foam::wordList Foam::objectRegistry::names
+(
+    const wordRes& matcher
+) const
 {
-    wordList names(this->names<Type>());
-
-    return wordList(names, findStrings(matcher, names));
+    return namesImpl<Type>(*this, matcher, false);
 }
 
 
 template<class Type>
 Foam::wordList Foam::objectRegistry::sortedNames() const
 {
-    wordList sorted(this->names<Type>());
-    sort(sorted);
-
-    return sorted;
-}
-
-template<class Type>
-Foam::wordList Foam::objectRegistry::sortedNames
-(
-    const wordRe& match
-) const
-{
-    wordList sorted(this->names<Type>(match));
-    sort(sorted);
-
-    return sorted;
+    return namesImpl<Type>(*this, predicates::always(), true);
 }
 
 
 template<class Type>
 Foam::wordList Foam::objectRegistry::sortedNames
 (
-    const wordReList& matcher
+    const wordRe& matcher
 ) const
 {
-    wordList sorted(this->names<Type>(matcher));
-    sort(sorted);
+    return namesImpl<Type>(*this, matcher, true);
+}
 
-    return sorted;
+
+template<class Type>
+Foam::wordList Foam::objectRegistry::sortedNames
+(
+    const wordRes& matcher
+) const
+{
+    return namesImpl<Type>(*this, matcher, true);
 }
 
 
@@ -125,7 +145,7 @@ Foam::HashTable<const Type*> Foam::objectRegistry::lookupClass
 {
     HashTable<const Type*> objectsOfClass(size());
 
-    forAllConstIter(HashTable<regIOobject*>, *this, iter)
+    forAllConstIters(*this, iter)
     {
         if (strict ? isType<Type>(*iter()) : isA<Type>(*iter()))
         {
@@ -149,7 +169,7 @@ Foam::HashTable<Type*> Foam::objectRegistry::lookupClass
 {
     HashTable<Type*> objectsOfClass(size());
 
-    forAllIter(HashTable<regIOobject*>, *this, iter)
+    forAllIters(*this, iter)
     {
         if (strict ? isType<Type>(*iter()) : isA<Type>(*iter()))
         {
@@ -194,7 +214,7 @@ const Type& Foam::objectRegistry::lookupObject
 {
     const_iterator iter = find(name);
 
-    if (iter != end())
+    if (iter.found())
     {
         const Type* ptr = dynamic_cast<const Type*>(iter());
 
@@ -252,7 +272,7 @@ const Type* Foam::objectRegistry::lookupObjectPtr
 {
     const_iterator iter = find(name);
 
-    if (iter != end())
+    if (iter.found())
     {
         const Type* ptr = dynamic_cast<const Type*>(iter());
 

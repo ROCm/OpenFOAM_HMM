@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,52 +26,66 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::wordReListMatcher::wordReListMatcher
+inline Foam::wordRes::wordRes
 (
-    const UList<wordRe>& lst
+    const UList<wordRe>& list
 )
 :
-    reList_(lst)
+    list_(list)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::label Foam::wordReListMatcher::size() const
+inline Foam::label Foam::wordRes::size() const
 {
-    return reList_.size();
+    return list_.size();
 }
 
 
-inline bool Foam::wordReListMatcher::empty() const
+inline bool Foam::wordRes::empty() const
 {
-    return reList_.empty();
+    return list_.empty();
 }
 
 
-inline const Foam::UList<Foam::wordRe>&
-Foam::wordReListMatcher::operator()() const
-{
-    return reList_;
-}
-
-
-inline bool Foam::wordReListMatcher::match
+inline bool Foam::wordRes::match
 (
     const std::string& text,
-    bool literalMatch
+    const bool literal
 ) const
 {
-    const label n = reList_.size();
+    const label n = list_.size();
+
     for (label i = 0; i < n; ++i)
     {
-        if (reList_[i].match(text, literalMatch))
+        if (list_[i].match(text, literal))
         {
             return true;
         }
     }
 
     return false;
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline const Foam::UList<Foam::wordRe>& Foam::wordRes::operator()() const
+{
+    return list_;
+}
+
+
+inline bool Foam::wordRes::operator()(const std::string& text) const
+{
+    return match(text);
+}
+
+
+inline const Foam::wordRe& Foam::wordRes::operator[](const label i) const
+{
+    return list_[i];
 }
 
 

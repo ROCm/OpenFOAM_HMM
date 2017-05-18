@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,6 +78,7 @@ Note
 
 #include "fvc.H"
 #include "volFields.H"
+#include "hashedWordList.H"
 
 #include "labelIOField.H"
 #include "scalarIOField.H"
@@ -190,7 +191,7 @@ int main(int argc, char *argv[])
     );
 
     // The volume field types that we handle
-    const wordList volFieldTypes
+    const hashedWordList volFieldTypes
     {
         volScalarField::typeName,
         volVectorField::typeName,
@@ -207,7 +208,7 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    // default to binary output, unless otherwise specified
+    // Default to binary output, unless otherwise specified
     const IOstream::streamFormat format =
     (
         args.optionFound("ascii")
@@ -234,7 +235,7 @@ int main(int argc, char *argv[])
     }
 
     //
-    // general (case) output options
+    // General (case) output options
     //
     ensightCase::options caseOpts(format);
 
@@ -257,7 +258,7 @@ int main(int argc, char *argv[])
 
 
     //
-    // output configuration (geometry related)
+    // Output configuration (geometry related)
     //
     ensightMesh::options writeOpts(format);
     writeOpts.noPatches(args.optionFound("noPatches"));
@@ -313,12 +314,6 @@ int main(int argc, char *argv[])
         ensCase.printInfo(Info) << endl;
     }
 
-
-    // Set Time to the last time before looking for lagrangian objects
-    runTime.setTime(timeDirs.last(), timeDirs.size()-1);
-
-    IOobjectList objects(mesh, runTime.timeName());
-
     #include "checkMeshMoving.H"
     #include "findCloudFields.H"
 
@@ -330,6 +325,40 @@ int main(int argc, char *argv[])
     Info<< "Startup in "
         << timer.cpuTimeIncrement() << " s, "
         << mem.update().size() << " kB" << nl << endl;
+
+    // Get the list of supported classes/fields
+    HashTable<wordHashSet> usableObjects;
+    {
+        // Initially all possible objects that are available at the final time
+        IOobjectList objects(mesh, timeDirs.last().name());
+
+        // Categorize by classes, pre-filter on name (if requested)
+        usableObjects =
+        (
+            fieldPatterns.empty()
+          ? objects.classes()
+          : objects.classes(fieldPatterns)
+        );
+
+        // Limit to types that we explicitly handle
+        usableObjects.filterKeys(volFieldTypes);
+
+        // Force each field-type into existence (simplifies code logic
+        // and doesn't cost much) and simultaneously remove all
+        // "*_0" restart fields
+
+        for (auto fieldType : volFieldTypes)
+        {
+            usableObjects
+            (
+                fieldType
+            ).filterKeys
+            (
+                [](const word& k){ return k.endsWith("_0"); },
+                true  // prune
+            );
+        }
+    }
 
     // ignore special fields (_0 fields),
     // ignore fields we don't handle,
@@ -362,25 +391,22 @@ int main(int argc, char *argv[])
         // ~~~~~~~~~~~~~~~~~~~~~~
         Info<< "Write volume field (";
 
-        forAll(volFieldTypes, typei)
+        for (auto fieldType : volFieldTypes)
         {
-            const word& fieldType = volFieldTypes[typei];
-            wordList fieldNames = objects.names(fieldType);
+            // For convenience, just force each field-type into existence.
+            // This simplifies code logic and doesn't cost much at all.
+            wordHashSet& fieldNames = usableObjects(fieldType);
 
-            // Filter on name as required
-            if (!fieldPatterns.empty())
+            forAllIters(fieldNames, fieldIter)
             {
-                inplaceSubsetStrings(fieldPatterns, fieldNames);
-            }
-
-            forAll(fieldNames, fieldi)
-            {
-                const word& fieldName = fieldNames[fieldi];
+                const word& fieldName = fieldIter.key();
 
                 #include "checkData.H"
 
+                // Partially complete field?
                 if (!fieldsToUse[fieldName])
                 {
+                    fieldNames.erase(fieldIter);
                     continue;
                 }
 
@@ -597,7 +623,8 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
-                    // Do not currently handle this type - blacklist for the future.
+                    // Do not currently handle this type
+                    // - blacklist for the future.
                     fieldsToUse.set(fieldName, false);
                 }
 

@@ -159,6 +159,20 @@ Foam::label Foam::HashSet<Key, Hash>::insert(std::initializer_list<Key> lst)
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Key, class Hash>
+inline bool Foam::HashSet<Key, Hash>::operator()(const Key& key) const
+{
+    return this->found(key);
+}
+
+
+template<class Key, class Hash>
+inline bool Foam::HashSet<Key, Hash>::operator[](const Key& key) const
+{
+    return this->found(key);
+}
+
+
+template<class Key, class Hash>
 void Foam::HashSet<Key, Hash>::operator=(const UList<Key>& lst)
 {
     assignMultiple(lst.begin(), lst.end(), 2*lst.size());
@@ -179,12 +193,6 @@ void Foam::HashSet<Key, Hash>::operator=(std::initializer_list<Key> lst)
     assignMultiple(lst.begin(), lst.end(), 2*lst.size());
 }
 
-
-template<class Key, class Hash>
-inline bool Foam::HashSet<Key, Hash>::operator[](const Key& key) const
-{
-    return this->found(key);
-}
 
 
 template<class Key, class Hash>

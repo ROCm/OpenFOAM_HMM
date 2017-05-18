@@ -121,19 +121,26 @@ public:
 
     // Member operators
 
-        // Assignment
+        //- Avoid masking the normal operator()
+        using word::operator();
 
-            //- Assignment operator, retaining type (literal or regex)
-            inline void operator=(const keyType& s);
+        //- Perform smart match on text
+        inline bool operator()(const std::string& text) const;
 
-            //- Assign as word, not treated as a regular expression.
-            inline void operator=(const word& s);
 
-            //- Assign as regular expression
-            inline void operator=(const string& s);
+      // Assignment
 
-            //- Assign as word, not treated as a regular expression.
-            inline void operator=(const char* s);
+        //- Assignment operator, retaining type (literal or regex)
+        inline void operator=(const keyType& s);
+
+        //- Assign as word, not treated as a regular expression.
+        inline void operator=(const word& s);
+
+        //- Assign as regular expression
+        inline void operator=(const string& s);
+
+        //- Assign as word, not treated as a regular expression.
+        inline void operator=(const char* s);
 
 
     // IOstream operators
