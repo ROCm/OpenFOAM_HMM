@@ -25,12 +25,16 @@ License
 
 #include "edgeFaceCirculator.H"
 #include "primitiveMesh.H"
+#include "nullObject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const Foam::edgeFaceCirculator Foam::edgeFaceCirculator::endConstIter
 (
-    *reinterpret_cast<primitiveMesh*>(0),       // primitiveMesh
+    *reinterpret_cast<const primitiveMesh*>
+    (
+        NullObject::nullObject.pointer()        // nullptr dummy
+    ),
     -1,                                         // faceLabel
     false,                                      // ownerSide
     -1,                                         // index

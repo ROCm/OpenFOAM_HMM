@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,39 +21,36 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::labelPairLookup
-
-Description
-    A HashTable for two labels to another label.
-    Used for e.g. for face1, face2 to shared edge.
-
-Note
-    The hash table is based on a FixedList and not edge, since an edge
-    hashes commutatively!
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelPairLookup_H
-#define labelPairLookup_H
+#include "wordRes.H"
+#include "HashSet.H"
 
-#include "FixedList.H"
-#include "HashTable.H"
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+Foam::wordReList Foam::wordRes::uniq(const UList<wordRe>& input)
 {
-    typedef HashTable
-    <
-       label,
-       FixedList<label, 2>,
-       FixedList<label, 2>::Hash<>
-    > labelPairLookup;
+    wordReList retain(input.size());
+    wordHashSet uniqWord;
+
+    label count = 0;
+    forAll(input, i)
+    {
+        const wordRe& select = input[i];
+
+        if
+        (
+            select.isPattern()
+         || uniqWord.insert(static_cast<const word&>(select))
+        )
+        {
+            retain[count++] = select;
+        }
+    }
+
+    retain.setSize(count);
+    return retain;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

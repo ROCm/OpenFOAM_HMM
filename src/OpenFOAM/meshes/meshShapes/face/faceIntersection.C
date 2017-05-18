@@ -34,7 +34,7 @@ Foam::pointHit Foam::face::ray
 (
     const point& p,
     const vector& n,
-    const pointField& meshPoints,
+    const UList<point>& meshPoints,
     const intersection::algorithm alg,
     const intersection::direction dir
 ) const
@@ -62,7 +62,6 @@ Foam::pointHit Foam::face::ray
     point ctr = Foam::average(points(meshPoints));
 
     scalar nearestHitDist = GREAT;
-
     scalar nearestMissDist = GREAT;
     bool eligible = false;
 
@@ -71,7 +70,7 @@ Foam::pointHit Foam::face::ray
 
     const labelList& f = *this;
 
-    label nPoints = size();
+    const label nPoints = size();
 
     point nextPoint = ctr;
 
@@ -142,7 +141,7 @@ Foam::pointHit Foam::face::intersection
     const point& p,
     const vector& q,
     const point& ctr,
-    const pointField& meshPoints,
+    const UList<point>& meshPoints,
     const intersection::algorithm alg,
     const scalar tol
 ) const
@@ -198,7 +197,7 @@ Foam::pointHit Foam::face::intersection
 Foam::pointHit Foam::face::nearestPoint
 (
     const point& p,
-    const pointField& meshPoints
+    const UList<point>& meshPoints
 ) const
 {
     // Dummy labels
@@ -212,7 +211,7 @@ Foam::pointHit Foam::face::nearestPoint
 Foam::pointHit Foam::face::nearestPointClassify
 (
     const point& p,
-    const pointField& meshPoints,
+    const UList<point>& meshPoints,
     label& nearType,
     label& nearLabel
 ) const
@@ -237,7 +236,7 @@ Foam::pointHit Foam::face::nearestPointClassify
     nearType = -1;
     nearLabel = -1;
 
-    label nPoints = f.size();
+    const label nPoints = f.size();
 
     point nextPoint = ctr;
 

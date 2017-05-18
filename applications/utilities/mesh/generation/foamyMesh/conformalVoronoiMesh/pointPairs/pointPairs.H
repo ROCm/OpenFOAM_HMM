@@ -39,19 +39,12 @@ Description
 #ifndef pointPairs_H
 #define pointPairs_H
 
-#include "labelPair.H"
-#include "HashSet.H"
+#include "labelPairHashes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-typedef HashSet
-<
-    Pair<labelPair>,
-    FixedList<labelPair, 2>::Hash<>
-> ptPairTable;
 
 /*---------------------------------------------------------------------------*\
                          Class pointPairs Declaration
@@ -60,11 +53,12 @@ typedef HashSet
 template<class Triangulation>
 class pointPairs
 :
-    public ptPairTable
+    public HashSet<labelPairPair, labelPairPair::Hash<>>
 {
     // Private typedefs
 
-        typedef typename Triangulation::Vertex_handle Vertex_handle;
+    typedef HashSet<labelPairPair, labelPairPair::Hash<>> StorageContainer;
+    typedef typename Triangulation::Vertex_handle Vertex_handle;
 
 
     // Private data
@@ -74,7 +68,7 @@ class pointPairs
 
     // Private Member Functions
 
-        inline Pair<labelPair> orderPointPair
+        inline labelPairPair orderPointPair
         (
             const labelPair& vA,
             const labelPair& vB

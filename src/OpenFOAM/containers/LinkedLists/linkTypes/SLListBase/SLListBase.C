@@ -79,7 +79,7 @@ Foam::SLListBase::link* Foam::SLListBase::removeHead()
 {
     nElmts_--;
 
-    if (last_ == 0)
+    if (last_ == nullptr)
     {
         FatalErrorInFunction
             << "remove from empty list"
@@ -90,7 +90,7 @@ Foam::SLListBase::link* Foam::SLListBase::removeHead()
 
     if (f == last_)
     {
-        last_ = 0;
+        last_ = nullptr;
     }
     else
     {
@@ -132,7 +132,7 @@ Foam::SLListBase::link* Foam::SLListBase::remove(SLListBase::link* it)
         prev = p;
     }
 
-    return 0;
+    return nullptr;
 }
 
 

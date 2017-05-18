@@ -25,8 +25,7 @@ License
 
 #include "processorGAMGInterface.H"
 #include "addToRunTimeSelectionTable.H"
-#include "HashTable.H"
-#include "labelPair.H"
+#include "labelPairHashes.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -84,10 +83,7 @@ Foam::processorGAMGInterface::processorGAMGInterface
     );
 
     // From coarse cell pair to coarse face
-    HashTable<label, labelPair, labelPair::Hash<>> cellsToCoarseFace
-    (
-        2*localRestrictAddressing.size()
-    );
+    labelPairLookup cellsToCoarseFace(2*localRestrictAddressing.size());
 
     forAll(localRestrictAddressing, ffi)
     {
@@ -114,8 +110,7 @@ Foam::processorGAMGInterface::processorGAMGInterface
             );
         }
 
-        HashTable<label, labelPair, labelPair::Hash<>>::const_iterator fnd =
-            cellsToCoarseFace.find(cellPair);
+        labelPairLookup::const_iterator fnd = cellsToCoarseFace.find(cellPair);
 
         if (fnd == cellsToCoarseFace.end())
         {

@@ -25,9 +25,10 @@ Class
     Foam::SLListBase
 
 Description
-    Base singly-linked list.
+    Base for singly-linked lists.
 
 SourceFiles
+    SLListBaseI.H
     SLListBase.C
 
 \*---------------------------------------------------------------------------*/
@@ -81,10 +82,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        SLListBase(const SLListBase&);
+        SLListBase(const SLListBase&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const SLListBase&);
+        void operator=(const SLListBase&) = delete;
 
 
 public:
@@ -166,18 +167,14 @@ public:
             friend class SLListBase;
             friend class const_iterator;
 
-            // Private data
+            //- Reference to the list this is an iterator for
+            SLListBase& curList_;
 
-                //- Reference to the list this is an iterator for
-                SLListBase& curList_;
+            //- Current element
+            link* curElmt_;
 
-                //- Current element
-                link* curElmt_;
-
-                //- Copy of the link
-                link curLink_;
-
-            // Private Member Functions
+            //- Copy of the link
+            link curLink_;
 
             //- Construct for a given SLListBase with nullptr element and link.
             //  Only used to create endIter
@@ -188,17 +185,18 @@ public:
             //- Construct for a given SLListBase and link
             inline iterator(SLListBase&, link*);
 
-            // Member operators
+            //- Currently pointing at a valid entry
+            inline bool found() const;
 
-                inline void operator=(const iterator&);
+            inline void operator=(const iterator& iter);
 
-                inline bool operator==(const iterator&) const;
-                inline bool operator!=(const iterator&) const;
+            inline bool operator==(const iterator& iter) const;
+            inline bool operator!=(const iterator& iter) const;
 
-                inline link& operator*();
+            inline link& operator*() const;
 
-                inline iterator& operator++();
-                inline iterator operator++(int);
+            inline iterator& operator++();
+            inline iterator operator++(int);
         };
 
         inline iterator begin();
@@ -210,13 +208,11 @@ public:
         //- An STL-conforming const_iterator
         class const_iterator
         {
-            // Private data
+            //- Reference to the list this is an iterator for
+            const SLListBase& curList_;
 
-                //- Reference to the list this is an iterator for
-                const SLListBase& curList_;
-
-                //- Current element
-                const link* curElmt_;
+            //- Current element
+            const link* curElmt_;
 
         public:
 
@@ -224,20 +220,20 @@ public:
             inline const_iterator(const SLListBase&, const link*);
 
             //- Construct from a non-const iterator
-            inline const_iterator(const iterator&);
+            inline const_iterator(const SLListBase::iterator& iter);
 
+            //- Currently pointing at a valid entry
+            inline bool found() const;
 
-            // Member operators
+            inline void operator=(const const_iterator& iter);
 
-                inline void operator=(const const_iterator&);
+            inline bool operator==(const const_iterator& iter) const;
+            inline bool operator!=(const const_iterator& iter) const;
 
-                inline bool operator==(const const_iterator&) const;
-                inline bool operator!=(const const_iterator&) const;
+            inline const link& operator*() const;
 
-                inline const link& operator*();
-
-                inline const_iterator& operator++();
-                inline const_iterator operator++(int);
+            inline const_iterator& operator++();
+            inline const_iterator operator++(int);
         };
 
         inline const_iterator cbegin() const;

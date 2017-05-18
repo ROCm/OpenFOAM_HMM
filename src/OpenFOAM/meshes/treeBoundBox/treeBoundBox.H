@@ -77,10 +77,6 @@ class Random;
 // Forward declaration of friend functions and operators
 
 class treeBoundBox;
-
-bool operator==(const treeBoundBox& a, const treeBoundBox& b);
-bool operator!=(const treeBoundBox& a, const treeBoundBox& b);
-
 Istream& operator>>(Istream& is, treeBoundBox& bb);
 Ostream& operator<<(Ostream& os, const treeBoundBox& bb);
 
@@ -335,15 +331,9 @@ public:
             label distanceCmp(const point& pt, const treeBoundBox& other) const;
 
             //- Return slightly wider bounding box
-            //  Extends all dimensions with s*span*Random::scalar01()
+            //  Extends all dimensions with s*span*Random::sample01<scalar>()
             //  and guarantees in any direction s*mag(span) minimum width
             inline treeBoundBox extend(Random& rndGen, const scalar s) const;
-
-
-    // Friend Operators
-
-        friend bool operator==(const treeBoundBox& a, const treeBoundBox& b);
-        friend bool operator!=(const treeBoundBox& a, const treeBoundBox& b);
 
 
     // IOstream operator
@@ -356,6 +346,12 @@ public:
 //- Data associated with treeBoundBox type are contiguous
 template<>
 inline bool contiguous<treeBoundBox>() {return contiguous<boundBox>();}
+
+
+// Global Operators
+
+inline bool operator==(const treeBoundBox& a, const treeBoundBox& b);
+inline bool operator!=(const treeBoundBox& a, const treeBoundBox& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -31,7 +31,7 @@ Foam::autoPtr<Foam::distributionModels::distributionModel>
 Foam::distributionModels::distributionModel::New
 (
     const dictionary& dict,
-    cachedRandom& rndGen
+    Random& rndGen
 )
 {
     const word modelType(dict.lookup("type"));

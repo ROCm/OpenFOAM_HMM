@@ -36,6 +36,7 @@ License
 #include "faceSet.H"
 #include "cellSet.H"
 #include "pointSet.H"
+#include "labelPairHashes.H"
 #include "OFstream.H"
 #include "Time.H"
 #include "FaceCellWave.H"
@@ -4625,10 +4626,9 @@ void Foam::hexRef8::checkMesh() const
 
             if (pp.coupled())
             {
-                // Check how many faces between owner and neighbour. Should
-                // be only one.
-                HashTable<label, labelPair, labelPair::Hash<>>
-                    cellToFace(2*pp.size());
+                // Check how many faces between owner and neighbour.
+                // Should be only one.
+                labelPairLookup cellToFace(2*pp.size());
 
                 label facei = pp.start();
 

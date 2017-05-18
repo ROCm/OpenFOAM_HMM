@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,8 +68,18 @@ void Foam::gnuplotSetWriter<Type>::write
 ) const
 {
     os  << "set term postscript color" << nl
-        << "set output \"" << points.name() << ".ps\"" << nl
-        << "plot";
+        << "set output \"" << points.name() << ".ps\"" << nl;
+
+    // Set secondary Y axis if using two columns. Falls back to same
+    // values if both on same scale. However, ignore if more columns.
+    if (valueSetNames.size() == 2)
+    {
+        os  << "set ylabel \"" << valueSetNames[0] << "\"" << nl
+            << "set y2label \"" << valueSetNames[1] << "\"" << nl
+            << "set ytics nomirror" << nl << "set y2tics" << nl;
+    }
+
+    os  << "plot";
 
     forAll(valueSets, i)
     {
@@ -79,9 +89,13 @@ void Foam::gnuplotSetWriter<Type>::write
         }
 
         os  << " \"-\" title \"" << valueSetNames[i] << "\" with lines";
+
+        if (valueSetNames.size() == 2)
+        {
+            os  << " axes x1y" << (i+1) ;
+        }
     }
     os  << nl;
-
 
     forAll(valueSets, i)
     {

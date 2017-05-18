@@ -82,6 +82,9 @@ class wallDist
         //- Name for the patch set, e.g. "wall"
         const word patchTypeName_;
 
+        //- Construction dictionary
+        const dictionary dict_;
+
         //- Run-time selected method to generate the distance-to-wall field
         mutable autoPtr<patchDistMethod> pdm_;
 
@@ -121,19 +124,29 @@ public:
 
     // Constructors
 
-        //- Construct from mesh and optional patch type name
-        wallDist
-        (
-            const fvMesh& mesh,
-            const word& patchTypeName = "wall"
-        );
-
         //- Construct from mesh, patch IDs and optional patch type name
         wallDist
         (
             const fvMesh& mesh,
             const labelHashSet& patchIDs,
             const word& patchTypeName = "patch"
+        );
+
+        //- Construct from mesh, patch IDs, default patch distance method
+        //  and optional patch type name
+        wallDist
+        (
+            const fvMesh& mesh,
+            const word& defaultPatchDistMethod,
+            const labelHashSet& patchIDs,
+            const word& patchTypeName = "patch"
+        );
+
+        //- Construct from mesh and optional patch type name
+        wallDist
+        (
+            const fvMesh& mesh,
+            const word& patchTypeName = "wall"
         );
 
 

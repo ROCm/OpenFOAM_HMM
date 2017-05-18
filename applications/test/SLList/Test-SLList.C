@@ -52,29 +52,29 @@ int main(int argc, char *argv[])
 
     Info<< nl << "And again using STL iterator: " << nl << endl;
 
-    forAllIter(SLList<scalar>, myList, iter)
+    for (const auto& val : myList)
     {
-        Info<< "element:" << *iter << endl;
+        Info<< "element:" << val << endl;
     }
 
     Info<< nl << "And again using STL const_iterator: " << nl << endl;
 
     const SLList<scalar>& const_myList = myList;
 
-    forAllConstIter(SLList<scalar>, const_myList, iter)
+    forAllConstIters(const_myList, iter)
     {
         Info<< "element:" << *iter << endl;
     }
 
-    forAllIter(SLList<scalar>, myList, iter)
+    forAllIters(myList, iter)
     {
         Info<< "Removing element:" << *iter << endl;
         myList.remove(iter);
     }
 
-    forAllConstIter(SLList<scalar>, const_myList, iter)
+    for (const auto& val : const_myList)
     {
-        Info<< "element:" << *iter << endl;
+        Info<< "element:" << val << endl;
     }
 
 

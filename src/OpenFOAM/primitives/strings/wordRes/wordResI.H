@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,31 +23,69 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "cachedRandom.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::label Foam::cachedRandom::seed() const
+inline Foam::wordRes::wordRes
+(
+    const UList<wordRe>& list
+)
+:
+    list_(list)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline Foam::label Foam::wordRes::size() const
 {
-    return seed_;
+    return list_.size();
 }
 
 
-inline const Foam::scalarList& Foam::cachedRandom::samples() const
+inline bool Foam::wordRes::empty() const
 {
-    return samples_;
+    return list_.empty();
 }
 
 
-inline Foam::label Foam::cachedRandom::sampleI() const
+inline bool Foam::wordRes::match
+(
+    const std::string& text,
+    const bool literal
+) const
 {
-    return sampleI_;
+    const label n = list_.size();
+
+    for (label i = 0; i < n; ++i)
+    {
+        if (list_[i].match(text, literal))
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 
-inline Foam::label& Foam::cachedRandom::sampleI()
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline const Foam::UList<Foam::wordRe>& Foam::wordRes::operator()() const
 {
-    return sampleI_;
+    return list_;
+}
+
+
+inline bool Foam::wordRes::operator()(const std::string& text) const
+{
+    return match(text);
+}
+
+
+inline const Foam::wordRe& Foam::wordRes::operator[](const label i) const
+{
+    return list_[i];
 }
 
 

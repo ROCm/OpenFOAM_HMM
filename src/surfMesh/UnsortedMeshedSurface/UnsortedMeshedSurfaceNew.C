@@ -37,10 +37,9 @@ Foam::UnsortedMeshedSurface<Face>::New(const fileName& name, const word& ext)
         InfoInFunction << "Constructing UnsortedMeshedSurface" << endl;
     }
 
-    typename fileExtensionConstructorTable::iterator cstrIter =
-        fileExtensionConstructorTablePtr_->find(ext);
+    auto cstrIter = fileExtensionConstructorTablePtr_->find(ext);
 
-    if (cstrIter == fileExtensionConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         // No direct reader, delegate to parent if possible
         const wordHashSet& delegate = ParentType::readTypes();

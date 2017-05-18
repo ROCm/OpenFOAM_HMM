@@ -67,10 +67,10 @@ class removeEntry
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        removeEntry(const removeEntry&);
+        removeEntry(const removeEntry&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const removeEntry&);
+        void operator=(const removeEntry&) = delete;
 
 
 public:
@@ -82,7 +82,7 @@ public:
     // Member Functions
 
         //- Execute the functionEntry in a sub-dict context
-        static bool execute(dictionary& parentDict, Istream&);
+        static bool execute(dictionary& parentDict, Istream& is);
 };
 
 

@@ -128,11 +128,12 @@ public:
         explicit inline FixedList(const T& t);
 
         //- Construct from C-array
-        explicit inline FixedList(const T v[Size]);
+        explicit inline FixedList(const T lst[Size]);
 
-        //- Construct given start and end iterators
+        //- Construct given begin/end iterators
+        //  Uses std::distance when verifying the size.
         template<class InputIterator>
-        inline FixedList(InputIterator first, InputIterator last);
+        inline FixedList(InputIterator begIter, InputIterator endIter);
 
         //- Construct from an initializer list
         inline FixedList(std::initializer_list<T> lst);
@@ -329,7 +330,7 @@ public:
         //- Return size of the largest possible FixedList
         inline label max_size() const;
 
-        //- Return true if the FixedList is empty (ie, size() is zero)
+        //- Always false since zero-sized FixedList is compile-time disabled.
         inline bool empty() const;
 
         //- Swap two FixedLists of the same type in constant time

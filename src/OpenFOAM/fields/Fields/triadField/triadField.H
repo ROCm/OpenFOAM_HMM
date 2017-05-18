@@ -35,24 +35,11 @@ SourceFiles
 #ifndef triadField_H
 #define triadField_H
 
+#include "triadFieldFwd.H"
 #include "Field.H"
-#include "triad.H"
 
 #define TEMPLATE
 #include "FieldFunctionsM.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-typedef Field<triad> triadField;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "undefFieldFunctionsM.H"
 

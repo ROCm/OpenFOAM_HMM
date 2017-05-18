@@ -194,7 +194,7 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define BINARY_TYPE_OPERATOR_SF(ReturnType, Type1, Type2, Op, OpName, OpFunc) \
+#define BINARY_TYPE_OPERATOR_SF(ReturnType, Type1, Type2, Op, OpName, OpFunc)  \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
@@ -225,7 +225,7 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 );
 
 
-#define BINARY_TYPE_OPERATOR_FS(ReturnType, Type1, Type2, Op, OpName, OpFunc) \
+#define BINARY_TYPE_OPERATOR_FS(ReturnType, Type1, Type2, Op, OpName, OpFunc)  \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \

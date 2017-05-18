@@ -177,6 +177,14 @@ public:
                 const bool syncCouples = true
             );
 
+            //- setLargeCellSubset but only marking certain cells
+            void setLargeCellSubset
+            (
+                const UList<label>& globalCellMap,
+                const label patchID = -1,
+                const bool syncPar = true
+            );
+
             //- setLargeCellSubset but with labelHashSet.
             void setLargeCellSubset
             (

@@ -21,45 +21,38 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
 #include "cellModel.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const word& cellModel::name() const
+inline const Foam::word& Foam::cellModel::name() const
 {
     return name_;
 }
 
 
-inline label cellModel::index() const
+inline Foam::label Foam::cellModel::index() const
 {
     return index_;
 }
 
 
-inline label cellModel::nPoints() const
+inline Foam::label Foam::cellModel::nPoints() const
 {
     return nPoints_;
 }
 
 
-inline label cellModel::nEdges() const
+inline Foam::label Foam::cellModel::nEdges() const
 {
     return edges_.size();
 }
 
 
-inline label cellModel::nFaces() const
+inline Foam::label Foam::cellModel::nFaces() const
 {
     return faces_.size();
 }
@@ -67,7 +60,10 @@ inline label cellModel::nFaces() const
 
 //  Return the faces of a cellModel by untangling the geometry
 //  supplied in terms of the face labels
-inline edgeList cellModel::edges(const labelList& pointLabels) const
+inline Foam::edgeList Foam::cellModel::edges
+(
+    const UList<label>& pointLabels
+) const
 {
     edgeList e(edges_.size());
 
@@ -86,15 +82,18 @@ inline edgeList cellModel::edges(const labelList& pointLabels) const
 }
 
 
-// Return a raw list of model faces
-inline const faceList& cellModel::modelFaces() const
+inline const Foam::faceList& Foam::cellModel::modelFaces() const
 {
     return faces_;
 }
 
+
 //  Return the faces of a cellModel by untangling the geometry
 //  supplied in terms of the face labels
-inline faceList cellModel::faces(const labelList& pointLabels) const
+inline Foam::faceList Foam::cellModel::faces
+(
+    const UList<label>& pointLabels
+) const
 {
     faceList f(faces_.size());
 
@@ -120,20 +119,16 @@ inline faceList cellModel::faces(const labelList& pointLabels) const
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 // Equality operator: true => ptr to models are equal !
-inline bool operator==(const cellModel& m1, const cellModel& m2)
+inline bool Foam::operator==(const cellModel& m1, const cellModel& m2)
 {
     return (&m1 == &m2);
 }
 
 // Inequality operator: true => ptr to models are not equal !
-inline bool operator!=(const cellModel& m1, const cellModel& m2)
+inline bool Foam::operator!=(const cellModel& m1, const cellModel& m2)
 {
     return (&m1 != &m2);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

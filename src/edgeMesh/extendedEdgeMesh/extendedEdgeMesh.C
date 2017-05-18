@@ -456,6 +456,34 @@ Foam::extendedEdgeMesh::extendedEdgeMesh(Istream& is)
 
 Foam::extendedEdgeMesh::extendedEdgeMesh
 (
+    const pointField& points,
+    const edgeList& edges
+)
+:
+    edgeMesh(points, edges),
+    concaveStart_(0),
+    mixedStart_(0),
+    nonFeatureStart_(0),
+    internalStart_(0),
+    flatStart_(0),
+    openStart_(0),
+    multipleStart_(0),
+    normals_(0),
+    normalVolumeTypes_(0),
+    edgeDirections_(0),
+    normalDirections_(0),
+    edgeNormals_(0),
+    featurePointNormals_(0),
+    featurePointEdges_(0),
+    regionEdges_(0),
+    pointTree_(),
+    edgeTree_(),
+    edgeTreesByType_()
+{}
+
+
+Foam::extendedEdgeMesh::extendedEdgeMesh
+(
     const Xfer<pointField>& pointLst,
     const Xfer<edgeList>& edgeLst
 )

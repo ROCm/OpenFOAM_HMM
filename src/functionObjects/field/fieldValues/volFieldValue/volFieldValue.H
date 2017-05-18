@@ -255,10 +255,10 @@ public:
     // Public Member Functions
 
         //- Read from dictionary
-        virtual bool read(const dictionary& dict) override;
+        virtual bool read(const dictionary& dict);
 
         //- Calculate and write
-        virtual bool write() override;
+        virtual bool write();
 };
 
 

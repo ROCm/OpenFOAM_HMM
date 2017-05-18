@@ -46,10 +46,10 @@ Foam::label Foam::coupleGroupIdentifier::findOtherPatchID
             << exit(FatalError);
     }
 
-    HashTable<labelList, word>::const_iterator fnd =
+    HashTable<labelList>::const_iterator fnd =
         pbm.groupPatchIDs().find(name());
 
-    if (fnd == pbm.groupPatchIDs().end())
+    if (!fnd.found())
     {
         if (&mesh == &thisPatch.boundaryMesh().mesh())
         {
@@ -65,7 +65,7 @@ Foam::label Foam::coupleGroupIdentifier::findOtherPatchID
     }
 
     // Mesh has patch group
-    const labelList& patchIDs = fnd();
+    const labelList& patchIDs = fnd.object();
 
     if (&mesh == &thisPatch.boundaryMesh().mesh())
     {

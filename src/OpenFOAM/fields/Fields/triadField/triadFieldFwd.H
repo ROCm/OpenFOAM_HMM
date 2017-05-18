@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,58 +21,38 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::triadField
+
+Description
+    Forward declarations of the specialisation of Field\<T\> for triad.
+
+SourceFiles
+    triadField.C
+
 \*---------------------------------------------------------------------------*/
 
+#ifndef triadFieldFwd_H
+#define triadFieldFwd_H
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "triad.H"
 
-inline Foam::wordReListMatcher::wordReListMatcher
-(
-    const UList<wordRe>& lst
-)
-:
-    reList_(lst)
-{}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline Foam::label Foam::wordReListMatcher::size() const
+namespace Foam
 {
-    return reList_.size();
-}
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline bool Foam::wordReListMatcher::empty() const
-{
-    return reList_.empty();
-}
+template<class Type> class Field;
+typedef Field<triad> triadField;
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline const Foam::UList<Foam::wordRe>&
-Foam::wordReListMatcher::operator()() const
-{
-    return reList_;
-}
+} // End namespace Foam
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline bool Foam::wordReListMatcher::match
-(
-    const string& str,
-    bool literalMatch
-) const
-{
-    const label nElem = reList_.size();
-    for (label elemI = 0; elemI < nElem; ++elemI)
-    {
-        if (reList_[elemI].match(str, literalMatch))
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
+#endif
 
 // ************************************************************************* //

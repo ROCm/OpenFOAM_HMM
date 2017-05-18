@@ -45,10 +45,10 @@ class Ostream;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Istream& operator>>(Istream&, bool&);
-Ostream& operator<<(Ostream&, const bool);
+Istream& operator>>(Istream& is, bool& b);
+Ostream& operator<<(Ostream& os, const bool b);
 
-bool readBool(Istream&);
+bool readBool(Istream& is);
 
 } // End namespace Foam
 
@@ -61,7 +61,7 @@ bool readBool(Istream&);
 namespace Foam
 {
 
-// template specialisation for pTraits<bool>
+// Template specialisation for pTraits<bool>
 template<>
 class pTraits<bool>
 {
@@ -95,10 +95,10 @@ public:
     // Constructors
 
         //- Construct from primitive
-        explicit pTraits(const bool&);
+        explicit pTraits(const bool& p);
 
         //- Construct from Istream
-        pTraits(Istream&);
+        pTraits(Istream& is);
 
 
     // Member Functions

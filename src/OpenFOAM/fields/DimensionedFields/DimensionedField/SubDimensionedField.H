@@ -105,7 +105,7 @@ public:
         //- Return a component field of the field
         inline tmp<DimensionedField<cmptType, GeoMesh>> component
         (
-            const direction
+            const direction d
         ) const;
 
         //- Return the field transpose (only defined for second rank tensors)
@@ -115,7 +115,7 @@ public:
     // Member operators
 
         //- Assignment
-        inline void operator=(const SubDimensionedField<Type, GeoMesh>&);
+        inline void operator=(const SubDimensionedField<Type, GeoMesh>& rhs);
 
         //- Allow cast to a const DimensionedField<Type, GeoMesh>&
         inline operator const DimensionedField<Type, GeoMesh>&() const;

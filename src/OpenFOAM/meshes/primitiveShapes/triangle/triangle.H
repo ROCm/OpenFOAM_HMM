@@ -40,7 +40,6 @@ SourceFiles
 #include "tensor.H"
 #include "pointHit.H"
 #include "Random.H"
-#include "cachedRandom.H"
 #include "FixedList.H"
 #include "UList.H"
 #include "linePointRef.H"
@@ -173,18 +172,18 @@ public:
         inline triangle(const Point& a, const Point& b, const Point& c);
 
         //- Construct from three points
-        inline triangle(const FixedList<Point, 3>&);
+        inline triangle(const FixedList<Point, 3>& tri);
 
         //- Construct from three points in the list of points
         //  The indices could be from triFace etc.
         inline triangle
         (
-            const UList<Point>&,
+            const UList<Point>& points,
             const FixedList<label, 3>& indices
         );
 
         //- Construct from Istream
-        inline triangle(Istream&);
+        inline triangle(Istream& is);
 
 
     // Member Functions
@@ -237,10 +236,6 @@ public:
             //- Return a random point on the triangle from a uniform
             //  distribution
             inline Point randomPoint(Random& rndGen) const;
-
-            //- Return a random point on the triangle from a uniform
-            //  distribution
-            inline Point randomPoint(cachedRandom& rndGen) const;
 
             //- Calculate the barycentric coordinates of the given
             //  point, in the same order as a, b, c.  Returns the

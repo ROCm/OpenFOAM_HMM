@@ -31,7 +31,7 @@ License
 
 Foam::scalar Foam::face::areaInContact
 (
-    const pointField& meshPoints,
+    const UList<point>& meshPoints,
     const scalarField& v
 ) const
 {
@@ -90,7 +90,7 @@ Foam::scalar Foam::face::areaInContact
     // Dimension new point list to max possible size
     const labelList& faceLabels = *this;
 
-    pointField newFacePoints(2*size());
+    List<point> newFacePoints(2*size());
     label nNewFacePoints = 0;
 
     for (label vI = 0; vI < size() - 1; vI++)

@@ -78,7 +78,16 @@ public:
         (
             const polyMesh& mesh,
             const word& name,
-            const label,
+            const label size,
+            writeOption w=NO_WRITE
+        );
+
+        //- Construct from existing set
+        pointSet
+        (
+            const polyMesh& mesh,
+            const word& name,
+            const topoSet& set,
             writeOption w=NO_WRITE
         );
 
@@ -87,16 +96,16 @@ public:
         (
             const polyMesh& mesh,
             const word& name,
-            const topoSet&,
+            const labelHashSet& set,
             writeOption w=NO_WRITE
         );
 
-        //- Construct from additional labelHashSet
+        //- Construct from additional list of labels for the labelHashSet
         pointSet
         (
             const polyMesh& mesh,
             const word& name,
-            const labelHashSet&,
+            const UList<label>& set,
             writeOption w=NO_WRITE
         );
 

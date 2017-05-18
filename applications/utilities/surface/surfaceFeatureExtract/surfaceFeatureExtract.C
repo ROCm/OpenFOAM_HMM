@@ -87,73 +87,6 @@ scalar calcVertexNormalWeight
 }
 
 
-point randomPointInPlane(const plane& p)
-{
-    // Perturb base point
-    const point& refPt = p.refPoint();
-
-    // ax + by + cz + d = 0
-    const FixedList<scalar, 4>& planeCoeffs = p.planeCoeffs();
-
-    const scalar perturbX = refPt.x() + 1e-3;
-    const scalar perturbY = refPt.y() + 1e-3;
-    const scalar perturbZ = refPt.z() + 1e-3;
-
-    if (mag(planeCoeffs[2]) < SMALL)
-    {
-        if (mag(planeCoeffs[1]) < SMALL)
-        {
-            const scalar x =
-                -1.0
-                *(
-                     planeCoeffs[3]
-                   + planeCoeffs[1]*perturbY
-                   + planeCoeffs[2]*perturbZ
-                 )/planeCoeffs[0];
-
-            return point
-            (
-                x,
-                perturbY,
-                perturbZ
-            );
-        }
-
-        const scalar y =
-            -1.0
-            *(
-                 planeCoeffs[3]
-               + planeCoeffs[0]*perturbX
-               + planeCoeffs[2]*perturbZ
-             )/planeCoeffs[1];
-
-        return point
-        (
-            perturbX,
-            y,
-            perturbZ
-        );
-    }
-    else
-    {
-        const scalar z =
-            -1.0
-            *(
-                 planeCoeffs[3]
-               + planeCoeffs[0]*perturbX
-               + planeCoeffs[1]*perturbY
-             )/planeCoeffs[2];
-
-        return point
-        (
-            perturbX,
-            perturbY,
-            z
-        );
-    }
-}
-
-
 triadField calcVertexCoordSys
 (
     const triSurface& surf,
@@ -178,8 +111,8 @@ triadField calcVertexCoordSys
 
         plane p(pt, normal);
 
-        // Pick random point in plane
-        vector dir1 = pt - randomPointInPlane(p);
+        // Pick arbitrary point in plane
+        vector dir1 = pt - p.somePointInPlane(1e-3);
         dir1 /= mag(dir1);
 
         vector dir2 = dir1 ^ normal;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,173 +25,237 @@ License
 
 #include "Random.H"
 #include "OSspecific.H"
+#include "PstreamReduceOps.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * private Member Functions  * * * * * * * * * * * //
 
-#if INT_MAX    != 2147483647
-#    error "INT_MAX    != 2147483647"
-#    error "The random number generator may not work!"
-#endif
+Foam::scalar Foam::Random::scalar01()
+{
+    return osRandomDouble(buffer_);
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::Random::Random(const label seed)
+:
+    buffer_(osRandomBufferSize()),
+    seed_(seed),
+    hasGaussSample_(false),
+    gaussSample_(0)
+{
+    // Initialise the random number generator
+    osRandomSeed(seed_, buffer_);
+}
+
+
+Foam::Random::Random(const Random& r, const bool reset)
+:
+    buffer_(r.buffer_),
+    seed_(r.seed_),
+    hasGaussSample_(r.hasGaussSample_),
+    gaussSample_(r.gaussSample_)
+{
+    if (reset)
+    {
+        hasGaussSample_ = false;
+        gaussSample_ = 0;
+
+        // Re-initialise the samples
+        osRandomSeed(seed_, buffer_);
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::Random::~Random()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::Random::Random(const label seed)
+void Foam::Random::reset(const label seed)
 {
-    if (seed > 1)
-    {
-        Seed = seed;
-    }
-    else
-    {
-        Seed = 1;
-    }
-
-    osRandomSeed(Seed);
+    seed_ = seed;
+    osRandomSeed(seed_, buffer_);
 }
 
 
 int Foam::Random::bit()
 {
-    if (osRandomInteger() > INT_MAX/2)
+    return osRandomInteger(buffer_) & 1;
+}
+
+
+template<>
+Foam::scalar Foam::Random::sample01()
+{
+    return scalar01();
+}
+
+
+template<>
+Foam::label Foam::Random::sample01()
+{
+    return round(scalar01());
+}
+
+
+template<>
+Foam::scalar Foam::Random::GaussNormal()
+{
+    if (hasGaussSample_)
     {
-        return 1;
+        hasGaussSample_ = false;
+        return gaussSample_;
     }
     else
     {
-        return 0;
-    }
-}
-
-
-Foam::scalar Foam::Random::scalar01()
-{
-    return osRandomDouble();
-}
-
-
-Foam::vector Foam::Random::vector01()
-{
-    vector rndVec;
-    for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
-    {
-        rndVec.component(cmpt) = scalar01();
-    }
-
-    return rndVec;
-}
-
-
-Foam::sphericalTensor Foam::Random::sphericalTensor01()
-{
-    sphericalTensor rndTen;
-    rndTen.ii() = scalar01();
-
-    return rndTen;
-}
-
-
-Foam::symmTensor Foam::Random::symmTensor01()
-{
-    symmTensor rndTen;
-    for (direction cmpt=0; cmpt<symmTensor::nComponents; cmpt++)
-    {
-        rndTen.component(cmpt) = scalar01();
-    }
-
-    return rndTen;
-}
-
-
-Foam::tensor Foam::Random::tensor01()
-{
-    tensor rndTen;
-    for (direction cmpt=0; cmpt<tensor::nComponents; cmpt++)
-    {
-        rndTen.component(cmpt) = scalar01();
-    }
-
-    return rndTen;
-}
-
-
-Foam::label Foam::Random::integer(const label lower, const label upper)
-{
-    return lower + (osRandomInteger() % (upper+1-lower));
-}
-
-
-Foam::vector Foam::Random::position(const vector& start, const vector& end)
-{
-    vector rndVec(start);
-
-    for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
-    {
-        rndVec.component(cmpt) +=
-            scalar01()*(end.component(cmpt) - start.component(cmpt));
-    }
-
-    return rndVec;
-}
-
-
-void Foam::Random::randomise(scalar& s)
-{
-     s = scalar01();
-}
-
-
-void Foam::Random::randomise(vector& v)
-{
-    v = vector01();
-}
-
-
-void Foam::Random::randomise(sphericalTensor& st)
-{
-    st = sphericalTensor01();
-}
-
-
-void Foam::Random::randomise(symmTensor& st)
-{
-    st = symmTensor01();
-}
-
-
-void Foam::Random::randomise(tensor& t)
-{
-    t = tensor01();
-}
-
-
-Foam::scalar Foam::Random::GaussNormal()
-{
-    static int iset = 0;
-    static scalar gset;
-    scalar fac, rsq, v1, v2;
-
-    if (iset == 0)
-    {
+        scalar rsq, v1, v2;
         do
         {
-            v1 = 2.0*scalar01() - 1.0;
-            v2 = 2.0*scalar01() - 1.0;
+            v1 = 2*scalar01() - 1;
+            v2 = 2*scalar01() - 1;
             rsq = sqr(v1) + sqr(v2);
-        } while (rsq >= 1.0 || rsq == 0.0);
+        } while (rsq >= 1 || rsq == 0);
 
-        fac = sqrt(-2.0*log(rsq)/rsq);
-        gset = v1*fac;
-        iset = 1;
+        scalar fac = sqrt(-2*log(rsq)/rsq);
+
+        gaussSample_ = v1*fac;
+        hasGaussSample_ = true;
 
         return v2*fac;
     }
-    else
-    {
-        iset = 0;
+}
 
-        return gset;
+
+template<>
+Foam::label Foam::Random::GaussNormal()
+{
+    return round(GaussNormal<scalar>());
+}
+
+
+template<>
+Foam::scalar Foam::Random::position
+(
+    const scalar& start,
+    const scalar& end
+)
+{
+    return start + scalar01()*(end - start);
+}
+
+
+template<>
+Foam::label Foam::Random::position(const label& start, const label& end)
+{
+    return start + round(scalar01()*(end - start));
+}
+
+
+template<>
+Foam::scalar Foam::Random::globalSample01()
+{
+    scalar value = -GREAT;
+
+    if (Pstream::master())
+    {
+        value = scalar01();
     }
+
+    Pstream::scatter(value);
+
+    return value;
+}
+
+
+template<>
+Foam::label Foam::Random::globalSample01()
+{
+    scalar value = -GREAT;
+
+    if (Pstream::master())
+    {
+        value = scalar01();
+    }
+
+    Pstream::scatter(value);
+
+    return round(value);
+}
+
+
+template<>
+Foam::scalar Foam::Random::globalGaussNormal()
+{
+    scalar value = -GREAT;
+
+    if (Pstream::master())
+    {
+        value = GaussNormal<scalar>();
+    }
+
+    Pstream::scatter(value);
+
+    return value;
+}
+
+
+template<>
+Foam::label Foam::Random::globalGaussNormal()
+{
+    scalar value = -GREAT;
+
+    if (Pstream::master())
+    {
+        value = GaussNormal<scalar>();
+    }
+
+    Pstream::scatter(value);
+
+    return round(value);
+}
+
+
+template<>
+Foam::scalar Foam::Random::globalPosition
+(
+    const scalar& start,
+    const scalar& end
+)
+{
+    scalar value = -GREAT;
+
+    if (Pstream::master())
+    {
+        value = scalar01()*(end - start);
+    }
+
+    Pstream::scatter(value);
+
+    return start + value;
+}
+
+
+template<>
+Foam::label Foam::Random::globalPosition
+(
+    const label& start,
+    const label& end
+)
+{
+    label value = labelMin;
+
+    if (Pstream::master())
+    {
+        value = round(scalar01()*(end - start));
+    }
+
+    Pstream::scatter(value);
+
+    return start + value;
 }
 
 

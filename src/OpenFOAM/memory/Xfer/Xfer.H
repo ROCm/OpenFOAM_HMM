@@ -93,20 +93,23 @@ class Xfer
 
 public:
 
+    typedef T Type;
+
+
     // Constructors
 
         //- Store object pointer and manage its deletion
         //  Can also be used later to transfer by assignment
-        inline explicit Xfer(T* = 0);
+        inline explicit Xfer(T* p = 0);
 
         //- Construct by copying or by transferring the parameter contents
-        inline explicit Xfer(T&, bool allowTransfer=false);
+        inline explicit Xfer(T& t, bool allowTransfer=false);
 
         //- Construct by copying the parameter contents
-        inline explicit Xfer(const T&);
+        inline explicit Xfer(const T& t);
 
         //- Construct by transferring the contents
-        inline Xfer(const Xfer<T>&);
+        inline Xfer(const Xfer<T>& t);
 
 
     //- Destructor
@@ -122,10 +125,10 @@ public:
     // Member Operators
 
         //- Transfer the contents into the object
-        inline void operator=(T&);
+        inline void operator=(T& t);
 
         //- Transfer the contents into the object
-        inline void operator=(const Xfer<T>&);
+        inline void operator=(const Xfer<T>& t);
 
         //- Reference to the underlying datatype
         inline T& operator()() const;

@@ -62,7 +62,7 @@ class vtkPVblockMeshReader
 {
 public:
     vtkTypeMacro(vtkPVblockMeshReader, vtkMultiBlockDataSetAlgorithm);
-    void PrintSelf(ostream&, vtkIndent);
+    void PrintSelf(ostream&, vtkIndent) VTK_OVERRIDE;
 
     static vtkPVblockMeshReader* New();
 
@@ -127,7 +127,7 @@ protected:
         vtkInformation* unusedRequest,
         vtkInformationVector** unusedInputVector,
         vtkInformationVector* outputVector
-    );
+    ) VTK_OVERRIDE;
 
     //- Get the mesh for a particular time
     virtual int RequestData
@@ -135,10 +135,10 @@ protected:
         vtkInformation* unusedRequest,
         vtkInformationVector** unusedInputVector,
         vtkInformationVector* outputVector
-    );
+    ) VTK_OVERRIDE;
 
     //- Fill in additional port information
-    virtual int FillOutputPortInformation(int, vtkInformation*);
+    virtual int FillOutputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
 
     // The observer to modify this object when array selections are modified
     vtkCallbackCommand* SelectionObserver;

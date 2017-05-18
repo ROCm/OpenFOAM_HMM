@@ -28,7 +28,7 @@ License
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 template<class Triangulation>
-inline Foam::Pair<Foam::labelPair>
+inline Foam::labelPairPair
 Foam::pointPairs<Triangulation>::orderPointPair
 (
     const labelPair& vA,
@@ -38,8 +38,8 @@ Foam::pointPairs<Triangulation>::orderPointPair
     return
     (
         (vA < vB)
-      ? Pair<labelPair>(vA, vB)
-      : Pair<labelPair>(vB, vA)
+      ? labelPairPair(vA, vB)
+      : labelPairPair(vB, vA)
     );
 }
 
@@ -85,7 +85,7 @@ inline bool Foam::pointPairs<Triangulation>::insertPointPair
 template<class Triangulation>
 Foam::pointPairs<Triangulation>::pointPairs(const Triangulation& triangulation)
 :
-    ptPairTable(),
+    StorageContainer(),
     triangulation_(triangulation)
 {}
 
@@ -181,7 +181,7 @@ void Foam::pointPairs<Triangulation>::reIndex(const Map<label>& oldToNewIndices)
 
     forAllConstIter(pointPairs, *this, iter)
     {
-        Pair<labelPair> e = iter.key();
+        labelPairPair e = iter.key();
 
         labelPair& start = e.first();
         labelPair& end = e.second();

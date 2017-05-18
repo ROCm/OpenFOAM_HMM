@@ -21,9 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Base singly-linked list.
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
@@ -32,7 +29,7 @@ Description
 
 inline Foam::SLListBase::link::link()
 :
-    next_(0)
+    next_(nullptr)
 {}
 
 
@@ -44,16 +41,22 @@ inline Foam::SLListBase::link::link(link* p)
 
 inline Foam::SLListBase::SLListBase()
 :
-    last_(0),
+    last_(nullptr),
     nElmts_(0)
 {}
 
 
 inline Foam::SLListBase::SLListBase(link* a)
 :
-    last_(a->next_ = a),
-    nElmts_(1)
-{}
+    last_(a),
+    nElmts_(0)
+{
+    if (a)  // protect against nullptr
+    {
+        a->next_ = a;
+        nElmts_  = 1;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -130,7 +133,7 @@ Foam::SLListBase::last() const
 
 inline void Foam::SLListBase::clear()
 {
-    last_ = 0;
+    last_ = nullptr;
     nElmts_ = 0;
 }
 
@@ -171,6 +174,12 @@ inline Foam::SLListBase::iterator::iterator(SLListBase& s)
 {}
 
 
+inline bool Foam::SLListBase::iterator::found() const
+{
+    return (curElmt_ != nullptr);
+}
+
+
 inline void Foam::SLListBase::iterator::operator=(const iterator& iter)
 {
     curElmt_ = iter.curElmt_;
@@ -190,7 +199,7 @@ inline bool Foam::SLListBase::iterator::operator!=(const iterator& iter) const
 }
 
 
-inline Foam::SLListBase::link& Foam::SLListBase::iterator::operator*()
+inline Foam::SLListBase::link& Foam::SLListBase::iterator::operator*() const
 {
     return *curElmt_;
 }
@@ -198,9 +207,9 @@ inline Foam::SLListBase::link& Foam::SLListBase::iterator::operator*()
 
 inline Foam::SLListBase::iterator& Foam::SLListBase::iterator::operator++()
 {
-    if (curElmt_ == curList_.last_ || curList_.last_ == 0)
+    if (curElmt_ == curList_.last_ || curList_.last_ == nullptr)
     {
-        curElmt_ = 0;
+        curElmt_ = nullptr;
     }
     else
     {
@@ -255,11 +264,20 @@ inline Foam::SLListBase::const_iterator::const_iterator
 {}
 
 
-inline Foam::SLListBase::const_iterator::const_iterator(const iterator& iter)
+inline Foam::SLListBase::const_iterator::const_iterator
+(
+    const SLListBase::iterator& iter
+)
 :
     curList_(iter.curList_),
     curElmt_(iter.curElmt_)
 {}
+
+
+inline bool Foam::SLListBase::const_iterator::found() const
+{
+    return (curElmt_ != nullptr);
+}
 
 
 inline void Foam::SLListBase::const_iterator::operator=
@@ -290,7 +308,7 @@ inline bool Foam::SLListBase::const_iterator::operator!=
 
 
 inline const Foam::SLListBase::link&
-Foam::SLListBase::const_iterator::operator*()
+Foam::SLListBase::const_iterator::operator*() const
 {
     return *curElmt_;
 }
@@ -301,7 +319,7 @@ Foam::SLListBase::const_iterator::operator++()
 {
     if (curElmt_ == curList_.last_)
     {
-        curElmt_ = 0;
+        curElmt_ = nullptr;
     }
     else
     {

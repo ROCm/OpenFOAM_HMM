@@ -205,7 +205,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
 
     newParticles_.clear();
 
-    cachedRandom& rnd = this->owner().rndGen();
+    Random& rnd = this->owner().rndGen();
 
     // Diameter factor, when splitting particles into 4, this is the
     // factor that modifies the diameter.

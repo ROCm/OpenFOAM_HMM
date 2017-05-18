@@ -58,9 +58,9 @@ class cell;
 // Forward declaration of friend functions and operators
 
 class cellShape;
-bool operator==(const cellShape&, const cellShape&);
-Istream& operator>>(Istream&, cellShape&);
-Ostream& operator<<(Ostream&, const cellShape&);
+bool operator==(const cellShape& a, const cellShape& b);
+Istream& operator>>(Istream& is, cellShape& s);
+Ostream& operator<<(Ostream& os, const cellShape& s);
 
 
 /*---------------------------------------------------------------------------*\
@@ -110,19 +110,23 @@ public:
     // Member Functions
 
         //- Return the points corresponding to this cellShape
-        inline pointField points(const pointField& meshPoints) const;
+        inline pointField points(const UList<point>& meshPoints) const;
 
         //- Model reference
         inline const cellModel& model() const;
 
         //- Mesh face labels of this cell (in order of model)
-        inline labelList meshFaces(const faceList& allFaces, const cell&) const;
+        inline labelList meshFaces
+        (
+            const faceList& allFaces,
+            const cell& cFaces
+        ) const;
 
         //- Mesh edge labels of this cell (in order of model)
         inline labelList meshEdges
         (
             const edgeList& allEdges,
-            const labelList&
+            const labelList& cEdges
         ) const;
 
         //- Faces of this cell
@@ -144,7 +148,7 @@ public:
         inline label nPoints() const;
 
         //- Centroid of the cell
-        inline point centre(const pointField&) const;
+        inline point centre(const UList<point>& points) const;
 
         //- Return info proxy.
         //  Used to print token information to a stream
@@ -154,7 +158,7 @@ public:
         }
 
         //- Scalar magnitude
-        inline scalar mag(const pointField&) const;
+        inline scalar mag(const UList<point>& points) const;
 
         //- Collapse shape to correct one after removing duplicate vertices
         void collapse();
@@ -162,13 +166,13 @@ public:
 
     // Friend Operators
 
-        friend bool operator==(const cellShape&, const cellShape&);
+        friend bool operator==(const cellShape& a, const cellShape& b);
 
 
     // IOstream operators
 
-        friend Istream& operator>>(Istream&, cellShape&);
-        friend Ostream& operator<<(Ostream&, const cellShape&);
+        friend Istream& operator>>(Istream& is, cellShape& s);
+        friend Ostream& operator<<(Ostream& os, const cellShape& s);
 };
 
 

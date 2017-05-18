@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ Foam::HashTable<T, Key, Hash>::HashTable(Istream& is, const label size)
 
         for (label hashIdx = 0; hashIdx < tableSize_; ++hashIdx)
         {
-            table_[hashIdx] = 0;
+            table_[hashIdx] = nullptr;
         }
     }
 
@@ -54,8 +54,7 @@ Foam::HashTable<T, Key, Hash>::HashTable(Istream& is, const label size)
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
-Foam::Ostream&
-Foam::HashTable<T, Key, Hash>::printInfo(Ostream& os) const
+Foam::Ostream& Foam::HashTable<T, Key, Hash>::printInfo(Ostream& os) const
 {
     label used = 0;
     label maxChain = 0;
@@ -85,6 +84,53 @@ Foam::HashTable<T, Key, Hash>::printInfo(Ostream& os) const
         << " elements:" << size() << " slots:" << used << "/" << tableSize_
         << " chaining(avg/max):" << (used ? (float(avgChain)/used) : 0)
         << "/" << maxChain << endl;
+
+    return os;
+}
+
+
+template<class T, class Key, class Hash>
+Foam::Ostream& Foam::HashTable<T, Key, Hash>::writeKeys
+(
+    Ostream& os,
+    const label shortListLen
+) const
+{
+    // Similar to UList::writeList version except the following:
+    // - the keys can never be uniform
+    // - never write in binary
+
+    label i = this->size();
+
+    if (i <= 1 || !shortListLen || (i <= shortListLen))
+    {
+        // Write size and start delimiter
+        os << i << token::BEGIN_LIST;
+
+        i = 0;
+        for (const_iterator iter = this->cbegin(); iter != this->cend(); ++iter)
+        {
+            if (i++) os << token::SPACE;
+            os << iter.key();
+        }
+
+        os << token::END_LIST;  // End delimiter
+    }
+    else
+    {
+        // Write size and start delimiter
+        os << nl << i << nl << token::BEGIN_LIST << nl;
+
+        for (const_iterator iter = this->cbegin(); iter != this->cend(); ++iter)
+        {
+            os << iter.key() << nl;
+        }
+
+        os << token::END_LIST << nl;  // End delimiter
+    }
+
+    // Check state of IOstream
+    os.check(FUNCTION_NAME);
 
     return os;
 }
@@ -215,28 +261,25 @@ template<class T, class Key, class Hash>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const HashTable<T, Key, Hash>& L
+    const HashTable<T, Key, Hash>& tbl
 )
 {
+    using const_iterator = typename HashTable<T, Key, Hash>::const_iterator;
+
     // Write size and start delimiter
-    os << nl << L.size() << nl << token::BEGIN_LIST << nl;
+    os << nl << tbl.size() << nl << token::BEGIN_LIST << nl;
 
     // Write contents
-    for
-    (
-        typename HashTable<T, Key, Hash>::const_iterator iter = L.cbegin();
-        iter != L.cend();
-        ++iter
-    )
+    for (const_iterator iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
     {
-        os << iter.key() << token::SPACE << iter() << nl;
+        os << iter.key() << token::SPACE << iter.object() << nl;
     }
 
     // Write end delimiter
     os << token::END_LIST;
 
     // Check state of IOstream
-    os.check("Ostream& operator<<(Ostream&, const HashTable&)");
+    os.check(FUNCTION_NAME);
 
     return os;
 }

@@ -44,7 +44,7 @@ void Foam::labelRanges::insertBefore
             << *this << endl;
     }
 
-    ParentType::setSize(nElem+1);
+    StorageContainer::setSize(nElem+1);
 
     if (labelRange::debug)
     {
@@ -58,7 +58,7 @@ void Foam::labelRanges::insertBefore
             Info<<"copy from " << (i) << " to " << (i+1) << nl;
         }
 
-        ParentType::operator[](i+1) = ParentType::operator[](i);
+        StorageContainer::operator[](i+1) = StorageContainer::operator[](i);
     }
 
     // finally insert the range
@@ -66,7 +66,7 @@ void Foam::labelRanges::insertBefore
     {
         Info<< "finally insert the range at " << insert << nl;
     }
-    ParentType::operator[](insert) = range;
+    StorageContainer::operator[](insert) = range;
 }
 
 
@@ -76,18 +76,19 @@ void Foam::labelRanges::purgeEmpty()
     label nElem = 0;
     forAll(*this, elemI)
     {
-        if (!ParentType::operator[](elemI).empty())
+        if (!StorageContainer::operator[](elemI).empty())
         {
             if (nElem != elemI)
             {
-                ParentType::operator[](nElem) = ParentType::operator[](elemI);
+                StorageContainer::operator[](nElem) =
+                    StorageContainer::operator[](elemI);
             }
             ++nElem;
         }
     }
 
     // truncate
-    this->ParentType::setSize(nElem);
+    this->StorageContainer::setSize(nElem);
 }
 
 
@@ -134,20 +135,20 @@ bool Foam::labelRanges::add(const labelRange& range)
     // find the correct place for insertion
     forAll(*this, elemI)
     {
-        labelRange& currRange = ParentType::operator[](elemI);
+        labelRange& currRange = StorageContainer::operator[](elemI);
 
         if (currRange.overlaps(range, true))
         {
             // absorb into the existing (adjacent/overlapping) range
-            currRange += range;
+            currRange.join(range);
 
             // might connect with the next following range(s)
             for (; elemI < this->size()-1; ++elemI)
             {
-                labelRange& nextRange = ParentType::operator[](elemI+1);
+                labelRange& nextRange = StorageContainer::operator[](elemI+1);
                 if (currRange.overlaps(nextRange, true))
                 {
-                    currRange += nextRange;
+                    currRange.join(nextRange);
                     nextRange.clear();
                 }
                 else
@@ -187,7 +188,7 @@ bool Foam::labelRanges::remove(const labelRange& range)
 
     forAll(*this, elemI)
     {
-        labelRange& currRange = ParentType::operator[](elemI);
+        labelRange& currRange = StorageContainer::operator[](elemI);
 
         if (range.first() > currRange.first())
         {
@@ -290,14 +291,14 @@ bool Foam::labelRanges::remove(const labelRange& range)
 
 Foam::Istream& Foam::operator>>(Istream& is, labelRanges& ranges)
 {
-    is  >> static_cast<labelRanges::ParentType&>(ranges);
+    is  >> static_cast<labelRanges::StorageContainer&>(ranges);
     return is;
 }
 
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const labelRanges& ranges)
 {
-    os  << static_cast<const labelRanges::ParentType&>(ranges);
+    os  << static_cast<const labelRanges::StorageContainer&>(ranges);
     return os;
 }
 

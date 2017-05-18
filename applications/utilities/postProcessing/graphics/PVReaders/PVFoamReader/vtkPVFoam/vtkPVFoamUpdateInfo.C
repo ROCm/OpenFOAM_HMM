@@ -233,21 +233,16 @@ void Foam::vtkPVFoam::updateInfoPatches
     if (meshPtr_)
     {
         const polyBoundaryMesh& patches = meshPtr_->boundaryMesh();
-        const HashTable<labelList, word>& groups = patches.groupPatchIDs();
+        const HashTable<labelList>& groups = patches.groupPatchIDs();
         const wordList allPatchNames = patches.names();
 
         // Add patch groups
         // ~~~~~~~~~~~~~~~~
 
-        for
-        (
-            HashTable<labelList, word>::const_iterator iter = groups.begin();
-            iter != groups.end();
-            ++iter
-        )
+        forAllConstIters(groups, iter)
         {
             const word& groupName = iter.key();
-            const labelList& patchIDs = iter();
+            const labelList& patchIDs = iter.object();
 
             label nFaces = 0;
             forAll(patchIDs, i)
@@ -349,7 +344,7 @@ void Foam::vtkPVFoam::updateInfoPatches
             // Add (non-zero) patch groups to the list of mesh parts
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-            HashTable<labelList, word> groups(patchEntries.size());
+            HashTable<labelList> groups(patchEntries.size());
 
             forAll(patchEntries, patchi)
             {
@@ -360,7 +355,7 @@ void Foam::vtkPVFoam::updateInfoPatches
 
                 forAll(groupNames, groupI)
                 {
-                    HashTable<labelList, word>::iterator iter = groups.find
+                    HashTable<labelList>::iterator iter = groups.find
                     (
                         groupNames[groupI]
                     );
@@ -375,16 +370,10 @@ void Foam::vtkPVFoam::updateInfoPatches
                 }
             }
 
-            for
-            (
-                HashTable<labelList, word>::const_iterator iter =
-                    groups.begin();
-                iter != groups.end();
-                ++iter
-            )
+            forAllConstIters(groups, iter)
             {
                 const word& groupName = iter.key();
-                const labelList& patchIDs = iter();
+                const labelList& patchIDs = iter.object();
 
                 label nFaces = 0;
                 forAll(patchIDs, i)

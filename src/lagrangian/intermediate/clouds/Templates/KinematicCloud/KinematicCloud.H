@@ -59,7 +59,7 @@ SourceFiles
 #include "kinematicCloud.H"
 #include "IOdictionary.H"
 #include "autoPtr.H"
-#include "cachedRandom.H"
+#include "Random.H"
 #include "fvMesh.H"
 #include "volFields.H"
 #include "fvMatrices.H"
@@ -163,7 +163,7 @@ protected:
         const dictionary subModelProperties_;
 
         //- Random number generator - used by some injection routines
-        mutable cachedRandom rndGen_;
+        mutable Random rndGen_;
 
         //- Cell occupancy information for each parcel, (demand driven)
         autoPtr<List<DynamicList<parcelType*>>> cellOccupancyPtr_;
@@ -366,7 +366,7 @@ public:
             // Cloud data
 
                 //- Return reference to the random object
-                inline cachedRandom& rndGen() const;
+                inline Random& rndGen() const;
 
                 //- Return the cell occupancy information for each
                 //  parcel, non-const access, the caller is

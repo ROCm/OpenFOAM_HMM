@@ -310,17 +310,17 @@ bool Foam::argList::postProcess(int argc, char *argv[])
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Convert argv -> args_
-// Transform sequences with "(" ... ")" into string lists in the process
 bool Foam::argList::regroupArgv(int& argc, char**& argv)
 {
-    int nArgs = 0;
-    int listDepth = 0;
+    int nArgs = 1;
+    unsigned listDepth = 0;
     string tmpString;
 
-    // Note: we also re-write directly into args_
+    // Note: we rewrite directly into args_
     // and use a second pass to sort out args/options
-    for (int argI = 0; argI < argc; ++argI)
+
+    args_[0] = fileName(argv[0]);
+    for (int argI = 1; argI < argc; ++argI)
     {
         if (strcmp(argv[argI], "(") == 0)
         {
@@ -333,7 +333,7 @@ bool Foam::argList::regroupArgv(int& argc, char**& argv)
             {
                 --listDepth;
                 tmpString += ")";
-                if (listDepth == 0)
+                if (!listDepth)
                 {
                     args_[nArgs++] = tmpString;
                     tmpString.clear();
@@ -359,10 +359,20 @@ bool Foam::argList::regroupArgv(int& argc, char**& argv)
 
     if (tmpString.size())
     {
+        // Group(s) not closed, but flush anything still pending
         args_[nArgs++] = tmpString;
     }
 
     args_.setSize(nArgs);
+
+    std::string::size_type len = (nArgs-1); // Spaces between args
+    forAll(args_, argi)
+    {
+        len += args_[argi].size();
+    }
+
+    // Length needed for regrouped command-line
+    argListStr_.reserve(len);
 
     return nArgs < argc;
 }
@@ -403,6 +413,8 @@ void Foam::argList::getRootCase()
     globalCase_ = casePath.name();
     case_       = globalCase_;
 
+    // The name of the executable, unless already present in the environment
+    setEnv("FOAM_EXECUTABLE", executable_, false);
 
     // Set the case and case-name as an environment variable
     if (rootPath_.isAbsolute())
@@ -440,7 +452,7 @@ Foam::argList::argList
 {
     // Check if this run is a parallel run by searching for any parallel option
     // If found call runPar which might filter argv
-    for (int argI = 0; argI < argc; ++argI)
+    for (int argI = 1; argI < argc; ++argI)
     {
         if (argv[argI][0] == '-')
         {
@@ -455,17 +467,11 @@ Foam::argList::argList
     }
 
     // Convert argv -> args_ and capture ( ... ) lists
-    // for normal arguments and for options
     regroupArgv(argc, argv);
+    argListStr_ += args_[0];
 
-    // Get executable name
-    args_[0]    = fileName(argv[0]);
-    executable_ = fileName(argv[0]).name();
-
-    // Check arguments and options, we already have argv[0]
+    // Check arguments and options, argv[0] was already handled
     int nArgs = 1;
-    argListStr_ = args_[0];
-
     for (int argI = 1; argI < args_.size(); ++argI)
     {
         argListStr_ += ' ';
@@ -524,6 +530,9 @@ Foam::argList::argList
     }
 
     args_.setSize(nArgs);
+
+    // Set executable name
+    executable_ = fileName(args_[0]).name();
 
     parse(checkArgs, checkOpts, initialise);
 }
@@ -769,7 +778,7 @@ void Foam::argList::parse
                 }
 
                 // Distribute the master's argument list (with new root)
-                bool hadCaseOpt = options_.found("case");
+                const bool hadCaseOpt = options_.found("case");
                 for
                 (
                     int slave = Pstream::firstSlave();

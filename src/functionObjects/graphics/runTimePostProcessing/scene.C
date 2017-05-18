@@ -131,6 +131,21 @@ void Foam::functionObjects::runTimePostPro::scene::readColours
 }
 
 
+void Foam::functionObjects::runTimePostPro::scene::setActorVisibility
+(
+    vtkRenderer* renderer,
+    const bool visible
+) const
+{
+    vtkActorCollection *actors = renderer->GetActors();
+    for (int i = 0; i < actors->GetNumberOfItems(); ++i)
+    {
+        vtkActor *actor = vtkActor::SafeDownCast(actors->GetItemAsObject(i));
+        actor->SetVisibility(visible);
+    }
+}
+
+
 void Foam::functionObjects::runTimePostPro::scene::initialise
 (
     vtkRenderer* renderer,
@@ -239,9 +254,13 @@ void Foam::functionObjects::runTimePostPro::scene::setCamera
     //       to be done once on initialisation
     if (!clipBox_.empty())
     {
-        // Call ResetCamera() to fit clip box in view
+        setActorVisibility(renderer, false);
         clipBoxActor_->VisibilityOn();
+
+        // Call ResetCamera() to fit clip box in view
         renderer->ResetCamera();
+
+        setActorVisibility(renderer, true);
         clipBoxActor_->VisibilityOff();
     }
 

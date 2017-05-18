@@ -29,6 +29,9 @@ Description
 #include "pTraits.H"
 #include "vector.H"
 #include "tensor.H"
+#include "uLabel.H"
+
+#include <type_traits>
 
 using namespace Foam;
 
@@ -40,7 +43,10 @@ void printTraits()
 {
     Info<< pTraits<T>::typeName
         << ": zero=" << pTraits<T>::zero
-        << " one=" << pTraits<T>::one << endl;
+        << " one=" << pTraits<T>::one
+        << " integral=" << std::is_integral<T>::value
+        << " floating=" << std::is_floating_point<T>::value
+        << endl;
 }
 
 
@@ -50,6 +56,9 @@ void printTraits(const pTraits<T>& p)
     Info<< p.typeName << " == " << p << endl;
 }
 
+
+#pragma GCC diagnostic warning "-Wmaybe-uninitialized"
+#pragma GCC diagnostic warning "-Wuninitialized"
 
 int main()
 {
@@ -70,6 +79,27 @@ int main()
     }
 
     printTraits(pTraits<scalar>(3.14159));
+
+    label abc;
+    Info<< "unintialized primitive:"<< abc << endl;
+
+    label def = label();
+    Info<< "intialized primitive:"<< def << endl;
+
+    Info<< nl << "some interesting label limits:" << nl;
+    std::cout<< "sizeof = " << sizeof(label) << nl;
+    std::cout<< "min = " << pTraits<label>::min << nl;
+    std::cout<< "max = " << pTraits<label>::max << nl;
+    std::cout<< "umax = " << pTraits<uLabel>::max << nl;
+
+    std::cout<< "max_2 = " << pTraits<label>::max/2 << " == "
+        << (1 << (sizeof(label)*8-2)) << nl;
+
+    std::cout<< "max_4 = " << pTraits<label>::max/4 << " == "
+        << (1 << (sizeof(label)*8-3)) << nl;
+
+    std::cout<< "max_8 = " << pTraits<label>::max/8 << " == "
+        << (1 << (sizeof(label)*8-4)) << nl;
 
     Info<< "End\n" << endl;
 

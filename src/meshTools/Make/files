@@ -173,6 +173,7 @@ triSurface/triSurfaceSearch/triSurfaceSearch.C
 triSurface/triSurfaceSearch/triSurfaceRegionSearch.C
 triSurface/triangleFuncs/triangleFuncs.C
 triSurface/surfaceFeatures/surfaceFeatures.C
+triSurface/triSurfaceLoader/triSurfaceLoader.C
 triSurface/triSurfaceTools/triSurfaceTools.C
 triSurface/triSurfaceTools/geompack/geompack.C
 triSurface/triSurfaceTools/pointToPointPlanarInterpolation.C

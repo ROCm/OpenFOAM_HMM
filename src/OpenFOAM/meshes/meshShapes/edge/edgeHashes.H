@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,36 +21,37 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::edgeHashSet
+
+Description
+    A HashSet for an edge.
+    The hashing on an edge is commutative.
+
 \*---------------------------------------------------------------------------*/
 
-#include "wordReListMatcher.H"
+#ifndef edgeHashes_H
+#define edgeHashes_H
+
 #include "HashSet.H"
+#include "edge.H"
+#include "EdgeMap.H"
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::wordReList Foam::wordReListMatcher::uniq(const UList<wordRe>& input)
+namespace Foam
 {
-    wordReList retain(input.size());
-    wordHashSet uniqWord;
+    // Alternative:
+    // template<class T>
+    // using EdgeMap = HashTable<T, edge, Hash<edge>>;
 
-    label nUniq = 0;
-    forAll(input, i)
-    {
-        const wordRe& select = input[i];
+    //- A HashSet with edge for its key.
+    typedef HashSet<edge, Hash<edge>> edgeHashSet;
 
-        if
-        (
-            select.isPattern()
-         || uniqWord.insert(static_cast<const word&>(select))
-        )
-        {
-            retain[nUniq++] = select;
-        }
-    }
-
-    retain.setSize(nUniq);
-    return retain;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

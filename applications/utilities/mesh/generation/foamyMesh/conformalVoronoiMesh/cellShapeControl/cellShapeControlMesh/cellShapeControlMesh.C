@@ -635,7 +635,7 @@ void Foam::cellShapeControlMesh::write() const
         }
     }
 
-    DelaunayMesh<CellSizeDelaunay>::labelTolabelPairHashTable vertexMap;
+    labelPairLookup vertexMap;
     labelList cellMap;
 
     autoPtr<polyMesh> meshPtr = DelaunayMesh<CellSizeDelaunay>::createMesh

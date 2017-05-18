@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,8 +59,8 @@ class Ostream;
 
 // Forward declaration of friend functions and operators
 class edgeMesh;
-Istream& operator>>(Istream&, edgeMesh&);
-Ostream& operator<<(Ostream&, const edgeMesh&);
+Istream& operator>>(Istream& is, edgeMesh& em);
+Ostream& operator<<(Ostream& os, const edgeMesh& em);
 
 
 /*---------------------------------------------------------------------------*\
@@ -108,7 +108,7 @@ public:
     // Static
 
         //- Can we read this file format?
-        static bool canRead(const fileName&, const bool verbose=false);
+        static bool canRead(const fileName& name, const bool verbose=false);
 
         //- Can we read this file format?
         static bool canReadType(const word& ext, const bool verbose=false);
@@ -126,26 +126,23 @@ public:
         edgeMesh();
 
         //- Construct from components
-        edgeMesh(const pointField&, const edgeList&);
+        edgeMesh(const pointField& points, const edgeList& edges);
 
         //- Construct by transferring components (points, edges).
         edgeMesh
         (
-            const Xfer<pointField>&,
-            const Xfer<edgeList>&
+            const Xfer<pointField>& pointLst,
+            const Xfer<edgeList>& edgeLst
         );
 
         //- Construct as copy
-        edgeMesh(const edgeMesh&);
+        edgeMesh(const edgeMesh& em);
 
         //- Construct from file name (uses extension to determine type)
-        edgeMesh(const fileName&);
+        edgeMesh(const fileName& name);
 
         //- Construct from file name (uses extension to determine type)
-        edgeMesh(const fileName&, const word& ext);
-
-        //- Construct from Istream
-        edgeMesh(Istream&);
+        edgeMesh(const fileName& name, const word& ext);
 
 
     // Declare run-time constructor selection table
@@ -167,12 +164,12 @@ public:
         //- Select constructed from filename (explicit extension)
         static autoPtr<edgeMesh> New
         (
-            const fileName&,
+            const fileName& name,
             const word& ext
         );
 
         //- Select constructed from filename (implicit extension)
-        static autoPtr<edgeMesh> New(const fileName&);
+        static autoPtr<edgeMesh> New(const fileName& name);
 
 
     //- Destructor
@@ -195,7 +192,7 @@ public:
         );
 
         //- Write to file
-        static void write(const fileName&, const edgeMesh&);
+        static void write(const fileName& name, const edgeMesh& mesh);
 
 
     // Member Functions
@@ -204,15 +201,15 @@ public:
         void transfer(edgeMesh&);
 
         //- Transfer contents to the Xfer container
-        Xfer<edgeMesh > xfer();
+        Xfer<edgeMesh> xfer();
 
     // Read
 
         //- Read from file. Chooses reader based on explicit extension
-        bool read(const fileName&, const word& ext);
+        bool read(const fileName& name, const word& ext);
 
         //- Read from file. Chooses reader based on detected extension
-        virtual bool read(const fileName&);
+        virtual bool read(const fileName& name);
 
 
     // Access
@@ -245,13 +242,13 @@ public:
         );
 
         //- Scale points. A non-positive factor is ignored
-        virtual void scalePoints(const scalar);
+        virtual void scalePoints(const scalar scaleFactor);
 
-        //- Merge common points (points within mergeDist). Return map from
-        //  old to new points.
-        virtual void mergePoints(const scalar mergeDist, labelList&);
+        //- Geometric merge points (points within mergeDist) prior to
+        //  automatically calling mergeEdges().
+        virtual void mergePoints(const scalar mergeDist);
 
-        //- Merge duplicate edges
+        //- Merge duplicate edges and eliminate unused points.
         virtual void mergeEdges();
 
 
@@ -268,12 +265,12 @@ public:
 
     // Member Operators
 
-        inline void operator=(const edgeMesh&);
+        inline void operator=(const edgeMesh& rhs);
 
         // Ostream Operator
 
-            friend Ostream& operator<<(Ostream&, const edgeMesh&);
-            friend Istream& operator>>(Istream&, edgeMesh&);
+            friend Ostream& operator<<(Ostream& os, const edgeMesh& em);
+            friend Istream& operator>>(Istream& is, edgeMesh& em);
 
 };
 

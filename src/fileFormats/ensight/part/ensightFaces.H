@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,6 @@ Description
 #include "faceList.H"
 #include "FixedList.H"
 #include "PackedBoolList.H"
-#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,16 +56,16 @@ public:
         //- Addressable ensight element types
         enum elemType
         {
-            TRIA3,
-            QUAD4,
-            NSIDED
+            TRIA3,      //!< "tria3"
+            QUAD4,      //!< "quad4"
+            NSIDED      //!< "nsided"
         };
 
         //- Number of element types (3)
         static const label nTypes;
 
-        //- The Ensight names for each element type
-        static const NamedEnum<elemType, 3> elemEnum;
+        //- The ensight element type names
+        static const char* elemNames[3];
 
 
     // Static Member Functions
@@ -83,28 +82,27 @@ private:
         //  The ensight part number is typically this value +1.
         label index_;
 
-        //- Linear list of ids, sub-sectioned per element type via SubLists
+        //- Linear list of ids, sub-sectioned per element type by sub-lists
         labelList address_;
 
         //- Linear list of face-flips
         boolList flipMap_;
 
+        //- Slices (sub-lists) of the address and flips for each element type.
+        FixedList<labelRange, 3> slices_;
+
         //- List of global sizes for each element type.
         //  Used temporarily for local sizes when building the element lists.
         FixedList<label, 3> sizes_;
-
-        //- SubLists of ids for each element type.
-        //  Managed via pointers, since a SubList cannot be relocated/resized.
-        FixedList<SubList<label>*, 3> lists_;
 
 
     // Private Member Functions
 
         //- Simple classifier
-        inline static elemType whatType(const face&);
+        inline static elemType whatType(const face& f);
 
         //- Low-level internal addition routine
-        inline void add(const face&, const label id, const bool flip = false);
+        inline void add(const face& f, const label id, const bool flip = false);
 
         //- Use temporarily stored sizes to redimension the element lists
         void resizeAll();
@@ -121,7 +119,7 @@ public:
         ensightFaces(label partIndex = 0);
 
         //- Copy constructor. Needed for lists etc.
-        ensightFaces(const ensightFaces&);
+        ensightFaces(const ensightFaces& obj);
 
 
     //- Destructor
@@ -141,13 +139,16 @@ public:
         //- The processor local size of all elements.
         inline label size() const;
 
-        //- The global number of the specified element type.
-        //  This value is only meaningful after a reduce operation.
-        inline label total(const enum elemType) const;
+        //- The processor local size of the specified element type.
+        inline label size(const enum elemType) const;
 
         //- The global number of all element types.
         //  This value is only meaningful after a reduce operation.
         label total() const;
+
+        //- The global number of the specified element type.
+        //  This value is only meaningful after a reduce operation.
+        inline label total(const enum elemType) const;
 
         //- The global numbers per element type.
         //  This value is only meaningful after a reduce operation.
@@ -157,10 +158,10 @@ public:
         FixedList<label, 3> sizes() const;
 
         //- Processor local starting offset of element type.
-        label offset(const enum elemType what) const;
+        inline label offset(const enum elemType what) const;
 
         //- Return the (local) face ids of the specified element type
-        inline const labelUList& faceIds(const enum elemType) const;
+        inline const labelUList faceIds(const enum elemType) const;
 
         //- Return the processor local face ids of all elements
         inline const labelUList& faceIds() const;

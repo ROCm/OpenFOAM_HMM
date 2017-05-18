@@ -97,8 +97,8 @@ $(strings)/fileName/fileName.C
 $(strings)/fileName/fileNameIO.C
 $(strings)/keyType/keyType.C
 $(strings)/wordRe/wordRe.C
+$(strings)/wordRes/wordRes.C
 $(strings)/lists/hashedWordList.C
-$(strings)/lists/wordReListMatcher.C
 $(strings)/stringOps/stringOps.C
 
 ops = primitives/ops
@@ -111,7 +111,6 @@ $(sha1)/SHA1.C
 $(sha1)/SHA1Digest.C
 
 primitives/random/Random/Random.C
-primitives/random/cachedRandom/cachedRandom.C
 
 ranges = primitives/ranges
 $(ranges)/labelRange/labelRange.C

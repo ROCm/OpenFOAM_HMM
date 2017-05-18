@@ -40,6 +40,7 @@ License
 #include "syncTools.H"
 #include "CompactListList.H"
 #include "fvMeshTools.H"
+#include "labelPairHashes.H"
 #include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -982,7 +983,7 @@ void Foam::fvMeshDistribute::findCouples
 {
     // Store domain neighbour as map so we can easily look for pair
     // with same face+proc.
-    HashTable<label, labelPair, labelPair::Hash<>> map(domainFace.size());
+    labelPairLookup map(domainFace.size());
 
     forAll(domainProc, bFacei)
     {
@@ -1009,8 +1010,7 @@ void Foam::fvMeshDistribute::findCouples
         {
             labelPair myData(sourceFace[bFacei], sourceProc[bFacei]);
 
-            HashTable<label, labelPair, labelPair::Hash<>>::const_iterator
-                iter = map.find(myData);
+            labelPairLookup::const_iterator iter = map.find(myData);
 
             if (iter != map.end())
             {

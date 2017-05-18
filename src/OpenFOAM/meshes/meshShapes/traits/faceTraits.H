@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,76 +22,44 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::wordReListMatcher
+    Foam::faceTraits
 
 Description
-    A wrapper for matching a List of wordRe.
-
-Note
-    The constructor should remain non-explicit. This allows automatic
-    conversion from UList\<wordRe\> to wordReListMatcher in search
-    functions.
-
-SourceFiles
-    wordReListMatcherI.H
+    Traits class for faces
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wordReListMatcher_H
-#define wordReListMatcher_H
-
-#include "wordReList.H"
+#ifndef faceTraits_H
+#define faceTraits_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declarations
+class triFace;
+class labelledTri;
+
 /*---------------------------------------------------------------------------*\
-                      Class wordReListMatcher Declaration
+                         Class faceTraits Declaration
 \*---------------------------------------------------------------------------*/
 
-class wordReListMatcher
+template<class FaceType>
+class faceTraits
 {
-    // Private data
-
-        //- Reference to underlying list
-        const UList<wordRe>& reList_;
-
 public:
 
-    // Constructors
-
-        //- Construct from a List of wordRe
-        inline wordReListMatcher(const UList<wordRe>&);
-
-
-    // Member Functions
-
-        // Access
-
-            inline label size() const;
-            inline bool  empty() const;
-
-            //- Return underlying list of wordRe
-            inline const UList<wordRe>& operator()() const;
-
-
-        // Searching
-
-            //- Return true if string matches any of the regular expressions
-            //  Smart match as regular expression or as a string.
-            //  Optionally specify a literal match only.
-            inline bool match(const string&, bool literalMatch=false) const;
-
-
-        // Helpers
-
-            //- Return a wordReList with duplicate words filtered out.
-            //  No filtering is done on regular expressions.
-            static wordReList uniq(const UList<wordRe>& input);
-
+    //- Face-type only handles triangles. Not true in general.
+    inline static bool isTri()  { return false; }
 };
+
+
+template<>
+inline bool faceTraits<triFace>::isTri()        { return true; }
+
+template<>
+inline bool faceTraits<labelledTri>::isTri()    { return true; }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -99,8 +67,6 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "wordReListMatcherI.H"
 
 #endif
 

@@ -29,6 +29,7 @@ License
 #include "ListOps.H"
 #include "surfMesh.H"
 #include "OFstream.H"
+#include "faceTraits.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -60,17 +61,26 @@ void Foam::MeshedSurfaceProxy<Face>::write
     const MeshedSurfaceProxy& surf
 )
 {
+    write(name, name.ext(), surf);
+}
+
+
+template<class Face>
+void Foam::MeshedSurfaceProxy<Face>::write
+(
+    const fileName& name,
+    const word& ext,
+    const MeshedSurfaceProxy& surf
+)
+{
     if (debug)
     {
         InfoInFunction << "Writing to " << name << endl;
     }
 
-    const word ext = name.ext();
+    auto mfIter = writefileExtensionMemberFunctionTablePtr_->find(ext);
 
-    typename writefileExtensionMemberFunctionTable::iterator mfIter =
-        writefileExtensionMemberFunctionTablePtr_->find(ext);
-
-    if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
+    if (!mfIter.found())
     {
         FatalErrorInFunction
             << "Unknown file extension " << ext << nl << nl
@@ -237,38 +247,24 @@ Foam::MeshedSurfaceProxy<Face>::~MeshedSurfaceProxy()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
-namespace Foam
-{
-
-// Number of triangles for a triFace surface
-template<>
-inline label MeshedSurfaceProxy<triFace>::nTriangles() const
-{
-    return this->size();
-}
-
-// Number of triangles for a labelledTri surface
-template<>
-inline label MeshedSurfaceProxy<labelledTri>::nTriangles() const
-{
-    return this->size();
-}
-
-}
-
-
 template<class Face>
 inline Foam::label Foam::MeshedSurfaceProxy<Face>::nTriangles() const
 {
-    label nTri = 0;
-    const List<Face>& faceLst = this->surfFaces();
-    forAll(faceLst, facei)
+    if (faceTraits<Face>::isTri())
     {
-        nTri += faceLst[facei].nTriangles();
+        return this->size();
     }
+    else
+    {
+        label nTri = 0;
+        const List<Face>& faceLst = this->surfFaces();
+        forAll(faceLst, facei)
+        {
+            nTri += faceLst[facei].nTriangles();
+        }
 
-    return nTri;
+        return nTri;
+    }
 }
 
 

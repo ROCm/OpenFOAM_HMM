@@ -33,23 +33,16 @@ License
 #include "polyMesh.H"
 #include "surfMesh.H"
 #include "primitivePatch.H"
+#include "faceTraits.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-template<class Face>
-inline bool Foam::MeshedSurface<Face>::isTri()
-{
-    return false;
-}
-
 
 template<class Face>
 Foam::wordHashSet Foam::MeshedSurface<Face>::readTypes()
 {
     return wordHashSet(*fileExtensionConstructorTablePtr_);
 }
-
 
 template<class Face>
 Foam::wordHashSet Foam::MeshedSurface<Face>::writeTypes()
@@ -117,24 +110,33 @@ void Foam::MeshedSurface<Face>::write
     const MeshedSurface<Face>& surf
 )
 {
+    write(name, name.ext(), surf);
+}
+
+
+template<class Face>
+void Foam::MeshedSurface<Face>::write
+(
+    const fileName& name,
+    const word& ext,
+    const MeshedSurface<Face>& surf
+)
+{
     if (debug)
     {
         InfoInFunction << "Writing to " << name << endl;
     }
 
-    const word ext = name.ext();
+    auto mfIter = writefileExtensionMemberFunctionTablePtr_->find(ext);
 
-    typename writefileExtensionMemberFunctionTable::iterator mfIter =
-        writefileExtensionMemberFunctionTablePtr_->find(ext);
-
-    if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
+    if (!mfIter.found())
     {
         // No direct writer, delegate to proxy if possible
         const wordHashSet& delegate = ProxyType::writeTypes();
 
         if (delegate.found(ext))
         {
-            MeshedSurfaceProxy<Face>(surf).write(name);
+            MeshedSurfaceProxy<Face>(surf).write(name, ext);
         }
         else
         {
@@ -850,6 +852,11 @@ bool Foam::MeshedSurface<Face>::checkFaces
 template<class Face>
 Foam::label Foam::MeshedSurface<Face>::nTriangles() const
 {
+    if (faceTraits<Face>::isTri())
+    {
+        return ParentType::size();
+    }
+
     return nTriangles
     (
         const_cast<List<label>&>(List<label>::null())
@@ -905,10 +912,18 @@ Foam::label Foam::MeshedSurface<Face>::nTriangles
 template<class Face>
 Foam::label Foam::MeshedSurface<Face>::triangulate()
 {
-    return triangulate
-    (
-        const_cast<List<label>&>(List<label>::null())
-    );
+    if (faceTraits<Face>::isTri())
+    {
+        // Inplace triangulation of triFace/labelledTri surface = no-op
+        return 0;
+    }
+    else
+    {
+        return triangulate
+        (
+            const_cast<List<label>&>(List<label>::null())
+        );
+    }
 }
 
 
@@ -918,6 +933,17 @@ Foam::label Foam::MeshedSurface<Face>::triangulate
     List<label>& faceMapOut
 )
 {
+    if (faceTraits<Face>::isTri())
+    {
+        // Inplace triangulation of triFace/labelledTri surface = no-op
+        if (notNull(faceMapOut))
+        {
+            faceMapOut.clear();
+        }
+
+        return 0;
+    }
+
     label nTri = 0;
     label maxTri = 0;  // the maximum number of triangles for any single face
     List<Face>& faceLst = this->storedFaces();
@@ -966,7 +992,7 @@ Foam::label Foam::MeshedSurface<Face>::triangulate
             {
                 label fp1 = f.fcIndex(fp);
 
-                newFaces[nTri] = triFace(f[0], f[fp], f[fp1]);
+                newFaces[nTri] = Face{f[0], f[fp], f[fp1]};
                 faceMap[nTri] = facei;
                 nTri++;
             }
