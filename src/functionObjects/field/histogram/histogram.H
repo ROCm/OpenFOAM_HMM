@@ -58,6 +58,12 @@ Usage
         setFormat    | Output format           | yes         |
     \endtable
 
+Note
+    If max is not provided it will use the field's min and max as the bin
+    extremes. If max is provided but not min it will use 0. The set written
+    contains two columns, the first the volume averaged values, the second
+    the raw bin count.
+
 See also
     Foam::functionObject
     Foam::functionObjects::fvMeshFunctionObject
