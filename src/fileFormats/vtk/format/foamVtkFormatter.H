@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    foamVtkFormatter
+    Foam::foamVtkOutput::formatter
 
 Description
     Abstract class for a VTK output stream formatter.
@@ -31,6 +31,7 @@ Description
 
 SourceFiles
     foamVtkFormatter.C
+    foamVtkFormatterTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,6 +45,7 @@ SourceFiles
 #include "UList.H"
 #include "LIFOStack.H"
 #include "foamVtkPTraits.H"
+#include "foamVtkOutputTypes.H"
 
 #include <iostream>
 
@@ -51,12 +53,14 @@ SourceFiles
 
 namespace Foam
 {
+namespace foamVtkOutput
+{
 
 /*---------------------------------------------------------------------------*\
-                      Class foamVtkFormatter Declaration
+                          Class formatter Declaration
 \*---------------------------------------------------------------------------*/
 
-class foamVtkFormatter
+class formatter
 {
     // Private Data
 
@@ -72,7 +76,7 @@ class foamVtkFormatter
 
         //- Write XML attribute
         template<class Type>
-        foamVtkFormatter& xmlAttribute
+        formatter& xmlAttribute
         (
             const word& k,
             const Type& v,
@@ -85,7 +89,7 @@ protected:
     // Protected Member Functions
 
         //- Construct and attach to an output stream
-        foamVtkFormatter(std::ostream& os);
+        formatter(std::ostream& os);
 
 public:
 
@@ -96,10 +100,12 @@ public:
 
 
     //- Destructor
-    virtual ~foamVtkFormatter();
+    virtual ~formatter();
 
 
     // Member Functions
+
+      // Access
 
         //- Access to the underlying output stream
         inline std::ostream& os()
@@ -108,8 +114,10 @@ public:
         }
 
 
-        //- Name for the XML output type.
-        //  Possibly the lowercase version of the Legacy output type
+        //- The output formatType.
+        virtual enum formatType format() const = 0;
+
+        //- Name for the XML output type or the legacy output type.
         virtual const char* name() const = 0;
 
         //- Name for the XML append encoding
@@ -134,64 +142,78 @@ public:
 
     // Member Functions
 
+      // Output
+
         //- Indent according to the currently nested XML tags
         void indent();
 
         //- Write XML header
-        foamVtkFormatter& xmlHeader();
+        //  \return formatter for chaining
+        formatter& xmlHeader();
 
         //- Write XML comment (at the current indentation level)
-        foamVtkFormatter& comment(const std::string& text);
+        //  \return formatter for chaining
+        formatter& comment(const std::string& text);
 
 
         //- Open XML tag
-        foamVtkFormatter& openTag(const word& tag);
+        //  \return formatter for chaining
+        formatter& openTag(const word& tag);
 
         //- Close XML tag, optional as an empty container.
         //  Always adds a trailing newline.
-        foamVtkFormatter& closeTag(const bool isEmpty = false);
+        //  \return formatter for chaining
+        formatter& closeTag(const bool isEmpty = false);
 
         //- End XML tag, optional with sanity check
         //  Always adds a trailing newline.
-        foamVtkFormatter& endTag(const word& tag = word::null);
+        //  \return formatter for chaining
+        formatter& endTag(const word& tag = word::null);
 
         //- Write XML tag without any attributes. Combines openTag/closeTag.
-        foamVtkFormatter& tag(const word& tag);
+        //  \return formatter for chaining
+        formatter& tag(const word& tag);
 
         //- Add a "VTKFile" XML tag for contentType, followed by a tag for
         //  the contentType itself. Optionally leave the contentType tag
         //  open for adding additional attributes.
-        foamVtkFormatter& beginVTKFile
+        //  \return formatter for chaining
+        formatter& beginVTKFile
         (
             const word& contentType,
             const word& contentVersion,
             const bool leaveOpen = false
         );
 
-        //- Add a "AppendedData" XML tag with the current encoding and  output
+        //- Add a "AppendedData" XML tag with the current encoding and output
         //  the requisite '_' prefix.
-        foamVtkFormatter& beginAppendedData();
+        //  \return formatter for chaining
+        formatter& beginAppendedData();
 
 
         //- Open "DataArray" XML tag
+        //  \return formatter for chaining
         template<class Type, int nComp=0>
-        foamVtkFormatter& openDataArray(const word& dataName);
+        formatter& openDataArray(const word& dataName);
 
 
         //- Insert a single "PDataArray" XML entry tag.
         //  For some entries, the name is optional.
+        //  \return formatter for chaining
         template<class Type, int nComp=0>
-        foamVtkFormatter& PDataArray(const word& dataName);
+        formatter& PDataArray(const word& dataName);
 
 
         //- End "DataArray" XML tag
-        inline foamVtkFormatter& endDataArray()
+        //  \return formatter for chaining
+        inline formatter& endDataArray()
         {
             return endTag("DataArray");
         }
 
         //- End "AppendedData" XML tag
-        inline foamVtkFormatter& endAppendedData()
+        //  \return formatter for chaining
+        inline formatter& endAppendedData()
         {
             flush();     // flush any pending encoded content
             os_ << '\n'; // clear separation from content.
@@ -199,14 +221,16 @@ public:
         }
 
         //- End "VTKFile" XML tag
-        inline foamVtkFormatter& endVTKFile()
+        //  \return formatter for chaining
+        inline formatter& endVTKFile()
         {
             return endTag("VTKFile");
         }
 
 
         //- Write XML attribute
-        foamVtkFormatter& xmlAttr
+        //  \return formatter for chaining
+        formatter& xmlAttr
         (
             const word& k,
             const std::string& v,
@@ -214,7 +238,8 @@ public:
         );
 
         //- Write XML attribute
-        foamVtkFormatter& xmlAttr
+        //  \return formatter for chaining
+        formatter& xmlAttr
         (
             const word& k,
             const int32_t v,
@@ -222,7 +247,8 @@ public:
         );
 
         //- Write XML attribute
-        foamVtkFormatter& xmlAttr
+        //  \return formatter for chaining
+        formatter& xmlAttr
         (
             const word& k,
             const int64_t v,
@@ -230,7 +256,8 @@ public:
         );
 
         //- Write XML attribute
-        foamVtkFormatter& xmlAttr
+        //  \return formatter for chaining
+        formatter& xmlAttr
         (
             const word& k,
             const uint64_t v,
@@ -238,7 +265,8 @@ public:
         );
 
         //- Write XML attribute
-        foamVtkFormatter& xmlAttr
+        //  \return formatter for chaining
+        formatter& xmlAttr
         (
             const word& k,
             const scalar v,
@@ -246,29 +274,34 @@ public:
         );
 
 
-
     // Member Operators
 
         //- Write XML attribute
-        foamVtkFormatter& operator()(const word& k, const std::string& v);
+        //  \return formatter for chaining
+        formatter& operator()(const word& k, const std::string& v);
 
         //- Write XML attribute
-        foamVtkFormatter& operator()(const word& k, const int32_t v);
+        //  \return formatter for chaining
+        formatter& operator()(const word& k, const int32_t v);
 
         //- Write XML attribute
-        foamVtkFormatter& operator()(const word& k, const int64_t v);
+        //  \return formatter for chaining
+        formatter& operator()(const word& k, const int64_t v);
 
         //- Write XML attribute
-        foamVtkFormatter& operator()(const word& k, const uint64_t v);
+        //  \return formatter for chaining
+        formatter& operator()(const word& k, const uint64_t v);
 
         //- Write XML attribute
-        foamVtkFormatter& operator()(const word& k, const scalar v);
+        //  \return formatter for chaining
+        formatter& operator()(const word& k, const scalar v);
 
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace foamVtkOutput
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

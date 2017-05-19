@@ -27,62 +27,19 @@ License
 
 
 template<class Type>
-inline void Foam::foamVtkOutput::write
-(
-    foamVtkFormatter& fmt,
-    const Type& val
-)
-{
-    for (direction cmpt=0; cmpt < pTraits<Type>::nComponents; ++cmpt)
-    {
-        fmt.write(component(val, cmpt));
-    }
-}
-
-
-template<class Type>
-void Foam::foamVtkOutput::writeList
-(
-    foamVtkFormatter& fmt,
-    const UList<Type>& lst
-)
-{
-    forAll(lst, i)
-    {
-        write(fmt, lst[i]);
-    }
-}
-
-
-template<class Type>
-void Foam::foamVtkOutput::writeList
-(
-    foamVtkFormatter& fmt,
-    const UList<Type>& lst,
-    const UList<label>& addressing
-)
-{
-    forAll(addressing, i)
-    {
-        write(fmt, lst[addressing[i]]);
-    }
-}
-
-
-template<class Type>
 void Foam::foamVtkOutput::writeField
 (
-    foamVtkFormatter& fmt,
-    const GeometricField<Type, fvPatchField, volMesh>& vf
+    foamVtkOutput::formatter& fmt,
+    const GeometricField<Type, fvPatchField, volMesh>& fld
 )
 {
     const uint64_t payLoad =
     (
-        vf.size() * pTraits<Type>::nComponents * sizeof(float)
+        fld.size() * pTraits<Type>::nComponents * sizeof(float)
     );
 
     fmt.writeSize(payLoad);
-    writeList(fmt, vf.internalField());
+    writeList(fmt, fld.internalField());
 
     fmt.flush();
 }
@@ -91,8 +48,8 @@ void Foam::foamVtkOutput::writeField
 template<class Type>
 void Foam::foamVtkOutput::writeField
 (
-    foamVtkFormatter& fmt,
-    const GeometricField<Type, fvPatchField, volMesh>& vf,
+    foamVtkOutput::formatter& fmt,
+    const GeometricField<Type, fvPatchField, volMesh>& fld,
     const UList<label>& cellMap
 )
 {
@@ -102,7 +59,46 @@ void Foam::foamVtkOutput::writeField
     );
 
     fmt.writeSize(payLoad);
-    writeList(fmt, vf.internalField(), cellMap);
+    writeList(fmt, fld.internalField(), cellMap);
+
+    fmt.flush();
+}
+
+
+template<class Type>
+void Foam::foamVtkOutput::writeField
+(
+    foamVtkOutput::formatter& fmt,
+    const DimensionedField<Type, volMesh>& fld
+)
+{
+    const uint64_t payLoad =
+    (
+        fld.size() * pTraits<Type>::nComponents * sizeof(float)
+    );
+
+    fmt.writeSize(payLoad);
+    writeList(fmt, fld);
+
+    fmt.flush();
+}
+
+
+template<class Type>
+void Foam::foamVtkOutput::writeField
+(
+    foamVtkOutput::formatter& fmt,
+    const DimensionedField<Type, volMesh>& fld,
+    const UList<label>& cellMap
+)
+{
+    const uint64_t payLoad =
+    (
+        cellMap.size() * pTraits<Type>::nComponents * sizeof(float)
+    );
+
+    fmt.writeSize(payLoad);
+    writeList(fmt, fld, cellMap);
 
     fmt.flush();
 }

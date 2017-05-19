@@ -23,17 +23,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkLegacyFormatter.H"
+#include "foamVtkLegacyRawFormatter.H"
 #include "endian.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* Foam::foamVtkLegacyFormatter::name_ = "BINARY";
+const char* Foam::foamVtkOutput::legacyRawFormatter::legacyName_ = "BINARY";
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::foamVtkLegacyFormatter::write
+void Foam::foamVtkOutput::legacyRawFormatter::write
 (
     const char* s,
     std::streamsize n
@@ -45,37 +45,46 @@ void Foam::foamVtkLegacyFormatter::write
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::foamVtkLegacyFormatter::foamVtkLegacyFormatter(std::ostream& os)
+Foam::foamVtkOutput::legacyRawFormatter::legacyRawFormatter
+(
+    std::ostream& os
+)
 :
-    foamVtkFormatter(os)
+    formatter(os)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamVtkLegacyFormatter::~foamVtkLegacyFormatter()
+Foam::foamVtkOutput::legacyRawFormatter::~legacyRawFormatter()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-const char* Foam::foamVtkLegacyFormatter::name() const
+const char* Foam::foamVtkOutput::legacyRawFormatter::name() const
 {
-    return name_;
+    return legacyName_;
 }
 
 
-const char* Foam::foamVtkLegacyFormatter::encoding() const
+const char* Foam::foamVtkOutput::legacyRawFormatter::encoding() const
 {
-    return name_;
+    return legacyName_;
 }
 
 
-void Foam::foamVtkLegacyFormatter::writeSize(const uint64_t ignored)
+void Foam::foamVtkOutput::legacyRawFormatter::writeSize
+(
+    const uint64_t ignored
+)
 {/*nop*/}
 
 
-void Foam::foamVtkLegacyFormatter::write(const uint8_t val)
+void Foam::foamVtkOutput::legacyRawFormatter::write
+(
+    const uint8_t val
+)
 {
     // Legacy can only handle 32-bit integers.
     // Nonetheless promote to 'label' (32 or 64 bit) and deal with it later
@@ -84,7 +93,10 @@ void Foam::foamVtkLegacyFormatter::write(const uint8_t val)
 }
 
 
-void Foam::foamVtkLegacyFormatter::write(const label val)
+void Foam::foamVtkOutput::legacyRawFormatter::write
+(
+    const label val
+)
 {
     // std::cerr<<"label is:" << sizeof(val) << '\n';
 
@@ -104,7 +116,10 @@ void Foam::foamVtkLegacyFormatter::write(const label val)
 }
 
 
-void Foam::foamVtkLegacyFormatter::write(const float val)
+void Foam::foamVtkOutput::legacyRawFormatter::write
+(
+    const float val
+)
 {
     // std::cerr<<"float is:" << sizeof(val) << '\n';
 
@@ -122,7 +137,10 @@ void Foam::foamVtkLegacyFormatter::write(const float val)
 }
 
 
-void Foam::foamVtkLegacyFormatter::write(const double val)
+void Foam::foamVtkOutput::legacyRawFormatter::write
+(
+    const double val
+)
 {
     // Legacy cannot support Float64 anyhow.
     // std::cerr<<"write double as float:" << val << '\n';
@@ -131,7 +149,7 @@ void Foam::foamVtkLegacyFormatter::write(const double val)
 }
 
 
-void Foam::foamVtkLegacyFormatter::flush()
+void Foam::foamVtkOutput::legacyRawFormatter::flush()
 {
     os()<< '\n';
 }

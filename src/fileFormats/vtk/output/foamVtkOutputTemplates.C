@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2107 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,45 +23,47 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkBase64Formatter.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const char* Foam::foamVtkOutput::base64Formatter::name_ = "binary";
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::foamVtkOutput::base64Formatter::base64Formatter(std::ostream& os)
-:
-    foamVtkBase64Layer(os)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::foamVtkOutput::base64Formatter::~base64Formatter()
+template<class Type>
+inline void Foam::foamVtkOutput::write
+(
+    foamVtkOutput::formatter& fmt,
+    const Type& val
+)
 {
-    if (base64Layer::close())
+    for (direction cmpt=0; cmpt < pTraits<Type>::nComponents; ++cmpt)
     {
-        os().put('\n');
+        fmt.write(component(val, cmpt));
     }
 }
 
 
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-const char* Foam::foamVtkOutput::base64Formatter::name() const
+template<class Type>
+void Foam::foamVtkOutput::writeList
+(
+    foamVtkOutput::formatter& fmt,
+    const UList<Type>& lst
+)
 {
-    return name_;
+    forAll(lst, i)
+    {
+        write(fmt, lst[i]);
+    }
 }
 
 
-void Foam::foamVtkOutput::base64Formatter::flush()
+template<class Type>
+void Foam::foamVtkOutput::writeList
+(
+    foamVtkOutput::formatter& fmt,
+    const UList<Type>& lst,
+    const UList<label>& addressing
+)
 {
-    if (base64Layer::close())
+    forAll(addressing, i)
     {
-        os().put('\n');
+        write(fmt, lst[addressing[i]]);
     }
 }
 

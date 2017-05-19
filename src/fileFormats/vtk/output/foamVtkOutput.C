@@ -24,31 +24,63 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "foamVtkOutput.H"
-#include "foamVtkAsciiFormatter.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "foamVtkFormatter.H"
+#include "foamVtkAsciiFormatter.H"
+#include "foamVtkBase64Formatter.H"
+#include "foamVtkAppendBase64Formatter.H"
+#include "foamVtkAppendRawFormatter.H"
+#include "foamVtkLegacyAsciiFormatter.H"
+#include "foamVtkLegacyRawFormatter.H"
+#include "typeInfo.H"
+
+// * * * * * * * * * * * * * * * Static Data * * * * * * * * * * * * * * * * //
 
 const Foam::word Foam::foamVtkOutput::legacy::EXT = "vtk";
 
 
-//! \cond fileScope
-static inline std::ostream& legacyDataHeader
+// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::foamVtkOutput::formatter>
+Foam::foamVtkOutput::newFormatter
 (
     std::ostream& os,
-    const char* tag,
-    const Foam::label nItems,
-    const Foam::label nFields
+    const enum formatType fmtType,
+    unsigned prec
 )
 {
-    os  << tag << ' ' << nItems << '\n'
-        << "FIELD attributes " << nFields << '\n';
+    autoPtr<foamVtkOutput::formatter> fmt;
 
-    return os;
+    switch (fmtType)
+    {
+        case INLINE_ASCII:
+            fmt.set(new foamVtkOutput::asciiFormatter(os, prec));
+            break;
+
+        case INLINE_BASE64:
+            fmt.set(new foamVtkOutput::base64Formatter(os));
+            break;
+
+        case APPEND_BASE64:
+            fmt.set(new foamVtkOutput::appendBase64Formatter(os));
+            break;
+
+        case APPEND_BINARY:
+            fmt.set(new foamVtkOutput::appendRawFormatter(os));
+            break;
+
+        case LEGACY_ASCII:
+            fmt.set(new foamVtkOutput::legacyAsciiFormatter(os, prec));
+            break;
+
+        case LEGACY_BINARY:
+            fmt.set(new foamVtkOutput::legacyRawFormatter(os));
+            break;
+    }
+
+    return fmt;
 }
-//! \endcond
 
-
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::label Foam::foamVtkOutput::writeVtmFile
 (
@@ -58,7 +90,7 @@ Foam::label Foam::foamVtkOutput::writeVtmFile
 {
     const word& content = "vtkMultiBlockDataSet";
 
-    foamVtkAsciiFormatter vtmFile(os);
+    asciiFormatter vtmFile(os);
 
     vtmFile
         .xmlHeader()
@@ -79,7 +111,7 @@ Foam::label Foam::foamVtkOutput::writeVtmFile
 }
 
 
-std::ostream& Foam::foamVtkOutput::legacy::writeHeader
+std::ostream& Foam::foamVtkOutput::legacy::fileHeader
 (
     std::ostream& os,
     const std::string& title,
@@ -94,25 +126,41 @@ std::ostream& Foam::foamVtkOutput::legacy::writeHeader
 }
 
 
-std::ostream& Foam::foamVtkOutput::legacy::writeCellDataHeader
+std::ostream& Foam::foamVtkOutput::legacy::fileHeader
+(
+    foamVtkOutput::formatter& fmt,
+    const std::string& title
+)
+{
+    return fileHeader(fmt.os(), title, isType<legacyRawFormatter>(fmt));
+}
+
+
+std::ostream& Foam::foamVtkOutput::legacy::cellDataHeader
 (
     std::ostream& os,
     const label nCells,
     const label nFields
 )
 {
-    return legacyDataHeader(os, "CELL_DATA", nCells, nFields);
+    os  << "CELL_DATA " << nCells << nl
+        << "FIELD attributes " << nFields << nl;
+
+    return os;
 }
 
 
-std::ostream& Foam::foamVtkOutput::legacy::writePointDataHeader
+std::ostream& Foam::foamVtkOutput::legacy::pointDataHeader
 (
     std::ostream& os,
     const label nPoints,
     const label nFields
 )
 {
-    return legacyDataHeader(os, "POINT_DATA", nPoints, nFields);
+    os  << "POINT_DATA " << nPoints << nl
+        << "FIELD attributes " << nFields << nl;
+
+    return os;
 }
 
 

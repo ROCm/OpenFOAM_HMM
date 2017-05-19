@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    foamVtkBase64Formatter
+    Foam::foamVtkOutput::base64Formatter
 
 Description
     Inline base-64 encoded binary output.
@@ -39,12 +39,14 @@ Description
 
 namespace Foam
 {
+namespace foamVtkOutput
+{
 
 /*---------------------------------------------------------------------------*\
-                   Class foamVtkBase64Formatter Declaration
+                       Class base64Formatter Declaration
 \*---------------------------------------------------------------------------*/
 
-class foamVtkBase64Formatter
+class base64Formatter
 :
     public foamVtkBase64Layer
 {
@@ -57,27 +59,32 @@ class foamVtkBase64Formatter
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        foamVtkBase64Formatter(const foamVtkBase64Formatter&) = delete;
+        base64Formatter(const base64Formatter&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const foamVtkBase64Formatter&) = delete;
+        void operator=(const base64Formatter&) = delete;
 
 public:
 
     // Constructors
 
         //- Construct and attach to an output stream
-        foamVtkBase64Formatter(std::ostream& os);
+        base64Formatter(std::ostream& os);
 
 
     //- Destructor
-    virtual ~foamVtkBase64Formatter();
+    virtual ~base64Formatter();
 
 
     // Member Functions
 
+        //- The output formatType is INLINE_BASE64.
+        virtual enum formatType format() const
+        {
+            return formatType::INLINE_BASE64;
+        }
+
         //- Name for the XML output type ("binary")
-        //  The lowercase version of the Legacy output type.
         virtual const char* name() const;
 
 
@@ -89,6 +96,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace foamVtkOutput
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

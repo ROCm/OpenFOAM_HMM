@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,18 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::foamVtkOutput::appendRawFormatter
+    Foam::foamVtkOutput::legacyRawFormatter
 
 Description
-    Appended raw binary output.
+    Binary output for the VTK legacy format, always written as big-endian
+    and with 32-bit integers.
+
+    This format should never be used for OpenFOAM with 64-bit label sizes.
 
 SourceFiles
-    foamVtkAppendRawFormatter.C
+    foamVtkLegacyRawFormatter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkAppendRawFormatter_H
-#define foamVtkAppendRawFormatter_H
+#ifndef foamVtkLegacyRawFormatter_H
+#define foamVtkLegacyRawFormatter_H
 
 #include "foamVtkFormatter.H"
 
@@ -45,25 +48,25 @@ namespace foamVtkOutput
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class appendRawFormatter Declaration
+                       Class legacyRawFormatter Declaration
 \*---------------------------------------------------------------------------*/
 
-class appendRawFormatter
+class legacyRawFormatter
 :
     public formatter
 {
     // Private Data Members
 
-        static const char* name_;
-        static const char* encoding_;
+        static const char* legacyName_;
+
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        appendRawFormatter(const appendRawFormatter&) = delete;
+        legacyRawFormatter(const legacyRawFormatter&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const appendRawFormatter&) = delete;
+        void operator=(const legacyRawFormatter&) = delete;
 
 
 protected:
@@ -79,37 +82,38 @@ public:
     // Constructors
 
         //- Construct and attach to an output stream
-        appendRawFormatter(std::ostream& os);
+        legacyRawFormatter(std::ostream& os);
 
 
     //- Destructor
-    virtual ~appendRawFormatter();
+    virtual ~legacyRawFormatter();
 
 
     // Member Functions
 
-        //- The output formatType is APPEND_BINARY.
+        //- The output formatType is LEGACY_BINARY.
         virtual enum formatType format() const
         {
-            return formatType::APPEND_BINARY;
+            return formatType::LEGACY_BINARY;
         }
 
-        //- Output name for XML type ("append")
+        //- Name for the legacy binary output type ("BINARY")
         virtual const char* name() const;
 
-        //- Output name for append encoding type ("raw")
+        //- Name for the XML append encoding (unused)
+        //  Currently identical to name(), but do not rely on this.
         virtual const char* encoding() const;
 
 
-        //- Write leading size for binary output
-        virtual void writeSize(const uint64_t nBytes);
+        //- Write leading size - a no-op for legacy binary output
+        virtual void writeSize(const uint64_t ignored);
 
         virtual void write(const uint8_t val);
         virtual void write(const label val);
         virtual void write(const float val);
         virtual void write(const double val);
 
-        //- A no-op for this format
+        //- Write a newline to the output
         virtual void flush();
 
 };

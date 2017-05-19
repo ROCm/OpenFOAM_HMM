@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,33 +23,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-inline bool Foam::foamVtkOutputOptions::legacy() const
+#include "foamVtkLegacyAsciiFormatter.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const char* Foam::foamVtkOutput::legacyAsciiFormatter::legacyName_ = "ASCII";
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::foamVtkOutput::legacyAsciiFormatter::legacyAsciiFormatter
+(
+    std::ostream& os
+)
+:
+    asciiFormatter(os)
+{}
+
+
+Foam::foamVtkOutput::legacyAsciiFormatter::legacyAsciiFormatter
+(
+    std::ostream& os,
+    unsigned precision
+)
+:
+    asciiFormatter(os, precision)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::foamVtkOutput::legacyAsciiFormatter::~legacyAsciiFormatter()
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+const char* Foam::foamVtkOutput::legacyAsciiFormatter::name() const
 {
-    return (type_ & LEGACY);
+    return legacyName_;
 }
 
 
-inline bool Foam::foamVtkOutputOptions::xml() const
+const char* Foam::foamVtkOutput::legacyAsciiFormatter::encoding() const
 {
-    return !legacy();
-}
-
-
-inline bool Foam::foamVtkOutputOptions::append() const
-{
-    return (type_ & APPEND);
-}
-
-
-inline bool Foam::foamVtkOutputOptions::insitu() const
-{
-    return !(type_ & APPEND);
-}
-
-
-inline bool Foam::foamVtkOutputOptions::ascii() const
-{
-    return !(type_ & (BINARY | BASE64));
+    return legacyName_;
 }
 
 

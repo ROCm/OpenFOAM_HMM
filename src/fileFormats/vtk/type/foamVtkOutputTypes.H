@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,22 +21,19 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::foamVtkOutput::appendBase64Formatter
+InNamespace
+    Foam::foamVtkOutput
 
 Description
-    Appended base-64 encoded binary output.
-    Uses an output filter layer to write base-64 encoded content.
+    Enumerations and typedefs for VTK output.
 
 SourceFiles
-    foamVtkAppendBase64Formatter.C
+    foamVtkOutputTypes.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkAppendBase64Formatter_H
-#define foamVtkAppendBase64Formatter_H
-
-#include "foamVtkBase64Layer.H"
+#ifndef foamVtkOutputTypes_H
+#define foamVtkOutputTypes_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,52 +42,28 @@ namespace Foam
 namespace foamVtkOutput
 {
 
-/*---------------------------------------------------------------------------*\
-                    Class appendBase64Formatter Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-class appendBase64Formatter
-:
-    public foamVtkBase64Layer
-{
-    // Private Data Members
+  // Enumerations
 
-        static const char* name_;
+    //- The output format type for file contents.
+    //  Upper bits for output type, lower bits for the format itself.
+    enum formatType
+    {
+        /** XML inline ASCII, using the asciiFormatter */
+        INLINE_ASCII  = 0,
+        /** XML inline base64, using the base64Formatter */
+        INLINE_BASE64 = 0x01,
+        /** XML append base64, using the appendBase64Formatter */
+        APPEND_BASE64 = 0x11,
+        /** XML append raw binary, using the appendRawFormatter */
+        APPEND_BINARY = 0x12,
+        /** Legacy ASCII, using the legacyAsciiFormatter */
+        LEGACY_ASCII  = 0x20,
+        /** Legacy raw binary, using the legacyRawFormatter */
+        LEGACY_BINARY = 0x22,
+    };
 
-
-    // Private Member Functions
-
-    //- Disallow default bitwise copy construct
-    appendBase64Formatter(const appendBase64Formatter&) = delete;
-
-    //- Disallow default bitwise assignment
-    void operator=(const appendBase64Formatter&) = delete;
-
-
-public:
-
-    // Constructors
-
-        //- Construct and attach to an output stream
-        appendBase64Formatter(std::ostream& os);
-
-
-    //- Destructor
-    virtual ~appendBase64Formatter();
-
-
-    // Member Functions
-
-        //- The output formatType is APPEND_BASE64.
-        virtual enum formatType format() const
-        {
-            return formatType::APPEND_BASE64;
-        }
-
-        //- Output name for XML type ("append")
-        virtual const char* name() const;
-
-};
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

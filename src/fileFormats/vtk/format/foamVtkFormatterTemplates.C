@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,8 +27,8 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::xmlAttribute
+Foam::foamVtkOutput::formatter&
+Foam::foamVtkOutput::formatter::xmlAttribute
 (
     const word& k,
     const Type& v,
@@ -49,7 +49,8 @@ Foam::foamVtkFormatter::xmlAttribute
 
 
 template<class Type, int nComp>
-Foam::foamVtkFormatter& Foam::foamVtkFormatter::openDataArray
+Foam::foamVtkOutput::formatter&
+Foam::foamVtkOutput::formatter::openDataArray
 (
     const word& dataName
 )
@@ -68,7 +69,8 @@ Foam::foamVtkFormatter& Foam::foamVtkFormatter::openDataArray
 
 
 template<class Type, int nComp>
-Foam::foamVtkFormatter& Foam::foamVtkFormatter::PDataArray
+Foam::foamVtkOutput::formatter&
+Foam::foamVtkOutput::formatter::PDataArray
 (
     const word& dataName
 )
@@ -88,5 +90,6 @@ Foam::foamVtkFormatter& Foam::foamVtkFormatter::PDataArray
 
     return *this;
 }
+
 
 // ************************************************************************* //

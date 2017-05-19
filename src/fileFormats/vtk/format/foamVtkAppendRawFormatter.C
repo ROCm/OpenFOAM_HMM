@@ -27,13 +27,13 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* Foam::foamVtkAppendRawFormatter::name_     = "append";
-const char* Foam::foamVtkAppendRawFormatter::encoding_ = "raw";
+const char* Foam::foamVtkOutput::appendRawFormatter::name_     = "append";
+const char* Foam::foamVtkOutput::appendRawFormatter::encoding_ = "raw";
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::foamVtkAppendRawFormatter::write
+void Foam::foamVtkOutput::appendRawFormatter::write
 (
     const char* s,
     std::streamsize n
@@ -45,59 +45,59 @@ void Foam::foamVtkAppendRawFormatter::write
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::foamVtkAppendRawFormatter::foamVtkAppendRawFormatter(std::ostream& os)
+Foam::foamVtkOutput::appendRawFormatter::appendRawFormatter(std::ostream& os)
 :
-    foamVtkFormatter(os)
+    formatter(os)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamVtkAppendRawFormatter::~foamVtkAppendRawFormatter()
+Foam::foamVtkOutput::appendRawFormatter::~appendRawFormatter()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-const char* Foam::foamVtkAppendRawFormatter::name() const
+const char* Foam::foamVtkOutput::appendRawFormatter::name() const
 {
     return name_;
 }
 
 
-const char* Foam::foamVtkAppendRawFormatter::encoding() const
+const char* Foam::foamVtkOutput::appendRawFormatter::encoding() const
 {
     return encoding_;
 }
 
 
-void Foam::foamVtkAppendRawFormatter::writeSize(const uint64_t nBytes)
+void Foam::foamVtkOutput::appendRawFormatter::writeSize(const uint64_t nBytes)
 {
     write(reinterpret_cast<const char*>(&nBytes), sizeof(uint64_t));
 }
 
 
-void Foam::foamVtkAppendRawFormatter::write(const uint8_t val)
+void Foam::foamVtkOutput::appendRawFormatter::write(const uint8_t val)
 {
     write(reinterpret_cast<const char*>(&val), sizeof(uint8_t));
 }
 
 
-void Foam::foamVtkAppendRawFormatter::write(const label val)
+void Foam::foamVtkOutput::appendRawFormatter::write(const label val)
 {
     // std::cerr<<"label:" << sizeof(val) << "=" << val << '\n';
     write(reinterpret_cast<const char*>(&val), sizeof(label));
 }
 
 
-void Foam::foamVtkAppendRawFormatter::write(const float val)
+void Foam::foamVtkOutput::appendRawFormatter::write(const float val)
 {
     // std::cerr<<"float:" << sizeof(val) << "=" << val << '\n';
     write(reinterpret_cast<const char*>(&val), sizeof(float));
 }
 
 
-void Foam::foamVtkAppendRawFormatter::write(const double val)
+void Foam::foamVtkOutput::appendRawFormatter::write(const double val)
 {
     // std::cerr<<"double as float=" << val << '\n';
     float copy(val);
@@ -105,7 +105,7 @@ void Foam::foamVtkAppendRawFormatter::write(const double val)
 }
 
 
-void Foam::foamVtkAppendRawFormatter::flush()
+void Foam::foamVtkOutput::appendRawFormatter::flush()
 {/*nop*/}
 
 

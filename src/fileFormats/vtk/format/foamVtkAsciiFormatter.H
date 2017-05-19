@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    foamVtkAsciiFormatter
+    Foam::foamVtkOutput::asciiFormatter
 
 Description
-    Inline ASCII binary output.
+    Inline ASCII output.
     Adds spaces between entries and a newline every 6 items
     (for consistency with what VTK itself outputs).
 
@@ -43,14 +43,16 @@ SourceFiles
 
 namespace Foam
 {
+namespace foamVtkOutput
+{
 
 /*---------------------------------------------------------------------------*\
-                    Class foamVtkAsciiFormatter Declaration
+                       Class asciiFormatter Declaration
 \*---------------------------------------------------------------------------*/
 
-class foamVtkAsciiFormatter
+class asciiFormatter
 :
-    public foamVtkFormatter
+    public formatter
 {
     // Private Data Members
 
@@ -70,10 +72,10 @@ class foamVtkAsciiFormatter
 
 
         //- Disallow default bitwise copy construct
-        foamVtkAsciiFormatter(const foamVtkAsciiFormatter&) = delete;
+        asciiFormatter(const asciiFormatter&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const foamVtkAsciiFormatter&) = delete;
+        void operator=(const asciiFormatter&) = delete;
 
 
 public:
@@ -81,20 +83,25 @@ public:
     // Constructors
 
         //- Construct and attach to an output stream, use default precision
-        foamVtkAsciiFormatter(std::ostream& os);
+        asciiFormatter(std::ostream& os);
 
         //- Construct and attach to an output stream, use specified precision
-        foamVtkAsciiFormatter(std::ostream& os, unsigned precision);
+        asciiFormatter(std::ostream& os, unsigned precision);
 
 
     //- Destructor
-    virtual ~foamVtkAsciiFormatter();
+    virtual ~asciiFormatter();
 
 
     // Member Functions
 
+        //- The output formatType is INLINE_ASCII.
+        virtual enum formatType format() const
+        {
+            return formatType::INLINE_ASCII;
+        }
+
         //- Name for the XML output type ("ascii")
-        //  The legacy output type is an uppercase version of this.
         virtual const char* name() const;
 
         //- Name for the XML append encoding - unused.
@@ -120,6 +127,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace foamVtkOutput
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
