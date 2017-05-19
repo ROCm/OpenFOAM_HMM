@@ -39,7 +39,7 @@ Foam::autoPtr<Foam::ODESolver> Foam::ODESolver::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(ODESolverTypeName);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown ODESolver type "

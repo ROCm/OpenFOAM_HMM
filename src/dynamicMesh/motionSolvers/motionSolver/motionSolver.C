@@ -125,7 +125,7 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(solverTypeName);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown solver type "

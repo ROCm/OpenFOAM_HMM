@@ -364,7 +364,7 @@ Foam::autoPtr<Foam::GAMGProcAgglomeration> Foam::GAMGProcAgglomeration::New
     GAMGAgglomerationConstructorTable::iterator cstrIter =
         GAMGAgglomerationConstructorTablePtr_->find(type);
 
-    if (cstrIter == GAMGAgglomerationConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown GAMGProcAgglomeration type "

@@ -45,7 +45,7 @@ Foam::autoPtr<Foam::extendedEdgeMesh> Foam::extendedEdgeMesh::New
     fileExtensionConstructorTable::iterator cstrIter =
         fileExtensionConstructorTablePtr_->find(ext);
 
-    if (cstrIter == fileExtensionConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown file extension " << ext

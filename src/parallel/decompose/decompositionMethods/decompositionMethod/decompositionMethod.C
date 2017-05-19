@@ -187,7 +187,7 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(methodType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown decompositionMethod "

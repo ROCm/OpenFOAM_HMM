@@ -42,7 +42,7 @@ Foam::autoPtr<Foam::wallDampingModel> Foam::wallDampingModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(wallDampingModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown wallDampingModelType type "

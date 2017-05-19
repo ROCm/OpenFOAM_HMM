@@ -41,7 +41,7 @@ Foam::autoPtr<Foam::blendingMethod> Foam::blendingMethod::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(blendingMethodType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown blendingMethodType type "

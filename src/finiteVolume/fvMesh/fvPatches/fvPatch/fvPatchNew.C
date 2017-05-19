@@ -43,7 +43,7 @@ Foam::autoPtr<Foam::fvPatch> Foam::fvPatch::New
     polyPatchConstructorTable::iterator cstrIter =
         polyPatchConstructorTablePtr_->find(patch.type());
 
-    if (cstrIter == polyPatchConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown fvPatch type " << patch.type() << nl

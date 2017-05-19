@@ -68,7 +68,7 @@ autoPtr<faceAreaWeightModel> faceAreaWeightModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(faceAreaWeightModelTypeName);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown faceAreaWeightModel type "

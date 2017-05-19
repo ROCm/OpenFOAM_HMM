@@ -46,7 +46,7 @@ Foam::autoPtr<Foam::polyMeshModifier> Foam::polyMeshModifier::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modifierType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (

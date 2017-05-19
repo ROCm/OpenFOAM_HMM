@@ -94,7 +94,7 @@ Foam::pointPatchField<Type>::NewCalculatedType
     typename pointPatchConstructorTable::iterator patchTypeCstrIter =
         pointPatchConstructorTablePtr_->find(pf.patch().type());
 
-    if (patchTypeCstrIter != pointPatchConstructorTablePtr_->end())
+    if (patchTypeCstrIter.found())
     {
         return autoPtr<pointPatchField<Type>>
         (
