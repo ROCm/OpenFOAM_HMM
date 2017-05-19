@@ -59,7 +59,7 @@ public:
     inline always()
     {}
 
-    //- Evalulated as a bool - return true
+    //- Evaluated as a bool - return true
     inline operator bool() const
     {
         return true;
@@ -79,8 +79,8 @@ public:
         return true;
     }
 
-    //- String matching returning true
-    inline bool match(const std::string& unused, bool literal=false) const
+    //- String match returning true
+    inline bool match(const std::string&, bool literal=false) const
     {
         return true;
     }
@@ -101,7 +101,7 @@ public:
     inline never()
     {}
 
-    //- Evalulated as a bool - return false
+    //- Evaluated as a bool - return false
     inline operator bool() const
     {
         return false;
@@ -121,8 +121,8 @@ public:
         return false;
     }
 
-    //- String matching returning false
-    inline bool match(const std::string& unused, bool literal=false) const
+    //- String match returning false
+    inline bool match(const std::string&, bool literal=false) const
     {
         return false;
     }
