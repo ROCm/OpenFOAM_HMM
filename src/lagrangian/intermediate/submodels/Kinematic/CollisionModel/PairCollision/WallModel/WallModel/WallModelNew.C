@@ -42,7 +42,7 @@ Foam::WallModel<CloudType>::New
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(WallModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown wall model type type " << WallModelType

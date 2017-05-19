@@ -14,13 +14,17 @@ usage() {
 
 usage: ${0##*/} [OPTION]
 options:
-  -online    use links to the Github repositories instead of the local source code
+  -config name      use alternative doxygen config
+  -dir    name      process given directory name directly
+  -online           use links to the Github repositories instead of the
+                    local source code
   -help
 
 USAGE
     exit 1
 }
 
+# -----------------------------------------------------------------------------
 
 defineURL() {
     WEB_PATH="https://develop.openfoam.com"
@@ -39,12 +43,42 @@ defineURL() {
     export FOAM_ONLINE_REPO="$FOAM_BASE_REPO/blob/${FOAM_REPO_TAG}"
 }
 
-# parse options
+
+unset configName dirName
+
+# Parse options
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h | -help)
         usage
+        ;;
+    -config)
+        configName="$2"
+        [ -f "$configName" ] || {
+            # No such file. Try some common alternatives
+            for ending in $configName ".$configName" "-$configName"
+            do
+                if [ -f "Doxyfile$ending" ]
+                then
+                    configName="Doxyfile$ending"
+                    break
+                fi
+            done
+        }
+        [ -f "$configName" ] || {
+            echo "Could not resolve Doxyfile config: $configName" 1>&2
+            exit 1
+        }
+        shift
+        ;;
+    -dir)
+        dirName="$2"
+        [ -d "$dirName" ] || {
+            echo "Could not resolve input directory: $dirName" 1>&2
+            exit 1
+        }
+        shift
         ;;
     -online)
         defineURL
@@ -56,19 +90,31 @@ do
     shift
 done
 
+
 #------------------------------------------------------------------------------
 
 rm -rf latex man
 
-# remove html directory in background
+# Remove html directory in background
 mv html html-stagedRemove$$ 2> /dev/null
 rm -rf html-stagedRemove$$ >/dev/null 2>&1 &
 
-# ensure that created files are readable by everyone
+# Ensure that created files are readable by everyone
 umask 22
-doxygen
 
-# fix permissions (NB: '+X' and not '+x'!)
+if [ -n "$dirName" ]
+then
+    # Create a temporary with only the specified directory
+    tmpConfig="${TMPDIR:-/tmp}/Doxyfile.$$"
+    trap 'rm -f $tmpConfig 2>/dev/null; exit 0' EXIT TERM INT
+    cat $PWD/Doxyfile > $tmpConfig
+    echo "INPUT = $dirName" >> $tmpConfig
+    doxygen $tmpConfig
+else
+    doxygen $configName
+fi
+
+# Fix permissions (NB: '+X' and not '+x'!)
 chmod -R a+rX html latex man 2>/dev/null
 
 echo

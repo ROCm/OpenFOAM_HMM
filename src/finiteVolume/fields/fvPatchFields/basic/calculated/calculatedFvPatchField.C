@@ -105,7 +105,7 @@ Foam::fvPatchField<Type>::NewCalculatedType
     typename patchConstructorTable::iterator patchTypeCstrIter =
         patchConstructorTablePtr_->find(p.type());
 
-    if (patchTypeCstrIter != patchConstructorTablePtr_->end())
+    if (patchTypeCstrIter.found())
     {
         return patchTypeCstrIter()
         (

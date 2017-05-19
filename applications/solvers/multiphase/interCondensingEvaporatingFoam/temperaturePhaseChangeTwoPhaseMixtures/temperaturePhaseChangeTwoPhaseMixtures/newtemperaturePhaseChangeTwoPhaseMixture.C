@@ -63,7 +63,7 @@ Foam::temperaturePhaseChangeTwoPhaseMixture::New
         componentsConstructorTablePtr_
             ->find(temperaturePhaseChangeTwoPhaseMixtureTypeName);
 
-    if (cstrIter == componentsConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown temperaturePhaseChangeTwoPhaseMixture type "

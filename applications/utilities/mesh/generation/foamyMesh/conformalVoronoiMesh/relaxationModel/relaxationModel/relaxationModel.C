@@ -71,7 +71,7 @@ autoPtr<relaxationModel> relaxationModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(relaxationModelTypeName);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown relaxationModel type "

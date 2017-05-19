@@ -43,7 +43,7 @@ Foam::CloudFunctionObject<CloudType>::New
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(objectType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown cloud function type "

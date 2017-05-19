@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,9 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "sampledSurfaces.H"
-#include "volFields.H"
 #include "IOobjectList.H"
 #include "stringListOps.H"
+#include "UIndirectList.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -34,48 +34,50 @@ Foam::label Foam::sampledSurfaces::classifyFields()
 {
     label nFields = 0;
 
+    wordList allFields;    // Just needed for warnings
+    HashTable<wordHashSet> available;
+
     if (loadFromFiles_)
     {
         // Check files for a particular time
         IOobjectList objects(obr_, obr_.time().timeName());
-        wordList allFields = objects.sortedNames();
 
-        forAll(fieldSelection_, i)
-        {
-            labelList indices = findStrings(fieldSelection_[i], allFields);
-
-            if (indices.size())
-            {
-                nFields += indices.size();
-            }
-            else
-            {
-                WarningInFunction
-                    << "Cannot find field file matching "
-                    << fieldSelection_[i] << endl;
-            }
-        }
+        allFields = objects.names();
+        available = objects.classes(fieldSelection_);
     }
     else
     {
         // Check currently available fields
-        wordList allFields = obr_.sortedNames();
+        allFields = obr_.names();
+        available = obr_.classes(fieldSelection_);
+    }
 
-        forAll(fieldSelection_, i)
+    DynamicList<label> missed(fieldSelection_.size());
+
+    // Detect missing fields
+    forAll(fieldSelection_, i)
+    {
+        if (findStrings(fieldSelection_[i], allFields).empty())
         {
-            labelList indices = findStrings(fieldSelection_[i], allFields);
-
-            if (indices.size())
-            {
-                nFields += indices.size();
-            }
-            else
-            {
-                WarningInFunction
-                    << "Cannot find registered field matching "
-                    << fieldSelection_[i] << endl;
-            }
+            missed.append(i);
         }
+    }
+
+    if (missed.size())
+    {
+        WarningInFunction
+            << nl
+            << "Cannot find "
+            << (loadFromFiles_ ? "field file" : "registered field")
+            << " matching "
+            << UIndirectList<wordRe>(fieldSelection_, missed) << endl;
+    }
+
+
+    // Total number selected
+    forAllConstIters(available, iter)
+    {
+        nFields += iter.object().size();
     }
 
     return nFields;

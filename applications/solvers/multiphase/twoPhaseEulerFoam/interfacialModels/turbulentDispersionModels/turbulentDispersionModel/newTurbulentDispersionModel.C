@@ -43,7 +43,7 @@ Foam::turbulentDispersionModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(turbulentDispersionModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown turbulentDispersionModelType type "

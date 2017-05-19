@@ -41,7 +41,7 @@ Foam::autoPtr<Foam::tetherPotential> Foam::tetherPotential::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(potentialType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown tetherPotential type "

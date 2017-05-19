@@ -50,7 +50,7 @@ autoPtr<filmViscosityModel> filmViscosityModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown filmViscosityModel type " << modelType

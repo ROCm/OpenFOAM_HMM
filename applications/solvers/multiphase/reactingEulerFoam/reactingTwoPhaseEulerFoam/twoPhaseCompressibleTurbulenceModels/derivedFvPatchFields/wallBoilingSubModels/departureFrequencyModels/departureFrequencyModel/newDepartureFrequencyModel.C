@@ -41,7 +41,7 @@ Foam::wallBoilingModels::departureFrequencyModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(departureFrequencyModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown departureFrequencyModelType type "

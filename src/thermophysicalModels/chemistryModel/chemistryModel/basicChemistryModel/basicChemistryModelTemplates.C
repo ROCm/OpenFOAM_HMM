@@ -126,7 +126,7 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
         typename ChemistryModel::fvMeshConstructorTable::iterator cstrIter =
             ChemistryModel::fvMeshConstructorTablePtr_->find(chemistryTypeName);
 
-        if (cstrIter == ChemistryModel::fvMeshConstructorTablePtr_->end())
+        if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown " << ChemistryModel::typeName << " type " << nl
@@ -182,7 +182,7 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
         typename ChemistryModel::fvMeshConstructorTable::iterator cstrIter =
             ChemistryModel::fvMeshConstructorTablePtr_->find(chemistryTypeName);
 
-        if (cstrIter == ChemistryModel::fvMeshConstructorTablePtr_->end())
+        if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown " << ChemistryModel::typeName << " type "

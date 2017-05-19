@@ -27,7 +27,7 @@ License
 
 #include "volFields.H"
 #include "dictionary.H"
-#include "wordReListMatcher.H"
+#include "wordRes.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -120,7 +120,7 @@ bool Foam::functionObjects::zeroGradient::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
 
-    selectFields_ = wordReListMatcher::uniq
+    selectFields_ = wordRes::uniq
     (
         wordReList(dict.lookup("fields"))
     );

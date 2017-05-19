@@ -79,10 +79,7 @@ Foam::Istream& Foam::operator>>(Istream& is, Switch& s)
         return is;
     }
 
-
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, Switch&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -90,7 +87,7 @@ Foam::Istream& Foam::operator>>(Istream& is, Switch& s)
 Foam::Ostream& Foam::operator<<(Ostream& os, const Switch& s)
 {
     os << Switch::names[s.switch_];
-    os.check("Ostream& operator<<(Ostream&, const Switch&)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

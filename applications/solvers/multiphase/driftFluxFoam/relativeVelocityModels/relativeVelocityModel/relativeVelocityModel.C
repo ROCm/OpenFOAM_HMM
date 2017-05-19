@@ -111,7 +111,7 @@ Foam::autoPtr<Foam::relativeVelocityModel> Foam::relativeVelocityModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown time scale model type " << modelType

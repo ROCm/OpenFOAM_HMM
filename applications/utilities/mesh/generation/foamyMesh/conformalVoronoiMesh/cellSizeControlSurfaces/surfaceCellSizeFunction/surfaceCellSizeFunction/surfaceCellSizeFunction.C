@@ -75,7 +75,7 @@ Foam::autoPtr<Foam::surfaceCellSizeFunction> Foam::surfaceCellSizeFunction::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(surfaceCellSizeFunctionTypeName);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown surfaceCellSizeFunction type "

@@ -46,7 +46,7 @@ Foam::autoPtr<Foam::searchableSurface> Foam::searchableSurface::New
     dictConstructorTable::iterator cstrIter =
         dictConstructorTablePtr_->find(searchableSurfaceType);
 
-    if (cstrIter == dictConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown searchableSurface type " << searchableSurfaceType

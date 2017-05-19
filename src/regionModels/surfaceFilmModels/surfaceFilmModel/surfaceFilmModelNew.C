@@ -69,7 +69,7 @@ autoPtr<surfaceFilmModel> surfaceFilmModel::New
     meshConstructorTable::iterator cstrIter =
         meshConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == meshConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown surfaceFilmModel type " << modelType

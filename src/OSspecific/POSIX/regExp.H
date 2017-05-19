@@ -128,20 +128,23 @@ public:
 
       // Editing
 
-        //- Compile pattern into a regular expression, optionally ignore case
-        void set(const char* pattern, bool ignoreCase=false);
+        //- Compile pattern into a regular expression, optionally ignore case.
+        //  \return True if the pattern was compiled
+        bool set(const char* pattern, bool ignoreCase=false);
 
         //- Compile pattern into a regular expression, optionally ignore case
-        void set(const std::string& pattern, bool ignoreCase=false);
+        //  \return True if the pattern was compiled
+        bool set(const std::string& pattern, bool ignoreCase=false);
 
-        //- Clear expression, return true if expression had existed.
+        //- Clear expression.
+        //  \return True if expression had existed prior to the clear.
         bool clear();
 
 
       // Matching/Searching
 
         //- Find position within string.
-        //  Returns the index where it begins or string::npos if not found
+        //  \Return The index where it begins or string::npos if not found
         std::string::size_type find(const std::string& text) const;
 
         //- Return true if it matches the entire string
@@ -157,6 +160,9 @@ public:
 
 
     // Member Operators
+
+        //- Perform match on text
+        inline bool operator()(const std::string& text) const;
 
         //- Assign and compile pattern from a character array
         //  Always case sensitive

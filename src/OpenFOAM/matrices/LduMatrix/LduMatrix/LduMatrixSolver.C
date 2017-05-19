@@ -56,7 +56,7 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
         typename symMatrixConstructorTable::iterator constructorIter =
             symMatrixConstructorTablePtr_->find(solverName);
 
-        if (constructorIter == symMatrixConstructorTablePtr_->end())
+        if (!constructorIter.found())
         {
             FatalIOErrorInFunction(solverDict)
                 << "Unknown symmetric matrix solver " << solverName
@@ -81,7 +81,7 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
         typename asymMatrixConstructorTable::iterator constructorIter =
             asymMatrixConstructorTablePtr_->find(solverName);
 
-        if (constructorIter == asymMatrixConstructorTablePtr_->end())
+        if (!constructorIter.found())
         {
             FatalIOErrorInFunction(solverDict)
                 << "Unknown asymmetric matrix solver " << solverName

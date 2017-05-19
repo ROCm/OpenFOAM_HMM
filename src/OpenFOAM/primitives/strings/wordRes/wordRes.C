@@ -23,17 +23,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "wordReListMatcher.H"
+#include "wordRes.H"
 #include "HashSet.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::wordReList Foam::wordReListMatcher::uniq(const UList<wordRe>& input)
+Foam::wordReList Foam::wordRes::uniq(const UList<wordRe>& input)
 {
     wordReList retain(input.size());
     wordHashSet uniqWord;
 
-    label nUniq = 0;
+    label count = 0;
     forAll(input, i)
     {
         const wordRe& select = input[i];
@@ -44,11 +44,11 @@ Foam::wordReList Foam::wordReListMatcher::uniq(const UList<wordRe>& input)
          || uniqWord.insert(static_cast<const word&>(select))
         )
         {
-            retain[nUniq++] = select;
+            retain[count++] = select;
         }
     }
 
-    retain.setSize(nUniq);
+    retain.setSize(count);
     return retain;
 }
 

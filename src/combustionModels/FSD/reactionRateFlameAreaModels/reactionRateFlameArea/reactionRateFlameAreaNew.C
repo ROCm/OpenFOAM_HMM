@@ -45,7 +45,7 @@ Foam::autoPtr<Foam::reactionRateFlameArea> Foam::reactionRateFlameArea::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(reactionRateFlameAreaType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (

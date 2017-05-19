@@ -40,7 +40,7 @@ Foam::autoPtr<Foam::RBD::rigidBodySolver> Foam::RBD::rigidBodySolver::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(rigidBodySolverType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown rigidBodySolverType type "

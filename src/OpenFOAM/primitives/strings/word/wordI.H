@@ -97,11 +97,11 @@ inline Foam::word::word(const char* s, const bool doStripInvalid)
 inline Foam::word::word
 (
     const char* s,
-    const size_type n,
+    const size_type len,
     const bool doStripInvalid
 )
 :
-    string(s, n)
+    string(s, len)
 {
     if (doStripInvalid)
     {

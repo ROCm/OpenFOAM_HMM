@@ -99,7 +99,7 @@ void Foam::edgeMesh::write
     writefileExtensionMemberFunctionTable::iterator mfIter =
         writefileExtensionMemberFunctionTablePtr_->find(ext);
 
-    if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
+    if (!mfIter.found())
     {
         FatalErrorInFunction
             << "Unknown file extension " << ext << nl << nl

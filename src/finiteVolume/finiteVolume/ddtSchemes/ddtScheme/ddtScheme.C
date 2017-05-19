@@ -69,7 +69,7 @@ tmp<ddtScheme<Type>> ddtScheme<Type>::New
     typename IstreamConstructorTable::iterator cstrIter =
         IstreamConstructorTablePtr_->find(schemeName);
 
-    if (cstrIter == IstreamConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (

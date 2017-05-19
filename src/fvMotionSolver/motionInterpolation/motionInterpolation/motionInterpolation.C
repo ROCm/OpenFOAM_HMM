@@ -77,7 +77,7 @@ Foam::motionInterpolation::New(const fvMesh& mesh, Istream& entry)
     IstreamConstructorTable::iterator cstrIter =
         IstreamConstructorTablePtr_->find(type);
 
-    if (cstrIter == IstreamConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown interpolation type "

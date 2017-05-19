@@ -63,7 +63,7 @@ Foam::thermophysicalProperties::New
 
     ConstructorTable::iterator cstrIter = ConstructorTablePtr_->find(name);
 
-    if (cstrIter == ConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown thermophysicalProperties type "
@@ -93,7 +93,7 @@ Foam::thermophysicalProperties::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(thermophysicalPropertiesTypeName);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown thermophysicalProperties type "

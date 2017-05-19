@@ -234,6 +234,97 @@ int main()
 
     Info<<"\ntable1: " << table1 << endl;
 
+    // Start again
+    HashTable<scalar> table1start
+    {
+        {"aaa", 1.0},
+        {"aba", 2.0},
+        {"a_ca", 3.0},
+        {"ada", 4.0},
+        {"aeq_", 5.0},
+        {"aaw", 6.0},
+        {"abs", 7.0},
+        {"a_cr", 8.0},
+        {"adx", 9.0},
+        {"ae_c", 10.0}
+    };
+
+    table1 = table1start;
+    Info<< "\ntable has keys: "
+        << flatOutput(table1.sortedToc()) << nl;
+
+    wordRe matcher(".*_.*", wordRe::REGEX);
+    table1.filterKeys
+    (
+        [&matcher](const word& k){ return matcher.match(k); }
+    );
+    Info<< "retain things matching " << matcher << " => "
+        << flatOutput(table1.sortedToc()) << nl;
+
+    table1 = table1start;
+    table1.filterKeys
+    (
+        [&matcher](const word& k){ return matcher.match(k); },
+        true
+    );
+
+    Info<< "prune things matching " << matcher << " => "
+        << flatOutput(table1.sortedToc()) << nl;
+
+    // Same, without a lambda
+    table1 = table1start;
+    table1.filterKeys(matcher, true);
+
+    Info<< "prune things matching " << matcher << " => "
+        << flatOutput(table1.sortedToc()) << nl;
+
+
+    // Same idea, but inverted logic inside the lambda
+    table1 = table1start;
+    table1.filterKeys
+    (
+        [&matcher](const word& k){ return !matcher.match(k); },
+        true
+    );
+
+    Info<< "prune things matching " << matcher << " => "
+        << flatOutput(table1.sortedToc()) << nl;
+
+
+    table1 = table1start;
+    Info<< "\ntable:" << table1 << nl;
+
+    table1.filterValues
+    (
+        [](const scalar& v){ return (v >= 5); }
+    );
+
+    Info<< "\ntable with values >= 5:" << table1 << nl;
+
+    table1 = table1start;
+    Info<< "\ntable:" << table1 << nl;
+
+    table1.filterEntries
+    (
+        [&matcher](const word& k, const scalar& v)
+        {
+            return matcher(k) && (v >= 5);
+        }
+    );
+
+    Info<< "\ntable with values >= 5 and matching " << matcher
+        << table1 << nl;
+
+
+    table1 = table1start;
+    Info<< "\ntable:" << table1 << nl;
+    Info<< "has "
+        << table1.countValues([](const scalar& v) { return v >= 7; })
+        << " values >= 7 with these keys: "
+        << table1.tocValues([](const scalar& v) { return v >= 7; })
+        << nl;
+
+
     Info<< "\nDone\n";
 
     return 0;

@@ -41,7 +41,7 @@ Foam::autoPtr<Foam::facePointPatch> Foam::facePointPatch::New
     polyPatchConstructorTable::iterator cstrIter =
         polyPatchConstructorTablePtr_->find(patch.type());
 
-    if (cstrIter == polyPatchConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown facePointPatch type "

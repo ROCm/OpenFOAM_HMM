@@ -95,7 +95,7 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(functionType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown function type "

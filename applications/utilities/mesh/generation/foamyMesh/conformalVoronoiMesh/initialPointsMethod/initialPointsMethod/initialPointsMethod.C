@@ -94,7 +94,7 @@ autoPtr<initialPointsMethod> initialPointsMethod::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(initialPointsMethodTypeName);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown initialPointsMethod type "

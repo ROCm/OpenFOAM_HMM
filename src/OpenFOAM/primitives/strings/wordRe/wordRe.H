@@ -92,15 +92,15 @@ public:
     // Public data types
 
         //- Enumeration with compile options
-        //  Note that 'REGEXP' is implicit if 'NOCASE' is specified alone.
+        //  Note that 'REGEX' is implicit if 'NOCASE' is specified alone.
         enum compOption
         {
             LITERAL = 0, //!< Treat as a string literal
             DETECT  = 1, //!< Detect if the string contains meta-characters
-            REGEXP  = 2, //!< Treat as regular expression
+            REGEX   = 2, //!< Treat as regular expression
             NOCASE  = 4, //!< Ignore case in regular expression
-            DETECT_NOCASE = DETECT | NOCASE,  //!< Combined DETECT and NOCASE
-            REGEXP_NOCASE = REGEXP | NOCASE   //!< Combined REGEXP and NOCASE
+            DETECT_NOCASE = DETECT|NOCASE,  //!< Combined DETECT and NOCASE
+            REGEX_NOCASE  = REGEX|NOCASE    //!< Combined REGEX and NOCASE
         };
 
 
@@ -119,30 +119,35 @@ public:
         //- Construct as copy
         inline wordRe(const wordRe& str);
 
-        //- Construct from keyType
+        //- Construct from keyType, using its compile information
         inline explicit wordRe(const keyType& str);
+
+        //- Construct as copy of character array, treat as a literal
+        inline explicit wordRe(const char* str);
+
+        //- Construct as copy of std::string, treat as a literal
+        inline explicit wordRe(const std::string& str);
+
+        //- Construct as copy of string, treat as a literal
+        inline explicit wordRe(const string& str);
+
+        //- Construct as copy of word, treat as a literal
+        inline explicit wordRe(const word& str);
 
         //- Construct from keyType, use specified compile option
         inline wordRe(const keyType& str, const compOption);
 
-        //- Construct as copy of word
-        inline explicit wordRe(const word& str);
+        //- Construct as copy of character array, use specified compile option
+        inline wordRe(const char* str, const compOption);
 
-        //- Construct as copy of character array
-        //  Optionally specify how it should be treated.
-        inline explicit wordRe(const char* str, const compOption = LITERAL);
+        //- Construct as copy of std::string, use specified compile option
+        inline wordRe(const std::string& str, const compOption);
 
-        //- Construct as copy of string.
-        //  Optionally specify how it should be treated.
-        inline explicit wordRe(const string& str, const compOption = LITERAL);
+        //- Construct as copy of string, use specified compile option
+        inline wordRe(const string& str, const compOption);
 
-        //- Construct as copy of std::string
-        //  Optionally specify how it should be treated.
-        inline explicit wordRe
-        (
-            const std::string& str,
-            const compOption = LITERAL
-        );
+        //- Construct as copy of word, use specified compile option
+        inline wordRe(const word& str, const compOption);
 
         //- Construct from Istream
         //  Words are treated as literals, strings with an auto-test
@@ -199,6 +204,13 @@ public:
 
 
     // Member operators
+
+        //- Avoid masking the normal operator()
+        using word::operator();
+
+        //- Perform smart match on text, as per match()
+        inline bool operator()(const std::string& text) const;
+
 
       // Assignment
 

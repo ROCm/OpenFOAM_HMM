@@ -25,7 +25,7 @@ Class
     Foam::word
 
 Description
-    A class for handling words, derived from string.
+    A class for handling words, derived from Foam::string.
 
     A word is a string of characters without whitespace, quotes, slashes,
     semicolons or brace brackets. Words are delimited by whitespace.
@@ -93,7 +93,7 @@ public:
         inline word
         (
             const char* s,
-            const size_type,
+            const size_type len,
             const bool doStripInvalid
         );
 
@@ -119,12 +119,12 @@ public:
 
     // Member operators
 
-        // Assignment
+      // Assignment
 
-            inline void operator=(const word& w);
-            inline void operator=(const string& s);
-            inline void operator=(const std::string& s);
-            inline void operator=(const char* s);
+        inline void operator=(const word& w);
+        inline void operator=(const string& s);
+        inline void operator=(const std::string& s);
+        inline void operator=(const char* s);
 
 
     // Friend Operators

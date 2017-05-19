@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "doxygenXmlParser.H"
-#include "wordRe.H"
+#include "regExp.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -40,8 +40,8 @@ Foam::doxygenXmlParser::doxygenXmlParser
     dictionary(dictionary::null)
 {
     // Pre-construct and compile regular expressions
-    const wordRe nameRe(".*.H", wordRe::DETECT);
-    const wordRe searchStrRe(searchStr, wordRe::DETECT);
+    const regExp nameRe(".*.H");
+    const regExp searchStrRe(searchStr);
 
     // Pre-construct constant strings and names to speed-up comparisons
     const string slashStartTag('/' + startTag);
@@ -163,7 +163,7 @@ Foam::doxygenXmlParser::doxygenXmlParser
                     (
                         !exactMatch
                      && !found(tName) // not already added
-                     && wordRe(".*" + tName + ".*", wordRe::DETECT).match(name)
+                     && regExp(".*" + tName + ".*").match(name)
                     )
                     {
                         dictionary dict(dictionary::null);

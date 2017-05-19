@@ -43,7 +43,7 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
         typename dictionaryConstructorTable::iterator cstrIter =
             dictionaryConstructorTablePtr_->find(Function1Type);
 
-        if (cstrIter == dictionaryConstructorTablePtr_->end())
+        if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown Function1 type "
@@ -79,7 +79,7 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
         typename dictionaryConstructorTable::iterator cstrIter =
             dictionaryConstructorTablePtr_->find(Function1Type);
 
-        if (cstrIter == dictionaryConstructorTablePtr_->end())
+        if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown Function1 type "
