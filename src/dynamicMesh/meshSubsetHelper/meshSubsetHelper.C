@@ -92,7 +92,7 @@ Foam::polyMesh::readUpdateState Foam::meshSubsetHelper::readUpdate()
 {
     polyMesh::readUpdateState meshState = baseMesh_.readUpdate();
 
-    if (meshState != polyMesh::UNCHANGED)
+    if (meshState == polyMesh::TOPO_CHANGE || polyMesh::TOPO_PATCH_CHANGE)
     {
         correct(true);
     }
