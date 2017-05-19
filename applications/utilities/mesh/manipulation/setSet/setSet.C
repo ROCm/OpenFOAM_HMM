@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,8 +44,9 @@ Description
 #include "OFstream.H"
 #include "IFstream.H"
 #include "demandDrivenData.H"
-#include "writePatch.H"
-#include "writePointSet.H"
+#include "foamVtkWriteCellSetFaces.H"
+#include "foamVtkWriteFaceSet.H"
+#include "foamVtkWritePointSet.H"
 #include "IOobjectList.H"
 #include "cellZoneSet.H"
 #include "faceZoneSet.H"
@@ -81,93 +82,28 @@ void writeVTK
     if (isA<faceSet>(currentSet))
     {
         // Faces of set with OpenFOAM faceID as value
-
-        faceList setFaces(currentSet.size());
-        labelList faceValues(currentSet.size());
-        label setFacei = 0;
-
-        forAllConstIter(topoSet, currentSet, iter)
-        {
-            setFaces[setFacei] = mesh.faces()[iter.key()];
-            faceValues[setFacei] = iter.key();
-            setFacei++;
-        }
-
-        primitiveFacePatch fp(setFaces, mesh.points());
-
-        writePatch
+        foamVtkOutput::writeFaceSet
         (
             true,
-            currentSet.name(),
-            fp,
-            "faceID",
-            faceValues,
+            mesh,
+            currentSet,
             mesh.time().path()/vtkName
         );
     }
     else if (isA<cellSet>(currentSet))
     {
         // External faces of cellset with OpenFOAM cellID as value
-
-        Map<label> cellFaces(currentSet.size());
-
-        forAllConstIter(cellSet, currentSet, iter)
-        {
-            label celli = iter.key();
-
-            const cell& cFaces = mesh.cells()[celli];
-
-            forAll(cFaces, i)
-            {
-                label facei = cFaces[i];
-
-                if (mesh.isInternalFace(facei))
-                {
-                    label otherCelli = mesh.faceOwner()[facei];
-
-                    if (otherCelli == celli)
-                    {
-                        otherCelli = mesh.faceNeighbour()[facei];
-                    }
-
-                    if (!currentSet.found(otherCelli))
-                    {
-                        cellFaces.insert(facei, celli);
-                    }
-                }
-                else
-                {
-                    cellFaces.insert(facei, celli);
-                }
-            }
-        }
-
-        faceList setFaces(cellFaces.size());
-        labelList faceValues(cellFaces.size());
-        label setFacei = 0;
-
-        forAllConstIter(Map<label>, cellFaces, iter)
-        {
-            setFaces[setFacei] = mesh.faces()[iter.key()];
-            faceValues[setFacei] = iter();              // Cell ID
-            setFacei++;
-        }
-
-        primitiveFacePatch fp(setFaces, mesh.points());
-
-        writePatch
+        foamVtkOutput::writeCellSetFaces
         (
             true,
-            currentSet.name(),
-            fp,
-            "cellID",
-            faceValues,
+            mesh,
+            currentSet,
             mesh.time().path()/vtkName
         );
     }
     else if (isA<pointSet>(currentSet))
     {
-        writePointSet
+        foamVtkOutput::writePointSet
         (
             true,
             mesh,

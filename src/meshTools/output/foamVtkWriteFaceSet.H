@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,40 +21,44 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
-    Foam::writePatch
+InNamespace
+    Foam::foamVtkOutput
 
 Description
-    Write faceSet to vtk polydata file. Only one data which is original
-    faceID.
+    Write faceSet to vtk polydata file.
+    The data are the original point ids.
 
 SourceFiles
-    writePatch.C
+    foamVtkWritePointSet.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef writePatch_H
-#define writePatch_H
-
-#include "primitiveMesh.H"
-#include "primitiveFacePatch.H"
+#ifndef foamVtkWriteFaceSet_H
+#define foamVtkWriteFaceSet_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+class primitiveMesh;
+class faceSet;
+class fileName;
 
-// Write faceSet
-void writePatch
+namespace foamVtkOutput
+{
+
+//- Write pointSet to vtk polydata file.
+//  Only one data which is original pointID.
+void writeFaceSet
 (
     const bool binary,
-    const word& setName,
-    const primitiveFacePatch& fp,
-    const word& fieldName,
-    labelList& fieldValues,
+    const primitiveMesh& mesh,
+    const faceSet& set,
     const fileName& fileName
 );
 
+
+} // End namespace foamVtkOutput
 } // End namespace Foam
 
 
