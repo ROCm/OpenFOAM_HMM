@@ -82,7 +82,7 @@ Foam::autoPtr<Foam::profileModel> Foam::profileModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown profile model type " << modelType

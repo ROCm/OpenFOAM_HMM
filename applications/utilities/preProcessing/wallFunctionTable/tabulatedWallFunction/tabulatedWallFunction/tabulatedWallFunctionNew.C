@@ -47,7 +47,7 @@ autoPtr<tabulatedWallFunction> tabulatedWallFunction::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(twfTypeName);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown tabulatedWallFunction type " << twfTypeName

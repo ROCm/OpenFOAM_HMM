@@ -47,7 +47,7 @@ Foam::AMIMethod<SourcePatch, TargetPatch>::New
     typename componentsConstructorTable::iterator cstrIter =
         componentsConstructorTablePtr_->find(methodName);
 
-    if (cstrIter == componentsConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown AMIMethod type "

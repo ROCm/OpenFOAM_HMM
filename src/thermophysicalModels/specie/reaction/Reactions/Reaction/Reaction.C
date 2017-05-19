@@ -379,7 +379,7 @@ Foam::Reaction<ReactionThermo>::New
     typename IstreamConstructorTable::iterator cstrIter
         = IstreamConstructorTablePtr_->find(reactionTypeName);
 
-    if (cstrIter == IstreamConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (
@@ -412,7 +412,7 @@ Foam::Reaction<ReactionThermo>::New
     typename dictionaryConstructorTable::iterator cstrIter
         = dictionaryConstructorTablePtr_->find(reactionTypeName);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown reaction type "

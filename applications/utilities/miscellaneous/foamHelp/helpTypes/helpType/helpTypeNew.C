@@ -37,7 +37,7 @@ Foam::autoPtr<Foam::helpType> Foam::helpType::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(helpTypeName);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         // special treatment for -help
         // exit without stack trace

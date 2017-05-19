@@ -43,7 +43,7 @@ Foam::autoPtr<Foam::tableReader<Type>> Foam::tableReader<Type>::New
         dictionaryConstructorTablePtr_
             ->find(readerType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown reader type " << readerType

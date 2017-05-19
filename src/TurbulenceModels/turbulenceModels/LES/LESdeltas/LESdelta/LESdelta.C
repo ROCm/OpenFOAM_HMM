@@ -76,7 +76,7 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(deltaType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown LESdelta type "
@@ -115,7 +115,7 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
         dictionaryConstructorTable::const_iterator cstrIter =
             dictionaryConstructorTablePtr_->find(deltaType);
 
-        if (cstrIter == dictionaryConstructorTablePtr_->end())
+        if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown LESdelta type "

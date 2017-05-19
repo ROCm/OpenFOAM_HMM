@@ -71,7 +71,7 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
     IOobjectConstructorTable::iterator cstrIter =
         IOobjectConstructorTablePtr_->find(dynamicFvMeshTypeName);
 
-    if (cstrIter == IOobjectConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown dynamicFvMesh type "

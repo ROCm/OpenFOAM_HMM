@@ -40,7 +40,7 @@ Foam::autoPtr<Foam::saturationModel> Foam::saturationModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(saturationModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown saturationModelType type "

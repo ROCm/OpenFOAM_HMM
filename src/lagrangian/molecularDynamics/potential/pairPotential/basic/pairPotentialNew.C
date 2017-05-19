@@ -43,7 +43,7 @@ Foam::autoPtr<Foam::pairPotential> Foam::pairPotential::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(potentialType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown pairPotential type "

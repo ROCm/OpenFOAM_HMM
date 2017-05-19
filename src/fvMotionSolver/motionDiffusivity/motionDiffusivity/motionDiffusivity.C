@@ -57,7 +57,7 @@ Foam::autoPtr<Foam::motionDiffusivity> Foam::motionDiffusivity::New
     IstreamConstructorTable::iterator cstrIter =
         IstreamConstructorTablePtr_->find(motionType);
 
-    if (cstrIter == IstreamConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown diffusion type "

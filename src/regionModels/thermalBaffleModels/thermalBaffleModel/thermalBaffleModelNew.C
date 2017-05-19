@@ -64,7 +64,7 @@ autoPtr<thermalBaffleModel> thermalBaffleModel::New(const fvMesh& mesh)
     meshConstructorTable::iterator cstrIter =
         meshConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == meshConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
 
         FatalErrorInFunction
@@ -91,7 +91,7 @@ autoPtr<thermalBaffleModel> thermalBaffleModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
 
         FatalErrorInFunction

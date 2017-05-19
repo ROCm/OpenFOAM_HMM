@@ -44,7 +44,7 @@ Foam::autoPtr<Foam::energyScalingFunction> Foam::energyScalingFunction::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(scalingType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown energyScalingFunction type "

@@ -55,7 +55,7 @@ Foam::autoPtr<Foam::SRF::SRFModel> Foam::SRF::SRFModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown SRFModel type "

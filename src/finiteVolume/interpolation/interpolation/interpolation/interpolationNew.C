@@ -38,7 +38,7 @@ Foam::autoPtr<Foam::interpolation<Type>> Foam::interpolation<Type>::New
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(interpolationType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown interpolation type " << interpolationType

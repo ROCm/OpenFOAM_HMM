@@ -43,7 +43,7 @@ Foam::autoPtr<Foam::solidProperties> Foam::solidProperties::New(Istream& is)
         ConstructorTable::iterator cstrIter =
             ConstructorTablePtr_->find(solidType);
 
-        if (cstrIter == ConstructorTablePtr_->end())
+        if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown solidProperties type " << solidType << nl << nl
@@ -89,7 +89,7 @@ Foam::autoPtr<Foam::solidProperties> Foam::solidProperties::New
         ConstructorTable::iterator cstrIter =
             ConstructorTablePtr_->find(solidType);
 
-        if (cstrIter == ConstructorTablePtr_->end())
+        if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown solidProperties type " << solidType << nl << nl

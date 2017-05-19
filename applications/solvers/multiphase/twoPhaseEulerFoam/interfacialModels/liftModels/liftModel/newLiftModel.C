@@ -42,7 +42,7 @@ Foam::autoPtr<Foam::liftModel> Foam::liftModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(liftModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown liftModelType type "

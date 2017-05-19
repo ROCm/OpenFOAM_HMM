@@ -133,7 +133,7 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New(Istream& is)
         ConstructorTable::iterator cstrIter =
             ConstructorTablePtr_->find(liquidPropertiesType);
 
-        if (cstrIter == ConstructorTablePtr_->end())
+        if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown liquidProperties type "
@@ -181,7 +181,7 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
         ConstructorTable::iterator cstrIter =
             ConstructorTablePtr_->find(liquidPropertiesTypeName);
 
-        if (cstrIter == ConstructorTablePtr_->end())
+        if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown liquidProperties type "
@@ -198,7 +198,7 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
         dictionaryConstructorTable::iterator cstrIter =
             dictionaryConstructorTablePtr_->find(liquidPropertiesTypeName);
 
-        if (cstrIter == dictionaryConstructorTablePtr_->end())
+        if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown liquidProperties type "

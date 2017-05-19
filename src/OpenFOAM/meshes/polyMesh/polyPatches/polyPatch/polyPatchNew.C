@@ -46,7 +46,7 @@ Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
     wordConstructorTable::iterator cstrIter =
         wordConstructorTablePtr_->find(patchType);
 
-    if (cstrIter == wordConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown polyPatch type "
@@ -108,14 +108,14 @@ Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(patchType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         if (!disallowGenericPolyPatch)
         {
             cstrIter = dictionaryConstructorTablePtr_->find("genericPatch");
         }
 
-        if (cstrIter == dictionaryConstructorTablePtr_->end())
+        if (!cstrIter.found())
         {
             FatalIOErrorInFunction
             (

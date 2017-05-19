@@ -215,7 +215,7 @@ Foam::autoPtr<Foam::graph::writer> Foam::graph::writer::New
     wordConstructorTable::iterator cstrIter =
         wordConstructorTablePtr_->find(graphFormat);
 
-    if (cstrIter == wordConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown graph format " << graphFormat

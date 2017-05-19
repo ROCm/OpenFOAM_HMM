@@ -65,7 +65,7 @@ Foam::autoPtr<Foam::waveModel> Foam::waveModel::New
     patchConstructorTable::iterator cstrIter =
         patchConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == patchConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalIOErrorInFunction(waveDict)
             << "Unknown waveModel type "
