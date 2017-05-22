@@ -42,7 +42,7 @@ Foam::autoPtr<Foam::virtualMassModel> Foam::virtualMassModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(virtualMassModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown virtualMassModelType type "

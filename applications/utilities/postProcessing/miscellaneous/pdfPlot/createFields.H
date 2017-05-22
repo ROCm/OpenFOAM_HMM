@@ -22,9 +22,9 @@
 
     Random rndGen;
 
-    autoPtr<distributionModels::distributionModel> p
+    autoPtr<distributionModel> p
     (
-        distributionModels::distributionModel::New
+        distributionModel::New
         (
             pdfDictionary,
             rndGen
@@ -45,4 +45,3 @@
     }
 
     scalarField samples(nIntervals, 0);
-

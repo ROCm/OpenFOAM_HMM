@@ -43,7 +43,7 @@ Foam::sixDoFRigidBodyMotionConstraint::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(constraintType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown sixDoFRigidBodyMotionConstraint type "

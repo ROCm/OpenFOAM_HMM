@@ -8,11 +8,12 @@
         fvc::flux(HbyA)
       + fvc::interpolate(rho*rAU)*fvc::ddtCorr(U, Uf)
     );
+    MRF.makeRelative(phiHbyA);
 
     surfaceScalarField phig
     (
         (
-            interface.surfaceTensionForce()
+            mixture.surfaceTensionForce()
           - ghf*fvc::snGrad(rho)
         )*rAUf*mesh.magSf()
     );
@@ -20,7 +21,7 @@
     phiHbyA += phig;
 
     // Update the pressure BCs to ensure flux consistency
-    constrainPressure(p_rgh, U, phiHbyA, rAUf);
+    constrainPressure(p_rgh, U, phiHbyA, rAUf, MRF);
 
     // Make the fluxes relative to the mesh motion
     fvc::makeRelative(phiHbyA, U);
@@ -92,6 +93,7 @@
             U = HbyA
               + rAU*fvc::reconstruct((phig + p_rghEqnIncomp.flux())/rAUf);
             U.correctBoundaryConditions();
+            fvOptions.correct(U);
         }
     }
 
@@ -118,7 +120,4 @@
     );
 
     K = 0.5*magSqr(U);
-
-    Info<< "max(U) " << max(mag(U)).value() << endl;
-    Info<< "min(p_rgh) " << min(p_rgh).value() << endl;
 }

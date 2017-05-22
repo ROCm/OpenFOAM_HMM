@@ -40,7 +40,7 @@ Foam::autoPtr<Foam::sixDoFSolver> Foam::sixDoFSolver::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(sixDoFSolverType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown sixDoFSolverType type "

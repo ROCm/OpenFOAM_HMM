@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,27 +46,6 @@ inline Foam::LangmuirHinshelwoodReactionRate::LangmuirHinshelwoodReactionRate
         A_[i] = A[i];
         Ta_[i] = Ta[i];
     }
-}
-
-
-inline Foam::LangmuirHinshelwoodReactionRate::LangmuirHinshelwoodReactionRate
-(
-    const speciesTable& st,
-    Istream& is
-)
-:
-    co_(st["CO"]),
-    c3h6_(st["C3H6"]),
-    no_(st["NO"])
-{
-    is.readBegin("LangmuirHinshelwoodReactionRate(Istream&)");
-
-    for (int i=0; i<n_; i++)
-    {
-        is >> A_[i] >> Ta_[i];
-    }
-
-    is.readEnd("LangmuirHinshelwoodReactionRate(Istream&)");
 }
 
 
@@ -130,16 +109,7 @@ inline Foam::Ostream& Foam::operator<<
     const LangmuirHinshelwoodReactionRate& lhrr
 )
 {
-    os  << token::BEGIN_LIST;
-
-    for (int i=0; i<LangmuirHinshelwoodReactionRate::n_; i++)
-    {
-        os  << token::SPACE
-            << '(' << lhrr.A_[i] << token::SPACE << lhrr.Ta_[i] << ')';
-    }
-
-    os << token::END_LIST;
-
+    lhrr.write(os);
     return os;
 }
 

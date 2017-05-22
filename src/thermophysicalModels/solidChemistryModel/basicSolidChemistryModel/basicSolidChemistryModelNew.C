@@ -119,7 +119,7 @@ New
     fvMeshConstructorTable::iterator cstrIter =
         fvMeshConstructorTablePtr_->find(chemistryTypeName);
 
-    if (cstrIter == fvMeshConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown " << typeName << " type " << nl

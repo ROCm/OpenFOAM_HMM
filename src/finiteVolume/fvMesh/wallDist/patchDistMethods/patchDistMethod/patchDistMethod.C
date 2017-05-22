@@ -63,7 +63,7 @@ Foam::autoPtr<Foam::patchDistMethod> Foam::patchDistMethod::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(patchDistMethodType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown patchDistMethodType type "
@@ -93,7 +93,7 @@ Foam::autoPtr<Foam::patchDistMethod> Foam::patchDistMethod::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(patchDistMethodType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown patchDistMethodType type "

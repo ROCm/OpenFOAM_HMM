@@ -43,7 +43,7 @@ Foam::autoPtr<Foam::PDRDragModel> Foam::PDRDragModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown PDRDragModel type "

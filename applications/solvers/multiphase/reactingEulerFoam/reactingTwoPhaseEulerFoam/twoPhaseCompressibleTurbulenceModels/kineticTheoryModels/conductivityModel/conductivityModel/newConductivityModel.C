@@ -41,7 +41,7 @@ Foam::kineticTheoryModels::conductivityModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(conductivityModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalError
             << "conductivityModel::New(const dictionary&) : " << endl

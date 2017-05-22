@@ -53,7 +53,8 @@ Description
     }
 
     // Input file
-    inputFiles  ("postProcessing/faceSource1/surface/patch/patch.case");
+    file            "postProcessing/faceSource1/surface/patch/patch.case";
+    //files           ("postProcessing/faceSource1/surface/patch/patch.case");
 
     // Write interval for FFT data, default = 1
     fftWriteInterval 100;

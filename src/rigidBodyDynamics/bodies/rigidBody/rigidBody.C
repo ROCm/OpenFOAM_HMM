@@ -79,7 +79,7 @@ Foam::autoPtr<Foam::RBD::rigidBody> Foam::RBD::rigidBody::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(bodyType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown rigidBody type "

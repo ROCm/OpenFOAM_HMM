@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
@@ -49,8 +49,8 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), "undefined", "undefined", "undefined-K"),
     TnbrName_("undefined-Tnbr"),
-    QrNbrName_("undefined-QrNbr"),
-    QrName_("undefined-Qr"),
+    qrNbrName_("undefined-qrNbr"),
+    qrName_("undefined-qr"),
     thicknessLayers_(0),
     kappaLayers_(0),
     contactRes_(0),
@@ -74,8 +74,8 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     mixedFvPatchScalarField(psf, p, iF, mapper),
     temperatureCoupledBase(patch(), psf),
     TnbrName_(psf.TnbrName_),
-    QrNbrName_(psf.QrNbrName_),
-    QrName_(psf.QrName_),
+    qrNbrName_(psf.qrNbrName_),
+    qrName_(psf.qrName_),
     thicknessLayers_(psf.thicknessLayers_),
     kappaLayers_(psf.kappaLayers_),
     contactRes_(psf.contactRes_),
@@ -94,8 +94,8 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), dict),
     TnbrName_(dict.lookupOrDefault<word>("Tnbr", "T")),
-    QrNbrName_(dict.lookupOrDefault<word>("QrNbr", "none")),
-    QrName_(dict.lookupOrDefault<word>("Qr", "none")),
+    qrNbrName_(dict.lookupOrDefault<word>("qrNbr", "none")),
+    qrName_(dict.lookupOrDefault<word>("qr", "none")),
     thicknessLayers_(0),
     kappaLayers_(0),
     contactRes_(0.0),
@@ -156,8 +156,8 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     mixedFvPatchScalarField(psf, iF),
     temperatureCoupledBase(patch(), psf),
     TnbrName_(psf.TnbrName_),
-    QrNbrName_(psf.QrNbrName_),
-    QrName_(psf.QrName_),
+    qrNbrName_(psf.qrNbrName_),
+    qrName_(psf.qrName_),
     thicknessLayers_(psf.thicknessLayers_),
     kappaLayers_(psf.kappaLayers_),
     contactRes_(psf.contactRes_),
@@ -182,6 +182,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
     UPstream::msgType() = oldTag+1;
 
     // Get the coupling information from the mappedPatchBase
+    const label patchi = patch().index();
     const mappedPatchBase& mpp =
         refCast<const mappedPatchBase>(patch().patch());
     const polyMesh& nbrMesh = mpp.sampleMesh();
@@ -219,17 +220,17 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
 
     scalarField KDelta(kappa(Tp)*patch().deltaCoeffs());
 
-    scalarField Qr(Tp.size(), 0.0);
-    if (QrName_ != "none")
+    scalarField qr(Tp.size(), 0.0);
+    if (qrName_ != "none")
     {
-        Qr = patch().lookupPatchField<volScalarField, scalar>(QrName_);
+        qr = patch().lookupPatchField<volScalarField, scalar>(qrName_);
     }
 
-    scalarField QrNbr(Tp.size(), 0.0);
-    if (QrNbrName_ != "none")
+    scalarField qrNbr(Tp.size(), 0.0);
+    if (qrNbrName_ != "none")
     {
-        QrNbr = nbrPatch.lookupPatchField<volScalarField, scalar>(QrNbrName_);
-        mpp.distribute(QrNbr);
+        qrNbr = nbrPatch.lookupPatchField<volScalarField, scalar>(qrNbrName_);
+        mpp.distribute(qrNbr);
     }
 
     // inertia therm
@@ -244,10 +245,15 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
 
             if (thermo)
             {
+                const scalarField& ppn =
+                    thermo->p().boundaryField()[samplePatchi];
+                const scalarField& Tpn =
+                    thermo->T().boundaryField()[samplePatchi];
+
                 mCpDtNbr =
                 (
-                    thermo->Cp()().boundaryField()[nbrPatch.index()]
-                  * thermo->rho()().boundaryField()[nbrPatch.index()]
+                    thermo->Cp(ppn, Tpn, samplePatchi)
+                  * thermo->rho(samplePatchi)
                   / nbrPatch.deltaCoeffs()/dt
                 );
 
@@ -268,10 +274,12 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
 
             if (thermo)
             {
+                const scalarField& pp = thermo->p().boundaryField()[patchi];
+
                 mCpDt =
                 (
-                    thermo->rho()().boundaryField()[patch().index()]
-                  * thermo->Cp()().boundaryField()[patch().index()]
+                    thermo->Cp(pp, Tp, patchi)
+                  * thermo->rho(patchi)
                   / patch().deltaCoeffs()/dt
                 );
             }
@@ -288,21 +296,20 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
                 this->internalField().name()
             );
 
-        const fvPatchField<scalar>& TpOld =
-            T.oldTime().boundaryField()[patch().index()];
+        const fvPatchField<scalar>& TpOld = T.oldTime().boundaryField()[patchi];
 
         scalarField alpha(KDeltaNbr + mCpDt + mCpDtNbr);
 
         valueFraction() = alpha/(alpha + KDelta);
         scalarField c(KDeltaNbr*TcNbr + (mCpDt + mCpDtNbr)*TpOld);
         refValue() = c/alpha;
-        refGrad() = (Qr + QrNbr)/kappa(Tp);
+        refGrad() = (qr + qrNbr)/kappa(Tp);
     }
     else
     {
         valueFraction() = KDeltaNbr/(KDeltaNbr + KDelta);
         refValue() = TcNbr;
-        refGrad() = (Qr + QrNbr)/kappa(Tp);
+        refGrad() = (qr + qrNbr)/kappa(Tp);
     }
 
     mixedFvPatchScalarField::updateCoeffs();
@@ -337,8 +344,9 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::write
 {
     mixedFvPatchScalarField::write(os);
     os.writeKeyword("Tnbr")<< TnbrName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("QrNbr")<< QrNbrName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Qr")<< QrName_ << token::END_STATEMENT << nl;
+
+    os.writeKeyword("qrNbr")<< qrNbrName_ << token::END_STATEMENT << nl;
+    os.writeKeyword("qr")<< qrName_ << token::END_STATEMENT << nl;
     os.writeKeyword("thermalInertia")<< thermalInertia_
         << token::END_STATEMENT << nl;
 

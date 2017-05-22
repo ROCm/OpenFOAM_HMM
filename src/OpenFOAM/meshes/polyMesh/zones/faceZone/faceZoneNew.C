@@ -46,7 +46,7 @@ Foam::autoPtr<Foam::faceZone> Foam::faceZone::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(zoneType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (

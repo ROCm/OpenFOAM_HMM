@@ -42,7 +42,7 @@ Foam::autoPtr<Foam::wallLubricationModel> Foam::wallLubricationModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(wallLubricationModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown wallLubricationModelType type "

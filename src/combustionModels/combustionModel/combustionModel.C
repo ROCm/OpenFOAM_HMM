@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,7 +62,7 @@ Foam::combustionModel::combustionModel
     turbulencePtr_(),
     mesh_(mesh),
     active_(lookupOrDefault<Switch>("active", true)),
-    coeffs_(subDict(modelType + "Coeffs")),
+    coeffs_(optionalSubDict(modelType + "Coeffs")),
     modelType_(modelType),
     phaseName_(phaseName)
 {}
@@ -81,40 +81,18 @@ Foam::combustionModel::~combustionModel()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-
 bool Foam::combustionModel::read()
 {
     if (regIOobject::read())
     {
         this->lookup("active") >> active_;
-        coeffs_ = subDict(modelType_ + "Coeffs");
+        coeffs_ = optionalSubDict(modelType_ + "Coeffs");
         return true;
     }
     else
     {
         return false;
     }
-}
-
-
-Foam::tmp<Foam::volScalarField> Foam::combustionModel::Sh() const
-{
-    return tmp<Foam::volScalarField>
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                IOobject::groupName("Sh", phaseName_),
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            dimensionedScalar("zero", dimEnergy/dimVolume/dimTime, 0.0)
-        )
-    );
 }
 
 

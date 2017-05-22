@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,9 +52,7 @@ Foam::combustionModels::noCombustion<CombThermoType>::~noCombustion()
 
 template<class CombThermoType>
 void Foam::combustionModels::noCombustion<CombThermoType>::correct()
-{
-//  Do Nothing
-}
+{}
 
 
 template<class CombThermoType>
@@ -75,15 +73,15 @@ Foam::combustionModels::noCombustion<CombThermoType>::R
 
 template<class CombThermoType>
 Foam::tmp<Foam::volScalarField>
-Foam::combustionModels::noCombustion<CombThermoType>::dQ() const
+Foam::combustionModels::noCombustion<CombThermoType>::Qdot() const
 {
-    tmp<volScalarField> tdQ
+    tmp<volScalarField> tQdot
     (
         new volScalarField
         (
             IOobject
             (
-                IOobject::groupName("dQ", this->phaseName_),
+                IOobject::groupName(typeName + ":Qdot", this->phaseName_),
                 this->mesh().time().timeName(),
                 this->mesh(),
                 IOobject::NO_READ,
@@ -91,37 +89,11 @@ Foam::combustionModels::noCombustion<CombThermoType>::dQ() const
                 false
             ),
             this->mesh(),
-            dimensionedScalar("dQ", dimEnergy/dimTime, 0.0)
+            dimensionedScalar("Qdot", dimEnergy/dimVolume/dimTime, 0.0)
         )
     );
 
-    return tdQ;
-}
-
-
-template<class CombThermoType>
-Foam::tmp<Foam::volScalarField>
-Foam::combustionModels::noCombustion<CombThermoType>::Sh() const
-{
-    tmp<volScalarField> tSh
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                IOobject::groupName("Sh", this->phaseName_),
-                this->mesh().time().timeName(),
-                this->mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            this->mesh(),
-            dimensionedScalar("zero", dimEnergy/dimTime/dimVolume, 0.0)
-        )
-    );
-
-    return tSh;
+    return tQdot;
 }
 
 

@@ -6,7 +6,6 @@ CGAL_INEXACT = -DCGAL_INEXACT
 
 include $(GENERAL_RULES)/CGAL
 
-
 EXE_INC =  \
     ${ROUNDING_MATH} \
     ${EXE_NDEBUG} \
@@ -14,24 +13,20 @@ EXE_INC =  \
     ${CGAL_INC} \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
-    -I$(LIB_SRC)/triSurface/lnInclude \
     -I$(LIB_SRC)/fileFormats/lnInclude \
-    -I$(LIB_SRC)/sampling/lnInclude \
+    -I$(LIB_SRC)/surfMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/parallel/decompose/decompositionMethods/lnInclude \
-    -I$(LIB_SRC)/edgeMesh/lnInclude \
     -I$(LIB_SRC)/mesh/snappyHexMesh/lnInclude \
     -I../conformalVoronoiMesh/lnInclude
 
 EXE_LIBS =  \
     $(CGAL_LIBS) \
     -lconformalVoronoiMesh \
-    -lfiniteVolume    \
+    -lfiniteVolume \
     -lmeshTools \
-    -ldecompositionMethods \
-    -L$(FOAM_LIBBIN)/dummy -lptscotchDecomp \
-    -ledgeMesh \
-    -ltriSurface \
-    -ldynamicMesh \
     -lsampling \
-    -lfileFormats
+    -ldecompositionMethods \
+    -L$(FOAM_LIBBIN)/dummy -lscotchDecomp -lptscotchDecomp \
+    -ldynamicMesh

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,13 +52,6 @@ template<class Specie> class perfectFluid;
 
 template<class Specie>
 inline perfectFluid<Specie> operator+
-(
-    const perfectFluid<Specie>&,
-    const perfectFluid<Specie>&
-);
-
-template<class Specie>
-inline perfectFluid<Specie> operator-
 (
     const perfectFluid<Specie>&,
     const perfectFluid<Specie>&
@@ -116,9 +109,6 @@ public:
             const scalar rho0
         );
 
-        //- Construct from Istream
-        perfectFluid(Istream&);
-
         //- Construct from dictionary
         perfectFluid(const dictionary& dict);
 
@@ -127,9 +117,6 @@ public:
 
         //- Construct and return a clone
         inline autoPtr<perfectFluid> clone() const;
-
-        // Selector from Istream
-        inline static autoPtr<perfectFluid> New(Istream& is);
 
         // Selector from dictionary
         inline static autoPtr<perfectFluid> New(const dictionary& dict);
@@ -158,14 +145,14 @@ public:
             //- Return density [kg/m^3]
             inline scalar rho(scalar p, scalar T) const;
 
-            //- Return enthalpy departure [J/kmol]
-            inline scalar h(const scalar p, const scalar T) const;
+            //- Return enthalpy departure [J/kg]
+            inline scalar H(const scalar p, const scalar T) const;
 
-            //- Return cp departure [J/(kmol K]
-            inline scalar cp(scalar p, scalar T) const;
+            //- Return Cp departure [J/(kg K]
+            inline scalar Cp(scalar p, scalar T) const;
 
-            //- Return entropy [J/(kmol K)]
-            inline scalar s(const scalar p, const scalar T) const;
+            //- Return entropy [J/(kg K)]
+            inline scalar S(const scalar p, const scalar T) const;
 
             //- Return compressibility rho/p [s^2/m^2]
             inline scalar psi(scalar p, scalar T) const;
@@ -173,8 +160,8 @@ public:
             //- Return compression factor []
             inline scalar Z(scalar p, scalar T) const;
 
-            //- Return (cp - cv) [J/(kmol K]
-            inline scalar cpMcv(scalar p, scalar T) const;
+            //- Return (Cp - Cv) [J/(kg K]
+            inline scalar CpMCv(scalar p, scalar T) const;
 
 
         // IO
@@ -186,20 +173,12 @@ public:
     // Member operators
 
         inline void operator+=(const perfectFluid&);
-        inline void operator-=(const perfectFluid&);
-
         inline void operator*=(const scalar);
 
 
     // Friend operators
 
         friend perfectFluid operator+ <Specie>
-        (
-            const perfectFluid&,
-            const perfectFluid&
-        );
-
-        friend perfectFluid operator- <Specie>
         (
             const perfectFluid&,
             const perfectFluid&

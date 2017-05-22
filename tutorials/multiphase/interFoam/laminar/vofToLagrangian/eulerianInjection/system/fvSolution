@@ -24,7 +24,7 @@ solvers
         cAlpha          2;
     }
 
-    pcorr
+    "pcorr.*"
     {
         solver          GAMG;
         smoother        GaussSeidel;

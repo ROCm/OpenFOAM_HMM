@@ -238,7 +238,6 @@ fvMatrices/fvMatrices.C
 fvMatrices/fvScalarMatrix/fvScalarMatrix.C
 fvMatrices/solvers/MULES/MULES.C
 fvMatrices/solvers/MULES/CMULES.C
-fvMatrices/solvers/MULES/IMULES.C
 fvMatrices/solvers/GAMGSymSolver/GAMGAgglomerations/faceAreaPairGAMGAgglomeration/faceAreaPairGAMGAgglomeration.C
 
 interpolation = interpolation/interpolation
@@ -406,6 +405,7 @@ $(general)/constrainHbyA/constrainHbyA.C
 $(general)/adjustPhi/adjustPhi.C
 $(general)/bound/bound.C
 $(general)/CorrectPhi/correctUphiBCs.C
+$(general)/pressureControl/pressureControl.C
 
 solutionControl = $(general)/solutionControl
 $(solutionControl)/solutionControl/solutionControl.C
@@ -421,6 +421,7 @@ $(porosity)/porosityModel/IOporosityModelList.C
 $(porosity)/DarcyForchheimer/DarcyForchheimer.C
 $(porosity)/fixedCoeff/fixedCoeff.C
 $(porosity)/powerLaw/powerLaw.C
+$(porosity)/solidification/solidification.C
 
 MRF = $(general)/MRF
 $(MRF)/MRFZone.C

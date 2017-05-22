@@ -42,7 +42,7 @@ Foam::autoPtr<Foam::meshToMeshMethod> Foam::meshToMeshMethod::New
     componentsConstructorTable::iterator cstrIter =
         componentsConstructorTablePtr_->find(methodName);
 
-    if (cstrIter == componentsConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown meshToMesh type "

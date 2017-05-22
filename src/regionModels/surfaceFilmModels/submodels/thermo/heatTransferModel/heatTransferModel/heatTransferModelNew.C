@@ -49,7 +49,7 @@ autoPtr<heatTransferModel> heatTransferModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown heatTransferModel type " << modelType << nl << nl

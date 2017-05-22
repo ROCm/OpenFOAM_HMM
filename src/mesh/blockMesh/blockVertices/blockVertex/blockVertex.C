@@ -81,7 +81,7 @@ Foam::autoPtr<Foam::blockVertex> Foam::blockVertex::New
         IstreamConstructorTable::iterator cstrIter =
             IstreamConstructorTablePtr_->find(faceType);
 
-        if (cstrIter == IstreamConstructorTablePtr_->end())
+        if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown blockVertex type "

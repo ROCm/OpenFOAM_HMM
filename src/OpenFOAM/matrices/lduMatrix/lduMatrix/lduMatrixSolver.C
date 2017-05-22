@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -69,7 +69,7 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
         symMatrixConstructorTable::iterator constructorIter =
             symMatrixConstructorTablePtr_->find(name);
 
-        if (constructorIter == symMatrixConstructorTablePtr_->end())
+        if (!constructorIter.found())
         {
             FatalIOErrorInFunction(solverControls)
                 << "Unknown symmetric matrix solver " << name << nl << nl
@@ -96,7 +96,7 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
         asymMatrixConstructorTable::iterator constructorIter =
             asymMatrixConstructorTablePtr_->find(name);
 
-        if (constructorIter == asymMatrixConstructorTablePtr_->end())
+        if (!constructorIter.found())
         {
             FatalIOErrorInFunction(solverControls)
                 << "Unknown asymmetric matrix solver " << name << nl << nl
@@ -158,10 +158,10 @@ Foam::lduMatrix::solver::solver
 
 void Foam::lduMatrix::solver::readControls()
 {
-    maxIter_   = controlDict_.lookupOrDefault<label>("maxIter", 1000);
-    minIter_   = controlDict_.lookupOrDefault<label>("minIter", 0);
+    maxIter_ = controlDict_.lookupOrDefault<label>("maxIter", defaultMaxIter_);
+    minIter_ = controlDict_.lookupOrDefault<label>("minIter", 0);
     tolerance_ = controlDict_.lookupOrDefault<scalar>("tolerance", 1e-6);
-    relTol_    = controlDict_.lookupOrDefault<scalar>("relTol", 0);
+    relTol_ = controlDict_.lookupOrDefault<scalar>("relTol", 0);
 }
 
 

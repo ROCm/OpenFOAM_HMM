@@ -60,7 +60,7 @@ Foam::radiation::radiationModel::New
     TConstructorTable::iterator cstrIter =
         TConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == TConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown radiationModel type "
@@ -88,7 +88,7 @@ Foam::radiation::radiationModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown radiationModel type "

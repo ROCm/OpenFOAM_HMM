@@ -1,4 +1,3 @@
-// Do nothing
 void USERD_exit_routine
 (
     void
@@ -10,4 +9,3 @@ void USERD_exit_routine
 #endif
 
 }
-

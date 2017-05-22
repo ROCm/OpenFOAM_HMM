@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,8 +54,8 @@ Usage
         Tnbr               T;
         kappaMethod        fluidThermo; // or solidThermo
         kappa              none;
-        QrNbr              Qr;//or none.Name of Qr field on neighbourregion
-        Qr                 none;// or none.Name of Qr field on localregion
+        qrNbr              qr;//or none.Name of qr field on neighbourregion
+        qr                 none;// or none.Name of qr field on localregion
         value              uniform 300;
 
         // Baffle region name
@@ -78,7 +78,6 @@ Usage
         {
             specie
             {
-                nMoles          1;
                 molWeight       20;
             }
             transport

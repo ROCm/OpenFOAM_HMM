@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,8 +28,7 @@ Group
     grpSpecieThermo
 
 Description
-    Thermodynamics mapping class to expose the absolute enthalpy function
-    as the standard enthalpy function h(T).
+    Thermodynamics mapping class to expose the absolute enthalpy functions.
 
 \*---------------------------------------------------------------------------*/
 
@@ -73,30 +72,19 @@ public:
                 return "ha";
             }
 
-            // Absolute enthalpy [J/kmol]
-            scalar he
+            // Heat capacity at constant pressure [J/(kg K)]
+            scalar Cpv
             (
                 const Thermo& thermo,
                 const scalar p,
                 const scalar T
             ) const
             {
-                return thermo.ha(p, T);
+                return thermo.Cp(p, T);
             }
 
-            // Heat capacity at constant pressure [J/(kmol K)]
-            scalar cpv
-            (
-                const Thermo& thermo,
-                const scalar p,
-                const scalar T
-            ) const
-            {
-                return thermo.cp(p, T);
-            }
-
-            //- cp/cp []
-            scalar cpBycpv
+            //- Cp/Cp []
+            scalar CpByCpv
             (
                 const Thermo& thermo,
                 const scalar p,

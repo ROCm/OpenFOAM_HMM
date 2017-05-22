@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,23 +36,6 @@ inline Foam::thirdBodyArrheniusReactionRate::thirdBodyArrheniusReactionRate
     ArrheniusReactionRate(A, beta, Ta),
     thirdBodyEfficiencies_(tbes)
 {}
-
-
-inline Foam::thirdBodyArrheniusReactionRate::thirdBodyArrheniusReactionRate
-(
-    const speciesTable& species,
-    Istream& is
-)
-:
-    ArrheniusReactionRate
-    (
-        species,
-        is.readBegin("thirdBodyArrheniusReactionRate(Istream&)")
-    ),
-    thirdBodyEfficiencies_(species, is)
-{
-    is.readEnd("thirdBodyArrheniusReactionRate(Istream&)");
-}
 
 
 inline Foam::thirdBodyArrheniusReactionRate::thirdBodyArrheniusReactionRate
@@ -98,10 +81,7 @@ inline Foam::Ostream& Foam::operator<<
     const thirdBodyArrheniusReactionRate& arr
 )
 {
-    os  << token::BEGIN_LIST
-        << static_cast<const ArrheniusReactionRate&>(arr)
-        << token::SPACE << arr.thirdBodyEfficiencies_
-        << token::END_LIST;
+    arr.write(os);
     return os;
 }
 

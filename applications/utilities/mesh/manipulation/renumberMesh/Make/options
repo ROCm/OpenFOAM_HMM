@@ -17,4 +17,5 @@ EXE_LIBS = \
     -lrenumberMethods \
     -lreconstruct \
     $(LINK_FLAGS) \
-    -ldecompositionMethods -L$(FOAM_LIBBIN)/dummy -lmetisDecomp -lscotchDecomp
+    -ldecompositionMethods \
+    -L$(FOAM_LIBBIN)/dummy -lmetisDecomp -lscotchDecomp

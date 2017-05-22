@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,16 +56,13 @@ Description
 Usage
     Example usage:
     \verbatim
-    actuationDiskSourceCoeffs
-    {
-        fields          (U);        // names of fields to apply source
-        diskDir         (-1 0 0);   // disk direction
-        Cp              0.1;        // power coefficient
-        Ct              0.5;        // thrust coefficient
-        diskArea        5.0;        // disk area
-        coeffs          (0.1 0.5 0.01); // radial distribution coefficients
-        upstreamPoint   (0 0 0);    // upstream point
-    }
+    fields          (U);        // names of fields to apply source
+    diskDir         (-1 0 0);   // disk direction
+    Cp              0.1;        // power coefficient
+    Ct              0.5;        // thrust coefficient
+    diskArea        5.0;        // disk area
+    coeffs          (0.1 0.5 0.01); // radial distribution coefficients
+    upstreamPoint   (0 0 0);    // upstream point
     \endverbatim
 
 

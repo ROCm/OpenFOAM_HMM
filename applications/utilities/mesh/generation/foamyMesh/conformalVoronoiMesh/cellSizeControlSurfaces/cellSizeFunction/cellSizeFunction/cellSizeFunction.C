@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,7 +58,7 @@ Foam::cellSizeFunction::cellSizeFunction
             defaultCellSize
         )
     ),
-    coeffsDict_(subDict(type + "Coeffs")),
+    coeffsDict_(optionalSubDict(type + "Coeffs")),
     defaultCellSize_(defaultCellSize),
     regionIndices_(regionIndices),
     sideMode_(),
@@ -133,7 +133,7 @@ Foam::autoPtr<Foam::cellSizeFunction> Foam::cellSizeFunction::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(cellSizeFunctionTypeName);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown cellSizeFunction type "

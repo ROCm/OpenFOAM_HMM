@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -115,7 +115,7 @@ class FieldActivatedInjection
             scalarList diameters_;
 
             //- Parcel size distribution model
-            const autoPtr<distributionModels::distributionModel>
+            const autoPtr<distributionModel>
                 sizeDistribution_;
 
 

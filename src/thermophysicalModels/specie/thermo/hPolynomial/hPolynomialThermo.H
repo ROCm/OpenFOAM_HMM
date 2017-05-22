@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,13 +29,47 @@ Group
 
 Description
     Thermodynamics package templated on the equation of state, using polynomial
-    functions for cp, h and s
+    functions for \c cp, \c h and \c s.
 
-    Polynomials for h and s derived from cp
+    Polynomials for \c h and \c s derived from \c cp.
+
+Usage
+
+    \table
+        Property     | Description
+        Hf           | Heat of formation
+        Sf           | Standard entropy
+        CpCoeffs<8>  | Specific heat at constant pressure polynomial coeffs
+    \endtable
+
+    Example of the specification of the thermodynamic properties:
+    \verbatim
+    thermodynamics
+    {
+        Hf              0;
+        Sf              0;
+        CpCoeffs<8>     ( 1000 -0.05 0.003 0 0 0 0 0 );
+    }
+    \endverbatim
+
+    The polynomial expression is evaluated as so:
+
+        \f[
+            Cp = 1000 - 0.05 T + 0.003 T^2
+        \f]
+
+Note
+    - Heat of formation is inputted in [J/kg], but internally uses [J/kmol]
+    - Standard entropy is inputted in [J/kg/K], but internally uses [J/kmol/K]
+    - Specific heat at constant pressure polynomial coefficients evaluate to an
+      expression in [J/(kg.K)].
 
 SourceFiles
     hPolynomialThermoI.H
     hPolynomialThermo.C
+
+See also
+    Foam::Polynomial
 
 \*---------------------------------------------------------------------------*/
 
@@ -57,13 +91,6 @@ class hPolynomialThermo;
 
 template<class EquationOfState, int PolySize>
 inline hPolynomialThermo<EquationOfState, PolySize> operator+
-(
-    const hPolynomialThermo<EquationOfState, PolySize>&,
-    const hPolynomialThermo<EquationOfState, PolySize>&
-);
-
-template<class EquationOfState, int PolySize>
-inline hPolynomialThermo<EquationOfState, PolySize> operator-
 (
     const hPolynomialThermo<EquationOfState, PolySize>&,
     const hPolynomialThermo<EquationOfState, PolySize>&
@@ -103,14 +130,12 @@ class hPolynomialThermo
     // Private data
 
         //- Heat of formation
-        //  Note: input in [J/kg], but internally uses [J/kmol]
         scalar Hf_;
 
         //- Standard entropy
-        //  Note: input in [J/kg/K], but internally uses [J/kmol/K]
         scalar Sf_;
 
-        //- Specific heat at constant pressure polynomial coeffs [J/(kg.K)]
+        //- Specific heat at constant pressure polynomial coeffs
         Polynomial<PolySize> CpCoeffs_;
 
         //- Enthalpy polynomial coeffs - derived from cp [J/kg]
@@ -139,14 +164,8 @@ public:
 
     // Constructors
 
-        //- Construct from Istream
-        hPolynomialThermo(Istream& is);
-
         //- Construct from dictionary
         hPolynomialThermo(const dictionary& dict);
-
-        //- Construct as copy
-        inline hPolynomialThermo(const hPolynomialThermo&);
 
         //- Construct as a named copy
         inline hPolynomialThermo(const word&, const hPolynomialThermo&);
@@ -166,20 +185,20 @@ public:
 
         // Fundamental properties
 
-            //- Heat capacity at constant pressure [J/(kmol K)]
-            inline scalar cp(const scalar p, const scalar T) const;
+            //- Heat capacity at constant pressure [J/(kg K)]
+            inline scalar Cp(const scalar p, const scalar T) const;
 
-            //- Absolute Enthalpy [J/kmol]
-            inline scalar ha(const scalar p, const scalar T) const;
+            //- Absolute Enthalpy [J/kg]
+            inline scalar Ha(const scalar p, const scalar T) const;
 
-            //- Sensible enthalpy [J/kmol]
-            inline scalar hs(const scalar p, const scalar T) const;
+            //- Sensible enthalpy [J/kg]
+            inline scalar Hs(const scalar p, const scalar T) const;
 
-            //- Chemical enthalpy [J/kmol]
-            inline scalar hc() const;
+            //- Chemical enthalpy [J/kg]
+            inline scalar Hc() const;
 
-            //- Entropy [J/(kmol K)]
-            inline scalar s(const scalar p, const scalar T) const;
+            //- Entropy [J/(kg K)]
+            inline scalar S(const scalar p, const scalar T) const;
 
 
         // I-O
@@ -192,19 +211,12 @@ public:
 
         inline void operator=(const hPolynomialThermo&);
         inline void operator+=(const hPolynomialThermo&);
-        inline void operator-=(const hPolynomialThermo&);
         inline void operator*=(const scalar);
 
 
     // Friend operators
 
         friend hPolynomialThermo operator+ <EquationOfState, PolySize>
-        (
-            const hPolynomialThermo&,
-            const hPolynomialThermo&
-        );
-
-        friend hPolynomialThermo operator- <EquationOfState, PolySize>
         (
             const hPolynomialThermo&,
             const hPolynomialThermo&

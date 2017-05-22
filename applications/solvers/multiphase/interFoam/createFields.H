@@ -121,20 +121,6 @@ if (p_rgh.needReference())
 mesh.setFluxRequired(p_rgh.name());
 mesh.setFluxRequired(alpha1.name());
 
-// MULES flux from previous time-step
-surfaceScalarField alphaPhi
-(
-    IOobject
-    (
-        "alphaPhi",
-        runTime.timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    phi*fvc::interpolate(alpha1)
-);
-
 // MULES compressed flux is registered in case scalarTransport FO needs it.
 surfaceScalarField alphaPhiUn
 (
@@ -149,8 +135,5 @@ surfaceScalarField alphaPhiUn
     mesh,
     dimensionedScalar("zero", phi.dimensions(), 0.0)
 );
-
-// MULES Correction
-tmp<surfaceScalarField> talphaPhiCorr0;
 
 #include "createMRF.H"

@@ -38,13 +38,15 @@ functions
             UPrime2Mean
         );
 
-        origin  (0.001  0       0);
-
-        coordinateRotation
+        coordinateSystem
         {
-            type    axesRotation;
-            e1      (1      0.15    0);
-            e3      (0      0      -1);
+            origin  (0 0 0);
+            coordinateRotation
+            {
+                type    axesRotation;
+                e1      (1  0.15  0);
+                e3      (0  0    -1);
+            }
         }
     }
 }

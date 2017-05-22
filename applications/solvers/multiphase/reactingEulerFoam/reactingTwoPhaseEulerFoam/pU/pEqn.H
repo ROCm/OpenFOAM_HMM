@@ -7,8 +7,7 @@ volScalarField rAU1
     1.0
    /(
         U1Eqn.A()
-      + max(phase1.residualAlpha() - alpha1, scalar(0))
-       *rho1/runTime.deltaT()
+      + byDt(max(phase1.residualAlpha() - alpha1, scalar(0))*rho1)
     )
 );
 volScalarField rAU2
@@ -17,8 +16,7 @@ volScalarField rAU2
     1.0
    /(
         U2Eqn.A()
-      + max(phase2.residualAlpha() - alpha2, scalar(0))
-       *rho2/runTime.deltaT()
+      + byDt(max(phase2.residualAlpha() - alpha2, scalar(0))*rho2)
     )
 );
 
@@ -101,8 +99,8 @@ while (pimple.correct())
         rAU1
        *(
             U1Eqn.H()
-          + max(phase1.residualAlpha() - alpha1, scalar(0))
-           *rho1*U1.oldTime()/runTime.deltaT()
+          + byDt(max(phase1.residualAlpha() - alpha1, scalar(0))*rho1)
+           *U1.oldTime()
         );
 
     volVectorField HbyA2
@@ -114,8 +112,8 @@ while (pimple.correct())
         rAU2
        *(
             U2Eqn.H()
-         +  max(phase2.residualAlpha() - alpha2, scalar(0))
-           *rho2*U2.oldTime()/runTime.deltaT()
+         +  byDt(max(phase2.residualAlpha() - alpha2, scalar(0))*rho2)
+           *U2.oldTime()
         );
 
     surfaceScalarField ghSnGradRho
@@ -175,11 +173,9 @@ while (pimple.correct())
     (
         IOobject::groupName("phiHbyA", phase1.name()),
         fvc::flux(HbyA1)
-      + phiCorrCoeff1*fvc::interpolate(alpha1.oldTime()*rho1.oldTime()*rAU1)
-       *(
-            MRF.absolute(phi1.oldTime())
-          - fvc::flux(U1.oldTime())
-        )/runTime.deltaT()
+      + phiCorrCoeff1
+       *fvc::interpolate(byDt(alpha1.oldTime()*rho1.oldTime()*rAU1))
+       *(MRF.absolute(phi1.oldTime()) - fvc::flux(U1.oldTime()))
       - phiF1()
       - phig1
     );
@@ -189,11 +185,9 @@ while (pimple.correct())
     (
         IOobject::groupName("phiHbyA", phase2.name()),
         fvc::flux(HbyA2)
-      + phiCorrCoeff2*fvc::interpolate(alpha2.oldTime()*rho2.oldTime()*rAU2)
-       *(
-            MRF.absolute(phi2.oldTime())
-          - fvc::flux(U2.oldTime())
-        )/runTime.deltaT()
+      + phiCorrCoeff2
+       *fvc::interpolate(byDt(alpha2.oldTime()*rho2.oldTime()*rAU2))
+       *(MRF.absolute(phi2.oldTime()) - fvc::flux(U2.oldTime()))
       - phiF2()
       - phig2
     );
@@ -236,9 +230,10 @@ while (pimple.correct())
     tmp<fvScalarMatrix> pEqnComp2;
 
     // Construct the compressibility parts of the pressure equation
-    if (pimple.transonic())
+
+    if (phase1.compressible())
     {
-        if (phase1.compressible())
+        if (pimple.transonic())
         {
             surfaceScalarField phid1
             (
@@ -263,8 +258,24 @@ while (pimple.correct())
             deleteDemandDrivenData(pEqnComp1.ref().faceFluxCorrectionPtr());
             pEqnComp1.ref().relax();
         }
+        else
+        {
+            pEqnComp1 =
+                (
+                    phase1.continuityError()
+                  - fvc::Sp(fvc::ddt(alpha1) + fvc::div(alphaPhi1), rho1)
+                )/rho1
+              + (alpha1*psi1/rho1)*correction(fvm::ddt(p_rgh));
+        }
+    }
+    else
+    {
+        pEqnComp1 = fvm::Su(-(fvOptions(alpha1, rho1)&rho1)/rho1, p_rgh);
+    }
 
-        if (phase2.compressible())
+    if (phase2.compressible())
+    {
+        if (pimple.transonic())
         {
             surfaceScalarField phid2
             (
@@ -285,23 +296,11 @@ while (pimple.correct())
                       + fvm::div(phid2, p_rgh) - fvm::Sp(fvc::div(phid2), p_rgh)
                     )
                 );
+
             deleteDemandDrivenData(pEqnComp2.ref().faceFluxCorrectionPtr());
             pEqnComp2.ref().relax();
         }
-    }
-    else
-    {
-        if (phase1.compressible())
-        {
-            pEqnComp1 =
-                (
-                    phase1.continuityError()
-                  - fvc::Sp(fvc::ddt(alpha1) + fvc::div(alphaPhi1), rho1)
-                )/rho1
-              + (alpha1*psi1/rho1)*correction(fvm::ddt(p_rgh));
-        }
-
-        if (phase2.compressible())
+        else
         {
             pEqnComp2 =
                 (
@@ -310,6 +309,10 @@ while (pimple.correct())
                 )/rho2
               + (alpha2*psi2/rho2)*correction(fvm::ddt(p_rgh));
         }
+    }
+    else
+    {
+        pEqnComp2 = fvm::Su(-(fvOptions(alpha2, rho2)&rho2)/rho2, p_rgh);
     }
 
     if (fluid.transfersMass())
@@ -396,11 +399,11 @@ while (pimple.correct())
             }
 
             // Set the phase dilatation rates
-            if (phase1.compressible())
+            if (pEqnComp1.valid())
             {
                 phase1.divU(-pEqnComp1 & p_rgh);
             }
-            if (phase2.compressible())
+            if (pEqnComp2.valid())
             {
                 phase2.divU(-pEqnComp2 & p_rgh);
             }

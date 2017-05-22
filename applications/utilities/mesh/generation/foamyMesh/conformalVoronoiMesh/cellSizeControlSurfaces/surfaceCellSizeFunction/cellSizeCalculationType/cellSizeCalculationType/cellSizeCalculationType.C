@@ -71,7 +71,7 @@ Foam::autoPtr<Foam::cellSizeCalculationType> Foam::cellSizeCalculationType::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(cellSizeCalculationTypeTypeName);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown cellSizeCalculationType type "
