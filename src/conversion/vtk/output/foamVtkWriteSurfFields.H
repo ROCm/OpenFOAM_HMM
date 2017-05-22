@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,47 +21,43 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
-    Foam::readFields
+InNamespace
+    Foam::foamVtkOutput
 
 Description
+    Write a patch with its data.
 
 SourceFiles
-    readFields.C
+    foamVtkWriteSurfFields.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef readFields_H
-#define readFields_H
+#ifndef foamVtkWriteSurfFields_H
+#define foamVtkWriteSurfFields_H
 
-#include "meshSubsetHelper.H"
-#include "PtrList.H"
-#include "IOobjectList.H"
-#include "HashSet.H"
+#include "fvMesh.H"
+#include "surfaceMesh.H"
+#include "surfaceFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace foamVtkOutput
+{
 
-// Read the fields and optionally subset and put on the pointer list
-template<class GeoField>
-void readFields
+//- Write surface vector fields
+void writeSurfFields
 (
-    const meshSubsetHelper&,
-    const typename GeoField::Mesh& mesh,
-    const IOobjectList& objects,
-    const HashSet<word>& selectedFields,
-    PtrList<const GeoField>& fields
+    const bool binary,
+    const fvMesh& mesh,
+    const fileName& fileName,
+    const UPtrList<const surfaceVectorField>& surfVectorFields
 );
 
+} // End namespace foamVtkOutput
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "readFields.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

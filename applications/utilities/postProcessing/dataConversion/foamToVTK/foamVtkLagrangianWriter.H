@@ -22,127 +22,103 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::patchWriter
+    Foam::lagrangianWriter
 
 Description
-    Write patch fields
+    Write fields (internal).
 
 SourceFiles
-    patchWriter.C
-    patchWriterTemplates.C
+    lagrangianWriter.C
+    lagrangianWriterTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef patchWriter_H
-#define patchWriter_H
+#ifndef foamVtkLagrangianWriter_H
+#define foamVtkLagrangianWriter_H
 
-#include "pointMesh.H"
 #include "OFstream.H"
+#include "Cloud.H"
 #include "volFields.H"
 #include "pointFields.H"
-#include "indirectPrimitivePatch.H"
-#include "PrimitivePatchInterpolation.H"
+#include "foamVtkOutput.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 class volPointInterpolation;
 
+namespace foamVtkOutput
+{
+
 /*---------------------------------------------------------------------------*\
-                           Class patchWriter Declaration
+                           Class lagrangianWriter Declaration
 \*---------------------------------------------------------------------------*/
 
-class patchWriter
+class lagrangianWriter
 {
-    //- Reference to the OpenFOAM mesh (or subset)
     const fvMesh& mesh_;
 
-    const bool binary_;
+    autoPtr<foamVtkOutput::formatter> format_;
 
-    const bool nearCellValue_;
-
-    const fileName fName_;
-
-    const labelList patchIDs_;
+    const word cloudName_;
 
     std::ofstream os_;
 
-    label nPoints_;
+    label nParcels_;
 
-    label nFaces_;
 
 public:
 
     // Constructors
 
         //- Construct from components
-        patchWriter
+        lagrangianWriter
         (
-            const fvMesh&,
+            const fvMesh& mesh,
             const bool binary,
-            const bool nearCellValue,
             const fileName&,
-            const labelList& patchIDs
+            const word&,
+            const bool dummyCloud
         );
 
 
     // Member Functions
 
-        std::ofstream& os()
+        inline std::ofstream& os()
         {
             return os_;
         }
 
-        label nPoints() const
+        inline foamVtkOutput::formatter& format()
         {
-            return nPoints_;
+            return format_();
         }
 
-        label nFaces() const
+        inline label nParcels() const
         {
-            return nFaces_;
+            return nParcels_;
         }
 
-        //- Write cellIDs
-        void writePatchIDs();
+        void beginParcelData(const label nFields);
+        void endParcelData();
 
-        //- Write volFields
-        template<class Type>
-        void write
-        (
-            const UPtrList<const GeometricField<Type, fvPatchField, volMesh>>&
-        );
 
-        //- Write pointFields
+        //- Write IOField
         template<class Type>
-        void write
-        (
-            const UPtrList
-            <
-                const GeometricField<Type, pointPatchField, pointMesh>
-            >&
-        );
-
-        //- Interpolate and write volFields
-        template<class Type>
-        void write
-        (
-            const PrimitivePatchInterpolation<primitivePatch>&,
-            const UPtrList<const GeometricField<Type, fvPatchField, volMesh>>&
-        );
+        void writeIOField(const wordList&);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace foamVtkOutput
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "patchWriterTemplates.C"
+    #include "foamVtkLagrangianWriterTemplates.C"
 #endif
 
 

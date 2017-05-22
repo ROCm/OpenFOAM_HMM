@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,79 +23,71 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "patchWriter.H"
-#include "writeFuns.H"
+#include "foamVtkPatchWriter.H"
+#include "foamVtkOutput.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-void Foam::patchWriter::write
+template<class Type, template<class> class PatchField>
+void Foam::foamVtkOutput::patchWriter::write
 (
-    const UPtrList<const GeometricField<Type, fvPatchField, volMesh>>& flds
+    const UPtrList<const GeometricField<Type, PatchField, volMesh>>& flds
 )
 {
     forAll(flds, fieldi)
     {
-        const GeometricField<Type, fvPatchField, volMesh>& fld = flds[fieldi];
+        const auto& fld = flds[fieldi];
 
         os_ << fld.name() << ' '
             << int(pTraits<Type>::nComponents) << ' '
-            << nFaces_ << " float" << std::endl;
+            << nFaces_ << " float" << nl;
 
-        DynamicList<floatScalar> fField(pTraits<Type>::nComponents*nFaces_);
-
-        forAll(patchIDs_, j)
+        forAll(patchIDs_, i)
         {
-            label patchi = patchIDs_[j];
-
-            const fvPatchField<Type>& pfld = fld.boundaryField()[patchi];
+            const auto& pfld = fld.boundaryField()[patchIDs_[i]];
 
             if (nearCellValue_)
             {
-                writeFuns::insert(pfld.patchInternalField()(), fField);
+                foamVtkOutput::writeList(format(), pfld.patchInternalField()());
             }
             else
             {
-                writeFuns::insert(pfld, fField);
+                foamVtkOutput::writeList(format(), pfld);
             }
         }
-        writeFuns::write(os_, binary_, fField);
+
+        format().flush();
     }
 }
 
 
-template<class Type>
-void Foam::patchWriter::write
+template<class Type, template<class> class PatchField>
+void Foam::foamVtkOutput::patchWriter::write
 (
-    const UPtrList<const GeometricField<Type, pointPatchField, pointMesh>>& flds
+    const UPtrList<const GeometricField<Type, PatchField, pointMesh>>& flds
 )
 {
     forAll(flds, fieldi)
     {
-        const GeometricField<Type, pointPatchField, pointMesh>& fld =
-            flds[fieldi];
+        const auto& fld = flds[fieldi];
 
         os_ << fld.name() << ' '
             << int(pTraits<Type>::nComponents) << ' '
-            << nPoints_ << " float" << std::endl;
+            << nPoints_ << " float" << nl;
 
-        DynamicList<floatScalar> fField(pTraits<Type>::nComponents*nPoints_);
-
-        forAll(patchIDs_, j)
+        forAll(patchIDs_, i)
         {
-            label patchi = patchIDs_[j];
+            const auto& pfld = fld.boundaryField()[patchIDs_[i]];
 
-            const pointPatchField<Type>& pfld = fld.boundaryField()[patchi];
-
-            writeFuns::insert(pfld.patchInternalField()(), fField);
+            foamVtkOutput::writeList(format(), pfld.patchInternalField()());
         }
-        writeFuns::write(os_, binary_, fField);
+        format().flush();
     }
 }
 
 
 template<class Type>
-void Foam::patchWriter::write
+void Foam::foamVtkOutput::patchWriter::write
 (
     const PrimitivePatchInterpolation<primitivePatch>& pInter,
     const UPtrList<const GeometricField<Type, fvPatchField, volMesh>>& flds
@@ -103,41 +95,33 @@ void Foam::patchWriter::write
 {
     forAll(flds, fieldi)
     {
-        const GeometricField<Type, fvPatchField, volMesh>& fld = flds[fieldi];
+        const auto& fld = flds[fieldi];
 
         os_ << fld.name() << ' '
             << int(pTraits<Type>::nComponents) << ' '
-            << nPoints_ << " float" << std::endl;
+            << nPoints_ << " float" << nl;
 
         DynamicList<floatScalar> fField(pTraits<Type>::nComponents*nPoints_);
 
-        forAll(patchIDs_, j)
+        forAll(patchIDs_, i)
         {
-            label patchi = patchIDs_[j];
-
-            const fvPatchField<Type>& pfld = fld.boundaryField()[patchi];
+            const auto& pfld = fld.boundaryField()[patchIDs_[i]];
 
             if (nearCellValue_)
             {
-                writeFuns::insert
-                (
-                    pInter.faceToPointInterpolate
-                    (
-                        pfld.patchInternalField()()
-                    )(),
-                    fField
-                );
+                auto tfield =
+                    pInter.faceToPointInterpolate(pfld.patchInternalField()());
+
+                foamVtkOutput::writeList(format(), tfield());
             }
             else
             {
-                writeFuns::insert
-                (
-                    pInter.faceToPointInterpolate(pfld)(),
-                    fField
-                );
+                auto tfield = pInter.faceToPointInterpolate(pfld);
+
+                foamVtkOutput::writeList(format(), tfield());
             }
         }
-        writeFuns::write(os_, binary_, fField);
+        format().flush();
     }
 }
 

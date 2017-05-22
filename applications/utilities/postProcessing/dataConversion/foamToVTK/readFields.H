@@ -21,92 +21,47 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::lagrangianWriter
+InClass
+    Foam::readFields
 
 Description
-    Write fields (internal).
 
 SourceFiles
-    lagrangianWriter.C
-    lagrangianWriterTemplates.C
+    readFields.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef lagrangianWriter_H
-#define lagrangianWriter_H
+#ifndef readFields_H
+#define readFields_H
 
-#include "OFstream.H"
-#include "Cloud.H"
-#include "volFields.H"
-#include "pointFields.H"
+#include "meshSubsetHelper.H"
+#include "PtrList.H"
+#include "IOobjectList.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class volPointInterpolation;
-
-/*---------------------------------------------------------------------------*\
-                           Class lagrangianWriter Declaration
-\*---------------------------------------------------------------------------*/
-
-class lagrangianWriter
-{
-    const fvMesh& mesh_;
-
-    const bool binary_;
-
-    const fileName fName_;
-
-    const word cloudName_;
-
-    std::ofstream os_;
-
-    label nParcels_;
-
-
-public:
-
-    // Constructors
-
-        //- Construct from components
-        lagrangianWriter
-        (
-            const fvMesh&,
-            const bool binary,
-            const fileName&,
-            const word&,
-            const bool dummyCloud
-        );
-
-
-    // Member Functions
-
-        std::ofstream& os()
-        {
-            return os_;
-        }
-
-        void writeParcelHeader(const label nFields);
-
-        //- Write IOField
-        template<class Type>
-        void writeIOField(const wordList&);
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Read the fields and optionally subset and put on the pointer list
+template<class GeoField>
+void readFields
+(
+    const meshSubsetHelper& helper,
+    const typename GeoField::Mesh& mesh,
+    const IOobjectList& objects,
+    const HashSet<word>& selectedFields,
+    PtrList<const GeoField>& fields
+);
 
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "lagrangianWriterTemplates.C"
+    #include "readFields.C"
 #endif
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

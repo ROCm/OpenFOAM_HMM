@@ -25,7 +25,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
 template<class Type>
 void Foam::foamVtkOutput::writeField
 (

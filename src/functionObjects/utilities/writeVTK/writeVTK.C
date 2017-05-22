@@ -26,8 +26,7 @@ License
 #include "writeVTK.H"
 #include "dictionary.H"
 #include "Time.H"
-#include "vtkMesh.H"
-#include "internalWriter.H"
+#include "foamVtkInternalWriter.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -107,7 +106,7 @@ bool Foam::functionObjects::writeVTK::write()
     }
 
     // Create file and write header
-    fileName vtkFileName
+    fileName outputName
     (
         fvPath/vtkName
       + "_"
@@ -115,12 +114,24 @@ bool Foam::functionObjects::writeVTK::write()
       + ".vtk"
     );
 
-    Info<< "    Internal  : " << vtkFileName << endl;
+    Info<< "    Internal  : " << outputName << endl;
 
-    vtkMesh vMesh(const_cast<fvMesh&>(mesh_));
+    foamVtkCells foamVtkMeshCells
+    (
+        mesh_,
+        foamVtkCells::contentType::LEGACY,
+        true  // decompose
+    );
 
     // Write mesh
-    internalWriter writer(vMesh, false, vtkFileName);
+    foamVtkOutput::internalWriter writer
+    (
+        mesh_,
+        foamVtkOutput::LEGACY_ASCII,
+        foamVtkMeshCells,
+        outputName
+    );
+
 
     UPtrList<const volScalarField> vsf(lookupFields<volScalarField>());
     UPtrList<const volVectorField> vvf(lookupFields<volVectorField>());
@@ -131,23 +142,23 @@ bool Foam::functionObjects::writeVTK::write()
     UPtrList<const volSymmTensorField> vstf(lookupFields<volSymmTensorField>());
     UPtrList<const volTensorField> vtf(lookupFields<volTensorField>());
 
-    // Write header for cellID and volFields
-    writeFuns::writeCellDataHeader
-    (
-        writer.os(),
-        vMesh.nFieldCells(),
-        1 + vsf.size() + vvf.size() + vsptf.size() + vstf.size() + vtf.size()
-    );
+    const label nVolFields =
+        vsf.size() + vvf.size() + vsptf.size() + vstf.size() + vtf.size();
 
-    // Write cellID field
-    writer.writeCellIDs();
+    // CellData
+    {
+        writer.beginCellData(1 + nVolFields);
 
-    // Write volFields
-    writer.write(vsf);
-    writer.write(vvf);
-    writer.write(vsptf);
-    writer.write(vstf);
-    writer.write(vtf);
+        // Write cellID field
+        writer.writeCellIDs();
+
+        // Write volFields
+        writer.write(vsf);
+        writer.write(vvf);
+        writer.write(vsptf);
+        writer.write(vstf);
+        writer.write(vtf);
+    }
 
     return true;
 }

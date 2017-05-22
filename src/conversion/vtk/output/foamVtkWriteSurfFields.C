@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,16 +23,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "writeSurfFields.H"
+#include "foamVtkWriteSurfFields.H"
 #include "OFstream.H"
-#include "floatScalar.H"
-#include "writeFuns.H"
 #include "emptyFvsPatchFields.H"
 #include "fvsPatchFields.H"
+#include "surfaceFields.H"
+#include "foamVtkOutput.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-void Foam::writeSurfFields
+void Foam::foamVtkOutput::writeSurfFields
 (
     const bool binary,
     const fvMesh& mesh,
@@ -40,72 +40,67 @@ void Foam::writeSurfFields
     const UPtrList<const surfaceVectorField>& surfVectorFields
 )
 {
-    std::ofstream str(fileName.c_str());
+    std::ofstream os(fileName.c_str());
 
-    writeFuns::writeHeader
+    autoPtr<foamVtkOutput::formatter> format = foamVtkOutput::newFormatter
     (
-        str,
-        binary,
-        "surfaceFields"
+        os,
+        (
+            binary
+          ? foamVtkOutput::LEGACY_BINARY
+          : foamVtkOutput::LEGACY_ASCII
+        )
     );
 
-    str << "DATASET POLYDATA" << std::endl;
+    foamVtkOutput::legacy::fileHeader(format(), "surfaceFields")
+        << "DATASET POLYDATA" << nl;
 
     const pointField& fc = mesh.faceCentres();
 
-    str << "POINTS " << mesh.nFaces() << " float" << std::endl;
+    os << "POINTS " << mesh.nFaces() << " float" << nl;
 
-    DynamicList<floatScalar> pField(3*mesh.nFaces());
+    foamVtkOutput::writeList(format(), fc);
+    format().flush();
 
-    for (label facei = 0; facei < mesh.nFaces(); facei++)
-    {
-        writeFuns::insert(fc[facei], pField);
-    }
+    foamVtkOutput::legacy::pointDataHeader
+    (
+        os,
+        mesh.nFaces(),
+        surfVectorFields.size()
+    );
 
-    writeFuns::write(str, binary, pField);
-
-    str << "POINT_DATA " << mesh.nFaces() << std::endl
-        << "FIELD attributes " << surfVectorFields.size() << std::endl;
 
     // surfVectorFields
     forAll(surfVectorFields, fieldi)
     {
         const surfaceVectorField& svf = surfVectorFields[fieldi];
 
-        str << svf.name() << " 3 "
-            << mesh.nFaces() << " float" << std::endl;
-
-        DynamicList<floatScalar> fField(3*mesh.nFaces());
-
-        for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
+        os  << svf.name() << " 3 " << mesh.nFaces() << " float" << nl;
+        for (label facei=0; facei < mesh.nInternalFaces(); ++facei)
         {
-            writeFuns::insert(svf[facei], fField);
+            foamVtkOutput::write(format(), svf[facei]);
         }
 
         forAll(svf.boundaryField(), patchi)
         {
-            const fvsPatchVectorField& pf = svf.boundaryField()[patchi];
-
             const fvPatch& pp = mesh.boundary()[patchi];
+            const fvsPatchVectorField& pf = svf.boundaryField()[patchi];
 
             if (isA<emptyFvsPatchVectorField>(pf))
             {
                 // Note: loop over polypatch size, not fvpatch size.
                 forAll(pp.patch(), i)
                 {
-                    writeFuns::insert(vector::zero, fField);
+                    foamVtkOutput::write(format(), vector::zero);
                 }
             }
             else
             {
-                forAll(pf, i)
-                {
-                    writeFuns::insert(pf[i], fField);
-                }
+                foamVtkOutput::writeList(format(), pf);
             }
         }
 
-        writeFuns::write(str, binary, fField);
+        format().flush();
     }
 }
 

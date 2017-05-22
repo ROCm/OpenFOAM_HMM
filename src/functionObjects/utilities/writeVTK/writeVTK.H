@@ -28,10 +28,9 @@ Group
     grpUtilitiesFunctionObjects
 
 Description
-    This functionObject writes objects registered to the database in VTK format
-    using the foamToVTK library.
+    This functionObject writes objects registered to the database in VTK format.
 
-    Currently only the writing of the cell-values of volFields is supported but
+    Currently only supports writing of the cell-values of volFields but
     support for other field types, patch fields, Lagrangian data etc. will be
     added.
 
@@ -49,7 +48,7 @@ Description
 Usage
     \table
         Property     | Description             | Required    | Default value
-        type         | type name: writeVTK     | yes         |
+        type         | Type name: writeVTK     | yes         |
         objectNames  | objects to write        | yes         |
     \endtable
 
@@ -108,7 +107,6 @@ class writeVTK
         //- Names of objects
         wordReList objectNames_;
 
-
         //- Result name
         word resultName_;
 
@@ -121,10 +119,10 @@ class writeVTK
         UPtrList<const GeoField> lookupFields() const;
 
         //- Disallow default bitwise copy construct
-        writeVTK(const writeVTK&);
+        writeVTK(const writeVTK&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const writeVTK&);
+        void operator=(const writeVTK&) = delete;
 
 
 public:
@@ -140,7 +138,7 @@ public:
         (
             const word& name,
             const Time& t,
-            const dictionary&
+            const dictionary& dict
         );
 
 
@@ -151,7 +149,7 @@ public:
     // Member Functions
 
         //- Read the writeVTK data
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Execute, currently does nothing
         virtual bool execute();

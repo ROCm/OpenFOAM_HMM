@@ -2,6 +2,7 @@ abort/abort.C
 
 codedFunctionObject/codedFunctionObject.C
 ensightWrite/ensightWrite.C
+writeVTK/writeVTK.C
 
 removeRegisteredObject/removeRegisteredObject.C
 

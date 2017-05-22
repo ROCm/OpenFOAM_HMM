@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,56 +23,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfaceMeshWriter.H"
-#include "writeFuns.H"
+#include "foamVtkLagrangianWriter.H"
+#include "IOField.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::surfaceMeshWriter::surfaceMeshWriter
+template<class Type>
+void Foam::foamVtkOutput::lagrangianWriter::writeIOField
 (
-    const bool binary,
-    const indirectPrimitivePatch& pp,
-    const word& name,
-    const fileName& fName
+    const wordList& objects
 )
-:
-    binary_(binary),
-    pp_(pp),
-    fName_(fName),
-    os_(fName.c_str())
 {
-    // Write header
-    writeFuns::writeHeader(os_, binary_, name);
-
-    os_ << "DATASET POLYDATA" << std::endl;
-
-    // Write topology
-    label nFaceVerts = 0;
-
-    forAll(pp, facei)
+    forAll(objects, i)
     {
-        nFaceVerts += pp[facei].size() + 1;
+        const word& object = objects[i];
+
+        IOobject header
+        (
+            object,
+            mesh_.time().timeName(),
+            cloud::prefix/cloudName_,
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        );
+
+        IOField<Type> fld(header);
+
+        // Legacy
+        os()<< object << ' '
+            << int(pTraits<Type>::nComponents) << ' '
+            << fld.size() << " float" << nl;
+
+        foamVtkOutput::writeList(format(), fld);
+        format().flush();
     }
-
-    os_ << "POINTS " << pp.nPoints() << " float" << std::endl;
-
-    DynamicList<floatScalar> ptField(3*pp.nPoints());
-    writeFuns::insert(pp.localPoints(), ptField);
-    writeFuns::write(os_, binary, ptField);
-
-
-    os_ << "POLYGONS " << pp.size() << ' ' << nFaceVerts << std::endl;
-
-    DynamicList<label> vertLabels(nFaceVerts);
-
-    forAll(pp, facei)
-    {
-        const face& f = pp.localFaces()[facei];
-
-        vertLabels.append(f.size());
-        writeFuns::insert(f, vertLabels);
-    }
-    writeFuns::write(os_, binary_, vertLabels);
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,14 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfaceMeshWriter.H"
-#include "writeFuns.H"
+#include "foamVtkSurfaceMeshWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::surfaceMeshWriter::getFaceField
+Foam::foamVtkOutput::surfaceMeshWriter::getFaceField
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& sfld
 ) const
@@ -42,9 +41,8 @@ Foam::surfaceMeshWriter::getFaceField
 
     forAll(pp_.addressing(), i)
     {
-        label facei = pp_.addressing()[i];
-
-        label patchi = patches.whichPatch(facei);
+        const label facei = pp_.addressing()[i];
+        const label patchi = patches.whichPatch(facei);
 
         if (patchi == -1)
         {
@@ -62,7 +60,7 @@ Foam::surfaceMeshWriter::getFaceField
 
 
 template<class Type>
-void Foam::surfaceMeshWriter::write
+void Foam::foamVtkOutput::surfaceMeshWriter::write
 (
     const UPtrList
     <
@@ -79,9 +77,9 @@ void Foam::surfaceMeshWriter::write
             << int(pTraits<Type>::nComponents) << ' '
             << pp_.size() << " float" << std::endl;
 
-        DynamicList<floatScalar> fField(pTraits<Type>::nComponents*pp_.size());
-        writeFuns::insert(getFaceField(fld)(), fField);
-        writeFuns::write(os_, binary_, fField);
+        foamVtkOutput::writeList(format(), getFaceField(fld)());
+
+        format().flush();
     }
 }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,32 +22,35 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::surfaceMeshWriter
+    Foam::foamVtkOutput::surfaceMeshWriter
 
 Description
     Write faces with fields
 
 SourceFiles
-    surfaceMeshWriter.C
-    surfaceMeshWriterTemplates.C
+    foamVtkSurfaceMeshWriter.C
+    foamVtkSurfaceMeshWriterTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceMeshWriter_H
-#define surfaceMeshWriter_H
+#ifndef foamVtkSurfaceMeshWriter_H
+#define foamVtkSurfaceMeshWriter_H
 
 #include "pointMesh.H"
 #include "OFstream.H"
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "indirectPrimitivePatch.H"
+#include "foamVtkOutput.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 class volPointInterpolation;
+
+namespace foamVtkOutput
+{
 
 /*---------------------------------------------------------------------------*\
                       Class surfaceMeshWriter Declaration
@@ -55,11 +58,9 @@ class volPointInterpolation;
 
 class surfaceMeshWriter
 {
-    const bool binary_;
-
     const indirectPrimitivePatch& pp_;
 
-    const fileName fName_;
+    autoPtr<foamVtkOutput::formatter> format_;
 
     std::ofstream os_;
 
@@ -80,16 +81,26 @@ public:
 
     // Member Functions
 
-        std::ofstream& os()
+        inline std::ofstream& os()
         {
             return os_;
         }
+
+        inline foamVtkOutput::formatter& format()
+        {
+            return format_();
+        }
+
+        void beginCellData(label nFields);
+
+        void endCellData();
+
 
         //- Extract face data
         template<class Type>
         tmp<Field<Type>> getFaceField
         (
-            const GeometricField<Type, fvsPatchField, surfaceMesh>&
+            const GeometricField<Type, fvsPatchField, surfaceMesh>& sfld
         ) const;
 
         //- Write surfaceFields
@@ -99,19 +110,20 @@ public:
             const UPtrList
             <
                 const GeometricField<Type, fvsPatchField, surfaceMesh>
-            >&
+            >& sflds
         );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace foamVtkOutput
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "surfaceMeshWriterTemplates.C"
+    #include "foamVtkSurfaceMeshWriterTemplates.C"
 #endif
 
 

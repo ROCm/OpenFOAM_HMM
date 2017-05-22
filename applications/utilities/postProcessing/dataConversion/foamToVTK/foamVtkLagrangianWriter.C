@@ -23,14 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "lagrangianWriter.H"
-#include "writeFuns.H"
+#include "foamVtkLagrangianWriter.H"
 #include "Cloud.H"
 #include "passiveParticle.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::lagrangianWriter::lagrangianWriter
+Foam::foamVtkOutput::lagrangianWriter::lagrangianWriter
 (
     const fvMesh& mesh,
     const bool binary,
@@ -40,20 +39,27 @@ Foam::lagrangianWriter::lagrangianWriter
 )
 :
     mesh_(mesh),
-    binary_(binary),
-    fName_(fName),
+    format_(),
     cloudName_(cloudName),
-    os_(fName.c_str())
+    os_(fName.c_str()),
+    nParcels_(0)
 {
-    // Write header
-    writeFuns::writeHeader(os_, binary_, mesh_.time().caseName());
-    os_ << "DATASET POLYDATA" << std::endl;
+    format_ = foamVtkOutput::newFormatter
+    (
+        os_,
+        (
+            binary
+          ? foamVtkOutput::LEGACY_BINARY
+          : foamVtkOutput::LEGACY_ASCII
+        )
+    );
+
+    foamVtkOutput::legacy::fileHeader(format(), mesh_.time().caseName())
+        << "DATASET POLYDATA" << nl;
 
     if (dummyCloud)
     {
-        nParcels_ = 0;
-
-        os_ << "POINTS " << nParcels_ << " float" << std::endl;
+        os_ << "POINTS " << nParcels_ << " float" << nl;
     }
     else
     {
@@ -61,27 +67,32 @@ Foam::lagrangianWriter::lagrangianWriter
 
         nParcels_ = parcels.size();
 
-        os_ << "POINTS " << nParcels_ << " float" << std::endl;
+        os_ << "POINTS " << nParcels_ << " float" << nl;
 
-        DynamicList<floatScalar> partField(3*parcels.size());
-
-        forAllConstIter(Cloud<passiveParticle>, parcels, elmnt)
+        forAllConstIters(parcels, iter)
         {
-            writeFuns::insert(elmnt().position(), partField);
+            const point& pt = iter().position();
+
+            foamVtkOutput::write(format(), pt);
         }
-        writeFuns::write(os_, binary_, partField);
+        format().flush();
     }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::lagrangianWriter::writeParcelHeader(const label nFields)
+void Foam::foamVtkOutput::lagrangianWriter::beginParcelData
+(
+    const label nFields
+)
 {
-    os_ << "POINT_DATA " << nParcels_ << std::endl
-        << "FIELD attributes " << nFields
-        << std::endl;
+    foamVtkOutput::legacy::pointDataHeader(os_, nParcels_, nFields);
 }
+
+
+void Foam::foamVtkOutput::lagrangianWriter::endParcelData()
+{}
 
 
 // ************************************************************************* //

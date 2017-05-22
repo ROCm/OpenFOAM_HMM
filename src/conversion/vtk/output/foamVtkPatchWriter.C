@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,12 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "patchWriter.H"
-#include "writeFuns.H"
+#include "foamVtkPatchWriter.H"
+#include "foamVtkOutput.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::patchWriter::patchWriter
+Foam::foamVtkOutput::patchWriter::patchWriter
 (
     const fvMesh& mesh,
     const bool binary,
@@ -38,24 +38,34 @@ Foam::patchWriter::patchWriter
 )
 :
     mesh_(mesh),
-    binary_(binary),
+    format_(),
     nearCellValue_(nearCellValue),
-    fName_(fName),
     patchIDs_(patchIDs),
     os_(fName.c_str())
 {
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    // Write header
-    if (patchIDs_.size() == 1)
-    {
-        writeFuns::writeHeader(os_, binary_, patches[patchIDs_[0]].name());
-    }
-    else
-    {
-        writeFuns::writeHeader(os_, binary_, "patches");
-    }
-    os_ << "DATASET POLYDATA" << std::endl;
+    format_ = foamVtkOutput::newFormatter
+    (
+        os_,
+        (
+            binary
+          ? foamVtkOutput::LEGACY_BINARY
+          : foamVtkOutput::LEGACY_ASCII
+        )
+    );
+
+    foamVtkOutput::legacy::fileHeader
+    (
+        format(),
+        (
+            patchIDs_.size() == 1
+          ? patches[patchIDs_.first()].name()
+          : "patches"
+        )
+    ) << "DATASET POLYDATA" << nl;
+
+    //------------------------------------------------------------------
 
     // Write topology
     nPoints_ = 0;
@@ -69,30 +79,26 @@ Foam::patchWriter::patchWriter
         nPoints_ += pp.nPoints();
         nFaces_ += pp.size();
 
+        nFaceVerts += pp.size();
         forAll(pp, facei)
         {
-            nFaceVerts += pp[facei].size() + 1;
+            nFaceVerts += pp[facei].size();
         }
     }
 
-    os_ << "POINTS " << nPoints_ << " float" << std::endl;
-
-    DynamicList<floatScalar> ptField(3*nPoints_);
+    os_ << "POINTS " << nPoints_ << " float" << nl;
 
     forAll(patchIDs_, i)
     {
         const polyPatch& pp = patches[patchIDs_[i]];
 
-        writeFuns::insert(pp.localPoints(), ptField);
+        foamVtkOutput::writeList(format(), pp.localPoints());
     }
-    writeFuns::write(os_, binary_, ptField);
+    format().flush();
 
-    os_ << "POLYGONS " << nFaces_ << ' ' << nFaceVerts << std::endl;
+    os_ << "POLYGONS " << nFaces_ << ' ' << nFaceVerts << nl;
 
-    DynamicList<label> vertLabels(nFaceVerts);
-
-    label offset = 0;
-
+    label off = 0;
     forAll(patchIDs_, i)
     {
         const polyPatch& pp = patches[patchIDs_[i]];
@@ -101,35 +107,57 @@ Foam::patchWriter::patchWriter
         {
             const face& f = pp.localFaces()[facei];
 
-            vertLabels.append(f.size());
-            writeFuns::insert(f + offset, vertLabels);
+            format().write(f.size());
+            forAll(f, fi)
+            {
+                format().write(off + f[fi]);
+            }
         }
-        offset += pp.nPoints();
+
+        off += pp.nPoints();
     }
-    writeFuns::write(os_, binary_, vertLabels);
+    format().flush();
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::patchWriter::writePatchIDs()
+void Foam::foamVtkOutput::patchWriter::beginCellData(label nFields)
 {
-    DynamicList<floatScalar> fField(nFaces_);
+    foamVtkOutput::legacy::cellDataHeader(os(), nFaces_, nFields);
+}
 
-    os_ << "patchID 1 " << nFaces_ << " float" << std::endl;
+
+void Foam::foamVtkOutput::patchWriter::endCellData()
+{}
+
+
+void Foam::foamVtkOutput::patchWriter::beginPointData(label nFields)
+{
+    foamVtkOutput::legacy::pointDataHeader(os(), nPoints_, nFields);
+}
+
+
+void Foam::foamVtkOutput::patchWriter::endPointData()
+{}
+
+
+void Foam::foamVtkOutput::patchWriter::writePatchIDs()
+{
+    os_ << "patchID 1 " << nFaces_ << " float" << nl;
 
     forAll(patchIDs_, i)
     {
-        label patchi = patchIDs_[i];
+        const label patchId = patchIDs_[i];
 
-        const polyPatch& pp = mesh_.boundaryMesh()[patchi];
+        const polyPatch& pp = mesh_.boundaryMesh()[patchId];
 
-        if (!isA<emptyPolyPatch>(pp))
+        forAll(pp, facei)
         {
-            writeFuns::insert(scalarField(pp.size(), patchi), fField);
+            format().write(patchId);
         }
     }
-    writeFuns::write(os_, binary_, fField);
+    format().flush();
 }
 
 
