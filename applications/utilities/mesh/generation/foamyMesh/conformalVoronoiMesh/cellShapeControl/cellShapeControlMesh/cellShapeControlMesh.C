@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ License
 #include "pointIOField.H"
 #include "scalarIOField.H"
 #include "triadIOField.H"
-#include "tetrahedron.H"
+#include "tetPointRef.H"
 #include "plane.H"
 #include "transform.H"
 #include "meshTools.H"
