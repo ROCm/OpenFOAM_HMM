@@ -414,6 +414,7 @@ $(general)/adjustPhi/adjustPhi.C
 $(general)/bound/bound.C
 $(general)/CorrectPhi/correctUphiBCs.C
 $(general)/pressureControl/pressureControl.C
+$(general)/levelSet/levelSet.C
 
 coupling = $(general)/coupling
 $(coupling)/externalFileCoupler.C

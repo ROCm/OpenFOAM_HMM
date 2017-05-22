@@ -119,7 +119,7 @@ Foam::tmp<Foam::scalarField> Foam::levelSetFraction
 
         vector a = vector::zero, r = vector::zero;
 
-        for(label eI = 0; eI < f.size(); ++ eI)
+        for (label eI = 0; eI < f.size(); ++eI)
         {
             const edge e = f.faceEdge(eI);
 
