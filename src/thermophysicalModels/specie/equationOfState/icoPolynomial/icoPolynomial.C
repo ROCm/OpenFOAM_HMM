@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,16 +34,6 @@ namespace Foam
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Specie, int PolySize>
-icoPolynomial<Specie, PolySize>::icoPolynomial(Istream& is)
-:
-    Specie(is),
-    rhoCoeffs_("rhoCoeffs<" + Foam::name(PolySize) + '>', is)
-{
-    rhoCoeffs_ *= this->W();
-}
-
-
-template<class Specie, int PolySize>
 icoPolynomial<Specie, PolySize>::icoPolynomial(const dictionary& dict)
 :
     Specie(dict),
@@ -54,9 +44,7 @@ icoPolynomial<Specie, PolySize>::icoPolynomial(const dictionary& dict)
         "rhoCoeffs<" + Foam::name(PolySize) + '>'
     )
 )
-{
-    rhoCoeffs_ *= this->W();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -70,7 +58,7 @@ void icoPolynomial<Specie, PolySize>::write(Ostream& os) const
     dict.add
     (
         word("rhoCoeffs<" + Foam::name(PolySize) + '>'),
-        rhoCoeffs_/this->W()
+        rhoCoeffs_
     );
 
     os  << indent << dict.dictName() << dict;
@@ -82,16 +70,7 @@ void icoPolynomial<Specie, PolySize>::write(Ostream& os) const
 template<class Specie, int PolySize>
 Ostream& operator<<(Ostream& os, const icoPolynomial<Specie, PolySize>& ip)
 {
-    os  << static_cast<const Specie&>(ip) << tab
-        << "rhoCoeffs<" << Foam::name(PolySize) << '>' << tab
-        << ip.rhoCoeffs_/ip.W();
-
-    os.check
-    (
-        "Ostream& operator<<"
-        "(Ostream& os, const icoPolynomial<Specie, PolySize>& ip)"
-    );
-
+    ip.write(os);
     return os;
 }
 

@@ -23,8 +23,12 @@ thermoType
     thermo          hRefConst;
     equationOfState perfectFluid;
     specie          specie;
-    energy          sensibleInternalEnergy;
+    energy          sensibleEnthalpy;
 }
+
+dpdt yes;
+
+pressureWorkAlphaLimit 0;
 
 species
 (
@@ -37,7 +41,6 @@ water
 {
     specie
     {
-        nMoles          1;
         molWeight       18.0153;
     }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,10 +38,7 @@ Usage
         type            tabulatedAccelerationSource;
         active          yes;
 
-        tabulatedAccelerationSourceCoeffs
-        {
-            timeDataFileName "constant/acceleration-terms.dat";
-        }
+        timeDataFileName "constant/acceleration-terms.dat";
     }
     \endverbatim
 

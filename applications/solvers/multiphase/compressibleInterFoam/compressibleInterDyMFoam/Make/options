@@ -1,5 +1,7 @@
 EXE_INC = \
+    -I. \
     -I.. \
+    -I../../VoF \
     -I../twoPhaseMixtureThermo \
     -I$(LIB_SRC)/transportModels/compressible/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
@@ -14,6 +16,7 @@ EXE_INC = \
 
 EXE_LIBS = \
     -ltwoPhaseMixtureThermo \
+    -ltwoPhaseSurfaceTension \
     -lcompressibleTransportModels \
     -lfluidThermophysicalModels \
     -lspecie \

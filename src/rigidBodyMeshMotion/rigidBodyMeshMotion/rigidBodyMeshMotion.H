@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,7 @@ SourceFiles
 
 #include "displacementMotionSolver.H"
 #include "rigidBodyMotion.H"
+#include "ramp.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -118,6 +119,9 @@ class rigidBodyMeshMotion
         //  incompressible simulation, when this needs to be specified
         //  as rhoInf
         word rhoName_;
+
+        //- Ramp the forces according to the specified function and period
+        autoPtr<Function1<scalar>> ramp_;
 
         //- Current time index (used for updating)
         label curTimeIndex_;

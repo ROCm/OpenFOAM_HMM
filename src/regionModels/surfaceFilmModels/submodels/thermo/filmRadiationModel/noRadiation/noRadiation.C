@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,11 +51,11 @@ addToRunTimeSelectionTable
 
 noRadiation::noRadiation
 (
-    surfaceFilmModel& owner,
+    surfaceFilmModel& film,
     const dictionary& dict
 )
 :
-    filmRadiationModel(owner)
+    filmRadiationModel(film)
 {}
 
 
@@ -68,9 +68,7 @@ noRadiation::~noRadiation()
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void noRadiation::correct()
-{
-    // do nothing
-}
+{}
 
 
 tmp<volScalarField> noRadiation::Shs()
@@ -82,12 +80,12 @@ tmp<volScalarField> noRadiation::Shs()
             IOobject
             (
                 typeName + ":Shs",
-                owner().time().timeName(),
-                owner().regionMesh(),
+                film().time().timeName(),
+                film().regionMesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            owner().regionMesh(),
+            film().regionMesh(),
             dimensionedScalar("zero", dimMass/pow3(dimTime), 0.0)
         )
     );

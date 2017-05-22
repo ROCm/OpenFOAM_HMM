@@ -8,6 +8,6 @@ runApplication blockMesh
 runApplication $(getApplication)
 runApplication -s sample  postProcess -latestTime -func sample
 
-( cd validation && ./createGraphs )
+runApplication validation/createGraphs
 
 #------------------------------------------------------------------------------

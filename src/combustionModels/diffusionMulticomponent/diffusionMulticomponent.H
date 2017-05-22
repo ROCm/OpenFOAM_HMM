@@ -191,10 +191,7 @@ public:
             virtual tmp<fvScalarMatrix> R(volScalarField& Y) const;
 
             //- Heat release rate calculated from fuel consumption rate matrix
-            virtual tmp<volScalarField> dQ() const;
-
-            //-  Return source for enthalpy equation [kg/m/s3]
-            virtual tmp<volScalarField> Sh() const;
+            virtual tmp<volScalarField> Qdot() const;
 
 
     // IO

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PaSR.H"
-#include "fvmSup.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -39,19 +38,18 @@ Foam::combustionModels::PaSR<Type>::PaSR
 :
     laminar<Type>(modelType, mesh, combustionProperties, phaseName),
     Cmix_(readScalar(this->coeffs().lookup("Cmix"))),
-    turbulentReaction_(this->coeffs().lookup("turbulentReaction")),
     kappa_
     (
         IOobject
         (
-            IOobject::groupName("PaSR:kappa", phaseName),
+            IOobject::groupName(typeName + ":kappa", phaseName),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("kappa", dimless, 0.0)
+        dimensionedScalar("kappa", dimless, 0)
     )
 {}
 
@@ -72,35 +70,31 @@ void Foam::combustionModels::PaSR<Type>::correct()
     {
         laminar<Type>::correct();
 
-        if (turbulentReaction_)
-        {
-            tmp<volScalarField> tepsilon(this->turbulence().epsilon());
-            const volScalarField& epsilon = tepsilon();
-            tmp<volScalarField> tmuEff(this->turbulence().muEff());
-            const volScalarField& muEff = tmuEff();
-            tmp<volScalarField> ttc(this->tc());
-            const volScalarField& tc = ttc();
-            tmp<volScalarField> trho(this->rho());
-            const volScalarField& rho = trho();
+        tmp<volScalarField> tepsilon(this->turbulence().epsilon());
+        const scalarField& epsilon = tepsilon();
 
-            forAll(epsilon, i)
+        tmp<volScalarField> tmuEff(this->turbulence().muEff());
+        const scalarField& muEff = tmuEff();
+
+        tmp<volScalarField> ttc(this->tc());
+        const scalarField& tc = ttc();
+
+        tmp<volScalarField> trho(this->rho());
+        const scalarField& rho = trho();
+
+        forAll(epsilon, i)
+        {
+            const scalar tk =
+                Cmix_*sqrt(max(muEff[i]/rho[i]/(epsilon[i] + SMALL), 0));
+
+            if (tk > SMALL)
             {
-                scalar tk =
-                    Cmix_*sqrt(max(muEff[i]/rho[i]/(epsilon[i] + SMALL), 0));
-
-                if (tk > SMALL)
-                {
-                    kappa_[i] = tc[i]/(tc[i] + tk);
-                }
-                else
-                {
-                    kappa_[i] = 1.0;
-                }
+                kappa_[i] = tc[i]/(tc[i] + tk);
             }
-        }
-        else
-        {
-            kappa_ = 1.0;
+            else
+            {
+                kappa_[i] = 1.0;
+            }
         }
     }
 }
@@ -116,29 +110,14 @@ Foam::combustionModels::PaSR<Type>::R(volScalarField& Y) const
 
 template<class Type>
 Foam::tmp<Foam::volScalarField>
-Foam::combustionModels::PaSR<Type>::dQ() const
+Foam::combustionModels::PaSR<Type>::Qdot() const
 {
     return tmp<volScalarField>
     (
         new volScalarField
         (
-            IOobject::groupName("PaSR:dQ", this->phaseName_),
-            kappa_*laminar<Type>::dQ()
-        )
-    );
-}
-
-
-template<class Type>
-Foam::tmp<Foam::volScalarField>
-Foam::combustionModels::PaSR<Type>::Sh() const
-{
-    return tmp<volScalarField>
-    (
-        new volScalarField
-        (
-            IOobject::groupName("PaSR:Sh", this->phaseName_),
-            kappa_*laminar<Type>::Sh()
+            IOobject::groupName(typeName + ":Qdot", this->phaseName_),
+            kappa_*laminar<Type>::Qdot()
         )
     );
 }
@@ -150,7 +129,6 @@ bool Foam::combustionModels::PaSR<Type>::read()
     if (laminar<Type>::read())
     {
         this->coeffs().lookup("Cmix") >> Cmix_;
-        this->coeffs().lookup("turbulentReaction") >> turbulentReaction_;
         return true;
     }
     else

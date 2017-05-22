@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,7 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
 )
 :
     absorptionEmissionModel(dict, mesh),
-    coeffsDict_((dict.subDict(typeName + "Coeffs"))),
+    coeffsDict_((dict.optionalSubDict(typeName + "Coeffs"))),
     speciesNames_(0),
     specieIndex_(label(0)),
     lookUpTable_
@@ -67,7 +67,7 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
     totalWaveLength_(0)
 {
     label nBand = 0;
-    const dictionary& functionDicts = dict.subDict(typeName +"Coeffs");
+    const dictionary& functionDicts = dict.optionalSubDict(typeName +"Coeffs");
     forAllConstIter(dictionary, functionDicts, iter)
     {
         // safety:
@@ -248,31 +248,32 @@ Foam::radiation::wideBandAbsorptionEmission::ECont(const label bandi) const
         )
     );
 
-    if (mesh().foundObject<volScalarField>("dQ"))
+    if (mesh().foundObject<volScalarField>("Qdot"))
     {
-        const volScalarField& dQ = mesh().lookupObject<volScalarField>("dQ");
+        const volScalarField& Qdot =
+            mesh().lookupObject<volScalarField>("Qdot");
 
-        if (dQ.dimensions() == dimEnergy/dimTime)
+        if (Qdot.dimensions() == dimEnergy/dimTime)
         {
             E.ref().primitiveFieldRef() =
                 iEhrrCoeffs_[bandi]
-               *dQ.primitiveField()
+               *Qdot.primitiveField()
                *(iBands_[bandi][1] - iBands_[bandi][0])
                /totalWaveLength_
                /mesh_.V();
         }
-        else if (dQ.dimensions() == dimEnergy/dimTime/dimVolume)
+        else if (Qdot.dimensions() == dimEnergy/dimTime/dimVolume)
         {
             E.ref().primitiveFieldRef() =
                 iEhrrCoeffs_[bandi]
-               *dQ.primitiveField()
+               *Qdot.primitiveField()
                *(iBands_[bandi][1] - iBands_[bandi][0])
                /totalWaveLength_;
         }
         else
         {
             WarningInFunction
-                << "Incompatible dimensions for dQ field" << endl;
+                << "Incompatible dimensions for Qdot field" << endl;
         }
     }
 

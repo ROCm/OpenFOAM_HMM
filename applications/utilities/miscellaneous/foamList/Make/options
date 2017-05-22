@@ -15,9 +15,10 @@ EXE_LIBS = \
     -lchemistryModel \
     -lcoalCombustion \
     -lcombustionModels \
-    -lcompressibleEulerianInterfacialModels \
+    -lcompressibleTransportModels \
     -lcompressibleTurbulenceModels \
-    -lCompressibleTwoPhaseMixtureTurbulenceModels \
+    -lconversion \
+    -ldecompose \
     -ldecompositionMethods \
     -ldistributed \
     -ldistributionModels \
@@ -27,7 +28,6 @@ EXE_LIBS = \
     -lDSMC \
     -ldynamicFvMesh \
     -ldynamicMesh \
-    -ledgeMesh \
     -lengine \
     -lextrudeModel \
     -lfieldFunctionObjects \
@@ -38,25 +38,34 @@ EXE_LIBS = \
     -lfvMotionSolvers \
     -lfvOptions \
     -lgenericPatchFields \
+    -limmiscibleIncompressibleTwoPhaseMixture \
     -lincompressibleTransportModels \
     -lincompressibleTurbulenceModels \
     -linterfaceProperties \
     -llagrangianFunctionObjects \
     -llagrangianIntermediate \
+    -llagrangian \
     -llagrangianSpray \
     -llagrangianTurbulence \
     -llaminarFlameSpeedModels \
-    -lliquidPropertiesFvPatchFields \
-    -lliquidProperties \
+    -lthermophysicalProperties \
     -lmeshTools \
+    -lmolecularMeasurements \
+    -lmolecule \
     -lODE \
+    -lOpenFOAM \
+    -lpairPatchAgglomeration \
     -lphaseChangeTwoPhaseMixtures \
-    -lphaseCompressibleTurbulenceModels \
-    -lphaseTemperatureChangeTwoPhaseMixtures \
     -lpotential \
     -lpyrolysisModels \
     -lradiationModels \
+    -lrandomProcesses \
+    -lreactingEulerianInterfacialCompositionModels \
+    -lreactingEulerianInterfacialModels \
+    -lreactingPhaseSystem \
+    -lreactingTwoPhaseSystem \
     -lreactionThermophysicalModels \
+    -lreconstruct \
     -lregionCoupled \
     -lregionCoupling \
     -lregionModels \
@@ -67,10 +76,10 @@ EXE_LIBS = \
     -lsampling \
     -lscotchDecomp \
     -lsixDoFRigidBodyMotion \
-    -lSloanRenumber \
+    -lSLGThermo \
     -lsnappyHexMesh \
     -lsolidChemistryModel \
-    -lsolidProperties \
+    -lsolidParticle \
     -lsolidSpecie \
     -lsolidThermo \
     -lsolverFunctionObjects \
@@ -79,9 +88,10 @@ EXE_LIBS = \
     -lsurfaceFilmModels \
     -lsurfMesh \
     -lthermalBaffleModels \
-    -lthermophysicalFunctions \
     -ltopoChangerFvMesh \
-    -lturbulenceModelSchemes \
     -lturbulenceModels \
+    -ltwoPhaseMixture \
+    -ltwoPhaseMixtureThermo \
     -ltwoPhaseProperties \
+    -ltwoPhaseReactingTurbulenceModels \
     -lutilityFunctionObjects

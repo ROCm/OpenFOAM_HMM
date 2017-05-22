@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,34 +31,6 @@ License
 template<class EquationOfState, int PolySize>
 Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
 (
-    Istream& is
-)
-:
-    EquationOfState(is),
-    Hf_(readScalar(is)),
-    Sf_(readScalar(is)),
-    CpCoeffs_("CpCoeffs<" + Foam::name(PolySize) + '>', is),
-    hCoeffs_(),
-    sCoeffs_()
-{
-    Hf_ *= this->W();
-    Sf_ *= this->W();
-    CpCoeffs_ *= this->W();
-
-    hCoeffs_ = CpCoeffs_.integral();
-    sCoeffs_ = CpCoeffs_.integralMinus1();
-
-    // Offset h poly so that it is relative to the enthalpy at Tstd
-    hCoeffs_[0] += Hf_ - hCoeffs_.value(Tstd);
-
-    // Offset s poly so that it is relative to the entropy at Tstd
-    sCoeffs_[0] += Sf_ - sCoeffs_.value(Tstd);
-}
-
-
-template<class EquationOfState, int PolySize>
-Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
-(
     const dictionary& dict
 )
 :
@@ -75,10 +47,6 @@ Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
     hCoeffs_(),
     sCoeffs_()
 {
-    Hf_ *= this->W();
-    Sf_ *= this->W();
-    CpCoeffs_ *= this->W();
-
     hCoeffs_ = CpCoeffs_.integral();
     sCoeffs_ = CpCoeffs_.integralMinus1();
 
@@ -101,12 +69,12 @@ void Foam::hPolynomialThermo<EquationOfState, PolySize>::write
     EquationOfState::write(os);
 
     dictionary dict("thermodynamics");
-    dict.add("Hf", Hf_/this->W());
-    dict.add("Sf", Sf_/this->W());
+    dict.add("Hf", Hf_);
+    dict.add("Sf", Sf_);
     dict.add
     (
         word("CpCoeffs<" + Foam::name(PolySize) + '>'),
-        CpCoeffs_/this->W()
+        CpCoeffs_
     );
     os  << indent << dict.dictName() << dict;
 }
@@ -121,21 +89,7 @@ Foam::Ostream& Foam::operator<<
     const hPolynomialThermo<EquationOfState, PolySize>& pt
 )
 {
-    os  << static_cast<const EquationOfState&>(pt) << tab
-        << pt.Hf_/pt.W() << tab
-        << pt.Sf_/pt.W() << tab
-        << "CpCoeffs<" << Foam::name(PolySize) << '>' << tab
-        << pt.CpCoeffs_/pt.W();
-
-    os.check
-    (
-        "operator<<"
-        "("
-            "Ostream&, "
-            "const hPolynomialThermo<EquationOfState, PolySize>&"
-        ")"
-    );
-
+    pt.write(os);
     return os;
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,11 +41,11 @@ namespace regionModels
 
 Foam::regionModels::regionModelFunctionObject::regionModelFunctionObject
 (
-    regionModel& owner
+    regionModel& region
 )
 :
     dict_(dictionary::null),
-    owner_(owner),
+    regionModel_(region),
     modelType_("modelType")
 {}
 
@@ -53,12 +53,12 @@ Foam::regionModels::regionModelFunctionObject::regionModelFunctionObject
 Foam::regionModels::regionModelFunctionObject::regionModelFunctionObject
 (
     const dictionary& dict,
-    regionModel& owner,
+    regionModel& region,
     const word& type
 )
 :
     dict_(dict),
-    owner_(owner),
+    regionModel_(region),
     modelType_(type)
 {}
 
@@ -69,7 +69,7 @@ Foam::regionModels::regionModelFunctionObject::regionModelFunctionObject
 )
 :
     dict_(rmfo.dict_),
-    owner_(rmfo.owner_),
+    regionModel_(rmfo.regionModel_),
     modelType_(rmfo.modelType_)
 {}
 
@@ -83,14 +83,12 @@ Foam::regionModels::regionModelFunctionObject::~regionModelFunctionObject()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::regionModels::regionModelFunctionObject::preEvolveRegion()
-{
-    // do nothing
-}
+{}
 
 
 void Foam::regionModels::regionModelFunctionObject::postEvolveRegion()
 {
-    if (owner_.regionMesh().time().writeTime())
+    if (regionModel_.regionMesh().time().writeTime())
     {
         write();
     }
@@ -98,9 +96,7 @@ void Foam::regionModels::regionModelFunctionObject::postEvolveRegion()
 
 
 void Foam::regionModels::regionModelFunctionObject::write() const
-{
-    // do nothing
-}
+{}
 
 
 // ************************************************************************* //

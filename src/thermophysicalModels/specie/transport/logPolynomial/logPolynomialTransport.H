@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,15 +24,60 @@ License
 Class
     Foam::logPolynomialTransport
 
-Description
-    Transport package using polynomial functions of ln(T) for mu and kappa:
+Group
+    grpSpecieTransport
 
-        ln(mu)    = sum_i=1^N( a[i] * ln(T)^(i-1) )
-        ln(kappa) = sum_i=1^N( b[i] * ln(T)^(i-1) )
+Description
+    Transport package using polynomial functions of \c ln(T) for \c mu and
+    \c kappa:
+
+        \f[
+            ln(mu)    = \sum_{i=1}^N \left( a[i] * ln(T)^{i-1} \right)
+        \f]
+
+        \f[
+            ln(kappa) = \sum_{i=1}^N \left( b[i] * ln(T)^{i-1} \right)
+        \f]
+
+Usage
+
+    \table
+        Property        | Description
+        muCoeffs<8>     | Dynamic viscosity polynomial coefficients
+        kappaCoeffs<8>  | Thermal conductivity polynomial coefficients
+    \endtable
+
+    Example of the specification of the transport properties:
+    \verbatim
+    transport
+    {
+        muCoeffs<8>     ( 1000 -0.05 0.003 0 0 0 0 0 );
+        kappaCoeffs<8>  ( 2000 -0.15 0.023 0 0 0 0 0 );
+    }
+    \endverbatim
+
+    The polynomial expressions are evaluated as so:
+
+        \f[
+            \mu    = 1000 - 0.05 ln(T) + 0.003 ln(T)^2
+        \f]
+
+        \f[
+            \kappa = 2000 - 0.15 ln(T) + 0.023 ln(T)^2
+        \f]
+
+Note
+    - Dynamic viscosity polynomial coefficients evaluate to an expression in
+      [Pa.s], but internally uses [Pa.s/kmol].
+    - Thermal conductivity polynomial coefficients evaluate to an expression in
+      [W/m/K], but internally uses [W/m/K/kmol].
 
 SourceFiles
     logPolynomialTransportI.H
     logPolynomialTransport.C
+
+See also
+    Foam::Polynomial
 
 \*---------------------------------------------------------------------------*/
 
@@ -58,23 +103,9 @@ inline logPolynomialTransport<Thermo, PolySize> operator+
 );
 
 template<class Thermo, int PolySize>
-inline logPolynomialTransport<Thermo, PolySize> operator-
-(
-    const logPolynomialTransport<Thermo, PolySize>&,
-    const logPolynomialTransport<Thermo, PolySize>&
-);
-
-template<class Thermo, int PolySize>
 inline logPolynomialTransport<Thermo, PolySize> operator*
 (
     const scalar,
-    const logPolynomialTransport<Thermo, PolySize>&
-);
-
-template<class Thermo, int PolySize>
-inline logPolynomialTransport<Thermo, PolySize> operator==
-(
-    const logPolynomialTransport<Thermo, PolySize>&,
     const logPolynomialTransport<Thermo, PolySize>&
 );
 
@@ -121,9 +152,6 @@ public:
 
     // Constructors
 
-        //- Construct copy
-        inline logPolynomialTransport(const logPolynomialTransport&);
-
         //- Construct as named copy
         inline logPolynomialTransport
         (
@@ -131,17 +159,11 @@ public:
             const logPolynomialTransport&
         );
 
-        //- Construct from Istream
-        logPolynomialTransport(Istream& is);
-
         //- Construct from dictionary
         logPolynomialTransport(const dictionary& dict);
 
         //- Construct and return a clone
         inline autoPtr<logPolynomialTransport> clone() const;
-
-        // Selector from Istream
-        inline static autoPtr<logPolynomialTransport> New(Istream& is);
 
         // Selector from dictionary
         inline static autoPtr<logPolynomialTransport> New
@@ -177,8 +199,9 @@ public:
     // Member operators
 
         inline void operator=(const logPolynomialTransport&);
+
         inline void operator+=(const logPolynomialTransport&);
-        inline void operator-=(const logPolynomialTransport&);
+
         inline void operator*=(const scalar);
 
 
@@ -190,21 +213,9 @@ public:
             const logPolynomialTransport&
         );
 
-        friend logPolynomialTransport operator- <Thermo, PolySize>
-        (
-            const logPolynomialTransport&,
-            const logPolynomialTransport&
-        );
-
         friend logPolynomialTransport operator* <Thermo, PolySize>
         (
             const scalar,
-            const logPolynomialTransport&
-        );
-
-        friend logPolynomialTransport operator== <Thermo, PolySize>
-        (
-            const logPolynomialTransport&,
             const logPolynomialTransport&
         );
 

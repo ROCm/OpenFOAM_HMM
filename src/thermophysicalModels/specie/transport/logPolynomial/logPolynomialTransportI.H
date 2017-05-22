@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,18 +26,6 @@ License
 #include "specie.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Thermo, int PolySize>
-inline Foam::logPolynomialTransport<Thermo, PolySize>::logPolynomialTransport
-(
-    const logPolynomialTransport& pt
-)
-:
-    Thermo(pt),
-    muCoeffs_(pt.muCoeffs_),
-    kappaCoeffs_(pt.kappaCoeffs_)
-{}
-
 
 template<class Thermo, int PolySize>
 inline Foam::logPolynomialTransport<Thermo, PolySize>::logPolynomialTransport
@@ -79,17 +67,6 @@ Foam::logPolynomialTransport<Thermo, PolySize>::clone() const
 
 template<class Thermo, int PolySize>
 inline Foam::autoPtr<Foam::logPolynomialTransport<Thermo, PolySize>>
-Foam::logPolynomialTransport<Thermo, PolySize>::New(Istream& is)
-{
-    return autoPtr<logPolynomialTransport<Thermo, PolySize>>
-    (
-        new logPolynomialTransport<Thermo, PolySize>(is)
-    );
-}
-
-
-template<class Thermo, int PolySize>
-inline Foam::autoPtr<Foam::logPolynomialTransport<Thermo, PolySize>>
 Foam::logPolynomialTransport<Thermo, PolySize>::New(const dictionary& dict)
 {
     return autoPtr<logPolynomialTransport<Thermo, PolySize>>
@@ -108,7 +85,7 @@ inline Foam::scalar Foam::logPolynomialTransport<Thermo, PolySize>::mu
     const scalar T
 ) const
 {
-    return exp(muCoeffs_.value(log(T))/this->W());
+    return exp(muCoeffs_.value(log(T)));
 }
 
 
@@ -119,7 +96,7 @@ inline Foam::scalar Foam::logPolynomialTransport<Thermo, PolySize>::kappa
     const scalar T
 ) const
 {
-    return exp(kappaCoeffs_.value(log(T))/this->W());
+    return exp(kappaCoeffs_.value(log(T)));
 }
 
 
@@ -129,7 +106,7 @@ inline Foam::scalar Foam::logPolynomialTransport<Thermo, PolySize>::alphah
     const scalar p, const scalar T
 ) const
 {
-    return kappa(p, T)/this->Cpv(p, T);
+    return kappa(p, T)/this->Cp(p, T);
 }
 
 
@@ -154,33 +131,18 @@ inline void Foam::logPolynomialTransport<Thermo, PolySize>::operator+=
     const logPolynomialTransport<Thermo, PolySize>& pt
 )
 {
-    scalar molr1 = this->nMoles();
+    scalar Y1 = this->Y();
 
     Thermo::operator+=(pt);
 
-    molr1 /= this->nMoles();
-    scalar molr2 = pt.nMoles()/this->nMoles();
+    if (mag(this->Y()) > SMALL)
+    {
+        Y1 /= this->Y();
+        scalar Y2 = pt.Y()/this->Y();
 
-    muCoeffs_ = molr1*muCoeffs_ + molr2*pt.muCoeffs_;
-    kappaCoeffs_ = molr1*kappaCoeffs_ + molr2*pt.kappaCoeffs_;
-}
-
-
-template<class Thermo, int PolySize>
-inline void Foam::logPolynomialTransport<Thermo, PolySize>::operator-=
-(
-    const logPolynomialTransport<Thermo, PolySize>& pt
-)
-{
-    scalar molr1 = this->nMoles();
-
-    Thermo::operator-=(pt);
-
-    molr1 /= this->nMoles();
-    scalar molr2 = pt.nMoles()/this->nMoles();
-
-    muCoeffs_ = molr1*muCoeffs_ - molr2*pt.muCoeffs_;
-    kappaCoeffs_ = molr1*kappaCoeffs_ - molr2*pt.kappaCoeffs_;
+        muCoeffs_ = Y1*muCoeffs_ + Y2*pt.muCoeffs_;
+        kappaCoeffs_ = Y1*kappaCoeffs_ + Y2*pt.kappaCoeffs_;
+    }
 }
 
 
@@ -208,39 +170,28 @@ inline Foam::logPolynomialTransport<Thermo, PolySize> Foam::operator+
         static_cast<const Thermo&>(pt1) + static_cast<const Thermo&>(pt2)
     );
 
-    scalar molr1 = pt1.nMoles()/t.nMoles();
-    scalar molr2 = pt2.nMoles()/t.nMoles();
+    if (mag(t.Y()) < SMALL)
+    {
+        return logPolynomialTransport<Thermo>
+        (
+            t,
+            0,
+            pt1.muCoeffs_,
+            pt1.kappaCoeffs_
+        );
+    }
+    else
+    {
+        scalar Y1 = pt1.Y()/t.Y();
+        scalar Y2 = pt2.Y()/t.Y();
 
-    return logPolynomialTransport<Thermo, PolySize>
-    (
-        t,
-        molr1*pt1.muCoeffs_ + molr2*pt2.muCoeffs_,
-        molr1*pt1.kappaCoeffs_ + molr2*pt2.kappaCoeffs_
-    );
-}
-
-
-template<class Thermo, int PolySize>
-inline Foam::logPolynomialTransport<Thermo, PolySize> Foam::operator-
-(
-    const logPolynomialTransport<Thermo, PolySize>& pt1,
-    const logPolynomialTransport<Thermo, PolySize>& pt2
-)
-{
-    Thermo t
-    (
-        static_cast<const Thermo&>(pt1) - static_cast<const Thermo&>(pt2)
-    );
-
-    scalar molr1 = pt1.nMoles()/t.nMoles();
-    scalar molr2 = pt2.nMoles()/t.nMoles();
-
-    return logPolynomialTransport<Thermo, PolySize>
-    (
-        t,
-        molr1*pt1.muCoeffs_ - molr2*pt2.muCoeffs_,
-        molr1*pt1.kappaCoeffs_ - molr2*pt2.kappaCoeffs_
-    );
+        return logPolynomialTransport<Thermo, PolySize>
+        (
+            t,
+            Y1*pt1.muCoeffs_ + Y2*pt2.muCoeffs_,
+            Y1*pt1.kappaCoeffs_ + Y2*pt2.kappaCoeffs_
+        );
+    }
 }
 
 
@@ -257,17 +208,6 @@ inline Foam::logPolynomialTransport<Thermo, PolySize> Foam::operator*
         pt.muCoeffs_,
         pt.kappaCoeffs_
     );
-}
-
-
-template<class Thermo, int PolySize>
-inline Foam::logPolynomialTransport<Thermo, PolySize> Foam::operator==
-(
-    const logPolynomialTransport<Thermo, PolySize>& pt1,
-    const logPolynomialTransport<Thermo, PolySize>& pt2
-)
-{
-    return pt2 - pt1;
 }
 
 

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -204,18 +204,16 @@ Foam::Function1Types::CSV<Type>::CSV
 (
     const word& entryName,
     const dictionary& dict,
-    const word& ext,
     const fileName& fName
 )
 :
-    TableBase<Type>(entryName, dict.subDict(entryName + ext)),
-    coeffs_(dict.subDict(entryName + ext)),
-    nHeaderLine_(readLabel(coeffs_.lookup("nHeaderLine"))),
-    refColumn_(readLabel(coeffs_.lookup("refColumn"))),
-    componentColumns_(coeffs_.lookup("componentColumns")),
-    separator_(coeffs_.lookupOrDefault<string>("separator", string(","))[0]),
-    mergeSeparators_(readBool(coeffs_.lookup("mergeSeparators"))),
-    fName_(fName != fileName::null ? fName : coeffs_.lookup("fileName"))
+    TableBase<Type>(entryName, dict),
+    nHeaderLine_(readLabel(dict.lookup("nHeaderLine"))),
+    refColumn_(readLabel(dict.lookup("refColumn"))),
+    componentColumns_(dict.lookup("componentColumns")),
+    separator_(dict.lookupOrDefault<string>("separator", string(","))[0]),
+    mergeSeparators_(readBool(dict.lookup("mergeSeparators"))),
+    fName_(fName != fileName::null ? fName : dict.lookup("file"))
 {
     if (componentColumns_.size() != pTraits<Type>::nComponents)
     {
@@ -273,7 +271,7 @@ void Foam::Function1Types::CSV<Type>::writeData(Ostream& os) const
     TableBase<Type>::writeEntries(os);
 
     os.writeEntry("nHeaderLine", nHeaderLine_);
-    os.writeEntry("refColumn",   refColumn_);
+    os.writeEntry("refColumn", refColumn_);
 
     // Force writing labelList in ascii
     const enum IOstream::streamFormat fmt = os.format();
@@ -281,9 +279,9 @@ void Foam::Function1Types::CSV<Type>::writeData(Ostream& os) const
     os.writeEntry("componentColumns", componentColumns_);
     os.format(fmt);
 
-    os.writeEntry("separator",       string(separator_));
+    os.writeEntry("separator", string(separator_));
     os.writeEntry("mergeSeparators", mergeSeparators_);
-    os.writeEntry("fileName",        fName_);
+    os.writeEntry("file", fName_);
 
     os.endBlock() << flush;
 }

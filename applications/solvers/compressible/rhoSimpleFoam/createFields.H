@@ -1,10 +1,13 @@
 Info<< "Reading thermophysical properties\n" << endl;
-autoPtr<rhoThermo> pThermo
+
+autoPtr<fluidThermo> pThermo
 (
-    rhoThermo::New(mesh)
+    fluidThermo::New(mesh)
 );
-rhoThermo& thermo = pThermo();
+fluidThermo& thermo = pThermo();
 thermo.validate(args.executable(), "h", "e");
+
+volScalarField& p = thermo.p();
 
 volScalarField rho
 (
@@ -18,8 +21,6 @@ volScalarField rho
     ),
     thermo.rho()
 );
-
-volScalarField& p = thermo.p();
 
 Info<< "Reading field U\n" << endl;
 volVectorField U
@@ -37,34 +38,9 @@ volVectorField U
 
 #include "compressibleCreatePhi.H"
 
-
-label pRefCell = 0;
-scalar pRefValue = 0.0;
-setRefCell(p, simple.dict(), pRefCell, pRefValue);
+pressureControl pressureControl(p, rho, simple.dict());
 
 mesh.setFluxRequired(p.name());
-
-dimensionedScalar rhoMax
-(
-    dimensionedScalar::lookupOrDefault
-    (
-        "rhoMax",
-        simple.dict(),
-        dimDensity,
-        GREAT
-    )
-);
-
-dimensionedScalar rhoMin
-(
-    dimensionedScalar::lookupOrDefault
-    (
-        "rhoMin",
-        simple.dict(),
-        dimDensity,
-        0
-    )
-);
 
 Info<< "Creating turbulence model\n" << endl;
 autoPtr<compressible::turbulenceModel> turbulence
