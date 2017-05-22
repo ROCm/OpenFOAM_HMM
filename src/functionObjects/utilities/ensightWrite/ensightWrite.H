@@ -135,9 +135,6 @@ class ensightWrite
 
     // Private Member Functions
 
-        //- Eliminate duplicate 'word' entries
-        static void uniqWords(wordReList&);
-
         //- Ensight case handler
         ensightCase& ensCase()
         {
