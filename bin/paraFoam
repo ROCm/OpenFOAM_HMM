@@ -26,10 +26,10 @@
 #     paraFoam
 #
 # Description
-#     start paraview with the OpenFOAM libraries
+#     Start paraview with the OpenFOAM libraries and reader modules.
 #
 # Note
-#     combining -block or -builtin options with the -region option yields
+#     Combining -block or -builtin options with -region option yields
 #     undefined behaviour
 #------------------------------------------------------------------------------
 usage() {
@@ -37,7 +37,7 @@ usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-Usage: ${0##*/} [OPTION] [PARAVIEW_OPTION]
+Usage: ${0##*/} [OPTION] [--] [PARAVIEW_OPTION]
 options:
   -block            use blockMesh reader  (uses .blockMesh extension)
   -case <dir>       specify alternative case directory, default is the cwd
@@ -46,10 +46,10 @@ options:
   -touchAll         create .blockMesh, .OpenFOAM files (and for all regions)
   -vtk | -builtin   use VTK builtin OpenFOAM reader  (uses .foam extension)
   -help             print the usage
+  --help            paraview help
 
-Paraview options start with a double dashes.
-
-* start paraview with the OpenFOAM libraries
+Start paraview with the OpenFOAM libraries and reader modules.
+Note that paraview options begin with double dashes.
 
   paraview=$(command -v paraview)
 
@@ -57,11 +57,8 @@ USAGE
     exit 1
 }
 
-# We want to do nice exit when running paraview to give paraview opportunity
-# to clean up
+# Do a nice exit to give paraview an opportunity to clean up
 unset FOAM_ABORT
-
-unset regionName optTouch
 
 # Hack: change all locale to 'C' i.e. using '.' for decimal point. This is
 # only needed temporarily until paraview is locale aware. (git version is
@@ -73,18 +70,19 @@ extension=OpenFOAM
 plugin=PVFoamReader
 
 # Parse options
+unset regionName optTouch
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h | -help)
         usage
         ;;
-    -block | -blockMesh)
+    -block*)
         extension=blockMesh
         plugin=PVblockMeshReader
         shift
         ;;
-    -builtin | -vtk)
+    -vtk | -built*)
         extension=foam
         unset plugin
         shift
@@ -112,6 +110,11 @@ do
     --)
         shift
         break    # Stop here, treat balance as paraview options
+        ;;
+    --help)      # Emit paraview help directly
+        exec paraview "$@"
+        echo "Error: could not exec paraview" 1>&2
+        exit 1   # This should not have happened
         ;;
     --*)
         break    # Stop here, treat this and balance as paraview options
@@ -253,6 +256,8 @@ then
 
     # Has --data=.., send directly to paraview
     exec paraview "$@"
+    echo "Error: could not exec paraview" 1>&2
+    exit 1   # This should not have happened
 
 else
 

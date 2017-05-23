@@ -148,7 +148,7 @@
     <!-- Use VTK Polyhedron (check-box) -->
     <IntVectorProperty animateable="0"
       name="UseVTKPolyhedron"
-      label="Use VTK Polyhedron"
+      label="VTK Polyhedra"
       command="SetUseVTKPolyhedron"
       default_values="0"
       number_of_elements="1"

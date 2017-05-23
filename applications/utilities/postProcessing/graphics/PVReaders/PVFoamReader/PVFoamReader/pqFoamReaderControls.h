@@ -78,8 +78,8 @@ class pqFoamReaderControls
     //- Update property
     void fireCommand(vtkSMProperty* prop);
 
-    //- Toggle and update bool property
-    void fireCommand(vtkSMIntVectorProperty* prop, bool checked);
+    //- Update int property or toggle bool property
+    void fireCommand(vtkSMIntVectorProperty* prop, int val);
 
 
     //- Disallow default bitwise copy construct
