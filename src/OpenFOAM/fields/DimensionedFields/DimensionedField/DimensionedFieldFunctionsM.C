@@ -52,6 +52,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
                                                                                \
     Func(tRes.ref().field(), df1.field());                                     \
                                                                                \
+    tRes.ref().oriented() = Dfunc(df1.oriented());                             \
+                                                                               \
     return tRes;                                                               \
 }                                                                              \
                                                                                \
@@ -74,6 +76,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
     );                                                                         \
                                                                                \
     Func(tRes.ref().field(), df1.field());                                     \
+                                                                               \
+    tRes.ref().oriented() = Dfunc(df1.oriented());                             \
                                                                                \
     tdf1.clear();                                                              \
                                                                                \
@@ -108,6 +112,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
                                                                                \
     Foam::OpFunc(tRes.ref().field(), df1.field());                             \
                                                                                \
+    tRes.ref().oriented() = Dfunc(df1.oriented());                             \
+                                                                               \
     return tRes;                                                               \
 }                                                                              \
                                                                                \
@@ -130,6 +136,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
     );                                                                         \
                                                                                \
     Foam::OpFunc(tRes.ref().field(), df1.field());                             \
+                                                                               \
+    tRes.ref().oriented() = Dfunc(df1.oriented());                             \
                                                                                \
     tdf1.clear();                                                              \
                                                                                \
@@ -165,6 +173,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
                                                                                \
     Func(tRes.ref().field(), df1.field(), df2.field());                        \
                                                                                \
+    tRes.ref().oriented() = Func(df1.oriented(), df2.oriented());              \
+                                                                               \
     return tRes;                                                               \
 }                                                                              \
                                                                                \
@@ -188,6 +198,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
     );                                                                         \
                                                                                \
     Func(tRes.ref().field(), df1.field(), df2.field());                        \
+                                                                               \
+    tRes.ref().oriented() = Func(df1.oriented(), df2.oriented());              \
                                                                                \
     tdf2.clear();                                                              \
                                                                                \
@@ -214,6 +226,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
     );                                                                         \
                                                                                \
     Func(tRes.ref().field(), df1.field(), df2.field());                        \
+                                                                               \
+    tRes.ref().oriented() = Func(df1.oriented(), df2.oriented());              \
                                                                                \
     tdf1.clear();                                                              \
                                                                                \
@@ -243,6 +257,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
     );                                                                         \
                                                                                \
     Func(tRes.ref().field(), df1.field(), df2.field());                        \
+                                                                               \
+    tRes.ref().oriented() = Func(df1.oriented(), df2.oriented());              \
                                                                                \
     tdf1.clear();                                                              \
     tdf2.clear();                                                              \
@@ -279,6 +295,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
                                                                                \
     Func(tRes.ref().field(), dt1.value(), df2.field());                        \
                                                                                \
+    tRes.ref().oriented() = df2.oriented();                                    \
+                                                                               \
     return tRes;                                                               \
 }                                                                              \
                                                                                \
@@ -313,6 +331,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
     );                                                                         \
                                                                                \
     Func(tRes.ref().field(), dt1.value(), df2.field());                        \
+                                                                               \
+    tRes.ref().oriented() = df2.oriented();                                    \
                                                                                \
     tdf2.clear();                                                              \
                                                                                \
@@ -356,6 +376,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
                                                                                \
     Func(tRes.ref().field(), df1.field(), dt2.value());                        \
                                                                                \
+    tRes.ref().oriented() = df1.oriented();                                    \
+                                                                               \
     return tRes;                                                               \
 }                                                                              \
                                                                                \
@@ -390,6 +412,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
     );                                                                         \
                                                                                \
     Func(tRes.ref().field(), df1.field(), dt2.value());                        \
+                                                                               \
+    tRes.ref().oriented() = df1.oriented();                                    \
                                                                                \
     tdf1.clear();                                                              \
                                                                                \
@@ -440,6 +464,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
                                                                                \
     Foam::OpFunc(tRes.ref().field(), df1.field(), df2.field());                \
                                                                                \
+    tRes.ref().oriented() = df1.oriented() Op df2.oriented();                  \
+                                                                               \
     return tRes;                                                               \
 }                                                                              \
                                                                                \
@@ -463,6 +489,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
     );                                                                         \
                                                                                \
     Foam::OpFunc(tRes.ref().field(), df1.field(), df2.field());                \
+                                                                               \
+    tRes.ref().oriented() = df1.oriented() Op df2.oriented();                  \
                                                                                \
     tdf2.clear();                                                              \
                                                                                \
@@ -489,6 +517,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
     );                                                                         \
                                                                                \
     Foam::OpFunc(tRes.ref().field(), df1.field(), df2.field());                \
+                                                                               \
+    tRes.ref().oriented() = df1.oriented() Op df2.oriented();                  \
                                                                                \
     tdf1.clear();                                                              \
                                                                                \
@@ -519,6 +549,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
                                                                                \
     Foam::OpFunc(tRes.ref().field(), df1.field(), df2.field());                \
                                                                                \
+    tRes.ref().oriented() = df1.oriented() Op df2.oriented();                  \
+                                                                               \
     tdf1.clear();                                                              \
     tdf2.clear();                                                              \
                                                                                \
@@ -528,7 +560,7 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define BINARY_TYPE_OPERATOR_SF(ReturnType, Type1, Type2, Op, OpName, OpFunc) \
+#define BINARY_TYPE_OPERATOR_SF(ReturnType, Type1, Type2, Op, OpName, OpFunc)  \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
@@ -551,6 +583,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
             dt1.dimensions() Op df2.dimensions()                               \
         )                                                                      \
     );                                                                         \
+                                                                               \
+    tRes.ref().oriented() = df2.oriented();                                    \
                                                                                \
     Foam::OpFunc(tRes.ref().field(), dt1.value(), df2.field());                \
                                                                                \
@@ -589,6 +623,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
                                                                                \
     Foam::OpFunc(tRes.ref().field(), dt1.value(), tdf2().field());             \
                                                                                \
+    tRes.ref().oriented() = df2.oriented();                                    \
+                                                                               \
     tdf2.clear();                                                              \
                                                                                \
     return tRes;                                                               \
@@ -605,7 +641,7 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 }
 
 
-#define BINARY_TYPE_OPERATOR_FS(ReturnType, Type1, Type2, Op, OpName, OpFunc) \
+#define BINARY_TYPE_OPERATOR_FS(ReturnType, Type1, Type2, Op, OpName, OpFunc)  \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
@@ -630,6 +666,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
     );                                                                         \
                                                                                \
     Foam::OpFunc(tRes.ref().field(), df1.field(), dt2.value());                \
+                                                                               \
+    tRes.ref().oriented() = df1.oriented();                                    \
                                                                                \
     return tRes;                                                               \
 }                                                                              \
@@ -665,6 +703,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
     );                                                                         \
                                                                                \
     Foam::OpFunc(tRes.ref().field(), tdf1().field(), dt2.value());             \
+                                                                               \
+    tRes.ref().oriented() = df1.oriented();                                    \
                                                                                \
     tdf1.clear();                                                              \
                                                                                \

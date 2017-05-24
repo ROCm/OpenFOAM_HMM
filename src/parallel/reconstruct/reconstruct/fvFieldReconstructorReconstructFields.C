@@ -56,7 +56,7 @@ Foam::fvFieldReconstructor::reconstructFvVolumeInternalField
         );
     }
 
-    return tmp<DimensionedField<Type, volMesh>>
+    tmp<DimensionedField<Type, volMesh>> tfield
     (
         new DimensionedField<Type, volMesh>
         (
@@ -66,6 +66,10 @@ Foam::fvFieldReconstructor::reconstructFvVolumeInternalField
             internalField
         )
     );
+
+    tfield.ref().oriented() = procFields[0].oriented();
+
+    return tfield;
 }
 
 
@@ -282,7 +286,7 @@ Foam::fvFieldReconstructor::reconstructFvVolumeField
 
     // Now construct and write the field
     // setting the internalField and patchFields
-    return tmp<GeometricField<Type, fvPatchField, volMesh>>
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tfield
     (
         new GeometricField<Type, fvPatchField, volMesh>
         (
@@ -293,6 +297,10 @@ Foam::fvFieldReconstructor::reconstructFvVolumeField
             patchFields
         )
     );
+
+    tfield.ref().oriented() = procFields[0].oriented();
+
+    return tfield;
 }
 
 
@@ -523,7 +531,7 @@ Foam::fvFieldReconstructor::reconstructFvSurfaceField
 
     // Now construct and write the field
     // setting the internalField and patchFields
-    return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
+    tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> tfield
     (
         new GeometricField<Type, fvsPatchField, surfaceMesh>
         (
@@ -534,6 +542,10 @@ Foam::fvFieldReconstructor::reconstructFvSurfaceField
             patchFields
         )
     );
+
+    tfield.ref().oriented() = procFields[0].oriented();
+
+    return tfield;
 }
 
 

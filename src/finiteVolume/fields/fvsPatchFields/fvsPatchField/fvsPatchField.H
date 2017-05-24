@@ -286,8 +286,7 @@ public:
             }
 
             //- Return dimensioned internal field reference
-            const DimensionedField<Type, surfaceMesh>&
-            internalField() const
+            const DimensionedField<Type, surfaceMesh>& internalField() const
             {
                 return internalField_;
             }

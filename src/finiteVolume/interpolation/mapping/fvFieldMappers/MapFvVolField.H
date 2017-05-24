@@ -48,7 +48,7 @@ public:
 
     void operator()
     (
-        Field<Type>& field,
+        DimensionedField<Type, volMesh>& field,
         const MeshMapper& mapper
     ) const;
 };
@@ -57,7 +57,7 @@ public:
 template<class Type, class MeshMapper>
 void MapInternalField<Type, MeshMapper, volMesh>::operator()
 (
-    Field<Type>& field,
+    DimensionedField<Type, volMesh>& field,
     const MeshMapper& mapper
 ) const
 {

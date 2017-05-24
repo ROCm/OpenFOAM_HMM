@@ -128,6 +128,8 @@ Foam::multiphaseMixture::multiphaseMixture
         1e-8/pow(average(mesh_.V()), 1.0/3.0)
     )
 {
+    rhoPhi_.setOriented();
+
     calcAlphas();
     alphas_.write();
 }
@@ -273,6 +275,7 @@ Foam::multiphaseMixture::surfaceTensionForce() const
     );
 
     surfaceScalarField& stf = tstf.ref();
+    stf.setOriented();
 
     forAllConstIter(PtrDictionary<phase>, phases_, iter1)
     {

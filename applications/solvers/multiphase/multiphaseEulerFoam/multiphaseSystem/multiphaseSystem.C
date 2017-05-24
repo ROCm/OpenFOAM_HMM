@@ -801,6 +801,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::multiphaseSystem::surfaceTension
             )
         )
     );
+    tSurfaceTension.ref().setOriented();
 
     forAllConstIter(PtrDictionary<phaseModel>, phases_, iter)
     {
