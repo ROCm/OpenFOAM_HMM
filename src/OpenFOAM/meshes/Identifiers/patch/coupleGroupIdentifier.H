@@ -53,11 +53,11 @@ class Ostream;
 
 // Forward declaration of friend functions and operators
 class coupleGroupIdentifier;
-Ostream& operator<<(Ostream&, const coupleGroupIdentifier&);
+Ostream& operator<<(Ostream& os, const coupleGroupIdentifier& p);
 
 
 /*---------------------------------------------------------------------------*\
-                         Class coupleGroupIdentifier Declaration
+                    Class coupleGroupIdentifier Declaration
 \*---------------------------------------------------------------------------*/
 
 class coupleGroupIdentifier
@@ -71,7 +71,11 @@ class coupleGroupIdentifier
     // Private Member Functions
 
         //- Find other patch in specified mesh. Returns index of patch or -1.
-        label findOtherPatchID(const polyMesh&, const polyPatch&) const;
+        label findOtherPatchID
+        (
+            const polyMesh& mesh,
+            const polyPatch& thisPatch
+        ) const;
 
 
 public:
@@ -85,7 +89,7 @@ public:
         coupleGroupIdentifier(const word& patchGroupName);
 
         //- Construct from dictionary
-        coupleGroupIdentifier(const dictionary&);
+        coupleGroupIdentifier(const dictionary& dict);
 
 
     // Member Functions
@@ -97,19 +101,27 @@ public:
         inline bool valid() const;
 
         //- Find other patch in same region. Returns index of patch or -1.
-        label findOtherPatchID(const polyPatch&) const;
+        label findOtherPatchID(const polyPatch& thisPatch) const;
 
         //- Find other patch and region. Returns index of patch and sets
         //  otherRegion to name of region. Fatal error if patch not found
-        label findOtherPatchID(const polyPatch&, word&) const;
+        label findOtherPatchID
+        (
+            const polyPatch& thisPatch,
+            word& otherRegion
+        ) const;
 
         //- Write the data as a dictionary
-        void write(Ostream&) const;
+        void write(Ostream& os) const;
 
 
     // IOstream Operators
 
-        friend Ostream& operator<<(Ostream&, const coupleGroupIdentifier&);
+        friend Ostream& operator<<
+        (
+            Ostream& os,
+            const coupleGroupIdentifier& p
+        );
 };
 
 
