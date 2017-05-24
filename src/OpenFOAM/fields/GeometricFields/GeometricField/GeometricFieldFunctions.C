@@ -51,6 +51,7 @@ void component
 {
     component(gcf.primitiveFieldRef(), gf.primitiveField(), d);
     component(gcf.boundaryFieldRef(), gf.boundaryField(), d);
+    gcf.oriented() = gf.oriented();
 }
 
 
@@ -63,6 +64,7 @@ void T
 {
     T(gf.primitiveFieldRef(), gf1.primitiveField());
     T(gf.boundaryFieldRef(), gf1.boundaryField());
+    gf.oriented() = gf1.oriented();
 }
 
 
@@ -81,6 +83,7 @@ void pow
 {
     pow(gf.primitiveFieldRef(), gf1.primitiveField(), r);
     pow(gf.boundaryFieldRef(), gf1.boundaryField(), r);
+    gf.oriented() = pow(gf1.oriented(), r);
 }
 
 template
@@ -175,6 +178,7 @@ void sqr
 {
     sqr(gf.primitiveFieldRef(), gf1.primitiveField());
     sqr(gf.boundaryFieldRef(), gf1.boundaryField());
+    gf.oriented() = sqr(gf1.oriented());
 }
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -263,6 +267,7 @@ void magSqr
 {
     magSqr(gsf.primitiveFieldRef(), gf.primitiveField());
     magSqr(gsf.boundaryFieldRef(), gf.boundaryField());
+    gsf.oriented() = magSqr(gf.oriented());
 }
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -335,6 +340,7 @@ void mag
 {
     mag(gsf.primitiveFieldRef(), gf.primitiveField());
     mag(gsf.boundaryFieldRef(), gf.boundaryField());
+    gsf.oriented() = mag(gf.oriented());
 }
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -412,6 +418,7 @@ void cmptAv
 {
     cmptAv(gcf.primitiveFieldRef(), gf.primitiveField());
     cmptAv(gcf.boundaryFieldRef(), gf.boundaryField());
+    gcf.oriented() = cmptAv(gf.oriented());
 }
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -611,6 +618,8 @@ void opFunc                                                                    \
         gf1.boundaryField(),                                                   \
         gf2.boundaryField()                                                    \
     );                                                                         \
+                                                                               \
+    gf.oriented() = gf1.oriented() op gf2.oriented();                          \
 }                                                                              \
                                                                                \
 template                                                                       \
@@ -757,6 +766,7 @@ void opFunc                                                                    \
 {                                                                              \
     Foam::opFunc(gf.primitiveFieldRef(), gf1.primitiveField(), dvs.value());   \
     Foam::opFunc(gf.boundaryFieldRef(), gf1.boundaryField(), dvs.value());     \
+    gf.oriented() = gf1.oriented();                                            \
 }                                                                              \
                                                                                \
 template                                                                       \
@@ -870,6 +880,7 @@ void opFunc                                                                    \
 {                                                                              \
     Foam::opFunc(gf.primitiveFieldRef(), dvs.value(), gf1.primitiveField());   \
     Foam::opFunc(gf.boundaryFieldRef(), dvs.value(), gf1.boundaryField());     \
+    gf.oriented() = gf1.oriented();                                            \
 }                                                                              \
                                                                                \
 template                                                                       \

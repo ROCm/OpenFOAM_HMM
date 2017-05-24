@@ -113,6 +113,8 @@ Foam::phaseModel::phaseModel
         dimensionedScalar("0", dimensionSet(0, 3, -1, 0, 0), 0)
     )
 {
+    alphaPhi_.setOriented();
+
     const word phiName = IOobject::groupName("phi", name_);
 
     IOobject phiHeader

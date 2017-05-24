@@ -124,6 +124,7 @@ snGradScheme<Type>::snGrad
         )
     );
     GeometricField<Type, fvsPatchField, surfaceMesh>& ssf = tsf.ref();
+    ssf.setOriented();
 
     // set reference to difference factors array
     const scalarField& deltaCoeffs = tdeltaCoeffs();

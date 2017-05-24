@@ -107,7 +107,7 @@ processorSurfacePatchFieldDecomposer
         weights_[i].setSize(1);
 
         addressing_[i][0] = mag(addressingSlice[i]) - 1;
-        weights_[i][0] = sign(addressingSlice[i]);
+        weights_[i][0] = 1;
     }
 }
 
@@ -126,59 +126,75 @@ Foam::fvFieldDecomposer::fvFieldDecomposer
     faceAddressing_(faceAddressing),
     cellAddressing_(cellAddressing),
     boundaryAddressing_(boundaryAddressing),
-    patchFieldDecomposerPtrs_
-    (
-        procMesh_.boundary().size(),
-        static_cast<patchFieldDecomposer*>(nullptr)
-    ),
-    processorVolPatchFieldDecomposerPtrs_
-    (
-        procMesh_.boundary().size(),
-        static_cast<processorVolPatchFieldDecomposer*>(nullptr)
-    ),
-    processorSurfacePatchFieldDecomposerPtrs_
-    (
-        procMesh_.boundary().size(),
-        static_cast<processorSurfacePatchFieldDecomposer*>(nullptr)
-    )
+    patchFieldDecomposerPtrs_(procMesh_.boundary().size()),
+    processorVolPatchFieldDecomposerPtrs_(procMesh_.boundary().size()),
+    processorSurfacePatchFieldDecomposerPtrs_(procMesh_.boundary().size()),
+    faceSign_(procMesh_.boundary().size())
 {
     forAll(boundaryAddressing_, patchi)
     {
+        const fvPatch& fvp = procMesh_.boundary()[patchi];
+
         if
         (
             boundaryAddressing_[patchi] >= 0
         && !isA<processorLduInterface>(procMesh.boundary()[patchi])
         )
         {
-            patchFieldDecomposerPtrs_[patchi] = new patchFieldDecomposer
+            patchFieldDecomposerPtrs_.set
             (
-                procMesh_.boundary()[patchi].patchSlice(faceAddressing_),
-                completeMesh_.boundaryMesh()
-                [
-                    boundaryAddressing_[patchi]
-                ].start()
+                patchi,
+                new patchFieldDecomposer
+                (
+                    fvp.patchSlice(faceAddressing_),
+                    completeMesh_.boundaryMesh()
+                    [
+                        boundaryAddressing_[patchi]
+                    ].start()
+                )
             );
         }
         else
         {
-            processorVolPatchFieldDecomposerPtrs_[patchi] =
+            processorVolPatchFieldDecomposerPtrs_.set
+            (
+                patchi,
                 new processorVolPatchFieldDecomposer
                 (
                     completeMesh_,
-                    procMesh_.boundary()[patchi].patchSlice(faceAddressing_)
-                );
+                    fvp.patchSlice(faceAddressing_)
+                )
+            );
 
-            processorSurfacePatchFieldDecomposerPtrs_[patchi] =
+            processorSurfacePatchFieldDecomposerPtrs_.set
+            (
+                patchi,
                 new processorSurfacePatchFieldDecomposer
                 (
                     static_cast<const labelUList&>
                     (
-                        procMesh_.boundary()[patchi].patchSlice
+                        fvp.patchSlice
                         (
                             faceAddressing_
                         )
                     )
-                );
+                )
+            );
+
+            faceSign_.set
+            (
+                patchi,
+                new scalarField(fvp.patchSlice(faceAddressing_).size())
+            );
+
+            {
+                const SubList<label> fa = fvp.patchSlice(faceAddressing_);
+                scalarField& s = faceSign_[patchi];
+                forAll(s, i)
+                {
+                    s[i] = sign(fa[i]);
+                }
+            }
         }
     }
 }
@@ -187,30 +203,7 @@ Foam::fvFieldDecomposer::fvFieldDecomposer
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::fvFieldDecomposer::~fvFieldDecomposer()
-{
-    forAll(patchFieldDecomposerPtrs_, patchi)
-    {
-        if (patchFieldDecomposerPtrs_[patchi])
-        {
-            delete patchFieldDecomposerPtrs_[patchi];
-        }
-    }
+{}
 
-    forAll(processorVolPatchFieldDecomposerPtrs_, patchi)
-    {
-        if (processorVolPatchFieldDecomposerPtrs_[patchi])
-        {
-            delete processorVolPatchFieldDecomposerPtrs_[patchi];
-        }
-    }
-
-    forAll(processorSurfacePatchFieldDecomposerPtrs_, patchi)
-    {
-        if (processorSurfacePatchFieldDecomposerPtrs_[patchi])
-        {
-            delete processorSurfacePatchFieldDecomposerPtrs_[patchi];
-        }
-    }
-}
 
 // ************************************************************************* //

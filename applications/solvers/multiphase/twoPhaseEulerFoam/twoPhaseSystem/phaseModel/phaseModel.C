@@ -109,6 +109,9 @@ Foam::phaseModel::phaseModel
         dimensionedScalar("0", dimensionSet(1, 0, -1, 0, 0), 0)
     )
 {
+    alphaPhi_.setOriented();
+    alphaRhoPhi_.setOriented();
+
     thermo_->validate("phaseModel " + name_, "h", "e");
 
     const word phiName = IOobject::groupName("phi", name_);

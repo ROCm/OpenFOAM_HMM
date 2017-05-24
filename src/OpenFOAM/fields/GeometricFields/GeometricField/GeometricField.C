@@ -1175,6 +1175,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::operator=
     // Only assign field contents not ID
 
     this->dimensions() = gf.dimensions();
+    this->oriented() = gf.oriented();
 
     if (tgf.isTmp())
     {
@@ -1246,7 +1247,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::operator op              \
 {                                                                              \
     checkField(*this, gf, #op);                                                \
                                                                                \
-    ref() op gf();            \
+    ref() op gf();                                                             \
     boundaryFieldRef() op gf.boundaryField();                                  \
 }                                                                              \
                                                                                \
@@ -1266,7 +1267,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::operator op              \
     const dimensioned<TYPE>& dt                                                \
 )                                                                              \
 {                                                                              \
-    ref() op dt;                                       \
+    ref() op dt;                                                               \
     boundaryFieldRef() op dt.value();                                          \
 }
 

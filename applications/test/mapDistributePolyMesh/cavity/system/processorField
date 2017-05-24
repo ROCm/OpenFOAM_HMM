@@ -1,0 +1,64 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      postProcessingDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+functions
+{
+    processorField
+    {
+        // Type of functionObject
+        type            processorField;
+
+        // Where to load it from (if not already in solver)
+        libs            ("libfieldFunctionObjects.so");
+
+        // Function object enabled flag
+        enabled         true;
+
+        // When to output the average fields
+        writeControl    writeTime;
+    }
+    cellID
+    {
+        // Load the library containing the 'coded' functionObject
+        functionObjectLibs ("libutilityFunctionObjects.so");
+        type coded;
+        // Name of on-the-fly generated functionObject
+        redirectType cellID;
+        codeExecute
+        #{
+            volScalarField cellID
+            (
+                IOobject
+                (
+                    "cellID",
+                    mesh().time().timeName(),
+                    mesh(),
+                    IOobject::NO_READ
+                ),
+                mesh(),
+                dimensionedScalar("cellID", dimless, 0)
+            );
+            forAll(cellID, celli)
+            {
+                cellID[celli] = celli;
+            }
+            cellID.correctBoundaryConditions();
+            cellID.write();
+        #};
+    }
+}
+
+// ************************************************************************* //
