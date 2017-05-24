@@ -60,8 +60,7 @@ namespace Foam
         const Foam::point& pt
     )
     {
-        vtkSmartPointer<vtkTextActor> txt =
-            vtkSmartPointer<vtkTextActor>::New();
+        auto txt = vtkSmartPointer<vtkTextActor>::New();
 
         txt->SetInput(s.c_str());
 
@@ -310,8 +309,8 @@ void Foam::vtkPVblockMesh::updateInfo()
     HashSet<string> enabledEdges;
     if (!firstTime)
     {
-        enabledParts = getSelectedArrayEntries(blockSelection);
-        enabledEdges = getSelectedArrayEntries(edgeSelection);
+        enabledParts = getSelectedArraySet(blockSelection);
+        enabledEdges = getSelectedArraySet(edgeSelection);
     }
 
     // Clear current mesh parts list
@@ -407,14 +406,6 @@ void Foam::vtkPVblockMesh::Update
 {
     reader_->UpdateProgress(0.1);
 
-    // Set up mesh parts selection(s)
-    getSelected(blockStatus_, reader_->GetBlockSelection());
-
-    // Set up curved edges selection(s)
-    getSelected(edgeStatus_,  reader_->GetCurvedEdgesSelection());
-
-    reader_->UpdateProgress(0.2);
-
     // Update the OpenFOAM mesh
     updateFoamMesh();
     reader_->UpdateProgress(0.5);
@@ -427,7 +418,6 @@ void Foam::vtkPVblockMesh::Update
     convertMeshEdges(output, blockNo);
 
     reader_->UpdateProgress(0.8);
-
 }
 
 

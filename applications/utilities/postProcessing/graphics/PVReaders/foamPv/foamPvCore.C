@@ -34,6 +34,8 @@ License
 #include "vtkInformation.h"
 #include "vtkSmartPointer.h"
 
+#include "foamVtkAdaptors.H"
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -82,7 +84,7 @@ void Foam::foamPvCore::addToBlock
 
     block->SetBlock(datasetNo, dataset);
 
-    // name the output block when assigning dataset 0
+    // Name the output block when assigning dataset 0
     if (datasetNo == 0)
     {
         output->GetMetaData(blockNo)->Set
@@ -100,34 +102,6 @@ void Foam::foamPvCore::addToBlock
             datasetName.c_str()
         );
     }
-}
-
-
-int Foam::foamPvCore::getSelected
-(
-    boolList& status,
-    vtkDataArraySelection* selection
-)
-{
-    const int n = selection->GetNumberOfArrays();
-    if (status.size() != n)
-    {
-        status.setSize(n);
-        status = false;
-    }
-
-    int count = 0;
-    forAll(status, i)
-    {
-        const bool setting = selection->GetArraySetting(i);
-        if (setting)
-        {
-            ++count;
-        }
-        status[i] = setting;
-    }
-
-    return count;
 }
 
 
@@ -173,54 +147,15 @@ Foam::hashedWordList Foam::foamPvCore::getSelected
 
 
 Foam::HashSet<Foam::string>
-Foam::foamPvCore::getSelectedArrayEntries
+Foam::foamPvCore::getSelectedArraySet
 (
     vtkDataArraySelection* select
 )
 {
     const int n = select->GetNumberOfArrays();
-    HashSet<string> selections(2*n);
-
-    for (int i=0; i < n; ++i)
-    {
-        if (select->GetArraySetting(i))
-        {
-            selections.insert(select->GetArrayName(i));
-        }
-    }
-
-    if (debug > 1)
-    {
-        const int n = select->GetNumberOfArrays();
-        Info<< "available(";
-        for (int i=0; i < n; ++i)
-        {
-            Info<< " \"" << select->GetArrayName(i) << "\"";
-        }
-        Info<< " )\nselected(";
-
-        for (auto k : selections)
-        {
-            Info<< " " << k;
-        }
-        Info<< " )\n";
-    }
-
-    return selections;
-}
-
-
-Foam::HashSet<Foam::string>
-Foam::foamPvCore::getSelectedArrayEntries
-(
-    vtkDataArraySelection* select,
-    const arrayRange& slice
-)
-{
-    const int n = select->GetNumberOfArrays();
     HashSet<string> enabled(2*n);
 
-    for (auto i : slice)
+    for (int i=0; i < n; ++i)
     {
         if (select->GetArraySetting(i))
         {
@@ -230,8 +165,9 @@ Foam::foamPvCore::getSelectedArrayEntries
 
     if (debug > 1)
     {
+        const int n = select->GetNumberOfArrays();
         Info<< "available(";
-        for (auto i : slice)
+        for (int i=0; i < n; ++i)
         {
             Info<< " \"" << select->GetArrayName(i) << "\"";
         }
@@ -248,25 +184,24 @@ Foam::foamPvCore::getSelectedArrayEntries
 }
 
 
-void Foam::foamPvCore::setSelectedArrayEntries
+Foam::Map<Foam::string>
+Foam::foamPvCore::getSelectedArrayMap
 (
-    vtkDataArraySelection* select,
-    const HashSet<string>& enabled
+    vtkDataArraySelection* select
 )
 {
     const int n = select->GetNumberOfArrays();
-    // disable everything not explicitly enabled
-    select->DisableAllArrays();
+    Map<string> enabled(2*n);
 
-    // Loop through entries, enabling as required
     for (int i=0; i < n; ++i)
     {
-        const char* arrayName = select->GetArrayName(i);
-        if (enabled.found(arrayName))
+        if (select->GetArraySetting(i))
         {
-            select->EnableArray(arrayName);
+            enabled.insert(i, select->GetArrayName(i));
         }
     }
+
+    return enabled;
 }
 
 
@@ -309,6 +244,31 @@ void Foam::foamPvCore::printMemory()
     {
         Info<< "mem peak/size/rss: " << mem << endl;
     }
+}
+
+
+vtkSmartPointer<vtkCellArray> Foam::foamPvCore::identityVertices
+(
+    const label size
+)
+{
+    // VTK_VERTEX
+    auto cells = vtkSmartPointer<vtkCellArray>::New();
+
+    UList<vtkIdType> cellsUL = vtkUList(cells, size, 2*size);
+
+    // Cell connectivity for vertex
+    // [size, ids.., size, ids...]
+    // which means
+    // [1, id, 1, id, ...]
+    label idx = 0;
+    for (label id=0; id < size; ++id)
+    {
+        cellsUL[idx++] = 1;
+        cellsUL[idx++] = id;
+    }
+
+    return cells;
 }
 
 

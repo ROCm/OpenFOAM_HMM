@@ -26,6 +26,7 @@ License
 #include "pqFoamReaderControls.h"
 
 #include <QCheckBox>
+#include <QComboBox>
 #include <QFrame>
 #include <QGridLayout>
 #include <QPushButton>
@@ -41,6 +42,17 @@ License
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+// file-scope
+// Add horizontal divider to layout
+static void addHline(QGridLayout* layout, int row, int nCols)
+{
+    QFrame* hline = new QFrame(layout->parentWidget());
+    hline->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+
+    layout->addWidget(hline, row, 0, 1, nCols);
+}
+
 
 // file-scope
 // Widget properties
@@ -91,6 +103,66 @@ static QAbstractButton* setButtonProperties
     }
 
     return b;
+}
+
+
+// file-scope
+// Fill combo-box from XML enumeration
+static QComboBox* setComboBoxContent
+(
+    QComboBox* b,
+    vtkSMIntVectorProperty* prop
+)
+{
+    vtkSMEnumerationDomain* propEnum =
+        vtkSMEnumerationDomain::SafeDownCast
+        (
+            prop->FindDomain("vtkSMEnumerationDomain")
+        );
+
+    if (propEnum)
+    {
+        unsigned int n = propEnum->GetNumberOfEntries();
+        for (unsigned int idx=0; idx < n; ++idx)
+        {
+            const int val   = propEnum->GetEntryValue(idx);
+            const char* txt = propEnum->GetEntryText(idx);
+
+            b->insertItem(val, txt);
+        }
+
+        // Set default
+        const int val = prop->GetElement(0);
+        unsigned int idx = 0;
+        if (!propEnum->IsInDomain(val, idx))
+        {
+            idx = 0;
+        }
+        b->setCurrentIndex(idx);
+    }
+
+    return b;
+}
+
+
+// file-scope
+// Translate a combo-box index to a lookup value
+static int comboBoxValue(vtkSMIntVectorProperty* prop, int idx)
+{
+    vtkSMEnumerationDomain* propEnum =
+        vtkSMEnumerationDomain::SafeDownCast
+        (
+            prop->FindDomain("vtkSMEnumerationDomain")
+        );
+
+    if (propEnum)
+    {
+        return propEnum->GetEntryValue(idx);
+    }
+    else
+    {
+        return idx;
+    }
 }
 
 
@@ -154,9 +226,9 @@ void pqFoamReaderControls::refreshPressed()
 }
 
 
-void pqFoamReaderControls::cacheMesh(int val)
+void pqFoamReaderControls::cacheMesh(int idx)
 {
-    fireCommand(cacheMesh_, val);
+    fireCommand(meshCaching_, comboBoxValue(meshCaching_, idx));
 }
 
 
@@ -210,11 +282,13 @@ pqFoamReaderControls::pqFoamReaderControls
     showGroupsOnly_(lookupIntProp(group, "ShowGroupsOnly")),
     includeSets_(lookupIntProp(group, "IncludeSets")),
     includeZones_(lookupIntProp(group, "IncludeZones")),
-    cacheMesh_(lookupIntProp(group, "CacheMesh"))
+    meshCaching_(lookupIntProp(group, "MeshCaching"))
 {
     typedef vtkSMIntVectorProperty intProp;
 
     QGridLayout* form = new QGridLayout(this);
+
+    const int nCols = 3;
 
     // ROW
     // ~~~
@@ -243,13 +317,7 @@ pqFoamReaderControls::pqFoamReaderControls
     }
 
     // LINE
-    // ~~~~
-    ++row;
-    {
-        QFrame* hline = new QFrame(this);
-        hline->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-        form->addWidget(hline, row, 0, 1, 4);
-    }
+    addHline(form, ++row, nCols);
 
     // ROW
     // ~~~
@@ -321,13 +389,7 @@ pqFoamReaderControls::pqFoamReaderControls
     }
 
     // LINE
-    // ~~~~
-    ++row;
-    {
-        QFrame* hline = new QFrame(this);
-        hline->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-        form->addWidget(hline, row, 0, 1, 4);
-    }
+    addHline(form, ++row, nCols);
 
     // ROW
     // ~~~
@@ -360,13 +422,7 @@ pqFoamReaderControls::pqFoamReaderControls
     }
 
     // LINE
-    // ~~~~
-    ++row;
-    {
-        QFrame* hline = new QFrame(this);
-        hline->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-        form->addWidget(hline, row, 0, 1, 4);
-    }
+    addHline(form, ++row, nCols);
 
     // ROW
     // ~~~
@@ -398,14 +454,22 @@ pqFoamReaderControls::pqFoamReaderControls
         );
     }
 
-    if (cacheMesh_)
+    if (meshCaching_)
     {
-        QCheckBox* b = new QCheckBox(this);
-        setButtonProperties(b, cacheMesh_);
+        QComboBox* b = new QComboBox(this);
         form->addWidget(b, row, 2, Qt::AlignLeft);
+
+        setWidgetProperties(b, meshCaching_);
+        setComboBoxContent(b, meshCaching_);
+
+        addPropertyLink
+        (
+            b, "indexChanged", SIGNAL(currentIndexChanged(int)), meshCaching_
+        );
+
         connect
         (
-            b, SIGNAL(toggled(bool)), this, SLOT(cacheMesh(bool))
+            b, SIGNAL(currentIndexChanged(int)), this, SLOT(cacheMesh(int))
         );
     }
 }

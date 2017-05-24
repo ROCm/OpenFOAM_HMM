@@ -45,16 +45,16 @@ void Foam::vtkPVFoam::updateInfoFields
             << endl;
     }
 
-    HashSet<string> enabledEntries;
+    HashSet<string> enabled;
     if (!select->GetNumberOfArrays() && !meshPtr_)
     {
-        // enable 'p' and 'U' only on the first call
-        enabledEntries = { "p", "U" };
+        // Enable 'p' and 'U' only on the first call
+        enabled = { "p", "U" };
     }
     else
     {
-        // preserve the enabled selections
-        enabledEntries = getSelectedArrayEntries(select);
+        // Preserve the enabled selections
+        enabled = getSelectedArraySet(select);
     }
 
     select->RemoveAllArrays();
@@ -127,7 +127,7 @@ void Foam::vtkPVFoam::updateInfoFields
 
 
     // Restore the enabled selections
-    setSelectedArrayEntries(select, enabledEntries);
+    setSelectedArrayEntries(select, enabled);
 
     if (debug)
     {

@@ -69,8 +69,8 @@ class pqFoamReaderControls
         //- IncludeZones (bool property)
         vtkSMIntVectorProperty* includeZones_;
 
-        //- CacheMesh (bool property)
-        vtkSMIntVectorProperty* cacheMesh_;
+        //- MeshCaching (enum property)
+        vtkSMIntVectorProperty* meshCaching_;
 
 
     // Private Member Functions
@@ -102,7 +102,7 @@ protected slots:
     // Protected Member Functions
 
     void refreshPressed();
-    void cacheMesh(bool checked);
+    void cacheMesh(int idx);
     void showPatchNames(bool checked);
     void showGroupsOnly(bool checked);
     void includeSets(bool checked);

@@ -25,7 +25,25 @@ Class
     Foam::vtkPVFoam
 
 Description
-    Provides a reader interface for OpenFOAM to VTK interaction.
+    The backend for the vtkPVFoamReader reader module -
+    providing a paraview reader interface for OpenFOAM meshes and fields.
+
+    Similar, and sometimes better, functionality may be provided by the
+    native VTK OpenFOAM reader. OpenCFD has recently (2017) been working
+    on improving the native VTK OpenFOAM reader for the benefit of everyone.
+
+    In some areas the reader module lacks compared to the native reader
+    (notably the ability to work on decomosed datasets), but provides
+    additional handling of sets,zones,groups. Some features have also since
+    been adapted to the native reader. Additionally, the reader module
+    provides a useful platform for testing new ideas.
+
+Note
+    The reader module allows two levels of caching. The OpenFOAM fvMesh
+    can be cached in memory, for faster loading of fields. Additionally,
+    the translated VTK geometries are held in a local cache. The cached
+    VTK geometries should incur no additional overhead since they use
+    the VTK reference counting for their storage management.
 
 SourceFiles
     vtkPVFoam.C
@@ -56,22 +74,22 @@ SourceFiles
 #include "foamPvCore.H"
 #include "foamVtkMeshMaps.H"
 
-#include "vtkSmartPointer.h"
+#include "vtkPoints.h"
 #include "vtkPolyData.h"
+#include "vtkSmartPointer.h"
 #include "vtkUnstructuredGrid.h"
 
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
 
+class vtkCellArray;
 class vtkDataArraySelection;
 class vtkDataSet;
 class vtkFloatArray;
-class vtkPoints;
+class vtkIndent;
+class vtkMultiBlockDataSet;
 class vtkPVFoamReader;
 class vtkRenderer;
 class vtkTextActor;
-class vtkMultiBlockDataSet;
-class vtkIndent;
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -104,20 +122,99 @@ class vtkPVFoam
 
     // Private classes
 
-        //- Bookkeeping for vtkPolyData
-        class foamVtpData
+        //- Bookkeeping for internal caching.
+        //  Retain an original copy of the geometry as well as a shallow copy
+        //  with the output fields.
+        //  The original copy is reused for different timestep
+        template<class DataType>
+        class foamVtkCaching
         {
         public:
-            vtkSmartPointer<vtkPolyData> vtkmesh;
+            typedef DataType dataType;
+
+            //- The geometry, without any cell/point data
+            vtkSmartPointer<dataType> vtkgeom;
+
+            //- The shallow-copy of geometry, plus additional data
+            vtkSmartPointer<dataType> dataset;
+
+            //- Number of points associated with geometry
+            inline uint64_t nPoints() const
+            {
+                return vtkgeom ? vtkgeom->GetNumberOfPoints() : 0;
+            }
+
+            //- Clear geometry and dataset
+            void clearGeom()
+            {
+                vtkgeom = nullptr;
+                dataset = nullptr;
+            }
+
+            //- Return a shallow copy of vtkgeom for manipulation
+            vtkSmartPointer<dataType> getCopy() const
+            {
+                auto copy = vtkSmartPointer<dataType>::New();
+                copy->ShallowCopy(vtkgeom);
+                return copy;
+            }
+
+            //- Make a shallow copy of vtkgeom into dataset
+            void reuse()
+            {
+                dataset = vtkSmartPointer<dataType>::New();
+                dataset->ShallowCopy(vtkgeom);
+            }
+
+            //- Set the geometry and make a shallow copy to dataset
+            void set(vtkSmartPointer<dataType> geom)
+            {
+                vtkgeom = geom;
+                reuse();
+            }
+
+            //- Report basic information to output
+            void PrintSelf(std::ostream& os) const
+            {
+                os << "geom" << nl;
+                if (vtkgeom)
+                {
+                    vtkgeom->PrintSelf(std::cout, vtkIndent(2));
+                }
+                else
+                {
+                    os << "nullptr";
+                }
+                os << nl;
+
+                os << "copy" << nl;
+                if (dataset)
+                {
+                    dataset->PrintSelf(std::cout, vtkIndent(2));
+                }
+                else
+                {
+                    os << "nullptr";
+                }
+                os << nl;
+            }
         };
+
+
+        //- Bookkeeping for vtkPolyData
+        class foamVtpData
+        :
+            public foamVtkCaching<vtkPolyData>,
+            public foamVtkMeshMaps
+        {};
 
 
         //- Bookkeeping for vtkUnstructuredGrid
-        class foamVtuData : public foamVtkMeshMaps
-        {
-        public:
-            vtkSmartPointer<vtkUnstructuredGrid> vtkmesh;
-        };
+        class foamVtuData
+        :
+            public foamVtkCaching<vtkUnstructuredGrid>,
+            public foamVtkMeshMaps
+        {};
 
 
     // Private Data
@@ -140,11 +237,11 @@ class vtkPVFoam
         //- The time index
         int timeIndex_;
 
+        //- Previous/current decomposition request
+        bool decomposePoly_;
+
         //- Track changes in mesh geometry
         enum polyMesh::readUpdateState meshState_;
-
-        //- Track changes in fields
-        bool fieldsChanged_;
 
         //- The index of selected parts mapped to their names
         Map<string> selectedPartIds_;
@@ -232,75 +329,143 @@ class vtkPVFoam
 
       // Mesh conversion functions
 
-        //- Convert volume mesh
+        //- Convert InternalMesh
         void convertMeshVolume();
 
         //- Convert Lagrangian points
         void convertMeshLagrangian();
 
-        //- Convert mesh patches
+        //- Convert mesh patches.
+        //  The additionalIds (cached data) contain the patch Ids.
+        //  There will be several for groups, but only one for regular patches.
         void convertMeshPatches();
-
-        //- Convert subsetted mesh
-        void convertMeshSubset
-        (
-            const fvMeshSubset& subsetter,
-            const string& longName
-        );
 
         //- Convert cell zones
         void convertMeshCellZones();
 
-        //- Convert face zones
-        void convertMeshFaceZones();
-
-        //- Convert point zones
-        void convertMeshPointZones();
-
         //- Convert cell sets
         void convertMeshCellSets();
 
+        //- Convert face zones
+        void convertMeshFaceZones();
+
         //- Convert face sets
+        //  The cellMap (cached data) contains the face-labels.
         void convertMeshFaceSets();
 
+        //- Convert point zones
+        //  The pointMap (cached data) contains the point-labels.
+        void convertMeshPointZones();
+
         //- Convert point sets
+        //  The pointMap (cached data) contains the point-labels.
         void convertMeshPointSets();
 
 
       // Add mesh functions
 
-        //- Volume meshes as vtkUnstructuredGrid
+        //- Generate vtk points for the current mesh points/decomposition
+        static vtkSmartPointer<vtkPoints> movePoints
+        (
+            const fvMesh& mesh,
+            const foamVtuData& vtuData
+        );
+
+        //- Generate vtk points for the current mesh points/decomposition,
+        //  using the provided pointMap
+        static vtkSmartPointer<vtkPoints> movePoints
+        (
+            const fvMesh& mesh,
+            const foamVtuData& vtuData,
+            const labelUList& pointMap
+        );
+
+        //- Volume mesh as vtkUnstructuredGrid
+        static vtkSmartPointer<vtkUnstructuredGrid> volumeVTKMesh
+        (
+            const fvMesh& mesh,
+            foamVtuData& vtuData,
+            const bool decompPoly
+        );
+
+        //- Subsetted mesh as vtkUnstructuredGrid
+        static vtkSmartPointer<vtkUnstructuredGrid> volumeVTKSubsetMesh
+        (
+            const fvMeshSubset& subsetter,
+            foamVtuData& vtuData,
+            const bool decompPoly
+        );
+
+        //- Volume mesh as vtkUnstructuredGrid
         vtkSmartPointer<vtkUnstructuredGrid> volumeVTKMesh
         (
             const fvMesh& mesh,
             foamVtuData& vtuData
-        );
+        ) const;
+
+        //- Subsetted mesh as vtkUnstructuredGrid
+        vtkSmartPointer<vtkUnstructuredGrid> volumeVTKSubsetMesh
+        (
+            const fvMeshSubset& subsetter,
+            foamVtuData& vtuData
+        ) const;
 
         //- Lagrangian positions as vtkPolyData
         vtkSmartPointer<vtkPolyData> lagrangianVTKMesh
         (
             const polyMesh& mesh,
             const word& cloudName
+        ) const;
+
+        //- Patch points
+        template<class PatchType>
+        static vtkSmartPointer<vtkPoints> movePatchPoints
+        (
+            const PatchType& p
+        );
+
+        //- Patch faces as vtk-cells
+        template<class PatchType>
+        static vtkSmartPointer<vtkCellArray> patchFacesVTKCells
+        (
+            const PatchType& p
         );
 
         //- Patches (mesh or primitive) as vtkPolyData
         template<class PatchType>
-        vtkSmartPointer<vtkPolyData> patchVTKMesh
+        static vtkSmartPointer<vtkPolyData> patchVTKMesh
         (
-            const string& name,
             const PatchType& p
         );
 
 
       // Field conversion functions
 
-        //- Convert Field to VTK field
+        //- Copy list to pre-allocated vtk array.
+        //  \return number of input items copied
+        template<class Type>
+        static label transcribeFloatData
+        (
+            vtkFloatArray* array,
+            const UList<Type>& input,
+            const label start = 0
+        );
+
+        //- Create named field initialized to zero
+        template<class Type>
+        static vtkSmartPointer<vtkFloatArray> zeroVTKField
+        (
+            const word& name,
+            const label size
+        );
+
+        //- Convert float data to VTK field
         template<class Type>
         vtkSmartPointer<vtkFloatArray> convertFieldToVTK
         (
             const word& name,
-            const Field<Type>& fld
-        );
+            const UList<Type>& fld
+        ) const;
 
         //- Face set/zone field
         template<class Type>
@@ -308,7 +473,7 @@ class vtkPVFoam
         (
             const GeometricField<Type, fvPatchField, volMesh>& fld,
             const labelUList& faceLabels
-        );
+        ) const;
 
         //- Volume field
         template<class Type>
@@ -316,7 +481,7 @@ class vtkPVFoam
         (
             const GeometricField<Type, fvPatchField, volMesh>& fld,
             const foamVtuData& vtuData
-        );
+        ) const;
 
 
         //- Convert volume fields
@@ -392,9 +557,8 @@ class vtkPVFoam
 
         //- Point field
         template<class Type>
-        void convertPointField
+        vtkSmartPointer<vtkFloatArray> convertPointField
         (
-            vtkUnstructuredGrid* vtkmesh,
             const GeometricField<Type, pointPatchField, pointMesh>& pfld,
             const GeometricField<Type, fvPatchField, volMesh>& vfld,
             const foamVtuData& vtuData
@@ -402,17 +566,6 @@ class vtkPVFoam
 
 
       // GUI selection helper functions
-
-        //- Only retain specified fields
-        static void pruneObjectList
-        (
-            IOobjectList& objects,
-            const hashedWordList& retain
-        );
-
-
-        //- Get the first word from selectedPartIds_
-        word getPartName(const int partId) const;
 
         //- Get the first word from the reader 'parts' selection
         word getReaderPartName(const int partId) const;

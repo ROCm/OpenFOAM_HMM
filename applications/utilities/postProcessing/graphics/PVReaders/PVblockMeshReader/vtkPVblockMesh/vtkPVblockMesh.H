@@ -25,13 +25,18 @@ Class
     Foam::vtkPVblockMesh
 
 Description
-    Provides a reader interface for OpenFOAM blockMesh to VTK interaction
+    The backend for the vtkPVblockMeshReader reader module -
+    providing a paraview reader interface for OpenFOAM blockMesh.
+
+    The block reader module can assist when creating a blockMeshDict
+    for use with the blockMesh utility. As well as blocks, it can be
+    used to visualize edges,corners and patch names.
+
+    There is no native VTK equivalent for this functionality.
 
 SourceFiles
     vtkPVblockMesh.C
     vtkPVblockMeshConvert.C
-    vtkPVblockMeshUpdate.C
-    vtkPVblockMeshUtils.C
 
     // Needed by VTK:
     vtkDataArrayTemplateImplicit.txx
@@ -94,12 +99,6 @@ class vtkPVblockMesh
 
         //- The mesh directory for the region
         fileName meshDir_;
-
-        //- Selected geometrical parts
-        boolList blockStatus_;
-
-        //- Selected curved edges
-        boolList edgeStatus_;
 
         //- First instance and size of bleckMesh blocks
         //  used to index into blockStatus_

@@ -28,18 +28,89 @@ License
 
 // OpenFOAM includes
 #include "fvMesh.H"
+#include "fvMeshSubset.H"
+#include "foamVtkAdaptors.H"
 #include "foamVtuSizing.H"
 
 // VTK includes
 #include "vtkUnstructuredGrid.h"
-#include "foamVtkAdaptors.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+vtkSmartPointer<vtkPoints> Foam::vtkPVFoam::movePoints
+(
+    const fvMesh& mesh,
+    const foamVtuData& vtuData
+)
+{
+    // Convert OpenFOAM mesh vertices to VTK
+    auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
+
+    // Normal points
+    const pointField& points = mesh.points();
+
+    // Additional cell centres
+    const labelList& addPoints = vtuData.additionalIds();
+
+    vtkpoints->SetNumberOfPoints(points.size() + addPoints.size());
+
+    // Normal points
+    label pointi = 0;
+    forAll(points, i)
+    {
+        vtkpoints->SetPoint(pointi++, points[i].v_);
+    }
+
+    // Cell centres
+    forAll(addPoints, i)
+    {
+        vtkpoints->SetPoint(pointi++, mesh.C()[addPoints[i]].v_);
+    }
+
+    return vtkpoints;
+}
+
+
+vtkSmartPointer<vtkPoints> Foam::vtkPVFoam::movePoints
+(
+    const fvMesh& mesh,
+    const foamVtuData& vtuData,
+    const labelUList& pointMap
+)
+{
+    // Convert OpenFOAM mesh vertices to VTK
+    auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
+
+    // Normal points
+    const pointField& points = mesh.points();
+
+    // Additional cell centres
+    const labelList& addPoints = vtuData.additionalIds();
+
+    vtkpoints->SetNumberOfPoints(pointMap.size() + addPoints.size());
+
+    // Normal points
+    label pointi = 0;
+    forAll(pointMap, i)
+    {
+        vtkpoints->SetPoint(pointi++, points[pointMap[i]].v_);
+    }
+
+    // Cell centres
+    forAll(addPoints, i)
+    {
+        vtkpoints->SetPoint(pointi++, mesh.C()[addPoints[i]].v_);
+    }
+
+    return vtkpoints;
+}
+
 
 vtkSmartPointer<vtkUnstructuredGrid> Foam::vtkPVFoam::volumeVTKMesh
 (
     const fvMesh& mesh,
-    foamVtuData& vtuData
+    foamVtuData& vtuData,
+    const bool decompPoly
 )
 {
     if (debug)
@@ -48,25 +119,15 @@ vtkSmartPointer<vtkUnstructuredGrid> Foam::vtkPVFoam::volumeVTKMesh
         printMemory();
     }
 
-    foamVtuSizing sizing(mesh, !reader_->GetUseVTKPolyhedron());
+    foamVtuSizing sizing(mesh, decompPoly);
 
-    vtkSmartPointer<vtkUnstructuredGrid> vtkmesh =
-        vtkSmartPointer<vtkUnstructuredGrid>::New();
+    auto cellTypes = vtkSmartPointer<vtkUnsignedCharArray>::New();
 
-    auto cellTypes =
-        nonNullSmartPointer<vtkUnsignedCharArray>(vtkmesh->GetCellTypesArray());
+    auto cells = vtkSmartPointer<vtkCellArray>::New();
+    auto faces = vtkSmartPointer<vtkIdTypeArray>::New();
 
-    auto cells =
-        nonNullSmartPointer<vtkCellArray>(vtkmesh->GetCells());
-
-    auto faces =
-        nonNullSmartPointer<vtkIdTypeArray>(vtkmesh->GetFaces());
-
-    auto cellLocations =
-        nonNullSmartPointer<vtkIdTypeArray>(vtkmesh->GetCellLocationsArray());
-
-    auto faceLocations =
-        nonNullSmartPointer<vtkIdTypeArray>(vtkmesh->GetFaceLocations());
+    auto cellLocations = vtkSmartPointer<vtkIdTypeArray>::New();
+    auto faceLocations = vtkSmartPointer<vtkIdTypeArray>::New();
 
     UList<uint8_t> cellTypesUL =
         vtkUList
@@ -116,33 +177,12 @@ vtkSmartPointer<vtkUnstructuredGrid> Foam::vtkPVFoam::volumeVTKMesh
         static_cast<foamVtkMeshMaps&>(vtuData)
     );
 
+    auto vtkmesh = vtkSmartPointer<vtkUnstructuredGrid>::New();
 
     // Convert OpenFOAM mesh vertices to VTK
     // - can only do this *after* populating the decompInfo with cell-ids
     //   for any additional points (ie, mesh cell-centres)
-    vtkSmartPointer<vtkPoints> vtkpoints = vtkmesh->GetPoints();
-    if (!vtkpoints)
-    {
-        // No points previously, add an entry
-        vtkpoints = vtkSmartPointer<vtkPoints>::New();
-        vtkmesh->SetPoints(vtkpoints);
-    }
-
-    vtkpoints->SetNumberOfPoints(sizing.nFieldPoints());
-
-    // Normal points
-    const pointField& points = mesh.points();
-    const labelList& addPoints = vtuData.additionalIds();
-
-    label pointi = 0;
-    forAll(points, i)
-    {
-        vtkpoints->SetPoint(pointi++, points[i].v_);
-    }
-    forAll(addPoints, i)
-    {
-        vtkpoints->SetPoint(pointi++, mesh.C()[addPoints[i]].v_);
-    }
+    vtkmesh->SetPoints(movePoints(mesh, vtuData));
 
     if (facesUL.size())
     {
@@ -174,6 +214,50 @@ vtkSmartPointer<vtkUnstructuredGrid> Foam::vtkPVFoam::volumeVTKMesh
     }
 
     return vtkmesh;
+}
+
+
+vtkSmartPointer<vtkUnstructuredGrid> Foam::vtkPVFoam::volumeVTKSubsetMesh
+(
+    const fvMeshSubset& subsetter,
+    foamVtuData& vtuData,
+    const bool decompPoly
+)
+{
+    vtkSmartPointer<vtkUnstructuredGrid> vtkmesh = volumeVTKMesh
+    (
+        subsetter.subMesh(),
+        vtuData,
+        decompPoly
+    );
+
+    // Convert cellMap, addPointCellLabels to global cell ids
+    vtuData.renumberCells(subsetter.cellMap());
+
+    // Copy pointMap as well, otherwise pointFields fail
+    vtuData.pointMap() = subsetter.pointMap();
+
+    return vtkmesh;
+}
+
+
+vtkSmartPointer<vtkUnstructuredGrid> Foam::vtkPVFoam::volumeVTKMesh
+(
+    const fvMesh& mesh,
+    foamVtuData& vtuData
+) const
+{
+    return volumeVTKMesh(mesh, vtuData, this->decomposePoly_);
+}
+
+
+vtkSmartPointer<vtkUnstructuredGrid> Foam::vtkPVFoam::volumeVTKSubsetMesh
+(
+    const fvMeshSubset& subsetter,
+    foamVtuData& vtuData
+) const
+{
+    return volumeVTKSubsetMesh(subsetter, vtuData, this->decomposePoly_);
 }
 
 

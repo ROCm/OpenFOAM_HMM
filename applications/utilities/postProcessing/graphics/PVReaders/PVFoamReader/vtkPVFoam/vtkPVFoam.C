@@ -136,12 +136,12 @@ bool Foam::vtkPVFoam::addOutputBlock
         if (selectedPartIds_.found(partId))
         {
             const auto& longName = selectedPartIds_[partId];
-            const word shortName = getPartName(partId);
+            const word shortName = getFoamName(longName);
 
             auto iter = cache.find(longName);
-            if (iter.found() && (*iter).vtkmesh)
+            if (iter.found() && iter.object().dataset)
             {
-                auto dataset = (*iter).vtkmesh;
+                auto dataset = iter.object().dataset;
 
                 if (singleDataset)
                 {
@@ -224,7 +224,6 @@ int Foam::vtkPVFoam::setTime(int nRequest, const double requestTimes[])
         runTime.setTime(Times[nearestIndex], nearestIndex);
 
         // When the changes, so do the fields
-        fieldsChanged_ = true;
         meshState_ = meshPtr_ ? meshPtr_->readUpdate() : polyMesh::TOPO_CHANGE;
 
         reader_->UpdateProgress(0.05);
@@ -238,24 +237,10 @@ int Foam::vtkPVFoam::setTime(int nRequest, const double requestTimes[])
         Info<< "<end> setTime() - selectedTime="
             << Times[nearestIndex].name() << " index=" << timeIndex_
             << "/" << Times.size()
-            << " meshUpdateState=" << updateStateName(meshState_)
-            << " fieldsChanged=" << Switch(fieldsChanged_) << endl;
+            << " meshUpdateState=" << updateStateName(meshState_) << endl;
     }
 
     return nearestIndex;
-}
-
-
-Foam::word Foam::vtkPVFoam::getPartName(const int partId) const
-{
-    if (selectedPartIds_.found(partId))
-    {
-        return getFoamName(selectedPartIds_[partId]);
-    }
-    else
-    {
-        return word::null;
-    }
 }
 
 
@@ -279,8 +264,8 @@ Foam::vtkPVFoam::vtkPVFoam
     meshRegion_(polyMesh::defaultRegion),
     meshDir_(polyMesh::meshSubDir),
     timeIndex_(-1),
+    decomposePoly_(false),
     meshState_(polyMesh::TOPO_CHANGE),
-    fieldsChanged_(true),
     rangeVolume_("unzoned"),
     rangePatches_("patch"),
     rangeLagrangian_("lagrangian"),
@@ -414,16 +399,16 @@ void Foam::vtkPVFoam::updateInfo()
     // time of the vtkDataArraySelection, but the qt/paraview proxy
     // layer doesn't care about that anyhow.
 
-    HashSet<string> enabledEntries;
+    HashSet<string> enabled;
     if (!partSelection->GetNumberOfArrays() && !meshPtr_)
     {
-        // enable 'internalMesh' on the first call
-        enabledEntries = { "internalMesh" };
+        // Fake enable 'internalMesh' on the first call
+        enabled = { "internalMesh" };
     }
     else
     {
         // preserve the enabled selections
-        enabledEntries = getSelectedArrayEntries(partSelection);
+        enabled = getSelectedArraySet(partSelection);
     }
 
     // Clear current mesh parts list
@@ -431,18 +416,13 @@ void Foam::vtkPVFoam::updateInfo()
 
     // Update mesh parts list - add Lagrangian at the bottom
     updateInfoInternalMesh(partSelection);
-    updateInfoPatches(partSelection, enabledEntries);
+    updateInfoPatches(partSelection, enabled);
     updateInfoSets(partSelection);
     updateInfoZones(partSelection);
     updateInfoLagrangian(partSelection);
 
     // Adjust/restore the enabled selections
-    setSelectedArrayEntries(partSelection, enabledEntries);
-
-    if (meshState_ != polyMesh::UNCHANGED)
-    {
-        fieldsChanged_ = true;
-    }
+    setSelectedArrayEntries(partSelection, enabled);
 
     // Update volume, point and lagrangian fields
     updateInfoFields<fvPatchField, volMesh>
@@ -480,48 +460,67 @@ void Foam::vtkPVFoam::Update
     }
     reader_->UpdateProgress(0.1);
 
+    const int caching = reader_->GetMeshCaching();
+    const bool oldDecomp = decomposePoly_;
+    decomposePoly_ = !reader_->GetUseVTKPolyhedron();
+
     // Set up mesh parts selection(s)
+    // Update cached, saved, unneed values.
     {
         vtkDataArraySelection* selection = reader_->GetPartSelection();
         const int n = selection->GetNumberOfArrays();
 
-        // All previously selected (enabled) names
-        HashSet<string> original;
-        forAllConstIters(selectedPartIds_, iter)
-        {
-            original.insert(iter.object());
-        }
-
         selectedPartIds_.clear();
+        HashSet<string> nowActive;
 
         for (int id=0; id < n; ++id)
         {
-            string str(selection->GetArrayName(id));
-            bool status = selection->GetArraySetting(id);
+            const string str(selection->GetArrayName(id));
+            const bool status = selection->GetArraySetting(id);
 
             if (status)
             {
                 selectedPartIds_.set(id, str); // id -> name
-
-                if (!original.erase(str))
-                {
-                    // New part, or newly enabled
-                    //? meshChanged_ = true;
-                }
-            }
-            else
-            {
-                if (original.erase(str))
-                {
-                    // Part disappeared, or newly disabled
-                    //? meshChanged_ = true;
-                }
+                nowActive.set(str);
             }
 
             if (debug > 1)
             {
                 Info<< "  part[" << id << "] = " << status
                     << " : " << str << nl;
+            }
+        }
+
+        // Dispose of unneeded components
+        cachedVtp_.retain(nowActive);
+        cachedVtu_.retain(nowActive);
+
+        if
+        (
+            !caching
+         || meshState_ == polyMesh::TOPO_CHANGE
+         || meshState_ == polyMesh::TOPO_PATCH_CHANGE
+        )
+        {
+            // Eliminate cached values that would be unreliable
+            forAllIters(cachedVtp_, iter)
+            {
+                iter.object().clearGeom();
+                iter.object().clear();
+            }
+            forAllIters(cachedVtu_, iter)
+            {
+                iter.object().clearGeom();
+                iter.object().clear();
+            }
+        }
+        else if (oldDecomp != decomposePoly_)
+        {
+            // poly-decompose changed - dispose of cached values
+            forAllIters(cachedVtu_, iter)
+            {
+                iter.object().clearGeom();
+                iter.object().clear();
             }
         }
     }
@@ -536,7 +535,7 @@ void Foam::vtkPVFoam::Update
             printMemory();
         }
 
-        if (!reader_->GetCacheMesh())
+        if (!caching)
         {
             delete meshPtr_;
             meshPtr_ = nullptr;
@@ -549,7 +548,6 @@ void Foam::vtkPVFoam::Update
             {
                 Info<< "Creating OpenFOAM mesh for region " << meshRegion_
                     << " at time=" << dbPtr_().timeName() << endl;
-
             }
 
             meshPtr_ = new fvMesh
@@ -581,17 +579,6 @@ void Foam::vtkPVFoam::Update
     }
 
     reader_->UpdateProgress(0.4);
-
-    // Update cached, saved, unneed values:
-    HashSet<string> nowActive;
-    forAllConstIters(selectedPartIds_, iter)
-    {
-        nowActive.insert(iter.object());
-    }
-
-    // Dispose of unneeded components
-    cachedVtp_.retain(nowActive);
-    cachedVtu_.retain(nowActive);
 
     convertMeshVolume();
     convertMeshPatches();
@@ -645,18 +632,28 @@ void Foam::vtkPVFoam::Update
     }
     reader_->UpdateProgress(0.95);
 
-    fieldsChanged_ = false;
     meshState_ = polyMesh::UNCHANGED;
 
-    // Standard memory cleanup
-    cachedVtp_.clear();
-    cachedVtu_.clear();
+    if (caching & 2)
+    {
+        // Suppress caching of Lagrangian since it normally always changes.
+        cachedVtp_.filterKeys
+        (
+            [](const word& k){ return k.startsWith("lagrangian/"); },
+            true // prune
+        );
+    }
+    else
+    {
+        cachedVtp_.clear();
+        cachedVtu_.clear();
+    }
 }
 
 
 void Foam::vtkPVFoam::UpdateFinalize()
 {
-    if (!reader_->GetCacheMesh())
+    if (!reader_->GetMeshCaching())
     {
         delete meshPtr_;
         meshPtr_ = nullptr;

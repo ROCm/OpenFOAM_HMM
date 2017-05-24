@@ -69,8 +69,7 @@ vtkPVFoamReader::vtkPVFoamReader()
     // Add second output for the Lagrangian
     this->SetNumberOfOutputPorts(2);
 
-    vtkSmartPointer<vtkMultiBlockDataSet> lagrangian =
-        vtkSmartPointer<vtkMultiBlockDataSet>::New();
+    auto lagrangian = vtkSmartPointer<vtkMultiBlockDataSet>::New();
 
     lagrangian->ReleaseData();
 
@@ -80,7 +79,7 @@ vtkPVFoamReader::vtkPVFoamReader()
     TimeStepRange[0] = 0;
     TimeStepRange[1] = 0;
 
-    CacheMesh = true;
+    MeshCaching = 3;  // fvMesh+vtk
 
     SkipZeroTime = true;
     ExtrapolatePatches = false;

@@ -163,7 +163,7 @@ void Foam::vtkPVFoam::updateInfoLagrangian
 {
     if (debug)
     {
-        Info<< "<beg> updateInfoLagrangian" << nl
+        Info<< "<beg> " << FUNCTION_NAME << nl
             << "    " << dbPtr_->timePath()/cloud::prefix << endl;
     }
 
@@ -194,7 +194,7 @@ void Foam::vtkPVFoam::updateInfoLagrangian
 
     if (debug)
     {
-        Info<< "<end> updateInfoLagrangian" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
     }
 }
 
@@ -207,7 +207,7 @@ void Foam::vtkPVFoam::updateInfoPatches
 {
     if (debug)
     {
-        Info<< "<beg> updateInfoPatches"
+        Info<< "<beg> " << FUNCTION_NAME
             << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
     }
 
@@ -409,7 +409,7 @@ void Foam::vtkPVFoam::updateInfoPatches
 
     if (debug)
     {
-        Info<< "<end> updateInfoPatches" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
     }
 }
 
@@ -591,7 +591,7 @@ void Foam::vtkPVFoam::updateInfoLagrangianFields
     }
 
     // Preserve the enabled selections
-    HashSet<string> enabledEntries = getSelectedArrayEntries(select);
+    HashSet<string> enabled = getSelectedArraySet(select);
     select->RemoveAllArrays();
 
     // TODO - currently only get fields from ONE cloud
@@ -631,25 +631,7 @@ void Foam::vtkPVFoam::updateInfoLagrangianFields
     addToSelection<IOField<tensor>>(select, objects);
 
     // Restore the enabled selections
-    setSelectedArrayEntries(select, enabledEntries);
-
-    if (debug > 1)
-    {
-        boolList status;
-        const label nElem = getSelected(status, select);
-
-        forAll(status, i)
-        {
-            Info<< "  lagrangian[" << i << "] = "
-                << status[i]
-                << " : " << select->GetArrayName(i) << nl;
-        }
-
-        if (!nElem)
-        {
-            Info<< "  lagrangian[none]" << nl;
-        }
-    }
+    setSelectedArrayEntries(select, enabled);
 
     if (debug)
     {

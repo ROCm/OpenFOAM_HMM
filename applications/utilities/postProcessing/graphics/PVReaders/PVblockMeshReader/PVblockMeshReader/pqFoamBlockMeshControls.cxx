@@ -40,6 +40,7 @@ License
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 // file-scope
+// Widget properties
 static QWidget* setWidgetProperties
 (
     QWidget* widget,
@@ -67,6 +68,7 @@ static QWidget* setWidgetProperties
 
 
 // file-scope
+// Button properties
 static QAbstractButton* setButtonProperties
 (
     QAbstractButton* b,

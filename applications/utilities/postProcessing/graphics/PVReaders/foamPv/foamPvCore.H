@@ -40,17 +40,19 @@ SourceFiles
 #include "wordList.H"
 #include "Hash.H"
 #include "HashSet.H"
+#include "Map.H"
 #include "hashedWordList.H"
 #include "labelRange.H"
 
-#include "vtkPoints.h"
-
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
 
+class vtkCellArray;
 class vtkDataArraySelection;
 class vtkDataSet;
-class vtkMultiBlockDataSet;
 class vtkIndent;
+class vtkMultiBlockDataSet;
+class vtkPoints;
+template<class T> class vtkSmartPointer;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -168,13 +170,6 @@ public:
     );
 
 
-    //- Retrieve the current selections into a boolList
-    static int getSelected
-    (
-        boolList& lst,
-        vtkDataArraySelection* select
-    );
-
     //- Retrieve the current selections as a hashedWordList,
     //  while stripping off any prefix or suffix
     static hashedWordList getSelected
@@ -192,25 +187,24 @@ public:
     );
 
 
-    //- Retrieve the currently enabled selections
-    static HashSet<string> getSelectedArrayEntries
+    //- Retrieve the currently enabled selections as hashset
+    static HashSet<string> getSelectedArraySet
     (
         vtkDataArraySelection* select
     );
 
-    //- Retrieve a sub-list of the currently enabled selections
-    static HashSet<string> getSelectedArrayEntries
+    //- Retrieve the currently enabled selections as id/name map
+    static Map<string> getSelectedArrayMap
     (
-        vtkDataArraySelection* select,
-        const arrayRange& slice
+        vtkDataArraySelection* select
     );
 
-
     //- Enable the selection(s)
+    template<class AnyValue, class AnyHasher>
     static void setSelectedArrayEntries
     (
         vtkDataArraySelection* select,
-        const HashSet<string>& enabled
+        const HashTable<AnyValue, string, AnyHasher>& enabled
     );
 
 
@@ -220,6 +214,13 @@ public:
 
     //- Simple memory used debugging information
     static void printMemory();
+
+
+    //- Return an identity list of VTK_VERTEX
+    static vtkSmartPointer<vtkCellArray> identityVertices
+    (
+        const label size
+    );
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -40,28 +40,6 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::vtkPVFoam::pruneObjectList
-(
-    IOobjectList& objects,
-    const hashedWordList& retain
-)
-{
-    if (retain.empty())
-    {
-        objects.clear();
-    }
-
-    // only retain specified fields
-    forAllIters(objects, iter)
-    {
-        if (!retain.found(iter()->name()))
-        {
-            objects.erase(iter);
-        }
-    }
-}
-
-
 void Foam::vtkPVFoam::convertVolFields()
 {
     const fvMesh& mesh = *meshPtr_;
@@ -80,7 +58,7 @@ void Foam::vtkPVFoam::convertVolFields()
     // Get objects (fields) for this time - only keep selected fields
     // the region name is already in the mesh db
     IOobjectList objects(mesh, dbPtr_().timeName());
-    pruneObjectList(objects, selectedFields);
+    objects.filterKeys(selectedFields);
 
     if (objects.empty())
     {
@@ -89,7 +67,7 @@ void Foam::vtkPVFoam::convertVolFields()
 
     if (debug)
     {
-        Info<< "<beg> convert volume fields" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         forAllConstIters(objects, iter)
         {
             Info<< "  " << iter()->name()
@@ -132,7 +110,7 @@ void Foam::vtkPVFoam::convertVolFields()
 
     if (debug)
     {
-        Info<< "<end> convert volume fields" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }
@@ -159,7 +137,7 @@ void Foam::vtkPVFoam::convertPointFields()
     // Get objects (fields) for this time - only keep selected fields
     // the region name is already in the mesh db
     IOobjectList objects(mesh, dbPtr_().timeName());
-    pruneObjectList(objects, selectedFields);
+    objects.filterKeys(selectedFields);
 
     if (objects.empty())
     {
@@ -196,7 +174,7 @@ void Foam::vtkPVFoam::convertPointFields()
 
 void Foam::vtkPVFoam::convertLagrangianFields()
 {
-    arrayRange& range = rangeLagrangian_;
+    const arrayRange& range = rangeLagrangian_;
     const fvMesh& mesh = *meshPtr_;
 
     hashedWordList selectedFields = getSelected
@@ -211,7 +189,7 @@ void Foam::vtkPVFoam::convertLagrangianFields()
 
     if (debug)
     {
-        Info<< "<beg> convert Lagrangian fields" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
@@ -222,14 +200,16 @@ void Foam::vtkPVFoam::convertLagrangianFields()
             continue;
         }
 
-        const word cloudName = getPartName(partId);
-        auto iter = cachedVtp_.find(selectedPartIds_[partId]);
+        const auto& longName = selectedPartIds_[partId];
+        const word cloudName = getFoamName(longName);
 
-        if (!iter.found() || !(*iter).vtkmesh)
+        auto iter = cachedVtp_.find(longName);
+        if (!iter.found() || !iter.object().dataset)
         {
+            // Should not happen, but for safety require a vtk geometry
             continue;
         }
-        auto vtkmesh = (*iter).vtkmesh;
+        auto dataset = iter.object().dataset;
 
         // Get the Lagrangian fields for this time and this cloud
         // but only keep selected fields
@@ -240,7 +220,7 @@ void Foam::vtkPVFoam::convertLagrangianFields()
             dbPtr_().timeName(),
             cloud::prefix/cloudName
         );
-        pruneObjectList(objects, selectedFields);
+        objects.filterKeys(selectedFields);
 
         if (objects.empty())
         {
@@ -257,17 +237,17 @@ void Foam::vtkPVFoam::convertLagrangianFields()
             }
         }
 
-        convertLagrangianFields<label>(objects, vtkmesh);
-        convertLagrangianFields<scalar>(objects, vtkmesh);
-        convertLagrangianFields<vector>(objects, vtkmesh);
-        convertLagrangianFields<sphericalTensor>(objects, vtkmesh);
-        convertLagrangianFields<symmTensor>(objects, vtkmesh);
-        convertLagrangianFields<tensor>(objects, vtkmesh);
+        convertLagrangianFields<label>(objects, dataset);
+        convertLagrangianFields<scalar>(objects, dataset);
+        convertLagrangianFields<vector>(objects, dataset);
+        convertLagrangianFields<sphericalTensor>(objects, dataset);
+        convertLagrangianFields<symmTensor>(objects, dataset);
+        convertLagrangianFields<tensor>(objects, dataset);
     }
 
     if (debug)
     {
-        Info<< "<end> convert Lagrangian fields" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }

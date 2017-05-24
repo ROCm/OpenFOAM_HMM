@@ -54,4 +54,27 @@ Foam::label Foam::foamPvCore::addToSelection
 }
 
 
+template<class AnyValue, class AnyHasher>
+void Foam::foamPvCore::setSelectedArrayEntries
+(
+    vtkDataArraySelection* select,
+    const HashTable<AnyValue, string, AnyHasher>& enabled
+)
+{
+    const int n = select->GetNumberOfArrays();
+    // disable everything not explicitly enabled
+    select->DisableAllArrays();
+
+    // Loop through entries, enabling as required
+    for (int i=0; i < n; ++i)
+    {
+        const char* arrayName = select->GetArrayName(i);
+        if (enabled.found(arrayName))
+        {
+            select->EnableArray(arrayName);
+        }
+    }
+}
+
+
 // ************************************************************************* //

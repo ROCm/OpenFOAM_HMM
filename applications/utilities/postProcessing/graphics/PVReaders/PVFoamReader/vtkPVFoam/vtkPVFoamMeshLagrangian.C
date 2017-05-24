@@ -43,7 +43,7 @@ vtkSmartPointer<vtkPolyData> Foam::vtkPVFoam::lagrangianVTKMesh
 (
     const polyMesh& mesh,
     const word& cloudName
-)
+) const
 {
     vtkSmartPointer<vtkPolyData> vtkmesh;
 
@@ -73,29 +73,19 @@ vtkSmartPointer<vtkPolyData> Foam::vtkPVFoam::lagrangianVTKMesh
             Info<< "cloud with " << parcels.size() << " parcels" << endl;
         }
 
-        vtkmesh = vtkSmartPointer<vtkPolyData>::New();
-
-        vtkSmartPointer<vtkPoints> vtkpoints =
-            vtkSmartPointer<vtkPoints>::New();
-
-        vtkSmartPointer<vtkCellArray> vtkcells =
-            vtkSmartPointer<vtkCellArray>::New();
-
+        auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
         vtkpoints->SetNumberOfPoints(parcels.size());
-        vtkcells->Allocate(2*parcels.size());
-        // If reusing memory, ensure insert always starts from 0
-        vtkcells->Reset();
 
         vtkIdType particleId = 0;
         forAllConstIters(parcels, iter)
         {
             vtkpoints->SetPoint(particleId, iter().position().v_);
-            vtkcells->InsertNextCell(1, &particleId);  // VTK_VERTEX
-            particleId++;
+            ++particleId;
         }
 
+        vtkmesh = vtkSmartPointer<vtkPolyData>::New();
         vtkmesh->SetPoints(vtkpoints);
-        vtkmesh->SetVerts(vtkcells);
+        vtkmesh->SetVerts(foamPvCore::identityVertices(parcels.size()));
     }
 
     if (debug)
