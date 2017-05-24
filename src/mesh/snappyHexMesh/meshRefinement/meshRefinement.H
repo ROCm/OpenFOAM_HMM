@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ SourceFiles
 #include "hexRef8.H"
 #include "mapPolyMesh.H"
 #include "autoPtr.H"
-#include "labelPair.H"
+#include "labelPairHashes.H"
 #include "indirectPrimitivePatch.H"
 #include "pointFieldsFwd.H"
 #include "Tuple2.H"
@@ -77,7 +77,7 @@ class snapParameters;
 
 
 /*---------------------------------------------------------------------------*\
-                           Class meshRefinement Declaration
+                       Class meshRefinement Declaration
 \*---------------------------------------------------------------------------*/
 
 class meshRefinement
@@ -91,17 +91,16 @@ public:
         enum IOdebugType
         {
             IOMESH,
-            //IOSCALARLEVELS,
             IOOBJINTERSECTIONS,
             IOFEATURESEEDS,
             IOATTRACTION,
             IOLAYERINFO
         };
+
         static const NamedEnum<IOdebugType, 5> IOdebugTypeNames;
         enum debugType
         {
             MESH = 1<<IOMESH,
-            //SCALARLEVELS = 1<<IOSCALARLEVELS,
             OBJINTERSECTIONS = 1<<IOOBJINTERSECTIONS,
             FEATURESEEDS = 1<<IOFEATURESEEDS,
             ATTRACTION = 1<< IOATTRACTION,
@@ -113,6 +112,7 @@ public:
         {
             IOOUTPUTLAYERINFO
         };
+
         static const NamedEnum<IOoutputType, 1> IOoutputTypeNames;
         enum outputType
         {
@@ -123,14 +123,17 @@ public:
         enum IOwriteType
         {
             IOWRITEMESH,
+            IONOWRITEREFINEMENT,
             IOWRITELEVELS,
             IOWRITELAYERSETS,
             IOWRITELAYERFIELDS
         };
-        static const NamedEnum<IOwriteType, 4> IOwriteTypeNames;
+
+        static const NamedEnum<IOwriteType, 5> IOwriteTypeNames;
         enum writeType
         {
             WRITEMESH = 1<<IOWRITEMESH,
+            NOWRITEREFINEMENT = 1<<IONOWRITEREFINEMENT,
             WRITELEVELS = 1<<IOWRITELEVELS,
             WRITELAYERSETS = 1<<IOWRITELAYERSETS,
             WRITELAYERFIELDS = 1<<IOWRITELAYERFIELDS
@@ -732,7 +735,7 @@ private:
                 const label ownZone,
                 const label neiZone,
                 wordPairHashTable& zonesToFaceZone,
-                HashTable<word, labelPair, labelPair::Hash<>>&
+                LabelPairMap<word>& zoneIDsToFaceZone
             ) const;
 
             //- Remove any loose standing cells
@@ -1355,6 +1358,12 @@ public:
                 // Pick up faces of cells of faces in set.
                 labelList growFaceCellFace
                 (
+                    const UList<label>& set
+                ) const;
+
+                // Pick up faces of cells of faces in set.
+                labelList growFaceCellFace
+                (
                     const labelHashSet& set
                 ) const;
 
@@ -1481,7 +1490,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "meshRefinementTemplates.C"
+    #include "meshRefinementTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

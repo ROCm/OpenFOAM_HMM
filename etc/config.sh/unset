@@ -148,13 +148,9 @@ then
     cleaned=$($foamClean "$MANPATH" "$foamOldDirs") && MANPATH="$cleaned"
 fi
 
-
 [ -n "$LD_LIBRARY_PATH" ] || unset LD_LIBRARY_PATH
-[ -n "$MANPATH" ] || unset MANPATH
 [ -n "$LD_PRELOAD" ] || unset LD_PRELOAD
-
-unset cleaned foamClean foamOldDirs
-
+[ -n "$MANPATH" ] || unset MANPATH
 
 #------------------------------------------------------------------------------
 # Cleanup aliases and functions
@@ -181,9 +177,13 @@ unalias util        2>/dev/null
 unalias tut         2>/dev/null
 unalias run         2>/dev/null
 
-unset -f wmRefresh
-unset -f foamVersion
-unset -f foamPV
+unset -f wmRefresh  2>/dev/null
+unset -f foamVersion 2>/dev/null
+unset -f foamPV     2>/dev/null
 
+#------------------------------------------------------------------------------
+# Intermediate variables (do as last for a clean exit code)
+
+unset cleaned foamClean foamOldDirs
 
 #------------------------------------------------------------------------------

@@ -28,8 +28,8 @@
 #     Setup file for libccmio include/libraries.
 #     Sourced during wmake process only.
 #
-#     Dynamic libraries are found under the FOAM_EXT_LIBBIN path.
-#     Static libraries  are found under the CCMIO_ARCH_PATH/lib path.
+#     Static libraries (recommended) are found under CCMIO_ARCH_PATH/lib.
+#     Dynamic libraries are found under FOAM_EXT_LIBBIN path.
 #
 # Note
 #     A csh version is not needed, since the values here are only sourced

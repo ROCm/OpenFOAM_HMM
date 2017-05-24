@@ -180,9 +180,9 @@ int main(int argc, char *argv[])
         // A regex with a zero length matcher doesn't work at all:
         // eg "(png|jpg|txt|)" regex matcher itself
 
-        wordRe matcher0("()", wordRe::REGEXP);
-        wordRe matcher1("(png|jpg|txt)", wordRe::REGEXP);
-        wordRe matcher2("(png|txt)", wordRe::REGEXP);
+        wordRe matcher0("()", wordRe::REGEX);
+        wordRe matcher1("(png|jpg|txt)", wordRe::REGEX);
+        wordRe matcher2("(png|txt)", wordRe::REGEX);
 
         Info<<"Has extension(s):" << nl
             << "input: " << endWithDot << nl;

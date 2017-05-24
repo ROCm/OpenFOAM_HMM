@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,9 +77,6 @@ public:
     // Member functions
 
         // Per specie properties
-
-            //- Number of moles of the given specie []
-            virtual scalar nMoles(const label speciei) const;
 
             //- Molecular weight of the given specie [kg/kmol]
             virtual scalar W(const label speciei) const;

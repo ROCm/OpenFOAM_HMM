@@ -49,7 +49,7 @@ autoPtr<filmRadiationModel> filmRadiationModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown radiationModel type " << modelType << nl << nl

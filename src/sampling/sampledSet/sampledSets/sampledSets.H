@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,7 +104,6 @@ class sampledSets
             {
                 formatter = writer<Type>::New(writeFormat);
             }
-
         };
 
 
@@ -173,40 +172,37 @@ class sampledSets
         meshSearch searchEngine_;
 
 
-        // Read from dictonary
+      // Read from dictonary
 
-            //- Names of fields to sample
-            wordReList fieldSelection_;
+        //- Names of fields to sample
+        wordReList fieldSelection_;
 
-            //- Interpolation scheme to use
-            word interpolationScheme_;
+        //- Interpolation scheme to use
+        word interpolationScheme_;
 
-            //- Output format to use
-            word writeFormat_;
-
-
-        // Categorized scalar/vector/tensor fields
-
-            fieldGroup<scalar> scalarFields_;
-            fieldGroup<vector> vectorFields_;
-            fieldGroup<sphericalTensor> sphericalTensorFields_;
-            fieldGroup<symmTensor> symmTensorFields_;
-            fieldGroup<tensor> tensorFields_;
+        //- Output format to use
+        word writeFormat_;
 
 
-        // Merging structures
+      // Categorized scalar/vector/tensor fields
 
-            PtrList<coordSet> masterSampledSets_;
-            labelListList indexSets_;
+        fieldGroup<scalar> scalarFields_;
+        fieldGroup<vector> vectorFields_;
+        fieldGroup<sphericalTensor> sphericalTensorFields_;
+        fieldGroup<symmTensor> symmTensorFields_;
+        fieldGroup<tensor> tensorFields_;
+
+
+      // Merging structures
+
+        PtrList<coordSet> masterSampledSets_;
+        labelListList indexSets_;
 
 
     // Private Member Functions
 
         //- Clear old field groups
         void clearFieldGroups();
-
-        //- Append fieldName to the appropriate group
-        label appendFieldGroup(const word& fieldName, const word& fieldType);
 
         //- Classify field types, returns the number of fields
         label classifyFields();
@@ -245,8 +241,8 @@ class sampledSets
 
 
         //- Disallow default bitwise copy construct and assignment
-        sampledSets(const sampledSets&);
-        void operator=(const sampledSets&);
+        sampledSets(const sampledSets&) = delete;
+        void operator=(const sampledSets&) = delete;
 
 
 public:

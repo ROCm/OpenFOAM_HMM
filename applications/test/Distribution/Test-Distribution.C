@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 
         for (label i = 0; i < randomDistributionTestSize; i++)
         {
-            dS.add(2.5*R.GaussNormal() + 8.5);
+            dS.add(2.5*R.GaussNormal<scalar>() + 8.5);
         }
 
         Info<< "Mean " << dS.mean() << nl
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 
         for (label i = 0; i < randomDistributionTestSize; i++)
         {
-            dS2.add(1.5*R.GaussNormal() -6.0);
+            dS2.add(1.5*R.GaussNormal<scalar>() -6.0);
         }
 
         Info<< "Mean " << dS2.mean() << nl
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 
         for (label i = 0; i < randomDistributionTestSize; i++)
         {
-            dS.add(R.scalar01() + 10*Pstream::myProcNo());
+            dS.add(R.sample01<scalar>() + 10*Pstream::myProcNo());
         }
 
         Pout<< "Mean " << dS.mean() << nl
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 
         for (label i = 0; i < randomDistributionTestSize; i++)
         {
-            dV.add(R.vector01());
+            dV.add(R.sample01<vector>());
 
             // Adding separate GaussNormal components with component
             // weights
@@ -164,9 +164,9 @@ int main(int argc, char *argv[])
             (
                 vector
                 (
-                    R.GaussNormal()*3.0 + 1.5,
-                    R.GaussNormal()*0.25 + 4.0,
-                    R.GaussNormal()*3.0 - 1.5
+                    R.GaussNormal<scalar>()*3.0 + 1.5,
+                    R.GaussNormal<scalar>()*0.25 + 4.0,
+                    R.GaussNormal<scalar>()*3.0 - 1.5
                 ),
                 vector(1.0, 2.0, 5.0)
             );
@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
 
         for (label i = 0; i < randomDistributionTestSize; i++)
         {
-            dT.add(R.tensor01());
+            dT.add(R.sample01<tensor>());
         }
 
         Info<< "Mean " << dT.mean() << nl
@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
 
         for (label i = 0; i < randomDistributionTestSize; i++)
         {
-            dSyT.add(R.symmTensor01());
+            dSyT.add(R.sample01<symmTensor>());
         }
 
         Info<< "Mean " << dSyT.mean() << nl
@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
 
         for (label i = 0; i < randomDistributionTestSize; i++)
         {
-            dSpT.add(R.sphericalTensor01());
+            dSpT.add(R.sample01<sphericalTensor>());
         }
 
         Info<< "Mean " << dSpT.mean() << nl

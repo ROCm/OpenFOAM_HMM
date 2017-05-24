@@ -2,8 +2,8 @@ sinclude $(GENERAL_RULES)/paraview
 
 EXE_INC = \
     ${c++LESSWARN} \
-    -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/fileFormats/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/mesh/blockMesh/lnInclude \
     -I$(ParaView_INCLUDE_DIR) \
     -I$(ParaView_INCLUDE_DIR)/vtkkwiml \
@@ -12,7 +12,6 @@ EXE_INC = \
 
 LIB_LIBS = \
     -lmeshTools \
-    -lfileFormats \
     -lblockMesh \
     -L$(FOAM_LIBBIN) -lfoamPv-pv${ParaView_MAJOR} \
     $(GLIBS)

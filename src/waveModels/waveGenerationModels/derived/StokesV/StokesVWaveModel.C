@@ -672,11 +672,13 @@ Foam::scalar Foam::waveModels::StokesV::eta
     const scalar theta = kx*x + ky*y - 2.0*mathematical::pi/T*t + phase;
 
     return
+    (
         amp1*cos(theta)
       + amp2*cos(2*theta)
       + amp3*cos(3*theta)
-	  + amp4*cos(4*theta)
-      + amp5*cos(5*theta);
+      + amp4*cos(4*theta)
+      + amp5*cos(5*theta)
+    );
 }
 
 
@@ -758,9 +760,9 @@ void Foam::waveModels::StokesV::setLevel
     {
         const scalar eta =
             this->eta
-	        (
+            (
                 waterDepthRef_,
-		        waveKx,
+                waveKx,
                 waveKy,
                 lambda_,
                 wavePeriod_,
@@ -801,7 +803,7 @@ void Foam::waveModels::StokesV::setVelocity
             const label paddlei = faceToPaddle_[facei];
 
             const vector Uf = this->Uf
-	        (
+            (
                 waterDepthRef_,
                 waveKx,
                 waveKy,
@@ -869,11 +871,11 @@ bool Foam::waveModels::StokesV::readDict(const dictionary& overrideDict)
 
         if (f1 > 0.001 || f2 > 0.001)
         {
-	        FatalErrorInFunction
+            FatalErrorInFunction
                 << "No convergence for Stokes V wave theory" << nl
                 << "    f1: " << f1 << nl
                 << "    f2: " << f2 << nl
-	            << exit(FatalError);
+                << exit(FatalError);
         }
 
         return true;

@@ -293,9 +293,9 @@ inline Foam::point Foam::conformalVoronoiMesh::perturbPoint
 
     scalar pert = 1e-12*defaultCellSize();
 
-    perturbedPt.x() += pert*(rndGen_.scalar01() - 0.5);
-    perturbedPt.y() += pert*(rndGen_.scalar01() - 0.5);
-    perturbedPt.z() += pert*(rndGen_.scalar01() - 0.5);
+    perturbedPt.x() += pert*(rndGen_.sample01<scalar>() - 0.5);
+    perturbedPt.y() += pert*(rndGen_.sample01<scalar>() - 0.5);
+    perturbedPt.z() += pert*(rndGen_.sample01<scalar>() - 0.5);
 
     return perturbedPt;
 }

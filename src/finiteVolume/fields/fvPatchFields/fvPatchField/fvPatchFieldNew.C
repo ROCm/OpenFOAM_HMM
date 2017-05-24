@@ -45,7 +45,7 @@ Foam::tmp<Foam::fvPatchField<Type>> Foam::fvPatchField<Type>::New
     typename patchConstructorTable::iterator cstrIter =
         patchConstructorTablePtr_->find(patchFieldType);
 
-    if (cstrIter == patchConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown patchField type "
@@ -64,7 +64,7 @@ Foam::tmp<Foam::fvPatchField<Type>> Foam::fvPatchField<Type>::New
      || actualPatchType != p.type()
     )
     {
-        if (patchTypeCstrIter != patchConstructorTablePtr_->end())
+        if (patchTypeCstrIter.found())
         {
             return patchTypeCstrIter()(p, iF);
         }
@@ -78,7 +78,7 @@ Foam::tmp<Foam::fvPatchField<Type>> Foam::fvPatchField<Type>::New
         tmp<fvPatchField<Type>> tfvp = cstrIter()(p, iF);
 
         // Check if constraint type override and store patchType if so
-        if ((patchTypeCstrIter != patchConstructorTablePtr_->end()))
+        if (patchTypeCstrIter.found())
         {
             tfvp.ref().patchType() = actualPatchType;
         }
@@ -119,14 +119,14 @@ Foam::tmp<Foam::fvPatchField<Type>> Foam::fvPatchField<Type>::New
     typename dictionaryConstructorTable::iterator cstrIter
         = dictionaryConstructorTablePtr_->find(patchFieldType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         if (!disallowGenericFvPatchField)
         {
             cstrIter = dictionaryConstructorTablePtr_->find("generic");
         }
 
-        if (cstrIter == dictionaryConstructorTablePtr_->end())
+        if (!cstrIter.found())
         {
             FatalIOErrorInFunction
             (
@@ -185,7 +185,7 @@ Foam::tmp<Foam::fvPatchField<Type>> Foam::fvPatchField<Type>::New
     typename patchMapperConstructorTable::iterator cstrIter =
         patchMapperConstructorTablePtr_->find(ptf.type());
 
-    if (cstrIter == patchMapperConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown patchField type " << ptf.type() << nl << nl

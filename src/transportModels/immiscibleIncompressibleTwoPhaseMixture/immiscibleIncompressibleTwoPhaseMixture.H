@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -80,12 +80,7 @@ public:
         }
 
         //- Read base transportProperties dictionary
-        virtual bool read()
-        {
-            return
-                incompressibleTwoPhaseMixture::read()
-             && interfaceProperties::read();
-        }
+        virtual bool read();
 };
 
 

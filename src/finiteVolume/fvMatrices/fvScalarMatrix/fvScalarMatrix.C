@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -60,7 +60,12 @@ Foam::fvMatrix<Foam::scalar>::solver
     const dictionary& solverControls
 )
 {
-    addProfiling(solve, "fvMatrix::solve." + psi_.name());
+    word regionName;
+    if (psi_.mesh().name() != polyMesh::defaultRegion)
+    {
+        regionName = psi_.mesh().name() + "::";
+    }
+    addProfiling(solve, "fvMatrix::solve." + regionName + psi_.name());
 
     if (debug)
     {
@@ -112,7 +117,7 @@ Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
     scalarField totalSource(fvMat_.source());
     fvMat_.addBoundarySource(totalSource, false);
 
-    // assign new solver controls
+    // Assign new solver controls
     solver_->read(solverControls);
 
     solverPerformance solverPerf = solver_->solve

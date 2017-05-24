@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,18 +24,23 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "profilingSysInfo.H"
-#include "demandDrivenData.H"
 #include "foamVersion.H"
+#include "clock.H"
+#include "Ostream.H"
+#include "OSspecific.H"
+
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 // file-scope function
 inline static void printEnv
 (
-    Foam::Ostream& os, const Foam::word& key, const Foam::word& envName
+    Foam::Ostream& os,
+    const Foam::word& key,
+    const std::string& envName
 )
 {
-    const std::string value = getEnv(envName);
+    const std::string value = Foam::getEnv(envName);
     if (!value.empty())
     {
         os.writeEntry(key, value);
@@ -45,26 +50,25 @@ inline static void printEnv
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::profiling::sysInfo::sysInfo()
+Foam::profilingSysInfo::profilingSysInfo()
 {}
-
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::profiling::sysInfo::~sysInfo()
+Foam::profilingSysInfo::~profilingSysInfo()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::profiling::sysInfo::write
+Foam::Ostream& Foam::profilingSysInfo::write
 (
     Ostream& os
 ) const
 {
-    os.writeEntry("host",       hostName(false)); // short name
-    os.writeEntry("date",       clock::dateTime());
+    os.writeEntry("host",       Foam::hostName(false)); // short name
+    os.writeEntry("date",       Foam::clock::dateTime());
 
     // compile-time information
     os.writeEntry("version",    std::string(FOAMversion));

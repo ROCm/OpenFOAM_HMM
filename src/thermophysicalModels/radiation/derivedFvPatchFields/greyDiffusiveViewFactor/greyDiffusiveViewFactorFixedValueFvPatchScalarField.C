@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    Qro_(),
+    qro_(),
     solarLoad_(false)
 {}
 
@@ -54,7 +54,7 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
-    Qro_(ptf.Qro_, mapper),
+    qro_(ptf.qro_, mapper),
     solarLoad_(ptf.solarLoad_)
 {}
 
@@ -68,7 +68,7 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict, false),
-    Qro_("Qro", dict, p.size()),
+    qro_("qro", dict, p.size()),
     solarLoad_(dict.lookupOrDefault<bool>("solarLoad", false))
 {
     if (dict.found("value"))
@@ -93,7 +93,7 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf),
-    Qro_(ptf.Qro_),
+    qro_(ptf.qro_),
     solarLoad_(ptf.solarLoad_)
 {}
 
@@ -106,7 +106,7 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf, iF),
-    Qro_(ptf.Qro_),
+    qro_(ptf.qro_),
     solarLoad_(ptf.solarLoad_)
 {}
 
@@ -120,7 +120,7 @@ autoMap
 )
 {
     fixedValueFvPatchScalarField::autoMap(m);
-    Qro_.autoMap(m);
+    qro_.autoMap(m);
 }
 
 
@@ -135,7 +135,7 @@ void Foam::radiation::greyDiffusiveViewFactorFixedValueFvPatchScalarField::rmap
     const greyDiffusiveViewFactorFixedValueFvPatchScalarField& mrptf =
         refCast<const greyDiffusiveViewFactorFixedValueFvPatchScalarField>(ptf);
 
-    Qro_.rmap(mrptf.Qro_, addr);
+    qro_.rmap(mrptf.qro_, addr);
 }
 
 
@@ -146,7 +146,6 @@ updateCoeffs()
     {
         return;
     }
-
 
     if (debug)
     {
@@ -166,22 +165,22 @@ updateCoeffs()
 
 
 Foam::tmp<Foam::scalarField> Foam::radiation::
-greyDiffusiveViewFactorFixedValueFvPatchScalarField::Qro() const
+greyDiffusiveViewFactorFixedValueFvPatchScalarField::qro() const
 {
-    tmp<scalarField> tQrt(new scalarField(Qro_));
+    tmp<scalarField> tqrt(new scalarField(qro_));
 
     if (solarLoad_)
     {
         const radiationModel& radiation =
             db().lookupObject<radiationModel>("radiationProperties");
 
-        tQrt.ref() += patch().lookupPatchField<volScalarField,scalar>
+        tqrt.ref() += patch().lookupPatchField<volScalarField, scalar>
         (
             radiation.externalRadHeatFieldName_
         );
     }
 
-    return tQrt;
+    return tqrt;
 }
 
 
@@ -192,7 +191,7 @@ write
 ) const
 {
     fixedValueFvPatchScalarField::write(os);
-    Qro_.writeEntry("Qro", os);
+    qro_.writeEntry("qro", os);
     os.writeKeyword("solarLoad") << solarLoad_ << token::END_STATEMENT << nl;
 }
 

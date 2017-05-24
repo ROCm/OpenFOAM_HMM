@@ -62,6 +62,7 @@ Note
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "profiling.H"
 #include "Time.H"
 
 #include "UnsortedMeshedSurfaces.H"
@@ -98,6 +99,7 @@ int main(int argc, char *argv[])
         "xml",
         "write output in XML format"
     );
+    profiling::disable(); // Disable profiling (and its output)
 
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());

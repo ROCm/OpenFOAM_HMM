@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -105,7 +105,7 @@ void Foam::fvMeshSubset::doCoupledPatches
 
     if (syncPar && Pstream::parRun())
     {
-        PstreamBuffers pBufs(Pstream::nonBlocking);
+        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
         // Send face usage across processor patches
         forAll(oldPatches, oldPatchi)
@@ -1381,6 +1381,23 @@ void Foam::fvMeshSubset::setLargeCellSubset
 
     // Subset and add any zones
     subsetZones();
+}
+
+
+void Foam::fvMeshSubset::setLargeCellSubset
+(
+    const UList<label>& globalCellMap,
+    const label patchID,
+    const bool syncPar
+)
+{
+    labelList region(baseMesh().nCells(), 0);
+
+    for (auto cellId : globalCellMap)
+    {
+        region[cellId] = 1;
+    }
+    setLargeCellSubset(region, 1, patchID, syncPar);
 }
 
 

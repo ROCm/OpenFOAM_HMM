@@ -50,7 +50,7 @@ namespace Foam
     )
     {
         // First triangulate
-        // - slightly wasteful for space, but manages adjusts the zones too!
+        // - slightly wasteful for space, but adjusts the zones too!
         surf.triangulate();
         this->storedPoints().transfer(surf.storedPoints());
         this->storedZones().transfer(surf.storedZones());
@@ -81,12 +81,12 @@ namespace Foam
     )
     {
         // First triangulate
-        // - slightly wasteful for space, but manages adjusts the zones too!
+        // - slightly wasteful for space, but adjusts the zones too!
         surf.triangulate();
         this->storedPoints().transfer(surf.storedPoints());
         this->storedZones().transfer(surf.storedZones());
 
-        // transcribe from face -> triFace
+        // transcribe from face -> labelledTri (via triFace)
         const List<face>& origFaces = surf.surfFaces();
         List<labelledTri> newFaces(origFaces.size());
         forAll(origFaces, facei)

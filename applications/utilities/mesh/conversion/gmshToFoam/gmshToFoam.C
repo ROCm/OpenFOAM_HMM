@@ -512,7 +512,7 @@ void readCells
         {
             label meshPti;
             lineStr >> meshPti >> meshPti;
-	    }
+        }
         else if (elmType == MSHTRI)
         {
             lineStr >> triPoints[0] >> triPoints[1] >> triPoints[2];

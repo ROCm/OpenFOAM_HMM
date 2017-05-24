@@ -209,7 +209,10 @@ class motionSmootherAlgo
         static void checkFld(const pointScalarField&);
 
         //- Get points used by given faces
-        labelHashSet getPoints(const labelHashSet&) const;
+        labelHashSet getPoints(const UList<label>& faceLabels) const;
+
+        //- Get points used by given faces
+        labelHashSet getPoints(const labelHashSet& faceLabels) const;
 
         //- Calculate per-edge weight
         tmp<scalarField> calcEdgeWeights(const pointField&) const;

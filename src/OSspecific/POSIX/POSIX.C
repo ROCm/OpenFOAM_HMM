@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,6 @@ Description
 #include <link.h>
 
 #include <netinet/in.h>
-
 #ifdef USE_RANDOM
     #include <climits>
     #if INT_MAX    != 2147483647
@@ -74,6 +73,41 @@ namespace Foam
 {
     defineTypeNameAndDebug(POSIX, 0);
 }
+
+
+// * * * * * * * * * * * * * * Static Functions  * * * * * * * * * * * * * * //
+
+//
+//! \cond fileScope
+//
+// Return true if filename appears to be a backup file
+//
+static inline bool isBackupName(const Foam::fileName& name)
+{
+    if (name.empty())
+    {
+        return false;
+    }
+    else if (name[name.size()-1] == '~')
+    {
+        return true;
+    }
+
+    // Now check the extension
+    const Foam::word ext = name.ext();
+    if (ext.empty())
+    {
+        return false;
+    }
+
+    return
+    (
+        ext == "bak" || ext == "BAK"
+     || ext == "old" || ext == "save"
+    );
+}
+
+//! \endcond
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -98,13 +132,15 @@ pid_t Foam::pgid()
 
 bool Foam::env(const std::string& envName)
 {
-    return ::getenv(envName.c_str()) != nullptr;
+    // An empty envName => always false
+    return !envName.empty() && ::getenv(envName.c_str()) != nullptr;
 }
 
 
 Foam::string Foam::getEnv(const std::string& envName)
 {
-    char* env = ::getenv(envName.c_str());
+    // Ignore an empty envName => always ""
+    char* env = envName.empty() ? nullptr : ::getenv(envName.c_str());
 
     if (env)
     {
@@ -126,7 +162,12 @@ bool Foam::setEnv
     const bool overwrite
 )
 {
-    return ::setenv(envName.c_str(), value.c_str(), overwrite) == 0;
+    // Ignore an empty envName => always false
+    return
+    (
+        !envName.empty()
+     && ::setenv(envName.c_str(), value.c_str(), overwrite) == 0
+    );
 }
 
 
@@ -173,14 +214,13 @@ Foam::string Foam::domainName()
 Foam::string Foam::userName()
 {
     struct passwd* pw = ::getpwuid(::getuid());
-
     if (pw != nullptr)
     {
         return pw->pw_name;
     }
     else
     {
-        return string::null;
+        return string();
     }
 }
 
@@ -194,54 +234,39 @@ bool Foam::isAdministrator()
 Foam::fileName Foam::home()
 {
     char* env = ::getenv("HOME");
-
-    if (env != nullptr)
+    if (env)
     {
         return fileName(env);
     }
+
+    struct passwd* pw = ::getpwuid(::getuid());
+    if (pw)
+    {
+        return pw->pw_dir;
+    }
     else
     {
-        struct passwd* pw = ::getpwuid(getuid());
-
-        if (pw != nullptr)
-        {
-            return pw->pw_dir;
-        }
-        else
-        {
-            return fileName::null;
-        }
+        return fileName();
     }
 }
 
 
 Foam::fileName Foam::home(const std::string& userName)
 {
-    struct passwd* pw;
-
-    if (userName.size())
+    // An empty userName => same as home()
+    if (userName.empty())
     {
-        pw = ::getpwnam(userName.c_str());
-    }
-    else
-    {
-        char* env = ::getenv("HOME");
-
-        if (env != nullptr)
-        {
-            return fileName(env);
-        }
-
-        pw = ::getpwuid(::getuid());
+        return Foam::home();
     }
 
-    if (pw != nullptr)
+    struct passwd* pw = ::getpwnam(userName.c_str());
+    if (pw)
     {
         return pw->pw_dir;
     }
     else
     {
-        return fileName::null;
+        return fileName();
     }
 }
 
@@ -260,7 +285,7 @@ Foam::fileName Foam::cwd()
         }
         else if (errno == ERANGE)
         {
-            // Increment path length upto the pathLengthMax limit
+            // Increment path length up to the pathLengthMax limit
             if
             (
                 (pathLengthLimit += POSIX::pathLengthChunk)
@@ -291,19 +316,20 @@ Foam::fileName Foam::cwd()
 
 bool Foam::chDir(const fileName& dir)
 {
-    return ::chdir(dir.c_str()) == 0;
+    // Ignore an empty dir name => always false
+    return !dir.empty() && ::chdir(dir.c_str()) == 0;
 }
 
 
 bool Foam::mkDir(const fileName& pathName, mode_t mode)
 {
-    // empty names are meaningless
+    // Ignore an empty pathName => always false
     if (pathName.empty())
     {
         return false;
     }
 
-    // Construct instance path directory if does not exist
+    // Construct path directory if does not exist
     if (::mkdir(pathName.c_str(), mode) == 0)
     {
         // Directory made OK so return true
@@ -443,26 +469,35 @@ bool Foam::mkDir(const fileName& pathName, mode_t mode)
 
 bool Foam::chMod(const fileName& name, const mode_t m)
 {
-    return ::chmod(name.c_str(), m) == 0;
+    // Ignore an empty name => always false
+    return !name.empty() && ::chmod(name.c_str(), m) == 0;
 }
 
 
 mode_t Foam::mode(const fileName& name, const bool followLink)
 {
-    fileStat fileStatus(name, followLink);
-    if (fileStatus.isValid())
+    // Ignore an empty name => always 0
+    if (!name.empty())
     {
-        return fileStatus.status().st_mode;
+        fileStat fileStatus(name, followLink);
+        if (fileStatus.isValid())
+        {
+            return fileStatus.status().st_mode;
+        }
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0;
 }
 
 
 Foam::fileName::Type Foam::type(const fileName& name, const bool followLink)
 {
+    // Ignore an empty name => always UNDEFINED
+    if (name.empty())
+    {
+        return fileName::UNDEFINED;
+    }
+
     mode_t m = mode(name, followLink);
 
     if (S_ISREG(m))
@@ -477,10 +512,8 @@ Foam::fileName::Type Foam::type(const fileName& name, const bool followLink)
     {
         return fileName::DIRECTORY;
     }
-    else
-    {
-        return fileName::UNDEFINED;
-    }
+
+    return fileName::UNDEFINED;
 }
 
 
@@ -491,13 +524,19 @@ bool Foam::exists
     const bool followLink
 )
 {
-    return mode(name, followLink) || isFile(name, checkGzip, followLink);
+    // Ignore an empty name => always false
+    return
+    (
+        !name.empty()
+     && (mode(name, followLink) || isFile(name, checkGzip, followLink))
+    );
 }
 
 
 bool Foam::isDir(const fileName& name, const bool followLink)
 {
-    return S_ISDIR(mode(name, followLink));
+    // Ignore an empty name => always false
+    return !name.empty() && S_ISDIR(mode(name, followLink));
 }
 
 
@@ -508,53 +547,65 @@ bool Foam::isFile
     const bool followLink
 )
 {
+    // Ignore an empty name => always false
     return
-        S_ISREG(mode(name, followLink))
-     || (checkGzip && S_ISREG(mode(name + ".gz", followLink)));
+    (
+        !name.empty()
+     && (
+            S_ISREG(mode(name, followLink))
+         || (checkGzip && S_ISREG(mode(name + ".gz", followLink)))
+        )
+    );
 }
 
 
 off_t Foam::fileSize(const fileName& name, const bool followLink)
 {
-    fileStat fileStatus(name, followLink);
-    if (fileStatus.isValid())
+    // Ignore an empty name
+    if (!name.empty())
     {
-        return fileStatus.status().st_size;
+        fileStat fileStatus(name, followLink);
+        if (fileStatus.isValid())
+        {
+            return fileStatus.status().st_size;
+        }
     }
-    else
-    {
-        return -1;
-    }
+
+    return -1;
 }
 
 
 time_t Foam::lastModified(const fileName& name, const bool followLink)
 {
-    fileStat fileStatus(name, followLink);
-    if (fileStatus.isValid())
+    // Ignore an empty name
+    if (!name.empty())
     {
-        return fileStatus.status().st_mtime;
+        fileStat fileStatus(name, followLink);
+        if (fileStatus.isValid())
+        {
+            return fileStatus.status().st_mtime;
+        }
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0;
 }
 
 
 double Foam::highResLastModified(const fileName& name)
 {
-    fileStat fileStatus(name);
-    if (fileStatus.isValid())
+    // Ignore an empty name
+    if (!name.empty())
     {
-        return
-            fileStatus.status().st_mtime
-          + 1e-9*fileStatus.status().st_atim.tv_nsec;
+        fileStat fileStatus(name);
+        if (fileStatus.isValid())
+        {
+            return
+                fileStatus.status().st_mtime
+              + 1e-9*fileStatus.status().st_atim.tv_nsec;
+        }
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0;
 }
 
 
@@ -570,84 +621,77 @@ Foam::fileNameList Foam::readDir
     // also used as increment if initial size found to be insufficient
     static const int maxNnames = 100;
 
+    // Basic sanity: cannot strip '.gz' from directory names
+    const bool stripgz = filtergz && (type != fileName::DIRECTORY);
+    const word extgz("gz");
+
+    // Open directory and set the structure pointer
+    // Do not attempt to open an empty directory name
+    DIR *source;
+    if
+    (
+        directory.empty()
+     || (source = ::opendir(directory.c_str())) == nullptr
+    )
+    {
+        if (POSIX::debug)
+        {
+            InfoInFunction
+                << "cannot open directory " << directory << endl;
+        }
+
+        return fileNameList();
+    }
+
     if (POSIX::debug)
     {
         InfoInFunction
             << "reading directory " << directory << endl;
     }
 
-    // Setup empty string list MAXTVALUES long
+    label nEntries = 0;
     fileNameList dirEntries(maxNnames);
 
-    // Pointers to the directory entries
-    DIR *source;
-    struct dirent *list;
-
-    // Temporary variables and counters
-    label nEntries = 0;
-
-    // Attempt to open directory and set the structure pointer
-    if ((source = ::opendir(directory.c_str())) == nullptr)
+    // Read and parse all the entries in the directory
+    for (struct dirent *list; (list = ::readdir(source)) != nullptr; /*nil*/)
     {
-        dirEntries.setSize(0);
+        const fileName name(list->d_name);
 
-        if (POSIX::debug)
+        // Ignore files/directories beginning with "."
+        // These are the ".", ".." directories and any hidden files/dirs
+        if (name.empty() || name[0] == '.')
         {
-            InfoInFunction
-                << "cannot open directory " << directory << endl;
+            continue;
         }
-    }
-    else
-    {
-        // Read and parse all the entries in the directory
-        while ((list = ::readdir(source)) != nullptr)
+
+        if
+        (
+            (type == fileName::DIRECTORY)
+         || (type == fileName::FILE && !isBackupName(name))
+        )
         {
-            fileName fName(list->d_name);
-
-            // ignore files beginning with ., i.e. '.', '..' and '.*'
-            if (fName.size() && fName[0] != '.')
+            if ((directory/name).type(followLink) == type)
             {
-                const word fExt = fName.ext();
-
-                if
-                (
-                    (type == fileName::DIRECTORY)
-                 ||
-                    (
-                        type == fileName::FILE
-                     && fName[fName.size()-1] != '~'
-                     && fExt != "bak"
-                     && fExt != "BAK"
-                     && fExt != "old"
-                     && fExt != "save"
-                    )
-                )
+                if (nEntries >= dirEntries.size())
                 {
-                    if ((directory/fName).type(followLink) == type)
-                    {
-                        if (nEntries >= dirEntries.size())
-                        {
-                            dirEntries.setSize(dirEntries.size() + maxNnames);
-                        }
+                    dirEntries.setSize(dirEntries.size() + maxNnames);
+                }
 
-                        if (filtergz && fExt == "gz")
-                        {
-                            dirEntries[nEntries++] = fName.lessExt();
-                        }
-                        else
-                        {
-                            dirEntries[nEntries++] = fName;
-                        }
-                    }
+                if (stripgz && name.hasExt(extgz))
+                {
+                    dirEntries[nEntries++] = name.lessExt();
+                }
+                else
+                {
+                    dirEntries[nEntries++] = name;
                 }
             }
         }
-
-        // Reset the length of the entries list
-        dirEntries.setSize(nEntries);
-
-        ::closedir(source);
     }
+
+    // Reset the length of the entries list
+    dirEntries.setSize(nEntries);
+    ::closedir(source);
 
     return dirEntries;
 }
@@ -655,7 +699,7 @@ Foam::fileNameList Foam::readDir
 
 bool Foam::cp(const fileName& src, const fileName& dest, const bool followLink)
 {
-    // Make sure source exists.
+    // Make sure source exists - this also handles an empty source name
     if (!exists(src))
     {
         return false;
@@ -789,6 +833,20 @@ bool Foam::ln(const fileName& src, const fileName& dst)
             << endl;
     }
 
+    if (src.empty())
+    {
+        WarningInFunction
+            << "source name is empty: not linking." << endl;
+        return false;
+    }
+
+    if (dst.empty())
+    {
+        WarningInFunction
+            << "destination name is empty: not linking." << endl;
+        return false;
+    }
+
     if (exists(dst))
     {
         WarningInFunction
@@ -825,6 +883,12 @@ bool Foam::mv(const fileName& src, const fileName& dst, const bool followLink)
             << "Move : " << src << " to " << dst << endl;
     }
 
+    // Ignore an empty names => always false
+    if (src.empty() || dst.empty())
+    {
+        return false;
+    }
+
     if
     (
         dst.type() == fileName::DIRECTORY
@@ -850,17 +914,23 @@ bool Foam::mvBak(const fileName& src, const std::string& ext)
             << "mvBak : " << src << " to extension " << ext << endl;
     }
 
+    // Ignore an empty name or extension => always false
+    if (src.empty() || ext.empty())
+    {
+        return false;
+    }
+
     if (exists(src, false))
     {
         const int maxIndex = 99;
         char index[3];
 
-        for (int n = 0; n <= maxIndex; n++)
+        for (int n = 0; n <= maxIndex; ++n)
         {
             fileName dstName(src + "." + ext);
             if (n)
             {
-                sprintf(index, "%02d", n);
+                ::sprintf(index, "%02d", n);
                 dstName += index;
             }
 
@@ -870,7 +940,6 @@ bool Foam::mvBak(const fileName& src, const std::string& ext)
             {
                 return ::rename(src.c_str(), dstName.c_str()) == 0;
             }
-
         }
     }
 
@@ -887,6 +956,12 @@ bool Foam::rm(const fileName& file)
             << "Removing : " << file << endl;
     }
 
+    // Ignore an empty name => always false
+    if (file.empty())
+    {
+        return false;
+    }
+
     // Try returning plain file name; if not there, try with .gz
     if (::remove(file.c_str()) == 0)
     {
@@ -899,89 +974,91 @@ bool Foam::rm(const fileName& file)
 }
 
 
-bool Foam::rmDir(const fileName& directory)
+bool Foam::rmDir(const fileName& directory, const bool silent)
 {
+    // Open directory and set the structure pointer
+    // Do not attempt to open an empty directory name
+    DIR *source;
+    if
+    (
+        directory.empty()
+     || (source = ::opendir(directory.c_str())) == nullptr
+    )
+    {
+        if (!silent)
+        {
+            WarningInFunction
+                << "cannot open directory " << directory << endl;
+        }
+
+        return false;
+    }
+
     if (POSIX::debug)
     {
         InfoInFunction
             << "removing directory " << directory << endl;
     }
 
-    // Pointers to the directory entries
-    DIR *source;
-    struct dirent *list;
-
-    // Attempt to open directory and set the structure pointer
-    if ((source = ::opendir(directory.c_str())) == nullptr)
+    // Process each directory entry, counting any errors encountered
+    label nErrors = 0;
+    for (struct dirent *list; (list = ::readdir(source)) != nullptr; /*nil*/)
     {
-        WarningInFunction
-            << "cannot open directory " << directory << endl;
+        const fileName name(list->d_name);
+        if (name.empty() || name == "." || name == "..")
+        {
+            // Ignore "." and ".." directories
+            continue;
+        }
 
-        return false;
+        const fileName path = directory/name;
+        if (path.type(false) == fileName::DIRECTORY)
+        {
+            if (!rmDir(path, true))  // Only report errors at the top-level
+            {
+                ++nErrors;
+            }
+        }
+        else
+        {
+            if (!rm(path))
+            {
+                ++nErrors;
+            }
+        }
+    }
+
+    if (nErrors)
+    {
+        if (!silent)
+        {
+            WarningInFunction
+                << "failed to remove directory " << directory << nl
+                << "could not remove " << nErrors << " sub-entries" << endl;
+        }
     }
     else
     {
-        // Read and parse all the entries in the directory
-        while ((list = ::readdir(source)) != nullptr)
-        {
-            fileName fName(list->d_name);
-
-            if (fName != "." && fName != "..")
-            {
-                fileName path = directory/fName;
-
-                if (path.type(false) == fileName::DIRECTORY)
-                {
-                    if (!rmDir(path))
-                    {
-                        WarningInFunction
-                            << "failed to remove directory " << fName
-                            << " while removing directory " << directory
-                            << endl;
-
-                        ::closedir(source);
-
-                        return false;
-                    }
-                }
-                else
-                {
-                    if (!rm(path))
-                    {
-                        WarningInFunction
-                            << "failed to remove file " << fName
-                            << " while removing directory " << directory
-                            << endl;
-
-                        ::closedir(source);
-
-                        return false;
-                    }
-                }
-            }
-
-        }
-
         if (!rm(directory))
         {
-            WarningInFunction
-                << "failed to remove directory " << directory << endl;
-
-            ::closedir(source);
-
-            return false;
+            ++nErrors;
+            if (!silent)
+            {
+                WarningInFunction
+                    << "failed to remove directory " << directory << endl;
+            }
         }
-
-        ::closedir(source);
-
-        return true;
     }
+
+    // clean up
+    ::closedir(source);
+    return !nErrors;
 }
 
 
-unsigned int Foam::sleep(const unsigned int s)
+unsigned int Foam::sleep(const unsigned int sec)
 {
-    return ::sleep(s);
+    return ::sleep(sec);
 }
 
 
@@ -1161,7 +1238,7 @@ int Foam::system(const std::string& command)
         (
             "/bin/sh",          // Path of the shell
             "sh",               // Command-name (name for the shell)
-            "-c",               // Read commands from the command_string operand.
+            "-c",               // Read commands from command_string operand
             command.c_str(),    // Command string
             reinterpret_cast<char *>(0)
         );
@@ -1352,6 +1429,15 @@ Foam::fileNameList Foam::dlLoaded()
     return libs;
 }
 
+Foam::label Foam::osRandomBufferSize()
+{
+    #ifdef USE_RANDOM
+    return sizeof(random_data);
+    #else
+    return sizeof(drand48_data);
+    #endif
+}
+
 
 void Foam::osRandomSeed(const label seed)
 {
@@ -1379,6 +1465,44 @@ Foam::scalar Foam::osRandomDouble()
     return (scalar)random()/INT_MAX;
     #else
     return drand48();
+    #endif
+}
+
+
+void Foam::osRandomSeed(const label seed, List<char>& buffer)
+{
+    #ifdef USE_RANDOM
+    srandom_r((unsigned int)seed, reinterpret_cast<random_data*>(buffer.begin()));
+    #else
+    srand48_r(seed, reinterpret_cast<drand48_data*>(buffer.begin()));
+    #endif
+}
+
+
+Foam::label Foam::osRandomInteger(List<char>& buffer)
+{
+    #ifdef USE_RANDOM
+    int32_t result;
+    random_r(reinterpret_cast<random_data*>(buffer.begin()), &result);
+    return result;
+    #else
+    long result;
+    lrand48_r(reinterpret_cast<drand48_data*>(buffer.begin()), &result);
+    return result;
+    #endif
+}
+
+
+Foam::scalar Foam::osRandomDouble(List<char>& buffer)
+{
+    #ifdef USE_RANDOM
+    int32_t result;
+    random_r(reinterpret_cast<random_data*>(buffer.begin()), &result);
+    return (scalar)result/INT_MAX;
+    #else
+    double result;
+    drand48_r(reinterpret_cast<drand48_data*>(buffer.begin()), &result);
+    return result;
     #endif
 }
 

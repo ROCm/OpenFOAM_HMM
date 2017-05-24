@@ -42,7 +42,7 @@ Foam::autoPtr<Foam::XiEqModel> Foam::XiEqModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown XiEqModel type "

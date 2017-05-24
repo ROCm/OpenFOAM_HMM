@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
     Random rnd(123456);
     for (int i=0; i<10; i++)
     {
-        scalar x = rnd.scalar01()*100;
+        scalar x = rnd.sample01<scalar>()*100;
 
         scalar px = polyValue(x);
         scalar ipx = intPolyValue(x);

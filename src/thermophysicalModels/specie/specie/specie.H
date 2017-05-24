@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,6 @@ namespace Foam
 class specie;
 
 inline specie operator+(const specie&, const specie&);
-inline specie operator-(const specie&, const specie&);
 inline specie operator*(const scalar, const specie&);
 inline specie operator==(const specie&, const specie&);
 
@@ -72,7 +71,7 @@ class specie
         word name_;
 
         //- Number of moles of this component in the mixture
-        scalar nMoles_;
+        scalar Y_;
 
         //- Molecular weight of specie [kg/kmol]
         scalar molWeight_;
@@ -86,26 +85,19 @@ public:
 
     // Constructors
 
-
         //- Construct from components without name
-        inline specie(const scalar nMoles, const scalar molWeight);
+        inline specie(const scalar Y, const scalar molWeight);
 
         //- Construct from components with name
         inline specie
         (
             const word& name,
-            const scalar nMoles,
+            const scalar Y,
             const scalar molWeight
         );
 
-        //- Construct as copy
-        inline specie(const specie&);
-
         //- Construct as named copy
         inline specie(const word& name, const specie&);
-
-        //- Construct from Istream
-        specie(Istream&);
 
         //- Construct from dictionary
         specie(const dictionary& dict);
@@ -122,7 +114,7 @@ public:
             inline scalar W() const;
 
             //- No of moles of this species in mixture
-            inline scalar nMoles() const;
+            inline scalar Y() const;
 
             //- Gas constant [J/(kg K)]
             inline scalar R() const;
@@ -137,20 +129,14 @@ public:
     // Member operators
 
         inline void operator=(const specie&);
-
         inline void operator+=(const specie&);
-        inline void operator-=(const specie&);
-
         inline void operator*=(const scalar);
 
 
     // Friend operators
 
         inline friend specie operator+(const specie&, const specie&);
-        inline friend specie operator-(const specie&, const specie&);
-
         inline friend specie operator*(const scalar, const specie&);
-
         inline friend specie operator==(const specie&, const specie&);
 
 

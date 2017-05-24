@@ -33,7 +33,7 @@ solvers
         maxIter         100;
     }
 
-    pcorr
+    "pcorr.*"
     {
         solver          PCG;
         preconditioner  DIC;

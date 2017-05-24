@@ -67,7 +67,7 @@ inline polygonRef Foam::pyramid<Point, PointRef, polygonRef>::base() const
 template<class Point, class PointRef, class polygonRef>
 inline Point Foam::pyramid<Point, PointRef, polygonRef>::centre
 (
-    const pointField& points
+    const UList<point>& points
 ) const
 {
     return (3.0/4.0)*base_.centre(points) + (1.0/4.0)*apex_;
@@ -77,7 +77,7 @@ inline Point Foam::pyramid<Point, PointRef, polygonRef>::centre
 template<class Point, class PointRef, class polygonRef>
 inline Foam::vector Foam::pyramid<Point, PointRef, polygonRef>::height
 (
-    const pointField& points
+    const UList<point>& points
 ) const
 {
     // Height = apex - baseCentroid
@@ -88,7 +88,7 @@ inline Foam::vector Foam::pyramid<Point, PointRef, polygonRef>::height
 template<class Point, class PointRef, class polygonRef>
 inline Foam::scalar Foam::pyramid<Point, PointRef, polygonRef>::mag
 (
-    const pointField& points
+    const UList<point>& points
 ) const
 {
     return (1.0/3.0)*(base_.normal(points)&(height(points)));

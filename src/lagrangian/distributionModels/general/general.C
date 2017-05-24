@@ -78,7 +78,7 @@ void Foam::distributionModels::general::initialise()
 Foam::distributionModels::general::general
 (
     const dictionary& dict,
-    cachedRandom& rndGen
+    Random& rndGen
 )
 :
     distributionModel(typeName, dict, rndGen),
@@ -96,7 +96,7 @@ Foam::distributionModels::general::general
 (
     const UList<scalar>& sampleData,
     const scalar binWidth,
-    cachedRandom& rndGen
+    Random& rndGen
 )
 :
     distributionModel(typeName, dictionary::null, rndGen),

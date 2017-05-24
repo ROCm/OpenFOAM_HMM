@@ -35,7 +35,7 @@ static const char* notImplementedMessage =
 "Please install ptscotch and make sure that libptscotch.so is in your "
 "LD_LIBRARY_PATH.\n"
 "The ptscotchDecomp library can then be built in "
-"$FOAM_SRC/parallel/decompose/ptscotchDecomp\n";
+"src/parallel/decompose/ptscotchDecomp\n";
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -146,7 +146,7 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
         forAll(faceLst, facei)
         {
             const label startPt = 3*facei;
-            faceLst[facei] = triFace(startPt, startPt+1, startPt+2);
+            faceLst[facei] = Face{startPt, startPt+1, startPt+2};
         }
     }
     else
@@ -160,7 +160,7 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
         forAll(faceMap, facei)
         {
             const label startPt = 3*faceMap[facei];
-            faceLst[facei] = triFace(startPt, startPt+1, startPt+2);
+            faceLst[facei] = Face{startPt, startPt+1, startPt+2};
         }
     }
     zoneIds.clear();

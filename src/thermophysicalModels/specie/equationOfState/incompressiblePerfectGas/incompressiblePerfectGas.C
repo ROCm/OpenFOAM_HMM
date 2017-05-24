@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,20 +27,6 @@ License
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Specie>
-Foam::incompressiblePerfectGas<Specie>::incompressiblePerfectGas(Istream& is)
-:
-    Specie(is),
-    pRef_(readScalar(is))
-{
-    is.check
-    (
-        "incompressiblePerfectGas<Specie>::"
-        "incompressiblePerfectGas(Istream& is)"
-    );
-}
-
 
 template<class Specie>
 Foam::incompressiblePerfectGas<Specie>::incompressiblePerfectGas
@@ -75,14 +61,7 @@ Foam::Ostream& Foam::operator<<
     const incompressiblePerfectGas<Specie>& pg
 )
 {
-    os  << static_cast<const Specie&>(pg)
-        << token::SPACE << pg.pRef_;
-
-    os.check
-    (
-        "Ostream& operator<<"
-        "(Ostream& os, const incompressiblePerfectGas<Specie>& st)"
-    );
+    pg.write(os);
     return os;
 }
 

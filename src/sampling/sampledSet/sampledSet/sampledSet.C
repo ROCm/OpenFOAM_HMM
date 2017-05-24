@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -451,7 +451,7 @@ Foam::autoPtr<Foam::sampledSet> Foam::sampledSet::New
     wordConstructorTable::iterator cstrIter =
         wordConstructorTablePtr_->find(sampleType);
 
-    if (cstrIter == wordConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown sample type "
@@ -468,7 +468,7 @@ Foam::autoPtr<Foam::sampledSet> Foam::sampledSet::New
             name,
             mesh,
             searchEngine,
-            dict
+            dict.optionalSubDict(sampleType + "Coeffs")
         )
     );
 }

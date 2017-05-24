@@ -49,7 +49,7 @@ Foam::autoPtr<Foam::LESfilter> Foam::LESfilter::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(filterType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown LESfilter type "

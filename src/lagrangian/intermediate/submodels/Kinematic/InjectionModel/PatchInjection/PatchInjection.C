@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ Foam::PatchInjection<CloudType>::PatchInjection
     ),
     sizeDistribution_
     (
-        distributionModels::distributionModel::New
+        distributionModel::New
         (
             this->coeffDict().subDict("sizeDistribution"),
             owner.rndGen()
@@ -121,7 +121,7 @@ Foam::label Foam::PatchInjection<CloudType>::parcelsToInject
     if ((time0 >= 0.0) && (time0 < duration_))
     {
         scalar nParcels = (time1 - time0)*parcelsPerSecond_;
-        cachedRandom& rnd = this->owner().rndGen();
+        Random& rnd = this->owner().rndGen();
         scalar rndPos = rnd.globalPosition(scalar(0), scalar(1));
         label nParcelsToInject = floor(nParcels);
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -42,19 +42,22 @@ Usage
         writeControl    writeTime;
 
         setFormat       vtk;
+        U               U;
         trackForward    yes;
+
         fields
         (
             U
             p
         );
+
         lifeTime        10000;
         trackLength     1e-3;
         nSubCycle       5;
         bounds          (0.2 -10 -10)(0.22 10 10);
         cloudName       particleTracks;
-        seedSampleSet   uniform;
-        uniformCoeffs
+
+        seedSampleSet
         {
             type        uniform;
             axis        x;  //distance;
@@ -70,7 +73,7 @@ Usage
         Property     | Description             | Required    | Default value
         type         | Type name: streamLine   | yes         |
         setFormat    | Output data type        | yes         |
-        U            | Tracking velocity field name | yes    |
+        U            | Tracking velocity field name | no     | U
         fields       | Fields to sample        | yes         |
         lifetime     | Maximum number of particle tracking steps | yes |
         trackLength  | Tracking segment length | no          |
@@ -80,7 +83,7 @@ Usage
         seedSampleSet| Seeding method (see below)| yes       |
     \endtable
 
-    Where \c seedSampleSet is typically one of
+    Where \c seedSampleSet \c type is typically one of
     \plaintable
         uniform | uniform particle seeding
         cloud   | cloud of points

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -72,7 +72,7 @@ Foam::InflationInjection<CloudType>::InflationInjection
     dSeed_(SMALL),
     sizeDistribution_
     (
-        distributionModels::distributionModel::New
+        distributionModel::New
         (
             this->coeffDict().subDict("sizeDistribution"),
             owner.rndGen()
@@ -155,9 +155,7 @@ Foam::InflationInjection<CloudType>::~InflationInjection()
 
 template<class CloudType>
 void Foam::InflationInjection<CloudType>::updateMesh()
-{
-    // do nothing
-}
+{}
 
 
 template<class CloudType>
@@ -205,7 +203,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
 
     newParticles_.clear();
 
-    cachedRandom& rnd = this->owner().rndGen();
+    Random& rnd = this->owner().rndGen();
 
     // Diameter factor, when splitting particles into 4, this is the
     // factor that modifies the diameter.

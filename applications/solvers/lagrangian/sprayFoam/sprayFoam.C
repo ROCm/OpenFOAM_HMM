@@ -78,32 +78,42 @@ int main(int argc, char *argv[])
 
         parcels.evolve();
 
-        #include "rhoEqn.H"
-
-        // --- Pressure-velocity PIMPLE corrector loop
-        while (pimple.loop())
+        if (pimple.solveFlow())
         {
-            #include "UEqn.H"
-            #include "YEqn.H"
-            #include "EEqn.H"
+            #include "rhoEqn.H"
 
-            // --- Pressure corrector loop
-            while (pimple.correct())
+            // --- Pressure-velocity PIMPLE corrector loop
+            while (pimple.loop())
             {
-                #include "pEqn.H"
+                #include "UEqn.H"
+                #include "YEqn.H"
+                #include "EEqn.H"
+
+                // --- Pressure corrector loop
+                while (pimple.correct())
+                {
+                    #include "pEqn.H"
+                }
+
+                if (pimple.turbCorr())
+                {
+                    turbulence->correct();
+                }
             }
 
-            if (pimple.turbCorr())
+            rho = thermo.rho();
+
+            if (runTime.write())
             {
-                turbulence->correct();
+                combustion->Qdot()().write();
             }
         }
-
-        rho = thermo.rho();
-
-        if (runTime.write())
+        else
         {
-            combustion->dQ()().write();
+            if (runTime.writeTime())
+            {
+                parcels.write();
+            }
         }
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"

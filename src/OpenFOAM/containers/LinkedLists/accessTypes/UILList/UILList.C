@@ -57,19 +57,19 @@ bool Foam::UILList<LListBase, T>::operator==
     const UILList<LListBase, T>& rhs
 ) const
 {
-    if (this->size() != rhs.size())
+    bool equal = (this->size() == rhs.size());
+    if (!equal)
     {
         return false;
     }
-
-    bool equal = true;
 
     const_iterator iter1 = this->begin();
     const_iterator iter2 = rhs.begin();
 
     for (; iter1 != this->end(); ++iter1, ++iter2)
     {
-        equal = equal && iter1() == iter2();
+        equal = (iter1() == iter2());
+        if (!equal) break;
     }
 
     return equal;

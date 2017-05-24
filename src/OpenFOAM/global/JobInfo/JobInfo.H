@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,8 @@ Description
       - $FOAM_JOB_DIR/runningJobs
       - $FOAM_JOB_DIR/finishedJobs
 
+    If FOAM_JOB_DIR is unset, defaults to ~/.OpenFOAM/jobControl
+
 SourceFiles
     JobInfo.C
 
@@ -57,20 +59,27 @@ class JobInfo
     public dictionary
 {
     // Private data
-        fileName runningJobPath_;
-        fileName finishedJobPath_;
+
+        //- The name of the job file
+        string   jobFileName_;
+        fileName runningDir_;
+        fileName finishedDir_;
         cpuTime  cpuTime_;
 
     // Private Member Functions
 
-        bool write(Ostream&) const;
+        bool write(Ostream& os) const;
         void end(const word& terminationType);
 
 
 public:
 
+    //- Global value for constructed job info
     static bool constructed;
+
+    //- Global value for writeJobInfo enabled
     static bool writeJobInfo;
+
 
     // Constructors
 
@@ -79,22 +88,26 @@ public:
 
 
     //- Destructor
+    //  Update job info and relocate the file from running to finished.
     ~JobInfo();
 
 
     // Member Functions
 
-        // Write
+        //- Write the job info to its file in the runningJobs directory
+        void write() const;
 
-            void write() const;
+        //- End with "termination=normal"
+        void end();
 
-            void end();
+        //- End with "termination=exit"
+        void exit();
 
-            void exit();
+        //- End with "termination=abort"
+        void abort();
 
-            void abort();
-
-            void signalEnd() const;
+        //- Update job info and relocate the file from running to finished.
+        void signalEnd() const;
 };
 
 

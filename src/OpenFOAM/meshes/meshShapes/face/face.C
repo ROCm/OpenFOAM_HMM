@@ -38,7 +38,7 @@ const char* const Foam::face::typeName = "face";
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::tmp<Foam::vectorField>
-Foam::face::calcEdges(const pointField& points) const
+Foam::face::calcEdges(const UList<point>& points) const
 {
     tmp<vectorField> tedges(new vectorField(size()));
     vectorField& edges = tedges.ref();
@@ -76,7 +76,7 @@ Foam::scalar Foam::face::edgeCos
 
 Foam::label Foam::face::mostConcaveAngle
 (
-    const pointField& points,
+    const UList<point>& points,
     const vectorField& edges,
     scalar& maxAngle
 ) const
@@ -124,7 +124,7 @@ Foam::label Foam::face::mostConcaveAngle
 Foam::label Foam::face::split
 (
     const face::splitMode mode,
-    const pointField& points,
+    const UList<point>& points,
     label& triI,
     label& quadI,
     faceList& triFaces,
@@ -399,8 +399,8 @@ int Foam::face::compare(const face& a, const face& b)
 
 bool Foam::face::sameVertices(const face& a, const face& b)
 {
-    label sizeA = a.size();
-    label sizeB = b.size();
+    const label sizeA = a.size();
+    const label sizeB = b.size();
 
     // Trivial reject: faces are different size
     if (sizeA != sizeB)
@@ -410,14 +410,7 @@ bool Foam::face::sameVertices(const face& a, const face& b)
     // Check faces with a single vertex
     else if (sizeA == 1)
     {
-        if (a[0] == b[0])
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return (a[0] == b[0]);
     }
 
     forAll(a, i)
@@ -461,7 +454,7 @@ Foam::label Foam::face::collapse()
 
         if (operator[](ci) != operator[](0))
         {
-            ci++;
+            ++ci;
         }
 
         setSize(ci);
@@ -485,7 +478,7 @@ void Foam::face::flip()
 }
 
 
-Foam::point Foam::face::centre(const pointField& points) const
+Foam::point Foam::face::centre(const UList<point>& points) const
 {
     // Calculate the centre by breaking the face into triangles and
     // area-weighted averaging their centres
@@ -549,7 +542,7 @@ Foam::point Foam::face::centre(const pointField& points) const
 }
 
 
-Foam::vector Foam::face::normal(const pointField& p) const
+Foam::vector Foam::face::normal(const UList<point>& p) const
 {
     const label nPoints = size();
 
@@ -645,8 +638,8 @@ Foam::label Foam::face::which(const label globalIndex) const
 
 Foam::scalar Foam::face::sweptVol
 (
-    const pointField& oldPoints,
-    const pointField& newPoints
+    const UList<point>& oldPoints,
+    const UList<point>& newPoints
 ) const
 {
     // This Optimization causes a small discrepancy between the swept-volume of
@@ -724,7 +717,7 @@ Foam::scalar Foam::face::sweptVol
 
 Foam::tensor Foam::face::inertia
 (
-    const pointField& p,
+    const UList<point>& p,
     const point& refPt,
     scalar density
 ) const
@@ -819,7 +812,7 @@ int Foam::face::edgeDirection(const edge& e) const
 }
 
 
-Foam::label Foam::face::nTriangles(const pointField&) const
+Foam::label Foam::face::nTriangles(const UList<point>&) const
 {
     return nTriangles();
 }
@@ -827,7 +820,7 @@ Foam::label Foam::face::nTriangles(const pointField&) const
 
 Foam::label Foam::face::triangles
 (
-    const pointField& points,
+    const UList<point>& points,
     label& triI,
     faceList& triFaces
 ) const
@@ -841,7 +834,7 @@ Foam::label Foam::face::triangles
 
 Foam::label Foam::face::nTrianglesQuads
 (
-    const pointField& points,
+    const UList<point>& points,
     label& triI,
     label& quadI
 ) const
@@ -855,7 +848,7 @@ Foam::label Foam::face::nTrianglesQuads
 
 Foam::label Foam::face::trianglesQuads
 (
-    const pointField& points,
+    const UList<point>& points,
     label& triI,
     label& quadI,
     faceList& triFaces,
@@ -866,9 +859,9 @@ Foam::label Foam::face::trianglesQuads
 }
 
 
-Foam::label Foam::longestEdge(const face& f, const pointField& pts)
+Foam::label Foam::face::longestEdge(const UList<point>& pts) const
 {
-    const edgeList& eds = f.edges();
+    const edgeList& eds = this->edges();
 
     label longestEdgeI = -1;
     scalar longestEdgeLength = -SMALL;
@@ -885,6 +878,12 @@ Foam::label Foam::longestEdge(const face& f, const pointField& pts)
     }
 
     return longestEdgeI;
+}
+
+
+Foam::label Foam::longestEdge(const face& f, const UList<point>& pts)
+{
+    return f.longestEdge(pts);
 }
 
 

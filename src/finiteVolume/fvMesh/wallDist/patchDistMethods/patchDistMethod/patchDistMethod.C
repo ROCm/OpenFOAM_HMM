@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +63,37 @@ Foam::autoPtr<Foam::patchDistMethod> Foam::patchDistMethod::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(patchDistMethodType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
+    {
+        FatalErrorInFunction
+            << "Unknown patchDistMethodType type "
+            << patchDistMethodType << endl << endl
+            << "Valid patchDistMethod types are : " << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return cstrIter()(dict, mesh, patchIDs);
+}
+
+
+
+Foam::autoPtr<Foam::patchDistMethod> Foam::patchDistMethod::New
+(
+    const dictionary& dict,
+    const fvMesh& mesh,
+    const labelHashSet& patchIDs,
+    const word& defaultPatchDistMethod
+)
+{
+    word patchDistMethodType = defaultPatchDistMethod;
+    dict.readIfPresent("method", patchDistMethodType);
+
+    Info<< "Selecting patchDistMethod " << patchDistMethodType << endl;
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(patchDistMethodType);
+
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown patchDistMethodType type "

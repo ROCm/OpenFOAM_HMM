@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 #include "NASsurfaceFormat.H"
 #include "IFstream.H"
 #include "IStringStream.H"
+#include "faceTraits.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -191,12 +192,10 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
         if (cmd == "CTRIA3")
         {
-            triFace fTri;
-
             label groupId = readLabel(IStringStream(line.substr(16,8))());
-            fTri[0] = readLabel(IStringStream(line.substr(24,8))());
-            fTri[1] = readLabel(IStringStream(line.substr(32,8))());
-            fTri[2] = readLabel(IStringStream(line.substr(40,8))());
+            label a = readLabel(IStringStream(line.substr(24,8))());
+            label b = readLabel(IStringStream(line.substr(32,8))());
+            label c = readLabel(IStringStream(line.substr(40,8))());
 
             // Convert groupID into zoneId
             Map<label>::const_iterator fnd = lookup.find(groupId);
@@ -217,20 +216,17 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
                 // Info<< "zone" << zoneI << " => group " << groupId <<endl;
             }
 
-            dynFaces.append(fTri);
+            dynFaces.append(Face{a, b, c});
             dynZones.append(zoneI);
             dynSizes[zoneI]++;
         }
         else if (cmd == "CQUAD4")
         {
-            face fQuad(4);
-            labelUList& f = static_cast<labelUList&>(fQuad);
-
             label groupId = readLabel(IStringStream(line.substr(16,8))());
-            fQuad[0] = readLabel(IStringStream(line.substr(24,8))());
-            fQuad[1] = readLabel(IStringStream(line.substr(32,8))());
-            fQuad[2] = readLabel(IStringStream(line.substr(40,8))());
-            fQuad[3] = readLabel(IStringStream(line.substr(48,8))());
+            label a = readLabel(IStringStream(line.substr(24,8))());
+            label b = readLabel(IStringStream(line.substr(32,8))());
+            label c = readLabel(IStringStream(line.substr(40,8))());
+            label d = readLabel(IStringStream(line.substr(48,8))());
 
             // Convert groupID into zoneId
             Map<label>::const_iterator fnd = lookup.find(groupId);
@@ -251,18 +247,17 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
                 // Info<< "zone" << zoneI << " => group " << groupId <<endl;
             }
 
-
-            if (MeshedSurface<Face>::isTri())
+            if (faceTraits<Face>::isTri())
             {
-                dynFaces.append(triFace(f[0], f[1], f[2]));
-                dynFaces.append(triFace(f[0], f[2], f[3]));
+                dynFaces.append(Face{a, b, c});
+                dynFaces.append(Face{c, d, a});
                 dynZones.append(zoneI);
                 dynZones.append(zoneI);
                 dynSizes[zoneI] += 2;
             }
             else
             {
-                dynFaces.append(Face(f));
+                dynFaces.append(Face{a,b,c,d});
                 dynZones.append(zoneI);
                 dynSizes[zoneI]++;
             }

@@ -4,7 +4,9 @@ global/global.Cver
 global/argList/argList.C
 global/clock/clock.C
 global/profiling/profiling.C
+global/profiling/profilingInformation.C
 global/profiling/profilingSysInfo.C
+global/profiling/profilingTrigger.C
 global/etcFiles/etcFiles.C
 
 bools = primitives/bools
@@ -78,8 +80,14 @@ primitives/quaternion/quaternion.C
 primitives/septernion/septernion.C
 primitives/triad/triad.C
 
-/* functions, data entries */
+/* Run-time selectable functions */
 primitives/functions/Function1/makeDataEntries.C
+primitives/functions/Function1/ramp/ramp.C
+primitives/functions/Function1/linearRamp/linearRamp.C
+primitives/functions/Function1/quadraticRamp/quadraticRamp.C
+primitives/functions/Function1/quarterSineRamp/quarterSineRamp.C
+primitives/functions/Function1/quarterCosineRamp/quarterCosineRamp.C
+primitives/functions/Function1/halfCosineRamp/halfCosineRamp.C
 primitives/functions/Polynomial/polynomialFunction.C
 
 primitives/subModelBase/subModelBase.C
@@ -95,8 +103,8 @@ $(strings)/fileName/fileName.C
 $(strings)/fileName/fileNameIO.C
 $(strings)/keyType/keyType.C
 $(strings)/wordRe/wordRe.C
+$(strings)/wordRes/wordRes.C
 $(strings)/lists/hashedWordList.C
-$(strings)/lists/wordReListMatcher.C
 $(strings)/stringOps/stringOps.C
 
 ops = primitives/ops
@@ -109,7 +117,6 @@ $(sha1)/SHA1.C
 $(sha1)/SHA1Digest.C
 
 primitives/random/Random/Random.C
-primitives/random/cachedRandom/cachedRandom.C
 
 ranges = primitives/ranges
 $(ranges)/labelRange/labelRange.C
@@ -121,6 +128,9 @@ spatialVectorAlgebra = primitives/spatialVectorAlgebra
 $(spatialVectorAlgebra)/SpatialVector/spatialVector/spatialVector.C
 $(spatialVectorAlgebra)/SpatialTensor/spatialTensor/spatialTensor.C
 $(spatialVectorAlgebra)/CompactSpatialTensor/compactSpatialTensor/compactSpatialTensor.C
+
+primitives/polynomialEqns/cubicEqn/cubicEqn.C
+primitives/polynomialEqns/quadraticEqn/quadraticEqn.C
 
 containers/HashTables/HashTable/HashTableCore.C
 containers/HashTables/StaticHashTable/StaticHashTableCore.C

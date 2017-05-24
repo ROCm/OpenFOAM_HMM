@@ -70,7 +70,7 @@ tmp<snGradScheme<Type>> snGradScheme<Type>::New
     typename MeshConstructorTable::iterator constructorIter =
         MeshConstructorTablePtr_->find(schemeName);
 
-    if (constructorIter == MeshConstructorTablePtr_->end())
+    if (!constructorIter.found())
     {
         FatalIOErrorInFunction
         (

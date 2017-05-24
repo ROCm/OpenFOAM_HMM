@@ -1,1 +1,3 @@
-LIB_LIBS = -lOpenFOAM
+EXE_INC =
+
+LIB_LIBS =

@@ -48,7 +48,7 @@ Foam::searchableSurfaceFeatures::New
     dictConstructorTable::iterator cstrIter =
         dictConstructorTablePtr_->find(searchableSurfaceFeaturesType);
 
-    if (cstrIter == dictConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown searchableSurfaceFeatures type "

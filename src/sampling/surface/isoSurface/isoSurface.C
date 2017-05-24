@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -24,21 +24,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "isoSurface.H"
-#include "fvMesh.H"
 #include "mergePoints.H"
-#include "addToRunTimeSelectionTable.H"
 #include "slicedVolFields.H"
 #include "volFields.H"
-#include "surfaceFields.H"
-#include "OFstream.H"
-#include "meshTools.H"
-#include "triSurfaceSearch.H"
 #include "triSurfaceTools.H"
-#include "surfaceIntersection.H"
-#include "intersectedSurface.H"
-#include "searchableBox.H"
 #include "triSurface.H"
-#include "triSurfaceMesh.H"
 #include "triPoints.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -164,7 +154,11 @@ void Foam::isoSurface::syncUnseparatedPoints
                     patchInfo[nbrPointi] = pointValues[meshPts[pointi]];
                 }
 
-                OPstream toNbr(Pstream::blocking, pp.neighbProcNo());
+                OPstream toNbr
+                (
+                    Pstream::commsTypes::blocking,
+                    pp.neighbProcNo()
+                );
                 toNbr << patchInfo;
             }
         }
@@ -187,7 +181,11 @@ void Foam::isoSurface::syncUnseparatedPoints
                 {
                     // We do not know the number of points on the other side
                     // so cannot use Pstream::read.
-                    IPstream fromNbr(Pstream::blocking, pp.neighbProcNo());
+                    IPstream fromNbr
+                    (
+                        Pstream::commsTypes::blocking,
+                        pp.neighbProcNo()
+                    );
                     fromNbr >> nbrPatchInfo;
                 }
 

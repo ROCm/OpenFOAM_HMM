@@ -71,7 +71,7 @@ Foam::autoPtr<Foam::faceSelection> Foam::faceSelection::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(sampleType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown faceSelection type "

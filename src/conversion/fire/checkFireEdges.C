@@ -25,8 +25,7 @@ License
 
 #include "checkFireEdges.H"
 #include "polyMesh.H"
-#include "edge.H"
-#include "HashSet.H"
+#include "edgeHashes.H"
 #include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -69,7 +68,6 @@ Foam::label Foam::checkFireEdges
 {
     label nFailedEdges = 0;
     const bool fullCheck = true;
-    typedef HashSet<edge, Hash<edge>> edgeHashSet;
 
     Info<< "Checking edges according to AVL/FIRE on-the-fly methodology..."
         << endl;

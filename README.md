@@ -1,5 +1,5 @@
 # About OpenFOAM
-OpenFOAM is a free, open source CFD software [released and developed primarily by OpenCFD Ltd](http://www.openfoam.com) since 2004released and developed primarily by. It has a large user base across most areas of engineering and science, from both commercial and academic organisations. OpenFOAM has an extensive range of features to solve anything from complex fluid flows involving chemical reactions, turbulence and heat transfer, to acoustics, solid mechanics and electromagnetics.  [More...](http://www.openfoam.com/documentation)
+OpenFOAM is a free, open source CFD software [released and developed primarily by OpenCFD Ltd](http://www.openfoam.com) since 2004. It has a large user base across most areas of engineering and science, from both commercial and academic organisations. OpenFOAM has an extensive range of features to solve anything from complex fluid flows involving chemical reactions, turbulence and heat transfer, to acoustics, solid mechanics and electromagnetics.  [More...](http://www.openfoam.com/documentation)
 
 OpenFOAM+ is professionally released every six months to include customer sponsored developments and contributions from the community, including the OpenFOAM Foundation. Releases designated OpenFOAM+ contain several man years of client-sponsored developments of which much has been transferred to, but not released in the OpenFOAM Foundation branch.
 
@@ -23,4 +23,4 @@ Violations of the Trademark are continuously monitored, and will be duly prosecu
 - [OpenFOAM Community](http://www.openfoam.com/community/)
 - [Contacting OpenCFD](http://www.openfoam.com/contact/)
 
-Copyright 2016 OpenCFD Ltd
+Copyright 2016-2017 OpenCFD Ltd

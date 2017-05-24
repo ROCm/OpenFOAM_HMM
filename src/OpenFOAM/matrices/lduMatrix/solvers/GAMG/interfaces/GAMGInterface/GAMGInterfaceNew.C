@@ -46,7 +46,7 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
     lduInterfaceConstructorTable::iterator cstrIter =
         lduInterfaceConstructorTablePtr_->find(coupleType);
 
-    if (cstrIter == lduInterfaceConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown GAMGInterface type " << coupleType << ".\n"
@@ -82,7 +82,7 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
     IstreamConstructorTable::iterator cstrIter =
         IstreamConstructorTablePtr_->find(coupleType);
 
-    if (cstrIter == IstreamConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown GAMGInterface type " << coupleType << ".\n"

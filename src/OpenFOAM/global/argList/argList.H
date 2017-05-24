@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,8 @@ Description
     Default command-line options:
       - \par -case \<dir\>
         Select a case directory instead of the current working directory
+      - \par -decomposeParDict \<file\>
+        Read decomposePar dictionary from specified location
       - \par -parallel
         Specify case as a parallel job
       - \par -doc
@@ -51,10 +53,25 @@ Description
       - \par -help
         Print the usage
 
-    The environment variable \b FOAM_CASE is set to the path of the
-    global case (same for serial and parallel jobs).
-    The environment variable \b FOAM_CASENAME is set to the name of the
-    global case.
+    Additionally, the \b -noFunctionObjects and \b -postProcess options
+    may be present for some solvers or utilities.
+
+    Environment variables set by argList or by Time:
+      - \par FOAM_CASE
+        The path of the global case.
+        It is the same for serial and parallel jobs.
+      - \par FOAM_CASENAME
+        The name of the global case.
+      - \par FOAM_EXECUTABLE
+        If not already present in the calling environment,
+        it is set to the \a name portion of the calling executable.
+      - \par FOAM_APPLICATION
+        If not already present in the calling environment,
+        it is set to the value of the \c application entry
+        (from \c controlDict) if that entry is present.
+
+    The value of the \b FOAM_APPLICATION may be inconsistent if the value of
+    the \c application entry is adjusted during runtime.
 
 Note
     - The document browser used is defined by the \b FOAM_DOC_BROWSER
@@ -98,7 +115,9 @@ namespace Foam
 class argList
 {
     // Private data
-        static bool bannerEnabled;
+
+        //- Track enabled/disabled banner state
+        static bool bannerEnabled_;
 
         //- Switch on/off parallel mode. Has to be first to be constructed
         //  so destructor is done last.
@@ -109,6 +128,7 @@ class argList
 
         word executable_;
         fileName rootPath_;
+        bool distributed_;
         fileName globalCase_;
         fileName case_;
         string argListStr_;
@@ -128,10 +148,12 @@ class argList
         //   * cwd
         //
         // Also export FOAM_CASE and FOAM_CASENAME environment variables
-        // so they can be used immediately (eg, in decomposeParDict)
+        // so they can be used immediately (eg, in decomposeParDict), as well
+        // as the FOAM_EXECUTABLE environment.
         void getRootCase();
 
-        //- Transcribe argv into internal args_
+        //- Transcribe argv into internal args_.
+        //  Transform sequences with "(" ... ")" into string lists
         //  return true if any "(" ... ")" sequences were captured
         bool regroupArgv(int& argc, char**& argv);
 
@@ -220,6 +242,10 @@ public:
 
             //- Return root path
             inline const fileName& rootPath() const;
+
+            //- Return distributed flag (i.e. are rootPaths different on
+            //  different machines)
+            inline bool distributed() const;
 
             //- Return case name (parallel run) or global case (serial run)
             inline const fileName& caseName() const;
@@ -348,9 +374,15 @@ public:
             //- Disable emitting the banner information
             static void noBanner();
 
+            //- Banner status (enabled/disabled)
+            static bool bannerEnabled();
+
             //- Remove the 'noFunctionObjects' option,
             //  optionally adding a 'withFunctionObjects' option instead
             static void noFunctionObjects(bool addWithOption = false);
+
+            //- Suppress JobInfo, overriding controlDict setting
+            static void noJobInfo();
 
             //- Remove the parallel options
             static void noParallel();

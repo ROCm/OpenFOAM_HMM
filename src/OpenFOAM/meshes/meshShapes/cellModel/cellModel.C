@@ -31,7 +31,7 @@ License
 Foam::vector Foam::cellModel::centre
 (
     const labelList& pointLabels,
-    const pointField& points
+    const UList<point>& points
 ) const
 {
     // Estimate centre of cell
@@ -88,7 +88,7 @@ Foam::vector Foam::cellModel::centre
 Foam::scalar Foam::cellModel::mag
 (
     const labelList& pointLabels,
-    const pointField& points
+    const UList<point>& points
 ) const
 {
     // Estimate centre of cell

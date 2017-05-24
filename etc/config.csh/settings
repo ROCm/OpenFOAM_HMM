@@ -25,7 +25,7 @@
 #     etc/config.csh/settings
 #
 # Description
-#     Startup file for OpenFOAM
+#     Setup file for OpenFOAM
 #     Sourced from OpenFOAM-<VERSION>/etc/cshrc
 #
 #------------------------------------------------------------------------------
@@ -137,8 +137,8 @@ endsw
 
 #------------------------------------------------------------------------------
 
-# Location of the jobControl directory
-setenv FOAM_JOB_DIR $WM_PROJECT_INST_DIR/jobControl
+# Optional jobControl directory: unset is equivalent to ~/.OpenFOAM/jobControl
+# setenv FOAM_JOB_DIR "$HOME/.OpenFOAM/jobControl"
 
 # wmake configuration
 setenv WM_DIR $WM_PROJECT_DIR/wmake
@@ -178,8 +178,8 @@ setenv FOAM_ETC $WM_PROJECT_DIR/etc
 setenv FOAM_APP $WM_PROJECT_DIR/applications
 setenv FOAM_SRC $WM_PROJECT_DIR/src
 setenv FOAM_TUTORIALS $WM_PROJECT_DIR/tutorials
-setenv FOAM_UTILITIES $FOAM_APP/utilities
-setenv FOAM_SOLVERS $FOAM_APP/solvers
+setenv FOAM_UTILITIES $WM_PROJECT_DIR/applications/utilities
+setenv FOAM_SOLVERS $WM_PROJECT_DIR/applications/solvers
 setenv FOAM_RUN $WM_PROJECT_USER_DIR/run
 
 # Add wmake to the path - not required for runtime-only environment
@@ -197,8 +197,11 @@ endif
 unset siteDir
 
 _foamAddPath ${FOAM_USER_APPBIN}:${FOAM_SITE_APPBIN}:${FOAM_APPBIN}
-# Make sure to pick up dummy versions of external libraries last
-_foamAddLib  ${FOAM_USER_LIBBIN}:${FOAM_SITE_LIBBIN}:${FOAM_LIBBIN}:${FOAM_EXT_LIBBIN}:${FOAM_LIBBIN}/dummy
+_foamAddLib  $FOAM_LIBBIN/dummy     # Dummy versions of external libraries last
+if ( $?FOAM_EXT_LIBBIN ) then       # External libraries (allowed to be unset)
+    _foamAddLib $FOAM_EXT_LIBBIN
+endif
+_foamAddLib  ${FOAM_USER_LIBBIN}:${FOAM_SITE_LIBBIN}:${FOAM_LIBBIN}
 
 #------------------------------------------------------------------------------
 

@@ -42,7 +42,7 @@ Foam::autoPtr<Foam::massTransferModel> Foam::massTransferModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(massTransferModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown massTransferModelType type "

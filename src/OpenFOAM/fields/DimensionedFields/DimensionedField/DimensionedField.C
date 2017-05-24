@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,6 +45,27 @@ if (&(df1).mesh() != &(df2).mesh())                                 \
 }
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class Type, class GeoMesh>
+void Foam::DimensionedField<Type, GeoMesh>::checkFieldSize() const
+{
+    const label fieldSize = this->size();
+    if (fieldSize)
+    {
+        const label meshSize = GeoMesh::size(this->mesh_);
+        if (fieldSize != meshSize)
+        {
+            FatalErrorInFunction
+                << "size of field = " << fieldSize
+                << " is not the same as the size of mesh = "
+                << meshSize
+                << abort(FatalError);
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type, class GeoMesh>
@@ -62,14 +83,43 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     dimensions_(dims),
     oriented_()
 {
-    if (field.size() && field.size() != GeoMesh::size(mesh))
-    {
-        FatalErrorInFunction
-            << "size of field = " << field.size()
-            << " is not the same as the size of mesh = "
-            << GeoMesh::size(mesh)
-            << abort(FatalError);
-    }
+    checkFieldSize();
+}
+
+
+template<class Type, class GeoMesh>
+DimensionedField<Type, GeoMesh>::DimensionedField
+(
+    const IOobject& io,
+    const Mesh& mesh,
+    const dimensionSet& dims,
+    const Xfer<Field<Type>>& field
+)
+:
+    regIOobject(io),
+    Field<Type>(field),
+    mesh_(mesh),
+    dimensions_(dims)
+{
+    checkFieldSize();
+}
+
+
+template<class Type, class GeoMesh>
+DimensionedField<Type, GeoMesh>::DimensionedField
+(
+    const IOobject& io,
+    const Mesh& mesh,
+    const dimensionSet& dims,
+    const Xfer<List<Type>>& field
+)
+:
+    regIOobject(io),
+    Field<Type>(field),
+    mesh_(mesh),
+    dimensions_(dims)
+{
+    checkFieldSize();
 }
 
 

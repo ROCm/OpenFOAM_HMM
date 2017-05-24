@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::profiling::sysInfo
+    Foam::profilingSysInfo
 
 Description
-    General system information
+    General system information useful for profiling
 
 SourceFiles
     profilingSysInfo.C
@@ -35,8 +35,6 @@ SourceFiles
 #ifndef profilingSysInfo_H
 #define profilingSysInfo_H
 
-#include "profiling.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -44,27 +42,22 @@ namespace Foam
 
 // Forward declaration of classes
 class Ostream;
+class profilingSysInfo;
 
 /*---------------------------------------------------------------------------*\
-                     Class profiling::sysInfo Declaration
+                      Class profilingSysInfo Declaration
 \*---------------------------------------------------------------------------*/
 
-class profiling::sysInfo
+class profilingSysInfo
 {
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        sysInfo(const sysInfo&) = delete;
+        profilingSysInfo(const profilingSysInfo&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const sysInfo&) = delete;
+        void operator=(const profilingSysInfo&) = delete;
 
-
-protected:
-
-    // Friendship
-
-        friend class profiling;
 
 public:
 
@@ -72,11 +65,11 @@ public:
     // Constructors
 
         //- Construct from components
-        sysInfo();
+        profilingSysInfo();
 
 
     //- Destructor
-    ~sysInfo();
+    ~profilingSysInfo();
 
 
     // Member Functions
@@ -84,7 +77,7 @@ public:
         //- Update it with a new timing information
         void update();
 
-        //- Write the profiling sys-info, use dictionary format.
+        //- Write the profiling system-info, use dictionary format.
         Ostream& write(Ostream& os) const;
 };
 

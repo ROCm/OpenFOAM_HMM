@@ -96,14 +96,14 @@ public:
     // Constructors
 
         //- Construct from components
-        general(const dictionary& dict, cachedRandom& rndGen);
+        general(const dictionary& dict, Random& rndGen);
 
         //- Construct from components
         general
         (
             const UList<scalar>& sampleData,
             const scalar binWidth,
-            cachedRandom& rndGen
+            Random& rndGen
         );
 
         //- Construct copy

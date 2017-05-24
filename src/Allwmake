@@ -5,8 +5,8 @@ cd ${0%/*} && wmakeCheckPwd "$WM_PROJECT_DIR/src" 2>/dev/null || {
     echo "    Check your OpenFOAM environment and installation"
     exit 1
 }
-[ -n "$FOAM_EXT_LIBBIN" ] || {
-    echo "Error (${0##*/}) : FOAM_EXT_LIBBIN not set"
+[ -d "$WM_PROJECT_DIR" -a -f "$WM_PROJECT_DIR/etc/bashrc" ] || {
+    echo "Error (${0##*/}) : WM_PROJECT_DIR appears to be incorrect"
     echo "    Check your OpenFOAM environment and installation"
     exit 1
 }
@@ -28,9 +28,7 @@ wmake $targetType OpenFOAM
 
 wmake $targetType fileFormats
 wmake $targetType surfMesh
-wmake $targetType triSurface
 wmake $targetType meshTools
-wmake $targetType edgeMesh
 
 # Decomposition methods needed by dummyThirdParty
 # (dummy metisDecomp, scotchDecomp etc) needed by e.g. meshTools
@@ -51,7 +49,6 @@ wmake $targetType sampling
 wmake $targetType dynamicFvMesh
 wmake $targetType sampling
 wmake $targetType topoChangerFvMesh
-wmake $targetType sampling
 
 # Compile scotchDecomp, metisDecomp etc.
 parallel/Allwmake $targetType $*
@@ -82,6 +79,7 @@ wmake $targetType rigidBodyDynamics
 wmake $targetType rigidBodyMeshMotion
 
 # Needs access to Turbulence
-wmake $targetType thermophysicalModels/properties/liquidPropertiesFvPatchFields
+
+wmake $targetType thermophysicalModels/thermophysicalPropertiesFvPatchFields/liquidProperties
 
 #------------------------------------------------------------------------------

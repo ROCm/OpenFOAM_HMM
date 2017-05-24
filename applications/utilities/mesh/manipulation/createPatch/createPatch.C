@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -352,7 +352,11 @@ void syncPoints
                     }
                 }
 
-                OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
+                OPstream toNbr
+                (
+                    Pstream::commsTypes::blocking,
+                    procPatch.neighbProcNo()
+                );
                 toNbr << patchInfo;
             }
         }
@@ -380,7 +384,7 @@ void syncPoints
                     // so cannot use Pstream::read.
                     IPstream fromNbr
                     (
-                        Pstream::blocking,
+                        Pstream::commsTypes::blocking,
                         procPatch.neighbProcNo()
                     );
                     fromNbr >> nbrPatchInfo;

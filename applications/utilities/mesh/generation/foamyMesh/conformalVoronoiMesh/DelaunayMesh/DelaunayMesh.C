@@ -24,7 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "DelaunayMesh.H"
-#include "labelPair.H"
+#include "polyMesh.H"
+#include "labelPairHashes.H"
 #include "PrintTable.H"
 #include "pointIOField.H"
 #include "scalarIOField.H"

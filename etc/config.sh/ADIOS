@@ -58,7 +58,7 @@ then
     echo "Using adios ($adios_version)  ->  $ADIOS_ARCH_PATH" 1>&2
 fi
 
-if type _foamAddPath > /dev/null 2>&1    # normal sourcing
+if command -v _foamAddPath >/dev/null 2>&1  # normal sourcing
 then
     # If ADIOS_ARCH_PATH does not end with '-system' or '-none',
     # it is located within ThirdParty, or a central installation
@@ -71,7 +71,7 @@ then
         _foamAddPath $ADIOS_ARCH_PATH/bin
     fi
 
-    unset adios_version ending cleaned
+    unset adios_version ending
 
 fi
 

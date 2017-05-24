@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,9 +40,9 @@ complexVector UOprocess::WeinerProcess()
 {
     return RootDeltaT*complexVector
     (
-        complex(GaussGen.GaussNormal(), GaussGen.GaussNormal()),
-        complex(GaussGen.GaussNormal(), GaussGen.GaussNormal()),
-        complex(GaussGen.GaussNormal(), GaussGen.GaussNormal())
+        complex(GaussGen.GaussNormal<scalar>(), GaussGen.GaussNormal<scalar>()),
+        complex(GaussGen.GaussNormal<scalar>(), GaussGen.GaussNormal<scalar>()),
+        complex(GaussGen.GaussNormal<scalar>(), GaussGen.GaussNormal<scalar>())
     );
 }
 
@@ -57,7 +57,7 @@ UOprocess::UOprocess
     const dictionary& UOdict
 )
 :
-    GaussGen(label(0)),
+    GaussGen(),
     Mesh(kmesh),
     DeltaT(deltaT),
     RootDeltaT(sqrt(DeltaT)),
@@ -127,4 +127,3 @@ const complexVectorField& UOprocess::newField()
 } // End namespace Foam
 
 // ************************************************************************* //
-

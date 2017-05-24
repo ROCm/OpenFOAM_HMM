@@ -42,7 +42,7 @@
 #
 #     If using a central installation, but not located under ThirdParty:
 #         - specify metis-system
-#         - provide full paths for METIS_ARCH_PATH
+#         - provide full path for METIS_ARCH_PATH
 #
 # Note
 #     A csh version is not needed, since the values here are only sourced

@@ -90,21 +90,15 @@ inline Foam::hashedWordList::hashedWordList(std::initializer_list<word> lst)
 template<class AnyType, class AnyHash>
 inline Foam::hashedWordList::hashedWordList
 (
-    const HashTable<AnyType, word, AnyHash>& h
+    const HashTable<AnyType, word, AnyHash>& tbl
 )
 :
-    List<word>(h.size())
+    List<word>(tbl.size())
 {
-    label nElem = 0;
-    for
-    (
-        typename HashTable<AnyType, word, AnyHash>::const_iterator
-        iter = h.cbegin();
-        iter != h.cend();
-        ++iter
-    )
+    label count = 0;
+    for (auto iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
     {
-        List<word>::operator[](nElem++) = iter.key();
+        List<word>::operator[](count++) = iter.key();
     }
 
     this->sort();
@@ -134,7 +128,7 @@ inline void Foam::hashedWordList::append
 }
 
 
-inline const Foam::HashTable<Foam::label,Foam::word>&
+inline const Foam::HashTable<Foam::label>&
 Foam::hashedWordList::lookup() const
 {
     return indices_;
@@ -162,6 +156,34 @@ inline void Foam::hashedWordList::sort()
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
+inline const Foam::word& Foam::hashedWordList::operator[]
+(
+    const label index
+) const
+{
+    return List<word>::operator[](index);
+}
+
+
+inline Foam::label Foam::hashedWordList::operator[](const word& name) const
+{
+    auto iter = indices_.find(name);
+
+    if (iter.found())
+    {
+        return iter.object();
+    }
+
+    return -1;  // Not found (or not hashed?)
+}
+
+
+inline bool Foam::hashedWordList::operator()(const word& name) const
+{
+    return indices_.found(name);
+}
+
+
 inline void Foam::hashedWordList::operator=(const UList<word>& lst)
 {
     List<word>::operator=(lst);
@@ -179,22 +201,6 @@ inline void Foam::hashedWordList::operator=(std::initializer_list<word> lst)
 inline void Foam::hashedWordList::operator=(const hashedWordList& lst)
 {
     operator=(static_cast<const UList<word>&>(lst));
-}
-
-
-inline const Foam::word& Foam::hashedWordList::operator[]
-(
-    const label index
-) const
-{
-    return List<word>::operator[](index);
-}
-
-
-inline Foam::label Foam::hashedWordList::operator[](const word& name) const
-{
-    // Could return -1 instead of bombing out
-    return indices_[name];
 }
 
 

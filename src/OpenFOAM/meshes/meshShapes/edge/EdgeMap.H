@@ -25,7 +25,9 @@ Class
     Foam::EdgeMap
 
 Description
-    Map from edge (expressed as its endpoints) to value
+    Map from edge (expressed as its endpoints) to value.
+    For easier forward declaration it is currently implemented as a
+    separate class rather than a template alias.
 
 \*---------------------------------------------------------------------------*/
 
@@ -49,28 +51,11 @@ class EdgeMap
 :
     public HashTable<T, edge, Hash<edge>>
 {
-
 public:
 
-    // Constructors
+    //- Inherit constructors from HashTable
+    using HashTable<T, edge, Hash<edge>>::HashTable;
 
-        //- Construct given initial map size
-        EdgeMap(const label size = 128)
-        :
-            HashTable<T, edge, Hash<edge>>(size)
-        {}
-
-        //- Construct from Istream
-        EdgeMap(Istream& is)
-        :
-            HashTable<T, edge, Hash<edge>>(is)
-        {}
-
-        //- Construct as copy
-        EdgeMap(const EdgeMap<T>& map)
-        :
-            HashTable<T, edge, Hash<edge>>(map)
-        {}
 };
 
 

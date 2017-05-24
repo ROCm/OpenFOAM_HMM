@@ -41,7 +41,7 @@ Foam::kineticTheoryModels::viscosityModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(viscosityModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalError
             << "viscosityModel::New(const dictionary&) : " << endl

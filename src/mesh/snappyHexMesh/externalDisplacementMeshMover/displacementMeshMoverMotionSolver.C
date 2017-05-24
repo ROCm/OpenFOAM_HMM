@@ -74,7 +74,7 @@ Foam::displacementMeshMoverMotionSolver::meshMover() const
         meshMoverPtr_ = externalDisplacementMeshMover::New
         (
             moverType,
-            coeffDict().subDict(moverType + "Coeffs"),
+            coeffDict().optionalSubDict(moverType + "Coeffs"),
             localPointRegion::findDuplicateFacePairs(mesh()),
             pointDisplacement_
         );
@@ -105,7 +105,7 @@ void Foam::displacementMeshMoverMotionSolver::solve()
     labelList checkFaces(identity(mesh().nFaces()));
     meshMover().move
     (
-        coeffDict().subDict(meshMover().type() + "Coeffs"),
+        coeffDict().optionalSubDict(meshMover().type() + "Coeffs"),
         nAllowableErrors,
         checkFaces
     );

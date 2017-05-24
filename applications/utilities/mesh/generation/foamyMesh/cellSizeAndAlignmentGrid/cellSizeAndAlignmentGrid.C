@@ -62,7 +62,7 @@ Foam::tmp<Foam::Field<Type>> filterFarPoints
 )
 {
     tmp<Field<Type>> tNewField(new Field<Type>(field.size()));
-    Field<Type>& newField = tNewField();
+    Field<Type>& newField = tNewField.ref();
 
     label added = 0;
     label count = 0;
@@ -160,7 +160,7 @@ Foam::tmp<Foam::triadField> buildAlignmentField(const T& mesh)
     (
         new triadField(mesh.vertexCount(), triad::unset)
     );
-    triadField& alignments = tAlignments();
+    triadField& alignments = tAlignments.ref();
 
     for
     (
@@ -188,7 +188,7 @@ Foam::tmp<Foam::pointField> buildPointField(const T& mesh)
     (
         new pointField(mesh.vertexCount(), point(GREAT, GREAT, GREAT))
     );
-    pointField& points = tPoints();
+    pointField& points = tPoints.ref();
 
     for
     (

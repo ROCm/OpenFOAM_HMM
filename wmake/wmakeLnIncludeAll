@@ -29,7 +29,7 @@
 #     wmakeLnIncludeAll [dir1 .. dirN]
 #
 # Description
-#     Find directories with a 'Make/files' that contains a 'LIB =' directive
+#     Find directories with a 'Make/files' containing a 'LIB =' directive
 #     and execute 'wmakeLnInclude' for each one
 #
 #------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ options:
   -jN or -j N       Compile using N cores/hyperthreads
   -h | -help        Print the usage
 
-Find directories with a 'Make/files' that contains a 'LIB =' directive
+Find directories with a 'Make/files' containing a 'LIB =' directive
 and execute 'wmakeLnInclude -update' for each one
 
 USAGE
@@ -78,6 +78,11 @@ do
             nCores=${WM_NCOMPPROCS:-0}
             test $# -ge 2 && expr $2 + 1 > /dev/null 2>&1 \
                 && shift && nCores=$1
+
+            if [ "$nCores" = 0 ]
+            then
+                nCores=1
+            fi
             ;;
         # Parallel compilation on specified number of cores
         -j[1-9]*)
@@ -93,16 +98,24 @@ do
     shift
 done
 
+# Default search is from CWD, with special handling of the top-level
+# project directory: {applications,src} directories
+if [ "$#" -eq 0 ]
+then
+    if wmakeCheckPwd "$WM_PROJECT_DIR" 2>/dev/null
+    then
+        set -- applications src
+    else
+        set -- .
+    fi
+fi
+
 if [ "$nCores" -gt 0 ]
 then
     echo "$Script: starting wmakeLnInclude processes on $nCores cores"
 else
     echo "$Script: running wmakeLnInclude"
 fi
-
-
-# Defaults to searching from CWD
-[ "$#" -gt 0 ] || set -- .
 
 for checkDir
 do
@@ -114,7 +127,7 @@ do
         continue
     fi
 
-    find $checkDir -depth -type d -name Make -print | while read MakeDir
+    find $checkDir -depth -name Make -type d -print | while read MakeDir
     do
         topDir=${MakeDir%/Make}    # trim /Make from the end
         if [ -d "$topDir" ]

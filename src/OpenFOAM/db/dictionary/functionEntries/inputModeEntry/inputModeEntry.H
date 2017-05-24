@@ -34,12 +34,20 @@ Description
     \endverbatim
 
     The possible input modes:
-      - \par merge      merge sub-dictionaries when possible
-      - \par overwrite  keep last entry and silently remove previous ones
-      - \par protect    keep initial entry and silently ignore subsequent ones
-      - \par warn       keep initial entry and warn about subsequent ones
-      - \par error      issue a FatalError for duplicate entries
-      - \par default    currently identical to merge
+      - \par merge
+        merge sub-dictionaries when possible
+      - \par overwrite
+        keep last entry and silently remove previous ones
+      - \par protect
+        keep initial entry and silently ignore subsequent ones
+      - \par warn
+        keep initial entry and warn about subsequent ones
+      - \par error
+        issue a FatalError for duplicate entries
+      - \par default
+        The default treatment - currently identical to \b merge.
+
+      Note that the clear() method resets to the default mode (merge).
 
 SourceFiles
     inputModeEntry.C
@@ -83,13 +91,13 @@ class inputModeEntry
     // Private Member Functions
 
         //- Read the mode as a word and set enum appropriately
-        static void setMode(Istream&);
+        static void setMode(Istream& is);
 
         //- Disallow default bitwise copy construct
-        inputModeEntry(const inputModeEntry&);
+        inputModeEntry(const inputModeEntry&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const inputModeEntry&);
+        void operator=(const inputModeEntry&) = delete;
 
 
 public:
@@ -101,7 +109,7 @@ public:
     // Member Functions
 
         //- Execute the functionEntry in a sub-dict context
-        static bool execute(dictionary& parentDict, Istream&);
+        static bool execute(dictionary& parentDict, Istream& is);
 
         //- Reset the inputMode to %default (ie, %merge)
         static void clear();

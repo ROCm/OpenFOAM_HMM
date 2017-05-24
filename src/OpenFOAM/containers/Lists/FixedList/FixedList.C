@@ -53,7 +53,8 @@ bool Foam::FixedList<T, Size>::operator==(const FixedList<T, Size>& a) const
     List_CONST_ACCESS(T, (a), ap);
 
     List_FOR_ALL((*this), i)
-        equal = equal && (List_ELEM((*this), vp, i) == List_ELEM((a), ap, i));
+        equal = (List_ELEM((*this), vp, i) == List_ELEM((a), ap, i));
+        if (!equal) break;
     List_END_FOR_ALL
 
     return equal;
@@ -70,31 +71,24 @@ bool Foam::FixedList<T, Size>::operator!=(const FixedList<T, Size>& a) const
 template<class T, unsigned Size>
 bool Foam::FixedList<T, Size>::operator<(const FixedList<T, Size>& a) const
 {
-    for
-    (
-        const_iterator vi = cbegin(), ai = a.cbegin();
-        vi < cend() && ai < a.cend();
-        vi++, ai++
-    )
+    const T* const __restrict__ ptr1 = this->begin();
+    const T* const __restrict__ ptr2 = a.begin();
+
+    for (unsigned i=0; i<Size; ++i)
     {
-        if (*vi < *ai)
+        if (ptr1[i] < ptr2[i])
         {
             return true;
         }
-        else if (*vi > *ai)
+        else if (ptr1[i] > ptr2[i])
         {
             return false;
         }
     }
 
-    if (Size < a.Size)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    // Contents look to be identical.
+    // The sizes are identical by definition (template parameter)
+    return false;
 }
 
 

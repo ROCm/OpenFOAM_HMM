@@ -129,7 +129,7 @@ Foam::eddy::eddy
     const scalar x,
     const scalar sigmaX,
     const symmTensor& R,
-    cachedRandom& rndGen
+    Random& rndGen
 )
 :
     patchFaceI_(patchFaceI),

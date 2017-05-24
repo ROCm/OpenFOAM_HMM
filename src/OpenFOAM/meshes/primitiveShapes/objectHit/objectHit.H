@@ -84,28 +84,15 @@ public:
     // Member Functions
 
         //- Is there a hit
-        bool hit() const
+        inline bool hit() const
         {
             return hit_;
         }
 
         //- Return hit object
-        label hitObject() const
+        inline label hitObject() const
         {
             return hitObject_;
-        }
-
-
-    // Friend Operators
-
-        inline friend bool operator==(const objectHit& a, const objectHit& b)
-        {
-            return (a.hit_ == b.hit_) && (a.hitObject_ == b.hitObject_);
-        }
-
-        inline friend bool operator!=(const objectHit& a, const objectHit& b)
-        {
-            return !(a == b);
         }
 
 
@@ -116,6 +103,20 @@ public:
              return os << obj.hit() << token::SPACE << obj.hitObject();
         }
 };
+
+
+// Global Operators
+
+inline bool operator==(const objectHit& a, const objectHit& b)
+{
+    return a.hit() == b.hit() && a.hitObject() == b.hitObject();
+}
+
+
+inline bool operator!=(const objectHit& a, const objectHit& b)
+{
+    return !(a == b);
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

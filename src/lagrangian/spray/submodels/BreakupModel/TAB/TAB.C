@@ -110,7 +110,7 @@ bool Foam::TAB<CloudType>::update
     scalar& massChild
 )
 {
-    cachedRandom& rndGen = this->owner().rndGen();
+    Random& rndGen = this->owner().rndGen();
 
     scalar r = 0.5*d;
     scalar r2 = r*r;

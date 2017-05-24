@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -88,7 +88,7 @@ Foam::ConeInjection<CloudType>::ConeInjection
     ),
     sizeDistribution_
     (
-        distributionModels::distributionModel::New
+        distributionModel::New
         (
             this->coeffDict().subDict("sizeDistribution"), owner.rndGen()
         )
@@ -110,7 +110,7 @@ Foam::ConeInjection<CloudType>::ConeInjection
         vector tangent = Zero;
         scalar magTangent = 0.0;
 
-        cachedRandom& rnd = this->owner().rndGen();
+        Random& rnd = this->owner().rndGen();
         while (magTangent < SMALL)
         {
             vector v = rnd.sample01<vector>();
@@ -260,7 +260,7 @@ void Foam::ConeInjection<CloudType>::setProperties
     typename CloudType::parcelType& parcel
 )
 {
-    cachedRandom& rnd = this->owner().rndGen();
+    Random& rnd = this->owner().rndGen();
 
     // Set particle velocity
     const label i = parcelI % positionAxis_.size();

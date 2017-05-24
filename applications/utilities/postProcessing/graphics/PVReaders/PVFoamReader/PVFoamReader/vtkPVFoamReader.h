@@ -55,7 +55,7 @@ namespace Foam
 
 
 /*---------------------------------------------------------------------------*\
-                     Class vtkPVFoamReader Declaration
+                       Class vtkPVFoamReader Declaration
 \*---------------------------------------------------------------------------*/
 
 class vtkPVFoamReader
@@ -64,7 +64,7 @@ class vtkPVFoamReader
 {
 public:
     vtkTypeMacro(vtkPVFoamReader, vtkMultiBlockDataSetAlgorithm);
-    void PrintSelf(ostream&, vtkIndent);
+    void PrintSelf(ostream&, vtkIndent) VTK_OVERRIDE;
 
     static vtkPVFoamReader* New();
 
@@ -199,7 +199,7 @@ protected:
         vtkInformation*,
         vtkInformationVector**,
         vtkInformationVector*
-    );
+    ) VTK_OVERRIDE;
 
     //- Get the mesh/fields for a particular time
     virtual int RequestData
@@ -207,10 +207,10 @@ protected:
         vtkInformation*,
         vtkInformationVector**,
         vtkInformationVector*
-    );
+    ) VTK_OVERRIDE;
 
     //- Fill in additional port information
-    virtual int FillOutputPortInformation(int, vtkInformation*);
+    virtual int FillOutputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
 
     //- The observer to modify this object when array selections are modified
     vtkCallbackCommand* SelectionObserver;

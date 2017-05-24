@@ -41,7 +41,7 @@ Foam::wallBoilingModels::nucleationSiteModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(nucleationSiteModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown nucleationSiteModelType type "

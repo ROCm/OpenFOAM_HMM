@@ -192,19 +192,19 @@ public:
         void verbose(const bool verbosity = true);
 
         //- Read the surfMeshSamplers dictionary
-        virtual bool read(const dictionary&) override;
+        virtual bool read(const dictionary&);
 
         //- Execute, does sampling
-        virtual bool execute() override;
+        virtual bool execute();
 
         //- Write sampled values
-        virtual bool write() override;
+        virtual bool write();
 
         //- Update for changes of mesh - expires the surfaces
-        virtual void updateMesh(const mapPolyMesh&) override;
+        virtual void updateMesh(const mapPolyMesh&);
 
         //- Update for mesh point-motion - expires the surfaces
-        virtual void movePoints(const polyMesh&) override;
+        virtual void movePoints(const polyMesh&);
 
         //- Update for changes of mesh due to readUpdate - expires the surfaces
         virtual void readUpdate(const polyMesh::readUpdateState state);

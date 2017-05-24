@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,99 @@ License
 #include "Time.H"
 #include "OSspecific.H"
 #include "IOList.H"
-#include "stringListOps.H"
+#include "predicates.H"
+
+// * * * * * * * * * * * * * * Static Functions * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    // Templated implementation for lookup() - file-scope
+    template<class UnaryMatchPredicate>
+    static IOobjectList lookupImpl
+    (
+        const IOobjectList& list,
+        const UnaryMatchPredicate& matcher
+    )
+    {
+        IOobjectList results(list.size());
+
+        forAllConstIters(list, iter)
+        {
+            if (matcher(iter.key()))
+            {
+                if (IOobject::debug)
+                {
+                    InfoInFunction << "Found " << iter.key() << endl;
+                }
+
+                results.insert
+                (
+                    iter.key(),
+                    new IOobject(*(iter.object()))
+                );
+            }
+        }
+
+        return results;
+    }
+
+
+    // Templated implementation for classes() - file-scope
+    template<class UnaryMatchPredicate>
+    static HashTable<wordHashSet> classesImpl
+    (
+        const IOobjectList& list,
+        const UnaryMatchPredicate& matcher
+    )
+    {
+        HashTable<wordHashSet> summary(2*list.size());
+
+        // Summary (key,val) = (class-name, object-names)
+        forAllConstIters(list, iter)
+        {
+            if (matcher(iter.key()))
+            {
+                // Create entry (if needed) and insert
+                summary(iter.object()->headerClassName()).insert(iter.key());
+            }
+        }
+
+        return summary;
+    }
+
+
+    // Templated implementation for names(), sortedNames() - file-scope
+    template<class UnaryMatchPredicate>
+    static wordList namesImpl
+    (
+        const IOobjectList& list,
+        const word& clsName,
+        const UnaryMatchPredicate& matcher,
+        const bool doSort
+    )
+    {
+        wordList objNames(list.size());
+
+        label count = 0;
+        forAllConstIters(list, iter)
+        {
+            if (iter()->headerClassName() == clsName && matcher(iter.key()))
+            {
+                objNames[count++] = iter.key();
+            }
+        }
+
+        objNames.setSize(count);
+
+        if (doSort)
+        {
+            Foam::sort(objNames);
+        }
+
+        return objNames;
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -62,14 +154,14 @@ Foam::IOobjectList::IOobjectList
     }
 
     // Create a list of file names in this directory
-    fileNameList ObjectNames =
+    fileNameList objNames =
         readDir(db.path(newInstance, db.dbDir()/local), fileName::FILE);
 
-    forAll(ObjectNames, i)
+    forAll(objNames, i)
     {
         IOobject* objectPtr = new IOobject
         (
-            ObjectNames[i],
+            objNames[i],
             newInstance,
             local,
             db,
@@ -81,7 +173,7 @@ Foam::IOobjectList::IOobjectList
         // Use object with local scope
         if (objectPtr->typeHeaderOk<IOList<label>>(false))
         {
-            insert(ObjectNames[i], objectPtr);
+            insert(objectPtr->name(), objectPtr);
         }
         else
         {
@@ -91,9 +183,9 @@ Foam::IOobjectList::IOobjectList
 }
 
 
-Foam::IOobjectList::IOobjectList(const IOobjectList& ioOL)
+Foam::IOobjectList::IOobjectList(const IOobjectList& iolist)
 :
-    HashPtrTable<IOobject>(ioOL)
+    HashPtrTable<IOobject>(iolist)
 {}
 
 
@@ -113,25 +205,15 @@ bool Foam::IOobjectList::add(IOobject& io)
 
 bool Foam::IOobjectList::remove(IOobject& io)
 {
-    HashPtrTable<IOobject>::iterator iter =
-        HashPtrTable<IOobject>::find(io.name());
-
-    if (iter != end())
-    {
-        return erase(iter);
-    }
-    else
-    {
-        return false;
-    }
+    return erase(io.name());
 }
 
 
 Foam::IOobject* Foam::IOobjectList::lookup(const word& name) const
 {
-    HashPtrTable<IOobject>::const_iterator iter = find(name);
+    const_iterator iter = find(name);
 
-    if (iter != end())
+    if (iter.found())
     {
         if (IOobject::debug)
         {
@@ -152,68 +234,60 @@ Foam::IOobject* Foam::IOobjectList::lookup(const word& name) const
 }
 
 
-Foam::IOobjectList Foam::IOobjectList::lookup(const wordRe& name) const
+Foam::IOobjectList Foam::IOobjectList::lookup(const wordRe& matcher) const
 {
-    IOobjectList objectsOfName(size());
-
-    forAllConstIter(HashPtrTable<IOobject>, *this, iter)
-    {
-        if (name.match(iter()->name()))
-        {
-            if (IOobject::debug)
-            {
-                InfoInFunction << "Found " << iter.key() << endl;
-            }
-
-            objectsOfName.insert(iter.key(), new IOobject(*iter()));
-        }
-    }
-
-    return objectsOfName;
+    return lookupImpl(*this, matcher);
 }
 
 
-Foam::IOobjectList Foam::IOobjectList::lookup(const wordReList& patterns) const
+Foam::IOobjectList Foam::IOobjectList::lookup(const wordRes& matcher) const
 {
-    wordReListMatcher names(patterns);
-
-    IOobjectList objectsOfName(size());
-
-    forAllConstIter(HashPtrTable<IOobject>, *this, iter)
-    {
-        if (names.match(iter()->name()))
-        {
-            if (IOobject::debug)
-            {
-                InfoInFunction << "Found " << iter.key() << endl;
-            }
-
-            objectsOfName.insert(iter.key(), new IOobject(*iter()));
-        }
-    }
-
-    return objectsOfName;
+    return lookupImpl(*this, matcher);
 }
 
 
-Foam::IOobjectList Foam::IOobjectList::lookupClass(const word& ClassName) const
+Foam::IOobjectList Foam::IOobjectList::lookupClass(const word& clsName) const
 {
-    IOobjectList objectsOfClass(size());
+    IOobjectList results(size());
 
-    forAllConstIter(HashPtrTable<IOobject>, *this, iter)
+    forAllConstIters(*this, iter)
     {
-        if (iter()->headerClassName() == ClassName)
+        if (iter()->headerClassName() == clsName)
         {
             if (IOobject::debug)
             {
                 InfoInFunction << "Found " << iter.key() << endl;
             }
 
-            objectsOfClass.insert(iter.key(), new IOobject(*iter()));
+            results.insert
+            (
+                iter.key(),
+                new IOobject(*(iter.object()))
+            );
         }
     }
 
-    return objectsOfClass;
+    return results;
+}
+
+
+Foam::HashTable<Foam::wordHashSet> Foam::IOobjectList::classes() const
+{
+    return classesImpl(*this, predicates::always());
+}
+
+
+Foam::HashTable<Foam::wordHashSet>
+Foam::IOobjectList::classes(const wordRe& matcher) const
+{
+    return classesImpl(*this, matcher);
+}
+
+
+Foam::HashTable<Foam::wordHashSet>
+Foam::IOobjectList::classes(const wordRes& matcher) const
+{
+    return classesImpl(*this, matcher);
 }
 
 
@@ -231,85 +305,77 @@ Foam::wordList Foam::IOobjectList::sortedNames() const
 
 Foam::wordList Foam::IOobjectList::names
 (
-    const word& ClassName
+    const word& clsName
 ) const
 {
-    wordList objectNames(size());
+    return namesImpl(*this, clsName, predicates::always(), false);
+}
 
-    label count = 0;
-    forAllConstIter(HashPtrTable<IOobject>, *this, iter)
+
+Foam::wordList Foam::IOobjectList::names
+(
+    const word& clsName,
+    const wordRe& matcher
+) const
+{
+    return namesImpl(*this, clsName, matcher, false);
+}
+
+
+Foam::wordList Foam::IOobjectList::names
+(
+    const word& clsName,
+    const wordRes& matcher
+) const
+{
+    return namesImpl(*this, clsName, matcher, false);
+}
+
+
+Foam::wordList Foam::IOobjectList::sortedNames
+(
+    const word& clsName
+) const
+{
+    return namesImpl(*this, clsName, predicates::always(), true);
+}
+
+
+Foam::wordList Foam::IOobjectList::sortedNames
+(
+    const word& clsName,
+    const wordRe& matcher
+) const
+{
+    return namesImpl(*this, clsName, matcher, true);
+}
+
+
+Foam::wordList Foam::IOobjectList::sortedNames
+(
+    const word& clsName,
+    const wordRes& matcher
+) const
+{
+    return namesImpl(*this, clsName, matcher, true);
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const IOobjectList& list)
+{
+    os << nl << list.size() << nl << token::BEGIN_LIST << nl;
+
+    forAllConstIters(list, it)
     {
-        if (iter()->headerClassName() == ClassName)
-        {
-            objectNames[count++] = iter.key();
-        }
+        os << it.key() << token::SPACE << it.object()->headerClassName() << nl;
     }
 
-    objectNames.setSize(count);
+    os << token::END_LIST;
+    os.check(FUNCTION_NAME);
 
-    return objectNames;
-}
-
-
-Foam::wordList Foam::IOobjectList::names
-(
-    const word& ClassName,
-    const wordRe& matcher
-) const
-{
-    wordList objNames = names(ClassName);
-
-    return wordList(objNames, findStrings(matcher, objNames));
-}
-
-
-Foam::wordList Foam::IOobjectList::names
-(
-    const word& ClassName,
-    const wordReList& matcher
-) const
-{
-    wordList objNames = names(ClassName);
-
-    return wordList(objNames, findStrings(matcher, objNames));
-}
-
-
-Foam::wordList Foam::IOobjectList::sortedNames
-(
-    const word& ClassName
-) const
-{
-    wordList sortedLst = names(ClassName);
-    sort(sortedLst);
-
-    return sortedLst;
-}
-
-
-Foam::wordList Foam::IOobjectList::sortedNames
-(
-    const word& ClassName,
-    const wordRe& matcher
-) const
-{
-    wordList sortedLst = names(ClassName, matcher);
-    sort(sortedLst);
-
-    return sortedLst;
-}
-
-
-Foam::wordList Foam::IOobjectList::sortedNames
-(
-    const word& ClassName,
-    const wordReList& matcher
-) const
-{
-    wordList sortedLst = names(ClassName, matcher);
-    sort(sortedLst);
-
-    return sortedLst;
+    return os;
 }
 
 

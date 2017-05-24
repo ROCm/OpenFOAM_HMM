@@ -49,7 +49,7 @@ inline const Foam::Switch& Foam::ParticleTracks<CloudType>::resetOnWrite() const
 
 
 template<class CloudType>
-inline const typename Foam::ParticleTracks<CloudType>::hitTableType&
+inline const Foam::labelPairLookup&
 Foam::ParticleTracks<CloudType>::faceHitCounter() const
 {
     return faceHitCounter_;

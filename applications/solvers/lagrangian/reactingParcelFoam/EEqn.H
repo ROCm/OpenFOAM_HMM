@@ -19,8 +19,8 @@
      ==
         rho*(U&g)
       + parcels.Sh(he)
-      + radiation->Sh(thermo)
-      + combustion->Sh()
+      + radiation->Sh(thermo, he)
+      + Qdot
       + fvOptions(rho, he)
     );
 
@@ -35,6 +35,6 @@
     thermo.correct();
     radiation->correct();
 
-    Info<< "T gas min/max   = " << min(T).value() << ", "
+    Info<< "T gas min/max   " << min(T).value() << ", "
         << max(T).value() << endl;
 }
