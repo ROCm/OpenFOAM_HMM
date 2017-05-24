@@ -156,22 +156,24 @@ public:
       // Edit
 
         //- Insert a new entry
+        //  \return True if the entry inserted, which means that it did
+        //  not previously exist in the set.
         bool insert(const Key& key)
         {
             return this->parent_type::insert(key, nil());
         }
 
         //- Insert keys from the list of Key
-        //  Return the number of new elements inserted
+        //  \return The number of new elements inserted
         label insert(const UList<Key>& lst);
 
         //- Insert keys from the list of Key
-        //  Return the number of new elements inserted
+        //  \return The number of new elements inserted
         template<unsigned Size>
         label insert(const FixedList<Key, Size>& lst);
 
         //- Insert keys from a initializer list of Key
-        //  Return the number of new elements inserted
+        //  \return The number of new elements inserted
         label insert(std::initializer_list<Key> lst);
 
         //- Same as insert (cannot overwrite nil content)
@@ -200,18 +202,21 @@ public:
         }
 
         //- Unset the specified key - same as erase
+        //  \return True if the entry existed and was removed
         bool unset(const Key& key)
         {
             return this->parent_type::erase(key);
         }
 
         //- Unset the listed keys - same as erase
+        //  \return The number of items removed
         label unset(const UList<Key>& lst)
         {
             return this->parent_type::erase(lst);
         }
 
         //- Unset the listed keys - same as erase
+        //  \return The number of items removed
         template<unsigned Size>
         label unset(const FixedList<Key, Size>& lst)
         {
@@ -219,10 +224,35 @@ public:
         }
 
         //- Unset the listed keys - same as erase
+        //  \return The number of items removed
         label unset(std::initializer_list<Key> lst)
         {
             return this->parent_type::erase(lst);
         }
+
+        //- Not applicable for HashSet
+        template<class UnaryPredicate>
+        List<Key> tocValues(const UnaryPredicate&, const bool) = delete;
+
+        //- Not applicable for HashSet
+        template<class BinaryPredicate>
+        List<Key> tocEntries(const BinaryPredicate&, const bool) = delete;
+
+        //- Not applicable for HashSet
+        template<class UnaryPredicate>
+        label countValues(const UnaryPredicate&, const bool) = delete;
+
+        //- Not applicable for HashSet
+        template<class BinaryPredicate>
+        label countEntries(const BinaryPredicate&, const bool) = delete;
+
+        //- Not applicable for HashSet
+        template<class UnaryPredicate>
+        label filterValues(const UnaryPredicate&, const bool) = delete;
+
+        //- Not applicable for HashSet
+        template<class BinaryPredicate>
+        label filterEntries(const BinaryPredicate&, const bool) = delete;
 
 
     // STL iterators
@@ -248,11 +278,14 @@ public:
 
     // Member Operators
 
-        //- This operation doesn't make much sense for a hash-set
-        void operator()(const Key& key) = delete;
-
         //- Return true if the entry exists, same as found()
+        inline bool operator()(const Key& key) const;
+
+        //- Return true if the entry exists, same as found().
         inline bool operator[](const Key& key) const;
+
+
+      // Comparison
 
         //- Equality. Two hashset are equal when they have the same keys.
         //  Independent of table size or order.
@@ -261,6 +294,8 @@ public:
         //- The opposite of the equality operation.
         bool operator!=(const this_type& rhs) const;
 
+
+      // Assignment
 
         //- Assignment from a UList of keys
         void operator=(const UList<Key>& lst);
@@ -272,6 +307,8 @@ public:
         //- Assignment from an initializer list of keys
         void operator=(std::initializer_list<Key> lst);
 
+
+      // Logical operations
 
         //- Combine entries from HashSets
         void operator|=(const HashSet<Key, Hash>& rhs);

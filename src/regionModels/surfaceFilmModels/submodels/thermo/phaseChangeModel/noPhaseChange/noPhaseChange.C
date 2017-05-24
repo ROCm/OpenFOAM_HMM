@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,11 +44,11 @@ addToRunTimeSelectionTable(phaseChangeModel, noPhaseChange, dictionary);
 
 noPhaseChange::noPhaseChange
 (
-    surfaceFilmModel& owner,
+    surfaceFilmModel& film,
     const dictionary&
 )
 :
-    phaseChangeModel(owner)
+    phaseChangeModel(film)
 {}
 
 
@@ -73,9 +73,7 @@ void noPhaseChange::correctModel
     scalarField&,
     scalarField&
 )
-{
-    // do nothing
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

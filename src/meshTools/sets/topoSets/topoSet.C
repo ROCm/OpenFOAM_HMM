@@ -54,7 +54,7 @@ Foam::autoPtr<Foam::topoSet> Foam::topoSet::New
     wordConstructorTable::iterator cstrIter =
         wordConstructorTablePtr_->find(setType);
 
-    if (cstrIter == wordConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown set type " << setType
@@ -80,7 +80,7 @@ Foam::autoPtr<Foam::topoSet> Foam::topoSet::New
     sizeConstructorTable::iterator cstrIter =
         sizeConstructorTablePtr_->find(setType);
 
-    if (cstrIter == sizeConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown set type " << setType
@@ -106,7 +106,7 @@ Foam::autoPtr<Foam::topoSet> Foam::topoSet::New
     setConstructorTable::iterator cstrIter =
         setConstructorTablePtr_->find(setType);
 
-    if (cstrIter == setConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown set type " << setType

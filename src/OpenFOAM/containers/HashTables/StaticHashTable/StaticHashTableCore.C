@@ -46,25 +46,25 @@ Foam::label Foam::StaticHashTableCore::canonicalSize(const label requested_size)
     {
         return 0;
     }
+    else if (requested_size >= maxTableSize)
+    {
+        return maxTableSize;
+    }
 
-    // Enforce power of two - makes for a vey fast modulus etc.
+    // Enforce power of two - makes for a very fast modulus.
     // Use unsigned for these calculations.
     //
     // - The lower limit (8) is somewhat arbitrary, but if the hash table
     //   is too small, there will be many direct table collisions.
-    // - The uper limit (approx. labelMax/4) must be a power of two,
+    // - The upper limit (approx. labelMax/4) must be a power of two,
     //   need not be extremely large for hashing.
 
     uLabel powerOfTwo = 8; // lower-limit
 
     const uLabel size = requested_size;
-    if (size < powerOfTwo)
+    if (size <= powerOfTwo)
     {
         return powerOfTwo;
-    }
-    else if (requested_size >= maxTableSize)
-    {
-        return maxTableSize;
     }
     else if (size & (size-1))  // <- Modulus of i^2
     {

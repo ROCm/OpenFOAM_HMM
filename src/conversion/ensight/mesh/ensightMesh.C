@@ -151,7 +151,7 @@ void Foam::ensightMesh::correct()
                 useAll = false;
                 matched = findMatchingStrings
                 (
-                    wordReListMatcher(matcher),
+                    wordRes(matcher),
                     patchNames
                 );
             }
@@ -250,7 +250,7 @@ void Foam::ensightMesh::correct()
         wordList selectZones = mesh_.faceZones().names();
         inplaceSubsetMatchingStrings
         (
-            wordReListMatcher(matcher),
+            wordRes(matcher),
             selectZones
         );
 

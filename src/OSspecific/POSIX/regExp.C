@@ -111,7 +111,7 @@ Foam::regExp::~regExp()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::regExp::set(const char* pattern, bool ignoreCase)
+bool Foam::regExp::set(const char* pattern, bool ignoreCase)
 {
     clear();
 
@@ -137,7 +137,7 @@ void Foam::regExp::set(const char* pattern, bool ignoreCase)
             // avoid zero-length patterns
             if (!*pat)
             {
-                return;
+                return false;
             }
         }
 
@@ -154,11 +154,15 @@ void Foam::regExp::set(const char* pattern, bool ignoreCase)
                 << nl << errbuf
                 << exit(FatalError);
         }
+
+        return true;
     }
+
+    return false;  // Was cleared and nothing was set
 }
 
 
-void Foam::regExp::set(const std::string& pattern, bool ignoreCase)
+bool Foam::regExp::set(const std::string& pattern, bool ignoreCase)
 {
     return set(pattern.c_str(), ignoreCase);
 }
@@ -208,7 +212,7 @@ bool Foam::regExp::match(const std::string& text) const
         if
         (
             regexec(preg_, text.c_str(), nmatch, pmatch, 0) == 0
-         && (pmatch[0].rm_so == 0 && pmatch[0].rm_eo == label(text.size()))
+         && (pmatch[0].rm_so == 0 && pmatch[0].rm_eo == regoff_t(text.size()))
         )
         {
             return true;

@@ -56,7 +56,7 @@ Foam::autoPtr<Foam::engineMesh> Foam::engineMesh::New
     IOobjectConstructorTable::iterator cstrIter =
         IOobjectConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == IOobjectConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown engineMesh type "

@@ -178,14 +178,20 @@ inline String Foam::string::validate(const std::string& str)
     return ss;
 }
 
+
 inline bool Foam::string::match(const std::string& text) const
 {
-    // check as string
-    return (text == *this);
+    return !compare(text);  // Always compare as literal string
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline bool Foam::string::operator()(const std::string& text) const
+{
+    return !compare(text);  // Always compare as literal string
+}
+
 
 inline Foam::string Foam::string::operator()
 (
@@ -205,11 +211,11 @@ inline Foam::string Foam::string::operator()(const size_type n) const
 
 inline unsigned Foam::string::hash::operator()
 (
-    const string& key,
+    const string& str,
     unsigned seed
 ) const
 {
-    return Hasher(key.data(), key.size(), seed);
+    return Hasher(str.data(), str.size(), seed);
 }
 
 // ************************************************************************* //

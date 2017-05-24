@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -97,7 +97,7 @@ Foam::porosityModel::porosityModel
     name_(name),
     mesh_(mesh),
     dict_(dict),
-    coeffs_(dict.subDict(modelType + "Coeffs")),
+    coeffs_(dict.optionalSubDict(modelType + "Coeffs")),
     active_(true),
     zoneName_(cellZoneName),
     cellZoneIDs_(),
@@ -105,7 +105,7 @@ Foam::porosityModel::porosityModel
 {
     if (zoneName_ == word::null)
     {
-        dict.lookup("active") >> active_;
+        dict.readIfPresent("active", active_);
         dict_.lookup("cellZone") >> zoneName_;
     }
 
@@ -258,8 +258,10 @@ bool Foam::porosityModel::writeData(Ostream& os) const
 
 bool Foam::porosityModel::read(const dictionary& dict)
 {
-    active_ = readBool(dict.lookup("active"));
-    coeffs_ = dict.subDict(type() + "Coeffs");
+    dict.readIfPresent("active", active_);
+
+    coeffs_ = dict.optionalSubDict(type() + "Coeffs");
+
     dict.lookup("cellZone") >> zoneName_;
     cellZoneIDs_ = mesh_.cellZones().findIndices(zoneName_);
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,17 +38,6 @@ inline Foam::TroeFallOffFunction::TroeFallOffFunction
     Ts_(Ts),
     Tss_(Tss)
 {}
-
-
-inline Foam::TroeFallOffFunction::TroeFallOffFunction(Istream& is)
-:
-    alpha_(readScalar(is.readBegin("TroeFallOffFunction(Istream&)"))),
-    Tsss_(readScalar(is)),
-    Ts_(readScalar(is)),
-    Tss_(readScalar(is))
-{
-    is.readEnd("TroeFallOffFunction(Istream&)");
-}
 
 
 inline Foam::TroeFallOffFunction::TroeFallOffFunction(const dictionary& dict)
@@ -103,13 +92,7 @@ inline Foam::Ostream& Foam::operator<<
     const Foam::TroeFallOffFunction& tfof
 )
 {
-    os  << token::BEGIN_LIST
-        << tfof.alpha_
-        << token::SPACE << tfof.Tsss_
-        << token::SPACE << tfof.Ts_
-        << token::SPACE << tfof.Tss_
-        << token::END_LIST;
-
+    tfof.write(os);
     return os;
 }
 

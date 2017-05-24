@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -1870,7 +1870,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
 
 
     // Allocate buffers
-    PstreamBuffers pBufs(Pstream::nonBlocking);
+    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
 
     // What to send to neighbouring domains
@@ -1899,7 +1899,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             }
 
             // Pstream for sending mesh and fields
-            //OPstream str(Pstream::blocking, recvProc);
+            //OPstream str(Pstream::commsTypes::blocking, recvProc);
             UOPstream str(recvProc, pBufs);
 
             // Mesh subsetting engine

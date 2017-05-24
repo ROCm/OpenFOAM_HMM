@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ initialPointsMethod::initialPointsMethod
     geometryToConformTo_(geometryToConformTo),
     cellShapeControls_(cellShapeControls),
     decomposition_(decomposition),
-    detailsDict_(subDict(type + "Coeffs")),
+    detailsDict_(optionalSubDict(type + "Coeffs")),
     minimumSurfaceDistanceCoeffSqr_
     (
         sqr
@@ -94,7 +94,7 @@ autoPtr<initialPointsMethod> initialPointsMethod::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(initialPointsMethodTypeName);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown initialPointsMethod type "

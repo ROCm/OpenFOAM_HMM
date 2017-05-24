@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -1017,7 +1017,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
 
         mapDistributeBase::distribute
         (
-            Pstream::nonBlocking,
+            Pstream::commsTypes::nonBlocking,
             List<labelPair>(),
             tgtPatch.size(),
             map.constructMap(),
@@ -1032,7 +1032,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
 
         mapDistributeBase::distribute
         (
-            Pstream::nonBlocking,
+            Pstream::commsTypes::nonBlocking,
             List<labelPair>(),
             tgtPatch.size(),
             map.constructMap(),

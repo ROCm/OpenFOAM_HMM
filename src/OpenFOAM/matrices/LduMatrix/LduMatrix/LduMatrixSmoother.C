@@ -43,7 +43,7 @@ Foam::LduMatrix<Type, DType, LUType>::smoother::New
         typename symMatrixConstructorTable::iterator constructorIter =
             symMatrixConstructorTablePtr_->find(smootherName);
 
-        if (constructorIter == symMatrixConstructorTablePtr_->end())
+        if (!constructorIter.found())
         {
             FatalIOErrorInFunction(smootherDict)
                 << "Unknown symmetric matrix smoother " << smootherName
@@ -67,7 +67,7 @@ Foam::LduMatrix<Type, DType, LUType>::smoother::New
         typename asymMatrixConstructorTable::iterator constructorIter =
             asymMatrixConstructorTablePtr_->find(smootherName);
 
-        if (constructorIter == asymMatrixConstructorTablePtr_->end())
+        if (!constructorIter.found())
         {
             FatalIOErrorInFunction(smootherDict)
                 << "Unknown asymmetric matrix smoother " << smootherName

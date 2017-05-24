@@ -64,7 +64,7 @@ Foam::autoPtr<Foam::sampledSurface> Foam::sampledSurface::New
     wordConstructorTable::iterator cstrIter =
         wordConstructorTablePtr_->find(sampleType);
 
-    if (cstrIter == wordConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown sample type "

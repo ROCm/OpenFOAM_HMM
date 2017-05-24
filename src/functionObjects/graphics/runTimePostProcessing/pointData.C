@@ -153,7 +153,7 @@ Foam::autoPtr<Foam::functionObjects::runTimePostPro::pointData> Foam::functionOb
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(pointDataType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown pointData type "

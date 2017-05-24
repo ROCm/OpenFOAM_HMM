@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,10 +28,11 @@ Group
     grpCombustionModels
 
 Description
-    Partially stirred reactor combustion model.  The model calculates a finite
-    rate, based on both turbulence and chemistry time scales.  Depending on
-    mesh resolution, the Cmix parameter can be used to scale the turbulence
-    mixing time scale.
+    Partially stirred reactor turbulent combustion model.
+
+    This model calculates a finite rate, based on both turbulence and chemistry
+    time scales.  Depending on mesh resolution, the Cmix parameter can be used
+    to scale the turbulence mixing time scale.
 
 SourceFiles
     PaSR.C
@@ -63,9 +64,6 @@ class PaSR
 
         //- Mixing constant
         scalar Cmix_;
-
-        //- Turbulent reaction switch
-        Switch turbulentReaction_;
 
         //- Mixing parameter
         volScalarField kappa_;
@@ -110,11 +108,8 @@ public:
         //- Fuel consumption rate matrix.
         virtual tmp<fvScalarMatrix> R(volScalarField& Y) const;
 
-        //- Heat release rate calculated from fuel consumption rate matrix
-        virtual tmp<volScalarField> dQ() const;
-
-        //-  Return source for enthalpy equation [kg/m/s3]
-        virtual tmp<volScalarField> Sh() const;
+        //- Heat release rate [kg/m/s3]
+        virtual tmp<volScalarField> Qdot() const;
 
         //- Update properties from given dictionary
         virtual bool read();

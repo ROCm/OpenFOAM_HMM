@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -119,18 +119,18 @@ protected:
             //- Sensible enthalpy gas flux [J/m2/s]
             volScalarField phiHsGas_;
 
-            //- Heat release [J/s/m3]
-            volScalarField chemistrySh_;
+            //- Heat release rate [J/s/m3]
+            volScalarField chemistryQdot_;
 
 
         // Source term fields
 
             //- Coupled region radiative heat flux [W/m2]
             //  Requires user to input mapping info for coupled patches
-            //volScalarField QrCoupled_;
+            //volScalarField qrCoupled_;
 
             //- In depth radiative heat flux [W/m2]
-            volScalarField Qr_;
+            volScalarField qr_;
 
 
         // Checks
@@ -154,7 +154,7 @@ protected:
             bool  gasHSource_;
 
             //- Add in depth radiation source term
-            bool  QrHSource_;
+            bool  qrHSource_;
 
             //- Use chemistry solvers (ode or sequential)
             bool useChemistrySolvers_;
@@ -175,7 +175,7 @@ protected:
         void updateMesh(const scalarField& mass0);
 
         //- Update radiative flux in pyrolysis region
-        void updateQr();
+        void updateqr();
 
         //- Update enthalpy flux for pyrolysis gases
         void updatePhiGas();

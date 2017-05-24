@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,9 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
+#include "physicoChemicalConstants.H"
+
+using Foam::constant::physicoChemical::sigma;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -40,12 +43,11 @@ namespace Foam
         3
     >::names[] =
     {
-        "fixed_heat_flux",
-        "fixed_heat_transfer_coefficient",
-        "unknown"
+        "power",
+        "flux",
+        "coefficient"
     };
-
-} // End namespace Foam
+}
 
 const Foam::NamedEnum
 <
@@ -65,19 +67,108 @@ externalWallHeatFluxTemperatureFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), "undefined", "undefined", "undefined-K"),
-    mode_(unknown),
-    q_(p.size(), 0.0),
-    h_(p.size(), 0.0),
-    Ta_(p.size(), 0.0),
-    QrPrevious_(p.size(), 0.0),
-    QrRelaxation_(1),
-    QrName_("undefined-Qr"),
+    mode_(fixedHeatFlux),
+    Q_(0),
+    relaxation_(1),
+    emissivity_(0),
+    qrRelaxation_(1),
+    qrName_("undefined-qr"),
     thicknessLayers_(),
     kappaLayers_()
 {
-    refValue() = 0.0;
-    refGrad() = 0.0;
-    valueFraction() = 1.0;
+    refValue() = 0;
+    refGrad() = 0;
+    valueFraction() = 1;
+}
+
+
+Foam::externalWallHeatFluxTemperatureFvPatchScalarField::
+externalWallHeatFluxTemperatureFvPatchScalarField
+(
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF,
+    const dictionary& dict
+)
+:
+    mixedFvPatchScalarField(p, iF),
+    temperatureCoupledBase(patch(), dict),
+    mode_(operationModeNames.read(dict.lookup("mode"))),
+    Q_(0),
+    relaxation_(dict.lookupOrDefault<scalar>("relaxation", 1)),
+    emissivity_(dict.lookupOrDefault<scalar>("emissivity", 0)),
+    qrRelaxation_(dict.lookupOrDefault<scalar>("qrRelaxation", 1)),
+    qrName_(dict.lookupOrDefault<word>("qr", "none")),
+    thicknessLayers_(),
+    kappaLayers_()
+{
+    switch (mode_)
+    {
+        case fixedPower:
+        {
+            dict.lookup("Q") >> Q_;
+
+            break;
+        }
+        case fixedHeatFlux:
+        {
+            q_ = scalarField("q", dict, p.size());
+
+            break;
+        }
+        case fixedHeatTransferCoeff:
+        {
+            h_ = scalarField("h", dict, p.size());
+            Ta_ = scalarField("Ta", dict, p.size());
+
+            if (dict.found("thicknessLayers"))
+            {
+                dict.lookup("thicknessLayers") >> thicknessLayers_;
+                dict.lookup("kappaLayers") >> kappaLayers_;
+
+                if (thicknessLayers_.size() != kappaLayers_.size())
+                {
+                    FatalIOErrorInFunction(dict)
+                        << "\n number of layers for thicknessLayers and "
+                        << "kappaLayers must be the same"
+                        << "\n for patch " << p.name()
+                        << " of field " << internalField().name()
+                        << " in file " << internalField().objectPath()
+                        << exit(FatalIOError);
+                }
+            }
+
+            break;
+        }
+    }
+
+    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
+
+    if (qrName_ != "none")
+    {
+        if (dict.found("qrPrevious"))
+        {
+            qrPrevious_ = scalarField("qrPrevious", dict, p.size());
+        }
+        else
+        {
+            qrPrevious_.setSize(p.size(), 0);
+        }
+    }
+
+    if (dict.found("refValue"))
+    {
+        // Full restart
+        refValue() = scalarField("refValue", dict, p.size());
+        refGrad() = scalarField("refGradient", dict, p.size());
+        valueFraction() = scalarField("valueFraction", dict, p.size());
+    }
+    else
+    {
+        // Start from user entered data. Assume fixedValue.
+        refValue() = *this;
+        refGrad() = 0;
+        valueFraction() = 1;
+    }
 }
 
 
@@ -93,96 +184,38 @@ externalWallHeatFluxTemperatureFvPatchScalarField
     mixedFvPatchScalarField(ptf, p, iF, mapper),
     temperatureCoupledBase(patch(), ptf),
     mode_(ptf.mode_),
-    q_(ptf.q_, mapper),
-    h_(ptf.h_, mapper),
-    Ta_(ptf.Ta_, mapper),
-    QrPrevious_(ptf.QrPrevious_, mapper),
-    QrRelaxation_(ptf.QrRelaxation_),
-    QrName_(ptf.QrName_),
+    Q_(ptf.Q_),
+    relaxation_(ptf.relaxation_),
+    emissivity_(ptf.emissivity_),
+    qrRelaxation_(ptf.qrRelaxation_),
+    qrName_(ptf.qrName_),
     thicknessLayers_(ptf.thicknessLayers_),
     kappaLayers_(ptf.kappaLayers_)
-{}
-
-
-Foam::externalWallHeatFluxTemperatureFvPatchScalarField::
-externalWallHeatFluxTemperatureFvPatchScalarField
-(
-    const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF,
-    const dictionary& dict
-)
-:
-    mixedFvPatchScalarField(p, iF),
-    temperatureCoupledBase(patch(), dict),
-    mode_(unknown),
-    q_(p.size(), 0.0),
-    h_(p.size(), 0.0),
-    Ta_(p.size(), 0.0),
-    QrPrevious_(p.size(), 0.0),
-    QrRelaxation_(dict.lookupOrDefault<scalar>("relaxation", 1)),
-    QrName_(dict.lookupOrDefault<word>("Qr", "none")),
-    thicknessLayers_(),
-    kappaLayers_()
 {
-    if (dict.found("q") && !dict.found("h") && !dict.found("Ta"))
+    switch (mode_)
     {
-        mode_ = fixedHeatFlux;
-        q_ = scalarField("q", dict, p.size());
-    }
-    else if (dict.found("h") && dict.found("Ta") && !dict.found("q"))
-    {
-        mode_ = fixedHeatTransferCoeff;
-        h_ = scalarField("h", dict, p.size());
-        Ta_ = scalarField("Ta", dict, p.size());
-        if (dict.found("thicknessLayers"))
-
-        if (dict.readIfPresent("thicknessLayers", thicknessLayers_))
+        case fixedPower:
         {
-            dict.lookup("kappaLayers") >> kappaLayers_;
+            break;
+        }
+        case fixedHeatFlux:
+        {
+            q_.autoMap(mapper);
 
-            if (thicknessLayers_.size() != kappaLayers_.size())
-            {
-                FatalIOErrorInFunction(dict)
-                    << "\n number of layers for thicknessLayers and "
-                    << "kappaLayers must be the same"
-                    << "\n for patch " << p.name()
-                    << " of field " << internalField().name()
-                    << " in file " << internalField().objectPath()
-                    << exit(FatalIOError);
-            }
+            break;
+        }
+        case fixedHeatTransferCoeff:
+        {
+            h_.autoMap(mapper);
+            Ta_.autoMap(mapper);
+
+            break;
         }
     }
-    else
-    {
-        FatalErrorInFunction
-            << "\n patch type '" << p.type()
-            << "' either q or h and Ta were not found '"
-            << "\n for patch " << p.name()
-            << " of field " << internalField().name()
-            << " in file " << internalField().objectPath()
-            << exit(FatalError);
-    }
 
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
-
-    if (dict.found("QrPrevious"))
+    if (qrName_ != "none")
     {
-        QrPrevious_ = scalarField("QrPrevious", dict, p.size());
-    }
-
-    if (dict.found("refValue"))
-    {
-        // Full restart
-        refValue() = scalarField("refValue", dict, p.size());
-        refGrad() = scalarField("refGradient", dict, p.size());
-        valueFraction() = scalarField("valueFraction", dict, p.size());
-    }
-    else
-    {
-        // Start from user entered data. Assume fixedValue.
-        refValue() = *this;
-        refGrad() = 0.0;
-        valueFraction() = 1.0;
+        qrPrevious_.autoMap(mapper);
     }
 }
 
@@ -190,41 +223,47 @@ externalWallHeatFluxTemperatureFvPatchScalarField
 Foam::externalWallHeatFluxTemperatureFvPatchScalarField::
 externalWallHeatFluxTemperatureFvPatchScalarField
 (
-    const externalWallHeatFluxTemperatureFvPatchScalarField& tppsf
+    const externalWallHeatFluxTemperatureFvPatchScalarField& ewhftpsf
 )
 :
-    mixedFvPatchScalarField(tppsf),
-    temperatureCoupledBase(tppsf),
-    mode_(tppsf.mode_),
-    q_(tppsf.q_),
-    h_(tppsf.h_),
-    Ta_(tppsf.Ta_),
-    QrPrevious_(tppsf.QrPrevious_),
-    QrRelaxation_(tppsf.QrRelaxation_),
-    QrName_(tppsf.QrName_),
-    thicknessLayers_(tppsf.thicknessLayers_),
-    kappaLayers_(tppsf.kappaLayers_)
+    mixedFvPatchScalarField(ewhftpsf),
+    temperatureCoupledBase(ewhftpsf),
+    mode_(ewhftpsf.mode_),
+    Q_(ewhftpsf.Q_),
+    q_(ewhftpsf.q_),
+    h_(ewhftpsf.h_),
+    Ta_(ewhftpsf.Ta_),
+    relaxation_(ewhftpsf.relaxation_),
+    emissivity_(ewhftpsf.emissivity_),
+    qrPrevious_(ewhftpsf.qrPrevious_),
+    qrRelaxation_(ewhftpsf.qrRelaxation_),
+    qrName_(ewhftpsf.qrName_),
+    thicknessLayers_(ewhftpsf.thicknessLayers_),
+    kappaLayers_(ewhftpsf.kappaLayers_)
 {}
 
 
 Foam::externalWallHeatFluxTemperatureFvPatchScalarField::
 externalWallHeatFluxTemperatureFvPatchScalarField
 (
-    const externalWallHeatFluxTemperatureFvPatchScalarField& tppsf,
+    const externalWallHeatFluxTemperatureFvPatchScalarField& ewhftpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    mixedFvPatchScalarField(tppsf, iF),
-    temperatureCoupledBase(patch(), tppsf),
-    mode_(tppsf.mode_),
-    q_(tppsf.q_),
-    h_(tppsf.h_),
-    Ta_(tppsf.Ta_),
-    QrPrevious_(tppsf.QrPrevious_),
-    QrRelaxation_(tppsf.QrRelaxation_),
-    QrName_(tppsf.QrName_),
-    thicknessLayers_(tppsf.thicknessLayers_),
-    kappaLayers_(tppsf.kappaLayers_)
+    mixedFvPatchScalarField(ewhftpsf, iF),
+    temperatureCoupledBase(patch(), ewhftpsf),
+    mode_(ewhftpsf.mode_),
+    Q_(ewhftpsf.Q_),
+    q_(ewhftpsf.q_),
+    h_(ewhftpsf.h_),
+    Ta_(ewhftpsf.Ta_),
+    relaxation_(ewhftpsf.relaxation_),
+    emissivity_(ewhftpsf.emissivity_),
+    qrPrevious_(ewhftpsf.qrPrevious_),
+    qrRelaxation_(ewhftpsf.qrRelaxation_),
+    qrName_(ewhftpsf.qrName_),
+    thicknessLayers_(ewhftpsf.thicknessLayers_),
+    kappaLayers_(ewhftpsf.kappaLayers_)
 {}
 
 
@@ -236,10 +275,32 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::autoMap
 )
 {
     mixedFvPatchScalarField::autoMap(m);
-    q_.autoMap(m);
-    h_.autoMap(m);
-    Ta_.autoMap(m);
-    QrPrevious_.autoMap(m);
+
+    switch (mode_)
+    {
+        case fixedPower:
+        {
+            break;
+        }
+        case fixedHeatFlux:
+        {
+            q_.autoMap(m);
+
+            break;
+        }
+        case fixedHeatTransferCoeff:
+        {
+            h_.autoMap(m);
+            Ta_.autoMap(m);
+
+            break;
+        }
+    }
+
+    if (qrName_ != "none")
+    {
+        qrPrevious_.autoMap(m);
+    }
 }
 
 
@@ -251,13 +312,34 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::rmap
 {
     mixedFvPatchScalarField::rmap(ptf, addr);
 
-    const externalWallHeatFluxTemperatureFvPatchScalarField& tiptf =
+    const externalWallHeatFluxTemperatureFvPatchScalarField& ewhftpsf =
         refCast<const externalWallHeatFluxTemperatureFvPatchScalarField>(ptf);
 
-    q_.rmap(tiptf.q_, addr);
-    h_.rmap(tiptf.h_, addr);
-    Ta_.rmap(tiptf.Ta_, addr);
-    QrPrevious_.rmap(tiptf.QrPrevious_, addr);
+    switch (mode_)
+    {
+        case fixedPower:
+        {
+            break;
+        }
+        case fixedHeatFlux:
+        {
+            q_.rmap(ewhftpsf.q_, addr);
+
+            break;
+        }
+        case fixedHeatTransferCoeff:
+        {
+            h_.rmap(ewhftpsf.h_, addr);
+            Ta_.rmap(ewhftpsf.Ta_, addr);
+
+            break;
+        }
+    }
+
+    if (qrName_ != "none")
+    {
+        qrPrevious_.rmap(ewhftpsf.qrPrevious_, addr);
+    }
 }
 
 
@@ -268,65 +350,114 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const scalarField Tp(*this);
-    scalarField hp(patch().size(), 0.0);
+    const scalarField& Tp(*this);
 
-    scalarField Qr(Tp.size(), 0.0);
-    if (QrName_ != "none")
+    scalarField qr(Tp.size(), 0);
+    if (qrName_ != "none")
     {
-        Qr = patch().lookupPatchField<volScalarField, scalar>(QrName_);
+        qr =
+            qrRelaxation_
+           *patch().lookupPatchField<volScalarField, scalar>(qrName_)
+          + (1 - qrRelaxation_)*qrPrevious_;
 
-        Qr = QrRelaxation_*Qr + (1.0 - QrRelaxation_)*QrPrevious_;
-        QrPrevious_ = Qr;
+        qrPrevious_ = qr;
     }
 
     switch (mode_)
     {
+        case fixedPower:
+        {
+            refGrad() = (Q_/gSum(patch().magSf()) + qr)/kappa(Tp);
+            refValue() = 0;
+            valueFraction() = 0;
+
+            break;
+        }
         case fixedHeatFlux:
         {
-            refGrad() = (q_ + Qr)/kappa(Tp);
-            refValue() = 0.0;
-            valueFraction() = 0.0;
+            refGrad() = (q_ + qr)/kappa(Tp);
+            refValue() = 0;
+            valueFraction() = 0;
 
             break;
         }
         case fixedHeatTransferCoeff:
         {
-            scalar totalSolidRes = 0.0;
-            if (thicknessLayers_.size() > 0)
+            scalar totalSolidRes = 0;
+            if (thicknessLayers_.size())
             {
                 forAll(thicknessLayers_, iLayer)
                 {
                     const scalar l = thicknessLayers_[iLayer];
-                    if (kappaLayers_[iLayer] > 0.0)
+                    if (kappaLayers_[iLayer] > 0)
                     {
                         totalSolidRes += l/kappaLayers_[iLayer];
                     }
                 }
             }
-            hp = 1.0/(1.0/h_ + totalSolidRes);
+            scalarField hp(1/(1/h_ + totalSolidRes));
 
-            Qr /= Tp;
-            refGrad() = 0.0;
-            refValue() = hp*Ta_/(hp - Qr);
-            valueFraction() =
-                (hp - Qr)/((hp - Qr) + kappa(Tp)*patch().deltaCoeffs());
+            scalarField hpTa(hp*Ta_);
+
+            if (emissivity_ > 0)
+            {
+                // Evaluate the radiative flux to the environment
+                // from the surface temperature ...
+                if (totalSolidRes > 0)
+                {
+                    // ... including the effect of the solid wall thermal
+                    // resistance
+                    scalarField TpLambda(h_/(h_ + 1/totalSolidRes));
+                    scalarField Ts(TpLambda*Tp + (1 - TpLambda)*Ta_);
+                    scalarField lambdaTa4(pow4((1 - TpLambda)*Ta_));
+
+                    hp += emissivity_*sigma.value()*(pow4(Ts) - lambdaTa4)/Tp;
+                    hpTa += sigma.value()*(emissivity_*lambdaTa4 + pow4(Ta_));
+                }
+                else
+                {
+                    // ... if there is no solid wall thermal resistance use
+                    // the current wall temperature
+                    hp += emissivity_*sigma.value()*pow3(Tp);
+                    hpTa += sigma.value()*pow4(Ta_);
+                }
+            }
+
+            const scalarField kappaDeltaCoeffs
+            (
+                this->kappa(Tp)*patch().deltaCoeffs()
+            );
+
+            refGrad() = 0;
+
+            forAll(Tp, i)
+            {
+                if (qr[i] < 0)
+                {
+                    const scalar hpmqr = hp[i] - qr[i]/Tp[i];
+
+                    refValue()[i] = hpTa[i]/hpmqr;
+                    valueFraction()[i] = hpmqr/(hpmqr + kappaDeltaCoeffs[i]);
+                }
+                else
+                {
+                    refValue()[i] = (hpTa[i] + qr[i])/hp[i];
+                    valueFraction()[i] = hp[i]/(hp[i] + kappaDeltaCoeffs[i]);
+                }
+            }
 
             break;
         }
-        default:
-        {
-            FatalErrorInFunction
-                << "Illegal heat flux mode " << operationModeNames[mode_]
-                << exit(FatalError);
-        }
     }
+
+    valueFraction() = relaxation_*valueFraction() + (1 - relaxation_);
+    refValue() = relaxation_*refValue() + (1 - relaxation_)*Tp;
 
     mixedFvPatchScalarField::updateCoeffs();
 
     if (debug)
     {
-        scalar Q = gSum(kappa(Tp)*patch().magSf()*snGrad());
+        const scalar Q = gSum(kappa(Tp)*patch().magSf()*snGrad());
 
         Info<< patch().boundaryMesh().mesh().name() << ':'
             << patch().name() << ':'
@@ -346,37 +477,68 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchScalarField::write(os);
-    temperatureCoupledBase::write(os);
+    fvPatchScalarField::write(os);
 
-    QrPrevious_.writeEntry("QrPrevious", os);
-    os.writeKeyword("Qr")<< QrName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("relaxation")<< QrRelaxation_
-        << token::END_STATEMENT << nl;
+    os.writeKeyword("mode")
+        << operationModeNames[mode_] << token::END_STATEMENT << nl;
+    temperatureCoupledBase::write(os);
 
     switch (mode_)
     {
+        case fixedPower:
+        {
+            os.writeKeyword("Q")
+                << Q_ << token::END_STATEMENT << nl;
 
+            break;
+        }
         case fixedHeatFlux:
         {
             q_.writeEntry("q", os);
+
             break;
         }
         case fixedHeatTransferCoeff:
         {
             h_.writeEntry("h", os);
             Ta_.writeEntry("Ta", os);
-            thicknessLayers_.writeEntry("thicknessLayers", os);
-            kappaLayers_.writeEntry("kappaLayers", os);
+
+            if (relaxation_ < 1)
+            {
+                os.writeKeyword("relaxation")
+                    << relaxation_ << token::END_STATEMENT << nl;
+            }
+
+            if (emissivity_ > 0)
+            {
+                os.writeKeyword("emissivity")
+                    << emissivity_ << token::END_STATEMENT << nl;
+            }
+
+            if (thicknessLayers_.size())
+            {
+                thicknessLayers_.writeEntry("thicknessLayers", os);
+                kappaLayers_.writeEntry("kappaLayers", os);
+            }
+
             break;
         }
-        default:
-        {
-            FatalErrorInFunction
-                << "Illegal heat flux mode " << operationModeNames[mode_]
-                << abort(FatalError);
-        }
     }
+
+    os.writeKeyword("qr")<< qrName_ << token::END_STATEMENT << nl;
+
+    if (qrName_ != "none")
+    {
+        os.writeKeyword("qrRelaxation")
+            << qrRelaxation_ << token::END_STATEMENT << nl;
+
+        qrPrevious_.writeEntry("qrPrevious", os);
+    }
+
+    refValue().writeEntry("refValue", os);
+    refGrad().writeEntry("refGradient", os);
+    valueFraction().writeEntry("valueFraction", os);
+    writeEntry("value", os);
 }
 
 

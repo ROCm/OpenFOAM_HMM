@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,16 @@ immiscibleIncompressibleTwoPhaseMixture
     incompressibleTwoPhaseMixture(U, phi),
     interfaceProperties(alpha1(), U, *this)
 {}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+bool Foam::immiscibleIncompressibleTwoPhaseMixture::read()
+{
+    return
+        incompressibleTwoPhaseMixture::read()
+     && interfaceProperties::read();
+}
 
 
 // ************************************************************************* //

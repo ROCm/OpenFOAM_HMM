@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ faceAreaWeightModel::faceAreaWeightModel
 )
 :
     dictionary(relaxationDict),
-    coeffDict_(subDict(type + "Coeffs"))
+    coeffDict_(optionalSubDict(type + "Coeffs"))
 {}
 
 
@@ -68,7 +68,7 @@ autoPtr<faceAreaWeightModel> faceAreaWeightModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(faceAreaWeightModelTypeName);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown faceAreaWeightModel type "

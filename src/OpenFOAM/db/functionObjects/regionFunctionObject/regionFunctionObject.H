@@ -176,7 +176,7 @@ public:
     // Member Functions
 
         //- Read optional controls
-        virtual bool read(const dictionary& dict) override;
+        virtual bool read(const dictionary& dict);
 };
 
 

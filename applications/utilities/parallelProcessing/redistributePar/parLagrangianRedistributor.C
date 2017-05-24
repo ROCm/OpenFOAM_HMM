@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -137,7 +137,7 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
 
 
     // Allocate transfer buffers
-    PstreamBuffers pBufs(Pstream::nonBlocking);
+    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
     {
         // List of lists of particles to be transfered for all of the

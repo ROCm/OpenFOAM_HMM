@@ -54,7 +54,7 @@ Foam::autoPtr<Foam::multiphaseSystem> Foam::multiphaseSystem::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(multiphaseSystemType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown multiphaseSystemType type "

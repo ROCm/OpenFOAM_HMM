@@ -144,7 +144,7 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
             const word scsFuncName =
                 shapeDict.lookup("surfaceCellSizeFunction");
             const dictionary& scsDict =
-                shapeDict.subDict(scsFuncName + "Coeffs");
+                shapeDict.optionalSubDict(scsFuncName + "Coeffs");
 
             const scalar surfaceCellSize =
                 readScalar(scsDict.lookup("surfaceCellSizeCoeff"));
@@ -666,15 +666,6 @@ void writeMesh
     }
     refinementHistory::removeFiles(mesh);
 
-    //label flag = meshRefinement::MESH;
-    //if (writeLevel)
-    //{
-    //    flag |= meshRefinement::SCALARLEVELS;
-    //}
-    //if (debug & meshRefinement::OBJINTERSECTIONS)
-    //{
-    //    flag |= meshRefinement::OBJINTERSECTIONS;
-    //}
     meshRefiner.write
     (
         debugLevel,
@@ -710,7 +701,7 @@ int main(int argc, char *argv[])
     Foam::argList::addOption
     (
         "outFile",
-        "fileName",
+        "file",
         "name of the file to save the simplified surface to"
     );
     #include "addProfilingOption.H"
@@ -726,117 +717,6 @@ int main(int argc, char *argv[])
 
     autoPtr<fvMesh> meshPtr;
 
-//    if (surfaceSimplify)
-//    {
-//        IOdictionary foamyHexMeshDict
-//        (
-//           IOobject
-//           (
-//                "foamyHexMeshDict",
-//                runTime.system(),
-//                runTime,
-//                IOobject::MUST_READ_IF_MODIFIED,
-//                IOobject::NO_WRITE
-//           )
-//        );
-//
-//        const dictionary& motionDict =
-//            foamyHexMeshDict.subDict("motionControl");
-//
-//        const scalar defaultCellSize =
-//            readScalar(motionDict.lookup("defaultCellSize"));
-//
-//        Info<< "Constructing single cell mesh from boundBox" << nl << endl;
-//
-//        boundBox bb(args.optionRead<boundBox>("surfaceSimplify"));
-//
-//        labelList owner(6, label(0));
-//        labelList neighbour(0);
-//
-//        const cellModel& hexa = *(cellModeller::lookup("hex"));
-//        faceList faces = hexa.modelFaces();
-//
-//        meshPtr.set
-//        (
-//            new fvMesh
-//            (
-//                IOobject
-//                (
-//                    fvMesh::defaultRegion,
-//                    runTime.timeName(),
-//                    runTime,
-//                    IOobject::NO_READ
-//                ),
-//                xferMove<Field<vector>>(bb.points()()),
-//                faces.xfer(),
-//                owner.xfer(),
-//                neighbour.xfer()
-//            )
-//        );
-//
-//        List<polyPatch*> patches(1);
-//
-//        patches[0] = new wallPolyPatch
-//        (
-//            "boundary",
-//            6,
-//            0,
-//            0,
-//            meshPtr().boundaryMesh(),
-//            wallPolyPatch::typeName
-//        );
-//
-//        meshPtr().addFvPatches(patches);
-//
-//        const scalar initialCellSize = ::pow(meshPtr().V()[0], 1.0/3.0);
-//        const label initialRefLevels =
-//            ::log(initialCellSize/defaultCellSize)/::log(2);
-//
-//        Info<< "Default cell size = " << defaultCellSize << endl;
-//        Info<< "Initial cell size = " << initialCellSize << endl;
-//
-//        Info<< "Initial refinement levels = " << initialRefLevels << endl;
-//
-//        Info<< "Mesh starting size = " << meshPtr().nCells() << endl;
-//
-//        // meshCutter must be destroyed before writing the mesh otherwise it
-//        // writes the cellLevel/pointLevel files
-//        {
-//            hexRef8 meshCutter(meshPtr(), false);
-//
-//            for (label refinei = 0; refinei < initialRefLevels; ++refinei)
-//            {
-//                // Mesh changing engine.
-//                polyTopoChange meshMod(meshPtr(), true);
-//
-//                // Play refinement commands into mesh changer.
-//                meshCutter.setRefinement
-//                (
-//                    identity(meshPtr().nCells()),
-//                    meshMod
-//                );
-//
-//                // Create mesh (no inflation), return map from old to new mesh
-//                autoPtr<mapPolyMesh> map =
-//                    meshMod.changeMesh(meshPtr(), false);
-//
-//                // Update fields
-//                meshPtr().updateMesh(map);
-//
-//                // Delete mesh volumes.
-//                meshPtr().clearOut();
-//
-//                Info<< "Refinement Iteration " << refinei + 1
-//                    << ", Mesh size = " << meshPtr().nCells() << endl;
-//            }
-//        }
-//
-//        Info<< "Mesh end size = " << meshPtr().nCells() << endl;
-//
-//        Info<< "Create mesh" << endl;
-//        meshPtr().write();
-//    }
-//    else
     {
         word regionName;
         if (args.optionReadIfPresent("region", regionName))

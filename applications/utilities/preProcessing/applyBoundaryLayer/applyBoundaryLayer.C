@@ -241,14 +241,8 @@ tmp<volScalarField> calcNut
             )
         );
 
-        // Hack to correct nut
-        // Note: in previous versions of the code, nut was initialised on
-        //       construction of the turbulence model.  This is no longer the
-        //       case for the Templated Turbulence models.  The call to correct
-        //       below will evolve the turbulence model equations and update nut,
-        //       whereas only nut update is required.  Need to revisit.
-//        turbulence->correct();
-        turbulence->correctEnergyTransport();
+        // Correct nut
+        turbulence->validate();
 
         return tmp<volScalarField>(new volScalarField(turbulence->nut()));
     }

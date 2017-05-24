@@ -13,8 +13,8 @@
      ==
         rho*(U&g)
       + parcels.Sh(he)
-      + radiation->Sh(thermo)
-      + combustion->Sh()
+      + radiation->Sh(thermo, he)
+      + Qdot
       + fvOptions(rho, he)
     );
 

@@ -36,7 +36,7 @@ Foam::autoPtr<Foam::noiseModel> Foam::noiseModel::New(const dictionary& dict)
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown noiseModel type "

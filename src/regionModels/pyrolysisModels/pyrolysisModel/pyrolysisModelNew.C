@@ -66,7 +66,7 @@ autoPtr<pyrolysisModel> pyrolysisModel::New
     meshConstructorTable::iterator cstrIter =
         meshConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == meshConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown pyrolysisModel type " << modelType
@@ -94,7 +94,7 @@ autoPtr<pyrolysisModel> pyrolysisModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown pyrolysisModel type " << modelType

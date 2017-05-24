@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ SourceFiles
 #include "pointField.H"
 #include "Map.H"
 #include "PackedBoolList.H"
-#include "wordReList.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ namespace Foam
 template<class ZoneType, class MeshType> class ZoneMesh;
 
 template<class ZoneType, class MeshType>
-Ostream& operator<<(Ostream&, const ZoneMesh<ZoneType, MeshType>&);
+Ostream& operator<<(Ostream& os, const ZoneMesh<ZoneType, MeshType>& zones);
 
 /*---------------------------------------------------------------------------*\
                            Class ZoneMesh Declaration
@@ -80,15 +80,24 @@ class ZoneMesh
         //- Read if IOobject flags set. Return true if read.
         bool read();
 
+        //- Create zone map
+        void calcZoneMap() const;
+
+        //- Templated implementation for names()
+        template<class UnaryMatchPredicate>
+        static wordList namesImpl
+        (
+            const PtrList<ZoneType>& zones,
+            const UnaryMatchPredicate& matcher,
+            const bool doSort
+        );
+
+
         //- Disallow construct as copy
         ZoneMesh(const ZoneMesh&) = delete;
 
         //- Disallow assignment
         void operator=(const ZoneMesh<ZoneType, MeshType>&) = delete;
-
-
-        //- Create zone map
-        void calcZoneMap() const;
 
 
 public:
@@ -98,24 +107,24 @@ public:
         //- Read constructor given IOobject and a MeshType reference
         ZoneMesh
         (
-            const IOobject&,
-            const MeshType&
+            const IOobject& io,
+            const MeshType& mesh
         );
 
         //- Construct given size
         ZoneMesh
         (
-            const IOobject&,
-            const MeshType&,
+            const IOobject& io,
+            const MeshType& mesh,
             const label size
         );
 
-         //- Construct given a PtrList
+        //- Construct given a PtrList
         ZoneMesh
         (
-            const IOobject&,
-            const MeshType&,
-            const PtrList<ZoneType>&
+            const IOobject& io,
+            const MeshType& mesh,
+            const PtrList<ZoneType>& pzm
         );
 
 
@@ -146,32 +155,32 @@ public:
         wordList names() const;
 
         //- A list of the zone names satisfying the input matcher
-        wordList names(const wordRe&) const;
+        wordList names(const wordRe& matcher) const;
 
         //- A list of the zone names satisfying the input matchers
-        wordList names(const wordReList&) const;
+        wordList names(const wordRes& matcher) const;
 
         //- Sorted list of the zone names
         wordList sortedNames() const;
 
         //- Sorted list of the zone names satisfying the input matcher
-        wordList sortedNames(const wordRe&) const;
+        wordList sortedNames(const wordRe& matcher) const;
 
         //- Sorted list of the zone names satisfying the input matchers
-        wordList sortedNames(const wordReList&) const;
+        wordList sortedNames(const wordRes& matcher) const;
 
 
         //- Return zone indices for all matches
-        labelList findIndices(const keyType&) const;
+        labelList findIndices(const keyType& key) const;
 
         //- Return zone index for the first match, return -1 if not found
-        label findIndex(const keyType&) const;
+        label findIndex(const keyType& key) const;
 
         //- Find zone index given a name
         label findZoneID(const word& zoneName) const;
 
         //- Mark cells that match the zone specification
-        PackedBoolList findMatching(const keyType&) const;
+        PackedBoolList findMatching(const keyType& key) const;
 
         //- Clear addressing
         void clearAddressing();
@@ -187,10 +196,10 @@ public:
         bool checkParallelSync(const bool report = false) const;
 
         //- Correct zone mesh after moving points
-        void movePoints(const pointField&);
+        void movePoints(const pointField& p);
 
         //- writeData member function required by regIOobject
-        bool writeData(Ostream&) const;
+        bool writeData(Ostream& os) const;
 
     // Member Operators
 
@@ -198,18 +207,18 @@ public:
         using PtrList<ZoneType>::operator[];
 
         //- Return const reference to ZoneType by name.
-        const ZoneType& operator[](const word&) const;
+        const ZoneType& operator[](const word& zoneName) const;
 
         //- Return reference to ZoneType by name.
-        ZoneType& operator[](const word&);
+        ZoneType& operator[](const word& zoneName);
 
 
     // Ostream operator
 
         friend Ostream& operator<< <ZoneType, MeshType>
         (
-            Ostream&,
-            const ZoneMesh<ZoneType, MeshType>&
+            Ostream& os,
+            const ZoneMesh<ZoneType, MeshType>& zones
         );
 };
 

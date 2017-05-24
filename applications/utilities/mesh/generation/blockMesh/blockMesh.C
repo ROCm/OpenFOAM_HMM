@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -81,6 +81,11 @@ int main(int argc, char *argv[])
     (
         "blockTopology",
         "write block edges and centres as .obj files"
+    );
+    argList::addBoolOption
+    (
+        "noClean",
+        "keep the existing files in the polyMesh"
     );
     argList::addOption
     (
@@ -169,6 +174,30 @@ int main(int argc, char *argv[])
     else
     {
         dictPath = runTime.system()/regionPath/dictName;
+    }
+
+    if (!args.optionFound("noClean"))
+    {
+        fileName polyMeshPath
+        (
+            runTime.path()/runTime.constant()/regionPath/polyMesh::meshSubDir
+        );
+
+        if (exists(polyMeshPath))
+        {
+            if (exists(polyMeshPath/dictName))
+            {
+                Info<< "Not deleting polyMesh directory " << nl
+                    << "    " << polyMeshPath << nl
+                    << "    because it contains " << dictName << endl;
+            }
+            else
+            {
+                Info<< "Deleting polyMesh directory" << nl
+                    << "    " << polyMeshPath << endl;
+                rmDir(polyMeshPath);
+            }
+        }
     }
 
     IOobject meshDictIO

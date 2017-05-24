@@ -1,3 +1,44 @@
+em = edgeMesh
+
+$(em)/edgeMesh.C
+$(em)/edgeMeshIO.C
+$(em)/edgeMeshNew.C
+
+edgeMeshFormats = $(em)/edgeMeshFormats
+$(edgeMeshFormats)/edgeMeshFormatsCore.C
+
+$(edgeMeshFormats)/edgeMesh/edgeMeshFormat.C
+$(edgeMeshFormats)/edgeMesh/edgeMeshFormatRunTime.C
+
+$(edgeMeshFormats)/extendedFeatureEdgeMesh/extendedFeatureEdgeMeshFormat.C
+$(edgeMeshFormats)/extendedFeatureEdgeMesh/extendedFeatureEdgeMeshFormatRunTime.C
+
+$(edgeMeshFormats)/nas/NASedgeFormat.C
+$(edgeMeshFormats)/nas/NASedgeFormatRunTime.C
+
+$(edgeMeshFormats)/obj/OBJedgeFormat.C
+$(edgeMeshFormats)/obj/OBJedgeFormatRunTime.C
+
+$(edgeMeshFormats)/starcd/STARCDedgeFormat.C
+$(edgeMeshFormats)/starcd/STARCDedgeFormatRunTime.C
+
+$(edgeMeshFormats)/vtk/VTKedgeFormat.C
+$(edgeMeshFormats)/vtk/VTKedgeFormatRunTime.C
+
+$(em)/featureEdgeMesh/featureEdgeMesh.C
+
+eem = $(em)/extendedEdgeMesh
+
+$(eem)/extendedEdgeMesh.C
+$(eem)/extendedEdgeMeshNew.C
+
+$(eem)/extendedEdgeMeshFormats/extendedEdgeMeshFormat/extendedEdgeMeshFormat.C
+$(eem)/extendedEdgeMeshFormats/extendedEdgeMeshFormat/extendedEdgeMeshFormatRunTime.C
+
+efm = $(eem)/extendedFeatureEdgeMesh
+
+$(efm)/extendedFeatureEdgeMesh.C
+
 cellClassification/cellClassification.C
 cellClassification/cellInfo.C
 
@@ -21,8 +62,6 @@ $(csys)/coordinateRotation/coordinateRotationNew.C
 $(csys)/coordinateRotation/EulerCoordinateRotation.C
 $(csys)/coordinateRotation/STARCDCoordinateRotation.C
 $(csys)/coordinateRotation/cylindrical.C
-
-edgeFaceCirculator/edgeFaceCirculator.C
 
 polyMeshZipUpCells/polyMeshZipUpCells.C
 primitiveMeshGeometry/primitiveMeshGeometry.C
@@ -63,23 +102,24 @@ indexedOctree/treeDataPoint.C
 indexedOctree/treeDataPrimitivePatchName.C
 indexedOctree/treeDataTriSurface.C
 
-searchableSurface = searchableSurface
-$(searchableSurface)/searchableBox.C
-$(searchableSurface)/searchableRotatedBox.C
-$(searchableSurface)/searchableCylinder.C
-$(searchableSurface)/searchableCone.C
-$(searchableSurface)/searchableDisk.C
-$(searchableSurface)/searchablePlane.C
-$(searchableSurface)/searchablePlate.C
-$(searchableSurface)/searchableSphere.C
-$(searchableSurface)/searchableSurface.C
-$(searchableSurface)/searchableSurfaceCollection.C
-$(searchableSurface)/searchableSurfaces.C
-$(searchableSurface)/searchableSurfacesQueries.C
-$(searchableSurface)/searchableSurfaceWithGaps.C
-$(searchableSurface)/triSurfaceMesh.C
-$(searchableSurface)/closedTriSurfaceMesh.C
-$(searchableSurface)/subTriSurfaceMesh.C
+
+searchableSurfaces/closedTriSurfaceMesh/closedTriSurfaceMesh.C
+searchableSurfaces/searchableBox/searchableBox.C
+searchableSurfaces/searchableCone/searchableCone.C
+searchableSurfaces/searchableCylinder/searchableCylinder.C
+searchableSurfaces/searchableDisk/searchableDisk.C
+searchableSurfaces/searchableExtrudedCircle/searchableExtrudedCircle.C
+searchableSurfaces/searchablePlane/searchablePlane.C
+searchableSurfaces/searchablePlate/searchablePlate.C
+searchableSurfaces/searchableRotatedBox/searchableRotatedBox.C
+searchableSurfaces/searchableSphere/searchableSphere.C
+searchableSurfaces/searchableSurface/searchableSurface.C
+searchableSurfaces/searchableSurfaceCollection/searchableSurfaceCollection.C
+searchableSurfaces/searchableSurfaces/searchableSurfaces.C
+searchableSurfaces/searchableSurfacesQueries/searchableSurfacesQueries.C
+searchableSurfaces/searchableSurfaceWithGaps/searchableSurfaceWithGaps.C
+searchableSurfaces/subTriSurfaceMesh/subTriSurfaceMesh.C
+searchableSurfaces/triSurfaceMesh/triSurfaceMesh.C
 
 topoSets = sets/topoSets
 $(topoSets)/cellSet.C

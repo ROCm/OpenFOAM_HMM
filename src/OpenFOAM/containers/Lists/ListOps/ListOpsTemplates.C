@@ -124,16 +124,11 @@ void Foam::inplaceMapValue
     Container& lst
 )
 {
-    for
-    (
-        typename Container::iterator iter = lst.begin();
-        iter != lst.end();
-        ++iter
-    )
+    for (auto iter = lst.begin(); iter != lst.end(); ++iter)
     {
-        if (iter() >= 0)
+        if (iter.object() >= 0)
         {
-            iter() = oldToNew[iter()];
+            iter.object() = oldToNew[iter.object()];
         }
     }
 }
@@ -148,16 +143,11 @@ void Foam::inplaceMapKey
 {
     Container newLst(lst.size());
 
-    for
-    (
-        typename Container::iterator iter = lst.begin();
-        iter != lst.end();
-        ++iter
-    )
+    for (auto iter = lst.begin(); iter != lst.end(); ++iter)
     {
         if (iter.key() >= 0)
         {
-            newLst.insert(oldToNew[iter.key()], iter());
+            newLst.insert(oldToNew[iter.key()], iter.object());
         }
     }
 
@@ -477,46 +467,45 @@ void Foam::inplaceSubsetList
 }
 
 
-template<class InList, class OutList>
+template<class InputIntListType, class OutputIntListType>
 void Foam::invertManyToMany
 (
-    const label nEdges,
-    const UList<InList>& pointEdges,
-    List<OutList>& edges
+    const label len,
+    const UList<InputIntListType>& input,
+    List<OutputIntListType>& output
 )
 {
-    // Number of points per edge
-    labelList nPointsPerEdge(nEdges, 0);
+    // The output list sizes
+    labelList sizes(len, 0);
 
-    forAll(pointEdges, pointi)
+    forAll(input, listi)
     {
-        const InList& pEdges = pointEdges[pointi];
+        const InputIntListType& sublist = input[listi];
 
-        forAll(pEdges, j)
+        forAll(sublist, idx)
         {
-            nPointsPerEdge[pEdges[j]]++;
+            sizes[sublist[idx]]++;
         }
     }
 
-    // Size edges
-    edges.setSize(nEdges);
-
-    forAll(nPointsPerEdge, edgeI)
+    // Size output
+    output.setSize(len);
+    forAll(sizes, outi)
     {
-        edges[edgeI].setSize(nPointsPerEdge[edgeI]);
+        output[outi].setSize(sizes[outi]);
     }
-    nPointsPerEdge = 0;
 
-    // Fill edges
-    forAll(pointEdges, pointi)
+    // Fill output
+    sizes = 0;
+    forAll(input, listi)
     {
-        const InList& pEdges = pointEdges[pointi];
+        const InputIntListType& sublist = input[listi];
 
-        forAll(pEdges, j)
+        forAll(sublist, idx)
         {
-            label edgeI = pEdges[j];
+            const label outi = sublist[idx];
 
-            edges[edgeI][nPointsPerEdge[edgeI]++] = pointi;
+            output[outi][sizes[outi]++] = listi;
         }
     }
 }

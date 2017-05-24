@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -438,14 +438,24 @@ bool Foam::functionObjects::externalCoupled::writeData
 
                     for (label proci = 1; proci < Pstream::nProcs(); proci++)
                     {
-                        IPstream fromSlave(Pstream::scheduled, proci);
+                        IPstream fromSlave
+                        (
+                            Pstream::commsTypes::scheduled,
+                            proci
+                        );
+
                         string str(fromSlave);
                         masterFilePtr() << str.c_str();
                     }
                 }
                 else
                 {
-                    OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
+                    OPstream toMaster
+                    (
+                        Pstream::commsTypes::scheduled,
+                        Pstream::masterNo()
+                    );
+
                     toMaster << os.str();
                 }
             }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -324,7 +324,7 @@ protected:
     // Protected Member Functions
 
         //- The volume mesh or surface registry being used
-        const objectRegistry& obr() const override;
+        const objectRegistry& obr() const;
 
         //- Return the local list of face IDs
         inline const labelList& faceId() const;
@@ -471,10 +471,10 @@ public:
         inline fileName outputDir() const;
 
         //- Read from dictionary
-        virtual bool read(const dictionary& dict) override;
+        virtual bool read(const dictionary& dict);
 
         //- Calculate and write
-        virtual bool write() override;
+        virtual bool write();
 };
 
 

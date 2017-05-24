@@ -68,7 +68,7 @@ tmp<laplacianScheme<Type, GType>> laplacianScheme<Type, GType>::New
     typename IstreamConstructorTable::iterator cstrIter =
         IstreamConstructorTablePtr_->find(schemeName);
 
-    if (cstrIter == IstreamConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (

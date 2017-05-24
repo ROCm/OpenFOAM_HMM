@@ -40,7 +40,7 @@ Foam::autoPtr<Foam::windowModel> Foam::windowModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorIn
         (

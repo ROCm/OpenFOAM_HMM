@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,75 +25,79 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Matcher, class StringType>
+template<class UnaryMatchPredicate, class StringType>
 Foam::labelList Foam::findMatchingStrings
 (
-    const Matcher& matcher,
+    const UnaryMatchPredicate& matcher,
     const UList<StringType>& lst,
     const bool invert
 )
 {
     labelList indices(lst.size());
 
-    label nElem = 0;
-    forAll(lst, elemI)
+    label count = 0;
+    forAll(lst, elemi)
     {
-        if (matcher.match(lst[elemI]) ? !invert : invert)
+        if (matcher(lst[elemi]) ? !invert : invert)
         {
-            indices[nElem++] = elemI;
+            indices[count++] = elemi;
         }
     }
-    indices.setSize(nElem);
+    indices.setSize(count);
 
     return indices;
 }
 
 
-template<class Matcher, class StringListType>
+template<class UnaryMatchPredicate, class StringListType>
 StringListType Foam::subsetMatchingStrings
 (
-    const Matcher& matcher,
+    const UnaryMatchPredicate& matcher,
     const StringListType& lst,
     const bool invert
 )
 {
-    // Create copy
+    // Create as a copy
     StringListType newLst(lst.size());
 
-    // ensure consistent addressable size (eg, DynamicList)
+    // Ensure consistent addressable size (eg, DynamicList)
     newLst.setSize(lst.size());
 
-    label nElem = 0;
-    forAll(lst, elemI)
+    label count = 0;
+    forAll(lst, elemi)
     {
-        if (matcher.match(lst[elemI]) ? !invert : invert)
+        if (matcher(lst[elemi]) ? !invert : invert)
         {
-            newLst[nElem++] = lst[elemI];
+            newLst[count++] = lst[elemi];
         }
     }
-    newLst.setSize(nElem);
+    newLst.setSize(count);
 
     return newLst;
 }
 
 
-template<class Matcher, class StringListType>
+template<class UnaryMatchPredicate, class StringListType>
 void Foam::inplaceSubsetMatchingStrings
 (
-    const Matcher& matcher,
+    const UnaryMatchPredicate& matcher,
     StringListType& lst,
     const bool invert
 )
 {
-    label nElem = 0;
-    forAll(lst, elemI)
+    label count = 0;
+    forAll(lst, elemi)
     {
-        if (matcher.match(lst[elemI]) ? !invert : invert)
+        if (matcher(lst[elemi]) ? !invert : invert)
         {
-            lst[nElem++] = lst[elemI];
+            if (count != elemi)
+            {
+                lst[count] = lst[elemi];
+            }
+            ++count;
         }
     }
-    lst.setSize(nElem);
+    lst.setSize(count);
 }
 
 

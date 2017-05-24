@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -130,7 +130,10 @@ kOmegaSSTSato<BasicTurbulenceModel>::gasTurbulence() const
 
 
 template<class BasicTurbulenceModel>
-void kOmegaSSTSato<BasicTurbulenceModel>::correctNut()
+void kOmegaSSTSato<BasicTurbulenceModel>::correctNut
+(
+    const volScalarField& S2
+)
 {
     const PhaseCompressibleTurbulenceModel<transportModel>& gasTurbulence =
         this->gasTurbulence();
@@ -145,7 +148,7 @@ void kOmegaSSTSato<BasicTurbulenceModel>::correctNut()
        /max
         (
             this->a1_*this->omega_,
-            this->F23()*sqrt(2.0)*mag(symm(fvc::grad(this->U_)))
+            this->b1_*this->F23()*sqrt(S2)
         )
       + sqr(1 - exp(-yPlus/16.0))
        *Cmub_*gasTurbulence.transport().d()*gasTurbulence.alpha()

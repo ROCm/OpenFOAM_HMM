@@ -94,7 +94,9 @@ public:
         hash()
         {}
 
-        inline unsigned operator()(const string&, unsigned seed = 0) const;
+        //- Hash for string.
+        //  Uses Foam::string instead of std::string for automatic conversions.
+        inline unsigned operator()(const string& str, unsigned seed = 0) const;
     };
 
 
@@ -109,7 +111,7 @@ public:
         //- Construct as copy of character array
         inline string(const char* str);
 
-        //- Construct as copy of specified number of characters
+        //- Construct as copy with a maximum number of characters
         inline string(const char* str, const size_type len);
 
         //- Construct from a single character
@@ -222,14 +224,18 @@ public:
 
     // Member Operators
 
-        //- Return the sub-string from the i-th character for \a n characters
+        //- Match text
+        //  \return True when strings match literally.
+        inline bool operator()(const std::string& text) const;
+
+        //- Return sub-string from the i-th character for \a n characters
         inline string operator()
         (
             const size_type i,
             const size_type n
         ) const;
 
-        //- Return the sub-string from the first character for \a n characters
+        //- Return sub-string from the first character for \a n characters
         inline string operator()
         (
             const size_type n

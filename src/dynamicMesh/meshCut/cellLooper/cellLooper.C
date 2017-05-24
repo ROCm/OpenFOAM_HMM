@@ -48,7 +48,7 @@ Foam::autoPtr<Foam::cellLooper> Foam::cellLooper::New
     wordConstructorTable::iterator cstrIter =
         wordConstructorTablePtr_->find(type);
 
-    if (cstrIter == wordConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown set type "

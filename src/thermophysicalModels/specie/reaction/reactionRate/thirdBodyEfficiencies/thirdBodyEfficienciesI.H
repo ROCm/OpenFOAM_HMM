@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,62 +42,6 @@ inline Foam::thirdBodyEfficiencies::thirdBodyEfficiencies
             << "number of efficiencies = " << size()
             << " is not equal to the number of species " << species_.size()
             << exit(FatalError);
-    }
-}
-
-
-inline Foam::thirdBodyEfficiencies::thirdBodyEfficiencies
-(
-    const speciesTable& species,
-    Istream& is
-)
-:
-    scalarList(species.size()),
-    species_(species)
-{
-    is.readBeginList
-    (
-        "thirdBodyEfficiencies::thirdBodyEfficiencies"
-        "(const speciesTable& species, Istream& is)"
-    );
-    scalar defaultEff = readScalar(is);
-    scalarList::operator=(defaultEff);
-
-    token t;
-
-    while ((is >> t) && !t.isPunctuation())
-    {
-        if (t.isWord())
-        {
-            operator[](species[t.wordToken()]) = readScalar(is);
-        }
-        else
-        {
-            FatalIOErrorInFunction
-            (
-                is
-            )   << "expected <word>, found " << t.info()
-                << exit(FatalIOError);
-        }
-    }
-
-    if (t.pToken() != token::END_LIST)
-    {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "expected ')', found " << t.info()
-            << exit(FatalIOError);
-    }
-
-    if (size() != species_.size())
-    {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "number of efficiencies = " << size()
-            << " is not equal to the number of species " << species_.size()
-            << exit(FatalIOError);
     }
 }
 
@@ -170,53 +114,7 @@ inline Foam::Ostream& Foam::operator<<
     const thirdBodyEfficiencies& tbes
 )
 {
-    scalarList orderedTbes = tbes;
-    sort(orderedTbes);
-
-    scalar val = orderedTbes[0];
-    label count = 1;
-
-    scalar valMaxCount = val;
-    label maxCount = 1;
-
-    for (label i=1; i<orderedTbes.size(); i++)
-    {
-        if (equal(orderedTbes[i], val))
-        {
-            count++;
-        }
-        else
-        {
-            if (count > maxCount)
-            {
-                maxCount = count;
-                valMaxCount = val;
-            }
-
-            count = 1;
-            val = orderedTbes[i];
-        }
-    }
-
-    if (count > maxCount)
-    {
-        maxCount = count;
-        valMaxCount = val;
-    }
-
-    os << token::BEGIN_LIST << valMaxCount;
-
-    forAll(tbes, i)
-    {
-        if (notEqual(tbes[i], valMaxCount))
-        {
-            os  << token::SPACE << tbes.species_[i]
-                << token::SPACE << tbes[i];
-        }
-    }
-
-    os << token::END_LIST;
-
+    tbes.write(os);
     return os;
 }
 
