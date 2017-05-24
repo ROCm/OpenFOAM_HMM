@@ -266,11 +266,14 @@ public:
         //- Return non-const access to dimensions
         inline dimensionSet& dimensions();
 
-        //- Return oriented flag
+        //- Return oriented type
         inline const orientedType& oriented() const;
 
-        //- Return non-const access to the oriented flag
+        //- Return non-const access to the oriented type
         inline orientedType& oriented();
+
+        //- Set the oriented flag
+        inline void setOriented(const bool oriented = true);
 
         inline const Field<Type>& field() const;
 

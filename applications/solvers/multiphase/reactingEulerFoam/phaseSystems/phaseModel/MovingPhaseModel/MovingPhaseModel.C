@@ -200,8 +200,8 @@ Foam::MovingPhaseModel<BasePhaseModel>::MovingPhaseModel
         dimensionedScalar("0", dimDensity/dimTime, 0)
     )
 {
-    alphaPhi_.oriented().oriented() = true;
-    alphaRhoPhi_.oriented().oriented() = true;
+    alphaPhi_.setOriented();
+    alphaRhoPhi_.setOriented();
 
     phi_.writeOpt() = IOobject::AUTO_WRITE;
     correctKinematics();

@@ -558,7 +558,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::multiphaseSystem::surfaceTension
         )
     );
 
-    tSurfaceTension.ref().oriented().oriented() = true;
+    tSurfaceTension.ref().setOriented();
 
     forAll(phases(), phasej)
     {
@@ -665,8 +665,6 @@ void Foam::multiphaseSystem::solve()
                     dimensionedScalar("0", dimensionSet(0, 3, -1, 0, 0), 0)
                 )
             );
-
-            alphaPhiSums[phasei].oriented().oriented() = true;
         }
 
         for

@@ -72,6 +72,16 @@ inline Foam::orientedType& Foam::DimensionedField<Type, GeoMesh>::oriented()
 
 
 template<class Type, class GeoMesh>
+inline void Foam::DimensionedField<Type, GeoMesh>::setOriented
+(
+    const bool oriented
+)
+{
+    oriented_.setOriented(oriented);
+}
+
+
+template<class Type, class GeoMesh>
 inline const Foam::Field<Type>&
 Foam::DimensionedField<Type, GeoMesh>::field() const
 {

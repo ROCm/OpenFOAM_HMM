@@ -12,7 +12,6 @@ if (nAlphaSubCycles > 1)
         mesh,
         dimensionedScalar("0", rhoPhi.dimensions(), 0)
     );
-    rhoPhiSum.oriented().oriented() = true;
 
     for
     (

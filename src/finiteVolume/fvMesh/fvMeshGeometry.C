@@ -68,7 +68,7 @@ void Foam::fvMesh::makeSf() const
         faceAreas()
     );
 
-    SfPtr_->oriented().oriented() = true;
+    SfPtr_->setOriented();
 }
 
 
@@ -400,7 +400,7 @@ Foam::tmp<Foam::surfaceVectorField> Foam::fvMesh::delta() const
         )
     );
     surfaceVectorField& delta = tdelta.ref();
-    delta.oriented().oriented() = true;
+    delta.setOriented();
 
     const volVectorField& C = this->C();
     const labelUList& owner = this->owner();
@@ -438,7 +438,7 @@ const Foam::surfaceScalarField& Foam::fvMesh::phi() const
         (*phiPtr_) = dimensionedScalar("0", dimVolume/dimTime, 0.0);
     }
 
-    phiPtr_->oriented().oriented() = true;
+    phiPtr_->setOriented();
 
     return *phiPtr_;
 }

@@ -72,9 +72,9 @@ void MapInternalField<Type, MeshMapper, surfaceMesh>::operator()
     // Passing in oriented flag so that oriented fields (e.g. phi) are negated
     // if flipped.  Un-oriented fields, e.g U interpolated to faces (Uf) are not
     // touched
-    field.autoMap(mapper.surfaceMap(), field.oriented().oriented());
+    field.autoMap(mapper.surfaceMap(), field.oriented()());
 
-    if (field.oriented().oriented())
+    if (field.oriented()())
     {
         // Flip the flux
         const labelList flipFaces = mapper.surfaceMap().flipFaceFlux().toc();

@@ -455,8 +455,7 @@ Foam::BlendedInterfacialModel<ModelType>::Ff() const
             dimensionedScalar("zero", ModelType::dimF*dimArea, 0)
         )
     );
-
-    x.ref().oriented().oriented() = true;
+    x.ref().setOriented();
 
     if (model_.valid())
     {

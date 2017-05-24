@@ -154,7 +154,7 @@ void Foam::surfaceInterpolation::makeWeights() const
         dimless
     );
     surfaceScalarField& weights = *weights_;
-    weights.oriented().oriented() = true;
+    weights.setOriented();
 
     // Set local references to mesh data
     // Note that we should not use fvMesh sliced fields at this point yet
@@ -226,7 +226,7 @@ void Foam::surfaceInterpolation::makeDeltaCoeffs() const
         dimless/dimLength
     );
     surfaceScalarField& deltaCoeffs = *deltaCoeffs_;
-    deltaCoeffs.oriented().oriented() = true;
+    deltaCoeffs.setOriented();
 
 
     // Set local references to mesh data
@@ -277,7 +277,7 @@ void Foam::surfaceInterpolation::makeNonOrthDeltaCoeffs() const
         dimless/dimLength
     );
     surfaceScalarField& nonOrthDeltaCoeffs = *nonOrthDeltaCoeffs_;
-    nonOrthDeltaCoeffs.oriented().oriented() = true;
+    nonOrthDeltaCoeffs.setOriented();
 
 
     // Set local references to mesh data
@@ -342,7 +342,7 @@ void Foam::surfaceInterpolation::makeNonOrthCorrectionVectors() const
         dimless
     );
     surfaceVectorField& corrVecs = *nonOrthCorrectionVectors_;
-    corrVecs.oriented().oriented() = true;
+    corrVecs.setOriented();
 
     // Set local references to mesh data
     const volVectorField& C = mesh_.C();

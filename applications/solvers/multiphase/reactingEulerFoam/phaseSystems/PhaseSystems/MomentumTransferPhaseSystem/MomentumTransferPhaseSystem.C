@@ -365,7 +365,7 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::Ff
             )
         );
 
-        tFf.ref().oriented().oriented() = true;
+        tFf.ref().setOriented();
 
         return tFf;
     }
@@ -626,7 +626,7 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::setPhiD
             )
         );
 
-        phiDs[phasei].oriented().oriented() = true;
+        phiDs[phasei].setOriented();
     }
 
     return phiDs[phasei];

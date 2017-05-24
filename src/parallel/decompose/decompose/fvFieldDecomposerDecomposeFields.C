@@ -291,7 +291,7 @@ Foam::fvFieldDecomposer::decomposeField
                 )
             );
 
-            if (resF.oriented().oriented())
+            if (resF.oriented()())
             {
                 bf[patchi] *= faceSign_[patchi];
             }
@@ -313,7 +313,7 @@ Foam::fvFieldDecomposer::decomposeField
                 )
             );
 
-            if (resF.oriented().oriented())
+            if (resF.oriented()())
             {
                 bf[patchi] *= faceSign_[patchi];
             }

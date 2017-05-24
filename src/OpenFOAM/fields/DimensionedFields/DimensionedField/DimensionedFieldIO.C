@@ -37,7 +37,7 @@ void Foam::DimensionedField<Type, GeoMesh>::readField
 )
 {
     dimensions_.reset(dimensionSet(fieldDict.lookup("dimensions")));
-    fieldDict.template readIfPresent<bool>("oriented", oriented_.oriented());
+    oriented_.read(fieldDict);
 
     Field<Type> f(fieldDictEntry, fieldDict, GeoMesh::size(mesh_));
     this->transfer(f);
@@ -76,7 +76,7 @@ Foam::DimensionedField<Type, GeoMesh>::DimensionedField
     Field<Type>(0),
     mesh_(mesh),
     dimensions_(dimless),
-    oriented_(false)
+    oriented_()
 {
     readField(dictionary(readStream(typeName)), fieldDictEntry);
 }
@@ -95,7 +95,7 @@ Foam::DimensionedField<Type, GeoMesh>::DimensionedField
     Field<Type>(0),
     mesh_(mesh),
     dimensions_(dimless),
-    oriented_(false)
+    oriented_()
 {
     readField(fieldDict, fieldDictEntry);
 }
@@ -111,7 +111,7 @@ bool Foam::DimensionedField<Type, GeoMesh>::writeData
 ) const
 {
     os.writeEntry("dimensions", dimensions());
-    if (oriented_.oriented()) os.writeEntry("oriented", oriented());
+    oriented_.writeEntry(os);
 
     os<< nl << nl;
 

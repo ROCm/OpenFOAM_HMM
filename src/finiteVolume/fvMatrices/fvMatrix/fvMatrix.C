@@ -892,7 +892,7 @@ flux() const
     GeometricField<Type, fvsPatchField, surfaceMesh>& fieldFlux =
         tfieldFlux.ref();
 
-    fieldFlux.oriented().oriented() = true;
+    fieldFlux.setOriented();
 
     for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
     {

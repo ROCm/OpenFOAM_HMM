@@ -21,8 +21,6 @@
             dimensionedScalar("0", rhoPhi.dimensions(), 0)
         );
 
-        rhoPhiSum.oriented().oriented() = true;
-
         for
         (
             subCycle<volScalarField> alphaSubCycle(alpha1, nAlphaSubCycles);

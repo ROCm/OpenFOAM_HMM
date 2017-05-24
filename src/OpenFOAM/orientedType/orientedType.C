@@ -25,29 +25,72 @@ License
 
 #include "orientedType.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    template<>
+    const char* NamedEnum
+    <
+        orientedType::orientedOption,
+        3
+    >::names[] =
+    {
+        "oriented",
+        "unoriented",
+        "unknown"
+    };
+}
+
+const Foam::NamedEnum<Foam::orientedType::orientedOption, 3>
+    Foam::orientedType::orientedOptionNames;
+
+
+bool Foam::orientedType::checkType
+(
+    const orientedType& ot1,
+    const orientedType& ot2
+)
+{
+    if
+    (
+        (ot1.oriented() == UNKNOWN)
+     || (ot2.oriented() == UNKNOWN)
+     || (ot1.oriented() == ot2.oriented())
+    )
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::orientedType::orientedType()
 :
-    oriented_(false)
+    oriented_(UNKNOWN)
 {}
 
 
-Foam::orientedType::orientedType(const orientedType& of)
+Foam::orientedType::orientedType(const orientedType& ot)
 :
-    oriented_(of.oriented_)
+    oriented_(ot.oriented_)
 {}
 
 
 Foam::orientedType::orientedType(const bool oriented)
 :
-    oriented_(oriented)
+    oriented_(oriented ? ORIENTED : UNORIENTED)
 {}
 
 
 Foam::orientedType::orientedType(Istream& is)
 :
-    oriented_(readBool(is))
+    oriented_(orientedOptionNames.read(is))
 {
     is.check(FUNCTION_NAME);
 }
@@ -55,312 +98,339 @@ Foam::orientedType::orientedType(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool& Foam::orientedType::oriented()
+Foam::orientedType::orientedOption& Foam::orientedType::oriented()
 {
     return oriented_;
 }
 
 
-bool Foam::orientedType::oriented() const
+Foam::orientedType::orientedOption Foam::orientedType::oriented() const
 {
     return oriented_;
+}
+
+
+void Foam::orientedType::setOriented(const bool oriented)
+{
+    oriented_ = oriented ? ORIENTED : UNORIENTED;
+}
+
+
+void Foam::orientedType::read(const dictionary& dict)
+{
+    if (dict.found("oriented"))
+    {
+        oriented_ = orientedOptionNames.read(dict.lookup("oriented"));
+    }
+    else
+    {
+        oriented_ = UNKNOWN;
+    }
+}
+
+
+void Foam::orientedType::writeEntry(Ostream& os) const
+{
+    if (oriented_ == ORIENTED)
+    {
+        os.writeEntry("oriented", orientedOptionNames[oriented_]);
+    }
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void Foam::orientedType::operator=(const orientedType& of)
+void Foam::orientedType::operator=(const orientedType& ot)
 {
-    oriented_ = of.oriented();
+    // Oriented state is inherited on assignment
+    oriented_ = ot.oriented();
 }
 
 
-void Foam::orientedType::operator+=(const orientedType& of)
+void Foam::orientedType::operator+=(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    if (oriented_ != of.oriented())
+    // Set the oriented status if it was unknown
+    if (oriented_ == UNKNOWN)
     {
-        FatalErrorInFunction
-            << "Operator += is undefined for oriented and unoriented types. "
-            << "oriented:" << oriented_ << ", of:" << of.oriented()
-            << abort(FatalError);
+        oriented_ = ot.oriented();
     }
 
-    // No change to oriented_ flag
-}
-
-
-void Foam::orientedType::operator-=(const orientedType& of)
-{
-//InfoInFunction << "of:" << of.oriented() << endl;
-    if (oriented_ != of.oriented())
+    if (!checkType(*this, ot))
     {
         FatalErrorInFunction
-            << "Operator -= is undefined for oriented and unoriented types. "
-            << "oriented:" << oriented_ << ", of:" << of.oriented()
+            << "Operator += is undefined for "
+            << orientedOptionNames[oriented_] << " and "
+            << orientedOptionNames[ot.oriented()] << " types"
             << abort(FatalError);
     }
-
-    // No change to oriented_ flag
 }
 
 
-void Foam::orientedType::operator*=(const orientedType& of)
+void Foam::orientedType::operator-=(const orientedType& ot)
 {
-    oriented_ = oriented_ ^ of.oriented();
+    // Set the oriented status if it was unknown
+    if (oriented_ == UNKNOWN)
+    {
+        oriented_ = ot.oriented();
+    }
+
+    if (!checkType(*this, ot))
+    {
+        FatalErrorInFunction
+            << "Operator -= is undefined for "
+            << orientedOptionNames[oriented_] << " and "
+            << orientedOptionNames[ot.oriented()] << " types"
+            << abort(FatalError);
+    }
 }
 
 
-void Foam::orientedType::operator/=(const orientedType& of)
+void Foam::orientedType::operator*=(const orientedType& ot)
 {
-    oriented_ = oriented_ ^ of.oriented();
+    const orientedType& ot1 = *this;
+    if (ot1() ^ ot())
+    {
+        oriented_ = ORIENTED;
+    }
+    else
+    {
+        oriented_ = UNORIENTED;
+    }
+}
+
+
+void Foam::orientedType::operator/=(const orientedType& ot)
+{
+    const orientedType& ot1 = *this;
+    if (ot1() ^ ot())
+    {
+        oriented_ = ORIENTED;
+    }
+    else
+    {
+        oriented_ = UNORIENTED;
+    }
 }
 
 
 void Foam::orientedType::operator*=(const scalar s)
 {
-//InfoInFunction << "oriented_: " << oriented_ << endl;
     // No change to oriented_ flag
 }
 
 
 void Foam::orientedType::operator/=(const scalar s)
 {
-//InfoInFunction << "oriented_: " << oriented_ << endl;
     // No change to oriented_ flag
 }
 
 
 bool Foam::orientedType::operator()() const
 {
-//InfoInFunction << "oriented_: " << oriented_ << endl;
-    return oriented_;
+    return oriented_ == ORIENTED;
 }
 
 
 // * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
 
-Foam::orientedType Foam::max(const orientedType& of1, const orientedType& of2)
+Foam::orientedType Foam::max(const orientedType& ot1, const orientedType& ot2)
 {
-//InfoInFunction << "of1:" << of1.oriented() << ", of2:" << of2.oriented() << endl;
-    if (of1.oriented() != of2.oriented())
+    if (!orientedType::checkType(ot1, ot2))
     {
         FatalErrorInFunction
-            << "max is undefined for oriented and unoriented types. "
-            << "of1:" << of1.oriented() << ", of2:" << of2.oriented()
+            << "Operator max is undefined for "
+            << orientedType::orientedOptionNames[ot1.oriented()] << " and "
+            << orientedType::orientedOptionNames[ot2.oriented()] << " types"
             << abort(FatalError);
     }
 
-    return of1;
+    return ot1;
 }
 
 
-Foam::orientedType Foam::min(const orientedType& of1, const orientedType& of2)
+Foam::orientedType Foam::min(const orientedType& ot1, const orientedType& ot2)
 {
-//InfoInFunction << "of1:" << of1.oriented() << ", of2:" << of2.oriented() << endl;
-    if (of1.oriented() != of2.oriented())
+    if (!orientedType::checkType(ot1, ot2))
     {
         FatalErrorInFunction
-            << "min is undefined for oriented and unoriented types. "
-            << "of1:" << of1.oriented() << ", of2:" << of2.oriented()
+            << "Operator min is undefined for "
+            << orientedType::orientedOptionNames[ot1.oriented()] << " and "
+            << orientedType::orientedOptionNames[ot2.oriented()] << "types"
             << abort(FatalError);
     }
 
-    return of1;
+    return ot1;
 }
 
 
 Foam::orientedType Foam::cmptMultiply
 (
-    const orientedType& of1,
-    const orientedType& of2
+    const orientedType& ot1,
+    const orientedType& ot2
 )
 {
-//InfoInFunction << "of1:" << of1.oriented() << ", of2:" << of2.oriented() << endl;
-    return orientedType(of1.oriented() ^ of2.oriented());
+    return ot1 ^ ot2;
 }
 
 
 Foam::orientedType Foam::cmptDivide
 (
-    const orientedType& of1,
-    const orientedType& of2
+    const orientedType& ot1,
+    const orientedType& ot2
 )
 {
-//InfoInFunction << "of1:" << of1.oriented() << ", of2:" << of2.oriented() << endl;
-    return orientedType(of1.oriented() ^ of2.oriented());
+    return ot1 ^ ot2;
 }
 
 
-Foam::orientedType Foam::cmptAv(const orientedType& of)
+Foam::orientedType Foam::cmptAv(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    return of;
+    return ot;
 }
 
 
-Foam::orientedType Foam::pow(const orientedType& of, const scalar r)
+Foam::orientedType Foam::pow(const orientedType& ot, const scalar r)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
     // Undefined???
     // - only defined for integers where:
-    //   - odd powers = oriented_ = yes (if of is oriented)
+    //   - odd powers = oriented_ = yes (if ot is oriented)
     //   - even powers = oriented_ = no
-    return of;
+    return ot;
 }
 
 
-Foam::orientedType Foam::sqr(const orientedType& of)
+Foam::orientedType Foam::sqr(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
     return orientedType(false);
 }
 
 
-Foam::orientedType Foam::pow3(const orientedType& of)
+Foam::orientedType Foam::pow3(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    return orientedType(of.oriented());
+    return ot;
 }
 
 
-Foam::orientedType Foam::pow4(const orientedType& of)
+Foam::orientedType Foam::pow4(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
     return orientedType(false);
 }
 
 
-Foam::orientedType Foam::pow5(const orientedType& of)
+Foam::orientedType Foam::pow5(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    return orientedType(of.oriented());
+    return ot;
 }
 
 
-Foam::orientedType Foam::pow6(const orientedType& of)
+Foam::orientedType Foam::pow6(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
     return orientedType(false);
 }
 
 
-Foam::orientedType Foam::pow025(const orientedType& of)
+Foam::orientedType Foam::pow025(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    return orientedType(of.oriented());
+    return ot;
 }
 
 
-Foam::orientedType Foam::sqrt(const orientedType& of)
+Foam::orientedType Foam::sqrt(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    return of;
+    return ot;
 }
 
 
-Foam::orientedType Foam::cbrt(const orientedType& of)
+Foam::orientedType Foam::cbrt(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    return of;
+    return ot;
 }
 
 
-Foam::orientedType Foam::magSqr(const orientedType& of)
+Foam::orientedType Foam::magSqr(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
     return orientedType(false);
 }
 
 
-Foam::orientedType  Foam::mag(const orientedType& of)
+Foam::orientedType  Foam::mag(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
     return orientedType(false);
 }
 
 
-Foam::orientedType  Foam::sign(const orientedType& of)
+Foam::orientedType  Foam::sign(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    return of;
+    return ot;
 }
 
 
-Foam::orientedType  Foam::pos(const orientedType& of)
+Foam::orientedType  Foam::pos(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    return of;
+    return ot;
 }
 
 
-Foam::orientedType  Foam::neg(const orientedType& of)
+Foam::orientedType  Foam::neg(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    return of;
+    return ot;
 }
 
 
-Foam::orientedType  Foam::posPart(const orientedType& of)
+Foam::orientedType  Foam::posPart(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    return of;
+    return ot;
 }
 
 
-Foam::orientedType  Foam::negPart(const orientedType& of)
+Foam::orientedType  Foam::negPart(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    return of;
+    return ot;
 }
 
 
-Foam::orientedType  Foam::inv(const orientedType& of)
+Foam::orientedType  Foam::inv(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    return of;
+    return ot;
 }
 
 
-Foam::orientedType Foam::trans(const orientedType& of)
+Foam::orientedType Foam::trans(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    return of;
+    return ot;
 }
 
 
 Foam::orientedType Foam::atan2
 (
-    const orientedType& of1,
-    const orientedType& of2
+    const orientedType& ot1,
+    const orientedType& ot2
 )
 {
-//InfoInFunction << "of1:" << of1.oriented() << ", of2:" << of2.oriented() << endl;
-    if (of1.oriented() != of2.oriented())
+    if (!orientedType::checkType(ot1, ot2))
     {
         FatalErrorInFunction
-            << "atan2 is undefined for oriented and unoriented types. "
-            << "of1:" << of1.oriented() << ", of2:" << of2.oriented()
+            << "Operator atan2 is undefined for "
+            << orientedType::orientedOptionNames[ot1.oriented()] << " and "
+            << orientedType::orientedOptionNames[ot2.oriented()] << "types"
             << abort(FatalError);
     }
 
-    return of1;
+    return ot1;
 }
 
 
-Foam::orientedType Foam::transform(const orientedType& of)
+Foam::orientedType Foam::transform(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    return of;
+    return ot;
 }
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, orientedType& of)
+Foam::Istream& Foam::operator>>(Istream& is, orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    is >> of.oriented_;
+    ot.oriented_ = orientedType::orientedOptionNames.read(is);
 
     is.check(FUNCTION_NAME);
 
@@ -368,10 +438,9 @@ Foam::Istream& Foam::operator>>(Istream& is, orientedType& of)
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const orientedType& of)
+Foam::Ostream& Foam::operator<<(Ostream& os, const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    os << of.oriented();
+    os << orientedType::orientedOptionNames[ot.oriented()];
 
     os.check(FUNCTION_NAME);
 
@@ -383,114 +452,109 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const orientedType& of)
 
 Foam::orientedType Foam::operator+
 (
-    const orientedType& of1,
-    const orientedType& of2
+    const orientedType& ot1,
+    const orientedType& ot2
 )
 {
-//InfoInFunction << "of1:" << of1.oriented() << ", of2:" << of2.oriented() << endl;
-    if (of1.oriented() != of2.oriented())
+    if (!orientedType::checkType(ot1, ot2))
     {
         FatalErrorInFunction
-            << "Operator + is undefined for oriented and unoriented types. "
-            << "of1:" << of1.oriented() << ", of2:" << of2.oriented()
+            << "Operator + is undefined for "
+            << orientedType::orientedOptionNames[ot1.oriented()] << " and "
+            << orientedType::orientedOptionNames[ot2.oriented()] << " types"
             << abort(FatalError);
     }
 
-    return orientedType(of1.oriented() || of2.oriented());
+    // Note use of () operators to convert to boolean op
+    return orientedType(ot1() || ot2());
 }
 
 
-Foam::orientedType Foam::operator-(const orientedType& of)
+Foam::orientedType Foam::operator-(const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    return orientedType(of);
+    return ot;
 }
 
 
 Foam::orientedType Foam::operator-
 (
-    const orientedType& of1,
-    const orientedType& of2
+    const orientedType& ot1,
+    const orientedType& ot2
 )
 {
-//InfoInFunction << "of1:" << of1.oriented() << ", of2:" << of2.oriented() << endl;
-    if (of1.oriented() != of2.oriented())
+    if (!orientedType::checkType(ot1, ot2))
     {
         FatalErrorInFunction
-            << "Operator - is undefined for oriented and unoriented types. "
-            << "of1:" << of1.oriented() << ", of2:" << of2.oriented()
+            << "Operator - is undefined for "
+            << orientedType::orientedOptionNames[ot1.oriented()] << " and "
+            << orientedType::orientedOptionNames[ot2.oriented()] << " types"
             << abort(FatalError);
     }
 
-    return orientedType(of1.oriented() || of2.oriented());
+    // Note use of () operators to convert to boolean op
+    return orientedType(ot1() || ot2());
 }
 
 
-Foam::orientedType Foam::operator*(const scalar s, const orientedType& of)
+Foam::orientedType Foam::operator*(const scalar s, const orientedType& ot)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    return orientedType(of);
+    return ot;
 }
 
 
-Foam::orientedType Foam::operator/(const orientedType& of, const scalar s)
+Foam::orientedType Foam::operator/(const orientedType& ot, const scalar s)
 {
-//InfoInFunction << "of:" << of.oriented() << endl;
-    return orientedType(of);
+    return ot;
 }
 
 
 Foam::orientedType Foam::operator/
 (
-    const orientedType& of1,
-    const orientedType& of2
+    const orientedType& ot1,
+    const orientedType& ot2
 )
 {
-//InfoInFunction << "of1:" << of1.oriented() << ", of2:" << of2.oriented() << endl;
-    return orientedType(of1.oriented() ^ of2.oriented());
+    return ot1 ^ ot2;
 }
 
 
 Foam::orientedType Foam::operator*
 (
-    const orientedType& of1,
-    const orientedType& of2
+    const orientedType& ot1,
+    const orientedType& ot2
 )
 {
-//InfoInFunction << "of1:" << of1.oriented() << ", of2:" << of2.oriented() << endl;
-    return orientedType(of1.oriented() ^ of2.oriented());
+    return ot1 ^ ot2;
 }
 
 
 Foam::orientedType Foam::operator^
 (
-    const orientedType& of1,
-    const orientedType& of2
+    const orientedType& ot1,
+    const orientedType& ot2
 )
 {
-//InfoInFunction << "of1:" << of1.oriented() << ", of2:" << of2.oriented() << endl;
-    return orientedType(of1.oriented() ^ of2.oriented());
+    // Note use of () operators to convert to boolean op
+    return orientedType(ot1() ^ ot2());
 }
 
 
 Foam::orientedType Foam::operator&
 (
-    const orientedType& of1,
-    const orientedType& of2
+    const orientedType& ot1,
+    const orientedType& ot2
 )
 {
-//InfoInFunction << "of1:" << of1.oriented() << ", of2:" << of2.oriented() << endl;
-    return orientedType(of1.oriented() ^ of2.oriented());
+    return ot1 ^ ot2;
 }
 
 
 Foam::orientedType Foam::operator&&
 (
-    const orientedType& of1,
-    const orientedType& of2
+    const orientedType& ot1,
+    const orientedType& ot2
 )
 {
-//InfoInFunction << "of1:" << of1.oriented() << ", of2:" << of2.oriented() << endl;
     return orientedType(false);
 }
 

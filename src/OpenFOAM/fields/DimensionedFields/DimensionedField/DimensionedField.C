@@ -60,7 +60,7 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     Field<Type>(field),
     mesh_(mesh),
     dimensions_(dims),
-    oriented_(false)
+    oriented_()
 {
     if (field.size() && field.size() != GeoMesh::size(mesh))
     {
@@ -86,7 +86,7 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     Field<Type>(GeoMesh::size(mesh)),
     mesh_(mesh),
     dimensions_(dims),
-    oriented_(false)
+    oriented_()
 {
     if (checkIOFlags)
     {
@@ -108,7 +108,7 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     Field<Type>(GeoMesh::size(mesh), dt.value()),
     mesh_(mesh),
     dimensions_(dt.dimensions()),
-    oriented_(false)
+    oriented_()
 {
     if (checkIOFlags)
     {

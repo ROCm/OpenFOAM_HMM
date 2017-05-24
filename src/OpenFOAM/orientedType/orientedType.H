@@ -37,6 +37,8 @@ SourceFiles
 
 #include "Istream.H"
 #include "Ostream.H"
+#include "dictionary.H"
+#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,19 +54,35 @@ Istream& operator>>(Istream&, orientedType&);
 Ostream& operator<<(Ostream&, const orientedType&);
 
 /*---------------------------------------------------------------------------*\
-                           Class dimensioned Declaration
+                        Class orientedType Declaration
 \*---------------------------------------------------------------------------*/
 
 class orientedType
 {
+public:
+
+    // Public data types
+
+        //- Enumeration defining the valid oriented flags
+        enum orientedOption
+        {
+            ORIENTED,
+            UNORIENTED,
+            UNKNOWN
+        };
+
+        static const NamedEnum<orientedOption, 3> orientedOptionNames;
+
+
+private:
+
     // Private data
 
         //- Oriented flag
-        bool oriented_;
+        orientedOption oriented_;
 
 
 public:
-
 
     // Constructors
 
@@ -72,7 +90,7 @@ public:
         orientedType();
 
         //- Copy constructor
-        orientedType(const orientedType& of);
+        orientedType(const orientedType& ot);
 
         //- Construct from bool
         orientedType(const bool oriented);
@@ -83,21 +101,37 @@ public:
 
     // Member functions
 
+        //- Return true if can operate on this pair of oriented types
+        static bool checkType
+        (
+            const orientedType& ot1,
+            const orientedType& ot2
+        );
+
         //- Return non-const reference to the oriented flag
-        bool& oriented();
+        orientedOption& oriented();
 
         //- Return const reference to the oriented flag
-        bool oriented() const;
+        orientedOption oriented() const;
+
+        //- Set the oriented flag
+        void setOriented(const bool oriented = true);
+
+        //- Read the oriented state from dictionary
+        void read(const dictionary& dict);
+
+        //- Write the oriented flag entry
+        void writeEntry(Ostream& os) const;
 
 
     // Member operators
 
-        void operator=(const orientedType& of);
+        void operator=(const orientedType& ot);
 
-        void operator+=(const orientedType& of);
-        void operator-=(const orientedType& of);
-        void operator*=(const orientedType& of);
-        void operator/=(const orientedType& of);
+        void operator+=(const orientedType& ot);
+        void operator-=(const orientedType& ot);
+        void operator*=(const orientedType& ot);
+        void operator/=(const orientedType& ot);
         void operator*=(const scalar s);
         void operator/=(const scalar s);
         bool operator()() const;
@@ -105,57 +139,57 @@ public:
 
     // IOstream operators
 
-        friend Istream& operator>>(Istream& is, orientedType& of);
+        friend Istream& operator>>(Istream& is, orientedType& ot);
 
-        friend Ostream& operator<<(Ostream& os, const orientedType& of);
+        friend Ostream& operator<<(Ostream& os, const orientedType& ot);
 };
 
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-orientedType max(const orientedType& of1, const orientedType& of2);
-orientedType min(const orientedType& of1, const orientedType& of2);
-orientedType cmptMultiply(const orientedType& of1, const orientedType& of2);
-orientedType cmptDivide(const orientedType& of1, const orientedType& of);
-orientedType cmptAv(const orientedType& of);
+orientedType max(const orientedType& ot1, const orientedType& ot2);
+orientedType min(const orientedType& ot1, const orientedType& ot2);
+orientedType cmptMultiply(const orientedType& ot1, const orientedType& ot2);
+orientedType cmptDivide(const orientedType& ot1, const orientedType& ot);
+orientedType cmptAv(const orientedType& ot);
 
 
-orientedType pow(const orientedType& of, const scalar r);
-orientedType sqr(const orientedType& of);
-orientedType pow3(const orientedType& of);
-orientedType pow4(const orientedType& of);
-orientedType pow5(const orientedType& of);
-orientedType pow6(const orientedType& of);
-orientedType pow025(const orientedType& of);
+orientedType pow(const orientedType& ot, const scalar r);
+orientedType sqr(const orientedType& ot);
+orientedType pow3(const orientedType& ot);
+orientedType pow4(const orientedType& ot);
+orientedType pow5(const orientedType& ot);
+orientedType pow6(const orientedType& ot);
+orientedType pow025(const orientedType& ot);
 
 
-orientedType sqrt(const orientedType& of);
-orientedType cbrt(const orientedType& of);
-orientedType magSqr(const orientedType& of);
-orientedType mag(const orientedType& of);
-orientedType sign(const orientedType& of);
-orientedType pos(const orientedType& of);
-orientedType neg(const orientedType& of);
-orientedType posPart(const orientedType& of);
-orientedType negPart(const orientedType& of);
-orientedType inv(const orientedType& of);
+orientedType sqrt(const orientedType& ot);
+orientedType cbrt(const orientedType& ot);
+orientedType magSqr(const orientedType& ot);
+orientedType mag(const orientedType& ot);
+orientedType sign(const orientedType& ot);
+orientedType pos(const orientedType& ot);
+orientedType neg(const orientedType& ot);
+orientedType posPart(const orientedType& ot);
+orientedType negPart(const orientedType& ot);
+orientedType inv(const orientedType& ot);
 
 
-orientedType trans(const orientedType& of);
-orientedType atan2(const orientedType& of1, const orientedType& of2);
-orientedType transform(const orientedType& of);
+orientedType trans(const orientedType& ot);
+orientedType atan2(const orientedType& ot1, const orientedType& ot2);
+orientedType transform(const orientedType& ot);
 
-orientedType operator-(const orientedType& of);
-orientedType operator*(const scalar s, const orientedType& of);
-orientedType operator/(const orientedType& of, const scalar s);
+orientedType operator-(const orientedType& ot);
+orientedType operator*(const scalar s, const orientedType& ot);
+orientedType operator/(const orientedType& ot, const scalar s);
 
-orientedType operator+(const orientedType& of1, const orientedType& of2);
-orientedType operator-(const orientedType& of1, const orientedType& of2);
-orientedType operator/(const orientedType& of1, const orientedType& of2);
-orientedType operator*(const orientedType& of1, const orientedType& of2);
-orientedType operator^(const orientedType& of1, const orientedType& of2);
-orientedType operator&(const orientedType& of1, const orientedType& of2);
-orientedType operator&&(const orientedType& of1, const orientedType& of2);
+orientedType operator+(const orientedType& ot1, const orientedType& ot2);
+orientedType operator-(const orientedType& ot1, const orientedType& ot2);
+orientedType operator/(const orientedType& ot1, const orientedType& ot2);
+orientedType operator*(const orientedType& ot1, const orientedType& ot2);
+orientedType operator^(const orientedType& ot1, const orientedType& ot2);
+orientedType operator&(const orientedType& ot1, const orientedType& ot2);
+orientedType operator&&(const orientedType& ot1, const orientedType& ot2);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
