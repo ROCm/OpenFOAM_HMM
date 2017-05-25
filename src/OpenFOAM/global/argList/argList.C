@@ -673,6 +673,17 @@ void Foam::argList::parse
                     adjustOpt = true;
                     source = source/"decomposeParDict";
                 }
+
+                if
+                (
+                   !source.isAbsolute()
+                && !(source.size() && source[0] == '.')
+                )
+                {
+                    source = rootPath_/globalCase_/source;
+                    adjustOpt = true;
+                }
+
                 // Could also check for absolute path, but shouldn't be needed
                 if (adjustOpt)
                 {
