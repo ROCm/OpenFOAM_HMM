@@ -267,7 +267,7 @@ Foam::PackedList<nBits>::clone() const
 template<unsigned nBits>
 inline Foam::PackedList<nBits>::iteratorBase::iteratorBase()
 :
-    list_(0),
+    list_(nullptr),
     index_(0)
 {}
 
@@ -1002,6 +1002,12 @@ inline bool Foam::PackedList<nBits>::set
     }
     else if (i >= size_)
     {
+        if (!val)
+        {
+            // Same as unset out-of-bounds = noop
+            return false;
+        }
+
         // Lazy evaluation - increase size on assigment
         resize(i + 1);
     }
@@ -1013,7 +1019,7 @@ inline bool Foam::PackedList<nBits>::set
 template<unsigned nBits>
 inline bool Foam::PackedList<nBits>::unset(const label i)
 {
-    // lazy evaluation - ignore out-of-bounds
+    // Unset out-of-bounds = noop
     if (i < 0 || i >= size_)
     {
         return false;
