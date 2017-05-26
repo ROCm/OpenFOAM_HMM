@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,9 @@ Class
     Foam::NamedEnum
 
 Description
-    Initialise the NamedEnum HashTable from the static list of names.
+    A NamedEnum is a wrapper around a static list of names that represent
+    a particular enumeration. Internally it uses a HashTable for quicker
+    lookups.
 
 SourceFiles
     NamedEnum.C
@@ -44,6 +46,7 @@ SourceFiles
 
 namespace Foam
 {
+class dictionary;
 
 // Forward declaration
 template<class Enum, int> class NamedEnum;
@@ -57,10 +60,18 @@ class NamedEnum
 :
     public HashTable<int>
 {
-    //- nEnum must be positive (non-zero)
+    //- The nEnum must be positive (non-zero)
     static_assert(nEnum > 0, "nEnum must be positive (non-zero)");
 
+    //- The type of HashTable used for the lookup.
+    typedef HashTable<int> table_type;
+
+
     // Private Member Functions
+
+        //- The names as a list of strings
+        template<class StringType>
+        static List<StringType> getNamesList();
 
         //- Disallow default bitwise copy construct
         NamedEnum(const NamedEnum&) = delete;
@@ -70,6 +81,10 @@ class NamedEnum
 
 
 public:
+
+    //- The type of enumeration wrapped by NamedEnum
+    typedef Enum enum_type;
+
 
     // Static data members
 
@@ -87,10 +102,33 @@ public:
 
         //- Read a word from Istream and return the corresponding
         //  enumeration element
-        Enum read(Istream& is) const;
+        enum_type read(Istream& is) const;
 
         //- Write the name representation of the enumeration to an Ostream
-        void write(const Enum e, Ostream& os) const;
+        void write(const enum_type e, Ostream& os) const;
+
+        //- Lookup the key in the dictionary and return the corresponding
+        // enumeration element based on its name.
+        // Fatal if anything is incorrect.
+        enum_type lookup
+        (
+            const word& key,
+            const dictionary& dict
+        ) const;
+
+        //- Find the key in the dictionary and return the corresponding
+        //  enumeration element based on its name.
+        //  Return the default value if the key was not found in the dictionary.
+        //  Fatal if enumerated name was incorrect.
+        enum_type lookupOrDefault
+        (
+            const word& key,
+            const dictionary& dict,
+            const enum_type deflt
+        ) const;
+
+        //- List of enumerations
+        static List<enum_type> enums();
 
         //- The set of names as a list of strings
         static stringList strings();
@@ -98,26 +136,23 @@ public:
         //- The set of names as a list of words
         static wordList words();
 
-        //- List of enumerations
-        static List<Enum> enums();
-
 
     // Member Operators
 
         //- Return the enumeration element corresponding to the given name
-        const Enum operator[](const char* name) const
+        inline const enum_type operator[](const char* name) const
         {
-            return Enum(HashTable<int>::operator[](name));
+            return enum_type(table_type::operator[](name));
         }
 
         //- Return the enumeration element corresponding to the given name
-        const Enum operator[](const word& name) const
+        inline const enum_type operator[](const word& name) const
         {
-            return Enum(HashTable<int>::operator[](name));
+            return enum_type(table_type::operator[](name));
         }
 
         //- Return the name of the given enumeration element
-        const char* operator[](const Enum e) const
+        inline const char* operator[](const enum_type e) const
         {
             return names[int(e)];
         }
