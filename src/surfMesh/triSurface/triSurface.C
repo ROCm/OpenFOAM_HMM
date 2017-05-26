@@ -623,7 +623,7 @@ Foam::triSurface::calcPatches(labelList& faceMap) const
         }
         else
         {
-            newPatch.geometricType() = "empty";
+            newPatch.geometricType() = geometricSurfacePatch::emptyType;
         }
 
         startFacei += newPatch.size();

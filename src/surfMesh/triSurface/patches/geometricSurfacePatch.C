@@ -26,28 +26,54 @@ License
 #include "geometricSurfacePatch.H"
 #include "dictionary.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 defineTypeNameAndDebug(geometricSurfacePatch, 0);
+}
+
+const Foam::word Foam::geometricSurfacePatch::emptyType = "empty";
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct null
-geometricSurfacePatch::geometricSurfacePatch()
+Foam::geometricSurfacePatch::geometricSurfacePatch()
 :
-    geometricType_("empty"),
+    geometricType_(emptyType),
     name_("patch"),
     index_(0)
 {}
 
 
-// Construct from components
-geometricSurfacePatch::geometricSurfacePatch
+Foam::geometricSurfacePatch::geometricSurfacePatch(const label index)
+:
+    geometricType_(emptyType),
+    name_("patch"),
+    index_(index)
+{}
+
+
+Foam::geometricSurfacePatch::geometricSurfacePatch
+(
+    const word& name,
+    const label index,
+    const word& geometricType
+)
+:
+    geometricType_(geometricType),
+    name_(name),
+    index_(index)
+
+{
+    if (geometricType_.empty())
+    {
+        geometricType_ = emptyType;
+    }
+}
+
+
+Foam::geometricSurfacePatch::geometricSurfacePatch
 (
     const word& geometricType,
     const word& name,
@@ -61,13 +87,16 @@ geometricSurfacePatch::geometricSurfacePatch
 {
     if (geometricType_.empty())
     {
-        geometricType_ = "empty";
+        geometricType_ = emptyType;
     }
 }
 
 
-// Construct from Istream
-geometricSurfacePatch::geometricSurfacePatch(Istream& is, const label index)
+Foam::geometricSurfacePatch::geometricSurfacePatch
+(
+    Istream& is,
+    const label index
+)
 :
     geometricType_(is),
     name_(is),
@@ -75,89 +104,82 @@ geometricSurfacePatch::geometricSurfacePatch(Istream& is, const label index)
 {
     if (geometricType_.empty())
     {
-        geometricType_ = "empty";
+        geometricType_ = emptyType;
     }
 }
 
 
-// Construct from dictionary
-geometricSurfacePatch::geometricSurfacePatch
+Foam::geometricSurfacePatch::geometricSurfacePatch
 (
     const word& name,
     const dictionary& dict,
     const label index
 )
 :
-    geometricType_(dict.lookup("geometricType")),
+    geometricType_(emptyType),
     name_(name),
     index_(index)
 {
-    if (geometricType_.empty())
-    {
-        geometricType_ = "empty";
-    }
+    dict.readIfPresent("geometricType", geometricType_);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Write
-void geometricSurfacePatch::write(Ostream& os) const
+void Foam::geometricSurfacePatch::write(Ostream& os) const
 {
     os  << nl << name_
         << nl << geometricType_;
 }
 
 
-void geometricSurfacePatch::writeDict(Ostream& os) const
+void Foam::geometricSurfacePatch::writeDict(Ostream& os) const
 {
-    os  << "    geometricType " << geometricType_ << ';' << nl;
+    os.writeEntry("geometricType", geometricType_);
 }
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-bool Foam::geometricSurfacePatch::operator!=(const geometricSurfacePatch& p)
-    const
-{
-    return !(*this == p);
-}
-
-
-bool Foam::geometricSurfacePatch::operator==(const geometricSurfacePatch& p)
-    const
+bool Foam::operator==
+(
+    const geometricSurfacePatch& a,
+    const geometricSurfacePatch& b
+)
 {
     return
     (
-        (geometricType() == p.geometricType())
-     && (name() == p.name())
+        (a.geometricType() == b.geometricType())
+     && (a.name() == b.name())
     );
+}
+
+
+bool Foam::operator!=
+(
+    const geometricSurfacePatch& a,
+    const geometricSurfacePatch& b
+)
+{
+    return !(a == b);
 }
 
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Istream& operator>>(Istream& is, geometricSurfacePatch& gp)
+Foam::Istream& Foam::operator>>(Istream& is, geometricSurfacePatch& p)
 {
-    is >> gp.name_ >> gp.geometricType_;
-
+    is >> p.name_ >> p.geometricType_;
     return is;
 }
 
 
-Ostream& operator<<(Ostream& os, const geometricSurfacePatch& gp)
+Foam::Ostream& Foam::operator<<(Ostream& os, const geometricSurfacePatch& p)
 {
-    gp.write(os);
-    os.check
-    (
-        "Ostream& operator<<(Ostream& f, const geometricSurfacePatch& gp)"
-    );
+    p.write(os);
+    os.check(FUNCTION_NAME);
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

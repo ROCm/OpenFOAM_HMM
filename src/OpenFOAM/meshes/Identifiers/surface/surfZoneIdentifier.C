@@ -106,29 +106,22 @@ void Foam::surfZoneIdentifier::write(Ostream& os) const
 }
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-// needed for list output
-bool Foam::surfZoneIdentifier::operator!=
-(
-    const surfZoneIdentifier& rhs
-) const
-{
-    return !(*this == rhs);
-}
-
-
-bool Foam::surfZoneIdentifier::operator==
-(
-    const surfZoneIdentifier& rhs
-) const
+bool Foam::operator==(const surfZoneIdentifier& a, const surfZoneIdentifier& b)
 {
     return
     (
-        (index() == rhs.index())
-     && (name()  == rhs.name())
-     && (geometricType() == rhs.geometricType())
+        (a.index() == b.index())
+     && (a.name()  == b.name())
+     && (a.geometricType() == b.geometricType())
     );
+}
+
+
+bool Foam::operator!=(const surfZoneIdentifier& a, const surfZoneIdentifier& b)
+{
+    return !(a == b);
 }
 
 
@@ -137,17 +130,15 @@ bool Foam::surfZoneIdentifier::operator==
 Foam::Istream& Foam::operator>>(Istream& is, surfZoneIdentifier& obj)
 {
     is >> obj.name_ >> obj.geometricType_;
-
     return is;
 }
 
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const surfZoneIdentifier& obj)
 {
-    // newlines to separate, since that is what triSurface currently expects
+    // Newlines to separate, since that is what triSurface currently expects
     os  << nl << obj.name_ << nl << obj.geometricType_;
-
-    os.check("Ostream& operator<<(Ostream&, const surfZoneIdentifier&)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

@@ -327,9 +327,8 @@ void Foam::UnsortedMeshedSurface<Face>::setOneZone()
         zoneName = "zone0";
     }
 
-    // set single default zone
-    zoneToc_.setSize(1);
-    zoneToc_[0] = surfZoneIdentifier(zoneName, 0);
+    // Set single default zone
+    zoneToc_ = { surfZoneIdentifier(zoneName, 0) };
 }
 
 
