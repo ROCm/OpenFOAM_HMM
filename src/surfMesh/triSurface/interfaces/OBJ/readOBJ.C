@@ -1,4 +1,3 @@
-
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
@@ -172,19 +171,19 @@ bool Foam::triSurface::readOBJ(const fileName& OBJfileName)
 
     if (maxGroupID == 0)
     {
-        // Generate default patch
-        patches.setSize(1);
-        patches[0] = geometricSurfacePatch("empty", "patch0", 0);
+        // Add single (default) patch
+        patches = { geometricSurfacePatch("patch0", 0) };
     }
     else
     {
-        forAllConstIter(HashTable<label>, groupToPatch, iter)
+        forAllConstIters(groupToPatch, iter)
         {
-            patches[iter()] = geometricSurfacePatch
+            const label patchIdx = iter.object();
+
+            patches[patchIdx] = geometricSurfacePatch
             (
-                "empty",
                 iter.key(),
-                iter()
+                patchIdx
             );
         }
     }

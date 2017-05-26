@@ -869,7 +869,7 @@ inline Foam::Istream& Foam::operator>>
     is  >> t.a_ >> t.b_ >> t.c_;
     is.readEnd("triangle");
 
-    is.check("Istream& operator>>(Istream&, triangle&)");
+    is.check(FUNCTION_NAME);
     return is;
 }
 

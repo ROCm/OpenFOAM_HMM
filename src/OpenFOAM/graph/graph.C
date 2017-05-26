@@ -298,7 +298,7 @@ void Foam::graph::write
 Foam::Ostream& Foam::operator<<(Ostream& os, const graph& g)
 {
     g.writeTable(os);
-    os.check("Ostream& operator<<(Ostream&, const graph&)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

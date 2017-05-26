@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 #include "IOobject.H"
 #include "dictionary.H"
 #include "fvMesh.H"
+#include "surfaceMesh.H"
 #include "fvPatchFieldMapper.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -93,20 +94,15 @@ Foam::fvsPatchField<Type>::fvsPatchField
     }
     else
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "essential value entry not provided"
+        FatalIOErrorInFunction(dict)
+            << "essential 'value' entry not provided"
             << exit(FatalIOError);
     }
 }
 
 
 template<class Type>
-Foam::fvsPatchField<Type>::fvsPatchField
-(
-    const fvsPatchField<Type>& ptf
-)
+Foam::fvsPatchField<Type>::fvsPatchField(const fvsPatchField<Type>& ptf)
 :
     Field<Type>(ptf),
     patch_(ptf.patch_),
@@ -149,12 +145,10 @@ void Foam::fvsPatchField<Type>::check(const fvsPatchField<Type>& ptf) const
 
 
 template<class Type>
-void Foam::fvsPatchField<Type>::autoMap
-(
-    const fvPatchFieldMapper& m
-)
+void Foam::fvsPatchField<Type>::autoMap(const fvPatchFieldMapper& m)
 {
-    Field<Type>::autoMap(m);
+    const bool oriented = internalField_.oriented()();
+    Field<Type>::autoMap(m, oriented);
 }
 
 
@@ -382,7 +376,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const fvsPatchField<Type>& ptf)
 {
     ptf.write(os);
 
-    os.check("Ostream& operator<<(Ostream&, const fvsPatchField<Type>&");
+    os.check(FUNCTION_NAME);
 
     return os;
 }

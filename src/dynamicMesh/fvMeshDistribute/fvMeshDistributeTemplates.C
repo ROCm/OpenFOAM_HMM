@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -205,6 +205,8 @@ void Foam::fvMeshDistribute::mapExposedFaces
     forAllIter(typename HashTable<fldType*>, flds, iter)
     {
         fldType& fld = *iter();
+        const bool oriented = fld.oriented()();
+
         typename fldType::Boundary& bfld = fld.boundaryFieldRef();
 
         const Field<T>& oldInternal = oldFlds[fieldI++];
@@ -225,7 +227,7 @@ void Foam::fvMeshDistribute::mapExposedFaces
                 {
                     patchFld[i] = oldInternal[oldFaceI];
 
-                    if (map.flipFaceFlux().found(faceI))
+                    if (oriented && map.flipFaceFlux().found(faceI))
                     {
                         patchFld[i] = flipOp()(patchFld[i]);
                     }

@@ -91,4 +91,46 @@ Foam::word Foam::word::validated(const std::string& s)
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::word Foam::word::lessExt() const
+{
+    const size_type i = find_ext();
+
+    if (i == npos)
+    {
+        return *this;
+    }
+    else
+    {
+        return substr(0, i);
+    }
+}
+
+
+Foam::word Foam::word::ext() const
+{
+    return string::ext();
+}
+
+
+Foam::word& Foam::word::ext(const word& ending)
+{
+    string::ext(ending);
+    return *this;
+}
+
+
+bool Foam::word::hasExt(const word& ending) const
+{
+    return string::hasExt(ending);
+}
+
+
+bool Foam::word::hasExt(const wordRe& ending) const
+{
+    return string::hasExt(ending);
+}
+
+
 // ************************************************************************* //

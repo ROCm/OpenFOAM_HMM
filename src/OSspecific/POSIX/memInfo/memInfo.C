@@ -118,12 +118,7 @@ Foam::Istream& Foam::operator>>(Istream& is, memInfo& m)
 
     is.readEnd("memInfo");
 
-    // Check state of Istream
-    is.check
-    (
-        "Foam::Istream& Foam::operator>>(Foam::Istream&, Foam::memInfo&)"
-    );
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -136,12 +131,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const memInfo& m)
         << m.rss_
         << token::END_LIST;
 
-    // Check state of Ostream
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, const Foam::memInfo&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

@@ -623,7 +623,7 @@ Foam::triSurface::calcPatches(labelList& faceMap) const
         }
         else
         {
-            newPatch.geometricType() = "empty";
+            newPatch.geometricType() = geometricSurfacePatch::emptyType;
         }
 
         startFacei += newPatch.size();
@@ -1157,7 +1157,7 @@ void Foam::triSurface::write(Ostream& os) const
         << static_cast<const List<labelledTri>&>(*this) << endl;
 
     // Check state of Ostream
-    os.check("triSurface::write(Ostream&)");
+    os.check(FUNCTION_NAME);
 }
 
 
@@ -1181,14 +1181,15 @@ void Foam::triSurface::writeStats(Ostream& os) const
 
     label nPoints = 0;
     boundBox bb(boundBox::invertedBox);
+    labelHashSet regionsUsed;
 
-    forAll(*this, facei)
+    for (const triSurface::FaceType& f : *this)
     {
-        const triSurface::FaceType& f = operator[](facei);
+        regionsUsed.insert(f.region());
 
         forAll(f, fp)
         {
-            label pointi = f[fp];
+            const label pointi = f[fp];
             if (pointIsUsed.set(pointi, 1))
             {
                 bb.add(points()[pointi]);
@@ -1197,8 +1198,9 @@ void Foam::triSurface::writeStats(Ostream& os) const
         }
     }
 
-    os  << "Triangles    : " << size() << endl
-        << "Vertices     : " << nPoints << endl
+    os  << "Triangles    : " << size()
+        << " in " << regionsUsed.size() <<  " region(s)" << nl
+        << "Vertices     : " << nPoints << nl
         << "Bounding Box : " << bb << endl;
 }
 

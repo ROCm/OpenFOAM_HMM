@@ -105,9 +105,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const token& t)
                 << endl;
     }
 
-    // Check state of stream
-    os.check("Ostream& operator<<(Ostream&, const token&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

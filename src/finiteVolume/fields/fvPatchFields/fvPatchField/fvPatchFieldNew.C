@@ -148,11 +148,7 @@ Foam::tmp<Foam::fvPatchField<Type>> Foam::fvPatchField<Type>::New
         typename dictionaryConstructorTable::iterator patchTypeCstrIter
             = dictionaryConstructorTablePtr_->find(p.type());
 
-        if
-        (
-            patchTypeCstrIter != dictionaryConstructorTablePtr_->end()
-         && patchTypeCstrIter() != cstrIter()
-        )
+        if (patchTypeCstrIter.found() && patchTypeCstrIter() != cstrIter())
         {
             FatalIOErrorInFunction
             (

@@ -43,6 +43,7 @@ void Func                                                                      \
 {                                                                              \
     Foam::Func(res.primitiveFieldRef(), gf1.primitiveField());                 \
     Foam::Func(res.boundaryFieldRef(), gf1.boundaryField());                   \
+    res.oriented() = gf1.oriented();                                           \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -112,6 +113,7 @@ void OpFunc                                                                    \
 {                                                                              \
     Foam::OpFunc(res.primitiveFieldRef(), gf1.primitiveField());               \
     Foam::OpFunc(res.boundaryFieldRef(), gf1.boundaryField());                 \
+    res.oriented() = gf1.oriented();                                           \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -192,6 +194,7 @@ void Func                                                                      \
         gf1.boundaryField(),                                                   \
         gf2.boundaryField()                                                    \
     );                                                                         \
+    res.oriented() = Func(gf1.oriented(), gf2.oriented());                     \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -320,6 +323,7 @@ void Func                                                                      \
 {                                                                              \
     Foam::Func(res.primitiveFieldRef(), dt1.value(), gf2.primitiveField());    \
     Foam::Func(res.boundaryFieldRef(), dt1.value(), gf2.boundaryField());      \
+    res.oriented() = gf2.oriented();                                           \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -411,6 +415,7 @@ void Func                                                                      \
 {                                                                              \
     Foam::Func(res.primitiveFieldRef(), gf1.primitiveField(), dt2.value());    \
     Foam::Func(res.boundaryFieldRef(), gf1.boundaryField(), dt2.value());      \
+    res.oriented() = gf1.oriented();                                           \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -511,6 +516,7 @@ void OpFunc                                                                    \
     (res.primitiveFieldRef(), gf1.primitiveField(), gf2.primitiveField());     \
     Foam::OpFunc                                                               \
     (res.boundaryFieldRef(), gf1.boundaryField(), gf2.boundaryField());        \
+    res.oriented() = gf1.oriented() Op gf2.oriented();                         \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -639,6 +645,8 @@ void OpFunc                                                                    \
 {                                                                              \
     Foam::OpFunc(res.primitiveFieldRef(), dt1.value(), gf2.primitiveField());  \
     Foam::OpFunc(res.boundaryFieldRef(), dt1.value(), gf2.boundaryField());    \
+    res.oriented() = gf2.oriented();                                           \
+                                                                               \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -730,6 +738,7 @@ void OpFunc                                                                    \
 {                                                                              \
     Foam::OpFunc(res.primitiveFieldRef(), gf1.primitiveField(), dt2.value());  \
     Foam::OpFunc(res.boundaryFieldRef(), gf1.boundaryField(), dt2.value());    \
+    res.oriented() = gf1.oriented();                                           \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \

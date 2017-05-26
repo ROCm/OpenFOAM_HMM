@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -233,7 +233,16 @@ void Foam::pointConstraints::makePatchPatchAddressing()
                     // Allocate new constraint
                     if (patchPatchPoints.size() <= pppi)
                     {
+                        // Check if not enough space. This
+                        // can occasionally happen if -coupled points connect
+                        // to the inside of a patch -these coupled points also
+                        // carry a constraint
                         patchPatchPoints.setSize(pppi+100);
+                        patchPatchPointConstraints_.setSize
+                        (
+                            pppi+100,
+                            pointConstraint()
+                        );
                     }
                     patchPatchPointSet.insert(meshPointi, pppi);
                     patchPatchPoints[pppi] = meshPointi;

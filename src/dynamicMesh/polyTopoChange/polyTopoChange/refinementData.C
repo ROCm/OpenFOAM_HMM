@@ -46,8 +46,7 @@ Foam::Ostream& Foam::operator<<
         );
     }
 
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const refinementData&)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 
@@ -67,8 +66,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::refinementData& wDist)
         );
     }
 
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, refinementData&)");
+    is.check(FUNCTION_NAME);
     return is;
 }
 

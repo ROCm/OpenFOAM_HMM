@@ -171,17 +171,26 @@ labelList invert(const label len, const labelUList& map);
 labelListList invertOneToMany(const label len, const labelUList& map);
 
 //- Invert many-to-many.
-//  Input and output types need to be inherited from List.
-//  eg, faces to pointFaces.
-template<class InList, class OutList>
-void invertManyToMany(const label len, const UList<InList>&, List<OutList>&);
+//  Input and output types must be inherited from List and also
+//  contain ints/labels. Used, for example, for faces to pointFaces.
+template<class InputIntListType, class OutputIntListType>
+void invertManyToMany
+(
+    const label len,
+    const UList<InputIntListType>& input,
+    List<OutputIntListType>& output
+);
 
-template<class InList, class OutList>
-List<OutList> invertManyToMany(const label len, const UList<InList>& in)
+template<class InputIntListType, class OutputIntListType>
+List<OutputIntListType> invertManyToMany
+(
+    const label len,
+    const UList<InputIntListType>& input
+)
 {
-    List<OutList> out;
-    invertManyToMany<InList,OutList>(len, in, out);
-    return out;
+    List<OutputIntListType> output;
+    invertManyToMany<InputIntListType,OutputIntListType>(len, input, output);
+    return output;
 }
 
 //- Create identity map of the given length with (map[i] == i)

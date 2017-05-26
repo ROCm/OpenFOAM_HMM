@@ -128,9 +128,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const edgeMesh& em)
 {
     fileFormats::edgeMeshFormat::write(os, em.points_, em.edges_);
 
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const edgeMesh&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 
@@ -141,9 +139,7 @@ Foam::Istream& Foam::operator>>(Istream& is, edgeMesh& em)
 
     em.pointEdgesPtr_.clear();
 
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, edgeMesh&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 

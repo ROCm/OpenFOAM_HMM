@@ -87,13 +87,7 @@ Foam::Istream& Foam::operator>>
 {
     is  >> wIS.patchi_ >> wIS.wallData_;
 
-    // Check state of Istream
-    is.check
-    (
-        "Foam::Istream& Foam::operator>>"
-        "(Foam::Istream&, Foam::WallSiteData<Type>&)"
-    );
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -107,13 +101,7 @@ Foam::Ostream& Foam::operator<<
 {
     os  << wIS.patchi_ << token::SPACE << wIS.wallData_;
 
-    // Check state of Ostream
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<"
-        "(Ostream&, const WallSiteData<Type>&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

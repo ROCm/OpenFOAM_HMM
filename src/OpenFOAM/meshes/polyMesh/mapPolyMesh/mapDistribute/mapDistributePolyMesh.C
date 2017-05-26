@@ -309,7 +309,7 @@ void Foam::mapDistributePolyMesh::operator=(const mapDistributePolyMesh& rhs)
 
 Foam::Istream& Foam::operator>>(Istream& is, mapDistributePolyMesh& map)
 {
-    is.fatalCheck("operator>>(Istream&, mapDistributePolyMesh&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     is  >> map.nOldPoints_
         >> map.nOldFaces_

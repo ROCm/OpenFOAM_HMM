@@ -146,7 +146,7 @@ public:
         //- Update mesh subset
         void correct(bool verbose = false);
 
-        //- Read mesh
+        //- Read mesh. Correct on topo-change
         polyMesh::readUpdateState readUpdate();
 
 

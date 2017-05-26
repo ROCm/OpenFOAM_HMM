@@ -127,6 +127,18 @@ inline bool Foam::word::valid(char c)
 }
 
 
+inline bool Foam::word::hasExt() const
+{
+    return string::hasExt();
+}
+
+
+inline bool Foam::word::removeExt()
+{
+    return string::removeExt();
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 inline void Foam::word::operator=(const word& w)

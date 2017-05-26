@@ -63,8 +63,6 @@ $(csys)/coordinateRotation/EulerCoordinateRotation.C
 $(csys)/coordinateRotation/STARCDCoordinateRotation.C
 $(csys)/coordinateRotation/cylindrical.C
 
-edgeFaceCirculator/edgeFaceCirculator.C
-
 polyMeshZipUpCells/polyMeshZipUpCells.C
 primitiveMeshGeometry/primitiveMeshGeometry.C
 

@@ -36,8 +36,7 @@ Foam::CLASSNAME<TemplateArgument>::CLASSNAME(Istream& is)
     member1(is),
     member2(is)
 {
-    // Check state of Istream
-    is.check("Foam::CLASSNAME<TemplateArgument>::CLASSNAME(Foam::Istream&)");
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -50,13 +49,7 @@ Foam::Istream& Foam::operator>>
     CLASSNAME<TemplateArgument>&
 )
 {
-    // Check state of Istream
-    is.check
-    (
-        "Foam::Istream& Foam::operator>>"
-        "(Foam::Istream&, Foam::CLASSNAME<TemplateArgument>&)"
-    );
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -68,13 +61,7 @@ Foam::Ostream& Foam::operator<<
     const CLASSNAME<TemplateArgument>&
 )
 {
-    // Check state of Ostream
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<"
-        "(Ostream&, const CLASSNAME<TemplateArgument>&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

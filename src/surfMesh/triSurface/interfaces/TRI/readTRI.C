@@ -163,7 +163,7 @@ bool Foam::triSurface::readTRI(const fileName& TRIfileName)
     forAll(names, nameI)
     {
         patches_[nameI].name() = names[nameI];
-        patches_[nameI].geometricType() = "empty";
+        patches_[nameI].geometricType() = geometricSurfacePatch::emptyType;
     }
 
     return true;

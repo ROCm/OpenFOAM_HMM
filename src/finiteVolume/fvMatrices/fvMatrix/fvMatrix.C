@@ -892,6 +892,8 @@ flux() const
     GeometricField<Type, fvsPatchField, surfaceMesh>& fieldFlux =
         tfieldFlux.ref();
 
+    fieldFlux.setOriented();
+
     for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
     {
         fieldFlux.primitiveFieldRef().replace
@@ -2385,7 +2387,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const fvMatrix<Type>& fvm)
         << fvm.internalCoeffs_ << nl
         << fvm.boundaryCoeffs_ << endl;
 
-    os.check("Ostream& operator<<(Ostream&, fvMatrix<Type>&");
+    os.check(FUNCTION_NAME);
 
     return os;
 }

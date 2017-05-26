@@ -573,12 +573,7 @@ writeEntry(const word& keyword, Ostream& os) const
     this->writeEntries(os);
     os.endBlock() << flush;
 
-    // Check state of IOstream
-    os.check
-    (
-        "GeometricField<Type, PatchField, GeoMesh>::Boundary::"
-        "writeEntry(const word& keyword, Ostream& os) const"
-    );
+    os.check(FUNCTION_NAME);
 }
 
 

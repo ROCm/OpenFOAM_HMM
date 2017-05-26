@@ -39,7 +39,7 @@ Foam::eddy::eddy(Istream& is)
     c1_(readScalar(is)),
     dir1_(readLabel(is))
 {
-    is.check("Foam::eddy::eddy(Foam::Istream&)");
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -62,11 +62,7 @@ void Foam::eddy::operator=(const eddy& e)
 
 Foam::Istream& Foam::operator>>(Istream& is, eddy& e)
 {
-    is.check
-    (
-        "Foam::Istream& Foam::operator>>"
-        "(Foam::Istream&, Foam::eddy&)"
-    );
+    is.check(FUNCTION_NAME);
 
     is  >> e.patchFaceI_
         >> e.position0_
@@ -77,23 +73,14 @@ Foam::Istream& Foam::operator>>(Istream& is, eddy& e)
         >> e.c1_
         >> e.dir1_;
 
-    is.check
-    (
-        "Foam::Istream& Foam::operator>>"
-        "(Foam::Istream&, Foam::eddy&)"
-    );
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const eddy& e)
 {
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<"
-        "(Foam::Ostream&, const Foam::eddy&)"
-    );
+    os.check(FUNCTION_NAME);
 
     os  << e.patchFaceI_ << token::SPACE
         << e.position0_ << token::SPACE
@@ -104,12 +91,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const eddy& e)
         << e.c1_ << token::SPACE
         << e.dir1_;
 
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<"
-        "(Foam::Ostream&, const Foam::eddy&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

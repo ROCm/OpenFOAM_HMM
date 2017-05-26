@@ -38,7 +38,7 @@ Foam::Istream& Foam::MeshedSurface<Face>::read(Istream& is)
         >> this->storedPoints()
         >> this->storedFaces();
 
-    is.check("MeshedSurface::read(Istream&)");
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -50,7 +50,7 @@ Foam::Ostream& Foam::MeshedSurface<Face>::write(Ostream& os) const
         << this->points()
         << this->surfFaces();
 
-    os.check("MeshedSurface::write(Ostream&) const");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

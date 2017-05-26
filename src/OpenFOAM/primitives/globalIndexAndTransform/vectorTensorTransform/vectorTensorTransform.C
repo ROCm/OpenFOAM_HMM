@@ -107,7 +107,7 @@ Foam::Istream& Foam::operator>>(Istream& is, vectorTensorTransform& tr)
     is.readEnd("vectorTensorTransform");
 
     // Check state of Istream
-    is.check("operator>>(Istream&, vectorTensorTransform&)");
+    is.check(FUNCTION_NAME);
 
     return is;
 }

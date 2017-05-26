@@ -548,6 +548,8 @@ Foam::tmp<Foam::surfaceScalarField> Foam::multiphaseSystem::surfaceTension
         )
     );
 
+    tSurfaceTension.ref().setOriented();
+
     forAll(phases(), phasej)
     {
         const phaseModel& phase2 = phases()[phasej];

@@ -25,8 +25,8 @@ Class
     Foam::wordRe
 
 Description
-    A wordRe is a word, but can also have a regular expression for matching
-    words.
+    A wordRe is a Foam::word, but can contain a regular expression for
+    matching words or strings.
 
     By default the constructors will generally preserve the argument as a
     string literal and the assignment operators will use the wordRe::DETECT

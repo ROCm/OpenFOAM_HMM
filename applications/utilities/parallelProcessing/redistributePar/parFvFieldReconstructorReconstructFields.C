@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,7 +66,7 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeInternalField
         IOobject::NO_WRITE
     );
 
-    return tmp<DimensionedField<Type, volMesh>>
+    tmp<DimensionedField<Type, volMesh>> tfield
     (
         new DimensionedField<Type, volMesh>
         (
@@ -76,6 +76,10 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeInternalField
             internalField
         )
     );
+
+    tfield.ref().oriented() = fld.oriented();
+
+    return tfield;
 }
 
 
@@ -209,7 +213,7 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeField
         IOobject::NO_WRITE
     );
 
-    return tmp<GeometricField<Type, fvPatchField, volMesh>>
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tfield
     (
         new GeometricField<Type, fvPatchField, volMesh>
         (
@@ -220,6 +224,10 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeField
             basePatchFields
         )
     );
+
+    tfield.ref().oriented()= fld.oriented();
+
+    return tfield;
 }
 
 
@@ -269,7 +277,7 @@ Foam::parFvFieldReconstructor::reconstructFvSurfaceField
     }
 
     // Map all faces
-    Field<Type> internalField(flatFld, mapper);
+    Field<Type> internalField(flatFld, mapper, fld.oriented()());
 
     // Trim to internal faces (note: could also have special mapper)
     internalField.setSize
@@ -372,7 +380,7 @@ Foam::parFvFieldReconstructor::reconstructFvSurfaceField
         IOobject::NO_WRITE
     );
 
-    return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
+    tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> tfield
     (
         new GeometricField<Type, fvsPatchField, surfaceMesh>
         (
@@ -383,6 +391,10 @@ Foam::parFvFieldReconstructor::reconstructFvSurfaceField
             basePatchFields
         )
     );
+
+    tfield.ref().oriented() = fld.oriented();
+
+    return tfield;
 }
 
 

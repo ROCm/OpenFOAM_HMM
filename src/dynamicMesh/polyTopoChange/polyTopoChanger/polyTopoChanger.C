@@ -74,7 +74,7 @@ void Foam::polyTopoChanger::readModifiers()
         }
 
         // Check state of IOstream
-        is.check("polyTopoChanger::readModifiers()");
+        is.check(FUNCTION_NAME);
 
         close();
     }

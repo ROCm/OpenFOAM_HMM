@@ -41,7 +41,7 @@ typename Table::iterator Foam::basicThermo::lookupThermo
     typename Table::iterator cstrIter = tablePtr->find(thermoTypeName);
 
     // Print error message if package not found in the table
-    if (cstrIter == tablePtr->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown " << Thermo::typeName << " type " << nl
@@ -182,7 +182,7 @@ typename Table::iterator Foam::basicThermo::lookupThermo
 
         typename Table::iterator cstrIter = tablePtr->find(thermoTypeName);
 
-        if (cstrIter == tablePtr->end())
+        if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown " << Thermo::typeName << " type "

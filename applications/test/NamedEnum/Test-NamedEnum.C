@@ -66,6 +66,9 @@ int main(int argc, char *argv[])
     const List<namedEnumTest::option> options
         = namedEnumTest::namedEnum.enums();
 
+    dictionary testDict;
+    testDict.add("lookup1", "c");
+
     Info<< "enums: " << options << nl;
 
     Info<< "loop over enums (as list):" << nl;
@@ -87,6 +90,30 @@ int main(int argc, char *argv[])
     Info<< nl
         << namedEnumTest::namedEnum["a"] << nl
         << namedEnumTest::namedEnum[namedEnumTest::a] << nl;
+
+    Info<< "--- test dictionary lookup ---" << endl;
+    {
+        Info<< "dict: " << testDict << endl;
+
+        namedEnumTest::option gotOpt =
+            namedEnumTest::namedEnum.lookupOrDefault
+            (
+                "test",
+                testDict,
+                namedEnumTest::option::a
+            );
+
+        Info<< "got: " << gotOpt << endl;
+
+        gotOpt = namedEnumTest::namedEnum.lookupOrDefault
+        (
+            "lookup1",
+            testDict,
+            namedEnumTest::option::a
+        );
+
+        Info<< "got: " << gotOpt << endl;
+    }
 
     Info<< "--- test read construction ---" << endl;
 

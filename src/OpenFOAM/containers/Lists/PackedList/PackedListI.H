@@ -137,8 +137,7 @@ inline void Foam::PackedList<nBits>::setPair(Istream& is)
 
     set(ind, val);
 
-    // Check state of Istream
-    is.check("PackedList<nBits>::setPair(Istream&)");
+    is.check(FUNCTION_NAME);
 }
 
 

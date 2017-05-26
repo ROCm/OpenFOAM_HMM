@@ -327,6 +327,10 @@ public:
         //  If not found iterator = end()
         const_iterator find(const Key& key) const;
 
+        //- Find and return an const_iterator set at the hashed entry
+        //  If not found iterator = end()
+        const_iterator cfind(const Key& key) const;
+
         //- Return hashed entry if it exists, or return the given default
         inline const T& lookup(const Key& key, const T& deflt) const;
 

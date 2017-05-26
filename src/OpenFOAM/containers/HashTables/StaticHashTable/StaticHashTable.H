@@ -203,6 +203,10 @@ public:
             //  If not found iterator = end()
             const_iterator find(const Key& key) const;
 
+            //- Find and return an const_iterator set at the hashed entry
+            //  If not found iterator = end()
+            const_iterator cfind(const Key& key) const;
+
             //- Return the table of contents
             List<Key> toc() const;
 

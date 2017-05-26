@@ -545,7 +545,7 @@ void Foam::mapDistribute::operator=(const mapDistribute& rhs)
 
 Foam::Istream& Foam::operator>>(Istream& is, mapDistribute& map)
 {
-    is.fatalCheck("operator>>(Istream&, mapDistribute&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     is  >> static_cast<mapDistributeBase&>(map)
         >> map.transformElements_ >> map.transformStart_;

@@ -101,11 +101,14 @@ int main(int argc, char *argv[])
             "cSf_pos",
             interpolate(c, pos, T.name())*mesh.magSf()
         );
+        cSf_pos.setOriented();
+
         surfaceScalarField cSf_neg
         (
             "cSf_neg",
             interpolate(c, neg, T.name())*mesh.magSf()
         );
+        cSf_neg.setOriented();
 
         surfaceScalarField ap
         (

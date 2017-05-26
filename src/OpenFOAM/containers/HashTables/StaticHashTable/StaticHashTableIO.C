@@ -94,12 +94,12 @@ Foam::StaticHashTable<T, Key, Hash>::printInfo(Ostream& os) const
 template<class T, class Key, class Hash>
 Foam::Istream& Foam::operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
 {
-    is.fatalCheck("operator>>(Istream&, StaticHashTable<T, Key, Hash>&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     // Anull list
     L.clear();
 
-    is.fatalCheck("operator>>(Istream&, StaticHashTable<T, Key, Hash>&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     token firstToken(is);
 
@@ -200,7 +200,7 @@ Foam::Istream& Foam::operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
             << exit(FatalIOError);
     }
 
-    is.fatalCheck("operator>>(Istream&, StaticHashTable<T, Key, Hash>&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     return is;
 }
@@ -229,9 +229,7 @@ Foam::Ostream& Foam::operator<<
     // Write end delimiter
     os << token::END_LIST;
 
-    // Check state of IOstream
-    os.check("Ostream& operator<<(Ostream&, const StaticHashTable&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

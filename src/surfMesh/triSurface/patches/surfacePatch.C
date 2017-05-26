@@ -158,7 +158,7 @@ bool Foam::surfacePatch::operator==(const surfacePatch& p) const
 Foam::Ostream& Foam::operator<<(Ostream& os, const surfacePatch& p)
 {
     p.write(os);
-    os.check("Ostream& operator<<(Ostream& f, const surfacePatch& p");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

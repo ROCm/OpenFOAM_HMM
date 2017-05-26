@@ -37,7 +37,7 @@ Foam::thermoParcelInjectionData::thermoParcelInjectionData(Istream& is)
     is.check("reading Cp");
     is >> Cp_;
 
-    is.check("thermoParcelInjectionData(Istream& is)");
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -67,7 +67,7 @@ Foam::Istream& Foam::operator>>(Istream& is, thermoParcelInjectionData& data)
     is.check("reading Cp");
     is >> data.Cp_;
 
-    is.check("operator(Istream&, thermoParcelInjectionData&)");
+    is.check(FUNCTION_NAME);
 
     return is;
 }

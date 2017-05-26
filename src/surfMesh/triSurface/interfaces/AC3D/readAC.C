@@ -183,7 +183,7 @@ bool triSurface::readAC(const fileName& ACfileName)
         );
 
         // Object global values
-        string patchName = string("patch") + name(patchi);
+        string patchName = string("patch") + Foam::name(patchi);
         label nVerts = 0;
         tensor rot(I);
         vector loc(0, 0, 0);
@@ -319,7 +319,6 @@ bool triSurface::readAC(const fileName& ACfileName)
                 patches[patchi] =
                     geometricSurfacePatch
                     (
-                        "empty",
                         word(patchName),
                         patchi
                     );

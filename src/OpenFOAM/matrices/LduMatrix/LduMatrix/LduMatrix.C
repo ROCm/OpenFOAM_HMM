@@ -363,7 +363,7 @@ Foam::Ostream& Foam::operator<<
             << endl << endl;
     }
 
-    os.check("Ostream& operator<<(Ostream&, const LduMatrix&");
+    os.check(FUNCTION_NAME);
 
     return os;
 }

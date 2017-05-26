@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,33 +24,60 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "NamedEnum.H"
+#include "dictionary.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class Enum, int nEnum>
+template<class StringType>
+Foam::List<StringType> Foam::NamedEnum<Enum, nEnum>::getNamesList()
+{
+    List<StringType> lst(nEnum);
+
+    label count = 0;
+    for (int enumi=0; enumi < nEnum; ++enumi)
+    {
+        if (names[enumi] && names[enumi][0])
+        {
+            lst[count++] = names[enumi];
+        }
+    }
+
+    lst.setSize(count);
+    return lst;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Enum, int nEnum>
 Foam::NamedEnum<Enum, nEnum>::NamedEnum()
 :
-    HashTable<int>(2*nEnum)
+    table_type(2*nEnum)
 {
-    for (int enumI = 0; enumI < nEnum; ++enumI)
+    for (int enumi=0; enumi < nEnum; ++enumi)
     {
-        if (!names[enumI] || names[enumI][0] == '\0')
+        if (names[enumi] && names[enumi][0])
         {
-            stringList goodNames(enumI);
+            insert(names[enumi], enumi);
+        }
+        else
+        {
+            // Bad name - generate error message
+            stringList goodNames(enumi);
 
-            for (int i = 0; i < enumI; ++i)
+            for (int i = 0; i < enumi; ++i)
             {
                 goodNames[i] = names[i];
             }
 
             FatalErrorInFunction
-                << "Illegal enumeration name at position " << enumI << endl
-                << "after entries " << goodNames << ".\n"
+                << "Illegal enumeration name at position " << enumi << nl
+                << "after entries " << goodNames << nl
                 << "Possibly your NamedEnum<Enum, nEnum>::names array"
                 << " is not of size " << nEnum << endl
                 << abort(FatalError);
         }
-        insert(names[enumI], enumI);
     }
 }
 
@@ -60,14 +87,13 @@ Foam::NamedEnum<Enum, nEnum>::NamedEnum()
 template<class Enum, int nEnum>
 Enum Foam::NamedEnum<Enum, nEnum>::read(Istream& is) const
 {
-    const word name(is);
-
-    HashTable<int>::const_iterator iter = find(name);
+    const word enumName(is);
+    table_type::const_iterator iter = find(enumName);
 
     if (!iter.found())
     {
         FatalIOErrorInFunction(is)
-            << name << " is not in enumeration: "
+            << enumName << " is not in enumeration: "
             << sortedToc() << exit(FatalIOError);
     }
 
@@ -78,45 +104,47 @@ Enum Foam::NamedEnum<Enum, nEnum>::read(Istream& is) const
 template<class Enum, int nEnum>
 void Foam::NamedEnum<Enum, nEnum>::write(const Enum e, Ostream& os) const
 {
-    os  << operator[](e);
+    os  << names[int(e)];
 }
 
 
 template<class Enum, int nEnum>
-Foam::stringList Foam::NamedEnum<Enum, nEnum>::strings()
+Enum Foam::NamedEnum<Enum, nEnum>::lookup
+(
+    const word& key,
+    const dictionary& dict
+) const
 {
-    stringList lst(nEnum);
+    const word enumName(dict.lookup(key));
+    table_type::const_iterator iter = find(enumName);
 
-    label nElem = 0;
-    for (int enumI = 0; enumI < nEnum; ++enumI)
+    if (!iter.found())
     {
-        if (names[enumI] && names[enumI][0])
-        {
-            lst[nElem++] = names[enumI];
-        }
+        FatalIOErrorInFunction(dict)
+            << enumName << " is not in enumeration: "
+            << sortedToc() << exit(FatalIOError);
     }
 
-    lst.setSize(nElem);
-    return lst;
+    return Enum(iter.object());
 }
 
 
 template<class Enum, int nEnum>
-Foam::wordList Foam::NamedEnum<Enum, nEnum>::words()
+Enum Foam::NamedEnum<Enum, nEnum>::lookupOrDefault
+(
+    const word& key,
+    const dictionary& dict,
+    const enum_type deflt
+) const
 {
-    wordList lst(nEnum);
-
-    label nElem = 0;
-    for (int enumI = 0; enumI < nEnum; ++enumI)
+    if (dict.found(key))
     {
-        if (names[enumI] && names[enumI][0])
-        {
-            lst[nElem++] = names[enumI];
-        }
+        return lookup(key, dict);
     }
-
-    lst.setSize(nElem);
-    return lst;
+    else
+    {
+        return deflt;
+    }
 }
 
 
@@ -125,17 +153,31 @@ Foam::List<Enum> Foam::NamedEnum<Enum, nEnum>::enums()
 {
     List<Enum> lst(nEnum);
 
-    label nElem = 0;
-    for (int enumI = 0; enumI < nEnum; ++enumI)
+    label count = 0;
+    for (int enumi = 0; enumi < nEnum; ++enumi)
     {
-        if (names[enumI] && names[enumI][0])
+        if (names[enumi] && names[enumi][0])
         {
-            lst[nElem++] = Enum(enumI);
+            lst[count++] = Enum(enumi);
         }
     }
 
-    lst.setSize(nElem);
+    lst.setSize(count);
     return lst;
+}
+
+
+template<class Enum, int nEnum>
+Foam::stringList Foam::NamedEnum<Enum, nEnum>::strings()
+{
+    return getNamesList<string>();
+}
+
+
+template<class Enum, int nEnum>
+Foam::wordList Foam::NamedEnum<Enum, nEnum>::words()
+{
+    return getNamesList<word>();
 }
 
 

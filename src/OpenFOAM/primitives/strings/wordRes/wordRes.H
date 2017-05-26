@@ -78,6 +78,10 @@ public:
         //  No filtering is done on regular expressions.
         static wordReList uniq(const UList<wordRe>& input);
 
+        //- Inplace subset of wordReList with duplicate words filtered out.
+        //  No filtering is done on regular expressions.
+        static void inplaceUniq(wordReList& input);
+
 
     // Member Functions
 

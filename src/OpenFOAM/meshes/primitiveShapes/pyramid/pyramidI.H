@@ -45,7 +45,7 @@ template<class Point, class PointRef, class polygonRef>
 inline Foam::pyramid<Point, PointRef, polygonRef>::pyramid(Istream& is)
 {
     is >> base_ >> apex_;
-    is.check("pyramid::pyramid(Istream&)");
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -105,7 +105,7 @@ inline Foam::Istream& Foam::operator>>
 )
 {
     is  >> p.base_ >> p.apex_;
-    is.check("Istream& operator>>(Istream&, pyramid&)");
+    is.check(FUNCTION_NAME);
     return is;
 }
 

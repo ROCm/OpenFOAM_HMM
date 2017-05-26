@@ -74,10 +74,6 @@ class fileName
 {
     // Private Member Functions
 
-        //- Find position of the file extension dot, return npos on failure.
-        //  A wrapped version of find_last_of("./") with additional logic.
-        inline size_type find_ext() const;
-
         //- Strip invalid characters
         inline void stripInvalid();
 
@@ -154,6 +150,7 @@ public:
         //
         // * Removes trailing '/'
         //
+        // \return True if any contents changed
         bool clean();
 
         //- Cleanup file name
@@ -167,8 +164,8 @@ public:
         //  LINK (only if followLink=false)
         Type type(const bool followLink = true) const;
 
-        //- Return true if file name is absolute
-        bool isAbsolute() const;
+        //- Return true if file name is absolute (starts with a '/')
+        inline bool isAbsolute() const;
 
         //- Convert from relative to absolute
         fileName& toAbsolute();
@@ -194,8 +191,8 @@ public:
         word nameLessExt() const;
 
         //- Return basename, optionally without extension
-        // \deprecated in favour of name() or nameLessExt() which more
-        //  explicitly describe their behaviour (MAR-2017).
+        // \deprecated in favour of name() or nameLessExt() which describe
+        //  their behaviour more explicitly (MAR-2017).
         word name(const bool noExt) const
         {
             return noExt ? this->nameLessExt() : this->name();
@@ -227,7 +224,7 @@ public:
         fileName& ext(const word& ending);
 
         //- Return true if it has an extension or simply ends with a '.'
-        bool hasExt() const;
+        inline bool hasExt() const;
 
         //- Return true if the extension is the same as the given ending.
         bool hasExt(const word& ending) const;
@@ -236,7 +233,7 @@ public:
         bool hasExt(const wordRe& ending) const;
 
         //- Remove extension, returning true if string changed.
-        bool removeExt();
+        inline bool removeExt();
 
 
         //- Return path components as wordList
@@ -287,6 +284,8 @@ public:
         friend Ostream& operator<<(Ostream& os, const fileName& fn);
 };
 
+
+// Global Operators
 
 //- Assemble words and fileNames as pathnames by adding a '/' separator.
 //  No '/' separator is added if either argument is an empty string.
