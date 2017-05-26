@@ -87,10 +87,10 @@ public:
 
         //- Read a word from Istream and return the corresponding
         //  enumeration element
-        Enum read(Istream&) const;
+        Enum read(Istream& is) const;
 
         //- Write the name representation of the enumeration to an Ostream
-        void write(const Enum e, Ostream&) const;
+        void write(const Enum e, Ostream& os) const;
 
         //- The set of names as a list of strings
         static stringList strings();

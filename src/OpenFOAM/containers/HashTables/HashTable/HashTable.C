@@ -74,7 +74,7 @@ Foam::HashTable<T, Key, Hash>::HashTable(const label size)
     {
         table_ = new hashedEntry*[tableSize_];
 
-        for (label hashIdx = 0; hashIdx < tableSize_; hashIdx++)
+        for (label hashIdx = 0; hashIdx < tableSize_; ++hashIdx)
         {
             table_[hashIdx] = nullptr;
         }
@@ -200,6 +200,17 @@ Foam::HashTable<T, Key, Hash>::find
 template<class T, class Key, class Hash>
 typename Foam::HashTable<T, Key, Hash>::const_iterator
 Foam::HashTable<T, Key, Hash>::find
+(
+    const Key& key
+) const
+{
+    return this->cfind(key);
+}
+
+
+template<class T, class Key, class Hash>
+typename Foam::HashTable<T, Key, Hash>::const_iterator
+Foam::HashTable<T, Key, Hash>::cfind
 (
     const Key& key
 ) const
@@ -912,7 +923,7 @@ bool Foam::HashTable<T, Key, Hash>::operator==
 
     for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
-        const_iterator other = find(iter.key());
+        const_iterator other = this->cfind(iter.key());
 
         if (!other.found() || other.object() != iter.object())
         {
