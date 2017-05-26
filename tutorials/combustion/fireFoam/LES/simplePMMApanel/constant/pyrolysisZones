@@ -29,7 +29,7 @@ FoamFile
 
             filmCoupled     false;
 
-            radFluxName     Qr;
+            qrHSource       on;
 
             minimumDelta    1e-6;
 

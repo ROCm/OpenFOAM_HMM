@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -186,18 +186,27 @@ public:
             const speciesTable& species,
             const List<specieCoeffs>& lhs,
             const List<specieCoeffs>& rhs,
-            const HashPtrTable<ReactionThermo>& thermoDatabase
+            const HashPtrTable<ReactionThermo>& thermoDatabase,
+            bool initReactionThermo = true
         );
 
         //- Construct as copy given new speciesTable
-        Reaction(const Reaction<ReactionThermo>&, const speciesTable& species);
+        Reaction
+        (
+            const Reaction<ReactionThermo>&,
+            const speciesTable& species
+        );
 
         //- Construct from dictionary
+        // NOTE: initReactionThermo is used by solidReaction where there is no
+        // need of setting a lhs - rhs thermo type for each reaction. This is
+        // needed for mechanism with reversible reactions
         Reaction
         (
             const speciesTable& species,
             const HashPtrTable<ReactionThermo>& thermoDatabase,
-            const dictionary& dict
+            const dictionary& dict,
+            bool initReactionThermo = true
         );
 
         //- Construct and return a clone
