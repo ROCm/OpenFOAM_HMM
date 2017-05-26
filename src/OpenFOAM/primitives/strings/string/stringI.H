@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,45 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include <iostream>
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+inline std::string::size_type Foam::string::find_ext() const
+{
+    const size_type i = find_last_of("./");
+
+    if (i == npos || i == 0 || operator[](i) == '/')
+    {
+        return npos;
+    }
+    else
+    {
+        return i;
+    }
+}
+
+
+inline bool Foam::string::hasExt() const
+{
+    return (find_ext() != npos);
+}
+
+
+inline bool Foam::string::removeExt()
+{
+    const size_type i = find_ext();
+
+    if (i == npos)
+    {
+        return false;
+    }
+    else
+    {
+        this->resize(i);
+        return true;
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

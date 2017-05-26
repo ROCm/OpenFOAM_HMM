@@ -25,6 +25,8 @@ License
 
 #include "string.H"
 #include "stringOps.H"
+#include "word.H"
+#include "wordRe.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -33,13 +35,75 @@ int Foam::string::debug(Foam::debug::debugSwitch(string::typeName, 0));
 const Foam::string Foam::string::null;
 
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+Foam::word Foam::string::ext() const
+{
+    const size_type i = find_ext();
+
+    if (i == npos)
+    {
+        return word::null;
+    }
+    else
+    {
+        return substr(i+1, npos);
+    }
+}
+
+
+bool Foam::string::ext(const Foam::word& ending)
+{
+    if (!ending.empty() && !empty() && operator[](size()-1) != '/')
+    {
+        append(1u, '.');
+        append(ending);
+
+        return true;
+    }
+
+    return false;
+}
+
+
+bool Foam::string::hasExt(const word& ending) const
+{
+    size_type i = find_ext();
+    if (i == npos)
+    {
+        return false;
+    }
+
+    ++i; // Compare *after* the dot
+    return
+    (
+        // Lengths must match
+        ((size() - i) == ending.size())
+     && !compare(i, npos, ending)
+    );
+}
+
+
+bool Foam::string::hasExt(const wordRe& ending) const
+{
+    const size_type i = find_ext();
+    if (i == npos)
+    {
+        return false;
+    }
+
+    const std::string end = substr(i+1, npos);  // Compare *after* the dot
+    return ending.match(end);
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::string::size_type Foam::string::count(const char c) const
 {
     size_type cCount = 0;
 
-    for (const_iterator iter = begin(); iter != end(); ++iter)
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
         if (*iter == c)
         {
