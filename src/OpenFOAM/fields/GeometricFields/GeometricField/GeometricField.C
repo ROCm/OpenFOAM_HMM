@@ -1292,14 +1292,8 @@ Foam::Ostream& Foam::operator<<
     os  << nl;
     gf.boundaryField().writeEntry("boundaryField", os);
 
-    // Check state of IOstream
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, "
-        "const GeometricField<Type, PatchField, GeoMesh>&)"
-    );
-
-    return (os);
+    os.check(FUNCTION_NAME);
+    return os;
 }
 
 

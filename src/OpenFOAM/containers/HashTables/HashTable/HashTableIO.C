@@ -129,9 +129,7 @@ Foam::Ostream& Foam::HashTable<T, Key, Hash>::writeKeys
         os << token::END_LIST << nl;  // End delimiter
     }
 
-    // Check state of IOstream
     os.check(FUNCTION_NAME);
-
     return os;
 }
 
@@ -145,12 +143,12 @@ Foam::Istream& Foam::operator>>
     HashTable<T, Key, Hash>& L
 )
 {
-    is.fatalCheck("operator>>(Istream&, HashTable<T, Key, Hash>&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     // Anull list
     L.clear();
 
-    is.fatalCheck("operator>>(Istream&, HashTable<T, Key, Hash>&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     token firstToken(is);
 
@@ -251,7 +249,7 @@ Foam::Istream& Foam::operator>>
             << exit(FatalIOError);
     }
 
-    is.fatalCheck("operator>>(Istream&, HashTable<T, Key, Hash>&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     return is;
 }
@@ -278,9 +276,7 @@ Foam::Ostream& Foam::operator<<
     // Write end delimiter
     os << token::END_LIST;
 
-    // Check state of IOstream
     os.check(FUNCTION_NAME);
-
     return os;
 }
 

@@ -64,9 +64,7 @@ Foam::Istream& Foam::operator>>(Istream& is, complex& c)
     // Read end of complex
     is.readEnd("complex");
 
-    // Check state of Istream
-    is.check("operator>>(Istream&, complex&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 

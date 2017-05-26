@@ -144,13 +144,7 @@ Foam::Ostream& Foam::fileFormats::edgeMeshFormat::write
 
     IOobject::writeDivider(os);
 
-    // Check state of Ostream
-    os.check
-    (
-        "edgeMeshFormat::write"
-        "(Ostream&, const pointField&, const edgeList&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 
@@ -208,8 +202,7 @@ void Foam::fileFormats::edgeMeshFormat::write
 
     write(os, mesh.points(), mesh.edges());
 
-    // Check state of Ostream
-    os.check("edgeMeshFormat::write(Ostream&)");
+    os.check(FUNCTION_NAME);
 }
 
 

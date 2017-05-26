@@ -445,7 +445,7 @@ Foam::Istream& Foam::UnsortedMeshedSurface<Face>::read(Istream& is)
         >> this->storedPoints()
         >> this->storedFaces();
 
-    is.check("UnsortedMeshedSurface::read(Istream&)");
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -457,7 +457,7 @@ Foam::Ostream& Foam::UnsortedMeshedSurface<Face>::write(Ostream& os) const
         << this->points()
         << this->surfFaces();
 
-    os.check("UnsortedMeshedSurface::write(Ostream&) const");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

@@ -63,7 +63,7 @@ void Foam::specie::write(Ostream& os) const
 Foam::Ostream& Foam::operator<<(Ostream& os, const specie& st)
 {
     st.write(os);
-    os.check("Ostream& operator<<(Ostream& os, const specie& st)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

@@ -60,9 +60,7 @@ Foam::Istream& Foam::operator>>(Istream& is, string& s)
         return is;
     }
 
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, string&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -70,7 +68,7 @@ Foam::Istream& Foam::operator>>(Istream& is, string& s)
 Foam::Ostream& Foam::operator<<(Ostream& os, const string& s)
 {
     os.write(s);
-    os.check("Ostream& operator<<(Ostream&, const string&)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 
@@ -78,7 +76,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const string& s)
 Foam::Ostream& Foam::operator<<(Ostream& os, const std::string& s)
 {
     os.write(string(s));
-    os.check("Ostream& operator<<(Ostream&, const std::string&)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

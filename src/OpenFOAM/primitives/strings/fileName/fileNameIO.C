@@ -62,9 +62,7 @@ Foam::Istream& Foam::operator>>(Istream& is, fileName& fn)
 
     fn.stripInvalid();
 
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, fileName&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -72,7 +70,7 @@ Foam::Istream& Foam::operator>>(Istream& is, fileName& fn)
 Foam::Ostream& Foam::operator<<(Ostream& os, const fileName& fn)
 {
     os.write(fn);
-    os.check("Ostream& operator<<(Ostream&, const fileName&)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

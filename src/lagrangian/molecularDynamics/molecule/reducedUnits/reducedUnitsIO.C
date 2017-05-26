@@ -46,13 +46,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const reducedUnits& rU)
         << tab << "refNumberDensity = " << rU.refNumberDensity() << " m^-3"
         << endl;
 
-    // Check state of Ostream
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
-        "const Foam::reducedUnits&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

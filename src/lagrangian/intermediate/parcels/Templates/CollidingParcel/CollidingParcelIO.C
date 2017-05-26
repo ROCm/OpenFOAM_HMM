@@ -73,12 +73,7 @@ Foam::CollidingParcel<ParcelType>::CollidingParcel
         is >> collisionRecords_;
     }
 
-    // Check state of Istream
-    is.check
-    (
-        "CollidingParcel<ParcelType>::Collisions"
-        "(const polyMesh&, Istream&, bool)"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -335,12 +330,7 @@ Foam::Ostream& Foam::operator<<
         os  << p.collisionRecords();
     }
 
-    // Check state of Ostream
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, const CollidingParcel<ParcelType>&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

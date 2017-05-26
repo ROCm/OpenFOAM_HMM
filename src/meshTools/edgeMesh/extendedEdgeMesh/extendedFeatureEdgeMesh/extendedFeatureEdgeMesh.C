@@ -250,9 +250,7 @@ bool Foam::extendedFeatureEdgeMesh::writeData(Ostream& os) const
 //
 //    vt = static_cast<Foam::extendedFeatureEdgeMesh::sideVolumeType>(type);
 //
-//    // Check state of Istream
-//    is.check("operator>>(Istream&, sideVolumeType&)");
-//
+//    is.check(FUNCTION_NAME);
 //    return is;
 //}
 //

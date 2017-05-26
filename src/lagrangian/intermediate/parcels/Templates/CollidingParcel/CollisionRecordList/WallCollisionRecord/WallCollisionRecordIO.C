@@ -35,11 +35,7 @@ Foam::WallCollisionRecord<Type>::WallCollisionRecord(Istream& is)
     pRel_(is),
     data_(is)
 {
-    // Check state of Istream
-    is.check
-    (
-        "Foam::WallCollisionRecord<Type>::WallCollisionRecord(Foam::Istream&)"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -50,13 +46,7 @@ Foam::Istream& Foam::operator>>(Istream& is, WallCollisionRecord<Type>& wCR)
 {
     is  >> wCR.accessed_ >> wCR.pRel_ >> wCR.data_;
 
-    // Check state of Istream
-    is.check
-    (
-        "Foam::Istream&"
-        "Foam::operator>>(Foam::Istream&, Foam::WallCollisionRecord<Type>&)"
-    );
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -72,13 +62,7 @@ Foam::Ostream& Foam::operator<<
         << token::SPACE << wCR.pRel_
         << token::SPACE << wCR.data_;
 
-    // Check state of Ostream
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
-        "const Foam::WallCollisionRecord<Type>&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

@@ -464,13 +464,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const distribution& d)
     os  << d.binWidth_
         << static_cast<const Map<label>&>(d);
 
-    // Check state of Ostream
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, "
-        "const distribution&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

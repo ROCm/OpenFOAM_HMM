@@ -280,7 +280,7 @@ inline Foam::Istream& Foam::operator>>
     is  >> l.a_ >> l.b_;
     is.readEnd("line");
 
-    is.check("Istream& operator>>(Istream&, line&)");
+    is.check(FUNCTION_NAME);
     return is;
 }
 

@@ -122,9 +122,7 @@ Foam::Istream& Foam::operator>>(Istream& is, gradingDescriptor& gd)
         is.readEnd("gradingDescriptor");
     }
 
-    // Check state of Istream
-    is.check("operator>>(Istream&, gradingDescriptor&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 

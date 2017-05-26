@@ -133,11 +133,7 @@ Foam::Ostream& Foam::operator<<
     const Function1<Type>& f1
 )
 {
-    // Check state of Ostream
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, const Function1<Type>&)"
-    );
+    os.check(FUNCTION_NAME);
 
     os  << f1.name_;
     f1.writeData(os);

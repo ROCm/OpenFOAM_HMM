@@ -150,9 +150,7 @@ Foam::Ostream& Foam::UList<T>::writeList
         }
     }
 
-    // Check state of IOstream
-    os.check("UList<T>::writeList(Ostream&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 
@@ -169,7 +167,7 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
 template<class T>
 Foam::Istream& Foam::operator>>(Istream& is, UList<T>& L)
 {
-    is.fatalCheck("operator>>(Istream&, UList<T>&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     token firstToken(is);
 

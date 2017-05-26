@@ -44,7 +44,7 @@ Foam::Istream& Foam::operator>>(Istream& is, LList<LListBase, T>& L)
     // Anull list
     L.clear();
 
-    is.fatalCheck(" operator>>(Istream&, LList<LListBase, T>&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     token firstToken(is);
 
@@ -98,7 +98,7 @@ Foam::Istream& Foam::operator>>(Istream& is, LList<LListBase, T>& L)
         }
 
         token lastToken(is);
-        is.fatalCheck(" operator>>(Istream&, LList<LListBase, T>&)");
+        is.fatalCheck(FUNCTION_NAME);
 
         while
         (
@@ -114,7 +114,7 @@ Foam::Istream& Foam::operator>>(Istream& is, LList<LListBase, T>& L)
             L.append(element);
 
             is >> lastToken;
-            is.fatalCheck(" operator>>(Istream&, LList<LListBase, T>&)");
+            is.fatalCheck(FUNCTION_NAME);
         }
     }
     else
@@ -126,7 +126,7 @@ Foam::Istream& Foam::operator>>(Istream& is, LList<LListBase, T>& L)
     }
 
     // Check state of IOstream
-    is.fatalCheck(" operator>>(Istream&, LList<LListBase,>&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     return is;
 }
@@ -152,9 +152,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const LList<LListBase, T>& lst)
     // Write end of contents
     os << token::END_LIST;
 
-    // Check state of IOstream
-    os.check("Ostream& operator<<(Ostream&, const LList<LListBase, T>&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

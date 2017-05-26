@@ -48,7 +48,7 @@ Foam::VectorSpace<Form, Cmpt, Ncmpts>::VectorSpace
     is.readEnd("VectorSpace<Form, Cmpt, Ncmpts>");
 
     // Check state of Istream
-    is.check("VectorSpace<Form, Cmpt, Ncmpts>::VectorSpace(Istream&)");
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -94,7 +94,7 @@ Foam::Istream& Foam::operator>>
     is.readEnd("VectorSpace<Form, Cmpt, Ncmpts>");
 
     // Check state of Istream
-    is.check("operator>>(Istream&, VectorSpace<Form, Cmpt, Ncmpts>&)");
+    is.check(FUNCTION_NAME);
 
     return is;
 }
@@ -116,9 +116,7 @@ Foam::Ostream& Foam::operator<<
 
     os << token::END_LIST;
 
-    // Check state of Ostream
-    os.check("operator<<(Ostream&, const VectorSpace<Form, Cmpt, Ncmpts>&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

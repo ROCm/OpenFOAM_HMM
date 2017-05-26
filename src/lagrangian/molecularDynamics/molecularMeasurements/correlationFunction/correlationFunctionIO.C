@@ -57,13 +57,7 @@ Foam::Ostream& Foam::operator<<
         << nl << cF.tZeroBuffers()
         << nl << static_cast<const bufferedAccumulator<scalar>&>(cF);
 
-    // Check state of Ostream
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<"
-        "(Ostream&, const correlationFunction<Type>&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

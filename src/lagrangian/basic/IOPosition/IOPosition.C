@@ -139,11 +139,7 @@ void Foam::IOPosition<CloudType>::readData(CloudType& c, bool checkClass)
             << firstToken.info() << exit(FatalIOError);
     }
 
-    // Check state of IOstream
-    is.check
-    (
-        "void IOPosition<CloudType>::readData(CloudType&, bool)"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 

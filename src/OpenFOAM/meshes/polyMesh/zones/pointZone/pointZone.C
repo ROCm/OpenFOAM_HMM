@@ -225,7 +225,7 @@ void Foam::pointZone::operator=(const Xfer<labelList>& addr)
 Foam::Ostream& Foam::operator<<(Ostream& os, const pointZone& zn)
 {
     zn.write(os);
-    os.check("Ostream& operator<<(Ostream&, const pointZone&");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

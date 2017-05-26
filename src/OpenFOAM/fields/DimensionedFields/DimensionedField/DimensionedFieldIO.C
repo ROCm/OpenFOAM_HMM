@@ -117,10 +117,8 @@ bool Foam::DimensionedField<Type, GeoMesh>::writeData
 
     Field<Type>::writeEntry(fieldDictEntry, os);
 
-    // Check state of Ostream
     os.check(FUNCTION_NAME);
-
-    return (os.good());
+    return os.good();
 }
 
 

@@ -86,12 +86,7 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
             );
         }
 
-        // Check state of IOstream
-        is.check
-        (
-            "polyBoundaryMesh::polyBoundaryMesh"
-            "(const IOobject&, const polyMesh&)"
-        );
+        is.check(FUNCTION_NAME);
 
         close();
     }
@@ -155,12 +150,7 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
             );
         }
 
-        // Check state of IOstream
-        is.check
-        (
-            "polyBoundaryMesh::polyBoundaryMesh"
-            "(const IOobject&, const polyMesh&, const polyPatchList&)"
-        );
+        is.check(FUNCTION_NAME);
 
         close();
     }
@@ -1121,9 +1111,7 @@ bool Foam::polyBoundaryMesh::writeData(Ostream& os) const
 
     os  << decrIndent << token::END_LIST;
 
-    // Check state of IOstream
-    os.check("polyBoundaryMesh::writeData(Ostream& os) const");
-
+    os.check(FUNCTION_NAME);
     return os.good();
 }
 

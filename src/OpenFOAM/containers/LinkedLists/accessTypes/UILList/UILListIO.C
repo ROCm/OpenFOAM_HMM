@@ -52,9 +52,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const UILList<LListBase, T>& lst)
     // Write end of contents
     os << token::END_LIST;
 
-    // Check state of IOstream
-    os.check("Ostream& operator<<(Ostream&, const UILList<LListBase, T>&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

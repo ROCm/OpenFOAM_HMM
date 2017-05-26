@@ -83,7 +83,7 @@ Foam::particle::particle(const polyMesh& mesh, Istream& is, bool readFields)
     }
 
     // Check state of Istream
-    is.check("particle::particle(Istream&, bool)");
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -99,7 +99,7 @@ void Foam::particle::writePosition(Ostream& os) const
     }
 
     // Check state of Ostream
-    os.check("particle::writePosition(Ostream& os, bool) const");
+    os.check(FUNCTION_NAME);
 }
 
 

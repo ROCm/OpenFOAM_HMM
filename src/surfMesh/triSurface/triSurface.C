@@ -1157,7 +1157,7 @@ void Foam::triSurface::write(Ostream& os) const
         << static_cast<const List<labelledTri>&>(*this) << endl;
 
     // Check state of Ostream
-    os.check("triSurface::write(Ostream&)");
+    os.check(FUNCTION_NAME);
 }
 
 

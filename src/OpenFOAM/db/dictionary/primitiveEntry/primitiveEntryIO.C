@@ -91,10 +91,7 @@ bool Foam::primitiveEntry::expandFunction
 
 bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
 {
-    is.fatalCheck
-    (
-        "primitiveEntry::readData(const dictionary&, Istream&)"
-    );
+    is.fatalCheck(FUNCTION_NAME);
 
     label blockCount = 0;
     token currToken;
@@ -145,10 +142,7 @@ bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
         }
     }
 
-    is.fatalCheck
-    (
-        "primitiveEntry::readData(const dictionary&, Istream&)"
-    );
+    is.fatalCheck(FUNCTION_NAME);
 
     if (currToken.good())
     {

@@ -44,9 +44,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const UPtrList<T>& L)
     // Write end delimiter
     os << nl << decrIndent << indent << token::END_LIST << nl;
 
-    // Check state of IOstream
-    os.check("Ostream& operator<<(Ostream&, const UPtrList&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 
