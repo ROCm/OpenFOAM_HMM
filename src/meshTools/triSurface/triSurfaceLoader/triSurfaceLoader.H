@@ -42,6 +42,7 @@ SourceFiles
 
 #include "triSurface.H"
 #include "wordReList.H"
+#include "Enum.H"
 #include "hashedWordList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -59,6 +60,23 @@ class Time;
 
 class triSurfaceLoader
 {
+public:
+
+    //- The file loading options for triSurfaceLoader
+    enum loadingOption
+    {
+        SINGLE_REGION,  //!< "single" = One region for all files
+        FILE_REGION,    //!< "file"   = One region for each file
+        OFFSET_REGION,  //!< "offset" = Offset regions per file
+        MERGE_REGION    //!< "merge"  = Merge regions by name
+    };
+
+    //- The loading enumeration names
+    static const Enum<loadingOption> loadingOptionNames;
+
+
+private:
+
     // Private data
 
         //- The directory to load from (eg, case/constant/triSurface)
@@ -136,7 +154,10 @@ public:
         label select(const wordReList& matcher);
 
         //- Load a single file, or load and combine multiple selected files
-        autoPtr<triSurface> load() const;
+        autoPtr<triSurface> load
+        (
+            const enum loadingOption opt = loadingOption::OFFSET_REGION
+        ) const;
 
 };
 
