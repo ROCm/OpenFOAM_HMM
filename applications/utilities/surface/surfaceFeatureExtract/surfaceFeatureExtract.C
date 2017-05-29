@@ -149,8 +149,21 @@ int main(int argc, char *argv[])
         }
         Info<< "Output             : " << outputName << nl;
 
+        triSurfaceLoader::loadingOption loadingOption =
+            triSurfaceLoader::loadingOptionNames.lookupOrDefault
+            (
+                "loadingOption",
+                surfaceDict,
+                triSurfaceLoader::loadingOption::OFFSET_REGION
+            );
+
+        Info<<"loading with "
+            << triSurfaceLoader::loadingOptionNames[loadingOption]
+            << endl;
+
+
         // Load a single file, or load and combine multiple selected files
-        autoPtr<triSurface> surfPtr = loader.load();
+        autoPtr<triSurface> surfPtr = loader.load(loadingOption);
         if (!surfPtr.valid() || surfPtr().empty())
         {
             FatalErrorInFunction
@@ -390,14 +403,21 @@ int main(int argc, char *argv[])
             feMesh.add(addFeMesh);
         }
 
-        if (surfaceDict.lookupOrDefault<bool>("selfIntersection", false))
-        {
-            // TODO: perturbance tolerance?
+        const surfaceIntersection::intersectionType selfIntersect =
+            surfaceIntersection::selfIntersectionNames.lookupOrDefault
+            (
+                "intersectionMethod",
+                surfaceDict,
+                surfaceIntersection::NONE
+            );
 
+        if (selfIntersect != surfaceIntersection::NONE)
+        {
             triSurfaceSearch query(surf);
             surfaceIntersection intersect(query, surfaceDict);
 
-            intersect.mergePoints(5*SMALL);
+            // Remove rounding noise - could make adjustable
+            intersect.mergePoints(10*SMALL);
 
             labelPair sizeInfo
             (
@@ -413,14 +433,15 @@ int main(int argc, char *argv[])
                     intersect.cutEdges()
                 );
 
-                addMesh.mergePoints(5*SMALL);
                 feMesh.add(addMesh);
 
                 sizeInfo[0] = addMesh.points().size();
                 sizeInfo[1] = addMesh.edges().size();
             }
             Info<< nl
-                << "Self intersection:" << nl
+                << "intersection: "
+                << surfaceIntersection::selfIntersectionNames[selfIntersect]
+                << nl
                 << "    points : " << sizeInfo[0] << nl
                 << "    edges  : " << sizeInfo[1] << nl;
         }

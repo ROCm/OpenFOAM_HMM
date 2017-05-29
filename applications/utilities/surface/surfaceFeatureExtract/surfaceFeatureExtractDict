@@ -16,7 +16,7 @@ FoamFile
 
 surface1.stl
 {
-    // How to obtain raw features (extractFromFile | extractFromSurface | none)
+    // How to obtain raw features (none | extractFromFile | extractFromSurface)
     extractionMethod    extractFromSurface;
 
     // Mark edges whose adjacent surface normals are at an angle less
@@ -36,8 +36,8 @@ surface1.stl
         geometricTestOnly  yes;
     } */
 
-    // Generate additional features from self-intersect
-    selfIntersection    false;
+    // Generate additional intersection features (none | self | region)
+    intersectionMethod  none;
 
     // Tolerance for surface intersections
     tolerance           1e-3;
@@ -51,7 +51,7 @@ surface1.stl
 
 surface2.nas
 {
-    // How to obtain raw features (extractFromFile | extractFromSurface | none)
+    // How to obtain raw features (none | extractFromFile | extractFromSurface)
     extractionMethod    extractFromFile;
 
     extractFromFileCoeffs
@@ -114,8 +114,8 @@ surface2.nas
     // Out put the closeness of surface elements to other surface elements.
     closeness           no;
 
-    // Generate additional features from self-intersect
-    selfIntersection    false;
+    // Generate additional intersection features (none | self | region)
+    intersectionMethod  none;
 
     // Tolerance for surface intersections
     tolerance           1e-3;
@@ -148,8 +148,8 @@ dummyName
     // Base output name (optional)
     // output              surfaces;
 
-    // Generate additional features from self-intersect
-    selfIntersection    true;
+    // Generate additional intersection features (none | self | region)
+    intersectionMethod  self;
 
     // Tolerance for surface intersections
     tolerance           1e-3;
@@ -183,8 +183,8 @@ surfaces
     // Base output name (optional)
     // output              surfaces;
 
-    // Generate additional features from self-intersect
-    selfIntersection    true;
+    // Generate additional intersection features (none | self | region)
+    intersectionMethod  self;
 
     // Tolerance for surface intersections
     tolerance           1e-3;
@@ -193,8 +193,7 @@ surfaces
     noneCoeffs
     {
         includedAngle   0;
-    }
-    */
+    } */
 
     // Write options
 

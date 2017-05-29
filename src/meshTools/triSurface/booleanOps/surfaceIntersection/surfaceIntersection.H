@@ -52,6 +52,7 @@ Description
         allowEdgeHits  | Edge-end cuts another edge     | bool   | true
         snap           | Snap near end-points           | bool   | true
         warnDegenerate | Number of warnings about degenerate edges | label | 0
+        intersectionMethod | Control for self intersection | (self,region,none)
     \endtable
 
 SourceFiles
@@ -71,6 +72,7 @@ SourceFiles
 #include "labelPairHashes.H"
 #include "pointIndexHit.H"
 #include "typeInfo.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -96,15 +98,25 @@ typedef EdgeMap<labelPairHashSet> edgelabelPairHashLookup;
 
 class surfaceIntersection
 {
-    // Private data
+public:
 
-        //- Surface intersection types for classify, doCutEdges
-        enum originatingType
-        {
-            FIRST,      //!< First surface
-            SECOND,     //!< Second surface
-            SELF        //!< Self-intersection
-        };
+    //- Surface intersection types for classify, doCutEdges
+    enum intersectionType
+    {
+        FIRST,          //!< First surface
+        SECOND,         //!< Second surface
+        SELF,           //!< Self-intersection
+        SELF_REGION,    //!< Self-intersection, region-wise only
+        NONE            //!< None = invalid (for input only)
+    };
+
+    //- The user-selectable self-intersection enumeration names
+    static const Enum<intersectionType> selfIntersectionNames;
+
+
+private:
+
+    // Private data
 
         //- Tolerance for intersections
         scalar tolerance_;
@@ -204,7 +216,7 @@ class surfaceIntersection
         //  Updates facePairToEdge_ and facePairToEdgeId_ (on the second hit)
         void storeIntersection
         (
-            const enum originatingType cutFrom,
+            const enum intersectionType cutFrom,
             const labelList& facesA,
             const label faceB,
             const UList<point>& allCutPoints,
@@ -219,7 +231,7 @@ class surfaceIntersection
             const triSurface& surf1,
             const scalarField& surf1PointTol,
             const triSurface& surf2,
-            const enum originatingType cutFrom,
+            const enum intersectionType cutFrom,
             const label edgeI,
             const pointIndexHit& pHit,
 
@@ -233,7 +245,7 @@ class surfaceIntersection
         (
             const triSurface& surf1,
             const triSurfaceSearch& querySurf2,
-            const enum originatingType cutFrom,
+            const enum intersectionType cutFrom,
 
             DynamicList<point>& allCutPoints,
             DynamicList<edge>& allCutEdges,

@@ -27,6 +27,7 @@ License
 #include "triSurfaceSearch.H"
 #include "OBJstream.H"
 #include "labelPairHashes.H"
+#include "PackedBoolList.H"
 #include "triSurface.H"
 #include "pointIndexHit.H"
 #include "mergePoints.H"
@@ -39,6 +40,14 @@ namespace Foam
 {
 defineTypeNameAndDebug(surfaceIntersection, 0);
 }
+
+const Foam::Enum<Foam::surfaceIntersection::intersectionType>
+Foam::surfaceIntersection::selfIntersectionNames
+{
+    { intersectionType::SELF, "self" },
+    { intersectionType::SELF_REGION, "region" },
+    { intersectionType::NONE, "none" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -54,7 +63,7 @@ void Foam::surfaceIntersection::setOptions(const dictionary& dict)
 
 void Foam::surfaceIntersection::storeIntersection
 (
-    const enum originatingType cutFrom,
+    const enum intersectionType cutFrom,
     const labelList& facesA,
     const label faceB,
     const UList<point>& allCutPoints,
@@ -85,6 +94,7 @@ void Foam::surfaceIntersection::storeIntersection
                 break;
             }
             case surfaceIntersection::SELF:
+            case surfaceIntersection::SELF_REGION:
             {
                 // Lookup should be commutativity - use sorted order
                 if (faceA < faceB)
@@ -99,6 +109,10 @@ void Foam::surfaceIntersection::storeIntersection
                 }
                 break;
             }
+
+            case surfaceIntersection::NONE:
+                return;
+                break;
         }
 
 
@@ -245,7 +259,7 @@ void Foam::surfaceIntersection::classifyHit
     const triSurface& surf1,
     const scalarField& surf1PointTol,
     const triSurface& surf2,
-    const enum originatingType cutFrom,
+    const enum intersectionType cutFrom,
     const label edgeI,
     const pointIndexHit& pHit,
 
@@ -306,7 +320,11 @@ void Foam::surfaceIntersection::classifyHit
             // For self-intersection, we have tolerances for each point
             // (surf2 is actually surf1) so we shift the hit to coincide
             // identically.
-            if (cutFrom == surfaceIntersection::SELF)
+            if
+            (
+                cutFrom == surfaceIntersection::SELF
+             || cutFrom == surfaceIntersection::SELF_REGION
+            )
             {
                 const point& nearPt = surf1Pts[nearVert];
 
@@ -392,7 +410,15 @@ void Foam::surfaceIntersection::classifyHit
             // >0: store point/edge-cut. Attempt to create new edge.
             // <0: store point/edge-cut only
             int handling = (allowEdgeHits_ ? 1 : 0);
-            if (allowEdgeHits_ && cutFrom == surfaceIntersection::SELF)
+            if
+            (
+                allowEdgeHits_
+             &&
+                (
+                    cutFrom == surfaceIntersection::SELF
+                 || cutFrom == surfaceIntersection::SELF_REGION
+                )
+            )
             {
                 // The edge-edge intersection is hashed as an 'edge' to
                 // exploit the commutative lookup.
@@ -513,12 +539,18 @@ void Foam::surfaceIntersection::classifyHit
             switch (cutFrom)
             {
                 case surfaceIntersection::FIRST:
+                {
                     handling = 1;
                     break;
+                }
                 case surfaceIntersection::SECOND:
+                {
                     handling = -1;
                     break;
+                }
                 case surfaceIntersection::SELF:
+                case surfaceIntersection::SELF_REGION:
+                {
                     // The edge-edge intersection is hashed as an 'edge' to
                     // exploit the commutative lookup.
                     // Ie, only do the cut once
@@ -563,6 +595,12 @@ void Foam::surfaceIntersection::classifyHit
                             }
                         }
                     }
+
+                    break;
+                }
+
+                case surfaceIntersection::NONE:
+                    return;
                     break;
             }
 
@@ -744,7 +782,7 @@ void Foam::surfaceIntersection::doCutEdges
 (
     const triSurface& surf1,
     const triSurfaceSearch& querySurf2,
-    const enum originatingType cutFrom,
+    const enum intersectionType cutFrom,
 
     DynamicList<point>& allCutPoints,
     DynamicList<edge>& allCutEdges,
@@ -766,12 +804,20 @@ void Foam::surfaceIntersection::doCutEdges
     const indexedOctree<treeDataPrimitivePatch<triSurface>>& searchTree
         = querySurf2.tree();
 
-    if (cutFrom == surfaceIntersection::SELF)
+    if
+    (
+        cutFrom == surfaceIntersection::SELF
+     || cutFrom == surfaceIntersection::SELF_REGION
+    )
     {
         // An edge may intersect multiple faces
         // - mask out faces that have already been hit before trying again
         // - never intersect with faces attached to the edge itself
         DynamicList<label> maskFaces(32);
+
+        // Optionally prevent intersection within a single region.
+        // Like self-intersect, but only if regions are different
+        PackedBoolList maskRegions(32);
 
         treeDataTriSurface::findAllIntersectOp
             allIntersectOp(searchTree, maskFaces);
@@ -786,6 +832,15 @@ void Foam::surfaceIntersection::doCutEdges
                 surf1Pts[e.start()] - 0.5*surf1PointTol[e.start()]*edgeVec;
             const point ptEnd =
                 surf1Pts[e.end()]   + 0.5*surf1PointTol[e.end()]*edgeVec;
+
+            maskRegions.clear();
+            if (cutFrom == surfaceIntersection::SELF_REGION)
+            {
+                for (auto& facei : surf1.edgeFaces()[edgeI])
+                {
+                    maskRegions.set(surf1[facei].region());
+                }
+            }
 
             // Never intersect with faces attached directly to the edge itself,
             // nor with faces attached to its end points. This mask contains
@@ -808,6 +863,11 @@ void Foam::surfaceIntersection::doCutEdges
                 }
 
                 maskFaces.append(pHit.index());
+
+                if (maskRegions[surf1[pHit.index()].region()])
+                {
+                    continue;
+                }
 
                 classifyHit
                 (
@@ -1133,6 +1193,27 @@ Foam::surfaceIntersection::surfaceIntersection
 {
     setOptions(dict);
 
+    const intersectionType cutFrom = selfIntersectionNames.lookupOrDefault
+    (
+        "intersectionMethod",
+        dict,
+        intersectionType::SELF
+    );
+
+    if (cutFrom == intersectionType::NONE)
+    {
+        if (debug)
+        {
+            Pout<< "Skipping self-intersection (selected: none)" << endl;
+        }
+
+        // Temporaries
+        facePairToEdge_.clear();
+        facePairToEdgeId_.clear();
+
+        return;
+    }
+
     const triSurface& surf1 = query1.surface();
 
     //
@@ -1154,7 +1235,7 @@ Foam::surfaceIntersection::surfaceIntersection
     (
         surf1,
         query1,
-        surfaceIntersection::SELF,
+        cutFrom,
         allCutPoints,
         allCutEdges,
         edgeCuts1
@@ -1402,17 +1483,16 @@ void Foam::surfaceIntersection::mergePoints(const scalar mergeDist)
     pointField newPoints;
     labelList pointMap;
 
-    const bool hasMerged = Foam::mergePoints
+    const label nMerged = Foam::mergePoints
     (
         cutPoints_,
         mergeDist,
         false,
         pointMap,
-        newPoints,
-        vector::zero
+        newPoints
     );
 
-    if (hasMerged)
+    if (nMerged)
     {
         cutPoints_.transfer(newPoints);
 

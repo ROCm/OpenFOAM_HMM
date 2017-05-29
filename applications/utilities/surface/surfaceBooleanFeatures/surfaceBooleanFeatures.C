@@ -83,7 +83,7 @@ Description
 #include "edgeIntersections.H"
 #include "meshTools.H"
 #include "DynamicField.H"
-
+#include "Enum.H"
 
 #ifndef NO_CGAL
 
@@ -1514,8 +1514,8 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("action");
-    argList::validArgs.append("surface file");
-    argList::validArgs.append("surface file");
+    argList::validArgs.append("surfaceFile1");
+    argList::validArgs.append("surfaceFile2");
 
     argList::addBoolOption
     (
@@ -1553,24 +1553,30 @@ int main(int argc, char *argv[])
         " 'mixed' (keep all)"
     );
 
+    argList::addNote
+    (
+        "Valid actions: \"intersection\", \"union\", \"difference\""
+    );
+
 
     #include "setRootCase.H"
     #include "createTime.H"
 
     const word action(args[1]);
 
-    const HashTable<booleanSurface::booleanOpType> validActions
+    const Enum<booleanSurface::booleanOpType> validActions
     {
-        {"intersection", booleanSurface::INTERSECTION},
-        {"union", booleanSurface::UNION},
-        {"difference", booleanSurface::DIFFERENCE}
+        { booleanSurface::INTERSECTION, "intersection" },
+        { booleanSurface::UNION, "union" },
+        { booleanSurface::DIFFERENCE, "difference" }
     };
 
-    if (!validActions.found(action))
+    if (!validActions.hasEnum(action))
     {
         FatalErrorInFunction
             << "Unsupported action " << action << endl
-            << "Supported actions:" << validActions.toc() << abort(FatalError);
+            << "Supported actions:" << validActions << nl
+            << abort(FatalError);
     }
 
 
