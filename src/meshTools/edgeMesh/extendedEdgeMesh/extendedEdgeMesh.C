@@ -1277,11 +1277,13 @@ void Foam::extendedEdgeMesh::add(const extendedEdgeMesh& fem)
         );
     }
 
-    pointField newEdgeDirections(newEdgeI);
+    pointField newEdgeDirections
+    (
+        edgeDirections().size()
+      + fem.edgeDirections().size()
+    );
     newEdgeDirections.rmap(edgeDirections(), reverseEdgeMap);
     newEdgeDirections.rmap(fem.edgeDirections(), reverseFemEdgeMap);
-
-
 
 
     // Normals
