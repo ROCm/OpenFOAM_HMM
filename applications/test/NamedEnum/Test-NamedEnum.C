@@ -34,15 +34,15 @@ class namedEnumTest
 {
 public:
 
-    enum option
+    enum class option
     {
-        a,
-        b,
-        c,
-        d
+        A,
+        B,
+        C,
+        D
     };
 
-    static const Foam::NamedEnum<option, 4> namedEnum;
+    static const Foam::NamedEnum<option, 4> optionNamed;
 };
 
 
@@ -52,10 +52,10 @@ const char* Foam::NamedEnum<namedEnumTest::option, 4>::names[] =
     "a",
     "b",
     "c",
-    "d"
+    "d",
 };
 
-const Foam::NamedEnum<namedEnumTest::option, 4> namedEnumTest::namedEnum;
+const Foam::NamedEnum<namedEnumTest::option, 4> namedEnumTest::optionNamed;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -69,56 +69,43 @@ int main(int argc, char *argv[])
     dictionary testDict;
     testDict.add("lookup1", "c");
 
-    Info<< "enums: " << options << nl;
-
-    Info<< "loop over enums (as list):" << nl;
-    forAll(options, i)
-    {
-        const namedEnumTest::option& opt = options[i];
-
-        Info<< "option[" << opt
-            << "] = '" << namedEnumTest::namedEnum[opt] << "'" << nl;
-    }
-
-    Info<< "loop over enums (C++11 for range):" << nl;
-    for (const auto& opt : options)
-    {
-        Info<< "option[" << opt
-            << "] = '" << namedEnumTest::namedEnum[opt] << "'" << nl;
-    }
-
     Info<< nl
-        << namedEnumTest::namedEnum["a"] << nl
-        << namedEnumTest::namedEnum[namedEnumTest::a] << nl;
+        << int(namedEnumTest::optionNamed["a"]) << nl
+        << namedEnumTest::optionNamed[namedEnumTest::option::A] << nl;
 
     Info<< "--- test dictionary lookup ---" << endl;
     {
         Info<< "dict: " << testDict << endl;
 
-        namedEnumTest::option gotOpt =
-            namedEnumTest::namedEnum.lookupOrDefault
-            (
-                "test",
-                testDict,
-                namedEnumTest::option::a
-            );
+        Info<< "got: "
+            <<  int
+                (
+                    namedEnumTest::optionNamed.lookupOrDefault
+                    (
+                        "notFound",
+                        testDict,
+                        namedEnumTest::option::A
+                    )
+                )
+            << nl;
 
-        Info<< "got: " << gotOpt << endl;
-
-        gotOpt = namedEnumTest::namedEnum.lookupOrDefault
-        (
-            "lookup1",
-            testDict,
-            namedEnumTest::option::a
-        );
-
-        Info<< "got: " << gotOpt << endl;
+        Info<< "got: "
+            <<  int
+                (
+                    namedEnumTest::optionNamed.lookupOrDefault
+                    (
+                        "lookup1",
+                        testDict,
+                        namedEnumTest::option::A
+                    )
+                )
+            << nl;
     }
 
-    Info<< "--- test read construction ---" << endl;
+    Info<< "--- test read ---" << endl;
 
-    namedEnumTest::option dummy(namedEnumTest::namedEnum.read(Sin));
-    Info<< namedEnumTest::namedEnum[dummy] << endl;
+    namedEnumTest::option dummy(namedEnumTest::optionNamed.read(Sin));
+    Info<< namedEnumTest::optionNamed[dummy] << endl;
 
     Info<< "End\n" << endl;
 

@@ -25,9 +25,8 @@ Class
     Foam::NamedEnum
 
 Description
-    A NamedEnum is a wrapper around a static list of names that represent
-    a particular enumeration. Internally it uses a HashTable for quicker
-    lookups.
+    A NamedEnum is a wrapper around a list of names that represent
+    particular enumeration values.
 
 SourceFiles
     NamedEnum.C
@@ -38,7 +37,6 @@ SourceFiles
 #define NamedEnum_H
 
 #include "HashTable.H"
-#include "stringList.H"
 #include "wordList.H"
 #include <type_traits>
 
@@ -46,32 +44,31 @@ SourceFiles
 
 namespace Foam
 {
+// Forward declarations
 class dictionary;
+template<class EnumType, int nEnum> class NamedEnum;
 
-// Forward declaration
-template<class Enum, int> class NamedEnum;
+template<class EnumType, int nEnum>
+Ostream& operator<<(Ostream& os, const NamedEnum<EnumType, nEnum>& wrapped);
+
 
 /*---------------------------------------------------------------------------*\
                           Class NamedEnum Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Enum, int nEnum>
+template<class EnumType, int nEnum>
 class NamedEnum
-:
-    public HashTable<int>
 {
     //- The nEnum must be positive (non-zero)
     static_assert(nEnum > 0, "nEnum must be positive (non-zero)");
 
-    //- The type of HashTable used for the lookup.
-    typedef HashTable<int> table_type;
+    // Private Member Data
+
+        //- The values for the enum
+        HashTable<int> lookup_;
 
 
     // Private Member Functions
-
-        //- The names as a list of strings
-        template<class StringType>
-        static List<StringType> getNamesList();
 
         //- Disallow default bitwise copy construct
         NamedEnum(const NamedEnum&) = delete;
@@ -83,12 +80,12 @@ class NamedEnum
 public:
 
     //- The type of enumeration wrapped by NamedEnum
-    typedef Enum enum_type;
+    typedef EnumType value_type;
 
 
     // Static data members
 
-        //- The set of names corresponding to the enumeration Enum
+        //- The set of names corresponding to the enumeration EnumType
         static const char* names[nEnum];
 
 
@@ -100,17 +97,39 @@ public:
 
     // Member Functions
 
-        //- Read a word from Istream and return the corresponding
-        //  enumeration element
-        enum_type read(Istream& is) const;
+      // Access
 
-        //- Write the name representation of the enumeration to an Ostream
-        void write(const enum_type e, Ostream& os) const;
+        //- The number of lookup names for the enumeration
+        inline label size() const;
+
+        //- The list of enum names
+        inline wordList toc() const;
+
+        //- The sorted list of enum names
+        inline wordList sortedToc() const;
+
+        //- The list of enum names, in construction order
+        wordList words() const;
+
+        //- The list of enum values, in construction order
+        List<int> values() const;
+
+
+      // Query
+
+        //- Test if there is an enumeration corresponding to the given name.
+        inline bool hasEnum(const word& enumName) const;
+
+        //- Test if there is a name corresponding to the given enumeration.
+        bool hasName(const EnumType e) const;
+
+
+      // Lookup
 
         //- Lookup the key in the dictionary and return the corresponding
         // enumeration element based on its name.
         // Fatal if anything is incorrect.
-        enum_type lookup
+        EnumType lookup
         (
             const word& key,
             const dictionary& dict
@@ -120,42 +139,42 @@ public:
         //  enumeration element based on its name.
         //  Return the default value if the key was not found in the dictionary.
         //  Fatal if enumerated name was incorrect.
-        enum_type lookupOrDefault
+        EnumType lookupOrDefault
         (
             const word& key,
             const dictionary& dict,
-            const enum_type deflt
+            const EnumType deflt
         ) const;
 
-        //- List of enumerations
-        static List<enum_type> enums();
 
-        //- The set of names as a list of strings
-        static stringList strings();
+      // IO
 
-        //- The set of names as a list of words
-        static wordList words();
+        //- Read a word from Istream and return the corresponding enumeration
+        EnumType read(Istream& is) const;
+
+        //- Write the name representation of the enumeration to an Ostream
+        //  A noop if the enumeration wasn't found.
+        void write(const EnumType e, Ostream& os) const;
 
 
     // Member Operators
 
         //- Return the enumeration element corresponding to the given name
-        inline const enum_type operator[](const char* name) const
-        {
-            return enum_type(table_type::operator[](name));
-        }
-
-        //- Return the enumeration element corresponding to the given name
-        inline const enum_type operator[](const word& name) const
-        {
-            return enum_type(table_type::operator[](name));
-        }
+        inline const EnumType operator[](const word& name) const;
 
         //- Return the name of the given enumeration element
-        inline const char* operator[](const enum_type e) const
-        {
-            return names[int(e)];
-        }
+        inline const char* operator[](const EnumType e) const;
+
+
+    // IOstream operators
+
+        //- Write names to Ostream, as per writeKeys() with shortListLen=10
+        friend Ostream& operator<< <EnumType, nEnum>
+        (
+            Ostream& os,
+            const NamedEnum<EnumType, nEnum>& wrapped
+        );
+
 };
 
 
@@ -164,6 +183,8 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "NamedEnumI.H"
 
 #ifdef NoRepository
     #include "NamedEnum.C"

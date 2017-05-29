@@ -236,7 +236,7 @@ directionalPressureGradientExplicitSource
             << "Did not find mode " << model_
             << nl
             << "Please set 'model' to one of "
-            << PressureDropModelNames_.toc()
+            << PressureDropModelNames_
             << exit(FatalError);
     }
 
