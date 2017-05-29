@@ -57,6 +57,7 @@ SourceFiles
 #include "uLabel.H"
 #include "word.H"
 #include "Xfer.H"
+#include "Hash.H"
 #include "className.H"
 #include "nullObject.H"
 
