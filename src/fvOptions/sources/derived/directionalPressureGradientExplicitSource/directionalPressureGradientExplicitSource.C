@@ -290,7 +290,6 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
                 const scalarField nu(turbModel.nu(), cells_);
 
                 gradPporous_ = -flowDir_*(D_*nu + I_*0.5*magUn)*magUn*length_;
-                break;
             }
             else
             {
@@ -307,6 +306,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
                 gradPporous_ =
                     - flowDir_*(D_*mu + I_*0.5*rho*magUn)*magUn*length_;
             }
+            break;
         }
         case pConstant:
         {
