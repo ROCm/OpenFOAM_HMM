@@ -96,7 +96,7 @@ public:
         {}
 
         //- Construct from an initializer list
-        Map(std::initializer_list<Tuple2<label, T>> map)
+        Map(std::initializer_list<std::pair<label, T>> map)
         :
             parent_type(map)
         {}

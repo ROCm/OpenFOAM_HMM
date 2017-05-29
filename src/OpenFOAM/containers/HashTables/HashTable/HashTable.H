@@ -62,6 +62,7 @@ SourceFiles
 
 #include <initializer_list>
 #include <iterator>
+#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,7 +74,6 @@ namespace Foam
 template<class T> class List;
 template<class T> class UList;
 template<class T, unsigned Size> class FixedList;
-template<class T1, class T2> class Tuple2;
 template<class T, class Key, class Hash> class HashTable;
 
 template<class T, class Key, class Hash>
@@ -212,7 +212,7 @@ private:
 
     // Private data type for table entries
 
-        //- Structure to hold a hashed entry, with a SLList for collisions
+        //- Structure to hold a hashed entry, with a linked-list for collisions
         struct hashedEntry
         {
             //- The lookup key
@@ -224,7 +224,7 @@ private:
             //- Pointer to next hashedEntry in sub-list
             hashedEntry* next_;
 
-            //- Construct from key, next pointer and object
+            //- Construct from key, object, next pointer
             inline hashedEntry(const Key& key, const T& obj, hashedEntry* next);
 
         private:
@@ -296,7 +296,7 @@ public:
         HashTable(const Xfer<HashTable<T, Key, Hash>>& ht);
 
         //- Construct from an initializer list
-        HashTable(std::initializer_list<Tuple2<Key, T>> lst);
+        HashTable(std::initializer_list<std::pair<Key, T>> lst);
 
 
     //- Destructor
@@ -558,7 +558,7 @@ public:
         void operator=(const HashTable<T, Key, Hash>& rhs);
 
         //- Assignment from an initializer list
-        void operator=(std::initializer_list<Tuple2<Key, T>> lst);
+        void operator=(std::initializer_list<std::pair<Key, T>> lst);
 
         //- Equality. Hash tables are equal if the keys and values are equal.
         //  Independent of table storage size and table order.

@@ -900,10 +900,8 @@ void Foam::conformalVoronoiMesh::writeMesh
     mesh.addFvPatches(patches);
 
 
-
     // Add zones to the mesh
     addZones(mesh, cellCentres);
-
 
 
     Info<< indent << "Add pointZones" << endl;
@@ -914,6 +912,9 @@ void Foam::conformalVoronoiMesh::writeMesh
 
         forAll(dualMeshPointTypeNames_, typeI)
         {
+            const word& znName =
+                dualMeshPointTypeNames_[dualMeshPointType(typeI)];
+
             forAll(boundaryPts, ptI)
             {
                 const label& bPtType = boundaryPts[ptI];
@@ -928,14 +929,14 @@ void Foam::conformalVoronoiMesh::writeMesh
 
             Info<< incrIndent << indent
                 << "Adding " << bPts.size()
-                << " points of type " << dualMeshPointTypeNames_.words()[typeI]
+                << " points of type " << znName
                 << decrIndent << endl;
 
             mesh.pointZones().append
             (
                 new pointZone
                 (
-                    dualMeshPointTypeNames_.words()[typeI],
+                    znName,
                     bPts,
                     sz + typeI,
                     mesh.pointZones()
