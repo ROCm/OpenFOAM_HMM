@@ -195,7 +195,7 @@ void Foam::Function1Types::TableBase<Type>::check() const
             << nl << exit(FatalError);
     }
 
-    label n = table_.size();
+    const label n = table_.size();
     scalar prevValue = table_[0].first();
 
     for (label i = 1; i < n; ++i)
@@ -221,7 +221,7 @@ bool Foam::Function1Types::TableBase<Type>::checkMinBounds
     scalar& xDash
 ) const
 {
-    if (x < table_[0].first())
+    if (x < table_.first().first())
     {
         switch (boundsHandling_)
         {
@@ -238,19 +238,28 @@ bool Foam::Function1Types::TableBase<Type>::checkMinBounds
                     << "value (" << x << ") underflow" << nl
                     << endl;
 
-                // fall-through to 'CLAMP'
+                // Behaviour as per 'CLAMP'
+                xDash = table_.first().first();
+                return true;
+                break;
             }
             case CLAMP:
             {
-                xDash = table_[0].first();
+                xDash = table_.first().first();
                 return true;
                 break;
             }
             case REPEAT:
             {
                 // adjust x to >= minX
-                scalar span = table_.last().first() - table_[0].first();
-                xDash = fmod(x - table_[0].first(), span) + table_[0].first();
+                const scalar span =
+                    table_.last().first() - table_.first().first();
+
+                xDash =
+                (
+                    fmod(x - table_.first().first(), span)
+                  + table_.first().first()
+                );
                 break;
             }
         }
@@ -288,7 +297,10 @@ bool Foam::Function1Types::TableBase<Type>::checkMaxBounds
                     << "value (" << x << ") overflow" << nl
                     << endl;
 
-                // fall-through to 'CLAMP'
+                // Behaviour as per 'CLAMP'
+                xDash = table_.last().first();
+                return true;
+                break;
             }
             case CLAMP:
             {
@@ -299,8 +311,14 @@ bool Foam::Function1Types::TableBase<Type>::checkMaxBounds
             case REPEAT:
             {
                 // adjust x to >= minX
-                scalar span = table_.last().first() - table_[0].first();
-                xDash = fmod(x - table_[0].first(), span) + table_[0].first();
+                const scalar span =
+                    table_.last().first() - table_.first().first();
+
+                xDash =
+                (
+                    fmod(x - table_.first().first(), span)
+                  + table_.first().first()
+                );
                 break;
             }
         }
@@ -335,7 +353,7 @@ Type Foam::Function1Types::TableBase<Type>::value(const scalar x) const
 
     if (checkMinBounds(x, xDash))
     {
-        return table_[0].second();
+        return table_.first().second();
     }
 
     if (checkMaxBounds(xDash, xDash))
@@ -411,13 +429,11 @@ void Foam::Function1Types::TableBase<Type>::writeEntries(Ostream& os) const
 {
     if (boundsHandling_ != CLAMP)
     {
-        os.writeKeyword("outOfBounds") << boundsHandlingToWord(boundsHandling_)
-            << token::END_STATEMENT << nl;
+        os.writeEntry("outOfBounds", boundsHandlingToWord(boundsHandling_));
     }
     if (interpolationScheme_ != "linear")
     {
-        os.writeKeyword("interpolationScheme") << interpolationScheme_
-            << token::END_STATEMENT << nl;
+        os.writeEntry("interpolationScheme", interpolationScheme_);
     }
 }
 
