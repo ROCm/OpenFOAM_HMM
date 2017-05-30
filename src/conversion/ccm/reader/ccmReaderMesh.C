@@ -38,7 +38,7 @@ License
 #include "uindirectPrimitivePatch.H"
 #include "SortableList.H"
 #include "mergePoints1.H"
-#include "ListOps1.H"
+#include "ListOps.H"
 
 #include "ccmInternal.H" // include last to avoid any strange interactions
 
