@@ -44,7 +44,7 @@ constrainPressure(p_rgh, rho, U, phiHbyA, rhorAUf, MRF);
           - fvm::laplacian(rhorAUf, p_rgh)
         );
 
-        solvPerfp_rgh = p_rghEqn.solve
+        p_rghEqn.solve
         (
             mesh.solver
             (
