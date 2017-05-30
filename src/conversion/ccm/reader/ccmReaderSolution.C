@@ -622,7 +622,7 @@ Foam::ccm::reader::readField
                             // transcribe to output list
                             forAll(mapData, i)
                             {
-                                label cellId = mapData[i];
+                                const label cellId = mapData[i];
                                 scalarData[cellId] = rawData[i];
                             }
 

@@ -567,9 +567,9 @@ void Foam::ccm::writer::writeCells
                     tableId = cellTable_.append(dict);
                 }
 
-                forAll(cZone, i)
+                for (auto id : cZone)
                 {
-                    mapData[cZone[i]] = tableId;
+                    mapData[id] = tableId;
                 }
             }
         }
@@ -582,11 +582,11 @@ void Foam::ccm::writer::writeCells
             dict.add("MaterialType", "fluid");
             label tableId = cellTable_.append(dict);
 
-            forAll(mapData, i)
+            for (auto& id : mapData)
             {
-                if (mapData[i] < 0)
+                if (id < 0)
                 {
-                    mapData[i] = tableId;
+                    id = tableId;
                 }
             }
         }

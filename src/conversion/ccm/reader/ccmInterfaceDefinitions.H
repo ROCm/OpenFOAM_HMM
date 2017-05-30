@@ -57,6 +57,7 @@ public:
         //- The second boundary
         label bnd1;
 
+
     // Constructors
 
         //- Construct null
@@ -194,7 +195,7 @@ public:
         //- Scan available interface entries for one matching this boundary id
         bool isInterface(label bndId)
         {
-            forAllConstIter(Map<interfaceEntry>, *this, iter)
+            forAllConstIters(*this, iter)
             {
                 if (iter().inInterface(bndId))
                 {
@@ -210,7 +211,7 @@ public:
         word interfaceName(label bndId)
         {
             word ifname;
-            forAllConstIter(Map<interfaceEntry>, *this, iter)
+            forAllConstIters(*this, iter)
             {
                 ifname = iter().canonicalName(bndId);
                 if (!ifname.empty())
@@ -231,7 +232,7 @@ public:
             const interfaceDefinitions& defs
         )
         {
-            os  << static_cast<const Map<interfaceEntry>& >(defs)
+            os  << static_cast<const Map<interfaceEntry>&>(defs)
                 << nl;
 
             return os;

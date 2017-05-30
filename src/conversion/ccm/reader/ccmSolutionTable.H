@@ -50,8 +50,8 @@ class namesList
     public SLList<T>
 {
 public:
-    typedef typename SLList<T>::const_iterator const_iterator;
-    typedef typename SLList<T>::iterator iterator;
+    using const_iterator = typename SLList<T>::const_iterator;
+    using iterator = typename SLList<T>::iterator;
 
     // Constructors
 
@@ -65,12 +65,7 @@ public:
         //- Return true if a list element has a name that matches key
         bool found(const word& key) const
         {
-            for
-            (
-                const_iterator iter = SLList<T>::begin();
-                iter != SLList<T>::end();
-                ++iter
-            )
+            forAllConstIters(*this, iter)
             {
                 if (iter().name() == key)
                 {
@@ -85,12 +80,7 @@ public:
         //- Find a list element has a name matching key
         iterator find(const word& key)
         {
-            for
-            (
-                iterator iter = SLList<T>::begin();
-                iter != SLList<T>::end();
-                ++iter
-            )
+            forAllIters(*this, iter)
             {
                 if (iter().name() == key)
                 {
@@ -112,12 +102,7 @@ public:
             List<word> matched(SLList<T>::size());
 
             label matchI = 0;
-            for
-            (
-                const_iterator iter = SLList<T>::begin();
-                iter != SLList<T>::end();
-                ++iter
-            )
+            forAllConstIters(*this, iter)
             {
                 const word& name = iter().name();
 
@@ -382,15 +367,16 @@ public:
             namesList<fieldEntry>()
         {}
 
+
     // Access
 
         //- The maximum cell Id referenced in the list
         label maxCellId() const
         {
             label maxId = 0;
-            forAllConstIter(namesList<fieldEntry>, *this, iter)
+            forAllConstIters(*this, iter)
             {
-                label currMax = (iter()).maxCellId();
+                const label currMax = iter().maxCellId();
 
                 if (maxId < currMax)
                 {
@@ -407,9 +393,9 @@ public:
         {
             label maxId = 0;
 
-            forAllConstIter(namesList<fieldEntry>, *this, iter)
+            forAllConstIters(*this, iter)
             {
-                label currMax = (iter()).maxFaceId();
+                const label currMax = iter().maxFaceId();
 
                 if (maxId < currMax)
                 {

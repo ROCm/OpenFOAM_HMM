@@ -95,7 +95,7 @@ void Foam::ccm::writer::writeBoundaryRegion
     // Create dictionary lookup for constant/boundaryRegion
     dictionary typeDict;
 
-    forAllConstIter(Map<dictionary>, boundaryRegion_, iter)
+    forAllConstIters(boundaryRegion_, iter)
     {
         const dictionary& dict = iter();
         if
@@ -207,7 +207,7 @@ void Foam::ccm::writer::writeCellTable
 
     ccmID nodeId;
 
-    forAllConstIter(Map<dictionary>, cellTable_, iter)
+    forAllConstIters(cellTable_, iter)
     {
         label intVal = iter.key();
         const dictionary& dict = iter();
