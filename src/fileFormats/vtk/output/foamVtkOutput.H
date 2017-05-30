@@ -44,6 +44,7 @@ SourceFiles
 #define foamVtkOutput_H
 
 #include "autoPtr.H"
+#include "Enum.H"
 #include "foamVtkOutputTypes.H"
 #include "foamVtkFormatter.H"
 #include "floatScalar.H"
@@ -120,10 +121,22 @@ namespace foamVtkOutput
 //- Some minimal additional support for writing legacy files
 namespace legacy
 {
-  // Constants
+    //- Some standard text elements for legacy vtk files
+    enum class textElemType
+    {
+        POINTS,             //!< "POINTS"
+        CELLS,              //!< "CELLS"
+        POLYS,              //!< "POLYGONS"
+        VERTS,              //!< "VERTICES"
+        POLY_DATA,          //!< "POLYDATA"
+        UNSTRUCTURED_GRID,  //!< "UNSTRUCTURED_GRID"
+    };
 
-    //- File extension for legacy files (vtk)
-    extern const Foam::word EXT;
+    //- Strings corresponding to the elements
+    extern const Foam::Enum<textElemType> textNames;
+
+    //- Strings corresponding to the elements
+    extern const Foam::Enum<vtkFileTag>   dataTypeNames;
 
 
   // Functions
@@ -145,20 +158,34 @@ namespace legacy
         const std::string& title
     );
 
-    //- Emit header for legacy CELL_DATA
-    std::ostream& cellDataHeader
+
+    //- Emit header for legacy CELL_DATA or POINT_DATA, corresponding to the
+    //  enumeration textElemType::CELLS or textElemType::POINTS, respectively.
+    //  The nEntries corresponds similarly to the number of cells or points,
+    //  respectively.
+    std::ostream& dataHeader
     (
         std::ostream& os,
-        const label nCells,
+        const vtkFileTag& dataTypeTag,
+        const label nEntries,
         const label nFields
     );
 
+    //- Emit header for legacy CELL_DATA.
+    //  The nEntries should normally correspond to the number of cells.
+    std::ostream& cellDataHeader
+    (
+        std::ostream& os,
+        const label nEntries,
+        const label nFields
+    );
 
     //- Emit header for legacy POINT_DATA
+    //  The nEntries should normally correspond to the number of points.
     std::ostream& pointDataHeader
     (
         std::ostream& os,
-        const label nPoints,
+        const label nEntries,
         const label nFields
     );
 

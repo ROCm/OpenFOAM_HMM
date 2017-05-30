@@ -44,6 +44,7 @@ SourceFiles
 #include "word.H"
 #include "UList.H"
 #include "LIFOStack.H"
+#include "foamVtkFileEnums.H"
 #include "foamVtkPTraits.H"
 #include "foamVtkOutputTypes.H"
 
@@ -89,7 +90,7 @@ protected:
     // Protected Member Functions
 
         //- Construct and attach to an output stream
-        formatter(std::ostream& os);
+        inline formatter(std::ostream& os);
 
 public:
 
@@ -108,11 +109,7 @@ public:
       // Access
 
         //- Access to the underlying output stream
-        inline std::ostream& os()
-        {
-            return os_;
-        }
-
+        inline std::ostream& os();
 
         //- The output formatType.
         virtual enum formatType format() const = 0;
@@ -158,7 +155,11 @@ public:
 
         //- Open XML tag
         //  \return formatter for chaining
-        formatter& openTag(const word& tag);
+        formatter& openTag(const word& tagName);
+
+        //- Open XML tag
+        //  \return formatter for chaining
+        inline formatter& openTag(const vtkFileTag& tagEnum);
 
         //- Close XML tag, optional as an empty container.
         //  Always adds a trailing newline.
@@ -168,11 +169,20 @@ public:
         //- End XML tag, optional with sanity check
         //  Always adds a trailing newline.
         //  \return formatter for chaining
-        formatter& endTag(const word& tag = word::null);
+        formatter& endTag(const word& tagName = word::null);
+
+        //- End XML tag with sanity check
+        //  Always adds a trailing newline.
+        //  \return formatter for chaining
+        inline formatter& endTag(const vtkFileTag& tagEnum);
 
         //- Write XML tag without any attributes. Combines openTag/closeTag.
         //  \return formatter for chaining
-        formatter& tag(const word& tag);
+        inline formatter& tag(const word& tagName);
+
+        //- Write XML tag without any attributes. Combines openTag/closeTag.
+        //  \return formatter for chaining
+        inline formatter& tag(const vtkFileTag& tagEnum);
 
         //- Add a "VTKFile" XML tag for contentType, followed by a tag for
         //  the contentType itself. Optionally leave the contentType tag
@@ -206,26 +216,15 @@ public:
 
         //- End "DataArray" XML tag
         //  \return formatter for chaining
-        inline formatter& endDataArray()
-        {
-            return endTag("DataArray");
-        }
+        inline formatter& endDataArray();
 
         //- End "AppendedData" XML tag
         //  \return formatter for chaining
-        inline formatter& endAppendedData()
-        {
-            flush();     // flush any pending encoded content
-            os_ << '\n'; // clear separation from content.
-            return endTag("AppendedData");
-        }
+        inline formatter& endAppendedData();
 
         //- End "VTKFile" XML tag
         //  \return formatter for chaining
-        inline formatter& endVTKFile()
-        {
-            return endTag("VTKFile");
-        }
+        inline formatter& endVTKFile();
 
 
         //- Write XML attribute
@@ -239,7 +238,7 @@ public:
 
         //- Write XML attribute
         //  \return formatter for chaining
-        formatter& xmlAttr
+        inline formatter& xmlAttr
         (
             const word& k,
             const int32_t v,
@@ -248,7 +247,7 @@ public:
 
         //- Write XML attribute
         //  \return formatter for chaining
-        formatter& xmlAttr
+        inline formatter& xmlAttr
         (
             const word& k,
             const int64_t v,
@@ -257,7 +256,7 @@ public:
 
         //- Write XML attribute
         //  \return formatter for chaining
-        formatter& xmlAttr
+        inline formatter& xmlAttr
         (
             const word& k,
             const uint64_t v,
@@ -266,7 +265,7 @@ public:
 
         //- Write XML attribute
         //  \return formatter for chaining
-        formatter& xmlAttr
+        inline formatter& xmlAttr
         (
             const word& k,
             const scalar v,
@@ -278,23 +277,23 @@ public:
 
         //- Write XML attribute
         //  \return formatter for chaining
-        formatter& operator()(const word& k, const std::string& v);
+        inline formatter& operator()(const word& k, const std::string& v);
 
         //- Write XML attribute
         //  \return formatter for chaining
-        formatter& operator()(const word& k, const int32_t v);
+        inline formatter& operator()(const word& k, const int32_t v);
 
         //- Write XML attribute
         //  \return formatter for chaining
-        formatter& operator()(const word& k, const int64_t v);
+        inline formatter& operator()(const word& k, const int64_t v);
 
         //- Write XML attribute
         //  \return formatter for chaining
-        formatter& operator()(const word& k, const uint64_t v);
+        inline formatter& operator()(const word& k, const uint64_t v);
 
         //- Write XML attribute
         //  \return formatter for chaining
-        formatter& operator()(const word& k, const scalar v);
+        inline formatter& operator()(const word& k, const scalar v);
 
 };
 
@@ -305,6 +304,8 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "foamVtkFormatterI.H"
 
 #ifdef NoRepository
     #include "foamVtkFormatterTemplates.C"

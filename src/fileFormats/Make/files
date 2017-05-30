@@ -26,6 +26,7 @@ vtk/format/foamVtkLegacyRawFormatter.C
 vtk/output/foamVtkOutput.C
 vtk/output/foamVtkOutputOptions.C
 vtk/read/vtkUnstructuredReader.C
+vtk/type/foamVtkFileEnums.C
 vtk/type/foamVtkPTraits.C
 
 coordSet/coordSet.C
