@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,27 +46,28 @@ namespace Foam
 
 //- Sorts and merges points. All points closer than/equal mergeTol get merged.
 //  Returns the number of unique points and a map from old to new.
-template<class Type>
+template<class PointList>
 label mergePoints
 (
-    const UList<Type>& points,
+    const PointList& points,
     const scalar mergeTol,
     const bool verbose,
     labelList& pointMap,
-    const Type& origin = Type::zero
+    typename PointList::const_reference origin = PointList::value_type::zero
 );
+
 
 //- Sorts and merges points. Determines new points. Returns true if anything
 //  merged (though newPoints still sorted even if not merged).
-template<class Type>
+template<class PointList>
 bool mergePoints
 (
-    const UList<Type>& points,
+    const PointList& points,
     const scalar mergeTol,
     const bool verbose,
     labelList& pointMap,
-    List<Type>& newPoints,
-    const Type& origin = Type::zero
+    List<typename PointList::value_type>& newPoints,
+    typename PointList::const_reference origin = PointList::value_type::zero
 );
 
 } // End namespace Foam

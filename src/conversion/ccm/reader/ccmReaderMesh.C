@@ -37,7 +37,7 @@ License
 #include "PackedList.H"
 #include "uindirectPrimitivePatch.H"
 #include "SortableList.H"
-#include "mergePoints1.H"
+#include "mergePoints.H"
 #include "ListOps.H"
 
 #include "ccmInternal.H" // include last to avoid any strange interactions
@@ -2002,9 +2002,8 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
         Info<< "    patch "  << patch0 << "," << patch1 << ": ("
             << nPatch0Faces << " and " << nPatch1Faces << " faces) " << flush;
 
-        label nMerged = mergePoints
+        const label nMerged = mergePoints
         (
-            true,
             pointsToMerge,
             option().mergeTol(),
             false,
@@ -2017,9 +2016,9 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
         if (nMerged)
         {
             // Transcribe local to global addressing
-            forAll(mergedPointMap, lookupI)
+            forAll(mergedPointMap, i)
             {
-                oldToNew[addr[lookupI]] = addr[mergedPointMap[lookupI]];
+                oldToNew[addr[i]] = addr[mergedPointMap[i]];
             }
 
             interfacesToMerge.append(interI);
