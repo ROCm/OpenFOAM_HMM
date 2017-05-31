@@ -93,24 +93,11 @@ private:
         //- From face to our edges_
         labelListList faceEdges_;
 
-
         //- Constructed from above: pointEdges
         labelListList pointEdges_;
 
 
     // Private Member Functions
-
-        //- Dump edges in obj format
-        static void writeOBJ(const pointField&, const edgeList&, Ostream&);
-
-        //- Dump selected edges in obj format
-        static void writeOBJ
-        (
-            const pointField&,
-            const edgeList&,
-            const labelList&,
-            Ostream&
-        );
 
         //- Calculate pointEdges
         void calcPointEdges();

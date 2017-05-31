@@ -129,8 +129,7 @@ void dumpFaces
     const Map<label>& connectedFaces
 )
 {
-    Info<< "Dumping connectedFaces as Lightwave .obj file to " << fName
-        << "\nThis can be visualized with e.g. javaview (www.javaview.de)\n\n";
+    Info<< "Dumping connectedFaces as .obj file to " << fName << nl;
 
     OFstream os(fName);
 
