@@ -517,51 +517,6 @@ void Foam::ccm::reader::readCells
     origBndId_  = -1;
     nPatches = 0;
 
-    HashTable<label, std::string> hashedNames;
-    if (option().combineBoundaries())
-    {
-        // Ensure all the interfaces are orderd up-front:
-        forAll(interfaceDefinitions_, interI)
-        {
-            const interfaceEntry& ifentry = interfaceDefinitions_[interI];
-
-            label info0Index = -1;
-            label info1Index = -1;
-
-            forAll(bndInfo, infoI)
-            {
-                if (bndInfo[infoI].ccmIndex == ifentry.bnd0)
-                {
-                    info0Index = infoI;
-                }
-                else if (bndInfo[infoI].ccmIndex == ifentry.bnd1)
-                {
-                    info1Index = infoI;
-                }
-            }
-
-            if (info0Index == info1Index || info0Index < 0 || info1Index < 0)
-            {
-                // this should never be able to happen
-                continue;
-            }
-
-            ccmBoundaryInfo& info0 = bndInfo[info0Index];
-            ccmBoundaryInfo& info1 = bndInfo[info1Index];
-
-            // Preserve interface order
-            info0.patchId = nPatches++;
-            info1.patchId = nPatches++;
-
-            // full safety:
-            info0.patchName = ifentry.canonicalName0();
-            info1.patchName = ifentry.canonicalName1();
-
-            hashedNames.insert(info0.patchName, info0Index);
-            hashedNames.insert(info1.patchName, info1Index);
-        }
-    }
-
     forAll(bndInfo, infoI)
     {
         ccmBoundaryInfo& info = bndInfo[infoI];
@@ -573,27 +528,8 @@ void Foam::ccm::reader::readCells
         }
         else
         {
-            if (option().combineBoundaries())
-            {
-                // Check if patch name was already seen
-                auto citer = hashedNames.cfind(info.patchName);
-                if (citer.found())
-                {
-                    info.patchId = bndInfo[citer()].patchId;
-                }
-                else
-                {
-                    hashedNames.insert(info.patchName, infoI);
-
-                    info.patchId = nPatches++;
-                    origBndId_[info.patchId] = info.ccmIndex;
-                }
-            }
-            else
-            {
-                info.patchId = nPatches++;
-                origBndId_[info.patchId] = info.ccmIndex;
-            }
+            info.patchId = nPatches++;
+            origBndId_[info.patchId] = info.ccmIndex;
         }
 
         patchSizes_[info.patchId] += info.size;
@@ -620,20 +556,6 @@ void Foam::ccm::reader::readCells
         }
 
         ccmLookupOrder.resetAddressing(addr.xfer());
-    }
-
-    if (option().combineBoundaries())
-    {
-        Info<<"patches combined by name: ";
-        if (nPatches == bndInfo.size())
-        {
-            Info<<"none" << endl;
-        }
-        else
-        {
-            Info<< bndInfo.size() << " into " << nPatches << endl;
-        }
-        // Info<< ccmLookupOrder << endl;
     }
 
 
@@ -1521,7 +1443,7 @@ void Foam::ccm::reader::validateInterface
 
 void Foam::ccm::reader::renumberInterfaces
 (
-    const labelList& oldToNew
+    const labelUList& oldToNew
 )
 {
     forAll(domInterfaces_, elemI)
@@ -1553,8 +1475,8 @@ void Foam::ccm::reader::cleanupInterfaces()
 
     if (bafInterfaces_.size() <= 0 && domInterfaces_.size() <= 0)
     {
-        Info<<"0 baffle interface pairs" << endl;
-        Info<<"0 domain interface pairs" << endl;
+        Info<<"0 baffle interface pairs" << nl
+            <<"0 domain interface pairs" << endl;
         return;
     }
 
@@ -1568,8 +1490,8 @@ void Foam::ccm::reader::cleanupInterfaces()
 
     forAll(domInterfaces_, elemI)
     {
-        label face0 = domInterfaces_[elemI][0];
-        label face1 = domInterfaces_[elemI][1];
+        const label face0 = domInterfaces_[elemI][0];
+        const label face1 = domInterfaces_[elemI][1];
 
         Info<< "interface [" << elemI << "] = "
             << face0 << " - " << face1 << " own/neigh = "
@@ -1902,9 +1824,11 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
     // List of patch pairs that are interfaces
     DynamicList<labelPair> interfacePatches(interfaceDefinitions_.size());
 
-    forAll(interfaceDefinitions_, interI)
+    label nWarn = 0;
+
+    forAllConstIters(interfaceDefinitions_, iter)
     {
-        const interfaceEntry& ifentry = interfaceDefinitions_[interI];
+        const interfaceEntry& ifentry = iter.object();
 
         labelPair patchPair
         (
@@ -1920,7 +1844,7 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
         )
         {
             // This should not happen
-            Info<<"Warning : bad interface " << interI << " " << ifentry
+            Info<<"Warning : bad interface " << ifentry.id << " " << ifentry
                 <<" on patches " << patchPair << endl;
         }
         else if
@@ -1930,11 +1854,18 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
          || patchSizes_[patchPair[1]] == 0
         )
         {
-            Info<<"Warning : skip interface " << interI << " " << ifentry
-                <<" on patches " << patchPair << nl
-                <<"   has zero or different number of faces: ("
-                << patchSizes_[patchPair[0]]  << " " << patchSizes_[patchPair[1]] << ")"
-                << endl;
+            if (!nWarn++)
+            {
+                Info<<"Warning: skip interface with zero or different"
+                    << " number of faces" << nl;
+            }
+
+            Info<<"  Interface:" << ifentry.id << " " << ifentry
+                <<" patches " << patchPair
+                <<" sizes ("
+                << patchSizes_[patchPair[0]]
+                << " " << patchSizes_[patchPair[1]] << ")"
+                << nl;
         }
         else
         {
@@ -1961,7 +1892,8 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
     // Markup points to merge
     PackedBoolList whichPoints(points_.size());
 
-    Info<< "interface merge points (tol=" << option().mergeTol() << "):" << endl;
+    Info<< "interface merge points (tol="
+        << option().mergeTol() << "):" << endl;
 
     DynamicList<label> interfacesToMerge(interfacePatches.size());
     forAll(interfacePatches, interI)

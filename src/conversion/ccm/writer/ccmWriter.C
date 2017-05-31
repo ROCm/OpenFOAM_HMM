@@ -292,7 +292,6 @@ void Foam::ccm::writer::writeProblem
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct for writing geometry
 Foam::ccm::writer::writer
 (
     const fileName& file,

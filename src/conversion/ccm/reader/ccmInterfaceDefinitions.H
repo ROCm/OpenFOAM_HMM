@@ -38,8 +38,14 @@ namespace Foam
 namespace ccm
 {
 
+class interfaceEntry;
+class interfaceDefinitions;
+
+Ostream& operator<<(Ostream& os, const interfaceEntry& entry);
+Ostream& operator<<(Ostream& os, const interfaceDefinitions& defs);
+
 /*---------------------------------------------------------------------------*\
-                     Class ccm::interfaceEntry Declaration
+                  Class Foam::ccm::interfaceEntry Declaration
 \*---------------------------------------------------------------------------*/
 
 //- A STARCCM interface definition is a pair of boundary ids
@@ -107,6 +113,12 @@ public:
             return bndId == bnd0 || bndId == bnd1;
         }
 
+        //- True if all internal ids are non-negative
+        bool valid() const
+        {
+            return (id >= 0 && bnd0 >= 0 && bnd1 >= 0 && bnd0 != bnd1);
+        }
+
 
         //- Canonical name for boundary 0
         word canonicalName0() const
@@ -162,42 +174,57 @@ class interfaceDefinitions
 :
     public Map<interfaceEntry>
 {
+
+    inline Map<interfaceEntry>& map()
+    {
+        return *this;
+    }
+
+    inline const Map<interfaceEntry>& map() const
+    {
+        return *this;
+    }
+
+
 public:
     // Constructor
 
         //- Null construct
         interfaceDefinitions()
-        :
-            Map<interfaceEntry>()
         {}
 
-
-        //- Scan available interface entries for one matching this boundary id
-        bool add(interfaceEntry entry)
+        //- Size
+        label size() const
         {
-            if
-            (
-                entry.id >= 0
-             && entry.bnd0 >= 0 && entry.bnd1 >= 0
-             && entry.bnd0 != entry.bnd1
-            )
-            {
-                this->set(entry.id, entry);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return map().size();
+        }
+
+        //- Size
+        bool empty() const
+        {
+            return map().empty();
+        }
+
+        //- Clear
+        void clear()
+        {
+            map().clear();
+        }
+
+
+        //- Add (valid) interface entry
+        bool add(const interfaceEntry& entry)
+        {
+            return (entry.valid() && map().set(entry.id, entry));
         }
 
 
         //- Scan available interface entries for one matching this boundary id
         bool isInterface(label bndId)
         {
-            forAllConstIters(*this, iter)
+            forAllConstIters(map(), iter)
             {
-                if (iter().inInterface(bndId))
+                if (iter.object().inInterface(bndId))
                 {
                     return true;
                 }
@@ -211,9 +238,9 @@ public:
         word interfaceName(label bndId)
         {
             word ifname;
-            forAllConstIters(*this, iter)
+            forAllConstIters(map(), iter)
             {
-                ifname = iter().canonicalName(bndId);
+                ifname = iter.object().canonicalName(bndId);
                 if (!ifname.empty())
                 {
                     break;
@@ -232,9 +259,7 @@ public:
             const interfaceDefinitions& defs
         )
         {
-            os  << static_cast<const Map<interfaceEntry>&>(defs)
-                << nl;
-
+            os  << defs.map() << nl;
             return os;
         }
 

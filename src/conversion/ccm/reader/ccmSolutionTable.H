@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,8 +29,8 @@ Description
 #define ccmSolutionTable_H
 
 #include "SLList.H"
-#include "stringListOps.H"
 #include "Ostream.H"
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -39,8 +39,16 @@ namespace Foam
 namespace ccm
 {
 
+class fieldEntry;
+class fieldTable;
+class solutionEntry;
+
+Ostream& operator<<(Ostream& os, const fieldEntry& entry);
+Ostream& operator<<(Ostream& os, const fieldTable& entry);
+Ostream& operator<<(Ostream& os, const solutionEntry& entry);
+
 /*---------------------------------------------------------------------------*\
-                      Class ccm::namesList Declaration
+                    Class Foam::ccm::namesList Declaration
 \*---------------------------------------------------------------------------*/
 
 //- A linked-list that is searchable by the 'name()' of the items
@@ -124,7 +132,7 @@ public:
 
 
 /*---------------------------------------------------------------------------*\
-                      Class ccm::fieldEntry Declaration
+                    Class Foam::ccm::fieldEntry Declaration
 \*---------------------------------------------------------------------------*/
 
 //- A ccm field entry with short name, name, maxId and type
@@ -209,15 +217,6 @@ public:
     // Edit
 
         //- Set the field units
-        void units(const char* units)
-        {
-            if (units && *units)
-            {
-                units_ = units;
-            }
-        }
-
-        //- Set the field units
         void units(const std::string& units)
         {
             if (!units.empty())
@@ -264,8 +263,9 @@ public:
 
 };
 
+
 /*---------------------------------------------------------------------------*\
-                    Class ccm::solutionEntry Declaration
+                  Class Foam::ccm::solutionEntry Declaration
 \*---------------------------------------------------------------------------*/
 
 //- A ccm solution entry with name, iteration and time
@@ -291,8 +291,8 @@ public:
         solutionEntry
         (
             const word& name,
-            const label& iteration,
-            const scalar& timeValue = 0
+            const label iteration,
+            const scalar timeValue = 0
         )
         :
             name_(name),
@@ -340,7 +340,7 @@ public:
 
 
 /*---------------------------------------------------------------------------*\
-                    Class ccm::solutionTable Declaration
+                  Class Foam::ccm::solutionTable Declaration
 \*---------------------------------------------------------------------------*/
 
 // Typedef: ccm::solutionTable
@@ -349,7 +349,7 @@ typedef namesList<solutionEntry> solutionTable;
 
 
 /*---------------------------------------------------------------------------*\
-                      Class ccm::fieldTable Declaration
+                    Class Foam::ccm::fieldTable Declaration
 \*---------------------------------------------------------------------------*/
 
 //- A list of the available fields
@@ -392,7 +392,6 @@ public:
         label maxFaceId() const
         {
             label maxId = 0;
-
             forAllConstIters(*this, iter)
             {
                 const label currMax = iter().maxFaceId();
