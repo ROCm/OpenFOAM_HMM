@@ -28,6 +28,9 @@ Description
     Encapsulated combinations of output format options.
     This is primarily useful when defining the output type based on some
     command-line arguments or dictionary contents.
+    However, it can also be a useful alternative to using the underlying
+    enumeration directly, since this class provides additional methods
+    not possible with an enum.
 
 SourceFiles
     foamVtkOutputOptions.C
@@ -53,8 +56,6 @@ namespace foamVtkOutput
 
 class outputOptions
 {
-private:
-
     // Private Member Data
 
         //- The output style tuning
@@ -63,7 +64,6 @@ private:
             NONE   = 0x00,  //!< Normal
             HEADER = 0x01   //!< Emit xml header
         };
-
 
         //- The output format type
         formatType fmtType_;
@@ -79,7 +79,8 @@ public:
         //- Construct null - XML insitu ASCII format with default precision
         inline outputOptions();
 
-        //- Construct with specified format
+        //- Construct with specified format.
+        //  This constructor should remain non-explicit.
         inline outputOptions(enum formatType fmtType);
 
 
@@ -94,7 +95,7 @@ public:
       // Access
 
         //- The output format type
-        inline formatType format() const;
+        inline formatType fmt() const;
 
         //- True if writer uses legacy file format
         inline bool legacy() const;
@@ -110,6 +111,9 @@ public:
 
         //- True if output format is ASCII
         inline bool ascii() const;
+
+        //- Return the ASCII write precision
+        inline unsigned precision() const;
 
 
       // Edit
@@ -131,12 +135,12 @@ public:
 
         //- Set the write precision to be used for new ASCII formatters
         //  \return outputOptions for chaining
-        inline const outputOptions& precision(unsigned prec) const;
+        outputOptions& precision(unsigned prec);
 
 
     // Other
 
-        //- Report description about the option selected
+        //- A text description about the output option selected
         string description() const;
 
 };

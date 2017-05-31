@@ -70,6 +70,17 @@ Foam::foamVtkOutput::formatter::openDataArray
 
 template<class Type, int nComp>
 Foam::foamVtkOutput::formatter&
+Foam::foamVtkOutput::formatter::openDataArray
+(
+    const vtkFileTag& tagEnum
+)
+{
+    return openDataArray<Type, nComp>(vtkFileTagNames[tagEnum]);
+}
+
+
+template<class Type, int nComp>
+Foam::foamVtkOutput::formatter&
 Foam::foamVtkOutput::formatter::PDataArray
 (
     const word& dataName

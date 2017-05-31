@@ -24,10 +24,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "foamVtkAsciiFormatter.H"
+#include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* Foam::foamVtkOutput::asciiFormatter::name_ = "ascii";
+
+const Foam::foamVtkOutput::outputOptions
+Foam::foamVtkOutput::asciiFormatter::opts_(formatType::INLINE_ASCII);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -88,6 +92,13 @@ Foam::foamVtkOutput::asciiFormatter::~asciiFormatter()
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+const Foam::foamVtkOutput::outputOptions&
+Foam::foamVtkOutput::asciiFormatter::opts() const
+{
+    return opts_;
+}
+
 
 const char* Foam::foamVtkOutput::asciiFormatter::name() const
 {

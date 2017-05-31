@@ -79,7 +79,6 @@ void Foam::vtkSetWriter<Type>::write
         os  << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
     }
 
-
     os  << "POINT_DATA " << points.size() << nl
         << " FIELD attributes " << valueSetNames.size() << nl;
 

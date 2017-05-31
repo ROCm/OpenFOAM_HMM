@@ -239,24 +239,32 @@ labelList getSelectedPatches
 // Process args for output options
 // Default from foamVtkOutputOptions is inline ASCII xml
 //
-enum foamVtkOutput::formatType getOutputOptions(const argList& args)
+foamVtkOutput::outputOptions getOutputOptions(const argList& args)
 {
-    if (!args.optionFound("ascii"))
+    foamVtkOutput::outputOptions opts;
+
     {
-        if (sizeof(floatScalar) != 4 || sizeof(label) != 4)
+        opts.legacy(true);
+
+        if (!args.optionFound("ascii"))
         {
-            WarningInFunction
-                << "Using ASCII rather than binary VTK format since "
-                << "floatScalar and/or label are not 4 bytes in size."
-                << nl << endl;
-        }
-        else
-        {
-            return foamVtkOutput::formatType::LEGACY_BINARY;
+            if (sizeof(floatScalar) != 4 || sizeof(label) != 4)
+            {
+                opts.ascii(true);
+
+                WarningInFunction
+                    << "Using ASCII rather than binary VTK format since "
+                    << "floatScalar and/or label are not 4 bytes in size."
+                    << nl << endl;
+            }
+            else
+            {
+                opts.ascii(false);
+            }
         }
     }
 
-    return foamVtkOutput::formatType::LEGACY_ASCII;
+    return opts;
 }
 
 
@@ -398,10 +406,9 @@ int main(int argc, char *argv[])
     const bool doLinks         = !args.optionFound("noLinks");
     const bool useTimeName     = args.optionFound("useTimeName");
     const bool noLagrangian    = args.optionFound("noLagrangian");
+    const bool nearCellValue   = args.optionFound("nearCellValue");
 
-    const enum foamVtkOutput::formatType fmtType = getOutputOptions(args);
-    const bool binary = (fmtType == foamVtkOutput::formatType::LEGACY_BINARY);
-    const bool nearCellValue = args.optionFound("nearCellValue");
+    const foamVtkOutput::outputOptions fmtType = getOutputOptions(args);
 
     if (nearCellValue)
     {
@@ -495,11 +502,7 @@ int main(int argc, char *argv[])
     meshSubsetHelper meshRef(mesh, meshSubsetHelper::SET, cellSetName);
 
     // Collect decomposition information etc.
-    foamVtkCells foamVtkMeshCells
-    (
-        foamVtkCells::contentType::LEGACY,
-        decomposePoly
-    );
+    foamVtkCells foamVtkMeshCells(fmtType, decomposePoly);
 
     Info<< "VTK mesh topology: "
         << timer.cpuTimeIncrement() << " s, "
@@ -545,17 +548,16 @@ int main(int argc, char *argv[])
                 fvPath/set.name()/set.name()
               + "_"
               + timeDesc
-              + ".vtk"
             );
             Info<< "    faceSet   : "
                 << relativeName(runTime, outputName) << nl;
 
             foamVtkOutput::writeFaceSet
             (
-                binary,
                 meshRef.mesh(),
                 set,
-                outputName
+                outputName,
+                fmtType
             );
             continue;
         }
@@ -574,17 +576,16 @@ int main(int argc, char *argv[])
                 fvPath/set.name()/set.name()
               + "_"
               + timeDesc
-              + ".vtk"
             );
             Info<< "    pointSet  : "
                 << relativeName(runTime, outputName) << nl;
 
             foamVtkOutput::writePointSet
             (
-                binary,
                 meshRef.mesh(),
                 set,
-                outputName
+                outputName,
+                fmtType
             );
             continue;
         }
@@ -594,7 +595,7 @@ int main(int argc, char *argv[])
         IOobjectList objects(mesh, runTime.timeName());
 
         HashSet<word> selectedFields;
-        bool specifiedFields = args.optionReadIfPresent
+        const bool specifiedFields = args.optionReadIfPresent
         (
             "fields",
             selectedFields
@@ -836,7 +837,6 @@ int main(int argc, char *argv[])
                 fvPath/vtkName
               + "_"
               + timeDesc
-              + ".vtk"
             );
             Info<< "    Internal  : "
                 << relativeName(runTime, outputName) << endl;
@@ -845,9 +845,9 @@ int main(int argc, char *argv[])
             foamVtkOutput::internalWriter writer
             (
                 meshRef.baseMesh(),
-                fmtType,
                 foamVtkMeshCells,
-                outputName
+                outputName,
+                fmtType
             );
 
             // CellData
@@ -963,14 +963,13 @@ int main(int argc, char *argv[])
                   / "surfaceFields"
                   + "_"
                   + timeDesc
-                  + ".vtk"
                 );
 
                 foamVtkOutput::writeSurfFields
                 (
-                    binary,
                     meshRef.mesh(),
                     outputName,
+                    fmtType,
                     sVectorFld
                 );
             }
@@ -995,7 +994,6 @@ int main(int argc, char *argv[])
               / (meshRef.useSubMesh() ? cellSetName : "allPatches")
               + "_"
               + timeDesc
-              + ".vtk"
             );
             Info<< "    Combined patches     : "
                 << relativeName(runTime, outputName) << nl;
@@ -1003,9 +1001,9 @@ int main(int argc, char *argv[])
             foamVtkOutput::patchWriter writer
             (
                 meshRef.mesh(),
-                binary,
-                nearCellValue,
                 outputName,
+                fmtType,
+                nearCellValue,
                 getSelectedPatches(patches, excludePatches)
             );
 
@@ -1064,7 +1062,6 @@ int main(int argc, char *argv[])
                   / (meshRef.useSubMesh() ? cellSetName : pp.name())
                   + "_"
                   + timeDesc
-                  + ".vtk"
                 );
                 Info<< "    Patch     : "
                     << relativeName(runTime, outputName) << nl;
@@ -1072,9 +1069,9 @@ int main(int argc, char *argv[])
                 foamVtkOutput::patchWriter writer
                 (
                     meshRef.mesh(),
-                    binary,
-                    nearCellValue,
                     outputName,
+                    fmtType,
+                    nearCellValue,
                     labelList{patchi}
                 );
 
@@ -1168,7 +1165,6 @@ int main(int argc, char *argv[])
                   / (meshRef.useSubMesh() ? cellSetName : fz.name())
                   + "_"
                   + timeDesc
-                  + ".vtk"
                 );
                 Info<< "    FaceZone  : "
                     << relativeName(runTime, outputName) << nl;
@@ -1181,10 +1177,10 @@ int main(int argc, char *argv[])
 
                 foamVtkOutput::surfaceMeshWriter writer
                 (
-                    binary,
                     pp,
                     fz.name(),
-                    outputName
+                    outputName,
+                    fmtType
                 );
 
                 // Number of fields
@@ -1214,7 +1210,7 @@ int main(int argc, char *argv[])
             fileName outputName
             (
                 fvPath/cloud::prefix/cloudName/cloudName
-              + "_" + timeDesc + ".vtk"
+              + "_" + timeDesc
             );
             Info<< "    Lagrangian: "
                 << relativeName(runTime, outputName) << nl;
@@ -1267,10 +1263,9 @@ int main(int argc, char *argv[])
                 foamVtkOutput::lagrangianWriter writer
                 (
                     meshRef.mesh(),
-                    binary,
-                    outputName,
                     cloudName,
-                    false
+                    outputName,
+                    fmtType
                 );
 
                 // Write number of fields
@@ -1299,9 +1294,9 @@ int main(int argc, char *argv[])
                 foamVtkOutput::lagrangianWriter writer
                 (
                     meshRef.mesh(),
-                    binary,
-                    outputName,
                     cloudName,
+                    outputName,
+                    fmtType,
                     true
                 );
 

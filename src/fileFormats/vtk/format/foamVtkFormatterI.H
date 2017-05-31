@@ -73,6 +73,23 @@ Foam::foamVtkOutput::formatter::tag(const vtkFileTag& tagEnum)
 
 
 inline Foam::foamVtkOutput::formatter&
+Foam::foamVtkOutput::formatter::beginVTKFile
+(
+    const vtkFileTag& contentType,
+    const word& contentVersion,
+    const bool leaveOpen
+)
+{
+    return beginVTKFile
+    (
+        vtkFileTagNames[contentType],
+        contentVersion,
+        leaveOpen
+    );
+}
+
+
+inline Foam::foamVtkOutput::formatter&
 Foam::foamVtkOutput::formatter::endDataArray()
 {
     return endTag("DataArray");

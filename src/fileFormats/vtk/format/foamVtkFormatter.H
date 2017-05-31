@@ -57,6 +57,8 @@ namespace Foam
 namespace foamVtkOutput
 {
 
+class outputOptions;
+
 /*---------------------------------------------------------------------------*\
                           Class formatter Declaration
 \*---------------------------------------------------------------------------*/
@@ -111,8 +113,8 @@ public:
         //- Access to the underlying output stream
         inline std::ostream& os();
 
-        //- The output formatType.
-        virtual enum formatType format() const = 0;
+        //- The format-type / output options.
+        virtual const outputOptions& opts() const = 0;
 
         //- Name for the XML output type or the legacy output type.
         virtual const char* name() const = 0;
@@ -195,6 +197,17 @@ public:
             const bool leaveOpen = false
         );
 
+        //- Add a "VTKFile" XML tag for contentType, followed by a tag for
+        //  the contentType itself. Optionally leave the contentType tag
+        //  open for adding additional attributes.
+        //  \return formatter for chaining
+        inline formatter& beginVTKFile
+        (
+            const vtkFileTag& contentType,
+            const word& contentVersion,
+            const bool leaveOpen = false
+        );
+
         //- Add a "AppendedData" XML tag with the current encoding and output
         //  the requisite '_' prefix.
         //  \return formatter for chaining
@@ -205,6 +218,11 @@ public:
         //  \return formatter for chaining
         template<class Type, int nComp=0>
         formatter& openDataArray(const word& dataName);
+
+        //- Open "DataArray" XML tag
+        //  \return formatter for chaining
+        template<class Type, int nComp=0>
+        formatter& openDataArray(const vtkFileTag& tagEnum);
 
 
         //- Insert a single "PDataArray" XML entry tag.

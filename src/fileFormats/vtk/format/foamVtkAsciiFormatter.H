@@ -57,6 +57,7 @@ class asciiFormatter
     // Private Data Members
 
         static const char* name_;
+        static const outputOptions opts_;
 
         //- Track the current output position
         unsigned short pos_;
@@ -95,11 +96,8 @@ public:
 
     // Member Functions
 
-        //- The output formatType is INLINE_ASCII.
-        virtual enum formatType format() const
-        {
-            return formatType::INLINE_ASCII;
-        }
+        //- The output is INLINE_ASCII.
+        virtual const outputOptions& opts() const;
 
         //- Name for the XML output type ("ascii")
         virtual const char* name() const;

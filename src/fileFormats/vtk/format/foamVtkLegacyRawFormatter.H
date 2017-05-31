@@ -58,6 +58,7 @@ class legacyRawFormatter
     // Private Data Members
 
         static const char* legacyName_;
+        static const outputOptions opts_;
 
 
     // Private Member Functions
@@ -91,11 +92,8 @@ public:
 
     // Member Functions
 
-        //- The output formatType is LEGACY_BINARY.
-        virtual enum formatType format() const
-        {
-            return formatType::LEGACY_BINARY;
-        }
+        //- The output is LEGACY_BINARY.
+        virtual const outputOptions& opts() const;
 
         //- Name for the legacy binary output type ("BINARY")
         virtual const char* name() const;

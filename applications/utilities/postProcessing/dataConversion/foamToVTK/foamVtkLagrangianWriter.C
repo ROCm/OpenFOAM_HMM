@@ -32,30 +32,30 @@ License
 Foam::foamVtkOutput::lagrangianWriter::lagrangianWriter
 (
     const fvMesh& mesh,
-    const bool binary,
-    const fileName& fName,
     const word& cloudName,
+    const fileName& baseName,
+    const foamVtkOutput::outputOptions outOpts,
     const bool dummyCloud
 )
 :
     mesh_(mesh),
     format_(),
     cloudName_(cloudName),
-    os_(fName.c_str()),
+    os_(),
     nParcels_(0)
 {
-    format_ = foamVtkOutput::newFormatter
-    (
-        os_,
-        (
-            binary
-          ? foamVtkOutput::LEGACY_BINARY
-          : foamVtkOutput::LEGACY_ASCII
-        )
-    );
+    outputOptions opts(outOpts);
+    opts.legacy(true);  // Legacy only, no append
 
-    foamVtkOutput::legacy::fileHeader(format(), mesh_.time().caseName())
-        << "DATASET POLYDATA" << nl;
+    os_.open((baseName + (opts.legacy() ? ".vtk" : ".vtp")).c_str());
+
+    format_ = opts.newFormatter(os_);
+
+    if (opts.legacy())
+    {
+        foamVtkOutput::legacy::fileHeader(format(), mesh_.time().caseName())
+            << "DATASET POLYDATA" << nl;
+    }
 
     if (dummyCloud)
     {
@@ -78,6 +78,12 @@ Foam::foamVtkOutput::lagrangianWriter::lagrangianWriter
         format().flush();
     }
 }
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::foamVtkOutput::lagrangianWriter::~lagrangianWriter()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

@@ -34,27 +34,29 @@ License
 
 void Foam::foamVtkOutput::writeFaceSet
 (
-    const bool binary,
     const primitiveMesh& mesh,
     const faceSet& set,
-    const fileName& fileName
+    const fileName& baseName,
+    const foamVtkOutput::outputOptions outOpts
 )
 {
-    std::ofstream os(fileName.c_str());
+    outputOptions opts(outOpts);
+    opts.legacy(true);  // Legacy only, no append
 
-    autoPtr<foamVtkOutput::formatter> format =
-        foamVtkOutput::outputOptions().legacy(true).ascii(!binary).newFormatter
-        (
-            os
-        );
+    std::ofstream os((baseName + (opts.legacy() ? ".vtk" : ".vtp")).c_str());
 
-    foamVtkOutput::legacy::fileHeader(format(), set.name())
-        << "DATASET POLYDATA" << nl;
+    autoPtr<foamVtkOutput::formatter> format = opts.newFormatter(os);
+
+    if (opts.legacy())
+    {
+        foamVtkOutput::legacy::fileHeader(format(), set.name())
+            << "DATASET POLYDATA" << nl;
+    }
 
     //-------------------------------------------------------------------------
 
     // Faces of set with OpenFOAM faceID as value
-    labelList faceLabels = set.sortedToc();
+    const labelList faceLabels = set.sortedToc();
 
     uindirectPrimitivePatch pp
     (

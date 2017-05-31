@@ -24,10 +24,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "foamVtkLegacyAsciiFormatter.H"
+#include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* Foam::foamVtkOutput::legacyAsciiFormatter::legacyName_ = "ASCII";
+
+const Foam::foamVtkOutput::outputOptions
+Foam::foamVtkOutput::legacyAsciiFormatter::opts_(formatType::LEGACY_ASCII);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -58,6 +62,13 @@ Foam::foamVtkOutput::legacyAsciiFormatter::~legacyAsciiFormatter()
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+const Foam::foamVtkOutput::outputOptions&
+Foam::foamVtkOutput::legacyAsciiFormatter::opts() const
+{
+    return opts_;
+}
+
 
 const char* Foam::foamVtkOutput::legacyAsciiFormatter::name() const
 {

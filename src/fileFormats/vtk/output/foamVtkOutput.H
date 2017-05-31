@@ -70,7 +70,6 @@ namespace foamVtkOutput
     //- Return a default asciiFormatter
     autoPtr<foamVtkOutput::formatter> newFormatter(std::ostream& os);
 
-
     //- Return a new formatter based on the specified format type
     autoPtr<foamVtkOutput::formatter> newFormatter
     (

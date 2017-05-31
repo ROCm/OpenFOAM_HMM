@@ -24,11 +24,15 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "foamVtkAppendRawFormatter.H"
+#include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* Foam::foamVtkOutput::appendRawFormatter::name_     = "append";
 const char* Foam::foamVtkOutput::appendRawFormatter::encoding_ = "raw";
+
+const Foam::foamVtkOutput::outputOptions
+Foam::foamVtkOutput::appendRawFormatter::opts_(formatType::APPEND_BINARY);
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -58,6 +62,13 @@ Foam::foamVtkOutput::appendRawFormatter::~appendRawFormatter()
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+const Foam::foamVtkOutput::outputOptions&
+Foam::foamVtkOutput::appendRawFormatter::opts() const
+{
+    return opts_;
+}
+
 
 const char* Foam::foamVtkOutput::appendRawFormatter::name() const
 {

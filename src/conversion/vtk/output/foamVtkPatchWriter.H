@@ -42,7 +42,7 @@ SourceFiles
 #include "pointFields.H"
 #include "indirectPrimitivePatch.H"
 #include "PrimitivePatchInterpolation.H"
-#include "foamVtkOutput.H"
+#include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,11 +82,15 @@ public:
         patchWriter
         (
             const fvMesh& mesh,
-            const bool binary,
+            const fileName& baseName,
+            const foamVtkOutput::outputOptions outOpts,
             const bool nearCellValue,
-            const fileName& fName,
             const labelList& patchIDs
         );
+
+
+    //- Destructor
+    ~patchWriter();
 
 
     // Member Functions

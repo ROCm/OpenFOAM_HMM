@@ -38,6 +38,7 @@ SourceFiles
 #include "fvMesh.H"
 #include "surfaceMesh.H"
 #include "surfaceFieldsFwd.H"
+#include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,9 +50,9 @@ namespace foamVtkOutput
 //- Write surface vector fields
 void writeSurfFields
 (
-    const bool binary,
     const fvMesh& mesh,
-    const fileName& fileName,
+    const fileName& baseName,
+    const foamVtkOutput::outputOptions outOpts,
     const UPtrList<const surfaceVectorField>& surfVectorFields
 );
 

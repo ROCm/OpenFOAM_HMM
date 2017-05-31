@@ -31,9 +31,9 @@ License
 Foam::foamVtkOutput::patchWriter::patchWriter
 (
     const fvMesh& mesh,
-    const bool binary,
+    const fileName& baseName,
+    const foamVtkOutput::outputOptions outOpts,
     const bool nearCellValue,
-    const fileName& fName,
     const labelList& patchIDs
 )
 :
@@ -41,29 +41,28 @@ Foam::foamVtkOutput::patchWriter::patchWriter
     format_(),
     nearCellValue_(nearCellValue),
     patchIDs_(patchIDs),
-    os_(fName.c_str())
+    os_()
 {
+    outputOptions opts(outOpts);
+    opts.legacy(true);  // Legacy only, no append
+
+    os_.open((baseName + (opts.legacy() ? ".vtk" : ".vtp")).c_str());
+    format_ = opts.newFormatter(os_);
+
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    format_ = foamVtkOutput::newFormatter
-    (
-        os_,
+    if (opts.legacy())
+    {
+        foamVtkOutput::legacy::fileHeader
         (
-            binary
-          ? foamVtkOutput::LEGACY_BINARY
-          : foamVtkOutput::LEGACY_ASCII
-        )
-    );
-
-    foamVtkOutput::legacy::fileHeader
-    (
-        format(),
-        (
-            patchIDs_.size() == 1
-          ? patches[patchIDs_.first()].name()
-          : "patches"
-        )
-    ) << "DATASET POLYDATA" << nl;
+            format(),
+            (
+                patchIDs_.size() == 1
+              ? patches[patchIDs_.first()].name()
+              : "patches"
+            )
+        ) << "DATASET POLYDATA" << nl;
+    }
 
     //------------------------------------------------------------------
 
@@ -118,6 +117,12 @@ Foam::foamVtkOutput::patchWriter::patchWriter
     }
     format().flush();
 }
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::foamVtkOutput::patchWriter::~patchWriter()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

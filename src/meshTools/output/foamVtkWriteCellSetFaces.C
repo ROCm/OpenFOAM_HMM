@@ -34,22 +34,24 @@ License
 
 void Foam::foamVtkOutput::writeCellSetFaces
 (
-    const bool binary,
     const primitiveMesh& mesh,
     const cellSet& set,
-    const fileName& fileName
+    const fileName& baseName,
+    const foamVtkOutput::outputOptions outOpts
 )
 {
-    std::ofstream os(fileName.c_str());
+    outputOptions opts(outOpts);
+    opts.legacy(true);  // Legacy only, no append
 
-    autoPtr<foamVtkOutput::formatter> format =
-        foamVtkOutput::outputOptions().legacy(true).ascii(!binary).newFormatter
-        (
-            os
-        );
+    std::ofstream os((baseName + (opts.legacy() ? ".vtk" : ".vtp")).c_str());
 
-    foamVtkOutput::legacy::fileHeader(format(), set.name())
-        << "DATASET POLYDATA" << nl;
+    autoPtr<foamVtkOutput::formatter> format = opts.newFormatter(os);
+
+    if (opts.legacy())
+    {
+        foamVtkOutput::legacy::fileHeader(format(), set.name())
+            << "DATASET POLYDATA" << nl;
+    }
 
     //-------------------------------------------------------------------------
 
@@ -87,7 +89,7 @@ void Foam::foamVtkOutput::writeCellSetFaces
         }
     }
 
-    labelList faceLabels = cellFaces.sortedToc();
+    const labelList faceLabels = cellFaces.sortedToc();
     labelList faceValues(cellFaces.size());
 
     forAll(faceLabels, facei)

@@ -56,6 +56,10 @@ class legacyAsciiFormatter
     // Private Data Members
 
         static const char* legacyName_;
+        static const outputOptions opts_;
+
+
+    // Private Member Functions
 
         //- Disallow default bitwise copy construct
         legacyAsciiFormatter(const legacyAsciiFormatter&) = delete;
@@ -81,11 +85,8 @@ public:
 
     // Member Functions
 
-        //- The output formatType is LEGACY_ASCII.
-        virtual enum formatType format() const
-        {
-            return formatType::LEGACY_ASCII;
-        }
+        //- The output is LEGACY_ASCII.
+        virtual const outputOptions& opts() const;
 
         //- Name for the legacy ascii output type ("ASCII")
         virtual const char* name() const;

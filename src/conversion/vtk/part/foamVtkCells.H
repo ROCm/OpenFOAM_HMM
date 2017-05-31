@@ -61,6 +61,12 @@ namespace Foam
 // Forward declaration of classes
 class polyMesh;
 
+namespace foamVtkOutput
+{
+    class outputOptions;
+}
+
+
 /*---------------------------------------------------------------------------*\
                         Class foamVtkCells Declaration
 \*---------------------------------------------------------------------------*/
@@ -129,6 +135,23 @@ public:
         (
             const polyMesh& mesh,
             const enum contentType output = contentType::XML,
+            const bool decompose = false
+        );
+
+        //- Construct from components.
+        //  Optionally with polyhedral decomposition.
+        foamVtkCells
+        (
+            const foamVtkOutput::outputOptions outOpts,
+            const bool decompose = false
+        );
+
+        //- Construct from components and create the output information
+        //  immediately
+        foamVtkCells
+        (
+            const polyMesh& mesh,
+            const foamVtkOutput::outputOptions outOpts,
             const bool decompose = false
         );
 

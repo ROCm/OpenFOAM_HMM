@@ -40,7 +40,7 @@ SourceFiles
 #include "Cloud.H"
 #include "volFields.H"
 #include "pointFields.H"
-#include "foamVtkOutput.H"
+#include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,11 +76,15 @@ public:
         lagrangianWriter
         (
             const fvMesh& mesh,
-            const bool binary,
-            const fileName&,
-            const word&,
-            const bool dummyCloud
+            const word& cloudName,
+            const fileName& baseName,
+            const foamVtkOutput::outputOptions outOpts,
+            const bool dummyCloud = false
         );
+
+
+    //- Destructor
+    ~lagrangianWriter();
 
 
     // Member Functions

@@ -36,6 +36,8 @@ SourceFiles
 #ifndef foamVtkWritePointSet_H
 #define foamVtkWritePointSet_H
 
+#include "foamVtkOutputOptions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -51,10 +53,10 @@ namespace foamVtkOutput
 //  The data are the original point ids.
 void writePointSet
 (
-    const bool binary,
     const primitiveMesh& mesh,
     const pointSet& set,
-    const fileName& fileName
+    const fileName& baseName,
+    const foamVtkOutput::outputOptions outOpts
 );
 
 

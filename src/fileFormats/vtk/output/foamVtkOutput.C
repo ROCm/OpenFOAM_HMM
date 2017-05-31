@@ -70,27 +70,27 @@ Foam::foamVtkOutput::newFormatter
 
     switch (fmtType)
     {
-        case INLINE_ASCII:
+        case formatType::INLINE_ASCII:
             fmt.set(new foamVtkOutput::asciiFormatter(os, prec));
             break;
 
-        case INLINE_BASE64:
+        case formatType::INLINE_BASE64:
             fmt.set(new foamVtkOutput::base64Formatter(os));
             break;
 
-        case APPEND_BASE64:
+        case formatType::APPEND_BASE64:
             fmt.set(new foamVtkOutput::appendBase64Formatter(os));
             break;
 
-        case APPEND_BINARY:
+        case formatType::APPEND_BINARY:
             fmt.set(new foamVtkOutput::appendRawFormatter(os));
             break;
 
-        case LEGACY_ASCII:
+        case formatType::LEGACY_ASCII:
             fmt.set(new foamVtkOutput::legacyAsciiFormatter(os, prec));
             break;
 
-        case LEGACY_BINARY:
+        case formatType::LEGACY_BINARY:
             fmt.set(new foamVtkOutput::legacyRawFormatter(os));
             break;
     }

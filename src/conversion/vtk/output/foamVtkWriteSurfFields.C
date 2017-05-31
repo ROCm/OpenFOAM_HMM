@@ -34,26 +34,23 @@ License
 
 void Foam::foamVtkOutput::writeSurfFields
 (
-    const bool binary,
     const fvMesh& mesh,
-    const fileName& fileName,
+    const fileName& baseName,
+    const foamVtkOutput::outputOptions outOpts,
     const UPtrList<const surfaceVectorField>& surfVectorFields
 )
 {
-    std::ofstream os(fileName.c_str());
+    outputOptions opts(outOpts);
+    opts.legacy(true);  // Legacy only, no append
 
-    autoPtr<foamVtkOutput::formatter> format = foamVtkOutput::newFormatter
-    (
-        os,
-        (
-            binary
-          ? foamVtkOutput::LEGACY_BINARY
-          : foamVtkOutput::LEGACY_ASCII
-        )
-    );
+    std::ofstream os((baseName + (opts.legacy() ? ".vtk" : ".vtp")).c_str());
+    autoPtr<foamVtkOutput::formatter> format = opts.newFormatter(os);
 
-    foamVtkOutput::legacy::fileHeader(format(), "surfaceFields")
-        << "DATASET POLYDATA" << nl;
+    if (opts.legacy())
+    {
+        foamVtkOutput::legacy::fileHeader(format(), "surfaceFields")
+            << "DATASET POLYDATA" << nl;
+    }
 
     const pointField& fc = mesh.faceCentres();
 

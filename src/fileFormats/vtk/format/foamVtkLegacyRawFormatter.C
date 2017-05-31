@@ -24,11 +24,15 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "foamVtkLegacyRawFormatter.H"
+#include "foamVtkOutputOptions.H"
 #include "endian.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* Foam::foamVtkOutput::legacyRawFormatter::legacyName_ = "BINARY";
+
+const Foam::foamVtkOutput::outputOptions
+Foam::foamVtkOutput::legacyRawFormatter::opts_(formatType::LEGACY_BINARY);
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -61,6 +65,13 @@ Foam::foamVtkOutput::legacyRawFormatter::~legacyRawFormatter()
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+const Foam::foamVtkOutput::outputOptions&
+Foam::foamVtkOutput::legacyRawFormatter::opts() const
+{
+    return opts_;
+}
+
 
 const char* Foam::foamVtkOutput::legacyRawFormatter::name() const
 {

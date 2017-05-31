@@ -24,10 +24,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "foamVtkBase64Formatter.H"
+#include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* Foam::foamVtkOutput::base64Formatter::name_ = "binary";
+
+const Foam::foamVtkOutput::outputOptions
+Foam::foamVtkOutput::base64Formatter::opts_(formatType::INLINE_BASE64);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -50,6 +54,13 @@ Foam::foamVtkOutput::base64Formatter::~base64Formatter()
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+const Foam::foamVtkOutput::outputOptions&
+Foam::foamVtkOutput::base64Formatter::opts() const
+{
+    return opts_;
+}
+
 
 const char* Foam::foamVtkOutput::base64Formatter::name() const
 {

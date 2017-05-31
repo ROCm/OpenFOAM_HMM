@@ -30,28 +30,27 @@ License
 
 Foam::foamVtkOutput::surfaceMeshWriter::surfaceMeshWriter
 (
-    const bool binary,
     const indirectPrimitivePatch& pp,
     const word& name,
-    const fileName& fName
+    const fileName& baseName,
+    const foamVtkOutput::outputOptions outOpts
 )
 :
     pp_(pp),
     format_(),
-    os_(fName.c_str())
+    os_()
 {
-    format_ = foamVtkOutput::newFormatter
-    (
-        os_,
-        (
-            binary
-          ? foamVtkOutput::LEGACY_BINARY
-          : foamVtkOutput::LEGACY_ASCII
-        )
-    );
+    outputOptions opts(outOpts);
+    opts.legacy(true);  // Legacy only, no append
 
-    foamVtkOutput::legacy::fileHeader(format(), name)
-        << "DATASET POLYDATA" << nl;
+    os_.open((baseName + (opts.legacy() ? ".vtk" : ".vtp")).c_str());
+    format_ = opts.newFormatter(os_);
+
+    if (opts.legacy())
+    {
+        foamVtkOutput::legacy::fileHeader(format(), name)
+            << "DATASET POLYDATA" << nl;
+    }
 
     //------------------------------------------------------------------
 
@@ -79,6 +78,12 @@ Foam::foamVtkOutput::surfaceMeshWriter::surfaceMeshWriter
     }
     format().flush();
 }
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::foamVtkOutput::surfaceMeshWriter::~surfaceMeshWriter()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

@@ -33,6 +33,7 @@ Description
 #ifndef foamVtkBase64Formatter_H
 #define foamVtkBase64Formatter_H
 
+#include "foamVtkFormatter.H"
 #include "foamVtkBase64Layer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -53,7 +54,7 @@ class base64Formatter
     // Private Data Members
 
         static const char* name_;
-        static const char* encoding_;
+        static const outputOptions opts_;
 
 
     // Private Member Functions
@@ -63,6 +64,7 @@ class base64Formatter
 
         //- Disallow default bitwise assignment
         void operator=(const base64Formatter&) = delete;
+
 
 public:
 
@@ -78,11 +80,8 @@ public:
 
     // Member Functions
 
-        //- The output formatType is INLINE_BASE64.
-        virtual enum formatType format() const
-        {
-            return formatType::INLINE_BASE64;
-        }
+        //- The output is INLINE_BASE64.
+        virtual const outputOptions& opts() const;
 
         //- Name for the XML output type ("binary")
         virtual const char* name() const;

@@ -48,7 +48,7 @@ namespace foamVtkOutput
 
     //- The output format type for file contents.
     //  Upper bits for output type, lower bits for the format itself.
-    enum formatType
+    enum class formatType
     {
         /** XML inline ASCII, using the asciiFormatter */
         INLINE_ASCII  = 0,

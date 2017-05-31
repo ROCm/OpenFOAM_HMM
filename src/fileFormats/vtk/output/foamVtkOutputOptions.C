@@ -35,20 +35,40 @@ Foam::foamVtkOutput::outputOptions::ascii(bool on)
     {
         switch (fmtType_)
         {
-            case INLINE_BASE64: fmtType_ = INLINE_ASCII;   break;
-            case APPEND_BINARY: fmtType_ = APPEND_BASE64;  break;
-            case LEGACY_BINARY: fmtType_ = LEGACY_ASCII;   break;
-            default: break; // no change
+            case formatType::INLINE_BASE64:
+                fmtType_ = formatType::INLINE_ASCII;
+                break;
+
+            case formatType::APPEND_BINARY:
+                fmtType_ = formatType::APPEND_BASE64;
+                break;
+
+            case formatType::LEGACY_BINARY:
+                fmtType_ = formatType::LEGACY_ASCII;
+                break;
+
+            default:  // No change
+                break;
         }
     }
     else
     {
         switch (fmtType_)
         {
-            case INLINE_ASCII:  fmtType_ = INLINE_BASE64;  break;
-            case APPEND_BASE64: fmtType_ = APPEND_BINARY;  break;
-            case LEGACY_ASCII:  fmtType_ = LEGACY_BINARY;  break;
-            default: break; // no change
+            case formatType::INLINE_ASCII:
+                fmtType_ = formatType::INLINE_BASE64;
+                break;
+
+            case formatType::APPEND_BASE64:
+                fmtType_ = formatType::APPEND_BINARY;
+                break;
+
+            case formatType::LEGACY_ASCII:
+                fmtType_ = formatType::LEGACY_BINARY;
+                break;
+
+            default:  // No change
+                break;
         }
     }
 
@@ -63,20 +83,34 @@ Foam::foamVtkOutput::outputOptions::append(bool on)
     {
         switch (fmtType_)
         {
-            case INLINE_ASCII:  fmtType_ = APPEND_BASE64;  break;
-            case LEGACY_ASCII:  fmtType_ = APPEND_BASE64;  break;
-            case INLINE_BASE64: fmtType_ = APPEND_BINARY;  break;
-            case LEGACY_BINARY: fmtType_ = APPEND_BINARY;  break;
-            default: break; // no change
+            case formatType::INLINE_ASCII:
+            case formatType::LEGACY_ASCII:
+                fmtType_ = formatType::APPEND_BASE64;
+                break;
+
+            case formatType::INLINE_BASE64:
+            case formatType::LEGACY_BINARY:
+                fmtType_ = formatType::APPEND_BINARY;
+                break;
+
+            default:  // No change
+                break;
         }
     }
     else
     {
         switch (fmtType_)
         {
-            case APPEND_BASE64: fmtType_ = INLINE_ASCII;   break;
-            case APPEND_BINARY: fmtType_ = INLINE_BASE64;  break;
-            default: break; // no change
+            case formatType::APPEND_BASE64:
+                fmtType_ = formatType::INLINE_ASCII;
+                break;
+
+            case formatType::APPEND_BINARY:
+                fmtType_ = formatType::INLINE_BASE64;
+                break;
+
+            default:  // No change
+                break;
         }
     }
 
@@ -91,23 +125,45 @@ Foam::foamVtkOutput::outputOptions::legacy(bool on)
     {
         switch (fmtType_)
         {
-            case INLINE_ASCII:  fmtType_ = LEGACY_ASCII;   break;
-            case INLINE_BASE64: fmtType_ = LEGACY_BINARY;  break;
-            case APPEND_BASE64: fmtType_ = LEGACY_ASCII;   break;
-            case APPEND_BINARY: fmtType_ = LEGACY_BINARY;  break;
-            default: break; // no change
+            case formatType::INLINE_ASCII:
+            case formatType::APPEND_BASE64:
+                fmtType_ = formatType::LEGACY_ASCII;
+                break;
+
+            case formatType::INLINE_BASE64:
+            case formatType::APPEND_BINARY:
+                fmtType_ = formatType::LEGACY_BINARY;
+                break;
+
+            default:  // no change
+                break;
         }
     }
     else
     {
         switch (fmtType_)
         {
-            case LEGACY_ASCII:  fmtType_ = INLINE_ASCII;   break;
-            case LEGACY_BINARY: fmtType_ = INLINE_BASE64;  break;
-            default: break; // no change
+            case formatType::LEGACY_ASCII:
+                fmtType_ = formatType::INLINE_ASCII;
+                break;
+
+            case formatType::LEGACY_BINARY:
+                fmtType_ = formatType::INLINE_BASE64;
+                break;
+
+            default:  // no change
+                break;
         }
     }
 
+    return *this;
+}
+
+
+Foam::foamVtkOutput::outputOptions&
+Foam::foamVtkOutput::outputOptions::precision(unsigned prec)
+{
+    precision_ = prec;
     return *this;
 }
 
@@ -116,12 +172,12 @@ Foam::string Foam::foamVtkOutput::outputOptions::description() const
 {
     switch (fmtType_)
     {
-        case INLINE_ASCII:  return "xml ascii";
-        case INLINE_BASE64: return "xml base64";
-        case APPEND_BASE64: return "xml-append base64";
-        case APPEND_BINARY: return "xml-append binary";
-        case LEGACY_ASCII:  return "legacy ascii";
-        case LEGACY_BINARY: return "legacy binary";
+        case formatType::INLINE_ASCII:  return "xml ascii";
+        case formatType::INLINE_BASE64: return "xml base64";
+        case formatType::APPEND_BASE64: return "xml-append base64";
+        case formatType::APPEND_BINARY: return "xml-append binary";
+        case formatType::LEGACY_ASCII:  return "legacy ascii";
+        case formatType::LEGACY_BINARY: return "legacy binary";
     }
 
     return "";

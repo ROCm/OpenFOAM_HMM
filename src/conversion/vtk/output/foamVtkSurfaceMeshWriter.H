@@ -41,7 +41,7 @@ SourceFiles
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "indirectPrimitivePatch.H"
-#include "foamVtkOutput.H"
+#include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,11 +72,15 @@ public:
         //- Construct from components
         surfaceMeshWriter
         (
-            const bool binary,
             const indirectPrimitivePatch& pp,
             const word& name,
-            const fileName&
+            const fileName& baseName,
+            const foamVtkOutput::outputOptions outOpts
         );
+
+
+    //- Destructor
+    ~surfaceMeshWriter();
 
 
     // Member Functions

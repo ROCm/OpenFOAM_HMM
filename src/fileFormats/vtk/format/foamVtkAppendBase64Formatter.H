@@ -56,15 +56,16 @@ class appendBase64Formatter
     // Private Data Members
 
         static const char* name_;
+        static const outputOptions opts_;
 
 
     // Private Member Functions
 
-    //- Disallow default bitwise copy construct
-    appendBase64Formatter(const appendBase64Formatter&) = delete;
+        //- Disallow default bitwise copy construct
+        appendBase64Formatter(const appendBase64Formatter&) = delete;
 
-    //- Disallow default bitwise assignment
-    void operator=(const appendBase64Formatter&) = delete;
+        //- Disallow default bitwise assignment
+        void operator=(const appendBase64Formatter&) = delete;
 
 
 public:
@@ -81,11 +82,8 @@ public:
 
     // Member Functions
 
-        //- The output formatType is APPEND_BASE64.
-        virtual enum formatType format() const
-        {
-            return formatType::APPEND_BASE64;
-        }
+        //- The output is APPEND_BASE64.
+        virtual const outputOptions& opts() const;
 
         //- Output name for XML type ("append")
         virtual const char* name() const;

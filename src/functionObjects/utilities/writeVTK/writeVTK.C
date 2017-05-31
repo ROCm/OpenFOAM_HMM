@@ -106,12 +106,11 @@ bool Foam::functionObjects::writeVTK::write()
     }
 
     // Create file and write header
-    fileName outputName
+    const fileName outputName
     (
         fvPath/vtkName
       + "_"
       + timeDesc
-      + ".vtk"
     );
 
     Info<< "    Internal  : " << outputName << endl;
@@ -127,9 +126,9 @@ bool Foam::functionObjects::writeVTK::write()
     foamVtkOutput::internalWriter writer
     (
         mesh_,
-        foamVtkOutput::LEGACY_ASCII,
         foamVtkMeshCells,
-        outputName
+        outputName,
+        foamVtkOutput::formatType::LEGACY_ASCII
     );
 
 

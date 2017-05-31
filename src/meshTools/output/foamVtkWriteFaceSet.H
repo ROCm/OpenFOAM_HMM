@@ -36,6 +36,8 @@ SourceFiles
 #ifndef foamVtkWriteFaceSet_H
 #define foamVtkWriteFaceSet_H
 
+#include "foamVtkOutputOptions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -51,10 +53,10 @@ namespace foamVtkOutput
 //  Only one data which is original pointID.
 void writeFaceSet
 (
-    const bool binary,
     const primitiveMesh& mesh,
     const faceSet& set,
-    const fileName& fileName
+    const fileName& baseName,
+    const foamVtkOutput::outputOptions outOpts
 );
 
 

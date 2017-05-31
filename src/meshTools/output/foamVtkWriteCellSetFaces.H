@@ -39,6 +39,7 @@ SourceFiles
 
 #include "primitiveMesh.H"
 #include "uindirectPrimitivePatch.H"
+#include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,10 +56,10 @@ namespace foamVtkOutput
 //  The data are the original cell ids
 void writeCellSetFaces
 (
-    const bool binary,
     const primitiveMesh& mesh,
     const cellSet& set,
-    const fileName& fileName
+    const fileName& baseName,
+    const foamVtkOutput::outputOptions outOpts
 );
 
 } // End namespace foamVtkOutput

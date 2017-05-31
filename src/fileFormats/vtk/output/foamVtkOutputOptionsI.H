@@ -23,12 +23,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "foamVtkOutput.H"
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::foamVtkOutput::outputOptions::outputOptions()
 :
-    fmtType_(INLINE_ASCII),
+    fmtType_(formatType::INLINE_ASCII),
     precision_(IOstream::defaultPrecision())
 {}
 
@@ -55,7 +57,7 @@ Foam::foamVtkOutput::outputOptions::newFormatter(std::ostream& os) const
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 inline Foam::foamVtkOutput::formatType
-Foam::foamVtkOutput::outputOptions::format() const
+Foam::foamVtkOutput::outputOptions::fmt() const
 {
     return fmtType_;
 }
@@ -63,7 +65,11 @@ Foam::foamVtkOutput::outputOptions::format() const
 
 inline bool Foam::foamVtkOutput::outputOptions::legacy() const
 {
-    return (fmtType_ & formatType::LEGACY_ASCII & formatType::LEGACY_BINARY);
+    return
+    (
+        fmtType_ == formatType::LEGACY_ASCII
+     || fmtType_ == formatType::LEGACY_BINARY
+    );
 }
 
 
@@ -75,7 +81,11 @@ inline bool Foam::foamVtkOutput::outputOptions::xml() const
 
 inline bool Foam::foamVtkOutput::outputOptions::append() const
 {
-    return (fmtType_ & formatType::APPEND_BASE64 & formatType::APPEND_BINARY);
+    return
+    (
+        fmtType_ == formatType::APPEND_BASE64
+     || fmtType_ == formatType::APPEND_BINARY
+    );
 }
 
 
@@ -87,15 +97,13 @@ inline bool Foam::foamVtkOutput::outputOptions::insitu() const
 
 inline bool Foam::foamVtkOutput::outputOptions::ascii() const
 {
-    return !(fmtType_ & 0xF);
+    return !(unsigned(fmtType_) & 0x0F);
 }
 
 
-inline const Foam::foamVtkOutput::outputOptions&
-Foam::foamVtkOutput::outputOptions::precision(unsigned prec) const
+inline unsigned Foam::foamVtkOutput::outputOptions::precision() const
 {
-    precision_ = prec;
-    return *this;
+    return precision_;
 }
 
 

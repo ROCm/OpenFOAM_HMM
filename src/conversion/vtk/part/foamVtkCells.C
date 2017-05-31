@@ -23,8 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkCells.H"
 #include "polyMesh.H"
+#include "foamVtkCells.H"
+#include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -54,6 +55,33 @@ Foam::foamVtkCells::foamVtkCells
 )
 :
     foamVtkCells(output, decompose)
+{
+    reset(mesh);
+}
+
+
+Foam::foamVtkCells::foamVtkCells
+(
+    const foamVtkOutput::outputOptions outOpts,
+    const bool decompose
+)
+:
+    foamVtkCells
+    (
+        (outOpts.legacy() ? contentType::LEGACY : contentType::XML),
+        decompose
+    )
+{}
+
+
+Foam::foamVtkCells::foamVtkCells
+(
+    const polyMesh& mesh,
+    const foamVtkOutput::outputOptions outOpts,
+    const bool decompose
+)
+:
+    foamVtkCells(outOpts, decompose)
 {
     reset(mesh);
 }

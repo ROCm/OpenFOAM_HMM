@@ -56,6 +56,8 @@ class appendRawFormatter
 
         static const char* name_;
         static const char* encoding_;
+        static const outputOptions opts_;
+
 
     // Private Member Functions
 
@@ -88,11 +90,8 @@ public:
 
     // Member Functions
 
-        //- The output formatType is APPEND_BINARY.
-        virtual enum formatType format() const
-        {
-            return formatType::APPEND_BINARY;
-        }
+        //- The output is APPEND_BINARY.
+        virtual const outputOptions& opts() const;
 
         //- Output name for XML type ("append")
         virtual const char* name() const;

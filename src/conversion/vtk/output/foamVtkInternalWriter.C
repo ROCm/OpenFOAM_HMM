@@ -30,21 +30,27 @@ License
 Foam::foamVtkOutput::internalWriter::internalWriter
 (
     const fvMesh& mesh,
-    enum foamVtkOutput::formatType fmtType,
     const foamVtkCells& cells,
-    const fileName& outputName
+    const fileName& baseName,
+    const foamVtkOutput::outputOptions outOpts
 )
 :
     mesh_(mesh),
     format_(),
     vtkCells_(cells),
-    os_(outputName.c_str())
+    os_()
 {
-    format_ = foamVtkOutput::newFormatter(os_, fmtType);
+    outputOptions opts(outOpts);
+    opts.legacy(true);  // Legacy only, no append
 
-    // Write header
-    foamVtkOutput::legacy::fileHeader(format(), mesh.time().caseName())
-        << "DATASET UNSTRUCTURED_GRID" << nl;
+    os_.open((baseName + (opts.legacy() ? ".vtk" : ".vtu")).c_str());
+    format_ = opts.newFormatter(os_);
+
+    if (opts.legacy())
+    {
+        foamVtkOutput::legacy::fileHeader(format(), mesh.time().caseName())
+            << "DATASET UNSTRUCTURED_GRID" << nl;
+    }
 
     //------------------------------------------------------------------
     //
@@ -82,6 +88,12 @@ Foam::foamVtkOutput::internalWriter::internalWriter
     }
     format().flush();
 }
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::foamVtkOutput::internalWriter::~internalWriter()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

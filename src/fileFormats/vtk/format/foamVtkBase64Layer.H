@@ -64,6 +64,7 @@ class foamVtkBase64Layer
         //- Disallow default bitwise assignment
         void operator=(const foamVtkBase64Layer&) = delete;
 
+
 protected:
 
     // Protected Member Functions

@@ -24,10 +24,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "foamVtkAppendBase64Formatter.H"
+#include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* Foam::foamVtkOutput::appendBase64Formatter::name_ = "append";
+
+const Foam::foamVtkOutput::outputOptions
+Foam::foamVtkOutput::appendBase64Formatter::opts_(formatType::APPEND_BASE64);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -50,6 +54,13 @@ Foam::foamVtkOutput::appendBase64Formatter::~appendBase64Formatter()
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+const Foam::foamVtkOutput::outputOptions&
+Foam::foamVtkOutput::appendBase64Formatter::opts() const
+{
+    return opts_;
+}
+
 
 const char* Foam::foamVtkOutput::appendBase64Formatter::name() const
 {

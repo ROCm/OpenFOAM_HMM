@@ -42,6 +42,7 @@ SourceFiles
 
 #include "foamVtkCells.H"
 #include "foamVtkOutputFields.H"
+#include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -78,10 +79,14 @@ public:
         internalWriter
         (
             const fvMesh& mesh,
-            enum foamVtkOutput::formatType fmtType,
             const foamVtkCells& cells,
-            const fileName& outputName
+            const fileName& baseName,
+            const foamVtkOutput::outputOptions outOpts
         );
+
+
+    //- Destructor
+    ~internalWriter();
 
 
     // Member Functions
