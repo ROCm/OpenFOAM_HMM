@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::primaryRadiation
+    Foam::regionModels::surfaceFilmModels::primaryRadiation
 
 Description
     Radiation model whereby the radiative heat flux is mapped from the primary

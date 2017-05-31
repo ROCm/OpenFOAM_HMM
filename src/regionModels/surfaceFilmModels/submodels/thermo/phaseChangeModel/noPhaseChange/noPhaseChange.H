@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::noPhaseChange
+    Foam::regionModels::surfaceFilmModels::noPhaseChange
 
 Description
     Dummy phase change model for 'none'

@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::filmThermoModel
+    Foam::regionModels::surfaceFilmModels::filmThermoModel
 
 Description
     Base class for film thermo models

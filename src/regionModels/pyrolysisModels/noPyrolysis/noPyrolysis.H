@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::noPyrolysis
+    Foam::regionModels::pyrolysisModels::noPyrolysis
 
 Description
     Dummy surface pyrolysis model for 'none'

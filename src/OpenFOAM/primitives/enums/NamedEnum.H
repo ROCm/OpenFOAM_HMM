@@ -118,6 +118,9 @@ public:
       // Query
 
         //- Test if there is an enumeration corresponding to the given name.
+        inline bool found(const word& enumName) const;
+
+        //- Test if there is an enumeration corresponding to the given name.
         inline bool hasEnum(const word& enumName) const;
 
         //- Test if there is a name corresponding to the given enumeration.

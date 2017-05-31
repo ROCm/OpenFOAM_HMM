@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::kinematicSingleLayer
+    Foam::regionModels::surfaceFilmModels::kinematicSingleLayer
 
 Description
     Kinematic form of single-cell layer surface film model

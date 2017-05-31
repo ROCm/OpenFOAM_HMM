@@ -47,6 +47,16 @@ inline Foam::wordList Foam::NamedEnum<EnumType, nEnum>::sortedToc() const
 
 
 template<class EnumType, int nEnum>
+inline bool Foam::NamedEnum<EnumType, nEnum>::found
+(
+    const word& enumName
+) const
+{
+    return lookup_.found(enumName);
+}
+
+
+template<class EnumType, int nEnum>
 inline bool Foam::NamedEnum<EnumType, nEnum>::hasEnum
 (
     const word& enumName

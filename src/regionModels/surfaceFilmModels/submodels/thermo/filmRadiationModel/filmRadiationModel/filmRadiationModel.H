@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::filmRadiationModel
+    Foam::regionModels::surfaceFilmModels::filmRadiationModel
 
 Description
     Base class for film radiation models

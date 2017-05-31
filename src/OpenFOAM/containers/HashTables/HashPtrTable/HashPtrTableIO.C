@@ -54,7 +54,7 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
 
         if (s)
         {
-            if (2*s > this->tableSize_)
+            if (2*s > this->capacity())
             {
                 this->resize(2*s);
             }

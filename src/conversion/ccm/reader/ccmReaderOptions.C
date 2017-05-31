@@ -34,7 +34,6 @@ Foam::ccm::reader::options::options()
     keepSolid_(true),
     mergeInterfaces_(false),
     renameInterfaces_(true),
-    combineBoundaries_(false),
     removeBaffles_(false),
     useNumberedNames_(false),
     mergeTol_(0.05e-3),
@@ -77,12 +76,6 @@ bool Foam::ccm::reader::options::mergeInterfaces() const
 bool Foam::ccm::reader::options::renameInterfaces() const
 {
     return renameInterfaces_;
-}
-
-
-bool Foam::ccm::reader::options::combineBoundaries() const
-{
-    return combineBoundaries_;
 }
 
 
@@ -138,12 +131,6 @@ void Foam::ccm::reader::options::mergeInterfaces(bool b)
 void Foam::ccm::reader::options::renameInterfaces(bool b)
 {
     renameInterfaces_ = b;
-}
-
-
-void Foam::ccm::reader::options::combineBoundaries(bool b)
-{
-    combineBoundaries_ = b;
 }
 
 
