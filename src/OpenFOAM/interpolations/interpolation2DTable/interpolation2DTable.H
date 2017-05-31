@@ -66,7 +66,7 @@ public:
             CLAMP           //!< Clamp value to the start/end value
         };
 
-        //- Cconvenience typedef
+        //- Convenience typedef
         typedef List<Tuple2<scalar, List<Tuple2<scalar, Type>>>> table;
 
 
@@ -156,7 +156,7 @@ public:
         const List<Tuple2<scalar, Type>>& operator[](const label) const;
 
         //- Return an interpolated value
-        Type operator()(const scalar, const scalar) const;
+        Type operator()(const scalar valueX, const scalar valueY) const;
 };
 
 

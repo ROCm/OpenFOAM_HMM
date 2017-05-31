@@ -35,36 +35,25 @@ if (timeDirs.size() && !noLagrangian)
                 cloudPrefix/cloudName
             );
 
-            // clouds always require "positions"
+            // Clouds always have "positions"
             if (cloudObjs.found("positions"))
             {
-                HashTable<HashTable<word>>::iterator cloudIter =
-                    cloudFields.find(cloudName);
+                // Save the cloud fields on a per cloud basis
+                auto fieldsPerCloud = cloudFields(cloudName);
 
-                if (cloudIter == cloudFields.end())
+                forAllConstIters(cloudObjs, fieldIter)
                 {
-                    // A newly discovered cloud
-                    cloudFields.insert(cloudName, HashTable<word>());
-                    cloudIter = cloudFields.find(cloudName);
-                }
+                    const IOobject* obj = fieldIter();
 
-                forAllConstIter(IOobjectList, cloudObjs, fieldIter)
-                {
-                    const IOobject& obj = *fieldIter();
-
-                    // Add field and field type
-                    cloudIter().insert
-                    (
-                        obj.name(),
-                        obj.headerClassName()
-                    );
+                    // Field name/type
+                    fieldsPerCloud.insert(obj->name(), obj->headerClassName());
                 }
             }
         }
     }
 
-    // prune out "positions" again since it gets treated specially
-    forAllIter(HashTable<HashTable<word>>, cloudFields, cloudIter)
+    // Prune out "positions" again since it gets treated specially
+    forAllIters(cloudFields, cloudIter)
     {
         cloudIter().erase("positions");
     }
@@ -76,18 +65,13 @@ if (timeDirs.size() && !noLagrangian)
 }
 
 
-// sorted list of cloud names
+// Sorted list of cloud names
 const wordList cloudNames(cloudFields.sortedToc());
 
 if (cloudNames.size())
 {
-    // complete the echo information
-    Info<< "(";
-    forAll(cloudNames, cloudNo)
-    {
-        Info<< ' ' << cloudNames[cloudNo];
-    }
-    Info<< " ) " << endl;
+    // Complete the echo information - as flatOutput
+    cloudNames.writeList(Info) << endl;
 }
 
 // ************************************************************************* //

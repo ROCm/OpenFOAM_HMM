@@ -63,7 +63,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const curve& c)
         << c.style_ << nl
         << static_cast<const scalarField&>(c);
 
-    os.check("Ostream& operator>>(Ostream&, const curve&)");
+    os.check(FUNCTION_NAME);
 
     return os;
 }

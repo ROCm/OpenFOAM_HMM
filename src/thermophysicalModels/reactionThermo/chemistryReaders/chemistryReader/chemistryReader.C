@@ -47,7 +47,7 @@ Foam::chemistryReader<ThermoType>::New
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(chemistryReaderTypeName);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown chemistryReader type "

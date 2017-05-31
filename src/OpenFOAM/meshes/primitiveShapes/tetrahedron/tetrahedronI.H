@@ -967,7 +967,7 @@ inline Foam::Istream& Foam::operator>>
     is  >> t.a_ >> t.b_ >> t.c_ >> t.d_;
     is.readEnd("tetrahedron");
 
-    is.check("Istream& operator>>(Istream&, tetrahedron&)");
+    is.check(FUNCTION_NAME);
 
     return is;
 }

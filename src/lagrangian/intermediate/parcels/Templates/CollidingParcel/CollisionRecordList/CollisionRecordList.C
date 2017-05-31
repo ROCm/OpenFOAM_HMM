@@ -42,12 +42,7 @@ Foam::CollisionRecordList<PairType, WallType>::CollisionRecordList(Istream& is)
     pairRecords_(is),
     wallRecords_(is)
 {
-    // Check state of Istream
-    is.check
-    (
-        "Foam::CollisionRecordList<PairType, WallType>::"
-        "CollisionRecordList(Foam::Istream&)"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -448,13 +443,7 @@ Foam::Istream& Foam::operator>>
 {
     is  >> cRL.pairRecords_ >> cRL.wallRecords_;
 
-    // Check state of Istream
-    is.check
-    (
-        "Foam::Istream& Foam::operator>>"
-        "(Foam::Istream&, Foam::CollisionRecordList<PairType, WallType>&)"
-    );
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -468,13 +457,7 @@ Foam::Ostream& Foam::operator<<
 {
     os  << cRL.pairRecords_ << cRL.wallRecords_;
 
-    // Check state of Ostream
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
-        "const Foam::CollisionRecordList<PairType, WallType>&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

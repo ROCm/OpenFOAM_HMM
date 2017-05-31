@@ -84,11 +84,7 @@ bool Foam::functionEntry::execute
     Istream& is
 )
 {
-    is.fatalCheck
-    (
-        "functionEntry::execute"
-        "(const word& functionName, dictionary& parentDict, Istream&)"
-    );
+    is.fatalCheck(FUNCTION_NAME);
 
     if (!executedictionaryIstreamMemberFunctionTablePtr_)
     {
@@ -104,7 +100,7 @@ bool Foam::functionEntry::execute
     executedictionaryIstreamMemberFunctionTable::iterator mfIter =
         executedictionaryIstreamMemberFunctionTablePtr_->find(functionName);
 
-    if (mfIter == executedictionaryIstreamMemberFunctionTablePtr_->end())
+    if (!mfIter.found())
     {
         FatalErrorInFunction
             << "Unknown functionEntry '" << functionName
@@ -127,11 +123,7 @@ bool Foam::functionEntry::execute
     Istream& is
 )
 {
-    is.fatalCheck
-    (
-        "functionEntry::execute"
-        "(const word&, const dictionary&, primitiveEntry&, Istream&)"
-    );
+    is.fatalCheck(FUNCTION_NAME);
 
     if (!executeprimitiveEntryIstreamMemberFunctionTablePtr_)
     {
@@ -147,7 +139,7 @@ bool Foam::functionEntry::execute
     executeprimitiveEntryIstreamMemberFunctionTable::iterator mfIter =
         executeprimitiveEntryIstreamMemberFunctionTablePtr_->find(functionName);
 
-    if (mfIter == executeprimitiveEntryIstreamMemberFunctionTablePtr_->end())
+    if (!mfIter.found())
     {
         FatalErrorInFunction
             << "Unknown functionEntry '" << functionName

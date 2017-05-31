@@ -25,21 +25,6 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline std::string::size_type Foam::fileName::find_ext() const
-{
-    const size_type i = find_last_of("./");
-
-    if (i == npos || i == 0 || operator[](i) == '/')
-    {
-        return npos;
-    }
-    else
-    {
-        return i;
-    }
-}
-
-
 inline void Foam::fileName::stripInvalid()
 {
     // skip stripping unless debug is active to avoid
@@ -127,6 +112,24 @@ inline bool Foam::fileName::valid(char c)
      && c != '"'   // string quote
      && c != '\''  // string quote
     );
+}
+
+
+inline bool Foam::fileName::isAbsolute() const
+{
+    return !empty() && operator[](0) == '/';
+}
+
+
+inline bool Foam::fileName::hasExt() const
+{
+    return string::hasExt();
+}
+
+
+inline bool Foam::fileName::removeExt()
+{
+    return string::removeExt();
 }
 
 

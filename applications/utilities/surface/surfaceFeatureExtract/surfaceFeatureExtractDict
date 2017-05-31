@@ -16,31 +16,42 @@ FoamFile
 
 surface1.stl
 {
-    // How to obtain raw features (extractFromFile || extractFromSurface)
+    // How to obtain raw features (none | extractFromFile | extractFromSurface)
     extractionMethod    extractFromSurface;
 
+    // Mark edges whose adjacent surface normals are at an angle less
+    // than includedAngle as features
+    // - 0  : selects no edges
+    // - 180: selects all edges
+    includedAngle       120;
+
+    // Do not mark region edges
+    geometricTestOnly   yes;
+
+    /* alternative specification as coeff dictionary
     extractFromSurfaceCoeffs
     {
-        // Mark edges whose adjacent surface normals are at an angle less
-        // than includedAngle as features
-        // - 0  : selects no edges
-        // - 180: selects all edges
         includedAngle   120;
 
-        // Do not mark region edges
-        geometricTestOnly       yes;
-    }
+        geometricTestOnly  yes;
+    } */
+
+    // Generate additional intersection features (none | self | region)
+    intersectionMethod  none;
+
+    // Tolerance for surface intersections
+    tolerance           1e-3;
 
     // Write options
 
         // Write features to obj format for postprocessing
-        writeObj                yes;
+        writeObj        yes;
 }
 
 
 surface2.nas
 {
-    // How to obtain raw features (extractFromFile || extractFromSurface)
+    // How to obtain raw features (none | extractFromFile | extractFromSurface)
     extractionMethod    extractFromFile;
 
     extractFromFileCoeffs
@@ -63,27 +74,27 @@ surface2.nas
         // Use a plane to select feature edges
         // (normal)(basePoint)
         // Keep only edges that intersect the plane will be included
-        plane               (1 0 0)(0 0 0);
+        plane           (1 0 0)(0 0 0);
 
         // Select feature edges using a box
         // (minPt)(maxPt)
         // Keep edges inside the box:
-        insideBox           (0 0 0)(1 1 1);
+        insideBox       (0 0 0)(1 1 1);
         // Keep edges outside the box:
-        outsideBox          (0 0 0)(1 1 1);
+        outsideBox      (0 0 0)(1 1 1);
 
         // Keep nonManifold edges (edges with >2 connected faces where
         // the faces form more than two different normal planes)
-        nonManifoldEdges    yes;
+        nonManifoldEdges yes;
 
         // Keep open edges (edges with 1 connected face)
-        openEdges           yes;
+        openEdges       yes;
     }
 
     addFeatures
     {
         // Add (without merging) another extendedFeatureEdgeMesh
-        name                axZ.extendedFeatureEdgeMesh;
+        name            axZ.extendedFeatureEdgeMesh;
 
         // Optionally flip features (invert all normals, making
         // convex<->concave etc)
@@ -91,27 +102,103 @@ surface2.nas
     }
 
     // Output the curvature of the surface
-    curvature               no;
+    curvature           no;
 
     // Output the proximity of feature points and edges to each other
-    featureProximity        no;
+    featureProximity    no;
 
     // The maximum search distance to use when looking for other feature
     // points and edges
-    maxFeatureProximity     1;
+    maxFeatureProximity 1;
 
     // Out put the closeness of surface elements to other surface elements.
-    closeness               no;
+    closeness           no;
+
+    // Generate additional intersection features (none | self | region)
+    intersectionMethod  none;
+
+    // Tolerance for surface intersections
+    tolerance           1e-3;
 
     // Write options
 
         // Write features to obj format for postprocessing
-        writeObj                yes;
+        writeObj        yes;
 
         // Write surface proximity and curvature fields to vtk format
         // for postprocessing
-        writeVTK                no;
+        writeVTK        no;
 }
 
+
+// Handle single or multiple surfaces
+//
+// - If the dictionary is named 'surfaces', it must also contain a 'surfaces'
+//   entry (wordRe list).
+//
+// - If other dictionaries contain a 'surfaces' entry,
+//   it will be taken for the input.
+//
+dummyName
+{
+    extractionMethod    extractFromSurface;
+
+    surfaces            (surface1.stl surface2.nas);
+
+    // Base output name (optional)
+    // output              surfaces;
+
+    // Generate additional intersection features (none | self | region)
+    intersectionMethod  self;
+
+    // Tolerance for surface intersections
+    tolerance           1e-3;
+
+    includedAngle       120;
+
+    // Do not mark region edges
+    geometricTestOnly   yes;
+
+    // Write options
+
+        // Write features to obj format for postprocessing
+        writeObj        yes;
+}
+
+
+// Handle single or multiple surfaces
+//
+// - If the dictionary is named 'surfaces', it must also contain a 'surfaces'
+//   entry (wordRe list).
+//
+// - If other dictionaries contain a 'surfaces' entry,
+//   it will be taken for the input.
+//
+surfaces
+{
+    extractionMethod    none;
+
+    surfaces            (surface1.stl surface2.nas);
+
+    // Base output name (optional)
+    // output              surfaces;
+
+    // Generate additional intersection features (none | self | region)
+    intersectionMethod  self;
+
+    // Tolerance for surface intersections
+    tolerance           1e-3;
+
+    /* alternative specification as coeff dictionary
+    noneCoeffs
+    {
+        includedAngle   0;
+    } */
+
+    // Write options
+
+    // Write features to obj format for postprocessing
+    writeObj        yes;
+}
 
 // ************************************************************************* //

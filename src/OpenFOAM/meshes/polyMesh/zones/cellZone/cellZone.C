@@ -173,7 +173,7 @@ void Foam::cellZone::operator=(const Xfer<labelList>& addr)
 Foam::Ostream& Foam::operator<<(Ostream& os, const cellZone& zn)
 {
     zn.write(os);
-    os.check("Ostream& operator<<(Ostream&, const cellZone&");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

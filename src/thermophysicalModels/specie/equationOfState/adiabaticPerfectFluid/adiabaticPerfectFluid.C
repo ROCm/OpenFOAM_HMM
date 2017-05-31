@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,22 +27,6 @@ License
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Specie>
-Foam::adiabaticPerfectFluid<Specie>::adiabaticPerfectFluid(Istream& is)
-:
-    Specie(is),
-    p0_(readScalar(is)),
-    rho0_(readScalar(is)),
-    gamma_(readScalar(is)),
-    B_(readScalar(is))
-{
-    is.check
-    (
-        "adiabaticPerfectFluid<Specie>::adiabaticPerfectFluid(Istream& is)"
-    );
-}
-
 
 template<class Specie>
 Foam::adiabaticPerfectFluid<Specie>::adiabaticPerfectFluid
@@ -84,17 +68,7 @@ Foam::Ostream& Foam::operator<<
     const adiabaticPerfectFluid<Specie>& pf
 )
 {
-    os  << static_cast<const Specie&>(pf)
-        << token::SPACE << pf.R_
-        << token::SPACE << pf.rho0_
-        << token::SPACE << pf.gamma_
-        << token::SPACE << pf.B_;
-
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, const adiabaticPerfectFluid<Specie>&)"
-    );
-
+    pf.write(os);
     return os;
 }
 

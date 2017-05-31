@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
         typename symMatrixConstructorTable::iterator constructorIter =
             symMatrixConstructorTablePtr_->find(solverName);
 
-        if (constructorIter == symMatrixConstructorTablePtr_->end())
+        if (!constructorIter.found())
         {
             FatalIOErrorInFunction(solverDict)
                 << "Unknown symmetric matrix solver " << solverName
@@ -81,7 +81,7 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
         typename asymMatrixConstructorTable::iterator constructorIter =
             asymMatrixConstructorTablePtr_->find(solverName);
 
-        if (constructorIter == asymMatrixConstructorTablePtr_->end())
+        if (!constructorIter.found())
         {
             FatalIOErrorInFunction(solverDict)
                 << "Unknown asymmetric matrix solver " << solverName
@@ -131,7 +131,7 @@ Foam::LduMatrix<Type, DType, LUType>::solver::solver
 
     controlDict_(solverDict),
 
-    maxIter_(1000),
+    maxIter_(defaultMaxIter_),
     minIter_(0),
     tolerance_(1e-6*pTraits<Type>::one),
     relTol_(Zero)

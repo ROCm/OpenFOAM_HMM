@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,21 +38,6 @@ inline Foam::JanevReactionRate::JanevReactionRate
     Ta_(Ta),
     b_(b)
 {}
-
-
-inline Foam::JanevReactionRate::JanevReactionRate
-(
-    const speciesTable&,
-    Istream& is
-)
-:
-    A_(readScalar(is.readBegin("JanevReactionRate(Istream&)"))),
-    beta_(readScalar(is)),
-    Ta_(readScalar(is)),
-    b_(is)
-{
-    is.readEnd("JanevReactionRate(Istream&)");
-}
 
 
 inline Foam::JanevReactionRate::JanevReactionRate
@@ -119,16 +104,7 @@ inline Foam::Ostream& Foam::operator<<
     const JanevReactionRate& jrr
 )
 {
-    os  << token::BEGIN_LIST
-        << jrr.A_ << token::SPACE << jrr.beta_ << token::SPACE << jrr.Ta_;
-
-    for (int n=0; n<JanevReactionRate::nb_; n++)
-    {
-        os  << token::SPACE << jrr.b_[n];
-    }
-
-    os << token::END_LIST;
-
+    jrr.write(os);
     return os;
 }
 

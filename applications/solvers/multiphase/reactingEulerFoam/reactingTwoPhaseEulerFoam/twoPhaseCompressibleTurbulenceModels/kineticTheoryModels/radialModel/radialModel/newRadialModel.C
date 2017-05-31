@@ -41,7 +41,7 @@ Foam::kineticTheoryModels::radialModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(radialModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalError
             << "radialModel::New(const dictionary&) : " << endl

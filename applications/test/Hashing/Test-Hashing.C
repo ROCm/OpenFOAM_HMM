@@ -42,13 +42,44 @@ Description
 
 using namespace Foam;
 
+void infoHashString
+(
+    unsigned modulus,
+    std::initializer_list<std::string> lst
+)
+{
+    if (modulus)
+    {
+        Info<< "basic string hashing (mod " << label(modulus) << ")" << endl;
+
+        for (const auto& str : lst)
+        {
+            Info<<"hash(" << str.c_str() << ")="
+                << (Hash<string>()(str) % modulus) << nl;
+        }
+
+    }
+    else
+    {
+        Info<< "basic string hashing" << nl;
+
+        for (const auto& str : lst)
+        {
+            Info<<"hash(" << str.c_str() << ")="
+                << Hash<string>()(str) << nl;
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
 int main(int argc, char *argv[])
 {
-    IFstream is("hashingTests");
+    infoHashString(8, {"asdathis1", "adsxf", "hij", "klmpq"});
 
+    IFstream is("hashingTests");
 
     while (is.good())
     {

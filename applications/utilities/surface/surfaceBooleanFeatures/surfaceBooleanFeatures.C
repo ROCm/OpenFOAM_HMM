@@ -83,7 +83,7 @@ Description
 #include "edgeIntersections.H"
 #include "meshTools.H"
 #include "DynamicField.H"
-
+#include "Enum.H"
 
 #ifndef NO_CGAL
 
@@ -99,7 +99,7 @@ typedef CGAL::AABB_face_graph_triangle_primitive
 typedef CGAL::AABB_traits<K, Primitive> Traits;
 typedef CGAL::AABB_tree<Traits> Tree;
 
-typedef boost::optional<Tree::Intersection_and_primitive_id<Segment>::Type >
+typedef boost::optional<Tree::Intersection_and_primitive_id<Segment>::Type>
 Segment_intersection;
 
 #endif // NO_CGAL
@@ -476,7 +476,6 @@ label dupNonManifoldPoints(triSurface& s, labelList& pointMap)
     DynamicList<label> newPointMap(identity(newPoints.size()));
     List<labelledTri> newFaces(s);
     label nNonManifold = 0;
-
 
     forAll(pf, pointI)
     {
@@ -1257,10 +1256,10 @@ autoPtr<extendedFeatureEdgeMesh> createEdgeMesh
     const triSurface& s1 = surf1;
     const triSurface& s2 = surf2;
 
-    forAllConstIter(labelPairLookup, inter.facePairToEdge(), iter)
+    forAllConstIters(inter.facePairToEdgeId(), iter)
     {
-        const label& cutEdgeI = iter();
         const labelPair& facePair = iter.key();
+        const label cutEdgeI = iter.object();
 
         const edge& fE = inter.cutEdges()[cutEdgeI];
 
@@ -1515,8 +1514,8 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("action");
-    argList::validArgs.append("surface file");
-    argList::validArgs.append("surface file");
+    argList::validArgs.append("surfaceFile1");
+    argList::validArgs.append("surfaceFile2");
 
     argList::addBoolOption
     (
@@ -1554,24 +1553,30 @@ int main(int argc, char *argv[])
         " 'mixed' (keep all)"
     );
 
+    argList::addNote
+    (
+        "Valid actions: \"intersection\", \"union\", \"difference\""
+    );
+
 
     #include "setRootCase.H"
     #include "createTime.H"
 
     const word action(args[1]);
 
-    const HashTable<booleanSurface::booleanOpType> validActions
+    const Enum<booleanSurface::booleanOpType> validActions
     {
-        {"intersection", booleanSurface::INTERSECTION},
-        {"union", booleanSurface::UNION},
-        {"difference", booleanSurface::DIFFERENCE}
+        { booleanSurface::INTERSECTION, "intersection" },
+        { booleanSurface::UNION, "union" },
+        { booleanSurface::DIFFERENCE, "difference" }
     };
 
-    if (!validActions.found(action))
+    if (!validActions.hasEnum(action))
     {
         FatalErrorInFunction
             << "Unsupported action " << action << endl
-            << "Supported actions:" << validActions.toc() << abort(FatalError);
+            << "Supported actions:" << validActions << nl
+            << abort(FatalError);
     }
 
 

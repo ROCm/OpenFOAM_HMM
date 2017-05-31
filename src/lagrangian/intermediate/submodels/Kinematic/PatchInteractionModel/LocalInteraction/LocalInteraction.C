@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -190,6 +190,10 @@ bool Foam::LocalInteraction<CloudType>::correct
 
         switch (it)
         {
+            case PatchInteractionModel<CloudType>::itNone:
+            {
+                return false;
+            }
             case PatchInteractionModel<CloudType>::itEscape:
             {
                 scalar dm = p.mass()*p.nParticle();

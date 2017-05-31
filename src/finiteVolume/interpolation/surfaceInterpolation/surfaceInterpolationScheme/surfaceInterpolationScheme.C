@@ -61,7 +61,7 @@ Foam::surfaceInterpolationScheme<Type>::New
     typename MeshConstructorTable::iterator constructorIter =
         MeshConstructorTablePtr_->find(schemeName);
 
-    if (constructorIter == MeshConstructorTablePtr_->end())
+    if (!constructorIter.found())
     {
         FatalIOErrorInFunction
         (
@@ -109,7 +109,7 @@ Foam::surfaceInterpolationScheme<Type>::New
     typename MeshFluxConstructorTable::iterator constructorIter =
         MeshFluxConstructorTablePtr_->find(schemeName);
 
-    if (constructorIter == MeshFluxConstructorTablePtr_->end())
+    if (!constructorIter.found())
     {
         FatalIOErrorInFunction
         (
@@ -311,6 +311,8 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
 
     tlambdas.clear();
 
+//    tsf.ref().oriented() = Sf.oriented();
+
     return tsf;
 }
 
@@ -363,6 +365,8 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
         >
     > tsf = dotInterpolate(Sf, vf, weights(vf));
 
+    tsf.ref().oriented() = Sf.oriented();
+
     if (corrected())
     {
         tsf.ref() += Sf & correction(vf);
@@ -397,6 +401,7 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
             surfaceMesh
         >
     > tSfDotinterpVf = dotInterpolate(Sf, tvf());
+
     tvf.clear();
     return tSfDotinterpVf;
 }

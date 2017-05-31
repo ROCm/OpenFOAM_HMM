@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,21 +31,6 @@ License
 template<class Thermo, int PolySize>
 Foam::logPolynomialTransport<Thermo, PolySize>::logPolynomialTransport
 (
-    Istream& is
-)
-:
-    Thermo(is),
-    muCoeffs_("muLogCoeffs<" + Foam::name(PolySize) + '>', is),
-    kappaCoeffs_("kappaLogCoeffs<" + Foam::name(PolySize) + '>', is)
-{
-    muCoeffs_ *= this->W();
-    kappaCoeffs_ *= this->W();
-}
-
-
-template<class Thermo, int PolySize>
-Foam::logPolynomialTransport<Thermo, PolySize>::logPolynomialTransport
-(
     const dictionary& dict
 )
 :
@@ -64,10 +49,7 @@ Foam::logPolynomialTransport<Thermo, PolySize>::logPolynomialTransport
             "kappaLogCoeffs<" + Foam::name(PolySize) + '>'
         )
     )
-{
-    muCoeffs_ *= this->W();
-    kappaCoeffs_ *= this->W();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -84,12 +66,12 @@ void Foam::logPolynomialTransport<Thermo, PolySize>::write(Ostream& os) const
     dict.add
     (
         word("muLogCoeffs<" + Foam::name(PolySize) + '>'),
-        muCoeffs_/this->W()
+        muCoeffs_
     );
     dict.add
     (
         word("kappaLogCoeffs<" + Foam::name(PolySize) + '>'),
-        kappaCoeffs_/this->W()
+        kappaCoeffs_
     );
     os  << indent << dict.dictName() << dict;
 
@@ -106,21 +88,7 @@ Foam::Ostream& Foam::operator<<
     const logPolynomialTransport<Thermo, PolySize>& pt
 )
 {
-    os  << static_cast<const Thermo&>(pt) << tab
-        << "muLogCoeffs<" << Foam::name(PolySize) << '>' << tab
-        << pt.muCoeffs_/pt.W() << tab
-        << "kappaLogCoeffs<" << Foam::name(PolySize) << '>' << tab
-        << pt.kappaCoeffs_/pt.W();
-
-    os.check
-    (
-        "Ostream& operator<<"
-        "("
-            "Ostream&, "
-            "const logPolynomialTransport<Thermo, PolySize>&"
-        ")"
-    );
-
+    pt.write(os);
     return os;
 }
 

@@ -87,7 +87,7 @@ Foam::autoPtr<Foam::blockFace> Foam::blockFace::New
     IstreamConstructorTable::iterator cstrIter =
         IstreamConstructorTablePtr_->find(faceType);
 
-    if (cstrIter == IstreamConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown blockFace type "

@@ -259,8 +259,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const boundBox& bb)
         );
     }
 
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const boundBox&)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 
@@ -280,8 +279,7 @@ Foam::Istream& Foam::operator>>(Istream& is, boundBox& bb)
         );
     }
 
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, boundBox&)");
+    is.check(FUNCTION_NAME);
     return is;
 }
 

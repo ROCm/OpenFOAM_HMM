@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,7 +92,7 @@ template<class Thermo>
 inline Foam::vector Foam::constAnIsoSolidTransport<Thermo>::
 alphah(const scalar p, const scalar T) const
 {
-    return kappa_/this->Cpv(p, T);
+    return kappa_/this->Cp(p, T);
 }
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
@@ -113,27 +113,12 @@ inline void Foam::constAnIsoSolidTransport<Thermo>::operator+=
     const constAnIsoSolidTransport<Thermo>& ct
 )
 {
-    scalar molr1 = this->nMoles();
+    scalar Y1 = this->Y();
 
-    molr1 /= this->nMoles();
-    scalar molr2 = ct.nMoles()/this->nMoles();
+    Y1 /= this->Y();
+    scalar Y2 = ct.Y()/this->Y();
 
-    kappa_ = molr1*kappa_ + molr2*ct.kappa_;
-}
-
-
-template<class Thermo>
-inline void Foam::constAnIsoSolidTransport<Thermo>::operator-=
-(
-    const constAnIsoSolidTransport<Thermo>& ct
-)
-{
-    scalar molr1 = this->nMoles();
-
-    molr1 /= this->nMoles();
-    scalar molr2 = ct.nMoles()/this->nMoles();
-
-    kappa_ = molr1*kappa_ - molr2*ct.kappa_;
+    kappa_ = Y1*kappa_ + Y2*ct.kappa_;
 }
 
 

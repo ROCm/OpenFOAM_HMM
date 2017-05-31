@@ -70,13 +70,7 @@ Foam::Istream& Foam::operator>>
         >> sDoFRBMS.pi_
         >> sDoFRBMS.tau_;
 
-    // Check state of Istream
-    is.check
-    (
-        "Foam::Istream& Foam::operator>>"
-        "(Foam::Istream&, Foam::sixDoFRigidBodyMotionState&)"
-    );
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -94,13 +88,7 @@ Foam::Ostream& Foam::operator<<
         << token::SPACE << sDoFRBMS.pi()
         << token::SPACE << sDoFRBMS.tau();
 
-    // Check state of Ostream
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
-        "const Foam::sixDoFRigidBodyMotionState&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

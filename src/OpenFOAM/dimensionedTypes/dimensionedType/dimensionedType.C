@@ -339,12 +339,7 @@ Foam::dimensioned<Type>::read(Istream& is, const dictionary& readSet)
     is >> value_;
     value_ *= mult;
 
-    // Check state of Istream
-    is.check
-    (
-        "Istream& dimensioned<Type>::read(Istream& is, const dictionary&)"
-    );
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -367,13 +362,7 @@ Foam::Istream& Foam::dimensioned<Type>::read
     is >> value_;
     value_ *= mult;
 
-    // Check state of Istream
-    is.check
-    (
-        "Istream& dimensioned<Type>::read"
-        "(Istream& is, const HashTable<dimensionedScalar>&)"
-    );
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -392,12 +381,7 @@ Foam::Istream& Foam::dimensioned<Type>::read(Istream& is)
     is >> value_;
     value_ *= mult;
 
-    // Check state of Istream
-    is.check
-    (
-        "Istream& dimensioned<Type>::read(Istream& is)"
-    );
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -612,9 +596,7 @@ Foam::Istream& Foam::operator>>(Istream& is, dimensioned<Type>& dt)
     is >> dt.value_;
     dt.value_ *= multiplier;
 
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, dimensioned<Type>&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -634,9 +616,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const dimensioned<Type>& dt)
     // Write the value
     os << dt.value()/mult;
 
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const dimensioned<Type>&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -322,7 +322,7 @@ void Foam::functionObjects::externalCoupled::readColumns
     // Get sizes for all processors
     const globalIndex globalFaces(nRows);
 
-    PstreamBuffers pBufs(Pstream::nonBlocking);
+    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
     if (Pstream::master())
     {
         string line;
@@ -391,7 +391,7 @@ void Foam::functionObjects::externalCoupled::readLines
     // Get sizes for all processors
     const globalIndex globalFaces(nRows);
 
-    PstreamBuffers pBufs(Pstream::nonBlocking);
+    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
     if (Pstream::master())
     {

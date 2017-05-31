@@ -27,6 +27,12 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+inline const Foam::primitiveMesh& Foam::edgeFaceCirculator::mesh() const
+{
+    return *meshPtr_;
+}
+
+
 void Foam::edgeFaceCirculator::setEnd()
 {
     faceLabel_ = -1;
@@ -42,7 +48,7 @@ void Foam::edgeFaceCirculator::setFace
 {
     faceLabel_ = facei;
 
-    if (!isBoundaryEdge_ && !mesh_.isInternalFace(facei))
+    if (!isBoundaryEdge_ && !mesh().isInternalFace(facei))
     {
         FatalErrorInFunction
             << "Edge is not defined as boundary edge but still walked to"
@@ -54,11 +60,11 @@ void Foam::edgeFaceCirculator::setFace
 
 void Foam::edgeFaceCirculator::otherFace(const label celli)
 {
-    const face& f = mesh_.faces()[faceLabel_];
+    const face& f = mesh().faces()[faceLabel_];
     label v0 = f[index_];
     label v1 = f.nextLabel(index_);
 
-    const cell& cFaces = mesh_.cells()[celli];
+    const cell& cFaces = mesh().cells()[celli];
 
     forAll(cFaces, i)
     {
@@ -66,7 +72,7 @@ void Foam::edgeFaceCirculator::otherFace(const label celli)
 
         if (faceB != faceLabel_)
         {
-            label fp = getMinIndex(mesh_.faces()[faceB], v0, v1);
+            label fp = getMinIndex(mesh().faces()[faceB], v0, v1);
 
             if (fp >= 0)
             {
@@ -81,14 +87,24 @@ void Foam::edgeFaceCirculator::otherFace(const label celli)
         << "Could not find next face stepping"
         << " through cell along edge." << endl
         << "face:" << faceLabel_ << " index in face:" << index_
-        << " edge:" << mesh_.points()[v0] << mesh_.points()[v1]
+        << " edge:" << mesh().points()[v0] << mesh().points()[v1]
         << abort(FatalError);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct from components
+Foam::edgeFaceCirculator::edgeFaceCirculator()
+:
+    meshPtr_(nullptr),
+    faceLabel_(-1),
+    ownerSide_(false),
+    index_(-1),
+    isBoundaryEdge_(false),
+    startFaceLabel_(0)
+{}
+
+
 Foam::edgeFaceCirculator::edgeFaceCirculator
 (
     const primitiveMesh& mesh,
@@ -98,7 +114,7 @@ Foam::edgeFaceCirculator::edgeFaceCirculator
     const bool isBoundaryEdge
 )
 :
-    mesh_(mesh),
+    meshPtr_(&mesh),
     faceLabel_(faceLabel),
     ownerSide_(ownerSide),
     index_(index),
@@ -107,10 +123,9 @@ Foam::edgeFaceCirculator::edgeFaceCirculator
 {}
 
 
-//- Construct copy
 Foam::edgeFaceCirculator::edgeFaceCirculator(const edgeFaceCirculator& circ)
 :
-    mesh_(circ.mesh_),
+    meshPtr_(circ.meshPtr_),
     faceLabel_(circ.faceLabel_),
     ownerSide_(circ.ownerSide_),
     index_(circ.index_),
@@ -158,6 +173,17 @@ Foam::label Foam::edgeFaceCirculator::faceLabel() const
 }
 
 
+bool Foam::edgeFaceCirculator::isInternalFace() const
+{
+    return
+    (
+        faceLabel_ >= 0
+     && meshPtr_
+     && meshPtr_->isInternalFace(faceLabel_)
+    );
+}
+
+
 bool Foam::edgeFaceCirculator::ownerSide() const
 {
     return ownerSide_;
@@ -174,11 +200,11 @@ Foam::label Foam::edgeFaceCirculator::cellLabel() const
 {
     if (ownerSide_)
     {
-        return mesh_.faceOwner()[faceLabel_];
+        return mesh().faceOwner()[faceLabel_];
     }
-    else if (mesh_.isInternalFace(faceLabel_))
+    else if (mesh().isInternalFace(faceLabel_))
     {
-        return mesh_.faceNeighbour()[faceLabel_];
+        return mesh().faceNeighbour()[faceLabel_];
     }
     else
     {
@@ -189,7 +215,7 @@ Foam::label Foam::edgeFaceCirculator::cellLabel() const
 
 bool Foam::edgeFaceCirculator::sameOrder(const label v0, const label v1) const
 {
-    const face& f = mesh_.faces()[faceLabel_];
+    const face& f = mesh().faces()[faceLabel_];
 
     label fp = getMinIndex(f, v0, v1);
 
@@ -216,21 +242,21 @@ void Foam::edgeFaceCirculator::setCanonical()
 
         while (true)
         {
-            if (mesh_.isInternalFace(faceLabel_))
+            if (mesh().isInternalFace(faceLabel_))
             {
                 if (ownerSide_)
                 {
-                    label celli = mesh_.faceNeighbour()[faceLabel_];
+                    label celli = mesh().faceNeighbour()[faceLabel_];
                     otherFace(celli);
                     // Maintain reverse direction of walking
-                    ownerSide_ = (mesh_.faceOwner()[faceLabel_] == celli);
+                    ownerSide_ = (mesh().faceOwner()[faceLabel_] == celli);
                 }
                 else
                 {
-                    label celli = mesh_.faceOwner()[faceLabel_];
+                    label celli = mesh().faceOwner()[faceLabel_];
                     otherFace(celli);
                     // Maintain reverse direction of walking
-                    ownerSide_ = (mesh_.faceOwner()[faceLabel_] == celli);
+                    ownerSide_ = (mesh().faceOwner()[faceLabel_] == celli);
                 }
             }
             else if (ownerSide_)
@@ -239,22 +265,22 @@ void Foam::edgeFaceCirculator::setCanonical()
             }
             else
             {
-                label celli = mesh_.faceOwner()[faceLabel_];
+                label celli = mesh().faceOwner()[faceLabel_];
                 otherFace(celli);
                 // Maintain reverse direction of walking
-                ownerSide_ = (mesh_.faceOwner()[faceLabel_] == celli);
+                ownerSide_ = (mesh().faceOwner()[faceLabel_] == celli);
             }
 
             i++;
 
             if (i >= 1000)
             {
-                const face& f = mesh_.faces()[faceLabel_];
+                const face& f = mesh().faces()[faceLabel_];
 
                 FatalErrorInFunction
                     << "Walked " << i << " cells around edge "
-                    << mesh_.points()[f[index_]]
-                    << mesh_.points()[f.nextLabel(index_)]
+                    << mesh().points()[f[index_]]
+                    << mesh().points()[f.nextLabel(index_)]
                     << " without reaching a boundary face."
                     << " Are you sure this is a boundary edge?"
                     << abort(FatalError);
@@ -281,15 +307,15 @@ void Foam::edgeFaceCirculator::setCanonical()
                 break;
             }
 
-            if (!mesh_.isInternalFace(faceLabel_))
+            if (!mesh().isInternalFace(faceLabel_))
             {
-                const face& f = mesh_.faces()[faceLabel_];
+                const face& f = mesh().faces()[faceLabel_];
 
                 FatalErrorInFunction
                     << "Reached boundary face " << faceLabel_
                     << " when walking around internal edge "
-                    << mesh_.points()[f[index_]]
-                    << mesh_.points()[f.nextLabel(index_)]
+                    << mesh().points()[f[index_]]
+                    << mesh().points()[f.nextLabel(index_)]
                     << "." << endl
                     << "Are you sure this is an internal edge?"
                     << abort(FatalError);
@@ -360,10 +386,10 @@ Foam::edgeFaceCirculator::operator++()
     else if (ownerSide_)
     {
         // Step to owner
-        label celli = mesh_.faceOwner()[faceLabel_];
+        label celli = mesh().faceOwner()[faceLabel_];
         otherFace(celli);
         // Maintain direction of walking
-        ownerSide_ = (mesh_.faceOwner()[faceLabel_] != celli);
+        ownerSide_ = (mesh().faceOwner()[faceLabel_] != celli);
 
         // Check for internal edge : ends on starting face.
         if (!isBoundaryEdge_ && faceLabel_ == startFaceLabel_)
@@ -371,13 +397,13 @@ Foam::edgeFaceCirculator::operator++()
             setEnd();
         }
     }
-    else if (mesh_.isInternalFace(faceLabel_))
+    else if (mesh().isInternalFace(faceLabel_))
     {
         // Step to neighbour
-        label celli = mesh_.faceNeighbour()[faceLabel_];
+        label celli = mesh().faceNeighbour()[faceLabel_];
         otherFace(celli);
         // Maintain direction of walking
-        ownerSide_ = (mesh_.faceOwner()[faceLabel_] != celli);
+        ownerSide_ = (mesh().faceOwner()[faceLabel_] != celli);
 
         // Check for internal edge : ends on starting face.
         if (!isBoundaryEdge_ && faceLabel_ == startFaceLabel_)
@@ -399,7 +425,7 @@ Foam::edgeFaceCirculator Foam::edgeFaceCirculator::begin() const
 {
     edgeFaceCirculator iter
     (
-        mesh_,
+        *meshPtr_,
         faceLabel_,
         ownerSide_,
         index_,
@@ -418,7 +444,7 @@ Foam::edgeFaceCirculator Foam::edgeFaceCirculator::cbegin() const
 {
     edgeFaceCirculator iter
     (
-        mesh_,
+        *meshPtr_,
         faceLabel_,
         ownerSide_,
         index_,
@@ -433,14 +459,14 @@ Foam::edgeFaceCirculator Foam::edgeFaceCirculator::cbegin() const
 }
 
 
-const Foam::edgeFaceCirculator& Foam::edgeFaceCirculator::end() const
+const Foam::edgeFaceCirculator Foam::edgeFaceCirculator::end() const
 {
-    return endConstIter;
+    return edgeFaceCirculator();
 }
 
-const Foam::edgeFaceCirculator& Foam::edgeFaceCirculator::cend() const
+const Foam::edgeFaceCirculator Foam::edgeFaceCirculator::cend() const
 {
-    return endConstIter;
+    return edgeFaceCirculator();
 }
 
 

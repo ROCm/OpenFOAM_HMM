@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -399,7 +399,7 @@ int main(int argc, char *argv[])
             );
             if (entPtr)
             {
-                Info<< *entPtr << endl;
+                Info<< *entPtr;
             }
         }
         else if (args.optionFound("remove"))
@@ -470,7 +470,11 @@ int main(int argc, char *argv[])
                             const tokenList& tokens = entPtr->stream();
                             forAll(tokens, i)
                             {
-                                Info<< tokens[i] << token::SPACE;
+                                Info<< tokens[i];
+                                if (i < tokens.size() - 1)
+                                {
+                                    Info<< token::SPACE;
+                                }
                             }
                             Info<< endl;
                         }
@@ -481,7 +485,7 @@ int main(int argc, char *argv[])
                     }
                     else
                     {
-                        Info<< *entPtr << endl;
+                        Info<< *entPtr;
                     }
                 }
             }

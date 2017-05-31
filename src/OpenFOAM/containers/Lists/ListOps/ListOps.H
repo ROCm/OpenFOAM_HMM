@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -57,25 +57,41 @@ static const List<Type>& emptyList()
 
 
 //- Renumber the values (not the indices) of a list.
-//  Negative ListType elements are left as is.
+//  Negative ListType elements are left untouched.
 template<class ListType>
 ListType renumber(const labelUList& oldToNew, const ListType& lst);
 
-//- Inplace renumber the values of a list.
-//  Negative ListType elements are left as is.
+//- Inplace renumber the values (not the indices) of a list.
+//  Negative ListType elements are left untouched.
 template<class ListType>
 void inplaceRenumber(const labelUList& oldToNew, ListType& lst);
 
 
-//- Reorder the elements (indices, not values) of a list.
-//  Negative ListType elements are left as is.
+//- Reorder the elements of a list.
+//  Locations with negative oldToNew values are left as is (copy-through).
+//  However, if pruning is activated, these negative oldToNew values are
+//  instead skipped over and the resulting list shrunk to the max index
+//  actually used.
 template<class ListType>
-ListType reorder(const labelUList& oldToNew, const ListType& lst);
+ListType reorder
+(
+    const labelUList& oldToNew,
+    const ListType& lst,
+    const bool prune = false
+);
 
 //- Inplace reorder the elements of a list.
-//  Negative ListType elements are left as is.
+//  Locations with negative oldToNew values are left as is (copy-through).
+//  However, if pruning is activated, these negative oldToNew values are
+//  instead skipped over and the resulting list shrunk to the max index
+//  actually used.
 template<class ListType>
-void inplaceReorder(const labelUList& oldToNew, ListType& lst);
+void inplaceReorder
+(
+    const labelUList& oldToNew,
+    ListType& lst,
+    const bool prune = false
+);
 
 
 // Variants to work with iterators and sparse tables.
@@ -156,12 +172,20 @@ void inplaceSubset(const BoolListType& select, ListType& lst);
 //- Copy a subset of the input list when predicate is true.
 //  Do not use FixedList for the input list, since it doesn't resize.
 template<class ListType, class UnaryPredicate>
-ListType subsetList(const ListType& input, UnaryPredicate pred);
+ListType subsetList
+(
+    const ListType& input,
+    const UnaryPredicate& pred
+);
 
 //- Inplace subset of the list when predicate is true.
 //  Do not use FixedList for the input list, since it doesn't resize.
 template<class ListType, class UnaryPredicate>
-void inplaceSubsetList(ListType& input, UnaryPredicate pred);
+void inplaceSubsetList
+(
+    ListType& input,
+    const UnaryPredicate& pred
+);
 
 
 //- Invert one-to-one map. Unmapped elements will be -1.
@@ -171,17 +195,26 @@ labelList invert(const label len, const labelUList& map);
 labelListList invertOneToMany(const label len, const labelUList& map);
 
 //- Invert many-to-many.
-//  Input and output types need to be inherited from List.
-//  eg, faces to pointFaces.
-template<class InList, class OutList>
-void invertManyToMany(const label len, const UList<InList>&, List<OutList>&);
+//  Input and output types must be inherited from List and also
+//  contain ints/labels. Used, for example, for faces to pointFaces.
+template<class InputIntListType, class OutputIntListType>
+void invertManyToMany
+(
+    const label len,
+    const UList<InputIntListType>& input,
+    List<OutputIntListType>& output
+);
 
-template<class InList, class OutList>
-List<OutList> invertManyToMany(const label len, const UList<InList>& in)
+template<class InputIntListType, class OutputIntListType>
+List<OutputIntListType> invertManyToMany
+(
+    const label len,
+    const UList<InputIntListType>& input
+)
 {
-    List<OutList> out;
-    invertManyToMany<InList,OutList>(len, in, out);
-    return out;
+    List<OutputIntListType> output;
+    invertManyToMany<InputIntListType,OutputIntListType>(len, input, output);
+    return output;
 }
 
 //- Create identity map of the given length with (map[i] == i)
@@ -341,4 +374,3 @@ void inplaceRotateList(ListType<DataType>& list, label n);
 #endif
 
 // ************************************************************************* //
-

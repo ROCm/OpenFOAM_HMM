@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -231,17 +231,14 @@ public:
             //- Return the chemical time scale
             virtual tmp<volScalarField> tc() const;
 
-            //- Return source for enthalpy equation [kg/m/s3]
-            virtual tmp<volScalarField> Sh() const;
-
-            //- Return the heat release, i.e. enthalpy/sec [kg/m2/s3]
-            virtual tmp<volScalarField> dQ() const;
+            //- Return the heat release rate [kg/m/s3]
+            virtual tmp<volScalarField> Qdot() const;
 
 
         // ODE functions (overriding abstract functions in ODE.H)
 
             //- Number of ODE's to solve
-            virtual label nEqns() const;
+            inline virtual label nEqns() const;
 
             virtual void derivatives
             (

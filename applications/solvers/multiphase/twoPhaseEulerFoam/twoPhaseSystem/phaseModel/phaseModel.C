@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -109,6 +109,9 @@ Foam::phaseModel::phaseModel
         dimensionedScalar("0", dimensionSet(1, 0, -1, 0, 0), 0)
     )
 {
+    alphaPhi_.setOriented();
+    alphaRhoPhi_.setOriented();
+
     thermo_->validate("phaseModel " + name_, "h", "e");
 
     const word phiName = IOobject::groupName("phi", name_);
@@ -248,27 +251,19 @@ bool Foam::phaseModel::read(const dictionary& phaseProperties)
 }
 
 
-void Foam::phaseModel::correctInflowFlux(surfaceScalarField& alphaPhi) const
+void Foam::phaseModel::correctInflowOutflow(surfaceScalarField& alphaPhi) const
 {
     surfaceScalarField::Boundary& alphaPhiBf = alphaPhi.boundaryFieldRef();
+    const volScalarField::Boundary& alphaBf = boundaryField();
+    const surfaceScalarField::Boundary& phiBf = phi().boundaryField();
 
-    // Ensure that the flux at inflow BCs is preserved
     forAll(alphaPhiBf, patchi)
     {
         fvsPatchScalarField& alphaPhip = alphaPhiBf[patchi];
 
         if (!alphaPhip.coupled())
         {
-            const scalarField& phip = phi().boundaryField()[patchi];
-            const scalarField& alphap = boundaryField()[patchi];
-
-            forAll(alphaPhip, facei)
-            {
-                if (phip[facei] < SMALL)
-                {
-                    alphaPhip[facei] = alphap[facei]*phip[facei];
-                }
-            }
+            alphaPhip = phiBf[patchi]*alphaBf[patchi];
         }
     }
 }

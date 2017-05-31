@@ -58,8 +58,7 @@ Foam::solidParticle::solidParticle
         }
     }
 
-    // Check state of Istream
-    is.check("solidParticle::solidParticle(Istream&)");
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -134,9 +133,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const solidParticle& p)
         );
     }
 
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const solidParticle&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

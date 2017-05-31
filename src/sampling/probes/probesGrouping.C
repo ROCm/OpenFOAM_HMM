@@ -47,106 +47,74 @@ void Foam::probes::clearFieldGroups()
 }
 
 
-Foam::label Foam::probes::appendFieldGroup
-(
-    const word& fieldName,
-    const word& fieldType
-)
-{
-    if (fieldType == volScalarField::typeName)
-    {
-        scalarFields_.append(fieldName);
-        return 1;
-    }
-    else if (fieldType == volVectorField::typeName)
-    {
-        vectorFields_.append(fieldName);
-        return 1;
-    }
-    else if (fieldType == volSphericalTensorField::typeName)
-    {
-        sphericalTensorFields_.append(fieldName);
-        return 1;
-    }
-    else if (fieldType == volSymmTensorField::typeName)
-    {
-        symmTensorFields_.append(fieldName);
-        return 1;
-    }
-    else if (fieldType == volTensorField::typeName)
-    {
-        tensorFields_.append(fieldName);
-        return 1;
-    }
-    else if (fieldType == surfaceScalarField::typeName)
-    {
-        surfaceScalarFields_.append(fieldName);
-        return 1;
-    }
-    else if (fieldType == surfaceVectorField::typeName)
-    {
-        surfaceVectorFields_.append(fieldName);
-        return 1;
-    }
-    else if (fieldType == surfaceSphericalTensorField::typeName)
-    {
-        surfaceSphericalTensorFields_.append(fieldName);
-        return 1;
-    }
-    else if (fieldType == surfaceSymmTensorField::typeName)
-    {
-        surfaceSymmTensorFields_.append(fieldName);
-        return 1;
-    }
-    else if (fieldType == surfaceTensorField::typeName)
-    {
-        surfaceTensorFields_.append(fieldName);
-        return 1;
-    }
-
-    return 0;
-}
-
-
 Foam::label Foam::probes::classifyFields()
 {
     label nFields = 0;
     clearFieldGroups();
 
-    if (loadFromFiles_)
+    HashTable<wordHashSet> available =
+    (
+        loadFromFiles_
+      ? IOobjectList(mesh_, mesh_.time().timeName()).classes(fieldSelection_)
+      : mesh_.classes(fieldSelection_)
+    );
+
+    forAllConstIters(available, iter)
     {
-        // Check files for a particular time
-        IOobjectList objects(mesh_, mesh_.time().timeName());
-        wordList allFields = objects.sortedNames();
+        const word& fieldType = iter.key();
+        const wordList fieldNames = iter.object().sortedToc();
 
-        labelList indices = findStrings(fieldSelection_, allFields);
+        const label count = fieldNames.size(); // pre-filtered, so non-empty
 
-        forAll(indices, fieldi)
+        if (fieldType == volScalarField::typeName)
         {
-            const word& fieldName = allFields[indices[fieldi]];
-
-            nFields += appendFieldGroup
-            (
-                fieldName,
-                objects.find(fieldName)()->headerClassName()
-            );
+            scalarFields_.append(fieldNames);
+            nFields += count;
         }
-    }
-    else
-    {
-        // Check currently available fields
-        wordList allFields = mesh_.sortedNames();
-        labelList indices = findStrings(fieldSelection_, allFields);
-
-        forAll(indices, fieldi)
+        else if (fieldType == volVectorField::typeName)
         {
-            const word& fieldName = allFields[indices[fieldi]];
-
-            nFields += appendFieldGroup
-            (
-                fieldName,
-                mesh_.find(fieldName)()->type()
-            );
+            vectorFields_.append(fieldNames);
+            nFields += count;
+        }
+        else if (fieldType == volSphericalTensorField::typeName)
+        {
+            sphericalTensorFields_.append(fieldNames);
+            nFields += count;
+        }
+        else if (fieldType == volSymmTensorField::typeName)
+        {
+            symmTensorFields_.append(fieldNames);
+            nFields += count;
+        }
+        else if (fieldType == volTensorField::typeName)
+        {
+            tensorFields_.append(fieldNames);
+            nFields += count;
+        }
+        else if (fieldType == surfaceScalarField::typeName)
+        {
+            surfaceScalarFields_.append(fieldNames);
+            nFields += count;
+        }
+        else if (fieldType == surfaceVectorField::typeName)
+        {
+            surfaceVectorFields_.append(fieldNames);
+            nFields += count;
+        }
+        else if (fieldType == surfaceSphericalTensorField::typeName)
+        {
+            surfaceSphericalTensorFields_.append(fieldNames);
+            nFields += count;
+        }
+        else if (fieldType == surfaceSymmTensorField::typeName)
+        {
+            surfaceSymmTensorFields_.append(fieldNames);
+            nFields += count;
+        }
+        else if (fieldType == surfaceTensorField::typeName)
+        {
+            surfaceTensorFields_.append(fieldNames);
+            nFields += count;
         }
     }
 

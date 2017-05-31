@@ -90,23 +90,23 @@ void Foam::patchIdentifier::write(Ostream& os) const
 {
     if (physicalType_.size())
     {
-        os.writeKeyword("physicalType") << physicalType_
-            << token::END_STATEMENT << nl;
+        os.writeEntry("physicalType", physicalType_);
     }
     if (inGroups_.size())
     {
-        os.writeKeyword("inGroups") << inGroups_
-            << token::END_STATEMENT << nl;
+        os.writeKeyword("inGroups");
+        // Write list with flatOutput
+        inGroups_.writeList(os, 0) << token::END_STATEMENT << nl;
     }
 }
 
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const patchIdentifier& pi)
+Foam::Ostream& Foam::operator<<(Ostream& os, const patchIdentifier& p)
 {
-    pi.write(os);
-    os.check("Ostream& operator<<(Ostream&, const patchIdentifier&)");
+    p.write(os);
+    os.check(FUNCTION_NAME);
     return os;
 }
 

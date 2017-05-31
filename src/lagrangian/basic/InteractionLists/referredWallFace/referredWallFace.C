@@ -101,13 +101,7 @@ Foam::Istream& Foam::operator>>(Istream& is, referredWallFace& rWF)
 {
     is  >> static_cast<face&>(rWF) >> rWF.pts_ >> rWF.patchi_;
 
-    // Check state of Istream
-    is.check
-    (
-        "Foam::Istream& "
-        "Foam::operator>>(Foam::Istream&, Foam::referredWallFace&)"
-    );
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -118,13 +112,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const referredWallFace& rWF)
         << rWF.pts_ << token::SPACE
         << rWF.patchi_;
 
-    // Check state of Ostream
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
-        "const Foam::referredWallFace&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

@@ -77,7 +77,7 @@ const Foam::polyTopoChanger& Foam::polyMeshModifier::topoChanger() const
 Foam::Ostream& Foam::operator<<(Ostream& os, const polyMeshModifier& pmm)
 {
     pmm.write(os);
-    os.check("Ostream& operator<<(Ostream& f, const polyMeshModifier& pmm)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

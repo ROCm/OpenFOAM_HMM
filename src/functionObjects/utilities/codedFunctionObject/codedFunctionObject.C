@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -289,6 +289,16 @@ bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
             endPtr->startLineNumber(),
             dict.name()
         );
+    }
+
+    if(!dataPtr && !readPtr && !execPtr && !writePtr && !endPtr)
+    {
+        IOWarningInFunction
+        (
+            dict
+        )   << "No critical \"code\" prefixed keywords were found."
+            << " Please check the code documentation for more details."
+            << nl << endl;
     }
 
     updateLibrary(name_);

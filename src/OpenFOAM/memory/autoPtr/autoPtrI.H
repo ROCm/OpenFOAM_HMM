@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -215,6 +215,13 @@ template<class T>
 inline const T* Foam::autoPtr<T>::operator->() const
 {
     return const_cast<autoPtr<T>&>(*this).operator->();
+}
+
+
+template<class T>
+inline void Foam::autoPtr<T>::operator=(T* p)
+{
+    reset(p);
 }
 
 

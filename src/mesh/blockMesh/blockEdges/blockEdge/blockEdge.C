@@ -90,7 +90,7 @@ Foam::autoPtr<Foam::blockEdge> Foam::blockEdge::New
     IstreamConstructorTable::iterator cstrIter =
         IstreamConstructorTablePtr_->find(edgeType);
 
-    if (cstrIter == IstreamConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown blockEdge type "

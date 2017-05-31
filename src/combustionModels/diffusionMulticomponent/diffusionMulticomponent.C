@@ -369,8 +369,10 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
 
 template<class CombThermoType, class ThermoType>
 Foam::tmp<Foam::fvScalarMatrix>
-Foam::combustionModels::diffusionMulticomponent<CombThermoType, ThermoType>::
-R(volScalarField& Y) const
+Foam::combustionModels::diffusionMulticomponent<CombThermoType, ThermoType>::R
+(
+    volScalarField& Y
+) const
 {
     tmp<fvScalarMatrix> tSu(new fvScalarMatrix(Y, dimMass/dimTime));
 
@@ -378,7 +380,7 @@ R(volScalarField& Y) const
 
     if (this->active())
     {
-        const label specieI = this->thermo().composition().species()[Y.name()];
+        const label specieI = this->thermo().composition().species()[Y.member()];
         Su += this->chemistryPtr_->RR(specieI);
     }
 
@@ -389,15 +391,15 @@ R(volScalarField& Y) const
 template<class CombThermoType, class ThermoType>
 Foam::tmp<Foam::volScalarField>
 Foam::combustionModels::diffusionMulticomponent<CombThermoType, ThermoType>::
-dQ() const
+Qdot() const
 {
-    tmp<volScalarField> tdQ
+    tmp<volScalarField> tQdot
     (
         new volScalarField
         (
             IOobject
             (
-                "dQ",
+                "Qdot",
                 this->mesh().time().timeName(),
                 this->mesh(),
                 IOobject::NO_READ,
@@ -412,45 +414,11 @@ dQ() const
 
     if (this->active())
     {
-        volScalarField& dQ = tdQ.ref();
-        dQ = this->chemistryPtr_->dQ();
+        volScalarField& Qdot = tQdot.ref();
+        Qdot = this->chemistryPtr_->Qdot();
     }
 
-    return tdQ;
-}
-
-
-template<class CombThermoType, class ThermoType>
-Foam::tmp<Foam::volScalarField>
-Foam::combustionModels::diffusionMulticomponent<CombThermoType, ThermoType>::
-Sh() const
-{
-    tmp<volScalarField> tSh
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "Sh",
-                this->mesh().time().timeName(),
-                this->mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            this->mesh(),
-            dimensionedScalar("zero", dimEnergy/dimTime/dimVolume, 0.0),
-            zeroGradientFvPatchScalarField::typeName
-        )
-    );
-
-    if (this->active())
-    {
-        scalarField& Sh = tSh.ref();
-        Sh = this->chemistryPtr_->Sh();
-    }
-
-    return tSh;
+    return tQdot;
 }
 
 

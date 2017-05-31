@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,11 +28,13 @@ Group
     grpUtilitiesFunctionObjects
 
 Description
-    This function object overrides the calculation time step. Can only be used
-    with solvers with adjustTimeStep control (e.g. pimpleFoam).  It makes no
-    attempt to co-operate with other time step 'controllers', e.g. maxCo, other
-    functionObjects. Supports 'enabled' flag but none of the other options
-    'timeStart', 'timeEnd', 'writeControl' etc.
+    This function object overrides the calculation time step.
+
+    Can only be used with solvers with adjustTimeStep control (e.g.
+    pimpleFoam).  It makes no attempt to co-operate with other time step
+    'controllers', e.g. maxCo, other functionObjects. Supports 'enabled'
+    flag but none of the other options 'timeStart', 'timeEnd', 'writeControl'
+    etc.
 
 Usage
     Example of function object specification to manipulate the time step:

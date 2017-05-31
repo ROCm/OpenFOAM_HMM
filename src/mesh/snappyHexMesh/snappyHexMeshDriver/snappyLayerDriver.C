@@ -493,9 +493,22 @@ void Foam::snappyLayerDriver::handleNonStringConnected
     // warning from checkMesh. These faces cannot be extruded so
     // there is no need to even attempt it.
 
-List<extrudeMode> oldExtrudeStatus(extrudeStatus);
-OBJstream str(meshRefiner_.mesh().time().path()/"nonStringConnected.obj");
-Pout<< "Dumping string edges to " << str.name();
+    List<extrudeMode> oldExtrudeStatus;
+    autoPtr<OBJstream> str;
+    if (debug&meshRefinement::LAYERINFO)
+    {
+        oldExtrudeStatus = extrudeStatus;
+        str.reset
+        (
+            new OBJstream
+            (
+                meshRefiner_.mesh().time().path()
+               /"nonStringConnected.obj"
+            )
+        );
+        Pout<< "Dumping string edges to " << str().name();
+    }
+
 
     // 1) Local
     Map<label> nCommonPoints(100);
@@ -521,15 +534,21 @@ Pout<< "Dumping string edges to " << str.name();
 
     // 2) TDB. Other face remote
 
-forAll(extrudeStatus, pointi)
-{
-    if (extrudeStatus[pointi] != oldExtrudeStatus[pointi])
+
+
+    if (debug&meshRefinement::LAYERINFO)
     {
-        str.write(meshRefiner_.mesh().points()[pp.meshPoints()[pointi]]);
+        forAll(extrudeStatus, pointi)
+        {
+            if (extrudeStatus[pointi] != oldExtrudeStatus[pointi])
+            {
+                str().write
+                (
+                    meshRefiner_.mesh().points()[pp.meshPoints()[pointi]]
+                );
+            }
+        }
     }
-}
-
-
 }
 
 

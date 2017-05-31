@@ -376,7 +376,8 @@ void Foam::fv::rotorDiskSource::createCoordinateSystem()
             FatalErrorInFunction
                 << "Unknown geometryMode " << geometryModeTypeNames_[gm]
                 << ". Available geometry modes include "
-                << geometryModeTypeNames_ << exit(FatalError);
+                << geometryModeTypeNames_
+                << exit(FatalError);
         }
     }
 

@@ -57,11 +57,13 @@ SourceFiles
 #include "uLabel.H"
 #include "word.H"
 #include "Xfer.H"
+#include "Hash.H"
 #include "className.H"
 #include "nullObject.H"
 
 #include <initializer_list>
 #include <iterator>
+#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,7 +75,6 @@ namespace Foam
 template<class T> class List;
 template<class T> class UList;
 template<class T, unsigned Size> class FixedList;
-template<class T1, class T2> class Tuple2;
 template<class T, class Key, class Hash> class HashTable;
 
 template<class T, class Key, class Hash>
@@ -212,7 +213,7 @@ private:
 
     // Private data type for table entries
 
-        //- Structure to hold a hashed entry, with a SLList for collisions
+        //- Structure to hold a hashed entry, with a linked-list for collisions
         struct hashedEntry
         {
             //- The lookup key
@@ -224,7 +225,7 @@ private:
             //- Pointer to next hashedEntry in sub-list
             hashedEntry* next_;
 
-            //- Construct from key, next pointer and object
+            //- Construct from key, object, next pointer
             inline hashedEntry(const Key& key, const T& obj, hashedEntry* next);
 
         private:
@@ -255,7 +256,7 @@ private:
         inline label hashKeyIndex(const Key& key) const;
 
         //- Assign a new hash-entry to a possibly already existing key.
-        //  Return true if the new entry was set.
+        //  \return True if the new entry was set.
         bool set(const Key& key, const T& obj, const bool protect);
 
 
@@ -296,7 +297,7 @@ public:
         HashTable(const Xfer<HashTable<T, Key, Hash>>& ht);
 
         //- Construct from an initializer list
-        HashTable(std::initializer_list<Tuple2<Key, T>> lst);
+        HashTable(std::initializer_list<std::pair<Key, T>> lst);
 
 
     //- Destructor
@@ -327,8 +328,15 @@ public:
         //  If not found iterator = end()
         const_iterator find(const Key& key) const;
 
+        //- Find and return an const_iterator set at the hashed entry
+        //  If not found iterator = end()
+        const_iterator cfind(const Key& key) const;
+
         //- Return hashed entry if it exists, or return the given default
         inline const T& lookup(const Key& key, const T& deflt) const;
+
+
+      // Table of contents
 
         //- Return the table of contents
         List<Key> toc() const;
@@ -336,16 +344,74 @@ public:
         //- Return the table of contents as a sorted list
         List<Key> sortedToc() const;
 
+        //- Return the sorted table of contents with keys that satisfy
+        //  the unary predicate, optionally with inverted logic.
+        template<class UnaryPredicate>
+        List<Key> tocKeys
+        (
+            const UnaryPredicate& pred,
+            const bool invert = false
+        ) const;
+
+        //- Return the sorted table of contents with values that satisfy
+        // the unary predicate, optionally with inverted logic.
+        template<class UnaryPredicate>
+        List<Key> tocValues
+        (
+            const UnaryPredicate& pred,
+            const bool invert = false
+        ) const;
+
+        //- Return the sorted table of contents with keys/values that satisfy
+        //  the binary predicate, optionally with inverted logic.
+        template<class BinaryPredicate>
+        List<Key> tocEntries
+        (
+            const BinaryPredicate& pred,
+            const bool invert = false
+        ) const;
+
+
+      // Counting
+
+        //- Count the number of keys that satisfy the unary predicate,
+        //  optionally with inverted logic.
+        template<class UnaryPredicate>
+        label countKeys
+        (
+            const UnaryPredicate& pred,
+            const bool invert = false
+        ) const;
+
+        //- Count the number of values that satisfy the unary predicate,
+        //  optionally with inverted logic.
+        template<class UnaryPredicate>
+        label countValues
+        (
+            const UnaryPredicate& pred,
+            const bool invert = false
+        ) const;
+
+        //- Count the number of entries that satisfy the binary predicate,
+        //  optionally with inverted logic.
+        template<class BinaryPredicate>
+        label countEntries
+        (
+            const BinaryPredicate& pred,
+            const bool invert = false
+        ) const;
+
 
       // Edit
 
         //- Insert a new entry
-        //  Return true if the entry inserted, which means that it did
+        //  \return True if the entry inserted, which means that it did
         //  not previously exist in the table.
         inline bool insert(const Key& key, const T& obj);
 
         //- Assign a new entry, overwriting existing entries.
-        //  Returns true.
+        //
+        //  \return True, since it always overwrites any entries.
         inline bool set(const Key& key, const T& obj);
 
         //- Erase an entry specified by given iterator
@@ -357,30 +423,34 @@ public:
         //      auto iter = table.find(unknownKey);
         //      table.erase(iter);
         //  \endcode
-        //  which is what \code table.erase(unknownKey) \endcode does anyhow
+        //  which is what \code table.erase(unknownKey) \endcode does anyhow.
+        //
+        //  \return True if the corresponding entry existed and was removed
         bool erase(const iterator& iter);
 
         //- Erase an entry specified by the given key
+        //  \return True if the entry existed and was removed
         bool erase(const Key& key);
 
         //- Remove table entries given by the listed keys
-        //  Return the number of elements removed
+        //  \return The number of items removed
         label erase(const UList<Key>& keys);
 
         //- Remove table entries given by the listed keys
-        //  Return the number of elements removed
+        //  \return The number of items removed
         template<unsigned Size>
         label erase(const FixedList<Key, Size>& keys);
 
         //- Remove table entries given by the listed keys
-        //  Return the number of elements removed
+        //  \return The number of items removed
         label erase(std::initializer_list<Key> keys);
 
         //- Remove table entries given by keys of the other hash-table.
-        //  Return the number of elements removed.
         //
         //  The other hash-table must have the same type of key, but the
         //  type of values held and the hashing function are arbitrary.
+        //
+        //  \return The number of items removed
         template<class AnyType, class AnyHash>
         label erase(const HashTable<AnyType, Key, AnyHash>& other);
 
@@ -388,8 +458,65 @@ public:
         //
         //  The other hash-table must have the same type of key, but the
         //  type of values held and the hashing function are arbitrary.
+        //
+        //  \return The number of items changed (removed)
         template<class AnyType, class AnyHash>
         label retain(const HashTable<AnyType, Key, AnyHash>& other);
+
+        //- Generalized means to filter table entries based on their keys.
+        //  Keep (or optionally prune) entries with keys that satisfy
+        //  the unary predicate, which has the following signature:
+        //  \code
+        //  bool operator()(const Key& k);
+        //  \endcode
+        //
+        //  For example,
+        //  \code
+        //  wordRes goodFields = ...;
+        //  allFieldNames.filterKeys
+        //  (
+        //      [&goodFields](const word& k){ return goodFields.match(k); }
+        //  );
+        //  \endcode
+        //
+        //  \return The number of items changed (removed)
+        template<class UnaryPredicate>
+        label filterKeys
+        (
+            const UnaryPredicate& pred,
+            const bool pruning = false
+        );
+
+        //- Generalized means to filter table entries based on their values.
+        //  Keep (or optionally prune) entries with values that satisfy
+        //  the unary predicate, which has the following signature:
+        //  \code
+        //  bool operator()(const T& v);
+        //  \endcode
+        //
+        //  \return The number of items changed (removed)
+        template<class UnaryPredicate>
+        label filterValues
+        (
+            const UnaryPredicate& pred,
+            const bool pruning = false
+        );
+
+        //- Generalized means to filter table entries based on their key/value.
+        //  Keep (or optionally prune) entries with keys/values that satisfy
+        //  the binary predicate, which has the following signature:
+        //  \code
+        //  bool operator()(const Key& k, const T& v);
+        //  \endcode
+        //
+        //  \return The number of items changed (removed)
+        template<class BinaryPredicate>
+        label filterEntries
+        (
+            const BinaryPredicate& pred,
+            const bool pruning = false
+        );
+
 
         //- Resize the hash table for efficiency
         void resize(const label sz);
@@ -432,7 +559,7 @@ public:
         void operator=(const HashTable<T, Key, Hash>& rhs);
 
         //- Assignment from an initializer list
-        void operator=(std::initializer_list<Tuple2<Key, T>> lst);
+        void operator=(std::initializer_list<std::pair<Key, T>> lst);
 
         //- Equality. Hash tables are equal if the keys and values are equal.
         //  Independent of table storage size and table order.

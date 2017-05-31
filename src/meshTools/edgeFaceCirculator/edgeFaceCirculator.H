@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -86,16 +86,10 @@ class primitiveMesh;
 
 class edgeFaceCirculator
 {
-    // Static data members
+    // Private Member Data
 
-        //- End iterator
-        static const edgeFaceCirculator endConstIter;
-
-
-    // Private data
-
-        //- Mesh
-        const primitiveMesh& mesh_;
+        //- The underlying mesh pointer
+        const primitiveMesh* meshPtr_;
 
         //- Current face
         label faceLabel_;
@@ -116,15 +110,20 @@ class edgeFaceCirculator
 
     // Private Member Functions
 
+        //- The underlying mesh
+        inline const primitiveMesh& mesh() const;
+
         //- Set to end() iterator
         inline void setEnd();
 
         //- Check and set faceLabel_ and ownerSide_
         inline void setFace(const label facei, const label celli);
 
-        //- Set faceLabel_ to be the other face on the cell that uses the
-        //  edge.
+        //- Set faceLabel_ to be the other face on the cell that uses the edge.
         inline void otherFace(const label celli);
+
+        //- Construct null - this is also an end iterator
+        inline edgeFaceCirculator();
 
 
 public:
@@ -142,7 +141,7 @@ public:
         );
 
         //- Construct as copy
-        inline edgeFaceCirculator(const edgeFaceCirculator&);
+        inline edgeFaceCirculator(const edgeFaceCirculator& circ);
 
 
     // Member Functions
@@ -156,7 +155,11 @@ public:
             const label v1
         );
 
+        //- Return the face label, -1 for end iterator
         inline label faceLabel() const;
+
+        //- Return true if the face label corresponds to an internal face
+        inline bool isInternalFace() const;
 
         inline bool ownerSide() const;
 
@@ -194,8 +197,8 @@ public:
         inline edgeFaceCirculator cbegin() const;
 
         //- Iterator set to beyond the end of the walk.
-        inline const edgeFaceCirculator& end() const;
-        inline const edgeFaceCirculator& cend() const;
+        inline const edgeFaceCirculator end() const;
+        inline const edgeFaceCirculator cend() const;
 };
 
 

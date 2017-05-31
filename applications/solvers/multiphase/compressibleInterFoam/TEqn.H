@@ -5,19 +5,25 @@
       + fvm::div(rhoPhi, T)
       - fvm::laplacian(mixture.alphaEff(turbulence->mut()), T)
       + (
-            divU*p
+            fvc::div(fvc::absolute(phi, U), p)
           + fvc::ddt(rho, K) + fvc::div(rhoPhi, K)
         )
        *(
            alpha1/mixture.thermo1().Cv()
          + alpha2/mixture.thermo2().Cv()
         )
+     ==
+        fvOptions(rho, T)
     );
 
     TEqn.relax();
+
+    fvOptions.constrain(TEqn);
+
     TEqn.solve();
 
-    mixture.correct();
+    fvOptions.correct(T);
 
-    Info<< "min(T) " << min(T).value() << endl;
+    mixture.correctThermo();
+    mixture.correct();
 }

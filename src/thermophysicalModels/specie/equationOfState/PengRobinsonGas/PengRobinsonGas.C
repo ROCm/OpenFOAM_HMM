@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,20 +27,6 @@ License
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Specie>
-Foam::PengRobinsonGas<Specie>::PengRobinsonGas(Istream& is)
-:
-    Specie(is),
-    Tc_(readScalar(is)),
-    Vc_(readScalar(is)),
-    Zc_(readScalar(is)),
-    Pc_(readScalar(is)),
-    omega_(readScalar(is))
-{
-    is.check("PengRobinsonGas<Specie>::PengRobinsonGas(Istream& is)");
-}
-
 
 template<class Specie>
 Foam::PengRobinsonGas<Specie>::PengRobinsonGas
@@ -78,17 +64,7 @@ Foam::Ostream& Foam::operator<<
     const PengRobinsonGas<Specie>& pg
 )
 {
-    os  << static_cast<const Specie&>(pg)
-        << token::SPACE << pg.Tc_
-        << token::SPACE << pg.Vc_
-        << token::SPACE << pg.Zc_
-        << token::SPACE << pg.Pc_
-        << token::SPACE << pg.omega_;
-
-    os.check
-    (
-        "Ostream& operator<<(Ostream& os, const PengRobinsonGas<Specie>& st)"
-    );
+    pg.write(os);
     return os;
 }
 

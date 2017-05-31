@@ -331,12 +331,7 @@ Foam::wallBoundedParticle::wallBoundedParticle
         }
     }
 
-    // Check state of Istream
-    is.check
-    (
-        "wallBoundedParticle::wallBoundedParticle"
-        "(const Cloud<wallBoundedParticle>&, Istream&, bool)"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 

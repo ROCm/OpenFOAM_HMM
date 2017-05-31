@@ -110,7 +110,7 @@ Foam::displacementMotionSolver::New
     displacementConstructorTable::iterator cstrIter =
         displacementConstructorTablePtr_->find(solverTypeName);
 
-    if (cstrIter == displacementConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown solver type "

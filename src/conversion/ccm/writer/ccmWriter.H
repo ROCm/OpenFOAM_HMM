@@ -219,7 +219,12 @@ public:
     // Constructors
 
         //- Open a file for writing, with backup/overwrite existing file
-        writer(const fileName&, const polyMesh&, const bool backup=true);
+        writer
+        (
+            const fileName& file,
+            const polyMesh& mesh,
+            const bool backup=true
+        );
 
 
     //- Destructor (closes file)
@@ -228,7 +233,7 @@ public:
 
     // Member Functions
 
-        // Write
+      // Write
 
         //- Write the mesh
         void writeGeometry();
@@ -237,7 +242,7 @@ public:
         //  provide optional remapping dictionary
         void writeSolution
         (
-            const IOobjectList&,
+            const IOobjectList& objects,
             const fileName& remappingDictName = fileName::null
         );
 

@@ -10,10 +10,7 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
     -I$(LIB_SRC)/transportModels/compressible/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/properties/liquidProperties/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/properties/liquidMixtureProperties/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/properties/solidProperties/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/properties/solidMixtureProperties/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/thermophysicalProperties/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/thermophysicalFunctions/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/reactionThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/SLGThermo/lnInclude \
@@ -37,11 +34,6 @@ EXE_LIBS = \
     -llagrangianTurbulence \
     -lspecie \
     -lfluidThermophysicalModels \
-    -lliquidProperties \
-    -lliquidMixtureProperties \
-    -lsolidProperties \
-    -lsolidMixtureProperties \
-    -lthermophysicalFunctions \
     -lreactionThermophysicalModels \
     -lSLGThermo \
     -lchemistryModel \

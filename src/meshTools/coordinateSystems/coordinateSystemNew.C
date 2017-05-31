@@ -40,7 +40,7 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(coordType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (

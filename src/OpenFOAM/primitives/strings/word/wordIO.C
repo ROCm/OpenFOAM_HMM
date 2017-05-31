@@ -79,9 +79,7 @@ Foam::Istream& Foam::operator>>(Istream& is, word& w)
         return is;
     }
 
-    // Check state of IOstream
-    is.check("Istream& operator>>(Istream&, word&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -89,7 +87,7 @@ Foam::Istream& Foam::operator>>(Istream& is, word& w)
 Foam::Ostream& Foam::operator<<(Ostream& os, const word& w)
 {
     os.write(w);
-    os.check("Ostream& operator<<(Ostream&, const word&)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 #include "volFields.H"
 #include "IOobjectList.H"
 #include "stringListOps.H"
+#include "UIndirectList.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -40,107 +41,81 @@ void Foam::sampledSets::clearFieldGroups()
 }
 
 
-Foam::label Foam::sampledSets::appendFieldGroup
-(
-    const word& fieldName,
-    const word& fieldType
-)
-{
-    if (fieldType == volScalarField::typeName)
-    {
-        scalarFields_.append(fieldName);
-        return 1;
-    }
-    else if (fieldType == volVectorField::typeName)
-    {
-        vectorFields_.append(fieldName);
-        return 1;
-    }
-    else if (fieldType == volSphericalTensorField::typeName)
-    {
-        sphericalTensorFields_.append(fieldName);
-        return 1;
-    }
-    else if (fieldType == volSymmTensorField::typeName)
-    {
-        symmTensorFields_.append(fieldName);
-        return 1;
-    }
-    else if (fieldType == volTensorField::typeName)
-    {
-        tensorFields_.append(fieldName);
-        return 1;
-    }
-
-    return 0;
-}
-
-
 Foam::label Foam::sampledSets::classifyFields()
 {
     label nFields = 0;
     clearFieldGroups();
 
+    wordList allFields;    // Just needed for warnings
+    HashTable<wordHashSet> available;
+
     if (loadFromFiles_)
     {
         // Check files for a particular time
         IOobjectList objects(mesh_, mesh_.time().timeName());
-        wordList allFields = objects.sortedNames();
 
-        forAll(fieldSelection_, i)
-        {
-            labelList indices = findStrings(fieldSelection_[i], allFields);
-
-            if (indices.size())
-            {
-                forAll(indices, fieldi)
-                {
-                    const word& fieldName = allFields[indices[fieldi]];
-
-                    nFields += appendFieldGroup
-                    (
-                        fieldName,
-                        objects.find(fieldName)()->headerClassName()
-                    );
-                }
-            }
-            else
-            {
-                WarningInFunction
-                    << "Cannot find field file matching "
-                    << fieldSelection_[i] << endl;
-            }
-        }
+        allFields = objects.names();
+        available = objects.classes(fieldSelection_);
     }
     else
     {
         // Check currently available fields
-        wordList allFields = mesh_.sortedNames();
-        labelList indices = findStrings(fieldSelection_, allFields);
+        allFields = mesh_.names();
+        available = mesh_.classes(fieldSelection_);
+    }
 
-        forAll(fieldSelection_, i)
+    DynamicList<label> missed(fieldSelection_.size());
+
+    // Detect missing fields
+    forAll(fieldSelection_, i)
+    {
+        if (findStrings(fieldSelection_[i], allFields).empty())
         {
-            labelList indices = findStrings(fieldSelection_[i], allFields);
+            missed.append(i);
+        }
+    }
 
-            if (indices.size())
-            {
-                forAll(indices, fieldi)
-                {
-                    const word& fieldName = allFields[indices[fieldi]];
+    if (missed.size())
+    {
+        WarningInFunction
+            << nl
+            << "Cannot find "
+            << (loadFromFiles_ ? "field file" : "registered field")
+            << " matching "
+            << UIndirectList<wordRe>(fieldSelection_, missed) << endl;
+    }
 
-                    nFields += appendFieldGroup
-                    (
-                        fieldName,
-                        mesh_.find(fieldName)()->type()
-                    );
-                }
-            }
-            else
-            {
-                WarningInFunction
-                    << "Cannot find registered field matching "
-                    << fieldSelection_[i] << endl;
-            }
+    forAllConstIters(available, iter)
+    {
+        const word& fieldType = iter.key();
+        const wordList fieldNames = iter.object().sortedToc();
+
+        const label count = fieldNames.size(); // pre-filtered, so non-empty
+
+        if (fieldType == volScalarField::typeName)
+        {
+            scalarFields_.append(fieldNames);
+            nFields += count;
+        }
+        else if (fieldType == volVectorField::typeName)
+        {
+            vectorFields_.append(fieldNames);
+            nFields += count;
+        }
+        else if (fieldType == volSphericalTensorField::typeName)
+        {
+            sphericalTensorFields_.append(fieldNames);
+            nFields += count;
+        }
+        else if (fieldType == volSymmTensorField::typeName)
+        {
+            symmTensorFields_.append(fieldNames);
+            nFields += count;
+        }
+        else if (fieldType == volTensorField::typeName)
+        {
+            tensorFields_.append(fieldNames);
+            nFields += count;
         }
     }
 

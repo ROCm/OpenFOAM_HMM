@@ -104,7 +104,7 @@ bool Foam::regIOobject::read
 
             IPstream fromAbove
             (
-                Pstream::scheduled,
+                Pstream::commsTypes::scheduled,
                 myComm.above(),
                 0,
                 Pstream::msgType(),
@@ -119,7 +119,7 @@ bool Foam::regIOobject::read
         {
             OPstream toBelow
             (
-                Pstream::scheduled,
+                Pstream::commsTypes::scheduled,
                 myComm.below()[belowI],
                 0,
                 Pstream::msgType(),

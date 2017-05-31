@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,20 +102,6 @@ template<class Thermo>
 inline Foam::autoPtr<Foam::sutherlandTransport<Thermo>>
 Foam::sutherlandTransport<Thermo>::New
 (
-    Istream& is
-)
-{
-    return autoPtr<sutherlandTransport<Thermo>>
-    (
-        new sutherlandTransport<Thermo>(is)
-    );
-}
-
-
-template<class Thermo>
-inline Foam::autoPtr<Foam::sutherlandTransport<Thermo>>
-Foam::sutherlandTransport<Thermo>::New
-(
     const dictionary& dict
 )
 {
@@ -158,7 +144,7 @@ inline Foam::scalar Foam::sutherlandTransport<Thermo>::alphah
 ) const
 {
 
-    return kappa(p, T)/this->Cpv(p, T);
+    return kappa(p, T)/this->Cp(p, T);
 }
 
 
@@ -183,33 +169,18 @@ inline void Foam::sutherlandTransport<Thermo>::operator+=
     const sutherlandTransport<Thermo>& st
 )
 {
-    scalar molr1 = this->nMoles();
+    scalar Y1 = this->Y();
 
     Thermo::operator+=(st);
 
-    molr1 /= this->nMoles();
-    scalar molr2 = st.nMoles()/this->nMoles();
+    if (mag(this->Y()) > SMALL)
+    {
+        Y1 /= this->Y();
+        scalar Y2 = st.Y()/this->Y();
 
-    As_ = molr1*As_ + molr2*st.As_;
-    Ts_ = molr1*Ts_ + molr2*st.Ts_;
-}
-
-
-template<class Thermo>
-inline void Foam::sutherlandTransport<Thermo>::operator-=
-(
-    const sutherlandTransport<Thermo>& st
-)
-{
-    scalar molr1 = this->nMoles();
-
-    Thermo::operator-=(st);
-
-    molr1 /= this->nMoles();
-    scalar molr2 = st.nMoles()/this->nMoles();
-
-    As_ = molr1*As_ - molr2*st.As_;
-    Ts_ = molr1*Ts_ - molr2*st.Ts_;
+        As_ = Y1*As_ + Y2*st.As_;
+        Ts_ = Y1*Ts_ + Y2*st.Ts_;
+    }
 }
 
 
@@ -237,39 +208,28 @@ inline Foam::sutherlandTransport<Thermo> Foam::operator+
         static_cast<const Thermo&>(st1) + static_cast<const Thermo&>(st2)
     );
 
-    scalar molr1 = st1.nMoles()/t.nMoles();
-    scalar molr2 = st2.nMoles()/t.nMoles();
+    if (mag(t.Y()) < SMALL)
+    {
+        return sutherlandTransport<Thermo>
+        (
+            t,
+            0,
+            st1.As_,
+            st1.Ts_
+        );
+    }
+    else
+    {
+        scalar Y1 = st1.Y()/t.Y();
+        scalar Y2 = st2.Y()/t.Y();
 
-    return sutherlandTransport<Thermo>
-    (
-        t,
-        molr1*st1.As_ + molr2*st2.As_,
-        molr1*st1.Ts_ + molr2*st2.Ts_
-    );
-}
-
-
-template<class Thermo>
-inline Foam::sutherlandTransport<Thermo> Foam::operator-
-(
-    const sutherlandTransport<Thermo>& st1,
-    const sutherlandTransport<Thermo>& st2
-)
-{
-    Thermo t
-    (
-        static_cast<const Thermo&>(st1) - static_cast<const Thermo&>(st2)
-    );
-
-    scalar molr1 = st1.nMoles()/t.nMoles();
-    scalar molr2 = st2.nMoles()/t.nMoles();
-
-    return sutherlandTransport<Thermo>
-    (
-        t,
-        molr1*st1.As_ - molr2*st2.As_,
-        molr1*st1.Ts_ - molr2*st2.Ts_
-    );
+        return sutherlandTransport<Thermo>
+        (
+            t,
+            Y1*st1.As_ + Y2*st2.As_,
+            Y1*st1.Ts_ + Y2*st2.Ts_
+        );
+    }
 }
 
 
@@ -286,17 +246,6 @@ inline Foam::sutherlandTransport<Thermo> Foam::operator*
         st.As_,
         st.Ts_
     );
-}
-
-
-template<class Thermo>
-inline Foam::sutherlandTransport<Thermo> Foam::operator==
-(
-    const sutherlandTransport<Thermo>& st1,
-    const sutherlandTransport<Thermo>& st2
-)
-{
-    return st2 - st1;
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,7 @@ public:
 
     void operator()
     (
-        Field<Type>& field,
+        DimensionedField<Type, GeoMesh>& field,
         const MeshMapper& mapper
     ) const;
 };
@@ -72,10 +72,12 @@ void MapGeometricFields
     const MeshMapper& mapper
 )
 {
-    HashTable<const GeometricField<Type, PatchField, GeoMesh>*> fields
+    typedef GeometricField<Type, PatchField, GeoMesh> FieldType;
+
+    HashTable<const FieldType*> fields
     (
         mapper.thisDb().objectRegistry::template
-            lookupClass<GeometricField<Type, PatchField, GeoMesh>>()
+            lookupClass<FieldType>()
     );
 
     // It is necessary to enforce that all old-time fields are stored
@@ -83,17 +85,9 @@ void MapGeometricFields
     // old-time-level field is mapped before the field itself, sizes
     // will not match.
 
-    for
-    (
-        typename HashTable<const GeometricField<Type, PatchField, GeoMesh>*>::
-            iterator fieldIter = fields.begin();
-        fieldIter != fields.end();
-        ++fieldIter
-    )
+    forAllConstIter(typename HashTable<const FieldType*>, fields, fieldIter)
     {
-        GeometricField<Type, PatchField, GeoMesh>& field =
-            const_cast<GeometricField<Type, PatchField, GeoMesh>&>
-            (*fieldIter());
+        FieldType& field = const_cast<FieldType&>(*fieldIter());
 
         //Note: check can be removed once pointFields are actually stored on
         //      the pointMesh instead of now on the polyMesh!
@@ -103,17 +97,9 @@ void MapGeometricFields
         }
     }
 
-    for
-    (
-        typename HashTable<const GeometricField<Type, PatchField, GeoMesh>*>::
-            iterator fieldIter = fields.begin();
-        fieldIter != fields.end();
-        ++fieldIter
-    )
+    forAllConstIter(typename HashTable<const FieldType*>, fields, fieldIter)
     {
-        GeometricField<Type, PatchField, GeoMesh>& field =
-            const_cast<GeometricField<Type, PatchField, GeoMesh>&>
-            (*fieldIter());
+        FieldType& field = const_cast<FieldType&>(*fieldIter());
 
         if (&field.mesh() == &mapper.mesh())
         {
@@ -124,15 +110,11 @@ void MapGeometricFields
             }
 
             // Map the internal field
-            MapInternalField<Type, MeshMapper, GeoMesh>()
-            (
-                field.primitiveFieldRef(),
-                mapper
-            );
+            MapInternalField<Type, MeshMapper, GeoMesh>()(field.ref(), mapper);
 
             // Map the patch fields
-            typename GeometricField<Type, PatchField, GeoMesh>
-            ::Boundary& bfield = field.boundaryFieldRef();
+            typename FieldType::Boundary& bfield = field.boundaryFieldRef();
+
             forAll(bfield, patchi)
             {
                 // Cannot check sizes for patch fields because of

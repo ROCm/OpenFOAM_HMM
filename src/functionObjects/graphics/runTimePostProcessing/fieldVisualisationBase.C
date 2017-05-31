@@ -480,8 +480,7 @@ void Foam::functionObjects::fieldVisualisationBase::addGlyphs
     else
     {
         WarningInFunction
-            << "Glyphs can only be added to " << pTraits<scalar>::typeName
-            << " and " << pTraits<vector>::typeName << " fields. "
+            << "Glyphs can only be added to scalar and vector fields."
             << " Field " << scaleFieldName << " has " << nComponents
             << " components" << endl;
 

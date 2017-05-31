@@ -75,16 +75,7 @@ Foam::ReactingParcel<ParcelType>::ReactingParcel
         Y_.transfer(Ymix);
     }
 
-    // Check state of Istream
-    is.check
-    (
-        "ReactingParcel<ParcelType>::ReactingParcel"
-        "("
-            "const polyMesh&, "
-            "Istream&, "
-            "bool"
-        ")"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -328,12 +319,7 @@ Foam::Ostream& Foam::operator<<
         os  << p.Y();
     }
 
-    // Check state of Ostream
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, const ReactingParcel<ParcelType>&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

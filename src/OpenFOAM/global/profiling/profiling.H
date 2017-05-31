@@ -54,6 +54,7 @@ SourceFiles
 
 #include "profilingTrigger.H"
 #include "HashPtrTable.H"
+#include "Tuple2.H"
 #include "LIFOStack.H"
 #include "Map.H"
 #include "Time.H"

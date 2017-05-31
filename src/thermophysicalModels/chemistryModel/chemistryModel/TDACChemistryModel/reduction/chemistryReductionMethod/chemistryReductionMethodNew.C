@@ -78,7 +78,7 @@ Foam::chemistryReductionMethod<CompType, ThermoType>::New
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(chemistryReductionMethodTypeName);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown chemistryReductionMethodType type "

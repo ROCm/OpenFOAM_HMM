@@ -67,7 +67,7 @@ autoPtr<interpolationWeights> interpolationWeights::New
     wordConstructorTable::iterator cstrIter =
         wordConstructorTablePtr_->find(type);
 
-    if (cstrIter == wordConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown interpolationWeights type "

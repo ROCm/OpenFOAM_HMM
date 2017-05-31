@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,17 +55,17 @@ addToRunTimeSelectionTable
 
 const thermoSingleLayer& liquidFilmThermo::thermoFilm() const
 {
-    if (!isA<thermoSingleLayer>(owner_))
+    if (!isA<thermoSingleLayer>(filmModel_))
     {
         FatalErrorInFunction
             << "Thermo model requires a " << thermoSingleLayer::typeName
             << " film to supply the pressure and temperature, but "
-            << owner_.type() << " film model selected.  "
+            << filmModel_.type() << " film model selected.  "
             << "Use the 'useReferenceValues' flag to employ reference "
             << "pressure and temperature" << exit(FatalError);
     }
 
-    return refCast<const thermoSingleLayer>(owner_);
+    return refCast<const thermoSingleLayer>(filmModel_);
 }
 
 
@@ -78,13 +78,13 @@ void liquidFilmThermo::initLiquid(const dictionary& dict)
 
     dict.lookup("liquid") >> name_;
 
-    if (owner_.primaryMesh().foundObject<SLGThermo>("SLGThermo"))
+    if (filmModel_.primaryMesh().foundObject<SLGThermo>("SLGThermo"))
     {
         // retrieve from film thermo
         ownLiquid_ = false;
 
         const SLGThermo& thermo =
-            owner_.primaryMesh().lookupObject<SLGThermo>("SLGThermo");
+            filmModel_.primaryMesh().lookupObject<SLGThermo>("SLGThermo");
         label id = thermo.liquidId(name_);
         liquidPtr_ = &thermo.liquids().properties()[id];
     }
@@ -93,7 +93,8 @@ void liquidFilmThermo::initLiquid(const dictionary& dict)
         // new liquid create
         ownLiquid_ = true;
 
-        liquidPtr_ = new liquidProperties(dict.subDict(name_ + "Coeffs"));
+        liquidPtr_ =
+            liquidProperties::New(dict.optionalSubDict(name_ + "Coeffs")).ptr();
     }
 }
 
@@ -102,11 +103,11 @@ void liquidFilmThermo::initLiquid(const dictionary& dict)
 
 liquidFilmThermo::liquidFilmThermo
 (
-    surfaceFilmModel& owner,
+    surfaceFilmModel& film,
     const dictionary& dict
 )
 :
-    filmThermoModel(typeName, owner, dict),
+    filmThermoModel(typeName, film, dict),
     name_("unknown_liquid"),
     liquidPtr_(nullptr),
     ownLiquid_(false),
@@ -189,7 +190,7 @@ scalar liquidFilmThermo::kappa
     const scalar T
 ) const
 {
-    return liquidPtr_->K(p, T);
+    return liquidPtr_->kappa(p, T);
 }
 
 
@@ -244,12 +245,12 @@ tmp<volScalarField> liquidFilmThermo::rho() const
             IOobject
             (
                 type() + ":rho",
-                owner().time().timeName(),
-                owner().regionMesh(),
+                film().time().timeName(),
+                film().regionMesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            owner().regionMesh(),
+            film().regionMesh(),
             dimensionedScalar("0", dimDensity, 0.0),
             extrapolatedCalculatedFvPatchScalarField::typeName
         )
@@ -289,12 +290,12 @@ tmp<volScalarField> liquidFilmThermo::mu() const
             IOobject
             (
                 type() + ":mu",
-                owner().time().timeName(),
-                owner().regionMesh(),
+                film().time().timeName(),
+                film().regionMesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            owner().regionMesh(),
+            film().regionMesh(),
             dimensionedScalar("0", dimPressure*dimTime, 0.0),
             extrapolatedCalculatedFvPatchScalarField::typeName
         )
@@ -334,12 +335,12 @@ tmp<volScalarField> liquidFilmThermo::sigma() const
             IOobject
             (
                 type() + ":sigma",
-                owner().time().timeName(),
-                owner().regionMesh(),
+                film().time().timeName(),
+                film().regionMesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            owner().regionMesh(),
+            film().regionMesh(),
             dimensionedScalar("0", dimMass/sqr(dimTime), 0.0),
             extrapolatedCalculatedFvPatchScalarField::typeName
         )
@@ -379,12 +380,12 @@ tmp<volScalarField> liquidFilmThermo::Cp() const
             IOobject
             (
                 type() + ":Cp",
-                owner().time().timeName(),
-                owner().regionMesh(),
+                film().time().timeName(),
+                film().regionMesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            owner().regionMesh(),
+            film().regionMesh(),
             dimensionedScalar("0", dimEnergy/dimMass/dimTemperature, 0.0),
             extrapolatedCalculatedFvPatchScalarField::typeName
         )
@@ -424,12 +425,12 @@ tmp<volScalarField> liquidFilmThermo::kappa() const
             IOobject
             (
                 type() + ":kappa",
-                owner().time().timeName(),
-                owner().regionMesh(),
+                film().time().timeName(),
+                film().regionMesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            owner().regionMesh(),
+            film().regionMesh(),
             dimensionedScalar("0", dimPower/dimLength/dimTemperature, 0.0),
             extrapolatedCalculatedFvPatchScalarField::typeName
         )

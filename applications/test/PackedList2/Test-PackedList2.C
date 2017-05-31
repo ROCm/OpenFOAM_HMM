@@ -84,6 +84,12 @@ int main(int argc, char *argv[])
         packed.resize(n, 1);
     }
     Info<< "resize/shrink/resize:" << timer.cpuTimeIncrement() << " s\n\n";
+    Info<< "packed bool size=" << packed.size() << nl;
+
+    // Neither of these should affect the size
+    packed.unset(2*n-1);
+    packed.set(2*n-1, 0);
+    Info<< "packed bool size=" << packed.size() << nl;
 
     // set every other bit on:
     Info<< "set every other bit on and count\n";
@@ -99,8 +105,8 @@ int main(int argc, char *argv[])
         }
     }
     Info<< "Counting brute-force:" << timer.cpuTimeIncrement()
-        << " s" << endl;
-    Info<< "  sum " << sum << endl;
+        << " s" << nl
+        << "  sum " << sum << endl;
 
 
     // Count packed
@@ -110,8 +116,8 @@ int main(int argc, char *argv[])
         sum += packed.count();
     }
     Info<< "Counting via count():" << timer.cpuTimeIncrement()
-        << " s" << endl;
-    Info<< "  sum " << sum << endl;
+        << " s" << nl
+        << "  sum " << sum << endl;
 
 
     // Dummy addition
@@ -123,8 +129,8 @@ int main(int argc, char *argv[])
             sum += i + 1;
         }
     }
-    Info<< "Dummy loop:" << timer.cpuTimeIncrement() << " s" << endl;
-    Info<< "  sum " << sum << endl;
+    Info<< "Dummy loop:" << timer.cpuTimeIncrement() << " s" << nl
+        << "  sum " << sum << " (sum is meaningless)" << endl;
 
     //
     // Read
@@ -139,8 +145,8 @@ int main(int argc, char *argv[])
             sum += stlVector[i];
         }
     }
-    Info<< "Reading stl:" << timer.cpuTimeIncrement() << " s" << endl;
-    Info<< "  sum " << sum << endl;
+    Info<< "Reading stl:" << timer.cpuTimeIncrement() << " s" << nl
+        << "  sum " << sum << endl;
 
 
     // Read unpacked
@@ -152,8 +158,8 @@ int main(int argc, char *argv[])
             sum += unpacked[i];
         }
     }
-    Info<< "Reading unpacked:" << timer.cpuTimeIncrement() << " s" << endl;
-    Info<< "  sum " << sum << endl;
+    Info<< "Reading unpacked:" << timer.cpuTimeIncrement() << " s" << nl
+        << "  sum " << sum << endl;
 
 
     // Read packed
@@ -166,8 +172,8 @@ int main(int argc, char *argv[])
         }
     }
     Info<< "Reading packed using get:" << timer.cpuTimeIncrement()
-        << " s" << endl;
-    Info<< "  sum " << sum << endl;
+        << " s" << nl
+        << "  sum " << sum << endl;
 
 
     // Read packed
@@ -180,8 +186,8 @@ int main(int argc, char *argv[])
         }
     }
     Info<< "Reading packed using reference:" << timer.cpuTimeIncrement()
-        << " s" << endl;
-    Info<< "  sum " << sum << endl;
+        << " s" << nl
+        << "  sum " << sum << endl;
 
 
     // Read via iterator
@@ -194,8 +200,8 @@ int main(int argc, char *argv[])
         }
     }
     Info<< "Reading packed using iterator:" << timer.cpuTimeIncrement()
-        << " s" << endl;
-    Info<< "  sum " << sum << endl;
+        << " s" << nl
+        << "  sum " << sum << endl;
 
 
     // Read via iterator
@@ -208,8 +214,8 @@ int main(int argc, char *argv[])
         }
     }
     Info<< "Reading packed using const_iterator():" << timer.cpuTimeIncrement()
-        << " s" << endl;
-    Info<< "  sum " << sum << endl;
+        << " s" << nl
+        << "  sum " << sum << endl;
 
 
     // Read empty hash
@@ -222,8 +228,8 @@ int main(int argc, char *argv[])
         }
     }
     Info<< "Reading empty labelHashSet:" << timer.cpuTimeIncrement()
-        << " s" << endl;
-    Info<< "  sum " << sum << endl;
+        << " s" << nl
+        << "  sum " << sum << endl;
 
 
     // Read full hash
@@ -236,8 +242,8 @@ int main(int argc, char *argv[])
         }
     }
     Info<< "Reading full labelHashSet:" << timer.cpuTimeIncrement()
-        << " s" << endl;
-    Info<< "  sum " << sum << endl;
+        << " s" << nl
+        << "  sum " << sum << endl;
 
 
     // Read empty static hash
@@ -250,8 +256,8 @@ int main(int argc, char *argv[])
         }
     }
     Info<< "Reading empty StaticHash:" << timer.cpuTimeIncrement()
-        << " s" << endl;
-    Info<< "  sum " << sum << endl;
+        << " s" << nl
+        << "  sum " << sum << endl;
 
 #if 0
     // we can skip this test - it is usually quite slow
@@ -265,8 +271,8 @@ int main(int argc, char *argv[])
         }
     }
     Info<< "Reading full StaticHash:" << timer.cpuTimeIncrement()
-        << " s" << endl;
-    Info<< "  sum " << sum << endl;
+        << " s" << nl
+        << "  sum " << sum << endl;
 #endif
 
     Info<< "Starting write tests" << endl;
@@ -318,7 +324,6 @@ int main(int argc, char *argv[])
     }
     Info<< "Writing packed using set:" << timer.cpuTimeIncrement()
         << " s" << endl;
-
 
     // Write packed
     for (label iter = 0; iter < nIters; ++iter)

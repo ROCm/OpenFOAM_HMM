@@ -54,4 +54,7 @@ derivedFvPatchFields/greyDiffusiveRadiation/greyDiffusiveRadiationMixedFvPatchSc
 derivedFvPatchFields/wideBandDiffusiveRadiation/wideBandDiffusiveRadiationMixedFvPatchScalarField.C
 derivedFvPatchFields/greyDiffusiveViewFactor/greyDiffusiveViewFactorFixedValueFvPatchScalarField.C
 
+/* fvOptions */
+fvOptions/radiation/radiation.C
+
 LIB = $(FOAM_LIBBIN)/libradiationModels

@@ -34,10 +34,7 @@ template<class LListBase, class T>
 template<class INew>
 void Foam::LPtrList<LListBase, T>::read(Istream& is, const INew& iNew)
 {
-    is.fatalCheck
-    (
-        "LPtrList<LListBase, T>::read(Istream&, const INew&)"
-    );
+    is.fatalCheck(FUNCTION_NAME);
 
     token firstToken(is);
 
@@ -102,7 +99,7 @@ void Foam::LPtrList<LListBase, T>::read(Istream& is, const INew& iNew)
         }
 
         token lastToken(is);
-        is.fatalCheck("LPtrList<LListBase, T>::read(Istream&, const INew&)");
+        is.fatalCheck(FUNCTION_NAME);
 
         while
         (
@@ -116,10 +113,7 @@ void Foam::LPtrList<LListBase, T>::read(Istream& is, const INew& iNew)
             this->append(iNew(is).ptr());
 
             is >> lastToken;
-            is.fatalCheck
-            (
-                "LPtrList<LListBase, T>::read(Istream&, const INew&)"
-            );
+            is.fatalCheck(FUNCTION_NAME);
         }
     }
     else
@@ -132,7 +126,7 @@ void Foam::LPtrList<LListBase, T>::read(Istream& is, const INew& iNew)
             << exit(FatalIOError);
     }
 
-    is.fatalCheck("LPtrList<LListBase, T>::read(Istream&, const INew&)");
+    is.fatalCheck(FUNCTION_NAME);
 }
 
 
@@ -190,9 +184,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const LPtrList<LListBase, T>& lst)
     // Write end of contents
     os << token::END_LIST;
 
-    // Check state of IOstream
-    os.check("Ostream& operator<<(Ostream&, const LPtrList<LListBase, T>&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

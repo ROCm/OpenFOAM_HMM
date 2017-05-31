@@ -45,6 +45,18 @@ Description
 
 namespace Foam
 {
+    tmp<volScalarField> byDt(const volScalarField& vf)
+    {
+        if (fv::localEulerDdt::enabled(vf.mesh()))
+        {
+            return fv::localEulerDdt::localRDeltaT(vf.mesh())*vf;
+        }
+        else
+        {
+            return vf/vf.mesh().time().deltaT();
+        }
+    }
+
     tmp<surfaceScalarField> byDt(const surfaceScalarField& sf)
     {
         if (fv::localEulerDdt::enabled(sf.mesh()))
@@ -92,7 +104,7 @@ int main(int argc, char *argv[])
         )
     );
 
-    #include "createRDeltaTf.H"
+    #include "pUf/createRDeltaTf.H"
     #include "pUf/createDDtU.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -234,9 +234,7 @@ inline Istream& operator>>(Istream& is, Tuple2<Type1, Type2>& t2)
     is >> t2.f_ >> t2.s_;
     is.readEnd("Tuple2");
 
-    // Check state of Istream
-    is.check("operator>>(Istream&, Tuple2<Type1, Type2>&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 

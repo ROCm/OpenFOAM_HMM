@@ -125,12 +125,6 @@ int main(int argc, char *argv[])
         "provide alternative base name when re-exporting (implies -export). "
         "Default is <meshExport>."
     );
-    // This often works, but is not entirely stable
-    //     argList::addBoolOption
-    //     (
-    //         "combine",
-    //         "combine identically named patches"
-    //     );
     argList::addBoolOption
     (
         "noBaffles",
@@ -210,10 +204,6 @@ int main(int argc, char *argv[])
     if (args.optionFound("numbered"))
     {
         rOpts.useNumberedNames(true);
-    }
-    else if (args.optionFound("combine"))
-    {
-        rOpts.combineBoundaries(true);
     }
 
     if (args.optionFound("solids"))
@@ -295,7 +285,7 @@ int main(int argc, char *argv[])
         {
             const fileName geomName = exportName + ".ccmg";
             Info<< nl << "Re-exporting geometry as " << geomName << nl;
-            ccm::writer(geomName, mesh).writeGeometry();
+            ccm::writer(geomName, mesh()).writeGeometry();
         }
     }
     else

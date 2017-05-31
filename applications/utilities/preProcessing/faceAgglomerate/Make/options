@@ -5,6 +5,4 @@ EXE_INC = \
 
 EXE_LIBS = \
     -lfiniteVolume \
-    -lpairPatchAgglomeration \
-    -ltriSurface \
-    -lmeshTools
+    -lpairPatchAgglomeration

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,45 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include <iostream>
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+inline std::string::size_type Foam::string::find_ext() const
+{
+    const size_type i = find_last_of("./");
+
+    if (i == npos || i == 0 || operator[](i) == '/')
+    {
+        return npos;
+    }
+    else
+    {
+        return i;
+    }
+}
+
+
+inline bool Foam::string::hasExt() const
+{
+    return (find_ext() != npos);
+}
+
+
+inline bool Foam::string::removeExt()
+{
+    const size_type i = find_ext();
+
+    if (i == npos)
+    {
+        return false;
+    }
+    else
+    {
+        this->resize(i);
+        return true;
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -178,14 +217,20 @@ inline String Foam::string::validate(const std::string& str)
     return ss;
 }
 
+
 inline bool Foam::string::match(const std::string& text) const
 {
-    // check as string
-    return (text == *this);
+    return !compare(text);  // Always compare as literal string
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline bool Foam::string::operator()(const std::string& text) const
+{
+    return !compare(text);  // Always compare as literal string
+}
+
 
 inline Foam::string Foam::string::operator()
 (
@@ -205,11 +250,11 @@ inline Foam::string Foam::string::operator()(const size_type n) const
 
 inline unsigned Foam::string::hash::operator()
 (
-    const string& key,
+    const string& str,
     unsigned seed
 ) const
 {
-    return Hasher(key.data(), key.size(), seed);
+    return Hasher(str.data(), str.size(), seed);
 }
 
 // ************************************************************************* //

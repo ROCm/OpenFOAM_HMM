@@ -69,11 +69,7 @@ Foam::MPPICParcel<ParcelType>::MPPICParcel
         }
     }
 
-    is.check
-    (
-        "MPPICParcel<ParcelType>::Collisions"
-        "(const polyMesh&, Istream&, bool)"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -182,11 +178,7 @@ Foam::Ostream& Foam::operator<<
         );
     }
 
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, const MPPICParcel<ParcelType>&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

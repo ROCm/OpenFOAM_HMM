@@ -38,11 +38,7 @@ Foam::dictionaryEntry::dictionaryEntry
     entry(keyType(is)),
     dictionary(parentDict, is)
 {
-    is.fatalCheck
-    (
-        "dictionaryEntry::dictionaryEntry"
-        "(const dictionary& parentDict, Istream&)"
-    );
+    is.fatalCheck(FUNCTION_NAME);
 }
 
 
@@ -56,11 +52,7 @@ Foam::dictionaryEntry::dictionaryEntry
     entry(key),
     dictionary(key, parentDict, is)
 {
-    is.fatalCheck
-    (
-        "dictionaryEntry::dictionaryEntry"
-        "(const keyType&, const dictionary& parentDict, Istream&)"
-    );
+    is.fatalCheck(FUNCTION_NAME);
 }
 
 

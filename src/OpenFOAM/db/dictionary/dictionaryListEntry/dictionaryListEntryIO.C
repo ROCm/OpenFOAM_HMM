@@ -115,8 +115,7 @@ void Foam::dictionaryListEntry::write(Ostream& os) const
     // Write end delimiter
     os << decrIndent << indent << token::END_LIST << nl;
 
-    // Check state of IOstream
-    os.check("Ostream& operator<<(Ostream&, const dictionaryListEntry&)");
+    os.check(FUNCTION_NAME);
 }
 
 

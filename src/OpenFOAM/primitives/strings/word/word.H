@@ -25,7 +25,7 @@ Class
     Foam::word
 
 Description
-    A class for handling words, derived from string.
+    A class for handling words, derived from Foam::string.
 
     A word is a string of characters without whitespace, quotes, slashes,
     semicolons or brace brackets. Words are delimited by whitespace.
@@ -93,7 +93,7 @@ public:
         inline word
         (
             const char* s,
-            const size_type,
+            const size_type len,
             const bool doStripInvalid
         );
 
@@ -117,14 +117,47 @@ public:
         static word validated(const std::string& s);
 
 
+      // File-like functions
+
+        //- Return word without extension (part before last .)
+        word lessExt() const;
+
+        //- Return file name extension (part after last .)
+        word ext() const;
+
+        //- Append a '.' and the ending, and return the object.
+        //  The '.' and ending will not be added when the ending is empty,
+        //  or when the file name is empty or ended with a '/'.
+        word& ext(const word& ending);
+
+        //- Return true if it has an extension or simply ends with a '.'
+        inline bool hasExt() const;
+
+        //- Return true if the extension is the same as the given ending.
+        bool hasExt(const word& ending) const;
+
+        //- Return true if the extension matches the given ending.
+        bool hasExt(const wordRe& ending) const;
+
+        //- Remove extension, returning true if string changed.
+        inline bool removeExt();
+
+
     // Member operators
 
-        // Assignment
+      // Assignment
 
-            inline void operator=(const word& w);
-            inline void operator=(const string& s);
-            inline void operator=(const std::string& s);
-            inline void operator=(const char* s);
+        //- Copy, no character validation required
+        inline void operator=(const word& w);
+
+        //- Copy, stripping invalid characters
+        inline void operator=(const string& s);
+
+        //- Copy, stripping invalid characters
+        inline void operator=(const std::string& s);
+
+        //- Copy, stripping invalid characters
+        inline void operator=(const char* s);
 
 
     // Friend Operators

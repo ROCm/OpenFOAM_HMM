@@ -143,7 +143,7 @@ bool Foam::functionObjects::volRegion::read
         {
             FatalIOErrorInFunction(dict)
                 << "Unknown region type. Valid region types are:"
-                << regionTypeNames_
+                << regionTypeNames_.toc()
                 << exit(FatalIOError);
         }
     }

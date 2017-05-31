@@ -185,7 +185,7 @@ Foam::Istream& Foam::operator>>(Istream& is, labelRange& range)
     is  >> range.start_ >> range.size_;
     is.readEnd("labelRange");
 
-    is.check("operator>>(Istream&, labelRange&)");
+    is.check(FUNCTION_NAME);
 
     // Disallow invalid sizes
     if (range.size_ < 0)
@@ -204,7 +204,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const labelRange& range)
         << range.start() << token::SPACE << range.size()
         << token::END_LIST;
 
-    os.check("operator<<(Ostream&, const labelRange&)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

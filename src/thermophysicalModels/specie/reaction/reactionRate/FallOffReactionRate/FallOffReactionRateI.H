@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,23 +40,6 @@ FallOffReactionRate
     F_(F),
     thirdBodyEfficiencies_(tbes)
 {}
-
-
-template<class ReactionRate, class FallOffFunction>
-inline Foam::FallOffReactionRate<ReactionRate, FallOffFunction>::
-FallOffReactionRate
-(
-    const speciesTable& species,
-    Istream& is
-)
-:
-    k0_(species, is.readBegin("FallOffReactionRate(Istream&)")),
-    kInf_(species, is),
-    F_(is),
-    thirdBodyEfficiencies_(species, is)
-{
-    is.readEnd("FallOffReactionRate(Istream&)");
-}
 
 
 template<class ReactionRate, class FallOffFunction>
@@ -137,12 +120,7 @@ inline Foam::Ostream& Foam::operator<<
     const FallOffReactionRate<ReactionRate, FallOffFunction>& forr
 )
 {
-    os  << token::BEGIN_LIST
-        << forr.k0_ << token::SPACE
-        << forr.kInf_ << token::SPACE
-        << forr.F_ << token::SPACE
-        << forr.thirdBodyEfficiencies_
-        << token::END_LIST;
+    forr.write(os);
     return os;
 }
 

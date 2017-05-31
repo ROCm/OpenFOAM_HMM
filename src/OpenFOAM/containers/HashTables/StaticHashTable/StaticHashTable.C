@@ -159,6 +159,17 @@ Foam::StaticHashTable<T, Key, Hash>::find
     const Key& key
 ) const
 {
+    return this->cfind(key);
+}
+
+
+template<class T, class Key, class Hash>
+typename Foam::StaticHashTable<T, Key, Hash>::const_iterator
+Foam::StaticHashTable<T, Key, Hash>::cfind
+(
+    const Key& key
+) const
+{
     if (nElmts_)
     {
         const label hashIdx = hashKeyIndex(key);
