@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::noFilm
+    Foam::regionModels::surfaceFilmModels::noFilm
 
 Description
     Dummy surface film model for 'none'

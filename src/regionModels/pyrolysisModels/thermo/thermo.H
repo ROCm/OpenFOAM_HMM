@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::thermo
+    Foam::regionModels::pyrolysisModels::thermo
 
 Description
     Pyrolysis model which solves only the energy equation in the region.

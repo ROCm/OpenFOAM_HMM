@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::drippingInjection
+    Foam::regionModels::surfaceFilmModels::drippingInjection
 
 Description
-    Film Dripping mass transfer model.
+    Film dripping mass transfer model.
 
     If the film mass exceeds that needed to generate a valid parcel, the
     equivalent mass is removed from the film.

@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::standardRadiation
+    Foam::regionModels::surfaceFilmModels::standardRadiation
 
 Description
     Standard radiation model

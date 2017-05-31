@@ -22,13 +22,13 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::constant
+    Foam::diameterModels::constant
 
 Description
     Constant dispersed-phase particle diameter model.
 
 SourceFiles
-    constant.C
+    constantDiameter.C
 
 \*---------------------------------------------------------------------------*/
 

@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::constantHeatTransfer
+    Foam::regionModels::surfaceFilmModels::constantHeatTransfer
 
 Description
     Constant heat transfer model

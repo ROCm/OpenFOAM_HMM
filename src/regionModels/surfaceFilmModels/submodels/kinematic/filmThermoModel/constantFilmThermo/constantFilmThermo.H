@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::constantFilmThermo
+    Foam::regionModels::surfaceFilmModels::constantFilmThermo
 
 Description
     Constant thermo model

@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::thermalBaffle
+    Foam::regionModels::thermalBaffleModels::thermalBaffle
 
 Description
     2D thermal baffle

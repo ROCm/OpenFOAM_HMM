@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::solidification
+    Foam::regionModels::surfaceFilmModels::solidification
 
 Description
     Solidification phase change model where all film mass is converted when the

@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::noRadiation
+    Foam::regionModels::surfaceFilmModels::noRadiation
 
 Description
     Dummy radiation model for 'none' option
