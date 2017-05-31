@@ -594,7 +594,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const fvPatchField<Type>& ptf)
 {
     ptf.write(os);
 
-    os.check("Ostream& operator<<(Ostream&, const fvPatchField<Type>&");
+    os.check(FUNCTION_NAME);
 
     return os;
 }

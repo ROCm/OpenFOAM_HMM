@@ -222,7 +222,8 @@ Foam::radiation::boundaryRadiationPropertiesPatch::emissivity
         default:
         {
             FatalErrorInFunction
-                << "Please set 'mode' to one of " << methodTypeNames_.toc()
+                << "Please set 'mode' to one of "
+                << methodTypeNames_
                 << exit(FatalError);
         }
         break;
@@ -302,7 +303,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::absorptivity
             FatalErrorInFunction
                 << "Unimplemented method " << method_ << endl
                 << "Please set 'mode' to one of "
-                << methodTypeNames_.toc()
+                << methodTypeNames_
                 << exit(FatalError);
         }
         break;
@@ -382,7 +383,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::transmissivity
             FatalErrorInFunction
                 << "Unimplemented method " << method_ << endl
                 << "Please set 'mode' to one of "
-                << methodTypeNames_.toc()
+                << methodTypeNames_
                 << exit(FatalError);
         }
         break;

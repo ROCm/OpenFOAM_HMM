@@ -82,12 +82,7 @@ Foam::molecule::molecule
         }
     }
 
-    // Check state of Istream
-    is.check
-    (
-        "Foam::molecule::molecule"
-        "(const Cloud<molecule>& cloud, Foam::Istream&), bool"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -281,13 +276,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const molecule& mol)
         os  << mol.siteForces_ << mol.sitePositions_;
     }
 
-    // Check state of Ostream
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<"
-        "(Foam::Ostream&, const Foam::molecule&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

@@ -338,7 +338,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const lduMatrix& ldum)
         os  << ldum.upper();
     }
 
-    os.check("Ostream& operator<<(Ostream&, const lduMatrix&");
+    os.check(FUNCTION_NAME);
 
     return os;
 }
@@ -398,7 +398,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMatrix>& ip)
     //    os  << endl;
     //}
 
-    os.check("Ostream& operator<<(Ostream&, const lduMatrix&");
+    os.check(FUNCTION_NAME);
 
     return os;
 }

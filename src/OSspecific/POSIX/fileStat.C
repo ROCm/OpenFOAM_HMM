@@ -123,9 +123,7 @@ Foam::Istream& Foam::operator>>(Istream& is, fileStat& fStat)
     fStat.status_.st_mtime = stat[11];
     fStat.status_.st_ctime = stat[12];
 
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, fileStat&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 

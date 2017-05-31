@@ -244,7 +244,7 @@ void Foam::sampledSurface::print(Ostream& os) const
 Foam::Ostream& Foam::operator<<(Ostream &os, const sampledSurface& s)
 {
     s.print(os);
-    os.check("Ostream& operator<<(Ostream&, const sampledSurface&");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

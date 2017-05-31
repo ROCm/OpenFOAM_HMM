@@ -95,7 +95,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const wchar_t wc)
         os.write(char(0xBD));
     }
 
-    os.check("Ostream& operator<<(Ostream&, const wchar_t)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

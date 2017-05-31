@@ -72,7 +72,7 @@ Foam::Istream& Foam::operator>>
     patchInteractionData& pid
 )
 {
-    is.check("Istream& operator>>(Istream&, patchInteractionData&)");
+    is.check(FUNCTION_NAME);
 
     const dictionaryEntry entry(dictionary::null, is);
 

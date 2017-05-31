@@ -185,12 +185,7 @@ Foam::wallBoundedStreamLineParticle::wallBoundedStreamLineParticle
         }
     }
 
-    // Check state of Istream
-    is.check
-    (
-        "wallBoundedStreamLineParticle::wallBoundedStreamLineParticle"
-        "(const Cloud<wallBoundedStreamLineParticle>&, Istream&, bool)"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -422,12 +417,7 @@ Foam::Ostream& Foam::operator<<
         << token::SPACE << p.sampledScalars_
         << token::SPACE << p.sampledVectors_;
 
-    // Check state of Ostream
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, const wallBoundedStreamLineParticle&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

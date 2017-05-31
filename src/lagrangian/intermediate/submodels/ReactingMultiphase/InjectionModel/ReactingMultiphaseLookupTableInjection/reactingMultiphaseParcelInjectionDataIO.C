@@ -41,7 +41,7 @@ reactingMultiphaseParcelInjectionData(Istream& is)
     is.check("reading YSolid's");
     is >> YSolid_;
 
-    is.check("reactingMultiphaseParcelInjectionData(Istream& is)");
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -78,7 +78,7 @@ Foam::Istream& Foam::operator>>
     is.check("reading YSolid's");
     is >> data.YSolid_;
 
-    is.check("operator(Istream&, reactingMultiphaseParcelInjectionData&)");
+    is.check(FUNCTION_NAME);
 
     return is;
 }

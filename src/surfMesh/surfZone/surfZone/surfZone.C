@@ -148,7 +148,7 @@ Foam::Istream& Foam::operator>>(Istream& is, surfZone& zone)
 {
     zone = surfZone(is, 0);
 
-    is.check("Istream& operator>>(Istream&, surfZone&)");
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -156,7 +156,7 @@ Foam::Istream& Foam::operator>>(Istream& is, surfZone& zone)
 Foam::Ostream& Foam::operator<<(Ostream& os, const surfZone& zone)
 {
     zone.write(os);
-    os.check("Ostream& operator<<(Ostream&, const surfZone&");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

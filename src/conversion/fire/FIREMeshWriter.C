@@ -278,7 +278,7 @@ bool Foam::fileFormats::FIREMeshWriter::write(const fileName& meshName) const
     {
         const word ext = baseName.ext();
 
-        if (FIRECore::file3dExtensions.found(ext))
+        if (FIRECore::file3dExtensions.hasEnum(ext))
         {
             FIRECore::fileExt3d fireFileType = FIRECore::file3dExtensions[ext];
             if (fireFileType == FIRECore::POLY_ASCII)

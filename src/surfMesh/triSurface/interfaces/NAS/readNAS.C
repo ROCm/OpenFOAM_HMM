@@ -372,16 +372,10 @@ bool triSurface::readNAS(const fileName& fName)
     // Convert groupToPatch to patchList.
     geometricSurfacePatchList patches(nPatches);
 
-    forAllConstIter(Map<word>, groupToName, iter)
+    forAllConstIters(groupToName, iter)
     {
-        label patchi = groupToPatch[iter.key()];
-
-        patches[patchi] = geometricSurfacePatch
-        (
-            "empty",
-            iter(),
-            patchi
-        );
+        const label patchIdx = groupToPatch[iter.key()];
+        patches[patchIdx] = geometricSurfacePatch(iter.object(), patchIdx);
     }
 
     Info<< "patches:" << patches << endl;

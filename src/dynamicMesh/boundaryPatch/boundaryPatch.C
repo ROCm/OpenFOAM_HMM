@@ -100,7 +100,7 @@ void Foam::boundaryPatch::write(Ostream& os) const
 Foam::Ostream& Foam::operator<<(Ostream& os, const boundaryPatch& p)
 {
     p.write(os);
-    os.check("Ostream& operator<<(Ostream& f, const boundaryPatch&)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

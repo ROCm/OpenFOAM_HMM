@@ -196,7 +196,8 @@ bool Foam::functionObjects::writeObjects::write()
                 FatalErrorInFunction
                     << "Unknown writeOption "
                     << writeOptionNames_[writeOption_]
-                    << ". Valid writeOption types are" << writeOptionNames_
+                    << ". Valid writeOption types are "
+                    << writeOptionNames_
                     << exit(FatalError);
             }
         }

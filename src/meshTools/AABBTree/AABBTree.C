@@ -492,7 +492,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const AABBTree<Type>& tree)
             << tree.addressing_;
     }
 
-    os.check("Ostream& operator<<(Ostream&, const AABBTree<Type>&)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 
@@ -519,7 +519,7 @@ Foam::Istream& Foam::operator>>(Istream& is, AABBTree<Type>& tree)
             >> tree.addressing_;
     }
 
-    is.check("Istream& operator>>(Istream&, AABBTree<Type>&)");
+    is.check(FUNCTION_NAME);
     return is;
 }
 

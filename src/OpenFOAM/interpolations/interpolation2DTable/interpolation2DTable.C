@@ -123,10 +123,10 @@ Type Foam::interpolation2DTable<Type>::interpolateValue
     const scalar lookupValue
 ) const
 {
-    label n = data.size();
+    const label n = data.size();
 
-    scalar minLimit = data.first().first();
-    scalar maxLimit = data.last().first();
+    const scalar minLimit = data.first().first();
+    const scalar maxLimit = data.last().first();
 
     if (lookupValue < minLimit)
     {
@@ -147,7 +147,9 @@ Type Foam::interpolation2DTable<Type>::interpolateValue
                     << "bound (" << minLimit << ")" << nl
                     << "    Continuing with the first entry"
                     << endl;
-                // fall-through to 'CLAMP'
+                // Behaviour as per 'CLAMP'
+                return data.first().second();
+                break;
             }
             case interpolation2DTable::CLAMP:
             {
@@ -175,7 +177,9 @@ Type Foam::interpolation2DTable<Type>::interpolateValue
                     << "bound (" << maxLimit << ")" << nl
                     << "    Continuing with the last entry"
                     << endl;
-                // fall-through to 'CLAMP'
+                // Behaviour as per 'CLAMP'
+                return data.last().second();
+                break;
             }
             case interpolation2DTable::CLAMP:
             {
@@ -251,16 +255,19 @@ Foam::label Foam::interpolation2DTable<Type>::Xi
                 WarningInFunction
                     << "value (" << valueX << ") out of bounds"
                     << endl;
-                // fall-through to 'CLAMP'
+                // Behaviour as per 'CLAMP'
+                return limitI;
+                break;
             }
             case interpolation2DTable::CLAMP:
             {
                 return limitI;
+                break;
             }
             default:
             {
                 FatalErrorInFunction
-                    << "Un-handled enumeration " << boundsHandling_
+                    << "Unhandled enumeration " << boundsHandling_
                     << abort(FatalError);
             }
         }
@@ -299,7 +306,7 @@ Type Foam::interpolation2DTable<Type>::operator()
 ) const
 {
     // Considers all of the list in Y being equal
-    label nX = this->size();
+    const label nX = this->size();
 
     const table& t = *this;
 
@@ -320,8 +327,8 @@ Type Foam::interpolation2DTable<Type>::operator()
         // have 2-D data, interpolate
 
         // find low and high indices in the X range that bound valueX
-        label x0i = Xi(lessOp<scalar>(), valueX, false);
-        label x1i = Xi(greaterOp<scalar>(), valueX, true);
+        const label x0i = Xi(lessOp<scalar>(), valueX, false);
+        const label x1i = Xi(greaterOp<scalar>(), valueX, true);
 
         if (x0i == x1i)
         {
@@ -333,8 +340,8 @@ Type Foam::interpolation2DTable<Type>::operator()
             Type y1(interpolateValue(t[x1i].second(), valueY));
 
             // gradient in X
-            scalar x0 = t[x0i].first();
-            scalar x1 = t[x1i].first();
+            const scalar x0 = t[x0i].first();
+            const scalar x1 = t[x1i].first();
             Type mX = (y1 - y0)/(x1 - x0);
 
             // interpolate
@@ -420,7 +427,7 @@ Foam::interpolation2DTable<Type>::outOfBounds
 template<class Type>
 void Foam::interpolation2DTable<Type>::checkOrder() const
 {
-    label n = this->size();
+    const label n = this->size();
     const table& t = *this;
 
     scalar prevValue = t[0].first();
@@ -445,10 +452,8 @@ void Foam::interpolation2DTable<Type>::checkOrder() const
 template<class Type>
 void Foam::interpolation2DTable<Type>::write(Ostream& os) const
 {
-    os.writeKeyword("file")
-        << fileName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("outOfBounds")
-        << boundsHandlingToWord(boundsHandling_) << token::END_STATEMENT << nl;
+    os.writeEntry("file", fileName_);
+    os.writeEntry("outOfBounds", boundsHandlingToWord(boundsHandling_));
 
     os  << *this;
 }

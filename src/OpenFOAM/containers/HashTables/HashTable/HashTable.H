@@ -57,11 +57,13 @@ SourceFiles
 #include "uLabel.H"
 #include "word.H"
 #include "Xfer.H"
+#include "Hash.H"
 #include "className.H"
 #include "nullObject.H"
 
 #include <initializer_list>
 #include <iterator>
+#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,7 +75,6 @@ namespace Foam
 template<class T> class List;
 template<class T> class UList;
 template<class T, unsigned Size> class FixedList;
-template<class T1, class T2> class Tuple2;
 template<class T, class Key, class Hash> class HashTable;
 
 template<class T, class Key, class Hash>
@@ -212,7 +213,7 @@ private:
 
     // Private data type for table entries
 
-        //- Structure to hold a hashed entry, with a SLList for collisions
+        //- Structure to hold a hashed entry, with a linked-list for collisions
         struct hashedEntry
         {
             //- The lookup key
@@ -224,7 +225,7 @@ private:
             //- Pointer to next hashedEntry in sub-list
             hashedEntry* next_;
 
-            //- Construct from key, next pointer and object
+            //- Construct from key, object, next pointer
             inline hashedEntry(const Key& key, const T& obj, hashedEntry* next);
 
         private:
@@ -296,7 +297,7 @@ public:
         HashTable(const Xfer<HashTable<T, Key, Hash>>& ht);
 
         //- Construct from an initializer list
-        HashTable(std::initializer_list<Tuple2<Key, T>> lst);
+        HashTable(std::initializer_list<std::pair<Key, T>> lst);
 
 
     //- Destructor
@@ -326,6 +327,10 @@ public:
         //- Find and return an const_iterator set at the hashed entry
         //  If not found iterator = end()
         const_iterator find(const Key& key) const;
+
+        //- Find and return an const_iterator set at the hashed entry
+        //  If not found iterator = end()
+        const_iterator cfind(const Key& key) const;
 
         //- Return hashed entry if it exists, or return the given default
         inline const T& lookup(const Key& key, const T& deflt) const;
@@ -554,7 +559,7 @@ public:
         void operator=(const HashTable<T, Key, Hash>& rhs);
 
         //- Assignment from an initializer list
-        void operator=(std::initializer_list<Tuple2<Key, T>> lst);
+        void operator=(std::initializer_list<std::pair<Key, T>> lst);
 
         //- Equality. Hash tables are equal if the keys and values are equal.
         //  Independent of table storage size and table order.

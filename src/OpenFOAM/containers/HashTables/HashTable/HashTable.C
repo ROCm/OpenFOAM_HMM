@@ -29,7 +29,6 @@ License
 #include "HashTable.H"
 #include "List.H"
 #include "FixedList.H"
-#include "Tuple2.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -74,7 +73,7 @@ Foam::HashTable<T, Key, Hash>::HashTable(const label size)
     {
         table_ = new hashedEntry*[tableSize_];
 
-        for (label hashIdx = 0; hashIdx < tableSize_; hashIdx++)
+        for (label hashIdx = 0; hashIdx < tableSize_; ++hashIdx)
         {
             table_[hashIdx] = nullptr;
         }
@@ -112,14 +111,14 @@ Foam::HashTable<T, Key, Hash>::HashTable
 template<class T, class Key, class Hash>
 Foam::HashTable<T, Key, Hash>::HashTable
 (
-    std::initializer_list<Tuple2<Key, T>> lst
+    std::initializer_list<std::pair<Key, T>> lst
 )
 :
     HashTable<T, Key, Hash>(2*lst.size())
 {
-    for (const Tuple2<Key, T>& pair : lst)
+    for (const auto& pair : lst)
     {
-        insert(pair.first(), pair.second());
+        insert(pair.first, pair.second);
     }
 }
 
@@ -200,6 +199,17 @@ Foam::HashTable<T, Key, Hash>::find
 template<class T, class Key, class Hash>
 typename Foam::HashTable<T, Key, Hash>::const_iterator
 Foam::HashTable<T, Key, Hash>::find
+(
+    const Key& key
+) const
+{
+    return this->cfind(key);
+}
+
+
+template<class T, class Key, class Hash>
+typename Foam::HashTable<T, Key, Hash>::const_iterator
+Foam::HashTable<T, Key, Hash>::cfind
 (
     const Key& key
 ) const
@@ -878,7 +888,7 @@ void Foam::HashTable<T, Key, Hash>::operator=
 template<class T, class Key, class Hash>
 void Foam::HashTable<T, Key, Hash>::operator=
 (
-    std::initializer_list<Tuple2<Key, T>> lst
+    std::initializer_list<std::pair<Key, T>> lst
 )
 {
     // Could be zero-sized from a previous transfer()
@@ -893,7 +903,7 @@ void Foam::HashTable<T, Key, Hash>::operator=
 
     for (const auto& pair : lst)
     {
-        insert(pair.first(), pair.second());
+        insert(pair.first, pair.second);
     }
 }
 
@@ -912,7 +922,7 @@ bool Foam::HashTable<T, Key, Hash>::operator==
 
     for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
-        const_iterator other = find(iter.key());
+        const_iterator other = this->cfind(iter.key());
 
         if (!other.found() || other.object() != iter.object())
         {

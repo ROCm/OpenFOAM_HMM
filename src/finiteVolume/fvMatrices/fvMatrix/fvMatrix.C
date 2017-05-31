@@ -2387,7 +2387,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const fvMatrix<Type>& fvm)
         << fvm.internalCoeffs_ << nl
         << fvm.boundaryCoeffs_ << endl;
 
-    os.check("Ostream& operator<<(Ostream&, fvMatrix<Type>&");
+    os.check(FUNCTION_NAME);
 
     return os;
 }

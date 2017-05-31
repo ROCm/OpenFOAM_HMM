@@ -82,7 +82,7 @@ Foam::patchIdentifier::~patchIdentifier()
 
 bool Foam::patchIdentifier::inGroup(const word& name) const
 {
-    return inGroups_.size() && findIndex(inGroups_, name) != -1;
+    return findIndex(inGroups_, name) != -1;
 }
 
 

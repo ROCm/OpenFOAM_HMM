@@ -327,9 +327,8 @@ void Foam::UnsortedMeshedSurface<Face>::setOneZone()
         zoneName = "zone0";
     }
 
-    // set single default zone
-    zoneToc_.setSize(1);
-    zoneToc_[0] = surfZoneIdentifier(zoneName, 0);
+    // Set single default zone
+    zoneToc_ = { surfZoneIdentifier(zoneName, 0) };
 }
 
 
@@ -446,7 +445,7 @@ Foam::Istream& Foam::UnsortedMeshedSurface<Face>::read(Istream& is)
         >> this->storedPoints()
         >> this->storedFaces();
 
-    is.check("UnsortedMeshedSurface::read(Istream&)");
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -458,7 +457,7 @@ Foam::Ostream& Foam::UnsortedMeshedSurface<Face>::write(Ostream& os) const
         << this->points()
         << this->surfFaces();
 
-    os.check("UnsortedMeshedSurface::write(Ostream&) const");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

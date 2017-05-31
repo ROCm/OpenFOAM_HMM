@@ -67,13 +67,13 @@ bool Foam::triSurface::readVTK(const fileName& fName)
 
             patches[zoneI] = geometricSurfacePatch
             (
-                zone.geometricType().size() ? zone.geometricType() : "empty",
                 regionName,
-                zoneI
+                zoneI,
+                zone.geometricType()
             );
 
             // Set triangle regions
-            for (label i = zone.start(); i < zone.start()+zone.size(); i++)
+            for (label i = zone.start(); i < zone.start()+zone.size(); ++i)
             {
                 tris[i].region() = zoneI;
             }
@@ -81,11 +81,9 @@ bool Foam::triSurface::readVTK(const fileName& fName)
     }
     else
     {
-        // Add single patch
-        patches.setSize(1);
-        patches[0] = geometricSurfacePatch("empty", "patch0", 0);
-
+        // Add single (default) patch
         // Triangle regions already set to 0
+        patches = { geometricSurfacePatch("patch0", 0) };
     }
 
 

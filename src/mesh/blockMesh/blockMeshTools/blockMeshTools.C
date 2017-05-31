@@ -69,10 +69,7 @@ void Foam::blockMeshTools::read
             << exit(FatalIOError);
     }
 
-    is.fatalCheck
-    (
-        "operator>>(Istream&, List<T>&) : reading entry"
-    );
+    is.fatalCheck(FUNCTION_NAME);
 }
 
 

@@ -114,12 +114,7 @@ Foam::Istream& Foam::operator>>(Istream& is, tetIndices& tI)
         >> tI.facePtB()
         >> tI.tetPt();
 
-    // Check state of Istream
-    is.check
-    (
-        "Foam::Istream& Foam::operator>>(Foam::Istream&, Foam::tetIndices&)"
-    );
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -134,13 +129,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const tetIndices& tI)
         << tI.tetPt() << token::SPACE
         << endl;
 
-    // Check state of Ostream
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
-        "const Foam::tetIndices&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

@@ -134,7 +134,7 @@ kappa() const
                     << " on mesh " << this->db().name() << " patch "
                     << patch().name()
                     << " could not find a method in. Methods are:  "
-                    << methodTypeNames_.toc()
+                    << methodTypeNames_
                     << " Not turbulenceModel or thermophysicalProperties"
                     << " were found"
                     << exit(FatalError);

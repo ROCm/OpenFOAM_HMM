@@ -266,7 +266,7 @@ Foam::Istream& Foam::PackedList<nBits>::read(Istream& is)
     PackedList<nBits>& lst = *this;
 
     lst.clear();
-    is.fatalCheck("PackedList<nBits>::read(Istream&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     token firstTok(is);
     is.fatalCheck
@@ -349,7 +349,7 @@ Foam::Istream& Foam::PackedList<nBits>::read(Istream& is)
         if (firstTok.pToken() == token::BEGIN_LIST)
         {
             token nextTok(is);
-            is.fatalCheck("PackedList<nBits>::read(Istream&)");
+            is.fatalCheck(FUNCTION_NAME);
 
             while
             (
@@ -362,13 +362,13 @@ Foam::Istream& Foam::PackedList<nBits>::read(Istream& is)
                 lst.append(lst.readValue(is));
 
                 is  >> nextTok;
-                is.fatalCheck("PackedList<nBits>::read(Istream&)");
+                is.fatalCheck(FUNCTION_NAME);
             }
         }
         else if (firstTok.pToken() == token::BEGIN_BLOCK)
         {
             token nextTok(is);
-            is.fatalCheck("PackedList<nBits>::read(Istream&)");
+            is.fatalCheck(FUNCTION_NAME);
 
             while
             (
@@ -381,7 +381,7 @@ Foam::Istream& Foam::PackedList<nBits>::read(Istream& is)
                 lst.setPair(is);
 
                 is  >> nextTok;
-                is.fatalCheck("PackedList<nBits>::read(Istream&)");
+                is.fatalCheck(FUNCTION_NAME);
             }
         }
         else

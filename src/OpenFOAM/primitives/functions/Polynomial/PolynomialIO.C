@@ -37,12 +37,7 @@ Foam::Ostream& Foam::operator<<
     os  << static_cast
             <VectorSpace<Polynomial<PolySize>, scalar, PolySize>>(poly);
 
-    // Check state of Ostream
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, const Polynomial<PolySize>&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

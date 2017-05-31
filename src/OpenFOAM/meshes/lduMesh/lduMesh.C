@@ -139,7 +139,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMesh>& ip)
         }
     }
 
-    os.check("Ostream& operator<<(Ostream&, const lduMesh&");
+    os.check(FUNCTION_NAME);
 
     return os;
 }

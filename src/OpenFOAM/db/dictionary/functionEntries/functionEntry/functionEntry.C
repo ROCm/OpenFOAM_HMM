@@ -84,11 +84,7 @@ bool Foam::functionEntry::execute
     Istream& is
 )
 {
-    is.fatalCheck
-    (
-        "functionEntry::execute"
-        "(const word& functionName, dictionary& parentDict, Istream&)"
-    );
+    is.fatalCheck(FUNCTION_NAME);
 
     if (!executedictionaryIstreamMemberFunctionTablePtr_)
     {
@@ -127,11 +123,7 @@ bool Foam::functionEntry::execute
     Istream& is
 )
 {
-    is.fatalCheck
-    (
-        "functionEntry::execute"
-        "(const word&, const dictionary&, primitiveEntry&, Istream&)"
-    );
+    is.fatalCheck(FUNCTION_NAME);
 
     if (!executeprimitiveEntryIstreamMemberFunctionTablePtr_)
     {

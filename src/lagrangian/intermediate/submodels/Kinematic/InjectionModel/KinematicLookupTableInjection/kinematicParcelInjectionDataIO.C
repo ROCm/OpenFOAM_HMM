@@ -44,7 +44,7 @@ Foam::kinematicParcelInjectionData::kinematicParcelInjectionData(Istream& is)
     is.check("reading mDot");
     is >> mDot_;
 
-    is.check("kinematicParcelInjectionData(Istream& is)");
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -79,7 +79,7 @@ Foam::Istream& Foam::operator>>(Istream& is, kinematicParcelInjectionData& data)
     is.check("reading mDot");
     is >> data.mDot_;
 
-    is.check("operator(Istream&, kinematicParcelInjectionData&)");
+    is.check(FUNCTION_NAME);
 
     return is;
 }

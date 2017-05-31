@@ -104,9 +104,7 @@ Foam::Istream& Foam::operator>>(Istream& is, keyType& kw)
         return is;
     }
 
-    // Check state of IOstream
-    is.check("Istream& operator>>(Istream&, keyType&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -114,7 +112,7 @@ Foam::Istream& Foam::operator>>(Istream& is, keyType& kw)
 Foam::Ostream& Foam::operator<<(Ostream& os, const keyType& kw)
 {
     os.write(kw);
-    os.check("Ostream& operator<<(Ostream&, const keyType&)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

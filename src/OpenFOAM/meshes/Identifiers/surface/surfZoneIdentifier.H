@@ -51,8 +51,8 @@ class dictionary;
 // Forward declaration of friend functions and operators
 
 class surfZoneIdentifier;
-Istream& operator>>(Istream&, surfZoneIdentifier&);
-Ostream& operator<<(Ostream&, const surfZoneIdentifier&);
+Istream& operator>>(Istream& is, surfZoneIdentifier& p);
+Ostream& operator<<(Ostream& os, const surfZoneIdentifier& p);
 
 /*---------------------------------------------------------------------------*\
                      Class surfZoneIdentifier Declaration
@@ -94,21 +94,20 @@ public:
             const word& name,
             const label index,
             const word& geometricType = word::null
-
         );
 
         //- Construct from dictionary
         surfZoneIdentifier
         (
             const word& name,
-            const dictionary&,
+            const dictionary& dict,
             const label index
         );
 
-        //- Construct from another zone identifier, resetting the index
+        //- Copy construct from another zone identifier, resetting the index
         surfZoneIdentifier
         (
-            const surfZoneIdentifier&,
+            const surfZoneIdentifier& p,
             const label index
         );
 
@@ -156,14 +155,8 @@ public:
         }
 
 
-        //- Write surfZoneIdentifier as a dictionary
-        void write(Ostream&) const;
-
-
-    // Member Operators
-
-        bool operator!=(const surfZoneIdentifier&) const;
-        bool operator==(const surfZoneIdentifier&) const;
+        //- Write identifier as a dictionary
+        void write(Ostream& os) const;
 
 
     // Ostream Operator
@@ -171,18 +164,27 @@ public:
         //- Read name/type.
         friend Istream& operator>>
         (
-            Istream&,
-            surfZoneIdentifier&
+            Istream& is,
+            surfZoneIdentifier& ob
         );
 
         //- Write name/type.
         friend Ostream& operator<<
         (
-            Ostream&,
-            const surfZoneIdentifier&
+            Ostream& os,
+            const surfZoneIdentifier& obj
         );
 
 };
+
+
+// Global Operators
+
+//- Compare zone indentifiers for equality
+bool operator==(const surfZoneIdentifier& a, const surfZoneIdentifier& b);
+
+//- Compare zone indentifiers for inequality
+bool operator!=(const surfZoneIdentifier& a, const surfZoneIdentifier& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

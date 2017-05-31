@@ -111,9 +111,7 @@ Istream& operator>>(Istream& is, Scalar& s)
         return is;
     }
 
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, Scalar&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -121,7 +119,7 @@ Istream& operator>>(Istream& is, Scalar& s)
 Ostream& operator<<(Ostream& os, const Scalar s)
 {
     os.write(s);
-    os.check("Ostream& operator<<(Ostream&, const Scalar&)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

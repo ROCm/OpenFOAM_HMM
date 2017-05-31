@@ -66,12 +66,7 @@ Foam::DSMCParcel<ParcelType>::DSMCParcel
         }
     }
 
-    // Check state of Istream
-    is.check
-    (
-        "DSMCParcel<ParcelType>::DSMCParcel"
-        "(const Cloud<ParcelType>&, Istream&, bool)"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -164,12 +159,7 @@ Foam::Ostream& Foam::operator<<
         );
     }
 
-    // Check state of Ostream
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, const DSMCParcel<ParcelType>&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

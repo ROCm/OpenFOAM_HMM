@@ -125,9 +125,7 @@ inline Foam::Istream& Foam::operator>>(Istream& is, Keyed<T>& item)
     // Read end of Keyed item/key pair
     is.readEnd("Keyed<T>");
 
-    // Check state of Ostream
-    is.check("Istream& operator>>(Istream&, Keyed&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 

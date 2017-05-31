@@ -139,9 +139,7 @@ Foam::Ostream& Foam::FixedList<T, Size>::writeList
         os.write(reinterpret_cast<const char*>(L.cdata()), Size*sizeof(T));
     }
 
-    // Check state of IOstream
-    os.check("const FixedList::writeList(Ostream&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 
@@ -158,7 +156,7 @@ Foam::FixedList<T, Size>::FixedList(Istream& is)
 template<class T, unsigned Size>
 Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
 {
-    is.fatalCheck("operator>>(Istream&, FixedList<T, Size>&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     if (is.format() == IOstream::ASCII || !contiguous<T>())
     {

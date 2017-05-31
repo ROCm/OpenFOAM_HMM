@@ -90,9 +90,13 @@ void Foam::meshSubsetHelper::correct(bool verbose)
 
 Foam::polyMesh::readUpdateState Foam::meshSubsetHelper::readUpdate()
 {
-    polyMesh::readUpdateState meshState = baseMesh_.readUpdate();
+    const polyMesh::readUpdateState meshState = baseMesh_.readUpdate();
 
-    if (meshState == polyMesh::TOPO_CHANGE || polyMesh::TOPO_PATCH_CHANGE)
+    if
+    (
+        meshState == polyMesh::TOPO_CHANGE
+     || meshState == polyMesh::TOPO_PATCH_CHANGE
+    )
     {
         correct(true);
     }

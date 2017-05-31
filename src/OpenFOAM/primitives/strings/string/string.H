@@ -58,6 +58,8 @@ namespace Foam
 {
 
 // Forward declaration of classes
+class word;
+class wordRe;
 class Istream;
 class Ostream;
 
@@ -76,6 +78,37 @@ class string
 :
     public std::string
 {
+protected:
+
+    // Protected Member Functions
+
+        //- Find position of a file extension dot, return npos on failure.
+        //  A wrapped version of find_last_of("./") with additional logic.
+        inline size_type find_ext() const;
+
+        //- Return file name extension (part after last .)
+        word ext() const;
+
+        //- Append a '.' and the ending.
+        //  The '.' and ending will not be added when the ending is empty,
+        //  or when the object was or ended with a '/'.
+        //
+        //  \return True if append occurred.
+        bool ext(const word& ending);
+
+        //- Return true if it has an extension or simply ends with a '.'
+        inline bool hasExt() const;
+
+        //- Return true if the extension is the same as the given ending.
+        bool hasExt(const word& ending) const;
+
+        //- Return true if the extension matches the given ending.
+        bool hasExt(const wordRe& ending) const;
+
+        //- Remove extension, returning true if string changed.
+        inline bool removeExt();
+
+
 public:
 
     // Static data members

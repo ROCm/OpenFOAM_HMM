@@ -61,9 +61,7 @@ Foam::Istream& Foam::operator>>(Istream& is, volumeType& vt)
     // Read end of volumeType
     is.readEnd("volumeType");
 
-    // Check state of Istream
-    is.check("operator>>(Istream&, volumeType&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 

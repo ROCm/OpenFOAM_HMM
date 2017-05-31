@@ -1248,7 +1248,7 @@ void Foam::mapDistributeBase::operator=(const mapDistributeBase& rhs)
 
 Foam::Istream& Foam::operator>>(Istream& is, mapDistributeBase& map)
 {
-    is.fatalCheck("operator>>(Istream&, mapDistributeBase&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     is  >> map.constructSize_ >> map.subMap_ >> map.constructMap_
         >> map.subHasFlip_ >> map.constructHasFlip_;

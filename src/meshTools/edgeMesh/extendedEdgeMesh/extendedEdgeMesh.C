@@ -1277,11 +1277,13 @@ void Foam::extendedEdgeMesh::add(const extendedEdgeMesh& fem)
         );
     }
 
-    pointField newEdgeDirections(newEdgeI);
+    pointField newEdgeDirections
+    (
+        edgeDirections().size()
+      + fem.edgeDirections().size()
+    );
     newEdgeDirections.rmap(edgeDirections(), reverseEdgeMap);
     newEdgeDirections.rmap(fem.edgeDirections(), reverseFemEdgeMap);
-
-
 
 
     // Normals
@@ -2446,9 +2448,7 @@ Foam::Istream& Foam::operator>>
 
     vt = static_cast<Foam::extendedEdgeMesh::sideVolumeType>(type);
 
-    // Check state of Istream
-    is.check("operator>>(Istream&, sideVolumeType&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -2497,9 +2497,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const extendedEdgeMesh& em)
         << em.regionEdges_
         << endl;
 
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const extendedEdgeMesh&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 
@@ -2523,9 +2521,7 @@ Foam::Istream& Foam::operator>>(Istream& is, extendedEdgeMesh& em)
         >> em.featurePointEdges_
         >> em.regionEdges_;
 
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, extendedEdgeMesh&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
