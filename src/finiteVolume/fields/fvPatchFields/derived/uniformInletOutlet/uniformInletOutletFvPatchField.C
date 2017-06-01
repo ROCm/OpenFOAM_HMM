@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,6 +55,7 @@ Foam::uniformInletOutletFvPatchField<Type>::uniformInletOutletFvPatchField
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     uniformInletValue_(Function1<Type>::New("uniformInletValue", dict))
 {
+    this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);
     this->refValue() =
         uniformInletValue_->value(this->db().time().timeOutputValue());
 

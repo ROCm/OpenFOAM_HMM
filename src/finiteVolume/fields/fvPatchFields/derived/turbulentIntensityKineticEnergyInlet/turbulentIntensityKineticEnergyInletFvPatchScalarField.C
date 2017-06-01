@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,6 +73,7 @@ turbulentIntensityKineticEnergyInletFvPatchScalarField
     intensity_(readScalar(dict.lookup("intensity"))),
     UName_(dict.lookupOrDefault<word>("U", "U"))
 {
+    this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);
     this->phiName_ = dict.lookupOrDefault<word>("phi", "phi");
 
     if (intensity_ < 0 || intensity_ > 1)

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,9 @@ Foam::fixedMeanFvPatchField<Type>::fixedMeanFvPatchField
 :
     fixedValueFvPatchField<Type>(p, iF, dict),
     meanValue_(Function1<Type>::New("meanValue", dict))
-{}
+{
+    this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+}
 
 
 template<class Type>

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,6 +48,8 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
 :
     inletOutletFvPatchField<Type>(p, iF)
 {
+    this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+
     this->phiName_ = dict.lookupOrDefault<word>("phi","phi");
 
     freestreamValue() = Field<Type>("freestreamValue", dict, p.size());

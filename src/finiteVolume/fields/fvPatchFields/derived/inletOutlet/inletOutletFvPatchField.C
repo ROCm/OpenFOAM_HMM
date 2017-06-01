@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,6 +68,8 @@ Foam::inletOutletFvPatchField<Type>::inletOutletFvPatchField
     mixedFvPatchField<Type>(p, iF),
     phiName_(dict.lookupOrDefault<word>("phi", "phi"))
 {
+    this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+
     this->refValue() = Field<Type>("inletValue", dict, p.size());
 
     if (dict.found("value"))
