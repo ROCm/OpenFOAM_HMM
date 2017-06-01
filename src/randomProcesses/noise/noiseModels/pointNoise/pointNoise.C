@@ -84,7 +84,15 @@ void pointNoise::processData
     Info<< "    read " << t.size() << " values" << nl << endl;
 
     Info<< "Creating noise FFT" << endl;
+
     const scalar deltaT = checkUniformTimeStep(t);
+
+    if (!validateBounds(p))
+    {
+        Info<< "No noise data generated" << endl;
+        return;
+    }
+
 
     // Determine the windowing
     windowModelPtr_->validate(t.size());

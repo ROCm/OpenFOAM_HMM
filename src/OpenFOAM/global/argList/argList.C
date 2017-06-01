@@ -43,6 +43,7 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 bool Foam::argList::bannerEnabled_ = true;
+bool Foam::argList::checkProcessorDirectories_ = true;
 Foam::SLList<Foam::string>    Foam::argList::validArgs;
 Foam::HashTable<Foam::string> Foam::argList::validOptions;
 Foam::HashTable<Foam::string> Foam::argList::validParOptions;
@@ -191,6 +192,12 @@ void Foam::argList::noParallel()
     removeOption("roots");
     removeOption("decomposeParDict");
     validParOptions.clear();
+}
+
+
+void Foam::argList::noCheckProcessorDirectories()
+{
+    checkProcessorDirectories_ = false;
 }
 
 
@@ -748,7 +755,7 @@ void Foam::argList::parse
             // - normal running : nProcs = dictNProcs = nProcDirs
             // - decomposition to more  processors : nProcs = dictNProcs
             // - decomposition to fewer processors : nProcs = nProcDirs
-            if (dictNProcs > Pstream::nProcs())
+            if (checkProcessorDirectories_ && dictNProcs > Pstream::nProcs())
             {
                 FatalError
                     << source
@@ -803,7 +810,11 @@ void Foam::argList::parse
             {
                 // Possibly going to fewer processors.
                 // Check if all procDirs are there.
-                if (dictNProcs < Pstream::nProcs())
+                if
+                (
+                    checkProcessorDirectories_
+                 && dictNProcs < Pstream::nProcs()
+                )
                 {
                     label nProcDirs = 0;
                     while
@@ -1318,15 +1329,30 @@ bool Foam::argList::checkRootCase() const
         return false;
     }
 
-    if (Pstream::master() && !isDir(path()))
+    if (Pstream::parRun())
     {
-        // Allow slaves on non-existing processor directories, created later
-        FatalError
-            << executable_
-            << ": cannot open case directory " << path()
-            << endl;
+        if (Pstream::master() && (checkProcessorDirectories_ && !isDir(path())))
+        {
+            // Allow slaves on non-existing processor directories created later
+            FatalError
+                << executable_
+                << ": cannot open case directory " << path()
+                << endl;
 
-        return false;
+            return false;
+        }
+    }
+    else
+    {
+        if (!isDir(path()))
+        {
+            FatalError
+                << executable_
+                << ": cannot open case directory " << path()
+                << endl;
+
+            return false;
+        }
     }
 
     return true;
