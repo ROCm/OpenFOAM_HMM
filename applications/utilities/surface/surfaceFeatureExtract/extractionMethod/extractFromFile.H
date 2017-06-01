@@ -27,6 +27,7 @@ Class
 Description
     Run-time selectable surface feature extraction.
 
+    Selectable as "extractFromFile".
     Mandatory dictionary entries: "featureEdgeFile".
     Optional dictionary entries: "geometricTestOnly".
 
@@ -60,17 +61,13 @@ class extractFromFile
 
 public:
 
-    // Constructors
-
-        //- Construct from dictionary
-        extractFromFile(const dictionary& dict);
-
+    //- Construct from dictionary
+    extractFromFile(const dictionary& dict);
 
     //- Destructor
     virtual ~extractFromFile();
 
-
-    //- Extracted features from surface
+    //- Features loaded (extracted) from featureEdgeFile
     virtual autoPtr<surfaceFeatures> features
     (
         const triSurface& surf

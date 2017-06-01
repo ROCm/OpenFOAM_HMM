@@ -31,6 +31,153 @@ Description
     Extracts and writes surface features to file. All but the basic feature
     extraction is a work-in-progress.
 
+    The extraction process is driven by the \a system/surfaceFeatureExtractDict
+    dictionary, but the \a -dict option can be used to define an alternative
+    location.
+
+    The \a system/surfaceFeatureExtractDict dictionary contains entries
+    for each extraction process.
+    The name of the individual dictionary is used to load the input surface
+    (found under \a constant/triSurface) and also as the basename for the
+    output.
+
+    If the \c surfaces entry is present in a sub-dictionary, it has absolute
+    precedence over a surface name deduced from the dictionary name.
+    If the dictionary name itself does not have an extension, the \c surfaces
+    entry becomes mandatory since in this case the dictionary name cannot
+    represent an input surface file (ie, there is no file extension).
+    The \c surfaces entry is a wordRe list, which allows loading and
+    combining of multiple surfaces. Any exactly specified surface names must
+    exist, but surfaces selected via regular expressions need not exist.
+    The selection mechanism preserves order and is without duplicates.
+    For example,
+    \verbatim
+    dictName
+    {
+        surfaces    (surface1.stl "other.*" othersurf.obj);
+        ...
+    }
+    \endverbatim
+
+    When loading surfaces, the points/faces/regions of each surface are
+    normally offset to create an aggregated surface. No merging of points
+    or faces is done. The optional entry \c loadingOption can be used to
+    adjust the treatment of the regions when loading single or multiple files,
+    with selections according to the Foam::triSurfaceLoader::loadingOption
+    enumeration.
+    \verbatim
+    dictName
+    {
+        // Optional treatment of surface regions when loading
+        // (single, file, offset, merge)
+        loadingOption   file;
+        ...
+    }
+    \endverbatim
+    The \c loadingOption is primarily used in combination with the
+    \c intersectionMethod (specifically its \c region option).
+    The default \c loadingOption is normally \c offset,
+    but this changes to \c file if the \c intersectionMethod
+    \c region is being used.
+
+    Once surfaces have been loaded, the first stage is to extract
+    features according to the specified \c extractionMethod with values
+    as per the following table:
+    \table
+        extractionMethod   | Description
+        none               | No feature extraction
+        extractFromFile    | Load features from the file named in featureEdgeFile
+        extractFromSurface | Extract features from surface geometry
+    \endtable
+
+    There are a few entries that influence the extraction behaviour:
+    \verbatim
+        // File to use for extractFromFile input
+        featureEdgeFile     "FileName"
+
+        // Mark edges whose adjacent surface normals are at an angle less
+        // than includedAngle as features
+        // - 0  : selects no edges
+        // - 180: selects all edges
+        includedAngle       120;
+
+        // Do not mark region edges
+        geometricTestOnly   yes;
+    \endverbatim
+
+    This initial set of edges can be trimmed:
+    \verbatim
+        trimFeatures
+        {
+            // Remove features with fewer than the specified number of edges
+            minElem         0;
+
+            // Remove features shorter than the specified cumulative length
+            minLen          0.0;
+        }
+    \endverbatim
+
+    and subsetted
+    \verbatim
+    subsetFeatures
+    {
+        // Use a plane to select feature edges (normal)(basePoint)
+        // Only keep edges that intersect the plane
+        plane           (1 0 0)(0 0 0);
+
+        // Select feature edges using a box // (minPt)(maxPt)
+        // Only keep edges inside the box:
+        insideBox       (0 0 0)(1 1 1);
+
+        // Only keep edges outside the box:
+        outsideBox      (0 0 0)(1 1 1);
+
+        // Keep nonManifold edges (edges with >2 connected faces where
+        // the faces form more than two different normal planes)
+        nonManifoldEdges yes;
+
+        // Keep open edges (edges with 1 connected face)
+        openEdges       yes;
+    }
+    \endverbatim
+
+    Subsequently, additional features can be added from another file:
+    \verbatim
+        addFeatures
+        {
+            // Add (without merging) another extendedFeatureEdgeMesh
+            name        axZ.extendedFeatureEdgeMesh;
+        }
+    \endverbatim
+
+    The intersectionMethod provides a final means of adding additional
+    features. These are loosely termed "self-intersection", since it
+    detects the face/face intersections of the loaded surface or surfaces.
+
+    \table
+        intersectionMethod | Description
+        none    | Do nothing
+        self    | All face/face intersections
+        region  | Limit face/face intersections to those between different regions.
+    \endtable
+    The optional \c tolerance tuning parameter is available for handling
+    the face/face intersections, but should normally not be touched.
+
+    As well as the normal extendedFeatureEdgeMesh written,
+    other items can be selected with boolean switches:
+
+    \table
+        Output option | Description
+        closeness | Output the closeness of surface elements to other surface elements.
+        curvature | Output surface curvature
+        featureProximity | Output the proximity of feature points and edges to another
+        writeObj  | Write features to OBJ format for postprocessing
+        writeVTK  | Write closeness/curvature/proximity fields as VTK for postprocessing
+    \endtable
+
+Note
+   Although surfaceFeatureExtract can do many things, there are still a fair
+   number of corner cases where it may not produce the desired result.
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
@@ -60,15 +207,25 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "extract and write surface features to file"
+        "Extract and write surface features to file"
     );
     argList::noParallel();
     argList::noFunctionObjects();
 
-    #include "addDictOption.H"
+    argList::addOption
+    (
+        "dict",
+        "file",
+        "read surfaceFeatureExtractDict from specified location"
+    );
 
     #include "setRootCase.H"
     #include "createTime.H"
+
+    Info<< nl
+        << "Note: "
+        << "Feature line extraction only valid on closed manifold surfaces"
+        << nl << nl;
 
     const word dictName("surfaceFeatureExtractDict");
     #include "setSystemRunTimeDictionaryIO.H"
@@ -82,20 +239,24 @@ int main(int argc, char *argv[])
     // Where to write VTK output files
     const fileName vtkOutputDir = runTime.constantPath()/"triSurface";
 
-    forAllConstIter(dictionary, dict, iter)
+    forAllConstIters(dict, iter)
     {
-        const word& dictName = iter().keyword();
-
-        if (!iter().isDict())
+        if (!iter().isDict() || iter().keyword().isPattern())
         {
             continue;
         }
+
         const dictionary& surfaceDict = iter().dict();
 
         if (!surfaceDict.found("extractionMethod"))
         {
+            // Insist on an extractionMethod
             continue;
         }
+
+        // The output name based in dictionary name (without extensions)
+        const word& dictName = iter().keyword();
+        const word outputName = dictName.lessExt();
 
         autoPtr<surfaceFeaturesExtraction::method> extractor =
             surfaceFeaturesExtraction::method::New
@@ -103,23 +264,33 @@ int main(int argc, char *argv[])
                 surfaceDict
             );
 
-        // The output name, cleansed of extensions
-        // Optional "output" entry, or the dictionary name.
-        const word outputName =
-            fileName
+        // We don't needs the intersectionMethod yet, but can use it
+        // for setting a reasonable loading option
+        const surfaceIntersection::intersectionType selfIntersect =
+            surfaceIntersection::selfIntersectionNames.lookupOrDefault
             (
-                surfaceDict.lookupOrDefault<word>("output", dictName)
-            ).lessExt();
+                "intersectionMethod",
+                surfaceDict,
+                surfaceIntersection::NONE
+            );
 
-        // The "surfaces" entry is normally optional, but if the sub-dictionary
-        // is itself called "surfaces", then this becomes mandatory.
-        // This provides a simple means of handling both situations without an
-        // additional switch.
-        if
+        const Switch writeObj = surfaceDict.lookupOrDefault<Switch>
         (
-            dictName == "surfaces"  // mandatory
-         || surfaceDict.found("surfaces")   // or optional
-        )
+            "writeObj",
+            Switch::OFF
+        );
+        const Switch writeVTK = surfaceDict.lookupOrDefault<Switch>
+        (
+            "writeVTK",
+            Switch::OFF
+        );
+
+        // The "surfaces" entry is normally optional, but make it mandatory
+        // if the dictionary name doesn't have an extension
+        // (ie, probably not a surface filename at all).
+        // If it is missing, this will fail nicely with an appropriate error
+        // message.
+        if (surfaceDict.found("surfaces") || !dictName.hasExt())
         {
             loader.select(wordReList(surfaceDict.lookup("surfaces")));
         }
@@ -128,39 +299,45 @@ int main(int argc, char *argv[])
             loader.select(dictName);
         }
 
+        // DebugVar(loader.available());
+        // DebugVar(outputName);
+
         if (loader.selected().empty())
         {
             FatalErrorInFunction
                 << "No surfaces specified/found for entry: "
                 << dictName << exit(FatalError);
         }
-        // DebugVar(loader.available());
-        // DebugVar(outputName);
 
-
-        Info<< "Surfaces           : ";
+        Info<< "Surfaces     : ";
         if (loader.selected().size() == 1)
         {
-            Info<< loader.selected()[0] << nl;
+            Info<< loader.selected().first() << nl;
         }
         else
         {
             Info<< flatOutput(loader.selected()) << nl;
         }
-        Info<< "Output             : " << outputName << nl;
+        Info<< "Output       : " << outputName << nl;
 
+        // Loading option - default depends on context
         triSurfaceLoader::loadingOption loadingOption =
             triSurfaceLoader::loadingOptionNames.lookupOrDefault
             (
                 "loadingOption",
                 surfaceDict,
-                triSurfaceLoader::loadingOption::OFFSET_REGION
+                (
+                    selfIntersect == surfaceIntersection::SELF_REGION
+                  ? triSurfaceLoader::FILE_REGION
+                  : triSurfaceLoader::OFFSET_REGION
+                )
             );
 
-        Info<<"loading with "
-            << triSurfaceLoader::loadingOptionNames[loadingOption]
-            << endl;
-
+        Info<<"Load options : "
+            << triSurfaceLoader::loadingOptionNames[loadingOption] << nl
+            << "Write options:"
+            << " writeObj=" << writeObj
+            << " writeVTK=" << writeVTK << nl;
 
         // Load a single file, or load and combine multiple selected files
         autoPtr<triSurface> surfPtr = loader.load(loadingOption);
@@ -173,25 +350,12 @@ int main(int argc, char *argv[])
 
         triSurface surf = surfPtr();
 
-        const Switch writeVTK = surfaceDict.lookupOrDefault<Switch>
-        (
-            "writeVTK",
-            Switch::OFF
-        );
-        const Switch writeObj = surfaceDict.lookupOrDefault<Switch>
-        (
-            "writeObj",
-            Switch::OFF
-        );
-
-        Info<< "write VTK: " <<  writeVTK << nl;
-
-        Info<< "Feature line extraction is only valid on closed manifold "
+        Info<< "NB: Feature line extraction is only valid on closed manifold "
             << "surfaces." << nl;
 
-        Info<< nl << "Statistics:" << nl;
+        Info<< nl
+            << "Statistics:" << nl;
         surf.writeStats(Info);
-        Info<< nl;
 
         // Need a copy as plain faces if outputting VTK format
         faceList faces;
@@ -403,14 +567,6 @@ int main(int argc, char *argv[])
             feMesh.add(addFeMesh);
         }
 
-        const surfaceIntersection::intersectionType selfIntersect =
-            surfaceIntersection::selfIntersectionNames.lookupOrDefault
-            (
-                "intersectionMethod",
-                surfaceDict,
-                surfaceIntersection::NONE
-            );
-
         if (selfIntersect != surfaceIntersection::NONE)
         {
             triSurfaceSearch query(surf);
@@ -461,7 +617,8 @@ int main(int argc, char *argv[])
 
         feMesh.write();
 
-        // Write a featureEdgeMesh for backwards compatibility
+        // Write a featureEdgeMesh (.eMesh) for backwards compatibility
+        // Used by snappyHexMesh (JUN-2017)
         if (true)
         {
             featureEdgeMesh bfeMesh

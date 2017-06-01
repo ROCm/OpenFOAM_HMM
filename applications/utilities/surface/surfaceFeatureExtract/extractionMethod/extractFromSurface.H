@@ -27,6 +27,8 @@ Class
 Description
     Run-time selectable surface feature extraction - extract from surface.
 
+    Selectable as "extractFromSurface".
+
     Mandatory dictionary entries: "includedAngle".
     Optional dictionary entries: "geometricTestOnly".
 
@@ -57,22 +59,17 @@ class extractFromSurface
 {
 public:
 
-    // Constructors
-
-        //- Construct from dictionary
-        extractFromSurface(const dictionary& dict);
-
+    //- Construct from dictionary
+    extractFromSurface(const dictionary& dict);
 
     //- Destructor
     virtual ~extractFromSurface();
 
-
-    //- Extracted features from surface
+    //- Features extracted from surface
     virtual autoPtr<surfaceFeatures> features
     (
         const triSurface& surf
     ) const override;
-
 
 };
 

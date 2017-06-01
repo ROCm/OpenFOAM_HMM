@@ -52,10 +52,10 @@ Foam::surfaceFeaturesExtraction::extractFromNone::extractFromNone
 :
     method()
 {
-    const dictionary& coeffDict = dict.optionalSubDict("noneCoeffs");
+    // A "noneCoeffs" sub-dictionary doesn't make much sense.
 
-    coeffDict.readIfPresent("includedAngle", includedAngle_);
-    coeffDict.readIfPresent("geometricTestOnly", geometricTestOnly_);
+    dict.readIfPresent("includedAngle", includedAngle_);
+    dict.readIfPresent("geometricTestOnly", geometricTestOnly_);
 }
 
 
@@ -66,7 +66,6 @@ Foam::surfaceFeaturesExtraction::extractFromNone::~extractFromNone()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 
 Foam::autoPtr<Foam::surfaceFeatures>
 Foam::surfaceFeaturesExtraction::extractFromNone::features
