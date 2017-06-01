@@ -53,6 +53,20 @@ void Foam::foamVtkOutput::writeList
 }
 
 
+template<class Type, unsigned Size>
+void Foam::foamVtkOutput::writeList
+(
+    foamVtkOutput::formatter& fmt,
+    const FixedList<Type, Size>& lst
+)
+{
+    for (unsigned i=0; i<Size; ++i)
+    {
+        write(fmt, lst[i]);
+    }
+}
+
+
 template<class Type>
 void Foam::foamVtkOutput::writeList
 (

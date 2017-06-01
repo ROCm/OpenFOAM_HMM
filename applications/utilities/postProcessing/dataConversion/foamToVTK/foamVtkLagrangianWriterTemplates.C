@@ -31,33 +31,78 @@ License
 template<class Type>
 void Foam::foamVtkOutput::lagrangianWriter::writeIOField
 (
-    const wordList& objects
+    const wordList& objectNames
 )
 {
-    forAll(objects, i)
-    {
-        const word& object = objects[i];
+    const int nCmpt(pTraits<Type>::nComponents);
 
+    const bool useIntField =
+        std::is_integral<typename pTraits<Type>::cmptType>();
+
+    for (const word& fldName : objectNames)
+    {
         IOobject header
         (
-            object,
+            fldName,
             mesh_.time().timeName(),
             cloud::prefix/cloudName_,
             mesh_,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            false  // no register
         );
 
         IOField<Type> fld(header);
 
-        // Legacy
-        os()<< object << ' '
-            << int(pTraits<Type>::nComponents) << ' '
-            << fld.size() << " float" << nl;
+        if (useIntField)
+        {
+            const uint64_t payLoad(fld.size() * nCmpt * sizeof(label));
 
-        foamVtkOutput::writeList(format(), fld);
+            if (legacy_)
+            {
+                legacy::intField(os(), fldName, nCmpt, fld.size());
+            }
+            else
+            {
+                format().openDataArray<label, nCmpt>(fldName)
+                    .closeTag();
+            }
+
+            format().writeSize(payLoad);
+
+            // Ensure consistent output width
+            for (const Type& val : fld)
+            {
+                for (int cmpt=0; cmpt < nCmpt; ++cmpt)
+                {
+                    format().write(label(component(val, cmpt)));
+                }
+            }
+        }
+        else
+        {
+            const uint64_t payLoad(fld.size() * nCmpt * sizeof(float));
+
+            if (legacy_)
+            {
+                legacy::floatField(os(), fldName, nCmpt, fld.size());
+            }
+            else
+            {
+                format().openDataArray<float, nCmpt>(fldName)
+                    .closeTag();
+            }
+
+            format().writeSize(payLoad);
+            foamVtkOutput::writeList(format(), fld);
+        }
+
         format().flush();
+
+        if (!legacy_)
+        {
+            format().endDataArray();
+        }
     }
 }
 

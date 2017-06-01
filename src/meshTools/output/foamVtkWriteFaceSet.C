@@ -43,14 +43,15 @@ void Foam::foamVtkOutput::writeFaceSet
     outputOptions opts(outOpts);
     opts.legacy(true);  // Legacy only, no append
 
-    std::ofstream os((baseName + (opts.legacy() ? ".vtk" : ".vtp")).c_str());
+    const bool legacy_(opts.legacy());
+
+    std::ofstream os((baseName + (legacy_ ? ".vtk" : ".vtp")).c_str());
 
     autoPtr<foamVtkOutput::formatter> format = opts.newFormatter(os);
 
-    if (opts.legacy())
+    if (legacy_)
     {
-        foamVtkOutput::legacy::fileHeader(format(), set.name())
-            << "DATASET POLYDATA" << nl;
+        legacy::fileHeader(format(), set.name(), vtkFileTag::POLY_DATA);
     }
 
     //-------------------------------------------------------------------------
@@ -67,28 +68,36 @@ void Foam::foamVtkOutput::writeFaceSet
     //-------------------------------------------------------------------------
 
     // Write points and faces as polygons
-    os << "POINTS " << pp.nPoints() << " float" << nl;
+    legacy::beginPoints(os, pp.nPoints());
 
     foamVtkOutput::writeList(format(), pp.localPoints());
     format().flush();
 
-    label count = pp.size();
+    // connectivity count without additional storage (done internally)
+    uint64_t nConnectivity = 0;
     forAll(pp, facei)
     {
-        count += pp.localFaces()[facei].size();
+        nConnectivity += pp[facei].size();
     }
-    os << "POLYGONS " << pp.size() << ' ' << count << nl;
+    legacy::beginPolys(os, pp.size(), nConnectivity);
 
+
+    // legacy: size + connectivity together
+    // [nPts, id1, id2, ..., nPts, id1, id2, ...]
     forAll(pp, facei)
     {
         const face& f = pp.localFaces()[facei];
 
-        format().write(f.size());
+        format().write(f.size());  // The size prefix
         foamVtkOutput::writeList(format(), f);
     }
     format().flush();
 
+
     // Write data - faceId/cellId
+
+    legacy::dataHeader(os, vtkFileTag::CELL_DATA, pp.size(), 1);
+
     os << "faceID 1 " << pp.size() << " int" << nl;
 
     foamVtkOutput::writeList(format(), faceLabels);

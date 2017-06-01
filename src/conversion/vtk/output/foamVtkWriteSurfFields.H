@@ -25,7 +25,7 @@ InNamespace
     Foam::foamVtkOutput
 
 Description
-    Write a patch with its data.
+    Write surface fields as vectors
 
 SourceFiles
     foamVtkWriteSurfFields.C

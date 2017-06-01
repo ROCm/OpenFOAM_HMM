@@ -65,7 +65,7 @@ Foam::foamVtkOutput::formatter::xmlHeader()
 
 
 Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::comment(const std::string& text)
+Foam::foamVtkOutput::formatter::xmlComment(const std::string& comment)
 {
     if (inTag_)
     {
@@ -75,7 +75,7 @@ Foam::foamVtkOutput::formatter::comment(const std::string& text)
     }
 
     indent();
-    os_ << "<!-- " << text << " -->" << nl;
+    os_ << "<!-- " << comment << " -->" << nl;
 
     return *this;
 }

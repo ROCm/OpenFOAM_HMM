@@ -26,6 +26,158 @@ License
 #include "foamVtkSurfaceMeshWriter.H"
 #include "foamVtkOutput.H"
 
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::foamVtkOutput::surfaceMeshWriter::beginPiece()
+{
+    if (!legacy_)
+    {
+        format()
+            .openTag(vtkFileTag::PIECE)
+            ( "NumberOfPoints", pp_.nPoints() )
+            ( "NumberOfPolys",  pp_.size() )
+            .closeTag();
+    }
+}
+
+
+void Foam::foamVtkOutput::surfaceMeshWriter::writePoints()
+{
+    // payload count
+    const uint64_t payLoad = (pp_.nPoints()*3*sizeof(float));
+
+    if (legacy_)
+    {
+        legacy::beginPoints(os_, pp_.nPoints());
+    }
+    else
+    {
+        format().tag(vtkFileTag::POINTS)
+            .openDataArray<float, 3>(vtkFileTag::POINTS)
+            .closeTag();
+    }
+
+    format().writeSize(payLoad);
+
+    foamVtkOutput::writeList(format(), pp_.localPoints());
+    format().flush();
+
+    if (!legacy_)
+    {
+        format()
+            .endDataArray()
+            .endTag(vtkFileTag::POINTS);
+    }
+}
+
+
+void Foam::foamVtkOutput::surfaceMeshWriter::writePolysLegacy()
+{
+    // connectivity count without additional storage (done internally)
+    uint64_t nConnectivity = 0;
+    forAll(pp_, facei)
+    {
+        nConnectivity += pp_[facei].size();
+    }
+
+    legacy::beginPolys(os_, pp_.size(), nConnectivity);
+
+
+    // legacy: size + connectivity together
+    // [nPts, id1, id2, ..., nPts, id1, id2, ...]
+
+    forAll(pp_, facei)
+    {
+        const face& f = pp_.localFaces()[facei];
+
+        format().write(f.size());  // The size prefix
+        foamVtkOutput::writeList(format(), f);
+    }
+
+    format().flush();
+}
+
+
+void Foam::foamVtkOutput::surfaceMeshWriter::writePolys()
+{
+    //
+    // 'connectivity'
+    //
+
+    format().tag(vtkFileTag::POLYS);
+
+    //
+    // 'connectivity'
+    //
+    {
+        // payload count
+        uint64_t payLoad = 0;
+        forAll(pp_, facei)
+        {
+            payLoad += pp_[facei].size();
+        }
+
+        format().openDataArray<label>("connectivity")
+            .closeTag();
+
+        // payload size
+        format().writeSize(payLoad * sizeof(label));
+
+        forAll(pp_, facei)
+        {
+            const face& f = pp_.localFaces()[facei];
+            foamVtkOutput::writeList(format(), f);
+        }
+
+        format().flush();
+
+        format()
+            .endDataArray();
+    }
+
+
+    //
+    // 'offsets'  (connectivity offsets)
+    //
+    {
+        format()
+            .openDataArray<label>("offsets")
+            .closeTag();
+
+        // payload size
+        format().writeSize(pp_.size() * sizeof(label));
+
+        label off = 0;
+        forAll(pp_, facei)
+        {
+            off += pp_[facei].size();
+
+            format().write(off);
+        }
+
+        format().flush();
+        format().endDataArray();
+    }
+
+    format().endTag(vtkFileTag::POLYS);
+}
+
+
+void Foam::foamVtkOutput::surfaceMeshWriter::writeMesh()
+{
+    writePoints();
+    if (legacy_)
+    {
+        writePolysLegacy();
+    }
+    else
+    {
+        writePolys();
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::foamVtkOutput::surfaceMeshWriter::surfaceMeshWriter
@@ -37,46 +189,33 @@ Foam::foamVtkOutput::surfaceMeshWriter::surfaceMeshWriter
 )
 :
     pp_(pp),
+    legacy_(outOpts.legacy()),
     format_(),
     os_()
 {
     outputOptions opts(outOpts);
-    opts.legacy(true);  // Legacy only, no append
+    opts.legacy(true);  // No append supported
 
-    os_.open((baseName + (opts.legacy() ? ".vtk" : ".vtp")).c_str());
+    os_.open((baseName + (legacy_ ? ".vtk" : ".vtp")).c_str());
     format_ = opts.newFormatter(os_);
 
-    if (opts.legacy())
+    if (legacy_)
     {
-        foamVtkOutput::legacy::fileHeader(format(), name)
-            << "DATASET POLYDATA" << nl;
+        legacy::fileHeader(format(), name, vtkFileTag::POLY_DATA);
+    }
+    else
+    {
+        // XML (inline)
+
+        format()
+            .xmlHeader()
+            .xmlComment(name)
+            .beginVTKFile(vtkFileTag::POLY_DATA, "0.1");
+
     }
 
-    //------------------------------------------------------------------
-
-    // Write topology
-    label nFaceVerts = pp.size();
-
-    forAll(pp, facei)
-    {
-        nFaceVerts += pp[facei].size();
-    }
-
-    os_ << "POINTS " << pp.nPoints() << " float" << nl;
-
-    foamVtkOutput::writeList(format(), pp.localPoints());
-    format().flush();
-
-    os_ << "POLYGONS " << pp.size() << ' ' << nFaceVerts << nl;
-
-    forAll(pp, facei)
-    {
-        const face& f = pp.localFaces()[facei];
-
-        format().write(f.size());
-        foamVtkOutput::writeList(format(), f);
-    }
-    format().flush();
+    beginPiece();
+    writeMesh();
 }
 
 
@@ -90,12 +229,37 @@ Foam::foamVtkOutput::surfaceMeshWriter::~surfaceMeshWriter()
 
 void Foam::foamVtkOutput::surfaceMeshWriter::beginCellData(label nFields)
 {
-    foamVtkOutput::legacy::cellDataHeader(os(), pp_.size(), nFields);
+    if (legacy_)
+    {
+        legacy::dataHeader(os(), vtkFileTag::CELL_DATA, pp_.size(), nFields);
+    }
+    else
+    {
+        format().tag(vtkFileTag::CELL_DATA);
+    }
 }
 
 
 void Foam::foamVtkOutput::surfaceMeshWriter::endCellData()
-{}
+{
+    if (!legacy_)
+    {
+        format().endTag(vtkFileTag::CELL_DATA);
+    }
+}
+
+
+void Foam::foamVtkOutput::surfaceMeshWriter::writeFooter()
+{
+    if (!legacy_)
+    {
+        // slight cheat. </Piece> too
+        format().endTag(vtkFileTag::PIECE);
+
+        format().endTag(vtkFileTag::POLY_DATA)
+            .endVTKFile();
+    }
+}
 
 
 // ************************************************************************* //

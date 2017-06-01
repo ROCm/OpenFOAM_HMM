@@ -32,7 +32,7 @@ Namespace
     Foam::foamVtkOutput::legacy
 
 Description
-    Namespace for legacy VTK output functions.
+    Namespace for legacy VTK output constants and functions.
 
 SourceFiles
     foamVtkOutput.C
@@ -63,6 +63,9 @@ namespace foamVtkOutput
 
     //- Use UInt64 for header data
     typedef formatter::headerType headerType;
+
+
+  // Constants
 
 
   // General Functions
@@ -101,6 +104,15 @@ namespace foamVtkOutput
         const UList<Type>& lst
     );
 
+    //- Write a list of values.
+    //  The output does not include the payload size.
+    template<class Type, unsigned Size>
+    void writeList
+    (
+        foamVtkOutput::formatter& fmt,
+        const FixedList<Type, Size>& lst
+    );
+
 
     //- Write a list of values via indirect addressing.
     //  The output does not include the payload size.
@@ -120,49 +132,68 @@ namespace foamVtkOutput
 //- Some minimal additional support for writing legacy files
 namespace legacy
 {
-    //- Some standard text elements for legacy vtk files
-    enum class textElemType
-    {
-        POINTS,             //!< "POINTS"
-        CELLS,              //!< "CELLS"
-        POLYS,              //!< "POLYGONS"
-        VERTS,              //!< "VERTICES"
-        POLY_DATA,          //!< "POLYDATA"
-        UNSTRUCTURED_GRID,  //!< "UNSTRUCTURED_GRID"
-    };
 
-    //- Strings corresponding to the elements
-    extern const Foam::Enum<textElemType> textNames;
+  // Constants
 
-    //- Strings corresponding to the elements
-    extern const Foam::Enum<vtkFileTag>   dataTypeNames;
+    //- Strings corresponding to the (POLYDATA, UNSTRUCTURED_GRID) elements
+    extern const Foam::Enum<vtkFileTag> contentNames;
+
+    //- Strings corresponding to the (CELL_DATA, POINT_DATA) elements
+    extern const Foam::Enum<vtkFileTag> dataTypeNames;
 
 
   // Functions
 
     //- Emit header for legacy file.
     //  Writes "ASCII" or "BINARY" depending on specified type.
-    std::ostream& fileHeader
+    inline std::ostream& fileHeader
     (
         std::ostream& os,
         const std::string& title,
-        const bool binary = false
+        const bool binary
     );
 
-    //- Emit header for legacy file.
-    //  Writes "ASCII" or "BINARY" depending on the formatter type.
+    //- Emit header for legacy file, with "ASCII" or "BINARY" depending on
+    //  the formatter type.
+    //  Includes "DATASET" with the specified dataset type.
+    inline void fileHeader
+    (
+        foamVtkOutput::formatter& fmt,
+        const std::string& title,
+        const vtkFileTag& contentTypeTag
+    );
+
+    //- Emit header for legacy file, with "ASCII" or "BINARY" depending on
+    //  the formatter type.
+    //  If the contentType is non-empty, it is used for "DATASET" line.
     std::ostream& fileHeader
     (
         foamVtkOutput::formatter& fmt,
-        const std::string& title
+        const std::string& title,
+        const std::string& contentType
     );
 
 
-    //- Emit header for legacy CELL_DATA or POINT_DATA, corresponding to the
-    //  enumeration textElemType::CELLS or textElemType::POINTS, respectively.
+    //- Emit header for POINTS (with trailing newline).
+    inline void beginPoints(std::ostream& os, const label nPoints);
+
+    //- Emit header for POLYGONS (with trailing newline).
+    //  The nConnectivity is the sum of all connectivity points used,
+    //  but \b without additional space for the size prefixes.
+    //  The additional prefix sizes are added internally.
+    inline void beginPolys
+    (
+        std::ostream& os,
+        const label nPolys,
+        const label nConnectivity
+    );
+
+
+    //- Use the enumerations vtkFileTag::CELL_DATA, vtkFileTag::POINT_DATA,
+    //  to emit a legacy CELL_DATA, POINT_DATA element.
     //  The nEntries corresponds similarly to the number of cells or points,
     //  respectively.
-    std::ostream& dataHeader
+    inline void dataHeader
     (
         std::ostream& os,
         const vtkFileTag& dataTypeTag,
@@ -170,61 +201,35 @@ namespace legacy
         const label nFields
     );
 
-    //- Emit header for legacy CELL_DATA.
-    //  The nEntries should normally correspond to the number of cells.
-    std::ostream& cellDataHeader
+    //- Start output of float field with the specified name.
+    inline void floatField
     (
         std::ostream& os,
-        const label nEntries,
-        const label nFields
+        const word& name,
+        const label nCmpt,
+        const label nEntries
     );
 
-    //- Emit header for legacy POINT_DATA
-    //  The nEntries should normally correspond to the number of points.
-    std::ostream& pointDataHeader
+    //- Start output of int field with the specified name.
+    inline void intField
     (
         std::ostream& os,
-        const label nEntries,
-        const label nFields
+        const word& name,
+        const label nCmpt,
+        const label nEntries
     );
 
 };
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//- Template specialization for label
-template<>
-inline void write<label>(foamVtkOutput::formatter& fmt, const label& val)
-{
-    fmt.write(val);
-}
-
-
-//- Template specialization for float
-template<>
-inline void write<float>(foamVtkOutput::formatter& fmt, const float& val)
-{
-    fmt.write(val);
-}
-
-
-//- Template specialization for double
-template<>
-inline void write<double>(foamVtkOutput::formatter& fmt, const double& val)
-{
-    fmt.write(val);
-}
 
 } // End namespace foamVtkOutput
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 } // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "foamVtkOutputI.H"
 
 #ifdef NoRepository
     #include "foamVtkOutputTemplates.C"

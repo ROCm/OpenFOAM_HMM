@@ -52,20 +52,51 @@ namespace foamVtkOutput
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class lagrangianWriter Declaration
+                      Class lagrangianWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 class lagrangianWriter
 {
-    const fvMesh& mesh_;
+    // Private Member Data
 
-    autoPtr<foamVtkOutput::formatter> format_;
+        //- Reference to the OpenFOAM mesh (or subset)
+        const fvMesh& mesh_;
 
-    const word cloudName_;
+        //- Commonly used query
+        const bool legacy_;
 
-    std::ofstream os_;
+        //- Write lagrangian as cell data (verts) or point data?
+        const bool useVerts_;
 
-    label nParcels_;
+        autoPtr<foamVtkOutput::formatter> format_;
+
+        const word cloudName_;
+
+        std::ofstream os_;
+
+        label nParcels_;
+
+
+    // Private Member Functions
+
+        //- Begin piece
+        void beginPiece();
+
+        //- Write positions
+        void writePoints();
+
+        //- Write vertex (cells)
+        void writeVertsLegacy();
+
+        //- Write vertex (cells)
+        void writeVerts();
+
+
+        //- Disallow default bitwise copy construct
+        lagrangianWriter(const lagrangianWriter&) = delete;
+
+        //- Disallow default bitwise assignment
+        void operator=(const lagrangianWriter&) = delete;
 
 
 public:
@@ -104,13 +135,15 @@ public:
             return nParcels_;
         }
 
-        void beginParcelData(const label nFields);
+        void beginParcelData(label nFields);
         void endParcelData();
 
+        //- Write file footer
+        void writeFooter();
 
         //- Write IOField
         template<class Type>
-        void writeIOField(const wordList&);
+        void writeIOField(const wordList& objectNames);
 };
 
 

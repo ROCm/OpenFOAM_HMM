@@ -59,20 +59,51 @@ namespace foamVtkOutput
 
 class patchWriter
 {
-    //- Reference to the OpenFOAM mesh (or subset)
-    const fvMesh& mesh_;
+    // Private Member Data
 
-    autoPtr<foamVtkOutput::formatter> format_;
+        //- Reference to the OpenFOAM mesh (or subset)
+        const fvMesh& mesh_;
 
-    const bool nearCellValue_;
+        //- Commonly used query
+        const bool legacy_;
 
-    const labelList patchIDs_;
+        autoPtr<foamVtkOutput::formatter> format_;
 
-    std::ofstream os_;
+        const bool nearCellValue_;
 
-    label nPoints_;
+        const labelList patchIDs_;
 
-    label nFaces_;
+        std::ofstream os_;
+
+        label nPoints_;
+
+        label nFaces_;
+
+
+    // Private Member Functions
+
+        //- Begin piece
+        void beginPiece();
+
+        //- Write patch points
+        void writePoints();
+
+        //- Write patch faces
+        void writePolysLegacy();
+
+        //- Write patch faces
+        void writePolys();
+
+        //- Write mesh topology
+        void writeMesh();
+
+
+        //- Disallow default bitwise copy construct
+        patchWriter(const patchWriter&) = delete;
+
+        //- Disallow default bitwise assignment
+        void operator=(const patchWriter&) = delete;
+
 
 public:
 
@@ -131,6 +162,10 @@ public:
 
         //- Write cellIDs
         void writePatchIDs();
+
+        //- Write file footer
+        void writeFooter();
+
 
         //- Write volFields
         template<class Type, template<class> class PatchField>

@@ -152,7 +152,7 @@ public:
 
         //- Write XML comment (at the current indentation level)
         //  \return formatter for chaining
-        formatter& comment(const std::string& text);
+        formatter& xmlComment(const std::string& comment);
 
 
         //- Open XML tag

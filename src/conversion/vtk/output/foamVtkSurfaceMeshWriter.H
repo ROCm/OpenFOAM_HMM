@@ -58,12 +58,41 @@ namespace foamVtkOutput
 
 class surfaceMeshWriter
 {
-    const indirectPrimitivePatch& pp_;
+    // Private Member Data
 
-    autoPtr<foamVtkOutput::formatter> format_;
+        const indirectPrimitivePatch& pp_;
 
-    std::ofstream os_;
+        //- Commonly used query
+        const bool legacy_;
 
+        autoPtr<foamVtkOutput::formatter> format_;
+
+        std::ofstream os_;
+
+
+    // Private Member Functions
+
+        //- Begin piece
+        void beginPiece();
+
+        //- Write patch points
+        void writePoints();
+
+        //- Write patch faces
+        void writePolysLegacy();
+
+        //- Write patch faces
+        void writePolys();
+
+        //- Write mesh topology
+        void writeMesh();
+
+
+        //- Disallow default bitwise copy construct
+        surfaceMeshWriter(const surfaceMeshWriter&) = delete;
+
+        //- Disallow default bitwise assignment
+        void operator=(const surfaceMeshWriter&) = delete;
 
 public:
 
@@ -95,19 +124,25 @@ public:
             return format_();
         }
 
+        //- Open write for CellData of count fields.
+        //  The parameters are only used for the legacy format.
         void beginCellData(label nFields);
 
+        //- Close write for CellData
         void endCellData();
 
+        //- Write file footer
+        void writeFooter();
 
-        //- Extract face data
+
+        //- Get face field
         template<class Type>
         tmp<Field<Type>> getFaceField
         (
             const GeometricField<Type, fvsPatchField, surfaceMesh>& sfld
         ) const;
 
-        //- Write surfaceFields
+        //- Write surface fields
         template<class Type>
         void write
         (

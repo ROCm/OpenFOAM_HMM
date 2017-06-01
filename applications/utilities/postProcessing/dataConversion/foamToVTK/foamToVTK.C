@@ -28,7 +28,7 @@ Group
     grpPostProcessingUtilities
 
 Description
-    Legacy VTK file format writer.
+    VTK file format writer.
 
     - Handles volFields, pointFields, surfaceScalarField, surfaceVectorField
       fields.
@@ -45,6 +45,9 @@ Usage
     Options:
       - \par -ascii
         Write VTK data in ASCII format instead of binary.
+
+      - \par -xml
+        Write VTK data in XML format instead of legacy format
 
       - \par -mesh \<name\>
         Use a different mesh name (instead of -region)
@@ -243,6 +246,11 @@ foamVtkOutput::outputOptions getOutputOptions(const argList& args)
 {
     foamVtkOutput::outputOptions opts;
 
+    if (args.optionFound("xml"))
+    {
+        opts.ascii(args.optionFound("ascii"));
+    }
+    else
     {
         opts.legacy(true);
 
@@ -333,6 +341,11 @@ int main(int argc, char *argv[])
     (
         "ascii",
         "write in ASCII format instead of binary"
+    );
+    argList::addBoolOption
+    (
+        "xml",
+        "write VTK xml instead of legacy format"
     );
     argList::addBoolOption
     (
@@ -902,6 +915,8 @@ int main(int argc, char *argv[])
 
                 writer.endPointData();
             }
+
+            writer.writeFooter();
         }
 
         //---------------------------------------------------------------------
@@ -1041,6 +1056,8 @@ int main(int argc, char *argv[])
 
                 writer.endPointData();
             }
+
+            writer.writeFooter();
         }
         else
         {
@@ -1118,6 +1135,8 @@ int main(int argc, char *argv[])
                         writer.endPointData();
                     }
                 }
+
+                writer.writeFooter();
             }
         }
 
@@ -1190,6 +1209,8 @@ int main(int argc, char *argv[])
                 writer.write(sVectorFld);
 
                 writer.endCellData();
+
+                writer.writeFooter();
             }
         }
 
@@ -1288,6 +1309,8 @@ int main(int argc, char *argv[])
                 writer.writeIOField<tensor>(tensorNames);
 
                 writer.endParcelData();
+
+                writer.writeFooter();
             }
             else
             {
@@ -1304,6 +1327,8 @@ int main(int argc, char *argv[])
                 writer.beginParcelData(0);
 
                 writer.endParcelData();
+
+                writer.writeFooter();
             }
         }
 

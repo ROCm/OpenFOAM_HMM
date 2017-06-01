@@ -42,14 +42,15 @@ void Foam::foamVtkOutput::writePointSet
     outputOptions opts(outOpts);
     opts.legacy(true);  // Legacy only, no append
 
-    std::ofstream os((baseName + (opts.legacy() ? ".vtk" : ".vtp")).c_str());
+    const bool legacy_(opts.legacy());
+
+    std::ofstream os((baseName + (legacy_ ? ".vtk" : ".vtp")).c_str());
 
     autoPtr<foamVtkOutput::formatter> format = opts.newFormatter(os);
 
-    if (opts.legacy())
+    if (legacy_)
     {
-        foamVtkOutput::legacy::fileHeader(format(), set.name())
-            << "DATASET POLYDATA" << nl;
+        legacy::fileHeader(format(), set.name(), vtkFileTag::POLY_DATA);
     }
 
     //-------------------------------------------------------------------------
@@ -57,14 +58,13 @@ void Foam::foamVtkOutput::writePointSet
     const labelList pointLabels(set.sortedToc());
 
     // Write points
-    os << "POINTS " << pointLabels.size() << " float" << nl;
+    legacy::beginPoints(os, pointLabels.size());
 
     foamVtkOutput::writeList(format(), mesh.points(), pointLabels);
     format().flush();
 
-
     // Write data - pointID
-    foamVtkOutput::legacy::pointDataHeader(os, pointLabels.size(), 1);
+    legacy::dataHeader(os, vtkFileTag::POINT_DATA, pointLabels.size(), 1);
 
     os << "pointID 1 " << pointLabels.size() << " int" << nl;
 

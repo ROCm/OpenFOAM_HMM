@@ -36,21 +36,32 @@ void Foam::foamVtkOutput::internalWriter::write
     const UPtrList<const DimensionedField<Type, volMesh>>& flds
 )
 {
-    const int nCmpt(pTraits<Type>::nComponents);
     const labelList& cellMap = vtkCells_.cellMap();
+
+    const int nCmpt(pTraits<Type>::nComponents);
+    // const uint64_t payLoad(cellMap.size() * nCmpt * sizeof(float));
 
     forAll(flds, i)
     {
         const auto& fld = flds[i];
 
-        // Legacy
-        os()<< fld.name() << ' '
-            << nCmpt << ' '
-            << cellMap.size() << " float"
-            << nl;
+        if (legacy_)
+        {
+            legacy::floatField(os(), fld.name(), nCmpt, cellMap.size());
+        }
+        else
+        {
+            format().openDataArray<float, nCmpt>(fld.name())
+                .closeTag();
+        }
 
         // writeField includes payload size
         foamVtkOutput::writeField(format(), fld, cellMap);
+
+        if (!legacy_)
+        {
+            format().endDataArray();
+        }
     }
 }
 
@@ -61,21 +72,32 @@ void Foam::foamVtkOutput::internalWriter::write
     const UPtrList<const GeometricField<Type, PatchField, volMesh>>& flds
 )
 {
-    const int nCmpt(pTraits<Type>::nComponents);
     const labelList& cellMap = vtkCells_.cellMap();
+
+    const int nCmpt(pTraits<Type>::nComponents);
+    // const uint64_t payLoad(cellMap.size() * nCmpt * sizeof(float));
 
     forAll(flds, i)
     {
         const auto& fld = flds[i];
 
-        // Legacy
-        os()<< fld.name() << ' '
-            << nCmpt << ' '
-            << cellMap.size() << " float"
-            << nl;
+        if (legacy_)
+        {
+            legacy::floatField(os(), fld.name(), nCmpt, cellMap.size());
+        }
+        else
+        {
+            format().openDataArray<float, nCmpt>(fld.name())
+                .closeTag();
+        }
 
         // writeField includes payload size
         foamVtkOutput::writeField(format(), fld, cellMap);
+
+        if (!legacy_)
+        {
+            format().endDataArray();
+        }
     }
 }
 
@@ -86,25 +108,27 @@ void Foam::foamVtkOutput::internalWriter::write
     const UPtrList<const GeometricField<Type, PatchField, pointMesh>>& flds
 )
 {
-    const int nCmpt(pTraits<Type>::nComponents);
-    const int nVals(vtkCells_.nFieldPoints());
     const labelList& addPointCellLabels = vtkCells_.addPointCellLabels();
 
+    const int nCmpt(pTraits<Type>::nComponents);
+    const int nVals(vtkCells_.nFieldPoints());
+
     // Only needed for non-legacy
-    const uint64_t payLoad
-    (
-        nVals * nCmpt * sizeof(float)
-    );
+    const uint64_t payLoad(nVals * nCmpt * sizeof(float));
 
     forAll(flds, i)
     {
         const auto& fld = flds[i];
 
-        // Legacy
-        os()<< fld.name() << ' '
-            << nCmpt << ' '
-            << nVals << " float"
-            << nl;
+        if (legacy_)
+        {
+            legacy::floatField(os(), fld.name(), nCmpt, nVals);
+        }
+        else
+        {
+            format().openDataArray<float, nCmpt>(fld.name())
+                .closeTag();
+        }
 
         format().writeSize(payLoad);
         foamVtkOutput::writeList(format(), fld);
@@ -116,6 +140,11 @@ void Foam::foamVtkOutput::internalWriter::write
         }
 
         format().flush();
+
+        if (!legacy_)
+        {
+            format().endDataArray();
+        }
     }
 }
 
@@ -127,31 +156,38 @@ void Foam::foamVtkOutput::internalWriter::write
     const UPtrList<const DimensionedField<Type, volMesh>>& flds
 )
 {
-    const int nCmpt(pTraits<Type>::nComponents);
-    const int nVals(vtkCells_.nFieldPoints());
     const labelList& addPointCellLabels = vtkCells_.addPointCellLabels();
 
+    const int nCmpt(pTraits<Type>::nComponents);
+    const int nVals(vtkCells_.nFieldPoints());
+
     // Only needed for non-legacy
-    const uint64_t payLoad
-    (
-        nVals * nCmpt * sizeof(float)
-    );
+    const uint64_t payLoad(nVals * nCmpt * sizeof(float));
 
     forAll(flds, i)
     {
         const auto& vfield = flds[i];
         const auto& pfield = pInterp.interpolate(vfield)();
 
-        // Legacy
-        os()<< vfield.name() << ' '
-            << nCmpt << ' '
-            << nVals << " float"
-            << nl;
+        if (legacy_)
+        {
+            legacy::floatField(os(), vfield.name(), nCmpt, nVals);
+        }
+        else
+        {
+            format().openDataArray<float, nCmpt>(vfield.name())
+                .closeTag();
+        }
 
         format().writeSize(payLoad);
         foamVtkOutput::writeList(format(), pfield);
         foamVtkOutput::writeList(format(), vfield, addPointCellLabels);
         format().flush();
+
+        if (!legacy_)
+        {
+            format().endDataArray();
+        }
     }
 }
 
@@ -163,31 +199,38 @@ void Foam::foamVtkOutput::internalWriter::write
     const UPtrList<const GeometricField<Type, PatchField, volMesh>>& flds
 )
 {
-    const int nCmpt(pTraits<Type>::nComponents);
-    const int nVals(vtkCells_.nFieldPoints());
     const labelList& addPointCellLabels = vtkCells_.addPointCellLabels();
 
+    const int nCmpt(pTraits<Type>::nComponents);
+    const int nVals(vtkCells_.nFieldPoints());
+
     // Only needed for non-legacy
-    const uint64_t payLoad
-    (
-        nVals * nCmpt * sizeof(float)
-    );
+    const uint64_t payLoad(nVals * nCmpt * sizeof(float));
 
     forAll(flds, i)
     {
         const auto& vfield = flds[i];
         const auto& pfield = pInterp.interpolate(vfield)();
 
-        // Legacy
-        os()<< vfield.name() << ' '
-            << nCmpt << ' '
-            << nVals << " float"
-            << nl;
+        if (legacy_)
+        {
+            legacy::floatField(os(), vfield.name(), nCmpt, nVals);
+        }
+        else
+        {
+            format().openDataArray<float, nCmpt>(vfield.name())
+                .closeTag();
+        }
 
         format().writeSize(payLoad);
         foamVtkOutput::writeList(format(), pfield);
         foamVtkOutput::writeList(format(), vfield, addPointCellLabels);
         format().flush();
+
+        if (!legacy_)
+        {
+            format().endDataArray();
+        }
     }
 }
 

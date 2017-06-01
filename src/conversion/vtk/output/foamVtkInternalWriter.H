@@ -64,12 +64,41 @@ class internalWriter
         //- Reference to the OpenFOAM mesh (or subset)
         const fvMesh& mesh_;
 
+        //- Commonly used query
+        const bool legacy_;
+
         autoPtr<foamVtkOutput::formatter> format_;
 
         //- The volume cells (internalMesh)
         const foamVtkCells& vtkCells_;
 
         std::ofstream os_;
+
+
+    // Private Member Functions
+
+        //- Begin piece
+        void beginPiece();
+
+        //- Write mesh points
+        void writePoints();
+
+        //- Write mesh cells
+        void writeCellsLegacy();
+
+        //- Write mesh cells
+        void writeCells();
+
+        //- Write mesh topology
+        void writeMesh();
+
+
+        //- Disallow default bitwise copy construct
+        internalWriter(const internalWriter&) = delete;
+
+        //- Disallow default bitwise assignment
+        void operator=(const internalWriter&) = delete;
+
 
 public:
 
@@ -119,6 +148,10 @@ public:
 
         //- Write cellIDs
         void writeCellIDs();
+
+        //- Write file footer
+        void writeFooter();
+
 
         //- Write internal fields
         template<class Type>

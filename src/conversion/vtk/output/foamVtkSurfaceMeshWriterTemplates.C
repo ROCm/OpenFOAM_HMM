@@ -50,7 +50,7 @@ Foam::foamVtkOutput::surfaceMeshWriter::getFaceField
         }
         else
         {
-            label localFacei = facei - patches[patchi].start();
+            const label localFacei = facei - patches[patchi].start();
             fld[i] = sfld.boundaryField()[patchi][localFacei];
         }
     }
@@ -68,18 +68,32 @@ void Foam::foamVtkOutput::surfaceMeshWriter::write
     >& sflds
 )
 {
+    const int nCmpt(pTraits<Type>::nComponents);
+    const uint64_t payLoad(pp_.size() * nCmpt * sizeof(float));
+
     forAll(sflds, fieldi)
     {
-        const GeometricField<Type, fvsPatchField, surfaceMesh>& fld =
-            sflds[fieldi];
+        const auto& fld = sflds[fieldi];
 
-        os_ << fld.name() << ' '
-            << int(pTraits<Type>::nComponents) << ' '
-            << pp_.size() << " float" << std::endl;
+        if (legacy_)
+        {
+            legacy::floatField(os(), fld.name(), nCmpt, pp_.size());
+        }
+        else
+        {
+            format().openDataArray<float, nCmpt>(fld.name())
+                .closeTag();
+        }
 
+        format().writeSize(payLoad);
         foamVtkOutput::writeList(format(), getFaceField(fld)());
 
         format().flush();
+
+        if (!legacy_)
+        {
+            format().endDataArray();
+        }
     }
 }
 

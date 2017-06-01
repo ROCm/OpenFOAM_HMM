@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,134 @@ License
 #include "Cloud.H"
 #include "passiveParticle.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::foamVtkOutput::lagrangianWriter::beginPiece()
+{
+    if (!legacy_)
+    {
+        if (useVerts_)
+        {
+            format()
+                .openTag(vtkFileTag::PIECE)
+                ( "NumberOfPoints", nParcels_ )
+                ( "NumberOfVerts",  nParcels_ )
+                .closeTag();
+        }
+        else
+        {
+            format()
+                .openTag(vtkFileTag::PIECE)
+                ( "NumberOfPoints", nParcels_ )
+                .closeTag();
+        }
+    }
+}
+
+
+void Foam::foamVtkOutput::lagrangianWriter::writePoints()
+{
+    Cloud<passiveParticle> parcels(mesh_, cloudName_, false);
+    nParcels_ = parcels.size();
+
+    const uint64_t payLoad = (nParcels_ * 3 * sizeof(float));
+
+    if (legacy_)
+    {
+        legacy::beginPoints(os_, nParcels_);
+    }
+    else
+    {
+        beginPiece(); // Tricky - hide in here
+
+        format().tag(vtkFileTag::POINTS)
+            .openDataArray<float,3>(vtkFileTag::POINTS)
+            .closeTag();
+    }
+
+    format().writeSize(payLoad);
+
+    forAllConstIters(parcels, iter)
+    {
+        const point& pt = iter().position();
+
+        foamVtkOutput::write(format(), pt);
+    }
+    format().flush();
+
+    if (!legacy_)
+    {
+        format()
+            .endDataArray()
+            .endTag(vtkFileTag::POINTS);
+    }
+}
+
+
+void Foam::foamVtkOutput::lagrangianWriter::writeVertsLegacy()
+{
+    os_ << "VERTICES " << nParcels_ << ' ' << 2*nParcels_ << nl;
+
+    // legacy has cells + connectivity together
+    // count the number of vertices referenced
+
+    for (label i=0; i < nParcels_; ++i)
+    {
+        format().write(1);  // Number of vertices for this cell (==1)
+        format().write(i);
+    }
+    format().flush();
+}
+
+
+void Foam::foamVtkOutput::lagrangianWriter::writeVerts()
+{
+    format().tag(vtkFileTag::VERTS);
+
+    // Same payload throughout
+    const uint64_t payLoad = (nParcels_ * sizeof(label));
+
+    //
+    // 'connectivity'
+    // = linear mapping onto points
+    //
+    {
+        format().openDataArray<label>("connectivity")
+            .closeTag();
+
+        format().writeSize(payLoad);
+        for (label i=0; i < nParcels_; ++i)
+        {
+            format().write(i);
+        }
+        format().flush();
+
+        format().endDataArray();
+    }
+
+
+    //
+    // 'offsets'  (connectivity offsets)
+    // = linear mapping onto points (with 1 offset)
+    //
+    {
+        format().openDataArray<label>("offsets")
+            .closeTag();
+
+        format().writeSize(payLoad);
+        for (label i=0; i < nParcels_; ++i)
+        {
+            format().write(i+1);
+        }
+        format().flush();
+
+        format().endDataArray();
+    }
+
+    format().endTag(vtkFileTag::VERTS);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::foamVtkOutput::lagrangianWriter::lagrangianWriter
@@ -39,43 +167,54 @@ Foam::foamVtkOutput::lagrangianWriter::lagrangianWriter
 )
 :
     mesh_(mesh),
+    legacy_(outOpts.legacy()),
+    useVerts_(false),
     format_(),
     cloudName_(cloudName),
     os_(),
     nParcels_(0)
 {
+
     outputOptions opts(outOpts);
-    opts.legacy(true);  // Legacy only, no append
+    opts.append(false);  // No append supported
 
-    os_.open((baseName + (opts.legacy() ? ".vtk" : ".vtp")).c_str());
-
+    os_.open((baseName + (legacy_ ? ".vtk" : ".vtp")).c_str());
     format_ = opts.newFormatter(os_);
 
-    if (opts.legacy())
-    {
-        foamVtkOutput::legacy::fileHeader(format(), mesh_.time().caseName())
-            << "DATASET POLYDATA" << nl;
-    }
+    const auto& title = mesh_.time().caseName();
 
-    if (dummyCloud)
+    if (legacy_)
     {
-        os_ << "POINTS " << nParcels_ << " float" << nl;
+        legacy::fileHeader(format(), title, vtkFileTag::POLY_DATA);
+
+        if (dummyCloud)
+        {
+            legacy::beginPoints(os_, nParcels_);
+        }
+        else
+        {
+            writePoints();
+            if (useVerts_) writeVertsLegacy();
+        }
     }
     else
     {
-        Cloud<passiveParticle> parcels(mesh, cloudName_, false);
+        // XML (inline)
 
-        nParcels_ = parcels.size();
+        format()
+            .xmlHeader()
+            .xmlComment(title)
+            .beginVTKFile(vtkFileTag::POLY_DATA, "0.1");
 
-        os_ << "POINTS " << nParcels_ << " float" << nl;
-
-        forAllConstIters(parcels, iter)
+        if (dummyCloud)
         {
-            const point& pt = iter().position();
-
-            foamVtkOutput::write(format(), pt);
+            beginPiece();
         }
-        format().flush();
+        else
+        {
+            writePoints();
+            if (useVerts_) writeVerts();
+        }
     }
 }
 
@@ -88,17 +227,53 @@ Foam::foamVtkOutput::lagrangianWriter::~lagrangianWriter()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::foamVtkOutput::lagrangianWriter::beginParcelData
-(
-    const label nFields
-)
+void Foam::foamVtkOutput::lagrangianWriter::beginParcelData(label nFields)
 {
-    foamVtkOutput::legacy::pointDataHeader(os_, nParcels_, nFields);
+    const vtkFileTag dataType =
+    (
+        useVerts_
+      ? vtkFileTag::CELL_DATA
+      : vtkFileTag::POINT_DATA
+    );
+
+    if (legacy_)
+    {
+        legacy::dataHeader(os_, dataType, nParcels_, nFields);
+    }
+    else
+    {
+        format().tag(dataType);
+    }
 }
 
 
 void Foam::foamVtkOutput::lagrangianWriter::endParcelData()
-{}
+{
+    const vtkFileTag dataType =
+    (
+        useVerts_
+      ? vtkFileTag::CELL_DATA
+      : vtkFileTag::POINT_DATA
+    );
+
+    if (!legacy_)
+    {
+        format().endTag(dataType);
+    }
+}
+
+
+void Foam::foamVtkOutput::lagrangianWriter::writeFooter()
+{
+    if (!legacy_)
+    {
+        // slight cheat. </Piece> too
+        format().endTag(vtkFileTag::PIECE);
+
+        format().endTag(vtkFileTag::POLY_DATA)
+            .endVTKFile();
+    }
+}
 
 
 // ************************************************************************* //

@@ -25,51 +25,62 @@ License
 
 #include "foamVtkInternalWriter.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::internalWriter::internalWriter
-(
-    const fvMesh& mesh,
-    const foamVtkCells& cells,
-    const fileName& baseName,
-    const foamVtkOutput::outputOptions outOpts
-)
-:
-    mesh_(mesh),
-    format_(),
-    vtkCells_(cells),
-    os_()
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::foamVtkOutput::internalWriter::beginPiece()
 {
-    outputOptions opts(outOpts);
-    opts.legacy(true);  // Legacy only, no append
-
-    os_.open((baseName + (opts.legacy() ? ".vtk" : ".vtu")).c_str());
-    format_ = opts.newFormatter(os_);
-
-    if (opts.legacy())
+    if (!legacy_)
     {
-        foamVtkOutput::legacy::fileHeader(format(), mesh.time().caseName())
-            << "DATASET UNSTRUCTURED_GRID" << nl;
+        format()
+            .openTag(vtkFileTag::PIECE)
+            ( "NumberOfPoints", vtkCells_.nFieldPoints() )
+            ( "NumberOfCells",  vtkCells_.nFieldCells() )
+            .closeTag();
+    }
+}
+
+
+void Foam::foamVtkOutput::internalWriter::writePoints()
+{
+    // payload size
+    const uint64_t payLoad = (vtkCells_.nFieldPoints() * 3 * sizeof(float));
+
+    if (legacy_)
+    {
+        legacy::beginPoints(os_, vtkCells_.nFieldPoints());
+    }
+    else
+    {
+        format()
+            .tag(vtkFileTag::POINTS)
+            .openDataArray<float,3>(vtkFileTag::POINTS)
+            .closeTag();
     }
 
-    //------------------------------------------------------------------
-    //
-    // Write topology
-    //
-    //------------------------------------------------------------------
+    format().writeSize(payLoad);
 
-    os_ << "POINTS " << vtkCells_.nFieldPoints() << " float" << nl;
-    foamVtkOutput::writeList(format(), mesh.points());
-
-    const pointField& ctrs = mesh.cellCentres();
-    foamVtkOutput::writeList(format(), ctrs, vtkCells_.addPointCellLabels());
+    foamVtkOutput::writeList(format(), mesh_.points());
+    foamVtkOutput::writeList
+    (
+        format(),
+        mesh_.cellCentres(),
+        vtkCells_.addPointCellLabels()
+    );
 
     format().flush();
 
-    //
-    // Write cells
-    //
+    if (!legacy_)
+    {
+        format()
+            .endDataArray()
+            .endTag(vtkFileTag::POINTS);
+    }
+}
 
+
+void Foam::foamVtkOutput::internalWriter::writeCellsLegacy()
+{
     const List<uint8_t>& cellTypes = vtkCells_.cellTypes();
     const labelList& vertLabels = vtkCells_.vertLabels();
 
@@ -90,6 +101,177 @@ Foam::foamVtkOutput::internalWriter::internalWriter
 }
 
 
+void Foam::foamVtkOutput::internalWriter::writeCells()
+{
+    format().tag(vtkFileTag::CELLS);
+
+    //
+    // 'connectivity'
+    //
+    {
+        const labelList& vertLabels = vtkCells_.vertLabels();
+        const uint64_t payLoad = vertLabels.size() * sizeof(label);
+
+        format().openDataArray<label>("connectivity")
+            .closeTag();
+
+        format().writeSize(payLoad);
+        foamVtkOutput::writeList(format(), vertLabels);
+        format().flush();
+
+        format().endDataArray();
+    }
+
+
+    //
+    // 'offsets'  (connectivity offsets)
+    //
+    {
+        const labelList& vertOffsets = vtkCells_.vertOffsets();
+        const uint64_t payLoad = vertOffsets.size() * sizeof(label);
+
+        format().openDataArray<label>("offsets")
+            .closeTag();
+
+        format().writeSize(payLoad);
+        foamVtkOutput::writeList(format(), vertOffsets);
+        format().flush();
+
+        format().endDataArray();
+    }
+
+
+    //
+    // 'types' (cell types)
+    //
+    {
+        const List<uint8_t>& cellTypes = vtkCells_.cellTypes();
+        const uint64_t payLoad = cellTypes.size() * sizeof(uint8_t);
+
+        format().openDataArray<uint8_t>("types")
+            .closeTag();
+
+        format().writeSize(payLoad);
+        forAll(cellTypes, i)
+        {
+            // No nComponents for char, cannot use foamVtkOutput::writeList here
+            format().write(cellTypes[i]);
+        }
+        format().flush();
+
+        format().endDataArray();
+    }
+
+
+    //
+    // can quit here if there are NO face streams
+    //
+    if (vtkCells_.faceLabels().empty())
+    {
+        format().endTag(vtkFileTag::CELLS);
+
+        return;
+    }
+
+
+    // --------------------------------------------------
+
+    //
+    // 'faces' (face streams)
+    //
+    {
+        const labelList& faceLabels = vtkCells_.faceLabels();
+        const uint64_t payLoad = faceLabels.size() * sizeof(label);
+
+        format().openDataArray<label>("faces")
+            .closeTag();
+
+        format().writeSize(payLoad);
+        foamVtkOutput::writeList(format(), faceLabels);
+        format().flush();
+
+        format().endDataArray();
+    }
+
+
+    // 'faceoffsets' (face stream offsets)
+    // -1 to indicate that the cell is a primitive type that does not
+    // have a face stream
+    {
+        const labelList& faceOffsets = vtkCells_.faceOffsets();
+        const uint64_t payLoad = faceOffsets.size() * sizeof(label);
+
+        format().openDataArray<label>("faceoffsets")
+            .closeTag();
+
+        format().writeSize(payLoad);
+        foamVtkOutput::writeList(format(), faceOffsets);
+        format().flush();
+
+        format().endDataArray();
+    }
+
+    format().endTag(vtkFileTag::CELLS);
+}
+
+
+void Foam::foamVtkOutput::internalWriter::writeMesh()
+{
+    writePoints();
+    if (legacy_)
+    {
+        writeCellsLegacy();
+    }
+    else
+    {
+        writeCells();
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::foamVtkOutput::internalWriter::internalWriter
+(
+    const fvMesh& mesh,
+    const foamVtkCells& cells,
+    const fileName& baseName,
+    const foamVtkOutput::outputOptions outOpts
+)
+:
+    mesh_(mesh),
+    legacy_(outOpts.legacy()),
+    format_(),
+    vtkCells_(cells),
+    os_()
+{
+    outputOptions opts(outOpts);
+    opts.append(false);  // No append supported
+
+    os_.open((baseName + (legacy_ ? ".vtk" : ".vtu")).c_str());
+    format_ = opts.newFormatter(os_);
+
+    const auto& title = mesh_.time().caseName();
+
+    if (legacy_)
+    {
+        legacy::fileHeader(format(), title, vtkFileTag::UNSTRUCTURED_GRID);
+    }
+    else
+    {
+        // XML (inline)
+
+        format()
+            .xmlHeader()
+            .xmlComment(title)
+            .beginVTKFile(vtkFileTag::UNSTRUCTURED_GRID, "0.1");
+    }
+
+    beginPiece();
+    writeMesh();
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::foamVtkOutput::internalWriter::~internalWriter()
@@ -101,43 +283,98 @@ Foam::foamVtkOutput::internalWriter::~internalWriter()
 
 void Foam::foamVtkOutput::internalWriter::beginCellData(label nFields)
 {
-    foamVtkOutput::legacy::cellDataHeader
-    (
-        os(),
-        vtkCells_.nFieldCells(),
-        nFields
-    );
+    if (legacy_)
+    {
+        legacy::dataHeader
+        (
+            os(),
+            vtkFileTag::CELL_DATA,
+            vtkCells_.nFieldCells(),
+            nFields
+        );
+    }
+    else
+    {
+        format().tag(vtkFileTag::CELL_DATA);
+    }
 }
 
 
 void Foam::foamVtkOutput::internalWriter::endCellData()
-{}
+{
+    if (!legacy_)
+    {
+        format().endTag(vtkFileTag::CELL_DATA);
+    }
+}
 
 
 void Foam::foamVtkOutput::internalWriter::beginPointData(label nFields)
 {
-    foamVtkOutput::legacy::pointDataHeader
-    (
-        os(),
-        vtkCells_.nFieldPoints(),
-        nFields
-    );
+    if (legacy_)
+    {
+        legacy::dataHeader
+        (
+            os(),
+            vtkFileTag::POINT_DATA,
+            vtkCells_.nFieldPoints(),
+            nFields
+        );
+    }
+    else
+    {
+        format().tag(vtkFileTag::POINT_DATA);
+    }
 }
 
 
 void Foam::foamVtkOutput::internalWriter::endPointData()
-{}
+{
+    if (!legacy_)
+    {
+        format().endTag(vtkFileTag::POINT_DATA);
+    }
+}
+
+
+void Foam::foamVtkOutput::internalWriter::writeFooter()
+{
+    if (!legacy_)
+    {
+        // slight cheat. </Piece> too
+        format().endTag(vtkFileTag::PIECE);
+
+        format().endTag(vtkFileTag::UNSTRUCTURED_GRID)
+            .endVTKFile();
+    }
+}
 
 
 void Foam::foamVtkOutput::internalWriter::writeCellIDs()
 {
-    const labelList& cellMap = vtkCells_.cellMap();
-
     // Cell ids first
-    os_ << "cellID 1 " << vtkCells_.nFieldCells() << " int" << nl;
+    const labelList& cellMap = vtkCells_.cellMap();
+    const uint64_t payLoad = vtkCells_.nFieldCells() * sizeof(label);
+
+    if (legacy_)
+    {
+        os_ << "cellID 1 " << vtkCells_.nFieldCells() << " int" << nl;
+    }
+    else
+    {
+        format().openDataArray<label>("cellID")
+            .closeTag();
+    }
+
+    format().writeSize(payLoad);
 
     foamVtkOutput::writeList(format(), cellMap);
     format().flush();
+
+    if (!legacy_)
+    {
+        format().endDataArray();
+    }
 }
 
 

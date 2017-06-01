@@ -34,13 +34,24 @@ void Foam::foamVtkOutput::patchWriter::write
     const UPtrList<const GeometricField<Type, PatchField, volMesh>>& flds
 )
 {
+    const int nCmpt(pTraits<Type>::nComponents);
+    const uint64_t payLoad(nFaces_ * nCmpt * sizeof(float));
+
     forAll(flds, fieldi)
     {
         const auto& fld = flds[fieldi];
 
-        os_ << fld.name() << ' '
-            << int(pTraits<Type>::nComponents) << ' '
-            << nFaces_ << " float" << nl;
+        if (legacy_)
+        {
+            legacy::floatField(os_, fld.name(), nCmpt, nFaces_);
+        }
+        else
+        {
+            format().openDataArray<float, nCmpt>(fld.name())
+                .closeTag();
+        }
+
+        format().writeSize(payLoad);
 
         forAll(patchIDs_, i)
         {
@@ -57,6 +68,11 @@ void Foam::foamVtkOutput::patchWriter::write
         }
 
         format().flush();
+
+        if (!legacy_)
+        {
+            format().endDataArray();
+        }
     }
 }
 
@@ -67,13 +83,24 @@ void Foam::foamVtkOutput::patchWriter::write
     const UPtrList<const GeometricField<Type, PatchField, pointMesh>>& flds
 )
 {
+    const int nCmpt(pTraits<Type>::nComponents);
+    const uint64_t payLoad(nPoints_ * nCmpt * sizeof(float));
+
     forAll(flds, fieldi)
     {
         const auto& fld = flds[fieldi];
 
-        os_ << fld.name() << ' '
-            << int(pTraits<Type>::nComponents) << ' '
-            << nPoints_ << " float" << nl;
+        if (legacy_)
+        {
+            legacy::floatField(os_, fld.name(), nCmpt, nPoints_);
+        }
+        else
+        {
+            format().openDataArray<float, nCmpt>(fld.name())
+                .closeTag();
+        }
+
+        format().writeSize(payLoad);
 
         forAll(patchIDs_, i)
         {
@@ -81,7 +108,13 @@ void Foam::foamVtkOutput::patchWriter::write
 
             foamVtkOutput::writeList(format(), pfld.patchInternalField()());
         }
+
         format().flush();
+
+        if (!legacy_)
+        {
+            format().endDataArray();
+        }
     }
 }
 
@@ -93,15 +126,24 @@ void Foam::foamVtkOutput::patchWriter::write
     const UPtrList<const GeometricField<Type, fvPatchField, volMesh>>& flds
 )
 {
+    const int nCmpt(pTraits<Type>::nComponents);
+    const uint64_t payLoad(nPoints_ * nCmpt * sizeof(float));
+
     forAll(flds, fieldi)
     {
         const auto& fld = flds[fieldi];
 
-        os_ << fld.name() << ' '
-            << int(pTraits<Type>::nComponents) << ' '
-            << nPoints_ << " float" << nl;
+        if (legacy_)
+        {
+            legacy::floatField(os_, fld.name(), nCmpt, nPoints_);
+        }
+        else
+        {
+            format().openDataArray<float, nCmpt>(fld.name())
+                .closeTag();
+        }
 
-        DynamicList<floatScalar> fField(pTraits<Type>::nComponents*nPoints_);
+        format().writeSize(payLoad);
 
         forAll(patchIDs_, i)
         {
@@ -121,7 +163,13 @@ void Foam::foamVtkOutput::patchWriter::write
                 foamVtkOutput::writeList(format(), tfield());
             }
         }
+
         format().flush();
+
+        if (!legacy_)
+        {
+            format().endDataArray();
+        }
     }
 }
 

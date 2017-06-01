@@ -36,15 +36,11 @@ License
 
 // * * * * * * * * * * * * * * * Static Data * * * * * * * * * * * * * * * * //
 
-const Foam::Enum<Foam::foamVtkOutput::legacy::textElemType>
-Foam::foamVtkOutput::legacy::textNames
+const Foam::Enum<Foam::vtkFileTag>
+Foam::foamVtkOutput::legacy::contentNames
 {
-    { textElemType::POINTS,            "POINTS" },
-    { textElemType::CELLS,             "CELLS" },
-    { textElemType::POLYS,             "POLYGONS" },
-    { textElemType::VERTS,             "VERTICES" },
-    { textElemType::POLY_DATA,         "POLYDATA" },
-    { textElemType::UNSTRUCTURED_GRID, "UNSTRUCTURED_GRID" },
+    { vtkFileTag::POLY_DATA,         "POLYDATA" },
+    { vtkFileTag::UNSTRUCTURED_GRID, "UNSTRUCTURED_GRID" },
 };
 
 
@@ -130,63 +126,20 @@ Foam::label Foam::foamVtkOutput::writeVtmFile
 
 std::ostream& Foam::foamVtkOutput::legacy::fileHeader
 (
-    std::ostream& os,
-    const std::string& title,
-    const bool binary
-)
-{
-    os  << "# vtk DataFile Version 2.0" << nl
-        << title << nl
-        << (binary ? "BINARY" : "ASCII") << nl;
-
-    return os;
-}
-
-
-std::ostream& Foam::foamVtkOutput::legacy::fileHeader
-(
     foamVtkOutput::formatter& fmt,
-    const std::string& title
+    const std::string& title,
+    const std::string& contentType
 )
 {
-    return fileHeader(fmt.os(), title, isType<legacyRawFormatter>(fmt));
-}
+    std::ostream& os = fmt.os();
 
-
-std::ostream& Foam::foamVtkOutput::legacy::dataHeader
-(
-    std::ostream& os,
-    const vtkFileTag& dataTypeTag,
-    const label nEntries,
-    const label nFields
-)
-{
-    os  << dataTypeNames[dataTypeTag] << ' ' << nEntries << nl
-        << "FIELD attributes " << nFields << nl;
+    fileHeader(os, title, isType<legacyRawFormatter>(fmt));
+    if (!contentType.empty())
+    {
+        os << "DATASET " << contentType.c_str() << nl;
+    }
 
     return os;
-}
-
-
-std::ostream& Foam::foamVtkOutput::legacy::cellDataHeader
-(
-    std::ostream& os,
-    const label nEntries,
-    const label nFields
-)
-{
-    return dataHeader(os, vtkFileTag::CELL_DATA, nEntries, nFields);
-}
-
-
-std::ostream& Foam::foamVtkOutput::legacy::pointDataHeader
-(
-    std::ostream& os,
-    const label nEntries,
-    const label nFields
-)
-{
-    return dataHeader(os, vtkFileTag::POINT_DATA, nEntries, nFields);
 }
 
 
