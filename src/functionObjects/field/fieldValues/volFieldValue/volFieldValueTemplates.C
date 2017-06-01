@@ -217,12 +217,17 @@ bool Foam::functionObjects::fieldValues::volFieldValue::writeValues
 
             if (Pstream::master())
             {
+                word outName = fieldName + '_' + regionTypeNames_[regionType_];
+                if (this->volRegion::regionName_ != polyMesh::defaultRegion)
+                {
+                    outName = outName + '-' + this->volRegion::regionName_;
+                }
+
                 IOField<Type>
                 (
                     IOobject
                     (
-                        fieldName + '_' + regionTypeNames_[regionType_]
-                      + '-' + volRegion::regionName_,
+                        outName,
                         obr_.time().timeName(),
                         obr_,
                         IOobject::NO_READ,
@@ -241,13 +246,17 @@ bool Foam::functionObjects::fieldValues::volFieldValue::writeValues
         file()<< tab << result;
 
         Log << "    " << operationTypeNames_[operation_]
-            << "(" << volRegion::regionName_ << ") of " << fieldName
+            << "(" << this->volRegion::regionName_ << ") of " << fieldName
             <<  " = " << result << endl;
 
         // Write state/results information
         const word& opName = operationTypeNames_[operation_];
-        word resultName =
-            opName + '(' + volRegion::regionName_ + ',' + fieldName + ')';
+        word outName = fieldName;
+        if (this->volRegion::regionName_ != polyMesh::defaultRegion)
+        {
+            outName = this->volRegion::regionName_ + ',' + outName;
+        }
+        word resultName = opName + '(' + outName + ')';
         this->setResult(resultName, result);
     }
 

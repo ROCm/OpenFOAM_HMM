@@ -83,6 +83,7 @@ Foam::functionObjects::volRegion::volRegion
       ? regionTypeNames_.read(dict.lookup("regionType"))
       : vrtAll
     ),
+    regionName_(polyMesh::defaultRegion),
     regionID_(-1)
 {
     read(dict);
