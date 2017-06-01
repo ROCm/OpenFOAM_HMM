@@ -15,24 +15,20 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-mul             [1 -1 -1 0 0] 0.0065;
-
-muv             [1 -1 -1 0 0] 5.953e-06;
-
 phases (vapour water);
 
 water
 {
     transportModel  Newtonian;
-    nu              [0 2 -1 0 0 0 0] 7.831e-06;
-    rho             [1 -3 0 0 0 0 0] 830;
+    nu              7.831e-06;
+    rho             830;
 }
 
 vapour
 {
     transportModel  Newtonian;
-    nu              [0 2 -1 0 0 0 0] 4.252e-05;
-    rho             [1 -3 0 0 0 0 0] 0.14;
+    nu              4.252e-05;
+    rho             0.14;
 }
 
 

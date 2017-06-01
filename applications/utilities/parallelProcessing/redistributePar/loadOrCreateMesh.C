@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -124,14 +124,18 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             slave++
         )
         {
-            OPstream toSlave(Pstream::scheduled, slave);
+            OPstream toSlave(Pstream::commsTypes::scheduled, slave);
             toSlave << patchEntries;
         }
     }
     else
     {
         // Receive patches
-        IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
+        IPstream fromMaster
+        (
+            Pstream::commsTypes::scheduled,
+            Pstream::masterNo()
+        );
         fromMaster >> patchEntries;
     }
 

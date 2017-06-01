@@ -111,7 +111,7 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
         {
             typedef compressible::turbulenceModel turbulenceModel;
 
-            word turbName(turbulenceModel::propertiesName);
+            const word turbName(turbulenceModel::propertiesName);
 
             if
             (
@@ -205,8 +205,8 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
                     << " on mesh " << mesh.name() << " patch " << patch_.name()
                     << nl
                     << "Please set 'kappaMethod' to one of "
-                    << KMethodTypeNames_.toc()
-                    << " and 'kappa' to the name of the volScalar"
+                    << flatOutput(KMethodTypeNames_.sortedToc()) << nl
+                    << "and 'kappa' to the name of the volScalar"
                     << " or volSymmTensor field (if kappaMethod=lookup)"
                     << exit(FatalError);
             }
@@ -219,8 +219,8 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
             FatalErrorInFunction
                 << "Unimplemented method " << KMethodTypeNames_[method_] << nl
                 << "Please set 'kappaMethod' to one of "
-                << KMethodTypeNames_.toc()
-                << " and 'kappa' to the name of the volScalar"
+                << flatOutput(KMethodTypeNames_.sortedToc()) << nl
+                << "and 'kappa' to the name of the volScalar"
                 << " or volSymmTensor field (if kappaMethod=lookup)"
                 << exit(FatalError);
         }

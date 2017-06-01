@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,7 +85,7 @@ Foam::motionSolver::motionSolver
 :
     IOdictionary(stealRegistration(dict), dict),
     mesh_(mesh),
-    coeffDict_(dict.subDict(type + "Coeffs"))
+    coeffDict_(dict.optionalSubDict(type + "Coeffs"))
 {}
 
 
@@ -104,7 +104,12 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::New
     const IOdictionary& solverDict
 )
 {
-    const word solverTypeName(solverDict.lookup("solver"));
+    const word solverTypeName
+    (
+        solverDict.found("motionSolver")
+      ? solverDict.lookup("motionSolver")
+      : solverDict.lookup("solver")
+    );
 
     Info<< "Selecting motion solver: " << solverTypeName << endl;
 
@@ -227,7 +232,7 @@ bool Foam::motionSolver::read()
 {
     if (regIOobject::read())
     {
-        coeffDict_ = subDict(type() + "Coeffs");
+        coeffDict_ = optionalSubDict(type() + "Coeffs");
 
         return true;
     }

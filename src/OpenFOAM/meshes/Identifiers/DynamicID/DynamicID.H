@@ -142,9 +142,7 @@ Ostream& operator<<(Ostream& os, const DynamicID<ObjectType>& dynId)
         << dynId.name() << token::SPACE << dynId.index()
         << token::END_LIST;
 
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const DynamicID<ObjectType>&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

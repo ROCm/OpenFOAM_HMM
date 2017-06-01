@@ -89,8 +89,19 @@ autoPtr<incompressible::turbulenceModel> turbulence
 dimensionedScalar zeroSensitivity("0", dimVelocity*dimVelocity, 0.0);
 dimensionedScalar zeroAlpha("0", dimless/dimTime, 0.0);
 
-dimensionedScalar lambda(laminarTransport.lookup("lambda"));
-dimensionedScalar alphaMax(laminarTransport.lookup("alphaMax"));
+dimensionedScalar lambda
+(
+    "lambda",
+    dimTime/sqr(dimLength),
+    laminarTransport
+);
+
+dimensionedScalar alphaMax
+(
+    "alphaMax",
+    dimless/dimTime,
+    laminarTransport
+);
 
 const labelList& inletCells = mesh.boundary()["inlet"].faceCells();
 //const labelList& outletCells = mesh.boundary()["outlet"].faceCells();

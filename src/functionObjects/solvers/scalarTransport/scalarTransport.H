@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -30,18 +30,24 @@ Group
 Description
     Evolves a passive scalar transport equation.
 
-    - To specify the field name set the 'field' entry
+    - To specify the field name set the \c field entry
     - To employ the same numerical schemes as another field set
-      the 'schemesField' entry,
+      the \c schemesField entry,
     - The diffusivity can be set manually using the 'D' entry, retrieved
       from the turbulence model or specified nut
+    - Alternatively if a turbulence model is available a turbulent diffusivity
+      may be constructed from the laminar and turbulent viscosities using the
+      optional diffusivity coefficients \c alphaD and \c alphaDt (which default
+      to 1):
+      \verbatim
+          D = alphaD*nu + alphaDt*nut
+      \endverbatim
     - To specify a transport quantity within a phase enter phase.
     - bounded01 bounds the transported scalar within 0 and 1.
 
 Usage
     Example of function object specification to solve a scalar transport
     equation:
-    \verbatim
     functions
     {
         scalar1
@@ -180,6 +186,12 @@ class scalarTransport
 
         //- Flag to indicate whether a constant, uniform D_ is specified
         bool constantD_;
+
+        //- Laminar diffusion coefficient (optional)
+        scalar alphaD_;
+
+        //- Turbulent diffusion coefficient (optional)
+        scalar alphaDt_;
 
         //- Number of corrector iterations (optional)
         label nCorr_;

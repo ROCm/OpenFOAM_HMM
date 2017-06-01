@@ -104,6 +104,7 @@ public:
 
     //- Append elements to DynamicList
     static void insert(const labelList&, DynamicList<label>&);
+
     template<class Type>
     static void insert(const List<Type>&, DynamicList<floatScalar>&);
 
@@ -140,36 +141,6 @@ public:
         const vtkMesh&
     );
 
-    //- Write generic GeometricFields
-    template<class Type, template<class> class PatchField, class GeoMesh>
-    static void write
-    (
-        std::ostream&,
-        const bool binary,
-        const PtrList<GeometricField<Type, PatchField, GeoMesh>>&,
-        const vtkMesh&
-    );
-
-    //- Write generic dimensioned internal fields
-    template<class Type>
-    static void write
-    (
-        std::ostream&,
-        const bool binary,
-        const PtrList<DimensionedField<Type, volMesh>>&,
-        const vtkMesh&
-    );
-
-    //- Interpolate and write volFields
-    template<class Type>
-    static void write
-    (
-        std::ostream&,
-        const bool binary,
-        const volPointInterpolation&,
-        const PtrList<GeometricField<Type, fvPatchField, volMesh>>&,
-        const vtkMesh&
-    );
 };
 
 

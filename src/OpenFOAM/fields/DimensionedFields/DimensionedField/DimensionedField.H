@@ -41,6 +41,7 @@ SourceFiles
 #include "regIOobject.H"
 #include "Field.H"
 #include "dimensionedType.H"
+#include "orientedType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,7 +66,7 @@ template<class Type, class GeoMesh> Ostream& operator<<
 
 
 /*---------------------------------------------------------------------------*\
-                           Class DimensionedField Declaration
+                      Class DimensionedField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type, class GeoMesh>
@@ -98,6 +99,9 @@ private:
 
         //- Dimension set for this field
         dimensionSet dimensions_;
+
+        //- Oriented flag
+        orientedType oriented_;
 
 
     // Private Member Functions
@@ -282,6 +286,15 @@ public:
 
         //- Return non-const access to dimensions
         inline dimensionSet& dimensions();
+
+        //- Return oriented type
+        inline const orientedType& oriented() const;
+
+        //- Return non-const access to the oriented type
+        inline orientedType& oriented();
+
+        //- Set the oriented flag
+        inline void setOriented(const bool oriented = true);
 
         //- Return field
         inline const Field<Type>& field() const;

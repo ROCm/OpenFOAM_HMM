@@ -591,9 +591,7 @@ Foam::Istream& Foam::operator>>
         >> d.binWidth_
         >> d.listStarts_;
 
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, Distribution<Type>&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -609,9 +607,7 @@ Foam::Ostream& Foam::operator<<
         << d.binWidth_ << token::SPACE
         << d.listStarts_;
 
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, " "const Distribution&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

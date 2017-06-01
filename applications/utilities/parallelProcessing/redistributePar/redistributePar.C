@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -467,7 +467,7 @@ void writeProcAddressing
             // Apply face flips
             mapDistributeBase::distribute
             (
-                Pstream::nonBlocking,
+                Pstream::commsTypes::nonBlocking,
                 List<labelPair>(),
                 faceDistMap.constructSize(),
                 faceDistMap.subMap(),
@@ -489,7 +489,7 @@ void writeProcAddressing
         // provide one ...
         mapDistributeBase::distribute
         (
-            Pstream::nonBlocking,
+            Pstream::commsTypes::nonBlocking,
             List<labelPair>(),
             patchDistMap.constructSize(),
             patchDistMap.subMap(),
@@ -520,7 +520,7 @@ void writeProcAddressing
 
             mapDistributeBase::distribute
             (
-                Pstream::nonBlocking,
+                Pstream::commsTypes::nonBlocking,
                 List<labelPair>(),
                 map.nOldFaces(),
                 faceDistMap.constructMap(),
@@ -649,7 +649,7 @@ void readFields
                 {
                     if (!haveMesh[procI])
                     {
-                        OPstream toProc(Pstream::blocking, procI);
+                        OPstream toProc(Pstream::commsTypes::blocking, procI);
                         toProc<< tsubfld();
                     }
                 }
@@ -665,7 +665,11 @@ void readFields
             const word& name = masterNames[i];
 
             // Receive field
-            IPstream fromMaster(Pstream::blocking, Pstream::masterNo());
+            IPstream fromMaster
+            (
+                Pstream::commsTypes::blocking,
+                Pstream::masterNo()
+            );
             dictionary fieldDict(fromMaster);
 
             fields.set
@@ -723,8 +727,8 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
         typename GeoField::Boundary& bfld = fld.boundaryFieldRef();
         if
         (
-            Pstream::defaultCommsType == Pstream::blocking
-         || Pstream::defaultCommsType == Pstream::nonBlocking
+            Pstream::defaultCommsType == Pstream::commsTypes::blocking
+         || Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
         )
         {
             label nReq = Pstream::nRequests();
@@ -745,7 +749,7 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
             if
             (
                 Pstream::parRun()
-             && Pstream::defaultCommsType == Pstream::nonBlocking
+             && Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
             )
             {
                 Pstream::waitRequests(nReq);
@@ -763,7 +767,7 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
                 }
             }
         }
-        else if (Pstream::defaultCommsType == Pstream::scheduled)
+        else if (Pstream::defaultCommsType == Pstream::commsTypes::scheduled)
         {
             const lduSchedule& patchSchedule =
                 fld.mesh().globalData().patchSchedule();
@@ -779,11 +783,11 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
                 {
                     if (patchSchedule[patchEvali].init)
                     {
-                        pfld.initEvaluate(Pstream::scheduled);
+                        pfld.initEvaluate(Pstream::commsTypes::scheduled);
                     }
                     else
                     {
-                        pfld.evaluate(Pstream::scheduled);
+                        pfld.evaluate(Pstream::commsTypes::scheduled);
                     }
                 }
             }

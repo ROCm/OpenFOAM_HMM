@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,22 +40,6 @@ inline Foam::LandauTellerReactionRate::LandauTellerReactionRate
     B_(B),
     C_(C)
 {}
-
-
-inline Foam::LandauTellerReactionRate::LandauTellerReactionRate
-(
-    const speciesTable&,
-    Istream& is
-)
-:
-    A_(readScalar(is.readBegin("LandauTellerReactionRate(Istream&)"))),
-    beta_(readScalar(is)),
-    Ta_(readScalar(is)),
-    B_(readScalar(is)),
-    C_(readScalar(is))
-{
-    is.readEnd("LandauTellerReactionRate(Istream&)");
-}
 
 
 inline Foam::LandauTellerReactionRate::LandauTellerReactionRate
@@ -130,10 +114,7 @@ inline Foam::Ostream& Foam::operator<<
     const LandauTellerReactionRate& arr
 )
 {
-    os  << token::BEGIN_LIST
-        << arr.A_ << token::SPACE << arr.beta_ << token::SPACE << arr.Ta_
-        << token::SPACE << arr.B_ << token::SPACE << arr.C_
-        << token::END_LIST;
+    arr.write(os);
     return os;
 }
 

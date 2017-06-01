@@ -320,7 +320,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const polynomialFunction& poly)
 
 
     // Check state of Ostream
-    os.check("operator<<(Ostream&, const polynomialFunction&)");
+    os.check(FUNCTION_NAME);
 
     return os;
 }

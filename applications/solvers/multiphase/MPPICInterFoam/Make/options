@@ -4,6 +4,7 @@ EXE_INC =  \
     -I. \
     -I./IncompressibleTwoPhaseMixtureTurbulenceModels/lnInclude \
     -I$(interFoamPath) \
+    -I../VoF \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/fvOptions/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
@@ -31,7 +32,7 @@ EXE_LIBS = \
     -lmeshTools \
     -llagrangian \
     -llagrangianIntermediate \
-    -lthermophysicalFunctions \
+    -lthermophysicalProperties \
     -lspecie \
     -lincompressibleTransportModels \
     -limmiscibleIncompressibleTwoPhaseMixture \

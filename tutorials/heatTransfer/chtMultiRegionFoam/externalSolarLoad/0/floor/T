@@ -44,13 +44,14 @@ boundaryField
     minZ
     {
         type            externalWallHeatFluxTemperature;
-        value           uniform 300;
-        kappaMethod     solidThermo;
+        mode            coefficient;
         Ta              uniform 313;
         h               uniform 1000000;
         thicknessLayers ( 1 2 );
         kappaLayers     ( 100 200 );
+        kappaMethod     solidThermo;
         kappa           none;
+        value           uniform 300;
     }
     floor_to_domain3
     {

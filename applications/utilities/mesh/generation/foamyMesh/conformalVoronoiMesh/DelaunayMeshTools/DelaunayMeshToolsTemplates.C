@@ -44,22 +44,9 @@ void Foam::DelaunayMeshTools::writeOBJ
     OFstream str(fName);
 
     Pout<< nl
-        << "Writing points of types:" << nl;
-
-    forAllConstIter
-    (
-        HashTable<int>,
-        indexedVertexEnum::vertexTypeNames_,
-        iter
-    )
-    {
-        if (iter() >= startPointType && iter() <= endPointType)
-        {
-            Pout<< "    " << iter.key() << nl;
-        }
-    }
-
-    Pout<< "to " << str.name() << endl;
+        << "Writing points of types ("
+        << int(startPointType) << "-" << int(endPointType)
+        << ") to " << str.name() << endl;
 
     for
     (
@@ -265,7 +252,7 @@ void Foam::DelaunayMeshTools::drawDelaunayCell
         << "f " << 1 + offset << " " << 4 + offset << " " << 3 + offset << nl
         << "f " << 1 + offset << " " << 2 + offset << " " << 4 + offset << endl;
 
-//    os  << "# cicumcentre " << endl;
+//    os  << "# circumcentre " << endl;
 
 //    meshTools::writeOBJ(os, c->dual());
 

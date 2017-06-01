@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -86,12 +86,7 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
             );
         }
 
-        // Check state of IOstream
-        is.check
-        (
-            "polyBoundaryMesh::polyBoundaryMesh"
-            "(const IOobject&, const polyMesh&)"
-        );
+        is.check(FUNCTION_NAME);
 
         close();
     }
@@ -155,12 +150,7 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
             );
         }
 
-        // Check state of IOstream
-        is.check
-        (
-            "polyBoundaryMesh::polyBoundaryMesh"
-            "(const IOobject&, const polyMesh&, const polyPatchList&)"
-        );
+        is.check(FUNCTION_NAME);
 
         close();
     }
@@ -212,8 +202,8 @@ void Foam::polyBoundaryMesh::calcGeometry()
 
     if
     (
-        Pstream::defaultCommsType == Pstream::blocking
-     || Pstream::defaultCommsType == Pstream::nonBlocking
+        Pstream::defaultCommsType == Pstream::commsTypes::blocking
+     || Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
     )
     {
         forAll(*this, patchi)
@@ -228,7 +218,7 @@ void Foam::polyBoundaryMesh::calcGeometry()
             operator[](patchi).calcGeometry(pBufs);
         }
     }
-    else if (Pstream::defaultCommsType == Pstream::scheduled)
+    else if (Pstream::defaultCommsType == Pstream::commsTypes::scheduled)
     {
         const lduSchedule& patchSchedule = mesh().globalData().patchSchedule();
 
@@ -992,8 +982,8 @@ void Foam::polyBoundaryMesh::movePoints(const pointField& p)
 
     if
     (
-        Pstream::defaultCommsType == Pstream::blocking
-     || Pstream::defaultCommsType == Pstream::nonBlocking
+        Pstream::defaultCommsType == Pstream::commsTypes::blocking
+     || Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
     )
     {
         forAll(*this, patchi)
@@ -1008,7 +998,7 @@ void Foam::polyBoundaryMesh::movePoints(const pointField& p)
             operator[](patchi).movePoints(pBufs, p);
         }
     }
-    else if (Pstream::defaultCommsType == Pstream::scheduled)
+    else if (Pstream::defaultCommsType == Pstream::commsTypes::scheduled)
     {
         const lduSchedule& patchSchedule = mesh().globalData().patchSchedule();
 
@@ -1042,8 +1032,8 @@ void Foam::polyBoundaryMesh::updateMesh()
 
     if
     (
-        Pstream::defaultCommsType == Pstream::blocking
-     || Pstream::defaultCommsType == Pstream::nonBlocking
+        Pstream::defaultCommsType == Pstream::commsTypes::blocking
+     || Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
     )
     {
         forAll(*this, patchi)
@@ -1058,7 +1048,7 @@ void Foam::polyBoundaryMesh::updateMesh()
             operator[](patchi).updateMesh(pBufs);
         }
     }
-    else if (Pstream::defaultCommsType == Pstream::scheduled)
+    else if (Pstream::defaultCommsType == Pstream::commsTypes::scheduled)
     {
         const lduSchedule& patchSchedule = mesh().globalData().patchSchedule();
 
@@ -1121,9 +1111,7 @@ bool Foam::polyBoundaryMesh::writeData(Ostream& os) const
 
     os  << decrIndent << token::END_LIST;
 
-    // Check state of IOstream
-    os.check("polyBoundaryMesh::writeData(Ostream& os) const");
-
+    os.check(FUNCTION_NAME);
     return os.good();
 }
 

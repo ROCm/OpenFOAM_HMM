@@ -62,6 +62,8 @@ fi
 
 SETSDIRT="../postProcessing/thermoCouple"
 
+[ -d $SETSDIRT ] || echo "No probe data available to create graphs" && exit 1
+
 arr=(`ls $SETSDIRT`)
 OFDATAROOTT="$SETSDIRT/${arr[0]}"
 

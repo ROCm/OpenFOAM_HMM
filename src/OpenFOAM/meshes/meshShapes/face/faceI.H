@@ -176,9 +176,7 @@ inline Foam::Istream& Foam::operator>>(Istream& is, face& f)
         is >> static_cast<labelList&>(f);
     }
 
-    // Check state of Ostream
-    is.check("Istream& operator>>(Istream&, face&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 

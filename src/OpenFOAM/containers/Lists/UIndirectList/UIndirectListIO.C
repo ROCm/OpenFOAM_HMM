@@ -120,9 +120,7 @@ Foam::Ostream& Foam::UIndirectList<T>::writeList
         }
     }
 
-    // Check state of IOstream
-    os.check("UIndirectList::writeList(Ostream&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

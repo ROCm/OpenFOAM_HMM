@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -91,7 +91,6 @@ Usage
         orientedWeightField  | name of oriented field to apply weighting | no |
         scaleFactor  | scale factor            | no          | 1
         fields       | list of fields to operate on | yes    |
-        orientedFields | list of oriented fields to operate on | no |
     \endtable
 
     Where \c regionType is defined by
@@ -130,8 +129,6 @@ Note
     - faces on empty patches get ignored
     - if the field is a volField the \c faceZone can only consist of boundary
       faces
-    - the `oriented' entries relate to mesh-oriented fields, such as the
-      flux, phi.  These fields will be oriented according to the face normals.
     - Using \c surface:
       - The keyword %subRegion should not be used to select surfaces.
         Specify instead the regionType 'surface' and provide the surface name.
@@ -285,12 +282,6 @@ protected:
         //- Weight field name - optional
         word weightFieldName_;
 
-        //- Flag to indicate if flipMap should be applied to the weight field
-        bool orientWeightField_;
-
-        //- Start index of fields that require application of flipMap
-        label orientedFieldsStart_;
-
         //- Total area of the surfaceFieldValue
         scalar totalArea_;
 
@@ -353,8 +344,7 @@ protected:
         tmp<Field<Type>> getFieldValues
         (
             const word& fieldName,
-            const bool mustGet = false,
-            const bool applyOrientation = false
+            const bool mustGet = false
         ) const;
 
         //- Apply the 'operation' to the values. Operation must preserve Type.
@@ -380,16 +370,14 @@ protected:
         template<class Type>
         tmp<Field<Type>> filterField
         (
-            const GeometricField<Type, fvsPatchField, surfaceMesh>& field,
-            const bool applyOrientation
+            const GeometricField<Type, fvsPatchField, surfaceMesh>& field
         ) const;
 
         //- Filter a volume field according to faceIds
         template<class Type>
         tmp<Field<Type>> filterField
         (
-            const GeometricField<Type, fvPatchField, volMesh>& field,
-            const bool applyOrientation
+            const GeometricField<Type, fvPatchField, volMesh>& field
         ) const;
 
         //- Weighting factor
@@ -424,7 +412,6 @@ protected:
             const word& fieldName,
             const vectorField& Sf,
             const Field<WeightType>& weightField,
-            const bool orient,
             const meshedSurf& surfToWrite
         );
 

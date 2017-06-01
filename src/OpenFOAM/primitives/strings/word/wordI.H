@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include <cctype>
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -126,6 +124,18 @@ inline bool Foam::word::valid(char c)
      && c != '{'   // beg subdict
      && c != '}'   // end subdict
     );
+}
+
+
+inline bool Foam::word::hasExt() const
+{
+    return string::hasExt();
+}
+
+
+inline bool Foam::word::removeExt()
+{
+    return string::removeExt();
 }
 
 

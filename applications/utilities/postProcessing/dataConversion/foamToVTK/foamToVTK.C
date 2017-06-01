@@ -341,6 +341,7 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
 
+    const bool decomposePoly   = !args.optionFound("poly");
     const bool doWriteInternal = !args.optionFound("noInternal");
     const bool doFaceZones     = !args.optionFound("noFaceZones");
     const bool doLinks         = !args.optionFound("noLinks");
@@ -349,7 +350,7 @@ int main(int argc, char *argv[])
     const bool noLagrangian    = args.optionFound("noLagrangian");
 
     // Decomposition of polyhedral cells into tets/pyramids cells
-    vtkTopo::decomposePoly     = !args.optionFound("poly");
+    vtkTopo::decomposePoly     = decomposePoly;
 
     if (binary && (sizeof(floatScalar) != 4 || sizeof(label) != 4))
     {
@@ -410,8 +411,6 @@ int main(int argc, char *argv[])
     args.optionReadIfPresent("pointSet", pointSetName);
 
 
-    instantList timeDirs = timeSelector::select0(runTime, args);
-
     #include "createNamedMesh.H"
 
     // VTK/ directory in the case
@@ -448,6 +447,9 @@ int main(int argc, char *argv[])
     }
 
     mkDir(fvPath);
+
+    instantList timeDirs = timeSelector::select0(runTime, args);
+
 
     // Mesh wrapper: does subsetting and decomposition
     vtkMesh vMesh(mesh, cellSetName);
@@ -492,7 +494,7 @@ int main(int argc, char *argv[])
             // Filename as if patch with same name.
             mkDir(fvPath/set.name());
 
-            fileName patchFileName
+            fileName outputName
             (
                 fvPath/set.name()/set.name()
               + "_"
@@ -500,12 +502,12 @@ int main(int argc, char *argv[])
               + ".vtk"
             );
 
-            Info<< "    FaceSet   : " << patchFileName << endl;
+            Info<< "    faceSet   : " << outputName << endl;
 
-            writeFaceSet(binary, vMesh.mesh(), set, patchFileName);
-
+            writeFaceSet(binary, vMesh.mesh(), set, outputName);
             continue;
         }
+
         // If pointSet: write pointSet only (as polydata)
         if (pointSetName.size())
         {
@@ -515,7 +517,7 @@ int main(int argc, char *argv[])
             // Filename as if patch with same name.
             mkDir(fvPath/set.name());
 
-            fileName patchFileName
+            fileName outputName
             (
                 fvPath/set.name()/set.name()
               + "_"
@@ -523,10 +525,9 @@ int main(int argc, char *argv[])
               + ".vtk"
             );
 
-            Info<< "    pointSet   : " << patchFileName << endl;
+            Info<< "    pointSet   : " << outputName << endl;
 
-            writePointSet(binary, vMesh.mesh(), set, patchFileName);
-
+            writePointSet(binary, vMesh.mesh(), set, outputName);
             continue;
         }
 
@@ -868,11 +869,11 @@ int main(int argc, char *argv[])
         {
             mkDir(fvPath/"allPatches");
 
-            fileName patchFileName;
+            fileName outputName;
 
             if (vMesh.useSubMesh())
             {
-                patchFileName =
+                outputName =
                     fvPath/"allPatches"/cellSetName
                   + "_"
                   + timeDesc
@@ -880,21 +881,21 @@ int main(int argc, char *argv[])
             }
             else
             {
-                patchFileName =
+                outputName =
                     fvPath/"allPatches"/"allPatches"
                   + "_"
                   + timeDesc
                   + ".vtk";
             }
 
-            Info<< "    Combined patches     : " << patchFileName << endl;
+            Info<< "    Combined patches     : " << outputName << endl;
 
             patchWriter writer
             (
                 vMesh.mesh(),
                 binary,
                 nearCellValue,
-                patchFileName,
+                outputName,
                 getSelectedPatches(patches, excludePatches)
             );
 
@@ -946,11 +947,11 @@ int main(int argc, char *argv[])
                 {
                     mkDir(fvPath/pp.name());
 
-                    fileName patchFileName;
+                    fileName outputName;
 
                     if (vMesh.useSubMesh())
                     {
-                        patchFileName =
+                        outputName =
                             fvPath/pp.name()/cellSetName
                           + "_"
                           + timeDesc
@@ -958,22 +959,22 @@ int main(int argc, char *argv[])
                     }
                     else
                     {
-                        patchFileName =
+                        outputName =
                             fvPath/pp.name()/pp.name()
                           + "_"
                           + timeDesc
                           + ".vtk";
                     }
 
-                    Info<< "    Patch     : " << patchFileName << endl;
+                    Info<< "    Patch     : " << outputName << endl;
 
                     patchWriter writer
                     (
                         vMesh.mesh(),
                         binary,
                         nearCellValue,
-                        patchFileName,
-                        labelList(1, patchi)
+                        outputName,
+                        labelList{patchi}
                     );
 
                     if (!isA<emptyPolyPatch>(pp))
@@ -1068,11 +1069,11 @@ int main(int argc, char *argv[])
 
                 mkDir(fvPath/fz.name());
 
-                fileName patchFileName;
+                fileName outputName;
 
                 if (vMesh.useSubMesh())
                 {
-                    patchFileName =
+                    outputName =
                         fvPath/fz.name()/cellSetName
                       + "_"
                       + timeDesc
@@ -1080,14 +1081,14 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
-                    patchFileName =
+                    outputName =
                         fvPath/fz.name()/fz.name()
                       + "_"
                       + timeDesc
                       + ".vtk";
                 }
 
-                Info<< "    FaceZone  : " << patchFileName << endl;
+                Info<< "    FaceZone  : " << outputName << endl;
 
                 indirectPrimitivePatch pp
                 (
@@ -1100,7 +1101,7 @@ int main(int argc, char *argv[])
                     binary,
                     pp,
                     fz.name(),
-                    patchFileName
+                    outputName
                 );
 
                 // Number of fields
@@ -1131,14 +1132,13 @@ int main(int argc, char *argv[])
             // Always create the cloud directory.
             mkDir(fvPath/cloud::prefix/cloudName);
 
-            fileName lagrFileName
+            fileName outputName
             (
                 fvPath/cloud::prefix/cloudName/cloudName
               + "_" + timeDesc + ".vtk"
             );
 
-            Info<< "    Lagrangian: " << lagrFileName << endl;
-
+            Info<< "    Lagrangian: " << outputName << endl;
 
             IOobjectList sprayObjs
             (
@@ -1189,7 +1189,7 @@ int main(int argc, char *argv[])
                 (
                     vMesh.mesh(),
                     binary,
-                    lagrFileName,
+                    outputName,
                     cloudName,
                     false
                 );
@@ -1219,7 +1219,7 @@ int main(int argc, char *argv[])
                 (
                     vMesh.mesh(),
                     binary,
-                    lagrFileName,
+                    outputName,
                     cloudName,
                     true
                 );

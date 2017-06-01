@@ -147,7 +147,7 @@ Foam::Ostream& Foam::SHA1Digest::write(Ostream& os, const bool prefixed) const
         os.write(hexChars[(v_[i] & 0xF)]);
     }
 
-    os.check("SHA1Digest::write(Ostream&, const bool)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 
@@ -268,7 +268,7 @@ Foam::Istream& Foam::operator>>(Istream& is, SHA1Digest& dig)
         v[i] = (c1 << 4) + c2;
     }
 
-    is.check("Istream& operator>>(Istream&, SHA1Digest&)");
+    is.check(FUNCTION_NAME);
     return is;
 }
 

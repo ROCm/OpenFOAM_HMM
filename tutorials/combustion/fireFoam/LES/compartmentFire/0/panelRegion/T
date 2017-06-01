@@ -25,6 +25,7 @@ boundaryField
     wallPanel_top
     {
         type            externalWallHeatFluxTemperature;
+        mode            coefficient;
         Ta              uniform 294.75;
         h               uniform 10;
         kappaMethod     solidThermo;

@@ -59,13 +59,7 @@ Foam::Istream& Foam::RBD::operator>>
         >> state.qDdot_
         >> state.deltaT_;
 
-    // Check state of Istream
-    is.check
-    (
-        "Foam::Istream& Foam::operator>>"
-        "(Foam::Istream&, Foam::RBD::rigidBodyModelState&)"
-    );
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -81,13 +75,7 @@ Foam::Ostream& Foam::RBD::operator<<
         << token::SPACE << state.qDdot_
         << token::SPACE << state.deltaT_;
 
-    // Check state of Ostream
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
-        "const Foam::RBD::rigidBodyModelState&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

@@ -477,9 +477,8 @@ Foam::Istream& Foam::dimensionSet::read
                 << exit(FatalIOError);
         }
     }
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, dimensionSet&)");
 
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -617,9 +616,7 @@ Foam::Istream& Foam::dimensionSet::read
         }
     }
 
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, dimensionSet&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -691,9 +688,7 @@ Foam::Ostream& Foam::dimensionSet::write
 
     os  << token::END_SQR;
 
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const dimensionSet&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 
@@ -722,9 +717,7 @@ Foam::Istream& Foam::operator>>(Istream& is, dimensionSet& dset)
             << exit(FatalIOError);
     }
 
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, dimensionSet&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -734,9 +727,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const dimensionSet& dset)
     scalar multiplier;
     dset.write(os, multiplier);
 
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const dimensionSet&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

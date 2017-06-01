@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -128,6 +128,8 @@ Foam::multiphaseMixture::multiphaseMixture
         1e-8/pow(average(mesh_.V()), 1.0/3.0)
     )
 {
+    rhoPhi_.setOriented();
+
     calcAlphas();
     alphas_.write();
 }
@@ -273,6 +275,7 @@ Foam::multiphaseMixture::surfaceTensionForce() const
     );
 
     surfaceScalarField& stf = tstf.ref();
+    stf.setOriented();
 
     forAllConstIter(PtrDictionary<phase>, phases_, iter1)
     {
@@ -680,6 +683,14 @@ void Foam::multiphaseMixture::solveAlphas
         << ' ' << min(sumAlpha).value()
         << ' ' << max(sumAlpha).value()
         << endl;
+
+    // Correct the sum of the phase-fractions to avoid 'drift'
+    volScalarField sumCorr(1.0 - sumAlpha);
+    forAllIter(PtrDictionary<phase>, phases_, iter)
+    {
+        phase& alpha = iter();
+        alpha += alpha*sumCorr;
+    }
 
     calcAlphas();
 }

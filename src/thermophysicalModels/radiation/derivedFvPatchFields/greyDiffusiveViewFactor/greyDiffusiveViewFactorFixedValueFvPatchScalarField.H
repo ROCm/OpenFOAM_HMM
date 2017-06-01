@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
@@ -29,12 +29,13 @@ Group
 
 Description
     This boundary condition provides a grey-diffuse condition for radiative
-    heat flux, \c Qr, for use with the view factor model
+    heat flux, \c qr, for use with the view factor model
 
 Usage
     \table
         Property     | Description             | Required    | Default value
-        Qro          | external radiative heat flux | yes    |
+        qro          | external radiative heat flux | yes    |
+        emissivityMode | emissivity mode: solidRadiation or lookup | yes |
     \endtable
 
     Example of the boundary condition specification:
@@ -42,7 +43,8 @@ Usage
     <patchName>
     {
         type            greyDiffusiveRadiationViewFactor;
-        Qro             uniform 0;
+        qro             uniform 0;
+        emissivityMode  solidRadiation;
         value           uniform 0;
     }
     \endverbatim
@@ -69,6 +71,7 @@ namespace Foam
 {
 namespace radiation
 {
+
 /*---------------------------------------------------------------------------*\
       Class greyDiffusiveViewFactorFixedValueFvPatchScalarField declaration
 \*---------------------------------------------------------------------------*/
@@ -80,7 +83,7 @@ class greyDiffusiveViewFactorFixedValueFvPatchScalarField
     // Private data
 
         //- External radiative heat flux
-        scalarField Qro_;
+        scalarField qro_;
 
         //- Activate solar load
         bool solarLoad_;
@@ -163,7 +166,7 @@ public:
         // Access
 
             //- Return external + solar load radiative heat flux
-            tmp<scalarField> Qro() const;
+            tmp<scalarField> qro() const;
 
 
         // Evaluation functions
@@ -197,8 +200,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace radiation
 } // End namespace Foam
-}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

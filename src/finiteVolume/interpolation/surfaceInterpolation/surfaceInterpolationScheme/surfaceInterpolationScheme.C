@@ -311,6 +311,8 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
 
     tlambdas.clear();
 
+//    tsf.ref().oriented() = Sf.oriented();
+
     return tsf;
 }
 
@@ -363,6 +365,8 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
         >
     > tsf = dotInterpolate(Sf, vf, weights(vf));
 
+    tsf.ref().oriented() = Sf.oriented();
+
     if (corrected())
     {
         tsf.ref() += Sf & correction(vf);
@@ -397,6 +401,7 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
             surfaceMesh
         >
     > tSfDotinterpVf = dotInterpolate(Sf, tvf());
+
     tvf.clear();
     return tSfDotinterpVf;
 }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,9 +56,9 @@ class arcEdge
     // Private data
 
         point p1_, p2_, p3_;
-        cylindricalCS cs_;
         scalar angle_;
         scalar radius_;
+        cylindricalCS cs_;
 
 
     // Private Member Functions

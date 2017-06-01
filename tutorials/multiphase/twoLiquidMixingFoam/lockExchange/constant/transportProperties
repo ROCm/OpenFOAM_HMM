@@ -15,23 +15,23 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Dab           [0 2 -1 0 0 0 0]    1e-06;
-alphatab      [0 0 0 0 0 0 0]     1;
+Dab         1e-06;
+alphatab    1;
 
 phases (sludge water);
 
 sludge
 {
     transportModel  Newtonian;
-    nu              [0 2 -1 0 0 0 0] 1e-06;
-    rho             [1 -3 0 0 0 0 0] 1000;
+    nu              1e-06;
+    rho             1000;
 }
 
 water
 {
     transportModel  Newtonian;
-    nu              [0 2 -1 0 0 0 0] 1e-06;
-    rho             [1 -3 0 0 0 0 0] 990;
+    nu              1e-06;
+    rho             990;
 }
 
 // ************************************************************************* //

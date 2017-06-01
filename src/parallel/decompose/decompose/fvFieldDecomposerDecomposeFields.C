@@ -40,6 +40,8 @@ Foam::fvFieldDecomposer::decomposeField
     const bool allowUnknownPatchFields
 ) const
 {
+    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
+
     // 1. Create the complete field with dummy patch fields
     PtrList<fvPatchField<Type>> patchFields(boundaryAddressing_.size());
 
@@ -58,9 +60,9 @@ Foam::fvFieldDecomposer::decomposeField
     }
 
     // Create the field for the processor
-    tmp<GeometricField<Type, fvPatchField, volMesh>> tresF
+    tmp<VolFieldType> tresF
     (
-        new GeometricField<Type, fvPatchField, volMesh>
+        new VolFieldType
         (
             IOobject
             (
@@ -76,18 +78,18 @@ Foam::fvFieldDecomposer::decomposeField
             patchFields
         )
     );
-    GeometricField<Type, fvPatchField, volMesh>& resF = tresF.ref();
+    VolFieldType& resF = tresF.ref();
+    resF.oriented() = field().oriented();
 
 
     // 2. Change the fvPatchFields to the correct type using a mapper
     //  constructor (with reference to the now correct internal field)
 
-    typename GeometricField<Type, fvPatchField, volMesh>::
-        Boundary& bf = resF.boundaryFieldRef();
+    typename VolFieldType::Boundary& bf = resF.boundaryFieldRef();
 
     forAll(bf, patchi)
     {
-        if (patchFieldDecomposerPtrs_[patchi])
+        if (patchFieldDecomposerPtrs_.set(patchi))
         {
             bf.set
             (
@@ -97,7 +99,7 @@ Foam::fvFieldDecomposer::decomposeField
                     field.boundaryField()[boundaryAddressing_[patchi]],
                     procMesh_.boundary()[patchi],
                     resF(),
-                    *patchFieldDecomposerPtrs_[patchi]
+                    patchFieldDecomposerPtrs_[patchi]
                 )
             );
         }
@@ -113,7 +115,7 @@ Foam::fvFieldDecomposer::decomposeField
                     Field<Type>
                     (
                         field.primitiveField(),
-                        *processorVolPatchFieldDecomposerPtrs_[patchi]
+                        processorVolPatchFieldDecomposerPtrs_[patchi]
                     )
                 )
             );
@@ -130,7 +132,7 @@ Foam::fvFieldDecomposer::decomposeField
                     Field<Type>
                     (
                         field.primitiveField(),
-                        *processorVolPatchFieldDecomposerPtrs_[patchi]
+                        processorVolPatchFieldDecomposerPtrs_[patchi]
                     )
                 )
             );
@@ -166,6 +168,8 @@ Foam::fvFieldDecomposer::decomposeField
     const GeometricField<Type, fvsPatchField, surfaceMesh>& field
 ) const
 {
+    typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
+
     labelList mapAddr
     (
         labelList::subList
@@ -200,7 +204,7 @@ Foam::fvFieldDecomposer::decomposeField
 
     forAll(field.boundaryField(), patchi)
     {
-        const Field<Type> & p = field.boundaryField()[patchi];
+        const Field<Type>& p = field.boundaryField()[patchi];
 
         const label patchStart = field.mesh().boundaryMesh()[patchi].start();
 
@@ -228,9 +232,9 @@ Foam::fvFieldDecomposer::decomposeField
         );
     }
 
-    tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> tresF
+    tmp<SurfaceFieldType> tresF
     (
-        new GeometricField<Type, fvsPatchField, surfaceMesh>
+        new SurfaceFieldType
         (
             IOobject
             (
@@ -246,18 +250,17 @@ Foam::fvFieldDecomposer::decomposeField
             patchFields
         )
     );
-    GeometricField<Type, fvsPatchField, surfaceMesh>& resF = tresF.ref();
-
+    SurfaceFieldType& resF = tresF.ref();
+    resF.oriented() = field().oriented();
 
     // 2. Change the fvsPatchFields to the correct type using a mapper
     //  constructor (with reference to the now correct internal field)
 
-    typename GeometricField<Type, fvsPatchField, surfaceMesh>::
-        Boundary& bf = resF.boundaryFieldRef();
+    typename SurfaceFieldType::Boundary& bf = resF.boundaryFieldRef();
 
     forAll(boundaryAddressing_, patchi)
     {
-        if (patchFieldDecomposerPtrs_[patchi])
+        if (patchFieldDecomposerPtrs_.set(patchi))
         {
             bf.set
             (
@@ -267,7 +270,7 @@ Foam::fvFieldDecomposer::decomposeField
                     field.boundaryField()[boundaryAddressing_[patchi]],
                     procMesh_.boundary()[patchi],
                     resF(),
-                    *patchFieldDecomposerPtrs_[patchi]
+                    patchFieldDecomposerPtrs_[patchi]
                 )
             );
         }
@@ -283,10 +286,15 @@ Foam::fvFieldDecomposer::decomposeField
                     Field<Type>
                     (
                         allFaceField,
-                        *processorSurfacePatchFieldDecomposerPtrs_[patchi]
+                        processorSurfacePatchFieldDecomposerPtrs_[patchi]
                     )
                 )
             );
+
+            if (resF.oriented()())
+            {
+                bf[patchi] *= faceSign_[patchi];
+            }
         }
         else if (isA<processorFvPatch>(procMesh_.boundary()[patchi]))
         {
@@ -300,10 +308,15 @@ Foam::fvFieldDecomposer::decomposeField
                     Field<Type>
                     (
                         allFaceField,
-                        *processorSurfacePatchFieldDecomposerPtrs_[patchi]
+                        processorSurfacePatchFieldDecomposerPtrs_[patchi]
                     )
                 )
             );
+
+            if (resF.oriented()())
+            {
+                bf[patchi] *= faceSign_[patchi];
+            }
         }
         else
         {

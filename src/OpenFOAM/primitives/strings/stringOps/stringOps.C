@@ -308,7 +308,7 @@ Foam::string Foam::stringOps::getVariable
             }
         }
 
-        if (value.empty())
+        if (!allowEmpty && value.empty())
         {
             FatalIOErrorInFunction
             (
@@ -317,7 +317,8 @@ Foam::string Foam::stringOps::getVariable
                 << name << exit(FatalIOError);
         }
     }
-    else
+
+    if (!allowEmpty && value.empty())
     {
         FatalIOErrorInFunction
         (

@@ -58,8 +58,7 @@ inline objectMap::objectMap(Istream& is)
     // Read master of objectMap
     is.readEnd("objectMap");
 
-    // Check state of Istream
-    is.check("objectMap::objectMap(Istream&)");
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -115,9 +114,7 @@ inline Ostream& operator<<(Ostream& os, const objectMap& a)
         << a.masterObjects_
         << token::END_LIST;
 
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const objectMap&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 
@@ -128,9 +125,7 @@ inline Istream& operator>>(Istream& is, objectMap& a)
     is  >> a.index_ >> a.masterObjects_;
     is.readEnd("objectMap");
 
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, objectMap&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 

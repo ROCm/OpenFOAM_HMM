@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,13 +51,6 @@ template<class EquationOfState> class hConstThermo;
 
 template<class EquationOfState>
 inline hConstThermo<EquationOfState> operator+
-(
-    const hConstThermo<EquationOfState>&,
-    const hConstThermo<EquationOfState>&
-);
-
-template<class EquationOfState>
-inline hConstThermo<EquationOfState> operator-
 (
     const hConstThermo<EquationOfState>&,
     const hConstThermo<EquationOfState>&
@@ -115,9 +108,6 @@ public:
 
     // Constructors
 
-        //- Construct from Istream
-        hConstThermo(Istream&);
-
         //- Construct from dictionary
         hConstThermo(const dictionary& dict);
 
@@ -126,9 +116,6 @@ public:
 
         //- Construct and return a clone
         inline autoPtr<hConstThermo> clone() const;
-
-        //- Selector from Istream
-        inline static autoPtr<hConstThermo> New(Istream& is);
 
         //- Selector from dictionary
         inline static autoPtr<hConstThermo> New(const dictionary& dict);
@@ -148,20 +135,20 @@ public:
 
         // Fundamental properties
 
-            //- Heat capacity at constant pressure [J/(kmol K)]
-            inline scalar cp(const scalar p, const scalar T) const;
+            //- Heat capacity at constant pressure [J/(kg K)]
+            inline scalar Cp(const scalar p, const scalar T) const;
 
-            //- Absolute Enthalpy [J/kmol]
-            inline scalar ha(const scalar p, const scalar T) const;
+            //- Absolute Enthalpy [J/kg]
+            inline scalar Ha(const scalar p, const scalar T) const;
 
-            //- Sensible enthalpy [J/kmol]
-            inline scalar hs(const scalar p, const scalar T) const;
+            //- Sensible enthalpy [J/kg]
+            inline scalar Hs(const scalar p, const scalar T) const;
 
-            //- Chemical enthalpy [J/kmol]
-            inline scalar hc() const;
+            //- Chemical enthalpy [J/kg]
+            inline scalar Hc() const;
 
-            //- Entropy [J/(kmol K)]
-            inline scalar s(const scalar p, const scalar T) const;
+            //- Entropy [J/(kg K)]
+            inline scalar S(const scalar p, const scalar T) const;
 
 
         // I-O
@@ -173,18 +160,11 @@ public:
     // Member operators
 
         inline void operator+=(const hConstThermo&);
-        inline void operator-=(const hConstThermo&);
 
 
     // Friend operators
 
         friend hConstThermo operator+ <EquationOfState>
-        (
-            const hConstThermo&,
-            const hConstThermo&
-        );
-
-        friend hConstThermo operator- <EquationOfState>
         (
             const hConstThermo&,
             const hConstThermo&

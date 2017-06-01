@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,11 +25,39 @@ Class
     Foam::polynomialSolidTransport
 
 Description
-    Transport package using polynomial functions for solid kappa
+    Transport package using polynomial functions for solid \c kappa.
+
+Usage
+
+    \table
+        Property        | Description
+        kappaCoeffs<8>  | Thermal conductivity polynomial coefficients
+    \endtable
+
+    Example of the specification of the transport properties:
+    \verbatim
+    transport
+    {
+        kappaCoeffs<8>     ( 1000 -0.05 0.003 0 0 0 0 0 );
+    }
+    \endverbatim
+
+    The polynomial expression is evaluated as so:
+
+        \f[
+            \kappa = 1000 - 0.05 T + 0.003 T^2
+        \f]
+
+Note
+    Thermal conductivity polynomial coefficients evaluate to an expression in
+    [W/m/K].
 
 SourceFiles
     polynomialSolidTransportI.H
     polynomialSolidTransport.C
+
+See also
+    Foam::Polynomial
 
 \*---------------------------------------------------------------------------*/
 
@@ -55,23 +83,9 @@ inline polynomialSolidTransport<Thermo, PolySize> operator+
 );
 
 template<class Thermo, int PolySize>
-inline polynomialSolidTransport<Thermo, PolySize> operator-
-(
-    const polynomialSolidTransport<Thermo, PolySize>&,
-    const polynomialSolidTransport<Thermo, PolySize>&
-);
-
-template<class Thermo, int PolySize>
 inline polynomialSolidTransport<Thermo, PolySize> operator*
 (
     const scalar,
-    const polynomialSolidTransport<Thermo, PolySize>&
-);
-
-template<class Thermo, int PolySize>
-inline polynomialSolidTransport<Thermo, PolySize> operator==
-(
-    const polynomialSolidTransport<Thermo, PolySize>&,
     const polynomialSolidTransport<Thermo, PolySize>&
 );
 
@@ -113,9 +127,6 @@ public:
 
     // Constructors
 
-        //- Construct copy
-        inline polynomialSolidTransport(const polynomialSolidTransport&);
-
         //- Construct as named copy
         inline polynomialSolidTransport
         (
@@ -123,17 +134,11 @@ public:
             const polynomialSolidTransport&
         );
 
-        //- Construct from Istream
-        polynomialSolidTransport(Istream& is);
-
         //- Construct from dictionary
         polynomialSolidTransport(const dictionary& dict);
 
         //- Construct and return a clone
         inline autoPtr<polynomialSolidTransport> clone() const;
-
-        // Selector from Istream
-        inline static autoPtr<polynomialSolidTransport> New(Istream& is);
 
         // Selector from dictionary
         inline static autoPtr<polynomialSolidTransport> New
@@ -174,7 +179,6 @@ public:
 
         inline void operator=(const polynomialSolidTransport&);
         inline void operator+=(const polynomialSolidTransport&);
-        inline void operator-=(const polynomialSolidTransport&);
         inline void operator*=(const scalar);
 
 
@@ -186,21 +190,9 @@ public:
             const polynomialSolidTransport&
         );
 
-        friend polynomialSolidTransport operator- <Thermo, PolySize>
-        (
-            const polynomialSolidTransport&,
-            const polynomialSolidTransport&
-        );
-
         friend polynomialSolidTransport operator* <Thermo, PolySize>
         (
             const scalar,
-            const polynomialSolidTransport&
-        );
-
-        friend polynomialSolidTransport operator== <Thermo, PolySize>
-        (
-            const polynomialSolidTransport&,
             const polynomialSolidTransport&
         );
 

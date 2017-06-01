@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -57,8 +57,7 @@ Usage
         bounds          (0.2 -10 -10)(0.22 10 10);
         cloudName       particleTracks;
 
-        seedSampleSet   patchSeed;
-        patchSeedCoeffs
+        seedSampleSet
         {
             type        patchSeed;
             patches     (wall);
@@ -83,10 +82,10 @@ Usage
         seedSampleSet| Seeding method (see below)| yes       |
     \endtable
 
-    Where \c seedSampleSet is typically one of
+    Where \c seedSampleSet \c type is typically one of
     \plaintable
-        uniform | uniform particle seeding
-        cloud   | cloud of points
+        uniform   | uniform particle seeding
+        cloud     | cloud of points
         patchSeed | seeding via patch faces
         triSurfaceMeshPointSet | points according to a tri-surface mesh
     \endplaintable

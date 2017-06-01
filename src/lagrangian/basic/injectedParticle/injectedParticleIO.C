@@ -72,12 +72,7 @@ Foam::injectedParticle::injectedParticle
         }
     }
 
-    // Check state of Istream
-    is.check
-    (
-        "injectedParticle::injectedParticle"
-        "(const polyMesh&, Istream&, bool)"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -207,12 +202,7 @@ Foam::Ostream& Foam::operator<<
         );
     }
 
-    // Check state of Ostream
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, const injectedParticle&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

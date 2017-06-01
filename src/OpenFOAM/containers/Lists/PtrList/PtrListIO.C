@@ -35,7 +35,7 @@ template<class T>
 template<class INew>
 void Foam::PtrList<T>::read(Istream& is, const INew& inewt)
 {
-    is.fatalCheck("PtrList<T>::read(Istream&, const INew&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     token firstToken(is);
 

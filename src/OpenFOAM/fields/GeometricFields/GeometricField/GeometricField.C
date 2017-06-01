@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -1175,12 +1175,20 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::operator=
     // Only assign field contents not ID
 
     this->dimensions() = gf.dimensions();
+    this->oriented() = gf.oriented();
 
-    // Transfer the storage from the tmp
-    primitiveFieldRef().transfer
-    (
-        const_cast<Field<Type>&>(gf.primitiveField())
-    );
+    if (tgf.isTmp())
+    {
+        // Transfer the storage from the tmp
+        primitiveFieldRef().transfer
+        (
+            const_cast<Field<Type>&>(gf.primitiveField())
+        );
+    }
+    else
+    {
+        primitiveFieldRef() = gf.primitiveField();
+    }
 
     boundaryFieldRef() = gf.boundaryField();
 
@@ -1239,7 +1247,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::operator op              \
 {                                                                              \
     checkField(*this, gf, #op);                                                \
                                                                                \
-    ref() op gf();            \
+    ref() op gf();                                                             \
     boundaryFieldRef() op gf.boundaryField();                                  \
 }                                                                              \
                                                                                \
@@ -1259,7 +1267,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::operator op              \
     const dimensioned<TYPE>& dt                                                \
 )                                                                              \
 {                                                                              \
-    ref() op dt;                                       \
+    ref() op dt;                                                               \
     boundaryFieldRef() op dt.value();                                          \
 }
 
@@ -1284,14 +1292,8 @@ Foam::Ostream& Foam::operator<<
     os  << nl;
     gf.boundaryField().writeEntry("boundaryField", os);
 
-    // Check state of IOstream
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, "
-        "const GeometricField<Type, PatchField, GeoMesh>&)"
-    );
-
-    return (os);
+    os.check(FUNCTION_NAME);
+    return os;
 }
 
 

@@ -378,7 +378,7 @@ bool Foam::operator!=(const coordinateSystem& a, const coordinateSystem& b)
 Foam::Ostream& Foam::operator<<(Ostream& os, const coordinateSystem& cs)
 {
     cs.write(os);
-    os.check("Ostream& operator<<(Ostream&, const coordinateSystem&");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

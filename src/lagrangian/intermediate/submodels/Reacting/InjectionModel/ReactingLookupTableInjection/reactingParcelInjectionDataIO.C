@@ -34,7 +34,7 @@ Foam::reactingParcelInjectionData::reactingParcelInjectionData(Istream& is)
     is.check("reading Y's");
     is >> Y_;
 
-    is.check("reactingParcelInjectionData(Istream& is)");
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -61,7 +61,7 @@ Foam::Istream& Foam::operator>>(Istream& is, reactingParcelInjectionData& data)
     is.check("reading Y's");
     is >> data.Y_;
 
-    is.check("operator(Istream&, reactingParcelInjectionData&)");
+    is.check(FUNCTION_NAME);
 
     return is;
 }

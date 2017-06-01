@@ -37,13 +37,7 @@ Foam::operator<<(Ostream& os, const bufferedAccumulator<Type>& bA)
         << static_cast<const List<Field<Type>>&>(bA)
         << bA.bufferOffsets();
 
-    // Check state of Ostream
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
-        "const Foam::bufferedAccumulator&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

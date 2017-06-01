@@ -33,7 +33,7 @@ template<class LListBase, class T>
 template<class INew>
 void Foam::ILList<LListBase, T>::read(Istream& is, const INew& iNew)
 {
-    is.fatalCheck("operator>>(Istream&, ILList<LListBase, T>&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     token firstToken(is);
 
@@ -97,7 +97,7 @@ void Foam::ILList<LListBase, T>::read(Istream& is, const INew& iNew)
         }
 
         token lastToken(is);
-        is.fatalCheck("operator>>(Istream&, ILList<LListBase, T>&)");
+        is.fatalCheck(FUNCTION_NAME);
 
         while
         (
@@ -111,7 +111,7 @@ void Foam::ILList<LListBase, T>::read(Istream& is, const INew& iNew)
             this->append(iNew(is).ptr());
 
             is >> lastToken;
-            is.fatalCheck("operator>>(Istream&, ILList<LListBase, T>&)");
+            is.fatalCheck(FUNCTION_NAME);
         }
     }
     else
@@ -122,7 +122,7 @@ void Foam::ILList<LListBase, T>::read(Istream& is, const INew& iNew)
             << exit(FatalIOError);
     }
 
-    is.fatalCheck("operator>>(Istream&, ILList<LListBase, T>&)");
+    is.fatalCheck(FUNCTION_NAME);
 }
 
 

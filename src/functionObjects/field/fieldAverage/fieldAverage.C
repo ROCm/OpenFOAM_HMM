@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -67,6 +67,27 @@ void Foam::functionObjects::fieldAverage::resetFields()
 
 void Foam::functionObjects::fieldAverage::initialize()
 {
+    if (!totalIter_.size())
+    {
+        totalIter_.setSize(faItems_.size(), 1);
+    }
+
+    if (!totalTime_.size())
+    {
+        totalTime_.setSize(faItems_.size(), obr_.time().deltaTValue());
+    }
+    else
+    {
+        // Check if totalTime_ has been set otherwise initialize
+        forAll(totalTime_, fieldi)
+        {
+            if (totalTime_[fieldi] < 0)
+            {
+                totalTime_[fieldi] = obr_.time().deltaTValue();
+            }
+        }
+    }
+
     resetFields();
 
     Log << type() << " " << name() << ":" << nl;
@@ -113,10 +134,7 @@ void Foam::functionObjects::fieldAverage::restart()
         << nl << endl;
 
     totalIter_.clear();
-    totalIter_.setSize(faItems_.size(), 1);
-
     totalTime_.clear();
-    totalTime_.setSize(faItems_.size(), obr().time().deltaTValue());
 
     initialize();
 }
@@ -217,8 +235,10 @@ void Foam::functionObjects::fieldAverage::readAveragingProperties()
     totalIter_.clear();
     totalIter_.setSize(faItems_.size(), 1);
 
+    // Initialize totalTime with negative values
+    // to indicate that it has not been set
     totalTime_.clear();
-    totalTime_.setSize(faItems_.size(), obr().time().deltaTValue());
+    totalTime_.setSize(faItems_.size(), -1);
 
     if (restartOnRestart_ || restartOnOutput_)
     {

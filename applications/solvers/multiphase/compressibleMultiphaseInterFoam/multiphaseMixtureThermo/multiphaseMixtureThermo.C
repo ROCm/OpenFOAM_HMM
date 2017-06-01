@@ -113,6 +113,7 @@ Foam::multiphaseMixtureThermo::multiphaseMixtureThermo
         1e-8/pow(average(mesh_.V()), 1.0/3.0)
     )
 {
+    rhoPhi_.setOriented();
     calcAlphas();
     alphas_.write();
     correct();
@@ -698,6 +699,7 @@ Foam::multiphaseMixtureThermo::surfaceTensionForce() const
     );
 
     surfaceScalarField& stf = tstf.ref();
+    stf.setOriented();
 
     forAllConstIter(PtrDictionary<phaseModel>, phases_, phase1)
     {

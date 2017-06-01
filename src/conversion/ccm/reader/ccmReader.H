@@ -368,7 +368,7 @@ private:
         void validateInterface(List<labelPair>&);
 
         //- Renumber interface faces
-        void renumberInterfaces(const List<label>&);
+        void renumberInterfaces(const labelUList& oldToNew);
 
         //- Remove interfaces between domains (fluid/porosity; fluid/solid, etc)
         //  reorganize baffle interfaces into [0-N/2; N/2-N] lists at the
@@ -394,23 +394,27 @@ private:
         ) const;
 
         // polyMesh Friend Functions
-        void addPatches(polyMesh&) const;
+        void addPatches(polyMesh& mesh) const;
 
         //- Add faceZones based on monitoring boundary conditions
-        void addFaceZones(polyMesh&) const;
+        void addFaceZones(polyMesh& mesh) const;
 
         //- Get information about all available solutions
         bool detectSolution();
 
         //- Get information about available fields
         //  assume that all fields are available for all solution intervals
-        void determineFieldInfo(const ccmID& fieldSetNode, fieldTable&);
+        void determineFieldInfo
+        (
+            const ccmID& fieldSetNode,
+            fieldTable& table
+        );
 
 
     // Static Members
 
         //- Get map of porous regions
-        static Map<word> selectPorous(const Map<dictionary>&);
+        static Map<word> selectPorous(const Map<dictionary>& table);
 
 
 public:
@@ -418,13 +422,13 @@ public:
     // Static Members
 
         //- Warn about repeated name
-        static void warnDuplicates(const word& context, const wordList&);
+        static void warnDuplicates(const word& context, const wordList& lst);
 
 
     // Constructors
 
         //- Open a file for reading
-        reader(const fileName&, const options& opts);
+        reader(const fileName& file, const reader::options& opts);
 
 
     //- Destructor (closes file)
@@ -433,7 +437,7 @@ public:
 
     // Member Functions
 
-    // Access
+      // Access
 
         //- Reference to the reader options
         const reader::options& option() const;
@@ -459,7 +463,7 @@ public:
         // const pointField& points() const { return points_; }
 
 
-    // Check
+      // Check
 
         //- Return true if file has geometry associated with it
         bool hasGeometry();
@@ -468,7 +472,7 @@ public:
         bool hasSolution();
 
 
-    // Edit
+      // Edit
 
         //- Remap cellTable and boundaryRegion according to dictionary
         bool remapMeshInfo
@@ -478,17 +482,17 @@ public:
         );
 
 
-    // Write
+      // Write
 
         //- Write the polyMesh
         void writeMesh
         (
-            const polyMesh&,
+            const polyMesh& mesh,
             IOstream::streamFormat fmt = IOstream::BINARY
         ) const;
 
         //- Write cellTable, boundaryRegion and interface information
-        void writeAux(const objectRegistry&) const;
+        void writeAux(const objectRegistry& registry) const;
 
         //- Detect and read geometry if possible
         bool readGeometry(const scalar scaleFactor = 1.0);
@@ -593,11 +597,9 @@ class reader::options
         //- Merge in-place interfaces (default true)
         bool mergeInterfaces_;
 
-        //- Rename interface boundaries as InterfaceN_0, InterfaceN_1 (default true)
+        //- Rename interface boundaries as InterfaceN_0, InterfaceN_1
+        //  (default true)
         bool renameInterfaces_;
-
-        //- Combine identically named boundaries (default false)
-        bool combineBoundaries_;
 
         //- Remove baffles by merging their respective faces (default false)
         bool removeBaffles_;
@@ -623,7 +625,7 @@ public:
 
     // Member Functions
 
-    // Access
+      // Access
 
         //- Keep fluid regions (default true)
         bool keepFluid() const;
@@ -640,11 +642,9 @@ public:
         //- Merge in-place interfaces (default true)
         bool mergeInterfaces() const;
 
-        //- Rename interface boundaries as InterfaceN_0, InterfaceN_1 (default true)
+        //- Rename interface boundaries as InterfaceN_0, InterfaceN_1
+        //  (default true)
         bool renameInterfaces() const;
-
-        //- Combine identically named boundaries (default false)
-        bool combineBoundaries() const;
 
         //- Remove baffles by merging their respective faces (default false)
         bool removeBaffles() const;
@@ -660,37 +660,35 @@ public:
         scalar undefScalar() const;
 
 
-    // Edit
+      // Edit
 
         //- Keep fluid regions
-        void keepFluid(bool);
+        void keepFluid(bool b);
 
         //- Keep porous regions
-        void keepPorous(bool);
+        void keepPorous(bool b);
 
         //- Keep solid regions
-        void keepSolid(bool);
+        void keepSolid(bool b);
 
         //- Merge in-place interfaces
-        void mergeInterfaces(bool);
+        void mergeInterfaces(bool b);
 
         //- Rename interface boundaries as InterfaceN_0, InterfaceN_1
-        void renameInterfaces(bool);
+        void renameInterfaces(bool b);
 
-        //- Combine identically named boundaries
-        void combineBoundaries(bool);
 
         //- Remove baffles by merging their respective faces
-        void removeBaffles(bool);
+        void removeBaffles(bool b);
 
         //- Use numbered names (eg, patch_0, zone_0) instead of human-readable
-        void useNumberedNames(bool);
+        void useNumberedNames(bool b);
 
         //- Merge tolerance for points (default 0.05e-3)
-        void mergeTol(const scalar&);
+        void mergeTol(const scalar& tol);
 
         //- Value to assign for undefined solutions (default: NaN)
-        void undefScalar(const scalar&);
+        void undefScalar(const scalar& val);
 
 };
 

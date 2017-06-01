@@ -80,8 +80,14 @@ primitives/quaternion/quaternion.C
 primitives/septernion/septernion.C
 primitives/triad/triad.C
 
-/* functions, data entries */
+/* Run-time selectable functions */
 primitives/functions/Function1/makeDataEntries.C
+primitives/functions/Function1/ramp/ramp.C
+primitives/functions/Function1/linearRamp/linearRamp.C
+primitives/functions/Function1/quadraticRamp/quadraticRamp.C
+primitives/functions/Function1/quarterSineRamp/quarterSineRamp.C
+primitives/functions/Function1/quarterCosineRamp/quarterCosineRamp.C
+primitives/functions/Function1/halfCosineRamp/halfCosineRamp.C
 primitives/functions/Polynomial/polynomialFunction.C
 
 primitives/subModelBase/subModelBase.C
@@ -122,6 +128,9 @@ spatialVectorAlgebra = primitives/spatialVectorAlgebra
 $(spatialVectorAlgebra)/SpatialVector/spatialVector/spatialVector.C
 $(spatialVectorAlgebra)/SpatialTensor/spatialTensor/spatialTensor.C
 $(spatialVectorAlgebra)/CompactSpatialTensor/compactSpatialTensor/compactSpatialTensor.C
+
+primitives/polynomialEqns/cubicEqn/cubicEqn.C
+primitives/polynomialEqns/quadraticEqn/quadraticEqn.C
 
 containers/HashTables/HashTable/HashTableCore.C
 containers/HashTables/StaticHashTable/StaticHashTableCore.C
@@ -265,6 +274,8 @@ dimensionedTypes/dimensionedScalar/dimensionedScalar.C
 dimensionedTypes/dimensionedSphericalTensor/dimensionedSphericalTensor.C
 dimensionedTypes/dimensionedSymmTensor/dimensionedSymmTensor.C
 dimensionedTypes/dimensionedTensor/dimensionedTensor.C
+
+orientedType/orientedType.C
 
 matrices/solution/solution.C
 

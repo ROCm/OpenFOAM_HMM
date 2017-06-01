@@ -46,11 +46,11 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
     // Anull list
     L.setSize(0);
 
-    is.fatalCheck("operator>>(Istream&, List<T>&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     token firstToken(is);
 
-    is.fatalCheck("operator>>(Istream&, List<T>&) : reading first token");
+    is.fatalCheck(FUNCTION_NAME);
 
     if (firstToken.isCompound())
     {

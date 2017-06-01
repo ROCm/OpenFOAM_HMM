@@ -134,16 +134,18 @@ Foam::coupleGroupIdentifier::coupleGroupIdentifier()
 {}
 
 
-Foam::coupleGroupIdentifier::coupleGroupIdentifier(const word& name)
+Foam::coupleGroupIdentifier::coupleGroupIdentifier(const word& patchGroupName)
 :
-    name_(name)
+    name_(patchGroupName)
 {}
 
 
 Foam::coupleGroupIdentifier::coupleGroupIdentifier(const dictionary& dict)
 :
-    name_(dict.lookupOrDefault<word>("coupleGroup", ""))
-{}
+    name_()
+{
+    dict.readIfPresent("coupleGroup", name_);
+}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
@@ -222,7 +224,7 @@ void Foam::coupleGroupIdentifier::write(Ostream& os) const
 {
     if (valid())
     {
-        os.writeKeyword("coupleGroup") << name() << token::END_STATEMENT << nl;
+        os.writeEntry("coupleGroup", name());
     }
 }
 
@@ -232,7 +234,7 @@ void Foam::coupleGroupIdentifier::write(Ostream& os) const
 Foam::Ostream& Foam::operator<<(Ostream& os, const coupleGroupIdentifier& p)
 {
     p.write(os);
-    os.check("Ostream& operator<<(Ostream& os, const coupleGroupIdentifier& p");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

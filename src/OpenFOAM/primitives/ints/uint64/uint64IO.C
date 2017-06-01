@@ -69,9 +69,7 @@ Foam::Istream& Foam::operator>>(Istream& is, uint64_t& i)
         return is;
     }
 
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, uint64_t&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -97,7 +95,7 @@ bool Foam::read(const char* buf, uint64_t& s)
 Foam::Ostream& Foam::operator<<(Ostream& os, const uint64_t i)
 {
     os.write(label(i));
-    os.check("Ostream& operator<<(Ostream&, const uint64_t)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

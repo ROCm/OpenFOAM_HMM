@@ -770,7 +770,7 @@ bool Foam::cp(const fileName& src, const fileName& dest, const bool followLink)
         // If dest is a directory, create the destination file name.
         if (destFile.type() == fileName::DIRECTORY)
         {
-            destFile = destFile/src.component(src.components().size() -1);
+            destFile = destFile/src.components().last();
         }
 
         // Make sure the destination directory exists.
@@ -943,7 +943,7 @@ bool Foam::mvBak(const fileName& src, const std::string& ext)
         }
     }
 
-    // fall-through: nothing to do
+    // fallthrough: nothing to do
     return false;
 }
 

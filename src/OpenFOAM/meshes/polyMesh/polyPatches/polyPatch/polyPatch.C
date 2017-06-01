@@ -421,7 +421,7 @@ void Foam::polyPatch::operator=(const polyPatch& p)
 Foam::Ostream& Foam::operator<<(Ostream& os, const polyPatch& p)
 {
     p.write(os);
-    os.check("Ostream& operator<<(Ostream& os, const polyPatch& p");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

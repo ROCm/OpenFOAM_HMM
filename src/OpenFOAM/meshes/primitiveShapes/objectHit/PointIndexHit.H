@@ -212,11 +212,10 @@ public:
                 );
             }
 
-            // Check state of Ostream
-            os.check("Ostream& operator<<(Ostream&, const PointIndexHit&)");
-
+            os.check(FUNCTION_NAME);
             return os;
         }
+
 
         friend Istream& operator>>(Istream& is, PointIndexHit& pHit)
         {
@@ -233,9 +232,7 @@ public:
                 );
             }
 
-            // Check state of Istream
-            is.check("Istream& operator>>(Istream&, PointIndexHit&)");
-
+            is.check(FUNCTION_NAME);
             return is;
         }
 

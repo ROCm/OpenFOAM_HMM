@@ -286,7 +286,7 @@ Foam::Xfer<Foam::labelList> Foam::PackedBoolList::used() const
 
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
-void Foam::PackedBoolList::operator=(const Foam::UList<bool>& lst)
+void Foam::PackedBoolList::operator=(const UList<bool>& lst)
 {
     this->setSize(lst.size());
 

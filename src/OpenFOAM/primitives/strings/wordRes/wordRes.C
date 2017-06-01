@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,20 +36,40 @@ Foam::wordReList Foam::wordRes::uniq(const UList<wordRe>& input)
     label count = 0;
     forAll(input, i)
     {
-        const wordRe& select = input[i];
+        const auto& select = input[i];
 
-        if
-        (
-            select.isPattern()
-         || uniqWord.insert(static_cast<const word&>(select))
-        )
+        if (select.isPattern() || uniqWord.insert(select))
         {
-            retain[count++] = select;
+            retain[count] = select;
+            ++count;
         }
     }
 
     retain.setSize(count);
     return retain;
+}
+
+
+void Foam::wordRes::inplaceUniq(wordReList& input)
+{
+    wordHashSet uniqWord;
+
+    label count = 0;
+    forAll(input, i)
+    {
+        const auto& select = input[i];
+
+        if (select.isPattern() || uniqWord.insert(select))
+        {
+            if (count != i)
+            {
+                input[count] = input[i];
+            }
+            ++count;
+        }
+    }
+
+    input.setSize(count);
 }
 
 

@@ -329,7 +329,7 @@ Foam::Ostream& Foam::operator<<
 {
     ptf.write(os);
 
-    os.check("Ostream& operator<<(Ostream&, const pointPatchField<Type>&)");
+    os.check(FUNCTION_NAME);
 
     return os;
 }

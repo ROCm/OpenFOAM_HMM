@@ -48,7 +48,7 @@ public:
 
     void operator()
     (
-        Field<Type>& field,
+        DimensionedField<Type, surfaceMesh>& field,
         const MeshMapper& mapper
     ) const;
 };
@@ -57,7 +57,7 @@ public:
 template<class Type, class MeshMapper>
 void MapInternalField<Type, MeshMapper, surfaceMesh>::operator()
 (
-    Field<Type>& field,
+    DimensionedField<Type, surfaceMesh>& field,
     const MeshMapper& mapper
 ) const
 {
@@ -69,16 +69,22 @@ void MapInternalField<Type, MeshMapper, surfaceMesh>::operator()
            << abort(FatalError);
     }
 
-    field.autoMap(mapper.surfaceMap());
+    // Passing in oriented flag so that oriented fields (e.g. phi) are negated
+    // if flipped.  Un-oriented fields, e.g U interpolated to faces (Uf) are not
+    // touched
+    field.autoMap(mapper.surfaceMap(), field.oriented()());
 
-    // Flip the flux
-    const labelList flipFaces = mapper.surfaceMap().flipFaceFlux().toc();
-
-    forAll(flipFaces, i)
+    if (field.oriented()())
     {
-        if (flipFaces[i] < field.size())
+        // Flip the flux
+        const labelList flipFaces = mapper.surfaceMap().flipFaceFlux().toc();
+
+        forAll(flipFaces, i)
         {
-            field[flipFaces[i]] *= -1.0;
+            if (flipFaces[i] < field.size())
+            {
+                field[flipFaces[i]] *= -1.0;
+            }
         }
     }
 }

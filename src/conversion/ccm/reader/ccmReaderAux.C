@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,7 @@ Foam::Map<Foam::word> Foam::ccm::reader::selectPorous
 {
     Map<word> lookup;
 
-    forAllConstIter(Map<dictionary>, table, iter)
+    forAllConstIters(table, iter)
     {
         if (iter().lookupOrDefault<label>("PorosityId", 0) != 0)
         {
@@ -70,21 +70,21 @@ void Foam::ccm::reader::warnDuplicates
     const wordList& lst
 )
 {
-    HashTable<label> hashed(lst.size());
+    HashTable<label> hashed(2*lst.size());
     bool duplicates = false;
 
-    forAll(lst, elemI)
+    for (const word& item : lst)
     {
-        // Check duplicate name
-        HashTable<label>::iterator iter = hashed.find(lst[elemI]);
-        if (iter != hashed.end())
+        // Check duplicate names
+        auto iter = hashed.find(item);
+        if (iter.found())
         {
             (*iter)++;
             duplicates = true;
         }
         else
         {
-            hashed.insert(lst[elemI], 1);
+            hashed.insert(item, 1);
         }
     }
 
@@ -92,9 +92,9 @@ void Foam::ccm::reader::warnDuplicates
     if (duplicates)
     {
         Info << nl << "WARNING: " << context << " with identical names:";
-        forAllConstIter(HashTable<label>, hashed, iter)
+        forAllConstIters(hashed, iter)
         {
-            if (*iter > 1)
+            if (iter.object() > 1)
             {
                 Info << "  " << iter.key();
             }

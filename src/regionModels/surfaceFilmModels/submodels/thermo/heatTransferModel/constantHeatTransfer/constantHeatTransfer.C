@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,11 +51,11 @@ addToRunTimeSelectionTable
 
 constantHeatTransfer::constantHeatTransfer
 (
-    surfaceFilmModel& owner,
+    surfaceFilmModel& film,
     const dictionary& dict
 )
 :
-    heatTransferModel(typeName, owner, dict),
+    heatTransferModel(typeName, film, dict),
     c0_(readScalar(coeffDict_.lookup("c0")))
 {}
 
@@ -69,9 +69,7 @@ constantHeatTransfer::~constantHeatTransfer()
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void constantHeatTransfer::correct()
-{
-    // do nothing
-}
+{}
 
 
 tmp<volScalarField> constantHeatTransfer::h() const
@@ -83,13 +81,13 @@ tmp<volScalarField> constantHeatTransfer::h() const
             IOobject
             (
                 "htc",
-                owner_.time().timeName(),
-                owner_.regionMesh(),
+                filmModel_.time().timeName(),
+                filmModel_.regionMesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            owner_.regionMesh(),
+            filmModel_.regionMesh(),
             dimensionedScalar
             (
                 "c0",

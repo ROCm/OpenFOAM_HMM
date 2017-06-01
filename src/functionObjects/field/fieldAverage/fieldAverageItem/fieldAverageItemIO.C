@@ -40,11 +40,7 @@ Foam::functionObjects::fieldAverageItem::fieldAverageItem(Istream& is)
     base_(ITER),
     window_(-1.0)
 {
-    is.check
-    (
-        "Foam::functionObjects::fieldAverageItem::fieldAverageItem"
-        "(Foam::Istream&)"
-    );
+    is.check(FUNCTION_NAME);
 
     const dictionaryEntry entry(dictionary::null, is);
 
@@ -73,11 +69,7 @@ Foam::Istream& Foam::functionObjects::operator>>
     fieldAverageItem& faItem
 )
 {
-    is.check
-    (
-        "Foam::Istream& Foam::operator>>"
-        "(Foam::Istream&, Foam::functionObjects::fieldAverageItem&)"
-    );
+    is.check(FUNCTION_NAME);
 
     const dictionaryEntry entry(dictionary::null, is);
 
@@ -111,11 +103,7 @@ Foam::Ostream& Foam::functionObjects::operator<<
     const fieldAverageItem& faItem
 )
 {
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<"
-        "(Foam::Ostream&, const Foam::functionObjects::fieldAverageItem&)"
-    );
+    os.check(FUNCTION_NAME);
 
     os  << faItem.fieldName_ << nl << token::BEGIN_BLOCK << nl;
     os.writeKeyword("mean") << faItem.mean_ << token::END_STATEMENT << nl;
@@ -138,12 +126,7 @@ Foam::Ostream& Foam::functionObjects::operator<<
 
     os  << token::END_BLOCK << nl;
 
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<"
-        "(Foam::Ostream&, const Foam::functionObjects::fieldAverageItem&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,17 +27,6 @@ License
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Specie>
-Foam::linear<Specie>::linear(Istream& is)
-:
-    Specie(is),
-    psi_(readScalar(is)),
-    rho0_(readScalar(is))
-{
-    is.check("linear<Specie>::linear(Istream& is)");
-}
-
 
 template<class Specie>
 Foam::linear<Specie>::linear(const dictionary& dict)
@@ -68,11 +57,7 @@ void Foam::linear<Specie>::write(Ostream& os) const
 template<class Specie>
 Foam::Ostream& Foam::operator<<(Ostream& os, const linear<Specie>& pf)
 {
-    os  << static_cast<const Specie&>(pf)
-        << token::SPACE << pf.psi_
-        << token::SPACE << pf.rho0_;
-
-    os.check("Ostream& operator<<(Ostream&, const linear<Specie>&)");
+    pf.write(os);
     return os;
 }
 
