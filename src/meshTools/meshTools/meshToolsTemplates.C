@@ -49,7 +49,7 @@ void Foam::meshTools::writeOBJ
             }
         }
 
-        os << 'l';
+        os << 'f';
         forAll(f, fp)
         {
             os << ' ' << foamToObj[f[fp]]+1;
