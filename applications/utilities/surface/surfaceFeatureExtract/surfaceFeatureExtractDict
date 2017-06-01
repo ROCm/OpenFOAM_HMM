@@ -16,7 +16,7 @@ FoamFile
 
 surface1.stl
 {
-    // How to obtain raw features (none | extractFromFile | extractFromSurface)
+    // Extract raw features (none | extractFromFile | extractFromSurface)
     extractionMethod    extractFromSurface;
 
     // Mark edges whose adjacent surface normals are at an angle less
@@ -28,37 +28,48 @@ surface1.stl
     // Do not mark region edges
     geometricTestOnly   yes;
 
-    /* alternative specification as coeff dictionary
-    extractFromSurfaceCoeffs
-    {
-        includedAngle   120;
-
-        geometricTestOnly  yes;
-    } */
-
     // Generate additional intersection features (none | self | region)
     intersectionMethod  none;
 
     // Tolerance for surface intersections
-    tolerance           1e-3;
+    // tolerance           1e-3;
 
-    // Write options
+  // Output options:
 
-        // Write features to obj format for postprocessing
-        writeObj        yes;
+    // Write features to obj format for postprocessing
+    writeObj            yes;
+}
+
+
+// Self intersection (single or multiple surfaces).
+// - Use 'surfaces' entry (a wordRe list) if it exists.
+// - If the dictionary name does not have an extension, 'surfaces' is mandatory.
+outputName1
+{
+    extractionMethod    none;
+
+    surfaces            (surface1.stl surface2.nas);
+
+    // Generate additional intersection features (none | self | region)
+    intersectionMethod  self;
+
+    // Tolerance for surface intersections
+    // tolerance           1e-3;
+
+  // Output options:
+
+    // Write features to OBJ format for postprocessing
+    writeObj            yes;
 }
 
 
 surface2.nas
 {
-    // How to obtain raw features (none | extractFromFile | extractFromSurface)
+    // Extract raw features (none | extractFromFile | extractFromSurface)
     extractionMethod    extractFromFile;
 
-    extractFromFileCoeffs
-    {
-        // Load from an existing feature edge file
-        featureEdgeFile "constant/triSurface/featureEdges.nas";
-    }
+    // Load from an existing feature edge file
+    featureEdgeFile     "constant/triSurface/featureEdges.nas";
 
     trimFeatures
     {
@@ -71,16 +82,15 @@ surface2.nas
 
     subsetFeatures
     {
-        // Use a plane to select feature edges
-        // (normal)(basePoint)
-        // Keep only edges that intersect the plane will be included
+        // Use a plane to select feature edges (normal)(basePoint)
+        // Only keep edges that intersect the plane
         plane           (1 0 0)(0 0 0);
 
-        // Select feature edges using a box
-        // (minPt)(maxPt)
-        // Keep edges inside the box:
+        // Select feature edges using a box // (minPt)(maxPt)
+        // Only keep edges inside the box:
         insideBox       (0 0 0)(1 1 1);
-        // Keep edges outside the box:
+
+        // Only keep edges outside the box:
         outsideBox      (0 0 0)(1 1 1);
 
         // Keep nonManifold edges (edges with >2 connected faces where
@@ -95,110 +105,35 @@ surface2.nas
     {
         // Add (without merging) another extendedFeatureEdgeMesh
         name            axZ.extendedFeatureEdgeMesh;
-
-        // Optionally flip features (invert all normals, making
-        // convex<->concave etc)
-        //flip                false;
     }
 
-    // Output the curvature of the surface
-    curvature           no;
-
-    // Output the proximity of feature points and edges to each other
-    featureProximity    no;
-
-    // The maximum search distance to use when looking for other feature
-    // points and edges
-    maxFeatureProximity 1;
-
-    // Out put the closeness of surface elements to other surface elements.
-    closeness           no;
 
     // Generate additional intersection features (none | self | region)
     intersectionMethod  none;
 
     // Tolerance for surface intersections
-    tolerance           1e-3;
+    // tolerance           1e-3;
 
-    // Write options
+  // Output options:
 
-        // Write features to obj format for postprocessing
-        writeObj        yes;
+    // Output the closeness of surface elements to other surface elements.
+    closeness           no;
 
-        // Write surface proximity and curvature fields to vtk format
-        // for postprocessing
-        writeVTK        no;
+    // Output surface curvature
+    curvature           no;
+
+    // Output the proximity of feature points and edges to another
+    featureProximity    no;
+
+    // The maximum search distance when checking feature proximity
+    maxFeatureProximity 1;
+
+    // Write features to OBJ format for postprocessing
+    writeObj            no;
+
+    // Write closeness/curvature/proximity fields as VTK for postprocessing
+    writeVTK            no;
 }
 
-
-// Handle single or multiple surfaces
-//
-// - If the dictionary is named 'surfaces', it must also contain a 'surfaces'
-//   entry (wordRe list).
-//
-// - If other dictionaries contain a 'surfaces' entry,
-//   it will be taken for the input.
-//
-dummyName
-{
-    extractionMethod    extractFromSurface;
-
-    surfaces            (surface1.stl surface2.nas);
-
-    // Base output name (optional)
-    // output              surfaces;
-
-    // Generate additional intersection features (none | self | region)
-    intersectionMethod  self;
-
-    // Tolerance for surface intersections
-    tolerance           1e-3;
-
-    includedAngle       120;
-
-    // Do not mark region edges
-    geometricTestOnly   yes;
-
-    // Write options
-
-        // Write features to obj format for postprocessing
-        writeObj        yes;
-}
-
-
-// Handle single or multiple surfaces
-//
-// - If the dictionary is named 'surfaces', it must also contain a 'surfaces'
-//   entry (wordRe list).
-//
-// - If other dictionaries contain a 'surfaces' entry,
-//   it will be taken for the input.
-//
-surfaces
-{
-    extractionMethod    none;
-
-    surfaces            (surface1.stl surface2.nas);
-
-    // Base output name (optional)
-    // output              surfaces;
-
-    // Generate additional intersection features (none | self | region)
-    intersectionMethod  self;
-
-    // Tolerance for surface intersections
-    tolerance           1e-3;
-
-    /* alternative specification as coeff dictionary
-    noneCoeffs
-    {
-        includedAngle   0;
-    } */
-
-    // Write options
-
-    // Write features to obj format for postprocessing
-    writeObj        yes;
-}
 
 // ************************************************************************* //

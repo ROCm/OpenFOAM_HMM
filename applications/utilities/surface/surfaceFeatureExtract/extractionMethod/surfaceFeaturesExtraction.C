@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |  Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,22 +70,20 @@ Foam::surfaceFeaturesExtraction::method::New
 {
     const word methodName = dict.lookup("extractionMethod");
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(methodName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodName);
 
     if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (
             dict
-        )   << "Unknown extractionMethod "
-            << methodName << nl << nl
-            << "Valid extraction methods: :" << nl
+        )   << "Unknown extractionMethod " << methodName << nl << nl
+            << "Valid extraction methods:" << nl
             << flatOutput(dictionaryConstructorTablePtr_->sortedToc())
             << exit(FatalIOError);
     }
 
-    return autoPtr<method>(cstrIter()(dict));
+    return autoPtr<method>(cstrIter.object()(dict));
 }
 
 

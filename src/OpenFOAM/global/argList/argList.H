@@ -119,6 +119,9 @@ class argList
         //- Track enabled/disabled banner state
         static bool bannerEnabled_;
 
+        //- Track enabled/disabled checking of processor directories state
+        static bool checkProcessorDirectories_;
+
         //- Switch on/off parallel mode. Has to be first to be constructed
         //  so destructor is done last.
         ParRunControl parRunControl_;
@@ -386,6 +389,9 @@ public:
 
             //- Remove the parallel options
             static void noParallel();
+
+            //- Remove checking of processor directories
+            static void noCheckProcessorDirectories();
 
             //- Return true if the post-processing option is specified
             static bool postProcess(int argc, char *argv[]);

@@ -21,11 +21,17 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Namespace
+    Foam::surfaceFeaturesExtraction
+
+Description
+    Namespace for run-time selectable surface feature extraction methods.
+
 Class
     Foam::surfaceFeaturesExtraction::method
 
 Description
-    Run-time selectable surface feature extraction methods.
+    Abstract base for run-time selectable surface feature extraction methods.
 
 SourceFiles
     surfaceFeaturesExtraction.C
@@ -121,7 +127,6 @@ public:
         ) const = 0;
 
 };
-
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

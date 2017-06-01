@@ -28,6 +28,7 @@ Description
     Run-time selectable surface feature extraction - no extraction.
     Primarily useful with self-intersection methods.
 
+    Selectable as "none".
     Optional dictionary entries: "includedAngle", "geometricTestOnly".
 
 SourceFiles
@@ -58,15 +59,11 @@ class extractFromNone
 
 public:
 
-    // Constructors
-
-        //- Construct from dictionary
-        extractFromNone(const dictionary& dict);
-
+    //- Construct from dictionary
+    extractFromNone(const dictionary& dict);
 
     //- Destructor
     virtual ~extractFromNone();
-
 
     //- Extracted features from surface (no-op)
     virtual autoPtr<surfaceFeatures> features
