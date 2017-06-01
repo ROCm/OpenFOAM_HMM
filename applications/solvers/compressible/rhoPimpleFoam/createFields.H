@@ -73,3 +73,26 @@ Info<< "Creating field kinetic energy K\n" << endl;
 volScalarField K("K", 0.5*magSqr(U));
 
 #include "createMRF.H"
+
+
+dimensionedScalar rhoMax
+(
+    dimensionedScalar::lookupOrDefault
+    (
+        "rhoMax",
+        pimple.dict(),
+        dimDensity,
+        GREAT
+    )
+);
+
+dimensionedScalar rhoMin
+(
+    dimensionedScalar::lookupOrDefault
+    (
+        "rhoMin",
+        pimple.dict(),
+        dimDensity,
+        0
+    )
+);

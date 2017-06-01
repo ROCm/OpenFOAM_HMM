@@ -4,6 +4,10 @@ bool compressible = (compressibility.value() > SMALL);
 
 rho = thermo.rho();
 
+// Thermodynamic density needs to be updated by psi*d(p) after the
+// pressure solution
+const volScalarField psip0(psi*p);
+
 volScalarField rAU("rAU", 1.0/UEqn.A());
 surfaceScalarField rhorAUf("rhorAUf", fvc::interpolate(rho*rAU));
 volVectorField HbyA(constrainHbyA(rAU*UEqn.H(), U, p_rgh));
@@ -32,16 +36,18 @@ constrainPressure(p_rgh, rho, U, phiHbyA, rhorAUf, MRF);
       + fvc::div(phiHbyA)
     );
 
-    // Thermodynamic density needs to be updated by psi*d(p) after the
-    // pressure solution
-    const volScalarField psip0(psi*p);
-
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
         fvScalarMatrix p_rghEqn
         (
             p_rghDDtEqn
           - fvm::laplacian(rhorAUf, p_rgh)
+        );
+
+        p_rghEqn.setReference
+        (
+            pRefCell,
+            compressible ? getRefCellValue(p_rgh, pRefCell) : pRefValue
         );
 
         p_rghEqn.solve
@@ -62,6 +68,9 @@ constrainPressure(p_rgh, rho, U, phiHbyA, rhorAUf, MRF);
         if (nonOrth == nNonOrthCorr)
         {
             phi = phiHbyA + p_rghEqn.flux();
+
+            p_rgh.relax();
+
             U = HbyA
               + rAU*fvc::reconstruct((phig + p_rghEqn.flux())/rhorAUf);
             U.correctBoundaryConditions();
@@ -73,15 +82,10 @@ constrainPressure(p_rgh, rho, U, phiHbyA, rhorAUf, MRF);
     p = p_rgh + rho*gh;
 
     // Thermodynamic density update
-    thermo.correctRho(psi*p - psip0);
+    //thermo.correctRho(psi*p - psip0);
 }
 
 
-// Update pressure time derivative if needed
-if (thermo.dpdt())
-{
-    dpdt = fvc::ddt(p);
-}
 
 // Solve continuity
 #include "rhoEqn.H"
@@ -91,10 +95,35 @@ if (thermo.dpdt())
 
 // For closed-volume cases adjust the pressure and density levels
 // to obey overall mass continuity
-if (closedVolume && compressible)
+if (closedVolume)
 {
-    p += (initialMass - fvc::domainIntegrate(thermo.rho()))
-        /compressibility;
-    rho = thermo.rho();
+    if (!compressible)
+    {
+        p += dimensionedScalar
+        (
+            "p",
+            p.dimensions(),
+            pRefValue - getRefCellValue(p, pRefCell)
+        );
+    }
+    else
+    {
+        p += (initialMass - fvc::domainIntegrate(psi*p))
+            /compressibility;
+        thermo.correctRho(psi*p - psip0);
+        rho = thermo.rho();
+    }
     p_rgh = p - rho*gh;
+}
+else
+{
+    thermo.correctRho(psi*p - psip0);
+}
+
+rho = thermo.rho();
+
+// Update pressure time derivative if needed
+if (thermo.dpdt())
+{
+    dpdt = fvc::ddt(p);
 }

@@ -173,11 +173,17 @@ Foam::volScalarField& Foam::rhoThermo::rho()
 }
 
 
-void Foam::rhoThermo::correctRho(const Foam::volScalarField& deltaRho)
+void Foam::rhoThermo::correctRho
+(
+    const Foam::volScalarField& deltaRho,
+    const dimensionedScalar& rhoMin,
+    const dimensionedScalar& rhoMax
+)
 {
     rho_ += deltaRho;
+    rho_ = max(rho_, rhoMin);
+    rho_ = min(rho_, rhoMax);
 }
-
 
 const Foam::volScalarField& Foam::rhoThermo::psi() const
 {

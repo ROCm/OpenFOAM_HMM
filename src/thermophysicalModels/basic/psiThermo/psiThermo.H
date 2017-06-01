@@ -118,7 +118,12 @@ public:
             //- Add the given density correction to the density field.
             //  Used to update the density field following pressure solution.
             //  For psiThermo does nothing.
-            virtual void correctRho(const volScalarField& deltaRho);
+            virtual void correctRho
+            (
+                const volScalarField& deltaRho,
+                const dimensionedScalar& rhoMin,
+                const dimensionedScalar& rhoMax
+            );
 
             //- Density [kg/m^3] - uses current value of pressure
             virtual tmp<volScalarField> rho() const;

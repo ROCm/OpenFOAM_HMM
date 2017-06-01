@@ -33,3 +33,6 @@
     );
 
     const bool frozenFlow = frozenFlowFluid[i];
+
+    const label pRefCell = refCellFluid[i];
+    const scalar pRefValue = refValueFluid[i];

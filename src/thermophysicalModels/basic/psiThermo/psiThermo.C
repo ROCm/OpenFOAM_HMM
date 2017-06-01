@@ -102,9 +102,13 @@ Foam::tmp<Foam::scalarField> Foam::psiThermo::rho(const label patchi) const
 }
 
 
-void Foam::psiThermo::correctRho(const Foam::volScalarField& deltaRho)
+void Foam::psiThermo::correctRho
+(
+    const Foam::volScalarField& deltaRho,
+    const dimensionedScalar& rhoMin,
+    const dimensionedScalar& rhoMax
+)
 {}
-
 
 const Foam::volScalarField& Foam::psiThermo::psi() const
 {

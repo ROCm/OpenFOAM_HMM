@@ -95,9 +95,6 @@ else
     }
 }
 
-// Thermodynamic density update
-thermo.correctRho(psi*p - psip0);
-
 #include "rhoEqn.H"
 #include "compressibleContinuityErrs.H"
 
@@ -112,12 +109,21 @@ K = 0.5*magSqr(U);
 if (pressureControl.limit(p))
 {
     p.correctBoundaryConditions();
+    thermo.correctRho(psi*p - psip0, rhoMin, rhoMax);
     rho = thermo.rho();
 }
+
 else if (pimple.SIMPLErho())
 {
+    thermo.correctRho(psi*p - psip0, rhoMin, rhoMax);
     rho = thermo.rho();
 }
+else
+{
+    thermo.correctRho(psi*p - psip0, rhoMin, rhoMax);
+}
+
+Info<< "rho max/min : " << max(rho).value() << " " << min(rho).value() << endl;
 
 if (thermo.dpdt())
 {
