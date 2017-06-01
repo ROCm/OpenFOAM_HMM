@@ -350,9 +350,6 @@ int main(int argc, char *argv[])
 
         triSurface surf = surfPtr();
 
-        Info<< "NB: Feature line extraction is only valid on closed manifold "
-            << "surfaces." << nl;
-
         Info<< nl
             << "Statistics:" << nl;
         surf.writeStats(Info);
@@ -572,7 +569,9 @@ int main(int argc, char *argv[])
             triSurfaceSearch query(surf);
             surfaceIntersection intersect(query, surfaceDict);
 
-            // Remove rounding noise - could make adjustable
+            // Remove rounding noise. For consistency could use 1e-6,
+            // as per extractFromFile implementation
+
             intersect.mergePoints(10*SMALL);
 
             labelPair sizeInfo
