@@ -126,7 +126,7 @@ protected:
         //- Upper frequency limit, default = 10kHz
         scalar fUpper_;
 
-        //- Flag to indicate that custom frequenct bounds are being used
+        //- Flag to indicate that custom frequency bounds are being used
         bool customBounds_;
 
         //- Start time, default = 0s
@@ -137,6 +137,15 @@ protected:
 
         //- Graph format
         word graphFormat_;
+
+
+        // Data validation
+
+            //- Min pressure value
+            scalar minPressure_;
+
+            //- Min pressure value
+            scalar maxPressure_;
 
 
         // Write options
@@ -175,6 +184,9 @@ protected:
         (
             const scalarList& times
         ) const;
+
+        //- Return true if all pressure data is within min/max bounds
+        bool validateBounds(const scalarList& p) const;
 
         //- Find and return start time index
         label findStartTimeIndex

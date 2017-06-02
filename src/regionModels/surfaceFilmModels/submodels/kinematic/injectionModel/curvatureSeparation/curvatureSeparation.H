@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::curvatureSeparation
+    Foam::regionModels::surfaceFilmModels::curvatureSeparation
 
 Description
     Curvature film separation model

@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::constantRadiation
+    Foam::regionModels::surfaceFilmModels::constantRadiation
 
 Description
     Film constant radiation model.  The constant radiative flux is specified

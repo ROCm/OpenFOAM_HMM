@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::regionModelFunctionObject
+    Foam::regionModels::regionModelFunctionObject
 
 Description
     Region model function object base class

@@ -82,7 +82,8 @@ void Foam::fv::cellSetOption::setSelection(const dictionary& dict)
             FatalErrorInFunction
                 << "Unknown selectionMode "
                 << selectionModeTypeNames_[selectionMode_]
-                << ". Valid selectionMode types are" << selectionModeTypeNames_
+                << ". Valid selectionMode types are "
+                << selectionModeTypeNames_
                 << exit(FatalError);
         }
     }
@@ -186,7 +187,8 @@ void Foam::fv::cellSetOption::setCellSet()
             FatalErrorInFunction
                 << "Unknown selectionMode "
                 << selectionModeTypeNames_[selectionMode_]
-                << ". Valid selectionMode types are" << selectionModeTypeNames_
+                << ". Valid selectionMode types are "
+                << selectionModeTypeNames_
                 << exit(FatalError);
         }
     }

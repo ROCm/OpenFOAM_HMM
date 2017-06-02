@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,64 +21,66 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InNamspace
-    Foam
+Class
+    Foam::surfaceFeaturesExtraction::extractFromSurface
 
 Description
-    Various functions to operate on Lists.
+    Run-time selectable surface feature extraction - extract from surface.
+
+    Selectable as "extractFromSurface".
+
+    Mandatory dictionary entries: "includedAngle".
+    Optional dictionary entries: "geometricTestOnly".
 
 SourceFiles
-    ListOps.C
-    ListOpsTemplates.C
+    extractFromSurface.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ListOps1_H
-#define ListOps1_H
+#ifndef surfaceFeaturesExtraction_extractFromSurface_H
+#define surfaceFeaturesExtraction_extractFromSurface_H
 
-#include "ListOps.H"
+#include "surfaceFeaturesExtraction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace surfaceFeaturesExtraction
+{
 
-//- Reorder the elements (indices, not values) of a list.
-//  Negative ListType elements are untouched, unless pruning has been selected.
-//  With pruning, these elements are skipped and the list shrinks accordingly.
-template<class ListType>
-ListType reorder
-(
-    const labelUList& oldToNew,
-    const ListType&,
-    const bool prune
-);
+/*---------------------------------------------------------------------------*\
+         Class surfaceFeaturesExtraction::extractFromSurface Declaration
+\*---------------------------------------------------------------------------*/
 
-//- Inplace reorder the elements of a list.
-//  Negative ListType elements are untouched, unless pruning has been selected.
-//  With pruning, these elements are skipped and the list shrinks accordingly.
-template<class ListType>
-void inplaceReorder
-(
-    const labelUList& oldToNew,
-    ListType&,
-    const bool prune
-);
+class extractFromSurface
+:
+    public method
+{
+public:
+
+    //- Construct from dictionary
+    extractFromSurface(const dictionary& dict);
+
+    //- Destructor
+    virtual ~extractFromSurface();
+
+    //- Features extracted from surface
+    virtual autoPtr<surfaceFeatures> features
+    (
+        const triSurface& surf
+    ) const override;
+
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace surfaceFeaturesExtraction
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "ListOps1Templates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 
 // ************************************************************************* //
-

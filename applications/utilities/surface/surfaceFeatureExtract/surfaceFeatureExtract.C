@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,866 +29,219 @@ Group
 
 Description
     Extracts and writes surface features to file. All but the basic feature
-    extraction is WIP.
+    extraction is a work-in-progress.
 
-    Curvature calculation is an implementation of the algorithm from:
+    The extraction process is driven by the \a system/surfaceFeatureExtractDict
+    dictionary, but the \a -dict option can be used to define an alternative
+    location.
 
-      "Estimating Curvatures and their Derivatives on Triangle Meshes"
-      by S. Rusinkiewicz
+    The \a system/surfaceFeatureExtractDict dictionary contains entries
+    for each extraction process.
+    The name of the individual dictionary is used to load the input surface
+    (found under \a constant/triSurface) and also as the basename for the
+    output.
 
+    If the \c surfaces entry is present in a sub-dictionary, it has absolute
+    precedence over a surface name deduced from the dictionary name.
+    If the dictionary name itself does not have an extension, the \c surfaces
+    entry becomes mandatory since in this case the dictionary name cannot
+    represent an input surface file (ie, there is no file extension).
+    The \c surfaces entry is a wordRe list, which allows loading and
+    combining of multiple surfaces. Any exactly specified surface names must
+    exist, but surfaces selected via regular expressions need not exist.
+    The selection mechanism preserves order and is without duplicates.
+    For example,
+    \verbatim
+    dictName
+    {
+        surfaces    (surface1.stl "other.*" othersurf.obj);
+        ...
+    }
+    \endverbatim
+
+    When loading surfaces, the points/faces/regions of each surface are
+    normally offset to create an aggregated surface. No merging of points
+    or faces is done. The optional entry \c loadingOption can be used to
+    adjust the treatment of the regions when loading single or multiple files,
+    with selections according to the Foam::triSurfaceLoader::loadingOption
+    enumeration.
+    \verbatim
+    dictName
+    {
+        // Optional treatment of surface regions when loading
+        // (single, file, offset, merge)
+        loadingOption   file;
+        ...
+    }
+    \endverbatim
+    The \c loadingOption is primarily used in combination with the
+    \c intersectionMethod (specifically its \c region option).
+    The default \c loadingOption is normally \c offset,
+    but this changes to \c file if the \c intersectionMethod
+    \c region is being used.
+
+    Once surfaces have been loaded, the first stage is to extract
+    features according to the specified \c extractionMethod with values
+    as per the following table:
+    \table
+        extractionMethod   | Description
+        none               | No feature extraction
+        extractFromFile    | Load features from the file named in featureEdgeFile
+        extractFromSurface | Extract features from surface geometry
+    \endtable
+
+    There are a few entries that influence the extraction behaviour:
+    \verbatim
+        // File to use for extractFromFile input
+        featureEdgeFile     "FileName"
+
+        // Mark edges whose adjacent surface normals are at an angle less
+        // than includedAngle as features
+        // - 0  : selects no edges
+        // - 180: selects all edges
+        includedAngle       120;
+
+        // Do not mark region edges
+        geometricTestOnly   yes;
+    \endverbatim
+
+    This initial set of edges can be trimmed:
+    \verbatim
+        trimFeatures
+        {
+            // Remove features with fewer than the specified number of edges
+            minElem         0;
+
+            // Remove features shorter than the specified cumulative length
+            minLen          0.0;
+        }
+    \endverbatim
+
+    and subsetted
+    \verbatim
+    subsetFeatures
+    {
+        // Use a plane to select feature edges (normal)(basePoint)
+        // Only keep edges that intersect the plane
+        plane           (1 0 0)(0 0 0);
+
+        // Select feature edges using a box // (minPt)(maxPt)
+        // Only keep edges inside the box:
+        insideBox       (0 0 0)(1 1 1);
+
+        // Only keep edges outside the box:
+        outsideBox      (0 0 0)(1 1 1);
+
+        // Keep nonManifold edges (edges with >2 connected faces where
+        // the faces form more than two different normal planes)
+        nonManifoldEdges yes;
+
+        // Keep open edges (edges with 1 connected face)
+        openEdges       yes;
+    }
+    \endverbatim
+
+    Subsequently, additional features can be added from another file:
+    \verbatim
+        addFeatures
+        {
+            // Add (without merging) another extendedFeatureEdgeMesh
+            name        axZ.extendedFeatureEdgeMesh;
+        }
+    \endverbatim
+
+    The intersectionMethod provides a final means of adding additional
+    features. These are loosely termed "self-intersection", since it
+    detects the face/face intersections of the loaded surface or surfaces.
+
+    \table
+        intersectionMethod | Description
+        none    | Do nothing
+        self    | All face/face intersections
+        region  | Limit face/face intersections to those between different regions.
+    \endtable
+    The optional \c tolerance tuning parameter is available for handling
+    the face/face intersections, but should normally not be touched.
+
+    As well as the normal extendedFeatureEdgeMesh written,
+    other items can be selected with boolean switches:
+
+    \table
+        Output option | Description
+        closeness | Output the closeness of surface elements to other surface elements.
+        curvature | Output surface curvature
+        featureProximity | Output the proximity of feature points and edges to another
+        writeObj  | Write features to OBJ format for postprocessing
+        writeVTK  | Write closeness/curvature/proximity fields as VTK for postprocessing
+    \endtable
+
+Note
+   Although surfaceFeatureExtract can do many things, there are still a fair
+   number of corner cases where it may not produce the desired result.
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
 #include "Time.H"
 #include "triSurface.H"
-#include "surfaceFeatures.H"
+#include "triSurfaceTools.H"
+#include "edgeMeshTools.H"
+#include "surfaceFeaturesExtraction.H"
+#include "surfaceIntersection.H"
 #include "featureEdgeMesh.H"
 #include "extendedFeatureEdgeMesh.H"
 #include "treeBoundBox.H"
 #include "meshTools.H"
-#include "OFstream.H"
+#include "OBJstream.H"
 #include "triSurfaceMesh.H"
 #include "vtkSurfaceWriter.H"
-#include "triSurfaceFields.H"
-#include "indexedOctree.H"
-#include "treeDataEdge.H"
 #include "unitConversion.H"
 #include "plane.H"
-#include "tensor2D.H"
-#include "symmTensor2D.H"
 #include "point.H"
-#include "triadField.H"
-#include "transform.H"
+#include "triSurfaceLoader.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-scalar calcVertexNormalWeight
-(
-    const triFace& f,
-    const label pI,
-    const vector& fN,
-    const pointField& points
-)
-{
-    label index = findIndex(f, pI);
-
-    if (index == -1)
-    {
-        FatalErrorInFunction
-            << "Point not in face" << abort(FatalError);
-    }
-
-    const vector e1 = points[f[index]] - points[f[f.fcIndex(index)]];
-    const vector e2 = points[f[index]] - points[f[f.rcIndex(index)]];
-
-    return mag(fN)/(magSqr(e1)*magSqr(e2) + VSMALL);
-}
-
-
-triadField calcVertexCoordSys
-(
-    const triSurface& surf,
-    const vectorField& pointNormals
-)
-{
-    const pointField& points = surf.points();
-    const Map<label>& meshPointMap = surf.meshPointMap();
-
-    triadField pointCoordSys(points.size());
-
-    forAll(points, pI)
-    {
-        const point& pt = points[pI];
-        const vector& normal = pointNormals[meshPointMap[pI]];
-
-        if (mag(normal) < SMALL)
-        {
-            pointCoordSys[meshPointMap[pI]] = triad::unset;
-            continue;
-        }
-
-        plane p(pt, normal);
-
-        // Pick arbitrary point in plane
-        vector dir1 = pt - p.somePointInPlane(1e-3);
-        dir1 /= mag(dir1);
-
-        vector dir2 = dir1 ^ normal;
-        dir2 /= mag(dir2);
-
-        pointCoordSys[meshPointMap[pI]] = triad(dir1, dir2, normal);
-    }
-
-    return pointCoordSys;
-}
-
-
-vectorField calcVertexNormals(const triSurface& surf)
-{
-    // Weighted average of normals of faces attached to the vertex
-    // Weight = fA / (mag(e0)^2 * mag(e1)^2);
-
-    Info<< "Calculating vertex normals" << endl;
-
-    vectorField pointNormals(surf.nPoints(), Zero);
-
-    const pointField& points = surf.points();
-    const labelListList& pointFaces = surf.pointFaces();
-    const labelList& meshPoints = surf.meshPoints();
-
-    forAll(pointFaces, pI)
-    {
-        const labelList& pFaces = pointFaces[pI];
-
-        forAll(pFaces, fI)
-        {
-            const label facei = pFaces[fI];
-            const triFace& f = surf[facei];
-
-            vector fN = f.normal(points);
-
-            scalar weight = calcVertexNormalWeight
-            (
-                f,
-                meshPoints[pI],
-                fN,
-                points
-            );
-
-            pointNormals[pI] += weight*fN;
-        }
-
-        pointNormals[pI] /= mag(pointNormals[pI]) + VSMALL;
-    }
-
-    return pointNormals;
-}
-
-
-triSurfacePointScalarField calcCurvature
-(
-    const word& name,
-    const Time& runTime,
-    const triSurface& surf,
-    const vectorField& pointNormals,
-    const triadField& pointCoordSys
-)
-{
-    Info<< "Calculating face curvature" << endl;
-
-    const pointField& points = surf.points();
-    const labelList& meshPoints = surf.meshPoints();
-    const Map<label>& meshPointMap = surf.meshPointMap();
-
-    triSurfacePointScalarField curvaturePointField
-    (
-        IOobject
-        (
-            name + ".curvature",
-            runTime.constant(),
-            "triSurface",
-            runTime,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        surf,
-        dimLength,
-        scalarField(points.size(), 0.0)
-    );
-
-    List<symmTensor2D> pointFundamentalTensors
-    (
-        points.size(),
-        symmTensor2D::zero
-    );
-
-    scalarList accumulatedWeights(points.size(), 0.0);
-
-    forAll(surf, fI)
-    {
-        const triFace& f = surf[fI];
-        const edgeList fEdges = f.edges();
-
-        // Calculate the edge vectors and the normal differences
-        vectorField edgeVectors(f.size(), Zero);
-        vectorField normalDifferences(f.size(), Zero);
-
-        forAll(fEdges, feI)
-        {
-            const edge& e = fEdges[feI];
-
-            edgeVectors[feI] = e.vec(points);
-            normalDifferences[feI] =
-               pointNormals[meshPointMap[e[0]]]
-             - pointNormals[meshPointMap[e[1]]];
-        }
-
-        // Set up a local coordinate system for the face
-        const vector& e0 = edgeVectors[0];
-        const vector eN = f.normal(points);
-        const vector e1 = (e0 ^ eN);
-
-        if (magSqr(eN) < ROOTVSMALL)
-        {
-            continue;
-        }
-
-        triad faceCoordSys(e0, e1, eN);
-        faceCoordSys.normalize();
-
-        // Construct the matrix to solve
-        scalarSymmetricSquareMatrix T(3, 0);
-        scalarDiagonalMatrix Z(3, 0);
-
-        // Least Squares
-        for (label i = 0; i < 3; ++i)
-        {
-            scalar x = edgeVectors[i] & faceCoordSys[0];
-            scalar y = edgeVectors[i] & faceCoordSys[1];
-
-            T(0, 0) += sqr(x);
-            T(1, 0) += x*y;
-            T(1, 1) += sqr(x) + sqr(y);
-            T(2, 1) += x*y;
-            T(2, 2) += sqr(y);
-
-            scalar dndx = normalDifferences[i] & faceCoordSys[0];
-            scalar dndy = normalDifferences[i] & faceCoordSys[1];
-
-            Z[0] += dndx*x;
-            Z[1] += dndx*y + dndy*x;
-            Z[2] += dndy*y;
-        }
-
-        // Perform Cholesky decomposition and back substitution.
-        // Decomposed matrix is in T and solution is in Z.
-        LUsolve(T, Z);
-        symmTensor2D secondFundamentalTensor(Z[0], Z[1], Z[2]);
-
-        // Loop over the face points adding the contribution of the face
-        // curvature to the points.
-        forAll(f, fpI)
-        {
-            const label patchPointIndex = meshPointMap[f[fpI]];
-
-            const triad& ptCoordSys = pointCoordSys[patchPointIndex];
-
-            if (!ptCoordSys.set())
-            {
-                continue;
-            }
-
-            // Rotate faceCoordSys to ptCoordSys
-            tensor rotTensor = rotationTensor(ptCoordSys[2], faceCoordSys[2]);
-            triad rotatedFaceCoordSys = rotTensor & tensor(faceCoordSys);
-
-            // Project the face curvature onto the point plane
-
-            vector2D cmp1
-            (
-                ptCoordSys[0] & rotatedFaceCoordSys[0],
-                ptCoordSys[0] & rotatedFaceCoordSys[1]
-            );
-            vector2D cmp2
-            (
-                ptCoordSys[1] & rotatedFaceCoordSys[0],
-                ptCoordSys[1] & rotatedFaceCoordSys[1]
-            );
-
-            tensor2D projTensor
-            (
-                cmp1,
-                cmp2
-            );
-
-            symmTensor2D projectedFundamentalTensor
-            (
-                projTensor.x() & (secondFundamentalTensor & projTensor.x()),
-                projTensor.x() & (secondFundamentalTensor & projTensor.y()),
-                projTensor.y() & (secondFundamentalTensor & projTensor.y())
-            );
-
-            // Calculate weight
-            // TODO: Voronoi area weighting
-            scalar weight = calcVertexNormalWeight
-            (
-                f,
-                meshPoints[patchPointIndex],
-                f.normal(points),
-                points
-            );
-
-            // Sum contribution of face to this point
-            pointFundamentalTensors[patchPointIndex] +=
-                weight*projectedFundamentalTensor;
-
-            accumulatedWeights[patchPointIndex] += weight;
-        }
-
-        if (false)
-        {
-            Info<< "Points = " << points[f[0]] << " "
-                << points[f[1]] << " "
-                << points[f[2]] << endl;
-            Info<< "edgeVecs = " << edgeVectors[0] << " "
-                << edgeVectors[1] << " "
-                << edgeVectors[2] << endl;
-            Info<< "normDiff = " << normalDifferences[0] << " "
-                << normalDifferences[1] << " "
-                << normalDifferences[2] << endl;
-            Info<< "faceCoordSys = " << faceCoordSys << endl;
-            Info<< "T = " << T << endl;
-            Info<< "Z = " << Z << endl;
-        }
-    }
-
-    forAll(curvaturePointField, pI)
-    {
-        pointFundamentalTensors[pI] /= (accumulatedWeights[pI] + SMALL);
-
-        vector2D principalCurvatures = eigenValues(pointFundamentalTensors[pI]);
-
-        //scalar curvature =
-        //    (principalCurvatures[0] + principalCurvatures[1])/2;
-        scalar curvature = max
-        (
-            mag(principalCurvatures[0]),
-            mag(principalCurvatures[1])
-        );
-        //scalar curvature = principalCurvatures[0]*principalCurvatures[1];
-
-        curvaturePointField[meshPoints[pI]] = curvature;
-    }
-
-    return curvaturePointField;
-}
-
-
-bool edgesConnected(const edge& e1, const edge& e2)
-{
-    if
-    (
-        e1.start() == e2.start()
-     || e1.start() == e2.end()
-     || e1.end() == e2.start()
-     || e1.end() == e2.end()
-    )
-    {
-        return true;
-    }
-
-    return false;
-}
-
-
-scalar calcProximityOfFeaturePoints
-(
-    const List<pointIndexHit>& hitList,
-    const scalar defaultCellSize
-)
-{
-    scalar minDist = defaultCellSize;
-
-    for
-    (
-        label hI1 = 0;
-        hI1 < hitList.size() - 1;
-        ++hI1
-    )
-    {
-        const pointIndexHit& pHit1 = hitList[hI1];
-
-        if (pHit1.hit())
-        {
-            for
-            (
-                label hI2 = hI1 + 1;
-                hI2 < hitList.size();
-                ++hI2
-            )
-            {
-                const pointIndexHit& pHit2 = hitList[hI2];
-
-                if (pHit2.hit())
-                {
-                    scalar curDist = mag(pHit1.hitPoint() - pHit2.hitPoint());
-
-                    minDist = min(curDist, minDist);
-                }
-            }
-        }
-    }
-
-    return minDist;
-}
-
-
-scalar calcProximityOfFeatureEdges
-(
-    const extendedFeatureEdgeMesh& efem,
-    const List<pointIndexHit>& hitList,
-    const scalar defaultCellSize
-)
-{
-    scalar minDist = defaultCellSize;
-
-    for
-    (
-        label hI1 = 0;
-        hI1 < hitList.size() - 1;
-        ++hI1
-    )
-    {
-        const pointIndexHit& pHit1 = hitList[hI1];
-
-        if (pHit1.hit())
-        {
-            const edge& e1 = efem.edges()[pHit1.index()];
-
-            for
-            (
-                label hI2 = hI1 + 1;
-                hI2 < hitList.size();
-                ++hI2
-            )
-            {
-                const pointIndexHit& pHit2 = hitList[hI2];
-
-                if (pHit2.hit())
-                {
-                    const edge& e2 = efem.edges()[pHit2.index()];
-
-                    // Don't refine if the edges are connected to each other
-                    if (!edgesConnected(e1, e2))
-                    {
-                        scalar curDist =
-                            mag(pHit1.hitPoint() - pHit2.hitPoint());
-
-                        minDist = min(curDist, minDist);
-                    }
-                }
-            }
-        }
-    }
-
-    return minDist;
-}
-
-
-void dumpBox(const treeBoundBox& bb, const fileName& fName)
-{
-    OFstream str(fName);
-
-    Info<< "Dumping bounding box " << bb << " as lines to obj file "
-        << str.name() << endl;
-
-
-    pointField boxPoints(bb.points());
-
-    forAll(boxPoints, i)
-    {
-        meshTools::writeOBJ(str, boxPoints[i]);
-    }
-
-    forAll(treeBoundBox::edges, i)
-    {
-        const edge& e = treeBoundBox::edges[i];
-
-        str<< "l " << e[0]+1 <<  ' ' << e[1]+1 << nl;
-    }
-}
-
-
-// Deletes all edges inside/outside bounding box from set.
-void deleteBox
-(
-    const triSurface& surf,
-    const treeBoundBox& bb,
-    const bool removeInside,
-    List<surfaceFeatures::edgeStatus>& edgeStat
-)
-{
-    forAll(edgeStat, edgeI)
-    {
-        const point eMid = surf.edges()[edgeI].centre(surf.localPoints());
-
-        if (removeInside ? bb.contains(eMid) : !bb.contains(eMid))
-        {
-            edgeStat[edgeI] = surfaceFeatures::NONE;
-        }
-    }
-}
-
-
-bool onLine(const point& p, const linePointRef& line)
-{
-    const point& a = line.start();
-    const point& b = line.end();
-
-    if
-    (
-        ( p.x() < min(a.x(), b.x()) || p.x() > max(a.x(), b.x()) )
-     || ( p.y() < min(a.y(), b.y()) || p.y() > max(a.y(), b.y()) )
-     || ( p.z() < min(a.z(), b.z()) || p.z() > max(a.z(), b.z()) )
-    )
-    {
-        return false;
-    }
-
-    return true;
-}
-
-
-// Deletes all edges inside/outside bounding box from set.
-void deleteEdges
-(
-    const triSurface& surf,
-    const plane& cutPlane,
-    List<surfaceFeatures::edgeStatus>& edgeStat
-)
-{
-    const pointField& points = surf.points();
-    const labelList& meshPoints = surf.meshPoints();
-
-    forAll(edgeStat, edgeI)
-    {
-        const edge& e = surf.edges()[edgeI];
-        const point& p0 = points[meshPoints[e.start()]];
-        const point& p1 = points[meshPoints[e.end()]];
-        const linePointRef line(p0, p1);
-
-        // If edge does not intersect the plane, delete.
-        scalar intersect = cutPlane.lineIntersect(line);
-
-        point featPoint = intersect * (p1 - p0) + p0;
-
-        if (!onLine(featPoint, line))
-        {
-            edgeStat[edgeI] = surfaceFeatures::NONE;
-        }
-    }
-}
-
-
-void drawHitProblem
-(
-    label fI,
-    const triSurface& surf,
-    const pointField& start,
-    const pointField& faceCentres,
-    const pointField& end,
-    const List<pointIndexHit>& hitInfo
-)
-{
-    Info<< nl << "# findLineAll did not hit its own face."
-        << nl << "# fI " << fI
-        << nl << "# start " << start[fI]
-        << nl << "# f centre " << faceCentres[fI]
-        << nl << "# end " << end[fI]
-        << nl << "# hitInfo " << hitInfo
-        << endl;
-
-    meshTools::writeOBJ(Info, start[fI]);
-    meshTools::writeOBJ(Info, faceCentres[fI]);
-    meshTools::writeOBJ(Info, end[fI]);
-
-    Info<< "l 1 2 3" << endl;
-
-    meshTools::writeOBJ(Info, surf.points()[surf[fI][0]]);
-    meshTools::writeOBJ(Info, surf.points()[surf[fI][1]]);
-    meshTools::writeOBJ(Info, surf.points()[surf[fI][2]]);
-
-    Info<< "f 4 5 6" << endl;
-
-    forAll(hitInfo, hI)
-    {
-        label hFI = hitInfo[hI].index();
-
-        meshTools::writeOBJ(Info, surf.points()[surf[hFI][0]]);
-        meshTools::writeOBJ(Info, surf.points()[surf[hFI][1]]);
-        meshTools::writeOBJ(Info, surf.points()[surf[hFI][2]]);
-
-        Info<< "f "
-            << 3*hI + 7 << " "
-            << 3*hI + 8 << " "
-            << 3*hI + 9
-            << endl;
-    }
-}
-
-
-// Unmark non-manifold edges if individual triangles are not features
-void unmarkBaffles
-(
-    const triSurface& surf,
-    const scalar includedAngle,
-    List<surfaceFeatures::edgeStatus>& edgeStat
-)
-{
-    scalar minCos = Foam::cos(degToRad(180.0 - includedAngle));
-
-    const labelListList& edgeFaces = surf.edgeFaces();
-
-    forAll(edgeFaces, edgeI)
-    {
-        const labelList& eFaces = edgeFaces[edgeI];
-
-        if (eFaces.size() > 2)
-        {
-            label i0 = eFaces[0];
-            //const labelledTri& f0 = surf[i0];
-            const Foam::vector& n0 = surf.faceNormals()[i0];
-
-            //Pout<< "edge:" << edgeI << " n0:" << n0 << endl;
-
-            bool same = true;
-
-            for (label i = 1; i < eFaces.size(); i++)
-            {
-                //const labelledTri& f = surf[i];
-                const Foam::vector& n = surf.faceNormals()[eFaces[i]];
-
-                //Pout<< "    mag(n&n0): " << mag(n&n0) << endl;
-
-                if (mag(n&n0) < minCos)
-                {
-                    same = false;
-                    break;
-                }
-            }
-
-            if (same)
-            {
-                edgeStat[edgeI] = surfaceFeatures::NONE;
-            }
-        }
-    }
-}
-
-
-//- Divide into multiple normal bins
-//  - return REGION if != 2 normals
-//  - return REGION if 2 normals that make feature angle
-//  - otherwise return NONE and set normals,bins
-surfaceFeatures::edgeStatus checkFlatRegionEdge
-(
-    const triSurface& surf,
-    const scalar tol,
-    const scalar includedAngle,
-    const label edgeI
-)
-{
-    const edge& e = surf.edges()[edgeI];
-    const labelList& eFaces = surf.edgeFaces()[edgeI];
-
-    // Bin according to normal
-
-    DynamicList<Foam::vector> normals(2);
-    DynamicList<labelList> bins(2);
-
-    forAll(eFaces, eFacei)
-    {
-        const Foam::vector& n = surf.faceNormals()[eFaces[eFacei]];
-
-        // Find the normal in normals
-        label index = -1;
-        forAll(normals, normalI)
-        {
-            if (mag(n&normals[normalI]) > (1-tol))
-            {
-                index = normalI;
-                break;
-            }
-        }
-
-        if (index != -1)
-        {
-            bins[index].append(eFacei);
-        }
-        else if (normals.size() >= 2)
-        {
-            // Would be third normal. Mark as feature.
-            //Pout<< "** at edge:" << surf.localPoints()[e[0]]
-            //    << surf.localPoints()[e[1]]
-            //    << " have normals:" << normals
-            //    << " and " << n << endl;
-            return surfaceFeatures::REGION;
-        }
-        else
-        {
-            normals.append(n);
-            bins.append(labelList(1, eFacei));
-        }
-    }
-
-
-    // Check resulting number of bins
-    if (bins.size() == 1)
-    {
-        // Note: should check here whether they are two sets of faces
-        // that are planar or indeed 4 faces al coming together at an edge.
-        //Pout<< "** at edge:"
-        //    << surf.localPoints()[e[0]]
-        //    << surf.localPoints()[e[1]]
-        //    << " have single normal:" << normals[0]
-        //    << endl;
-        return surfaceFeatures::NONE;
-    }
-    else
-    {
-        // Two bins. Check if normals make an angle
-
-        //Pout<< "** at edge:"
-        //    << surf.localPoints()[e[0]]
-        //    << surf.localPoints()[e[1]] << nl
-        //    << "    normals:" << normals << nl
-        //    << "    bins   :" << bins << nl
-        //    << endl;
-
-        if (includedAngle >= 0)
-        {
-            scalar minCos = Foam::cos(degToRad(180.0 - includedAngle));
-
-            forAll(eFaces, i)
-            {
-                const Foam::vector& ni = surf.faceNormals()[eFaces[i]];
-                for (label j=i+1; j<eFaces.size(); j++)
-                {
-                    const Foam::vector& nj = surf.faceNormals()[eFaces[j]];
-                    if (mag(ni & nj) < minCos)
-                    {
-                        //Pout<< "have sharp feature between normal:" << ni
-                        //    << " and " << nj << endl;
-
-                        // Is feature. Keep as region or convert to
-                        // feature angle? For now keep as region.
-                        return surfaceFeatures::REGION;
-                    }
-                }
-            }
-        }
-
-
-        // So now we have two normals bins but need to make sure both
-        // bins have the same regions in it.
-
-         // 1. store + or - region number depending
-        //    on orientation of triangle in bins[0]
-        const labelList& bin0 = bins[0];
-        labelList regionAndNormal(bin0.size());
-        forAll(bin0, i)
-        {
-            const labelledTri& t = surf.localFaces()[eFaces[bin0[i]]];
-            int dir = t.edgeDirection(e);
-
-            if (dir > 0)
-            {
-                regionAndNormal[i] = t.region()+1;
-            }
-            else if (dir == 0)
-            {
-                FatalErrorInFunction
-                    << exit(FatalError);
-            }
-            else
-            {
-                regionAndNormal[i] = -(t.region()+1);
-            }
-        }
-
-        // 2. check against bin1
-        const labelList& bin1 = bins[1];
-        labelList regionAndNormal1(bin1.size());
-        forAll(bin1, i)
-        {
-            const labelledTri& t = surf.localFaces()[eFaces[bin1[i]]];
-            int dir = t.edgeDirection(e);
-
-            label myRegionAndNormal;
-            if (dir > 0)
-            {
-                myRegionAndNormal = t.region()+1;
-            }
-            else
-            {
-                myRegionAndNormal = -(t.region()+1);
-            }
-
-            regionAndNormal1[i] = myRegionAndNormal;
-
-            label index = findIndex(regionAndNormal, -myRegionAndNormal);
-            if (index == -1)
-            {
-                // Not found.
-                //Pout<< "cannot find region " << myRegionAndNormal
-                //    << " in regions " << regionAndNormal << endl;
-
-                return surfaceFeatures::REGION;
-            }
-        }
-
-        // Passed all checks, two normal bins with the same contents.
-        //Pout<< "regionAndNormal:" << regionAndNormal << endl;
-        //Pout<< "myRegionAndNormal:" << regionAndNormal1 << endl;
-
-        return surfaceFeatures::NONE;
-    }
-}
-
-
-void writeStats(const extendedFeatureEdgeMesh& fem, Ostream& os)
-{
-    os  << "    points : " << fem.points().size() << nl
-        << "    of which" << nl
-        << "        convex             : "
-        << fem.concaveStart() << nl
-        << "        concave            : "
-        << (fem.mixedStart()-fem.concaveStart()) << nl
-        << "        mixed              : "
-        << (fem.nonFeatureStart()-fem.mixedStart()) << nl
-        << "        non-feature        : "
-        << (fem.points().size()-fem.nonFeatureStart()) << nl
-        << "    edges  : " << fem.edges().size() << nl
-        << "    of which" << nl
-        << "        external edges     : "
-        << fem.internalStart() << nl
-        << "        internal edges     : "
-        << (fem.flatStart()- fem.internalStart()) << nl
-        << "        flat edges         : "
-        << (fem.openStart()- fem.flatStart()) << nl
-        << "        open edges         : "
-        << (fem.multipleStart()- fem.openStart()) << nl
-        << "        multiply connected : "
-        << (fem.edges().size()- fem.multipleStart()) << endl;
-}
-
-
-
 int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "extract and write surface features to file"
+        "Extract and write surface features to file"
     );
     argList::noParallel();
+    argList::noFunctionObjects();
 
-    #include "addDictOption.H"
+    argList::addOption
+    (
+        "dict",
+        "file",
+        "read surfaceFeatureExtractDict from specified location"
+    );
 
     #include "setRootCase.H"
     #include "createTime.H"
+
+    Info<< nl
+        << "Note: "
+        << "Feature line extraction only valid on closed manifold surfaces"
+        << nl << nl;
 
     const word dictName("surfaceFeatureExtractDict");
     #include "setSystemRunTimeDictionaryIO.H"
 
     Info<< "Reading " << dictName << nl << endl;
-
     const IOdictionary dict(dictIO);
 
-    forAllConstIter(dictionary, dict, iter)
+    // Loader for available triSurface surface files
+    triSurfaceLoader loader(runTime);
+
+    // Where to write VTK output files
+    const fileName vtkOutputDir = runTime.constantPath()/"triSurface";
+
+    forAllConstIters(dict, iter)
     {
-        if (!iter().isDict())
+        if (!iter().isDict() || iter().keyword().isPattern())
         {
             continue;
         }
@@ -897,167 +250,167 @@ int main(int argc, char *argv[])
 
         if (!surfaceDict.found("extractionMethod"))
         {
+            // Insist on an extractionMethod
             continue;
         }
 
-        const word extractionMethod = surfaceDict.lookup("extractionMethod");
+        // The output name based in dictionary name (without extensions)
+        const word& dictName = iter().keyword();
+        const word outputName = dictName.lessExt();
 
-        const fileName surfFileName = iter().keyword();
-        const fileName sFeatFileName = surfFileName.lessExt().name();
-
-        Info<< "Surface            : " << surfFileName << nl << endl;
-
-        const Switch writeVTK =
-            surfaceDict.lookupOrDefault<Switch>("writeVTK", "off");
-        const Switch writeObj =
-            surfaceDict.lookupOrDefault<Switch>("writeObj", "off");
-
-        const Switch curvature =
-            surfaceDict.lookupOrDefault<Switch>("curvature", "off");
-        const Switch featureProximity =
-            surfaceDict.lookupOrDefault<Switch>("featureProximity", "off");
-        const Switch closeness =
-            surfaceDict.lookupOrDefault<Switch>("closeness", "off");
-
-
-        Info<< nl << "Feature line extraction is only valid on closed manifold "
-            << "surfaces." << endl;
-
-        // Read
-        // ~~~~
-
-        triSurface surf(runTime.constantPath()/"triSurface"/surfFileName);
-
-        Info<< "Statistics:" << endl;
-        surf.writeStats(Info);
-        Info<< endl;
-
-        faceList faces(surf.size());
-
-        forAll(surf, fI)
-        {
-            faces[fI] = surf[fI].triFaceFace();
-        }
-
-
-        // Either construct features from surface & featureAngle or read set.
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        autoPtr<surfaceFeatures> set;
-
-        scalar includedAngle = 0.0;
-
-        if (extractionMethod == "extractFromFile")
-        {
-            const dictionary& extractFromFileDict =
-                surfaceDict.subDict("extractFromFileCoeffs");
-
-            const fileName featureEdgeFile =
-                extractFromFileDict.lookup("featureEdgeFile");
-
-            const Switch geometricTestOnly =
-                extractFromFileDict.lookupOrDefault<Switch>
-                (
-                    "geometricTestOnly",
-                    "no"
-                );
-
-            edgeMesh eMesh(featureEdgeFile);
-
-            // Sometimes duplicate edges are present. Remove them.
-            eMesh.mergeEdges();
-
-            Info<< nl << "Reading existing feature edges from file "
-                << featureEdgeFile << nl
-                << "Selecting edges purely based on geometric tests: "
-                << geometricTestOnly.asText() << endl;
-
-            set.set
+        autoPtr<surfaceFeaturesExtraction::method> extractor =
+            surfaceFeaturesExtraction::method::New
             (
-                new surfaceFeatures
-                (
-                    surf,
-                    eMesh.points(),
-                    eMesh.edges(),
-                    1e-6,
-                    geometricTestOnly
-                )
+                surfaceDict
             );
-        }
-        else if (extractionMethod == "extractFromSurface")
-        {
-            const dictionary& extractFromSurfaceDict =
-                surfaceDict.subDict("extractFromSurfaceCoeffs");
 
-            includedAngle =
-                readScalar(extractFromSurfaceDict.lookup("includedAngle"));
-
-            const Switch geometricTestOnly =
-                extractFromSurfaceDict.lookupOrDefault<Switch>
-                (
-                    "geometricTestOnly",
-                    "no"
-                );
-
-            Info<< nl
-                << "Constructing feature set from included angle "
-                << includedAngle << nl
-                << "Selecting edges purely based on geometric tests: "
-                << geometricTestOnly.asText() << endl;
-
-            set.set
+        // We don't needs the intersectionMethod yet, but can use it
+        // for setting a reasonable loading option
+        const surfaceIntersection::intersectionType selfIntersect =
+            surfaceIntersection::selfIntersectionNames.lookupOrDefault
             (
-                new surfaceFeatures
-                (
-                    surf,
-                    includedAngle,
-                    0,
-                    0,
-                    geometricTestOnly
-                )
+                "intersectionMethod",
+                surfaceDict,
+                surfaceIntersection::NONE
             );
+
+        const Switch writeObj = surfaceDict.lookupOrDefault<Switch>
+        (
+            "writeObj",
+            Switch::OFF
+        );
+        const Switch writeVTK = surfaceDict.lookupOrDefault<Switch>
+        (
+            "writeVTK",
+            Switch::OFF
+        );
+
+        // The "surfaces" entry is normally optional, but make it mandatory
+        // if the dictionary name doesn't have an extension
+        // (ie, probably not a surface filename at all).
+        // If it is missing, this will fail nicely with an appropriate error
+        // message.
+        if (surfaceDict.found("surfaces") || !dictName.hasExt())
+        {
+            loader.select(wordReList(surfaceDict.lookup("surfaces")));
         }
         else
         {
-            FatalErrorInFunction
-                << "No initial feature set. Provide either one"
-                << " of extractFromFile (to read existing set)" << nl
-                << " or extractFromSurface (to construct new set from angle)"
-                << exit(FatalError);
+            loader.select(dictName);
         }
 
+        // DebugVar(loader.available());
+        // DebugVar(outputName);
+
+        if (loader.selected().empty())
+        {
+            FatalErrorInFunction
+                << "No surfaces specified/found for entry: "
+                << dictName << exit(FatalError);
+        }
+
+        Info<< "Surfaces     : ";
+        if (loader.selected().size() == 1)
+        {
+            Info<< loader.selected().first() << nl;
+        }
+        else
+        {
+            Info<< flatOutput(loader.selected()) << nl;
+        }
+        Info<< "Output       : " << outputName << nl;
+
+        // Loading option - default depends on context
+        triSurfaceLoader::loadingOption loadingOption =
+            triSurfaceLoader::loadingOptionNames.lookupOrDefault
+            (
+                "loadingOption",
+                surfaceDict,
+                (
+                    selfIntersect == surfaceIntersection::SELF_REGION
+                  ? triSurfaceLoader::FILE_REGION
+                  : triSurfaceLoader::OFFSET_REGION
+                )
+            );
+
+        Info<<"Load options : "
+            << triSurfaceLoader::loadingOptionNames[loadingOption] << nl
+            << "Write options:"
+            << " writeObj=" << writeObj
+            << " writeVTK=" << writeVTK << nl;
+
+        // Load a single file, or load and combine multiple selected files
+        autoPtr<triSurface> surfPtr = loader.load(loadingOption);
+        if (!surfPtr.valid() || surfPtr().empty())
+        {
+            FatalErrorInFunction
+                << "Problem loading surface(s) for entry: "
+                << dictName << exit(FatalError);
+        }
+
+        triSurface surf = surfPtr();
+
+        Info<< nl
+            << "Statistics:" << nl;
+        surf.writeStats(Info);
+
+        // Need a copy as plain faces if outputting VTK format
+        faceList faces;
+        if (writeVTK)
+        {
+            faces.setSize(surf.size());
+            forAll(surf, fi)
+            {
+                faces[fi] = surf[fi].triFaceFace();
+            }
+        }
+
+        //
+        // Extract features using the preferred extraction method
+        //
+        autoPtr<surfaceFeatures> features = extractor().features(surf);
 
         // Trim set
         // ~~~~~~~~
 
+        // Option: "trimFeatures" (dictionary)
         if (surfaceDict.isDict("trimFeatures"))
         {
-            dictionary trimDict = surfaceDict.subDict("trimFeatures");
+            const dictionary& trimDict = surfaceDict.subDict("trimFeatures");
 
-            scalar minLen =
-                trimDict.lookupOrAddDefault<scalar>("minLen", -GREAT);
-
-            label minElem = trimDict.lookupOrAddDefault<label>("minElem", 0);
+            const scalar minLen =
+                trimDict.lookupOrDefault<scalar>("minLen", 0);
+            const label minElem =
+                trimDict.lookupOrDefault<label>("minElem", 0);
 
             // Trim away small groups of features
-            if (minElem > 0 || minLen > 0)
+            if (minLen > 0 || minElem > 0)
             {
-                Info<< "Removing features of length < "
-                    << minLen << endl;
-                Info<< "Removing features with number of edges < "
-                    << minElem << endl;
+                if (minLen > 0)
+                {
+                    Info<< "Removing features of length < "
+                        << minLen << endl;
+                }
+                if (minElem > 0)
+                {
+                    Info<< "Removing features with number of edges < "
+                        << minElem << endl;
+                }
 
-                set().trimFeatures(minLen, minElem, includedAngle);
+                features().trimFeatures
+                (
+                    minLen, minElem, extractor().includedAngle()
+                );
             }
         }
-
 
         // Subset
         // ~~~~~~
 
         // Convert to marked edges, points
-        List<surfaceFeatures::edgeStatus> edgeStat(set().toStatus());
+        List<surfaceFeatures::edgeStatus> edgeStat(features().toStatus());
 
+        // Option: "subsetFeatures" (dictionary)
         if (surfaceDict.isDict("subsetFeatures"))
         {
             const dictionary& subsetDict = surfaceDict.subDict
@@ -1065,118 +418,115 @@ int main(int argc, char *argv[])
                 "subsetFeatures"
             );
 
+            // Suboption: "insideBox"
             if (subsetDict.found("insideBox"))
             {
                 treeBoundBox bb(subsetDict.lookup("insideBox")());
 
-                Info<< "Removing all edges outside bb " << bb << endl;
-                dumpBox(bb, "subsetBox.obj");
+                Info<< "Subset edges inside box " << bb << endl;
+                features().subsetBox(edgeStat, bb);
 
-                deleteBox(surf, bb, false, edgeStat);
+                {
+                    OBJstream os("subsetBox.obj");
+
+                    Info<< "Dumping bounding box " << bb
+                        << " as lines to obj file "
+                        << os.name() << endl;
+
+                    os.write(bb);
+                }
             }
+            // Suboption: "outsideBox"
             else if (subsetDict.found("outsideBox"))
             {
                 treeBoundBox bb(subsetDict.lookup("outsideBox")());
 
-                Info<< "Removing all edges inside bb " << bb << endl;
-                dumpBox(bb, "deleteBox.obj");
+                Info<< "Exclude edges outside box " << bb << endl;
+                features().excludeBox(edgeStat, bb);
 
-                deleteBox(surf, bb, true, edgeStat);
+                {
+                    OBJstream os("deleteBox.obj");
+
+                    Info<< "Dumping bounding box " << bb
+                        << " as lines to obj file "
+                        << os.name() << endl;
+
+                    os.write(bb);
+                }
             }
 
-            const Switch nonManifoldEdges =
-                subsetDict.lookupOrDefault<Switch>("nonManifoldEdges", "yes");
-
-            if (!nonManifoldEdges)
+            // Suboption: "nonManifoldEdges" (false: remove non-manifold edges)
+            if (!subsetDict.lookupOrDefault<bool>("nonManifoldEdges", true))
             {
                 Info<< "Removing all non-manifold edges"
                     << " (edges with > 2 connected faces) unless they"
                     << " cross multiple regions" << endl;
 
-                forAll(edgeStat, edgeI)
-                {
-                    const labelList& eFaces = surf.edgeFaces()[edgeI];
-
-                    if
-                    (
-                        eFaces.size() > 2
-                     && edgeStat[edgeI] == surfaceFeatures::REGION
-                     && (eFaces.size() % 2) == 0
-                    )
-                    {
-                        edgeStat[edgeI] = checkFlatRegionEdge
-                        (
-                            surf,
-                            1e-5,   //tol,
-                            includedAngle,
-                            edgeI
-                        );
-                    }
-                }
+                features().checkFlatRegionEdge
+                (
+                    edgeStat,
+                    1e-5,   // tol
+                    extractor().includedAngle()
+                );
             }
 
-            const Switch openEdges =
-                subsetDict.lookupOrDefault<Switch>("openEdges", "yes");
-
-            if (!openEdges)
+            // Suboption: "openEdges" (false: remove open edges)
+            if (!subsetDict.lookupOrDefault<bool>("openEdges", true))
             {
                 Info<< "Removing all open edges"
                     << " (edges with 1 connected face)" << endl;
 
-                forAll(edgeStat, edgeI)
-                {
-                    if (surf.edgeFaces()[edgeI].size() == 1)
-                    {
-                        edgeStat[edgeI] = surfaceFeatures::NONE;
-                    }
-                }
+                features().excludeOpen(edgeStat);
             }
 
+            // Suboption: "plane"
             if (subsetDict.found("plane"))
             {
                 plane cutPlane(subsetDict.lookup("plane")());
 
-                deleteEdges(surf, cutPlane, edgeStat);
+                Info<< "Only include feature edges that intersect the plane"
+                    << " with normal " << cutPlane.normal()
+                    << " and base point " << cutPlane.refPoint() << endl;
 
-                Info<< "Only edges that intersect the plane with normal "
-                    << cutPlane.normal()
-                    << " and base point " << cutPlane.refPoint()
-                    << " will be included as feature edges."<< endl;
+                features().subsetPlane(edgeStat, cutPlane);
             }
         }
 
-
         surfaceFeatures newSet(surf);
-        newSet.setFromStatus(edgeStat, includedAngle);
+        newSet.setFromStatus(edgeStat, extractor().includedAngle());
 
-        Info<< nl
-            << "Initial feature set:" << nl
-            << "    feature points : " << newSet.featurePoints().size() << nl
-            << "    feature edges  : " << newSet.featureEdges().size() << nl
-            << "    of which" << nl
-            << "        region edges   : " << newSet.nRegionEdges() << nl
-            << "        external edges : " << newSet.nExternalEdges() << nl
-            << "        internal edges : " << newSet.nInternalEdges() << nl
-            << endl;
-
-        //if (writeObj)
-        //{
-        //    newSet.writeObj("final");
-        //}
+        Info<< nl << "Initial ";
+        newSet.writeStats(Info);
 
         boolList surfBaffleRegions(surf.patches().size(), false);
-
-        wordList surfBaffleNames;
-        surfaceDict.readIfPresent("baffles", surfBaffleNames);
-
-        forAll(surf.patches(), pI)
+        if (surfaceDict.found("baffles"))
         {
-            const word& name = surf.patches()[pI].name();
+            wordReList baffleSelect(surfaceDict.lookup("baffles"));
 
-            if (findIndex(surfBaffleNames, name) != -1)
+            wordList patchNames(surf.patches().size());
+            forAll(surf.patches(), patchi)
             {
-                Info<< "Adding baffle region " << name << endl;
-                surfBaffleRegions[pI] = true;
+                patchNames[patchi] = surf.patches()[patchi].name();
+            }
+
+            labelList indices = findStrings(baffleSelect, patchNames);
+            forAll(indices, patchi)
+            {
+                surfBaffleRegions[patchi] = true;
+            }
+
+            if (indices.size())
+            {
+                Info<< "Adding " << indices.size() << " baffle regions: (";
+
+                forAll(surfBaffleRegions, patchi)
+                {
+                    if (surfBaffleRegions[patchi])
+                    {
+                        Info<< ' ' << patchNames[patchi];
+                    }
+                }
+                Info<< " )" << nl << nl;
             }
         }
 
@@ -1185,7 +535,7 @@ int main(int argc, char *argv[])
         (
             newSet,
             runTime,
-            sFeatFileName + ".extendedFeatureEdgeMesh",
+            outputName + ".extendedFeatureEdgeMesh",
             surfBaffleRegions
         );
 
@@ -1209,15 +559,50 @@ int main(int argc, char *argv[])
                 )
             );
             Info<< "Read " << addFeMesh.name() << nl;
-            writeStats(addFeMesh, Info);
+            edgeMeshTools::writeStats(Info, addFeMesh);
 
             feMesh.add(addFeMesh);
         }
 
+        if (selfIntersect != surfaceIntersection::NONE)
+        {
+            triSurfaceSearch query(surf);
+            surfaceIntersection intersect(query, surfaceDict);
 
-        Info<< nl
-            << "Final feature set:" << nl;
-        writeStats(feMesh, Info);
+            // Remove rounding noise. For consistency could use 1e-6,
+            // as per extractFromFile implementation
+
+            intersect.mergePoints(10*SMALL);
+
+            labelPair sizeInfo
+            (
+                intersect.cutPoints().size(),
+                intersect.cutEdges().size()
+            );
+
+            if (intersect.cutEdges().size())
+            {
+                extendedEdgeMesh addMesh
+                (
+                    intersect.cutPoints(),
+                    intersect.cutEdges()
+                );
+
+                feMesh.add(addMesh);
+
+                sizeInfo[0] = addMesh.points().size();
+                sizeInfo[1] = addMesh.edges().size();
+            }
+            Info<< nl
+                << "intersection: "
+                << surfaceIntersection::selfIntersectionNames[selfIntersect]
+                << nl
+                << "    points : " << sizeInfo[0] << nl
+                << "    edges  : " << sizeInfo[1] << nl;
+        }
+
+        Info<< nl << "Final ";
+        edgeMeshTools::writeStats(Info, feMesh);
 
         Info<< nl << "Writing extendedFeatureEdgeMesh to "
             << feMesh.objectPath() << endl;
@@ -1226,498 +611,140 @@ int main(int argc, char *argv[])
 
         if (writeObj)
         {
-            feMesh.writeObj(feMesh.path()/surfFileName.lessExt().name());
+            feMesh.writeObj(feMesh.path()/outputName);
         }
 
         feMesh.write();
 
-        // Write a featureEdgeMesh for backwards compatibility
-        featureEdgeMesh bfeMesh
-        (
-            IOobject
-            (
-                surfFileName.lessExt().name() + ".eMesh",   // name
-                runTime.constant(),                         // instance
-                "triSurface",
-                runTime,                                    // registry
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
-            ),
-            feMesh.points(),
-            feMesh.edges()
-        );
-
-        Info<< nl << "Writing featureEdgeMesh to "
-            << bfeMesh.objectPath() << endl;
-
-        bfeMesh.regIOobject::write();
-
-    // Find close features
-
-    // // Dummy trim operation to mark features
-    // labelList featureEdgeIndexing = newSet.trimFeatures(-GREAT, 0);
-
-    // scalarField surfacePtFeatureIndex(surf.points().size(), -1);
-
-    // forAll(newSet.featureEdges(), eI)
-    // {
-    //     const edge& e = surf.edges()[newSet.featureEdges()[eI]];
-
-    //     surfacePtFeatureIndex[surf.meshPoints()[e.start()]] =
-    //     featureEdgeIndexing[newSet.featureEdges()[eI]];
-
-    //     surfacePtFeatureIndex[surf.meshPoints()[e.end()]] =
-    //     featureEdgeIndexing[newSet.featureEdges()[eI]];
-    // }
-
-    // if (writeVTK)
-    // {
-    //     vtkSurfaceWriter().write
-    //     (
-    //         runTime.constant()/"triSurface",    // outputDir
-    //         sFeatFileName,                      // surfaceName
-    //         surf.points(),
-    //         faces,
-    //         "surfacePtFeatureIndex",            // fieldName
-    //         surfacePtFeatureIndex,
-    //         true,                               // isNodeValues
-    //         true                                // verbose
-    //     );
-    // }
-
-    // Random rndGen(343267);
-
-    // treeBoundBox surfBB
-    // (
-    //     treeBoundBox(searchSurf.bounds()).extend(rndGen, 1e-4)
-    // );
-
-    // surfBB.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-    // surfBB.max() += Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-
-    // indexedOctree<treeDataEdge> ftEdTree
-    // (
-    //     treeDataEdge
-    //     (
-    //         false,
-    //         surf.edges(),
-    //         surf.localPoints(),
-    //         newSet.featureEdges()
-    //     ),
-    //     surfBB,
-    //     8,      // maxLevel
-    //     10,     // leafsize
-    //     3.0     // duplicity
-    // );
-
-    // labelList nearPoints = ftEdTree.findBox
-    // (
-    //     treeBoundBox
-    //     (
-    //         sPt - featureSearchSpan*Foam::vector::one,
-    //         sPt + featureSearchSpan*Foam::vector::one
-    //     )
-    // );
-
-        if (closeness)
+        // Write a featureEdgeMesh (.eMesh) for backwards compatibility
+        // Used by snappyHexMesh (JUN-2017)
+        if (true)
         {
-            Info<< nl << "Extracting internal and external closeness of "
-                << "surface." << endl;
-
-
-            triSurfaceMesh searchSurf
+            featureEdgeMesh bfeMesh
             (
                 IOobject
                 (
-                    sFeatFileName + ".closeness",
-                    runTime.constant(),
+                    outputName + ".eMesh",      // name
+                    runTime.constant(),         // instance
                     "triSurface",
-                    runTime,
+                    runTime,                    // registry
                     IOobject::NO_READ,
-                    IOobject::NO_WRITE
+                    IOobject::AUTO_WRITE,
+                    false
                 ),
-                surf
+                feMesh.points(),
+                feMesh.edges()
             );
 
+            Info<< nl << "Writing featureEdgeMesh to "
+                << bfeMesh.objectPath() << endl;
 
-            // Internal and external closeness
+            bfeMesh.regIOobject::write();
+        }
 
-            // Prepare start and end points for intersection tests
-
-            const vectorField& normals = searchSurf.faceNormals();
-
-            scalar span = searchSurf.bounds().mag();
-
-            scalar externalAngleTolerance = 10;
-            scalar externalToleranceCosAngle =
-                Foam::cos
+        // Option: "closeness"
+        if (surfaceDict.lookupOrDefault<bool>("closeness", false))
+        {
+            Pair<tmp<scalarField>> tcloseness =
+                triSurfaceTools::writeCloseness
                 (
-                    degToRad(180 - externalAngleTolerance)
+                    runTime,
+                    outputName,
+                    surf,
+                    45,  // internalAngleTolerance
+                    10   // externalAngleTolerance
                 );
-
-            scalar internalAngleTolerance = 45;
-            scalar internalToleranceCosAngle =
-                Foam::cos
-                (
-                    degToRad(180 - internalAngleTolerance)
-                );
-
-            Info<< "externalToleranceCosAngle: " << externalToleranceCosAngle
-                << nl
-                << "internalToleranceCosAngle: " << internalToleranceCosAngle
-                << endl;
-
-            // Info<< "span " << span << endl;
-
-            pointField start(searchSurf.faceCentres() - span*normals);
-            pointField end(searchSurf.faceCentres() + span*normals);
-            const pointField& faceCentres = searchSurf.faceCentres();
-
-            List<List<pointIndexHit>> allHitInfo;
-
-            // Find all intersections (in order)
-            searchSurf.findLineAll(start, end, allHitInfo);
-
-            scalarField internalCloseness(start.size(), GREAT);
-            scalarField externalCloseness(start.size(), GREAT);
-
-            forAll(allHitInfo, fI)
-            {
-                const List<pointIndexHit>& hitInfo = allHitInfo[fI];
-
-                if (hitInfo.size() < 1)
-                {
-                    drawHitProblem(fI, surf, start, faceCentres, end, hitInfo);
-
-                    // FatalErrorInFunction
-                    //     << "findLineAll did not hit its own face."
-                    //     << exit(FatalError);
-                }
-                else if (hitInfo.size() == 1)
-                {
-                    if (!hitInfo[0].hit())
-                    {
-                        // FatalErrorInFunction
-                        //     << "findLineAll did not hit any face."
-                        //     << exit(FatalError);
-                    }
-                    else if (hitInfo[0].index() != fI)
-                    {
-                        drawHitProblem
-                        (
-                            fI,
-                            surf,
-                            start,
-                            faceCentres,
-                            end,
-                            hitInfo
-                        );
-
-                        // FatalErrorInFunction
-                        //     << "findLineAll did not hit its own face."
-                        //     << exit(FatalError);
-                    }
-                }
-                else
-                {
-                    label ownHitI = -1;
-
-                    forAll(hitInfo, hI)
-                    {
-                        // Find the hit on the triangle that launched the ray
-
-                        if (hitInfo[hI].index() == fI)
-                        {
-                            ownHitI = hI;
-
-                            break;
-                        }
-                    }
-
-                    if (ownHitI < 0)
-                    {
-                        drawHitProblem
-                        (
-                            fI,
-                            surf,
-                            start,
-                            faceCentres,
-                            end,
-                            hitInfo
-                        );
-
-                        // FatalErrorInFunction
-                        //     << "findLineAll did not hit its own face."
-                        //     << exit(FatalError);
-                    }
-                    else if (ownHitI == 0)
-                    {
-                        // There are no internal hits, the first hit is the
-                        // closest external hit
-
-                        if
-                        (
-                            (
-                                normals[fI]
-                              & normals[hitInfo[ownHitI + 1].index()]
-                            )
-                          < externalToleranceCosAngle
-                        )
-                        {
-                            externalCloseness[fI] =
-                                mag
-                                (
-                                    faceCentres[fI]
-                                  - hitInfo[ownHitI + 1].hitPoint()
-                                );
-                        }
-                    }
-                    else if (ownHitI == hitInfo.size() - 1)
-                    {
-                        // There are no external hits, the last but one hit is
-                        // the closest internal hit
-
-                        if
-                        (
-                            (
-                                normals[fI]
-                              & normals[hitInfo[ownHitI - 1].index()]
-                            )
-                          < internalToleranceCosAngle
-                        )
-                        {
-                            internalCloseness[fI] =
-                                mag
-                                (
-                                    faceCentres[fI]
-                                  - hitInfo[ownHitI - 1].hitPoint()
-                                );
-                        }
-                    }
-                    else
-                    {
-                        if
-                        (
-                            (
-                                normals[fI]
-                              & normals[hitInfo[ownHitI + 1].index()]
-                            )
-                          < externalToleranceCosAngle
-                        )
-                        {
-                            externalCloseness[fI] =
-                                mag
-                                (
-                                    faceCentres[fI]
-                                  - hitInfo[ownHitI + 1].hitPoint()
-                                );
-                        }
-
-                        if
-                        (
-                            (
-                                normals[fI]
-                              & normals[hitInfo[ownHitI - 1].index()]
-                            )
-                          < internalToleranceCosAngle
-                        )
-                        {
-                            internalCloseness[fI] =
-                                mag
-                                (
-                                    faceCentres[fI]
-                                  - hitInfo[ownHitI - 1].hitPoint()
-                                );
-                        }
-                    }
-                }
-            }
-
-            triSurfaceScalarField internalClosenessField
-            (
-                IOobject
-                (
-                    sFeatFileName + ".internalCloseness",
-                    runTime.constant(),
-                    "triSurface",
-                    runTime,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                surf,
-                dimLength,
-                internalCloseness
-            );
-
-            internalClosenessField.write();
-
-            triSurfaceScalarField externalClosenessField
-            (
-                IOobject
-                (
-                    sFeatFileName + ".externalCloseness",
-                    runTime.constant(),
-                    "triSurface",
-                    runTime,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                surf,
-                dimLength,
-                externalCloseness
-            );
-
-            externalClosenessField.write();
 
             if (writeVTK)
             {
                 vtkSurfaceWriter().write
                 (
-                    runTime.constantPath()/"triSurface",// outputDir
-                    sFeatFileName,                      // surfaceName
+                    vtkOutputDir,
+                    outputName,
                     meshedSurfRef
                     (
                         surf.points(),
                         faces
                     ),
                     "internalCloseness",                // fieldName
-                    internalCloseness,
+                    tcloseness[0](),
                     false,                              // isNodeValues
                     true                                // verbose
                 );
 
                 vtkSurfaceWriter().write
                 (
-                    runTime.constantPath()/"triSurface",// outputDir
-                    sFeatFileName,                      // surfaceName
+                    vtkOutputDir,
+                    outputName,
                     meshedSurfRef
                     (
                         surf.points(),
                         faces
                     ),
                     "externalCloseness",                // fieldName
-                    externalCloseness,
+                    tcloseness[1](),
                     false,                              // isNodeValues
                     true                                // verbose
                 );
             }
         }
 
-
-        if (curvature)
+        // Option: "curvature"
+        if (surfaceDict.lookupOrDefault<bool>("curvature", false))
         {
-            Info<< nl << "Extracting curvature of surface at the points."
-                << endl;
-
-            vectorField pointNormals = calcVertexNormals(surf);
-            triadField pointCoordSys = calcVertexCoordSys(surf, pointNormals);
-
-            triSurfacePointScalarField k = calcCurvature
-            (
-                sFeatFileName,
-                runTime,
-                surf,
-                pointNormals,
-                pointCoordSys
-            );
-
-            k.write();
+            tmp<scalarField> tcurvatureField =
+                triSurfaceTools::writeCurvature
+                (
+                    runTime,
+                    outputName,
+                    surf
+                );
 
             if (writeVTK)
             {
                 vtkSurfaceWriter().write
                 (
-                    runTime.constantPath()/"triSurface",// outputDir
-                    sFeatFileName,                      // surfaceName
+                    vtkOutputDir,
+                    outputName,
                     meshedSurfRef
                     (
                         surf.points(),
                         faces
                     ),
                     "curvature",                        // fieldName
-                    k,
+                    tcurvatureField(),
                     true,                               // isNodeValues
                     true                                // verbose
                 );
             }
         }
 
-
-        if (featureProximity)
+        // Option: "featureProximity"
+        if (surfaceDict.lookupOrDefault<bool>("featureProximity", false))
         {
-            Info<< nl << "Extracting proximity of close feature points and "
-                << "edges to the surface" << endl;
-
-            const scalar searchDistance =
-                readScalar(surfaceDict.lookup("maxFeatureProximity"));
-
-            scalarField featureProximity(surf.size(), searchDistance);
-
-            forAll(surf, fI)
-            {
-                const triPointRef& tri = surf[fI].tri(surf.points());
-                const point& triCentre = tri.circumCentre();
-
-                const scalar radiusSqr = min
+            tmp<scalarField> tproximity =
+                edgeMeshTools::writeFeatureProximity
                 (
-                    sqr(4*tri.circumRadius()),
-                    sqr(searchDistance)
-                );
-
-                List<pointIndexHit> hitList;
-
-                feMesh.allNearestFeatureEdges(triCentre, radiusSqr, hitList);
-
-                featureProximity[fI] =
-                    calcProximityOfFeatureEdges
-                    (
-                        feMesh,
-                        hitList,
-                        featureProximity[fI]
-                    );
-
-                feMesh.allNearestFeaturePoints(triCentre, radiusSqr, hitList);
-
-                featureProximity[fI] =
-                    calcProximityOfFeaturePoints
-                    (
-                        hitList,
-                        featureProximity[fI]
-                    );
-            }
-
-            triSurfaceScalarField featureProximityField
-            (
-                IOobject
-                (
-                    sFeatFileName + ".featureProximity",
-                    runTime.constant(),
-                    "triSurface",
                     runTime,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                surf,
-                dimLength,
-                featureProximity
-            );
-
-            featureProximityField.write();
+                    outputName,
+                    feMesh,
+                    surf,
+                    readScalar(surfaceDict.lookup("maxFeatureProximity"))
+                );
 
             if (writeVTK)
             {
                 vtkSurfaceWriter().write
                 (
-                    runTime.constantPath()/"triSurface",// outputDir
-                    sFeatFileName,                      // surfaceName
+                    vtkOutputDir,
+                    outputName,
                     meshedSurfRef
                     (
                         surf.points(),
                         faces
                     ),
                     "featureProximity",                 // fieldName
-                    featureProximity,
+                    tproximity(),
                     false,                              // isNodeValues
                     true                                // verbose
                 );

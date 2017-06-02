@@ -92,6 +92,28 @@ Foam::scalar Foam::noiseModel::checkUniformTimeStep
 }
 
 
+bool Foam::noiseModel::validateBounds(const scalarList& p) const
+{
+    forAll(p, i)
+    {
+        if ((p[i] < minPressure_) || (p[i] > maxPressure_))
+        {
+            WarningInFunction
+                << "Pressure data at position " << i
+                << " is outside of permitted bounds:" << nl
+                << "    pressure: " << p[i] << nl
+                << "    minimum pressure: " << minPressure_ << nl
+                << "    maximum pressure: " << maxPressure_ << nl
+                << endl;
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 Foam::label Foam::noiseModel::findStartTimeIndex
 (
     const instantList& allTimes,
@@ -141,6 +163,8 @@ Foam::noiseModel::noiseModel(const dictionary& dict, const bool readFields)
     startTime_(0),
     windowModelPtr_(),
     graphFormat_("raw"),
+    minPressure_(-0.5*VGREAT),
+    maxPressure_(0.5*VGREAT),
     outputPrefix_(),
     writePrmsf_(true),
     writeSPL_(true),
@@ -178,6 +202,8 @@ bool Foam::noiseModel::read(const dictionary& dict)
     }
     dict.readIfPresent("startTime", startTime_);
     dict.readIfPresent("graphFormat", graphFormat_);
+    dict.readIfPresent("minPressure", minPressure_);
+    dict.readIfPresent("maxPressure", maxPressure_);
     dict.readIfPresent("outputPrefix", outputPrefix_);
 
     // Check number of samples  - must be a power of 2 for our FFT
@@ -224,6 +250,8 @@ bool Foam::noiseModel::read(const dictionary& dict)
 
 
     windowModelPtr_ = windowModel::New(dict, nSamples_);
+
+    Info<< nl << endl;
 
     return true;
 }

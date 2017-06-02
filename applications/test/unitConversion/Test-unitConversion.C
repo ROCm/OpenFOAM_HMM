@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,53 +21,30 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Merge points. See below.
-
-SourceFiles
-    mergePoints.C
+Application
+    Test-unitConversion
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mergePoints1_H
-#define mergePoints1_H
+#include "IOstreams.H"
+#include "unitConversion.H"
 
-#include "scalar.H"
-#include "labelList.H"
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//  Main program:
 
-namespace Foam
+int main(int argc, char *argv[])
 {
+    Info<< "30_deg:   " << 30_deg << nl;
+    Info<< "30.0_deg: " << 30.0_deg << nl;
+    Info<< "3e+1_deg: " << 3e+1_deg << nl;
+    Info<< "degToRad(30): " << degToRad(30) << nl;
 
-/*---------------------------------------------------------------------------*\
-                           Function mergePoints Declaration
-\*---------------------------------------------------------------------------*/
+    Info<< "cos(30_deg): " << ::cos(30_deg) << nl;
 
-//- Sorts and merges points. All points closer than/equal mergeTol get merged.
-//  Returns the number of unique points and a map from old to new.
-//template<class Type, template<class> class ListType=UList>
-template<class Type>
-label mergePoints
-(
-    const bool dummy,
-    const UIndirectList<Type>& points,
-    const scalar mergeTol,
-    const bool verbose,
-    labelList& pointMap,
-    const Type& origin = Type::zero
-);
+    return 0;
+}
 
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "mergePoints1.C"
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

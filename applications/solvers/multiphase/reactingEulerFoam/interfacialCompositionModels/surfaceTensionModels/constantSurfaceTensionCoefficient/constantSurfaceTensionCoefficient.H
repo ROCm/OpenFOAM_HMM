@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::constantSurfaceTensionCoefficient
+    Foam::surfaceTensionModels::constantSurfaceTensionCoefficient
 
 Description
     Constant value surface tension model.

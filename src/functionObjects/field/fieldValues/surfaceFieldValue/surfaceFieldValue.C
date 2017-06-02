@@ -564,9 +564,10 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::initialise
         {
             FatalErrorInFunction
                 << type() << " " << name() << ": "
-                << regionTypeNames_[regionType_] << "(" << regionName_ << "):"
+                << int(regionType_) << "(" << regionName_ << "):"
                 << nl << "    Unknown region type. Valid region types are:"
-                << regionTypeNames_.sortedToc() << nl << exit(FatalError);
+                << regionTypeNames_ << nl
+                << exit(FatalError);
         }
     }
 

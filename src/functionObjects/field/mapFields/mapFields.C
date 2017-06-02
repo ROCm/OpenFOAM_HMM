@@ -71,14 +71,14 @@ void Foam::functionObjects::mapFields::createInterpolation
         )
     );
     const fvMesh& mapRegion = mapRegionPtr_();
-    word mapMethodName(dict.lookup("mapMethod"));
-    if (!meshToMesh::interpolationMethodNames_.found(mapMethodName))
+    const word mapMethodName(dict.lookup("mapMethod"));
+    if (!meshToMesh::interpolationMethodNames_.hasEnum(mapMethodName))
     {
         FatalErrorInFunction
             << type() << " " << name() << ": unknown map method "
             << mapMethodName << nl
             << "Available methods include: "
-            << meshToMesh::interpolationMethodNames_.sortedToc()
+            << meshToMesh::interpolationMethodNames_
             << exit(FatalError);
     }
 

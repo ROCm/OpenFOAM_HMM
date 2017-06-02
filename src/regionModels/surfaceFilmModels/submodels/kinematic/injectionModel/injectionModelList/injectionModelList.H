@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::injectionModelList
+    Foam::regionModels::surfaceFilmModels::injectionModelList
 
 Description
     List container for film injection models

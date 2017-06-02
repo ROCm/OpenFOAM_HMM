@@ -943,7 +943,7 @@ bool Foam::mvBak(const fileName& src, const std::string& ext)
         }
     }
 
-    // fall-through: nothing to do
+    // fallthrough: nothing to do
     return false;
 }
 

@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::phaseChangeModel
+    Foam::regionModels::surfaceFilmModels::phaseChangeModel
 
 Description
     Base class for surface film phase change models

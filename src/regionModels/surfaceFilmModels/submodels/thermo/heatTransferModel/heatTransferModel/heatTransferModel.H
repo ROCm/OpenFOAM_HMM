@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::heatTransferModel
+    Foam::regionModels::surfaceFilmModels::heatTransferModel
 
 Description
     Base class for film heat transfer models

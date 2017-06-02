@@ -25,6 +25,12 @@ $(edgeMeshFormats)/starcd/STARCDedgeFormatRunTime.C
 $(edgeMeshFormats)/vtk/VTKedgeFormat.C
 $(edgeMeshFormats)/vtk/VTKedgeFormatRunTime.C
 
+
+edgeMeshTools = $(em)/edgeMeshTools
+$(edgeMeshTools)/edgeMeshTools.C
+$(edgeMeshTools)/edgeMeshFeatureProximity.C
+
+
 $(em)/featureEdgeMesh/featureEdgeMesh.C
 
 eem = $(em)/extendedEdgeMesh
@@ -215,6 +221,8 @@ triSurface/triangleFuncs/triangleFuncs.C
 triSurface/surfaceFeatures/surfaceFeatures.C
 triSurface/triSurfaceLoader/triSurfaceLoader.C
 triSurface/triSurfaceTools/triSurfaceTools.C
+triSurface/triSurfaceTools/triSurfaceCloseness.C
+triSurface/triSurfaceTools/triSurfaceCurvature.C
 triSurface/triSurfaceTools/geompack/geompack.C
 triSurface/triSurfaceTools/pointToPointPlanarInterpolation.C
 
