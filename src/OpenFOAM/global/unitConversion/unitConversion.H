@@ -44,14 +44,12 @@ namespace Foam
 //- Conversion from degrees to radians
 inline constexpr scalar degToRad(const scalar deg) noexcept
 {
-    //return (deg*Foam::constant::mathematical::pi/180.0);
     return (deg*M_PI/180.0);
 }
 
 //- Conversion from radians to degrees
 inline constexpr scalar radToDeg(const scalar rad) noexcept
 {
-    //return (rad*180.0/Foam::constant::mathematical::pi);
     return (rad*180.0/M_PI);
 }
 
@@ -71,14 +69,12 @@ inline constexpr scalar paToAtm(const scalar pa) noexcept
 //- User literal for degrees to radians conversion (integers)
 inline constexpr scalar operator "" _deg(unsigned long long int deg) noexcept
 {
-    //return (deg*Foam::constant::mathematical::pi/180.0);
     return (deg*M_PI/180.0);
 }
 
 //- User literal for degrees to radians conversion (floats)
 inline constexpr scalar operator "" _deg(long double deg) noexcept
 {
-    //return (deg*Foam::constant::mathematical::pi/180.0);
     return (deg*M_PI/180.0);
 }
 
