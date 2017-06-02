@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -166,6 +166,12 @@ int main(int argc, char *argv[])
                 turbulence->correct();
             }
         }
+
+        rho = alpha1*rho1 + alpha2*rho2;
+
+        // Correct p_rgh for consistency with p and the updated densities
+        p_rgh = p - rho*gh;
+        p_rgh.correctBoundaryConditions();
 
         runTime.write();
 
