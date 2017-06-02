@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,21 +22,24 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fileFormats::VTKsurfaceFormatCore
+    Foam::fileFormats::VTPsurfaceFormat
 
 Description
-    Internal class used by the VTKsurfaceFormat
+    Provide a means of writing VTP (xml) format.
+    The output is never sorted by zone.
 
 SourceFiles
-    VTKsurfaceFormatCore.C
+    VTPsurfaceFormat.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef VTKsurfaceFormatCore_H
-#define VTKsurfaceFormatCore_H
+#ifndef VTPsurfaceFormat_H
+#define VTPsurfaceFormat_H
 
 #include "MeshedSurface.H"
-#include "foamVtkFormatter.H"
+#include "MeshedSurfaceProxy.H"
+#include "UnsortedMeshedSurface.H"
+#include "VTPsurfaceFormatCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,36 +49,68 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class VTKsurfaceFormatCore Declaration
+                      Class VTPsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
-class VTKsurfaceFormatCore
+template<class Face>
+class VTPsurfaceFormat
+:
+    public MeshedSurface<Face>,
+    public VTPsurfaceFormatCore
 {
-protected:
+    // Private Member Functions
 
-    // Protected Member Functions
-
-        //- Write header information with points
-        static void writeHeader
+        //- Write polygons
+        static void writePolys
         (
             foamVtkOutput::formatter& format,
-            const pointField& pts
+            const UList<Face>& faces
         );
 
-        //- Write regions (zones) information as CellData
-        static void writeCellData
+
+        //- Disallow default bitwise copy construct
+        VTPsurfaceFormat(const VTPsurfaceFormat<Face>&) = delete;
+
+        //- Disallow default bitwise assignment
+        void operator=(const VTPsurfaceFormat<Face>&) = delete;
+
+
+public:
+
+    // Constructors
+
+        //- Construct null
+        VTPsurfaceFormat();
+
+
+    //- Destructor
+    virtual ~VTPsurfaceFormat()
+    {}
+
+
+    // Member Functions
+
+      // Write
+
+        //- Write surface mesh components by proxy
+        static void write
         (
-            foamVtkOutput::formatter& format,
-            const UList<surfZone>& zones
+            const fileName& filename,
+            const MeshedSurfaceProxy<Face>& surf
         );
 
-        //- Write regions (zones) information as CellData
-        static void writeCellData
+        //- Write UnsortedMeshedSurface, the output remains unsorted
+        static void write
         (
-            foamVtkOutput::formatter& format,
-            const labelUList& zoneIds
+            const fileName& filename,
+            const UnsortedMeshedSurface<Face>& surf
         );
 
+        //- Write object file
+        virtual void write(const fileName& name) const
+        {
+            write(name, MeshedSurfaceProxy<Face>(*this));
+        }
 };
 
 
@@ -83,6 +118,12 @@ protected:
 
 } // End namespace fileFormats
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "VTPsurfaceFormat.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

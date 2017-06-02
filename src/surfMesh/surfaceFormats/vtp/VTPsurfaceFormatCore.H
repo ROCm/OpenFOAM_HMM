@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,18 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fileFormats::VTKsurfaceFormatCore
+    Foam::fileFormats::VTPsurfaceFormatCore
 
 Description
-    Internal class used by the VTKsurfaceFormat
+    Internal class used by the VTPsurfaceFormat
 
 SourceFiles
-    VTKsurfaceFormatCore.C
+    VTPsurfaceFormatCore.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef VTKsurfaceFormatCore_H
-#define VTKsurfaceFormatCore_H
+#ifndef VTPsurfaceFormatCore_H
+#define VTPsurfaceFormatCore_H
 
 #include "MeshedSurface.H"
 #include "foamVtkFormatter.H"
@@ -46,21 +46,26 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class VTKsurfaceFormatCore Declaration
+                    Class VTPsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
-class VTKsurfaceFormatCore
+class VTPsurfaceFormatCore
 {
 protected:
 
     // Protected Member Functions
 
-        //- Write header information with points
+        //- Write file header information with points
         static void writeHeader
         (
             foamVtkOutput::formatter& format,
-            const pointField& pts
+            const pointField& pts,
+            const label nFaces
         );
+
+        //- Write file footer
+        static void writeFooter(foamVtkOutput::formatter& format);
+
 
         //- Write regions (zones) information as CellData
         static void writeCellData
@@ -75,7 +80,6 @@ protected:
             foamVtkOutput::formatter& format,
             const labelUList& zoneIds
         );
-
 };
 
 

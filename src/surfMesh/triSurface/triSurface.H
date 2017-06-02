@@ -167,7 +167,7 @@ class triSurface
         void writeOFF(const bool writeSorted, Ostream&) const;
 
         //- Write to VTK legacy format.
-        void writeVTK(const bool writeSorted, Ostream&) const;
+        void writeVTK(const bool writeSorted, std::ostream& os) const;
 
         //- Write to Ostream in TRI (AC3D) format
         //  Ac3d .tri format (unmerged triangle format)
@@ -318,143 +318,145 @@ public:
 
     // Member Functions
 
-        // Access
+      // Access
 
-            const geometricSurfacePatchList& patches() const
-            {
-                return patches_;
-            }
+        const geometricSurfacePatchList& patches() const
+        {
+            return patches_;
+        }
 
-            geometricSurfacePatchList& patches()
-            {
-                return patches_;
-            }
+        geometricSurfacePatchList& patches()
+        {
+            return patches_;
+        }
 
-            //- Return edge-face addressing sorted (for edges with more than
-            //  2 faces) according to the angle around the edge.
-            //  Orientation is anticlockwise looking from
-            //  edge.vec(localPoints())
-            const labelListList& sortedEdgeFaces() const;
+        //- Return const access to the faces
+        inline const List<labelledTri>& surfFaces() const
+        {
+            return static_cast<const List<labelledTri>&>(*this);
+        }
 
-            //- If 2 face neighbours: label of face where ordering of edge
-            //  is consistent with righthand walk.
-            //  If 1 neighbour: label of only face.
-            //  If >2 neighbours: undetermined.
-            const labelList& edgeOwner() const;
+        //- Return edge-face addressing sorted (for edges with more than
+        //  2 faces) according to the angle around the edge.
+        //  Orientation is anticlockwise looking from
+        //  edge.vec(localPoints())
+        const labelListList& sortedEdgeFaces() const;
 
-
-            //- Face area vectors (normals)
-            inline const vectorField& Sf() const
-            {
-                return ParentType::faceAreas();
-            }
-
-            //- Face area magnitudes
-            inline const scalarField& magSf() const
-            {
-                return ParentType::magFaceAreas();
-            }
-
-            //- Face centres
-            inline const vectorField& Cf() const
-            {
-                return ParentType::faceCentres();
-            }
+        //- If 2 face neighbours: label of face where ordering of edge
+        //  is consistent with righthand walk.
+        //  If 1 neighbour: label of only face.
+        //  If >2 neighbours: undetermined.
+        const labelList& edgeOwner() const;
 
 
-        // Interoperability with other surface mesh classes
+        //- Face area vectors (normals)
+        inline const vectorField& Sf() const
+        {
+            return ParentType::faceAreas();
+        }
 
-            //- Sort faces according to zoneIds
-            //  Returns a surfZoneList and sets faceMap to index within faces()
-            //  (i.e. map from original,unsorted to sorted)
-            List<surfZone> sortedZones(labelList& faceMap) const;
+        //- Face area magnitudes
+        inline const scalarField& magSf() const
+        {
+            return ParentType::magFaceAreas();
+        }
 
-            //- Create a list of faces from the triFaces
-            void triFaceFaces(List<face>& plainFaceList) const;
-
-
-        // Edit
-
-            //- Move points
-            virtual void movePoints(const pointField&);
-
-            //- Scale points. A non-positive factor is ignored
-            virtual void scalePoints(const scalar);
-
-            //- Check/remove duplicate/degenerate triangles
-            void checkTriangles(const bool verbose);
-
-            //- Check triply (or more) connected edges.
-            void checkEdges(const bool verbose);
-
-            //- Remove non-valid triangles
-            void cleanup(const bool verbose);
-
-            //- Fill faceZone with currentZone for every face reachable
-            //  from facei without crossing edge marked in borderEdge.
-            //  Note: faceZone has to be sized nFaces before calling this fun.
-            void markZone
-            (
-                const boolList& borderEdge,
-                const label facei,
-                const label currentZone,
-                labelList& faceZone
-            ) const;
-
-            //- (size and) fills faceZone with zone of face. Zone is area
-            //  reachable by edge crossing without crossing borderEdge
-            //  (bool for every edge in surface). Returns number of zones.
-            label markZones
-            (
-                const boolList& borderEdge,
-                labelList& faceZone
-            ) const;
-
-            //- 'Create' sub mesh, including only faces for which
-            //  boolList entry is true
-            //  Sets: pointMap: from new to old localPoints
-            //        faceMap: new to old faces
-            void subsetMeshMap
-            (
-                const boolList& include,
-                labelList& pointMap,
-                labelList& faceMap
-            ) const;
-
-            //- Return new surface. Returns pointMap, faceMap from
-            //  subsetMeshMap
-            triSurface subsetMesh
-            (
-                const boolList& include,
-                labelList& pointMap,
-                labelList& faceMap
-            ) const;
+        //- Face centres
+        inline const vectorField& Cf() const
+        {
+            return ParentType::faceCentres();
+        }
 
 
-            //- Transfer stored faces to an Xfer container
-            Xfer<List<labelledTri>> xferFaces();
+      // Interoperability with other surface mesh classes
 
-            //- Transfer stored points to an Xfer container
-            Xfer<List<point>> xferPoints();
+        //- Sort faces according to zoneIds
+        //  Returns a surfZoneList and sets faceMap to index within faces()
+        //  (i.e. map from original,unsorted to sorted)
+        List<surfZone> sortedZones(labelList& faceMap) const;
+
+        //- Create a list of faces from the triFaces
+        void triFaceFaces(List<face>& plainFaceList) const;
 
 
-        // Write
+      // Edit
 
-            //- Write to Ostream in simple FOAM format
-            void write(Ostream&) const;
+        //- Move points
+        virtual void movePoints(const pointField&);
 
-            //- Generic write routine. Chooses writer based on extension.
-            void write(const fileName&, const bool sortByRegion = false) const;
+        //- Scale points. A non-positive factor is ignored
+        virtual void scalePoints(const scalar);
 
-            //- Write to database
-            void write(const Time&) const;
+        //- Check/remove duplicate/degenerate triangles
+        void checkTriangles(const bool verbose);
 
-            //- Write to Ostream in OpenDX format
-            void writeDX(const scalarField&, Ostream&) const;
-            void writeDX(const vectorField&, Ostream&) const;
+        //- Check triply (or more) connected edges.
+        void checkEdges(const bool verbose);
 
-            //- Write some statistics
-            void writeStats(Ostream&) const;
+        //- Remove non-valid triangles
+        void cleanup(const bool verbose);
+
+        //- Fill faceZone with currentZone for every face reachable
+        //  from facei without crossing edge marked in borderEdge.
+        //  Note: faceZone has to be sized nFaces before calling this fun.
+        void markZone
+        (
+            const boolList& borderEdge,
+            const label facei,
+            const label currentZone,
+            labelList& faceZone
+        ) const;
+
+        //- (size and) fills faceZone with zone of face. Zone is area
+        //  reachable by edge crossing without crossing borderEdge
+        //  (bool for every edge in surface). Returns number of zones.
+        label markZones
+        (
+            const boolList& borderEdge,
+            labelList& faceZone
+        ) const;
+
+        //- 'Create' sub mesh, including only faces for which
+        //  boolList entry is true
+        //  Sets: pointMap: from new to old localPoints
+        //        faceMap: new to old faces
+        void subsetMeshMap
+        (
+            const boolList& include,
+            labelList& pointMap,
+            labelList& faceMap
+        ) const;
+
+        //- Return new surface. Returns pointMap, faceMap from
+        //  subsetMeshMap
+        triSurface subsetMesh
+        (
+            const boolList& include,
+            labelList& pointMap,
+            labelList& faceMap
+        ) const;
+
+
+        //- Transfer stored faces to an Xfer container
+        Xfer<List<labelledTri>> xferFaces();
+
+        //- Transfer stored points to an Xfer container
+        Xfer<List<point>> xferPoints();
+
+
+      // Write
+
+        //- Write to Ostream in simple FOAM format
+        void write(Ostream&) const;
+
+        //- Generic write routine. Chooses writer based on extension.
+        void write(const fileName&, const bool sortByRegion = false) const;
+
+        //- Write to database
+        void write(const Time&) const;
+
+        //- Write some statistics
+        void writeStats(Ostream& os) const;
 
 
     // Member operators
