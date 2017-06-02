@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
-     \\/     M anipulation  | Copyright (C) 2015 IH-Cantabria
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017 IH-Cantabria
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,12 +52,11 @@ Foam::scalar Foam::waveModels::Grimshaw::alfa
 ) const
 {
     scalar eps = H/h;
-    scalar alfa = sqrt(0.75*eps)*(1.0 - (5.0/8.0)*eps + (71.0/128.0)*eps*eps);
 
-    return alfa;
+    return sqrt(0.75*eps)*(1.0 - 0.625*eps + (71.0/128.0)*eps*eps);
 }
 
-//- Wave height
+
 Foam::scalar Foam::waveModels::Grimshaw::eta
 (
     const scalar H,
@@ -69,22 +68,32 @@ Foam::scalar Foam::waveModels::Grimshaw::eta
     const scalar X0
 ) const
 {
-    scalar eps = H/h;
-    scalar C = sqrt(mag(g_)*h)*sqrt(1.0+eps-(1.0/20.0)*eps*eps-(3.0/70.0)*eps*eps*eps);
+    const scalar eps = H/h;
+    const scalar eps2 = eps*eps;
+    const scalar eps3 = eps*eps2;
 
-    scalar ts = 3.5*h/sqrt(H/h);
-    scalar xa = -C*t + ts - X0 + x*cos(theta) + y*sin(theta);
+    const scalar C = sqrt(mag(g_)*h)*sqrt(1.0 + eps - 0.05*eps2 - (3.0/70.0)*eps3);
 
-    scalar alfa = this->alfa(H, h);
+    const scalar ts = 3.5*h/sqrt(H/h);
+    const scalar xa = -C*t + ts - X0 + x*cos(theta) + y*sin(theta);
+    const scalar alfa = this->alfa(H, h);
 
-    scalar s = (1.0)/(cosh(alfa*(xa/h)));
-    scalar q = tanh(alfa*(xa/h));
+    const scalar s = (1.0)/(cosh(alfa*(xa/h)));
+    const scalar s2 = s*s;
+    const scalar q = tanh(alfa*(xa/h));
+    const scalar q2 = q*q;
 
-    return h*(eps*s*s - 0.75*eps*eps*s*s*q*q + eps*eps*eps*((5.0/8.0)*s*s*q*q - (101.0/80.0)*s*s*s*s*q*q));
+    return
+        h
+       *(
+            eps*s2
+          - 0.75*eps2*s2*q2
+          + eps3*(0.625*s2*q2 - 1.2625*s2*s2*q2)
+        );
 }
 
-//- Wave velocity
-Foam::vector Foam::waveModels::Grimshaw::U
+
+Foam::vector Foam::waveModels::Grimshaw::Uf
 (
     const scalar H,
     const scalar h,
@@ -96,33 +105,45 @@ Foam::vector Foam::waveModels::Grimshaw::U
     const scalar z
 ) const
 {
-    scalar eps = H/h;
-    scalar C = sqrt(mag(g_)*h)*sqrt(1.0+eps-(1.0/20.0)*eps*eps-(3.0/70.0)*eps*eps*eps);
-    scalar ts = 3.5*h/sqrt(H/h);
-    scalar xa = -C*t + ts - X0 + x*cos(theta) + y*sin(theta);
-    scalar alfa = this->alfa(H, h);
+    const scalar eps = H/h;
+    const scalar eps2 = eps*eps;
+    const scalar eps3 = eps*eps2;
 
-    scalar s = (1.0)/(cosh(alfa*(xa/h)));
+    const scalar C = sqrt(mag(g_)*h)*sqrt(1.0 + eps - 0.05*eps2 - (3.0/70.0)*eps3);
 
-    scalar outa = eps*s*s - eps*eps*(-(1.0/4.0)*s*s + s*s*s*s + ((z/h)*(z/h))*((3.0/2.0)*s*s - (9.0/4.0)*s*s*s*s));
-    scalar outb = (19.0/40.0)*s*s + (1.0/5.0)*s*s*s*s - (6.0/5.0)*s*s*s*s*s*s;
-    scalar outc = ((z/h)*(z/h)) * ( -(3.0/2.0)*s*s - (15.0/4.0)*s*s*s*s + (15.0/2.0)*s*s*s*s*s*s);
-    scalar outd = ((z/h)*(z/h)*(z/h)*(z/h)) * ((-3.0/8.0)*s*s + (45.0/16.0)*s*s*s*s - (45.0/16.0)*s*s*s*s*s*s);
+    const scalar ts = 3.5*h/sqrt(eps);
+    const scalar xa = -C*t + ts - X0 + x*cos(theta) + y*sin(theta);
+    const scalar alfa = this->alfa(H, h);
 
-    scalar u = sqrt(mag(g_)*h)*(outa - eps*eps*eps*(outb+outc+outd));
+    const scalar s = (1.0)/(cosh(alfa*(xa/h)));
+    const scalar s2 = s*s;
+    const scalar s4 = s2*s2;
+    const scalar s6 = s2*s4;
 
-    outa = eps*s*s - eps*eps*((3.0/8.0)*s*s + 2.0*s*s*s*s + ((z/h)*(z/h))*(0.5*s*s - (3.0/2.0)*s*s*s*s));
-    outb = (49.0/640.0)*s*s - (17.0/20.0)*s*s*s*s - (18.0/5.0)*s*s*s*s*s*s;
-    outc = ((z/h)*(z/h)) * ((-13.0/16.0)*s*s -(25.0/16.0)*s*s*s*s + (15.0/2.0)*s*s*s*s*s*s);
-    outd = ((z/h)*(z/h)*(z/h)*(z/h)) * ((-3.0/40.0)*s*s -(9.0/8.0)*s*s*s*s - (27.0/16.0)*s*s*s*s*s*s);
+    const scalar zbyh = z/h;
+    const scalar zbyh2 = zbyh*zbyh;
+    const scalar zbyh4 = zbyh2*zbyh2;
 
-    scalar w = sqrt(mag(g_)*h)*(outa - eps*eps*eps*(outb+outc+outd));
+    scalar outa = eps*s2 - eps2*(-0.25*s2 + s4 + zbyh2*(1.5*s2 - 2.25*s4));
+    scalar outb = 0.475*s2 + 0.2*s4 - 1.2*s6;
+    scalar outc = zbyh2*(-1.5*s2 - 3.75*s4 + 7.5*s6);
+    scalar outd = zbyh4*(-0.375*s2 + (45.0/16.0)*s4 - (45.0/16.0)*s6);
 
-    scalar v = u*sin(waveAngle_);
+    scalar u = sqrt(mag(g_)*h)*(outa - eps3*(outb + outc + outd));
+
+    outa = eps*s2 - eps2*(0.375*s2 + 2*s4 + zbyh2*(0.5*s2 - 1.5*s4));
+    outb = (49.0/640.0)*s2 - 0.85*s4 - 3.6*s6;
+    outc = zbyh2*((-13.0/16.0)*s2 -(25.0/16.0)*s4 + 7.5*s6);
+    outd = zbyh4*(-0.075*s2 -1.125*s4 - (27.0/16.0)*s6);
+
+    const scalar w = sqrt(mag(g_)*h)*(outa - eps3*(outb + outc + outd));
+
+    const scalar v = u*sin(waveAngle_);
     u *= cos(waveAngle_);
 
     return vector(u, v, w);
 }
+
 
 void Foam::waveModels::Grimshaw::setLevel
 (
@@ -164,7 +185,7 @@ Foam::waveModels::Grimshaw::Grimshaw
 {
     if (readFields)
     {
-        read(dict);
+        readDict(dict);
     }
 }
 
@@ -177,9 +198,9 @@ Foam::waveModels::Grimshaw::~Grimshaw()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::waveModels::Grimshaw::read(const dictionary& overrideDict)
+bool Foam::waveModels::Grimshaw::readDict(const dictionary& overrideDict)
 {
-    if (solitaryWaveModel::read(overrideDict))
+    if (solitaryWaveModel::readDict(overrideDict))
     {
         return true;
     }
@@ -187,12 +208,12 @@ bool Foam::waveModels::Grimshaw::read(const dictionary& overrideDict)
     return false;
 }
 
+
 void Foam::waveModels::Grimshaw::setVelocity
 (
     const scalar t,
     const scalar tCoeff,
-    const scalarField& level,
-    const scalar tg
+    const scalarField& level
 )
 {
     forAll(U_, facei)
@@ -207,12 +228,9 @@ void Foam::waveModels::Grimshaw::setVelocity
 
         if (fraction > 0)
         {
-
-	    if ( (tg<0) || (t >= tg) )
-	    {
 		    const label paddlei = faceToPaddle_[facei];
 
-		    const vector Uf = U
+		    const vector Uf = this->Uf
 			(
 		        waveHeight_,
 		        waterDepthRef_,
@@ -224,54 +242,11 @@ void Foam::waveModels::Grimshaw::setVelocity
 		        z
 		    );
 
-                U_[facei] = fraction*Uf*tCoeff + fraction*UCurrent_;
-
-	    }
-	    else if ( tg>=t )
-	    {
-	        U_[facei] = fraction*UCurrent_;	
-	    }
+            U_[facei] = fraction*Uf*tCoeff;
         }
     }
 }
 
-void Foam::waveModels::Grimshaw::setVelocityAbsorption
-(
-    const scalarField& calculatedLevel,
-    const scalarField& activeLevel
-) 
-{
-
-    forAll(U_, facei)
-    {
-	const label paddlei = faceToPaddle_[facei];
-
-	scalar activeLevelMBL=activeLevel[paddlei];
-
-	scalar zMin = zMin_[facei];
-
-//------ not needed anymore in new release
-	if (fabs(zMinGb_)>1.0e-3)
-    	{
-	      zMin = zMin - zMinGb_;
-    	}
-//------
-	
-	if (zMin < activeLevelMBL)
-
-	{
-	    scalar UCorr =
-	    	 (calculatedLevel[paddlei] - activeLevel[paddlei])
-	    	 *sqrt(mag(g_)/activeLevel[paddlei]);
-					
-	    U_[facei].x() += UCorr;
-	}
-	else
-	{
-	    U_[facei].x() = 0;
-	}
-    }
-}
 
 void Foam::waveModels::Grimshaw::info(Ostream& os) const
 {

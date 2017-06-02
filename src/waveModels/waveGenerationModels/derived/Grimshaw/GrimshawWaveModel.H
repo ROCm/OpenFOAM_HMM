@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
-     \\/     M anipulation  | Copyright (C) 2015 IH-Cantabria
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017 IH-Cantabria
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,7 +73,7 @@ protected:
         ) const;
 
         //- Wave velocity
-        virtual vector U
+        virtual vector Uf
         (
             const scalar H,
             const scalar h,
@@ -98,22 +98,9 @@ protected:
         (
             const scalar t,
             const scalar tCoeff,
-            const scalarField& level,
-            const scalar tg
+            const scalarField& level
         );
 
-	// Add current absorption to velocity
-        virtual void setCurrent
-        (
-            const scalarField& levelMBO
-        );
-
-        //- Calculate the wave model velocity absorption
-        virtual void setVelocityAbsorption
-        (
-    	    const scalarField& calculatedLevel,
-    	    const scalarField& activeLevel
-        );
 
 public:
 
@@ -136,7 +123,7 @@ public:
     // Public Member Functions
 
         //- Read from dictionary
-        virtual bool read(const dictionary& overrideDict);
+        virtual bool readDict(const dictionary& overrideDict);
 
         //- Info
         virtual void info(Ostream& os) const;
