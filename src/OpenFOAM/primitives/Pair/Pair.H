@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -171,14 +171,14 @@ Pair<Type> reverse(const Pair<Type>& p)
 template<class Type>
 bool operator==(const Pair<Type>& a, const Pair<Type>& b)
 {
-    return Pair<Type>::compare(a,b) != 0;
+    return (a.first() == b.first() && a.second() == b.second());
 }
 
 
 template<class Type>
 bool operator!=(const Pair<Type>& a, const Pair<Type>& b)
 {
-    return Pair<Type>::compare(a,b) == 0;
+    return !(a == b);
 }
 
 
