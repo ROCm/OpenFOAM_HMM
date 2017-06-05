@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -111,19 +111,20 @@ void Foam::Reaction<ReactionThermo>::setThermo
     const HashPtrTable<ReactionThermo>& thermoDatabase
 )
 {
+
     typename ReactionThermo::thermoType rhsThermo
     (
         rhs_[0].stoichCoeff
-       *(*thermoDatabase[species_[rhs_[0].index]]).W()
-       *(*thermoDatabase[species_[rhs_[0].index]])
+        *(*thermoDatabase[species_[rhs_[0].index]]).W()
+        *(*thermoDatabase[species_[rhs_[0].index]])
     );
 
     for (label i=1; i<rhs_.size(); ++i)
     {
         rhsThermo +=
             rhs_[i].stoichCoeff
-           *(*thermoDatabase[species_[rhs_[i].index]]).W()
-           *(*thermoDatabase[species_[rhs_[i].index]]);
+        *(*thermoDatabase[species_[rhs_[i].index]]).W()
+        *(*thermoDatabase[species_[rhs_[i].index]]);
     }
 
     typename ReactionThermo::thermoType lhsThermo
@@ -154,7 +155,8 @@ Foam::Reaction<ReactionThermo>::Reaction
     const speciesTable& species,
     const List<specieCoeffs>& lhs,
     const List<specieCoeffs>& rhs,
-    const HashPtrTable<ReactionThermo>& thermoDatabase
+    const HashPtrTable<ReactionThermo>& thermoDatabase,
+    bool initReactionThermo
 )
 :
     ReactionThermo::thermoType(*thermoDatabase[species[0]]),
@@ -163,7 +165,10 @@ Foam::Reaction<ReactionThermo>::Reaction
     lhs_(lhs),
     rhs_(rhs)
 {
-    setThermo(thermoDatabase);
+    if (initReactionThermo)
+    {
+        setThermo(thermoDatabase);
+    }
 }
 
 
@@ -325,7 +330,8 @@ Foam::Reaction<ReactionThermo>::Reaction
 (
     const speciesTable& species,
     const HashPtrTable<ReactionThermo>& thermoDatabase,
-    const dictionary& dict
+    const dictionary& dict,
+    bool initReactionThermo
 )
 :
     ReactionThermo::thermoType(*thermoDatabase[species[0]]),
@@ -339,7 +345,11 @@ Foam::Reaction<ReactionThermo>::Reaction
         lhs_,
         rhs_
     );
-    setThermo(thermoDatabase);
+
+    if (initReactionThermo)
+    {
+        setThermo(thermoDatabase);
+    }
 }
 
 

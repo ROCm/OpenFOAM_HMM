@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) OpenCFD Ltd. 2017
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,6 +113,7 @@ int main(int argc, char *argv[])
             solve(fvm::ddt(rho) + fvc::div(rhoPhi));
 
             #include "UEqn.H"
+            volScalarField divU(fvc::div(fvc::absolute(phi, U)));
             #include "TEqn.H"
 
             // --- Pressure corrector loop

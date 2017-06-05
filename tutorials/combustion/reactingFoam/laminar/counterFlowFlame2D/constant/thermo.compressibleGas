@@ -21,6 +21,10 @@ O2
     {
         molWeight       31.9988;
     }
+    elements
+    {
+        O       2;
+    }
     thermodynamics
     {
         Tlow            200;
@@ -41,6 +45,11 @@ H2O
     specie
     {
         molWeight       18.0153;
+    }
+    elements
+    {
+        O       1;
+        H       2;
     }
     thermodynamics
     {
@@ -63,6 +72,11 @@ CH4
     {
         molWeight       16.0428;
     }
+    elements
+    {
+        C       1;
+        H       4;
+    }
     thermodynamics
     {
         Tlow            200;
@@ -84,6 +98,11 @@ CO2
     {
         molWeight       44.01;
     }
+    elements
+    {
+        C       1;
+        O       2;
+    }
     thermodynamics
     {
         Tlow            200;
@@ -104,6 +123,10 @@ N2
     specie
     {
         molWeight       28.0134;
+    }
+    elements
+    {
+        N       2;
     }
     thermodynamics
     {

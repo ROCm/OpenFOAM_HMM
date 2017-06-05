@@ -344,9 +344,11 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::write
 {
     mixedFvPatchScalarField::write(os);
     os.writeKeyword("Tnbr")<< TnbrName_ << token::END_STATEMENT << nl;
+
     os.writeKeyword("qrNbr")<< qrNbrName_ << token::END_STATEMENT << nl;
     os.writeKeyword("qr")<< qrName_ << token::END_STATEMENT << nl;
-    os.writeEntry("thermalInertia", thermalInertia_);
+    os.writeKeyword("thermalInertia")<< thermalInertia_
+        << token::END_STATEMENT << nl;
 
     thicknessLayers_.writeEntry("thicknessLayers", os);
     kappaLayers_.writeEntry("kappaLayers", os);
