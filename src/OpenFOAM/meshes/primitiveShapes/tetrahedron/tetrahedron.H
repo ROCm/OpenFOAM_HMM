@@ -47,6 +47,7 @@ SourceFiles
 #include "UList.H"
 #include "triPointRef.H"
 #include "boundBox.H"
+#include "barycentric.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -169,13 +170,22 @@ public:
             //  uniform distribution
             inline Point randomPoint(Random& rndGen) const;
 
-            //- Calculate the barycentric coordinates of the given
-            //  point, in the same order as a, b, c, d.  Returns the
-            //  determinant of the solution.
-            inline scalar barycentric
+            //- Return a random point in the tetrahedron from a
+            //  uniform distribution
+            inline Point randomPoint(cachedRandom& rndGen) const;
+
+            //- Calculate the point from the given barycentric coordinates.
+            inline Point barycentricToPoint(const barycentric& bary) const;
+
+            //- Calculate the barycentric coordinates from the given point
+            inline barycentric pointToBarycentric(const point& pt) const;
+
+            //- Calculate the barycentric coordinates from the given point.
+            //  Returns the determinant.
+            inline scalar pointToBarycentric
             (
                 const point& pt,
-                FixedList<scalar, 4>& bary
+                barycentric& bary
             ) const;
 
             //- Return nearest point to p on tetrahedron. Is p itself

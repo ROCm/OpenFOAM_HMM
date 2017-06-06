@@ -450,7 +450,7 @@ Foam::cellShapeControlMesh::~cellShapeControlMesh()
 void Foam::cellShapeControlMesh::barycentricCoords
 (
     const Foam::point& pt,
-    FixedList<scalar, 4>& bary,
+    barycentric& bary,
     Cell_handle& ch
 ) const
 {
@@ -470,7 +470,7 @@ void Foam::cellShapeControlMesh::barycentricCoords
             topoint(ch->vertex(3)->point())
         );
 
-        tet.barycentric(pt, bary);
+        bary = tet.pointToBarycentric(pt);
     }
 }
 
