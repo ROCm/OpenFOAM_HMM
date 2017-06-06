@@ -212,10 +212,10 @@ private:
             const word TnbrName_;
 
             //- Name of the radiative heat flux in the neighbout region
-            const word QrNbrName_;
+            const word qrNbrName_;
 
             //- Name of the radiative heat flux field
-            const word QrName_;
+            const word qrName_;
 
             //- Name of the species on which the mass transfered (default H2O)
             const word specieName_;

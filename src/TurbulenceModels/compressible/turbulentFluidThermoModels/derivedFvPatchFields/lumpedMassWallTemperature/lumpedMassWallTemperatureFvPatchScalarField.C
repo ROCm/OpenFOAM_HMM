@@ -150,18 +150,18 @@ void Foam::lumpedMassWallTemperatureFvPatchScalarField::updateCoeffs()
 
     if (debug)
     {
-        scalar qin(0);
-        scalar qout(0);
+        scalar Qin(0);
+        scalar Qout(0);
 
         forAll(q, facei)
         {
-            if (q[facei] > 0.0) //out the wall
+            if (q[facei] > 0.0) // out the wall
             {
-                qout += q[facei]*magSf[facei];
+                Qout += q[facei]*magSf[facei];
             }
-            else if (q[facei] < 0.0) //into the wall
+            else if (q[facei] < 0.0) // into the wall
             {
-                qin += q[facei]*magSf[facei];
+                Qin += q[facei]*magSf[facei];
             }
         }
 
@@ -173,8 +173,8 @@ void Foam::lumpedMassWallTemperatureFvPatchScalarField::updateCoeffs()
             << " min:" << gMin(*this)
             << " max:" << gMax(*this)
             << " avg:" << gAverage(*this)
-            << " Qin [W]:" << qin
-            << " Qout [W]:" << qout
+            << " Qin [W]:" << Qin
+            << " Qout [W]:" << Qout
             << endl;
     }
 

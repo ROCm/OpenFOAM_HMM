@@ -43,7 +43,7 @@ namespace Foam
 }
 
 const Foam::word Foam::radiation::radiationModel::externalRadHeatFieldName_ =
-    "QrExt";
+    "qrExt";
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

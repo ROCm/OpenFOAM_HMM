@@ -155,7 +155,7 @@ inline const filmRadiationModel& thermoSingleLayer::radiation() const
 }
 
 
-inline tmp<scalarField> thermoSingleLayer::Qconvw(const label patchi) const
+inline tmp<scalarField> thermoSingleLayer::qconvw(const label patchi) const
 {
     const scalarField htc(htcw_->h()().boundaryField()[patchi]);
     const scalarField& Tp = T_.boundaryField()[patchi];
@@ -165,7 +165,7 @@ inline tmp<scalarField> thermoSingleLayer::Qconvw(const label patchi) const
 }
 
 
-inline tmp<scalarField> thermoSingleLayer::Qconvp(const label patchi) const
+inline tmp<scalarField> thermoSingleLayer::qconvp(const label patchi) const
 {
     const scalarField htc(htcs_->h()().boundaryField()[patchi]);
     const scalarField& Tp = T_.boundaryField()[patchi];

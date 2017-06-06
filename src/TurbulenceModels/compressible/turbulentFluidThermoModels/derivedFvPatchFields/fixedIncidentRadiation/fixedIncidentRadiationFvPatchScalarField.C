@@ -45,7 +45,7 @@ fixedIncidentRadiationFvPatchScalarField
 :
     fixedGradientFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), "undefined", "undefined", "undefined-K"),
-    QrIncident_(p.size(), 0.0)
+    qrIncident_(p.size(), 0.0)
 {}
 
 
@@ -60,7 +60,7 @@ fixedIncidentRadiationFvPatchScalarField
 :
     fixedGradientFvPatchScalarField(psf, p, iF, mapper),
     temperatureCoupledBase(patch(), psf),
-    QrIncident_(psf.QrIncident_)
+    qrIncident_(psf.qrIncident_)
 {}
 
 
@@ -74,7 +74,7 @@ fixedIncidentRadiationFvPatchScalarField
 :
     fixedGradientFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), dict),
-    QrIncident_("QrIncident", dict, p.size())
+    qrIncident_("qrIncident", dict, p.size())
 {
     if (dict.found("value") && dict.found("gradient"))
     {
@@ -99,7 +99,7 @@ fixedIncidentRadiationFvPatchScalarField
 :
     fixedGradientFvPatchScalarField(psf, iF),
     temperatureCoupledBase(patch(), psf),
-    QrIncident_(psf.QrIncident_)
+    qrIncident_(psf.qrIncident_)
 {}
 
 
@@ -111,7 +111,7 @@ fixedIncidentRadiationFvPatchScalarField
 :
     fixedGradientFvPatchScalarField(ptf),
     temperatureCoupledBase(patch(), ptf),
-    QrIncident_(ptf.QrIncident_)
+    qrIncident_(ptf.qrIncident_)
 {}
 
 
@@ -123,7 +123,7 @@ void Foam::radiation::fixedIncidentRadiationFvPatchScalarField::autoMap
 )
 {
     fixedGradientFvPatchScalarField::autoMap(m);
-    QrIncident_.autoMap(m);
+    qrIncident_.autoMap(m);
 }
 
 
@@ -141,7 +141,7 @@ void Foam::radiation::fixedIncidentRadiationFvPatchScalarField::rmap
             psf
         );
 
-    QrIncident_.rmap(thftpsf.QrIncident_, addr);
+    qrIncident_.rmap(thftpsf.qrIncident_, addr);
 }
 
 
@@ -165,7 +165,7 @@ void Foam::radiation::fixedIncidentRadiationFvPatchScalarField::updateCoeffs()
     gradient() =
         emissivity
        *(
-            QrIncident_
+            qrIncident_
           - physicoChemical::sigma.value()*pow4(*this)
         )/kappa(*this);
 
@@ -173,11 +173,11 @@ void Foam::radiation::fixedIncidentRadiationFvPatchScalarField::updateCoeffs()
 
     if (debug)
     {
-        scalar Qr = gSum(kappa(*this)*gradient()*patch().magSf());
+        scalar qr = gSum(kappa(*this)*gradient()*patch().magSf());
         Info<< patch().boundaryMesh().mesh().name() << ':'
             << patch().name() << ':'
             << this->internalField().name() << " -> "
-            << " radiativeFlux:" << Qr
+            << " radiativeFlux:" << qr
             << " walltemperature "
             << " min:" << gMin(*this)
             << " max:" << gMax(*this)
@@ -194,7 +194,7 @@ void Foam::radiation::fixedIncidentRadiationFvPatchScalarField::write
 {
     fixedGradientFvPatchScalarField::write(os);
     temperatureCoupledBase::write(os);
-    QrIncident_.writeEntry("QrIncident", os);
+    qrIncident_.writeEntry("qrIncident", os);
     writeEntry("value", os);
 }
 

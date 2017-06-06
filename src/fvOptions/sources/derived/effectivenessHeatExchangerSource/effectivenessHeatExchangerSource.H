@@ -48,7 +48,7 @@ Description
     \endvartable
 
 
-    The distribution inside the hear exchanger is given by:
+    The distribution inside the heat exchanger is given by:
     \f[
         Q_c = \frac{V_c |U_c| (T_c - T_{ref})}{\sum(V_c |U_c| (T_c - T_{ref}))}
     \f]

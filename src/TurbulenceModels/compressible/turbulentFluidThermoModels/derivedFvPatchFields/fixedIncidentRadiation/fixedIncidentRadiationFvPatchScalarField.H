@@ -34,19 +34,19 @@ Description
 
     the gradient heat flux is calculated as :
 
-        Qr = emissivity*(QrIncident - sigma_*T^4)
+        qr = emissivity*(qrIncident - sigma_*T^4)
 
     where:
 
     emissivity is the emissivity of the solid.
-    QrIncident is the specified fixed incident radiation.
+    qrIncident is the specified fixed incident radiation.
 
     Example usage:
 
     wall
     {
         type            fixedIncidentRadiation;
-        QrIncident      uniform 500;
+        qrIncident      uniform 500;
         kappa           solidThermo;
         KappaName       none;
     }
@@ -89,7 +89,7 @@ class fixedIncidentRadiationFvPatchScalarField
     // Private data
 
         //- Incident radiative heat flux
-        scalarField QrIncident_;
+        scalarField qrIncident_;
 
 
 public:

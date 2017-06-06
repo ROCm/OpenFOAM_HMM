@@ -149,8 +149,8 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     rhoName_("rho"),
     muName_("thermo:mu"),
     TnbrName_("T"),
-    QrNbrName_("none"),
-    QrName_("none"),
+    qrNbrName_("none"),
+    qrName_("none"),
     specieName_("none"),
     liquid_(nullptr),
     liquidDict_(nullptr),
@@ -189,8 +189,8 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     rhoName_(psf.rhoName_),
     muName_(psf.muName_),
     TnbrName_(psf.TnbrName_),
-    QrNbrName_(psf.QrNbrName_),
-    QrName_(psf.QrName_),
+    qrNbrName_(psf.qrNbrName_),
+    qrName_(psf.qrName_),
     specieName_(psf.specieName_),
     liquid_(psf.liquid_, false),
     liquidDict_(psf.liquidDict_),
@@ -224,8 +224,8 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     muName_(dict.lookupOrDefault<word>("mu", "thermo:mu")),
     TnbrName_(dict.lookupOrDefault<word>("Tnbr", "T")),
-    QrNbrName_(dict.lookupOrDefault<word>("QrNbr", "none")),
-    QrName_(dict.lookupOrDefault<word>("Qr", "none")),
+    qrNbrName_(dict.lookupOrDefault<word>("qrNbr", "none")),
+    qrName_(dict.lookupOrDefault<word>("qr", "none")),
     specieName_(dict.lookupOrDefault<word>("specie", "none")),
     liquid_(nullptr),
     liquidDict_(),
@@ -348,8 +348,8 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     rhoName_(psf.rhoName_),
     muName_(psf.muName_),
     TnbrName_(psf.TnbrName_),
-    QrNbrName_(psf.QrNbrName_),
-    QrName_(psf.QrName_),
+    qrNbrName_(psf.qrNbrName_),
+    qrName_(psf.qrName_),
     specieName_(psf.specieName_),
     liquid_(psf.liquid_, false),
     liquidDict_(psf.liquidDict_),
@@ -675,26 +675,26 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
         mpp.distribute(dmHfgNbr);
     }
 
-    // Obtain Rad heat (Qr)
-    scalarField Qr(Tp.size(), 0.0);
-    if (QrName_ != "none")
+    // Obtain Rad heat (qr)
+    scalarField qr(Tp.size(), 0.0);
+    if (qrName_ != "none")
     {
-        Qr = patch().lookupPatchField<volScalarField, scalar>(QrName_);
+        qr = patch().lookupPatchField<volScalarField, scalar>(qrName_);
     }
 
-    scalarField QrNbr(Tp.size(), 0.0);
-    if (QrNbrName_ != "none")
+    scalarField qrNbr(Tp.size(), 0.0);
+    if (qrNbrName_ != "none")
     {
-        QrNbr = nbrPatch.lookupPatchField<volScalarField, scalar>(QrNbrName_);
-        mpp.distribute(QrNbr);
+        qrNbr = nbrPatch.lookupPatchField<volScalarField, scalar>(qrNbrName_);
+        mpp.distribute(qrNbr);
     }
 
     const scalarField dmHfg(dmHfgNbr + dmHfg_);
 
     const scalarField mpCpdt(mpCpTpNbr + mpCpTp_);
 
-    // Qr > 0 (heat up the wall)
-    scalarField alpha(KDeltaNbr + mpCpdt - (Qr + QrNbr)/Tp);
+    // qr > 0 (heat up the wall)
+    scalarField alpha(KDeltaNbr + mpCpdt - (qr + qrNbr)/Tp);
 
     valueFraction() = alpha/(alpha + myKDelta_);
 
@@ -742,8 +742,8 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::write
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
     writeEntryIfDifferent<word>(os, "mu", "thermo:mu", muName_);
     writeEntryIfDifferent<word>(os, "Tnbr", "T", TnbrName_);
-    writeEntryIfDifferent<word>(os, "QrNbr", "none", QrNbrName_);
-    writeEntryIfDifferent<word>(os, "Qr", "none", QrName_);
+    writeEntryIfDifferent<word>(os, "qrNbr", "none", qrNbrName_);
+    writeEntryIfDifferent<word>(os, "qr", "none", qrName_);
 
     if (fluid_)
     {

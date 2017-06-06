@@ -69,8 +69,8 @@ dictionaryReplacement
                 type            compressible::turbulentTemperatureRadCoupledMixed;
                 Tnbr            T;
                 kappaMethod     fluidThermo;
-                QrNbr           none;
-                Qr              Qr;
+                qrNbr           none;
+                qr              qr;
                 kappa           none;
                 value           uniform 300;
             }

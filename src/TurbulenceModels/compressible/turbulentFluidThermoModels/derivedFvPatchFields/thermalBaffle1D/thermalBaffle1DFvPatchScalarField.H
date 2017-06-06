@@ -46,7 +46,7 @@ Usage
         samplePatch     <slavePatchName>;
 
         thickness       uniform 0.005;  // thickness [m]
-        Qs              uniform 100;    // heat flux [W/m2]
+        qs              uniform 100;    // heat flux [W/m2]
 
         qr              none;
         relaxation      1;
@@ -124,7 +124,7 @@ class thermalBaffle1DFvPatchScalarField
         mutable scalarField thickness_;
 
         //- Superficial heat source [W/m2]
-        mutable scalarField Qs_;
+        mutable scalarField qs_;
 
         //- Solid dictionary
         dictionary solidDict_;
@@ -147,8 +147,8 @@ class thermalBaffle1DFvPatchScalarField
         //- Return const solid thermo
         const solidType& solid() const;
 
-        //- Return Qs from master
-        tmp<scalarField> Qs() const;
+        //- Return qs from master
+        tmp<scalarField> qs() const;
 
         //- Return thickness from master
         tmp<scalarField> baffleThickness() const;

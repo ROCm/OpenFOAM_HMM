@@ -219,7 +219,7 @@ bool Foam::slidingInterface::projectPoints() const
             projectionAlgo_
         );
 
-//     Pout<< "USING N-SQAURED!!!" << endl;
+//     Pout<< "USING N-SQUARED!!!" << endl;
 //     List<objectHit> slavePointFaceHits =
 //         projectPointsNSquared<face, List, const pointField&>
 //         (
