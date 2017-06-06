@@ -48,7 +48,7 @@ void Foam::KinematicParcel<ParcelType>::setCellValues
 {
     tetIndices tetIs = this->currentTetIndices();
 
-    rhoc_ = td.rhoInterp().interpolate(this->position(), tetIs);
+    rhoc_ = td.rhoInterp().interpolate(this->coordinates(), tetIs);
 
     if (rhoc_ < td.cloud().constProps().rhoMin())
     {
@@ -62,9 +62,9 @@ void Foam::KinematicParcel<ParcelType>::setCellValues
         rhoc_ = td.cloud().constProps().rhoMin();
     }
 
-    Uc_ = td.UInterp().interpolate(this->position(), tetIs);
+    Uc_ = td.UInterp().interpolate(this->coordinates(), tetIs);
 
-    muc_ = td.muInterp().interpolate(this->position(), tetIs);
+    muc_ = td.muInterp().interpolate(this->coordinates(), tetIs);
 
     // Apply dispersion components to carrier phase velocity
     Uc_ = td.cloud().dispersion().update
