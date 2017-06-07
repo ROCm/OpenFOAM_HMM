@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,6 +102,24 @@ public:
     // Member functions
 
         // Access to thermodynamic state variables
+
+            //- Add the given density correction to the density field.
+            //  Used to update the density field following pressure solution
+            //  Limit thermo rho between rhoMin and rhoMax
+            virtual void correctRho
+            (
+                const volScalarField& deltaRho,
+                const dimensionedScalar& rhoMin,
+                const dimensionedScalar& rhoMax
+            ) = 0;
+
+
+            //- Add the given density correction to the density field.
+            //  Used to update the density field following pressure solution
+            virtual void correctRho
+            (
+                const volScalarField& deltaRho
+            ) = 0;
 
             //- Compressibility [s^2/m^2]
             virtual const volScalarField& psi() const = 0;

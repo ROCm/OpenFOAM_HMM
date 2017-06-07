@@ -184,18 +184,18 @@ updateCoeffs()
 
     const scalarField& emissivity = temissivity();
 
-    scalarField& Qem = ray.Qem().boundaryFieldRef()[patchi];
-    scalarField& Qin = ray.Qin().boundaryFieldRef()[patchi];
+    scalarField& qem = ray.qem().boundaryFieldRef()[patchi];
+    scalarField& qin = ray.qin().boundaryFieldRef()[patchi];
 
     const vector& myRayId = dom.IRay(rayId).d();
 
     // Use updated Ir while iterating over rays
-    // avoids to used lagged Qin
-    scalarField Ir = dom.IRay(0).Qin().boundaryField()[patchi];
+    // avoids to used lagged qin
+    scalarField Ir = dom.IRay(0).qin().boundaryField()[patchi];
 
     for (label rayI=1; rayI < dom.nRay(); rayI++)
     {
-        Ir += dom.IRay(rayI).Qin().boundaryField()[patchi];
+        Ir += dom.IRay(rayI).qin().boundaryField()[patchi];
     }
 
     if (solarLoad_)
@@ -221,7 +221,7 @@ updateCoeffs()
                 )/pi;
 
             // Emmited heat flux from this ray direction
-            Qem[faceI] = refValue()[faceI]*nAve[faceI];
+            qem[faceI] = refValue()[faceI]*nAve[faceI];
         }
         else
         {
@@ -231,7 +231,7 @@ updateCoeffs()
             refValue()[faceI] = 0.0; //not used
 
             // Incident heat flux on this ray direction
-            Qin[faceI] = Iw[faceI]*nAve[faceI];
+            qin[faceI] = Iw[faceI]*nAve[faceI];
         }
     }
 

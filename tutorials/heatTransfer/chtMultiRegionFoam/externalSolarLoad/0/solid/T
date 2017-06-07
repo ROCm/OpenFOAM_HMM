@@ -32,8 +32,8 @@ boundaryField
         value           uniform 300;
         Tnbr            T;
         kappaMethod     solidThermo;
-        QrNbr           Qr;
-        Qr              none;
+        qrNbr           qr;
+        qr              none;
         kappa           none;
     }
     solid_to_floor
@@ -42,8 +42,8 @@ boundaryField
         value           uniform 300;
         Tnbr            T;
         kappaMethod     solidThermo;
-        QrNbr           none;
-        Qr              none;
+        qrNbr           none;
+        qr              none;
         kappa           none;
     }
 }

@@ -70,7 +70,7 @@ functions
         fields              (phi);
     }
 
-    wallPanel_Qin
+    wallPanel_qin
     {
         type                patchProbes;
         libs                ("libsampling.so");
@@ -84,10 +84,10 @@ functions
             (0.2  0.2 0.01)  // HF3
             (0.0  0.4 0.01)  // HF4
         );
-        fields              (Qin);
+        fields              (qin);
     }
 
-    inletQr_Qin
+    inletqr_qin
     {
         type                patchProbes;
         libs                ("libsampling.so");
@@ -103,7 +103,7 @@ functions
             (-0.02 0.0  0.02) // HF4
             (-0.02 0.0 -0.02) // HF5
         );
-        fields    (Qr Qin);
+        fields    (qr qin);
     }
 
     thermoCouple

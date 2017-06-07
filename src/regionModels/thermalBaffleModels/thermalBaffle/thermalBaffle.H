@@ -94,7 +94,7 @@ protected:
         // Source term fields
 
             //- Surface energy source  / [J/m2/s]
-            volScalarField Qs_;
+            volScalarField qs_;
 
             //- Volumetric energy source  / [J/m3/s]
             volScalarField Q_;

@@ -92,6 +92,7 @@ Foam::fv::correctedSnGrad<Type>::correction
         )
     );
     GeometricField<Type, fvsPatchField, surfaceMesh>& ssf = tssf.ref();
+    ssf.setOriented();
 
     for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
     {

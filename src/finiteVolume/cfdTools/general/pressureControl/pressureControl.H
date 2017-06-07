@@ -66,6 +66,12 @@ class pressureControl
         //- Pressure upper-limit
         dimensionedScalar pMin_;
 
+        //- Pressure lower-limit
+        bool limitMaxP_;
+
+        //- Pressure upper-limit
+        bool limitMinP_;
+
 
 public:
 
@@ -89,8 +95,8 @@ public:
         //- Return the pressure reference level
         inline scalar refValue() const;
 
-        //- Limit the pressure
-        void limit(volScalarField& p) const;
+        //- Limit the pressure if necessary and return true if so
+        bool limit(volScalarField& p) const;
 };
 
 
