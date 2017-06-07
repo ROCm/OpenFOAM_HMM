@@ -95,7 +95,7 @@ public:
         //- Return the pressure reference level
         inline scalar refValue() const;
 
-        //- Limit the pressure
+        //- Limit the pressure if necessary and return true if so
         bool limit(volScalarField& p) const;
 };
 

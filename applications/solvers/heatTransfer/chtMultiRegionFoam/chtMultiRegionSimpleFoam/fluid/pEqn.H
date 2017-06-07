@@ -1,8 +1,10 @@
 {
+    /*
     rho = thermo.rho();
     rho = max(rho, rhoMin[i]);
     rho = min(rho, rhoMax[i]);
     rho.relax();
+    */
 
     volScalarField rAU("rAU", 1.0/UEqn.A());
     surfaceScalarField rhorAUf("rhorAUf", fvc::interpolate(rho*rAU));
@@ -67,11 +69,23 @@
 
     // For closed-volume cases adjust the pressure level
     // to obey overall mass continuity
-    if (closedVolume && compressible)
+    if (closedVolume)
     {
-        p += (initialMass - fvc::domainIntegrate(thermo.rho()))
-            /compressibility;
-        p_rgh = p - rho*gh;
+        if (!compressible)
+        {
+            p += dimensionedScalar
+            (
+                "p",
+                p.dimensions(),
+                pRefValue - getRefCellValue(p, pRefCell)
+            );
+        }
+        else
+        {
+            p += (initialMass - fvc::domainIntegrate(psi*p))
+                /compressibility;
+            p_rgh = p - rho*gh;
+        }
     }
 
     rho = thermo.rho();
