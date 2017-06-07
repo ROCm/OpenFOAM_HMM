@@ -62,6 +62,10 @@ Description
             (0.21 0.20999 0.01)   // at outlet2
             (0.21 0 0.01)         // at central block
         );
+
+        // Optional: filter out points that haven't been found. Default
+        //           is to include them (with value -VGREAT)
+        includeOutOfBounds  true;
     }
     \endverbatim
 
@@ -148,6 +152,9 @@ protected:
         //  Note: only possible when fixedLocations_ is true
         word interpolationScheme_;
 
+        //- Include probes that were not found
+        bool includeOutOfBounds_;
+
 
       // Calculated
 
@@ -165,11 +172,15 @@ protected:
         fieldGroup<symmTensor> surfaceSymmTensorFields_;
         fieldGroup<tensor> surfaceTensorFields_;
 
-        // Cells to be probed (obtained from the locations)
+        //- Cells to be probed (obtained from the locations)
         labelList elementList_;
 
-        // Faces to be probed
+        //- Faces to be probed
         labelList faceList_;
+
+        //- Processor holding the cell or face (-1 if point not found
+        //  on any processor)
+        labelList processor_;
 
         //- Current open files
         HashPtrTable<OFstream> probeFilePtrs_;
