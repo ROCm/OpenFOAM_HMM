@@ -110,6 +110,12 @@ void Foam::psiThermo::correctRho
 )
 {}
 
+void Foam::psiThermo::correctRho
+(
+    const Foam::volScalarField& deltaRho
+)
+{}
+
 const Foam::volScalarField& Foam::psiThermo::psi() const
 {
     return psi_;

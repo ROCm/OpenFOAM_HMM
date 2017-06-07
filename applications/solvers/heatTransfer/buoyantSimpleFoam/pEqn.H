@@ -76,8 +76,8 @@
         {
             p += (initialMass - fvc::domainIntegrate(psi*p))
                 /fvc::domainIntegrate(psi);
+            p_rgh = p - rho*gh;
         }
-        p_rgh = p - rho*gh;
     }
 
     rho = thermo.rho();

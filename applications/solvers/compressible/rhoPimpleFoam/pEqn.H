@@ -111,8 +111,6 @@ else
     thermo.correctRho(psi*p - psip0, rhoMin, rhoMax) ;
 }
 
-Info<< "rho max/min : " << max(rho).value() << " " << min(rho).value() << endl;
-
 if (thermo.dpdt())
 {
     dpdt = fvc::ddt(p);

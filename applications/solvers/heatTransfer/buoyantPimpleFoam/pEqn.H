@@ -72,9 +72,6 @@ while (pimple.correctNonOrthogonal())
 
 p = p_rgh + rho*gh;
 
-// Thermodynamic density update
-//thermo.correctRho(psi*p - psip0);
-
 #include "rhoEqn.H"
 #include "compressibleContinuityErrs.H"
 
@@ -95,9 +92,8 @@ if (p_rgh.needReference())
             /compressibility;
         thermo.correctRho(psi*p - psip0);
         rho = thermo.rho();
-
+        p_rgh = p - rho*gh;
     }
-    p_rgh = p - rho*gh;
 }
 else
 {

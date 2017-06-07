@@ -125,6 +125,13 @@ public:
                 const dimensionedScalar& rhoMax
             );
 
+            //- Add the given density correction to the density field.
+            //  Used to update the density field following pressure solution
+            virtual void correctRho
+            (
+                const volScalarField& deltaRho
+            );
+
             //- Density [kg/m^3] - uses current value of pressure
             virtual tmp<volScalarField> rho() const;
 

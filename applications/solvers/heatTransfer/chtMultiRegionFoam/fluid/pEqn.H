@@ -112,8 +112,8 @@ if (closedVolume)
             /compressibility;
         thermo.correctRho(psi*p - psip0);
         rho = thermo.rho();
+        p_rgh = p - rho*gh;
     }
-    p_rgh = p - rho*gh;
 }
 else
 {

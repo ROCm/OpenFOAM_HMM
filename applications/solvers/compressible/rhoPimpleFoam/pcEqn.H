@@ -112,7 +112,6 @@ if (pressureControl.limit(p))
     thermo.correctRho(psi*p - psip0, rhoMin, rhoMax);
     rho = thermo.rho();
 }
-
 else if (pimple.SIMPLErho())
 {
     thermo.correctRho(psi*p - psip0, rhoMin, rhoMax);
@@ -122,8 +121,6 @@ else
 {
     thermo.correctRho(psi*p - psip0, rhoMin, rhoMax);
 }
-
-Info<< "rho max/min : " << max(rho).value() << " " << min(rho).value() << endl;
 
 if (thermo.dpdt())
 {

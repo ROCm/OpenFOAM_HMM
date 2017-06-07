@@ -105,11 +105,20 @@ public:
 
             //- Add the given density correction to the density field.
             //  Used to update the density field following pressure solution
+            //  Limit thermo rho between rhoMin and rhoMax
             virtual void correctRho
             (
                 const volScalarField& deltaRho,
                 const dimensionedScalar& rhoMin,
                 const dimensionedScalar& rhoMax
+            ) = 0;
+
+
+            //- Add the given density correction to the density field.
+            //  Used to update the density field following pressure solution
+            virtual void correctRho
+            (
+                const volScalarField& deltaRho
             ) = 0;
 
             //- Compressibility [s^2/m^2]
