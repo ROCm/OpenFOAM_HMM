@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,6 +58,9 @@ void Foam::probes::findElements(const fvMesh& mesh)
     faceList_.clear();
     faceList_.setSize(size());
 
+    processor_.setSize(size());
+    processor_ = -1;
+
     forAll(*this, probei)
     {
         const vector& location = operator[](probei);
@@ -105,9 +108,12 @@ void Foam::probes::findElements(const fvMesh& mesh)
         label celli = elementList_[probei];
         label facei = faceList_[probei];
 
+        processor_[probei] = (celli != -1 ? Pstream::myProcNo() : -1);
+
         // Check at least one processor with cell.
         reduce(celli, maxOp<label>());
         reduce(facei, maxOp<label>());
+        reduce(processor_[probei], maxOp<label>());
 
         if (celli == -1)
         {
@@ -240,8 +246,13 @@ Foam::label Foam::probes::prepare()
 
             forAll(*this, probei)
             {
-                fout<< "# Probe " << probei << ' ' << operator[](probei)
-                    << endl;
+                fout<< "# Probe " << probei << ' ' << operator[](probei);
+
+                if (processor_[probei] == -1)
+                {
+                    fout<< "  # Not Found";
+                }
+                fout<< endl;
             }
 
             fout<< '#' << setw(IOstream::defaultPrecision() + 6)
@@ -249,7 +260,10 @@ Foam::label Foam::probes::prepare()
 
             forAll(*this, probei)
             {
-                fout<< ' ' << setw(w) << probei;
+                if (includeOutOfBounds_ || processor_[probei] != -1)
+                {
+                    fout<< ' ' << setw(w) << probei;
+                }
             }
             fout<< endl;
 
@@ -288,7 +302,8 @@ Foam::probes::probes
     loadFromFiles_(loadFromFiles),
     fieldSelection_(),
     fixedLocations_(true),
-    interpolationScheme_("cell")
+    interpolationScheme_("cell"),
+    includeOutOfBounds_(true)
 {
     if (readFields)
     {
@@ -320,6 +335,7 @@ bool Foam::probes::read(const dictionary& dict)
                 << "entry will be ignored";
         }
     }
+    dict.readIfPresent("includeOutOfBounds", includeOutOfBounds_);
 
     // Initialise cells to sample from supplied locations
     findElements(mesh_);
