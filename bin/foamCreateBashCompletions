@@ -1,0 +1,195 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#-------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software: you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Script
+#     foamCreateBashCompletions
+#
+# Description
+#     Create bash completions for OpenFOAM applications
+#
+#------------------------------------------------------------------------------
+#set -x
+
+usage() {
+    exec 1>&2
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+
+Usage: $Script [OPTION] <file>
+
+* Create bash completions for OpenFOAM applications and write to <file>.
+  By default searches directories \$FOAM_APPBIN and \$FOAM_USER_APPBIN
+  
+
+Options:
+  -d | -directory   Directory to process
+  -h | -help        Print the usage
+
+USAGE
+    exit 1
+}
+
+searchDirs="$FOAM_APPBIN $FOAM_USER_APPBIN"
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+        -h | -help)
+            usage
+            ;;
+        -d | -directory)
+            searchDirs="$2"
+            [ -d $searchDirs ] || usage "directory not found '$searchDirs'"
+            shift
+            ;;
+        -*)
+            usage "unknown option: '$1'"
+            ;;
+        *)
+            outFile=$1
+            break
+            ;;
+    esac
+    shift
+done
+
+[ -z $outFile ] && usage
+\rm -f $outFile
+touch $outFile
+
+
+writeFilterFunction()
+{
+    cat<<WRITEFILTER >> $1
+unset -f _filter_opts
+_filter_opts()
+{
+    local allOpts=\$1
+    local applied=\$2
+    for o in \${allOpts}; do
+        [ "\${applied/\$o/}" == "\${applied}" ] && echo \$o
+    done
+}
+
+WRITEFILTER
+}
+
+
+commonOptions()
+{
+    local options=$@
+    local indent1="        "
+    local indent2="            "
+    for o in ${options[@]}; do
+        case $o in
+            -case)
+                echo "${indent1}-case)"
+                echo "${indent2}COMPREPLY=(\$(compgen -d -- \${cur}))"
+                echo "${indent2};;"
+                ;;
+            -srcDoc|-help)
+                echo "${indent1}-srcDoc|-help)"
+                echo "${indent2}COMPREPLY=()"
+                echo "${indent2};;"
+                ;;
+            -time)
+                echo "${indent1}-time)"
+                echo "${indent2}COMPREPLY=(\$(compgen -d -X '![-0-9]*' -- \${cur}))"
+                echo "${indent2};;"
+                ;;
+            -region)
+                echo "${indent1}-region)"
+                echo "${indent2}local regions=\$(sed 's#/##g' <<< \$([ -d system ] && (\cd system && (\ls -d */ 2>/dev/null))))"
+                echo "${indent2}COMPREPLY=(\$(compgen -W \"\$regions\" -- \${cur}))"
+                echo "${indent2};;"
+                ;;
+            *Dict)
+                echo "${indent1}*Dict)"
+#                echo "${indent2}local dirs=\$(\ls -d s*/)"
+#                echo "${indent2}local files=\$(\ls -f | grep Dict)"
+#                echo "${indent2}COMPREPLY=(\$(compgen -W \"\$dirs \$files\" -- \${cur}))"
+                echo "${indent2}COMPREPLY=(\$(compgen -f -- \${cur}))"
+                echo "${indent2};;"
+                ;;
+        esac
+    done
+}
+
+
+writeFilterFunction $outFile
+
+for dir in ${searchDirs}
+do
+    echo "Processing directory $dir"
+
+    apps=($(\ls $dir))
+    for appName in "${apps[@]}"; do
+        appHelp=$($appName -help)
+
+        echo "Processing $appName"
+
+        # Options with args
+        optsWithArgs=($(awk '/^ *-[a-z]/ && /</ {print $1}' <<< "$appHelp"))
+
+        # Options without args
+        opts=($(awk '/^ *-[a-z]/ && !/</ {print $1}' <<< "$appHelp"))
+
+        cat<<WRITECOMPLETION >> $outFile
+unset -f _${appName}
+_${appName}()
+{
+    local cur="\${COMP_WORDS[COMP_CWORD]}"
+    local prev="\${COMP_WORDS[COMP_CWORD-1]}"
+
+    local opts="${opts[@]} "
+    local optsWithArgs="${optsWithArgs[@]} "
+
+    case \${prev} in
+$(commonOptions ${optsWithArgs[@]})
+        *)
+            if [ "\${optsWithArgs/\${prev} /}" != "\${optsWithArgs}" ]; then
+                # Unknown what type of arg follows - set to files
+                # not always correct but at least can still navigate path if
+                # needed...
+                COMPREPLY=(\$(compgen -f -- \${cur}))
+            else
+                # Catch-all - present all remaining options
+                opts=\$(_filter_opts "\${opts}" "\${COMP_LINE}")
+                optsWithArgs=\$(_filter_opts "\${optsWithArgs}" "\${COMP_LINE}")
+                COMPREPLY=(\$(compgen -W "\${opts} \${optsWithArgs}" -- \${cur}))
+            fi
+            ;;
+    esac
+
+    return 0
+}
+complete -o nospace -F _${appName} $appName
+
+WRITECOMPLETION
+    done
+done
+
+unset searchDirs writeFilterFunction commonOptions
+
+
+#------------------------------------------------------------------------------
