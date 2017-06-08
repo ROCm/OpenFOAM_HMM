@@ -73,7 +73,7 @@ public:
     (
         autoPtr,
         surfaceTensionModel,
-        dictionary,
+        multiphase,
         (
             const dictionary& dict,
             const phasePair& pair,

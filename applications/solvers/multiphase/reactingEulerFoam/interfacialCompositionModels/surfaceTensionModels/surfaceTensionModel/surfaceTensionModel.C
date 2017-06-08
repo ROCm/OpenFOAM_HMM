@@ -31,7 +31,7 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(surfaceTensionModel, 0);
-    defineRunTimeSelectionTable(surfaceTensionModel, dictionary);
+    defineRunTimeSelectionTable(surfaceTensionModel, multiphase);
 }
 
 const Foam::dimensionSet Foam::surfaceTensionModel::dimSigma(1, 0, -2, 0, 0);
