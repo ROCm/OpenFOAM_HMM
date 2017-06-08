@@ -62,8 +62,6 @@ void Foam::helpTypes::helpBoundary::init()
 {
     helpType::init();
 
-    argList::validArgs.append("boundary");
-
     argList::addOption
     (
         "field",
