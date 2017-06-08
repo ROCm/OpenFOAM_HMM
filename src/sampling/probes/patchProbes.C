@@ -129,11 +129,11 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
             if (isA<emptyPolyPatch>(bm[patchi]))
             {
                 WarningInFunction
-                << " The sample point: " << sample
-                << " belongs to " << patchi
-                << " which is an empty patch. This is not permitted. "
-                << " This sample will not be included "
-                << endl;
+                    << " The sample point: " << sample
+                    << " belongs to " << patchi
+                    << " which is an empty patch. This is not permitted. "
+                    << " This sample will not be included "
+                    << endl;
             }
             else if (info.hit())
             {
@@ -197,9 +197,12 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
     elementList_ = -1;
     faceList_.setSize(nearest.size());
     faceList_ = -1;
+    processor_.setSize(nearest.size());
+    processor_ = -1;
 
     forAll(nearest, sampleI)
     {
+        processor_[sampleI] = nearest[sampleI].second().second();
         if (nearest[sampleI].second().second() == Pstream::myProcNo())
         {
             // Store the face to sample
