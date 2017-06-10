@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -159,6 +159,15 @@ class argList
         //  Transform sequences with "(" ... ")" into string lists
         //  return true if any "(" ... ")" sequences were captured
         bool regroupArgv(int& argc, char**& argv);
+
+        //- List debug switches
+        static void listSwitches
+        (
+            const wordList& debugSwitches,
+            const wordList& infoSwitches,
+            const wordList& optSwitches,
+            const bool unset
+        );
 
 
 public:
@@ -420,6 +429,12 @@ public:
             //- Display documentation in browser
             //  Optionally display the application source code
             void displayDoc(bool source=false) const;
+
+            //- List debug switches
+            void listSwitches(const bool unset) const;
+
+            //- List registered debug switches
+            void listRegisteredSwitches(const bool unset) const;
 
 
         // Check
