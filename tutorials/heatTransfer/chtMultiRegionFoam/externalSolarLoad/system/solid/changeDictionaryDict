@@ -37,6 +37,7 @@ dictionaryReplacement
                 qrNbr           qr;
                 qr              none;
                 kappa           none;
+                thermalInertia  true;
                 value           uniform 300;
             }
 
@@ -48,6 +49,7 @@ dictionaryReplacement
                 qrNbr           none;
                 qr              none;
                 kappa           none;
+                thermalInertia  true;
                 value           uniform 300;
             }
 

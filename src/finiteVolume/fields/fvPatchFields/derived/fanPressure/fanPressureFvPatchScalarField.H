@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,24 @@ Description
     This boundary condition can be applied to assign either a pressure inlet
     or outlet total pressure condition for a fan.
 
+    The switch nonDimensional can be used for a non-dimensional table. It needs
+    inputs rpm and dm of the fan.
+
+    The nonDimensional flux for the table is calculate as :
+
+        phi = 4.0*mDot/(rho*sqr(PI)*dm^3*omega)
+        where:
+            dm is the mean diameter.
+            omega is rad/sec.
+
+    The nonDimensinal pressure :
+
+        Psi = 2 deltaP/(rho*(sqr(PI*omega*dm)))
+        where:
+            deltaP is the pressure drop
+
+    The non-dimensional table should be given as Psi = F(phi).
+
 Usage
     \table
         Property     | Description             | Required    | Default value
@@ -38,6 +56,9 @@ Usage
         outOfBounds  | out of bounds handling  | yes         |
         direction    | direction of flow through fan [in/out] | yes |
         p0           | environmental total pressure | yes    |
+        nonDimensional | uses non-dimensional table | no | false
+        rpm          | fan rpm for non-dimensional table | no | 0.0
+        dm           | mean diameter for non-dimensional table | no | 0.0
     \endtable
 
     Example of the boundary condition specification:
@@ -115,6 +136,17 @@ private:
 
         //- Direction of flow through the fan relative to patch
         fanFlowDirection direction_;
+
+        //- Swtich for using non-dimensional curve
+        Switch nonDimensional_;
+
+        // Parameters for non-dimensional table
+
+            //- Fan rpm
+            scalar rpm_;
+
+            //- Fan mean diameter
+            scalar dm_;
 
 
 public:
