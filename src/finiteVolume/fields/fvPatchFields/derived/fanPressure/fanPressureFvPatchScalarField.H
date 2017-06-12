@@ -66,7 +66,7 @@ Usage
     inlet
     {
         type            fanPressure;
-        fileName        "fanCurve";
+        file            "fanCurve";
         outOfBounds     clamp;
         direction       in;
         p0              uniform 0;
@@ -76,7 +76,7 @@ Usage
     outlet
     {
         type            fanPressure;
-        fileName        "fanCurve";
+        file            "fanCurve";
         outOfBounds     clamp;
         direction       out;
         p0              uniform 0;
