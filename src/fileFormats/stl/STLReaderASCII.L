@@ -77,7 +77,7 @@ class STLASCIILexer
         label lineNo_;
         word  startError_;
 
-        DynamicList<point> points_;
+        DynamicList<STLpoint> points_;
         DynamicList<label> facets_;
         DynamicList<word>  names_;
         DynamicList<label> sizes_;
@@ -105,7 +105,7 @@ public:
         }
 
         //- A list of unstitched triangle points
-        inline DynamicList<point>& points()
+        inline DynamicList<STLpoint>& points()
         {
             return points_;
         }

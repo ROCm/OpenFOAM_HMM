@@ -26,6 +26,7 @@ License
 #include "STLReader.H"
 #include "Map.H"
 #include "IFstream.H"
+#include "mergePoints.H"
 
 #undef DEBUG_STLBINARY
 
@@ -199,6 +200,40 @@ void Foam::fileFormats::STLReader::clear()
     names_.clear();
     sizes_.clear();
     format_ = UNKNOWN;
+}
+
+
+Foam::label Foam::fileFormats::STLReader::mergePointsMap
+(
+    labelList& pointMap
+) const
+{
+    // With the merge distance depending on the input format (ASCII | BINARY),
+    // but must be independent of WM_SP or WM_DP flag.
+    // - floatScalarSMALL  = 1e-6
+    // - doubleScalarSMALL = 1e-15
+
+    return mergePointsMap
+    (
+        (format_ == BINARY ? 10 : 100) * doubleScalarSMALL,
+        pointMap
+    );
+}
+
+
+Foam::label Foam::fileFormats::STLReader::mergePointsMap
+(
+    const scalar mergeTol,
+    labelList& pointMap
+) const
+{
+    return Foam::mergePoints
+    (
+        points_,
+        mergeTol,
+        false, // verbose
+        pointMap
+    );
 }
 
 

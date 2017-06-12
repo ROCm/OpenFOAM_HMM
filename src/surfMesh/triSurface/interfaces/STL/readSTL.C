@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STLReader.H"
-#include "mergePoints.H"
 #include "triSurface.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -42,22 +41,13 @@ bool Foam::triSurface::readSTL(const fileName& STLfileName, bool forceBinary)
         )
     );
 
-    // Stitch points
+    // Get the map for stitched surface points, with merge tolerance depending
+    // on the input format
     labelList pointMap;
-    label nUniquePoints = mergePoints
-    (
-        reader.points(),
-        (
-            // With the merge distance depending on the input format
-            (reader.stlFormat() == fileFormats::STLCore::BINARY ? 10 : 100)
-          * SMALL
-        ),
-        false,                  // verbose
-        pointMap                // old to new point map
-    );
+    const label nUniquePoints = reader.mergePointsMap(pointMap);
 
-    const pointField& readpts = reader.points();
-    const labelList&  zoneIds = reader.zoneIds();
+    const auto& readpts = reader.points();
+    const labelList& zoneIds = reader.zoneIds();
 
     pointField& pointLst = storedPoints();
     List<Face>& faceLst  = storedFaces();
@@ -84,18 +74,16 @@ bool Foam::triSurface::readSTL(const fileName& STLfileName, bool forceBinary)
         f.region() = zoneIds[i];
     }
 
-    // Set patch names (and sizes)
-    // - there is likely a more efficient means of doing this
+    // Set patch name/index.
     if (reader.stlFormat() == fileFormats::STLCore::ASCII)
     {
         const List<word>& names = reader.names();
 
         patches_.setSize(names.size());
-        forAll(names, namei)
+        forAll(patches_, patchi)
         {
-            patches_[namei].name() = names[namei];
+            patches_[patchi] = geometricSurfacePatch(names[patchi], patchi);
         }
-        setDefaultPatches();
     }
 
     return true;
