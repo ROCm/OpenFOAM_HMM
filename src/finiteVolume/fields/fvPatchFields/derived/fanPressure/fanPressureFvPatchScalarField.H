@@ -52,7 +52,7 @@ Description
 Usage
     \table
         Property     | Description             | Required    | Default value
-        fileName     | fan curve file name     | yes         |
+        file         | fan curve file name     | yes         |
         outOfBounds  | out of bounds handling  | yes         |
         direction    | direction of flow through fan [in/out] | yes |
         p0           | environmental total pressure | yes    |

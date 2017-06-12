@@ -23,12 +23,17 @@ boundaryField
 {
     inlet
     {
-        type            uniformTotalPressure;
-        p0              table
-        (
-            (0 10)
-            (1 40)
-        );
+        type            fanPressure;
+        outOfBounds     clamp;
+        direction       in;
+        readerType      openFoam;
+        hasHeaderLine   true;
+        file            "$FOAM_CASE/constant/FluxVsdP.dat";
+        //nonDimensional  true;
+        //rpm             300;
+        //dm              2e-2;
+        outOfBounds     clamp;
+        p0              uniform 30;
     }
     outlet1
     {
