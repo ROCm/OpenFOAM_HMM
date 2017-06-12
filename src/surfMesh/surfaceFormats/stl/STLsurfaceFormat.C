@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STLsurfaceFormat.H"
-#include "labelledTri.H"
 #include "triPointRef.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -126,13 +125,25 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
 {
     this->clear();
 
-    // read in the values
+    // Read in the values
     STLReader reader(filename);
 
-    // transfer points
-    this->storedPoints().transfer(reader.points());
+    // Get the map for stitched surface points, with merge tolerance depending
+    // on the input format
+    labelList pointMap;
+    const label nUniquePoints = reader.mergePointsMap(pointMap);
 
-    // retrieve the original zone information
+    const auto& readpts = reader.points();
+
+    // Assign points
+    pointField& pointLst = this->storedPoints();
+    pointLst.setSize(nUniquePoints);
+    forAll(readpts, pointi)
+    {
+        pointLst[pointMap[pointi]] = readpts[pointi];
+    }
+
+    // Retrieve the original zone information
     List<word>  names(reader.names().xfer());
     List<label> sizes(reader.sizes().xfer());
     List<label> zoneIds(reader.zoneIds().xfer());
@@ -142,16 +153,21 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
 
     if (reader.sorted())
     {
-        // already sorted - generate directly
+        // Already sorted - generate directly
         forAll(faceLst, facei)
         {
             const label startPt = 3*facei;
-            faceLst[facei] = Face{startPt, startPt+1, startPt+2};
+            faceLst[facei] = Face
+            {
+                pointMap[startPt],
+                pointMap[startPt+1],
+                pointMap[startPt+2]
+            };
         }
     }
     else
     {
-        // unsorted - determine the sorted order:
+        // Unsorted - determine the sorted order:
         // avoid SortableList since we discard the main list anyhow
         List<label> faceMap;
         sortedOrder(zoneIds, faceMap);
@@ -160,7 +176,12 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
         forAll(faceMap, facei)
         {
             const label startPt = 3*faceMap[facei];
-            faceLst[facei] = Face{startPt, startPt+1, startPt+2};
+            faceLst[facei] = Face
+            {
+                pointMap[startPt],
+                pointMap[startPt+1],
+                pointMap[startPt+2]
+            };
         }
     }
     zoneIds.clear();
@@ -177,7 +198,6 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
         this->addZones(sizes);
     }
     this->addZonesToFaces(); // for labelledTri
-    this->stitchFaces(SMALL);
 
     return true;
 }

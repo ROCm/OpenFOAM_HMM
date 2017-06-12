@@ -51,7 +51,7 @@ SourceFiles
 #include "objectRegistry.H"
 #include "cellShapeList.H"
 #include "HashSet.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -83,7 +83,7 @@ public:
             VTK_ID
         };
 
-        static const NamedEnum<vtkDataType, 8> vtkDataTypeNames;
+        static const Enum<vtkDataType> vtkDataTypeNames;
 
 
         //- Enumeration defining the vtk dataset types
@@ -94,11 +94,10 @@ public:
             VTK_VECTORS
         };
 
-        static const NamedEnum<vtkDataSetType, 3> vtkDataSetTypeNames;
+        static const Enum<vtkDataSetType> vtkDataSetTypeNames;
 
 
-        //- Enumeration defining the parse mode - what type of data is being
-        //  read
+        //- Enumeration defining the parse mode - type of data being read
         enum parseMode
         {
             NOMODE,
@@ -108,7 +107,7 @@ public:
             POINT_DATA
         };
 
-        static const NamedEnum<parseMode, 5> parseModeNames;
+        static const Enum<parseMode> parseModeNames;
 
 
 private:

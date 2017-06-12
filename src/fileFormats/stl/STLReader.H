@@ -61,7 +61,7 @@ class STLReader
         bool sorted_;
 
         //- The points supporting the facets
-        pointField points_;
+        List<STLpoint> points_;
 
         //- The zones associated with the faces
         List<label> zoneIds_;
@@ -117,6 +117,15 @@ public:
         //- Flush all values
         void clear();
 
+        //- Calculate merge points mapping, return old to new pointMap.
+        //  The merge tolerance based on ASCII or BINARY input format.
+        //  \return number of unique points
+        label mergePointsMap(labelList& pointMap) const;
+
+        //- Calculate merge points mapping, return old to new pointMap.
+        //  \return number of unique points
+        label mergePointsMap(const scalar mergeTol, labelList& pointMap) const;
+
         //- File read was already sorted?
         inline bool sorted() const
         {
@@ -124,7 +133,7 @@ public:
         }
 
         //- Return full access to the points
-        inline pointField& points()
+        inline List<STLpoint>& points()
         {
             return points_;
         }
