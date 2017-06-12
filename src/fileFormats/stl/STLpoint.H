@@ -47,7 +47,7 @@ namespace Foam
 
 class STLpoint
 :
-    public Vector<float>
+    public floatVector
 {
 
 public:
@@ -58,28 +58,34 @@ public:
         inline STLpoint()
         {}
 
+        //- Construct from base class
+        inline STLpoint(const floatVector& v)
+        :
+            floatVector(v)
+        {}
+
         //- Construct from components
         inline STLpoint(float x, float y, float z)
         :
-            Vector<float>(x, y, z)
+            floatVector(x, y, z)
         {}
 
         //- Construct from components
         inline STLpoint(double x, double y, double z)
         :
-            Vector<float>(float(x), float(y), float(z))
+            floatVector(float(x), float(y), float(z))
         {}
 
         //- Construct from point
         inline STLpoint(const point& pt)
         :
-            Vector<float>(float(pt.x()), float(pt.y()), float(pt.z()))
+            floatVector(float(pt.x()), float(pt.y()), float(pt.z()))
         {}
 
         //- Construct from istream
         inline STLpoint(Istream& is)
         :
-            Vector<float>(is)
+            floatVector(is)
         {}
 
 
