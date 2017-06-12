@@ -40,7 +40,7 @@ Usage: $Script [OPTION] <file>
 
 * Create bash completions for OpenFOAM applications and write to <file>.
   By default searches directories \$FOAM_APPBIN and \$FOAM_USER_APPBIN
-  
+
 
 Options:
   -d | -directory   Directory to process
@@ -149,10 +149,10 @@ do
         echo "Processing $appName"
 
         # Options with args
-        optsWithArgs=($(awk '/^ *-[a-z]/ && /</ {print $1}' <<< "$appHelp"))
+        optsWithArgs=($(awk '/^ {0,4}-[a-z]/ && /</ {print $1}' <<< "$appHelp"))
 
         # Options without args
-        opts=($(awk '/^ *-[a-z]/ && !/</ {print $1}' <<< "$appHelp"))
+        opts=($(awk '/^ {0,4}-[a-z]/ && !/</ {print $1}' <<< "$appHelp"))
 
         cat<<WRITECOMPLETION >> $outFile
 unset -f _${appName}
