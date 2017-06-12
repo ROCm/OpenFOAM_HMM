@@ -40,7 +40,7 @@ SourceFiles
 #include "labelList.H"
 #include "pointField.H"
 #include "IOstreams.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -86,8 +86,8 @@ public:
         {
             POLY_ASCII,
             POLY_BINARY,
-            POLY_ASCII_COMPRESSED,
-            POLY_BINARY_COMPRESSED
+            POLY_ASCII_Z,
+            POLY_BINARY_Z
         };
 
 
@@ -97,11 +97,12 @@ public:
         //- Float type (binary format)
         typedef double  fireReal_t;
 
+
 protected:
 
     // Protected Data
 
-        static const NamedEnum<fileExt3d, 4>  file3dExtensions;
+        static const Enum<fileExt3d>  file3dExtensions;
 
 
     // Protected Member Functions
