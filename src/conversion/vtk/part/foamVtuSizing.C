@@ -29,12 +29,12 @@ License
 #include "cellShape.H"
 #include "cellModeller.H"
 
-// only used in this file
+// Only used in this file
 #include "foamVtuSizingTemplates.C"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::foamVtuSizing::presizeMaps(foamVtkMeshMaps& maps) const
+void Foam::vtk::vtuSizing::presizeMaps(foamVtkMeshMaps& maps) const
 {
     maps.cellMap().setSize(this->nFieldCells());
     maps.additionalIds().setSize(this->nAddPoints());
@@ -43,7 +43,7 @@ void Foam::foamVtuSizing::presizeMaps(foamVtkMeshMaps& maps) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::foamVtuSizing::foamVtuSizing
+Foam::vtk::vtuSizing::vtuSizing
 (
     const polyMesh& mesh,
     const bool decompose
@@ -54,7 +54,7 @@ Foam::foamVtuSizing::foamVtuSizing
 }
 
 
-Foam::foamVtuSizing::foamVtuSizing()
+Foam::vtk::vtuSizing::vtuSizing()
 {
     clear();
 }
@@ -62,13 +62,13 @@ Foam::foamVtuSizing::foamVtuSizing()
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamVtuSizing::~foamVtuSizing()
+Foam::vtk::vtuSizing::~vtuSizing()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::foamVtuSizing::reset
+void Foam::vtk::vtuSizing::reset
 (
     const polyMesh& mesh,
     const bool decompose
@@ -160,7 +160,7 @@ void Foam::foamVtuSizing::reset
 
             const labelList& cFaces = mesh.cells()[celli];
 
-            // Unique node ids used (only needed for XML)
+            // Unique node ids used (XML/INTERNAL, not needed for LEGACY)
             hashUniqId.clear();
 
             // Face stream sizing:
@@ -189,7 +189,7 @@ void Foam::foamVtuSizing::reset
 }
 
 
-Foam::label Foam::foamVtuSizing::slotSize
+Foam::label Foam::vtk::vtuSizing::sizeOf
 (
     const enum contentType output,
     const enum slotType slot
@@ -269,7 +269,7 @@ Foam::label Foam::foamVtuSizing::slotSize
 }
 
 
-void Foam::foamVtuSizing::populateLegacy
+void Foam::vtk::vtuSizing::populateLegacy
 (
     const polyMesh& mesh,
     UList<uint8_t>& cellTypes,
@@ -298,7 +298,7 @@ void Foam::foamVtuSizing::populateLegacy
 }
 
 
-void Foam::foamVtuSizing::populateXml
+void Foam::vtk::vtuSizing::populateXml
 (
     const polyMesh& mesh,
     UList<uint8_t>& cellTypes,
@@ -327,7 +327,7 @@ void Foam::foamVtuSizing::populateXml
 }
 
 
-void Foam::foamVtuSizing::populateInternal
+void Foam::vtk::vtuSizing::populateInternal
 (
     const polyMesh& mesh,
     UList<uint8_t>& cellTypes,
@@ -356,7 +356,7 @@ void Foam::foamVtuSizing::populateInternal
 }
 
 
-void Foam::foamVtuSizing::populateInternal
+void Foam::vtk::vtuSizing::populateInternal
 (
     const polyMesh& mesh,
     UList<uint8_t>& cellTypes,
@@ -385,7 +385,7 @@ void Foam::foamVtuSizing::populateInternal
 }
 
 
-void Foam::foamVtuSizing::populateInternal
+void Foam::vtk::vtuSizing::populateInternal
 (
     const polyMesh& mesh,
     UList<uint8_t>& cellTypes,
@@ -414,7 +414,7 @@ void Foam::foamVtuSizing::populateInternal
 }
 
 
-void Foam::foamVtuSizing::populateInternal
+void Foam::vtk::vtuSizing::populateInternal
 (
     const polyMesh& mesh,
     UList<uint8_t>& cellTypes,
@@ -442,7 +442,7 @@ void Foam::foamVtuSizing::populateInternal
 }
 
 
-void Foam::foamVtuSizing::populateInternal
+void Foam::vtk::vtuSizing::populateInternal
 (
     const polyMesh& mesh,
     UList<uint8_t>& cellTypes,
@@ -470,7 +470,7 @@ void Foam::foamVtuSizing::populateInternal
 }
 
 
-void Foam::foamVtuSizing::populateInternal
+void Foam::vtk::vtuSizing::populateInternal
 (
     const polyMesh& mesh,
     UList<uint8_t>& cellTypes,
@@ -498,7 +498,7 @@ void Foam::foamVtuSizing::populateInternal
 }
 
 
-void Foam::foamVtuSizing::clear()
+void Foam::vtk::vtuSizing::clear()
 {
     decompose_   = false;
     nCells_      = 0;
@@ -515,7 +515,7 @@ void Foam::foamVtuSizing::clear()
 }
 
 
-void Foam::foamVtuSizing::info(Ostream& os) const
+void Foam::vtk::vtuSizing::info(Ostream& os) const
 {
     os  << "nFieldCells:" << nFieldCells();
     if (nAddCells_)
@@ -551,7 +551,7 @@ void Foam::foamVtuSizing::info(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-bool Foam::foamVtuSizing::operator==(const foamVtuSizing& rhs) const
+bool Foam::vtk::vtuSizing::operator==(const vtuSizing& rhs) const
 {
     return
     (
@@ -569,7 +569,7 @@ bool Foam::foamVtuSizing::operator==(const foamVtuSizing& rhs) const
 }
 
 
-bool Foam::foamVtuSizing::operator!=(const foamVtuSizing& rhs) const
+bool Foam::vtk::vtuSizing::operator!=(const vtuSizing& rhs) const
 {
     return !operator==(rhs);
 }

@@ -36,58 +36,58 @@ License
 
 // * * * * * * * * * * * * * * * Static Data * * * * * * * * * * * * * * * * //
 
-const Foam::Enum<Foam::vtkFileTag>
-Foam::foamVtkOutput::legacy::contentNames
+const Foam::Enum<Foam::vtk::fileTag>
+Foam::vtk::legacy::contentNames
 {
-    { vtkFileTag::POLY_DATA,         "POLYDATA" },
-    { vtkFileTag::UNSTRUCTURED_GRID, "UNSTRUCTURED_GRID" },
+    { vtk::fileTag::POLY_DATA,         "POLYDATA" },
+    { vtk::fileTag::UNSTRUCTURED_GRID, "UNSTRUCTURED_GRID" },
 };
 
 
-const Foam::Enum<Foam::vtkFileTag>
-Foam::foamVtkOutput::legacy::dataTypeNames
+const Foam::Enum<Foam::vtk::fileTag>
+Foam::vtk::legacy::dataTypeNames
 {
-    { vtkFileTag::CELL_DATA,  "CELL_DATA" },
-    { vtkFileTag::POINT_DATA, "POINT_DATA" }
+    { vtk::fileTag::CELL_DATA,  "CELL_DATA" },
+    { vtk::fileTag::POINT_DATA, "POINT_DATA" }
 };
 
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::foamVtkOutput::formatter>
-Foam::foamVtkOutput::newFormatter
+Foam::autoPtr<Foam::vtk::formatter>
+Foam::vtk::newFormatter
 (
     std::ostream& os,
     const enum formatType fmtType,
     unsigned prec
 )
 {
-    autoPtr<foamVtkOutput::formatter> fmt;
+    autoPtr<vtk::formatter> fmt;
 
     switch (fmtType)
     {
         case formatType::INLINE_ASCII:
-            fmt.set(new foamVtkOutput::asciiFormatter(os, prec));
+            fmt.set(new vtk::asciiFormatter(os, prec));
             break;
 
         case formatType::INLINE_BASE64:
-            fmt.set(new foamVtkOutput::base64Formatter(os));
+            fmt.set(new vtk::base64Formatter(os));
             break;
 
         case formatType::APPEND_BASE64:
-            fmt.set(new foamVtkOutput::appendBase64Formatter(os));
+            fmt.set(new vtk::appendBase64Formatter(os));
             break;
 
         case formatType::APPEND_BINARY:
-            fmt.set(new foamVtkOutput::appendRawFormatter(os));
+            fmt.set(new vtk::appendRawFormatter(os));
             break;
 
         case formatType::LEGACY_ASCII:
-            fmt.set(new foamVtkOutput::legacyAsciiFormatter(os, prec));
+            fmt.set(new vtk::legacyAsciiFormatter(os, prec));
             break;
 
         case formatType::LEGACY_BINARY:
-            fmt.set(new foamVtkOutput::legacyRawFormatter(os));
+            fmt.set(new vtk::legacyRawFormatter(os));
             break;
     }
 
@@ -95,7 +95,7 @@ Foam::foamVtkOutput::newFormatter
 }
 
 
-Foam::label Foam::foamVtkOutput::writeVtmFile
+Foam::label Foam::vtk::writeVtmFile
 (
     std::ostream& os,
     const UList<fileName>& files
@@ -112,9 +112,9 @@ Foam::label Foam::foamVtkOutput::writeVtmFile
     forAll(files, i)
     {
         vtmFile
-            .openTag(vtkFileTag::DATA_SET)
-            ( "index", i )
-            ( "file", files[i] )
+            .openTag(vtk::fileTag::DATA_SET)
+            .xmlAttr("index", i)
+            .xmlAttr("file", files[i])
             .closeTag(true);
     }
 
@@ -124,9 +124,9 @@ Foam::label Foam::foamVtkOutput::writeVtmFile
 }
 
 
-std::ostream& Foam::foamVtkOutput::legacy::fileHeader
+std::ostream& Foam::vtk::legacy::fileHeader
 (
-    foamVtkOutput::formatter& fmt,
+    vtk::formatter& fmt,
     const std::string& title,
     const std::string& contentType
 )

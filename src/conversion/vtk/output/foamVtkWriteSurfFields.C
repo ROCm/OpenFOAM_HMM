@@ -32,11 +32,11 @@ License
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-void Foam::foamVtkOutput::writeSurfFields
+void Foam::vtk::writeSurfFields
 (
     const fvMesh& mesh,
     const fileName& baseName,
-    const foamVtkOutput::outputOptions outOpts,
+    const vtk::outputOptions outOpts,
     const UPtrList<const surfaceVectorField>& surfVectorFields
 )
 {
@@ -46,7 +46,7 @@ void Foam::foamVtkOutput::writeSurfFields
     const bool legacy_(opts.legacy());
 
     std::ofstream os((baseName + (legacy_ ? ".vtk" : ".vtp")).c_str());
-    autoPtr<foamVtkOutput::formatter> format = opts.newFormatter(os);
+    autoPtr<vtk::formatter> format = opts.newFormatter(os);
 
     // Same payload size for points and vector fields!
     const int nCmpt(3);  // vector
@@ -54,7 +54,7 @@ void Foam::foamVtkOutput::writeSurfFields
 
     if (legacy_)
     {
-        legacy::fileHeader(format(), "surfaceFields", vtkFileTag::POLY_DATA);
+        legacy::fileHeader(format(), "surfaceFields", vtk::fileTag::POLY_DATA);
         legacy::beginPoints(os, mesh.nFaces());
     }
     else
@@ -64,30 +64,30 @@ void Foam::foamVtkOutput::writeSurfFields
         format()
             .xmlHeader()
             .xmlComment("surfaceFields")
-            .beginVTKFile(vtkFileTag::POLY_DATA, "0.1");
+            .beginVTKFile(vtk::fileTag::POLY_DATA, "0.1");
 
         // Tricky - hide in beginPiece()
         format()
-            .openTag(vtkFileTag::PIECE)
-            ( "NumberOfPoints", mesh.nFaces() )
+            .openTag(vtk::fileTag::PIECE)
+            .xmlAttr(vtk::fileAttr::NUMBER_OF_POINTS, mesh.nFaces())
             .closeTag();
 
-        format().tag(vtkFileTag::POINTS)
-            .openDataArray<float,3>(vtkFileTag::POINTS)
+        format().tag(vtk::fileTag::POINTS)
+            .openDataArray<float,3>(vtk::dataArrayAttr::POINTS)
             .closeTag();
     }
 
     const pointField& fc = mesh.faceCentres();
 
     format().writeSize(payLoad);
-    foamVtkOutput::writeList(format(), fc);
+    vtk::writeList(format(), fc);
     format().flush();
 
     if (!legacy_)
     {
         format()
             .endDataArray()
-            .endTag(vtkFileTag::POINTS);
+            .endTag(vtk::fileTag::POINTS);
     }
 
 
@@ -97,14 +97,14 @@ void Foam::foamVtkOutput::writeSurfFields
         legacy::dataHeader
         (
             os,
-            vtkFileTag::POINT_DATA,
+            vtk::fileTag::POINT_DATA,
             mesh.nFaces(),
             surfVectorFields.size()
         );
     }
     else
     {
-        format().tag(vtkFileTag::POINT_DATA);
+        format().tag(vtk::fileTag::POINT_DATA);
     }
 
     // surfVectorFields
@@ -126,7 +126,7 @@ void Foam::foamVtkOutput::writeSurfFields
 
         for (label facei=0; facei < mesh.nInternalFaces(); ++facei)
         {
-            foamVtkOutput::write(format(), fld[facei]);
+            vtk::write(format(), fld[facei]);
         }
 
         forAll(fld.boundaryField(), patchi)
@@ -139,12 +139,12 @@ void Foam::foamVtkOutput::writeSurfFields
                 // Note: loop over polypatch size, not fvpatch size.
                 forAll(pp.patch(), i)
                 {
-                    foamVtkOutput::write(format(), vector::zero);
+                    vtk::write(format(), vector::zero);
                 }
             }
             else
             {
-                foamVtkOutput::writeList(format(), pf);
+                vtk::writeList(format(), pf);
             }
         }
 
@@ -158,12 +158,12 @@ void Foam::foamVtkOutput::writeSurfFields
 
     if (!legacy_)
     {
-        format().endTag(vtkFileTag::POINT_DATA);
+        format().endTag(vtk::fileTag::POINT_DATA);
 
         // slight cheat. </Piece> too
-        format().endTag(vtkFileTag::PIECE);
+        format().endTag(vtk::fileTag::PIECE);
 
-        format().endTag(vtkFileTag::POLY_DATA)
+        format().endTag(vtk::fileTag::POLY_DATA)
             .endVTKFile();
     }
 }

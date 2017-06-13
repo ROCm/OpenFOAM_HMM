@@ -22,12 +22,12 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::foamVtkOutput::formatter
+    Foam::vtk::formatter
 
 Description
     Abstract class for a VTK output stream formatter.
 
-    Includes very simple support for writing XML tags.
+    Includes very simple support for writing XML elements.
 
 SourceFiles
     foamVtkFormatter.C
@@ -44,9 +44,8 @@ SourceFiles
 #include "word.H"
 #include "UList.H"
 #include "LIFOStack.H"
-#include "foamVtkFileEnums.H"
+#include "foamVtkCore.H"
 #include "foamVtkPTraits.H"
-#include "foamVtkOutputTypes.H"
 
 #include <iostream>
 
@@ -54,7 +53,7 @@ SourceFiles
 
 namespace Foam
 {
-namespace foamVtkOutput
+namespace vtk
 {
 
 class outputOptions;
@@ -77,13 +76,15 @@ class formatter
         mutable bool inTag_;
 
 
-        //- Write XML attribute
+    // Private Member Functions
+
+        //- Write XML attribute key/value pair
         template<class Type>
-        formatter& xmlAttribute
+        formatter& writeAttribute
         (
             const word& k,
             const Type& v,
-            const char quote
+            const char quote = '\''
         );
 
 
@@ -161,7 +162,7 @@ public:
 
         //- Open XML tag
         //  \return formatter for chaining
-        inline formatter& openTag(const vtkFileTag& tagEnum);
+        inline formatter& openTag(const vtk::fileTag& tagEnum);
 
         //- Close XML tag, optional as an empty container.
         //  Always adds a trailing newline.
@@ -176,7 +177,7 @@ public:
         //- End XML tag with sanity check
         //  Always adds a trailing newline.
         //  \return formatter for chaining
-        inline formatter& endTag(const vtkFileTag& tagEnum);
+        inline formatter& endTag(const vtk::fileTag& tagEnum);
 
         //- Write XML tag without any attributes. Combines openTag/closeTag.
         //  \return formatter for chaining
@@ -184,7 +185,7 @@ public:
 
         //- Write XML tag without any attributes. Combines openTag/closeTag.
         //  \return formatter for chaining
-        inline formatter& tag(const vtkFileTag& tagEnum);
+        inline formatter& tag(const vtk::fileTag& tagEnum);
 
         //- Add a "VTKFile" XML tag for contentType, followed by a tag for
         //  the contentType itself. Optionally leave the contentType tag
@@ -203,7 +204,7 @@ public:
         //  \return formatter for chaining
         inline formatter& beginVTKFile
         (
-            const vtkFileTag& contentType,
+            const vtk::fileTag& contentType,
             const word& contentVersion,
             const bool leaveOpen = false
         );
@@ -222,7 +223,7 @@ public:
         //- Open "DataArray" XML tag
         //  \return formatter for chaining
         template<class Type, int nComp=0>
-        formatter& openDataArray(const vtkFileTag& tagEnum);
+        formatter& openDataArray(const vtk::dataArrayAttr& attrEnum);
 
 
         //- Insert a single "PDataArray" XML entry tag.
@@ -238,11 +239,11 @@ public:
 
         //- End "AppendedData" XML tag
         //  \return formatter for chaining
-        inline formatter& endAppendedData();
+        formatter& endAppendedData();
 
         //- End "VTKFile" XML tag
         //  \return formatter for chaining
-        inline formatter& endVTKFile();
+        formatter& endVTKFile();
 
 
         //- Write XML attribute
@@ -290,35 +291,39 @@ public:
             const char quote = '\''
         );
 
-
-    // Member Operators
+        //- Write XML attribute
+        //  \return formatter for chaining
+        inline formatter& xmlAttr
+        (
+            const vtk::fileAttr& attrEnum,
+            const int32_t v,
+            const char quote = '\''
+        );
 
         //- Write XML attribute
         //  \return formatter for chaining
-        inline formatter& operator()(const word& k, const std::string& v);
+        inline formatter& xmlAttr
+        (
+            const vtk::fileAttr& attrEnum,
+            const int64_t v,
+            const char quote = '\''
+        );
 
         //- Write XML attribute
         //  \return formatter for chaining
-        inline formatter& operator()(const word& k, const int32_t v);
-
-        //- Write XML attribute
-        //  \return formatter for chaining
-        inline formatter& operator()(const word& k, const int64_t v);
-
-        //- Write XML attribute
-        //  \return formatter for chaining
-        inline formatter& operator()(const word& k, const uint64_t v);
-
-        //- Write XML attribute
-        //  \return formatter for chaining
-        inline formatter& operator()(const word& k, const scalar v);
+        inline formatter& xmlAttr
+        (
+            const vtk::fileAttr& attrEnum,
+            const uint64_t v,
+            const char quote = '\''
+        );
 
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace foamVtkOutput
+} // End namespace vtk
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

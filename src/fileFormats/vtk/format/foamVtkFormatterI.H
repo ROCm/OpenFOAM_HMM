@@ -25,7 +25,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::foamVtkOutput::formatter::formatter(std::ostream& os)
+inline Foam::vtk::formatter::formatter(std::ostream& os)
 :
     os_(os),
     xmlTags_(),
@@ -35,28 +35,28 @@ inline Foam::foamVtkOutput::formatter::formatter(std::ostream& os)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline std::ostream& Foam::foamVtkOutput::formatter::os()
+inline std::ostream& Foam::vtk::formatter::os()
 {
     return os_;
 }
 
 
-inline Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::openTag(const vtkFileTag& tagEnum)
+inline Foam::vtk::formatter&
+Foam::vtk::formatter::openTag(const vtk::fileTag& tagEnum)
 {
-    return openTag(vtkFileTagNames[tagEnum]);
+    return openTag(vtk::fileTagNames[tagEnum]);
 }
 
 
-inline Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::endTag(const vtkFileTag& tagEnum)
+inline Foam::vtk::formatter&
+Foam::vtk::formatter::endTag(const vtk::fileTag& tagEnum)
 {
-    return endTag(vtkFileTagNames[tagEnum]);
+    return endTag(vtk::fileTagNames[tagEnum]);
 }
 
 
-inline Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::tag(const word& tagName)
+inline Foam::vtk::formatter&
+Foam::vtk::formatter::tag(const word& tagName)
 {
     openTag(tagName);
     closeTag();
@@ -65,135 +65,118 @@ Foam::foamVtkOutput::formatter::tag(const word& tagName)
 }
 
 
-inline Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::tag(const vtkFileTag& tagEnum)
+inline Foam::vtk::formatter&
+Foam::vtk::formatter::tag(const vtk::fileTag& tagEnum)
 {
-    return tag(vtkFileTagNames[tagEnum]);
+    return tag(vtk::fileTagNames[tagEnum]);
 }
 
 
-inline Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::beginVTKFile
+inline Foam::vtk::formatter&
+Foam::vtk::formatter::beginVTKFile
 (
-    const vtkFileTag& contentType,
+    const vtk::fileTag& contentType,
     const word& contentVersion,
     const bool leaveOpen
 )
 {
     return beginVTKFile
     (
-        vtkFileTagNames[contentType],
+        vtk::fileTagNames[contentType],
         contentVersion,
         leaveOpen
     );
 }
 
 
-inline Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::endDataArray()
+inline Foam::vtk::formatter&
+Foam::vtk::formatter::endDataArray()
 {
     return endTag("DataArray");
 }
 
 
-inline Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::endAppendedData()
-{
-    flush();     // flush any pending encoded content
-    os_ << '\n'; // clear separation from content.
-    return endTag("AppendedData");
-}
-
-
-inline Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::endVTKFile()
-{
-    return endTag(vtkFileTag::VTK_FILE);
-}
-
-
-inline Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::xmlAttr
+inline Foam::vtk::formatter&
+Foam::vtk::formatter::xmlAttr
 (
     const word& k,
     const int32_t v,
     const char quote
 )
 {
-    return xmlAttribute(k, v, quote);
+    return writeAttribute(k, v, quote);
 }
 
 
-inline Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::xmlAttr
+inline Foam::vtk::formatter&
+Foam::vtk::formatter::xmlAttr
 (
     const word& k,
     const int64_t v,
     const char quote
 )
 {
-    return xmlAttribute(k, v, quote);
+    return writeAttribute(k, v, quote);
 }
 
 
-inline Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::xmlAttr
+inline Foam::vtk::formatter&
+Foam::vtk::formatter::xmlAttr
 (
     const word& k,
     const uint64_t v,
     const char quote
 )
 {
-    return xmlAttribute(k, v, quote);
+    return writeAttribute(k, v, quote);
 }
 
 
-inline Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::xmlAttr
+inline Foam::vtk::formatter&
+Foam::vtk::formatter::xmlAttr
 (
     const word& k,
     const scalar v,
     const char quote
 )
 {
-    return xmlAttribute(k, v, quote);
+    return writeAttribute(k, v, quote);
 }
 
 
-// * * * * * * * * * * * * * * Member Operators * * * * * * * * * * * * * * //
-
-inline Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::operator()(const word& k, const std::string& v)
+inline Foam::vtk::formatter&
+Foam::vtk::formatter::xmlAttr
+(
+    const vtk::fileAttr& attrEnum,
+    const int32_t v,
+    const char quote
+)
 {
-    return xmlAttr(k, v);
+    return xmlAttr(vtk::fileAttrNames[attrEnum], v, quote);
 }
 
 
-inline Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::operator()(const word& k, const int32_t v)
+inline Foam::vtk::formatter&
+Foam::vtk::formatter::xmlAttr
+(
+    const vtk::fileAttr& attrEnum,
+    const int64_t v,
+    const char quote
+)
 {
-    return xmlAttr(k, v);
+    return xmlAttr(vtk::fileAttrNames[attrEnum], v, quote);
 }
 
 
-inline Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::operator()(const word& k, const int64_t v)
+inline Foam::vtk::formatter&
+Foam::vtk::formatter::xmlAttr
+(
+    const vtk::fileAttr& attrEnum,
+    const uint64_t v,
+    const char quote
+)
 {
-    return xmlAttr(k, v);
-}
-
-
-inline Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::operator()(const word& k, const uint64_t v)
-{
-    return xmlAttr(k, v);
-}
-
-
-inline Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::operator()(const word& k, const scalar v)
-{
-    return xmlAttr(k, v);
+    return xmlAttr(vtk::fileAttrNames[attrEnum], v, quote);
 }
 
 

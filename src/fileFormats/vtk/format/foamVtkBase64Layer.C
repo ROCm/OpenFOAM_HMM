@@ -27,12 +27,12 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* Foam::foamVtkOutput::foamVtkBase64Layer::encoding_ = "base64";
+const char* Foam::vtk::foamVtkBase64Layer::encoding_ = "base64";
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::foamVtkOutput::foamVtkBase64Layer::write
+void Foam::vtk::foamVtkBase64Layer::write
 (
     const char* s,
     std::streamsize n
@@ -44,7 +44,7 @@ void Foam::foamVtkOutput::foamVtkBase64Layer::write
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::foamVtkBase64Layer::foamVtkBase64Layer(std::ostream& os)
+Foam::vtk::foamVtkBase64Layer::foamVtkBase64Layer(std::ostream& os)
 :
     formatter(os),
     base64Layer(os)
@@ -53,7 +53,7 @@ Foam::foamVtkOutput::foamVtkBase64Layer::foamVtkBase64Layer(std::ostream& os)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::foamVtkBase64Layer::~foamVtkBase64Layer()
+Foam::vtk::foamVtkBase64Layer::~foamVtkBase64Layer()
 {
     base64Layer::close();
 }
@@ -61,39 +61,39 @@ Foam::foamVtkOutput::foamVtkBase64Layer::~foamVtkBase64Layer()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-const char* Foam::foamVtkOutput::foamVtkBase64Layer::encoding() const
+const char* Foam::vtk::foamVtkBase64Layer::encoding() const
 {
     return encoding_;
 }
 
 
-void Foam::foamVtkOutput::foamVtkBase64Layer::writeSize(const uint64_t nBytes)
+void Foam::vtk::foamVtkBase64Layer::writeSize(const uint64_t nBytes)
 {
     write(reinterpret_cast<const char*>(&nBytes), sizeof(uint64_t));
 }
 
 
-void Foam::foamVtkOutput::foamVtkBase64Layer::write(const uint8_t val)
+void Foam::vtk::foamVtkBase64Layer::write(const uint8_t val)
 {
     base64Layer::add(val);
 }
 
 
-void Foam::foamVtkOutput::foamVtkBase64Layer::write(const label val)
+void Foam::vtk::foamVtkBase64Layer::write(const label val)
 {
     // std::cerr<<"label:" << sizeof(val) << "=" << val << '\n';
     write(reinterpret_cast<const char*>(&val), sizeof(label));
 }
 
 
-void Foam::foamVtkOutput::foamVtkBase64Layer::write(const float val)
+void Foam::vtk::foamVtkBase64Layer::write(const float val)
 {
     // std::cerr<<"float:" << sizeof(val) << "=" << val << '\n';
     write(reinterpret_cast<const char*>(&val), sizeof(float));
 }
 
 
-void Foam::foamVtkOutput::foamVtkBase64Layer::write(const double val)
+void Foam::vtk::foamVtkBase64Layer::write(const double val)
 {
     // std::cerr<<"double as float=" << val << '\n';
     float copy(val);
@@ -101,13 +101,13 @@ void Foam::foamVtkOutput::foamVtkBase64Layer::write(const double val)
 }
 
 
-void Foam::foamVtkOutput::foamVtkBase64Layer::flush()
+void Foam::vtk::foamVtkBase64Layer::flush()
 {
     base64Layer::close();
 }
 
 
-std::size_t Foam::foamVtkOutput::foamVtkBase64Layer::encodedLength
+std::size_t Foam::vtk::foamVtkBase64Layer::encodedLength
 (
     std::size_t n
 ) const

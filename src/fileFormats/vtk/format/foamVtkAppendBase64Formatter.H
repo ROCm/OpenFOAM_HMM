@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::foamVtkOutput::appendBase64Formatter
+    Foam::vtk::appendBase64Formatter
 
 Description
     Appended base-64 encoded binary output.
@@ -42,7 +42,7 @@ SourceFiles
 
 namespace Foam
 {
-namespace foamVtkOutput
+namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
@@ -92,7 +92,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace foamVtkOutput
+} // End namespace vtk
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

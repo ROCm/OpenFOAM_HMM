@@ -25,49 +25,11 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-void Foam::foamVtkOutput::writeField
-(
-    foamVtkOutput::formatter& fmt,
-    const GeometricField<Type, fvPatchField, volMesh>& fld
-)
-{
-    const uint64_t payLoad =
-    (
-        fld.size() * pTraits<Type>::nComponents * sizeof(float)
-    );
-
-    fmt.writeSize(payLoad);
-    writeList(fmt, fld.internalField());
-
-    fmt.flush();
-}
-
 
 template<class Type>
-void Foam::foamVtkOutput::writeField
+void Foam::vtk::writeField
 (
-    foamVtkOutput::formatter& fmt,
-    const GeometricField<Type, fvPatchField, volMesh>& fld,
-    const UList<label>& cellMap
-)
-{
-    const uint64_t payLoad =
-    (
-        cellMap.size() * pTraits<Type>::nComponents * sizeof(float)
-    );
-
-    fmt.writeSize(payLoad);
-    writeList(fmt, fld.internalField(), cellMap);
-
-    fmt.flush();
-}
-
-
-template<class Type>
-void Foam::foamVtkOutput::writeField
-(
-    foamVtkOutput::formatter& fmt,
+    vtk::formatter& fmt,
     const DimensionedField<Type, volMesh>& fld
 )
 {
@@ -84,9 +46,9 @@ void Foam::foamVtkOutput::writeField
 
 
 template<class Type>
-void Foam::foamVtkOutput::writeField
+void Foam::vtk::writeField
 (
-    foamVtkOutput::formatter& fmt,
+    vtk::formatter& fmt,
     const DimensionedField<Type, volMesh>& fld,
     const UList<label>& cellMap
 )
@@ -98,6 +60,45 @@ void Foam::foamVtkOutput::writeField
 
     fmt.writeSize(payLoad);
     writeList(fmt, fld, cellMap);
+
+    fmt.flush();
+}
+
+
+template<class Type>
+void Foam::vtk::writeField
+(
+    vtk::formatter& fmt,
+    const GeometricField<Type, fvPatchField, volMesh>& fld
+)
+{
+    const uint64_t payLoad =
+    (
+        fld.size() * pTraits<Type>::nComponents * sizeof(float)
+    );
+
+    fmt.writeSize(payLoad);
+    writeList(fmt, fld.internalField());
+
+    fmt.flush();
+}
+
+
+template<class Type>
+void Foam::vtk::writeField
+(
+    vtk::formatter& fmt,
+    const GeometricField<Type, fvPatchField, volMesh>& fld,
+    const UList<label>& cellMap
+)
+{
+    const uint64_t payLoad =
+    (
+        cellMap.size() * pTraits<Type>::nComponents * sizeof(float)
+    );
+
+    fmt.writeSize(payLoad);
+    writeList(fmt, fld.internalField(), cellMap);
 
     fmt.flush();
 }

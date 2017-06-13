@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::foamVtkOutput::legacyRawFormatter
+    Foam::vtk::legacyRawFormatter
 
 Description
     Binary output for the VTK legacy format, always written as big-endian
@@ -44,7 +44,7 @@ SourceFiles
 
 namespace Foam
 {
-namespace foamVtkOutput
+namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
@@ -118,7 +118,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace foamVtkOutput
+} // End namespace vtk
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

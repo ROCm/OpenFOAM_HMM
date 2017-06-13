@@ -29,22 +29,21 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::foamVtkOutput::surfaceMeshWriter::beginPiece()
+void Foam::vtk::surfaceMeshWriter::beginPiece()
 {
     if (!legacy_)
     {
         format()
-            .openTag(vtkFileTag::PIECE)
-            ( "NumberOfPoints", pp_.nPoints() )
-            ( "NumberOfPolys",  pp_.size() )
+            .openTag(vtk::fileTag::PIECE)
+            .xmlAttr(vtk::fileAttr::NUMBER_OF_POINTS, pp_.nPoints())
+            .xmlAttr(vtk::fileAttr::NUMBER_OF_POLYS,  pp_.size())
             .closeTag();
     }
 }
 
 
-void Foam::foamVtkOutput::surfaceMeshWriter::writePoints()
+void Foam::vtk::surfaceMeshWriter::writePoints()
 {
-    // payload count
     const uint64_t payLoad = (pp_.nPoints()*3*sizeof(float));
 
     if (legacy_)
@@ -53,26 +52,26 @@ void Foam::foamVtkOutput::surfaceMeshWriter::writePoints()
     }
     else
     {
-        format().tag(vtkFileTag::POINTS)
-            .openDataArray<float, 3>(vtkFileTag::POINTS)
+        format().tag(vtk::fileTag::POINTS)
+            .openDataArray<float, 3>(vtk::dataArrayAttr::POINTS)
             .closeTag();
     }
 
     format().writeSize(payLoad);
 
-    foamVtkOutput::writeList(format(), pp_.localPoints());
+    vtk::writeList(format(), pp_.localPoints());
     format().flush();
 
     if (!legacy_)
     {
         format()
             .endDataArray()
-            .endTag(vtkFileTag::POINTS);
+            .endTag(vtk::fileTag::POINTS);
     }
 }
 
 
-void Foam::foamVtkOutput::surfaceMeshWriter::writePolysLegacy()
+void Foam::vtk::surfaceMeshWriter::writePolysLegacy()
 {
     // connectivity count without additional storage (done internally)
     uint64_t nConnectivity = 0;
@@ -92,20 +91,20 @@ void Foam::foamVtkOutput::surfaceMeshWriter::writePolysLegacy()
         const face& f = pp_.localFaces()[facei];
 
         format().write(f.size());  // The size prefix
-        foamVtkOutput::writeList(format(), f);
+        vtk::writeList(format(), f);
     }
 
     format().flush();
 }
 
 
-void Foam::foamVtkOutput::surfaceMeshWriter::writePolys()
+void Foam::vtk::surfaceMeshWriter::writePolys()
 {
     //
     // 'connectivity'
     //
 
-    format().tag(vtkFileTag::POLYS);
+    format().tag(vtk::fileTag::POLYS);
 
     //
     // 'connectivity'
@@ -118,7 +117,7 @@ void Foam::foamVtkOutput::surfaceMeshWriter::writePolys()
             payLoad += pp_[facei].size();
         }
 
-        format().openDataArray<label>("connectivity")
+        format().openDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY)
             .closeTag();
 
         // payload size
@@ -127,7 +126,7 @@ void Foam::foamVtkOutput::surfaceMeshWriter::writePolys()
         forAll(pp_, facei)
         {
             const face& f = pp_.localFaces()[facei];
-            foamVtkOutput::writeList(format(), f);
+            vtk::writeList(format(), f);
         }
 
         format().flush();
@@ -142,7 +141,7 @@ void Foam::foamVtkOutput::surfaceMeshWriter::writePolys()
     //
     {
         format()
-            .openDataArray<label>("offsets")
+            .openDataArray<label>(vtk::dataArrayAttr::OFFSETS)
             .closeTag();
 
         // payload size
@@ -160,11 +159,11 @@ void Foam::foamVtkOutput::surfaceMeshWriter::writePolys()
         format().endDataArray();
     }
 
-    format().endTag(vtkFileTag::POLYS);
+    format().endTag(vtk::fileTag::POLYS);
 }
 
 
-void Foam::foamVtkOutput::surfaceMeshWriter::writeMesh()
+void Foam::vtk::surfaceMeshWriter::writeMesh()
 {
     writePoints();
     if (legacy_)
@@ -180,12 +179,12 @@ void Foam::foamVtkOutput::surfaceMeshWriter::writeMesh()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::surfaceMeshWriter::surfaceMeshWriter
+Foam::vtk::surfaceMeshWriter::surfaceMeshWriter
 (
     const indirectPrimitivePatch& pp,
     const word& name,
     const fileName& baseName,
-    const foamVtkOutput::outputOptions outOpts
+    const vtk::outputOptions outOpts
 )
 :
     pp_(pp),
@@ -201,7 +200,7 @@ Foam::foamVtkOutput::surfaceMeshWriter::surfaceMeshWriter
 
     if (legacy_)
     {
-        legacy::fileHeader(format(), name, vtkFileTag::POLY_DATA);
+        legacy::fileHeader(format(), name, vtk::fileTag::POLY_DATA);
     }
     else
     {
@@ -210,7 +209,7 @@ Foam::foamVtkOutput::surfaceMeshWriter::surfaceMeshWriter
         format()
             .xmlHeader()
             .xmlComment(name)
-            .beginVTKFile(vtkFileTag::POLY_DATA, "0.1");
+            .beginVTKFile(vtk::fileTag::POLY_DATA, "0.1");
 
     }
 
@@ -221,42 +220,42 @@ Foam::foamVtkOutput::surfaceMeshWriter::surfaceMeshWriter
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::surfaceMeshWriter::~surfaceMeshWriter()
+Foam::vtk::surfaceMeshWriter::~surfaceMeshWriter()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::foamVtkOutput::surfaceMeshWriter::beginCellData(label nFields)
+void Foam::vtk::surfaceMeshWriter::beginCellData(label nFields)
 {
     if (legacy_)
     {
-        legacy::dataHeader(os(), vtkFileTag::CELL_DATA, pp_.size(), nFields);
+        legacy::dataHeader(os(), vtk::fileTag::CELL_DATA, pp_.size(), nFields);
     }
     else
     {
-        format().tag(vtkFileTag::CELL_DATA);
+        format().tag(vtk::fileTag::CELL_DATA);
     }
 }
 
 
-void Foam::foamVtkOutput::surfaceMeshWriter::endCellData()
+void Foam::vtk::surfaceMeshWriter::endCellData()
 {
     if (!legacy_)
     {
-        format().endTag(vtkFileTag::CELL_DATA);
+        format().endTag(vtk::fileTag::CELL_DATA);
     }
 }
 
 
-void Foam::foamVtkOutput::surfaceMeshWriter::writeFooter()
+void Foam::vtk::surfaceMeshWriter::writeFooter()
 {
     if (!legacy_)
     {
         // slight cheat. </Piece> too
-        format().endTag(vtkFileTag::PIECE);
+        format().endTag(vtk::fileTag::PIECE);
 
-        format().endTag(vtkFileTag::POLY_DATA)
+        format().endTag(vtk::fileTag::POLY_DATA)
             .endVTKFile();
     }
 }

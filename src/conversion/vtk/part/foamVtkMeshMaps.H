@@ -26,6 +26,8 @@ Class
 
 Description
     Bookkeeping for mesh subsetting and/or polyhedral cell decomposition.
+    Although the main use case is for handling vtk meshes, it is not specific
+    to VTK alone.
 
     The cellMap is a local-to-global lookup for normal and decomposed cells.
     The pointMap is an optional local-to-global lookup for point ids.
@@ -101,17 +103,19 @@ public:
         //- Clear
         inline void clear();
 
-        //- Renumber cell ids to account for subset meshes
+        //- Renumber cell ids (cellMap and additionalIds) to account for
+        //  subset meshes
         void renumberCells(const UList<label>& mapping);
 
-        //- Renumber point ids to account for subset meshes
+        //- Renumber point ids (pointMap) to account for subset meshes
         void renumberPoints(const UList<label>& mapping);
 
 
         //- Original cell ids for all cells (regular and decomposed).
-        //  A regular mesh comprising only primitive cell types, this will just
-        //  be an identity list. However, for subsetted meshes and decomposed
-        //  cells this becomes a useful means of mapping from the original mesh.
+        //  For a regular mesh comprising only primitive cell types, this
+        //  will simply be an identity list. However, for subsetted meshes
+        //  and decomposed cells this becomes a useful means of mapping from
+        //  the original mesh.
         inline DynamicList<label>& cellMap();
 
         //- Point labels for subsetted meshes

@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 InNamespace
-    Foam::foamVtkOutput
+    Foam::vtk
 
 Description
     Write faces of cellSet to vtk polydata file.
@@ -45,11 +45,11 @@ SourceFiles
 
 namespace Foam
 {
- class primitiveMesh;
+class primitiveMesh;
 class cellSet;
 class fileName;
 
-namespace foamVtkOutput
+namespace vtk
 {
 
 //- Write perimeter faces of cellset to vtk polydata file.
@@ -59,10 +59,10 @@ void writeCellSetFaces
     const primitiveMesh& mesh,
     const cellSet& set,
     const fileName& baseName,
-    const foamVtkOutput::outputOptions outOpts
+    const vtk::outputOptions outOpts
 );
 
-} // End namespace foamVtkOutput
+} // End namespace vtk
 } // End namespace Foam
 
 

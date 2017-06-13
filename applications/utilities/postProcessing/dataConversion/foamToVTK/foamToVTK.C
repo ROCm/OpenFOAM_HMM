@@ -242,9 +242,9 @@ labelList getSelectedPatches
 // Process args for output options
 // Default from foamVtkOutputOptions is inline ASCII xml
 //
-foamVtkOutput::outputOptions getOutputOptions(const argList& args)
+vtk::outputOptions getOutputOptions(const argList& args)
 {
-    foamVtkOutput::outputOptions opts;
+    vtk::outputOptions opts;
 
     if (args.optionFound("xml"))
     {
@@ -421,7 +421,7 @@ int main(int argc, char *argv[])
     const bool noLagrangian    = args.optionFound("noLagrangian");
     const bool nearCellValue   = args.optionFound("nearCellValue");
 
-    const foamVtkOutput::outputOptions fmtType = getOutputOptions(args);
+    const vtk::outputOptions fmtType = getOutputOptions(args);
 
     if (nearCellValue)
     {
@@ -515,7 +515,7 @@ int main(int argc, char *argv[])
     meshSubsetHelper meshRef(mesh, meshSubsetHelper::SET, cellSetName);
 
     // Collect decomposition information etc.
-    foamVtkCells foamVtkMeshCells(fmtType, decomposePoly);
+    vtk::vtuCells vtuMeshCells(fmtType, decomposePoly);
 
     Info<< "VTK mesh topology: "
         << timer.cpuTimeIncrement() << " s, "
@@ -544,7 +544,7 @@ int main(int argc, char *argv[])
         )
         {
             // Trigger change for vtk cells too
-            foamVtkMeshCells.clear();
+            vtuMeshCells.clear();
         }
 
         // If faceSet: write faceSet only (as polydata)
@@ -565,7 +565,7 @@ int main(int argc, char *argv[])
             Info<< "    faceSet   : "
                 << relativeName(runTime, outputName) << nl;
 
-            foamVtkOutput::writeFaceSet
+            vtk::writeFaceSet
             (
                 meshRef.mesh(),
                 set,
@@ -593,7 +593,7 @@ int main(int argc, char *argv[])
             Info<< "    pointSet  : "
                 << relativeName(runTime, outputName) << nl;
 
-            foamVtkOutput::writePointSet
+            vtk::writePointSet
             (
                 meshRef.mesh(),
                 set,
@@ -830,14 +830,14 @@ int main(int argc, char *argv[])
 
         if (doWriteInternal)
         {
-            if (foamVtkMeshCells.empty())
+            if (vtuMeshCells.empty())
             {
-                foamVtkMeshCells.reset(meshRef.mesh());
+                vtuMeshCells.reset(meshRef.mesh());
 
                 // Convert cellMap, addPointCellLabels to global cell ids
                 if (meshRef.useSubMesh())
                 {
-                    foamVtkMeshCells.renumberCells
+                    vtuMeshCells.renumberCells
                     (
                         meshRef.subsetter().cellMap()
                     );
@@ -855,10 +855,10 @@ int main(int argc, char *argv[])
                 << relativeName(runTime, outputName) << endl;
 
             // Write mesh
-            foamVtkOutput::internalWriter writer
+            vtk::internalWriter writer
             (
                 meshRef.baseMesh(),
-                foamVtkMeshCells,
+                vtuMeshCells,
                 outputName,
                 fmtType
             );
@@ -980,7 +980,7 @@ int main(int argc, char *argv[])
                   + timeDesc
                 );
 
-                foamVtkOutput::writeSurfFields
+                vtk::writeSurfFields
                 (
                     meshRef.mesh(),
                     outputName,
@@ -1013,7 +1013,7 @@ int main(int argc, char *argv[])
             Info<< "    Combined patches     : "
                 << relativeName(runTime, outputName) << nl;
 
-            foamVtkOutput::patchWriter writer
+            vtk::patchWriter writer
             (
                 meshRef.mesh(),
                 outputName,
@@ -1083,7 +1083,7 @@ int main(int argc, char *argv[])
                 Info<< "    Patch     : "
                     << relativeName(runTime, outputName) << nl;
 
-                foamVtkOutput::patchWriter writer
+                vtk::patchWriter writer
                 (
                     meshRef.mesh(),
                     outputName,
@@ -1194,7 +1194,7 @@ int main(int argc, char *argv[])
                     mesh.points()
                 );
 
-                foamVtkOutput::surfaceMeshWriter writer
+                vtk::surfaceMeshWriter writer
                 (
                     pp,
                     fz.name(),
@@ -1281,7 +1281,7 @@ int main(int argc, char *argv[])
                 Info<< "        tensors           :";
                 print(Info, tensorNames);
 
-                foamVtkOutput::lagrangianWriter writer
+                vtk::lagrangianWriter writer
                 (
                     meshRef.mesh(),
                     cloudName,
@@ -1314,7 +1314,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                foamVtkOutput::lagrangianWriter writer
+                vtk::lagrangianWriter writer
                 (
                     meshRef.mesh(),
                     cloudName,

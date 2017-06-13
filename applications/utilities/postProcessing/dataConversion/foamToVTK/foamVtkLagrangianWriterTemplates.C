@@ -29,7 +29,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::foamVtkOutput::lagrangianWriter::writeIOField
+void Foam::vtk::lagrangianWriter::writeIOField
 (
     const wordList& objectNames
 )
@@ -94,7 +94,7 @@ void Foam::foamVtkOutput::lagrangianWriter::writeIOField
             }
 
             format().writeSize(payLoad);
-            foamVtkOutput::writeList(format(), fld);
+            vtk::writeList(format(), fld);
         }
 
         format().flush();

@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::foamVtkOutput::legacyAsciiFormatter
+    Foam::vtk::legacyAsciiFormatter
 
 Description
-    Formatting as per Foam::foamVtkOutput::asciiFormatter, but with
+    Formatting as per Foam::vtk::asciiFormatter, but with
     naming for legacy output.
 
 SourceFiles
@@ -42,7 +42,7 @@ SourceFiles
 
 namespace Foam
 {
-namespace foamVtkOutput
+namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
@@ -99,7 +99,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace foamVtkOutput
+} // End namespace vtk
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

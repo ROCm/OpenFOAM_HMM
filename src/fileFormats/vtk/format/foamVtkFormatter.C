@@ -26,19 +26,19 @@ License
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::formatter::~formatter()
+Foam::vtk::formatter::~formatter()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-std::size_t Foam::foamVtkOutput::formatter::encodedLength(std::size_t n) const
+std::size_t Foam::vtk::formatter::encodedLength(std::size_t n) const
 {
     return n;
 }
 
 
-void Foam::foamVtkOutput::formatter::indent()
+void Foam::vtk::formatter::indent()
 {
     label n = xmlTags_.size() * 2;
     while (n--)
@@ -48,8 +48,8 @@ void Foam::foamVtkOutput::formatter::indent()
 }
 
 
-Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::xmlHeader()
+Foam::vtk::formatter&
+Foam::vtk::formatter::xmlHeader()
 {
     if (inTag_)
     {
@@ -64,8 +64,8 @@ Foam::foamVtkOutput::formatter::xmlHeader()
 }
 
 
-Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::xmlComment(const std::string& comment)
+Foam::vtk::formatter&
+Foam::vtk::formatter::xmlComment(const std::string& comment)
 {
     if (inTag_)
     {
@@ -81,8 +81,8 @@ Foam::foamVtkOutput::formatter::xmlComment(const std::string& comment)
 }
 
 
-Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::openTag(const word& tagName)
+Foam::vtk::formatter&
+Foam::vtk::formatter::openTag(const word& tagName)
 {
     if (inTag_)
     {
@@ -102,8 +102,8 @@ Foam::foamVtkOutput::formatter::openTag(const word& tagName)
 }
 
 
-Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::closeTag(const bool isEmpty)
+Foam::vtk::formatter&
+Foam::vtk::formatter::closeTag(const bool isEmpty)
 {
     if (!inTag_)
     {
@@ -126,8 +126,8 @@ Foam::foamVtkOutput::formatter::closeTag(const bool isEmpty)
 }
 
 
-Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::endTag(const word& tagName)
+Foam::vtk::formatter&
+Foam::vtk::formatter::endTag(const word& tagName)
 {
     const word curr = xmlTags_.pop();
     indent();
@@ -140,11 +140,11 @@ Foam::foamVtkOutput::formatter::endTag(const word& tagName)
             << endl;
     }
 
-    // verify inTag_
+    // verify expected end tag
     if (!tagName.empty() && tagName != curr)
     {
         WarningInFunction
-            << "expected to end xml-tag '" << tagName
+            << "expecting to end xml-tag '" << tagName
             << "' but found '" << curr << "' instead"
             << endl;
     }
@@ -157,19 +157,19 @@ Foam::foamVtkOutput::formatter::endTag(const word& tagName)
 }
 
 
-Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::beginVTKFile
+Foam::vtk::formatter&
+Foam::vtk::formatter::beginVTKFile
 (
     const word& contentType,
     const word& contentVersion,
     const bool leaveOpen
 )
 {
-    openTag(vtkFileTag::VTK_FILE);
+    openTag(vtk::fileTag::VTK_FILE);
     xmlAttr("type",        contentType);
     xmlAttr("version",     contentVersion);
-    xmlAttr("byte_order",  foamVtkPTraits<Foam::endian>::typeName);
-    xmlAttr("header_type", foamVtkPTraits<headerType>::typeName);
+    xmlAttr("byte_order",  vtkPTraits<Foam::endian>::typeName);
+    xmlAttr("header_type", vtkPTraits<headerType>::typeName);
     closeTag();
 
     openTag(contentType);
@@ -182,8 +182,15 @@ Foam::foamVtkOutput::formatter::beginVTKFile
 }
 
 
-Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::beginAppendedData()
+Foam::vtk::formatter&
+Foam::vtk::formatter::endVTKFile()
+{
+    return endTag(vtk::fileTag::VTK_FILE);
+}
+
+
+Foam::vtk::formatter&
+Foam::vtk::formatter::beginAppendedData()
 {
     openTag("AppendedData");
     xmlAttr("encoding", encoding());
@@ -194,8 +201,17 @@ Foam::foamVtkOutput::formatter::beginAppendedData()
 }
 
 
-Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::xmlAttr
+Foam::vtk::formatter&
+Foam::vtk::formatter::endAppendedData()
+{
+    flush();     // flush any pending encoded content
+    os_ << nl;   // ensure clear separation from content.
+    return endTag("AppendedData");
+}
+
+
+Foam::vtk::formatter&
+Foam::vtk::formatter::xmlAttr
 (
     const word& k,
     const std::string& v,

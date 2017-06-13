@@ -28,8 +28,8 @@ License
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::outputOptions&
-Foam::foamVtkOutput::outputOptions::ascii(bool on)
+Foam::vtk::outputOptions&
+Foam::vtk::outputOptions::ascii(bool on)
 {
     if (on)
     {
@@ -76,8 +76,8 @@ Foam::foamVtkOutput::outputOptions::ascii(bool on)
 }
 
 
-Foam::foamVtkOutput::outputOptions&
-Foam::foamVtkOutput::outputOptions::append(bool on)
+Foam::vtk::outputOptions&
+Foam::vtk::outputOptions::append(bool on)
 {
     if (on)
     {
@@ -118,8 +118,8 @@ Foam::foamVtkOutput::outputOptions::append(bool on)
 }
 
 
-Foam::foamVtkOutput::outputOptions&
-Foam::foamVtkOutput::outputOptions::legacy(bool on)
+Foam::vtk::outputOptions&
+Foam::vtk::outputOptions::legacy(bool on)
 {
     if (on)
     {
@@ -160,15 +160,15 @@ Foam::foamVtkOutput::outputOptions::legacy(bool on)
 }
 
 
-Foam::foamVtkOutput::outputOptions&
-Foam::foamVtkOutput::outputOptions::precision(unsigned prec)
+Foam::vtk::outputOptions&
+Foam::vtk::outputOptions::precision(unsigned prec)
 {
     precision_ = prec;
     return *this;
 }
 
 
-Foam::string Foam::foamVtkOutput::outputOptions::description() const
+Foam::string Foam::vtk::outputOptions::description() const
 {
     switch (fmtType_)
     {

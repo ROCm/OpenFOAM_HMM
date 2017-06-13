@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::foamVtkOutput::foamVtkBase64Layer
+    Foam::vtk::foamVtkBase64Layer
 
 Description
     Base-64 encoded output layer - normally only used indirectly by formatters.
@@ -39,7 +39,7 @@ Description
 
 namespace Foam
 {
-namespace foamVtkOutput
+namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
@@ -108,7 +108,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace foamVtkOutput
+} // End namespace vtk
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

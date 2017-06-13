@@ -32,10 +32,10 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class LabelType, class LabelType2>
-void Foam::foamVtuSizing::populateArrays
+void Foam::vtk::vtuSizing::populateArrays
 (
     const polyMesh& mesh,
-    const foamVtuSizing& sizing,
+    const vtk::vtuSizing& sizing,
     UList<uint8_t>& cellTypes,
     UList<LabelType>& vertLabels,
     UList<LabelType>& vertOffset,
@@ -46,8 +46,6 @@ void Foam::foamVtuSizing::populateArrays
     UList<LabelType2>& addPointsIds
 )
 {
-    using vtkTypes = fileFormats::foamVtkCore::vtkTypes;
-
     // STAGE 1: Verify storage sizes
 
     if (cellTypes.size() != sizing.nFieldCells())
@@ -275,7 +273,7 @@ void Foam::foamVtuSizing::populateArrays
 
         if (model == tet)
         {
-            cellTypes[celli] = vtkTypes::VTK_TETRA;
+            cellTypes[celli] = vtk::cellType::VTK_TETRA;
             if (vertOffset.size())
             {
                 vertOffset[celli] = shape.size();
@@ -292,7 +290,7 @@ void Foam::foamVtuSizing::populateArrays
         }
         else if (model == pyr)
         {
-            cellTypes[celli] = vtkTypes::VTK_PYRAMID;
+            cellTypes[celli] = vtk::cellType::VTK_PYRAMID;
             if (vertOffset.size())
             {
                 vertOffset[celli] = shape.size();
@@ -309,7 +307,7 @@ void Foam::foamVtuSizing::populateArrays
         }
         else if (model == hex)
         {
-            cellTypes[celli] = vtkTypes::VTK_HEXAHEDRON;
+            cellTypes[celli] = vtk::cellType::VTK_HEXAHEDRON;
             if (vertOffset.size())
             {
                 vertOffset[celli] = shape.size();
@@ -326,7 +324,7 @@ void Foam::foamVtuSizing::populateArrays
         }
         else if (model == prism)
         {
-            cellTypes[celli] = vtkTypes::VTK_WEDGE;
+            cellTypes[celli] = vtk::cellType::VTK_WEDGE;
             if (vertOffset.size())
             {
                 vertOffset[celli] = shape.size();
@@ -347,7 +345,7 @@ void Foam::foamVtuSizing::populateArrays
         else if (model == tetWedge && sizing.decompose())
         {
             // Treat as squeezed prism
-            cellTypes[celli] = vtkTypes::VTK_WEDGE;
+            cellTypes[celli] = vtk::cellType::VTK_WEDGE;
             if (vertOffset.size())
             {
                 vertOffset[celli] = 6;
@@ -367,7 +365,7 @@ void Foam::foamVtuSizing::populateArrays
         else if (model == wedge && sizing.decompose())
         {
             // Treat as squeezed hex
-            cellTypes[celli] = vtkTypes::VTK_HEXAHEDRON;
+            cellTypes[celli] = vtk::cellType::VTK_HEXAHEDRON;
             if (vertOffset.size())
             {
                 vertOffset[celli] = 8;
@@ -443,7 +441,7 @@ void Foam::foamVtuSizing::populateArrays
                     }
                     cellMap[celLoc] = celli;
 
-                    cellTypes[celLoc] = vtkTypes::VTK_PYRAMID;
+                    cellTypes[celLoc] = vtk::cellType::VTK_PYRAMID;
                     if (vertOffset.size())
                     {
                         vertOffset[celLoc] = nShapePoints;
@@ -494,7 +492,7 @@ void Foam::foamVtuSizing::populateArrays
                     }
                     cellMap[celLoc] = celli;
 
-                    cellTypes[celLoc] = vtkTypes::VTK_TETRA;
+                    cellTypes[celLoc] = vtk::cellType::VTK_TETRA;
                     if (vertOffset.size())
                     {
                         vertOffset[celLoc] = nShapePoints;
@@ -504,7 +502,7 @@ void Foam::foamVtuSizing::populateArrays
                         vertLabels[vrtLoc++] = nShapePoints;
                     }
 
-                    cellTypes[celLoc] = vtkTypes::VTK_TETRA;
+                    cellTypes[celLoc] = vtk::cellType::VTK_TETRA;
 
                     // See note above about the orientation.
                     if (isOwner)
@@ -530,7 +528,7 @@ void Foam::foamVtuSizing::populateArrays
 
             // face-stream
             //   [nFaces, nFace0Pts, id1, id2, ..., nFace1Pts, id1, id2, ...]
-            cellTypes[celli] = vtkTypes::VTK_POLYHEDRON;
+            cellTypes[celli] = vtk::cellType::VTK_POLYHEDRON;
             const labelList& cFaces = mesh.cells()[celli];
 
             const label startLabel = faceIndexer;

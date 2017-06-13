@@ -27,12 +27,12 @@ License
 
 namespace Foam
 {
-namespace foamVtkOutput
+namespace vtk
 {
 
 //- Template specialization for label
 template<>
-inline void write<label>(foamVtkOutput::formatter& fmt, const label& val)
+inline void write<label>(vtk::formatter& fmt, const label& val)
 {
     fmt.write(val);
 }
@@ -40,7 +40,7 @@ inline void write<label>(foamVtkOutput::formatter& fmt, const label& val)
 
 //- Template specialization for float
 template<>
-inline void write<float>(foamVtkOutput::formatter& fmt, const float& val)
+inline void write<float>(vtk::formatter& fmt, const float& val)
 {
     fmt.write(val);
 }
@@ -48,18 +48,18 @@ inline void write<float>(foamVtkOutput::formatter& fmt, const float& val)
 
 //- Template specialization for double
 template<>
-inline void write<double>(foamVtkOutput::formatter& fmt, const double& val)
+inline void write<double>(vtk::formatter& fmt, const double& val)
 {
     fmt.write(val);
 }
 
-} // End namespace foamVtkOutput
+} // End namespace vtk
 } // End namespace Foam
 
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
-inline std::ostream& Foam::foamVtkOutput::legacy::fileHeader
+inline std::ostream& Foam::vtk::legacy::fileHeader
 (
     std::ostream& os,
     const std::string& title,
@@ -74,18 +74,18 @@ inline std::ostream& Foam::foamVtkOutput::legacy::fileHeader
 }
 
 
-inline void Foam::foamVtkOutput::legacy::fileHeader
+inline void Foam::vtk::legacy::fileHeader
 (
-    foamVtkOutput::formatter& fmt,
+    vtk::formatter& fmt,
     const std::string& title,
-    const vtkFileTag& contentTypeTag
+    const vtk::fileTag& contentTypeTag
 )
 {
     fileHeader(fmt, title, contentNames[contentTypeTag]);
 }
 
 
-inline void Foam::foamVtkOutput::legacy::beginPoints
+inline void Foam::vtk::legacy::beginPoints
 (
     std::ostream& os,
     const label nPoints
@@ -95,7 +95,7 @@ inline void Foam::foamVtkOutput::legacy::beginPoints
 }
 
 
-inline void Foam::foamVtkOutput::legacy::beginPolys
+inline void Foam::vtk::legacy::beginPolys
 (
     std::ostream& os,
     const label nPolys,
@@ -106,10 +106,10 @@ inline void Foam::foamVtkOutput::legacy::beginPolys
 }
 
 
-inline void Foam::foamVtkOutput::legacy::dataHeader
+inline void Foam::vtk::legacy::dataHeader
 (
     std::ostream& os,
-    const vtkFileTag& dataTypeTag,
+    const vtk::fileTag& dataTypeTag,
     const label nEntries,
     const label nFields
 )
@@ -119,7 +119,7 @@ inline void Foam::foamVtkOutput::legacy::dataHeader
 }
 
 
-inline void Foam::foamVtkOutput::legacy::floatField
+inline void Foam::vtk::legacy::floatField
 (
     std::ostream& os,
     const word& fieldName,
@@ -131,7 +131,7 @@ inline void Foam::foamVtkOutput::legacy::floatField
 }
 
 
-inline void Foam::foamVtkOutput::legacy::intField
+inline void Foam::vtk::legacy::intField
 (
     std::ostream& os,
     const word& fieldName,

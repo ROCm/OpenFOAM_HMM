@@ -27,108 +27,108 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::foamVtuSizing::decompose() const
+inline bool Foam::vtk::vtuSizing::decompose() const
 {
     return decompose_;
 }
 
 
-inline Foam::label Foam::foamVtuSizing::nCells() const
+inline Foam::label Foam::vtk::vtuSizing::nCells() const
 {
     return nCells_;
 }
 
 
-inline Foam::label Foam::foamVtuSizing::nPoints() const
+inline Foam::label Foam::vtk::vtuSizing::nPoints() const
 {
     return nPoints_;
 }
 
 
-inline Foam::label Foam::foamVtuSizing::nVertLabels() const
+inline Foam::label Foam::vtk::vtuSizing::nVertLabels() const
 {
     return nVertLabels_;
 }
 
 
-inline Foam::label Foam::foamVtuSizing::nFaceLabels() const
+inline Foam::label Foam::vtk::vtuSizing::nFaceLabels() const
 {
     return nFaceLabels_;
 }
 
 
-inline Foam::label Foam::foamVtuSizing::nCellsPoly() const
+inline Foam::label Foam::vtk::vtuSizing::nCellsPoly() const
 {
     return nCellsPoly_;
 }
 
 
-inline Foam::label Foam::foamVtuSizing::nVertPoly() const
+inline Foam::label Foam::vtk::vtuSizing::nVertPoly() const
 {
     return nVertPoly_;
 }
 
 
-inline Foam::label Foam::foamVtuSizing::nAddCells() const
+inline Foam::label Foam::vtk::vtuSizing::nAddCells() const
 {
     return nAddCells_;
 }
 
 
-inline Foam::label Foam::foamVtuSizing::nAddPoints() const
+inline Foam::label Foam::vtk::vtuSizing::nAddPoints() const
 {
     return nAddPoints_;
 }
 
 
-inline Foam::label Foam::foamVtuSizing::nAddVerts() const
+inline Foam::label Foam::vtk::vtuSizing::nAddVerts() const
 {
     return nAddVerts_;
 }
 
 
-inline Foam::label Foam::foamVtuSizing::nFieldCells() const
+inline Foam::label Foam::vtk::vtuSizing::nFieldCells() const
 {
     return nCells_ + nAddCells_;
 }
 
 
-inline Foam::label Foam::foamVtuSizing::nFieldPoints() const
+inline Foam::label Foam::vtk::vtuSizing::nFieldPoints() const
 {
     return nPoints_ + nAddPoints_;
 }
 
 
-inline Foam::label Foam::foamVtuSizing::sizeLegacy() const
+inline Foam::label Foam::vtk::vtuSizing::sizeLegacy() const
 {
-    return slotSize(contentType::LEGACY, slotType::CELLS);
+    return sizeOf(contentType::LEGACY, slotType::CELLS);
 }
 
 
-inline Foam::label Foam::foamVtuSizing::sizeLegacy
+inline Foam::label Foam::vtk::vtuSizing::sizeLegacy
 (
     const enum slotType slot
 ) const
 {
-    return slotSize(contentType::LEGACY, slot);
+    return sizeOf(contentType::LEGACY, slot);
 }
 
 
-inline Foam::label Foam::foamVtuSizing::sizeXml
+inline Foam::label Foam::vtk::vtuSizing::sizeXml
 (
     const enum slotType slot
 ) const
 {
-    return slotSize(contentType::XML, slot);
+    return sizeOf(contentType::XML, slot);
 }
 
 
-inline Foam::label Foam::foamVtuSizing::sizeInternal
+inline Foam::label Foam::vtk::vtuSizing::sizeInternal
 (
     const enum slotType slot
 ) const
 {
-    return slotSize(contentType::INTERNAL, slot);
+    return sizeOf(contentType::INTERNAL, slot);
 }
 
 

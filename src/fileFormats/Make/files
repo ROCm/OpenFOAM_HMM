@@ -14,7 +14,8 @@ stl/STLCore.C
 stl/STLReader.C
 stl/STLReaderASCII.L
 
-vtk/foamVtkCore.C
+vtk/core/foamVtkCore.C
+vtk/core/foamVtkPTraits.C
 vtk/format/foamVtkFormatter.C
 vtk/format/foamVtkAsciiFormatter.C
 vtk/format/foamVtkBase64Formatter.C
@@ -26,8 +27,6 @@ vtk/format/foamVtkLegacyRawFormatter.C
 vtk/output/foamVtkOutput.C
 vtk/output/foamVtkOutputOptions.C
 vtk/read/vtkUnstructuredReader.C
-vtk/type/foamVtkFileEnums.C
-vtk/type/foamVtkPTraits.C
 
 coordSet/coordSet.C
 

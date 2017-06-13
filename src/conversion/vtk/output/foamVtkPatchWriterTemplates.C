@@ -29,7 +29,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type, template<class> class PatchField>
-void Foam::foamVtkOutput::patchWriter::write
+void Foam::vtk::patchWriter::write
 (
     const UPtrList<const GeometricField<Type, PatchField, volMesh>>& flds
 )
@@ -59,11 +59,11 @@ void Foam::foamVtkOutput::patchWriter::write
 
             if (nearCellValue_)
             {
-                foamVtkOutput::writeList(format(), pfld.patchInternalField()());
+                vtk::writeList(format(), pfld.patchInternalField()());
             }
             else
             {
-                foamVtkOutput::writeList(format(), pfld);
+                vtk::writeList(format(), pfld);
             }
         }
 
@@ -78,7 +78,7 @@ void Foam::foamVtkOutput::patchWriter::write
 
 
 template<class Type, template<class> class PatchField>
-void Foam::foamVtkOutput::patchWriter::write
+void Foam::vtk::patchWriter::write
 (
     const UPtrList<const GeometricField<Type, PatchField, pointMesh>>& flds
 )
@@ -106,7 +106,7 @@ void Foam::foamVtkOutput::patchWriter::write
         {
             const auto& pfld = fld.boundaryField()[patchIDs_[i]];
 
-            foamVtkOutput::writeList(format(), pfld.patchInternalField()());
+            vtk::writeList(format(), pfld.patchInternalField()());
         }
 
         format().flush();
@@ -120,7 +120,7 @@ void Foam::foamVtkOutput::patchWriter::write
 
 
 template<class Type>
-void Foam::foamVtkOutput::patchWriter::write
+void Foam::vtk::patchWriter::write
 (
     const PrimitivePatchInterpolation<primitivePatch>& pInter,
     const UPtrList<const GeometricField<Type, fvPatchField, volMesh>>& flds
@@ -154,13 +154,13 @@ void Foam::foamVtkOutput::patchWriter::write
                 auto tfield =
                     pInter.faceToPointInterpolate(pfld.patchInternalField()());
 
-                foamVtkOutput::writeList(format(), tfield());
+                vtk::writeList(format(), tfield());
             }
             else
             {
                 auto tfield = pInter.faceToPointInterpolate(pfld);
 
-                foamVtkOutput::writeList(format(), tfield());
+                vtk::writeList(format(), tfield());
             }
         }
 

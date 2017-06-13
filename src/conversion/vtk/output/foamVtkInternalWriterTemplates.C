@@ -31,12 +31,12 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::foamVtkOutput::internalWriter::write
+void Foam::vtk::internalWriter::write
 (
     const UPtrList<const DimensionedField<Type, volMesh>>& flds
 )
 {
-    const labelList& cellMap = vtkCells_.cellMap();
+    const labelList& cellMap = vtuCells_.cellMap();
 
     const int nCmpt(pTraits<Type>::nComponents);
     // const uint64_t payLoad(cellMap.size() * nCmpt * sizeof(float));
@@ -56,7 +56,7 @@ void Foam::foamVtkOutput::internalWriter::write
         }
 
         // writeField includes payload size
-        foamVtkOutput::writeField(format(), fld, cellMap);
+        vtk::writeField(format(), fld, cellMap);
 
         if (!legacy_)
         {
@@ -67,12 +67,12 @@ void Foam::foamVtkOutput::internalWriter::write
 
 
 template<class Type, template<class> class PatchField>
-void Foam::foamVtkOutput::internalWriter::write
+void Foam::vtk::internalWriter::write
 (
     const UPtrList<const GeometricField<Type, PatchField, volMesh>>& flds
 )
 {
-    const labelList& cellMap = vtkCells_.cellMap();
+    const labelList& cellMap = vtuCells_.cellMap();
 
     const int nCmpt(pTraits<Type>::nComponents);
     // const uint64_t payLoad(cellMap.size() * nCmpt * sizeof(float));
@@ -92,7 +92,7 @@ void Foam::foamVtkOutput::internalWriter::write
         }
 
         // writeField includes payload size
-        foamVtkOutput::writeField(format(), fld, cellMap);
+        vtk::writeField(format(), fld, cellMap);
 
         if (!legacy_)
         {
@@ -103,15 +103,15 @@ void Foam::foamVtkOutput::internalWriter::write
 
 
 template<class Type, template<class> class PatchField>
-void Foam::foamVtkOutput::internalWriter::write
+void Foam::vtk::internalWriter::write
 (
     const UPtrList<const GeometricField<Type, PatchField, pointMesh>>& flds
 )
 {
-    const labelList& addPointCellLabels = vtkCells_.addPointCellLabels();
+    const labelList& addPointCellLabels = vtuCells_.addPointCellLabels();
 
     const int nCmpt(pTraits<Type>::nComponents);
-    const int nVals(vtkCells_.nFieldPoints());
+    const int nVals(vtuCells_.nFieldPoints());
 
     // Only needed for non-legacy
     const uint64_t payLoad(nVals * nCmpt * sizeof(float));
@@ -131,12 +131,12 @@ void Foam::foamVtkOutput::internalWriter::write
         }
 
         format().writeSize(payLoad);
-        foamVtkOutput::writeList(format(), fld);
+        vtk::writeList(format(), fld);
 
         forAll(addPointCellLabels, i)
         {
             const Type val = interpolatePointToCell(fld, addPointCellLabels[i]);
-            foamVtkOutput::write(format(), val);
+            vtk::write(format(), val);
         }
 
         format().flush();
@@ -150,16 +150,16 @@ void Foam::foamVtkOutput::internalWriter::write
 
 
 template<class Type>
-void Foam::foamVtkOutput::internalWriter::write
+void Foam::vtk::internalWriter::write
 (
     const volPointInterpolation& pInterp,
     const UPtrList<const DimensionedField<Type, volMesh>>& flds
 )
 {
-    const labelList& addPointCellLabels = vtkCells_.addPointCellLabels();
+    const labelList& addPointCellLabels = vtuCells_.addPointCellLabels();
 
     const int nCmpt(pTraits<Type>::nComponents);
-    const int nVals(vtkCells_.nFieldPoints());
+    const int nVals(vtuCells_.nFieldPoints());
 
     // Only needed for non-legacy
     const uint64_t payLoad(nVals * nCmpt * sizeof(float));
@@ -180,8 +180,8 @@ void Foam::foamVtkOutput::internalWriter::write
         }
 
         format().writeSize(payLoad);
-        foamVtkOutput::writeList(format(), pfield);
-        foamVtkOutput::writeList(format(), vfield, addPointCellLabels);
+        vtk::writeList(format(), pfield);
+        vtk::writeList(format(), vfield, addPointCellLabels);
         format().flush();
 
         if (!legacy_)
@@ -193,16 +193,16 @@ void Foam::foamVtkOutput::internalWriter::write
 
 
 template<class Type, template<class> class PatchField>
-void Foam::foamVtkOutput::internalWriter::write
+void Foam::vtk::internalWriter::write
 (
     const volPointInterpolation& pInterp,
     const UPtrList<const GeometricField<Type, PatchField, volMesh>>& flds
 )
 {
-    const labelList& addPointCellLabels = vtkCells_.addPointCellLabels();
+    const labelList& addPointCellLabels = vtuCells_.addPointCellLabels();
 
     const int nCmpt(pTraits<Type>::nComponents);
-    const int nVals(vtkCells_.nFieldPoints());
+    const int nVals(vtuCells_.nFieldPoints());
 
     // Only needed for non-legacy
     const uint64_t payLoad(nVals * nCmpt * sizeof(float));
@@ -223,8 +223,8 @@ void Foam::foamVtkOutput::internalWriter::write
         }
 
         format().writeSize(payLoad);
-        foamVtkOutput::writeList(format(), pfield);
-        foamVtkOutput::writeList(format(), vfield, addPointCellLabels);
+        vtk::writeList(format(), pfield);
+        vtk::writeList(format(), vfield, addPointCellLabels);
         format().flush();
 
         if (!legacy_)

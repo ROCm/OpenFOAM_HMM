@@ -28,15 +28,15 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* Foam::foamVtkOutput::legacyAsciiFormatter::legacyName_ = "ASCII";
+const char* Foam::vtk::legacyAsciiFormatter::legacyName_ = "ASCII";
 
-const Foam::foamVtkOutput::outputOptions
-Foam::foamVtkOutput::legacyAsciiFormatter::opts_(formatType::LEGACY_ASCII);
+const Foam::vtk::outputOptions
+Foam::vtk::legacyAsciiFormatter::opts_(formatType::LEGACY_ASCII);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::legacyAsciiFormatter::legacyAsciiFormatter
+Foam::vtk::legacyAsciiFormatter::legacyAsciiFormatter
 (
     std::ostream& os
 )
@@ -45,7 +45,7 @@ Foam::foamVtkOutput::legacyAsciiFormatter::legacyAsciiFormatter
 {}
 
 
-Foam::foamVtkOutput::legacyAsciiFormatter::legacyAsciiFormatter
+Foam::vtk::legacyAsciiFormatter::legacyAsciiFormatter
 (
     std::ostream& os,
     unsigned precision
@@ -57,26 +57,26 @@ Foam::foamVtkOutput::legacyAsciiFormatter::legacyAsciiFormatter
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::legacyAsciiFormatter::~legacyAsciiFormatter()
+Foam::vtk::legacyAsciiFormatter::~legacyAsciiFormatter()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-const Foam::foamVtkOutput::outputOptions&
-Foam::foamVtkOutput::legacyAsciiFormatter::opts() const
+const Foam::vtk::outputOptions&
+Foam::vtk::legacyAsciiFormatter::opts() const
 {
     return opts_;
 }
 
 
-const char* Foam::foamVtkOutput::legacyAsciiFormatter::name() const
+const char* Foam::vtk::legacyAsciiFormatter::name() const
 {
     return legacyName_;
 }
 
 
-const char* Foam::foamVtkOutput::legacyAsciiFormatter::encoding() const
+const char* Foam::vtk::legacyAsciiFormatter::encoding() const
 {
     return legacyName_;
 }

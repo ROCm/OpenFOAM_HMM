@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::foamVtkOutput::asciiFormatter
+    Foam::vtk::asciiFormatter
 
 Description
     Inline ASCII output.
@@ -43,7 +43,7 @@ SourceFiles
 
 namespace Foam
 {
-namespace foamVtkOutput
+namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
@@ -125,7 +125,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace foamVtkOutput
+} // End namespace vtk
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

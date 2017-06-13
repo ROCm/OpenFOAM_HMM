@@ -32,12 +32,12 @@ License
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-void Foam::foamVtkOutput::writeFaceSet
+void Foam::vtk::writeFaceSet
 (
     const primitiveMesh& mesh,
     const faceSet& set,
     const fileName& baseName,
-    const foamVtkOutput::outputOptions outOpts
+    const vtk::outputOptions outOpts
 )
 {
     outputOptions opts(outOpts);
@@ -47,11 +47,11 @@ void Foam::foamVtkOutput::writeFaceSet
 
     std::ofstream os((baseName + (legacy_ ? ".vtk" : ".vtp")).c_str());
 
-    autoPtr<foamVtkOutput::formatter> format = opts.newFormatter(os);
+    autoPtr<vtk::formatter> format = opts.newFormatter(os);
 
     if (legacy_)
     {
-        legacy::fileHeader(format(), set.name(), vtkFileTag::POLY_DATA);
+        legacy::fileHeader(format(), set.name(), vtk::fileTag::POLY_DATA);
     }
 
     //-------------------------------------------------------------------------
@@ -70,7 +70,7 @@ void Foam::foamVtkOutput::writeFaceSet
     // Write points and faces as polygons
     legacy::beginPoints(os, pp.nPoints());
 
-    foamVtkOutput::writeList(format(), pp.localPoints());
+    vtk::writeList(format(), pp.localPoints());
     format().flush();
 
     // connectivity count without additional storage (done internally)
@@ -89,18 +89,18 @@ void Foam::foamVtkOutput::writeFaceSet
         const face& f = pp.localFaces()[facei];
 
         format().write(f.size());  // The size prefix
-        foamVtkOutput::writeList(format(), f);
+        vtk::writeList(format(), f);
     }
     format().flush();
 
 
     // Write data - faceId/cellId
 
-    legacy::dataHeader(os, vtkFileTag::CELL_DATA, pp.size(), 1);
+    legacy::dataHeader(os, vtk::fileTag::CELL_DATA, pp.size(), 1);
 
     os << "faceID 1 " << pp.size() << " int" << nl;
 
-    foamVtkOutput::writeList(format(), faceLabels);
+    vtk::writeList(format(), faceLabels);
     format().flush();
 }
 

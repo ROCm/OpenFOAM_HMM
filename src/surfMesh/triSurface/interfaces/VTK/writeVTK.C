@@ -33,9 +33,9 @@ License
 // TODO: make this run-time selectable (ASCII | BINARY)
 // - Legacy mode only
 
-static const Foam::foamVtkOutput::formatType fmtType =
-    Foam::foamVtkOutput::formatType::LEGACY_ASCII;
-    // Foam::foamVtkOutput::formatType::LEGACY_BASE64;
+static const Foam::vtk::formatType fmtType =
+    Foam::vtk::formatType::LEGACY_ASCII;
+    // Foam::vtk::formatType::LEGACY_BINARY;
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -46,15 +46,15 @@ void Foam::triSurface::writeVTK
     std::ostream& os
 ) const
 {
-    autoPtr<foamVtkOutput::formatter> format =
-        foamVtkOutput::newFormatter(os, fmtType);
+    autoPtr<vtk::formatter> format =
+        vtk::newFormatter(os, fmtType);
 
     // Header
-    foamVtkOutput::legacy::fileHeader
+    vtk::legacy::fileHeader
     (
         format(),
         "triSurface",
-        vtkFileTag::POLY_DATA
+        vtk::fileTag::POLY_DATA
     );
 
     const pointField& pts = this->points();
@@ -63,15 +63,15 @@ void Foam::triSurface::writeVTK
     const label nFaces = faceLst.size();
 
     // Points
-    foamVtkOutput::legacy::beginPoints(os, pts.size());
+    vtk::legacy::beginPoints(os, pts.size());
 
-    foamVtkOutput::writeList(format(), pts);
+    vtk::writeList(format(), pts);
     format().flush();
 
     // connectivity count (without additional storage)
     // is simply 3 * nFaces
 
-    foamVtkOutput::legacy::beginPolys(os, nFaces, 3*nFaces);
+    vtk::legacy::beginPolys(os, nFaces, 3*nFaces);
 
     labelList faceMap;
     surfacePatchList patches(calcPatches(faceMap));
@@ -88,7 +88,7 @@ void Foam::triSurface::writeVTK
                 const Face& f = faceLst[faceMap[faceIndex++]];
 
                 format().write(3);  // The size prefix
-                foamVtkOutput::writeList(format(), f);
+                vtk::writeList(format(), f);
             }
         }
         format().flush();
@@ -97,15 +97,15 @@ void Foam::triSurface::writeVTK
         // Write regions (zones) as CellData
         if (patches.size() > 1)
         {
-            foamVtkOutput::legacy::dataHeader
+            vtk::legacy::dataHeader
             (
                 os,
-                vtkFileTag::CELL_DATA,
+                vtk::fileTag::CELL_DATA,
                 nFaces,
                 1  // Only one field
             );
 
-            foamVtkOutput::legacy::intField
+            vtk::legacy::intField
             (
                 os,
                 "region",
@@ -132,22 +132,22 @@ void Foam::triSurface::writeVTK
         for (const Face& f : faceLst)
         {
             format().write(3);  // The size prefix
-            foamVtkOutput::writeList(format(), f);
+            vtk::writeList(format(), f);
         }
         format().flush();
 
 
         // Write regions (zones) as CellData
 
-        foamVtkOutput::legacy::dataHeader
+        vtk::legacy::dataHeader
         (
             os,
-            vtkFileTag::CELL_DATA,
+            vtk::fileTag::CELL_DATA,
             faceLst.size(),
             1  // Only one field
         );
 
-        foamVtkOutput::legacy::intField
+        vtk::legacy::intField
         (
             os,
             "region",

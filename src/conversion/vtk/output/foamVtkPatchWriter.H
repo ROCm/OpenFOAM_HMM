@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::foamVtkOutput::patchWriter
+    Foam::vtk::patchWriter
 
 Description
     Write patch fields
@@ -50,7 +50,7 @@ namespace Foam
 {
 class volPointInterpolation;
 
-namespace foamVtkOutput
+namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
@@ -67,7 +67,7 @@ class patchWriter
         //- Commonly used query
         const bool legacy_;
 
-        autoPtr<foamVtkOutput::formatter> format_;
+        autoPtr<vtk::formatter> format_;
 
         const bool nearCellValue_;
 
@@ -114,7 +114,7 @@ public:
         (
             const fvMesh& mesh,
             const fileName& baseName,
-            const foamVtkOutput::outputOptions outOpts,
+            const vtk::outputOptions outOpts,
             const bool nearCellValue,
             const labelList& patchIDs
         );
@@ -131,7 +131,7 @@ public:
             return os_;
         }
 
-        inline foamVtkOutput::formatter& format()
+        inline vtk::formatter& format()
         {
             return format_();
         }
@@ -202,7 +202,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace foamVtkOutput
+} // End namespace vtk
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -27,8 +27,8 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::xmlAttribute
+Foam::vtk::formatter&
+Foam::vtk::formatter::writeAttribute
 (
     const word& k,
     const Type& v,
@@ -49,18 +49,18 @@ Foam::foamVtkOutput::formatter::xmlAttribute
 
 
 template<class Type, int nComp>
-Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::openDataArray
+Foam::vtk::formatter&
+Foam::vtk::formatter::openDataArray
 (
     const word& dataName
 )
 {
     openTag("DataArray");
-    xmlAttr("type", foamVtkPTraits<Type>::typeName);
+    xmlAttr("type", vtkPTraits<Type>::typeName);
     xmlAttr("Name", dataName);
     if (nComp > 1)
     {
-        xmlAttr("NumberOfComponents", nComp);
+        xmlAttr(fileAttr::NUMBER_OF_COMPONENTS, nComp);
     }
     xmlAttr("format", name());
 
@@ -69,32 +69,32 @@ Foam::foamVtkOutput::formatter::openDataArray
 
 
 template<class Type, int nComp>
-Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::openDataArray
+Foam::vtk::formatter&
+Foam::vtk::formatter::openDataArray
 (
-    const vtkFileTag& tagEnum
+    const vtk::dataArrayAttr& attrEnum
 )
 {
-    return openDataArray<Type, nComp>(vtkFileTagNames[tagEnum]);
+    return openDataArray<Type, nComp>(vtk::dataArrayAttrNames[attrEnum]);
 }
 
 
 template<class Type, int nComp>
-Foam::foamVtkOutput::formatter&
-Foam::foamVtkOutput::formatter::PDataArray
+Foam::vtk::formatter&
+Foam::vtk::formatter::PDataArray
 (
     const word& dataName
 )
 {
     openTag("PDataArray");
-    xmlAttr("type", foamVtkPTraits<Type>::typeName);
+    xmlAttr("type", vtkPTraits<Type>::typeName);
     if (dataName.size())
     {
         xmlAttr("Name", dataName);
     }
     if (nComp > 1)
     {
-        xmlAttr("NumberOfComponents", nComp);
+        xmlAttr(fileAttr::NUMBER_OF_COMPONENTS, nComp);
     }
 
     closeTag(true);

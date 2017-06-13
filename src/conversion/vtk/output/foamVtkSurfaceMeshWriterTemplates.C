@@ -29,7 +29,7 @@ License
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::foamVtkOutput::surfaceMeshWriter::getFaceField
+Foam::vtk::surfaceMeshWriter::getFaceField
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& sfld
 ) const
@@ -60,7 +60,7 @@ Foam::foamVtkOutput::surfaceMeshWriter::getFaceField
 
 
 template<class Type>
-void Foam::foamVtkOutput::surfaceMeshWriter::write
+void Foam::vtk::surfaceMeshWriter::write
 (
     const UPtrList
     <
@@ -86,7 +86,7 @@ void Foam::foamVtkOutput::surfaceMeshWriter::write
         }
 
         format().writeSize(payLoad);
-        foamVtkOutput::writeList(format(), getFaceField(fld)());
+        vtk::writeList(format(), getFaceField(fld)());
 
         format().flush();
 

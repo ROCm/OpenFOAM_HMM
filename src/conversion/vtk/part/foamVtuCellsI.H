@@ -23,79 +23,80 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkCells.H"
+#include "foamVtuCells.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
-inline enum Foam::foamVtkCells::contentType Foam::foamVtkCells::content() const
+inline enum Foam::vtk::vtuCells::contentType
+Foam::vtk::vtuCells::content() const
 {
     return output_;
 }
 
 
-inline bool Foam::foamVtkCells::decomposeRequested() const
+inline bool Foam::vtk::vtuCells::decomposeRequested() const
 {
     return decomposeRequest_;
 }
 
 
-inline bool Foam::foamVtkCells::empty() const
+inline bool Foam::vtk::vtuCells::empty() const
 {
     return cellTypes_.empty();
 }
 
 
-inline Foam::label Foam::foamVtkCells::size() const
+inline Foam::label Foam::vtk::vtuCells::size() const
 {
     return cellTypes_.size();
 }
 
 
 inline const Foam::List<uint8_t>&
-Foam::foamVtkCells::cellTypes() const
+Foam::vtk::vtuCells::cellTypes() const
 {
     return cellTypes_;
 }
 
 
 inline const Foam::labelList&
-Foam::foamVtkCells::vertLabels() const
+Foam::vtk::vtuCells::vertLabels() const
 {
     return vertLabels_;
 }
 
 
 inline const Foam::labelList&
-Foam::foamVtkCells::vertOffsets() const
+Foam::vtk::vtuCells::vertOffsets() const
 {
     return vertOffset_;
 }
 
 
 inline const Foam::labelList&
-Foam::foamVtkCells::faceLabels() const
+Foam::vtk::vtuCells::faceLabels() const
 {
     return faceLabels_;
 }
 
 
 inline const Foam::labelList&
-Foam::foamVtkCells::faceOffsets() const
+Foam::vtk::vtuCells::faceOffsets() const
 {
     return faceOffset_;
 }
 
 
 inline const Foam::labelList&
-Foam::foamVtkCells::addPointCellLabels() const
+Foam::vtk::vtuCells::addPointCellLabels() const
 {
     return maps_.additionalIds();
 }
 
 
 inline const Foam::labelList&
-Foam::foamVtkCells::cellMap() const
+Foam::vtk::vtuCells::cellMap() const
 {
     return maps_.cellMap();
 }

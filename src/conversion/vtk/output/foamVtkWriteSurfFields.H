@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 InNamespace
-    Foam::foamVtkOutput
+    Foam::vtk
 
 Description
     Write surface fields as vectors
@@ -44,7 +44,7 @@ SourceFiles
 
 namespace Foam
 {
-namespace foamVtkOutput
+namespace vtk
 {
 
 //- Write surface vector fields
@@ -52,11 +52,11 @@ void writeSurfFields
 (
     const fvMesh& mesh,
     const fileName& baseName,
-    const foamVtkOutput::outputOptions outOpts,
+    const vtk::outputOptions outOpts,
     const UPtrList<const surfaceVectorField>& surfVectorFields
 );
 
-} // End namespace foamVtkOutput
+} // End namespace vtk
 } // End namespace Foam
 
 

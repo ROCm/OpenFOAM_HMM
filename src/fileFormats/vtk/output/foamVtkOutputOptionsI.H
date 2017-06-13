@@ -28,14 +28,14 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::foamVtkOutput::outputOptions::outputOptions()
+inline Foam::vtk::outputOptions::outputOptions()
 :
     fmtType_(formatType::INLINE_ASCII),
     precision_(IOstream::defaultPrecision())
 {}
 
 
-inline Foam::foamVtkOutput::outputOptions::outputOptions
+inline Foam::vtk::outputOptions::outputOptions
 (
     enum formatType fmtType
 )
@@ -47,23 +47,23 @@ inline Foam::foamVtkOutput::outputOptions::outputOptions
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-inline Foam::autoPtr<Foam::foamVtkOutput::formatter>
-Foam::foamVtkOutput::outputOptions::newFormatter(std::ostream& os) const
+inline Foam::autoPtr<Foam::vtk::formatter>
+Foam::vtk::outputOptions::newFormatter(std::ostream& os) const
 {
-    return foamVtkOutput::newFormatter(os, fmtType_, precision_);
+    return vtk::newFormatter(os, fmtType_, precision_);
 }
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-inline Foam::foamVtkOutput::formatType
-Foam::foamVtkOutput::outputOptions::fmt() const
+inline Foam::vtk::formatType
+Foam::vtk::outputOptions::fmt() const
 {
     return fmtType_;
 }
 
 
-inline bool Foam::foamVtkOutput::outputOptions::legacy() const
+inline bool Foam::vtk::outputOptions::legacy() const
 {
     return
     (
@@ -73,13 +73,13 @@ inline bool Foam::foamVtkOutput::outputOptions::legacy() const
 }
 
 
-inline bool Foam::foamVtkOutput::outputOptions::xml() const
+inline bool Foam::vtk::outputOptions::xml() const
 {
     return !legacy();
 }
 
 
-inline bool Foam::foamVtkOutput::outputOptions::append() const
+inline bool Foam::vtk::outputOptions::append() const
 {
     return
     (
@@ -89,19 +89,19 @@ inline bool Foam::foamVtkOutput::outputOptions::append() const
 }
 
 
-inline bool Foam::foamVtkOutput::outputOptions::insitu() const
+inline bool Foam::vtk::outputOptions::insitu() const
 {
     return !append();
 }
 
 
-inline bool Foam::foamVtkOutput::outputOptions::ascii() const
+inline bool Foam::vtk::outputOptions::ascii() const
 {
     return !(unsigned(fmtType_) & 0x0F);
 }
 
 
-inline unsigned Foam::foamVtkOutput::outputOptions::precision() const
+inline unsigned Foam::vtk::outputOptions::precision() const
 {
     return precision_;
 }

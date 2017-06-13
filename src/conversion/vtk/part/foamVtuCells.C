@@ -24,18 +24,18 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "polyMesh.H"
-#include "foamVtkCells.H"
+#include "foamVtuCells.H"
 #include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::foamVtkCells::foamVtkCells
+Foam::vtk::vtuCells::vtuCells
 (
     const contentType output,
     const bool decompose
 )
 :
-    foamVtuSizing(),
+    vtk::vtuSizing(),
     output_(output),
     decomposeRequest_(decompose),
     cellTypes_(),
@@ -47,26 +47,26 @@ Foam::foamVtkCells::foamVtkCells
 {}
 
 
-Foam::foamVtkCells::foamVtkCells
+Foam::vtk::vtuCells::vtuCells
 (
     const polyMesh& mesh,
     const contentType output,
     const bool decompose
 )
 :
-    foamVtkCells(output, decompose)
+    vtuCells(output, decompose)
 {
     reset(mesh);
 }
 
 
-Foam::foamVtkCells::foamVtkCells
+Foam::vtk::vtuCells::vtuCells
 (
-    const foamVtkOutput::outputOptions outOpts,
+    const vtk::outputOptions outOpts,
     const bool decompose
 )
 :
-    foamVtkCells
+    vtuCells
     (
         (outOpts.legacy() ? contentType::LEGACY : contentType::XML),
         decompose
@@ -74,14 +74,14 @@ Foam::foamVtkCells::foamVtkCells
 {}
 
 
-Foam::foamVtkCells::foamVtkCells
+Foam::vtk::vtuCells::vtuCells
 (
     const polyMesh& mesh,
-    const foamVtkOutput::outputOptions outOpts,
+    const vtk::outputOptions outOpts,
     const bool decompose
 )
 :
-    foamVtkCells(outOpts, decompose)
+    vtuCells(outOpts, decompose)
 {
     reset(mesh);
 }
@@ -89,15 +89,15 @@ Foam::foamVtkCells::foamVtkCells
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamVtkCells::~foamVtkCells()
+Foam::vtk::vtuCells::~vtuCells()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::foamVtkCells::clear()
+void Foam::vtk::vtuCells::clear()
 {
-    foamVtuSizing::clear();
+    vtuSizing::clear();
     cellTypes_.clear();
     vertLabels_.clear();
     vertOffset_.clear();
@@ -108,15 +108,15 @@ void Foam::foamVtkCells::clear()
 }
 
 
-void Foam::foamVtkCells::reset(const polyMesh& mesh)
+void Foam::vtk::vtuCells::reset(const polyMesh& mesh)
 {
-    foamVtuSizing::reset(mesh, decomposeRequest_);
+    vtuSizing::reset(mesh, decomposeRequest_);
 
     cellTypes_.setSize(nFieldCells());
-    vertLabels_.setSize(slotSize(output_, slotType::CELLS));
-    vertOffset_.setSize(slotSize(output_, slotType::CELLS_OFFSETS));
-    faceLabels_.setSize(slotSize(output_, slotType::FACES));
-    faceOffset_.setSize(slotSize(output_, slotType::FACES_OFFSETS));
+    vertLabels_.setSize(sizeOf(output_, slotType::CELLS));
+    vertOffset_.setSize(sizeOf(output_, slotType::CELLS_OFFSETS));
+    faceLabels_.setSize(sizeOf(output_, slotType::FACES));
+    faceOffset_.setSize(sizeOf(output_, slotType::FACES_OFFSETS));
 
     switch (output_)
     {
@@ -157,7 +157,7 @@ void Foam::foamVtkCells::reset(const polyMesh& mesh)
 }
 
 
-void Foam::foamVtkCells::reset
+void Foam::vtk::vtuCells::reset
 (
     const polyMesh& mesh,
     const enum contentType output,
@@ -171,13 +171,13 @@ void Foam::foamVtkCells::reset
 }
 
 
-void Foam::foamVtkCells::renumberCells(const UList<label>& mapping)
+void Foam::vtk::vtuCells::renumberCells(const UList<label>& mapping)
 {
     maps_.renumberCells(mapping);
 }
 
 
-void Foam::foamVtkCells::renumberPoints(const UList<label>& mapping)
+void Foam::vtk::vtuCells::renumberPoints(const UList<label>& mapping)
 {
     maps_.renumberPoints(mapping);
 }

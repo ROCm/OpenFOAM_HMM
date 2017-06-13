@@ -28,15 +28,15 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* Foam::foamVtkOutput::asciiFormatter::name_ = "ascii";
+const char* Foam::vtk::asciiFormatter::name_ = "ascii";
 
-const Foam::foamVtkOutput::outputOptions
-Foam::foamVtkOutput::asciiFormatter::opts_(formatType::INLINE_ASCII);
+const Foam::vtk::outputOptions
+Foam::vtk::asciiFormatter::opts_(formatType::INLINE_ASCII);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline void Foam::foamVtkOutput::asciiFormatter::next()
+inline void Foam::vtk::asciiFormatter::next()
 {
     if (pos_ == 6)
     {
@@ -51,7 +51,7 @@ inline void Foam::foamVtkOutput::asciiFormatter::next()
 }
 
 
-inline void Foam::foamVtkOutput::asciiFormatter::done()
+inline void Foam::vtk::asciiFormatter::done()
 {
     if (pos_)
     {
@@ -63,14 +63,14 @@ inline void Foam::foamVtkOutput::asciiFormatter::done()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::asciiFormatter::asciiFormatter(std::ostream& os)
+Foam::vtk::asciiFormatter::asciiFormatter(std::ostream& os)
 :
     formatter(os),
     pos_(0)
 {}
 
 
-Foam::foamVtkOutput::asciiFormatter::asciiFormatter
+Foam::vtk::asciiFormatter::asciiFormatter
 (
     std::ostream& os,
     unsigned precision
@@ -85,7 +85,7 @@ Foam::foamVtkOutput::asciiFormatter::asciiFormatter
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::asciiFormatter::~asciiFormatter()
+Foam::vtk::asciiFormatter::~asciiFormatter()
 {
     done();
 }
@@ -93,65 +93,65 @@ Foam::foamVtkOutput::asciiFormatter::~asciiFormatter()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-const Foam::foamVtkOutput::outputOptions&
-Foam::foamVtkOutput::asciiFormatter::opts() const
+const Foam::vtk::outputOptions&
+Foam::vtk::asciiFormatter::opts() const
 {
     return opts_;
 }
 
 
-const char* Foam::foamVtkOutput::asciiFormatter::name() const
+const char* Foam::vtk::asciiFormatter::name() const
 {
     return name_;
 }
 
 
-const char* Foam::foamVtkOutput::asciiFormatter::encoding() const
+const char* Foam::vtk::asciiFormatter::encoding() const
 {
     return name_;
 }
 
 
-void Foam::foamVtkOutput::asciiFormatter::writeSize(const uint64_t ignored)
+void Foam::vtk::asciiFormatter::writeSize(const uint64_t ignored)
 {/*nop*/}
 
 
-void Foam::foamVtkOutput::asciiFormatter::write(const uint8_t val)
+void Foam::vtk::asciiFormatter::write(const uint8_t val)
 {
     next();
     os()<< int(val);
 }
 
 
-void Foam::foamVtkOutput::asciiFormatter::write(const label val)
+void Foam::vtk::asciiFormatter::write(const label val)
 {
     next();
     os()<< val;
 }
 
 
-void Foam::foamVtkOutput::asciiFormatter::write(const float val)
+void Foam::vtk::asciiFormatter::write(const float val)
 {
     next();
     os()<< val;
 }
 
 
-void Foam::foamVtkOutput::asciiFormatter::write(const double val)
+void Foam::vtk::asciiFormatter::write(const double val)
 {
     next();
     os()<< float(val);
 }
 
 
-void Foam::foamVtkOutput::asciiFormatter::flush()
+void Foam::vtk::asciiFormatter::flush()
 {
     done();
 }
 
 
 std::size_t
-Foam::foamVtkOutput::asciiFormatter::encodedLength(std::size_t ignored) const
+Foam::vtk::asciiFormatter::encodedLength(std::size_t ignored) const
 {
     return 0;
 }

@@ -58,21 +58,21 @@ protected:
         //- Write header information with points
         static void writeHeader
         (
-            foamVtkOutput::formatter& format,
+            vtk::formatter& format,
             const pointField& pts
         );
 
         //- Write regions (zones) information as CellData
         static void writeCellData
         (
-            foamVtkOutput::formatter& format,
+            vtk::formatter& format,
             const UList<surfZone>& zones
         );
 
         //- Write regions (zones) information as CellData
         static void writeCellData
         (
-            foamVtkOutput::formatter& format,
+            vtk::formatter& format,
             const labelUList& zoneIds
         );
 

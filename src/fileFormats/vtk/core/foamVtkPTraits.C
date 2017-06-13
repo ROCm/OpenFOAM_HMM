@@ -23,32 +23,48 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkCore.H"
+#include "foamVtkPTraits.H"
+#include "endian.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+template<>
+const char* const
+Foam::vtkPTraits<uint8_t>::typeName = "UInt8";
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+template<>
+const char * const
+Foam::vtkPTraits<int32_t>::typeName = "Int32";
 
-Foam::fileFormats::foamVtkCore::foamVtkCore()
-{}
+template<>
+const char * const
+Foam::vtkPTraits<uint32_t>::typeName = "UInt32";
 
+template<>
+const char * const
+Foam::vtkPTraits<int64_t>::typeName = "Int64";
 
-// * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
+template<>
+const char * const
+Foam::vtkPTraits<uint64_t>::typeName = "UInt64";
 
+template<>
+const char * const
+Foam::vtkPTraits<float>::typeName = "Float32";
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+template<>
+const char * const
+Foam::vtkPTraits<double>::typeName = "Float64";
 
-/*
-Foam::fileName Foam::fileFormats::foamVtkCore::vtkFileName
-(
-    const fileName& base,
-    const enum fileExt ext
-)
-{
-    return base + '.' + fileExtensions_[ext];
-}
-*/
+#ifdef WM_LITTLE_ENDIAN
+template<>
+const char* const
+Foam::vtkPTraits<Foam::endian>::typeName = "LittleEndian";
+#else
+template<>
+const char* const
+Foam::vtkPTraits<Foam::endian>::typeName = "BigEndian";
+#endif
 
 
 // ************************************************************************* //

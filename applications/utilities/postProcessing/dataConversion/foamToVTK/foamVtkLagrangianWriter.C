@@ -29,30 +29,30 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::foamVtkOutput::lagrangianWriter::beginPiece()
+void Foam::vtk::lagrangianWriter::beginPiece()
 {
     if (!legacy_)
     {
         if (useVerts_)
         {
             format()
-                .openTag(vtkFileTag::PIECE)
-                ( "NumberOfPoints", nParcels_ )
-                ( "NumberOfVerts",  nParcels_ )
+                .openTag(vtk::fileTag::PIECE)
+                .xmlAttr(fileAttr::NUMBER_OF_POINTS, nParcels_)
+                .xmlAttr(fileAttr::NUMBER_OF_VERTS,  nParcels_)
                 .closeTag();
         }
         else
         {
             format()
-                .openTag(vtkFileTag::PIECE)
-                ( "NumberOfPoints", nParcels_ )
+                .openTag(vtk::fileTag::PIECE)
+                .xmlAttr(fileAttr::NUMBER_OF_POINTS, nParcels_)
                 .closeTag();
         }
     }
 }
 
 
-void Foam::foamVtkOutput::lagrangianWriter::writePoints()
+void Foam::vtk::lagrangianWriter::writePoints()
 {
     Cloud<passiveParticle> parcels(mesh_, cloudName_, false);
     nParcels_ = parcels.size();
@@ -67,8 +67,8 @@ void Foam::foamVtkOutput::lagrangianWriter::writePoints()
     {
         beginPiece(); // Tricky - hide in here
 
-        format().tag(vtkFileTag::POINTS)
-            .openDataArray<float,3>(vtkFileTag::POINTS)
+        format().tag(vtk::fileTag::POINTS)
+            .openDataArray<float,3>(vtk::dataArrayAttr::POINTS)
             .closeTag();
     }
 
@@ -78,7 +78,7 @@ void Foam::foamVtkOutput::lagrangianWriter::writePoints()
     {
         const point& pt = iter().position();
 
-        foamVtkOutput::write(format(), pt);
+        vtk::write(format(), pt);
     }
     format().flush();
 
@@ -86,12 +86,12 @@ void Foam::foamVtkOutput::lagrangianWriter::writePoints()
     {
         format()
             .endDataArray()
-            .endTag(vtkFileTag::POINTS);
+            .endTag(vtk::fileTag::POINTS);
     }
 }
 
 
-void Foam::foamVtkOutput::lagrangianWriter::writeVertsLegacy()
+void Foam::vtk::lagrangianWriter::writeVertsLegacy()
 {
     os_ << "VERTICES " << nParcels_ << ' ' << 2*nParcels_ << nl;
 
@@ -107,9 +107,9 @@ void Foam::foamVtkOutput::lagrangianWriter::writeVertsLegacy()
 }
 
 
-void Foam::foamVtkOutput::lagrangianWriter::writeVerts()
+void Foam::vtk::lagrangianWriter::writeVerts()
 {
-    format().tag(vtkFileTag::VERTS);
+    format().tag(vtk::fileTag::VERTS);
 
     // Same payload throughout
     const uint64_t payLoad = (nParcels_ * sizeof(label));
@@ -119,7 +119,7 @@ void Foam::foamVtkOutput::lagrangianWriter::writeVerts()
     // = linear mapping onto points
     //
     {
-        format().openDataArray<label>("connectivity")
+        format().openDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY)
             .closeTag();
 
         format().writeSize(payLoad);
@@ -138,7 +138,7 @@ void Foam::foamVtkOutput::lagrangianWriter::writeVerts()
     // = linear mapping onto points (with 1 offset)
     //
     {
-        format().openDataArray<label>("offsets")
+        format().openDataArray<label>(vtk::dataArrayAttr::OFFSETS)
             .closeTag();
 
         format().writeSize(payLoad);
@@ -151,18 +151,18 @@ void Foam::foamVtkOutput::lagrangianWriter::writeVerts()
         format().endDataArray();
     }
 
-    format().endTag(vtkFileTag::VERTS);
+    format().endTag(vtk::fileTag::VERTS);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::lagrangianWriter::lagrangianWriter
+Foam::vtk::lagrangianWriter::lagrangianWriter
 (
     const fvMesh& mesh,
     const word& cloudName,
     const fileName& baseName,
-    const foamVtkOutput::outputOptions outOpts,
+    const vtk::outputOptions outOpts,
     const bool dummyCloud
 )
 :
@@ -185,7 +185,7 @@ Foam::foamVtkOutput::lagrangianWriter::lagrangianWriter
 
     if (legacy_)
     {
-        legacy::fileHeader(format(), title, vtkFileTag::POLY_DATA);
+        legacy::fileHeader(format(), title, vtk::fileTag::POLY_DATA);
 
         if (dummyCloud)
         {
@@ -204,7 +204,7 @@ Foam::foamVtkOutput::lagrangianWriter::lagrangianWriter
         format()
             .xmlHeader()
             .xmlComment(title)
-            .beginVTKFile(vtkFileTag::POLY_DATA, "0.1");
+            .beginVTKFile(vtk::fileTag::POLY_DATA, "0.1");
 
         if (dummyCloud)
         {
@@ -221,19 +221,19 @@ Foam::foamVtkOutput::lagrangianWriter::lagrangianWriter
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::lagrangianWriter::~lagrangianWriter()
+Foam::vtk::lagrangianWriter::~lagrangianWriter()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::foamVtkOutput::lagrangianWriter::beginParcelData(label nFields)
+void Foam::vtk::lagrangianWriter::beginParcelData(label nFields)
 {
-    const vtkFileTag dataType =
+    const vtk::fileTag dataType =
     (
         useVerts_
-      ? vtkFileTag::CELL_DATA
-      : vtkFileTag::POINT_DATA
+      ? vtk::fileTag::CELL_DATA
+      : vtk::fileTag::POINT_DATA
     );
 
     if (legacy_)
@@ -247,13 +247,13 @@ void Foam::foamVtkOutput::lagrangianWriter::beginParcelData(label nFields)
 }
 
 
-void Foam::foamVtkOutput::lagrangianWriter::endParcelData()
+void Foam::vtk::lagrangianWriter::endParcelData()
 {
-    const vtkFileTag dataType =
+    const vtk::fileTag dataType =
     (
         useVerts_
-      ? vtkFileTag::CELL_DATA
-      : vtkFileTag::POINT_DATA
+      ? vtk::fileTag::CELL_DATA
+      : vtk::fileTag::POINT_DATA
     );
 
     if (!legacy_)
@@ -263,14 +263,14 @@ void Foam::foamVtkOutput::lagrangianWriter::endParcelData()
 }
 
 
-void Foam::foamVtkOutput::lagrangianWriter::writeFooter()
+void Foam::vtk::lagrangianWriter::writeFooter()
 {
     if (!legacy_)
     {
         // slight cheat. </Piece> too
-        format().endTag(vtkFileTag::PIECE);
+        format().endTag(vtk::fileTag::PIECE);
 
-        format().endTag(vtkFileTag::POLY_DATA)
+        format().endTag(vtk::fileTag::POLY_DATA)
             .endVTKFile();
     }
 }

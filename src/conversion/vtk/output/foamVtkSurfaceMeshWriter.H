@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::foamVtkOutput::surfaceMeshWriter
+    Foam::vtk::surfaceMeshWriter
 
 Description
     Write faces with fields
@@ -49,7 +49,7 @@ namespace Foam
 {
 class volPointInterpolation;
 
-namespace foamVtkOutput
+namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
@@ -65,7 +65,7 @@ class surfaceMeshWriter
         //- Commonly used query
         const bool legacy_;
 
-        autoPtr<foamVtkOutput::formatter> format_;
+        autoPtr<vtk::formatter> format_;
 
         std::ofstream os_;
 
@@ -104,7 +104,7 @@ public:
             const indirectPrimitivePatch& pp,
             const word& name,
             const fileName& baseName,
-            const foamVtkOutput::outputOptions outOpts
+            const vtk::outputOptions outOpts
         );
 
 
@@ -119,7 +119,7 @@ public:
             return os_;
         }
 
-        inline foamVtkOutput::formatter& format()
+        inline vtk::formatter& format()
         {
             return format_();
         }
@@ -156,7 +156,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace foamVtkOutput
+} // End namespace vtk
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

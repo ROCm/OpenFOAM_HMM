@@ -29,25 +29,24 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::foamVtkOutput::patchWriter::beginPiece()
+void Foam::vtk::patchWriter::beginPiece()
 {
     if (!legacy_)
     {
         format()
-            .openTag(vtkFileTag::PIECE)
-            ( "NumberOfPoints", nPoints_ )
-            ( "NumberOfPolys",  nFaces_ )
+            .openTag(vtk::fileTag::PIECE)
+            .xmlAttr(vtk::fileAttr::NUMBER_OF_POINTS, nPoints_)
+            .xmlAttr(vtk::fileAttr::NUMBER_OF_POLYS,  nFaces_)
             .closeTag();
     }
 }
 
 
-void Foam::foamVtkOutput::patchWriter::writePoints()
+void Foam::vtk::patchWriter::writePoints()
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    // payload count
-    const uint64_t payLoad = (nPoints_*3* sizeof(float));
+    const uint64_t payLoad = (nPoints_*3*sizeof(float));
 
     if (legacy_)
     {
@@ -55,8 +54,8 @@ void Foam::foamVtkOutput::patchWriter::writePoints()
     }
     else
     {
-        format().tag(vtkFileTag::POINTS)
-            .openDataArray<float, 3>(vtkFileTag::POINTS)
+        format().tag(vtk::fileTag::POINTS)
+            .openDataArray<float, 3>(vtk::dataArrayAttr::POINTS)
             .closeTag();
     }
 
@@ -66,7 +65,7 @@ void Foam::foamVtkOutput::patchWriter::writePoints()
     {
         const polyPatch& pp = patches[patchIDs_[i]];
 
-        foamVtkOutput::writeList(format(), pp.localPoints());
+        vtk::writeList(format(), pp.localPoints());
     }
     format().flush();
 
@@ -74,12 +73,12 @@ void Foam::foamVtkOutput::patchWriter::writePoints()
     {
         format()
             .endDataArray()
-            .endTag(vtkFileTag::POINTS);
+            .endTag(vtk::fileTag::POINTS);
     }
 }
 
 
-void Foam::foamVtkOutput::patchWriter::writePolysLegacy()
+void Foam::vtk::patchWriter::writePolysLegacy()
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
@@ -123,7 +122,7 @@ void Foam::foamVtkOutput::patchWriter::writePolysLegacy()
 }
 
 
-void Foam::foamVtkOutput::patchWriter::writePolys()
+void Foam::vtk::patchWriter::writePolys()
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
@@ -131,7 +130,7 @@ void Foam::foamVtkOutput::patchWriter::writePolys()
     // 'connectivity'
     //
 
-    format().tag(vtkFileTag::POLYS);
+    format().tag(vtk::fileTag::POLYS);
 
     //
     // 'connectivity'
@@ -150,7 +149,7 @@ void Foam::foamVtkOutput::patchWriter::writePolys()
             }
         }
 
-        format().openDataArray<label>("connectivity")
+        format().openDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY)
             .closeTag();
 
         // payload size
@@ -185,7 +184,7 @@ void Foam::foamVtkOutput::patchWriter::writePolys()
     //
     {
         format()
-            .openDataArray<label>("offsets")
+            .openDataArray<label>(vtk::dataArrayAttr::OFFSETS)
             .closeTag();
 
         // payload size
@@ -208,11 +207,11 @@ void Foam::foamVtkOutput::patchWriter::writePolys()
         format().endDataArray();
     }
 
-    format().endTag(vtkFileTag::POLYS);
+    format().endTag(vtk::fileTag::POLYS);
 }
 
 
-void Foam::foamVtkOutput::patchWriter::writeMesh()
+void Foam::vtk::patchWriter::writeMesh()
 {
     writePoints();
     if (legacy_)
@@ -228,11 +227,11 @@ void Foam::foamVtkOutput::patchWriter::writeMesh()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::patchWriter::patchWriter
+Foam::vtk::patchWriter::patchWriter
 (
     const fvMesh& mesh,
     const fileName& baseName,
-    const foamVtkOutput::outputOptions outOpts,
+    const vtk::outputOptions outOpts,
     const bool nearCellValue,
     const labelList& patchIDs
 )
@@ -274,7 +273,7 @@ Foam::foamVtkOutput::patchWriter::patchWriter
 
     if (legacy_)
     {
-        legacy::fileHeader(format(), title, vtkFileTag::POLY_DATA);
+        legacy::fileHeader(format(), title, vtk::fileTag::POLY_DATA);
     }
     else
     {
@@ -283,7 +282,7 @@ Foam::foamVtkOutput::patchWriter::patchWriter
         format()
             .xmlHeader()
             .xmlComment(title)
-            .beginVTKFile(vtkFileTag::POLY_DATA, "0.1");
+            .beginVTKFile(vtk::fileTag::POLY_DATA, "0.1");
     }
 
     beginPiece();
@@ -293,82 +292,82 @@ Foam::foamVtkOutput::patchWriter::patchWriter
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::patchWriter::~patchWriter()
+Foam::vtk::patchWriter::~patchWriter()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::foamVtkOutput::patchWriter::beginCellData(label nFields)
+void Foam::vtk::patchWriter::beginCellData(label nFields)
 {
     if (legacy_)
     {
         legacy::dataHeader
         (
             os(),
-            vtkFileTag::CELL_DATA,
+            vtk::fileTag::CELL_DATA,
             nFaces_,
             nFields
         );
     }
     else
     {
-        format().tag(vtkFileTag::CELL_DATA);
+        format().tag(vtk::fileTag::CELL_DATA);
     }
 }
 
 
-void Foam::foamVtkOutput::patchWriter::endCellData()
+void Foam::vtk::patchWriter::endCellData()
 {
     if (!legacy_)
     {
-        format().endTag(vtkFileTag::CELL_DATA);
+        format().endTag(vtk::fileTag::CELL_DATA);
     }
 }
 
 
-void Foam::foamVtkOutput::patchWriter::beginPointData(label nFields)
+void Foam::vtk::patchWriter::beginPointData(label nFields)
 {
     if (legacy_)
     {
         legacy::dataHeader
         (
             os(),
-            vtkFileTag::POINT_DATA,
+            vtk::fileTag::POINT_DATA,
             nPoints_,
             nFields
         );
     }
     else
     {
-        format().tag(vtkFileTag::POINT_DATA);
+        format().tag(vtk::fileTag::POINT_DATA);
     }
 }
 
 
-void Foam::foamVtkOutput::patchWriter::endPointData()
+void Foam::vtk::patchWriter::endPointData()
 {
     if (!legacy_)
     {
-        format().endTag(vtkFileTag::POINT_DATA);
+        format().endTag(vtk::fileTag::POINT_DATA);
     }
 }
 
 
-void Foam::foamVtkOutput::patchWriter::writeFooter()
+void Foam::vtk::patchWriter::writeFooter()
 {
     if (!legacy_)
     {
         // slight cheat. </Piece> too
-        format().endTag(vtkFileTag::PIECE);
+        format().endTag(vtk::fileTag::PIECE);
 
-        format().endTag(vtkFileTag::POLY_DATA)
+        format().endTag(vtk::fileTag::POLY_DATA)
             .endVTKFile();
     }
 }
 
 
-void Foam::foamVtkOutput::patchWriter::writePatchIDs()
+void Foam::vtk::patchWriter::writePatchIDs()
 {
     // Patch ids first
     const uint64_t payLoad = nFaces_ * sizeof(label);

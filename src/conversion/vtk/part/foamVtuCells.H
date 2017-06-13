@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::foamVtkCells
+    Foam::vtk::vtuCells
 
 Description
     A deep-copy description of an OpenFOAM volume mesh in data structures
@@ -36,20 +36,20 @@ Description
     related to the xml format, but not entirely.
 
 SeeAlso
-    Foam::foamVtuSizing
+    Foam::vtk::vtuSizing
 
 SourceFiles
-    foamVtkCells.C
-    foamVtkCellsI.H
+    foamVtuCells.C
+    foamVtuCellsI.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkCells_H
-#define foamVtkCells_H
+#ifndef foamVtuCells_H
+#define foamVtuCells_H
 
+#include "foamVtkCore.H"
 #include "foamVtkMeshMaps.H"
 #include "foamVtuSizing.H"
-#include "foamVtkCore.H"
 #include "DynamicList.H"
 #include "labelList.H"
 
@@ -61,22 +61,20 @@ namespace Foam
 // Forward declaration of classes
 class polyMesh;
 
-namespace foamVtkOutput
+namespace vtk
 {
+// Forward declaration of classes
     class outputOptions;
-}
-
 
 /*---------------------------------------------------------------------------*\
-                        Class foamVtkCells Declaration
+                     Class Foam::vtk::vtuCells Declaration
 \*---------------------------------------------------------------------------*/
 
-class foamVtkCells
+class vtuCells
 :
-    public fileFormats::foamVtkCore,
-    public foamVtuSizing
+    public vtuSizing
 {
-    // Private data
+    // Private Member Data
 
       // Requested output types
 
@@ -111,10 +109,10 @@ class foamVtkCells
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        foamVtkCells(const foamVtkCells&) = delete;
+        vtuCells(const vtuCells&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const foamVtkCells&) = delete;
+        void operator=(const vtuCells&) = delete;
 
 
 public:
@@ -123,7 +121,7 @@ public:
 
         //- Construct from components.
         //  Optionally with polyhedral decomposition.
-        foamVtkCells
+        vtuCells
         (
             const enum contentType output = contentType::XML,
             const bool decompose = false
@@ -131,7 +129,7 @@ public:
 
         //- Construct from components and create the output information
         //  immediately
-        foamVtkCells
+        vtuCells
         (
             const polyMesh& mesh,
             const enum contentType output = contentType::XML,
@@ -140,24 +138,24 @@ public:
 
         //- Construct from components.
         //  Optionally with polyhedral decomposition.
-        foamVtkCells
+        vtuCells
         (
-            const foamVtkOutput::outputOptions outOpts,
+            const vtk::outputOptions outOpts,
             const bool decompose = false
         );
 
         //- Construct from components and create the output information
         //  immediately
-        foamVtkCells
+        vtuCells
         (
             const polyMesh& mesh,
-            const foamVtkOutput::outputOptions outOpts,
+            const vtk::outputOptions outOpts,
             const bool decompose = false
         );
 
 
     //- Destructor
-    ~foamVtkCells();
+    ~vtuCells();
 
 
     // Member Functions
@@ -230,11 +228,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace vtk
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "foamVtkCellsI.H"
+#include "foamVtuCellsI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

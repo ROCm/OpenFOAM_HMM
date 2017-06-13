@@ -35,9 +35,9 @@ License
 // - No append mode supported
 // - Legacy mode is dispatched via 'VTKsurfaceFormat' instead
 
-static const Foam::foamVtkOutput::formatType fmtType =
-    Foam::foamVtkOutput::formatType::INLINE_ASCII;
-    // Foam::foamVtkOutput::formatType::INLINE_BASE64;
+static const Foam::vtk::formatType fmtType =
+    Foam::vtk::formatType::INLINE_ASCII;
+    // Foam::vtk::formatType::INLINE_BASE64;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -45,11 +45,11 @@ static const Foam::foamVtkOutput::formatType fmtType =
 template<class Face>
 void Foam::fileFormats::VTPsurfaceFormat<Face>::writePolys
 (
-    foamVtkOutput::formatter& format,
+    vtk::formatter& format,
     const UList<Face>& faces
 )
 {
-    format.tag(vtkFileTag::POLYS);
+    format.tag(vtk::fileTag::POLYS);
 
     //
     // 'connectivity'
@@ -61,14 +61,14 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::writePolys
             payLoad += f.size();
         }
 
-        format.openDataArray<label>("connectivity")
+        format.openDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY)
             .closeTag();
 
         format.writeSize(payLoad * sizeof(label));
 
         for (const Face& f : faces)
         {
-            foamVtkOutput::writeList(format, f);
+            vtk::writeList(format, f);
         }
 
         format.flush();
@@ -83,7 +83,7 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::writePolys
         const uint64_t payLoad(faces.size() * sizeof(label));
 
         format
-            .openDataArray<label>("offsets")
+            .openDataArray<label>(vtk::dataArrayAttr::OFFSETS)
             .closeTag();
 
         format.writeSize(payLoad);
@@ -100,7 +100,7 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::writePolys
         format.endDataArray();
     }
 
-    format.endTag(vtkFileTag::POLYS);
+    format.endTag(vtk::fileTag::POLYS);
 }
 
 
@@ -135,14 +135,14 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::write
 
     std::ofstream os(filename.c_str(), std::ios::binary);
 
-    autoPtr<foamVtkOutput::formatter> format =
-        foamVtkOutput::newFormatter(os, fmtType);
+    autoPtr<vtk::formatter> format =
+        vtk::newFormatter(os, fmtType);
 
     writeHeader(format(), pointLst, faceLst.size());
 
     if (useFaceMap)
     {
-        format().tag(vtkFileTag::POLYS);
+        format().tag(vtk::fileTag::POLYS);
 
         //
         // 'connectivity'
@@ -154,7 +154,7 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::write
                 payLoad += f.size();
             }
 
-            format().openDataArray<label>("connectivity")
+            format().openDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY)
                 .closeTag();
 
             format().writeSize(payLoad * sizeof(label));
@@ -166,7 +166,7 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::write
                 {
                     const Face& f = faceLst[faceMap[faceIndex++]];
 
-                    foamVtkOutput::writeList(format(), f);
+                    vtk::writeList(format(), f);
                 }
             }
 
@@ -182,7 +182,7 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::write
             const uint64_t payLoad(faceLst.size() * sizeof(label));
 
             format()
-                .openDataArray<label>("offsets")
+                .openDataArray<label>(vtk::dataArrayAttr::OFFSETS)
                     .closeTag();
 
             format().writeSize(payLoad);
@@ -204,7 +204,7 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::write
             format().endDataArray();
         }
 
-        format().endTag(vtkFileTag::POLYS);
+        format().endTag(vtk::fileTag::POLYS);
     }
     else
     {
@@ -231,8 +231,8 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::write
 {
     std::ofstream os(filename.c_str(), std::ios::binary);
 
-    autoPtr<foamVtkOutput::formatter> format =
-        foamVtkOutput::newFormatter(os, fmtType);
+    autoPtr<vtk::formatter> format =
+        vtk::newFormatter(os, fmtType);
 
     const List<Face>& faceLst = surf.surfFaces();
 

@@ -25,47 +25,46 @@ License
 
 #include "foamVtkInternalWriter.H"
 
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::foamVtkOutput::internalWriter::beginPiece()
+void Foam::vtk::internalWriter::beginPiece()
 {
     if (!legacy_)
     {
         format()
-            .openTag(vtkFileTag::PIECE)
-            ( "NumberOfPoints", vtkCells_.nFieldPoints() )
-            ( "NumberOfCells",  vtkCells_.nFieldCells() )
+            .openTag(vtk::fileTag::PIECE)
+            .xmlAttr(vtk::fileAttr::NUMBER_OF_POINTS, vtuCells_.nFieldPoints())
+            .xmlAttr(vtk::fileAttr::NUMBER_OF_CELLS,  vtuCells_.nFieldCells())
             .closeTag();
     }
 }
 
 
-void Foam::foamVtkOutput::internalWriter::writePoints()
+void Foam::vtk::internalWriter::writePoints()
 {
     // payload size
-    const uint64_t payLoad = (vtkCells_.nFieldPoints() * 3 * sizeof(float));
+    const uint64_t payLoad = (vtuCells_.nFieldPoints() * 3 * sizeof(float));
 
     if (legacy_)
     {
-        legacy::beginPoints(os_, vtkCells_.nFieldPoints());
+        legacy::beginPoints(os_, vtuCells_.nFieldPoints());
     }
     else
     {
         format()
-            .tag(vtkFileTag::POINTS)
-            .openDataArray<float,3>(vtkFileTag::POINTS)
+            .tag(vtk::fileTag::POINTS)
+            .openDataArray<float,3>(vtk::dataArrayAttr::POINTS)
             .closeTag();
     }
 
     format().writeSize(payLoad);
 
-    foamVtkOutput::writeList(format(), mesh_.points());
-    foamVtkOutput::writeList
+    vtk::writeList(format(), mesh_.points());
+    vtk::writeList
     (
         format(),
         mesh_.cellCentres(),
-        vtkCells_.addPointCellLabels()
+        vtuCells_.addPointCellLabels()
     );
 
     format().flush();
@@ -74,25 +73,25 @@ void Foam::foamVtkOutput::internalWriter::writePoints()
     {
         format()
             .endDataArray()
-            .endTag(vtkFileTag::POINTS);
+            .endTag(vtk::fileTag::POINTS);
     }
 }
 
 
-void Foam::foamVtkOutput::internalWriter::writeCellsLegacy()
+void Foam::vtk::internalWriter::writeCellsLegacy()
 {
-    const List<uint8_t>& cellTypes = vtkCells_.cellTypes();
-    const labelList& vertLabels = vtkCells_.vertLabels();
+    const List<uint8_t>& cellTypes = vtuCells_.cellTypes();
+    const labelList& vertLabels = vtuCells_.vertLabels();
 
-    os_ << "CELLS " << vtkCells_.nFieldCells() << ' '
+    os_ << "CELLS " << vtuCells_.nFieldCells() << ' '
         << vertLabels.size() << nl;
 
-    foamVtkOutput::writeList(format(), vertLabels);
+    vtk::writeList(format(), vertLabels);
     format().flush();
 
     os_ << "CELL_TYPES " << cellTypes.size() << nl;
 
-    // No nComponents for char, so cannot use foamVtkOutput::writeList
+    // No nComponents for char, so cannot use vtk::writeList
     forAll(cellTypes, i)
     {
         format().write(cellTypes[i]);
@@ -101,22 +100,22 @@ void Foam::foamVtkOutput::internalWriter::writeCellsLegacy()
 }
 
 
-void Foam::foamVtkOutput::internalWriter::writeCells()
+void Foam::vtk::internalWriter::writeCells()
 {
-    format().tag(vtkFileTag::CELLS);
+    format().tag(vtk::fileTag::CELLS);
 
     //
     // 'connectivity'
     //
     {
-        const labelList& vertLabels = vtkCells_.vertLabels();
+        const labelList& vertLabels = vtuCells_.vertLabels();
         const uint64_t payLoad = vertLabels.size() * sizeof(label);
 
-        format().openDataArray<label>("connectivity")
+        format().openDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY)
             .closeTag();
 
         format().writeSize(payLoad);
-        foamVtkOutput::writeList(format(), vertLabels);
+        vtk::writeList(format(), vertLabels);
         format().flush();
 
         format().endDataArray();
@@ -127,14 +126,14 @@ void Foam::foamVtkOutput::internalWriter::writeCells()
     // 'offsets'  (connectivity offsets)
     //
     {
-        const labelList& vertOffsets = vtkCells_.vertOffsets();
+        const labelList& vertOffsets = vtuCells_.vertOffsets();
         const uint64_t payLoad = vertOffsets.size() * sizeof(label);
 
-        format().openDataArray<label>("offsets")
+        format().openDataArray<label>(vtk::dataArrayAttr::OFFSETS)
             .closeTag();
 
         format().writeSize(payLoad);
-        foamVtkOutput::writeList(format(), vertOffsets);
+        vtk::writeList(format(), vertOffsets);
         format().flush();
 
         format().endDataArray();
@@ -145,16 +144,16 @@ void Foam::foamVtkOutput::internalWriter::writeCells()
     // 'types' (cell types)
     //
     {
-        const List<uint8_t>& cellTypes = vtkCells_.cellTypes();
+        const List<uint8_t>& cellTypes = vtuCells_.cellTypes();
         const uint64_t payLoad = cellTypes.size() * sizeof(uint8_t);
 
-        format().openDataArray<uint8_t>("types")
+        format().openDataArray<uint8_t>(vtk::dataArrayAttr::TYPES)
             .closeTag();
 
         format().writeSize(payLoad);
         forAll(cellTypes, i)
         {
-            // No nComponents for char, cannot use foamVtkOutput::writeList here
+            // No nComponents for char, cannot use vtk::writeList here
             format().write(cellTypes[i]);
         }
         format().flush();
@@ -166,9 +165,9 @@ void Foam::foamVtkOutput::internalWriter::writeCells()
     //
     // can quit here if there are NO face streams
     //
-    if (vtkCells_.faceLabels().empty())
+    if (vtuCells_.faceLabels().empty())
     {
-        format().endTag(vtkFileTag::CELLS);
+        format().endTag(vtk::fileTag::CELLS);
 
         return;
     }
@@ -180,14 +179,14 @@ void Foam::foamVtkOutput::internalWriter::writeCells()
     // 'faces' (face streams)
     //
     {
-        const labelList& faceLabels = vtkCells_.faceLabels();
+        const labelList& faceLabels = vtuCells_.faceLabels();
         const uint64_t payLoad = faceLabels.size() * sizeof(label);
 
-        format().openDataArray<label>("faces")
+        format().openDataArray<label>(vtk::dataArrayAttr::FACES)
             .closeTag();
 
         format().writeSize(payLoad);
-        foamVtkOutput::writeList(format(), faceLabels);
+        vtk::writeList(format(), faceLabels);
         format().flush();
 
         format().endDataArray();
@@ -198,24 +197,24 @@ void Foam::foamVtkOutput::internalWriter::writeCells()
     // -1 to indicate that the cell is a primitive type that does not
     // have a face stream
     {
-        const labelList& faceOffsets = vtkCells_.faceOffsets();
+        const labelList& faceOffsets = vtuCells_.faceOffsets();
         const uint64_t payLoad = faceOffsets.size() * sizeof(label);
 
-        format().openDataArray<label>("faceoffsets")
+        format().openDataArray<label>(vtk::dataArrayAttr::FACEOFFSETS)
             .closeTag();
 
         format().writeSize(payLoad);
-        foamVtkOutput::writeList(format(), faceOffsets);
+        vtk::writeList(format(), faceOffsets);
         format().flush();
 
         format().endDataArray();
     }
 
-    format().endTag(vtkFileTag::CELLS);
+    format().endTag(vtk::fileTag::CELLS);
 }
 
 
-void Foam::foamVtkOutput::internalWriter::writeMesh()
+void Foam::vtk::internalWriter::writeMesh()
 {
     writePoints();
     if (legacy_)
@@ -231,18 +230,18 @@ void Foam::foamVtkOutput::internalWriter::writeMesh()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::internalWriter::internalWriter
+Foam::vtk::internalWriter::internalWriter
 (
     const fvMesh& mesh,
-    const foamVtkCells& cells,
+    const vtk::vtuCells& cells,
     const fileName& baseName,
-    const foamVtkOutput::outputOptions outOpts
+    const vtk::outputOptions outOpts
 )
 :
     mesh_(mesh),
     legacy_(outOpts.legacy()),
     format_(),
-    vtkCells_(cells),
+    vtuCells_(cells),
     os_()
 {
     outputOptions opts(outOpts);
@@ -255,7 +254,7 @@ Foam::foamVtkOutput::internalWriter::internalWriter
 
     if (legacy_)
     {
-        legacy::fileHeader(format(), title, vtkFileTag::UNSTRUCTURED_GRID);
+        legacy::fileHeader(format(), title, vtk::fileTag::UNSTRUCTURED_GRID);
     }
     else
     {
@@ -264,7 +263,7 @@ Foam::foamVtkOutput::internalWriter::internalWriter
         format()
             .xmlHeader()
             .xmlComment(title)
-            .beginVTKFile(vtkFileTag::UNSTRUCTURED_GRID, "0.1");
+            .beginVTKFile(vtk::fileTag::UNSTRUCTURED_GRID, "0.1");
     }
 
     beginPiece();
@@ -274,91 +273,91 @@ Foam::foamVtkOutput::internalWriter::internalWriter
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::internalWriter::~internalWriter()
+Foam::vtk::internalWriter::~internalWriter()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
-void Foam::foamVtkOutput::internalWriter::beginCellData(label nFields)
+void Foam::vtk::internalWriter::beginCellData(label nFields)
 {
     if (legacy_)
     {
         legacy::dataHeader
         (
             os(),
-            vtkFileTag::CELL_DATA,
-            vtkCells_.nFieldCells(),
+            vtk::fileTag::CELL_DATA,
+            vtuCells_.nFieldCells(),
             nFields
         );
     }
     else
     {
-        format().tag(vtkFileTag::CELL_DATA);
+        format().tag(vtk::fileTag::CELL_DATA);
     }
 }
 
 
-void Foam::foamVtkOutput::internalWriter::endCellData()
+void Foam::vtk::internalWriter::endCellData()
 {
     if (!legacy_)
     {
-        format().endTag(vtkFileTag::CELL_DATA);
+        format().endTag(vtk::fileTag::CELL_DATA);
     }
 }
 
 
-void Foam::foamVtkOutput::internalWriter::beginPointData(label nFields)
+void Foam::vtk::internalWriter::beginPointData(label nFields)
 {
     if (legacy_)
     {
         legacy::dataHeader
         (
             os(),
-            vtkFileTag::POINT_DATA,
-            vtkCells_.nFieldPoints(),
+            vtk::fileTag::POINT_DATA,
+            vtuCells_.nFieldPoints(),
             nFields
         );
     }
     else
     {
-        format().tag(vtkFileTag::POINT_DATA);
+        format().tag(vtk::fileTag::POINT_DATA);
     }
 }
 
 
-void Foam::foamVtkOutput::internalWriter::endPointData()
+void Foam::vtk::internalWriter::endPointData()
 {
     if (!legacy_)
     {
-        format().endTag(vtkFileTag::POINT_DATA);
+        format().endTag(vtk::fileTag::POINT_DATA);
     }
 }
 
 
-void Foam::foamVtkOutput::internalWriter::writeFooter()
+void Foam::vtk::internalWriter::writeFooter()
 {
     if (!legacy_)
     {
         // slight cheat. </Piece> too
-        format().endTag(vtkFileTag::PIECE);
+        format().endTag(vtk::fileTag::PIECE);
 
-        format().endTag(vtkFileTag::UNSTRUCTURED_GRID)
+        format().endTag(vtk::fileTag::UNSTRUCTURED_GRID)
             .endVTKFile();
     }
 }
 
 
-void Foam::foamVtkOutput::internalWriter::writeCellIDs()
+void Foam::vtk::internalWriter::writeCellIDs()
 {
     // Cell ids first
-    const labelList& cellMap = vtkCells_.cellMap();
-    const uint64_t payLoad = vtkCells_.nFieldCells() * sizeof(label);
+    const labelList& cellMap = vtuCells_.cellMap();
+    const uint64_t payLoad = vtuCells_.nFieldCells() * sizeof(label);
 
     if (legacy_)
     {
-        os_ << "cellID 1 " << vtkCells_.nFieldCells() << " int" << nl;
+        os_ << "cellID 1 " << vtuCells_.nFieldCells() << " int" << nl;
     }
     else
     {
@@ -368,7 +367,7 @@ void Foam::foamVtkOutput::internalWriter::writeCellIDs()
 
     format().writeSize(payLoad);
 
-    foamVtkOutput::writeList(format(), cellMap);
+    vtk::writeList(format(), cellMap);
     format().flush();
 
     if (!legacy_)

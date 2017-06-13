@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::foamVtkOutput::internalWriter
+    Foam::vtk::internalWriter
 
 Description
     Write fields (internal).
@@ -40,9 +40,9 @@ SourceFiles
 #include "volFields.H"
 #include "pointFields.H"
 
-#include "foamVtkCells.H"
 #include "foamVtkOutputFields.H"
 #include "foamVtkOutputOptions.H"
+#include "foamVtuCells.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,7 +50,7 @@ namespace Foam
 {
 class volPointInterpolation;
 
-namespace foamVtkOutput
+namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
@@ -67,10 +67,10 @@ class internalWriter
         //- Commonly used query
         const bool legacy_;
 
-        autoPtr<foamVtkOutput::formatter> format_;
+        autoPtr<vtk::formatter> format_;
 
         //- The volume cells (internalMesh)
-        const foamVtkCells& vtkCells_;
+        const vtuCells& vtuCells_;
 
         std::ofstream os_;
 
@@ -108,9 +108,9 @@ public:
         internalWriter
         (
             const fvMesh& mesh,
-            const foamVtkCells& cells,
+            const vtk::vtuCells& cells,
             const fileName& baseName,
-            const foamVtkOutput::outputOptions outOpts
+            const vtk::outputOptions outOpts
         );
 
 
@@ -125,7 +125,7 @@ public:
             return os_;
         }
 
-        inline foamVtkOutput::formatter& format()
+        inline vtk::formatter& format()
         {
             return format_();
         }
@@ -212,7 +212,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace foamVtkOutput
+} // End namespace vtk
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

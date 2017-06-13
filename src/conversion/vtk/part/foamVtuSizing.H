@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::foamVtuSizing
+    Foam::vtk::vtuSizing
 
 Description
     Sizing descriptions and routines for transcribing an OpenFOAM volume mesh
@@ -97,32 +97,36 @@ namespace Foam
 // Forward declaration of classes
 class polyMesh;
 
+namespace vtk
+{
+
 /*---------------------------------------------------------------------------*\
-                        Class foamVtuSizing Declaration
+                    Class Foam::vtk::vtuSizing Declaration
 \*---------------------------------------------------------------------------*/
 
-class foamVtuSizing
+class vtuSizing
 {
 public:
 
     // Public data
 
-        //- Types of content that the storage may represent
-        enum contentType
-        {
-            LEGACY,     //!< Legacy VTK content
-            XML,        //!< XML (VTU) content
-            INTERNAL    //!< Internal vtkUnstructuredGrid content
-        };
+    //- Types of content that the storage may represent
+    enum contentType
+    {
+        LEGACY,     //!< Legacy VTK content
+        XML,        //!< XML (VTU) content
+        INTERNAL    //!< Internal vtkUnstructuredGrid content
+    };
 
-        //- The storage 'slots' required
-        enum slotType
-        {
-            CELLS,         //!< Cell connectivity (ALL)
-            CELLS_OFFSETS, //!< Begin (XML) or end (INTERNAL) offsets into cells
-            FACES,         //!< Face-stream (XML, INTERNAL)
-            FACES_OFFSETS  //!< Begin (XML) or end (INTERNAL) offsets into faces
-        };
+    //- The possible storage 'slots' that can be used
+    enum slotType
+    {
+        CELLS,         //!< Cell connectivity (ALL)
+        CELLS_OFFSETS, //!< End-offsets (XML) or locations (INTERNAL) for cells
+        FACES,         //!< Face-stream (XML, INTERNAL)
+        FACES_OFFSETS  //!< End-offsets (XML) or locations (INTERNAL) for faces
+    };
+
 
 private:
 
@@ -173,7 +177,7 @@ private:
         static void populateArrays
         (
             const polyMesh& mesh,
-            const foamVtuSizing& sizing,
+            const vtk::vtuSizing& sizing,
             UList<uint8_t>& cellTypes,
             UList<LabelType>& vertLabels,
             UList<LabelType>& vertOffset,
@@ -191,15 +195,15 @@ public:
     // Constructors
 
         //- Construct null.
-        foamVtuSizing();
+        vtuSizing();
 
         //- Construct sizes by analyzing the mesh,
         //  optionally with polyhedral decomposition.
-        foamVtuSizing(const polyMesh& mesh, const bool decompose=false);
+        vtuSizing(const polyMesh& mesh, const bool decompose=false);
 
 
     //- Destructor
-    ~foamVtuSizing();
+    ~vtuSizing();
 
 
     // Member Functions
@@ -257,7 +261,7 @@ public:
       // Derived sizes
 
         //- Return the required size for the storage slot
-        label slotSize
+        label sizeOf
         (
             const enum contentType output,
             const enum slotType slot
@@ -385,16 +389,17 @@ public:
       // Member Operators
 
         //- Test equality
-        bool operator==(const foamVtuSizing& rhs) const;
+        bool operator==(const vtuSizing& rhs) const;
 
         //- Test inequality
-        bool operator!=(const foamVtuSizing& rhs) const;
+        bool operator!=(const vtuSizing& rhs) const;
 
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace vtk
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

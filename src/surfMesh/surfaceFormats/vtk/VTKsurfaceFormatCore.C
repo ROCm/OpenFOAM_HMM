@@ -31,27 +31,27 @@ License
 
 void Foam::fileFormats::VTKsurfaceFormatCore::writeHeader
 (
-    foamVtkOutput::formatter& format,
+    vtk::formatter& format,
     const pointField& pts
 )
 {
-    foamVtkOutput::legacy::fileHeader
+    vtk::legacy::fileHeader
     (
         format,
         ("surface written " + clock::dateTime()),
-        vtkFileTag::POLY_DATA
+        vtk::fileTag::POLY_DATA
     );
 
-    foamVtkOutput::legacy::beginPoints(format.os(), pts.size());
+    vtk::legacy::beginPoints(format.os(), pts.size());
 
-    foamVtkOutput::writeList(format, pts);
+    vtk::writeList(format, pts);
     format.flush();
 }
 
 
 void Foam::fileFormats::VTKsurfaceFormatCore::writeCellData
 (
-    foamVtkOutput::formatter& format,
+    vtk::formatter& format,
     const UList<surfZone>& zones
 )
 {
@@ -64,15 +64,15 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeCellData
         nFaces += z.size();
     }
 
-    foamVtkOutput::legacy::dataHeader
+    vtk::legacy::dataHeader
     (
         format.os(),
-        vtkFileTag::CELL_DATA,
+        vtk::fileTag::CELL_DATA,
         nFaces,
         1  // Only one field
     );
 
-    foamVtkOutput::legacy::intField
+    vtk::legacy::intField
     (
         format.os(),
         "region",
@@ -95,7 +95,7 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeCellData
 
 void Foam::fileFormats::VTKsurfaceFormatCore::writeCellData
 (
-    foamVtkOutput::formatter& format,
+    vtk::formatter& format,
     const labelUList& zoneIds
 )
 {
@@ -104,15 +104,15 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeCellData
     // Number of faces
     const label nFaces = zoneIds.size();
 
-    foamVtkOutput::legacy::dataHeader
+    vtk::legacy::dataHeader
     (
         format.os(),
-        vtkFileTag::CELL_DATA,
+        vtk::fileTag::CELL_DATA,
         nFaces,
         1  // Only one field
     );
 
-    foamVtkOutput::legacy::intField
+    vtk::legacy::intField
     (
         format.os(),
         "region",
@@ -120,7 +120,7 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeCellData
         nFaces
     );
 
-    foamVtkOutput::writeList(format, zoneIds);
+    vtk::writeList(format, zoneIds);
     format.flush();
 }
 

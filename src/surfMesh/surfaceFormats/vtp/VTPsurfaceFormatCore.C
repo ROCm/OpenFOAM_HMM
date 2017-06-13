@@ -31,7 +31,7 @@ License
 
 void Foam::fileFormats::VTPsurfaceFormatCore::writeHeader
 (
-    foamVtkOutput::formatter& format,
+    vtk::formatter& format,
     const pointField& pts,
     const label nFaces
 )
@@ -41,13 +41,13 @@ void Foam::fileFormats::VTPsurfaceFormatCore::writeHeader
     format
         .xmlHeader()
         .xmlComment("surface written " + clock::dateTime())
-        .beginVTKFile(vtkFileTag::POLY_DATA, "0.1");
+        .beginVTKFile(vtk::fileTag::POLY_DATA, "0.1");
 
     // <Piece>
     format
-        .openTag(vtkFileTag::PIECE)
-        ( "NumberOfPoints", pts.size() )
-        ( "NumberOfPolys",  nFaces )
+        .openTag(vtk::fileTag::PIECE)
+        .xmlAttr(vtk::fileAttr::NUMBER_OF_POINTS, pts.size())
+        .xmlAttr(vtk::fileAttr::NUMBER_OF_POLYS,  nFaces)
         .closeTag();
 
 
@@ -55,29 +55,29 @@ void Foam::fileFormats::VTPsurfaceFormatCore::writeHeader
 
     const uint64_t payLoad = (pts.size()*3* sizeof(float));
 
-    format.tag(vtkFileTag::POINTS)
-        .openDataArray<float, 3>(vtkFileTag::POINTS)
+    format.tag(vtk::fileTag::POINTS)
+        .openDataArray<float, 3>(vtk::dataArrayAttr::POINTS)
         .closeTag();
 
     format.writeSize(payLoad);
-    foamVtkOutput::writeList(format, pts);
+    vtk::writeList(format, pts);
     format.flush();
 
     format
         .endDataArray()
-        .endTag(vtkFileTag::POINTS);
+        .endTag(vtk::fileTag::POINTS);
 }
 
 
 void Foam::fileFormats::VTPsurfaceFormatCore::writeFooter
 (
-    foamVtkOutput::formatter& format
+    vtk::formatter& format
 )
 {
     // Slight cheat. </Piece> too
-    format.endTag(Foam::vtkFileTag::PIECE);
+    format.endTag(Foam::vtk::fileTag::PIECE);
 
-    format.endTag(vtkFileTag::POLY_DATA)
+    format.endTag(vtk::fileTag::POLY_DATA)
         .endVTKFile();
 }
 
@@ -85,7 +85,7 @@ void Foam::fileFormats::VTPsurfaceFormatCore::writeFooter
 
 void Foam::fileFormats::VTPsurfaceFormatCore::writeCellData
 (
-    foamVtkOutput::formatter& format,
+    vtk::formatter& format,
     const UList<surfZone>& zones
 )
 {
@@ -98,7 +98,7 @@ void Foam::fileFormats::VTPsurfaceFormatCore::writeCellData
         payLoad += z.size();
     }
 
-    format.tag(vtkFileTag::CELL_DATA);
+    format.tag(vtk::fileTag::CELL_DATA);
     format.openDataArray<label>("region")
         .closeTag();
 
@@ -117,31 +117,31 @@ void Foam::fileFormats::VTPsurfaceFormatCore::writeCellData
     format.flush();
     format.endDataArray();
 
-    format.endTag(vtkFileTag::CELL_DATA);
+    format.endTag(vtk::fileTag::CELL_DATA);
 }
 
 
 void Foam::fileFormats::VTPsurfaceFormatCore::writeCellData
 (
-    foamVtkOutput::formatter& format,
+    vtk::formatter& format,
     const labelUList& zoneIds
 )
 {
     // Zone ids as CellData
 
-    format.tag(vtkFileTag::CELL_DATA);
+    format.tag(vtk::fileTag::CELL_DATA);
     format.openDataArray<label>("region")
         .closeTag();
 
     const uint64_t payLoad(zoneIds.size() * sizeof(label));
 
     format.writeSize(payLoad);
-    foamVtkOutput::writeList(format, zoneIds);
+    vtk::writeList(format, zoneIds);
 
     format.flush();
     format.endDataArray();
 
-    format.endTag(vtkFileTag::CELL_DATA);
+    format.endTag(vtk::fileTag::CELL_DATA);
 
 }
 

@@ -26,9 +26,9 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-inline void Foam::foamVtkOutput::write
+inline void Foam::vtk::write
 (
-    foamVtkOutput::formatter& fmt,
+    vtk::formatter& fmt,
     const Type& val
 )
 {
@@ -40,9 +40,9 @@ inline void Foam::foamVtkOutput::write
 
 
 template<class Type>
-void Foam::foamVtkOutput::writeList
+void Foam::vtk::writeList
 (
-    foamVtkOutput::formatter& fmt,
+    vtk::formatter& fmt,
     const UList<Type>& lst
 )
 {
@@ -54,9 +54,9 @@ void Foam::foamVtkOutput::writeList
 
 
 template<class Type, unsigned Size>
-void Foam::foamVtkOutput::writeList
+void Foam::vtk::writeList
 (
-    foamVtkOutput::formatter& fmt,
+    vtk::formatter& fmt,
     const FixedList<Type, Size>& lst
 )
 {
@@ -68,9 +68,9 @@ void Foam::foamVtkOutput::writeList
 
 
 template<class Type>
-void Foam::foamVtkOutput::writeList
+void Foam::vtk::writeList
 (
-    foamVtkOutput::formatter& fmt,
+    vtk::formatter& fmt,
     const UList<Type>& lst,
     const UList<label>& addressing
 )

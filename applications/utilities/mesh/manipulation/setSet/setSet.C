@@ -82,33 +82,33 @@ void writeVTK
     if (isA<faceSet>(currentSet))
     {
         // Faces of set with OpenFOAM faceID as value
-        foamVtkOutput::writeFaceSet
+        vtk::writeFaceSet
         (
             mesh,
             currentSet,
             mesh.time().path()/vtkBaseName,
-            foamVtkOutput::formatType::LEGACY_BINARY
+            vtk::formatType::LEGACY_BINARY
         );
     }
     else if (isA<cellSet>(currentSet))
     {
         // External faces of cellset with OpenFOAM cellID as value
-        foamVtkOutput::writeCellSetFaces
+        vtk::writeCellSetFaces
         (
             mesh,
             currentSet,
             mesh.time().path()/vtkBaseName,
-            foamVtkOutput::formatType::LEGACY_BINARY
+            vtk::formatType::LEGACY_BINARY
         );
     }
     else if (isA<pointSet>(currentSet))
     {
-        foamVtkOutput::writePointSet
+        vtk::writePointSet
         (
             mesh,
             currentSet,
             mesh.time().path()/vtkBaseName,
-            foamVtkOutput::formatType::LEGACY_BINARY
+            vtk::formatType::LEGACY_BINARY
         );
     }
     else

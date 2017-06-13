@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 InNamespace
-    Foam::foamVtkOutput
+    Foam::vtk
 
 Description
     Write faceSet to vtk polydata file.
@@ -46,7 +46,7 @@ class primitiveMesh;
 class faceSet;
 class fileName;
 
-namespace foamVtkOutput
+namespace vtk
 {
 
 //- Write pointSet to vtk polydata file.
@@ -56,11 +56,11 @@ void writeFaceSet
     const primitiveMesh& mesh,
     const faceSet& set,
     const fileName& baseName,
-    const foamVtkOutput::outputOptions outOpts
+    const vtk::outputOptions outOpts
 );
 
 
-} // End namespace foamVtkOutput
+} // End namespace vtk
 } // End namespace Foam
 
 

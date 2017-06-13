@@ -31,12 +31,12 @@ License
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-void Foam::foamVtkOutput::writePointSet
+void Foam::vtk::writePointSet
 (
     const primitiveMesh& mesh,
     const pointSet& set,
     const fileName& baseName,
-    const foamVtkOutput::outputOptions outOpts
+    const vtk::outputOptions outOpts
 )
 {
     outputOptions opts(outOpts);
@@ -46,11 +46,11 @@ void Foam::foamVtkOutput::writePointSet
 
     std::ofstream os((baseName + (legacy_ ? ".vtk" : ".vtp")).c_str());
 
-    autoPtr<foamVtkOutput::formatter> format = opts.newFormatter(os);
+    autoPtr<vtk::formatter> format = opts.newFormatter(os);
 
     if (legacy_)
     {
-        legacy::fileHeader(format(), set.name(), vtkFileTag::POLY_DATA);
+        legacy::fileHeader(format(), set.name(), vtk::fileTag::POLY_DATA);
     }
 
     //-------------------------------------------------------------------------
@@ -60,15 +60,15 @@ void Foam::foamVtkOutput::writePointSet
     // Write points
     legacy::beginPoints(os, pointLabels.size());
 
-    foamVtkOutput::writeList(format(), mesh.points(), pointLabels);
+    vtk::writeList(format(), mesh.points(), pointLabels);
     format().flush();
 
     // Write data - pointID
-    legacy::dataHeader(os, vtkFileTag::POINT_DATA, pointLabels.size(), 1);
+    legacy::dataHeader(os, vtk::fileTag::POINT_DATA, pointLabels.size(), 1);
 
     os << "pointID 1 " << pointLabels.size() << " int" << nl;
 
-    foamVtkOutput::writeList(format(), pointLabels);
+    vtk::writeList(format(), pointLabels);
     format().flush();
 }
 

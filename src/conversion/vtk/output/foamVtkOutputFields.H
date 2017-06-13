@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 InNamespace
-    Foam::foamVtkOutput
+    Foam::vtk
 
 Description
     Additional functions for writing fields in VTK format.
@@ -42,36 +42,17 @@ SourceFiles
 
 namespace Foam
 {
-namespace foamVtkOutput
+namespace vtk
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    //- Write internalField for mesh
-    //  The output includes the payload size and flush.
-    template<class Type>
-    void writeField
-    (
-        foamVtkOutput::formatter& fmt,
-        const GeometricField<Type, fvPatchField, volMesh>& fld
-    );
-
-    //- Write internalField based on the cellMap
-    //  The output includes the payload size and flush.
-    template<class Type>
-    void writeField
-    (
-        foamVtkOutput::formatter& fmt,
-        const GeometricField<Type, fvPatchField, volMesh>& fld,
-        const UList<label>& cellMap
-    );
 
     //- Write DimensionedField for mesh
     //  The output includes the payload size and flush.
     template<class Type>
     void writeField
     (
-        foamVtkOutput::formatter& fmt,
+        vtk::formatter& fmt,
         const DimensionedField<Type, volMesh>& fld
     );
 
@@ -80,15 +61,34 @@ namespace foamVtkOutput
     template<class Type>
     void writeField
     (
-        foamVtkOutput::formatter& fmt,
+        vtk::formatter& fmt,
         const DimensionedField<Type, volMesh>& fld,
+        const UList<label>& cellMap
+    );
+
+    //- Write internalField for mesh
+    //  The output includes the payload size and flush.
+    template<class Type>
+    void writeField
+    (
+        vtk::formatter& fmt,
+        const GeometricField<Type, fvPatchField, volMesh>& fld
+    );
+
+    //- Write internalField based on the cellMap
+    //  The output includes the payload size and flush.
+    template<class Type>
+    void writeField
+    (
+        vtk::formatter& fmt,
+        const GeometricField<Type, fvPatchField, volMesh>& fld,
         const UList<label>& cellMap
     );
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace foamVtkOutput
+} // End namespace vtk
 } // End namespace Foam
 
 

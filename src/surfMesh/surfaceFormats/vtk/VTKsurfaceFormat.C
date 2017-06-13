@@ -37,9 +37,9 @@ License
 // TODO: make this run-time selectable (ASCII | BINARY)
 // - Legacy mode only
 
-static const Foam::foamVtkOutput::formatType fmtType =
-    Foam::foamVtkOutput::formatType::LEGACY_ASCII;
-    // Foam::foamVtkOutput::formatType::LEGACY_BASE64;
+static const Foam::vtk::formatType fmtType =
+    Foam::vtk::formatType::LEGACY_ASCII;
+    // Foam::vtk::formatType::LEGACY_BINARY;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -47,7 +47,7 @@ static const Foam::foamVtkOutput::formatType fmtType =
 template<class Face>
 void Foam::fileFormats::VTKsurfaceFormat<Face>::writePolys
 (
-    foamVtkOutput::formatter& format,
+    vtk::formatter& format,
     const UList<Face>& faces
 )
 {
@@ -58,7 +58,7 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::writePolys
         nConnectivity += f.size();
     }
 
-    foamVtkOutput::legacy::beginPolys
+    vtk::legacy::beginPolys
     (
         format.os(),
         faces.size(),
@@ -72,7 +72,7 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::writePolys
     for (const Face& f : faces)
     {
         format.write(f.size());  // The size prefix
-        foamVtkOutput::writeList(format, f);
+        vtk::writeList(format, f);
     }
 
     format.flush();
@@ -276,8 +276,8 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
 
     std::ofstream os(filename.c_str());
 
-    autoPtr<foamVtkOutput::formatter> format =
-        foamVtkOutput::newFormatter(os, fmtType);
+    autoPtr<vtk::formatter> format =
+        vtk::newFormatter(os, fmtType);
 
     writeHeader(format(), pointLst);
 
@@ -290,7 +290,7 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
             nConnectivity += f.size();
         }
 
-        foamVtkOutput::legacy::beginPolys
+        vtk::legacy::beginPolys
         (
             format().os(),
             faceLst.size(),
@@ -305,7 +305,7 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
                 const Face& f = faceLst[faceMap[faceIndex++]];
 
                 format().write(f.size());  // The size prefix
-                foamVtkOutput::writeList(format(), f);
+                vtk::writeList(format(), f);
             }
         }
 
@@ -334,8 +334,8 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
 {
     std::ofstream os(filename.c_str());
 
-    autoPtr<foamVtkOutput::formatter> format =
-        foamVtkOutput::newFormatter(os, fmtType);
+    autoPtr<vtk::formatter> format =
+        vtk::newFormatter(os, fmtType);
 
     writeHeader(format(), surf.points());
 

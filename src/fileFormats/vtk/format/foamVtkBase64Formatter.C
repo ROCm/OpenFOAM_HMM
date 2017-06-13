@@ -28,15 +28,15 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* Foam::foamVtkOutput::base64Formatter::name_ = "binary";
+const char* Foam::vtk::base64Formatter::name_ = "binary";
 
-const Foam::foamVtkOutput::outputOptions
-Foam::foamVtkOutput::base64Formatter::opts_(formatType::INLINE_BASE64);
+const Foam::vtk::outputOptions
+Foam::vtk::base64Formatter::opts_(formatType::INLINE_BASE64);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::base64Formatter::base64Formatter(std::ostream& os)
+Foam::vtk::base64Formatter::base64Formatter(std::ostream& os)
 :
     foamVtkBase64Layer(os)
 {}
@@ -44,7 +44,7 @@ Foam::foamVtkOutput::base64Formatter::base64Formatter(std::ostream& os)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::base64Formatter::~base64Formatter()
+Foam::vtk::base64Formatter::~base64Formatter()
 {
     if (base64Layer::close())
     {
@@ -55,20 +55,20 @@ Foam::foamVtkOutput::base64Formatter::~base64Formatter()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-const Foam::foamVtkOutput::outputOptions&
-Foam::foamVtkOutput::base64Formatter::opts() const
+const Foam::vtk::outputOptions&
+Foam::vtk::base64Formatter::opts() const
 {
     return opts_;
 }
 
 
-const char* Foam::foamVtkOutput::base64Formatter::name() const
+const char* Foam::vtk::base64Formatter::name() const
 {
     return name_;
 }
 
 
-void Foam::foamVtkOutput::base64Formatter::flush()
+void Foam::vtk::base64Formatter::flush()
 {
     if (base64Layer::close())
     {

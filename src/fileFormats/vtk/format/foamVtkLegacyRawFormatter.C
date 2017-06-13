@@ -29,15 +29,15 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* Foam::foamVtkOutput::legacyRawFormatter::legacyName_ = "BINARY";
+const char* Foam::vtk::legacyRawFormatter::legacyName_ = "BINARY";
 
-const Foam::foamVtkOutput::outputOptions
-Foam::foamVtkOutput::legacyRawFormatter::opts_(formatType::LEGACY_BINARY);
+const Foam::vtk::outputOptions
+Foam::vtk::legacyRawFormatter::opts_(formatType::LEGACY_BINARY);
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::foamVtkOutput::legacyRawFormatter::write
+void Foam::vtk::legacyRawFormatter::write
 (
     const char* s,
     std::streamsize n
@@ -49,7 +49,7 @@ void Foam::foamVtkOutput::legacyRawFormatter::write
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::legacyRawFormatter::legacyRawFormatter
+Foam::vtk::legacyRawFormatter::legacyRawFormatter
 (
     std::ostream& os
 )
@@ -60,39 +60,39 @@ Foam::foamVtkOutput::legacyRawFormatter::legacyRawFormatter
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamVtkOutput::legacyRawFormatter::~legacyRawFormatter()
+Foam::vtk::legacyRawFormatter::~legacyRawFormatter()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-const Foam::foamVtkOutput::outputOptions&
-Foam::foamVtkOutput::legacyRawFormatter::opts() const
+const Foam::vtk::outputOptions&
+Foam::vtk::legacyRawFormatter::opts() const
 {
     return opts_;
 }
 
 
-const char* Foam::foamVtkOutput::legacyRawFormatter::name() const
+const char* Foam::vtk::legacyRawFormatter::name() const
 {
     return legacyName_;
 }
 
 
-const char* Foam::foamVtkOutput::legacyRawFormatter::encoding() const
+const char* Foam::vtk::legacyRawFormatter::encoding() const
 {
     return legacyName_;
 }
 
 
-void Foam::foamVtkOutput::legacyRawFormatter::writeSize
+void Foam::vtk::legacyRawFormatter::writeSize
 (
     const uint64_t ignored
 )
 {/*nop*/}
 
 
-void Foam::foamVtkOutput::legacyRawFormatter::write
+void Foam::vtk::legacyRawFormatter::write
 (
     const uint8_t val
 )
@@ -104,7 +104,7 @@ void Foam::foamVtkOutput::legacyRawFormatter::write
 }
 
 
-void Foam::foamVtkOutput::legacyRawFormatter::write
+void Foam::vtk::legacyRawFormatter::write
 (
     const label val
 )
@@ -127,7 +127,7 @@ void Foam::foamVtkOutput::legacyRawFormatter::write
 }
 
 
-void Foam::foamVtkOutput::legacyRawFormatter::write
+void Foam::vtk::legacyRawFormatter::write
 (
     const float val
 )
@@ -148,7 +148,7 @@ void Foam::foamVtkOutput::legacyRawFormatter::write
 }
 
 
-void Foam::foamVtkOutput::legacyRawFormatter::write
+void Foam::vtk::legacyRawFormatter::write
 (
     const double val
 )
@@ -160,7 +160,7 @@ void Foam::foamVtkOutput::legacyRawFormatter::write
 }
 
 
-void Foam::foamVtkOutput::legacyRawFormatter::flush()
+void Foam::vtk::legacyRawFormatter::flush()
 {
     os()<< '\n';
 }

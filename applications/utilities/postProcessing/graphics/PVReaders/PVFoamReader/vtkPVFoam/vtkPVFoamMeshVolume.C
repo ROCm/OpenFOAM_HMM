@@ -119,7 +119,7 @@ vtkSmartPointer<vtkUnstructuredGrid> Foam::vtkPVFoam::volumeVTKMesh
         printMemory();
     }
 
-    foamVtuSizing sizing(mesh, decompPoly);
+    vtk::vtuSizing sizing(mesh, decompPoly);
 
     auto cellTypes = vtkSmartPointer<vtkUnsignedCharArray>::New();
 
@@ -141,28 +141,28 @@ vtkSmartPointer<vtkUnstructuredGrid> Foam::vtkPVFoam::volumeVTKMesh
         (
             cells,
             sizing.nFieldCells(),
-            sizing.sizeInternal(foamVtuSizing::slotType::CELLS)
+            sizing.sizeInternal(vtk::vtuSizing::slotType::CELLS)
         );
 
     UList<vtkIdType> cellLocationsUL =
         vtkUList
         (
             cellLocations,
-            sizing.sizeInternal(foamVtuSizing::slotType::CELLS_OFFSETS)
+            sizing.sizeInternal(vtk::vtuSizing::slotType::CELLS_OFFSETS)
         );
 
     UList<vtkIdType> facesUL =
         vtkUList
         (
             faces,
-            sizing.sizeInternal(foamVtuSizing::slotType::FACES)
+            sizing.sizeInternal(vtk::vtuSizing::slotType::FACES)
         );
 
     UList<vtkIdType> faceLocationsUL =
         vtkUList
         (
             faceLocations,
-            sizing.sizeInternal(foamVtuSizing::slotType::FACES_OFFSETS)
+            sizing.sizeInternal(vtk::vtuSizing::slotType::FACES_OFFSETS)
         );
 
 

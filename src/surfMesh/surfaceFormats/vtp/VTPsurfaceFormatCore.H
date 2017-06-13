@@ -58,26 +58,26 @@ protected:
         //- Write file header information with points
         static void writeHeader
         (
-            foamVtkOutput::formatter& format,
+            vtk::formatter& format,
             const pointField& pts,
             const label nFaces
         );
 
         //- Write file footer
-        static void writeFooter(foamVtkOutput::formatter& format);
+        static void writeFooter(vtk::formatter& format);
 
 
         //- Write regions (zones) information as CellData
         static void writeCellData
         (
-            foamVtkOutput::formatter& format,
+            vtk::formatter& format,
             const UList<surfZone>& zones
         );
 
         //- Write regions (zones) information as CellData
         static void writeCellData
         (
-            foamVtkOutput::formatter& format,
+            vtk::formatter& format,
             const labelUList& zoneIds
         );
 };

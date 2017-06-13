@@ -63,7 +63,7 @@ class VTPsurfaceFormat
         //- Write polygons
         static void writePolys
         (
-            foamVtkOutput::formatter& format,
+            vtk::formatter& format,
             const UList<Face>& faces
         );
 

@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::lagrangianWriter
+    Foam::vtk::lagrangianWriter
 
 Description
     Write fields (internal).
@@ -48,7 +48,7 @@ namespace Foam
 {
 class volPointInterpolation;
 
-namespace foamVtkOutput
+namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
@@ -68,7 +68,7 @@ class lagrangianWriter
         //- Write lagrangian as cell data (verts) or point data?
         const bool useVerts_;
 
-        autoPtr<foamVtkOutput::formatter> format_;
+        autoPtr<vtk::formatter> format_;
 
         const word cloudName_;
 
@@ -109,7 +109,7 @@ public:
             const fvMesh& mesh,
             const word& cloudName,
             const fileName& baseName,
-            const foamVtkOutput::outputOptions outOpts,
+            const vtk::outputOptions outOpts,
             const bool dummyCloud = false
         );
 
@@ -125,7 +125,7 @@ public:
             return os_;
         }
 
-        inline foamVtkOutput::formatter& format()
+        inline vtk::formatter& format()
         {
             return format_();
         }
@@ -149,7 +149,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace foamVtkOutput
+} // End namespace vtk
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

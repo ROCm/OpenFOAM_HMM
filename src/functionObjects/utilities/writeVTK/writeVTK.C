@@ -115,20 +115,20 @@ bool Foam::functionObjects::writeVTK::write()
 
     Info<< "    Internal  : " << outputName << endl;
 
-    foamVtkCells foamVtkMeshCells
+    vtk::vtuCells meshCells
     (
         mesh_,
-        foamVtkCells::contentType::LEGACY,
+        vtk::vtuCells::contentType::LEGACY,
         true  // decompose
     );
 
     // Write mesh
-    foamVtkOutput::internalWriter writer
+    vtk::internalWriter writer
     (
         mesh_,
-        foamVtkMeshCells,
+        meshCells,
         outputName,
-        foamVtkOutput::formatType::LEGACY_ASCII
+        vtk::formatType::LEGACY_ASCII
     );
 
 

@@ -22,14 +22,14 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Namespace
-    Foam::foamVtkOutput
+    Foam::vtk
 
 Description
     Namespace for handling VTK output.
     Contains classes and functions for writing VTK file content.
 
 Namespace
-    Foam::foamVtkOutput::legacy
+    Foam::vtk::legacy
 
 Description
     Namespace for legacy VTK output constants and functions.
@@ -45,7 +45,7 @@ SourceFiles
 
 #include "autoPtr.H"
 #include "Enum.H"
-#include "foamVtkOutputTypes.H"
+#include "foamVtkCore.H"
 #include "foamVtkFormatter.H"
 #include "floatScalar.H"
 #include "IOstream.H"
@@ -54,27 +54,20 @@ SourceFiles
 
 namespace Foam
 {
-namespace foamVtkOutput
+namespace vtk
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-  // Typedefs
-
-    //- Use UInt64 for header data
-    typedef formatter::headerType headerType;
-
-
   // Constants
-
 
   // General Functions
 
     //- Return a default asciiFormatter
-    autoPtr<foamVtkOutput::formatter> newFormatter(std::ostream& os);
+    autoPtr<vtk::formatter> newFormatter(std::ostream& os);
 
     //- Return a new formatter based on the specified format type
-    autoPtr<foamVtkOutput::formatter> newFormatter
+    autoPtr<vtk::formatter> newFormatter
     (
         std::ostream& os,
         const enum formatType fmtType,
@@ -90,7 +83,7 @@ namespace foamVtkOutput
     template<class Type>
     inline void write
     (
-        foamVtkOutput::formatter& fmt,
+        vtk::formatter& fmt,
         const Type& val
     );
 
@@ -100,7 +93,7 @@ namespace foamVtkOutput
     template<class Type>
     void writeList
     (
-        foamVtkOutput::formatter& fmt,
+        vtk::formatter& fmt,
         const UList<Type>& lst
     );
 
@@ -109,7 +102,7 @@ namespace foamVtkOutput
     template<class Type, unsigned Size>
     void writeList
     (
-        foamVtkOutput::formatter& fmt,
+        vtk::formatter& fmt,
         const FixedList<Type, Size>& lst
     );
 
@@ -119,7 +112,7 @@ namespace foamVtkOutput
     template<class Type>
     void writeList
     (
-        foamVtkOutput::formatter& fmt,
+        vtk::formatter& fmt,
         const UList<Type>& lst,
         const UList<label>& addressing
     );
@@ -136,10 +129,10 @@ namespace legacy
   // Constants
 
     //- Strings corresponding to the (POLYDATA, UNSTRUCTURED_GRID) elements
-    extern const Foam::Enum<vtkFileTag> contentNames;
+    extern const Foam::Enum<vtk::fileTag> contentNames;
 
     //- Strings corresponding to the (CELL_DATA, POINT_DATA) elements
-    extern const Foam::Enum<vtkFileTag> dataTypeNames;
+    extern const Foam::Enum<vtk::fileTag> dataTypeNames;
 
 
   // Functions
@@ -158,9 +151,9 @@ namespace legacy
     //  Includes "DATASET" with the specified dataset type.
     inline void fileHeader
     (
-        foamVtkOutput::formatter& fmt,
+        vtk::formatter& fmt,
         const std::string& title,
-        const vtkFileTag& contentTypeTag
+        const vtk::fileTag& contentTypeTag
     );
 
     //- Emit header for legacy file, with "ASCII" or "BINARY" depending on
@@ -168,7 +161,7 @@ namespace legacy
     //  If the contentType is non-empty, it is used for "DATASET" line.
     std::ostream& fileHeader
     (
-        foamVtkOutput::formatter& fmt,
+        vtk::formatter& fmt,
         const std::string& title,
         const std::string& contentType
     );
@@ -189,14 +182,14 @@ namespace legacy
     );
 
 
-    //- Use the enumerations vtkFileTag::CELL_DATA, vtkFileTag::POINT_DATA,
+    //- Use the enumerations vtk::fileTag::CELL_DATA, vtk::fileTag::POINT_DATA,
     //  to emit a legacy CELL_DATA, POINT_DATA element.
     //  The nEntries corresponds similarly to the number of cells or points,
     //  respectively.
     inline void dataHeader
     (
         std::ostream& os,
-        const vtkFileTag& dataTypeTag,
+        const vtk::fileTag& dataTypeTag,
         const label nEntries,
         const label nFields
     );
@@ -219,11 +212,12 @@ namespace legacy
         const label nEntries
     );
 
-};
+} // End namespace legacy
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace foamVtkOutput
+} // End namespace vtk
 } // End namespace Foam
 
 

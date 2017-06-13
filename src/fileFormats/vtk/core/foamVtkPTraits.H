@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,53 +21,69 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InNamespace
-    Foam::foamVtkOutput
+Class
+    Foam::vtkPTraits
 
 Description
-    Enumerations and typedefs for VTK output.
-
-SourceFiles
-    foamVtkOutputTypes.H
+    Names for VTK primitive types.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkOutputTypes_H
-#define foamVtkOutputTypes_H
+#ifndef foamVtkPTraits_H
+#define foamVtkPTraits_H
+
+#include <cstdint>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace foamVtkOutput
+
+// Forward declarations
+class endian;
+
+/*---------------------------------------------------------------------------*\
+                         Class vtkPTraits Declaration
+\*---------------------------------------------------------------------------*/
+
+template<class PrimitiveType>
+class vtkPTraits
 {
+public:
+
+    // Static data members
+
+        static const char* const typeName;
+};
+
+
+template<>
+const char* const vtkPTraits<uint8_t>::typeName;  // UInt8
+
+template<>
+const char* const vtkPTraits<int32_t>::typeName;  // Int32
+
+template<>
+const char* const vtkPTraits<uint32_t>::typeName; // UInt32
+
+template<>
+const char* const vtkPTraits<int64_t>::typeName;  // Int64
+
+template<>
+const char* const vtkPTraits<uint64_t>::typeName; // UInt64
+
+template<>
+const char* const vtkPTraits<float>::typeName;    // Float32
+
+template<>
+const char* const vtkPTraits<double>::typeName;   // Float64
+
+template<>
+const char* const vtkPTraits<Foam::endian>::typeName; // (Big|Little)Endian
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-  // Enumerations
-
-    //- The output format type for file contents.
-    //  Upper bits for output type, lower bits for the format itself.
-    enum class formatType
-    {
-        /** XML inline ASCII, using the asciiFormatter */
-        INLINE_ASCII  = 0,
-        /** XML inline base64, using the base64Formatter */
-        INLINE_BASE64 = 0x01,
-        /** XML append base64, using the appendBase64Formatter */
-        APPEND_BASE64 = 0x11,
-        /** XML append raw binary, using the appendRawFormatter */
-        APPEND_BINARY = 0x12,
-        /** Legacy ASCII, using the legacyAsciiFormatter */
-        LEGACY_ASCII  = 0x20,
-        /** Legacy raw binary, using the legacyRawFormatter */
-        LEGACY_BINARY = 0x22,
-    };
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace foamVtkOutput
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
