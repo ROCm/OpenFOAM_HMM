@@ -122,10 +122,7 @@ Note
 
     \verbatim
       <?xml version="1.0"?>
-      <VTKFile type="Collection"
-           version="0.1"
-           byte_order="LittleEndian"
-           compressor="vtkZLibDataCompressor">
+      <VTKFile type="Collection" version="0.1" byte_order="LittleEndian">
         <Collection>
           <DataSet timestep="50" file="pitzDaily_2.vtu"/>
           <DataSet timestep="100" file="pitzDaily_3.vtu"/>
@@ -261,7 +258,7 @@ vtk::outputOptions getOutputOptions(const argList& args)
                 opts.ascii(true);
 
                 WarningInFunction
-                    << "Using ASCII rather than binary VTK format since "
+                    << "Using ASCII rather than legacy binary VTK format since "
                     << "floatScalar and/or label are not 4 bytes in size."
                     << nl << endl;
             }
@@ -434,8 +431,9 @@ int main(int argc, char *argv[])
 
     if (noPointValues)
     {
-        WarningInFunction
-            << "Outputting cell values only" << nl << endl;
+        Info<< "Outputting cell values only."
+            << " Point fields disabled by '-noPointValues' option"
+            << nl;
     }
 
     const bool allPatches = args.optionFound("allPatches");
@@ -676,11 +674,13 @@ int main(int argc, char *argv[])
         }
 
         const label nVolFields =
-                vScalarFld.size()
-              + vVectorFld.size()
-              + vSphTensorf.size()
-              + vSymTensorFld.size()
-              + vTensorFld.size();
+        (
+            vScalarFld.size()
+          + vVectorFld.size()
+          + vSphTensorf.size()
+          + vSymTensorFld.size()
+          + vTensorFld.size()
+        );
 
 
         // Construct dimensioned fields
@@ -744,22 +744,14 @@ int main(int argc, char *argv[])
         }
 
         const label nDimFields =
-                dScalarFld.size()
-              + dVectorFld.size()
-              + dSphTensorFld.size()
-              + dSymTensorFld.size()
-              + dTensorFld.size();
+        (
+            dScalarFld.size()
+          + dVectorFld.size()
+          + dSphTensorFld.size()
+          + dSymTensorFld.size()
+          + dTensorFld.size()
+        );
 
-
-        // Construct pointMesh only if necessary since constructs edge
-        // addressing (expensive on polyhedral meshes)
-        if (noPointValues)
-        {
-            Info<< "    pointScalarFields : switched off"
-                << " (\"-noPointValues\" (at your option)\n";
-            Info<< "    pointVectorFields : switched off"
-                << " (\"-noPointValues\" (at your option)\n";
-        }
 
         PtrList<const pointScalarField> pScalarFld;
         PtrList<const pointVectorField> pVectorFld;
@@ -767,6 +759,8 @@ int main(int argc, char *argv[])
         PtrList<const pointSymmTensorField> pSymTensorFld;
         PtrList<const pointTensorField> pTensorFld;
 
+        // Construct pointMesh only if necessary since it constructs edge
+        // addressing (expensive on polyhedral meshes)
         if (!noPointValues && !(specifiedFields && selectedFields.empty()))
         {
             readFields
@@ -797,7 +791,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 pSphTensorFld
             );
-            print("    pointSphericalTensor :", Info, pSphTensorFld);
+            print("    pointSphTensor       : ", Info, pSphTensorFld);
 
             readFields
             (
@@ -819,7 +813,6 @@ int main(int argc, char *argv[])
             );
             print("    pointTensor          :", Info, pTensorFld);
         }
-        Info<< endl;
 
         const label nPointFields =
             pScalarFld.size()
@@ -901,6 +894,7 @@ int main(int argc, char *argv[])
 
                 // Interpolated volFields
                 volPointInterpolation pInterp(mesh);
+
                 writer.write(pInterp, vScalarFld);
                 writer.write(pInterp, vVectorFld);
                 writer.write(pInterp, vSphTensorf);
@@ -1051,8 +1045,8 @@ int main(int argc, char *argv[])
                 writer.write(pSymTensorFld);
                 writer.write(pTensorFld);
 
-                // no interpolated volFields since I cannot be bothered to
-                // create the patchInterpolation for all subpatches.
+                // no interpolated volFields to avoid creating
+                // patchInterpolation for all subpatches.
 
                 writer.endPointData();
             }
