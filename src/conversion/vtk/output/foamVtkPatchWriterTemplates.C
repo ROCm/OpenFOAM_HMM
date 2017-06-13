@@ -31,48 +31,43 @@ License
 template<class Type, template<class> class PatchField>
 void Foam::vtk::patchWriter::write
 (
-    const UPtrList<const GeometricField<Type, PatchField, volMesh>>& flds
+    const GeometricField<Type, PatchField, volMesh>& field
 )
 {
     const int nCmpt(pTraits<Type>::nComponents);
     const uint64_t payLoad(nFaces_ * nCmpt * sizeof(float));
 
-    forAll(flds, fieldi)
+    if (legacy_)
     {
-        const auto& fld = flds[fieldi];
+        legacy::floatField(os_, field.name(), nCmpt, nFaces_);
+    }
+    else
+    {
+        format().openDataArray<float, nCmpt>(field.name())
+            .closeTag();
+    }
 
-        if (legacy_)
+    format().writeSize(payLoad);
+
+    for (const label patchId : patchIDs_)
+    {
+        const auto& pfld = field.boundaryField()[patchId];
+
+        if (nearCellValue_)
         {
-            legacy::floatField(os_, fld.name(), nCmpt, nFaces_);
+            vtk::writeList(format(), pfld.patchInternalField()());
         }
         else
         {
-            format().openDataArray<float, nCmpt>(fld.name())
-                .closeTag();
+            vtk::writeList(format(), pfld);
         }
+    }
 
-        format().writeSize(payLoad);
+    format().flush();
 
-        forAll(patchIDs_, i)
-        {
-            const auto& pfld = fld.boundaryField()[patchIDs_[i]];
-
-            if (nearCellValue_)
-            {
-                vtk::writeList(format(), pfld.patchInternalField()());
-            }
-            else
-            {
-                vtk::writeList(format(), pfld);
-            }
-        }
-
-        format().flush();
-
-        if (!legacy_)
-        {
-            format().endDataArray();
-        }
+    if (!legacy_)
+    {
+        format().endDataArray();
     }
 }
 
@@ -80,41 +75,99 @@ void Foam::vtk::patchWriter::write
 template<class Type, template<class> class PatchField>
 void Foam::vtk::patchWriter::write
 (
-    const UPtrList<const GeometricField<Type, PatchField, pointMesh>>& flds
+    const GeometricField<Type, PatchField, pointMesh>& field
 )
 {
     const int nCmpt(pTraits<Type>::nComponents);
     const uint64_t payLoad(nPoints_ * nCmpt * sizeof(float));
 
-    forAll(flds, fieldi)
+    if (legacy_)
     {
-        const auto& fld = flds[fieldi];
+        legacy::floatField(os_, field.name(), nCmpt, nPoints_);
+    }
+    else
+    {
+        format().openDataArray<float, nCmpt>(field.name())
+            .closeTag();
+    }
 
-        if (legacy_)
+    format().writeSize(payLoad);
+
+    for (const label patchId : patchIDs_)
+    {
+        const auto& pfld = field.boundaryField()[patchId];
+
+        vtk::writeList(format(), pfld.patchInternalField()());
+    }
+
+    format().flush();
+
+    if (!legacy_)
+    {
+        format().endDataArray();
+    }
+}
+
+
+template<class Type>
+void Foam::vtk::patchWriter::write
+(
+    const PrimitivePatchInterpolation<primitivePatch>& pInter,
+    const GeometricField<Type, fvPatchField, volMesh>& field
+)
+{
+    const int nCmpt(pTraits<Type>::nComponents);
+    const uint64_t payLoad(nPoints_ * nCmpt * sizeof(float));
+
+    if (legacy_)
+    {
+        legacy::floatField(os_, field.name(), nCmpt, nPoints_);
+    }
+    else
+    {
+        format().openDataArray<float, nCmpt>(field.name())
+            .closeTag();
+    }
+
+    format().writeSize(payLoad);
+
+    for (const label patchId : patchIDs_)
+    {
+        const auto& pfld = field.boundaryField()[patchId];
+
+        if (nearCellValue_)
         {
-            legacy::floatField(os_, fld.name(), nCmpt, nPoints_);
+            auto tfield =
+                pInter.faceToPointInterpolate(pfld.patchInternalField()());
+
+            vtk::writeList(format(), tfield());
         }
         else
         {
-            format().openDataArray<float, nCmpt>(fld.name())
-                .closeTag();
+            auto tfield = pInter.faceToPointInterpolate(pfld);
+
+            vtk::writeList(format(), tfield());
         }
+    }
 
-        format().writeSize(payLoad);
+    format().flush();
 
-        forAll(patchIDs_, i)
-        {
-            const auto& pfld = fld.boundaryField()[patchIDs_[i]];
+    if (!legacy_)
+    {
+        format().endDataArray();
+    }
+}
 
-            vtk::writeList(format(), pfld.patchInternalField()());
-        }
 
-        format().flush();
-
-        if (!legacy_)
-        {
-            format().endDataArray();
-        }
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::vtk::patchWriter::write
+(
+    const UPtrList<const GeometricField<Type, PatchField, GeoMesh>>& flds
+)
+{
+    for (const auto& field : flds)
+    {
+        write(field);
     }
 }
 
@@ -126,50 +179,9 @@ void Foam::vtk::patchWriter::write
     const UPtrList<const GeometricField<Type, fvPatchField, volMesh>>& flds
 )
 {
-    const int nCmpt(pTraits<Type>::nComponents);
-    const uint64_t payLoad(nPoints_ * nCmpt * sizeof(float));
-
-    forAll(flds, fieldi)
+    for (const auto& field : flds)
     {
-        const auto& fld = flds[fieldi];
-
-        if (legacy_)
-        {
-            legacy::floatField(os_, fld.name(), nCmpt, nPoints_);
-        }
-        else
-        {
-            format().openDataArray<float, nCmpt>(fld.name())
-                .closeTag();
-        }
-
-        format().writeSize(payLoad);
-
-        forAll(patchIDs_, i)
-        {
-            const auto& pfld = fld.boundaryField()[patchIDs_[i]];
-
-            if (nearCellValue_)
-            {
-                auto tfield =
-                    pInter.faceToPointInterpolate(pfld.patchInternalField()());
-
-                vtk::writeList(format(), tfield());
-            }
-            else
-            {
-                auto tfield = pInter.faceToPointInterpolate(pfld);
-
-                vtk::writeList(format(), tfield());
-            }
-        }
-
-        format().flush();
-
-        if (!legacy_)
-        {
-            format().endDataArray();
-        }
+        write(pInter, field);
     }
 }
 

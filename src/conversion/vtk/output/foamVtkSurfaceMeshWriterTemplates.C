@@ -62,38 +62,46 @@ Foam::vtk::surfaceMeshWriter::getFaceField
 template<class Type>
 void Foam::vtk::surfaceMeshWriter::write
 (
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& field
+)
+{
+    const int nCmpt(pTraits<Type>::nComponents);
+    const uint64_t payLoad(pp_.size() * nCmpt * sizeof(float));
+
+    if (legacy_)
+    {
+        legacy::floatField(os(), field.name(), nCmpt, pp_.size());
+    }
+    else
+    {
+        format().openDataArray<float, nCmpt>(field.name())
+            .closeTag();
+    }
+
+    format().writeSize(payLoad);
+    vtk::writeList(format(), getFaceField(field)());
+
+    format().flush();
+
+    if (!legacy_)
+    {
+        format().endDataArray();
+    }
+}
+
+
+template<class Type>
+void Foam::vtk::surfaceMeshWriter::write
+(
     const UPtrList
     <
         const GeometricField<Type, fvsPatchField, surfaceMesh>
     >& sflds
 )
 {
-    const int nCmpt(pTraits<Type>::nComponents);
-    const uint64_t payLoad(pp_.size() * nCmpt * sizeof(float));
-
-    forAll(sflds, fieldi)
+    for (const auto& field : sflds)
     {
-        const auto& fld = sflds[fieldi];
-
-        if (legacy_)
-        {
-            legacy::floatField(os(), fld.name(), nCmpt, pp_.size());
-        }
-        else
-        {
-            format().openDataArray<float, nCmpt>(fld.name())
-                .closeTag();
-        }
-
-        format().writeSize(payLoad);
-        vtk::writeList(format(), getFaceField(fld)());
-
-        format().flush();
-
-        if (!legacy_)
-        {
-            format().endDataArray();
-        }
+        write(field);
     }
 }
 

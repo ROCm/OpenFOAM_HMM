@@ -61,9 +61,9 @@ void Foam::vtk::patchWriter::writePoints()
 
     format().writeSize(payLoad);
 
-    forAll(patchIDs_, i)
+    for (const label patchId : patchIDs_)
     {
-        const polyPatch& pp = patches[patchIDs_[i]];
+        const polyPatch& pp = patches[patchId];
 
         vtk::writeList(format(), pp.localPoints());
     }
@@ -84,9 +84,9 @@ void Foam::vtk::patchWriter::writePolysLegacy()
 
     // connectivity count without additional storage (done internally)
     uint64_t nConnectivity = 0;
-    forAll(patchIDs_, i)
+    for (const label patchId : patchIDs_)
     {
-        const polyPatch& pp = patches[patchIDs_[i]];
+        const polyPatch& pp = patches[patchId];
 
         forAll(pp, facei)
         {
@@ -101,9 +101,9 @@ void Foam::vtk::patchWriter::writePolysLegacy()
     // [nPts, id1, id2, ..., nPts, id1, id2, ...]
 
     label off = 0;
-    forAll(patchIDs_, i)
+    for (const label patchId : patchIDs_)
     {
-        const polyPatch& pp = patches[patchIDs_[i]];
+        const polyPatch& pp = patches[patchId];
 
         forAll(pp, facei)
         {
@@ -138,14 +138,13 @@ void Foam::vtk::patchWriter::writePolys()
     {
         // payload count
         uint64_t payLoad = 0;
-        forAll(patchIDs_, i)
+        for (const label patchId : patchIDs_)
         {
-            const polyPatch& pp = patches[patchIDs_[i]];
+            const polyPatch& pp = patches[patchId];
 
             forAll(pp, facei)
             {
-                const face& f = pp.localFaces()[facei];
-                payLoad += f.size();
+                payLoad += pp[facei].size();
             }
         }
 
@@ -156,9 +155,9 @@ void Foam::vtk::patchWriter::writePolys()
         format().writeSize(payLoad * sizeof(label));
 
         label off = 0;
-        forAll(patchIDs_, i)
+        for (const label patchId : patchIDs_)
         {
-            const polyPatch& pp = patches[patchIDs_[i]];
+            const polyPatch& pp = patches[patchId];
 
             forAll(pp, facei)
             {
@@ -191,9 +190,9 @@ void Foam::vtk::patchWriter::writePolys()
         format().writeSize(nFaces_ * sizeof(label));
 
         label off = 0;
-        forAll(patchIDs_, i)
+        for (const label patchId : patchIDs_)
         {
-            const polyPatch& pp = patches[patchIDs_[i]];
+            const polyPatch& pp = patches[patchId];
 
             forAll(pp, facei)
             {
@@ -262,9 +261,9 @@ Foam::vtk::patchWriter::patchWriter
 
     // Basic sizes
     nPoints_ = nFaces_ = 0;
-    forAll(patchIDs_, i)
+    for (const label patchId : patchIDs_)
     {
-        const polyPatch& pp = patches[patchIDs_[i]];
+        const polyPatch& pp = patches[patchId];
 
         nPoints_ += pp.nPoints();
         nFaces_  += pp.size();
@@ -384,10 +383,8 @@ void Foam::vtk::patchWriter::writePatchIDs()
 
     format().writeSize(payLoad);
 
-    forAll(patchIDs_, i)
+    for (const label patchId : patchIDs_)
     {
-        const label patchId = patchIDs_[i];
-
         const label sz = mesh_.boundaryMesh()[patchId].size();
 
         for (label facei = 0; facei < sz; ++facei)

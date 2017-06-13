@@ -167,27 +167,38 @@ public:
         void writeFooter();
 
 
-        //- Write volFields
+      // Write fields (individually)
+
+        //- Write volume field
         template<class Type, template<class> class PatchField>
+        void write(const GeometricField<Type, PatchField, volMesh>& field);
+
+        //- Write point fields
+        template<class Type, template<class> class PatchField>
+        void write(const GeometricField<Type, PatchField, pointMesh>& field);
+
+        //- Write point-interpolated volume field
+        template<class Type>
+        void write
+        (
+            const PrimitivePatchInterpolation<primitivePatch>& pInterp,
+            const GeometricField<Type, fvPatchField, volMesh>& field
+        );
+
+
+      // Write fields (collectively)
+
+        //- Write multiple volume/point fields
+        template<class Type, template<class> class PatchField, class GeoMesh>
         void write
         (
             const UPtrList
             <
-                const GeometricField<Type, PatchField, volMesh>
+                const GeometricField<Type, PatchField, GeoMesh>
             >& flds
         );
 
-        //- Write pointFields
-        template<class Type, template<class> class PatchField>
-        void write
-        (
-            const UPtrList
-            <
-                const GeometricField<Type, PatchField, pointMesh>
-            >&
-        );
-
-        //- Interpolated volFields
+        //- Write multiple point-interpolated volume fields
         template<class Type>
         void write
         (

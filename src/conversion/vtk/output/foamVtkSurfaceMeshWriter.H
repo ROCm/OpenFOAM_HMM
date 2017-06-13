@@ -135,12 +135,25 @@ public:
         void writeFooter();
 
 
-        //- Get face field
+        //- Get face field (internal face or boundary face)
         template<class Type>
         tmp<Field<Type>> getFaceField
         (
             const GeometricField<Type, fvsPatchField, surfaceMesh>& sfld
         ) const;
+
+
+      // Write fields (individually)
+
+        //- Write surface field
+        template<class Type>
+        void write
+        (
+            const GeometricField<Type, fvsPatchField, surfaceMesh>& field
+        );
+
+
+      // Write fields (collectively)
 
         //- Write surface fields
         template<class Type>
