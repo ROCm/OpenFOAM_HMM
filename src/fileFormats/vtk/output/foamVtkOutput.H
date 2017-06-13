@@ -199,7 +199,7 @@ namespace legacy
     (
         std::ostream& os,
         const word& name,
-        const label nCmpt,
+        const int nCmpt,
         const label nEntries
     );
 
@@ -208,7 +208,7 @@ namespace legacy
     (
         std::ostream& os,
         const word& name,
-        const label nCmpt,
+        const int nCmpt,
         const label nEntries
     );
 

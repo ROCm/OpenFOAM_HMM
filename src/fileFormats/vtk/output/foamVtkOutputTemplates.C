@@ -32,7 +32,8 @@ inline void Foam::vtk::write
     const Type& val
 )
 {
-    for (direction cmpt=0; cmpt < pTraits<Type>::nComponents; ++cmpt)
+    const direction nCmpt = pTraits<Type>::nComponents;
+    for (direction cmpt=0; cmpt < nCmpt; ++cmpt)
     {
         fmt.write(component(val, cmpt));
     }

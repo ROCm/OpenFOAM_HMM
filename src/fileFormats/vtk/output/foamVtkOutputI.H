@@ -123,7 +123,7 @@ inline void Foam::vtk::legacy::floatField
 (
     std::ostream& os,
     const word& fieldName,
-    const label nCmpt,
+    const int nCmpt,
     const label nEntries
 )
 {
@@ -135,7 +135,7 @@ inline void Foam::vtk::legacy::intField
 (
     std::ostream& os,
     const word& fieldName,
-    const label nCmpt,
+    const int nCmpt,
     const label nEntries
 )
 {
