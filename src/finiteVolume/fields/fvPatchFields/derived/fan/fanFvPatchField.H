@@ -59,7 +59,7 @@ Usage
             componentColumns 1(1);
             separator       ",";
             mergeSeparators no;
-            fileName        "$FOAM_CASE/constant/pressureVsU";
+            file            "$FOAM_CASE/constant/pressureVsU";
         }
         value           uniform 0;
     }
