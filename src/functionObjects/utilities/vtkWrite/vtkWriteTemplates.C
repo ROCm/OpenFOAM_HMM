@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,38 +23,38 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "writeVTK.H"
-#include "objectRegistry.H"
-#include "DynamicList.H"
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class GeoField>
-Foam::UPtrList<const GeoField>
-Foam::functionObjects::writeVTK::lookupFields() const
+Foam::label
+Foam::functionObjects::vtkWrite::countFields() const
 {
-    DynamicList<word> allNames(obr_.toc().size());
-    forAll(objectNames_, i)
-    {
-        wordList names(obr_.names<GeoField>(objectNames_[i]));
+    return obr_.names<GeoField>(selectFields_).size();
+}
 
-        if (names.size())
-        {
-            allNames.append(names);
-        }
+
+template<class GeoField>
+Foam::label
+Foam::functionObjects::vtkWrite::writeFields
+(
+    vtk::internalWriter& writer,
+    bool verbose
+) const
+{
+    const wordList names = obr_.sortedNames<GeoField>(selectFields_);
+
+    if (verbose && names.size())
+    {
+        Info<< "    " << GeoField::typeName
+            << " " << flatOutput(names) << endl;
     }
 
-    UPtrList<const GeoField> fields(allNames.size());
-
-    forAll(allNames, i)
+    for (const word& fieldName : names)
     {
-        const GeoField& field = obr_.lookupObject<GeoField>(allNames[i]);
-        Info<< "    Writing " << GeoField::typeName
-            << " field " << field.name() << endl;
-        fields.set(i, &field);
+        writer.write(obr_.lookupObject<GeoField>(fieldName));
     }
 
-    return fields;
+    return names.size();
 }
 
 

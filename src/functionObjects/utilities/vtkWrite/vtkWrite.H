@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjects::writeVTK
+    Foam::functionObjects::vtkWrite
 
 Group
     grpUtilitiesFunctionObjects
@@ -36,56 +36,47 @@ Description
 
     Example of function object specification:
     \verbatim
-        writeVTK1
-        {
-            type        writeVTK;
-            libs ("libutilityFunctionObjects.so");
-            ...
-            objectNames (obj1 obj2);
-        }
+    vtkWrite1
+    {
+        type            vtkWrite;
+        libs            ("libutilityFunctionObjects.so");
+        writeControl    writeTime;
+        writeInterval   1;
+        format          binary;
+        legacy          false;
+        ...
+        fields          (U p);
+    }
     \endverbatim
 
 Usage
     \table
         Property     | Description             | Required    | Default value
-        type         | Type name: writeVTK     | yes         |
-        objectNames  | objects to write        | yes         |
+        type         | Type name: vtkWrite     | yes         |
+        fields       | Fields to output        | yes         |
+        writeControl | Output control          | recommended | timeStep
+        directory    | The output directory name | no        | "VTK"
+        format       | ASCII or binary format  | no          | binary
+        legacy       | Legacy VTK output       | no          | false
+        writeIds     | Write cell ids as field | no          | true
     \endtable
 
 See also
     Foam::functionObjects::fvMeshFunctionObject
     Foam::functionObjects::timeControl
 
-    Example of function object specification to calculate Lambda2:
-    \verbatim
-    Lambda2_1
-    {
-        type        Lambda2;
-        functionObjectLibs ("libutilityFunctionObjects.so");
-        ...
-    }
-    \endverbatim
-
-    \heading Function object usage
-    \table
-        Property     | Description             | Required    | Default value
-        type         | Type name: Lambda2      | yes         |
-        UName        | Name of velocity field  | no          | U
-        resultName   | Name of Lambda2 field   | no          | <function name>
-        log          | Log to standard output  | no          | yes
-    \endtable
-
 SourceFiles
-    writeVTK.C
-    IOwriteVTK.H
+    vtkWrite.C
+    vtkWriteTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_writeVTK_H
-#define functionObjects_writeVTK_H
+#ifndef functionObjects_vtkWrite_H
+#define functionObjects_vtkWrite_H
 
 #include "fvMeshFunctionObject.H"
-#include "wordReList.H"
+#include "foamVtkInternalWriter.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -95,46 +86,57 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class writeVTK Declaration
+                          Class vtkWrite Declaration
 \*---------------------------------------------------------------------------*/
 
-class writeVTK
+class vtkWrite
 :
     public fvMeshFunctionObject
 {
     // Private data
 
-        //- Names of objects
-        wordReList objectNames_;
+        //- VTK output options
+        vtk::outputOptions writeOpts_;
 
-        //- Result name
-        word resultName_;
+        //- Name of fields to process
+        wordReList selectFields_;
 
-        //- Switch to send output to Info as well as to file
-        Switch log_;
+        //- Output directory name
+        fileName dirName_;
+
+        //- Write cell ids field
+        bool writeIds_;
+
 
     // Private Member Functions
 
+        //- Count number of selected fields for GeoField type.
+        //  Only needed for legacy vtk format.
         template<class GeoField>
-        UPtrList<const GeoField> lookupFields() const;
+        label countFields() const;
+
+        //- Write selected fields for GeoField type.
+        template<class GeoField>
+        label writeFields(vtk::internalWriter& writer, bool verbose=true) const;
+
 
         //- Disallow default bitwise copy construct
-        writeVTK(const writeVTK&) = delete;
+        vtkWrite(const vtkWrite&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const writeVTK&) = delete;
+        void operator=(const vtkWrite&) = delete;
 
 
 public:
 
     //- Runtime type information
-    TypeName("writeVTK");
+    TypeName("vtkWrite");
 
 
     // Constructors
 
         //- Construct from Time and dictionary
-        writeVTK
+        vtkWrite
         (
             const word& name,
             const Time& t,
@@ -143,18 +145,18 @@ public:
 
 
     //- Destructor
-    virtual ~writeVTK();
+    virtual ~vtkWrite();
 
 
     // Member Functions
 
-        //- Read the writeVTK data
+        //- Read the vtkWrite specification
         virtual bool read(const dictionary& dict);
 
         //- Execute, currently does nothing
         virtual bool execute();
 
-        //- Write the writeVTK
+        //- Write fields
         virtual bool write();
 };
 
@@ -167,7 +169,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "writeVTKTemplates.C"
+    #include "vtkWriteTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

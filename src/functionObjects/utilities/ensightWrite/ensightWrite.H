@@ -76,7 +76,6 @@ SourceFiles
     ensightWrite.C
     ensightWriteTemplates.C
 
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef functionObjects_ensightWrite_H
