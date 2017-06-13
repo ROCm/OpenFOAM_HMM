@@ -153,7 +153,44 @@ public:
         void writeFooter();
 
 
-        //- Write internal fields
+      // Write fields (individually)
+
+        //- Write the internal field
+        template<class Type>
+        void write(const DimensionedField<Type, volMesh>& field);
+
+        //- Write the volume field (internal part)
+        template<class Type, template<class> class PatchField>
+        void write(const GeometricField<Type, PatchField, volMesh>& field);
+
+        //- Write the point field
+        //  Interpolate to originating cell centre for decomposed cells.
+        template<class Type, template<class> class PatchField>
+        void write
+        (
+            const GeometricField<Type, PatchField, pointMesh>& field
+        );
+
+        //- Write point-interpolated internal field
+        template<class Type>
+        void write
+        (
+            const volPointInterpolation& pInterp,
+            const DimensionedField<Type, volMesh>& vfield
+        );
+
+        //- Write point-interpolated volume field
+        template<class Type>
+        void write
+        (
+            const volPointInterpolation& pInterp,
+            const GeometricField<Type, fvPatchField, volMesh>& vfield
+        );
+
+
+      // Write fields (collectively)
+
+        //- Write multiple internal fields
         template<class Type>
         void write
         (
@@ -163,29 +200,18 @@ public:
             >& flds
         );
 
-        //- Write volFields
-        template<class Type, template<class> class PatchField>
+        //- Write multiple volume/point fields
+        template<class Type, template<class> class PatchField, class GeoMesh>
         void write
         (
             const UPtrList
             <
-                const GeometricField<Type, PatchField, volMesh>
-            >& flds
-        );
-
-        //- Write pointFields on all mesh points.
-        //  Interpolate to cell centre for decomposed cell centres.
-        template<class Type, template<class> class PatchField>
-        void write
-        (
-            const UPtrList
-            <
-                const GeometricField<Type, PatchField, pointMesh>
+                const GeometricField<Type, PatchField, GeoMesh>
             >& flds
         );
 
 
-        //- Interpolated internal fields
+        //- Write multiple point-interpolated internal fields
         template<class Type>
         void write
         (
@@ -196,14 +222,14 @@ public:
             >& flds
         );
 
-        //- Interpolated volFields
-        template<class Type, template<class> class PatchField>
+        //- Write multiple point-interpolated volume fields
+        template<class Type>
         void write
         (
             const volPointInterpolation& pInterp,
             const UPtrList
             <
-                const GeometricField<Type, PatchField, volMesh>
+                const GeometricField<Type, fvPatchField, volMesh>
             >& flds
         );
 
