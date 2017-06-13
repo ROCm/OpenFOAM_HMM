@@ -198,13 +198,19 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
     faceList_.setSize(nearest.size());
     faceList_ = -1;
 
+    processor_.setSize(size());
+    processor_ = -1;
+
     forAll(nearest, sampleI)
     {
         if (nearest[sampleI].second().second() == Pstream::myProcNo())
         {
             // Store the face to sample
             faceList_[sampleI] = nearest[sampleI].first().index();
+            label facei = faceList_[sampleI];
+            processor_[sampleI] = (facei != -1 ? Pstream::myProcNo() : -1);
         }
+        reduce(processor_[sampleI], maxOp<label>());
     }
 }
 
