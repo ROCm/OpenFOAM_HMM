@@ -126,7 +126,7 @@ SourceFiles
 #include "DynamicList.H"
 #include "wordReList.H"
 #include "scalarField.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "Switch.H"
 #include "UPtrList.H"
 
@@ -164,8 +164,8 @@ public:
 
 private:
 
-        //- State end names
-        static const NamedEnum<stateEnd, 2> stateEndNames_;
+        //- State end names (NB, only selectable values itemized)
+        static const Enum<stateEnd> stateEndNames_;
 
 
     // Private data
@@ -177,19 +177,19 @@ private:
         fileName commsDir_;
 
         //- Interval time between checking for return data [s]
-        label waitInterval_;
+        unsigned waitInterval_;
 
         //- Time out time [s]
-        label timeOut_;
+        unsigned timeOut_;
 
         //- Calculation frequency
         label calcFrequency_;
 
         //- Flag to indicate values are initialised by external application
-        bool initByExternal_;
+        bool slaveFirst_;
 
         //- Lockfile state on termination
-        stateEnd stateEnd_;
+        mutable stateEnd stateEnd_;
 
         //- Names of (composite) regions
         DynamicList<word> regionGroupNames_;
@@ -240,10 +240,10 @@ private:
         void cleanup() const;
 
         //- Remove files written by OpenFOAM
-        void removeWriteFiles() const;
+        void removeDataMaster() const;
 
         //- Remove files written by external code
-        void removeReadFiles() const;
+        void removeDataSlave() const;
 
         //- Wait for indication that the external program has supplied input
         //  (ie, for the lock file to reappear).
@@ -302,7 +302,7 @@ private:
         template<class Type>
         static tmp<Field<Type>> gatherAndCombine(const Field<Type>& fld);
 
-        static void checkOrder(const wordList&);
+        static void checkOrder(const wordList& regionNames);
 
         //- Disallow default bitwise copy constructor
         externalCoupled(const externalCoupled&) = delete;
@@ -340,34 +340,34 @@ public:
 
     // Member Functions
 
-        // Function object control
+      // Function object control
 
-            //- Called at each ++ or += of the time-loop
-            virtual bool execute();
+        //- Called at each ++ or += of the time-loop
+        virtual bool execute();
 
-            //- Called when Time::run() determines that the time-loop exits
-            virtual bool end();
+        //- Called when Time::run() determines that the time-loop exits
+        virtual bool end();
 
-            //- Read and set the function object if its data have changed
-            virtual bool read(const dictionary&);
+        //- Read and set the function object if its data have changed
+        virtual bool read(const dictionary& dict);
 
-            //- Write
-            virtual bool write();
+        //- Write, currently a no-op
+        virtual bool write();
 
 
-        // Other
+      // Other
 
-            //- Create single name by appending words (in sorted order),
-            //  separated by '_'
-            static word compositeName(const wordList&);
+        //- Create single name by appending words (in sorted order),
+        //  separated by '_'
+        static word compositeName(const wordList&);
 
-            //- Write geometry for the group as region/patch
-            static void writeGeometry
-            (
-                const UPtrList<const fvMesh>& meshes,
-                const fileName& commsDir,
-                const wordRe& groupName
-            );
+        //- Write geometry for the group as region/patch
+        static void writeGeometry
+        (
+            const UPtrList<const fvMesh>& meshes,
+            const fileName& commsDir,
+            const wordRe& groupName
+        );
 };
 
 
