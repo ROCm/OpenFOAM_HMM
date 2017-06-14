@@ -1,6 +1,5 @@
 #!/bin/sh
-
-# Source tutorial run functions
+cd ${0%/*} || exit 1    # Run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 runApplication extrudeMesh
@@ -8,8 +7,9 @@ runApplication createPatch -overwrite
 mergeMeshes . ../aeroFoil_overset -overwrite
 runApplication topoSet
 
-# Copy standard fields
-rm -rf 0 && cp -r 0.org 0
+restore0Dir
 
 # Use cellSets to write zoneID
 runApplication setFields
+
+#------------------------------------------------------------------------------

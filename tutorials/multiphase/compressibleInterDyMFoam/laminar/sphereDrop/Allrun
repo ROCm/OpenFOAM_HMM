@@ -1,7 +1,5 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # run from this directory
-
-# Source tutorial run functions
+cd ${0%/*} || exit 1    # Run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 runApplication blockMesh
@@ -13,8 +11,7 @@ runApplication createPatch -overwrite
 # split mesh into 2 regions at the AMI coupled patch
 runApplication mergeOrSplitBaffles -overwrite
 
-echo "Copying 0.org to 0"
-cp -r 0.org 0
+restore0Dir
 
 runApplication setFields
 
@@ -22,4 +19,4 @@ runApplication setFields
 
 runApplication $(getApplication)
 
-# ----------------------------------------------------------------- end-of-file
+#------------------------------------------------------------------------------
