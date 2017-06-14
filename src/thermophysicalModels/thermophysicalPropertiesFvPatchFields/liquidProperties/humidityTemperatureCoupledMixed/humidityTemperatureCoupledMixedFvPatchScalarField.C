@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -469,7 +469,7 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
     scalarField nrbDeltaCoeffs(nbrPatch.deltaCoeffs());
     mpp.distribute(nrbDeltaCoeffs);
 
-    scalarField KDeltaNbr(nbrK*nrbDeltaCoeffs);
+    scalarField KDeltaNbr(nbrField.kappa(*this)*nbrPatch.deltaCoeffs());
     mpp.distribute(KDeltaNbr);
 
     myKDelta_ = K*patch().deltaCoeffs();
@@ -701,7 +701,6 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
     refValue() = (KDeltaNbr*nbrIntFld + mpCpdt*TpOld + dmHfg)/alpha;
 
     mixedFvPatchScalarField::updateCoeffs();
-
 
     if (debug && fluid_)
     {
