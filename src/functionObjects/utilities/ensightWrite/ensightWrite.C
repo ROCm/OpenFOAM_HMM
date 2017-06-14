@@ -114,11 +114,6 @@ bool Foam::functionObjects::ensightWrite::read(const dictionary& dict)
         dict.lookupOrDefault<Switch>("noPatches", false)
     );
 
-    writeOpts_.deprecatedOrder
-    (
-        dict.lookupOrDefault<Switch>("deprecatedOrder", false)
-    );
-
     if (dict.found("patches"))
     {
         wordReList lst(dict.lookup("patches"));
