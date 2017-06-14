@@ -71,7 +71,7 @@ runParallel checkMesh -allTopology -allGeometry -latestTime
 
 # Copy the mesh from the latest time folder into polyMesh and delete that
 # latest time folder
-latestTime=$(foamInfoExec -case processor0 -latestTime)
+latestTime=$(foamListTimes -latestTime -processor)
 if [ "$latestTime" != "constant" ] && [ -d processor0/$latestTime/polyMesh ]
 then
     runApplication reconstructParMesh -latestTime
