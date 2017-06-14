@@ -36,6 +36,7 @@ template<>
 void processorFvPatchField<scalar>::initInterfaceMatrixUpdate
 (
     scalarField&,
+    const bool add,
     const scalarField& psiInternal,
     const scalarField&,
     const direction,
@@ -96,6 +97,7 @@ template<>
 void processorFvPatchField<scalar>::updateInterfaceMatrix
 (
     scalarField& result,
+    const bool add,
     const scalarField&,
     const scalarField& coeffs,
     const direction,
@@ -106,8 +108,6 @@ void processorFvPatchField<scalar>::updateInterfaceMatrix
     {
         return;
     }
-
-    const labelUList& faceCells = this->patch().faceCells();
 
     if
     (
@@ -130,10 +130,7 @@ void processorFvPatchField<scalar>::updateInterfaceMatrix
 
 
         // Consume straight from scalarReceiveBuf_
-        forAll(faceCells, elemI)
-        {
-            result[faceCells[elemI]] -= coeffs[elemI]*scalarReceiveBuf_[elemI];
-        }
+        this->addToInternalField(result, !add, coeffs, scalarReceiveBuf_);
     }
     else
     {
@@ -142,10 +139,7 @@ void processorFvPatchField<scalar>::updateInterfaceMatrix
             procPatch_.compressedReceive<scalar>(commsType, this->size())()
         );
 
-        forAll(faceCells, elemI)
-        {
-            result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-        }
+        this->addToInternalField(result, !add, coeffs, pnf);
     }
 
     const_cast<processorFvPatchField<scalar>&>(*this).updatedMatrix() = true;

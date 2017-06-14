@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -332,7 +332,9 @@ void Foam::displacementLaplacianFvMotionSolver::solve()
     diffusivity().correct();
     pointDisplacement_.boundaryFieldRef().updateCoeffs();
 
-    Foam::solve
+    // We explicitly do NOT want to interpolate the motion inbetween
+    // different regions so bypass all the matrix manipulation.
+    fvVectorMatrix TEqn
     (
         fvm::laplacian
         (
@@ -341,6 +343,8 @@ void Foam::displacementLaplacianFvMotionSolver::solve()
             "laplacian(diffusivity,cellDisplacement)"
         )
     );
+
+    TEqn.solveSegregatedOrCoupled(TEqn.solverDict());
 }
 
 

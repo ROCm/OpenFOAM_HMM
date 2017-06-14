@@ -93,6 +93,7 @@ Foam::cyclicAMIGAMGInterfaceField::~cyclicAMIGAMGInterfaceField()
 void Foam::cyclicAMIGAMGInterfaceField::updateInterfaceMatrix
 (
     scalarField& result,
+    const bool add,
     const scalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
@@ -117,12 +118,7 @@ void Foam::cyclicAMIGAMGInterfaceField::updateInterfaceMatrix
         pnf = cyclicAMIInterface_.neighbPatch().AMI().interpolateToTarget(pnf);
     }
 
-    const labelUList& faceCells = cyclicAMIInterface_.faceCells();
-
-    forAll(faceCells, elemI)
-    {
-        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-    }
+    this->addToInternalField(result, !add, coeffs, pnf);
 }
 
 

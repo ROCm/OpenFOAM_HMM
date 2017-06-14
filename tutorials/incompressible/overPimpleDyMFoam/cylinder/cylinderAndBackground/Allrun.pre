@@ -1,0 +1,20 @@
+#!/bin/sh
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+# Create background mesh
+runApplication blockMesh
+
+# Add the cylinder mesh
+runApplication mergeMeshes . ../cylinderMesh -overwrite
+
+## Make it a bit smaller to keep it laminar
+#runApplication transformPoints -scale '(0.001 0.001 0.001)'
+
+# Select cellSets for the different zones
+runApplication topoSet
+
+# Copy standard fields
+rm -rf 0 && cp -r 0.org 0
+
+# Use cellSets to write zoneID
+runApplication setFields

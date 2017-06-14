@@ -54,6 +54,8 @@ wmake $targetType topoChangerFvMesh
 parallel/Allwmake $targetType $*
 randomProcesses/Allwmake $targetType $*
 
+wmake $targetType overset
+
 wmake $targetType ODE
 wmake $targetType fvMotionSolver
 

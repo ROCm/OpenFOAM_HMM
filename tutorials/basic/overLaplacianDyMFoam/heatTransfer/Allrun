@@ -1,0 +1,13 @@
+#!/bin/sh
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+./Allrun.pre
+
+# Run it for a bit
+
+# Serial
+#runApplication `getApplication`
+
+# Parallel
+runApplication decomposePar -cellDist
+runParallel `getApplication`

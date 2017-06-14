@@ -209,6 +209,7 @@ public:
             virtual void initInterfaceMatrixUpdate
             (
                 scalarField& result,
+                const bool add,
                 const scalarField& psiInternal,
                 const scalarField& coeffs,
                 const direction cmpt,
@@ -219,6 +220,7 @@ public:
             virtual void updateInterfaceMatrix
             (
                 scalarField& result,
+                const bool add,
                 const scalarField& psiInternal,
                 const scalarField& coeffs,
                 const direction cmpt,
@@ -229,6 +231,7 @@ public:
             virtual void initInterfaceMatrixUpdate
             (
                 Field<Type>& result,
+                const bool add,
                 const Field<Type>& psiInternal,
                 const scalarField& coeffs,
                 const Pstream::commsTypes commsType
@@ -238,6 +241,7 @@ public:
             virtual void updateInterfaceMatrix
             (
                 Field<Type>& result,
+                const bool add,
                 const Field<Type>& psiInternal,
                 const scalarField& coeffs,
                 const Pstream::commsTypes commsType

@@ -173,6 +173,7 @@ template<class Type>
 void Foam::cyclicFvPatchField<Type>::updateInterfaceMatrix
 (
     scalarField& result,
+    const bool add,
     const scalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
@@ -188,12 +189,7 @@ void Foam::cyclicFvPatchField<Type>::updateInterfaceMatrix
     transformCoupleField(pnf, cmpt);
 
     // Multiply the field by coefficients and add into the result
-    const labelUList& faceCells = cyclicPatch_.faceCells();
-
-    forAll(faceCells, elemI)
-    {
-        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-    }
+    this->addToInternalField(result, !add, coeffs, pnf);
 }
 
 
@@ -201,6 +197,7 @@ template<class Type>
 void Foam::cyclicFvPatchField<Type>::updateInterfaceMatrix
 (
     Field<Type>& result,
+    const bool add,
     const Field<Type>& psiInternal,
     const scalarField& coeffs,
     const Pstream::commsTypes
@@ -215,12 +212,7 @@ void Foam::cyclicFvPatchField<Type>::updateInterfaceMatrix
     transformCoupleField(pnf);
 
     // Multiply the field by coefficients and add into the result
-    const labelUList& faceCells = cyclicPatch_.faceCells();
-
-    forAll(faceCells, elemI)
-    {
-        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-    }
+    this->addToInternalField(result, !add, coeffs, pnf);
 }
 
 

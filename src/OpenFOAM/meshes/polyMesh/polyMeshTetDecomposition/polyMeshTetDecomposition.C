@@ -311,7 +311,7 @@ Foam::labelList Foam::polyMeshTetDecomposition::findFaceBasePts
         {
             FatalErrorInFunction
                 << "Coupled face base point exchange failure for face "
-                << fI
+                << fI << " at " << mesh.faceCentres()[fI]
                 << abort(FatalError);
         }
 
@@ -552,6 +552,7 @@ Foam::List<Foam::tetIndices> Foam::polyMeshTetDecomposition::faceTetIndices
         {
             WarningInFunction
                 << "No base point for face " << fI << ", " << f
+                << ", vertices " << UIndirectList<point>(mesh.points(), f)
                 << ", produces a valid tet decomposition."
                 << endl;
             nWarnings++;
@@ -616,6 +617,7 @@ Foam::tetIndices Foam::polyMeshTetDecomposition::triangleTetIndices
         {
             WarningInFunction
                 << "No base point for face " << fI << ", " << f
+                << ", vertices " << UIndirectList<point>(mesh.points(), f)
                 << ", produces a valid tet decomposition."
                 << endl;
             nWarnings++;

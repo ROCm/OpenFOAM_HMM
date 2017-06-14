@@ -109,6 +109,7 @@ Foam::cyclicGAMGInterfaceField::~cyclicGAMGInterfaceField()
 void Foam::cyclicGAMGInterfaceField::updateInterfaceMatrix
 (
     scalarField& result,
+    const bool add,
     const scalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
@@ -123,12 +124,7 @@ void Foam::cyclicGAMGInterfaceField::updateInterfaceMatrix
 
     transformCoupleField(pnf, cmpt);
 
-    const labelUList& faceCells = cyclicInterface_.faceCells();
-
-    forAll(faceCells, elemI)
-    {
-        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-    }
+    this->addToInternalField(result, !add, coeffs, pnf);
 }
 
 

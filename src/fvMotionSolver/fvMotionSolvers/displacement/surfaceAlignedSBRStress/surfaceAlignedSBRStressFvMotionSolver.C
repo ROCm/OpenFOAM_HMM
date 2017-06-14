@@ -409,7 +409,8 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::solve()
             fvc::div(sigmaD_)
         );
 
-        DEqn.solve();
+        // Note: solve uncoupled
+        DEqn.solveSegregatedOrCoupled(DEqn.solverDict());
     }
 }
 

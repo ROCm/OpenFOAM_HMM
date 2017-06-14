@@ -39,6 +39,7 @@ template<>
 void processorFvPatchField<scalar>::initInterfaceMatrixUpdate
 (
     scalarField&,
+    const bool add,
     const scalarField&,
     const scalarField&,
     const direction,
@@ -50,6 +51,7 @@ template<>
 void processorFvPatchField<scalar>::updateInterfaceMatrix
 (
     scalarField& result,
+    const bool add,
     const scalarField&,
     const scalarField& coeffs,
     const direction,

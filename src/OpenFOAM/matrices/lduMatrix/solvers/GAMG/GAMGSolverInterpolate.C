@@ -51,6 +51,7 @@ void Foam::GAMGSolver::interpolate
 
     m.initMatrixInterfaces
     (
+        true,
         interfaceBouCoeffs,
         interfaces,
         psi,
@@ -67,6 +68,7 @@ void Foam::GAMGSolver::interpolate
 
     m.updateMatrixInterfaces
     (
+        true,
         interfaceBouCoeffs,
         interfaces,
         psi,

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,6 +56,7 @@ void Foam::lduMatrix::Amul
     // Initialise the update of interfaced interfaces
     initMatrixInterfaces
     (
+        true,
         interfaceBouCoeffs,
         interfaces,
         psi,
@@ -81,6 +82,7 @@ void Foam::lduMatrix::Amul
     // Update interface interfaces
     updateMatrixInterfaces
     (
+        true,
         interfaceBouCoeffs,
         interfaces,
         psi,
@@ -117,6 +119,7 @@ void Foam::lduMatrix::Tmul
     // Initialise the update of interfaced interfaces
     initMatrixInterfaces
     (
+        true,
         interfaceIntCoeffs,
         interfaces,
         psi,
@@ -140,6 +143,7 @@ void Foam::lduMatrix::Tmul
     // Update interface interfaces
     updateMatrixInterfaces
     (
+        true,
         interfaceIntCoeffs,
         interfaces,
         psi,
@@ -233,20 +237,11 @@ void Foam::lduMatrix::residual
     // To compensate for this, it is necessary to turn the
     // sign of the contribution.
 
-    FieldField<Field, scalar> mBouCoeffs(interfaceBouCoeffs.size());
-
-    forAll(mBouCoeffs, patchi)
-    {
-        if (interfaces.set(patchi))
-        {
-            mBouCoeffs.set(patchi, -interfaceBouCoeffs[patchi]);
-        }
-    }
-
     // Initialise the update of interfaced interfaces
     initMatrixInterfaces
     (
-        mBouCoeffs,
+        false,
+        interfaceBouCoeffs,
         interfaces,
         psi,
         rA,
@@ -271,7 +266,8 @@ void Foam::lduMatrix::residual
     // Update interface interfaces
     updateMatrixInterfaces
     (
-        mBouCoeffs,
+        false,
+        interfaceBouCoeffs,
         interfaces,
         psi,
         rA,
