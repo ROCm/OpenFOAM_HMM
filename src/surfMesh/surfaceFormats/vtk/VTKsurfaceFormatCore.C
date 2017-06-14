@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,102 +25,103 @@ License
 
 #include "VTKsurfaceFormatCore.H"
 #include "clock.H"
+#include "foamVtkOutput.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::fileFormats::VTKsurfaceFormatCore::writeHeader
 (
-    Ostream& os,
-    const pointField& pointLst
+    vtk::formatter& format,
+    const pointField& pts
 )
 {
-    // Write header
-    os  << "# vtk DataFile Version 2.0" << nl
-        << "surface written " << clock::dateTime().c_str() << nl
-        << "ASCII" << nl
-        << nl
-        << "DATASET POLYDATA" << nl;
+    vtk::legacy::fileHeader
+    (
+        format,
+        ("surface written " + clock::dateTime()),
+        vtk::fileTag::POLY_DATA
+    );
 
-    // Write vertex coords
-    os  << "POINTS " << pointLst.size() << " float" << nl;
-    forAll(pointLst, ptI)
-    {
-        const point& pt = pointLst[ptI];
+    vtk::legacy::beginPoints(format.os(), pts.size());
 
-        os  << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
-    }
+    vtk::writeList(format, pts);
+    format.flush();
 }
 
 
-void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
+void Foam::fileFormats::VTKsurfaceFormatCore::writeCellData
 (
-    Ostream& os,
-    const UList<surfZone>& zoneLst
+    vtk::formatter& format,
+    const UList<surfZone>& zones
 )
 {
+    // Zone ids as CellData
+
+    // Number of faces covered by the zones
     label nFaces = 0;
-    forAll(zoneLst, zoneI)
+    for (const auto& z : zones)
     {
-        nFaces += zoneLst[zoneI].size();
+        nFaces += z.size();
     }
 
-    // Print zone numbers
-    os  << nl
-        << "CELL_DATA " << nFaces << nl
-        << "FIELD attributes 1" << nl
-        << "region 1 " << nFaces << " float" << nl;
+    vtk::legacy::dataHeader
+    (
+        format.os(),
+        vtk::fileTag::CELL_DATA,
+        nFaces,
+        1  // Only one field
+    );
 
+    vtk::legacy::intField
+    (
+        format.os(),
+        "region",
+        1, // nComponent
+        nFaces
+    );
 
-    forAll(zoneLst, zoneI)
+    label zoneId = 0;
+    for (const surfZone& zone : zones)
     {
-        forAll(zoneLst[zoneI], localFacei)
+        forAll(zone, i)
         {
-            if (localFacei)
-            {
-                if (localFacei % 20)
-                {
-                    os << ' ';
-                }
-                else
-                {
-                    os << nl;
-                }
-            }
-            os  << zoneI + 1;
+            format.write(zoneId);
         }
-        os  << nl;
+        ++zoneId;
     }
+    format.flush();
 }
 
 
-void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
+void Foam::fileFormats::VTKsurfaceFormatCore::writeCellData
 (
-    Ostream& os,
+    vtk::formatter& format,
     const labelUList& zoneIds
 )
 {
-    // Print zone numbers
-    os  << nl
-        << "CELL_DATA " << zoneIds.size() << nl
-        << "FIELD attributes 1" << nl
-        << "region 1 " << zoneIds.size() << " float" << nl;
+    // Zone ids as CellData
 
-    forAll(zoneIds, facei)
-    {
-        if (facei)
-        {
-            if (facei % 20)
-            {
-                os << ' ';
-            }
-            else
-            {
-                os << nl;
-            }
-        }
-        os  << zoneIds[facei] + 1;
-    }
-    os  << nl;
+    // Number of faces
+    const label nFaces = zoneIds.size();
+
+    vtk::legacy::dataHeader
+    (
+        format.os(),
+        vtk::fileTag::CELL_DATA,
+        nFaces,
+        1  // Only one field
+    );
+
+    vtk::legacy::intField
+    (
+        format.os(),
+        "region",
+        1, // nComponent
+        nFaces
+    );
+
+    vtk::writeList(format, zoneIds);
+    format.flush();
 }
 
 

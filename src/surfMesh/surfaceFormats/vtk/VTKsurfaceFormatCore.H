@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,7 @@ SourceFiles
 #define VTKsurfaceFormatCore_H
 
 #include "MeshedSurface.H"
-#include "Ostream.H"
+#include "foamVtkFormatter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,15 +58,24 @@ protected:
         //- Write header information with points
         static void writeHeader
         (
-            Ostream&,
-            const pointField&
+            vtk::formatter& format,
+            const pointField& pts
         );
 
-        //- Write trailing information with zone information
-        static void writeTail(Ostream&, const UList<surfZone>&);
+        //- Write regions (zones) information as CellData
+        static void writeCellData
+        (
+            vtk::formatter& format,
+            const UList<surfZone>& zones
+        );
 
-        //- Write trailing information with zone Ids
-        static void writeTail(Ostream&, const labelUList& zoneIds);
+        //- Write regions (zones) information as CellData
+        static void writeCellData
+        (
+            vtk::formatter& format,
+            const labelUList& zoneIds
+        );
+
 };
 
 

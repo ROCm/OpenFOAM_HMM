@@ -33,6 +33,7 @@ License
 #include "PackedBoolList.H"
 #include "surfZoneList.H"
 #include "surfaceFormatsCore.H"
+#include "MeshedSurfaceProxy.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -52,7 +53,9 @@ const Foam::wordHashSet Foam::triSurface::readTypes_
 
 const Foam::wordHashSet Foam::triSurface::writeTypes_
 {
-    "ftr", "stl", "stlb", "gts", "obj", "off", "tri", "ac", "smesh", "vtk"
+    "ftr", "stl", "stlb", "gts", "obj", "off", "tri", "ac", "smesh", "vtk",
+    // via proxy:
+    "inp", "vtp"
 };
 
 
@@ -477,8 +480,9 @@ bool Foam::triSurface::read
     {
         FatalErrorInFunction
             << "unknown file extension " << ext
-            << ". Supported extensions are '.ftr', '.stl', '.stlb', '.gts'"
-            << ", '.obj', '.ac', '.off', '.nas', '.tri' and '.vtk'"
+            << " for reading file " << name
+            << ". Supported extensions:" << nl
+            << "    " << flatOutput(readTypes_.sortedToc()) << nl
             << exit(FatalError);
 
         return false;
@@ -504,7 +508,7 @@ void Foam::triSurface::write
     }
     else if (ext == "stlb")
     {
-        ofstream outFile(name.c_str(), std::ios::binary);
+        std::ofstream outFile(name.c_str(), std::ios::binary);
 
         writeSTLBINARY(outFile);
     }
@@ -522,7 +526,27 @@ void Foam::triSurface::write
     }
     else if (ext == "vtk")
     {
-        writeVTK(sort, OFstream(name)());
+        std::ofstream outFile(name.c_str(), std::ios::binary);
+        writeVTK(sort, outFile);
+    }
+    else if
+    (
+        ext == "inp"  // STARCD
+     || ext == "vtp"  // VTK
+    )
+    {
+        labelList faceMap;
+        List<surfZone> zoneLst = this->sortedZones(faceMap);
+
+        MeshedSurfaceProxy<labelledTri> proxy
+        (
+            this->points(),
+            this->surfFaces(),
+            zoneLst,
+            faceMap
+        );
+
+        proxy.write(name, ext);
     }
     else if (ext == "tri")
     {
@@ -540,10 +564,9 @@ void Foam::triSurface::write
     {
         FatalErrorInFunction
             << "unknown file extension " << ext
-            << " for file " << name
-            << ". Supported extensions are '.ftr', '.stl', '.stlb', "
-            << "'.gts', '.obj', '.vtk'"
-            << ", '.off', '.smesh', '.ac' and '.tri'"
+            << " for writing file " << name
+            << ". Supported extensions:" << nl
+            << "    " << flatOutput(writeTypes_.sortedToc()) << nl
             << exit(FatalError);
     }
 }

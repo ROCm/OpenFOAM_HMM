@@ -25,7 +25,7 @@ Class
     Foam::displacementInterpolationMotionSolver
 
 Group
-    grpMeshMotionSolvers 
+    grpMeshMotionSolvers
 
 Description
     Mesh motion solver for an fvMesh.

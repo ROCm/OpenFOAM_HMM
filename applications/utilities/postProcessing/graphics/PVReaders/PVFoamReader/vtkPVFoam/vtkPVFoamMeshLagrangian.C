@@ -35,16 +35,17 @@ License
 #include "vtkCellArray.h"
 #include "vtkPoints.h"
 #include "vtkPolyData.h"
+#include "vtkSmartPointer.h"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-vtkPolyData* Foam::vtkPVFoam::lagrangianVTKMesh
+vtkSmartPointer<vtkPolyData> Foam::vtkPVFoam::lagrangianVTKMesh
 (
     const polyMesh& mesh,
     const word& cloudName
-)
+) const
 {
-    vtkPolyData* vtkmesh = nullptr;
+    vtkSmartPointer<vtkPolyData> vtkmesh;
 
     if (debug)
     {
@@ -72,27 +73,19 @@ vtkPolyData* Foam::vtkPVFoam::lagrangianVTKMesh
             Info<< "cloud with " << parcels.size() << " parcels" << endl;
         }
 
-        vtkmesh = vtkPolyData::New();
-        vtkPoints* vtkpoints = vtkPoints::New();
-        vtkCellArray* vtkcells = vtkCellArray::New();
-
-        vtkpoints->Allocate(parcels.size());
-        vtkcells->Allocate(parcels.size());
+        auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
+        vtkpoints->SetNumberOfPoints(parcels.size());
 
         vtkIdType particleId = 0;
-        forAllConstIter(Cloud<passiveParticle>, parcels, iter)
+        forAllConstIters(parcels, iter)
         {
-            vtkpoints->InsertNextPoint(iter().position().v_);
-
-            vtkcells->InsertNextCell(1, &particleId);
-            particleId++;
+            vtkpoints->SetPoint(particleId, iter().position().v_);
+            ++particleId;
         }
 
+        vtkmesh = vtkSmartPointer<vtkPolyData>::New();
         vtkmesh->SetPoints(vtkpoints);
-        vtkpoints->Delete();
-
-        vtkmesh->SetVerts(vtkcells);
-        vtkcells->Delete();
+        vtkmesh->SetVerts(foamPvCore::identityVertices(parcels.size()));
     }
 
     if (debug)

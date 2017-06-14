@@ -93,6 +93,7 @@ Foam::processorGAMGInterfaceField::~processorGAMGInterfaceField()
 void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
 (
     scalarField&,
+    const bool,
     const scalarField& psiInternal,
     const scalarField&,
     const direction,
@@ -148,6 +149,7 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
 void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
 (
     scalarField& result,
+    const bool add,
     const scalarField&,
     const scalarField& coeffs,
     const direction cmpt,
@@ -161,8 +163,6 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
 
     label oldWarn = UPstream::warnComm;
     UPstream::warnComm = comm();
-
-    const labelUList& faceCells = procInterface_.faceCells();
 
     if
     (
@@ -189,10 +189,7 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
         transformCoupleField(scalarReceiveBuf_, cmpt);
 
         // Multiply the field by coefficients and add into the result
-        forAll(faceCells, elemI)
-        {
-            result[faceCells[elemI]] -= coeffs[elemI]*scalarReceiveBuf_[elemI];
-        }
+        addToInternalField(result, !add, coeffs, scalarReceiveBuf_);
     }
     else
     {
@@ -202,10 +199,7 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
         );
         transformCoupleField(pnf, cmpt);
 
-        forAll(faceCells, elemI)
-        {
-            result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-        }
+        addToInternalField(result, !add, coeffs, pnf);
     }
 
     const_cast<processorGAMGInterfaceField&>(*this).updatedMatrix() = true;

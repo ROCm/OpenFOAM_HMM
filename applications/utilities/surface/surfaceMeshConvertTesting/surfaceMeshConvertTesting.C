@@ -159,12 +159,16 @@ int main(int argc, char *argv[])
 
     if
     (
-        !MeshedSurface<face>::canRead(importName, true)
-     ||
-        (
-            !optStdout
-         && !MeshedSurface<face>::canWriteType(exportName.ext(), true)
-        )
+        !args.optionFound("triSurface")
+    &&
+         (
+            !MeshedSurface<face>::canRead(importName, true)
+         ||
+            (
+                !optStdout
+             && !MeshedSurface<face>::canWriteType(exportName.ext(), true)
+            )
+         )
     )
     {
         return 1;

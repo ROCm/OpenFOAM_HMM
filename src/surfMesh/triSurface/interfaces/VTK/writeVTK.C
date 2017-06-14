@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,159 +24,144 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "triSurface.H"
+#include "foamVtkOutput.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
+// File-scope constant.
+//
+// TODO: make this run-time selectable (ASCII | BINARY)
+// - Legacy mode only
+
+static const Foam::vtk::formatType fmtType =
+    Foam::vtk::formatType::LEGACY_ASCII;
+    // Foam::vtk::formatType::LEGACY_BINARY;
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void triSurface::writeVTK(const bool writeSorted, Ostream& os) const
+void Foam::triSurface::writeVTK
+(
+    const bool writeSorted,
+    std::ostream& os
+) const
 {
-    // Write header
-    os  << "# vtk DataFile Version 2.0" << nl
-        << "triSurface" << nl
-        << "ASCII" << nl
-        << "DATASET POLYDATA"
-        << nl;
+    autoPtr<vtk::formatter> format =
+        vtk::newFormatter(os, fmtType);
 
-    const pointField& ps = points();
+    // Header
+    vtk::legacy::fileHeader
+    (
+        format(),
+        "triSurface",
+        vtk::fileTag::POLY_DATA
+    );
 
-    os  << "POINTS " << ps.size() << " float" << nl;
+    const pointField& pts = this->points();
+    const auto& faceLst = this->surfFaces();
 
-    // Write vertex coords
-    forAll(ps, pointi)
-    {
-        if (pointi > 0 && (pointi % 10) == 0)
-        {
-            os  << nl;
-        }
-        else
-        {
-            os  << ' ';
-        }
-        os  << ps[pointi].x() << ' '
-            << ps[pointi].y() << ' '
-            << ps[pointi].z();
-    }
-    os  << nl;
+    const label nFaces = faceLst.size();
 
-    os  << "POLYGONS " << size() << ' ' << 4*size() << nl;
+    // Points
+    vtk::legacy::beginPoints(os, pts.size());
+
+    vtk::writeList(format(), pts);
+    format().flush();
+
+    // connectivity count (without additional storage)
+    // is simply 3 * nFaces
+
+    vtk::legacy::beginPolys(os, nFaces, 3*nFaces);
 
     labelList faceMap;
     surfacePatchList patches(calcPatches(faceMap));
 
-    if (writeSorted)
+    const bool useFaceMap = (writeSorted && patches.size() > 1);
+
+    if (useFaceMap)
     {
         label faceIndex = 0;
-
-        forAll(patches, patchi)
+        for (const surfacePatch& patch : patches)
         {
-            // Print all faces belonging to this patch
-
-            for
-            (
-                label patchFacei = 0;
-                patchFacei < patches[patchi].size();
-                patchFacei++
-            )
+            forAll(patch, i)
             {
-                if (faceIndex > 0 && (faceIndex % 10) == 0)
-                {
-                    os  << nl;
-                }
-                else
-                {
-                    os  << ' ';
-                }
+                const Face& f = faceLst[faceMap[faceIndex++]];
 
-                const label facei = faceMap[faceIndex++];
-
-                os  << "3 "
-                    << operator[](facei)[0] << ' '
-                    << operator[](facei)[1] << ' '
-                    << operator[](facei)[2];
+                format().write(3);  // The size prefix
+                vtk::writeList(format(), f);
             }
         }
-        os  << nl;
+        format().flush();
 
 
-        // Print region numbers
-
-        os  << "CELL_DATA " << size() << nl;
-        os  << "FIELD attributes 1" << nl;
-        os  << "region 1 " << size() << " float" << nl;
-
-        faceIndex = 0;
-
-        forAll(patches, patchi)
+        // Write regions (zones) as CellData
+        if (patches.size() > 1)
         {
-            for
+            vtk::legacy::dataHeader
             (
-                label patchFacei = 0;
-                patchFacei < patches[patchi].size();
-                patchFacei++
-            )
+                os,
+                vtk::fileTag::CELL_DATA,
+                nFaces,
+                1  // Only one field
+            );
+
+            vtk::legacy::intField
+            (
+                os,
+                "region",
+                1, // nComponent
+                nFaces
+            );
+
+            faceIndex = 0;
+            for (const surfacePatch& patch : patches)
             {
-                if (faceIndex > 0 && (faceIndex % 10) == 0)
+                forAll(patch, i)
                 {
-                    os  << nl;
+                    const Face& f = faceLst[faceMap[faceIndex++]];
+                    format().write(f.region());
                 }
-                else
-                {
-                    os  << ' ';
-                }
-
-                const label facei = faceMap[faceIndex++];
-
-                os  << operator[](facei).region();
             }
+            format().flush();
         }
-        os  << nl;
     }
     else
     {
-        forAll(*this, facei)
-        {
-            if (facei > 0 && (facei % 10) == 0)
-            {
-                os  << nl;
-            }
-            else
-            {
-                os  << ' ';
-            }
-            os  << "3 "
-                << operator[](facei)[0] << ' '
-                << operator[](facei)[1] << ' '
-                << operator[](facei)[2];
-        }
-        os  << nl;
+        // No faceMap (unsorted)
 
-        os  << "CELL_DATA " << size() << nl;
-        os  << "FIELD attributes 1" << nl;
-        os  << "region 1 " << size() << " float" << nl;
-
-        forAll(*this, facei)
+        for (const Face& f : faceLst)
         {
-            if (facei > 0 && (facei % 10) == 0)
-            {
-                os  << nl;
-            }
-            else
-            {
-                os  << ' ';
-            }
-            os  << operator[](facei).region();
+            format().write(3);  // The size prefix
+            vtk::writeList(format(), f);
         }
-        os  << nl;
+        format().flush();
+
+
+        // Write regions (zones) as CellData
+
+        vtk::legacy::dataHeader
+        (
+            os,
+            vtk::fileTag::CELL_DATA,
+            faceLst.size(),
+            1  // Only one field
+        );
+
+        vtk::legacy::intField
+        (
+            os,
+            "region",
+            1, // nComponent
+            faceLst.size()
+        );
+
+        for (const Face& f : faceLst)
+        {
+            format().write(f.region());
+        }
+        format().flush();
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

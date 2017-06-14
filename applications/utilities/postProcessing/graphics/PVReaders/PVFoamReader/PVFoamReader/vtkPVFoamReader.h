@@ -46,6 +46,7 @@ SourceFiles
 // VTK forward declarations
 class vtkDataArraySelection;
 class vtkCallbackCommand;
+template<class T> class vtkSmartPointer;
 
 // OpenFOAM forward declarations
 namespace Foam
@@ -82,9 +83,9 @@ public:
     virtual void PrintInfo();
 
     // Description:
-    // OpenFOAM mesh caching control
-    vtkSetMacro(CacheMesh, bool);
-    vtkGetMacro(CacheMesh, bool);
+    // Mesh caching control (0:none,1:fvMesh,3:fvMesh+vtk)
+    vtkSetMacro(MeshCaching, int);
+    vtkGetMacro(MeshCaching, int);
 
     // Description:
     // OpenFOAM refresh times/fields
@@ -231,7 +232,7 @@ private:
     void updatePatchNamesView(const bool show);
 
     int TimeStepRange[2];
-    bool CacheMesh;
+    int MeshCaching;
     bool SkipZeroTime;
 
     bool ExtrapolatePatches;
@@ -249,9 +250,6 @@ private:
     vtkDataArraySelection* VolFieldSelection;
     vtkDataArraySelection* PointFieldSelection;
     vtkDataArraySelection* LagrangianFieldSelection;
-
-    //- Cached data for output port0 (experimental!)
-    vtkMultiBlockDataSet* output0_;
 
     //- Backend portion of the reader
     Foam::vtkPVFoam* backend_;

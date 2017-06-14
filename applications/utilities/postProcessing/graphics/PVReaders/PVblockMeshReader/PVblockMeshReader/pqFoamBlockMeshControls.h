@@ -71,8 +71,8 @@ class pqFoamBlockMeshControls
     //- Update property
     void fireCommand(vtkSMProperty* prop);
 
-    //- Toggle and update bool property
-    void fireCommand(vtkSMIntVectorProperty* prop, bool checked);
+    //- Update int property or toggle bool property
+    void fireCommand(vtkSMIntVectorProperty* prop, int val);
 
     //- Update "BlockArrayStatus", "CurvedEdgesArrayStatus" information
     void updateParts();

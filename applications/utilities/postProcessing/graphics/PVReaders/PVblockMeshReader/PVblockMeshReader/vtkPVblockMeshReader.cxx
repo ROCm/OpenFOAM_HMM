@@ -106,7 +106,7 @@ vtkPVblockMeshReader::~vtkPVblockMeshReader()
 
     if (FileName)
     {
-        delete [] FileName;
+        delete[] FileName;
     }
 
     BlockSelection->RemoveAllObservers();
@@ -165,20 +165,19 @@ int vtkPVblockMeshReader::RequestData
 
     if (!FileName)
     {
-        vtkErrorMacro("FileName has to be specified!");
+        vtkErrorMacro("FileName must be specified!");
         return 0;
     }
-
-    // Catch previous error
     if (!backend_)
     {
-        vtkErrorMacro("Reader failed - perhaps no mesh?");
+        // Catch some previous error
+        vtkErrorMacro("Reader failed - perhaps no blockMesh?");
         return 0;
     }
 
     if (Foam::vtkPVblockMesh::debug)
     {
-        cout<<"REQUEST_DATA:\n";
+        cout<<"RequestData:\n";
         outputVector->GetInformationObject(0)->Print(cout);
     }
 
@@ -190,19 +189,12 @@ int vtkPVblockMeshReader::RequestData
         )
     );
 
-    if (Foam::vtkPVblockMesh::debug)
-    {
-        cout<< "update output with "
-            << output->GetNumberOfBlocks() << " blocks\n";
-    }
-
     backend_->Update(output);
 
     updatePatchNamesView(ShowPatchNames);
     updatePointNumbersView(ShowPointNumbers);
 
-    // Do any cleanup on the OpenFOAM side
-    backend_->CleanUp();
+    backend_->UpdateFinalize();
 
     return 1;
 }
@@ -263,12 +255,11 @@ void vtkPVblockMeshReader::updatePatchNamesView(const bool show)
     }
 
     // Get all the pqRenderView instances
-    QList<pqRenderView*> renderViews = smModel->findItems<pqRenderView*>();
-    for (int viewI=0; viewI<renderViews.size(); ++viewI)
+    for (auto view : smModel->findItems<pqRenderView*>())
     {
         backend_->renderPatchNames
         (
-            renderViews[viewI]->getRenderViewProxy()->GetRenderer(),
+            view->getRenderViewProxy()->GetRenderer(),
             show
         );
     }
@@ -295,12 +286,11 @@ void vtkPVblockMeshReader::updatePointNumbersView(const bool show)
     }
 
     // Get all the pqRenderView instances
-    QList<pqRenderView*> renderViews = smModel->findItems<pqRenderView*>();
-    for (int viewI=0; viewI<renderViews.size(); ++viewI)
+    for (auto view : smModel->findItems<pqRenderView*>())
     {
         backend_->renderPointNumbers
         (
-            renderViews[viewI]->getRenderViewProxy()->GetRenderer(),
+            view->getRenderViewProxy()->GetRenderer(),
             show
         );
     }

@@ -318,6 +318,7 @@ template<class Type>
 void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
 (
     scalarField&,
+    const bool add,
     const scalarField& psiInternal,
     const scalarField&,
     const direction,
@@ -378,6 +379,7 @@ template<class Type>
 void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
 (
     scalarField& result,
+    const bool add,
     const scalarField&,
     const scalarField& coeffs,
     const direction cmpt,
@@ -388,8 +390,6 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
     {
         return;
     }
-
-    const labelUList& faceCells = this->patch().faceCells();
 
     if
     (
@@ -416,10 +416,7 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
         transformCoupleField(scalarReceiveBuf_, cmpt);
 
         // Multiply the field by coefficients and add into the result
-        forAll(faceCells, elemI)
-        {
-            result[faceCells[elemI]] -= coeffs[elemI]*scalarReceiveBuf_[elemI];
-        }
+        this->addToInternalField(result, !add, coeffs, scalarReceiveBuf_);
     }
     else
     {
@@ -432,10 +429,7 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
         transformCoupleField(pnf, cmpt);
 
         // Multiply the field by coefficients and add into the result
-        forAll(faceCells, elemI)
-        {
-            result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-        }
+        this->addToInternalField(result, !add, coeffs, pnf);
     }
 
     const_cast<processorFvPatchField<Type>&>(*this).updatedMatrix() = true;
@@ -446,6 +440,7 @@ template<class Type>
 void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
 (
     Field<Type>&,
+    const bool add,
     const Field<Type>& psiInternal,
     const scalarField&,
     const Pstream::commsTypes commsType
@@ -505,6 +500,7 @@ template<class Type>
 void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
 (
     Field<Type>& result,
+    const bool add,
     const Field<Type>&,
     const scalarField& coeffs,
     const Pstream::commsTypes commsType
@@ -514,8 +510,6 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
     {
         return;
     }
-
-    const labelUList& faceCells = this->patch().faceCells();
 
     if
     (
@@ -542,10 +536,7 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
         transformCoupleField(receiveBuf_);
 
         // Multiply the field by coefficients and add into the result
-        forAll(faceCells, elemI)
-        {
-            result[faceCells[elemI]] -= coeffs[elemI]*receiveBuf_[elemI];
-        }
+        this->addToInternalField(result, !add, coeffs, receiveBuf_);
     }
     else
     {
@@ -558,10 +549,7 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
         transformCoupleField(pnf);
 
         // Multiply the field by coefficients and add into the result
-        forAll(faceCells, elemI)
-        {
-            result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-        }
+        this->addToInternalField(result, !add, coeffs, pnf);
     }
 
     const_cast<processorFvPatchField<Type>&>(*this).updatedMatrix() = true;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,21 +77,6 @@ class lduPrimitiveMesh
 
         //- Get size of all meshes
         static label totalSize(const PtrList<lduPrimitiveMesh>&);
-
-        static labelList upperTriOrder
-        (
-            const label nCells,
-            const labelUList& lower,
-            const labelUList& upper
-        );
-
-        //- Check if in upper-triangular ordering
-        static void checkUpperTriangular
-        (
-            const label size,
-            const labelUList& l,
-            const labelUList& u
-        );
 
         //- Disallow default bitwise copy construct
         lduPrimitiveMesh(const lduPrimitiveMesh&);
@@ -261,6 +246,21 @@ public:
             template<class ProcPatch>
             static lduSchedule nonBlockingSchedule(const lduInterfacePtrsList&);
 
+            //- Calculate upper-triangular order
+            static labelList upperTriOrder
+            (
+                const label nCells,
+                const labelUList& lower,
+                const labelUList& upper
+            );
+
+            //- Check if in upper-triangular ordering
+            static void checkUpperTriangular
+            (
+                const label size,
+                const labelUList& l,
+                const labelUList& u
+            );
 };
 
 

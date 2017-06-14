@@ -617,6 +617,7 @@ public:
             //  for matrix operations
             void initMatrixInterfaces
             (
+                const bool add,
                 const FieldField<Field, LUType>& interfaceCoeffs,
                 const Field<Type>& psiif,
                 Field<Type>& result
@@ -625,6 +626,7 @@ public:
             //- Update interfaced interfaces for matrix operations
             void updateMatrixInterfaces
             (
+                const bool add,
                 const FieldField<Field, LUType>& interfaceCoeffs,
                 const Field<Type>& psiif,
                 Field<Type>& result

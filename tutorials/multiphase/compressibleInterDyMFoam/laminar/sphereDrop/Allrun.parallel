@@ -1,7 +1,5 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # run from this directory
-
-# Source tutorial run functions
+cd ${0%/*} || exit 1    # Run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 runApplication blockMesh
@@ -13,15 +11,17 @@ runApplication createPatch -overwrite
 # split mesh into 2 regions at the AMI coupled patch
 runApplication mergeOrSplitBaffles -overwrite
 
-echo "Copying 0.org to 0"
-cp -r 0.org 0
+restore0Dir
 
 runApplication setFields
 
 runApplication decomposePar
 
-(cd  processor0/constant/polyMesh/ && ln -s ../../../include/meshModifiers .)
-(cd  processor1/constant/polyMesh/ && ln -s ../../../include/meshModifiers .)
+echo "Symlink include/meshModifiers"
+find -maxdepth 1 -name "processor*" -type d | while read procDir
+do
+    (cd $procDir/constant/polyMesh && ln -sf ../../../include/meshModifiers .)
+done
 
 runParallel $(getApplication)
 
@@ -29,4 +29,4 @@ runApplication reconstructParMesh
 
 runApplication reconstructPar
 
-# ----------------------------------------------------------------- end-of-file
+#------------------------------------------------------------------------------

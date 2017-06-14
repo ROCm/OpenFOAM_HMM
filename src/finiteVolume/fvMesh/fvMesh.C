@@ -3,6 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +37,7 @@ License
 #include "fvMeshMapper.H"
 #include "mapClouds.H"
 #include "MeshObject.H"
+#include "fvMatrix.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -407,6 +409,50 @@ Foam::fvMesh::~fvMesh()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::SolverPerformance<Foam::scalar> Foam::fvMesh::solve
+(
+    fvMatrix<scalar>& m,
+    const dictionary& dict
+) const
+{
+    // Redirect to fvMatrix solver
+    return m.solveSegregatedOrCoupled(dict);
+}
+
+
+Foam::SolverPerformance<Foam::vector> Foam::fvMesh::solve
+(
+    fvMatrix<vector>& m,
+    const dictionary& dict
+) const
+{
+    // Redirect to fvMatrix solver
+    return m.solveSegregatedOrCoupled(dict);
+}
+
+
+Foam::SolverPerformance<Foam::symmTensor> Foam::fvMesh::solve
+(
+    fvMatrix<symmTensor>& m,
+    const dictionary& dict
+) const
+{
+    // Redirect to fvMatrix solver
+    return m.solveSegregatedOrCoupled(dict);
+}
+
+
+Foam::SolverPerformance<Foam::tensor> Foam::fvMesh::solve
+(
+    fvMatrix<tensor>& m,
+    const dictionary& dict
+) const
+{
+    // Redirect to fvMatrix solver
+    return m.solveSegregatedOrCoupled(dict);
+}
+
 
 void Foam::fvMesh::addFvPatches
 (

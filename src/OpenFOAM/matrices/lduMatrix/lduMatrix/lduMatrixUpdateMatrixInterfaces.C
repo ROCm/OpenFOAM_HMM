@@ -29,6 +29,7 @@ License
 
 void Foam::lduMatrix::initMatrixInterfaces
 (
+    const bool add,
     const FieldField<Field, scalar>& coupleCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
     const scalarField& psiif,
@@ -49,6 +50,7 @@ void Foam::lduMatrix::initMatrixInterfaces
                 interfaces[interfacei].initInterfaceMatrixUpdate
                 (
                     result,
+                    add,
                     psiif,
                     coupleCoeffs[interfacei],
                     cmpt,
@@ -75,6 +77,7 @@ void Foam::lduMatrix::initMatrixInterfaces
                 interfaces[interfacei].initInterfaceMatrixUpdate
                 (
                     result,
+                    add,
                     psiif,
                     coupleCoeffs[interfacei],
                     cmpt,
@@ -95,6 +98,7 @@ void Foam::lduMatrix::initMatrixInterfaces
 
 void Foam::lduMatrix::updateMatrixInterfaces
 (
+    const bool add,
     const FieldField<Field, scalar>& coupleCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
     const scalarField& psiif,
@@ -111,6 +115,7 @@ void Foam::lduMatrix::updateMatrixInterfaces
                 interfaces[interfacei].updateInterfaceMatrix
                 (
                     result,
+                    add,
                     psiif,
                     coupleCoeffs[interfacei],
                     cmpt,
@@ -139,6 +144,7 @@ void Foam::lduMatrix::updateMatrixInterfaces
                             interfaces[interfacei].updateInterfaceMatrix
                             (
                                 result,
+                                add,
                                 psiif,
                                 coupleCoeffs[interfacei],
                                 cmpt,
@@ -190,6 +196,7 @@ void Foam::lduMatrix::updateMatrixInterfaces
                 interfaces[interfacei].updateInterfaceMatrix
                 (
                     result,
+                    add,
                     psiif,
                     coupleCoeffs[interfacei],
                     cmpt,
@@ -214,6 +221,7 @@ void Foam::lduMatrix::updateMatrixInterfaces
                     interfaces[interfacei].initInterfaceMatrixUpdate
                     (
                         result,
+                        add,
                         psiif,
                         coupleCoeffs[interfacei],
                         cmpt,
@@ -225,6 +233,7 @@ void Foam::lduMatrix::updateMatrixInterfaces
                     interfaces[interfacei].updateInterfaceMatrix
                     (
                         result,
+                        add,
                         psiif,
                         coupleCoeffs[interfacei],
                         cmpt,
@@ -248,6 +257,7 @@ void Foam::lduMatrix::updateMatrixInterfaces
                 interfaces[interfacei].updateInterfaceMatrix
                 (
                     result,
+                    add,
                     psiif,
                     coupleCoeffs[interfacei],
                     cmpt,

@@ -40,13 +40,14 @@ License
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 // file-scope
-static QAbstractButton* setButtonProperties
+// Widget properties
+static QWidget* setWidgetProperties
 (
-    QAbstractButton* b,
+    QWidget* widget,
     vtkSMProperty* prop
 )
 {
-    QString tip;
+    widget->setFocusPolicy(Qt::NoFocus); // avoid dotted border
 
     vtkSMDocumentation* doc = prop->GetDocumentation();
     if (doc)
@@ -54,22 +55,33 @@ static QAbstractButton* setButtonProperties
         const char* txt = doc->GetDescription();
         if (txt)
         {
-            tip = QString(txt).simplified();
+            QString tip = QString(txt).simplified();
+            if (tip.size())
+            {
+               widget->setToolTip(tip);
+            }
         }
     }
 
-    b->setText(prop->GetXMLLabel());
-    if (tip.size())
-    {
-        b->setToolTip(tip);
-    }
-    b->setFocusPolicy(Qt::NoFocus); // avoid dotted border
+    return widget;
+}
 
+
+// file-scope
+// Button properties
+static QAbstractButton* setButtonProperties
+(
+    QAbstractButton* b,
+    vtkSMProperty* prop
+)
+{
+    setWidgetProperties(b, prop);
+    b->setText(prop->GetXMLLabel());
 
     vtkSMIntVectorProperty* intProp =
         vtkSMIntVectorProperty::SafeDownCast(prop);
 
-    // initial checked state for integer (bool) properties
+    // Initial checked state for integer (bool) properties
     if (intProp)
     {
         b->setChecked(intProp->GetElement(0));
@@ -111,12 +123,12 @@ void pqFoamBlockMeshControls::fireCommand(vtkSMProperty* prop)
 void pqFoamBlockMeshControls::fireCommand
 (
     vtkSMIntVectorProperty* prop,
-    bool checked
+    int val
 )
 {
     vtkSMProxy* pxy = this->proxy();
 
-    prop->SetElement(0, checked); // Toogle bool
+    prop->SetElement(0, val); // Set int value, toogle bool, etc
 
     // Fire off command
     prop->Modified();
@@ -200,7 +212,10 @@ pqFoamBlockMeshControls::pqFoamBlockMeshControls
         setButtonProperties(b, refresh_);
         form->addWidget(b, 0, 0, Qt::AlignLeft);
 
-        connect(b, SIGNAL(clicked()), this, SLOT(refreshPressed()));
+        connect
+        (
+            b, SIGNAL(clicked()), this, SLOT(refreshPressed())
+        );
     }
 
     if (showPatchNames_)
@@ -209,7 +224,10 @@ pqFoamBlockMeshControls::pqFoamBlockMeshControls
         setButtonProperties(b, showPatchNames_);
         form->addWidget(b, 0, 1, Qt::AlignLeft);
 
-        connect(b, SIGNAL(toggled(bool)), this, SLOT(showPatchNames(bool)));
+        connect
+        (
+            b, SIGNAL(toggled(bool)), this, SLOT(showPatchNames(bool))
+        );
     }
 
     if (showPointNumbers_)
@@ -218,7 +236,10 @@ pqFoamBlockMeshControls::pqFoamBlockMeshControls
         setButtonProperties(b, showPointNumbers_);
         form->addWidget(b, 0, 2, Qt::AlignLeft);
 
-        connect(b, SIGNAL(toggled(bool)), this, SLOT(showPointNumbers(bool)));
+        connect
+        (
+            b, SIGNAL(toggled(bool)), this, SLOT(showPointNumbers(bool))
+        );
     }
 }
 

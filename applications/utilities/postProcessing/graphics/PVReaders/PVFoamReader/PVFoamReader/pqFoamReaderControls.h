@@ -69,8 +69,8 @@ class pqFoamReaderControls
         //- IncludeZones (bool property)
         vtkSMIntVectorProperty* includeZones_;
 
-        //- CacheMesh (bool property)
-        vtkSMIntVectorProperty* cacheMesh_;
+        //- MeshCaching (enum property)
+        vtkSMIntVectorProperty* meshCaching_;
 
 
     // Private Member Functions
@@ -78,8 +78,8 @@ class pqFoamReaderControls
     //- Update property
     void fireCommand(vtkSMProperty* prop);
 
-    //- Toggle and update bool property
-    void fireCommand(vtkSMIntVectorProperty* prop, bool checked);
+    //- Update int property or toggle bool property
+    void fireCommand(vtkSMIntVectorProperty* prop, int val);
 
 
     //- Disallow default bitwise copy construct
@@ -102,7 +102,7 @@ protected slots:
     // Protected Member Functions
 
     void refreshPressed();
-    void cacheMesh(bool checked);
+    void cacheMesh(int idx);
     void showPatchNames(bool checked);
     void showGroupsOnly(bool checked);
     void includeSets(bool checked);

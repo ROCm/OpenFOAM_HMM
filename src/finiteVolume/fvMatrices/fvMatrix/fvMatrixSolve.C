@@ -54,7 +54,7 @@ void Foam::fvMatrix<Type>::setComponentReference
 
 
 template<class Type>
-Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solve
+Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregatedOrCoupled
 (
     const dictionary& solverControls
 )
@@ -69,7 +69,8 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solve
     if (debug)
     {
         Info.masterStream(this->mesh().comm())
-            << "fvMatrix<Type>::solve(const dictionary& solverControls) : "
+            << "fvMatrix<Type>::solveSegregatedOrCoupled"
+               "(const dictionary& solverControls) : "
                "solving fvMatrix<Type>"
             << endl;
     }
@@ -174,6 +175,7 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregated
         // conditions
         initMatrixInterfaces
         (
+            true,
             bouCoeffsCmpt,
             interfaces,
             psiCmpt,
@@ -183,6 +185,7 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregated
 
         updateMatrixInterfaces
         (
+            true,
             bouCoeffsCmpt,
             interfaces,
             psiCmpt,
@@ -284,54 +287,34 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveCoupled
 
 
 template<class Type>
+Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solve
+(
+    const dictionary& solverControls
+)
+{
+    return psi_.mesh().solve(*this, solverControls);
+}
+
+
+template<class Type>
 Foam::autoPtr<typename Foam::fvMatrix<Type>::fvSolver>
 Foam::fvMatrix<Type>::solver()
 {
-    return solver
-    (
-        psi_.mesh().solverDict
-        (
-            psi_.select
-            (
-                psi_.mesh().data::template lookupOrDefault<bool>
-                ("finalIteration", false)
-            )
-        )
-    );
+    return solver(solverDict());
 }
 
 
 template<class Type>
 Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::fvSolver::solve()
 {
-    return solve
-    (
-        fvMat_.psi_.mesh().solverDict
-        (
-            fvMat_.psi_.select
-            (
-                fvMat_.psi_.mesh().data::template lookupOrDefault<bool>
-                ("finalIteration", false)
-            )
-        )
-    );
+    return solve(fvMat_.solverDict());
 }
 
 
 template<class Type>
 Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solve()
 {
-    return solve
-    (
-        psi_.mesh().solverDict
-        (
-            psi_.select
-            (
-                psi_.mesh().data::template lookupOrDefault<bool>
-                ("finalIteration", false)
-            )
-        )
-    );
+    return this->solve(solverDict());
 }
 
 

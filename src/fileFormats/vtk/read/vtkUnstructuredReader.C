@@ -125,7 +125,7 @@ void Foam::vtkUnstructuredReader::extractCells
     {
         switch (cellTypes[i])
         {
-            case foamVtkCore::VTK_VERTEX:
+            case vtk::cellType::VTK_VERTEX:
             {
                 warnUnhandledType(inFile, cellTypes[i], warningGiven);
                 label nRead = cellVertData[dataIndex++];
@@ -141,7 +141,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_POLY_VERTEX:
+            case vtk::cellType::VTK_POLY_VERTEX:
             {
                 warnUnhandledType(inFile, cellTypes[i], warningGiven);
                 label nRead = cellVertData[dataIndex++];
@@ -149,7 +149,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_LINE:
+            case vtk::cellType::VTK_LINE:
             {
                 //warnUnhandledType(inFile, cellTypes[i], warningGiven);
                 label nRead = cellVertData[dataIndex++];
@@ -169,7 +169,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_POLY_LINE:
+            case vtk::cellType::VTK_POLY_LINE:
             {
                 //warnUnhandledType(inFile, cellTypes[i], warningGiven);
                 label nRead = cellVertData[dataIndex++];
@@ -183,7 +183,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_TRIANGLE:
+            case vtk::cellType::VTK_TRIANGLE:
             {
                 faceMap_[facei] = i;
                 face& f = faces_[facei++];
@@ -203,7 +203,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_QUAD:
+            case vtk::cellType::VTK_QUAD:
             {
                 faceMap_[facei] = i;
                 face& f = faces_[facei++];
@@ -224,7 +224,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_POLYGON:
+            case vtk::cellType::VTK_POLYGON:
             {
                 faceMap_[facei] = i;
                 face& f = faces_[facei++];
@@ -237,7 +237,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_TETRA:
+            case vtk::cellType::VTK_TETRA:
             {
                 label nRead = cellVertData[dataIndex++];
                 if (nRead != 4)
@@ -257,7 +257,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_PYRAMID:
+            case vtk::cellType::VTK_PYRAMID:
             {
                 label nRead = cellVertData[dataIndex++];
                 if (nRead != 5)
@@ -278,7 +278,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_WEDGE:
+            case vtk::cellType::VTK_WEDGE:
             {
                 label nRead = cellVertData[dataIndex++];
                 if (nRead != 6)
@@ -300,7 +300,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_HEXAHEDRON:
+            case vtk::cellType::VTK_HEXAHEDRON:
             {
                 label nRead = cellVertData[dataIndex++];
                 if (nRead != 8)

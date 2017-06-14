@@ -420,7 +420,7 @@ void Foam::meshToMesh::calcAddressing
 }
 
 
-void Foam::meshToMesh::calculate(const word& methodName)
+void Foam::meshToMesh::calculate(const word& methodName, const bool normalise)
 {
     Info<< "Creating mesh-to-mesh addressing for " << srcRegion_.name()
         << " and " << tgtRegion_.name() << " regions using "
@@ -566,19 +566,22 @@ void Foam::meshToMesh::calculate(const word& methodName)
         );
 
         // weights normalisation
-        normaliseWeights
-        (
-            "source",
-            srcToTgtCellAddr_,
-            srcToTgtCellWght_
-        );
+        if (normalise)
+        {
+            normaliseWeights
+            (
+                "source",
+                srcToTgtCellAddr_,
+                srcToTgtCellWght_
+            );
 
-        normaliseWeights
-        (
-            "target",
-            tgtToSrcCellAddr_,
-            tgtToSrcCellWght_
-        );
+            normaliseWeights
+            (
+                "target",
+                tgtToSrcCellAddr_,
+                tgtToSrcCellWght_
+            );
+        }
 
         // cache maps and reset addresses
         List<Map<label>> cMap;
@@ -598,19 +601,22 @@ void Foam::meshToMesh::calculate(const word& methodName)
     {
         calcAddressing(methodName, srcRegion_, tgtRegion_);
 
-        normaliseWeights
-        (
-            "source",
-            srcToTgtCellAddr_,
-            srcToTgtCellWght_
-        );
+        if (normalise)
+        {
+            normaliseWeights
+            (
+                "source",
+                srcToTgtCellAddr_,
+                srcToTgtCellWght_
+            );
 
-        normaliseWeights
-        (
-            "target",
-            tgtToSrcCellAddr_,
-            tgtToSrcCellWght_
-        );
+            normaliseWeights
+            (
+                "target",
+                tgtToSrcCellAddr_,
+                tgtToSrcCellWght_
+            );
+        }
     }
 
     Info<< "    Overlap volume: " << V_ << endl;
@@ -743,7 +749,7 @@ void Foam::meshToMesh::constructNoCuttingPatches
     }
 
     // calculate volume addressing and weights
-    calculate(methodName);
+    calculate(methodName, true);
 
     // calculate patch addressing and weights
     calculatePatchAMIs(AMIMethodName);
@@ -755,7 +761,8 @@ void Foam::meshToMesh::constructFromCuttingPatches
     const word& methodName,
     const word& AMIMethodName,
     const HashTable<word>& patchMap,
-    const wordList& cuttingPatches
+    const wordList& cuttingPatches,
+    const bool normalise
 )
 {
     const polyBoundaryMesh& srcBm = srcRegion_.boundaryMesh();
@@ -806,7 +813,7 @@ void Foam::meshToMesh::constructFromCuttingPatches
     tgtPatchID_.transfer(tgtIDs);
 
     // calculate volume addressing and weights
-    calculate(methodName);
+    calculate(methodName, normalise);
 
     // calculate patch addressing and weights
     calculatePatchAMIs(AMIMethodName);
@@ -888,7 +895,8 @@ Foam::meshToMesh::meshToMesh
     const polyMesh& tgt,
     const interpolationMethod& method,
     const HashTable<word>& patchMap,
-    const wordList& cuttingPatches
+    const wordList& cuttingPatches,
+    const bool normalise
 )
 :
     srcRegion_(src),
@@ -914,7 +922,8 @@ Foam::meshToMesh::meshToMesh
             interpolationMethodAMI(method)
         ),
         patchMap,
-        cuttingPatches
+        cuttingPatches,
+        normalise
     );
 }
 
@@ -926,7 +935,8 @@ Foam::meshToMesh::meshToMesh
     const word& methodName,     // internal mapping
     const word& AMIMethodName,  // boundary mapping
     const HashTable<word>& patchMap,
-    const wordList& cuttingPatches
+    const wordList& cuttingPatches,
+    const bool normalise
 )
 :
     srcRegion_(src),
@@ -949,7 +959,8 @@ Foam::meshToMesh::meshToMesh
         methodName,
         AMIMethodName,
         patchMap,
-        cuttingPatches
+        cuttingPatches,
+        normalise
     );
 }
 

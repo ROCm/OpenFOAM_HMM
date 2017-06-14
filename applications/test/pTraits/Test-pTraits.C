@@ -92,14 +92,14 @@ int main()
     std::cout<< "max = " << pTraits<label>::max << nl;
     std::cout<< "umax = " << pTraits<uLabel>::max << nl;
 
-    std::cout<< "max_2 = " << pTraits<label>::max/2 << " == "
-        << (1 << (sizeof(label)*8-2)) << nl;
+    std::cout<< "max_2 = " << pTraits<label>::max/2 << " <=> "
+        << (1L << (sizeof(label)*8-2)) << nl;
 
-    std::cout<< "max_4 = " << pTraits<label>::max/4 << " == "
-        << (1 << (sizeof(label)*8-3)) << nl;
+    std::cout<< "max_4 = " << pTraits<label>::max/4 << " <=> "
+        << (1L << (sizeof(label)*8-3)) << nl;
 
-    std::cout<< "max_8 = " << pTraits<label>::max/8 << " == "
-        << (1 << (sizeof(label)*8-4)) << nl;
+    std::cout<< "max_8 = " << pTraits<label>::max/8 << " <=> "
+        << (1L << (sizeof(label)*8-4)) << nl;
 
     Info<< "End\n" << endl;
 

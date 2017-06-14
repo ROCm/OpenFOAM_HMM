@@ -26,6 +26,7 @@ License
 #include "pqFoamReaderControls.h"
 
 #include <QCheckBox>
+#include <QComboBox>
 #include <QFrame>
 #include <QGridLayout>
 #include <QPushButton>
@@ -37,18 +38,31 @@ License
 #include "vtkSMIntVectorProperty.h"
 #include "vtkSMPropertyGroup.h"
 #include "vtkSMSourceProxy.h"
+#include "vtkSMEnumerationDomain.h"
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 // file-scope
-static QAbstractButton* setButtonProperties
+// Add horizontal divider to layout
+static void addHline(QGridLayout* layout, int row, int nCols)
+{
+    QFrame* hline = new QFrame(layout->parentWidget());
+    hline->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+
+    layout->addWidget(hline, row, 0, 1, nCols);
+}
+
+
+// file-scope
+// Widget properties
+static QWidget* setWidgetProperties
 (
-    QAbstractButton* b,
+    QWidget* widget,
     vtkSMProperty* prop
 )
 {
-    QString tip;
+    widget->setFocusPolicy(Qt::NoFocus); // avoid dotted border
 
     vtkSMDocumentation* doc = prop->GetDocumentation();
     if (doc)
@@ -56,27 +70,99 @@ static QAbstractButton* setButtonProperties
         const char* txt = doc->GetDescription();
         if (txt)
         {
-            tip = QString(txt).simplified();
+            QString tip = QString(txt).simplified();
+            if (tip.size())
+            {
+               widget->setToolTip(tip);
+            }
         }
     }
 
+    return widget;
+}
+
+
+// file-scope
+// Button properties
+static QAbstractButton* setButtonProperties
+(
+    QAbstractButton* b,
+    vtkSMProperty* prop
+)
+{
+    setWidgetProperties(b, prop);
     b->setText(prop->GetXMLLabel());
-    if (tip.size())
-    {
-        b->setToolTip(tip);
-    }
-    b->setFocusPolicy(Qt::NoFocus); // avoid dotted border
 
     vtkSMIntVectorProperty* intProp =
        vtkSMIntVectorProperty::SafeDownCast(prop);
 
-    // initial checked state for integer (bool) properties
+    // Initial checked state for integer (bool) properties
     if (intProp)
     {
         b->setChecked(intProp->GetElement(0));
     }
 
     return b;
+}
+
+
+// file-scope
+// Fill combo-box from XML enumeration
+static QComboBox* setComboBoxContent
+(
+    QComboBox* b,
+    vtkSMIntVectorProperty* prop
+)
+{
+    vtkSMEnumerationDomain* propEnum =
+        vtkSMEnumerationDomain::SafeDownCast
+        (
+            prop->FindDomain("vtkSMEnumerationDomain")
+        );
+
+    if (propEnum)
+    {
+        unsigned int n = propEnum->GetNumberOfEntries();
+        for (unsigned int idx=0; idx < n; ++idx)
+        {
+            const int val   = propEnum->GetEntryValue(idx);
+            const char* txt = propEnum->GetEntryText(idx);
+
+            b->insertItem(val, txt);
+        }
+
+        // Set default
+        const int val = prop->GetElement(0);
+        unsigned int idx = 0;
+        if (!propEnum->IsInDomain(val, idx))
+        {
+            idx = 0;
+        }
+        b->setCurrentIndex(idx);
+    }
+
+    return b;
+}
+
+
+// file-scope
+// Translate a combo-box index to a lookup value
+static int comboBoxValue(vtkSMIntVectorProperty* prop, int idx)
+{
+    vtkSMEnumerationDomain* propEnum =
+        vtkSMEnumerationDomain::SafeDownCast
+        (
+            prop->FindDomain("vtkSMEnumerationDomain")
+        );
+
+    if (propEnum)
+    {
+        return propEnum->GetEntryValue(idx);
+    }
+    else
+    {
+        return idx;
+    }
 }
 
 
@@ -102,12 +188,12 @@ static vtkSMIntVectorProperty* lookupIntProp
 void pqFoamReaderControls::fireCommand
 (
     vtkSMIntVectorProperty* prop,
-    bool checked
+    int val
 )
 {
     vtkSMProxy* pxy = this->proxy();
 
-    prop->SetElement(0, checked); // Toogle bool
+    prop->SetElement(0, val); // Set int value, toogle bool, etc
 
     // Fire off command
     prop->Modified();
@@ -140,9 +226,9 @@ void pqFoamReaderControls::refreshPressed()
 }
 
 
-void pqFoamReaderControls::cacheMesh(bool checked)
+void pqFoamReaderControls::cacheMesh(int idx)
 {
-    fireCommand(cacheMesh_, checked);
+    fireCommand(meshCaching_, comboBoxValue(meshCaching_, idx));
 }
 
 
@@ -196,11 +282,13 @@ pqFoamReaderControls::pqFoamReaderControls
     showGroupsOnly_(lookupIntProp(group, "ShowGroupsOnly")),
     includeSets_(lookupIntProp(group, "IncludeSets")),
     includeZones_(lookupIntProp(group, "IncludeZones")),
-    cacheMesh_(lookupIntProp(group, "CacheMesh"))
+    meshCaching_(lookupIntProp(group, "MeshCaching"))
 {
     typedef vtkSMIntVectorProperty intProp;
 
     QGridLayout* form = new QGridLayout(this);
+
+    const int nCols = 3;
 
     // ROW
     // ~~~
@@ -222,17 +310,14 @@ pqFoamReaderControls::pqFoamReaderControls
         setButtonProperties(b, zeroTime);
         form->addWidget(b, row, 1, Qt::AlignLeft);
 
-        addPropertyLink(b, "checked", SIGNAL(toggled(bool)), zeroTime);
+        addPropertyLink
+        (
+            b, "checked", SIGNAL(toggled(bool)), zeroTime
+        );
     }
 
     // LINE
-    // ~~~~
-    ++row;
-    {
-        QFrame* hline = new QFrame(this);
-        hline->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-        form->addWidget(hline, row, 0, 1, 4);
-    }
+    addHline(form, ++row, nCols);
 
     // ROW
     // ~~~
@@ -244,8 +329,14 @@ pqFoamReaderControls::pqFoamReaderControls
         setButtonProperties(b, includeSets_);
         form->addWidget(b, row, 0, Qt::AlignLeft);
 
-        addPropertyLink(b, "checked", SIGNAL(toggled(bool)), includeSets_);
-        connect(b, SIGNAL(toggled(bool)), this, SLOT(includeSets(bool)));
+        addPropertyLink
+        (
+            b, "checked", SIGNAL(toggled(bool)), includeSets_
+        );
+        connect
+        (
+            b, SIGNAL(toggled(bool)), this, SLOT(includeSets(bool))
+        );
     }
 
     if (showGroupsOnly_)
@@ -254,8 +345,14 @@ pqFoamReaderControls::pqFoamReaderControls
         setButtonProperties(b, showGroupsOnly_);
         form->addWidget(b, row, 1, Qt::AlignLeft);
 
-        addPropertyLink(b, "checked", SIGNAL(toggled(bool)), showGroupsOnly_);
-        connect(b, SIGNAL(toggled(bool)), this, SLOT(showGroupsOnly(bool)));
+        addPropertyLink
+        (
+            b, "checked", SIGNAL(toggled(bool)), showGroupsOnly_
+        );
+        connect
+        (
+            b, SIGNAL(toggled(bool)), this, SLOT(showGroupsOnly(bool))
+        );
     }
 
 
@@ -269,8 +366,14 @@ pqFoamReaderControls::pqFoamReaderControls
         setButtonProperties(b, includeZones_);
         form->addWidget(b, row, 0, Qt::AlignLeft);
 
-        addPropertyLink(b, "checked", SIGNAL(toggled(bool)), includeZones_);
-        connect(b, SIGNAL(toggled(bool)), this, SLOT(includeZones(bool)));
+        addPropertyLink
+        (
+            b, "checked", SIGNAL(toggled(bool)), includeZones_
+        );
+        connect
+        (
+            b, SIGNAL(toggled(bool)), this, SLOT(includeZones(bool))
+        );
     }
 
     if (showPatchNames_)
@@ -279,17 +382,14 @@ pqFoamReaderControls::pqFoamReaderControls
         setButtonProperties(b, showPatchNames_);
         form->addWidget(b, row, 1, Qt::AlignLeft);
 
-        connect(b, SIGNAL(toggled(bool)), this, SLOT(showPatchNames(bool)));
+        connect
+        (
+            b, SIGNAL(toggled(bool)), this, SLOT(showPatchNames(bool))
+        );
     }
 
     // LINE
-    // ~~~~
-    ++row;
-    {
-        QFrame* hline = new QFrame(this);
-        hline->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-        form->addWidget(hline, row, 0, 1, 4);
-    }
+    addHline(form, ++row, nCols);
 
     // ROW
     // ~~~
@@ -302,7 +402,10 @@ pqFoamReaderControls::pqFoamReaderControls
         setButtonProperties(b, interpolate);
         form->addWidget(b, row, 0, Qt::AlignLeft);
 
-        addPropertyLink(b, "checked", SIGNAL(toggled(bool)), interpolate);
+        addPropertyLink
+        (
+            b, "checked", SIGNAL(toggled(bool)), interpolate
+        );
     }
 
     intProp* extrapolate = lookupIntProp(group, "ExtrapolatePatches");
@@ -312,17 +415,14 @@ pqFoamReaderControls::pqFoamReaderControls
         setButtonProperties(b, extrapolate);
         form->addWidget(b, row, 1, Qt::AlignLeft);
 
-        addPropertyLink(b, "checked", SIGNAL(toggled(bool)), extrapolate);
+        addPropertyLink
+        (
+            b, "checked", SIGNAL(toggled(bool)), extrapolate
+        );
     }
 
     // LINE
-    // ~~~~
-    ++row;
-    {
-        QFrame* hline = new QFrame(this);
-        hline->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-        form->addWidget(hline, row, 0, 1, 4);
-    }
+    addHline(form, ++row, nCols);
 
     // ROW
     // ~~~
@@ -335,7 +435,10 @@ pqFoamReaderControls::pqFoamReaderControls
         setButtonProperties(b, updateGui);
         form->addWidget(b, row, 0, Qt::AlignLeft);
 
-        addPropertyLink(b, "checked", SIGNAL(clicked()), updateGui);
+        addPropertyLink
+        (
+            b, "checked", SIGNAL(clicked()), updateGui
+        );
     }
 
     intProp* usePolyhedron = lookupIntProp(group, "UseVTKPolyhedron");
@@ -345,16 +448,29 @@ pqFoamReaderControls::pqFoamReaderControls
         setButtonProperties(b, usePolyhedron);
         form->addWidget(b, row, 1, Qt::AlignLeft);
 
-        addPropertyLink(b, "checked", SIGNAL(toggled(bool)), usePolyhedron);
+        addPropertyLink
+        (
+            b, "checked", SIGNAL(toggled(bool)), usePolyhedron
+        );
     }
 
-    if (cacheMesh_)
+    if (meshCaching_)
     {
-        QCheckBox* b = new QCheckBox(this);
-        setButtonProperties(b, cacheMesh_);
+        QComboBox* b = new QComboBox(this);
         form->addWidget(b, row, 2, Qt::AlignLeft);
 
-        connect(b, SIGNAL(toggled(bool)), this, SLOT(cacheMesh(bool)));
+        setWidgetProperties(b, meshCaching_);
+        setComboBoxContent(b, meshCaching_);
+
+        addPropertyLink
+        (
+            b, "indexChanged", SIGNAL(currentIndexChanged(int)), meshCaching_
+        );
+
+        connect
+        (
+            b, SIGNAL(currentIndexChanged(int)), this, SLOT(cacheMesh(int))
+        );
     }
 }
 

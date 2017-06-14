@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    foamVtkBase64Layer
+    Foam::vtk::foamVtkBase64Layer
 
 Description
-    Base-64 encoded output.
+    Base-64 encoded output layer - normally only used indirectly by formatters.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,14 +39,16 @@ Description
 
 namespace Foam
 {
+namespace vtk
+{
 
 /*---------------------------------------------------------------------------*\
-                   Class foamVtkBase64Layer Declaration
+                     Class foamVtkBase64Layer Declaration
 \*---------------------------------------------------------------------------*/
 
 class foamVtkBase64Layer
 :
-    public foamVtkFormatter,
+    public formatter,
     protected base64Layer
 {
     // Private Data Members
@@ -61,6 +63,7 @@ class foamVtkBase64Layer
 
         //- Disallow default bitwise assignment
         void operator=(const foamVtkBase64Layer&) = delete;
+
 
 protected:
 
@@ -105,6 +108,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace vtk
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -134,18 +134,6 @@ void Foam::nonBlockingGaussSeidelSmoother::smooth
     // To compensate for this, it is necessary to turn the
     // sign of the contribution.
 
-    FieldField<Field, scalar>& mBouCoeffs =
-        const_cast<FieldField<Field, scalar>&>
-        (
-            interfaceBouCoeffs_
-        );
-    forAll(mBouCoeffs, patchi)
-    {
-        if (interfaces_.set(patchi))
-        {
-            mBouCoeffs[patchi].negate();
-        }
-    }
 
     for (label sweep=0; sweep<nSweeps; sweep++)
     {
@@ -153,7 +141,8 @@ void Foam::nonBlockingGaussSeidelSmoother::smooth
 
         matrix_.initMatrixInterfaces
         (
-            mBouCoeffs,
+            false,
+            interfaceBouCoeffs_,
             interfaces_,
             psi,
             bPrime,
@@ -193,7 +182,8 @@ void Foam::nonBlockingGaussSeidelSmoother::smooth
 
         matrix_.updateMatrixInterfaces
         (
-            mBouCoeffs,
+            false,
+            interfaceBouCoeffs_,
             interfaces_,
             psi,
             bPrime,
@@ -226,15 +216,6 @@ void Foam::nonBlockingGaussSeidelSmoother::smooth
             }
 
             psiPtr[celli] = curPsi;
-        }
-    }
-
-    // Restore interfaceBouCoeffs_
-    forAll(mBouCoeffs, patchi)
-    {
-        if (interfaces_.set(patchi))
-        {
-            mBouCoeffs[patchi].negate();
         }
     }
 }
