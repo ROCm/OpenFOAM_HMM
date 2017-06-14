@@ -169,7 +169,7 @@ then
 
 fi
 
-unset -f _foamParaviewEval
+unset -f _foamParaviewEval 2> /dev/null
 unset cleaned cmake cmake_version pvName pvMajor pvLibDir pvPython
 unset ParaView_MAJOR
 

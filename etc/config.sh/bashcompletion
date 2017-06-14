@@ -1,4 +1,7 @@
-unset -f _filter_opts
+#----------------------------------*-sh-*--------------------------------------
+# Bash completions for OpenFOAM applications
+
+unset -f _filter_opts 2>/dev/null
 _filter_opts()
 {
     local allOpts=$1
@@ -8,7 +11,7 @@ _filter_opts()
     done
 }
 
-unset -f _adiabaticFlameT
+unset -f _adiabaticFlameT 2>/dev/null
 _adiabaticFlameT()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -40,7 +43,7 @@ _adiabaticFlameT()
 }
 complete -o nospace -F _adiabaticFlameT adiabaticFlameT
 
-unset -f _adjointShapeOptimizationFoam
+unset -f _adjointShapeOptimizationFoam 2>/dev/null
 _adjointShapeOptimizationFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -75,7 +78,7 @@ _adjointShapeOptimizationFoam()
 }
 complete -o nospace -F _adjointShapeOptimizationFoam adjointShapeOptimizationFoam
 
-unset -f _ansysToFoam
+unset -f _ansysToFoam 2>/dev/null
 _ansysToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -107,7 +110,7 @@ _ansysToFoam()
 }
 complete -o nospace -F _ansysToFoam ansysToFoam
 
-unset -f _applyBoundaryLayer
+unset -f _applyBoundaryLayer 2>/dev/null
 _applyBoundaryLayer()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -146,7 +149,7 @@ _applyBoundaryLayer()
 }
 complete -o nospace -F _applyBoundaryLayer applyBoundaryLayer
 
-unset -f _attachMesh
+unset -f _attachMesh 2>/dev/null
 _attachMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -178,7 +181,7 @@ _attachMesh()
 }
 complete -o nospace -F _attachMesh attachMesh
 
-unset -f _autoPatch
+unset -f _autoPatch 2>/dev/null
 _autoPatch()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -210,7 +213,7 @@ _autoPatch()
 }
 complete -o nospace -F _autoPatch autoPatch
 
-unset -f _blockMesh
+unset -f _blockMesh 2>/dev/null
 _blockMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -246,7 +249,7 @@ _blockMesh()
 }
 complete -o nospace -F _blockMesh blockMesh
 
-unset -f _boundaryFoam
+unset -f _boundaryFoam 2>/dev/null
 _boundaryFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -278,7 +281,7 @@ _boundaryFoam()
 }
 complete -o nospace -F _boundaryFoam boundaryFoam
 
-unset -f _boxTurb
+unset -f _boxTurb 2>/dev/null
 _boxTurb()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -310,7 +313,7 @@ _boxTurb()
 }
 complete -o nospace -F _boxTurb boxTurb
 
-unset -f _buoyantBoussinesqPimpleFoam
+unset -f _buoyantBoussinesqPimpleFoam 2>/dev/null
 _buoyantBoussinesqPimpleFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -345,7 +348,7 @@ _buoyantBoussinesqPimpleFoam()
 }
 complete -o nospace -F _buoyantBoussinesqPimpleFoam buoyantBoussinesqPimpleFoam
 
-unset -f _buoyantBoussinesqSimpleFoam
+unset -f _buoyantBoussinesqSimpleFoam 2>/dev/null
 _buoyantBoussinesqSimpleFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -380,7 +383,7 @@ _buoyantBoussinesqSimpleFoam()
 }
 complete -o nospace -F _buoyantBoussinesqSimpleFoam buoyantBoussinesqSimpleFoam
 
-unset -f _buoyantPimpleFoam
+unset -f _buoyantPimpleFoam 2>/dev/null
 _buoyantPimpleFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -415,7 +418,7 @@ _buoyantPimpleFoam()
 }
 complete -o nospace -F _buoyantPimpleFoam buoyantPimpleFoam
 
-unset -f _buoyantSimpleFoam
+unset -f _buoyantSimpleFoam 2>/dev/null
 _buoyantSimpleFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -450,7 +453,7 @@ _buoyantSimpleFoam()
 }
 complete -o nospace -F _buoyantSimpleFoam buoyantSimpleFoam
 
-unset -f _cavitatingDyMFoam
+unset -f _cavitatingDyMFoam 2>/dev/null
 _cavitatingDyMFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -485,7 +488,7 @@ _cavitatingDyMFoam()
 }
 complete -o nospace -F _cavitatingDyMFoam cavitatingDyMFoam
 
-unset -f _cavitatingFoam
+unset -f _cavitatingFoam 2>/dev/null
 _cavitatingFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -520,7 +523,7 @@ _cavitatingFoam()
 }
 complete -o nospace -F _cavitatingFoam cavitatingFoam
 
-unset -f _cfx4ToFoam
+unset -f _cfx4ToFoam 2>/dev/null
 _cfx4ToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -552,7 +555,7 @@ _cfx4ToFoam()
 }
 complete -o nospace -F _cfx4ToFoam cfx4ToFoam
 
-unset -f _changeDictionary
+unset -f _changeDictionary 2>/dev/null
 _changeDictionary()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -597,7 +600,7 @@ _changeDictionary()
 }
 complete -o nospace -F _changeDictionary changeDictionary
 
-unset -f _checkMesh
+unset -f _checkMesh 2>/dev/null
 _checkMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -639,7 +642,7 @@ _checkMesh()
 }
 complete -o nospace -F _checkMesh checkMesh
 
-unset -f _chemFoam
+unset -f _chemFoam 2>/dev/null
 _chemFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -671,7 +674,7 @@ _chemFoam()
 }
 complete -o nospace -F _chemFoam chemFoam
 
-unset -f _chemkinToFoam
+unset -f _chemkinToFoam 2>/dev/null
 _chemkinToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -703,7 +706,7 @@ _chemkinToFoam()
 }
 complete -o nospace -F _chemkinToFoam chemkinToFoam
 
-unset -f _chtMultiRegionFoam
+unset -f _chtMultiRegionFoam 2>/dev/null
 _chtMultiRegionFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -738,7 +741,7 @@ _chtMultiRegionFoam()
 }
 complete -o nospace -F _chtMultiRegionFoam chtMultiRegionFoam
 
-unset -f _chtMultiRegionSimpleFoam
+unset -f _chtMultiRegionSimpleFoam 2>/dev/null
 _chtMultiRegionSimpleFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -773,7 +776,7 @@ _chtMultiRegionSimpleFoam()
 }
 complete -o nospace -F _chtMultiRegionSimpleFoam chtMultiRegionSimpleFoam
 
-unset -f _coalChemistryFoam
+unset -f _coalChemistryFoam 2>/dev/null
 _coalChemistryFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -808,7 +811,7 @@ _coalChemistryFoam()
 }
 complete -o nospace -F _coalChemistryFoam coalChemistryFoam
 
-unset -f _coldEngineFoam
+unset -f _coldEngineFoam 2>/dev/null
 _coldEngineFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -843,7 +846,7 @@ _coldEngineFoam()
 }
 complete -o nospace -F _coldEngineFoam coldEngineFoam
 
-unset -f _collapseEdges
+unset -f _collapseEdges 2>/dev/null
 _collapseEdges()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -881,7 +884,7 @@ _collapseEdges()
 }
 complete -o nospace -F _collapseEdges collapseEdges
 
-unset -f _combinePatchFaces
+unset -f _combinePatchFaces 2>/dev/null
 _combinePatchFaces()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -916,7 +919,7 @@ _combinePatchFaces()
 }
 complete -o nospace -F _combinePatchFaces combinePatchFaces
 
-unset -f _compressibleInterDyMFoam
+unset -f _compressibleInterDyMFoam 2>/dev/null
 _compressibleInterDyMFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -951,7 +954,7 @@ _compressibleInterDyMFoam()
 }
 complete -o nospace -F _compressibleInterDyMFoam compressibleInterDyMFoam
 
-unset -f _compressibleInterFoam
+unset -f _compressibleInterFoam 2>/dev/null
 _compressibleInterFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -986,7 +989,7 @@ _compressibleInterFoam()
 }
 complete -o nospace -F _compressibleInterFoam compressibleInterFoam
 
-unset -f _compressibleMultiphaseInterFoam
+unset -f _compressibleMultiphaseInterFoam 2>/dev/null
 _compressibleMultiphaseInterFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1021,7 +1024,7 @@ _compressibleMultiphaseInterFoam()
 }
 complete -o nospace -F _compressibleMultiphaseInterFoam compressibleMultiphaseInterFoam
 
-unset -f _createBaffles
+unset -f _createBaffles 2>/dev/null
 _createBaffles()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1060,7 +1063,7 @@ _createBaffles()
 }
 complete -o nospace -F _createBaffles createBaffles
 
-unset -f _createExternalCoupledPatchGeometry
+unset -f _createExternalCoupledPatchGeometry 2>/dev/null
 _createExternalCoupledPatchGeometry()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1099,7 +1102,7 @@ _createExternalCoupledPatchGeometry()
 }
 complete -o nospace -F _createExternalCoupledPatchGeometry createExternalCoupledPatchGeometry
 
-unset -f _createPatch
+unset -f _createPatch 2>/dev/null
 _createPatch()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1138,7 +1141,7 @@ _createPatch()
 }
 complete -o nospace -F _createPatch createPatch
 
-unset -f _createZeroDirectory
+unset -f _createZeroDirectory 2>/dev/null
 _createZeroDirectory()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1173,7 +1176,7 @@ _createZeroDirectory()
 }
 complete -o nospace -F _createZeroDirectory createZeroDirectory
 
-unset -f _datToFoam
+unset -f _datToFoam 2>/dev/null
 _datToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1205,7 +1208,7 @@ _datToFoam()
 }
 complete -o nospace -F _datToFoam datToFoam
 
-unset -f _decomposePar
+unset -f _decomposePar 2>/dev/null
 _decomposePar()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1247,7 +1250,7 @@ _decomposePar()
 }
 complete -o nospace -F _decomposePar decomposePar
 
-unset -f _deformedGeom
+unset -f _deformedGeom 2>/dev/null
 _deformedGeom()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1282,7 +1285,7 @@ _deformedGeom()
 }
 complete -o nospace -F _deformedGeom deformedGeom
 
-unset -f _dnsFoam
+unset -f _dnsFoam 2>/dev/null
 _dnsFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1317,7 +1320,7 @@ _dnsFoam()
 }
 complete -o nospace -F _dnsFoam dnsFoam
 
-unset -f _DPMDyMFoam
+unset -f _DPMDyMFoam 2>/dev/null
 _DPMDyMFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1352,7 +1355,7 @@ _DPMDyMFoam()
 }
 complete -o nospace -F _DPMDyMFoam DPMDyMFoam
 
-unset -f _DPMFoam
+unset -f _DPMFoam 2>/dev/null
 _DPMFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1387,7 +1390,7 @@ _DPMFoam()
 }
 complete -o nospace -F _DPMFoam DPMFoam
 
-unset -f _driftFluxFoam
+unset -f _driftFluxFoam 2>/dev/null
 _driftFluxFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1422,7 +1425,7 @@ _driftFluxFoam()
 }
 complete -o nospace -F _driftFluxFoam driftFluxFoam
 
-unset -f _dsmcFoam
+unset -f _dsmcFoam 2>/dev/null
 _dsmcFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1457,7 +1460,7 @@ _dsmcFoam()
 }
 complete -o nospace -F _dsmcFoam dsmcFoam
 
-unset -f _dsmcInitialise
+unset -f _dsmcInitialise 2>/dev/null
 _dsmcInitialise()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1492,7 +1495,7 @@ _dsmcInitialise()
 }
 complete -o nospace -F _dsmcInitialise dsmcInitialise
 
-unset -f _electrostaticFoam
+unset -f _electrostaticFoam 2>/dev/null
 _electrostaticFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1527,7 +1530,7 @@ _electrostaticFoam()
 }
 complete -o nospace -F _electrostaticFoam electrostaticFoam
 
-unset -f _engineCompRatio
+unset -f _engineCompRatio 2>/dev/null
 _engineCompRatio()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1562,7 +1565,7 @@ _engineCompRatio()
 }
 complete -o nospace -F _engineCompRatio engineCompRatio
 
-unset -f _engineFoam
+unset -f _engineFoam 2>/dev/null
 _engineFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1597,7 +1600,7 @@ _engineFoam()
 }
 complete -o nospace -F _engineFoam engineFoam
 
-unset -f _engineSwirl
+unset -f _engineSwirl 2>/dev/null
 _engineSwirl()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1632,7 +1635,7 @@ _engineSwirl()
 }
 complete -o nospace -F _engineSwirl engineSwirl
 
-unset -f _equilibriumCO
+unset -f _equilibriumCO 2>/dev/null
 _equilibriumCO()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1664,7 +1667,7 @@ _equilibriumCO()
 }
 complete -o nospace -F _equilibriumCO equilibriumCO
 
-unset -f _equilibriumFlameT
+unset -f _equilibriumFlameT 2>/dev/null
 _equilibriumFlameT()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1696,7 +1699,7 @@ _equilibriumFlameT()
 }
 complete -o nospace -F _equilibriumFlameT equilibriumFlameT
 
-unset -f _extrude2DMesh
+unset -f _extrude2DMesh 2>/dev/null
 _extrude2DMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1731,7 +1734,7 @@ _extrude2DMesh()
 }
 complete -o nospace -F _extrude2DMesh extrude2DMesh
 
-unset -f _extrudeMesh
+unset -f _extrudeMesh 2>/dev/null
 _extrudeMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1770,7 +1773,7 @@ _extrudeMesh()
 }
 complete -o nospace -F _extrudeMesh extrudeMesh
 
-unset -f _extrudeToRegionMesh
+unset -f _extrudeToRegionMesh 2>/dev/null
 _extrudeToRegionMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1809,7 +1812,7 @@ _extrudeToRegionMesh()
 }
 complete -o nospace -F _extrudeToRegionMesh extrudeToRegionMesh
 
-unset -f _faceAgglomerate
+unset -f _faceAgglomerate 2>/dev/null
 _faceAgglomerate()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1848,7 +1851,7 @@ _faceAgglomerate()
 }
 complete -o nospace -F _faceAgglomerate faceAgglomerate
 
-unset -f _financialFoam
+unset -f _financialFoam 2>/dev/null
 _financialFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1883,7 +1886,7 @@ _financialFoam()
 }
 complete -o nospace -F _financialFoam financialFoam
 
-unset -f _fireFoam
+unset -f _fireFoam 2>/dev/null
 _fireFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1918,7 +1921,7 @@ _fireFoam()
 }
 complete -o nospace -F _fireFoam fireFoam
 
-unset -f _fireToFoam
+unset -f _fireToFoam 2>/dev/null
 _fireToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1950,7 +1953,7 @@ _fireToFoam()
 }
 complete -o nospace -F _fireToFoam fireToFoam
 
-unset -f _flattenMesh
+unset -f _flattenMesh 2>/dev/null
 _flattenMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -1985,7 +1988,7 @@ _flattenMesh()
 }
 complete -o nospace -F _flattenMesh flattenMesh
 
-unset -f _fluent3DMeshToFoam
+unset -f _fluent3DMeshToFoam 2>/dev/null
 _fluent3DMeshToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2017,7 +2020,7 @@ _fluent3DMeshToFoam()
 }
 complete -o nospace -F _fluent3DMeshToFoam fluent3DMeshToFoam
 
-unset -f _fluentMeshToFoam
+unset -f _fluentMeshToFoam 2>/dev/null
 _fluentMeshToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2049,7 +2052,7 @@ _fluentMeshToFoam()
 }
 complete -o nospace -F _fluentMeshToFoam fluentMeshToFoam
 
-unset -f _foamDataToFluent
+unset -f _foamDataToFluent 2>/dev/null
 _foamDataToFluent()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2084,7 +2087,7 @@ _foamDataToFluent()
 }
 complete -o nospace -F _foamDataToFluent foamDataToFluent
 
-unset -f _foamDictionary
+unset -f _foamDictionary 2>/dev/null
 _foamDictionary()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2119,7 +2122,7 @@ _foamDictionary()
 }
 complete -o nospace -F _foamDictionary foamDictionary
 
-unset -f _foamFormatConvert
+unset -f _foamFormatConvert 2>/dev/null
 _foamFormatConvert()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2161,7 +2164,7 @@ _foamFormatConvert()
 }
 complete -o nospace -F _foamFormatConvert foamFormatConvert
 
-unset -f _foamHelp
+unset -f _foamHelp 2>/dev/null
 _foamHelp()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2200,7 +2203,7 @@ _foamHelp()
 }
 complete -o nospace -F _foamHelp foamHelp
 
-unset -f _foamList
+unset -f _foamList 2>/dev/null
 _foamList()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2232,7 +2235,7 @@ _foamList()
 }
 complete -o nospace -F _foamList foamList
 
-unset -f _foamListTimes
+unset -f _foamListTimes 2>/dev/null
 _foamListTimes()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2267,7 +2270,7 @@ _foamListTimes()
 }
 complete -o nospace -F _foamListTimes foamListTimes
 
-unset -f _foamMeshToFluent
+unset -f _foamMeshToFluent 2>/dev/null
 _foamMeshToFluent()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2299,7 +2302,7 @@ _foamMeshToFluent()
 }
 complete -o nospace -F _foamMeshToFluent foamMeshToFluent
 
-unset -f _foamToEnsight
+unset -f _foamToEnsight 2>/dev/null
 _foamToEnsight()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2341,7 +2344,7 @@ _foamToEnsight()
 }
 complete -o nospace -F _foamToEnsight foamToEnsight
 
-unset -f _foamToEnsightParts
+unset -f _foamToEnsightParts 2>/dev/null
 _foamToEnsightParts()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2376,7 +2379,7 @@ _foamToEnsightParts()
 }
 complete -o nospace -F _foamToEnsightParts foamToEnsightParts
 
-unset -f _foamToFireMesh
+unset -f _foamToFireMesh 2>/dev/null
 _foamToFireMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2411,7 +2414,7 @@ _foamToFireMesh()
 }
 complete -o nospace -F _foamToFireMesh foamToFireMesh
 
-unset -f _foamToGMV
+unset -f _foamToGMV 2>/dev/null
 _foamToGMV()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2446,7 +2449,7 @@ _foamToGMV()
 }
 complete -o nospace -F _foamToGMV foamToGMV
 
-unset -f _foamToStarMesh
+unset -f _foamToStarMesh 2>/dev/null
 _foamToStarMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2481,7 +2484,7 @@ _foamToStarMesh()
 }
 complete -o nospace -F _foamToStarMesh foamToStarMesh
 
-unset -f _foamToSurface
+unset -f _foamToSurface 2>/dev/null
 _foamToSurface()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2516,7 +2519,7 @@ _foamToSurface()
 }
 complete -o nospace -F _foamToSurface foamToSurface
 
-unset -f _foamToTetDualMesh
+unset -f _foamToTetDualMesh 2>/dev/null
 _foamToTetDualMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2554,7 +2557,7 @@ _foamToTetDualMesh()
 }
 complete -o nospace -F _foamToTetDualMesh foamToTetDualMesh
 
-unset -f _foamToVTK
+unset -f _foamToVTK 2>/dev/null
 _foamToVTK()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2596,7 +2599,7 @@ _foamToVTK()
 }
 complete -o nospace -F _foamToVTK foamToVTK
 
-unset -f _foamUpgradeCyclics
+unset -f _foamUpgradeCyclics 2>/dev/null
 _foamUpgradeCyclics()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2638,7 +2641,7 @@ _foamUpgradeCyclics()
 }
 complete -o nospace -F _foamUpgradeCyclics foamUpgradeCyclics
 
-unset -f _foamyHexMesh
+unset -f _foamyHexMesh 2>/dev/null
 _foamyHexMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2673,7 +2676,7 @@ _foamyHexMesh()
 }
 complete -o nospace -F _foamyHexMesh foamyHexMesh
 
-unset -f _foamyQuadMesh
+unset -f _foamyQuadMesh 2>/dev/null
 _foamyQuadMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2705,7 +2708,7 @@ _foamyQuadMesh()
 }
 complete -o nospace -F _foamyQuadMesh foamyQuadMesh
 
-unset -f _gambitToFoam
+unset -f _gambitToFoam 2>/dev/null
 _gambitToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2737,7 +2740,7 @@ _gambitToFoam()
 }
 complete -o nospace -F _gambitToFoam gambitToFoam
 
-unset -f _gmshToFoam
+unset -f _gmshToFoam 2>/dev/null
 _gmshToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2773,7 +2776,7 @@ _gmshToFoam()
 }
 complete -o nospace -F _gmshToFoam gmshToFoam
 
-unset -f _icoFoam
+unset -f _icoFoam 2>/dev/null
 _icoFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2808,7 +2811,7 @@ _icoFoam()
 }
 complete -o nospace -F _icoFoam icoFoam
 
-unset -f _icoUncoupledKinematicParcelDyMFoam
+unset -f _icoUncoupledKinematicParcelDyMFoam 2>/dev/null
 _icoUncoupledKinematicParcelDyMFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2843,7 +2846,7 @@ _icoUncoupledKinematicParcelDyMFoam()
 }
 complete -o nospace -F _icoUncoupledKinematicParcelDyMFoam icoUncoupledKinematicParcelDyMFoam
 
-unset -f _icoUncoupledKinematicParcelFoam
+unset -f _icoUncoupledKinematicParcelFoam 2>/dev/null
 _icoUncoupledKinematicParcelFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2878,7 +2881,7 @@ _icoUncoupledKinematicParcelFoam()
 }
 complete -o nospace -F _icoUncoupledKinematicParcelFoam icoUncoupledKinematicParcelFoam
 
-unset -f _ideasUnvToFoam
+unset -f _ideasUnvToFoam 2>/dev/null
 _ideasUnvToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2910,7 +2913,7 @@ _ideasUnvToFoam()
 }
 complete -o nospace -F _ideasUnvToFoam ideasUnvToFoam
 
-unset -f _insideCells
+unset -f _insideCells 2>/dev/null
 _insideCells()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2945,7 +2948,7 @@ _insideCells()
 }
 complete -o nospace -F _insideCells insideCells
 
-unset -f _interCondensatingEvaporatingFoam
+unset -f _interCondensatingEvaporatingFoam 2>/dev/null
 _interCondensatingEvaporatingFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -2980,7 +2983,7 @@ _interCondensatingEvaporatingFoam()
 }
 complete -o nospace -F _interCondensatingEvaporatingFoam interCondensatingEvaporatingFoam
 
-unset -f _interDyMFoam
+unset -f _interDyMFoam 2>/dev/null
 _interDyMFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3015,7 +3018,7 @@ _interDyMFoam()
 }
 complete -o nospace -F _interDyMFoam interDyMFoam
 
-unset -f _interFoam
+unset -f _interFoam 2>/dev/null
 _interFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3050,7 +3053,7 @@ _interFoam()
 }
 complete -o nospace -F _interFoam interFoam
 
-unset -f _interMixingFoam
+unset -f _interMixingFoam 2>/dev/null
 _interMixingFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3085,7 +3088,7 @@ _interMixingFoam()
 }
 complete -o nospace -F _interMixingFoam interMixingFoam
 
-unset -f _interPhaseChangeDyMFoam
+unset -f _interPhaseChangeDyMFoam 2>/dev/null
 _interPhaseChangeDyMFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3120,7 +3123,7 @@ _interPhaseChangeDyMFoam()
 }
 complete -o nospace -F _interPhaseChangeDyMFoam interPhaseChangeDyMFoam
 
-unset -f _interPhaseChangeFoam
+unset -f _interPhaseChangeFoam 2>/dev/null
 _interPhaseChangeFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3155,7 +3158,7 @@ _interPhaseChangeFoam()
 }
 complete -o nospace -F _interPhaseChangeFoam interPhaseChangeFoam
 
-unset -f _kivaToFoam
+unset -f _kivaToFoam 2>/dev/null
 _kivaToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3187,7 +3190,7 @@ _kivaToFoam()
 }
 complete -o nospace -F _kivaToFoam kivaToFoam
 
-unset -f _laplacianFoam
+unset -f _laplacianFoam 2>/dev/null
 _laplacianFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3222,7 +3225,7 @@ _laplacianFoam()
 }
 complete -o nospace -F _laplacianFoam laplacianFoam
 
-unset -f _magneticFoam
+unset -f _magneticFoam 2>/dev/null
 _magneticFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3257,7 +3260,7 @@ _magneticFoam()
 }
 complete -o nospace -F _magneticFoam magneticFoam
 
-unset -f _mapFields
+unset -f _mapFields 2>/dev/null
 _mapFields()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3295,7 +3298,7 @@ _mapFields()
 }
 complete -o nospace -F _mapFields mapFields
 
-unset -f _mapFieldsPar
+unset -f _mapFieldsPar 2>/dev/null
 _mapFieldsPar()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3330,7 +3333,7 @@ _mapFieldsPar()
 }
 complete -o nospace -F _mapFieldsPar mapFieldsPar
 
-unset -f _mdEquilibrationFoam
+unset -f _mdEquilibrationFoam 2>/dev/null
 _mdEquilibrationFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3365,7 +3368,7 @@ _mdEquilibrationFoam()
 }
 complete -o nospace -F _mdEquilibrationFoam mdEquilibrationFoam
 
-unset -f _mdFoam
+unset -f _mdFoam 2>/dev/null
 _mdFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3400,7 +3403,7 @@ _mdFoam()
 }
 complete -o nospace -F _mdFoam mdFoam
 
-unset -f _mdInitialise
+unset -f _mdInitialise 2>/dev/null
 _mdInitialise()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3435,7 +3438,7 @@ _mdInitialise()
 }
 complete -o nospace -F _mdInitialise mdInitialise
 
-unset -f _mergeMeshes
+unset -f _mergeMeshes 2>/dev/null
 _mergeMeshes()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3470,7 +3473,7 @@ _mergeMeshes()
 }
 complete -o nospace -F _mergeMeshes mergeMeshes
 
-unset -f _mergeOrSplitBaffles
+unset -f _mergeOrSplitBaffles 2>/dev/null
 _mergeOrSplitBaffles()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3509,7 +3512,7 @@ _mergeOrSplitBaffles()
 }
 complete -o nospace -F _mergeOrSplitBaffles mergeOrSplitBaffles
 
-unset -f _mhdFoam
+unset -f _mhdFoam 2>/dev/null
 _mhdFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3544,7 +3547,7 @@ _mhdFoam()
 }
 complete -o nospace -F _mhdFoam mhdFoam
 
-unset -f _mirrorMesh
+unset -f _mirrorMesh 2>/dev/null
 _mirrorMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3579,7 +3582,7 @@ _mirrorMesh()
 }
 complete -o nospace -F _mirrorMesh mirrorMesh
 
-unset -f _mixtureAdiabaticFlameT
+unset -f _mixtureAdiabaticFlameT 2>/dev/null
 _mixtureAdiabaticFlameT()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3611,7 +3614,7 @@ _mixtureAdiabaticFlameT()
 }
 complete -o nospace -F _mixtureAdiabaticFlameT mixtureAdiabaticFlameT
 
-unset -f _modifyMesh
+unset -f _modifyMesh 2>/dev/null
 _modifyMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3646,7 +3649,7 @@ _modifyMesh()
 }
 complete -o nospace -F _modifyMesh modifyMesh
 
-unset -f _moveDynamicMesh
+unset -f _moveDynamicMesh 2>/dev/null
 _moveDynamicMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3685,7 +3688,7 @@ _moveDynamicMesh()
 }
 complete -o nospace -F _moveDynamicMesh moveDynamicMesh
 
-unset -f _moveEngineMesh
+unset -f _moveEngineMesh 2>/dev/null
 _moveEngineMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3720,7 +3723,7 @@ _moveEngineMesh()
 }
 complete -o nospace -F _moveEngineMesh moveEngineMesh
 
-unset -f _moveMesh
+unset -f _moveMesh 2>/dev/null
 _moveMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3755,7 +3758,7 @@ _moveMesh()
 }
 complete -o nospace -F _moveMesh moveMesh
 
-unset -f _MPPICDyMFoam
+unset -f _MPPICDyMFoam 2>/dev/null
 _MPPICDyMFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3790,7 +3793,7 @@ _MPPICDyMFoam()
 }
 complete -o nospace -F _MPPICDyMFoam MPPICDyMFoam
 
-unset -f _MPPICFoam
+unset -f _MPPICFoam 2>/dev/null
 _MPPICFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3825,7 +3828,7 @@ _MPPICFoam()
 }
 complete -o nospace -F _MPPICFoam MPPICFoam
 
-unset -f _MPPICInterFoam
+unset -f _MPPICInterFoam 2>/dev/null
 _MPPICInterFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3860,7 +3863,7 @@ _MPPICInterFoam()
 }
 complete -o nospace -F _MPPICInterFoam MPPICInterFoam
 
-unset -f _mshToFoam
+unset -f _mshToFoam 2>/dev/null
 _mshToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3892,7 +3895,7 @@ _mshToFoam()
 }
 complete -o nospace -F _mshToFoam mshToFoam
 
-unset -f _multiphaseEulerFoam
+unset -f _multiphaseEulerFoam 2>/dev/null
 _multiphaseEulerFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3927,7 +3930,7 @@ _multiphaseEulerFoam()
 }
 complete -o nospace -F _multiphaseEulerFoam multiphaseEulerFoam
 
-unset -f _multiphaseInterDyMFoam
+unset -f _multiphaseInterDyMFoam 2>/dev/null
 _multiphaseInterDyMFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3962,7 +3965,7 @@ _multiphaseInterDyMFoam()
 }
 complete -o nospace -F _multiphaseInterDyMFoam multiphaseInterDyMFoam
 
-unset -f _multiphaseInterFoam
+unset -f _multiphaseInterFoam 2>/dev/null
 _multiphaseInterFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -3997,7 +4000,7 @@ _multiphaseInterFoam()
 }
 complete -o nospace -F _multiphaseInterFoam multiphaseInterFoam
 
-unset -f _netgenNeutralToFoam
+unset -f _netgenNeutralToFoam 2>/dev/null
 _netgenNeutralToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4032,7 +4035,7 @@ _netgenNeutralToFoam()
 }
 complete -o nospace -F _netgenNeutralToFoam netgenNeutralToFoam
 
-unset -f _noise
+unset -f _noise 2>/dev/null
 _noise()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4067,7 +4070,7 @@ _noise()
 }
 complete -o nospace -F _noise noise
 
-unset -f _nonNewtonianIcoFoam
+unset -f _nonNewtonianIcoFoam 2>/dev/null
 _nonNewtonianIcoFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4102,7 +4105,7 @@ _nonNewtonianIcoFoam()
 }
 complete -o nospace -F _nonNewtonianIcoFoam nonNewtonianIcoFoam
 
-unset -f _objToVTK
+unset -f _objToVTK 2>/dev/null
 _objToVTK()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4134,7 +4137,7 @@ _objToVTK()
 }
 complete -o nospace -F _objToVTK objToVTK
 
-unset -f _orientFaceZone
+unset -f _orientFaceZone 2>/dev/null
 _orientFaceZone()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4173,7 +4176,7 @@ _orientFaceZone()
 }
 complete -o nospace -F _orientFaceZone orientFaceZone
 
-unset -f _particleTracks
+unset -f _particleTracks 2>/dev/null
 _particleTracks()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4215,7 +4218,7 @@ _particleTracks()
 }
 complete -o nospace -F _particleTracks particleTracks
 
-unset -f _patchSummary
+unset -f _patchSummary 2>/dev/null
 _patchSummary()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4257,7 +4260,7 @@ _patchSummary()
 }
 complete -o nospace -F _patchSummary patchSummary
 
-unset -f _pdfPlot
+unset -f _pdfPlot 2>/dev/null
 _pdfPlot()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4292,7 +4295,7 @@ _pdfPlot()
 }
 complete -o nospace -F _pdfPlot pdfPlot
 
-unset -f _PDRFoam
+unset -f _PDRFoam 2>/dev/null
 _PDRFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4327,7 +4330,7 @@ _PDRFoam()
 }
 complete -o nospace -F _PDRFoam PDRFoam
 
-unset -f _PDRMesh
+unset -f _PDRMesh 2>/dev/null
 _PDRMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4362,7 +4365,7 @@ _PDRMesh()
 }
 complete -o nospace -F _PDRMesh PDRMesh
 
-unset -f _pimpleDyMFoam
+unset -f _pimpleDyMFoam 2>/dev/null
 _pimpleDyMFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4397,7 +4400,7 @@ _pimpleDyMFoam()
 }
 complete -o nospace -F _pimpleDyMFoam pimpleDyMFoam
 
-unset -f _pimpleFoam
+unset -f _pimpleFoam 2>/dev/null
 _pimpleFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4432,7 +4435,7 @@ _pimpleFoam()
 }
 complete -o nospace -F _pimpleFoam pimpleFoam
 
-unset -f _pisoFoam
+unset -f _pisoFoam 2>/dev/null
 _pisoFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4467,7 +4470,7 @@ _pisoFoam()
 }
 complete -o nospace -F _pisoFoam pisoFoam
 
-unset -f _plot3dToFoam
+unset -f _plot3dToFoam 2>/dev/null
 _plot3dToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4499,7 +4502,7 @@ _plot3dToFoam()
 }
 complete -o nospace -F _plot3dToFoam plot3dToFoam
 
-unset -f _polyDualMesh
+unset -f _polyDualMesh 2>/dev/null
 _polyDualMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4531,7 +4534,7 @@ _polyDualMesh()
 }
 complete -o nospace -F _polyDualMesh polyDualMesh
 
-unset -f _porousSimpleFoam
+unset -f _porousSimpleFoam 2>/dev/null
 _porousSimpleFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4566,7 +4569,7 @@ _porousSimpleFoam()
 }
 complete -o nospace -F _porousSimpleFoam porousSimpleFoam
 
-unset -f _postChannel
+unset -f _postChannel 2>/dev/null
 _postChannel()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4601,7 +4604,7 @@ _postChannel()
 }
 complete -o nospace -F _postChannel postChannel
 
-unset -f _postProcess
+unset -f _postProcess 2>/dev/null
 _postProcess()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4643,7 +4646,7 @@ _postProcess()
 }
 complete -o nospace -F _postProcess postProcess
 
-unset -f _potentialFoam
+unset -f _potentialFoam 2>/dev/null
 _potentialFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4678,7 +4681,7 @@ _potentialFoam()
 }
 complete -o nospace -F _potentialFoam potentialFoam
 
-unset -f _potentialFreeSurfaceDyMFoam
+unset -f _potentialFreeSurfaceDyMFoam 2>/dev/null
 _potentialFreeSurfaceDyMFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4713,7 +4716,7 @@ _potentialFreeSurfaceDyMFoam()
 }
 complete -o nospace -F _potentialFreeSurfaceDyMFoam potentialFreeSurfaceDyMFoam
 
-unset -f _potentialFreeSurfaceFoam
+unset -f _potentialFreeSurfaceFoam 2>/dev/null
 _potentialFreeSurfaceFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4748,7 +4751,7 @@ _potentialFreeSurfaceFoam()
 }
 complete -o nospace -F _potentialFreeSurfaceFoam potentialFreeSurfaceFoam
 
-unset -f _reactingFoam
+unset -f _reactingFoam 2>/dev/null
 _reactingFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4783,7 +4786,7 @@ _reactingFoam()
 }
 complete -o nospace -F _reactingFoam reactingFoam
 
-unset -f _reactingMultiphaseEulerFoam
+unset -f _reactingMultiphaseEulerFoam 2>/dev/null
 _reactingMultiphaseEulerFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4818,7 +4821,7 @@ _reactingMultiphaseEulerFoam()
 }
 complete -o nospace -F _reactingMultiphaseEulerFoam reactingMultiphaseEulerFoam
 
-unset -f _reactingParcelFilmFoam
+unset -f _reactingParcelFilmFoam 2>/dev/null
 _reactingParcelFilmFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4853,7 +4856,7 @@ _reactingParcelFilmFoam()
 }
 complete -o nospace -F _reactingParcelFilmFoam reactingParcelFilmFoam
 
-unset -f _reactingParcelFoam
+unset -f _reactingParcelFoam 2>/dev/null
 _reactingParcelFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4888,7 +4891,7 @@ _reactingParcelFoam()
 }
 complete -o nospace -F _reactingParcelFoam reactingParcelFoam
 
-unset -f _reactingTwoPhaseEulerFoam
+unset -f _reactingTwoPhaseEulerFoam 2>/dev/null
 _reactingTwoPhaseEulerFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4923,7 +4926,7 @@ _reactingTwoPhaseEulerFoam()
 }
 complete -o nospace -F _reactingTwoPhaseEulerFoam reactingTwoPhaseEulerFoam
 
-unset -f _reconstructPar
+unset -f _reconstructPar 2>/dev/null
 _reconstructPar()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -4962,7 +4965,7 @@ _reconstructPar()
 }
 complete -o nospace -F _reconstructPar reconstructPar
 
-unset -f _reconstructParMesh
+unset -f _reconstructParMesh 2>/dev/null
 _reconstructParMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5001,7 +5004,7 @@ _reconstructParMesh()
 }
 complete -o nospace -F _reconstructParMesh reconstructParMesh
 
-unset -f _redistributePar
+unset -f _redistributePar 2>/dev/null
 _redistributePar()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5043,7 +5046,7 @@ _redistributePar()
 }
 complete -o nospace -F _redistributePar redistributePar
 
-unset -f _refineHexMesh
+unset -f _refineHexMesh 2>/dev/null
 _refineHexMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5082,7 +5085,7 @@ _refineHexMesh()
 }
 complete -o nospace -F _refineHexMesh refineHexMesh
 
-unset -f _refinementLevel
+unset -f _refinementLevel 2>/dev/null
 _refinementLevel()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5117,7 +5120,7 @@ _refinementLevel()
 }
 complete -o nospace -F _refinementLevel refinementLevel
 
-unset -f _refineMesh
+unset -f _refineMesh 2>/dev/null
 _refineMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5156,7 +5159,7 @@ _refineMesh()
 }
 complete -o nospace -F _refineMesh refineMesh
 
-unset -f _refineWallLayer
+unset -f _refineWallLayer 2>/dev/null
 _refineWallLayer()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5191,7 +5194,7 @@ _refineWallLayer()
 }
 complete -o nospace -F _refineWallLayer refineWallLayer
 
-unset -f _removeFaces
+unset -f _removeFaces 2>/dev/null
 _removeFaces()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5226,7 +5229,7 @@ _removeFaces()
 }
 complete -o nospace -F _removeFaces removeFaces
 
-unset -f _renumberMesh
+unset -f _renumberMesh 2>/dev/null
 _renumberMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5268,7 +5271,7 @@ _renumberMesh()
 }
 complete -o nospace -F _renumberMesh renumberMesh
 
-unset -f _rhoCentralDyMFoam
+unset -f _rhoCentralDyMFoam 2>/dev/null
 _rhoCentralDyMFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5303,7 +5306,7 @@ _rhoCentralDyMFoam()
 }
 complete -o nospace -F _rhoCentralDyMFoam rhoCentralDyMFoam
 
-unset -f _rhoCentralFoam
+unset -f _rhoCentralFoam 2>/dev/null
 _rhoCentralFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5338,7 +5341,7 @@ _rhoCentralFoam()
 }
 complete -o nospace -F _rhoCentralFoam rhoCentralFoam
 
-unset -f _rhoPimpleDyMFoam
+unset -f _rhoPimpleDyMFoam 2>/dev/null
 _rhoPimpleDyMFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5373,7 +5376,7 @@ _rhoPimpleDyMFoam()
 }
 complete -o nospace -F _rhoPimpleDyMFoam rhoPimpleDyMFoam
 
-unset -f _rhoPimpleFoam
+unset -f _rhoPimpleFoam 2>/dev/null
 _rhoPimpleFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5408,7 +5411,7 @@ _rhoPimpleFoam()
 }
 complete -o nospace -F _rhoPimpleFoam rhoPimpleFoam
 
-unset -f _rhoPorousSimpleFoam
+unset -f _rhoPorousSimpleFoam 2>/dev/null
 _rhoPorousSimpleFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5443,7 +5446,7 @@ _rhoPorousSimpleFoam()
 }
 complete -o nospace -F _rhoPorousSimpleFoam rhoPorousSimpleFoam
 
-unset -f _rhoReactingBuoyantFoam
+unset -f _rhoReactingBuoyantFoam 2>/dev/null
 _rhoReactingBuoyantFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5478,7 +5481,7 @@ _rhoReactingBuoyantFoam()
 }
 complete -o nospace -F _rhoReactingBuoyantFoam rhoReactingBuoyantFoam
 
-unset -f _rhoReactingFoam
+unset -f _rhoReactingFoam 2>/dev/null
 _rhoReactingFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5513,7 +5516,7 @@ _rhoReactingFoam()
 }
 complete -o nospace -F _rhoReactingFoam rhoReactingFoam
 
-unset -f _rhoSimpleFoam
+unset -f _rhoSimpleFoam 2>/dev/null
 _rhoSimpleFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5548,7 +5551,7 @@ _rhoSimpleFoam()
 }
 complete -o nospace -F _rhoSimpleFoam rhoSimpleFoam
 
-unset -f _rotateMesh
+unset -f _rotateMesh 2>/dev/null
 _rotateMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5586,7 +5589,7 @@ _rotateMesh()
 }
 complete -o nospace -F _rotateMesh rotateMesh
 
-unset -f _scalarTransportFoam
+unset -f _scalarTransportFoam 2>/dev/null
 _scalarTransportFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5621,7 +5624,7 @@ _scalarTransportFoam()
 }
 complete -o nospace -F _scalarTransportFoam scalarTransportFoam
 
-unset -f _selectCells
+unset -f _selectCells 2>/dev/null
 _selectCells()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5653,7 +5656,7 @@ _selectCells()
 }
 complete -o nospace -F _selectCells selectCells
 
-unset -f _setFields
+unset -f _setFields 2>/dev/null
 _setFields()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5692,7 +5695,7 @@ _setFields()
 }
 complete -o nospace -F _setFields setFields
 
-unset -f _setSet
+unset -f _setSet 2>/dev/null
 _setSet()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5734,7 +5737,7 @@ _setSet()
 }
 complete -o nospace -F _setSet setSet
 
-unset -f _setsToZones
+unset -f _setsToZones 2>/dev/null
 _setsToZones()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5776,7 +5779,7 @@ _setsToZones()
 }
 complete -o nospace -F _setsToZones setsToZones
 
-unset -f _shallowWaterFoam
+unset -f _shallowWaterFoam 2>/dev/null
 _shallowWaterFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5811,7 +5814,7 @@ _shallowWaterFoam()
 }
 complete -o nospace -F _shallowWaterFoam shallowWaterFoam
 
-unset -f _simpleCoalParcelFoam
+unset -f _simpleCoalParcelFoam 2>/dev/null
 _simpleCoalParcelFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5846,7 +5849,7 @@ _simpleCoalParcelFoam()
 }
 complete -o nospace -F _simpleCoalParcelFoam simpleCoalParcelFoam
 
-unset -f _simpleFoam
+unset -f _simpleFoam 2>/dev/null
 _simpleFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5881,7 +5884,7 @@ _simpleFoam()
 }
 complete -o nospace -F _simpleFoam simpleFoam
 
-unset -f _simpleReactingParcelFoam
+unset -f _simpleReactingParcelFoam 2>/dev/null
 _simpleReactingParcelFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5916,7 +5919,7 @@ _simpleReactingParcelFoam()
 }
 complete -o nospace -F _simpleReactingParcelFoam simpleReactingParcelFoam
 
-unset -f _singleCellMesh
+unset -f _singleCellMesh 2>/dev/null
 _singleCellMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5954,7 +5957,7 @@ _singleCellMesh()
 }
 complete -o nospace -F _singleCellMesh singleCellMesh
 
-unset -f _smapToFoam
+unset -f _smapToFoam 2>/dev/null
 _smapToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -5986,7 +5989,7 @@ _smapToFoam()
 }
 complete -o nospace -F _smapToFoam smapToFoam
 
-unset -f _snappyHexMesh
+unset -f _snappyHexMesh 2>/dev/null
 _snappyHexMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6025,7 +6028,7 @@ _snappyHexMesh()
 }
 complete -o nospace -F _snappyHexMesh snappyHexMesh
 
-unset -f _snappyRefineMesh
+unset -f _snappyRefineMesh 2>/dev/null
 _snappyRefineMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6057,7 +6060,7 @@ _snappyRefineMesh()
 }
 complete -o nospace -F _snappyRefineMesh snappyRefineMesh
 
-unset -f _solidDisplacementFoam
+unset -f _solidDisplacementFoam 2>/dev/null
 _solidDisplacementFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6092,7 +6095,7 @@ _solidDisplacementFoam()
 }
 complete -o nospace -F _solidDisplacementFoam solidDisplacementFoam
 
-unset -f _solidEquilibriumDisplacementFoam
+unset -f _solidEquilibriumDisplacementFoam 2>/dev/null
 _solidEquilibriumDisplacementFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6127,7 +6130,7 @@ _solidEquilibriumDisplacementFoam()
 }
 complete -o nospace -F _solidEquilibriumDisplacementFoam solidEquilibriumDisplacementFoam
 
-unset -f _sonicDyMFoam
+unset -f _sonicDyMFoam 2>/dev/null
 _sonicDyMFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6162,7 +6165,7 @@ _sonicDyMFoam()
 }
 complete -o nospace -F _sonicDyMFoam sonicDyMFoam
 
-unset -f _sonicFoam
+unset -f _sonicFoam 2>/dev/null
 _sonicFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6197,7 +6200,7 @@ _sonicFoam()
 }
 complete -o nospace -F _sonicFoam sonicFoam
 
-unset -f _sonicLiquidFoam
+unset -f _sonicLiquidFoam 2>/dev/null
 _sonicLiquidFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6232,7 +6235,7 @@ _sonicLiquidFoam()
 }
 complete -o nospace -F _sonicLiquidFoam sonicLiquidFoam
 
-unset -f _splitCells
+unset -f _splitCells 2>/dev/null
 _splitCells()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6264,7 +6267,7 @@ _splitCells()
 }
 complete -o nospace -F _splitCells splitCells
 
-unset -f _splitMesh
+unset -f _splitMesh 2>/dev/null
 _splitMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6296,7 +6299,7 @@ _splitMesh()
 }
 complete -o nospace -F _splitMesh splitMesh
 
-unset -f _splitMeshRegions
+unset -f _splitMeshRegions 2>/dev/null
 _splitMeshRegions()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6335,7 +6338,7 @@ _splitMeshRegions()
 }
 complete -o nospace -F _splitMeshRegions splitMeshRegions
 
-unset -f _sprayDyMFoam
+unset -f _sprayDyMFoam 2>/dev/null
 _sprayDyMFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6370,7 +6373,7 @@ _sprayDyMFoam()
 }
 complete -o nospace -F _sprayDyMFoam sprayDyMFoam
 
-unset -f _sprayEngineFoam
+unset -f _sprayEngineFoam 2>/dev/null
 _sprayEngineFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6405,7 +6408,7 @@ _sprayEngineFoam()
 }
 complete -o nospace -F _sprayEngineFoam sprayEngineFoam
 
-unset -f _sprayFoam
+unset -f _sprayFoam 2>/dev/null
 _sprayFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6440,7 +6443,7 @@ _sprayFoam()
 }
 complete -o nospace -F _sprayFoam sprayFoam
 
-unset -f _SRFPimpleFoam
+unset -f _SRFPimpleFoam 2>/dev/null
 _SRFPimpleFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6475,7 +6478,7 @@ _SRFPimpleFoam()
 }
 complete -o nospace -F _SRFPimpleFoam SRFPimpleFoam
 
-unset -f _SRFSimpleFoam
+unset -f _SRFSimpleFoam 2>/dev/null
 _SRFSimpleFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6510,7 +6513,7 @@ _SRFSimpleFoam()
 }
 complete -o nospace -F _SRFSimpleFoam SRFSimpleFoam
 
-unset -f _star4ToFoam
+unset -f _star4ToFoam 2>/dev/null
 _star4ToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6542,7 +6545,7 @@ _star4ToFoam()
 }
 complete -o nospace -F _star4ToFoam star4ToFoam
 
-unset -f _steadyParticleTracks
+unset -f _steadyParticleTracks 2>/dev/null
 _steadyParticleTracks()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6581,7 +6584,7 @@ _steadyParticleTracks()
 }
 complete -o nospace -F _steadyParticleTracks steadyParticleTracks
 
-unset -f _stitchMesh
+unset -f _stitchMesh 2>/dev/null
 _stitchMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6620,7 +6623,7 @@ _stitchMesh()
 }
 complete -o nospace -F _stitchMesh stitchMesh
 
-unset -f _subsetMesh
+unset -f _subsetMesh 2>/dev/null
 _subsetMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6659,7 +6662,7 @@ _subsetMesh()
 }
 complete -o nospace -F _subsetMesh subsetMesh
 
-unset -f _surfaceAdd
+unset -f _surfaceAdd 2>/dev/null
 _surfaceAdd()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6691,7 +6694,7 @@ _surfaceAdd()
 }
 complete -o nospace -F _surfaceAdd surfaceAdd
 
-unset -f _surfaceBooleanFeatures
+unset -f _surfaceBooleanFeatures 2>/dev/null
 _surfaceBooleanFeatures()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6723,7 +6726,7 @@ _surfaceBooleanFeatures()
 }
 complete -o nospace -F _surfaceBooleanFeatures surfaceBooleanFeatures
 
-unset -f _surfaceCheck
+unset -f _surfaceCheck 2>/dev/null
 _surfaceCheck()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6755,7 +6758,7 @@ _surfaceCheck()
 }
 complete -o nospace -F _surfaceCheck surfaceCheck
 
-unset -f _surfaceClean
+unset -f _surfaceClean 2>/dev/null
 _surfaceClean()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6787,7 +6790,7 @@ _surfaceClean()
 }
 complete -o nospace -F _surfaceClean surfaceClean
 
-unset -f _surfaceCoarsen
+unset -f _surfaceCoarsen 2>/dev/null
 _surfaceCoarsen()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6819,7 +6822,7 @@ _surfaceCoarsen()
 }
 complete -o nospace -F _surfaceCoarsen surfaceCoarsen
 
-unset -f _surfaceConvert
+unset -f _surfaceConvert 2>/dev/null
 _surfaceConvert()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6851,7 +6854,7 @@ _surfaceConvert()
 }
 complete -o nospace -F _surfaceConvert surfaceConvert
 
-unset -f _surfaceFeatureConvert
+unset -f _surfaceFeatureConvert 2>/dev/null
 _surfaceFeatureConvert()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6883,7 +6886,7 @@ _surfaceFeatureConvert()
 }
 complete -o nospace -F _surfaceFeatureConvert surfaceFeatureConvert
 
-unset -f _surfaceFeatureExtract
+unset -f _surfaceFeatureExtract 2>/dev/null
 _surfaceFeatureExtract()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6915,7 +6918,7 @@ _surfaceFeatureExtract()
 }
 complete -o nospace -F _surfaceFeatureExtract surfaceFeatureExtract
 
-unset -f _surfaceFind
+unset -f _surfaceFind 2>/dev/null
 _surfaceFind()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6947,7 +6950,7 @@ _surfaceFind()
 }
 complete -o nospace -F _surfaceFind surfaceFind
 
-unset -f _surfaceHookUp
+unset -f _surfaceHookUp 2>/dev/null
 _surfaceHookUp()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6979,7 +6982,7 @@ _surfaceHookUp()
 }
 complete -o nospace -F _surfaceHookUp surfaceHookUp
 
-unset -f _surfaceInertia
+unset -f _surfaceInertia 2>/dev/null
 _surfaceInertia()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7011,7 +7014,7 @@ _surfaceInertia()
 }
 complete -o nospace -F _surfaceInertia surfaceInertia
 
-unset -f _surfaceInflate
+unset -f _surfaceInflate 2>/dev/null
 _surfaceInflate()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7043,7 +7046,7 @@ _surfaceInflate()
 }
 complete -o nospace -F _surfaceInflate surfaceInflate
 
-unset -f _surfaceLambdaMuSmooth
+unset -f _surfaceLambdaMuSmooth 2>/dev/null
 _surfaceLambdaMuSmooth()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7073,7 +7076,7 @@ _surfaceLambdaMuSmooth()
 }
 complete -o nospace -F _surfaceLambdaMuSmooth surfaceLambdaMuSmooth
 
-unset -f _surfaceMeshConvert
+unset -f _surfaceMeshConvert 2>/dev/null
 _surfaceMeshConvert()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7105,7 +7108,7 @@ _surfaceMeshConvert()
 }
 complete -o nospace -F _surfaceMeshConvert surfaceMeshConvert
 
-unset -f _surfaceMeshConvertTesting
+unset -f _surfaceMeshConvertTesting 2>/dev/null
 _surfaceMeshConvertTesting()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7137,7 +7140,7 @@ _surfaceMeshConvertTesting()
 }
 complete -o nospace -F _surfaceMeshConvertTesting surfaceMeshConvertTesting
 
-unset -f _surfaceMeshExport
+unset -f _surfaceMeshExport 2>/dev/null
 _surfaceMeshExport()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7169,7 +7172,7 @@ _surfaceMeshExport()
 }
 complete -o nospace -F _surfaceMeshExport surfaceMeshExport
 
-unset -f _surfaceMeshImport
+unset -f _surfaceMeshImport 2>/dev/null
 _surfaceMeshImport()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7201,7 +7204,7 @@ _surfaceMeshImport()
 }
 complete -o nospace -F _surfaceMeshImport surfaceMeshImport
 
-unset -f _surfaceMeshInfo
+unset -f _surfaceMeshInfo 2>/dev/null
 _surfaceMeshInfo()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7233,7 +7236,7 @@ _surfaceMeshInfo()
 }
 complete -o nospace -F _surfaceMeshInfo surfaceMeshInfo
 
-unset -f _surfaceMeshTriangulate
+unset -f _surfaceMeshTriangulate 2>/dev/null
 _surfaceMeshTriangulate()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7275,7 +7278,7 @@ _surfaceMeshTriangulate()
 }
 complete -o nospace -F _surfaceMeshTriangulate surfaceMeshTriangulate
 
-unset -f _surfaceOrient
+unset -f _surfaceOrient 2>/dev/null
 _surfaceOrient()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7307,7 +7310,7 @@ _surfaceOrient()
 }
 complete -o nospace -F _surfaceOrient surfaceOrient
 
-unset -f _surfacePatch
+unset -f _surfacePatch 2>/dev/null
 _surfacePatch()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7339,7 +7342,7 @@ _surfacePatch()
 }
 complete -o nospace -F _surfacePatch surfacePatch
 
-unset -f _surfacePointMerge
+unset -f _surfacePointMerge 2>/dev/null
 _surfacePointMerge()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7371,7 +7374,7 @@ _surfacePointMerge()
 }
 complete -o nospace -F _surfacePointMerge surfacePointMerge
 
-unset -f _surfaceRedistributePar
+unset -f _surfaceRedistributePar 2>/dev/null
 _surfaceRedistributePar()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7406,7 +7409,7 @@ _surfaceRedistributePar()
 }
 complete -o nospace -F _surfaceRedistributePar surfaceRedistributePar
 
-unset -f _surfaceRefineRedGreen
+unset -f _surfaceRefineRedGreen 2>/dev/null
 _surfaceRefineRedGreen()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7438,7 +7441,7 @@ _surfaceRefineRedGreen()
 }
 complete -o nospace -F _surfaceRefineRedGreen surfaceRefineRedGreen
 
-unset -f _surfaceSplitByPatch
+unset -f _surfaceSplitByPatch 2>/dev/null
 _surfaceSplitByPatch()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7470,7 +7473,7 @@ _surfaceSplitByPatch()
 }
 complete -o nospace -F _surfaceSplitByPatch surfaceSplitByPatch
 
-unset -f _surfaceSplitByTopology
+unset -f _surfaceSplitByTopology 2>/dev/null
 _surfaceSplitByTopology()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7500,7 +7503,7 @@ _surfaceSplitByTopology()
 }
 complete -o nospace -F _surfaceSplitByTopology surfaceSplitByTopology
 
-unset -f _surfaceSplitNonManifolds
+unset -f _surfaceSplitNonManifolds 2>/dev/null
 _surfaceSplitNonManifolds()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7532,7 +7535,7 @@ _surfaceSplitNonManifolds()
 }
 complete -o nospace -F _surfaceSplitNonManifolds surfaceSplitNonManifolds
 
-unset -f _surfaceSubset
+unset -f _surfaceSubset 2>/dev/null
 _surfaceSubset()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7564,7 +7567,7 @@ _surfaceSubset()
 }
 complete -o nospace -F _surfaceSubset surfaceSubset
 
-unset -f _surfaceToPatch
+unset -f _surfaceToPatch 2>/dev/null
 _surfaceToPatch()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7596,7 +7599,7 @@ _surfaceToPatch()
 }
 complete -o nospace -F _surfaceToPatch surfaceToPatch
 
-unset -f _surfaceTransformPoints
+unset -f _surfaceTransformPoints 2>/dev/null
 _surfaceTransformPoints()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7628,7 +7631,7 @@ _surfaceTransformPoints()
 }
 complete -o nospace -F _surfaceTransformPoints surfaceTransformPoints
 
-unset -f _temporalInterpolate
+unset -f _temporalInterpolate 2>/dev/null
 _temporalInterpolate()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7670,7 +7673,7 @@ _temporalInterpolate()
 }
 complete -o nospace -F _temporalInterpolate temporalInterpolate
 
-unset -f _tetgenToFoam
+unset -f _tetgenToFoam 2>/dev/null
 _tetgenToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7705,7 +7708,7 @@ _tetgenToFoam()
 }
 complete -o nospace -F _tetgenToFoam tetgenToFoam
 
-unset -f _thermoFoam
+unset -f _thermoFoam 2>/dev/null
 _thermoFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7740,7 +7743,7 @@ _thermoFoam()
 }
 complete -o nospace -F _thermoFoam thermoFoam
 
-unset -f _topoSet
+unset -f _topoSet 2>/dev/null
 _topoSet()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7782,7 +7785,7 @@ _topoSet()
 }
 complete -o nospace -F _topoSet topoSet
 
-unset -f _transformPoints
+unset -f _transformPoints 2>/dev/null
 _transformPoints()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7821,7 +7824,7 @@ _transformPoints()
 }
 complete -o nospace -F _transformPoints transformPoints
 
-unset -f _twoLiquidMixingFoam
+unset -f _twoLiquidMixingFoam 2>/dev/null
 _twoLiquidMixingFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7856,7 +7859,7 @@ _twoLiquidMixingFoam()
 }
 complete -o nospace -F _twoLiquidMixingFoam twoLiquidMixingFoam
 
-unset -f _twoPhaseEulerFoam
+unset -f _twoPhaseEulerFoam 2>/dev/null
 _twoPhaseEulerFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7891,7 +7894,7 @@ _twoPhaseEulerFoam()
 }
 complete -o nospace -F _twoPhaseEulerFoam twoPhaseEulerFoam
 
-unset -f _uncoupledKinematicParcelFoam
+unset -f _uncoupledKinematicParcelFoam 2>/dev/null
 _uncoupledKinematicParcelFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7926,7 +7929,7 @@ _uncoupledKinematicParcelFoam()
 }
 complete -o nospace -F _uncoupledKinematicParcelFoam uncoupledKinematicParcelFoam
 
-unset -f _viewFactorsGen
+unset -f _viewFactorsGen 2>/dev/null
 _viewFactorsGen()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7965,7 +7968,7 @@ _viewFactorsGen()
 }
 complete -o nospace -F _viewFactorsGen viewFactorsGen
 
-unset -f _vtkUnstructuredToFoam
+unset -f _vtkUnstructuredToFoam 2>/dev/null
 _vtkUnstructuredToFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -7997,7 +8000,7 @@ _vtkUnstructuredToFoam()
 }
 complete -o nospace -F _vtkUnstructuredToFoam vtkUnstructuredToFoam
 
-unset -f _wallFunctionTable
+unset -f _wallFunctionTable 2>/dev/null
 _wallFunctionTable()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -8032,7 +8035,7 @@ _wallFunctionTable()
 }
 complete -o nospace -F _wallFunctionTable wallFunctionTable
 
-unset -f _writeMeshObj
+unset -f _writeMeshObj 2>/dev/null
 _writeMeshObj()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -8074,7 +8077,7 @@ _writeMeshObj()
 }
 complete -o nospace -F _writeMeshObj writeMeshObj
 
-unset -f _XiDyMFoam
+unset -f _XiDyMFoam 2>/dev/null
 _XiDyMFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -8109,7 +8112,7 @@ _XiDyMFoam()
 }
 complete -o nospace -F _XiDyMFoam XiDyMFoam
 
-unset -f _XiFoam
+unset -f _XiFoam 2>/dev/null
 _XiFoam()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -8144,7 +8147,7 @@ _XiFoam()
 }
 complete -o nospace -F _XiFoam XiFoam
 
-unset -f _zipUpMesh
+unset -f _zipUpMesh 2>/dev/null
 _zipUpMesh()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -8183,3 +8186,5 @@ _zipUpMesh()
 }
 complete -o nospace -F _zipUpMesh zipUpMesh
 
+
+#------------------------------------------------------------------------------

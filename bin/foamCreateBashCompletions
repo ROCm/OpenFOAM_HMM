@@ -5,7 +5,7 @@
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
 #    \\/     M anipulation  |
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -50,6 +50,7 @@ USAGE
     exit 1
 }
 
+unset outFile
 searchDirs="$FOAM_APPBIN $FOAM_USER_APPBIN"
 while [ "$#" -gt 0 ]
 do
@@ -73,15 +74,15 @@ do
     shift
 done
 
-[ -z $outFile ] && usage
+[ -n "$outFile" ] || usage
 \rm -f $outFile
 touch $outFile
 
 
 writeFilterFunction()
 {
-    cat<<WRITEFILTER >> $1
-unset -f _filter_opts
+    cat<< WRITEFILTER >> $1
+unset -f _filter_opts 2>/dev/null
 _filter_opts()
 {
     local allOpts=\$1
@@ -136,17 +137,27 @@ commonOptions()
 }
 
 
+# Generate header
+cat << HEADER > $outFile
+#----------------------------------*-sh-*--------------------------------------
+# Bash completions for OpenFOAM applications
+
+HEADER
+
 writeFilterFunction $outFile
 
 for dir in ${searchDirs}
 do
-    echo "Processing directory $dir"
+    echo "Processing directory $dir" 1>&2
 
-    apps=($(\ls $dir))
-    for appName in "${apps[@]}"; do
+    # Sort with ignore-case
+    apps=($(\ls $dir | sort -f))
+    for appName in "${apps[@]}"
+    do
+        [ -f "$dir/$appName" -a -x "$dir/$appName" ] || continue
         appHelp=$($appName -help)
 
-        echo "Processing $appName"
+        echo "Processing $appName" 1>&2
 
         # Options with args
         optsWithArgs=($(awk '/^ {0,4}-[a-z]/ && /</ {print $1}' <<< "$appHelp"))
@@ -155,7 +166,7 @@ do
         opts=($(awk '/^ {0,4}-[a-z]/ && !/</ {print $1}' <<< "$appHelp"))
 
         cat<<WRITECOMPLETION >> $outFile
-unset -f _${appName}
+unset -f _${appName} 2>/dev/null
 _${appName}()
 {
     local cur="\${COMP_WORDS[COMP_CWORD]}"
@@ -189,7 +200,11 @@ WRITECOMPLETION
     done
 done
 
-unset searchDirs writeFilterFunction commonOptions
 
+# Generate footer
+cat << FOOTER >> $outFile
+
+#------------------------------------------------------------------------------
+FOOTER
 
 #------------------------------------------------------------------------------
