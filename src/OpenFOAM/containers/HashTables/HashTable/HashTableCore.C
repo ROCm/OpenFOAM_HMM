@@ -33,9 +33,8 @@ namespace Foam
 defineTypeNameAndDebug(HashTableCore, 0);
 }
 
-
 // Approximately labelMax/4
-const Foam::label Foam::HashTableCore::maxTableSize(1 << (sizeof(label)*8-3));
+const Foam::label Foam::HashTableCore::maxTableSize(1L << (sizeof(label)*8-3));
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
@@ -59,7 +58,7 @@ Foam::label Foam::HashTableCore::canonicalSize(const label requested_size)
     // - The upper limit (approx. labelMax/4) must be a power of two,
     //   need not be extremely large for hashing.
 
-    uLabel powerOfTwo = 8; // lower-limit
+    uLabel powerOfTwo = 8u; // lower-limit
 
     const uLabel size = requested_size;
     if (size <= powerOfTwo)
