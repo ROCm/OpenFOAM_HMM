@@ -97,6 +97,7 @@ public:
             virtual void initInterfaceMatrixUpdate
             (
                 Field<Type>&,
+                const bool add,
                 const Field<Type>&,
                 const scalarField&,
                 const Pstream::commsTypes commsType
@@ -110,6 +111,7 @@ public:
             virtual void updateInterfaceMatrix
             (
                 Field<Type>&,
+                const bool add,
                 const Field<Type>&,
                 const scalarField&,
                 const Pstream::commsTypes commsType

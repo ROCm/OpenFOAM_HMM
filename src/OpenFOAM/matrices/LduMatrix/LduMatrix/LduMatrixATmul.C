@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,6 +82,7 @@ void Foam::LduMatrix<Type, DType, LUType>::Amul
     // Initialise the update of interfaced interfaces
     initMatrixInterfaces
     (
+        true,
         interfacesUpper_,
         psi,
         Apsi
@@ -104,6 +105,7 @@ void Foam::LduMatrix<Type, DType, LUType>::Amul
     // Update interface interfaces
     updateMatrixInterfaces
     (
+        true,
         interfacesUpper_,
         psi,
         Apsi
@@ -136,6 +138,7 @@ void Foam::LduMatrix<Type, DType, LUType>::Tmul
     // Initialise the update of interfaced interfaces
     initMatrixInterfaces
     (
+        true,
         interfacesLower_,
         psi,
         Tpsi
@@ -157,6 +160,7 @@ void Foam::LduMatrix<Type, DType, LUType>::Tmul
     // Update interface interfaces
     updateMatrixInterfaces
     (
+        true,
         interfacesLower_,
         psi,
         Tpsi
@@ -237,20 +241,11 @@ void Foam::LduMatrix<Type, DType, LUType>::residual
     // Note: there is a change of sign in the coupled
     // interface update to add the contibution to the r.h.s.
 
-    FieldField<Field, LUType> mBouCoeffs(interfacesUpper_.size());
-
-    forAll(mBouCoeffs, patchi)
-    {
-        if (interfaces_.set(patchi))
-        {
-            mBouCoeffs.set(patchi, -interfacesUpper_[patchi]);
-        }
-    }
-
     // Initialise the update of interfaced interfaces
     initMatrixInterfaces
     (
-        mBouCoeffs,
+        false,          // negate interface contributions
+        interfacesUpper_,
         psi,
         rA
     );
@@ -272,7 +267,8 @@ void Foam::LduMatrix<Type, DType, LUType>::residual
     // Update interface interfaces
     updateMatrixInterfaces
     (
-        mBouCoeffs,
+        false,
+        interfacesUpper_,
         psi,
         rA
     );

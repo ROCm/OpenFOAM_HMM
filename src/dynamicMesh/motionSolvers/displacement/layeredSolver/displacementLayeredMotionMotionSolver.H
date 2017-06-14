@@ -25,7 +25,7 @@ Class
     Foam::displacementLayeredMotionMotionSolver
 
 Group
-    grpMeshMotionSolvers 
+    grpMeshMotionSolvers
 
 Description
     Mesh motion solver for an (multi-block) extruded fvMesh. Gets given the

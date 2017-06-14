@@ -31,6 +31,7 @@ License
 template<class Type, class DType, class LUType>
 void Foam::LduMatrix<Type, DType, LUType>::initMatrixInterfaces
 (
+    const bool add,
     const FieldField<Field, LUType>& interfaceCoeffs,
     const Field<Type>& psiif,
     Field<Type>& result
@@ -49,6 +50,7 @@ void Foam::LduMatrix<Type, DType, LUType>::initMatrixInterfaces
                 interfaces_[interfacei].initInterfaceMatrixUpdate
                 (
                     result,
+                    add,
                     psiif,
                     interfaceCoeffs[interfacei],
                     //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
@@ -75,6 +77,7 @@ void Foam::LduMatrix<Type, DType, LUType>::initMatrixInterfaces
                 interfaces_[interfacei].initInterfaceMatrixUpdate
                 (
                     result,
+                    add,
                     psiif,
                     interfaceCoeffs[interfacei],
                     //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
@@ -96,6 +99,7 @@ void Foam::LduMatrix<Type, DType, LUType>::initMatrixInterfaces
 template<class Type, class DType, class LUType>
 void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
 (
+    const bool add,
     const FieldField<Field, LUType>& interfaceCoeffs,
     const Field<Type>& psiif,
     Field<Type>& result
@@ -121,6 +125,7 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                 interfaces_[interfacei].updateInterfaceMatrix
                 (
                     result,
+                    add,
                     psiif,
                     interfaceCoeffs[interfacei],
                     //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
@@ -145,6 +150,7 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                     interfaces_[interfacei].initInterfaceMatrixUpdate
                     (
                         result,
+                        add,
                         psiif,
                         interfaceCoeffs[interfacei],
                       //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
@@ -156,6 +162,7 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                     interfaces_[interfacei].updateInterfaceMatrix
                     (
                         result,
+                        add,
                         psiif,
                         interfaceCoeffs[interfacei],
                       //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
@@ -179,6 +186,7 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                 interfaces_[interfacei].updateInterfaceMatrix
                 (
                     result,
+                    add,
                     psiif,
                     interfaceCoeffs[interfacei],
                     //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),

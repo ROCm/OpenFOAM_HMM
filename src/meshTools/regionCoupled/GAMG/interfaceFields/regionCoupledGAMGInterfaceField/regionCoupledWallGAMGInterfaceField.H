@@ -113,6 +113,7 @@ public:
             virtual void updateInterfaceMatrix
             (
                 scalarField&,
+                const bool add,
                 const scalarField&,
                 const scalarField&,
                 const direction,
