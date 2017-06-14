@@ -21,9 +21,7 @@ vtkWrite
     //- Write cell ids as field - Default=true
     writeIds        false;
 
-    writeControl    writeTime;
-    writeInterval   1;
-
+    //- Write more frequent than fields
     writeControl    timeStep;
     writeInterval   25;
 }
