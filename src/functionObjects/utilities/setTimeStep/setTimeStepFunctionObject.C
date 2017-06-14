@@ -89,7 +89,7 @@ bool Foam::functionObjects::setTimeStepFunctionObject::adjustTimeStep()
         index = time_.timeIndex();
 
         // Set time, allow deltaT to be adjusted for writeInterval purposes
-        const_cast<Time&>(time_).setDeltaT(newDeltaT, true);
+        const_cast<Time&>(time_).setDeltaT(newDeltaT, false);
     }
 
     return true;
