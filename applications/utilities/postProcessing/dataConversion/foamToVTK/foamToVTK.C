@@ -302,10 +302,7 @@ fileName relativeName(const Time& runTime, const fileName& file)
 
 int main(int argc, char *argv[])
 {
-    argList::addNote
-    (
-        "legacy VTK file format writer"
-    );
+    argList::addNote("VTK file format writer");
     timeSelector::addOptions();
 
     #include "addRegionOption.H"
@@ -398,7 +395,13 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "useTimeName",
-        "use the time name instead of the time index when naming the files"
+        "use time name instead of the time index when naming files"
+    );
+    argList::addOption
+    (
+        "name",
+        "subdir",
+        "sub-directory name for VTK output (default: 'VTK')"
     );
 
     #include "setRootCase.H"
@@ -470,10 +473,13 @@ int main(int argc, char *argv[])
     word pointSetName;
     args.optionReadIfPresent("pointSet", pointSetName);
 
+    // Define sub-directory name to use for VTK data.
+    const word vtkDirName = args.optionLookupOrDefault<word>("name", "VTK");
+
     #include "createNamedMesh.H"
 
     // VTK/ directory in the case
-    fileName fvPath(runTime.path()/"VTK");
+    fileName fvPath(runTime.path()/vtkDirName);
 
     // Directory of mesh (region0 gets filtered out)
     fileName regionPrefix;
@@ -1340,10 +1346,11 @@ int main(int argc, char *argv[])
 
     if (Pstream::parRun() && doLinks)
     {
-        mkDir(runTime.path()/".."/"VTK");
-        chDir(runTime.path()/".."/"VTK");
+        mkDir(runTime.path()/".."/vtkDirName);
+        chDir(runTime.path()/".."/vtkDirName);
 
-        Info<< "Linking all processor files to " << runTime.path()/".."/"VTK"
+        Info<< "Linking all processor files to "
+            << runTime.path()/".."/vtkDirName
             << endl;
 
         // Get list of vtk files
@@ -1351,7 +1358,7 @@ int main(int argc, char *argv[])
         (
             fileName("..")
           / "processor" + Foam::name(Pstream::myProcNo())
-          / "VTK"
+          / vtkDirName
         );
 
         fileNameList dirs(readDir(procVTK, fileName::DIRECTORY));

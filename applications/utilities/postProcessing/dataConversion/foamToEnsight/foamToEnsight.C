@@ -173,8 +173,7 @@ int main(int argc, char *argv[])
     (
         "name",
         "subdir",
-        "define sub-directory name to use for ensight data "
-        "(default: 'EnSight')"
+        "sub-directory name for ensight output (default: 'EnSight')"
     );
     argList::addOption
     (
