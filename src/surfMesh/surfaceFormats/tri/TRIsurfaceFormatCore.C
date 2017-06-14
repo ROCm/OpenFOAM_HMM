@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 #include "IFstream.H"
 #include "IOmanip.H"
 #include "IStringStream.H"
+#include "mergePoints.H"
 #include "Map.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -71,7 +72,7 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
 
     // uses similar structure as STL, just some points
     // the rest of the reader resembles the STL binary reader
-    DynamicList<point> dynPoints;
+    DynamicList<STLpoint> dynPoints;
     DynamicList<label> dynZones;
     DynamicList<label> dynSizes;
     HashTable<label>   lookup;
@@ -94,7 +95,7 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
 
         IStringStream lineStream(line);
 
-        point p
+        STLpoint p
         (
             readScalar(lineStream),
             readScalar(lineStream),
@@ -106,7 +107,7 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
         dynPoints.append(p);
         dynPoints.append
         (
-            point
+            STLpoint
             (
                 readScalar(lineStream),
                 readScalar(lineStream),
@@ -115,7 +116,7 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
         );
         dynPoints.append
         (
-            point
+            STLpoint
             (
                 readScalar(lineStream),
                 readScalar(lineStream),
@@ -176,6 +177,45 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
     sizes_.transfer(dynSizes);
 
     return true;
+}
+
+
+void Foam::fileFormats::TRIsurfaceFormatCore::clear()
+{
+    sorted_ = true;
+    points_.clear();
+    zoneIds_.clear();
+    sizes_.clear();
+}
+
+
+Foam::label Foam::fileFormats::TRIsurfaceFormatCore::mergePointsMap
+(
+    labelList& pointMap
+) const
+{
+    // Use merge tolerance as per STL ascii
+    return mergePointsMap
+    (
+        100 * doubleScalarSMALL,
+        pointMap
+    );
+}
+
+
+Foam::label Foam::fileFormats::TRIsurfaceFormatCore::mergePointsMap
+(
+    const scalar mergeTol,
+    labelList& pointMap
+) const
+{
+    return Foam::mergePoints
+    (
+        points_,
+        mergeTol,
+        false, // verbose
+        pointMap
+    );
 }
 
 

@@ -72,6 +72,7 @@ dictionaryReplacement
                 qrNbr           none;
                 qr              qr;
                 kappa           none;
+                thermalInertia  true;
                 value           uniform 300;
             }
         }

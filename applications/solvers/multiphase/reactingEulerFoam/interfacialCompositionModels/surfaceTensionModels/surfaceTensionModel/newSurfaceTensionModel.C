@@ -40,8 +40,8 @@ Foam::surfaceTensionModel::New
     Info<< "Selecting surfaceTensionModel for "
         << pair << ": " << surfaceTensionModelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(surfaceTensionModelType);
+    multiphaseConstructorTable::iterator cstrIter =
+        multiphaseConstructorTablePtr_->find(surfaceTensionModelType);
 
     if (!cstrIter.found())
     {
@@ -49,7 +49,7 @@ Foam::surfaceTensionModel::New
             << "Unknown surfaceTensionModelType type "
             << surfaceTensionModelType << endl << endl
             << "Valid surfaceTensionModel types are : " << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
+            << multiphaseConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

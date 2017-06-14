@@ -61,8 +61,6 @@ Foam::helpTypes::helpFunctionObject::~helpFunctionObject()
 void Foam::helpTypes::helpFunctionObject::init()
 {
     helpType::init();
-
-    argList::validArgs.append("functionObject");
 }
 
 

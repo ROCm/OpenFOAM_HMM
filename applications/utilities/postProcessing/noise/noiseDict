@@ -90,7 +90,7 @@ pointNoiseCoeffs
 {
     csvFileData
     {
-        fileName        "pressureData";
+        file            "pressureData";
         nHeaderLine     1;
         refColumn       0;
         componentColumns (1);

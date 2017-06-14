@@ -33,40 +33,22 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::NamedEnum<Foam::fileFormats::STARCDCore::fileHeader, 3>
-    Foam::fileFormats::STARCDCore::fileHeaders_;
-
-const Foam::NamedEnum<Foam::fileFormats::STARCDCore::fileExt, 4>
-    Foam::fileFormats::STARCDCore::fileExtensions_;
-
-namespace Foam
-{
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::fileFormats::STARCDCore::fileHeader,
-        3
-    >::names[] =
+const Foam::Enum<Foam::fileFormats::STARCDCore::fileHeader>
+    Foam::fileFormats::STARCDCore::fileHeaders_
     {
-        "PROSTAR_CELL",
-        "PROSTAR_VERTEX",
-        "PROSTAR_BOUNDARY"
+        { fileHeader::HEADER_CEL, "PROSTAR_CELL" },
+        { fileHeader::HEADER_VRT, "PROSTAR_VERTEX" },
+        { fileHeader::HEADER_BND, "PROSTAR_BOUNDARY" }
     };
 
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::fileFormats::STARCDCore::fileExt,
-        4
-    >::names[] =
+const Foam::Enum<Foam::fileFormats::STARCDCore::fileExt>
+    Foam::fileFormats::STARCDCore::fileExtensions_
     {
-        "cel",
-        "vrt",
-        "bnd",
-        "inp"
+        { fileExt::CEL_FILE, "cel" },
+        { fileExt::VRT_FILE, "vrt" },
+        { fileExt::BND_FILE, "bnd" },
+        { fileExt::INP_FILE, "inp" }
     };
-}
-
 
 const char* const Foam::fileFormats::STARCDCore::defaultBoundaryName =
     "Default_Boundary_Region";

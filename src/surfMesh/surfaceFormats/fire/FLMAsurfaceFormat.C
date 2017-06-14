@@ -222,7 +222,7 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
     // Set the precision of the points data to 10
     os.precision(10);
 
-    Info<< "points: " << pointLst.size() << endl;
+    Info<< nl << "points: " << pointLst.size() << endl;
     putFireLabel(os, pointLst.size());
     newline(os);
 

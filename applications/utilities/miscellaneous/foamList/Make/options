@@ -38,28 +38,22 @@ EXE_LIBS = \
     -lfvMotionSolvers \
     -lfvOptions \
     -lgenericPatchFields \
-    -limmiscibleIncompressibleTwoPhaseMixture \
     -lincompressibleTransportModels \
     -lincompressibleTurbulenceModels \
-    -linterfaceProperties \
+    -llagrangian \
     -llagrangianFunctionObjects \
     -llagrangianIntermediate \
-    -llagrangian \
     -llagrangianSpray \
     -llagrangianTurbulence \
     -llaminarFlameSpeedModels \
-    -lthermophysicalProperties \
     -lmeshTools \
     -lmolecularMeasurements \
     -lmolecule \
     -lODE \
-    -lOpenFOAM \
     -lpairPatchAgglomeration \
-    -lphaseChangeTwoPhaseMixtures \
     -lpotential \
     -lpyrolysisModels \
     -lradiationModels \
-    -lrandomProcesses \
     -lreactingEulerianInterfacialCompositionModels \
     -lreactingEulerianInterfacialModels \
     -lreactingPhaseSystem \
@@ -88,10 +82,17 @@ EXE_LIBS = \
     -lsurfaceFilmModels \
     -lsurfMesh \
     -lthermalBaffleModels \
+    -lthermophysicalProperties \
     -ltopoChangerFvMesh \
     -lturbulenceModels \
     -ltwoPhaseMixture \
-    -ltwoPhaseMixtureThermo \
-    -ltwoPhaseProperties \
     -ltwoPhaseReactingTurbulenceModels \
     -lutilityFunctionObjects
+/*
+    Combinations of the following libs leads to corruption errors... ?
+    -limmiscibleIncompressibleTwoPhaseMixture \
+    -linterfaceProperties \
+    -lphaseChangeTwoPhaseMixtures \
+    -ltwoPhaseMixtureThermo \
+    -ltwoPhaseProperties \
+*/

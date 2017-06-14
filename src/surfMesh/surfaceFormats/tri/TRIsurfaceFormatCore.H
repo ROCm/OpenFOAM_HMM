@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,7 @@ SourceFiles
 #define TRIsurfaceFormatCore_H
 
 #include "surfaceFormatsCore.H"
-#include "triFace.H"
+#include "STLpoint.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +58,7 @@ class TRIsurfaceFormatCore
         bool sorted_;
 
         //- The points supporting the facets
-        pointField points_;
+        List<STLpoint> points_;
 
         //- The zones associated with the faces
         List<label> zoneIds_;
@@ -83,7 +83,7 @@ public:
     // Constructors
 
         //- Read from file, filling in the information
-        TRIsurfaceFormatCore(const fileName&);
+        TRIsurfaceFormatCore(const fileName& filename);
 
 
     //- Destructor
@@ -92,35 +92,39 @@ public:
 
     // Member Functions
 
+        //- Flush all values
+        void clear();
+
+        //- Calculate merge points mapping, return old to new pointMap.
+        //  Use merge tolerance as per STL ascii
+        //  \return number of unique points
+        label mergePointsMap(labelList& pointMap) const;
+
+        //- Calculate merge points mapping, return old to new pointMap.
+        //  \return number of unique points
+        label mergePointsMap(const scalar mergeTol, labelList& pointMap) const;
+
+
         //- File read was already sorted
-        bool sorted() const
+        inline bool sorted() const
         {
             return sorted_;
         }
 
-        //- Flush all values
-        void clear()
-        {
-            sorted_ = true;
-            points_.clear();
-            zoneIds_.clear();
-            sizes_.clear();
-        }
-
         //- Return full access to the points
-        pointField& points()
+        inline List<STLpoint>& points()
         {
             return points_;
         }
 
         //- Return full access to the zones
-        List<label>& zoneIds()
+        inline List<label>& zoneIds()
         {
             return zoneIds_;
         }
 
         //- The list of zone sizes in the order of their first appearance
-        List<label>& sizes()
+        inline List<label>& sizes()
         {
             return sizes_;
         }
