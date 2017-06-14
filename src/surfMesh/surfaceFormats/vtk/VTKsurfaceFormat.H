@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,8 +60,13 @@ class VTKsurfaceFormat
 {
     // Private Member Functions
 
-        //- Write header information about number of polygon points
-        static void writeHeaderPolygons(Ostream&, const UList<Face>&);
+        //- Write polygons
+        static void writePolys
+        (
+            vtk::formatter& format,
+            const UList<Face>& faces
+        );
+
 
         //- Disallow default bitwise copy construct
         VTKsurfaceFormat(const VTKsurfaceFormat<Face>&) = delete;
@@ -75,7 +80,7 @@ public:
     // Constructors
 
         //- Construct from file name
-        VTKsurfaceFormat(const fileName&);
+        VTKsurfaceFormat(const fileName& filename);
 
 
     // Selectors
@@ -97,24 +102,24 @@ public:
 
     // Member Functions
 
-        // Write
+      // Write
 
         //- Write surface mesh components by proxy
         static void write
         (
-            const fileName&,
-            const MeshedSurfaceProxy<Face>&
+            const fileName& filename,
+            const MeshedSurfaceProxy<Face>& surf
         );
 
         //- Write UnsortedMeshedSurface, the output remains unsorted
         static void write
         (
-            const fileName&,
-            const UnsortedMeshedSurface<Face>&
+            const fileName& fileName,
+            const UnsortedMeshedSurface<Face>& surf
         );
 
         //- Read from file
-        virtual bool read(const fileName&);
+        virtual bool read(const fileName& filename);
 
         //- Write object file
         virtual void write(const fileName& name) const

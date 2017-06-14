@@ -27,6 +27,8 @@
       </Documentation>
     </DoubleVectorProperty>
 
+<!-- General Controls -->
+
     <!-- Refresh (push button) -->
     <Property
       name="Refresh"
@@ -35,12 +37,10 @@
       <Documentation>Rescan for updated times/fields.</Documentation>
     </Property>
 
-<!-- General Controls -->
-
     <!-- Skip Zero Time (check-box) -->
     <IntVectorProperty animateable="0"
       name="ZeroTime"
-      label="Skip Zero Time"
+      label="Skip 0/ time"
       command="SetSkipZeroTime"
       default_values="1"
       number_of_elements="1"
@@ -54,26 +54,28 @@
     <!-- Include Sets (check-box) -->
     <IntVectorProperty animateable="0"
       name="IncludeSets"
+      label="With Sets"
       command="SetIncludeSets"
       default_values="0"
       number_of_elements="1"
       panel_visibility="default">
       <BooleanDomain name="bool"/>
       <Documentation>
-        Search the polyMesh/sets/ directory
+        Search the polyMesh/sets/ directory for {cell,face,point} sets
       </Documentation>
     </IntVectorProperty>
 
     <!-- Include Zones (check-box) -->
     <IntVectorProperty animateable="0"
       name="IncludeZones"
+      label="With Zones"
       command="SetIncludeZones"
       default_values="0"
       number_of_elements="1"
       panel_visibility="default">
       <BooleanDomain name="bool"/>
       <Documentation>
-        ZoneMesh information is used to find {cell,face,point}Zones.
+        ZoneMesh information is used to find {cell,face,point} zones.
         The polyMesh/ directory is only checked on startup.
       </Documentation>
     </IntVectorProperty>
@@ -88,7 +90,7 @@
       panel_visibility="default">
       <BooleanDomain name="bool"/>
       <Documentation>
-        Show patchGroups only.
+        Display patchGroups only instead of individual patches.
       </Documentation>
     </IntVectorProperty>
 
@@ -109,6 +111,7 @@
     <!-- Interpolate Fields (check-box) -->
     <IntVectorProperty animateable="0"
       name="InterpolateFields"
+      label="cell-to-point"
       command="SetInterpolateVolFields"
       default_values="1"
       number_of_elements="1"
@@ -122,6 +125,7 @@
     <!-- Extrapolate Patches (check-box) -->
     <IntVectorProperty animateable="0"
       name="ExtrapolatePatches"
+      label="field-to-patch"
       command="SetExtrapolatePatches"
       default_values="0"
       number_of_elements="1"
@@ -132,7 +136,7 @@
       </Documentation>
     </IntVectorProperty>
 
-    <!-- Force GUI update (check-box) -->
+    <!-- Force GUI update (push button) -->
     <IntVectorProperty animateable="0"
       name="UpdateGUI"
       command="SetUpdateGUI"
@@ -148,7 +152,7 @@
     <!-- Use VTK Polyhedron (check-box) -->
     <IntVectorProperty animateable="0"
       name="UseVTKPolyhedron"
-      label="Use VTK Polyhedron"
+      label="VTK Polyhedra"
       command="SetUseVTKPolyhedron"
       default_values="0"
       number_of_elements="1"
@@ -159,16 +163,22 @@
       </Documentation>
     </IntVectorProperty>
 
-    <!-- Cache Mesh (check-box) -->
+    <!-- Mesh Caching (combo-box) -->
     <IntVectorProperty animateable="0"
-      name="CacheMesh"
-      command="SetCacheMesh"
-      default_values="1"
+      name="MeshCaching"
+      command="SetMeshCaching"
+      default_values="3"
       number_of_elements="1"
       panel_visibility="default">
-      <BooleanDomain name="bool"/>
+      <EnumerationDomain name="enum">
+        <Entry text="No caching" value="0" />
+        <Entry text="Cache fvMesh" value="1" />
+        <Entry text="Cache vtk,fvMesh" value="3" />
+      </EnumerationDomain>
       <Documentation>
-        Cache the fvMesh in memory.
+        Mesh caching styles.
+        Caching the OpenFOAM fvMesh reduces disk access.
+        Caching the VTK mesh reduces transcription overhead.
       </Documentation>
     </IntVectorProperty>
 
@@ -185,7 +195,7 @@
     <Property name="ShowPatchNames"/>
     <Property name="UpdateGUI"/>
     <Property name="UseVTKPolyhedron"/>
-    <Property name="CacheMesh"/>
+    <Property name="MeshCaching"/>
   </PropertyGroup>
 
 <!-- Parts Selections -->

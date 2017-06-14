@@ -24,31 +24,21 @@ License
 
 #include "foamVtkFormatter.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::foamVtkFormatter::foamVtkFormatter(std::ostream& os)
-:
-    os_(os),
-    xmlTags_(),
-    inTag_(false)
-{}
-
-
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamVtkFormatter::~foamVtkFormatter()
+Foam::vtk::formatter::~formatter()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-std::size_t Foam::foamVtkFormatter::encodedLength(std::size_t n) const
+std::size_t Foam::vtk::formatter::encodedLength(std::size_t n) const
 {
     return n;
 }
 
 
-void Foam::foamVtkFormatter::indent()
+void Foam::vtk::formatter::indent()
 {
     label n = xmlTags_.size() * 2;
     while (n--)
@@ -58,8 +48,8 @@ void Foam::foamVtkFormatter::indent()
 }
 
 
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::xmlHeader()
+Foam::vtk::formatter&
+Foam::vtk::formatter::xmlHeader()
 {
     if (inTag_)
     {
@@ -74,8 +64,8 @@ Foam::foamVtkFormatter::xmlHeader()
 }
 
 
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::comment(const std::string& text)
+Foam::vtk::formatter&
+Foam::vtk::formatter::xmlComment(const std::string& comment)
 {
     if (inTag_)
     {
@@ -85,34 +75,35 @@ Foam::foamVtkFormatter::comment(const std::string& text)
     }
 
     indent();
-    os_ << "<!-- " << text << " -->" << nl;
+    os_ << "<!-- " << comment << " -->" << nl;
 
     return *this;
 }
 
 
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::openTag(const word& tag)
+Foam::vtk::formatter&
+Foam::vtk::formatter::openTag(const word& tagName)
 {
     if (inTag_)
     {
         WarningInFunction
-            << "open XML tag '" << tag << "', but already within a tag!"
+            << "open XML tag '" << tagName
+            << "', but already within a tag!"
             << endl;
     }
 
     indent();
-    os_ << '<' << tag;
+    os_ << '<' << tagName;
 
-    xmlTags_.push(tag);
+    xmlTags_.push(tagName);
     inTag_ = true;
 
     return *this;
 }
 
 
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::closeTag(const bool isEmpty)
+Foam::vtk::formatter&
+Foam::vtk::formatter::closeTag(const bool isEmpty)
 {
     if (!inTag_)
     {
@@ -135,8 +126,8 @@ Foam::foamVtkFormatter::closeTag(const bool isEmpty)
 }
 
 
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::endTag(const word& tag)
+Foam::vtk::formatter&
+Foam::vtk::formatter::endTag(const word& tagName)
 {
     const word curr = xmlTags_.pop();
     indent();
@@ -149,11 +140,11 @@ Foam::foamVtkFormatter::endTag(const word& tag)
             << endl;
     }
 
-    // verify inTag_
-    if (!tag.empty() && tag != curr)
+    // verify expected end tag
+    if (!tagName.empty() && tagName != curr)
     {
         WarningInFunction
-            << "expected to end xml-tag '" << tag
+            << "expecting to end xml-tag '" << tagName
             << "' but found '" << curr << "' instead"
             << endl;
     }
@@ -166,29 +157,19 @@ Foam::foamVtkFormatter::endTag(const word& tag)
 }
 
 
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::tag(const word& tag)
-{
-    openTag(tag);
-    closeTag();
-
-    return *this;
-}
-
-
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::beginVTKFile
+Foam::vtk::formatter&
+Foam::vtk::formatter::beginVTKFile
 (
     const word& contentType,
     const word& contentVersion,
     const bool leaveOpen
 )
 {
-    openTag("VTKFile");
+    openTag(vtk::fileTag::VTK_FILE);
     xmlAttr("type",        contentType);
     xmlAttr("version",     contentVersion);
-    xmlAttr("byte_order",  foamVtkPTraits<Foam::endian>::typeName);
-    xmlAttr("header_type", foamVtkPTraits<headerType>::typeName);
+    xmlAttr("byte_order",  vtkPTraits<Foam::endian>::typeName);
+    xmlAttr("header_type", vtkPTraits<headerType>::typeName);
     closeTag();
 
     openTag(contentType);
@@ -201,8 +182,15 @@ Foam::foamVtkFormatter::beginVTKFile
 }
 
 
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::beginAppendedData()
+Foam::vtk::formatter&
+Foam::vtk::formatter::endVTKFile()
+{
+    return endTag(vtk::fileTag::VTK_FILE);
+}
+
+
+Foam::vtk::formatter&
+Foam::vtk::formatter::beginAppendedData()
 {
     openTag("AppendedData");
     xmlAttr("encoding", encoding());
@@ -213,8 +201,17 @@ Foam::foamVtkFormatter::beginAppendedData()
 }
 
 
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::xmlAttr
+Foam::vtk::formatter&
+Foam::vtk::formatter::endAppendedData()
+{
+    flush();     // flush any pending encoded content
+    os_ << nl;   // ensure clear separation from content.
+    return endTag("AppendedData");
+}
+
+
+Foam::vtk::formatter&
+Foam::vtk::formatter::xmlAttr
 (
     const word& k,
     const std::string& v,
@@ -231,91 +228,6 @@ Foam::foamVtkFormatter::xmlAttr
     os_ << ' ' << k << '=' << quote << v.c_str() << quote;
 
     return *this;
-}
-
-
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::xmlAttr
-(
-    const word& k,
-    const int32_t v,
-    const char quote
-)
-{
-    return xmlAttribute(k, v, quote);
-}
-
-
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::xmlAttr
-(
-    const word& k,
-    const int64_t v,
-    const char quote
-)
-{
-    return xmlAttribute(k, v, quote);
-}
-
-
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::xmlAttr
-(
-    const word& k,
-    const uint64_t v,
-    const char quote
-)
-{
-    return xmlAttribute(k, v, quote);
-}
-
-
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::xmlAttr
-(
-    const word& k,
-    const scalar v,
-    const char quote
-)
-{
-    return xmlAttribute(k, v, quote);
-}
-
-
-// * * * * * * * * * * * * * * Member Operators * * * * * * * * * * * * * * //
-
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::operator()(const word& k, const std::string& v)
-{
-    return xmlAttr(k, v);
-}
-
-
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::operator()(const word& k, const int32_t v)
-{
-    return xmlAttr(k, v);
-}
-
-
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::operator()(const word& k, const int64_t v)
-{
-    return xmlAttr(k, v);
-}
-
-
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::operator()(const word& k, const uint64_t v)
-{
-    return xmlAttr(k, v);
-}
-
-
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::operator()(const word& k, const scalar v)
-{
-    return xmlAttr(k, v);
 }
 
 

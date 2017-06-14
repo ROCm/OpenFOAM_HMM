@@ -25,59 +25,55 @@ License
 
 #include "IOobjectList.H"
 #include "vtkDataArraySelection.h"
-#include "vtkMultiBlockDataSet.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-Type* Foam::foamPvCore::getDataFromBlock
-(
-    vtkMultiBlockDataSet* output,
-    const arrayRange& selector,
-    const label datasetNo
-)
-{
-    const int blockNo = selector.block();
-
-    vtkMultiBlockDataSet* block =
-    (
-        datasetNo < 0
-      ? nullptr
-      : vtkMultiBlockDataSet::SafeDownCast(output->GetBlock(blockNo))
-    );
-
-    if (block)
-    {
-        return Type::SafeDownCast(block->GetBlock(datasetNo));
-    }
-
-    return nullptr;
-}
-
 
 template<class Type>
 Foam::label Foam::foamPvCore::addToSelection
 (
     vtkDataArraySelection *select,
     const IOobjectList& objects,
-    const string& suffix
+    const std::string& prefix
 )
 {
     const wordList names = objects.sortedNames(Type::typeName);
 
     forAll(names, i)
     {
-        if (suffix.empty())
+        if (prefix.empty())
         {
             select->AddArray(names[i].c_str());
         }
         else
         {
-            select->AddArray((names[i] + suffix).c_str());
+            select->AddArray((prefix + names[i]).c_str());
         }
     }
 
     return names.size();
+}
+
+
+template<class AnyValue, class AnyHasher>
+void Foam::foamPvCore::setSelectedArrayEntries
+(
+    vtkDataArraySelection* select,
+    const HashTable<AnyValue, string, AnyHasher>& enabled
+)
+{
+    const int n = select->GetNumberOfArrays();
+    // disable everything not explicitly enabled
+    select->DisableAllArrays();
+
+    // Loop through entries, enabling as required
+    for (int i=0; i < n; ++i)
+    {
+        const char* arrayName = select->GetArrayName(i);
+        if (enabled.found(arrayName))
+        {
+            select->EnableArray(arrayName);
+        }
+    }
 }
 
 

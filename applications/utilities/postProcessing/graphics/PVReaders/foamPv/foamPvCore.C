@@ -32,6 +32,9 @@ License
 #include "vtkDataSet.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkInformation.h"
+#include "vtkSmartPointer.h"
+
+#include "foamVtkAdaptors.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -54,7 +57,8 @@ void Foam::foamPvCore::addToBlock
     const int blockNo = selector.block();
 
     vtkDataObject* dataObj = output->GetBlock(blockNo);
-    vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast(dataObj);
+    vtkSmartPointer<vtkMultiBlockDataSet> block =
+        vtkMultiBlockDataSet::SafeDownCast(dataObj);
 
     if (!block)
     {
@@ -66,9 +70,8 @@ void Foam::foamPvCore::addToBlock
             return;
         }
 
-        block = vtkMultiBlockDataSet::New();
+        block = vtkSmartPointer<vtkMultiBlockDataSet>::New();
         output->SetBlock(blockNo, block);
-        block->Delete();
     }
 
     if (debug)
@@ -81,7 +84,7 @@ void Foam::foamPvCore::addToBlock
 
     block->SetBlock(datasetNo, dataset);
 
-    // name the output block when assigning dataset 0
+    // Name the output block when assigning dataset 0
     if (datasetNo == 0)
     {
         output->GetMetaData(blockNo)->Set
@@ -102,56 +105,6 @@ void Foam::foamPvCore::addToBlock
 }
 
 
-int Foam::foamPvCore::getNumberOfDataSets
-(
-    vtkMultiBlockDataSet* output,
-    const arrayRange& selector
-)
-{
-    const int blockNo = selector.block();
-
-    vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast
-    (
-        output->GetBlock(blockNo)
-    );
-
-    if (block)
-    {
-        return block->GetNumberOfBlocks();
-    }
-
-    return 0;
-}
-
-
-int Foam::foamPvCore::getSelected
-(
-    boolList& status,
-    vtkDataArraySelection* selection
-)
-{
-    const int n = selection->GetNumberOfArrays();
-    if (status.size() != n)
-    {
-        status.setSize(n);
-        status = false;
-    }
-
-    int count = 0;
-    forAll(status, i)
-    {
-        const bool setting = selection->GetArraySetting(i);
-        if (setting)
-        {
-            ++count;
-        }
-        status[i] = setting;
-    }
-
-    return count;
-}
-
-
 Foam::hashedWordList Foam::foamPvCore::getSelected
 (
     vtkDataArraySelection* select
@@ -164,7 +117,7 @@ Foam::hashedWordList Foam::foamPvCore::getSelected
     {
         if (select->GetArraySetting(i))
         {
-            selected.append(getFirstWord(select->GetArrayName(i)));
+            selected.append(getFoamName(select->GetArrayName(i)));
         }
     }
 
@@ -181,11 +134,11 @@ Foam::hashedWordList Foam::foamPvCore::getSelected
     const int n = select->GetNumberOfArrays();
     DynamicList<word> selected(n);
 
-    for (int i = selector.start(); i < selector.end(); ++i)
+    for (auto i : selector)
     {
         if (select->GetArraySetting(i))
         {
-            selected.append(getFirstWord(select->GetArrayName(i)));
+            selected.append(getFoamName(select->GetArrayName(i)));
         }
     }
 
@@ -193,22 +146,22 @@ Foam::hashedWordList Foam::foamPvCore::getSelected
 }
 
 
-Foam::stringList Foam::foamPvCore::getSelectedArrayEntries
+Foam::HashSet<Foam::string>
+Foam::foamPvCore::getSelectedArraySet
 (
     vtkDataArraySelection* select
 )
 {
-    stringList selections(select->GetNumberOfArrays());
-    label nElem = 0;
+    const int n = select->GetNumberOfArrays();
+    HashSet<string> enabled(2*n);
 
-    forAll(selections, elemI)
+    for (int i=0; i < n; ++i)
     {
-        if (select->GetArraySetting(elemI))
+        if (select->GetArraySetting(i))
         {
-            selections[nElem++] = select->GetArrayName(elemI);
+            enabled.insert(select->GetArrayName(i));
         }
     }
-    selections.setSize(nElem);
 
     if (debug > 1)
     {
@@ -220,92 +173,61 @@ Foam::stringList Foam::foamPvCore::getSelectedArrayEntries
         }
         Info<< " )\nselected(";
 
-        forAll(selections, elemI)
+        for (auto k : enabled)
         {
-            Info<< " " << selections[elemI];
+            Info<< " " << k;
         }
         Info<< " )\n";
     }
 
-    return selections;
+    return enabled;
 }
 
 
-Foam::stringList Foam::foamPvCore::getSelectedArrayEntries
+Foam::Map<Foam::string>
+Foam::foamPvCore::getSelectedArrayMap
 (
-    vtkDataArraySelection* select,
-    const arrayRange& selector
-)
-{
-    stringList selections(selector.size());
-    label nElem = 0;
-
-    for (int i = selector.start(); i < selector.end(); ++i)
-    {
-        if (select->GetArraySetting(i))
-        {
-            selections[nElem++] = select->GetArrayName(i);
-        }
-    }
-    selections.setSize(nElem);
-
-    if (debug > 1)
-    {
-        Info<< "available(";
-        for (int i = selector.start(); i < selector.end(); ++i)
-        {
-            Info<< " \"" << select->GetArrayName(i) << "\"";
-        }
-        Info<< " )\nselected(";
-
-        forAll(selections, elemI)
-        {
-            Info<< " " << selections[elemI];
-        }
-        Info<< " )\n";
-    }
-
-    return selections;
-}
-
-
-void Foam::foamPvCore::setSelectedArrayEntries
-(
-    vtkDataArraySelection* select,
-    const stringList& selections
+    vtkDataArraySelection* select
 )
 {
     const int n = select->GetNumberOfArrays();
-    select->DisableAllArrays();
+    Map<string> enabled(2*n);
 
-    // Loop through entries, setting values from selectedEntries
     for (int i=0; i < n; ++i)
     {
-        const string arrayName(select->GetArrayName(i));
-
-        forAll(selections, elemI)
+        if (select->GetArraySetting(i))
         {
-            if (selections[elemI] == arrayName)
-            {
-                select->EnableArray(arrayName.c_str());
-                break;
-            }
+            enabled.insert(i, select->GetArrayName(i));
         }
     }
+
+    return enabled;
 }
 
 
-Foam::word Foam::foamPvCore::getFirstWord(const char* str)
+Foam::word Foam::foamPvCore::getFoamName(const std::string& str)
 {
-    if (str)
+    if (str.size())
     {
-        label n = 0;
-        while (str[n] && word::valid(str[n]))
+        std::string::size_type beg = str.rfind('/');
+        if (beg == std::string::npos)
         {
-            ++n;
+            beg = 0;
         }
-        // don't need to re-check for invalid chars
-        return word(str, n, false);
+        else
+        {
+            ++beg;
+        }
+
+        std::string::size_type end = beg;
+
+        while (str[end] && word::valid(str[end]))
+        {
+            ++end;
+        }
+
+        // Already checked for valid/invalid chars
+        return word(str.substr(beg, beg+end), false);
     }
     else
     {
@@ -323,5 +245,31 @@ void Foam::foamPvCore::printMemory()
         Info<< "mem peak/size/rss: " << mem << endl;
     }
 }
+
+
+vtkSmartPointer<vtkCellArray> Foam::foamPvCore::identityVertices
+(
+    const label size
+)
+{
+    // VTK_VERTEX
+    auto cells = vtkSmartPointer<vtkCellArray>::New();
+
+    UList<vtkIdType> cellsUL = vtkUList(cells, size, 2*size);
+
+    // Cell connectivity for vertex
+    // [size, ids.., size, ids...]
+    // which means
+    // [1, id, 1, id, ...]
+    label idx = 0;
+    for (label id=0; id < size; ++id)
+    {
+        cellsUL[idx++] = 1;
+        cellsUL[idx++] = id;
+    }
+
+    return cells;
+}
+
 
 // ************************************************************************* //

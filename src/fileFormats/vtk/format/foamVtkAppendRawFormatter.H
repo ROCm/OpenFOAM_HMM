@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    foamVtkAppendRawFormatter
+    Foam::vtk::appendRawFormatter
 
 Description
     Appended raw binary output.
@@ -41,27 +41,31 @@ SourceFiles
 
 namespace Foam
 {
+namespace vtk
+{
 
 /*---------------------------------------------------------------------------*\
-                  Class foamVtkAppendRawFormatter Declaration
+                     Class appendRawFormatter Declaration
 \*---------------------------------------------------------------------------*/
 
-class foamVtkAppendRawFormatter
+class appendRawFormatter
 :
-    public foamVtkFormatter
+    public formatter
 {
     // Private Data Members
 
         static const char* name_;
         static const char* encoding_;
+        static const outputOptions opts_;
+
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        foamVtkAppendRawFormatter(const foamVtkAppendRawFormatter&) = delete;
+        appendRawFormatter(const appendRawFormatter&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const foamVtkAppendRawFormatter&) = delete;
+        void operator=(const appendRawFormatter&) = delete;
 
 
 protected:
@@ -77,14 +81,17 @@ public:
     // Constructors
 
         //- Construct and attach to an output stream
-        foamVtkAppendRawFormatter(std::ostream& os);
+        appendRawFormatter(std::ostream& os);
 
 
     //- Destructor
-    virtual ~foamVtkAppendRawFormatter();
+    virtual ~appendRawFormatter();
 
 
     // Member Functions
+
+        //- The output is APPEND_BINARY.
+        virtual const outputOptions& opts() const;
 
         //- Output name for XML type ("append")
         virtual const char* name() const;
@@ -108,6 +115,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace vtk
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

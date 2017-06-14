@@ -24,15 +24,19 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "foamVtkAppendBase64Formatter.H"
+#include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* Foam::foamVtkAppendBase64Formatter::name_ = "append";
+const char* Foam::vtk::appendBase64Formatter::name_ = "append";
+
+const Foam::vtk::outputOptions
+Foam::vtk::appendBase64Formatter::opts_(formatType::APPEND_BASE64);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::foamVtkAppendBase64Formatter::foamVtkAppendBase64Formatter
+Foam::vtk::appendBase64Formatter::appendBase64Formatter
 (
     std::ostream& os
 )
@@ -43,7 +47,7 @@ Foam::foamVtkAppendBase64Formatter::foamVtkAppendBase64Formatter
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamVtkAppendBase64Formatter::~foamVtkAppendBase64Formatter()
+Foam::vtk::appendBase64Formatter::~appendBase64Formatter()
 {
     base64Layer::close();
 }
@@ -51,7 +55,14 @@ Foam::foamVtkAppendBase64Formatter::~foamVtkAppendBase64Formatter()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-const char* Foam::foamVtkAppendBase64Formatter::name() const
+const Foam::vtk::outputOptions&
+Foam::vtk::appendBase64Formatter::opts() const
+{
+    return opts_;
+}
+
+
+const char* Foam::vtk::appendBase64Formatter::name() const
 {
     return name_;
 }

@@ -38,229 +38,254 @@ License
 #include "vtkMultiBlockDataSet.h"
 #include "vtkPolyData.h"
 #include "vtkUnstructuredGrid.h"
+#include "vtkSmartPointer.h"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::vtkPVFoam::convertMeshVolume
-(
-    vtkMultiBlockDataSet* output,
-    int& blockNo
-)
+void Foam::vtkPVFoam::convertMeshVolume()
 {
-    arrayRange& range = arrayRangeVolume_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
+    const arrayRange& range = rangeVolume_;
     const fvMesh& mesh = *meshPtr_;
-
-    // resize for decomposed polyhedra
-    regionPolyDecomp_.setSize(range.size());
 
     if (debug)
     {
-        Info<< "<beg> convertMeshVolume" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
     // Convert the internalMesh
     // this looks like more than one part, but it isn't
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
-        const word partName = "internalMesh";
-
-        if (!partStatus_[partId])
+        if (selectedPartIds_.found(partId))
         {
-            continue;
+            const auto& longName = selectedPartIds_[partId];
+            foamVtuData& vtuData = cachedVtu_(longName);
+
+            vtkSmartPointer<vtkUnstructuredGrid> vtkgeom;
+            if (vtuData.nPoints())
+            {
+                if (meshState_ == polyMesh::UNCHANGED)
+                {
+                    if (debug)
+                    {
+                        Info<< "reuse " << longName << nl;
+                    }
+                    vtuData.reuse(); // reuse
+                    continue;
+                }
+                else if (meshState_ == polyMesh::POINTS_MOVED)
+                {
+                    if (debug)
+                    {
+                        Info<< "move points " << longName << nl;
+                    }
+                    vtkgeom = vtuData.getCopy();
+                    vtkgeom->SetPoints(movePoints(mesh, vtuData));
+                }
+            }
+
+            if (!vtkgeom)
+            {
+                // Nothing usable from cache - create new geometry
+                vtkgeom = volumeVTKMesh(mesh, vtuData);
+            }
+
+            vtuData.set(vtkgeom);
         }
-
-        vtkUnstructuredGrid* vtkmesh = volumeVTKMesh
-        (
-            mesh,
-            regionPolyDecomp_[datasetNo]
-        );
-
-        if (vtkmesh)
-        {
-            addToBlock(output, vtkmesh, range, datasetNo, partName);
-            vtkmesh->Delete();
-
-            partDataset_[partId] = datasetNo++;
-        }
-    }
-
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshVolume" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }
 
 
-void Foam::vtkPVFoam::convertMeshLagrangian
-(
-    vtkMultiBlockDataSet* output,
-    int& blockNo
-)
+void Foam::vtkPVFoam::convertMeshLagrangian()
 {
-    arrayRange& range = arrayRangeLagrangian_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
+    const arrayRange& range = rangeLagrangian_;
     const fvMesh& mesh = *meshPtr_;
 
     if (debug)
     {
-        Info<< "<beg> convertMeshLagrangian" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
-        const word cloudName = getPartName(partId);
-
-        if (!partStatus_[partId])
+        if (selectedPartIds_.found(partId))
         {
-            continue;
+            const auto& longName = selectedPartIds_[partId];
+            const word cloudName = getFoamName(longName);
+
+            // Direct conversion, no caching for Lagrangian
+            cachedVtp_(longName).set
+            (
+                lagrangianVTKMesh(mesh, cloudName)
+            );
         }
-
-        vtkPolyData* vtkmesh = lagrangianVTKMesh(mesh, cloudName);
-
-        if (vtkmesh)
-        {
-            addToBlock(output, vtkmesh, range, datasetNo, cloudName);
-            vtkmesh->Delete();
-
-            partDataset_[partId] = datasetNo++;
-        }
-    }
-
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshLagrangian" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }
 
 
-void Foam::vtkPVFoam::convertMeshPatches
-(
-    vtkMultiBlockDataSet* output,
-    int& blockNo
-)
+void Foam::vtkPVFoam::convertMeshPatches()
 {
-    arrayRange& range = arrayRangePatches_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
+    const arrayRange& range = rangePatches_;
     const fvMesh& mesh = *meshPtr_;
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     if (debug)
     {
-        Info<< "<beg> convertMeshPatches" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
-        if (!partStatus_[partId])
+        if (!selectedPartIds_.found(partId))
         {
             continue;
         }
+        const auto& longName = selectedPartIds_[partId];
+        const word partName = getFoamName(longName);
+        foamVtpData& vtpData = cachedVtp_(longName);
 
-        const word patchName = getPartName(partId);
-
-        labelHashSet
-            patchIds(patches.patchSet(List<wordRe>(1, wordRe(patchName))));
-
-        if (debug)
+        vtkSmartPointer<vtkPolyData> vtkgeom;
+        if (vtpData.nPoints())
         {
-            Info<< "Creating VTK mesh for patches [" << patchIds <<"] "
-                << patchName << endl;
+            if (meshState_ == polyMesh::UNCHANGED)
+            {
+                // Without movement is easy.
+                if (debug)
+                {
+                    Info<< "reuse " << longName << nl;
+                }
+                vtpData.reuse();
+                continue;
+            }
+            else if (meshState_ == polyMesh::POINTS_MOVED)
+            {
+                // Point movement on single patch is OK
+
+                const labelList& patchIds = vtpData.additionalIds();
+                if (patchIds.size() == 1)
+                {
+                    vtkgeom = vtpData.getCopy();
+                    vtkgeom->SetPoints(movePatchPoints(patches[patchIds[0]]));
+                    continue;
+                }
+            }
         }
 
-        vtkPolyData* vtkmesh = nullptr;
-        if (patchIds.size() == 1)
-        {
-            vtkmesh = patchVTKMesh(patchName, patches[patchIds.begin().key()]);
-        }
-        else
+        if (longName.startsWith("group/"))
         {
             // Patch group. Collect patch faces.
-            label sz = 0;
-            forAllConstIter(labelHashSet, patchIds, iter)
+
+            vtpData.clear(); // Remove any old mappings
+
+            const labelList& patchIds =
+                patches.groupPatchIDs().lookup(partName, labelList());
+
+            if (debug)
             {
-                sz += patches[iter.key()].size();
+                Info<< "Creating VTK mesh for patches [" << patchIds <<"] "
+                    << longName << endl;
             }
-            labelList faceLabels(sz);
-            sz = 0;
-            forAllConstIter(labelHashSet, patchIds, iter)
+
+            // Store good patch ids as additionalIds
+            vtpData.additionalIds().reserve(patchIds.size());
+
+            label sz = 0;
+            for (auto id : patchIds)
             {
-                const polyPatch& pp = patches[iter.key()];
+                const label n = patches[id].size();
+
+                if (n)
+                {
+                    vtpData.additionalIds().append(id);
+                    sz += n;
+                }
+            }
+            Foam::sort(vtpData.additionalIds());
+
+            // Temporarily (mis)use cellMap for face labels
+            DynamicList<label>& faceLabels = vtpData.cellMap();
+            faceLabels.reserve(sz);
+
+            for (auto id : vtpData.additionalIds())
+            {
+                const auto& pp = patches[id];
                 forAll(pp, i)
                 {
-                    faceLabels[sz++] = pp.start()+i;
+                    faceLabels.append(pp.start()+i);
                 }
             }
 
-            uindirectPrimitivePatch pp
-            (
-                UIndirectList<face>
+            if (faceLabels.size())
+            {
+                uindirectPrimitivePatch pp
                 (
-                    mesh.faces(),
-                    faceLabels
-                ),
-                mesh.points()
-            );
+                    UIndirectList<face>(mesh.faces(), faceLabels),
+                    mesh.points()
+                );
 
-            vtkmesh = patchVTKMesh(patchName, pp);
+                vtkgeom = patchVTKMesh(pp);
+            }
+
+            faceLabels.clear();  // Unneeded
         }
-
-        if (vtkmesh)
+        else
         {
-            addToBlock(output, vtkmesh, range, datasetNo, patchName);
-            vtkmesh->Delete();
+            vtpData.clear(); // Remove any old mappings
 
-            partDataset_[partId] = datasetNo++;
+            const label patchId = patches.findPatchID(partName);
+
+            if (debug)
+            {
+                Info<< "Creating VTK mesh for patch [" << patchId <<"] "
+                    << partName << endl;
+            }
+
+            if (patchId >= 0)
+            {
+                // Store good patch id as additionalIds
+                vtpData.additionalIds() = {patchId};
+
+                vtkgeom = patchVTKMesh(patches[patchId]);
+            }
         }
-    }
 
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
+        if (vtkgeom)
+        {
+            vtpData.set(vtkgeom);
+        }
+        else
+        {
+            cachedVtp_.erase(longName);
+        }
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshPatches" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }
 
 
-void Foam::vtkPVFoam::convertMeshCellZones
-(
-    vtkMultiBlockDataSet* output,
-    int& blockNo
-)
+void Foam::vtkPVFoam::convertMeshCellZones()
 {
-    arrayRange& range = arrayRangeCellZones_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
+    const arrayRange& range = rangeCellZones_;
     const fvMesh& mesh = *meshPtr_;
-
-    // resize for decomposed polyhedra
-    zonePolyDecomp_.setSize(range.size());
 
     if (range.empty())
     {
@@ -269,17 +294,23 @@ void Foam::vtkPVFoam::convertMeshCellZones
 
     if (debug)
     {
-        Info<< "<beg> convertMeshCellZones" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
     const cellZoneMesh& zMesh = mesh.cellZones();
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
-        const word zoneName = getPartName(partId);
+        if (!selectedPartIds_.found(partId))
+        {
+            continue;
+        }
+
+        const auto& longName = selectedPartIds_[partId];
+        const word zoneName = getFoamName(longName);
         const label  zoneId = zMesh.findZoneID(zoneName);
 
-        if (!partStatus_[partId] || zoneId < 0)
+        if (zoneId < 0)
         {
             continue;
         }
@@ -290,144 +321,129 @@ void Foam::vtkPVFoam::convertMeshCellZones
                 << zoneName << endl;
         }
 
-        fvMeshSubset subsetter(mesh);
-        subsetter.setLargeCellSubset(zMesh[zoneId]);
+        foamVtuData& vtuData = cachedVtu_(longName);
 
-        vtkUnstructuredGrid* vtkmesh = volumeVTKMesh
-        (
-            subsetter.subMesh(),
-            zonePolyDecomp_[datasetNo]
-        );
-
-        if (vtkmesh)
+        vtkSmartPointer<vtkUnstructuredGrid> vtkgeom;
+        if (vtuData.nPoints() && vtuData.pointMap().size())
         {
-            // superCells + addPointCellLabels must contain global cell ids
-            inplaceRenumber
-            (
-                subsetter.cellMap(),
-                zonePolyDecomp_[datasetNo].superCells()
-            );
-            inplaceRenumber
-            (
-                subsetter.cellMap(),
-                zonePolyDecomp_[datasetNo].addPointCellLabels()
-            );
-
-            // copy pointMap as well, otherwise pointFields fail
-            zonePolyDecomp_[datasetNo].pointMap() = subsetter.pointMap();
-
-            addToBlock(output, vtkmesh, range, datasetNo, zoneName);
-            vtkmesh->Delete();
-
-            partDataset_[partId] = datasetNo++;
+            if (meshState_ == polyMesh::UNCHANGED)
+            {
+                if (debug)
+                {
+                    Info<< "reuse " << longName << nl;
+                }
+                vtuData.reuse();
+                continue;
+            }
+            else if (meshState_ == polyMesh::POINTS_MOVED)
+            {
+                if (debug)
+                {
+                    Info<< "move points " << longName << nl;
+                }
+                vtkgeom = vtuData.getCopy();
+                vtkgeom->SetPoints
+                (
+                    movePoints(mesh, vtuData, vtuData.pointMap())
+                );
+            }
         }
-    }
 
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
+        if (!vtkgeom)
+        {
+            fvMeshSubset subsetter(mesh);
+            subsetter.setLargeCellSubset(zMesh[zoneId]);
+
+            vtkgeom = volumeVTKSubsetMesh(subsetter, vtuData);
+        }
+
+        vtuData.set(vtkgeom);
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshCellZones" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }
 
 
-void Foam::vtkPVFoam::convertMeshCellSets
-(
-    vtkMultiBlockDataSet* output,
-    int& blockNo
-)
+void Foam::vtkPVFoam::convertMeshCellSets()
 {
-    arrayRange& range = arrayRangeCellSets_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
+    const arrayRange& range = rangeCellSets_;
     const fvMesh& mesh = *meshPtr_;
-
-    // resize for decomposed polyhedra
-    csetPolyDecomp_.setSize(range.size());
 
     if (debug)
     {
-        Info<< "<beg> convertMeshCellSets" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
-        const word partName = getPartName(partId);
-
-        if (!partStatus_[partId])
+        if (!selectedPartIds_.found(partId))
         {
             continue;
         }
+
+        const auto& longName = selectedPartIds_[partId];
+        const word partName = getFoamName(longName);
 
         if (debug)
         {
             Info<< "Creating VTK mesh for cellSet=" << partName << endl;
         }
 
-        const cellSet cSet(mesh, partName);
-        fvMeshSubset subsetter(mesh);
-        subsetter.setLargeCellSubset(cSet);
+        foamVtuData& vtuData = cachedVtu_(longName);
 
-        vtkUnstructuredGrid* vtkmesh = volumeVTKMesh
-        (
-            subsetter.subMesh(),
-            csetPolyDecomp_[datasetNo]
-        );
-
-        if (vtkmesh)
+        vtkSmartPointer<vtkUnstructuredGrid> vtkgeom;
+        if (vtuData.nPoints() && vtuData.pointMap().size())
         {
-            // superCells + addPointCellLabels must contain global cell ids
-            inplaceRenumber
-            (
-                subsetter.cellMap(),
-                csetPolyDecomp_[datasetNo].superCells()
-            );
-            inplaceRenumber
-            (
-                subsetter.cellMap(),
-                csetPolyDecomp_[datasetNo].addPointCellLabels()
-            );
-
-            // copy pointMap as well, otherwise pointFields fail
-            csetPolyDecomp_[datasetNo].pointMap() = subsetter.pointMap();
-
-            addToBlock(output, vtkmesh, range, datasetNo, partName);
-            vtkmesh->Delete();
-
-            partDataset_[partId] = datasetNo++;
+            if (meshState_ == polyMesh::UNCHANGED)
+            {
+                if (debug)
+                {
+                    Info<< "reuse " << longName << nl;
+                }
+                vtuData.reuse();
+                continue;
+            }
+            else if (meshState_ == polyMesh::POINTS_MOVED)
+            {
+                if (debug)
+                {
+                    Info<< "move points " << longName << nl;
+                }
+                vtkgeom = vtuData.getCopy();
+                vtkgeom->SetPoints
+                (
+                    movePoints(mesh, vtuData, vtuData.pointMap())
+                );
+            }
         }
-    }
 
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
+        if (!vtkgeom)
+        {
+            fvMeshSubset subsetter(mesh);
+            subsetter.setLargeCellSubset(cellSet(mesh, partName));
+
+            vtkgeom = volumeVTKSubsetMesh(subsetter, vtuData);
+        }
+
+        vtuData.set(vtkgeom);
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshCellSets" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }
 
 
-void Foam::vtkPVFoam::convertMeshFaceZones
-(
-    vtkMultiBlockDataSet* output,
-    int& blockNo
-)
+void Foam::vtkPVFoam::convertMeshFaceZones()
 {
-    arrayRange& range = arrayRangeFaceZones_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
+    const arrayRange& range = rangeFaceZones_;
     const fvMesh& mesh = *meshPtr_;
 
     if (range.empty())
@@ -437,257 +453,311 @@ void Foam::vtkPVFoam::convertMeshFaceZones
 
     if (debug)
     {
-        Info<< "<beg> convertMeshFaceZones" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
     const faceZoneMesh& zMesh = mesh.faceZones();
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
-        const word zoneName = getPartName(partId);
-        const label  zoneId = zMesh.findZoneID(zoneName);
-
-        if (!partStatus_[partId] || zoneId < 0)
+        if (!selectedPartIds_.found(partId))
         {
             continue;
         }
 
+        const auto& longName = selectedPartIds_[partId];
+        const word zoneName = getFoamName(longName);
+        const label  zoneId = zMesh.findZoneID(zoneName);
+
+        if (zoneId < 0)
+        {
+            continue;
+        }
         if (debug)
         {
             Info<< "Creating VTKmesh for faceZone[" << zoneId << "] "
                 << zoneName << endl;
         }
 
-        vtkPolyData* vtkmesh = patchVTKMesh(zoneName, zMesh[zoneId]());
+        foamVtpData& vtpData = cachedVtp_(longName);
 
-        if (vtkmesh)
+        vtkSmartPointer<vtkPolyData> vtkgeom;
+        if (vtpData.nPoints())
         {
-            addToBlock(output, vtkmesh, range, datasetNo, zoneName);
-            vtkmesh->Delete();
-
-            partDataset_[partId] = datasetNo++;
+            if (meshState_ == polyMesh::UNCHANGED)
+            {
+                // Without movement is easy.
+                if (debug)
+                {
+                    Info<<"reuse " << longName << nl;
+                }
+                vtpData.reuse();
+                continue;
+            }
+            else if (meshState_ == polyMesh::POINTS_MOVED)
+            {
+                // Need point maps etc - not worth it at the moment
+            }
         }
-    }
 
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
+        if (!vtkgeom)
+        {
+            vtpData.clear();  // No additional ids, maps
+
+            const primitiveFacePatch& pp = zMesh[zoneId]();
+            vtkgeom = patchVTKMesh(pp);
+        }
+
+        vtpData.set(vtkgeom);
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshFaceZones" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }
 
 
-void Foam::vtkPVFoam::convertMeshFaceSets
-(
-    vtkMultiBlockDataSet* output,
-    int& blockNo
-)
+void Foam::vtkPVFoam::convertMeshFaceSets()
 {
-    arrayRange& range = arrayRangeFaceSets_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
+    const arrayRange& range = rangeFaceSets_;
     const fvMesh& mesh = *meshPtr_;
 
     if (debug)
     {
-        Info<< "<beg> convertMeshFaceSets" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
-        const word partName = getPartName(partId);
-
-        if (!partStatus_[partId])
+        if (!selectedPartIds_.found(partId))
         {
             continue;
         }
+
+        const auto& longName = selectedPartIds_[partId];
+        const word partName = getFoamName(longName);
 
         if (debug)
         {
             Info<< "Creating VTK mesh for faceSet=" << partName << endl;
         }
 
-        // faces in sorted order for more reliability
-        uindirectPrimitivePatch p
-        (
-            UIndirectList<face>
-            (
-                mesh.faces(),
-                faceSet(mesh, partName).sortedToc()
-            ),
-            mesh.points()
-        );
+        foamVtpData& vtpData = cachedVtp_(longName);
 
-        if (p.empty())
+        vtkSmartPointer<vtkPolyData> vtkgeom;
+        if (vtpData.nPoints())
         {
-            continue;
+            if (meshState_ == polyMesh::UNCHANGED)
+            {
+                // Without movement is easy.
+                if (debug)
+                {
+                    Info<<"reuse " << longName << nl;
+                }
+                vtpData.reuse();
+                continue;
+            }
+            else if (meshState_ == polyMesh::POINTS_MOVED)
+            {
+                // Need point maps etc - not worth it at the moment
+            }
         }
 
-        vtkPolyData* vtkmesh = patchVTKMesh("faceSet:" + partName, p);
-        if (vtkmesh)
+        if (!vtkgeom)
         {
-            addToBlock(output, vtkmesh, range, datasetNo, partName);
-            vtkmesh->Delete();
+            vtpData.clear();  // No other additional ids, maps
 
-            partDataset_[partId] = datasetNo++;
+            // Misuse cellMap for face labels - sorted order for reliability
+            vtpData.cellMap() = faceSet(mesh, partName).sortedToc();
+
+            if (vtpData.cellMap().size())
+            {
+                uindirectPrimitivePatch pp
+                (
+                    UIndirectList<face>(mesh.faces(), vtpData.cellMap()),
+                    mesh.points()
+                );
+
+                vtkgeom = patchVTKMesh(pp);
+            }
         }
-    }
 
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
+        if (vtkgeom)
+        {
+            vtpData.set(vtkgeom);
+        }
+        else
+        {
+            cachedVtp_.erase(longName);
+        }
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshFaceSets" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }
 
 
-void Foam::vtkPVFoam::convertMeshPointZones
-(
-    vtkMultiBlockDataSet* output,
-    int& blockNo
-)
+void Foam::vtkPVFoam::convertMeshPointZones()
 {
-    arrayRange& range = arrayRangePointZones_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
+    const arrayRange& range = rangePointZones_;
     const fvMesh& mesh = *meshPtr_;
 
     if (debug)
     {
-        Info<< "<beg> convertMeshPointZones" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
     if (range.size())
     {
         const pointZoneMesh& zMesh = mesh.pointZones();
-        for (int partId = range.start(); partId < range.end(); ++partId)
+        for (auto partId : range)
         {
-            word zoneName = getPartName(partId);
-            label zoneId = zMesh.findZoneID(zoneName);
-
-            if (!partStatus_[partId] || zoneId < 0)
+            if (!selectedPartIds_.found(partId))
             {
                 continue;
             }
 
-            const labelUList& pointLabels = zMesh[zoneId];
+            const auto& longName = selectedPartIds_[partId];
+            const word zoneName = getFoamName(longName);
+            const label zoneId = zMesh.findZoneID(zoneName);
 
-            vtkPoints* vtkpoints = vtkPoints::New();
-            vtkpoints->Allocate(pointLabels.size());
-
-            const pointField& meshPoints = mesh.points();
-            forAll(pointLabels, pointi)
+            if (zoneId < 0)
             {
-                vtkpoints->InsertNextPoint(meshPoints[pointLabels[pointi]].v_);
+                continue;
             }
 
-            vtkPolyData* vtkmesh = vtkPolyData::New();
-            vtkmesh->SetPoints(vtkpoints);
-            vtkpoints->Delete();
+            foamVtpData& vtpData = cachedVtp_(longName);
 
-            if (vtkmesh)
+            vtkSmartPointer<vtkPolyData> vtkgeom;
+            if (vtpData.nPoints() && vtpData.pointMap().size())
             {
-                addToBlock(output, vtkmesh, range, datasetNo, zoneName);
-                vtkmesh->Delete();
-
-                partDataset_[partId] = datasetNo++;
+                if (meshState_ == polyMesh::UNCHANGED)
+                {
+                    if (debug)
+                    {
+                        Info<< "reusing " << longName << nl;
+                    }
+                    vtpData.reuse();
+                    continue;
+                }
+                else if (meshState_ == polyMesh::POINTS_MOVED)
+                {
+                    if (debug)
+                    {
+                        Info<< "move points " << longName << nl;
+                    }
+                    vtkgeom = vtpData.getCopy();
+                }
             }
+
+            if (!vtkgeom)
+            {
+                // First time, or topo change
+                vtkgeom = vtkSmartPointer<vtkPolyData>::New();
+                vtpData.pointMap() = zMesh[zoneId];
+            }
+
+            const pointField& points = mesh.points();
+            const labelUList& pointMap = vtpData.pointMap();
+
+            auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
+
+            vtkpoints->SetNumberOfPoints(pointMap.size());
+            forAll(pointMap, pointi)
+            {
+                vtkpoints->SetPoint(pointi, points[pointMap[pointi]].v_);
+            }
+
+            vtkgeom->SetPoints(vtkpoints);
+            vtpData.set(vtkgeom);
         }
-    }
-
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshPointZones" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }
 
 
-
-void Foam::vtkPVFoam::convertMeshPointSets
-(
-    vtkMultiBlockDataSet* output,
-    int& blockNo
-)
+void Foam::vtkPVFoam::convertMeshPointSets()
 {
-    arrayRange& range = arrayRangePointSets_;
-    range.block(blockNo);      // set output block
-    label datasetNo = 0;       // restart at dataset 0
+    const arrayRange& range = rangePointSets_;
     const fvMesh& mesh = *meshPtr_;
 
     if (debug)
     {
-        Info<< "<beg> convertMeshPointSets" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << endl;
         printMemory();
     }
 
-    for (int partId = range.start(); partId < range.end(); ++partId)
+    for (auto partId : range)
     {
-        word partName = getPartName(partId);
-
-        if (!partStatus_[partId])
+        if (!selectedPartIds_.found(partId))
         {
             continue;
         }
 
-        if (debug)
+        const auto& longName = selectedPartIds_[partId];
+        const word partName = getFoamName(longName);
+
+        foamVtpData& vtpData = cachedVtp_(longName);
+
+        vtkSmartPointer<vtkPolyData> vtkgeom;
+        if (vtpData.nPoints() && vtpData.pointMap().size())
         {
-            Info<< "Creating VTK mesh for pointSet=" << partName << endl;
+            if (meshState_ == polyMesh::UNCHANGED)
+            {
+                if (debug)
+                {
+                    Info<< "reusing " << longName << nl;
+                }
+                vtpData.reuse();
+                continue;
+            }
+            else if (meshState_ == polyMesh::POINTS_MOVED)
+            {
+                if (debug)
+                {
+                    Info<< "move points " << longName << nl;
+                }
+                vtkgeom = vtpData.getCopy();
+            }
         }
 
-        const pointSet pSet(mesh, partName);
-
-        vtkPoints* vtkpoints = vtkPoints::New();
-        vtkpoints->Allocate(pSet.size());
-
-        const pointField& meshPoints = mesh.points();
-        forAllConstIter(pointSet, pSet, iter)
+        if (!vtkgeom)
         {
-            vtkpoints->InsertNextPoint(meshPoints[iter.key()].v_);
+            // First time, or topo change
+            vtkgeom = vtkSmartPointer<vtkPolyData>::New();
+            vtpData.pointMap() = pointSet(mesh, partName).sortedToc();
         }
 
-        vtkPolyData* vtkmesh = vtkPolyData::New();
-        vtkmesh->SetPoints(vtkpoints);
-        vtkpoints->Delete();
+        const pointField& points = mesh.points();
+        const labelUList& pointMap = vtpData.pointMap();
 
-        if (vtkmesh)
+        auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
+
+        vtkpoints->SetNumberOfPoints(pointMap.size());
+        forAll(pointMap, pointi)
         {
-            addToBlock(output, vtkmesh, range, datasetNo, partName);
-            vtkmesh->Delete();
-
-            partDataset_[partId] = datasetNo++;
+            vtkpoints->SetPoint(pointi, points[pointMap[pointi]].v_);
         }
-    }
 
-    // anything added?
-    if (datasetNo)
-    {
-        ++blockNo;
+        vtkgeom->SetPoints(vtkpoints);
+        vtpData.set(vtkgeom);
     }
 
     if (debug)
     {
-        Info<< "<end> convertMeshPointSets" << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
         printMemory();
     }
 }

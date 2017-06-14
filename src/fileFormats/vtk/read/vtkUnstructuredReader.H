@@ -63,8 +63,6 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class vtkUnstructuredReader
-:
-    public fileFormats::foamVtkCore
 {
 public:
 
@@ -206,7 +204,7 @@ private:
 
         void read(ISstream& inFile);
 
-        //- Dissallow assignment
+        //- Disallow assignment
         void operator=(const vtkUnstructuredReader&);
 
 
@@ -219,6 +217,7 @@ public:
 
         //- Construct from Istream, read all
         vtkUnstructuredReader(const objectRegistry& obr, ISstream&);
+
 
     // Member Functions
 

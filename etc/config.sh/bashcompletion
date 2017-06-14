@@ -2563,8 +2563,8 @@ _of_foamToVTK()
     local cur="${COMP_WORDS[COMP_CWORD]}"
     local prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-    local opts="-allPatches -ascii -constant -latestTime -nearCellValue -newTimes -noFaceZones -noFunctionObjects -noInternal -noLagrangian -noLinks -noPointValues -noZero -parallel -poly -surfaceFields -useTimeName -srcDoc -doc -help "
-    local optsWithArgs="-case -cellSet -decomposeParDict -excludePatches -faceSet -fields -pointSet -region -roots -time "
+    local opts="-allPatches -ascii -constant -latestTime -nearCellValue -newTimes -noFaceZones -noFunctionObjects -noInternal -noLagrangian -noLinks -noPointValues -noZero -parallel -poly -surfaceFields -useTimeName -xml -srcDoc -doc -help "
+    local optsWithArgs="-case -cellSet -decomposeParDict -excludePatches -faceSet -fields -name -pointSet -region -roots -time "
 
     case ${prev} in
         -case)
