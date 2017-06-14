@@ -65,8 +65,7 @@ Description
         noPatches    | Suppress writing patches     | no        | false
         patches      | Select patches to write      | no        |
         faceZones    | Select faceZones to write    | no        |
-        deprecatedOrder | Old ordering of volume cells  | no    | false
-        consecutive  | Consecutive output numbering | no    | false
+        consecutive  | Consecutive output numbering | no        | false
     \endtable
 
     Note that if the \c patches entry is an empty list, this will select all

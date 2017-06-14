@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
             << mesh.boundaryMesh()[0].name() << ")"
             << endl;
     }
-    meshSubsetHelper myMesh(mesh, meshSubsetHelper::ZONE, cellZoneName);
+    meshSubsetHelper meshRef(mesh, meshSubsetHelper::ZONE, cellZoneName);
 
     //
     // Open new ensight case file, initialize header etc.
@@ -306,7 +306,7 @@ int main(int argc, char *argv[])
 
 
     // Construct the Ensight mesh
-    ensightMesh ensMesh(myMesh.mesh(), writeOpts);
+    ensightMesh ensMesh(meshRef.mesh(), writeOpts);
 
     if (Pstream::master())
     {
@@ -375,7 +375,7 @@ int main(int argc, char *argv[])
         polyMesh::readUpdateState meshState = mesh.readUpdate();
         if (meshState != polyMesh::UNCHANGED)
         {
-            myMesh.correct();
+            meshRef.correct();
             ensMesh.expire();
             ensMesh.correct();
         }
@@ -430,7 +430,7 @@ int main(int argc, char *argv[])
                     volScalarField vf(fieldObject, mesh);
                     wrote = ensightOutput::writeField<scalar>
                     (
-                        myMesh.interpolate(vf),
+                        meshRef.interpolate(vf),
                         ensMesh,
                         os,
                         nodeValues
@@ -446,7 +446,7 @@ int main(int argc, char *argv[])
                     volVectorField vf(fieldObject, mesh);
                     wrote = ensightOutput::writeField<vector>
                     (
-                        myMesh.interpolate(vf),
+                        meshRef.interpolate(vf),
                         ensMesh,
                         os,
                         nodeValues
@@ -462,7 +462,7 @@ int main(int argc, char *argv[])
                     volSphericalTensorField vf(fieldObject, mesh);
                     wrote = ensightOutput::writeField<sphericalTensor>
                     (
-                        myMesh.interpolate(vf),
+                        meshRef.interpolate(vf),
                         ensMesh,
                         os,
                         nodeValues
@@ -478,7 +478,7 @@ int main(int argc, char *argv[])
                     volSymmTensorField vf(fieldObject, mesh);
                     wrote = ensightOutput::writeField<symmTensor>
                     (
-                        myMesh.interpolate(vf),
+                        meshRef.interpolate(vf),
                         ensMesh,
                         os,
                         nodeValues
@@ -494,7 +494,7 @@ int main(int argc, char *argv[])
                     volTensorField vf(fieldObject, mesh);
                     wrote = ensightOutput::writeField<tensor>
                     (
-                        myMesh.interpolate(vf),
+                        meshRef.interpolate(vf),
                         ensMesh,
                         os,
                         nodeValues
@@ -519,7 +519,7 @@ int main(int argc, char *argv[])
                     );
                     wrote = ensightOutput::writeField<scalar>
                     (
-                        myMesh.interpolate<scalar>(df),
+                        meshRef.interpolate<scalar>(df),
                         ensMesh,
                         os,
                         nodeValues
@@ -543,7 +543,7 @@ int main(int argc, char *argv[])
                     );
                     wrote = ensightOutput::writeField<vector>
                     (
-                        myMesh.interpolate<vector>(df),
+                        meshRef.interpolate<vector>(df),
                         ensMesh,
                         os,
                         nodeValues
@@ -567,7 +567,7 @@ int main(int argc, char *argv[])
                     );
                     wrote = ensightOutput::writeField<sphericalTensor>
                     (
-                        myMesh.interpolate<sphericalTensor>(df),
+                        meshRef.interpolate<sphericalTensor>(df),
                         ensMesh,
                         os,
                         nodeValues
@@ -591,7 +591,7 @@ int main(int argc, char *argv[])
                     );
                     wrote = ensightOutput::writeField<symmTensor>
                     (
-                        myMesh.interpolate<symmTensor>(df),
+                        meshRef.interpolate<symmTensor>(df),
                         ensMesh,
                         os,
                         nodeValues
@@ -615,7 +615,7 @@ int main(int argc, char *argv[])
                     );
                     wrote = ensightOutput::writeField<tensor>
                     (
-                        myMesh.interpolate<tensor>(df),
+                        meshRef.interpolate<tensor>(df),
                         ensMesh,
                         os,
                         nodeValues
