@@ -82,8 +82,8 @@ touch $outFile
 writeFilterFunction()
 {
     cat<< WRITEFILTER >> $1
-unset -f _filter_opts 2>/dev/null
-_filter_opts()
+unset -f _of_filter_opts 2>/dev/null
+_of_filter_opts()
 {
     local allOpts=\$1
     local applied=\$2
@@ -166,8 +166,8 @@ do
         opts=($(awk '/^ {0,4}-[a-z]/ && !/</ {print $1}' <<< "$appHelp"))
 
         cat<<WRITECOMPLETION >> $outFile
-unset -f _${appName} 2>/dev/null
-_${appName}()
+unset -f _of_${appName} 2>/dev/null
+_of_${appName}()
 {
     local cur="\${COMP_WORDS[COMP_CWORD]}"
     local prev="\${COMP_WORDS[COMP_CWORD-1]}"
@@ -185,8 +185,8 @@ $(commonOptions ${optsWithArgs[@]})
                 COMPREPLY=(\$(compgen -f -- \${cur}))
             else
                 # Catch-all - present all remaining options
-                opts=\$(_filter_opts "\${opts}" "\${COMP_LINE}")
-                optsWithArgs=\$(_filter_opts "\${optsWithArgs}" "\${COMP_LINE}")
+                opts=\$(_of_filter_opts "\${opts}" "\${COMP_LINE}")
+                optsWithArgs=\$(_of_filter_opts "\${optsWithArgs}" "\${COMP_LINE}")
                 COMPREPLY=(\$(compgen -W "\${opts} \${optsWithArgs}" -- \${cur}))
             fi
             ;;
@@ -194,7 +194,7 @@ $(commonOptions ${optsWithArgs[@]})
 
     return 0
 }
-complete -o nospace -F _${appName} $appName
+complete -o nospace -F _of_${appName} $appName
 
 WRITECOMPLETION
     done
