@@ -19,6 +19,9 @@ do
    rm -f 0*/$i/{rho,mut,alphat,epsilon,k,U,p_rgh,qr,G,IDefault}
 done
 
+# set the initial fields
+restore0Dir
+
 for i in air solid floor
 do
     runApplication -s $i changeDictionary -region $i -subDict dictionaryReplacement
