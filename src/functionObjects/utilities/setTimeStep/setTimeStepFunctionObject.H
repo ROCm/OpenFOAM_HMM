@@ -43,6 +43,9 @@ Usage
     {
         type        setTimeStep;
         libs        ("libutilityFunctionObjects.so");
+
+        deltaT      table ((0 5e-4)(0.01 1e-3));
+
         ...
     }
     \endverbatim
@@ -52,6 +55,10 @@ Usage
         Property     | Description             | Required    | Default value
         type         | Type name: setTimeStep  | yes         |
         enabled      | On/off switch           | no          | yes
+        deltaT       | Time step value         | yes         |
+        timeStart    | Start time              | no          | 0
+        timeEnd      | End time                | no          | GREAT
+        deltaTCoeff  | Time step change limit  | no          | GREAT
     \endtable
 
 SourceFiles

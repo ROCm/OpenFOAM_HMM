@@ -25,6 +25,13 @@ Class
     Foam::functionObjects::timeControl
 
 Description
+    Wrapper around functionObjects to add time control.
+
+    Adds
+    - timeStart, timeEnd activation
+    - deltaT modification to hit writeInterval (note: if adjustableRunTime
+      also in controlDict this has to be an integer multiple)
+    - smooth deltaT variation through optional deltaTCoeff parameter
 
 Note
     Since the timeIndex is used directly from Foam::Time, it is unaffected
@@ -85,6 +92,9 @@ class timeControl
             //- De-activation time - defaults to VGREAT
             scalar timeEnd_;
 
+            //- Max time step change
+            scalar deltaTCoeff_;
+
             //- Number of steps before the dump-time during which deltaT
             //  may be changed (valid for adjustableRunTime)
             label nStepsToStartTimeChange_;
@@ -103,6 +113,16 @@ class timeControl
         label executeTimeIndex_;
 
 
+        // For time-step change limiting (deltaTCoeff supplied) only:
+
+            //- Store the old deltaT value
+            scalar deltaT0_;
+
+            //- Store the series expansion coefficient value
+            scalar seriesDTCoeff_;
+
+
+
     // Private Member Functions
 
         //- Read relevant dictionary entries
@@ -110,6 +130,26 @@ class timeControl
 
         //- Returns true if within time bounds
         bool active() const;
+
+        //- Return expansion ratio (deltaT change) that gives overall time
+        static scalar calcExpansion
+        (
+            const scalar startRatio,
+            const scalar y,
+            const label n
+        );
+
+        //- Calculate deltaT change such that the next write interval is
+        //  obeyed. Updates requiredDeltaTCoeff
+        void calcDeltaTCoeff
+        (
+            scalar& requiredDeltaTCoeff,
+            const scalar wantedDT,
+            const label nSteps,
+            const scalar presentTime,
+            const scalar timeToNextWrite,
+            const bool rampDirectionUp
+        );
 
         //- Disallow default bitwise copy construct
         timeControl(const timeControl&);
