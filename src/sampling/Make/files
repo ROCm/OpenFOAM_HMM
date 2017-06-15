@@ -39,6 +39,7 @@ sampledSurface/sampledSurface/sampledSurface.C
 sampledSurface/sampledSurfaces/sampledSurfaces.C
 sampledSurface/sampledSurfaces/sampledSurfacesGrouping.C
 sampledSurface/sampledTriSurfaceMesh/sampledTriSurfaceMesh.C
+sampledSurface/sampledTriSurfaceMesh/sampledTriSurfaceMeshNormal.C
 sampledSurface/thresholdCellFaces/sampledThresholdCellFaces.C
 
 /* Proof-of-concept: */
