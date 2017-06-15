@@ -87,7 +87,7 @@ void Foam::triSurface::writeVTK
             {
                 const Face& f = faceLst[faceMap[faceIndex++]];
 
-                format().write(3);  // The size prefix
+                format().write(label(3));   // The size prefix
                 vtk::writeList(format(), f);
             }
         }
@@ -131,7 +131,7 @@ void Foam::triSurface::writeVTK
 
         for (const Face& f : faceLst)
         {
-            format().write(3);  // The size prefix
+            format().write(label(3));   // The size prefix
             vtk::writeList(format(), f);
         }
         format().flush();
