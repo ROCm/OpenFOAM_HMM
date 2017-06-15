@@ -35,8 +35,7 @@ volVectorField U
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh,
-    true
+    mesh
 );
 
 #include "compressibleCreatePhi.H"
@@ -57,20 +56,7 @@ autoPtr<compressible::turbulenceModel> turbulence
     )
 );
 
-Info<< "Creating field dpdt\n" << endl;
-volScalarField dpdt
-(
-    IOobject
-    (
-        "dpdt",
-        runTime.timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedScalar("dpdt", p.dimensions()/dimTime, 0)
-);
+#include "createDpdt.H"
 
 #include "createK.H"
 
