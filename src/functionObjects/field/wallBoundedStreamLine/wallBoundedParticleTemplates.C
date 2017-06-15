@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -175,7 +175,14 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
             // endposition? i.e. since volume of nbr tet is positive the
             // tracking direction should be into the tet.
             tetIndices nbrTi(nbrCelli, tetFacei_, tetPti_, mesh_);
-            if ((nbrTi.faceTri(mesh_).normal() & (endPosition-position())) < 0)
+
+            bool posVol = (nbrTi.tet(mesh_).mag() > 0);
+
+            if
+            (
+                posVol
+             == ((nbrTi.faceTri(mesh_).normal() & (endPosition-position())) < 0)
+            )
             {
                 // Change into nbrCell. No need to change tetFace, tetPt.
                 //Pout<< "    crossed from cell:" << celli_
@@ -213,12 +220,22 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
                 << abort(FatalError);
         }
 
+        const triFace tri(currentTetIndices().faceTriIs(mesh_));
+        vector n = tri.normal(mesh_.points());
+        n /= mag(n);
+
         point projectedEndPosition = endPosition;
+
+        const bool posVol = (currentTetIndices().tet(mesh_).mag() > 0);
+
+        if (!posVol)
+        {
+            // Negative tet volume. Track back by setting the end point
+            projectedEndPosition = position() - (endPosition-position());
+        }
+
         // Remove normal component
         {
-            const triFace tri(currentTetIndices().faceTriIs(mesh_));
-            vector n = tri.normal(mesh_.points());
-            n /= mag(n);
             const point& basePt = mesh_.points()[tri[0]];
             projectedEndPosition -= ((projectedEndPosition-basePt)&n)*n;
         }
@@ -234,7 +251,7 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
         {
             // See if the current triangle has got a point on the
             // correct side of the edge.
-            doTrack = isTriAlongTrack(projectedEndPosition);
+            doTrack = isTriAlongTrack(n, projectedEndPosition);
         }
 
 
@@ -242,7 +259,7 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
         {
             // Track across triangle. Return triangle edge crossed.
             label triEdgei = -1;
-            trackFraction = trackFaceTri(projectedEndPosition, triEdgei);
+            trackFraction = trackFaceTri(n, projectedEndPosition, triEdgei);
 
             if (triEdgei == -1)
             {

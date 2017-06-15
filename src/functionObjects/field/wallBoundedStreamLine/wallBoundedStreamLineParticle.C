@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -120,11 +120,12 @@ Foam::vector Foam::wallBoundedStreamLineParticle::sample
     {
         // Stagnant particle. Might as well stop
         lifeTime_ = 0;
+        return vector::zero;
     }
-
-    U /= magU;
-
-    return U;
+    else
+    {
+        return U/magU;
+    }
 }
 
 
@@ -266,16 +267,6 @@ bool Foam::wallBoundedStreamLineParticle::move
         {
             // Force removal
             lifeTime_ = 0;
-        }
-
-        if
-        (
-            !td.keepParticle
-        ||  td.switchProcessor
-        ||  lifeTime_ == 0
-        )
-        {
-            break;
         }
     }
 
