@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  plus                                  |
@@ -9,29 +9,14 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
+    class       uniformDimensionedVectorField;
     location    "constant";
-    object      transportProperties;
+    object      g;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phases (water air);
-
-water
-{
-    transportModel  Newtonian;
-    nu              1e-06;
-    rho             1000;
-}
-
-air
-{
-    transportModel  Newtonian;
-    nu              1.48e-05;
-    rho             1;
-}
-
-sigma           0.07;
+dimensions      [0 1 -2 0 0 0 0];
+value           ( 0 0 -9.81 );
 
 
 // ************************************************************************* //

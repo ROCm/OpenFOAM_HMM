@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  plus                                  |
@@ -9,29 +9,45 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      transportProperties;
+    class       volVectorField;
+    location    "0";
+    object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phases (water air);
+dimensions      [0 1 -1 0 0 0 0];
 
-water
+internalField   uniform (0 0 0);
+
+boundaryField
 {
-    transportModel  Newtonian;
-    nu              1e-06;
-    rho             1000;
+    left
+    {
+        type            waveVelocity;
+        value           uniform (0 0 0);
+    }
+
+    right
+    {
+        type            waveVelocity;
+        value           uniform (0 0 0);
+    }
+
+    sides
+    {
+        type            slip;
+    }
+
+    ground
+    {
+        type            noSlip;
+    }
+
+    top
+    {
+        type            pressureInletOutletVelocity;
+        value           uniform (0 0 0);
+    }
 }
-
-air
-{
-    transportModel  Newtonian;
-    nu              1.48e-05;
-    rho             1;
-}
-
-sigma           0.07;
-
 
 // ************************************************************************* //

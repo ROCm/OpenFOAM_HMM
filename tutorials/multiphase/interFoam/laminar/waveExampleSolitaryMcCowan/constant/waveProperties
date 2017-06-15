@@ -11,27 +11,33 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      transportProperties;
+    object      wavesProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phases (water air);
-
-water
+left
 {
-    transportModel  Newtonian;
-    nu              1e-06;
-    rho             1000;
+    alpha           alpha.water;
+
+    waveModel       McCowan;
+
+    nPaddle         1;
+
+    waveHeight      0.05;
+
+    waveAngle       0.0;
+
+    activeAbsorption yes;
 }
 
-air
+right
 {
-    transportModel  Newtonian;
-    nu              1.48e-05;
-    rho             1;
+    alpha           alpha.water;
+
+    waveModel       shallowWaterAbsorption;
+
+    nPaddle         1;
 }
-
-sigma           0.07;
-
 
 // ************************************************************************* //
+
