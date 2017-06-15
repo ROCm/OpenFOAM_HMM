@@ -1,11 +1,4 @@
 {
-    /*
-    rho = thermo.rho();
-    rho = max(rho, rhoMin[i]);
-    rho = min(rho, rhoMax[i]);
-    rho.relax();
-    */
-
     volScalarField rAU("rAU", 1.0/UEqn.A());
     surfaceScalarField rhorAUf("rhorAUf", fvc::interpolate(rho*rAU));
     volVectorField HbyA(constrainHbyA(rAU*UEqn.H(), U, p_rgh));
@@ -39,11 +32,7 @@
             fvm::laplacian(rhorAUf, p_rgh) == fvc::div(phiHbyA)
         );
 
-        p_rghEqn.setReference
-        (
-            pRefCell,
-            compressible ? getRefCellValue(p_rgh, pRefCell) : pRefValue
-        );
+        p_rghEqn.setReference(pRefCell, getRefCellValue(p_rgh, pRefCell));
 
         p_rghEqn.solve();
 
@@ -84,8 +73,8 @@
         {
             p += (initialMass - fvc::domainIntegrate(psi*p))
                 /compressibility;
-            p_rgh = p - rho*gh;
         }
+        p_rgh = p - rho*gh;
     }
 
     rho = thermo.rho();

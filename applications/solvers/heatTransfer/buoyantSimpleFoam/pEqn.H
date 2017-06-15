@@ -31,11 +31,7 @@
             fvm::laplacian(rhorAUf, p_rgh) == fvc::div(phiHbyA)
         );
 
-        p_rghEqn.setReference
-        (
-            pRefCell,
-            compressible ? getRefCellValue(p_rgh, pRefCell) : pRefValue
-        );
+        p_rghEqn.setReference(pRefCell, getRefCellValue(p_rgh, pRefCell));
 
         p_rghEqn.solve();
 
@@ -76,8 +72,9 @@
         {
             p += (initialMass - fvc::domainIntegrate(psi*p))
                 /fvc::domainIntegrate(psi);
-            p_rgh = p - rho*gh;
+
         }
+        p_rgh = p - rho*gh;
     }
 
     rho = thermo.rho();

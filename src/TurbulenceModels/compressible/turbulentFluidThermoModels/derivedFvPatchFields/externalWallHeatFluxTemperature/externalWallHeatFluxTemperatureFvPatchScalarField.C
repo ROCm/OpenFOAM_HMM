@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -185,39 +185,17 @@ externalWallHeatFluxTemperatureFvPatchScalarField
     temperatureCoupledBase(patch(), ptf),
     mode_(ptf.mode_),
     Q_(ptf.Q_),
+    q_(ptf.q_, mapper),
+    h_(ptf.h_, mapper),
+    Ta_(ptf.Ta_, mapper),
     relaxation_(ptf.relaxation_),
     emissivity_(ptf.emissivity_),
+    qrPrevious_(ptf.qrPrevious_, mapper),
     qrRelaxation_(ptf.qrRelaxation_),
     qrName_(ptf.qrName_),
     thicknessLayers_(ptf.thicknessLayers_),
     kappaLayers_(ptf.kappaLayers_)
-{
-    switch (mode_)
-    {
-        case fixedPower:
-        {
-            break;
-        }
-        case fixedHeatFlux:
-        {
-            q_.autoMap(mapper);
-
-            break;
-        }
-        case fixedHeatTransferCoeff:
-        {
-            h_.autoMap(mapper);
-            Ta_.autoMap(mapper);
-
-            break;
-        }
-    }
-
-    if (qrName_ != "none")
-    {
-        qrPrevious_.autoMap(mapper);
-    }
-}
+{}
 
 
 Foam::externalWallHeatFluxTemperatureFvPatchScalarField::

@@ -22,7 +22,8 @@ done
 # Generate view factors
 for i in air
 do
-     runParallel -s $i -np 4 viewFactorsGen -region $i
+     runParallel -s $i -np 4 \
+        viewFactorsGen -region $i
 done
 
 # set the initial fields
