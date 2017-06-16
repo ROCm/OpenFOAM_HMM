@@ -317,7 +317,8 @@ bool Foam::probes::read(const dictionary& dict)
             WarningInFunction
                 << "Only cell interpolation can be applied when "
                 << "not using fixedLocations.  InterpolationScheme "
-                << "entry will be ignored";
+                << "entry will be ignored"
+                << endl;
         }
     }
 
