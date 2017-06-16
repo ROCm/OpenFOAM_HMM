@@ -510,9 +510,9 @@ int main(int argc, char *argv[])
             }
 
             labelList indices = findStrings(baffleSelect, patchNames);
-            forAll(indices, patchi)
+            for (const label patchId : indices)
             {
-                surfBaffleRegions[patchi] = true;
+                surfBaffleRegions[patchId] = true;
             }
 
             if (indices.size())
