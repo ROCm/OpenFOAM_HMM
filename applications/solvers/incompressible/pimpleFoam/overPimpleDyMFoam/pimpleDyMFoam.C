@@ -101,15 +101,6 @@ int main(int argc, char *argv[])
         // Calculate absolute flux from the mapped surface velocity
         phi = mesh.Sf() & Uf;
 
-        if (runTime.outputTime())
-        {
-            volScalarField
-            (
-                "contPhi",
-                interpolatedCells*cellMask*fvc::div(phi)
-            ).write();
-        }
-
         if (mesh.changing() && correctPhi)
         {
             #include "correctPhi.H"

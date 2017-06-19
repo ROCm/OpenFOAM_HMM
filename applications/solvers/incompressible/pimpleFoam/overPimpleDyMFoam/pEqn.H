@@ -56,16 +56,6 @@ if (adjustFringe)
     fvc::makeAbsolute(phiHbyA, U);
 }
 
-if (runTime.outputTime())
-{
-    volScalarField
-    (
-        "div(phiHbyA)",
-        fvc::div(phiHbyA)
-        //interpolatedCells*cellMask*fvc::div(phiHbyA)
-    ).write();
-}
-
 while (pimple.correctNonOrthogonal())
 {
     fvScalarMatrix pEqn

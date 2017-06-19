@@ -104,10 +104,4 @@ if (mesh.changing())
             phi -= pcorrEqn.flux();
         }
     }
-
-    if (runTime.outputTime())
-    {
-        volScalarField("contPhiPcorr", fvc::div(phi)).write();
-        pcorr.write();
-    }
 }
