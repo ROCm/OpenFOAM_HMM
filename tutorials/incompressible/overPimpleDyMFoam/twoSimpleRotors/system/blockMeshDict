@@ -94,7 +94,23 @@ boundary
         (
             (3 7 6 2)
             (1 5 4 0)
+        );
+    }
+
+    inlet
+    {
+        type patch;
+        faces
+        (
             (0 4 7 3)
+        );
+    }
+
+    outlet
+    {
+        type patch;
+        faces
+        (
             (2 6 5 1)
         );
     }

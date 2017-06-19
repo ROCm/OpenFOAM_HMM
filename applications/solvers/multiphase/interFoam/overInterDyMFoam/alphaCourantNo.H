@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,32 +22,38 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Global
-    blockedCellMask
+    alphaCourantNo
 
 Description
-    Creates mask for blocked out cells
+    Calculates and outputs the mean and maximum Courant Numbers.
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-Info<< "Creating cellMask field to block out hole cells\n" << endl;
-
-volScalarField cellMask
+scalar maxAlphaCo
 (
-    IOobject
-    (
-        "cellMask",
-        runTime.timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedScalar("cellMask", dimless, 1.0),
-    zeroGradientFvPatchScalarField::typeName
+    readScalar(runTime.controlDict().lookup("maxAlphaCo"))
 );
 
-#include "setCellMask.H"
+scalar alphaCoNum = 0.0;
+scalar meanAlphaCoNum = 0.0;
+
+if (mesh.nInternalFaces())
+{
+    surfaceScalarField phiMask(localMin<scalar>(mesh).interpolate(cellMask));
+
+    scalarField sumPhi
+    (
+        mixture.nearInterface()().internalField()
+       *fvc::surfaceSum(mag(phiMask*phi))().internalField()
+    );
+
+    alphaCoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
+
+    meanAlphaCoNum =
+        0.5*(gSum(sumPhi)/gSum(mesh.V().field()))*runTime.deltaTValue();
+}
+
+Info<< "Interface Courant Number mean: " << meanAlphaCoNum
+    << " max: " << alphaCoNum << endl;
 
 // ************************************************************************* //
