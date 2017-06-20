@@ -95,8 +95,8 @@ Foam::label Foam::mergePoints
         sortedTol[sortI] =
             2*mergeTol*
             (
-                mag(scalar(pt.x() - compareOrigin.x())),
-              + mag(scalar(pt.y() - compareOrigin.y())),
+                mag(scalar(pt.x() - compareOrigin.x()))
+              + mag(scalar(pt.y() - compareOrigin.y()))
               + mag(scalar(pt.z() - compareOrigin.z()))
             );
     }
