@@ -232,6 +232,39 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
         {
             // Negative tet volume. Track back by setting the end point
             projectedEndPosition = position() - (endPosition-position());
+
+            // Make sure to use a large enough vector to cross the negative
+            // face. Bit overkill.
+            const vector d(endPosition-position());
+            const scalar magD(mag(d));
+            if (magD > ROOTVSMALL)
+            {
+                // Get overall mesh bounding box
+                treeBoundBox meshBb(mesh_.bounds());
+                // Extend to make 3D
+                meshBb.inflate(ROOTSMALL);
+
+                // Create vector guaranteed to cross mesh bounds
+                projectedEndPosition = position()-meshBb.mag()*d/magD;
+
+                // Clip to mesh bounds
+                point intPt;
+                direction intPtBits;
+                bool ok = meshBb.intersects
+                (
+                    projectedEndPosition,
+                    position()-projectedEndPosition,
+                    projectedEndPosition,
+                    position(),
+                    intPt,
+                    intPtBits
+                );
+                if (ok)
+                {
+                    // Should always be the case
+                    projectedEndPosition = intPt;
+                }
+            }
         }
 
         // Remove normal component

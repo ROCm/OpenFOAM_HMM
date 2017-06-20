@@ -190,7 +190,7 @@ void Foam::fieldToCell::applyToSet
         false
     );
 
-    // Note: should check for volScalarField but that introduces depencendy
+    // Note: should check for volScalarField but that introduces dependency
     //       on volMesh so just use another type with processor-local scope
     if (!fieldObject.typeHeaderOk<labelIOList>(false))
     {
@@ -198,6 +198,9 @@ void Foam::fieldToCell::applyToSet
             << "Cannot read field " << fieldName_
             << " from time " << mesh().time().timeName() << endl;
     }
+    // Note: should use volScalarField::typeName instead below
+    //       but that would introduce linkage problems (finiteVolume needs
+    //       meshTools)
     else if (fieldObject.headerClassName() == "volScalarField")
     {
         IFstream str(typeFilePath<labelIOList>(fieldObject));
