@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,12 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(axesRotation, 0);
-    addToRunTimeSelectionTable(coordinateRotation, axesRotation, dictionary);
+    addToRunTimeSelectionTable
+    (
+        coordinateRotation,
+        axesRotation,
+        dictionary
+    );
     addToRunTimeSelectionTable
     (
         coordinateRotation,
@@ -41,119 +46,13 @@ namespace Foam
     );
 }
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::axesRotation::calcTransform
-(
-    const vector& axis1,
-    const vector& axis2,
-    const axisOrder& order
-)
-{
-    vector a = axis1/mag(axis1);
-    vector b = axis2;
-
-    b = b - (b & a)*a;
-
-    if (mag(b) < SMALL)
-    {
-        FatalErrorInFunction
-            << "axis1, axis2 appear co-linear: "
-            << axis1 << ", " << axis2 << endl
-            << abort(FatalError);
-    }
-
-    b = b/mag(b);
-    vector c = a^b;
-
-    tensor Rtr;
-    switch (order)
-    {
-        case e1e2:
-        {
-            Rtr = tensor(a, b, c);
-            break;
-        }
-        case e2e3:
-        {
-            Rtr = tensor(c, a, b);
-            break;
-        }
-        case e3e1:
-        {
-            Rtr = tensor(b, c, a);
-            break;
-        }
-        default:
-        {
-            FatalErrorInFunction
-                << "Unhandled axes specifictation" << endl
-                << abort(FatalError);
-
-            Rtr = Zero;
-            break;
-        }
-    }
-
-    // Global->local transformation
-    Rtr_ = Rtr;
-
-    // Local->global transformation
-    R_ = Rtr.T();
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::axesRotation::axesRotation()
 :
     R_(sphericalTensor::I),
-    Rtr_(R_)
-{}
-
-
-Foam::axesRotation::axesRotation
-(
-    const vector& axis,
-    const vector& dir
-)
-:
-    R_(sphericalTensor::I),
-    Rtr_(R_)
-{
-    calcTransform(axis, dir, e3e1);
-}
-
-
-Foam::axesRotation::axesRotation
-(
-    const dictionary& dict
-)
-:
-    R_(sphericalTensor::I),
-    Rtr_(R_)
-{
-    operator=(dict);
-}
-
-
-Foam::axesRotation::axesRotation
-(
-    const dictionary& dict,
-    const objectRegistry& obr
-)
-:
-    R_(sphericalTensor::I),
-    Rtr_(R_)
-{
-    operator=(dict);
-}
-
-
-Foam::axesRotation::axesRotation(const tensor& R)
-:
-    R_(R),
-    Rtr_(R_.T())
+    Rtr_(sphericalTensor::I)
 {}
 
 
@@ -164,8 +63,144 @@ Foam::axesRotation::axesRotation(const axesRotation& r)
 {}
 
 
+Foam::axesRotation::axesRotation(const tensor& R)
+:
+    R_(R),
+    Rtr_(R_.T())
+{}
+
+
+Foam::axesRotation::axesRotation
+(
+    const vector& axis,
+    const vector& dir,
+    const axisOrder& order
+)
+:
+    R_(sphericalTensor::I),
+    Rtr_(sphericalTensor::I)
+{
+    setTransform(axis, dir, order);
+}
+
+
+Foam::axesRotation::axesRotation
+(
+    const vector& axis
+)
+:
+    R_(sphericalTensor::I),
+    Rtr_(sphericalTensor::I)
+{
+    direction maxCmpt = 0, dirCmpt = 1;
+
+    scalar maxVal = mag(axis[maxCmpt]);
+    bool negative = (axis[maxCmpt] < 0);
+
+    for (direction cmpt = 1; cmpt < vector::nComponents; ++cmpt)
+    {
+        const scalar val = mag(axis[cmpt]);
+
+        if (maxVal < val)
+        {
+            maxVal  = val;
+            maxCmpt = cmpt;
+            dirCmpt = maxCmpt+1;
+            negative = (axis[cmpt] < 0);
+
+            if (dirCmpt >= vector::nComponents)
+            {
+                dirCmpt = 0;
+            }
+        }
+    }
+
+    vector dir = Zero;
+    dir.component(dirCmpt) = (negative ? -1 : 1);
+
+    setTransform(axis, dir, E3_E1);
+}
+
+
+Foam::axesRotation::axesRotation
+(
+    const dictionary& dict
+)
+:
+    R_(sphericalTensor::I),
+    Rtr_(sphericalTensor::I)
+{
+    operator=(dict);
+}
+
+
+Foam::axesRotation::axesRotation
+(
+    const dictionary& dict,
+    const objectRegistry&
+)
+:
+    axesRotation(dict)
+{}
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::axesRotation::setTransform
+(
+    const vector& axis1,
+    const vector& axis2,
+    const axisOrder& order
+)
+{
+    const vector a = axis1/mag(axis1);
+    vector b = axis2;
+
+    b = b - (b & a)*a;
+
+    if (mag(b) < SMALL)
+    {
+        FatalErrorInFunction
+            << "axis1, axis2 appear to be co-linear: "
+            << axis1 << ", " << axis2 << endl
+            << abort(FatalError);
+    }
+
+    b = b/mag(b);
+    const vector c = a^b;
+
+    // Global->local transformation
+    switch (order)
+    {
+        case E1_E2:
+        {
+            Rtr_ = tensor(a, b, c);
+            break;
+        }
+        case E2_E3:
+        {
+            Rtr_ = tensor(c, a, b);
+            break;
+        }
+        case E3_E1:
+        {
+            Rtr_ = tensor(b, c, a);
+            break;
+        }
+        default:
+        {
+            FatalErrorInFunction
+                << "Unhandled axes specification" << endl
+                << abort(FatalError);
+
+            break;
+        }
+    }
+
+    // Local->global transformation
+    R_ = Rtr_.T();
+}
+
 
 const Foam::tensorField& Foam::axesRotation::Tr() const
 {
@@ -263,34 +298,28 @@ Foam::symmTensor Foam::axesRotation::transformVector
 
 void Foam::axesRotation::operator=(const dictionary& dict)
 {
-    if (debug)
-    {
-        Pout<< "axesRotation::operator=(const dictionary&) : "
-            << "assign from " << dict << endl;
-    }
-
     vector axis1, axis2;
-    axisOrder order(e3e1);
 
     if (dict.readIfPresent("e1", axis1) && dict.readIfPresent("e2", axis2))
     {
-        order = e1e2;
+        setTransform(axis1, axis2, E1_E2);
     }
-    else if (dict.readIfPresent("e2", axis1)&& dict.readIfPresent("e3", axis2))
+    else if (dict.readIfPresent("e2", axis1) && dict.readIfPresent("e3", axis2))
     {
-        order = e2e3;
+        setTransform(axis1, axis2, E2_E3);
     }
-    else if (dict.readIfPresent("e3", axis1)&& dict.readIfPresent("e1", axis2))
+    else if (dict.readIfPresent("e3", axis1) && dict.readIfPresent("e1", axis2))
     {
-        order = e3e1;
+        setTransform(axis1, axis2, E3_E1);
     }
     else if (dict.found("axis") || dict.found("direction"))
     {
         // Both "axis" and "direction" are required
         // If one is missing the appropriate error message will be generated
-        order = e3e1;
         dict.lookup("axis") >> axis1;
         dict.lookup("direction") >> axis2;
+
+        setTransform(axis1, axis2, E3_E1);
     }
     else
     {
@@ -299,16 +328,6 @@ void Foam::axesRotation::operator=(const dictionary& dict)
             << "found "
             << exit(FatalError);
     }
-
-    calcTransform(axis1, axis2, order);
-}
-
-
-void Foam::axesRotation::write(Ostream& os) const
-{
-     os.writeKeyword("e1") << e1() << token::END_STATEMENT << nl;
-     os.writeKeyword("e2") << e2() << token::END_STATEMENT << nl;
-     os.writeKeyword("e3") << e3() << token::END_STATEMENT << nl;
 }
 
 
