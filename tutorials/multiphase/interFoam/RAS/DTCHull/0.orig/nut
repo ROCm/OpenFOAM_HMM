@@ -21,7 +21,6 @@ internalField   uniform 5e-07;
 
 boundaryField
 {
-    //- Set patchGroups for constraint patches
     #includeEtc "caseDicts/setConstraintTypes"
 
     inlet
