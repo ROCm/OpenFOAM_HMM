@@ -49,7 +49,7 @@ case SYSTEMOPENMPI:
     breaksw
 
 case OPENMPI:
-    setenv FOAM_MPI openmpi-2.0.2
+    setenv FOAM_MPI openmpi-2.1.1
     _foamEtc config.csh/openmpi                 # <- Adjustments (optional)
 
     setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
