@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,26 +34,15 @@ Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
     const objectRegistry& obr
 )
 {
-    if (debug)
-    {
-        Pout<< "coordinateRotation::New"
-            "(const dictionary&, const objectRegistry&) : "
-            << "constructing coordinateRotation"
-            << endl;
-    }
-
     const word rotType = dict.lookup("type");
 
-    objectRegistryConstructorTable::iterator cstrIter =
-        objectRegistryConstructorTablePtr_->find(rotType);
+    auto cstrIter = objectRegistryConstructorTablePtr_->cfind(rotType);
 
     if (!cstrIter.found())
     {
         FatalIOErrorInFunction(dict)
-            << "Unknown coordinateRotation type "
-            << rotType << nl << nl
+            << "Unknown coordinateRotation type " << rotType << nl << nl
             << "Valid coordinateRotation types are :" <<  nl
-            << "[default: axes ]"
             << objectRegistryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
@@ -67,23 +56,14 @@ Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
     const dictionary& dict
 )
 {
-    if (debug)
-    {
-        Pout<< "coordinateRotation::New(const dictionary&) : "
-            << "constructing coordinateRotation"
-            << endl;
-    }
-
     const word rotType = dict.lookup("type");
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(rotType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(rotType);
 
     if (!cstrIter.found())
     {
         FatalIOErrorInFunction(dict)
-            << "Unknown coordinateRotation type "
-            << rotType << nl << nl
+            << "Unknown coordinateRotation type " << rotType << nl << nl
             << "Valid coordinateRotation types are :" <<  nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);

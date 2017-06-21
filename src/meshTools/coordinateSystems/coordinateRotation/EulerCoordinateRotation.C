@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -195,7 +195,17 @@ void Foam::EulerCoordinateRotation::calcTransform
 Foam::EulerCoordinateRotation::EulerCoordinateRotation()
 :
     R_(sphericalTensor::I),
-    Rtr_(R_)
+    Rtr_(sphericalTensor::I)
+{}
+
+
+Foam::EulerCoordinateRotation::EulerCoordinateRotation
+(
+    const EulerCoordinateRotation& r
+)
+:
+    R_(r.R_),
+    Rtr_(r.Rtr_)
 {}
 
 
@@ -206,7 +216,7 @@ Foam::EulerCoordinateRotation::EulerCoordinateRotation
 )
 :
     R_(sphericalTensor::I),
-    Rtr_(R_)
+    Rtr_(sphericalTensor::I)
 {
     calcTransform
     (
@@ -227,7 +237,7 @@ Foam::EulerCoordinateRotation::EulerCoordinateRotation
 )
 :
     R_(sphericalTensor::I),
-    Rtr_(R_)
+    Rtr_(sphericalTensor::I)
 {
     calcTransform(phiAngle, thetaAngle, psiAngle, inDegrees);
 }
@@ -239,9 +249,9 @@ Foam::EulerCoordinateRotation::EulerCoordinateRotation
 )
 :
     R_(sphericalTensor::I),
-    Rtr_(R_)
+    Rtr_(sphericalTensor::I)
 {
-    vector rotation(dict.lookup("rotation"));
+    const vector rotation(dict.lookup("rotation"));
 
     calcTransform
     (
@@ -259,36 +269,8 @@ Foam::EulerCoordinateRotation::EulerCoordinateRotation
     const objectRegistry&
 )
 :
-    R_(sphericalTensor::I),
-    Rtr_(R_)
-{
-    vector rotation(dict.lookup("rotation"));
-
-    calcTransform
-    (
-        rotation.component(vector::X),
-        rotation.component(vector::Y),
-        rotation.component(vector::Z),
-        dict.lookupOrDefault("degrees", true)
-    );
-}
-
-
-Foam::EulerCoordinateRotation::EulerCoordinateRotation
-(
-    const EulerCoordinateRotation& r
-)
-:
-    R_(r.R_),
-    Rtr_(r.Rtr_)
+    EulerCoordinateRotation(dict)
 {}
 
-
-void Foam::EulerCoordinateRotation::write(Ostream& os) const
-{
-     os.writeKeyword("e1") << e1() << token::END_STATEMENT << nl;
-     os.writeKeyword("e2") << e2() << token::END_STATEMENT << nl;
-     os.writeKeyword("e3") << e3() << token::END_STATEMENT << nl;
-}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

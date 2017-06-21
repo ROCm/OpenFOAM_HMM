@@ -770,10 +770,11 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::storeOldTimes() const
     )
     {
         storeOldTime();
+        timeIndex_ = this->time().timeIndex();
     }
 
     // Correct time index
-    timeIndex_ = this->time().timeIndex();
+    //timeIndex_ = this->time().timeIndex();
 }
 
 
@@ -835,6 +836,17 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::oldTime() const
             ),
             *this
         );
+
+        if (debug)
+        {
+            InfoInFunction
+                << "created old time field " << field0Ptr_->info() << endl;
+
+            if (debug&2)
+            {
+                error::printStack(Info);
+            }
+        }
     }
     else
     {

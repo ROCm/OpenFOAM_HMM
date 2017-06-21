@@ -60,7 +60,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class cylindrical Declaration
+                         Class cylindrical Declaration
 \*---------------------------------------------------------------------------*/
 
 class cylindrical
@@ -96,13 +96,22 @@ public:
 
     // Constructors
 
+        //- Construct as copy
+        cylindrical(const cylindrical& r);
+
+        //- Construct from tensor Field
+        explicit cylindrical(const tensorField& R);
+
+        //- Construct from dictionary - for API compatibility only
+        explicit cylindrical(const dictionary& dict);
+
         //- Construct from dictionary and objectRegistry
-        cylindrical(const dictionary&, const objectRegistry&);
+        cylindrical(const dictionary& dict, const objectRegistry& obr);
 
         //- Construct from components for all cells
         cylindrical
         (
-            const objectRegistry&,
+            const objectRegistry& obr,
             const vector& axis,
             const point& origin
         );
@@ -110,20 +119,11 @@ public:
         //- Construct from components for list of cells
         cylindrical
         (
-            const objectRegistry&,
+            const objectRegistry& obr,
             const vector& axis,
             const point& origin,
             const List<label>& cells
         );
-
-        //- Construct from dictionary
-        cylindrical(const dictionary&);
-
-        //- Construct from tensor Field
-        cylindrical(const tensorField&);
-
-        //- Construct as copy
-        cylindrical(const cylindrical&);
 
         //- Return clone
         autoPtr<coordinateRotation> clone() const

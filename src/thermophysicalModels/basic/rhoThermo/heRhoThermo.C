@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,16 +28,43 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class BasicPsiThermo, class MixtureType>
-void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::calculate()
+void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::calculate
+(
+    const volScalarField& p,
+    volScalarField& T,
+    volScalarField& he,
+    volScalarField& psi,
+    volScalarField& rho,
+    volScalarField& mu,
+    volScalarField& alpha,
+    const bool doOldTimes
+)
 {
-    const scalarField& hCells = this->he();
-    const scalarField& pCells = this->p_;
+    // Note: update oldTimes before current time so that if T.oldTime() is
+    // created from T, it starts from the unconverted T
+    if (doOldTimes && (p.nOldTimes() || T.nOldTimes()))
+    {
+        calculate
+        (
+            p.oldTime(),
+            T.oldTime(),
+            he.oldTime(),
+            psi.oldTime(),
+            rho.oldTime(),
+            mu.oldTime(),
+            alpha.oldTime(),
+            true
+        );
+    }
 
-    scalarField& TCells = this->T_.primitiveFieldRef();
-    scalarField& psiCells = this->psi_.primitiveFieldRef();
-    scalarField& rhoCells = this->rho_.primitiveFieldRef();
-    scalarField& muCells = this->mu_.primitiveFieldRef();
-    scalarField& alphaCells = this->alpha_.primitiveFieldRef();
+    const scalarField& hCells = he.primitiveField();
+    const scalarField& pCells = p.primitiveField();
+
+    scalarField& TCells = T.primitiveFieldRef();
+    scalarField& psiCells = psi.primitiveFieldRef();
+    scalarField& rhoCells = rho.primitiveFieldRef();
+    scalarField& muCells = mu.primitiveFieldRef();
+    scalarField& alphaCells = alpha.primitiveFieldRef();
 
     forAll(TCells, celli)
     {
@@ -58,30 +85,17 @@ void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::calculate()
         alphaCells[celli] = mixture_.alphah(pCells[celli], TCells[celli]);
     }
 
-    volScalarField::Boundary& pBf =
-        this->p_.boundaryFieldRef();
+    const volScalarField::Boundary& pBf = p.boundaryField();
+    volScalarField::Boundary& TBf = T.boundaryFieldRef();
+    volScalarField::Boundary& psiBf = psi.boundaryFieldRef();
+    volScalarField::Boundary& rhoBf = rho.boundaryFieldRef();
+    volScalarField::Boundary& heBf = he.boundaryFieldRef();
+    volScalarField::Boundary& muBf = mu.boundaryFieldRef();
+    volScalarField::Boundary& alphaBf = alpha.boundaryFieldRef();
 
-    volScalarField::Boundary& TBf =
-        this->T_.boundaryFieldRef();
-
-    volScalarField::Boundary& psiBf =
-        this->psi_.boundaryFieldRef();
-
-    volScalarField::Boundary& rhoBf =
-        this->rho_.boundaryFieldRef();
-
-    volScalarField::Boundary& heBf =
-        this->he().boundaryFieldRef();
-
-    volScalarField::Boundary& muBf =
-        this->mu_.boundaryFieldRef();
-
-    volScalarField::Boundary& alphaBf =
-        this->alpha_.boundaryFieldRef();
-
-    forAll(this->T_.boundaryField(), patchi)
+    forAll(pBf, patchi)
     {
-        fvPatchScalarField& pp = pBf[patchi];
+        const fvPatchScalarField& pp = pBf[patchi];
         fvPatchScalarField& pT = TBf[patchi];
         fvPatchScalarField& ppsi = psiBf[patchi];
         fvPatchScalarField& prho = rhoBf[patchi];
@@ -134,7 +148,17 @@ Foam::heRhoThermo<BasicPsiThermo, MixtureType>::heRhoThermo
 :
     heThermo<BasicPsiThermo, MixtureType>(mesh, phaseName)
 {
-    calculate();
+    calculate
+    (
+        this->p_,
+        this->T_,
+        this->he_,
+        this->psi_,
+        this->rho_,
+        this->mu_,
+        this->alpha_,
+        true                    // Create old time fields
+    );
 }
 
 
@@ -150,17 +174,21 @@ Foam::heRhoThermo<BasicPsiThermo, MixtureType>::~heRhoThermo()
 template<class BasicPsiThermo, class MixtureType>
 void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::correct()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
-    calculate();
+    calculate
+    (
+        this->p_,
+        this->T_,
+        this->he_,
+        this->psi_,
+        this->rho_,
+        this->mu_,
+        this->alpha_,
+        false           // No need to update old times
+    );
 
-    if (debug)
-    {
-        Info<< "    Finished" << endl;
-    }
+    DebugInFunction << "Finished" << endl;
 }
 
 
