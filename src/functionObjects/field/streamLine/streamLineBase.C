@@ -767,7 +767,7 @@ bool Foam::functionObjects::streamLineBase::write()
 
         // Convert scalar values
 
-        if (allScalars_.size() > 0)
+        if (allScalars_.size() > 0 && tracks.size() > 0)
         {
             List<List<scalarField>> scalarValues(allScalars_.size());
 
@@ -811,7 +811,7 @@ bool Foam::functionObjects::streamLineBase::write()
 
         // Convert vector values
 
-        if (allVectors_.size() > 0)
+        if (allVectors_.size() > 0 && tracks.size() > 0)
         {
             List<List<vectorField>> vectorValues(allVectors_.size());
 

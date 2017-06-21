@@ -139,39 +139,43 @@ void Foam::functionObjects::wallBoundedStreamLine::track()
 
         forAll(seedPoints, i)
         {
-            const point& seedPt = seedPoints[i];
             label celli = seedPoints.cells()[i];
 
-            tetIndices ids(findNearestTet(isWallPatch, seedPt, celli));
-
-            if (ids.face() != -1 && isWallPatch[ids.face()])
+            if (celli != -1)
             {
-                //Pout<< "Seeding particle :" << nl
-                //    << "     seedPt:" << seedPt << nl
-                //    << "     face  :" << ids.face() << nl
-                //    << "     at    :" << mesh_.faceCentres()[ids.face()] << nl
-                //    << "     cell  :" << mesh_.cellCentres()[ids.cell()] << nl
-                //    << endl;
+                const point& seedPt = seedPoints[i];
+                tetIndices ids(findNearestTet(isWallPatch, seedPt, celli));
 
-                particles.addParticle
-                (
-                    new wallBoundedStreamLineParticle
+                if (ids.face() != -1 && isWallPatch[ids.face()])
+                {
+                    //Pout<< "Seeding particle :" << nl
+                    //    << "     seedPt:" << seedPt << nl
+                    //    << "     face  :" << ids.face() << nl
+                    //    << "     at    :" << mesh_.faceCentres()[ids.face()]
+                    //    << nl
+                    //    << "     cell  :" << mesh_.cellCentres()[ids.cell()]
+                    //    << nl << endl;
+
+                    particles.addParticle
                     (
-                        mesh_,
-                        ids.faceTri(mesh_).centre(),
-                        ids.cell(),
-                        ids.face(),     // tetFace
-                        ids.tetPt(),
-                        -1,             // not on a mesh edge
-                        -1,             // not on a diagonal edge
-                        lifeTime_       // lifetime
-                    )
-                );
-            }
-            else
-            {
-                Pout<< type() << " : ignoring seed " << seedPt
-                    << " since not in wall cell." << endl;
+                        new wallBoundedStreamLineParticle
+                        (
+                            mesh_,
+                            ids.faceTri(mesh_).centre(),
+                            ids.cell(),
+                            ids.face(),     // tetFace
+                            ids.tetPt(),
+                            -1,             // not on a mesh edge
+                            -1,             // not on a diagonal edge
+                            lifeTime_       // lifetime
+                        )
+                    );
+                }
+                else
+                {
+                    Pout<< type() << " : ignoring seed " << seedPt
+                        << " since not in wall cell." << endl;
+                }
             }
         }
     }
