@@ -24,7 +24,6 @@ internalField   uniform ($mUmean 0 0);
 
 boundaryField
 {
-    //- Set patchGroups for constraint patches
     #includeEtc "caseDicts/setConstraintTypes"
 
     inlet

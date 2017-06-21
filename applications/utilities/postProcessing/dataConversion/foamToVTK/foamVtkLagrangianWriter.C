@@ -100,7 +100,7 @@ void Foam::vtk::lagrangianWriter::writeVertsLegacy()
 
     for (label i=0; i < nParcels_; ++i)
     {
-        format().write(1);  // Number of vertices for this cell (==1)
+        format().write(label(1)); // Number of vertices for this cell (==1)
         format().write(i);
     }
     format().flush();

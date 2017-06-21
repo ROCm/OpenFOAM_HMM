@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,7 +91,7 @@ class EulerCoordinateRotation
             const scalar phiAngle,
             const scalar thetaAngle,
             const scalar psiAngle,
-            const bool inDegrees=true
+            const bool inDegrees
         );
 
 
@@ -106,11 +106,14 @@ public:
         //- Construct null
         EulerCoordinateRotation();
 
+        //- Construct as copy
+        EulerCoordinateRotation(const EulerCoordinateRotation& r);
+
         //- Construct from rotation vector
         EulerCoordinateRotation
         (
             const vector& phiThetaPsi,
-            const bool inDegrees=true
+            const bool inDegrees
         );
 
         //- Construct from components of rotation vector
@@ -119,17 +122,18 @@ public:
             const scalar phiAngle,
             const scalar thetaAngle,
             const scalar psiAngle,
-            const bool inDegrees=true
+            const bool inDegrees
         );
 
         //- Construct from dictionary
-        EulerCoordinateRotation(const dictionary&);
+        explicit EulerCoordinateRotation(const dictionary& dict);
 
-        //- Construct from dictionary and mesh
-        EulerCoordinateRotation(const dictionary&, const objectRegistry&);
-
-        //- Construct as copy
-        EulerCoordinateRotation(const EulerCoordinateRotation&);
+        //- Construct from dictionary and a registry (typically a mesh)
+        EulerCoordinateRotation
+        (
+            const dictionary& dict,
+            const objectRegistry& unused
+        );
 
         //- Return clone
         autoPtr<coordinateRotation> clone() const
@@ -226,11 +230,6 @@ public:
         // symmetrical tensor
         virtual symmTensor transformVector(const vector& st) const;
 
-
-    // Write
-
-        //- Write
-        virtual void write(Ostream&) const;
 };
 
 

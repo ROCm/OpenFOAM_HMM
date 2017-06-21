@@ -906,7 +906,7 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
 
     timeOut_ = dict.lookupOrDefault("timeOut", 100*waitInterval_);
     stateEnd_ =
-        stateEndNames_.lookupOrDefault("stateEnd", dict, stateEnd::REMOVE);
+        stateEndNames_.lookupOrDefault("stateEnd", dict, stateEnd::DONE);
 
 
     // Get names of all fvMeshes (and derived types)

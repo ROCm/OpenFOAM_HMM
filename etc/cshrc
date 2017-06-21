@@ -216,7 +216,11 @@ if ( $status == 0 ) setenv MANPATH $cleaned
 # Source project setup files
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 _foamEtc config.csh/settings
-_foamEtc config.csh/aliases
+
+if ($?prompt) then  # Interactive shell
+    _foamEtc config.csh/aliases
+endif
+
 
 # Source user setup files for optional packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -169,12 +169,16 @@ export PATH LD_LIBRARY_PATH MANPATH
 # Source project setup files
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 _foamEtc config.sh/settings
-_foamEtc config.sh/aliases
 
-# Bash completions
-if command -v complete > /dev/null 2>&1
+if /usr/bin/tty -s 2>/dev/null  # Interactive shell
 then
-    _foamEtc config.sh/bashcompletion
+    _foamEtc config.sh/aliases
+
+    # Bash completions
+    if command -v complete > /dev/null 2>&1
+    then
+        _foamEtc config.sh/bashcompletion
+    fi
 fi
 
 

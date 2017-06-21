@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -147,6 +147,7 @@ Foam::symmTensor Foam::STARCDCoordinateRotation::transformVector
     return transformPrincipal(R_, st);
 }
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::STARCDCoordinateRotation::calcTransform
@@ -195,7 +196,17 @@ void Foam::STARCDCoordinateRotation::calcTransform
 Foam::STARCDCoordinateRotation::STARCDCoordinateRotation()
 :
     R_(sphericalTensor::I),
-    Rtr_(R_)
+    Rtr_(sphericalTensor::I)
+{}
+
+
+Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
+(
+    const STARCDCoordinateRotation& r
+)
+:
+    R_(r.R_),
+    Rtr_(r.Rtr_)
 {}
 
 
@@ -206,7 +217,7 @@ Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
 )
 :
     R_(sphericalTensor::I),
-    Rtr_(R_)
+    Rtr_(sphericalTensor::I)
 {
     calcTransform
     (
@@ -227,7 +238,7 @@ Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
 )
 :
     R_(sphericalTensor::I),
-    Rtr_(R_)
+    Rtr_(sphericalTensor::I)
 {
     calcTransform(rotZ, rotX, rotY, inDegrees);
 }
@@ -239,9 +250,9 @@ Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
 )
 :
     R_(sphericalTensor::I),
-    Rtr_(R_)
+    Rtr_(sphericalTensor::I)
 {
-    vector rotation(dict.lookup("rotation"));
+    const vector rotation(dict.lookup("rotation"));
 
     calcTransform
     (
@@ -258,34 +269,9 @@ Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
     const dictionary& dict,
     const objectRegistry&
 )
-{
-    vector rotation(dict.lookup("rotation"));
-
-    calcTransform
-    (
-        rotation.component(vector::X),
-        rotation.component(vector::Y),
-        rotation.component(vector::Z),
-        dict.lookupOrDefault("degrees", true)
-    );
-}
-
-
-Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
-(
-    const STARCDCoordinateRotation& r
-)
 :
-    R_(r.R_),
-    Rtr_(r.Rtr_)
+    STARCDCoordinateRotation(dict)
 {}
 
-
-void Foam::STARCDCoordinateRotation::write(Ostream& os) const
-{
-     os.writeKeyword("e1") << e1() << token::END_STATEMENT << nl;
-     os.writeKeyword("e2") << e2() << token::END_STATEMENT << nl;
-     os.writeKeyword("e3") << e3() << token::END_STATEMENT << nl;
-}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

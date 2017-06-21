@@ -22,7 +22,6 @@ internalField   uniform $turbulentOmega;
 
 boundaryField
 {
-    //- Set patchGroups for constraint patches
     #includeEtc "caseDicts/setConstraintTypes"
 
     #include "include/fixedInlet"

@@ -36,15 +36,15 @@
 #         - the vtk_version, mesa_version variables are retained.
 #           (for future integration into ThirdParty build)
 #
-# It is recommended to use the VTK sources from ParaView 5.0.1 or later
+# It is recommended to use VTK sources from ParaView (5.0.1 or later)
 #
-# See the BuildIssues.txt about problems that can be encountered when using
+# See BuildIssues.txt about problems that can be encountered when using
 # the 'plain' VTK sources.
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-vtk_version=VTK-7.1.0
-mesa_version=mesa-13.0.1
+vtk_version=VTK-8.1.0
+mesa_version=mesa-17.1.1
 
 export VTK_DIR=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$vtk_version
 export MESA_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mesa_version

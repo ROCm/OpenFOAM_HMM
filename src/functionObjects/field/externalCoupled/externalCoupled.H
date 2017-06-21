@@ -32,12 +32,13 @@ Description
     an external application. The coupling is through plain text files
     where OpenFOAM boundary data is read/written as one line per face
     (data from all processors collated):
-
+    \verbatim
         # Patch: <patch name>
         <fld1> <fld2> .. <fldn>             //face0
         <fld1> <fld2> .. <fldn>             //face1
         ..
         <fld1> <fld2> .. <fldn>             //faceN
+    \endverbatim
 
     where the actual entries depend on the bc type:
     - mixed: value, snGrad, refValue, refGrad, valueFraction
@@ -47,29 +48,33 @@ Description
     These text files are located in a user specified communications directory
     which gets read/written on the master processor only. In the
     communications directory the structure will be
-
+    \verbatim
         <regionsName>/<patchGroup>/<fieldName>.[in|out]
+    \endverbatim
 
     (where regionsName is either the name of a single region or a composite
     of multiple region names)
 
     At start-up, the boundary creates a lock file, i.e..
-
+    \verbatim
         OpenFOAM.lock
+    \endverbatim
 
     ... to signal the external source to wait. During the functionObject
     execution the boundary values are written to files (one per region,
     per patch(group), per field), e.g.
-
+    \verbatim
         <regionsName>/<patchGroup>/<fieldName>.out
+    \endverbatim
 
     The lock file is then removed, instructing the external source to take
     control of the program execution. When ready, the external program
     should create the return values, e.g. to files
-
+    \verbatim
         <regionsName>/<patchGroup>/<fieldName>.in
+    \endverbatim
 
-    ... and then re-instate the lock file. The functionObject will then
+    ... and then reinstate the lock file. The functionObject will then
     read these values, apply them to the boundary conditions and pass
     program execution back to OpenFOAM.
 
@@ -98,20 +103,38 @@ Usage
     }
     \endverbatim
 
-    This reads/writes (on the master processor) the directory:
 
+    This reads/writes (on the master processor) the directory:
+    \verbatim
         comms/region0_region1/TPatchGroup/
+    \endverbatim
 
     with contents:
+    \verbatim
         patchPoints     (collected points)
         patchFaces      (collected faces)
         p.in            (input file of p, written by external application)
         T.out           (output file of T, written by OpenFOAM)
+    \endverbatim
 
     The patchPoints/patchFaces files denote the (collated) geometry
     which will be written if it does not exist yet or can be written as
     a preprocessing step using the createExternalCoupledPatchGeometry
     application.
+
+    The entries comprise:
+    \table
+        Property     | Description             | Required | Default value
+        type         | type name: externalCoupled | yes |
+        commsDir     | communication directory | yes |
+        waitInterval | wait interval in (s)    | no | 1
+        timeOut      | timeout in (s)          | no | 100*waitInterval
+        stateEnd     | Lockfile treatment on termination | no | done
+        initByExternal | initialization values supplied by external application | yes
+        calcFrequency | calculation frequency  | no | 1
+        regions  | the regions to couple | yes
+    \endtable
+
 
 SourceFiles
     externalCoupled.C

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,11 +25,12 @@ Class
     Foam::axesRotation
 
 Description
-    A coordinate rotation specified using global axis
+    A coordinate rotation specified using global axes
 
     The rotation is defined by a combination of vectors (e1/e2), (e2/e3)
     or (e3/e1). Any nonorthogonality will be absorbed into the second
-    vector.
+    vector. In terms of cylindrical coordinates, the 'axis' would
+    correspond to the \a z-axis and the 'direction' to the \a r-axis.
 
     \verbatim
     axesRotation
@@ -66,6 +67,20 @@ class axesRotation
 :
     public coordinateRotation
 {
+public:
+
+    //- The order/combination of local axes for the axes-rotation definition
+    //  Note that these follow the right-hand rule.
+    enum axisOrder
+    {
+        E1_E2,  //!< The axis is X-dominant, the direction is Y-dominant
+        E2_E3,  //!< The axis is Y-dominant, the direction is Z-dominant
+        E3_E1   //!< The axis is Z-dominant, the direction is X-dominant
+    };
+
+
+private:
+
     // Private data
 
         //- Local-to-Global transformation tensor
@@ -73,24 +88,6 @@ class axesRotation
 
         //- Global-to-Local transformation tensor
         tensor Rtr_;
-
-        //- The combination of local axes to be used
-        enum axisOrder
-        {
-            e1e2,
-            e2e3,
-            e3e1
-        };
-
-    // Private Member Functions
-
-        //- Calculate transformation tensor
-        void calcTransform
-        (
-            const vector& axis1,
-            const vector& axis2,
-            const axisOrder& order = e3e1
-        );
 
 
 public:
@@ -103,20 +100,34 @@ public:
         //- Construct null
         axesRotation();
 
-        //- Construct from 2 axes
-        axesRotation(const vector& axis, const vector& dir);
+        //- Construct as copy
+        axesRotation(const axesRotation& r);
+
+        //- Construct from local to global rotation matrix
+        explicit axesRotation(const tensor& R);
+
+        //- Construct from two axes (axis and direction)
+        axesRotation
+        (
+            const vector& axis,
+            const vector& dir,
+            const axisOrder& order = E3_E1
+        );
+
+        //- Construct from a single axis using a best-guess for the second axis
+        //  For the best-guess, the largest component value and sign of the
+        //  axis determines the direction orientation.
+        explicit axesRotation(const vector& axis);
 
         //- Construct from dictionary
-        axesRotation(const dictionary&);
+        explicit axesRotation(const dictionary& dict);
 
-        //- Construct from components
-        axesRotation(const tensor& R);
-
-        //- Construct from dictionary and mesh
-        axesRotation(const dictionary&, const objectRegistry&);
-
-        //- Construct as copy
-        axesRotation(const axesRotation&);
+        //- Construct from dictionary and a registry (typically a mesh)
+        axesRotation
+        (
+            const dictionary& dict,
+            const objectRegistry& unused
+        );
 
         //- Return clone
         autoPtr<coordinateRotation> clone() const
@@ -138,6 +149,14 @@ public:
             R_ = sphericalTensor::I;
             Rtr_ = sphericalTensor::I;
         }
+
+        //- Set the transformation tensors from two axes (axis and direction)
+        void setTransform
+        (
+            const vector& axis1,
+            const vector& axis2,
+            const axisOrder& order = E3_E1
+        );
 
         //- Update the rotation for a list of cells
         virtual void updateCells(const polyMesh&, const labelList&)
@@ -216,13 +235,8 @@ public:
     // Member Operators
 
         //- Assign from dictionary
-        void operator=(const dictionary&);
+        void operator=(const dictionary& dict);
 
-
-    // Write
-
-        //- Write
-        virtual void write(Ostream&) const;
 };
 
 
