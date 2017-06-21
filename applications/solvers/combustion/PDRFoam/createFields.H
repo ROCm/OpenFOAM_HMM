@@ -58,23 +58,6 @@ autoPtr<compressible::RASModel> turbulence
 );
 
 
-Info<< "Creating field dpdt\n" << endl;
-volScalarField dpdt
-(
-    IOobject
-    (
-        "dpdt",
-        runTime.timeName(),
-        mesh
-    ),
-    mesh,
-    dimensionedScalar("dpdt", p.dimensions()/dimTime, 0)
-);
-
-Info<< "Creating field kinetic energy K\n" << endl;
-volScalarField K("K", 0.5*magSqr(U));
-
-
 Info<< "Creating the unstrained laminar flame speed\n" << endl;
 autoPtr<laminarFlameSpeed> unstrainedLaminarFlameSpeed
 (
@@ -226,5 +209,9 @@ fields.add(b);
 fields.add(thermo.he());
 fields.add(thermo.heu());
 flameWrinkling->addXi(fields);
+
+#include "createDpdt.H"
+
+#include "createK.H"
 
 #include "createMRF.H"

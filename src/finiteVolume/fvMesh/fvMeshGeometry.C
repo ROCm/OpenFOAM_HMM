@@ -260,10 +260,11 @@ const Foam::volScalarField::Internal& Foam::fvMesh::V00() const
                 *this,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                true
             ),
             V0()
         );
+
 
         // If V00 is used then V0 should be stored for restart
         V0Ptr_->writeOpt() = IOobject::AUTO_WRITE;
