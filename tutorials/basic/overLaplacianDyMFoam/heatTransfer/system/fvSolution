@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -41,14 +40,12 @@ solvers
         maxIter         100;
     }
 
-
 }
 
 SIMPLE
 {
     nNonOrthogonalCorrectors 0; //2;
 }
-
 
 PIMPLE
 {
@@ -57,7 +54,6 @@ PIMPLE
     nCorrectors         1;
     nNonOrthogonalCorrectors 0;
 }
-
 
 relaxationFactors
 {
@@ -72,6 +68,5 @@ relaxationFactors
         omega           0.7;
     }
 }
-
 
 // ************************************************************************* //
