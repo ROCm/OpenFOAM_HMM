@@ -238,6 +238,9 @@ fvMatrices/fvMatrices.C
 fvMatrices/fvScalarMatrix/fvScalarMatrix.C
 fvMatrices/solvers/MULES/MULES.C
 fvMatrices/solvers/MULES/CMULES.C
+fvMatrices/solvers/isoAdvection/isoCutCell/isoCutCell.C
+fvMatrices/solvers/isoAdvection/isoCutFace/isoCutFace.C
+fvMatrices/solvers/isoAdvection/isoAdvection/isoAdvection.C
 fvMatrices/solvers/GAMGSymSolver/GAMGAgglomerations/faceAreaPairGAMGAgglomeration/faceAreaPairGAMGAgglomeration.C
 
 interpolation = interpolation/interpolation

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -238,8 +238,6 @@ void omegaWallFunctionFvPatchScalarField::calculate
     {
         const label celli = patch.faceCells()[facei];
 
-        const scalar yPlus = Cmu25*y[facei]*sqrt(k[celli])/nuw[facei];
-
         const scalar w = cornerWeights[facei];
 
         const scalar omegaVis = 6*nuw[facei]/(beta1_*sqr(y[facei]));
@@ -257,27 +255,17 @@ void omegaWallFunctionFvPatchScalarField::calculate
             omega0[celli] += w*sqrt(sqr(omegaVis) + sqr(omegaLog));
         }
 
-        if (yPlus > yPlusLam_)
+        if (!blended_)
         {
-            if (!blended_)
-            {
-                omega0[celli] += w*omegaLog;
-            }
+            omega0[celli] += w*omegaLog;
+        }
 
-            G0[celli] +=
-                w
-               *(nutw[facei] + nuw[facei])
-               *magGradUw[facei]
-               *Cmu25*sqrt(k[celli])
-               /(kappa_*y[facei]);
-        }
-        else
-        {
-            if (!blended_)
-            {
-                omega0[celli] += w*omegaVis;
-            }
-        }
+        G0[celli] +=
+            w
+            *(nutw[facei] + nuw[facei])
+            *magGradUw[facei]
+            *Cmu25*sqrt(k[celli])
+            /(kappa_*y[facei]);
     }
 }
 

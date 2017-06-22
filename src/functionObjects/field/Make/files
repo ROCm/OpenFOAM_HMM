@@ -18,6 +18,8 @@ nearWallFields/findCellParticleCloud.C
 processorField/processorField.C
 readFields/readFields.C
 
+setFlow/setFlow.C
+
 streamLine/streamLine.C
 streamLine/streamLineBase.C
 streamLine/streamLineParticle.C

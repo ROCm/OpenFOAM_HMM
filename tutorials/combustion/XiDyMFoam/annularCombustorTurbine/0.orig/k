@@ -21,7 +21,7 @@ internalField   uniform 6;
 
 boundaryField
 {
-    #include "${WM_PROJECT_DIR}/etc/caseDicts/setConstraintTypes"
+    #includeEtc "caseDicts/setConstraintTypes"
 
     inlet
     {
