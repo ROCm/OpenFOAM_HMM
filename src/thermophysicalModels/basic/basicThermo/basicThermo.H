@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,11 +83,15 @@ protected:
         //- Construct as copy (not implemented)
         basicThermo(const basicThermo&);
 
+        //- Look up or contruct field
         volScalarField& lookupOrConstruct
         (
             const fvMesh& mesh,
             const char* name
         ) const;
+
+        //- Lookup and check out field
+        void lookupAndCheckout(const char* name) const;
 
         //- Return the enthalpy/internal energy field boundary types
         //  by interrogating the temperature field boundary types

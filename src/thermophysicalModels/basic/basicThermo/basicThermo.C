@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -159,6 +159,15 @@ Foam::volScalarField& Foam::basicThermo::lookupOrConstruct
 }
 
 
+void Foam::basicThermo::lookupAndCheckout(const char* name) const
+{
+    if (db().foundObject<volScalarField>(name))
+    {
+         db().checkOut(*db()[name]);
+    }
+}
+
+
 Foam::basicThermo::basicThermo
 (
     const fvMesh& mesh,
@@ -280,7 +289,9 @@ Foam::autoPtr<Foam::basicThermo> Foam::basicThermo::New
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::basicThermo::~basicThermo()
-{}
+{
+    lookupAndCheckout("p");
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
