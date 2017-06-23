@@ -73,6 +73,12 @@ inline bool Foam::solutionControl::consistent() const
 }
 
 
+inline bool Foam::solutionControl::frozenFlow() const
+{
+    return frozenFlow_;
+}
+
+
 inline bool Foam::solutionControl::correctNonOrthogonal()
 {
     corrNonOrtho_++;
