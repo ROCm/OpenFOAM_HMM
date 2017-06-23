@@ -248,7 +248,7 @@ bool Foam::timeControl::execute()
         default:
         {
             FatalErrorInFunction
-                << "Undefined output control: "
+                << "Undefined time control: "
                 << timeControlNames_[timeControl_] << nl
                 << abort(FatalError);
             break;
