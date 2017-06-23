@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -114,7 +114,10 @@ bool Foam::functionObjects::valueAverage::read(const dictionary& dict)
 
     dict.lookup("functionObject") >> functionObjectName_;
     dict.lookup("fields") >> fieldNames_;
-    window_ = dict.lookupOrDefault<scalar>("window", -1);
+    if (dict.readIfPresent("window", window_))
+    {
+        window_ = obr().time().userTimeToTime(window_);
+    }
 
     totalTime_.setSize(fieldNames_.size());
     forAll(totalTime_, i)
