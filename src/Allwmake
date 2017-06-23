@@ -76,6 +76,7 @@ wmake $targetType regionCoupled
 
 functionObjects/Allwmake $targetType $*
 
+wmake $targetType lumpedPointMotion
 wmake $targetType sixDoFRigidBodyMotion
 wmake $targetType rigidBodyDynamics
 wmake $targetType rigidBodyMeshMotion
