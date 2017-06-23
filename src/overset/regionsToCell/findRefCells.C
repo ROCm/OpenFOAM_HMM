@@ -108,19 +108,8 @@ void Foam::setRefCells
 
             if (refCells.size() != regionNeedReference.size())
             {
-                FatalIOErrorIn
-                (
-                    "setRefCell\n"
-                    "(\n"
-                    "    const volScalarField&,\n"
-                    "    const volScalarField&,\n"
-                    "    const dictionary&,\n"
-                    "    labelList&,\n"
-                    "    scalarField&,\n"
-                    "    const bool\n"
-                    ")\n",
-                    dict
-                )   << "Number of refCells " << refCells.size()
+                FatalIOErrorInFunction(dict)
+                    << "Number of refCells " << refCells.size()
                     << " does not correspond to number of regions "
                     << regionNeedReference.size()
                     << exit(FatalIOError);
@@ -146,19 +135,8 @@ void Foam::setRefCells
                  && regionRefCells[regionI] == -1
                 )
                 {
-                    FatalIOErrorIn
-                    (
-                        "setRefCell\n"
-                        "(\n"
-                        "    const volScalarField&,\n"
-                        "    const volScalarField&,\n"
-                        "    const dictionary&,\n"
-                        "    labelList&,\n"
-                        "    scalarField&,\n"
-                        "    const bool\n"
-                        ")\n",
-                        dict
-                    )   << "Have no reference cell for region " << regionI
+                    FatalIOErrorInFunction(dict)
+                        << "Have no reference cell for region " << regionI
                         << nl
                         << "Overall per-region reference cells "
                         << regionRefCells
@@ -173,19 +151,8 @@ void Foam::setRefCells
 
         if (refPoints.size() != regionNeedReference.size())
         {
-            FatalIOErrorIn
-            (
-                "setRefCell\n"
-                "(\n"
-                "    const volScalarField&,\n"
-                "    const volScalarField&,\n"
-                "    const dictionary&,\n"
-                "    labelList&,\n"
-                "    scalarField&,\n"
-                "    const bool\n"
-                ")\n",
-                dict
-            )   << "Number of refPoints " << refPoints.size()
+            FatalIOErrorInFunction(dict)
+                << "Number of refPoints " << refPoints.size()
                 << " does not correspond to number of regions "
                 << regionNeedReference.size()
                 << exit(FatalIOError);
@@ -226,19 +193,8 @@ void Foam::setRefCells
         {
             if (hasRef[regionI] != 1)
             {
-                FatalIOErrorIn
-                (
-                    "setRefCell\n"
-                    "(\n"
-                    "    const volScalarField&,\n"
-                    "    const volScalarField&,\n"
-                    "    const dictionary&,\n"
-                    "    labelList&,\n"
-                    "    scalarField&,\n"
-                    "    const bool\n"
-                    ")\n",
-                    dict
-                )   << "Unable to set reference cell for field " << field.name()
+                FatalIOErrorInFunction(dict)
+                    << "Unable to set reference cell for field " << field.name()
                     << nl
                     << "    Reference points " << refPointName
                     << " " << refPoints
@@ -251,19 +207,8 @@ void Foam::setRefCells
     }
     else
     {
-        FatalIOErrorIn
-        (
-            "setRefCell\n"
-            "(\n"
-            "    const volScalarField&,\n"
-            "    const volScalarField&,\n"
-            "    const dictionary&,\n"
-            "    labelList&,\n"
-            "    scalarField&,\n"
-            "    const bool\n"
-            ")\n",
-            dict
-        )   << "Unable to set reference cell for field " << field.name()
+        FatalIOErrorInFunction(dict)
+            << "Unable to set reference cell for field " << field.name()
             << nl
             << "    Please supply either " << refCellName
             << " or " << refPointName << nl << exit(FatalIOError);
