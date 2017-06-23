@@ -110,6 +110,11 @@ int main(int argc, char *argv[])
 
             mixture.correct();
 
+            if (pimple.frozenFlow())
+            {
+                continue;
+            }
+
             #include "UEqn.H"
 
             // --- Pressure corrector loop
