@@ -33,6 +33,7 @@ boundaryField
     wall
     {
         type            omegaWallFunction;
+        blended         true;
         value           $internalField;
     }
 }

@@ -32,7 +32,7 @@ boundaryField
 
     wall
     {
-        type            nutkRoughWallFunction;
+        type            nutkWallFunction;
         Ks              uniform 100e-6;
         Cs              uniform 0.5;
         value           $internalField;
