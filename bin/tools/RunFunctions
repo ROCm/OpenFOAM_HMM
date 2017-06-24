@@ -219,28 +219,97 @@ compileApplication()
 #
 cloneCase()
 {
-    if [ -e "$2" ]
-    then
-        echo "Case already cloned: remove case directory $2 to clone"
-    elif [ -d "$1" ]
-    then
-        echo "Cloning $2 case from $1"
-        mkdir $2
-        # These must exist, so do not hide error messages
-        for f in system constant
-        do
-            \cp -r $1/$f $2
-        done
+    local src=$1
+    local dst=$2
+    shift 2
 
-        # Either (or both) may exist, so error messages may be spurious
-        for f in 0 0.orig
-        do
-            \cp -r $1/$f $2 2>/dev/null
-        done
-    else
-        echo "Error: cannot clone from non-existent directory"
-        echo "    $1"
+    if [ -e "$dst" ]
+    then
+        echo "Case already cloned: remove case directory $dst prior to cloning"
+        return 1
+    elif [ ! -d "$src" ]
+    then
+        echo "Error: no directory to clone:  $src"
+        return 1
     fi
+
+    echo "Cloning $dst case from $src"
+    mkdir $dst
+    # These must exist, so do not hide error messages
+    for f in constant system
+    do
+        \cp -r $src/$f $dst
+    done
+
+    # Either (or both) may exist, so error messages may be spurious
+    for f in 0 0.orig
+    do
+        \cp -r $src/$f $dst 2>/dev/null
+    done
+    return 0
+}
+
+#
+# cloneParallelCase srcDir dstDir [...times]
+#
+# If any times are specified, they will be used for the cloning.
+# Otherwise the entire processor* directories are cloned
+cloneParallelCase()
+{
+    local src=$1
+    local dst=$2
+    shift 2
+
+    if [ -e "$dst" ]
+    then
+        echo "Case already cloned: remove case directory $dst prior to cloning"
+        return 1
+    fi
+
+    [ -d "$src" ] || {
+        echo "Error: no directory to clone: $src"
+        return 1
+    }
+
+    echo "Cloning $dst parallel case from $src"
+    mkdir $dst
+    # These must exist, so do not hide error messages
+    for f in constant system
+    do
+        \cp -r $src/$f $dst
+    done
+
+    [ -d $src/processor0 ] || {
+        echo "Does not appear to be a parallel case"
+        return 1
+    }
+
+    if [ "$#" -eq 0 ]
+    then
+        # Copy all processor directories
+        echo "    clone processor* directories"
+        \cp -r $src/processor* $dst
+    else
+        # Only copy some time directories
+        echo "    clone processor directories with $# times: $@"
+
+        for proc in $(cd $src && \ls -d processor*)
+        do
+            srcProc=$src/$proc
+            dstProc=$dst/$proc
+
+            mkdir $dstProc
+            cp -r $srcProc/constant $dstProc/
+
+            for time
+            do
+                [ -d $srcProc/$time ] && cp -r $srcProc/$time $dstProc/
+            done
+
+        done
+    fi
+
+    return 0
 }
 
 # Overwrite 0/ with the contents of 0.orig/ if it exists.
