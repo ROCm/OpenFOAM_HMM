@@ -80,16 +80,8 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
 {
     if (!isA<oversetFvPatch>(p))
     {
-        FatalIOErrorIn
-        (
-            "oversetFvPatchField<Type>::oversetFvPatchField"
-            "("
-                "const fvPatch&, "
-                "const DimensionedField<Type, volMesh>&, "
-                "const dictionary&"
-            ")",
-            dict
-        )   << "    patch type '" << p.type()
+        FatalIOErrorInFunction(dict)
+            << "    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->internalField().name()

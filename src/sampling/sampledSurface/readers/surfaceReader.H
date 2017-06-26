@@ -108,7 +108,7 @@ public:
         virtual wordList fieldNames(const label timeIndex) const = 0;
 
         //- Return a scalar field at a given time
-        virtual tmp<Field<scalar> > field
+        virtual tmp<Field<scalar>> field
         (
             const label timeIndex,
             const label fieldIndex,
@@ -116,7 +116,7 @@ public:
         ) const = 0;
 
         //- Return a vector field at a given time
-        virtual tmp<Field<vector> > field
+        virtual tmp<Field<vector>> field
         (
             const label timeIndex,
             const label fieldIndex,
@@ -124,7 +124,7 @@ public:
         ) const = 0;
 
         //- Return a sphericalTensor field at a given time
-        virtual tmp<Field<sphericalTensor> > field
+        virtual tmp<Field<sphericalTensor>> field
         (
             const label timeIndex,
             const label fieldIndex,
@@ -132,7 +132,7 @@ public:
         ) const = 0;
 
         //- Return a symmTensor field at a given time
-        virtual tmp<Field<symmTensor> > field
+        virtual tmp<Field<symmTensor>> field
         (
             const label timeIndex,
             const label fieldIndex,
@@ -140,7 +140,7 @@ public:
         ) const = 0;
 
         //- Return a tensor field at a given time
-        virtual tmp<Field<tensor> > field
+        virtual tmp<Field<tensor>> field
         (
             const label timeIndex,
             const label fieldIndex,

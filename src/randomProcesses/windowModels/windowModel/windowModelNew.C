@@ -42,10 +42,8 @@ Foam::autoPtr<Foam::windowModel> Foam::windowModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorIn
-        (
-            "windowModel::New(const dictionary&, const label)"
-        )   << "Unknown windowModel type "
+        FatalErrorInFunction
+            << "Unknown windowModel type "
             << modelType << nl << nl
             << "Valid windowModel types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()

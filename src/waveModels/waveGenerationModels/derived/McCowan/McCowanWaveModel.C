@@ -320,19 +320,19 @@ void Foam::waveModels::McCowan::setVelocity
 
         if (fraction > 0)
         {
-		    const label paddlei = faceToPaddle_[facei];
+            const label paddlei = faceToPaddle_[facei];
 
-		    const vector Uf = this->Uf
-			(
-		        waveHeight_,
-		        waterDepthRef_,
-		        xPaddle_[paddlei],
-		        yPaddle_[paddlei],
-		        waveAngle_,
-		        t,
-		        x0_,
-		        z
-		    );
+            const vector Uf = this->Uf
+            (
+                waveHeight_,
+                waterDepthRef_,
+                xPaddle_[paddlei],
+                yPaddle_[paddlei],
+                waveAngle_,
+                t,
+                x0_,
+                z
+            );
 
             U_[facei] = fraction*Uf*tCoeff;
         }

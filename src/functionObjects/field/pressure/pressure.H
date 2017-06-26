@@ -92,14 +92,14 @@ Usage
     Where the entries comprise:
     \table
         Property     | Description                 | Required   | Default value
-        type         | type name: pressure    | yes        |
+        type         | type name: pressure         | yes        |
         field        | Name of the pressure field  | no         | p
         U            | Name of the velocity field  | no         | U
         rho          | Name of the density field   | no         | rho
         result       | Name of the resulting field | no         | derived from p
         calcTotal    | Calculate total coefficient | yes        |
         pRef         | Reference pressure for total pressure | no | 0
-        calcCoeff    | Calculate pressure coefficient | yes  |
+        calcCoeff    | Calculate pressure coefficient | yes     |
         pInf         | Freestream pressure for coefficient calculation | no |
         UInf         | Freestream velocity for coefficient calculation | no |
         rhoInf       | Freestream density for coefficient calculation  | no |

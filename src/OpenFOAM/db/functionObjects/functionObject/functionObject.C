@@ -39,6 +39,14 @@ namespace Foam
 bool Foam::functionObject::postProcess(false);
 
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+Foam::word Foam::functionObject::scopedName(const word& name) const
+{
+    return name_ + ":" + name;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObject::functionObject(const word& name)

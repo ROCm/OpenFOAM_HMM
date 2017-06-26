@@ -1,5 +1,6 @@
 #----------------------------------*-sh-*--------------------------------------
 # Bash completions for OpenFOAM applications
+# Formatted as "complete ... -F _of_APPNAME APPNAME
 
 unset -f _of_filter_opts 2>/dev/null
 _of_filter_opts()

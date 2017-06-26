@@ -154,6 +154,14 @@ class functionObject
         void operator=(const functionObject&) = delete;
 
 
+protected:
+
+    // Protected Member Functions
+
+        //- Return a scoped name, e.g. used to construct local field names
+        word scopedName(const word& name) const;
+
+
 public:
 
     //- Runtime type information

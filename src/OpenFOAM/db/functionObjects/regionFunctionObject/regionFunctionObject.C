@@ -158,7 +158,7 @@ Foam::functionObjects::regionFunctionObject::~regionFunctionObject()
 
 bool Foam::functionObjects::regionFunctionObject::read(const dictionary& dict)
 {
-    return functionObject::read(dict);
+    return stateFunctionObject::read(dict);
 }
 
 

@@ -87,6 +87,10 @@ protected:
             //  "consistent" approach of SIMPLEC
             bool consistent_;
 
+            //- Flag to indicate that the flow system of equations should not
+            //  be evolved
+            bool frozenFlow_;
+
 
         // Evolution
 
@@ -198,6 +202,10 @@ public:
             //- Flag to indicate to relax pressure using the
             //  "consistent" approach of SIMPLEC
             inline bool consistent() const;
+
+            //- Flag to indicate that the flow system of equations should not
+            //  be evolved
+            inline bool frozenFlow() const;
 
 
         // Evolution
