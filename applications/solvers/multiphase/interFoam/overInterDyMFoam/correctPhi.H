@@ -96,9 +96,25 @@
             fvm::laplacian(rAUf, pcorr) == fvc::div(phi)
         );
 
-        //pcorrEqn.setReference(refCellI2, 0, true);
-        scalarList values(nZones, 0.0);
-        pcorrEqn.setReferences(refCells, values, true);
+        // Only set reference for cells that are CALCULATED
+        {
+            DynamicList<label> validCells(refCells.size());
+            forAll(refCells, zoneId)
+            {
+                if (refCells[zoneId] != -1)
+                {
+                    validCells.append(refCells[zoneId]);
+                }
+            }
+
+            pcorrEqn.setReferences
+            (
+                validCells,
+                scalarList(validCells.size(), 0.0),
+                true
+            );
+        }
+
 
         const dictionary& d = mesh.solver
             (
@@ -117,9 +133,9 @@
         }
     }
 
-    if (runTime.outputTime())
-    {
-        volScalarField("contPhiPcorr", fvc::div(phi)).write();
-        pcorr.write();
-    }
+    //if (runTime.outputTime())
+    //{
+    //    volScalarField("contPhiPcorr", fvc::div(phi)).write();
+    //    pcorr.write();
+    //}
 }
