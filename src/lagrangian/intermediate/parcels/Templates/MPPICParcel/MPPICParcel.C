@@ -63,6 +63,8 @@ bool Foam::MPPICParcel<ParcelType>::move
     typename TrackData::cloudType::parcelType& p =
         static_cast<typename TrackData::cloudType::parcelType&>(*this);
 
+    td.switchProcessor = false;
+
     switch (td.part())
     {
         case TrackData::tpLinearTrack:
