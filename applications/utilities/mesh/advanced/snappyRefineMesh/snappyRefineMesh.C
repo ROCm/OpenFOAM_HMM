@@ -651,7 +651,7 @@ int main(int argc, char *argv[])
     );
 
     // corrector for mesh motion
-    twoDPointCorrector* correct2DPtr = NULL;
+    twoDPointCorrector* correct2DPtr = nullptr;
 
     if (motionObj.typeHeaderOk<IOdictionary>(true))
     {

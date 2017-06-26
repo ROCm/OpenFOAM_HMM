@@ -62,6 +62,7 @@ Usage
     \endtable
 
 See also
+    Foam::functionObjects::ensightWrite
     Foam::functionObjects::fvMeshFunctionObject
     Foam::functionObjects::timeControl
 

@@ -1284,7 +1284,7 @@ int Foam::system(const Foam::UList<Foam::string>& command)
     {
         // in child:
         // Need command and arguments separately.
-        // args is a NULL-terminated list of c-strings
+        // args is a nullptr-terminated list of c-strings
 
         CStringList args(SubList<string>(command, 0));
         if (argc > 1)

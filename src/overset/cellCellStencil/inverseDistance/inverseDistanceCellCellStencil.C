@@ -488,7 +488,7 @@ void Foam::cellCellStencils::inverseDistance::markDonors
 
 
     // Indices of tgtcells to send over to each processor
-    List<DynamicList<label> > tgtSendCells(Pstream::nProcs());
+    List<DynamicList<label>> tgtSendCells(Pstream::nProcs());
     forAll(srcOverlapProcs, i)
     {
         label procI = srcOverlapProcs[i];
@@ -1548,7 +1548,7 @@ void Foam::cellCellStencils::inverseDistance::createStencil
     }
 
     // Re-do the mapDistribute
-    List<Map<label> > compactMap;
+    List<Map<label>> compactMap;
     mapDistribute map(globalCells, cellStencil_, compactMap);
     cellInterpolationMap_.transfer(map);
 }
@@ -1902,7 +1902,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
     }
     interpolationCells_.transfer(interpolationCells);
 
-    List<Map<label> > compactMap;
+    List<Map<label>> compactMap;
     mapDistribute map(globalCells, cellStencil_, compactMap);
     cellInterpolationMap_.transfer(map);
 

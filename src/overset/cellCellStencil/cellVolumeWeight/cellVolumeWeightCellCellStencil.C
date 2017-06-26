@@ -1047,7 +1047,7 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
     interpolationCells_.transfer(interpolationCells);
 
 
-    List<Map<label> > compactMap;
+    List<Map<label>> compactMap;
     mapDistribute map(globalCells, cellStencil_, compactMap);
     cellInterpolationMap_.transfer(map);
 
