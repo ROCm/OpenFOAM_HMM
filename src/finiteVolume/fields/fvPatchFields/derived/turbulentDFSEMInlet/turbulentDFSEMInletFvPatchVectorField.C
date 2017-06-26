@@ -592,7 +592,7 @@ Foam::vector Foam::turbulentDFSEMInletFvPatchVectorField::uDashEddy
 
 void Foam::turbulentDFSEMInletFvPatchVectorField::calcOverlappingProcEddies
 (
-    List<List<eddy> >& overlappingEddies
+    List<List<eddy>>& overlappingEddies
 ) const
 {
     int oldTag = UPstream::msgType();
@@ -604,7 +604,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::calcOverlappingProcEddies
     Pstream::scatterList(patchBBs);
 
     // Per processor indices into all segments to send
-    List<DynamicList<label> > dynSendMap(Pstream::nProcs());
+    List<DynamicList<label>> dynSendMap(Pstream::nProcs());
 
     forAll(eddies_, i)
     {
@@ -1050,7 +1050,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::updateCoeffs()
             }
 
             // Add contributions from overlapping eddies
-            List<List<eddy> > overlappingEddies(Pstream::nProcs());
+            List<List<eddy>> overlappingEddies(Pstream::nProcs());
             calcOverlappingProcEddies(overlappingEddies);
 
             forAll(overlappingEddies, procI)

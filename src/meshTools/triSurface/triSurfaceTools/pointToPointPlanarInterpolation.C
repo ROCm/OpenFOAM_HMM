@@ -358,8 +358,8 @@ Foam::pointToPointPlanarInterpolation::pointToPointPlanarInterpolation
     const bool nearestOnly,
     const coordinateSystem& referenceCS,
     const label sourceSize,
-    const List<FixedList<label, 3> >& nearestVertex,
-    const List<FixedList<scalar, 3> >& nearestVertexWeight
+    const List<FixedList<label, 3>>& nearestVertex,
+    const List<FixedList<scalar, 3>>& nearestVertexWeight
 )
 :
     perturb_(perturb),

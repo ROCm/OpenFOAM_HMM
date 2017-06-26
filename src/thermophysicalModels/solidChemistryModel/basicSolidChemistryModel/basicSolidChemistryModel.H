@@ -153,7 +153,7 @@ public:
         ) const = 0;
 
         //- Return net solid sensible enthalpy [J/Kg]
-        virtual tmp<DimensionedField<scalar, volMesh> > RRsHs() const = 0;
+        virtual tmp<DimensionedField<scalar, volMesh>> RRsHs() const = 0;
 
         //- Return specie Table for gases
         virtual const speciesTable& gasTable() const = 0;

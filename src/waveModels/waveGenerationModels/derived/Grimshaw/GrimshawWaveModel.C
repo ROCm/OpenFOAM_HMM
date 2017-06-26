@@ -72,7 +72,8 @@ Foam::scalar Foam::waveModels::Grimshaw::eta
     const scalar eps2 = eps*eps;
     const scalar eps3 = eps*eps2;
 
-    const scalar C = sqrt(mag(g_)*h)*sqrt(1.0 + eps - 0.05*eps2 - (3.0/70.0)*eps3);
+    const scalar C =
+        sqrt(mag(g_)*h)*sqrt(1.0 + eps - 0.05*eps2 - (3.0/70.0)*eps3);
 
     const scalar ts = 3.5*h/sqrt(H/h);
     const scalar xa = -C*t + ts - X0 + x*cos(theta) + y*sin(theta);
@@ -109,7 +110,8 @@ Foam::vector Foam::waveModels::Grimshaw::Uf
     const scalar eps2 = eps*eps;
     const scalar eps3 = eps*eps2;
 
-    const scalar C = sqrt(mag(g_)*h)*sqrt(1.0 + eps - 0.05*eps2 - (3.0/70.0)*eps3);
+    const scalar C =
+        sqrt(mag(g_)*h)*sqrt(1.0 + eps - 0.05*eps2 - (3.0/70.0)*eps3);
 
     const scalar ts = 3.5*h/sqrt(eps);
     const scalar xa = -C*t + ts - X0 + x*cos(theta) + y*sin(theta);
@@ -228,19 +230,19 @@ void Foam::waveModels::Grimshaw::setVelocity
 
         if (fraction > 0)
         {
-		    const label paddlei = faceToPaddle_[facei];
+            const label paddlei = faceToPaddle_[facei];
 
-		    const vector Uf = this->Uf
-			(
-		        waveHeight_,
-		        waterDepthRef_,
-		        xPaddle_[paddlei],
-		        yPaddle_[paddlei],
-		        waveAngle_,
-		        t,
-		        x0_,
-		        z
-		    );
+            const vector Uf = this->Uf
+            (
+                waveHeight_,
+                waterDepthRef_,
+                xPaddle_[paddlei],
+                yPaddle_[paddlei],
+                waveAngle_,
+                t,
+                x0_,
+                z
+            );
 
             U_[facei] = fraction*Uf*tCoeff;
         }

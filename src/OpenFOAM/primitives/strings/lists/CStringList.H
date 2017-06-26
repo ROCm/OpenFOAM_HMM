@@ -73,7 +73,7 @@ class CStringList
         //  Does not include the final nul-character
         size_t len_;
 
-        //- List of strings, including trailing NULL pointer
+        //- List of strings, including trailing nullptr
         char** argv_;
 
         //- Flattened content with interspersed nul-characters
@@ -109,8 +109,8 @@ public:
 
     // Public Members
 
-        //- Count the number of parameters until the first NULL pointer.
-        //  Return 0 if argv is NULL.
+        //- Count the number of parameters until the first nullptr
+        //  Return 0 if argv is nullptr.
         static inline int count(const char * const argv[]);
 
 
@@ -120,7 +120,7 @@ public:
         inline int size() const;
 
         //- Return the list of C-strings (ie, argv)
-        //  The position at argc is a NULL pointer
+        //  The position at argc is a nullptr
         inline char** strings() const;
 
 
@@ -148,8 +148,8 @@ public:
         template<class StringType>
         static List<StringType> asList(int argc, const char * const argv[]);
 
-        //- Create a list from a NULL-terminated list of argv parameters.
-        //  A null pointer for argv is permissible.
+        //- Create a list from a nullptr-terminated list of argv parameters.
+        //  Using a nullptr for argv is permissible.
         template<class StringType>
         static inline List<StringType> asList(const char * const argv[]);
 

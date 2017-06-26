@@ -615,7 +615,11 @@ void Foam::waveModels::StokesV::initialise
 
         f1 = pi*H/d - 2*pi/(k*d)*(lambda + l3*b33 + l5*(b35 + b55));
 
-        f2 = (2*pi*d)/(mag(g_)*sqr(T)) - k*d/(2*pi)*tanh(k*d)*(1 + l2*c1 + l4*c2);
+        f2 =
+        (
+            (2*pi*d)/(mag(g_)*sqr(T))
+          - k*d/(2*pi)*tanh(k*d)*(1 + l2*c1 + l4*c2)
+        );
 
         const scalar lambdaPr =
             (f1*Bmat21 - f2*Bmat11)/(Bmat11*Bmat22 - Bmat12*Bmat21);
