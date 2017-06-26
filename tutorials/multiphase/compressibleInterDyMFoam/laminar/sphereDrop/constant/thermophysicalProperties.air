@@ -38,12 +38,6 @@ mixture
         Cp          1007;
         Hf          0;
     }
-    equationOfState
-    {
-        rho         1.27;
-        R           90000;
-        rho0        1.27;
-    }
     transport
     {
         mu          1.84e-05;
