@@ -39,12 +39,14 @@ usage() {
 
 Usage: ${0##*/} [OPTION] [--] [PARAVIEW_OPTION]
 options:
-  -block            use blockMesh reader  (uses .blockMesh extension)
+  -block            use blockMesh reader (uses .blockMesh extension)
   -case <dir>       specify alternative case directory, default is the cwd
   -region <name>    specify alternative mesh region
-  -touch            only create the file  (eg, .blockMesh, .OpenFOAM, etc)
-  -touchAll         create .blockMesh, .OpenFOAM files (and for all regions)
-  -vtk | -builtin   use VTK builtin OpenFOAM reader  (uses .foam extension)
+  -touch            create the file (eg, .blockMesh, .OpenFOAM, .foam, ...)
+  -touch-all | -touchAll
+                    create .blockMesh, .OpenFOAM files (and for all regions)
+  -touch-proc       same as '-touch' but for each processor
+  -vtk | -builtin   use VTK builtin OpenFOAM reader (uses .foam extension)
   -help             print the usage
   --help            paraview help
 
@@ -102,8 +104,13 @@ do
         unset plugin
         shift
         ;;
-    -touchAll)
+    -touch-all | -touchAll)
         optTouch=all
+        unset plugin
+        shift
+        ;;
+    -touch-proc*)
+        optTouch=processor
         unset plugin
         shift
         ;;
@@ -203,6 +210,16 @@ all)
             echo "Created '$caseName{$regionName}.$extension'" 1>&2
         fi
     done
+    exit 0
+    ;;
+processor)
+    for i in processor*
+    do
+    (
+        cd $i 2> /dev/null && touch "${caseFile%.*}#${i#processor}.$extension"
+    )
+    done
+    echo "Created '$caseFile' for processor directories" 1>&2
     exit 0
     ;;
 true)

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -23,21 +22,22 @@ ddtSchemes
 gradSchemes
 {
     default         Gauss linear;
+    grad(U)         cellLimited Gauss linear 1;
 }
 
 divSchemes
 {
-    div(rhoPhi,U)   Gauss upwind;
-    div(phi,alpha)  Gauss vanLeer;
-    div(phi,omega)  Gauss upwind;
-    div(phi,k)  Gauss upwind;
-    div(phirb,alpha) Gauss linear;
-    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
+    default         none;
+    div(phi,U)      bounded Gauss linearUpwindV grad(U);
+    div(phi,k)      bounded Gauss upwind;
+    div(phi,omega)  bounded Gauss upwind;
+    div(phi,epsilon) bounded Gauss upwind;
+    div((nuEff*dev2(T(grad(U))))) Gauss linear;
 }
 
 laplacianSchemes
 {
-    default         Gauss linear limited corrected 0.333;
+    default         Gauss linear corrected;
 }
 
 interpolationSchemes
@@ -47,13 +47,26 @@ interpolationSchemes
 
 snGradSchemes
 {
-    default         limited corrected 0.333;
+    default         corrected;
 }
 
 wallDist
 {
-    method meshWave;
+    method  meshWave;
 }
 
+
+// Embed steady-state settings (simpleFoam) without changeDictionary
+_simpleFoam
+{
+    ddtSchemes
+    {
+        default     steadyState;
+    }
+}
+
+${_${FOAM_EXECUTABLE}};
+
+#remove _simpleFoam
 
 // ************************************************************************* //

@@ -10,57 +10,21 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
-    object      controlDict;
+    note        "mesh decomposition control dictionary";
+    object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//DebugSwitches
-//{
-//    dynamicRefineFvMesh 1;
-//}
+numberOfSubdomains  12;
+method          scotch;
 
-application     interDyMFoam;
+// method          hierarchical;
 
-startFrom       startTime;
-
-startTime       0;
-
-stopAt          endTime;
-
-endTime         0.6;
-
-deltaT          0.001;
-
-writeControl    adjustableRunTime;
-writeInterval   0.02;
-
-purgeWrite      0;
-
-
-writeFormat     binary;
-
-writePrecision  6;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable yes;
-
-adjustTimeStep  yes;
-
-maxCo           0.5;
-maxAlphaCo      0.5;
-maxDeltaT       1;
-
-functions
+hierarchicalCoeffs
 {
-    // Print stats
-    #include "minMax"
+    n               (3 2 1);
+    delta           0.001;
+    order           xyz;
 }
-
 
 // ************************************************************************* //

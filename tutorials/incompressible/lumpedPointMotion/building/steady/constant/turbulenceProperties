@@ -10,57 +10,20 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
-    object      controlDict;
+    object      turbulenceProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//DebugSwitches
-//{
-//    dynamicRefineFvMesh 1;
-//}
+simulationType RAS;
 
-application     interDyMFoam;
-
-startFrom       startTime;
-
-startTime       0;
-
-stopAt          endTime;
-
-endTime         0.6;
-
-deltaT          0.001;
-
-writeControl    adjustableRunTime;
-writeInterval   0.02;
-
-purgeWrite      0;
-
-
-writeFormat     binary;
-
-writePrecision  6;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable yes;
-
-adjustTimeStep  yes;
-
-maxCo           0.5;
-maxAlphaCo      0.5;
-maxDeltaT       1;
-
-functions
+RAS
 {
-    // Print stats
-    #include "minMax"
-}
+    // RASModel            kOmegaSST;
+    RASModel            kEpsilon;
 
+    turbulence          on;
+
+    printCoeffs         on;
+}
 
 // ************************************************************************* //

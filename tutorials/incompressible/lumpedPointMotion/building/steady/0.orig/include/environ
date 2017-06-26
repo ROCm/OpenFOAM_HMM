@@ -5,39 +5,20 @@
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-FoamFile
+
+_y
 {
-    version     2.0;
-    format      ascii;
-    class       volScalarField;
-    location    "0";
-    object      omega;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-dimensions      [0 0 -1 0 0 0 0];
-
-internalField   uniform 2;
-
-boundaryField
-{
-    #includeEtc "caseDicts/setConstraintTypes"
-
-    upperWall
-    {
-        type            inletOutlet;
-        inletValue      $internalField;
-        value           $internalField;
-    }
-
-    wall
-    {
-        type            omegaWallFunction;
-        blended         true;
-        value           $internalField;
-    }
+    type slip;
 }
 
+y_
+{
+    type slip;
+}
 
+_z
+{
+    type slip;
+}
 
 // ************************************************************************* //

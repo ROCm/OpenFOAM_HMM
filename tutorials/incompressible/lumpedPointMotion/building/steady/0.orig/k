@@ -9,58 +9,43 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "system";
-    object      controlDict;
+    class       volScalarField;
+    object      k;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//DebugSwitches
-//{
-//    dynamicRefineFvMesh 1;
-//}
+#include        "include/initialConditions"
 
-application     interDyMFoam;
+dimensions      [0 2 -2 0 0 0 0];
 
-startFrom       startTime;
+internalField   uniform $turbulentKE;
 
-startTime       0;
-
-stopAt          endTime;
-
-endTime         0.6;
-
-deltaT          0.001;
-
-writeControl    adjustableRunTime;
-writeInterval   0.02;
-
-purgeWrite      0;
-
-
-writeFormat     binary;
-
-writePrecision  6;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable yes;
-
-adjustTimeStep  yes;
-
-maxCo           0.5;
-maxAlphaCo      0.5;
-maxDeltaT       1;
-
-functions
+boundaryField
 {
-    // Print stats
-    #include "minMax"
-}
+    #includeEtc "caseDicts/setConstraintTypes"
 
+    #include "include/fixedInlet"
+
+    outlet
+    {
+        type            inletOutlet;
+        inletValue      $internalField;
+        value           $internalField;
+    }
+
+    z_
+    {
+        type            kqRWallFunction;
+        value           $internalField;
+    }
+
+    "(?i).*building.*"
+    {
+        type            kqRWallFunction;
+        value           $internalField;
+    }
+
+    #include "include/environ"
+}
 
 // ************************************************************************* //
