@@ -51,9 +51,20 @@ void Foam::functionObjects::timeControl::readControls()
     {
         timeEnd_ = time_.userTimeToTime(timeEnd_);
     }
-    deltaTCoeff_ = dict_.lookupOrDefault("deltaTCoeff", GREAT);
-
-    dict_.readIfPresent("nStepsToStartTimeChange", nStepsToStartTimeChange_);
+    deltaTCoeff_ = GREAT;
+    if (dict_.readIfPresent("deltaTCoeff", deltaTCoeff_))
+    {
+        nStepsToStartTimeChange_ = labelMax;
+    }
+    else
+    {
+        nStepsToStartTimeChange_ = 3;
+        dict_.readIfPresent
+        (
+            "nStepsToStartTimeChange",
+            nStepsToStartTimeChange_
+        );
+    }
 }
 
 
@@ -73,7 +84,6 @@ Foam::scalar Foam::functionObjects::timeControl::calcExpansion
 )
 {
     scalar ratio = startRatio;
-
     // This function is used to calculate the 'expansion ratio' or
     // 'time step growth factor'. Inputs:
     //  - ratio: wanted ratio
@@ -156,7 +166,7 @@ void Foam::functionObjects::timeControl::calcDeltaTCoeff
            /(requiredDeltaTCoeff - 1);
     }
 
-    // Nearest time which is multiple of wantedDT, after 
+    // Nearest time which is multiple of wantedDT, after
     // requiredTimeInterval
     scalar timeToNextMultiple = -presentTime;
 
@@ -185,7 +195,7 @@ void Foam::functionObjects::timeControl::calcDeltaTCoeff
     if (timeToNextWrite <= timeToNextMultiple)
     {
         // As the ramping can't be achieved, use current, unadapted deltaT
-        // (from e.g. maxCo calculation in solver) and adjust when 
+        // (from e.g. maxCo calculation in solver) and adjust when
         // writeInterval is closer than this deltaT
         newDeltaT = deltaT0_;
         if (timeToNextWrite < newDeltaT)
@@ -220,13 +230,12 @@ void Foam::functionObjects::timeControl::calcDeltaTCoeff
     }
     else
     {
-        // Find the minimum number of time steps (with constant deltaT 
+        // Find the minimum number of time steps (with constant deltaT
         // variation) to get us to the writeInterval and multiples of wantedDT.
         // Increases the number of nSteps to do the adjustment in until it
         // has reached one that is possible. Returns the new expansionratio.
 
         scalar y = timeToNextMultiple/wantedDT;
-
         label requiredSteps = nSteps;
 
         scalar ratioEstimate = deltaTCoeff_;
@@ -240,6 +249,7 @@ void Foam::functionObjects::timeControl::calcDeltaTCoeff
         if (!rampDirectionUp)
         {
             ratioEstimate = 1/ratioEstimate;
+            ratioMax = 1/ratioMax;
             requiredSteps *= -1;
         }
         // Provision for fall-back value if we can't satisfy requirements
@@ -253,16 +263,18 @@ void Foam::functionObjects::timeControl::calcDeltaTCoeff
                 y,
                 requiredSteps
             );
-            const scalar deltaTLoop = wantedDT/pow(newRatio, requiredSteps-1);
+            const scalar deltaTLoop =
+                wantedDT
+              / pow(newRatio, mag(requiredSteps)-1);
             scalar firstDeltaRatio = deltaTLoop/deltaT0_;
+            // Avoid division by zero for ratio = 1.0
+            scalar Sn =
+                deltaTLoop
+               *(pow(newRatio, mag(requiredSteps))-1)
+               /(newRatio-1+SMALL);
+
             if (debug)
             {
-                // Avoid division by zero for ratio = 1.0
-                scalar Sn =
-                    deltaTLoop
-                   *(pow(newRatio, requiredSteps)-1)
-                   /(newRatio-1+SMALL);
-
                 Info<< " nSteps " << requiredSteps
                     << " ratioEstimate " << ratioEstimate
                     << " a0 " << deltaTLoop
@@ -281,7 +293,7 @@ void Foam::functionObjects::timeControl::calcDeltaTCoeff
             )
             {
                 y += 1;
-                requiredSteps = nSteps;
+                requiredSteps = mag(nSteps);
                 if (debug)
                 {
                     Info<< "firstDeltaRatio " << firstDeltaRatio << " rampDir"
@@ -291,7 +303,7 @@ void Foam::functionObjects::timeControl::calcDeltaTCoeff
                 continue;
             }
 
-            if (firstDeltaRatio > ratioMax)
+            if (firstDeltaRatio > ratioMax && rampDirectionUp)
             {
                 requiredSteps++;
                 if (debug)
@@ -302,7 +314,22 @@ void Foam::functionObjects::timeControl::calcDeltaTCoeff
                         << endl;
                 }
             }
-            else if (newRatio > ratioMax)
+            else if (firstDeltaRatio < ratioMax && !rampDirectionUp)
+            {
+                requiredSteps--;
+                if (debug)
+                {
+                    Info<< "First ratio " << firstDeltaRatio
+                        << " exceeds threshold " << ratioMax << nl
+                        << "Decreasing required steps " << requiredSteps
+                        << endl;
+                }
+            }
+            else if
+            (
+                 (newRatio > ratioMax && rampDirectionUp)
+             ||  (newRatio < ratioMax && !rampDirectionUp)
+            )
             {
                 y += 1;
                 requiredSteps = nSteps;
@@ -319,7 +346,18 @@ void Foam::functionObjects::timeControl::calcDeltaTCoeff
                 // Reset future series expansion at last step
                 if (requiredSteps == 1)
                 {
+                    Sn = deltaT0_*firstDeltaRatio;
                     seriesDTCoeff_ = GREAT;
+                }
+                // Situations where we achieve wantedDT but fail to achieve
+                // multiple of writeInterval
+                scalar jumpError =
+                   remainder(Sn + presentTime, wantedDT) / wantedDT;
+
+                if (mag(jumpError) > ROOTSMALL)
+                {
+                    requiredSteps = label(timeToNextWrite/wantedDT);
+                    firstDeltaRatio = timeToNextWrite/requiredSteps/deltaT0_;
                 }
                 if (debug)
                 {
@@ -365,10 +403,7 @@ Foam::functionObjects::timeControl::timeControl
     dict_(dict),
     timeStart_(-VGREAT),
     timeEnd_(VGREAT),
-    nStepsToStartTimeChange_
-    (
-        dict.lookupOrDefault("nStepsToStartTimeChange", 3)
-    ),
+    nStepsToStartTimeChange_(labelMax),
     executeControl_(t, dict, "execute"),
     writeControl_(t, dict, "write"),
     foPtr_(functionObject::New(name, t, dict_)),
@@ -484,7 +519,7 @@ bool Foam::functionObjects::timeControl::adjustTimeStep()
             // too strict.
             scalar intervalError =
                 remainder(writeInterval, wantedDT)/writeInterval;
-            if 
+            if
             (
                  mag(intervalError) > ROOTSMALL
               || deltaTCoeff_ == GREAT
@@ -494,7 +529,14 @@ bool Foam::functionObjects::timeControl::adjustTimeStep()
                 scalar nSteps = timeToNextWrite/deltaT;
 
                 // For tiny deltaT the label can overflow!
-                if (nSteps < labelMax)
+                if
+                (
+                    nSteps < labelMax
+                 && (
+                        deltaTCoeff_ != GREAT
+                     || nSteps < nStepsToStartTimeChange_
+                    )
+                )
                 {
                     // nSteps can be < 1 so make sure at least 1
 
@@ -517,6 +559,7 @@ bool Foam::functionObjects::timeControl::adjustTimeStep()
                         clipThreshold = 1/clipThreshold;
                         deltaT = max(newDeltaT, clipThreshold*deltaT);
                     }
+
                     const_cast<Time&>(time_).setDeltaT(deltaT, false);
                 }
             }
@@ -569,12 +612,12 @@ bool Foam::functionObjects::timeControl::adjustTimeStep()
                         )
                     );
                 }
-                // Negative steps -> ramp down needed, 
+                // Negative steps -> ramp down needed,
                 // zero steps -> we are at writeInterval-multiple time!
                 if (nSteps < 1)
                 {
                     // Not enough steps to do gradual time step adjustment
-                    // if earlier deltaT larger than wantedDT 
+                    // if earlier deltaT larger than wantedDT
                     if (wantedDT < deltaT0_)
                     {
                         requiredDeltaTCoeff = 1/requiredDeltaTCoeff;
@@ -582,7 +625,7 @@ bool Foam::functionObjects::timeControl::adjustTimeStep()
                         (
                             requiredDeltaTCoeff,
                             wantedDT,
-                            nSteps, 
+                            nSteps,
                             presentTime,
                             timeToNextWrite,
                             false
@@ -614,7 +657,7 @@ bool Foam::functionObjects::timeControl::adjustTimeStep()
                     (
                         requiredDeltaTCoeff,
                         wantedDT,
-                        nSteps, 
+                        nSteps,
                         presentTime,
                         timeToNextWrite,
                         true
@@ -635,7 +678,7 @@ bool Foam::functionObjects::timeControl::adjustTimeStep()
                 }
             }
         }
-        else 
+        else
         {
             foPtr_->adjustTimeStep();
             const scalar wantedDT = time_.deltaTValue();
