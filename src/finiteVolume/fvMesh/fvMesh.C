@@ -198,7 +198,7 @@ void Foam::fvMesh::storeOldVol(const scalarField& V)
                     time().timeName(),
                     *this,
                     IOobject::NO_READ,
-                    IOobject::AUTO_WRITE,
+                    IOobject::NO_WRITE,
                     true
                 ),
                 *this,
@@ -865,6 +865,9 @@ bool Foam::fvMesh::writeObject
     if (phiPtr_)
     {
         ok = phiPtr_->write();
+        // NOTE: The old old time mesh phi might be necessary for certain
+        // solver smooth restart using second order time schemes.
+        //ok = phiPtr_->oldTime().write();
     }
 
     return ok && polyMesh::writeObject(fmt, ver, cmp);
