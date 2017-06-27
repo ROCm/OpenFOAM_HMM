@@ -40,6 +40,8 @@ SourceFiles
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 
+#define MOVING_MESH
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
