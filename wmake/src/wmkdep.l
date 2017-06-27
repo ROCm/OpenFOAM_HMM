@@ -36,7 +36,7 @@ Description
     which makes this faster than cpp.
 
 Usage
-    wmkdep [-Idir..] [-iheader...] [-eENV...] [-ofile] filename
+    wmkdep [-Idir..] [-iheader...] [-eENV...] [-oFile] [-q] filename
 
 \*---------------------------------------------------------------------------*/
 /* With cpp:
@@ -264,6 +264,7 @@ static void print_fileName(const char* fileName)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+int optQuiet = 0;
 int nDirectories = 0;
 char** directories = NULL;
 char* sourceFile = NULL;
@@ -314,16 +315,21 @@ int main(int argc, char* argv[])
                 fputs
                 (
                     "\nUsage: " EXENAME
-                    " [-Idir...] [-iheader...] [-eENV...]"
-                    " [-ofile] filename\n\n"
+                    " [-Idir...] [-iheader...] [-eENV...] [-oFile] [-q]"
+                    " filename\n\n"
                     "  -Idir     Directories to be searched for headers.\n"
                     "  -iheader  Headers to be ignored.\n"
                     "  -eENV     Environment variable path substitutions.\n"
-                    "  -ofile    Write output to file.\n"
+                    "  -oFile    Write output to File.\n"
+                    "  -q        Suppress 'No such file' warnings.\n"
                     "\nDependency list generator, similar to 'cpp -M'\n\n",
                     stderr
                 );
                 return 0;
+                break;
+
+            case 'q':           /* Option: -q (quiet) */
+                ++optQuiet;
                 break;
 
             case 'I':           /* Option: -Idir */
@@ -390,7 +396,7 @@ int main(int argc, char* argv[])
         }
         else if (!strncmp(argv[i], "-o", 2))
         {
-            /* Option: -ofile */
+            /* Option: -oFile */
             if (optLen > 2)
             {
                 outputFile = (argv[i] + 2);
@@ -414,6 +420,7 @@ int main(int argc, char* argv[])
                 EXENAME ": could not open file '%s' for output: %s\n",
                 outputFile, strerror(errno)
             );
+            fflush(stderr);
 
             return 1;
         }
@@ -427,6 +434,7 @@ int main(int argc, char* argv[])
     yylex();
 
     fputs("\n\n", stdout);
+    fflush(stdout);
 
     for (i = nDirectories-1; i >= 0; --i)
     {
@@ -437,9 +445,6 @@ int main(int argc, char* argv[])
 
     free_hashTable(visitedFiles);
     free_envTable();
-
-    fflush(stdout);
-    fflush(stderr);
 
     return 0;
 }
@@ -553,20 +558,23 @@ void nextFile(const char* fileName)
             }
         }
 
-        fprintf
-        (
-            stderr,
-            EXENAME ": could not open file '%s' for source file '%s'",
-            fileName, sourceFile
-        );
-        if (nDirectories)
+        if (!optQuiet)
         {
-            fprintf(stderr, ": %s", strerror(errno));
+            fprintf
+            (
+                stderr,
+                EXENAME ": could not open file '%s' for source file '%s'",
+                fileName, sourceFile
+            );
+            if (nDirectories)
+            {
+                fprintf(stderr, ": %s", strerror(errno));
+            }
+            fputs("\n", stderr);
+            fflush(stderr);
         }
-        fputs("\n", stderr);
 
         fflush(stdout);
-        fflush(stderr);
 
         /* Only report the first occurrence */
         lookUp(visitedFiles, fileName);

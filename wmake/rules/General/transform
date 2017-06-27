@@ -1,5 +1,7 @@
 #----------------------------*- makefile-gmake -*------------------------------
 
+WMKDEP_FLAGS := -eWM_PROJECT_DIR -eWM_THIRD_PARTY_DIR
+
 ifneq ("$(WM_QUIET)","")
     E=@
     define QUIET_MESSAGE
@@ -7,6 +9,7 @@ ifneq ("$(WM_QUIET)","")
     endef
     define VERBOSE_MESSAGE
     endef
+    WMKDEP_FLAGS += -q
 else
     E=
     define QUIET_MESSAGE
@@ -28,7 +31,6 @@ $(OBJECTS_DIR)/%.dep : %
 	$(call QUIET_MESSAGE,wmkdep,$(<F))
 	$(call VERBOSE_MESSAGE,Making dependency list for source file,$(<F))
 	@$(WM_SCRIPTS)/makeTargetDir $@
-	@$(WMAKE_BIN)/wmkdep -o$@ -I$(*D) $(LIB_HEADER_DIRS) \
-		-eWM_PROJECT_DIR -eWM_THIRD_PARTY_DIR $<
+	@$(WMAKE_BIN)/wmkdep $(WMKDEP_FLAGS) -o$@ -I$(*D) $(LIB_HEADER_DIRS) $<
 
 #------------------------------------------------------------------------------

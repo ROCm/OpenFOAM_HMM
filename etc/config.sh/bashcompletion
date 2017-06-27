@@ -3054,6 +3054,41 @@ _of_interFoam()
 }
 complete -o nospace -F _of_interFoam interFoam
 
+unset -f _of_interIsoFoam 2>/dev/null
+_of_interIsoFoam()
+{
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    local opts="-noFunctionObjects -parallel -postProcess -srcDoc -doc -help "
+    local optsWithArgs="-case -decomposeParDict -roots "
+
+    case ${prev} in
+    -case)
+        COMPREPLY=($(compgen -d -- ${cur}))
+        ;;
+    *Dict)
+        COMPREPLY=($(compgen -f -- ${cur}))
+        ;;
+    *)
+        if [ "${optsWithArgs/${prev} /}" != "${optsWithArgs}" ]
+        then
+            # Unknown type of arg follows - set to files.
+            # Not always correct but can still navigate path if needed...
+            COMPREPLY=($(compgen -f -- ${cur}))
+        else
+            # Catch-all - present all remaining options
+            opts=$(_of_filter_opts "${opts}" "${COMP_LINE}")
+            optsWithArgs=$(_of_filter_opts "${optsWithArgs}" "${COMP_LINE}")
+            COMPREPLY=($(compgen -W "${opts} ${optsWithArgs}" -- ${cur}))
+        fi
+        ;;
+    esac
+
+    return 0
+}
+complete -o nospace -F _of_interIsoFoam interIsoFoam
+
 unset -f _of_interMixingFoam 2>/dev/null
 _of_interMixingFoam()
 {
@@ -3225,6 +3260,116 @@ _of_laplacianFoam()
     return 0
 }
 complete -o nospace -F _of_laplacianFoam laplacianFoam
+
+unset -f _of_lumpedPointForces 2>/dev/null
+_of_lumpedPointForces()
+{
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    local opts="-constant -latestTime -newTimes -noZero -parallel -vtk -srcDoc -doc -help "
+    local optsWithArgs="-case -decomposeParDict -region -roots -time "
+
+    case ${prev} in
+    -case)
+        COMPREPLY=($(compgen -d -- ${cur}))
+        ;;
+    *Dict)
+        COMPREPLY=($(compgen -f -- ${cur}))
+        ;;
+    -region)
+        local regions=$(sed 's#/##g' <<< $([ -d system ] && (\cd system && (\ls -d */ 2>/dev/null))))
+        COMPREPLY=($(compgen -W "$regions" -- ${cur}))
+        ;;
+    -time)
+        COMPREPLY=($(compgen -d -X '![-0-9]*' -- ${cur}))
+        ;;
+    *)
+        if [ "${optsWithArgs/${prev} /}" != "${optsWithArgs}" ]
+        then
+            # Unknown type of arg follows - set to files.
+            # Not always correct but can still navigate path if needed...
+            COMPREPLY=($(compgen -f -- ${cur}))
+        else
+            # Catch-all - present all remaining options
+            opts=$(_of_filter_opts "${opts}" "${COMP_LINE}")
+            optsWithArgs=$(_of_filter_opts "${optsWithArgs}" "${COMP_LINE}")
+            COMPREPLY=($(compgen -W "${opts} ${optsWithArgs}" -- ${cur}))
+        fi
+        ;;
+    esac
+
+    return 0
+}
+complete -o nospace -F _of_lumpedPointForces lumpedPointForces
+
+unset -f _of_lumpedPointMovement 2>/dev/null
+_of_lumpedPointMovement()
+{
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    local opts="-removeLock -slave -srcDoc -doc -help "
+    local optsWithArgs="-case -max -scale -span "
+
+    case ${prev} in
+    -case)
+        COMPREPLY=($(compgen -d -- ${cur}))
+        ;;
+    *)
+        if [ "${optsWithArgs/${prev} /}" != "${optsWithArgs}" ]
+        then
+            # Unknown type of arg follows - set to files.
+            # Not always correct but can still navigate path if needed...
+            COMPREPLY=($(compgen -f -- ${cur}))
+        else
+            # Catch-all - present all remaining options
+            opts=$(_of_filter_opts "${opts}" "${COMP_LINE}")
+            optsWithArgs=$(_of_filter_opts "${optsWithArgs}" "${COMP_LINE}")
+            COMPREPLY=($(compgen -W "${opts} ${optsWithArgs}" -- ${cur}))
+        fi
+        ;;
+    esac
+
+    return 0
+}
+complete -o nospace -F _of_lumpedPointMovement lumpedPointMovement
+
+unset -f _of_lumpedPointZones 2>/dev/null
+_of_lumpedPointZones()
+{
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    local opts="-verbose -srcDoc -doc -help "
+    local optsWithArgs="-case -region "
+
+    case ${prev} in
+    -case)
+        COMPREPLY=($(compgen -d -- ${cur}))
+        ;;
+    -region)
+        local regions=$(sed 's#/##g' <<< $([ -d system ] && (\cd system && (\ls -d */ 2>/dev/null))))
+        COMPREPLY=($(compgen -W "$regions" -- ${cur}))
+        ;;
+    *)
+        if [ "${optsWithArgs/${prev} /}" != "${optsWithArgs}" ]
+        then
+            # Unknown type of arg follows - set to files.
+            # Not always correct but can still navigate path if needed...
+            COMPREPLY=($(compgen -f -- ${cur}))
+        else
+            # Catch-all - present all remaining options
+            opts=$(_of_filter_opts "${opts}" "${COMP_LINE}")
+            optsWithArgs=$(_of_filter_opts "${optsWithArgs}" "${COMP_LINE}")
+            COMPREPLY=($(compgen -W "${opts} ${optsWithArgs}" -- ${cur}))
+        fi
+        ;;
+    esac
+
+    return 0
+}
+complete -o nospace -F _of_lumpedPointZones lumpedPointZones
 
 unset -f _of_magneticFoam 2>/dev/null
 _of_magneticFoam()
@@ -5831,6 +5976,41 @@ _of_selectCells()
     return 0
 }
 complete -o nospace -F _of_selectCells selectCells
+
+unset -f _of_setAlphaField 2>/dev/null
+_of_setAlphaField()
+{
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    local opts="-noFunctionObjects -parallel -srcDoc -doc -help "
+    local optsWithArgs="-case -decomposeParDict -roots "
+
+    case ${prev} in
+    -case)
+        COMPREPLY=($(compgen -d -- ${cur}))
+        ;;
+    *Dict)
+        COMPREPLY=($(compgen -f -- ${cur}))
+        ;;
+    *)
+        if [ "${optsWithArgs/${prev} /}" != "${optsWithArgs}" ]
+        then
+            # Unknown type of arg follows - set to files.
+            # Not always correct but can still navigate path if needed...
+            COMPREPLY=($(compgen -f -- ${cur}))
+        else
+            # Catch-all - present all remaining options
+            opts=$(_of_filter_opts "${opts}" "${COMP_LINE}")
+            optsWithArgs=$(_of_filter_opts "${optsWithArgs}" "${COMP_LINE}")
+            COMPREPLY=($(compgen -W "${opts} ${optsWithArgs}" -- ${cur}))
+        fi
+        ;;
+    esac
+
+    return 0
+}
+complete -o nospace -F _of_setAlphaField setAlphaField
 
 unset -f _of_setFields 2>/dev/null
 _of_setFields()
