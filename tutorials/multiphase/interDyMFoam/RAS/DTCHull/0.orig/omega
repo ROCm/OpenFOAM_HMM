@@ -46,6 +46,7 @@ boundaryField
     hull
     {
         type            omegaWallFunction;
+        blended         true;
         value           $internalField;
     }
 }
