@@ -34,7 +34,6 @@ Description
 
 #include "point.H"
 #include "floatVector.H"
-#include "Istream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,34 +57,28 @@ public:
         inline STLpoint()
         {}
 
-        //- Construct from base class
-        inline STLpoint(const floatVector& v)
+        //- Construct from single-precision point
+        inline STLpoint(const Vector<float>& p)
         :
-            floatVector(v)
+            floatVector(p)
         {}
 
-        //- Construct from components
+        //- Construct from double-precision point
+        inline STLpoint(const Vector<double>& p)
+        :
+            floatVector(float(p.x()), float(p.y()), float(p.z()))
+        {}
+
+        //- Construct from single-precision components
         inline STLpoint(float x, float y, float z)
         :
             floatVector(x, y, z)
         {}
 
-        //- Construct from components
+        //- Construct from double-precision components
         inline STLpoint(double x, double y, double z)
         :
             floatVector(float(x), float(y), float(z))
-        {}
-
-        //- Construct from point
-        inline STLpoint(const point& pt)
-        :
-            floatVector(float(pt.x()), float(pt.y()), float(pt.z()))
-        {}
-
-        //- Construct from istream
-        inline STLpoint(Istream& is)
-        :
-            floatVector(is)
         {}
 
 
