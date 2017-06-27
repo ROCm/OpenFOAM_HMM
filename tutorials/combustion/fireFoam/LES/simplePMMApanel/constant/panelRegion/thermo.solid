@@ -19,7 +19,6 @@ PMMA
 {
     specie
     {
-        nMoles      1;
         molWeight   100;
     }
     transport

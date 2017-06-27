@@ -32,8 +32,6 @@ fuel
 {
     specie
     {
-        nMoles          1;
-
         molWeight       16.0428;
     }
     thermodynamics
@@ -48,7 +46,6 @@ fuel
         lowCpCoeffs     ( 7.78741500000000e-01   1.74766800000000e-02  -2.78340900000000e-05
                           3.04970800000000e-08  -1.22393100000000e-11  -9.82522900000000e+03
                           1.37221900000000e+01);
-
     }
     transport
     {
@@ -61,7 +58,6 @@ oxidant
 {
     specie
     {
-        nMoles          1;
         molWeight       28.8504;
     }
     thermodynamics
@@ -87,8 +83,6 @@ burntProducts
 {
     specie
     {
-        nMoles          1;
-
         molWeight       27.6333203887;
     }
     thermodynamics
