@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "injectionModelList.H"
+#include "transferModelList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -36,31 +36,34 @@ namespace surfaceFilmModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-injectionModelList::injectionModelList(surfaceFilmModel& film)
+transferModelList::transferModelList(surfaceFilmModel& film)
 :
-    PtrList<injectionModel>(),
+    PtrList<transferModel>(),
     filmSubModelBase(film)
 {}
 
 
-injectionModelList::injectionModelList
+transferModelList::transferModelList
 (
     surfaceFilmModel& film,
     const dictionary& dict
 )
 :
-    PtrList<injectionModel>(),
+    PtrList<transferModel>(),
     filmSubModelBase
     (
-        "injectionModelList",
+        "transferModelList",
         film,
         dict,
-        "injectionModelList",
-        "injectionModelList"
+        "transferModelList",
+        "transferModelList"
     ),
-    massInjected_(film.intCoupledPatchIDs().size(), 0.0)
+    massTransferred_(film.intCoupledPatchIDs().size(), 0.0)
 {
-    const wordList activeModels(dict.lookup("injectionModels"));
+    const wordList activeModels
+    (
+        dict.lookupOrDefault("transferModels", wordList::null())
+    );
 
     wordHashSet models;
     forAll(activeModels, i)
@@ -68,7 +71,7 @@ injectionModelList::injectionModelList
         models.insert(activeModels[i]);
     }
 
-    Info<< "    Selecting film injection models" << endl;
+    Info<< "    Selecting film transfer models" << endl;
     if (models.size() > 0)
     {
         this->setSize(models.size());
@@ -77,7 +80,7 @@ injectionModelList::injectionModelList
         forAllConstIter(wordHashSet, models, iter)
         {
             const word& model = iter.key();
-            set(i, injectionModel::New(film, dict, model));
+            set(i, transferModel::New(film, dict, model));
             i++;
         }
     }
@@ -90,47 +93,72 @@ injectionModelList::injectionModelList
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-injectionModelList::~injectionModelList()
+transferModelList::~transferModelList()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void injectionModelList::correct
+void transferModelList::correct
 (
     scalarField& availableMass,
-    volScalarField& massToInject,
-    volScalarField& diameterToInject
+    volScalarField& massToTransfer
 )
 {
     // Correct models that accumulate mass and diameter transfers
     forAll(*this, i)
     {
-        injectionModel& im = operator[](i);
-        im.correct(availableMass, massToInject, diameterToInject);
+        operator[](i).correct(availableMass, massToTransfer);
     }
 
     // Push values to boundaries ready for transfer to the primary region
-    massToInject.correctBoundaryConditions();
-    diameterToInject.correctBoundaryConditions();
+    massToTransfer.correctBoundaryConditions();
 
     const labelList& patchIDs = film().intCoupledPatchIDs();
 
     forAll(patchIDs, i)
     {
         label patchi = patchIDs[i];
-        massInjected_[i] =
-            massInjected_[i] + sum(massToInject.boundaryField()[patchi]);
+        massTransferred_[i] =
+            massTransferred_[i] + sum(massToTransfer.boundaryField()[patchi]);
     }
 }
 
 
-void injectionModelList::info(Ostream& os)
+void transferModelList::correct
+(
+    scalarField& availableMass,
+    volScalarField& massToTransfer,
+    volScalarField& energyToTransfer
+)
+{
+    // Correct models that accumulate mass and diameter transfers
+    forAll(*this, i)
+    {
+        operator[](i).correct(availableMass, massToTransfer, energyToTransfer);
+    }
+
+    // Push values to boundaries ready for transfer to the primary region
+    massToTransfer.correctBoundaryConditions();
+    energyToTransfer.correctBoundaryConditions();
+
+    const labelList& patchIDs = film().intCoupledPatchIDs();
+
+    forAll(patchIDs, i)
+    {
+        label patchi = patchIDs[i];
+        massTransferred_[i] =
+            massTransferred_[i] + sum(massToTransfer.boundaryField()[patchi]);
+    }
+}
+
+
+void transferModelList::info(Ostream& os)
 {
     const polyBoundaryMesh& pbm = film().regionMesh().boundaryMesh();
 
-    scalar injectedMass = 0;
-    scalarField patchInjectedMasses
+    scalar transferredMass = 0;
+    scalarField patchTransferredMasses
     (
         pbm.size() - film().regionMesh().globalData().processorPatches().size(),
         0
@@ -138,26 +166,26 @@ void injectionModelList::info(Ostream& os)
 
     forAll(*this, i)
     {
-        const injectionModel& im = operator[](i);
-        injectedMass += im.injectedMassTotal();
-        im.patchInjectedMassTotals(patchInjectedMasses);
+        const transferModel& im = operator[](i);
+        transferredMass += im.transferredMassTotal();
+        im.patchTransferredMassTotals(patchTransferredMasses);
     }
 
-    os  << indent << "injected mass      = " << injectedMass << nl;
+    os  << indent << "transferred mass      = " << transferredMass << nl;
 
-    forAll(patchInjectedMasses, patchi)
+    forAll(patchTransferredMasses, patchi)
     {
-        if (mag(patchInjectedMasses[patchi]) > VSMALL)
+        if (mag(patchTransferredMasses[patchi]) > VSMALL)
         {
             os  << indent << indent << "from patch " << pbm[patchi].name()
-                << " = " << patchInjectedMasses[patchi] << nl;
+                << " = " << patchTransferredMasses[patchi] << nl;
         }
     }
 
-    scalarField mass0(massInjected_.size(), 0);
-    this->getBaseProperty("massInjected", mass0);
+    scalarField mass0(massTransferred_.size(), 0);
+    this->getBaseProperty("massTransferred", mass0);
 
-    scalarField mass(massInjected_);
+    scalarField mass(massTransferred_);
     Pstream::listCombineGather(mass, plusEqOp<scalar>());
     mass += mass0;
 
@@ -172,8 +200,8 @@ void injectionModelList::info(Ostream& os)
 
     if (film().time().writeTime())
     {
-        setBaseProperty("massInjected", mass);
-        massInjected_ = 0.0;
+        setBaseProperty("massTransferred", mass);
+        massTransferred_ = 0.0;
     }
 }
 
