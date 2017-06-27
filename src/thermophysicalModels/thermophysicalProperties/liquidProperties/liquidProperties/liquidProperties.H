@@ -259,14 +259,14 @@ public:
             //- Surface tension [N/m]
             virtual scalar sigma(scalar p, scalar T) const = 0;
 
-            //- Vapour diffussivity [m2/s]
+            //- Vapour diffusivity [m2/s]
             virtual scalar D(scalar p, scalar T) const = 0;
 
-            //- Vapour diffussivity [m2/s] with specified binary pair
+            //- Vapour diffusivity [m2/s] with specified binary pair
             virtual scalar D(scalar p, scalar T, scalar Wb) const = 0;
 
             //- Invert the vapour pressure relationship to retrieve the
-            //  boiling temperuture as a function of pressure
+            //  boiling temperature as a function of pressure
             virtual scalar pvInvert(scalar p) const;
 
 

@@ -159,11 +159,7 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
 {
     if (!os.good())
     {
-        FatalErrorIn
-        (
-            "fileFormats::FLMAsurfaceFormat::write"
-            "(OSstream&, const MeshedSurfaceProxy<Face>&)"
-        )
+        FatalErrorInFunction
             << "bad output state "
             << exit(FatalError);
     }
@@ -352,11 +348,7 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
     }
     else
     {
-        FatalErrorIn
-        (
-            "fileFormats::FLMAsurfaceFormat::write"
-            "(const fileName&, const MeshedSurfaceProxy<Face>&)"
-        )
+        FatalErrorInFunction
             << "Cannot open file for writing " << filename
             << exit(FatalError);
     }

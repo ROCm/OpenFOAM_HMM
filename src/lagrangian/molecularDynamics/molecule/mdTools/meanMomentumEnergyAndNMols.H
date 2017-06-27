@@ -82,7 +82,7 @@ label singleStepDOFs = 0;
 
         const vector& molV(mol().v());
 
-        const vector& molOmega(inv(molMoI) & mol().pi());
+        const vector molOmega(inv(molMoI) & mol().pi());
 
         vector molPiGlobal = mol().Q() & mol().pi();
 

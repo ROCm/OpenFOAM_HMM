@@ -33,6 +33,7 @@ Foam::thermophysicalPropertiesSelector<ThermophysicalProperties>
     return propertiesPtr_();
 }
 
+
 template<class ThermophysicalProperties>
 inline Foam::scalar
 Foam::thermophysicalPropertiesSelector<ThermophysicalProperties>::W() const

@@ -52,6 +52,7 @@ PecletNo/PecletNo.C
 blendingFactor/blendingFactor.C
 pressure/pressure.C
 MachNo/MachNo.C
+Curle/Curle.C
 
 fieldsExpression/fieldsExpression.C
 add/add.C

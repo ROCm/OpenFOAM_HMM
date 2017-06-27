@@ -188,7 +188,7 @@ public:
             inline tmp<volScalarField::Internal> RRs() const;
 
             //- Return net solid sensible enthalpy
-            inline tmp<DimensionedField<scalar, volMesh> > RRsHs() const;
+            inline tmp<DimensionedField<scalar, volMesh>> RRsHs() const;
 
             //- Solve the reaction system for the given time step
             //  and return the characteristic time

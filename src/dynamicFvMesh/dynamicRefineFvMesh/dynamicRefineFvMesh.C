@@ -1232,9 +1232,9 @@ Foam::dynamicRefineFvMesh::~dynamicRefineFvMesh()
 
 bool Foam::dynamicRefineFvMesh::update()
 {
-    // Re-read dictionary. Choosen since usually -small so trivial amount
-    // of time compared to actual refinement. Also very useful to be able
-    // to modify on-the-fly.
+    // Re-read dictionary. Usually small so takes trivial amount of time
+    // compared to actual refinement. Also very useful to be able to modify
+    // on-the-fly.
     dictionary refineDict
     (
         IOdictionary

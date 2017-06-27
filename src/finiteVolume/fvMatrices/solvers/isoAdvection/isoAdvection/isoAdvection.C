@@ -1024,7 +1024,7 @@ void Foam::isoAdvection::applyBruteForceBounding()
     bool clip = dict_.lookupOrDefault<bool>("clip", true);
     if (clip)
     {
-        alpha1_ = min(1.0, max(0.0, alpha1_));
+        alpha1_ = min(scalar(1.0), max(scalar(0.0), alpha1_));
         alpha1Changed = true;
     }
 

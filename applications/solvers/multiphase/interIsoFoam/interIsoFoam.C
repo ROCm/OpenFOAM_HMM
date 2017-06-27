@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 
             mixture.correct();
 
-            if (frozenFlow)
+            if (pimple.frozenFlow())
             {
                 continue;
             }

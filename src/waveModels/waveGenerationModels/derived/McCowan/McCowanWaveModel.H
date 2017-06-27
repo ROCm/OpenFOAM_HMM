@@ -74,14 +74,14 @@ protected:
         virtual scalar newtonRapsonF1
         (
             const scalar x0,
-    	    const scalar H,
+            const scalar H,
             const scalar h
         ) const;
 
         virtual scalar newtonRapsonF2
         (
             const scalar x0,
-    	    const scalar H,
+            const scalar H,
             const scalar h,
             const scalar xa,
             const scalar m,

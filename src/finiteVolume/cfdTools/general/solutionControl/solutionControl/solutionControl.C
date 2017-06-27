@@ -46,6 +46,7 @@ void Foam::solutionControl::read(const bool absTolOnly)
         solutionDict.lookupOrDefault("momentumPredictor", true);
     transonic_ = solutionDict.lookupOrDefault("transonic", false);
     consistent_ = solutionDict.lookupOrDefault("consistent", false);
+    frozenFlow_ = solutionDict.lookupOrDefault("frozenFlow", false);
 
     // Read residual information
     const dictionary residualDict
@@ -228,6 +229,7 @@ Foam::solutionControl::solutionControl(fvMesh& mesh, const word& algorithmName)
     momentumPredictor_(true),
     transonic_(false),
     consistent_(false),
+    frozenFlow_(false),
     corr_(0),
     corrNonOrtho_(0)
 {}

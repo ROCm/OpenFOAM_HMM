@@ -36,6 +36,7 @@ Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
 )
 :
     transformFvPatchField<Type>(p, iF),
+    refValue_(p.size()),
     valueFraction_(p.size(), 1.0)
 {}
 
@@ -50,6 +51,7 @@ Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
 )
 :
     transformFvPatchField<Type>(ptf, p, iF, mapper),
+    refValue_(ptf.refValue_, mapper),
     valueFraction_(ptf.valueFraction_, mapper)
 {}
 
@@ -63,9 +65,17 @@ Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
 )
 :
     transformFvPatchField<Type>(p, iF),
+    refValue_(p.size(), pTraits<Type>::zero),
     valueFraction_("valueFraction", dict, p.size())
 {
     this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+
+    // Backwards compatibility - leave refValue as zero unless specified
+    if (dict.found("refValue"))
+    {
+        refValue_ = Field<Type>("refValue", dict, p.size());
+    }
+
     evaluate();
 }
 
@@ -77,6 +87,7 @@ Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
 )
 :
     transformFvPatchField<Type>(ptf),
+    refValue_(ptf.refValue_),
     valueFraction_(ptf.valueFraction_)
 {}
 
@@ -89,6 +100,7 @@ Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
 )
 :
     transformFvPatchField<Type>(ptf, iF),
+    refValue_(ptf.refValue_),
     valueFraction_(ptf.valueFraction_)
 {}
 
@@ -102,6 +114,7 @@ void Foam::partialSlipFvPatchField<Type>::autoMap
 )
 {
     transformFvPatchField<Type>::autoMap(m);
+    refValue_.autoMap(m);
     valueFraction_.autoMap(m);
 }
 
@@ -118,6 +131,7 @@ void Foam::partialSlipFvPatchField<Type>::rmap
     const partialSlipFvPatchField<Type>& dmptf =
         refCast<const partialSlipFvPatchField<Type>>(ptf);
 
+    refValue_.rmap(dmptf.refValue_, addr);
     valueFraction_.rmap(dmptf.valueFraction_, addr);
 }
 
@@ -131,7 +145,8 @@ Foam::partialSlipFvPatchField<Type>::snGrad() const
 
     return
     (
-        (1.0 - valueFraction_)*transform(I - sqr(nHat), pif) - pif
+        valueFraction_*refValue_
+      + (1.0 - valueFraction_)*transform(I - sqr(nHat), pif) - pif
     )*this->patch().deltaCoeffs();
 }
 
@@ -151,6 +166,8 @@ void Foam::partialSlipFvPatchField<Type>::evaluate
 
     Field<Type>::operator=
     (
+        valueFraction_*refValue_
+      +
         (1.0 - valueFraction_)
        *transform(I - sqr(nHat), this->patchInternalField())
     );
@@ -181,6 +198,7 @@ template<class Type>
 void Foam::partialSlipFvPatchField<Type>::write(Ostream& os) const
 {
     transformFvPatchField<Type>::write(os);
+    refValue_.writeEntry("refValue", os);
     valueFraction_.writeEntry("valueFraction", os);
 }
 

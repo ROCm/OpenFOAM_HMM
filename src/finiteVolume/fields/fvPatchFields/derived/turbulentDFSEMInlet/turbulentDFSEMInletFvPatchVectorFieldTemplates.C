@@ -30,7 +30,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> >
+Foam::tmp<Foam::Field<Type>>
 Foam::turbulentDFSEMInletFvPatchVectorField::interpolateOrRead
 (
     const word& fieldName,
@@ -40,7 +40,7 @@ Foam::turbulentDFSEMInletFvPatchVectorField::interpolateOrRead
 {
     if (dict.found(fieldName))
     {
-        tmp<Field<Type> > tFld
+        tmp<Field<Type>> tFld
         (
             new Field<Type>
             (
@@ -62,7 +62,7 @@ Foam::turbulentDFSEMInletFvPatchVectorField::interpolateOrRead
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> >
+Foam::tmp<Foam::Field<Type>>
 Foam::turbulentDFSEMInletFvPatchVectorField::interpolateBoundaryData
 (
     const word& fieldName

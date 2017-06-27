@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::windowModel::apply
+Foam::tmp<Foam::Field<Type>> Foam::windowModel::apply
 (
     const Field<Type>& fld,
     const label windowI
@@ -44,7 +44,7 @@ Foam::tmp<Foam::Field<Type> > Foam::windowModel::apply
     }
 
 
-    tmp<Field<Type> > tresult(new Field<Type>(nSamples, pTraits<Type>::zero));
+    tmp<Field<Type>> tresult(new Field<Type>(nSamples, pTraits<Type>::zero));
     Field<Type>& result = tresult.ref();
 
     label nWindow = nWindowsTotal(fld.size());

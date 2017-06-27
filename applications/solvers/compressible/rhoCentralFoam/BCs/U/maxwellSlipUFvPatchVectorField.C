@@ -38,7 +38,7 @@ Foam::maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    mixedFixedValueSlipFvPatchVectorField(p, iF),
+    partialSlipFvPatchVectorField(p, iF),
     TName_("T"),
     rhoName_("rho"),
     psiName_("thermo:psi"),
@@ -59,7 +59,7 @@ Foam::maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
     const fvPatchFieldMapper& mapper
 )
 :
-    mixedFixedValueSlipFvPatchVectorField(mspvf, p, iF, mapper),
+    partialSlipFvPatchVectorField(mspvf, p, iF, mapper),
     TName_(mspvf.TName_),
     rhoName_(mspvf.rhoName_),
     psiName_(mspvf.psiName_),
@@ -79,7 +79,7 @@ Foam::maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
     const dictionary& dict
 )
 :
-    mixedFixedValueSlipFvPatchVectorField(p, iF),
+    partialSlipFvPatchVectorField(p, iF),
     TName_(dict.lookupOrDefault<word>("T", "T")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     psiName_(dict.lookupOrDefault<word>("psi", "thermo:psi")),
@@ -132,7 +132,7 @@ Foam::maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    mixedFixedValueSlipFvPatchVectorField(mspvf, iF),
+    partialSlipFvPatchVectorField(mspvf, iF),
     TName_(mspvf.TName_),
     rhoName_(mspvf.rhoName_),
     psiName_(mspvf.psiName_),
@@ -193,7 +193,7 @@ void Foam::maxwellSlipUFvPatchVectorField::updateCoeffs()
         refValue() -= C1/prho*transform(I - n*n, (n & ptauMC));
     }
 
-    mixedFixedValueSlipFvPatchVectorField::updateCoeffs();
+    partialSlipFvPatchVectorField::updateCoeffs();
 }
 
 

@@ -97,7 +97,7 @@ void Foam::writeFields
         (
             radToDeg
             (
-                Foam::acos(min(1.0, faceOrthogonality))
+                Foam::acos(min(scalar(1.0), faceOrthogonality))
             )
         );
 

@@ -124,7 +124,6 @@ CO
 {
     specie
     {
-        nMoles          1;
         molWeight       28.0106;
     }
     thermodynamics

@@ -64,7 +64,7 @@ class boundaryRadiationProperties
     // Private data
 
         //- Ptr list of boundaryRadiationProperties
-        List<autoPtr<boundaryRadiationPropertiesPatch> >
+        List<autoPtr<boundaryRadiationPropertiesPatch>>
             radBoundaryPropertiesPtrList_;
 
 
