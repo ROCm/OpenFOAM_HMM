@@ -171,10 +171,11 @@ tmp<surfaceScalarField> ddtScheme<Type>::fvcDdtPhiCoeff
         )
     );
 
+    surfaceScalarField& ddtCouplingCoeff = tddtCouplingCoeff.ref();
 
     if (ddtPhiCoeff_ < 0)
     {
-        tddtCouplingCoeff.ref() =- min
+        ddtCouplingCoeff -= min
         (
             mag(phiCorr)
            /(mag(phi) + dimensionedScalar("small", phi.dimensions(), SMALL)),
@@ -183,14 +184,11 @@ tmp<surfaceScalarField> ddtScheme<Type>::fvcDdtPhiCoeff
     }
     else
     {
-        tddtCouplingCoeff.ref() =
+        ddtCouplingCoeff =
             dimensionedScalar("ddtPhiCoeff", dimless, ddtPhiCoeff_);
     }
 
-    surfaceScalarField& ddtCouplingCoeff = tddtCouplingCoeff.ref();
-
-    surfaceScalarField::Boundary& ccbf =
-        ddtCouplingCoeff.boundaryFieldRef();
+    surfaceScalarField::Boundary& ccbf = ddtCouplingCoeff.boundaryFieldRef();
 
     forAll(U.boundaryField(), patchi)
     {
