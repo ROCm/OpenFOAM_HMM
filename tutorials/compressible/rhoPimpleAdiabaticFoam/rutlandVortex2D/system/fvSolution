@@ -11,43 +11,49 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "system";
-    object      controlDict;
+    object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     simpleFoam;
-
-startFrom       startTime;
-
-startTime       0;
-
-stopAt          endTime;
-
-endTime         2000;
-
-deltaT          1;
-
-writeControl    timeStep;
-
-writeInterval   100;
-
-purgeWrite      0;
-
-writeFormat     ascii;
-
-writePrecision  6;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable true;
-
-functions
+solvers
 {
-    #includeFunc streamlines
+    "(p|rho)"
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-9;
+        relTol          0.01;
+        minIter         1;
+    }
+
+    "(p|rho)Final"
+    {
+        $p;
+        relTol          0;
+    }
+
+    "(U|e|h)"
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-9;
+        relTol          0.01;
+    }
+
+    "(U|e|h)Final"
+    {
+        $U;
+        relTol          0;
+    }
 }
+
+PIMPLE
+{
+    momentumPredictor          yes;
+    nOuterCorrectors           1;
+    nCorrectors                2;
+    nNonOrthogonalCorrectors   0;
+}
+
 
 // ************************************************************************* //

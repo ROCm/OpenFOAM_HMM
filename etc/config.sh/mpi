@@ -55,7 +55,7 @@ SYSTEMOPENMPI)
     ;;
 
 OPENMPI)
-    export FOAM_MPI=openmpi-2.1.1
+    export FOAM_MPI=openmpi-1.10.4
     _foamEtc config.sh/openmpi                  # <- Adjustments (optional)
 
     export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI

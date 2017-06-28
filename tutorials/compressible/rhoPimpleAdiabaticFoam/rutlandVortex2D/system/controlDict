@@ -15,39 +15,55 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     simpleFoam;
+application       rhoPimpleAdiabaticFoam;
 
-startFrom       startTime;
+startFrom         startTime;
 
-startTime       0;
+startTime         0;
 
-stopAt          endTime;
+stopAt            endTime;
 
-endTime         2000;
+endTime           0.22528;
 
-deltaT          1;
+deltaT            3.2e-05;
 
-writeControl    timeStep;
+writeControl      timeStep;
 
-writeInterval   100;
+writeInterval     100;
 
-purgeWrite      0;
+purgeWrite        0;
 
-writeFormat     ascii;
+writeFormat       binary;
 
-writePrecision  6;
+writePrecision    10;
 
-writeCompression off;
+writeCompression  uncompressed;
 
-timeFormat      general;
+timeFormat        general;
 
-timePrecision   6;
+timePrecision     6;
 
 runTimeModifiable true;
 
 functions
 {
-    #includeFunc streamlines
+    probes
+    {
+        type probes;
+
+        functionObjectLibs ("libsampling.so");
+
+        probeLocations
+        (
+            (3.0  2.0  0.0)
+            (3.0 -2.0  0.0)
+        );
+
+        fields
+        (
+            p
+        );
+    }
 }
 
 // ************************************************************************* //

@@ -10,44 +10,44 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
-    object      controlDict;
+    location    "constant";
+    object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     simpleFoam;
-
-startFrom       startTime;
-
-startTime       0;
-
-stopAt          endTime;
-
-endTime         2000;
-
-deltaT          1;
-
-writeControl    timeStep;
-
-writeInterval   100;
-
-purgeWrite      0;
-
-writeFormat     ascii;
-
-writePrecision  6;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable true;
-
-functions
+thermoType
 {
-    #includeFunc streamlines
+    type            hePsiThermo;
+    mixture         pureMixture;
+    transport       const;
+    thermo          hConst;
+    equationOfState perfectGas;
+    specie          specie;
+    energy          sensibleEnthalpy;
 }
+
+mixture
+{
+    equationOfState
+    {
+        p0          103308.85730683322;
+        T0          225.24440406165331;
+    }
+    specie
+    {
+        molWeight   28.970278977370906;
+    }
+    thermodynamics
+    {
+        Cp          1004.5;
+        Hf          0;
+    }
+    transport
+    {
+        mu          1.4585464649816414e-05;
+        Pr          0.7179;
+    }
+}
+
 
 // ************************************************************************* //

@@ -110,12 +110,12 @@ calculateSpeciesRR
             if (RR[0] > 0.0)
             {
                 production_[speciei][reactioni] = RR[0];
-                productionInt_[speciei][reactioni] =+ dt*RR[0];
+                productionInt_[speciei][reactioni] += dt*RR[0];
             }
             else if (RR[0] < 0.0)
             {
                 consumption_[speciei][reactioni] = RR[0];
-                consumptionInt_[speciei][reactioni] =+ dt*RR[0];
+                consumptionInt_[speciei][reactioni] += dt*RR[0];
             }
             else
             {

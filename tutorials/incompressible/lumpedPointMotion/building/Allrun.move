@@ -27,13 +27,18 @@ linkParallelCase()
 
     echo "Linking $dst parallel case from $src"
     mkdir $dst
-    for i in constant system
+
+    # Copy system - may wish to change things
+    for i in system 0
     do
-        cp -r $src/$i $dst
+        echo "    copy $i/"
+        ( cd $dst && cp -r ../$src/$i . )
     done
 
-    echo "    link processor directories with $# times: $@"
+    echo "    link constant/"
+    ( cd $dst && ln -sf ../$src/constant . )
 
+    echo "    link processor*/ with $# times: $@"
     for proc in $(cd $src && \ls -d processor*)
     do
         ( cd $dst && ln -sf ../$src/$proc . )

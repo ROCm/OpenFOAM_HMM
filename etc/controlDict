@@ -498,7 +498,6 @@ DebugSwitches
     flowRateInletVelocity   0;
     fluxCorrectedVelocity   0;
     foamChemistryReader 0;
-    foamFile            0;
     forceCoeffs         0;
     forces              0;
     fourth              0;
