@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -156,13 +156,36 @@ tmp<surfaceScalarField> ddtScheme<Type>::fvcDdtPhiCoeff
     const fluxFieldType& phiCorr
 )
 {
-    tmp<surfaceScalarField> tddtCouplingCoeff = scalar(1)
-      - min
+    tmp<surfaceScalarField> tddtCouplingCoeff
+    (
+        new surfaceScalarField
+        (
+            IOobject
+            (
+                "ddtCouplingCoeff",
+                U.mesh().time().timeName(),
+                U.mesh()
+            ),
+            U.mesh(),
+            dimensionedScalar("one", dimless, 1.0)
+        )
+    );
+
+
+    if (ddtPhiCoeff_ < 0)
+    {
+        tddtCouplingCoeff.ref() =- min
         (
             mag(phiCorr)
            /(mag(phi) + dimensionedScalar("small", phi.dimensions(), SMALL)),
             scalar(1)
         );
+    }
+    else
+    {
+        tddtCouplingCoeff.ref() =
+            dimensionedScalar("ddtPhiCoeff", dimless, ddtPhiCoeff_);
+    }
 
     surfaceScalarField& ddtCouplingCoeff = tddtCouplingCoeff.ref();
 
