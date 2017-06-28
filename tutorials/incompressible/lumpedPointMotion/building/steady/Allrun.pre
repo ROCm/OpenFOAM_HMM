@@ -15,7 +15,7 @@ unset parallel
 parallel=true
 
 # Dummy 0 directory
-mkdir 0
+mkdir -p 0
 
 if [ "${parallel:-false}" = false ]
 then
@@ -38,6 +38,11 @@ else
     restore0Dir -processor
 
     runParallel renumberMesh  -overwrite
+
+    # In case serial calculations are needed later
+
+    restore0Dir # Overwrite dummy 0 directory
+    # runApplication reconstructParMesh -constant
 
 fi
 
