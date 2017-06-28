@@ -101,7 +101,7 @@ public:
         {
             if (is.good() && !is.eof())
             {
-                this->ddtPhiCoeff_ = readScalar(is);
+                is >> this->ddtPhiCoeff_;
             }
 
             // Ensure the old-old-time cell volumes are available
