@@ -68,7 +68,7 @@ Foam::Istream& Foam::operator>>(Istream& is, direction& d)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const direction d)
 {
-    os.write(int(d));
+    os.write(label(d));
     os.check(FUNCTION_NAME);
     return os;
 }

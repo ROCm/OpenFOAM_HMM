@@ -45,7 +45,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const bool b)
 {
     // we could also write as text string without any difficulty
     // os  << (b ? "true" : "false");
-    os.write(int(b));
+    os.write(label(b));
     os.check(FUNCTION_NAME);
     return os;
 }
