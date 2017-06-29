@@ -36,7 +36,7 @@ functions
             scalar pInf = 101325;
             scalar TInf = 224;
             scalar gamma = 1.4;
-            scalar A = 0.3*D*UInf;
+            scalar A = -0.3*D*UInf;
             const dimensionedScalar rhoRef("rhoRef", dimDensity, 1);
             const volScalarField& rho =
                 mesh().lookupObject<volScalarField>("rho");

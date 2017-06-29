@@ -20,26 +20,9 @@ internalField   uniform 224;
 
 boundaryField
 {
-    top
+    ".*"
     {
-        type            slip;
-    }
-
-    bottom
-    {
-        type            slip;
-    }
-
-    left
-    {
-        type            fixedValue;
-        value           $internalField;
-    }
-
-    right
-    {
-        type            inletOutlet;
-        inletValue      $internalField;
+        type            calculated;
         value           $internalField;
     }
 
