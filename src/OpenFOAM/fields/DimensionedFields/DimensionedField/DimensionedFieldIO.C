@@ -37,7 +37,15 @@ void Foam::DimensionedField<Type, GeoMesh>::readField
 )
 {
     dimensions_.reset(dimensionSet(fieldDict.lookup("dimensions")));
-    oriented_.read(fieldDict);
+
+    // Note: oriented state may have already been set on construction
+    // - if so - do not reset by re-reading
+    // - required for backwards compatibility in case of restarting from
+    //   an old run where the oriented state may not have been set
+    if (oriented_.oriented() != orientedType::ORIENTED)
+    {
+        oriented_.read(fieldDict);
+    }
 
     Field<Type> f(fieldDictEntry, fieldDict, GeoMesh::size(mesh_));
     this->transfer(f);

@@ -169,6 +169,11 @@ bool Foam::GeometricField<Type, PatchField, GeoMesh>::readOldTimeIfPresent()
             this->mesh()
         );
 
+        // Ensure the old time field oriented flag is set to the parent's state
+        // Note: required for backwards compatibility in case of restarting from
+        // an old run where the oriented state may not have been set
+        field0Ptr_->oriented() = this->oriented();
+
         field0Ptr_->timeIndex_ = timeIndex_ - 1;
 
         if (!field0Ptr_->readOldTimeIfPresent())
