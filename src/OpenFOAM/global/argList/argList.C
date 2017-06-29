@@ -731,7 +731,7 @@ void Foam::argList::parse
                     dictNProcs = roots.size()+1;
                 }
             }
-            else
+            else if (checkProcessorDirectories_)
             {
                 // Use values from decomposeParDict, the location was already
                 // established above.

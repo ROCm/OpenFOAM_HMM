@@ -109,18 +109,10 @@ K = 0.5*magSqr(U);
 if (pressureControl.limit(p))
 {
     p.correctBoundaryConditions();
-    thermo.correctRho(psi*p - psip0, rhoMin, rhoMax);
-    rho = thermo.rho();
 }
-else if (pimple.SIMPLErho())
-{
-    thermo.correctRho(psi*p - psip0, rhoMin, rhoMax);
-    rho = thermo.rho();
-}
-else
-{
-    thermo.correctRho(psi*p - psip0, rhoMin, rhoMax);
-}
+
+thermo.correctRho(psi*p - psip0, rhoMin, rhoMax) ;
+rho = thermo.rho();
 
 if (thermo.dpdt())
 {
