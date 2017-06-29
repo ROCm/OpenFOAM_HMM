@@ -1,0 +1,140 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     pimpleFoam;
+
+startFrom       latestTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         0.2;
+
+deltaT          1e-5;
+
+writeControl    timeStep;
+
+writeInterval   100; // every 0.001s
+
+purgeWrite      200;
+
+writeFormat     binary;
+
+writePrecision  8;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+functions
+{
+    minMax1
+    {
+        libs            ("libfieldFunctionObjects.so");
+        type            fieldMinMax;
+        fields          (U p);
+    }
+
+    curle
+    {
+        libs            ("libfieldFunctionObjects.so");
+        type            Curle;
+        writeControl    writeTime;
+        timeStart       0.1;
+
+        patches         (cylinder);
+        c0              343;
+    }
+
+    cuttingPlane
+    {
+        type            surfaces;
+        libs            ("libsampling.so");
+        writeControl    timeStep;
+        writeInterval   2;
+        timeStart       0.1;
+
+        surfaceFormat   ensight;
+        formatOptions
+        {
+            ensight
+            {
+                format binary;
+                collateTimes true;
+            }
+        }
+        fields          (p Curle);
+
+        interpolationScheme cellPoint;
+
+        surfaces
+        (
+            zNormal
+            {
+                type            cuttingPlane;
+                planeType       pointAndNormal;
+                pointAndNormalDict
+                {
+                    basePoint       (0 0 -0.01);
+                    normalVector    (0 0 1);
+                }
+                interpolate     false;
+            }
+        );
+    }
+
+    forces
+    {
+        type            forces;
+        libs            ("libforces.so");
+        writeControl    writeTime;
+        timeStart       0.1;
+
+        patches         (cylinder);
+        CofR            (0.20 0.15 -0.01);
+        writeFields     yes;
+
+        rho             rhoInf;
+        rhoInf          1.205;
+    }
+
+    probes
+    {
+        type            patchProbes;
+        libs            ("libsampling.so");
+        writeControl    timeStep;
+        timeStart       0.1;
+
+        patch           cylinder;
+        probeLocations
+        (
+            (0.20 0.17 -0.01) // N
+            (0.22 0.15 -0.01) // E
+            (0.20 0.13 -0.01) // S
+            (0.18 0.15 -0.01) // W
+        );
+        fields          (p forces:force Curle);
+    }
+}
+
+
+// ************************************************************************* //
