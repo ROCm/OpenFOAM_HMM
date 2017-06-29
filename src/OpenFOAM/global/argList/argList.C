@@ -37,6 +37,7 @@ License
 #include "sigInt.H"
 #include "sigQuit.H"
 #include "sigSegv.H"
+#include "endian.H"
 
 #include <cctype>
 
@@ -52,6 +53,22 @@ Foam::SLList<Foam::string>    Foam::argList::notes;
 Foam::string::size_type Foam::argList::usageMin = 20;
 Foam::string::size_type Foam::argList::usageMax = 80;
 Foam::word Foam::argList::postProcessOptionName("postProcess");
+
+// file-scope
+// Hint about machine endian, OpenFOAM label and scalar sizes
+static const std::string archHint =
+(
+#ifdef WM_LITTLE_ENDIAN
+    "LSB"
+#elif defined (WM_BIG_ENDIAN)
+    "MSB"
+#else
+    "???"
+#endif
+    ";label="  + std::to_string(8*sizeof(Foam::label))
+  + ";scalar=" + std::to_string(8*sizeof(Foam::scalar))
+);
+
 
 Foam::argList::initValidTables::initValidTables()
 {
@@ -622,6 +639,7 @@ void Foam::argList::parse
         {
             IOobject::writeBanner(Info, true)
                 << "Build  : " << Foam::FOAMbuild << nl
+                << "Arch   : " << archHint << nl
                 << "Exec   : " << argListStr_.c_str() << nl
                 << "Date   : " << dateString.c_str() << nl
                 << "Time   : " << timeString.c_str() << nl
@@ -1228,7 +1246,8 @@ void Foam::argList::printUsage() const
     Info<< nl
         <<"Using: OpenFOAM-" << Foam::FOAMversion
         << " (see www.OpenFOAM.com)" << nl
-        <<"Build: " << Foam::FOAMbuild << nl
+        << "Build: " << Foam::FOAMbuild << nl
+        << "Arch:  " << archHint << nl
         << endl;
 }
 

@@ -26,8 +26,7 @@ setFormat raw;
 
 // Surface output format. Choice of
 //      null        : suppress output
-//      foamFile    : separate points, faces and values file
-//      dx          : DX scalar or vector format
+//      foam        : separate points, faces and values file
 //      vtk         : VTK ascii format
 //      raw         : x y z value format for use with e.g. gnuplot 'splot'.
 //

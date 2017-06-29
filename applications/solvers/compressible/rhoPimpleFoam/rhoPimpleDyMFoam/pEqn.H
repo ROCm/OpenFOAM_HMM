@@ -1,4 +1,11 @@
-rho = thermo.rho();
+if (!pimple.SIMPLErho())
+{
+    rho = thermo.rho();
+}
+
+// Thermodynamic density needs to be updated by psi*d(p) after the
+// pressure solution
+const volScalarField psip0(psi*p);
 
 volScalarField rAU(1.0/UEqn.A());
 surfaceScalarField rhorAUf("rhorAUf", fvc::interpolate(rho*rAU));
@@ -92,8 +99,10 @@ K = 0.5*magSqr(U);
 if (pressureControl.limit(p))
 {
     p.correctBoundaryConditions();
-    rho = thermo.rho();
 }
+
+thermo.correctRho(psi*p - psip0, rhoMin, rhoMax);
+rho = thermo.rho();
 
 {
     rhoUf = fvc::interpolate(rho*U);
