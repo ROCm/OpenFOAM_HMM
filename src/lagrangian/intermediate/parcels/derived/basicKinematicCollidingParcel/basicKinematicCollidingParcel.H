@@ -46,12 +46,6 @@ namespace Foam
 {
     typedef CollidingParcel<KinematicParcel<particle>>
         basicKinematicCollidingParcel;
-
-    template<>
-    inline bool contiguous<basicKinematicCollidingParcel>()
-    {
-        return true;
-    }
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
